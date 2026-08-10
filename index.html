@@ -1,373 +1,668 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Managing Agent Teams — a talk by Haiyuan Cao</title>
-<style>
-  :root {
-    --bg: #f3f5f7;
-    --surface: #ffffff;
-    --ink: #182430;
-    --ink-soft: #46586a;
-    --ink-faint: #7a8a99;
-    --line: #d5dde4;
-    --accent: #0b6e6e;
-    --accent-ink: #ffffff;
-    --highlight: #b3541e;
-    --note-bg: #fdf6ec;
-    --note-line: #e3cfa8;
-    --slot-bg: #eef1f4;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #10161c;
-      --surface: #1a222b;
-      --ink: #e8edf2;
-      --ink-soft: #aebbc7;
-      --ink-faint: #71818f;
-      --line: #2c3843;
-      --accent: #3fbdbd;
-      --accent-ink: #0d1418;
-      --highlight: #e09a5f;
-      --note-bg: #241f16;
-      --note-line: #4d4028;
-      --slot-bg: #151c23;
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A practical engineering talk by Haiyuan Cao about running AI agents with rigor: framing work, parallel execution, verification, and the skills that compound in the agent era.">
+  <meta property="og:title" content="Engineering in the Agent Era — Haiyuan Cao">
+  <meta property="og:description" content="How to get leverage from AI agents without lowering the engineering bar.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://caohy1988.github.io/">
+  <meta name="theme-color" content="#101828">
+  <title>Engineering in the Agent Era — Haiyuan Cao</title>
+  <style>
+    :root {
+      --navy: #101828;
+      --navy-soft: #1d2939;
+      --paper: #f7f8fa;
+      --surface: #ffffff;
+      --ink: #182230;
+      --ink-soft: #566275;
+      --ink-faint: #7d8999;
+      --line: #dfe3e8;
+      --line-strong: #c9d0d8;
+      --accent: #e87324;
+      --accent-dark: #b7480d;
+      --accent-pale: #fff1e7;
+      --mint: #0f766e;
+      --mint-pale: #e9f7f5;
+      --shadow: 0 18px 55px rgba(16, 24, 40, 0.08);
+      --radius: 18px;
     }
-  }
-  :root[data-theme="dark"] {
-    --bg: #10161c;
-    --surface: #1a222b;
-    --ink: #e8edf2;
-    --ink-soft: #aebbc7;
-    --ink-faint: #71818f;
-    --line: #2c3843;
-    --accent: #3fbdbd;
-    --accent-ink: #0d1418;
-    --highlight: #e09a5f;
-    --note-bg: #241f16;
-    --note-line: #4d4028;
-    --slot-bg: #151c23;
-  }
 
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-  .wrap {
-    max-width: 46rem;
-    margin: 0 auto;
-    padding: 0 1.5rem 5rem;
-  }
-  .mono {
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  }
-
-  /* Header */
-  header { padding: 4.5rem 0 2.5rem; }
-  .eyebrow {
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 0.78rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin: 0 0 1.2rem;
-  }
-  h1 {
-    font-family: Charter, Georgia, "Times New Roman", serif;
-    font-size: clamp(2rem, 5.5vw, 3rem);
-    line-height: 1.12;
-    margin: 0 0 1rem;
-    text-wrap: balance;
-    font-weight: 700;
-  }
-  .subtitle {
-    font-size: 1.15rem;
-    color: var(--ink-soft);
-    margin: 0 0 2rem;
-    max-width: 38rem;
-    text-wrap: balance;
-  }
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.75rem;
-    font-size: 0.9rem;
-    color: var(--ink-soft);
-  }
-  .meta strong { color: var(--ink); font-weight: 600; }
-
-  /* Disclaimer */
-  .note {
-    background: var(--note-bg);
-    border: 1px solid var(--note-line);
-    border-radius: 6px;
-    padding: 1rem 1.25rem;
-    margin: 2.5rem 0 0;
-    font-size: 0.95rem;
-  }
-  .note b { color: var(--highlight); }
-
-  /* Diagram */
-  .diagram {
-    margin: 3.5rem 0 0;
-    padding: 1.75rem 1.5rem 1.25rem;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    overflow-x: auto;
-  }
-  .diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
-  .diagram figcaption {
-    text-align: center;
-    font-size: 0.82rem;
-    color: var(--ink-faint);
-    margin-top: 0.75rem;
-  }
-
-  /* Sections */
-  section { margin-top: 4rem; }
-  h2 {
-    font-family: Charter, Georgia, "Times New Roman", serif;
-    font-size: 1.5rem;
-    margin: 0 0 1rem;
-    font-weight: 700;
-  }
-  section > p { max-width: 40rem; color: var(--ink-soft); }
-  section > p strong { color: var(--ink); }
-
-  /* Agenda */
-  .agenda { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
-  .agenda-item {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 1.25rem 1.5rem;
-  }
-  .agenda-item .tag {
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  .agenda-item h3 { margin: 0.35rem 0 0.5rem; font-size: 1.1rem; }
-  .agenda-item p { margin: 0; color: var(--ink-soft); font-size: 0.95rem; }
-
-  /* Slides slot */
-  .slides-slot {
-    margin-top: 1.5rem;
-    border: 2px dashed var(--line);
-    border-radius: 8px;
-    background: var(--slot-bg);
-    padding: 3rem 1.5rem;
-    text-align: center;
-    color: var(--ink-faint);
-  }
-  .slides-slot .mono { font-size: 0.85rem; }
-
-  /* Bio */
-  .bio {
-    display: flex;
-    gap: 1.25rem;
-    align-items: flex-start;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-top: 1.5rem;
-  }
-  .avatar {
-    flex: none;
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: 50%;
-    background: var(--accent);
-    color: var(--accent-ink);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: Charter, Georgia, serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-  }
-  .bio h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
-  .bio p { margin: 0 0 0.6rem; color: var(--ink-soft); font-size: 0.95rem; }
-  .bio a { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
-
-  .cred-list {
-    list-style: none;
-    margin: 0.75rem 0 1rem;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-  .cred-list li {
-    display: grid;
-    grid-template-columns: 6.5rem 1fr;
-    gap: 0.75rem;
-    font-size: 0.92rem;
-    color: var(--ink-soft);
-  }
-  .cred-list .cred-tag {
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--accent);
-    padding-top: 0.2rem;
-  }
-  .cred-list strong { color: var(--ink); font-weight: 600; }
-  .bio-links { display: flex; flex-wrap: wrap; gap: 1.25rem; }
-
-  footer {
-    margin-top: 5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--line);
-    font-size: 0.85rem;
-    color: var(--ink-faint);
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    header, .note, .diagram { animation: rise 0.5s ease-out both; }
-    .note { animation-delay: 0.08s; }
-    .diagram { animation-delay: 0.16s; }
-    @keyframes rise {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: none; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
-  }
-</style>
+    a { color: inherit; }
+    .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    .mono {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      letter-spacing: 0.04em;
+    }
+
+    .site-nav {
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .brand {
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+    }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 26px; }
+    .nav-links a {
+      color: var(--ink-soft);
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      color: #ffffff;
+      background:
+        radial-gradient(circle at 86% 12%, rgba(232, 115, 36, 0.28), transparent 25rem),
+        linear-gradient(135deg, #101828 0%, #17243a 58%, #102b37 100%);
+      padding: clamp(64px, 8vw, 104px) 0 42px;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.12;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.16) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.16) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, black, transparent 75%);
+    }
+    .hero-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(390px, 0.88fr);
+      gap: clamp(44px, 7vw, 88px);
+      align-items: center;
+    }
+    .eyebrow {
+      display: inline-flex;
+      gap: 9px;
+      align-items: center;
+      margin: 0 0 22px;
+      color: #ffb17d;
+      font-size: 0.75rem;
+      font-weight: 750;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 26px; height: 2px; background: currentColor; }
+    h1 {
+      max-width: 720px;
+      margin: 0;
+      font-family: Iowan Old Style, Charter, Georgia, serif;
+      font-size: clamp(3.15rem, 7vw, 5.8rem);
+      font-weight: 650;
+      letter-spacing: -0.05em;
+      line-height: 0.96;
+      text-wrap: balance;
+    }
+    h1 em { color: #ff9b59; font-style: normal; }
+    .hero-lead {
+      max-width: 670px;
+      margin: 28px 0 0;
+      color: #d0d9e7;
+      font-size: clamp(1.08rem, 2vw, 1.3rem);
+      line-height: 1.55;
+      text-wrap: balance;
+    }
+    .hero-lead strong { color: #fff; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 18px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .button-primary { background: var(--accent); color: #fff; }
+    .button-primary:hover { background: #f18032; }
+    .button-secondary { border-color: rgba(255,255,255,.22); color: #e5ebf4; }
+    .button-secondary:hover { border-color: rgba(255,255,255,.5); }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 24px;
+      margin: 34px 0 0;
+      color: #9faec1;
+      font-size: 0.82rem;
+    }
+    .hero-meta span { display: inline-flex; align-items: center; gap: 8px; }
+    .hero-meta span::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #ff9b59; }
+
+    .loop-card {
+      position: relative;
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 22px;
+      background: rgba(255,255,255,.075);
+      box-shadow: 0 28px 80px rgba(0,0,0,.2);
+      backdrop-filter: blur(12px);
+    }
+    .loop-head { display: flex; justify-content: space-between; gap: 18px; align-items: center; }
+    .loop-title { color: #ffb17d; font-size: 0.71rem; font-weight: 750; text-transform: uppercase; }
+    .live-pill { color: #b7f2e8; font-size: 0.7rem; }
+    .live-pill::before { content: "●"; margin-right: 6px; color: #49d6c3; }
+    .loop-thesis {
+      margin: 15px 0 21px;
+      font-family: Iowan Old Style, Charter, Georgia, serif;
+      font-size: 1.4rem;
+      line-height: 1.3;
+    }
+    .loop-steps { display: grid; gap: 9px; }
+    .loop-step {
+      display: grid;
+      grid-template-columns: 30px 1fr auto;
+      align-items: center;
+      min-height: 52px;
+      padding: 9px 12px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      background: rgba(4, 12, 24, .28);
+    }
+    .loop-step .num { color: #ffb17d; font-size: 0.74rem; }
+    .loop-step strong { font-size: 0.9rem; }
+    .loop-step small { color: #93a4b9; font-size: 0.72rem; }
+    .human-owns {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(15, 118, 110, .28);
+      color: #c9f4ed;
+      font-size: 0.79rem;
+      text-align: center;
+    }
+    .scope-note {
+      position: relative;
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,.13);
+      color: #9faec1;
+      font-size: 0.77rem;
+    }
+    .scope-note strong { color: #d5deea; }
+
+    main { overflow: hidden; }
+    .section { padding: clamp(72px, 9vw, 118px) 0; }
+    .section + .section { border-top: 1px solid var(--line); }
+    .section-kicker {
+      margin: 0 0 12px;
+      color: var(--accent-dark);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    h2 {
+      max-width: 820px;
+      margin: 0;
+      font-family: Iowan Old Style, Charter, Georgia, serif;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 650;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      text-wrap: balance;
+    }
+    .section-intro {
+      max-width: 720px;
+      margin: 22px 0 0;
+      color: var(--ink-soft);
+      font-size: 1.08rem;
+    }
+
+    .shift-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 44px;
+    }
+    .shift-card {
+      min-height: 220px;
+      padding: 25px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .shift-card .num { color: var(--accent-dark); font-size: 0.72rem; font-weight: 800; }
+    .shift-card h3 { margin: 42px 0 9px; font-size: 1.12rem; line-height: 1.3; }
+    .shift-card p { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+    .thesis {
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 22px;
+      align-items: start;
+      margin-top: 28px;
+      padding: clamp(25px, 4vw, 38px);
+      border-radius: var(--radius);
+      background: var(--navy);
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+    .thesis-mark { color: #ff9b59; font-family: Georgia, serif; font-size: 4rem; line-height: .8; }
+    .thesis p { max-width: 840px; margin: 0; font-family: Iowan Old Style, Charter, Georgia, serif; font-size: clamp(1.35rem, 2.8vw, 2rem); line-height: 1.35; }
+    .thesis strong { color: #ffb17d; font-weight: 650; }
+
+    .agenda-grid { display: grid; gap: 16px; margin-top: 44px; }
+    .agenda-card {
+      display: grid;
+      grid-template-columns: 150px minmax(220px, .8fr) 1.4fr;
+      gap: 30px;
+      align-items: start;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .agenda-label { color: var(--accent-dark); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+    .agenda-card h3 { margin: 0; font-size: 1.2rem; line-height: 1.35; }
+    .agenda-card p { margin: 0; color: var(--ink-soft); font-size: 0.94rem; }
+    .tool-note {
+      margin: 22px 0 0;
+      color: var(--ink-faint);
+      font-size: 0.84rem;
+    }
+    .tool-note strong { color: var(--ink-soft); }
+
+    .dark-section { background: var(--navy); color: #fff; }
+    .dark-section .section-kicker { color: #ffb17d; }
+    .dark-section .section-intro { color: #b4c0cf; }
+    .comparison {
+      margin-top: 44px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .comparison-row {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      min-height: 92px;
+    }
+    .comparison-row + .comparison-row { border-top: 1px solid rgba(255,255,255,.13); }
+    .comparison-cell { display: flex; gap: 16px; align-items: center; padding: 22px 26px; }
+    .comparison-cell + .comparison-cell { border-left: 1px solid rgba(255,255,255,.13); }
+    .comparison-cell small { display: block; color: #7f90a6; font-size: 0.67rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .comparison-cell strong { display: block; margin-top: 4px; font-size: 0.95rem; }
+    .comparison-cell.future { background: rgba(15,118,110,.16); }
+    .comparison-cell.future strong { color: #cdf5ef; }
+
+    .takeaway-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 44px;
+    }
+    .takeaway {
+      position: relative;
+      padding: 26px 26px 26px 68px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .takeaway::before {
+      content: "✓";
+      position: absolute;
+      top: 26px;
+      left: 26px;
+      display: grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--mint-pale);
+      color: var(--mint);
+      font-size: 0.8rem;
+      font-weight: 900;
+    }
+    .takeaway h3 { margin: 0 0 7px; font-size: 1rem; }
+    .takeaway p { margin: 0; color: var(--ink-soft); font-size: 0.9rem; }
+
+    .abstract-box {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: clamp(30px, 6vw, 80px);
+      align-items: start;
+    }
+    .abstract-copy { color: var(--ink-soft); font-size: 1.03rem; }
+    .abstract-copy p:first-child { margin-top: 0; }
+    .abstract-copy strong { color: var(--ink); }
+
+    .resources {
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+      align-items: center;
+      padding: 32px;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .resources h3 { margin: 0 0 6px; font-size: 1.08rem; }
+    .resources p { margin: 0; color: var(--ink-soft); font-size: .92rem; }
+    .status {
+      flex: none;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-pale);
+      color: var(--accent-dark);
+      font-size: .72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .speaker {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: clamp(38px, 7vw, 92px);
+      align-items: start;
+    }
+    .speaker-card {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .avatar {
+      display: grid;
+      width: 62px;
+      height: 62px;
+      place-items: center;
+      border-radius: 17px;
+      background: var(--navy);
+      color: #ffb17d;
+      font-family: Iowan Old Style, Charter, Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .speaker-card h3 { margin: 18px 0 2px; font-size: 1.1rem; }
+    .speaker-card p { margin: 0; color: var(--ink-faint); font-size: .82rem; }
+    .speaker-links { display: grid; gap: 8px; margin-top: 19px; }
+    .speaker-links a { color: var(--accent-dark); font-size: .82rem; font-weight: 700; text-decoration: none; }
+    .speaker-copy h2 { font-size: clamp(2.1rem, 4vw, 3.5rem); }
+    .speaker-copy > p { margin: 22px 0 0; color: var(--ink-soft); font-size: 1rem; }
+    .cred-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 30px;
+    }
+    .cred {
+      padding-top: 14px;
+      border-top: 2px solid var(--line);
+    }
+    .cred b { display: block; font-size: .88rem; }
+    .cred span { color: var(--ink-faint); font-size: .75rem; }
+
+    footer { padding: 30px 0 44px; border-top: 1px solid var(--line); }
+    .footer-inner { display: flex; justify-content: space-between; gap: 22px; color: var(--ink-faint); font-size: .75rem; }
+    .footer-inner p { margin: 0; }
+
+    @media (max-width: 860px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .loop-card { max-width: 560px; }
+      .shift-grid { grid-template-columns: 1fr; }
+      .shift-card { min-height: 0; }
+      .shift-card h3 { margin-top: 22px; }
+      .agenda-card { grid-template-columns: 110px 1fr; }
+      .agenda-card p { grid-column: 2; }
+      .speaker { grid-template-columns: 210px 1fr; }
+      .abstract-box { grid-template-columns: 1fr; gap: 28px; }
+    }
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 28px, 1120px); }
+      .nav-links a:not(:last-child) { display: none; }
+      .hero { padding-top: 54px; }
+      h1 { font-size: clamp(3rem, 15vw, 4.4rem); }
+      .hero-meta { display: grid; }
+      .loop-card { padding: 18px; }
+      .loop-step { grid-template-columns: 28px 1fr; }
+      .loop-step small { display: none; }
+      .thesis { grid-template-columns: 1fr; gap: 4px; }
+      .agenda-card { grid-template-columns: 1fr; gap: 10px; }
+      .agenda-card p { grid-column: auto; }
+      .comparison-row { grid-template-columns: 1fr; }
+      .comparison-cell + .comparison-cell { border-left: 0; border-top: 1px solid rgba(255,255,255,.13); }
+      .takeaway-grid { grid-template-columns: 1fr; }
+      .resources { align-items: flex-start; flex-direction: column; }
+      .speaker { grid-template-columns: 1fr; }
+      .speaker-card { max-width: 280px; }
+      .cred-strip { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .hero-copy, .loop-card { animation: rise .55s ease-out both; }
+      .loop-card { animation-delay: .12s; }
+      @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    }
+    @media print {
+      .site-nav, .hero-actions { display: none; }
+      .hero { padding-top: 48px; background: var(--navy); }
+      .section { padding: 42px 0; }
+    }
+  </style>
 </head>
 <body>
-
-
-<div class="wrap">
-  <header>
-    <p class="eyebrow">Tech Talk</p>
-    <h1>Everyone Is a TL Now: Working With Teams of AI Agents</h1>
-    <p class="subtitle">How I run Claude Code, Codex, and Kimi Code as parallel agent teams for daily engineering and learning — and why the shape of orgs, and the definition of work itself, is about to shift.</p>
-    <div class="meta">
-      <span><strong>Speaker</strong> Haiyuan Cao</span>
-      <span><strong>Date</strong> TBD</span>
-      <span><strong>Format</strong> Talk + Q&amp;A</span>
+  <nav class="site-nav shell" aria-label="Primary navigation">
+    <a class="brand mono" href="#top"><span>HC</span> / FIELD NOTES</a>
+    <div class="nav-links">
+      <a href="#agenda">Agenda</a>
+      <a href="#takeaways">Takeaways</a>
+      <a href="#speaker">Speaker</a>
     </div>
+  </nav>
 
-    <div class="note">
-      <b>A note on scope:</b> this talk is given in a personal capacity. Nothing in the talk or the slides covers, references, or draws on my work at Google. All examples come from personal projects, open-source tools, and publicly available information.
+  <header class="hero" id="top">
+    <div class="shell">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow mono">A practical engineering talk</p>
+          <h1>Engineering in the <em>agent era.</em></h1>
+          <p class="hero-lead">AI agents make execution cheaper. The engineering bottleneck moves to <strong>framing the right work, directing parallel effort, and verifying outcomes.</strong> This is a field guide to that new loop.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#takeaways">What you'll take away ↓</a>
+            <a class="button button-secondary" href="#abstract">Read the abstract</a>
+          </div>
+          <p class="hero-meta mono">
+            <span>Haiyuan Cao</span>
+            <span>Talk + Q&amp;A</span>
+            <span>Built for production-minded engineers</span>
+          </p>
+        </div>
+
+        <aside class="loop-card" aria-label="The agent-era engineering loop">
+          <div class="loop-head">
+            <span class="loop-title mono">The new work loop</span>
+            <span class="live-pill mono">human in control</span>
+          </div>
+          <p class="loop-thesis">From one execution thread to a portfolio of work.</p>
+          <div class="loop-steps">
+            <div class="loop-step"><span class="num mono">01</span><strong>Frame</strong><small>intent · constraints</small></div>
+            <div class="loop-step"><span class="num mono">02</span><strong>Route</strong><small>decompose · delegate</small></div>
+            <div class="loop-step"><span class="num mono">03</span><strong>Verify</strong><small>tests · critique · evidence</small></div>
+            <div class="loop-step"><span class="num mono">04</span><strong>Integrate</strong><small>decide · ship · learn</small></div>
+          </div>
+          <div class="human-owns mono">Human owns: context · judgment · accountability</div>
+        </aside>
+      </div>
+      <div class="scope-note"><strong>Independent talk.</strong> Examples come from personal projects, open-source tools, and public information. No confidential employer material.</div>
     </div>
   </header>
 
-  <figure class="diagram">
-    <svg viewBox="0 0 560 220" width="560" height="220" role="img" aria-label="Diagram: one engineer orchestrating three agent teams — Claude Code, Codex, and Kimi Code">
-      <style>
-        .box { fill: none; stroke: var(--line); }
-        .lbl { font: 600 13px ui-monospace, Menlo, Consolas, monospace; fill: var(--ink); }
-        .sub { font: 11px ui-monospace, Menlo, Consolas, monospace; fill: var(--ink-faint); }
-        .edge { stroke: var(--accent); stroke-width: 1.5; fill: none; }
-      </style>
-      <rect class="box" x="215" y="14" width="130" height="46" rx="6"/>
-      <text class="lbl" x="280" y="34" text-anchor="middle">you</text>
-      <text class="sub" x="280" y="50" text-anchor="middle">TL / M2 of agents</text>
-
-      <path class="edge" d="M280 60 V92 H90 V124"/>
-      <path class="edge" d="M280 60 V124"/>
-      <path class="edge" d="M280 60 V92 H470 V124"/>
-
-      <rect class="box" x="20" y="124" width="140" height="70" rx="6"/>
-      <text class="lbl" x="90" y="150" text-anchor="middle">claude code</text>
-      <text class="sub" x="90" y="168" text-anchor="middle">build · refactor</text>
-      <text class="sub" x="90" y="183" text-anchor="middle">deep research</text>
-
-      <rect class="box" x="210" y="124" width="140" height="70" rx="6"/>
-      <text class="lbl" x="280" y="150" text-anchor="middle">codex</text>
-      <text class="sub" x="280" y="168" text-anchor="middle">second opinion</text>
-      <text class="sub" x="280" y="183" text-anchor="middle">cross-review</text>
-
-      <rect class="box" x="400" y="124" width="140" height="70" rx="6"/>
-      <text class="lbl" x="470" y="150" text-anchor="middle">kimi code</text>
-      <text class="sub" x="470" y="168" text-anchor="middle">parallel tracks</text>
-      <text class="sub" x="470" y="183" text-anchor="middle">exploration</text>
-    </svg>
-    <figcaption>The daily setup: one engineer, several agent teams, work assigned and reviewed like an org.</figcaption>
-  </figure>
-
-  <section>
-    <h2>Abstract</h2>
-    <p>AI coding agents stopped being autocomplete a while ago. Run several of them at once — each with its own strengths, each holding hundreds of thousands of tokens of context — and your job quietly changes: you stop writing most of the code and start <strong>specifying, delegating, reviewing, and arbitrating</strong>, the way a tech lead runs a team.</p>
-    <p>This talk is a field report from working that way every day. I'll show how I combine Claude Code, Codex, and Kimi Code as complementary agent teams; how I use their huge context windows to learn new codebases, papers, and fast-moving trends far faster than I could alone; and where I think this leads: a world where <strong>every engineer is a TL — and increasingly an M2 — of agent teams</strong>, where the number of agent teams you can effectively manage becomes a real competitive edge, and where org shape and the very definition of "work" have to be redrawn.</p>
-  </section>
-
-  <section>
-    <h2>What we'll cover</h2>
-    <div class="agenda">
-      <div class="agenda-item">
-        <span class="tag">Part 1 · Practice</span>
-        <h3>Running agent teams day to day</h3>
-        <p>My working setup with Claude Code, Codex, and Kimi Code: how work gets split across agents, how agents review each other's output, and which tasks each one is actually good at. Concrete workflows, not demos.</p>
+  <main>
+    <section class="section" aria-labelledby="shift-title">
+      <div class="shell">
+        <p class="section-kicker mono">The shift</p>
+        <h2 id="shift-title">The work is not disappearing. The leverage point is moving.</h2>
+        <p class="section-intro">Coding agents can now hold context, use tools, and carry tasks across many steps. That does not remove engineering discipline—it makes the quality of your operating mechanism more visible.</p>
+        <div class="shift-grid">
+          <article class="shift-card">
+            <span class="num mono">01 / EXECUTION</span>
+            <h3>Parallel work becomes the default.</h3>
+            <p>Independent research, implementation, and review tracks can run at once. Your attention—not machine time—becomes the scarce resource.</p>
+          </article>
+          <article class="shift-card">
+            <span class="num mono">02 / QUALITY</span>
+            <h3>Fast output increases review pressure.</h3>
+            <p>More code is not more progress. Tests, observability, small blast radii, and explicit acceptance criteria become the trust system.</p>
+          </article>
+          <article class="shift-card">
+            <span class="num mono">03 / CAREER</span>
+            <h3>Judgment compounds faster than typing speed.</h3>
+            <p>Problem framing, architecture, product sense, and the ability to spot plausible-but-wrong work become higher-leverage skills.</p>
+          </article>
+        </div>
+        <blockquote class="thesis">
+          <span class="thesis-mark">“</span>
+          <p>In the agent era, the unit of productivity shifts from <strong>code produced</strong> to <strong>verified outcomes delivered.</strong></p>
+        </blockquote>
       </div>
-      <div class="agenda-item">
-        <span class="tag">Part 2 · Learning</span>
-        <h3>Learning at agent speed</h3>
-        <p>Using massive context windows as a learning instrument: dropping whole codebases, papers, and docs into an agent and interrogating them. How this changes learning efficiency and how I stay current with a field that moves weekly.</p>
-      </div>
-      <div class="agenda-item">
-        <span class="tag">Part 3 · Future</span>
-        <h3>Everyone is a TL and an M2</h3>
-        <p>What happens to collaboration when management span over agents — not headcount — becomes the edge. How org shapes flatten and reform, why "writing code" stops being the unit of work, and what to practice now to be ready.</p>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <section id="slides">
-    <h2>Slides</h2>
-    <p>The interactive slides will be attached here closer to the talk.</p>
-    <div class="slides-slot">
-      <p class="mono">[ slides — coming soon ]</p>
-      <p>Check back near the talk date.</p>
-    </div>
-  </section>
-
-  <section>
-    <h2>About the speaker</h2>
-    <div class="bio">
-      <div class="avatar">HC</div>
-      <div>
-        <h3>Haiyuan Cao</h3>
-        <p>Haiyuan has spent the last decade building AI into products at two of the industry's largest AI organizations — first at <strong>Microsoft</strong>, where as a Principal SDE in Azure AI he worked on <strong>LoRA fine-tuning of GPT-3</strong>, built <strong>RAG chatbots on GPT-3.5</strong>, and worked on the <strong>GitHub Copilot code agent</strong>; and now at <strong>Google</strong>, where his work centers on LLM agents and evaluation. He builds with AI coding agents daily and writes about what multi-agent workflows mean for how engineers learn and collaborate.</p>
-        <ul class="cred-list">
-          <li>
-            <span class="cred-tag">Research</span>
-            <span><strong>Ph.D. in theoretical physics.</strong> Published research on high-temperature superconductivity in <em>Nature Communications</em> and <em>Physical Review Letters</em> — 1,000+ citations, h-index 11. Later studied data science at Columbia University.</span>
-          </li>
-          <li>
-            <span class="cred-tag">Patents</span>
-            <span><strong>Inventor on multiple U.S. patents</strong> in machine learning and natural language processing — including synthetic training-data generation for code-writing language models and semantic parsing — with recent patent applications in AI agent systems.</span>
-          </li>
-          <li>
-            <span class="cred-tag">Industry</span>
-            <span><strong>Microsoft → Google.</strong> At Microsoft: LoRA fine-tuning on GPT-3, RAG chatbots on GPT-3.5, and the GitHub Copilot code agent. At Google: LLM agents and evaluation — a front-row seat, at both companies, to how AI is reshaping engineering work.</span>
-          </li>
-        </ul>
-        <p class="bio-links">
-          <a href="https://www.linkedin.com/in/haiyuancao/">LinkedIn ↗</a>
-          <a href="https://scholar.google.com/citations?user=0ElAD3gAAAAJ&amp;hl=en">Google Scholar ↗</a>
-          <a href="https://patents.justia.com/inventor/haiyuan-cao">Patents ↗</a>
-        </p>
+    <section class="section" id="agenda" aria-labelledby="agenda-title">
+      <div class="shell">
+        <p class="section-kicker mono">What we'll cover</p>
+        <h2 id="agenda-title">A mechanism, not a magic trick.</h2>
+        <p class="section-intro">The talk moves from a workflow you can try on Monday, to the controls that keep it trustworthy, to the longer-term implications for engineering teams.</p>
+        <div class="agenda-grid">
+          <article class="agenda-card">
+            <span class="agenda-label mono">Part 01 · Operate</span>
+            <h3>Run a portfolio of agent work</h3>
+            <p>How to split work by independence, observability, and reversibility; write useful task contracts; manage context; and keep multiple tracks moving without losing the plot.</p>
+          </article>
+          <article class="agenda-card">
+            <span class="agenda-label mono">Part 02 · Trust</span>
+            <h3>Build a verification system</h3>
+            <p>Where agents predictably fail, when cross-review helps, how to use tests and evidence as gates, and why the engineer must remain accountable for the final decision.</p>
+          </article>
+          <article class="agenda-card">
+            <span class="agenda-label mono">Part 03 · Adapt</span>
+            <h3>Invest in the skills that compound</h3>
+            <p>How the role shifts from producing every artifact to directing systems of work—and what that means for learning, team topology, technical leadership, and career growth.</p>
+          </article>
+        </div>
+        <p class="tool-note"><strong>Tools are examples, not the thesis.</strong> The walkthrough uses Claude Code, Codex, and Kimi Code; the operating principles transfer across models and platforms.</p>
       </div>
-    </div>
-  </section>
+    </section>
+
+    <section class="section dark-section" aria-labelledby="move-title">
+      <div class="shell">
+        <p class="section-kicker mono">Before → after</p>
+        <h2 id="move-title">What changes in the daily engineering loop?</h2>
+        <p class="section-intro">The core responsibilities stay. The place where an engineer adds the most value moves upstream toward intent and downstream toward verification.</p>
+        <div class="comparison" role="table" aria-label="How engineering work changes with agents">
+          <div class="comparison-row" role="row">
+            <div class="comparison-cell" role="cell"><div><small>Single-threaded</small><strong>Finish one task, then start the next</strong></div></div>
+            <div class="comparison-cell future" role="cell"><div><small>Portfolio</small><strong>Route independent work and manage attention across tracks</strong></div></div>
+          </div>
+          <div class="comparison-row" role="row">
+            <div class="comparison-cell" role="cell"><div><small>Implicit context</small><strong>Keep requirements and decisions in your head</strong></div></div>
+            <div class="comparison-cell future" role="cell"><div><small>Explicit contracts</small><strong>State constraints, interfaces, evidence, and done conditions</strong></div></div>
+          </div>
+          <div class="comparison-row" role="row">
+            <div class="comparison-cell" role="cell"><div><small>Review code</small><strong>Read the diff and look for mistakes</strong></div></div>
+            <div class="comparison-cell future" role="cell"><div><small>Verify outcomes</small><strong>Inspect behavior, tests, assumptions, and operational risk</strong></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="takeaways" aria-labelledby="takeaway-title">
+      <div class="shell">
+        <p class="section-kicker mono">What you'll leave with</p>
+        <h2 id="takeaway-title">Four things you can use immediately.</h2>
+        <div class="takeaway-grid">
+          <article class="takeaway"><h3>A task-routing heuristic</h3><p>Decide what to delegate, parallelize, supervise closely, or keep fully human.</p></article>
+          <article class="takeaway"><h3>A repeatable work loop</h3><p>Frame → route → verify → integrate, with clear checkpoints and ownership.</p></article>
+          <article class="takeaway"><h3>A failure-mode checklist</h3><p>Catch false confidence, context drift, shallow tests, and integration mistakes early.</p></article>
+          <article class="takeaway"><h3>A personal practice plan</h3><p>Build agent-management skill gradually without betting a critical system on day one.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="abstract" aria-labelledby="abstract-title">
+      <div class="shell abstract-box">
+        <div>
+          <p class="section-kicker mono">Abstract</p>
+          <h2 id="abstract-title">For organizers and attendees.</h2>
+        </div>
+        <div class="abstract-copy">
+          <p>AI coding agents have moved beyond autocomplete: they can inspect repositories, use tools, make changes, and carry work across multiple steps. Run several in parallel and an engineer's role starts to change. The bottleneck is no longer only producing code—it is <strong>framing work precisely, allocating attention, and proving that the result is correct.</strong></p>
+          <p>This talk is a field report from working that way every day. Haiyuan shows how he uses complementary coding agents for implementation, research, and cross-review; the controls he uses to manage their predictable failure modes; and a practical framework for deciding which work to delegate. He then looks beyond today's tools at the skills and team mechanisms that become more valuable as execution gets cheaper.</p>
+          <p>The goal is not “AI will do everything.” It is a grounded answer to a more useful question: <strong>how should a strong engineer work when capable agents are part of the team?</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="resources" aria-labelledby="resources-title">
+      <div class="shell">
+        <div class="resources">
+          <div>
+            <h3 id="resources-title">Slides, templates, and references</h3>
+            <p>Resources will be published here with the talk. Bookmark this page to find everything in one place.</p>
+          </div>
+          <span class="status mono">Coming with the talk</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="speaker" aria-labelledby="speaker-title">
+      <div class="shell speaker">
+        <aside class="speaker-card">
+          <div class="avatar" aria-hidden="true">HC</div>
+          <h3>Haiyuan Cao</h3>
+          <p>AI engineer · researcher · builder</p>
+          <div class="speaker-links">
+            <a href="https://www.linkedin.com/in/haiyuancao/" rel="noreferrer">LinkedIn ↗</a>
+            <a href="https://scholar.google.com/citations?user=0ElAD3gAAAAJ&amp;hl=en" rel="noreferrer">Google Scholar ↗</a>
+            <a href="https://patents.justia.com/inventor/haiyuan-cao" rel="noreferrer">Patents ↗</a>
+          </div>
+        </aside>
+        <div class="speaker-copy">
+          <p class="section-kicker mono">About the speaker</p>
+          <h2 id="speaker-title">Building AI systems, then pressure-testing how they change the work.</h2>
+          <p>Haiyuan has spent the last decade building AI into products at Microsoft and Google. His work has included LoRA fine-tuning on GPT-3, RAG systems, the GitHub Copilot code agent, and LLM-agent evaluation. He uses coding agents daily across personal projects and open-source work.</p>
+          <p>Before industry, he earned a Ph.D. in theoretical physics and published research in <em>Nature Communications</em> and <em>Physical Review Letters</em>. That research background still shapes his approach: make the hypothesis explicit, design the test, and trust evidence over a convincing story.</p>
+          <div class="cred-strip" aria-label="Speaker background">
+            <div class="cred"><b>Microsoft → Google</b><span>Applied AI systems</span></div>
+            <div class="cred"><b>1,000+ citations</b><span>Research track record</span></div>
+            <div class="cred"><b>Multiple US patents</b><span>ML and NLP systems</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <footer>
-    <p>Personal talk · Content reflects the speaker's personal views and personal projects only.</p>
+    <div class="shell footer-inner">
+      <p>© Haiyuan Cao · Personal views and projects only.</p>
+      <p class="mono">FRAME → ROUTE → VERIFY → INTEGRATE</p>
+    </div>
   </footer>
-</div>
-
 </body>
 </html>
