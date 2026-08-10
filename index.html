@@ -655,7 +655,7 @@
         <h2 id="case-title">One real workflow, end to end: conversation → issue → plan → go → dashboard.</h2>
         <p class="section-intro">The talk is roughly 70% field report, 20% reusable mechanisms, and 10% future-of-work hypothesis. Its spine is my actual pipeline, run in the open on <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK" rel="noreferrer"><strong>BigQuery-Agent-Analytics-SDK</strong></a>—my open-source experiment repo for agent-team ideas—walked through on a real issue: <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/issues/404" rel="noreferrer">the Looker Studio dashboard tracking issue (#404)</a>.</p>
         <div class="org-diagram" role="img" aria-label="Swimlane diagram of the workflow: the human briefs an agent manager, the manager drafts a GitHub issue and fans review out to a team of three agents on different models, plans are cross-reviewed, the manager calls alignment, the human says go, the team implements with agent code review and CI, and the human checks the final outcome">
-          <svg viewBox="0 0 720 640" width="720" height="640" style="min-width: 640px;">
+          <svg viewBox="0 0 720 716" width="720" height="716" style="min-width: 640px;">
             <defs>
               <marker id="wfArrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
                 <path d="M0 0 L8 4 L0 8 Z" fill="var(--ink-faint)"/>
@@ -667,9 +667,9 @@
             <text class="viz-sub" x="360" y="42" text-anchor="middle">your only interface</text>
             <text class="viz-lbl" x="590" y="26" text-anchor="middle">AGENT TEAM</text>
             <text class="viz-sub" x="590" y="42" text-anchor="middle">3 seats · 3 model families</text>
-            <rect class="wf-band" x="25" y="54" width="210" height="556" rx="12"/>
-            <rect class="wf-band" x="255" y="54" width="210" height="556" rx="12"/>
-            <rect class="wf-band" x="485" y="54" width="210" height="556" rx="12"/>
+            <rect class="wf-band" x="25" y="54" width="210" height="648" rx="12"/>
+            <rect class="wf-band" x="255" y="54" width="210" height="648" rx="12"/>
+            <rect class="wf-band" x="485" y="54" width="210" height="648" rx="12"/>
 
             <rect class="wf-you" x="35" y="76" width="190" height="44" rx="8"/>
             <text class="wf-txt" x="130" y="102" text-anchor="middle">01 · brief the manager</text>
@@ -696,17 +696,25 @@
 
             <rect class="wf-you" x="35" y="386" width="190" height="44" rx="8" stroke-width="2.5"/>
             <text class="wf-txt" x="130" y="412" text-anchor="middle">06 · read plan → GO</text>
-            <path class="wf-flow" d="M130 430 V439 H590 V443" marker-end="url(#wfArrow)"/>
+            <path class="wf-flow" d="M130 430 V439 H360 V443" marker-end="url(#wfArrow)"/>
 
-            <rect class="wf-team" x="495" y="448" width="190" height="56" rx="8"/>
-            <text class="wf-txt" x="590" y="468" text-anchor="middle">07 · implement</text>
-            <text class="viz-sub" x="590" y="484" text-anchor="middle">manager leads · dep order</text>
-            <text class="viz-sub" x="590" y="497" text-anchor="middle">agent review · CI floor</text>
-            <path class="wf-flow" d="M590 504 V514 H130 V518" marker-end="url(#wfArrow)"/>
+            <rect class="wf-mgr" x="265" y="448" width="190" height="44" rx="8"/>
+            <text class="wf-txt-inv" x="360" y="467" text-anchor="middle">07 · orchestrate</text>
+            <text class="viz-sub" x="360" y="483" text-anchor="middle" fill="#b4c0cf">priority · deps · reviews</text>
+            <path class="wf-flow" d="M360 492 V501 H590 V505" marker-end="url(#wfArrow)"/>
 
-            <rect class="wf-you" x="35" y="524" width="190" height="52" rx="8" stroke-width="2.5"/>
-            <text class="wf-txt" x="130" y="544" text-anchor="middle">08 · check the outcome</text>
-            <text class="viz-sub" x="130" y="560" text-anchor="middle">open the dashboard, use it</text>
+            <rect class="wf-team" x="495" y="510" width="190" height="44" rx="8"/>
+            <text class="wf-txt" x="590" y="529" text-anchor="middle">08 · implement</text>
+            <text class="viz-sub" x="590" y="545" text-anchor="middle">agent review · CI floor</text>
+            <path class="wf-flow" d="M590 554 V563 H360 V567" marker-end="url(#wfArrow)"/>
+
+            <rect class="wf-mgr" x="265" y="572" width="190" height="44" rx="8"/>
+            <text class="wf-txt-inv" x="360" y="598" text-anchor="middle">09 · confirm all done</text>
+            <path class="wf-flow" d="M360 616 V625 H130 V629" marker-end="url(#wfArrow)"/>
+
+            <rect class="wf-you" x="35" y="634" width="190" height="52" rx="8" stroke-width="2.5"/>
+            <text class="wf-txt" x="130" y="654" text-anchor="middle">10 · check the real thing</text>
+            <text class="viz-sub" x="130" y="670" text-anchor="middle">open the dashboard, use it</text>
           </svg>
         </div>
         <div class="case-steps">
@@ -715,9 +723,11 @@
           <div class="case-step"><span class="num mono">03</span><div><b>Review fans out across the team</b><small>The manager splits the review; each agent finalizes its part of the issue and drafts implementation plan and design.</small></div></div>
           <div class="case-step"><span class="num mono">04</span><div><b>Every member reviews every plan</b><small>Plans and designs are cross-reviewed by all teammates, the manager included—each a different frontier model.</small></div></div>
           <div class="case-step"><span class="num mono">05</span><div><b>The manager calls alignment</b><small>It monitors who has finalized, chases stragglers, and only then declares the team aligned on one final plan.</small></div></div>
-          <div class="case-step"><span class="num mono">06</span><div><b>I read the plan and say go</b><small>The first human gate. I read one aligned plan—not five drafts—and make one decision.</small></div></div>
-          <div class="case-step"><span class="num mono">07</span><div><b>The team implements in dependency order</b><small>The manager leads and sequences all tasks. Every code review is agent-to-agent, with the CI pipeline as the floor.</small></div></div>
-          <div class="case-step"><span class="num mono">08</span><div><b>I check the outcome, not the diff</b><small>When the manager reports done, I verify the result itself—in this case, by opening and using the dashboard.</small></div></div>
+          <div class="case-step"><span class="num mono">06</span><div><b>I read the plan and tell the manager: go</b><small>The first human gate. One aligned plan—not five drafts—one decision, delivered through the same conversation.</small></div></div>
+          <div class="case-step"><span class="num mono">07</span><div><b>The manager orchestrates implementation</b><small>It sets task priority, sequences the dependencies, and organizes the reviews. My go is the last input it needs.</small></div></div>
+          <div class="case-step"><span class="num mono">08</span><div><b>The team implements and reviews</b><small>Every code review is agent-to-agent, with the CI pipeline as the floor.</small></div></div>
+          <div class="case-step"><span class="num mono">09</span><div><b>The manager confirms every task is done</b><small>It tracks each task to completion and reports finished only when everything has landed.</small></div></div>
+          <div class="case-step"><span class="num mono">10</span><div><b>I check the real thing, not the diff</b><small>The second human gate: I open the actual dashboard and use it.</small></div></div>
         </div>
         <div class="cred-strip" aria-label="Team model requirement" style="margin-top:16px;">
           <div class="cred"><b>GPT 5.6 sol</b><span>One seat</span></div>
@@ -911,7 +921,7 @@
         </div>
         <div class="abstract-copy">
           <p>AI coding agents have moved beyond autocomplete: they can inspect repositories, use tools, make changes, and carry work across multiple steps. Run several in parallel and an engineer's role starts to change. The bottleneck is no longer only producing code—it is <strong>framing work precisely, allocating attention, and proving that the result is correct.</strong></p>
-          <p>This talk is a field report from working that way every day. Haiyuan walks through the pipeline he runs in his open-source experiment repo: he briefs a single <strong>agent manager</strong>, which drafts a GitHub issue, fans review out to a team of agents built on different frontier models, drives every plan and design through full cross-review, and calls alignment before he reads the one final plan and says go. Implementation runs in dependency order under the manager's lead, all code review is agent-to-agent with CI as the floor, and his job reduces to two gates: approving the plan and verifying the shipped outcome. He also shows how large context windows change learning itself—loading whole codebases and papers into an agent and interrogating them. He then looks at how the role expands—more TL mechanics practiced daily, wider spans of execution—and closes with a carefully scoped hypothesis about how collaboration and org shapes may change, kept clearly separate from what the evidence already supports.</p>
+          <p>This talk is a field report from working that way every day. Haiyuan walks through the pipeline he runs in his open-source experiment repo: he briefs a single <strong>agent manager</strong>, which drafts a GitHub issue, fans review out to a team of agents built on different frontier models, drives every plan and design through full cross-review, and calls alignment before he reads the one final plan and says go. His go goes back to the same manager, which sets priorities, sequences dependencies, and organizes the reviews; all code review is agent-to-agent with CI as the floor; and only when the manager confirms every task has landed does he step back in—to open the real dashboard and use it. Two gates, one conversation. He also shows how large context windows change learning itself—loading whole codebases and papers into an agent and interrogating them. He then looks at how the role expands—more TL mechanics practiced daily, wider spans of execution—and closes with a carefully scoped hypothesis about how collaboration and org shapes may change, kept clearly separate from what the evidence already supports.</p>
           <p>The goal is not “AI will do everything.” It is a grounded answer to a more useful question: <strong>how should a strong engineer work when capable agents are part of the team?</strong></p>
         </div>
       </div>
