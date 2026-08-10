@@ -311,6 +311,21 @@
     .comparison-cell.future { background: rgba(15,118,110,.16); }
     .comparison-cell.future strong { color: #cdf5ef; }
 
+    .viz-lbl { font: 600 12px "SFMono-Regular", Consolas, monospace; fill: var(--ink); }
+    .viz-sub { font: 10px "SFMono-Regular", Consolas, monospace; fill: var(--ink-faint); }
+    .viz-axis { stroke: var(--line-strong); fill: none; }
+    .viz-accent { stroke: var(--accent); fill: none; stroke-width: 2.5; stroke-linecap: round; }
+    .viz-dash { stroke: var(--accent-dark); stroke-dasharray: 4 4; fill: none; }
+    .wf-you { fill: var(--accent-pale); stroke: var(--accent-dark); }
+    .wf-mgr { fill: var(--navy); stroke: var(--navy); }
+    .wf-team { fill: var(--mint-pale); stroke: var(--mint); }
+    .wf-band { fill: none; stroke: var(--line); }
+    .wf-flow { stroke: var(--ink-faint); fill: none; stroke-width: 1.5; }
+    .wf-txt { font: 600 12.5px "SFMono-Regular", Consolas, monospace; fill: var(--ink); }
+    .wf-txt-inv { font: 600 12.5px "SFMono-Regular", Consolas, monospace; fill: #ffffff; }
+    .edge-viz { margin-top: 16px; }
+    .edge-viz svg { display: block; width: 100%; height: auto; }
+
     .case-steps {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -639,6 +654,61 @@
         <p class="section-kicker mono">The centerpiece</p>
         <h2 id="case-title">One real workflow, end to end: conversation → issue → plan → go → dashboard.</h2>
         <p class="section-intro">The talk is roughly 70% field report, 20% reusable mechanisms, and 10% future-of-work hypothesis. Its spine is my actual pipeline, run in the open on <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK" rel="noreferrer"><strong>BigQuery-Agent-Analytics-SDK</strong></a>—my open-source experiment repo for agent-team ideas—walked through on a real issue: <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/issues/404" rel="noreferrer">the Looker Studio dashboard tracking issue (#404)</a>.</p>
+        <div class="org-diagram" role="img" aria-label="Swimlane diagram of the workflow: the human briefs an agent manager, the manager drafts a GitHub issue and fans review out to a team of three agents on different models, plans are cross-reviewed, the manager calls alignment, the human says go, the team implements with agent code review and CI, and the human checks the final outcome">
+          <svg viewBox="0 0 720 640" width="720" height="640" style="min-width: 640px;">
+            <defs>
+              <marker id="wfArrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M0 0 L8 4 L0 8 Z" fill="var(--ink-faint)"/>
+              </marker>
+            </defs>
+            <text class="viz-lbl" x="130" y="26" text-anchor="middle">YOU</text>
+            <text class="viz-sub" x="130" y="42" text-anchor="middle">two gates, one brief</text>
+            <text class="viz-lbl" x="360" y="26" text-anchor="middle">AGENT MANAGER</text>
+            <text class="viz-sub" x="360" y="42" text-anchor="middle">your only interface</text>
+            <text class="viz-lbl" x="590" y="26" text-anchor="middle">AGENT TEAM</text>
+            <text class="viz-sub" x="590" y="42" text-anchor="middle">3 seats · 3 model families</text>
+            <rect class="wf-band" x="25" y="54" width="210" height="556" rx="12"/>
+            <rect class="wf-band" x="255" y="54" width="210" height="556" rx="12"/>
+            <rect class="wf-band" x="485" y="54" width="210" height="556" rx="12"/>
+
+            <rect class="wf-you" x="35" y="76" width="190" height="44" rx="8"/>
+            <text class="wf-txt" x="130" y="102" text-anchor="middle">01 · brief the manager</text>
+            <path class="wf-flow" d="M130 120 V129 H360 V133" marker-end="url(#wfArrow)"/>
+
+            <rect class="wf-mgr" x="265" y="138" width="190" height="44" rx="8"/>
+            <text class="wf-txt-inv" x="360" y="164" text-anchor="middle">02 · draft the GH issue</text>
+            <path class="wf-flow" d="M360 182 V191 H590 V195" marker-end="url(#wfArrow)"/>
+
+            <rect class="wf-team" x="495" y="200" width="190" height="44" rx="8"/>
+            <text class="wf-txt" x="590" y="219" text-anchor="middle">03 · review fans out</text>
+            <text class="viz-sub" x="590" y="235" text-anchor="middle">each seat: plan + design</text>
+            <path class="wf-flow" d="M590 244 V257" marker-end="url(#wfArrow)"/>
+
+            <rect class="wf-team" x="495" y="262" width="190" height="44" rx="8"/>
+            <text class="wf-txt" x="590" y="281" text-anchor="middle">04 · cross-review ⟲</text>
+            <text class="viz-sub" x="590" y="297" text-anchor="middle">every member × every plan</text>
+            <path class="wf-flow" d="M590 306 V315 H360 V319" marker-end="url(#wfArrow)"/>
+
+            <rect class="wf-mgr" x="265" y="324" width="190" height="44" rx="8"/>
+            <text class="wf-txt-inv" x="360" y="343" text-anchor="middle">05 · call alignment</text>
+            <text class="viz-sub" x="360" y="359" text-anchor="middle" fill="#b4c0cf">all finalized · one plan</text>
+            <path class="wf-flow" d="M360 368 V377 H130 V381" marker-end="url(#wfArrow)"/>
+
+            <rect class="wf-you" x="35" y="386" width="190" height="44" rx="8" stroke-width="2.5"/>
+            <text class="wf-txt" x="130" y="412" text-anchor="middle">06 · read plan → GO</text>
+            <path class="wf-flow" d="M130 430 V439 H590 V443" marker-end="url(#wfArrow)"/>
+
+            <rect class="wf-team" x="495" y="448" width="190" height="56" rx="8"/>
+            <text class="wf-txt" x="590" y="468" text-anchor="middle">07 · implement</text>
+            <text class="viz-sub" x="590" y="484" text-anchor="middle">dependency order · manager leads</text>
+            <text class="viz-sub" x="590" y="497" text-anchor="middle">agent code review · CI floor</text>
+            <path class="wf-flow" d="M590 504 V514 H130 V518" marker-end="url(#wfArrow)"/>
+
+            <rect class="wf-you" x="35" y="524" width="190" height="52" rx="8" stroke-width="2.5"/>
+            <text class="wf-txt" x="130" y="544" text-anchor="middle">08 · check the outcome</text>
+            <text class="viz-sub" x="130" y="560" text-anchor="middle">open the dashboard, use it</text>
+          </svg>
+        </div>
         <div class="case-steps">
           <div class="case-step"><span class="num mono">01</span><div><b>I brief the agent manager</b><small>One conversation with one agent. I describe the goal; the manager is my only interface to the team.</small></div></div>
           <div class="case-step"><span class="num mono">02</span><div><b>The manager drafts the GitHub issue</b><small>Intent, constraints, and open questions become a public, reviewable artifact—like issue #404.</small></div></div>
@@ -688,7 +758,7 @@
       <div class="shell">
         <p class="section-kicker mono">Collaboration &amp; organization</p>
         <h2 id="org-title">How collaboration might change—a hypothesis, held loosely.</h2>
-        <p class="section-intro">Agent leverage will change collaboration before it changes org charts. Teams may spend less time coordinating execution and more time sharing context, reviewing evidence, and making customer decisions. Whether organizations actually flatten is still an open question—and accountability and people leadership remain human.</p>
+        <p class="section-intro">Agent leverage will change collaboration before it changes org charts: less time coordinating execution, more time sharing context and reviewing evidence. Whether orgs actually flatten is an open question—accountability and people leadership remain human.</p>
         <div class="org-diagram" role="img" aria-label="Diagram: a headcount pyramid reshaping into small pods of engineers, each directing their own agent teams">
           <svg viewBox="0 0 860 240" width="860" height="240">
             <style>
@@ -762,12 +832,34 @@
           <article class="org-card">
             <span class="num mono">THE INDIVIDUAL EDGE</span>
             <h3>Span: how many agent teams you can run in parallel.</h3>
-            <p>The ceiling is not typing speed or tooling—it is how much you can responsibly verify. That span is trainable, and the gap between engineers who practice it and engineers who don't compounds month over month.</p>
+            <p>The ceiling is not typing speed—it is how much you can responsibly verify. Push past it and quality collapses; grow it and the gap compounds monthly.</p>
+            <div class="edge-viz">
+              <svg viewBox="0 0 300 140" role="img" aria-label="Curve of verified outcomes versus parallel agent teams: throughput rises with more teams, peaks at your verification ceiling, then falls if you push past it">
+                <path class="viz-axis" d="M34 12 V108 H292"/>
+                <path class="viz-accent" d="M34 102 C 90 94, 138 46, 178 40 C 214 36, 254 62, 288 88"/>
+                <path class="viz-dash" d="M178 20 V108"/>
+                <circle cx="178" cy="40" r="4" fill="var(--accent)"/>
+                <text class="viz-sub" x="178" y="14" text-anchor="middle">your verification ceiling</text>
+                <text class="viz-sub" x="163" y="124" text-anchor="middle">parallel agent teams →</text>
+                <text class="viz-sub" x="12" y="60" text-anchor="middle" transform="rotate(-90 12 60)">verified outcomes →</text>
+              </svg>
+            </div>
           </article>
           <article class="org-card">
             <span class="num mono">THE ORGANIZATIONAL EDGE</span>
             <h3>Agentic operations: meetings without calendars.</h3>
-            <p>When a dependency appears, my manager agent meets your manager agent within minutes—no scheduling, no week of calendar latency. Teams stop aligning on scope ("is this mine or yours?") and align on outcomes; the agents negotiate the seams. Delivery speed becomes bounded by verification, not by coordination.</p>
+            <p>When a dependency appears, my manager agent meets yours within minutes—no calendar tetris. Teams align on outcomes, not each other's scope; the agents negotiate the seams. Delivery speed becomes bounded by verification, not coordination.</p>
+            <div class="edge-viz">
+              <svg viewBox="0 0 300 140" role="img" aria-label="Bar comparison of coordination latency: a human-held meeting takes days of scheduling and follow-up, an agent-held meeting takes minutes">
+                <text class="viz-sub" x="10" y="20">humans hold the meeting</text>
+                <rect x="10" y="28" width="256" height="18" rx="4" fill="var(--line-strong)"/>
+                <text class="viz-sub" x="18" y="41" fill="var(--ink)">slot hunt · meeting · follow-ups — days</text>
+                <text class="viz-sub" x="10" y="82">agents hold the meeting</text>
+                <rect x="10" y="90" width="30" height="18" rx="4" fill="var(--mint)"/>
+                <text class="viz-sub" x="48" y="103" fill="var(--ink)">minutes</text>
+                <text class="viz-sub" x="10" y="132">same alignment · none of the latency</text>
+              </svg>
+            </div>
           </article>
         </div>
         <blockquote class="thesis">
