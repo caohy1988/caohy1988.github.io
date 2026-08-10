@@ -311,6 +311,31 @@
     .comparison-cell.future { background: rgba(15,118,110,.16); }
     .comparison-cell.future strong { color: #cdf5ef; }
 
+    .org-diagram {
+      margin-top: 44px;
+      padding: clamp(24px, 4vw, 40px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      overflow-x: auto;
+    }
+    .org-diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+    .org-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .org-card {
+      padding: 25px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .org-card .num { color: var(--accent-dark); font-size: 0.72rem; font-weight: 800; }
+    .org-card h3 { margin: 14px 0 8px; font-size: 1.08rem; line-height: 1.3; }
+    .org-card p { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+
     .takeaway-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -448,6 +473,7 @@
       .agenda-card p { grid-column: auto; }
       .comparison-row { grid-template-columns: 1fr; }
       .comparison-cell + .comparison-cell { border-left: 0; border-top: 1px solid rgba(255,255,255,.13); }
+      .org-grid { grid-template-columns: 1fr; }
       .takeaway-grid { grid-template-columns: 1fr; }
       .resources { align-items: flex-start; flex-direction: column; }
       .speaker { grid-template-columns: 1fr; }
@@ -472,6 +498,7 @@
     <a class="brand mono" href="#top"><span>HC</span> / FIELD NOTES</a>
     <div class="nav-links">
       <a href="#agenda">Agenda</a>
+      <a href="#org">Org</a>
       <a href="#takeaways">Takeaways</a>
       <a href="#speaker">Speaker</a>
     </div>
@@ -597,6 +624,83 @@
             <div class="comparison-cell" role="cell"><div><small>Serial learning</small><strong>Ramp up from docs, tutorials, and trial and error</strong></div></div>
             <div class="comparison-cell future" role="cell"><div><small>Context-window learning</small><strong>Load the whole codebase or paper and interrogate it</strong></div></div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="org" aria-labelledby="org-title">
+      <div class="shell">
+        <p class="section-kicker mono">Collaboration &amp; organization</p>
+        <h2 id="org-title">What does a team look like when everyone has leverage?</h2>
+        <p class="section-intro">When each engineer can direct several tracks of agent work, the pyramid built around scarce execution capacity stops making sense. Collaboration reorganizes around context, contracts, and verification.</p>
+        <div class="org-diagram" role="img" aria-label="Diagram: a headcount pyramid reshaping into small pods of engineers, each directing their own agent teams">
+          <svg viewBox="0 0 860 240" width="860" height="240">
+            <style>
+              .od-box { fill: var(--paper); stroke: var(--line-strong); }
+              .od-lbl { font: 600 12px "SFMono-Regular", Consolas, monospace; fill: var(--ink); }
+              .od-sub { font: 11px "SFMono-Regular", Consolas, monospace; fill: var(--ink-faint); }
+              .od-edge { stroke: var(--line-strong); fill: none; }
+              .od-agent { fill: var(--mint-pale); stroke: var(--mint); }
+              .od-human { fill: var(--accent-pale); stroke: var(--accent-dark); }
+              .od-arrow { stroke: var(--accent); stroke-width: 2; fill: none; }
+            </style>
+            <!-- Left: pyramid -->
+            <rect class="od-box" x="120" y="24" width="120" height="30" rx="6"/>
+            <text class="od-lbl" x="180" y="43" text-anchor="middle">director</text>
+            <path class="od-edge" d="M180 54 V70 H110 V86 M180 54 V70 H250 V86"/>
+            <rect class="od-box" x="55" y="86" width="110" height="30" rx="6"/>
+            <text class="od-lbl" x="110" y="105" text-anchor="middle">manager</text>
+            <rect class="od-box" x="195" y="86" width="110" height="30" rx="6"/>
+            <text class="od-lbl" x="250" y="105" text-anchor="middle">manager</text>
+            <path class="od-edge" d="M110 116 V132 M250 116 V132"/>
+            <rect class="od-box" x="30" y="132" width="160" height="30" rx="6"/>
+            <text class="od-lbl" x="110" y="151" text-anchor="middle">eng · eng · eng</text>
+            <rect class="od-box" x="210" y="132" width="160" height="30" rx="6"/>
+            <text class="od-lbl" x="290" y="151" text-anchor="middle">eng · eng · eng</text>
+            <text class="od-sub" x="200" y="205" text-anchor="middle">before: layers ration scarce execution</text>
+            <!-- Arrow -->
+            <path class="od-arrow" d="M400 120 H452 M452 120 l-9 -6 M452 120 l-9 6"/>
+            <!-- Right: pods -->
+            <rect class="od-human" x="500" y="46" width="94" height="30" rx="6"/>
+            <text class="od-lbl" x="547" y="65" text-anchor="middle">engineer</text>
+            <path class="od-edge" d="M547 76 V92 M547 84 H509 V92 M547 84 H585 V92"/>
+            <rect class="od-agent" x="486" y="92" width="46" height="24" rx="6"/>
+            <rect class="od-agent" x="540" y="92" width="46" height="24" rx="6"/>
+            <rect class="od-agent" x="594" y="92" width="46" height="24" rx="6"/>
+            <text class="od-sub" x="563" y="134" text-anchor="middle">agent teams</text>
+            <rect class="od-human" x="690" y="46" width="94" height="30" rx="6"/>
+            <text class="od-lbl" x="737" y="65" text-anchor="middle">engineer</text>
+            <path class="od-edge" d="M737 76 V92 M737 84 H699 V92 M737 84 H775 V92"/>
+            <rect class="od-agent" x="676" y="92" width="46" height="24" rx="6"/>
+            <rect class="od-agent" x="730" y="92" width="46" height="24" rx="6"/>
+            <rect class="od-agent" x="784" y="92" width="46" height="24" rx="6"/>
+            <text class="od-sub" x="753" y="134" text-anchor="middle">agent teams</text>
+            <path class="od-edge" d="M594 61 H690" stroke-dasharray="4 4"/>
+            <text class="od-sub" x="642" y="54" text-anchor="middle">shared context</text>
+            <text class="od-sub" x="660" y="205" text-anchor="middle">after: small pods of high-span operators</text>
+          </svg>
+        </div>
+        <div class="org-grid">
+          <article class="org-card">
+            <span class="num mono">SHAPE</span>
+            <h3>Small pods, wide scope.</h3>
+            <p>A handful of high-span engineers plus their agent fleets covers what used to take a large team. Fewer handoffs, less coordination tax, flatter charts—and management span measured in agent tracks, not headcount.</p>
+          </article>
+          <article class="org-card">
+            <span class="num mono">ROLES</span>
+            <h3>TL and M2 become skills, not titles.</h3>
+            <p>Every engineer sets direction, decomposes work, reviews output, and unblocks their agents daily. The role boundaries between IC, lead, and manager blur—what remains is who owns judgment for which outcomes.</p>
+          </article>
+          <article class="org-card">
+            <span class="num mono">RITUALS</span>
+            <h3>Standups become portfolio reviews.</h3>
+            <p>The daily question shifts from "what are you coding?" to "which tracks are running, which are blocked on judgment, which passed their evidence gates?" Code review becomes outcome verification.</p>
+          </article>
+          <article class="org-card">
+            <span class="num mono">MEDIUM</span>
+            <h3>Context becomes the collaboration surface.</h3>
+            <p>Specs, task contracts, evals, and shared context files replace meetings as the coordination medium. The best collaborators write context that other people—and other people's agents—can pick up and run with.</p>
+          </article>
         </div>
       </div>
     </section>
