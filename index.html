@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Managing Agent Teams — a talk by Haiyuan Cao</title>
+<style>
+  :root {
+    --bg: #f3f5f7;
+    --surface: #ffffff;
+    --ink: #182430;
+    --ink-soft: #46586a;
+    --ink-faint: #7a8a99;
+    --line: #d5dde4;
+    --accent: #0b6e6e;
+    --accent-ink: #ffffff;
+    --highlight: #b3541e;
+    --note-bg: #fdf6ec;
+    --note-line: #e3cfa8;
+    --slot-bg: #eef1f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10161c;
+      --surface: #1a222b;
+      --ink: #e8edf2;
+      --ink-soft: #aebbc7;
+      --ink-faint: #71818f;
+      --line: #2c3843;
+      --accent: #3fbdbd;
+      --accent-ink: #0d1418;
+      --highlight: #e09a5f;
+      --note-bg: #241f16;
+      --note-line: #4d4028;
+      --slot-bg: #151c23;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10161c;
+    --surface: #1a222b;
+    --ink: #e8edf2;
+    --ink-soft: #aebbc7;
+    --ink-faint: #71818f;
+    --line: #2c3843;
+    --accent: #3fbdbd;
+    --accent-ink: #0d1418;
+    --highlight: #e09a5f;
+    --note-bg: #241f16;
+    --note-line: #4d4028;
+    --slot-bg: #151c23;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 0 1.5rem 5rem;
+  }
+  .mono {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  /* Header */
+  header { padding: 4.5rem 0 2.5rem; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 1.2rem;
+  }
+  h1 {
+    font-family: Charter, Georgia, "Times New Roman", serif;
+    font-size: clamp(2rem, 5.5vw, 3rem);
+    line-height: 1.12;
+    margin: 0 0 1rem;
+    text-wrap: balance;
+    font-weight: 700;
+  }
+  .subtitle {
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    margin: 0 0 2rem;
+    max-width: 38rem;
+    text-wrap: balance;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .meta strong { color: var(--ink); font-weight: 600; }
+
+  /* Disclaimer */
+  .note {
+    background: var(--note-bg);
+    border: 1px solid var(--note-line);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 2.5rem 0 0;
+    font-size: 0.95rem;
+  }
+  .note b { color: var(--highlight); }
+
+  /* Diagram */
+  .diagram {
+    margin: 3.5rem 0 0;
+    padding: 1.75rem 1.5rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  .diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+  .diagram figcaption {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+    margin-top: 0.75rem;
+  }
+
+  /* Sections */
+  section { margin-top: 4rem; }
+  h2 {
+    font-family: Charter, Georgia, "Times New Roman", serif;
+    font-size: 1.5rem;
+    margin: 0 0 1rem;
+    font-weight: 700;
+  }
+  section > p { max-width: 40rem; color: var(--ink-soft); }
+  section > p strong { color: var(--ink); }
+
+  /* Agenda */
+  .agenda { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+  .agenda-item {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+  }
+  .agenda-item .tag {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .agenda-item h3 { margin: 0.35rem 0 0.5rem; font-size: 1.1rem; }
+  .agenda-item p { margin: 0; color: var(--ink-soft); font-size: 0.95rem; }
+
+  /* Slides slot */
+  .slides-slot {
+    margin-top: 1.5rem;
+    border: 2px dashed var(--line);
+    border-radius: 8px;
+    background: var(--slot-bg);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--ink-faint);
+  }
+  .slides-slot .mono { font-size: 0.85rem; }
+
+  /* Bio */
+  .bio {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .avatar {
+    flex: none;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Charter, Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  .bio h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+  .bio p { margin: 0 0 0.6rem; color: var(--ink-soft); font-size: 0.95rem; }
+  .bio a { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
+
+  .cred-list {
+    list-style: none;
+    margin: 0.75rem 0 1rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .cred-list li {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: 0.75rem;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+  .cred-list .cred-tag {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding-top: 0.2rem;
+  }
+  .cred-list strong { color: var(--ink); font-weight: 600; }
+  .bio-links { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+
+  footer {
+    margin-top: 5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    header, .note, .diagram { animation: rise 0.5s ease-out both; }
+    .note { animation-delay: 0.08s; }
+    .diagram { animation-delay: 0.16s; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: none; }
+    }
+  }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Tech Talk · Amazon Engineer Club</p>
+    <h1>Everyone Is a TL Now: Working With Teams of AI Agents</h1>
+    <p class="subtitle">How I run Claude Code, Codex, and Kimi Code as parallel agent teams for daily engineering and learning — and why the shape of orgs, and the definition of work itself, is about to shift.</p>
+    <div class="meta">
+      <span><strong>Speaker</strong> Haiyuan Cao</span>
+      <span><strong>Date</strong> TBD</span>
+      <span><strong>Format</strong> Talk + Q&amp;A</span>
+    </div>
+
+    <div class="note">
+      <b>A note on scope:</b> this talk is given in a personal capacity. Nothing in the talk or the slides covers, references, or draws on my work at Google. All examples come from personal projects, open-source tools, and publicly available information.
+    </div>
+  </header>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 560 220" width="560" height="220" role="img" aria-label="Diagram: one engineer orchestrating three agent teams — Claude Code, Codex, and Kimi Code">
+      <style>
+        .box { fill: none; stroke: var(--line); }
+        .lbl { font: 600 13px ui-monospace, Menlo, Consolas, monospace; fill: var(--ink); }
+        .sub { font: 11px ui-monospace, Menlo, Consolas, monospace; fill: var(--ink-faint); }
+        .edge { stroke: var(--accent); stroke-width: 1.5; fill: none; }
+      </style>
+      <rect class="box" x="215" y="14" width="130" height="46" rx="6"/>
+      <text class="lbl" x="280" y="34" text-anchor="middle">you</text>
+      <text class="sub" x="280" y="50" text-anchor="middle">TL / M2 of agents</text>
+
+      <path class="edge" d="M280 60 V92 H90 V124"/>
+      <path class="edge" d="M280 60 V124"/>
+      <path class="edge" d="M280 60 V92 H470 V124"/>
+
+      <rect class="box" x="20" y="124" width="140" height="70" rx="6"/>
+      <text class="lbl" x="90" y="150" text-anchor="middle">claude code</text>
+      <text class="sub" x="90" y="168" text-anchor="middle">build · refactor</text>
+      <text class="sub" x="90" y="183" text-anchor="middle">deep research</text>
+
+      <rect class="box" x="210" y="124" width="140" height="70" rx="6"/>
+      <text class="lbl" x="280" y="150" text-anchor="middle">codex</text>
+      <text class="sub" x="280" y="168" text-anchor="middle">second opinion</text>
+      <text class="sub" x="280" y="183" text-anchor="middle">cross-review</text>
+
+      <rect class="box" x="400" y="124" width="140" height="70" rx="6"/>
+      <text class="lbl" x="470" y="150" text-anchor="middle">kimi code</text>
+      <text class="sub" x="470" y="168" text-anchor="middle">parallel tracks</text>
+      <text class="sub" x="470" y="183" text-anchor="middle">exploration</text>
+    </svg>
+    <figcaption>The daily setup: one engineer, several agent teams, work assigned and reviewed like an org.</figcaption>
+  </figure>
+
+  <section>
+    <h2>Abstract</h2>
+    <p>AI coding agents stopped being autocomplete a while ago. Run several of them at once — each with its own strengths, each holding hundreds of thousands of tokens of context — and your job quietly changes: you stop writing most of the code and start <strong>specifying, delegating, reviewing, and arbitrating</strong>, the way a tech lead runs a team.</p>
+    <p>This talk is a field report from working that way every day. I'll show how I combine Claude Code, Codex, and Kimi Code as complementary agent teams; how I use their huge context windows to learn new codebases, papers, and fast-moving trends far faster than I could alone; and where I think this leads: a world where <strong>every engineer is a TL — and increasingly an M2 — of agent teams</strong>, where the number of agent teams you can effectively manage becomes a real competitive edge, and where org shape and the very definition of "work" have to be redrawn.</p>
+  </section>
+
+  <section>
+    <h2>What we'll cover</h2>
+    <div class="agenda">
+      <div class="agenda-item">
+        <span class="tag">Part 1 · Practice</span>
+        <h3>Running agent teams day to day</h3>
+        <p>My working setup with Claude Code, Codex, and Kimi Code: how work gets split across agents, how agents review each other's output, and which tasks each one is actually good at. Concrete workflows, not demos.</p>
+      </div>
+      <div class="agenda-item">
+        <span class="tag">Part 2 · Learning</span>
+        <h3>Learning at agent speed</h3>
+        <p>Using massive context windows as a learning instrument: dropping whole codebases, papers, and docs into an agent and interrogating them. How this changes learning efficiency and how I stay current with a field that moves weekly.</p>
+      </div>
+      <div class="agenda-item">
+        <span class="tag">Part 3 · Future</span>
+        <h3>Everyone is a TL and an M2</h3>
+        <p>What happens to collaboration when management span over agents — not headcount — becomes the edge. How org shapes flatten and reform, why "writing code" stops being the unit of work, and what to practice now to be ready.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="slides">
+    <h2>Slides</h2>
+    <p>The interactive slides will be attached here closer to the talk.</p>
+    <div class="slides-slot">
+      <p class="mono">[ slides — coming soon ]</p>
+      <p>Check back near the talk date.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>About the speaker</h2>
+    <div class="bio">
+      <div class="avatar">HC</div>
+      <div>
+        <h3>Haiyuan Cao</h3>
+        <p>Haiyuan has spent the last decade building AI into products at two of the industry's largest AI organizations — first at <strong>Microsoft</strong>, where as a Principal SDE in Azure AI he worked on <strong>LoRA fine-tuning of GPT-3</strong>, built <strong>RAG chatbots on GPT-3.5</strong>, and worked on the <strong>GitHub Copilot code agent</strong>; and now at <strong>Google</strong>, where his work centers on LLM agents and evaluation. He builds with AI coding agents daily and writes about what multi-agent workflows mean for how engineers learn and collaborate.</p>
+        <ul class="cred-list">
+          <li>
+            <span class="cred-tag">Research</span>
+            <span><strong>Ph.D. in theoretical physics.</strong> Published research on high-temperature superconductivity in <em>Nature Communications</em> and <em>Physical Review Letters</em> — 1,000+ citations, h-index 11. Later studied data science at Columbia University.</span>
+          </li>
+          <li>
+            <span class="cred-tag">Patents</span>
+            <span><strong>Inventor on multiple U.S. patents</strong> in machine learning and natural language processing — including synthetic training-data generation for code-writing language models and semantic parsing — with recent patent applications in AI agent systems.</span>
+          </li>
+          <li>
+            <span class="cred-tag">Industry</span>
+            <span><strong>Microsoft → Google.</strong> At Microsoft: LoRA fine-tuning on GPT-3, RAG chatbots on GPT-3.5, and the GitHub Copilot code agent. At Google: LLM agents and evaluation — a front-row seat, at both companies, to how AI is reshaping engineering work.</span>
+          </li>
+        </ul>
+        <p class="bio-links">
+          <a href="https://www.linkedin.com/in/haiyuancao/">LinkedIn ↗</a>
+          <a href="https://scholar.google.com/citations?user=0ElAD3gAAAAJ&amp;hl=en">Google Scholar ↗</a>
+          <a href="https://patents.justia.com/inventor/haiyuan-cao">Patents ↗</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Personal talk · Amazon Engineer Club · Content reflects the speaker's personal views and personal projects only.</p>
+  </footer>
+</div>
+
+</body>
+</html>
