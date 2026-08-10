@@ -490,6 +490,36 @@
     .cred b { display: block; font-size: .88rem; }
     .cred span { color: var(--ink-faint); font-size: .75rem; }
 
+    .qa-form { max-width: 680px; margin-top: 36px; display: grid; gap: 8px; }
+    .qa-label {
+      margin-top: 10px;
+      color: var(--ink-faint);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .qa-form textarea, .qa-form input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      resize: vertical;
+    }
+    .qa-form textarea:focus, .qa-form input:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+      border-color: var(--accent);
+    }
+    .qa-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 14px; }
+    .qa-actions .button { cursor: pointer; font: inherit; font-size: 0.9rem; font-weight: 700; }
+    .qa-alt { color: var(--ink-soft); font-size: 0.88rem; }
+    .qa-note { margin: 10px 0 0; color: var(--ink-faint); font-size: 0.82rem; }
+    .qa-note a { color: var(--accent-dark); }
+
     footer { padding: 30px 0 44px; border-top: 1px solid var(--line); }
     .footer-inner { display: flex; justify-content: space-between; gap: 22px; color: var(--ink-faint); font-size: .75rem; }
     .footer-inner p { margin: 0; }
@@ -547,6 +577,7 @@
       <a href="#agenda">Agenda</a>
       <a href="#org">Org</a>
       <a href="#takeaways">Takeaways</a>
+      <a href="#questions">Ask</a>
       <a href="#speaker">Speaker</a>
     </div>
   </nav>
@@ -944,6 +975,25 @@
       </div>
     </section>
 
+    <section class="section" id="questions" aria-labelledby="qa-title">
+      <div class="shell">
+        <p class="section-kicker mono">Before the talk</p>
+        <h2 id="qa-title">Ask your question ahead of time.</h2>
+        <p class="section-intro">Drop a question now and I'll work the best ones into the talk. Submissions land as public GitHub issues—fitting, since a GitHub issue is exactly where my agent team starts its work too.</p>
+        <form class="qa-form" onsubmit="return submitQuestion(event)">
+          <label class="qa-label mono" for="qa-text">Your question</label>
+          <textarea id="qa-text" required rows="4" maxlength="1000" placeholder="e.g. How do you keep three agents from making conflicting changes to the same repo?"></textarea>
+          <label class="qa-label mono" for="qa-name">Name or handle (optional)</label>
+          <input id="qa-name" type="text" maxlength="80" placeholder="anonymous">
+          <div class="qa-actions">
+            <button class="button button-primary" type="submit">Submit via GitHub ↗</button>
+            <a class="qa-alt" href="mailto:caohaiyuan1988@gmail.com?subject=%5BTalk%20Q%5D">or email it instead</a>
+          </div>
+          <p class="qa-note">The button opens a prefilled GitHub issue—hit “Submit new issue” there to finish. <a href="https://github.com/caohy1988/caohy1988.github.io/issues?q=is%3Aissue+%22%5BTalk+Q%5D%22" rel="noreferrer">See what others have asked ↗</a></p>
+        </form>
+      </div>
+    </section>
+
     <section class="section" id="speaker" aria-labelledby="speaker-title">
       <div class="shell speaker">
         <aside class="speaker-card">
@@ -980,5 +1030,20 @@
       <p class="mono">FRAME → ROUTE → VERIFY → INTEGRATE</p>
     </div>
   </footer>
+  <script>
+    function submitQuestion(e) {
+      e.preventDefault();
+      var q = document.getElementById('qa-text').value.trim();
+      var n = document.getElementById('qa-name').value.trim();
+      if (!q) return false;
+      var title = '[Talk Q] ' + q.slice(0, 80) + (q.length > 80 ? '…' : '');
+      var body = q + '\n\n— ' + (n || 'anonymous');
+      var url = 'https://github.com/caohy1988/caohy1988.github.io/issues/new'
+        + '?title=' + encodeURIComponent(title)
+        + '&body=' + encodeURIComponent(body);
+      window.open(url, '_blank', 'noopener');
+      return false;
+    }
+  </script>
 </body>
 </html>
