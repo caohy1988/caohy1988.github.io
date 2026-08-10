@@ -311,6 +311,37 @@
     .comparison-cell.future { background: rgba(15,118,110,.16); }
     .comparison-cell.future strong { color: #cdf5ef; }
 
+    .case-steps {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 44px;
+      counter-reset: casestep;
+    }
+    .case-step {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+    .case-step .num { color: var(--accent-dark); font-size: 0.72rem; font-weight: 800; padding-top: 3px; }
+    .case-step b { display: block; font-size: 0.95rem; }
+    .case-step small { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; }
+    .case-note {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-top: 16px;
+      padding: 16px 20px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 12px;
+      color: var(--ink-soft);
+      font-size: 0.87rem;
+    }
+
     .org-diagram {
       margin-top: 44px;
       padding: clamp(24px, 4vw, 40px);
@@ -473,6 +504,7 @@
       .agenda-card p { grid-column: auto; }
       .comparison-row { grid-template-columns: 1fr; }
       .comparison-cell + .comparison-cell { border-left: 0; border-top: 1px solid rgba(255,255,255,.13); }
+      .case-steps { grid-template-columns: 1fr; }
       .org-grid { grid-template-columns: 1fr; }
       .takeaway-grid { grid-template-columns: 1fr; }
       .resources { align-items: flex-start; flex-direction: column; }
@@ -559,9 +591,9 @@
             <p>More code is not more progress. Tests, observability, small blast radii, and explicit acceptance criteria become the trust system.</p>
           </article>
           <article class="shift-card">
-            <span class="num mono">03 / ORG</span>
-            <h3>Every engineer becomes a tech lead.</h3>
-            <p>You direct agent teams the way a TL directs a team—and as spans grow, a manager of managers. How many tracks you can run well becomes a real edge, and org shapes start to bend around it.</p>
+            <span class="num mono">03 / SPAN</span>
+            <h3>Every engineer picks up TL mechanics.</h3>
+            <p>Framing work, decomposing it, setting quality bars, reviewing outcomes—daily, at agent speed. That doesn't make everyone a people leader, but it expands every engineer's span of execution. "M2 of agents" is an analogy—and part of the talk is where it breaks.</p>
           </article>
         </div>
         <blockquote class="thesis">
@@ -590,7 +622,7 @@
           <article class="agenda-card">
             <span class="agenda-label mono">Part 03 · Learn</span>
             <h3>Turn context windows into a learning instrument</h3>
-            <p>Million-token contexts change how you ramp up: drop a whole codebase, paper, or unfamiliar stack into an agent and interrogate it. Compressing weeks of onboarding into days—and keeping pace with a field that shifts weekly.</p>
+            <p>A safe learning loop for million-token contexts: map the system → ask source-linked questions → form a prediction → run the real code → explain it back → build something. Shown on a real repository, including what the agent first got wrong.</p>
           </article>
           <article class="agenda-card">
             <span class="agenda-label mono">Part 04 · Adapt</span>
@@ -599,6 +631,25 @@
           </article>
         </div>
         <p class="tool-note"><strong>Tools are examples, not the thesis.</strong> The walkthrough uses Claude Code, Codex, and Kimi Code; the operating principles transfer across models, harnesses, and the growing MCP tool ecosystem.</p>
+      </div>
+    </section>
+
+    <section class="section" id="case-study" aria-labelledby="case-title">
+      <div class="shell">
+        <p class="section-kicker mono">The centerpiece</p>
+        <h2 id="case-title">One real task, end to end.</h2>
+        <p class="section-intro">The talk is roughly 70% field report, 20% reusable mechanisms, and 10% future-of-work hypothesis. Its spine is a single task from my own backlog, shown honestly—the contract, the wrong turns, and the bill.</p>
+        <div class="case-steps">
+          <div class="case-step"><span class="num mono">01</span><div><b>The goal</b><small>What I was trying to accomplish, in one sentence—before any agent was involved.</small></div></div>
+          <div class="case-step"><span class="num mono">02</span><div><b>The split</b><small>Why this task went to multiple agents, what stayed serial, and what stayed fully human.</small></div></div>
+          <div class="case-step"><span class="num mono">03</span><div><b>The contract</b><small>The actual prompt: problem, constraints, non-goals, interfaces, verification, stop conditions.</small></div></div>
+          <div class="case-step"><span class="num mono">04</span><div><b>The tracks</b><small>How the git worktrees and parallel branches were organized, and how they merged.</small></div></div>
+          <div class="case-step"><span class="num mono">05</span><div><b>The failure</b><small>What an agent got confidently wrong—shown verbatim, not paraphrased.</small></div></div>
+          <div class="case-step"><span class="num mono">06</span><div><b>The catch</b><small>Which verification gate caught it, and why that gate exists in my loop at all.</small></div></div>
+          <div class="case-step"><span class="num mono">07</span><div><b>The ship</b><small>What actually merged, what got thrown away, and what I learned about the loop itself.</small></div></div>
+          <div class="case-step"><span class="num mono">08</span><div><b>The bill</b><small>Elapsed time, review time, agent cost, retries, and defects found downstream.</small></div></div>
+        </div>
+        <div class="case-note"><span>Real measurements come straight from the run logs and are published with the slides. Receipts, not vibes—that evidence is what earns the second half of the talk.</span></div>
       </div>
     </section>
 
@@ -631,8 +682,8 @@
     <section class="section" id="org" aria-labelledby="org-title">
       <div class="shell">
         <p class="section-kicker mono">Collaboration &amp; organization</p>
-        <h2 id="org-title">What does a team look like when everyone has leverage?</h2>
-        <p class="section-intro">When each engineer can direct several tracks of agent work, the pyramid built around scarce execution capacity stops making sense. Collaboration reorganizes around context, contracts, and verification.</p>
+        <h2 id="org-title">How collaboration might change—a hypothesis, held loosely.</h2>
+        <p class="section-intro">Agent leverage will change collaboration before it changes org charts. Teams may spend less time coordinating execution and more time sharing context, reviewing evidence, and making customer decisions. Whether organizations actually flatten is still an open question—and accountability and people leadership remain human.</p>
         <div class="org-diagram" role="img" aria-label="Diagram: a headcount pyramid reshaping into small pods of engineers, each directing their own agent teams">
           <svg viewBox="0 0 860 240" width="860" height="240">
             <style>
@@ -657,7 +708,7 @@
             <text class="od-lbl" x="110" y="151" text-anchor="middle">eng · eng · eng</text>
             <rect class="od-box" x="210" y="132" width="160" height="30" rx="6"/>
             <text class="od-lbl" x="290" y="151" text-anchor="middle">eng · eng · eng</text>
-            <text class="od-sub" x="200" y="205" text-anchor="middle">before: layers ration scarce execution</text>
+            <text class="od-sub" x="200" y="205" text-anchor="middle">today: layers coordinate scarce execution</text>
             <!-- Arrow -->
             <path class="od-arrow" d="M400 120 H452 M452 120 l-9 -6 M452 120 l-9 6"/>
             <!-- Right: pods -->
@@ -677,30 +728,46 @@
             <text class="od-sub" x="753" y="134" text-anchor="middle">agent teams</text>
             <path class="od-edge" d="M594 61 H690" stroke-dasharray="4 4"/>
             <text class="od-sub" x="642" y="54" text-anchor="middle">shared context</text>
-            <text class="od-sub" x="660" y="205" text-anchor="middle">after: small pods of high-span operators</text>
+            <text class="od-sub" x="660" y="205" text-anchor="middle">hypothesis: small pods of high-span operators</text>
           </svg>
         </div>
         <div class="org-grid">
           <article class="org-card">
-            <span class="num mono">SHAPE</span>
-            <h3>Small pods, wide scope.</h3>
-            <p>A handful of high-span engineers plus their agent fleets covers what used to take a large team. Fewer handoffs, less coordination tax, flatter charts—and management span measured in agent tracks, not headcount.</p>
-          </article>
-          <article class="org-card">
-            <span class="num mono">ROLES</span>
-            <h3>TL and M2 become skills, not titles.</h3>
-            <p>Every engineer sets direction, decomposes work, reviews output, and unblocks their agents daily. The role boundaries between IC, lead, and manager blur—what remains is who owns judgment for which outcomes.</p>
-          </article>
-          <article class="org-card">
-            <span class="num mono">RITUALS</span>
-            <h3>Standups become portfolio reviews.</h3>
-            <p>The daily question shifts from "what are you coding?" to "which tracks are running, which are blocked on judgment, which passed their evidence gates?" Code review becomes outcome verification.</p>
-          </article>
-          <article class="org-card">
-            <span class="num mono">MEDIUM</span>
+            <span class="num mono">ALREADY HAPPENING</span>
             <h3>Context becomes the collaboration surface.</h3>
-            <p>Specs, task contracts, evals, and shared context files replace meetings as the coordination medium. The best collaborators write context that other people—and other people's agents—can pick up and run with.</p>
+            <p>Explicit specifications, agent-readable context files, cross-model review, and portfolio-style standups—"which tracks are running, which passed their evidence gates?"—are visible today among power users and small teams.</p>
           </article>
+          <article class="org-card">
+            <span class="num mono">LIKELY NEXT</span>
+            <h3>Wider scope, fewer handoffs.</h3>
+            <p>Project scope per engineer grows as one person carries research, implementation, and review tracks that used to be split across roles. Execution handoffs—the slowest part of team coordination—get rarer.</p>
+          </article>
+          <article class="org-card">
+            <span class="num mono">STILL UNCERTAIN</span>
+            <h3>Whether org charts actually flatten.</h3>
+            <p>Staffing ratios, management layers, and team sizes are open empirical questions. The honest position: watch the data as it arrives, not the hype. The diagram above is a hypothesis to test, not a prediction to bank on.</p>
+          </article>
+          <article class="org-card">
+            <span class="num mono">INVARIANT</span>
+            <h3>Humans own judgment and consequences.</h3>
+            <p>Customer judgment, prioritization, and accountability stay human. So does people leadership—agents don't need coaching, career growth, motivation, or trust. People do, and someone must still build both.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="rules" aria-labelledby="rules-title">
+      <div class="shell">
+        <p class="section-kicker mono">Operating rules</p>
+        <h2 id="rules-title">The rules I actually work by.</h2>
+        <p class="section-intro">Not best practices—scar tissue. Each of these exists because I broke it once and paid for it. The talk gives the story behind each one.</p>
+        <div class="takeaway-grid">
+          <article class="takeaway"><h3>No agent starts without an observable "done."</h3><p>If I can't state what evidence would prove the task complete, I'm not ready to delegate it.</p></article>
+          <article class="takeaway"><h3>Second models attack, not rewrite.</h3><p>Cross-review means asking another model to break the first one's assumptions—not to paraphrase its answer.</p></article>
+          <article class="takeaway"><h3>A summary is not proof.</h3><p>I never accept an agent's report of success. I inspect the diff, the test run, the actual behavior.</p></article>
+          <article class="takeaway"><h3>Stop parallelizing at the review ceiling.</h3><p>When the verification queue grows faster than I can clear it, more agents make me slower, not faster.</p></article>
+          <article class="takeaway"><h3>Irreversible stays human.</h3><p>Deploys, deletions, and anything outward-facing get human hands and human sign-off. Every time.</p></article>
+          <article class="takeaway"><h3>Learning ends in an artifact.</h3><p>A session that produces only an explanation is entertainment. It ends with a prediction, an experiment, or a code change.</p></article>
         </div>
       </div>
     </section>
@@ -708,13 +775,18 @@
     <section class="section" id="takeaways" aria-labelledby="takeaway-title">
       <div class="shell">
         <p class="section-kicker mono">What you'll leave with</p>
-        <h2 id="takeaway-title">Four things you can use immediately.</h2>
+        <h2 id="takeaway-title">Four tools, not four ideas.</h2>
+        <p class="section-intro">The best outcome is not "that future sounded interesting." It is "I used one of these templates on Monday." All four ship as downloadable artifacts with the slides.</p>
         <div class="takeaway-grid">
-          <article class="takeaway"><h3>A task-routing heuristic</h3><p>Decide what to delegate, parallelize, supervise closely, or keep fully human.</p></article>
-          <article class="takeaway"><h3>A repeatable work loop</h3><p>Frame → route → verify → integrate, with clear checkpoints and ownership.</p></article>
-          <article class="takeaway"><h3>A failure-mode checklist</h3><p>Catch false confidence, context drift, shallow tests, and integration mistakes early.</p></article>
-          <article class="takeaway"><h3>A personal practice plan</h3><p>Build agent-management and agent-powered learning habits gradually, without betting a critical system on day one.</p></article>
+          <article class="takeaway"><h3>A routing matrix</h3><p>Decide what to delegate, parallelize, supervise closely, or keep fully human—scored by observability and reversibility.</p></article>
+          <article class="takeaway"><h3>A task-contract template</h3><p>Problem, constraints, non-goals, interfaces, verification, stop conditions. Fill-in-the-blanks ready.</p></article>
+          <article class="takeaway"><h3>A verification checklist</h3><p>Tests, assumptions, integration, security, and blast radius—the gates a change passes before it merges.</p></article>
+          <article class="takeaway"><h3>A learning-session prompt sequence</h3><p>Source-linked questions, a prediction, real execution, and an explain-back step—so the mental model is validated, not just plausible.</p></article>
         </div>
+        <blockquote class="thesis">
+          <span class="thesis-mark">“</span>
+          <p>My advantage is not how many agents I can start. It is how many <strong>verified outcomes I can responsibly own.</strong></p>
+        </blockquote>
       </div>
     </section>
 
@@ -726,7 +798,7 @@
         </div>
         <div class="abstract-copy">
           <p>AI coding agents have moved beyond autocomplete: they can inspect repositories, use tools, make changes, and carry work across multiple steps. Run several in parallel and an engineer's role starts to change. The bottleneck is no longer only producing code—it is <strong>framing work precisely, allocating attention, and proving that the result is correct.</strong></p>
-          <p>This talk is a field report from working that way every day. Haiyuan shows how he uses complementary coding agents for implementation, research, and cross-review; the controls he uses to manage their predictable failure modes; and a practical framework for deciding which work to delegate. He also shows how large context windows change learning itself—loading whole codebases and papers into an agent and interrogating them. He then argues that every engineer starts to operate like a tech lead of agent teams—and, as spans grow, a manager of managers—and looks at the skills and org shapes that become more valuable as execution gets cheaper.</p>
+          <p>This talk is a field report from working that way every day. Haiyuan shows how he uses complementary coding agents for implementation, research, and cross-review; the controls he uses to manage their predictable failure modes; and a practical framework for deciding which work to delegate. He also shows how large context windows change learning itself—loading whole codebases and papers into an agent and interrogating them. He then looks at how the role expands—more TL mechanics practiced daily, wider spans of execution—and closes with a carefully scoped hypothesis about how collaboration and org shapes may change, kept clearly separate from what the evidence already supports.</p>
           <p>The goal is not “AI will do everything.” It is a grounded answer to a more useful question: <strong>how should a strong engineer work when capable agents are part of the team?</strong></p>
         </div>
       </div>
