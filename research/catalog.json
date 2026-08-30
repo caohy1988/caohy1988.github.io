@@ -18,6 +18,11 @@
           "at": "2026-08-29T22:24",
           "displayTime": "10:24 PM PT",
           "html": "Fable 5: Engine is a consumer of LangSmith’s store, not a new store. Self-hosted keeps orchestration in-VPC; inference still leaves for LSI and hard-fails without it. Verification of proposed fixes is roadmap, not shipped. BQAA has the primitives and no named cluster→dataset recipe. <a href=\"/research/briefs/2026-08-29-fable5.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-08-30T0525",
+          "displayTime": "5:25 AM PT",
+          "html": "Fable 5: Engine’s primary page did not move. AgentDebugX shows the half that moves outcomes is Detect → Rerun, not Attribute. Arize Signal is now subordinate to the Dynatrace close. <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -34,6 +39,11 @@
           "at": "2026-08-29T22:24",
           "displayTime": "10:24 PM PT",
           "html": "Fable 5: Databricks stores raw OTel spans, so it inherits 0-of-63-stable churn as columns. BQAA’s ADK schema + <code>trace_id</code> join is insulated. Docs (19 Aug) default quota is 10,000 req/s; the blog still says 200 QPS."
+        },
+        {
+          "at": "2026-08-30T0525",
+          "displayTime": "5:25 AM PT",
+          "html": "Fable 5: unified trace table is Beta (notes 21 Aug, docs 28 Aug) — a gateway log, one OTel span per row, not the MLflow/Zerobus path. Shared multi-hop trace IDs “coming soon.” Analog is a Vertex request log, not <code>agent_events</code>. <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -55,6 +65,11 @@
           "at": "2026-08-29T22:24",
           "displayTime": "10:24 PM PT",
           "html": "Fable 5: do not claim “OTel-native.” Keep ADK events as system of record; treat <code>gen_ai.*</code> as a COALESCE projection."
+        },
+        {
+          "at": "2026-08-30T0525",
+          "displayTime": "5:25 AM PT",
+          "html": "Fable 5: still 0 of 63 <code>gen_ai</code> attributes stable; no tagged release. ADK #5889 is closed — plugin emits no OTel spans since 2.2.0. Databricks gateway table and the LangChain handler are fresh consumers of the unstable vocabulary. <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -124,6 +139,11 @@
           "at": "2026-08-29T22:24",
           "displayTime": "10:24 PM PT",
           "html": "Fable 5: 24.1% exact root step, 51.1% role, human agreement 39.5% / 65.9%. This gates #435: session-level EvalBench MVP is fine; do not claim span forensics."
+        },
+        {
+          "at": "2026-08-30T0525",
+          "displayTime": "5:25 AM PT",
+          "html": "Fable 5: TelemetrySuffBench does not contradict LongRCA — it brackets it. On real public traces, Full-view origin-step is 9.6–24.3% (TraceElephant), the same band as LongRCA’s 24.1%. <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -161,6 +181,11 @@
           "at": "2026-08-29T22:24",
           "displayTime": "10:24 PM PT",
           "html": "Fable 5 consume loop: cluster session-level failures → write a dataset → re-score with 0.5.1 rubrics / golden 0.92. Call the output table <code>issues</code>. Persist scores on <code>trace_id</code> / <code>invocation_id</code>, not <code>session_id</code>. <a href=\"/research/briefs/2026-08-29-fable5.html\">Brief</a>."
+        },
+        {
+          "at": "2026-08-30T0525",
+          "displayTime": "5:25 AM PT",
+          "html": "Fable 5: 0.5.1 still the tag (<code>main</code> is <code>3fb6a00</code>, #450). EvalBench importer is PR 451 (merge first) and PR 452 (do not merge at <code>e384695</code>: circular superseded-generation ownership; no manifest migration). <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -182,6 +207,11 @@
           "at": "2026-08-29T22:24",
           "displayTime": "10:24 PM PT",
           "html": "Fable 5: do not start the clock. SANA (2606.13904) abstract is a component-ablation on LakeQA/KramaBench, not a seven-category taxonomy on Strands — re-read before treating as prior art. P1s (counterfactual gate, uncertainty, D4) are each backed by a paper."
+        },
+        {
+          "at": "2026-08-30T0525",
+          "displayTime": "5:25 AM PT",
+          "html": "Fable 5: do not start the #435 clock (0/5 week-0 gate). Slice 1 <a href=\"https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/451\">PR 451</a> is agent-review-complete; do not merge <a href=\"https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/452\">PR 452</a> at <code>e384695</code> (two P1s). Snapshot consistency (an engineering prerequisite) is closed by 451. <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -198,6 +228,11 @@
           "at": "2026-08-29T22:24",
           "displayTime": "10:24 PM PT",
           "html": "Fable 5: steal the 18-mode enum; do not trust injected labels as a production prior. Error-mode F1 ~22%. Combine with MAST’s 14 (κ 0.88 in the abstract, not 0.77)."
+        },
+        {
+          "at": "2026-08-30T0525",
+          "displayTime": "5:25 AM PT",
+          "html": "Fable 5: Model or Harness (arXiv 2607.28802) says the unit of attribution is <code>fault_edge</code> + <code>fault_side</code>, not a 19th mode. Who&amp;When Pro’s 18 modes remain the <em>what</em>; replace <code>responsible_role</code> with edge+side. <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -246,6 +281,11 @@
           "at": "2026-08-29T22:24",
           "displayTime": "10:24 PM PT",
           "html": "Fable 5: Amplitude’s Aug 28 privacy contract made redaction a procurement checkbox. Java still does not redact <code>secret:</code>. File it against adk-java."
+        },
+        {
+          "at": "2026-08-30T0525",
+          "displayTime": "5:25 AM PT",
+          "html": "Fable 5: Java <code>secret:</code> gap still open, now with page-quoted evidence; Java <code>create_views</code> defaults false and table name is <code>events</code>. Commit <code>6d14518</code> means nested HITL pause/resume can cross invocations — join on <code>function_call_id</code> across the session. <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -298,7 +338,13 @@
       "html": "Enterprise managed agents at no extra charge through 15 Sep. Commercial clock on the Engine/Signal race.",
       "added": "2026-08-29T21:38",
       "addedDisplay": "9:38 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-08-30T0525",
+          "displayTime": "5:25 AM PT",
+          "html": "Fable 5: Sep 15 promo end now reads as a pre-close cleanup for the Dynatrace deal, not a pricing signal — ignore it. <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "langfuse-cutover",
@@ -404,10 +450,69 @@
       "html": "Highest-EV SQL in the Fable 5 brief: group <code>TOOL_STARTING</code> by <code>invocation_id</code>, tool name, and a hash of the args, <code>HAVING COUNT(*) &gt; k</code>. This is Arize’s 43× <code>get_datasets</code> loop with OK spans. No LLM. No #435. Ships as an SDK view.",
       "added": "2026-08-29T22:24",
       "addedDisplay": "10:24 PM PT",
+      "progress": [
+        {
+          "at": "2026-08-30T0525",
+          "displayTime": "5:25 AM PT",
+          "html": "Fable 5: highest-EV is now deterministic session flags (<code>loop</code>, <code>latency_outlier</code>, <code>misroute</code>, <code>overflow</code>, <code>status='ERROR'</code>) plus a <em>non-decaying</em> session risk latch, not <code>v_tool_repeat</code> alone. <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>."
+        }
+      ]
+    },
+    {
+      "id": "dynatrace-arize",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Dynatrace buys Arize for $915M",
+      "html": "Definitive agreement (13 Aug): Dynatrace acquires Arize for <a href=\"https://ir.dynatrace.com/news-events/press-releases/detail/435/dynatrace-to-acquire-ai-observability-leader-arize\">$915M</a> (~$815M cash + replacement equity). Close Q2 or early Q3 FY2027. Phoenix/OpenInference unmentioned. An evaluation-layer buy, not a warehouse store of record. <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>.",
+      "added": "2026-08-30T0525",
+      "addedDisplay": "5:25 AM PT",
+      "progress": []
+    },
+    {
+      "id": "telemetrysuffbench",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "TelemetrySuffBench: localization is the telemetry",
+      "html": "<a href=\"https://arxiv.org/abs/2608.07899\">Zhu &amp; Pu, arXiv 2608.07899</a> (submitted 8 Aug). Detection F1 99.5–100%; origin-step ≤0.5% on OTel/OpenInference; drop decision content → 0%; real traces 9.6–24.3% (LongRCA band). Binding constraint is what the row contains. <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>.",
+      "added": "2026-08-30T0525",
+      "addedDisplay": "5:25 AM PT",
+      "progress": []
+    },
+    {
+      "id": "pr-451-452",
+      "tag": "Desk",
+      "kind": "desk",
+      "title": "PR 451 merge-ready; do not merge 452 at e384695",
+      "html": "Do not start the #435 clock (0/5 week-0 gate). <a href=\"https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/451\">PR 451</a> agent-review-complete — merge first. Do not merge <a href=\"https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/452\">PR 452</a> at <code>e384695</code> (two P1s: circular superseded-generation ownership; no manifest migration). <a href=\"/research/briefs/2026-08-30-fable5.html\">Full brief</a>.",
+      "added": "2026-08-30T0525",
+      "addedDisplay": "5:25 AM PT",
       "progress": []
     }
   ],
   "runs": [
+    {
+      "id": "2026-08-30T0525",
+      "date": "2026-08-30",
+      "displayTime": "5:25 AM PT",
+      "added": [
+        "dynatrace-arize",
+        "telemetrysuffbench",
+        "pr-451-452"
+      ],
+      "updated": [
+        "langsmith-engine",
+        "databricks-uc",
+        "otel-genai",
+        "longrca",
+        "bqaa-sdk",
+        "issue-435",
+        "who-when-pro",
+        "java-lag",
+        "signal-promo",
+        "v-tool-repeat"
+      ],
+      "brief": "/research/briefs/2026-08-30-fable5.html"
+    },
     {
       "id": "2026-08-29T2224",
       "date": "2026-08-29",
@@ -487,6 +592,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-08-30T0525",
+      "date": "2026-08-30",
+      "displayTime": "5:25 AM PT",
+      "title": "Fable 5: industry + academy → BQAA",
+      "href": "/research/briefs/2026-08-30-fable5.html",
+      "analyzer": "Claude Code Fable 5"
+    },
     {
       "id": "2026-08-29T2224",
       "date": "2026-08-29",
