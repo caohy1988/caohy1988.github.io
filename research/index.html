@@ -199,6 +199,20 @@
     }
     .search:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
     .search::placeholder { color: var(--ink-faint); }
+    .times { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 0 14px; }
+    .time {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--cream);
+      color: var(--ink-soft);
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+    }
+    .time[aria-current="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
 
     .layout {
       display: grid;
@@ -483,8 +497,12 @@
     }
     function strip(html) { return String(html || "").replace(/<[^>]+>/g, " "); }
     function blob(item) { return ((item.title || "") + " " + strip(item.html)).toLowerCase(); }
+    function dayKey(e) { return (e.date || e.id || "").slice(0, 10); }
     function sorted() {
-      return STATE.editions.slice().sort((a, b) => b.date.localeCompare(a.date));
+      return STATE.editions.slice().sort((a, b) => String(b.id).localeCompare(String(a.id)));
+    }
+    function latestOn(list, day) {
+      return sorted().find(e => dayKey(e) === day) || null;
     }
     function params() {
       const q = new URLSearchParams(location.search);
@@ -527,24 +545,25 @@
       return ranks || desk || open;
     }
 
-    function calHtml(currentId, byDate, tag, q) {
+    function calHtml(current, byDay, tag, q) {
       const y = STATE.calY, m = STATE.calM;
       const first = new Date(y, m, 1);
       const start = first.getDay();
       const daysIn = new Date(y, m + 1, 0).getDate();
       const prevDays = new Date(y, m, 0).getDate();
       const cells = [];
+      const currentDay = dayKey(current);
       for (let i = 0; i < start; i++) {
         cells.push(`<span class="cal-cell muted">${prevDays - start + 1 + i}</span>`);
       }
       for (let d = 1; d <= daysIn; d++) {
         const id = y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
-        const ed = byDate.get(id);
-        const has = !!ed;
-        const match = has && editionHasMatch(ed, tag, q);
-        const cur = id === currentId ? ' aria-current="date"' : "";
+        const eds = byDay.get(id) || [];
+        const has = eds.length > 0;
+        const match = has && eds.some(ed => editionHasMatch(ed, tag, q));
+        const cur = id === currentDay ? ' aria-current="date"' : "";
         const cls = ["cal-cell", has ? "has" : "", has && !match ? "muted" : ""].filter(Boolean).join(" ");
-        cells.push(`<button class="${cls}" type="button" data-id="${id}" ${has ? "" : "disabled"}${cur}>${d}</button>`);
+        cells.push(`<button class="${cls}" type="button" data-day="${id}" ${has ? "" : "disabled"}${cur}>${d}</button>`);
       }
       return `
         <div class="cal" aria-label="Edition calendar">
@@ -574,9 +593,10 @@
       const isLatest = current.id === list[0].id;
       $("edition-date").innerHTML = current.weekday + ", " + escapeHtml(current.displayDate) +
         (isLatest ? '<span class="live">Latest</span>' : "");
-      $("edition-meta").textContent =
+      $("edition-meta").innerHTML =
         "No. " + String(current.edition).padStart(3, "0") +
-        "  ·  " + current.ranks.length + " ranked  ·  " + current.kicker;
+        "  ·  " + current.ranks.length + " ranked  ·  " + escapeHtml(current.kicker) +
+        (current.displayTime ? "  ·  " + escapeHtml(current.displayTime) : "");
 
       const tags = allTags(list);
       $("controls").hidden = false;
@@ -591,7 +611,16 @@
       const openItems = (current.open || []).filter(r => itemMatch(r, tag, q, "open"));
       const lead = ranks[0];
       const rest = ranks.slice(1);
-      const byDate = new Map(list.map(e => [e.id, e]));
+      const byDay = new Map();
+      list.forEach(e => {
+        const k = dayKey(e);
+        if (!byDay.has(k)) byDay.set(k, []);
+        byDay.get(k).push(e);
+      });
+      const sameDay = (byDay.get(dayKey(current)) || []).slice().sort((a,b) => String(b.id).localeCompare(String(a.id)));
+      const timeChips = sameDay.length > 1
+        ? `<div class="times">${sameDay.map(e => `<button class="time" type="button" data-id="${escapeHtml(e.id)}" aria-current="${e.id === current.id}">${escapeHtml(e.displayTime || e.id)}</button>`).join("")}</div>`
+        : "";
 
       const desk = deskItems.map(n => `<div class="note"><b>${escapeHtml(n.title)}</b><p>${n.html}</p></div>`).join("");
       const open = openItems.map(n => `<div class="open-item"><i></i><div><b>${escapeHtml(n.title)}</b><p>${n.html}</p></div></div>`).join("");
@@ -622,9 +651,9 @@
           </div>`;
 
       $("app").innerHTML = `
-        <div>${main}</div>
+        <div>${timeChips}${main}</div>
         <aside class="rail">
-          ${calHtml(current.id, byDate, tag, q)}
+          ${calHtml(current, byDay, tag, q)}
           <div class="${desk ? "" : "hide"}">
             <p class="rail-kicker">On the desk</p>
             <h2>Own stack tonight</h2>
@@ -647,15 +676,27 @@
     }
 
     function bind(currentId) {
-      $("app").querySelectorAll(".day, .cal-cell.has").forEach(btn => {
+      $("app").querySelectorAll(".day, .time").forEach(btn => {
         btn.addEventListener("click", () => {
           const id = btn.dataset.id;
           if (!id) return;
-          const [yy, mm] = id.split("-").map(Number);
+          const [yy, mm] = dayKey({id}).split("-").map(Number);
           STATE.calY = yy; STATE.calM = mm - 1;
           const { tag, q } = params();
           setParams({ date: id, tag, q });
           location.hash = id;
+        });
+      });
+      $("app").querySelectorAll(".cal-cell.has").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const day = btn.dataset.day;
+          const ed = latestOn(sorted(), day);
+          if (!ed) return;
+          const [yy, mm] = day.split("-").map(Number);
+          STATE.calY = yy; STATE.calM = mm - 1;
+          const { tag, q } = params();
+          setParams({ date: ed.id, tag, q });
+          location.hash = ed.id;
         });
       });
       $("app").querySelectorAll("[data-cal]").forEach(btn => {

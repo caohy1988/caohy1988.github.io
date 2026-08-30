@@ -1,6 +1,86 @@
 {
   "editions": [
     {
+      "id": "2026-08-29T2138",
+      "date": "2026-08-29",
+      "weekday": "Saturday",
+      "displayDate": "29 August 2026",
+      "displayTime": "9:38 PM PT",
+      "edition": 2,
+      "kicker": "Hourly · industry + academy",
+      "headline": "The store is no longer the demo. Engine shipped the loop.",
+      "dek": "Top 5 across vendors and papers. Judgment first. Sources remain the authority.",
+      "itemCount": 5,
+      "ranks": [
+        {
+          "n": "01",
+          "tag": "Industry",
+          "title": "LangSmith Engine is now the product to beat",
+          "html": "The <a href=\"https://www.langchain.com/blog/new-in-langsmith-engine-2x-better-issue-detection\">25 Aug post</a> is not a new toy. Engine (May beta) now claims &gt;2× issue detection on IssueBench, +25% on Terminal-Bench for proposed fixes, Slack/Linear, Reduced Analysis, and <strong>self-hosted</strong> orchestration in the customer VPC (inference via LangSmith Intelligence, ZDR). Same job as <a href=\"https://arize.com/docs/ax/observe/signal\">Arize Signal</a> (GA 29 Jul, Enterprise PRs, promo through 15 Sep). <em>Judgment:</em> BQAA still wins governed SQL and business joins. It loses the 2026 demo. Package a named trace→cluster→dataset loop on <code>AI.GENERATE</code> or customers will buy Engine for the narrative while data sits in BigQuery. The 2× figure is first-party; verification of proposed fixes is still unshipped."
+        },
+        {
+          "n": "02",
+          "tag": "Academy",
+          "title": "UModel: warehouse as entity graph, not raw SQL",
+          "html": "<a href=\"https://arxiv.org/abs/2606.04799\">Pei et al., arXiv 2606.04799</a> (June 2026, Alibaba Cloud production: millions of ops/s). Remodels metrics/logs/traces as objects (EntitySet, DataLink) plus a pipe language. Agents calling raw PromQL/SQL sit under 5% query accuracy; entity PaaS tools add +8 pts RCA and +21–27 vs writing SPL from scratch. <em>Judgment:</em> this is the closest architecture analog to BQAA. Do not ship “here is agent_events, write SQL” as the agent interface. Expose <code>analyze_golden_metric(entity)</code>-style tools on top of the table. UModel is the consume-layer design doc the SDK still does not have."
+        },
+        {
+          "n": "03",
+          "tag": "Academy",
+          "title": "LongRCA: production RCA is still unsolved",
+          "html": "<a href=\"https://arxiv.org/abs/2608.15242\">Zhang, Feng, Pei et al., arXiv 2608.15242</a> (Aug 2026). 1,140 <em>natural</em> failed traces, median 145 steps, max 728. Score responsible role and exact root step independently. Best method: 51.1% role / 24.1% exact root. Human agreement on exact step is 39.5%. Injected-error benches overstate. <em>Judgment:</em> this should gate <a href=\"https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/issues/435\">#435</a>. A 6-week EvalBench MVP that only does session-level labels on a short warehouse benchmark is fine as a start; do not claim span-level forensics until you beat LongRCA-like length. Store <code>role</code>, <code>step_idx</code>, <code>handoff_from/to</code>, <code>root_to_end_distance</code>."
+        },
+        {
+          "n": "04",
+          "tag": "Industry",
+          "title": "Langfuse v4 is the missed platform ship",
+          "html": "<a href=\"https://langfuse.com/changelog/2026-08-17-langfuse-v4\">v4 GA 17 Aug</a>. Observations-first ClickHouse model (append-only <code>events_full</code>, no read-time join/dedup). Cloud becomes v4-only on <strong>16 Nov 2026</strong>. Self-host v3 patches through Jan 2027. Claimed: table loads seconds→ms; long-range dashboards ≥10× on large projects. No Engine/Signal equivalent. <em>Judgment:</em> this is the self-host / data-residency answer to SaaS trace stores, not a fixer agent. If you pitch BQAA vs Langfuse, argue warehouse joins and retention, not query latency. Mark 16 Nov on the calendar."
+        },
+        {
+          "n": "05",
+          "tag": "Industry",
+          "title": "Amplitude published the privacy contract for Agent Analytics",
+          "html": "<a href=\"https://amplitude.com/blog/connecting-agent-performance-to-product-outcomes\">GA 20 Aug</a> on every plan, including free. <a href=\"https://amplitude.com/blog/agent-data-security\">28 Aug</a> (inside 72h) names the modes: <code>full</code> / <code>metadata_only</code> / <code>customer_enriched</code>, plus RBAC, hashed tool schemas, session-safety classes. The pitch is shared <code>user_id</code> with product events: failed task → 30-day retention. Caps: 5k–20k sessions/month; chat retained 14 or 30 days. <em>Judgment:</em> they own the phrase “agent analytics” for PMs. Threat is the business-join story, not debugging. Productize BQAA’s Looker/SQL joins as that loop, or Amplitude will sell it to the same Google customers."
+        }
+      ],
+      "desk": [
+        {
+          "title": "SDK 0.5.1 and #435 plan v4, tonight",
+          "html": "<a href=\"https://pypi.org/project/bigquery-agent-analytics/\">0.5.1</a> at 19:50 PT: EvalBench reader, canonical rubrics, golden matching 0.92. <a href=\"https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/issues/435\">#435</a> comments through 20:21 PT iterated the RFC to a 6-week EvalBench-only MVP. Reviewers flagged SANA (arXiv 2606.13904) as adjacent. Do not start the clock until P1s and partner/job are named."
+        },
+        {
+          "title": "Who&When Pro is the failure enum to steal",
+          "html": "<a href=\"https://arxiv.org/abs/2607.09996\">arXiv 2607.09996</a> (10 Jul): 12,326 traces, 18-mode taxonomy, golden who/when/why. Frontier models ~74% text-step accuracy, ~22% error-mode F1. Planning/coordination collapse into “reasoning.” Use the taxonomy in #435; do not trust injected labels as a production prior."
+        },
+        {
+          "title": "Tuned Evaluators / Perceived Error",
+          "html": "<a href=\"https://www.langchain.com/blog/introducing-langsmith-tuned-evaluators-starting-with-perceived-error\">18 Aug</a>. Managed judge on threads, 12-hour lag, US Plus/Enterprise, 82% cheaper than frontier on their bench. This is the cheap production score Engine needs. BQAA’s GraderPipeline is the warehouse version — still batch, not attached to the live row."
+        }
+      ],
+      "open": [
+        {
+          "title": "OTel GenAI still 0/63 stable",
+          "html": "Dedicated repo, no tagged release as of 21 Aug. Python instrumentation flip silently blanks old dashboards. “OTel-native” in Aug 2026 is a Development convention."
+        },
+        {
+          "title": "OpenAI Evals export 31 Oct / shutdown 30 Nov",
+          "html": "Unchanged. Forced migration to Promptfoo / Braintrust / LangSmith / BQAA. Oct 31 is the date that matters."
+        },
+        {
+          "title": "Arize Signal promo ends 15 Sep",
+          "html": "Enterprise managed agents at no extra charge through 15 Sep. Commercial clock on the Engine/Signal race."
+        },
+        {
+          "title": "Looker Studio template still FAILING",
+          "html": "#445 closed; external-access contract not green. Grafana is the documented alternative."
+        },
+        {
+          "title": "AgentProcessBench FirstErrAcc",
+          "html": "<a href=\"https://arxiv.org/abs/2603.14465\">KDD 2026 / 2603.14465</a>: 8,509 human ternary step labels. FirstErrAcc is the judge SLO (81.6% StepAcc vs 65.8% FirstErrAcc on Gemini-3-Flash-Thinking). Warehouse process-score columns."
+        }
+      ]
+    },
+    {
       "id": "2026-08-29",
       "date": "2026-08-29",
       "weekday": "Saturday",
