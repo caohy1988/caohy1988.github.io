@@ -514,9 +514,8 @@
 <body>
   <div class="topbar">
     <div class="shell topbar-inner">
-      <a class="brand" href="/"><span>HC</span> / FIELD NOTES</a>
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
       <nav class="nav-links" aria-label="Primary">
-        <a href="/">Talk</a>
         <a href="/research/" aria-current="page">Research</a>
       </nav>
     </div>
@@ -727,16 +726,6 @@
         <aside class="rail">
           ${calHtml(date, tag, q)}
           ${briefsHtml()}
-          <div class="${desk.length ? "" : "hide"}">
-            <p class="rail-kicker">On the desk</p>
-            <h2>Own stack</h2>
-            ${deskHtml}
-          </div>
-          <div class="${open.length ? "" : "hide"}" style="margin-top:28px">
-            <p class="rail-kicker">Still open</p>
-            <h2>Broken or lagging</h2>
-            ${openHtml}
-          </div>
         </aside>`;
       bind();
       const briefStamp = latestBrief
@@ -787,7 +776,8 @@
       try {
         const res = await fetch("/research/catalog.json", { cache: "no-store" });
         const data = await res.json();
-        STATE.items = data.items || [];
+        const raw = data.items || [];
+        STATE.items = raw.filter(i => i.kind !== "desk" && i.kind !== "open");
         STATE.runs = data.runs || [];
         STATE.briefs = data.briefs || [];
       } catch (err) {
