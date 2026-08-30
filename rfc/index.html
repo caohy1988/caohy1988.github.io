@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="https://caohy1988.github.io/rfc/">
+<title>OKF runtime context projection — consolidated RFC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16233B; --ink-soft:#44536E; --paper:#F6F8FA; --panel:#FFFFFF;
+    --line:#D9E1EB; --line-soft:#E8EDF3;
+    --source:#3B5BDB; --source-bg:#EEF2FF;
+    --catalog:#0E7C7B; --catalog-bg:#E8F5F4;
+    --runtime:#B4690E; --runtime-bg:#FBF1E2;
+    --telemetry:#7048A8; --telemetry-bg:#F2ECFA;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --display:'Space Grotesk',system-ui,sans-serif;
+    --body:'Source Serif 4',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  a{color:var(--source)}
+  a:focus-visible,summary:focus-visible{outline:3px solid var(--source);outline-offset:2px;border-radius:4px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 22px}
+  .wide{max-width:1220px;margin:0 auto;padding:0 22px}
+
+  /* ---------- header ---------- */
+  header{border-bottom:1px solid var(--line);background:var(--panel)}
+  .masthead{padding:56px 0 40px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--runtime);display:inline-block}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,52px);line-height:1.08;letter-spacing:-.02em;margin:16px 0 10px}
+  h1 .thin{color:var(--ink-soft);font-weight:500}
+  .subtitle{font-size:clamp(17px,2.4vw,21px);color:var(--ink-soft);max-width:760px}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .badge{font-family:var(--mono);font-size:12px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;background:var(--paper);white-space:nowrap}
+  .badge b{font-weight:600;color:var(--ink)}
+  .badge.ok{border-color:#BBD8C6;background:#EDF7F1;color:#1C6B45}
+  .badge.rev{border-color:#D6C7EE;background:var(--telemetry-bg);color:var(--telemetry)}
+
+  /* credo strip */
+  .credo{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:34px 0 4px;background:var(--panel)}
+  .credo div{padding:16px 16px 18px;border-left:1px solid var(--line-soft)}
+  .credo div:first-child{border-left:none}
+  .credo .k{font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:.02em;display:flex;align-items:center;gap:7px;margin-bottom:6px}
+  .credo .swatch{width:9px;height:9px;border-radius:2px}
+  .credo p{font-size:13.5px;line-height:1.45;color:var(--ink-soft);font-family:var(--display)}
+  @media(max-width:760px){.credo{grid-template-columns:repeat(2,1fr)}.credo div{border-top:1px solid var(--line-soft)}}
+
+  /* ---------- sections ---------- */
+  section{padding:52px 0 8px}
+  .sec-label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px}
+  h2{font-family:var(--display);font-weight:700;font-size:clamp(24px,3.4vw,32px);letter-spacing:-.015em;margin-bottom:18px}
+  h3{font-family:var(--display);font-weight:600;font-size:19px;margin:26px 0 10px}
+  p{margin-bottom:14px;max-width:76ch}
+  p.lede{font-size:19px}
+  strong{font-weight:600}
+  em{font-style:italic}
+  ul,ol{margin:0 0 16px 22px;max-width:76ch}
+  li{margin-bottom:8px}
+  code{font-family:var(--mono);font-size:.86em;background:#EDF1F6;border:1px solid var(--line-soft);border-radius:5px;padding:1px 6px;color:#233;white-space:nowrap}
+  pre{font-family:var(--mono);font-size:13.5px;line-height:1.6;background:#101A2C;color:#D7E3F4;border-radius:12px;padding:18px 20px;overflow-x:auto;margin:16px 0 20px}
+  pre code{background:none;border:none;padding:0;color:inherit;white-space:pre}
+  blockquote{border-left:3px solid var(--runtime);background:var(--runtime-bg);padding:14px 18px;border-radius:0 10px 10px 0;margin:18px 0;font-family:var(--display);font-size:16px;max-width:76ch}
+  .note{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:14px 18px;font-family:var(--display);font-size:14.5px;line-height:1.55;color:var(--ink-soft);max-width:none;margin:18px 0}
+  .note b{color:var(--ink)}
+
+  /* decision cards */
+  .decisions{counter-reset:d;display:grid;gap:12px;margin:22px 0 6px}
+  .decision{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px 16px 60px;position:relative}
+  .decision::before{counter-increment:d;content:counter(d);position:absolute;left:16px;top:14px;width:30px;height:30px;border-radius:8px;background:var(--ink);color:#fff;font-family:var(--display);font-weight:600;font-size:15px;display:flex;align-items:center;justify-content:center}
+  .decision p{margin:0 0 8px;font-size:15.5px;font-family:var(--display);line-height:1.5;max-width:none}
+  .decision p:last-child{margin-bottom:0}
+  .decision ul{font-family:var(--display);font-size:15px;max-width:none;margin:6px 0 0 18px}
+  .decision li{margin-bottom:5px}
+  .decision .h{font-weight:600}
+
+  /* plane table */
+  table{border-collapse:collapse;width:100%;margin:18px 0 8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-family:var(--display);font-size:14.5px}
+  th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);background:var(--paper)}
+  tr:last-child td{border-bottom:none}
+  td:first-child{font-weight:600;white-space:nowrap}
+  table.keys td:first-child{white-space:normal}
+  .pill{font-family:var(--mono);font-size:11.5px;padding:2px 9px;border-radius:999px;white-space:nowrap}
+  .pill.yes{background:#EDF7F1;color:#1C6B45;border:1px solid #BBD8C6}
+  .pill.no{background:var(--paper);color:var(--ink-soft);border:1px solid var(--line)}
+  .pill.obs{background:var(--telemetry-bg);color:var(--telemetry);border:1px solid #D6C7EE}
+
+  /* diagram frames */
+  figure.diagram{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 18px 12px;margin:26px 0}
+  figure.diagram svg{width:100%;height:auto;display:block}
+  figcaption{font-family:var(--mono);font-size:12px;color:var(--ink-soft);text-align:center;padding:10px 8px 8px;letter-spacing:.04em}
+
+  /* details */
+  details{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:14px 0;overflow:hidden}
+  details summary{cursor:pointer;list-style:none;font-family:var(--display);font-weight:600;font-size:16.5px;padding:17px 20px 17px 52px;position:relative;user-select:none}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"";position:absolute;left:20px;top:50%;width:16px;height:16px;transform:translateY(-50%);border:2px solid var(--ink-soft);border-radius:5px}
+  details summary::after{content:"+";position:absolute;left:23.5px;top:50%;transform:translateY(-54%);font-family:var(--mono);font-size:15px;color:var(--ink-soft)}
+  details[open] summary::after{content:"–"}
+  details[open] summary{border-bottom:1px solid var(--line-soft)}
+  details .inner{padding:18px 22px 8px}
+  details pre{font-size:12.8px}
+  details h4{font-family:var(--display);font-size:15px;font-weight:600;margin:16px 0 8px}
+  details p,details li{font-size:15.5px}
+
+  /* checklist */
+  .checklist{display:grid;gap:10px;margin:20px 0}
+  .check{display:flex;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-family:var(--display);font-size:15px;line-height:1.5}
+  .check .box{flex:0 0 auto;width:20px;height:20px;border:2px solid var(--catalog);border-radius:6px;margin-top:2px}
+
+  /* ladder */
+  .ladder{display:grid;gap:0;margin:20px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+  .rung{display:grid;grid-template-columns:56px 1fr;border-bottom:1px solid var(--line-soft)}
+  .rung:last-child{border-bottom:none}
+  .rung .n{display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:18px;background:var(--paper);border-right:1px solid var(--line-soft)}
+  .rung .t{padding:13px 18px;font-family:var(--display);font-size:14.5px;line-height:1.5}
+  .rung .t b{display:block;font-size:15px}
+  .rung.g .n{color:#1C6B45}.rung.c .n{color:var(--runtime)}
+
+  /* phases */
+  .phases{display:grid;gap:14px;margin:22px 0 6px}
+  .phase{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .phase .ph{display:flex;align-items:baseline;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line-soft);background:var(--paper)}
+  .phase .ph .n{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--ink-soft)}
+  .phase .ph .t{font-family:var(--display);font-weight:700;font-size:17px}
+  .phase .row{display:grid;grid-template-columns:96px 1fr;border-bottom:1px solid var(--line-soft)}
+  .phase .row:last-child{border-bottom:none}
+  .phase .row .l{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:12px 0 12px 18px;color:var(--ink-soft)}
+  .phase .row .v{font-family:var(--display);font-size:14.5px;line-height:1.55;padding:12px 18px 12px 0}
+  .phase .row.gate .l{color:var(--catalog)}
+  .phase .row.out .l{color:var(--runtime)}
+  @media(max-width:640px){.phase .row{grid-template-columns:1fr}.phase .row .v{padding-left:18px;padding-top:0}}
+
+  footer{margin-top:70px;border-top:1px solid var(--line);background:var(--panel)}
+  footer .wrap{padding:26px 22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+
+  /* svg text */
+  .svgt{font-family:var(--display)}
+  .svgm{font-family:var(--mono)}
+
+  .flowline{stroke-dasharray:6 6;animation:march 1.6s linear infinite}
+  @keyframes march{to{stroke-dashoffset:-24}}
+  @media(prefers-reduced-motion:reduce){.flowline{animation:none}}
+  @media(max-width:640px){body{font-size:16px}.decision{padding-left:54px}}
+
+  /* Field Brief site chrome */
+  .site-topbar { background:#101828; color:#e8edf4; position:sticky; top:0; z-index:40; }
+  .site-topbar .site-shell { width:min(1220px, calc(100% - 40px)); margin:0 auto; min-height:58px; display:flex; align-items:center; justify-content:space-between; }
+  .site-topbar a.brand { text-decoration:none; font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:.16em; color:#e8edf4; }
+  .site-topbar a.brand span { color:#e87324; }
+  .site-topbar .nav-links { display:flex; gap:22px; }
+  .site-topbar .nav-links a { color:#b7c2d0; font-size:14px; font-weight:600; text-decoration:none; font-family:var(--display); }
+  .site-topbar .nav-links a:hover, .site-topbar .nav-links a[aria-current="page"] { color:#fff; }
+</style>
+</head>
+<body>
+
+<div class="site-topbar">
+  <div class="site-shell">
+    <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/rfc/" aria-current="page">RFC</a>
+    </nav>
+  </div>
+</div>
+
+
+<header>
+  <div class="wrap masthead">
+    <div class="eyebrow"><span class="dot"></span>Request for comments · GoogleCloudPlatform / knowledge-catalog</div>
+    <h1>OKF runtime context projection<br><span class="thin">a Knowledge Catalog + BigQuery runtime profile for OKF v0.2</span></h1>
+    <p class="subtitle">An optional runtime profile and reference implementation that compiles an authored OKF bundle into two derived projections — Knowledge Catalog for discovery and governance, BigQuery for search, traversal, attested computation and evidence — without changing OKF core.</p>
+    <div class="badges">
+      <span class="badge"><b>Status</b>&nbsp;· RFC · consolidated</span>
+      <span class="badge"><b>Scope</b>&nbsp;· optional profile + reference implementation</span>
+      <span class="badge ok">No changes to OKF v0.2 core</span>
+      <span class="badge rev">Folds in Claude · Codex · Kimi review</span>
+      <span class="badge">proposal · okf · knowledge-catalog · bigquery · agents · toolbox</span>
+    </div>
+    <div class="credo">
+      <div><span class="k"><span class="swatch" style="background:var(--source)"></span>OKF</span><p>makes knowledge portable</p></div>
+      <div><span class="k"><span class="swatch" style="background:var(--catalog)"></span>Knowledge Catalog</span><p>makes it discoverable and governed</p></div>
+      <div><span class="k"><span class="swatch" style="background:var(--runtime)"></span>BigQuery</span><p>makes it searchable, traversable, and attestably computed</p></div>
+      <div><span class="k"><span class="swatch" style="background:var(--telemetry)"></span>Agent Analytics</span><p>observes it</p></div>
+    </div>
+    <div class="note" style="margin-top:18px"><b>On the name.</b> Informally this is still "the OKF Context Graph RFC". Normative text says <b>OKF runtime context projection</b>, because BigQuery Agent Analytics already uses "context graph" for a telemetry-derived graph of agent behavior, and the two must not be confused. <b>Sources:</b> the OKF v0.2 spec now lives in <code>GoogleCloudPlatform/open-knowledge-format</code>; <code>knowledge-catalog/okf/</code> is a frozen snapshot and nothing here targets it. The convention threads (#120, #148, #183, #195, #209, #253, #254, Discussion #261) live in the knowledge-catalog tracker as of 2026-08-30 and may be re-filed; the profile follows the convention, not the number.</div>
+  </div>
+</header>
+
+<!-- ============ SUMMARY ============ -->
+<section class="wrap" id="summary">
+  <div class="sec-label">01 · Summary</div>
+  <h2>One authored source, two reconciled projections</h2>
+  <p class="lede">This RFC proposes an optional runtime profile that compiles an authored OKF v0.2 bundle into two derived projections without changing OKF core. The bundle is canonical for <strong>authored knowledge and sanctioned-computation declarations</strong>; authorization policy, deployment state, runtime observations, and telemetry have separate owners.</p>
+  <p><strong style="color:var(--catalog)">Knowledge Catalog</strong> is the governed discovery projection: where people find a concept, see its owner, lifecycle, freshness, and the computations that govern it. <strong style="color:var(--runtime)">BigQuery</strong> relational tables are the authoritative runtime projection: immutable compiled history, a per-deployment head, retrieval data, evidence paths, and execution receipts. For agents, BigQuery is the read path; for humans, Catalog is the read path; when they disagree, <code>status</code> says by how many publications.</p>
+  <p>Each <strong>publication</strong> pins one source observation to one deterministic semantic snapshot and one deployment, so provenance, compiled state, and rollout are never conflated. Catalog reconciliation follows the BigQuery commit and may lag; a request that originates in Catalog stays pinned to the publication Catalog showed, or fails stale — it never silently jumps to a newer head.</p>
+  <p><strong>Attested Computation</strong> is the only path whose result carries this profile's attestation claim. It proves that a trusted executor and attester verified the declared artifact, the complete parameter binding, and the result path. It does not prove data correctness, and the RFC says so.</p>
+  <p><strong style="color:var(--telemetry)">BigQuery Agent Analytics observes this runtime.</strong> The profile emits opaque correlation identifiers and receipts on its tool results; BQAA owns spans, events, privacy, evaluation, and health derivation, specified in a companion RFC in the BQAA SDK repository. Nothing here defines a telemetry schema.</p>
+  <p>The reference implementation is a new <code>toolbox/okf-context</code> package that depends on <code>kcmd</code> as a library for the Catalog projection. It is push-only, relational-first, and advances only through gated phases.</p>
+</section>
+
+<!-- ============ MOTIVATION ============ -->
+<section class="wrap" id="motivation">
+  <div class="sec-label">02 · Motivation</div>
+  <h2>“What was active-customer revenue in Germany last quarter — and can I trust the number?”</h2>
+  <p>Document retrieval can find a definition. A catalog can locate tables. A semantic model knows the metric expression. BigQuery can run SQL. The agent needs one coherent path:</p>
+  <pre><code>question → business concept → metric definition → eligibility policy
+        → sanctioned computation → tables / joins / filters → execution
+        → receipt + freshness → answer with evidence</code></pre>
+  <p>A defensible answer carries the definition version used, its owner and verification status, the path to the underlying assets, the sanctioned computation ID, the BigQuery job ID and executed-artifact hash, freshness and lifecycle warnings, and a stable publication ID. Today those live in disconnected systems.</p>
+  <p>This question is not only the motivation; it is the <strong>Phase 0 fixture</strong>. One sample bundle answers it end to end, with golden <code>observation_id</code>, <code>snapshot_id</code>, <code>publication_id</code>, envelope manifest, and receipt. Every later phase gate regresses against that fixture.</p>
+  <blockquote>Attestation proves <em>the sanctioned computation ran with the declared parameters</em> — evidence of process integrity, not a guarantee of data quality. The runtime surfaces both, and keeps them distinct.</blockquote>
+</section>
+
+<!-- ============ ARCHITECTURE + MAIN DIAGRAM ============ -->
+<section class="wide" id="architecture">
+  <div class="wrap" style="padding:0">
+    <div class="sec-label">03 · System design</div>
+    <h2>Four planes, one identity chain</h2>
+    <table>
+      <tr><th>Plane</th><th>Primary responsibility</th><th>Authority</th></tr>
+      <tr><td style="color:var(--source)">Source OKF bundle</td><td>Authoring, review, portability, history (Git in the reference workflow)</td><td><span class="pill yes">Canonical</span> for authored knowledge and computation declarations</td></tr>
+      <tr><td style="color:var(--catalog)">Knowledge Catalog</td><td>Governed discovery: ownership, lifecycle, freshness, links to physical assets</td><td><span class="pill no">Derived</span> discovery projection</td></tr>
+      <tr><td style="color:var(--runtime)">BigQuery runtime projection</td><td>Compiled history, retrieval, traversal, evidence, receipts</td><td><span class="pill no">Derived</span> serving authority for the runtime</td></tr>
+      <tr><td style="color:var(--telemetry)">Agent Analytics</td><td>Runtime observation and evaluation</td><td><span class="pill obs">Observed</span> never a source of truth</td></tr>
+    </table>
+    <p style="margin-top:14px">Between source and projections sits the <strong>compiler / publication plane</strong>: where ingestion records live — source observations, resolved artifact manifests, snapshot membership, sync runs. They are not files in the authored bundle. Corrections flow <strong>through the source bundle</strong>, never as silent runtime mutation; a future writeback tool may propose source-native changes (a pull request), nothing more.</p>
+    <p>Three questions, three identities: <em>what was in git</em> (observation), <em>what was compiled</em> (snapshot), <em>what was served when</em> (publication + <code>deployment_heads_history</code>). Citations to humans carry publication + observation; <code>context_ref</code> on tool results carries publication.</p>
+  </div>
+
+  <figure class="diagram">
+  <svg viewBox="0 0 1230 1250" role="img" aria-label="System design: the source OKF bundle compiles through a publication plane into Knowledge Catalog (governed discovery projection) and BigQuery (authoritative runtime projection), consumed by humans and agents; attested execution writes receipts; BigQuery Agent Analytics observes via context_ref only. A parallel identity chain runs observation, snapshot, publication, envelope, receipt.">
+    <defs>
+      <marker id="aInk" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#44536E"/></marker>
+      <marker id="aTeal" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#0E7C7B"/></marker>
+      <marker id="aAmber" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#B4690E"/></marker>
+      <marker id="aPurp" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#7048A8"/></marker>
+      <marker id="aBlue" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#3B5BDB"/></marker>
+    </defs>
+
+    <!-- ===== identity chain rail ===== -->
+    <text x="95" y="34" text-anchor="middle" class="svgm" font-size="11" letter-spacing="2" fill="#44536E">IDENTITY CHAIN</text>
+    <line x1="95" y1="46" x2="95" y2="1140" stroke="#C6D0DE" stroke-width="2"/>
+    <g class="svgm" font-size="11">
+      <g><rect x="30" y="250" width="130" height="46" rx="10" fill="#fff" stroke="#44536E"/><text x="95" y="269" text-anchor="middle" fill="#16233B" font-weight="600">observation</text><text x="95" y="285" text-anchor="middle" fill="#44536E">observation_id</text></g>
+      <line x1="95" y1="296" x2="95" y2="336" stroke="#44536E" stroke-width="1.6" marker-end="url(#aInk)"/>
+      <g><rect x="30" y="340" width="130" height="46" rx="10" fill="#fff" stroke="#44536E"/><text x="95" y="359" text-anchor="middle" fill="#16233B" font-weight="600">snapshot</text><text x="95" y="375" text-anchor="middle" fill="#44536E">snapshot_id</text></g>
+      <line x1="95" y1="386" x2="95" y2="556" stroke="#44536E" stroke-width="1.6" marker-end="url(#aInk)"/>
+      <g><rect x="30" y="560" width="130" height="58" rx="10" fill="#FBF1E2" stroke="#B4690E"/><text x="95" y="579" text-anchor="middle" fill="#16233B" font-weight="600">publication</text><text x="95" y="594" text-anchor="middle" fill="#B4690E">publication_id</text><text x="95" y="608" text-anchor="middle" fill="#8593AA" font-size="10">deployment_key</text></g>
+      <line x1="95" y1="618" x2="95" y2="846" stroke="#44536E" stroke-width="1.6" marker-end="url(#aInk)"/>
+      <g><rect x="30" y="850" width="130" height="46" rx="10" fill="#fff" stroke="#44536E"/><text x="95" y="869" text-anchor="middle" fill="#16233B" font-weight="600">envelope</text><text x="95" y="885" text-anchor="middle" fill="#44536E">envelope_id</text></g>
+      <line x1="95" y1="896" x2="95" y2="1026" stroke="#44536E" stroke-width="1.6" marker-end="url(#aInk)"/>
+      <g><rect x="30" y="1030" width="130" height="46" rx="10" fill="#FBF1E2" stroke="#B4690E"/><text x="95" y="1049" text-anchor="middle" fill="#16233B" font-weight="600">execution</text><text x="95" y="1065" text-anchor="middle" fill="#B4690E">receipt_id</text></g>
+    </g>
+
+    <!-- ===== SOURCE PLANE ===== -->
+    <g>
+      <rect x="200" y="46" width="960" height="130" rx="14" fill="#EEF2FF" stroke="#3B5BDB" stroke-width="1.6"/>
+      <text x="222" y="76" class="svgt" font-size="16" font-weight="700" fill="#16233B">SOURCE OKF BUNDLE</text>
+      <text x="430" y="76" class="svgm" font-size="11" fill="#3B5BDB">canonical for authored knowledge + computation declarations</text>
+      <rect x="980" y="58" width="166" height="24" rx="12" fill="#3B5BDB"/>
+      <text x="1063" y="74" text-anchor="middle" class="svgm" font-size="10.5" fill="#fff" font-weight="600">NO OKF CORE CHANGE</text>
+      <g class="svgm" font-size="11.5">
+        <rect x="222" y="94" width="450" height="66" rx="9" fill="#fff" stroke="#C7D2F5"/>
+        <text x="238" y="116" fill="#16233B" font-weight="600">OKF concepts (Markdown + YAML) · unchanged v0.2</text>
+        <text x="238" y="135" fill="#44536E">concepts · metrics · policies · data-assets · playbooks · owners</text>
+        <text x="238" y="152" fill="#44536E">core keys consumed · #195 / #183 / #253 keys tolerated</text>
+        <rect x="694" y="94" width="452" height="66" rx="9" fill="#fff" stroke="#C7D2F5"/>
+        <text x="710" y="116" fill="#16233B" font-weight="600">references/</text>
+        <text x="710" y="135" fill="#44536E">sanctioned SQL (named-parameter templates) · executors</text>
+        <text x="710" y="152" fill="#44536E">attesters · vocabularies</text>
+      </g>
+    </g>
+
+    <line x1="680" y1="176" x2="680" y2="214" stroke="#44536E" stroke-width="2" marker-end="url(#aInk)"/>
+    <text x="694" y="200" class="svgm" font-size="11" fill="#44536E">deterministic logical compile</text>
+
+    <!-- ===== COMPILER / PUBLICATION PLANE ===== -->
+    <g>
+      <rect x="200" y="218" width="960" height="190" rx="14" fill="#fff" stroke="#44536E" stroke-width="1.6"/>
+      <text x="222" y="248" class="svgt" font-size="16" font-weight="700" fill="#16233B">COMPILER / PUBLICATION PLANE</text>
+      <text x="530" y="248" class="svgm" font-size="11" fill="#44536E">toolbox/okf-context · validate · plan · push · status · kcmd as a library · push-only</text>
+      <g class="svgm" font-size="11.5">
+        <rect x="222" y="264" width="176" height="34" rx="8" fill="#F6F8FA" stroke="#D9E1EB"/><text x="310" y="286" text-anchor="middle" fill="#16233B">parse + validate</text>
+        <line x1="398" y1="281" x2="422" y2="281" stroke="#44536E" stroke-width="1.6" marker-end="url(#aInk)"/>
+        <rect x="424" y="264" width="216" height="34" rx="8" fill="#F6F8FA" stroke="#D9E1EB"/><text x="532" y="286" text-anchor="middle" fill="#16233B">resolve identities + predicates</text>
+        <line x1="640" y1="281" x2="664" y2="281" stroke="#44536E" stroke-width="1.6" marker-end="url(#aInk)"/>
+        <rect x="666" y="264" width="176" height="34" rx="8" fill="#F6F8FA" stroke="#D9E1EB"/><text x="754" y="286" text-anchor="middle" fill="#16233B">chunk + index plan</text>
+        <line x1="842" y1="281" x2="866" y2="281" stroke="#44536E" stroke-width="1.6" marker-end="url(#aInk)"/>
+        <rect x="868" y="264" width="270" height="34" rx="8" fill="#16233B"/><text x="1003" y="286" text-anchor="middle" fill="#fff">publish → publication_id</text>
+        <rect x="222" y="312" width="916" height="80" rx="9" fill="#F6F8FA" stroke="#D9E1EB"/>
+        <text x="238" y="333" fill="#16233B" font-weight="600">Ingestion records — not files in the bundle</text>
+        <text x="238" y="352" fill="#44536E">observation_id (source_uri @ revision) · artifact_manifest (content-hashed) · snapshot_id · membership · sync_runs</text>
+        <text x="238" y="369" fill="#44536E">snapshot_id = H( source_manifest ⊕ canonicalization ⊕ compiler ⊕ semantic_config ⊕ vocabulary ⊕ resolver )</text>
+        <text x="238" y="386" fill="#8593AA">publication_id = H( deployment_key ⊕ observation_id ⊕ snapshot_id ⊕ profile_contract ) · new observation → new publication</text>
+      </g>
+    </g>
+
+    <path d="M 470 408 L 470 440 L 430 470" fill="none" stroke="#0E7C7B" stroke-width="2" marker-end="url(#aTeal)"/>
+    <text x="222" y="452" class="svgm" font-size="11" fill="#0E7C7B">KC_RECONCILING → KC_APPLIED · after commit</text>
+    <path d="M 900 408 L 900 440 L 935 470" fill="none" stroke="#B4690E" stroke-width="2" marker-end="url(#aAmber)"/>
+    <text x="948" y="452" class="svgm" font-size="11" fill="#B4690E">BQ_COMMITTED · atomic head swap</text>
+
+    <!-- ===== CATALOG PLANE ===== -->
+    <g>
+      <rect x="200" y="474" width="450" height="282" rx="14" fill="#E8F5F4" stroke="#0E7C7B" stroke-width="1.6"/>
+      <text x="222" y="504" class="svgt" font-size="16" font-weight="700" fill="#16233B">KNOWLEDGE CATALOG</text>
+      <text x="222" y="522" class="svgm" font-size="11" fill="#0E7C7B">governed discovery projection · derived</text>
+      <g class="svgm" font-size="11.5">
+        <rect x="222" y="536" width="406" height="56" rx="9" fill="#fff" stroke="#BCDEDC"/>
+        <text x="238" y="553" fill="#16233B" font-weight="600">okf-concept entries (one generic type, v1)</text>
+        <text x="238" y="569" fill="#44536E">okf aspect: authored type · lifecycle · provenance</text>
+        <text x="238" y="584" fill="#44536E">okf-computation aspect on §10 concepts</text>
+        <rect x="222" y="600" width="406" height="40" rx="9" fill="#fff" stroke="#BCDEDC"/>
+        <text x="238" y="617" fill="#16233B" font-weight="600">Entry links</text>
+        <text x="238" y="633" fill="#44536E">to existing BigQuery asset entries · partial; ledger in BQ</text>
+        <rect x="222" y="648" width="406" height="40" rx="9" fill="#fff" stroke="#BCDEDC"/>
+        <text x="238" y="665" fill="#16233B" font-weight="600">Ownership + pinning</text>
+        <text x="238" y="681" fill="#44536E">publication_id on every entry · pin-or-fail-stale · lag SLO</text>
+        <rect x="222" y="696" width="406" height="44" rx="9" fill="#fff" stroke="#D6C7EE" stroke-dasharray="4 4"/>
+        <text x="238" y="713" fill="#7048A8" font-weight="600">optional, opaque: BQAA-owned health aspect</text>
+        <text x="238" y="729" fill="#44536E">windowed · sample_count · never part of KC_APPLIED</text>
+      </g>
+    </g>
+
+    <!-- reconcile arrow between planes -->
+    <line x1="700" y1="600" x2="654" y2="600" stroke="#44536E" stroke-width="1.8" marker-end="url(#aInk)" stroke-dasharray="5 5"/>
+    <text x="677" y="588" text-anchor="middle" class="svgm" font-size="10.5" fill="#44536E">reconcile</text>
+
+    <!-- ===== BIGQUERY PLANE ===== -->
+    <g>
+      <rect x="704" y="474" width="456" height="282" rx="14" fill="#FBF1E2" stroke="#B4690E" stroke-width="1.6"/>
+      <text x="726" y="504" class="svgt" font-size="16" font-weight="700" fill="#16233B">BIGQUERY RUNTIME PROJECTION</text>
+      <text x="726" y="522" class="svgm" font-size="11" fill="#B4690E">serving authority · relational is authoritative</text>
+      <g class="svgm" font-size="11.5">
+        <rect x="726" y="536" width="412" height="56" rx="9" fill="#fff" stroke="#EBD3AC"/>
+        <text x="742" y="553" fill="#16233B" font-weight="600">Append-only versions + membership + publications</text>
+        <text x="742" y="569" fill="#44536E">concepts · assertions · resources · computations · chunks</text>
+        <text x="742" y="584" fill="#44536E">deployment_heads → *_current · deployment_heads_history</text>
+        <rect x="726" y="600" width="200" height="56" rx="9" fill="#fff" stroke="#EBD3AC"/>
+        <text x="742" y="618" fill="#16233B" font-weight="600">Search + traversal</text>
+        <text x="742" y="634" fill="#44536E">lexical · semantic optional</text>
+        <text x="742" y="649" fill="#44536E">expansion · index_build_id</text>
+        <rect x="938" y="600" width="200" height="56" rx="9" fill="#fff" stroke="#EBD3AC" stroke-dasharray="4 4"/>
+        <text x="954" y="618" fill="#16233B" font-weight="600">Property Graph</text>
+        <text x="954" y="634" fill="#44536E">optional · Pre-GA · Phase 5</text>
+        <text x="954" y="649" fill="#44536E">no gate may require it</text>
+        <rect x="726" y="664" width="412" height="40" rx="9" fill="#fff" stroke="#EBD3AC"/>
+        <text x="742" y="681" fill="#16233B" font-weight="600">execution_receipts</text>
+        <text x="742" y="697" fill="#44536E">keyed commitments · integrity proofs · attester pinned</text>
+        <rect x="726" y="712" width="412" height="30" rx="9" fill="#fff" stroke="#EBD3AC"/>
+        <text x="742" y="732" fill="#44536E"><tspan fill="#16233B" font-weight="600">envelope manifests</tspan> · runtime-dataset IAM, source-equivalent</text>
+      </g>
+    </g>
+
+    <!-- arrows planes -> consumers -->
+    <line x1="380" y1="756" x2="380" y2="810" stroke="#0E7C7B" stroke-width="2" marker-end="url(#aTeal)"/>
+    <text x="394" y="788" class="svgm" font-size="11" fill="#0E7C7B">discover · govern · review</text>
+    <line x1="932" y1="756" x2="932" y2="810" stroke="#B4690E" stroke-width="2" marker-end="url(#aAmber)"/>
+    <text x="586" y="788" class="svgm" font-size="11" fill="#B4690E">search_context · expand_context · get_evidence · explain_context</text>
+
+    <!-- ===== CONSUMERS ===== -->
+    <g>
+      <rect x="200" y="814" width="330" height="120" rx="14" fill="#fff" stroke="#0E7C7B" stroke-width="1.4"/>
+      <text x="222" y="844" class="svgt" font-size="15" font-weight="700" fill="#16233B">HUMAN CATALOG USER</text>
+      <g class="svgm" font-size="11.5" fill="#44536E">
+        <text x="222" y="868">definition · owner · freshness</text>
+        <text x="222" y="885">governing policies · computations</text>
+        <text x="222" y="902">requests carry publication_id</text>
+      </g>
+    </g>
+    <g>
+      <rect x="560" y="814" width="600" height="120" rx="14" fill="#fff" stroke="#44536E" stroke-width="1.6"/>
+      <text x="582" y="844" class="svgt" font-size="15" font-weight="700" fill="#16233B">AGENT / MCP CLIENT</text>
+      <text x="582" y="866" class="svgm" font-size="11.5" fill="#44536E">authorize → seed → filter → bounded expansion → rank → pack · fail closed</text>
+      <rect x="582" y="878" width="556" height="40" rx="9" fill="#F6F8FA" stroke="#D9E1EB"/>
+      <text x="600" y="895" class="svgm" font-size="11.5" fill="#16233B" font-weight="600">Context Envelope · opaque envelope_id · context_ref on every result</text>
+      <text x="600" y="911" class="svgm" font-size="11" fill="#44536E">publication_id · paths · evidence · warnings · keyed policy-context commitment</text>
+    </g>
+
+    <!-- consumers -> execution + telemetry -->
+    <line x1="960" y1="934" x2="960" y2="994" stroke="#B4690E" stroke-width="2" marker-end="url(#aAmber)"/>
+    <text x="948" y="958" text-anchor="end" class="svgm" font-size="11" fill="#B4690E">run_attested_computation</text>
+    <text x="948" y="974" text-anchor="end" class="svgm" font-size="11" fill="#B4690E">(declared parameters only)</text>
+    <path d="M 640 934 L 640 966 L 420 994" fill="none" stroke="#7048A8" stroke-width="2" marker-end="url(#aPurp)"/>
+    <text x="430" y="970" class="svgm" font-size="11" fill="#7048A8">context_ref only</text>
+
+    <!-- ===== EXECUTION ===== -->
+    <g>
+      <rect x="560" y="998" width="600" height="134" rx="14" fill="#FBF1E2" stroke="#B4690E" stroke-width="1.6"/>
+      <text x="582" y="1028" class="svgt" font-size="15" font-weight="700" fill="#16233B">ATTESTED EXECUTION</text>
+      <g class="svgm" font-size="11.5" fill="#44536E">
+        <text x="582" y="1052">caller-delegated BigQuery job · named parameters · template compared literally</text>
+        <text x="582" y="1070">attester: independent constrained identity · job-metadata read · no data read</text>
+        <text x="582" y="1088">ATTESTED only on complete evidence · else UNVERIFIABLE / REJECTED · fail closed</text>
+        <text x="582" y="1106">receipt: HMAC commitments · executed_artifact_hash · integrity_proof</text>
+        <text x="582" y="1124" fill="#B4690E">threat model stated: process integrity, not data correctness</text>
+      </g>
+    </g>
+    <path d="M 1172 1060 L 1196 1060 L 1196 684 L 1164 684" fill="none" stroke="#B4690E" stroke-width="1.6" stroke-dasharray="4 5" marker-end="url(#aAmber)"/>
+    <text x="1196" y="870" class="svgm" font-size="10.5" fill="#B4690E" transform="rotate(90 1196 870)" text-anchor="middle">receipts persisted</text>
+
+    <!-- ===== BQAA OBSERVER ===== -->
+    <g>
+      <rect x="200" y="998" width="330" height="134" rx="14" fill="#F2ECFA" stroke="#7048A8" stroke-width="1.6"/>
+      <text x="222" y="1028" class="svgt" font-size="15" font-weight="700" fill="#16233B">AGENT ANALYTICS</text>
+      <text x="372" y="1028" class="svgm" font-size="11" fill="#7048A8">observer · BQAA</text>
+      <g class="svgm" font-size="11.5" fill="#44536E">
+        <text x="222" y="1052">receives: publication_id · envelope_id ·</text>
+        <text x="222" y="1069">receipt_id · bq_job_id · buckets · warning codes</text>
+        <text x="222" y="1090">owns: spans · events · privacy · evaluation ·</text>
+        <text x="222" y="1107">citation · Knowledge Health</text>
+        <text x="222" y="1124" fill="#7048A8">never a source of truth · no schema here</text>
+      </g>
+    </g>
+
+    <!-- ===== FEEDBACK LOOP (source review) ===== -->
+    <path class="flowline" d="M 365 1132 L 365 1200 L 1216 1200 L 1216 110 L 1166 110" fill="none" stroke="#3B5BDB" stroke-width="2" marker-end="url(#aBlue)"/>
+    <text x="790" y="1222" class="svgm" font-size="11.5" fill="#3B5BDB" text-anchor="middle">review loop · a human or agent proposes a reviewed source PR → new observation → recompile</text>
+  </svg>
+  <figcaption>System design — four planes, the compiler/publication plane between them, and the identity chain. Agent Analytics is an observer; runtime observations never mutate authored knowledge.</figcaption>
+  </figure>
+</section>
+
+<!-- ============ DECISIONS ============ -->
+<section class="wrap" id="decision">
+  <div class="sec-label">04 · Decisions</div>
+  <h2>Six agreements, each answered with one recommendation</h2>
+  <p>These are decided for this RFC and stated as positions, not as a menu, so that maintainers review a recommendation rather than choose among options.</p>
+  <div class="decisions">
+    <div class="decision"><p><span class="h">Scope — an optional profile, no OKF core change.</span> The profile compiles unchanged OKF v0.2 input and defines only normalized runtime records and enforcement behavior. It adds no authoring syntax and makes neither BigQuery nor Catalog mandatory for conformance. Demonstrated mechanically: the Phase 0 sample passes OKF §11 unchanged, and every key the profile reads is core or a producer-extension key tolerated under §4.1 (keys table in §06).</p></div>
+    <div class="decision"><p><span class="h">Placement — <code>toolbox/okf-context/PROFILE.md</code>, plus a one-page Discussion in <code>open-knowledge-format</code>.</span> The normative document lives beside its implementation, where a maintainer will keep it in sync. The Discussion, <em>“Runtime profile: consumes v0.2 as-is”</em>, is non-normative: it tells the format community a runtime exists and which conventions it tracks. <strong>Not</strong> <code>knowledge-catalog/okf/proposals/</code> — that tree is frozen, and neither repository has a proposals mechanism today.</p></div>
+    <div class="decision"><p><span class="h">Implementation — a separate package, <code>toolbox/okf-context</code> (name is bikeshed), depending on <code>kcmd</code> as a library.</span> <code>kcmd</code>'s core model is pull-then-push reconciliation of catalog metadata inside one EntryGroup; this profile is append-only, push-only, BigQuery-first. Fusing them ties the compiler to a metadata CLI's cadence and invites <code>pull</code> semantics back in. Reused via library import, as <code>toolbox/mdcode/demo/okf/push.ts</code> already does: Documents-Layout staging, custom-aspect passthrough, delete-only-what-you-created reconciliation. Explicitly <strong>not</strong> used: <code>toolbox/mdcode/demo/okf/pull.ts</code> and the round-trip connector path. Phase 0 probes the exact <code>kcmd</code> APIs consumed.</p></div>
+    <div class="decision"><p><span class="h">Authority — one source, two independent reconcilers.</span> BigQuery's relational deployment head is the runtime-serving authority; Catalog is the governed discovery projection. Both carry the same bundle, observation, snapshot, publication, and deployment IDs. A Catalog failure never rolls back a committed BigQuery publication.</p></div>
+    <div class="decision"><p><span class="h">Workflow — source-authoritative, push-only.</span> <code>validate | plan | push | status</code>. No Catalog pull, no source reconstruction, no Catalog-side edits to source-owned fields, no second authoring path. A runtime export, if ever built, is labeled lossy. Catalog-native annotations, if allowed later, live in a separately owned aspect and never enter snapshot identity.</p></div>
+    <div class="decision">
+      <p><span class="h">Source conventions — consume adopted syntax only, in this order.</span></p>
+      <ul>
+        <li><strong>First: PR #195</strong> — <code>supersedes</code> / <code>contested_by</code>. The only convention with a PR, shipping producers, and query-time semantics (“exclusion follows affirmation”). The <code>current</code> retrieval mode depends on exactly those semantics. Consumed as-is.</li>
+        <li><strong>Second: the <code>links:</code> carrier from #183</strong> (<code>target</code>, <code>rel</code>, <code>confidence</code>) with #148's <code>rel</code> as predicate; <code>confidence</code> maps onto <code>assertion_mode</code> without inventing anything.</li>
+        <li><strong>Later, not gated on: Discussion #261</strong> — a vocabulary-binding layer over the #183 carrier. Declared vocabulary → namespaced predicate; none → <code>producer:&lt;rel&gt;</code>.</li>
+        <li><strong>Consumed when authored, never inferred: #253 validity.</strong> #209's “expiry should down-rank, not hide” corroborates the <code>stale_after</code>-as-warning rule.</li>
+        <li><strong>Identity: path identity until #120.</strong> No producer UID extension. A file move is delete-plus-create; a pilot needing continuity may use a profile-local <code>concept_aliases</code> ledger, never presented as OKF syntax.</li>
+        <li><strong>Catalog types: one generic <code>okf-concept</code> entry type in v1</strong>, <code>okf</code> aspect preserving the authored <code>type:</code>, <code>okf-computation</code> aspect on §10 concepts; existing entries reused only for physical BigQuery assets. <code>semantic-metric</code> / <code>semantic-entity</code> are <strong>not</strong> reused — <code>kcmd</code>'s semantic-model push owns those inside the same EntryGroup model, and two tools owning one system type makes ownership stamps the only thing between a push and someone else's deletions. Revisit as Phase 2b after the ownership tests pass.</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:16px">If accepted, implementation proceeds as small PRs in phase order (§09).</p>
+</section>
+
+<!-- ============ CONSISTENCY DIAGRAM ============ -->
+<section class="wide" id="statemachine">
+  <div class="wrap" style="padding:0">
+    <div class="sec-label">05 · Cross-service consistency</div>
+    <h2>Explicit states instead of pretended atomicity</h2>
+    <p>No cross-service transaction exists between BigQuery and Knowledge Catalog, so consistency is explicit. Immutable rows stage under an uncommitted <code>sync_id</code>. <strong>BQ_COMMITTED</strong> is the atomic advance of <code>deployment_heads</code> to a new <code>publication_id</code>; that is when <code>*_current</code> views become visible. Catalog is reconciled only afterwards.</p>
+  </div>
+  <figure class="diagram">
+  <svg viewBox="0 0 1230 240" role="img" aria-label="Sync state machine: planned, preparing, BigQuery staged, BigQuery committed via atomic head swap to a publication, Knowledge Catalog applied, complete, with a KC reconciling branch when the catalog lags.">
+    <defs>
+      <marker id="sInk" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#44536E"/></marker>
+      <marker id="sTeal" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#0E7C7B"/></marker>
+    </defs>
+    <g class="svgm" font-size="12.5">
+      <rect x="16" y="46" width="150" height="52" rx="11" fill="#fff" stroke="#D9E1EB"/><text x="91" y="77" text-anchor="middle" fill="#16233B" font-weight="600">PLANNED</text>
+      <line x1="166" y1="72" x2="196" y2="72" stroke="#44536E" stroke-width="1.8" marker-end="url(#sInk)"/>
+      <rect x="200" y="46" width="150" height="52" rx="11" fill="#fff" stroke="#D9E1EB"/><text x="275" y="77" text-anchor="middle" fill="#16233B" font-weight="600">PREPARING</text>
+      <line x1="350" y1="72" x2="380" y2="72" stroke="#44536E" stroke-width="1.8" marker-end="url(#sInk)"/>
+      <rect x="384" y="46" width="150" height="52" rx="11" fill="#FBF1E2" stroke="#B4690E"/><text x="459" y="77" text-anchor="middle" fill="#16233B" font-weight="600">BQ_STAGED</text>
+      <line x1="534" y1="72" x2="564" y2="72" stroke="#44536E" stroke-width="1.8" marker-end="url(#sInk)"/>
+      <rect x="568" y="40" width="196" height="64" rx="11" fill="#16233B"/><text x="666" y="66" text-anchor="middle" fill="#fff" font-weight="600">BQ_COMMITTED</text>
+      <text x="666" y="86" text-anchor="middle" fill="#B8C7DE" font-size="10.5">head → publication_id (atomic)</text>
+      <line x1="764" y1="72" x2="794" y2="72" stroke="#44536E" stroke-width="1.8" marker-end="url(#sInk)"/>
+      <rect x="798" y="46" width="150" height="52" rx="11" fill="#E8F5F4" stroke="#0E7C7B"/><text x="873" y="77" text-anchor="middle" fill="#16233B" font-weight="600">KC_APPLIED</text>
+      <line x1="948" y1="72" x2="978" y2="72" stroke="#44536E" stroke-width="1.8" marker-end="url(#sInk)"/>
+      <rect x="982" y="46" width="150" height="52" rx="11" fill="#EDF7F1" stroke="#1C6B45"/><text x="1057" y="77" text-anchor="middle" fill="#1C6B45" font-weight="600">COMPLETE</text>
+      <path d="M 666 104 L 666 150 L 686 168" fill="none" stroke="#0E7C7B" stroke-width="1.8" stroke-dasharray="5 5" marker-end="url(#sTeal)"/>
+      <rect x="690" y="158" width="262" height="52" rx="11" fill="#fff" stroke="#0E7C7B" stroke-dasharray="5 4"/>
+      <text x="821" y="180" text-anchor="middle" fill="#16233B" font-weight="600">KC_RECONCILING</text>
+      <text x="821" y="198" text-anchor="middle" fill="#44536E" font-size="10.5">BigQuery serving · catalog catching up · lag SLO</text>
+      <path d="M 952 184 L 990 184 L 990 132 L 900 104" fill="none" stroke="#0E7C7B" stroke-width="1.8" stroke-dasharray="5 5" marker-end="url(#sTeal)"/>
+      <text x="200" y="150" fill="#44536E" font-size="11.5">current views become visible here — never before commit;</text>
+      <text x="200" y="168" fill="#44536E" font-size="11.5">a committed publication is never rolled back for a catalog failure</text>
+    </g>
+  </svg>
+  <figcaption>Sync state machine — publishing one publication to one deployment.</figcaption>
+  </figure>
+  <div class="wrap" style="padding:0">
+    <ul>
+      <li><strong><code>KC_RECONCILING</code> is a legal resting state</strong>, but lag is a metric with an owner and an SLO. Persistent <code>KC_RECONCILING</code> is an operational incident, not a steady state. <code>status</code> reports lag in publications.</li>
+      <li><strong>Publication pinning.</strong> Every owned Catalog entry carries <code>publication_id</code> and <code>published_snapshot_id</code>. A request launched from Catalog carries that <code>publication_id</code> and either serves that retained publication or fails stale. Agent tools never read Catalog for lifecycle decisions.</li>
+      <li><strong>History.</strong> <code>deployment_heads</code> answers “what is current now.” <code>deployment_heads_history (deployment_key, publication_id, snapshot_id, committed_at, sync_id)</code> answers “what was current for deployment D at time t.” Both are Phase 1 deliverables.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ DETAIL SECTIONS ============ -->
+<section class="wrap" id="details">
+  <div class="sec-label">06 · Proposed model</div>
+  <h2>Design detail, collapsed by intent</h2>
+
+  <details open>
+    <summary>Identity: observations, snapshots, publications, versions</summary>
+    <div class="inner">
+      <ul>
+        <li><code>bundle_key</code> — stable identity of one logical source bundle, independent of revision, deployment, and publication attempt.</li>
+        <li><code>concept_key</code> — <code>bundle_key + "#" + concept_id</code>, where <code>concept_id</code> is the bundle-relative path without <code>.md</code> (OKF v0.2 fallback). Changes on a file move; see Decision 6.</li>
+        <li><code>concept_version_id</code> — <strong>identity-and-content-derived</strong>: canonical structured hash of <code>(concept_key, normalized_frontmatter, body)</code>. A version carries an authored locator, not a source revision — one version can appear in many revisions.</li>
+        <li><code>observation_id</code> — one observation of the source: <code>hash(bundle_key, source_uri, revision)</code>. Ingestion state, not bundle content.</li>
+        <li><code>snapshot_id</code> — deterministic identity of one compiled semantic world-state. Many observations may map to one snapshot.</li>
+        <li><code>publication_id</code> — one observation compiled to one snapshot and committed to one deployment. <code>deployment_heads</code> points to a publication, not only a snapshot.</li>
+        <li><code>deployment_key</code> — where and under which runtime policy publications land; <code>sync_id</code> — one operational attempt.</li>
+        <li><code>index_build_id</code> — an embedding/search-index build; <code>envelope_id</code> — one exact context package delivered; <code>receipt_id</code> — one attested execution.</li>
+      </ul>
+      <pre><code>snapshot_id    = SHA256("okf-context:snapshot:v1\0" || canonical_cbor({
+                   bundle_key, source_manifest_hash, canonicalization_manifest_hash,
+                   compiler_semantics_version, semantic_config_hash,
+                   vocabulary_manifest_hash, resolver_manifest_hash }))
+
+publication_id = SHA256("okf-context:publication:v1\0" || canonical_cbor({
+                   deployment_key, observation_id, snapshot_id, profile_contract_version }))</code></pre>
+      <p><strong>Republish semantics, precisely.</strong> Retrying an identical publication (same observation, snapshot, deployment) is a no-op: no rows, no head change. Publishing a <em>new observation</em> of an <em>unchanged snapshot</em> creates a new publication row and advances the head to it, with no new semantic rows — a semantic no-op that is still a provenance event, and therefore not silent.</p>
+      <p><code>source_manifest_hash</code> covers only runtime-relevant compiled inputs. Validation-only tests, CI metadata, and unrelated repository content affect validation provenance, not snapshot identity. All identifiers use domain-separated canonical structured encoding, never bare string concatenation.</p>
+      <h4>Configuration is scoped, not lumped</h4>
+      <p>Semantics-affecting config (<code>semantic_config_hash</code>) belongs to the snapshot; chunking/embedding/index parameters (<code>index_config_hash</code>) to the index build; project, dataset, IAM mode, retention, region (<code>deployment_config_hash</code>) to the deployment.</p>
+      <h4>Snapshot membership is the temporal model</h4>
+      <p>Membership maps logical identities to exact versions per snapshot and is <strong>logically complete and immutable</strong>; any deduplicated physical representation is acceptable provided exact membership for any retained <code>snapshot_id</code> is reconstructible without consulting mutable current state. Deletion is absence from the next snapshot. What this gives is <strong>immutable system-time publication history</strong> — not bitemporality. Business validity is populated only when explicitly authored.</p>
+      <h4>Artifact closure</h4>
+      <pre><code>computation_version_id = hash(concept_version_id, parameter_schema_hash,
+                              computation_artifact_hash, executor_artifact_hash,
+                              attester_artifact_hash, runtime_contract_version)</code></pre>
+      <p>Each snapshot retains an <code>artifact_manifest</code> (authored reference, resolved URI, content hash, media type, role, resolution status, bytes retained). A computation is “reconstructible” only when every load-bearing artifact is retained by content hash or immutably content-addressed. The compiler never merges two documents into one concept on embedding or LLM similarity alone.</p>
+      <h4>Keys this profile reads</h4>
+      <table class="keys">
+        <tr><th>Class</th><th>Keys</th><th>Handling</th></tr>
+        <tr><td>OKF v0.2 core</td><td><code>type</code>, <code>status</code>, <code>stale_after</code>, <code>sources</code>, <code>generated</code>, <code>verified</code>, <code>resource</code>; §10 <code>runtime</code>, <code>parameters</code>, <code>computation</code>, <code>executor</code>, <code>attester</code></td><td>Consumed</td></tr>
+        <tr><td>Producer extensions (§4.1)</td><td><code>supersedes</code>, <code>contested_by</code> (PR #195); <code>links[]</code> (#183); <code>validity</code> (#253)</td><td>Tolerated; consumed when present, never required</td></tr>
+        <tr><td>Anything else</td><td>—</td><td>Ignored; preserved opaquely in the <code>okf</code> aspect</td></tr>
+      </table>
+      <p style="margin-top:10px">Nothing else. No key is required beyond core.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Relationships, resource nodes, and unresolved links</summary>
+    <div class="inner">
+      <p>Resolved bundle-internal Markdown links compile with no extensions, each to a generic explicit edge under a <strong>profile-local</strong> predicate (<code>context:untyped_link</code>) — deliberately not an OKF core predicate, since OKF v0.2 links are untyped with meaning carried by prose. External hyperlinks in prose are not materialized as nodes. The compiler <strong>never guesses</strong> a stronger predicate.</p>
+      <h4>Assertion identity ≠ logical edge identity</h4>
+      <pre><code>logical_relationship_key   = hash(source_key, canonical_predicate, direction, target_ref)
+relationship_assertion_key = hash(logical_relationship_key, assertion_mode, source_kind,
+                                  evidence_locator, producer_assertion_id | source_occurrence_id)
+target_ref                 = "resolved:" + concept_key
+                           | "unresolved:" + normalized_authored_target   # namespaced, never null-collapsed</code></pre>
+      <p>Equivalent edges from multiple sources are preserved as distinct assertions; presentation may collapse by logical key. <code>assertion_mode</code> (<code>explicit | imported | deterministic-derived | inferred</code>) is always preserved; inferred is always labeled inferred. The complete assertion ledger lives in BigQuery; Catalog receives only the links it can express.</p>
+      <h4>Versioned resource nodes</h4>
+      <p>Edges may target a <code>resource_uri</code> — a real BigQuery table. Resolution is external state, so resource nodes get versions and snapshot membership; resolver outputs are pinned via <code>resolver_manifest_hash</code> so the same source cannot silently compile differently because Catalog or BigQuery state changed.</p>
+      <h4>Unresolved links</h4>
+      <p>OKF requires consumers to tolerate broken links. The relational runtime is <strong>lossless</strong>: unresolved assertions keep the authored target under a namespaced <code>unresolved:</code> key and <code>resolution_status: unresolved</code>, so two missing targets never collapse into one assertion. The Property Graph projection includes resolved edges only.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Runtime schema, current views, and graph projection</summary>
+    <div class="inner">
+      <p>Append-only version tables, snapshot membership, <code>snapshot_observations</code>, <code>publications</code>, <code>deployments</code>, <code>deployment_heads</code>, <code>deployment_heads_history</code>, <code>sync_runs</code>, <code>execution_receipts</code>, and the ownership ledger for Catalog artifacts. Current views resolve through <code>deployment_heads</code> — never a global “latest snapshot.” “Current” is always current <em>for a deployment</em>.</p>
+      <p><strong>Relational is authoritative.</strong> Every operation this profile requires — seed lookup, bounded relationship expansion, evidence traversal, path explanation — has a relational implementation. No correctness gate, acceptance test, or sample query in any phase may require Property Graph.</p>
+      <p><strong>Property Graph is optional.</strong> A <code>nodes_current</code> view unions concept and resource nodes (<code>ContextNode</code>, <code>node_kind = concept | resource</code>, namespaced keys). BigQuery Graph is Pre-GA; element-key uniqueness is a definition, not an enforced constraint, so the compiler validates uniqueness itself. Whether Graph accepts views is to be confirmed in Phase 5, not asserted here. Graph names must not collide with <code>kcmd</code>'s semantic-model graphs in the same project.</p>
+      <p><strong>Determinism, precisely scoped:</strong> given the same source manifest, canonicalization manifest, compiler semantics version, semantic config, vocabulary manifest, and resolver manifest, the compiler reproduces the same <code>snapshot_id</code>. Embeddings and index behavior are versioned under <code>index_build_id</code> and are not part of logical determinism.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Retrieval, lifecycle modes, and the Context Envelope</summary>
+    <div class="inner">
+      <pre><code>authorize → seed retrieval (lexical; semantic optional) → structured filters
+          → bounded relational expansion → dedupe → rank
+          → token-bounded Context Envelope → emit context_ref</code></pre>
+      <p><strong>Authorization constrains every step</strong> — candidates, every expansion hop, edge visibility, evidence retrieval, computation discovery and execution, and cached envelopes. An authorized seed must not traverse through an unauthorized intermediate node. The enforcement unit may be a concept, chunk, assertion, evidence record, resource, or computation (#209: concept granularity is not assumed sufficient). Fail closed when access cannot be evaluated.</p>
+      <p><strong>Policy authority, v1.</strong> OKF frontmatter is not an ACL and OKF v0.2 defines no fragment-level policy. V1 supports one security domain per bundle/deployment with caller-delegated BigQuery authorization as the policy source. Mixed-policy bundles fail closed unless an external policy resolver is configured.</p>
+      <h4>Lifecycle-aware retrieval modes</h4>
+      <pre><code>current:    exclude status: deprecated and concepts made out-of-force by an
+            affirmed supersession (PR #195) before ranking; apply application
+            policy to status: draft; warn/down-rank stale; surface contests
+historical: resolve through the requested publication or authored valid time
+all:        discovery/debug mode with lifecycle state visible</code></pre>
+      <p><code>stale_after</code> is a warning/ranking signal, not an exclusion. A retired governing instruction must be excludable from in-force retrieval, not merely down-ranked into the prompt.</p>
+      <p><strong>Instruction boundary:</strong> concept body text is untrusted knowledge content by default and is never automatically promoted into a privileged instruction channel. An application may promote only explicitly approved fields or concept types through a policy-controlled allowlist.</p>
+      <h4>The Context Envelope</h4>
+      <p><code>envelope_id</code> is an <strong>opaque, random, tenant-scoped identifier</strong> issued at pack time — not a public content hash, because a deterministic hash is linkable across users and runs. Equality for cache reuse is decided by a privileged keyed digest kept in the manifest, never exposed:</p>
+      <pre><code>policy_context_commitment = HMAC-SHA256(tenant_scoped_key,
+    "okf-context:policy-context:v1" || canonical(effective_policy_context))
+envelope_equality_digest  = HMAC-SHA256(tenant_scoped_key,
+    "okf-context:envelope:v1" || canonical({ publication_id, index_build_id,
+    policy_context_commitment, ordered_items, rendered_content_digest, packing }))</code></pre>
+      <p>A policy context is a handful of group memberships — lower entropy than a date range — so it gets the same keyed treatment as parameter bindings, and its serialization is versioned so that cross-principal cache reuse is collision-safe across authorization-model versions.</p>
+      <p>The retained manifest lives in the runtime dataset under source-equivalent IAM and records policy and ranker versions, tokenizer version, token budget, ordered version/chunk/assertion IDs, paths, warnings, and the observation for citation. Principal identity never enters the envelope. <strong>Possession of an <code>envelope_id</code> grants nothing</strong>: reads and replays still pass tenant, deployment, publication, revocation, retention, quarantine, and purge checks.</p>
+      <p><strong>Explainability without side channels:</strong> caller-visible explanations return authorized candidates and ranking decisions only — no denied counts (even “1 result filtered” discloses existence), or at most coarse buckets where policy allows. Full access decisions go only to a privileged audit view.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Attested Computation: identity model, receipts, integrity, and threat model</summary>
+    <div class="inner">
+      <p>Attested Computation is the only execution path whose result may be labeled <strong>sanctioned and attested by this profile</strong>. The agent binds <strong>declared parameters only</strong> (OKF §10); it cannot edit SQL, swap the referenced computation, add parameters, bypass the attester, or run deprecated computations without explicit override.</p>
+      <h4>Identity model, decided</h4>
+      <p>Execution is <strong>caller-delegated</strong>: the computation runs under the caller's BigQuery identity, and BigQuery IAM remains the authorization source of truth. The <strong>attester runs as an independent, constrained service identity</strong> — not as the caller, because a caller-run attester can be subverted by the caller. It holds job-metadata read on the executing project (<code>bigquery.jobs.listAll</code>-class permission, e.g. <code>roles/bigquery.resourceViewer</code>) and no data read. A Phase 0 probe confirms the exact least-privilege grant, including cross-project and cross-region cases. Constrained-service-identity <em>execution</em> is out of v1.</p>
+      <h4>Named query parameters, required</h4>
+      <p>Attested SQL executes with BigQuery named query parameters, so the executed <code>query</code> string <em>is</em> the template and bindings appear in job configuration. <code>executed_artifact_hash</code> is computed over the template; the attester compares template text and job parameters literally, with no re-rendering.</p>
+      <h4>Verdicts are exact and fail closed</h4>
+      <p><code>ATTESTED</code> requires all of: authoritative artifact identity, complete parameter binding, authenticated caller, BigQuery job metadata, result destination, output authorization, attester key validity, and evidence digest. Anything less returns <code>UNVERIFIABLE</code> or <code>REJECTED</code>; unavailable evidence never degrades to success. “Parameters where available” cannot support an attested verdict.</p>
+      <h4>Two receipt artifacts</h4>
+      <p>(1) The <em>execution receipt presented to the attester</em> may include executed SQL, bound parameters, result, and job metadata — the attester needs authoritative evidence, matching OKF's <code>executor.receipt</code> contract. (2) The <em>persisted receipt projection</em> stores commitments and governed metadata per retention policy.</p>
+      <h4>Authenticated verdicts</h4>
+      <p>The persisted receipt carries receipt and attester identities, verdict, details digest, and an <code>integrity_proof</code> (service signature, runtime MAC, or immutable audit-log reference) with algorithm and key ID. <code>receipt_digest</code> is computed over a versioned canonical serialization; the proof covers at least that digest, the attester artifact hash, and the profile contract version. Verifiers reject a receipt whose canonicalization version they do not understand.</p>
+      <h4>Keyed commitments with domain separation</h4>
+      <pre><code>parameter_binding_commitment = HMAC-SHA256(tenant_scoped_key,
+    "okf-context:parameter-binding:v1" || canonicalized_parameter_map)</code></pre>
+      <p>Low-entropy parameters make plain hashes dictionary-attackable. Keys remain verifiable for the receipt-retention period or the receipt transitions explicitly to a crypto-erased state. Key custody, rotation, revocation, retained-receipt verification, and crypto-erasure are <strong>Phase 4 gates</strong>, not prose.</p>
+      <blockquote>Threat model, stated honestly: attestation protects against an agent substituting an improvised computation, parameters, or displayed result. It assumes the configured executor, BigQuery, the attester runtime, and the receipt-integrity mechanism are trusted. It does not prove correctness against a compromised executor, attester, credential, administrator, or underlying data source.</blockquote>
+      <p>Attesters are bundle-authored code (<code>attester.resource</code>), possibly agent-written: sandboxed, restricted identity, subject to the same review as the computations they attest. “Deterministic” is a review property, not enforced.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Seam with BigQuery Agent Analytics</summary>
+    <div class="inner">
+      <p>Agent Analytics is <strong>observed</strong>, not a fifth source of truth. This profile never writes to <code>agent_events</code>, never defines event types, span cardinality, sampling, retention, redaction, evaluation semantics, or health aggregation. It emits identifiers on its tool results. That is the entire seam.</p>
+      <h4>What this profile emits</h4>
+      <p>One versioned sub-object, <code>context_ref</code>, on the response of every profile tool:</p>
+      <pre><code>context_ref:
+  profile_contract_version        # "okf-context/1"
+  bundle_key, observation_id, snapshot_id, deployment_key, publication_id
+  index_build_id                  # only when an index was used
+  envelope_id                     # search / expand / pack results
+  computation_version_id, receipt_id, bq_job_id, verdict   # run_attested_computation only
+  candidate_bucket                # coarse bucket, never an exact denied/filtered count
+  included_count
+  warning_codes[]                 # stale, unresolved, contested, draft — codes only</code></pre>
+      <p>Packed items carry a citation token <code>[okf:&lt;envelope_id&gt;#&lt;n&gt;]</code> so a later “was it cited” analysis can join on <code>envelope_id</code> without item IDs leaving the runtime dataset.</p>
+      <h4>What it never emits into telemetry</h4>
+      <p><code>concept_version_id</code>s, graph paths, authored locators, principal, policy context (hashed or not), raw query/prompt/answer text, raw bound values. Those live in the envelope manifest and receipts in the runtime dataset and are joined by <code>envelope_id</code> / <code>receipt_id</code> under that dataset's IAM. Telemetry holds opaque IDs only, so it cannot become a path around source authorization.</p>
+      <h4>What BQAA owns</h4>
+      <p>Decided in the companion RFC in the BQAA SDK repository: the event envelope, the <code>TOOL_STARTING</code> / <code>TOOL_COMPLETED</code> / <code>TOOL_ERROR</code> events the profile's tools naturally produce, the <code>attributes</code> key where <code>context_ref</code> lands, content truncation of tool bodies, OTel correlation and the pinned semantic-convention version, principal pseudonyms (keyed and purpose-scoped, not salted hashes), retention, evaluation, citation detection, and Knowledge Health. If Catalog displays a health aspect, it is BQAA-owned, windowed, carries <code>sample_count</code>, and is stored opaquely — never part of <code>KC_APPLIED</code>, publication completion, or snapshot identity.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Catalog ownership and reconciliation</summary>
+    <div class="inner">
+      <p><strong>Mapping.</strong> One <code>okf-concept</code> entry per concept; <code>okf</code> aspect (authored type, lifecycle, provenance, <code>publication_id</code>, <code>published_snapshot_id</code>); <code>okf-computation</code> aspect on §10 concepts; entry links to <em>existing</em> BigQuery table/column/dataset entries, never duplicates. Catalog has a small set of system link types, so only relationships with matching Catalog semantics are materialized as EntryLinks; the partial projection is documented, and the full ledger stays in BigQuery.</p>
+      <p><strong>Ownership.</strong> The EntryLink API offers no general ownership-stamp surface, so ownership is tracked in a BigQuery ledger keyed by deterministic deployment-scoped link and entry IDs, with <code>managed_by_*</code> stamps on aspects where aspects exist. Reconciliation removes or replaces only artifacts this deployment owns; existing system entries and other bundles' state are referenced, never garbage-collected. Coexistence with a <code>kcmd</code> semantic-model push in the same EntryGroup is tested adversarially in Phase 2.</p>
+      <h4>Non-goals</h4>
+      <p>No mandatory BigQuery/Catalog dependency for OKF; no new OKF authoring syntax or core predicates; no universal ontology or required semantic-web stack; no LLM-guessed typed edges; no universal truth score; no telemetry in the source bundle; no frontmatter-as-access-control; no Catalog→source writeback in v1; no arbitrary agent SQL; no low-latency transactional graph workloads; no telemetry schema in this RFC.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============ REPRODUCIBILITY ============ -->
+<section class="wrap" id="repro">
+  <div class="sec-label">07 · Reproducibility</div>
+  <h2>Identity is permanent; reconstruction is retention-scoped</h2>
+  <div class="ladder">
+    <div class="rung g"><div class="n">1</div><div class="t"><b>Snapshot and publication identity — guaranteed.</b> <code>snapshot_id</code> permanently identifies the compiled state; <code>publication_id</code> permanently identifies which observation was served to which deployment.</div></div>
+    <div class="rung g"><div class="n">2</div><div class="t"><b>Snapshot reconstruction — guaranteed while retained.</b> Requires the snapshot and all referenced immutable versions, marked complete.</div></div>
+    <div class="rung g"><div class="n">3</div><div class="t"><b>Envelope reconstruction — guaranteed while retained.</b> Needs the manifest and referenced snapshot content — no re-run of retrieval. Re-running retrieval is <em>not</em> guaranteed to reproduce an envelope.</div></div>
+    <div class="rung g"><div class="n">4</div><div class="t"><b>Computation-contract reconstruction — guaranteed while artifact closure is retained</b> or immutably retrievable.</div></div>
+    <div class="rung c"><div class="n">5</div><div class="t"><b>Result reproduction — conditional</b> on data-version evidence (source-data snapshots, time-travel coordinates). BigQuery time travel has a bounded window.</div></div>
+  </div>
+</section>
+
+<!-- ============ ACCEPTANCE ============ -->
+<section class="wrap" id="accept">
+  <div class="sec-label">08 · Acceptance</div>
+  <h2>What a “yes” means</h2>
+  <div class="checklist">
+    <div class="check"><span class="box"></span><span>The OKF bundle remains the portable canonical source for authored knowledge and computation declarations; Catalog and BigQuery are independently reconciled projections, with BigQuery relational state as serving authority.</span></div>
+    <div class="check"><span class="box"></span><span>This is an optional profile with zero new required OKF fields and no new authoring syntax; the Phase 0 sample passes §11 conformance unchanged.</span></div>
+    <div class="check"><span class="box"></span><span>Plain bundle-internal links compile with no extensions; typed relationships are preserved as provenance-bearing assertions when present.</span></div>
+    <div class="check"><span class="box"></span><span>Observation, snapshot, publication, and sync attempt are distinct identities; a provenance-only republish is a publication event, not a silent no-op.</span></div>
+    <div class="check"><span class="box"></span><span>Attested Computation is the only path carrying this profile's attestation claim — caller-delegated execution, an independent attester identity, complete-evidence verdicts, and a stated threat model.</span></div>
+    <div class="check"><span class="box"></span><span>BQAA is the observer: this RFC emits <code>context_ref</code> and receipts and specifies nothing else about telemetry.</span></div>
+    <div class="check"><span class="box"></span><span>Placement, package, convention order, Catalog types, and identity are decided as in §04; no blocking questions remain.</span></div>
+  </div>
+  <p><strong>Deferred to their phase:</strong> body storage location, typed graph labels, the exact <code>attributes</code> key for <code>context_ref</code>, benchmark corpus, historical-retrieval defaults, Property Graph over views.</p>
+</section>
+
+<!-- ============ PHASES ============ -->
+<section class="wrap" id="phases">
+  <div class="sec-label">09 · Phases</div>
+  <h2>Every phase: outcome, gate, explicitly out</h2>
+  <p>Every gate regresses against the Phase 0 fixture — the Germany active-customer-revenue question.</p>
+  <div class="phases">
+
+    <div class="phase">
+      <div class="ph"><span class="n">PHASE 0</span><span class="t">Contract + fixture</span></div>
+      <div class="row"><div class="l">Outcome</div><div class="v"><code>PROFILE.md</code> (identity chain; hashing and canonicalization spec with golden vectors; observation/snapshot/publication/deployment model; edge, resource, and unresolved-link model; retrieval modes; envelope manifest schema; attester identity model; BQAA seam) and one sample bundle answering the Germany question end to end, with golden <code>observation_id</code>, <code>snapshot_id</code>, <code>publication_id</code>, envelope manifest, and receipt fixture. Capability probes of the <code>kcmd</code> APIs and Catalog behaviors to be reused, and of the attester's least-privilege job-metadata grant.</div></div>
+      <div class="row gate"><div class="l">Gate</div><div class="v">Sample passes OKF §11 unchanged; zero new required keys; two independent hash implementations agree on <code>snapshot_id</code> and <code>publication_id</code>; <code>PROFILE.md</code> names every key it reads; the BQAA owner agrees to the <code>context_ref</code> seam; maintainers agree to placement.</div></div>
+      <div class="row out"><div class="l">Out</div><div class="v">Receipt-integrity mechanism, embeddings, Property Graph, Catalog, any telemetry model, new OKF syntax.</div></div>
+    </div>
+
+    <div class="phase">
+      <div class="ph"><span class="n">PHASE 1</span><span class="t">Compiler + BigQuery relational core</span></div>
+      <div class="row"><div class="l">Outcome</div><div class="v"><code>validate | plan | push | status</code>; version tables, membership, <code>publications</code>, <code>deployment_heads</code>, <code>deployment_heads_history</code>; lexical search; relational traversal (seed, bounded expansion, evidence path). A publication-scoped lexical query answers the fixture question with provenance.</div></div>
+      <div class="row gate"><div class="l">Gate</div><div class="v">Identical republish = no rows, no head change; new observation of an unchanged snapshot = new publication, head advanced, no semantic rows; a one-file change creates version rows only for affected objects with full membership reconstructible; uncommitted <code>sync_id</code> rows invisible to <code>*_current</code>; unresolved targets preserved under namespaced keys and do not collide; a file move is delete-plus-create; “what was current for deployment D at time t” answerable from history.</div></div>
+      <div class="row out"><div class="l">Out</div><div class="v">Embeddings (feature-flag allowed, not gated), Property Graph, Catalog, agent tools, attestation.</div></div>
+    </div>
+
+    <div class="phase">
+      <div class="ph"><span class="n">PHASE 2</span><span class="t">Knowledge Catalog projection</span></div>
+      <div class="row"><div class="l">Outcome</div><div class="v"><code>okf-concept</code> entries, <code>okf</code> / <code>okf-computation</code> aspects, links to existing BigQuery asset entries, produced through the <code>kcmd</code> library; ownership ledger; <code>status</code> reports lag in publications.</div></div>
+      <div class="row gate"><div class="l">Gate</div><div class="v">Re-push idempotent; deleting a concept removes only the owned entry; a <code>kcmd</code> semantic-model push into the same EntryGroup before and after leaves both projections intact; every owned artifact carries <code>publication_id</code>; a forced Catalog failure leaves BigQuery at <code>BQ_COMMITTED</code> with state <code>KC_RECONCILING</code>; a Catalog-originated request either serves its pinned publication or fails stale, never jumps to the latest head; partial link projection is documented.</div></div>
+      <div class="row out"><div class="l">Out</div><div class="v"><code>semantic-*</code> type reuse (Phase 2b, behind the ownership test), writeback, health aspect, Property Graph.</div></div>
+    </div>
+
+    <div class="phase">
+      <div class="ph"><span class="n">PHASE 3</span><span class="t">Authorized retrieval + Context Envelope</span></div>
+      <div class="row"><div class="l">Outcome</div><div class="v"><code>search_context</code>, <code>expand_context</code>, <code>get_evidence</code>, <code>explain_context</code> as ADK tools with an MCP wrapper; opaque <code>envelope_id</code>; retained manifest in the runtime dataset; <code>context_ref</code> on every result.</div></div>
+      <div class="row gate"><div class="l">Gate</div><div class="v">Authorization applied before search and at every hop; mixed-policy bundles fail closed; policy-context commitment is keyed and versioned; envelope reconstructible from manifest alone; <code>envelope_id</code> contains no principal and grants nothing on its own; explanation output contains no denied counts; raw values absent from logs; retention and emergency purge tested; latency and answer quality on the fixture beat direct file search.</div></div>
+      <div class="row out"><div class="l">Out</div><div class="v">Embeddings until the lexical baseline passes, Property Graph, fragment-level policy invented from frontmatter, cross-tenant envelope deduplication, adaptive “truth” ranking.</div></div>
+    </div>
+
+    <div class="phase">
+      <div class="ph"><span class="n">PHASE 4</span><span class="t">Attested execution + BQAA seam closure</span></div>
+      <div class="row"><div class="l">Outcome</div><div class="v"><code>run_attested_computation</code>; named-parameter execution under caller-delegated identity; one reference attester under its own constrained identity; receipts with keyed commitments and integrity proofs; companion BQAA RFC merged in the BQAA SDK repository.</div></div>
+      <div class="row gate"><div class="l">Gate</div><div class="v">Negative tests fail attestation (edited SQL, undeclared parameter, swapped computation, job not matching template + bindings, deprecated computation without override, replay, revoked key, unauthorized output destination, unavailable evidence → <code>UNVERIFIABLE</code>, never success); key rotation and crypto-erasure exercised; <code>agent_events</code> ↔ envelope manifest and receipt join by <code>envelope_id</code> / <code>receipt_id</code> works where the runtime dataset is stricter than the telemetry dataset; no <code>concept_version_id</code>, path, principal, or query text appears in <code>agent_events</code> from this profile's tools.</div></div>
+      <div class="row out"><div class="l">Out</div><div class="v">Constrained-service-identity execution, non-BigQuery executors, attester access to row data, citation-detection accuracy targets, evaluation semantics, Knowledge Health computation (BQAA's).</div></div>
+    </div>
+
+    <div class="phase">
+      <div class="ph"><span class="n">PHASE 5</span><span class="t">Hardening + pilot</span></div>
+      <div class="row"><div class="l">Outcome</div><div class="v">Optional Property Graph over <code>nodes_current</code> / <code>edges_current</code> with compiler-side key validation; versioned index builds and optional embeddings; principal-specific projections; benchmark corpus; CI gates; a limited production pilot with lag, rollback, key-revocation, purge, cost, and DR drills and an on-call owner.</div></div>
+      <div class="row gate"><div class="l">Gate</div><div class="v">Relational and GQL traversals return identical paths on the fixture; graph names do not collide with <code>kcmd</code> graphs; embeddings and Graph advance only after relational equivalence, authorization, cost, and latency tests; published latency for seed + 2-hop expansion at N concepts; drills pass.</div></div>
+      <div class="row out"><div class="l">Parked</div><div class="v">RDF/JSON-LD adapters; health-driven PR suggestions; Catalog→source writeback; a low-latency general serving layer. Not phased.</div></div>
+    </div>
+  </div>
+
+  <h3>Risks, and where each is gated</h3>
+  <table>
+    <tr><th>Risk</th><th>Mitigation</th><th>Gate</th></tr>
+    <tr><td>Catalog lag: one publication shown, another served</td><td><code>publication_id</code> on every owned entry; pin-or-fail-stale; lag SLO with owner</td><td>Phase 2</td></tr>
+    <tr><td>Two pushers deleting orphans in one EntryGroup</td><td>Ownership ledger + deterministic IDs; no <code>semantic-*</code> reuse in v1</td><td>Phase 2</td></tr>
+    <tr><td>Envelope manifest as sensitive as content</td><td>Runtime-dataset IAM; opaque <code>envelope_id</code>; keyed policy-context commitment</td><td>Phase 3</td></tr>
+    <tr><td>Attester subverted by the caller</td><td>Independent constrained attester identity; named parameters; complete-evidence verdicts</td><td>Phase 4</td></tr>
+    <tr><td>Receipt keys expire before the receipts do</td><td>Key lifecycle and crypto-erasure as gates</td><td>Phase 4</td></tr>
+    <tr><td>Property Graph quietly becomes the contract</td><td>Relational authority; no gate may require Graph</td><td>Every phase</td></tr>
+    <tr><td>Path identity breaks continuity</td><td>Delete-plus-create stated plainly; alias ledger optional, never OKF syntax</td><td>Phase 1</td></tr>
+  </table>
+</section>
+
+<!-- ============ CLOSING ============ -->
+<section class="wrap" id="closing">
+  <div class="sec-label">10 · Closing</div>
+  <h2>Joining the answers without collapsing their boundaries</h2>
+  <p>OKF answers <em>how knowledge is authored, reviewed, and exchanged without a proprietary runtime</em>. Knowledge Catalog answers <em>where people discover and govern it</em>. BigQuery answers <em>how it is searched, traversed, joined with live data, and attestably computed</em>. Agent Analytics answers <em>how it was used</em> — as an observer, in its own document.</p>
+  <blockquote><strong>Portable knowledge + catalog governance + explicit semantics + live data + attested execution = evidence-backed context for agents</strong> — knowledge that is readable, discoverable, queryable, attestably computed, and reproducible in retained snapshot, publication, envelope, and computation contract.</blockquote>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>OKF runtime context projection — consolidated RFC</span>
+    <span>Consolidated 2026-08-30 from Claude + Codex + Kimi review of the original artifact · Prepared with Claude</span>
+  </div>
+</footer>
+
+</body>
+</html>
