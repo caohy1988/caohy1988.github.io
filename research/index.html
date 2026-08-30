@@ -3,31 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Daily research hub: latest industry and academic progress on agent analytics, ranked. Public sources only.">
-  <meta property="og:title" content="Research hub — Haiyuan Cao">
-  <meta property="og:description" content="Standing watch on agent analytics. The brief directs attention; the source remains the authority.">
+  <meta name="description" content="The Field Brief: a daily ranked watch on agent analytics. Public sources only.">
+  <meta property="og:title" content="The Field Brief — Haiyuan Cao">
+  <meta property="og:description" content="Daily ranked research on agent analytics. The brief directs attention; the source remains the authority.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://caohy1988.github.io/research/">
   <meta name="theme-color" content="#101828">
-  <title>Research hub — Haiyuan Cao</title>
+  <title>The Field Brief — Haiyuan Cao</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --navy: #101828;
-      --navy-soft: #1d2939;
-      --paper: #f7f8fa;
-      --surface: #ffffff;
-      --ink: #182230;
-      --ink-soft: #566275;
-      --ink-faint: #7d8999;
-      --line: #dfe3e8;
-      --line-strong: #c9d0d8;
+      --navy-2: #17233a;
+      --paper: #f4efe6;
+      --paper-2: #ebe4d8;
+      --cream: #fbf7f0;
+      --ink: #161410;
+      --ink-soft: #5c564c;
+      --ink-faint: #8a8378;
+      --line: #d9d0c3;
       --accent: #e87324;
       --accent-dark: #b7480d;
-      --accent-pale: #fff1e7;
       --mint: #0f766e;
-      --mint-pale: #e9f7f5;
-      --shadow: 0 18px 55px rgba(16, 24, 40, 0.08);
-      --radius: 18px;
+      --rule: 1px solid var(--line);
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -35,296 +38,452 @@
       margin: 0;
       background: var(--paper);
       color: var(--ink);
-      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.6;
+      font-family: var(--sans);
+      font-size: 17px;
+      line-height: 1.55;
       -webkit-font-smoothing: antialiased;
     }
     a { color: inherit; }
-    .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
-    .mono {
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      letter-spacing: 0.04em;
+    code {
+      font-family: var(--mono);
+      font-size: 0.86em;
+      background: var(--paper-2);
+      padding: 0.08em 0.32em;
+      border-radius: 4px;
     }
-    .site-nav {
-      min-height: 68px;
+    .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+
+    .topbar {
+      background: var(--navy);
+      color: #e8edf4;
+    }
+    .topbar-inner {
+      min-height: 58px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 24px;
+      gap: 20px;
     }
     .brand {
       text-decoration: none;
-      font-size: 0.78rem;
-      font-weight: 750;
-      letter-spacing: 0.12em;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
     }
     .brand span { color: var(--accent); }
-    .nav-links { display: flex; gap: 26px; }
+    .nav-links { display: flex; gap: 22px; }
     .nav-links a {
-      color: var(--ink-soft);
-      font-size: 0.88rem;
+      color: #b7c2d0;
+      font-size: 0.86rem;
       font-weight: 600;
       text-decoration: none;
     }
-    .nav-links a:hover, .nav-links a[aria-current="page"] { color: var(--ink); }
-    .hero {
-      position: relative;
-      overflow: hidden;
-      color: #ffffff;
-      background:
-        radial-gradient(circle at 86% 12%, rgba(232, 115, 36, 0.28), transparent 25rem),
-        linear-gradient(135deg, #101828 0%, #17243a 58%, #102b37 100%);
-      padding: clamp(56px, 7vw, 92px) 0 42px;
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+
+    .masthead {
+      padding: 36px 0 28px;
+      border-bottom: 3px solid var(--ink);
+      background: var(--cream);
     }
-    .eyebrow {
-      display: inline-flex;
-      gap: 9px;
-      align-items: center;
-      margin: 0 0 22px;
-      color: #ffb17d;
-      font-size: 0.75rem;
-      font-weight: 750;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-    .eyebrow::before { content: ""; width: 26px; height: 2px; background: currentColor; }
-    h1 {
-      max-width: 820px;
-      margin: 0;
-      font-family: Iowan Old Style, Charter, Georgia, serif;
-      font-size: clamp(2.6rem, 6vw, 4.6rem);
-      font-weight: 650;
-      letter-spacing: -0.05em;
-      line-height: 0.98;
-      text-wrap: balance;
-    }
-    h1 em { font-style: italic; color: #ffb17d; }
-    .hero-lead {
-      max-width: 640px;
-      margin: 22px 0 0;
-      color: #d5dde8;
-      font-size: 1.08rem;
-    }
-    .hero-meta {
+    .masthead-kicker {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px 22px;
-      margin: 28px 0 0;
-      color: #9aabc0;
-      font-size: 0.78rem;
-    }
-    .scope-note {
-      margin-top: 36px;
-      padding: 14px 16px;
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 12px;
-      color: #c5d0dc;
-      font-size: 0.92rem;
-    }
-    .section { padding: clamp(48px, 6vw, 80px) 0; }
-    .section-kicker {
+      justify-content: space-between;
+      gap: 16px;
       margin: 0 0 10px;
-      color: var(--accent-dark);
-      font-size: 0.72rem;
-      font-weight: 750;
-      letter-spacing: 0.14em;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
+      color: var(--accent-dark);
     }
-    h2 {
-      margin: 0 0 12px;
-      font-family: Iowan Old Style, Charter, Georgia, serif;
-      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-      letter-spacing: -0.03em;
-      line-height: 1.15;
+    .nameplate {
+      margin: 0;
+      font-family: var(--serif);
+      font-optical-sizing: auto;
+      font-size: clamp(3.2rem, 9vw, 6.4rem);
+      font-weight: 600;
+      letter-spacing: -0.045em;
+      line-height: 0.86;
+      text-align: center;
     }
-    .section-intro { max-width: 680px; color: var(--ink-soft); margin: 0 0 28px; }
-    .rank {
-      display: grid;
-      gap: 14px;
+    .nameplate em { font-style: italic; font-weight: 500; }
+    .masthead-rule {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid var(--ink);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
     }
-    .rank-item {
-      display: grid;
-      grid-template-columns: 56px 1fr;
-      gap: 18px;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 22px 24px;
-      box-shadow: var(--shadow);
-    }
-    .rank-item .num {
-      color: var(--accent);
-      font-size: 1.1rem;
-      font-weight: 750;
-      padding-top: 4px;
-    }
-    .rank-item h3 { margin: 0 0 8px; font-size: 1.12rem; letter-spacing: -0.02em; }
-    .rank-item p { margin: 0; color: var(--ink-soft); }
-    .rank-item a { color: var(--accent-dark); font-weight: 650; text-decoration: none; }
-    .rank-item a:hover { text-decoration: underline; }
-    .stack, .lag {
-      display: grid;
-      gap: 12px;
-    }
-    .note {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 20px 22px;
-    }
-    .note b { display: block; margin-bottom: 6px; }
-    .note p { margin: 0; color: var(--ink-soft); }
-    .note a { color: var(--accent-dark); font-weight: 650; text-decoration: none; }
-    .note a:hover { text-decoration: underline; }
-    .lag .note { background: var(--accent-pale); border-color: #f3d3bf; }
-    .archive {
+
+    .edition-bar {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px 24px;
+      padding: 22px 0 8px;
     }
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: var(--surface);
-      border: 1px solid var(--line);
-      text-decoration: none;
-      font-size: 0.88rem;
-      font-weight: 650;
+    .edition-date {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
     }
-    .chip:hover { border-color: var(--accent); }
-    footer {
-      border-top: 1px solid var(--line);
-      padding: 28px 0;
+    .edition-meta {
       color: var(--ink-soft);
       font-size: 0.92rem;
     }
+    .live {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 10px;
+      color: var(--mint);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .live::before {
+      content: "";
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--mint);
+      box-shadow: 0 0 0 4px rgba(15,118,110,.16);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.7fr);
+      gap: 36px 48px;
+      padding: 12px 0 64px;
+      align-items: start;
+    }
+
+    .lead {
+      padding: 8px 0 28px;
+      border-bottom: var(--rule);
+    }
+    .lead .num {
+      font-family: var(--serif);
+      font-size: 4.4rem;
+      font-weight: 600;
+      line-height: 0.8;
+      color: var(--accent);
+      letter-spacing: -0.06em;
+    }
+    .tag {
+      display: inline-block;
+      margin: 0 0 8px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+    }
+    .lead h2 {
+      margin: 6px 0 14px;
+      font-family: var(--serif);
+      font-optical-sizing: auto;
+      font-size: clamp(2rem, 4.4vw, 3.15rem);
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      line-height: 1.08;
+      text-wrap: balance;
+    }
+    .lead p, .card p, .note p { margin: 0; color: var(--ink-soft); }
+    .lead a, .card a, .note a, .open-item a {
+      color: var(--accent-dark);
+      font-weight: 650;
+      text-decoration: none;
+      box-shadow: inset 0 -1px 0 rgba(183,72,13,.35);
+    }
+    .lead a:hover, .card a:hover, .note a:hover { box-shadow: inset 0 -2px 0 var(--accent); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      margin-top: 6px;
+    }
+    .card {
+      padding: 22px 22px 22px 0;
+      border-bottom: var(--rule);
+    }
+    .card:nth-child(odd) { padding-right: 22px; border-right: var(--rule); }
+    .card:nth-child(even) { padding-left: 22px; }
+    .card .num {
+      font-family: var(--serif);
+      font-size: 1.65rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.04em;
+    }
+    .card h3 {
+      margin: 4px 0 10px;
+      font-family: var(--serif);
+      font-size: 1.28rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+
+    .rail h2 {
+      margin: 0 0 14px;
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+    }
+    .rail-kicker {
+      margin: 0 0 6px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+    }
+    .note {
+      padding: 14px 0;
+      border-top: var(--rule);
+    }
+    .note b { display: block; margin-bottom: 4px; font-size: 0.98rem; }
+    .open-item {
+      display: grid;
+      grid-template-columns: 10px 1fr;
+      gap: 10px;
+      padding: 12px 0;
+      border-top: var(--rule);
+    }
+    .open-item i {
+      width: 8px; height: 8px;
+      margin-top: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .open-item b { display: block; font-size: 0.95rem; }
+    .open-item p { margin: 4px 0 0; color: var(--ink-soft); font-size: 0.92rem; }
+
+    .archive {
+      margin-top: 28px;
+      padding-top: 8px;
+      border-top: 3px solid var(--ink);
+    }
+    .days { display: flex; flex-direction: column; gap: 0; }
+    .day {
+      appearance: none;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: 0;
+      border-bottom: var(--rule);
+      padding: 12px 0;
+      cursor: pointer;
+      font: inherit;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--ink-soft);
+    }
+    .day:hover, .day[aria-current="true"] { color: var(--ink); }
+    .day[aria-current="true"] { font-weight: 650; }
+    .day .d-date { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.04em; }
+    .day .d-no { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-faint); }
+
+    footer {
+      border-top: 3px solid var(--ink);
+      padding: 22px 0 36px;
+      color: var(--ink-soft);
+      font-size: 0.9rem;
+      background: var(--cream);
+    }
     .footer-inner { display: flex; justify-content: space-between; gap: 16px; }
-    @media (max-width: 720px) {
+    .footer-inner .mono {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+    }
+
+    .empty {
+      padding: 48px 0;
+      color: var(--ink-soft);
+    }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      .card:nth-child(odd), .card:nth-child(even) {
+        padding: 20px 0;
+        border-right: 0;
+      }
+      .masthead-kicker, .masthead-rule, .footer-inner { flex-direction: column; gap: 6px; }
+      .nameplate { font-size: clamp(2.6rem, 16vw, 4rem); text-align: left; }
+    }
+    @media (max-width: 640px) {
       .nav-links a:not(:last-child) { display: none; }
-      .rank-item { grid-template-columns: 1fr; gap: 6px; }
-      .footer-inner { flex-direction: column; }
+    }
+    @media print {
+      .topbar, .archive, footer { display: none; }
+      body { background: #fff; }
+      .lead h2 { font-size: 28pt; }
     }
   </style>
 </head>
 <body>
-  <nav class="site-nav shell" aria-label="Primary navigation">
-    <a class="brand mono" href="/"><span>HC</span> / FIELD NOTES</a>
-    <div class="nav-links">
-      <a href="/">Talk</a>
-      <a href="/research/" aria-current="page">Research</a>
+  <div class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="/"><span>HC</span> / FIELD NOTES</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/">Talk</a>
+        <a href="/research/" aria-current="page">Research</a>
+      </nav>
     </div>
-  </nav>
+  </div>
 
-  <header class="hero">
+  <header class="masthead">
     <div class="shell">
-      <p class="eyebrow mono">Standing watch</p>
-      <h1>Daily research hub on <em>agent analytics.</em></h1>
-      <p class="hero-lead">Industry and academic progress, ranked. The brief directs attention; the source remains the authority.</p>
-      <p class="hero-meta mono">
-        <span>Latest: 29 Aug 2026 PT</span>
-        <span>Public sources only</span>
-        <span>No confidential employer material</span>
+      <p class="masthead-kicker"><span>Daily ranked watch</span><span>Public sources only</span></p>
+      <h1 class="nameplate">The Field <em>Brief.</em></h1>
+      <p class="masthead-rule">
+        <span>Agent analytics</span>
+        <span>Industry · academy · own stack</span>
+        <span>Verify the source</span>
       </p>
-      <div class="scope-note">Watcher-agent brief for the BigQuery Agent Analytics / ADK landscape. Written for people already in this space.</div>
     </div>
   </header>
 
-  <main>
-    <section class="section" aria-labelledby="ranked-title">
-      <div class="shell">
-        <p class="section-kicker mono">29 Aug 2026 · ranked</p>
-        <h2 id="ranked-title">What actually moved.</h2>
-        <p class="section-intro">Five items, in the order they matter. Not a dump of every changelog.</p>
-        <div class="rank">
-          <article class="rank-item">
-            <span class="num mono">01</span>
-            <div>
-              <h3>Trace-to-fix agents are the product now</h3>
-              <p><a href="https://www.langchain.com/blog/new-in-langsmith-engine-2x-better-issue-detection">LangSmith Engine</a> (May beta; 25 Aug claims &gt;2× issue detection, including self-hosted) and <a href="https://arize.com/docs/ax/release-notes/history/2026/07-2026">Arize Signal / Managed Agents</a> (GA 29 Jul) cluster production traces and open PRs. The store is no longer the demo.</p>
-            </div>
-          </article>
-          <article class="rank-item">
-            <span class="num mono">02</span>
-            <div>
-              <h3>Databricks is the only warehouse peer</h3>
-              <p><a href="https://www.databricks.com/blog/observability-any-agent-anywhere-production-ready-tracing-opentelemetry-unity-catalog">OTel traces into Unity Catalog Delta</a> via Zerobus, SQL scorers, UC ACLs. Same pitch: join traces to business data; don’t send prompts to a SaaS.</p>
-            </div>
-          </article>
-          <article class="rank-item">
-            <span class="num mono">03</span>
-            <div>
-              <h3>OTel GenAI is still Development</h3>
-              <p>Conventions moved to <a href="https://github.com/open-telemetry/semantic-conventions-genai"><code>semantic-conventions-genai</code></a> (repo 5 May; core v1.42.0 on 12 Jun stripped <code>gen_ai.*</code>). Production mixes v1.36 and v1.37+ names. BQAA still does not export OTel spans; it joins on <code>trace_id</code>.</p>
-            </div>
-          </article>
-          <article class="rank-item">
-            <span class="num mono">04</span>
-            <div>
-              <h3>Amplitude branded “Agent Analytics”</h3>
-              <p><a href="https://amplitude.com/blog/agent-analytics">Product analytics on conversations</a> this month: funnels, retention, identity. Not a trace debugger. That’s the business-insights story packaged as a product.</p>
-            </div>
-          </article>
-          <article class="rank-item">
-            <span class="num mono">05</span>
-            <div>
-              <h3>Academic work to absorb</h3>
-              <p>Closest analog to BQAA: Oracle <a href="https://arxiv.org/abs/2603.21692">AER</a> (Vispute &amp; Kadam, Mar 2026) — population-level behavioral analytics as a first-class schema (intent / observation / inference), not NLP over traces. Empirical validation still preliminary. Then IBM <a href="https://arxiv.org/abs/2503.06745">ABBench</a> (eval harness for analytics systems; unit = a log). Failure taxonomies: <a href="https://arxiv.org/abs/2505.08638">TRAIL</a> / <a href="https://arxiv.org/abs/2503.13657">MAST</a> / <a href="https://arxiv.org/abs/2505.00212">Who&amp;When</a> (step-level RCA ~14%). <a href="https://aclanthology.org/2026.findings-acl.1330/">Yehudai et al., Findings of ACL 2026</a> is the survey that says developer eval frameworks cannot aggregate across large run collections. Warehouse-native SQL-over-agents papers remain thin.</p>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" style="padding-top:0;" aria-labelledby="own-title">
-      <div class="shell">
-        <p class="section-kicker mono">Own stack · same evening</p>
-        <h2 id="own-title">BQAA tonight.</h2>
-        <div class="stack">
-          <div class="note">
-            <b>SDK 0.5.1 landed ~19:50 PT</b>
-            <p><a href="https://pypi.org/project/bigquery-agent-analytics/">EvalBench reader, 8-metric rubrics, golden matching at 0.92</a>. Consume SDK, not the capture plugin.</p>
-          </div>
-          <div class="note">
-            <b>#435 is an open RFC, not a PR</b>
-            <p><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/issues/435">AgentForensics failure taxonomy</a>. Plan v3 is a 6-week EvalBench-only session-level MVP. Last review: do not start the clock until the P1s are closed.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" style="padding-top:0;" aria-labelledby="lag-title">
-      <div class="shell">
-        <p class="section-kicker mono">Still open</p>
-        <h2 id="lag-title">Broken or lagging.</h2>
-        <div class="lag">
-          <div class="note"><b>Looker Studio template</b><p>#445 closed; external-access contract still FAILING. Grafana is the documented alternative.</p></div>
-          <div class="note"><b>Java ≪ Python</b><p>No <code>attributes.adk</code>, views off by default, different table name, no <code>secret:</code> redaction.</p></div>
-          <div class="note"><b>OTLP allowlist</b><p>Claude Code and Codex only. Generic producers need allowlist + provenance.</p></div>
-          <div class="note"><b>ADK HITL secret leak</b><p><a href="https://github.com/google/adk-python/issues/3845">#3845</a> still open. BQAA redaction is logging mitigation, not a protocol fix.</p></div>
-          <div class="note"><b>OpenAI Evals sunset</b><p>Deprecated 3 Jun; read-only 31 Oct; shutdown 30 Nov 2026. Demand shock for <code>GraderPipeline</code>.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" style="padding-top:0;" aria-labelledby="archive-title">
-      <div class="shell">
-        <p class="section-kicker mono">Archive</p>
-        <h2 id="archive-title">Briefs.</h2>
-        <div class="archive">
-          <a class="chip" href="/research/"><span class="mono">2026-08-29</span> Agent analytics ranked brief</a>
-        </div>
-      </div>
-    </section>
+  <main class="shell">
+    <div class="edition-bar">
+      <h2 class="edition-date" id="edition-date">Loading edition…</h2>
+      <p class="edition-meta" id="edition-meta"></p>
+    </div>
+    <div class="layout" id="app">
+      <p class="empty">Fetching today’s brief…</p>
+    </div>
   </main>
 
   <footer>
     <div class="shell footer-inner">
-      <p>© Haiyuan Cao · Personal views and public sources only.</p>
-      <p class="mono">WATCH → RANK → LINK → VERIFY</p>
+      <p>© Haiyuan Cao · Personal views. No confidential employer material.</p>
+      <p class="mono">WATCH · RANK · LINK · VERIFY</p>
     </div>
   </footer>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    function render(editions, currentId) {
+      const list = editions.slice().sort((a, b) => b.date.localeCompare(a.date));
+      const current = list.find(e => e.id === currentId) || list[0];
+      if (!current) {
+        $('app').innerHTML = '<p class="empty">No editions yet.</p>';
+        return;
+      }
+      const isLatest = current.id === list[0].id;
+      $('edition-date').innerHTML = current.weekday + ', ' + escapeHtml(current.displayDate) +
+        (isLatest ? '<span class="live">Latest</span>' : '');
+      $('edition-meta').textContent =
+        'No. ' + String(current.edition).padStart(3, '0') +
+        '  ·  ' + current.ranks.length + ' ranked  ·  ' + current.kicker;
+
+      const lead = current.ranks[0];
+      const rest = current.ranks.slice(1);
+      const desk = (current.desk || []).map(n =>
+        `<div class="note"><b>${escapeHtml(n.title)}</b><p>${n.html}</p></div>`
+      ).join('');
+      const open = (current.open || []).map(n =>
+        `<div class="open-item"><i></i><div><b>${escapeHtml(n.title)}</b><p>${n.html}</p></div></div>`
+      ).join('');
+      const days = list.map(e =>
+        `<button class="day" type="button" data-id="${escapeHtml(e.id)}" aria-current="${e.id === current.id}">
+          <span class="d-date">${escapeHtml(e.displayDate)}</span>
+          <span class="d-no">No. ${String(e.edition).padStart(3,'0')}</span>
+        </button>`
+      ).join('');
+
+      $('app').innerHTML = `
+        <div>
+          <article class="lead">
+            <div class="num">${lead.n}</div>
+            <p class="tag">${escapeHtml(lead.tag)}</p>
+            <h2>${escapeHtml(lead.title)}</h2>
+            <p>${lead.html}</p>
+          </article>
+          <div class="grid">
+            ${rest.map(r => `
+              <article class="card">
+                <div class="num">${r.n}</div>
+                <p class="tag">${escapeHtml(r.tag)}</p>
+                <h3>${escapeHtml(r.title)}</h3>
+                <p>${r.html}</p>
+              </article>
+            `).join('')}
+          </div>
+        </div>
+        <aside class="rail">
+          <p class="rail-kicker">On the desk</p>
+          <h2>Own stack tonight</h2>
+          ${desk}
+          <div style="height:28px"></div>
+          <p class="rail-kicker">Still open</p>
+          <h2>Broken or lagging</h2>
+          ${open}
+          <div class="archive">
+            <p class="rail-kicker">Archive</p>
+            <h2>Past briefs</h2>
+            <div class="days">${days}</div>
+          </div>
+        </aside>
+      `;
+
+      $('app').querySelectorAll('.day').forEach(btn => {
+        btn.addEventListener('click', () => {
+          location.hash = btn.dataset.id;
+        });
+      });
+      document.title = current.displayDate + ' · The Field Brief';
+    }
+
+    async function boot() {
+      let editions = [];
+      try {
+        const res = await fetch('editions.json', { cache: 'no-store' });
+        const data = await res.json();
+        editions = data.editions || [];
+      } catch (err) {
+        $('app').innerHTML = '<p class="empty">Could not load editions.json.</p>';
+        return;
+      }
+      const show = () => render(editions, (location.hash || '').replace(/^#/, ''));
+      show();
+      window.addEventListener('hashchange', show);
+      window.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        const list = editions.slice().sort((a, b) => b.date.localeCompare(a.date));
+        const id = (location.hash || '').replace(/^#/, '') || list[0].id;
+        const i = list.findIndex(x => x.id === id);
+        const next = e.key === 'ArrowRight' ? list[i + 1] : list[i - 1];
+        if (next) location.hash = next.id;
+      });
+    }
+    boot();
+  </script>
 </body>
 </html>
