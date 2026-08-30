@@ -252,6 +252,51 @@
       text-wrap: balance;
     }
     .lead p, .card p, .note p { margin: 0; color: var(--ink-soft); }
+
+    .story {
+      padding: 22px 0 24px;
+      border-bottom: var(--rule);
+    }
+    .story-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; }
+    .badge {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mint);
+    }
+    .badge.upd { color: var(--accent-dark); }
+    .story h3 {
+      margin: 6px 0 10px;
+      font-family: var(--serif);
+      font-size: 1.45rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+    .story .body { color: var(--ink-soft); }
+    .prog {
+      margin: 14px 0 0;
+      padding: 12px 0 0 16px;
+      border-left: 2px solid var(--accent);
+    }
+    .prog-item { margin: 0 0 12px; }
+    .prog-item:last-child { margin: 0; }
+    .prog-item .when {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+    }
+    .prog-item p { margin: 4px 0 0; color: var(--ink-soft); font-size: 0.95rem; }
+    .story a, .prog-item a, .note a, .open-item a {
+      color: var(--accent-dark);
+      font-weight: 650;
+      text-decoration: none;
+      box-shadow: inset 0 -1px 0 rgba(183,72,13,.35);
+    }
     .lead a, .card a, .note a, .open-item a {
       color: var(--accent-dark);
       font-weight: 650;
@@ -459,11 +504,11 @@
 
   <header class="masthead">
     <div class="shell">
-      <p class="masthead-kicker"><span>Daily ranked watch</span><span>Public sources only</span></p>
+      <p class="masthead-kicker"><span>Living catalog · append only</span><span>Public sources only</span></p>
       <h1 class="nameplate">The Field <em>Brief.</em></h1>
       <p class="masthead-rule">
         <span>Agent analytics</span>
-        <span>Industry · academy · own stack</span>
+        <span>Old items stay · progress is a new line</span>
         <span>Verify the source</span>
       </p>
     </div>
@@ -490,19 +535,23 @@
   <script>
     const $ = (id) => document.getElementById(id);
     const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    const STATE = { editions: [], calY: null, calM: null };
+    const STATE = { items: [], runs: [], calY: null, calM: null };
 
     function escapeHtml(s) {
       return String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     }
     function strip(html) { return String(html || "").replace(/<[^>]+>/g, " "); }
-    function blob(item) { return ((item.title || "") + " " + strip(item.html)).toLowerCase(); }
-    function dayKey(e) { return (e.date || e.id || "").slice(0, 10); }
-    function sorted() {
-      return STATE.editions.slice().sort((a, b) => String(b.id).localeCompare(String(a.id)));
+    function blob(item) {
+      const extra = (item.progress || []).map(p => strip(p.html)).join(" ");
+      return ((item.title || "") + " " + strip(item.html) + " " + extra).toLowerCase();
     }
-    function latestOn(list, day) {
-      return sorted().find(e => dayKey(e) === day) || null;
+    function dayKey(s) { return String(s || "").slice(0, 10); }
+    function lastAt(item) {
+      const p = item.progress || [];
+      return p.length ? p[p.length - 1].at : item.added;
+    }
+    function datesOf(item) {
+      return [dayKey(item.added), ...(item.progress || []).map(p => dayKey(p.at))];
     }
     function params() {
       const q = new URLSearchParams(location.search);
@@ -512,61 +561,50 @@
         q: (q.get("q") || "").trim()
       };
     }
-    function setParams({ date, tag, q }, pushHash) {
+    function setParams({ date, tag, q }) {
       const sp = new URLSearchParams();
       if (tag && tag !== "All") sp.set("tag", tag);
       if (q) sp.set("q", q);
       const search = sp.toString();
-      const hash = date ? "#" + date : location.hash;
-      const url = location.pathname + (search ? "?" + search : "") + hash;
-      history.replaceState(null, "", url);
-      if (pushHash && date) location.hash = date;
+      history.replaceState(null, "", location.pathname + (search ? "?" + search : "") + (date ? "#" + date : ""));
     }
 
-    function allTags(list) {
+    function allTags(items) {
       const set = new Set();
-      list.forEach(e => (e.ranks || []).forEach(r => r.tag && set.add(r.tag)));
-      return ["All", ...Array.from(set), "Desk", "Open"];
+      items.forEach(i => i.tag && set.add(i.tag));
+      return ["All", ...Array.from(set)];
     }
 
-    function itemMatch(item, tag, q, kind) {
+    function itemMatch(item, tag, q, day) {
+      if (tag && tag !== "All" && item.tag !== tag) return false;
       if (q && !blob(item).includes(q.toLowerCase())) return false;
-      if (!tag || tag === "All") return true;
-      if (tag === "Desk") return kind === "desk";
-      if (tag === "Open") return kind === "open";
-      return (item.tag || "") === tag && kind === "rank";
+      if (day && !datesOf(item).includes(day.slice(0, 10))) return false;
+      return true;
     }
 
-    function editionHasMatch(ed, tag, q) {
-      if ((!tag || tag === "All") && !q) return true;
-      const ranks = (ed.ranks || []).some(r => itemMatch(r, tag, q, "rank"));
-      const desk = (ed.desk || []).some(r => itemMatch(r, tag, q, "desk"));
-      const open = (ed.open || []).some(r => itemMatch(r, tag, q, "open"));
-      return ranks || desk || open;
-    }
-
-    function calHtml(current, byDay, tag, q) {
+    function calHtml(day, tag, q) {
       const y = STATE.calY, m = STATE.calM;
-      const first = new Date(y, m, 1);
-      const start = first.getDay();
+      const start = new Date(y, m, 1).getDay();
       const daysIn = new Date(y, m + 1, 0).getDate();
       const prevDays = new Date(y, m, 0).getDate();
+      const byDay = new Set();
+      STATE.items.forEach(it => {
+        if (!itemMatch(it, tag, q, null)) return;
+        datesOf(it).forEach(d => byDay.add(d));
+      });
       const cells = [];
-      const currentDay = dayKey(current);
       for (let i = 0; i < start; i++) {
         cells.push(`<span class="cal-cell muted">${prevDays - start + 1 + i}</span>`);
       }
       for (let d = 1; d <= daysIn; d++) {
         const id = y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
-        const eds = byDay.get(id) || [];
-        const has = eds.length > 0;
-        const match = has && eds.some(ed => editionHasMatch(ed, tag, q));
-        const cur = id === currentDay ? ' aria-current="date"' : "";
-        const cls = ["cal-cell", has ? "has" : "", has && !match ? "muted" : ""].filter(Boolean).join(" ");
+        const has = byDay.has(id);
+        const cur = id === day.slice(0, 10) ? ' aria-current="date"' : "";
+        const cls = ["cal-cell", has ? "has" : ""].filter(Boolean).join(" ");
         cells.push(`<button class="${cls}" type="button" data-day="${id}" ${has ? "" : "disabled"}${cur}>${d}</button>`);
       }
       return `
-        <div class="cal" aria-label="Edition calendar">
+        <div class="cal" aria-label="Activity calendar">
           <p class="rail-kicker">Calendar</p>
           <div class="cal-head">
             <button class="cal-nav" type="button" data-cal="-1" aria-label="Previous month">‹</button>
@@ -578,131 +616,107 @@
         </div>`;
     }
 
+    function storyHtml(item) {
+      const updated = (item.progress || []).length > 0;
+      const badge = updated
+        ? `<span class="badge upd">Updated ${escapeHtml((item.progress.slice(-1)[0] || {}).displayTime || "")}</span>`
+        : `<span class="badge">Added ${escapeHtml(item.addedDisplay || "")}</span>`;
+      const prog = (item.progress || []).map(p => `
+        <div class="prog-item">
+          <div class="when">Progress · ${escapeHtml(p.displayTime || p.at)}</div>
+          <p>${p.html}</p>
+        </div>`).join("");
+      return `
+        <article class="story" id="${escapeHtml(item.id)}">
+          <div class="story-head">
+            <p class="tag">${escapeHtml(item.tag)}</p>
+            ${badge}
+          </div>
+          <h3>${escapeHtml(item.title)}</h3>
+          <p class="body">${item.html}</p>
+          ${prog ? `<div class="prog">${prog}</div>` : ""}
+        </article>`;
+    }
+
     function render() {
-      const list = sorted();
       const { date, tag, q } = params();
-      const current = list.find(e => e.id === date) || list[0];
-      if (!current) {
-        $("app").innerHTML = '<p class="empty">No editions yet.</p>';
+      const items = STATE.items.slice().sort((a, b) => lastAt(b).localeCompare(lastAt(a)));
+      if (!items.length) {
+        $("app").innerHTML = '<p class="empty">No items yet.</p>';
         return;
       }
       if (STATE.calY == null) {
-        const [yy, mm] = current.date.split("-").map(Number);
+        const [yy, mm] = dayKey(lastAt(items[0])).split("-").map(Number);
         STATE.calY = yy; STATE.calM = mm - 1;
       }
-      const isLatest = current.id === list[0].id;
-      $("edition-date").innerHTML = current.weekday + ", " + escapeHtml(current.displayDate) +
-        (isLatest ? '<span class="live">Latest</span>' : "");
-      $("edition-meta").innerHTML =
-        "No. " + String(current.edition).padStart(3, "0") +
-        "  ·  " + current.ranks.length + " ranked  ·  " + escapeHtml(current.kicker) +
-        (current.displayTime ? "  ·  " + escapeHtml(current.displayTime) : "");
+      const day = date.slice(0, 10);
+      const visible = items.filter(it => itemMatch(it, tag, q, date));
+      const ranks = visible.filter(i => i.kind === "rank");
+      const desk = visible.filter(i => i.kind === "desk");
+      const open = visible.filter(i => i.kind === "open");
+      const latestRun = (STATE.runs || [])[0];
 
-      const tags = allTags(list);
+      $("edition-date").innerHTML = day
+        ? `Catalog · ${escapeHtml(day)}`
+        : `Living catalog`;
+      $("edition-meta").textContent = latestRun
+        ? `Last pass ${latestRun.displayTime} · ${STATE.items.length} items kept · append only`
+        : `${STATE.items.length} items`;
+
+      const tags = allTags(STATE.items);
       $("controls").hidden = false;
       $("controls").innerHTML =
         `<div class="chips">` + tags.map(t =>
           `<button class="chip" type="button" data-tag="${escapeHtml(t)}" aria-pressed="${t === tag}">${escapeHtml(t)}</button>`
         ).join("") + `</div>
-        <input class="search" type="search" placeholder="Filter this brief…" value="${escapeHtml(q)}" aria-label="Filter stories">`;
+        <input class="search" type="search" placeholder="Filter the catalog…" value="${escapeHtml(q)}" aria-label="Filter stories">`;
 
-      const ranks = (current.ranks || []).filter(r => itemMatch(r, tag, q, "rank"));
-      const deskItems = (current.desk || []).filter(r => itemMatch(r, tag, q, "desk"));
-      const openItems = (current.open || []).filter(r => itemMatch(r, tag, q, "open"));
-      const lead = ranks[0];
-      const rest = ranks.slice(1);
-      const byDay = new Map();
-      list.forEach(e => {
-        const k = dayKey(e);
-        if (!byDay.has(k)) byDay.set(k, []);
-        byDay.get(k).push(e);
-      });
-      const sameDay = (byDay.get(dayKey(current)) || []).slice().sort((a,b) => String(b.id).localeCompare(String(a.id)));
-      const timeChips = sameDay.length > 1
-        ? `<div class="times">${sameDay.map(e => `<button class="time" type="button" data-id="${escapeHtml(e.id)}" aria-current="${e.id === current.id}">${escapeHtml(e.displayTime || e.id)}</button>`).join("")}</div>`
-        : "";
+      const main = !visible.length
+        ? `<p class="empty">Nothing in the catalog matches that filter.</p>`
+        : ranks.map(storyHtml).join("");
 
-      const desk = deskItems.map(n => `<div class="note"><b>${escapeHtml(n.title)}</b><p>${n.html}</p></div>`).join("");
-      const open = openItems.map(n => `<div class="open-item"><i></i><div><b>${escapeHtml(n.title)}</b><p>${n.html}</p></div></div>`).join("");
-      const days = list.map(e =>
-        `<button class="day" type="button" data-id="${escapeHtml(e.id)}" aria-current="${e.id === current.id}">
-          <span class="d-date">${escapeHtml(e.displayDate)}</span>
-          <span class="d-no">No. ${String(e.edition).padStart(3,"0")}</span>
-        </button>`
-      ).join("");
-
-      const main = !lead && !desk && !open
-        ? `<p class="empty">Nothing in this edition matches that filter.</p>`
-        : `
-          ${lead ? `<article class="lead">
-            <div class="num">${lead.n}</div>
-            <p class="tag">${escapeHtml(lead.tag)}</p>
-            <h2>${escapeHtml(lead.title)}</h2>
-            <p>${lead.html}</p>
-          </article>` : ""}
-          <div class="grid">
-            ${rest.map(r => `
-              <article class="card">
-                <div class="num">${r.n}</div>
-                <p class="tag">${escapeHtml(r.tag)}</p>
-                <h3>${escapeHtml(r.title)}</h3>
-                <p>${r.html}</p>
-              </article>`).join("")}
-          </div>`;
+      const deskHtml = desk.map(n => {
+        const prog = (n.progress || []).map(p => `<p style="margin-top:8px"><span class="badge upd">${escapeHtml(p.displayTime)}</span> ${p.html}</p>`).join("");
+        return `<div class="note"><b>${escapeHtml(n.title)}</b><p>${n.html}</p>${prog}</div>`;
+      }).join("");
+      const openHtml = open.map(n => {
+        const prog = (n.progress || []).map(p => `<p style="margin-top:8px"><span class="badge upd">${escapeHtml(p.displayTime)}</span> ${p.html}</p>`).join("");
+        return `<div class="open-item"><i></i><div><b>${escapeHtml(n.title)}</b><p>${n.html}</p>${prog}</div></div>`;
+      }).join("");
 
       $("app").innerHTML = `
-        <div>${timeChips}${main}</div>
+        <div>${main}</div>
         <aside class="rail">
-          ${calHtml(current, byDay, tag, q)}
-          <div class="${desk ? "" : "hide"}">
+          ${calHtml(date, tag, q)}
+          <div class="${desk.length ? "" : "hide"}">
             <p class="rail-kicker">On the desk</p>
-            <h2>Own stack tonight</h2>
-            ${desk}
+            <h2>Own stack</h2>
+            ${deskHtml}
           </div>
-          <div class="${open ? "" : "hide"}" style="margin-top:28px">
+          <div class="${open.length ? "" : "hide"}" style="margin-top:28px">
             <p class="rail-kicker">Still open</p>
             <h2>Broken or lagging</h2>
-            ${open}
-          </div>
-          <div class="archive">
-            <p class="rail-kicker">Archive</p>
-            <h2>Past briefs</h2>
-            <div class="days">${days}</div>
+            ${openHtml}
           </div>
         </aside>`;
-
-      bind(current.id);
-      document.title = current.displayDate + " · The Field Brief";
+      bind();
+      document.title = "The Field Brief · catalog";
     }
 
-    function bind(currentId) {
-      $("app").querySelectorAll(".day, .time").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const id = btn.dataset.id;
-          if (!id) return;
-          const [yy, mm] = dayKey({id}).split("-").map(Number);
-          STATE.calY = yy; STATE.calM = mm - 1;
-          const { tag, q } = params();
-          setParams({ date: id, tag, q });
-          location.hash = id;
-        });
-      });
+    function bind() {
       $("app").querySelectorAll(".cal-cell.has").forEach(btn => {
         btn.addEventListener("click", () => {
           const day = btn.dataset.day;
-          const ed = latestOn(sorted(), day);
-          if (!ed) return;
           const [yy, mm] = day.split("-").map(Number);
           STATE.calY = yy; STATE.calM = mm - 1;
           const { tag, q } = params();
-          setParams({ date: ed.id, tag, q });
-          location.hash = ed.id;
+          setParams({ date: day, tag, q });
+          location.hash = day;
         });
       });
       $("app").querySelectorAll("[data-cal]").forEach(btn => {
         btn.addEventListener("click", () => {
-          const delta = Number(btn.dataset.cal);
-          STATE.calM += delta;
+          STATE.calM += Number(btn.dataset.cal);
           if (STATE.calM < 0) { STATE.calM = 11; STATE.calY -= 1; }
           if (STATE.calM > 11) { STATE.calM = 0; STATE.calY += 1; }
           render();
@@ -711,7 +725,7 @@
       $("controls").querySelectorAll("[data-tag]").forEach(btn => {
         btn.addEventListener("click", () => {
           const { date, q } = params();
-          setParams({ date: date || currentId, tag: btn.dataset.tag, q });
+          setParams({ date, tag: btn.dataset.tag, q });
           render();
         });
       });
@@ -719,7 +733,7 @@
       if (search) {
         search.addEventListener("input", () => {
           const { date, tag } = params();
-          setParams({ date: date || currentId, tag, q: search.value });
+          setParams({ date, tag, q: search.value });
           render();
           const again = $("controls").querySelector(".search");
           if (again) { again.focus(); again.setSelectionRange(again.value.length, again.value.length); }
@@ -729,28 +743,16 @@
 
     async function boot() {
       try {
-        const res = await fetch("/research/editions.json", { cache: "no-store" });
-        STATE.editions = (await res.json()).editions || [];
+        const res = await fetch("/research/catalog.json", { cache: "no-store" });
+        const data = await res.json();
+        STATE.items = data.items || [];
+        STATE.runs = data.runs || [];
       } catch (err) {
-        $("app").innerHTML = '<p class="empty">Could not load editions.json.</p>';
+        $("app").innerHTML = '<p class="empty">Could not load catalog.json.</p>';
         return;
       }
       render();
       window.addEventListener("hashchange", render);
-      window.addEventListener("keydown", (e) => {
-        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
-        const list = sorted();
-        const { date, tag, q } = params();
-        const id = date || list[0].id;
-        const i = list.findIndex(x => x.id === id);
-        const next = e.key === "ArrowRight" ? list[i + 1] : list[i - 1];
-        if (!next) return;
-        const [yy, mm] = next.id.split("-").map(Number);
-        STATE.calY = yy; STATE.calM = mm - 1;
-        setParams({ date: next.id, tag, q });
-        location.hash = next.id;
-      });
     }
     boot();
   </script>

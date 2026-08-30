@@ -1,0 +1,285 @@
+{
+  "items": [
+    {
+      "id": "langsmith-engine",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Trace-to-fix agents are the product now",
+      "html": "<a href=\"https://www.langchain.com/blog/new-in-langsmith-engine-2x-better-issue-detection\">LangSmith Engine</a> (May beta) and <a href=\"https://arize.com/docs/ax/release-notes/history/2026/07-2026\">Arize Signal / Managed Agents</a> (GA 29 Jul) cluster production traces and open PRs. The store is no longer the demo.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": [
+        {
+          "at": "2026-08-29T21:38",
+          "displayTime": "9:38 PM PT",
+          "html": "Engine’s <a href=\"https://www.langchain.com/blog/new-in-langsmith-engine-2x-better-issue-detection\">25 Aug post</a> ships self-hosted VPC orchestration (LangSmith Intelligence, ZDR), claimed &gt;2× IssueBench and +25% Terminal-Bench on proposed fixes, Slack/Linear, Reduced Analysis. Same job as Signal (Enterprise PRs, promo through 15 Sep). 2× is first-party; auto-verify of fixes is still unshipped. BQAA still wins the warehouse and loses the demo unless it names a trace→cluster→dataset loop."
+        }
+      ]
+    },
+    {
+      "id": "databricks-uc",
+      "tag": "Architecture",
+      "kind": "rank",
+      "title": "Databricks is the only warehouse peer",
+      "html": "<a href=\"https://www.databricks.com/blog/observability-any-agent-anywhere-production-ready-tracing-opentelemetry-unity-catalog\">OTel traces into Unity Catalog Delta</a> via Zerobus, SQL scorers, UC ACLs. Same pitch: join traces to business data; don’t send prompts to a SaaS.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": []
+    },
+    {
+      "id": "otel-genai",
+      "tag": "Standards",
+      "kind": "rank",
+      "title": "OTel GenAI is still Development",
+      "html": "Conventions moved to <a href=\"https://github.com/open-telemetry/semantic-conventions-genai\"><code>semantic-conventions-genai</code></a> (repo 5 May; core v1.42.0 on 12 Jun stripped <code>gen_ai.*</code>). Production mixes v1.36 and v1.37+ names. BQAA still does not export OTel spans; it joins on <code>trace_id</code>.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": [
+        {
+          "at": "2026-08-29T21:38",
+          "displayTime": "9:38 PM PT",
+          "html": "As of 21 Aug the dedicated repo still has no tagged release. 0 of 63 <code>gen_ai</code> attributes are stable. Python instrumentation flip can silently blank dashboards keyed on old names. “OTel-native” in Aug 2026 is still a Development convention."
+        }
+      ]
+    },
+    {
+      "id": "amplitude-agent-analytics",
+      "tag": "Brand",
+      "kind": "rank",
+      "title": "Amplitude claimed the name",
+      "html": "<a href=\"https://amplitude.com/blog/agent-analytics\">Product analytics on conversations</a> this month: funnels, retention, identity. Not a trace debugger. That’s the business-insights story packaged as a product.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": [
+        {
+          "at": "2026-08-29T21:38",
+          "displayTime": "9:38 PM PT",
+          "html": "<a href=\"https://amplitude.com/blog/connecting-agent-performance-to-product-outcomes\">GA 20 Aug</a> on every plan, including free. <a href=\"https://amplitude.com/blog/agent-data-security\">28 Aug</a> names privacy modes <code>full</code> / <code>metadata_only</code> / <code>customer_enriched</code>. Pitch is shared <code>user_id</code> with product events. Caps 5k–20k sessions/month; chat retained 14 or 30 days. Threat is the PM buyer, not debugging."
+        }
+      ]
+    },
+    {
+      "id": "aer-abbench",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "AER is the closest paper to BQAA",
+      "html": "Oracle <a href=\"https://arxiv.org/abs/2603.21692\">AER</a> (Vispute &amp; Kadam, Mar 2026) treats population-level behavioral analytics as a first-class schema (intent / observation / inference), not NLP over traces. Empirical validation still preliminary. Then IBM <a href=\"https://arxiv.org/abs/2503.06745\">ABBench</a>. Failure taxonomies: <a href=\"https://arxiv.org/abs/2505.08638\">TRAIL</a> / <a href=\"https://arxiv.org/abs/2503.13657\">MAST</a> / <a href=\"https://arxiv.org/abs/2505.00212\">Who&amp;When</a>. <a href=\"https://aclanthology.org/2026.findings-acl.1330/\">Yehudai et al., Findings of ACL 2026</a> says developer eval frameworks cannot aggregate across large run collections.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": []
+    },
+    {
+      "id": "umodel",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "UModel: warehouse as entity graph, not raw SQL",
+      "html": "<a href=\"https://arxiv.org/abs/2606.04799\">Pei et al., arXiv 2606.04799</a> (June 2026, Alibaba Cloud: millions of ops/s). Object graph plus pipe queries. Agents on raw PromQL/SQL sit under 5% query accuracy; entity PaaS tools add the points. Do not ship “here is <code>agent_events</code>, write SQL” as the agent API.",
+      "added": "2026-08-29T21:38",
+      "addedDisplay": "9:38 PM PT",
+      "progress": []
+    },
+    {
+      "id": "longrca",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "LongRCA: production RCA is still unsolved",
+      "html": "<a href=\"https://arxiv.org/abs/2608.15242\">Zhang, Feng, Pei et al., arXiv 2608.15242</a> (Aug 2026). 1,140 natural failed traces, median 145 steps, max 728. Best method 51.1% role / 24.1% exact root. Injected-error benches overstate. Should gate <a href=\"https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/issues/435\">#435</a>: session-level EvalBench MVP is fine; do not claim span forensics until traces this long survive.",
+      "added": "2026-08-29T21:38",
+      "addedDisplay": "9:38 PM PT",
+      "progress": []
+    },
+    {
+      "id": "langfuse-v4",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Langfuse v4 is the missed platform ship",
+      "html": "<a href=\"https://langfuse.com/changelog/2026-08-17-langfuse-v4\">v4 GA 17 Aug</a>. Observations-first ClickHouse. Cloud becomes v4-only on 16 Nov 2026. No Engine/Signal equivalent. Pitch BQAA on joins and retention, not query latency.",
+      "added": "2026-08-29T21:38",
+      "addedDisplay": "9:38 PM PT",
+      "progress": []
+    },
+    {
+      "id": "bqaa-sdk",
+      "tag": "Desk",
+      "kind": "desk",
+      "title": "SDK 0.5.1 landed ~19:50 PT",
+      "html": "<a href=\"https://pypi.org/project/bigquery-agent-analytics/\">EvalBench reader, 8-metric rubrics, golden matching at 0.92</a>. Consume SDK, not the capture plugin.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": [
+        {
+          "at": "2026-08-29T21:38",
+          "displayTime": "9:38 PM PT",
+          "html": "Release notes confirm LangSmith Cloud’s 24-hour ingest window, so warehouse→LangSmith is near-real-time sync, not historical backfill. Grafana one-command local run and single-input Looker configurator shipped with 0.5.1."
+        }
+      ]
+    },
+    {
+      "id": "issue-435",
+      "tag": "Desk",
+      "kind": "desk",
+      "title": "#435 is an open RFC, not a PR",
+      "html": "<a href=\"https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/issues/435\">AgentForensics failure taxonomy</a>. Plan v3 is a 6-week EvalBench-only session-level MVP. Last review: do not start the clock until the P1s are closed.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": [
+        {
+          "at": "2026-08-29T21:38",
+          "displayTime": "9:38 PM PT",
+          "html": "Comments through 20:21 PT iterated the RFC to plan v4. Reviewers flagged SANA (arXiv 2606.13904) as adjacent. Still: do not start the clock until P1s and the partner/job are named."
+        }
+      ]
+    },
+    {
+      "id": "who-when-pro",
+      "tag": "Academy",
+      "kind": "desk",
+      "title": "Who&When Pro is the failure enum to steal",
+      "html": "<a href=\"https://arxiv.org/abs/2607.09996\">arXiv 2607.09996</a> (10 Jul): 12,326 traces, 18-mode taxonomy. Frontier models ~74% text-step accuracy, ~22% error-mode F1. Use the taxonomy in #435; do not trust injected labels as a production prior.",
+      "added": "2026-08-29T21:38",
+      "addedDisplay": "9:38 PM PT",
+      "progress": []
+    },
+    {
+      "id": "tuned-evaluators",
+      "tag": "Industry",
+      "kind": "desk",
+      "title": "Tuned Evaluators / Perceived Error",
+      "html": "<a href=\"https://www.langchain.com/blog/introducing-langsmith-tuned-evaluators-starting-with-perceived-error\">18 Aug</a>. Managed judge on threads, 12-hour lag, US Plus/Enterprise. Cheap production score Engine needs. BQAA GraderPipeline is still batch, not attached to the live row.",
+      "added": "2026-08-29T21:38",
+      "addedDisplay": "9:38 PM PT",
+      "progress": []
+    },
+    {
+      "id": "looker-template",
+      "tag": "Open",
+      "kind": "open",
+      "title": "Looker Studio template",
+      "html": "#445 closed; external-access contract still FAILING. Grafana is the documented alternative.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": []
+    },
+    {
+      "id": "java-lag",
+      "tag": "Open",
+      "kind": "open",
+      "title": "Java ≪ Python",
+      "html": "No <code>attributes.adk</code>, views off by default, different table name, no <code>secret:</code> redaction.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": []
+    },
+    {
+      "id": "otlp-allowlist",
+      "tag": "Open",
+      "kind": "open",
+      "title": "OTLP allowlist",
+      "html": "Claude Code and Codex only. Generic producers need allowlist + provenance.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": []
+    },
+    {
+      "id": "adk-3845",
+      "tag": "Open",
+      "kind": "open",
+      "title": "ADK HITL secret leak",
+      "html": "<a href=\"https://github.com/google/adk-python/issues/3845\">#3845</a> still open. BQAA redaction is logging mitigation, not a protocol fix.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": []
+    },
+    {
+      "id": "openai-evals",
+      "tag": "Open",
+      "kind": "open",
+      "title": "OpenAI Evals sunset",
+      "html": "Deprecated 3 Jun; read-only 31 Oct; shutdown 30 Nov 2026. Demand shock for <code>GraderPipeline</code>.",
+      "added": "2026-08-29T20:16",
+      "addedDisplay": "8:16 PM PT",
+      "progress": [
+        {
+          "at": "2026-08-29T21:38",
+          "displayTime": "9:38 PM PT",
+          "html": "Deadline unchanged. Oct 31 is the export date that matters. Official migration path is Promptfoo."
+        }
+      ]
+    },
+    {
+      "id": "signal-promo",
+      "tag": "Open",
+      "kind": "open",
+      "title": "Arize Signal promo ends 15 Sep",
+      "html": "Enterprise managed agents at no extra charge through 15 Sep. Commercial clock on the Engine/Signal race.",
+      "added": "2026-08-29T21:38",
+      "addedDisplay": "9:38 PM PT",
+      "progress": []
+    },
+    {
+      "id": "langfuse-cutover",
+      "tag": "Open",
+      "kind": "open",
+      "title": "Langfuse Cloud v4-only on 16 Nov",
+      "html": "Cloud cutover 16 Nov 2026. Self-host v3 security patches through January 2027.",
+      "added": "2026-08-29T21:38",
+      "addedDisplay": "9:38 PM PT",
+      "progress": []
+    },
+    {
+      "id": "agentprocessbench",
+      "tag": "Academy",
+      "kind": "open",
+      "title": "AgentProcessBench FirstErrAcc",
+      "html": "<a href=\"https://arxiv.org/abs/2603.14465\">KDD 2026 / 2603.14465</a>: 8,509 human ternary step labels. FirstErrAcc is the judge SLO (81.6% StepAcc vs 65.8% FirstErrAcc). Warehouse process-score columns.",
+      "added": "2026-08-29T21:38",
+      "addedDisplay": "9:38 PM PT",
+      "progress": []
+    }
+  ],
+  "runs": [
+    {
+      "id": "2026-08-29T2138",
+      "date": "2026-08-29",
+      "displayTime": "9:38 PM PT",
+      "added": [
+        "umodel",
+        "longrca",
+        "langfuse-v4",
+        "who-when-pro",
+        "tuned-evaluators",
+        "signal-promo",
+        "langfuse-cutover",
+        "agentprocessbench"
+      ],
+      "updated": [
+        "langsmith-engine",
+        "amplitude-agent-analytics",
+        "otel-genai",
+        "bqaa-sdk",
+        "issue-435",
+        "openai-evals"
+      ]
+    },
+    {
+      "id": "2026-08-29",
+      "date": "2026-08-29",
+      "displayTime": "8:16 PM PT",
+      "added": [
+        "langsmith-engine",
+        "databricks-uc",
+        "otel-genai",
+        "amplitude-agent-analytics",
+        "aer-abbench",
+        "bqaa-sdk",
+        "issue-435",
+        "looker-template",
+        "java-lag",
+        "otlp-allowlist",
+        "adk-3845",
+        "openai-evals"
+      ],
+      "updated": []
+    }
+  ]
+}
