@@ -688,8 +688,6 @@
       const day = date.slice(0, 10);
       const visible = items.filter(it => itemMatch(it, tag, q, date));
       const ranks = visible.filter(i => i.kind === "rank");
-      const desk = visible.filter(i => i.kind === "desk");
-      const open = visible.filter(i => i.kind === "open");
       const latestRun = (STATE.runs || [])[0];
 
       $("edition-date").innerHTML = day
@@ -711,15 +709,6 @@
       const main = !visible.length
         ? `<p class="empty">Nothing in the catalog matches that filter.</p>`
         : ranks.map(storyHtml).join("");
-
-      const deskHtml = desk.map(n => {
-        const prog = (n.progress || []).map(p => `<p style="margin-top:8px"><span class="badge upd">${escapeHtml(p.displayTime)}</span> ${p.html}</p>`).join("");
-        return `<div class="note"><b>${escapeHtml(n.title)}</b><p>${n.html}</p>${prog}</div>`;
-      }).join("");
-      const openHtml = open.map(n => {
-        const prog = (n.progress || []).map(p => `<p style="margin-top:8px"><span class="badge upd">${escapeHtml(p.displayTime)}</span> ${p.html}</p>`).join("");
-        return `<div class="open-item"><i></i><div><b>${escapeHtml(n.title)}</b><p>${n.html}</p>${prog}</div></div>`;
-      }).join("");
 
       $("app").innerHTML = `
         <div>${main}</div>
