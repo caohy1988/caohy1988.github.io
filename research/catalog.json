@@ -160,6 +160,11 @@
           "at": "2026-08-29T22:24",
           "displayTime": "10:24 PM PT",
           "html": "Fable 5: v4 converged on BQAA’s row shape (append-only observations, user/session on every row). Pitch joins and retention, not latency. Nov 16 is the Cloud cutover."
+        },
+        {
+          "at": "2026-08-30T1040",
+          "displayTime": "10:40 AM PT",
+          "html": "Fable 5: <a href=\"https://github.com/langfuse/langfuse/releases/tag/v4.23.0\">v4.23.0</a> (28 Aug) adds <code>toolCallInvocations</code> as a first-class measure and evaluator version restore; v4.24.0 is housekeeping. Nov 16 v4-only Cloud deadline unchanged. BQAA copy: named <code>v_tool_invocations</code> view and <code>judge_version</code> + rubric content hash. <a href=\"/research/briefs/2026-08-30-1040-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -327,6 +332,11 @@
           "at": "2026-08-29T22:24",
           "displayTime": "10:24 PM PT",
           "html": "Fable 5: Oct 31 is the operative export date. Publish OpenAI Evals → GraderPipeline with a worked JSONL example before then. Promptfoo takes CI; BQAA takes scores next to production events."
+        },
+        {
+          "at": "2026-08-30T1040",
+          "displayTime": "10:40 AM PT",
+          "html": "Fable 5: dates now on the <a href=\"https://developers.openai.com/api/docs/guides/evals\">primary page</a> — read-only 31 Oct, shutdown 30 Nov 2026. Oct 31 is the migration deadline (when a replacement runner must exist); Nov 30 is the export window. Ship the GraderPipeline guide with a Nov 30 export section, not a connector. <a href=\"/research/briefs/2026-08-30-1040-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -487,9 +497,65 @@
       "added": "2026-08-30T0525",
       "addedDisplay": "5:25 AM PT",
       "progress": []
+    },
+    {
+      "id": "agent-mesh",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Agent Mesh: loops of successful identical calls",
+      "html": "<a href=\"https://arxiv.org/abs/2608.26225\">Shaikh, Bombarde, Pathak, arXiv 2608.26225</a> (submitted 26 Aug). 147 incidents; 54 successful identical calls invisible to error-rate breakers; effects accumulate across six invocations. Re-key <code>v_tool_repeat</code> on <code>(tool, args_sha256, result_sha256)</code>, not <code>status='ERROR'</code>. <a href=\"/research/briefs/2026-08-30-1040-fable5.html\">Full brief</a>.",
+      "added": "2026-08-30T1040",
+      "addedDisplay": "10:40 AM PT",
+      "progress": []
+    },
+    {
+      "id": "verdict-staleness",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Verdict Staleness: approvals expire between check and use",
+      "html": "<a href=\"https://arxiv.org/abs/2608.26306\">Shraga, Eshel, Gorelik, arXiv 2608.26306</a> (26 Aug; IEEE ACSOS 2026). Freshness contract: 5.3–48.4% verdict change between check and use. Ship <code>v_approval_age</code>; reserve <code>checked_context_sha256</code>, <code>grounding_ts</code>, <code>expiry_rule</code>, <code>fallback</code> on <code>GUARDRAIL_DECISION</code>. <a href=\"/research/briefs/2026-08-30-1040-fable5.html\">Full brief</a>.",
+      "added": "2026-08-30T1040",
+      "addedDisplay": "10:40 AM PT",
+      "progress": []
+    },
+    {
+      "id": "ctf-abacus",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "CTF-ABACUS: only 62–87% of successes are trace-verified",
+      "html": "<a href=\"https://arxiv.org/abs/2608.26237\">Milner, Shao, Rani et al., arXiv 2608.26237</a> (26 Aug). 1,435 attempts; 13–38% of matching outputs skip the required work. Add <code>trajectory_verified</code> beside <code>match_golden_qa</code> (answer matched <em>and</em> required tools observed). <a href=\"/research/briefs/2026-08-30-1040-fable5.html\">Full brief</a>.",
+      "added": "2026-08-30T1040",
+      "addedDisplay": "10:40 AM PT",
+      "progress": []
+    },
+    {
+      "id": "same-model-harness",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Same model, different harness: 28% → 49%",
+      "html": "<a href=\"https://arxiv.org/abs/2608.26218\">Lewis, arXiv 2608.26218</a> (26 Aug). Holding model and task fixed, a harness change moved SWE-bench Verified fail-to-pass 28% → 49%. Put ADK version, compaction policy, and <code>EVENT_COMPACTION</code> count on the eval manifest so <code>fault_side = harness</code> is populatable. <a href=\"/research/briefs/2026-08-30-1040-fable5.html\">Full brief</a>.",
+      "added": "2026-08-30T1040",
+      "addedDisplay": "10:40 AM PT",
+      "progress": []
     }
   ],
   "runs": [
+    {
+      "id": "2026-08-30T1040",
+      "date": "2026-08-30",
+      "displayTime": "10:40 AM PT",
+      "added": [
+        "agent-mesh",
+        "verdict-staleness",
+        "ctf-abacus",
+        "same-model-harness"
+      ],
+      "updated": [
+        "openai-evals",
+        "langfuse-v4"
+      ],
+      "brief": "/research/briefs/2026-08-30-1040-fable5.html"
+    },
     {
       "id": "2026-08-30T0525",
       "date": "2026-08-30",
@@ -592,6 +658,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-08-30T1040",
+      "date": "2026-08-30",
+      "displayTime": "10:40 AM PT",
+      "title": "Fable 5: industry + academy → BQAA",
+      "href": "/research/briefs/2026-08-30-1040-fable5.html",
+      "analyzer": "Claude Code Fable 5"
+    },
     {
       "id": "2026-08-30T0525",
       "date": "2026-08-30",
