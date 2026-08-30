@@ -44,6 +44,7 @@
       -webkit-font-smoothing: antialiased;
     }
     a { color: inherit; }
+    button, input { font: inherit; }
     code {
       font-family: var(--mono);
       font-size: 0.86em;
@@ -53,10 +54,7 @@
     }
     .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
 
-    .topbar {
-      background: var(--navy);
-      color: #e8edf4;
-    }
+    .topbar { background: var(--navy); color: #e8edf4; }
     .topbar-inner {
       min-height: 58px;
       display: flex;
@@ -140,10 +138,7 @@
       letter-spacing: -0.03em;
       line-height: 1.1;
     }
-    .edition-meta {
-      color: var(--ink-soft);
-      font-size: 0.92rem;
-    }
+    .edition-meta { color: var(--ink-soft); font-size: 0.92rem; }
     .live {
       display: inline-flex;
       align-items: center;
@@ -164,18 +159,56 @@
       box-shadow: 0 0 0 4px rgba(15,118,110,.16);
     }
 
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 10px;
+      padding: 4px 0 18px;
+      border-bottom: var(--rule);
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+    .chip {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--cream);
+      color: var(--ink-soft);
+      padding: 6px 11px;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--ink); color: var(--ink); }
+    .chip[aria-pressed="true"] {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #fff;
+    }
+    .search {
+      appearance: none;
+      width: min(260px, 100%);
+      border: 1px solid var(--line);
+      background: var(--cream);
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--ink);
+    }
+    .search:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .search::placeholder { color: var(--ink-faint); }
+
     .layout {
       display: grid;
       grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.7fr);
       gap: 36px 48px;
-      padding: 12px 0 64px;
+      padding: 18px 0 64px;
       align-items: start;
     }
 
-    .lead {
-      padding: 8px 0 28px;
-      border-bottom: var(--rule);
-    }
+    .lead { padding: 8px 0 28px; border-bottom: var(--rule); }
     .lead .num {
       font-family: var(--serif);
       font-size: 4.4rem;
@@ -219,10 +252,7 @@
       gap: 0;
       margin-top: 6px;
     }
-    .card {
-      padding: 22px 22px 22px 0;
-      border-bottom: var(--rule);
-    }
+    .card { padding: 22px 22px 22px 0; border-bottom: var(--rule); }
     .card:nth-child(odd) { padding-right: 22px; border-right: var(--rule); }
     .card:nth-child(even) { padding-left: 22px; }
     .card .num {
@@ -256,10 +286,7 @@
       text-transform: uppercase;
       color: var(--accent-dark);
     }
-    .note {
-      padding: 14px 0;
-      border-top: var(--rule);
-    }
+    .note { padding: 14px 0; border-top: var(--rule); }
     .note b { display: block; margin-bottom: 4px; font-size: 0.98rem; }
     .open-item {
       display: grid;
@@ -277,12 +304,82 @@
     .open-item b { display: block; font-size: 0.95rem; }
     .open-item p { margin: 4px 0 0; color: var(--ink-soft); font-size: 0.92rem; }
 
-    .archive {
-      margin-top: 28px;
-      padding-top: 8px;
-      border-top: 3px solid var(--ink);
+    .cal {
+      margin: 0 0 28px;
+      padding-bottom: 8px;
+      border-bottom: 3px solid var(--ink);
     }
-    .days { display: flex; flex-direction: column; gap: 0; }
+    .cal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .cal-head h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    .cal-nav {
+      appearance: none;
+      width: 32px; height: 32px;
+      border: 1px solid var(--line);
+      background: var(--cream);
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .cal-nav:hover { border-color: var(--ink); }
+    .cal-week, .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+    }
+    .cal-week span {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      padding: 4px 0 8px;
+    }
+    .cal-cell {
+      appearance: none;
+      background: none;
+      border: 0;
+      height: 38px;
+      border-radius: 10px;
+      cursor: default;
+      color: var(--ink-faint);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      position: relative;
+    }
+    .cal-cell.has {
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .cal-cell.has::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 5px;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      transform: translateX(-50%);
+    }
+    .cal-cell.has:hover { background: var(--paper-2); }
+    .cal-cell[aria-current="date"] {
+      background: var(--navy);
+      color: #fff;
+    }
+    .cal-cell[aria-current="date"]::after { background: var(--accent); }
+    .cal-cell.muted { opacity: 0.35; }
+
+    .archive { margin-top: 8px; }
+    .days { display: flex; flex-direction: column; }
     .day {
       appearance: none;
       width: 100%;
@@ -292,7 +389,6 @@
       border-bottom: var(--rule);
       padding: 12px 0;
       cursor: pointer;
-      font: inherit;
       display: flex;
       justify-content: space-between;
       gap: 12px;
@@ -316,29 +412,23 @@
       font-size: 0.72rem;
       letter-spacing: 0.1em;
     }
-
-    .empty {
-      padding: 48px 0;
-      color: var(--ink-soft);
-    }
+    .empty { padding: 48px 0; color: var(--ink-soft); }
+    .hide { display: none; }
 
     @media (max-width: 860px) {
       .layout { grid-template-columns: 1fr; }
       .grid { grid-template-columns: 1fr; }
-      .card:nth-child(odd), .card:nth-child(even) {
-        padding: 20px 0;
-        border-right: 0;
-      }
+      .card:nth-child(odd), .card:nth-child(even) { padding: 20px 0; border-right: 0; }
       .masthead-kicker, .masthead-rule, .footer-inner { flex-direction: column; gap: 6px; }
       .nameplate { font-size: clamp(2.6rem, 16vw, 4rem); text-align: left; }
+      .search { width: 100%; }
     }
     @media (max-width: 640px) {
       .nav-links a:not(:last-child) { display: none; }
     }
     @media print {
-      .topbar, .archive, footer { display: none; }
+      .topbar, .controls, .cal, .archive, footer { display: none; }
       body { background: #fff; }
-      .lead h2 { font-size: 28pt; }
     }
   </style>
 </head>
@@ -370,6 +460,7 @@
       <h2 class="edition-date" id="edition-date">Loading edition…</h2>
       <p class="edition-meta" id="edition-meta"></p>
     </div>
+    <div class="controls" id="controls" hidden></div>
     <div class="layout" id="app">
       <p class="empty">Fetching today’s brief…</p>
     </div>
@@ -384,48 +475,142 @@
 
   <script>
     const $ = (id) => document.getElementById(id);
+    const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const STATE = { editions: [], calY: null, calM: null };
 
     function escapeHtml(s) {
       return String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     }
+    function strip(html) { return String(html || "").replace(/<[^>]+>/g, " "); }
+    function blob(item) { return ((item.title || "") + " " + strip(item.html)).toLowerCase(); }
+    function sorted() {
+      return STATE.editions.slice().sort((a, b) => b.date.localeCompare(a.date));
+    }
+    function params() {
+      const q = new URLSearchParams(location.search);
+      return {
+        date: (location.hash || "").replace(/^#/, "") || q.get("date") || "",
+        tag: q.get("tag") || "All",
+        q: (q.get("q") || "").trim()
+      };
+    }
+    function setParams({ date, tag, q }, pushHash) {
+      const sp = new URLSearchParams();
+      if (tag && tag !== "All") sp.set("tag", tag);
+      if (q) sp.set("q", q);
+      const search = sp.toString();
+      const hash = date ? "#" + date : location.hash;
+      const url = location.pathname + (search ? "?" + search : "") + hash;
+      history.replaceState(null, "", url);
+      if (pushHash && date) location.hash = date;
+    }
 
-    function render(editions, currentId) {
-      const list = editions.slice().sort((a, b) => b.date.localeCompare(a.date));
-      const current = list.find(e => e.id === currentId) || list[0];
+    function allTags(list) {
+      const set = new Set();
+      list.forEach(e => (e.ranks || []).forEach(r => r.tag && set.add(r.tag)));
+      return ["All", ...Array.from(set), "Desk", "Open"];
+    }
+
+    function itemMatch(item, tag, q, kind) {
+      if (q && !blob(item).includes(q.toLowerCase())) return false;
+      if (!tag || tag === "All") return true;
+      if (tag === "Desk") return kind === "desk";
+      if (tag === "Open") return kind === "open";
+      return (item.tag || "") === tag && kind === "rank";
+    }
+
+    function editionHasMatch(ed, tag, q) {
+      if ((!tag || tag === "All") && !q) return true;
+      const ranks = (ed.ranks || []).some(r => itemMatch(r, tag, q, "rank"));
+      const desk = (ed.desk || []).some(r => itemMatch(r, tag, q, "desk"));
+      const open = (ed.open || []).some(r => itemMatch(r, tag, q, "open"));
+      return ranks || desk || open;
+    }
+
+    function calHtml(currentId, byDate, tag, q) {
+      const y = STATE.calY, m = STATE.calM;
+      const first = new Date(y, m, 1);
+      const start = first.getDay();
+      const daysIn = new Date(y, m + 1, 0).getDate();
+      const prevDays = new Date(y, m, 0).getDate();
+      const cells = [];
+      for (let i = 0; i < start; i++) {
+        cells.push(`<span class="cal-cell muted">${prevDays - start + 1 + i}</span>`);
+      }
+      for (let d = 1; d <= daysIn; d++) {
+        const id = y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+        const ed = byDate.get(id);
+        const has = !!ed;
+        const match = has && editionHasMatch(ed, tag, q);
+        const cur = id === currentId ? ' aria-current="date"' : "";
+        const cls = ["cal-cell", has ? "has" : "", has && !match ? "muted" : ""].filter(Boolean).join(" ");
+        cells.push(`<button class="${cls}" type="button" data-id="${id}" ${has ? "" : "disabled"}${cur}>${d}</button>`);
+      }
+      return `
+        <div class="cal" aria-label="Edition calendar">
+          <p class="rail-kicker">Calendar</p>
+          <div class="cal-head">
+            <button class="cal-nav" type="button" data-cal="-1" aria-label="Previous month">‹</button>
+            <h2>${MONTHS[m]} ${y}</h2>
+            <button class="cal-nav" type="button" data-cal="1" aria-label="Next month">›</button>
+          </div>
+          <div class="cal-week">${["Su","Mo","Tu","We","Th","Fr","Sa"].map(d => `<span>${d}</span>`).join("")}</div>
+          <div class="cal-grid">${cells.join("")}</div>
+        </div>`;
+    }
+
+    function render() {
+      const list = sorted();
+      const { date, tag, q } = params();
+      const current = list.find(e => e.id === date) || list[0];
       if (!current) {
-        $('app').innerHTML = '<p class="empty">No editions yet.</p>';
+        $("app").innerHTML = '<p class="empty">No editions yet.</p>';
         return;
       }
+      if (STATE.calY == null) {
+        const [yy, mm] = current.date.split("-").map(Number);
+        STATE.calY = yy; STATE.calM = mm - 1;
+      }
       const isLatest = current.id === list[0].id;
-      $('edition-date').innerHTML = current.weekday + ', ' + escapeHtml(current.displayDate) +
-        (isLatest ? '<span class="live">Latest</span>' : '');
-      $('edition-meta').textContent =
-        'No. ' + String(current.edition).padStart(3, '0') +
-        '  ·  ' + current.ranks.length + ' ranked  ·  ' + current.kicker;
+      $("edition-date").innerHTML = current.weekday + ", " + escapeHtml(current.displayDate) +
+        (isLatest ? '<span class="live">Latest</span>' : "");
+      $("edition-meta").textContent =
+        "No. " + String(current.edition).padStart(3, "0") +
+        "  ·  " + current.ranks.length + " ranked  ·  " + current.kicker;
 
-      const lead = current.ranks[0];
-      const rest = current.ranks.slice(1);
-      const desk = (current.desk || []).map(n =>
-        `<div class="note"><b>${escapeHtml(n.title)}</b><p>${n.html}</p></div>`
-      ).join('');
-      const open = (current.open || []).map(n =>
-        `<div class="open-item"><i></i><div><b>${escapeHtml(n.title)}</b><p>${n.html}</p></div></div>`
-      ).join('');
+      const tags = allTags(list);
+      $("controls").hidden = false;
+      $("controls").innerHTML =
+        `<div class="chips">` + tags.map(t =>
+          `<button class="chip" type="button" data-tag="${escapeHtml(t)}" aria-pressed="${t === tag}">${escapeHtml(t)}</button>`
+        ).join("") + `</div>
+        <input class="search" type="search" placeholder="Filter this brief…" value="${escapeHtml(q)}" aria-label="Filter stories">`;
+
+      const ranks = (current.ranks || []).filter(r => itemMatch(r, tag, q, "rank"));
+      const deskItems = (current.desk || []).filter(r => itemMatch(r, tag, q, "desk"));
+      const openItems = (current.open || []).filter(r => itemMatch(r, tag, q, "open"));
+      const lead = ranks[0];
+      const rest = ranks.slice(1);
+      const byDate = new Map(list.map(e => [e.id, e]));
+
+      const desk = deskItems.map(n => `<div class="note"><b>${escapeHtml(n.title)}</b><p>${n.html}</p></div>`).join("");
+      const open = openItems.map(n => `<div class="open-item"><i></i><div><b>${escapeHtml(n.title)}</b><p>${n.html}</p></div></div>`).join("");
       const days = list.map(e =>
         `<button class="day" type="button" data-id="${escapeHtml(e.id)}" aria-current="${e.id === current.id}">
           <span class="d-date">${escapeHtml(e.displayDate)}</span>
-          <span class="d-no">No. ${String(e.edition).padStart(3,'0')}</span>
+          <span class="d-no">No. ${String(e.edition).padStart(3,"0")}</span>
         </button>`
-      ).join('');
+      ).join("");
 
-      $('app').innerHTML = `
-        <div>
-          <article class="lead">
+      const main = !lead && !desk && !open
+        ? `<p class="empty">Nothing in this edition matches that filter.</p>`
+        : `
+          ${lead ? `<article class="lead">
             <div class="num">${lead.n}</div>
             <p class="tag">${escapeHtml(lead.tag)}</p>
             <h2>${escapeHtml(lead.title)}</h2>
             <p>${lead.html}</p>
-          </article>
+          </article>` : ""}
           <div class="grid">
             ${rest.map(r => `
               <article class="card">
@@ -433,54 +618,97 @@
                 <p class="tag">${escapeHtml(r.tag)}</p>
                 <h3>${escapeHtml(r.title)}</h3>
                 <p>${r.html}</p>
-              </article>
-            `).join('')}
-          </div>
-        </div>
+              </article>`).join("")}
+          </div>`;
+
+      $("app").innerHTML = `
+        <div>${main}</div>
         <aside class="rail">
-          <p class="rail-kicker">On the desk</p>
-          <h2>Own stack tonight</h2>
-          ${desk}
-          <div style="height:28px"></div>
-          <p class="rail-kicker">Still open</p>
-          <h2>Broken or lagging</h2>
-          ${open}
+          ${calHtml(current.id, byDate, tag, q)}
+          <div class="${desk ? "" : "hide"}">
+            <p class="rail-kicker">On the desk</p>
+            <h2>Own stack tonight</h2>
+            ${desk}
+          </div>
+          <div class="${open ? "" : "hide"}" style="margin-top:28px">
+            <p class="rail-kicker">Still open</p>
+            <h2>Broken or lagging</h2>
+            ${open}
+          </div>
           <div class="archive">
             <p class="rail-kicker">Archive</p>
             <h2>Past briefs</h2>
             <div class="days">${days}</div>
           </div>
-        </aside>
-      `;
+        </aside>`;
 
-      $('app').querySelectorAll('.day').forEach(btn => {
-        btn.addEventListener('click', () => {
-          location.hash = btn.dataset.id;
+      bind(current.id);
+      document.title = current.displayDate + " · The Field Brief";
+    }
+
+    function bind(currentId) {
+      $("app").querySelectorAll(".day, .cal-cell.has").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          if (!id) return;
+          const [yy, mm] = id.split("-").map(Number);
+          STATE.calY = yy; STATE.calM = mm - 1;
+          const { tag, q } = params();
+          setParams({ date: id, tag, q });
+          location.hash = id;
         });
       });
-      document.title = current.displayDate + ' · The Field Brief';
+      $("app").querySelectorAll("[data-cal]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const delta = Number(btn.dataset.cal);
+          STATE.calM += delta;
+          if (STATE.calM < 0) { STATE.calM = 11; STATE.calY -= 1; }
+          if (STATE.calM > 11) { STATE.calM = 0; STATE.calY += 1; }
+          render();
+        });
+      });
+      $("controls").querySelectorAll("[data-tag]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const { date, q } = params();
+          setParams({ date: date || currentId, tag: btn.dataset.tag, q });
+          render();
+        });
+      });
+      const search = $("controls").querySelector(".search");
+      if (search) {
+        search.addEventListener("input", () => {
+          const { date, tag } = params();
+          setParams({ date: date || currentId, tag, q: search.value });
+          render();
+          const again = $("controls").querySelector(".search");
+          if (again) { again.focus(); again.setSelectionRange(again.value.length, again.value.length); }
+        });
+      }
     }
 
     async function boot() {
-      let editions = [];
       try {
-        const res = await fetch('/research/editions.json', { cache: 'no-store' });
-        const data = await res.json();
-        editions = data.editions || [];
+        const res = await fetch("/research/editions.json", { cache: "no-store" });
+        STATE.editions = (await res.json()).editions || [];
       } catch (err) {
-        $('app').innerHTML = '<p class="empty">Could not load editions.json.</p>';
+        $("app").innerHTML = '<p class="empty">Could not load editions.json.</p>';
         return;
       }
-      const show = () => render(editions, (location.hash || '').replace(/^#/, ''));
-      show();
-      window.addEventListener('hashchange', show);
-      window.addEventListener('keydown', (e) => {
-        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-        const list = editions.slice().sort((a, b) => b.date.localeCompare(a.date));
-        const id = (location.hash || '').replace(/^#/, '') || list[0].id;
+      render();
+      window.addEventListener("hashchange", render);
+      window.addEventListener("keydown", (e) => {
+        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+        const list = sorted();
+        const { date, tag, q } = params();
+        const id = date || list[0].id;
         const i = list.findIndex(x => x.id === id);
-        const next = e.key === 'ArrowRight' ? list[i + 1] : list[i - 1];
-        if (next) location.hash = next.id;
+        const next = e.key === "ArrowRight" ? list[i + 1] : list[i - 1];
+        if (!next) return;
+        const [yy, mm] = next.id.split("-").map(Number);
+        STATE.calY = yy; STATE.calM = mm - 1;
+        setParams({ date: next.id, tag, q });
+        location.hash = next.id;
       });
     }
     boot();
