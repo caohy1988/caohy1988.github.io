@@ -13,6 +13,11 @@
           "at": "2026-08-29T21:38",
           "displayTime": "9:38 PM PT",
           "html": "Engine’s <a href=\"https://www.langchain.com/blog/new-in-langsmith-engine-2x-better-issue-detection\">25 Aug post</a> ships self-hosted VPC orchestration (LangSmith Intelligence, ZDR), claimed &gt;2× IssueBench and +25% Terminal-Bench on proposed fixes, Slack/Linear, Reduced Analysis. Same job as Signal (Enterprise PRs, promo through 15 Sep). 2× is first-party; auto-verify of fixes is still unshipped. BQAA still wins the warehouse and loses the demo unless it names a trace→cluster→dataset loop."
+        },
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: Engine is a consumer of LangSmith’s store, not a new store. Self-hosted keeps orchestration in-VPC; inference still leaves for LSI and hard-fails without it. Verification of proposed fixes is roadmap, not shipped. BQAA has the primitives and no named cluster→dataset recipe. <a href=\"/research/briefs/2026-08-29-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -24,7 +29,13 @@
       "html": "<a href=\"https://www.databricks.com/blog/observability-any-agent-anywhere-production-ready-tracing-opentelemetry-unity-catalog\">OTel traces into Unity Catalog Delta</a> via Zerobus, SQL scorers, UC ACLs. Same pitch: join traces to business data; don’t send prompts to a SaaS.",
       "added": "2026-08-29T20:16",
       "addedDisplay": "8:16 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: Databricks stores raw OTel spans, so it inherits 0-of-63-stable churn as columns. BQAA’s ADK schema + <code>trace_id</code> join is insulated. Docs (19 Aug) default quota is 10,000 req/s; the blog still says 200 QPS."
+        }
+      ]
     },
     {
       "id": "otel-genai",
@@ -39,6 +50,11 @@
           "at": "2026-08-29T21:38",
           "displayTime": "9:38 PM PT",
           "html": "As of 21 Aug the dedicated repo still has no tagged release. 0 of 63 <code>gen_ai</code> attributes are stable. Python instrumentation flip can silently blank dashboards keyed on old names. “OTel-native” in Aug 2026 is still a Development convention."
+        },
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: do not claim “OTel-native.” Keep ADK events as system of record; treat <code>gen_ai.*</code> as a COALESCE projection."
         }
       ]
     },
@@ -55,6 +71,11 @@
           "at": "2026-08-29T21:38",
           "displayTime": "9:38 PM PT",
           "html": "<a href=\"https://amplitude.com/blog/connecting-agent-performance-to-product-outcomes\">GA 20 Aug</a> on every plan, including free. <a href=\"https://amplitude.com/blog/agent-data-security\">28 Aug</a> names privacy modes <code>full</code> / <code>metadata_only</code> / <code>customer_enriched</code>. Pitch is shared <code>user_id</code> with product events. Caps 5k–20k sessions/month; chat retained 14 or 30 days. Threat is the PM buyer, not debugging."
+        },
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: Amplitude owns the PM buyer and the phrase “agent analytics.” BQAA can do the <code>user_id</code> join; Amplitude ships it. One documented cohort recipe (failing rubric → 30-day retention) is the counter."
         }
       ]
     },
@@ -66,7 +87,13 @@
       "html": "Oracle <a href=\"https://arxiv.org/abs/2603.21692\">AER</a> (Vispute &amp; Kadam, Mar 2026) treats population-level behavioral analytics as a first-class schema (intent / observation / inference), not NLP over traces. Empirical validation still preliminary. Then IBM <a href=\"https://arxiv.org/abs/2503.06745\">ABBench</a>. Failure taxonomies: <a href=\"https://arxiv.org/abs/2505.08638\">TRAIL</a> / <a href=\"https://arxiv.org/abs/2503.13657\">MAST</a> / <a href=\"https://arxiv.org/abs/2505.00212\">Who&amp;When</a>. <a href=\"https://aclanthology.org/2026.findings-acl.1330/\">Yehudai et al., Findings of ACL 2026</a> says developer eval frameworks cannot aggregate across large run collections.",
       "added": "2026-08-29T20:16",
       "addedDisplay": "8:16 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: AER is still the closest schema paper (intent / observation / inference + verdict with confidence and evidence_chain). Empirical validation remains preliminary; reasoning fields are self-report."
+        }
+      ]
     },
     {
       "id": "umodel",
@@ -76,7 +103,13 @@
       "html": "<a href=\"https://arxiv.org/abs/2606.04799\">Pei et al., arXiv 2606.04799</a> (June 2026, Alibaba Cloud: millions of ops/s). Object graph plus pipe queries. Agents on raw PromQL/SQL sit under 5% query accuracy; entity PaaS tools add the points. Do not ship “here is <code>agent_events</code>, write SQL” as the agent API.",
       "added": "2026-08-29T21:38",
       "addedDisplay": "9:38 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: agents on raw SQL/PromQL sit under 5% query accuracy. The stale skill repo (last commit 4 May) is BQAA’s entity-tool layer and is the Monday fix."
+        }
+      ]
     },
     {
       "id": "longrca",
@@ -86,7 +119,13 @@
       "html": "<a href=\"https://arxiv.org/abs/2608.15242\">Zhang, Feng, Pei et al., arXiv 2608.15242</a> (Aug 2026). 1,140 natural failed traces, median 145 steps, max 728. Best method 51.1% role / 24.1% exact root. Injected-error benches overstate. Should gate <a href=\"https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/issues/435\">#435</a>: session-level EvalBench MVP is fine; do not claim span forensics until traces this long survive.",
       "added": "2026-08-29T21:38",
       "addedDisplay": "9:38 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: 24.1% exact root step, 51.1% role, human agreement 39.5% / 65.9%. This gates #435: session-level EvalBench MVP is fine; do not claim span forensics."
+        }
+      ]
     },
     {
       "id": "langfuse-v4",
@@ -96,7 +135,13 @@
       "html": "<a href=\"https://langfuse.com/changelog/2026-08-17-langfuse-v4\">v4 GA 17 Aug</a>. Observations-first ClickHouse. Cloud becomes v4-only on 16 Nov 2026. No Engine/Signal equivalent. Pitch BQAA on joins and retention, not query latency.",
       "added": "2026-08-29T21:38",
       "addedDisplay": "9:38 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: v4 converged on BQAA’s row shape (append-only observations, user/session on every row). Pitch joins and retention, not latency. Nov 16 is the Cloud cutover."
+        }
+      ]
     },
     {
       "id": "bqaa-sdk",
@@ -111,6 +156,11 @@
           "at": "2026-08-29T21:38",
           "displayTime": "9:38 PM PT",
           "html": "Release notes confirm LangSmith Cloud’s 24-hour ingest window, so warehouse→LangSmith is near-real-time sync, not historical backfill. Grafana one-command local run and single-input Looker configurator shipped with 0.5.1."
+        },
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5 consume loop: cluster session-level failures → write a dataset → re-score with 0.5.1 rubrics / golden 0.92. Call the output table <code>issues</code>. Persist scores on <code>trace_id</code> / <code>invocation_id</code>, not <code>session_id</code>. <a href=\"/research/briefs/2026-08-29-fable5.html\">Brief</a>."
         }
       ]
     },
@@ -127,6 +177,11 @@
           "at": "2026-08-29T21:38",
           "displayTime": "9:38 PM PT",
           "html": "Comments through 20:21 PT iterated the RFC to plan v4. Reviewers flagged SANA (arXiv 2606.13904) as adjacent. Still: do not start the clock until P1s and the partner/job are named."
+        },
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: do not start the clock. SANA (2606.13904) abstract is a component-ablation on LakeQA/KramaBench, not a seven-category taxonomy on Strands — re-read before treating as prior art. P1s (counterfactual gate, uncertainty, D4) are each backed by a paper."
         }
       ]
     },
@@ -138,7 +193,13 @@
       "html": "<a href=\"https://arxiv.org/abs/2607.09996\">arXiv 2607.09996</a> (10 Jul): 12,326 traces, 18-mode taxonomy. Frontier models ~74% text-step accuracy, ~22% error-mode F1. Use the taxonomy in #435; do not trust injected labels as a production prior.",
       "added": "2026-08-29T21:38",
       "addedDisplay": "9:38 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: steal the 18-mode enum; do not trust injected labels as a production prior. Error-mode F1 ~22%. Combine with MAST’s 14 (κ 0.88 in the abstract, not 0.77)."
+        }
+      ]
     },
     {
       "id": "tuned-evaluators",
@@ -148,7 +209,13 @@
       "html": "<a href=\"https://www.langchain.com/blog/introducing-langsmith-tuned-evaluators-starting-with-perceived-error\">18 Aug</a>. Managed judge on threads, 12-hour lag, US Plus/Enterprise. Cheap production score Engine needs. BQAA GraderPipeline is still batch, not attached to the live row.",
       "added": "2026-08-29T21:38",
       "addedDisplay": "9:38 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: Perceived Error is a 12-hour idle-thread batch, not online scoring. 0.5.1’s <code>response_usefulness</code> / <code>first_time_right</code> cover overlapping signal. Missing piece is the idle trigger, not a new judge."
+        }
+      ]
     },
     {
       "id": "looker-template",
@@ -158,7 +225,13 @@
       "html": "#445 closed; external-access contract still FAILING. Grafana is the documented alternative.",
       "added": "2026-08-29T20:16",
       "addedDisplay": "8:16 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: do not spend the six weeks on Looker Studio. Grafana is the working demo. Looker is blocked on an unowned external-access canary."
+        }
+      ]
     },
     {
       "id": "java-lag",
@@ -168,7 +241,13 @@
       "html": "No <code>attributes.adk</code>, views off by default, different table name, no <code>secret:</code> redaction.",
       "added": "2026-08-29T20:16",
       "addedDisplay": "8:16 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: Amplitude’s Aug 28 privacy contract made redaction a procurement checkbox. Java still does not redact <code>secret:</code>. File it against adk-java."
+        }
+      ]
     },
     {
       "id": "otlp-allowlist",
@@ -203,6 +282,11 @@
           "at": "2026-08-29T21:38",
           "displayTime": "9:38 PM PT",
           "html": "Deadline unchanged. Oct 31 is the export date that matters. Official migration path is Promptfoo."
+        },
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: Oct 31 is the operative export date. Publish OpenAI Evals → GraderPipeline with a worked JSONL example before then. Promptfoo takes CI; BQAA takes scores next to production events."
         }
       ]
     },
@@ -234,10 +318,130 @@
       "html": "<a href=\"https://arxiv.org/abs/2603.14465\">KDD 2026 / 2603.14465</a>: 8,509 human ternary step labels. FirstErrAcc is the judge SLO (81.6% StepAcc vs 65.8% FirstErrAcc). Warehouse process-score columns.",
       "added": "2026-08-29T21:38",
       "addedDisplay": "9:38 PM PT",
+      "progress": [
+        {
+          "at": "2026-08-29T22:24",
+          "displayTime": "10:24 PM PT",
+          "html": "Fable 5: FirstErrAcc is the judge SLO (81.6% StepAcc vs 65.8% FirstErrAcc). Persist ternary step labels; do not populate <code>first_error_idx</code> until a FirstErrAcc gate passes on long natural traces."
+        }
+      ]
+    },
+    {
+      "id": "fable5-brief",
+      "tag": "Desk",
+      "kind": "desk",
+      "title": "Fable 5 deep brief (Claude Code)",
+      "html": "<a href=\"/research/briefs/2026-08-29-fable5.html\">Industry + academy → BQAA</a>. 36 sections, 10:24 PM PT. Analysis is Claude Code Fable 5; this catalog only appends. Highest-EV: <code>v_tool_repeat</code> view, named cluster→dataset→re-score loop, OpenAI Evals guide before Oct 31. Do not start #435.",
+      "added": "2026-08-29T22:24",
+      "addedDisplay": "10:24 PM PT",
+      "progress": []
+    },
+    {
+      "id": "trca",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "TRCA: deterministic step flags, not a learned PRM",
+      "html": "<a href=\"https://arxiv.org/abs/2608.16156\">Zhang et al., arXiv 2608.16156</a> (17 Aug). Evidence / Execution / Invalidity per transition; Breakthrough paid only on first coverage. 96.5% of early rollouts fail yet 72.2% of failed-trajectory actions still carry signal. Warehouse schema: <code>invalid_tool_rate</code>, thrash, first-coverage latency. No LLM required.",
+      "added": "2026-08-29T22:24",
+      "addedDisplay": "10:24 PM PT",
+      "progress": []
+    },
+    {
+      "id": "graphectory",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Graphectory: phase graphs for coding-agent logs",
+      "html": "<a href=\"https://arxiv.org/abs/2512.02393\">OOPSLA 2026</a> + <a href=\"https://arxiv.org/abs/2608.17195\">ASE 2026 viewer</a>. 4,000 SWE-agent/OpenHands runs; 35,664-line logs compress to ~35 nodes. 5-person forensics 8% → 84% vs the CLI viewer. Maps onto Claude Code / Codex OTLP producers: a <code>phase</code> column and loop detection as SQL.",
+      "added": "2026-08-29T22:24",
+      "addedDisplay": "10:24 PM PT",
+      "progress": []
+    },
+    {
+      "id": "trace-tij",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "TRACE: multi-pass monitors, not one LLM over the trace",
+      "html": "<a href=\"https://arxiv.org/abs/2606.07054\">Mittapalli et al., arXiv 2606.07054</a>. Triage–Inspect–Judge on SHADE-Arena (avg 91.8 turns). Claude Sonnet 4.6 F1 0.713 vs full-trajectory 0.577. Template for any BQAA judge: materialize suspect windows in SQL, persist evidence, judge the log.",
+      "added": "2026-08-29T22:24",
+      "addedDisplay": "10:24 PM PT",
+      "progress": []
+    },
+    {
+      "id": "dover",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "DoVer: attribution is a hypothesis until you replay",
+      "html": "<a href=\"https://arxiv.org/abs/2512.06749\">Ma et al., ICLR 2026</a>. 14/29 Who&amp;When GAIA labels were uncertain. Interventions flip 18–28% of Magentic-One failures; end-of-trace critique flipped 0%. Gates #435: report % hypotheses validated, not judge accuracy vs a single gold step. Hook is <code>AGENT_STATE_CHECKPOINT</code>.",
+      "added": "2026-08-29T22:24",
+      "addedDisplay": "10:24 PM PT",
+      "progress": []
+    },
+    {
+      "id": "yehudai",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Yehudai: warehouse aggregation is the missing layer",
+      "html": "<a href=\"https://aclanthology.org/2026.findings-acl.1330/\">Findings of ACL 2026</a> (also arXiv 2503.16416). Developer eval frameworks (LangSmith, Langfuse, Vertex, Arize) cannot derive insights across large run collections. Direct product implication for BQAA’s consume side.",
+      "added": "2026-08-29T22:24",
+      "addedDisplay": "10:24 PM PT",
+      "progress": []
+    },
+    {
+      "id": "sana",
+      "tag": "Academy",
+      "kind": "open",
+      "title": "SANA is not a taxonomy paper",
+      "html": "<a href=\"https://arxiv.org/abs/2606.13904\">arXiv 2606.13904</a>. The #435 thread described a seven-category taxonomy and two-stage LLM audit on Strands. The abstract is a component-ablation over LakeQA/KramaBench (data analysis is the bottleneck). Re-read the PDF before citing as prior art.",
+      "added": "2026-08-29T22:24",
+      "addedDisplay": "10:24 PM PT",
+      "progress": []
+    },
+    {
+      "id": "v-tool-repeat",
+      "tag": "Desk",
+      "kind": "desk",
+      "title": "Monday: v_tool_repeat view",
+      "html": "Highest-EV SQL in the Fable 5 brief: group <code>TOOL_STARTING</code> by <code>invocation_id</code>, tool name, and a hash of the args, <code>HAVING COUNT(*) &gt; k</code>. This is Arize’s 43× <code>get_datasets</code> loop with OK spans. No LLM. No #435. Ships as an SDK view.",
+      "added": "2026-08-29T22:24",
+      "addedDisplay": "10:24 PM PT",
       "progress": []
     }
   ],
   "runs": [
+    {
+      "id": "2026-08-29T2224",
+      "date": "2026-08-29",
+      "displayTime": "10:24 PM PT",
+      "added": [
+        "fable5-brief",
+        "trca",
+        "graphectory",
+        "trace-tij",
+        "dover",
+        "yehudai",
+        "sana",
+        "v-tool-repeat"
+      ],
+      "updated": [
+        "langsmith-engine",
+        "tuned-evaluators",
+        "langfuse-v4",
+        "amplitude-agent-analytics",
+        "databricks-uc",
+        "otel-genai",
+        "aer-abbench",
+        "umodel",
+        "longrca",
+        "who-when-pro",
+        "agentprocessbench",
+        "bqaa-sdk",
+        "issue-435",
+        "openai-evals",
+        "java-lag",
+        "looker-template"
+      ],
+      "brief": "/research/briefs/2026-08-29-fable5.html"
+    },
     {
       "id": "2026-08-29T2138",
       "date": "2026-08-29",
@@ -280,6 +484,16 @@
         "openai-evals"
       ],
       "updated": []
+    }
+  ],
+  "briefs": [
+    {
+      "id": "2026-08-29T2224",
+      "date": "2026-08-29",
+      "displayTime": "10:24 PM PT",
+      "title": "Fable 5: industry + academy → BQAA",
+      "href": "/research/briefs/2026-08-29-fable5.html",
+      "analyzer": "Claude Code Fable 5"
     }
   ]
 }

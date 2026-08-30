@@ -472,6 +472,26 @@
       letter-spacing: 0.1em;
     }
     .empty { padding: 48px 0; color: var(--ink-soft); }
+
+    .briefs { margin: 0 0 28px; }
+    .brief-link {
+      display: block;
+      text-decoration: none;
+      padding: 12px 0;
+      border-bottom: var(--rule);
+      color: inherit;
+      box-shadow: none;
+    }
+    .brief-link:hover b { color: var(--accent-dark); }
+    .brief-link .when {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+    }
+    .brief-link b { display: block; margin: 4px 0 0; font-size: 1.02rem; }
+    .brief-link p { margin: 4px 0 0; color: var(--ink-soft); font-size: 0.92rem; }
     .hide { display: none; }
 
     @media (max-width: 860px) {
@@ -535,7 +555,7 @@
   <script>
     const $ = (id) => document.getElementById(id);
     const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    const STATE = { items: [], runs: [], calY: null, calM: null };
+    const STATE = { items: [], runs: [], briefs: [], calY: null, calM: null };
 
     function escapeHtml(s) {
       return String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -638,6 +658,23 @@
         </article>`;
     }
 
+
+    function briefsHtml() {
+      const list = STATE.briefs || [];
+      if (!list.length) return "";
+      const items = list.map(b => `
+        <a class="brief-link" href="${escapeHtml(b.href)}">
+          <span class="when">${escapeHtml(b.displayTime || "")} · ${escapeHtml(b.analyzer || "Fable 5")}</span>
+          <b>${escapeHtml(b.title)}</b>
+          <p>Open the deep brief</p>
+        </a>`).join("");
+      return `<div class="briefs">
+          <p class="rail-kicker">Fable 5</p>
+          <h2>Deep briefs</h2>
+          ${items}
+        </div>`;
+    }
+
     function render() {
       const { date, tag, q } = params();
       const items = STATE.items.slice().sort((a, b) => lastAt(b).localeCompare(lastAt(a)));
@@ -659,8 +696,9 @@
       $("edition-date").innerHTML = day
         ? `Catalog · ${escapeHtml(day)}`
         : `Living catalog`;
+      const latestBrief = (STATE.briefs || [])[0];
       $("edition-meta").textContent = latestRun
-        ? `Last pass ${latestRun.displayTime} · ${STATE.items.length} items kept · append only`
+        ? `Last pass ${latestRun.displayTime} · ${STATE.items.length} items kept · append only` + (latestBrief ? ` · Fable 5 ${latestBrief.displayTime}` : "")
         : `${STATE.items.length} items`;
 
       const tags = allTags(STATE.items);
@@ -688,6 +726,7 @@
         <div>${main}</div>
         <aside class="rail">
           ${calHtml(date, tag, q)}
+          ${briefsHtml()}
           <div class="${desk.length ? "" : "hide"}">
             <p class="rail-kicker">On the desk</p>
             <h2>Own stack</h2>
@@ -747,6 +786,7 @@
         const data = await res.json();
         STATE.items = data.items || [];
         STATE.runs = data.runs || [];
+        STATE.briefs = data.briefs || [];
       } catch (err) {
         $("app").innerHTML = '<p class="empty">Could not load catalog.json.</p>';
         return;
