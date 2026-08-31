@@ -657,8 +657,9 @@
     }
 
 
-    function briefsHtml() {
-      const list = STATE.briefs || [];
+    function briefsHtml(day) {
+      let list = STATE.briefs || [];
+      if (day) list = list.filter(b => dayKey(b.id) === day.slice(0, 10));
       if (!list.length) return "";
       const items = list.map(b => `
         <a class="brief-link" href="${escapeHtml(b.href)}">
@@ -713,7 +714,7 @@
         <div>${main}</div>
         <aside class="rail">
           ${calHtml(date, tag, q)}
-          ${briefsHtml()}
+          ${briefsHtml(date)}
         </aside>`;
       bind();
       const briefStamp = latestBrief
@@ -728,9 +729,10 @@
           const day = btn.dataset.day;
           const [yy, mm] = day.split("-").map(Number);
           STATE.calY = yy; STATE.calM = mm - 1;
-          const { tag, q } = params();
-          setParams({ date: day, tag, q });
-          location.hash = day;
+          const { date, tag, q } = params();
+          const next = date.slice(0, 10) === day ? "" : day;
+          setParams({ date: next, tag, q });
+          render();
         });
       });
       $("app").querySelectorAll("[data-cal]").forEach(btn => {
