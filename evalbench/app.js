@@ -35,17 +35,21 @@
         "</ul>" +
         '<div class="sibling"><p>Sibling session <code>ab7535a5</code> answered: “There are 0 widgets in stock.” ' +
         "The agent <em>can</em> do this; this session just never did.</p></div>",
-      note: "A stock question with no answer. The sibling proves the tool works."
+      note: "These events live in agent_events — the source of truth. The sibling proves the tool works."
     },
     {
-      headline: "Import the real job.",
+      headline: "Read agent_events. Write a BQAA snapshot.",
       body:
         '<span class="codeblock-label">CLI — static sample, not executed</span>' +
-        '<div class="codeblock">$ bq-agent-sdk evalbench-import \\\n' +
-        "    --project-id benchmark-project --evalbench-dataset evalbench \\\n" +
-        "    --job-id mvp-e2e-real-traces --import-version v1 \\\n" +
-        "    --target-project analytics-project --target-dataset bqaa \\\n" +
-        "    --min-score goal_completion=1 --format json</div>" +
+        '<div class="codeblock">$ bq-agent-sdk evalbench-native-import \\\n' +
+        "    --source-table test-project-0728-467323.bqaa_e2e_real.agent_events \\\n" +
+        "    --job-id mvp-e2e-real-traces \\\n" +
+        "    --target-dataset bqaa \\\n" +
+        "    --session-id 7e352c34-4c1c-4395-acd5-fb3c8f215346 \\\n" +
+        "    --location US \\\n" +
+        "    --snapshot-at 2026-08-30T08:00:00Z \\\n" +
+        "    --import-version v1 \\\n" +
+        "    --min-score goal_completion=1.0</div>" +
         '<span class="codeblock-label">Sample output — hardcoded</span>' +
         '<div class="codeblock">{\n' +
         '  <span class="key">"job"</span>: <span class="val">"mvp-e2e-real-traces"</span>,\n' +
@@ -55,7 +59,8 @@
         '  <span class="key">"score_row_count"</span>: <span class="val">7</span>,\n' +
         '  <span class="key">"failed_sessions_view"</span>: <span class="val">"analytics-project.bqaa.evalbench_failed_sessions"</span>\n' +
         "}</div>" +
-        '<p class="loud">7 scenarios, 27 events, 7 scores — status <code>imported</code>.</p>',
+        '<p class="loud">Source is production <code>agent_events</code>. Destination is BQAA-owned snapshot tables. ' +
+        "EvalBench configs/results/scores are not read.</p>",
       note: "Sample output. This page does not call BigQuery."
     },
     {
@@ -65,7 +70,7 @@
         "Failing score: <code>goal_completion 0.0</code>.</p>" +
         '<span class="codeblock-label">Failed row — frozen fixture, array order preserved</span>' +
         '<div class="codeblock">{\n' +
-        '  <span class="key">"import_identity"</span>: <span class="val">"evalbench-import:mvp-e2e-real-traces:v1:7e352c34"</span>,\n' +
+        '  <span class="key">"import_identity"</span>: <span class="val">"evalbench-native-import:mvp-e2e-real-traces:v1:7e352c34"</span>,\n' +
         '  <span class="key">"taxonomy_categories"</span>: [<span class="val">"task/planning"</span>, <span class="val">"finalization"</span>, <span class="val">"tool blockers"</span>],\n' +
         '  <span class="key">"process_failed"</span>: <span class="val">true</span>,\n' +
         '  <span class="key">"missing_completion"</span>: <span class="val">true</span>,\n' +
@@ -101,8 +106,9 @@
         "G1 names it task/planning, tool blockers, and finalization — it never planned the lookup, never called " +
         "check_inventory, never finished. Next debugging action: inspect why the trace died after AGENT_STARTING " +
         "before the inventory tool.</p>" +
-        '<p><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/462">' +
-        "GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK · PR 462</a></p>",
+        '<p class="loud">We did not need EvalBench tables to see this. Native <code>agent_events</code> was enough.</p>' +
+        '<p><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/464">' +
+        "GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK · PR 464</a></p>",
       note: "That next action is the debugging start, not a funding rec."
     }
   ];
