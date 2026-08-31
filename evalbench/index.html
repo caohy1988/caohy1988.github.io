@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="EvalBench team demo: six acts, one real session. Static fixture — no live BigQuery.">
+  <meta property="og:title" content="The widget that never answered — EvalBench team demo">
+  <meta property="og:description" content="Six acts, one real session. A presenter walkthrough of SDK PR 462. Static fixture, no live BigQuery.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://caohy1988.github.io/evalbench/">
+  <meta name="theme-color" content="#101828">
+  <title>The widget that never answered — EvalBench team demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #101828;
+      --navy-2: #17233a;
+      --paper: #f4efe6;
+      --paper-2: #ebe4d8;
+      --cream: #fbf7f0;
+      --ink: #161410;
+      --ink-soft: #5c564c;
+      --ink-faint: #8a8378;
+      --line: #d9d0c3;
+      --accent: #e87324;
+      --accent-dark: #b7480d;
+      --mint: #0f766e;
+      --rule: 1px solid var(--line);
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 17px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    button, input { font: inherit; }
+    code {
+      font-family: var(--mono);
+      font-size: 0.86em;
+      background: var(--paper-2);
+      padding: 0.08em 0.32em;
+      border-radius: 4px;
+    }
+    .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .topbar-inner {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand {
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+    }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a {
+      color: #b7c2d0;
+      font-size: 0.86rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+
+    .masthead {
+      padding: 36px 0 28px;
+      border-bottom: 3px solid var(--ink);
+      background: var(--cream);
+    }
+    .masthead-kicker {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 10px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+    }
+    .nameplate {
+      margin: 0;
+      font-family: var(--serif);
+      font-optical-sizing: auto;
+      font-size: clamp(2.6rem, 7vw, 5.2rem);
+      font-weight: 600;
+      letter-spacing: -0.045em;
+      line-height: 0.92;
+      text-align: center;
+      text-wrap: balance;
+    }
+    .nameplate em { font-style: italic; font-weight: 500; }
+    .masthead-rule {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid var(--ink);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+
+    /* Act stage */
+    .stage-wrap { padding: 26px 0 20px; }
+    .stage {
+      background: var(--cream);
+      border: var(--rule);
+      border-bottom: 3px solid var(--ink);
+      border-radius: 4px;
+      padding: clamp(22px, 4vw, 44px) clamp(20px, 4vw, 48px) clamp(24px, 3vw, 36px);
+      min-height: 420px;
+    }
+    .act-head {
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .act-kicker {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+    }
+    .act-num {
+      font-family: var(--serif);
+      font-size: clamp(3.4rem, 8vw, 5.6rem);
+      font-weight: 600;
+      line-height: 0.8;
+      color: var(--accent);
+      letter-spacing: -0.06em;
+    }
+    .act-headline {
+      margin: 10px 0 18px;
+      font-family: var(--serif);
+      font-optical-sizing: auto;
+      font-size: clamp(1.9rem, 4.6vw, 3.3rem);
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      line-height: 1.06;
+      text-wrap: balance;
+    }
+    .act-body { max-width: 72ch; }
+    .act-body p { margin: 0 0 14px; color: var(--ink-soft); }
+    .act-body p.loud { color: var(--ink); font-size: 1.06rem; }
+    .act-body a {
+      color: var(--accent-dark);
+      font-weight: 650;
+      text-decoration: none;
+      box-shadow: inset 0 -1px 0 rgba(183,72,13,.35);
+    }
+    .act-body a:hover { box-shadow: inset 0 -2px 0 var(--accent); }
+
+    .presenter-note {
+      margin: 20px 0 0;
+      padding-top: 12px;
+      border-top: var(--rule);
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+    }
+    .presenter-note::before {
+      content: "Presenter note · ";
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    /* Fact list (Act 1) */
+    .facts {
+      margin: 0 0 14px;
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 7px 20px;
+      background: var(--paper-2);
+      border: var(--rule);
+      border-radius: 4px;
+      padding: 16px 18px;
+    }
+    .facts dt {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+      padding-top: 3px;
+    }
+    .facts dd {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+    .facts dd code { background: var(--cream); }
+
+    /* Timeline (Act 2) */
+    .timeline { margin: 0 0 16px; padding: 0; list-style: none; }
+    .timeline li {
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      gap: 12px;
+      align-items: baseline;
+      padding: 7px 0;
+      font-family: var(--mono);
+      font-size: 0.86rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .timeline li::before {
+      content: "";
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--mint);
+      align-self: center;
+    }
+    .timeline li.broken { color: var(--ink-faint); font-style: italic; font-family: var(--sans); font-weight: 500; letter-spacing: 0; }
+    .timeline li.broken::before { background: none; border: 2px dashed var(--accent-dark); width: 8px; height: 8px; }
+    .missing { margin: 0 0 16px; padding: 0; list-style: none; }
+    .missing li {
+      padding: 4px 0;
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      color: var(--ink-faint);
+      text-decoration: line-through;
+      text-decoration-color: var(--accent-dark);
+    }
+    .missing li::before { content: "✕ "; text-decoration: none; color: var(--accent-dark); }
+    .sibling {
+      border-left: 2px solid var(--mint);
+      padding: 8px 0 8px 16px;
+      margin: 0 0 14px;
+    }
+    .sibling p { margin: 0; }
+
+    /* Code / JSON blocks */
+    .codeblock {
+      margin: 0 0 16px;
+      background: var(--paper-2);
+      border: var(--rule);
+      border-radius: 4px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: var(--ink);
+      white-space: pre;
+    }
+    .codeblock .cmt { color: var(--ink-faint); }
+    .codeblock .key { color: var(--accent-dark); }
+    .codeblock .val { color: var(--mint); }
+    .codeblock-label {
+      display: block;
+      margin: 0 0 6px;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    /* Score tiles (Act 5) */
+    .scores {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 0 0 16px;
+    }
+    .score-tile {
+      background: var(--paper-2);
+      border: var(--rule);
+      border-radius: 4px;
+      padding: 14px 16px;
+    }
+    .score-tile b {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+    .score-tile span {
+      font-family: var(--serif);
+      font-size: 1.7rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+    }
+    .score-tile.trap span { color: var(--accent-dark); }
+
+    /* Plain-English list (Act 4) */
+    .plain { margin: 0 0 16px; padding: 0; list-style: none; }
+    .plain li { padding: 6px 0; color: var(--ink-soft); }
+    .plain li b { color: var(--ink); font-family: var(--mono); font-size: 0.86em; font-weight: 600; }
+
+    /* Controls */
+    .deck-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px 18px;
+      padding: 18px 0 8px;
+    }
+    .btn {
+      appearance: none;
+      border: 2px solid var(--navy);
+      background: var(--navy);
+      color: #fff;
+      padding: 13px 30px;
+      border-radius: 6px;
+      font-family: var(--sans);
+      font-size: 1rem;
+      font-weight: 650;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+    }
+    .btn:hover { background: var(--navy-2); border-color: var(--navy-2); }
+    .btn:disabled { opacity: 0.35; cursor: default; }
+    .btn:disabled:hover { background: var(--navy); border-color: var(--navy); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+    .btn.ghost { background: transparent; color: var(--navy); }
+    .btn.ghost:hover { background: var(--paper-2); }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-left: auto;
+    }
+    .step-count {
+      font-family: var(--mono);
+      font-size: 0.86rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+    }
+    .dots { display: flex; gap: 8px; }
+    .dots button {
+      appearance: none;
+      border: 1px solid var(--ink-faint);
+      background: transparent;
+      width: 12px; height: 12px;
+      padding: 0;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .dots button[aria-current="step"] {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .dots button:hover { border-color: var(--ink); }
+    .keys-hint {
+      width: 100%;
+      margin: 2px 0 0;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    /* Extras */
+    .extras { padding: 10px 0 40px; }
+    .extras details {
+      border-top: var(--rule);
+      padding: 14px 0;
+    }
+    .extras summary {
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+    .extras summary:hover { color: var(--accent-dark); }
+    .extras pre {
+      margin: 14px 0 0;
+      background: var(--paper-2);
+      border: var(--rule);
+      border-radius: 4px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+    .extras video {
+      display: block;
+      margin: 14px 0 0;
+      width: min(760px, 100%);
+      border: var(--rule);
+      border-radius: 4px;
+      background: var(--navy);
+    }
+    .extras .hint { margin: 8px 0 0; font-size: 0.86rem; color: var(--ink-soft); }
+
+    footer {
+      border-top: 3px solid var(--ink);
+      padding: 22px 0 36px;
+      color: var(--ink-soft);
+      font-size: 0.9rem;
+      background: var(--cream);
+    }
+    .footer-inner { display: flex; flex-direction: column; gap: 6px; }
+    .footer-inner .mono {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+    }
+    .footer-inner p { margin: 0; }
+    .footer-inner a {
+      color: var(--accent-dark);
+      font-weight: 650;
+      text-decoration: none;
+      box-shadow: inset 0 -1px 0 rgba(183,72,13,.35);
+    }
+
+    @media (max-width: 860px) {
+      .masthead-kicker, .masthead-rule { flex-direction: column; gap: 6px; }
+      .nameplate { font-size: clamp(2.2rem, 11vw, 3.4rem); text-align: left; }
+      .facts { grid-template-columns: 1fr; gap: 2px 0; }
+      .facts dt { padding-top: 10px; }
+      .step-indicator { margin-left: 0; width: 100%; }
+      .stage { min-height: 0; }
+    }
+    @media print {
+      .topbar, .deck-controls, .extras, footer { display: none; }
+      body { background: #fff; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/">Research</a>
+        <a href="/rfc/">RFC</a>
+        <a href="/evalbench/" aria-current="page">EvalBench</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="masthead">
+    <div class="shell">
+      <p class="masthead-kicker"><span>Team demo · PR 462</span><span>Static fixture · no live BigQuery</span></p>
+      <h1 class="nameplate">The widget that never <em>answered.</em></h1>
+      <p class="masthead-rule">
+        <span>EvalBench walkthrough</span>
+        <span>Six acts, one real session</span>
+        <span>Frozen sample output</span>
+      </p>
+    </div>
+  </header>
+
+  <main class="shell stage-wrap">
+    <section class="stage" id="stage" aria-live="polite">
+      <!-- Act content rendered by app.js -->
+      <noscript>
+        <p>This demo needs JavaScript to step through the six acts. The punchline:</p>
+        <p>This widget-stock session failed because the agent never answered (goal_completion=0.0). G1 names it task/planning, tool blockers, and finalization — it never planned the lookup, never called check_inventory, never finished. Next debugging action: inspect why the trace died after AGENT_STARTING before the inventory tool.</p>
+      </noscript>
+    </section>
+
+    <div class="deck-controls">
+      <button class="btn ghost" id="btn-back" type="button">← Back</button>
+      <button class="btn primary" id="btn-next" type="button">Next →</button>
+      <button class="btn" id="btn-play" type="button">Play all</button>
+      <div class="step-indicator">
+        <span class="step-count" id="step-count">1 / 6</span>
+        <div class="dots" id="dots" role="group" aria-label="Jump to act"></div>
+      </div>
+      <p class="keys-hint">Keys: → / space / N next · ← / P back · Home restart · A autoplay</p>
+    </div>
+
+    <div class="extras">
+      <details>
+        <summary>CLI fixture replay</summary>
+        <pre>==[ ACT 1 · THE QUESTION ]=====================================
+real-user-0 → support_agent: "How many widgets are in stock?"
+session_id 7e352c34-4c1c-4395-acd5-fb3c8f215346   eval_id 7e352c34
+
+==[ ACT 2 · THE TRACE ]========================================
+USER_MESSAGE_RECEIVED → INVOCATION_STARTING → AGENT_STARTING → (silence)
+missing: check_inventory · LLM_RESPONSE · AGENT_COMPLETED
+sibling ab7535a5 answered: "There are 0 widgets in stock."
+
+==[ ACT 3 · IMPORT ]===========================================
+$ bq-agent-sdk evalbench-import --job-id mvp-e2e-real-traces ...
+{ "status": "imported", "event_row_count": 27, "score_row_count": 7 }
+
+==[ ACT 4 · FAILED_SESSIONS ]==================================
+failed_count 1 of session_count 7
+taxonomy_categories ["task/planning", "finalization", "tool blockers"]
+failing_scores { "goal_completion": 0.0 }
+
+==[ ACT 5 · THE JUDGE ]========================================
+correctness 1.0 · llm_feedback null · pass_rate 1.0 · pinned_sessions 7
+(nothing to judge — failed_sessions is the denominator)
+
+==[ ACT 6 · PUNCHLINE ]========================================
+Next debugging action: inspect why the trace died after
+AGENT_STARTING before the inventory tool.
+</pre>
+      </details>
+      <details>
+        <summary>Watch the CLI version</summary>
+        <video controls preload="metadata" src="evalbench-week0-freeze-e2e.mp4"></video>
+        <p class="hint">Screen recording of the Week 0 freeze end-to-end run. Same session, same facts.</p>
+      </details>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell footer-inner">
+      <p class="mono">CLOCK NOT STARTED · FAIL-CLOSED D4: HAI-YUAN CAO ONLY · A FIXTURE CANNOT PRODUCE A FUNDING REC</p>
+      <p>This is our real BQAA ADK+EvalBench pilot (not SANA/Strands). Story: <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/462">SDK PR 462</a>.</p>
+      <p>© Haiyuan Cao · Personal views. No confidential employer material.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
