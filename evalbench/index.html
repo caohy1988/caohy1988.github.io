@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="EvalBench team demo: six acts, one real session. Static fixture — no live BigQuery.">
-  <meta property="og:title" content="The widget that never answered — EvalBench team demo">
-  <meta property="og:description" content="Six acts, one real session. A presenter walkthrough of SDK PR 462. Static fixture, no live BigQuery.">
+  <meta name="description" content="Team demo: six acts, one real session. Forensics from native agent_events (SDK PR 464). Static fixture — no live BigQuery.">
+  <meta property="og:title" content="The widget that never answered — native agent_events team demo">
+  <meta property="og:description" content="Six acts, one real session. A presenter walkthrough of the native agent_events writer (SDK PR 464). Static fixture, no live BigQuery.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://caohy1988.github.io/evalbench/">
   <meta name="theme-color" content="#101828">
-  <title>The widget that never answered — EvalBench team demo</title>
+  <title>The widget that never answered — native agent_events team demo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -479,11 +479,11 @@
 
   <header class="masthead">
     <div class="shell">
-      <p class="masthead-kicker"><span>Team demo · PR 462</span><span>Static fixture · no live BigQuery</span></p>
+      <p class="masthead-kicker"><span>Team demo · PR 464</span><span>Native agent_events · no live BigQuery</span></p>
       <h1 class="nameplate">The widget that never <em>answered.</em></h1>
       <p class="masthead-rule">
-        <span>EvalBench walkthrough</span>
         <span>Six acts, one real session</span>
+        <span>Forensics from native agent_events</span>
         <span>Frozen sample output</span>
       </p>
     </div>
@@ -494,7 +494,7 @@
       <!-- Act content rendered by app.js -->
       <noscript>
         <p>This demo needs JavaScript to step through the six acts. The punchline:</p>
-        <p>This widget-stock session failed because the agent never answered (goal_completion=0.0). G1 names it task/planning, tool blockers, and finalization — it never planned the lookup, never called check_inventory, never finished. Next debugging action: inspect why the trace died after AGENT_STARTING before the inventory tool.</p>
+        <p>This widget-stock session failed because the agent never answered (goal_completion=0.0). G1 names it task/planning, tool blockers, and finalization — it never planned the lookup, never called check_inventory, never finished. Next debugging action: inspect why the trace died after AGENT_STARTING before the inventory tool. We did not need EvalBench tables to see this. Native agent_events was enough.</p>
       </noscript>
     </section>
 
@@ -521,11 +521,16 @@ USER_MESSAGE_RECEIVED → INVOCATION_STARTING → AGENT_STARTING → (silence)
 missing: check_inventory · LLM_RESPONSE · AGENT_COMPLETED
 sibling ab7535a5 answered: "There are 0 widgets in stock."
 
-==[ ACT 3 · IMPORT ]===========================================
-$ bq-agent-sdk evalbench-import --job-id mvp-e2e-real-traces ...
+==[ ACT 3 · NATIVE IMPORT ]====================================
+$ bq-agent-sdk evalbench-native-import \
+    --source-table test-project-0728-467323.bqaa_e2e_real.agent_events \
+    --job-id mvp-e2e-real-traces ...
 { "status": "imported", "event_row_count": 27, "score_row_count": 7 }
+source: production agent_events · destination: BQAA-owned snapshot
+EvalBench configs/results/scores are not read.
 
 ==[ ACT 4 · FAILED_SESSIONS ]==================================
+import_identity evalbench-native-import:mvp-e2e-real-traces:v1:7e352c34
 failed_count 1 of session_count 7
 taxonomy_categories ["task/planning", "finalization", "tool blockers"]
 failing_scores { "goal_completion": 0.0 }
@@ -537,12 +542,14 @@ correctness 1.0 · llm_feedback null · pass_rate 1.0 · pinned_sessions 7
 ==[ ACT 6 · PUNCHLINE ]========================================
 Next debugging action: inspect why the trace died after
 AGENT_STARTING before the inventory tool.
+We did not need EvalBench tables to see this.
+Native agent_events was enough.
 </pre>
       </details>
       <details>
         <summary>Watch the CLI version</summary>
         <video controls preload="metadata" src="evalbench-week0-freeze-e2e.mp4"></video>
-        <p class="hint">Screen recording of the Week 0 freeze end-to-end run. Same session, same facts.</p>
+        <p class="hint">Adapter-path CLI recording (PR 462 freeze). Native path is this page.</p>
       </details>
     </div>
   </main>
@@ -550,7 +557,8 @@ AGENT_STARTING before the inventory tool.
   <footer>
     <div class="shell footer-inner">
       <p class="mono">CLOCK NOT STARTED · FAIL-CLOSED D4: HAI-YUAN CAO ONLY · A FIXTURE CANNOT PRODUCE A FUNDING REC</p>
-      <p>This is our real BQAA ADK+EvalBench pilot (not SANA/Strands). Story: <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/462">SDK PR 462</a>.</p>
+      <p>This is our real BQAA pilot (not SANA/Strands). Story: <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/464">SDK PR 464</a> — native agent_events writer.</p>
+      <p>EvalBench adapter path (PR 462) is freeze evidence, not the runtime.</p>
       <p>© Haiyuan Cao · Personal views. No confidential employer material.</p>
     </div>
   </footer>
