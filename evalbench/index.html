@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Team demo: six acts, one real session. Forensics from native agent_events (SDK PR 464). Static fixture — no live BigQuery.">
-  <meta property="og:title" content="The widget that never answered — native agent_events team demo">
-  <meta property="og:description" content="Six acts, one real session. A presenter walkthrough of the native agent_events writer (SDK PR 464). Static fixture, no live BigQuery.">
+  <meta name="description" content="Team demo: six acts, one real session. Native agent_events plus span-G1 localization (SDK PRs 464 + 468). Static fixture — no live BigQuery.">
+  <meta property="og:title" content="The widget that never answered — native span-G1 team demo">
+  <meta property="og:description" content="Six acts, one real session. Native agent_events was enough; span-G1 tells you where the trace died (SDK PRs 464 + 468). Static fixture, no live BigQuery.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://caohy1988.github.io/evalbench/">
   <meta name="theme-color" content="#101828">
-  <title>The widget that never answered — native agent_events team demo</title>
+  <title>The widget that never answered — native span-G1 team demo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -479,11 +479,11 @@
 
   <header class="masthead">
     <div class="shell">
-      <p class="masthead-kicker"><span>Team demo · PR 464</span><span>Native agent_events · no live BigQuery</span></p>
+      <p class="masthead-kicker"><span>Team demo · PRs 464 + 468</span><span>Native span-G1 · no live BigQuery</span></p>
       <h1 class="nameplate">The widget that never <em>answered.</em></h1>
       <p class="masthead-rule">
         <span>Six acts, one real session</span>
-        <span>Forensics from native agent_events</span>
+        <span>Native agent_events · span-G1 localization</span>
         <span>Frozen sample output</span>
       </p>
     </div>
@@ -494,7 +494,7 @@
       <!-- Act content rendered by app.js -->
       <noscript>
         <p>This demo needs JavaScript to step through the six acts. The punchline:</p>
-        <p>This widget-stock session failed because the agent never answered (goal_completion=0.0). G1 names it task/planning, tool blockers, and finalization — it never planned the lookup, never called check_inventory, never finished. Next debugging action: inspect why the trace died after AGENT_STARTING before the inventory tool. We did not need EvalBench tables to see this. Native agent_events was enough.</p>
+        <p>This widget-stock session failed because the agent never answered (goal_completion=0.0). Session-level G1 still names it task/planning, tool blockers, and finalization. Span-level G1 localizes all three to AGENT_STARTING span b7ad6b7169203331 (gap_after_span). Next debugging action: inspect that span. We did not need EvalBench tables to see this. Native agent_events was enough; span-G1 tells you where in the trace.</p>
       </noscript>
     </section>
 
@@ -517,8 +517,8 @@ real-user-0 → support_agent: "How many widgets are in stock?"
 session_id 7e352c34-4c1c-4395-acd5-fb3c8f215346   eval_id 7e352c34
 
 ==[ ACT 2 · THE TRACE ]========================================
-USER_MESSAGE_RECEIVED → INVOCATION_STARTING → AGENT_STARTING → (silence)
-missing: check_inventory · LLM_RESPONSE · AGENT_COMPLETED
+USER_MESSAGE_RECEIVED → INVOCATION_STARTING → AGENT_STARTING b7ad6b7169203331 → (silence)
+missing: TOOL_STARTING · check_inventory · AGENT_COMPLETED
 sibling ab7535a5 answered: "There are 0 widgets in stock."
 
 ==[ ACT 3 · NATIVE IMPORT ]====================================
@@ -534,22 +534,27 @@ import_identity evalbench-native-import:mvp-e2e-real-traces:v1:7e352c34
 failed_count 1 of session_count 7
 taxonomy_categories ["task/planning", "finalization", "tool blockers"]
 failing_scores { "goal_completion": 0.0 }
+(session-level denominator — span labels localize, they do not replace this)
 
-==[ ACT 5 · THE JUDGE ]========================================
-correctness 1.0 · llm_feedback null · pass_rate 1.0 · pinned_sessions 7
+==[ ACT 5 · SPAN-G1 ]==========================================
+label_native_run(run, policy=EvalScorePolicy({"goal_completion": 1.0}))
+three frozen G1 names localize on span b7ad6b7169203331
+target_kind gap_after_span · no synthetic span ids · no turn_index
+library localization on the native snapshot — not persisted BQ rows
+judge trap: correctness 1.0 · llm_feedback null · pass_rate 1.0
 (nothing to judge — failed_sessions is the denominator)
 
 ==[ ACT 6 · PUNCHLINE ]========================================
-Next debugging action: inspect why the trace died after
-AGENT_STARTING before the inventory tool.
+Span-G1 localizes all three to AGENT_STARTING span b7ad6b7169203331
+(gap_after_span). Next debugging action: inspect that span.
 We did not need EvalBench tables to see this.
-Native agent_events was enough.
+Native agent_events was enough; span-G1 tells you where.
 </pre>
       </details>
       <details>
         <summary>Watch the CLI version</summary>
         <video controls preload="metadata" src="evalbench-week0-freeze-e2e.mp4"></video>
-        <p class="hint">Adapter-path CLI recording (PR 462 freeze). Native path is this page.</p>
+        <p class="hint">Adapter-path CLI recording (PR 462 freeze). Native span-G1 path is this page.</p>
       </details>
     </div>
   </main>
@@ -557,7 +562,8 @@ Native agent_events was enough.
   <footer>
     <div class="shell footer-inner">
       <p class="mono">CLOCK NOT STARTED · FAIL-CLOSED D4: HAI-YUAN CAO ONLY · A FIXTURE CANNOT PRODUCE A FUNDING REC</p>
-      <p>This is our real BQAA pilot (not SANA/Strands). Story: <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/464">SDK PR 464</a> — native agent_events writer.</p>
+      <p>This is our real BQAA pilot (not SANA/Strands). Story: <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/464">SDK PR 464</a> native writer · <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/467">PR 467</a> span_taxonomy · <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/468">PR 468</a> span-G1 e2e.</p>
+      <p>Span-G1 here is library localization on the native snapshot, not persisted span-label BQ rows. Facts are hardcoded fixtures; this page does not call BigQuery.</p>
       <p>EvalBench adapter path (PR 462) is freeze evidence, not the runtime.</p>
       <p>© Haiyuan Cao · Personal views. No confidential employer material.</p>
     </div>

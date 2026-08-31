@@ -1,4 +1,5 @@
 /* EvalBench team demo — six acts, one real session.
+   Native-path span-G1 story (PRs 464 + 467 + 468).
    All facts are hardcoded fixture data. This page makes no network calls
    beyond Google Fonts and same-origin static files. */
 (function () {
@@ -25,16 +26,17 @@
         '<ol class="timeline">' +
         "<li>USER_MESSAGE_RECEIVED</li>" +
         "<li>INVOCATION_STARTING</li>" +
-        "<li>AGENT_STARTING</li>" +
+        "<li>AGENT_STARTING · <code>b7ad6b7169203331</code></li>" +
         '<li class="broken">…silence.</li>' +
         "</ol>" +
         '<ul class="missing">' +
+        "<li>no TOOL_STARTING</li>" +
         "<li>no check_inventory</li>" +
-        "<li>no LLM_RESPONSE</li>" +
         "<li>no AGENT_COMPLETED</li>" +
         "</ul>" +
         '<div class="sibling"><p>Sibling session <code>ab7535a5</code> answered: “There are 0 widgets in stock.” ' +
-        "The agent <em>can</em> do this; this session just never did.</p></div>",
+        "The agent <em>can</em> do this; this session just never did.</p></div>" +
+        '<p class="loud">Last real span: <code>AGENT_STARTING</code> <code>b7ad6b7169203331</code>. The trace died there.</p>',
       note: "These events live in agent_events — the source of truth. The sibling proves the tool works."
     },
     {
@@ -61,7 +63,7 @@
         "}</div>" +
         '<p class="loud">Source is production <code>agent_events</code>. Destination is BQAA-owned snapshot tables. ' +
         "EvalBench configs/results/scores are not read.</p>",
-      note: "Sample output. This page does not call BigQuery."
+      note: "Sample output. This page does not call BigQuery. Native writer: PR 464."
     },
     {
       headline: "failed_sessions finds the one of 7.",
@@ -83,32 +85,52 @@
         "<li><b>task/planning</b> — never decided to look up stock</li>" +
         "<li><b>tool blockers</b> — never called check_inventory</li>" +
         "<li><b>finalization</b> — never produced an answer</li>" +
-        "</ul>",
-      note: "JSON format, not table — table omits taxonomy_categories."
+        "</ul>" +
+        '<p class="loud">This is still the session-level denominator. Span labels localize; they never replace <code>failed_sessions</code> + G1.</p>',
+      note: "JSON format, not table — table omits taxonomy_categories. Denominator unchanged."
     },
     {
-      headline: "A live judge would miss this.",
+      headline: "Span-G1 says where it died.",
       body:
+        '<p class="loud">The three frozen G1 names localize onto that span — not a new taxonomy. ' +
+        "<code>span_id b7ad6b7169203331</code> · <code>target_kind gap_after_span</code>.</p>" +
+        '<span class="codeblock-label">Library call — static sample, not executed</span>' +
+        '<div class="codeblock">from bigquery_agent_analytics.span_taxonomy import label_native_run\n' +
+        "policy = EvalScorePolicy({\"goal_completion\": 1.0})\n" +
+        "labels = label_native_run(run, policy=policy)</div>" +
+        '<span class="codeblock-label">Three SpanFailureLabel rows — same real span, frozen order</span>' +
+        '<div class="codeblock">[\n' +
+        '  { <span class="key">"span_id"</span>: <span class="val">"b7ad6b7169203331"</span>, <span class="key">"failure_category"</span>: <span class="val">"task/planning"</span>, <span class="key">"target_kind"</span>: <span class="val">"gap_after_span"</span> },\n' +
+        '  { <span class="key">"span_id"</span>: <span class="val">"b7ad6b7169203331"</span>, <span class="key">"failure_category"</span>: <span class="val">"finalization"</span>, <span class="key">"target_kind"</span>: <span class="val">"gap_after_span"</span> },\n' +
+        '  { <span class="key">"span_id"</span>: <span class="val">"b7ad6b7169203331"</span>, <span class="key">"failure_category"</span>: <span class="val">"tool blockers"</span>, <span class="key">"target_kind"</span>: <span class="val">"gap_after_span"</span> }\n' +
+        "]</div>" +
+        "<p>No subsequent <code>TOOL_STARTING</code> / <code>check_inventory</code> / <code>AGENT_COMPLETED</code>. " +
+        "No synthetic span ids. No <code>turn_index</code>. Drawn from the native snapshot, not persisted span-label BQ rows.</p>" +
         '<div class="scores">' +
         '<div class="score-tile trap"><b>correctness</b><span>1.0</span></div>' +
         '<div class="score-tile"><b>llm_feedback</b><span>null</span></div>' +
         '<div class="score-tile trap"><b>pass_rate</b><span>1.0</span></div>' +
         '<div class="score-tile"><b>pinned_sessions</b><span>7</span></div>' +
         "</div>" +
-        '<p class="loud">Because there was nothing to judge.</p>' +
-        "<p><code>failed_sessions</code>, not the judge, is the denominator.</p>",
-      note: "Correctness 1.0 is a trap when the agent never answered."
+        '<p class="loud">A live judge would still miss this — nothing to judge. ' +
+        "<code>failed_sessions</code> is the denominator. Span-G1 is the ticket: which span to open.</p>",
+      note: "Library localization on the native snapshot (PRs 467 + 468). Correctness 1.0 is a trap when the agent never answered."
     },
     {
       headline: "Punchline.",
       body:
         '<p class="loud">This widget-stock session failed because the agent never answered (goal_completion=0.0). ' +
-        "G1 names it task/planning, tool blockers, and finalization — it never planned the lookup, never called " +
-        "check_inventory, never finished. Next debugging action: inspect why the trace died after AGENT_STARTING " +
-        "before the inventory tool.</p>" +
-        '<p class="loud">We did not need EvalBench tables to see this. Native <code>agent_events</code> was enough.</p>' +
-        '<p><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/464">' +
-        "GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK · PR 464</a></p>",
+        "Session-level G1 still names it task/planning, tool blockers, and finalization. " +
+        "Span-level G1 localizes all three to AGENT_STARTING span <code>b7ad6b7169203331</code> " +
+        "(<code>gap_after_span</code>) — it died before check_inventory was ever called. " +
+        "Next debugging action: inspect that span.</p>" +
+        '<p class="loud">We did not need EvalBench tables to see this. Native <code>agent_events</code> was enough; span-G1 tells you <em>where</em> in the trace.</p>' +
+        "<p>" +
+        '<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/464">PR 464</a> native writer · ' +
+        '<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/467">PR 467</a> span_taxonomy library · ' +
+        '<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/468">PR 468</a> span-G1 e2e' +
+        "</p>" +
+        "<p>Facts on this page are hardcoded fixtures. The page does not call BigQuery. The clock has not started.</p>",
       note: "That next action is the debugging start, not a funding rec."
     }
   ];
