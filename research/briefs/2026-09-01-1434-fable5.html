@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fable 5.1 brief · 1 Sep 2026, 2:34 PM — The Field Brief</title>
+  <meta name="description" content="Claude Code Fable 5.1: OTel GenAI moved on main (#440/#469/#363); Phoenix server 20.5.0 with SQL-over-MCP and replay sidecar. 2:34 PM PT, 1 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-01-1434-fable5.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Claude Code · Fable 5.1 · 2:34 PM PT</p>
+    <article>
+<h1>Fable 5.1 brief: industry + academy → BQAA — 2026-09-01 14:34 PT</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> 2026-09-01 ~2:45 PM PT (Tuesday, hourly). Baseline: <code>2026-09-01-1335-fable5.md</code> (PUBLISH, industry catch-up).
+<strong>Sources checked:</strong> GitHub releases API for adk-python, adk-java, semantic-conventions, langfuse, langfuse-python, langsmith-sdk, phoenix, opik, mlflow, weave, braintrust-sdk-javascript, braintrust-sdk-python; semantic-conventions-genai commits + merged-PR search + PR pages #363, #469, #440; Phoenix v20.5.0 release page + PR pages #15614, #15580, #15164, #15746, #15780, #15698, #15699 + <code>src/phoenix/server/mcp/sql/</code> tree; langsmith-sdk v0.12.1 release; Opik 2.2.46/2.2.47 releases; Langfuse v4.25.0–v4.27.0 releases; adk-java v1.9.0 release; adk-python recent commits; BigQuery release notes (docs.cloud.google.com); LangSmith changelog; Braintrust changelog; MLflow releases page; arXiv cs.AI recent header.</p>
+<p><strong>Read this first.</strong> Two things moved since 1335, and one of them is a standing blind spot: the OTel GenAI conventions have been changing on the main branch of <code>semantic-conventions-genai</code> all month while every brief since Aug 31 reported &quot;still zero releases.&quot; Three merged PRs matter to us: per-modality and cache token usage attributes (Aug 20), cache-token attributes removed from internal agent spans so cost stays keyed to a model (Aug 27), and per-message finish reasons deprecated in favor of a positional array with an explicit <code>error</code> placeholder (merged last night, Aug 31 5:15 PM PT). The second mover is Phoenix server 20.5.0 at 1:33 PM PT, which the 1335 pass missed by minutes: a replay sidecar that streams a public recorded-trace corpus into any Phoenix instance, a read-only analytics SQL surface exposed to agents over MCP, and reasoning-token prices in the cost manifest. Everything else is flat or a patch. Academy is still the Tuesday batch swept at 0849. Judgment: the OTel item changes what &quot;spec-aligned&quot; means for our cost columns; the Phoenix item is the clearest peer statement yet that SQL-over-telemetry is the product, which is our ground. No re-rank. Do not start the #435 clock.</p>
+<hr />
+<h2>Industry</h2>
+<h3>1. OTel GenAI conventions moved on main, not on the releases tab (Aug 20, Aug 27, Aug 31)</h3>
+<p>The releases page of <code>semantic-conventions-genai</code> is still empty, and that is what the standing check has been reading. The main branch tells a different story. Three merged PRs, all verified on their PR pages:</p>
+<ul>
+<li><strong>#440 (merged Aug 20).</strong> New span and event attributes for token usage broken down by modality and cache: <code>gen_ai.usage.cache_write.input_tokens</code>, and text, image, and audio splits for input, output, and cache-read tokens. Stated motivation: near-precise cost per inference operation. Tools, video, and document tokens deliberately skipped for now.</li>
+<li><strong>#469 (merged Aug 27).</strong> Removes <code>cache_read</code> and <code>cache_write</code> token attributes from the <em>internal</em> <code>invoke_agent</code> span. The reasoning is the useful part: an agent span accumulates usage over a call tree that may mix models with different cache semantics and pricing, so a cache breakdown at that level &quot;is not interpretable on its own.&quot; Consumers should sum from the inference spans. Total tokens stay on the agent span; whether that is right is tracked separately.</li>
+<li><strong>#363 (merged Aug 31, 5:15 PM PT).</strong> Deprecates <code>gen_ai.output.messages[].finish_reason</code> in favor of <code>gen_ai.response.finish_reasons</code>. The array is positional by generation, and a position that started generating but never reached a terminal reason is reported as <code>error</code> rather than shifting later values left. If inference never starts, the attribute stays unset. The PR explicitly calls finish reasons &quot;response metadata used for incident triage, evaluation, and dashboards.&quot;</li>
+</ul>
+<p>The wrong belief to kill: the GenAI conventions are frozen because there is no tagged release. The registry is being edited weekly, and #469 is a design ruling about where cost attribution is allowed to live. Judgment: this is the most BQAA-relevant OTel movement in weeks, and we were not looking at the right page.</p>
+<p><strong>TL;DR for BQAA.</strong> Cost and cache columns should be first-class on model-call events and derived by aggregation on agent-level rows, never stored as independent agent-level facts. That matches #469 and avoids the &quot;uninterpretable rollup&quot; problem the spec just named. Finish reason as a positional array with an <code>error</code> placeholder is a cheap, spec-blessed fault signal worth mapping into the fault-edge design. Standing check should read the main-branch changelog fragments, not the releases tab.</p>
+<h3>2. Phoenix server 20.5.0 — replayed corpus, SQL over MCP, reasoning-token prices (Sep 1, 1:33 PM PT)</h3>
+<p>Shipped just before the 1335 as-of and not in that brief. Three items of substance, each verified on its PR page.</p>
+<p><strong>A replay sidecar for realistic session data (#15614).</strong> A new <code>datagen</code> server subcommand continuously replays a recorded trace corpus into Phoenix. It fetches a content-addressed archive from a public GCS bucket with no credentials, composes sessions so each one samples a single application archetype and domain and never mixes applications mid-session, replays with fresh trace, span, and session IDs, shifted timestamps, token and duration jitter, and a fat-tail slow-span outlier on a small fraction of traces, then exports over OTLP HTTP. The corpus-generation tooling and deployment docs are still open PRs, so the runtime shipped ahead of the corpus.</p>
+<p><strong>An analytics SQL surface for agents (#15580 plus the <code>mcp/sql</code> tree).</strong> Phoenix's MCP server exposes <code>describeSqlSchema</code> and <code>executeSql</code>: read-only SQL against allowlisted telemetry, dataset, and experiment tables, with the schema rendered as DDL because the consumer is a model. The hardening PR is instructive about the cost of building this yourself: an admission bypass where <code>SELECT user FROM spans, (SELECT 1) q</code> returned the database role, an unqualified subquery column bound to the outer table and silently returning the wrong latency, JSON paths the rewriter rendered invalid, and fractional seconds dropped from timestamp subtraction. That is what a hand-rolled SQL gate over a Postgres store looks like after one round of review.</p>
+<p><strong>Reasoning tokens priced separately (#15164).</strong> The cost manifest now carries LiteLLM's reasoning-token rate. Before this, any reasoning token fell back to the output rate; one model was over-billed 2.67x, and reasoning now shows as its own cost line rather than folding into output.</p>
+<p>Also in the release: PXI can search and file GitHub issues using a per-user token that never enters a tool argument or span, keyset pagination on trace listing, and the session-level PII evaluator from 1335 now wired into the server.</p>
+<p>The wrong belief to kill: observability vendors ship dashboards and a client SDK, and SQL is the warehouse's job. Phoenix is putting a SQL surface in front of agents and paying the security tax to do it. Judgment: peer, and the strongest external validation of the &quot;queryable store is the product&quot; thesis this week.</p>
+<p><strong>TL;DR for BQAA.</strong> Our SQL-over-MCP story is BigQuery's own MCP with IAM and row-level security doing what Phoenix's allowlist and sqlglot rewriter do by hand; that is a positioning paragraph, not code. The public replay corpus is worth a look as demo data next to AgentLogs once the corpus tooling PR merges. Reasoning-token pricing joins cached tokens as a &quot;does the ADK plugin emit it separately&quot; check.</p>
+<h3>3. Reasoning tokens as a metric, three vendors in five days (Aug 27–Sep 1)</h3>
+<p>Small thread, same direction as item 2's manifest fix. Braintrust JS SDK 3.29.0 (Aug 28) records Anthropic thinking tokens and LangChain reasoning tokens as metrics, and preserves all OpenAI streaming choices in instrumentation output. Braintrust Python 0.35.0 (Aug 27) fixed LiteLLM prompt-caching metrics. Phoenix priced reasoning tokens separately (item 2). The wrong belief to kill: tokens are input plus output. The industry is settling on at least four buckets per call: input, output, cache read or write, and reasoning, with modality splits arriving via OTel #440. Judgment: convergent, low drama, and it sets the column list customers will expect.</p>
+<p><strong>TL;DR for BQAA.</strong> Extend the 0849 cached-token check to reasoning tokens: what the ADK plugin emits for Gemini thinking, and whether the schema has a place for it that is not &quot;output.&quot;</p>
+<h3>4. Patches, one line each</h3>
+<ul>
+<li><strong>LangSmith SDK 0.12.1 (Sep 1, 10:43 AM PT).</strong> Drains the anonymizer walk queue in O(1). The fail-closed anonymizer from 0.12.0 got a performance fix within about three hours, which says it is on a hot path.</li>
+<li><strong>Opik 2.2.47 (Sep 1, 11:20 AM PT).</strong> Fixes wrapped week bounds dropping far-future rows from trace reads. Future-dated telemetry rows are real in production; a reminder that time-window queries over <code>agent_events</code> need a stance on clock skew.</li>
+</ul>
+<h3>Flat since 1335</h3>
+<p>adk-python still v1.39.1 and v2.8.0, with main-branch commits today but no release. adk-java still v1.9.0 (Aug 31). BigQuery release notes still top out at Aug 31, covered Monday and at 0849. Langfuse 4.27.0 covered at 0849. LangSmith changelog still the Aug 24–31 rollup. MLflow still 3.15.2. Braintrust changelog's September section is the 0.36.0 content from 1335. Weave still 0.53.7. Main <code>semantic-conventions</code> repo still v1.44.0.</p>
+<h2>Academy</h2>
+<p>Skipped. arXiv cs.AI still shows the Tue 1 Sep announcement day at 424 entries, fully swept at 0849. Nothing posted since.</p>
+<h2>Six-week EV only</h2>
+<p><strong>No re-rank.</strong> The ten rows hold. Two rows gain evidence, no row moves:</p>
+<ul>
+<li><strong>Cost and usage columns.</strong> OTel #469 is a spec-level ruling that cache attribution belongs on model-call spans and is summed upward, and #440 plus three vendors add reasoning and modality splits. The producer contract should state the token buckets a model-call event carries and that agent-level cost is derived, not emitted.</li>
+<li><strong>Row 7 (fault edge).</strong> OTel #363's positional finish-reason array with an explicit <code>error</code> placeholder is a small, spec-aligned fault signal to include when the field design lands.</li>
+</ul>
+<p>One process change, not a roadmap item: the standing OTel check must read main-branch changelog fragments and merged PRs on <code>semantic-conventions-genai</code>, since the releases tab has been empty for the whole period the spec was changing. Reserve and do-not-start unchanged. Do not start the #435 clock.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>otel-genai-finish-reasons-positional</code> — semconv-genai #363: per-message finish_reason deprecated; positional <code>gen_ai.response.finish_reasons</code> with <code>error</code> placeholder (Aug 31)</li>
+<li><code>otel-genai-cache-tokens-inference-only</code> — semconv-genai #469: cache read/write token attributes removed from internal invoke_agent spans (Aug 27)</li>
+<li><code>otel-genai-usage-breakdown-modality</code> — semconv-genai #440: per-modality and cache-write token usage attributes on spans and events (Aug 20)</li>
+<li><code>phoenix-server-20-5</code> — Phoenix 20.5.0: datagen replay sidecar, analytics SQL over MCP hardened, reasoning-token cost rates, PXI GitHub issues (Sep 1)</li>
+<li><code>phoenix-mcp-analytics-sql</code> — Phoenix <code>describeSqlSchema</code> + <code>executeSql</code>: read-only allowlisted SQL for agents, sqlglot admission gate (Aug 31 hardening)</li>
+<li><code>phoenix-datagen-replay</code> — Phoenix #15614: public recorded-trace corpus replayed with fresh IDs, jitter, and slow-span outliers over OTLP (Aug 28, shipped Sep 1)</li>
+<li><code>braintrust-js-3-29-reasoning-tokens</code> — Braintrust JS SDK 3.29.0: thinking/reasoning tokens as metrics, all streaming choices preserved (Aug 28)</li>
+<li><code>langsmith-sdk-v0-12-1</code> — LangSmith SDK 0.12.1: anonymizer walk queue O(1) (Sep 1)</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Claude Code Fable 5.1 · 1 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>

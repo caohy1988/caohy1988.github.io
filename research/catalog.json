@@ -1,6 +1,76 @@
 {
   "items": [
     {
+      "id": "otel-genai-finish-reasons-positional",
+      "tag": "Standards",
+      "kind": "rank",
+      "title": "OTel GenAI #363: positional finish_reasons with error placeholder (Aug 31)",
+      "html": "<a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/363\">semconv-genai #363</a> (merged 31 Aug 5:15 PM PT). Deprecates per-message <code>finish_reason</code> for positional <code>gen_ai.response.finish_reasons</code>; a generation that starts but never terminates reports <code>error</code> rather than shifting later values. Spec-blessed fault signal for incident triage and dashboards. <a href=\"/research/briefs/2026-09-01-1434-fable5.html\">Full brief</a>.",
+      "added": "2026-09-01T1434",
+      "addedDisplay": "2:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "otel-genai-cache-tokens-inference-only",
+      "tag": "Standards",
+      "kind": "rank",
+      "title": "OTel GenAI #469: cache token attrs removed from invoke_agent spans (Aug 27)",
+      "html": "<a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/469\">semconv-genai #469</a> (merged 27 Aug). Removes cache read/write token attributes from internal <code>invoke_agent</code> spans — agent-level cache breakdowns mix models and are \"not interpretable on their own.\" Sum from inference spans; total tokens stay on the agent span. Design ruling on where cost attribution may live. <a href=\"/research/briefs/2026-09-01-1434-fable5.html\">Full brief</a>.",
+      "added": "2026-09-01T1434",
+      "addedDisplay": "2:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "otel-genai-usage-breakdown-modality",
+      "tag": "Standards",
+      "kind": "rank",
+      "title": "OTel GenAI #440: per-modality and cache-write token usage attributes (Aug 20)",
+      "html": "<a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/440\">semconv-genai #440</a> (merged 20 Aug). New span/event attributes for token usage by modality and cache: <code>gen_ai.usage.cache_write.input_tokens</code>, plus text/image/audio splits for input, output, and cache-read. Motivation: near-precise cost per inference. Tools/video/document tokens deliberately skipped for now. <a href=\"/research/briefs/2026-09-01-1434-fable5.html\">Full brief</a>.",
+      "added": "2026-09-01T1434",
+      "addedDisplay": "2:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "phoenix-server-20-5",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Phoenix 20.5.0: datagen replay, SQL over MCP, reasoning-token prices (Sep 1)",
+      "html": "<a href=\"https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.5.0\">arize-phoenix v20.5.0</a> (1 Sep ~1:33 PM PT). Replay sidecar streams a public recorded-trace corpus into any Phoenix; MCP analytics SQL (<code>describeSqlSchema</code>/<code>executeSql</code>) hardened; reasoning tokens priced separately in the cost manifest (was falling back to output rate). Clearest peer statement that SQL-over-telemetry is the product. <a href=\"/research/briefs/2026-09-01-1434-fable5.html\">Full brief</a>.",
+      "added": "2026-09-01T1434",
+      "addedDisplay": "2:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "phoenix-mcp-analytics-sql",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Phoenix MCP analytics SQL: describeSqlSchema + executeSql for agents (Aug 31)",
+      "html": "<a href=\"https://github.com/Arize-ai/phoenix/pull/15580\">Phoenix #15580</a> + <code>mcp/sql</code> tree (hardened Aug 31; shipped in 20.5.0). Read-only allowlisted SQL against telemetry/dataset/experiment tables; schema rendered as DDL for model consumers; sqlglot admission gate. Hardening caught admission bypass, wrong outer-table binding, invalid JSON paths, and fractional-second drops. <a href=\"/research/briefs/2026-09-01-1434-fable5.html\">Full brief</a>.",
+      "added": "2026-09-01T1434",
+      "addedDisplay": "2:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "phoenix-datagen-replay",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Phoenix datagen: public recorded-trace corpus replayed over OTLP (Aug 28 → Sep 1)",
+      "html": "<a href=\"https://github.com/Arize-ai/phoenix/pull/15614\">Phoenix #15614</a> (Aug 28; shipped in 20.5.0). <code>datagen</code> server subcommand fetches a content-addressed corpus from public GCS (no credentials), composes single-archetype sessions, replays with fresh IDs, shifted timestamps, token/duration jitter, and fat-tail slow-span outliers over OTLP HTTP. Runtime shipped ahead of corpus-generation tooling. <a href=\"/research/briefs/2026-09-01-1434-fable5.html\">Full brief</a>.",
+      "added": "2026-09-01T1434",
+      "addedDisplay": "2:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "braintrust-js-3-29-reasoning-tokens",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Braintrust JS SDK 3.29.0: thinking/reasoning tokens as metrics (Aug 28)",
+      "html": "<a href=\"https://github.com/braintrustdata/braintrust-sdk-javascript/releases/tag/braintrust%403.29.0\">braintrust@3.29.0</a> (28 Aug). Records Anthropic thinking tokens and LangChain reasoning tokens as metrics; preserves all OpenAI streaming choices in instrumentation output. Convergent with Phoenix reasoning-token pricing and OTel #440 modality splits — four+ token buckets per call. <a href=\"/research/briefs/2026-09-01-1434-fable5.html\">Full brief</a>.",
+      "added": "2026-09-01T1434",
+      "addedDisplay": "2:34 PM PT",
+      "progress": []
+    },
+    {
       "id": "langsmith-sdk-v0-12",
       "tag": "Industry",
       "kind": "rank",
@@ -8,7 +78,13 @@
       "html": "<a href=\"https://github.com/langchain-ai/langsmith-sdk/releases/tag/v0.12.0\">langsmith-sdk v0.12.0</a> (1 Sep 07:35 PT). Breaking: deterministic trace sampling; per-function anonymization fails closed on error instead of shipping unredacted data; httpx2 with httpx fallback. Strongest single release in the catch-up pack — redaction as a forensics statement. <a href=\"/research/briefs/2026-09-01-1335-fable5.html\">Full brief</a>.",
       "added": "2026-09-01T1335",
       "addedDisplay": "1:35 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-09-01T1434",
+          "displayTime": "2:34 PM PT",
+          "html": "Fable 5.1: <a href=\"https://github.com/langchain-ai/langsmith-sdk/releases/tag/v0.12.1\">v0.12.1</a> (1 Sep 10:43 AM PT). Drains the anonymizer walk queue in O(1) — fail-closed anonymizer from 0.12.0 got a performance fix within ~3 hours; on a hot path. <a href=\"/research/briefs/2026-09-01-1434-fable5.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "phoenix-evals-v3-6",
@@ -400,6 +476,11 @@
           "at": "2026-08-30T1740",
           "displayTime": "5:40 PM PT",
           "html": "Fable 5: verified-flat hour — PyPI 0.5.1, adk-python v2.8.0, adk-java v1.8.0, GCP BQAA page Aug 26, BigQuery notes end Aug 27, OTel GenAI zero releases, vendor changelogs unchanged; arXiv still closed since Fri Aug 28. No new first-party fact. <a href=\"/research/briefs/2026-08-30-1740-fable5.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-09-01T1434",
+          "displayTime": "2:34 PM PT",
+          "html": "Fable 5.1: releases tab still empty, but main moved — <a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/440\">#440</a> modality/cache usage attrs (20 Aug), <a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/469\">#469</a> cache attrs off invoke_agent (27 Aug), <a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/363\">#363</a> positional finish_reasons with <code>error</code> placeholder (31 Aug). Standing check must read main-branch changelog fragments, not the releases tab. <a href=\"/research/briefs/2026-09-01-1434-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -995,6 +1076,25 @@
   ],
   "runs": [
     {
+      "id": "2026-09-01T1434",
+      "date": "2026-09-01",
+      "displayTime": "2:34 PM PT",
+      "added": [
+        "otel-genai-finish-reasons-positional",
+        "otel-genai-cache-tokens-inference-only",
+        "otel-genai-usage-breakdown-modality",
+        "phoenix-server-20-5",
+        "phoenix-mcp-analytics-sql",
+        "phoenix-datagen-replay",
+        "braintrust-js-3-29-reasoning-tokens"
+      ],
+      "updated": [
+        "langsmith-sdk-v0-12",
+        "otel-genai"
+      ],
+      "brief": "/research/briefs/2026-09-01-1434-fable5.html"
+    },
+    {
       "id": "2026-09-01T1335",
       "date": "2026-09-01",
       "displayTime": "1:35 PM PT",
@@ -1228,6 +1328,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-09-01T1434",
+      "date": "2026-09-01",
+      "displayTime": "2:34 PM PT",
+      "title": "Fable 5.1: OTel GenAI on main + Phoenix 20.5.0",
+      "href": "/research/briefs/2026-09-01-1434-fable5.html",
+      "analyzer": "Claude Code Fable 5.1"
+    },
     {
       "id": "2026-09-01T1335",
       "date": "2026-09-01",
