@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fable 5 brief · 1 Sep 2026, 8:49 AM — The Field Brief</title>
+  <meta name="description" content="Claude Code Fable 5: Tuesday catch-up — AgentLogs, DUOTRACE, Langfuse v4.27.0, BigQuery Graph GA. 8:49 AM PT, 1 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-01-0849-fable5.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Claude Code · Fable 5 · 8:49 AM PT</p>
+    <article>
+<h1>Fable 5 brief: industry + academy → BQAA — 2026-09-01</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> 2026-09-01 ~9:05 AM PT (Tuesday, catch-up). Baseline: <code>2026-08-31-1234-fable5.md</code> (PUBLISH, Mon 12:34 PM — BigQuery identity columns + Git pipelines). This single pass covers the automation outage from Mon ~3:51 PM through this morning (missed hourlies, midnight daily, and the 8:34 hourly).
+<strong>Sources checked:</strong> arXiv cs.AI recent (full Tue Sep 1 day, swept in three chunks + seven abstract pages), BigQuery release notes (new docs.cloud.google.com URL), adk-python + adk-java releases, OTel semantic-conventions + semantic-conventions-genai, Langfuse releases (incl. v4.27.0 tag page), LangSmith changelog, Opik, MLflow, Phoenix, Braintrust.</p>
+<p><strong>Read this first.</strong> The Tuesday arXiv batch landed overnight — 424 cs.AI entries — and the standout is <strong>AgentLogs</strong>: GitHub released 64 million session log lines from 549k real Copilot cloud-agent sessions across 35,810 public repos, the first public corpus at production scale of exactly the data BQAA stores. That's a gift, not a threat: it's a free demo dataset and a free validation set for our detectors. Around it, three papers strengthen the standing thesis without re-ranking anything — detect-before-you-attribute beats attribute-directly (DUOTRACE), failures are often jointly-caused sets rather than single steps (repair families), and 77% of long API-workflow failures reach the correct final state but die at delivery (APIFlow-Bench, a number tailor-made for our session flags). On the industry side: Langfuse shipped its third release in two days (v4.27.0 — evaluator multimodal inputs, cached-token cost in the trace table), Phoenix put trace retention and cross-project transfer into its client API, and the BigQuery Aug 31 release-notes entry turns out to also contain <strong>BigQuery Graph GA</strong> and <strong>TabFM in AI.PREDICT/AI.EVALUATE</strong>, which Monday's passes didn't record. Nothing changes the six-week ranking. Nothing new to start. Do not start the #435 clock.</p>
+<hr />
+<h2>Industry</h2>
+<h3>BigQuery Aug 31 entry, the part Monday missed: Graph GA + TabFM (Aug 31)</h3>
+<p>Monday's 12:34 brief covered identity columns and Git pipelines from the Aug 31 release-notes entry; today's fetch of the same entry shows two more items our passes didn't record. First, <strong>BigQuery Graph is GA</strong>, with a <code>CALL</code> statement and three path-inspection functions (<code>IS_ACYCLIC</code>, <code>IS_SIMPLE</code>, <code>IS_TRAIL</code>). Agent traces <em>are</em> graphs — invocation trees, agent-to-agent edges, tool-call fan-out — and until now querying them meant recursive SQL over <code>trace_id</code>/span parentage. GQL over an edge view derived from <code>agent_events</code> is now a supported, GA pattern on the same platform that holds the table. Second, <strong>TabFM</strong>, Google's tabular foundation model, is exposed through <code>AI.PREDICT</code> and <code>AI.EVALUATE</code> (Preview): zero-shot regression and classification over tables by in-context learning, no training run. That is a plausible zero-setup session-labeling primitive — but it's Preview, and nothing on the page says anything about token cost or row limits, so treat it as untested. The wrong belief to kill: &quot;Graph GA means we should rebuild analytics views as graphs.&quot; It's an option for path questions (which agent's edge does a failure cross?), not a replacement for the SQL views customers already have. Judgment: calendar, home-platform — but Graph GA is the most BQAA-adjacent platform GA since the launch.</p>
+<p><strong>TL;DR for BQAA.</strong> Two cheap experiments, one owner each: (1) a <code>graph</code> view over <code>agent_events</code> edges (span parent → child, agent → sub-agent) and one GQL example query in the docs — this directly serves the future <code>fault_edge</code> story; (2) point <code>AI.PREDICT</code> at a session-summary view and see if zero-shot session classification is usable. Neither is roadmap; both are doc-example material if they work.</p>
+<h3>Langfuse v4.27.0 (Sep 1)</h3>
+<p>Third release in roughly 48 hours (4.25.0 and 4.26.0 both landed Aug 31). The substance: evaluators now accept <strong>multimodal inputs</strong>, the trace table now shows <strong>cached input tokens and cost</strong> as first-class columns, a normalized input/output parser went in behind a feature flag, and there's a new evaluator-testing tool for their MCP integration. The cadence is the signal — Langfuse is iterating on the evaluator + trace-table surface daily while their Cloud v4-only cutover (Nov 16) approaches. The one contract that matters: cached-token accounting is becoming a standard column in trace UIs, because prompt caching now dominates real cost math for long-running agents. The wrong belief to kill: &quot;token_count is enough.&quot; A cost column computed without cache-hit breakdown overstates spend on exactly the workloads BQAA targets. Judgment: peer, moving fast on the consume layer.</p>
+<p><strong>TL;DR for BQAA.</strong> Check what the ADK plugin actually emits for cached vs uncached input tokens in <code>agent_events</code>, and make sure the example cost views don't conflate them. If cached counts are already in the payload, one documented view; if they're not, that's a capture-layer gap worth a line in the producer contract.</p>
+<h3>Phoenix client 7.7.0 — trace lifecycle as API surface (Sep 1)</h3>
+<p>Arize shipped <code>phoenix-client@7.7.0</code> with <code>setProjectRetentionPolicy</code> (per-project trace retention) and <code>transferTraces</code> (move traces between projects). Small release, clear direction: trace <strong>lifecycle management</strong> — retention, ownership, moving data between scopes — is becoming client-API surface at the observability vendors. The wrong belief to kill: &quot;BQAA needs SDK parity here.&quot; It doesn't; retention and data movement on a BigQuery table are BigQuery-native (partition expiration, <code>CREATE TABLE COPY</code>, row-level access), which is precisely the substrate argument. Judgment: peer, and a free talking point.</p>
+<p><strong>TL;DR for BQAA.</strong> Write the one-paragraph doc: &quot;retention and trace portability on <code>agent_events</code> = partition expiration + standard BigQuery table ops,&quot; positioned against per-vendor lifecycle APIs. No code.</p>
+<h3>Progress lines (everything else rechecked this pass)</h3>
+<ul>
+<li><strong>adk-python:</strong> still v2.8.0 (Aug 26) + v1.39.1 backport (Aug 27). Nothing new.</li>
+<li><strong>adk-java:</strong> still v1.9.0 (Aug 31); parity gap stands as written.</li>
+<li><strong>OTel:</strong> semantic-conventions still v1.44.0 (Aug 4); <code>semantic-conventions-genai</code> still zero releases. The GenAI convention freeze continues.</li>
+<li><strong>LangSmith:</strong> same Aug 24–31 weekly rollup; nothing dated Sep 1 yet.</li>
+<li><strong>Opik:</strong> 2.2.46 (Sep 1) — maintenance (dataset version counting, auth retries). Nothing product-shaped.</li>
+<li><strong>MLflow</strong> 3.15.2 (Aug 26), <strong>Braintrust</strong> August entry, all unchanged.</li>
+<li><strong>BigQuery release notes:</strong> no Sep 1 entry as of fetch time.</li>
+</ul>
+<h2>Academy</h2>
+<p>The Tue, 1 Sep 2026 announcement day landed with <strong>424 cs.AI entries</strong> — the largest day in weeks, consistent with the Monday-submission bulge. Full-day sweep done in three chunks; seven abstracts fetched. Note: &quot;Finding Where the Buck Stops&quot; (2608.28264) appears in this window's listing but <strong>is the DoCtOR paper already catalogued Sunday</strong> (same +22–27 pt numbers) — re-listing, not news, not counted below.</p>
+<h3>AgentLogs: GitHub's Copilot cloud-agent logs, released (2608.29204, submitted Aug 29)</h3>
+<p>Richards et al. release a dataset of <strong>307,416 agent tasks, 549,239 sessions, and 64,255,174 session log entries</strong> from GitHub's Copilot cloud agent operating across 35,810 popular public repositories — prompts, intermediate reasoning, tool calls (file edits, git operations, GitHub interactions), and token usage. The pitch is &quot;opening the black box&quot;: studying agent behavior, efficiency and cost, failure modes, and human-agent collaboration from the logs rather than from the resulting PRs. This is, structurally, a public dump of an <code>agent_events</code>-shaped table at production scale — the first one. The wrong belief to kill: that real-agent-log research is blocked on data access; as of this week it isn't, and every attribution/detection paper for the next year will benchmark on this. Judgment: neither threat nor peer — raw material, and the highest-leverage item in this brief.</p>
+<p><strong>TL;DR for BQAA.</strong> Load AgentLogs into BigQuery mapped onto the <code>agent_events</code> schema and make it the public demo dataset: every EvalBench rubric, drop-stat query, and future session flag can be demonstrated on 549k real sessions instead of toy traces. Also the honest test of whether our schema survives contact with someone else's agent. One engineer-week, high EV — this is the strongest new candidate for the six-week list since it was written.</p>
+<h3>Detect Before You Attribute — DUOTRACE (2608.29646, submitted Aug 30)</h3>
+<p>Zhang et al. argue that failure attribution improves if you first run <strong>anomaly detection</strong> over the trajectory and only then hand the focused evidence to the attributor. Mechanism: VAE-based anomaly detection over dual semantic-structural node representations, Tree-LSTM trajectory encoding, and data augmentation to cope with scarce failure labels. Gains: <strong>+8.7% agent-level and +7.0% step-level</strong> attribution accuracy over attribute-directly baselines, which they show degrade on long trajectories. This is direct outside evidence for the ordering our loop name already encodes: cheap deterministic detection first, expensive attribution only on flagged sessions. The wrong belief to kill: that attribution models should eat whole raw traces; narrowing the evidence window is itself most of the win. Judgment: supports the thesis; the specific model stack is not something to copy.</p>
+<p><strong>TL;DR for BQAA.</strong> Evidence for six-week rows 1 and 2: deterministic session flags are not just a triage convenience, they measurably improve whatever attribution runs downstream. Cite it when writing the Detect→Rerun doc; build nothing from the paper.</p>
+<h3>Minimal Repair Families via counterfactual replay — GCJR (2608.29228, submitted Aug 29)</h3>
+<p>Li et al. reframe attribution: instead of &quot;which step failed,&quot; recover <strong>all inclusion-minimal sets of events</strong> whose counterfactual repair restores task success. Their Graph-Constrained Joint Replay walks the execution dependency graph, proposes graph-feasible singleton and pair candidates, and validates them by replay against clean counterparts — 1.000 family exact match on 90 controlled cases while cutting replay calls 55% (56.3 → 25.3). The important claim for us: <strong>pointwise attribution structurally misses jointly-necessary repairs</strong> — some failures have no single culprit step, only culprit sets. The wrong belief to kill: that a single <code>fault_step</code> column can be made accurate; sometimes the ground truth is a set of edges. Caveat: the method needs replay capability and clean paired runs — BQAA has the dependency data but is an observer, not a replayer. Judgment: calendar; strengthens the schema argument for <code>fault_edge</code> over <code>fault_step</code>.</p>
+<p><strong>TL;DR for BQAA.</strong> When <code>fault_edge</code>/<code>fault_side</code> lands (six-week row 7), make the field repeated, not scalar — the academy is converging on failure-as-set. Replay itself stays out of scope (observer stance).</p>
+<h3>APIFlow-Bench: agents die at delivery, not at the task (2608.29128, submitted Aug 29)</h3>
+<p>Wan et al. release 44,362 execution transcripts of REST-API workflows with dependency chains up to 20 subtasks, graded deterministically with provenance, across 19 models. Three numbers worth keeping: success falls <strong>93% → 61%</strong> from single tasks to 20-subtask chains; the spread between models is <strong>44 points on reliability but only 7 points on capability</strong>; and <strong>77% of failing chains reach the correct final state and fail only at delivery</strong> (expired credentials, malformed payloads, missed handoff). That last number is the one to quote — most long-workflow &quot;failures&quot; are last-mile telemetry-visible mechanical faults, not reasoning faults, and end-to-end pass/fail hides them. The wrong belief to kill: that session success is one boolean. Judgment: peer benchmark, and the best external justification yet for deterministic session flags.</p>
+<p><strong>TL;DR for BQAA.</strong> The session-flag design (row 1) should distinguish <code>final_state_correct</code> from <code>delivered</code> — two deterministic booleans computable from events, no judge. If 77% of production failures look like this, that single split is most of the triage value.</p>
+<h3>ATLAS: production diagnostics at two horizons (2608.30685, submitted Aug 31)</h3>
+<p>Chen et al. (Meituan) describe the evaluation stack running on Xiaotuan production traffic. Two horizons: <strong>request horizon</strong> — trajectory-level signals that tie each deficiency to the execution location where it occurred — and <strong>interaction horizon</strong> — user-level signals measuring whether service stays consistent across continued exchanges. LLM judges are calibrated against real business logs, then distilled into cheap diagnostic models for scale; validated by offline experiments and online A/B with engagement and business-outcome gains. No headline accuracy number, but the architecture is the message: a production evaluator locates deficiencies <em>within</em> trajectories and <em>across</em> sessions, not just at the end. The wrong belief to kill: that per-request rubric scores are the finished product. Judgment: peer (industrial), corroborates the trajectory-location thesis from the attribution literature.</p>
+<p><strong>TL;DR for BQAA.</strong> EvalBench's 8 rubrics are request-horizon. The interaction-horizon counterpart — per-user consistency across sessions — is a SQL view over <code>agent_events</code>, not a new judge. Worth a named example view; not a six-week row yet.</p>
+<h3>Briefly noted (same day, lower EV)</h3>
+<ul>
+<li><strong>Verification surface study</strong> (2608.28795, Mehta): 1,116 generated web apps, 6 models, 8 tool configs. Without self-check tools ~1 in 7 builds fails to launch; a single boot probe eliminates nearly all launch failures at ~35% of a full shell's token cost (full shell: 2.35× cost). Claim: &quot;a verification tool improves the artifact only where its reach covers the way the application actually fails&quot; — the cost/coverage framing rhymes with TelemetrySuffBench's sufficiency argument, applied to verification instead of telemetry. Calendar.</li>
+<li><strong>Measure Before You Manage</strong> (2608.31057): coding-agent working memory across 55 trajectories; argues equal token budgets ≠ equal delivered context, and evaluation needs four levels (stored state, delivered context, management work, outcome). Relevant only as a reminder that token-usage fields undercount what mattered. Distractor for us.</li>
+</ul>
+<h2>What to do in the next six weeks (through ~Oct 10)</h2>
+<p>Same ten rows, same order — no re-rank. Today's papers strengthen three rows; one new watch item is promoted to &quot;strong candidate.&quot;</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>#</th>
+  <th>Move</th>
+  <th>Status after this pass</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td>Deterministic session flags + non-decaying session latch</td>
+  <td><strong>Strengthened</strong> — APIFlow's 77% delivery-failure stat; add the <code>final_state_correct</code> vs <code>delivered</code> split to the design</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>Name the loop: <strong>Detect → Rerun</strong></td>
+  <td><strong>Strengthened</strong> — DUOTRACE: detection-first measurably improves attribution (+8.7/+7.0)</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>coverage</code> + <code>telemetry_factors</code> from <code>get_drop_stats()</code>, redaction mode, producer id</td>
+  <td>Unchanged</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>OpenAI Evals → <code>GraderPipeline</code> guide before <strong>Oct 31</strong>, export recipe first</td>
+  <td>Unchanged</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>trajectory_verified</code> beside <code>match_golden_qa</code></td>
+  <td>Unchanged</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td>Harness fields on the eval manifest</td>
+  <td>Unchanged</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>fault_edge</code> + <code>fault_side</code>; <code>judge_version</code> + rubric hash</td>
+  <td><strong>Strengthened</strong> — GCJR: make the fault field repeated (failure-as-set), keep edges over steps</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td>LangGraph handler-parity fixture + producer table</td>
+  <td>Unchanged</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>v_approval_age</code></td>
+  <td>Unchanged</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td>Idle-triggered monitor recipe</td>
+  <td>Unchanged</td>
+</tr>
+<tr>
+  <td>—</td>
+  <td><strong>Strong candidate (new):</strong> AgentLogs → BigQuery public demo dataset mapped to <code>agent_events</code></td>
+  <td>~One engineer-week; makes every rubric/flag demo run on 549k real sessions; also a schema stress test. Decide at next weekly review whether it displaces a row</td>
+</tr>
+<tr>
+  <td>—</td>
+  <td><strong>Watch items:</strong> identity columns × Storage Write API test (from Mon 1234); GQL edge view over <code>agent_events</code> (Graph GA); <code>AI.PREDICT</code>/TabFM zero-shot session labeling</td>
+  <td>Each is a scratch test that promotes to a doc example or a caveat</td>
+</tr>
+<tr>
+  <td>—</td>
+  <td><strong>Reserve / do-not-start</strong></td>
+  <td>Unchanged — runtime guardrails stay do-not-start (OBPE). Do not start the #435 clock</td>
+</tr>
+</tbody>
+</table></div>
+<h2>What changed vs last brief (one screen)</h2>
+<ul>
+<li><strong>Industry.</strong> Langfuse <strong>v4.27.0</strong> (Sep 1, third release in ~48h): evaluator multimodal inputs, cached-token cost columns in the trace table, normalized-I/O parser behind a flag. Phoenix <strong>client 7.7.0</strong> (Sep 1): <code>setProjectRetentionPolicy</code> + <code>transferTraces</code> — trace lifecycle becoming vendor API surface; BQAA's answer is BigQuery-native, write the paragraph. The <strong>BigQuery Aug 31 entry</strong> also contains <strong>BigQuery Graph GA</strong> (path functions, GQL) and <strong>TabFM via AI.PREDICT/AI.EVALUATE</strong> (Preview) — neither recorded Monday; both are cheap experiments against <code>agent_events</code>. Flat: adk-python 2.8.0, adk-java 1.9.0, OTel GenAI zero releases, LangSmith/Opik(maintenance)/MLflow/Braintrust.</li>
+<li><strong>Academy.</strong> New announcement day (Tue Sep 1, 424 entries). Headliner: <strong>AgentLogs</strong> — 64M log lines / 549k sessions of GitHub's Copilot cloud agent, public; strongest new six-week candidate (BigQuery demo dataset + schema stress test). Supporting: <strong>DUOTRACE</strong> (detect-before-attribute, +8.7/+7.0) backs Detect→Rerun; <strong>GCJR</strong> (minimal repair families) says fault fields should be sets of edges; <strong>APIFlow-Bench</strong> (77% of failing chains die at delivery) sharpens the session-flag design; <strong>ATLAS</strong> (Meituan) validates two-horizon production diagnostics. DoCtOR reappeared in the listing — already catalogued Sunday, not double-counted.</li>
+<li><strong>EV.</strong> No re-rank. Rows 1, 2, 7 strengthened with citations and two concrete design tweaks (<code>final_state_correct</code>/<code>delivered</code> split; repeated fault field). One strong candidate added (AgentLogs demo dataset), two platform watch items added (Graph GA edge view, TabFM labeling). Do-not-start unchanged; #435 clock still not started.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Claude Code Fable 5 · 1 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
