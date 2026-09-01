@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fable 5 brief · 1 Sep 2026, 1:35 PM — The Field Brief</title>
+  <meta name="description" content="Claude Code Fable 5: industry catch-up — LangSmith SDK v0.12, phoenix-evals 3.6, Braintrust 0.36, plus a two-month observability backlog. 1:35 PM PT, 1 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-01-1335-fable5.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Claude Code · Fable 5 · 1:35 PM PT</p>
+    <article>
+<h1>Fable 5 brief: industry catch-up → BQAA — 2026-09-01 13:35 PT</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> 2026-09-01 ~1:55 PM PT (Tuesday, industry catch-up). Baseline: <code>2026-09-01-0849-fable5.md</code> (PUBLISH). This pass covers the extra industry sweep; 11:34 and 12:34 were STAY_QUIET against that baseline.
+<strong>Sources checked:</strong> langsmith-sdk v0.12.0 release, arize-phoenix-evals v3.6.0 release, braintrust-sdk-python v0.36.0 release, Operata press release (PRNewswire), traccia.ai + Traccia Product Hunt page, Agnost AI hunted.space page, Phoenix release notes 08-25 + 08-11, Braintrust Harbor + MCP blog posts, Weave v0.53.7 + v0.53.6 (dates cross-checked via GitHub API), Datadog Patterns blog, Grafana agent-observability blog, GitHub changelog Aug 7 + Aug 11, marktechpost on Vercel Is Agentic, AWS What's New (AgentCore), Snowflake press release, Microsoft Foundry ROI (via devblogs/techcommunity search; the techcommunity page itself would not render), adk-python + adk-java releases, BigQuery release notes, OTel semantic-conventions releases, Langfuse releases, LangSmith changelog (new URL: docs.langchain.com/langsmith/changelog), Opik releases, MLflow releases, arXiv cs.AI recent header.</p>
+<p><strong>Read this first.</strong> All twenty items in the EM's extra sweep survived a primary-page check — this is the catch-up brief for everything the standing allowlist missed, and two of its claims needed correction (no <code>redact_patterns</code> in the Braintrust release; Snowflake's product is &quot;Cortex AI Gateway,&quot; not &quot;Gateway 2&quot;). Three things actually shipped after 0849 this morning: LangSmith SDK v0.12.0 with breaking changes that make trace sampling deterministic and anonymization fail-closed, a session-level PII evaluator in phoenix-evals 3.6.0, and Braintrust SDK 0.36.0 wiring Harbor verifier output into evals. The rest is a two-month backlog with three clear threads: PII/redaction is moving from span-level nicety to session-level, fail-closed contract; per-agent cost and usage accounting is becoming standard surface everywhere from GitHub's billing API to AWS log groups; and a governance/control-plane wave (Traccia, Snowflake, Operata) is building runtime enforcement we deliberately don't do. Nothing re-ranks the six-week list, but row 3 — coverage, redaction mode, producer id — is now the most externally-corroborated row on it. Academy is empty: arXiv is still the same Tuesday Sep 1 batch (424 entries) fully swept at 0849. Do not start the #435 clock.</p>
+<hr />
+<h2>Industry</h2>
+<p>Ranked. Items 1–3 shipped after 0849 today; 4–7 are this-week misses; 8–14 are older catch-up, dated as such.</p>
+<h3>1. LangSmith Python SDK v0.12.0 — sampling goes deterministic, anonymization goes fail-closed (Sep 1)</h3>
+<p>Shipped 07:35 PT this morning, so it technically predates the 0849 brief but wasn't on the changelog page that pass checked (the SDK releases on GitHub, and the changelog page still shows the Aug 24–31 rollup). Three breaking changes: trace sampling is now deterministic (&quot;make trace sampling deterministic&quot;), per-function anonymization now <strong>fails closed</strong> — if a custom anonymization callable errors, the SDK raises instead of silently shipping unredacted data — and the HTTP layer moved to httpx2 with httpx fallback. Plus replica-write compression and single-frame serialization of identical replicas.</p>
+<p>The first two are the story. Deterministic sampling means a sampled trace set is reproducible — you can rerun analytics over &quot;the same 10%&quot; and get the same rows, which is what makes sampled telemetry citable. Fail-closed anonymization is a vendor putting in writing that a redaction failure is worse than a telemetry gap. The wrong belief to kill: sampling and redaction are capture-time conveniences with no analytics contract. Both are now breaking-change-worthy API surface at the biggest LangChain-side vendor. Judgment: peer, and the strongest single release in this pack.</p>
+<p><strong>TL;DR for BQAA.</strong> This is row 3's argument made by someone else: redaction behavior is a forensics statement, and the producer contract should say what happens on redaction failure (drop the event? drop the field? flag it in <code>telemetry_factors</code>?). Worth one explicit line in the producer contract doc.</p>
+<h3>2. Phoenix: session-level PII evaluator (Sep 1) + PXI agent workflows (Aug 25) + persistent agent sessions (Aug 11)</h3>
+<p>Three Phoenix moves the allowlist under-covered. Today: <code>arize-phoenix-evals</code> 3.6.0 adds a <strong>session-level <code>pii_detection</code> evaluator</strong> — PII checked across a whole session, not per span. Aug 25 (server 20.4.0): PXI, their in-product agent, can now run multi-step workflows across the Phoenix UI with approval gates for GraphQL changes, and a retrieval-relevance evaluator grades the combined result of each retrieval step regardless of source (vector search, tool call, SQL). Aug 11 (server 20.0.0): agent sessions are persistent server-side — browse, restore, rewind, branch, from browser or terminal interchangeably, with REST routes at <code>/v1/agent_sessions</code> and admin idle-deletion controls.</p>
+<p>The pattern: session is becoming the unit of evaluation, storage, and management at Arize, not the span. The wrong belief to kill: PII detection is a span-payload scrubbing problem. A session-level evaluator exists because PII risk composes across turns — individually clean spans can leak in aggregate. Judgment: peer, coherent direction.</p>
+<p><strong>TL;DR for BQAA.</strong> Session-level PII is a SQL problem for us — an example query that aggregates payload fields per <code>session_id</code> and flags exposure would demo in an afternoon and reads well next to the redaction-mode story. Persistent-session management stays vendor territory; BigQuery tables already are the persistence.</p>
+<h3>3. Braintrust's three-week arc: Harbor (Aug 24) → MCP write tools (Aug 26) → SDK 0.36.0 (Sep 1)</h3>
+<p>Three connected releases. Harbor is a Python framework for <strong>sandboxed agent tasks</strong> — each task runs in an isolated Docker container, agents execute, verifiers score, everything lands in a job directory — and its Braintrust plugin syncs jobs into datasets and experiments, with trajectories in ATIF format and the API key held in the host process so agent code can't reach it. The MCP post ships <strong>write tools</strong>: coding agents can create evaluators and scorers, build datasets, run evals, configure monitors and alerts from the terminal — &quot;move from investigating a problem to acting on what it finds.&quot; Today's SDK 0.36.0 closes the loop: Agno eval instrumentation and Harbor standard-verifier-output upload. (The source pack claimed <code>redact_patterns</code> in 0.36.0; the release page shows no such thing — dropped.)</p>
+<p>The wrong belief to kill: eval platforms are dashboards humans click through. Braintrust is making the eval platform itself agent-operable — the agent files its own evals. Judgment: peer, and the MCP-write direction is the one to watch; it's where &quot;observability as a tool surface for agents&quot; gets real.</p>
+<p><strong>TL;DR for BQAA.</strong> BQAA's equivalent already exists structurally — <code>agent_events</code> is queryable by any agent with BigQuery MCP access, no bespoke write tools needed. That's a positioning line worth writing down: our &quot;MCP integration&quot; is BigQuery's, inherited for free.</p>
+<h3>4. Traccia — OTel control plane with runtime blocking (Product Hunt, ~Aug 27)</h3>
+<p>New entrant. OTel-native open-source SDK (Python and Node), framework-neutral, and the differentiator is <strong>runtime policy enforcement</strong>: <code>govern()</code> hard-blocks agents mid-execution — runaway cost, loops, data leaks — with the pitch &quot;the only tool that enforces, not just observes.&quot; Also claims cost attribution across 2,500+ models that stays accurate at 10% trace sampling, and PII flagging before export. The wrong belief to kill: observability vendors will stay observers. The market is pulling toward enforcement. Judgment: early-stage, but the third &quot;control layer&quot; claim in this pack alone — it's a wave, not a startup quirk.</p>
+<p><strong>TL;DR for BQAA.</strong> Runtime guardrails stay do-not-start (observer stance, OBPE) — this validates that the lane exists and that we're deliberately not in it. One line for the positioning doc, nothing to build. Their sampled-cost-accuracy claim is the same problem our <code>coverage</code>/<code>telemetry_factors</code> fields address from the honest side: say what's missing rather than extrapolate.</p>
+<h3>5. Agnost AI — mine production conversations to discover evals (~Aug 25)</h3>
+<p>Launch pitch: read <strong>every</strong> production conversation across chat and voice agents, detect silent failures, drift, hallucinated links, user frustration; group them into recurring patterns tied to users and conversations; turn patterns into evals. Their core line is good: &quot;evals test problems you already know about. You can't write an eval for something you haven't discovered yet.&quot; Claims 1M+ messages analyzed daily, integration in three lines or via OTel. The wrong belief to kill: the eval suite is the source of truth for quality. Dashboards show 200 OK while the agent confidently lies; discovery has to run on the raw conversations. Judgment: small but pointed at a real gap — eval <em>discovery</em>, upstream of eval <em>execution</em>.</p>
+<p><strong>TL;DR for BQAA.</strong> The raw material for this is exactly what <code>agent_events</code> holds. A &quot;find recurring failure shapes you don't have a rubric for&quot; example — even a simple clustering-by-error-text query — is a doc-example candidate, not roadmap.</p>
+<h3>6. Operata — one journey trace across AI and human agents (Aug 28)</h3>
+<p>Contact-center observability vendor extends to AI agents: a <strong>single customer-journey record spanning AI and human interactions</strong>, normalized metrics/traces/logs across voice AI, CCaaS, CRM, and CPaaS stacks, real-time visibility into AI-to-human handoffs, and governance evidence collection aimed at EU AI Act Article 50 (disclosure of AI interaction). The wrong belief to kill: the trace ends where the AI agent stops. In CX, the handoff to a human is part of the same session, and regulators care about exactly that boundary. Judgment: vertical, not a competitor — but the Article 50 framing is the first time this pack ties agent telemetry to a named regulatory article.</p>
+<p><strong>TL;DR for BQAA.</strong> &quot;Handoff to human&quot; is an event type worth checking against the schema — can a customer represent an AI→human transfer in <code>agent_events</code> today without contortions? If yes, one sentence in the docs; if no, note it for the producer contract.</p>
+<h3>7. Weave 0.53.6 / 0.53.7 — Claude Agent SDK tracing + PII helpers (Aug 13 / Aug 27)</h3>
+<p>Two releases the allowlist missed (dates confirmed via GitHub API). 0.53.6: <strong>Claude Agent SDK tracing</strong> including nested, background, and subagent spans; linking weave ops and evaluations to the agent spans that produced them; cost mapping for OpenAI cache tokens; new intent and failure-signature tables in the schema. 0.53.7: record which agent span invoked a call, <strong>PII detection and redaction helpers</strong> plus an agent PII policy field, and keeping eval rows that have no scores. The wrong belief to kill: Claude Agent SDK telemetry is a niche integration. W&amp;B built first-class nested/subagent tracing for it, which says where their customers' agents run. Judgment: peer, quietly thorough — their span→eval linkage and failure-signature table rhyme with our fault-edge direction.</p>
+<p><strong>TL;DR for BQAA.</strong> Second data point (after Langfuse's cached-token columns at 0849) that cache-token cost accounting is table stakes — reinforces the 0849 action to verify what the ADK plugin emits for cached vs uncached tokens. Also: does anything exercise BQAA with Claude Agent SDK-shaped multi-producer traces? Worth knowing before a customer asks.</p>
+<h3>8. Datadog Patterns — clustering production behavior (Jun 9, still Preview)</h3>
+<p>Dated catch-up. Patterns clusters production LLM interactions into hierarchical topic groups without predefined categories, then attaches cost, latency, error rate, and <strong>evaluation coverage</strong> per cluster. The pitch: align quality infrastructure with the interactions users actually have, not synthetic test sets. Same gap as Agnost (item 5), from the incumbent side. The wrong belief to kill: you know your agent's workload taxonomy. Users &quot;develop workflows the application was never designed to support.&quot; Judgment: Preview since June, so not urgent — but &quot;eval coverage per behavior cluster&quot; is a metric shape worth remembering.</p>
+<p><strong>TL;DR for BQAA.</strong> Pairs with item 5; same one-line implication. Per-cluster eval coverage is a view over <code>agent_events</code> joined to eval results — a future doc example, nothing more.</p>
+<h3>9. Grafana Agent Observability GA (Jul 30)</h3>
+<p>Dated catch-up: what launched as public preview in April went GA July 30. OTel-compatible, thin SDK, captures generations, conversations, tool usage, token and cost metrics; continuous output evaluation via LLM-as-judge, heuristics, or regex, wired to native alerting. The framing is &quot;treat agents like the rest of your services.&quot; The wrong belief to kill: agent observability is a specialist-vendor category. It's now a GA checkbox at a general observability platform. Judgment: commoditization signal — the capture layer is table stakes; differentiation moves to analytics on the stored data, which is our ground.</p>
+<p><strong>TL;DR for BQAA.</strong> Strengthens the substrate story: when every platform captures, the question becomes where the data can be <em>queried at warehouse scale</em> — one sentence for positioning.</p>
+<h3>10. GitHub Copilot: per-agent activity in the metrics API (Aug 7) + per-model token breakdown (Aug 11)</h3>
+<p>Dated catch-up, one theme: GitHub is decomposing the usage black box. The metrics API adds <code>totals_by_3rd_party_agent</code> — per-agent <code>agent_id</code>, interaction counts, session counts — because &quot;agent activity in your usage metrics was effectively a single bucket.&quot; The usage report adds per-model <strong>input, output, cache read, and cache write tokens</strong> beside the credits they consumed. The wrong belief to kill: usage accounting can stay aggregate. Buyers now expect attribution by agent and by model, with cache split out. Judgment: this is the demand side of the same cached-token contract Langfuse and Weave ship on the supply side.</p>
+<p><strong>TL;DR for BQAA.</strong> Per-producer, per-model, cache-split cost views over <code>agent_events</code> are exactly what enterprise admins are being trained to expect. Confirms the producer-id field earns its place (row 3); no new work beyond what 0849 already queued.</p>
+<h3>11. AWS Bedrock AgentCore — all agent telemetry in one per-agent log group (Jul 23)</h3>
+<p>Dated catch-up. AgentCore now lands traces, prompts, structured logs, and stdout in a single per-agent CloudWatch log group (<code>/aws/bedrock-agentcore/runtimes/&lt;agent_id&gt;-&lt;endpoint&gt;</code>), replacing the split between a shared spans group and per-resource event logs. Per-agent IAM and encryption; default for agents created after Jul 20. The wrong belief to kill: unifying telemetry destinations is a small plumbing fix. AWS is making &quot;one queryable place per agent, with agent-granular access control&quot; the default — the same bet BQAA makes with one table and row-level access. Judgment: convergent design from the largest cloud; useful validation, not competition on our analytics layer.</p>
+<p><strong>TL;DR for BQAA.</strong> One positioning sentence: AWS unified to a log group; BQAA unified to a warehouse table — same instinct, and only one of them takes SQL joins against business data.</p>
+<h3>12. Snowflake Cortex AI Gateway (Jul 28, public preview &quot;soon&quot;)</h3>
+<p>Dated catch-up, and a naming correction: the press release says <strong>Cortex AI Gateway</strong>, not &quot;Gateway 2.&quot; A centralized control layer: govern agent access to models, data, and 100+ MCP servers; end-to-end activity monitoring; unified consumption tracking with spending limits; quality/cost/latency routing. Supports third-party agents including Claude Code and Cursor, plus identity partnerships (Okta, SailPoint et al.) for task-scoped agent access. The wrong belief to kill: the warehouse rivals will compete on trace analytics. Snowflake is competing on <em>gateway governance</em> — enforcement again, like Traccia at 100× the size. Judgment: the closest strategic neighbor in this pack; watch whether monitoring data lands in queryable Snowflake tables, which would be the direct BQAA analog.</p>
+<p><strong>TL;DR for BQAA.</strong> No action now — press-release stage. Flag for a closer read when the preview docs exist: specifically whether agent activity is exposed as tables.</p>
+<h3>13. Microsoft Foundry — ROI for agents (private preview, ~Jul)</h3>
+<p>Dated catch-up; the techcommunity page wouldn't render, verified via Microsoft's devblogs and search excerpts. Foundry translates agent running cost into business value — task completion, time saved — against customer-defined value models, side by side in portal and API, with drill-down from low-ROI numbers into the underlying traces. Private preview, sign-up gated. The wrong belief to kill: agent analytics stops at cost and quality. Microsoft is building the layer above: cost <em>versus modeled value</em>, per agent version. Judgment: earliest-stage item in the pack, but the trace→ROI drill-down is the shape enterprise buyers will start asking every vendor about.</p>
+<p><strong>TL;DR for BQAA.</strong> ROI-per-agent is a join between <code>agent_events</code> cost fields and the customer's own business tables — an argument BigQuery wins by default. Keep as a talking point; build nothing.</p>
+<h3>14. Vercel &quot;Is Agentic&quot; — scoring sites for agent readiness (Aug 23)</h3>
+<p>Dated catch-up, adjacent rather than core. Free public tool scoring how readily agents can discover, access, use, and pay on a website — 118 checks from Ora across four layers (Discovery 20 pts, Access 30, Usability 40, Payments 10), reverse-engineered from real agent runs rather than authored opinion. The wrong belief to kill: agent failures on the open web are agent bugs. Often the <em>site</em> is the fault side — which is an environment-side fault-attribution claim, the mirror of our fault-edge story. Judgment: lowest direct relevance in the pack; kept because it's the only item scoring the environment instead of the agent.</p>
+<p><strong>TL;DR for BQAA.</strong> One line for the <code>fault_side</code> design note: the industry is starting to grade the environment's side of the edge, not just the agent's.</p>
+<h2>Academy</h2>
+<p>Skipped, deliberately. arXiv cs.AI still shows the Tue 1 Sep announcement day (424 entries) that 0849 swept in full; nothing has posted since. AgentLogs, DUOTRACE, GCJR, APIFlow-Bench, and ATLAS stand as written this morning.</p>
+<h2>Six-week EV only</h2>
+<p><strong>No re-rank.</strong> The ten rows and their order hold; the AgentLogs strong candidate and the two platform watch items from 0849 stand. What this pack changes is evidence weight, all pointing at <strong>row 3</strong> (coverage + <code>telemetry_factors</code>, redaction mode, producer id), which is now the most externally-corroborated row on the list: LangSmith made anonymization failure a fail-closed breaking change, Phoenix made PII a session-level evaluator, Weave shipped PII policy fields, and GitHub's billing surface made per-agent, per-model, cache-split accounting the enterprise default. Two additions below the line, neither displacing a row:</p>
+<ul>
+<li><strong>Watch item (new):</strong> eval-discovery via conversation clustering (Datadog Patterns, Agnost). A &quot;find failure shapes without a rubric&quot; example query over <code>agent_events</code> — doc-example candidate if someone has a spare afternoon, not roadmap.</li>
+<li><strong>Positioning notes (new, writing not engineering):</strong> capture is commoditizing (Grafana GA), hyperscalers are unifying telemetry per agent (AgentCore) and building value layers above it (Foundry ROI), and the enforcement/control-plane lane (Traccia, Snowflake, Operata) is real and deliberately not ours. Reserve/do-not-start unchanged — runtime guardrails stay out (OBPE). Do not start the #435 clock.</li>
+</ul>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>langsmith-sdk-v0-12</code> — LangSmith Python SDK v0.12.0: deterministic sampling, fail-closed anonymization, httpx2 (Sep 1)</li>
+<li><code>phoenix-evals-v3-6</code> — arize-phoenix-evals 3.6.0: session-level pii_detection evaluator (Sep 1)</li>
+<li><code>braintrust-sdk-v0-36</code> — Braintrust py-sdk 0.36.0: Agno eval instrumentation, Harbor verifier-output upload (Sep 1)</li>
+<li><code>operata-cx-agent-obs</code> — Operata CX AI Agent Observability: one journey trace across AI+human, EU AI Act Art. 50 evidence (Aug 28)</li>
+<li><code>traccia-otel-govern</code> — Traccia: OTel-native control plane with runtime blocking, open-source SDK (~Aug 27)</li>
+<li><code>agnost-ai</code> — Agnost AI: production conversation mining → pattern discovery → evals (~Aug 25)</li>
+<li><code>phoenix-server-20-4</code> — Phoenix 20.4.0: PXI multi-step UI workflows, retrieval-relevance evaluator (Aug 25)</li>
+<li><code>phoenix-pxi-sessions</code> — Phoenix 20.0.0: persistent agent sessions, <code>/v1/agent_sessions</code> REST (Aug 11)</li>
+<li><code>braintrust-harbor</code> — Harbor: sandboxed Docker agent tasks synced to Braintrust evals, ATIF trajectories (Aug 24)</li>
+<li><code>braintrust-mcp-write</code> — Braintrust MCP write tools: agents create evaluators, datasets, monitors, alerts (Aug 26)</li>
+<li><code>weave-claude-agent-sdk</code> — Weave 0.53.6/0.53.7: Claude Agent SDK nested/subagent tracing, PII helpers, cache-token cost (Aug 13/27)</li>
+<li><code>datadog-patterns</code> — Datadog Patterns: hierarchical behavior clustering with per-cluster eval coverage (Jun 9, Preview)</li>
+<li><code>grafana-agent-obs</code> — Grafana Cloud Agent Observability GA: OTel capture + judge/heuristic/regex evals (Jul 30)</li>
+<li><code>copilot-usage-metrics-api</code> — Copilot usage: per-agent activity array (Aug 7) + per-model cache-split token breakdown (Aug 11)</li>
+<li><code>vercel-is-agentic</code> — Vercel Is Agentic: 118-check agent-readiness scoring of public websites (Aug 23)</li>
+<li><code>bedrock-agentcore-unified</code> — Bedrock AgentCore: all agent telemetry in one per-agent CloudWatch log group (Jul 23)</li>
+<li><code>snowflake-cortex-gateway-2</code> — Snowflake Cortex AI Gateway: agent governance/monitoring/cost control layer (Jul 28, preview pending; press release names no &quot;2&quot;)</li>
+<li><code>foundry-roi-agents</code> — Microsoft Foundry ROI for agents: cost vs. customer-defined value models, trace drill-down (Jul, private preview)</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Claude Code Fable 5 · 1 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
