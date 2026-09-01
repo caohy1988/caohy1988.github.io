@@ -1,6 +1,46 @@
 {
   "items": [
     {
+      "id": "otel-genai-execution-state-changed-proposal",
+      "tag": "Standards",
+      "kind": "rank",
+      "title": "OTel GenAI #483: gen_ai.execution.state.changed event (ready for review, Sep 1)",
+      "html": "<a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/483\">semconv-genai #483</a> (draft Aug 30; ready-for-review 1 Sep 3:02 PM PT). Adds Development-status event <code>gen_ai.execution.state.changed</code> with required changed-key count, opt-in bounded <code>changed_keys</code>, and conditionally required runtime-owned <code>version</code> — no state values, tool args, or secrets on the event. Reference producers: LangGraph and Google ADK (<code>EventActions.state_delta</code> on confirmation-gated pause/resume). Two bot reviews, no maintainer comment yet. <a href=\"/research/briefs/2026-09-01-1634-fable5.html\">Full brief</a>.",
+      "added": "2026-09-01T1634",
+      "addedDisplay": "4:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "otel-genai-durable-execution-thread",
+      "tag": "Standards",
+      "kind": "rank",
+      "title": "OTel GenAI #462/#445: durable-runtime observability; lifecycle PR to draft (Aug 19–31)",
+      "html": "<a href=\"https://github.com/open-telemetry/semantic-conventions-genai/issues/462\">semconv-genai #462</a> (opened 19 Aug) frames durable agentic runtimes that persist, pause, resume, delegate, retry, and compensate. <a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/445\">#445</a> proposed <code>paused</code>/<code>checkpointed</code>/<code>resumed</code>/<code>pause.resolved</code> events; on 31 Aug the author converted it to draft after critique and committed to prototyping over LangGraph, CrewAI, and ADK (\"append-only event log, nothing to point at\"). Not spec. <a href=\"/research/briefs/2026-09-01-1634-fable5.html\">Full brief</a>.",
+      "added": "2026-09-01T1634",
+      "addedDisplay": "4:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "otel-genai-skills-proposal",
+      "tag": "Standards",
+      "kind": "rank",
+      "title": "OTel GenAI #463: gen_ai.skill.* attrs + skill metrics (ready for review, Sep 1)",
+      "html": "<a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/463\">semconv-genai #463</a> (opened 20 Aug; ready-for-review 1 Sep 4:42 AM PT; further commit 12:17 PM PT). Adds <code>gen_ai.skill.*</code> attributes and skill metrics — loads/resource reads/script runs on <code>execute_tool</code>; active skills (and compacted flag) on invoke-agent as <code>gen_ai.skills</code>. Prototyped on Google ADK and Microsoft Agent Framework; ongoing work to land in ADK as experimental. Fourteen open review comments. Not spec. <a href=\"/research/briefs/2026-09-01-1634-fable5.html\">Full brief</a>.",
+      "added": "2026-09-01T1634",
+      "addedDisplay": "4:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "otel-python-genai-langgraph-state-producer",
+      "tag": "Standards",
+      "kind": "rank",
+      "title": "opentelemetry-python-genai #507: LangGraph state-change producer (Aug 31)",
+      "html": "<a href=\"https://github.com/open-telemetry/opentelemetry-python-genai/pull/507\">opentelemetry-python-genai #507</a> (open; same author as semconv #483). LangGraph instrumentation emitting <code>gen_ai.execution.state.changed</code> events; values never emitted. Companion reference producer to the ADK <code>state_delta</code> scenario in #483. <a href=\"/research/briefs/2026-09-01-1634-fable5.html\">Full brief</a>.",
+      "added": "2026-09-01T1634",
+      "addedDisplay": "4:34 PM PT",
+      "progress": []
+    },
+    {
       "id": "otel-genai-finish-reasons-positional",
       "tag": "Standards",
       "kind": "rank",
@@ -481,6 +521,11 @@
           "at": "2026-09-01T1434",
           "displayTime": "2:34 PM PT",
           "html": "Fable 5.1: releases tab still empty, but main moved — <a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/440\">#440</a> modality/cache usage attrs (20 Aug), <a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/469\">#469</a> cache attrs off invoke_agent (27 Aug), <a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/363\">#363</a> positional finish_reasons with <code>error</code> placeholder (31 Aug). Standing check must read main-branch changelog fragments, not the releases tab. <a href=\"/research/briefs/2026-09-01-1434-fable5.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-09-01T1634",
+          "displayTime": "4:34 PM PT",
+          "html": "Fable 5.1 process note: main still ends at dependency-bump <a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/486\">#486</a> (ruled out at 1534); standing check must also read the open-PR list. <a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/483\">#483</a> (execution state.changed) and <a href=\"https://github.com/open-telemetry/semantic-conventions-genai/pull/463\">#463</a> (skill attrs) both left draft and are ready-for-review today — ADK as reference producer — without touching main. Neither has maintainer review yet. <a href=\"/research/briefs/2026-09-01-1634-fable5.html\">Full brief</a>."
         }
       ]
     },
@@ -1076,6 +1121,21 @@
   ],
   "runs": [
     {
+      "id": "2026-09-01T1634",
+      "date": "2026-09-01",
+      "displayTime": "4:34 PM PT",
+      "added": [
+        "otel-genai-execution-state-changed-proposal",
+        "otel-genai-durable-execution-thread",
+        "otel-genai-skills-proposal",
+        "otel-python-genai-langgraph-state-producer"
+      ],
+      "updated": [
+        "otel-genai"
+      ],
+      "brief": "/research/briefs/2026-09-01-1634-fable5.html"
+    },
+    {
       "id": "2026-09-01T1434",
       "date": "2026-09-01",
       "displayTime": "2:34 PM PT",
@@ -1328,6 +1388,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-09-01T1634",
+      "date": "2026-09-01",
+      "displayTime": "4:34 PM PT",
+      "title": "Fable 5.1: OTel GenAI state-change + skills proposals (ADK as reference)",
+      "href": "/research/briefs/2026-09-01-1634-fable5.html",
+      "analyzer": "Claude Code Fable 5.1"
+    },
     {
       "id": "2026-09-01T1434",
       "date": "2026-09-01",
