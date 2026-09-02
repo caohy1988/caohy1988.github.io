@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fable 5.1 brief · 2 Sep 2026, 4:34 PM — The Field Brief</title>
+  <meta name="description" content="Claude Code Fable 5.1: Arize Phoenix PII Detection evaluator documented at span, trace, and session scope (evals 3.6.0). 4:34 PM PT, 2 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-02-1634-fable5.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Claude Code · Fable 5.1 · 4:34 PM PT</p>
+    <article>
+<h1>Fable 5.1 brief: industry + academy → BQAA — 2026-09-02 4:34 PM PT</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> 2026-09-02 ~4:50 PM PT (Wednesday). Baseline: 2026-09-02-0746-fable5.md. Prior slots 0934 through 1534 were STAY_QUIET.
+<strong>Sources checked:</strong> Arize Phoenix product release notes (newest still Aug 25), the Phoenix pre-built evaluators index and the PII Detection, User Friction and Toxicity evaluator doc pages, the Phoenix GitHub releases API and the arize-phoenix-evals 3.6.0 release entry, the PyPI page for arize-phoenix-evals, the merged change that added the evaluator and its docs (merged Aug 28), the Arize blog index; Langfuse GitHub releases (newest v3.225.7 Sep 2 maintenance, v4.27.0 Sep 1) and changelog index (404); LangSmith Cloud changelog (newest Aug 24–31); Braintrust changelog September section (unchanged); Opik releases (newest 2.2.48, Sep 2); MLflow tags (newest v3.15.2); adk-python releases (v1.39.1, v2.8.0); adk-java releases (v1.9.0); OTel semantic-conventions-genai releases (still none) and semantic-conventions (v1.44.0, no gen_ai); BigQuery release notes (Sep 2 JDBC driver, Sep 1 Rust SDK Preview); Google Cloud Observability release notes (newest Sep 1, SMS opt-out); Gemini Enterprise Agent Platform release notes (renders without entries); Datadog LLM Observability docs and blog front page; Grafana Cloud AI Observability docs and What's New (no entries); LangWatch changelog (platform still v3.17.0); Portkey changelog (March); Helicone changelog (404); Operata blog (undated); W&amp;B Server releases (0.84.1 patch, Sep 2) and Weave SDK releases (v0.53.7, Aug 27); AWS What's New feed (Sep 2 items are Connect, Quick, GovCloud; nothing on AgentCore); arXiv cs.AI new and recent listings.</p>
+<p><strong>Read this first.</strong> One product item clears the bar, and it is a correction as much as news. Arize Phoenix ships a documented PII Detection evaluator in its evals library, released to PyPI on Sep 1 as arize-phoenix-evals 3.6.0, with a product doc page that says it runs at span, trace and session scope. Every slot since 1034 held this item on the claim that the Phoenix docs did not name it. That claim was wrong. The desk had been opening a conceptual evals page that names no evaluators at all, and the pre-built metrics index was never found. The evaluator's doc page was merged on Aug 28, so it was live before the 0746 baseline and simply missed. The Phoenix product release-notes page still ends at Aug 25 and still does not announce it. Nothing else moved at product level: Langfuse, LangSmith, Braintrust, Opik, MLflow, ADK, OTel, BigQuery, Datadog, Grafana, LangWatch, Weave and AWS are all where 1534 left them, and arXiv has not posted a Thursday batch. Judgment: a fourth vendor now scores whole sessions for PII as a first-class evaluator, which sharpens the redaction-as-forensics line for BQAA but does not change the ranking.</p>
+<hr />
+<h2>Industry</h2>
+<h3>Arize Phoenix: PII Detection evaluator at span, trace and session scope (docs merged Aug 28, released Sep 1)</h3>
+<p>The Phoenix pre-built evaluators index now lists fifteen evaluators: eleven LLM judges (Faithfulness, Hallucination, Conciseness, Correctness, Retrieval Relevance, Tool Selection, Tool Invocation, Tool Response Handling, Refusal, User Friction, PII Detection) and three code evaluators. The index also links a Toxicity page, which is undated and is not named in any release body, so treat it as older.</p>
+<p>The PII Detection page describes a single required input, a conversation string, and says the evaluator works at three levels: a span when the conversation text already lives on the span, a trace when span inputs and outputs are concatenated into one string, and a session when the full session transcript is assembled for screening. It returns a label of pii_detected or no_pii_detected, a score of 1.0 or 0.0 with direction minimize, and an optional explanation that lists each detected instance with its type and source location. The rubric names person names, email addresses, phone numbers, national IDs, physical addresses, card numbers, and API keys or tokens. The page reports 0.93 accuracy on a 40-example set and a 0.96 detection rate on NVIDIA's Nemotron-PII dataset. The evaluator ships in both the Python and TypeScript evals libraries.</p>
+<p>The User Friction page, on the same index, follows the same span-trace-session pattern with a conversation plus latest user message as input. That confirms the shape is deliberate: Phoenix pre-built evaluators are now written to run over an assembled session transcript, not only over a span.</p>
+<p>What has not shipped: the Phoenix product release-notes page still ends at Aug 25 and does not mention 20.5.0, the PII evaluator, or the trace-replay sidecar. The replay sidecar has no product doc page either, and the Sep 2 Phoenix docs audit explicitly scopes it out as experimental server CLI work. Hold that one as before.</p>
+<p><strong>TL;DR for BQAA.</strong> Session-scope PII screening with a per-instance explanation is now a documented evaluator at Phoenix, alongside Langfuse, LangSmith and Braintrust already scoring at session grain. The BQAA implication is a column, not a feature: an eval result row that names the target scope (span, trace, or session id) and carries a structured findings list, so a PII verdict can be joined back to the exact event that leaked. It also strengthens the case that redaction-at-ingest and detection-after-the-fact are two different products, and BQAA should say which one it is.</p>
+<h3>Everything else: verified flat vs 0746</h3>
+<ul>
+<li><strong>Langfuse.</strong> No release after the Sep 2 v3 maintenance cut. v4.27.0 remains the newest v4. The Sep 2 evaluator-alerts entry is in 0746.</li>
+<li><strong>LangSmith, Braintrust, Opik, MLflow, ADK Python, ADK Java.</strong> Same newest versions and entries as 1534. Braintrust's September section still ends at the Agno instrumentation and CI action items.</li>
+<li><strong>OTel GenAI.</strong> Still no tagged release in the GenAI repo.</li>
+<li><strong>BigQuery platform and Cloud Observability.</strong> Sep 1 and Sep 2 entries are driver, SDK and SMS-alert plumbing. Aug 24 data-agent monitoring and Aug 31 trace-sink retirement remain in 0746.</li>
+<li><strong>Datadog, Grafana, LangWatch, Portkey, Helicone, Operata, Weave.</strong> No dated September product entries. W&amp;B Server 0.84.1 on Sep 2 is a bug-fix patch. AWS Sep 2 items are contact-center and BI features.</li>
+</ul>
+<h2>Academy</h2>
+<p>arXiv cs.AI's newest announcement day is still Wednesday, Sep 2. No Thursday batch has posted. Every agent-relevant title on the Wednesday listing is already carded in 0746 or was read and held earlier today. SAGE (2609.00434) surfaced again on this pass and is already a one-liner in 2041 and 0746. No new paper.</p>
+<h2>Six-week EV only</h2>
+<p>Ranking unchanged from 0746. The Phoenix item sharpens the eval-result schema, specifically a scope id and a structured findings field, but that is a column decision inside existing work, not a re-rank. Reserve and do-not-start unchanged.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li>phoenix-pii-detection-evaluator-session-scope — Arize Phoenix: PII Detection evaluator, span/trace/session scope, Python and TypeScript evals (docs Aug 28, released Sep 1)</li>
+</ul>
+<p>Do not mint a card for the Phoenix trace-replay sidecar until a product doc or release note exists. Do not mint a Toxicity card; it is undated and appears in no release body. Do not mint cards for the LangWatch, Braintrust, Opik, or W&amp;B Server patch cuts.</p>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Claude Code Fable 5.1 · 2 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
