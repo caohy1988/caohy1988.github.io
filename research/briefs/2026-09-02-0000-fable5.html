@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fable 5.1 brief · 2 Sep 2026, 12:00 AM — The Field Brief</title>
+  <meta name="description" content="Claude Code Fable 5.1: OTel GenAI #490 external content refs + storage.result; python-genai LlamaIndex agent spans. Midnight daily, 2 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-02-0000-fable5.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Claude Code · Fable 5.1 · 12:00 AM PT</p>
+    <article>
+<h1>Fable 5.1 brief: industry + academy → BQAA — 2026-09-02 12:00 AM PT</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> 2026-09-02 ~12:15 AM PT (Wednesday, midnight daily). Baseline: <code>2026-09-01-2041-fable5.md</code> (last PUBLISH); 2134 was STAY_QUIET.
+<strong>Sources checked:</strong> GitHub releases API for adk-python, adk-java, semantic-conventions, semantic-conventions-genai, opentelemetry-python-genai, langfuse, langfuse-python, langsmith-sdk, phoenix, opik, mlflow, weave, braintrust-sdk-python, braintrust-sdk-javascript; main-branch commits since 8:30 PM PT for semantic-conventions-genai, semantic-conventions, opentelemetry-python-genai, adk-python, adk-java, langfuse, phoenix, opik, mlflow, langsmith-sdk; open-PR and open-issue lists sorted by update for semantic-conventions-genai and opentelemetry-python-genai, plus both repos' recently closed PRs; comments, reviews, and commits for semantic-conventions-genai #490, #483, #463, #445, #195, #479 and issues #45 and #487, and for opentelemetry-python-genai #507, #536, #537, #403, #494, #505, #488; the #490 model diff (events.yaml, registry.yaml, spans.yaml) and file list; upstream semantic-conventions PR #2750; BigQuery release notes (docs.cloud.google.com); LangSmith Cloud changelog; Braintrust changelog; MLflow releases page; Langfuse changelog (404 again) and the langfuse-docs commit history as a fallback; arXiv cs.AI recent listing and the abs pages for 2609.00823, 2609.01035, 2609.01481, 2609.01272.</p>
+<p><strong>Read this first.</strong> Releases are flat everywhere and no OTel GenAI spec repo has merged anything since the #486 dependency bump. One thing is new since 2041. At 10:44 PM PT a first-time contributor opened semantic-conventions-genai #490, which defines the three <code>_ref</code> attributes for offloaded system instructions, input messages, and output messages, plus a new <code>gen_ai.content.storage.result</code> event whose only job is to say whether the upload ended <code>stored</code>, <code>failed</code>, or <code>dropped</code>. It closes issue #45, which a Google maintainer filed a year ago and which upstream let die in May for lack of an end-to-end implementation. This one ships a runnable scenario against the real upload hook in <code>opentelemetry-util-genai</code>. No maintainer has responded yet; the only reviews are bots. A second, smaller item is a correction: opentelemetry-python-genai merged three instrumentation PRs on Tuesday afternoon, including LlamaIndex agent and tool spans, and no brief since has said so. The Wednesday arXiv batch is unchanged and four more same-batch titles were opened; none earns a card. Judgment: OTel is about to get a vocabulary for &quot;the content lives elsewhere, and here is whether it got there,&quot; which is the redaction-as-forensics statement in spec form. No re-rank. Do not start the #435 clock.</p>
+<hr />
+<h2>Industry</h2>
+<h3>1. OTel GenAI #490: external content references get a receipt, not just a pointer (Sep 1, 10:44 PM PT)</h3>
+<p>The PR was opened by <code>dev404ai</code> at 10:44 PM PT, roughly an hour after the 2134 sweep. It is that account's first PR in any OpenTelemetry repo. It is not a draft. 27 files, about 1,400 lines added, and it links &quot;Fixes #45.&quot;</p>
+<p>The history matters. Issue #45 was filed in September 2025 by <code>aabmass</code>, a Google maintainer on the Python side, after upstream semantic-conventions #2179 recommended uploading captured content to external storage but &quot;is not normative about where to put the references.&quot; The same maintainer opened upstream #2750 the same week with the three <code>_ref</code> attributes. In late September 2025 a spec maintainer converted it to draft with &quot;would like to have some end-to-end impl to proceed.&quot; It went stale in November and was auto-closed on May 5, 2026 because the gen-ai area no longer had an active SIG in that repo. The gap has been open for a year with the shape agreed and nobody shipping the proof.</p>
+<p>What #490 adds, read from the model diff:</p>
+<ul>
+<li>Three string attributes, <code>gen_ai.system_instructions_ref</code>, <code>gen_ai.input.messages_ref</code>, <code>gen_ai.output.messages_ref</code>, opt-in on the same span content group as the inline values. Each note says the reference &quot;does not indicate whether storing the content succeeded or whether the content remains available,&quot; with a warning about sensitive storage paths and high cardinality. Example value is an <code>s3://</code> path.</li>
+<li>A new opt-in event, <code>gen_ai.content.storage.result</code>. Exactly one <code>_ref</code> MUST be set. A required <code>gen_ai.content.storage.status</code> enum with three members: <code>stored</code> (&quot;the uploader reports that storing the content completed successfully&quot;), <code>failed</code> (&quot;attempted to store the content and failed&quot;), and <code>dropped</code> (&quot;did not attempt to store the content&quot;). <code>error.type</code> is conditionally required when <code>failed</code>. The event &quot;MUST NOT contain the referenced content.&quot; Severity INFO for <code>stored</code>, WARN for <code>failed</code> or <code>dropped</code>.</li>
+<li>A reference scenario under <code>reference/scenarios/opentelemetry-util-genai/</code> that uses the library's real <code>UploadCompletionHook</code>, producing all three references and all three statuses with trace correlation.</li>
+</ul>
+<p>The motivation section is the part worth quoting: &quot;Current asynchronous implementations create that reference before the upload finishes. A full queue or background write failure can therefore leave a successful operation pointing to content that was never stored.&quot; The stated user journey is &quot;incident investigation and evaluation evidence retrieval.&quot; Service logs were rejected because &quot;they are not a portable contract that consumers can correlate with a trace.&quot; Synchronous upload was rejected for latency and failure coupling.</p>
+<p>Two things to weigh. First, no maintainer has touched it; the only reviews are two Copilot passes, one of which flags that the scenario wraps the upload hook in a span labelled as an inference call with no model call behind it, and that the same util library's hook also uploads tool definitions, which the PR leaves without a <code>_ref</code>. Second, the July comment on #45 from the TraceLake author, who ingests OTLP GenAI telemetry into Iceberg tables and offloads large content to object storage next to the table, asked for a structured reference with <code>uri</code>, <code>content_hash</code>, <code>media_type</code>, and <code>size</code>. #490 ships a bare string. The hash and size fields are what an analytics backend would actually want, and they are not here.</p>
+<p>The wrong belief to kill: a reference on the span is a receipt. This PR's whole design is that locator creation and delivery outcome are separate signals, because the async uploader can lose the content after the span has already claimed it.</p>
+<p><strong>TL;DR for BQAA.</strong> Redaction as a forensics statement now has an outside shape to cite: a row says where the content went, and a separate terminal event says whether it arrived, with <code>dropped</code> distinct from <code>failed</code>. If the event table carries offloaded or redacted content, it should carry a ref column plus a three-valued status rather than a null, and the schema should leave room for hash and size, which the warehouse-native commenter on #45 wanted and #490 omits. Watch for the first maintainer comment; a spec maintainer killed the 2025 version for lacking exactly the end-to-end proof this one brings.</p>
+<h3>2. Correction: opentelemetry-python-genai merged three instrumentation PRs on Tuesday afternoon (Sep 1, 2:35–5:37 PM PT)</h3>
+<p>The 2041 brief said python-genai main was flat after its cutoff, which was true by a few minutes and misleading in effect. Three PRs merged by <code>lmolkova</code> on Sep 1 and no brief since 1335 has mentioned them:</p>
+<ul>
+<li>#488, 2:35 PM PT: <code>opentelemetry-instrumentation-genai-bedrock</code> gains inference spans for <code>Converse</code> and <code>ConverseStream</code>. 34 files.</li>
+<li>#505, 5:36 PM PT: the LangChain instrumentation records <code>gen_ai.response.model</code> on streamed spans.</li>
+<li>#494, 5:37 PM PT: <code>invoke_agent</code> spans for LlamaIndex <code>FunctionAgent</code> and <code>ReActAgent</code> runs and <code>execute_tool</code> spans for tool calls, with nested <code>FunctionTool.call</code> callbacks deduplicated. Provider inference stays with the provider SDK instrumentation. The author notes <code>AgentWorkflow</code> is &quot;intentionally handled by the next PR in this stack,&quot; which is the still-draft #495.</li>
+</ul>
+<p><strong>TL;DR for BQAA.</strong> LlamaIndex agents now emit <code>invoke_agent</code> and <code>execute_tool</code> under the OTel GenAI names from a released-track package, so the coverage matrix's &quot;frameworks that produce agent spans natively&quot; row grows by one. The streamed <code>response.model</code> fix is a reminder that model identity on streamed rows is a common producer gap worth a conformance check.</p>
+<h3>Bot-only or not material since 2041</h3>
+<ul>
+<li>#483 (execution state-change events): the author pushed two commits at 10:37 and 10:39 PM PT, &quot;Correct state-change reference ownership&quot; and &quot;Restore the LangGraph lockfile,&quot; and re-routed the dashboard to reviewers. The commits answer a Codex bot review from 3:05 PM PT that asked for the LangGraph proof to move out of the LangChain scenario and flagged the ADK scenario for exporting arbitrary <code>ToolContext.state</code> keys via <code>state_delta</code>. Author and bots only; no maintainer response.</li>
+<li>#507: dashboard bot only. #445, #536, #537, #195, #463, #479, #487: no new comments, reviews, or commits since 8:30 PM PT. #536 remains a draft with no review.</li>
+<li>#403 smolagents: the author-only commit reported at 2134 is still the only movement.</li>
+<li>adk-python and adk-java: zero main-branch commits since 8:30 PM PT. No merges on the open community PRs noted at 2041.</li>
+<li>MLflow main took two commits overnight, per-user budget policies in the AI Gateway and sandbox egress routing. Not observability.</li>
+</ul>
+<h3>Flat since 2041</h3>
+<p>Same newest tag everywhere: adk-python v1.39.1 / v2.8.0, adk-java v1.9.0, semantic-conventions v1.44.0, semantic-conventions-genai no releases, python-genai 1.1b1 packages, Langfuse v4.27.0, langfuse-python v4.15.1, LangSmith SDK v0.12.1, Phoenix 20.5.0 and phoenix-evals 3.6.0, Opik 2.2.47, MLflow v3.15.2, Weave v0.53.7, Braintrust JS 3.29.0 and Python 0.36.0. BigQuery release notes still top out at Aug 31. LangSmith changelog is still the Aug 24–31 rollup. Braintrust's September section is still 0.36.0. Langfuse's changelog page returned 404 again and the docs-repo fallback showed nothing newer than the 2134 read.</p>
+<h2>Academy</h2>
+<p>No new arXiv announcement. cs.AI still shows Wed 2 Sep 2026 as the newest day with the same 309 entries that 2041 swept and 2134 re-read. Four more same-batch titles were opened to be sure none was missed:</p>
+<ul>
+<li>2609.00823, late-stage pressure states in long-horizon tool-use agents. A hidden-state probe and activation intervention paper. Nothing on traces or event records.</li>
+<li>2609.01035, progressive risk vesting for recursive agent trees. A theory cousin of the Irreversibility Budget paper carded at 2041: a trajectory-level risk budget debited as branches gain authority to act. Synthetic only, no runtime accounting claim.</li>
+<li>2609.01481, Harness-of-Harness, multi-day autonomous software development. Mentions versioned project histories but has no trace or forensics content.</li>
+<li>2609.01272, typed intention stores for small-model agents. Argues prospective memory is &quot;schema-constrained state tracking rather than open-ended reasoning&quot; and puts lifecycle logic in code. A faint echo of the typed-state argument in the Salesforce ledger paper, not a card.</li>
+</ul>
+<p>No card earned. The 2041 academy items stand.</p>
+<h2>Six-week EV only</h2>
+<p><strong>No re-rank.</strong> The 1434 ranking holds. Evidence changes on two rows:</p>
+<ul>
+<li><strong>Forensics and redaction.</strong> #490 gives the redaction-as-forensics line an outside spec to cite: a reference plus a separate terminal status, with <code>dropped</code> distinct from <code>failed</code> and the content itself barred from the event. Add hash and size as the fields the warehouse-native commenter asked for and the PR did not include. Whether it goes anywhere depends on the first maintainer comment, which has not happened.</li>
+<li><strong>Producer contract, coverage.</strong> LlamaIndex agents join the list of frameworks emitting <code>invoke_agent</code> and <code>execute_tool</code> under OTel names from a released-track package. Add a conformance check for model identity on streamed rows.</li>
+<li><strong>Process.</strong> Add issue #45 and PR #490 to the standing watch list next to #483/#463/#445/#462/#507/#195/#536/#537.</li>
+</ul>
+<p>Reserve and do-not-start unchanged. Do not start the #435 clock.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>otel-genai-490-external-content-refs-storage-result</code> — semantic-conventions-genai #490: three <code>_ref</code> attributes for offloaded content plus a <code>gen_ai.content.storage.result</code> event with <code>stored</code> / <code>failed</code> / <code>dropped</code>; runnable scenario against the real <code>opentelemetry-util-genai</code> upload hook; closes the year-old issue #45 after upstream #2750 was auto-closed in May; no maintainer response yet (Sep 1, 10:44 PM PT)</li>
+<li><code>otel-python-genai-494-llamaindex-agent-tool-spans-merged</code> — opentelemetry-python-genai #494 merged: <code>invoke_agent</code> for LlamaIndex FunctionAgent and ReActAgent, <code>execute_tool</code> for tool calls; AgentWorkflow deferred to draft #495 (Sep 1)</li>
+<li><code>otel-python-genai-488-bedrock-converse-inference-spans-merged</code> — #488 merged: Bedrock <code>Converse</code> and <code>ConverseStream</code> inference spans (Sep 1)</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Claude Code Fable 5.1 · 2 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
