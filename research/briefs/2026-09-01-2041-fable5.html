@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fable 5.1 brief · 1 Sep 2026, 8:41 PM — The Field Brief</title>
+  <meta name="description" content="Claude Code Fable 5.1: OTel python-genai #536 LangGraph lifecycle producer; Salesforce live-trace ledger 2609.01466. 8:41 PM PT, 1 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-01-2041-fable5.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Claude Code · Fable 5.1 · 8:41 PM PT</p>
+    <article>
+<h1>Fable 5.1 brief: industry + academy → BQAA — 2026-09-01 20:41 PT</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> 2026-09-01 ~8:48 PM PT (Tuesday, catch-up for the missed 18:34 / 19:34 / 20:34 slots). Baseline: <code>2026-09-01-1734-fable5.md</code> (PUBLISH).
+<strong>Sources checked:</strong> GitHub releases API for adk-python, adk-java, semantic-conventions, semantic-conventions-genai, opentelemetry-python-genai, langfuse, langfuse-python, langsmith-sdk, phoenix, opik, mlflow, weave, braintrust-sdk-javascript, braintrust-sdk-python; main-branch commit logs since 5:40 PM PT for semantic-conventions-genai, semantic-conventions, opentelemetry-python-genai, adk-python, adk-java, langfuse, phoenix, opik; semantic-conventions-genai open-PR list sorted by update, plus comments, reviews, and commit lists for #483, #463, #445, #479, #195 and issue #462; opentelemetry-python-genai PR #507, new PR #536, and new issue #537; the meshailabs fork branch compared against upstream main; adk-python open-PR list and PR #6957 page; BigQuery release notes (docs.cloud.google.com); LangSmith changelog (docs.langchain.com); Braintrust changelog; Langfuse changelog (404 again); MLflow releases page; arXiv cs.AI recent and new listings, the arXiv export API, and the abs pages for 2609.01466 and 2609.01360.</p>
+<p><strong>Read this first.</strong> Releases are flat everywhere and nothing has merged on OTel GenAI main since the #486 dependency bump. Two things are material since 1734. First, the OTel #445 author stopped editing the spec and shipped a producer: at 5:58 PM PT a draft PR in opentelemetry-python-genai emits paused, checkpointed, and resumed from LangGraph 1.2's public interrupt and resume callbacks, and a tracking issue filed at 6:16 PM PT plans a CrewAI package next and an ADK plugin third. The author also retracted two of their own Aug 31 claims about how LangGraph exposes pauses. Second, arXiv's Wednesday cs.AI batch is up, and it contains the most on-topic paper in weeks: a Salesforce AI Research paper that treats a long-horizon agent trace as an append-only event ledger folded into typed run state, with code released, plus an EMNLP 2026 paper on multi-error attribution over agent traces and a paper showing a cascade's own dashboard cannot see its own degradation. A third smaller item: the A2A protocol conventions PR #195, which a maintainer called one round from done on Aug 27, took its author's final-round commits tonight. #483 and #463 still have no maintainer response. Judgment: the pause-and-resume spec is now being decided by what real instrumentation can emit, and the answer so far is &quot;no execution id,&quot; which is exactly the gap the ADK invocation id fills. No re-rank. Do not start the #435 clock.</p>
+<hr />
+<h2>Industry</h2>
+<h3>1. OTel #445 gets a real producer: python-genai draft #536 and tracking issue #537 (Sep 1, 5:48–6:28 PM PT)</h3>
+<p>The sequence tonight, all by the #445 author, all in the two hours after the 1734 cutoff:</p>
+<ul>
+<li>5:48 PM PT, comment on #445: the five drops from Aug 31 are confirmed applied, and phase 1 of the prototypes is &quot;real instrumentation on a branch of the released <code>opentelemetry-instrumentation-genai-langchain</code> package.&quot;</li>
+<li>5:58 PM PT, opentelemetry-python-genai PR #536 opened as a draft: &quot;Add LangGraph durable-execution agent lifecycle events.&quot; 17 files, roughly 2,000 lines added, including a new <code>lifecycle.py</code> and a 700-line test file. Checked against upstream main: the fork branch is 8 commits ahead and the files are real.</li>
+<li>6:16 PM PT, issue #537 opened: &quot;Prototype agent lifecycle events (semconv #445) across LangGraph, CrewAI and ADK.&quot; One PR each. LangGraph is #536. CrewAI goes through its event bus. ADK &quot;ships its own OpenTelemetry tracing, so this would be a plugin rather than an instrumentation package,&quot; and the author is &quot;open to guidance on whether it belongs in this repo at all.&quot;</li>
+<li>6:24 PM PT, the #445 description was rewritten to match the shrunken PR and to link the prototype. The stale-description problem flagged at 1734 is fixed.</li>
+</ul>
+<p>The comment contains two retractions worth reading. On Aug 31 the author had said pauses would be read at chain end and the checkpointer patched at the base class. Tonight: &quot;LangGraph 1.2 ships a public lifecycle API, <code>on_interrupt</code> / <code>on_resume</code>, whose events carry the real <code>Interrupt</code> objects, the checkpoint id and the run id, and it already dispatches them to the released OTel handler, which currently raises <code>AttributeError</code> on every interrupt and resume.&quot; So the shipped OTel LangChain instrumentation is throwing on every LangGraph interrupt today, and #536 doubles as a bug fix. The base-class checkpointer hook does not work either because <code>put</code> is abstract; the saver instance passed to <code>compile()</code> is patched instead.</p>
+<p>What the captured run shows, per the author: three <code>checkpointed</code> events on the pausing invoke and two on the resume, <code>paused</code> carrying the real interrupt id, <code>resumed</code> carrying <code>resumed_from = checkpoint</code> with the real checkpoint id. What it cannot show: <code>execution.id</code>, because &quot;no id spans suspend and resume; the two invokes are unlinked traces.&quot; Also not producible from LangGraph: <code>pause.reason</code> and the <code>pause</code> member of <code>resumed_from.type</code>. The author's rule: &quot;None of the three has a producer anywhere yet; they ride on CrewAI and ADK or they come out too.&quot;</p>
+<p>Two structural limits the author admits the flat model cannot express: nested subgraphs emit one <code>resumed</code> per level, and without a checkpointer <code>paused</code> still fires with a checkpoint id that nothing persisted.</p>
+<p>No maintainer has responded to #445, #536, or #537 yet. The only comment on #536 is the author's &quot;Tracking in #537.&quot;</p>
+<p>The wrong belief to kill: OTel pause/resume is a spec argument. It is now an instrumentation argument, and the field that decides whether a resumed run can be joined to its origin has no producer in the first of three libraries.</p>
+<p><strong>TL;DR for BQAA.</strong> The producer contract's pause/resume join key just became a cross-library claim rather than an internal detail: LangGraph cannot supply one, so ADK's invocation id across a confirmation pause is the reference example the OTel thread will end up citing or copying. Two rows to add to the coverage matrix now: one <code>resumed</code> per nesting level, and a checkpoint id that may never have been persisted. Watch #537 for the ADK plugin decision, because whichever repo it lands in will define what an ADK pause looks like in OTel terms.</p>
+<h3>2. A2A protocol conventions (#195) took final-round commits (Sep 1, 6:14–6:58 PM PT)</h3>
+<p>This PR has been open since May 26 and was not in the 1734 brief because it had been quiet. On Aug 27 a maintainer left a round of minor comments with &quot;I think it's the last round and we're super-close!&quot; Tonight the author pushed six commits, ending with &quot;Refine A2A attributes and scenario output&quot; and a merge of upstream main, and posted a review-thread reply at 6:58 PM PT. The dashboard bot still lists it as waiting on the author with review items to close out.</p>
+<p>What it defines, per the PR page: client and server spans for A2A calls with a shared attribute group, and eleven <code>a2a.*</code> attributes including method name, protocol version and binding, message id, referenced task ids, task id, task state, artifact ids, and agent card URL. Metrics were split out to a follow-up at reviewer request. The reference scenario runs against a mock server, which the maintainer had asked to be replaced with real SDK components.</p>
+<p>The wrong belief to kill: agent-to-agent hops will be modelled at the transport layer. The point of #195, in the author's words, is to let users &quot;understand agent interactions at the protocol level instead of only seeing the underlying HTTP, JSON-RPC, or gRPC transport.&quot;</p>
+<p><strong>TL;DR for BQAA.</strong> If this merges, an A2A hop row has a canonical attribute set: task id, task state, message id, referenced task ids. The transfer row that gained <code>transfer_reason</code> at 1734 is the in-process cousin; the schema should let the two join on the same hop identity, and the A2A task id is the natural key. Cite #195 in the producer contract, not the transport headers.</p>
+<h3>Bot-only or not material since 1734</h3>
+<ul>
+<li>#483 and #463: no comments, reviews, or commits since 1734. Still no maintainer response.</li>
+<li>#479 groq metrics: dashboard bot refresh only.</li>
+<li>#507: no new comments; the #536 description says its event-emit helper &quot;mirrors #507 and should drop on rebase if that lands first.&quot;</li>
+<li>adk-python main after 1734: five docs, refactor, and test commits, nothing on the event model. PR #6590 is merged, as reported at 1734.</li>
+<li>adk-python open PRs: two competing community fixes for <code>skip_summarization</code> on the MCP tool confirmation pause, and a community PR that redacts OAuth2 client secrets and tokens at the serialization boundary of the run endpoints. Both are open with no maintainer merge, so not news yet. The redaction one is worth a glance when it lands because it draws the same line the forensics story draws: redact at the wire, keep the stored event intact.</li>
+</ul>
+<h3>Flat since 1734</h3>
+<p>Same newest tag everywhere: adk-python v1.39.1 / v2.8.0, adk-java v1.9.0, semantic-conventions v1.44.0, semantic-conventions-genai no releases, python-genai 1.1b1 packages, Langfuse v4.27.0, langfuse-python v4.15.1, LangSmith SDK v0.12.1, Phoenix 20.5.0 and phoenix-evals 3.6.0, Opik 2.2.47, MLflow v3.15.2, Weave v0.53.7, Braintrust JS 3.29.0 and Python 0.36.0. No main-branch commits after the cutoff on semantic-conventions, semantic-conventions-genai, python-genai, adk-java, langfuse, phoenix, or opik. BigQuery release notes still top out at Aug 31. LangSmith changelog is still the Aug 24–31 rollup. Braintrust's September section is still 0.36.0 plus the eval action 2.1.0. Langfuse's changelog page returned 404 again.</p>
+<h2>Academy</h2>
+<p>arXiv cs.AI now shows Wed 2 Sep 2026 as the newest announcement day. All papers below were submitted Sep 1 (or Aug 31 late evening UTC) and announced in that batch, so none were visible at 0849.</p>
+<h3>3. Parsing the Stream: A Live Trace Model for Long-Horizon Agents and Their Observers (arXiv 2609.01466, submitted Sep 1)</h3>
+<p>Egor Pakhomov and Erik Nijkamp. Code is released as <code>SalesforceAIResearch/tracelab</code> with a companion dataset on Hugging Face, so this is Salesforce AI Research. 22 pages.</p>
+<p>The thesis is one sentence from the abstract: &quot;A long-horizon agent's trace outgrows both of its consumers: the human observer monitoring the run, and the agent itself, whose bounded context the trace must be folded back into.&quot; Their answer is &quot;an append-only event ledger folded incrementally into typed run state and compiled into per-consumer views.&quot; The ledger is the source of truth; the fold is deterministic; the views are compiled, not prompted.</p>
+<p>Observer-side result, with an LLM reader as proxy for a human: the compiled view answered monitoring questions with &quot;approximately 14x and 15x fewer input tokens&quot; and &quot;at 5-7x lower cost&quot; than a budget-capped single read of the raw trace, at accuracy &quot;0.85-0.87 versus 0.48.&quot; They flag that the questions were co-designed with the view schema and say only the token and cost reduction, &quot;conditional on schema coverage,&quot; should transfer. Agent-side, on 120-link sequential tasks, per-step state maintenance succeeded 30/30 where full-context prompting managed 8/30; a plain scratchpad matched the fold's accuracy at lower cost, so the fold's remaining edge is &quot;deterministic auditability and serving the observer from the same state.&quot; They derive eleven candidate requirements for trace folding from observed failures and show a task family where folding stops helping.</p>
+<p>The wrong belief to kill: an observer product should summarize traces with a model. This paper's evidence points the other way: fold events into typed state deterministically, then let the model read the state.</p>
+<p><strong>TL;DR for BQAA.</strong> This is an outside argument for the named-loop and typed-state columns: an append-only event table plus a deterministic fold into per-run state is what an observer reads well, and the paper puts a rough 14x token reduction on doing it that way. The &quot;schema coverage&quot; caveat is the coverage matrix in academic clothing. Read the eleven requirements against the state-and-loop columns; the code is public.</p>
+<h3>4. EDGE: Error Dependency Graph-Guided Multi-Error Attribution in Multi-Agent LLM Systems (arXiv 2609.01360, submitted Sep 1)</h3>
+<p>Jun Hou, Priya Pitre, Yi Fang, Xuan Wang. Accepted to EMNLP 2026.</p>
+<p>Premise: &quot;LLM agent failures often contain multiple related errors rather than a single mistake.&quot; Existing attribution picks one agent, step, or root cause. EDGE builds an error dependency graph from observed error events, validates a causal subset by counterfactual rollout, and uses the graph to guide a two-stage LLM judge. Evaluated on TRAIL and MAST, the two public agent-trace failure benchmarks; the abstract says it &quot;improves category-level multi-error attribution across most evaluated models and settings.&quot;</p>
+<p><strong>TL;DR for BQAA.</strong> Third paper in two days to treat forensics as attribution over a multi-error graph rather than a single root cause. The product implication is unchanged and now better sourced: an error row needs a parent-error pointer, or the attribution tooling everyone is building will have to reconstruct dependencies from timestamps.</p>
+<h3>5. Cheap Verifiers, Large Blind Spots (arXiv 2609.01345, submitted Sep 1)</h3>
+<p>Dushyant Rajput. Studies cascades where a cheap model answers and a stronger model verifies, then the cheap model is fine-tuned on rejections. Four findings, but one matters here: &quot;the cascade's own dashboard, every metric computed through the verifier, reads a flat 3% error while true delivered error swings up to 32%: the system is blind to its own degradation by construction.&quot; Conclusion: &quot;the reliability of a self-improving cascade cannot be read from any metric computed through its own verifier.&quot;</p>
+<p><strong>TL;DR for BQAA.</strong> Any quality metric BQAA reports that is computed by the same judge the agent uses to route or self-correct is structurally uninformative. The eval schema should record which model produced a verdict so that analysts can exclude in-loop judges from quality dashboards.</p>
+<h3>6. Three more, one line each</h3>
+<ul>
+<li><strong>SAGE: State-Grounded, Abstention-Aware Evaluation of Task-Oriented Dialogue Agents</strong> (2609.00434). Compiles a workflow spec plus per-turn state diff into atomic criteria, routes them through symbolic and encoder verifiers that abstain rather than guess, and emits &quot;a turn-level decision with an evidence trace.&quot; Decides 81–91% of criteria with no paid LLM call. Another vote for state deltas as the eval substrate.</li>
+<li><strong>Invalidation Contracts for Cross-Episode Agent Memory</strong> (2609.00243). Version stamps and cacheability hints on cached recovery suggestions so agents evict stale fixes without trial and error. Notable for the finding that identical bytes get 100% first-try compliance on one model and 11% or below on another. Memory rows want a version stamp.</li>
+<li><strong>The Irreversibility Budget</strong> (2609.00275). Fleet-level cumulative account of residual value-at-risk per principal, charged per effect at a trusted runtime. Per-effect gates admitted overdraws &quot;up to 48 times the tenant's risk limit&quot; in their study. An analytics question, not a spec one: can a fleet's irreversible effects be summed from the event table.</li>
+</ul>
+<h2>Six-week EV only</h2>
+<p><strong>No re-rank.</strong> The 1434 ranking holds. Evidence changes on three rows:</p>
+<ul>
+<li><strong>Producer contract, state and loops.</strong> Add the sentence that LangGraph exposes no id across suspend and resume, per the #445 author's own prototype, and that ADK's invocation id is the contract's join key. Add the two edge cases from #536: one resume event per nesting level, and checkpoint ids without persistence.</li>
+<li><strong>Forensics and eval schema.</strong> EDGE and SAGE both want per-error dependency and per-turn state diff as inputs; Cheap Verifiers wants the judge identity on every verdict. None of this changes priority, all of it sharpens the column list.</li>
+<li><strong>Process.</strong> Tonight's biggest item was in a different repo from the spec PR that motivated it. Add opentelemetry-python-genai open PRs and issues to the standing page list alongside the conventions repo.</li>
+</ul>
+<p>Reserve and do-not-start unchanged. Do not start the #435 clock.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>otel-python-genai-536-langgraph-lifecycle-producer</code> — opentelemetry-python-genai draft PR #536: paused / checkpointed / resumed from LangGraph 1.2 on_interrupt / on_resume and a patched checkpointer; no execution id producible; also fixes the shipped handler raising on every interrupt (Sep 1)</li>
+<li><code>otel-python-genai-537-lifecycle-prototype-plan</code> — issue #537: one prototype per library, LangGraph then CrewAI then an ADK plugin, with the ADK repo home left open (Sep 1)</li>
+<li>update <code>otel-genai-durable-execution-thread</code> — #445 description rewritten to match the model-only draft and link the prototype; author retracted the chain-end and base-class checkpointer claims (Sep 1)</li>
+<li><code>otel-genai-195-a2a-protocol-semconv</code> — semantic-conventions-genai #195: A2A client/server spans and eleven a2a.* attributes; maintainer called it last round Aug 27; author final-round commits tonight (Sep 1)</li>
+<li><code>arxiv-2609-01466-live-trace-model-ledger-fold</code> — Pakhomov and Nijkamp, Salesforce AI Research: append-only event ledger folded into typed run state, compiled per-consumer views, code released (Sep 1)</li>
+<li><code>arxiv-2609-01360-edge-multi-error-attribution</code> — Hou et al., EMNLP 2026: error dependency graph plus counterfactual rollout on TRAIL and MAST (Sep 1)</li>
+<li><code>arxiv-2609-01345-cheap-verifiers-blind-spots</code> — Rajput: in-loop verifier metrics cannot see cascade degradation (Sep 1)</li>
+<li><code>arxiv-2609-00434-sage-state-grounded-eval</code> — Khoury et al.: per-turn state diff compiled to atomic criteria with an evidence trace (Aug 31)</li>
+<li><code>arxiv-2609-00243-invalidation-contracts-agent-memory</code> — Wu and Canedo: version stamps and cacheability hints on cached recovery suggestions (Aug 31)</li>
+<li><code>arxiv-2609-00275-irreversibility-budget</code> — Mohammadi and Bindschaedler: fleet-level residual risk accounting and admission control (Aug 31)</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Claude Code Fable 5.1 · 1 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
