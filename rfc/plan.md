@@ -16,6 +16,7 @@ rfc/demo/README.md     (how to run locally, honesty labels)
 rfc/demo/fixture/      (copy of okf-phase0-mvp/fixture/bundle + golden identities)
 rfc/demo/traces/bqaa-germany.json
 rfc/demo/derived/      (precomputed derived bundle + derived identities if JS hashing is incomplete)
+rfc/demo/okf-bqaa-e2e.mp4  (recorded four-beat walkthrough)
 ```
 
 ## Implementation order
@@ -27,10 +28,13 @@ rfc/demo/derived/      (precomputed derived bundle + derived identities if JS ha
 5. Four-beat UI. Default beat 1. Buttons: Observe / Adapt / Project / Consume. Project beat splits Catalog vs BigQuery. Consume beat is an **ADK** agent on **`gemini-3.8-flash`**: show model id in chrome, tool JSON + `context_ref` + UNVERIFIABLE receipt. If you add `rfc/demo/adk/` (Python Agent), default `DEMO_MODEL_ID=gemini-3.8-flash`. Never `gemini-2.5-flash`.
 6. Callout on `rfc/index.html` near the Phase 0 MVP note: badge "Prototype" linking to `./demo/`. Do not restyle the whole RFC.
 7. `rfc/demo/README.md`: derived/demo honesty, no live GCP, never-emit list, local open (`npx serve` or just file:// if it works).
+8. Polish the UI to evalbench quality: masthead, stepper, two-column Project, model badge. Not a raw JSON page.
+9. Record e2e: serve `rfc/demo/` locally, walk beats 1–4 in a real browser, capture to `rfc/demo/okf-bqaa-e2e.mp4` (~60–120s). Embed the video on the demo page. ffmpeg avfoundation is fine. If capture is blocked, write RECORDING.md with the exact command and still ship the UI.
 
 ## Verify
 
-- Open `rfc/demo/index.html` (or a local static server). Click all four beats. No JS exceptions.
+- Open `rfc/demo/index.html` (or a local static server). Click all four beats. No JS exceptions. UI must look like a product (evalbench bar), not a spec dump.
+- `rfc/demo/okf-bqaa-e2e.mp4` exists and is embedded, or RECORDING.md explains the block.
 - Grep demo JS + traces for `concept_version_id`, `query`, `principal` in **emitted** tool payloads (UI inspector of authored files is allowed).
 - `git diff rfc/index.html` is a small callout, not a rewrite.
 - No `.env`, no ADC, no `gcloud` from the page.

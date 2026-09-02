@@ -33,6 +33,25 @@ The **derived** bundle gets its own `bundle_key` (e.g. `bqaa-derived-cymbal-demo
 - Add `rfc/demo/traces/bqaa-germany.json`: a small observer trace (≤20 events) that a BQAA writer could have emitted while an agent asked the Germany question. Synthetic is fine if labeled. Must be valid-looking BQAA events.
 - Adapter is JavaScript in the page (or a tiny precomputed derived bundle JSON the page applies). No build step required for Pages. Vanilla JS matching `evalbench/app.js` is preferred over a bundler.
 
+## Web UI
+
+This is a product demo, not a JSON dump. Bar is `evalbench/index.html` (six-act deck, masthead, stepper, named beats).
+
+- Full-page layout: masthead, four-beat stepper with keyboard next/back, identity chips (`observation_id` / `snapshot_id` / `publication_id`), derived/demo banner.
+- Reuse RFC tokens (`--telemetry`, `--catalog`, `--runtime`, Space Grotesk / Source Serif / IBM Plex Mono). Catalog pane uses `--catalog`, BQ pane `--runtime`, observer events `--telemetry`.
+- Project beat is a real two-column UI (Catalog cards + BQ table), not two `<pre>` blocks.
+- Consume beat shows ADK chrome with **`gemini-3.8-flash`** as a visible model badge, then tool JSON + `context_ref` + UNVERIFIABLE receipt.
+- Deep-linkable `#beat=1`…`#beat=4`. No bundler.
+
+## E2E recording
+
+Haiyuan, 2026-09-02: record a real walkthrough of beats 1–4 and ship it with the page.
+
+- File: `rfc/demo/okf-bqaa-e2e.mp4` (keep it short, ~60–120s). Embed with `<video controls>` on `rfc/demo/index.html`, same pattern as `evalbench/evalbench-week0-freeze-e2e.mp4`.
+- Capture the actual demo UI in a browser (ffmpeg `avfoundation` on the Mac, or a headed browser record). Not a slideshow of screenshots. Not a mock.
+- Narrate on-screen via beat titles so the video stands alone (Observe → Adapt → Project → Consume). Show the `gemini-3.8-flash` badge in the consume beat.
+- If screen capture is blocked, leave a `rfc/demo/RECORDING.md` with the exact ffmpeg command and a note; still ship the UI. Prefer landing the mp4 in this PR.
+
 ## RFC page wiring
 
 - Keep `rfc/index.html` as the RFC. Add a visible "Prototype demo" callout near the Phase 0 MVP note (around the existing `okf-phase0-mvp/` note) linking to `rfc/demo/`.
