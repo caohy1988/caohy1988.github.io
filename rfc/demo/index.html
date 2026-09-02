@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="https://caohy1988.github.io/rfc/demo/">
+<meta name="description" content="Clickable prototype: BQAA observer events → one-way adapter → derived OKF v0.2 bundle → Knowledge Catalog + BigQuery projections → ADK agent (gemini-3.8-flash) consuming context_ref only. Fixture data, no live GCP.">
+<meta property="og:title" content="Observed, not authored — BQAA → derived OKF prototype">
+<meta property="og:description" content="Four beats: Observe, Adapt, Project, Consume. Derived / demo bundle with its own identity chain; agent tools emit context_ref only. No live GCP.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://caohy1988.github.io/rfc/demo/">
+<meta name="theme-color" content="#101828">
+<title>Observed, not authored — BQAA → derived OKF prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="site-topbar">
+  <div class="site-shell">
+    <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/rfc/" aria-current="page">RFC</a>
+      <a href="/evalbench/">EvalBench</a>
+    </nav>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="shell">
+    <div class="kicker">
+      <span><span class="dot"></span>Prototype · OKF runtime context projection · <a href="../" style="color:inherit">back to the RFC</a></span>
+      <span>BQAA observer → derived OKF · no live GCP</span>
+    </div>
+    <h1 class="nameplate">Observed, <em>not authored.</em></h1>
+    <p class="subtitle">One BQAA observer trace of the Germany active-customer-revenue question becomes a <b>derived</b> OKF v0.2 bundle with its own identity chain, lands in both projections, and is consumed by an ADK agent that only ever sees <code>context_ref</code>.</p>
+    <div class="badges">
+      <span class="badge derived"><b>derived / demo</b>&nbsp;· not canonical authoring</span>
+      <span class="badge ok">Authored cymbal-finance-core untouched</span>
+      <span class="badge model">ADK · <b>gemini-3.8-flash</b></span>
+      <span class="badge">Fixture data · synthetic trace</span>
+      <span class="badge">No live Catalog / BigQuery / model calls</span>
+    </div>
+  </div>
+</header>
+
+<div class="banner" role="note">
+  <div class="shell">
+    <span class="tag">derived / demo</span>
+    <span>Everything below the authored row is a one-way projection of observer telemetry. BQAA is observer-only; it is not a fifth source of truth and never writes the authored bundle.</span>
+  </div>
+</div>
+
+<section class="identity" aria-label="Identity chain">
+  <div class="shell" id="identity-strip">
+    <div class="idrow">
+      <div class="lbl"><b>Authored</b>cymbal-finance-core · pinned golden</div>
+      <div class="chip auth"><span class="k">observation_id</span><span class="v" id="a-obs">…</span></div>
+      <div class="chip auth"><span class="k">snapshot_id</span><span class="v" id="a-snap">…</span></div>
+      <div class="chip auth"><span class="k">publication_id</span><span class="v" id="a-pub">…</span></div>
+      <span class="status wait" id="a-status">golden</span>
+    </div>
+    <div class="idrow">
+      <div class="lbl"><b>Derived</b>bqaa-derived-cymbal-demo · computed in-browser</div>
+      <div class="chip deriv"><span class="k">observation_id</span><span class="v" id="d-obs">…</span></div>
+      <div class="chip deriv"><span class="k">snapshot_id</span><span class="v" id="d-snap">…</span></div>
+      <div class="chip deriv"><span class="k">publication_id</span><span class="v" id="d-pub">…</span></div>
+      <span class="status wait" id="d-status">computing…</span>
+    </div>
+  </div>
+</section>
+
+<main class="shell">
+  <nav class="stepper" aria-label="Beats">
+    <ol class="steps" id="steps">
+      <li><button class="step" type="button" data-beat="1" data-tone="telemetry"><span class="n">1</span><span class="t">Observe</span><span class="s">BQAA agent_events, observer-only</span></button></li>
+      <li><button class="step" type="button" data-beat="2" data-tone="source"><span class="n">2</span><span class="t">Adapt</span><span class="s">One-way → derived OKF bundle + identity chain</span></button></li>
+      <li><button class="step" type="button" data-beat="3" data-tone="split"><span class="n">3</span><span class="t">Project</span><span class="s">Knowledge Catalog · BigQuery, same publication_id</span></button></li>
+      <li><button class="step" type="button" data-beat="4" data-tone="ink"><span class="n">4</span><span class="t">Consume</span><span class="s">ADK agent on gemini-3.8-flash, context_ref only</span></button></li>
+    </ol>
+    <div class="seam" aria-hidden="true">
+      <span class="obs">observer seam · reads telemetry</span><span>adapter · never writes authored</span><span>two stores · one publication</span><span>tool results · never-emit list</span>
+    </div>
+  </nav>
+
+  <div class="stage-wrap">
+    <section class="stage" id="stage" aria-live="polite">
+      <p class="loading">Loading fixture trace and golden identities…</p>
+      <noscript><p>This prototype needs JavaScript to run the adapter and step through the four beats. The static inputs are in <code>traces/bqaa-germany.json</code>, <code>fixture/</code> and <code>derived/</code>.</p></noscript>
+    </section>
+    <div class="controls">
+      <button class="btn ghost" id="btn-back" type="button">← Back</button>
+      <button class="btn primary" id="btn-next" type="button">Next →</button>
+      <span class="step-count" id="step-count">1 / 4</span>
+      <p class="keys-hint">Keys: → / N next · ← / P back · 1–4 jump · deep link <code>#beat=1</code> … <code>#beat=4</code></p>
+    </div>
+  </div>
+
+  <div class="extras">
+    <details>
+      <summary>What is real here, and what is not</summary>
+      <div class="body">
+        <ul>
+          <li><b>Real:</b> the Phase 0 authored fixture and its golden identities (copied from <code>okf-phase0-mvp/</code>); the PROFILE.md hashing rules, ported to JavaScript and cross-checked against the golden vectors and an independent Python re-derivation; the derived bundle you can read file by file in beat 2.</li>
+          <li><b>Synthetic, labelled:</b> the BQAA trace (shaped like <code>agent_events</code> rows, never written to a table); the Catalog entries and BigQuery rows in beat 3 (client-side projection views, no <code>kcmd</code> write, no DML); the ADK transcript in beat 4 (fixture replay of a <code>gemini-3.8-flash</code> agent, no model call).</li>
+          <li><b>Honest by construction:</b> the receipt verdict is <code>UNVERIFIABLE</code> with reason <code>phase0_no_execution_or_integrity_proof</code>. Nothing was executed, so nothing is attested. The Phase 4 <code>ATTESTED</code> shape is shown beside it and marked non-normative.</li>
+          <li><b>Never emitted on agent-facing payloads:</b> <code>concept_version_id</code>, bundle paths, principal, SQL / query text, parameter values, raw destination table names. Beat 4 asserts this against the tool JSON at render time.</li>
+        </ul>
+      </div>
+    </details>
+    <details>
+      <summary>Run it locally</summary>
+      <div class="body">
+        <p>Static files, no build. From the repo root: <code>python3 -m http.server 8000</code> then open <code>http://localhost:8000/rfc/demo/</code>. Regenerate the derived bundle with <code>node rfc/demo/tools/build-derived.mjs</code> and verify with <code>python3 rfc/demo/tools/derived_vectors.py</code>. See <code>README.md</code>.</p>
+      </div>
+    </details>
+  </div>
+</main>
+
+<footer>
+  <div class="shell">
+    <span>rfc/demo · prototype for the OKF runtime context projection RFC</span>
+    <span>derived / demo · fixture data · all names fictional</span>
+  </div>
+</footer>
+
+<script src="hash.js"></script>
+<script src="adapter.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
