@@ -43,14 +43,9 @@ This is a product demo, not a JSON dump. Bar is `evalbench/index.html` (six-act 
 - Consume beat shows ADK chrome with **`gemini-3.8-flash`** as a visible model badge, then tool JSON + `context_ref` + UNVERIFIABLE receipt.
 - Deep-linkable `#beat=1`…`#beat=4`. No bundler.
 
-## E2E recording
+## E2E recording (follow-up, not this PR)
 
-Haiyuan, 2026-09-02: record a real walkthrough of beats 1–4 and ship it with the page.
-
-- File: `rfc/demo/okf-bqaa-e2e.mp4` (keep it short, ~60–120s). Embed with `<video controls>` on `rfc/demo/index.html`, same pattern as `evalbench/evalbench-week0-freeze-e2e.mp4`.
-- Capture the actual demo UI in a browser (ffmpeg `avfoundation` on the Mac, or a headed browser record). Not a slideshow of screenshots. Not a mock.
-- Narrate on-screen via beat titles so the video stands alone (Observe → Adapt → Project → Consume). Show the `gemini-3.8-flash` badge in the consume beat.
-- If screen capture is blocked, leave a `rfc/demo/RECORDING.md` with the exact ffmpeg command and a note; still ship the UI. Prefer landing the mp4 in this PR.
+Haiyuan, 2026-09-02 3:03 PM PT: **do not record until Claude, Codex, and Kimi have aligned** on the demo UI (dual LGTM on the GitHub PR). This slice ships the clickable page only. After dual LGTM, a follow-up records `rfc/demo/okf-bqaa-e2e.mp4` (~60–120s) and embeds it, evalbench-style. Do not block the UI PR on ffmpeg, Playwright, or screencapture.
 
 ## RFC page wiring
 

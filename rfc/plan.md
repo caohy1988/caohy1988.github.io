@@ -16,7 +16,7 @@ rfc/demo/README.md     (how to run locally, honesty labels)
 rfc/demo/fixture/      (copy of okf-phase0-mvp/fixture/bundle + golden identities)
 rfc/demo/traces/bqaa-germany.json
 rfc/demo/derived/      (precomputed derived bundle + derived identities if JS hashing is incomplete)
-rfc/demo/okf-bqaa-e2e.mp4  (recorded four-beat walkthrough)
+rfc/demo/okf-bqaa-e2e.mp4  (NOT this PR — record only after Codex+Kimi dual LGTM)
 ```
 
 ## Implementation order
@@ -29,12 +29,12 @@ rfc/demo/okf-bqaa-e2e.mp4  (recorded four-beat walkthrough)
 6. Callout on `rfc/index.html` near the Phase 0 MVP note: badge "Prototype" linking to `./demo/`. Do not restyle the whole RFC.
 7. `rfc/demo/README.md`: derived/demo honesty, no live GCP, never-emit list, local open (`npx serve` or just file:// if it works).
 8. Polish the UI to evalbench quality: masthead, stepper, two-column Project, model badge. Not a raw JSON page.
-9. Record e2e: serve `rfc/demo/` locally, walk beats 1–4 in a real browser, capture to `rfc/demo/okf-bqaa-e2e.mp4` (~60–120s). Embed the video on the demo page. ffmpeg avfoundation is fine. If capture is blocked, write RECORDING.md with the exact command and still ship the UI.
+9. Do **not** record in this PR. Haiyuan: wait for Claude + Codex + Kimi to align (dual LGTM) before any mp4. Ship the UI, open the PR, stop.
 
 ## Verify
 
 - Open `rfc/demo/index.html` (or a local static server). Click all four beats. No JS exceptions. UI must look like a product (evalbench bar), not a spec dump.
-- `rfc/demo/okf-bqaa-e2e.mp4` exists and is embedded, or RECORDING.md explains the block.
+- No mp4 in this PR. Recording is a follow-up after dual LGTM.
 - Grep demo JS + traces for `concept_version_id`, `query`, `principal` in **emitted** tool payloads (UI inspector of authored files is allowed).
 - `git diff rfc/index.html` is a small callout, not a rewrite.
 - No `.env`, no ADC, no `gcloud` from the page.
