@@ -24,7 +24,7 @@ rfc/demo/derived/      (precomputed derived bundle + derived identities if JS ha
 2. Write `traces/bqaa-germany.json`: 8–15 observer events. Include `attributes.context_ref` on completed tools. Omit query, principal, paths, `concept_version_id`.
 3. Adapter in `app.js`: map traces → derived bundle object. Minimum derived concepts: one metric stub, one policy stub, one computation stub, one log line that says "derived from BQAA observation, not authored." `bundle_key = bqaa-derived-cymbal-demo`.
 4. If hashing in JS is too large for this slice, precompute derived identities with a one-off run of `vectors_gen.py` (read-only copy; do not mutate `okf-phase0-mvp/golden/`). Check the precomputed JSON into `rfc/demo/derived/identities.json`. Comment the generator command in README.
-5. Four-beat UI. Default beat 1. Buttons: Observe / Adapt / Project / Consume. Project beat splits Catalog vs BigQuery. Consume beat shows tool JSON + `context_ref` + UNVERIFIABLE receipt.
+5. Four-beat UI. Default beat 1. Buttons: Observe / Adapt / Project / Consume. Project beat splits Catalog vs BigQuery. Consume beat is an **ADK** agent on **`gemini-3.8-flash`**: show model id in chrome, tool JSON + `context_ref` + UNVERIFIABLE receipt. If you add `rfc/demo/adk/` (Python Agent), default `DEMO_MODEL_ID=gemini-3.8-flash`. Never `gemini-2.5-flash`.
 6. Callout on `rfc/index.html` near the Phase 0 MVP note: badge "Prototype" linking to `./demo/`. Do not restyle the whole RFC.
 7. `rfc/demo/README.md`: derived/demo honesty, no live GCP, never-emit list, local open (`npx serve` or just file:// if it works).
 

@@ -9,7 +9,7 @@ Slice of `intent.md`. Target: static GitHub Pages demo plus fixture data copied 
 | 1 | Observe | A short BQAA event list (TOOL_STARTING / TOOL_COMPLETED / TOOL_ERROR or native `agent_events` shape) about the Germany active-customer-revenue question | Events are observer-only. No query text, principal, source path, or `concept_version_id`. Optional `context_ref` attribute only. |
 | 2 | Adapt | One-way adapter output: a derived OKF v0.2 bundle (markdown/JSON tree) | Banner `derived/demo`. Distinct `bundle_key` from authored `cymbal-finance-core`. Does not rewrite `okf-phase0-mvp/fixture/bundle`. |
 | 3 | Project | Two panes: Knowledge Catalog discovery (entries + `okf` aspect pins) and BigQuery serving (normalized runtime rows) | Same `publication_id` on both. Catalog pane labeled projection/demo (no live `kcmd` write). Serving pane is client-side rows shaped like the RFC BigQuery projection. |
-| 4 | Consume | Agent retrieve + (optional) attested-computation stub | Tool result JSON contains `context_ref` and nothing from the never-emit list. Receipt is `UNVERIFIABLE` with reason `phase0_no_execution_or_integrity_proof`, matching golden honesty. A Phase-4 `ATTESTED` shape may sit beside it, labeled non-normative. |
+| 4 | Consume | ADK agent retrieve + (optional) attested-computation stub. **Model: `gemini-3.8-flash`** (Gemini 3.8 Flash, GA 2026-09-02). | Tool result JSON contains `context_ref` and nothing from the never-emit list. Receipt is `UNVERIFIABLE` with reason `phase0_no_execution_or_integrity_proof`, matching golden honesty. A Phase-4 `ATTESTED` shape may sit beside it, labeled non-normative. The agent is ADK (`google.adk.agents.Agent` / `Gemini(model="gemini-3.8-flash")`). Do not default to `gemini-2.5-flash`, `gemini-3.5-flash`, or `gemini-flash-latest`. |
 
 Stepper UI: Next / Back, deep-linkable (`#beat=1` … `#beat=4`). Highlight the federated/observer seam the way glance catalog highlighted the federated beat.
 
@@ -49,3 +49,8 @@ The **derived** bundle gets its own `bundle_key` (e.g. `bqaa-derived-cymbal-demo
 ## Non-goals in this PR
 
 Live `kcmd` upsert, live BigQuery DML, attester service, changing PROFILE.md hashing, merging SDK PRs, starting the six-week clock.
+
+
+## ADK demo model
+
+Haiyuan, 2026-09-02: the consuming agent in this prototype is an ADK agent whose model id is **`gemini-3.8-flash`**. Show that id in the Consume beat chrome. Browser demo may replay a fixture transcript produced by that agent; if a live ADK process is included, it must construct `Agent(model=Gemini(model="gemini-3.8-flash"), ...)` (or `model="gemini-3.8-flash"`). Env override `DEMO_MODEL_ID` may exist but the checked-in default is `gemini-3.8-flash`.
