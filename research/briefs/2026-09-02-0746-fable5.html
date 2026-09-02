@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fable 5.1 brief · 2 Sep 2026, 7:46 AM — The Field Brief</title>
+  <meta name="description" content="Claude Code Fable 5.1 product-level recast: Langfuse evaluator alerts, LangSmith Engine to Slack/Linear, AWS AgentCore Evaluations on OTel spans, Google Cloud agent telemetry. 7:46 AM PT, 2 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-02-0746-fable5.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Claude Code · Fable 5.1 · 7:46 AM PT</p>
+    <article>
+<h1>Fable 5.1 brief: industry + academy → BQAA — 2026-09-02 7:46 AM PT</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> 2026-09-02 ~8:10 AM PT (Wednesday). Recast of <code>2026-09-02-0000-fable5.md</code> under the product-level Industry bar, plus a wider related-product search. The midnight edition's GitHub PR items are dropped; none of them is a shipped product feature.
+<strong>Sources checked:</strong> Langfuse changelog entries for Sep 2 (evaluator alerts) and Aug 27 (stable evaluator API); LangSmith Engine blog (Aug 25), Tuned Evaluators blog (Aug 18), and the LangSmith Cloud changelog (Aug 24–31 rollup); Braintrust changelog, MCP blog (Aug 26), Harbor blog (Aug 24); LangWatch changelog (Aug 30); W&amp;B Server release notes (0.84.0, Aug 25); Confident AI self-host changelog (v2.5.0, Aug 21); Arize Phoenix release notes (newest Aug 25); Opik GitHub releases (2.2.46–2.2.48); MLflow releases (3.15.2); Datadog LLM Observability product docs; Grafana Cloud AI Observability docs; adk-python releases (v2.8.0, v1.39.1) and adk-java releases (v1.9.0); OTel semantic-conventions-genai releases tab (still none); BigQuery release notes and the data-agents monitoring doc; Gemini Enterprise Agent Platform release notes and Agent Runtime tracing doc; Google Cloud Observability release notes and the agent-observability doc; AWS AgentCore Evaluations blog (Aug 26), release notes, and supported-frameworks doc; arXiv cs.AI new and recent listings plus abs pages for 2609.00015, 2609.00076, 2609.01519, 2609.00967, 2609.00012. Not reachable or stale: Langfuse changelog index (404, individual entries load), Helicone changelog (404), Portkey changelog (nothing dated after April).</p>
+<p><strong>Read this first.</strong> Three things are true at product level this morning. First, &quot;evaluate, then alert&quot; is now a shipped loop in three eval platforms: Langfuse turned evaluator scores into alerts today, LangSmith Engine now files Slack alerts and Linear tickets from trace-detected issues, and Braintrust exposes alerts and monitors as MCP write tools. Second, &quot;evaluate any agent from its OTel spans&quot; is a hyperscaler feature, not a spec draft: AWS AgentCore Evaluations reads OTel GenAI or OpenInference spans from CloudWatch and scores agents from six named frameworks, Google ADK included, plus a generic path for anything that follows the conventions. Third, Google Cloud itself shipped three agent-telemetry features in August that sit next to BQAA: data-agent conversation monitoring in BigQuery (Preview), ADK gen_ai metrics from Agent Runtime into Cloud Monitoring, and larger per-span limits and OTLP log ingestion GA in Cloud Observability. The midnight brief spent its weight on an unmerged OTel PR about content references and three instrumentation merges; those are inputs to a future release, not news a TL should act on. The papers that earned cards yesterday still hold, and two more from the same batch belong: OpenAgentFlow, which normalizes every agent action into one event stream with audit records, and a clinical &quot;morbidity and mortality&quot; framework for reconstructing single AI failures from preserved evidence. Judgment: the market is converging on a single shape, an event stream in a warehouse-like store, evaluators that read it, and alerts that fire on the scores. No re-rank. Do not start the #435 clock.</p>
+<hr />
+<h2>Industry</h2>
+<h3>1. Langfuse: evaluator alerts (Sep 2) on top of a stable evaluator API (Aug 27)</h3>
+<p>Today's changelog entry, &quot;Create alerts for evaluators,&quot; lets you create an alert from inside the evaluator workflow with the metric and filters prefilled. Triggers: an evaluator's average numeric or Boolean score drops below a target, categorical score counts change &quot;in topics, failures, or policy outcomes,&quot; or an LLM-as-a-judge cost threshold is crossed, for one evaluator or all combined. You pick how the team is notified.</p>
+<p>The Aug 27 entry is the foundation: stable, ID-based endpoints under <code>/api/public/v2</code> for evaluators and evaluation rules, with create, read, update, delete and version history. Names no longer act as identifiers, rules always use the latest version of their evaluator, and the stated goal is to &quot;keep evaluation setup in version control&quot; and reuse it across projects from CI. Old unstable endpoints must be migrated by November 16, 2026, the same day Langfuse Cloud goes v4-only.</p>
+<p><strong>TL;DR for BQAA.</strong> The eval loop customers now expect is score → threshold → alert, with the evaluator definition itself versioned as code. BQAA's eval results should carry a stable evaluator id and version so the same loop can be built with Cloud Monitoring or a scheduled query; that is a schema statement, not a feature.</p>
+<h3>2. LangSmith Engine: self-hosted, wired to Slack and Linear, cheaper to run (Aug 25)</h3>
+<p>Engine is LangSmith's in-platform agent that reads production traces, finds issues, proposes fixes and watches for regressions. The Aug 25 post says it is now &quot;&gt;2x better on internal benchmarks&quot; at finding issues and &quot;25% better on industry-standard benchmarks&quot; at fixing them, has scanned over 60 million traces and surfaced more than 20,000 issues, runs self-hosted inside a customer VPC, posts detected issues to Slack, opens Linear tickets, closes stale issues automatically, and has a Reduced Analysis mode that scans fewer traces to save cost. Plus and Enterprise plans. The Aug 24–31 changelog adds that Engine usage now costs 40% fewer usage credits and that ABAC policies can scope access to matching project traces.</p>
+<p>The Aug 18 Tuned Evaluators post (Perceived Error, a post-trained model that flags conversations where the agent &quot;made a mistake, misunderstood a request, or took the interaction in the wrong direction&quot;) is already catalogued and unchanged.</p>
+<p><strong>TL;DR for BQAA.</strong> The trace store is being read by an agent, not a dashboard, and the output is a ticket. BQAA's answer to &quot;who reads the table&quot; should name the loop explicitly: the same event rows feed an issue-finding agent, and the issue it files points back at session and event ids.</p>
+<h3>3. AWS AgentCore Evaluations: any OTel or OpenInference agent, Google ADK included (Jul–Aug; walkthrough blog Aug 26)</h3>
+<p>AgentCore Evaluations has been GA since March 2026. The July release notes added evaluation of agents built with OpenAI Agents, LlamaIndex, Google ADK and Claude Agent SDK, alongside Strands and LangGraph, plus &quot;generic framework support&quot;: emit spans in the OpenTelemetry GenAI or OpenInference conventions and the service &quot;classifies your spans and extracts the values that evaluators need.&quot; The supported-frameworks doc keys everything on the span's <code>scope.name</code>; Google ADK is supported through the OpenInference ADK instrumentation, Python only. The Aug 26 blog is a walkthrough of this: invoke-agent, inference and execute-tool spans reconstructed from CloudWatch, then scored by built-in evaluators such as GoalSuccessRate, Correctness and Helpfulness.</p>
+<p>August added two more things. Skill evaluators (<code>Builtin.SkillSelectionAccuracy</code>, <code>Builtin.SkillInstructionFollowing</code>) run per skill invocation and anchor each result &quot;to the tool call span that loaded the skill.&quot; Third-party evaluators from DeepEval and AutoEval can be run managed or derived into custom evaluators, and all of them are discoverable through one ListEvaluators API.</p>
+<p><strong>TL;DR for BQAA.</strong> A hyperscaler now treats &quot;spans that follow the GenAI conventions&quot; as the producer contract and evaluates ADK agents through someone else's instrumentation. BQAA's coverage matrix should state, per framework, which instrumentation produces rows and which attribute names the evaluators may rely on. Skill-anchored eval results are a reminder that eval rows need a target span id, not just a session id.</p>
+<h3>4. Google Cloud, next door to BQAA: data-agent monitoring, ADK metrics in Cloud Monitoring, bigger spans (Aug 13–31)</h3>
+<p>Three platform release notes, none of them the BQAA product page.</p>
+<ul>
+<li><strong>BigQuery (Aug 24, Preview).</strong> &quot;Monitor the performance, adoption, latency, and costs of your data agents and their conversations by using Google Cloud Observability in BigQuery.&quot; The doc lists agents used in conversations, users who asked questions, conversations created, top-answering agents, most-used knowledge sources, token usage projections and hourly answer latency. It requires the Cloud Trace, Cloud Monitoring and Cloud Logging APIs.</li>
+<li><strong>Gemini Enterprise Agent Platform (Aug 13).</strong> Agents on Agent Runtime built with ADK 2.6.0 or later &quot;can emit gen_ai application metrics that follow OpenTelemetry's generative AI semantic conventions&quot; to Cloud Monitoring as user-defined metrics, alongside traces and logs, behind one environment variable. On Aug 15 the semantic governance policy engine got built-in metrics in Preview: throughput, evaluation counts, latency, ALLOW versus DENY verdict distribution and token consumption, queryable with PromQL and usable in alerting.</li>
+<li><strong>Cloud Observability (Aug 12–31).</strong> Cloud Trace limits rose to 1,024 attributes and 256 events per span (Aug 17). The Telemetry API for OTLP logs went GA (Aug 14). Remote MCP servers now emit a span per <code>tools/call</code> (Aug 12, Aug 27). Trace sinks can no longer be created or edited as of Aug 31, and the stated migration path is Observability Analytics with SQL. Custom dashboards can show trace exemplars linked from SQL results (Preview).</li>
+</ul>
+<p><strong>TL;DR for BQAA.</strong> Google now has two first-party ways to see agent conversations in Cloud Observability that are not BQAA, and a SQL-over-traces path that is not BigQuery. The positioning line has to be precise: BQAA is the durable, joinable, per-event record for analytics and forensics, and it should ingest or link to the same gen_ai metrics and trace ids rather than compete with them.</p>
+<h3>5. ADK Python 2.8.0: opt-in agent and workflow metrics (Aug 26, still current)</h3>
+<p>Already covered in earlier briefs and unchanged since. With <code>ADK_EXPERIMENTAL_TELEMETRY=true</code> ADK emits per-invocation token spend on <code>invoke_agent</code>, per-workflow inference and tool-call counts, per-workflow token spend, MCP HTTP exchanges as OTel log records, and context cache state on the LLM call span. The Aug 27 v1.39.1 patch back-ported credential and inline-data exclusions from logs and spans to the v1 line. ADK Java's newest release, v1.9.0, has no observability item.</p>
+<p><strong>TL;DR for BQAA.</strong> These are the numbers a BQAA session summary should reproduce from rows, so that the metric and the table never disagree. Nothing new to do this week.</p>
+<h3>6. Braintrust: conversation-scoped online scoring and coding-agent traces (Aug)</h3>
+<p>Beyond the already-catalogued MCP write tools (Aug 26) and Harbor sandboxed evals (Aug 24), the August changelog lists two product features not yet in the catalog: group scope for online scoring, which evaluates &quot;multi-turn conversations as single units,&quot; and coding-agent plugins that trace Claude Code, Codex, OpenCode and pi sessions through the <code>bt</code> CLI. Monitor views became dashboards with a project-scoped list.</p>
+<p><strong>TL;DR for BQAA.</strong> Session-scoped online scoring is now the default grain at a third vendor after Phoenix and LangSmith. Coding-agent sessions are an ingestion source peers take seriously; a BQAA example that loads a coding-agent transcript would be cheap and timely.</p>
+<h3>7. LangWatch Agent Testing v2 (Aug 30, v3.17.0)</h3>
+<p>Replaces Simulations. A run can hold up to four targets, each with its own parameters, and results render as a side-by-side matrix; scenarios and results are two tabs on one page, and test suites are folders of scenarios. The workbench gained &quot;Optimize this prompt,&quot; which scores a baseline, generates candidates, evaluates them and returns a closing report.</p>
+<p><strong>TL;DR for BQAA.</strong> Multi-target comparison is the query shape: same scenario, N agent versions, one matrix. A BQAA example query that pivots eval scores by agent version and scenario covers it.</p>
+<h3>8. Still current, one line each</h3>
+<ul>
+<li><strong>W&amp;B Server 0.84.0 (Aug 25).</strong> Weave agent views gained search and filtering, signals can be created from a tag description and link back to their parent conversation, and BYOB media renders inline, including audio waveforms.</li>
+<li><strong>Confident AI v2.5.0 (Aug 21).</strong> Public, read-only dashboards queryable through public resources.</li>
+<li><strong>MLflow 3.15.2 (Aug 25).</strong> Patch, but it carries immutable evaluation dataset versions and a <code>scorer_ensemble</code> primitive.</li>
+<li><strong>Arize Phoenix.</strong> Newest dated note is Aug 25 (PXI multi-step workflows, retrieval relevance evaluator). Nothing since.</li>
+<li><strong>Opik.</strong> 2.2.46 through 2.2.48 (Sep 1–2) are backend fixes and a dataset insertion flag. Not news.</li>
+<li><strong>Datadog LLM Observability, Grafana Cloud AI Observability.</strong> Product pages describe the same capabilities as last week (Patterns clustering and PII redaction; OTel capture with judge and heuristic evals). Nothing dated.</li>
+<li><strong>OTel GenAI.</strong> The semantic-conventions-genai repo still has no tagged release. Nothing here is Industry until a version is cut or a vendor ships it.</li>
+</ul>
+<h2>Academy</h2>
+<p>arXiv cs.AI's newest announcement day is still Wednesday, Sep 2. The cards below from that batch stand; two more from the same batch are added because they speak to the event-record and forensics rows.</p>
+<h3>9. Parsing the Stream: A Live Trace Model for Long-Horizon Agents and Their Observers (2609.01466)</h3>
+<p>Pakhomov and Nijkamp, Salesforce AI Research, code released. Thesis: a long-horizon trace outgrows both the human observer and the agent's own context, so keep an append-only event ledger, fold it deterministically into typed run state, and compile per-consumer views. Their observer-side result was roughly 14x fewer input tokens and 0.85–0.87 accuracy against 0.48 for reading the raw trace, with the caveat that only the token reduction transfers, &quot;conditional on schema coverage.&quot;</p>
+<p><strong>TL;DR for BQAA.</strong> Outside evidence for typed state derived from an event table rather than model summaries of raw traces. Read the eleven folding requirements against the state and loop columns.</p>
+<h3>10. EDGE: Error Dependency Graph-Guided Multi-Error Attribution (2609.01360)</h3>
+<p>Hou, Pitre, Fang, Wang, EMNLP 2026. Failures contain several related errors; EDGE builds an error dependency graph, validates a causal subset by counterfactual rollout, and guides a two-stage judge. Evaluated on TRAIL and MAST.</p>
+<p><strong>TL;DR for BQAA.</strong> An error row needs a parent-error pointer, or every attribution tool will rebuild the graph from timestamps.</p>
+<h3>11. Cheap Verifiers, Large Blind Spots (2609.01345)</h3>
+<p>Rajput. In a cheap-answer, strong-verify cascade, every dashboard metric computed through the verifier &quot;reads a flat 3% error while true delivered error swings up to 32%.&quot;</p>
+<p><strong>TL;DR for BQAA.</strong> Record which model produced each verdict so quality dashboards can exclude in-loop judges.</p>
+<h3>12. New: OpenAgentFlow: System-Wide Safety Boundaries for Heterogeneous AI Agent Fleets (2609.00015)</h3>
+<p>Chen, Zhao, Yao, Wei. A control-plane and action-plane architecture that &quot;normalizes pending GUI actions, API calls, tool calls, and LLM-generated invocations into a unified AgentEvent stream,&quot; routes each through a shared pre-execution policy enforcement point, and &quot;maintains provenance, session state, audit records, and updatable policies in the control plane.&quot; New rules take effect without changing agents, prompts or models. Evaluated on Android: 94.0% accuracy and a 95.3% block rate on a 300-case action-event benchmark, and a 92.9% trace-adjusted pass rate across 98 traced emulator cases.</p>
+<p><strong>TL;DR for BQAA.</strong> Enforcement stays out of scope, but the paper's event stream is the same normalized action record BQAA stores, and its audit records are what a forensics query reads. The producer contract should make a policy decision (allow, deny, rule id) a first-class event so an enforcement point can write into the same table.</p>
+<h3>13. New: AI Morbidity and Mortality: A Framework for Clinical AI Failure Review (2609.00076)</h3>
+<p>Mui, Sittig, Labkoff, Basu. Argues that aggregate model monitoring and incident reporting both miss how a single AI-related failure emerged, and proposes a blameless case-review framework built on &quot;evidence preservation and investigator-level reconstruction, tool-in-loop attribution, and corrective-action tracking,&quot; with each case classified on four axes: Trigger, Mechanism, Clinical Pathway, Corrective Action. Five illustrative cases, two reviewers, full agreement on all 20 axis-level classifications.</p>
+<p><strong>TL;DR for BQAA.</strong> Forensics is a per-case workflow, not a metric. The test for the redaction and retention design is whether an investigator can reconstruct one session months later; that is the sentence to put in the redaction-as-forensics statement.</p>
+<h3>14. Also read, not carded</h3>
+<ul>
+<li><strong>SAGE</strong> (2609.00434), <strong>Invalidation Contracts for Cross-Episode Agent Memory</strong> (2609.00243), <strong>The Irreversibility Budget</strong> (2609.00275): still the one-liners from yesterday, state diffs as eval substrate, version stamps on memory rows, and fleet-level irreversible-effect accounting as an analytics question.</li>
+<li><strong>When Guardrails Look Effective</strong> (2609.01519), Zhu and Chang, NeurIPS 2026 Trust-AI-Eval workshop: a construct-validity contract for agent simulations that returns INVALID or INCONCLUSIVE before any policy claim. Evaluation methodology, no trace content.</li>
+<li><strong>CoBRA</strong> (2609.00967) and <strong>Long-Horizon State Tracking via 196 dependent tool calls</strong> (2609.00012): tool-use boundary learning and a state-carrying stress test. Neither touches the record.</li>
+<li><strong>AgentLogs</strong> (from Tuesday's batch) remains the strongest six-week academic candidate: a public 64M-line, 549k-session coding-agent log corpus to load as a BigQuery demo and stress the schema.</li>
+</ul>
+<h2>Six-week EV only</h2>
+<p><strong>No re-rank.</strong> The ten rows and their order from 1434 hold. Evidence weight moves on three rows:</p>
+<ul>
+<li><strong>Named loop and eval schema.</strong> Three products shipped score-to-alert this fortnight (Langfuse alerts, LangSmith Engine to Slack and Linear, Braintrust alerts via MCP). The eval results table needs a stable evaluator id and version, a target span id (AgentCore anchors skill evals to the tool-call span), and the judge model id (Cheap Verifiers). A scheduled-query-to-alert example belongs in docs, not roadmap.</li>
+<li><strong>Coverage and producer contract.</strong> AgentCore's generic framework support and Google Agent Runtime's gen_ai metrics both define &quot;conforming spans&quot; as the contract. The coverage matrix should say, per framework, which instrumentation produces BQAA rows and which attribute names are guaranteed.</li>
+<li><strong>Forensics and redaction.</strong> OpenAgentFlow's audit records and the AI M&amp;M reconstruction standard replace the unmerged OTel content-reference proposal as the outside citation for redaction as a forensics statement: what an investigator can rebuild from a session months later, and what a pointer to offloaded content is worth if the upload failed.</li>
+</ul>
+<p>Positioning note, writing not engineering: Google Cloud now has first-party agent conversation monitoring in Cloud Observability and SQL over traces in Observability Analytics. BQAA's one-line difference is the joinable per-event record, and the docs should link to the gen_ai metrics rather than restate them. Reserve and do-not-start unchanged. Do not start the #435 clock.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>langfuse-evaluator-alerts</code> — Langfuse: alerts from evaluator score drops, categorical count changes, or judge cost, with Slack, webhook and other channels (Sep 2)</li>
+<li><code>langfuse-evaluator-api-v2</code> — Langfuse: stable ID-based <code>/api/public/v2</code> evaluator and evaluation-rule endpoints with version history; unstable endpoints retire Nov 16, 2026 (Aug 27)</li>
+<li>update <code>langsmith-engine</code> — LangSmith Engine: self-hosted in customer VPC, Slack alerts, Linear tickets, Reduced Analysis mode, 40% cheaper usage credits (Aug 25 blog, Aug 24–31 changelog)</li>
+<li><code>agentcore-evaluations-any-framework</code> — AWS AgentCore Evaluations: evaluates OpenAI Agents, LlamaIndex, Google ADK, Claude Agent SDK, Strands and LangGraph from OTel GenAI or OpenInference spans, plus generic conforming-span support; August adds skill evaluators anchored to the tool-call span and DeepEval/AutoEval third-party evaluators (Jul–Aug)</li>
+<li><code>bigquery-data-agent-monitoring-preview</code> — BigQuery platform: monitor data-agent conversations (adoption, latency, cost, token projections) in Google Cloud Observability, Preview (Aug 24)</li>
+<li><code>agent-runtime-adk-genai-metrics</code> — Gemini Enterprise Agent Platform: ADK 2.6.0+ on Agent Runtime emits OTel GenAI gen_ai metrics to Cloud Monitoring (Aug 13); policy-engine ALLOW/DENY and token metrics in Preview (Aug 15)</li>
+<li><code>cloud-observability-aug-2026-trace-limits</code> — Google Cloud Observability: 1,024 attributes and 256 events per span, OTLP logs Telemetry API GA, MCP tools/call spans, trace sinks retired in favor of Observability Analytics SQL (Aug 12–31)</li>
+<li><code>braintrust-group-scope-online-scoring</code> — Braintrust: online scoring at conversation-group scope plus Claude Code, Codex, OpenCode and pi session tracing through <code>bt</code> (Aug)</li>
+<li><code>langwatch-agent-testing-v2</code> — LangWatch 3.17.0: up to four targets per scenario run in a comparison matrix, workbench prompt optimizer (Aug 30)</li>
+<li><code>arxiv-2609-00015-openagentflow-agentevent-stream</code> — Chen, Zhao, Yao, Wei: unified AgentEvent stream with provenance and audit records at a shared pre-execution enforcement point; Android benchmarks (Sep 2 batch)</li>
+<li><code>arxiv-2609-00076-ai-mm-clinical-failure-review</code> — Mui, Sittig, Labkoff, Basu: case-based AI failure review with evidence preservation, tool-in-loop attribution, and a four-axis classification (Sep 2 batch)</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Claude Code Fable 5.1 · 2 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
