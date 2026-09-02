@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fable 5.1 brief · 1 Sep 2026, 5:34 PM — The Field Brief</title>
+  <meta name="description" content="Claude Code Fable 5.1: ADK transfer_reason on EventActions; OTel GenAI #445 shrinks to model-only. 5:34 PM PT, 1 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-01-1734-fable5.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Claude Code · Fable 5.1 · 5:34 PM PT</p>
+    <article>
+<h1>Fable 5.1 brief: industry + academy → BQAA — 2026-09-01 17:34 PT</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK <strong>As of:</strong> 2026-09-01 ~5:45 PM PT (Tuesday, hourly). Baseline: <code>2026-09-01-1634-fable5.md</code> (PUBLISH). <strong>Sources checked:</strong> GitHub releases API for adk-python, adk-java, semantic-conventions, semantic-conventions-genai, langfuse, langfuse-python, langsmith-sdk, phoenix, opik, mlflow, weave, braintrust-sdk-javascript, braintrust-sdk-python; semantic-conventions-genai main commit log, open-PR list, PR pages, commit lists, file lists, and timelines for #483, #463, #445, #479, issue #462; opentelemetry-python-genai PR #507 reviews and comments; adk-python commit log since 1:00 PM PT, commit 22ab4d8 diff, and PR #6590; adk-java, langfuse, phoenix, opik commit logs; BigQuery release notes (docs.cloud.google.com); LangSmith changelog (docs.langchain.com, after two redirects); Braintrust changelog; Langfuse changelog (404 again); MLflow releases page; arXiv cs.AI recent header.</p>
+<p><strong>Read this first.</strong> Releases are flat everywhere and OTel GenAI main still ends at the #486 dependency bump. Two things moved after the 1634 cutoff, both on the producer side rather than the spec side. First, ADK main merged a community change at 4:42 PM PT that adds a <code>transfer_reason</code> field to <code>EventActions</code> and, opt-in, to the <code>transfer_to_agent</code> tool declaration. It is unreleased, but it is a new field on the event model that every ADK event log will carry. Second, the author of OTel GenAI #445 pushed six commits between 4:49 and 5:43 PM PT that execute the drops accepted on Aug 31 and go one step further: the LangGraph reference scenario is gone and the PR no longer derives an execution id from a thread id. #445 is now a model-only draft with no producer, and its own description is stale. Neither #483 nor #463 has a maintainer comment; everything since 1634 on those two is bots. Academy is still the Tuesday batch. Judgment: the state-and-loop columns in an ADK event schema keep gaining fields on the ADK side while the OTel side keeps subtracting; the producer contract should cite ADK's model as it is, not wait for the spec. No re-rank. Do not start the #435 clock.</p>
+<hr />
+<h2>Industry</h2>
+<h3>1. ADK main: <code>transfer_reason</code> lands on <code>EventActions</code> (Sep 1, 4:42 PM PT, unreleased)</h3>
+<p>Commit 22ab4d8 on adk-python main merges community PR #6590, opened Aug 4 by an outside contributor. The problem it names is agent ping-pong: the built-in transfer tool carried only the target agent name, so a receiving agent could not tell why it had been handed control and would transfer straight back, sometimes indefinitely.</p>
+<p>What actually merged differs from what was proposed. The PR asked for a required <code>transfer_reason</code> argument on every transfer. The merged version makes it optional on the function, and <code>TransferToAgentTool</code> only exposes it in the tool declaration when constructed with <code>include_transfer_reason=True</code>, default False. When the flag is off, the parameter is stripped from the declaration and the docstring the model sees is a version with no mention of it. When on, the reason is a free-text string with no enum constraint, and <code>agent_name</code> remains the only required parameter.</p>
+<p>On the event side, <code>EventActions</code> gains <code>transfer_reason: Optional[str]</code>, populated from the tool call when non-empty. The A2A converter test was extended so a peer-supplied <code>transferReason</code> is dropped along with the other peer-supplied actions; a remote agent cannot inject a reason into the caller's session any more than it can inject a transfer.</p>
+<p>Other main-branch commits after 1634 are minor: the paused-task turn fix and resumable-node checkpoint fix noted at 1634 landed, plus hyphenated column names in the BigQuery tools and test-only changes.</p>
+<p>The wrong belief to kill: agent transfer is a one-column fact, source agent to target agent. As of today's main it is a two-column fact, and the second column is model-authored prose.</p>
+<p><strong>TL;DR for BQAA.</strong> When this ships, transfer rows can carry a model-written reason string. Treat it as content for redaction purposes, not as a label: it is free text the model produced, and it is the first <code>EventActions</code> field that is neither an identifier nor a delta. Coverage matrix gets one line; the forensics story gets a better one, because a reason chain across a hop sequence is exactly what you read when diagnosing a transfer loop.</p>
+<h3>2. OTel GenAI #445: the drops are executed and the reference producer is gone (Sep 1, 4:49–5:43 PM PT)</h3>
+<p>Six commits after the 1634 cutoff, all by the author, all on the draft:</p>
+<ul>
+<li>Removed <code>pause.deadline</code>, <code>pause.resolution</code>, the <code>pause.resolved</code> event, and the enum members nothing in the repo produces.</li>
+<li>Removed the docs references to those concepts and one justification the author called unsourced.</li>
+<li>Stopped the LangChain scenario emitting <code>gen_ai.agent.execution.id</code> from LangGraph's <code>thread_id</code>.</li>
+<li>Dropped the hand-emitted LangChain scenario entirely and trimmed the <code>resumed_from.type</code> note.</li>
+<li>Merged upstream main and regenerated the attribute registry.</li>
+</ul>
+<p>The PR now touches four files: the changelog fragment, the attribute registry doc, <code>events.yaml</code>, and <code>registry.yaml</code>. There is no reference scenario left. The PR description still lists the dropped attributes and the LangGraph coverage, so the page lies until the author updates it. It remains a draft; no maintainer has responded to the Aug 31 acceptance.</p>
+<p>One piece of context from earlier in the afternoon that 1634 did not carry: at 2:33 PM PT the same author commented on opentelemetry-python-genai #507 that the suspend and resume half is being built alongside the state-change producer, on the same LangGraph callback plumbing. <code>paused</code> reads the interrupt marker at chain end; <code>checkpointed</code> and <code>resumed_from</code> come from wrapping the checkpointer. The author says it will not touch <code>state.changed</code> and will rebase if #507 lands first. So the real LangGraph producer is moving to the instrumentation repo, not the conventions repo.</p>
+<p>The wrong belief to kill: #445 is converging. It is shrinking to the parts the author can defend, and the one identity it had, thread id as execution id, was just withdrawn. The question 1634 raised, what a resumed run is joined on, is more open tonight than it was this morning.</p>
+<p><strong>TL;DR for BQAA.</strong> The producer contract should state its own join key for pause and resume and not wait for this thread. ADK's <code>invocation_id</code> across a confirmation pause is a concrete answer; OTel currently has none. Cite #445 as the reason the contract needs to say this, not as something to align to.</p>
+<h3>Bot-only since 1634</h3>
+<p>#483 took a review request at 3:02 PM PT, a Copilot review that failed on quota, a Codex bot review, and the dashboard bot. #507 has the same two bot reviewers and the dashboard bot. #463 was last touched by the author at 12:17 PM PT. #479, groq client metrics in a reference scenario, was updated at 4:40 PM PT and does not change the model. None of this is a maintainer response.</p>
+<h3>Flat since 1634</h3>
+<p>Same newest tag everywhere: adk-python v1.39.1 / v2.8.0, adk-java v1.9.0, semantic-conventions v1.44.0, Langfuse v4.27.0, langfuse-python v4.15.1, LangSmith SDK v0.12.1, Phoenix 20.5.0 and phoenix-evals 3.6.0, Opik 2.2.47, MLflow v3.15.2, Weave v0.53.7, Braintrust JS 3.29.0 and Python 0.36.0. adk-java has no commit since the MCP SDK 2.0.0 bump. BigQuery release notes still top out at Aug 31. LangSmith changelog is still the Aug 24–31 rollup. Braintrust's September section is still 0.36.0 plus the eval action 2.1.0. Langfuse's changelog page returned 404 again; the repo shows dashboard and experiment-filter commits but no new tag.</p>
+<h2>Academy</h2>
+<p>Skipped. arXiv cs.AI still shows Tue 1 Sep 2026 as the newest announcement day, swept at 0849. No Wednesday section yet.</p>
+<h2>Six-week EV only</h2>
+<p><strong>No re-rank.</strong> The 1434 ranking holds. Two rows gain evidence:</p>
+<ul>
+<li><strong>Producer contract, state and loops.</strong> Add <code>transfer_reason</code> to the list of <code>EventActions</code> fields the contract enumerates, with a note that it is content-class. Add the sentence that the contract's pause/resume join key is ADK's invocation id, and that OTel #445 currently offers no counterpart.</li>
+<li><strong>Process.</strong> The 1634 note said to read the open-PR list, not just main. Tonight's item came from the commit list on a draft, which the open-PR sort by update time surfaces. Keep doing that.</li>
+</ul>
+<p>Reserve and do-not-start unchanged. Do not start the #435 clock.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>adk-python-transfer-reason-event-action</code> — adk-python main 22ab4d8 / PR #6590: <code>transfer_reason</code> on <code>EventActions</code>, opt-in on <code>TransferToAgentTool</code> via <code>include_transfer_reason</code>, peer-supplied value stripped in A2A conversion; unreleased (Sep 1)</li>
+<li>update <code>otel-genai-durable-execution-thread</code> — #445 now model-only: deadline, resolution, resolved event, and unproducible enum members removed; thread-id-as-execution-id withdrawn; LangGraph scenario dropped; suspend/resume producer moving to python-genai alongside #507 (Sep 1)</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Claude Code Fable 5.1 · 1 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
