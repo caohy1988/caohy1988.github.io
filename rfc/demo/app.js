@@ -558,7 +558,7 @@
       '<div class="cols even">' +
       '<div class="pane catalog"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--catalog)"></span>Knowledge Catalog · discovery</span><span class="m">derived view · no entry created</span></div><div class="pane-b"><div class="cards">' +
       docs.map(function (f) {
-        return '<div class="card"><div class="ch"><span class="name">' + esc(f.title) + '</span><span class="etype">okf-concept · derived view</span></div><div class="pins">' +
+        return '<div class="card"><div class="ch"><span class="name">' + esc(f.title) + '</span><span class="etype">okf-bundle · derived view</span></div><div class="pins">' +
           '<span class="pin"><b>okf.type</b> ' + esc(f.type) + "</span>" +
           '<span class="pin' + (f.status === "deprecated" ? " dep" : "") + '"><b>okf.lifecycle</b> ' + esc(f.status) + "</span>" +
           '<span class="pin"><b>okf.provenance</b> bqaa observer · derived</span>' +
