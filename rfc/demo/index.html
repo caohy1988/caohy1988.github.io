@@ -57,9 +57,10 @@
 <section class="identity live-strip" aria-label="Live GCP run">
   <div class="shell">
     <div class="idrow live-row">
-      <div class="lbl"><b>Live GCP</b>okf_rfc_demo · 2026-09-02</div>
+      <div class="lbl"><b>Live GCP</b>okf_rfc_demo · 2026-09-02T23:05:12Z</div>
       <div class="chip deriv"><span class="k">dataset</span><span class="v">test-project-0728-467323.okf_rfc_demo.agent_events</span></div>
       <div class="chip deriv"><span class="k">agent</span><span class="v">okf_rfc_consume_agent</span></div>
+      <div class="chip deriv"><span class="k">model</span><span class="v">gemini-3.8-flash · Vertex global</span></div>
       <div class="chip deriv"><span class="k">session_id</span><span class="v">04fa3d56-f2f1-413e-8c2b-ec116835af84</span></div>
       <span class="status wait" id="live-status">loading snapshot…</span>
     </div>
@@ -123,9 +124,25 @@
 
   <div class="walkthrough" id="walkthrough">
     <h2 class="walk-title">Walkthrough</h2>
-    <p class="walk-lede">Four beats on this page: Observe → Adapt → Project → Consume. Live dataset <code>okf_rfc_demo</code>, agent <code>okf_rfc_consume_agent</code>, model <code>gemini-3.8-flash</code>, Knowledge Catalog entry <code>okf-derived-germany</code>.</p>
-    <video controls preload="metadata" src="okf-bqaa-e2e.mp4" width="1280">The demo walkthrough recording.</video>
-    <p class="walk-note">Recording of the four-beat demo UI. Live GCP proof is the committed <code>live/</code> snapshot plus the BigQuery and Dataplex console links above — this page does not call GCP from the browser.</p>
+    <p class="walk-lede">Four beats on this page: Observe → Adapt → Project → Consume. The live-GCP proof is the committed <code>live/</code> snapshot summarised in the card below plus the two console links; the video beneath it is an older clip of the fixture UI.</p>
+    <div class="live-card walk-live" aria-label="Live run summary">
+      <div class="lh"><span>Live run · <code>okf_rfc_demo</code></span><span class="tag">derived / demo · observer-only · not attested</span></div>
+      <dl class="kv">
+        <dt>dataset</dt><dd><code>test-project-0728-467323.okf_rfc_demo.agent_events</code></dd>
+        <dt>agent</dt><dd><code>okf_rfc_consume_agent</code> · google-adk · <code>gemini-3.8-flash</code> · Vertex <code>global</code></dd>
+        <dt>session_id</dt><dd><code>04fa3d56-f2f1-413e-8c2b-ec116835af84</code></dd>
+        <dt>trace_id</dt><dd><code>0294f653a4f141ae960865e438538d2e</code></dd>
+        <dt>context_ref</dt><dd><code>okf:env-demo#a25e1c0ccbca</code></dd>
+        <dt>KC entry</dt><dd><code>okf-derived-germany</code> · group <code>okf-rfc-demo</code> · <code>us-central1</code></dd>
+        <dt>ran_at</dt><dd><code>2026-09-02T23:05:12Z</code></dd>
+      </dl>
+      <div class="live-links">
+        <a class="lk bq" href="https://console.cloud.google.com/bigquery?project=test-project-0728-467323&amp;ws=!1m5!1m4!4m3!1stest-project-0728-467323!2sokf_rfc_demo!3sagent_events" target="_blank" rel="noopener">Open the table in BigQuery ↗</a>
+        <a class="lk kc" href="https://console.cloud.google.com/dataplex/search?project=test-project-0728-467323&amp;q=okf-derived-germany" target="_blank" rel="noopener">Find the entry in Dataplex ↗</a>
+      </div>
+    </div>
+    <p class="walk-note walk-clip-label"><b>Prior fixture clip, recorded before the live run, not live-GCP proof.</b> It shows the earlier fixture-replay version of this UI. A capture of the live page is planned; the beats to record are listed in <a href="WALKTHROUGH.md">WALKTHROUGH.md</a>.</p>
+    <video controls preload="metadata" src="okf-bqaa-e2e.mp4" width="1280">Prior fixture clip, recorded before the live run, not live-GCP proof.</video>
   </div>
 
   <div class="extras">

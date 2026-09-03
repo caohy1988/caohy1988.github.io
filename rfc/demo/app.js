@@ -520,7 +520,7 @@
       turn("user", "user", '<div class="bubble user">' + esc(L.question) + "</div>") +
       turn("model", L.model, '<div class="bubble call">function_call → <b>' + esc(L.toolName) + "</b> " + esc(JSON.stringify(L.toolArgs)) + '<span class="usage">LLM_RESPONSE · ' + esc((call.usage || {}).prompt || 0) + " prompt / " + esc((call.usage || {}).completion || 0) + " completion tokens</span></div>") +
       turn("tool", "tool result", result(L.toolName, "TOOL_COMPLETED · live row", L.toolResult)) +
-      turn("model", L.model, '<div class="bubble final">' + answerHtml + '<span class="usage">AGENT_RESPONSE · ' + esc((fin.usage || {}).prompt || 0) + " prompt / " + esc((fin.usage || {}).completion || 0) + " completion tokens</span></div>") +
+      turn("model", L.model, '<div class="bubble final">' + answerHtml + '<span class="usage">LLM_RESPONSE · ' + esc((fin.usage || {}).prompt || 0) + " prompt / " + esc((fin.usage || {}).completion || 0) + " completion tokens</span></div>") +
       "</div>" +
       '<div class="side">' +
       '<div class="tile"><div class="th">agent construction · <a href="live/run_okf_agent.py">live/run_okf_agent.py</a></div><pre class="py">' + py + "</pre></div>" +
