@@ -1,0 +1,210 @@
+{
+  "_comment": "TRIMMED viewer snapshot of the live observe export. Full 180-row JSON lives on SDK PR 474; do not treat this file as the export.",
+  "source_of_truth": {
+    "repo": "GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK",
+    "pr": 474,
+    "pr_url": "https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/474",
+    "head": "476d37dc9d4210a335c2f77e78003f6a5ebe2878",
+    "path": "examples/okf_bqaa_adapter/fixtures/live_observe_agent_events.json",
+    "do_not_merge_pr_474": true
+  },
+  "live": {
+    "label": "derived/demo, observer-only, nothing attested",
+    "session_id": "f21ee192-d989-4c38-894f-66b6b82eaf18",
+    "trace_id": "e-c7214361-4017-43d7-af4e-cddfe51b09a4",
+    "agent": "okf_rfc_observe_agent",
+    "model": "gemini-3.8-flash",
+    "project": "test-project-0728-467323",
+    "dataset": "okf_rfc_demo",
+    "table": "test-project-0728-467323.okf_rfc_demo.agent_events",
+    "vertex_location": "global",
+    "ran_at": "2026-09-03T04:10:36.152769+00:00",
+    "event_count": 180,
+    "context_ref": "okf:env-observe#674153c572f6",
+    "receipt_context_ref": "okf:env-observe#674153c572f6"
+  },
+  "identities": {
+    "observation_id": "sha256:85ea62a96e5076a292572a996f0408865c4c56aac696bbeb79a73bbc5eda8af6",
+    "snapshot_id": "sha256:f18befd010ff7e3d1fe140303626a82dc985c986846093f73643e7d0eea92b75",
+    "publication_id": "sha256:53bd1651c43f69d53f591e4f91e3ccdda4640d8b36cb1dce1ac97328ffa39a77",
+    "adapter_version": "okf-bqaa-adapter:v0",
+    "label": "derived/demo, observer-only, nothing attested"
+  },
+  "event_count": 180,
+  "histogram": {
+    "USER_MESSAGE_RECEIVED": 12,
+    "INVOCATION_STARTING": 12,
+    "AGENT_STARTING": 12,
+    "LLM_REQUEST": 36,
+    "LLM_RESPONSE": 36,
+    "TOOL_STARTING": 24,
+    "TOOL_COMPLETED": 24,
+    "AGENT_COMPLETED": 12,
+    "INVOCATION_COMPLETED": 12
+  },
+  "agent": {
+    "name": "okf_rfc_observe_agent",
+    "framework": "google-adk",
+    "model": "gemini-3.8-flash"
+  },
+  "table": "test-project-0728-467323.okf_rfc_demo.agent_events",
+  "session_id": "f21ee192-d989-4c38-894f-66b6b82eaf18",
+  "trace_id": "e-c7214361-4017-43d7-af4e-cddfe51b09a4",
+  "never_emit": [
+    "concept_version_id",
+    "bundle_path",
+    "source_path",
+    "principal",
+    "user_id",
+    "query_text",
+    "sql",
+    "parameter_values",
+    "destination_table"
+  ],
+  "exported_at": "2026-09-03T04:10:36.152769+00:00",
+  "export_sha256": "846365aac91ba4e2806ea8b4541fa5ed676c78ae244ce1ce2c2cdce3941722a3",
+  "export_bytes": 494002,
+  "sample_events": [
+    {
+      "timestamp": "2026-09-03T04:08:33.012709Z",
+      "event_type": "USER_MESSAGE_RECEIVED",
+      "agent": "okf_rfc_observe_agent",
+      "session_id": "f21ee192-d989-4c38-894f-66b6b82eaf18",
+      "trace_id": "e-c7214361-4017-43d7-af4e-cddfe51b09a4",
+      "user_id": "okf-observe-demo",
+      "status": "OK",
+      "content": {
+        "text_summary": "What was active-customer revenue in Germany last quarter \u2014 and can I trust the number?"
+      }
+    },
+    {
+      "timestamp": "2026-09-03T04:08:36.028264Z",
+      "event_type": "LLM_RESPONSE",
+      "agent": "okf_rfc_observe_agent",
+      "session_id": "f21ee192-d989-4c38-894f-66b6b82eaf18",
+      "trace_id": "e-c7214361-4017-43d7-af4e-cddfe51b09a4",
+      "user_id": "okf-observe-demo",
+      "status": "OK",
+      "content": {
+        "_truncated": "{\"response\": \"call: okf_retrieve_context\", \"usage\": {\"completion\": 19, \"prompt\": 424, \"total\": 603}}"
+      }
+    },
+    {
+      "timestamp": "2026-09-03T04:08:36.037164Z",
+      "event_type": "TOOL_STARTING",
+      "agent": "okf_rfc_observe_agent",
+      "session_id": "f21ee192-d989-4c38-894f-66b6b82eaf18",
+      "trace_id": "e-c7214361-4017-43d7-af4e-cddfe51b09a4",
+      "user_id": "okf-observe-demo",
+      "status": "OK",
+      "content": {
+        "tool": "okf_retrieve_context"
+      }
+    },
+    {
+      "timestamp": "2026-09-03T04:08:36.037972Z",
+      "event_type": "TOOL_COMPLETED",
+      "agent": "okf_rfc_observe_agent",
+      "session_id": "f21ee192-d989-4c38-894f-66b6b82eaf18",
+      "trace_id": "e-c7214361-4017-43d7-af4e-cddfe51b09a4",
+      "user_id": "okf-observe-demo",
+      "status": "OK",
+      "content": {
+        "tool": "okf_retrieve_context",
+        "result": {
+          "kind": "okf-context:retrieve",
+          "context_ref": "okf:env-observe#674153c572f6",
+          "okf": {
+            "excluded": [
+              {
+                "reason": "superseded; out of force since 2026-06-20",
+                "title": "Customer revenue (legacy)",
+                "type": "Metric"
+              }
+            ],
+            "items": [
+              {
+                "rank": 1,
+                "title": "Active-customer revenue",
+                "type": "Metric"
+              },
+              {
+                "rank": 2,
+                "title": "Active-customer revenue by region and quarter",
+                "type": "Attested Computation"
+              },
+              {
+                "rank": 3,
+                "title": "Active customer",
+                "type": "Business Concept"
+              },
+              {
+                "rank": 4,
+                "title": "Revenue recognition eligibility",
+                "type": "Policy"
+              },
+              {
+                "rank": 5,
+                "title": "Billing invoice lines",
+                "type": "BigQuery Table"
+              },
+              {
+                "rank": 6,
+                "title": "CRM customers",
+                "type": "BigQuery Table"
+              }
+            ],
+            "links": [
+              {
+                "from": "Active-customer revenue",
+                "rel": "governed_by",
+                "to": "Revenue recognition eligibility"
+              }
+            ],
+            "mode": "current",
+            "profile_contract_version": "okf-context/1",
+            "publication_id": "sha256:674153c572f6be57618a8d769a1a2b21a3e20d98406b3d1e58dd00027bc45905",
+            "publication_id_note": "pin of the in-process demo catalog; not an authored publication"
+          }
+        }
+      }
+    },
+    {
+      "timestamp": "2026-09-03T04:08:39.984114Z",
+      "event_type": "AGENT_COMPLETED",
+      "agent": "okf_rfc_observe_agent",
+      "session_id": "f21ee192-d989-4c38-894f-66b6b82eaf18",
+      "trace_id": "e-c7214361-4017-43d7-af4e-cddfe51b09a4",
+      "user_id": "okf-observe-demo",
+      "status": "OK",
+      "content": {
+        "_truncated": "{}"
+      }
+    },
+    {
+      "timestamp": "2026-09-03T04:10:11.518138Z",
+      "event_type": "INVOCATION_COMPLETED",
+      "agent": "okf_rfc_observe_agent",
+      "session_id": "f21ee192-d989-4c38-894f-66b6b82eaf18",
+      "trace_id": "e-d98e66d1-07ef-44f1-950c-862e364f672b",
+      "user_id": "okf-observe-demo",
+      "status": "OK",
+      "content": {
+        "_truncated": "{}"
+      }
+    }
+  ],
+  "germany_trace": {
+    "label": "SYNTHETIC hashing-only",
+    "path": "traces/bqaa-germany.json",
+    "not_source_of_truth": true,
+    "session": "sess-4c1f9a2e7b3d"
+  },
+  "prior_consume_experiment": {
+    "label": "prior live-GCP consume experiment, NOT this adapter input",
+    "agent": "okf_rfc_consume_agent",
+    "session_id": "04fa3d56-f2f1-413e-8c2b-ec116835af84",
+    "context_ref": "okf:env-demo#a25e1c0ccbca",
+    "tool": "lookup_okf_context"
+  }
+}
