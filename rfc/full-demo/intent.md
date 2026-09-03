@@ -10,7 +10,9 @@ session becomes derived OKF that the next agent can look up by `context_ref`. It
 questions a cold customer asks after watching it are still answered only in RFC prose:
 
 1. **"My bundles are already in Knowledge Catalog via `kcmd push`. How do they get into BigQuery?"**
-   Is that a built-in Dataplex / BigQuery service, or something I run?
+   Is that a built-in Dataplex / BigQuery service, or something I run? The answer this plan gives,
+   once and consistently: an external CLI in v1, direction bundle → BigQuery commit → Catalog stamp;
+   a Catalog → BigQuery import is not v1.
 2. **"What does the BigQuery deployment give me that Catalog does not?"** The RFC lists it (§05, §06,
    §09) but nothing on screen fails in Catalog and then succeeds in BigQuery.
 3. **"Who is this for, with what evidence?"** The value proposition today is a Cymbal finance
@@ -39,19 +41,23 @@ questions a cold customer asks after watching it are still answered only in RFC 
   **Not** human-in-the-loop or sentiment promotion. The number stays unproven until an attester runs.
 - Do not touch SDK PR 474, do not start the #435 clock, do not re-run the observe agent or pad the
   180-row export, do not re-record `okf-bqaa-cli.mp4` in this PR.
-- Honesty labels on every pane: live GCP vs recorded vs stubbed.
+- Honesty labels on every pane: live GCP vs recorded vs stubbed vs `RFC text only`.
+- The bridge runs under least-privilege identities scoped to one dataset and one EntryGroup
+  (`spec.md` §1.3); nothing relies on a Dataplex built-in or an unannounced roadmap item.
 
 ## Non-goals
 
 - Implementing the syncer. This PR specifies it; the build is Phase A of `plan.md`.
 - A managed Dataplex or BigQuery feature. We say what one would need to be; we do not pretend it exists.
+- A Catalog → BigQuery importer (`sync --from-catalog`). Future, lossy, out of v1.
 - Fortune-500 stories. Every story cites a session id, a table, and concept titles we can query.
 - A second finance narrative. Germany active-customer revenue stays the spine.
 
 ## Success
 
 A visitor who has read only the Google post can, in under five minutes on `/rfc/full-demo/`, say
-back: "sync is a CLI I run (or schedule) that commits the bundle to BigQuery and stamps the Catalog
-entry with the publication it committed; Catalog finds, BigQuery serves; here are three things I saw
-Catalog fail to answer and BigQuery answer with a SQL query." Every number on the page traces to
+back: "sync is an external CLI I run (or schedule) that commits the bundle to BigQuery and stamps
+the Catalog entry with the publication it committed; Catalog finds, BigQuery serves; here are three
+things I saw shipped OKF-in-Catalog stop at and BigQuery answer with a SQL query, and here is what the
+page marked as RFC text only." Every number on the page traces to
 `test-project-0728-467323.okf_rfc_demo.agent_events` or to a Catalog entry we can `gcloud` today.

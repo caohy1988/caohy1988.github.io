@@ -1,16 +1,19 @@
 -- Beat 6 (v0): which session used which context_ref / publication.
--- Runs today against agent_events only. Phase B joins this to
--- okf_rfc_demo.context_ref_bindings and okf_rfc_demo.publications once
--- `okf-context sync` has created them.
+-- Event-sourced only. Runs today against agent_events. Phase B joins this to
+-- okf_rfc_demo.publications on BOTH context_ref and the event-carried
+-- publication_id (seeded pre-Phase-A rows included), and lists adapter-tape /
+-- legacy-Catalog evidence from demo_evidence as separately sourced rows.
+-- Attested-computation rows carry no publication_id (NULL) and a verdict.
 --
 --   bq query --use_legacy_sql=false --project_id=test-project-0728-467323 < sessions_by_context_ref.sql
 --
--- Result on 2026-09-03 (5 rows):
---   04fa3d56  okf_rfc_consume_agent  lookup_okf_context            okf:env-demo#a25e1c0ccbca     sha256:a25e1c0c…  1
---   1e6dfed7  okf_rfc_observe_agent  okf_retrieve_context          okf:env-observe#674153c572f6  sha256:674153c5…  1
---   1e6dfed7  okf_rfc_observe_agent  okf_run_attested_computation  okf:env-observe#674153c572f6  (UNVERIFIABLE)    1
---   f21ee192  okf_rfc_observe_agent  okf_retrieve_context          okf:env-observe#674153c572f6  sha256:674153c5…  12
---   f21ee192  okf_rfc_observe_agent  okf_run_attested_computation  okf:env-observe#674153c572f6  (UNVERIFIABLE)    12
+-- Result on 2026-09-03 (5 rows, 7 columns):
+--   session_id  agent                  tool                          context_ref                   publication_id    verdict       n
+--   04fa3d56…   okf_rfc_consume_agent  lookup_okf_context            okf:env-demo#a25e1c0ccbca     sha256:a25e1c0c…  NULL          1
+--   1e6dfed7…   okf_rfc_observe_agent  okf_retrieve_context          okf:env-observe#674153c572f6  sha256:674153c5…  NULL          1
+--   1e6dfed7…   okf_rfc_observe_agent  okf_run_attested_computation  okf:env-observe#674153c572f6  NULL              UNVERIFIABLE  1
+--   f21ee192…   okf_rfc_observe_agent  okf_retrieve_context          okf:env-observe#674153c572f6  sha256:674153c5…  NULL          12
+--   f21ee192…   okf_rfc_observe_agent  okf_run_attested_computation  okf:env-observe#674153c572f6  NULL              UNVERIFIABLE  12
 SELECT
   session_id,
   agent,

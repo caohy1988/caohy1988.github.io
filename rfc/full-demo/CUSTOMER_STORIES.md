@@ -4,7 +4,8 @@ Every story below cites a session id, the table, concept titles, and the exact f
 Catalog-only deployment has. Nothing here is invented: the quotes are `content` fields read with
 `bq query` on 2026-09-03; the Catalog entry was read with `gcloud dataplex entries lookup`.
 "The customer" is the finance analytics team asking about Germany active-customer revenue, the
-only narrative these traces contain. We do not dress it up as a named enterprise.
+only narrative these traces contain. We do not dress it up as a named enterprise. Where the
+BigQuery side is not implemented in Phase A/B, the story says `RFC text only`.
 
 Shared facts:
 
@@ -15,8 +16,8 @@ Shared facts:
 | Agents / model | `okf_rfc_observe_agent`, `okf_rfc_consume_agent`; `gemini-3.8-flash` |
 | Tools observed | `okf_retrieve_context` (13 completions), `okf_run_attested_computation` (13), `lookup_okf_context` (1) |
 | Concepts returned (rank order) | `Active-customer revenue` (Metric) · `Active-customer revenue by region and quarter` (Attested Computation) · `Active customer` (Business Concept) · `Revenue recognition eligibility` (Policy) · `Billing invoice lines` (BigQuery Table) · `CRM customers` (BigQuery Table); excluded: `Customer revenue (legacy)` (Metric, "superseded; out of force since 2026-06-20") |
-| Catalog entry | `projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/okf-derived-germany`, type `okf-concept`, created 2026-09-02T23:03:22Z, **no aspects**, publication pin only inside `entrySource.description` |
-| Publications in play | `a25e1c0c…` (Catalog entry + consume sessions) · `674153c5…` (in-process pin, observe sessions) · `53bd1651…` (adapter CLI on record) |
+| Catalog entry (legacy, prior experiment) | `projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/okf-derived-germany`, type `okf-concept`, created 2026-09-02T23:03:22Z, **no aspects**, publication pin only inside `entrySource.description`. Not shipped OKF-in-KC; the shipped `okf-bundle` + `okf` types are set up in Phase A. |
+| Publications in play | In `agent_events`: `a25e1c0c…` (consume session) and `674153c5…` (observe sessions). Outside `agent_events`: `53bd1651…` (adapter CLI tape) and the legacy Catalog description (`a25e1c0c…`). Three distinct publications across two kinds of source. |
 
 ---
 
@@ -39,19 +40,33 @@ The agent then answered: **"You can trust the number because it is verified and 
 sanctioned computation bound in `okf:env-demo#a25e1c0ccbca`, and BQAA is observer-only."**
 No computation ran. No verdict existed. The word "verified" was produced from an `ok: true`.
 
+**Disclosure: this is an illustration, not a controlled comparison.** The two sessions differ in
+more than one field. Their system prompts, read from the `LLM_REQUEST` rows:
+
+- `04fa3d56` (consume agent): "If asked about Germany active-customer revenue, say the number is
+  produced by the sanctioned computation bound in that context_ref, and that BQAA is observer-only."
+  One tool, `lookup_okf_context`, whose contract has no verdict.
+- `f21ee192` (observe agent): "Report the receipt verdict and verdict_reason verbatim; if the
+  verdict is not ATTESTED, say plainly that the number is unproven." Two tools, including
+  `okf_run_attested_computation`, whose contract has a verdict.
+
+So the prompt, the tool set, and the question set all differ. What the pair shows is narrower and
+still useful: **a contract with no verdict field permits an agent to say "verified", and a prompt
+that leans on "sanctioned computation" language will do so.** It does not show that adding the
+field alone would have changed the answer.
+
 **KC-only failure mode.** The shipped `okf` aspect displays `runtime`, `computation`, `executor`,
-`attester`; LookupContext returns a YAML block with none of them; neither has a `verdict` field.
-An agent reading Catalog sees the words "Attested Computation" and has nothing that says whether
-one ran. The entry we actually have has no aspect at all: the pin lives in the description string.
+`attester`; LookupContext does not render those fields at all; neither carries a `verdict`. An agent
+reading Catalog sees the words "Attested Computation" and has nothing that says whether one ran.
 
-**What BigQuery deployment changes.** In session `f21ee192` the same question, with
-`okf_run_attested_computation` returning `verdict: UNVERIFIABLE`, `verdict_reason: "no-execution;
-observer-only demo, nothing attested"`, `receipt_id: rcpt-observe-noexec`, got this answer twelve
-times out of twelve: **"No. The number is unproven."** The difference between the two sessions is
-one field on the tool result, and that field only exists on the runtime side.
+**What BigQuery deployment changes.** In session `f21ee192`, `okf_run_attested_computation`
+returned `verdict: UNVERIFIABLE`, `verdict_reason: "no-execution; observer-only demo, nothing
+attested"`, `receipt_id: rcpt-observe-noexec`, and the agent answered **"No. The number is
+unproven."** twelve times out of twelve. The runtime contract makes the verdict a field the agent
+must carry; the prompt then has something to report verbatim.
 
-**Value proposition.** A finance answer carries its receipt or says it has none. The demo shows the
-overclaim and the correction as two real transcripts side by side (beat 3 vs beat 5).
+**Value proposition.** A finance answer carries its receipt or says it has none. The demo shows
+both transcripts side by side with both system prompts (beat 3 vs beat 5).
 
 ---
 
@@ -76,56 +91,72 @@ overclaim and the correction as two real transcripts side by side (beat 3 vs bea
 12. Which excluded items must I not use for last-quarter reporting?
 
 All twelve `okf_retrieve_context` calls used `mode: current` and returned the identical pack:
-`item_count: 6`, `excluded_count: 1`, `publication_id: 674153c5…`. Question 4 (prior quarter),
-question 10 (roll-up), and question 11 (what would attest it) are answerable only with history,
-parameters, and execution.
+`item_count: 6`, `excluded_count: 1`, `publication_id: 674153c5…`. Questions 4, 10, and 11 are
+the ones a static pack cannot serve.
 
 **KC-only failure mode.** Catalog has one mutable state per entry with `createTime` / `updateTime`.
-"What was current last quarter" is not a question it can hold. `parameters[]` is an array field and
-is not server-side searchable. Nothing executes.
+"Which publication was current last quarter" is not a question it can hold. `parameters[]` is an
+array field and is not server-side searchable. Nothing executes.
 
-**What BigQuery deployment changes.** `deployment_heads_history (deployment_key, publication_id,
-snapshot_id, committed_at, sync_id)` answers question 4 directly. The declared `parameter_schema`
-on record (`region STRING`, `quarter_start DATE`, `quarter_end DATE`) is what
-`run_attested_computation` binds for question 10. Question 11's answer is the RFC's `ATTESTED`
-requirement list, and the agent recited it correctly from the receipt fields.
+**What BigQuery deployment changes, in Phase B.** `deployment_heads_history (deployment_key,
+publication_id, snapshot_id, committed_at, sync_id)` answers **which publication was current** at
+the prior quarter's date, so the agent can retrieve in `historical` mode against that publication
+and say which definition of the metric applied then. The declared `parameter_schema` on record
+(`region STRING`, `quarter_start DATE`, `quarter_end DATE`) is shown as the contract the executor
+would bind. Question 11's answer is the RFC's `ATTESTED` requirement list, and the agent recited it
+correctly from the receipt fields.
+
+**What stays future.** The history table holds no revenue values. A numerical prior-quarter
+comparison (question 4) and a three-region roll-up (question 10) need an executor and an attester;
+Phase B keeps every receipt `UNVERIFIABLE` / `no-execution`. Beat 5 labels both as
+`RFC text only`.
 
 **Value proposition.** The runtime turns a static pack into something that can be pinned to a
-point in time and executed with bound parameters; Catalog can only be searched.
+point in time and has a declared parameter contract; Catalog can only be searched. The numbers
+come later, and the demo says so.
 
 ---
 
-## Story 3 — One handle, three publications, and the Catalog entry points at the oldest
+## Story 3 — One handle, three publications, and the legacy Catalog entry names the oldest
 
 **Who.** Whoever audits the demo after the fact.
-**Evidence.** All four sessions plus the Catalog entry and the adapter output on record.
+**Evidence.** All four sessions, the adapter tape, and the legacy Catalog entry.
 
-**What happened.** Group tool completions by session and `context_ref`:
+**What happened.** Two kinds of evidence, kept in separate tables because only one is event data.
 
-| session | tool | `context_ref` | publication seen by the agent |
+Event-sourced (`agent_events`, grouped by session, tool, `context_ref`, publication):
+
+| session | tool | `context_ref` | publication carried by the event |
 |---|---|---|---|
 | `04fa3d56` | `lookup_okf_context` | `okf:env-demo#a25e1c0ccbca` | `a25e1c0c…` |
 | `1e6dfed7` | `okf_retrieve_context` | `okf:env-observe#674153c572f6` | `674153c5…` (in-process pin) |
 | `f21ee192` | `okf_retrieve_context` ×12 | `okf:env-observe#674153c572f6` | `674153c5…` |
-| adapter CLI (PR 474 tape) | `run.py --lookup` | `okf:env-observe#674153c572f6` | `53bd1651…` |
 
-The Catalog entry `okf-derived-germany` says `publication_id=sha256:a25e1c0c…` in its description
-and has no aspect. So Catalog names the oldest publication, the observe sessions used a second,
-and the CLI on record binds the same `context_ref` to a third.
+Separately sourced (not `agent_events` rows):
+
+| source | `context_ref` | publication | note |
+|---|---|---|---|
+| adapter CLI tape, PR 474 `476d37dc` | `okf:env-observe#674153c572f6` | `53bd1651…` | same handle as the observe sessions, different publication |
+| legacy Catalog entry `okf-derived-germany`, `entrySource.description` | `okf:env-demo#a25e1c0ccbca` | `a25e1c0c…` | prose, no aspect |
+
+So the agents saw two publications, the tape binds the same observe handle to a third, and the only
+Catalog pin in the project names the oldest.
 
 **KC-only failure mode.** Catalog cannot say which publication an agent read, whether two agents
-read the same one, or whether the entry is stale relative to what is being served. A search
-predicate on the pin filters entries; it cannot refuse a stale request. And because this entry has
-no aspect, there is nothing to predicate on at all.
+read the same one, or whether the entry is stale relative to what is being served. After Phase A it
+can display a stamped pin; a search predicate on it filters entries; it cannot compare the pin to a
+head or refuse a stale request.
 
-**What BigQuery deployment changes.** `publications` plus the `context_ref` mapping table make the
-binding a ledger with one row per publication. A request that presents `a25e1c0c…` to a runtime
-whose head is `53bd1651…` fails stale. Beat 6 is the SQL that produces the table above from
-`agent_events` joined to `publications`.
+**What BigQuery deployment changes, and the attribution contract.** From Phase A on, a
+`context_ref` is bound to exactly one `publication_id` and never rebound; a new publication mints a
+new handle. The three pre-Phase-A publications are seeded into `publications` with a
+`seeded_pre_phase_a` source column. Beat 6 joins `agent_events` to those rows on **both** the
+event-carried `context_ref` and the event-carried `publication_id`, so the legacy double binding of
+`okf:env-observe#674153c572f6` cannot duplicate or misattribute a row; the adapter and Catalog
+evidence sit in their own table with a source column.
 
-**Value proposition.** "Which version did the agent use" becomes a query, not an incident review.
-The demo is honest that today the same `context_ref` is bound to two publications; the syncer's
-job is to make that impossible going forward.
+**Value proposition.** "Which version did the agent use" becomes a query, not an incident review,
+and the demo is honest that the legacy handle was bound twice before the contract existed.
 
 ---
 
@@ -145,17 +176,17 @@ why it is excluded, not just that it is absent.
 returns whatever is in the EntryGroup. A superseded metric stays discoverable and readable until an
 operator deletes the entry by hand or removes the whole EntryGroup with `cleanup.ts`.
 
-**What BigQuery deployment changes.** Retirement is a property of the data: snapshot membership,
-`current` / `historical` / `all` modes, "exclusion follows affirmation", and delete-as-absence in
-the ledger so the syncer removes only what it owns. The legacy metric is still in `historical`
-mode for audit and absent from `current`.
+**What BigQuery deployment changes (Phase A/B).** Retirement is a property of the data: snapshot
+membership, `current` / `historical` / `all` modes, "exclusion follows affirmation", and
+delete-as-absence in the ledger so the syncer removes only what it owns. The legacy metric is still
+in `historical` mode for audit and absent from `current`.
 
 **Value proposition.** The dead metric cannot be picked by accident, and the reason it died is one
 row away.
 
 ---
 
-## Story 5 — Who may read the policy
+## Story 5 — Who may read the policy (`RFC text only` on the BigQuery side)
 
 **Who.** The finance user asking question 7; the Catalog administrator granting `catalogViewer`.
 **Session.** `f21ee192`, invocation `e-68d2e6b9-…`.
@@ -165,27 +196,31 @@ edge: `Active-customer revenue —governed_by→ Revenue recognition eligibility
 projection that policy is one `okf-bundle` entry with its full body in the `overview` aspect,
 sitting in the same EntryGroup as `Billing invoice lines` and `CRM customers`.
 
-**KC-only failure mode.** The enforcement unit is the EntryGroup and IAM cascades to every entry
-in it. Anyone with `roles/dataplex.catalogViewer` on `okf-rfc-demo` can read the policy body via
-`entries.get`. OKF frontmatter is not an ACL, and the post's multi-team answer is one EntryGroup
-per team, which does not separate concepts inside one bundle.
+**KC-only structure (real, shown on beat 3).** The enforcement unit is the EntryGroup and IAM
+cascades to every entry in it (KC blog: "IAM on the EntryGroup cascades to its Entries"). Anyone
+with `roles/dataplex.catalogViewer` on `okf-rfc-demo` can read the policy body via `entries.get`.
+OKF frontmatter is not an ACL, and the post's multi-team answer is one EntryGroup per team, which
+does not separate concepts inside one bundle. This is structure, not an observed leak, and the page
+says so.
 
-**What BigQuery deployment changes.** One security domain per deployment with caller-delegated
-BigQuery authorization; the Context Envelope carries a `policy_context_commitment`; mixed-policy
-bundles fail closed at projection time rather than leaking through `overview`.
+**What the RFC proposes (`RFC text only`; not implemented in Phase A/B).** One security domain
+per deployment with caller-delegated BigQuery authorization; a `policy_context_commitment` inside
+the Context Envelope; mixed-policy bundles failing closed at projection time. The demo's runtime
+reader holds `dataViewer` on the one dataset and nothing finer. The page and tape quote the RFC and
+label the row accordingly; they do not show it working.
 
-**Value proposition.** Policy text reaches the agent through an authorized runtime path, not
-through whoever can browse the catalog. This story is grounded in the real question and the real
-Catalog structure, not in an observed leak; the page labels it "structure, not incident".
+**Value proposition (as proposed).** Policy text would reach the agent through an authorized
+runtime path rather than through whoever can browse the catalog. Today the honest claim is
+narrower: the dataset and the EntryGroup are the boundary, and both are real.
 
 ---
 
 ## How the stories map to the beats
 
-| Story | Beat where it lands | Evidence shown |
-|---|---|---|
-| 1 Verified | 3 (Catalog dies) and 5 (BQ serves) | two transcripts, `04fa3d56` vs `f21ee192` |
-| 2 Twelve questions | 1 (Ask) and 5 | the 12 `USER_MESSAGE_RECEIVED` rows; `deployment_heads_history` query |
-| 3 Three publications | 6 (Join) | `agent_events` ⋈ `publications` |
-| 4 Dead metric | 5 | retrieve `current` result; ledger row for absence |
-| 5 Policy | 3 and 5 | `entries.get view=ALL` on the policy entry; envelope commitment |
+| Story | Beat where it lands | Evidence shown | Status |
+|---|---|---|---|
+| 1 Verified | 3 (Catalog stops) and 5 (BQ serves) | two transcripts with both system prompts, `04fa3d56` vs `f21ee192` | illustration, not causal |
+| 2 Twelve questions | 1 (Ask) and 5 | the 12 `USER_MESSAGE_RECEIVED` rows; `deployment_heads_history` selection; `parameter_schema` | numbers `RFC text only` |
+| 3 Three publications | 6 (Attribution) | event-sourced join on handle + publication; separately sourced adapter/Catalog rows | real after seeding |
+| 4 Dead metric | 4, 5 | retrieve `current` result; ledger row for absence | real in Phase A/B |
+| 5 Policy | 3 | EntryGroup IAM structure, `governed_by` edge | BQ side `RFC text only` |
