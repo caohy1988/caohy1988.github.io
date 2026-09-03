@@ -1,4 +1,5 @@
-/* BQAA → derived OKF — static viewer of the SDK CLI path. Vanilla JS, no build.
+/* Why a BQAA trace becomes derived OKF the next agent can look up.
+   Static viewer of one SDK CLI run. Vanilla JS, no build.
    Source of truth: one stdlib run of `python examples/okf_bqaa_adapter/run.py`
    (okf-bqaa-adapter:v0, SDK PR 474 HEAD 476d37dc) over the committed export of
    the live ADK observe session f21ee192-… (okf_rfc_observe_agent,
@@ -6,7 +7,8 @@
    snapshot, the pinned identities and the CLI transcript. It does not hash,
    adapt or resolve anything for the live identities and never calls GCP.
    hash.js / adapter.js are loaded only for the labelled SYNTHETIC germany
-   hashing check, collapsed under beat 1 and never the demo input. */
+   hashing check, collapsed under beat 1 and never the demo input.
+   Four beats: Ask → Observe → Publish → Next agent. */
 (function () {
   "use strict";
 
@@ -21,6 +23,8 @@
   var BQ_CONSOLE = "https://console.cloud.google.com/bigquery?project=test-project-0728-467323&ws=!1m5!1m4!4m3!1stest-project-0728-467323!2sokf_rfc_demo!3sagent_events";
   var NEVER_EMIT = ["concept_version_id", "bundle_path", "source_path", "principal", "user_id", "query_text", "sql", "parameter_values", "destination_table"];
   var TYPE_BY_DIR = { computations: "Attested Computation", concepts: "Business Concept", metrics: "Metric", policies: "Policy", tables: "BigQuery Table" };
+  var CURRENT_METRIC = "Active-customer revenue";
+  var LEGACY_METRIC = "Customer revenue (legacy)";
 
   var stage = document.getElementById("stage");
   var btnBack = document.getElementById("btn-back");
@@ -83,6 +87,7 @@
     D.checks = crossChecks();
     renderIdentity();
     renderLiveStrip();
+    renderIdsHist();
     render();
     loadExtras();
   }).catch(function (err) {
@@ -118,6 +123,7 @@
   }
 
   // ---- transcript ---------------------------------------------------------
+  // The tape has four beats; commands are found by shape, not by position.
   function parseTranscript(text) {
     var blocks = [], cur = null, header = [];
     text.split("\n").forEach(function (ln) {
@@ -125,21 +131,42 @@
       if (!cur) { header.push(ln); return; }
       cur.out.push(ln);
     });
+    // A block ends before the next beat header; drop trailing blanks / "# N · BEAT" lines.
+    blocks.forEach(function (b) { while (b.out.length && (!b.out[b.out.length - 1] || /^# \d+ · /.test(b.out[b.out.length - 1]))) b.out.pop(); });
+    function find(re) { return blocks.filter(function (b) { return re.test(b.cmd); })[0] || null; }
+    function plain(b) { return b ? b.out.filter(function (l) { return l && !/^#/.test(l); }) : []; }
+    var ask = find(/USER_MESSAGE_RECEIVED/);
+    var observe = find(/_why_observe/);
+    var run = find(/run\.py\s*$/);
+    var titles = find(/grep .*title/);
+    var lookup = find(/--lookup 'okf:env-observe#/);
+    var junk = find(/--lookup 'okf:env-junk#/);
     var kv = {};
-    (blocks[0] ? blocks[0].out : []).forEach(function (ln) { var m = ln.match(/^([A-Z_]+) (.*)$/); if (m) kv[m[1]] = m[2]; });
+    plain(run).forEach(function (ln) { var m = ln.match(/^([A-Z_]+) (.*)$/); if (m) kv[m[1]] = m[2]; });
     var lookupJson = null;
-    if (blocks[1]) { try { lookupJson = JSON.parse(blocks[1].out.join("\n")); } catch (e) { lookupJson = null; } }
-    var junk = blocks[2] ? blocks[2].out.filter(function (l) { return l; }) : [];
-    return { header: header.filter(function (l) { return l; }), blocks: blocks, kv: kv, lookup: lookupJson, junk: junk };
+    try { lookupJson = JSON.parse(plain(lookup).join("\n")); } catch (e) { lookupJson = null; }
+    var junkLines = junk ? junk.out.filter(function (l) { return l; }) : [];
+    var all = text.split("\n");
+    var iFail = -1, iPayoff = -1;
+    all.forEach(function (l, i) { if (iFail < 0 && /^FAIL_CLOSED/.test(l)) iFail = i; if (/Payoff:/.test(l)) iPayoff = i; });
+    var payoffLine = iPayoff >= 0 ? all[iPayoff].replace(/^#\s*/, "") : "";
+    return {
+      header: header.filter(function (l) { return l; }), blocks: blocks, kv: kv, lookup: lookupJson, junk: junkLines,
+      askBlock: ask, observeBlock: observe, runBlock: run, titlesBlock: titles, lookupBlock: lookup, junkBlock: junk,
+      askText: plain(ask)[0] || "", observeLines: plain(observe),
+      titleLines: plain(titles).filter(function (l) { return /^title:/.test(l); }).map(function (l) { return l.replace(/^title:\s*/, ""); }),
+      payoffLine: payoffLine, payoffAfterJunk: iFail >= 0 && iPayoff > iFail
+    };
   }
   function transcriptHtml(blocks, hl) {
     hl = hl || {};
     var out = [];
     blocks.forEach(function (b, i) {
+      if (!b) return;
       if (i) out.push("");
       out.push('<span class="cmd">$ ' + esc(b.cmd) + "</span>");
       b.out.forEach(function (ln) {
-        if (/^#/.test(ln)) { out.push('<span class="cm">' + esc(ln) + "</span>"); return; }
+        if (/^#/.test(ln)) { out.push('<span class="cm' + (/Payoff:/.test(ln) ? " payoff" : "") + '">' + esc(ln) + "</span>"); return; }
         if (/^FAIL_CLOSED/.test(ln)) { out.push('<span class="fail">' + esc(ln) + "</span>"); return; }
         var m = ln.match(/^([A-Z_]+) (.*)$/);
         if (m) {
@@ -162,13 +189,19 @@
     var samples = (snap.sample_events || []).map(function (e) { var o = {}; Object.keys(e).forEach(function (k) { o[k] = e[k]; }); o.content = parseMaybe(e.content); return o; });
     var tool = samples.filter(function (e) { return e.event_type === "TOOL_COMPLETED" && e.content && e.content.result; })[0] || null;
     var result = tool ? tool.content.result : {};
+    var okf = result.okf || {};
     var contentKeys = keysDeep(samples.map(function (e) { return e.content; }));
     var never = snap.never_emit || NEVER_EMIT;
     var scan = never.filter(function (k) { return k !== "user_id"; });
     var traces = samples.map(function (e) { return e.trace_id; }).filter(function (v, i, a) { return a.indexOf(v) === i; });
+    var items = (okf.items || []).slice().sort(function (a, b) { return a.rank - b.rank; });
+    var rank1 = items[0] || null;
+    var excluded = (okf.excluded || [])[0] || null;
+    var edge = (okf.links || [])[0] || null;
     return {
       hist: hist, types: types, sum: sum, max: Math.max.apply(null, types.map(function (k) { return hist[k]; })),
-      samples: samples, tool: tool, result: result, okf: result.okf || {},
+      samples: samples, tool: tool, result: result, okf: okf,
+      items: items, rank1: rank1, excluded: excluded, edge: edge,
       never: never, scan: scan,
       violations: scan.filter(function (k) { return contentKeys[k]; }),
       scanned: Object.keys(contentKeys).length,
@@ -201,7 +234,7 @@
   }
 
   function crossChecks() {
-    var kv = D.cli.kv, live = D.live, ident = D.ident, map = D.mapping.mapping || {};
+    var kv = D.cli.kv, live = D.live, ident = D.ident, map = D.mapping.mapping || {}, cli = D.cli, o = D.obs;
     return {
       session: kv.SESSION === live.session_id && ident.inputs.session_id === live.session_id,
       trace: kv.TRACE === live.trace_id && ident.inputs.trace_id === live.trace_id,
@@ -213,41 +246,51 @@
       pub: kv.PUBLICATION_ID === ident.publication_id && D.snap.identities.publication_id === ident.publication_id,
       files: Number(kv.FILES) === Object.keys(ident.file_sha256).length,
       mapping: map[live.context_ref] === ident.publication_id && Object.keys(map).length === 1,
-      lookup: !!D.cli.lookup && D.cli.lookup.context_ref === live.context_ref && D.cli.lookup.publication_id === ident.publication_id && D.cli.lookup.label === "derived/demo",
-      junk: D.cli.junk.some(function (l) { return /^FAIL_CLOSED/.test(l) && l.indexOf("okf:env-junk#deadbeef") >= 0; }) && D.cli.junk.some(function (l) { return /exit 2/.test(l); }),
+      lookup: !!cli.lookup && cli.lookup.context_ref === live.context_ref && cli.lookup.publication_id === ident.publication_id && cli.lookup.label === "derived/demo",
+      junk: cli.junk.some(function (l) { return /^FAIL_CLOSED/.test(l) && l.indexOf("okf:env-junk#deadbeef") >= 0; }) && cli.junk.some(function (l) { return /exit 2/.test(l); }),
       receipt: /^UNVERIFIABLE rcpt-observe-noexec$/.test(kv.RECEIPT || ""),
-      count: live.event_count === 180 && D.obs.sum === 180 && D.snap.event_count === 180,
+      count: live.event_count === 180 && o.sum === 180 && D.snap.event_count === 180,
       distinct: ident.publication_id !== D.authored.publication_id && ident.inputs.bundle_key !== D.authored.inputs.bundle_key,
       adapter: kv.ADAPTER === "okf-bqaa-adapter:v0" && ident.inputs.adapter_version === "okf-bqaa-adapter:v0" && D.mapping.adapter_version === "okf-bqaa-adapter:v0",
-      lookupNever: NEVER_EMIT.filter(function (k) { return D.cli.lookup && k in D.cli.lookup; }).length === 0
+      lookupNever: NEVER_EMIT.filter(function (k) { return cli.lookup && k in cli.lookup; }).length === 0,
+      // why-slice: the tape says what the trace says
+      ask: !!cli.askText && cli.askText === o.question,
+      rank1: !!o.rank1 && o.rank1.title === CURRENT_METRIC && cli.observeLines.some(function (l) { return l === "rank 1: " + CURRENT_METRIC; }),
+      excluded: !!o.excluded && o.excluded.title === LEGACY_METRIC && cli.observeLines.some(function (l) { return l.indexOf("excluded: " + LEGACY_METRIC) === 0; }),
+      unproven: cli.observeLines.some(function (l) { return /^receipt: UNVERIFIABLE/.test(l); }),
+      titles: cli.titleLines.length > 0 && cli.titleLines.every(function (t) { return D.bundle.docs.some(function (f) { return f.title === t; }); }),
+      payoff: /not legacy/.test(cli.payoffLine) && /unproven/.test(cli.payoffLine) && cli.payoffAfterJunk
     };
   }
   function allOk() { var c = D.checks; return Object.keys(c).every(function (k) { return c[k]; }); }
 
-  // ---- strips ---------------------------------------------------------------
+  // ---- strips (inside the collapsed IDs panel) --------------------------------
   function renderLiveStrip() {
     var st = document.getElementById("live-status");
     if (!st) return;
     var ok = D.checks.count && D.checks.session && D.checks.ref && D.obs.violations.length === 0;
-    st.textContent = ok ? "snapshot loaded ✓ · " + D.live.event_count + " events · transcript agrees" : "snapshot mismatch — see beat 1";
+    st.textContent = ok ? "snapshot loaded ✓ · " + D.live.event_count + " events · transcript agrees" : "snapshot mismatch — see beat 2";
     st.className = "status " + (ok ? "ok" : "warn");
   }
   function renderIdentity() {
     var a = D.authored, d = D.ident;
-    document.getElementById("a-obs").textContent = a.observation_id;
-    document.getElementById("a-snap").textContent = a.snapshot_id;
-    document.getElementById("a-pub").textContent = a.publication_id;
-    document.getElementById("d-obs").textContent = d.observation_id;
-    document.getElementById("d-snap").textContent = d.snapshot_id;
-    document.getElementById("d-pub").textContent = d.publication_id;
-    var as = document.getElementById("a-status"); as.textContent = "pinned · display only"; as.className = "status ok";
+    var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+    set("a-obs", a.observation_id); set("a-snap", a.snapshot_id); set("a-pub", a.publication_id);
+    set("d-obs", d.observation_id); set("d-snap", d.snapshot_id); set("d-pub", d.publication_id);
+    var as = document.getElementById("a-status"); if (as) { as.textContent = "pinned · display only · untouched"; as.className = "status ok"; }
     var ds = document.getElementById("d-status");
-    var ok = D.checks.obs && D.checks.snap && D.checks.pub && D.checks.distinct;
-    ds.textContent = ok ? "pinned from CLI · okf-bqaa-adapter:v0 · = transcript ✓ · distinct from authored" : "pinned from CLI · MISMATCH vs transcript";
-    ds.className = "status " + (ok ? "ok" : "warn");
+    if (ds) {
+      var ok = D.checks.obs && D.checks.snap && D.checks.pub && D.checks.distinct;
+      ds.textContent = ok ? "pinned from CLI · okf-bqaa-adapter:v0 · = transcript ✓ · distinct from authored" : "pinned from CLI · MISMATCH vs transcript";
+      ds.className = "status " + (ok ? "ok" : "warn");
+    }
+  }
+  function renderIdsHist() {
+    var el = document.getElementById("ids-hist");
+    if (el) el.innerHTML = histogramHtml(D.obs);
   }
 
-  // ---- beat 1: observe --------------------------------------------------------
+  // ---- shared pieces --------------------------------------------------------------
   function sampleSummary(e) {
     var c = e.content || {};
     switch (e.event_type) {
@@ -272,8 +315,8 @@
       return '<div class="hrow" title="' + esc(k) + " · " + n + ' rows"><span class="hk">' + esc(k) + '</span><span class="hb"><span class="hf" style="width:' + w + '%"></span></span><span class="hn">' + n + "</span></div>";
     }).join("") + '<div class="hsum"><span>' + o.types.length + " event types</span><span>Σ = " + o.sum + "</span></div></div>";
   }
-  function renderObserve() {
-    var M = D.live, o = D.obs, snap = D.snap;
+  function sampleRowsHtml() {
+    var M = D.live, o = D.obs;
     var list = o.samples.map(function (e, i) {
       return '<li class="ev"><button type="button" aria-expanded="false" data-ev="' + i + '">' +
         '<span class="ts">' + esc(tsLive(e.timestamp)) + "</span>" +
@@ -286,26 +329,9 @@
       var present = o.violations.indexOf(k) >= 0;
       return check(!present, "<code>" + k + "</code> " + (present ? "present as a key" : "absent from every sample content key"));
     }).join("");
-    return beatHead(1, "telemetry", "Observe", "A live ADK agent ran a multi-turn finance session. The observer wrote <b>180</b> rows; the adapter read nothing else.",
-      "<code>" + esc(M.agent) + "</code> on <b><code>" + esc(M.model) + "</code></b> (Vertex <code>" + esc(M.vertex_location) + "</code>) answered " + o.invocations + " related questions in one session while the ADK <code>BigQueryAgentAnalyticsPlugin</code> appended <b>" + M.event_count + " rows</b> to <code>" + esc(M.table) + "</code>. The full export (" + Math.round(snap.export_bytes / 1024) + " KB, sha256 <code>" + esc(short(snap.export_sha256, 12)) + "</code>) is committed on SDK PR 474 and is the CLI's only input; this page carries a trimmed snapshot: the histogram, the identities and six sample rows.") +
-      must("observer-only · real BQAA rows in <code>okf_rfc_demo</code>, session <code>" + esc(short(M.session_id, 8)) + "</code> · <code>context_ref</code> is the only handle on the tool result · no SQL, no paths, no <code>concept_version_id</code> · not the prior consume session, not the synthetic Germany trace") +
-      '<div class="cols">' +
-      '<div class="pane telemetry"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--telemetry)"></span>agent_events · ' + esc(M.session_id) + '</span><span class="m">trimmed snapshot · histogram of all 180 rows · six sample rows</span></div>' +
-      '<div class="pane-b">' + histogramHtml(o) + '<p class="sub-h">sample rows · click to expand</p><ul class="events">' + list + "</ul></div></div>" +
-      '<div class="pane"><div class="pane-h"><span class="t">What the observer wrote</span><span class="m">and what it never wrote</span></div><div class="pane-b">' +
-      '<dl class="facts">' +
-      "<dt>table</dt><dd><code>" + esc(M.table) + "</code></dd>" +
-      "<dt>agent</dt><dd><code>" + esc(M.agent) + "</code> · " + esc(snap.agent.framework) + " · <code>" + esc(M.model) + "</code> · Vertex " + esc(M.vertex_location) + "</dd>" +
-      "<dt>session_id</dt><dd><code>" + esc(M.session_id) + "</code></dd>" +
-      "<dt>trace_id</dt><dd><code>" + esc(M.trace_id) + "</code> · first of " + o.invocations + " invocations; pinned as the adapter <code>revision</code></dd>" +
-      "<dt>event_count</dt><dd><b>" + M.event_count + "</b> · histogram Σ " + o.sum + "</dd>" +
-      "<dt>ran_at</dt><dd><code>" + esc(M.ran_at) + "</code></dd>" +
-      "<dt>first question</dt><dd>“" + esc(o.question) + "”</dd>" +
-      "<dt>tools</dt><dd><code>" + esc((o.tool && o.tool.content.tool) || "okf_retrieve_context") + "</code> · result carries <code>kind</code>, <code>context_ref</code>, <code>okf</code> (titles, types, ranks, one exclusion, one edge)</dd>" +
-      "<dt>context_ref</dt><dd><code>" + esc(M.context_ref) + "</code></dd>" +
-      "<dt>full export</dt><dd>" + link(PR_URL, "pr", "SDK PR 474 · fixtures/live_observe_agent_events.json") + " <span class=\"sub-h\" style=\"display:inline;margin:0\">· do not merge · not padded · not dumped here</span></dd>" +
-      "</dl>" +
-      '<div class="live-links">' + link(BQ_CONSOLE, "bq", "Open the table in the BigQuery console") + "</div>" +
+    return '<details class="nn"><summary>Six sample rows and the never-emit scan · <code>snapshot.json</code> · not a 180-row dump</summary><div class="nn-b">' +
+      '<p class="fixture-note">The trimmed snapshot carries six rows of the 180 (histogram in <a href="#ids">How this was built / IDs</a>; full export on SDK PR 474, do not merge). Click a row to see it.</p>' +
+      '<ul class="events">' + list + "</ul>" +
       '<p class="beat-kicker" style="margin:12px 0 6px">Never-emit scan · sample content keys</p>' +
       '<ul class="checklist">' + checks +
       check(o.sessionOk, "All " + o.samples.length + " sample rows carry session <code>" + esc(short(M.session_id, 8)) + "</code> and agent <code>" + esc(M.agent) + "</code>") +
@@ -313,8 +339,43 @@
       check(!!o.tool && o.result.context_ref === M.context_ref, "Sample <code>TOOL_COMPLETED.result.context_ref</code> = <code>" + esc(M.context_ref) + "</code>") +
       info("<code>user_id</code> is a BQAA row column, not an agent-facing field: the demo pseudonym <code>" + esc(o.userIds.join(", ")) + "</code>. It is not inside any tool result.") +
       info("The same scan over all 180 rows is documented on SDK PR 474 (<code>lookup.never_emit_violations</code>, tests). This page scans the sample it carries; " + o.scanned + " distinct content keys.") +
-      info("The tool result's <code>okf.publication_id</code> <code>" + esc(short(o.okf.publication_id || "", 19)) + "</code> is the pin of the in-process demo catalog the agent retrieved from; the adapter records it as <code>observed_publication_id</code> and derives its own publication in beat 2.") +
-      "</ul></div></div></div>" +
+      info("The tool result's <code>okf.publication_id</code> <code>" + esc(short(o.okf.publication_id || "", 19)) + "</code> is the pin of the in-process demo catalog the agent retrieved from; the adapter records it as <code>observed_publication_id</code> and derives its own publication in beat 3.") +
+      "</ul></div></details>";
+  }
+
+  // ---- beat 1: ask ----------------------------------------------------------------
+  function renderAsk() {
+    var o = D.obs, c = D.checks, M = D.live, cli = D.cli;
+    var ex = o.excluded || { title: LEGACY_METRIC, type: "Metric", reason: "superseded" };
+    var r1 = o.rank1 || { title: CURRENT_METRIC, type: "Metric", rank: 1 };
+    var edge = o.edge;
+    return beatHead(1, "telemetry", "Ask", "A finance agent is asked: “" + esc(o.question) + "”",
+      "There are two easy ways to get this wrong. The agent can answer with <b>" + esc(ex.title) + "</b>, a metric that is still on the shelf but " + esc(ex.reason) + ". Or it can quote the number as if someone had verified it, when no sanctioned computation has run. Both feel fine in the moment. The current metric is <b>" + esc(r1.title) + "</b>, and the honest answer names it and marks the number as unproven.") +
+      must("the trap is <code>" + esc(ex.title) + "</code> vs current <code>" + esc(r1.title) + "</code> · the second trap is claiming the number is verified · question as recorded in the trace, not invented") +
+      '<div class="traps">' +
+      '<div class="trap bad"><div class="th">Trap 1 · the dead metric</div><div class="name">' + esc(ex.title) + '</div><p>' + esc(ex.type) + " · " + esc(ex.reason) + ". Still findable. Still wrong.</p></div>" +
+      '<div class="trap soft"><div class="th">Trap 2 · over-claiming trust</div><div class="name">“The number is verified.”</div><p>Nothing ran as a sanctioned computation. The receipt on this run is <code>UNVERIFIABLE</code>, so the number is unproven and should be reported that way.</p></div>' +
+      '<div class="trap good"><div class="th">What a good answer does</div><div class="name">' + esc(r1.title) + '</div><p>' + esc(r1.type) + " · rank " + r1.rank + (edge ? " · " + esc(edge.rel.replace(/_/g, " ")) + " " + esc(edge.to) : "") + ". Use it, skip legacy, and say the number is unproven.</p></div>" +
+      "</div>" +
+      '<div class="compare">' +
+      '<div class="pane"><div class="pane-h"><span class="t">Without this path</span><span class="m">what can go wrong</span></div><div class="pane-b"><ul>' +
+      "<li><b>Picks the superseded metric.</b> " + esc(ex.title) + " still answers to the name “revenue”.</li>" +
+      "<li><b>Talks as if verified.</b> A confident number with no receipt behind it.</li>" +
+      "<li><b>Nothing to look up next time.</b> What this agent learned stays in a log nobody reads.</li>" +
+      "</ul></div></div>" +
+      '<div class="pane"><div class="pane-h"><span class="t">With BQAA observe → derived OKF in Knowledge Catalog</span><span class="m">the next three beats</span></div><div class="pane-b"><ul>' +
+      "<li><b>Observe.</b> The live trace already ranked " + esc(r1.title) + " first and excluded " + esc(ex.title) + "; the receipt is unproven.</li>" +
+      "<li><b>Publish.</b> One command turns that telemetry into derived OKF, the handle a Catalog entry would expose.</li>" +
+      "<li><b>Next agent.</b> Looks up that handle, uses the current metric, skips legacy, reports the number as unproven.</li>" +
+      "</ul></div></div>" +
+      "</div>" +
+      '<div class="pane source"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--source)"></span>The question, as recorded</span><span class="m">tape · beat 1 · read from the committed export, not typed for the demo</span></div>' +
+      '<div class="pane-b" style="padding:0">' + transcriptHtml([cli.askBlock]) + "</div>" +
+      '<div class="pane-b"><ul class="checklist">' +
+      check(c.ask, "Tape question = <code>USER_MESSAGE_RECEIVED.text_summary</code> in the snapshot, session <code>" + esc(short(M.session_id, 8)) + "</code>, agent <code>" + esc(M.agent) + "</code>") +
+      check(c.excluded, "The snapshot's tool result excludes <code>" + esc(ex.title) + "</code> with reason “" + esc(ex.reason) + "”") +
+      check(c.rank1, "The snapshot's tool result ranks <code>" + esc(r1.title) + "</code> first") +
+      "</ul></div></div>" +
       renderPriorConsume() + renderGermany();
   }
 
@@ -360,17 +421,39 @@
       "</ul></div></details>";
   }
 
-  // ---- beat 2: adapt ------------------------------------------------------------
-  var selectedFile = null;
-  function bundleList() {
-    var byDir = {};
-    D.bundle.files.forEach(function (f) { (byDir[f.dir] = byDir[f.dir] || []).push(f); });
-    return '<ul class="tree">' + Object.keys(byDir).sort().map(function (dir) {
-      return '<li><div class="dir">' + esc(dir) + "/</div><ul>" + byDir[dir].map(function (f) {
-        return '<li><button type="button" data-file="' + esc(f.path) + '"' + (f.path === selectedFile ? ' aria-current="true"' : "") + ">" + esc(f.path.split("/").pop()) + '<span class="ty">' + esc(f.type) + "</span></button></li>";
-      }).join("") + "</ul></li>";
-    }).join("") + "</ul>";
+  // ---- beat 2: observe ---------------------------------------------------------------
+  function renderObserve() {
+    var M = D.live, o = D.obs, c = D.checks, cli = D.cli, snap = D.snap;
+    var ex = o.excluded, edge = o.edge;
+    var saw = o.items.map(function (it) {
+      var top = it.rank === 1;
+      return '<li class="' + (top ? "top" : "") + '"><span class="rk">rank ' + it.rank + '</span><span><span class="ti">' + esc(it.title) + '</span><span class="ty">' + esc(it.type) + "</span>" +
+        (top ? '<span class="why">the current metric · the answer should use this</span>' : "") +
+        (edge && it.title === edge.from ? '<span class="why">' + esc(edge.rel.replace(/_/g, " ")) + " " + esc(edge.to) + "</span>" : "") +
+        "</span></li>";
+    }).join("") +
+      (ex ? '<li class="out"><span class="rk">excluded</span><span><span class="ti">' + esc(ex.title) + '</span><span class="ty">' + esc(ex.type) + '</span><span class="why">' + esc(ex.reason) + " · the observer recorded why it was left out</span></span></li>" : "") +
+      '<li class="rcpt"><span class="rk">receipt</span><span><span class="ti">UNVERIFIABLE</span><span class="ty">rcpt-observe-noexec</span><span class="why">no sanctioned computation ran · nothing attested · the number is unproven</span></span></li>';
+    return beatHead(2, "source", "Observe", "The live trace ranked <b>" + esc(CURRENT_METRIC) + "</b> first, excluded the legacy metric, and recorded the receipt as unproven.",
+      "<code>" + esc(M.agent) + "</code> on <code>" + esc(M.model) + "</code> answered the question in a real session while the BQAA plugin wrote observer rows to <code>" + esc(M.dataset) + "</code>. In the tool result the observer can see the ranked titles, the one exclusion and one governance edge. It never sees SQL, paths or parameter values, and it never writes the authored bundle. These are the titles a later agent needs; this beat is what the observer actually saw, not a row dump.") +
+      must("observer-only · rank 1 <code>" + esc(CURRENT_METRIC) + "</code> · <code>" + esc(LEGACY_METRIC) + "</code> excluded, superseded · receipt UNVERIFIABLE · session <code>" + esc(short(M.session_id, 8)) + "</code>, not the prior consume session, not the synthetic Germany trace") +
+      '<div class="cols">' +
+      '<div class="pane telemetry"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--telemetry)"></span>What the observer saw</span><span class="m">tool result · <code>okf_retrieve_context</code> · <code>' + esc(M.context_ref) + '</code></span></div>' +
+      '<div class="pane-b"><ul class="saw">' + saw + "</ul></div></div>" +
+      '<div class="pane source"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--source)"></span>The tape says the same</span><span class="m">beat 2 · read from the committed export</span></div>' +
+      '<div class="pane-b" style="padding:0">' + transcriptHtml([cli.observeBlock]) + "</div>" +
+      '<div class="pane-b"><ul class="checklist">' +
+      check(c.rank1, "Tape <code>rank 1: " + esc(CURRENT_METRIC) + "</code> = snapshot tool result rank 1") +
+      check(c.excluded, "Tape <code>excluded: " + esc(LEGACY_METRIC) + "</code> = snapshot exclusion, reason “" + esc(ex ? ex.reason : "") + "”") +
+      check(c.unproven, "Tape <code>receipt: UNVERIFIABLE</code> · nothing attested") +
+      check(c.session && c.count, "Session <code>" + esc(short(M.session_id, 8)) + "</code> · " + M.event_count + " rows, histogram Σ " + o.sum + " · agent <code>" + esc(M.agent) + "</code> · <code>" + esc(M.model) + "</code>") +
+      info("Full export (" + Math.round(snap.export_bytes / 1024) + " KB) is on " + link(PR_URL, "pr", "SDK PR 474") + " · do not merge · not padded · not dumped here. Table: " + link(BQ_CONSOLE, "bq", "BigQuery console") + ".") +
+      "</ul></div></div></div>" +
+      sampleRowsHtml();
   }
+
+  // ---- beat 3: publish ---------------------------------------------------------------
+  var selectedFile = null;
   function fileCard(p) {
     var f = D.bundle.files.filter(function (x) { return x.path === p; })[0];
     if (!f) return "";
@@ -383,27 +466,54 @@
       "<dt>where</dt><dd>CLI <code>out/bundle/" + esc(f.path) + "</code> on SDK PR 474 · file text not committed to Pages · every stub starts “Derived from BQAA observation, not authored.”</dd>" +
       "</dl>";
   }
-  function renderAdapt() {
-    var kv = D.cli.kv, d = D.ident, a = D.authored, M = D.live, c = D.checks;
-    if (!selectedFile) selectedFile = "computations/active-customer-revenue-by-region-and-quarter.md";
-    var hl = {}; hl.SESSION = M.session_id; hl.CONTEXT_REF = M.context_ref; hl.PUBLICATION_ID = d.publication_id; hl.OBSERVATION_ID = d.observation_id; hl.SNAPSHOT_ID = d.snapshot_id;
-    return beatHead(2, "source", "Adapt", "One stdlib command. The observer export in, a derived bundle and its identity chain out. Nothing ran in this browser.",
-      "<code>python examples/okf_bqaa_adapter/run.py</code> (<code>" + esc(kv.ADAPTER) + "</code>, SDK PR 474 HEAD <code>" + PR_HEAD.slice(0, 8) + "</code>) read the committed 180-row export, required it to be retrieve-shaped, projected the observer's view (titles, types, ranks, one exclusion, one edge, one unattested receipt) into <b>" + esc(kv.FILES) + " files</b> under <code>" + esc(d.inputs.bundle_key) + "</code>, and hashed them with the PROFILE.md rules. The transcript below is the committed proof; the identities on this page are copied from the CLI's <code>live_identities.json</code>. The authored bundle was neither read nor written.") +
-      must("CLI transcript, not an in-browser adapter · distinct <code>bundle_key</code> · own observation / snapshot / publication triple · transcript = pinned JSON = identity strip · <code>okf-phase0-mvp/fixture/bundle</code> untouched") +
-      '<div class="flow">' +
-      '<div class="box t"><b>in · live observe export</b>' + M.event_count + " real rows · session <code>" + esc(short(M.session_id, 13)) + "</code><br>6 retrieved + 1 excluded item · 1 edge · 1 receipt (UNVERIFIABLE)</div>" +
-      '<div class="arrow"><b>→</b>python run.py<br>observe · adapt · hash</div>' +
-      '<div class="box d"><b>out · derived OKF v0.2 bundle</b><code>' + esc(d.inputs.bundle_key) + "</code> · " + esc(kv.FILES) + " files<br>publication <code>" + short(d.publication_id, 23) + "</code></div>" +
-      '<div class="arrow"><b>→</b>mapping.json<br>fail-closed lookup</div>' +
-      '<div class="box l"><b>handle · context_ref</b><code>' + esc(M.context_ref) + "</code><br>resolves in beat 4 · junk refs exit 2</div>" +
+  function stubCards() {
+    return '<div class="stubs">' + D.bundle.files.map(function (f) {
+      var dep = f.status === "deprecated";
+      var isLog = f.path === "log.md";
+      return '<button type="button" class="card stub" data-file="' + esc(f.path) + '"' + (f.path === selectedFile ? ' aria-current="true"' : "") + ' style="text-align:left;cursor:pointer;width:100%">' +
+        '<div class="ch"><span class="name">' + esc(isLog ? "log.md" : f.title) + '</span><span class="etype' + (f.type === "Attested Computation" ? " comp" : "") + '">' + esc(isLog ? "reserved" : f.type) + "</span></div>" +
+        '<div class="pins">' +
+        (isLog ? '<span class="pin">§9 reserved · no frontmatter</span>' :
+          '<span class="pin' + (dep ? " dep" : "") + '"><b>lifecycle</b> ' + esc(f.status) + "</span>" +
+          (f.rank ? '<span class="pin"><b>rank</b> ' + f.rank + "</span>" : "") +
+          (dep ? '<span class="pin dep">' + esc(f.reason) + "</span>" : "")) +
+        '<span class="pin"><b>sha256</b> ' + esc(short(f.sha256, 12)) + "</span>" +
+        "</div></button>";
+    }).join("") + "</div>";
+  }
+  function renderPublish() {
+    var kv = D.cli.kv, d = D.ident, a = D.authored, M = D.live, c = D.checks, cli = D.cli, pub = d.publication_id;
+    var prior = X && X.prior ? X.prior.meta : null;
+    if (!selectedFile) selectedFile = "metrics/active-customer-revenue.md";
+    var hl = {}; hl.SESSION = M.session_id; hl.CONTEXT_REF = M.context_ref; hl.PUBLICATION_ID = pub; hl.OBSERVATION_ID = d.observation_id; hl.SNAPSHOT_ID = d.snapshot_id;
+    var dep = D.bundle.docs.filter(function (f) { return f.status === "deprecated"; })[0];
+    return beatHead(3, "split", "Publish", "One command turns that telemetry into derived OKF — the handle a Knowledge Catalog entry would expose.",
+      "<code>python examples/okf_bqaa_adapter/run.py</code> read the committed export and wrote <b>" + esc(kv.FILES) + " derived stubs</b>: the metric, the computation, the concept, the policy, two tables, the legacy metric marked <code>deprecated</code>, and a log. Each carries a title the next agent can use, and the set has its own identity chain, distinct from the authored bundle. Knowledge Catalog is where a later agent finds that publication by <code>context_ref</code>. <b>This CLI path did not write Catalog</b>: no entry, no DML, no real pin for this publication. What follows is the handle a Catalog entry would expose.") +
+      must("8 stubs with titles, not just hashes · <code>" + esc(LEGACY_METRIC) + "</code> carried as deprecated · one handle <code>" + esc(M.context_ref) + "</code> → publication · no Catalog write claimed · authored <code>cymbal-finance-core</code> untouched") +
+      '<div class="handle"><div class="th">Knowledge Catalog · the handle a Catalog entry would expose</div>' +
+      '<div class="h"><b>context_ref</b> ' + esc(M.context_ref) + ' &nbsp;→&nbsp; <b>publication_id</b> ' + esc(pub) + " &nbsp;·&nbsp; <b>label</b> derived/demo</div>" +
+      "<p><b>Honesty, on this beat.</b> No Knowledge Catalog entry was created and no DML ran on this CLI path; the handle above is rendered from the CLI's <code>mapping.json</code> and <code>live_identities.json</code>. There is no real Catalog pin for publication <code>" + esc(short(pub, 15)) + "</code>. A Catalog entry for this publication would expose exactly this: the ref, the publication, the derived/demo label, and the stub titles below.</p>" +
+      (prior ? '<details class="nn" style="margin-top:10px"><summary>Prior leftover · Dataplex entry <code>' + esc(prior.kc_entry_id) + '</code> · from the earlier consume experiment, not this run</summary><div class="nn-b"><p class="fixture-note">Prior experiment leftover. The entry <code>' + esc(prior.kc_entry_id) + '</code> in group <code>' + esc(prior.kc_entry_group) + '</code> (' + esc(prior.kc_location) + ') was created for the earlier consume experiment and its description names the synthetic Germany publication <code>' + esc(short(prior.publication_id, 19)) + '</code>, not this demo\'s <code>' + esc(short(pub, 19)) + '</code>. It is not a pin for this publication.</p><div class="live-links">' + link(prior.kc_console, "kc", "Find the prior entry in Dataplex") + "</div></div></details>" : "") +
       "</div>" +
       '<div class="cols">' +
-      '<div class="pane source"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--source)"></span>CLI transcript · cli/okf-bqaa-cli-transcript.txt</span><span class="m">recorded 2026-09-02 PT · stdlib, no GCP · highlighted values = pinned identities</span></div>' +
-      '<div class="pane-b" style="padding:0">' + transcriptHtml(D.cli.blocks.slice(0, 1), hl) + "</div>" +
-      '<div class="cli-links"><a class="lk cli" href="cli/okf-bqaa-cli-transcript.txt">plaintext</a><a class="lk cli" href="cli/okf-bqaa-cli.cast">asciinema .cast</a><a class="lk cli" href="cli/okf-bqaa-cli.gif">gif</a><a class="lk cli" href="#walkthrough">mp4 · walkthrough</a>' + link(PR_URL, "pr", "source · SDK PR 474") + "</div>" +
-      '<div class="pane-h" style="border-top:1px solid var(--line)"><span class="t">bundle · CLI out/bundle/ · ' + D.bundle.files.length + ' files</span><span class="m">names + hashes from live_identities.json · click a file</span></div>' +
-      '<div class="pane-b" style="padding:8px 10px">' + bundleList() + "</div>" + fileCard(selectedFile) + "</div>" +
-      '<div class="pane"><div class="pane-h"><span class="t">Identity chain · pinned from CLI</span><span class="m">live_identities.json · PROFILE.md rules in adapter.py</span></div><div class="pane-b">' +
+      '<div class="pane catalog"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--catalog)"></span>The 8 derived stubs</span><span class="m">titles from the observed envelope · hashes from <code>live_identities.json</code> · click one</span></div>' +
+      '<div class="pane-b">' + stubCards() + "</div>" + fileCard(selectedFile) + "</div>" +
+      '<div class="pane source"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--source)"></span>The tape</span><span class="m">beat 3 · <code>run.py</code>, then the stub titles</span></div>' +
+      '<div class="pane-b" style="padding:0">' + transcriptHtml([cli.runBlock, cli.titlesBlock], hl) + "</div>" +
+      '<div class="pane-b"><ul class="checklist">' +
+      check(c.titles, "Every <code>title:</code> on the tape is one of the derived stubs (" + cli.titleLines.length + " titles)") +
+      check(!!dep && dep.title === LEGACY_METRIC, "<code>" + esc(LEGACY_METRIC) + "</code> is carried as <code>deprecated</code> with its reason, so the next agent can see why to skip it") +
+      check(c.pub && c.mapping, "Transcript <code>PUBLICATION_ID</code> = <code>live_identities.json</code> = the one binding in <code>mapping.json</code>") +
+      check(c.files && c.adapter, "Transcript <code>FILES " + esc(kv.FILES) + "</code> = hashed files · adapter <code>" + esc(kv.ADAPTER) + "</code>") +
+      check(c.distinct, "Distinct from authored <code>" + esc(a.inputs.bundle_key) + "</code> · pub <code>" + short(a.publication_id, 16) + "</code> stays pinned and unchanged") +
+      check(c.receipt, "Transcript <code>RECEIPT UNVERIFIABLE rcpt-observe-noexec</code> · nothing attested") +
+      "</ul></div></div></div>" +
+      renderIdentityChain() + renderProjectionShape();
+  }
+  function renderIdentityChain() {
+    var d = D.ident, M = D.live, c = D.checks;
+    return '<details class="nn"><summary>Identity chain · pinned from CLI · <code>live_identities.json</code></summary><div class="nn-b">' +
+      '<p class="fixture-note">The adapter is Python in the SDK (<code>adapter.py</code>: observe / adapt / compute_identities / project, canonical CBOR + domain-separated SHA-256, PROFILE.md rules). This browser hashed 0 bytes for these identities. <code>adapter.js</code> on this page is only used for the labelled SYNTHETIC Germany hashing check under beat 1.</p>' +
       '<dl class="facts">' +
       "<dt>bundle_key</dt><dd><code>" + esc(d.inputs.bundle_key) + "</code></dd>" +
       "<dt>source_uri</dt><dd><code>" + esc(d.inputs.source_uri) + "</code></dd>" +
@@ -415,35 +525,15 @@
       "<dt>source_manifest_hash</dt><dd><code>" + esc(d.source_manifest_hash) + "</code></dd>" +
       "<dt>observed_publication_id</dt><dd><code>" + esc(short(d.inputs.observed_publication_id, 23)) + "</code> · the in-process catalog pin the agent retrieved; <code>context_ref</code> = <code>okf:env-observe#</code> + its first 12 hex</dd>" +
       "<dt>context_ref</dt><dd><code>" + esc(M.context_ref) + "</code></dd>" +
-      "</dl>" +
-      '<ul class="checklist">' +
-      check(c.obs && c.snap && c.pub, "Transcript <code>OBSERVATION_ID</code> / <code>SNAPSHOT_ID</code> / <code>PUBLICATION_ID</code> = <code>live_identities.json</code> = identity strip") +
+      "</dl><ul class=\"checklist\">" +
+      check(c.obs && c.snap && c.pub, "Transcript <code>OBSERVATION_ID</code> / <code>SNAPSHOT_ID</code> / <code>PUBLICATION_ID</code> = <code>live_identities.json</code> = IDs panel") +
       check(c.session && c.trace && c.table && c.model, "Transcript <code>SESSION</code> / <code>TRACE</code> / <code>TABLE</code> / <code>MODEL</code> = <code>live.json</code> (<code>gemini-3.8-flash</code>)") +
       check(c.ref, "Transcript <code>CONTEXT_REF</code> = <code>live.json</code> context_ref = receipt context_ref") +
-      check(c.files, "Transcript <code>FILES " + esc(kv.FILES) + "</code> = " + Object.keys(d.file_sha256).length + " hashed files in <code>live_identities.json</code>") +
-      check(c.mapping, "<code>mapping.json</code> binds exactly one ref, <code>" + esc(M.context_ref) + "</code>, to that publication") +
-      check(c.distinct, "Distinct from authored <code>" + esc(a.inputs.bundle_key) + "</code> · pub <code>" + short(a.publication_id, 16) + "</code> stays pinned and unchanged") +
-      check(c.receipt, "Transcript <code>RECEIPT UNVERIFIABLE rcpt-observe-noexec</code> · nothing attested") +
-      '<li class="ok"><span class="ic">✓</span><span>Adapter read 0 authored files; wrote 0 authored files. This browser hashed 0 bytes for these identities.</span></li>' +
-      info("The adapter is Python in the SDK (<code>adapter.py</code>: observe / adapt / compute_identities / project, canonical CBOR + domain-separated SHA-256). <code>adapter.js</code> on this page is only used for the labelled SYNTHETIC Germany hashing check under beat 1.") +
       info("No <code>computation:</code> artifact in the derived stub: the observer never sees SQL. It cites the observed envelope under <code>sources</code>.") +
-      "</ul></div></div></div>";
+      "</ul></div></details>";
   }
-
-  // ---- beat 3: project ------------------------------------------------------------
-  function renderProject() {
-    var d = D.ident, M = D.live, pub = d.publication_id, snap = d.snapshot_id, docs = D.bundle.docs, prior = X && X.prior ? X.prior.meta : null;
-    var cards = docs.map(function (f) {
-      return '<div class="card"><div class="ch"><span class="name">' + esc(f.title) + '</span><span class="etype">okf-concept · derived view</span></div>' +
-        '<div class="pins">' +
-        '<span class="pin"><b>okf.type</b> ' + esc(f.type) + "</span>" +
-        '<span class="pin' + (f.status === "deprecated" ? " dep" : "") + '"><b>okf.lifecycle</b> ' + esc(f.status) + "</span>" +
-        '<span class="pin"><b>okf.provenance</b> bqaa observer · derived</span>' +
-        '<span class="pin pub"><b>okf.publication_id</b> ' + esc(short(pub, 19)) + "</span>" +
-        '<span class="pin"><b>okf.published_snapshot_id</b> ' + esc(short(snap, 15)) + "</span>" +
-        (f.type === "Attested Computation" ? '<span class="pin" style="border-color:#F0D9B8;background:var(--runtime-bg);color:var(--runtime)"><b style="color:var(--runtime)">okf-computation</b> runtime bigquery · receipt UNVERIFIABLE</span>' : "") +
-        "</div></div>";
-    }).join("");
+  function renderProjectionShape() {
+    var d = D.ident, M = D.live, pub = d.publication_id, snap = d.snapshot_id, docs = D.bundle.docs;
     var pubRow = [{ publication_id: pub, observation_id: d.observation_id, snapshot_id: snap, deployment_key: d.inputs.deployment_key, bundle_key: d.inputs.bundle_key, profile_contract_version: d.inputs.profile_contract_version }];
     var headRow = [{ deployment_key: d.inputs.deployment_key, publication_id: pub, published_at: M.ran_at }];
     var nodes = docs.map(function (f) { return { concept_key: d.inputs.bundle_key + "#" + f.path.slice(0, -3), type: f.type, title: f.title, status: f.status, concept_version_id: f.cvid, publication_id: pub }; });
@@ -463,46 +553,25 @@
         rows.map(function (r) { return "<tr>" + cols.map(function (c) { var v = r[c]; return "<td" + (c === "publication_id" ? ' class="pub"' : "") + ' title="' + esc(v) + '">' + esc(/^sha256:/.test(String(v)) ? short(v, 19) : v) + "</td>"; }).join("") + "</tr>"; }).join("") +
         "</tbody></table></div>";
     }
-    var kcCard =
-      '<div class="live-card catalog"><div class="lh"><b>Knowledge Catalog</b><span class="tag">derived view · no write on this CLI path</span></div>' +
-      '<div class="pins">' +
-      '<span class="pin"><b>entry</b> none created · honesty label</span>' +
-      '<span class="pin pub"><b>publication (pinned, CLI)</b> ' + esc(short(pub, 19)) + "</span>" +
-      '<span class="pin"><b>provenance</b> bqaa observer · derived / demo</span>' +
-      '<span class="pin"><b>kcmd</b> not called · no Catalog aspect read or written by the CLI or this page</span>' +
-      "</div>" +
-      '<p class="res">The cards below are what a Catalog projection of this bundle would carry. They are rendered from <code>live_identities.json</code>, not read back from Dataplex.</p>' +
-      (prior ? '<details class="nn"><summary>Prior leftover · Dataplex entry <code>' + esc(prior.kc_entry_id) + '</code> · from the consume experiment, not this run</summary><div class="nn-b"><p class="fixture-note">Prior experiment leftover. The entry <code>' + esc(prior.kc_entry_id) + '</code> in group <code>' + esc(prior.kc_entry_group) + '</code> (' + esc(prior.kc_location) + ') was created for the earlier consume experiment and its description names the synthetic Germany publication <code>' + esc(short(prior.publication_id, 19)) + '</code>, not this demo\'s <code>' + esc(short(pub, 19)) + '</code>.</p><div class="live-links">' + link(prior.kc_console, "kc", "Find the prior entry in Dataplex") + "</div></div></details>" : "") +
-      "</div>";
-    var bqCard =
-      '<div class="live-card runtime"><div class="lh"><b>' + esc(M.dataset + ".agent_events") + '</b><span class="tag">BigQuery table · live source · read-only</span></div>' +
-      '<div class="pins">' +
-      '<span class="pin"><b>project</b> ' + esc(M.project) + "</span>" +
-      '<span class="pin"><b>writer</b> BigQueryAgentAnalyticsPlugin · observer-only</span>' +
-      '<span class="pin"><b>rows · session</b> ' + M.event_count + " · " + esc(short(M.session_id, 8)) + "</span>" +
-      '<span class="pin"><b>DML from CLI / page</b> none</span>' +
-      "</div>" +
-      '<p class="res"><code>' + esc(M.table) + "</code></p>" +
-      '<div class="live-links">' + link(BQ_CONSOLE, "bq", "Open the table in BigQuery") + "</div></div>";
-    return beatHead(3, "split", "Project", "Two derived views, one publication. The identities are pinned from the CLI; nothing was written to Catalog or BigQuery for them.",
-      "<b style=\"color:var(--catalog)\">Knowledge Catalog</b> and <b style=\"color:var(--runtime)\">BigQuery</b> are shown as the two projection targets of the RFC. On this CLI path neither received a write: the Catalog pane is a derived view with an honesty label, and the BigQuery pane shows the live <code>agent_events</code> source table (observer rows, read-only) above the RFC projection shape rendered from the pinned identities. The authored <code>cymbal-finance-core</code> publication stays pinned in the strip above, untouched.") +
-      must("identity chips = <code>live_identities.json</code> · Catalog / BQ tables are derived views, not extra DML · no Catalog write claimed for this path · prior Dataplex entry labelled as a leftover · authored publication unchanged") +
-      '<div class="idrow" style="margin:0 0 14px">' +
-      '<div class="lbl"><b>Derived · pinned from CLI</b>' + esc(d.inputs.bundle_key) + '</div>' +
-      '<div class="chip deriv"><span class="k">observation_id</span><span class="v">' + esc(d.observation_id) + '</span></div>' +
-      '<div class="chip deriv"><span class="k">snapshot_id</span><span class="v">' + esc(d.snapshot_id) + '</span></div>' +
-      '<div class="chip deriv"><span class="k">publication_id</span><span class="v">' + esc(d.publication_id) + '</span></div>' +
-      '<span class="status ok">= transcript ✓</span></div>' +
+    return '<details class="nn"><summary>Projection shape · what a Catalog entry and the BigQuery projection tables would carry · derived views, no write</summary><div class="nn-b">' +
+      '<p class="fixture-note">Rendered from the pinned identities, not read back from Dataplex or BigQuery. On this CLI path neither received a write. The live <code>' + esc(M.table) + '</code> table is the observer source (read-only); it is not a projection target.</p>' +
       '<div class="cols even">' +
-      '<div class="pane catalog"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--catalog)"></span>Knowledge Catalog · discovery</span><span class="m">derived view · honesty label</span></div>' +
-      '<div class="pane-b">' + kcCard + '<p class="sub-h">derived view · projection of the CLI bundle · not written to Catalog</p><div class="cards">' + cards + "</div></div></div>" +
-      '<div class="pane runtime"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--runtime)"></span>BigQuery · serving</span><span class="m">live source table first · derived view below</span></div>' +
-      '<div class="pane-b">' + bqCard + '<p class="sub-h">derived view · RFC projection shape · not a live table, no DML</p>' + table("publications", pubRow) + table("deployment_heads", headRow, "head advanced") + table("nodes_current", nodes, "one row per concept version") + (edges.length ? table("edges_current", edges, "from the observed envelope") : "") + "</div></div>" +
-      '<div class="seam-note"><span>pinned <code>publication_id</code> ' + esc(short(pub, 23)) + '</span><span class="eq">' + (D.checks.pub && D.checks.mapping ? "=" : "≠") + '</span><span>CLI transcript <code class="rt">PUBLICATION_ID</code> = <code class="rt">mapping.json</code> value ' + esc(short(D.cli.kv.PUBLICATION_ID || "", 23)) + "</span><span>· " + (D.checks.pub && D.checks.mapping ? "one publication everywhere on this page ✓" : "MISMATCH") + "</span><span>· Catalog: no entry created on this path; BigQuery: source table only, no DML</span></div>" +
-      "</div>";
+      '<div class="pane catalog"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--catalog)"></span>Knowledge Catalog · discovery</span><span class="m">derived view · no entry created</span></div><div class="pane-b"><div class="cards">' +
+      docs.map(function (f) {
+        return '<div class="card"><div class="ch"><span class="name">' + esc(f.title) + '</span><span class="etype">okf-concept · derived view</span></div><div class="pins">' +
+          '<span class="pin"><b>okf.type</b> ' + esc(f.type) + "</span>" +
+          '<span class="pin' + (f.status === "deprecated" ? " dep" : "") + '"><b>okf.lifecycle</b> ' + esc(f.status) + "</span>" +
+          '<span class="pin"><b>okf.provenance</b> bqaa observer · derived</span>' +
+          '<span class="pin pub"><b>okf.publication_id</b> ' + esc(short(pub, 19)) + "</span>" +
+          (f.type === "Attested Computation" ? '<span class="pin" style="border-color:#F0D9B8;background:var(--runtime-bg);color:var(--runtime)"><b style="color:var(--runtime)">okf-computation</b> runtime bigquery · receipt UNVERIFIABLE</span>' : "") +
+          "</div></div>";
+      }).join("") + "</div></div></div>" +
+      '<div class="pane runtime"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--runtime)"></span>BigQuery · serving</span><span class="m">RFC projection shape · not a live table, no DML</span></div><div class="pane-b">' +
+      table("publications", pubRow) + table("deployment_heads", headRow, "head advanced") + table("nodes_current", nodes, "one row per concept version") + (edges.length ? table("edges_current", edges, "from the observed envelope") : "") +
+      "</div></div></div></div></details>";
   }
 
-  // ---- beat 4: consume ---------------------------------------------------------------
+  // ---- beat 4: next agent ---------------------------------------------------------------
   var tryRef = null;
   function localLookup(ref) {
     var map = D.mapping.mapping || {};
@@ -512,10 +581,11 @@
     }
     return { ok: true, result: { context_ref: ref, publication_id: map[ref], label: "derived/demo" }, exit: 0 };
   }
-  function renderConsume() {
-    var M = D.live, d = D.ident, c = D.checks, cli = D.cli, lk = cli.lookup || {};
+  function renderNextAgent() {
+    var M = D.live, d = D.ident, c = D.checks, cli = D.cli, lk = cli.lookup || {}, o = D.obs;
     var okNever = c.lookupNever;
     var tried = tryRef === null ? null : localLookup(tryRef);
+    var ex = o.excluded || { title: LEGACY_METRIC, reason: "superseded" };
     var py =
       '<span class="cm"># examples/okf_bqaa_adapter/lookup.py — fail-closed resolver (excerpt, SDK PR 474)</span>\n' +
       '<span class="kw">class</span> UnknownContextRefError(KeyError):\n' +
@@ -529,23 +599,37 @@
       '            <span class="st">"publication_id"</span>: table[context_ref],\n' +
       '            <span class="st">"label"</span>: LABEL}   <span class="cm"># "derived/demo" · never concept_version_id, paths, principal, SQL</span>\n\n' +
       '<span class="cm"># run.py: unknown ref → stderr FAIL_CLOSED, exit 2; never-emit keys on a result → exit 2</span>';
-    return beatHead(4, "ink", "Consume", "Fail-closed lookup. The known <code>context_ref</code> resolves to the publication; a junk ref exits 2. Nothing is attested.",
-      "The consume side of this path is <code>run.py --lookup REF</code> over the CLI's <code>mapping.json</code>, which binds exactly one <code>context_ref</code>. A bound ref returns three keys and nothing from the never-emit list; an unbound ref raises and the process exits 2 with <code>FAIL_CLOSED</code> on stderr. Both tapes below are from the committed transcript. The receipt on the observe run is <code>UNVERIFIABLE</code>: no sanctioned computation ran, so <b>nothing on this page is ATTESTED</b>.") +
-      must("known ref → {<code>context_ref</code>, <code>publication_id</code>, <code>label</code>} · junk ref → <code>FAIL_CLOSED</code>, exit 2 · result keys ∩ never-emit = ∅ · receipt UNVERIFIABLE · no ATTESTED claim · browser calls no GCP") +
-      '<div class="adk">' +
-      '<div class="adk-h"><span class="agent"><span class="fw">SDK CLI · okf-bqaa-adapter:v0</span><b>run.py --lookup</b><span>mapping.json · session ' + esc(M.session_id) + '</span></span>' +
+    return beatHead(4, "ink", "Next agent", "The next agent looks up the handle, uses <b>" + esc(CURRENT_METRIC) + "</b>, skips legacy, and reports the number as unproven.",
+      "<code>run.py --lookup '" + esc(M.context_ref) + "'</code> returns the derived publication and nothing else: three keys, none from the never-emit list. From that publication the next agent reads the same titles the observer saw: <b>" + esc(CURRENT_METRIC) + "</b> at rank 1, <b>" + esc(ex.title) + "</b> marked deprecated with its reason, and a receipt that is <code>UNVERIFIABLE</code>. So it uses the current metric, skips legacy, and says the number is unproven. That is the payoff. Anything else fails closed.") +
+      must("lookup → {<code>context_ref</code>, <code>publication_id</code>, <code>label</code>} · agent uses <code>" + esc(CURRENT_METRIC) + "</code>, not legacy · number reported unproven · junk ref → <code>FAIL_CLOSED</code>, exit 2, expected · browser calls no GCP") +
+      '<div class="cols">' +
+      '<div class="pane"><div class="pane-h"><span class="t">The tape · the lookup and the payoff</span><span class="m">beat 4 · exit 0 · the last frames of the tape</span></div>' +
+      '<div class="pane-b" style="padding:0">' + transcriptHtml([cli.lookupBlock]) + "</div>" +
+      '<div class="pane-b"><ul class="checklist">' +
+      check(c.lookup, "Lookup returns <code>" + esc(M.context_ref) + "</code> → <code>" + esc(short(d.publication_id, 19)) + "</code>, label <code>derived/demo</code> · = <code>mapping.json</code>") +
+      check(okNever, "Result keys " + Object.keys(lk).map(function (k) { return "<code>" + esc(k) + "</code>"; }).join(" ") + " ∩ never-emit = ∅") +
+      check(c.payoff, "Tape ends on the payoff comment, after the labelled junk-ref exit: “" + esc(cli.payoffLine) + "”") +
+      "</ul></div></div>" +
+      '<div class="pane"><div class="pane-h"><span class="t">What the next agent does with it</span><span class="m">from the derived publication</span></div><div class="pane-b">' +
+      '<ul class="does">' +
+      '<li class="use"><span class="ic">✓</span><span><b>Uses ' + esc(CURRENT_METRIC) + '</b><span class="d">rank 1 in the derived publication · the current metric</span></span></li>' +
+      '<li class="skip"><span class="ic">✕</span><span><b>Skips ' + esc(ex.title) + '</b><span class="d">carried as deprecated · ' + esc(ex.reason) + "</span></span></li>" +
+      '<li class="unproven"><span class="ic">?</span><span><b>Reports the number as unproven</b><span class="d">receipt UNVERIFIABLE · rcpt-observe-noexec · nothing ATTESTED</span></span></li>' +
+      "</ul>" +
+      '<p class="fixture-note" style="margin-top:10px">Without this path, the next agent starts from the same shelf as the first one, legacy metric included, and with no receipt to point at.</p>' +
+      "</div></div></div>" +
+      '<div class="adk" style="margin-top:14px">' +
+      '<div class="adk-h"><span class="agent"><span class="fw">SDK CLI · okf-bqaa-adapter:v0</span><b>run.py --lookup</b><span>mapping.json · one binding · fail closed on anything else</span></span>' +
       '<span class="model-badge"><span class="dot"></span>source · <b>' + esc(M.agent) + "</b> · " + esc(M.model) + "</span></div>" +
       '<div class="adk-b"><div class="transcript">' +
-      '<div class="term ok"><div class="th">tape 1 · bound ref · exit 0</div>' + transcriptHtml(cli.blocks.slice(1, 2)) + "</div>" +
-      '<div class="term fail"><div class="th">tape 2 · junk ref · exit 2</div>' + transcriptHtml(cli.blocks.slice(2, 3)) + "</div>" +
+      '<div class="term fail"><div class="th expected">junk ref · exit 2 · expected fail-closed, not a crash</div>' + transcriptHtml([cli.junkBlock]) + "</div>" +
       '<div class="term try"><div class="th">try a ref · static mapping.json in this page · same rule as lookup.py · no store, no network</div>' +
       '<form class="tryform" data-try><input type="text" name="ref" value="' + esc(tryRef === null ? M.context_ref : tryRef) + '" aria-label="context_ref to resolve" spellcheck="false"><button class="btn primary" type="submit">--lookup</button></form>' +
-      (tried ? (tried.ok ? '<pre class="cli">' + jsonHtml(tried.result, ["context_ref", "publication_id"]) + '\n<span class="cm"># exit 0</span></pre>' : '<pre class="cli"><span class="fail">' + esc(tried.error) + '</span>\n<span class="cm"># exit 2</span></pre>') : '<p class="fixture-note" style="margin:8px 0 0">Resolves against the committed <code>mapping.json</code> (one binding). Anything else fails closed.</p>') +
+      (tried ? (tried.ok ? '<pre class="cli">' + jsonHtml(tried.result, ["context_ref", "publication_id"]) + '\n<span class="cm"># exit 0</span></pre>' : '<pre class="cli"><span class="fail">' + esc(tried.error) + '</span>\n<span class="cm"># exit 2</span></pre>') : '<p class="fixture-note" style="margin:8px 0 0">Resolves against the committed <code>mapping.json</code> (one binding). Anything else fails closed, including <code>constructor</code>, <code>toString</code> and <code>__proto__</code>.</p>') +
       "</div></div>" +
       '<div class="side">' +
-      '<div class="tile"><div class="th">resolver · lookup.py on SDK PR 474</div><pre class="py">' + py + "</pre></div>" +
-      '<div class="tile"><div class="th">never-emit assertion · lookup result keys</div><div class="big ' + (okNever ? "ok" : "warn") + '">keys ∩ never-emit = ' + (okNever ? "∅ ✓" : "violation") + "</div><p>Result keys: " + Object.keys(lk).map(function (k) { return "<code>" + esc(k) + "</code>"; }).join(" ") + " scanned against " + NEVER_EMIT.map(function (k) { return "<code>" + k + "</code>"; }).join(" ") + ".</p></div>" +
-      '<div class="tile"><div class="th">receipt · this run</div><span class="verdict">UNVERIFIABLE · rcpt-observe-noexec</span><p>The observe agent retrieved context; it did not run a sanctioned computation. The receipt the adapter carries is a no-execution specimen bound to <code>' + esc(M.receipt_context_ref) + '</code>. <b>Nothing is ATTESTED.</b> The Phase 4 ATTESTED shape below is non-normative.</p></div>' +
+      '<div class="tile"><div class="th">receipt · this run</div><span class="verdict">UNVERIFIABLE · rcpt-observe-noexec</span><p>The observe agent retrieved context; it did not run a sanctioned computation. The receipt the adapter carries is a no-execution specimen bound to <code>' + esc(M.receipt_context_ref) + '</code>. <b>Nothing is ATTESTED.</b> The number is unproven, and the next agent says so.</p></div>' +
+      '<details class="nn"><summary>Resolver · lookup.py on SDK PR 474</summary><div class="nn-b"><pre class="py">' + py + "</pre></div></details>" +
       '<details class="nn"><summary>Fixture receipts · not from this run</summary><div class="nn-b"><span class="verdict">UNVERIFIABLE · ' + esc(D.receipt.verdict_reason) + '</span><p style="font-family:var(--display);font-size:13px;color:var(--ink-soft);margin:8px 0 0">Phase 0 golden specimen <code>' + esc(D.receipt.receipt_id) + "</code>, bound to the authored publication. Integrity proof status <code>" + esc(D.receipt.integrity_proof.status) + '</code>.</p><span class="verdict att" style="margin-top:12px">ATTESTED · expected Phase 4 shape · non-normative</span><p style="font-family:var(--display);font-size:13px;color:var(--ink-soft);margin:8px 0 0">' + esc(D.phase4._fixture_note) + "</p>" + pre({ verdict: D.phase4.verdict, verdict_details_digest: D.phase4.verdict_details_digest, receipt_digest: D.phase4.receipt_digest, integrity_proof: D.phase4.integrity_proof }, [], "rounded") + "</div></details>" +
       "</div></div></div>" +
       renderPriorConsumeTranscript();
@@ -579,7 +663,7 @@
 
   function render() {
     if (!D) return;
-    stage.innerHTML = current === 1 ? renderObserve() : current === 2 ? renderAdapt() : current === 3 ? renderProject() : renderConsume();
+    stage.innerHTML = current === 1 ? renderAsk() : current === 2 ? renderObserve() : current === 3 ? renderPublish() : renderNextAgent();
     stepCount.textContent = current + " / " + TOTAL;
     btnBack.disabled = current === 1;
     btnNext.textContent = current === TOTAL ? "↺ Restart" : "Next →";

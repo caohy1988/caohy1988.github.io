@@ -1,8 +1,10 @@
-# Walkthrough: the CLI tape (live-adapter proof)
+# Walkthrough: the CLI tape (why the next agent does better)
 
-The walkthrough media on `/rfc/demo/` is the recorded SDK CLI run:
+The walkthrough media on `/rfc/demo/` is the recorded SDK CLI run, recut as
+the same four beats as the page:
 
-- `okf-bqaa-cli.mp4` (terminal clip, embedded first on the page)
+- `okf-bqaa-cli.mp4` (H.264 1280×720, ~25s, agg + ffmpeg; embedded first on the page)
+- `okf-bqaa-cli-poster.png` (last frame: lookup JSON + the payoff comment)
 - `cli/okf-bqaa-cli.cast` (asciinema v2, same commands)
 - `cli/okf-bqaa-cli.gif` (agg render of the cast)
 - `cli/okf-bqaa-cli-transcript.txt` (plaintext, the durable proof)
@@ -19,63 +21,96 @@ observer-only, nothing attested. Do not merge PR 474.
 and before the CLI path existed. It stays on the page only inside a collapsed
 section labelled "prior fixture clip, not this run".
 
+## One sentence per beat (the captions on the page)
+
+1. The agent is asked for Germany last-quarter revenue — and whether the number can be trusted.
+2. The live trace ranked Active-customer revenue first and excluded the superseded legacy metric; the receipt is unproven.
+3. One command turns that telemetry into derived OKF, the handle a Catalog entry would expose.
+4. The next agent looks up that handle, uses the current metric, skips legacy, and reports the number as unproven.
+
 ## What the tape shows
 
-A ~24s pedagogical recut (H.264 1280×720). Poster (`okf-bqaa-cli-poster.png`) is
-the successful lookup JSON, not an empty header and not FAIL_CLOSED. Junk-ref
-exit 2 is labelled on screen as expected fail-closed, not a crash.
+### 1 · ASK
 
-### 1 · OBSERVE
+On-screen comment: a finance agent is asked for Germany last-quarter revenue
+and whether to trust it; the trap is that `Customer revenue (legacy)` is
+still on the shelf, superseded. Then a one-liner reads the question off the
+committed export:
 
-On-screen: `# 180 live BQAA agent_events from okf_rfc_observe_agent`, then a
-one-liner against the committed export that prints `180 events` and session
-`f21ee192-d989-4c38-894f-66b6b82eaf18`. Reader sees: this is a real trace.
+```
+What was active-customer revenue in Germany last quarter — and can I trust the number?
+```
 
-### 2 · ADAPT (main beat)
+On the page: beat 1, the question as recorded, the two traps, the current
+metric.
 
-`# one command projects that trace into a derived OKF bundle`, then
-`python3 examples/okf_bqaa_adapter/run.py`. After SESSION / CONTEXT_REF /
-PUBLICATION_ID: `# useful OKF: 8 stubs (metric, computation, policy, tables) + identity chain`,
-`find …/out/bundle`, and the titles:
+### 2 · OBSERVE
+
+`python3 examples/okf_bqaa_adapter/_why_observe.py` prints what the trace saw,
+not 180 rows:
+
+```
+180 events · okf_rfc_observe_agent
+session f21ee192-d989-4c38-894f-66b6b82eaf18
+rank 1: Active-customer revenue
+excluded: Customer revenue (legacy) | superseded; out of force since 2026-06-20
+receipt: UNVERIFIABLE · nothing attested
+```
+
+On the page: beat 2, the ranked titles, the exclusion, the receipt; the tape
+pane says the same.
+
+### 3 · PUBLISH
+
+`python3 examples/okf_bqaa_adapter/run.py`, then `SESSION` / `CONTEXT_REF` /
+`PUBLICATION_ID` / `FILES 8`, then the stub titles:
 
 ```
 title: Active-customer revenue by region and quarter
 title: Active customer
 title: Active-customer revenue
-…
+title: Customer revenue (legacy)
+title: Revenue recognition eligibility
+title: Billing invoice lines
+title: CRM customers
 ```
 
-plus the frontmatter of `metrics/active-customer-revenue.md`. Reader sees titles
-they can use, not just hashes. On the page: beat 2 highlights the same pinned
-values, labelled "pinned from CLI".
+On-screen comment: 8 derived stubs with their own identity chain; this is the
+handle a Knowledge Catalog entry would expose; this CLI path did not write
+Catalog. On the page: beat 3, the handle card and the 8 stubs, legacy marked
+deprecated.
 
-### 3 · LOOKUP (poster frame)
+### 4 · NEXT AGENT (poster frame)
 
-`# an agent later resolves context_ref to that publication`, then
 `run.py --lookup 'okf:env-observe#674153c572f6'` → three-key JSON
 (`context_ref`, `publication_id` `sha256:53bd1651…`, `label: derived/demo`),
-exit 0. This frame is the video poster. On the page: beat 4, tape 1.
+then the comment **Payoff: use Active-customer revenue, not legacy; the number
+is unproven.**
 
-### 4 · FAIL-CLOSED (last, labelled)
-
-`# junk refs fail closed (expected exit 2, not a crash)`, then
-`run.py --lookup 'okf:env-junk#deadbeef'` → `FAIL_CLOSED` and
-`# expected FAIL_CLOSED exit 2 — not a crashed demo`. On the page: beat 4, tape 2.
+A brief junk-ref `run.py --lookup 'okf:env-junk#deadbeef'` → `FAIL_CLOSED`,
+labelled `expected FAIL_CLOSED exit 2 — not a crashed demo`, then the lookup
+and the payoff comment are held as the last frames, so the poster is the
+payoff, not FAIL_CLOSED and not an empty header. On the page: beat 4.
 
 ## Beats on the page, if presenting live
 
-1. **Observe.** Live strip: agent `okf_rfc_observe_agent`, session `f21ee192-…`,
-   180 events, table, model. Beat 1: histogram Σ 180, six sample rows, PR 474
-   link for the full export, never-emit scan. Expand the collapsed prior consume
-   experiment and Germany sections only to show that they are labelled.
-2. **Adapt.** Beat 2: the transcript, then the 8-file bundle listing (CLI
-   `out/bundle/`), then the identity chain and cross-checks, all ✓.
-3. **Project.** Beat 3: identity chips; Catalog pane says no write on this path;
-   BigQuery pane shows the live source table above the derived projection
-   tables; seam note "one publication everywhere on this page ✓".
-4. **Consume.** Beat 4: tape 1 resolves, tape 2 fails closed; type any other ref
-   into "try a ref" and see it fail closed against the committed
-   `mapping.json`; receipt tile `UNVERIFIABLE · rcpt-observe-noexec`.
+1. **Ask.** Read the hero question and the three-sentence payoff aloud. Beat 1:
+   the question as recorded, the dead metric, the over-claim, the current
+   metric. Expand the collapsed prior consume experiment and Germany sections
+   only to show that they are labelled.
+2. **Observe.** Beat 2: rank 1 `Active-customer revenue`, `Customer revenue
+   (legacy)` excluded with its reason, receipt UNVERIFIABLE. The tape pane
+   agrees, all ✓. The six sample rows and the never-emit scan are collapsed.
+3. **Publish.** Beat 3: the handle card (`context_ref` → publication, no
+   Catalog write on this path), the 8 stubs with titles, the tape. Identity
+   chain and projection shape are collapsed.
+4. **Next agent.** Beat 4: the lookup tape ending on the payoff; “what the next
+   agent does” (use / skip / unproven); the junk-ref tape labelled expected;
+   type any other ref into "try a ref" and see it fail closed against the
+   committed `mapping.json`.
+5. **How this was built / IDs** at the bottom: agent, session, table, SHA
+   triple, `context_ref`, SDK PR 474, the 180-event histogram, the
+   `Object.hasOwn` note. This is where a reviewer verifies the run.
 
 ## Before presenting
 
