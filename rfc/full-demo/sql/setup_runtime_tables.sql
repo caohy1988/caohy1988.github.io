@@ -2,9 +2,22 @@
 -- Owns every DDL statement and every seed MERGE for the demo. Never touches agent_events.
 -- The reader file sql/attribution_two_key.sql contains SELECTs only.
 --
---   bq query --use_legacy_sql=false --project_id=test-project-0728-467323 \
---     --impersonate_service_account=okf-setup@test-project-0728-467323.iam.gserviceaccount.com \
---     < setup_runtime_tables.sql
+-- bq has no impersonation flag (bq 2.1.28: "Unknown command line flag"). Impersonation is
+-- set on gcloud (bq reads it): use an ISOLATED gcloud configuration so the default config
+-- is never left pointing at a service account.
+--
+--   gcloud config configurations create okf-setup --no-activate
+--   export CLOUDSDK_ACTIVE_CONFIG_NAME=okf-setup
+--   gcloud config set account   <bootstrap-operator@…>            # the human Owner
+--   gcloud config set project   test-project-0728-467323
+--   gcloud config set auth/impersonate_service_account okf-setup@test-project-0728-467323.iam.gserviceaccount.com
+--   gcloud auth print-identity-token --impersonate-service-account=okf-setup@test-project-0728-467323.iam.gserviceaccount.com >/dev/null   # proves the SA is the caller
+--   bq query --use_legacy_sql=false --project_id=test-project-0728-467323 < setup_runtime_tables.sql
+--   unset CLOUDSDK_ACTIVE_CONFIG_NAME                                # back to the default config
+--   gcloud config configurations delete okf-setup --quiet             # after cleanup, when okf-setup is retired
+--
+-- The tape shows the configuration name and the impersonated account in the bq job's
+-- user_email (INFORMATION_SCHEMA.JOBS) so the DDL is demonstrably run as okf-setup.
 --
 -- Not runnable until Phase A; committed so the schema and seed contract are concrete.
 
