@@ -506,7 +506,10 @@
   var tryRef = null;
   function localLookup(ref) {
     var map = D.mapping.mapping || {};
-    if (typeof ref !== "string" || !(ref in map)) return { ok: false, error: "FAIL_CLOSED context_ref not bound in mapping (fail closed): '" + ref + "'", exit: 2 };
+    // Own-property only. The `in` operator is not fail-closed: constructor/toString/__proto__ inherit from Object.prototype.
+    if (typeof ref !== "string" || !Object.hasOwn(map, ref) || typeof map[ref] !== "string") {
+      return { ok: false, error: "FAIL_CLOSED context_ref not bound in mapping (fail closed): '" + ref + "'", exit: 2 };
+    }
     return { ok: true, result: { context_ref: ref, publication_id: map[ref], label: "derived/demo" }, exit: 0 };
   }
   function renderConsume() {

@@ -21,37 +21,46 @@ section labelled "prior fixture clip, not this run".
 
 ## What the tape shows
 
-### 1 · `python examples/okf_bqaa_adapter/run.py`
+A ~24s pedagogical recut (H.264 1280×720). Poster (`okf-bqaa-cli-poster.png`) is
+the successful lookup JSON, not an empty header and not FAIL_CLOSED. Junk-ref
+exit 2 is labelled on screen as expected fail-closed, not a crash.
 
-Watch for these stdout lines, in order:
+### 1 · OBSERVE
+
+On-screen: `# 180 live BQAA agent_events from okf_rfc_observe_agent`, then a
+one-liner against the committed export that prints `180 events` and session
+`f21ee192-d989-4c38-894f-66b6b82eaf18`. Reader sees: this is a real trace.
+
+### 2 · ADAPT (main beat)
+
+`# one command projects that trace into a derived OKF bundle`, then
+`python3 examples/okf_bqaa_adapter/run.py`. After SESSION / CONTEXT_REF /
+PUBLICATION_ID: `# useful OKF: 8 stubs (metric, computation, policy, tables) + identity chain`,
+`find …/out/bundle`, and the titles:
 
 ```
-LABEL derived/demo, observer-only, nothing attested
-ADAPTER okf-bqaa-adapter:v0
-TABLE test-project-0728-467323.okf_rfc_demo.agent_events
-SESSION f21ee192-d989-4c38-894f-66b6b82eaf18
-TRACE e-c7214361-4017-43d7-af4e-cddfe51b09a4
-MODEL gemini-3.8-flash
-CONTEXT_REF okf:env-observe#674153c572f6
-RECEIPT UNVERIFIABLE rcpt-observe-noexec
-OBSERVATION_ID sha256:85ea62a9…
-SNAPSHOT_ID sha256:f18befd0…
-PUBLICATION_ID sha256:53bd1651…
-FILES 8
+title: Active-customer revenue by region and quarter
+title: Active customer
+title: Active-customer revenue
+…
 ```
 
-On the page: beat 2 shows this block with the pinned values highlighted; the
-identity strip's derived row carries the same triple, labelled "pinned from CLI".
+plus the frontmatter of `metrics/active-customer-revenue.md`. Reader sees titles
+they can use, not just hashes. On the page: beat 2 highlights the same pinned
+values, labelled "pinned from CLI".
 
-### 2 · `run.py --lookup 'okf:env-observe#674153c572f6'`
+### 3 · LOOKUP (poster frame)
 
-Prints a three-key JSON object: `context_ref`, `publication_id`
-(`sha256:53bd1651…`), `label: derived/demo`. Exit 0. On the page: beat 4, tape 1.
+`# an agent later resolves context_ref to that publication`, then
+`run.py --lookup 'okf:env-observe#674153c572f6'` → three-key JSON
+(`context_ref`, `publication_id` `sha256:53bd1651…`, `label: derived/demo`),
+exit 0. This frame is the video poster. On the page: beat 4, tape 1.
 
-### 3 · `run.py --lookup 'okf:env-junk#deadbeef'`
+### 4 · FAIL-CLOSED (last, labelled)
 
-Prints `FAIL_CLOSED context_ref not bound in mapping (fail closed): …` on stderr
-and exits 2. On the page: beat 4, tape 2.
+`# junk refs fail closed (expected exit 2, not a crash)`, then
+`run.py --lookup 'okf:env-junk#deadbeef'` → `FAIL_CLOSED` and
+`# expected FAIL_CLOSED exit 2 — not a crashed demo`. On the page: beat 4, tape 2.
 
 ## Beats on the page, if presenting live
 

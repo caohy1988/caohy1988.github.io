@@ -43,7 +43,7 @@ python examples/okf_bqaa_adapter/run.py --lookup 'okf:env-junk#deadbeef'   # FAI
 | `live/observe/mapping.json` | The CLI's `out/mapping.json`: exactly one binding, `okf:env-observe#674153c572f6` → publication. |
 | `live/observe/snapshot.json` | **Trimmed** viewer snapshot: event-type histogram (Σ 180), identities, six sample rows, never-emit list. Not the export. The 494 KB 180-row export is on PR 474 only. |
 | `cli/okf-bqaa-cli-transcript.txt` | Plaintext of the CLI run (durable proof). |
-| `cli/okf-bqaa-cli.cast` · `cli/okf-bqaa-cli.gif` · `okf-bqaa-cli.mp4` | asciinema v2 cast, gif render and terminal clip of the same commands, labelled **live-adapter proof**. |
+| `cli/okf-bqaa-cli.cast` · `cli/okf-bqaa-cli.gif` · `okf-bqaa-cli.mp4` · `okf-bqaa-cli-poster.png` | asciinema v2 cast, gif, H.264 1280×720 pedagogical tape (BQAA TRACE → useful OKF), and poster = successful lookup JSON. Labelled **live-adapter proof**. |
 | `fixture/bundle/`, `fixture/golden/` | **Authored** Phase 0 fixture (`cymbal-finance-core`), display-only, never touched by the adapter. |
 | `okf-bqaa-e2e.mp4` | **Prior fixture clip**, recorded before the observe run. Collapsed on the page and labelled as not this run. |
 | `live/live.json`, `live/agent_events.json`, `live/run_okf_agent.py` | **Prior live-GCP consume experiment** (`okf_rfc_consume_agent`, session `04fa3d56-…`, stub `lookup_okf_context`, 14 rows). Kept, collapsed under beats 1 and 4, labelled prior. Not the Observe input; the SDK CLI fails closed on that session (not retrieve-shaped). |
@@ -55,7 +55,7 @@ python examples/okf_bqaa_adapter/run.py --lookup 'okf:env-junk#deadbeef'   # FAI
 1. **Observe.** Histogram of the 180 rows, six sample rows, run facts, PR 474 link for the full export. Never-emit scan over the sample content keys. Collapsed: the prior consume experiment and the synthetic Germany trace, both labelled.
 2. **Adapt.** The committed CLI transcript with the pinned identities highlighted, links to the cast / gif / mp4, and the 8 derived files (names, sha256, store-only concept versions) described as the CLI `out/bundle/`. Cross-checks: transcript = `live_identities.json` = identity strip; `FILES 8`; one mapping binding; distinct from the authored bundle.
 3. **Project.** Identity chips from `live_identities.json`. Catalog pane is a derived view with an honesty label (no entry created on this path; the prior Dataplex entry `okf-derived-germany` is a labelled leftover). BigQuery pane shows the live source table (read-only) above the RFC projection shape rendered from the pinned identities. No DML.
-4. **Consume.** Tape 1: `--lookup okf:env-observe#674153c572f6` → `{context_ref, publication_id, label: derived/demo}`. Tape 2: `--lookup okf:env-junk#deadbeef` → `FAIL_CLOSED`, exit 2. A "try a ref" box resolves against the committed `mapping.json` with the same rule (static file, no store, no network). Receipt tile `UNVERIFIABLE · rcpt-observe-noexec`; Phase 4 ATTESTED shape non-normative. Collapsed: the prior stub-tool consume transcript, labelled prior.
+4. **Consume.** Tape 1: `--lookup okf:env-observe#674153c572f6` → `{context_ref, publication_id, label: derived/demo}`. Tape 2: `--lookup okf:env-junk#deadbeef` → `FAIL_CLOSED`, exit 2 (labelled expected fail-closed, not a crash). A "try a ref" box resolves against the committed `mapping.json` with `Object.hasOwn` (constructor/toString/__proto__ fail closed; static file, no store, no network). Receipt tile `UNVERIFIABLE · rcpt-observe-noexec`; Phase 4 ATTESTED shape non-normative. Collapsed: the prior stub-tool consume transcript, labelled prior.
 
 ## Honesty
 
@@ -113,7 +113,7 @@ Deep links: `#beat=1` … `#beat=4`. Keys: → / N next, ← / P back, 1–4 jum
 - [ ] Beat 2 transcript shows `PUBLICATION_ID sha256:53bd1651…` highlighted; all cross-checks ✓.
 - [ ] Beat 3 seam note reads "one publication everywhere on this page ✓"; Catalog card says no write on this path.
 - [ ] Beat 4 tape 1 resolves, tape 2 reads `FAIL_CLOSED … # exit 2`; receipt tile reads `UNVERIFIABLE · rcpt-observe-noexec`.
-- [ ] Walkthrough: `okf-bqaa-cli.mp4` first, labelled live-adapter proof; the e2e clip collapsed and labelled prior fixture clip.
+- [ ] Walkthrough: `okf-bqaa-cli.mp4` first, poster is the successful lookup JSON (not empty header, not FAIL_CLOSED); labelled live-adapter proof; the e2e clip collapsed and labelled prior fixture clip.
 
 ## Not in this PR
 
