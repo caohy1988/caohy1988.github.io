@@ -1,0 +1,29 @@
+# BQAA → derived OKF  ·  okf-bqaa-adapter:v0  ·  stdlib, no GCP
+# recorded 2026-09-02 PT from /Users/haiyuancao/BigQuery-Agent-Analytics-SDK-okf-adapter
+# HEAD 476d37dc9d4210a335c2f77e78003f6a5ebe2878  (GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK PR 474 — do not merge)
+
+$ python examples/okf_bqaa_adapter/run.py
+LABEL derived/demo, observer-only, nothing attested
+ADAPTER okf-bqaa-adapter:v0
+TABLE test-project-0728-467323.okf_rfc_demo.agent_events
+SESSION f21ee192-d989-4c38-894f-66b6b82eaf18
+TRACE e-c7214361-4017-43d7-af4e-cddfe51b09a4
+MODEL gemini-3.8-flash
+CONTEXT_REF okf:env-observe#674153c572f6
+RECEIPT UNVERIFIABLE rcpt-observe-noexec
+OBSERVATION_ID sha256:85ea62a96e5076a292572a996f0408865c4c56aac696bbeb79a73bbc5eda8af6
+SNAPSHOT_ID sha256:f18befd010ff7e3d1fe140303626a82dc985c986846093f73643e7d0eea92b75
+PUBLICATION_ID sha256:53bd1651c43f69d53f591e4f91e3ccdda4640d8b36cb1dce1ac97328ffa39a77
+FILES 8
+OUT /Users/haiyuancao/BigQuery-Agent-Analytics-SDK-okf-adapter/examples/okf_bqaa_adapter/out
+
+$ python examples/okf_bqaa_adapter/run.py --lookup 'okf:env-observe#674153c572f6'
+{
+  "context_ref": "okf:env-observe#674153c572f6",
+  "publication_id": "sha256:53bd1651c43f69d53f591e4f91e3ccdda4640d8b36cb1dce1ac97328ffa39a77",
+  "label": "derived/demo"
+}
+
+$ python examples/okf_bqaa_adapter/run.py --lookup 'okf:env-junk#deadbeef'
+FAIL_CLOSED context_ref not bound in mapping (fail closed): 'okf:env-junk#deadbeef'
+# exit 2
