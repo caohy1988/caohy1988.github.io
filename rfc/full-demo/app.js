@@ -33,6 +33,10 @@
   var LEGACY_METRIC = "Customer revenue (legacy)";
   var BQ_CONSOLE = "https://console.cloud.google.com/bigquery?project=" + PROJECT + "&ws=!1m5!1m4!4m3!1s" + PROJECT + "!2sokf_rfc_demo!3sagent_events";
   var KC_CONSOLE = "https://console.cloud.google.com/dataplex/search?project=" + PROJECT + "&q=okf-rfc-demo";
+  var VERBATIM = "No. The number is unproven.";
+  // Honesty label per demo_evidence.source, rendered as a column on beat 6 (checked by tools/check_full_demo.py).
+  var EVID_LABELS = { adapter_tape_pr474_476d37dc: ["recorded", "recorded · adapter CLI tape, PR 474"], legacy_catalog_description: ["prior", "prior · okf-derived-germany, no aspect"] };
+  function evidLabel(v) { var l = EVID_LABELS[v]; return l ? src(l[0], l[1]) : src("stub", "unlabelled source"); }
   var TRAPS = { 1: "trap · over-claiming trust", 4: "static pack cannot answer · history", 6: "trap · the dead metric", 10: "static pack cannot answer · roll-up", 11: "what would make it attested", 12: "the dead metric, named" };
 
   var stage = document.getElementById("stage");
@@ -120,7 +124,7 @@
     scan: "live/never_emit_scan.json", v0: "live/sessions_by_context_ref.json",
     attr: "live/beat6_attribution.json", evid: "live/beat6_demo_evidence.json",
     heads: "live/beat5_serve_stmt1.json", hist: "live/beat5_serve_stmt2.json", resol: "live/beat5_serve_stmt3.json", pubs: "live/beat5_serve_stmt4.json", view: "live/beat5_serve_stmt5.json",
-    jobs: "live/bq_jobs_identity.json",
+    jobs: "live/bq_jobs_identity.json", summary: "live/sessions_summary.json",
     legacy: "live/catalog_entry_okf-derived-germany.json", legacyLc: "live/lookup_context_okf-derived-germany.json", // prior experiment, labelled prior on beat 3
     lc11: "live/lookup_context_11_resources.json", lcMissing: "live/lookup_context_missing_entry.json",
     metric: "live/catalog_shipped_entry_metric_viewALL.json", comp: "live/catalog_shipped_entry_computation_viewALL.json", legMetric: "live/catalog_shipped_entry_legacy_metric_viewALL.json",
@@ -190,6 +194,10 @@
     var all = D.F.retrieve.concat(D.G.inv.map(function (v) { return v.retrieve; }).filter(Boolean));
     D.exclusions = { total: all.length, legacy: all.filter(function (r) { return (r.result.okf.excluded || []).some(function (x) { return x.title === LEGACY_METRIC; }); }).length, rank1: all.filter(function (r) { var it = (r.result.okf.items || []).slice().sort(function (a, b) { return a.rank - b.rank; })[0]; return it && it.title === CURRENT_METRIC; }).length };
     D.unproven = D.F.inv.filter(function (v) { return /unproven/i.test(v.answer); }).length;
+    D.verbatim = D.F.inv.filter(function (v) { return v.answer.indexOf(VERBATIM) >= 0; }).length;
+    D.receiptsIdentical = D.F.receipts.filter(function (r) { return JSON.stringify(r.result) === JSON.stringify(D.F.receipts[0].result); }).length;
+    D.tableRows = D.summary.reduce(function (s, r) { return s + Number(r.rows_in_table); }, 0);
+    D.fourth = D.summary.filter(function (r) { return [S_OBS, S_CON, S_OBS2].indexOf(r.session_id) < 0; })[0] || null;
     D.overclaim = D.C.inv[0] || null;
     D.scanHits = D.scan.reduce(function (s, r) { return s + Number(r.hits); }, 0);
     D.scanned = D.scan.length ? Number(D.scan[0].tool_rows_scanned) : 0;
@@ -236,9 +244,9 @@
       pane("", '<span class="sw" style="background:var(--warn)"></span>Trap 2, as it actually sounded', src("live", "live · session " + shortId(S_CON)),
         '<div class="quote">' + esc(D.overclaim ? D.overclaim.answer : "") + '<span class="cite">' + esc(C.agent) + " · " + esc(S_CON) + " · " + esc(tsLive(C.t1)) + " UTC · tool <code>lookup_okf_context</code> returned <code>ok: true</code> and no verdict</span></div>" +
         caption("No computation ran. No verdict existed. The word “verified” was produced from an <code>ok: true</code>. Beat 3 shows the system prompt and the tool result behind it."), "") +
-      pane("", '<span class="sw" style="background:var(--ok)"></span>What a good answer did, twelve times', src("live", "live · session " + shortId(S_OBS)),
-        '<div class="quote good">' + esc((F.inv[0] && F.inv[0].answer.split("\n").filter(function (l) { return /unproven/i.test(l); })[0]) || "No. The number is unproven.") + '<span class="cite">' + esc(F.agent) + " · " + esc(S_OBS) + " · invocation 1 of " + F.inv.length + " · receipt <code>UNVERIFIABLE</code></span></div>" +
-        caption("<b>" + D.unproven + " of " + F.inv.length + "</b> answers in this session say the number is unproven, because the receipt tool returned a <code>verdict</code> the prompt had to report verbatim. Beat 5 shows the receipt."), "") +
+      pane("", '<span class="sw" style="background:var(--ok)"></span>What a good answer did · one verbatim example', src("live", "live · session " + shortId(S_OBS)),
+        '<div class="quote good">' + esc((F.inv.filter(function (v) { return v.answer.indexOf(VERBATIM) >= 0; })[0] || { answer: "" }).answer.split("\n").filter(function (l) { return l.indexOf(VERBATIM) >= 0; })[0] || "(no verbatim sentence found in the captured answers)") + '<span class="cite">' + esc(F.agent) + " · " + esc(S_OBS) + " · invocation 1 of " + F.inv.length + " · receipt <code>UNVERIFIABLE</code></span></div>" +
+        caption("Two counts, kept apart: <b>" + D.unproven + " of " + F.inv.length + "</b> final answers in this session contain the word “unproven”, because the receipt tool returned a <code>verdict</code> the prompt had to report; <b>" + D.verbatim + " of " + F.inv.length + "</b> uses the exact four-word sentence quoted above. Beat 5 shows the receipt."), "") +
       "</div>" +
       '<ul class="checklist">' +
       check(F.inv.length === 12 && F.hist.USER_MESSAGE_RECEIVED === 12, "12 invocations, 12 <code>USER_MESSAGE_RECEIVED</code> rows, one session; the list above is read from the rows, not typed") +
@@ -372,7 +380,8 @@
       "</div>" +
       '<details class="nn"><summary>IAM contract · spec.md §1.3 · three service accounts, resource-specific grants, seven negative checks · RFC text only</summary><div class="nn-b">' +
       '<table class="iam"><thead><tr><th>Principal</th><th>Resource</th><th>Grant</th><th>Status today</th></tr></thead><tbody>' +
-      iamRow("bootstrap operator (human Owner)", "project · dataset okf_rfc_demo · each SA", "time-boxed roleAdmin, projectIamAdmin, serviceAccountAdmin, catalogAdmin, aspectTypeOwner, dataset dataOwner; Token Creator per SA", "live", "ran as project Owner; no time-boxing yet") +
+      iamRow("operator, this capture (raincoatrun@gmail.com)", "project (Owner) · dataset okf_rfc_demo (OWNER)", "ran every bq, gcloud, curl and sample-script call in the default gcloud configuration; created no service account, granted nothing, revoked nothing", "live", "every job in bq_jobs_identity.json carries this user_email") +
+      iamRow("bootstrap operator, Phase A (human Owner)", "project · dataset okf_rfc_demo · each SA", "time-boxed roleAdmin, projectIamAdmin, serviceAccountAdmin, catalogAdmin, aspectTypeOwner, dataset dataOwner; Token Creator per SA; all setup-only roles revoked after the tape", "rfc", "not done; no time-boxing, no SA, no binding yet") +
       iamRow("okf-setup (one-time)", "project · dataset", "catalogEditor + aspectTypeOwner for type/group creation; dataOwner + jobUser for DDL and seeds; then every role revoked (checks 6, 7)", "rfc", "not created; DDL ran as operator") +
       iamRow("okf-sync-writer-okf-rfc-demo", "EntryGroup okf-rfc-demo · EntryType okf-bundle · AspectTypes okf, okf-context-runtime · nine tables", "catalogEditor on the group; entryTypeUser; aspectTypeUser ×2; dataEditor per table (no dataset grant, so agent_events is unreachable); jobUser", "rfc", "not created") +
       iamRow("okf-runtime-reader", "EntryGroup · project · dataset", "catalogViewer on the group; custom okfCatalogSearch = {dataplex.projects.search}; dataViewer; jobUser", "rfc", "not created; reads ran as operator") +
@@ -413,7 +422,7 @@
         info("<code>FAIL_STALE</code> (bound to a non-head publication) and <code>OK</code> (bound to the head) appear only once a head exists. Until then they are " + src("rfc", "RFC text only") + ". Refs minted by <code>sync</code> will be immutable; legacy ones are not.") +
         "</ul>" + jobs(jobsFor("serve_stmt3")), "runtime") +
       '<div class="grid2">' +
-      pane("", "The receipt · okf_run_attested_computation", src("live", "live · session " + shortId(S_OBS) + " · 12 of 12 identical"),
+      pane("", "The receipt · okf_run_attested_computation", src("live", "live trace · session " + shortId(S_OBS) + " · " + D.receiptsIdentical + " of " + F.receipts.length + " identical") + " " + src("stub", "stubbed attester · no-execution"),
         (rc ? pre(rc.result, ["verdict", "verdict_reason", "receipt_id", "parameter_schema"]) : "") +
         caption("<code>verdict: UNVERIFIABLE</code>, <code>verdict_reason: no-execution; observer-only demo, nothing attested</code>, <code>receipt_id: rcpt-observe-noexec</code>. The declared <code>parameter_schema</code> (<code>region STRING</code>, <code>quarter_start DATE</code>, <code>quarter_end DATE</code>) is the contract an executor would bind. No SQL ran under the demo identity, and nothing on this page calls the result attested. The Phase 4 verdict shape is a labelled, non-normative fixture on the four-beat demo, not here."), "runtime") +
       pane("", "The answer · same invocation", src("live", "live · LLM_RESPONSE"),
@@ -452,8 +461,8 @@
         check(D.attr.filter(function (r) { return r.band === "attributed"; }).every(function (r) { return r.publication_source === "seeded_pre_phase_a" && r.binding_source === "legacy"; }), "Every attributed row resolves through a <code>legacy</code> binding to a <code>seeded_pre_phase_a</code> publication: nothing has been committed by <code>sync</code> yet") +
         "</ul>" + jobs(jobsFor("attr_stmt1")), "") +
       '<div class="grid2">' +
-      pane("", "(b) Separately sourced evidence · demo_evidence", src("seeded", "seeded · STATEMENT 2"),
-        table([{ key: "source" }, { key: "context_ref", render: refCell }, { key: "publication_id", render: pubCell }, { key: "note", cls: "wrap" }], D.evid) +
+      pane("", "(b) Separately sourced evidence · demo_evidence", src("seeded", "seeded · STATEMENT 2") + " " + src("prior", "prior row labelled") + " " + src("recorded", "recorded row labelled"),
+        table([{ key: "source" }, { key: "label", render: evidLabel }, { key: "context_ref", render: refCell }, { key: "publication_id", render: pubCell }, { key: "note", cls: "wrap" }], D.evid.map(function (r) { var o = {}; Object.keys(r).forEach(function (k) { o[k] = r[k]; }); o.label = r.source; return o; })) +
         caption("The adapter tape binds the observe handle to a <b>third</b> publication <code>" + esc(short(PUB.p53b, 19)) + "</code>; the legacy Catalog description names the <b>oldest</b>, <code>" + esc(short(PUB.a25, 19)) + "</code>. Neither is an <code>agent_events</code> row, so neither is in table (a).") + jobs(jobsFor("attr_stmt2")), "") +
       pane("", "v0 · events only · runnable without the Phase A tables", src("live", "live · sql/sessions_by_context_ref.sql"),
         table([{ key: "session_id", render: sidCell }, { key: "tool" }, { key: "context_ref", render: refCell }, { key: "publication_id", render: pubCell }, { key: "verdict", render: function (v) { return v ? resCell(v) : "NULL"; } }, { key: "n", cls: "num" }], v0Rows) +
@@ -490,7 +499,7 @@
     if (!el) return;
     el.innerHTML =
       '<section class="identity ids-strip" aria-label="Live captures">' +
-      '<div class="idrow live-row"><div class="lbl"><b>Sessions</b>' + esc(TABLE) + '</div><div class="chip deriv"><span class="k">observe · 180 rows</span><span class="v">' + esc(S_OBS) + '</span></div><div class="chip deriv"><span class="k">consume · 14 rows</span><span class="v">' + esc(S_CON) + '</span></div><div class="chip deriv"><span class="k">observe · 15 rows</span><span class="v">' + esc(S_OBS2) + '</span></div><span class="status ok">' + (D.F.count + D.C.count + D.G.count) + " rows on this page · 212 in the table</span></div>" +
+      '<div class="idrow live-row"><div class="lbl"><b>Sessions</b>' + esc(TABLE) + '</div><div class="chip deriv"><span class="k">observe · 180 rows</span><span class="v">' + esc(S_OBS) + '</span></div><div class="chip deriv"><span class="k">consume · 14 rows</span><span class="v">' + esc(S_CON) + '</span></div><div class="chip deriv"><span class="k">observe · 15 rows</span><span class="v">' + esc(S_OBS2) + '</span></div><div class="chip deriv"><span class="k">not pulled · ' + (D.fourth ? D.fourth.rows_in_table + " rows · " + D.fourth.tool_completed + " tool calls" : "—") + '</span><span class="v">' + esc(D.fourth ? D.fourth.session_id : "") + '</span></div><span class="status ok">' + (D.F.count + D.C.count + D.G.count) + " rows on this page · " + D.tableRows + " in the table (live count, " + D.summary.length + " sessions)</span></div>" +
       '<div class="idrow live-row"><div class="lbl"><b>Publications</b>three, two kinds of source</div><div class="chip deriv"><span class="k">consume / legacy Catalog</span><span class="v">' + esc(PUB.a25) + '</span></div><div class="chip deriv"><span class="k">in-process pin · observe</span><span class="v">' + esc(PUB.p674) + '</span></div><div class="chip deriv"><span class="k">adapter tape · derived bundle</span><span class="v">' + esc(PUB.p53b) + "</span></div></div>" +
       '<div class="idrow live-row"><div class="lbl"><b>Catalog</b>us-central1 · EntryGroup okf-rfc-demo</div><div class="chip deriv"><span class="k">shipped entries</span><span class="v">' + D.shipped.length + ' okf-bundle · aspect okf (' + D.aspectFields.length + ' fields)</span></div><div class="chip deriv"><span class="k">prior entry</span><span class="v">okf-derived-germany · okf-concept · no aspects · prior</span></div><span class="live-links-inline">' + link(KC_CONSOLE, "Catalog") + link(BQ_CONSOLE, "BigQuery") + "</span></div>" +
       "</section>" +

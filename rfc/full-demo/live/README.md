@@ -19,6 +19,7 @@ is the `INFORMATION_SCHEMA.JOBS_BY_USER` row set for every `okf_full_demo_%` job
 | `session_f21ee192.json` | all rows for session `f21ee192-d989-4c38-894f-66b6b82eaf18` | 180 rows, 12 invocations, 9 event types |
 | `session_04fa3d56.json` | all rows for session `04fa3d56-f2f1-413e-8c2b-ec116835af84` | 14 rows, 1 invocation |
 | `session_1e6dfed7.json` | all rows for session `1e6dfed7-27ce-4c4d-b2e7-c45de7c241d1` | 15 rows, 1 invocation (second observe session) |
+| `sessions_summary.json` | `sql/sessions_summary.sql`, row and tool-call count per session (aggregate; no row pull) | 4 sessions, 212 rows; the fourth session `a63c3e86-5897-40cc-bdf3-77bfcf750b12` (3 rows, 0 tool calls) is counted here and **not pulled** |
 | `never_emit_scan.json` | `sql/never_emit_scan.sql` over all 27 `TOOL_COMPLETED` payloads | 0 hits on all 8 keys; 27 of 27 carry `context_ref` |
 | `setup_runtime_tables.out` | **DDL + seed MERGEs**, `sql/setup_runtime_tables.sql`, run once as the operator (not yet as `okf-setup`) | 11 tables + 1 view created; 3 + 3 + 2 rows seeded |
 | `beat6_attribution.json` | `sql/attribution_two_key.sql` STATEMENT 1 | 5 rows; band `attributed` Σ 14, band `receipt_only` Σ 13 |

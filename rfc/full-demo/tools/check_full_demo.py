@@ -96,8 +96,38 @@ check(sum(1 for r in obs if r["event_type"] == "USER_MESSAGE_RECEIVED") == 12, "
 check(sum(1 for r in obs if r["event_type"] == "TOOL_COMPLETED") == 24, "24 TOOL_COMPLETED rows in the observe session")
 for sid in (S_OBS, S_CON, S_OBS2):
     check(sid in app, "app.js names session %s" % sid)
+summary = load("sessions_summary.json")
+summary_ids = {r["session_id"] for r in summary}
+check(sum(int(r["rows_in_table"]) for r in summary) == 212 and len(summary) == 4, "sessions_summary.json: 4 sessions, 212 rows in the table (live aggregate)")
+by_sid = {r["session_id"]: int(r["rows_in_table"]) for r in summary}
+check(by_sid.get(S_OBS) == len(obs) and by_sid.get(S_CON) == len(con) and by_sid.get(S_OBS2) == len(obs2), "the three pulled snapshots match the live per-session counts (180 / 14 / 15 = 209 rows on the page)")
+fourth = [r for r in summary if r["session_id"] not in (S_OBS, S_CON, S_OBS2)]
+check(len(fourth) == 1 and int(fourth[0]["tool_completed"]) == 0 and not (LIVE / ("session_" + fourth[0]["session_id"][:8] + ".json")).exists(), "exactly one session (a63c3e86…, 0 tool calls) is counted but not pulled, and no snapshot for it is claimed")
 page_sessions = set(re.findall(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", app + index))
-check(page_sessions <= {S_OBS, S_CON, S_OBS2}, "no session id on the page outside the three checked-in snapshots: %s" % sorted(page_sessions - {S_OBS, S_CON, S_OBS2}))
+check(page_sessions <= summary_ids, "no session id on the page outside the live per-session summary: %s" % sorted(page_sessions - summary_ids))
+check("three of those sessions (209 rows" in index and "counted but not pulled" in index, "index.html states three pulled sessions / 209 rows and names the fourth as counted, not pulled")
+check("all four sessions" not in (DEMO / "stories.json").read_text("utf-8") and "all four sessions" not in index and "all four sessions" not in app, "no 'all four sessions' coverage claim remains")
+
+# ---- the twelve answers: semantic 12/12 vs one verbatim sentence -------------------------------
+VERBATIM = "No. The number is unproven."
+inv = {}
+for r in obs:
+    inv.setdefault(r["trace_id"], []).append(r)
+finals = []
+for evs in inv.values():
+    texts = [parse(e["content"]).get("response", "") for e in evs if e["event_type"] == "LLM_RESPONSE"]
+    texts = [t for t in texts if isinstance(t, str) and not t.startswith("call: ")]
+    finals.append(texts[-1] if texts else "")
+semantic = sum(1 for t in finals if "unproven" in t.lower())
+verbatim = sum(1 for t in finals if VERBATIM in t)
+check(len(finals) == 12 and semantic == 12, "12 of 12 final answers contain 'unproven' (semantic count, got %d)" % semantic)
+check(verbatim == 1, "exactly 1 of 12 final answers contains the verbatim sentence (got %d); the page must not claim more" % verbatim)
+check('var VERBATIM = "%s"' % VERBATIM in app and "D.verbatim" in app and "D.unproven" in app, "app.js computes and renders both counts from the rows")
+for name, text in (("index.html", index), ("stories.json", (DEMO / "stories.json").read_text("utf-8")), ("app.js", app)):
+    check("twelve times" not in text, "%s does not claim the verbatim sentence was said twelve times" % name)
+check("12 of 12 final responses contain “unproven”" in (DEMO / "stories.json").read_text("utf-8"), "stories.json states the semantic count separately from the one verbatim example")
+receipts = [parse(r["content"])["result"] for r in obs if r["event_type"] == "TOOL_COMPLETED" and parse(r["content"]).get("tool") == "okf_run_attested_computation"]
+check(len(receipts) == 12 and all(json.dumps(x, sort_keys=True) == json.dumps(receipts[0], sort_keys=True) for x in receipts), "the 12 attested-computation receipts are identical (UNVERIFIABLE, no-execution)")
 
 # ---- system prompts on beat 3 ---------------------------------------------------------
 prompts_con = {parse(r["content"]).get("system_prompt") for r in con if r["event_type"] == "LLM_REQUEST"}
@@ -187,6 +217,27 @@ check(legacy_lines and all("prior" in ln.lower() for ln in legacy_lines), "okf-d
 check("Dataplex built-in" not in app or "not" in app, "no claim of a Dataplex built-in")
 check(not re.search(r"sync --from-catalog[^.]*\b(is|now) (v1|available|shipped)", app), "no claim that sync --from-catalog exists")
 
+# ---- rendered honesty labels on JSON-backed rows -----------------------------------------------
+m = re.search(r"var EVID_LABELS = \{(.*?)\};", app, re.S)
+evid_labels = dict(re.findall(r"(\w+): \[\"(\w+)\"", m.group(1))) if m else {}
+check(set(evid_labels) == {r["source"] for r in evid}, "every demo_evidence.source rendered on beat 6 has an honesty label in EVID_LABELS: %s" % sorted(evid_labels))
+check(evid_labels.get("legacy_catalog_description") == "prior" and evid_labels.get("adapter_tape_pr474_476d37dc") == "recorded", "the okf-derived-germany evidence row renders as prior, the adapter-tape row as recorded")
+attr_fn = app[app.index("function renderAttribution("):app.index("function renderMatrix(")]
+check('render: evidLabel' in attr_fn, "beat 6 evidence table renders the label column")
+serve_fn = app[app.index("function renderServe("):app.index("function renderAttribution(")]
+receipt_pane = [ln for ln in serve_fn.split("\n") if "The receipt · okf_run_attested_computation" in ln]
+check(receipt_pane and 'src("live", "live trace' in receipt_pane[0] and 'src("stub", "stubbed attester' in receipt_pane[0], "beat 5 receipt pane is labelled live trace + stubbed attester")
+sync_fn = app[app.index("function renderSync("):app.index("function iamRow(")]
+live_iam = [ln for ln in sync_fn.split("\n") if ln.strip().startswith("iamRow(") and '"live"' in ln]
+check(live_iam and all("operator" in ln and not re.search(r"time-boxed|Token Creator|okf-setup\b|okf-sync-writer|okf-runtime-reader", ln.split('"live"')[0]) for ln in live_iam), "every IAM row labelled live describes only what the operator ran (no SA grants, no time-boxed roles)")
+for fname, must_have, must_not in (
+    ("sql/setup_runtime_tables.sql", "Phase A requirement (NOT yet met)", "so the DDL is demonstrably run as okf-setup.\n--\n-- Run once"),
+    ("sql/attribution_two_key.sql", "all ran as the operator raincoatrun@gmail.com", "The tape shows user_email = okf-runtime-reader"),
+):
+    txt = (DEMO / fname).read_text("utf-8")
+    check(must_have in txt and must_not not in txt, "%s describes the SA identity as a future Phase A requirement" % fname)
+check("Seeded by okf-setup in" not in (DEMO / "sql/attribution_two_key.sql").read_text("utf-8"), "attribution_two_key.sql does not say okf-setup seeded the table")
+
 # ---- matrix ---------------------------------------------------------------------------------
 matrix = json.loads((DEMO / "matrix.json").read_text("utf-8"))
 rows = matrix["rows"]
@@ -211,7 +262,7 @@ for s in stories:
     check(all(u in (S_OBS, S_CON, S_OBS2) or ("e-" + u) in trace_ids for u in uuids), "story %d cites only real session or invocation ids: %s" % (s["n"], uuids))
     rest = re.sub(r"e-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", "", text)
     sids = re.findall(r"\b[0-9a-f]{8}\b", rest)
-    check(all(any(sid.startswith(x) for sid in (S_OBS, S_CON, S_OBS2)) for x in sids), "story %d cites only real session prefixes: %s" % (s["n"], sids))
+    check(all(any(sid.startswith(x) for sid in summary_ids) for x in sids), "story %d cites only real session prefixes (live per-session summary): %s" % (s["n"], sids))
     check(all(p in PUBS for p in re.findall(r"[0-9a-f]{8}", s["publication_prefix"])), "story %d cites only captured publication prefixes" % s["n"])
     check(all(1 <= b <= 6 for b in s["beats"]), "story %d beats in range" % s["n"])
 check(any("RFC text only" in s["status"] for s in stories if s["n"] == 5), "story 5 BigQuery side is RFC text only")
@@ -243,7 +294,13 @@ check(any(r["dataplexEntry"]["entrySource"]["displayName"] == "Customer revenue 
 jobs = load("bq_jobs_identity.json")
 check(jobs and all(j["user_email"] == jobs[0]["user_email"] for j in jobs), "every capture job ran as one identity (%s)" % (jobs[0]["user_email"] if jobs else "none"))
 jobids = {p.read_text().strip() for p in LIVE.glob("*.jobid")}
-check(jobids <= {j["job_id"] for j in jobs}, "every *.jobid is in bq_jobs_identity.json")
+shown = {}
+for f in LIVE.glob("bq_job_*.json"):   # `bq show -j` snapshots for jobs INFORMATION_SCHEMA had not surfaced yet
+    d = json.loads(f.read_text("utf-8"))
+    shown[d["jobReference"]["jobId"]] = d["user_email"]
+known = {j["job_id"] for j in jobs} | set(shown)
+check(jobids <= known, "every *.jobid is in bq_jobs_identity.json or a bq_job_*.json show snapshot: missing %s" % sorted(jobids - known))
+check(all(u == jobs[0]["user_email"] for u in shown.values()), "every bq show -j snapshot carries the same operator user_email")
 
 # ---- wiring ---------------------------------------------------------------------------------------
 check('href="./full-demo/"' in (RFC / "index.html").read_text("utf-8"), "rfc/index.html Prototype callout links ./full-demo/")

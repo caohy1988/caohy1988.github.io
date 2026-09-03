@@ -24,7 +24,9 @@
 --
 -- Verified 2026-09-03: with this configuration bq attempts the impersonation (it fails
 -- only because the SA does not exist yet), and each piped statement reaches query
--- validation. The tape shows user_email = okf-runtime-reader@… in INFORMATION_SCHEMA.JOBS.
+-- validation. Phase A requirement (NOT yet met): the tape must show
+-- user_email = okf-runtime-reader@… in INFORMATION_SCHEMA.JOBS. The checked-in captures
+-- (live/beat6_*.json, live/bq_jobs_identity.json) all ran as the operator raincoatrun@gmail.com.
 --
 -- Relations read (all in okf_rfc_demo):
 --   publications                 (publication_id, …, source)   -- owns NO context_ref column
@@ -74,7 +76,7 @@ ORDER BY band, session_id, tool;
 -- END STATEMENT 1
 
 -- STATEMENT 2 — Table (b): separately sourced evidence (not agent_events rows).
--- Seeded by okf-setup in sql/setup_runtime_tables.sql.
+-- Seeded by sql/setup_runtime_tables.sql (Phase A: as okf-setup; the 2026-09-03 capture: as the operator).
 SELECT source, context_ref, publication_id, note
 FROM `test-project-0728-467323.okf_rfc_demo.demo_evidence`
 ORDER BY source;

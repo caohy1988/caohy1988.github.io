@@ -1,0 +1,182 @@
+{
+  "configuration": {
+    "jobType": "QUERY",
+    "query": {
+      "destinationTable": {
+        "datasetId": "_a2ad6e7f28d11e225b0775d0d1ab5ae353edd75e",
+        "projectId": "test-project-0728-467323",
+        "tableId": "anon0763b720da536a6f8c70e3662a996cc863517d8c1e6b878de830ad70afa9dc42"
+      },
+      "priority": "INTERACTIVE",
+      "query": "-- Row and tool-call count per session in agent_events (read-only aggregate, no row pull).\n-- Substantiates \"212 rows, 4 sessions\" on the page; the page pulls three of the four sessions.\n--   bq query --use_legacy_sql=false --project_id=test-project-0728-467323 < sessions_summary.sql\nSELECT session_id, agent,\n       COUNT(*)                                  AS rows_in_table,\n       COUNTIF(event_type = 'TOOL_COMPLETED')    AS tool_completed,\n       MIN(timestamp)                            AS t0,\n       MAX(timestamp)                            AS t1\nFROM `test-project-0728-467323.okf_rfc_demo.agent_events`\nGROUP BY 1, 2\nORDER BY t0;\n",
+      "useLegacySql": false,
+      "writeDisposition": "WRITE_TRUNCATE"
+    }
+  },
+  "etag": "f1VRuY9EHkMqT25DxxyF0Q==",
+  "id": "test-project-0728-467323:US.okf_full_demo_sessions_summary_20260903T231025Z",
+  "jobCreationReason": {
+    "code": "REQUESTED"
+  },
+  "jobReference": {
+    "jobId": "okf_full_demo_sessions_summary_20260903T231025Z",
+    "location": "US",
+    "projectId": "test-project-0728-467323"
+  },
+  "kind": "bigquery#job",
+  "principal_subject": "user:raincoatrun@gmail.com",
+  "selfLink": "https://bigquery.googleapis.com/bigquery/v2/projects/test-project-0728-467323/jobs/okf_full_demo_sessions_summary_20260903T231025Z?location=US",
+  "statistics": {
+    "creationTime": "1788477028411",
+    "endTime": "1788477029200",
+    "finalExecutionDurationMs": "41",
+    "query": {
+      "billingTier": 1,
+      "cacheHit": false,
+      "estimatedBytesProcessed": "18083",
+      "metadataCacheStatistics": {
+        "tableMetadataCacheUsage": [
+          {
+            "explanation": "Table does not have CMETA.",
+            "tableReference": {
+              "datasetId": "okf_rfc_demo",
+              "projectId": "test-project-0728-467323",
+              "tableId": "agent_events"
+            },
+            "unusedReason": "OTHER_REASON"
+          }
+        ]
+      },
+      "queryInfo": {
+        "optimizationDetails": {
+          "optimizations": [
+            {
+              "enhanced_vectorization": "applied"
+            },
+            {
+              "short_query_optimization": "applied"
+            }
+          ]
+        }
+      },
+      "queryPlan": [
+        {
+          "completedParallelInputs": "2",
+          "computeMode": "BIGQUERY",
+          "computeMsAvg": "15",
+          "computeMsMax": "15",
+          "computeRatioAvg": 1,
+          "computeRatioMax": 1,
+          "endMs": "1788477028934",
+          "id": "0",
+          "name": "S00: Output",
+          "parallelInputs": "2",
+          "readMsAvg": "9",
+          "readMsMax": "9",
+          "readRatioAvg": 0.6,
+          "readRatioMax": 0.6,
+          "recordsRead": "212",
+          "recordsWritten": "4",
+          "shuffleOutputBytes": "412",
+          "shuffleOutputBytesSpilled": "0",
+          "slotMs": "35",
+          "startMs": "1788477028918",
+          "status": "COMPLETE",
+          "steps": [
+            {
+              "kind": "READ",
+              "substeps": [
+                "$1:timestamp, $2:event_type, $3:agent, $4:session_id",
+                "FROM test-project-0728-467323.okf_rfc_demo.agent_events"
+              ]
+            },
+            {
+              "kind": "SORT",
+              "substeps": [
+                "$12 ASC"
+              ]
+            },
+            {
+              "kind": "AGGREGATE",
+              "substeps": [
+                "GROUP BY $50 := $40, $51 := $41",
+                "$10 := SUM_OF_COUNTS($20)",
+                "$11 := SUM_OF_COUNTS($21)",
+                "$12 := MIN($22)",
+                "$13 := MAX($23)"
+              ]
+            },
+            {
+              "kind": "AGGREGATE",
+              "substeps": [
+                "GROUP BY $40 := $4, $41 := $3",
+                "$20 := COUNT_STAR()",
+                "$21 := COUNTIF($30)",
+                "$22 := MIN($1)",
+                "$23 := MAX($1)"
+              ]
+            },
+            {
+              "kind": "COMPUTE",
+              "substeps": [
+                "$30 := equal($2, 'TOOL_COMPLETED')"
+              ]
+            },
+            {
+              "kind": "WRITE",
+              "substeps": [
+                "$60, $61, $62, $63, $64, $65",
+                "TO __stage00_output"
+              ]
+            }
+          ],
+          "waitMsAvg": "3",
+          "waitMsMax": "3",
+          "waitRatioAvg": 0.2,
+          "waitRatioMax": 0.2,
+          "writeMsAvg": "3",
+          "writeMsMax": "3",
+          "writeRatioAvg": 0.2,
+          "writeRatioMax": 0.2
+        }
+      ],
+      "referencedTables": [
+        {
+          "datasetId": "okf_rfc_demo",
+          "projectId": "test-project-0728-467323",
+          "tableId": "agent_events"
+        }
+      ],
+      "statementType": "SELECT",
+      "timeline": [
+        {
+          "activeUnits": "0",
+          "completedUnits": "1",
+          "elapsedMs": "408",
+          "estimatedRunnableUnits": "0",
+          "pendingUnits": "0",
+          "totalSlotMs": "35"
+        },
+        {
+          "completedUnits": "2",
+          "elapsedMs": "357",
+          "estimatedRunnableUnits": "0",
+          "pendingUnits": "0",
+          "totalSlotMs": "35"
+        }
+      ],
+      "totalBytesBilled": "10485760",
+      "totalBytesProcessed": "18083",
+      "totalPartitionsProcessed": "3",
+      "totalSlotMs": "35",
+      "transferredBytes": "0"
+    },
+    "startTime": "1788477028592",
+    "totalBytesProcessed": "18083",
+    "totalSlotMs": "35"
+  },
+  "status": {
+    "state": "DONE"
+  },
+  "user_email": "raincoatrun@gmail.com"
+}

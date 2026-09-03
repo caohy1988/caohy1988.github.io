@@ -16,8 +16,9 @@
 --   unset CLOUDSDK_ACTIVE_CONFIG_NAME                                # back to the default config
 --   gcloud config configurations delete okf-setup --quiet             # after cleanup, when okf-setup is retired
 --
--- The tape shows the configuration name and the impersonated account in the bq job's
--- user_email (INFORMATION_SCHEMA.JOBS) so the DDL is demonstrably run as okf-setup.
+-- Phase A requirement (NOT yet met): the tape must show the configuration name and the
+-- impersonated account in the bq job's user_email (INFORMATION_SCHEMA.JOBS) so the DDL is
+-- demonstrably run as okf-setup. No such tape exists; okf-setup has not been created.
 --
 -- Run once on 2026-09-03 as the operator (raincoatrun@gmail.com, dataset OWNER) for the
 -- /rfc/full-demo/ capture: 11 tables + 1 view created, 3 + 3 + 2 rows seeded
