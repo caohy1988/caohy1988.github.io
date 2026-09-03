@@ -1,24 +1,22 @@
--- Beat 6 (Phase B): two-key attribution that can be implemented.
--- NOT runnable today: the runtime tables are created by okf-context setup in
--- Phase A. Committed now so the contract is concrete. Runs as okf-runtime-reader.
+-- Beat 6 (Phase B): two-key attribution, SELECT ONLY.
+-- Runs as okf-runtime-reader (dataset dataViewer + project jobUser). No DDL here:
+-- tables, the context_ref_resolution view and the seed MERGEs live in the
+-- setup-owned sql/setup_runtime_tables.sql, run once as okf-setup.
+-- Not runnable until Phase A setup has run. Committed so the contract is concrete.
 --
--- Relations (all in okf_rfc_demo):
---   publications                 (publication_id PK, snapshot_id, observation_id, committed_at, source)
---                                 source ∈ {'sync','seeded_pre_phase_a'}; owns NO context_ref column
---   context_ref_bindings         (context_ref PK, publication_id, bound_at)    -- Phase A on; never rebound
---   legacy_context_ref_bindings  (context_ref, publication_id, origin)          -- pre-Phase-A handles; may repeat a context_ref
---   demo_evidence                (source, context_ref, publication_id, note)    -- adapter tape, legacy Catalog description
+-- Two statements, run as TWO invocations so each result set is captured on its own:
+--   bq query --use_legacy_sql=false --project_id=test-project-0728-467323 \
+--     --impersonate_service_account=okf-runtime-reader@test-project-0728-467323.iam.gserviceaccount.com \
+--     "$(sed -n '/^-- STATEMENT 1/,/^-- END STATEMENT 1/p' attribution_two_key.sql)"
+--   … same with STATEMENT 2.
 --
--- One view over both binding tables. Legacy rows may bind one handle to several
--- publications; that is why events are matched on BOTH keys below.
-CREATE OR REPLACE VIEW `test-project-0728-467323.okf_rfc_demo.context_ref_resolution` AS
-SELECT context_ref, publication_id, 'phase_a' AS binding_source, CAST(NULL AS STRING) AS origin
-FROM `test-project-0728-467323.okf_rfc_demo.context_ref_bindings`
-UNION ALL
-SELECT context_ref, publication_id, 'legacy' AS binding_source, origin
-FROM `test-project-0728-467323.okf_rfc_demo.legacy_context_ref_bindings`;
-
--- Table (a): event-sourced attribution.
+-- Relations read (all in okf_rfc_demo):
+--   publications                 (publication_id, …, source)   -- owns NO context_ref column
+--   context_ref_resolution       VIEW = context_ref_bindings (phase_a) ∪ legacy_context_ref_bindings (legacy)
+--   demo_evidence                (source, context_ref, publication_id, note)
+--   agent_events                 (BQAA, observer-only)
+--
+-- STATEMENT 1 — Table (a): event-sourced attribution.
 -- Band 1: retrieve/lookup rows carry an event publication_id → two-key match, then publications by id.
 -- Band 2: the 13 okf_run_attested_computation rows carry context_ref but NULL publication →
 --         kept, attributed by handle only, labelled 'receipt_only'; never merged into band 1.
@@ -57,11 +55,11 @@ FROM ev
 WHERE ev.event_publication_id IS NULL                      -- expected: 13 rows, verdict UNVERIFIABLE
 GROUP BY 1,2,3,4,5
 ORDER BY band, session_id, tool;
+-- END STATEMENT 1
 
--- Table (b): separately sourced evidence (not agent_events rows).
--- Seeded by okf-setup in Phase A:
---   ('adapter_tape_pr474_476d37dc', 'okf:env-observe#674153c572f6', 'sha256:53bd1651…', 'same handle as observe sessions, different publication')
---   ('legacy_catalog_description',  'okf:env-demo#a25e1c0ccbca',    'sha256:a25e1c0c…', 'okf-derived-germany entrySource.description; no aspect')
+-- STATEMENT 2 — Table (b): separately sourced evidence (not agent_events rows).
+-- Seeded by okf-setup in sql/setup_runtime_tables.sql.
 SELECT source, context_ref, publication_id, note
 FROM `test-project-0728-467323.okf_rfc_demo.demo_evidence`
 ORDER BY source;
+-- END STATEMENT 2
