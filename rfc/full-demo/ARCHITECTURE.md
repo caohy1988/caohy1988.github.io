@@ -56,19 +56,25 @@ Colour key matches the RFC tokens: telemetry (purple), catalog (blue), runtime (
 | stamp | same → Knowledge Catalog (`catalogEditor` on the one EntryGroup) | `okf-context-runtime` aspect on owned entries; delete ledger-owned entries for removed concepts | `CATALOG_STAMPED` (or `CATALOG_PENDING` on partial failure; rerun completes without a new publication) |
 | status | same | nothing | lag = publications committed − publications stamped |
 
-A human bootstrap operator (the project Owner) holds time-boxed policy-owner roles, creates the
-service accounts and the custom search role, and makes every binding on tape. Setup (`okf-setup`,
-one-time, project-level type and group creation) creates the tables, the `context_ref_resolution`
-view and the seed rows (`sql/setup_runtime_tables.sql`), the `okf-context-runtime` AspectType, and
-runs the sample `setup.ts` for the shipped `okf-bundle` / `okf` types; afterwards every `okf-setup`
-role and its impersonation grant are revoked and two denial checks prove it. The sync writer additionally holds
-`entryTypeUser` on `okf-bundle` and `aspectTypeUser` on `okf` and `okf-context-runtime`. Readers
-(`okf-runtime-reader`) hold `dataViewer` on the dataset, `catalogViewer` on the EntryGroup, and a
-custom role with only `dataplex.projects.search` at project level for `searchEntries`. Positive and
-negative permission checks, including the boundary-probe EntryGroup, are listed in `spec.md` §1.3.
+Status on 2026-09-03 (PR 16): none of this section has run. The sync leg, the service accounts, the
+grants and the checks below are the Phase A contract, `RFC text only` on the page. What PR 16 did run,
+as the operator, is the shipped sample (`setup.ts` + `push.ts`, Catalog side only) and the runtime
+DDL + seeds; see `spec.md` §1.2 for the row-by-row status.
 
-Trigger options, in order of what the demo shows: manual CLI (demo), Cloud Run Job on Cloud
-Scheduler polling the EntryGroup `updateTime` (production default), CI step after `kcmd push`.
+In Phase A a human bootstrap operator (the project Owner) will hold time-boxed policy-owner roles, create
+the service accounts and the custom search role, and make every binding on tape (Phase A, not yet run). Setup (`okf-setup`,
+one-time, project-level type and group creation) will create the tables, the `context_ref_resolution`
+view and the seed rows (`sql/setup_runtime_tables.sql`), the `okf-context-runtime` AspectType, and
+run the sample `setup.ts` for the shipped `okf-bundle` / `okf` types; afterwards every `okf-setup`
+role and its impersonation grant must be revoked and two denial checks must show it. The sync writer will
+additionally hold `entryTypeUser` on `okf-bundle` and `aspectTypeUser` on `okf` and `okf-context-runtime`.
+Readers (`okf-runtime-reader`) will hold `dataViewer` on the dataset, `catalogViewer` on the EntryGroup,
+and a custom role with only `dataplex.projects.search` at project level for `searchEntries`. Positive and
+negative permission checks, including the boundary-probe EntryGroup, are specified in `spec.md` §1.3.
+
+Trigger options, in the order the demo would show them: manual CLI (the Phase A tape; not yet recorded),
+Cloud Run Job on Cloud Scheduler polling the EntryGroup `updateTime` (production default), CI step after
+`kcmd push`.
 
 ## Why not a built-in service, and what "managed" would need
 

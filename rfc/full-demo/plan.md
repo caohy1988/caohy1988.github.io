@@ -1,5 +1,10 @@
 # Plan — building the full-version demo
 
+> Status on 2026-09-03 (PR 16): Phase C (the page) shipped against live captures; Phase A has not started.
+> Every "on tape", "recorded", `PERMISSION_DENIED`, `BQ_COMMITTED`, `CATALOG_STAMPED` and `no-op` item below is a
+> future deliverable, and `/rfc/full-demo/` labels each one `RFC text only`. The only writes made for PR 16 were the
+> operator-run sample `setup.ts` + `push.ts` (Catalog) and `sql/setup_runtime_tables.sql` (DDL + seeds).
+
 Implement from this file after Haiyuan merges the plan PR. Repo `caohy1988/caohy1988.github.io`;
 syncer code lives in the RFC's `toolbox/okf-context` package (location per RFC §04; name is
 bikeshed) and is **not** part of this PR. Implementer: Fable 5.1. Reviewers: Codex + Kimi on

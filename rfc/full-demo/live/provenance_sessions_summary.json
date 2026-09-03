@@ -1,0 +1,30 @@
+{
+ "_purpose": "Provenance binding for the per-session summary capture: job id \u2194 executed query text \u2194 committed SQL file \u2194 result file. Source: `bq show -j --format=prettyjson <job_id>` on 2026-09-03. NOT an identity source: tools/check_full_demo.py takes user_email only from bq_jobs_identity.json (INFORMATION_SCHEMA.JOBS_BY_USER) and cross-checks this file against it.",
+ "job_id": "okf_full_demo_sessions_summary_20260903T231025Z",
+ "location": "US",
+ "project": "test-project-0728-467323",
+ "state": "DONE",
+ "statement_type": "SELECT",
+ "user_email_as_shown_by_bq_show": "raincoatrun@gmail.com",
+ "creation_time_ms": "1788477028411",
+ "end_time_ms": "1788477029200",
+ "total_bytes_processed": "18083",
+ "cache_hit": false,
+ "executed_query": "-- Row and tool-call count per session in agent_events (read-only aggregate, no row pull).\n-- Substantiates \"212 rows, 4 sessions\" on the page; the page pulls three of the four sessions.\n--   bq query --use_legacy_sql=false --project_id=test-project-0728-467323 < sessions_summary.sql\nSELECT session_id, agent,\n       COUNT(*)                                  AS rows_in_table,\n       COUNTIF(event_type = 'TOOL_COMPLETED')    AS tool_completed,\n       MIN(timestamp)                            AS t0,\n       MAX(timestamp)                            AS t1\nFROM `test-project-0728-467323.okf_rfc_demo.agent_events`\nGROUP BY 1, 2\nORDER BY t0;\n",
+ "executed_query_sha256_normalized": "14d0d789c2846a9d462fe9e42184781c9398abfe6f8999d437928161bd6c925b",
+ "sql_file": "sql/sessions_summary.sql",
+ "sql_file_sha256_normalized": "14d0d789c2846a9d462fe9e42184781c9398abfe6f8999d437928161bd6c925b",
+ "normalization": "strip `-- ` comments, collapse whitespace, strip trailing semicolon",
+ "result_file": "live/sessions_summary.json",
+ "result_rows": 4,
+ "result_columns": [
+  "agent",
+  "rows_in_table",
+  "session_id",
+  "t0",
+  "t1",
+  "tool_completed"
+ ],
+ "result_sha256": "555a5535f75c1e00f02304c875d2c845a33baa9b25e44b938db0234c48bf3715",
+ "consumer": "app.js FILES.summary \u2192 D.summary (D.tableRows, D.fourth) \u2192 ids strip 'not pulled' chip and '<n> in the table' status"
+}

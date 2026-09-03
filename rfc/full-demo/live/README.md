@@ -30,6 +30,7 @@ is the `INFORMATION_SCHEMA.JOBS_BY_USER` row set for every `okf_full_demo_%` job
 | `beat5_serve_stmt4.json` | STATEMENT 4, `publications` | 3 rows, all `seeded_pre_phase_a` |
 | `beat5_serve_stmt5.json` | STATEMENT 5, `context_ref_resolution` view | 3 legacy rows, 0 phase_a rows |
 | `bq_jobs_identity.json` | `INFORMATION_SCHEMA.JOBS_BY_USER` for `okf_full_demo_%` | every row `user_email = raincoatrun@gmail.com` |
+| `provenance_sessions_summary.json` | `bq show -j` of the summary job: job id, executed query text, normalized SHA-256 of that text and of `sql/sessions_summary.sql`, result file hash and columns | binds job ↔ query ↔ SQL file ↔ result; **not** an identity source (identity comes only from `bq_jobs_identity.json`) |
 
 ## Knowledge Catalog (Dataplex Universal Catalog), `us-central1`
 

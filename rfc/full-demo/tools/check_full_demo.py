@@ -299,14 +299,33 @@ check(jobs and all(j["user_email"] == jobs[0]["user_email"] for j in jobs), "eve
 jobids = {p.read_text().strip() for p in LIVE.glob("*.jobid")}
 inventory = {j["job_id"]: j for j in jobs}
 check(jobids <= set(inventory), "every *.jobid is in bq_jobs_identity.json (no fallback source): missing %s" % sorted(jobids - set(inventory)))
-check(not list(LIVE.glob("bq_job_*.json")), "no bq show -j fallback snapshots remain; the inventory file is the only identity source")
-# the per-session summary job is bound end to end: job id ↔ inventory row ↔ SQL file ↔ result ↔ page claim
+check(not list(LIVE.glob("bq_job_*.json")), "no bq show -j identity-fallback snapshots remain; the inventory file is the only identity source (provenance_*.json binds query text only)")
+# the per-session summary job is bound end to end: job id ↔ inventory row (DONE, SELECT, operator) ↔ executed
+# query text (bq show -j, kept in provenance_sessions_summary.json) ↔ committed SQL file ↔ result file ↔ app consumer.
+# The provenance file is NOT an identity source: user_email comes only from the inventory and is cross-checked.
+import hashlib
+def norm_sql(text):
+    return re.sub(r"\s+", " ", re.sub(r"--[^\n]*", "", text)).strip().rstrip(";")
 summary_job = (LIVE / "sessions_summary.jobid").read_text().strip()
 srow = inventory.get(summary_job)
-check(bool(srow) and srow["statement_type"] == "SELECT" and srow["user_email"] == jobs[0]["user_email"], "sessions_summary job %s is in the inventory as a SELECT by the operator" % summary_job)
-check((DEMO / "sql/sessions_summary.sql").exists() and "GROUP BY 1, 2" in (DEMO / "sql/sessions_summary.sql").read_text("utf-8"), "sql/sessions_summary.sql exists and is the aggregate the summary snapshot came from")
-check("sessions_summary" in app and "summary:" in app, "app.js loads sessions_summary.json and renders the fourth session from it")
-check("sessions_summary.json" in (LIVE / "README.md").read_text("utf-8"), "live/README.md lists sessions_summary.json")
+check(bool(srow) and srow["state"] == "DONE" and srow["statement_type"] == "SELECT" and srow["user_email"] == jobs[0]["user_email"],
+      "inventory row for %s is DONE + SELECT + operator" % summary_job)
+prov = load("provenance_sessions_summary.json")
+check(prov["job_id"] == summary_job and prov["state"] == "DONE" and prov["statement_type"] == "SELECT", "provenance artifact names the same job id, DONE, SELECT")
+check(prov["user_email_as_shown_by_bq_show"] == (srow or {}).get("user_email"), "provenance artifact's user_email agrees with the inventory row (cross-check, not a fallback)")
+sql_text = (DEMO / "sql/sessions_summary.sql").read_text("utf-8")
+check(norm_sql(prov["executed_query"]) == norm_sql(sql_text), "normalized executed query text == normalized sql/sessions_summary.sql")
+check(hashlib.sha256(norm_sql(sql_text).encode()).hexdigest() == prov["sql_file_sha256_normalized"] == prov["executed_query_sha256_normalized"], "normalized SHA-256 of the SQL file matches the executed query hash recorded in the artifact")
+check(re.search(r"FROM `test-project-0728-467323\.okf_rfc_demo\.agent_events`", sql_text) and "COUNT(*)" in sql_text and "TOOL_COMPLETED" in sql_text and "GROUP BY 1, 2" in sql_text,
+      "the committed summary SQL is the per-session aggregate over agent_events (COUNT(*), TOOL_COMPLETED, GROUP BY 1, 2)")
+check(hashlib.sha256((LIVE / "sessions_summary.json").read_bytes()).hexdigest() == prov["result_sha256"], "sessions_summary.json bytes match the result hash in the artifact")
+expected_cols = {"session_id", "agent", "rows_in_table", "tool_completed", "t0", "t1"}
+check(set(prov["result_columns"]) == expected_cols and all(set(r) == expected_cols for r in summary) and len(summary) == prov["result_rows"] == 4,
+      "result schema (6 columns) and row count (4) bound between the artifact, the result file and the SELECT list")
+check(all(re.search(r"\b%s\b" % c, sql_text) for c in ("session_id", "agent", "rows_in_table", "tool_completed", "t0", "t1")), "every result column is named in the committed SELECT list")
+check("summary: \"live/sessions_summary.json\"" in app and "D.summary" in app and "rows_in_table" in app and "tool_completed" in app and "D.fourth" in app and "D.tableRows" in app,
+      "app.js consumes sessions_summary.json through D.summary (rows_in_table, tool_completed → D.tableRows, D.fourth)")
+check("provenance_sessions_summary.json" in (LIVE / "README.md").read_text("utf-8") and "sessions_summary.json" in (LIVE / "README.md").read_text("utf-8"), "live/README.md lists the summary result and its provenance artifact")
 
 # ---- spec.md status honesty (Codex round 2) -------------------------------------------------------------
 spec = (DEMO / "spec.md").read_text("utf-8")
@@ -318,6 +337,28 @@ check("Source (all recorded; page is static)" not in spec and "| Captured on PR 
 check("Phase A; not yet met" in spec, "spec.md §4 marks the bootstrap/negative-check criterion as Phase A, not yet met")
 arch = (DEMO / "ARCHITECTURE.md").read_text("utf-8")
 check("not yet shown" in arch, "ARCHITECTURE.md marks FAIL_STALE / history as not yet shown")
+
+# ---- executed-language scan (Codex round 3): deferred Phase A must read as future / RFC text only -------------
+EXECUTED = [r"recorded on tape", r"on tape under", r"\bon tape\b", r"\bthe tape shows\b", r"\bthe tape demonstrates\b",
+            r"\bdemonstrated, not asserted\b", r"\bis demonstrated\b", r"\bprove[sd]? (the|that|it)\b", r"\bdenial checks prove\b",
+            r"\bmakes every binding\b", r"\bevery binding call is made\b", r"\bcreates the (three )?service accounts\b", r"\bare revoked\b",
+            r"\beach (binding )?command (is )?recorded\b", r"\b(is|are) recorded (on|in) the tape\b", r"returned `?PERMISSION_DENIED",
+            r"\bran as `?okf-(setup|sync-writer|runtime-reader)", r"\bexercised once on tape\b", r"\bimpersonated `?user_email`? (from|after)\b",
+            r"\bidentity is demonstrated\b", r"\bshows? the impersonated\b"]
+SCOPED = [r"Phase A", r"not done", r"Not done", r"not yet", r"NOT yet", r"RFC text only", r"future", r"\bmust\b", r"\bwill\b", r"\bwould\b",
+          r"\bshall\b", r"to be recorded", r"expected", r"target", r"planned", r"not run", r"none (was|were) run", r"not created",
+          r"has not run", r"none happened", r"neither happened", r"prior", r"never"]
+scan_files = ["spec.md", "ARCHITECTURE.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json"]
+offenders = []
+for fname in scan_files:
+    for i, ln in enumerate((DEMO / fname).read_text("utf-8").split("\n"), 1):
+        if any(re.search(rx, ln) for rx in EXECUTED) and not any(re.search(rx, ln) for rx in SCOPED):
+            offenders.append("%s:%d: %s" % (fname, i, ln.strip()[:110]))
+check(not offenders, "no line narrates deferred Phase A (SA create/revoke, bindings on tape, denials proved, outcomes demonstrated) as executed without a future / not-done / RFC-text-only scope:\n      " + "\n      ".join(offenders[:12]))
+check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")
+check("Status on 2026-09-03 (PR 16): none of this section has run" in arch, "ARCHITECTURE.md sync-leg prose carries the not-run scope note")
+plan_md = (DEMO / "plan.md").read_text("utf-8")
+check("Status on 2026-09-03 (PR 16)" in plan_md and "Phase A has not started" in plan_md, "plan.md carries a status note that Phase A has not started")
 
 # ---- wiring ---------------------------------------------------------------------------------------
 check('href="./full-demo/"' in (RFC / "index.html").read_text("utf-8"), "rfc/index.html Prototype callout links ./full-demo/")

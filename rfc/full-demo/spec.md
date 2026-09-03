@@ -76,6 +76,12 @@ the page as `RFC text only`, and `tools/check_full_demo.py` asserts those labels
 
 ### 1.3 IAM contract for the bridge (normative, resource-specific, bootstrappable)
 
+**Scope.** This section is the Phase A contract, written as requirements. Nothing in §1.3 has been executed on PR 16: no
+service account, custom role, table-level grant, boundary EntryGroup, positive check or negative check exists, and no tape
+has been recorded. Every capture behind `/rfc/full-demo/` ran as the operator (`live/bq_jobs_identity.json`). Where a
+sentence below says what the tape "must" show, that is the acceptance criterion for Phase A, labelled `RFC text only`
+on the page until it is met.
+
 Four principals in `test-project-0728-467323`: one human **bootstrap operator** and three service
 accounts. Every grant below names the resource it is bound to; nothing is granted at a wider scope
 than the row says. Role and permission facts are from the Dataplex IAM roles page
@@ -88,11 +94,11 @@ AspectTypes in `roles/dataplex.aspectTypeOwner`. BigQuery grants use table-level
 
 **Who installs the boundary.** Service accounts cannot grant themselves anything, and
 `roles/iam.serviceAccountAdmin` cannot create custom roles, edit project IAM, or set Dataplex IAM.
-So every binding call is made by the **bootstrap operator**: the human project Owner account that
-already runs `gcloud` in this project. That account holds, for the duration of setup only, the exact
-policy-owner roles below, and each binding command is recorded on tape under that identity. After
-setup the operator keeps only what the demo needs at run time (impersonation of the sync writer and
-the reader).
+So every binding call must be made by the **bootstrap operator**: the human project Owner account that
+already runs `gcloud` in this project. In Phase A that account will hold, for the duration of setup only, the exact
+policy-owner roles below, and each binding command must be recorded on tape under that identity. After
+setup the operator must keep only what the demo needs at run time (impersonation of the sync writer and
+the reader). None of these bindings exists yet (PR 16 status: not done).
 
 | Principal | Resource | Grant | Why | Lifetime |
 |---|---|---|---|---|
@@ -126,12 +132,13 @@ impersonation flag of its own (bq 2.1.28 rejects `--impersonate_service_account`
 `gcloud` commands may also pass `--impersonate-service-account` explicitly. Every SQL statement is
 piped over stdin, never passed as a positional argument. Impersonation requires
 `roles/iam.serviceAccountTokenCreator` granted **on each service account resource** to the operator,
-one binding per SA. The tape shows the active configuration name before each step and the
-impersonated `user_email` from `INFORMATION_SCHEMA.JOBS` after each BigQuery step, so the identity
-is demonstrated, not asserted. The Cloud Run Job runs as the sync writer directly (no
-impersonation). No identity is granted to the job other than the sync writer.
+one binding per SA. The Phase A tape must show the active configuration name before each step and the
+impersonated `user_email` from `INFORMATION_SCHEMA.JOBS` after each BigQuery step (Phase A, not yet run), so that the identity
+will be demonstrated rather than asserted; today the only `user_email` on record is the operator's. The Cloud
+Run Job will run as the sync writer directly (no impersonation). No identity is to be granted to the job other
+than the sync writer.
 
-**Setup order on tape** (each command recorded under the identity that runs it):
+**Setup order for the Phase A tape** (each command to be recorded under the identity that runs it; not yet run):
 
 1. Operator: create SAs; create `okfCatalogSearch`; bind setup roles; bind Token Creator on `okf-setup`.
 2. `okf-setup` (isolated configuration `okf-setup`): sample `setup.ts` (shipped `okf-bundle`, `okf`); `aspect-types create okf-context-runtime`; create EntryGroup `okf-rfc-demo-boundary` and one disposable entry `boundary-probe` of type `okf-bundle` in it; `sql/setup_runtime_tables.sql` piped to `bq query` (tables, view, seed `MERGE`s).
@@ -139,22 +146,22 @@ impersonation). No identity is granted to the job other than the sync writer.
 4. Positive checks 1–3 and negative checks 1–5.
 5. Operator: revoke every `okf-setup` role and the dataset `dataOwner`; run check 6; revoke Token Creator on `okf-setup`; run check 7; delete EntryGroup `okf-rfc-demo-boundary`; revoke the operator's own setup-only roles.
 
-**Positive checks** (each allowed operation exercised once on tape, expected `OK`):
+**Positive checks** (Phase A, not yet run; each allowed operation to be exercised once on tape, expected `OK`):
 
-1. `okf-setup`: `aspect-types create okf-context-runtime`; `entries patch` on `okf-rfc-demo-boundary/entries/boundary-probe` (proves the probe is patchable, so check 2 below fails only on IAM); `sql/setup_runtime_tables.sql` piped to `bq query` under configuration `okf-setup`.
+1. `okf-setup`: `aspect-types create okf-context-runtime`; `entries patch` on `okf-rfc-demo-boundary/entries/boundary-probe` (expected `OK`, so that negative check 2 below can fail only on IAM); `sql/setup_runtime_tables.sql` piped to `bq query` under configuration `okf-setup`.
 2. `okf-sync-writer-okf-rfc-demo`: `entries create` of type `okf-bundle` with the `okf` aspect in `okf-rfc-demo`; `entries patch` adding `okf-context-runtime`; `MERGE` into `publications`, `INSERT` into `deployment_heads`; `entries delete` of a ledger-owned entry.
 3. `okf-runtime-reader`: `entries get --view=ALL`; `lookupContext` on one entry; `searchEntries` with `aspect:…okf.okf_type=metric`; the two marked `SELECT`s in `sql/attribution_two_key.sql`, each piped to `bq query` as its own invocation under configuration `okf-reader`.
 
-**Negative checks** (seven checks, nine real API calls, each call expected `PERMISSION_DENIED`,
-recorded on tape and asserted by the checker; check 6 is three calls):
+**Negative checks** (Phase A, not yet run: seven checks, nine real API calls, each call expected `PERMISSION_DENIED`,
+to be recorded on tape and asserted by the checker; check 6 is three calls):
 
 1. `okf-sync-writer-okf-rfc-demo`: `SELECT COUNT(*) FROM agent_events` → `PERMISSION_DENIED` (no dataset grant, no table grant).
 2. `okf-sync-writer-okf-rfc-demo`: the **same** `entries patch` on `okf-rfc-demo-boundary/entries/boundary-probe` that `okf-setup` just ran successfully → `PERMISSION_DENIED`. Custom group, existing user-created entry, identical request body; the only variable is the missing cross-group grant.
 3. `okf-sync-writer-okf-rfc-demo`: `aspect-types create okf-context-runtime-2` → `PERMISSION_DENIED` (no project-level type creation).
 4. `okf-runtime-reader`: `entries patch` on a stamped entry → `PERMISSION_DENIED`.
 5. `okf-runtime-reader`: `INSERT INTO deployment_heads` → `PERMISSION_DENIED`.
-6. Post-cleanup, `okf-setup` (still impersonable, roles revoked), three calls: (6a) `aspect-types update okf --description=x`, (6b) `aspect-types delete okf-context-runtime`, (6c) `aspect-types set-iam-policy okf` → each `PERMISSION_DENIED`. Proves the project-wide AspectType authority is gone.
-7. Post-cleanup, operator (default configuration): `gcloud auth print-access-token --impersonate-service-account=okf-setup@…` → `PERMISSION_DENIED` on `generateAccessToken`. Proves the impersonation path is closed; the `okf-setup` gcloud configuration is then deleted.
+6. Post-cleanup, `okf-setup` (still impersonable, roles revoked), three calls: (6a) `aspect-types update okf --description=x`, (6b) `aspect-types delete okf-context-runtime`, (6c) `aspect-types set-iam-policy okf` → each expected `PERMISSION_DENIED`, which would show the project-wide AspectType authority is gone.
+7. Post-cleanup, operator (default configuration): `gcloud auth print-access-token --impersonate-service-account=okf-setup@…` → expected `PERMISSION_DENIED` on `generateAccessToken`, which would show the impersonation path is closed; the `okf-setup` gcloud configuration is then to be deleted.
 
 What this buys and what it does not: the table set, the EntryGroup, and the type resources are the
 enforceable boundary. Inside one EntryGroup, `catalogEditor` can delete any entry, so the ownership
