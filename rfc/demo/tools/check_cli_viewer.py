@@ -23,6 +23,7 @@ Usage: python3 rfc/demo/tools/check_cli_viewer.py   (exit 0 on pass)
 """
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -130,13 +131,17 @@ for line in ("SESSION " + SESSION, "TRACE " + TRACE, "TABLE " + TABLE, "MODEL " 
              "PUBLICATION_ID " + PUBLICATION, "FILES 8", "RECEIPT UNVERIFIABLE rcpt-observe-noexec"):
     check(line in tx, "transcript has: " + line[:60] + ("…" if len(line) > 60 else ""))
 check("run.py --lookup 'okf:env-observe#674153c572f6'" in tx, "transcript shows the lookup command for " + CONTEXT_REF)
-check("FAIL_CLOSED" in tx and "okf:env-junk#deadbeef" in tx and "# exit 2" in tx, "transcript shows FAIL_CLOSED for the junk ref with exit 2")
+check("FAIL_CLOSED" in tx and "okf:env-junk#deadbeef" in tx and "exit 2" in tx, "transcript shows FAIL_CLOSED for the junk ref with exit 2")
+check("expected FAIL_CLOSED exit 2" in tx and "not a crashed demo" in tx, "transcript labels junk-ref exit 2 as expected fail-closed, not a crash")
+check("180 events" in tx and "useful OKF" in tx and "Active-customer revenue" in tx, "transcript is pedagogical: 180 events + useful OKF titles, not a hash dump")
+check("an agent later resolves context_ref" in tx, "transcript comments the LOOKUP beat")
 check("476d37dc9d4210a335c2f77e78003f6a5ebe2878" in tx and "do not merge" in tx, "transcript pins PR 474 HEAD and says do not merge")
 for name in ("okf-bqaa-cli.cast", "okf-bqaa-cli.gif"):
     check((CLI / name).exists(), "cli/%s present" % name)
 check((DEMO / "okf-bqaa-cli.mp4").exists(), "okf-bqaa-cli.mp4 present (live-adapter proof)")
+check((DEMO / "okf-bqaa-cli-poster.png").exists(), "okf-bqaa-cli-poster.png present (successful lookup JSON frame)")
 cast_head = (CLI / "okf-bqaa-cli.cast").read_text("utf-8").splitlines()[0]
-check('"version": 2' in cast_head and "live-adapter proof" in cast_head, "cast is asciinema v2 titled live-adapter proof")
+check(('"version": 2' in cast_head or '"version":2' in cast_head) and "live-adapter proof" in cast_head, "cast is asciinema v2 titled live-adapter proof")
 
 # ---- page ----------------------------------------------------------------------
 html = (DEMO / "index.html").read_text("utf-8")
@@ -155,6 +160,11 @@ for s in PRIOR_CONSUME + GERMANY:
 check("computed in-browser" not in html and "computed in-browser" not in app, 'no "computed in-browser" claim in index.html / app.js')
 check("pinned from CLI" in html, "derived identity row is labelled pinned from CLI")
 check('src="okf-bqaa-cli.mp4"' in html, "walkthrough embeds okf-bqaa-cli.mp4")
+check('poster="okf-bqaa-cli-poster.png"' in html, "video poster is the successful lookup PNG, not an empty first frame")
+check('preload="metadata"' in html, "video preload=metadata")
+check("180 live BQAA" in html and "derived OKF bundle" in html, "caption has OBSERVE + ADAPT sentences")
+check("resolves" in html and "context_ref" in html, "caption has LOOKUP sentence")
+check("fail-closed proof" in html or "junk-ref exit 2" in html, "caption says junk-ref exit 2 is fail-closed proof")
 m = re.search(r"okf-bqaa-e2e\.mp4", html)
 check(m is not None and PRIOR_LABEL.search(html[max(0, m.start() - 600):m.start()]) is not None,
       "okf-bqaa-e2e.mp4 is labelled prior fixture clip")
@@ -176,6 +186,40 @@ for s in ("live/observe/live.json", "live/observe/live_identities.json", "live/o
     check(s in app, "app.js loads " + s)
 check(re.search(r"fetch\(\s*[\"']https?://", app) is None, "app.js makes no cross-origin fetch()")
 check("FAIL_CLOSED" in app and "okf:env-junk#deadbeef" in app, "app.js shows the fail-closed junk-ref tape")
+check("Object.hasOwn(" in app, "app.js localLookup uses Object.hasOwn (own-key fail-closed)")
+check("ref in map" not in app, "app.js does not use `ref in map` (would accept constructor/toString/__proto__)")
+
+# Hermetic: execute the committed localLookup against mapping.json.
+# Python dict membership would not catch the JS `in` prototype leak, so this is node.
+m_lookup = re.search(r"function localLookup\(ref\) \{[\s\S]*?\n  \}", app)
+check(m_lookup is not None, "app.js defines localLookup")
+if m_lookup is not None:
+    node = (
+        "const fs = require('fs');\n"
+        "const D = { mapping: JSON.parse(fs.readFileSync(%s, 'utf8')) };\n"
+        % json.dumps(str(OBS / "mapping.json"))
+        + m_lookup.group(0)
+        + """
+const proto = ['constructor', 'toString', '__proto__'];
+for (const k of proto) {
+  const r = localLookup(k);
+  if (!r || r.ok || r.exit !== 2) {
+    console.error('prototype key did not fail closed:', k, r);
+    process.exit(1);
+  }
+}
+const junk = localLookup('okf:env-junk#deadbeef');
+if (!junk || junk.ok || junk.exit !== 2) { console.error('junk ref did not fail closed', junk); process.exit(1); }
+const ok = localLookup('okf:env-observe#674153c572f6');
+if (!ok || !ok.ok || ok.exit !== 0 || !String((ok.result || {}).publication_id).startsWith('sha256:53bd1651')) {
+  console.error('bound ref failed', ok); process.exit(1);
+}
+process.exit(0);
+"""
+    )
+    r = subprocess.run(["node", "-e", node], capture_output=True, text=True)
+    check(r.returncode == 0, "node hermetic: constructor/toString/__proto__ fail closed"
+          + ("" if r.returncode == 0 else " (%s %s)" % (r.stderr.strip(), r.stdout.strip())))
 
 for p in (DEMO / "index.html", DEMO / "app.js", DEMO / "README.md", DEMO / "WALKTHROUGH.md", OBS / "snapshot.json", CLI / "okf-bqaa-cli-transcript.txt"):
     check("gemini-2.5" not in p.read_text("utf-8"), "no gemini-2.5 in " + str(p.relative_to(DEMO)))
