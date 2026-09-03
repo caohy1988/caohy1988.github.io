@@ -149,11 +149,16 @@ head or refuse a stale request.
 
 **What BigQuery deployment changes, and the attribution contract.** From Phase A on, a
 `context_ref` is bound to exactly one `publication_id` and never rebound; a new publication mints a
-new handle. The three pre-Phase-A publications are seeded into `publications` with a
-`seeded_pre_phase_a` source column. Beat 6 joins `agent_events` to those rows on **both** the
-event-carried `context_ref` and the event-carried `publication_id`, so the legacy double binding of
-`okf:env-observe#674153c572f6` cannot duplicate or misattribute a row; the adapter and Catalog
-evidence sit in their own table with a source column.
+new handle. The three pre-Phase-A publications are seeded into `publications` (keyed by
+`publication_id` only; it owns no `context_ref` column) with a `seeded_pre_phase_a` source. The
+legacy handles go into `legacy_context_ref_bindings`, and one view, `context_ref_resolution`,
+unions legacy and Phase-A bindings. Beat 6 matches each event on **both** its event-carried
+`context_ref` and its event-carried `publication_id` against that view, then joins `publications`
+by `publication_id`. The 13 `okf_run_attested_computation` rows carry a `context_ref` but a NULL
+publication; they are kept in a separate "receipt-only" band, attributed via the handle alone and
+labelled as such, never merged into the publication rows. So the legacy double binding of
+`okf:env-observe#674153c572f6` cannot duplicate or misattribute a row. The adapter-tape and
+legacy-Catalog rows are seeded into `demo_evidence` with a source column and shown as a second table.
 
 **Value proposition.** "Which version did the agent use" becomes a query, not an incident review,
 and the demo is honest that the legacy handle was bound twice before the contract existed.

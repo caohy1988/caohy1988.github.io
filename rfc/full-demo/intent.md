@@ -1,4 +1,4 @@
-# Intent — the full-version OKF demo (KC → BQ sync, KC gaps, real customer stories)
+# Intent — the full-version OKF demo (bundle → BigQuery → Catalog-stamp sync, KC gaps, real customer stories)
 
 Status: plan only, from Haiyuan's ask of 2026-09-03. No syncer code, no re-recording, no
 SDK change in this PR. Haiyuan merges; Codex + Kimi review on GitHub after the PR URL exists.

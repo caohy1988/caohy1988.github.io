@@ -1,10 +1,10 @@
-# Architecture — KC → BQ sync recommendation and the Observe → Adapt → Project → Consume flow
+# Architecture — bundle → BigQuery commit → Catalog stamp (v1 sync) and the Observe → Adapt → Project → Consume flow
 
 Recommendation: **hybrid (option C), external CLI in v1**. Knowledge Catalog is the distribution
 and discovery projection written by `kcmd push`. BigQuery is the serving authority. The sync leg is
 `okf-context sync`, an external CLI whose v1 direction is **bundle → BigQuery commit → Catalog
-stamp**. A Catalog → BigQuery import (`sync --from-catalog`) is future, lossy, and stubbed; it is
-not v1. Decisions, evidence, and the IAM contract are in `spec.md` §1.
+stamp**. The only place the words "Catalog → BigQuery" apply is the future importer
+(`sync --from-catalog`), which is lossy, stubbed, and not v1. Decisions, evidence, and the IAM contract are in `spec.md` §1.
 
 ## One diagram
 
@@ -21,7 +21,7 @@ flowchart LR
   subgraph PROJECT["3 · Project"]
     direction TB
     B1 -->|"kcmd push (shipped, Catalog side only)<br/>identity: catalogEditor on EntryGroup"| C1["Knowledge Catalog<br/>EntryGroup okf-rfc-demo<br/>okf-bundle entries + okf aspect<br/>overview bodies · IAM cascade"]
-    B1 -->|"okf-context sync  ← NEW, external CLI<br/>identity: okf-sync-writer (dataset + EntryGroup only)"| C2[("BigQuery runtime<br/>publications · deployments<br/>deployment_heads(+history)<br/>concept_versions · membership<br/>context_ref_bindings (immutable)<br/>catalog_ownership ledger")]
+    B1 -->|"okf-context sync  ← NEW, external CLI<br/>identity: okf-sync-writer (nine tables + one EntryGroup + type use)"| C2[("BigQuery runtime<br/>publications · deployments<br/>deployment_heads(+history)<br/>concept_versions · membership<br/>context_ref_bindings (immutable)<br/>legacy_context_ref_bindings · demo_evidence<br/>view context_ref_resolution<br/>catalog_ownership ledger")]
     C2 -->|"stamp after BQ_COMMITTED<br/>okf-context-runtime aspect<br/>{publication_id, published_snapshot_id, managed_by_*}"| C1
     C1 -.->|"FUTURE, not v1:<br/>sync --from-catalog (lossy import, stubbed)"| C2
   end
@@ -34,7 +34,7 @@ flowchart LR
     D2 -->|BQAA| A2
   end
 
-  A2 -->|"SQL join on context_ref AND publication_id<br/>(beat 6)"| C2
+  A2 -->|"beat 6: match on event context_ref AND<br/>event publication_id via context_ref_resolution view,<br/>then join publications by publication_id"| C2
 
   classDef tel fill:#EFE7FA,stroke:#7B5EA7,color:#2B1E45
   classDef cat fill:#E6F1FB,stroke:#3A6EA5,color:#16233B
@@ -52,14 +52,17 @@ Colour key matches the RFC tokens: telemetry (purple), catalog (blue), runtime (
 |---|---|---|---|
 | validate · observe · snapshot | `okf-context sync` as `okf-sync-writer-<deployment>` | nothing | identities computed |
 | plan | same | nothing | diff vs `deployment_heads` printed; absence = delete |
-| commit | same → BigQuery (`dataEditor` on the one dataset) | staged rows under `sync_id`, then `publications`, `deployment_heads`, `deployment_heads_history`, `context_ref_bindings` (append-only, one ref → one publication, never rebound), ledger | `BQ_COMMITTED` |
+| commit | same → BigQuery (table-level `dataEditor` on the nine runtime tables; no dataset grant) | staged rows under `sync_id`, then `publications`, `deployment_heads`, `deployment_heads_history`, `context_ref_bindings` (append-only, one ref → one publication, never rebound), ledger | `BQ_COMMITTED` |
 | stamp | same → Knowledge Catalog (`catalogEditor` on the one EntryGroup) | `okf-context-runtime` aspect on owned entries; delete ledger-owned entries for removed concepts | `CATALOG_STAMPED` (or `CATALOG_PENDING` on partial failure; rerun completes without a new publication) |
 | status | same | nothing | lag = publications committed − publications stamped |
 
-Setup (`okf-setup`, one-time) creates the dataset tables, the `okf-context-runtime` AspectType, and
-runs the sample `setup.ts` for the shipped `okf-bundle` / `okf` types. Readers (`okf-runtime-reader`)
-hold `dataViewer` on the dataset and `catalogViewer` on the EntryGroup and nothing else. Negative
-permission checks are listed in `spec.md` §1.3.
+Setup (`okf-setup`, one-time, project-level type and group creation, time-boxed) creates the
+tables and the `context_ref_resolution` view, the `okf-context-runtime` AspectType, and runs the
+sample `setup.ts` for the shipped `okf-bundle` / `okf` types. The sync writer additionally holds
+`entryTypeUser` on `okf-bundle` and `aspectTypeUser` on `okf` and `okf-context-runtime`. Readers
+(`okf-runtime-reader`) hold `dataViewer` on the dataset, `catalogViewer` on the EntryGroup, and a
+custom role with only `dataplex.projects.search` at project level for `searchEntries`. Positive and
+negative permission checks are listed in `spec.md` §1.3.
 
 Trigger options, in order of what the demo shows: manual CLI (demo), Cloud Run Job on Cloud
 Scheduler polling the EntryGroup `updateTime` (production default), CI step after `kcmd push`.
@@ -87,5 +90,5 @@ Scheduler polling the EntryGroup `updateTime` (production default), CI step afte
 | What was the number at time t? | no | future executor/attester | `RFC text only` |
 | Is this `context_ref` stale? | no | pin-or-fail-stale | beat 5 |
 | Was the number attested? | no | `verdict` + `receipt_id` (always `UNVERIFIABLE` in demo) | beat 5 |
-| Which sessions used which publication? | no | SQL join on `context_ref` and `publication_id` | beat 6 |
+| Which sessions used which publication? | no | two-key match through the `context_ref_resolution` view, then `publications` by id | beat 6 |
 | Who may read the policy body? | EntryGroup IAM (coarse, real) | caller-delegated per deployment | `RFC text only` |
