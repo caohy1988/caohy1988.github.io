@@ -13,11 +13,32 @@ recorded the receipt as unproven. Derived OKF in Knowledge Catalog is how the
 next agent finds that: it uses the current metric, skips legacy, and reports
 the number as unproven.
 
+## What this demo is asking
+
+Three readings are possible and only one is right. Are we trusting what is
+in BQAA? Are we asking a human-in-the-loop or customer sentiment to decide
+what to promote? Or are we adding context the agent obtained via the hard
+path into OKF so it is available for easy discovery? **The third.**
+
+- **Yes:** hard-path agent context (ranked `Active-customer revenue`, excluded
+  the legacy metric, receipt unproven) was observed by BQAA; one adapter turn
+  projects it into derived OKF so the next agent discovers it via `context_ref`
+  instead of re-earning it or picking the dead metric.
+- **Not** trusting BQAA as knowledge or truth. BQAA is observer-only; telemetry
+  is not the authored bundle and not a truth score.
+- **Not** human-in-the-loop promotion or customer-sentiment ranking of what to
+  promote. This slice does not pick winners that way.
+- Trust here means **process integrity of what was observed**: opaque IDs,
+  fail-closed lookup, no overclaim. Not the number (the receipt stays
+  `UNVERIFIABLE`), not BQAA as a second wiki.
+
 ## Four beats
 
 1. **Ask.** The question, as recorded in the trace, and the two traps: the
    dead metric (`Customer revenue (legacy)`, superseded, out of force since
-   2026-06-20) and over-claiming trust (no sanctioned computation ran).
+   2026-06-20) and over-claiming trust (no sanctioned computation ran). Beat 1
+   also answers the three-way question above: hard-path context → derived OKF
+   for discovery; not HITL or sentiment promotion; not BQAA as truth.
 2. **Observe.** What the live trace saw: rank 1 `Active-customer revenue`;
    `Customer revenue (legacy)` excluded as superseded; receipt `UNVERIFIABLE`,
    nothing attested. A few observer-visible titles, not a 180-row dump.
@@ -52,7 +73,7 @@ python examples/okf_bqaa_adapter/run.py --lookup 'okf:env-junk#deadbeef'   # FAI
 
 | Item | Value |
 |---|---|
-| SDK | `GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK` [PR 474](https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/474) HEAD `476d37dc9d4210a335c2f77e78003f6a5ebe2878`, `examples/okf_bqaa_adapter` (**do not merge**) |
+| SDK | `GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK` [PR 474](https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/474) recording-time HEAD `476d37dc9d4210a335c2f77e78003f6a5ebe2878`, `examples/okf_bqaa_adapter`. **PR 474 merged 2026-09-03T16:54:58Z** (merge commit `4f54b5c0506d646f0fb785469701abbcc1ead79e`); the tape, cast, and transcript are a pre-merge recording of that HEAD |
 | Adapter | `okf-bqaa-adapter:v0`, stdlib only, no GCP on the default path |
 | Observe agent | `okf_rfc_observe_agent`, google-adk, `gemini-3.8-flash`, Vertex `global` |
 | Table | `test-project-0728-467323.okf_rfc_demo.agent_events` |
@@ -124,7 +145,8 @@ python3 rfc/demo/tools/check_live_trace.py          # prior consume-experiment s
 
 ```
 git clone https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK
-git checkout 476d37dc9d4210a335c2f77e78003f6a5ebe2878      # PR 474 HEAD; do not merge
+git checkout 476d37dc9d4210a335c2f77e78003f6a5ebe2878      # PR 474 pre-merge HEAD, the SHA the tape was recorded against
+# PR 474 has merged (2026-09-03, 4f54b5c0506d); the same adapter is on main, but reproduce against the recording SHA
 python examples/okf_bqaa_adapter/run.py
 python examples/okf_bqaa_adapter/run.py --lookup 'okf:env-observe#674153c572f6'
 ```
@@ -145,7 +167,7 @@ Deep links: `#beat=1` … `#beat=4`. Keys: → / N next, ← / P back, 1–4 jum
 
 - [ ] Hero reads the question and the three-sentence payoff; only three short badges, no SHA wall.
 - [ ] Open each of the four beats; no console errors.
-- [ ] Beat 1: the question as recorded, the two traps, the current metric; prior consume and Germany sections collapsed and labelled.
+- [ ] Beat 1: the question as recorded, the "What this demo is asking" block (third option; not HITL / sentiment; not BQAA as truth; number unproven), the two traps, the current metric; prior consume and Germany sections collapsed and labelled.
 - [ ] Beat 2: rank 1 `Active-customer revenue`, excluded `Customer revenue (legacy)`, receipt UNVERIFIABLE; tape agrees, all ✓.
 - [ ] Beat 3: 8 stubs with titles, legacy marked deprecated; the KC handle card says no Catalog write on this path; Dataplex leftover labelled prior.
 - [ ] Beat 4: lookup JSON + payoff; “what the next agent does” (use / skip / unproven); junk-ref tape labelled expected; try-a-ref fails closed on anything else.
@@ -154,4 +176,4 @@ Deep links: `#beat=1` … `#beat=4`. Keys: → / N next, ← / P back, 1–4 jum
 
 ## Not in this PR
 
-No re-run of the observe agent, no new BigQuery DML, no Catalog writes, no attester, no receipt beyond the no-execution specimen, no change to OKF v0.2 core or PROFILE.md, no merge of SDK PR 474, nothing from #435, no different finance story.
+No re-run of the observe agent, no new BigQuery DML, no Catalog writes, no attester, no receipt beyond the no-execution specimen, no change to OKF v0.2 core or PROFILE.md, nothing from #435, no re-record of the tape after SDK PR 474 merged (it stays a labelled pre-merge recording), no different finance story.

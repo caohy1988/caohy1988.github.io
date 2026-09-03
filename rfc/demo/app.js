@@ -1,7 +1,7 @@
 /* Why a BQAA trace becomes derived OKF the next agent can look up.
    Static viewer of one SDK CLI run. Vanilla JS, no build.
    Source of truth: one stdlib run of `python examples/okf_bqaa_adapter/run.py`
-   (okf-bqaa-adapter:v0, SDK PR 474 HEAD 476d37dc) over the committed export of
+   (okf-bqaa-adapter:v0, SDK PR 474 pre-merge HEAD 476d37dc; 474 merged 2026-09-03) over the committed export of
    the live ADK observe session f21ee192-… (okf_rfc_observe_agent,
    gemini-3.8-flash, 180 agent_events rows). This page renders the committed
    snapshot, the pinned identities and the CLI transcript. It does not hash,
@@ -330,7 +330,7 @@
       return check(!present, "<code>" + k + "</code> " + (present ? "present as a key" : "absent from every sample content key"));
     }).join("");
     return '<details class="nn"><summary>Six sample rows and the never-emit scan · <code>snapshot.json</code> · not a 180-row dump</summary><div class="nn-b">' +
-      '<p class="fixture-note">The trimmed snapshot carries six rows of the 180 (histogram in <a href="#ids">How this was built / IDs</a>; full export on SDK PR 474, do not merge). Click a row to see it.</p>' +
+      '<p class="fixture-note">The trimmed snapshot carries six rows of the 180 (histogram in <a href="#ids">How this was built / IDs</a>; full export on SDK PR 474, merged 2026-09-03). Click a row to see it.</p>' +
       '<ul class="events">' + list + "</ul>" +
       '<p class="beat-kicker" style="margin:12px 0 6px">Never-emit scan · sample content keys</p>' +
       '<ul class="checklist">' + checks +
@@ -352,6 +352,13 @@
     return beatHead(1, "telemetry", "Ask", "A finance agent is asked: “" + esc(o.question) + "”",
       "There are two easy ways to get this wrong. The agent can answer with <b>" + esc(ex.title) + "</b>, a metric that is still on the shelf but " + esc(ex.reason) + ". Or it can quote the number as if someone had verified it, when no sanctioned computation has run. Both feel fine in the moment. The current metric is <b>" + esc(r1.title) + "</b>, and the honest answer names it and marks the number as unproven.") +
       must("the trap is <code>" + esc(ex.title) + "</code> vs current <code>" + esc(r1.title) + "</code> · the second trap is claiming the number is verified · question as recorded in the trace, not invented") +
+      '<div class="pane ask-what"><div class="pane-h"><span class="t">What this demo is asking</span><span class="m">the three-way question, answered</span></div><div class="pane-b">' +
+      "<p><b>Are we trusting what is in BQAA? Asking a human-in-the-loop or customer sentiment to decide what to promote? Or adding context the agent obtained via the hard path into OKF so it is available for easy discovery?</b> The third one.</p><ul>" +
+      "<li><b>Yes: hard path → derived OKF for discovery.</b> Context this agent earned the hard way (ranked <code>" + esc(r1.title) + "</code>, excluded <code>" + esc(ex.title) + "</code>, receipt unproven) was observed by BQAA; one adapter turn projects it into derived OKF so the next agent discovers it via <code>context_ref</code> instead of re-earning it or picking the dead metric.</li>" +
+      "<li><b>Not trusting BQAA as knowledge or truth.</b> BQAA is observer-only. Telemetry is not the authored bundle and not a truth score.</li>" +
+      "<li><b>Not human-in-the-loop promotion or customer-sentiment ranking.</b> This slice does not pick winners that way, and no such feature exists here.</li>" +
+      "<li><b>Trust here means process integrity of what was observed.</b> Opaque IDs, fail-closed lookup, no overclaim. It does not mean the number is right: the receipt stays <code>UNVERIFIABLE</code>. It does not make BQAA a second wiki.</li>" +
+      "</ul></div></div>" +
       '<div class="traps">' +
       '<div class="trap bad"><div class="th">Trap 1 · the dead metric</div><div class="name">' + esc(ex.title) + '</div><p>' + esc(ex.type) + " · " + esc(ex.reason) + ". Still findable. Still wrong.</p></div>" +
       '<div class="trap soft"><div class="th">Trap 2 · over-claiming trust</div><div class="name">“The number is verified.”</div><p>Nothing ran as a sanctioned computation. The receipt on this run is <code>UNVERIFIABLE</code>, so the number is unproven and should be reported that way.</p></div>' +
@@ -447,7 +454,7 @@
       check(c.excluded, "Tape <code>excluded: " + esc(LEGACY_METRIC) + "</code> = snapshot exclusion, reason “" + esc(ex ? ex.reason : "") + "”") +
       check(c.unproven, "Tape <code>receipt: UNVERIFIABLE</code> · nothing attested") +
       check(c.session && c.count, "Session <code>" + esc(short(M.session_id, 8)) + "</code> · " + M.event_count + " rows, histogram Σ " + o.sum + " · agent <code>" + esc(M.agent) + "</code> · <code>" + esc(M.model) + "</code>") +
-      info("Full export (" + Math.round(snap.export_bytes / 1024) + " KB) is on " + link(PR_URL, "pr", "SDK PR 474") + " · do not merge · not padded · not dumped here. Table: " + link(BQ_CONSOLE, "bq", "BigQuery console") + ".") +
+      info("Full export (" + Math.round(snap.export_bytes / 1024) + " KB) is on " + link(PR_URL, "pr", "SDK PR 474") + " (merged 2026-09-03; export attached pre-merge) · not padded · not dumped here. Table: " + link(BQ_CONSOLE, "bq", "BigQuery console") + ".") +
       "</ul></div></div></div>" +
       sampleRowsHtml();
   }

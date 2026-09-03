@@ -3,7 +3,7 @@
 Implement from this file. Branch `feat/okf-why-demo`, worktree
 `/Users/haiyuancao/caohy1988.github.io-okf-why-demo` (from `origin/main` @
 `47575a4`, PR 11 already merged). PR against `main`. Do not merge. Do not
-touch SDK PR 474. Do not re-run the live ADK agent. Off #435.
+touch SDK PR 474 (historical: it has since merged, 2026-09-03). Do not re-run the live ADK agent. Off #435.
 
 SDK read-only: `/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-okf-adapter`
 @ `476d37dc9d4210a335c2f77e78003f6a5ebe2878`.
@@ -54,4 +54,4 @@ SDK read-only: `/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-okf-adapter`
 - Keep `gemini-3.8-flash`; grep for `2.5` before commit.
 - Do not invent a different finance story.
 - Do not claim a Knowledge Catalog write for this CLI path.
-- Do not merge SDK PR 474.
+- Do not touch SDK PR 474 (historical guardrail; it merged 2026-09-03 independently of this repo).
