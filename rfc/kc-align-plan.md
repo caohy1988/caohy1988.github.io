@@ -8,15 +8,17 @@ branch `feat/rfc-kc-blog-align` off `main` `cc38d7a`. PR against
 
 - **Adopt `okf-bundle`.** No fork. Every `okf-concept` in `rfc/index.html`
   becomes `okf-bundle`, with one sentence in §04 saying it is the shipped type.
-- **Pins as appended fields 14 and 15** on the shipped `okf` aspect
-  (`publication_id`, `published_snapshot_id`, top-level strings), via the
-  additive template update `setup.ts` already performs. Not a separate aspect.
-  Never in `extra`.
+- **Pins in a profile-owned `okf-context-runtime` aspect** (`publication_id`,
+  `published_snapshot_id`, `managed_by_*` stamps, top-level strings). The
+  shipped 13-field `okf` aspect is not extended. Revised 2026-09-03 after Codex
+  P1 on PR 13: a stock sample repush replaces `okf` whole. Never in `extra`.
 - **`okf-computation` is runtime-derived only.** Authored §10 fields stay on
   shipped `okf` fields 8 to 12.
 - **Reserved-file rule.** `index.md` and `log.md` are bundle content for
-  `source_manifest_hash`, not concepts. Index entries are projected and owned
-  for Documents-Layout parity, with `parentEntry`.
+  `source_manifest_hash`, not concepts. Index entries and the root `log.md`
+  entry are projected, owned, pinned, and reconciled as non-concept entries for
+  Documents-Layout parity, with `parentEntry`; `log.md` keeps the sample's
+  `overview` + `okf` (`okf_type: Log`) shape.
 
 ## Commit 1 — docs (this file and its siblings)
 
@@ -44,7 +46,7 @@ Edits by region (line numbers at `cc38d7a`):
 6. **§04 Implementation (L440).** Replace the false `push.ts` sentence with the
    verified description; add "delta on a shipped mechanism".
 7. **§04 Catalog types (L451).** Adopt `okf-bundle`; shipped `okf` aspect plus
-   indices 14/15; `okf-computation` runtime-derived; reworded Phase 2b
+   `okf-context-runtime` pin aspect; `okf-computation` runtime-derived; reworded Phase 2b
    `semantic-*` rule citing kcmd's prefix ownership, `--force-remove`, and
    one-model-per-EntryGroup.
 8. **§05 bullets (L497, L498).** Lag SLO per entry count; pin read via

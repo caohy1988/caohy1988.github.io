@@ -29,12 +29,16 @@ Line numbers refer to `rfc/index.html` at `cc38d7a` before edits.
    and that entry type is fixed at creation, so a sample-pushed EntryGroup is
    reusable rather than migrated. Decision: adopt, do not fork.
 
-4. **Define the `okf` aspect as the shipped 13-field template plus appended
-   fields.** `publication_id` and `published_snapshot_id` are top-level string
-   fields appended with fresh indices 14 and 15 through the additive
-   template-update path `setup.ts` already uses. They are never written into
-   `extra`, which `pull.ts` round-trips into authored frontmatter. Decision:
-   append 14/15, not a separate aspect.
+4. **Keep the shipped `okf` aspect as the authored-signal layer only; pins go
+   in a profile-owned aspect.** `publication_id`, `published_snapshot_id`, and
+   the `managed_by_*` stamps are top-level string fields of a separately named
+   `okf-context-runtime` aspect. Nothing is appended to the shared 13-field
+   template. Reason (Codex P1, PR 13): generic `kcmd push` sends
+   `updateMask=aspects` with `aspectKeys` limited to the staged aspects and no
+   delete-missing flag, so a stock sample repush replaces `okf` whole but does
+   not touch an aspect it never stages. Pins are never written into `extra`.
+   Decision: separate aspect, not indices 14/15 (revised 2026-09-03 after
+   review).
 
 5. **Reconcile `okf-computation` with shipped fields 8 to 12.** The authored §10
    contract (`runtime`, `parameters`, `computation`, `executor`, `attester`)
@@ -54,16 +58,20 @@ Line numbers refer to `rfc/index.html` at `cc38d7a` before edits.
    files (OKF §8, §9) are bundle content for `source_manifest_hash` but are not
    concepts: no `concept_key`, no version rows, no edges. Phase 2 projects index
    entries for parity with the Documents Layout, owns them in the ledger, and
-   sets `parentEntry` the same way the Documents Layout does; `log.md` is
-   projected only if the sample projects it, and never as a concept.
+   sets `parentEntry` the same way the Documents Layout does. Root `log.md`
+   IS projected, as the sample projects it: a non-concept `okf-bundle` Entry
+   with `overview` and `okf` (`okf_type: Log`), owned, pinned with
+   `okf-context-runtime`, and reconciled like index Entries. Never a concept.
+   (Normative; revised after Codex P1-2.)
 
 8. **Reword the Phase 2 pin gate (L734) and §05 pinning (L498).** The pin is
    read from the entry via `entries.get` with `view=ALL` (the post says
    LookupContext does not carry custom aspects; that is a post claim, unverified
    against Dataplex docs) and presented to the runtime, which serves that
    retained publication or fails stale. Search predicates on `publication_id`
-   filter only and never enforce. `publication_id` stays a top-level scalar so it
-   is searchable at all.
+   filter only and never enforce. `publication_id` stays a top-level scalar of
+   `okf-context-runtime` so it is searchable at all. The Phase 2 gate asserts
+   exact pin and stamp values after a stock Documents-Layout sample repush.
 
 9. **Second adversary in the Phase 2 coexistence gate (L734) and the risk table
    (L764).** Alongside a `kcmd` semantic-model push, test a `kcmd`
@@ -157,7 +165,7 @@ type and signal, `overview` for the body) is the post's, not the RFC's.
 ## Checks
 
 - `grep -c okf-concept rfc/index.html` is 0.
-- `rfc/index.html` contains the post URL, `okf-bundle`, "index 14", `index.md`,
+- `rfc/index.html` contains the post URL, `okf-bundle`, `okf-context-runtime`, `index.md`,
   `log.md`, `entries.get`, and no longer contains
   "delete-only-what-you-created reconciliation" attributed to `push.ts`.
 - `python3 rfc/demo/tools/check_cli_viewer.py` still exits 0 if the demo is
