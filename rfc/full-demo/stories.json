@@ -1,0 +1,71 @@
+{
+  "_source": "CUSTOMER_STORIES.md, condensed. Every id below appears in a file under live/.",
+  "table": "test-project-0728-467323.okf_rfc_demo.agent_events",
+  "stories": [
+    {
+      "n": 1,
+      "title": "The agent that said “verified”",
+      "who": "A leadership-demo user (user_id leadership-demo) asking the consume agent.",
+      "session": "04fa3d56-f2f1-413e-8c2b-ec116835af84",
+      "agent": "okf_rfc_consume_agent",
+      "context_ref": "okf:env-demo#a25e1c0ccbca",
+      "publication_prefix": "a25e1c0c",
+      "failure": "The shipped okf aspect displays runtime, computation, executor, attester; LookupContext does not render those fields at all; neither carries a verdict. A tool contract with ok: true and no verdict field let the agent say “verified”.",
+      "changes": "In session f21ee192 the runtime tool returned verdict UNVERIFIABLE with a reason and receipt_id, and the agent said “No. The number is unproven.” twelve times out of twelve.",
+      "status": "illustration, not a controlled comparison (prompt, tool set and questions all differ)",
+      "beats": [3, 5]
+    },
+    {
+      "n": 2,
+      "title": "Twelve questions, one frozen context pack",
+      "who": "The same finance user, in a multi-turn session.",
+      "session": "f21ee192-d989-4c38-894f-66b6b82eaf18",
+      "agent": "okf_rfc_observe_agent",
+      "context_ref": "okf:env-observe#674153c572f6",
+      "publication_prefix": "674153c5",
+      "failure": "Catalog has one mutable state per entry. “Which publication was current last quarter” is not a question it can hold; parameters[] is not server-side searchable; nothing executes.",
+      "changes": "deployment_heads_history answers which publication was current at T (the query runs today and is empty until a sync commits). The declared parameter_schema (region, quarter_start, quarter_end) is on record as the contract an executor would bind.",
+      "status": "history selection real-but-empty; the numbers for questions 4 and 10 are RFC text only",
+      "beats": [1, 5]
+    },
+    {
+      "n": 3,
+      "title": "One handle, three publications, and the legacy Catalog entry names the oldest",
+      "who": "Whoever audits the demo after the fact.",
+      "session": "04fa3d56 · 1e6dfed7 · f21ee192 (all four sessions), the adapter tape, the legacy entry",
+      "agent": "both agents",
+      "context_ref": "okf:env-observe#674153c572f6 (bound twice) · okf:env-demo#a25e1c0ccbca",
+      "publication_prefix": "a25e1c0c · 674153c5 · 53bd1651",
+      "failure": "Catalog cannot say which publication an agent read, whether two agents read the same one, or whether an entry is stale relative to what is served.",
+      "changes": "Events match the context_ref_resolution view on both keys, publications join by id only, receipt-only rows are banded, adapter-tape and legacy-Catalog evidence sit in demo_evidence. The live result: 14 attributed, 13 receipt-only, no row twice despite the double-bound legacy handle.",
+      "status": "real after seeding (operator, not yet okf-setup)",
+      "beats": [6]
+    },
+    {
+      "n": 4,
+      "title": "The metric that died on 2026-06-20",
+      "who": "The finance user asking questions 6 and 12.",
+      "session": "f21ee192 · 1e6dfed7",
+      "agent": "okf_rfc_observe_agent",
+      "context_ref": "okf:env-observe#674153c572f6",
+      "publication_prefix": "674153c5",
+      "failure": "Generic kcmd push never deletes. After the push, searchEntries still finds Customer revenue (legacy) (status deprecated) and LookupContext will return whatever is in the EntryGroup.",
+      "changes": "Retirement is a property of the data: every current-mode retrieval on record excluded the legacy metric with reason “superseded; out of force since 2026-06-20”.",
+      "status": "exclusion real in 13 of 13 retrievals; the ledger delete is RFC text only until sync exists",
+      "beats": [3, 5]
+    },
+    {
+      "n": 5,
+      "title": "Who may read the policy",
+      "who": "The finance user asking question 7; the Catalog administrator granting catalogViewer.",
+      "session": "f21ee192 (invocation e-68d2e6b9-ff1d-4f09-8811-b2f50f4f3a0d)",
+      "agent": "okf_rfc_observe_agent",
+      "context_ref": "okf:env-observe#674153c572f6",
+      "publication_prefix": "674153c5",
+      "failure": "The enforcement unit is the EntryGroup and IAM cascades to every entry in it; the policy body is in the overview aspect and in the lookupContext response for anyone with catalogViewer on okf-rfc-demo. Structure, not an observed leak.",
+      "changes": "RFC text only: one security domain per deployment, caller-delegated BigQuery authorization, policy_context_commitment, mixed-policy fail-closed. Not implemented in Phase A/B.",
+      "status": "Catalog side real (beat 3); BigQuery side RFC text only",
+      "beats": [3]
+    }
+  ]
+}

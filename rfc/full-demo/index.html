@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="https://caohy1988.github.io/rfc/full-demo/">
+<meta name="description" content="Full-version OKF runtime demo: live ADK sessions in BigQuery Agent Analytics, shipped OKF-in-Knowledge-Catalog and where it stops, the external bundle → BigQuery → Catalog-stamp sync, the BigQuery serve path, and a two-key attribution query. Every number traces to test-project-0728-467323.okf_rfc_demo or to a Catalog entry read with gcloud. Nothing attested.">
+<meta property="og:title" content="Catalog finds, BigQuery serves — the full OKF runtime demo on live traces">
+<meta property="og:description" content="Six beats: Ask, Observe, Catalog path and where it stops, Sync (external CLI), Serve (BigQuery), Attribution. Live GCP captures, honesty labels on every pane, five customer stories with real session ids.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://caohy1988.github.io/rfc/full-demo/">
+<meta name="theme-color" content="#101828">
+<title>Catalog finds, BigQuery serves — the full OKF runtime demo on live traces</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="site-topbar">
+  <div class="site-shell">
+    <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/rfc/" aria-current="page">RFC</a>
+      <a href="/evalbench/">EvalBench</a>
+    </nav>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="shell">
+    <div class="kicker">
+      <span><span class="dot"></span>Prototype · full version · OKF runtime context projection · <a href="../" style="color:inherit">back to the RFC</a> · <a href="../demo/" style="color:inherit">the four-beat demo</a></span>
+      <span>live ADK traces · Catalog vs BigQuery · external sync</span>
+    </div>
+    <h1 class="nameplate question">Catalog finds. BigQuery serves. <em>Here is where each one stops.</em></h1>
+    <p class="subtitle">Four real ADK sessions sit in <code>okf_rfc_demo.agent_events</code>. One agent read a Catalog-shaped lookup and said the number was “verified”. Another carried a verdict field and said, twelve times, “No. The number is unproven.” This page walks a cold reader from those traces through shipped OKF-in-Knowledge-Catalog, the external <code>okf-context sync</code> bridge, the BigQuery serve path, and a two-key attribution query, and labels on every pane what is live, what is seeded, what is recorded, and what is still RFC text.</p>
+    <div class="badges">
+      <span class="badge derived"><b>derived / demo</b>&nbsp;· observer-only · nothing attested</span>
+      <span class="badge ok">agent_events untouched · 212 rows, 4 sessions, not re-run</span>
+      <span class="badge">Static viewer · browser makes no GCP calls</span>
+      <span class="badge model">gemini-3.8-flash · google-adk · BQAA plugin</span>
+    </div>
+    <p class="ask-callout"><b>What this demo is asking.</b> Take context an agent already earned the hard way, observe it with BigQuery Agent Analytics, and project it into derived OKF the next agent can discover; then show what the BigQuery runtime adds on top of the Catalog projection Google shipped on 2026-08-26. It is <b>not</b> human-in-the-loop or sentiment promotion, <b>not</b> trusting BQAA as truth, and <b>not</b> a claim that Dataplex or BigQuery syncs anything on their own. Sync is an external CLI you run; Catalog is the discovery projection; BigQuery is the serving authority; every receipt on this page is <code>UNVERIFIABLE</code>.</p>
+  </div>
+</header>
+
+<div class="banner" role="note">
+  <div class="shell">
+    <span class="tag">derived / demo</span>
+    <span>Live captures from <code>test-project-0728-467323</code> on 2026-09-03, checked in as JSON with their BigQuery job ids. The observe and consume agents were not re-run and <code>agent_events</code> received no DML. Runtime tables were created and seeded by the operator, not yet by the Phase A service accounts. Nothing is ATTESTED.</span>
+  </div>
+</div>
+
+<main class="shell">
+  <nav class="stepper" aria-label="Beats">
+    <ol class="steps" id="steps">
+      <li><button class="step" type="button" data-beat="1" data-tone="telemetry"><span class="n">1</span><span class="t">Ask</span><span class="s">12 real questions, two traps</span></button></li>
+      <li><button class="step" type="button" data-beat="2" data-tone="source"><span class="n">2</span><span class="t">Observe</span><span class="s">180 events, 24 tool calls, 0 leaks</span></button></li>
+      <li><button class="step" type="button" data-beat="3" data-tone="catalog"><span class="n">3</span><span class="t">Catalog path</span><span class="s">Where shipped OKF-in-KC stops</span></button></li>
+      <li><button class="step" type="button" data-beat="4" data-tone="split"><span class="n">4</span><span class="t">Sync (CLI)</span><span class="s">Bundle → BigQuery → Catalog stamp</span></button></li>
+      <li><button class="step" type="button" data-beat="5" data-tone="runtime"><span class="n">5</span><span class="t">Serve (BigQuery)</span><span class="s">Pin, history, verdict, fail-closed</span></button></li>
+      <li><button class="step" type="button" data-beat="6" data-tone="ink"><span class="n">6</span><span class="t">Attribution</span><span class="s">Which session used which publication</span></button></li>
+    </ol>
+    <div class="seam" aria-hidden="true">
+      <span class="obs">hard path · not HITL</span><span>observer-only</span><span>lookupContext ≤ 10</span><span>external · idempotent</span><span>UNVERIFIABLE</span><span>14 attributed · 13 receipt-only</span>
+    </div>
+  </nav>
+
+  <div class="stage-wrap">
+    <section class="stage" id="stage" aria-live="polite">
+      <p class="loading">Loading the checked-in live captures…</p>
+      <noscript><p>This viewer needs JavaScript. The committed inputs are in <code>live/</code>; start with <a href="live/README.md">live/README.md</a>.</p></noscript>
+    </section>
+    <div class="controls">
+      <button class="btn ghost" id="btn-back" type="button">← Back</button>
+      <button class="btn primary" id="btn-next" type="button">Next →</button>
+      <span class="step-count" id="step-count">1 / 6</span>
+      <p class="keys-hint">Keys: → / N next · ← / P back · 1–6 jump · deep link <code>#beat=1</code> … <code>#beat=6</code></p>
+    </div>
+  </div>
+
+  <section class="walkthrough" id="matrix" aria-labelledby="matrix-title">
+    <h2 class="walk-title" id="matrix-title">Capability matrix · what OKF-in-Catalog cannot do that the BigQuery deployment can</h2>
+    <p class="walk-lede">“KC-only” means the shipped path after <code>setup.ts</code> + <code>push.ts</code>: <code>okf-bundle</code> entries, the 13-field <code>okf</code> aspect, <code>searchEntries</code>, <code>LookupContext</code>, <code>entries.get --view=ALL</code>, EntryGroup IAM. The <b>Shown on</b> column is the honesty flag: a beat number means the page shows it from a live capture or a recorded run; <span class="rfc-only" style="display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#7A5A12;background:#FBF6EA;border:1px solid #E4D3B0;border-radius:999px;padding:2px 7px">RFC text only</span> means the page quotes the RFC and says so.</p>
+    <div class="matrix-wrap" id="matrix-body"><p class="loading">Matrix renders with the captures…</p></div>
+    <div class="honest"><b>Honest limits, printed here on purpose.</b> The Catalog mapping itself (one entry per concept, the <code>okf</code> aspect, the <code>overview</code> body, index and log entries, parent hierarchy) is shipped and complete; the RFC adds pins and a ledger to it, not a rival projection. IAM on the EntryGroup, the type resources and the runtime tables is the only boundary enforceable today; the ownership ledger is a discipline. Nothing here claims a Dataplex built-in or a roadmap item.</div>
+  </section>
+
+  <section class="walkthrough" id="stories" aria-labelledby="stories-title">
+    <h2 class="walk-title" id="stories-title">Customer stories · grounded in the four real sessions</h2>
+    <p class="walk-lede">“The customer” is the finance analytics team asking about Germany active-customer revenue, the only narrative these traces contain. Every story cites a session id in <code>test-project-0728-467323.okf_rfc_demo.agent_events</code>, the concept titles the tools returned, and the exact failure mode a Catalog-only deployment has. Where the BigQuery side is not implemented yet, the story says <b>RFC text only</b>.</p>
+    <div class="stories" id="stories-body"><p class="loading">Stories render with the captures…</p></div>
+  </section>
+
+  <div class="extras">
+    <details id="ids">
+      <summary>How this was built / IDs / job ids</summary>
+      <div class="body wide" id="ids-body">
+        <p>Everything on this page is copied from the files in <code>live/</code>; the browser recomputes none of it and calls no Google API. Each BigQuery capture carries the job id it ran as, and <code>live/bq_jobs_identity.json</code> is the <code>INFORMATION_SCHEMA.JOBS_BY_USER</code> row set for those job ids, so the identity that ran every query is on record.</p>
+        <div id="ids-strip"></div>
+      </div>
+    </details>
+    <details>
+      <summary>What is real here, and what is not</summary>
+      <div class="body">
+        <ul id="real-list">
+          <li><b>Real, live GCP, read on 2026-09-03 for this page:</b> the four ADK sessions in <code>okf_rfc_demo.agent_events</code> (212 rows) pulled by <code>session_id</code> with explicit <code>bq</code> job ids; the never-emit scan over all 27 <code>TOOL_COMPLETED</code> payloads; <code>gcloud dataplex entries lookup --view=ALL</code>, <code>entry-types describe</code>, <code>entry-groups get-iam-policy</code>; the <code>lookupContext</code> REST call on the legacy entry, on eleven resources (rejected), on a missing entry, and on two entries; the Dataplex discovery document's <code>LookupContextRequest</code> text.</li>
+          <li><b>Real, written by the operator for this page:</b> the eleven runtime, legacy and evidence tables plus the <code>context_ref_resolution</code> view from <code>sql/setup_runtime_tables.sql</code>, run once as <code>raincoatrun@gmail.com</code> (project Owner, dataset OWNER), and the seed rows for three publications, three legacy bindings, and two evidence rows. <code>agent_events</code> received no DML.</li>
+          <li><b>Real, shipped Catalog types, if present under beat 3:</b> the sample <code>setup.ts</code> and <code>push.ts</code> from <code>GoogleCloudPlatform/knowledge-catalog</code> were built from source and run as the operator against the derived bundle the SDK adapter regenerated from the committed export (publication <code>sha256:53bd1651…</code> reproduced before any push). Beat 3 says which of those steps completed and shows only what the API returned.</li>
+          <li><b>Not done yet, and labelled:</b> the Phase A service accounts, custom role, table-level grants, boundary probe, negative checks and the <code>okf-context sync</code> CLI itself. Beat 4 shows the specified algorithm, the IAM contract and the captured operator identity; it shows no <code>BQ_COMMITTED</code> or <code>CATALOG_STAMPED</code> because none happened. <code>deployment_heads</code> is empty and the page shows that empty result rather than inventing a head.</li>
+          <li><b>Honest by construction:</b> every receipt is <code>UNVERIFIABLE</code> (<code>rcpt-observe-noexec</code>). The word ATTESTED appears only inside quoted agent answers and the labelled non-normative Phase 4 shape, never as a claim.</li>
+          <li><b>Never emitted on agent-facing payloads:</b> <code>concept_version_id</code>, bundle paths, principal, SQL / query text, parameter values, raw destination table names. The scan on beat 2 is the live query result.</li>
+          <li><b>This browser:</b> fetches same-origin static files and Google Fonts only. No BigQuery, no Dataplex, no model call.</li>
+        </ul>
+      </div>
+    </details>
+    <details>
+      <summary>Run it locally / re-run the queries</summary>
+      <div class="body">
+        <p>Static files, no build. From the repo root: <code>python3 -m http.server 8000</code> then open <code>http://localhost:8000/rfc/full-demo/</code>. Check the page against the committed captures with <code>python3 rfc/full-demo/tools/check_full_demo.py</code>. Every query is in <code>sql/</code>; each marked statement is piped over stdin to <code>bq query --use_legacy_sql=false --project_id=test-project-0728-467323</code> as its own invocation. Reader-side files contain <code>SELECT</code> only; <code>sql/setup_runtime_tables.sql</code> is the only file with DDL and seeds. See <a href="live/README.md">live/README.md</a> for the capture list.</p>
+      </div>
+    </details>
+  </div>
+</main>
+
+<footer>
+  <div class="shell">
+    <span>rfc/full-demo · Catalog finds, BigQuery serves · OKF runtime context projection RFC</span>
+    <span>derived / demo · observer-only · nothing attested · not canonical authoring</span>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

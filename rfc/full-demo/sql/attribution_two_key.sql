@@ -2,7 +2,9 @@
 -- Runs as okf-runtime-reader (dataset dataViewer + project jobUser). No DDL here:
 -- tables, the context_ref_resolution view and the seed MERGEs live in the
 -- setup-owned sql/setup_runtime_tables.sql, run once as okf-setup.
--- Not runnable until Phase A setup has run. Committed so the contract is concrete.
+-- Runnable since 2026-09-03: setup_runtime_tables.sql was run once as the operator (Phase A re-runs
+-- it as okf-setup). Both statements were captured as live/beat6_attribution.json and
+-- live/beat6_demo_evidence.json with their bq job ids (attributed Σ 14, receipt_only Σ 13).
 --
 -- bq has no impersonation flag; impersonation is set on gcloud in an ISOLATED configuration
 -- (same pattern as setup_runtime_tables.sql), and each marked SELECT is piped over stdin
