@@ -1,13 +1,46 @@
-# BQAA → derived OKF: static viewer of the SDK CLI path (`/rfc/demo/`)
+# Why a BQAA trace becomes derived OKF the next agent can look up (`/rfc/demo/`)
 
-Clickable four-beat page for the OKF runtime context projection RFC:
-**Observe → Adapt → Project → Consume**. Live at
-<https://caohy1988.github.io/rfc/demo/> once merged. Static files, no build.
+Live at <https://caohy1988.github.io/rfc/demo/> once merged. Static files, no build.
+
+## The question
+
+**What was active-customer revenue in Germany last quarter — and can I trust the number?**
+
+Without this path a finance agent can pick the superseded **Customer revenue
+(legacy)** metric, or talk as if the number is verified. A live BQAA trace
+ranked **Active-customer revenue** first, excluded the legacy metric, and
+recorded the receipt as unproven. Derived OKF in Knowledge Catalog is how the
+next agent finds that: it uses the current metric, skips legacy, and reports
+the number as unproven.
+
+## Four beats
+
+1. **Ask.** The question, as recorded in the trace, and the two traps: the
+   dead metric (`Customer revenue (legacy)`, superseded, out of force since
+   2026-06-20) and over-claiming trust (no sanctioned computation ran).
+2. **Observe.** What the live trace saw: rank 1 `Active-customer revenue`;
+   `Customer revenue (legacy)` excluded as superseded; receipt `UNVERIFIABLE`,
+   nothing attested. A few observer-visible titles, not a 180-row dump.
+3. **Publish.** `python examples/okf_bqaa_adapter/run.py` emits 8 derived
+   stubs (metric, computation, concept, policy, two tables, the legacy metric
+   marked deprecated, a log) with their own identity chain. The handle a
+   Knowledge Catalog entry would expose is `context_ref`
+   `okf:env-observe#674153c572f6` → publication `sha256:53bd1651…`.
+   **This CLI path did not write Knowledge Catalog.** No entry, no DML, no
+   real Catalog pin for that publication. The Dataplex entry
+   `okf-derived-germany` is a leftover of the prior consume experiment and is
+   labelled as such.
+4. **Next agent.** `run.py --lookup 'okf:env-observe#674153c572f6'` returns
+   `{context_ref, publication_id, label: derived/demo}`. The agent uses
+   `Active-customer revenue`, skips legacy, reports the number as unproven.
+   Junk refs fail closed (`FAIL_CLOSED`, exit 2, labelled expected). That is
+   the payoff.
 
 The page is a **viewer of one recorded CLI run**, not an adapter. It renders a
-committed snapshot of a live ADK observe session, the identities the SDK CLI
-derived from it, and the CLI transcript. The browser hashes nothing, adapts
-nothing, resolves nothing for the live identities, and never calls GCP.
+committed snapshot of the live ADK observe session, the identities the SDK
+CLI derived from it, and the CLI transcript. The browser hashes nothing,
+adapts nothing, resolves nothing for the live identities, and never calls
+GCP. All IDs sit in the collapsed **How this was built / IDs** panel.
 
 ## The run on record
 
@@ -25,12 +58,13 @@ python examples/okf_bqaa_adapter/run.py --lookup 'okf:env-junk#deadbeef'   # FAI
 | Table | `test-project-0728-467323.okf_rfc_demo.agent_events` |
 | Session | `f21ee192-d989-4c38-894f-66b6b82eaf18` |
 | Trace | `e-c7214361-4017-43d7-af4e-cddfe51b09a4` (first of 12 invocations) |
-| Events | **180** rows, multi-turn, one session; not padded |
+| Events | 180 rows, multi-turn, one session; not padded |
 | `context_ref` | `okf:env-observe#674153c572f6` |
 | observation_id | `sha256:85ea62a96e5076a292572a996f0408865c4c56aac696bbeb79a73bbc5eda8af6` |
 | snapshot_id | `sha256:f18befd010ff7e3d1fe140303626a82dc985c986846093f73643e7d0eea92b75` |
 | publication_id | `sha256:53bd1651c43f69d53f591e4f91e3ccdda4640d8b36cb1dce1ac97328ffa39a77` |
 | Receipt | `UNVERIFIABLE` `rcpt-observe-noexec`; nothing ATTESTED |
+| Catalog write on this path | none; no real Catalog pin for `53bd1651` |
 | Ran at | `2026-09-03T04:10:36Z` |
 | Label | **derived / demo, observer-only, nothing attested, not canonical authoring** |
 
@@ -41,41 +75,44 @@ python examples/okf_bqaa_adapter/run.py --lookup 'okf:env-junk#deadbeef'   # FAI
 | `live/observe/live.json` | Observe-run metadata (copy of SDK `fixtures/live.json`). |
 | `live/observe/live_identities.json` | Derived identity chain (copy of SDK `fixtures/live_identities.json`): 8 file hashes, 7 concept versions, the triple above. |
 | `live/observe/mapping.json` | The CLI's `out/mapping.json`: exactly one binding, `okf:env-observe#674153c572f6` → publication. |
-| `live/observe/snapshot.json` | **Trimmed** viewer snapshot: event-type histogram (Σ 180), identities, six sample rows, never-emit list. Not the export. The 494 KB 180-row export is on PR 474 only. |
-| `cli/okf-bqaa-cli-transcript.txt` | Plaintext of the CLI run (durable proof). |
-| `cli/okf-bqaa-cli.cast` · `cli/okf-bqaa-cli.gif` · `okf-bqaa-cli.mp4` · `okf-bqaa-cli-poster.png` | asciinema v2 cast, gif, H.264 1280×720 pedagogical tape (BQAA TRACE → useful OKF), and poster = successful lookup JSON. Labelled **live-adapter proof**. |
+| `live/observe/snapshot.json` | **Trimmed** viewer snapshot: event-type histogram (Σ 180), identities, six sample rows (including the tool result with the ranked titles and the exclusion), never-emit list. Not the export. The 494 KB 180-row export is on PR 474 only. |
+| `cli/okf-bqaa-cli-transcript.txt` | Plaintext of the four-beat tape (durable proof). |
+| `cli/okf-bqaa-cli.cast` · `cli/okf-bqaa-cli.gif` · `okf-bqaa-cli.mp4` · `okf-bqaa-cli-poster.png` | asciinema v2 cast, gif (agg), H.264 1280×720 ~25s tape (agg + ffmpeg), poster = last frame: lookup JSON + “Payoff: use Active-customer revenue, not legacy; the number is unproven.” |
 | `fixture/bundle/`, `fixture/golden/` | **Authored** Phase 0 fixture (`cymbal-finance-core`), display-only, never touched by the adapter. |
 | `okf-bqaa-e2e.mp4` | **Prior fixture clip**, recorded before the observe run. Collapsed on the page and labelled as not this run. |
 | `live/live.json`, `live/agent_events.json`, `live/run_okf_agent.py` | **Prior live-GCP consume experiment** (`okf_rfc_consume_agent`, session `04fa3d56-…`, stub `lookup_okf_context`, 14 rows). Kept, collapsed under beats 1 and 4, labelled prior. Not the Observe input; the SDK CLI fails closed on that session (not retrieve-shaped). |
 | `traces/bqaa-germany.json`, `derived/` | **SYNTHETIC hashing-only** (`sess-4c1f9a2e7b3d`). Regression input for `adapter.js` + `hash.js`; collapsed under beat 1; never the source of truth. |
-| `adapter.js`, `hash.js` | Loaded only for that synthetic hashing check. They do not drive Adapt and produce none of the live identities. |
-
-## Beats
-
-1. **Observe.** Histogram of the 180 rows, six sample rows, run facts, PR 474 link for the full export. Never-emit scan over the sample content keys. Collapsed: the prior consume experiment and the synthetic Germany trace, both labelled.
-2. **Adapt.** The committed CLI transcript with the pinned identities highlighted, links to the cast / gif / mp4, and the 8 derived files (names, sha256, store-only concept versions) described as the CLI `out/bundle/`. Cross-checks: transcript = `live_identities.json` = identity strip; `FILES 8`; one mapping binding; distinct from the authored bundle.
-3. **Project.** Identity chips from `live_identities.json`. Catalog pane is a derived view with an honesty label (no entry created on this path; the prior Dataplex entry `okf-derived-germany` is a labelled leftover). BigQuery pane shows the live source table (read-only) above the RFC projection shape rendered from the pinned identities. No DML.
-4. **Consume.** Tape 1: `--lookup okf:env-observe#674153c572f6` → `{context_ref, publication_id, label: derived/demo}`. Tape 2: `--lookup okf:env-junk#deadbeef` → `FAIL_CLOSED`, exit 2 (labelled expected fail-closed, not a crash). A "try a ref" box resolves against the committed `mapping.json` with `Object.hasOwn` (constructor/toString/__proto__ fail closed; static file, no store, no network). Receipt tile `UNVERIFIABLE · rcpt-observe-noexec`; Phase 4 ATTESTED shape non-normative. Collapsed: the prior stub-tool consume transcript, labelled prior.
+| `adapter.js`, `hash.js` | Loaded only for that synthetic hashing check. They do not drive Publish and produce none of the live identities. |
 
 ## Honesty
 
 - Browser never calls GCP. Same-origin static files and Google Fonts only.
 - Observe input is the 180-row observe session. Not the prior consume session, not the Germany fixture.
-- Adapt is the Python CLI on SDK PR 474. Not `adapter.js`. No identity on this page was computed in the browser.
-- Catalog / BigQuery projection tables are derived views. No Catalog write and no DML on this path.
-- Receipt is `UNVERIFIABLE`. Nothing is ATTESTED.
+- Publish is the Python CLI on SDK PR 474. Not `adapter.js`. No identity on this page was computed in the browser.
+- This CLI path did not write Knowledge Catalog and issued no DML. The handle on beat 3 is what a Catalog entry would expose, rendered from `mapping.json` and `live_identities.json`.
+- Receipt is `UNVERIFIABLE`. Nothing is ATTESTED. The number is unproven and the page says so.
 - Never emitted on agent-facing payloads: `concept_version_id`, bundle paths, principal, SQL / query text, parameter values, raw destination table names.
 - Model is `gemini-3.8-flash` throughout. Never `2.5`.
 
 ## Checks
 
 ```
-python3 rfc/demo/tools/check_cli_viewer.py    # exit 0: snapshot, identities, mapping, transcript, page strings, no forbidden claims
+python3 rfc/demo/tools/check_cli_viewer.py    # exit 0: story + snapshot + identities + transcript + page strings
+node --check rfc/demo/app.js
 ```
 
-Read-only over the committed files. It asserts the observe session, `event_count` 180, the `context_ref`, the publication, the transcript lines (`SESSION`, `PUBLICATION_ID`, `FAIL_CLOSED`), that the hero / live strip names `okf_rfc_observe_agent` and `okf:env-observe#674153c572f6`, that the prior consume session and the Germany fixture are never presented as source of truth, and that no "computed in-browser" claim remains.
+Read-only over the committed files. It asserts the locked hero question and
+three-sentence payoff, that the hero carries no SHA wall (no full publication,
+no `Object.hasOwn`, no adapter badge, no 180 badge), the stepper titles
+Ask / Observe / Publish / Next agent, the tape beats (question, rank 1,
+excluded legacy, `PUBLICATION_ID`, lookup JSON, payoff after the labelled
+`FAIL_CLOSED`), the poster wiring, the honesty strings, and that the prior
+consume session and the Germany fixture are never presented as source of
+truth. Two hermetic node runs exercise the page's `Object.hasOwn` lookup
+(constructor / toString / `__proto__` fail closed) and its transcript parser.
 
-The older germany hashing checks still run as labelled extras and are **not** retargeted at the live identities (different `bundle_key` inputs, different files):
+The older germany hashing checks still run as labelled extras and are **not**
+retargeted at the live identities:
 
 ```
 node rfc/demo/tools/check-authored-identities.mjs   # authored golden triple + 9 concept versions
@@ -106,15 +143,15 @@ Deep links: `#beat=1` … `#beat=4`. Keys: → / N next, ← / P back, 1–4 jum
 
 ## Manual checklist (static gate)
 
+- [ ] Hero reads the question and the three-sentence payoff; only three short badges, no SHA wall.
 - [ ] Open each of the four beats; no console errors.
-- [ ] Live strip reads "snapshot loaded ✓ · 180 events · transcript agrees".
-- [ ] Identity strip: authored triple pinned; derived row reads "pinned from CLI · okf-bqaa-adapter:v0 · = transcript ✓ · distinct from authored".
-- [ ] Beat 1 histogram sums to 180; never-emit scan all ✓; prior consume and Germany sections collapsed and labelled.
-- [ ] Beat 2 transcript shows `PUBLICATION_ID sha256:53bd1651…` highlighted; all cross-checks ✓.
-- [ ] Beat 3 seam note reads "one publication everywhere on this page ✓"; Catalog card says no write on this path.
-- [ ] Beat 4 tape 1 resolves, tape 2 reads `FAIL_CLOSED … # exit 2`; receipt tile reads `UNVERIFIABLE · rcpt-observe-noexec`.
-- [ ] Walkthrough: `okf-bqaa-cli.mp4` first, poster is the successful lookup JSON (not empty header, not FAIL_CLOSED); labelled live-adapter proof; the e2e clip collapsed and labelled prior fixture clip.
+- [ ] Beat 1: the question as recorded, the two traps, the current metric; prior consume and Germany sections collapsed and labelled.
+- [ ] Beat 2: rank 1 `Active-customer revenue`, excluded `Customer revenue (legacy)`, receipt UNVERIFIABLE; tape agrees, all ✓.
+- [ ] Beat 3: 8 stubs with titles, legacy marked deprecated; the KC handle card says no Catalog write on this path; Dataplex leftover labelled prior.
+- [ ] Beat 4: lookup JSON + payoff; “what the next agent does” (use / skip / unproven); junk-ref tape labelled expected; try-a-ref fails closed on anything else.
+- [ ] Walkthrough: `okf-bqaa-cli.mp4` first, poster is the lookup JSON + payoff (not FAIL_CLOSED, not an empty header); four one-sentence captions; e2e clip collapsed and labelled prior.
+- [ ] How this was built / IDs: live strip reads "snapshot loaded ✓ · 180 events · transcript agrees"; derived row reads "pinned from CLI · … = transcript ✓ · distinct from authored"; histogram Σ 180.
 
 ## Not in this PR
 
-No re-run of the observe agent, no new BigQuery DML, no Catalog writes, no attester, no receipt beyond the no-execution specimen, no change to OKF v0.2 core or PROFILE.md, no merge of SDK PR 474, nothing from #435.
+No re-run of the observe agent, no new BigQuery DML, no Catalog writes, no attester, no receipt beyond the no-execution specimen, no change to OKF v0.2 core or PROFILE.md, no merge of SDK PR 474, nothing from #435, no different finance story.

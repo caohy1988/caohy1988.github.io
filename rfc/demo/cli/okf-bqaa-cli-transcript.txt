@@ -1,19 +1,29 @@
-# BQAA TRACE → useful OKF  ·  okf-bqaa-adapter:v0  ·  stdlib, no GCP
+# Why a BQAA TRACE becomes derived OKF a later agent can look up
 # recorded 2026-09-02 PT from /Users/haiyuancao/BigQuery-Agent-Analytics-SDK-okf-adapter
 # HEAD 476d37dc9d4210a335c2f77e78003f6a5ebe2878  (GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK PR 474 — do not merge)
-# pedagogical recut: OBSERVE → ADAPT (titles, not a hash dump) → LOOKUP → labelled FAIL_CLOSED (exit 2, not a crash)
+# pedagogical recut: ASK → OBSERVE (titles) → PUBLISH (run.py, KC handle) → NEXT AGENT (lookup payoff); FAIL_CLOSED labelled, last frames = payoff
 
-# BQAA TRACE → useful OKF  ·  okf-bqaa-adapter:v0  ·  stdlib, no GCP
-# worktree @ 476d37dc  ·  SDK PR 474 HEAD (do not merge)  ·  derived/demo, nothing attested
+# Why a BQAA trace becomes derived OKF a later agent can look up
+# stdlib CLI · SDK PR 474 HEAD 476d37dc (do not merge) · derived/demo, nothing attested
 
-# 1 · OBSERVE
-# 180 live BQAA agent_events from okf_rfc_observe_agent
-$ python3 -c "import json; t=json.load(open('examples/okf_bqaa_adapter/fixtures/live_observe_agent_events.json')); print(len(t['events']) , 'events'); print(t['session_id'])"
-180 events
-f21ee192-d989-4c38-894f-66b6b82eaf18
+# 1 · ASK
+# A finance agent is asked for Germany last-quarter revenue — and whether to trust it.
+# Trap: Customer revenue (legacy) is still on the shelf, superseded.
+$ python3 -c "import json; t=json.load(open('examples/okf_bqaa_adapter/fixtures/live_observe_agent_events.json')); print(next(e['content']['text_summary'] for e in t['events'] if e['event_type']=='USER_MESSAGE_RECEIVED'))"
+What was active-customer revenue in Germany last quarter — and can I trust the number?
 
-# 2 · ADAPT
-# one command projects that trace into a derived OKF bundle
+# 2 · OBSERVE
+# The live trace ranked the current metric first and excluded the superseded one.
+# Receipt: UNVERIFIABLE — the number is unproven.
+$ python3 examples/okf_bqaa_adapter/_why_observe.py
+180 events · okf_rfc_observe_agent
+session f21ee192-d989-4c38-894f-66b6b82eaf18
+rank 1: Active-customer revenue
+excluded: Customer revenue (legacy) | superseded; out of force since 2026-06-20
+receipt: UNVERIFIABLE · nothing attested
+
+# 3 · PUBLISH
+# One command turns that telemetry into derived OKF a later agent can look up.
 $ python3 examples/okf_bqaa_adapter/run.py
 LABEL derived/demo, observer-only, nothing attested
 ADAPTER okf-bqaa-adapter:v0
@@ -28,16 +38,8 @@ SNAPSHOT_ID sha256:f18befd010ff7e3d1fe140303626a82dc985c986846093f73643e7d0eea92
 PUBLICATION_ID sha256:53bd1651c43f69d53f591e4f91e3ccdda4640d8b36cb1dce1ac97328ffa39a77
 FILES 8
 OUT /Users/haiyuancao/BigQuery-Agent-Analytics-SDK-okf-adapter/examples/okf_bqaa_adapter/out
-# useful OKF: 8 stubs (metric, computation, policy, tables) + identity chain
-$ find examples/okf_bqaa_adapter/out/bundle -name '*.md' | sort
-examples/okf_bqaa_adapter/out/bundle/computations/active-customer-revenue-by-region-and-quarter.md
-examples/okf_bqaa_adapter/out/bundle/concepts/active-customer.md
-examples/okf_bqaa_adapter/out/bundle/log.md
-examples/okf_bqaa_adapter/out/bundle/metrics/active-customer-revenue.md
-examples/okf_bqaa_adapter/out/bundle/metrics/customer-revenue-legacy.md
-examples/okf_bqaa_adapter/out/bundle/policies/revenue-recognition-eligibility.md
-examples/okf_bqaa_adapter/out/bundle/tables/billing-invoice-lines.md
-examples/okf_bqaa_adapter/out/bundle/tables/crm-customers.md
+# 8 derived stubs (metric, computation, policy, tables, log) with their own identity chain
+# This is the handle a Knowledge Catalog entry would expose — this CLI path did not write Catalog.
 $ grep -h '^title:' examples/okf_bqaa_adapter/out/bundle/*/*.md
 title: Active-customer revenue by region and quarter
 title: Active customer
@@ -46,27 +48,26 @@ title: Customer revenue (legacy)
 title: Revenue recognition eligibility
 title: Billing invoice lines
 title: CRM customers
-$ sed -n '1,8p' examples/okf_bqaa_adapter/out/bundle/metrics/active-customer-revenue.md
----
-type: Metric
-title: Active-customer revenue
-description: Derived from BQAA observation, not authored. Observed at rank 1 of 6 in retrieval envelope okf:env-observe#674153c572f6.
-status: draft
-tags: [bqaa-derived, observer-only, metric]
-supersedes:
-  - metrics/customer-revenue-legacy.md
 
-# 3 · LOOKUP
-# an agent later resolves context_ref to that publication
+# 4 · NEXT AGENT
+# lookup(context_ref) returns that publication.
 $ python3 examples/okf_bqaa_adapter/run.py --lookup 'okf:env-observe#674153c572f6'
 {
   "context_ref": "okf:env-observe#674153c572f6",
   "publication_id": "sha256:53bd1651c43f69d53f591e4f91e3ccdda4640d8b36cb1dce1ac97328ffa39a77",
   "label": "derived/demo"
 }
+# Payoff: use Active-customer revenue, not legacy; the number is unproven.
 
-# 4 · FAIL-CLOSED
 # junk refs fail closed (expected exit 2, not a crash)
 $ python3 examples/okf_bqaa_adapter/run.py --lookup 'okf:env-junk#deadbeef'
 FAIL_CLOSED context_ref not bound in mapping (fail closed): 'okf:env-junk#deadbeef'
 # expected FAIL_CLOSED exit 2 — not a crashed demo
+# 4 · NEXT AGENT
+$ python3 examples/okf_bqaa_adapter/run.py --lookup 'okf:env-observe#674153c572f6'
+{
+  "context_ref": "okf:env-observe#674153c572f6",
+  "publication_id": "sha256:53bd1651c43f69d53f591e4f91e3ccdda4640d8b36cb1dce1ac97328ffa39a77",
+  "label": "derived/demo"
+}
+# Payoff: use Active-customer revenue, not legacy; the number is unproven.
