@@ -41,8 +41,14 @@ committed export:
 What was active-customer revenue in Germany last quarter — and can I trust the number?
 ```
 
-On the page: beat 1, the question as recorded, the two traps, the current
-metric.
+On the page: beat 1, the question as recorded, the "What this demo is asking"
+block, the two traps, the current metric. Say the answer out loud: this is the
+third option. Context the first agent earned the hard way was observed by
+BQAA and projected into derived OKF so the next agent can discover it. It is
+not human-in-the-loop or customer-sentiment promotion, it is not trusting BQAA
+as truth (observer-only, not the authored bundle, not a truth score), and
+trust here means process integrity of what was observed. The number is still
+unproven.
 
 ### 2 · OBSERVE
 
@@ -94,9 +100,10 @@ payoff, not FAIL_CLOSED and not an empty header. On the page: beat 4.
 
 ## Beats on the page, if presenting live
 
-1. **Ask.** Read the hero question and the three-sentence payoff aloud. Beat 1:
-   the question as recorded, the dead metric, the over-claim, the current
-   metric. Expand the collapsed prior consume experiment and Germany sections
+1. **Ask.** Read the hero question and the three-sentence payoff aloud, then
+   the ask callout under the badges. Beat 1: the question as recorded, the
+   three-way answer (hard path → derived OKF; not HITL / sentiment; not BQAA
+   as truth), the dead metric, the over-claim, the current metric. Expand the collapsed prior consume experiment and Germany sections
    only to show that they are labelled.
 2. **Observe.** Beat 2: rank 1 `Active-customer revenue`, `Customer revenue
    (legacy)` excluded with its reason, receipt UNVERIFIABLE. The tape pane

@@ -352,6 +352,13 @@
     return beatHead(1, "telemetry", "Ask", "A finance agent is asked: “" + esc(o.question) + "”",
       "There are two easy ways to get this wrong. The agent can answer with <b>" + esc(ex.title) + "</b>, a metric that is still on the shelf but " + esc(ex.reason) + ". Or it can quote the number as if someone had verified it, when no sanctioned computation has run. Both feel fine in the moment. The current metric is <b>" + esc(r1.title) + "</b>, and the honest answer names it and marks the number as unproven.") +
       must("the trap is <code>" + esc(ex.title) + "</code> vs current <code>" + esc(r1.title) + "</code> · the second trap is claiming the number is verified · question as recorded in the trace, not invented") +
+      '<div class="pane ask-what"><div class="pane-h"><span class="t">What this demo is asking</span><span class="m">the three-way question, answered</span></div><div class="pane-b">' +
+      "<p><b>Are we trusting what is in BQAA? Asking a human-in-the-loop or customer sentiment to decide what to promote? Or adding context the agent obtained via the hard path into OKF so it is available for easy discovery?</b> The third one.</p><ul>" +
+      "<li><b>Yes: hard path → derived OKF for discovery.</b> Context this agent earned the hard way (ranked <code>" + esc(r1.title) + "</code>, excluded <code>" + esc(ex.title) + "</code>, receipt unproven) was observed by BQAA; one adapter turn projects it into derived OKF so the next agent discovers it via <code>context_ref</code> instead of re-earning it or picking the dead metric.</li>" +
+      "<li><b>Not trusting BQAA as knowledge or truth.</b> BQAA is observer-only. Telemetry is not the authored bundle and not a truth score.</li>" +
+      "<li><b>Not human-in-the-loop promotion or customer-sentiment ranking.</b> This slice does not pick winners that way, and no such feature exists here.</li>" +
+      "<li><b>Trust here means process integrity of what was observed.</b> Opaque IDs, fail-closed lookup, no overclaim. It does not mean the number is right: the receipt stays <code>UNVERIFIABLE</code>. It does not make BQAA a second wiki.</li>" +
+      "</ul></div></div>" +
       '<div class="traps">' +
       '<div class="trap bad"><div class="th">Trap 1 · the dead metric</div><div class="name">' + esc(ex.title) + '</div><p>' + esc(ex.type) + " · " + esc(ex.reason) + ". Still findable. Still wrong.</p></div>" +
       '<div class="trap soft"><div class="th">Trap 2 · over-claiming trust</div><div class="name">“The number is verified.”</div><p>Nothing ran as a sanctioned computation. The receipt on this run is <code>UNVERIFIABLE</code>, so the number is unproven and should be reported that way.</p></div>' +
