@@ -23,7 +23,8 @@ DATASET = os.environ.get("OKF_DEMO_DATASET", "okf_rfc_demo")
 TABLE = os.environ.get("OKF_DEMO_TABLE", "agent_events")
 LOCATION = os.environ.get("OKF_DEMO_BQ_LOCATION", "US")
 MODEL = os.environ.get("DEMO_MODEL_ID", "gemini-3.8-flash")
-AGENT_LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
+# "global" is what the recorded run used; us-central1 returned 404 for gemini-3.8-flash.
+AGENT_LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION", "global")
 
 # Pinned derived identities from rfc/demo/derived/identities.json
 CONTEXT_REF = os.environ.get(
@@ -41,8 +42,16 @@ os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
 
 
 def lookup_okf_context(context_ref: str) -> dict:
-    """Retrieve sanctioned OKF context. Returns context_ref only (no paths, query, principal)."""
+    """Pinned demo stub / live consumption smoke test.
+
+    Echoes any truthy caller context_ref and attaches the hard-coded
+    PUBLICATION_ID. It does NOT resolve or verify the binding against a
+    store, and unknown refs are not rejected. Its purpose is to exercise
+    the context_ref-only seam under a real model call with BQAA observing.
+    Returns context_ref + publication_id only (no paths, query, principal).
+    """
     # Never return concept_version_id, paths, principal, or query text.
+    # Unknown / unrelated refs are echoed back unchanged; there is no resolver here.
     return {
         "ok": True,
         "context_ref": context_ref or CONTEXT_REF,

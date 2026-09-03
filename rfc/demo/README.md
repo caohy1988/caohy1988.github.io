@@ -23,18 +23,22 @@ snapshot of one **live GCP run** plus console deep links.
 All of the above is pinned in `live/live.json`, which also carries the
 BigQuery and Dataplex console links the page shows. `live/agent_events.json`
 is the committed read-back of the 14 `agent_events` rows the ADK
-`BigQueryAgentAnalyticsPlugin` appended during that session.
+`BigQueryAgentAnalyticsPlugin` appended during that session, as a curated
+field projection rather than a lossless export: `invocation_id`,
+`content_parts`, `latency_ms`, `parent_span_id` and `is_truncated` were
+omitted, and some SQL NULLs were serialised as the JSON string `"null"`.
 
 ## Honesty labels
 
 | Thing | Status |
 |---|---|
-| `live/agent_events.json`, `live/live.json` | **Live, committed snapshot.** Real rows from a real `okf_rfc_demo.agent_events` run of `okf_rfc_consume_agent` on `gemini-3.8-flash`. Exported once; not re-queried by the page. |
+| `live/agent_events.json`, `live/live.json` | **Live, committed snapshot.** Real rows from a real `okf_rfc_demo.agent_events` run of `okf_rfc_consume_agent` on `gemini-3.8-flash`. Exported once as a curated field projection (not lossless, see above); not re-queried by the page. |
+| `lookup_okf_context` (`live/run_okf_agent.py`) | **Pinned demo stub / live consumption smoke test.** Echoes the caller `context_ref` and returns the hard-coded derived `publication_id`. No store lookup, no binding verification, unknown refs not rejected. The model call and the BQAA rows are real; the resolver is not. |
 | `fixture/bundle/`, `fixture/golden/` | **Authored** Phase 0 fixture, copied byte-for-byte from `okf-phase0-mvp/`. Display-only. Never modified by the adapter. |
 | `traces/bqaa-germany.json` | **Synthetic** adapter input (15 events shaped like `agent_events` rows). Used by beat 2 to derive the bundle; never written to a table. `user_id` null; no SQL, parameter values, bundle paths or `concept_version_id`. |
 | `derived/bundle/`, `derived/identities.json` | **Derived / demo.** Emitted by the adapter from the trace. `bundle_key = bqaa-derived-cymbal-demo`, its own observation / snapshot / publication triple. Not canonical authoring. |
 | Beat 1 Observe | Live `agent_events` rows, observer-only. Never-emit scan runs over every row's `attributes` and `content` keys in the browser. |
-| Beat 3 Catalog pane | Live Dataplex entry `okf-derived-germany` (console link). The projection table shown is a client-side view; no `kcmd` write happens from the page. |
+| Beat 3 Catalog pane | Live Dataplex entry `okf-derived-germany` (console link); its description contains the publication hash. The page reads no Catalog aspect: the publication pin on the card is the browser-computed expected value, labelled "expected publication (local)". The projection table shown is a client-side view; no `kcmd` write happens from the page. |
 | Beat 3 BigQuery pane | Live dataset link. Client-side rows in the RFC projection shape (`publications`, `deployment_heads`, `nodes_current`, `edges_current`). No DML from the page. |
 | Beat 4 ADK transcript | **Live** session reconstructed from the committed rows. The agent declared one tool, called it with `context_ref` only, and the tool result names the derived `publication_id` and nothing from the never-emit list. The earlier fixture replay is kept collapsed below it for comparison and is labelled as a replay. |
 | Receipt | This live run minted **no receipt**. Nothing was executed as a sanctioned computation and nothing is ATTESTED. The model's own "verified" wording overstates. The only receipt on the page is the Phase 0 golden specimen: `UNVERIFIABLE`, reason `phase0_no_execution_or_integrity_proof`. The Phase 4 `ATTESTED` shape is shown beside it, non-normative. |
@@ -103,7 +107,7 @@ Deep links: `#beat=1` … `#beat=4`. Keys: → / N next, ← / P back, 1–4 jum
 - [ ] Identity strip shows the authored triple (pinned) and the derived triple with "JS = pinned = Python ✓ · distinct from authored".
 - [ ] Beat 1 never-emit scan: every key absent on all live rows.
 - [ ] Beat 2 inspector: every stub starts "Derived from BQAA observation, not authored."
-- [ ] Beat 3 seam note reads "same publication on both stores ✓"; Dataplex and BigQuery links resolve.
+- [ ] Beat 3 seam note reads "local derived publication == live tool-result publication ✓"; Catalog card pin is labelled "expected publication (local)"; Dataplex and BigQuery links resolve.
 - [ ] Beat 4 model badge reads `gemini-3.8-flash`; tool args are `{context_ref}` only; assertion tile reads `keys ∩ never-emit = ∅ ✓`; receipt tile reads "NO RECEIPT".
 - [ ] Walkthrough: the live-run summary card comes first; the video below it is labelled as the prior fixture clip.
 

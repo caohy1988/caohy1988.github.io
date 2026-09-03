@@ -27,7 +27,8 @@ ATTESTED.
   id, full `ran_at`.
 - Open the BigQuery console link; show `okf_rfc_demo.agent_events` filtered
   to the session id; return to the page.
-- Show the 14 committed rows and the event-type histogram.
+- Show the 14 committed rows and the event-type histogram; expand one row
+  (labelled a curated field projection of the live BQ row, not lossless).
 - Show the never-emit scan: every key absent across all rows.
 
 ## Beat 2 · Adapt
@@ -42,8 +43,9 @@ ATTESTED.
 
 - Open the Dataplex console link; show entry `okf-derived-germany` in group
   `okf-rfc-demo`; return to the page.
-- Show the Catalog pane and the BigQuery pane side by side; seam note reads
-  "same publication on both stores ✓".
+- Show the Catalog pane and the BigQuery pane side by side; the Catalog card
+  pin is labelled "expected publication (local)" (not a Catalog aspect); seam
+  note reads "local derived publication == live tool-result publication ✓".
 - Point at `context_ref = okf:env-demo#a25e1c0ccbca` and the matching
   `publication_id`.
 

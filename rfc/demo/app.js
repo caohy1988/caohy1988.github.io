@@ -249,7 +249,7 @@
         '<span class="ty ' + evClass(e) + '">' + esc(e.event_type) + "</span>" +
         '<span class="sm">' + liveSummary(e) + "</span>" +
         '<span class="car">▸</span></button>' +
-        '<div class="raw" hidden>' + pre({ timestamp: e.timestamp, event_type: e.event_type, agent: e.agent, session_id: e.session_id, trace_id: e.trace_id, span_id: e.span_id, status: e.status, user_id: e.user_id, attributes: e.attributes, content: e.content }, ["context_ref", "publication_id", "session_id", "trace_id"]) + "</div></li>";
+        '<div class="raw" hidden><p class="sub-h" style="margin:0 0 6px">curated field projection of the live BQ row · not a lossless export</p>' + pre({ timestamp: e.timestamp, event_type: e.event_type, agent: e.agent, session_id: e.session_id, trace_id: e.trace_id, span_id: e.span_id, status: e.status, user_id: e.user_id, attributes: e.attributes, content: e.content }, ["context_ref", "publication_id", "session_id", "trace_id"]) + "</div></li>";
     }).join("");
     var histHtml = Object.keys(L.hist).map(function (k) { return "<code>" + esc(k) + "</code>×" + L.hist[k]; }).join(" ");
     var checks = L.never.map(function (k) {
@@ -260,7 +260,7 @@
       "<b>" + L.rows.length + " rows</b> read back from <code>" + esc(L.table) + "</code> (" + esc(M.dataset_location) + "), appended by the ADK <code>BigQueryAgentAnalyticsPlugin</code> while <code>" + esc(M.agent) + "</code> ran on <b><code>" + esc(L.model) + "</code></b>. They are committed here as a snapshot; the browser never queries BigQuery.") +
       must("observer-only · real BQAA rows, dataset <code>okf_rfc_demo</code> not <code>adk_logs</code> · <code>context_ref</code> is the only handle on the tool span · no SQL, no paths, no <code>concept_version_id</code>") +
       '<div class="cols">' +
-      '<div class="pane telemetry"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--telemetry)"></span>agent_events · ' + esc(M.session_id) + '</span><span class="m">live snapshot · click a row for the raw BQ row</span></div>' +
+      '<div class="pane telemetry"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--telemetry)"></span>agent_events · ' + esc(M.session_id) + '</span><span class="m">live snapshot · click a row for a curated field projection of the live BQ row</span></div>' +
       '<div class="pane-b"><ul class="events">' + list + "</ul></div></div>" +
       '<div class="pane"><div class="pane-h"><span class="t">What the observer wrote</span><span class="m">and what it never wrote</span></div><div class="pane-b">' +
       '<dl class="facts">' +
@@ -282,6 +282,7 @@
       check(L.argsOnlyRef && L.violations.length === 0, "Tool args = {<code>context_ref</code>} only; tool result keys ∩ never-emit = ∅") +
       info("<code>user_id</code> is a BQAA row column, not an agent-facing field. In this run it is the demo pseudonym <code>" + esc(L.userIds.join(", ")) + "</code>; it never appears on the tool args or result.") +
       info("The observer captured the prompt and the agent instruction as content. Neither contains SQL, parameter values, bundle paths or <code>concept_version_id</code>.") +
+      info("The committed snapshot is a <b>curated field projection</b> of the live rows, not a lossless export: <code>invocation_id</code>, <code>content_parts</code>, <code>latency_ms</code>, <code>parent_span_id</code> and <code>is_truncated</code> were omitted, and some SQL NULLs were serialised as the JSON string <code>\"null\"</code>. Expanded rows show that projection.") +
       "</ul></div></div></div>" +
       renderFixtureTrace();
   }
@@ -381,7 +382,7 @@
       '<div class="arrow"><b>→</b>consumed live<br>by context_ref</div>' +
       '<div class="box l"><b>live · BQAA session</b><code>' + esc(short(L.meta.session_id, 13)) + "</code> · " + L.rows.length + " real rows<br><code>" + esc(L.meta.context_ref) + "</code></div>" +
       "</div>" +
-      '<p class="fixture-note">The leadership proof is the live session, not the synthetic Germany fixture. The fixture is the adapter’s input and stays labelled synthetic; the publication it yields is what the real agent looked up.</p>' +
+      '<p class="fixture-note">The leadership proof is the live session, not the synthetic Germany fixture. The fixture is the adapter’s input and stays labelled synthetic; the publication it yields is what the real agent’s tool call carried by <code>context_ref</code> (via a pinned demo stub, not a resolver).</p>' +
       '<div class="cols">' +
       '<div class="pane source"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--source)"></span>bundle inspector · ' + esc(ad.bundle_key) + '</span><span class="m">source view · paths are allowed here, never in telemetry</span></div>' +
       '<div class="pane-b" style="padding:8px 10px">' + fileTree() + "</div>" + fileView(selectedFile) + "</div>" +
@@ -460,8 +461,9 @@
       '<span class="pin"><b>entry group</b> ' + esc(M.kc_entry_group) + "</span>" +
       '<span class="pin"><b>location</b> ' + esc(M.kc_location) + "</span>" +
       '<span class="pin"><b>project</b> ' + esc(M.project) + "</span>" +
-      '<span class="pin pub"><b>okf.publication_id</b> ' + esc(short(pub, 19)) + "</span>" +
-      '<span class="pin"><b>okf.provenance</b> bqaa observer · derived / demo</span>' +
+      '<span class="pin pub"><b>expected publication (local)</b> ' + esc(short(pub, 19)) + "</span>" +
+      '<span class="pin"><b>provenance</b> bqaa observer · derived / demo</span>' +
+      '<span class="pin"><b>description</b> contains the publication hash · not read as a Catalog aspect by this page</span>' +
       "</div>" +
       '<p class="res"><code>' + esc(M.kc_entry) + "</code></p>" +
       '<div class="live-links">' + link(M.kc_console, "kc", "Find the entry in Dataplex") + "</div></div>";
@@ -477,14 +479,14 @@
       '<p class="res"><code>' + esc(L.table) + "</code></p>" +
       '<div class="live-links">' + link(M.bq_console, "bq", "Open the table in BigQuery") + "</div></div>";
     return beatHead(3, "split", "Project", "Two stores, one publication. A real Dataplex entry for discovery, a real BigQuery table for serving.",
-      "The derived publication is what both stores point at. <b style=\"color:var(--catalog)\">Knowledge Catalog</b> holds the live entry <code>okf-derived-germany</code> in entry group <code>okf-rfc-demo</code>; <b style=\"color:var(--runtime)\">BigQuery</b> holds the live <code>okf_rfc_demo.agent_events</code> rows whose tool result names the publication. Below each live card, the in-browser projection of the derived bundle is shown as a labelled derived view: no <code>kcmd</code> write, no DML from this page.") +
-      must("real Dataplex entry + console link · real BigQuery table + console link · same <code>publication_id</code> on both panes · in-browser views labelled derived") +
+      "<b style=\"color:var(--catalog)\">Knowledge Catalog</b> holds the live entry <code>okf-derived-germany</code> in entry group <code>okf-rfc-demo</code>; its description contains the derived publication hash, but this page reads no Catalog aspect, so the publication pin on that card is the browser-computed expected value. <b style=\"color:var(--runtime)\">BigQuery</b> holds the live <code>okf_rfc_demo.agent_events</code> rows whose tool result names the publication, and that value is compared to the local derived publication below. Below each live card, the in-browser projection of the derived bundle is shown as a labelled derived view: no <code>kcmd</code> write, no DML from this page.") +
+      must("real Dataplex entry + console link · real BigQuery table + console link · local derived <code>publication_id</code> == live tool-result <code>publication_id</code> · Catalog pin is expected/local, not a read aspect · in-browser views labelled derived") +
       '<div class="cols even">' +
       '<div class="pane catalog"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--catalog)"></span>Knowledge Catalog · discovery</span><span class="m">live entry first · derived view below</span></div>' +
       '<div class="pane-b">' + kcCard + '<p class="sub-h">derived view · in-browser projection of the bundle · not written to Catalog</p><div class="cards">' + cards + "</div></div></div>" +
       '<div class="pane runtime"><div class="pane-h"><span class="t"><span class="sw" style="background:var(--runtime)"></span>BigQuery · serving</span><span class="m">live table first · derived view below</span></div>' +
       '<div class="pane-b">' + bqCard + '<p class="sub-h">derived view · RFC projection shape · not a live table</p>' + table("publications", pubRow) + table("deployment_heads", headRow, "head advanced") + table("nodes_current", nodes, "one row per concept version") + table("edges_current", edges) + "</div></div>" +
-      '<div class="seam-note"><span>Catalog <code>okf.publication_id</code> ' + esc(short(pub, 23)) + '</span><span class="eq">' + (same && L.pubMatch ? "=" : "≠") + '</span><span>BigQuery <code class="rt">tool result publication_id</code> ' + esc(short(L.toolResult.publication_id || "", 23)) + "</span><span>· " + (same && L.pubMatch ? "same publication on both stores ✓" : "MISMATCH") + "</span></div>" +
+      '<div class="seam-note"><span>local derived <code>publication_id</code> ' + esc(short(pub, 23)) + '</span><span class="eq">' + (same && L.pubMatch ? "=" : "≠") + '</span><span>live BigQuery <code class="rt">tool result publication_id</code> ' + esc(short(L.toolResult.publication_id || "", 23)) + "</span><span>· " + (same && L.pubMatch ? "local derived publication == live tool-result publication ✓" : "MISMATCH") + "</span><span>· Dataplex entry is live; its description contains the publication hash (console link is the live proof; this page does not read a Catalog aspect)</span></div>" +
       "</div>";
   }
 
@@ -502,6 +504,8 @@
       '<span class="kw">from</span> google.adk.plugins.bigquery_agent_analytics_plugin <span class="kw">import</span> BigQueryAgentAnalyticsPlugin\n\n' +
       'MODEL = os.environ.get(<span class="st">"DEMO_MODEL_ID"</span>, <span class="st hl">"gemini-3.8-flash"</span>)\n\n' +
       '<span class="kw">def</span> lookup_okf_context(context_ref: str) -> dict:\n' +
+      '    <span class="cm"># pinned demo stub / live consumption smoke test: echoes the caller\'s context_ref and</span>\n' +
+      '    <span class="cm"># returns the hard-coded publication. No store lookup; unknown refs are not rejected.</span>\n' +
       '    <span class="cm"># never returns concept_version_id, paths, principal or query text</span>\n' +
       '    <span class="kw">return</span> {<span class="st">"ok"</span>: True, <span class="st">"context_ref"</span>: context_ref, <span class="st">"publication_id"</span>: PUBLICATION_ID,\n' +
       '            <span class="st">"note"</span>: <span class="st">"derived/demo bundle; not canonical authoring"</span>}\n\n' +
@@ -510,8 +514,8 @@
       'bq_plugin = BigQueryAgentAnalyticsPlugin(project_id=PROJECT, dataset_id=<span class="st">"okf_rfc_demo"</span>,\n' +
       '                                        table_id=<span class="st">"agent_events"</span>, location=<span class="st">"US"</span>)';
     var answerHtml = esc(L.answerText).split(esc(ref)).join('<span class="cite">' + esc(ref) + "</span>");
-    return beatHead(4, "ink", "Consume", "A real ADK agent on <code>gemini-3.8-flash</code> looked up the derived context by <code>context_ref</code> and answered. This is the live transcript, not a replay.",
-      "Every turn below is reconstructed from the live <code>agent_events</code> rows for session <code>" + esc(short(M.session_id, 13)) + "</code>. The agent declared one tool, <code>" + esc(L.toolName) + "</code>, called it with <code>context_ref</code> only, and received a result that names the derived publication and nothing from the never-emit list. No receipt was minted in this run and nothing here is attested.") +
+    return beatHead(4, "ink", "Consume", "A real ADK agent on <code>gemini-3.8-flash</code> called a pinned demo stub with <code>context_ref</code> only and answered. This is the live transcript, not a replay.",
+      "Every turn below is reconstructed from the live <code>agent_events</code> rows for session <code>" + esc(short(M.session_id, 13)) + "</code>. The agent declared one tool, <code>" + esc(L.toolName) + "</code>, called it with <code>context_ref</code> only, and received a result that names the derived publication and nothing from the never-emit list. That tool is a <b>pinned demo stub</b> (a live consumption smoke test): it echoes the caller's <code>context_ref</code> and returns the hard-coded publication; it does not resolve the ref against a store and does not reject unknown refs. The model call and the BQAA rows are real. No receipt was minted in this run and nothing here is attested.") +
       must("real model call, real BQAA rows · tool args = {<code>context_ref</code>} · result keys ∩ never-emit = ∅ · no ATTESTED claim · model stays <code>gemini-3.8-flash</code>") +
       '<div class="adk">' +
       '<div class="adk-h"><span class="agent"><span class="fw">google-adk · live</span><b>' + esc(M.agent) + "</b><span>session " + esc(M.session_id) + '</span></span>' +
