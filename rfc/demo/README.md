@@ -73,7 +73,7 @@ python examples/okf_bqaa_adapter/run.py --lookup 'okf:env-junk#deadbeef'   # FAI
 
 | Item | Value |
 |---|---|
-| SDK | `GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK` [PR 474](https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/474) HEAD `476d37dc9d4210a335c2f77e78003f6a5ebe2878`, `examples/okf_bqaa_adapter` (**do not merge**) |
+| SDK | `GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK` [PR 474](https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/474) recording-time HEAD `476d37dc9d4210a335c2f77e78003f6a5ebe2878`, `examples/okf_bqaa_adapter`. **PR 474 merged 2026-09-03T16:54:58Z** (merge commit `4f54b5c0506d646f0fb785469701abbcc1ead79e`); the tape, cast, and transcript are a pre-merge recording of that HEAD |
 | Adapter | `okf-bqaa-adapter:v0`, stdlib only, no GCP on the default path |
 | Observe agent | `okf_rfc_observe_agent`, google-adk, `gemini-3.8-flash`, Vertex `global` |
 | Table | `test-project-0728-467323.okf_rfc_demo.agent_events` |
@@ -145,7 +145,8 @@ python3 rfc/demo/tools/check_live_trace.py          # prior consume-experiment s
 
 ```
 git clone https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK
-git checkout 476d37dc9d4210a335c2f77e78003f6a5ebe2878      # PR 474 HEAD; do not merge
+git checkout 476d37dc9d4210a335c2f77e78003f6a5ebe2878      # PR 474 pre-merge HEAD, the SHA the tape was recorded against
+# PR 474 has merged (2026-09-03, 4f54b5c0506d); the same adapter is on main, but reproduce against the recording SHA
 python examples/okf_bqaa_adapter/run.py
 python examples/okf_bqaa_adapter/run.py --lookup 'okf:env-observe#674153c572f6'
 ```
@@ -175,4 +176,4 @@ Deep links: `#beat=1` … `#beat=4`. Keys: → / N next, ← / P back, 1–4 jum
 
 ## Not in this PR
 
-No re-run of the observe agent, no new BigQuery DML, no Catalog writes, no attester, no receipt beyond the no-execution specimen, no change to OKF v0.2 core or PROFILE.md, no merge of SDK PR 474, nothing from #435, no different finance story.
+No re-run of the observe agent, no new BigQuery DML, no Catalog writes, no attester, no receipt beyond the no-execution specimen, no change to OKF v0.2 core or PROFILE.md, nothing from #435, no re-record of the tape after SDK PR 474 merged (it stays a labelled pre-merge recording), no different finance story.

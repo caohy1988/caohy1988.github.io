@@ -37,7 +37,9 @@ gap with the wrong readings.
   the stepper titles stay byte-identical; `check_cli_viewer.py` asserts them.
 - Do not invent HITL or sentiment features, in copy or in code.
 - Do not claim Catalog was written on this CLI path.
-- Do not merge or touch BigQuery-Agent-Analytics-SDK PR 474.
+- Do not touch BigQuery-Agent-Analytics-SDK PR 474. It merged on 2026-09-03
+  (`4f54b5c0506d`) independently of this repo; the demo tape stays a labelled
+  pre-merge recording of `476d37dc`.
 - Do not re-record `okf-bqaa-cli.mp4` or the poster; edit captions around them.
 - Keep the two existing traps (legacy metric, over-claiming trust).
 - `rfc/index.html` Prototype callout stays within the checker's 2–6 sentences.

@@ -10,12 +10,16 @@ the same four beats as the page:
 - `cli/okf-bqaa-cli-transcript.txt` (plaintext, the durable proof)
 
 Recorded 2026-09-02 PT from a checkout of
-`GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK` PR 474 at HEAD
+`GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK` PR 474 at its pre-merge HEAD
 `476d37dc9d4210a335c2f77e78003f6a5ebe2878`, `examples/okf_bqaa_adapter`.
 Stdlib only, no GCP, nothing re-run: the CLI reads the committed export of
 observe session `f21ee192-d989-4c38-894f-66b6b82eaf18` (180 rows,
 `okf_rfc_observe_agent`, `gemini-3.8-flash`). Label throughout: derived / demo,
-observer-only, nothing attested. Do not merge PR 474.
+observer-only, nothing attested. PR 474 merged on 2026-09-03T16:54:58Z (merge
+commit `4f54b5c0506d646f0fb785469701abbcc1ead79e`) after this recording, so the
+adapter now lives on the SDK `main` branch; the mp4, cast, and transcript are
+left as a pre-merge recording of that HEAD, and the on-tape "do not merge"
+note is from recording time.
 
 `okf-bqaa-e2e.mp4` is a **prior fixture clip**, recorded before the observe run
 and before the CLI path existed. It stays on the page only inside a collapsed

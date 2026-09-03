@@ -44,8 +44,9 @@ language; technical proof (CLI, SHA triple, 180-event histogram, SDK PR 474,
 `Object.hasOwn`) lives in a collapsed **How this was built / IDs** panel.
 
 Source of truth remains SDK PR 474 HEAD
-`476d37dc9d4210a335c2f77e78003f6a5ebe2878`. **Do not merge PR 474. Do not
-re-run the live ADK observe agent. Do not pad events. Off #435.**
+`476d37dc9d4210a335c2f77e78003f6a5ebe2878` (the pre-merge recording SHA; PR 474
+later merged on 2026-09-03). **Do not re-run the live ADK observe agent. Do not
+pad events. Off #435.**
 
 ## Why
 
@@ -67,7 +68,7 @@ legacy, and says the number is unproven.
 - Honesty that must stay: derived/demo, observer-only, nothing ATTESTED,
   authored `cymbal-finance-core` untouched, browser does not call GCP,
   germany is SYNTHETIC hashing-only, consume session `04fa3d56` is prior
-  experiment not Observe input, do not merge 474, this CLI path did not
+  experiment not Observe input, tape is a pre-merge recording of 474, this CLI path did not
   write Knowledge Catalog.
 - `context_ref` on the page (beats / IDs, not a hero SHA wall) is
   `okf:env-observe#674153c572f6`. Hero agent, if named, is

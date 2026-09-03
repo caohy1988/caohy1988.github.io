@@ -1,7 +1,7 @@
 /* Why a BQAA trace becomes derived OKF the next agent can look up.
    Static viewer of one SDK CLI run. Vanilla JS, no build.
    Source of truth: one stdlib run of `python examples/okf_bqaa_adapter/run.py`
-   (okf-bqaa-adapter:v0, SDK PR 474 HEAD 476d37dc) over the committed export of
+   (okf-bqaa-adapter:v0, SDK PR 474 pre-merge HEAD 476d37dc; 474 merged 2026-09-03) over the committed export of
    the live ADK observe session f21ee192-… (okf_rfc_observe_agent,
    gemini-3.8-flash, 180 agent_events rows). This page renders the committed
    snapshot, the pinned identities and the CLI transcript. It does not hash,
@@ -330,7 +330,7 @@
       return check(!present, "<code>" + k + "</code> " + (present ? "present as a key" : "absent from every sample content key"));
     }).join("");
     return '<details class="nn"><summary>Six sample rows and the never-emit scan · <code>snapshot.json</code> · not a 180-row dump</summary><div class="nn-b">' +
-      '<p class="fixture-note">The trimmed snapshot carries six rows of the 180 (histogram in <a href="#ids">How this was built / IDs</a>; full export on SDK PR 474, do not merge). Click a row to see it.</p>' +
+      '<p class="fixture-note">The trimmed snapshot carries six rows of the 180 (histogram in <a href="#ids">How this was built / IDs</a>; full export on SDK PR 474, merged 2026-09-03). Click a row to see it.</p>' +
       '<ul class="events">' + list + "</ul>" +
       '<p class="beat-kicker" style="margin:12px 0 6px">Never-emit scan · sample content keys</p>' +
       '<ul class="checklist">' + checks +
@@ -454,7 +454,7 @@
       check(c.excluded, "Tape <code>excluded: " + esc(LEGACY_METRIC) + "</code> = snapshot exclusion, reason “" + esc(ex ? ex.reason : "") + "”") +
       check(c.unproven, "Tape <code>receipt: UNVERIFIABLE</code> · nothing attested") +
       check(c.session && c.count, "Session <code>" + esc(short(M.session_id, 8)) + "</code> · " + M.event_count + " rows, histogram Σ " + o.sum + " · agent <code>" + esc(M.agent) + "</code> · <code>" + esc(M.model) + "</code>") +
-      info("Full export (" + Math.round(snap.export_bytes / 1024) + " KB) is on " + link(PR_URL, "pr", "SDK PR 474") + " · do not merge · not padded · not dumped here. Table: " + link(BQ_CONSOLE, "bq", "BigQuery console") + ".") +
+      info("Full export (" + Math.round(snap.export_bytes / 1024) + " KB) is on " + link(PR_URL, "pr", "SDK PR 474") + " (merged 2026-09-03; export attached pre-merge) · not padded · not dumped here. Table: " + link(BQ_CONSOLE, "bq", "BigQuery console") + ".") +
       "</ul></div></div></div>" +
       sampleRowsHtml();
   }

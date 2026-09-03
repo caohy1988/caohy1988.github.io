@@ -2,7 +2,8 @@
 
 Worktree `/Users/haiyuancao/caohy1988.github.io-okf-ask-clarify`, branch
 `feat/rfc-demo-ask-clarify` off `main` `ea60db5`. PR against
-`caohy1988/caohy1988.github.io` `main`. Do not merge. Do not touch SDK PR 474.
+`caohy1988/caohy1988.github.io` `main`. Do not merge this PR. SDK PR 474 has
+merged (2026-09-03); do not touch it, and do not re-record the tape.
 
 ## Order
 
