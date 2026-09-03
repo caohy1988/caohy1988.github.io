@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fable 5.1 brief · 3 Sep 2026, 10:01 AM — The Field Brief</title>
+  <meta name="description" content="Claude Code Fable 5.1: Braintrust Patterns/Debugger/Loop + Langfuse v4.28.0 + Epistemic Sybil Resistance. 10:01 AM PT catch-up, 3 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-03-1001-fable5.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Claude Code · Fable 5.1 · 10:01 AM PT</p>
+    <article>
+<h1>Fable 5.1 brief: industry + academy → BQAA — 2026-09-03 10:01 AM PT (catch-up; 8:34 and 9:34 hourlies failed)</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> 2026-09-03 ~10:20 AM PT (Thursday). Baseline: 2026-09-03-0000-fable5.md.
+<strong>Sources checked:</strong> Braintrust changelog September section, the Sep 3 launch post &quot;One connected system for agent observability&quot;, and the Patterns, Debugger, Loop automations and feature-lifecycle docs pages; Langfuse GitHub releases (new: v4.28.0, Sep 3) and the Langfuse custom-dashboards and LLM-as-a-judge docs; Arize Phoenix release notes (newest still Aug 25); LangSmith changelog (newest still Aug 24–31); Opik releases (2.2.49 Sep 3, patch); MLflow releases (3.15.2); adk-python (v1.39.1, v2.8.0) and adk-java (v1.9.0) releases; OTel semantic-conventions (v1.44.0) and semantic-conventions-genai (no releases); BigQuery platform release notes (Sep 2 JDBC, Sep 1 Rust SDK Preview) and Cloud Observability release notes (Sep 1 SMS opt-out, Aug 31 trace-sink deprecation); Datadog blog index, LLM Observability docs, the Patterns docs page and the Jun 9 Patterns post; Grafana What's New (page and RSS both fail to render); LangWatch changelog (v3.17.0 Aug 30); Weave releases (v0.53.7 Aug 27); Portkey changelog (March); Helicone changelog (Nov 2025); Operata blog and Traccia site (undated); arXiv cs.AI new listing (still the Thursday Sep 3 batch, 175 IDs, diffed against every ID opened in prior briefs); abs pages for 2609.01873, 2609.01818, 2609.02074; <strong>full PDF read</strong> for 2609.01873, extracted locally with pdftotext.</p>
+<p><strong>Read this first.</strong> Two products moved since midnight, and one paper in the Thursday batch had not been opened by any earlier pass. Braintrust shipped Patterns, a Debugger, a managed Loop runtime, and scheduled Loop automations, all in public preview, with a Sep 3 launch post. Patterns is a scheduled agent that reads the last 30 days of traces every weekday morning and records a recurring problem only when it can attach evidence; the Debugger reads one long trace and returns ranked failure hypotheses that cite the exact span, tool call, or model output behind each. That is the second vendor after Datadog to ship &quot;find failure shapes without a rubric,&quot; and the first to ship it as an agent that writes back scorers and datasets. Langfuse cut v4.28.0 this morning with evaluator alerting, an observation filter builder, and an agent/tools dashboard template, though its docs have not caught up yet. On the academy side, a single-author paper from Universitat Oberta de Catalunya formalizes why more agents do not mean more evidence, and shows with over 20,000 real agent calls that pooling reports without provenance collapses calibration while text-similarity deduplication tracks phrasing rather than ancestry. Judgment: no re-rank. Braintrust's Debugger gives the failure-step pointer a shipped reference implementation, and the Sybil paper is the third paper this week arguing that events need a source-event reference list.</p>
+<hr />
+<h2>Industry</h2>
+<h3>Braintrust: Patterns, Debugger, Loop runtime, and Loop automations (public preview, Sep 3)</h3>
+<p>The changelog's September section grew from four entries to roughly fourteen, and the four that matter are new named capabilities, not SDK bumps. Patterns &quot;runs Loop against your project on a schedule, searching for recurring problems and trends that no scorer is already measuring, such as a failure mode affecting one cohort of users or an LLM call whose cost has climbed.&quot; Enabling it creates a scheduled Loop automation that runs at 9:00 AM on weekdays, queries the last 30 days by default, and re-inspects the full range every run rather than only new traces. A pattern is recorded only when Loop can attach supporting evidence, and digests can post to Slack. It runs on Braintrust's built-in GPT-5.6 models and draws down the organization's monthly model credits; self-hosted deployments need data plane v2.13 or later.</p>
+<p>The Debugger is the per-trace counterpart. From the Logs page you open a trace, pick the Debugger layout, and run it; the report lists findings ordered by severity (critical, high, medium, low), each with a hypothesis, a candidate root cause, an area label such as infrastructure, evaluation, or tool_call, and an Evidence section that names the spans, tool calls, and model outputs behind it. Clicking an evidence item jumps to that span, scrolled to the field it came from, with the supporting phrase highlighted. Loop itself now runs in a Braintrust-managed runtime instead of the browser, so threads persist and it can query logs, experiments, and datasets together, run SQL and code, and take approval-gated write actions (create evaluators, datasets, dashboards, monitors). Loop automations generalize Patterns: a scheduled run (daily, weekly, interval, or cron) with its own instruction, model, write permissions ranging from read-only to creating patterns, scorers, or facets, and Slack or webhook destinations. Everything above is labeled public preview, and the post says pricing will be set before general availability.</p>
+<p><strong>TL;DR for BQAA.</strong> The shape here is an agent that runs over the trace store on a schedule and writes structured findings back. BQAA is the trace store, and the equivalent is a scheduled investigation over the events table, which needs nothing new in the schema except what the Debugger's evidence links need: a stable event id and a field path on every event so a finding can point at &quot;this tool result, this field.&quot; That is the failure-step pointer from the reserve list with a shipped reference. Note Datadog's Patterns docs page no longer shows the Preview label the 0746 brief recorded, but the Jun 9 launch post still says preview and nothing announces GA, so I am not calling that a change.</p>
+<h3>Langfuse v4.28.0 (Sep 3): evaluator alerts, observation filter builder, agent/tools dashboard template</h3>
+<p>Cut at 09:59 on Sep 3 per the GitHub release. User-facing features in the notes: evaluator alert management, an observation filter builder, a Langfuse-maintained agent/tools template dashboard, judge prompt metadata tracking, dedicated evaluator execution columns, unified experiment and item score filters across levels, dataset filtering by name, and a rename of providedModelName to model in the observation APIs. The evaluator alerts and execution columns extend the Sep 1 v4.27.0 line (multimodal judge inputs, cached-token cost), which prior briefs carded, so this gets the same treatment. Caveat: the docs have not caught up. The custom-dashboards page still lists only Latency, Cost, and Usage templates, and the LLM-as-a-judge page has no alert section, so the only description of these features is the release-note bullet titles.</p>
+<p><strong>TL;DR for BQAA.</strong> Score-to-alert on evaluator outcomes is now table stakes across Langfuse, LangSmith, and Braintrust. For BQAA it stays a docs example (scheduled query over eval results into an alert) rather than a feature, and the &quot;agent/tools template dashboard&quot; is a reminder that a tool-usage-and-latency dashboard is the first thing a new user expects to exist.</p>
+<h3>Verified flat vs 0000</h3>
+<ul>
+<li><strong>Arize Phoenix.</strong> Product release notes still end at Aug 25. The 20.6.0 GitHub tag from last night remains unaccompanied by a release note.</li>
+<li><strong>Opik.</strong> 2.2.49 on Sep 3 is a patch: default workspace on the MCP OAuth consent screen, concurrent dataset enrichment queries, Gemini thinking config for Vertex and Google AI providers. Not news.</li>
+<li><strong>LangSmith, MLflow, ADK Python, ADK Java, Weave, LangWatch, Portkey, Helicone.</strong> Same newest entries as 0000.</li>
+<li><strong>OTel GenAI.</strong> Still no tagged release in the GenAI conventions repo; core conventions still v1.44.0.</li>
+<li><strong>BigQuery platform and Cloud Observability.</strong> Nothing new in September on agents. Cloud Trace sinks can no longer be created or edited as of Aug 31, with Observability Analytics SQL as the replacement, which is adjacent but already known.</li>
+<li><strong>Datadog.</strong> Blog index shows nothing dated September beyond the Sep 1 traces-to-experiments post that 0000 covered. The LLM Observability docs page carries no new, preview, or beta labels.</li>
+<li><strong>Grafana, Operata, Traccia.</strong> Grafana's What's New page and RSS both fail to render today. Operata's newest posts are the Genesys Cloud AVA integration, undated. Traccia has no dated entries.</li>
+</ul>
+<h2>Academy</h2>
+<p>The arXiv cs.AI header still shows the Thursday Sep 3 batch. I diffed all 175 IDs in it against every ID any brief has opened, and read the titles of the 150 unopened ones. One earns a card.</p>
+<h3><a href="https://arxiv.org/abs/2609.01873">Epistemic Sybil Resistance: Multiplying AI Agents Without Multiplying Evidence</a> (submitted Sep 1, cs.AI and cs.MA)</h3>
+<p>Marc Bara, Universitat Oberta de Catalunya, Barcelona, single author.</p>
+<p>The claim is that a multi-agent system's own orchestration manufactures corroboration. Branching one retrieval across several agents, passing one agent's output into another's input, or re-prompting a shared base model all produce reports that look independent but descend from the same evidence. The paper defines an additional report as an epistemic Sybil extension when it carries zero conditional information about the latent state given what the aggregator already has, and proves that no rule seeing only report content can be Bayes-correct under both the &quot;copy&quot; and &quot;independent&quot; structures, since identical reports demand different posteriors. At 70% per-report accuracy the unavoidable error is about 0.072 in posterior probability. A Gaussian shared-root model then shows the middle ground: repeated extraction from one source does add information, but toward a ceiling set by the source's own noise, with the effective number of reports equal to m divided by 1 plus rho times (m minus 1), which is exactly the discount factor a recent provenance-aware aggregation paper had used as a heuristic. Correlated extraction errors, the kind agents sharing a base model produce, lower that ceiling further.</p>
+<p>The empirical section uses a single Haiku-class model reading synthetic quarterly-revenue memos from fictional companies, chosen so pretraining cannot leak the answer. Holding one evidence root fixed and raising report count from 1 to 32, nominal 95% coverage of the naive independence-assuming aggregator falls from 0.940 to 0.263 and its calibration ratio (RMSE over posterior standard deviation) rises from 0.961 to 5.473, while the provenance-aware aggregator stays between 0.850 and 0.940 coverage. Holding 16 reports fixed and raising the number of independent roots from 1 to 16 closes the gap monotonically; at 16 roots the two aggregators are identical to three decimals (coverage 0.927 vs 0.927). The model's replicate extractions from the same document are correlated (gamma estimated out of sample at 0.719), and an aggregator that accounts for that restores coverage to 0.940 to 0.953. The sharpest result is a 2×2 design that manipulates rationale wording separately from true ancestry: an embedding-plus-cosine deduplication baseline moves its inferred cluster count by 1.425 (95% CI 1.363 to 1.485) in response to wording, and by 0.040 (CI −0.045 to 0.120) in response to a fourfold change in true root count. No similarity threshold gets both false-merge and false-split error below 0.846 on the evaluation set.</p>
+<p>Stated limits: one task family, one main model, synthetic documents, heavy-tailed extraction noise the Gaussian aggregators do not model, and a pilot informativeness gate that was missed and disclosed rather than fixed. The correlated-extraction aggregator is flagged as exploratory. The author says the frozen Grid A and Grid B outputs will be released as a standalone benchmark with an aggregator interface, so the tables reproduce without any model calls.</p>
+<p><strong>TL;DR for BQAA.</strong> This is the third paper this week (after EAL-Bench's memory source references and the MCP-to-A2A field lineage trace) whose method depends on an event carrying a list of the events it derived from. For a multi-agent session, &quot;how many independent tool results actually back this final answer&quot; is only a query if each agent report event names its input events, and the paper's central finding is that no amount of text similarity over the outputs can recover that after the fact. One nullable repeated field, source event ids, serves all three papers.</p>
+<p>Abs read, not carded: <a href="https://arxiv.org/abs/2609.01818">Zeta-Lite</a> (a 2.87 MB WebAssembly SQL engine with snapshot-isolated concurrent transactions and copy-on-write database branching for in-browser agent memory, an engine paper adjacent to memory but with no record or observability implication), <a href="https://arxiv.org/abs/2609.02074">CHIME</a> (credit-aware hierarchical memory that attributes an outcome to planning or execution before storing it, a planning-side self-improvement method). The rest of the 150 unopened titles are training, retrieval, domain benchmarks, or vision.</p>
+<h2>Six-week EV only</h2>
+<p>Ranking unchanged from 0746 and 0000. What moved:</p>
+<ul>
+<li><strong>Failure-step pointer (reserve).</strong> Braintrust's Debugger is now a shipped example of what the pointer is for: a finding that cites a span, a field, and a phrase. Its evidence links assume a stable per-event id and a field path, both of which BQAA events already have or can have cheaply. Third citation this week after 2609.02057 and 2609.02371; still reserve, but the schema note should be written.</li>
+<li><strong>Source-event references on events (new note, replaces the memory-write note from 0000).</strong> EAL-Bench wants memory writes to cite the events that justify them, the MCP-to-A2A paper wants outbound messages joined to the tool results they copied, and today's Sybil paper wants agent reports to name their evidence roots. One repeated field of source event ids on the event record covers all three. This is a schema note, not a roadmap row.</li>
+<li><strong>Eval-discovery via clustering (watch item from 0746).</strong> Now two vendors (Datadog Patterns, Braintrust Patterns) plus Agnost. Braintrust's version is a scheduled agent over the trace table that writes back scorers and datasets. The BQAA analog is a scheduled investigation over the events table by a Gemini data agent, which is a docs example, not a feature. Do not start.</li>
+</ul>
+<p>Reserve and do-not-start otherwise unchanged.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li>epistemic-sybil-resistance-evidential-ancestry-provenance — Epistemic Sybil Resistance: Multiplying AI Agents Without Multiplying Evidence (https://arxiv.org/abs/2609.01873)</li>
+<li>braintrust-patterns-debugger-loop-automations — Braintrust Patterns, Debugger, and Loop automations, public preview (https://www.braintrust.dev/blog/active-observability-loop-patterns-debugger)</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Claude Code Fable 5.1 · 3 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
