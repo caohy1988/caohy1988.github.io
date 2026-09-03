@@ -16,7 +16,7 @@ Live at <https://caohy1988.github.io/rfc/full-demo/> once merged. Static files, 
    `CATALOG_STAMPED` shown because the syncer is not built.
 5. **Serve (BigQuery).** Five real `SELECT`s: empty `deployment_heads`, empty history, the resolution
    probe (`NO_HEAD`, `AMBIGUOUS_LEGACY`, `FAIL_CLOSED`), seeded `publications`, the view; the
-   `UNVERIFIABLE` receipt and the twelve “unproven” answers; 13 of 13 exclusions of the dead metric.
+   `UNVERIFIABLE` receipt; 12 of 12 answers contain “unproven” (one verbatim “No. The number is unproven.”); 13 of 13 exclusions of the dead metric.
 6. **Attribution.** The two-key query: band `attributed` Σ 14, band `receipt_only` Σ 13, `demo_evidence`,
    and the v0 events-only query.
 

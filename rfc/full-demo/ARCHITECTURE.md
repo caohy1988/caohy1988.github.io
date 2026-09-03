@@ -85,13 +85,17 @@ Scheduler polling the EntryGroup `updateTime` (production default), CI step afte
 
 ## What the two stores are each allowed to answer
 
+Status on 2026-09-03 (PR 16): rows that say a beat show a live query or capture on that beat; the
+syncer has not run, so `deployment_heads` and its history are empty, `FAIL_STALE` is **not yet
+shown** (only `FAIL_CLOSED`, `NO_HEAD`, `AMBIGUOUS_LEGACY`), and the stamped pin does not exist.
+
 | Question | Catalog | BigQuery | Demo status |
 |---|---|---|---|
 | Does concept X exist, who owns it, what does it say? | yes | yes | beat 3 / 5 |
-| Which publication is current for deployment D? | display only (stamped pin, `entries.get view=ALL`) | authoritative (`deployment_heads`) | beat 3 / 5 |
-| Which publication was current at time t? | no | `deployment_heads_history` | beat 5 |
+| Which publication is current for deployment D? | display only (stamped pin, `entries.get view=ALL`) | authoritative (`deployment_heads`) | beat 3 / 5 (pin not yet stamped; heads empty) |
+| Which publication was current at time t? | no | `deployment_heads_history` | beat 5 (query runs; 0 rows until a sync commits) |
 | What was the number at time t? | no | future executor/attester | `RFC text only` |
-| Is this `context_ref` stale? | no | pin-or-fail-stale | beat 5 |
+| Is this `context_ref` stale? | no | pin-or-fail-stale | beat 5 for `FAIL_CLOSED` / `NO_HEAD`; `FAIL_STALE` not yet shown, `RFC text only` |
 | Was the number attested? | no | `verdict` + `receipt_id` (always `UNVERIFIABLE` in demo) | beat 5 |
 | Which sessions used which publication? | no | two-key match through the `context_ref_resolution` view, then `publications` by id | beat 6 |
 | Who may read the policy body? | EntryGroup IAM (coarse, real) | caller-delegated per deployment | `RFC text only` |

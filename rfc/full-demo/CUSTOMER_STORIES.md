@@ -61,9 +61,12 @@ reading Catalog sees the words "Attested Computation" and has nothing that says 
 
 **What BigQuery deployment changes.** In session `f21ee192`, `okf_run_attested_computation`
 returned `verdict: UNVERIFIABLE`, `verdict_reason: "no-execution; observer-only demo, nothing
-attested"`, `receipt_id: rcpt-observe-noexec`, and the agent answered **"No. The number is
-unproven."** twelve times out of twelve. The runtime contract makes the verdict a field the agent
-must carry; the prompt then has something to report verbatim.
+attested"`, `receipt_id: rcpt-observe-noexec`, and the agent called the number unproven in every
+answer: 12 of 12 final answers contain the word "unproven" (semantic count, asserted by
+`tools/check_full_demo.py`). The exact sentence **"No. The number is unproven."** appears exactly
+once, in invocation 1; the other eleven phrase it differently ("The number is **unproven**", "the
+comparison and underlying numbers are **unproven**"). The runtime contract makes the verdict a
+field the agent must carry; the prompt then has something to report verbatim.
 
 **Value proposition.** A finance answer carries its receipt or says it has none. The demo shows
 both transcripts side by side with both system prompts (beat 3 vs beat 5).

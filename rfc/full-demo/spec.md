@@ -53,20 +53,26 @@ reports `BQ_COMMITTED, CATALOG_PENDING`; a rerun of `sync` completes the stamp w
 
 ### 1.2 What is real, recorded, stubbed, and future in the full demo
 
-| Piece | v1 demo status |
-|---|---|
-| BQAA trace in `okf_rfc_demo.agent_events` | Real. 212 rows, 4 sessions. Not re-run. |
-| Adapter trace → derived bundle | Real, SDK `main` after PR 474. Reproduced against `476d37dc`. |
-| Shipped `okf-bundle` entries + `okf` aspect | Real, after running the sample `setup.ts` + `push.ts` in Phase A (today the project has only the older `okf-concept` type and one aspect-less entry). |
-| `okf-context sync` commit into BigQuery runtime tables | Real BigQuery DDL/DML into `okf_rfc_demo` (new tables). Built in Phase A. |
-| Catalog stamp on `okf-context-runtime` | Real Catalog write, aspect type created by the setup identity in Phase A. |
-| IAM bootstrap, identities, positive and negative checks, setup retirement (§1.3) | Real, recorded in the Phase A tape. |
-| Scheduler / Cloud Run Job | Stubbed: job YAML shown, CLI run by hand. |
-| Attester / `ATTESTED` verdict | Stubbed: verdict `UNVERIFIABLE`, reason `no-execution`. Nothing on the page says `ATTESTED`. |
-| Numerical execution (quarter comparison, roll-up) | Future executor/attester work. `RFC text only`. |
-| Caller-delegated policy authorization, `policy_context_commitment`, mixed-policy fail-closed | `RFC text only`. Not implemented in Phase A/B. |
-| `sync --from-catalog` | Future. `RFC text only`. |
-| Page | Viewer of recorded runs, same as today. Browser never calls GCP. |
+The second column is the v1 target this spec sets. The third column is what `/rfc/full-demo/`
+(PR 16) actually captured on 2026-09-03; it was added after Codex review so that no deferred item
+reads as executed. Everything in the third column marked **Not done** or **Not built** is shown on
+the page as `RFC text only`, and `tools/check_full_demo.py` asserts those labels.
+
+| Piece | v1 target | Status on 2026-09-03 (PR 16) |
+|---|---|---|
+| BQAA trace in `okf_rfc_demo.agent_events` | Real. 212 rows, 4 sessions. Not re-run. | **Captured.** Live per-session count (4 sessions, 212 rows); three sessions pulled (209 rows); `a63c3e86…` (3 rows, no tool call) counted, not pulled. |
+| Adapter trace → derived bundle | Real, SDK `main` after PR 474. Reproduced against `476d37dc`. | **Captured.** SDK `main` `4f54b5c` reproduced `53bd1651…` before the push. |
+| Shipped `okf-bundle` entries + `okf` aspect | Real, after running the sample `setup.ts` + `push.ts` in Phase A. | **Captured**, run by the operator (not `okf-setup` / sync-writer): AspectType `okf`, EntryType `okf-bundle`, 8 entries; `entries.get` vs `lookupContext` on record. |
+| `okf-context sync` commit into BigQuery runtime tables | Real BigQuery DDL/DML into `okf_rfc_demo` (new tables). Built in Phase A. | **Not built.** Only the DDL + seeds ran (as the operator). `deployment_heads`, history and `context_ref_bindings` are empty. No `BQ_COMMITTED`, no `no-op`. `RFC text only` on beat 4. |
+| Catalog stamp on `okf-context-runtime` | Real Catalog write, aspect type created by the setup identity in Phase A. | **Not done.** No `okf-context-runtime` AspectType, no pin, no `CATALOG_STAMPED`. `RFC text only` on beats 3 and 4. |
+| IAM bootstrap, identities, positive and negative checks, setup retirement (§1.3) | Real, recorded in the Phase A tape. | **Not done.** No service account, custom role, table-level grant, boundary probe or `PERMISSION_DENIED` check exists; every job ran as the operator (`bq_jobs_identity.json`). `RFC text only` on beat 4. |
+| Pin-or-fail-stale (`FAIL_STALE`) | Real query against `deployment_heads`. | **Partly.** `FAIL_CLOSED`, `NO_HEAD`, `AMBIGUOUS_LEGACY` are live query results; `FAIL_STALE` needs a head and none exists. `RFC text only` on beat 5. |
+| Scheduler / Cloud Run Job | Stubbed: job YAML shown, CLI run by hand. | Not shown; `RFC text only`. |
+| Attester / `ATTESTED` verdict | Stubbed: verdict `UNVERIFIABLE`, reason `no-execution`. Nothing on the page says `ATTESTED`. | As specified: every receipt `UNVERIFIABLE`; beat 5 labels the pane live trace + stubbed attester. |
+| Numerical execution (quarter comparison, roll-up) | Future executor/attester work. `RFC text only`. | `RFC text only`. |
+| Caller-delegated policy authorization, `policy_context_commitment`, mixed-policy fail-closed | `RFC text only`. Not implemented in Phase A/B. | `RFC text only`. |
+| `sync --from-catalog` | Future. `RFC text only`. | `RFC text only`. |
+| Page | Viewer of recorded runs, same as today. Browser never calls GCP. | As specified. |
 
 ### 1.3 IAM contract for the bridge (normative, resource-specific, bootstrappable)
 
@@ -182,14 +188,17 @@ the runtime tables is the only boundary that is enforceable today; the ledger is
 
 ## 3. Demo beats (`/rfc/full-demo/`, six beats, deep-linkable `#beat=1…6`)
 
-| # | Beat | What the visitor sees | Source (all recorded; page is static) | Must prove |
-|---|---|---|---|---|
-| 1 | **Ask** | The real question and the 12 follow-ups from session `f21ee192`. Two traps: the dead metric, and over-claiming trust. | `agent_events` `USER_MESSAGE_RECEIVED` rows | Nothing is fictional. |
-| 2 | **Observe** | One SQL query and its result: event histogram (Σ 180), the 24 tool calls, the `context_ref` on every result, the never-emit scan (0 hits). | `bq query` transcript, checked in | BQAA is observer-only; telemetry is not the bundle. |
-| 3 | **Catalog path: where it stops** | Recorded **after** `setup.ts` + `push.ts`: (a) `entries.get --view=ALL` on the pushed `okf-bundle` metric entry showing the real 13-field `okf` aspect and, after Phase A, the stamped `okf-context-runtime` pin; (b) `lookupContext` on the same entry returning the YAML `context` with **no** `okf` fields and no pin, plus the ten-resource and no-link-following limits called out; (c) session `04fa3d56`'s transcript: "You can trust the number because it is verified", with its system prompt shown beside it. The legacy entry `okf-derived-germany` (type `okf-concept`, no aspects) appears collapsed, labelled "prior experiment, not shipped OKF-in-KC". | `gcloud` transcripts; `agent_events` session `04fa3d56` | Discovery works and can display a pin; it cannot carry a verdict, compare a pin to a head, or follow links. |
-| 4 | **Sync (CLI)** | `okf-context sync` as the sync-writer identity: validate → observe → snapshot → plan (adds 8, removes 0) → `BQ_COMMITTED` → heads advanced → new `context_ref` minted → `CATALOG_STAMPED` → status. Second run: `no-op`. Then the positive checks, boundary checks 1–5, and post-cleanup checks 6–7 (nine `PERMISSION_DENIED` calls in all). | asciinema tape of the Phase A CLI | Sync is external, idempotent, explicit-state, least-privilege. |
-| 5 | **Serve (BigQuery)** | Four SQL results: `deployment_heads` for the deployment; `deployment_heads_history` answering "which publication was current at T"; retrieve `current` returning the six items and the one exclusion, with the declared `parameter_schema` (`region`, `quarter_start`, `quarter_end`); `run_attested_computation` receipt `UNVERIFIABLE` with reason; a non-head `context_ref` → `FAIL_STALE`; junk → `FAIL_CLOSED`. Session `f21ee192` transcript beside it: "No. The number is unproven." Caption: numerical comparison and roll-up are future executor/attester work. | `bq query` transcripts; existing CLI tape | Pin, history selection, lifecycle, honest verdict, fail-stale, fail-closed. |
-| 6 | **Attribution** | Two tables. (a) Event-sourced: `agent_events` matched on both event-carried `context_ref` and event-carried `publication_id` against the `context_ref_resolution` view, then joined to `publications` by `publication_id`; one row per (session, tool, context_ref, publication); the 13 receipt-only rows (NULL event publication) appear as a labelled band attributed by handle only. (b) Separately sourced: `demo_evidence` rows for the adapter tape's `53bd1651…` and the legacy Catalog description's `a25e1c0c…`, each with its source column. Caption: the legacy handle `okf:env-observe#674153c572f6` was bound to two publications before Phase A; refs minted by `sync` are immutable. SQL: the two `SELECT`s in `sql/attribution_two_key.sql`, run as `okf-runtime-reader` under an isolated gcloud configuration, each piped over stdin as its own invocation; DDL lives in the setup-owned `sql/setup_runtime_tables.sql`. | two `bq query` transcripts; `demo_evidence` seed table | The gap is a SQL result, not a slide, and no event is misattributed. |
+The **Source** column is the target tape. **Captured on PR 16** says what the page shows today;
+anything else in the row is quoted as `RFC text only` on the page.
+
+| # | Beat | What the visitor sees | Source (target; page is static) | Must prove | Captured on PR 16 |
+|---|---|---|---|---|---|
+| 1 | **Ask** | The real question and the 12 follow-ups from session `f21ee192`. Two traps: the dead metric, and over-claiming trust. | `agent_events` `USER_MESSAGE_RECEIVED` rows | Nothing is fictional. | Yes: 12 questions from the pulled rows. |
+| 2 | **Observe** | One SQL query and its result: event histogram (Σ 180), the 24 tool calls, the `context_ref` on every result, the never-emit scan (0 hits). | `bq query` transcript, checked in | BQAA is observer-only; telemetry is not the bundle. | Yes: histogram, 24 tool calls, never-emit scan over 27 payloads. |
+| 3 | **Catalog path: where it stops** | Recorded **after** `setup.ts` + `push.ts`: (a) `entries.get --view=ALL` on the pushed `okf-bundle` metric entry showing the real 13-field `okf` aspect and, after Phase A, the stamped `okf-context-runtime` pin; (b) `lookupContext` on the same entry returning the YAML `context` with **no** `okf` fields and no pin, plus the ten-resource and no-link-following limits called out; (c) session `04fa3d56`'s transcript: "You can trust the number because it is verified", with its system prompt shown beside it. The legacy entry `okf-derived-germany` (type `okf-concept`, no aspects) appears collapsed, labelled "prior experiment, not shipped OKF-in-KC". | `gcloud` transcripts; `agent_events` session `04fa3d56` | Discovery works and can display a pin; it cannot carry a verdict, compare a pin to a head, or follow links. | Mostly: shipped aspect, `lookupContext` omission, ten-resource error, transcript, legacy entry. **Not** the `okf-context-runtime` pin (no sync). No-link-following not exercised. |
+| 4 | **Sync (CLI)** | `okf-context sync` as the sync-writer identity: validate → observe → snapshot → plan (adds 8, removes 0) → `BQ_COMMITTED` → heads advanced → new `context_ref` minted → `CATALOG_STAMPED` → status. Second run: `no-op`. Then the positive checks, boundary checks 1–5, and post-cleanup checks 6–7 (nine `PERMISSION_DENIED` calls in all). | asciinema tape of the Phase A CLI | Sync is external, idempotent, explicit-state, least-privilege. | **No.** Syncer not built; no `BQ_COMMITTED`, `CATALOG_STAMPED`, `no-op` or `PERMISSION_DENIED` shown. Page shows the algorithm and IAM contract as `RFC text only` plus the operator-run `setup.ts` / `push.ts` / DDL. |
+| 5 | **Serve (BigQuery)** | Four SQL results: `deployment_heads` for the deployment; `deployment_heads_history` answering "which publication was current at T"; retrieve `current` returning the six items and the one exclusion, with the declared `parameter_schema` (`region`, `quarter_start`, `quarter_end`); `run_attested_computation` receipt `UNVERIFIABLE` with reason; a non-head `context_ref` → `FAIL_STALE`; junk → `FAIL_CLOSED`. Session `f21ee192` transcript beside it: "No. The number is unproven." Caption: numerical comparison and roll-up are future executor/attester work. | `bq query` transcripts; existing CLI tape | Pin, history selection, lifecycle, honest verdict, fail-stale, fail-closed. | Partly: heads and history queries run and return 0 rows; `FAIL_CLOSED` / `NO_HEAD` / `AMBIGUOUS_LEGACY` live; receipt and answers live. **Not** `FAIL_STALE` (needs a head). |
+| 6 | **Attribution** | Two tables. (a) Event-sourced: `agent_events` matched on both event-carried `context_ref` and event-carried `publication_id` against the `context_ref_resolution` view, then joined to `publications` by `publication_id`; one row per (session, tool, context_ref, publication); the 13 receipt-only rows (NULL event publication) appear as a labelled band attributed by handle only. (b) Separately sourced: `demo_evidence` rows for the adapter tape's `53bd1651…` and the legacy Catalog description's `a25e1c0c…`, each with its source column. Caption: the legacy handle `okf:env-observe#674153c572f6` was bound to two publications before Phase A; refs minted by `sync` are immutable. SQL: the two `SELECT`s in `sql/attribution_two_key.sql`, run as `okf-runtime-reader` under an isolated gcloud configuration, each piped over stdin as its own invocation; DDL lives in the setup-owned `sql/setup_runtime_tables.sql`. | two `bq query` transcripts; `demo_evidence` seed table | The gap is a SQL result, not a slide, and no event is misattributed. | Yes, run as the operator (not yet `okf-runtime-reader`): 14 / 13, two evidence rows. |
 
 Beats 1, 2, 5 reuse material already on `/rfc/demo/`. Beats 3, 4, 6 are new. The existing
 `okf-bqaa-cli.mp4` stays as the Observe → Publish → Next-agent tape; a new ~90 s tape covers 3 → 6
@@ -197,7 +206,7 @@ after dual LGTM (see `plan.md`).
 
 ## 4. Success criteria
 
-- A cold reader can state the sync answer in one sentence after beat 4: "an external CLI I run or
+- (Met on PR 16 as text; the tape is Phase A.) A cold reader can state the sync answer in one sentence after beat 4: "an external CLI I run or
   schedule; bundle to BigQuery first, Catalog stamp second; Catalog-to-BigQuery import is not v1."
 - Beat 3 shows shipped OKF-in-KC (`okf-bundle` + `okf` aspect via `entries.get view=ALL`) and
   LookupContext omitting it; the legacy `okf-concept` entry is labelled prior.
@@ -206,7 +215,7 @@ after dual LGTM (see `plan.md`).
   events matched on both handle and publication through one resolution view, `publications` joined
   by id only, receipt-only rows banded, non-event evidence in `demo_evidence`.
 - Every capability row in §2 is either shown on a beat or marked `RFC text only` on the page.
-- The bootstrap operator installs every binding on tape; every positive check returns `OK`; all seven negative checks (nine API calls) return `PERMISSION_DENIED`, including the two post-cleanup checks that prove `okf-setup` is retired; each BigQuery step's `user_email` on tape matches the declared identity.
+- (Phase A; not yet met on PR 16.) The bootstrap operator installs every binding on tape; every positive check returns `OK`; all seven negative checks (nine API calls) return `PERMISSION_DENIED`, including the two post-cleanup checks that prove `okf-setup` is retired; each BigQuery step's `user_email` on tape matches the declared identity. Today every `user_email` on record is the operator's.
 - Never-emit scan over every agent-facing payload on the page returns 0 hits.
 - `python3 rfc/full-demo/tools/check_full_demo.py` (Phase C) exits 0: beats present, session ids and
   publication ids match the checked-in transcripts, no `ATTESTED` string outside the labelled Phase 4 shape,

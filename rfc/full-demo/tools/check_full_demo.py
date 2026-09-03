@@ -123,8 +123,11 @@ verbatim = sum(1 for t in finals if VERBATIM in t)
 check(len(finals) == 12 and semantic == 12, "12 of 12 final answers contain 'unproven' (semantic count, got %d)" % semantic)
 check(verbatim == 1, "exactly 1 of 12 final answers contains the verbatim sentence (got %d); the page must not claim more" % verbatim)
 check('var VERBATIM = "%s"' % VERBATIM in app and "D.verbatim" in app and "D.unproven" in app, "app.js computes and renders both counts from the rows")
-for name, text in (("index.html", index), ("stories.json", (DEMO / "stories.json").read_text("utf-8")), ("app.js", app)):
-    check("twelve times" not in text, "%s does not claim the verbatim sentence was said twelve times" % name)
+stories_md = (DEMO / "CUSTOMER_STORIES.md").read_text("utf-8")
+for name, text in (("index.html", index), ("stories.json", (DEMO / "stories.json").read_text("utf-8")), ("app.js", app), ("CUSTOMER_STORIES.md", stories_md), ("README.md", (DEMO / "README.md").read_text("utf-8"))):
+    check("twelve times" not in text and not re.search(r"unproven\.[”\"*]*\s*\(?12 of 12\)?", text), "%s does not claim the verbatim sentence was said twelve times / 12 of 12" % name)
+stories_flat = re.sub(r"\s+", " ", stories_md)
+check("12 of 12 final answers contain" in stories_flat and "appears exactly once" in stories_flat, "CUSTOMER_STORIES.md states the semantic 12/12 and the single verbatim occurrence separately")
 check("12 of 12 final responses contain “unproven”" in (DEMO / "stories.json").read_text("utf-8"), "stories.json states the semantic count separately from the one verbatim example")
 receipts = [parse(r["content"])["result"] for r in obs if r["event_type"] == "TOOL_COMPLETED" and parse(r["content"]).get("tool") == "okf_run_attested_computation"]
 check(len(receipts) == 12 and all(json.dumps(x, sort_keys=True) == json.dumps(receipts[0], sort_keys=True) for x in receipts), "the 12 attested-computation receipts are identical (UNVERIFIABLE, no-execution)")
@@ -294,13 +297,27 @@ check(any(r["dataplexEntry"]["entrySource"]["displayName"] == "Customer revenue 
 jobs = load("bq_jobs_identity.json")
 check(jobs and all(j["user_email"] == jobs[0]["user_email"] for j in jobs), "every capture job ran as one identity (%s)" % (jobs[0]["user_email"] if jobs else "none"))
 jobids = {p.read_text().strip() for p in LIVE.glob("*.jobid")}
-shown = {}
-for f in LIVE.glob("bq_job_*.json"):   # `bq show -j` snapshots for jobs INFORMATION_SCHEMA had not surfaced yet
-    d = json.loads(f.read_text("utf-8"))
-    shown[d["jobReference"]["jobId"]] = d["user_email"]
-known = {j["job_id"] for j in jobs} | set(shown)
-check(jobids <= known, "every *.jobid is in bq_jobs_identity.json or a bq_job_*.json show snapshot: missing %s" % sorted(jobids - known))
-check(all(u == jobs[0]["user_email"] for u in shown.values()), "every bq show -j snapshot carries the same operator user_email")
+inventory = {j["job_id"]: j for j in jobs}
+check(jobids <= set(inventory), "every *.jobid is in bq_jobs_identity.json (no fallback source): missing %s" % sorted(jobids - set(inventory)))
+check(not list(LIVE.glob("bq_job_*.json")), "no bq show -j fallback snapshots remain; the inventory file is the only identity source")
+# the per-session summary job is bound end to end: job id ↔ inventory row ↔ SQL file ↔ result ↔ page claim
+summary_job = (LIVE / "sessions_summary.jobid").read_text().strip()
+srow = inventory.get(summary_job)
+check(bool(srow) and srow["statement_type"] == "SELECT" and srow["user_email"] == jobs[0]["user_email"], "sessions_summary job %s is in the inventory as a SELECT by the operator" % summary_job)
+check((DEMO / "sql/sessions_summary.sql").exists() and "GROUP BY 1, 2" in (DEMO / "sql/sessions_summary.sql").read_text("utf-8"), "sql/sessions_summary.sql exists and is the aggregate the summary snapshot came from")
+check("sessions_summary" in app and "summary:" in app, "app.js loads sessions_summary.json and renders the fourth session from it")
+check("sessions_summary.json" in (LIVE / "README.md").read_text("utf-8"), "live/README.md lists sessions_summary.json")
+
+# ---- spec.md status honesty (Codex round 2) -------------------------------------------------------------
+spec = (DEMO / "spec.md").read_text("utf-8")
+check("| Piece | v1 target | Status on 2026-09-03 (PR 16) |" in spec, "spec.md §1.2 has a status column for what was actually captured")
+for piece, marker in (("`okf-context sync` commit into BigQuery runtime tables", "Not built"), ("Catalog stamp on `okf-context-runtime`", "Not done"), ("IAM bootstrap, identities, positive and negative checks", "Not done")):
+    row = [ln for ln in spec.split("\n") if ln.startswith("| " + piece)]
+    check(bool(row) and marker in row[0] and "RFC text only" in row[0], "spec.md §1.2 row '%s…' is marked %s / RFC text only" % (piece[:40], marker))
+check("Source (all recorded; page is static)" not in spec and "| Captured on PR 16 |" in spec, "spec.md §3 beat table no longer says 'all recorded' and carries a Captured-on-PR-16 column")
+check("Phase A; not yet met" in spec, "spec.md §4 marks the bootstrap/negative-check criterion as Phase A, not yet met")
+arch = (DEMO / "ARCHITECTURE.md").read_text("utf-8")
+check("not yet shown" in arch, "ARCHITECTURE.md marks FAIL_STALE / history as not yet shown")
 
 # ---- wiring ---------------------------------------------------------------------------------------
 check('href="./full-demo/"' in (RFC / "index.html").read_text("utf-8"), "rfc/index.html Prototype callout links ./full-demo/")
