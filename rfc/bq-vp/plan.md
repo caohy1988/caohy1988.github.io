@@ -1,64 +1,46 @@
-# Plan — a concrete story with a clear BigQuery case
+# Plan — deterministic OKF-graph retrieval in the VP brief
 
 ## Scope
 
+Start from main at `bf92ee8` on `feat/rfc-bq-vp-det-retrieval`, using the resumed gpt-6-astra session. Preserve the accepted Alder story and arithmetic; change the explanation of BigQuery's value from primarily computation beside revenue data to replayable retrieval over an OKF graph projection.
+
 | File | Change |
 | --- | --- |
-| `rfc/bq-vp/index.html` | Both numbers in the hero, one arithmetic comparison, three named roles with BigQuery emphasized, punchline, ask and honesty footer |
-| `rfc/bq-vp/styles.css` | Compact editorial layout; responsive figure, keyboard focus and print styling |
-| `rfc/bq-vp/STORY.md` | Invented scenario, arithmetic, rationale and counterfactual boundaries |
-| `rfc/bq-vp/intent.md` | Customer-first goal and pilot ask |
-| `rfc/bq-vp/spec.md` | Story, honesty, scope and usability requirements |
-| `rfc/bq-vp/plan.md` | Execution and validation record |
-| `rfc/index.html` | Masthead blurb updated to the 118%/96% story; keep the Illustrative label |
+| `rfc/bq-vp/index.html` | Retrieval heading, three graph roles, determinism boundary, separate receipt types, empty-project case, locked punchline and pilot ask |
+| `rfc/bq-vp/styles.css` | Only if the longer retrieval copy needs responsive adjustments |
+| `rfc/bq-vp/STORY.md` | Story-to-graph connection, retrieval contract, receipt distinction and empty-BigQuery rationale |
+| `rfc/bq-vp/intent.md` | Replayable-context goal and scope |
+| `rfc/bq-vp/spec.md` | Retrieval, honesty and usability acceptance criteria |
+| `rfc/bq-vp/plan.md` | Implementation and observed validation |
 
-Keep `/rfc/full-demo/`, dependencies and deployment configuration unchanged. Use gpt-6-astra only.
+Keep the illustrative RFC masthead link accurate. Do not edit `/rfc/full-demo/`, shared styles, dependencies or deployment configuration.
 
 ## Implementation
 
-1. Keep Alder, Maya, the deadline, $4 million decision and the 118% / 96% arithmetic. Put all of them in the hero, with both percentages in the headline.
-2. Replace the input ledger with one comparison showing the mistaken addition of new-customer ARR. Name Catalog, OKF and BigQuery directly in the technical section, and explain execution, job/context/result receipts, attribution and access grants.
-3. Update `STORY.md`, intent and spec to capture the sharper framing. Keep the unbuilt RFC label and compact evidence footer.
-4. Verify desktop, tablet and narrow mobile layout, arithmetic, 30-second skim content, keyboard access, links, contrast and print. Run the existing full-demo checker and `git diff --check`.
-5. Commit and push the seven changed files to existing PR 20 on `feat/rfc-bq-vp-story`. Refresh the PR description to match the final framing and measured page. Save follow-up session/validation metadata under `/tmp/okf-vp-story/`. Print the new HEAD; do not create another PR or merge.
+1. Inspect the current page and evidence boundaries. Confirm branch/base and session model.
+2. Preserve the hero and arithmetic. Reframe the runtime section around Catalog discovery, OKF authorship, and BigQuery graph projection plus deterministic retrieval. Follow retrieval with the separate computation-evidence boundary.
+3. Update the four local Markdown documents. Keep proposal/stub labels and record determinism preconditions precisely.
+4. Verify the static page in Chromium at desktop, tablet and narrow mobile widths. Inspect screenshots, word count, page length, heading order, keyboard access, links and print. Review the context/number distinction manually; do not claim an implemented retrieval test.
+5. Run the existing full-demo checker and `git diff --check`. Confirm the hero and full demo are unchanged and the diff stays within the intended page/docs.
+6. Commit, push this branch, and use `gh pr create --base main`. Record session ID, new HEAD and PR URL in `/tmp/okf-vp-det/sessions.json`. Do not merge.
 
 ## Acceptance checks
 
-- A skim answers: who is Maya, why does 9 a.m. matter, why is 118% wrong, what is 96%, and what would the proposed runtime add?
-- Arithmetic: `(9.6 + 2.2) / 10 = 1.18`; `9.6 / 10 = .96`. All figures use ARR consistently.
-- The illustrative label appears before the story; proposal labeling precedes all runtime promises; the footer separates the unrelated recorded demo from this invented scenario.
-- Main page is roughly 400–500 visible words, around two desktop screens, with three named roles and one ask. No real or invented execution IDs appear in the story.
-- HTTP 200, correct navigation, no horizontal overflow at desktop/768/375/320 widths, no script requirement, usable heading order and keyboard focus.
-- Relevant existing checker passes. No new test suite for this reversible editorial change; browser inspection and targeted checks provide the relevant validation.
+- Hero still conveys Maya/Alder, the deadline, $4 million decision and 118% → 96% before architecture.
+- A skim of the runtime explains why discovering the concept is different from deterministically selecting linked context. BigQuery is useful as the host of the graph projection, including an initially empty project.
+- Same-context guarantee is scoped to fixed query/publication/parameters/fact versions/access scope/order. It is not a promise of identical model answers.
+- Retrieval receipts describe selected context; computation receipts describe metric execution. Missing execution evidence leaves the number unproven.
+- Graph-over-OKF and retrieval receipts are explicitly proposed. No new execution/attestation or Phase A completion is implied.
+- Around two desktop viewports and 400–500 visible words; no mobile horizontal overflow, script dependency or external asset loading.
+- Existing evidence checker and whitespace check pass. QA artifacts stay outside the repository. No new test suite for a static editorial change.
 
-## Initial validation — HEAD 691ad08
+## Validation record
 
-- Chromium: 416 visible words; page height 1,345 px at 1280 × 720. The complete correction figure ends at y=665, within the first viewport.
-- Responsive checks at 1280, 768, 375 and 320 px: no document or element horizontal overflow. Desktop, tablet and mobile screenshots inspected; fixed a hidden-line-break spacing issue and the narrow-screen headline wrap.
-- Keyboard: visible focus on links; skip link moves focus to `main`; RFC entry and evidence deep-dive navigation work. Every page/stylesheet link returns HTTP 200. Heading IDs and labels are valid.
-- No authored scripts or external assets. Browser network shows only local HTML/CSS, with no console errors. Checked text color pairs exceed 4.5:1 contrast. A4 print output inspected across two pages with no clipping.
-- Decimal arithmetic checks pass for both 118% and 96%. All fictional and proposal labels reviewed against `STORY.md` and the full-demo status table.
-- `python3 rfc/full-demo/tools/check_full_demo.py`: exit 0, all checks passed, including the negative mutation fixtures and the clean-copy control. `/rfc/full-demo/` has no diff.
-- `git diff --check`: passed. Only the seven scoped files are staged for the delivery commit.
-- QA artifacts and the actual Codex session ID are saved in `/tmp/okf-vp-story/`; session metadata confirms `gpt-6-astra`.
-
-## Sharpening validation — follow-up (HEAD 7c5c243)
-
-- Chromium (independent re-review): ~420 visible words; page height ~1,312 px at 1280 × 720 (~1.8 viewports). Hero carries Maya / Alder / five-minute deadline / \$4M / 118% / 96% before architecture language; arithmetic figure teaches the new-customer trap on a 30-second skim.
-- Responsive checks at 1280, 768, 375 and 320 px: no document or element horizontal overflow (headless Chromium).
-- HTTP 200 on page + stylesheet; zero console errors; heading order valid (h1→h2→h3).
-- Decimal arithmetic: `(9.6 + 2.2) / 10 = 1.18`; `9.6 / 10 = 0.96`.
-- `python3 rfc/full-demo/tools/check_full_demo.py`: exit 0 (including mutation fixtures). `/rfc/full-demo/` untouched.
-- `git diff --check`: clean for the polish commit.
-- Artifacts under `/tmp/okf-vp-story/sharpen/`; Codex session `01a06e87-a6fd-7993-88b5-9c489219e68c` (`gpt-6-astra`).
-
-## Index blurb honesty fix (post e8f6b37)
-
-- Restored the Illustrative marker on `rfc/index.html` so `/rfc/` does not present 118%/96% as flat fact above real product links (`spec.md` masthead requirement).
-- Corrected plan/spec scope text that still claimed `rfc/index.html` was unchanged.
-
-## Opus fresh-review fix (post b86eb6a)
-
-- Ask CTA no longer points at Alder’s invented 96%; negative-test wording is explicit.
-- OKF role heading uses “Specify” (not “Pin”); pinning stays with the runtime.
-- Meta description avoids “need a BigQuery runtime” monopoly framing.
+- Chromium: 437 visible words; 1,404 px tall at 1280 × 720. The full arithmetic figure ends at y=540; the hero ends at y=626, before architecture.
+- The hero matches main at `bf92ee8` byte-for-byte. Both arithmetic results and the exact locked punchline pass targeted checks.
+- Desktop 1280, tablet 768, mobile 375 and narrow 320 px: no document/element horizontal overflow or authored scripts; only the local stylesheet loads. Screenshots inspected. Text contrast pairs exceed 4.5:1.
+- HTTP 200 for page, stylesheet, RFC and deep dive. Actual navigation through both links works. Keyboard focus is visible, the skip link focuses `main`, heading order and labels are valid, and the page has no console errors.
+- A4 print inspected across two pages; corrected the BigQuery column's print padding. Screen styling is unchanged.
+- `python3 rfc/full-demo/tools/check_full_demo.py`: exit 0, all checks passed, including mutation fixtures and the clean-copy control. Full demo and RFC entry page are unchanged.
+- Manual review confirms fixed-input retrieval semantics, the empty-project projection requirement, separate receipt types and explicit unbuilt Graph/retrieval-receipt labels. This is page verification, not a test of an implemented graph runtime.
+- `git diff --check` passed. Session metadata confirms `gpt-6-astra` and session `01a06e87-a6fd-7993-88b5-9c489219e68c`; artifacts are under `/tmp/okf-vp-det/`.
