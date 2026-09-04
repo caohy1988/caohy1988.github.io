@@ -525,7 +525,7 @@
     current = n;
     render();
     var top = document.querySelector(".stepper").getBoundingClientRect().top + window.scrollY - 70;
-    if (window.scrollY > top) window.scrollTo({ top: top, behavior: "smooth" });
+    window.scrollTo({ top: top, behavior: "smooth" });
   }
   function next() { goTo(current < TOTAL ? current + 1 : 1); }
   function prev() { goTo(current - 1); }

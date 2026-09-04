@@ -512,3 +512,58 @@ pre.json .hl{background:rgba(255,196,64,.22);border-radius:3px;padding:0 2px}
 .kv2{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px}
 .kv2 dt{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);padding-top:3px}
 .kv2 dd code{font-size:.82em}
+
+/* ===== VP punchline strip — the customer moment, then the value the runtime adds ===== */
+.vp{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.vp-thesis{font-family:var(--display);font-size:clamp(19px,2.1vw,25px);line-height:1.28;letter-spacing:-.015em;color:var(--ink-soft);max-width:64ch;text-wrap:balance}
+.vp-thesis b{color:var(--ink);font-weight:700}
+.vp-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
+
+/* the customer moment — one question, two answers from the traces */
+.vp-story{margin-top:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:15px 17px 16px}
+.vp-ask{font-size:16px;line-height:1.45;color:var(--ink-soft);max-width:88ch}
+.vp-ask .vp-k{display:block;margin-bottom:5px}
+.vp-ask b{color:var(--ink)}
+.vp-paths{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:13px}
+.vp-path{position:relative;min-width:0;border:1px solid var(--line);border-radius:10px;padding:12px 14px 13px 17px;background:var(--paper)}
+.vp-path::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0}
+.vp-path.bad{border-color:#F0C9C2;background:var(--warn-bg)}
+.vp-path.bad::before{background:var(--warn)}
+.vp-path.good{border-color:#BFE3CE;background:var(--ok-bg)}
+.vp-path.good::before{background:var(--ok)}
+.vp-pk{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+.vp-path.bad .vp-pk{color:var(--warn)}
+.vp-path.good .vp-pk{color:var(--ok)}
+.vp-pk code{font-size:.95em;background:rgba(255,255,255,.7);letter-spacing:0}
+.vp-q{font-family:var(--display);font-weight:700;font-size:clamp(17px,1.7vw,21px);line-height:1.22;letter-spacing:-.015em;color:var(--ink);margin:6px 0 7px;text-wrap:balance}
+.vp-pb{font-size:14.5px;line-height:1.5;color:var(--ink-soft)}
+.vp-pb code{font-size:.8em;background:rgba(255,255,255,.75)}
+
+/* the value, in three lines a VP can repeat */
+.vp-cards{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:12px 0 0}
+.vp-card{position:relative;min-width:0;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:13px 15px 14px 18px}
+.vp-card::before{content:"";position:absolute;left:0;top:13px;bottom:13px;width:3px;border-radius:0 3px 3px 0;background:var(--ink-faint)}
+.vp-card.trust::before{background:var(--telemetry)}
+.vp-card.pin::before{background:var(--catalog)}
+.vp-card.iam::before{background:var(--source)}
+.vp-card.trust .vp-k{color:var(--telemetry)}
+.vp-card.pin .vp-k{color:var(--catalog)}
+.vp-card.iam .vp-k{color:var(--source)}
+.vp-h{font-family:var(--display);font-weight:700;font-size:16px;line-height:1.2;letter-spacing:-.015em;color:var(--ink);margin:5px 0 7px;text-wrap:balance}
+.vp-b{font-size:14.5px;line-height:1.5;color:var(--ink-soft)}
+.vp-b b{color:var(--ink)}
+.vp-b code{font-size:.8em}
+
+/* every claim above points at the beat that carries its evidence */
+.vp-c{margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);font-family:var(--display);font-size:12px;line-height:1.75;color:var(--ink-faint)}
+.vp-c code{font-size:.86em;padding:0 4px}
+.vp-c a{font-family:var(--mono);font-size:11px;text-decoration:none;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink)}
+.vp-c a:hover{border-color:var(--ink)}
+.vp-c .src{font-size:9.5px;padding:2px 6px;vertical-align:1px}
+.vp-path .vp-c{border-top-color:rgba(0,0,0,.12)}
+.vp-close{margin-top:15px;max-width:86ch;font-size:15.5px;line-height:1.5;color:var(--ink-soft)}
+.vp-close b{font-family:var(--display);color:var(--ink)}
+.vp-close code{font-size:.82em}
+.vp-note{margin-top:7px;max-width:104ch;font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--ink-faint)}
+.vp-note .src{font-size:9.5px;padding:2px 6px}
+@media (max-width:900px){.vp-paths{grid-template-columns:1fr}.vp-cards{grid-template-columns:1fr}}

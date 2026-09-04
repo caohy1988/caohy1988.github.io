@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="canonical" href="https://caohy1988.github.io/rfc/full-demo/">
-<meta name="description" content="Full-version OKF runtime demo: live ADK sessions in BigQuery Agent Analytics, shipped OKF-in-Knowledge-Catalog and where it stops, the external bundle → BigQuery → Catalog-stamp sync, the BigQuery serve path, and a two-key attribution query. Every number traces to test-project-0728-467323.okf_rfc_demo or to a Catalog entry read with gcloud. Nothing attested.">
-<meta property="og:title" content="Catalog finds, BigQuery serves — the full OKF runtime demo on live traces">
-<meta property="og:description" content="Six beats: Ask, Observe, Catalog path and where it stops, Sync (external CLI), Serve (BigQuery), Attribution. Live GCP captures, honesty labels on every pane, five customer stories with real session ids.">
+<meta name="description" content="Leadership asks the finance team what active-customer revenue in Germany is, and whether the number can be trusted. On live ADK traces one agent read a Catalog-shaped lookup and handed back the word “verified” with nothing computing the number; another, whose tool carried a verdict field, called it unproven in 12 of 12 final answers. BigQuery is the runtime of Knowledge Catalog + OKF: trust you can defend, one pinned answer instead of EntryGroup roulette, and IAM you can explain. Six beats over live GCP captures. Every number traces to test-project-0728-467323.okf_rfc_demo or to a Catalog entry read with gcloud. Nothing attested.">
+<meta property="og:title" content="BigQuery is the runtime of Knowledge Catalog + OKF">
+<meta property="og:description" content="One customer question — can I trust the Germany number? — answered twice on live traces: “verified” from a Catalog-shaped lookup that computed nothing, and “No. The number is unproven.” from an agent carrying a verdict field. Six beats: Ask, Observe, Catalog path and where it stops, Sync (external CLI), Serve (BigQuery), Attribution. Live GCP captures, honesty labels on every pane, five customer stories with real session ids.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://caohy1988.github.io/rfc/full-demo/">
 <meta name="theme-color" content="#101828">
-<title>Catalog finds, BigQuery serves — the full OKF runtime demo on live traces</title>
+<title>Can I trust the Germany number? BigQuery is the runtime of Knowledge Catalog + OKF</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -36,13 +36,55 @@
       <span>live ADK traces · Catalog vs BigQuery · external sync</span>
     </div>
     <h1 class="nameplate question">Catalog finds. BigQuery serves. <em>Here is where each one stops.</em></h1>
-    <p class="subtitle">Four real ADK sessions sit in <code>okf_rfc_demo.agent_events</code>. One agent read a Catalog-shaped lookup and said the number was “verified”. Another carried a verdict field and called the number unproven in all twelve of its answers; one of them put it in four words: “No. The number is unproven.” This page walks a cold reader from those traces through shipped OKF-in-Knowledge-Catalog, the external <code>okf-context sync</code> bridge, the BigQuery serve path, and a two-key attribution query. Labels on every pane say what is live, what is seeded, what is recorded, and what is still RFC text.</p>
+    <p class="subtitle">Four real ADK sessions sit in <code>okf_rfc_demo.agent_events</code>. This page walks a cold reader from those traces through shipped OKF-in-Knowledge-Catalog, the external <code>okf-context sync</code> bridge, the BigQuery serve path, and a two-key attribution query. Labels on every pane say what is live, what is seeded, what is recorded, and what is still RFC text.</p>
     <div class="badges">
       <span class="badge derived"><b>derived / demo</b>&nbsp;· observer-only · nothing attested</span>
       <span class="badge ok">agent_events untouched · 212 rows, 4 sessions, not re-run</span>
       <span class="badge">Static viewer · browser makes no GCP calls</span>
       <span class="badge model">gemini-3.8-flash · google-adk · BQAA plugin</span>
     </div>
+    <section class="vp" aria-labelledby="vp-thesis">
+      <p class="vp-thesis" id="vp-thesis"><b>BigQuery is the runtime of Knowledge Catalog + OKF.</b> The point of a runtime is that the finance team’s Germany number would come from pinned, governed context rather than from whatever a Catalog shelf hands back. Here is the moment that makes the case, and how far this page gets.</p>
+      <div class="vp-story">
+        <p class="vp-ask"><span class="vp-k">The customer moment</span> Leadership asks the finance analytics team one question: <b>what is active-customer revenue in Germany, and can I trust the number?</b></p>
+        <div class="vp-paths">
+          <div class="vp-path bad">
+            <p class="vp-pk">Catalog path · session <code>04fa3d56</code></p>
+            <p class="vp-q">“You can trust the number because it is verified.”</p>
+            <p class="vp-pb">The agent read a Catalog-shaped lookup, took its <code>ok</code> flag for an answer, and handed leadership the word “verified”. Nothing computed the number.</p>
+            <p class="vp-c"><a href="#beat=3" data-goto="3">beat 3</a> <span class="src live">live</span> the transcript and the system prompt behind it · this tool records <code>tool_origin: LOCAL</code> too — the difference between the two sides is the contract, not the runtime under it</p>
+          </div>
+          <div class="vp-path good">
+            <p class="vp-pk">Verdict-carrying path · session <code>f21ee192</code></p>
+            <p class="vp-q">“No. The number is unproven.”</p>
+            <p class="vp-pb">This agent’s tool carried a verdict field, so it had a verdict to report. It calls the number unproven in 12 of 12 final answers, and one of them puts it in four words.</p>
+            <p class="vp-c"><a href="#beat=2" data-goto="2">beat 2</a> <a href="#beat=5" data-goto="5">beat 5</a> <span class="src live">live</span> 180 events, 24 tool calls · <span class="src stub">stubbed attester · no-execution</span> both tools in this session record <code>tool_origin: LOCAL</code>, the pin is the in-process demo catalog’s own rather than an authored publication, and the receipt reads <code>no-execution; observer-only demo</code> · what a BigQuery runtime would put behind that verdict field is <span class="src rfc">RFC text only</span> · illustration, not a controlled comparison</p>
+          </div>
+        </div>
+      </div>
+      <ol class="vp-cards">
+        <li class="vp-card trust">
+          <p class="vp-k">The value · 1</p>
+          <h2 class="vp-h">Trust you can defend</h2>
+          <p class="vp-b">Your agent hands back a verdict it had to report, or an honest “unproven” — never a word it picked up from a lookup. Leadership hears the difference, and so does whoever audits the quarter.</p>
+          <p class="vp-c"><a href="#beat=3" data-goto="3">beat 3</a> <span class="src live">live</span> the 13-field Catalog template carries no verdict field at all · <a href="#beat=5" data-goto="5">beat 5</a> <span class="src seeded">seeded</span> every receipt on this page reads <code>UNVERIFIABLE</code></p>
+        </li>
+        <li class="vp-card pin">
+          <p class="vp-k">The value · 2</p>
+          <h2 class="vp-h">One answer, not EntryGroup roulette</h2>
+          <p class="vp-b">Catalog distributes the concept; the runtime is the thing that would say which revision answered. The next agent would read the same pinned publication the last one did, and the run would join back to a receipt keyed to it.</p>
+          <p class="vp-c"><a href="#beat=6" data-goto="6">beat 6</a> <span class="src live">live</span> 14 attributed, 13 receipt-only — the attributed rows resolve through legacy bindings to seeded publications, and every receipt-only row carries no publication id · <a href="#beat=3" data-goto="3">beat 3</a> <span class="src live">live</span> the Catalog lookup renders no <code>okf</code> field and takes ten resources a call · <code>deployment_heads</code> is empty, so pinning to a head and refusing a stale pin both stay <span class="src rfc">RFC text only</span></p>
+        </li>
+        <li class="vp-card iam">
+          <p class="vp-k">The value · 3</p>
+          <h2 class="vp-h">IAM you can explain</h2>
+          <p class="vp-b">Today a reader on the EntryGroup reads every policy body inside it. The runtime answer is a blast radius the size of one deployment — a sentence a security review accepts on the first pass.</p>
+          <p class="vp-c"><a href="#beat=3" data-goto="3">beat 3</a> <span class="src live">live</span> the EntryGroup IAM policy, and the policy body the Catalog lookup returns · the BigQuery side is <span class="src rfc">RFC text only</span>: Phase A service accounts and table-level grants are not built, and this page claims neither</p>
+        </li>
+      </ol>
+      <p class="vp-close"><b>What it costs you:</b> nothing new to collect. The traces are already in BigQuery — <code>okf_rfc_demo.agent_events</code> holds these four sessions today. The runtime is what would turn them into context the next agent can trust.</p>
+      <p class="vp-note">BigQuery Graph can walk the OKF chain — observation → snapshot → publication — the easy way; on this page that chain is relational evidence on beat 4 and beat 5, and the graph projection is <span class="src rfc">RFC text only</span> and optional. Normative text here is OKF v0.2 core plus an optional runtime profile, so “OKF 2.0” in a walkthrough is shorthand for that runtime story and not a claim of a published core change.</p>
+    </section>
     <p class="ask-callout"><b>What this demo is asking.</b> Take context an agent already earned the hard way, observe it with BigQuery Agent Analytics, and project it into derived OKF the next agent can discover; then show what the BigQuery runtime adds on top of the Catalog projection Google shipped on 2026-08-26. It is <b>not</b> human-in-the-loop or sentiment promotion, <b>not</b> trusting BQAA as truth, and <b>not</b> a claim that Dataplex or BigQuery syncs anything on their own. Sync is an external CLI you run; Catalog is the discovery projection; BigQuery is the serving authority; every receipt on this page is <code>UNVERIFIABLE</code>.</p>
   </div>
 </header>
