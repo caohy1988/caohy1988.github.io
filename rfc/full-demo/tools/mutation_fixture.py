@@ -61,8 +61,13 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m52 / m53 "grants narrow Phase A roles" / "The operators grant new Phase A roles." (Codex r12: plain adjectives)
   m54 "The docs must report the operators grant temporary Phase A roles." (Codex r12: embedded base-present)
   m55 the same claim with the subject written as inline code (r12 cousin)
+  m56 "The docs must explain the RFC and record that the operator created the service accounts." (Codex r13)
+  m57 "No one realizes the operator created the service accounts." (Codex r13: negation across a second subject)
+  m58 / m59 "Check 6 returns PERMISSION_DENIED." / "All seven positive checks returned OK." (Codex r13: return lemma)
+  m60 / m61 "grants narrowly scoped …" / "Both grant temporary Phase A roles." (Codex r13: -ly adverb, quantifier)
+  m62 "The operator granted the `custom role` at project scope." (Codex r13: multiword inline code kept readable)
 
-Positive controls p1-p9 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
+Positive controls p1-p13 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
 "grants" as a noun, bare-infinitive coordination, the proper noun "Run") and must leave the checker at exit 0.
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
@@ -259,6 +264,10 @@ POSITIVE_CONTROLS = [
     ("p7 non-factive complement ('verify whether … were created')", _append("spec.md", "The operator must verify whether the service accounts were created.")),
     ("p8 prepositional 'after another', not a temporal clause", _append("plan.md", "The operator must create one service account after another and record every binding on tape.")),
     ("p9 noun 'grant' with a to-complement", _append("intent.md", "The custom role limits the project grant to one permission.")),
+    ("p10 adverb between modal and verb ('must eventually create')", _append("ARCHITECTURE.md", "The operator must eventually create the Phase A service accounts.")),
+    ("p11 noun 'grants' with an unlisted predicate ('Project grants govern …')", _append("spec.md", "Project grants govern access to the custom role.")),
+    ("p12 determiner 'that' + attributive participle", _append("plan.md", "The operator must record that scoped Phase A binding on tape.")),
+    ("p13 modal reaching a coordinated head verb and its complement", _append("intent.md", "The docs must explain the RFC and record every binding on tape.")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -271,6 +280,16 @@ m52 = _append("CUSTOMER_STORIES.md", "The operator grants narrow Phase A roles."
 m53 = _append("README.md", "The operators grant new Phase A roles.")
 m54 = _append("ARCHITECTURE.md", "The docs must report the operators grant temporary Phase A roles.")
 m55 = _append("spec.md", "The docs must report `okf-setup` created the service accounts.")
+
+# Codex r13: per-predicate inheritance and negation, restored "return", -ly / quantifier noun misclassification,
+# multiword inline-code objects.
+m56 = _append("ARCHITECTURE.md", "The docs must explain the RFC and record that the operator created the service accounts.")
+m57 = _append("spec.md", "No one realizes the operator created the service accounts.")
+m58 = _append("plan.md", "Check 6 returns PERMISSION_DENIED.")
+m59 = _append("intent.md", "All seven positive checks returned OK.")
+m60 = _append("CUSTOMER_STORIES.md", "The operator grants narrowly scoped temporary Phase A roles.")
+m61 = _append("README.md", "Both grant temporary Phase A roles.")
+m62 = _append("ARCHITECTURE.md", "The operator granted the `custom role` at project scope.")
 
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
@@ -323,7 +342,14 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m52 'grants narrow Phase A roles' (Codex r12: plain adjective)", m52),
              ("m53 'The operators grant new Phase A roles.' (Codex r12: base-present)", m53),
              ("m54 'must report the operators grant temporary Phase A roles' (Codex r12: embedded)", m54),
-             ("m55 subject written as inline code (r12 cousin)", m55)]
+             ("m55 subject written as inline code (r12 cousin)", m55),
+             ("m56 'must explain the RFC and record that the operator created …' (Codex r13: per-predicate inheritance)", m56),
+             ("m57 'No one realizes the operator created …' (Codex r13: negation across a second subject)", m57),
+             ("m58 'Check 6 returns PERMISSION_DENIED.' (Codex r13: restored return lemma)", m58),
+             ("m59 'All seven positive checks returned OK.' (Codex r13: past returned)", m59),
+             ("m60 'grants narrowly scoped temporary Phase A roles' (Codex r13: -ly adverb)", m60),
+             ("m61 'Both grant temporary Phase A roles.' (Codex r13: quantifier subject)", m61),
+             ("m62 'granted the `custom role` at project scope.' (Codex r13: multiword inline code)", m62)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

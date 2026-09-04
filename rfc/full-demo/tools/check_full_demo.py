@@ -402,7 +402,7 @@ VERB_FORMS = {
     "install": (["installed"], "installs"), "record": (["recorded"], "records"), "exercise": (["exercised"], "exercises"),
     "prove": (["proved", "proven"], "proves"), "demonstrate": (["demonstrated"], "demonstrates"),
     "delete": (["deleted"], "deletes"), "execute": (["executed"], "executes"), "run": (["ran", "run"], "runs"),
-    "deny": (["denied"], "denies"), "make": (["made"], "makes"),
+    "deny": (["denied"], "denies"), "make": (["made"], "makes"), "return": (["returned"], "returns"),
     "complete": (["completed"], "completes"), "perform": (["performed"], "performs"), "show": (["showed", "shown"], "shows"),
     "confirm": (["confirmed"], "confirms"), "impersonate": (["impersonated"], "impersonates"),
     "stamp": (["stamped"], "stamps"), "commit": (["committed"], "commits"),
@@ -437,9 +437,8 @@ MODAL_WORDS = r"must|will|would|shall|should|can|could|may|might"
 # A finite verb of ANY kind, used to decide whether a subordinating word opens a clause or is a determiner /
 # preposition. Deliberately broad (auxiliaries, modals, our own forms, ordinary verbs, any -ed word): a false hit here
 # only makes the scanner stricter.
-GENERAL_FINITE = re.compile(r"\b(?:" + AUX_WORDS + r"|" + MODAL_WORDS + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS) + r"|" + RELATIONAL + r")\b|\b(?-i:[a-z]+ed)\b", re.I)
+GENERAL_FINITE = re.compile(r"\b(?:" + AUX_WORDS + r"|" + MODAL_WORDS + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS) + r"|" + RELATIONAL + r")\b", re.I)
 NOUN_BEFORE = re.compile(r"(?:" + DETERMINER + r"|[a-z]+-[a-z-]+|[A-Za-z]+)\s*$", re.I)
-DETERMINER_BEFORE = re.compile(r"\b(?:" + DETERMINER + r")\s*$|[a-z]+-[a-z-]+\s*$", re.I)
 PREPOSITION = r"at|in|on|of|for|by|with|from|into|per|via|under|over|during|through|across|between|within|without|about|as|than"
 # A preposition takes a noun-phrase complement, so a bare form right after one is a noun ("at run time", "on record").
 PREP_BEFORE = re.compile(r"\b(?:" + PREPOSITION + r")\s+$", re.I)
@@ -447,16 +446,39 @@ PREP_BEFORE = re.compile(r"\b(?:" + PREPOSITION + r")\s+$", re.I)
 # a modal, an auxiliary, another verb or punctuation means the candidate was the head of a noun phrase instead
 # ("the project grant to one permission", "the wider grant honestly", "its impersonation grant must be revoked").
 NONOBJECT_AFTER = re.compile(r"^\s+(?:(?:to|" + PREPOSITION + r"|" + MODAL_WORDS + r"|" + AUX_WORDS + r"|" + RELATIONAL + r"|" +
-                             "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b|(?-i:[a-z]+ly)\b)|^\s*[)\],.;:|]", re.I)
+                             "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b)|^\s*[)\],.;:|]", re.I)
+
+ADVERB = r"(?-i:[a-z]+ly)|very|more|most|quite|fairly|only|just|even|also|then|now|still|already|first|again"
+OBJECT_HEAD_TOKEN = re.compile(r"^\s+(?:" + DETERMINER + r"\b|(?-i:[A-Z][a-z]+)\b|" + PHASE_A_OBJECT.pattern + r")", re.I)
+ADJECTIVE_TOKEN = re.compile(r"^\s+(?!(?:" + PREPOSITION + r"|to|" + MODAL_WORDS + r"|" + AUX_WORDS + r"|" + RELATIONAL + r"|" +
+                             "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b)(?-i:[a-z][\w-]*)", re.I)
+
+def takes_object(after):
+    """True when an object noun phrase follows: zero or more adverbs, then zero or more adjective-shaped words, then a
+    noun-phrase head. "grants narrowly scoped temporary Phase A roles" reaches the head "Phase"; "grants govern access
+    to the custom role" runs into the preposition "to" without ever reaching one, so "grants" was the subject noun."""
+    rest = re.sub(r"^(?:\s+(?:" + ADVERB + r"))+", "", after, flags=re.I)
+    for _ in range(12):
+        if OBJECT_HEAD_TOKEN.match(rest):
+            return True
+        m2 = ADJECTIVE_TOKEN.match(rest)
+        if not m2:
+            return False
+        rest = rest[m2.end():]
+    return False
 
 def reads_as_noun(cl, m):
-    """True when an ambiguous base / 3sg form heads a noun phrase rather than being a finite verb."""
+    """True when an ambiguous base / 3sg form heads a noun phrase rather than being a finite verb. The decision is
+    positional: a preposition before it, or no object noun phrase after it, means a noun. No determiner rule, so
+    "Both grant temporary Phase A roles" stays a verb while "Every grant below names …" does not."""
     before, after = cl[:m.start()], cl[m.end():]
-    if DETERMINER_BEFORE.search(before) or PREP_BEFORE.search(before):
+    if PREP_BEFORE.search(before):
         return True
     if not re.match(r"^\s+\S", after):             # nothing follows: these verbs are transitive here
         return True
-    return bool(NONOBJECT_AFTER.match(after))
+    if NONOBJECT_AFTER.match(after):                # an immediately following verb / modal / preposition / punctuation
+        return True
+    return not takes_object(after)
 
 PAST_VERB = re.compile(r"\b(" + "|".join(PAST_FORMS) + r")\b|\b(?:was|were|is|are|been|be|has|have|had)\s+(?:not\s+|already\s+)?(?:" + "|".join(AMBIGUOUS_PARTICIPLE) + r")\b", re.I)
 PRESENT_VERB = re.compile(r"\b(" + "|".join(PRESENT_FORMS) + r")\b", re.I)
@@ -480,7 +502,7 @@ NEGATION = re.compile(r"\b(not|no|none|nothing|never|cannot|without)\b", re.I)
 # our own participles, coordinators, "to", and adverbs. Anything else is a content word — typically a new subject or an
 # embedded verb — and ends the modal's / status marker's reach over a finite verb.
 LIGHT = re.compile(r"^(?:\W|\b(?:" + AUX_WORDS + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS + AMBIGUOUS_PARTICIPLE) +
-                   r"|and|or|to|not|never|also|already|then|still|now|only|just|even|afterwards|again|always|duly|properly)\b)*$", re.I)
+                   r"|and|or|to|not|never|also|already|then|still|now|only|just|even|afterwards|again|always)\b|\b(?-i:[a-z]+ly)\b)*$", re.I)
 # Factive complementizers assert the content of the clause they open, so they end a qualifier's reach; whether / if are
 # non-factive and leave the embedded claim unasserted, so they license the binding instead of breaking it.
 FACTIVE_OPENER = re.compile(r"\b(that|which|who|whom|whose|where|how|why|what|when)\b", re.I)
@@ -523,6 +545,9 @@ def executed_preds(cl):
     return sorted(found.items())
 
 # ---- structural binding (Codex rounds 9–12), fail-closed ---------------------------------------------------------
+# One token that can head a subject noun phrase: a determiner, pronoun, possessive or Titlecase word. ALL-CAPS and
+# snake_case identifiers are not subject heads.
+SUBJECT_TOKEN = re.compile(r"\b(the|a|an|this|that|these|those|every|each|all|its|their|our|his|her|my|your|it|they|we|he|she|one|someone|everyone|nobody|somebody)\b|(?-i:\b[A-Z][a-z]+\b)")
 SUBJECT_OPENER = re.compile(r"(the|a|an|this|that|these|those|every|each|all|its|their|our|his|her|my|your|it|they|we|he|she|one|someone|everyone|nobody|somebody|who|which)|[A-Z][a-z]+")
 LEADING_FUNCTION = re.compile(r"^(?:\W+|\b(?:as|so|then|also|already|now|still|indeed|only|just|even)\b\s*)*", re.I)
 VERB_PHRASE_TAIL = r"(?:\s*(?:,|\band\b|\bor\b)?\s+(?:" + AUX_WORDS + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS + AMBIGUOUS_PARTICIPLE) + r"|not|already|then|also))+\s*(?:,|\band\b|\bor\b)?\s*$"
@@ -560,7 +585,10 @@ def phrase_bound(cl, qual_end, pred_start, kind="phrase"):
     first = re.match(r"^(\S+)", rest)
     return not (first and SUBJECT_OPENER.fullmatch(first.group(1).strip(",.;:()\"'")))
 
-def phrase_bound_negation(cl, qual_end, pred_start):
+def phrase_bound_negation(cl, qual_end, pred_start, kind="phrase"):
+    """A negation may sit on the subject of the predicate it negates ("no service account was created"), so unlike a
+    modal it tolerates that one noun phrase. It does NOT reach across a further subject: in "No one realizes the
+    operator created …", "the operator" is a second subject, so the negation governs "realizes", not "created"."""
     if qual_end > pred_start:
         return False
     span = cl[qual_end:pred_start]
@@ -568,7 +596,10 @@ def phrase_bound_negation(cl, qual_end, pred_start):
         return True
     if opens_finite_clause(span):
         return False
-    return not FINITE_FORM.search(TRAILING_AUX.sub(" ", span))
+    core = TRAILING_AUX.sub(" ", span)
+    if FINITE_FORM.search(core):
+        return False
+    return not (kind == "verb" and SUBJECT_TOKEN.search(core))
 
 def nearest_before(rx, cl, pred_start):
     """The governing qualifier is the NEAREST one before the predicate; a farther one cannot reach over a nearer one
@@ -578,7 +609,7 @@ def nearest_before(rx, cl, pred_start):
 
 def negation_bound(cl, pred_start, kind):
     m = nearest_before(NEGATION, cl, pred_start)
-    return bool(m and phrase_bound_negation(cl, m.end(), pred_start))
+    return bool(m and phrase_bound_negation(cl, m.end(), pred_start, kind))
 
 def modal_before(cl, pred_start, kind):
     """A modal governs the predicate when the predicate sits inside the modal span ("to be revoked") or when the modal
@@ -611,6 +642,27 @@ def bare_verb_continuation(cl):
         return False
     return tok in LEMMAS
 
+def continuation_head_end(cl):
+    """Offset just past the bare lemma or participle that heads an inherited continuation ("… and revoke the role")."""
+    m = re.match(r"^\W*(?:(?:also|then|afterwards|again|now)\s+)*([\w'’\-]+)", cl)
+    return m.end() if m else 0
+
+def inherit_bound(cl, pred_start, kind):
+    """An inherited modal governs the continuation's own head verb and whatever that head verb takes as its complement,
+    but not a predicate belonging to an embedded clause. The head verb is part of the inherited verb phrase, so the span
+    is measured after it: "and record every binding on tape" inherits over "on tape"; "and record that the operator
+    created …" does not inherit over "created", because a new subject stands before it."""
+    head_end = continuation_head_end(cl)
+    if pred_start < head_end:
+        return True
+    span = cl[head_end:pred_start]
+    if opens_finite_clause(span):
+        return False
+    core = TRAILING_AUX.sub(" ", span)
+    if FINITE_FORM.search(core):
+        return False
+    return bool(LIGHT.match(core)) if kind == "verb" else True
+
 def opens_own_claim(cl):
     """A clause introduced by a temporal / sequential connector resets an earlier modal only when it makes a claim of its
     own — it has a finite verb or an executed predicate. "create one service account after another" does not."""
@@ -639,11 +691,17 @@ def md_blocks(text):
         yield start, " ".join(cur)
 
 INLINE_CODE = re.compile(r"`{1,3}[^`\n]+`{1,3}")
+CLI_SHAPE = re.compile(r"[<>|$*=&;{}\[\]()]|--|\bSELECT\b|^(?:gcloud|bq|curl|python3?|bun|npm|git|sed|export|unset)\b", re.I)
+
+def _code_span(inner):
+    """Inline code stays readable when it is plain prose (`custom role`, `okf-setup`) so a protected object is still
+    visible to the scanner; a shell / SQL fragment collapses to one opaque token so it is not parsed as a sentence."""
+    return inner if not CLI_SHAPE.search(inner) else "code"
 
 def strip_markdown(text):
     """Collapse inline code to one opaque token, then remove emphasis markers (*, stray backticks, and _ at word
     edges). Identifier underscores survive, so PERMISSION_DENIED and agent_events stay intact."""
-    text = INLINE_CODE.sub(lambda m: re.sub(r"\s+", "-", m.group(0).strip("`")) if re.fullmatch(r"`[\w.:/@-]+`", m.group(0)) else "code", text)
+    text = INLINE_CODE.sub(lambda m: _code_span(m.group(0).strip("`")), text)
     text = re.sub(r"[*`]", "", text)
     return re.sub(r"(?<![A-Za-z0-9])_+|_+(?![A-Za-z0-9])", "", text)
 
@@ -678,8 +736,11 @@ def scan_executed(text, fname="<text>"):
                 if RESET_ALWAYS.match(conn) or (RESET_IF_FINITE.match(conn) and not continues and opens_own_claim(cl)):
                     latch = passive = False
                     continues = False
-                inherits = latch and conn != "" and continues
+                continued = latch and conn != "" and continues
                 for pred, kind in preds:
+                    # An inherited modal governs only the predicates it actually reaches from the head of this clause:
+                    # "… and record that the operator created …" inherits over "record", never over the embedded "created".
+                    inherits = continued and inherit_bound(cl, pred, kind)
                     ok = (inherits or modal_before(cl, pred, kind) or status_before(cl, pred, kind)
                           or negation_bound(cl, pred, kind))
                     if not ok:
@@ -762,7 +823,14 @@ NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
        "The operator grants narrow Phase A roles.",                                                   # r12 Codex: plain adjective, no modifier vocabulary
        "The operators grant new Phase A roles.",                                                      # r12 Codex: base-present, plain adjective
        "The docs must report the operators grant temporary Phase A roles.",                           # r12 Codex: embedded base-present under an earlier modal
-       "The docs must report `okf-setup` created the service accounts."]                              # r12 cousin: subject written as inline code
+       "The docs must report `okf-setup` created the service accounts.",                              # r12 cousin: subject written as inline code
+       "The docs must explain the RFC and record that the operator created the service accounts.",    # r13 Codex: inheritance must be per predicate
+       "No one realizes the operator created the service accounts.",                                  # r13 Codex: negation must not cross a second subject
+       "Check 6 returns PERMISSION_DENIED.",                                                          # r13 Codex: "return" is an audited action lemma
+       "All seven positive checks returned OK.",                                                      # r13 Codex: past "returned"
+       "The operator grants narrowly scoped temporary Phase A roles.",                                # r13 Codex: -ly adverb is not proof of a noun
+       "Both grant temporary Phase A roles.",                                                         # r13 Codex: a quantifier subject is not proof of a noun
+       "The operator granted the `custom role` at project scope."]                                    # r13 Codex: multiword inline code keeps the object
 POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Each call is expected to return PERMISSION_DENIED; none has been run.",
        "The legacy handle was bound to two publications before Phase A.",
@@ -791,7 +859,11 @@ POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "The operator must verify whether the service accounts were created.",
        "The operator must create one service account after another and record every binding on tape.",
        "The custom role limits the project grant to one permission.",
-       "At run time the operator keeps only the impersonation grant."]
+       "At run time the operator keeps only the impersonation grant.",
+       "The operator must eventually create the Phase A service accounts.",
+       "Project grants govern access to the custom role.",
+       "The operator must record that scoped Phase A binding on tape.",
+       "The docs must explain the RFC and record every binding on tape."]
 check(all(scan_executed(t) for t in NEG), "scan flags every negative fixture (active past, perfect, after-verb status/modal, finite claims after coordination, once/then/after resets, block boundaries, bare Phase A, unbound negation, case, identifiers): %s" % [t[:50] for t in NEG if not scan_executed(t)])
 check(not any(scan_executed(t) for t in POS), "scan accepts preceding modals latched over nonfinite coordination, preceding status markers, bound negations and legacy data facts: %s" % [scan_executed(t) for t in POS if scan_executed(t)])
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")
