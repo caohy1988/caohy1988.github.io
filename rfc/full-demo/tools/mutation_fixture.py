@@ -25,6 +25,10 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m15 "It is not a secret that the denials were proved on tape." (r6 cousin: negation not bound to the predicate)
   m16 "Without a tape, the operator created the service accounts." (r6 cousin: negation in another clause)
   m17 upper-case executed claim (r6 cousin: case-insensitive matching)
+  m18 "The operator created the service accounts as expected." (Codex r7: qualifier after the verb)
+  m19 "Future documentation is planned, then the operator created the three service accounts." (Codex r7: then resets)
+  m20 "The service account was not created after the operator granted the custom role." (Codex r7: per-predicate negation)
+  m21 "The operator granted the custom role, as planned." (r7 cousin: trailing status in a later clause)
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
 """
@@ -167,6 +171,12 @@ m15 = _append("CUSTOMER_STORIES.md", "It is not a secret that the denials were p
 m16 = _append("intent.md", "Without a tape, the operator created the service accounts.")
 m17 = _append("README.md", "THE OPERATOR GRANTED THE CUSTOM ROLE okfCatalogSearch AT PROJECT LEVEL.")
 
+# Codex r7: modal after the verb, 'then' scope reset, negation bound to its own predicate
+m18 = _append("ARCHITECTURE.md", "The operator created the service accounts as expected.")
+m19 = _append("spec.md", "Future documentation is planned, then the operator created the three service accounts.")
+m20 = _append("plan.md", "The service account was not created after the operator granted the custom role.")
+m21 = _append("CUSTOMER_STORIES.md", "The operator granted the custom role, as planned.")
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -180,7 +190,11 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m14 'Check 6 returned PERMISSION_DENIED' (identifier underscore)", m14),
              ("m15 unbound negation 'not a secret that … were proved'", m15),
              ("m16 'Without a tape,' negation in another clause", m16),
-             ("m17 upper-case executed claim", m17)]
+             ("m17 upper-case executed claim", m17),
+             ("m18 'created the service accounts as expected' (modal after verb)", m18),
+             ("m19 'is planned, then the operator created …' (then resets scope)", m19),
+             ("m20 'was not created after the operator granted …' (negation bound to its own predicate)", m20),
+             ("m21 'granted the custom role, as planned.' (trailing status in another clause)", m21)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

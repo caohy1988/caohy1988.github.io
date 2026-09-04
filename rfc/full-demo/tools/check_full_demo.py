@@ -375,22 +375,20 @@ check("Phase A; not yet met" in spec, "spec.md §4 marks the bootstrap/negative-
 arch = (DEMO / "ARCHITECTURE.md").read_text("utf-8")
 check("not yet shown" in arch, "ARCHITECTURE.md marks FAIL_STALE / history as not yet shown")
 
-# ---- executed-language scan (Codex rounds 3–6): deferred Phase A must read as future / not done / RFC text only ----
-# Block → sentence → clause. Markdown structure is preserved: a heading, list item, table row, blockquote line or blank
-# line starts a new block and only continuation lines join it, so a qualifier in a later item or paragraph never covers
-# an earlier clause. Sentences split into clauses at commas (including ", and" / ", or") and connectors.
-# Three qualifier classes, bound differently:
-#   FORWARD  true forward-scoping modals and status phrases (must / will / shall / expected / not yet / not done /
-#            RFC text only / future / deferred / planned / has not run / none has been run …). They govern their own
-#            clause and every clause AFTER them in the same sentence, never an earlier one. Clauses split at commas
-#            and at bare "and", so "… was recorded on tape and future work is planned" still fails.
-#   CLAUSE   words that only qualify the clause they sit in (prior, requirement, acceptance criterion, requires).
-#   NEGATION not / no / none / nothing / never / cannot / without. A negation exempts an executed predicate only when it
-#            is bound to it: at most 4 words between the negation and the predicate, inside the same clause. A bare "No"
-#            in "No DML touched agent_events" does not exempt "the service accounts were created" in the next clause, and
-#            "It is not a secret that the denials were proved" is still an execution claim.
-# The bare words "Phase A" qualify nothing. Only Markdown emphasis is stripped (*, backticks, and _ at word edges);
-# underscores inside identifiers (PERMISSION_DENIED, agent_events, user_email) are preserved. Matching is case-insensitive.
+# ---- executed-language scan (Codex rounds 3–7): deferred Phase A must read as future / not done / RFC text only ----
+# Block → sentence → clause → predicate. Markdown structure is preserved (heading, list item, table row, blockquote or
+# blank line starts a new block; only continuation lines join), so a qualifier in a later item or paragraph never covers
+# an earlier clause. Sentences split at . ; : and clauses at commas and connectors (and / or / but / then / while /
+# after / before / until / when / because / so …). EVERY executed predicate in a clause is evaluated and must be governed by:
+#   MODAL    must / will / shall / expected / to be … PRECEDING the predicate; latches over coordinated clauses (comma,
+#            and, or) of the same sentence; reset by then / but / while / because / so and by after / before / until /
+#            when whenever the clause they open has its own executed predicate. Never reaches backwards.
+#   STATUS   not yet / not done / future / deferred / planned / RFC text only / prior / requirement … anywhere in the SAME
+#            clause only; no latch in either direction.
+#   NEGATION not / no / none / nothing / never / cannot / without, bound to THAT predicate: at most 4 words before it,
+#            same clause. "was not created after the operator granted the role" still flags "granted".
+# The bare words "Phase A" qualify nothing. Only emphasis is stripped (*, backticks, edge underscores); identifiers such
+# as PERMISSION_DENIED, agent_events and user_email survive. Matching is case-insensitive.
 PHASE_A_OBJECT = re.compile(r"\b(service accounts?|SAs?|bindings?|binding calls?|grants?|roles?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|okf-runtime-reader|okfCatalogSearch|custom role|Token Creator|boundary(-probe)?|denials?|negative checks?|positive checks?|checks? [1-7]|PERMISSION_DENIED|(the|Phase A|on) tape|impersonation|user_email)\b", re.I)
 # Past / perfect verbs count as executed language only when the same clause names a Phase A object (either side).
 PAST_VERB = re.compile(r"\b(created|revoked|granted|installed|recorded|exercised|proved|proven|demonstrated|deleted|executed|ran|denied|made|returned|completed|performed|showed|confirmed|impersonated)\b", re.I)
@@ -403,28 +401,45 @@ EXECUTED = [re.compile(rx, re.I) for rx in [
     r"\bidentity is demonstrated\b", r"\bshows? the impersonated\b", r"\b(was|were|is|are) denied\b", r"\bPERMISSION_DENIED\b[^.;]*\bon tape\b",
     r"\bPhase A (was|has been|is) (executed|done|complete|completed|run|recorded)\b"]]
 
-def executed_span(cl):
-    """Return the start offset of the executed predicate in the clause, or None."""
-    starts = [m.start() for rx in EXECUTED for m in [rx.search(cl)] if m]
+def executed_preds(cl):
+    """Return the start offsets of EVERY executed predicate in the clause (phrase matches and past verbs with a Phase A object)."""
+    starts = set()
+    for rx in EXECUTED:
+        for m in rx.finditer(cl):
+            starts.add(m.start())
     if PHASE_A_OBJECT.search(cl):
-        m = PAST_VERB.search(cl)
-        if m:
-            starts.append(m.start())
-    return min(starts) if starts else None
+        for m in PAST_VERB.finditer(cl):
+            starts.add(m.start())
+    return sorted(starts)
 
-FORWARD = re.compile(r"\b(must|will|would|shall|expected|not yet|NOT yet|not done|not run|not started|not created|not built|not met|not (been )?executed|"
-                     r"has not run|none (has|have|was|were) (been )?run|none happened|neither happened|future|deferred|planned|to be (recorded|run|exercised|made|created|revoked|deleted|granted|stamped))\b|RFC text only", re.I)
-CLAUSE = re.compile(r"\b(prior|requirement|acceptance criterion|requires?|does not exist|no (such )?tape)\b", re.I)
+# MODAL: a true forward-scoping modal. It must PRECEDE the predicate it governs, and it latches across coordinated
+# clauses (comma / and / or) of the same sentence: "must create X, bind Y on tape, and revoke Z". It never reaches
+# backwards ("… created the service accounts as expected" is still an execution claim) and it is reset by sequential or
+# adversative connectors (then / after / before / while / but / until / once / when / because / so).
+MODAL = re.compile(r"\b(must|will|would|shall|expected|is to|are to|to be (recorded|run|exercised|made|created|revoked|deleted|granted|stamped|demonstrated|shown))\b", re.I)
+# STATUS: a not-done / future / RFC-only marker. It qualifies only the clause it sits in (anywhere in that clause) and
+# never latches forward or backward to another clause.
+STATUS = re.compile(r"\b(not yet|not done|not run|not started|not created|not built|not met|not (been )?executed|has not run|none (has|have|was|were) (been )?run|"
+                    r"none happened|neither happened|future|deferred|planned|prior|requirement|acceptance criterion|requires?|does not exist|no (such )?tape)\b|RFC text only", re.I)
+# NEGATION: bound to one predicate: at most 4 words between the negation and THAT predicate, same clause, negation first.
 NEGATION = re.compile(r"\b(not|no|none|nothing|never|cannot|without)\b", re.I)
+# Connectors that reset modal scope (a new event, contrast or time relation): a modal before "then" says nothing
+# about what happened after it.
+RESET_ALWAYS = re.compile(r"^(then|and then|but|while|whereas|although|though|however|because|so)$", re.I)
+# Temporal connectors are prepositions as often as clause openers ("before each step"). They reset the modal latch only
+# when the clause they open carries its own executed predicate ("… after the service accounts were created").
+RESET_IF_EXECUTED = re.compile(r"^(after|before|until|when)$", re.I)
 
 def negation_bound(cl, pred_start):
-    """True when a negation precedes the executed predicate with at most 4 words in between (same clause)."""
+    """True when a negation precedes THIS predicate with at most 4 words in between (same clause)."""
     for m in NEGATION.finditer(cl):
-        if m.end() <= pred_start:
-            between = cl[m.end():pred_start].split()
-            if len(between) <= 4:
-                return True
+        if m.end() <= pred_start and len(cl[m.end():pred_start].split()) <= 4:
+            return True
     return False
+
+def modal_before(cl, pred_start):
+    m = MODAL.search(cl)
+    return bool(m and m.start() < pred_start)
 
 SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json"]
 BLOCK_START = re.compile(r"^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s?|\|)")
@@ -453,25 +468,43 @@ def strip_markdown(text):
     text = re.sub(r"[*`]", "", text)
     return re.sub(r"(?<![A-Za-z0-9])_+|_+(?![A-Za-z0-9])", "", text)
 
+CONNECTOR_WORDS = r"and then|while|whereas|but|although|though|however|and|or|then|after|before|until|when|because|so"
+CONNECTOR = re.compile(r",\s*(?:\b(" + CONNECTOR_WORDS + r")\b\s+)?|\s+\b(" + CONNECTOR_WORDS + r")\b\s+", re.I)
+
 def clauses(sentence):
-    """Split one sentence into clauses at commas (incl. ', and' / ', or') and subordinating/coordinating connectors."""
-    return [c for c in re.split(r",\s+(?:and\s+|or\s+)?|\s+\b(?:while|whereas|but|although|though|however|and|then)\b\s+", sentence) if c and c.strip()]
+    """Split one sentence into (connector, clause) pairs; connector is the token that introduced the clause ('' for the first)."""
+    out, pos, conn = [], 0, ""
+    for m in CONNECTOR.finditer(sentence):
+        piece = sentence[pos:m.start()]
+        if piece.strip():
+            out.append((conn, piece))
+        tok = (m.group(1) or m.group(2) or "").strip()
+        conn = tok.lower() if tok else ","
+        pos = m.end()
+    tail = sentence[pos:]
+    if tail.strip():
+        out.append((conn, tail))
+    return out
 
 def scan_executed(text, fname="<text>"):
-    """Return offending clauses: executed predicates not governed by a forward modal, a clause qualifier, or a bound negation."""
+    """Return offending predicates: every executed predicate must be governed by a preceding modal (own clause or latched
+    from a coordinated earlier clause), a status marker in its own clause, or a negation bound to that predicate."""
     out = []
     for start_line, block in md_blocks(strip_markdown(text)):
         for sent in re.split(r"(?<=[.;:])\s+", block):
-            forward = False
-            for cl in clauses(sent):
-                pred = executed_span(cl)
-                fwd_here = FORWARD.search(cl)
-                if pred is not None:
-                    ok = forward or bool(fwd_here) or CLAUSE.search(cl) or negation_bound(cl, pred)
+            latch = False
+            for conn, cl in clauses(sent):
+                preds = executed_preds(cl)
+                if RESET_ALWAYS.match(conn) or (RESET_IF_EXECUTED.match(conn) and preds):
+                    latch = False
+                status_here = bool(STATUS.search(cl))
+                for pred in preds:
+                    ok = latch or modal_before(cl, pred) or status_here or negation_bound(cl, pred)
                     if not ok:
                         out.append("%s:%d: %s" % (fname, start_line, cl.strip()[:130]))
-                if fwd_here:
-                    forward = True
+                        break
+                if MODAL.search(cl):
+                    latch = True
     return out
 
 offenders = []
@@ -483,29 +516,40 @@ NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
        "The operator created the service accounts and every binding was recorded on tape under the okf-setup identity.",
        "Check 6 returned PERMISSION_DENIED on tape.",
        "Phase A: the tape shows the impersonated user_email after each step.",
-       "The operator created the three Phase A service accounts.",                      # active past, bare Phase A
-       "Every binding was recorded on tape, while future documentation is planned.",     # trailing qualifier must not reach back
-       "The operator has revoked every okf-setup role and has proved the denials on tape.",  # perfect forms
-       "- Every binding was recorded on tape.\n- Future work: the rest is planned.",       # list boundary
-       "Every binding was recorded on tape.\n\nThe rest is future work.",                 # paragraph boundary
+       "The operator created the three Phase A service accounts.",
+       "Every binding was recorded on tape, while future documentation is planned.",
+       "The operator has revoked every okf-setup role and has proved the denials on tape.",
+       "- Every binding was recorded on tape.\n- Future work: the rest is planned.",
+       "Every binding was recorded on tape.\n\nThe rest is future work.",
        "## Status\nAll seven negative checks returned PERMISSION_DENIED on tape.\n\nPhase A is future work.",
-       "No DML touched agent_events, and the three Phase A service accounts were created.",   # r6: bare "No" must not latch forward
-       "The operator made every Phase A binding.",                                            # r6: 'made' + binding
-       "Check 6 returned PERMISSION_DENIED.",                                                 # r6: identifier underscore preserved
-       "It is not a secret that the denials were proved on tape.",                            # r6 cousin: unbound negation
-       "Without a tape, the operator created the service accounts.",                          # r6 cousin: negation in another clause
-       "THE OPERATOR CREATED THE SERVICE ACCOUNTS.",                                          # r6 cousin: case
-       "Phase A is not blocked; the custom role okfCatalogSearch was granted at project level."]  # r6 cousin: negation in other clause
+       "No DML touched agent_events, and the three Phase A service accounts were created.",
+       "The operator made every Phase A binding.",
+       "Check 6 returned PERMISSION_DENIED.",
+       "It is not a secret that the denials were proved on tape.",
+       "Without a tape, the operator created the service accounts.",
+       "THE OPERATOR CREATED THE SERVICE ACCOUNTS.",
+       "Phase A is not blocked; the custom role okfCatalogSearch was granted at project level.",
+       "The operator created the service accounts as expected.",                                    # r7: modal after the verb
+       "Future documentation is planned, then the operator created the three service accounts.",   # r7: 'then' resets scope
+       "The service account was not created after the operator granted the custom role.",          # r7: negation bound to its own predicate
+       "The operator granted the custom role, as planned.",                                         # r7 cousin: trailing status in another clause
+       "The SAs will be created; the operator revoked the setup roles.",                            # r7 cousin: semicolon boundary
+       "Nothing was executed before the operator created the service accounts.",                    # r7 cousin: 'before' resets
+       "The operator must create the SAs, but the denials were proved on tape.",                    # r7 cousin: 'but' resets the modal
+       "The operator will record the tape after the service accounts were created."]                 # r7 cousin: 'after' resets
 POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Each call is expected to return PERMISSION_DENIED; none has been run.",
        "The legacy handle was bound to two publications before Phase A.",
-       "The operator must create the service accounts, bind every role on tape, and revoke them afterwards.",  # modal scopes forward
+       "The operator must create the service accounts, bind every role on tape, and revoke them afterwards.",
        "No service account was created for this capture; the three SAs are the Phase A follow-up.",
        "The three service accounts were **not** created; they are deferred.",
        "Nothing in §1.3 has been executed on PR 16.",
-       "No `PERMISSION_DENIED` check was recorded; the three service accounts were not created."]
-check(all(scan_executed(t) for t in NEG), "scan flags every negative fixture (active past, perfect, trailing qualifier, block boundaries, bare Phase A, unbound negation, case, identifiers): %s" % [t[:50] for t in NEG if not scan_executed(t)])
-check(not any(scan_executed(t) for t in POS), "scan accepts forward-scoped modals, bound negations and legacy data facts: %s" % [scan_executed(t) for t in POS if scan_executed(t)])
+       "No `PERMISSION_DENIED` check was recorded; the three service accounts were not created.",
+       "The operator must create the service accounts and record every binding on tape.",
+       "Each check is expected to return PERMISSION_DENIED (not yet run).",
+       "Runtime tables were created and seeded by the operator, not yet by the Phase A service accounts."]
+check(all(scan_executed(t) for t in NEG), "scan flags every negative fixture (active past, perfect, trailing/after-verb qualifier, block and connector boundaries, bare Phase A, unbound negation, case, identifiers): %s" % [t[:50] for t in NEG if not scan_executed(t)])
+check(not any(scan_executed(t) for t in POS), "scan accepts preceding modals latched over coordination, same-clause status markers, bound negations and legacy data facts: %s" % [scan_executed(t) for t in POS if scan_executed(t)])
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")
 check("Status on 2026-09-03 (PR 16): none of this section has run" in arch, "ARCHITECTURE.md sync-leg prose carries the not-run scope note")
 plan_md = (DEMO / "plan.md").read_text("utf-8")
