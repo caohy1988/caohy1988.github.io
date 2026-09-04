@@ -56,3 +56,9 @@ Keep `/rfc/full-demo/`, dependencies and deployment configuration unchanged. Use
 
 - Restored the Illustrative marker on `rfc/index.html` so `/rfc/` does not present 118%/96% as flat fact above real product links (`spec.md` masthead requirement).
 - Corrected plan/spec scope text that still claimed `rfc/index.html` was unchanged.
+
+## Opus fresh-review fix (post b86eb6a)
+
+- Ask CTA no longer points at Alder’s invented 96%; negative-test wording is explicit.
+- OKF role heading uses “Specify” (not “Pin”); pinning stays with the runtime.
+- Meta description avoids “need a BigQuery runtime” monopoly framing.
