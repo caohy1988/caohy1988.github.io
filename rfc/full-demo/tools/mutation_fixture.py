@@ -54,8 +54,15 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m44 "The operator grants very narrowly scoped temporary Phase A roles." (Codex r11: no modifier ceiling)
   m45 "The tape will show how the operator created the service accounts." (Kimi r11)
   m46 / m47 why- and what-complements (r11 cousins)
+  m48 "The docs must report okf-setup created the service accounts." (Codex r12: null complement, identifier subject)
+  m49 "The docs must report service accounts were created." (Codex r12: bare plural subject)
+  m50 "The docs must explain why all IAM calls succeeded on tape." (Codex r12: factive why over a phrase predicate)
+  m51 "The planned service account was created." (Codex r12: status modifies the subject, not the predicate)
+  m52 / m53 "grants narrow Phase A roles" / "The operators grant new Phase A roles." (Codex r12: plain adjectives)
+  m54 "The docs must report the operators grant temporary Phase A roles." (Codex r12: embedded base-present)
+  m55 the same claim with the subject written as inline code (r12 cousin)
 
-Positive controls p1-p5 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
+Positive controls p1-p9 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
 "grants" as a noun, bare-infinitive coordination, the proper noun "Run") and must leave the checker at exit 0.
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
@@ -248,7 +255,22 @@ POSITIVE_CONTROLS = [
     ("p3 'grants' as a noun", _append("plan.md", "BigQuery grants use the table-level IAM policy for the custom role.")),
     ("p4 bare-infinitive coordination", _append("intent.md", "The operator will create the service accounts and revoke the custom role.")),
     ("p5 proper noun 'Run' and infinitive after a modal", _append("README.md", "The Cloud Run Job will run as the sync writer.")),
+    ("p6 noun + participle ('The table grant named the custom role.')", _append("ARCHITECTURE.md", "The table grant named the custom role.")),
+    ("p7 non-factive complement ('verify whether … were created')", _append("spec.md", "The operator must verify whether the service accounts were created.")),
+    ("p8 prepositional 'after another', not a temporal clause", _append("plan.md", "The operator must create one service account after another and record every binding on tape.")),
+    ("p9 noun 'grant' with a to-complement", _append("intent.md", "The custom role limits the project grant to one permission.")),
 ]
+
+# Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
+# subject, plain adjectives before the object, embedded base-present under an earlier modal.
+m48 = _append("ARCHITECTURE.md", "The docs must report okf-setup created the service accounts.")
+m49 = _append("spec.md", "The docs must report service accounts were created.")
+m50 = _append("plan.md", "The docs must explain why all IAM calls succeeded on tape.")
+m51 = _append("intent.md", "The planned service account was created.")
+m52 = _append("CUSTOMER_STORIES.md", "The operator grants narrow Phase A roles.")
+m53 = _append("README.md", "The operators grant new Phase A roles.")
+m54 = _append("ARCHITECTURE.md", "The docs must report the operators grant temporary Phase A roles.")
+m55 = _append("spec.md", "The docs must report `okf-setup` created the service accounts.")
 
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
@@ -293,7 +315,15 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m44 'grants very narrowly scoped temporary Phase A roles' (no modifier ceiling)", m44),
              ("m45 'The tape will show how the operator created …' (Kimi r11)", m45),
              ("m46 'must explain why the operator granted …' (r11 cousin: why)", m46),
-             ("m47 'must record what the operator revoked on tape' (r11 cousin: what)", m47)]
+             ("m47 'must record what the operator revoked on tape' (r11 cousin: what)", m47),
+             ("m48 'must report okf-setup created …' (Codex r12: identifier subject, null complement)", m48),
+             ("m49 'must report service accounts were created' (Codex r12: bare plural subject)", m49),
+             ("m50 'must explain why all IAM calls succeeded on tape' (Codex r12: factive why)", m50),
+             ("m51 'The planned service account was created.' (Codex r12: status modifies the subject)", m51),
+             ("m52 'grants narrow Phase A roles' (Codex r12: plain adjective)", m52),
+             ("m53 'The operators grant new Phase A roles.' (Codex r12: base-present)", m53),
+             ("m54 'must report the operators grant temporary Phase A roles' (Codex r12: embedded)", m54),
+             ("m55 subject written as inline code (r12 cousin)", m55)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

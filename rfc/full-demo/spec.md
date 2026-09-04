@@ -131,7 +131,7 @@ impersonation flag of its own (bq 2.1.28 rejects `--impersonate_service_account`
 2026-09-03, and with the gcloud setting bq reports "All API calls will be executed as [<sa>]").
 `gcloud` commands may also pass `--impersonate-service-account` explicitly. Every SQL statement is
 piped over stdin, never passed as a positional argument. Impersonation requires
-`roles/iam.serviceAccountTokenCreator` granted **on each service account resource** to the operator,
+`roles/iam.serviceAccountTokenCreator` **on each service account resource** for the operator,
 one binding per SA. The Phase A tape must show the active configuration name before each step and, after each
 BigQuery step, the `user_email` that `INFORMATION_SCHEMA.JOBS` reports for the acting service account (Phase A, not yet run), so that the identity
 will be demonstrated rather than asserted; today the only `user_email` on record is the operator's. The Cloud
