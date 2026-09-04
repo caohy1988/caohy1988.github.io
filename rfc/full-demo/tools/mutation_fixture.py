@@ -33,6 +33,11 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m23 "The documentation will explain the RFC, and the operator created the Phase A service accounts." (Codex r8)
   m24 "The operator will record the tape once the service accounts were created." (Codex r8: once resets)
   m25 "The operator must document the RFC and the service accounts were created by the operator." (r8 cousin)
+  m26 "The docs must describe the workflow, and the operator creates the three Phase A service accounts." (Codex r9)
+  m27 "The plan must document the workflow, and the operator makes every binding." (Codex r9)
+  m28 "As planned the operator created the Phase A service accounts." (Codex r9: status as manner)
+  m29 same as m26 with a 15-token subject (r9: the eight-token FINITE_PAST ceiling is gone)
+  m30 "The tape will be recorded, and Codex verified that the operator granted the custom role." (r9 cousin)
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
 """
@@ -187,6 +192,13 @@ m23 = _append("spec.md", "The documentation will explain the RFC, and the operat
 m24 = _append("plan.md", "The operator will record the tape once the service accounts were created.")
 m25 = _append("intent.md", "The operator must document the RFC and the service accounts were created by the operator.")
 
+# Codex r9: simple-present finite claims after coordination; status token that describes manner, not deferral; no token ceiling
+m26 = _append("ARCHITECTURE.md", "The docs must describe the workflow, and the operator creates the three Phase A service accounts.")
+m27 = _append("spec.md", "The plan must document the workflow, and the operator makes every binding.")
+m28 = _append("plan.md", "As planned the operator created the Phase A service accounts.")
+m29 = _append("intent.md", "The docs must describe the workflow, and the operator responsible for the Phase A bootstrap in the demo project on 2026-09-03 created the three service accounts.")
+m30 = _append("CUSTOMER_STORIES.md", "The tape will be recorded, and Codex verified that the operator granted the custom role.")
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -208,7 +220,12 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m22 'granted the custom role as planned.' (status after the predicate, same clause)", m22),
              ("m23 'will explain the RFC, and the operator created …' (finite claim after coordination)", m23),
              ("m24 'will record the tape once the service accounts were created.' (once resets)", m24),
-             ("m25 'must document … and the service accounts were created …' (finite passive after and)", m25)]
+             ("m25 'must document … and the service accounts were created …' (finite passive after and)", m25),
+             ("m26 'must describe …, and the operator creates the three Phase A service accounts' (simple present)", m26),
+             ("m27 'must document …, and the operator makes every binding' (simple present)", m27),
+             ("m28 'As planned the operator created …' (status describes manner)", m28),
+             ("m29 long subject (>8 tokens) after ', and' (no token ceiling)", m29),
+             ("m30 proper-noun subject 'Codex verified that the operator granted …'", m30)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

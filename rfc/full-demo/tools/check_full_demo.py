@@ -380,19 +380,33 @@ check("not yet shown" in arch, "ARCHITECTURE.md marks FAIL_STALE / history as no
 # blank line starts a new block; only continuation lines join), so a qualifier in a later item or paragraph never covers
 # an earlier clause. Sentences split at . ; : and clauses at commas and connectors (and / or / but / then / while /
 # after / before / until / when / because / so …). EVERY executed predicate in a clause is evaluated and must be governed by:
-#   MODAL    must / will / shall / expected / to be … PRECEDING the predicate; latches only over shared-subject NONFINITE
-#            continuations (comma, and, or: "must create X, bind Y on tape"), never over a clause with its own subject
-#            and finite past verb ("…, and the operator created the SAs"); reset by then / but / while / because / so and
-#            by after / before / until / when / once whenever the clause they open has its own executed predicate.
-#   STATUS   not yet / not done / future / deferred / planned / RFC text only / prior / requirement … only when it PRECEDES
-#            the predicate in the same clause; a trailing "as planned" qualifies nothing; no latch in either direction.
-#   NEGATION not / no / none / nothing / never / cannot / without, bound to THAT predicate: at most 4 words before it,
-#            same clause. "was not created after the operator granted the role" still flags "granted".
+#   MODAL    must / will / shall / expected / to be … heading the predicate's phrase (no new subject opens between the
+#            modal and the predicate); latches only into shared-subject NONFINITE continuations, i.e. coordinated clauses
+#            that start with the verb ("must create X, bind Y on tape"), never into a clause that opens its own subject
+#            ("…, and the operator creates / created / makes …"); reset by then / but / while / because / so and by
+#            after / before / until / when / once whenever the clause they open has its own subject.
+#   STATUS   not yet / not done / future / deferred / planned / RFC text only / prior / requirement … only when it heads
+#            the predicate's phrase; "As planned the operator created …" and a trailing "as planned" qualify nothing.
+#   NEGATION not / no / none / nothing / never / cannot / without, only when it heads the predicate's phrase ("were not
+#            created", "no service account was created"); "not a secret that the denials were proved" is unbound.
+# Binding is structural (a subject opener between qualifier and predicate breaks it), with no token-count ceilings.
 # The bare words "Phase A" qualify nothing. Only emphasis is stripped (*, backticks, edge underscores); identifiers such
 # as PERMISSION_DENIED, agent_events and user_email survive. Matching is case-insensitive.
 PHASE_A_OBJECT = re.compile(r"\b(service accounts?|SAs?|bindings?|binding calls?|grants?|roles?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|okf-runtime-reader|okfCatalogSearch|custom role|Token Creator|boundary(-probe)?|denials?|negative checks?|positive checks?|checks? [1-7]|PERMISSION_DENIED|(the|Phase A|on) tape|impersonation|user_email)\b", re.I)
 # Past / perfect verbs count as executed language only when the same clause names a Phase A object (either side).
-PAST_VERB = re.compile(r"\b(created|revoked|granted|installed|recorded|exercised|proved|proven|demonstrated|deleted|executed|ran|denied|made|returned|completed|performed|showed|confirmed|impersonated)\b", re.I)
+VERB_LEMMAS = ["create", "revoke", "grant", "install", "record", "exercise", "prove", "demonstrate", "delete", "execute", "run", "deny",
+               "make", "return", "complete", "perform", "show", "confirm", "impersonate"]
+IRREGULAR_PAST = {"run": ["ran"], "make": ["made"], "show": ["showed", "shown"], "prove": ["proved", "proven"]}
+def _forms(lemma):
+    past = IRREGULAR_PAST.get(lemma) or [lemma + "d" if lemma.endswith("e") else lemma + "ed"]
+    present = [lemma + ("es" if lemma.endswith(("s", "sh", "ch", "x", "z")) else "s")]
+    return past, present
+PAST_FORMS = sorted({f for l in VERB_LEMMAS for f in _forms(l)[0]})
+PRESENT_FORMS = sorted({f for l in VERB_LEMMAS for f in _forms(l)[1]})
+# Past / perfect forms AND simple-present finite forms ("creates", "makes") are executed language when the same clause
+# names a Phase A object; a bare infinitive after a modal ("must create") is not a finite form and is not matched.
+PAST_VERB = re.compile(r"\b(" + "|".join(PAST_FORMS) + r")\b", re.I)
+PRESENT_VERB = re.compile(r"\b(" + "|".join(PRESENT_FORMS) + r")\b(?=\s+(?:(?:also|already|then|now|still)\s+)?(?:the|a|an|every|each|all|its|their|this|that|these|those|one|two|three|any|some|no)\b|\s+" + PHASE_A_OBJECT.pattern + r")", re.I)
 EXECUTED = [re.compile(rx, re.I) for rx in [
     r"recorded on tape", r"on tape under", r"\bon tape\b", r"\bthe tape shows\b", r"\bthe tape demonstrates\b",
     r"\bdemonstrated, not asserted\b", r"\b(is|was|were|are|been) demonstrated\b", r"\bprove[sd]? (the|that|it)\b", r"\bdenial checks prove\b",
@@ -409,8 +423,9 @@ def executed_preds(cl):
         for m in rx.finditer(cl):
             starts.add(m.start())
     if PHASE_A_OBJECT.search(cl):
-        for m in PAST_VERB.finditer(cl):
-            starts.add(m.start())
+        for rx in (PAST_VERB, PRESENT_VERB):
+            for m in rx.finditer(cl):
+                starts.add(m.start())
     return sorted(starts)
 
 # MODAL: a true forward-scoping modal. It must PRECEDE the predicate it governs, and it latches across coordinated
@@ -433,28 +448,66 @@ RESET_ALWAYS = re.compile(r"^(but|while|whereas|although|though|however|because|
 # ("must create the SAs, then record every binding on tape") still inherits the modal.
 RESET_IF_FINITE = re.compile(r"^(then|and then|after|before|until|when|once)$", re.I)
 
+# ---- structural binding (Codex round 9) ------------------------------------------------------------------------
+# A qualifier governs a predicate only when it heads the SAME governing phrase: nothing that opens a new subject noun
+# phrase may stand between the qualifier and the predicate. A subject opener is a determiner, a pronoun, a possessive,
+# or a Titlecase word (a proper noun such as "Codex" or "Phase"); ALL-CAPS identifiers (PERMISSION_DENIED) and
+# snake_case identifiers are not subject openers. This is a shape test, not a vocabulary test, and it has no token ceiling.
+SUBJECT_OPENER = re.compile(r"(the|a|an|this|that|these|those|every|each|all|its|their|our|his|her|my|your|it|they|we|he|she|one|someone|everyone|nobody|somebody|who|which)|[A-Z][a-z]+")
+# Function words that may sit between a qualifier and the subject it introduces without changing the shape:
+# "planned that the operator …", "not clear whether the denials …".
+LEADING_FUNCTION = re.compile(r"^(?:\W+|\b(?:that|which|whether|if|because|as|so|then|also|already|now|still|indeed|only|just|even)\b\s*)*", re.I)
+
+def phrase_bound(cl, qual_end, pred_start):
+    """True when the qualifier heads the predicate's governing phrase: after the qualifier (and any function words) the
+    span up to the predicate must NOT begin with a subject opener. "must install every binding on tape" is bound (the
+    span starts with the verb "install"; "every binding" is its object); "As planned the operator created" is not bound
+    (the span starts with "the operator", a new subject); "not a secret that the denials were proved" is not bound."""
+    if qual_end > pred_start:
+        return False
+    span = LEADING_FUNCTION.sub("", cl[qual_end:pred_start], count=1)
+    first = re.match(r"^(\S+)", span)
+    return not (first and SUBJECT_OPENER.fullmatch(first.group(1).strip(",.;:()\"'")))
+
+def nearest_before(rx, cl, pred_start):
+    """The qualifier that governs a predicate is the NEAREST one before it; a farther qualifier cannot reach over a nearer
+    one that fails to bind ("As a future requirement it is true that the operator created …": "requirement" is nearest,
+    "it" opens a new subject, so "future" does not bind either)."""
+    ms = [m for m in rx.finditer(cl) if m.start() < pred_start]
+    return ms[-1] if ms else None
+
 def negation_bound(cl, pred_start):
-    """True when a negation precedes THIS predicate with at most 4 words in between (same clause)."""
-    for m in NEGATION.finditer(cl):
-        if m.end() <= pred_start and len(cl[m.end():pred_start].split()) <= 4:
-            return True
-    return False
+    """A negation governs THIS predicate only if it is the nearest qualifier before it and heads its phrase ("were not
+    created", "no service account was created", "nothing has been executed"); "not a secret that the denials were proved"
+    is not bound because "the denials" opens a new subject between the negation and the predicate."""
+    m = nearest_before(NEGATION, cl, pred_start)
+    return bool(m and phrase_bound(cl, m.end(), pred_start))
 
 def modal_before(cl, pred_start):
-    m = MODAL.search(cl)
-    return bool(m and m.start() < pred_start)
+    """A modal governs the predicate only if it heads the predicate's phrase ("must create the SAs", "to be revoked",
+    where the participle inside the modal span is the predicate itself); never a predicate before it."""
+    inside = [m for m in MODAL.finditer(cl) if m.start() <= pred_start < m.end()]
+    if inside:
+        return True
+    m = nearest_before(MODAL, cl, pred_start)
+    return bool(m and phrase_bound(cl, m.end(), pred_start))
 
 def status_before(cl, pred_start):
-    m = STATUS.search(cl)
-    return bool(m and m.start() < pred_start)
+    """A status marker governs the predicate only if it heads the predicate's phrase ("not yet run", "future executor
+    work", "deferred ledger delete"). "As planned the operator created …" is not bound: "the operator" opens a new
+    subject between the marker and the verb, so "planned" describes manner, not deferral."""
+    m = nearest_before(STATUS, cl, pred_start)
+    return bool(m and phrase_bound(cl, m.end(), pred_start))
 
-# A coordinated clause inherits an earlier modal only when it is a shared-subject NONFINITE continuation
-# ("must create X, bind Y on tape, and revoke Z"). A clause that introduces its own subject and a finite past / perfect
-# verb ("…, and the operator created the service accounts") is a new claim and inherits nothing.
-FINITE_PAST = re.compile(r"^\W*(?:[\w'’\-/`.]+\W+){1,8}?(?:was|were|has|have|had|did|is|are)\b|^\W*(?:[\w'’\-/`.]+\W+){1,8}?(?:" + PAST_VERB.pattern[3:-3] + r")\b", re.I)
+def own_subject(cl):
+    """A coordinated clause has its own subject when its first token is a subject opener ("the operator creates …",
+    "Codex verified …"). A shared-subject nonfinite continuation starts with the verb itself ("bind every role on tape",
+    "record every binding"). No token-count ceiling: the subject may be arbitrarily long."""
+    m = re.match(r"^\W*(\S+)", cl)
+    return bool(m and SUBJECT_OPENER.fullmatch(m.group(1).strip(",.;:()\"'")))
 
 def nonfinite_continuation(cl):
-    return not FINITE_PAST.match(cl)
+    return not own_subject(cl)
 
 SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json"]
 BLOCK_START = re.compile(r"^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s?|\|)")
@@ -557,7 +610,14 @@ NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
        "The operator will record the tape once the service accounts were created.",                  # r8: 'once' resets
        "The operator must document the RFC and the service accounts were created by the operator.",  # r8 cousin: finite passive after 'and'
        "The operator granted the custom role (RFC text only).",                                      # r8 cousin: trailing status label
-       "Deferred documentation aside, the operator created the service accounts."]                   # r8 cousin: status in an earlier clause
+       "Deferred documentation aside, the operator created the service accounts.",                   # r8 cousin: status in an earlier clause
+       "The docs must describe the workflow, and the operator creates the three Phase A service accounts.",  # r9: simple present after ', and'
+       "The plan must document the workflow, and the operator makes every binding.",                 # r9: simple present 'makes'
+       "As planned the operator created the Phase A service accounts.",                              # r9: status describes manner, subject intervenes
+       "The docs must describe the workflow, and the operator responsible for the Phase A bootstrap in the demo project on 2026-09-03 created the three service accounts.",  # r9: long subject, no ceiling
+       "The tape will be recorded, and Codex verified that the operator granted the custom role.",   # r9 cousin: proper-noun subject
+       "Not yet documented, the operator created the service accounts.",                             # r9 cousin: status in a fronted clause
+       "As a future requirement it is true that the operator created the service accounts."]         # r9 cousin: status then new subject
 POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Each call is expected to return PERMISSION_DENIED; none has been run.",
        "The legacy handle was bound to two publications before Phase A.",
@@ -571,7 +631,10 @@ POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Runtime tables were created and seeded by the operator, not yet by the Phase A service accounts.",
        "Phase A requirement, not yet run: the operator must create the SAs and record every binding on tape.",
        "The operator must create the SAs, then record every binding on tape, and revoke the roles afterwards.",
-       "RFC text only: the sync writer stamped every entry after BQ_COMMITTED."]
+       "RFC text only: the sync writer stamped every entry after BQ_COMMITTED.",
+       "The operator must create the SAs and, on tape, revoke every role afterwards.",
+       "Not yet run: the operator must create EntryGroup okf-rfc-demo-boundary, then record every binding on tape.",
+       "No PERMISSION_DENIED check was recorded and no service account was created."]
 check(all(scan_executed(t) for t in NEG), "scan flags every negative fixture (active past, perfect, after-verb status/modal, finite claims after coordination, once/then/after resets, block boundaries, bare Phase A, unbound negation, case, identifiers): %s" % [t[:50] for t in NEG if not scan_executed(t)])
 check(not any(scan_executed(t) for t in POS), "scan accepts preceding modals latched over nonfinite coordination, preceding status markers, bound negations and legacy data facts: %s" % [scan_executed(t) for t in POS if scan_executed(t)])
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")
