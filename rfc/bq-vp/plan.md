@@ -1,34 +1,64 @@
-# Plan — BigQuery VP one-pager
+# Plan — a concrete story with a clear BigQuery case
 
-## Files
+## Scope
 
-| File | Purpose |
+| File | Change |
 | --- | --- |
-| `rfc/bq-vp/intent.md` | Audience, problem, thesis, separation from full demo |
-| `rfc/bq-vp/spec.md` | Simplicity rules and evidence boundaries |
-| `rfc/bq-vp/plan.md` | Implementation scope and acceptance checks |
-| `rfc/bq-vp/index.html` | Complete static story, metadata, source links, and deep-dive CTA |
-| `rfc/bq-vp/styles.css` (if needed) | Page-local responsive styling; no JavaScript |
-| `rfc/index.html` | Clear link near the masthead to the new VP page |
+| `rfc/bq-vp/index.html` | Both numbers in the hero, one arithmetic comparison, three named roles with BigQuery emphasized, punchline, ask and honesty footer |
+| `rfc/bq-vp/styles.css` | Compact editorial layout; responsive figure, keyboard focus and print styling |
+| `rfc/bq-vp/STORY.md` | Invented scenario, arithmetic, rationale and counterfactual boundaries |
+| `rfc/bq-vp/intent.md` | Customer-first goal and pilot ask |
+| `rfc/bq-vp/spec.md` | Story, honesty, scope and usability requirements |
+| `rfc/bq-vp/plan.md` | Execution and validation record |
+| `rfc/index.html` | Masthead blurb updated to the 118%/96% story; keep the Illustrative label |
 
-No full-demo edits, shared CSS changes, dependencies, or deployment changes.
+Keep `/rfc/full-demo/`, dependencies and deployment configuration unchanged. Use gpt-6-astra only.
 
 ## Implementation
 
-1. Inspect the full demo's validated copy and linked captures. Preserve qualifiers alongside the observations and proposals.
-2. Have `gpt-6-astra` implement the new HTML/CSS within the supplied scope. Keep documentation, RFC navigation, integration, and shipping with the primary session.
-3. Verify the integrated page with a local static server and real browser. Capture desktop and mobile screenshots outside the repository.
-4. Commit only the listed files, push `feat/rfc-bq-vp`, and use `gh pr create --base main`. Stop once the PR exists; report its URL and HEAD SHA.
+1. Keep Alder, Maya, the deadline, $4 million decision and the 118% / 96% arithmetic. Put all of them in the hero, with both percentages in the headline.
+2. Replace the input ledger with one comparison showing the mistaken addition of new-customer ARR. Name Catalog, OKF and BigQuery directly in the technical section, and explain execution, job/context/result receipts, attribution and access grants.
+3. Update `STORY.md`, intent and spec to capture the sharper framing. Keep the unbuilt RFC label and compact evidence footer.
+4. Verify desktop, tablet and narrow mobile layout, arithmetic, 30-second skim content, keyboard access, links, contrast and print. Run the existing full-demo checker and `git diff --check`.
+5. Commit and push the seven changed files to existing PR 20 on `feat/rfc-bq-vp-story`. Refresh the PR description to match the final framing and measured page. Save follow-up session/validation metadata under `/tmp/okf-vp-story/`. Print the new HEAD; do not create another PR or merge.
 
 ## Acceptance checks
 
-- `/rfc/bq-vp/` returns HTTP 200 from a repository-root static server. Directory `index.html` routing matches the existing Pages structure.
-- Desktop 1280 × 720: question, thesis, and three takeaways appear above the fold. Mobile 375 × 812 and narrow 320 px: readable layout, no horizontal overflow or overlapping persistent notice.
-- Three or four short sections; story stands alone without clicking. Aim for at most 400 visible words (under 90 seconds at 270 words/minute; a comprehension proxy, not a user-study result).
-- No stepper, disclosure controls, matrix, backup stories, script, or external page-load requests.
-- All local source links and the deep-dive CTA resolve. The new RFC masthead link reaches the VP page. Keyboard focus and heading order are usable.
-- Confirm quotations against committed sessions; label different prompts/tools, stub/no execution, RFC proposal, and unbuilt IAM honestly.
-- Run `python3 rfc/full-demo/tools/check_full_demo.py` unchanged and `git diff --check`. Confirm no diff under `rfc/full-demo/`.
-- No new unit-test suite: this is static editorial HTML/CSS. Browser inspection, link checks, source verification, and the existing evidence checker provide the relevant proof.
-- Save actual Codex session identifiers to `/tmp/okf-vp-onepager/sessions.json`; keep screenshots and other QA artifacts in that directory, out of the commit.
-- Verify the PR targets `main`, uses `feat/rfc-bq-vp`, and exists on GitHub. Pages deployment remains after merge; this task does not merge or claim a live deployment.
+- A skim answers: who is Maya, why does 9 a.m. matter, why is 118% wrong, what is 96%, and what would the proposed runtime add?
+- Arithmetic: `(9.6 + 2.2) / 10 = 1.18`; `9.6 / 10 = .96`. All figures use ARR consistently.
+- The illustrative label appears before the story; proposal labeling precedes all runtime promises; the footer separates the unrelated recorded demo from this invented scenario.
+- Main page is roughly 400–500 visible words, around two desktop screens, with three named roles and one ask. No real or invented execution IDs appear in the story.
+- HTTP 200, correct navigation, no horizontal overflow at desktop/768/375/320 widths, no script requirement, usable heading order and keyboard focus.
+- Relevant existing checker passes. No new test suite for this reversible editorial change; browser inspection and targeted checks provide the relevant validation.
+
+## Initial validation — HEAD 691ad08
+
+- Chromium: 416 visible words; page height 1,345 px at 1280 × 720. The complete correction figure ends at y=665, within the first viewport.
+- Responsive checks at 1280, 768, 375 and 320 px: no document or element horizontal overflow. Desktop, tablet and mobile screenshots inspected; fixed a hidden-line-break spacing issue and the narrow-screen headline wrap.
+- Keyboard: visible focus on links; skip link moves focus to `main`; RFC entry and evidence deep-dive navigation work. Every page/stylesheet link returns HTTP 200. Heading IDs and labels are valid.
+- No authored scripts or external assets. Browser network shows only local HTML/CSS, with no console errors. Checked text color pairs exceed 4.5:1 contrast. A4 print output inspected across two pages with no clipping.
+- Decimal arithmetic checks pass for both 118% and 96%. All fictional and proposal labels reviewed against `STORY.md` and the full-demo status table.
+- `python3 rfc/full-demo/tools/check_full_demo.py`: exit 0, all checks passed, including the negative mutation fixtures and the clean-copy control. `/rfc/full-demo/` has no diff.
+- `git diff --check`: passed. Only the seven scoped files are staged for the delivery commit.
+- QA artifacts and the actual Codex session ID are saved in `/tmp/okf-vp-story/`; session metadata confirms `gpt-6-astra`.
+
+## Sharpening validation — follow-up (HEAD 7c5c243)
+
+- Chromium (independent re-review): ~420 visible words; page height ~1,312 px at 1280 × 720 (~1.8 viewports). Hero carries Maya / Alder / five-minute deadline / \$4M / 118% / 96% before architecture language; arithmetic figure teaches the new-customer trap on a 30-second skim.
+- Responsive checks at 1280, 768, 375 and 320 px: no document or element horizontal overflow (headless Chromium).
+- HTTP 200 on page + stylesheet; zero console errors; heading order valid (h1→h2→h3).
+- Decimal arithmetic: `(9.6 + 2.2) / 10 = 1.18`; `9.6 / 10 = 0.96`.
+- `python3 rfc/full-demo/tools/check_full_demo.py`: exit 0 (including mutation fixtures). `/rfc/full-demo/` untouched.
+- `git diff --check`: clean for the polish commit.
+- Artifacts under `/tmp/okf-vp-story/sharpen/`; Codex session `01a06e87-a6fd-7993-88b5-9c489219e68c` (`gpt-6-astra`).
+
+## Index blurb honesty fix (post e8f6b37)
+
+- Restored the Illustrative marker on `rfc/index.html` so `/rfc/` does not present 118%/96% as flat fact above real product links (`spec.md` masthead requirement).
+- Corrected plan/spec scope text that still claimed `rfc/index.html` was unchanged.
+
+## Opus fresh-review fix (post b86eb6a)
+
+- Ask CTA no longer points at Alder’s invented 96%; negative-test wording is explicit.
+- OKF role heading uses “Specify” (not “Pin”); pinning stays with the runtime.
+- Meta description avoids “need a BigQuery runtime” monopoly framing.
