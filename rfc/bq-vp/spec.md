@@ -1,36 +1,32 @@
-# Spec — one scroll for the VP of BigQuery
+# Spec — a story the VP can retell
 
-## Must
+## Page contract
 
-- Serve a static page at `/rfc/bq-vp/`, with no build or live cloud calls.
-- Use three or four short story sections: the Germany ask, the recorded observations, the proposed runtime, and one VP next step.
-- At a typical desktop viewport (1280 × 720), show the Germany question, the locked thesis, and no more than three punchline cards above the fold.
-- Say **BigQuery is the runtime of Knowledge Catalog + OKF**, immediately distinguishing discoverable context from the accountability the runtime would add.
-- Keep the exact takeaways: **Trust you can defend**, **One pinned answer**, **IAM you can explain**.
-- Show the recorded “verified” / “unproven” observations with their evidence limitations in the same section. Identify both as local tool paths; the first is Catalog-shaped, not a live Catalog-driven agent comparison.
-- Explain the proposed chain: pinned publication → computation receipt → attributable answer. Use conditional language and an explicit RFC-proposal label. Keep the proposed IAM boundary understandable.
-- Keep a small persistent honesty sentence visible while scrolling. Source links may be compact; the main argument must not require them.
-- End with one concrete next step: prove one governed deployment for the Germany question. Offer one primary deep-dive link to `/rfc/full-demo/`.
-- Use short sentences, legible text, semantic headings, visible keyboard focus, and responsive layout. Keep the page usable without JavaScript and free of horizontal overflow on mobile.
-- Add a discoverable link near the top of `/rfc/`.
+- Static HTML and page-local CSS at `/rfc/bq-vp/`; no JavaScript, build, external assets or cloud calls.
+- One continuous brief with four sections: the board-pack moment, the near-miss, three proposed runtime beats, and one VP ask. The punchline follows the runtime section. No stepper, tabs, drawers, alternate scenarios or abstract benefit cards as the lead.
+- At 1280 × 720 the first viewport must show the illustrative label, Maya's situation, both 118% and 96%, and why the first number was wrong. Target approximately two desktop viewport heights and 400–550 visible words for a two-to-three-minute read. Reading time is an editorial estimate, not a user-study result.
+- A clearly labeled arithmetic figure shows the $10.0m opening cohort, $9.6m same-customer closing ARR, $2.2m new-customer ARR, and both calculations. It is a board-pack illustration, not a rendered execution receipt.
+- The company, persona, deadline and $4 million decision are concrete. The story comes before the Knowledge Catalog + OKF / BigQuery thesis.
+- Define ARR and expand OKF on first use. Explain retention through the same-customer arithmetic.
 
-## Must not
+## Runtime and evidence contract
 
-- Add a stepper, tabs, evidence drawers, capability matrix, backup stories, or a second walkthrough.
-- Invent session IDs, numbers, live traces, attestations, `BQ_COMMITTED` success, deployment heads, completed sync, or Phase A service accounts/grants.
-- Present the observations as a controlled A/B, or suggest the stubbed verdict computed or attested a result.
-- Turn the honesty line into a large label legend.
-- Change `/rfc/full-demo/`, introduce cloud/network dependencies for the new page, or modify site deployment configuration.
-- Merge the PR or wait for reviews.
+- Explicitly label the entire counterfactual “RFC proposal, not built”; use conditional language.
+- Tie discovery to Finance's approved OKF definition and declared computation, context pinning to a revision held fixed for the run, and the computation receipt to the revision, quarter parameters, BigQuery job and result.
+- Missing execution evidence must leave the answer unproven. A citation or pinned context alone does not verify it.
+- Make the agent and its execution identity attributable under explicit access grants. Preserve the historical context; do not promise arbitrary data replay or identical answers across agents.
+- Keep v1 source-bundle authority intact; never imply an automatic Catalog-to-BigQuery import or an existing built-in runtime service.
+- Label the invented scenario before the headline and distinguish it from evidence in the footer. Do not borrow session IDs or recordings to support the Alder numbers.
+- Footer: no Alder query ran; the runtime is proposed; demo attesters are stubs and receipts are `UNVERIFIABLE`; governed sync and Phase A IAM remain unbuilt. No claims of `ATTESTED`, `BQ_COMMITTED` or Phase A completion.
+- Offer `/rfc/full-demo/` as a separate recorded evidence deep dive with limitations. Its content and artifacts remain unchanged.
 
-## Evidence sources
+## Ask and usability
 
-| Claim | Checked-in source |
-| --- | --- |
-| Local Catalog-shaped path says “verified” without computation | `../full-demo/index.html`, `../full-demo/live/session_04fa3d56.json` |
-| Verdict path reports “unproven”; attester is stubbed and executes nothing | `../full-demo/index.html`, `../full-demo/live/session_f21ee192.json` |
-| Prompts, questions, tools differ; in-process demo pin | `../full-demo/index.html`, `../full-demo/VP_SHOW_NOTES.md` |
-| Receipts are `UNVERIFIABLE`; heads, sync, Phase A IAM remain unbuilt | `../full-demo/live/README.md`, `../full-demo/index.html` |
-| Proposed publication, receipt, attribution, and IAM opportunity | `../full-demo/index.html`, `../full-demo/VP_SHOW_NOTES.md`, `../index.html` |
+- Ask for one retention pilot with a Finance owner, one quarter of data, and a missing-receipt negative case.
+- Make the RFC masthead link accurately describe the new story and illustrative status.
+- Semantic headings, an accessible calculation figure, visible keyboard focus, working skip link, readable contrast and no mobile horizontal overflow at 375 px or 320 px. No essential content depends on color or script.
+- Keep the print view legible. Avoid fixed/sticky elements covering text.
 
-The evidence set was already captured for the full demo. No new GCP collection is part of this change.
+## Delivery
+
+Only the requested page, its `intent.md`, `spec.md`, `plan.md`, `STORY.md`, and the one RFC entry link change. QA artifacts and actual session identifiers go in `/tmp/okf-vp-story/`. Commit, push `feat/rfc-bq-vp-story`, create a PR targeting `main`, report PR URL and HEAD, and do not merge.

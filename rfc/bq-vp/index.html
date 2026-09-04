@@ -3,107 +3,91 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A BigQuery VP brief: trust you can defend, one pinned answer, and IAM you can explain. Recorded local observations and a clearly labelled runtime proposal.">
-  <meta name="theme-color" content="#16233b">
+  <meta name="description" content="Five minutes before a board meeting, 118% retention turns out to be 96%. An illustrative customer story about the proposed BigQuery runtime for Knowledge Catalog + OKF.">
+  <meta name="theme-color" content="#1e302d">
   <link rel="canonical" href="https://caohy1988.github.io/rfc/bq-vp/">
-  <title>Can I trust the Germany number? · BigQuery VP brief</title>
+  <title>The board meets at 9. Retention is wrong. · BigQuery VP brief</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to the brief</a>
-  <div class="honesty" role="note">Static captures; runtime proposed; nothing attested.</div>
+  <a class="skip-link" href="#main">Skip to the story</a>
   <header class="masthead shell">
     <a class="brand" href="/rfc/"><strong>HC</strong> / FIELD BRIEF</a>
-    <p>BIGQUERY <span aria-hidden="true">/</span> VP BRIEF <span class="read-time">· 2–3 MIN READ</span></p>
+    <p>BIGQUERY <span aria-hidden="true">/</span> 2–3 MIN READ</p>
   </header>
 
   <main id="main" tabindex="-1">
-    <section class="hero shell" aria-labelledby="question">
-      <p class="eyebrow">The customer question</p>
-      <h1 id="question">Can I trust the <em>Germany</em> active-customer revenue number?</h1>
-      <div class="thesis">
-        <p class="eyebrow">The runtime opportunity · RFC proposal</p>
-        <p class="thesis-line">BigQuery is the runtime of Knowledge Catalog + OKF.</p>
-        <p class="thesis-detail">Catalog makes context discoverable. The runtime would make its use accountable.</p>
-      </div>
-      <ul class="values" aria-label="Three proposed customer outcomes">
-        <li>
-          <h2>Trust you can defend</h2>
-          <p>A verdict backed by a computation receipt.</p>
-        </li>
-        <li>
-          <h2>One pinned answer</h2>
-          <p>The same context revision, traceable across agents.</p>
-        </li>
-        <li>
-          <h2>IAM you can explain</h2>
-          <p>Who can discover, publish, and read in one deployment.</p>
-        </li>
-      </ul>
+    <section class="hero shell" aria-labelledby="story-title">
+      <p class="eyebrow scenario-label">Illustrative scenario · invented company, people &amp; numbers</p>
+      <h1 id="story-title">The board meets at 9. <br><em>Retention is wrong.</em></h1>
+      <p class="opening"><strong>8:55 a.m.</strong> Maya Chen, VP of Finance at subscription software company <strong>Alder</strong>, opens the final board pack. A $4 million customer-expansion plan rests on one claim: existing customers are spending more. Her finance agent reports <strong>118% net revenue retention. “Verified.”</strong></p>
     </section>
 
-    <section class="observations shell" aria-labelledby="observations-title">
-      <div class="section-heading">
-        <p class="eyebrow">Recorded observations</p>
-        <h2 id="observations-title">A claim needs a receipt.</h2>
+    <section class="near-miss shell" aria-labelledby="miss-title">
+      <div class="narrative">
+        <p class="eyebrow">Five minutes to catch it</p>
+        <h2 id="miss-title">“Did that include <br>new customers?”</h2>
+        <p>An analyst spots the problem. The agent reused an old query for total annual recurring revenue (ARR) and labeled its answer retention. It cited Finance’s metric page, but no computation receipt connected that definition to the number.</p>
+        <p><strong>The opening customer cohort actually shrank.</strong> Maya pulls the slide. The board will need a different case for the spending.</p>
       </div>
-      <div class="quotes">
-        <figure class="observation lookup">
-          <figcaption>Local Catalog-shaped lookup</figcaption>
-          <blockquote>“You can trust the number because it is verified.”</blockquote>
-          <p>Nothing computed the number. The agent used a local tool, not a Knowledge Catalog query.</p>
-          <a class="source" href="../full-demo/live/session_04fa3d56.json">Recorded session · 04fa3d56 <span aria-hidden="true">↗</span></a>
-        </figure>
-        <figure class="observation verdict">
-          <figcaption>Local verdict-carrying tool</figcaption>
-          <blockquote>“No. The number is unproven.”</blockquote>
-          <p>The agent reported the limit. The attester was stubbed; no computation ran.</p>
-          <a class="source" href="../full-demo/live/session_f21ee192.json">Recorded session · f21ee192 <span aria-hidden="true">↗</span></a>
-        </figure>
-      </div>
-      <p class="evidence-note">Different prompts, questions, and tools; not a controlled A/B. All demo receipts are <code>UNVERIFIABLE</code>.</p>
+      <figure class="reconciliation">
+        <figcaption>The board-pack correction <span>Illustrative quarter · annual recurring revenue (ARR)</span></figcaption>
+        <dl class="inputs">
+          <div><dt>Opening customer cohort</dt><dd>$10.0m</dd></div>
+          <div><dt>Same customers, quarter end</dt><dd>$9.6m</dd></div>
+          <div class="new-customers"><dt>New customers, quarter end</dt><dd>+$2.2m</dd></div>
+        </dl>
+        <div class="calculation draft">
+          <div><span class="calc-label">Agent’s draft · includes new customers</span><p>($9.6m + $2.2m) ÷ $10.0m</p></div>
+          <strong>118%</strong>
+        </div>
+        <div class="calculation corrected">
+          <div><span class="calc-label">Correct retention · same cohort</span><p>$9.6m ÷ $10.0m</p></div>
+          <strong>96%</strong>
+        </div>
+      </figure>
     </section>
 
     <section class="runtime" aria-labelledby="runtime-title">
       <div class="shell">
-        <div class="section-heading">
-          <p class="eyebrow">RFC proposal · not built</p>
-          <h2 id="runtime-title">Make the answer accountable in BigQuery.</h2>
+        <div class="runtime-heading">
+          <p class="eyebrow">What would change · RFC proposal, not built</p>
+          <h2 id="runtime-title">Give Maya the receipt before the meeting.</h2>
+          <p>Knowledge Catalog would help the agent discover Finance’s approved retention definition in Open Knowledge Format (OKF). BigQuery would be the runtime of that context, beside Alder’s revenue data.</p>
         </div>
-        <ol class="runtime-chain" aria-label="Proposed runtime: pinned publication, then computation receipt, then attributable answer">
+        <ol class="runtime-beats">
           <li>
-            <h3>Pinned publication <span aria-hidden="true">→</span></h3>
-            <p>Resolve one context revision for the deployment. Keep it fixed for the run.</p>
+            <h3>Find the right “retention.”</h3>
+            <p>The Catalog entry would point to Finance’s OKF definition: start with the opening cohort; exclude new customers. The approved computation would travel with it.</p>
           </li>
           <li>
-            <h3>Computation receipt <span aria-hidden="true">→</span></h3>
-            <p>Execute against that context. Return a verdict and the evidence behind it.</p>
+            <h3>Pin it. Compute the 96%.</h3>
+            <p>The runtime would hold that context revision fixed and run its declared query for the quarter. A receipt would bind the revision, parameters and BigQuery job to the result. Missing execution evidence would mean “unproven.”</p>
           </li>
           <li>
-            <h3>Attributable answer</h3>
-            <p>Trace which agent used which publication and receipt, under explicit access grants.</p>
+            <h3>Trace the board-pack answer.</h3>
+            <p>Maya’s reviewer could trace the answer to the finance agent, its execution identity, the pinned context and the receipt, under explicit access grants. A later definition change would not rewrite that record.</p>
           </li>
         </ol>
-        <p class="runtime-note">The recording used an in-process demo pin. Governed BigQuery deployment heads, sync, and Phase A service accounts and grants remain unbuilt.</p>
       </div>
     </section>
 
+    <div class="punchline shell">
+      <p>An agent’s boardroom number should come with a <em>BigQuery receipt.</em></p>
+    </div>
+
     <section class="ask shell" aria-labelledby="ask-title">
+      <p class="eyebrow">One ask of the BigQuery VP</p>
       <div>
-        <p class="eyebrow">The VP ask · one next step</p>
-        <h2 id="ask-title">Prove one governed<br>Germany deployment.</h2>
-        <p>From a pinned publication to a computation receipt and an attributable answer—with the access boundary demonstrated.</p>
+        <h2 id="ask-title">Sponsor one retention pilot with a Finance owner.</h2>
+        <p>Use one quarter of cohort data. Prove the path from Catalog discovery to an attributable, computed answer—and show that a missing receipt leaves the answer unproven.</p>
       </div>
-      <a class="primary-cta" href="/rfc/full-demo/">Deep dive / six-beat show <span aria-hidden="true">→</span></a>
     </section>
   </main>
 
   <footer class="shell">
-    <p>Knowledge Catalog + OKF <span aria-hidden="true">/</span> BigQuery runtime proposal</p>
-    <nav aria-label="Supporting sources">
-      <a href="../full-demo/live/README.md">Capture notes</a>
-      <a href="/rfc/">Full RFC</a>
-    </nav>
+    <p><strong>Scenario, not customer evidence.</strong> No Alder query ran. The runtime above is proposed. Existing demo attesters are stubs; receipts are <code>UNVERIFIABLE</code>. Governed sync and Phase A IAM remain unbuilt.</p>
+    <a href="/rfc/full-demo/">Evidence deep dive <span aria-hidden="true">↗</span><span class="link-detail">Separate recorded demo + limitations</span></a>
   </footer>
 </body>
 </html>
