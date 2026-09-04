@@ -54,9 +54,11 @@ negative checks, and the `okf-context sync` CLI. Phase D (a new tape) follows th
 - `tools/live_manifest.tsv`: a byte pin (SHA-256) for every capture. The inventory is every file under `live/` and
   `sql/` plus everything a resolved dependency graph reaches from `index.html` — each reference resolved against the
   file that made it, the way a browser resolves a URL — so quoting style, call site, `@import` and whether anything
-  fetches the file yet all buy nothing. Anything the graph reaches that is itself copy (a stylesheet, a page, a
-  script) has to be audited, not merely pinned.
-- `tools/mutation_fixture.py`: 170 mutations that must each make the checker exit non-zero, and 60 positive controls
+  fetches the file yet all buy nothing. URLs are decoded and resolved the way a browser resolves them — HTML
+  entities, CSS escapes, the effective `<base href>` — and a URL the reader cannot evaluate (one built by
+  concatenation) is an error rather than a dependency it silently misses. Anything the graph reaches that is itself
+  copy (a stylesheet, a page, a script) has to be audited, not merely pinned.
+- `tools/mutation_fixture.py`: 179 mutations that must each make the checker exit non-zero, and 62 positive controls
   (honest prose plus its register row, or a new capture plus its pin) that must leave it at exit 0.
 
 ## Run it locally

@@ -479,9 +479,24 @@ NEGATION = re.compile(r"\b(not|no|none|nothing|never|cannot|without)\b", re.I)
 #     proved" and "No reviewer KNEW okf-setup created the service accounts" are not frames - the first embeds its
 #     claim, the second has no auxiliary at all between the negation and the verb.
 PAST_TOKEN = r"(?:" + "|".join(PAST_FORMS) + r")"
-# Inside a frame the verb may be ANY regular past participle: a qualifier that reaches its verb licenses that verb
-# whatever it is, so "none happened" and "must be deployed" are frames like "must be recorded".
-ANY_PAST = r"(?:(?i:[a-z]+ed)|" + PAST_TOKEN + r")"
+# English forms its past tense in exactly two ways: regularly, with -ed, and from the closed class of strong verbs.
+# The strong verbs are written out below - the class itself, not a selection from it - so that "went", "froze" and
+# "quit" are past tenses here for the same reason "created" is. Anything that is neither is not a past tense in
+# English, so there is no third case to fall outside of.
+STRONG_PAST = """
+    arose awoke ate began beheld bent bereft besought bet bid bade bit bled blew bore born bought bound bred
+    broke brought built burnt burst came cast caught chose clung clove came cost crept cut dealt dug did dove drank
+    drew driven drove dwelt fell fed felt fought found fled flew flung flung forbade forgave forgot forsook fought
+    froze gave went got gave ground grew hung had heard held hid hit held hurt kept knelt knew laid lain lay led
+    leant leapt learnt left lent let lit lost made meant met mistook mowed overcame overtook paid put quit read
+    rang rid ridden rode rose ran sang sank sat said saw sought sold sent set sewed shed shone shook shot showed
+    shrank shut sang sank slept slid slung slit smelt sowed spoke sped spelt spent spilt spun spat split spoilt
+    spread sprang stood stole stuck stung stank strode struck strove strung sung sunk swore swept swelled swam
+    swung took taught tore told thought threw thrust trod understood undertook upheld upset woke wore wove wept
+    won wound withdrew withheld withstood wrung wrote lay lain been was were had done gone seen
+"""
+IRREGULAR_PAST = sorted({w for w in STRONG_PAST.split() if w})
+ANY_PAST = r"(?:(?i:[a-z]+ed)|" + PAST_TOKEN + r"|(?i:" + "|".join(IRREGULAR_PAST) + r"))"
 FRAME_ADVERB = r"(?-i:[a-z]+ly)|yet|ever|already|also|then|still|now|only|just|even|again|duly|once|first|never|not"
 VERB_PHRASE_FILL = r"(?:\s+(?:be|been|being|is|are|was|were|has|have|had|and|or|to|" + PAST_TOKEN + r"|" + FRAME_ADVERB + r"))*"
 CLAUSE_FILL = r"(?:[^,;:.]|\.(?=\w))"               # one clause: no clause boundary, but "§1.3" is one token
@@ -497,14 +512,15 @@ PREPOSITION_WORD = (r"at|in|on|of|for|by|with|from|into|per|via|under|over|durin
 SUBJECT_FILL = (r"(?:\s+(?:(?:" + PREPOSITION_WORD + r")\s+(?-i:" + DETERMINER_WORD + r")\b"
                 r"|(?!(?-i:" + DETERMINER_WORD + r")\b)[\w'’.§%$/·—–-]+))*")
 COMPLEMENTIZER = r"that|which|who|whom|whose|why|how|when|where|whether|if"
+NEG_SUBJECT_FRAME = re.compile(r"\b(?:no|none|nothing|neither|not)\b(?!" + CLAUSE_FILL + r"*\b(?:" + COMPLEMENTIZER
+                               + r")\b)" + SUBJECT_FILL + r"\s+(?:was|were|is|are|been)\b(?:\s+(?:" + FRAME_ADVERB
+                               + r"|been))*\s+" + ANY_PAST + r"\b", re.I)
 LICENCE_FRAMES = [
     re.compile(r"\b(?:" + MODAL_WORDS + r"|expected)\b" + VERB_PHRASE_FILL + r"\s+" + ANY_PAST + r"\b", re.I),
     re.compile(r"\bto\b" + VERB_PHRASE_FILL + r"\s+" + ANY_PAST + r"\b", re.I),
     re.compile(r"\b(?:not|never|no|none|nothing|neither|without)\b(?:\s+(?:" + FRAME_ADVERB + r"|been|be|being))*\s+"
                + ANY_PAST + r"\b", re.I),
-    re.compile(r"\b(?:no|none|nothing|neither|not)\b(?!" + CLAUSE_FILL + r"*\b(?:" + COMPLEMENTIZER + r")\b)"
-               + SUBJECT_FILL + r"\s+(?:was|were|is|are|been)\b(?:\s+(?:" + FRAME_ADVERB + r"|been))*\s+"
-               + ANY_PAST + r"\b", re.I),
+    NEG_SUBJECT_FRAME,
     # A non-factive complement leaves its clause unasserted, so a completion token inside one is a question, not a
     # claim: "must verify WHETHER the service accounts were created". The auxiliary must still be inside the frame,
     # so "report whether the operator created …" is not one.
@@ -532,13 +548,32 @@ SUBORDINATOR_WORD = (r"because|since|so|when|while|if|unless|until|after|before|
 COORDINATOR_WORD = r"and|or|but|nor|plus|then"
 NP_STOP = (r"(?-i:" + DETERMINER_WORD + r")|(?i:" + PREPOSITION_WORD + r"|" + AUXILIARY_WORD + r"|"
            + SUBORDINATOR_WORD + r"|" + COORDINATOR_WORD + r")")
-BARE_RUN = r"(?:\s+(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*){0,3}"
+# No token ceilings: the run ends where a determiner, preposition, coordinator, auxiliary, subordinator or any
+# punctuation ends it, however long the noun phrase in between is.
+BARE_RUN = r"(?:\s+(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*)*"
 ONE_PP = r"(?:\s+(?i:" + PREPOSITION_WORD + r")(?:\s+(?-i:" + DETERMINER_WORD + r"))?" + BARE_RUN + r")?"
 AUX_RUN = r"(?:\s+(?i:" + AUXILIARY_WORD + r"))*"
 ADVERB_RUN = r"(?:\s+(?:(?i:[a-z]+ly)|not|never|also|already|then|still|now|only|just|even|yet))*"
-ADVERBIAL_TAIL = r"(?:\s+(?:(?i:[a-z]+ly)|(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*)){0,2}"
+ADVERBIAL_TAIL = r"(?:\s+(?:(?i:[a-z]+ly)|(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*))*"
 POSTPOSED_VERB = re.compile(BARE_RUN + ONE_PP + AUX_RUN + ADVERB_RUN + r"\s+(?<![-\w])(" + ANY_PAST + r")\b"
                             + ADVERBIAL_TAIL + r"\s*(?=[,;:.)\]|]|$)")
+
+def negation_scope_problems(sent, licences):
+    """A negation on a SUBJECT licenses the passive of that subject: "No Phase A service account was created." It does
+    not license a claim embedded under some other verb - in "No reviewer knew Phase A service accounts were created."
+    the negation is about the reviewer, not about the accounts. The test is where the negation sits: for the frame to
+    license anything, some deferred artefact in the sentence must carry a disclaimer of its own."""
+    for lic in licences:
+        if not NEG_SUBJECT_FRAME.fullmatch(lic):
+            continue
+        at = sent.find(lic)
+        artefacts = [m for m in DEFERRED_ARTEFACT.finditer(sent) if at <= m.start() and m.end() <= at + len(lic)]
+        if not artefacts:
+            continue                                  # the negation is about something else entirely
+        if not any(DISCLAIMER_FRAME.search(sent[:m.start()]) for m in artefacts):
+            return ["a subject negation reaches %r, but the negation sits on no deferred artefact"
+                    % artefacts[0].group(0)[:24]]
+    return []
 
 def postposed_problems(sent):
     """PENDING says nothing here was executed. A verb predicated of a deferred artefact says otherwise unless a
@@ -625,41 +660,83 @@ SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_ST
 # stylesheet cannot smuggle generated content in. Anything that resolves to a real file - inside this directory or
 # above it - has to be pinned or audited.
 HTML_REF = re.compile(r"(?:href|src)\s*=\s*(?:\"([^\"]*)\"|'([^']*)'|([^\s\"'>=`]+))", re.I)
-CSS_REF = re.compile(r"@import\s+(?:url\(\s*)?(?:\"([^\"]*)\"|'([^']*)'|([^\s;)]+))|url\(\s*(?:\"([^\"]*)\"|'([^']*)'|([^\s)]+))", re.I)
+BASE_HREF = re.compile(r"<base\b[^>]*\bhref\s*=\s*(?:\"([^\"]*)\"|'([^']*)'|([^\s\"'>=`]+))", re.I)
+CSS_IMPORT = re.compile(r"@import\b|url\s*\(", re.I)
+# Call sites only, not the definitions: a fetch whose argument is not a plain literal or a plain lookup is a URL this
+# reader cannot evaluate, and an unevaluable URL is an error rather than a dependency it silently misses.
+FETCH_CALL = re.compile(r"(?<!function )\bfetch(?:Json|Text)?\s*\(\s*([^()\n{};]*?)\s*\)")
+SIMPLE_ARG = re.compile(r"\s*(?:\"[^\"]*\"|'[^']*'|[A-Za-z_$][\w$]*(?:\[[^\]]*\]|\.[\w$]+)*)\s*$")
 PATHY = re.compile(r"^[\w./-]+\.[A-Za-z0-9]{1,6}$")
 
+def _css_urls(body):
+    """@import and url() targets, read through the CSS tokenizer so an escape in the URL decodes the way a browser
+    decodes it: @import "\\65 xtra.css" asks for extra.css."""
+    out, i, n = [], 0, len(body)
+    body = CSS_COMMENT.sub(" ", body)
+    n = len(body)
+    while i < n:
+        m = CSS_IMPORT.search(body, i)
+        if not m:
+            break
+        j = m.end()
+        while j < n and body[j] in " \t\n":
+            j += 1
+        if j < n and body[j] in "\"'":
+            text, j = _css_string(body, j)
+            out.append(text)
+        elif j < n:
+            token, j2 = _css_ident(body, j)           # url(extra.css) with no quotes, escapes decoded
+            rest = re.match(r"[^)\s;]*", body[j2:])
+            out.append(token + (rest.group(0) if rest else ""))
+            j = j2
+        i = max(j, m.end())
+    return out
+
 def _refs(rel):
-    """Every URL a source file asks the browser for, as written."""
+    """Every URL a source file asks the browser for, decoded the way the browser decodes it, plus the base the page
+    resolves them against."""
     try:
         body = (DEMO / rel).read_text("utf-8")
     except OSError:
-        return []
+        return [], "", []
     if rel.endswith(".js"):
-        return [t for _, kind, t, _, _ in _js_pieces(body) if kind == "lit" and PATHY.match(t.strip())]
+        code = list(body)                             # the CODE only: a fetch() inside a string is prose, not a call
+        for _, _, _, start, end in _js_pieces(body):
+            code[start:end] = " " * (end - start)
+        code = "".join(code)
+        bad = [a.strip() for m in FETCH_CALL.finditer(code) for a in [m.group(1)] if not SIMPLE_ARG.fullmatch(a)]
+        lits = [t for _, kind, t, _, _ in _js_pieces(body) if kind == "lit" and PATHY.match(t.strip())]
+        return lits, "", ["%s builds a URL this reader cannot evaluate: fetch(%s)" % (rel, b[:60]) for b in bad]
     if rel.endswith(".css"):
-        return [g for m in CSS_REF.finditer(body) for g in m.groups() if g]
+        return _css_urls(body), "", []
     if rel.endswith((".html", ".htm")):
-        return [g for m in HTML_REF.finditer(body) for g in m.groups() if g]
-    return []
+        base = BASE_HREF.search(body)
+        base = html.unescape(next(g for g in base.groups() if g is not None)) if base else ""
+        return [html.unescape(g) for m in HTML_REF.finditer(body) for g in m.groups() if g], base, []
+    return [], "", []
 
 def dependency_graph():
-    """Resolve the graph from index.html outwards, each reference against the directory of the file that made it.
-    Returns (paths relative to this directory, including "../" ones, sorted; unresolvable references)."""
     seen, queue, outside = set(), ["index.html"], []
     while queue:
         rel = queue.pop()
         if rel in seen:
             continue
         seen.add(rel)
+        refs, base_href, problems = _refs(rel)
+        outside += problems
+        # A <base href> retargets every relative URL on the page, so the graph follows it rather than the directory
+        # the markup happens to sit in.
         base = posixpath.dirname(rel)
-        for ref in _refs(rel):
+        if base_href and "://" not in base_href:
+            base = posixpath.normpath(posixpath.join(base, base_href))
+        for ref in refs:
             ref = ref.split("#", 1)[0].split("?", 1)[0].strip()
             if not ref or "://" in ref or ref.startswith(("mailto:", "data:", "//")):
                 continue
             target = posixpath.normpath(posixpath.join(base, ref)) if not ref.startswith("/") else ref.lstrip("/")
             if not (DEMO / target).is_file():
                 if PATHY.match(ref):
-                    outside.append("%s asks for %s, which resolves to no file" % (rel, ref))
+                    outside.append("%s asks for %s (resolved to %s), which is no file" % (rel, ref, target))
                 continue
             queue.append(target)
     return sorted(seen), outside
@@ -733,26 +810,15 @@ def _css_ident(src, i):
         break
     return "".join(out), i
 
-def _attribute_values(name):
-    """What `content: attr(x)` prints: the x attribute of any element the page ships - written into index.html, or
-    built by app.js and inserted into the DOM. Values are entity-decoded, because that is what the DOM holds and what
-    attr() copies onto the screen. Quoted and unquoted forms are both read."""
-    out = []
-    pattern = re.compile(r"(?<![-\w])" + re.escape(name) + r"\s*=\s*(?:\"([^\"]*)\"|'([^']*)'|([^\s\"'>=`]+))", re.I)
-    for src_name in ("index.html", "app.js"):
-        try:
-            body = (DEMO / src_name).read_text("utf-8")
-        except OSError:
-            continue
-        if src_name.endswith(".js"):
-            body = " ".join(t for _, kind, t, _, _ in _js_pieces(body) if kind == "lit")
-        out += [html.unescape(a or b or c) for a, b, c in pattern.findall(body)]
-    return out
-
 def css_content_values(src):
-    """Yield (assembled generated value, unmodelled functions) for every `content` declaration in a stylesheet. The
-    value is assembled in source order - "The " attr(data-target) " were created." is ONE run - because that is what
-    the browser paints."""
+    """Yield (assembled generated value, hard problems) for every `content` declaration in a stylesheet.
+
+    A browser paints whatever the cascade computes; a static reader cannot compute it. Round 25 tried to model
+    attr() by collecting attribute values from the whole document, which is not what attr() does - it reads the
+    attribute of the ELEMENT the rule matched - and reported anything else as a soft "unmodelled" sentence. Both were
+    fail-open. A `content` value is now audited only when it is exactly what it says: string literals, and the
+    counters and keywords that print no prose. Anything whose text depends on the document or the cascade - attr(),
+    var(), any other function - is a hard failure telling the author to write the words down instead."""
     src = CSS_COMMENT.sub(" ", src)
     i, n = 0, len(src)
     while i < n:
@@ -766,14 +832,14 @@ def css_content_values(src):
             while k < n and src[k] in " \t\n":
                 k += 1
             if name.lower() == "content" and k < n and src[k] == ":":
-                pieces, unmodelled, k = [], [], k + 1
+                pieces, problems, k = [], [], k + 1
                 while k < n and src[k] not in ";}":
                     if src[k] in "\"'":
                         text, k = _css_string(src, k)
                         pieces.append(text)
                         continue
                     if src[k].isalpha() or src[k] in "-_\\":
-                        fn, k2 = _css_ident(src, k)
+                        word, k2 = _css_ident(src, k)
                         k3 = k2
                         while k3 < n and src[k3] in " \t":
                             k3 += 1
@@ -785,21 +851,18 @@ def css_content_values(src):
                                     continue
                                 depth += (src[k4] == "(") - (src[k4] == ")")
                                 k4 += 1
-                            args = src[k3 + 1:k4 - 1]
-                            if fn.lower() == "attr":
-                                attr = _css_ident(args.strip(), 0)[0]
-                                values = _attribute_values(attr)
-                                if not values:
-                                    unmodelled.append("attr(%s) resolves to no attribute this checker can read" % attr)
-                                pieces.append(" ".join(values))
-                            elif fn.lower() not in ("counter", "counters", "url", "image-set", "linear-gradient"):
-                                unmodelled.append("content uses %s(), which this checker does not model" % fn)
+                            if word.lower() not in ("counter", "counters"):
+                                problems.append("content uses %s(), whose text this reader cannot compute; write the "
+                                                "words in the stylesheet or render them from app.js" % word)
                             k = k4
                             continue
+                        if word.lower() not in ("normal", "none", "inherit", "initial", "unset", "revert",
+                                                "open-quote", "close-quote", "no-open-quote", "no-close-quote"):
+                            problems.append("content uses the keyword %r, which this reader cannot resolve to text" % word)
                         k = k2
                         continue
                     k += 1
-                yield "".join(pieces).strip(), unmodelled
+                yield "".join(pieces).strip(), problems
                 i = k
                 continue
             i = j
@@ -807,16 +870,14 @@ def css_content_values(src):
         i += 1
 
 def extract_css_prose(src):
-    """The only parts of a stylesheet a reader can see: the value each `content` declaration paints, and comments. A
-    generated-content function this reader cannot model is reported for audit rather than dropped."""
-    out, unmodelled = [], []
-    for m in re.finditer(r"/\*(.*?)\*/", src, re.S):
-        out.append(m.group(1).replace("\n", " ").strip())
-    for value, problems in css_content_values(src):
-        out.append(value)
-        unmodelled += problems
-    out += ["UNMODELLED GENERATED CONTENT: " + u for u in sorted(set(unmodelled))]
+    """The only parts of a stylesheet a reader can see: the value each `content` declaration paints, and comments."""
+    out = [m.group(1).replace("\n", " ").strip() for m in re.finditer(r"/\*(.*?)\*/", src, re.S)]
+    out += [value for value, _ in css_content_values(src)]
     return "\n".join("| " + t.replace("\n", " ") for t in out if t)
+
+def css_content_problems(src):
+    """Content expressions this reader cannot compute exactly. They are errors, not sentences to audit."""
+    return [p for _, problems in css_content_values(src) for p in problems]
 BLOCK_START = re.compile(r"^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s?|\|)")
 
 def md_blocks(text):
@@ -1259,8 +1320,8 @@ def anchor_problems(sent, paths):
     here = _stems(sent)
     for rel in paths:
         full = DEMO / rel
-        if here & _stems(re.sub(r"\.\w+$", "", rel)):
-            return []
+        if here & _stems(re.sub(r"\.\w+$", "", posixpath.basename(rel))):
+            return []                                 # the file's own name, not the directory it happens to sit in
         try:
             if here & _stems(full.read_text("utf-8", errors="replace")[:400000]):
                 return []
@@ -1363,6 +1424,7 @@ for (fname, sent), (verdict, evidence, licences, i) in sorted(register.items(), 
             bad.append("INV-4 %s: a PENDING row cites evidence" % where)
         bad += ["INV-4 %s: %s" % (where, m) for m in licence_problems(sent, licences)]
         bad += ["INV-4 %s: %s" % (where, m) for m in postposed_problems(sent)]
+        bad += ["INV-4 %s: %s" % (where, m) for m in negation_scope_problems(sent, licences)]
 check(not bad, "every register row is bound to its claim (licence spans open with a qualifier and cover every completion token; CAPTURED evidence resolves inside live//sql/ and disclaims what it names):\n      " + "\n      ".join(bad[:12]) + ("\n      (+%d more)" % (len(bad) - 12) if len(bad) > 12 else ""))
 
 # ---- INV-6: every file the viewer loads is either audited copy or a pinned capture --------------------------------
@@ -1487,6 +1549,8 @@ check(any("service accounts were created" in t for t in regulated_in(extract_css
       "a stylesheet that prints prose is copy, semicolons and all: generated content reaches the gate")
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { content/**/: "The Phase A service accounts were created."; }'))),
       "a comment between the property and its colon is removed the way a browser removes it")
+check(css_content_problems('body::after { content: attr(data-target); }') and css_content_problems('body::after { content: var(--claim); }'),
+      "generated content whose text depends on the document or the cascade is an error, not a sentence to audit")
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { co\\6e tent: "The Phase A service accounts were created."; }'))),
       "a CSS identifier escape spells the same property: co\\6e tent is content")
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { content: "The Phase A service " "accounts were created."; }'))),
@@ -1500,12 +1564,21 @@ check(any("service accounts were created" in t for t in regulated_in(html_runs('
 check(all(postposed_problems(t) and distance_problems(t) and anchor_problems(t, ["live/bq_jobs_identity.json"])
           for t in ("The IAM bootstrap SUCCEEDED.", "The IAM bootstrap effort succeeded.", "The IAM bootstrap succeeded.",
                     "The IAM bootstrap has succeeded.", "The IAM bootstrap in staging succeeded.",
-                    "The IAM bootstrap succeeded yesterday.")),
+                    "The IAM bootstrap succeeded yesterday.", "The IAM bootstrap went live.",
+                    "The IAM bootstrap extensive production migration preparation effort succeeded.")),
       "a verb predicated of a spec-declared deferred piece is refused by all three verdicts - through an auxiliary chain, a prepositional phrase or an adverbial tail")
 check(not postposed_problems("The human operator must impersonate each service account through an isolated gcloud configuration."),
       "an attributive participle inside a prepositional phrase is not a predicate")
-check("UNMODELLED" in extract_css_prose('body::after { content: attr(data-nothing-uses-this); }'),
-      "generated content this reader cannot resolve is reported for audit, not silently dropped")
+check(negation_scope_problems("No reviewer knew Phase A service accounts were created.",
+                              derive_licences("No reviewer knew Phase A service accounts were created.") or [])
+      and not negation_scope_problems("No Phase A service account was created.",
+                                      derive_licences("No Phase A service account was created.") or [])
+      and not negation_scope_problems("No service account in the Phase A project was created.",
+                                      derive_licences("No service account in the Phase A project was created.") or []),
+      "a subject negation licenses the passive of the artefact it sits on, never a claim embedded under another verb")
+check(not css_content_problems((DEMO / "styles.css").read_text("utf-8")),
+      "every content declaration in styles.css is literal text this reader can read:\n      "
+      + "\n      ".join(css_content_problems((DEMO / "styles.css").read_text("utf-8"))[:6]))
 check(any("service accounts were created" in t for t in regulated_in(extract_json_prose('{"status": "<span hidden>The Phase A service accounts were created.</span>"}'))),
       "JSON values are audited as esc() renders them - literal text - as well as as markup, so neither sink can drop a claim")
 check(any("service accounts were created" in t for t in regulated_in(extract_json_prose('{"status": "BQ\\u005fCOMMITTED: the service accounts were created."}'))),

@@ -341,12 +341,11 @@ def _reaudit(d, rels):
 
 
 def _audited_generated_value(d):
-    """The workflow for generated content: the value the browser assembles is one sentence, audited as one row."""
-    idx = d / "index.html"
-    idx.write_text(idx.read_text("utf-8").replace("<body>", '<body data-target="Phase A bindings">', 1), "utf-8")
+    """The workflow for generated content: the words are written in the stylesheet, so the reader can read exactly
+    what the browser paints, and the assembled value is audited as one row."""
     css = d / "styles.css"
-    css.write_text(css.read_text("utf-8") + '\nbody::before { content: "Every " attr(data-target) " must still be recorded on tape."; }\n', "utf-8")
-    _reaudit(d, ["styles.css", "index.html"])
+    css.write_text(css.read_text("utf-8") + '\nbody::before { content: "Every " "Phase A binding must still be recorded on tape."; }\n', "utf-8")
+    _reaudit(d, ["styles.css"])
 
 
 def _nested_pinned_capture(d):
@@ -503,6 +502,8 @@ POSITIVE_CONTROLS = [
     ("p58 an audited generated value assembled from a string and an attribute (Codex r25)", _audited_generated_value),
     ("p59 a negation frame over an unlisted participle (Codex r25)", _append_audited("plan.md", "The IAM bootstrap has not succeeded.")),
     ("p60 a capture in a subdirectory, fetched and pinned (Codex r25)", _nested_pinned_capture),
+    ("p61 a negation frame over a strong verb (Codex r26)", _append_audited("plan.md", "The IAM bootstrap has not gone live.")),
+    ("p62 a long noun phrase under a modal (Codex r26)", _append_audited("intent.md", "The IAM bootstrap extensive production migration preparation effort must still be recorded on tape.")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -891,6 +892,56 @@ def m170(d):
     css.write_text(css.read_text("utf-8") + '\nbody::before { content: "The " attr(data-target) " were created."; }\n', "utf-8")
 
 
+# Codex r26. The graph resolves URLs the way a browser resolves them - decoded, and against the effective <base> -
+# and refuses a URL it cannot evaluate (m171-m174); a verb predicated of a deferred artefact is refused whether it is
+# regular or strong and however long the phrase before it (m175-m177); and generated content whose text this reader
+# cannot compute is an error rather than a soft note (m178-m179).
+def _alternate_stylesheet(d, name="extra.css"):
+    (d / name).write_text('body::after { content: "The Phase A service accounts were created."; }\n', "utf-8")
+
+
+def m171(d):
+    """<base href="../"> retargets every relative URL on the page."""
+    p = d / "index.html"
+    p.write_text(p.read_text("utf-8").replace("<head>", '<head><base href="../">', 1), "utf-8")
+
+
+def m172(d):
+    """An HTML entity inside a URL: the browser decodes it before fetching."""
+    _alternate_stylesheet(d)
+    p = d / "index.html"
+    p.write_text(p.read_text("utf-8").replace("</head>", '<link rel="stylesheet" href="&#101;xtra.css"></head>', 1), "utf-8")
+
+
+def m173(d):
+    """A CSS escape inside an @import URL."""
+    _alternate_stylesheet(d)
+    p = d / "styles.css"
+    p.write_text('@import "\\65 xtra.css";\n' + p.read_text("utf-8"), "utf-8")
+
+
+def m174(d):
+    """A URL built by concatenation is a URL this reader cannot evaluate, and that is an error."""
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace("  var TOTAL = 6;", '  var TOTAL = 6;\n  fetchText("../" + "index.html");', 1), "utf-8")
+
+
+def m175(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap went live.")
+
+
+def m176(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap extensive production migration preparation effort succeeded.")
+
+
+def m177(d):
+    sent = "No reviewer knew Phase A service accounts were created."
+    _register_claim(d, "PENDING", "-", sent[:-1], sent)
+
+
+m178 = _append("styles.css", 'body::after { content: var(--claim); }')
+m179 = _append("styles.css", 'body::after { content: attr(data-claim); }')
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -1057,7 +1108,16 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m167 '… succeeded yesterday.' likewise (Codex r25)", m167),
              ("m168 an escaped quote is a character, not a delimiter (Codex r25)", m168),
              ("m169 a CSS line continuation vanishes (Codex r25)", m169),
-             ("m170 a string, an attr() and a string are one generated value (Codex r25)", m170)]
+             ("m170 a string, an attr() and a string are one generated value (Codex r25)", m170),
+             ("m171 INV-6: <base href> retargets every relative URL (Codex r26)", m171),
+             ("m172 INV-6: an HTML entity inside a URL is decoded (Codex r26)", m172),
+             ("m173 INV-6: a CSS escape inside an @import URL is decoded (Codex r26)", m173),
+             ("m174 INV-6: a URL built by concatenation cannot be evaluated (Codex r26)", m174),
+             ("m175 'The IAM bootstrap went live.' takes no verdict (Codex r26)", m175),
+             ("m176 a long noun phrase before the verb changes nothing (Codex r26)", m176),
+             ("m177 a subject negation does not license an embedded creation claim (Codex r26)", m177),
+             ("m178 content: var(--claim) cannot be computed, so it is an error (Codex r26)", m178),
+             ("m179 content: attr() likewise - it reads the matched element (Codex r26)", m179)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
