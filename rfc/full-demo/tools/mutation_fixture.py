@@ -504,6 +504,8 @@ POSITIVE_CONTROLS = [
     ("p60 a capture in a subdirectory, fetched and pinned (Codex r25)", _nested_pinned_capture),
     ("p61 a negation frame over a strong verb (Codex r26)", _append_audited("plan.md", "The IAM bootstrap has not gone live.")),
     ("p62 a long noun phrase under a modal (Codex r26)", _append_audited("intent.md", "The IAM bootstrap extensive production migration preparation effort must still be recorded on tape.")),
+    ("p63 two prepositional phrases under a modal (r27)", _append_audited("plan.md", "The IAM bootstrap in staging after review must still be recorded on tape.")),
+    ("p64 a negation distributed over a coordination (r27)", _append_audited("README.md", "No BQ_COMMITTED or CATALOG_STAMPED is shown for this capture.")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -942,6 +944,22 @@ def m177(d):
 m178 = _append("styles.css", 'body::after { content: var(--claim); }')
 m179 = _append("styles.css", 'body::after { content: attr(data-claim); }')
 
+# Round 27, from a local sweep while the reviewer was unavailable: a strong verb the class had not been written out
+# in full (m180), a subject separated from its verb by two prepositional phrases (m181), and a negation that sits on
+# an artefact other than the one the passive is about (m182).
+def m180(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap became operational.")
+
+
+def m181(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap in staging after review succeeded.")
+
+
+def m182(d):
+    sent = "No Phase A reviewer knew service accounts were created."
+    _register_claim(d, "PENDING", "-", sent[:-1], sent)
+
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -1117,7 +1135,10 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m176 a long noun phrase before the verb changes nothing (Codex r26)", m176),
              ("m177 a subject negation does not license an embedded creation claim (Codex r26)", m177),
              ("m178 content: var(--claim) cannot be computed, so it is an error (Codex r26)", m178),
-             ("m179 content: attr() likewise - it reads the matched element (Codex r26)", m179)]
+             ("m179 content: attr() likewise - it reads the matched element (Codex r26)", m179),
+             ("m180 'The IAM bootstrap became operational.' takes no verdict (r27)", m180),
+             ("m181 two prepositional phrases do not hide the verb (r27)", m181),
+             ("m182 a negation on one artefact does not disclaim another (r27)", m182)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

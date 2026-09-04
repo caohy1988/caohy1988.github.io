@@ -484,17 +484,24 @@ PAST_TOKEN = r"(?:" + "|".join(PAST_FORMS) + r")"
 # "quit" are past tenses here for the same reason "created" is. Anything that is neither is not a past tense in
 # English, so there is no third case to fall outside of.
 STRONG_PAST = """
-    arose awoke ate began beheld bent bereft besought bet bid bade bit bled blew bore born bought bound bred
-    broke brought built burnt burst came cast caught chose clung clove came cost crept cut dealt dug did dove drank
-    drew driven drove dwelt fell fed felt fought found fled flew flung flung forbade forgave forgot forsook fought
-    froze gave went got gave ground grew hung had heard held hid hit held hurt kept knelt knew laid lain lay led
-    leant leapt learnt left lent let lit lost made meant met mistook mowed overcame overtook paid put quit read
-    rang rid ridden rode rose ran sang sank sat said saw sought sold sent set sewed shed shone shook shot showed
-    shrank shut sang sank slept slid slung slit smelt sowed spoke sped spelt spent spilt spun spat split spoilt
-    spread sprang stood stole stuck stung stank strode struck strove strung sung sunk swore swept swelled swam
-    swung took taught tore told thought threw thrust trod understood undertook upheld upset woke wore wove wept
-    won wound withdrew withheld withstood wrung wrote lay lain been was were had done gone seen
+    arose arisen awoke awoken was were been bore borne born beat beaten became become began begun beheld bent
+    besought beset bet bade bidden bound bit bitten bled blew blown broke broken bred brought broadcast built burnt
+    burst bought cast caught chid chidden chose chosen clung clad came cost crept cut dealt dug dove did done drew
+    drawn dreamt drank drunk drove driven dwelt ate eaten fell fallen fed felt fought found fled flung flew flown
+    forbade forbidden forecast forgot forgotten forgave forgiven forsook forsaken froze frozen got gotten gave given
+    went gone ground grew grown hung had heard hewn hid hidden hit held hurt kept knelt knit knew known laid led
+    leant leapt learnt left lent let lay lain lit lost made meant met misled mistook mistaken misunderstood mown
+    outgrew overcame overdid overheard overrode overridden overran oversaw overseen overtook overtaken overthrew
+    overthrown paid proven put quit read rebuilt redid redone remade rent repaid reran reset rewrote rewritten rid
+    rode ridden rang rung rose risen ran sawn said saw seen sought sold sent set sewn shook shaken shaven shorn shed
+    shone shot shown shrank shrunk shut sang sung sank sunk sat slew slain slept slid slung slunk slit smelt sown
+    spoke spoken sped spelt spent spilt spun spat split spoilt spread sprang sprung stood stole stolen stuck stung
+    stank stunk strewn strode stridden struck stricken strung strove striven swore sworn swept swollen swam swum
+    swung took taken taught tore torn told thought throve thriven threw thrown thrust trod trodden underwent
+    undergone understood undertook undertaken undid undone unwound upheld upset woke woken wore worn wove woven wed
+    wept wet won wound withdrew withdrawn withheld withstood wrung wrote written
 """
+
 IRREGULAR_PAST = sorted({w for w in STRONG_PAST.split() if w})
 ANY_PAST = r"(?:(?i:[a-z]+ed)|" + PAST_TOKEN + r"|(?i:" + "|".join(IRREGULAR_PAST) + r"))"
 FRAME_ADVERB = r"(?-i:[a-z]+ly)|yet|ever|already|also|then|still|now|only|just|even|again|duly|once|first|never|not"
@@ -506,8 +513,13 @@ CLAUSE_FILL = r"(?:[^,;:.]|\.(?=\w))"               # one clause: no clause boun
 # accounts were created" is two clauses, without the checker knowing that "knew" is a verb.
 DETERMINER_WORD = (r"the|a|an|this|that|these|those|its|their|our|his|her|my|your|each|every|all|both|either|neither|"
                    r"such|any|some|no|another|own|one|two|three|four|five|six|seven|eight|nine|ten|many|few|several|most")
+# The English prepositions, as the closed class they are. They bound a frame's fill and carry the prepositional
+# phrases that may sit between a subject and its verb, so listing more of them can only make the reader stricter.
 PREPOSITION_WORD = (r"at|in|on|of|for|by|with|from|into|per|via|under|over|during|through|across|between|within|"
-                    r"without|about|as|than|below|above|beside|beyond|behind|beneath|to|onto|upon|among")
+                    r"without|about|as|than|below|above|beside|beyond|behind|beneath|to|onto|upon|among|amongst|"
+                    r"after|before|since|until|till|throughout|alongside|despite|besides|toward|towards|against|"
+                    r"around|near|off|out|outside|inside|opposite|past|along|amid|amidst|atop|barring|concerning|"
+                    r"considering|excluding|including|regarding|versus|unlike|underneath|up|down|onto|off")
 # The determiner test is case-sensitive on purpose: a lone capital "A" is a name part ("Phase A"), not the article.
 SUBJECT_FILL = (r"(?:\s+(?:(?:" + PREPOSITION_WORD + r")\s+(?-i:" + DETERMINER_WORD + r")\b"
                 r"|(?!(?-i:" + DETERMINER_WORD + r")\b)[\w'’.§%$/·—–-]+))*")
@@ -532,8 +544,13 @@ COMPLETION_PHRASE = re.compile("|".join("(?:%s)" % rx.pattern for rx in EXECUTED
 # A disclaimer FRAME sits immediately on the artefact it disclaims - "(not okf-setup)", "not yet by the Phase A
 # service accounts", "no service account" - so a negation belonging to some other clause cannot stand in for one.
 DISCLAIMER_FRAME = re.compile(r"\b(?:not|no|never|nothing|neither|without)\b"
-                              r"(?:\s+(?:yet|as|by|from|for|to|of|in|on|the|a|an|any|its|their|each|every|one|"
-                              r"(?-i:Phase)|(?-i:A)))*\s*$", re.I)
+                              r"(?:\s*[/·,]\s*|\s+(?:yet|as|by|from|for|to|of|in|on|the|a|an|any|its|their|each|"
+                              r"every|one|or|and|(?-i:Phase)|(?-i:A)))*\s*$", re.I)
+
+def disclaimed(sent, pos):
+    """True when a negation sits on the artefact at `pos`. Other artefact names may stand between them - a negation
+    distributes over a coordination ("no BQ_COMMITTED / CATALOG_STAMPED is shown") - but nothing else may."""
+    return bool(DISCLAIMER_FRAME.search(DEFERRED_ARTEFACT.sub(" ", sent[:pos])))
 # A verb PREDICATED of a deferred artefact is a claim about it, whatever the verb is. Round 24 could only see a verb
 # closing the artefact's own noun phrase; a browser reader sees the predicate wherever the ordinary machinery of
 # English puts it, so the reach now spans the rest of one noun phrase, at most one prepositional phrase, an auxiliary
@@ -551,11 +568,12 @@ NP_STOP = (r"(?-i:" + DETERMINER_WORD + r")|(?i:" + PREPOSITION_WORD + r"|" + AU
 # No token ceilings: the run ends where a determiner, preposition, coordinator, auxiliary, subordinator or any
 # punctuation ends it, however long the noun phrase in between is.
 BARE_RUN = r"(?:\s+(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*)*"
-ONE_PP = r"(?:\s+(?i:" + PREPOSITION_WORD + r")(?:\s+(?-i:" + DETERMINER_WORD + r"))?" + BARE_RUN + r")?"
+# Any number of prepositional phrases may sit between a subject and its verb: "in staging after review succeeded".
+PP_RUN = r"(?:\s+(?i:" + PREPOSITION_WORD + r")(?:\s+(?-i:" + DETERMINER_WORD + r"))?" + BARE_RUN + r")*"
 AUX_RUN = r"(?:\s+(?i:" + AUXILIARY_WORD + r"))*"
 ADVERB_RUN = r"(?:\s+(?:(?i:[a-z]+ly)|not|never|also|already|then|still|now|only|just|even|yet))*"
 ADVERBIAL_TAIL = r"(?:\s+(?:(?i:[a-z]+ly)|(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*))*"
-POSTPOSED_VERB = re.compile(BARE_RUN + ONE_PP + AUX_RUN + ADVERB_RUN + r"\s+(?<![-\w])(" + ANY_PAST + r")\b"
+POSTPOSED_VERB = re.compile(BARE_RUN + PP_RUN + AUX_RUN + ADVERB_RUN + r"\s+(?<![-\w])(" + ANY_PAST + r")\b"
                             + ADVERBIAL_TAIL + r"\s*(?=[,;:.)\]|]|$)")
 
 def negation_scope_problems(sent, licences):
@@ -567,12 +585,19 @@ def negation_scope_problems(sent, licences):
         if not NEG_SUBJECT_FRAME.fullmatch(lic):
             continue
         at = sent.find(lic)
-        artefacts = [m for m in DEFERRED_ARTEFACT.finditer(sent) if at <= m.start() and m.end() <= at + len(lic)]
-        if not artefacts:
-            continue                                  # the negation is about something else entirely
-        if not any(DISCLAIMER_FRAME.search(sent[:m.start()]) for m in artefacts):
-            return ["a subject negation reaches %r, but the negation sits on no deferred artefact"
-                    % artefacts[0].group(0)[:24]]
+        aux = None
+        for m in re.finditer(r"\b(?:was|were|is|are|been)\b", lic, re.I):
+            aux = m                                   # the passive auxiliary the frame ends on
+        if aux is None:
+            continue
+        subject = lic[:aux.start()].rstrip()          # the noun phrase the passive is about
+        last = None
+        for m in DEFERRED_ARTEFACT.finditer(subject):
+            last = m
+        if last is None or last.end() != len(subject):
+            continue                                  # the passive is about something that is not a deferred artefact
+        if not disclaimed(sent, at + last.start()):
+            return ["a subject negation reaches %r, but the negation does not sit on it" % last.group(0)[:24]]
     return []
 
 def postposed_problems(sent):
@@ -1351,7 +1376,7 @@ def containment_problems(sent):
     created." is not - its negation belongs to another clause, and no window can tell the difference."""
     out = []
     for m in DEFERRED_ARTEFACT.finditer(sent):
-        if not DISCLAIMER_FRAME.search(sent[:m.start()]):
+        if not disclaimed(sent, m.start()):
             out.append("names %r without a disclaimer on it" % m.group(0)[:30])
     return out
 
@@ -1565,12 +1590,17 @@ check(all(postposed_problems(t) and distance_problems(t) and anchor_problems(t, 
           for t in ("The IAM bootstrap SUCCEEDED.", "The IAM bootstrap effort succeeded.", "The IAM bootstrap succeeded.",
                     "The IAM bootstrap has succeeded.", "The IAM bootstrap in staging succeeded.",
                     "The IAM bootstrap succeeded yesterday.", "The IAM bootstrap went live.",
-                    "The IAM bootstrap extensive production migration preparation effort succeeded.")),
+                    "The IAM bootstrap extensive production migration preparation effort succeeded.",
+                    "The IAM bootstrap became operational.",
+                    "The IAM bootstrap in staging after review succeeded.")),
       "a verb predicated of a spec-declared deferred piece is refused by all three verdicts - through an auxiliary chain, a prepositional phrase or an adverbial tail")
 check(not postposed_problems("The human operator must impersonate each service account through an isolated gcloud configuration."),
       "an attributive participle inside a prepositional phrase is not a predicate")
-check(negation_scope_problems("No reviewer knew Phase A service accounts were created.",
-                              derive_licences("No reviewer knew Phase A service accounts were created.") or [])
+check(all(negation_scope_problems(t, derive_licences(t) or [])
+          for t in ("No reviewer knew Phase A service accounts were created.",
+                    "No Phase A reviewer knew service accounts were created."))
+      and negation_scope_problems("No reviewer knew Phase A service accounts were created.",
+                                  derive_licences("No reviewer knew Phase A service accounts were created.") or [])
       and not negation_scope_problems("No Phase A service account was created.",
                                       derive_licences("No Phase A service account was created.") or [])
       and not negation_scope_problems("No service account in the Phase A project was created.",
