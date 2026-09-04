@@ -42,6 +42,13 @@ negative checks, and the `okf-context sync` CLI. Phase D (a new tape) follows th
 - `sql/`: `sessions_by_context_ref.sql` (v0), `never_emit_scan.sql`, `serve_probes.sql`,
   `attribution_two_key.sql` (reader, SELECT only), `setup_runtime_tables.sql` (setup, DDL + seeds).
 - `tools/check_full_demo.py`: the checker. Exit 0 required.
+- `tools/audited_claims.tsv`: the audited claim register. Every sentence in the files above that names a Phase A
+  artefact appears here with a verdict — `PENDING` (claims nothing was executed) or `CAPTURED` (states what this
+  capture did, with the `live/` or `sql/` file behind it). The checker fails on any such sentence that is not
+  registered, so new or edited copy has to be re-audited before it ships. It does not try to parse English; the
+  register is the audit, and `tools/check_full_demo.py` documents that boundary and its non-goals.
+- `tools/mutation_fixture.py`: 121 mutations that must each make the checker exit non-zero, and 45 positive controls
+  (honest prose plus its register row) that must leave it at exit 0.
 
 ## Run it locally
 

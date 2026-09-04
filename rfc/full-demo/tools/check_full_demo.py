@@ -393,10 +393,10 @@ check("not yet shown" in arch, "ARCHITECTURE.md marks FAIL_STALE / history as no
 # The bare words "Phase A" qualify nothing. Only emphasis is stripped (*, backticks, edge underscores); identifiers such
 # as PERMISSION_DENIED, agent_events and user_email survive. Matching is case-insensitive.
 PHASE_A_OBJECT = re.compile(r"\b(service accounts?|SAs?|bindings?|binding calls?|grants?|roles?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|okf-runtime-reader|okfCatalogSearch|custom role|Token Creator|boundary(-probe)?|denials?|negative checks?|positive checks?|checks? [1-7]|PERMISSION_DENIED|(the|Phase A|on) tape|impersonation|user_email)\b", re.I)
-# Past / perfect verbs count as executed language only when the same clause names a Phase A object (either side).
-# ---- executed predicates: an audited form table, not a generator (Codex round 10) ---------------------------------
+# ---- the action verbs, as an audited form table (Codex round 10) -------------------------------------------------
 # lemma -> (past/participle forms, simple-present 3sg form). Written out and audited: a generator produced "denyed" /
-# "denys" and dropped the "run" participle. Adding a verb means adding one audited row here.
+# "denys" and dropped the "run" participle. Only the past forms are load-bearing now: they are the completion
+# vocabulary of INV-4, and adding a row can only make more sentences demand a qualifier, never fewer.
 VERB_FORMS = {
     "create": (["created"], "creates"), "revoke": (["revoked"], "revokes"), "grant": (["granted"], "grants"),
     "install": (["installed"], "installs"), "record": (["recorded"], "records"), "exercise": (["exercised"], "exercises"),
@@ -411,257 +411,40 @@ VERB_FORMS = {
 # Forms identical to their lemma are ambiguous with the infinitive and the noun ("run the DDL jobs", "Cloud Run Job"),
 # so they count as a past participle only directly after an auxiliary ("has run", "was run").
 AMBIGUOUS_PARTICIPLE = ["run"]
-LEMMAS = set(VERB_FORMS)
 PAST_FORMS = sorted({f for past, _ in VERB_FORMS.values() for f in past if f not in AMBIGUOUS_PARTICIPLE})
-PRESENT_FORMS = sorted({pres for _, pres in VERB_FORMS.values()})
-# An object head: a determiner / quantifier / possessive, a Titlecase word ("Phase"), or a Phase A object. ALL-CAPS
-# identifiers (IAM, PERMISSION_DENIED) are not object heads, so "BigQuery grants use table-level IAM" reads as a noun.
-AUX_WORDS = r"was|were|is|are|be|been|being|has|have|had|having|does|do|did"
-AUX = r"(?:" + AUX_WORDS + r")"
-# ---- noun / verb disambiguation for our own action lemmas (Codex round 12) ---------------------------------------
-# "grant(s)" is both an action and a noun in this corpus. The signals are structural, in this order:
-#   * immediately preceded by a determiner, quantifier, possessive or a hyphenated / compound modifier → noun
-#     ("Every grant below …", "the table-level grants", "nine dataEditor grants");
-#   * immediately followed by another verb → the candidate was the subject noun ("BigQuery grants use …",
-#     "The table grant named …"). RELATIONAL lists the ordinary verbs that show up in this position; it disambiguates
-#     a noun reading only, so a miss here can only make the scanner more permissive on one ambiguous word, never on
-#     the past-tense forms that carry the actual execution claims;
-#   * followed by nothing (clause end / punctuation) → noun, since these verbs are transitive here.
-# Otherwise the candidate is a verb, with no vocabulary list of allowed objects or modifiers.
-DETERMINER = r"(?:the|a|an|this|that|these|those|every|each|all|its|their|our|his|her|my|your|any|some|no|one|two|three|nine|both|such|many|few)"
-PREPOSITION = r"at|in|on|of|for|by|with|from|into|per|via|under|over|during|through|across|between|within|without|about|as|than|below|above|beside|beyond|behind|beneath"
-RELATIONAL = (r"use[sd]?|appl(?:y|ies|ied)|cover(?:s|ed)?|includ(?:e|es|ed)|name[sd]?|hold[s]?|held|need(?:s|ed)?|remain(?:s|ed)?|govern(?:s|ed)?|constrain(?:s|ed)?|control(?:s|led)?|limit(?:s|ed)?|restrict(?:s|ed)?|"
-              r"describ(?:e|es|ed)|explain(?:s|ed)?|report(?:s|ed)?|say[s]?|said|show[s]?|showed|mean[s]?|meant|allow(?:s|ed)?|"
-              r"give[s]?|gave|take[s]?|took|keep[s]?|kept|work(?:s|ed)?|stay(?:s|ed)?|answer(?:s|ed)?|succeed(?:s|ed)?|"
-              r"fail(?:s|ed)?|happen(?:s|ed)?|exist(?:s|ed)?|carr(?:y|ies|ied)|sit[s]?|live[s]?|come[s]?|go(?:es)?|went")
+# ---- the honesty gate (Codex round 20): an audited claim register, not an English parser -------------------------
+# Rounds 3-19 grew a clause parser that tried to decide, for arbitrary English, whether a qualifier bound an executed
+# predicate. Every round found a new lexical hole in it - an irregular past that was not listed, a comparative adverb
+# that was not listed, a participle shape that was not matched - because that question is open-domain and a regex
+# grammar can only ever approximate it. Each patch moved the ceiling; none removed it. The gate is now structural:
+#
+#   INV-1  COVERAGE.  Every sentence of the demo copy that NAMES a Phase A artefact must appear, verbatim after
+#          whitespace normalisation, in tools/audited_claims.tsv. No grammar is consulted: a sentence is regulated
+#          because it names one of our artefacts, full stop. New, edited or moved prose fails until it is audited,
+#          whatever words it uses, so no vocabulary list can make this fail open. There is nothing here to bypass.
+#   INV-2  EVIDENCE.  Every CAPTURED row cites a file under live/ or sql/ that exists in the tree.
+#   INV-3  CONTAINMENT.  A CAPTURED row may not name a deferred Phase A artefact unless it also carries a not-done
+#          marker, so no row can present a thing that does not exist as a thing that was done. Growing
+#          DEFERRED_ARTEFACT only makes this stricter.
+#   INV-4  QUALIFIED.  A PENDING row whose sentence carries completion language - a past / participle form of one of
+#          the audited action verbs, or one of the EXECUTED phrases - must also carry a qualifier token. This asks
+#          only that the qualifier be PRESENT in the sentence, never where it sits, so it has no parse to bypass and
+#          no adverb, irregular-verb or participle vocabulary on its critical path.
+#   INV-5  NO STALE ROWS.  A register row whose sentence is no longer in the copy is an error, so the register stays
+#          an audit of what ships rather than a graveyard that could pre-license future prose.
+#
+# Deliberate non-goals, stated so a reviewer can judge the boundary instead of guessing at it:
+#   * The register IS the audit. The checker guarantees that no sentence naming a Phase A artefact ships without a
+#     recorded verdict, and that the verdict is internally consistent; it does not re-derive the verdict from the
+#     sentence's grammar, and it makes no claim to parse English.
+#   * A contributor who writes a false sentence AND registers it defeats INV-1 by construction. That is a falsified
+#     audit record, visible in the register diff of any pull request, and it is out of scope for a static checker.
+#   * Present-tense and imperative contract prose ("create the SAs", "revoke every okf-setup role") asserts nothing
+#     about completion, so INV-4 ignores it. INV-1 still covers every such sentence.
+#   * What remains load-bearing and lexicon-free is EXTRACTION: text the reader sees must reach the gate. That is why
+#     the JavaScript reader is a token scanner with a real paren stack rather than a lookback regex, and why the HTML
+#     reader computes an element's effective `display` rather than matching a substring.
 MODAL_WORDS = r"must|will|would|shall|should|can|could|may|might"
-# A finite verb of ANY kind, used to decide whether a subordinating word opens a clause or is a determiner /
-# preposition. Deliberately broad (auxiliaries, modals, our own forms, ordinary verbs, any -ed word): a false hit here
-# only makes the scanner stricter.
-GENERAL_FINITE = re.compile(r"\b(?:" + AUX_WORDS + r"|" + MODAL_WORDS + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS) + r"|" + RELATIONAL + r")\b", re.I)
-# ---- token-level embedded-clause detection (Codex / Kimi round 15) ------------------------------------------------
-# The question "does this span contain a claim of its own?" is answered from token adjacency, not from a list of verbs.
-# A clause needs a SUBJECT next to its verb, so the signal is a noun immediately followed by a verb slot. A verb slot is
-#   * an auxiliary ("operators were …", "the operator was …"), or
-#   * the token right before a new determiner-headed noun phrase ("the operator audited THE bindings",
-#     "reviewers audit THE service accounts") — the new determiner closes the previous phrase, so what precedes it is a
-#     verb, whatever its spelling; unlisted, irregular and simple-present verbs are all caught, or
-#   * the last token of the span when it is verb-shaped ("and record the operator succeeded" + predicate).
-# A determiner that follows a preposition opens that preposition's object, not a new clause, so "service account in the
-# Phase A project" is not one. A verb preceded by a coordinator shares the earlier subject ("… and record the binding"),
-# so it is not a clause either. Noun compounds ("the Phase A binding") never reach a verb slot.
-TOKEN = re.compile(r"[A-Za-z][\w'’./-]*|[^\sA-Za-z]")
-def _word_set(pattern):
-    """The alternatives of a plain alternation pattern, without its (?: … ) wrapper."""
-    return {w for w in re.split(r"\|", pattern.strip()) if re.fullmatch(r"[a-z]+", w.strip("(?:)"))} | \
-           {w.strip("(?:)") for w in re.split(r"\|", pattern.strip()) if re.fullmatch(r"[a-z]+", w.strip("(?:)"))}
-DET_SET = _word_set(DETERMINER)
-PREP_SET = _word_set(PREPOSITION) | {"to"}
-CONJ_SET = {"and", "or", "but", "then", "nor", "plus"}
-AUX_SET = _word_set(AUX_WORDS) | _word_set(MODAL_WORDS)
-# English past tenses are either regular (-ed) or drawn from a closed list of irregular forms. Listing the irregulars
-# describes the language, like the non-ly adverbs; it is not a list of accepted phrasings. A word that is neither is a
-# noun as far as this scanner is concerned, so "the custom role" is a noun phrase and "the operator spoke" is a clause.
-IRREGULAR_PAST = {
-    "spoke", "knew", "went", "saw", "took", "gave", "told", "wrote", "began", "broke", "chose", "drove", "fell",
-    "felt", "found", "got", "grew", "held", "kept", "led", "left", "lost", "met", "paid", "put", "read", "said",
-    "sold", "sent", "set", "shot", "sat", "slept", "spent", "stood", "taught", "thought", "threw", "understood",
-    "wore", "won", "came", "did", "ate", "drew", "flew", "heard", "hit", "let", "lay", "rose", "sang", "sank",
-    "shook", "showed", "shut", "sought", "spread", "struck", "swore", "swept", "woke", "withdrew", "wound",
-    "quit", "cut", "cost", "hurt", "burst", "cast", "split", "bet", "beat", "bid", "bled", "fled", "fed", "hid",
-    "rode", "ran", "swam", "rang", "drank", "sprang", "sped", "built", "bought", "brought", "caught", "dealt",
-    "dug", "drank", "meant", "sank", "sewed", "shed", "slid", "spun", "stuck", "stung", "swung", "tore", "wove",
-}
-VERB_SHAPED = re.compile(r"(?-i:[a-z]+ed)$|^(?:" + "|".join(PAST_FORMS + PRESENT_FORMS + sorted(IRREGULAR_PAST)) + r")$", re.I)
-
-def _kind(tok):
-    low = tok.lower()
-    if not tok[0].isalpha():
-        return "PUNCT"
-    if len(tok) == 1 and tok.isupper():
-        return "WORD"                                 # "Phase A binding": a lone capital is part of a name, not "a"
-    if low in DET_SET:
-        return "DET"
-    if low in PREP_SET:
-        return "PREP"
-    if low in CONJ_SET:
-        return "CONJ"
-    if low in AUX_SET:
-        return "AUX"
-    if re.fullmatch(r"(?-i:[a-z]+ly)", tok):
-        return "ADV"
-    return "WORD"
-
-# Adverbs that do not end in -ly. Unlike verbs, these are a genuinely closed class in English, so listing them is a
-# description of the language rather than an allowlist of accepted phrasings.
-DEGREE_ADVERB = {"very", "quite", "always", "never", "again", "now", "then", "also", "still", "already",
-                 "afterwards", "first", "duly", "once", "twice", "only", "just", "even", "rather", "fairly", "soon",
-                 "often", "sometimes", "seldom", "rarely", "usually", "occasionally", "ever", "yet", "here", "there",
-                 "thus", "hence", "therefore", "indeed", "instead", "meanwhile", "later", "earlier", "anyway",
-                 "more", "most", "less", "least", "well", "far", "much", "too", "so", "almost", "nearly"}
-# Every path that skips adverbs uses this one definition, so the token grammar and the noun/verb test cannot disagree.
-ADVERB = r"(?-i:[a-z]+ly)|" + "|".join(sorted(DEGREE_ADVERB))
-
-def _is_adverb(tok, kind):
-    return kind == "ADV" or tok.lower() in DEGREE_ADVERB
-
-# A handful of degree words double as pronouns and determiners ("most record every binding", "most bindings"). A degree
-# reading needs a word to modify, so one of these is adverbial only when an adverb or an adjective follows it; standing
-# directly in front of the verb it is the clause's own subject, not a modifier of the verb.
-QUANTIFIER_ADVERB = {"more", "most", "less", "least", "much"}
-ADJECTIVE_SHAPED = re.compile(r"(?-i:[a-z]+(?:ed|ing|ive|al|ous|ary|ic|ful|less|able|ible|ent|ant|ory|ish))$")
-
-def _adverbial(toks, i):
-    """True when toks[i] is an adverb in this position — the context-sensitive test every path uses, so the token
-    grammar, the continuation head and the subject search cannot disagree about one word."""
-    tok, kind = toks[i]
-    if not _is_adverb(tok, kind):
-        return False
-    if tok.lower() in QUANTIFIER_ADVERB:
-        nxt = toks[i + 1] if i + 1 < len(toks) else None
-        return bool(nxt and (_is_adverb(*nxt) or ADJECTIVE_SHAPED.match(nxt[0])))
-    return True
-
-def _subject_index(toks, i):
-    """Index of the token governing position i, skipping any run of adverbs ("the operator quietly audited …")."""
-    j = i - 1
-    while j >= 0 and _adverbial(toks, j):
-        j -= 1
-    return j
-
-def _subject_head_ok(toks, subj_i):
-    """True when toks[subj_i] can HEAD a subject noun phrase rather than modify the word after it. A determiner, a
-    preposition, a coordinator, an adverb, an adjective-shaped word or nothing may stand before a head ("the operator
-    quit", "the experienced operator spoke"). A bare noun or name-part before it means the candidate is itself a
-    modifier and the following word is the phrase's head noun, not a verb ("the Phase A cache hit")."""
-    j = subj_i - 1
-    while j >= 0 and _adverbial(toks, j):
-        j -= 1
-    if j < 0:
-        return True
-    tok, kind = toks[j]
-    return kind != "WORD" or bool(ADJECTIVE_SHAPED.match(tok))
-
-def _subject_before(toks, i):
-    j = _subject_index(toks, i)
-    return toks[j] if j >= 0 else None
-
-def contains_finite_clause(span, tail_subject_verb=False):
-    """True when the span holds a subject-predicate structure of its own. `tail_subject_verb` is set for a phrase
-    predicate, whose span keeps its own words: a span that is exactly a bare noun plus a lowercase word
-    ("… operator spoke" | on tape) is a subject and its verb, whatever that verb's spelling."""
-    toks = [(t, _kind(t)) for t in TOKEN.findall(span)]
-    if tail_subject_verb and toks:
-        # The span of a phrase predicate keeps its own words, so a span ending in "<noun> <adverbs> <verb> <adverbs>"
-        # is a subject and its verb ("… the operator quietly spoke softly" | on tape). The final word must be a verb
-        # by morphology (-ed) or by the closed irregular list, so "the custom role" and "the Phase A binding" — whose
-        # last word is a noun — are noun phrases, not clauses.
-        last_i = len(toks) - 1
-        while last_i >= 0 and _adverbial(toks, last_i):
-            last_i -= 1                               # a trailing adverb run: "spoke softly", "recorded verbatim"
-        if last_i >= 0:
-            tok, kind = toks[last_i]
-            if kind == "WORD" and tok[:1].islower() and VERB_SHAPED.search(tok):
-                subj_i = _subject_index(toks, last_i)
-                if subj_i >= 0 and toks[subj_i][1] == "WORD" and _subject_head_ok(toks, subj_i):
-                    return True
-    for i, (tok, kind) in enumerate(toks):
-        if _adverbial(toks, i):
-            continue
-        prev_i = _subject_index(toks, i)
-        prev = toks[prev_i] if prev_i >= 0 else None
-        if not prev or prev[1] not in ("WORD", "DET"):
-            continue                                  # a verb needs a subject noun or quantifier before it
-        if prev[1] == "DET" and kind != "WORD":
-            continue
-        if kind == "AUX":
-            return True                               # "operators were …", "the operator was …"
-        if kind == "WORD":
-            nxt = toks[i + 1] if i + 1 < len(toks) else None
-            if nxt and nxt[1] == "DET":
-                return True                           # "… audited THE bindings", "… audit THE service accounts"
-            if nxt is None and VERB_SHAPED.search(tok) and _subject_head_ok(toks, prev_i):
-                return True                           # "… the operator succeeded" | predicate
-            # noun verb noun: "reviewer knew okf-setup", where the third noun is the next clause's subject. The verb
-            # must be lowercase, so a name compound ("Phase A project", "the Phase A binding") is not one.
-            before_subject = toks[_subject_index(toks, prev_i)] if _subject_index(toks, prev_i) >= 0 else None
-            if (nxt and nxt[1] == "WORD" and tok[:1].islower() and prev[1] == "WORD"
-                    and (before_subject is None or before_subject[1] != "WORD")):
-                return True                           # the subject starts its phrase, so this is not a name compound
-    return False
-NOUN_BEFORE = re.compile(r"(?:" + DETERMINER + r"|[a-z]+-[a-z-]+|[A-Za-z]+)\s*$", re.I)
-# A preposition takes a noun-phrase complement, so a bare form right after one is a noun ("at run time", "on record").
-PREP_BEFORE = re.compile(r"\b(?:" + PREPOSITION + r")\s+$", re.I)
-# What follows decides transitivity: a finite verb needs an object noun phrase after it. A preposition, an -ly adverb,
-# a modal, an auxiliary, another verb or punctuation means the candidate was the head of a noun phrase instead
-# ("the project grant to one permission", "the wider grant honestly", "its impersonation grant must be revoked").
-NONOBJECT_AFTER = re.compile(r"^\s+(?:(?:to|" + PREPOSITION + r"|" + MODAL_WORDS + r"|" + AUX_WORDS + r"|" + RELATIONAL + r"|" +
-                             "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b)|^\s*[)\],.;:|]", re.I)
-
-# A past participle right after the candidate either takes an object of its own — in which case the candidate before
-# it was the finite verb ("grants narrowly constrained PHASE A ROLES") — or heads a reduced relative / passive that
-# modifies the candidate, in which case the candidate is a noun ("grants narrowly constrained BY POLICY are …",
-# "grant NAMED THE custom role"). An object of its own is a bare noun phrase: no determiner (that reading belongs to
-# the participle's own clause), no preposition, no auxiliary, no further verb.
-PARTICIPLE_AFTER = re.compile(r"^(?:\s+(?:" + ADVERB + r"))*\s+(?-i:[a-z]+ed)\b", re.I)
-ATTRIBUTIVE_OBJECT = re.compile(r"^\s+(?!(?:" + DETERMINER + r"|" + PREPOSITION + r"|to|and|or|not|" + MODAL_WORDS + r"|" +
-                                AUX_WORDS + r"|" + RELATIONAL + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b)[\w'’-]+", re.I)
-
-OBJECT_HEAD_TOKEN = re.compile(r"^\s+(?:" + DETERMINER + r"\b|(?-i:[A-Z][a-z]+)\b|" + PHASE_A_OBJECT.pattern + r")", re.I)
-ADJECTIVE_TOKEN = re.compile(r"^\s+(?!(?:" + PREPOSITION + r"|to|" + MODAL_WORDS + r"|" + AUX_WORDS + r"|" + RELATIONAL + r"|" +
-                             "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b)(?-i:[a-z][\w-]*)", re.I)
-
-# A subject noun phrase before the candidate, in three ordinary shapes. A bare Titlecase noun with nothing between it
-# and the candidate is NOT one: "Project grants" and "BigQuery grants" are compound nouns, while "The operator grants",
-# "Check 6 returns" and clause-initial "Both grant" are subject + verb.
-PRONOUN = r"it|they|we|he|she|one|someone|everyone|nobody|somebody"
-DET_PLUS_WORD = re.compile(r"\b(?:" + DETERMINER + r")\b(?:\s+[\w'’-]+)+\s*$", re.I)
-TITLE_PLUS_WORD = re.compile(r"(?-i:\b[A-Z][a-z]+\b)(?:\s+[\w'’-]+)+\s*$")
-BARE_PRONOUN_SUBJECT = re.compile(r"^\W*(?:" + DETERMINER + r"|" + PRONOUN + r")\s*$", re.I)
-
-def has_subject(before):
-    """Any content word before the candidate can be its subject — a determiner-headed phrase, a bare plural
-    ("Operators grant …"), an identifier ("okf-setup returns …") or a pronoun. A clause-initial candidate shares the
-    subject of the clause it continues. What separates a noun reading from a verb reading is therefore what FOLLOWS,
-    not the shape of the subject."""
-    return True
-ADVERB_THEN_END = re.compile(r"^(?:\s+(?:" + ADVERB + r"))+\s*(?:[)\],.;:|]|$)", re.I)
-
-def reads_as_noun(cl, m):
-    """True when an ambiguous base / 3sg form heads a noun phrase rather than being a finite verb. The decision is
-    about the shape of the subject and of what follows, with no scan ceiling and no list of allowed objects:
-      * a preposition before it ("at run time") → noun;
-      * nothing after it, a verb / modal / preposition / punctuation after it, or only an adverb then the end
-        ("Every grant below names …", "the wider grant honestly.") → nothing for a transitive verb to take → noun;
-      * no subject noun phrase before it ("Project grants govern …", "BigQuery grants use …") → the candidate is part
-        of a bare compound noun phrase → noun.
-    Otherwise it is a verb, so "The operator grants access to the custom role" and "Both grant temporary Phase A roles"
-    are claims."""
-    before, after = cl[:m.start()], cl[m.end():]
-    if PREP_BEFORE.search(before):
-        return True
-    if not re.match(r"^\s+\S", after):             # nothing follows: these verbs are transitive here
-        return True
-    if ADVERB_THEN_END.match(after):
-        return True
-    m3 = PARTICIPLE_AFTER.match(after)
-    if m3:
-        return not ATTRIBUTIVE_OBJECT.match(after[m3.end():])
-    after_adverbs = re.sub(r"^(?:\s+(?:" + ADVERB + r"))+", "", after, flags=re.I)
-    for candidate in (after, after_adverbs):
-        m2 = NONOBJECT_AFTER.match(candidate)
-        if not m2:
-            continue
-        follower = candidate[m2.start():m2.end()].strip()
-        if re.fullmatch(r"(?-i:[a-z]+ed)", follower):
-            continue                                  # handled above, by what the participle itself takes
-        return True
-    return not has_subject(before)
-
-PAST_VERB = re.compile(r"\b(" + "|".join(PAST_FORMS) + r")\b|\b(?:was|were|is|are|been|be|has|have|had)\s+(?:not\s+|already\s+)?(?:" + "|".join(AMBIGUOUS_PARTICIPLE) + r")\b", re.I)
-PRESENT_VERB = re.compile(r"\b(" + "|".join(PRESENT_FORMS) + r")\b", re.I)
-BASE_VERB = re.compile(r"\b(" + "|".join(sorted(LEMMAS)) + r")\b")   # lowercase only: "Run"/"Create" are proper nouns or imperatives
-FINITE_FORM = re.compile(r"\b(" + "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b", re.I)
 
 EXECUTED = [re.compile(rx, re.I) for rx in [
     r"recorded on tape", r"on tape under", r"\bon tape\b", r"\bthe tape shows\b", r"\bthe tape demonstrates\b",
@@ -676,205 +459,21 @@ MODAL = re.compile(r"\b(" + MODAL_WORDS + r"|expected|is to|are to|to be (record
 STATUS = re.compile(r"\b(not yet|not done|not run|not started|not created|not built|not met|not (been )?executed|has not run|none (has|have|was|were) (been )?run|"
                     r"none happened|neither happened|future|deferred|planned|prior|requirement|acceptance criterion|requires?|does not exist|no (such )?tape)\b|RFC text only", re.I)
 NEGATION = re.compile(r"\b(not|no|none|nothing|never|cannot|without)\b", re.I)
-# LIGHT tokens may stand between a governor and the predicate it governs without breaking the government: auxiliaries,
-# our own participles, coordinators, "to", and adverbs. Anything else is a content word — typically a new subject or an
-# embedded verb — and ends the modal's / status marker's reach over a finite verb.
-LIGHT = re.compile(r"^(?:\W|\b(?:" + AUX_WORDS + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS + AMBIGUOUS_PARTICIPLE) +
-                   r"|and|or|to|not|" + "|".join(sorted(DEGREE_ADVERB)) + r")\b|\b(?-i:[a-z]+ly)\b)*$", re.I)
-# Factive complementizers assert the content of the clause they open, so they end a qualifier's reach; whether / if are
-# non-factive and leave the embedded claim unasserted, so they license the binding instead of breaking it.
-FACTIVE_OPENER = re.compile(r"\b(that|which|who|whom|whose|where|how|why|what|when)\b", re.I)
-NONFACTIVE_OPENER = re.compile(r"\b(whether|if)\b", re.I)
-RESET_ALWAYS = re.compile(r"^(but|while|whereas|although|though|however|because|so|\|)$", re.I)
-RESET_IF_FINITE = re.compile(r"^(then|and then|after|before|until|when|once)$", re.I)
 
-def governed_by(cl, start):
-    """True when a modal or infinitive "to" immediately governs the form at `start` (only LIGHT tokens in between):
-    "must create", "to be exercised". "must report the operators grant" does NOT govern "grant"."""
-    for rx in (MODAL, re.compile(r"\bto\b", re.I)):
-        for m in rx.finditer(cl[:start]):
-            if LIGHT.match(cl[m.end():start]):
-                return True
-    return False
-
-def base_is_finite(cl, start):
-    """A bare lemma is a finite base-present verb when nothing governs it as an infinitive and a subject stands before
-    it in the clause. No allowlist of subject words: any preceding content token counts."""
-    if governed_by(cl, start):
-        return False
-    return bool(re.search(r"[A-Za-z]", cl[:start]))
-
-def executed_preds(cl):
-    """Return (offset, kind) for EVERY executed predicate. kind "verb" is a finite past / present / base form (it takes a
-    subject, so an intervening subject means a different clause); kind "phrase" is a fixed phrase such as "on tape"."""
-    found = {}
-    for rx in EXECUTED:
-        for m in rx.finditer(cl):
-            found.setdefault(m.start(), "phrase")
-    if PHASE_A_OBJECT.search(cl):
-        for m in PAST_VERB.finditer(cl):
-            found[m.start()] = "verb"
-        for m in PRESENT_VERB.finditer(cl):
-            if not reads_as_noun(cl, m):
-                found[m.start()] = "verb"
-        for m in BASE_VERB.finditer(cl):
-            if not reads_as_noun(cl, m) and base_is_finite(cl, m.start()):
-                found[m.start()] = "verb"
-    return sorted(found.items())
-
-# ---- structural binding (Codex rounds 9–12), fail-closed ---------------------------------------------------------
-# One token that can head a subject noun phrase: a determiner, pronoun, possessive or Titlecase word. ALL-CAPS and
-# snake_case identifiers are not subject heads.
-SUBJECT_TOKEN = re.compile(r"\b(the|a|an|this|that|these|those|every|each|all|its|their|our|his|her|my|your|it|they|we|he|she|one|someone|everyone|nobody|somebody)\b|(?-i:\b[A-Z][a-z]+\b)")
-SUBJECT_OPENER = re.compile(r"(the|a|an|this|that|these|those|every|each|all|its|their|our|his|her|my|your|it|they|we|he|she|one|someone|everyone|nobody|somebody|who|which)|[A-Z][a-z]+")
-LEADING_FUNCTION = re.compile(r"^(?:\W+|\b(?:as|so|then|also|already|now|still|indeed|only|just|even)\b\s*)*", re.I)
-VERB_PHRASE_TAIL = r"(?:\s*(?:,|\band\b|\bor\b)?\s+(?:" + AUX_WORDS + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS + AMBIGUOUS_PARTICIPLE) + r"|not|already|then|also))+\s*(?:,|\band\b|\bor\b)?\s*$"
-TRAILING_AUX = re.compile(VERB_PHRASE_TAIL, re.I)
-
-def opens_finite_clause(span):
-    """True when a factive complementizer in the span is followed by a clause of its own, so it is a complementizer
-    rather than a determiner: "say that the operator created …", "explain why an operator audited …" break the
-    binding, while "record that scoped Phase A binding on tape" does not."""
-    m = FACTIVE_OPENER.search(span)
-    return bool(m and contains_finite_clause(span[m.end():], tail_subject_verb=True))
-
-def phrase_bound(cl, qual_end, pred_start, kind="phrase"):
-    """True when the qualifier governs this predicate. Fail-closed:
-      * a non-factive complement (whether / if) leaves the embedded claim unasserted, so the qualifier does govern it;
-      * a factive complementizer introducing a finite clause always ends the reach;
-      * a VERB predicate takes a subject, so ONLY LIGHT tokens may stand between a modal / status marker and it —
-        any content word is a new subject or an embedded verb ("must report okf-setup created …");
-      * a NEGATION may sit on the subject of a passive ("no service account was created"), so it only requires that no
-        other finite predicate intervene;
-      * a PHRASE predicate has no subject, so content words are fine as long as the span does not start a new subject."""
-    if qual_end > pred_start:
-        return False
-    span = cl[qual_end:pred_start]
-    if NONFACTIVE_OPENER.search(span):
-        return True
-    if opens_finite_clause(span):
-        return False
-    # A verb predicate owns the auxiliary chain that leads into it ("no service account WAS created"), so that chain is
-    # stripped before the span is judged. A phrase predicate ("on tape") owns no auxiliary, so "report operators WERE
-    # on tape" keeps its "were" and reads as the embedded claim it is.
-    core = TRAILING_AUX.sub(" ", span) if kind == "verb" else span
-    if FINITE_FORM.search(TRAILING_AUX.sub(" ", span)):
-        return False
-    if contains_finite_clause(core, tail_subject_verb=(kind != "verb")):
-        return False
-    if kind == "verb":
-        return bool(LIGHT.match(TRAILING_AUX.sub(" ", span)))
-    rest = LEADING_FUNCTION.sub("", span, count=1)
-    first = re.match(r"^(\S+)", rest)
-    return not (first and SUBJECT_OPENER.fullmatch(first.group(1).strip(",.;:()\"'")))
-
-def phrase_bound_negation(cl, qual_end, pred_start, kind="phrase"):
-    """A negation may sit on the subject of the predicate it negates ("no service account was created"), so unlike a
-    modal it tolerates that one noun phrase. It does NOT reach across a further subject: in "No one realizes the
-    operator created …", "the operator" is a second subject, so the negation governs "realizes", not "created"."""
-    if qual_end > pred_start:
-        return False
-    span = cl[qual_end:pred_start]
-    if NONFACTIVE_OPENER.search(span):
-        return True
-    if opens_finite_clause(span):
-        return False
-    core = TRAILING_AUX.sub(" ", span)
-    if FINITE_FORM.search(core):
-        return False
-    return not contains_finite_clause(core, tail_subject_verb=(kind != "verb"))
-
-def nearest_before(rx, cl, pred_start):
-    """The governing qualifier is the NEAREST one before the predicate; a farther one cannot reach over a nearer one
-    that fails to bind ("As a future requirement it is true that the operator created …")."""
-    ms = [m for m in rx.finditer(cl) if m.start() < pred_start]
-    return ms[-1] if ms else None
-
-def negation_bound(cl, pred_start, kind):
-    m = nearest_before(NEGATION, cl, pred_start)
-    return bool(m and phrase_bound_negation(cl, m.end(), pred_start, kind))
-
-def modal_before(cl, pred_start, kind):
-    """A modal governs the predicate when the predicate sits inside the modal span ("to be revoked") or when the modal
-    heads the predicate's phrase."""
-    if any(m.start() <= pred_start < m.end() for m in MODAL.finditer(cl)):
-        return True
-    m = nearest_before(MODAL, cl, pred_start)
-    return bool(m and phrase_bound(cl, m.end(), pred_start, kind))
-
-def status_before(cl, pred_start, kind):
-    m = nearest_before(STATUS, cl, pred_start)
-    return bool(m and phrase_bound(cl, m.end(), pred_start, kind))
-
-PASSIVE_FRAME = re.compile(r"\b(be|been|being)\b", re.I)
-
-def participle_continuation(cl):
-    """A clause headed by a past participle continues a passive modal frame ("must be created and granted on tape")."""
-    m = re.match(r"^\W*([\w'’\-]+)", cl)
-    return bool(m and m.group(1).strip(",.;:()\"'").lower() in {f.lower() for f in PAST_FORMS})
-
-ADVERBIAL_SKIP = re.compile(r"^\W*(?:(?-i:[a-z][\w'’-]*)\s+)?", re.I)
-
-def bare_verb_continuation(cl):
-    """POSITIVE recognition, fail-closed: a coordinated clause inherits an earlier modal only when it is a shared-subject
-    continuation headed by a bare lemma ("… and revoke the custom role"). A clause with its own subject, an adjunct, or a
-    finite verb inherits nothing. "run" is both lemma and participle, so it is treated as finite."""
-    for tok in _head_candidates(cl):
-        if tok in {f.lower() for f in PAST_FORMS} or tok in {f.lower() for f in PRESENT_FORMS}:
-            return False                              # "and revoked …" / "and commits …" is a claim, not a continuation
-        if tok in DET_SET or tok in PREP_SET or tok in CONJ_SET or tok in AUX_SET:
-            return False                              # "and the operator …" opens its own subject
-        if tok in LEMMAS:
-            return True
-    return False
-
-def _head_candidates(cl, limit=1):
-    """The clause's head word, after any run of adverbials ("always record …", "very carefully always record …").
-    A noun such as "operators" is not an adverbial, so "…, and operators record every binding" opens its own subject
-    and is not a continuation, however many words follow."""
-    toks = [(t, _kind(t)) for t in TOKEN.findall(cl) if t[0].isalpha()]
-    i = 0
-    while i < len(toks) and _adverbial(toks, i):
-        i += 1
-    return [toks[i][0].lower().strip(",.;:()\"'")] if i < len(toks) else []
-
-PAST_SET = {f.lower() for f in PAST_FORMS}
-
-def continuation_head_end(cl):
-    """Offset just past the verb that heads an inherited continuation: a bare lemma ("… and always revoke the role") or,
-    under a passive modal frame, a participle ("must be created and granted on tape"). Only adverbials may precede it."""
-    ms = list(re.finditer(r"[A-Za-z][\w'’-]*", cl))
-    toks = [(m.group(0), _kind(m.group(0))) for m in ms]
-    for i, m in enumerate(ms):
-        word = m.group(0).lower()
-        if word in LEMMAS or word in PAST_SET:
-            return m.end()
-        if not _adverbial(toks, i):
-            return 0
-    return 0
-
-def inherit_bound(cl, pred_start, kind):
-    """An inherited modal governs the continuation's own head verb and whatever that head verb takes as its complement,
-    but not a predicate belonging to an embedded clause. The head verb is part of the inherited verb phrase, so the span
-    is measured after it: "and record every binding on tape" inherits over "on tape"; "and record that the operator
-    created …" does not inherit over "created", because a new subject stands before it."""
-    head_end = continuation_head_end(cl)
-    if pred_start < head_end:
-        return True
-    span = cl[head_end:pred_start]
-    if opens_finite_clause(span):
-        return False
-    core = TRAILING_AUX.sub(" ", span)
-    if FINITE_FORM.search(core):
-        return False
-    if kind == "verb":
-        return bool(LIGHT.match(core))
-    return not contains_finite_clause(core, tail_subject_verb=True)
-
-def opens_own_claim(cl):
-    """A clause introduced by a temporal / sequential connector resets an earlier modal only when it makes a claim of its
-    own — it has a finite verb or an executed predicate. "create one service account after another" does not."""
-    return bool(GENERAL_FINITE.search(cl) or executed_preds(cl))
+# The qualifier vocabulary. It is used only to ask "is a qualifier present in this sentence", never to bind one to a
+# predicate, so a missing word here can at most demand an audit note - it cannot license an unaudited claim.
+QUALIFIER = re.compile("(?:%s)|(?:%s)|(?:%s)" % (MODAL.pattern, STATUS.pattern, NEGATION.pattern), re.I)
+# Completion language: any past / participle form of the audited action verbs, or one of the EXECUTED phrases.
+COMPLETION = re.compile(r"\b(?:" + "|".join(PAST_FORMS) + r")\b|" + "|".join("(?:%s)" % rx.pattern for rx in EXECUTED), re.I)
+# The artefacts that do not exist on this PR. Narrower than PHASE_A_OBJECT on purpose: legacy context_ref bindings,
+# BigQuery grants and user_email rows are real, so naming them is not a Phase A claim.
+DEFERRED_ARTEFACT = re.compile(r"\b(service accounts?|SAs?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|okf-runtime-reader|"
+                               r"okfCatalogSearch|custom (search )?role|table-level grants?|boundary(-| )?probe|"
+                               r"boundary EntryGroup|negative checks?|positive checks?|denial checks?|denials?|"
+                               r"binding calls?|PERMISSION_DENIED|BQ_COMMITTED|CATALOG_STAMPED|Token Creator|"
+                               r"impersonation|(on|the) tape)\b", re.I)
+NOT_DONE = re.compile(r"\b(not|no|none|never|without|nothing|neither|yet|deferred|planned|future|prior|pending|"
+                      r"requirements?|acceptance|expected|must|will|would|shall|should)\b|RFC text only", re.I)
 
 SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json"]
 BLOCK_START = re.compile(r"^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s?|\|)")
@@ -906,11 +505,20 @@ def _code_span(inner):
     visible to the scanner; a shell / SQL fragment collapses to one opaque token so it is not parsed as a sentence."""
     return inner if not CLI_SHAPE.search(inner) else "code"
 
-# What may stand immediately before a regular-expression literal. A keyword only counts when it is not a property name
-# ("holder.throw", "holder.if(…)" are member accesses, so the "/" after them is division), and a control-flow condition
-# may nest one level of parentheses ("if ((ready)) /'/.test(x)").
-REGEX_PRECEDER = re.compile(r"(?:^|=>|[(,=:\[!&|?{};+\-*%~^<>]|(?<![.\w])(?:return|throw|typeof|instanceof|in|of|new|delete|void|case|do|else|yield|await)\b"
-                            r"|(?<![.\w])(?:if|for|while|switch|catch)\s*\((?:[^()]|\([^()]*\))*\))\s*$")
+# Whether a "/" opens a regular expression or divides is decided the way a JavaScript tokenizer decides it: from the
+# PREVIOUS significant token, with a real stack for parentheses. A "/" divides after a value - an identifier, a number,
+# a string, a regex, "]", or a ")" that closed an ordinary call or grouping - and opens a regex everywhere else,
+# including after a ")" that closed an if / for / while / switch / catch head. A word after "." is a property name, not
+# a keyword, so "holder.if(ready) / x" and "holder . throw / x" are division however much whitespace sits around the
+# dot. There is no lookback window and no nesting limit, so neither a long condition nor a deeply nested one can
+# desynchronise the reader.
+JS_WORD = re.compile(r"[A-Za-z_$][\w$]*")
+JS_NUMBER = re.compile(r"(?:0[xXbBoO])?[\d._]+(?:[eE][+-]?\d+)?n?")
+JS_CONTROL = {"if", "for", "while", "switch", "catch", "with"}
+JS_VALUE_WORD = {"this", "true", "false", "null", "super"}
+JS_KEYWORD = {"return", "throw", "typeof", "instanceof", "in", "of", "new", "delete", "void", "case", "do", "else",
+              "yield", "await", "function", "var", "let", "const", "class", "extends", "import", "export", "default",
+              "if", "for", "while", "switch", "catch", "with"}
 
 ESCAPES = {"n": " ", "t": " ", "r": " ", "b": "", "f": "", "v": "", "0": "", "\n": ""}
 
@@ -931,31 +539,23 @@ def _decode_escape(src, i):
     return ESCAPES.get(ch, ch), i + 2
 
 def _js_pieces(src):
-    """Walk a JavaScript source and yield (line, kind, text, end_offset, start_offset) for every string literal and
-    comment. Handles escapes,
-    template literals and regular-expression literals, so a regex containing a quote (app.js has several) can no longer
-    shift the quoting state and spill executable code into the scanned prose."""
+    """Walk a JavaScript source and yield (line, kind, text, start_offset, end_offset) for every string literal and
+    comment, and nothing else. Escapes are decoded, so "cr\\u0065ated" reads as "created"; regular-expression literals
+    are recognised by the token rule above, so a regex containing a quote cannot shift the quoting state and spill
+    executable code into the scanned prose."""
     i, n, line = 0, len(src), 1
+    prev_value = False                                # can the previous significant token end an expression?
+    prev_dot = False                                  # was it "."?
+    last_word = None                                  # the last word token, for "if (" style heads
+    parens = []                                       # one flag per open "(": True when it heads a control statement
     while i < n:
         ch = src[i]
         if ch == "\n":
             line += 1
             i += 1
             continue
-        if ch in "'\"`":
-            quote, start_line, buf, start_off = ch, line, [], i
+        if ch in " \t\r\f\v":
             i += 1
-            while i < n and src[i] != quote:
-                if src[i] == "\\":
-                    esc, i = _decode_escape(src, i)   # keep the escaped character: "cr\\u0065ated" is "created"
-                    buf.append(esc)
-                    continue
-                if src[i] == "\n":
-                    line += 1
-                buf.append(src[i])
-                i += 1
-            i += 1
-            yield start_line, "lit", "".join(buf), start_off, i
             continue
         if src.startswith("//", i):
             j = src.find("\n", i)
@@ -971,7 +571,42 @@ def _js_pieces(src):
             line += body.count("\n")
             i = j
             continue
-        if ch == "/" and REGEX_PRECEDER.search(src[max(0, i - 160):i]):
+        if ch in "'\"`":
+            quote, start_line, buf, start_off = ch, line, [], i
+            i += 1
+            while i < n and src[i] != quote:
+                if src[i] == "\\":
+                    esc, i = _decode_escape(src, i)   # keep the escaped character, and drop a line continuation
+                    buf.append(esc)
+                    continue
+                if src[i] == "\n":
+                    line += 1
+                buf.append(src[i])
+                i += 1
+            i += 1
+            yield start_line, "lit", "".join(buf), start_off, i
+            prev_value, prev_dot, last_word = True, False, None
+            continue
+        m = JS_WORD.match(src, i)
+        if m:
+            word = m.group(0)
+            i = m.end()
+            if prev_dot:
+                prev_value, last_word = True, None     # a property name, never a keyword
+            else:
+                last_word = word
+                prev_value = word in JS_VALUE_WORD or word not in JS_KEYWORD
+            prev_dot = False
+            continue
+        if ch.isdigit():
+            i = JS_NUMBER.match(src, i).end()
+            prev_value, prev_dot, last_word = True, False, None
+            continue
+        if ch == "/":
+            if prev_value:                            # division, or the /= operator
+                i += 2 if src[i + 1:i + 2] == "=" else 1
+                prev_value, prev_dot, last_word = False, False, None
+                continue
             i += 1                                    # a regular-expression literal: skip it, class-aware
             in_class = False
             while i < n and (in_class or src[i] != "/"):
@@ -987,7 +622,22 @@ def _js_pieces(src):
                     break
                 i += 1
             i += 1
+            while i < n and src[i].isalpha():         # flags
+                i += 1
+            prev_value, prev_dot, last_word = True, False, None
             continue
+        if ch == "(":
+            parens.append(last_word in JS_CONTROL)
+            prev_value, prev_dot, last_word = False, False, None
+        elif ch == ")":
+            prev_value = not (parens.pop() if parens else False)
+            prev_dot, last_word = False, None
+        elif ch in "]":
+            prev_value, prev_dot, last_word = True, False, None
+        elif ch == ".":
+            prev_dot, prev_value, last_word = True, False, None
+        else:                                         # "{", "}", operators, separators: a value cannot precede "/"
+            prev_value, prev_dot, last_word = False, False, None
         i += 1
 
 # Two literals belong to one rendered run only when nothing but a concatenation stands between them: whitespace, "+",
@@ -1031,21 +681,44 @@ INLINE_TAG = re.compile(r"</?[a-zA-Z][^>]*>")
 # and data-hidden="false" are visible elements; a style hides its element only when the LAST display declaration is
 # none, because that is the one CSS applies; and the element is removed with its nesting balanced, so an inner tag of
 # the same name cannot end the removal early and leave hidden text in the reader's view.
+HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
 VOID_TAG = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
 OPEN_TAG = re.compile(r"<([A-Za-z][\w-]*)((?:\"[^\"]*\"|'[^']*'|[^>\"'])*)>")
 ATTR = re.compile(r"([A-Za-z_:][-\w:.]*)(?:\s*=\s*(\"[^\"]*\"|'[^']*'|[^\s\"'>=`]+))?")
 
+def _style_display(value):
+    """The display a browser computes from a style attribute. An !important declaration beats any normal one in the
+    same block whatever the order; otherwise the last declaration wins; and a custom property ("--x: display:none")
+    declares a variable, not a display."""
+    normal = important = None
+    for decl in value.split(";"):
+        prop, sep, val = decl.partition(":")
+        if not sep:
+            continue
+        prop = prop.strip()
+        if prop.startswith("--") or prop.lower() != "display":
+            continue
+        val = val.strip()
+        bang = re.search(r"!\s*important\s*$", val, re.I)
+        word = re.sub(r"!\s*important\s*$", "", val, flags=re.I).strip().lower()
+        if bang:
+            important = word
+        else:
+            normal = word
+    return important if important is not None else normal
+
 def _is_hidden(attrs):
+    """True when the browser does not render the element: a `hidden` attribute, aria-hidden="true", or a computed
+    display of none. Attributes are read as name / value pairs, so title="hidden" and data-hidden="false" are visible
+    elements whose text the reader sees."""
     for m in ATTR.finditer(attrs):
         name, val = m.group(1).lower(), (m.group(2) or "").strip("\"'")
         if name == "hidden":
             return True
         if name == "aria-hidden" and val.strip().lower() == "true":
             return True
-        if name == "style":
-            decls = re.findall(r"display\s*:\s*([\w-]+)", val, re.I)
-            if decls and decls[-1].lower() == "none":
-                return True
+        if name == "style" and _style_display(val) == "none":
+            return True
     return False
 
 def _drop_hidden(text):
@@ -1078,6 +751,7 @@ def html_runs(text):
     """What the reader sees. Hidden elements are dropped whole, so text the browser never renders can neither make a
     claim nor qualify one; block-level tags separate text runs; inline tags are removed so a phrase the reader sees as
     one ("The service <strong>accounts</strong> were created") stays one clause."""
+    text = HTML_COMMENT.sub(" ", text)            # a comment is not rendered, and its tags open no element
     text = _drop_hidden(text)
     text = INLINE_TAG.sub("", BLOCK_TAG.sub(" | ", text))
     return re.sub(r"[ \t]{2,}", " ", text)            # removing an element must not split "service  accounts"
@@ -1089,226 +763,155 @@ def strip_markdown(text):
     text = re.sub(r"[*`]", "", text)
     return re.sub(r"(?<![A-Za-z0-9])_+|_+(?![A-Za-z0-9])", "", text)
 
-CONNECTOR_WORDS = r"and then|while|whereas|but|although|though|however|and|or|then|after|before|until|when|because|so|once"
-CONNECTOR = re.compile(r"\s*\|\s*|,\s*(?:\b(" + CONNECTOR_WORDS + r")\b\s+)?|\s+\b(" + CONNECTOR_WORDS + r")\b\s+", re.I)
+# ---- the register: coverage, evidence, containment, qualification, staleness -------------------------------------
+REGISTER = HERE / "audited_claims.tsv"
+VERDICTS = ("PENDING", "CAPTURED")
 
-def clauses(sentence):
-    """Split one sentence into (connector, clause) pairs; connector is the token that introduced the clause ('' for the first)."""
-    out, pos, conn = [], 0, ""
-    for m in CONNECTOR.finditer(sentence):
-        piece = sentence[pos:m.start()]
-        if piece.strip():
-            out.append((conn, piece))
-        tok = (m.group(1) or m.group(2) or "").strip()
-        conn = tok.lower() if tok else ("|" if "|" in m.group(0) else ",")
-        pos = m.end()
-    tail = sentence[pos:]
-    if tail.strip():
-        out.append((conn, tail))
-    return out
-
-def scan_executed(text, fname="<text>"):
-    """Return offending predicates: every executed predicate must be governed by a preceding modal (own clause or latched
-    from a coordinated earlier clause), a status marker in its own clause, or a negation bound to that predicate."""
-    out = []
+def regulated_sentences(text, fname="<text>"):
+    """Yield (line, sentence) for every sentence of the demo copy that names a Phase A artefact. The test is naming,
+    not grammar: no tense, adverb, participle or clause structure is consulted anywhere in this function."""
     for start_line, block in md_blocks(strip_markdown(text)):
-        for sent in re.split(r"(?<=[.;:])\s+", block):
-            latch = passive = False
-            for conn, cl in clauses(sent):
-                preds = executed_preds(cl)
-                continues = bare_verb_continuation(cl) or (passive and participle_continuation(cl))
-                if RESET_ALWAYS.match(conn) or (RESET_IF_FINITE.match(conn) and not continues and opens_own_claim(cl)):
-                    latch = passive = False
-                    continues = False
-                continued = latch and conn != "" and continues
-                for pred, kind in preds:
-                    # An inherited modal governs only the predicates it actually reaches from the head of this clause:
-                    # "… and record that the operator created …" inherits over "record", never over the embedded "created".
-                    inherits = continued and inherit_bound(cl, pred, kind)
-                    ok = (inherits or modal_before(cl, pred, kind) or status_before(cl, pred, kind)
-                          or negation_bound(cl, pred, kind))
-                    if not ok:
-                        out.append("%s:%d: %s" % (fname, start_line, cl.strip()[:130]))
-                        break
-                if MODAL.search(cl):
-                    latch = True
-                    passive = bool(PASSIVE_FRAME.search(cl[MODAL.search(cl).end():]))
-    return out
+        for raw in re.split(r"(?<=[.;:])\s+", block):
+            sent = " ".join(raw.split())
+            if sent and PHASE_A_OBJECT.search(sent):
+                yield start_line, sent
 
-offenders = []
+def load_register():
+    """verdict, evidence and sentence per row; malformed rows are errors, not silently skipped."""
+    rows, problems = {}, []
+    for i, ln in enumerate(REGISTER.read_text("utf-8").split("\n"), 1):
+        if not ln.strip() or ln.lstrip().startswith("#"):
+            continue
+        parts = ln.split("\t")
+        if len(parts) != 3:
+            problems.append("line %d: expected verdict<TAB>evidence<TAB>sentence, got %d fields" % (i, len(parts)))
+            continue
+        verdict, evidence, sentence = (x.strip() for x in parts)
+        sentence = " ".join(sentence.split())
+        if verdict not in VERDICTS:
+            problems.append("line %d: unknown verdict %r (expected one of %s)" % (i, verdict, ", ".join(VERDICTS)))
+            continue
+        if sentence in rows:
+            problems.append("line %d: duplicate row for %r" % (i, sentence[:60]))
+            continue
+        rows[sentence] = (verdict, evidence, i)
+    return rows, problems
+
+register, reg_problems = load_register()
+check(not reg_problems, "tools/audited_claims.tsv parses: one verdict / evidence / sentence per row\n      " + "\n      ".join(reg_problems[:8]))
+
+unregistered, seen = [], set()
 for fname in SCAN_FILES:
     raw = (DEMO / fname).read_text("utf-8")
     if fname.endswith(".js"):
         raw = extract_js_prose(raw)
     elif fname.endswith(".html"):
         raw = html_runs(raw)
-    offenders += scan_executed(raw, fname)
+    for line, sent in regulated_sentences(raw, fname):
+        seen.add(sent)
+        if sent not in register:
+            unregistered.append("%s:%d: %s" % (fname, line, sent[:110]))
+
 check("def extract_js_prose(" in open(str(HERE / "check_full_demo.py"), encoding="utf-8").read() and not extract_js_prose("function current() { return roles; }").strip(),
       "app.js is scanned through its string literals and comments only: executable code carries no prose")
-check(not offenders, "no clause narrates deferred Phase A (SA create/revoke, bindings on tape, denials proved, outcomes demonstrated, PERMISSION_DENIED returned) as executed without a future / not-done / RFC-text-only qualifier in that clause or an earlier clause of the same sentence:\n      " + "\n      ".join(offenders[:12]))
-# in-memory negative fixtures: the scan itself must catch each of these
-def scan_fixture(t):
-    """JavaScript fixtures go through the same extractor the scan uses for app.js."""
-    return scan_executed(extract_js_prose(t) if t.lstrip().startswith(("function ", "var ", "//")) else t)
+check(not unregistered,
+      "INV-1: every sentence naming a Phase A artefact is audited in tools/audited_claims.tsv; these are not:\n      "
+      + "\n      ".join(unregistered[:12]) + ("\n      (+%d more)" % (len(unregistered) - 12) if len(unregistered) > 12 else ""))
+
+bad = []
+for sent, (verdict, evidence, i) in sorted(register.items(), key=lambda kv: kv[1][2]):
+    if verdict == "CAPTURED":
+        if not re.match(r"(live|sql)/", evidence) or not (DEMO / evidence).exists():
+            bad.append("INV-2 line %d: CAPTURED needs an existing live/ or sql/ file, got %r" % (i, evidence))
+        if DEFERRED_ARTEFACT.search(sent) and not NOT_DONE.search(sent):
+            bad.append("INV-3 line %d: CAPTURED names a deferred artefact with no not-done marker: %s" % (i, sent[:90]))
+    else:
+        if COMPLETION.search(sent) and not QUALIFIER.search(sent):
+            bad.append("INV-4 line %d: completion language with no qualifier in the sentence: %s" % (i, sent[:90]))
+check(not bad, "every register row is internally consistent (evidence exists, nothing deferred is claimed done, completion language carries a qualifier):\n      " + "\n      ".join(bad[:12]))
+
+stale = [sent for sent in register if sent not in seen]
+check(not stale, "INV-5: no register row survives the prose it audited (%d stale):\n      " % len(stale) + "\n      ".join(s[:110] for s in stale[:8]))
+
+# ---- in-memory fixtures ------------------------------------------------------------------------------------------
+def regulated(text):
+    """The sentences the gate would demand an audit for. JavaScript fragments go through the same reader app.js does."""
+    src = extract_js_prose(text) if text.lstrip().startswith(("function ", "var ", "const ", "//")) else text
+    return [s for _, s in regulated_sentences(src)]
+
+# Prose that must never ship unaudited. Each of these is a sentence a past review round produced as a bypass of the
+# old parser: an unlisted irregular past, a subject the old subject-head guard missed, a noun / verb homograph, a
+# comparative adverb. None of that matters now - they name a Phase A artefact, so they are regulated on sight.
 NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
-       "The operator created the service accounts and every binding was recorded on tape under the okf-setup identity.",
-       "Check 6 returned PERMISSION_DENIED on tape.",
-       "Phase A: the tape shows the impersonated user_email after each step.",
        "The operator created the three Phase A service accounts.",
-       "Every binding was recorded on tape, while future documentation is planned.",
+       "Check 6 returned PERMISSION_DENIED on tape.",
        "The operator has revoked every okf-setup role and has proved the denials on tape.",
-       "- Every binding was recorded on tape.\n- Future work: the rest is planned.",
-       "Every binding was recorded on tape.\n\nThe rest is future work.",
-       "## Status\nAll seven negative checks returned PERMISSION_DENIED on tape.\n\nPhase A is future work.",
-       "No DML touched agent_events, and the three Phase A service accounts were created.",
-       "The operator made every Phase A binding.",
-       "Check 6 returned PERMISSION_DENIED.",
-       "It is not a secret that the denials were proved on tape.",
-       "Without a tape, the operator created the service accounts.",
        "THE OPERATOR CREATED THE SERVICE ACCOUNTS.",
-       "Phase A is not blocked; the custom role okfCatalogSearch was granted at project level.",
-       "The operator created the service accounts as expected.",                                    # r7: modal after the verb
-       "Future documentation is planned, then the operator created the three service accounts.",   # r7: 'then' resets scope
-       "The service account was not created after the operator granted the custom role.",          # r7: negation bound to its own predicate
-       "The operator granted the custom role, as planned.",                                         # r7 cousin: trailing status in another clause
-       "The SAs will be created; the operator revoked the setup roles.",                            # r7 cousin: semicolon boundary
-       "Nothing was executed before the operator created the service accounts.",                    # r7 cousin: 'before' resets
-       "The operator must create the SAs, but the denials were proved on tape.",                    # r7 cousin: 'but' resets the modal
-       "The operator will record the tape after the service accounts were created.",                 # r7 cousin: 'after' resets
-       "The operator granted the custom role as planned.",                                           # r8: status after the predicate, no comma
-       "The documentation will explain the RFC, and the operator created the Phase A service accounts.",  # r8: finite new claim after ', and'
-       "The operator will record the tape once the service accounts were created.",                  # r8: 'once' resets
-       "The operator must document the RFC and the service accounts were created by the operator.",  # r8 cousin: finite passive after 'and'
-       "The operator granted the custom role (RFC text only).",                                      # r8 cousin: trailing status label
-       "Deferred documentation aside, the operator created the service accounts.",                   # r8 cousin: status in an earlier clause
-       "The docs must describe the workflow, and the operator creates the three Phase A service accounts.",  # r9: simple present after ', and'
-       "The plan must document the workflow, and the operator makes every binding.",                 # r9: simple present 'makes'
-       "As planned the operator created the Phase A service accounts.",                              # r9: status describes manner, subject intervenes
-       "The docs must describe the workflow, and the operator responsible for the Phase A bootstrap in the demo project on 2026-09-03 created the three service accounts.",  # r9: long subject, no ceiling
-       "The tape will be recorded, and Codex verified that the operator granted the custom role.",   # r9 cousin: proper-noun subject
-       "Not yet documented, the operator created the service accounts.",                             # r9 cousin: status in a fronted clause
-       "As a future requirement it is true that the operator created the service accounts.",         # r9 cousin: status then new subject
-       "The docs must say that the operator created the three Phase A service accounts.",             # r10 Codex: subordinate clause after the modal
-       "The docs must be updated after service accounts were created.",                               # r10 Codex: temporal adjunct clause
-       "Check 6 denied the request with PERMISSION_DENIED.",                                          # r10 Codex: past inflection (denied, not denyed)
-       "The operator grants temporary Phase A roles.",                                                # r10 Codex: present with a modifier before the object
-       "The operator will create the service accounts and revoked the custom role.",                  # r10 Kimi: verb-initial finite past inherits nothing
-       "The sync writer must validate the bundle and committed it on tape.",                          # r10 Kimi: verb-initial finite past, on tape
-       "The plan must document the workflow, and okf-setup created the service accounts.",            # r10 cousin: identifier subject
-       "In the demo project the operator created the service accounts.",                              # r10 cousin: leading adjunct
-       "The tape must show the switch, and the denials were proved.",                                 # r10 cousin: finite passive after coordination
-       "The okf-setup roles have been revoked.",                                                      # r10 cousin: perfect passive
-       "The operator will document the plan and denies every Phase A grant.",                         # r10 cousin: present form after coordination
-       "The setup job has run on tape.",                                                              # r10 cousin: ambiguous participle after an auxiliary
-       "The docs must be updated because service accounts were created.",                             # r10 cousin: causal reset
-       "The docs must explain how the operator created the Phase A service accounts.",                # r11 Codex: wh-complement
-       "The docs must report the operator created the Phase A service accounts.",                     # r11 Codex: null complement
-       "The operator will record the tape once Phase A has been executed.",                           # r11 Codex: unconditional temporal boundary
-       "The operators grant temporary Phase A roles.",                                                # r11 Codex: finite base-present, plural subject
-       "The operator grants very narrowly scoped temporary Phase A roles.",                           # r11 Codex: no modifier ceiling
-       "The tape will show how the operator created the service accounts.",                           # r11 Kimi: how
-       "The docs must explain why the operator granted the custom role.",                             # r11 cousin: why
-       "The tape will show the operator granted the custom role.",                                    # r11 cousin: null complement after show
-       "The report must record what the operator revoked on tape.",                                   # r11 cousin: what
-       "The docs must report okf-setup created the service accounts.",                                # r12 Codex: identifier subject, null complement
-       "The docs must report service accounts were created.",                                         # r12 Codex: bare plural subject
-       "The docs must explain why all IAM calls succeeded on tape.",                                   # r12 Codex: factive why over a phrase predicate
-       "The planned service account was created.",                                                    # r12 Codex: status modifies the subject, not the predicate
-       "The operator grants narrow Phase A roles.",                                                   # r12 Codex: plain adjective, no modifier vocabulary
-       "The operators grant new Phase A roles.",                                                      # r12 Codex: base-present, plain adjective
-       "The docs must report the operators grant temporary Phase A roles.",                           # r12 Codex: embedded base-present under an earlier modal
-       "The docs must report `okf-setup` created the service accounts.",                              # r12 cousin: subject written as inline code
-       "The docs must explain the RFC and record that the operator created the service accounts.",    # r13 Codex: inheritance must be per predicate
-       "No one realizes the operator created the service accounts.",                                  # r13 Codex: negation must not cross a second subject
-       "Check 6 returns PERMISSION_DENIED.",                                                          # r13 Codex: "return" is an audited action lemma
-       "All seven positive checks returned OK.",                                                      # r13 Codex: past "returned"
-       "The operator grants narrowly scoped temporary Phase A roles.",                                # r13 Codex: -ly adverb is not proof of a noun
-       "Both grant temporary Phase A roles.",                                                         # r13 Codex: a quantifier subject is not proof of a noun
-       "The operator granted the `custom role` at project scope.",                                    # r13 Codex: multiword inline code
-       "The docs must explain why an operator audited the Phase A service accounts on tape.",         # r14 Codex: unlisted finite in a complement
-       "The docs must explain the RFC and record the operator succeeded on tape.",                    # r14 Codex: embedded clause under an inherited modal
-       "No reviewer realized okf-setup created the service accounts.",                                # r14 Codex: negation across an embedded clause
-       "The operator grants access to the custom role.",                                              # r14 Codex: bare-noun object
-       "All positive checks return success.",                                                         # r14 Codex: base-present with a bare object
-       "The operator grants alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu Phase A roles.",                                                       # r14 Codex: no modifier ceiling
-       "The operator granted the `custom role (okfCatalogSearch)` at project scope.",                 # r14 Codex: inline code with punctuation
-       "The docs must explain the operator audited the bindings on tape.",                            # r15 Kimi: null complement, unlisted -ed verb
-       "The docs must report operators were on tape.",                                                # r15 Codex: null-complement phrase claim
-       "The planned operator was on tape.",                                                           # r15 Codex: status modifies the subject of a phrase claim
-       "The docs must explain why reviewers audit the service accounts on tape.",                     # r15 Codex: unlisted present verb
-       "No reviewer knew okf-setup created the service accounts.",                                    # r15 Codex: irregular past in the span
-       "Operators grant temporary Phase A roles.",                                                    # r15 Codex: bare plural subject
-       "okf-setup returns PERMISSION_DENIED.",                                                        # r15 Codex: identifier subject
-       "The operator granted the `custom role = okfCatalogSearch` at project scope.",                 # r15 Codex: inline code with an equals sign
-       "The docs must explain the operator quietly audited the bindings on tape.",                    # r16 Kimi: adverb between subject and verb
-       "The docs must report operators definitely were on tape.",                                     # r16 Codex: adverb before the auxiliary
-       "No reviewer clearly knew okf-setup created the service accounts.",                            # r16 Codex: adverb inside a negation span
-       "The planned operator spoke on tape.",                                                         # r16 Codex: irregular verb, bare subject+verb span
-       "The docs must explain the RFC, and operators grant temporary Phase A roles.",                  # r16 Codex: coordinated bare subject
-       "The docs must explain the RFC, and operators routinely record every binding on tape.",         # r16 Codex: bare subject with an adverb
-       "The docs must report the operator quietly spoke on tape.",                                    # r17 Codex: irregular verb after a reporting head
-       "The docs must report the operator spoke softly on tape.",                                     # r18 Kimi: post-verbal adverb, intransitive verb
-       "The docs must report the experienced operator quietly spoke on tape.",                        # r18 Codex: adjective in the subject phrase
-       "The operator grants narrowly constrained Phase A roles.",                                     # r18 Codex: attributive participle after an adverb keeps the object
-       "The docs must report the operator quit on tape.",                                             # r19 Codex: invariant irregular past
-       "The operator must create the service accounts, and most record every binding on tape."]       # r19 Codex: quantifier pronoun subject
-POS = ["In Phase A the operator must make every binding on tape (not yet run).",
-       "Each call is expected to return PERMISSION_DENIED; none has been run.",
-       "The legacy handle was bound to two publications before Phase A.",
-       "The operator must create the service accounts, record every binding on tape, and revoke them afterwards.",
-       "No service account was created for this capture; the three SAs are the Phase A follow-up.",
-       "The three service accounts were **not** created; they are deferred.",
-       "Nothing in §1.3 has been executed on PR 16.",
-       "No `PERMISSION_DENIED` check was recorded; the three service accounts were not created.",
-       "The operator must create the service accounts and record every binding on tape.",
-       "Each check is expected to return PERMISSION_DENIED (not yet run).",
-       "Runtime tables were created and seeded by the operator, not yet by the Phase A service accounts.",
-       "Phase A requirement, not yet run: the operator must create the SAs and record every binding on tape.",
-       "The operator must create the SAs, then record every binding on tape, and revoke the roles afterwards.",
-       "RFC text only: the sync writer stamped every entry after BQ_COMMITTED.",
-       "The operator must create the SAs and revoke every role on tape afterwards.",
-       "Not yet run: the operator must create EntryGroup okf-rfc-demo-boundary, then record every binding on tape.",
-       "No PERMISSION_DENIED check was recorded and no service account was created.",
-       "The Cloud Run Job will run as the sync writer.",
-       "The operator must run the DDL jobs and record every binding on tape.",
-       "Every grant below names the resource it is bound to.",
-       "BigQuery grants use table-level IAM so the sync writer never touches agent_events.",
-       "Every Phase A role must be created and granted on tape.",
-       "The operator must record that Phase A binding on tape.",
-       "BigQuery grants use the table-level IAM policy for the custom role.",
-       "The table grant named the custom role.",
-       "The operator must verify whether the service accounts were created.",
-       "The operator must create one service account after another and record every binding on tape.",
-       "The custom role limits the project grant to one permission.",
-       "At run time the operator keeps only the impersonation grant.",
-       "The operator must eventually create the Phase A service accounts.",
-       "Project grants govern access to the custom role.",
-       "The operator must record that scoped Phase A binding on tape.",
-       "The docs must explain the RFC and record every binding on tape.",
-       "No Phase A service account was created.",
-       "Project grants govern Phase A access to the custom role.",
-       "The operator must create the service accounts and carefully record every binding on tape.",
-       "function current() { return roles; }",
-       "The operator must be recorded on tape.",
-       "The docs must explain the RFC and record the Phase A binding on tape.",
-       "The docs must explain the RFC and record the previously scoped Phase A binding on tape.",
-       "No service account in the Phase A project was created.",
-       "The project grants govern Phase A access to the custom role.",
-       "The operator must create the service accounts and always record every binding on tape.",
-       "The operator must create the service accounts and very carefully always record every binding on tape.",
-       "Project grants constrain Phase A access to the custom role.",
-       "The operator must create the service accounts and often record every binding on tape.",
-       "The operator must create the service accounts and sometimes record every binding on tape.",
-       "Project grants narrowly constrain Phase A access to the custom role.",
-       "The operator must record the custom role on tape.",
-       "The operator must create the service accounts and more carefully record every binding on tape.",
-       "Project grants often constrain Phase A access to the custom role.",
+       "The operator created the service accounts as expected.",
+       "The docs must report the operator froze on tape.",                                            # r20 Codex 1
+       "The docs must report the Phase A operator quit on tape.",                                     # r20 Codex 1
+       "The docs must report the operator spoke softly on tape.",
+       "No reviewer knew okf-setup created the service accounts.",
+       "It is not a secret that the denials were proved on tape.",
+       "Without a tape, the operator created the service accounts."]
+check(all(regulated(t) for t in NEG),
+      "INV-1 regulates every claim fixture, whatever its verb morphology: %s" % [t[:50] for t in NEG if not regulated(t)])
+
+# Honest prose that a reviewer must be able to write and audit without the gate arguing about its grammar. Every one
+# of these was a false positive of the old parser in some round; under INV-4 they are clean because the qualifier is
+# simply present in the sentence.
+POS = ["The operator must record the service account binding on tape.",                               # r20 Codex 1
+       "The operator must better record every binding on tape.",                                      # r20 Codex 2
+       "The operator must create the service accounts and much better record every binding on tape.",  # r20 Codex 2
+       "Project grants widely known to reviewers are Phase A requirements.",                          # r20 Codex 3
+       "Project grants narrowly constrained only by policy are Phase A requirements.",                # r20 Codex 3
        "The operator must record the Phase A cache hit on tape.",
        "The operator must often record every binding on tape.",
-       "Project grants narrowly constrained by policy are Phase A requirements.",
-       "Future documentation must list project grants narrowly constrained by policy."]
-check(all(scan_fixture(t) for t in NEG), "scan flags every negative fixture (active past, perfect, after-verb status/modal, finite claims after coordination, once/then/after resets, block boundaries, bare Phase A, unbound negation, case, identifiers): %s" % [t[:50] for t in NEG if not scan_executed(t)])
-check(not any(scan_fixture(t) for t in POS), "scan accepts preceding modals latched over nonfinite coordination, preceding status markers, bound negations and legacy data facts: %s" % [scan_fixture(t) for t in POS if scan_fixture(t)])
+       "In Phase A the operator must make every binding on tape (not yet run).",
+       "No Phase A service account was created.",
+       "The three service accounts were not created; they are deferred.",
+       "Every Phase A role must be created and granted on tape.",
+       "Not yet run: the operator must create EntryGroup okf-rfc-demo-boundary."]
+unqualified = [s for t in POS for s in regulated(t) if COMPLETION.search(s) and not QUALIFIER.search(s)]
+check(not unqualified, "INV-4 accepts honest prose with the qualifier anywhere in the sentence: %s" % unqualified[:3])
+
+# ---- extraction: what the reader sees must reach the gate ---------------------------------------------------------
+# These are the load-bearing fixtures. A claim that extraction drops is never regulated, so every one of them asserts
+# that a visible claim survives, and that genuinely hidden text does not surface.
+VISIBLE = [
+    ("member access is division, not a regex",
+     "var q = holder.if(ready) / '/' / 2;\nvar c = 'The operator created the Phase A service accounts.';"),
+    ("member access with spaces around the dot",
+     "var q = holder . if(ready) / '/' / 2;\nvar c = 'The operator created the Phase A service accounts.';"),
+    ("a regex after a nested condition does not desynchronise",
+     "var r = function () { if (((ready))) /'/.test(x); };\nvar c = 'The operator created the Phase A service accounts.';"),
+    ("a long condition has no lookback ceiling",
+     "var r = function () { if (%s) /'/.test(x); };\nvar c = 'The operator created the Phase A service accounts.';"
+     % " && ".join("flag%02d" % i for i in range(1, 26))),
+    ("a custom property is not a display declaration",
+     'var h = "<span style=\'--x:display:none\'>The operator created the Phase A service accounts.</span>";'),
+    ("title=\"hidden\" is an attribute value, not the hidden attribute",
+     'var h = "<span title=\'hidden\'>The operator created the Phase A service accounts.</span>";'),
+    ("data-hidden=\"false\" is a visible element",
+     'var h = "<span data-hidden=\'false\'>The operator created the Phase A service accounts.</span>";'),
+    ("the last display declaration wins when neither is important",
+     'var h = "<span style=\'display:none; display:inline\'>The operator created the Phase A service accounts.</span>";'),
+    ("a tag inside an HTML comment does not open an element",
+     'var h = "<span hidden><!-- <span> --></span> The operator created the Phase A service accounts.";'),
+]
+missed = [why for why, src in VISIBLE if not regulated(src)]
+check(not missed, "every visible claim survives extraction and reaches the gate: %s" % missed)
+
+HIDDEN = [
+    ("the hidden attribute", 'var h = "<span hidden>The operator created the Phase A service accounts.</span> Nothing else here.";'),
+    ("aria-hidden=true", 'var h = "<span aria-hidden=\'true\'>The operator created the Phase A service accounts.</span> Nothing else here.";'),
+    ("an unquoted style attribute", 'var h = "<span style=display:none>The operator created the Phase A service accounts.</span> Nothing else here.";'),
+    ("!important beats a later normal declaration", 'var h = "<span style=\'display:none!important;display:inline\'>The operator created the Phase A service accounts.</span> Nothing else here.";'),
+    ("same-tag nesting is balanced", 'var h = "<span hidden><span>x</span> The operator created the Phase A service accounts.</span> Nothing else here.";'),
+]
+shown = [why for why, src in HIDDEN if regulated(src)]
+check(not shown, "text the browser does not render never reaches the gate: %s" % shown)
+
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")
 check("Status on 2026-09-03 (PR 16): none of this section has run" in arch, "ARCHITECTURE.md sync-leg prose carries the not-run scope note")
 plan_md = (DEMO / "plan.md").read_text("utf-8")

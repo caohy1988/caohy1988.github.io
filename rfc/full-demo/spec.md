@@ -102,17 +102,17 @@ the reader). None of these bindings exists yet (PR 16 status: not done).
 
 | Principal | Resource | Grant | Why | Lifetime |
 |---|---|---|---|---|
-| bootstrap operator (human Owner) | project | `roles/iam.roleAdmin` | create custom role `okfCatalogSearch` | setup only, revoked |
-| | project | `roles/resourcemanager.projectIamAdmin` | bind project-level roles to the three SAs | setup only, revoked |
-| | project | `roles/iam.serviceAccountAdmin` | create the three SAs; bind `serviceAccountTokenCreator` on each SA resource | setup only, revoked |
-| | project | `roles/dataplex.catalogAdmin` | `entryGroups.setIamPolicy`, `entryTypes.setIamPolicy` on `okf-rfc-demo`, `okf-rfc-demo-boundary`, `okf-bundle` | setup only, revoked |
-| | project | `roles/dataplex.aspectTypeOwner` | `aspectTypes.setIamPolicy` on `okf`, `okf-context-runtime` | setup only, revoked |
-| | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | `bigquery.tables.setIamPolicy` for the nine table-level bindings | setup only, revoked |
+| bootstrap operator (human Owner) | project | `roles/iam.roleAdmin` | create custom role `okfCatalogSearch` | setup only; to be revoked |
+| | project | `roles/resourcemanager.projectIamAdmin` | bind project-level roles to the three SAs | setup only; to be revoked |
+| | project | `roles/iam.serviceAccountAdmin` | create the three SAs; bind `serviceAccountTokenCreator` on each SA resource | setup only; to be revoked |
+| | project | `roles/dataplex.catalogAdmin` | `entryGroups.setIamPolicy`, `entryTypes.setIamPolicy` on `okf-rfc-demo`, `okf-rfc-demo-boundary`, `okf-bundle` | setup only; to be revoked |
+| | project | `roles/dataplex.aspectTypeOwner` | `aspectTypes.setIamPolicy` on `okf`, `okf-context-runtime` | setup only; to be revoked |
+| | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | `bigquery.tables.setIamPolicy` for the nine table-level bindings | setup only; to be revoked |
 | | SA `okf-sync-writer-okf-rfc-demo`, SA `okf-runtime-reader` | `roles/iam.serviceAccountTokenCreator` on each SA | run the demo by impersonation | kept |
 | | SA `okf-setup` | `roles/iam.serviceAccountTokenCreator` | run setup by impersonation | setup only; to be revoked (check 7) |
 | `okf-setup` (one-time) | project | `roles/dataplex.catalogEditor` (`entryGroups.create`, `entryTypes.create`) and `roles/dataplex.aspectTypeOwner` (`aspectTypes.create`) | type and group creation is checked on the project, not on the group | setup only; to be revoked (check 6) |
-| | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | table DDL, the `context_ref_resolution` view, seed `MERGE`s (`sql/setup_runtime_tables.sql`) | setup only, revoked |
-| | project | `roles/bigquery.jobUser` | run the DDL jobs | setup only, revoked |
+| | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | table DDL, the `context_ref_resolution` view, seed `MERGE`s (`sql/setup_runtime_tables.sql`) | setup only; to be revoked |
+| | project | `roles/bigquery.jobUser` | run the DDL jobs | setup only; to be revoked |
 | `okf-sync-writer-okf-rfc-demo` | EntryGroup `okf-rfc-demo` | `roles/dataplex.catalogEditor` | `entries.create/patch/delete` inside this group only | kept |
 | | EntryType `okf-bundle` | `roles/dataplex.entryTypeUser` | create entries of that type (the identity the sample `push.ts` uses) | kept |
 | | AspectType `okf`, AspectType `okf-context-runtime` | `roles/dataplex.aspectTypeUser` on each | attach the shipped aspect; stamp the profile aspect | kept |

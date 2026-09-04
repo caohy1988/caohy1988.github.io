@@ -4,7 +4,16 @@
 Copies rfc/full-demo/ (and the two sibling files the checker reads: rfc/index.html and
 rfc/demo/live/observe/live_identities.json) into a temp directory, applies one mutation at a time,
 runs the checker on the copy, and requires a NON-ZERO exit for every mutation and a ZERO exit for
-the unmodified copy. Each mutation reproduces a hole a reviewer found:
+the unmodified copy.
+
+Since round 20 the honesty gate is the audited claim register (tools/audited_claims.tsv), so the
+mechanism behind most of these is the same one: prose that names a Phase A artefact and is not
+registered fails, whatever words it uses. The historical entries are kept because each must still
+fail, and because together they record what nineteen rounds of review actually asked for. The
+positive controls append honest prose AND its register row, which is the authoring workflow the
+register defines; appending prose alone is precisely what the gate must reject.
+
+Each mutation reproduces a hole a reviewer found:
 
   m1  ARCHITECTURE.md gains "Phase A was executed; every binding call is made and recorded on tape."
       (Codex r4: bare "Phase A" must not qualify executed language)
@@ -250,6 +259,47 @@ def _append(rel, text):
     return fn
 
 
+# The register's own sentence splitter and readers, loaded out of the checker rather than copied, so this fixture
+# cannot drift from the gate it is testing.
+def _gate():
+    src = (HERE / "check_full_demo.py").read_text("utf-8")
+    seg = (src[src.index("PHASE_A_OBJECT = re.compile"):src.index("# ---- the register:")]
+           + src[src.index("def regulated_sentences("):src.index("def load_register(")])
+    g = {"re": re}
+    exec(seg, g)
+    return g
+
+
+GATE = _gate()
+
+
+def _rows_for(text, verdict, evidence):
+    return ["%s\t%s\t%s" % (verdict, evidence, s) for _, s in GATE["regulated_sentences"](text)]
+
+
+def _audit(d, rows):
+    p = d / "tools" / "audited_claims.tsv"
+    p.write_text(p.read_text("utf-8") + "".join(r + "\n" for r in rows), "utf-8")
+
+
+def _append_audited(rel, text, verdict="PENDING", evidence="-"):
+    """Append prose AND audit it. This is the authoring workflow INV-1 defines: adding a sentence that names a Phase A
+    artefact without adding its register row is exactly what the gate must reject, so a positive control does both."""
+    def fn(d):
+        p = d / rel
+        p.write_text(p.read_text("utf-8") + "\n\n" + text + "\n", "utf-8")
+        _audit(d, _rows_for(text, verdict, evidence))
+    return fn
+
+
+def _append_audited_js(rel, code, verdict="PENDING", evidence="-"):
+    def fn(d):
+        p = d / rel
+        p.write_text(p.read_text("utf-8") + "\n" + code + "\n", "utf-8")
+        _audit(d, _rows_for(GATE["extract_js_prose"](code), verdict, evidence))
+    return fn
+
+
 # Codex r6: bare "No" latched forward over ", and …"; 'made' missing from the verb list; "_" stripping broke PERMISSION_DENIED
 m12 = _append("ARCHITECTURE.md", "No DML touched agent_events, and the three Phase A service accounts were created.")
 m13 = _append("spec.md", "The operator made every Phase A binding.")
@@ -302,45 +352,51 @@ m47 = _append("spec.md", "The report must record what the operator revoked on ta
 # Positive controls (Codex r11 #3): honest RFC-only prose that must NOT be flagged. Appending any of these to a clean
 # copy must leave the checker at exit 0; a fail here means the guard has started rejecting truthful future-tense text.
 POSITIVE_CONTROLS = [
-    ("p1 shared modal + coordinated participle", _append("ARCHITECTURE.md", "Every Phase A role must be created and granted on tape.")),
-    ("p2 'that' as a determiner, not a complementizer", _append("spec.md", "The operator must record that Phase A binding on tape.")),
-    ("p3 'grants' as a noun", _append("plan.md", "BigQuery grants use the table-level IAM policy for the custom role.")),
-    ("p4 bare-infinitive coordination", _append("intent.md", "The operator will create the service accounts and revoke the custom role.")),
-    ("p5 proper noun 'Run' and infinitive after a modal", _append("README.md", "The Cloud Run Job will run as the sync writer.")),
-    ("p6 noun + participle ('The table grant named the custom role.')", _append("ARCHITECTURE.md", "The table grant named the custom role.")),
-    ("p7 non-factive complement ('verify whether … were created')", _append("spec.md", "The operator must verify whether the service accounts were created.")),
-    ("p8 prepositional 'after another', not a temporal clause", _append("plan.md", "The operator must create one service account after another and record every binding on tape.")),
-    ("p9 noun 'grant' with a to-complement", _append("intent.md", "The custom role limits the project grant to one permission.")),
-    ("p10 adverb between modal and verb ('must eventually create')", _append("ARCHITECTURE.md", "The operator must eventually create the Phase A service accounts.")),
-    ("p11 noun 'grants' with an unlisted predicate ('Project grants govern …')", _append("spec.md", "Project grants govern access to the custom role.")),
-    ("p12 determiner 'that' + attributive participle", _append("plan.md", "The operator must record that scoped Phase A binding on tape.")),
-    ("p13 modal reaching a coordinated head verb and its complement", _append("intent.md", "The docs must explain the RFC and record every binding on tape.")),
-    ("p14 honest denial with a Titlecase subject ('No Phase A service account was created.')", _append("ARCHITECTURE.md", "No Phase A service account was created.")),
-    ("p15 compound-noun subject with an unlisted verb ('Project grants govern …')", _append("spec.md", "Project grants govern Phase A access to the custom role.")),
-    ("p16 adverb before a coordinated continuation head ('and carefully record …')", _append("plan.md", "The operator must create the service accounts and carefully record every binding on tape.")),
-    ("p17 executable app.js code is not prose", _append_js("app.js", "function r14Control() { return roles; }")),
-    ("p18 honest app.js literal stays clean", _append_js("app.js", 'var r14Ok = "The operator must create the Phase A service accounts.";')),
-    ("p19 honest passive future ('The operator must be recorded on tape.')", _append("ARCHITECTURE.md", "The operator must be recorded on tape.")),
-    ("p20 modal over a coordinated head and its object phrase", _append("spec.md", "The docs must explain the RFC and record the Phase A binding on tape.")),
-    ("p21 attributive participle inside the object", _append("plan.md", "The docs must explain the RFC and record the previously scoped Phase A binding on tape.")),
-    ("p22 denial whose subject carries a prepositional phrase", _append("intent.md", "No service account in the Phase A project was created.")),
-    ("p23 determiner-headed compound noun with an unlisted verb", _append("CUSTOMER_STORIES.md", "The project grants govern Phase A access to the custom role.")),
-    ("p24 non-ly adverb before a coordinated continuation head", _append("README.md", "The operator must create the service accounts and always record every binding on tape.")),
-    ("p25 three adverbs before a coordinated continuation head", _append("ARCHITECTURE.md", "The operator must create the service accounts and very carefully always record every binding on tape.")),
-    ("p26 compound noun with an unlisted governance verb ('Project grants constrain …')", _append("spec.md", "Project grants constrain Phase A access to the custom role.")),
-    ("p27 unrelated neighbouring literals are not merged", _append_js("app.js", 'var r16e = "This is future work.";\nvar r16f = "The tape will show every binding.";')),
-    ("p28 non-ly adverb 'often' before a continuation head", _append("spec.md", "The operator must create the service accounts and often record every binding on tape.")),
-    ("p29 non-ly adverb 'sometimes' before a continuation head", _append("plan.md", "The operator must create the service accounts and sometimes record every binding on tape.")),
-    ("p30 adverb between a noun and its governance verb", _append("intent.md", "Project grants narrowly constrain Phase A access to the custom role.")),
-    ("p31 object noun phrase ending in a noun ('must record the custom role on tape')", _append("ARCHITECTURE.md", "The operator must record the custom role on tape.")),
-    ("p32 'more carefully' before a continuation head", _append("spec.md", "The operator must create the service accounts and more carefully record every binding on tape.")),
-    ("p33 'often' between a noun and its governance verb", _append("plan.md", "Project grants often constrain Phase A access to the custom role.")),
-    ("p34 compound noun ending in an invariant irregular ('the Phase A cache hit')", _append("ARCHITECTURE.md", "The operator must record the Phase A cache hit on tape.")),
-    ("p35 'must often record' keeps the modal's reach", _append("spec.md", "The operator must often record every binding on tape.")),
-    ("p36 reduced relative ('grants narrowly constrained by policy')", _append("plan.md", "Project grants narrowly constrained by policy are Phase A requirements.")),
-    ("p37 the same reduced relative under a modal", _append("intent.md", "Future documentation must list project grants narrowly constrained by policy.")),
-    ("p38 an honest literal after a nested-condition regex", _append_js("app.js", "var r19p = function () { if ((ready)) /'/.test(x); };\nvar r19q = 'Every binding is a future requirement.';")),
-    ("p39 a hidden element with nested inline markup is dropped whole", _append_js("app.js", 'var r19r = "<span hidden>The operator <em>created</em> the Phase A service accounts.</span>";')),
+    ("p1 shared modal + coordinated participle", _append_audited("ARCHITECTURE.md", "Every Phase A role must be created and granted on tape.")),
+    ("p2 'that' as a determiner, not a complementizer", _append_audited("spec.md", "The operator must record that Phase A binding on tape.")),
+    ("p3 'grants' as a noun", _append_audited("plan.md", "BigQuery grants use the table-level IAM policy for the custom role.")),
+    ("p4 bare-infinitive coordination", _append_audited("intent.md", "The operator will create the service accounts and revoke the custom role.")),
+    ("p5 proper noun 'Run' and infinitive after a modal", _append_audited("README.md", "The Cloud Run Job will run as the sync writer.")),
+    ("p6 noun + participle ('The table grant named the custom role.')", _append_audited("ARCHITECTURE.md", "The table grant named the custom role.")),
+    ("p7 non-factive complement ('verify whether … were created')", _append_audited("spec.md", "The operator must verify whether the service accounts were created.")),
+    ("p8 prepositional 'after another', not a temporal clause", _append_audited("plan.md", "The operator must create one service account after another and record every binding on tape.")),
+    ("p9 noun 'grant' with a to-complement", _append_audited("intent.md", "The custom role limits the project grant to one permission.")),
+    ("p10 adverb between modal and verb ('must eventually create')", _append_audited("ARCHITECTURE.md", "The operator must eventually create the Phase A service accounts.")),
+    ("p11 noun 'grants' with an unlisted predicate ('Project grants govern …')", _append_audited("spec.md", "Project grants govern access to the custom role.")),
+    ("p12 determiner 'that' + attributive participle", _append_audited("plan.md", "The operator must record that scoped Phase A binding on tape.")),
+    ("p13 modal reaching a coordinated head verb and its complement", _append_audited("intent.md", "The docs must explain the RFC and record every binding on tape.")),
+    ("p14 honest denial with a Titlecase subject ('No Phase A service account was created.')", _append_audited("ARCHITECTURE.md", "No Phase A service account was created.")),
+    ("p15 compound-noun subject with an unlisted verb ('Project grants govern …')", _append_audited("spec.md", "Project grants govern Phase A access to the custom role.")),
+    ("p16 adverb before a coordinated continuation head ('and carefully record …')", _append_audited("plan.md", "The operator must create the service accounts and carefully record every binding on tape.")),
+    ("p17 executable app.js code is not prose", _append_audited_js("app.js", "function r14Control() { return roles; }")),
+    ("p18 honest app.js literal stays clean", _append_audited_js("app.js", 'var r14Ok = "The operator must create the Phase A service accounts.";')),
+    ("p19 honest passive future ('The operator must be recorded on tape.')", _append_audited("ARCHITECTURE.md", "The operator must be recorded on tape.")),
+    ("p20 modal over a coordinated head and its object phrase", _append_audited("spec.md", "The docs must explain the RFC and record the Phase A binding on tape.")),
+    ("p21 attributive participle inside the object", _append_audited("plan.md", "The docs must explain the RFC and record the previously scoped Phase A binding on tape.")),
+    ("p22 denial whose subject carries a prepositional phrase", _append_audited("intent.md", "No service account in the Phase A project was created.")),
+    ("p23 determiner-headed compound noun with an unlisted verb", _append_audited("CUSTOMER_STORIES.md", "The project grants govern Phase A access to the custom role.")),
+    ("p24 non-ly adverb before a coordinated continuation head", _append_audited("README.md", "The operator must create the service accounts and always record every binding on tape.")),
+    ("p25 three adverbs before a coordinated continuation head", _append_audited("ARCHITECTURE.md", "The operator must create the service accounts and very carefully always record every binding on tape.")),
+    ("p26 compound noun with an unlisted governance verb ('Project grants constrain …')", _append_audited("spec.md", "Project grants constrain Phase A access to the custom role.")),
+    ("p27 unrelated neighbouring literals are not merged", _append_audited_js("app.js", 'var r16e = "This is future work.";\nvar r16f = "The tape will show every binding.";')),
+    ("p28 non-ly adverb 'often' before a continuation head", _append_audited("spec.md", "The operator must create the service accounts and often record every binding on tape.")),
+    ("p29 non-ly adverb 'sometimes' before a continuation head", _append_audited("plan.md", "The operator must create the service accounts and sometimes record every binding on tape.")),
+    ("p30 adverb between a noun and its governance verb", _append_audited("intent.md", "Project grants narrowly constrain Phase A access to the custom role.")),
+    ("p31 object noun phrase ending in a noun ('must record the custom role on tape')", _append_audited("ARCHITECTURE.md", "The operator must record the custom role on tape.")),
+    ("p32 'more carefully' before a continuation head", _append_audited("spec.md", "The operator must create the service accounts and more carefully record every binding on tape.")),
+    ("p33 'often' between a noun and its governance verb", _append_audited("plan.md", "Project grants often constrain Phase A access to the custom role.")),
+    ("p34 compound noun ending in an invariant irregular ('the Phase A cache hit')", _append_audited("ARCHITECTURE.md", "The operator must record the Phase A cache hit on tape.")),
+    ("p35 'must often record' keeps the modal's reach", _append_audited("spec.md", "The operator must often record every binding on tape.")),
+    ("p36 reduced relative ('grants narrowly constrained by policy')", _append_audited("plan.md", "Project grants narrowly constrained by policy are Phase A requirements.")),
+    ("p37 the same reduced relative under a modal", _append_audited("intent.md", "Future documentation must list project grants narrowly constrained by policy.")),
+    ("p38 an honest literal after a nested-condition regex", _append_audited_js("app.js", "var r19p = function () { if ((ready)) /'/.test(x); };\nvar r19q = 'Every binding is a future requirement.';")),
+    ("p39 a hidden element with nested inline markup is dropped whole", _append_audited_js("app.js", 'var r19r = "<span hidden>The operator <em>created</em> the Phase A service accounts.</span>";')),
+    ("p40 comparative adverb between a modal and its verb (Codex r20)", _append_audited("ARCHITECTURE.md", "The operator must better record every binding on tape.")),
+    ("p41 'much better record' after a coordinated modal (Codex r20)", _append_audited("spec.md", "The operator must create the service accounts and much better record every binding on tape.")),
+    ("p42 an irregular participle modifying a noun (Codex r20)", _append_audited("plan.md", "Project grants widely known to reviewers are Phase A requirements.")),
+    ("p43 an adverb between a participle and its by-phrase (Codex r20)", _append_audited("intent.md", "Project grants narrowly constrained only by policy are Phase A requirements.")),
+    ("p44 a compound object ending in a noun (Codex r20)", _append_audited("README.md", "The operator must record the service account binding on tape.")),
+    ("p45 an audited CAPTURED row with its evidence", _append_audited("live/README.md", "The summary query ran once as the operator and its job id is on record.", "CAPTURED", "live/bq_jobs_identity.json")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -448,6 +504,38 @@ m106 = _append_js("app.js", 'var r19f = "<span style=display:none>not yet</span>
 m107 = _append_js("app.js", 'var r19g = "<span hidden><span>deferred</span> not yet</span> The service accounts were created for this capture.";')
 m108 = _append_js("app.js", 'var r19h = "<span title=\'hidden\'>The operator created the Phase A service accounts.</span>";')
 
+# Codex r20. The gate is now the audited claim register, so prose that names a Phase A artefact and is not audited
+# fails whatever its morphology (m109-m111); a falsified or inconsistent register row fails on its own terms
+# (m112-m116); and the extraction readers stay load-bearing, because a claim they drop is never regulated at all
+# (m117-m121).
+m109 = _append("ARCHITECTURE.md", "The docs must report the operator froze on tape.")
+m110 = _append("spec.md", "The docs must report the Phase A operator quit on tape.")
+m111 = _append("plan.md", "The operator must record the service account binding on tape and the denials were proved.")
+m112 = _append_audited("intent.md", "Phase A was executed; every binding call is made and recorded on tape.")
+m113 = _append_audited("README.md", "The operator created the three Phase A service accounts.", "CAPTURED", "live/bq_jobs_identity.json")
+m114 = _append_audited("CUSTOMER_STORIES.md", "The operator must create the three Phase A service accounts on tape.", "CAPTURED", "live/no_such_file.json")
+
+
+def m115(d):
+    """A register row for prose that is not in the copy: the register must audit what ships, not license what might."""
+    _audit(d, ["PENDING\t-\tThe operator must create the three Phase A service accounts on tape."])
+
+
+def m116(d):
+    """Dropping a row leaves shipped prose unaudited."""
+    p = d / "tools" / "audited_claims.tsv"
+    lines = p.read_text("utf-8").split("\n")
+    keep = [ln for ln in lines if not ln.startswith("CAPTURED\tlive/setup_runtime_tables.out")]
+    assert len(keep) < len(lines)
+    p.write_text("\n".join(keep), "utf-8")
+
+
+m117 = _append_js("app.js", "var r20a = holder . if(ready) / '/' / 2;\nvar r20b = 'The operator created the Phase A service accounts.';")
+m118 = _append_js("app.js", "var r20c = function () { if (((ready))) /'/.test(x); };\nvar r20d = 'The operator created the Phase A service accounts.';")
+m119 = _append_js("app.js", "var r20e = function () { if (%s) /'/.test(x); };\nvar r20f = 'The operator created the Phase A service accounts.';" % " && ".join("flag%02d" % i for i in range(1, 26)))
+m120 = _append_js("app.js", 'var r20g = "<span style=\'--x:display:none\'>The operator created the Phase A service accounts.</span>";')
+m121 = _append_js("app.js", 'var r20h = "<span hidden><!-- <span> --></span> The operator created the Phase A service accounts.";')
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -552,7 +640,20 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m105 'display:none; display:inline' renders, so its claim is read (Codex r19)", m105),
              ("m106 unquoted 'style=display:none' still hides its qualifier (Codex r19)", m106),
              ("m107 a nested same-tag hidden element is removed whole (Codex r19)", m107),
-             ("m108 'title=\'hidden\'' is a visible element, not a hidden one (Codex r19)", m108)]
+             ("m108 'title=\'hidden\'' is a visible element, not a hidden one (Codex r19)", m108),
+             ("m109 'the operator froze on tape' is unaudited prose (Codex r20)", m109),
+             ("m110 'the Phase A operator quit on tape' is unaudited prose (Codex r20)", m110),
+             ("m111 an unaudited claim beside honest wording (Codex r20)", m111),
+             ("m112 INV-4: a PENDING row with completion language and no qualifier", m112),
+             ("m113 INV-3: a CAPTURED row claiming a deferred artefact", m113),
+             ("m114 INV-2: a CAPTURED row citing evidence that does not exist", m114),
+             ("m115 INV-5: a register row for prose that does not ship", m115),
+             ("m116 INV-1: dropping a row leaves shipped prose unaudited", m116),
+             ("m117 'holder . if(ready)' is member access whatever the spacing (Codex r20)", m117),
+             ("m118 a regex after a triple-nested condition does not desynchronise (Codex r20)", m118),
+             ("m119 a long condition has no lookback ceiling (Codex r20)", m119),
+             ("m120 '--x:display:none' is a custom property, not a display (Codex r20)", m120),
+             ("m121 a tag inside an HTML comment opens no element (Codex r20)", m121)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

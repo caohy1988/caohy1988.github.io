@@ -1,0 +1,214 @@
+# Audited claim register for /rfc/full-demo/ — see the INV-1..INV-5 comment in tools/check_full_demo.py.
+#
+# Every sentence of the demo copy that NAMES a Phase A artefact must appear here, verbatim after whitespace
+# normalisation, with a verdict. This file IS the audit: the checker guarantees that nothing naming an artefact
+# ships unaudited and that each verdict is internally consistent, not that the verdict was reached correctly.
+#
+#   PENDING   the sentence makes no claim that a deferred Phase A step has been executed. This is the default and
+#             the weaker verdict: it is true of normative RFC text, of deferral notes, and of statements about the
+#             world outside this project. A PENDING sentence carrying completion language must carry a qualifier.
+#   CAPTURED  the sentence states something that WAS executed for this capture, by the operator
+#             (raincoatrun@gmail.com). The evidence column names the live/ or sql/ file that substantiates it, and
+#             the sentence may not name a deferred artefact without a not-done marker.
+#
+# Format: verdict<TAB>evidence-or-dash<TAB>sentence. Regenerate by editing the copy, then re-auditing the diff.
+# Rows: 188 (19 CAPTURED, 169 PENDING).
+
+# --- spec.md
+PENDING	-	The table set, EntryGroup and type resources are the IAM boundary (§1.3).
+PENDING	-	the authorization boundary is §1.3.
+PENDING	-	| context_ref binding | Immutable and non-rebindable from Phase A on:
+PENDING	-	commit stage rows under sync_id → MERGE publications ON publication_id (seeded row matched, not duplicated) → BQ_COMMITTED → advance deployment_heads, append deployment_heads_history, mint context_ref → publication_id binding (append-only, never rebound)
+CAPTURED	live/README.md	| Captured, run by the operator (not okf-setup / sync-writer):
+PENDING	-	| IAM bootstrap, identities, positive and negative checks, setup retirement (§1.3) | Real;
+PENDING	-	to be recorded in the Phase A tape.
+PENDING	-	No service account, custom role, table-level grant, boundary probe or PERMISSION_DENIED check exists;
+PENDING	-	no service account, custom role, table-level grant, boundary EntryGroup, positive check or negative check exists, and no tape has been recorded.
+PENDING	-	Where a sentence below says what the tape "must" show, that is the acceptance criterion for Phase A, labelled RFC text only on the page until it is met.
+PENDING	-	one human bootstrap operator and three service accounts.
+PENDING	-	Every grant below names the resource it is bound to;
+PENDING	-	Role and permission facts are from the Dataplex IAM roles page (docs.cloud.google.com/dataplex/docs/iam-roles):
+PENDING	-	setIamPolicy on EntryGroups and EntryTypes is in roles/dataplex.catalogAdmin, and on AspectTypes in roles/dataplex.aspectTypeOwner.
+PENDING	-	BigQuery grants use table-level IAM (code) so the sync writer never touches agent_events.
+PENDING	-	Who must install the boundary.
+PENDING	-	Service accounts cannot grant themselves anything, and roles/iam.serviceAccountAdmin cannot create custom roles, edit project IAM, or set Dataplex IAM.
+PENDING	-	So every binding call must be made by the bootstrap operator:
+PENDING	-	In Phase A that account will hold, for the duration of setup only, the exact policy-owner roles below, and each binding command must be recorded on tape under that identity.
+PENDING	-	After setup the operator must keep only what the demo needs at run time (impersonation of the sync writer and the reader).
+PENDING	-	None of these bindings exists yet (PR 16 status:
+PENDING	-	| Principal | Resource | Grant | Why | Lifetime |
+PENDING	-	| bootstrap operator (human Owner) | project | roles/iam.roleAdmin | create custom role okfCatalogSearch | setup only;
+PENDING	-	| | project | roles/resourcemanager.projectIamAdmin | bind project-level roles to the three SAs | setup only;
+PENDING	-	| | project | roles/iam.serviceAccountAdmin | create the three SAs;
+PENDING	-	bind serviceAccountTokenCreator on each SA resource | setup only;
+PENDING	-	| | project | roles/dataplex.catalogAdmin | entryGroups.setIamPolicy, entryTypes.setIamPolicy on okf-rfc-demo, okf-rfc-demo-boundary, okf-bundle | setup only;
+PENDING	-	| | project | roles/dataplex.aspectTypeOwner | aspectTypes.setIamPolicy on okf, okf-context-runtime | setup only;
+PENDING	-	| | dataset okf_rfc_demo | roles/bigquery.dataOwner | bigquery.tables.setIamPolicy for the nine table-level bindings | setup only;
+PENDING	-	| | SA okf-sync-writer-okf-rfc-demo, SA okf-runtime-reader | roles/iam.serviceAccountTokenCreator on each SA | run the demo by impersonation | kept |
+PENDING	-	| | SA okf-setup | roles/iam.serviceAccountTokenCreator | run setup by impersonation | setup only;
+PENDING	-	to be revoked (check 7) |
+PENDING	-	| okf-setup (one-time) | project | roles/dataplex.catalogEditor (entryGroups.create, entryTypes.create) and roles/dataplex.aspectTypeOwner (aspectTypes.create) | type and group creation is checked on the project, not on the group | setup only;
+PENDING	-	to be revoked (check 6) |
+PENDING	-	| | dataset okf_rfc_demo | roles/bigquery.dataOwner | table DDL, the context_ref_resolution view, seed MERGEs (sql/setup_runtime_tables.sql) | setup only;
+PENDING	-	| | project | roles/bigquery.jobUser | run the DDL jobs | setup only;
+PENDING	-	| okf-sync-writer-okf-rfc-demo | EntryGroup okf-rfc-demo | roles/dataplex.catalogEditor | code inside this group only | kept |
+PENDING	-	| | EntryType okf-bundle | roles/dataplex.entryTypeUser | create entries of that type (the identity the sample push.ts uses) | kept |
+PENDING	-	| | AspectType okf, AspectType okf-context-runtime | roles/dataplex.aspectTypeUser on each | attach the shipped aspect;
+PENDING	-	| | tables publications, deployments, deployment_heads, deployment_heads_history, concept_versions, snapshot_membership, relationship_assertions, context_ref_bindings, catalog_ownership | roles/bigquery.dataEditor per table | no dataset grant, so agent_events, legacy_context_ref_bindings, and demo_evidence are unreachable | kept |
+PENDING	-	| | project | roles/bigquery.jobUser | run the commit jobs | kept |
+PENDING	-	| okf-runtime-reader | EntryGroup okf-rfc-demo | roles/dataplex.catalogViewer | code and lookupContext on entries in this group | kept |
+PENDING	-	| | project | custom role okfCatalogSearch = {code} | searchEntries is project-scoped;
+PENDING	-	the custom role limits the project grant to one permission | kept |
+PENDING	-	| | dataset okf_rfc_demo | roles/bigquery.dataViewer | code over runtime tables, the view, legacy bindings, demo_evidence, agent_events | kept |
+PENDING	-	| | project | roles/bigquery.jobUser | run the serve and attribution queries (SELECT only;
+PENDING	-	The human operator must impersonate each service account through an isolated gcloud configuration (code, code, code), one configuration per SA, never the default configuration.
+PENDING	-	it has no impersonation flag of its own (bq 2.1.28 rejects code;
+PENDING	-	verified 2026-09-03, and with the gcloud setting bq reports "All API calls will be executed as [<sa>]").
+PENDING	-	Impersonation requires roles/iam.serviceAccountTokenCreator on each service account resource for the operator, one binding per SA.
+PENDING	-	The Phase A tape must show the active configuration name before each step and, after each BigQuery step, the user_email that INFORMATION_SCHEMA.JOBS reports for the acting service account (Phase A, not yet run), so that the identity will be demonstrated rather than asserted;
+CAPTURED	live/bq_jobs_identity.json	today the only user_email on record is the operator's.
+PENDING	-	The Cloud Run Job will run as the sync writer directly (no impersonation).
+PENDING	-	Setup order for the Phase A tape (each command to be recorded under its own acting identity, not yet run):
+PENDING	-	create SAs;
+PENDING	-	create okfCatalogSearch;
+PENDING	-	bind setup roles;
+PENDING	-	bind Token Creator on okf-setup.
+PENDING	-	okf-setup (isolated configuration okf-setup):
+PENDING	-	create EntryGroup okf-rfc-demo-boundary and one disposable entry boundary-probe of type okf-bundle in it;
+PENDING	-	bind sync-writer and reader roles on the now-existing type, group, and table resources;
+PENDING	-	bind Token Creator on the two run-time SAs.
+PENDING	-	Positive checks 1–3 and negative checks 1–5.
+PENDING	-	revoke every okf-setup role and the dataset dataOwner;
+PENDING	-	run check 6;
+PENDING	-	revoke Token Creator on okf-setup;
+PENDING	-	run check 7;
+PENDING	-	delete EntryGroup okf-rfc-demo-boundary;
+PENDING	-	revoke the operator's own setup-only roles.
+PENDING	-	Positive checks (Phase A, not yet run;
+PENDING	-	each allowed operation to be exercised on tape exactly once, expected OK):
+PENDING	-	okf-setup:
+PENDING	-	code on okf-rfc-demo-boundary/entries/boundary-probe (expected OK, so that negative check 2 below can fail only on IAM);
+PENDING	-	sql/setup_runtime_tables.sql piped to code under configuration okf-setup.
+PENDING	-	okf-sync-writer-okf-rfc-demo:
+PENDING	-	okf-runtime-reader:
+PENDING	-	Negative checks (Phase A, not yet run:
+PENDING	-	seven checks, nine real API calls, each call expected PERMISSION_DENIED, to be recorded on tape and asserted by the checker;
+PENDING	-	check 6 is three calls):
+PENDING	-	code → expected PERMISSION_DENIED (no dataset grant, no table grant).
+PENDING	-	the same code on okf-rfc-demo-boundary/entries/boundary-probe that okf-setup will have just completed successfully → expected PERMISSION_DENIED.
+PENDING	-	the only variable is the missing cross-group grant.
+PENDING	-	code → expected PERMISSION_DENIED (no project-level type creation).
+PENDING	-	code on an entry that carries the runtime pin → expected PERMISSION_DENIED.
+PENDING	-	INSERT INTO deployment_heads → expected PERMISSION_DENIED.
+PENDING	-	Post-cleanup, okf-setup (still impersonable after step 5 removes its roles), three calls:
+PENDING	-	(6a) code, (6b) code, (6c) code → each expected PERMISSION_DENIED, which would show the project-wide AspectType authority is gone.
+PENDING	-	code → expected PERMISSION_DENIED on generateAccessToken, which would show the impersonation path is closed;
+PENDING	-	the okf-setup gcloud configuration is then to be deleted.
+PENDING	-	the table set, the EntryGroup, and the type resources are the enforceable boundary.
+PENDING	-	If EntryGroup- or type-level bindings are rejected by the API for any role above, the plan's risk table says to fall back to a dedicated project and document the wider grant;
+PENDING	-	| Events match the context_ref_resolution view (legacy ∪ Phase-A bindings) on both event-carried context_ref and event-carried publication_id, then join publications by publication_id;
+PENDING	-	| context_ref on every tool result, never-emit list enforced, immutable binding to one publication.
+PENDING	-	IAM on the EntryGroup, the type resources and the runtime tables is the only boundary that is enforceable today;
+PENDING	-	Then the positive checks, boundary checks 1–5, and post-cleanup checks 6–7 (nine PERMISSION_DENIED calls in all).
+PENDING	-	The page prints BQ_COMMITTED, CATALOG_STAMPED, no-op and PERMISSION_DENIED only inside the quoted RFC text only algorithm and IAM contract;
+PENDING	-	the two codes in sql/attribution_two_key.sql, run as okf-runtime-reader under an isolated gcloud configuration, each piped over stdin as its own invocation;
+CAPTURED	live/bq_jobs_identity.json	| Yes, run as the operator (not yet okf-runtime-reader):
+PENDING	-	the tape is Phase A.) A cold reader can state the sync answer in one sentence after beat 4:
+PENDING	-	not yet met on PR 16.) The bootstrap operator must install every binding on tape;
+PENDING	-	every positive check must return OK;
+PENDING	-	all seven negative checks (nine API calls) must return PERMISSION_DENIED, including the two post-cleanup checks that would show okf-setup is retired;
+PENDING	-	and the tape must show each BigQuery step's user_email matching the declared identity.
+CAPTURED	live/bq_jobs_identity.json	Today every user_email on record is the operator's.
+# --- ARCHITECTURE.md
+PENDING	-	okf-sync-writer (nine tables + one EntryGroup + type use)"| C2[("BigQuery runtime<br/>publications · deployments<br/>deployment_heads(+history)<br/>concept_versions · membership<br/>context_ref_bindings (immutable)<br/>legacy_context_ref_bindings · demo_evidence<br/>view context_ref_resolution<br/>catalog_ownership ledger")] C2 -->|"stamp after BQ_COMMITTED<br/>okf-context-runtime aspect<br/>{publication_id, published_snapshot_id, managed_by}"| C1 C1 -.->|"FUTURE, not v1:<br/>sync --from-catalog (lossy import, stubbed)"| C2 end
+PENDING	-	okf-runtime-reader<br/>okf_retrieve_context<br/>okf_run_attested_computation (UNVERIFIABLE)"] -->|"pin-or-fail-stale<br/>current / historical / all"| C2 C2 -->|"Context Envelope<br/>context_ref only on results"| D2 D2 -->|BQAA| A2 end
+PENDING	-	no dataset grant) | staged rows under sync_id, then publications, deployment_heads, deployment_heads_history, context_ref_bindings (append-only, one ref → one publication, never rebound), ledger | BQ_COMMITTED |
+PENDING	-	The sync leg, the service accounts, the grants and the checks below are the Phase A contract, RFC text only on the page.
+PENDING	-	In Phase A a human bootstrap operator (the project Owner) will hold time-boxed policy-owner roles, create the service accounts and the custom search role, and make every binding on tape (Phase A, not yet run).
+PENDING	-	Setup (okf-setup, one-time, project-level type and group creation) will create the tables, the context_ref_resolution view and the seed rows (sql/setup_runtime_tables.sql), the okf-context-runtime AspectType, and run the sample setup.ts for the shipped okf-bundle / okf types;
+PENDING	-	afterwards every okf-setup role and its impersonation grant must be revoked and two denial checks must show it.
+PENDING	-	Readers (okf-runtime-reader) will hold dataViewer on the dataset, catalogViewer on the EntryGroup, and a custom role with only code at project level for searchEntries.
+PENDING	-	Positive and negative permission checks, including the boundary-probe EntryGroup, are specified in spec.md §1.3.
+PENDING	-	manual CLI (the Phase A tape;
+# --- plan.md
+PENDING	-	> Every item below that mentions a tape, a recording, PERMISSION_DENIED, BQ_COMMITTED, CATALOG_STAMPED or no-op
+PENDING	-	the bootstrap operator must hold the setup-only policy-owner roles of spec.md §1.3 (roleAdmin, projectIamAdmin, serviceAccountAdmin, catalogAdmin, aspectTypeOwner, dataset dataOwner) for the duration of setup, must create okf-setup, okf-sync-writer-okf-rfc-demo, okf-runtime-reader and the custom role okfCatalogSearch, and must make every binding on tape under its own identity in the order §1.3 gives:
+PENDING	-	table-level dataEditor on the nine runtime tables (no dataset grant, so agent_events is unreachable);
+PENDING	-	okfCatalogSearch at project level for the reader;
+PENDING	-	serviceAccountTokenCreator per SA.
+PENDING	-	After setup it must revoke every okf-setup role, run denial check 6, revoke its Token Creator, run check 7, delete the boundary EntryGroup, and revoke the operator's own setup-only roles.
+PENDING	-	Impersonation of each SA must happen through its own isolated gcloud configuration, never the default one;
+PENDING	-	code reads auth/impersonate_service_account from that configuration (bq has no impersonation flag).
+PENDING	-	| BigQuery DDL (as okf-setup via the isolated okf-setup gcloud configuration, sql/setup_runtime_tables.sql piped to code) | New tables in okf_rfc_demo:
+PENDING	-	| Seed pre-Phase-A rows (as okf-setup, same file) | MERGE into publications on publication_id (WHEN NOT MATCHED THEN INSERT) for a25e1c0c…, 674153c5…, 53bd1651… with source = seeded_pre_phase_a, seeded_at = CURRENT_TIMESTAMP().
+PENDING	-	| Catalog prerequisites (as okf-setup) | Run the sample setup.ts to register shipped okf-bundle + okf in the project (today only the older okf-concept type exists).
+PENDING	-	| Boundary probe (as okf-setup) | Phase A requirement, not yet run:
+PENDING	-	create EntryGroup okf-rfc-demo-boundary and one disposable entry boundary-probe of type okf-bundle.
+PENDING	-	okf-setup patches it (OK, positive check 1);
+PENDING	-	the sync writer's identical patch is negative check 2 (PERMISSION_DENIED).
+PENDING	-	| Beat 3 recording (as okf-runtime-reader) | After the push:
+PENDING	-	All seven negative checks (nine API calls) in spec.md §1.3 must return PERMISSION_DENIED on tape, including the two post-cleanup checks for okf-setup;
+PENDING	-	## Phase B — BigQuery serve path against real tables (as okf-runtime-reader)
+PENDING	-	Both must be exercised in the tape.
+PENDING	-	| Attribution query (as okf-runtime-reader, code only) | sql/attribution_two_key.sql holds two marked statements, each piped over stdin to code as its own invocation under the isolated okf-reader gcloud configuration (bq has no impersonation flag;
+PENDING	-	| Beat 4 | The Phase A asciinema tape, with BQ_COMMITTED, CATALOG_STAMPED, each positive-check OK, and each of the nine PERMISSION_DENIED calls (seven checks) as named marks, plus the active gcloud configuration name before every identity switch.
+PENDING	-	- One asciinema cast of beats 3 → 6 (code / lookupContext, okf-context sync twice, the negative checks, the serve queries, the attribution query), rendered to gif and a ~90 s H.264 mp4 with the attribution tables as the poster frame.
+PENDING	-	| Needs real GCP | A human bootstrap operator with time-boxed policy-owner roles;
+PENDING	-	service accounts and resource-specific IAM bindings (type-level, EntryGroup-level, table-level);
+PENDING	-	a disposable boundary EntryGroup;
+PENDING	-	BigQuery DDL/DML for the runtime, legacy-binding, evidence tables and the resolution view;
+PENDING	-	| EntryGroup-, type- or table-level bindings are rejected for a role above | Verify with the positive and negative checks before recording;
+PENDING	-	if a level is unsupported, fall back to a dedicated project for the deployment or document the wider grant honestly.
+# --- CUSTOMER_STORIES.md
+PENDING	-	So the agents saw two publications, the tape binds the same observe handle to a third, and the only Catalog pin in the project names the oldest.
+PENDING	-	The legacy handles go into legacy_context_ref_bindings, and one view, context_ref_resolution, unions legacy and Phase-A bindings.
+PENDING	-	So the legacy double binding of okf:env-observe#674153c572f6 cannot duplicate or misattribute a row.
+PENDING	-	Anyone with roles/dataplex.catalogViewer on okf-rfc-demo can read the policy body via code.
+PENDING	-	the dataset and the EntryGroup are the boundary, and both are real.
+# --- README.md
+PENDING	-	the three service accounts, custom role, table-level grants, boundary probe, negative checks, and the okf-context sync CLI.
+PENDING	-	the register is the audit, and tools/check_full_demo.py documents that boundary and its non-goals.
+# --- live/README.md
+PENDING	-	The Phase A service accounts (okf-setup, okf-sync-writer-okf-rfc-demo, okf-runtime-reader), the custom role, the table-level grants, the boundary probe, and the negative checks of spec.md §1.3 were not created for this capture;
+CAPTURED	live/bq_jobs_identity.json	bq_jobs_identity.json is the INFORMATION_SCHEMA.JOBS_BY_USER row set for every okf_full_demo% job id, so the user_email behind each query is on record.
+CAPTURED	live/setup_runtime_tables.out	| setup_runtime_tables.out | DDL + seed MERGEs, sql/setup_runtime_tables.sql, run once as the operator (not yet as okf-setup) | 11 tables + 1 view created;
+CAPTURED	live/bq_jobs_identity.json	| bq_jobs_identity.json | INFORMATION_SCHEMA.JOBS_BY_USER for okf_full_demo% | every row user_email = raincoatrun@gmail.com |
+CAPTURED	live/catalog_entry_group_iam.json	| catalog_entry_group_iam.json | code (no bindings;
+PENDING	-	- No PERMISSION_DENIED checks:
+PENDING	-	the three service accounts were not created.
+# --- index.html
+CAPTURED	live/setup_runtime_tables.out	Runtime tables were created and seeded by the operator, not yet by the Phase A service accounts.
+PENDING	-	IAM on the EntryGroup, the type resources and the runtime tables is the only boundary enforceable today;
+CAPTURED	live/setup_runtime_tables.out	the eleven runtime, legacy and evidence tables plus the context_ref_resolution view from sql/setup_runtime_tables.sql, run once as raincoatrun@gmail.com (project Owner, dataset OWNER), and the seed rows for three publications, three legacy bindings, and two evidence rows.
+PENDING	-	the Phase A service accounts, custom role, table-level grants, boundary probe, negative checks and the okf-context sync CLI itself.
+# --- app.js
+CAPTURED	live/bq_jobs_identity.json	| | bq job id | · user_email on record:
+PENDING	-	| <div class="hist" role="img" aria-label="Event type histogram, rows">
+PENDING	-	| No bindings on okf-rfc-demo;
+PENDING	-	The three service accounts, the custom okfCatalogSearch role, the table-level dataEditor grants, the boundary EntryGroup and the seven negative checks were not created for this capture.
+PENDING	-	--deployment okf-rfc-demo --entry-group okf-rfc-demo --dataset okf_rfc_demo runs as okf-sync-writer-okf-rfc-demo (table-level dataEditor on nine tables, catalogEditor on one EntryGroup) 1.
+CAPTURED	live/setup_runtime_tables.out	| Runtime tables · sql/setup_runtime_tables.sql | seeded · operator, not yet okf-setup
+CAPTURED	live/beat5_serve_stmt4.json	three publications rows (source = seeded_pre_phase_a), three legacy bindings, two demo_evidence rows.
+PENDING	-	| The tape the RFC asks for must show the active gcloud configuration before every identity switch and, after each step, the user_email of the acting service account.
+PENDING	-	| | | IAM contract · spec.md §1.3 · three service accounts, resource-specific grants, seven negative checks · RFC text only | | | | | Principal | | Resource | | Grant | | Status today | |
+CAPTURED	live/bq_jobs_identity.json	no service account created, nothing granted, nothing revoked | every job in bq_jobs_identity.json carries this user_email
+PENDING	-	| bootstrap operator, Phase A (human Owner) | project · dataset okf_rfc_demo · each SA | time-boxed roleAdmin, projectIamAdmin, serviceAccountAdmin, catalogAdmin, aspectTypeOwner, dataset dataOwner;
+PENDING	-	Token Creator per SA;
+PENDING	-	all setup-only roles to be revoked after the tape | not done;
+PENDING	-	no time-boxing, no SA, no binding yet
+PENDING	-	| okf-setup (one-time) | project · dataset | catalogEditor + aspectTypeOwner for type/group creation;
+PENDING	-	then every role must be revoked (checks 6, 7) | not created;
+CAPTURED	live/setup_runtime_tables.out	the operator (not okf-setup) ran the DDL
+PENDING	-	dataEditor per table (no dataset grant, so agent_events is unreachable);
+PENDING	-	custom okfCatalogSearch = {dataplex.projects.search};
+CAPTURED	live/bq_jobs_identity.json	the operator (not okf-runtime-reader) ran the reads
+PENDING	-	| Positive checks 1–3 and negative checks 1–7 (nine PERMISSION_DENIED calls, including the two post-cleanup checks for the retirement of okf-setup) are the Phase A tape.
+PENDING	-	no binding row, no guess
+CAPTURED	live/beat6_attribution.json	| Every attributed row resolves through a legacy binding to a seeded_pre_phase_a publication:
+PENDING	-	The Phase A identities (okf-setup, okf-sync-writer-okf-rfc-demo, okf-runtime-reader) are a follow-up;
+# --- stories.json
+CAPTURED	live/setup_runtime_tables.out	"real after seeding (operator, not yet okf-setup)", "beats":
+# --- matrix.json
+PENDING	-	"context_ref on every tool result, never-emit list enforced, immutable binding to one publication from Phase A on.", "evidence":
+PENDING	-	"immutable binding (no Phase A binding exists yet)" }, { "n":
+CAPTURED	live/catalog_entry_group_iam.json	EntryGroup IAM policy read (no bindings;
