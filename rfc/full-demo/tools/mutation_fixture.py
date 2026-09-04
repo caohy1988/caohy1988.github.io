@@ -98,8 +98,16 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m98 a regex after a control-flow head does not desynchronise the lexer (Codex r18)
   m99 "style = 'display:none'" hides its content whatever the spacing (Codex r18)
   m100 "data-hidden='false'" is a visible element and its claim is read (Codex r18)
+  m101 "The docs must report the operator quit on tape." (Codex r19: invariant irregular past)
+  m102 "… and most record every binding on tape." (Codex r19: quantifier pronoun subject)
+  m103 "holder.if(ready) / '/' / 2" is member access and division, not a regex (Codex r19)
+  m104 a regex after a nested condition ("if ((ready)) /'/") does not desynchronise (Codex r19)
+  m105 "display:none; display:inline" renders, because the last declaration wins (Codex r19)
+  m106 unquoted "style=display:none" hides its element too (Codex r19)
+  m107 a nested same-tag hidden element is removed whole, not up to the inner tag (Codex r19)
+  m108 "title='hidden'" is an attribute value, not the hidden attribute (Codex r19)
 
-Positive controls p1-p33 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
+Positive controls p1-p39 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
 "grants" as a noun, bare-infinitive coordination, the proper noun "Run") and must leave the checker at exit 0.
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
@@ -327,6 +335,12 @@ POSITIVE_CONTROLS = [
     ("p31 object noun phrase ending in a noun ('must record the custom role on tape')", _append("ARCHITECTURE.md", "The operator must record the custom role on tape.")),
     ("p32 'more carefully' before a continuation head", _append("spec.md", "The operator must create the service accounts and more carefully record every binding on tape.")),
     ("p33 'often' between a noun and its governance verb", _append("plan.md", "Project grants often constrain Phase A access to the custom role.")),
+    ("p34 compound noun ending in an invariant irregular ('the Phase A cache hit')", _append("ARCHITECTURE.md", "The operator must record the Phase A cache hit on tape.")),
+    ("p35 'must often record' keeps the modal's reach", _append("spec.md", "The operator must often record every binding on tape.")),
+    ("p36 reduced relative ('grants narrowly constrained by policy')", _append("plan.md", "Project grants narrowly constrained by policy are Phase A requirements.")),
+    ("p37 the same reduced relative under a modal", _append("intent.md", "Future documentation must list project grants narrowly constrained by policy.")),
+    ("p38 an honest literal after a nested-condition regex", _append_js("app.js", "var r19p = function () { if ((ready)) /'/.test(x); };\nvar r19q = 'Every binding is a future requirement.';")),
+    ("p39 a hidden element with nested inline markup is dropped whole", _append_js("app.js", 'var r19r = "<span hidden>The operator <em>created</em> the Phase A service accounts.</span>";')),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -422,6 +436,17 @@ m97 = _append_js("app.js", "var r18a = holder.throw / '/' / 2;\nvar r18b = 'The 
 m98 = _append_js("app.js", "var r18c = function () { if (ready) /'/.test(x); };\nvar r18d = 'The operator created the Phase A service accounts.';")
 m99 = _append_js("app.js", 'var r18e = "<span style = \'display:none\'>not yet</span> The service accounts were created for this capture.";')
 m100 = _append_js("app.js", 'var r18f = "<span data-hidden=\'false\'>The operator created the Phase A service accounts.</span>";')
+
+# Codex r19: an invariant irregular past, a quantifier pronoun subject, a member-access division, a nested control-flow
+# condition, and four readings of what the browser actually renders.
+m101 = _append("ARCHITECTURE.md", "The docs must report the operator quit on tape.")
+m102 = _append("spec.md", "The operator must create the service accounts, and most record every binding on tape.")
+m103 = _append_js("app.js", "var r19a = holder.if(ready) / '/' / 2;\nvar r19b = 'The operator created the Phase A service accounts.';")
+m104 = _append_js("app.js", "var r19c = function () { if ((ready)) /'/.test(x); };\nvar r19d = 'The operator created the Phase A service accounts.';")
+m105 = _append_js("app.js", 'var r19e = "<span style = \'display:none; display:inline\'>The operator created the Phase A service accounts.</span>";')
+m106 = _append_js("app.js", 'var r19f = "<span style=display:none>not yet</span> The service accounts were created for this capture.";')
+m107 = _append_js("app.js", 'var r19g = "<span hidden><span>deferred</span> not yet</span> The service accounts were created for this capture.";')
+m108 = _append_js("app.js", 'var r19h = "<span title=\'hidden\'>The operator created the Phase A service accounts.</span>";')
 
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
@@ -519,7 +544,15 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m97 'holder.throw / \'/\' / 2' is property access and division (Codex r18)", m97),
              ("m98 regex after a control-flow head does not desynchronise (Codex r18)", m98),
              ("m99 'style = \'display:none\'' is hidden, spaces and all (Codex r18)", m99),
-             ("m100 'data-hidden=\'false\'' is visible and its claim is read (Codex r18)", m100)]
+             ("m100 'data-hidden=\'false\'' is visible and its claim is read (Codex r18)", m100),
+             ("m101 'the operator quit on tape' (Codex r19: invariant irregular past)", m101),
+             ("m102 'and most record every binding' opens its own subject (Codex r19)", m102),
+             ("m103 'holder.if(ready) / \'/\' / 2' is member access and division (Codex r19)", m103),
+             ("m104 a regex after a nested condition does not desynchronise (Codex r19)", m104),
+             ("m105 'display:none; display:inline' renders, so its claim is read (Codex r19)", m105),
+             ("m106 unquoted 'style=display:none' still hides its qualifier (Codex r19)", m106),
+             ("m107 a nested same-tag hidden element is removed whole (Codex r19)", m107),
+             ("m108 'title=\'hidden\'' is a visible element, not a hidden one (Codex r19)", m108)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

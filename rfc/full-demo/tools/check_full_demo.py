@@ -467,7 +467,10 @@ IRREGULAR_PAST = {
     "felt", "found", "got", "grew", "held", "kept", "led", "left", "lost", "met", "paid", "put", "read", "said",
     "sold", "sent", "set", "shot", "sat", "slept", "spent", "stood", "taught", "thought", "threw", "understood",
     "wore", "won", "came", "did", "ate", "drew", "flew", "heard", "hit", "let", "lay", "rose", "sang", "sank",
-    "shook", "showed", "shut", "sought", "spread", "struck", "swore", "swept", "took", "woke", "withdrew", "wound",
+    "shook", "showed", "shut", "sought", "spread", "struck", "swore", "swept", "woke", "withdrew", "wound",
+    "quit", "cut", "cost", "hurt", "burst", "cast", "split", "bet", "beat", "bid", "bled", "fled", "fed", "hid",
+    "rode", "ran", "swam", "rang", "drank", "sprang", "sped", "built", "bought", "brought", "caught", "dealt",
+    "dug", "drank", "meant", "sank", "sewed", "shed", "slid", "spun", "stuck", "stung", "swung", "tore", "wove",
 }
 VERB_SHAPED = re.compile(r"(?-i:[a-z]+ed)$|^(?:" + "|".join(PAST_FORMS + PRESENT_FORMS + sorted(IRREGULAR_PAST)) + r")$", re.I)
 
@@ -502,12 +505,42 @@ ADVERB = r"(?-i:[a-z]+ly)|" + "|".join(sorted(DEGREE_ADVERB))
 def _is_adverb(tok, kind):
     return kind == "ADV" or tok.lower() in DEGREE_ADVERB
 
+# A handful of degree words double as pronouns and determiners ("most record every binding", "most bindings"). A degree
+# reading needs a word to modify, so one of these is adverbial only when an adverb or an adjective follows it; standing
+# directly in front of the verb it is the clause's own subject, not a modifier of the verb.
+QUANTIFIER_ADVERB = {"more", "most", "less", "least", "much"}
+ADJECTIVE_SHAPED = re.compile(r"(?-i:[a-z]+(?:ed|ing|ive|al|ous|ary|ic|ful|less|able|ible|ent|ant|ory|ish))$")
+
+def _adverbial(toks, i):
+    """True when toks[i] is an adverb in this position — the context-sensitive test every path uses, so the token
+    grammar, the continuation head and the subject search cannot disagree about one word."""
+    tok, kind = toks[i]
+    if not _is_adverb(tok, kind):
+        return False
+    if tok.lower() in QUANTIFIER_ADVERB:
+        nxt = toks[i + 1] if i + 1 < len(toks) else None
+        return bool(nxt and (_is_adverb(*nxt) or ADJECTIVE_SHAPED.match(nxt[0])))
+    return True
+
 def _subject_index(toks, i):
     """Index of the token governing position i, skipping any run of adverbs ("the operator quietly audited …")."""
     j = i - 1
-    while j >= 0 and _is_adverb(*toks[j]):
+    while j >= 0 and _adverbial(toks, j):
         j -= 1
     return j
+
+def _subject_head_ok(toks, subj_i):
+    """True when toks[subj_i] can HEAD a subject noun phrase rather than modify the word after it. A determiner, a
+    preposition, a coordinator, an adverb, an adjective-shaped word or nothing may stand before a head ("the operator
+    quit", "the experienced operator spoke"). A bare noun or name-part before it means the candidate is itself a
+    modifier and the following word is the phrase's head noun, not a verb ("the Phase A cache hit")."""
+    j = subj_i - 1
+    while j >= 0 and _adverbial(toks, j):
+        j -= 1
+    if j < 0:
+        return True
+    tok, kind = toks[j]
+    return kind != "WORD" or bool(ADJECTIVE_SHAPED.match(tok))
 
 def _subject_before(toks, i):
     j = _subject_index(toks, i)
@@ -524,16 +557,16 @@ def contains_finite_clause(span, tail_subject_verb=False):
         # by morphology (-ed) or by the closed irregular list, so "the custom role" and "the Phase A binding" — whose
         # last word is a noun — are noun phrases, not clauses.
         last_i = len(toks) - 1
-        while last_i >= 0 and _is_adverb(*toks[last_i]):
+        while last_i >= 0 and _adverbial(toks, last_i):
             last_i -= 1                               # a trailing adverb run: "spoke softly", "recorded verbatim"
         if last_i >= 0:
             tok, kind = toks[last_i]
             if kind == "WORD" and tok[:1].islower() and VERB_SHAPED.search(tok):
                 subj_i = _subject_index(toks, last_i)
-                if subj_i >= 0 and toks[subj_i][1] == "WORD":
+                if subj_i >= 0 and toks[subj_i][1] == "WORD" and _subject_head_ok(toks, subj_i):
                     return True
     for i, (tok, kind) in enumerate(toks):
-        if _is_adverb(tok, kind):
+        if _adverbial(toks, i):
             continue
         prev_i = _subject_index(toks, i)
         prev = toks[prev_i] if prev_i >= 0 else None
@@ -547,7 +580,7 @@ def contains_finite_clause(span, tail_subject_verb=False):
             nxt = toks[i + 1] if i + 1 < len(toks) else None
             if nxt and nxt[1] == "DET":
                 return True                           # "… audited THE bindings", "… audit THE service accounts"
-            if nxt is None and VERB_SHAPED.search(tok):
+            if nxt is None and VERB_SHAPED.search(tok) and _subject_head_ok(toks, prev_i):
                 return True                           # "… the operator succeeded" | predicate
             # noun verb noun: "reviewer knew okf-setup", where the third noun is the next clause's subject. The verb
             # must be lowercase, so a name compound ("Phase A project", "the Phase A binding") is not one.
@@ -564,6 +597,15 @@ PREP_BEFORE = re.compile(r"\b(?:" + PREPOSITION + r")\s+$", re.I)
 # ("the project grant to one permission", "the wider grant honestly", "its impersonation grant must be revoked").
 NONOBJECT_AFTER = re.compile(r"^\s+(?:(?:to|" + PREPOSITION + r"|" + MODAL_WORDS + r"|" + AUX_WORDS + r"|" + RELATIONAL + r"|" +
                              "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b)|^\s*[)\],.;:|]", re.I)
+
+# A past participle right after the candidate either takes an object of its own — in which case the candidate before
+# it was the finite verb ("grants narrowly constrained PHASE A ROLES") — or heads a reduced relative / passive that
+# modifies the candidate, in which case the candidate is a noun ("grants narrowly constrained BY POLICY are …",
+# "grant NAMED THE custom role"). An object of its own is a bare noun phrase: no determiner (that reading belongs to
+# the participle's own clause), no preposition, no auxiliary, no further verb.
+PARTICIPLE_AFTER = re.compile(r"^(?:\s+(?:" + ADVERB + r"))*\s+(?-i:[a-z]+ed)\b", re.I)
+ATTRIBUTIVE_OBJECT = re.compile(r"^\s+(?!(?:" + DETERMINER + r"|" + PREPOSITION + r"|to|and|or|not|" + MODAL_WORDS + r"|" +
+                                AUX_WORDS + r"|" + RELATIONAL + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b)[\w'’-]+", re.I)
 
 OBJECT_HEAD_TOKEN = re.compile(r"^\s+(?:" + DETERMINER + r"\b|(?-i:[A-Z][a-z]+)\b|" + PHASE_A_OBJECT.pattern + r")", re.I)
 ADJECTIVE_TOKEN = re.compile(r"^\s+(?!(?:" + PREPOSITION + r"|to|" + MODAL_WORDS + r"|" + AUX_WORDS + r"|" + RELATIONAL + r"|" +
@@ -602,17 +644,17 @@ def reads_as_noun(cl, m):
         return True
     if ADVERB_THEN_END.match(after):
         return True
+    m3 = PARTICIPLE_AFTER.match(after)
+    if m3:
+        return not ATTRIBUTIVE_OBJECT.match(after[m3.end():])
     after_adverbs = re.sub(r"^(?:\s+(?:" + ADVERB + r"))+", "", after, flags=re.I)
     for candidate in (after, after_adverbs):
         m2 = NONOBJECT_AFTER.match(candidate)
         if not m2:
             continue
         follower = candidate[m2.start():m2.end()].strip()
-        # A past participle after the candidate is attributive unless it takes a determiner-headed object of its own:
-        # "grant named THE custom role" is a verb (so "grant" is a noun), while "grants narrowly constrained Phase A
-        # roles" modifies the roles (so "grants" is the verb).
-        if re.fullmatch(r"(?-i:[a-z]+ed)", follower) and not re.match(r"\s*(?:" + DETERMINER + r")\b", candidate[m2.end():], re.I):
-            continue
+        if re.fullmatch(r"(?-i:[a-z]+ed)", follower):
+            continue                                  # handled above, by what the participle itself takes
         return True
     return not has_subject(before)
 
@@ -638,7 +680,7 @@ NEGATION = re.compile(r"\b(not|no|none|nothing|never|cannot|without)\b", re.I)
 # our own participles, coordinators, "to", and adverbs. Anything else is a content word — typically a new subject or an
 # embedded verb — and ends the modal's / status marker's reach over a finite verb.
 LIGHT = re.compile(r"^(?:\W|\b(?:" + AUX_WORDS + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS + AMBIGUOUS_PARTICIPLE) +
-                   r"|and|or|to|not|never|also|already|then|still|now|only|just|even|afterwards|again|always)\b|\b(?-i:[a-z]+ly)\b)*$", re.I)
+                   r"|and|or|to|not|" + "|".join(sorted(DEGREE_ADVERB)) + r")\b|\b(?-i:[a-z]+ly)\b)*$", re.I)
 # Factive complementizers assert the content of the clause they open, so they end a qualifier's reach; whether / if are
 # non-factive and leave the embedded claim unasserted, so they license the binding instead of breaking it.
 FACTIVE_OPENER = re.compile(r"\b(that|which|who|whom|whose|where|how|why|what|when)\b", re.I)
@@ -792,7 +834,7 @@ def _head_candidates(cl, limit=1):
     and is not a continuation, however many words follow."""
     toks = [(t, _kind(t)) for t in TOKEN.findall(cl) if t[0].isalpha()]
     i = 0
-    while i < len(toks) and _is_adverb(*toks[i]):
+    while i < len(toks) and _adverbial(toks, i):
         i += 1
     return [toks[i][0].lower().strip(",.;:()\"'")] if i < len(toks) else []
 
@@ -801,11 +843,13 @@ PAST_SET = {f.lower() for f in PAST_FORMS}
 def continuation_head_end(cl):
     """Offset just past the verb that heads an inherited continuation: a bare lemma ("… and always revoke the role") or,
     under a passive modal frame, a participle ("must be created and granted on tape"). Only adverbials may precede it."""
-    for m in re.finditer(r"[A-Za-z][\w'’-]*", cl):
+    ms = list(re.finditer(r"[A-Za-z][\w'’-]*", cl))
+    toks = [(m.group(0), _kind(m.group(0))) for m in ms]
+    for i, m in enumerate(ms):
         word = m.group(0).lower()
         if word in LEMMAS or word in PAST_SET:
             return m.end()
-        if not _is_adverb(m.group(0), _kind(m.group(0))):
+        if not _adverbial(toks, i):
             return 0
     return 0
 
@@ -862,8 +906,11 @@ def _code_span(inner):
     visible to the scanner; a shell / SQL fragment collapses to one opaque token so it is not parsed as a sentence."""
     return inner if not CLI_SHAPE.search(inner) else "code"
 
+# What may stand immediately before a regular-expression literal. A keyword only counts when it is not a property name
+# ("holder.throw", "holder.if(…)" are member accesses, so the "/" after them is division), and a control-flow condition
+# may nest one level of parentheses ("if ((ready)) /'/.test(x)").
 REGEX_PRECEDER = re.compile(r"(?:^|=>|[(,=:\[!&|?{};+\-*%~^<>]|(?<![.\w])(?:return|throw|typeof|instanceof|in|of|new|delete|void|case|do|else|yield|await)\b"
-                            r"|\b(?:if|for|while|switch|catch)\s*\([^()]*\))\s*$")
+                            r"|(?<![.\w])(?:if|for|while|switch|catch)\s*\((?:[^()]|\([^()]*\))*\))\s*$")
 
 ESCAPES = {"n": " ", "t": " ", "r": " ", "b": "", "f": "", "v": "", "0": "", "\n": ""}
 
@@ -924,7 +971,7 @@ def _js_pieces(src):
             line += body.count("\n")
             i = j
             continue
-        if ch == "/" and REGEX_PRECEDER.search(src[max(0, i - 40):i]):
+        if ch == "/" and REGEX_PRECEDER.search(src[max(0, i - 160):i]):
             i += 1                                    # a regular-expression literal: skip it, class-aware
             in_class = False
             while i < n and (in_class or src[i] != "/"):
@@ -980,16 +1027,58 @@ def extract_js_prose(src):
 BLOCK_TAG = re.compile(r"</?(?:div|p|li|ul|ol|tr|td|th|table|section|article|header|footer|nav|details|summary|pre|blockquote|h[1-6]|br|dl|dt|dd|form|figure)\b[^>]*>", re.I)
 INLINE_TAG = re.compile(r"</?[a-zA-Z][^>]*>")
 
-HIDDEN_ELEMENT = re.compile(
-    r'''<(\w+)[^>]*(?:(?<![\w-])hidden(?![\w-])|(?<![\w-])aria-hidden\s*=\s*["']?true|'''
-    r'''(?<![\w-])style\s*=\s*["'][^"']*display\s*:\s*none)[^>]*>.*?</\1\s*>''',
-    re.I | re.S)
+# What the browser renders. Attributes are read as name / value pairs rather than as loose tokens, so title="hidden"
+# and data-hidden="false" are visible elements; a style hides its element only when the LAST display declaration is
+# none, because that is the one CSS applies; and the element is removed with its nesting balanced, so an inner tag of
+# the same name cannot end the removal early and leave hidden text in the reader's view.
+VOID_TAG = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+OPEN_TAG = re.compile(r"<([A-Za-z][\w-]*)((?:\"[^\"]*\"|'[^']*'|[^>\"'])*)>")
+ATTR = re.compile(r"([A-Za-z_:][-\w:.]*)(?:\s*=\s*(\"[^\"]*\"|'[^']*'|[^\s\"'>=`]+))?")
+
+def _is_hidden(attrs):
+    for m in ATTR.finditer(attrs):
+        name, val = m.group(1).lower(), (m.group(2) or "").strip("\"'")
+        if name == "hidden":
+            return True
+        if name == "aria-hidden" and val.strip().lower() == "true":
+            return True
+        if name == "style":
+            decls = re.findall(r"display\s*:\s*([\w-]+)", val, re.I)
+            if decls and decls[-1].lower() == "none":
+                return True
+    return False
+
+def _drop_hidden(text):
+    out, i = [], 0
+    while True:
+        m = OPEN_TAG.search(text, i)
+        if not m:
+            out.append(text[i:])
+            return "".join(out)
+        out.append(text[i:m.start()])
+        if not _is_hidden(m.group(2)):
+            out.append(m.group(0))
+            i = m.end()
+            continue
+        out.append(" ")
+        if m.group(1).lower() in VOID_TAG or m.group(2).rstrip().endswith("/"):
+            i = m.end()
+            continue
+        edge = re.compile(r"<(/?)" + re.escape(m.group(1)) + r"(?![\w-])[^>]*>", re.I)
+        depth, j = 1, m.end()
+        while depth:
+            c = edge.search(text, j)
+            if not c:
+                return "".join(out)                   # an unclosed hidden element hides the rest of the run too
+            depth += -1 if c.group(1) else 1
+            j = c.end()
+        i = j
 
 def html_runs(text):
     """What the reader sees. Hidden elements are dropped whole, so text the browser never renders can neither make a
     claim nor qualify one; block-level tags separate text runs; inline tags are removed so a phrase the reader sees as
     one ("The service <strong>accounts</strong> were created") stays one clause."""
-    text = HIDDEN_ELEMENT.sub(" ", text)
+    text = _drop_hidden(text)
     text = INLINE_TAG.sub("", BLOCK_TAG.sub(" | ", text))
     return re.sub(r"[ \t]{2,}", " ", text)            # removing an element must not split "service  accounts"
 
@@ -1160,7 +1249,9 @@ NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
        "The docs must report the operator quietly spoke on tape.",                                    # r17 Codex: irregular verb after a reporting head
        "The docs must report the operator spoke softly on tape.",                                     # r18 Kimi: post-verbal adverb, intransitive verb
        "The docs must report the experienced operator quietly spoke on tape.",                        # r18 Codex: adjective in the subject phrase
-       "The operator grants narrowly constrained Phase A roles."]                                     # r18 Codex: attributive participle after an adverb keeps the object
+       "The operator grants narrowly constrained Phase A roles.",                                     # r18 Codex: attributive participle after an adverb keeps the object
+       "The docs must report the operator quit on tape.",                                             # r19 Codex: invariant irregular past
+       "The operator must create the service accounts, and most record every binding on tape."]       # r19 Codex: quantifier pronoun subject
 POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Each call is expected to return PERMISSION_DENIED; none has been run.",
        "The legacy handle was bound to two publications before Phase A.",
@@ -1211,7 +1302,11 @@ POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Project grants narrowly constrain Phase A access to the custom role.",
        "The operator must record the custom role on tape.",
        "The operator must create the service accounts and more carefully record every binding on tape.",
-       "Project grants often constrain Phase A access to the custom role."]
+       "Project grants often constrain Phase A access to the custom role.",
+       "The operator must record the Phase A cache hit on tape.",
+       "The operator must often record every binding on tape.",
+       "Project grants narrowly constrained by policy are Phase A requirements.",
+       "Future documentation must list project grants narrowly constrained by policy."]
 check(all(scan_fixture(t) for t in NEG), "scan flags every negative fixture (active past, perfect, after-verb status/modal, finite claims after coordination, once/then/after resets, block boundaries, bare Phase A, unbound negation, case, identifiers): %s" % [t[:50] for t in NEG if not scan_executed(t)])
 check(not any(scan_fixture(t) for t in POS), "scan accepts preceding modals latched over nonfinite coordination, preceding status markers, bound negations and legacy data facts: %s" % [scan_fixture(t) for t in POS if scan_fixture(t)])
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")
