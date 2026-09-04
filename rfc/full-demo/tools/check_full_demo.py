@@ -600,6 +600,38 @@ def negation_scope_problems(sent, licences):
             return ["a subject negation reaches %r, but the negation does not sit on it" % last.group(0)[:24]]
     return []
 
+# A determiner cannot follow a noun: something has to stand between them, and in English that something is a verb.
+# So `<artefact> … <word> <determiner>` puts <word> in a predicate slot whatever the word is - which is how "The IAM
+# bootstrap preset every binding." is caught without "preset" appearing on any list. The slot excludes the closed
+# classes that are not verbs, a present-tense -s or -ing form (neither asserts completion), and a bare verb under a
+# modal ("must show the active configuration name" is a requirement, not a claim).
+PERFECT_RUN = r"(?:\s+(?i:has|have|had|was|were|is|are|been|being))*"
+PREDICATE_SLOT = r"(?!(?:" + NP_STOP + r")\b)(?!(?i:[a-z]+(?:s|ing))\b)[A-Za-z][\w'’]*"
+TRANSITIVE_VERB = re.compile(BARE_RUN + PP_RUN + PERFECT_RUN + ADVERB_RUN + r"\s+(?<![-\w])(" + PREDICATE_SLOT
+                             + r")\s+(?-i:" + DETERMINER_WORD + r")\b")
+
+def transitive_problems(sent):
+    """A word standing between a deferred artefact and a new determiner-headed noun phrase is a verb taking that
+    phrase as its object. PENDING says nothing here was executed, so it needs a licence frame like any other."""
+    out = []
+    frames = [(m.start(), m.end()) for rx in LICENCE_FRAMES for m in rx.finditer(sent)]
+    for a in DEFERRED_ARTEFACT.finditer(sent):
+        m = TRANSITIVE_VERB.match(sent[a.end():])
+        if not m:
+            continue
+        at, end = a.end() + m.start(1), a.end() + m.end(1)
+        before = re.search(r"([\w'’-]+)\s*$", sent[:at])
+        before = before.group(1).lower() if before else ""
+        if re.fullmatch(DETERMINER_WORD, before, re.I):
+            continue                                  # attributive, not a predicate
+        if any(x <= at and end <= y for x, y in frames):
+            continue
+        if QUALIFIER.search(sent):
+            continue                                  # an unclassified word is only a claim when nothing qualifies it
+        out.append("%r takes an object after %r and nothing in the sentence qualifies it"
+                   % (m.group(1)[:24], a.group(0)[:24]))
+    return out
+
 def postposed_problems(sent):
     """PENDING says nothing here was executed. A verb predicated of a deferred artefact says otherwise unless a
     licence frame covers it."""
@@ -693,29 +725,95 @@ FETCH_CALL = re.compile(r"(?<!function )\bfetch(?:Json|Text)?\s*\(\s*([^()\n{};]
 SIMPLE_ARG = re.compile(r"\s*(?:\"[^\"]*\"|'[^']*'|[A-Za-z_$][\w$]*(?:\[[^\]]*\]|\.[\w$]+)*)\s*$")
 PATHY = re.compile(r"^[\w./-]+\.[A-Za-z0-9]{1,6}$")
 
+def _css_url_token(body, i):
+    """Read the URL a CSS reference points at, from position i: a bare string, or url( … ) around a string or a bare
+    token. Round 28 read `url("extra.css")` as the identifier `url` followed by rubbish, so the file it names was not
+    a dependency; the two forms are one token here."""
+    n = len(body)
+    while i < n and body[i] in " \t\n":
+        i += 1
+    if i >= n:
+        return "", i
+    if body[i] in "\"'":
+        return _css_string(body, i)
+    word, j = _css_ident(body, i)
+    if word.lower() == "url":
+        k = j
+        while k < n and body[k] in " \t\n":
+            k += 1
+        if k < n and body[k] == "(":
+            k += 1
+            while k < n and body[k] in " \t\n":
+                k += 1
+            if k < n and body[k] in "\"'":
+                text, k = _css_string(body, k)
+            else:
+                out = []
+                while k < n and body[k] not in ")\n":
+                    if body[k] == "\\":
+                        text, k = _css_escape(body, k)
+                        out.append(text)
+                        continue
+                    out.append(body[k])
+                    k += 1
+                text = "".join(out).strip()
+            close = body.find(")", k)
+            return text, (close + 1 if close >= 0 else k)
+    rest = re.match(r"[^)\s;]*", body[j:])
+    return word + (rest.group(0) if rest else ""), j + (rest.end() if rest else 0)
+
 def _css_urls(body):
     """@import and url() targets, read through the CSS tokenizer so an escape in the URL decodes the way a browser
-    decodes it: @import "\\65 xtra.css" asks for extra.css."""
-    out, i, n = [], 0, len(body)
+    decodes it and `@import url("x.css")` names the file it actually names."""
+    out, i = [], 0
     body = CSS_COMMENT.sub(" ", body)
     n = len(body)
     while i < n:
-        m = CSS_IMPORT.search(body, i)
-        if not m:
-            break
-        j = m.end()
-        while j < n and body[j] in " \t\n":
-            j += 1
-        if j < n and body[j] in "\"'":
-            text, j = _css_string(body, j)
+        m = re.compile(r"@import\b", re.I).search(body, i)
+        u = re.compile(r"\burl\s*\(", re.I).search(body, i)
+        if m and (not u or m.start() <= u.start()):
+            text, i = _css_url_token(body, m.end())
             out.append(text)
-        elif j < n:
-            token, j2 = _css_ident(body, j)           # url(extra.css) with no quotes, escapes decoded
-            rest = re.match(r"[^)\s;]*", body[j2:])
-            out.append(token + (rest.group(0) if rest else ""))
-            j = j2
-        i = max(j, m.end())
-    return out
+            continue
+        if u:
+            text, i = _css_url_token(body, u.start())
+            out.append(text)
+            continue
+        break
+    return [t for t in out if t]
+
+# ---- literal provenance for a fetch argument (Codex round 28) -----------------------------------------------------
+# A URL is a dependency only if this reader can say what it is. An argument is accepted when it is a string literal,
+# or an identifier this file binds to exactly one string literal, or a member of a map whose values are all string
+# literals. Anything else - a concatenation, a computed name, an identifier bound to an expression - is an error, so
+# `var hiddenPath = "extra" + ".json"; fetchJson(hiddenPath)` cannot be a dependency nobody noticed.
+JS_STRING = r"(?:\"[^\"\n]*\"|'[^'\n]*')"
+JS_LITERAL_BINDING = re.compile(r"\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=\s*(" + JS_STRING + r")\s*[;,\n]")
+JS_ANY_BINDING = re.compile(r"\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=")
+JS_MAP_BINDING = re.compile(r"\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=\s*\{")
+JS_PARAMS = re.compile(r"\bfunction\s*[A-Za-z_$][\w$]*?\s*\(([^)]*)\)|\(([^)]*)\)\s*=>")
+
+def _js_symbols(body, masked):
+    """(single-literal bindings, map name -> its literal values, names bound to something else, parameter names)."""
+    literals = {m.group(1): m.group(2)[1:-1] for m in JS_LITERAL_BINDING.finditer(body)}
+    maps, impure = {}, set()
+    for m in JS_MAP_BINDING.finditer(body):
+        depth, i, n = 1, m.end(), len(body)
+        while i < n and depth:
+            depth += (body[i] == "{") - (body[i] == "}")
+            i += 1
+        block = body[m.end():i - 1]
+        values = re.findall(r":\s*(" + JS_STRING + r")", block)
+        others = re.findall(r":\s*(?!" + JS_STRING + r")\S", block)
+        maps[m.group(1)] = [v[1:-1] for v in values]
+        if others:
+            impure.add(m.group(1))
+    bound = {m.group(1) for m in JS_ANY_BINDING.finditer(body)}
+    params = set()
+    for m in JS_PARAMS.finditer(masked):
+        for group in m.groups():
+            params |= {p.strip() for p in (group or "").split(",") if p.strip()}
+    return literals, maps, impure, bound, params
 
 def _refs(rel):
     """Every URL a source file asks the browser for, decoded the way the browser decodes it, plus the base the page
@@ -729,9 +827,25 @@ def _refs(rel):
         for _, _, _, start, end in _js_pieces(body):
             code[start:end] = " " * (end - start)
         code = "".join(code)
-        bad = [a.strip() for m in FETCH_CALL.finditer(code) for a in [m.group(1)] if not SIMPLE_ARG.fullmatch(a)]
-        lits = [t for _, kind, t, _, _ in _js_pieces(body) if kind == "lit" and PATHY.match(t.strip())]
-        return lits, "", ["%s builds a URL this reader cannot evaluate: fetch(%s)" % (rel, b[:60]) for b in bad]
+        literals, maps, impure, bound, params = _js_symbols(body, code)
+        refs = [t for _, kind, t, _, _ in _js_pieces(body) if kind == "lit" and PATHY.match(t.strip())]
+        bad = []
+        for m in FETCH_CALL.finditer(code):
+            arg = m.group(1).strip()
+            if re.fullmatch(JS_STRING, arg):
+                refs.append(arg[1:-1])
+                continue
+            head = re.match(r"([A-Za-z_$][\w$]*)\s*(?:\[[^\]]*\]|\.[\w$]+)?\s*$", arg)
+            name = head.group(1) if head else None
+            if name and name in literals:
+                refs.append(literals[name])
+            elif name and name in maps and name not in impure:
+                refs += maps[name]
+            elif name and name not in bound and name in params:
+                continue                              # the wrapper's own parameter; its call sites are checked here
+            else:
+                bad.append("%s asks for a URL this reader cannot resolve to a literal: fetch(%s)" % (rel, arg[:60]))
+        return refs, "", bad
     if rel.endswith(".css"):
         return _css_urls(body), "", []
     if rel.endswith((".html", ".htm")):
@@ -876,33 +990,71 @@ def css_content_values(src):
                                     continue
                                 depth += (src[k4] == "(") - (src[k4] == ")")
                                 k4 += 1
-                            if word.lower() not in ("counter", "counters"):
+                            # counter(name) prints decimal digits; counter(name, style) prints whatever a custom
+                            # counter style says, which this reader cannot compute.
+                            if word.lower() in ("counter", "counters") and "," in src[k3 + 1:k4 - 1]:
+                                problems.append("content uses %s() with a custom style, whose symbols this reader "
+                                                "cannot compute" % word)
+                            elif word.lower() not in ("counter", "counters"):
                                 problems.append("content uses %s(), whose text this reader cannot compute; write the "
                                                 "words in the stylesheet or render them from app.js" % word)
                             k = k4
                             continue
+                        # open-quote / close-quote paint a `quotes:` string, and every stylesheet string is audited
+                        # above, so the words they paint are on record wherever they were written.
                         if word.lower() not in ("normal", "none", "inherit", "initial", "unset", "revert",
                                                 "open-quote", "close-quote", "no-open-quote", "no-close-quote"):
                             problems.append("content uses the keyword %r, which this reader cannot resolve to text" % word)
                         k = k2
                         continue
                     k += 1
-                yield "".join(pieces).strip(), problems
+                yield "".join(pieces).strip(), problems, j, k
                 i = k
                 continue
             i = j
             continue
         i += 1
 
+def css_strings(src, consumed=()):
+    """Every string literal a stylesheet carries, decoded in token context. Round 28 read only `content` values, so a
+    string that reaches the screen by another route - `quotes:` painted by open-quote, an @counter-style `symbols`,
+    a `counters()` separator - was copy nobody audited. A stylesheet string is audited wherever it sits: which
+    declaration paints it is the browser's business, not something this reader has to model."""
+    out, i = [], 0
+    src = CSS_COMMENT.sub(" ", src)
+    n = len(src)
+    while i < n:
+        if src[i] in "\"'":
+            start = i
+            text, i = _css_string(src, i)
+            # A string inside a `content` declaration is painted as part of that declaration's assembled value, not
+            # on its own, so it is audited there rather than twice and in pieces.
+            if not any(a <= start and i <= b for a, b in consumed):
+                out.append(text)
+            continue
+        i += 1
+    return out
+
 def extract_css_prose(src):
-    """The only parts of a stylesheet a reader can see: the value each `content` declaration paints, and comments."""
+    """What a stylesheet can put on the screen: its comments, the value each `content` declaration paints, and every
+    string it carries."""
     out = [m.group(1).replace("\n", " ").strip() for m in re.finditer(r"/\*(.*?)\*/", src, re.S)]
-    out += [value for value, _ in css_content_values(src)]
-    return "\n".join("| " + t.replace("\n", " ") for t in out if t)
+    consumed = []
+    for value, _, start, end in css_content_values(src):
+        out.append(value)
+        consumed.append((start, end))
+    out += css_strings(src, consumed)
+    seen, unique = set(), []
+    for t in out:
+        t = t.replace("\n", " ").strip()
+        if t and t not in seen:
+            seen.add(t)
+            unique.append(t)
+    return "\n".join("| " + t for t in unique)
 
 def css_content_problems(src):
     """Content expressions this reader cannot compute exactly. They are errors, not sentences to audit."""
-    return [p for _, problems in css_content_values(src) for p in problems]
+    return [p for _, problems, _, _ in css_content_values(src) for p in problems]
 BLOCK_START = re.compile(r"^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s?|\|)")
 
 def md_blocks(text):
@@ -1449,6 +1601,7 @@ for (fname, sent), (verdict, evidence, licences, i) in sorted(register.items(), 
             bad.append("INV-4 %s: a PENDING row cites evidence" % where)
         bad += ["INV-4 %s: %s" % (where, m) for m in licence_problems(sent, licences)]
         bad += ["INV-4 %s: %s" % (where, m) for m in postposed_problems(sent)]
+        bad += ["INV-4 %s: %s" % (where, m) for m in transitive_problems(sent)]
         bad += ["INV-4 %s: %s" % (where, m) for m in negation_scope_problems(sent, licences)]
 check(not bad, "every register row is bound to its claim (licence spans open with a qualifier and cover every completion token; CAPTURED evidence resolves inside live//sql/ and disclaims what it names):\n      " + "\n      ".join(bad[:12]) + ("\n      (+%d more)" % (len(bad) - 12) if len(bad) > 12 else ""))
 
@@ -1574,8 +1727,14 @@ check(any("service accounts were created" in t for t in regulated_in(extract_css
       "a stylesheet that prints prose is copy, semicolons and all: generated content reaches the gate")
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { content/**/: "The Phase A service accounts were created."; }'))),
       "a comment between the property and its colon is removed the way a browser removes it")
-check(css_content_problems('body::after { content: attr(data-target); }') and css_content_problems('body::after { content: var(--claim); }'),
+check(css_content_problems('body::after { content: attr(data-target); }') and css_content_problems('body::after { content: var(--claim); }')
+      and css_content_problems('.q li::before { content: counter(q, my-style); }') and not css_content_problems('.q li::before { content: counter(q); }'),
       "generated content whose text depends on the document or the cascade is an error, not a sentence to audit")
+check(any("service accounts were created" in t for t in regulated_in(extract_css_prose(
+          'body { quotes: "The Phase A service accounts were created." ""; } body::before { content: open-quote; }'))),
+      "every string a stylesheet carries is copy, whichever declaration paints it")
+check(_css_urls('@import url("extra.css");') == ["extra.css"] and _css_urls('@import "\\65 xtra.css";') == ["extra.css"],
+      "@import names the file it names, through url() and through an escape")
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { co\\6e tent: "The Phase A service accounts were created."; }'))),
       "a CSS identifier escape spells the same property: co\\6e tent is content")
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { content: "The Phase A service " "accounts were created."; }'))),
@@ -1586,6 +1745,10 @@ check(any("service accounts were created" in t for t in regulated_in(extract_css
       "a CSS line continuation vanishes the way a browser drops it, so the claim stays one run")
 check(any("service accounts were created" in t for t in regulated_in(html_runs('<input type="button" value="The Phase A service accounts were created.">'))),
       "copy a browser shows from an attribute - a button label, an alt text, a tooltip - is audited like element text")
+check(transitive_problems("The IAM bootstrap preset every binding.")
+      and not transitive_problems("The IAM bootstrap must preset every binding.")
+      and not transitive_problems("The Phase A tape must show the active configuration name."),
+      "a word between a deferred artefact and a determiner-headed object is a predicate, whatever the word is")
 check(all(postposed_problems(t) and distance_problems(t) and anchor_problems(t, ["live/bq_jobs_identity.json"])
           for t in ("The IAM bootstrap SUCCEEDED.", "The IAM bootstrap effort succeeded.", "The IAM bootstrap succeeded.",
                     "The IAM bootstrap has succeeded.", "The IAM bootstrap in staging succeeded.",

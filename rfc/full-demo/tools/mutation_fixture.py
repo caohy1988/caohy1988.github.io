@@ -358,6 +358,17 @@ def _nested_pinned_capture(d):
     _pin(d, rel)
 
 
+def _map_literal_capture(d):
+    """A dependency reached through a map whose values are all string literals: the reader can name the file, so it
+    can require the pin."""
+    rel = "live/beat7_new_capture.json"
+    (d / rel).write_text('[{"note": "not yet run"}]\n', "utf-8")
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace('matrix: "matrix.json"', 'extra: "' + rel + '", matrix: "matrix.json"', 1)
+                 .replace("  var TOTAL = 6;", "  var TOTAL = 6;\n  fetchJson(FILES.extra);", 1), "utf-8")
+    _pin(d, rel)
+
+
 def _unwired_pinned_capture(d):
     """A capture may land under live/ before a pane uses it - but it is pinned from the moment it lands."""
     rel = "live/beat7_new_capture.json"
@@ -506,6 +517,9 @@ POSITIVE_CONTROLS = [
     ("p62 a long noun phrase under a modal (Codex r26)", _append_audited("intent.md", "The IAM bootstrap extensive production migration preparation effort must still be recorded on tape.")),
     ("p63 two prepositional phrases under a modal (r27)", _append_audited("plan.md", "The IAM bootstrap in staging after review must still be recorded on tape.")),
     ("p64 a negation distributed over a coordination (r27)", _append_audited("README.md", "No BQ_COMMITTED or CATALOG_STAMPED is shown for this capture.")),
+    ("p65 an audited stylesheet string (Codex r28)", _append_audited_css("styles.css", 'body { quotes: "Phase A must still be recorded on tape." ""; }')),
+    ("p66 a capture reached through a map of literals (Codex r28)", _map_literal_capture),
+    ("p67 an unclassified verb under a modal (Codex r28)", _append_audited("spec.md", "The IAM bootstrap must preset every binding on tape.")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -960,6 +974,33 @@ def m182(d):
     _register_claim(d, "PENDING", "-", sent[:-1], sent)
 
 
+# Codex r28. A fetch argument must resolve to a literal this reader can name (m183); @import url() names a file
+# (m184); every string a stylesheet carries is copy, whichever declaration paints it (m185-m186); and a word between
+# an artefact and a determiner-headed object is a predicate whatever the word is (m187).
+def m183(d):
+    """A URL assembled at run time is a URL this reader cannot resolve, and that is an error."""
+    (d / "extra.json").write_text('[{"note": "The Phase A service accounts were created."}]\n', "utf-8")
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace(
+        "  var TOTAL = 6;",
+        '  var TOTAL = 6;\n  var hiddenPath = "extra" + ".json";\n  fetchJson(hiddenPath);', 1), "utf-8")
+
+
+def m184(d):
+    _alternate_stylesheet(d)
+    p = d / "styles.css"
+    p.write_text('@import url("extra.css");\n' + p.read_text("utf-8"), "utf-8")
+
+
+m185 = _append("styles.css", 'body { quotes: "The Phase A service accounts were created." ""; }\nbody::before { content: open-quote; }')
+m186 = _append("styles.css", '@counter-style claim { system: cyclic; symbols: "The Phase A service accounts were created."; }\n'
+                             '.qlist li::before { content: counter(q, claim); }')
+
+
+def m187(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap preset every binding.")
+
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -1138,7 +1179,12 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m179 content: attr() likewise - it reads the matched element (Codex r26)", m179),
              ("m180 'The IAM bootstrap became operational.' takes no verdict (r27)", m180),
              ("m181 two prepositional phrases do not hide the verb (r27)", m181),
-             ("m182 a negation on one artefact does not disclaim another (r27)", m182)]
+             ("m182 a negation on one artefact does not disclaim another (r27)", m182),
+             ("m183 INV-6: a URL assembled at run time cannot be resolved (Codex r28)", m183),
+             ("m184 INV-6: @import url() names a file (Codex r28)", m184),
+             ("m185 a quotes: string is painted copy (Codex r28)", m185),
+             ("m186 a custom counter style paints symbols this reader cannot compute (Codex r28)", m186),
+             ("m187 'The IAM bootstrap preset every binding.' takes no verdict (Codex r28)", m187)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

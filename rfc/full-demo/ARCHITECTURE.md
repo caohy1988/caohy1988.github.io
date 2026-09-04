@@ -81,8 +81,8 @@ Cloud Run Job on Cloud Scheduler polling the EntryGroup `updateTime` (production
 - BigQuery cannot read Catalog entries or custom aspects (no connector, no INFORMATION_SCHEMA view).
 - Dataplex cannot materialize an EntryGroup into a dataset and does not own the profile's hashing
   rules, republish semantics, or `deployment_heads`.
-- No cross-service transaction exists, so explicit `BQ_COMMITTED` / `CATALOG_STAMPED` states are
-  required either way; a managed job would still expose them.
+- No cross-service transaction exists, so explicit `BQ_COMMITTED` / `CATALOG_STAMPED` states remain
+  a requirement either way; a managed job would still expose them.
 - A managed version would be: the same CLI packaged as a Dataplex-triggered job, with the
   `okf-context-runtime` aspect template owned by the service, and the ledger held in a
   service-managed dataset. If Dataplex metadata export jobs cover custom aspects, the read leg of a
