@@ -38,6 +38,14 @@
   var EVID_LABELS = { adapter_tape_pr474_476d37dc: ["recorded", "recorded · adapter CLI tape, PR 474"], legacy_catalog_description: ["prior", "prior · okf-derived-germany, no aspect"] };
   function evidLabel(v) { var l = EVID_LABELS[v]; return l ? src(l[0], l[1]) : src("stub", "unlabelled source"); }
   var TRAPS = { 1: "trap · over-claiming trust", 4: "static pack cannot answer · history", 6: "trap · the dead metric", 10: "static pack cannot answer · roll-up", 11: "what would make it attested", 12: "the dead metric, named" };
+  var SHOW = [
+    { time: "45 sec", say: "Finance is asking for permission to act on a number. A successful lookup is not enough to give that permission.", look: "Read the customer question and the two captured answers. Leave the twelve-question transcript for Q&A.", evidence: "The 12 questions, full answers, and session checks" },
+    { time: "45 sec", say: "The agent already paid the cost of finding context. BigQuery holds the evidence we can use to make that work reusable.", look: "Point to the event and tool counts. These are observations, not proof that the revenue is correct.", evidence: "Event histogram, payload scan, and all tool completions" },
+    { time: "60 sec", say: "Catalog helps us find the right concept. A lookup success must not become a computation verdict.", look: "Point to “0 per-run computation verdicts”. The visible note distinguishes static declarations from beat 5’s stubbed receipt.", evidence: "Catalog responses, both system prompts, and EntryGroup IAM" },
+    { time: "45 sec", say: "The proposed bridge publishes the bundle to BigQuery first, then stamps Catalog so discovery points to that publication.", look: "Read the proposed direction once. The operator captures below show setup and Catalog push. Sync has not run.", evidence: "Proposed sync algorithm, operator captures, and IAM contract" },
+    { time: "75 sec", say: "An honest unproven is useful. The runtime contract should tie the answer to a publication and a receipt, and refuse to guess.", look: "Point to UNVERIFIABLE, then the resolution results. The empty head is the gap the next implementation must close.", evidence: "Serve queries, empty heads, stub receipt, and lifecycle evidence" },
+    { time: "90 sec", say: "Now we can ask which context a run used. The next step is to prove one governed Germany deployment end to end.", look: "Read the two attribution bands separately. Close on trust you can defend, one pinned answer, and IAM you can explain.", evidence: "Two-key attribution SQL, publication sources, and non-event evidence" }
+  ];
 
   var stage = document.getElementById("stage");
   var btnBack = document.getElementById("btn-back");
@@ -82,8 +90,46 @@
   function check(ok, html) { return '<li class="' + (ok ? "ok" : "no") + '"><span class="ic">' + (ok ? "✓" : "✕") + "</span><span>" + html + "</span></li>"; }
   function info(html) { return '<li class="info"><span class="ic">i</span><span>' + html + "</span></li>"; }
   function beatHead(n, tone, name, headline, lede) {
+    var note = SHOW[n - 1];
     return '<div class="beat-head"><span class="beat-num ' + tone + '">' + n + '</span><span class="beat-kicker">Beat ' + n + " of " + TOTAL + " · " + esc(name) + "</span></div>" +
-      '<h2 class="beat-headline">' + headline + "</h2>" + '<p class="beat-lede">' + lede + "</p>";
+      '<h2 class="beat-headline">' + headline + "</h2>" + '<p class="beat-lede">' + lede + "</p>" +
+      '<aside class="show-note" aria-label="Presenter show note"><p class="show-note-label">Show note · ' + esc(note.time) + '</p><p class="show-say">“' + esc(note.say) + '”</p><p class="show-look"><b>Show:</b> ' + esc(note.look) + "</p></aside>";
+  }
+  function evidenceOpen(n) { return '<details class="beat-evidence nn"><summary>Evidence · ' + esc(SHOW[n - 1].evidence) + '</summary><div class="nn-b">'; }
+  function showProof(n) {
+    if (n === 1) {
+      return '<p class="show-question">“' + esc(D.F.inv[0].question) + '” <span class="cite">' + fileLink("live/session_f21ee192.json", "session f21ee192") + '</span></p><div class="grid2">' +
+        pane("", "Catalog-shaped lookup", src("live", "live trace · LOCAL tool"), '<div class="quote">' + esc(D.overclaim.answer) + '</div>' + fileLink("live/session_04fa3d56.json", "session 04fa3d56") + caption("No computation and no verdict field.")) +
+        pane("", "Verdict-carrying tool", src("live", "live trace") + " " + src("stub", "stubbed attester · no-execution"), '<div class="quote good">' + esc(VERBATIM) + '</div>' + fileLink("live/session_f21ee192.json", "session f21ee192") + caption(D.unproven + " of " + D.F.inv.length + " final answers say “unproven”; one contains this exact sentence.")) +
+        '</div><p class="honest">Both paths use local tools with different prompts and questions. This is an illustration of contracts, not a controlled comparison of runtimes.</p>';
+    }
+    if (n === 2) {
+      return '<div class="show-stats"><p><b>' + D.F.count + '</b>captured events</p><p><b>' + D.F.toolRows.length + '</b>tool completions in this session</p><p><b>' + D.scanHits + '</b>hits for the eight never-emit keys</p></div>' +
+        caption(src("live", "live GCP captures") + ' ' + fileLink("live/session_f21ee192.json", "session f21ee192") + ' · ' + fileLink("live/never_emit_scan.json", "payload scan")) +
+        '<p class="honest">The scan covers ' + D.scanned + ' tool payloads across four sessions. Zero hits is scoped to these eight keys and these captures. BQAA is observer-only; the receipt tool is ' + src("stub", "stubbed · no-execution") + '.</p>';
+    }
+    if (n === 3) {
+      return '<div class="show-stats"><p><b>' + D.shipped.length + '</b>shipped OKF entries</p><p><b>' + D.aspectFields.length + '</b>fields in the OKF aspect template</p><p><b>' + D.aspectFields.filter(function (k) { return k === "verdict"; }).length + '</b>per-run computation verdicts</p></div>' +
+        caption(src("live", "live GCP captures") + ' ' + fileLink("live/catalog_aspect_type_okf.json", "aspect template") + ' · ' + fileLink("live/lookup_context_shipped_metric.json", "lookup response") + ' · ' + fileLink("live/catalog_entry_group_iam.json", "EntryGroup IAM")) +
+        '<p class="honest"><code>verified</code>, <code>executor</code>, and <code>attester</code> are static concept declarations, not the outcome of a specific run. <a href="#beat=5" data-goto="5">Beat 5’s stubbed receipt</a> reports <code>UNVERIFIABLE</code> for the observed invocation, with no execution. The local agent transcript and shipped Catalog captures are separate evidence. Deployment-scoped runtime IAM remains ' + src("rfc", "RFC text only") + '.</p>';
+    }
+    if (n === 4) {
+      return '<div class="show-flow"><span>Derived OKF bundle</span><span aria-hidden="true">→</span><span>BigQuery publication</span><span aria-hidden="true">→</span><span>Catalog stamp</span></div>' +
+        '<p class="caption">' + src("rfc", "RFC text only · proposed external CLI") + ' The syncer is not built; Phase A has not run.</p>' +
+        '<p class="honest">On record: ' + src("recorded", "recorded · SDK adapter") + ' the observation → snapshot → publication identity chain; ' + src("live", "live · operator") + ' Catalog push; ' + src("seeded", "seeded · operator") + ' runtime rows. These are inputs to the proposed bridge.</p>' +
+        caption(fileLink("live/catalog_push_transcript.txt", "adapter and Catalog push transcript") + ' · ' + fileLink("live/bq_jobs_identity.json", "BigQuery job identities"));
+    }
+    if (n === 5) {
+      var receipt = D.F.receipts[0].result.okf;
+      return '<div class="show-verdict"><p class="vp-k">The receipt the agent actually saw</p><strong>' + esc(receipt.verdict) + '</strong><p>' + esc(receipt.verdict_reason) + '</p>' + src("live", "live trace · LOCAL tool") + ' ' + src("stub", "stubbed attester · no-execution") + '</div>' +
+        table([{ key: "context_ref", render: refCell }, { key: "resolution", render: resCell }], D.resol) +
+        caption(src("live", "live queries over seeded bindings") + ' ' + fileLink("live/beat5_serve_stmt3.json", "resolution results") + ' · ' + fileLink("live/session_f21ee192.json", "receipt trace")) +
+        '<p class="honest"><code>deployment_heads</code>: ' + D.heads.length + ' rows. The demo pin is in-process; pinning to a head and rejecting a stale pin remain ' + src("rfc", "RFC text only") + '. No revenue computation ran in this trace.</p>';
+    }
+    return '<div class="show-stats two"><p><b>' + D.attrSum.attributed + '</b>attributed tool events</p><p><b>' + D.attrSum.receipt_only + '</b>receipt-only tool events</p></div>' +
+      caption(src("live", "live query") + ' ' + src("seeded", "seeded publications · legacy bindings") + ' ' + fileLink("live/beat6_attribution.json", "attribution result") + ' · ' + fileLink("sql/attribution_two_key.sql", "two-key SQL")) +
+      '<p class="honest">The attributed events match on both context reference and publication id. Receipt-only events carry no publication id; they are not proof of publication use.</p>' +
+      '<p class="show-close"><b>Prove one governed Germany deployment.</b> The next demonstration should connect a pinned publication, a computation receipt, access checks, and attribution. Optional Graph retrieval of the OKF chain remains ' + src("rfc", "RFC text only") + '.</p>';
   }
   function must(html) { return '<p class="must"><b>must prove</b> <span>' + html + "</span></p>"; }
   function caption(html) { return '<p class="caption">' + html + "</p>"; }
@@ -227,8 +273,9 @@
       var t = TRAPS[v.n];
       return '<li class="' + (t ? "trap" : "") + '">' + esc(v.question) + (t ? '<span class="tag">' + esc(t) + "</span>" : "") + "</li>";
     }).join("");
-    return beatHead(1, "telemetry", "Ask", "A finance agent is asked: “" + esc(F.inv[0] ? F.inv[0].question : "") + "” — and then eleven more.",
-      "Twelve real questions from one multi-turn ADK session, read from <code>USER_MESSAGE_RECEIVED</code> rows. Two traps run through them: the dead metric <b>" + esc(ex.title) + "</b> (" + esc(ex.reason) + ") is still on the shelf, and nothing has run as a sanctioned computation, so any confident number is an over-claim. A second, one-question session shows what the over-claim sounds like.") +
+    return beatHead(1, "telemetry", "Ask", "The customer needs a number they can act on.",
+      "The Germany revenue question exposes two risks: an obsolete metric and confidence without a computation.") +
+      showProof(1) + evidenceOpen(1) +
       must("nothing is fictional · 12 questions = 12 <code>USER_MESSAGE_RECEIVED</code> rows in session <code>" + esc(shortId(S_OBS)) + "</code> · the ask is hard-path context → derived OKF, not HITL, not sentiment, not BQAA-as-truth") +
       '<div class="src-legend">Labels on this page: ' + src("live", "live GCP") + src("seeded", "seeded by operator") + src("recorded", "recorded run") + src("prior", "prior experiment") + src("stub", "stubbed") + src("rfc", "RFC text only") + "</div>" +
       '<div class="pane ask-what"><div class="pane-h"><span class="t">What this demo is asking</span><span class="m">lock from the four-beat demo · unchanged</span></div><div class="pane-b">' +
@@ -246,14 +293,14 @@
         caption("No computation ran. No verdict existed. The word “verified” was produced from an <code>ok: true</code>. Beat 3 shows the system prompt and the tool result behind it."), "") +
       pane("", '<span class="sw" style="background:var(--ok)"></span>What a good answer did · one verbatim example', src("live", "live · session " + shortId(S_OBS)),
         '<div class="quote good">' + esc((F.inv.filter(function (v) { return v.answer.indexOf(VERBATIM) >= 0; })[0] || { answer: "" }).answer.split("\n").filter(function (l) { return l.indexOf(VERBATIM) >= 0; })[0] || "(no verbatim sentence found in the captured answers)") + '<span class="cite">' + esc(F.agent) + " · " + esc(S_OBS) + " · invocation 1 of " + F.inv.length + " · receipt <code>UNVERIFIABLE</code></span></div>" +
-        caption("Two counts, kept apart: <b>" + D.unproven + " of " + F.inv.length + "</b> final answers in this session contain the word “unproven”, because the receipt tool returned a <code>verdict</code> the prompt had to report; <b>" + D.verbatim + " of " + F.inv.length + "</b> uses the exact four-word sentence quoted above. Beat 5 shows the receipt."), "") +
+        caption("Two counts, kept apart: <b>" + D.unproven + " of " + F.inv.length + "</b> final answers in this session contain the word “unproven”, because the receipt tool returned a <code>verdict</code> the prompt had to report; <b>" + D.verbatim + " of " + F.inv.length + "</b> uses the exact sentence quoted above. Beat 5 shows the receipt."), "") +
       "</div>" +
       '<ul class="checklist">' +
       check(F.inv.length === 12 && F.hist.USER_MESSAGE_RECEIVED === 12, "12 invocations, 12 <code>USER_MESSAGE_RECEIVED</code> rows, one session; the list above is read from the rows, not typed") +
       check(F.sessionOk && F.sessionId === S_OBS, "Every one of the " + F.count + " rows carries <code>session_id = " + esc(S_OBS) + "</code>") +
       check(!!D.overclaim && /verified/.test(D.overclaim.answer), "The over-claim quote is the <code>AGENT_RESPONSE</code> row of session <code>" + esc(shortId(S_CON)) + "</code>, verbatim") +
       info("Rows were pulled by <code>session_id</code> with explicit job ids; see “How this was built”. No agent was re-run for this page.") +
-      "</ul>";
+      "</ul>" + "</div></details>";
   }
 
   // ---- beat 2: observe ------------------------------------------------------------
@@ -273,8 +320,9 @@
       return '<li class="ev"><button type="button" aria-expanded="false" data-ev="t' + v.n + '"><span class="ts">' + esc(tsLive(v.t0).slice(11)) + '</span><span class="ty tool">TOOL_COMPLETED ×' + v.tools.length + '</span><span class="sm">' + v.tools.map(function (t) { return esc(t.tool); }).join(" → ") + ' · <span class="ref">' + esc(v.retrieve && v.retrieve.result.context_ref || "") + "</span></span><span class=\"car\">▸</span></button>" +
         '<div class="raw" hidden>' + pre(v.tools, ["context_ref", "publication_id", "verdict", "verdict_reason"]) + "</div></li>";
     }).join("");
-    return beatHead(2, "source", "Observe", "One SQL query. 180 events, 24 tool calls, a <code>context_ref</code> on every result, and 0 hits on the never-emit list.",
-      "BigQuery Agent Analytics wrote every event of the twelve-question session into <code>" + esc(TABLE) + "</code>. This beat is a read of that table: the histogram, the twenty-four tool completions, and a live scan of all 27 <code>TOOL_COMPLETED</code> payloads across the four sessions for the eight things an agent-facing payload must never carry.") +
+    return beatHead(2, "source", "Observe", "The evidence is already in BigQuery.",
+      "The captured conversation gives us questions, context references, and receipts to inspect and reuse.") +
+      showProof(2) + evidenceOpen(2) +
       must("observer-only · telemetry is not the bundle · every tool result carries <code>context_ref</code> and none carries <code>concept_version_id</code>, paths, principal, SQL or parameter values") +
       '<div class="cols">' +
       pane("", '<span class="sw" style="background:var(--source)"></span>' + esc(TABLE) + " · session " + esc(shortId(S_OBS)), src("live", "live · " + F.count + " rows"),
@@ -296,7 +344,7 @@
         (rc ? pre(rc.result, ["verdict", "verdict_reason", "receipt_id", "parameter_schema"]) : '<div class="empty">no receipt</div>') +
         caption("<code>verdict: UNVERIFIABLE</code>, reason <code>no-execution</code>. The declared <code>parameter_schema</code> is the contract an executor would bind; no values were ever observed."), "runtime") +
       "</div>" +
-      '<details class="nn"><summary>All 24 tool completions · 12 invocations · click to expand each pair</summary><div class="nn-b"><ul class="events">' + toolList + "</ul></div></details>";
+      '<details class="nn"><summary>All 24 tool completions · 12 invocations · click to expand each pair</summary><div class="nn-b"><ul class="events">' + toolList + "</ul></div></details>" + "</div></details>";
   }
 
   // ---- beat 3: catalog path ---------------------------------------------------------
@@ -311,8 +359,9 @@
     var markVerified = function (s) { return esc(s).replace(/(You can trust the number because it is verified)/, "<mark>$1</mark>"); };
     var searchDep = (D.searchDep.results || []).map(function (r) { return r.dataplexEntry.entrySource.displayName; });
     var searchType = (D.searchType.results || []).map(function (r) { return r.dataplexEntry.entrySource.displayName; });
-    return beatHead(3, "catalog", "Catalog path: where it stops", "Discovery works and can show the signal layer. It cannot carry a verdict, compare a pin to a head, or follow links.",
-      "The shipped sample (<code>setup.ts</code> + <code>push.ts</code> from <code>GoogleCloudPlatform/knowledge-catalog</code>) was run as the operator against the derived bundle the SDK adapter regenerated from the committed export. Eight <code>okf-bundle</code> entries now exist with the real 13-field <code>okf</code> aspect. Three panes: what <code>entries.get --view=ALL</code> returns, what <code>lookupContext</code> returns for the same entry, and the transcript of the agent that read a Catalog-shaped lookup and said “verified”.") +
+    return beatHead(3, "catalog", "Catalog path: where it stops", "Found does not mean verified.",
+      "The shipped Catalog mapping makes OKF discoverable. Its 13-field template has no per-run computation verdict.") +
+      showProof(3) + evidenceOpen(3) +
       must("shipped OKF-in-KC is real on screen · <code>lookupContext</code> omits the <code>okf</code> aspect · eleven resources → 400 · no <code>verdict</code> field exists in the 13-field template · both system prompts shown · <code>okf-derived-germany</code> labelled prior") +
       '<div class="grid3">' +
       pane("", '<span class="sw" style="background:var(--catalog)"></span>(a) entries.get --view=ALL', src("live", "live · pushed okf-bundle entry"),
@@ -349,7 +398,7 @@
       '<details class="nn fixture"><summary>Prior experiment · <code>okf-derived-germany</code> · type <code>okf-concept</code> · no aspects · not shipped OKF-in-KC · labelled prior</summary><div class="nn-b">' +
       '<p class="fixture-note"><b>Prior, kept for history.</b> Created 2026-09-02 for the consume experiment, before the shipped types existed in this project. Its only pin is prose in <code>entrySource.description</code>. It was re-read after the push and is byte-identical; the push did not touch it.</p>' +
       '<div class="grid2">' + pane("", "entries.get --view=ALL", src("prior", "prior · live read"), pre(D.legacy, ["description", "entryType"]), "") +
-      pane("", "lookupContext", src("prior", "prior · live read"), yaml(D.legacyLc.context || ""), "") + "</div></div></details>";
+      pane("", "lookupContext", src("prior", "prior · live read"), yaml(D.legacyLc.context || ""), "") + "</div></div></details>" + "</div></details>";
   }
 
   // ---- beat 4: sync (CLI) ------------------------------------------------------------
@@ -358,8 +407,9 @@
     var setupHead = D.setupT.split("\n").filter(function (l) { return /^\$ |^Using existing|^Created|^exit=/.test(l); });
     var ddl = D.ddlOut.split("\n").filter(function (l) { return /Created|affected rows|Current status/.test(l); }).map(function (l) { return l.replace(/^\[?"|\\n"$|"$|^,$/g, "").replace(/\\n$/, ""); });
     var idRows = D.jobs.map(function (j) { return { job_id: j.job_id, user_email: j.user_email, type: j.statement_type, state: j.state }; });
-    return beatHead(4, "split", "Sync (CLI)", "Sync is an external CLI you run. Its direction is bundle → BigQuery commit → Catalog stamp. It has not run yet, and this beat does not pretend it has.",
-      "Nothing inside Dataplex or BigQuery performs this step. The RFC specifies <code>okf-context sync</code>, a subcommand of the planned <code>toolbox/okf-context</code> package, run by a person in the demo and by a Cloud Run Job or CI step in production. This page shows the algorithm and the IAM contract as text, and shows what <b>was</b> run for this capture, under the identity that ran it.") +
+    return beatHead(4, "split", "Sync (CLI)", "Publish once. Let discovery point to it.",
+      "The proposed external CLI connects the bundle, the BigQuery publication, and the Catalog stamp. It has not run.") +
+      showProof(4) + evidenceOpen(4) +
       must("one-sentence answer: an external CLI I run or schedule; bundle to BigQuery first, Catalog stamp second; Catalog → BigQuery import is not v1 · no <code>BQ_COMMITTED</code> or <code>CATALOG_STAMPED</code> is shown because neither happened · identities captured, not asserted") +
       '<div class="honest"><b>Status on 2026-09-03.</b> The syncer is not built (Phase A). The three service accounts, the custom <code>okfCatalogSearch</code> role, the table-level <code>dataEditor</code> grants, the boundary EntryGroup and the seven negative checks were <b>not</b> created for this capture. Everything below marked ' + src("live", "live") + " or " + src("seeded", "seeded") + " was run by the operator <code>" + esc(OPERATOR) + "</code> in the default gcloud configuration. Everything marked " + src("rfc", "RFC text only") + " is quoted from <code>spec.md</code>.</div>" +
       '<div class="grid2">' +
@@ -391,7 +441,7 @@
       '<details class="nn"><summary>Identity chain the syncer would commit · reproduced by the SDK adapter today</summary><div class="nn-b">' +
       pre(IDENT, ["observation_id", "snapshot_id", "publication_id"]) +
       caption("Observation → snapshot → publication, from <code>python3 examples/okf_bqaa_adapter/run.py</code> on SDK <code>main</code> (<code>4f54b5c</code>) over the committed 180-row export. The syncer must reproduce <code>" + esc(short(IDENT.publication_id, 19)) + "</code> before committing anything; the seeded <code>publications</code> row for it would be matched, not duplicated (first-sync contract). " + src("recorded", "recorded · stdlib, no GCP")) +
-      "</div></details>";
+      "</div></details>" + "</div></details>";
   }
   function iamRow(p, r, g, kind, note) {
     return "<tr><td><code>" + esc(p) + "</code></td><td>" + esc(r) + "</td><td>" + esc(g) + '</td><td class="st">' + src(kind, kind === "rfc" ? "RFC text only" : "live") + "<br><span style=\"font-size:12px;color:var(--ink-soft)\">" + esc(note) + "</span></td></tr>";
@@ -403,8 +453,9 @@
     var hist12 = F.inv[3], q11 = F.inv[10], q12 = F.inv[11];
     var resolRows = D.resol.map(function (r) { return { context_ref: r.context_ref, n: Number(r.n_bindings), bindings: (r.bindings || []).filter(function (b) { return b.publication_id; }).map(function (b) { return short(b.publication_id, 16) + " (" + b.binding_source + ")"; }).join(", ") || "—", head: r.head_publication_id, resolution: r.resolution }; });
     var pubRows = D.pubs.map(function (p) { return { publication_id: p.publication_id, source: p.source, origin: p.origin, seeded_at: p.seeded_at }; });
-    return beatHead(5, "runtime", "Serve (BigQuery)", "Pin, history, lifecycle, an honest verdict, and fail-closed. Shown from real queries, including the ones that return nothing yet.",
-      "Five <code>SELECT</code>s over the Phase A tables run today. Two of them are empty because no sync has committed a head; the page shows the empty result instead of inventing one. Beside them: the retrieve result and the <code>UNVERIFIABLE</code> receipt the observe agent carried through twelve questions, and its answer.") +
+    return beatHead(5, "runtime", "Serve (BigQuery)", "A verdict you can defend starts with an honest limit.",
+      "Read the stub receipt and the live resolution probes. One pinned answer is the goal; the empty deployment head shows the remaining work.") +
+      showProof(5) + evidenceOpen(5) +
       must("<code>deployment_heads</code> empty and shown empty · junk handle → <code>FAIL_CLOSED</code> · double-bound legacy handle → <code>AMBIGUOUS_LEGACY</code> · no <code>FAIL_STALE</code> yet (it needs a head, and is labelled RFC text only until one exists) · receipt <code>UNVERIFIABLE</code>, reason shown · numbers: future executor/attester, RFC text only") +
       '<div class="grid2">' +
       pane("", "deployment_heads · deployment okf-rfc-demo", src("live", "live · sql/serve_probes.sql §1"),
@@ -441,7 +492,7 @@
       pane("", "publications · seeded, not committed", src("seeded", "seeded · sql/serve_probes.sql §4"),
         table([{ key: "publication_id", render: pubCell }, { key: "source" }, { key: "origin", cls: "wrap" }], pubRows) +
         caption("Three publications, all <code>seeded_pre_phase_a</code>; <code>committed_at</code>, <code>snapshot_id</code>, <code>observation_id</code> are NULL because no sync committed them. The first real sync would match <code>" + esc(short(PUB.p53b, 19)) + "</code> by id, flip its <code>source</code> to <code>sync</code>, keep <code>seeded_at</code>, and advance the head.") + jobs(jobsFor("serve_stmt4")), "runtime") +
-      "</div>";
+      "</div>" + "</div></details>";
   }
 
   // ---- beat 6: attribution --------------------------------------------------------------
@@ -449,8 +500,9 @@
     var attrRows = D.attr.map(function (r) { return { band: r.band, session_id: r.session_id, agent: r.agent, tool: r.tool, context_ref: r.context_ref, publication_id: r.publication_id, publication_source: r.publication_source, binding_source: r.binding_source, n: Number(r.n) }; });
     var v0Rows = D.v0.map(function (r) { return { session_id: r.session_id, tool: r.tool, context_ref: r.context_ref, publication_id: r.publication_id, verdict: r.verdict, n: Number(r.n) }; });
     var bandCell = function (v) { return '<span class="band ' + esc(v) + '">' + esc(v) + "</span>"; };
-    return beatHead(6, "ink", "Attribution", "Which session used which publication: a SQL result, not a slide. 14 attributed, 13 receipt-only, no event twice.",
-      "Two tables from the two <code>SELECT</code>s in <code>sql/attribution_two_key.sql</code>. Table (a) matches every <code>TOOL_COMPLETED</code> event on <b>both</b> its event-carried <code>context_ref</code> and its event-carried <code>publication_id</code> against the <code>context_ref_resolution</code> view, then joins <code>publications</code> by id only; the thirteen receipt rows whose event carries no publication are a labelled band, attributed by handle alone, never merged. Table (b) is evidence that is not an event: the adapter tape and the legacy Catalog description.") +
+    return beatHead(6, "ink", "Attribution", "Which publication did this run actually use?",
+      "BigQuery can join the captured tool events to seeded publications. Keep the evidence of use separate from receipts with no publication id.") +
+      showProof(6) + evidenceOpen(6) +
       must("band <code>attributed</code> Σ 14 · band <code>receipt_only</code> Σ 13 · no (session, tool, context_ref, publication) row appears twice despite the double-bound legacy handle · <code>publications</code> joined by id only · non-event evidence kept separate with a source column") +
       pane("", "(a) Event-sourced attribution · two-key match through context_ref_resolution", src("live", "live · attribution_two_key.sql STATEMENT 1"),
         table([{ key: "band", render: bandCell }, { key: "session_id", render: sidCell }, { key: "agent" }, { key: "tool" }, { key: "context_ref", render: refCell }, { key: "publication_id", render: pubCell }, { key: "publication_source" }, { key: "binding_source" }, { key: "n", cls: "num" }], attrRows, { rowClass: function (r) { return "band-" + r.band; } }) +
@@ -468,7 +520,7 @@
         table([{ key: "session_id", render: sidCell }, { key: "tool" }, { key: "context_ref", render: refCell }, { key: "publication_id", render: pubCell }, { key: "verdict", render: function (v) { return v ? resCell(v) : "NULL"; } }, { key: "n", cls: "num" }], v0Rows) +
         caption("Five (session, tool, context_ref, publication) groups. Catalog can display none of them; there is no SQL over Catalog and no join to <code>agent_events</code>.") + jobs(jobsFor("v0_sessions")), "") +
       "</div>" +
-      caption("<b>Caption.</b> The legacy handle <code>" + esc(REF_OBS) + "</code> was bound to two publications before Phase A; that is legacy evidence, not the contract. Refs minted by <code>sync</code> are immutable: one <code>context_ref</code> → exactly one <code>publication_id</code>, forever, and a new publication mints a new handle. A visitor can rerun both statements with <code>bq query</code> as any <code>dataViewer</code> on <code>okf_rfc_demo</code>; the DDL lives in the setup-owned file only.");
+      caption("<b>Caption.</b> The legacy handle <code>" + esc(REF_OBS) + "</code> was bound to two publications before Phase A; that is legacy evidence, not the contract. Refs minted by <code>sync</code> are immutable: one <code>context_ref</code> → exactly one <code>publication_id</code>, forever, and a new publication mints a new handle. A visitor can rerun both statements with <code>bq query</code> as any <code>dataViewer</code> on <code>okf_rfc_demo</code>; the DDL lives in the setup-owned file only.") + "</div></details>";
   }
 
   // ---- matrix / stories / ids ---------------------------------------------------------------

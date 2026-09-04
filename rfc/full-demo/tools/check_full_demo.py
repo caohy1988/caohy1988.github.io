@@ -711,7 +711,7 @@ DEFERRED_ARTEFACT = re.compile(DEFERRED_ARTEFACT.pattern + ("|" + "|".join(re.es
 NOT_DONE = re.compile(r"\b(not|no|none|never|without|nothing|neither|yet|deferred|planned|future|prior|pending|"
                       r"requirements?|acceptance|expected|must|will|would|shall|should)\b|RFC text only", re.I)
 
-SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json", "styles.css"]
+SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "VP_SHOW_NOTES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json", "styles.css"]
 
 # ---- the dependency graph (Codex rounds 23-25), fail-closed -------------------------------------------------------
 # Everything the page can put on the screen is either COPY, audited sentence by sentence in the register, or a
