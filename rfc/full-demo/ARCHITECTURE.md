@@ -93,7 +93,7 @@ Cloud Run Job on Cloud Scheduler polling the EntryGroup `updateTime` (production
 
 Status on 2026-09-03 (PR 16): rows that say a beat show a live query or capture on that beat; the
 syncer has not run, so `deployment_heads` and its history are empty, `FAIL_STALE` is **not yet
-shown** (only `FAIL_CLOSED`, `NO_HEAD`, `AMBIGUOUS_LEGACY`), and the stamped pin does not exist.
+shown** (only `FAIL_CLOSED`, `NO_HEAD`, `AMBIGUOUS_LEGACY`), and no stamped pin exists.
 
 | Question | Catalog | BigQuery | Demo status |
 |---|---|---|---|

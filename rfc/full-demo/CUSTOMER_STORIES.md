@@ -147,7 +147,7 @@ Catalog pin in the project names the oldest.
 
 **KC-only failure mode.** Catalog cannot say which publication an agent read, whether two agents
 read the same one, or whether the entry is stale relative to what is being served. After Phase A it
-can display a stamped pin; a search predicate on it filters entries; it cannot compare the pin to a
+can display the pin sync would stamp; a search predicate on it filters entries; it cannot compare the pin to a
 head or refuse a stale request.
 
 **What BigQuery deployment changes, and the attribution contract.** From Phase A on, a

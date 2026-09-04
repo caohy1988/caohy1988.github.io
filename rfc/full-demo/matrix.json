@@ -4,7 +4,7 @@
     {
       "n": 1,
       "capability": "Pin-or-fail-stale",
-      "kc": "Can display a stamped pin (okf-context-runtime.publication_id, after Phase A) and filter on it with a search predicate. Cannot compare it to deployment_heads or refuse a stale request; LookupContext does not render custom aspects at all.",
+      "kc": "Can display the pin Phase A would stamp (okf-context-runtime.publication_id) and filter on it with a search predicate. Cannot compare it to deployment_heads or refuse a stale request; LookupContext does not render custom aspects at all.",
       "bq": "deployment_heads is the comparison target; a request presenting a non-head publication_id returns FAIL_STALE.",
       "evidence": "Live: lookupContext on the pushed metric entry omits every okf field (beat 3). Live: the resolution query returns NO_HEAD for a bound handle and FAIL_CLOSED for an unbound one because no sync has committed a head yet (beat 5). Prior, legacy: okf-derived-germany names a25e1c0c… only as prose in entrySource.description.",
       "shown": [3, 5],

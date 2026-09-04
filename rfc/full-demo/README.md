@@ -13,7 +13,7 @@ Live at <https://caohy1988.github.io/rfc/full-demo/> once merged. Static files, 
    IAM; the legacy `okf-derived-germany` entry collapsed and labelled prior.
 4. **Sync (CLI).** The `okf-context sync` algorithm and IAM contract as RFC text; what was actually run
    (sample `setup.ts` + `push.ts`, the DDL) under the operator identity; no `BQ_COMMITTED` /
-   `CATALOG_STAMPED` shown because the syncer is not built.
+   `CATALOG_STAMPED` is shown because the syncer is not built.
 5. **Serve (BigQuery).** Five real `SELECT`s: empty `deployment_heads`, empty history, the resolution
    probe (`NO_HEAD`, `AMBIGUOUS_LEGACY`, `FAIL_CLOSED`), seeded `publications`, the view; the
    `UNVERIFIABLE` receipt; 12 of 12 answers contain “unproven” (one verbatim “No. The number is unproven.”); 13 of 13 exclusions of the dead metric.
@@ -42,15 +42,16 @@ negative checks, and the `okf-context sync` CLI. Phase D (a new tape) follows th
 - `sql/`: `sessions_by_context_ref.sql` (v0), `never_emit_scan.sql`, `serve_probes.sql`,
   `attribution_two_key.sql` (reader, SELECT only), `setup_runtime_tables.sql` (setup, DDL + seeds).
 - `tools/check_full_demo.py`: the checker. Exit 0 required.
-- `tools/audited_claims.tsv`: the audited claim register. Every sentence in the files above that touches this project
-  appears here under its own source file with a verdict — `PENDING` (claims nothing was executed; every completion
-  word sits inside a licence span that opens with a qualifier), `CAPTURED` (what this capture did, with the `live/` or
-  `sql/` files behind it), or `NOT_PHASE_A` (completion language about something other than the deferred work). A
-  sentence is regulated when it carries a project identifier, completion language, or a named Phase A artefact — three
-  of those four tests are pure shape, and each can only widen coverage. The checker fails on any regulated sentence
-  that is not registered, so new, edited or moved copy has to be re-audited before it ships. It does not try to parse
-  English; the register is the audit, and `tools/check_full_demo.py` documents that boundary and its non-goals.
-- `tools/mutation_fixture.py`: 134 mutations that must each make the checker exit non-zero, and 48 positive controls
+- `tools/audited_claims.tsv`: the audited claim register. **Every** sentence of the files above appears here under its
+  own source file with a verdict — `PENDING` (claims nothing was executed; every completion word sits inside a licence
+  *frame* holding the qualifier, its auxiliary chain and the verb), `CAPTURED` (what this capture did, with the
+  `live/` or `sql/` files behind it and a disclaimer sitting on any deferred artefact it names), or `NOT_PHASE_A`
+  (completion language about something else, naming no deferred artefact). There is no test deciding which sentences
+  count, so no vocabulary can license unaudited prose, and what a reader sees is what is audited: JavaScript through
+  its literals and comments, HTML after tags and entities, JSON after `JSON.parse`, CSS through its generated
+  `content`. New, edited or moved copy has to be re-audited before it ships. It does not try to parse English; the
+  register is the audit, and `tools/check_full_demo.py` documents that boundary and its non-goals.
+- `tools/mutation_fixture.py`: 143 mutations that must each make the checker exit non-zero, and 51 positive controls
   (honest prose plus its register row) that must leave it at exit 0.
 
 ## Run it locally

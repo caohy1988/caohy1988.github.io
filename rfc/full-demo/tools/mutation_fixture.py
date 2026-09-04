@@ -122,6 +122,7 @@ Positive controls p1-p39 append honest RFC-only prose (shared modal + coordinate
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
 """
 import hashlib
+import html
 import json
 import os
 import re
@@ -263,9 +264,9 @@ def _append(rel, text):
 # cannot drift from the gate it is testing.
 def _gate():
     src = (HERE / "check_full_demo.py").read_text("utf-8")
-    seg = (src[src.index("SCREAMING_ID = re.compile"):src.index("# ---- the register:")]
+    seg = (src[src.index("PHASE_A_OBJECT = re.compile"):src.index("# ---- the register:")]
            + src[src.index("def regulated_sentences("):src.index("def load_register(")])
-    g = {"re": re}
+    g = {"re": re, "json": json, "html": html, "DEMO": DEMO}
     exec(seg, g)
     return g
 
@@ -420,6 +421,9 @@ POSITIVE_CONTROLS = [
     ("p46 aria-hidden prose is visible, and audited like any other (Codex r21)", _append_audited_js("app.js", 'var r21p = "<span aria-hidden=\'true\'>Every Phase A binding must be recorded on tape.</span>";')),
     ("p47 audited generated content in the stylesheet (Codex r21)", _append_audited_css("styles.css", 'body::after { content: "Phase A must still be recorded on tape."; }')),
     ("p48 a CAPTURED row citing two evidence files (Codex r21)", _append_audited("live/README.md", "The attribution bands were read once as the operator.", "CAPTURED", "live/beat6_attribution.json,live/bq_jobs_identity.json")),
+    ("p49 audited generated content with a semicolon inside it (Codex r22)", _append_audited_css("styles.css", 'body::after { content: "Note; Phase A must still be recorded on tape."; }')),
+    ("p50 a negation on the subject of a passive is a licence frame (Codex r22)", _append_audited("spec.md", "No Phase A service account was created for this capture.")),
+    ("p51 a modal over a coordinated verb phrase is one frame (Codex r22)", _append_audited("ARCHITECTURE.md", "Every Phase A role must be created and granted on tape.")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -589,6 +593,63 @@ m132 = _append_js("app.js", 'var r21e = "<span aria-hidden=\'true\'>The operator
 m133 = _append("styles.css", 'body::after { content: "The Phase A service accounts were created."; }')
 m134 = _append("styles.css", '/* The operator created the Phase A service accounts. */')
 
+# Codex r22. Coverage is total, so an ordinary claim about anything is regulated (m135-m136); a verdict is bound by a
+# licence or disclaimer FRAME rather than by position (m137-m139); and the readers meet the copy the way a reader does
+# — decoded JSON, decoded entities, quote-aware CSS that follows attr() (m140-m143).
+m135 = _append("README.md", "The IAM bootstrap succeeded.")
+m136 = _append("plan.md", "The sync finished successfully.")
+
+
+def m137(d):
+    """A licence that is not a frame licenses nothing: the negation belongs to another clause."""
+    p = d / "spec.md"
+    p.write_text(p.read_text("utf-8") + "\n\nNo reviewer knew okf-setup created the service accounts.\n", "utf-8")
+    _audit(d, ["PENDING\tspec.md\t-\tNo reviewer knew okf-setup created\tNo reviewer knew okf-setup created the service accounts."])
+
+
+def m138(d):
+    """A CAPTURED row needs a disclaimer sitting ON the artefact, not a negation elsewhere in the sentence."""
+    p = d / "ARCHITECTURE.md"
+    p.write_text(p.read_text("utf-8") + "\n\nNo unrelated query ran, and the service accounts were created.\n", "utf-8")
+    _audit(d, ["CAPTURED\tARCHITECTURE.md\tlive/bq_jobs_identity.json\t-\tNo unrelated query ran, and the service accounts were created."])
+
+
+def m139(d):
+    """NOT_PHASE_A is decided by naming, not distance, so padding the sentence buys nothing."""
+    sent = "The Phase A service accounts in the isolated demonstration environment for later operator validation were created."
+    p = d / "intent.md"
+    p.write_text(p.read_text("utf-8") + "\n\n" + sent + "\n", "utf-8")
+    _audit(d, ["NOT_PHASE_A\tintent.md\t-\t-\t" + sent])
+
+
+m140 = _append("styles.css", 'body::after { content: "Note; The Phase A service accounts were created."; }')
+
+
+def m141(d):
+    """content: attr(x) prints the attribute onto the screen, where an HTML scan of tags would never see it."""
+    idx = d / "index.html"
+    idx.write_text(idx.read_text("utf-8").replace("<body>", '<body data-claim="The operator created the Phase A service accounts.">', 1), "utf-8")
+    css = d / "styles.css"
+    css.write_text(css.read_text("utf-8") + "\nbody::before { content: attr(data-claim); }\n", "utf-8")
+
+
+def m142(d):
+    """JSON source bytes are not what the viewer renders: \\u005f is an underscore on the screen."""
+    p = d / "stories.json"
+    raw = p.read_text("utf-8")
+    marker = '"status": "'
+    at = raw.index(marker) + len(marker)
+    p.write_text(raw[:at] + 'BQ\\u005fCOMMITTED happened. ' + raw[at:], "utf-8")
+    _audit(d, ["NOT_PHASE_A\tstories.json\t-\t-\tBQ\\u005fCOMMITTED happened."])
+
+
+def m143(d):
+    """HTML entities are decoded before the reader sees them, so the source spelling is not the audited sentence."""
+    p = d / "index.html"
+    p.write_text(p.read_text("utf-8").replace("</body>", "<p>BQ&#95;COMMITTED happened.</p></body>", 1), "utf-8")
+    _audit(d, ["NOT_PHASE_A\tindex.html\t-\t-\tBQ&#95;COMMITTED happened."])
+
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -719,7 +780,16 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m131 postfix -- likewise (Codex r21)", m131),
              ("m132 aria-hidden text is on the screen and is audited (Codex r21)", m132),
              ("m133 a stylesheet that prints prose is copy (Codex r21)", m133),
-             ("m134 a stylesheet comment is read like any other comment (Codex r21)", m134)]
+             ("m134 a stylesheet comment is read like any other comment (Codex r21)", m134),
+             ("m135 'The IAM bootstrap succeeded.' is regulated because everything is (Codex r22)", m135),
+             ("m136 'The sync finished successfully.' likewise (Codex r22)", m136),
+             ("m137 INV-4: a licence that is not a frame licenses nothing (Codex r22)", m137),
+             ("m138 INV-3: a disclaimer must sit on the artefact it disclaims (Codex r22)", m138),
+             ("m139 INV-3: NOT_PHASE_A is naming, not distance (Codex r22)", m139),
+             ("m140 a semicolon inside a quoted CSS content value (Codex r22)", m140),
+             ("m141 content: attr(x) prints an attribute onto the screen (Codex r22)", m141),
+             ("m142 JSON is audited after JSON.parse, not as source bytes (Codex r22)", m142),
+             ("m143 HTML entities are decoded before the reader sees them (Codex r22)", m143)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
