@@ -138,7 +138,7 @@ will be demonstrated rather than asserted; today the only `user_email` on record
 Run Job will run as the sync writer directly (no impersonation). No identity is to be granted to the job other
 than the sync writer.
 
-**Setup order for the Phase A tape** (each command to be recorded under the identity that runs it; not yet run):
+**Setup order for the Phase A tape** (each command to be recorded under its own acting identity, not yet run):
 
 1. Operator: create SAs; create `okfCatalogSearch`; bind setup roles; bind Token Creator on `okf-setup`.
 2. `okf-setup` (isolated configuration `okf-setup`): sample `setup.ts` (shipped `okf-bundle`, `okf`); `aspect-types create okf-context-runtime`; create EntryGroup `okf-rfc-demo-boundary` and one disposable entry `boundary-probe` of type `okf-bundle` in it; `sql/setup_runtime_tables.sql` piped to `bq query` (tables, view, seed `MERGE`s).

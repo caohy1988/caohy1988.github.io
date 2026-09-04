@@ -386,7 +386,7 @@
       iamRow("okf-sync-writer-okf-rfc-demo", "EntryGroup okf-rfc-demo · EntryType okf-bundle · AspectTypes okf, okf-context-runtime · nine tables", "catalogEditor on the group; entryTypeUser; aspectTypeUser ×2; dataEditor per table (no dataset grant, so agent_events is unreachable); jobUser", "rfc", "not created") +
       iamRow("okf-runtime-reader", "EntryGroup · project · dataset", "catalogViewer on the group; custom okfCatalogSearch = {dataplex.projects.search}; dataViewer; jobUser", "rfc", "not created; the operator (not okf-runtime-reader) ran the reads") +
       "</tbody></table>" +
-      caption("Positive checks 1–3 and negative checks 1–7 (nine <code>PERMISSION_DENIED</code> calls, including the two post-cleanup checks that prove <code>okf-setup</code> is retired) are the Phase A tape. None appears on this page because none was run.") +
+      caption("Positive checks 1–3 and negative checks 1–7 (nine <code>PERMISSION_DENIED</code> calls, including the two post-cleanup checks for the retirement of <code>okf-setup</code>) are the Phase A tape. None appears on this page because none was run.") +
       "</div></details>" +
       '<details class="nn"><summary>Identity chain the syncer would commit · reproduced by the SDK adapter today</summary><div class="nn-b">' +
       pre(IDENT, ["observation_id", "snapshot_id", "publication_id"]) +

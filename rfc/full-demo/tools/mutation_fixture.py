@@ -66,8 +66,15 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m58 / m59 "Check 6 returns PERMISSION_DENIED." / "All seven positive checks returned OK." (Codex r13: return lemma)
   m60 / m61 "grants narrowly scoped …" / "Both grant temporary Phase A roles." (Codex r13: -ly adverb, quantifier)
   m62 "The operator granted the `custom role` at project scope." (Codex r13: multiword inline code kept readable)
+  m63 "The docs must explain why an operator audited the Phase A service accounts on tape." (Codex r14)
+  m64 "The docs must explain the RFC and record the operator succeeded on tape." (Codex r14)
+  m65 "No reviewer realized okf-setup created the service accounts." (Codex r14: negation across a clause)
+  m66 / m67 "grants access to the custom role" / "All positive checks return success." (Codex r14: bare-noun objects)
+  m68 twelve modifiers before "Phase A roles" (Codex r14: the 12-modifier scan ceiling is gone)
+  m69 "granted the `custom role (okfCatalogSearch)` at project scope." (Codex r14: punctuation in inline code)
+  m70 a claim in an app.js string literal under a "Future" comment (Codex r14: real source boundaries)
 
-Positive controls p1-p13 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
+Positive controls p1-p18 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
 "grants" as a noun, bare-infinitive coordination, the proper noun "Run") and must leave the checker at exit 0.
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
@@ -196,6 +203,13 @@ def m11(d):
     prov_p.write_text(json.dumps(prov, indent=1), "utf-8")
 
 
+def _append_js(rel, code):
+    def fn(d):
+        p = d / rel
+        p.write_text(p.read_text("utf-8") + "\n" + code + "\n", "utf-8")
+    return fn
+
+
 def _append(rel, text):
     def fn(d):
         p = d / rel
@@ -268,6 +282,11 @@ POSITIVE_CONTROLS = [
     ("p11 noun 'grants' with an unlisted predicate ('Project grants govern …')", _append("spec.md", "Project grants govern access to the custom role.")),
     ("p12 determiner 'that' + attributive participle", _append("plan.md", "The operator must record that scoped Phase A binding on tape.")),
     ("p13 modal reaching a coordinated head verb and its complement", _append("intent.md", "The docs must explain the RFC and record every binding on tape.")),
+    ("p14 honest denial with a Titlecase subject ('No Phase A service account was created.')", _append("ARCHITECTURE.md", "No Phase A service account was created.")),
+    ("p15 compound-noun subject with an unlisted verb ('Project grants govern …')", _append("spec.md", "Project grants govern Phase A access to the custom role.")),
+    ("p16 adverb before a coordinated continuation head ('and carefully record …')", _append("plan.md", "The operator must create the service accounts and carefully record every binding on tape.")),
+    ("p17 executable app.js code is not prose", _append_js("app.js", "function r14Control() { return roles; }")),
+    ("p18 honest app.js literal stays clean", _append_js("app.js", 'var r14Ok = "The operator must create the Phase A service accounts.";')),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -290,6 +309,24 @@ m59 = _append("intent.md", "All seven positive checks returned OK.")
 m60 = _append("CUSTOMER_STORIES.md", "The operator grants narrowly scoped temporary Phase A roles.")
 m61 = _append("README.md", "Both grant temporary Phase A roles.")
 m62 = _append("ARCHITECTURE.md", "The operator granted the `custom role` at project scope.")
+
+# Codex r14: unlisted finite verbs in complements, embedded clauses under an inherited modal, negation across an
+# embedded clause, bare-noun objects, no modifier ceiling, inline code with punctuation, and real app.js boundaries.
+MODS = " ".join(["alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu"])
+m63 = _append("ARCHITECTURE.md", "The docs must explain why an operator audited the Phase A service accounts on tape.")
+m64 = _append("spec.md", "The docs must explain the RFC and record the operator succeeded on tape.")
+m65 = _append("plan.md", "No reviewer realized okf-setup created the service accounts.")
+m66 = _append("intent.md", "The operator grants access to the custom role.")
+m67 = _append("CUSTOMER_STORIES.md", "All positive checks return success.")
+m68 = _append("README.md", "The operator grants " + MODS + " Phase A roles.")
+m69 = _append("ARCHITECTURE.md", "The operator granted the `custom role (okfCatalogSearch)` at project scope.")
+
+
+def m70(d):
+    """A claim inside an app.js string literal must be caught, and a "Future" comment above it must not qualify it."""
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8") + '\n// Future work is planned here.\nvar r14Claim = "The operator created the Phase A service accounts.";\n', "utf-8")
+
 
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
@@ -349,7 +386,15 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m59 'All seven positive checks returned OK.' (Codex r13: past returned)", m59),
              ("m60 'grants narrowly scoped temporary Phase A roles' (Codex r13: -ly adverb)", m60),
              ("m61 'Both grant temporary Phase A roles.' (Codex r13: quantifier subject)", m61),
-             ("m62 'granted the `custom role` at project scope.' (Codex r13: multiword inline code)", m62)]
+             ("m62 'granted the `custom role` at project scope.' (Codex r13: multiword inline code)", m62),
+             ("m63 'must explain why an operator audited …' (Codex r14: unlisted finite in a complement)", m63),
+             ("m64 'and record the operator succeeded on tape' (Codex r14: embedded clause under inheritance)", m64),
+             ("m65 'No reviewer realized okf-setup created …' (Codex r14: negation across a clause)", m65),
+             ("m66 'grants access to the custom role' (Codex r14: bare-noun object)", m66),
+             ("m67 'All positive checks return success.' (Codex r14: base-present, bare object)", m67),
+             ("m68 twelve modifiers before 'Phase A roles' (Codex r14: no scan ceiling)", m68),
+             ("m69 inline code with punctuation keeps the object (Codex r14)", m69),
+             ("m70 claim in an app.js string literal, 'Future' comment above it (Codex r14)", m70)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
