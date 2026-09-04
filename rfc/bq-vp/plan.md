@@ -10,7 +10,7 @@
 | `rfc/bq-vp/intent.md` | Customer-first goal and pilot ask |
 | `rfc/bq-vp/spec.md` | Story, honesty, scope and usability requirements |
 | `rfc/bq-vp/plan.md` | Execution and validation record |
-| `rfc/index.html` | Existing link remains accurate; unchanged in the follow-up |
+| `rfc/index.html` | Masthead blurb updated to the 118%/96% story; keep the Illustrative label |
 
 Keep `/rfc/full-demo/`, dependencies and deployment configuration unchanged. Use gpt-6-astra only.
 
@@ -20,7 +20,7 @@ Keep `/rfc/full-demo/`, dependencies and deployment configuration unchanged. Use
 2. Replace the input ledger with one comparison showing the mistaken addition of new-customer ARR. Name Catalog, OKF and BigQuery directly in the technical section, and explain execution, job/context/result receipts, attribution and access grants.
 3. Update `STORY.md`, intent and spec to capture the sharper framing. Keep the unbuilt RFC label and compact evidence footer.
 4. Verify desktop, tablet and narrow mobile layout, arithmetic, 30-second skim content, keyboard access, links, contrast and print. Run the existing full-demo checker and `git diff --check`.
-5. Commit and push the six changed files to existing PR 20 on `feat/rfc-bq-vp-story`. Refresh the PR description to match the final framing and measured page. Save follow-up session/validation metadata under `/tmp/okf-vp-story/`. Print the new HEAD; do not create another PR or merge.
+5. Commit and push the seven changed files to existing PR 20 on `feat/rfc-bq-vp-story`. Refresh the PR description to match the final framing and measured page. Save follow-up session/validation metadata under `/tmp/okf-vp-story/`. Print the new HEAD; do not create another PR or merge.
 
 ## Acceptance checks
 
@@ -51,3 +51,8 @@ Keep `/rfc/full-demo/`, dependencies and deployment configuration unchanged. Use
 - `python3 rfc/full-demo/tools/check_full_demo.py`: exit 0 (including mutation fixtures). `/rfc/full-demo/` untouched.
 - `git diff --check`: clean for the polish commit.
 - Artifacts under `/tmp/okf-vp-story/sharpen/`; Codex session `01a06e87-a6fd-7993-88b5-9c489219e68c` (`gpt-6-astra`).
+
+## Index blurb honesty fix (post e8f6b37)
+
+- Restored the Illustrative marker on `rfc/index.html` so `/rfc/` does not present 118%/96% as flat fact above real product links (`spec.md` masthead requirement).
+- Corrected plan/spec scope text that still claimed `rfc/index.html` was unchanged.

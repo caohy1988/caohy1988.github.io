@@ -31,4 +31,4 @@
 
 ## Delivery
 
-Only the requested page and its `intent.md`, `spec.md`, `plan.md`, and `STORY.md` change in this follow-up. The RFC entry link remains accurate. QA artifacts and actual session identifiers go in `/tmp/okf-vp-story/`. Commit and push `feat/rfc-bq-vp-story` to existing PR 20; report its URL and the new HEAD. Do not open a second PR or merge.
+The follow-up may change the page plus `intent.md`, `spec.md`, `plan.md`, `STORY.md`, and the `rfc/index.html` masthead blurb (must keep illustrative status). The RFC entry link remains accurate. QA artifacts and actual session identifiers go in `/tmp/okf-vp-story/`. Commit and push `feat/rfc-bq-vp-story` to existing PR 20; report its URL and the new HEAD. Do not open a second PR or merge.
