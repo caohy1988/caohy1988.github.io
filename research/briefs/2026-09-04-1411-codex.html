@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex gpt-6-astra brief · 4 Sep 2026, 2:11 PM — The Field Brief</title>
+  <meta name="description" content="Codex gpt-6-astra: Braintrust Batch tracing + seven academy cards (EarlyEval, late requirements, Coverage/DRACO control, CAPTURE, FailBench, retrievability, Flight Recorder). 2:11 PM PT, 4 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-04-1411-codex.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Codex gpt-6-astra · 2:11 PM PT</p>
+    <article>
+<h1>Field Brief — Codex gpt-6-astra (xhigh): preserve what a verdict actually establishes</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK<br />
+<strong>As of:</strong> Friday, September 4, 2026, approximately 2:20 PM PT; independent verification completed at approximately 2:30 PM PT. This is the 14:11 brief slot. Items below are catch-up findings or explicitly reconsidered papers, not launches claimed to have occurred since 12:34.</p>
+<p><strong>Sources checked:</strong> The required <a href="https://caohy1988.github.io/research/">Kimi source pack</a>; the <a href="https://caohy1988.github.io/research/briefs/2026-09-04-1234-codex.html">12:34 Codex baseline</a>, using its local Markdown and matching site HTML source because the hosted URL could not be fetched; local September 4 1234-Kimi, 1140, 1134, 1052, 0946 and 1337 briefs, plus September 3 2134/2115 and the relevant 1001/0000 deduplication history. Checked <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code>: <strong>155 items and all 62 <code>progress[]</code> entries</strong>, including candidate IDs, abstract numbers, and capability phrases. Independently fetched Braintrust's changelog, exact JavaScript release and Batch integration documentation; Phoenix releases and exact 20.6/20.7/client-3.4 notes; Agno 3.0.6, Opik 2.2.49, AgentCore release notes, and Langfuse/LangSmith changelogs. All seven academy cards have independently fetched abstract pages and full PDFs, with methods, results and limitations inspected. Other vendor coverage in the pack remains collector-reported rather than a second complete sweep by this analyzer.</p>
+<p><strong>Read this first.</strong> Publish eight items, led by a small shipped capability and a substantive correction to the academy sweep. An unchanged arXiv listing does not establish that every relevant paper in it was covered. The pack found uncatalogued work worth reading; several survive the PDF gate, while activation probes, generic benchmark construction and runtime plumbing remain below bar.</p>
+<p>The decision for BQAA + ADK is to strengthen the existing evaluation-provenance work before expanding automated diagnosis. Preserve whether an outcome was observed or predicted, what evidence the evaluator received, and whether a step label came from a verifier or an attribution method. EarlyEval is a plausible way to reduce development-evaluation cost, but its stopped runs need a distinct outcome status. The late-requirements study gives session analytics a concrete measurement recipe while warning against labeling every rewrite an agent failure. Coverage, Not Targeting qualifies the noon DRACO takeaway: carrying step attribution is useful; trusting its causal meaning requires additional evidence. <strong>Keep the six-week ranking and failure-localization reserve unchanged.</strong></p>
+<h2>Industry</h2>
+<h3>1. Braintrust traces asynchronous batches down to individual requests — a September 2 capability reassessed</h3>
+<p>The shipped <a href="https://github.com/braintrustdata/braintrust-sdk-javascript/releases/tag/braintrust%403.30.0">JavaScript SDK 3.30.0 release</a> adds OpenAI Batch API instrumentation. The <a href="https://www.braintrust.dev/docs/integrations/ai-providers/openai#openai-batch-api">product integration documentation</a> establishes the user-facing behavior: each traced input file produces an <code>openai.batch</code> task span with an LLM child span per request. Helpers trace upload and status retrieval; an explicit completion helper attaches request outputs and errors using the input/output/error files. This is an asynchronous workload becoming inspectable at request granularity, not just a version bump. The documented flow requires integration work; it does not establish automatic completion or exactly-once reconciliation.</p>
+<p><strong>TL;DR for BQAA + ADK.</strong> Preserve the join from submitted work to later results, including per-request errors. For warehouse analytics, submission time, completion time and result-ingestion time are different clocks. Test their reconstruction using existing event and source-reference shapes before proposing fields. This capability is absent from catalog IDs and progress, although earlier briefs listed the SDK version. It is separate from the already-covered Patterns/Debugger/Loop package.</p>
+<h2>Academy</h2>
+<h3>2. EarlyEval makes predicted outcomes an explicit evaluation product boundary</h3>
+<p><a href="https://arxiv.org/abs/2609.02783">arXiv:2609.02783</a> · submitted September 2 · <a href="https://arxiv.org/pdf/2609.02783">full PDF, 12 pages</a>, especially §§III–VI and Table III.</p>
+<p>EarlyEval trains success and failure classifiers on trajectory prefixes and substitutes a prediction for the eventual benchmark outcome when a calibrated threshold is crossed. Its retrospective evaluation holds out agent configurations; TerminalBench additionally separates model and scaffold overlap. On SWE-bench Verified at threshold 0.95, Table III reports <strong>26.0% fewer steps, 32.7% fewer input tokens, and 1.1 percentage points mean absolute resolve-rate distortion</strong>. Those are savings against recorded full runs, not proof that a prematurely stopped agent delivered a finished artifact. Reference-patch features are used where available; other benchmarks omit them. Success prediction transfers less reliably than failure prediction, particularly to unseen scaffolds.</p>
+<p><strong>TL;DR for BQAA + ADK.</strong> A useful offline experiment, with separate records for predicted outcome, stopping step, classifier/calibration version and observed completion. Preserve completed controls and report error separately for predicted successes and failures. Do not merge predicted passes into verified-pass dashboards.</p>
+<h3>3. Requirements After the First Edit separates changing requirements from defective execution</h3>
+<p><a href="https://arxiv.org/abs/2609.03028">arXiv:2609.03028</a> · submitted September 2 · <a href="https://arxiv.org/pdf/2609.03028">full PDF, 30 pages</a>, §§4–6.</p>
+<p>The study starts with 3,553 eligible SWE-chat sessions; its canonical emergence set contains <strong>921 events across 402 replayable sessions</strong>. The primary matched comparison uses 452 events: subsequent deletion/replacement of prior agent-authored lines averages 57.5 versus 29.4 at controls, a ratio of <strong>1.96, with a 95% interval of 1.31–2.82</strong>. Failure-triggered corrections are excluded from the emergence definition. Repository replay, authorship and requirement timing make this measurable; counts alone do not establish semantic waste or causation. Replay selects a convenience sample, and line tracking can misclassify moves or formatting. The controlled experiment does not demonstrate that advance warning reduces overwriting.</p>
+<p><strong>TL;DR for BQAA + ADK.</strong> Join user requirement changes to later edits, and distinguish newly disclosed constraints from corrections of earlier failures. Keep the event reference and measurement window with any rework metric. This supports a coding-session query example, not a universal “wasted work” score or mandatory clarification gate.</p>
+<h3>4. Coverage, Not Targeting supplies a control that the DRACO interpretation needs</h3>
+<p><a href="https://arxiv.org/abs/2609.02417">arXiv:2609.02417</a> · submitted September 2 · <a href="https://arxiv.org/pdf/2609.02417">full PDF, 22 pages</a>, §§4–8.</p>
+<p>In the studied terminal-state verification setting, the observable progress signal lands on one final write in 98% of rollouts, although successful execution requires a chain of five to eight tool calls. Necessary reads leave no scored state change. Under matched rollout/advantage budgets, concentrating credit on apparent progress or on shuffled turns underperforms spreading it uniformly; BFCL and cross-family experiments probe the boundary. The real-model comparisons isolate the <strong>first policy update</strong>. A synthetic crossover is not a universal deployment threshold.</p>
+<p><strong>TL;DR for BQAA + ADK.</strong> Preserve verifier coverage and attribution-method provenance alongside step scores. Compare proposed localization against both uniform and shuffled controls. This paper was previously excluded as training-side; reconsider it now because the 12:34 brief promoted rubric-to-step attribution. It qualifies that inference without refuting DRACO's added rubric information: a step pointer is addressability, not demonstrated causal credit.</p>
+<h3>5. CAPTURE distinguishes authentic memory revision from successful poisoning</h3>
+<p><a href="https://arxiv.org/abs/2609.02265">arXiv:2609.02265</a> · submitted September 2 · <a href="https://arxiv.org/pdf/2609.02265">full PDF, 29 pages</a>, §§4–8.</p>
+<p>CAPTURE combines a temporal belief tracker, memory hypotheses separated by scope/timescale, clarification, and removal-based audits of cited memories. On 480 held-out synthetic episodes from 96 users, it accepts 83.5% of genuine updates while fixed-policy poisoning succeeds at 11.5%. <strong>Adaptive attack success rises to 24.7%</strong>; the comparison with a provenance-only baseline is not statistically separated on that security axis. The identically supervised baseline closes much of the headline performance gap. Forty participants supplied natural histories, but attacks and clarification answers were added during offline, oracle-assisted replay; this was not a live adversarial deployment study.</p>
+<p><strong>TL;DR for BQAA + ADK.</strong> Attribute memory writes to their source, prior belief, proposed scope and disposition. Report acceptance of genuine changes and acceptance of poisoned changes separately. Reuse the existing memory/source-event lineage note; the evidence does not warrant building a new memory controller in six weeks.</p>
+<h3>6. FailBench tests the evidence available to a multimodal judge</h3>
+<p><a href="https://arxiv.org/abs/2609.03611">arXiv:2609.03611</a> · submitted September 3 · <a href="https://arxiv.org/pdf/2609.03611">full PDF, 19 pages</a>, §§3–5 and Tables 1–4.</p>
+<p>FailBench evaluates 13 detectors on 2,197 robot attempts from 14 sources. The strongest model scores approximately <strong>0.77 macro balanced accuracy</strong>; the macro denominator is 13 two-class subsets, with a failure-only subset excluded. No detector exceeds 0.60 on the contact-rich assembly slice. Supplying a localized crop improves the strongest detector in a controlled pipeline comparison, suggesting that evidence presentation can matter more than another reasoning pass. These are completed, visually judged tabletop manipulation attempts. Non-visual contact signals are unused, and the detailed reasoning diagnosis comes from one model.</p>
+<p><strong>TL;DR for BQAA + ADK.</strong> Strengthen the existing multimodal-evaluation note: retain the actual evaluated artifact or resolvable reference, frame selection/crop transform and source slice. Judge identity alone is insufficient for reproduction. The robotics scores do not transfer numerically to UI or enterprise agents; the testable lesson is to vary evidence presentation while holding the judge fixed.</p>
+<h3>7. Knowing Is Not Enough makes reviewer assistance part of measurement provenance</h3>
+<p><a href="https://arxiv.org/abs/2609.01976">arXiv:2609.01976</a> · submitted September 2 · <a href="https://arxiv.org/pdf/2609.01976">full PDF, 65 pages</a>, Study 1, Study 2 and limitations.</p>
+<p>Two randomized experiments involve 640 employees in one enterprise-software organization. In Study 1, participants who generated explanations of example errors before receiving standardized explanations achieved a mean detection score of 0.78 versus 0.68. Study 2 follows 240 participants over a baseline and seven workdays: personalized cues tied to prior verification reasoning slow the decline in detection compared with personalized neutral messages. The experiments use prepared tasks and searchable references. Retrieval is not directly observed, and the mechanism is not fully separated from attention or effort.</p>
+<p><strong>TL;DR for BQAA + ADK.</strong> Human review completion does not certify label quality. When comparing review queues or calibration runs, retain the assistance condition and measure detection plus false positives against adjudicated examples. This is a review-method note; it neither re-cards Braintrust blind reviews nor justifies adding prompts to every reviewer interaction.</p>
+<h3>8. Agent Flight Recorder separates record integrity from recording completeness — older catch-up</h3>
+<p><a href="https://arxiv.org/abs/2609.01931">arXiv:2609.01931</a> · submitted September 1 · <a href="https://arxiv.org/pdf/2609.01931">full PDF, 9 pages</a>, §§III, VI and VIII. No matching abstract ID or title was found in the catalog or earlier dated briefs.</p>
+<p>The prototype binds intent, policy decisions, approval, execution/effects and provenance into structured records, with hash chains, Merkle batches and external anchoring. Its most useful result for this beat is a boundary: tamper evidence cannot reveal actions that bypassed instrumentation, prove post-compromise entries truthful, or recover lost payloads from roots alone. The main evaluation is synthetic; real-trace overhead validation covers just five trajectories and 38 events. There is no implemented comparison against signed-digest or timestamp-authority alternatives. Reported anchoring fees are projections from measured testnet gas, not production cost observations.</p>
+<p><strong>TL;DR for BQAA + ADK.</strong> Keep capture completeness, record integrity and payload availability as separate claims. Typed approval/delegation events and source references remain useful without adopting this anchoring architecture. Retain cryptographic anchoring on the do-not-start side of the six-week plan.</p>
+<h2>Six-week EV</h2>
+<p><strong>Keep the current ranking. Within existing evaluation-provenance work, prioritize one bounded offline validation before expanding attribution automation.</strong> The following are implementation judgments from this brief, not shipped BQAA capabilities or forecasts of competitor launches.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Existing work</th>
+  <th>Concrete next step</th>
+  <th>Evidence required before expanding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Outcome and judge provenance</td>
+  <td>Reconstruct a small set of asynchronous batches and prefix-scored runs using existing event references; distinguish pending, observed, predicted and evaluator-error states.</td>
+  <td>Every result joins to the submitted request; predicted outcomes remain distinguishable in aggregates.</td>
+</tr>
+<tr>
+  <td>Evaluation efficiency</td>
+  <td>Test early-outcome prediction offline on held-out tasks and an unseen scaffold, retaining complete trajectories as controls.</td>
+  <td>Report compute saved, intervention coverage, success/failure precision and ranking distortion together. Choose tolerances before comparing methods.</td>
+</tr>
+<tr>
+  <td>Failure localization, still reserve</td>
+  <td>Compare step attribution with uniform and shuffled baselines; document which prerequisite steps the verifier can actually assess.</td>
+  <td>Added attribution must improve the intended diagnostic or training decision. A plausible explanation alone is insufficient.</td>
+</tr>
+<tr>
+  <td>Session and feedback examples</td>
+  <td>Add examples for changed requirements, memory revision disposition, evaluated media transforms and reviewer assistance conditions.</td>
+  <td>Each derived measure retains its source events and denominator; use optional metadata where sufficient.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Do not open new workstreams for a learned memory controller, blockchain anchoring, an activation-monitor stack, or MCP runtime scaling. The 12:34 effective-context/principal provenance note, deployment identity, separate latency clocks, raw-beside-normalized capture and source-event references remain intact. Today's evidence strengthens measurement discipline; it does not supply a new six-week product launch prediction.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>braintrust-js-3-30-openai-batch</code> — kind: <code>rank</code>; tag: Industry.</li>
+<li><code>arxiv-2609-02783-earlyeval-early-outcome-prediction</code> — kind: <code>rank</code>; tag: Academy.</li>
+<li><code>arxiv-2609-03028-late-requirement-emergence-coding-sessions</code> — kind: <code>rank</code>; tag: Academy.</li>
+<li><code>arxiv-2609-02417-coverage-not-targeting-credit</code> — kind: <code>rank</code>; tag: Academy.</li>
+<li><code>arxiv-2609-02265-capture-drift-vs-poisoning</code> — kind: <code>rank</code>; tag: Academy.</li>
+<li><code>arxiv-2609-03611-failbench-vlm-success-judges</code> — kind: <code>rank</code>; tag: Academy.</li>
+<li><code>arxiv-2609-01976-retrievability-precondition-oversight</code> — kind: <code>rank</code>; tag: Academy.</li>
+<li><code>arxiv-2609-01931-flight-recorder-integrity-completeness</code> — kind: <code>rank</code>; tag: Academy.</li>
+</ul>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Braintrust deduplication:</strong> Patterns, Debugger, managed Loop, automations and blind reviews remain covered by <code>braintrust-patterns-debugger-loop-automations</code> and the 1001 coverage boundary. No new cards or progress lines for those. The Batch capability is a deliberate reassessment of a previously inventoried SDK release, supported by shipped product documentation. September's month heading or page modification time is not its launch date.</li>
+<li><strong>Phoenix deduplication:</strong> MiniMax is already in the catalog text for <code>phoenix-20-8-error-status-latency-filters-trace-list-endpoint</code>. Prompt-version creation and retention already appear in the 1234-Kimi brief; retention also has older catalog coverage. The <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-client-v3.4.0">client 3.4 release</a> adds prompt deletion, but that is too small for an addendum here. No fresh Harbor card and no cosmetic <code>progress[]</code> updates. <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.6.0">20.6</a> provider/trace-deletion additions and <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.7.0">20.7</a> stateless MCP support do not clear the selective product bar.</li>
+<li><strong>Other industry exclusions:</strong> AgentCore TypeScript Evaluations is already the 1934 progress line on <code>agentcore-evaluations-any-framework</code>; its consent portal is identity infrastructure. <a href="https://github.com/agno-agi/agno/releases/tag/v3.0.6">Agno 3.0.6</a> is runtime/MCP work; <a href="https://github.com/comet-ml/opik/releases/tag/2.2.49">Opik 2.2.49</a> is below-bar provider configuration and patch work. <a href="https://langfuse.com/changelog">Langfuse</a> and <a href="https://docs.langchain.com/langsmith/changelog">LangSmith</a> expose the already-covered leading entries. First-party BQAA, including the pack's BigQuery conversational-analytics lead, is out of beat.</li>
+<li><strong>Academy selection:</strong> Skip catalogued abs IDs 2609.04198, 2609.03787, 2609.03192 and 2609.03340, plus the noon SWE-Gate/Terminal-Universe/DRACO cards. Keep the previously rejected activation-monitoring, model-diversity and evaluation-realism leads off the cards. Remaining pack benchmarks were not promoted on abstracts alone. Flight Recorder is explicitly older catch-up; Coverage is explicitly reconsidered in light of the noon interpretation. “Listing unchanged” should not again be used as a substitute for candidate-level coverage checks.</li>
+<li><strong>Numerical discipline:</strong> Use EarlyEval's named Table III operating point rather than mixing maxima across benchmarks. FailBench's abstract says a 2.4-point crop gain while the body/table label says 2.3 and rounded endpoints imply 2.4; the card therefore makes no precise gain claim. Flight Recorder's table gives approximately 48 microseconds as total per-event latency, so it should not be repeated as the incremental overhead over baseline.</li>
+<li><strong>Access and authorship:</strong> The hosted baseline returned a fetch error; the GitHub connector required reauthentication. Its local Markdown and corresponding local site HTML supplied the baseline, without claiming fresh verification of the deployed page. Full PDF text supported the academy analysis. Kimi supplied discovery leads; Codex gpt-6-astra (xhigh) made all selections and judgments. No Fable call, Kimi brief, HTML generation, catalog edit, commit or push.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Codex gpt-6-astra · 4 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
