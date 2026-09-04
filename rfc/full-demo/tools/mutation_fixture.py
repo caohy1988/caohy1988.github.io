@@ -358,6 +358,16 @@ def _nested_pinned_capture(d):
     _pin(d, rel)
 
 
+def _single_write_capture(d):
+    """A path bound to one literal and never written again: the reader can say what it is, so it can require the pin."""
+    rel = "live/beat7_new_capture.json"
+    (d / rel).write_text('[{"note": "not yet run"}]\n', "utf-8")
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace(
+        "  var TOTAL = 6;", '  var TOTAL = 6;\n  var extraPath = "' + rel + '";\n  fetchJson(extraPath);', 1), "utf-8")
+    _pin(d, rel)
+
+
 def _map_literal_capture(d):
     """A dependency reached through a map whose values are all string literals: the reader can name the file, so it
     can require the pin."""
@@ -522,6 +532,8 @@ POSITIVE_CONTROLS = [
     ("p67 an unclassified verb under a modal (Codex r28)", _append_audited("spec.md", "The IAM bootstrap must preset every binding on tape.")),
     ("p68 an unclassified verb under a negation (Codex r29)", _append_audited("plan.md", "The IAM bootstrap has not preset roles.")),
     ("p69 a font stack is not one composed string (Codex r29)", _append_audited_css("styles.css", "body { font-family: 'Phase A Sans', 'Phase A Mono'; }")),
+    ("p70 a whole bare noun phrase under a modal (Codex r30)", _append_audited("plan.md", "The IAM bootstrap must preset temporary roles.")),
+    ("p71 a path bound once and never written again (Codex r30)", _single_write_capture),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -1038,6 +1050,39 @@ def m192(d):
     _register_claim(d, "PENDING", "-", "-", "Phase A is not yet done, but the IAM bootstrap preset every binding.")
 
 
+# Codex r30. Every write form changes a path (m193-m194); which string open-quote paints depends on the element's
+# quote depth, so the reader refuses to guess (m195); and a bare object is a whole noun phrase (m196).
+def _hidden_json(d):
+    (d / "extra.json").write_text('[{"note": "The Phase A service accounts were created."}]\n', "utf-8")
+
+
+def m193(d):
+    """A logical assignment writes the path after the reader has read its first value."""
+    _hidden_json(d)
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace(
+        "  var TOTAL = 6;",
+        '  var TOTAL = 6;\n  var hiddenPath = "";\n  hiddenPath ||= ["extra", ".json"].join("");\n'
+        '  fetchJson(hiddenPath);', 1), "utf-8")
+
+
+def m194(d):
+    """The same through +=."""
+    _hidden_json(d)
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace(
+        "  var TOTAL = 6;",
+        '  var TOTAL = 6;\n  var hiddenPath = "extra";\n  hiddenPath += ".json";\n  fetchJson(hiddenPath);', 1), "utf-8")
+
+
+m195 = _append("styles.css", 'body { quotes: "The Phase A service accounts " ". " "were created." ""; }\n'
+                             'body::before { content: open-quote open-quote; }')
+
+
+def m196(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap preset temporary roles.")
+
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -1226,7 +1271,11 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m189 INV-6: a reassigned name is not one literal (Codex r29)", m189),
              ("m190 adjacent quotes strings paint one claim (Codex r29)", m190),
              ("m191 a bare-plural object is still an object (Codex r29)", m191),
-             ("m192 a qualifier in another clause licenses nothing (Codex r29)", m192)]
+             ("m192 a qualifier in another clause licenses nothing (Codex r29)", m192),
+             ("m193 INV-6: ||= writes the path too (Codex r30)", m193),
+             ("m194 INV-6: += writes the path too (Codex r30)", m194),
+             ("m195 open-quote paints a string this reader cannot pick (Codex r30)", m195),
+             ("m196 a bare object is a whole noun phrase (Codex r30)", m196)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

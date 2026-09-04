@@ -609,8 +609,8 @@ def negation_scope_problems(sent, licences):
 PERFECT_RUN = r"(?:\s+(?i:has|have|had|was|were|is|are|been|being))*"
 PREDICATE_SLOT = (r"(?!(?:" + NP_STOP + r"|cannot|can't|won't|shan't|don't|doesn't|didn't)\b)"
                   r"(?!(?i:[a-z]+(?:s|ing|ly))\b)(?-i:[a-z][\w'’]*)")
-PREDICATE_OBJECT = (r"\s+(?:(?-i:" + DETERMINER_WORD + r")\b[^,;:.|]*|(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*)"
-                    r"\s*(?=[;:.)\]|]|$)")
+PREDICATE_OBJECT = (r"(?:\s+(?-i:" + DETERMINER_WORD + r")\b[^,;:.|]*"
+                    r"|(?:\s+(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*)+)\s*(?=[;:.)\]|]|$)")
 TRANSITIVE_VERB = re.compile(PERFECT_RUN + ADVERB_RUN + r"\s+(?<![-\w])(" + PREDICATE_SLOT + r")" + PREDICATE_OBJECT)
 # The licence for an unclassified predicate is a frame reaching it, exactly as for a past one: a qualifier and only
 # verb-phrase material between. A qualifier somewhere else in the sentence licenses nothing, so "Phase A is not yet
@@ -813,13 +813,24 @@ def _js_functions(masked):
 def _js_symbols(body, masked):
     """(single-literal bindings, map name -> its literal values, names bound to something else, parameter names)."""
     literals = {m.group(1): m.group(2)[1:-1] for m in JS_LITERAL_BINDING.finditer(body)}
-    # A name that is assigned anywhere else - a second binding, a plain re-assignment - is no longer one literal.
-    assigned = {}
-    for m in re.finditer(r"\b([A-Za-z_$][\w$]*)\s*=(?!=)", masked):
-        assigned[m.group(1)] = assigned.get(m.group(1), 0) + 1
-    for name, count in assigned.items():
-        if count > 1:
-            literals.pop(name, None)                  # reassigned: this reader cannot say which value a fetch sees
+    # A name is one literal only if it is written exactly once and declared exactly once. Round 29 counted plain "="
+    # writes, which let `hiddenPath ||= …` and `hiddenPath += …` change a path the reader had already believed. EVERY
+    # write form counts here - compound, logical, increment - and so does a second declaration or a parameter of the
+    # same name, because a shadowed name is not the name this reader read.
+    writes = {}
+    for m in re.finditer(r"\b([A-Za-z_$][\w$]*)\s*(?:\+\+|--|(?:\*\*|<<|>>>|>>|\|\||&&|\?\?|[-+*/%&|^])?=(?![=>]))",
+                         masked):
+        writes[m.group(1)] = writes.get(m.group(1), 0) + 1
+    declared = {}
+    for m in re.finditer(r"\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)", masked):
+        declared[m.group(1)] = declared.get(m.group(1), 0) + 1
+    shadowed = set()
+    for m in JS_PARAMS.finditer(masked):
+        for group in m.groups():
+            shadowed |= {p.strip() for p in (group or "").split(",") if p.strip()}
+    for name in list(literals):
+        if writes.get(name, 0) > 1 or declared.get(name, 0) > 1 or name in shadowed:
+            literals.pop(name, None)                  # this reader cannot say which value a fetch would see
     maps, impure = {}, set()
     for m in JS_MAP_BINDING.finditer(body):
         depth, i, n = 1, m.end(), len(body)
@@ -1051,10 +1062,13 @@ def css_content_values(src):
                                                 "words in the stylesheet or render them from app.js" % word)
                             k = k4
                             continue
-                        # open-quote / close-quote paint a `quotes:` string, and every stylesheet string is audited
-                        # above, so the words they paint are on record wherever they were written.
-                        if word.lower() not in ("normal", "none", "inherit", "initial", "unset", "revert",
-                                                "open-quote", "close-quote", "no-open-quote", "no-close-quote"):
+                        # open-quote / close-quote paint one of the `quotes:` strings, and WHICH one depends on the
+                        # nesting depth of the element the rule matched: `quotes: a b c d` with two open-quotes paints
+                        # a then c, not a then b. This reader cannot compute that depth, so it says so.
+                        if word.lower() in ("open-quote", "close-quote", "no-open-quote", "no-close-quote"):
+                            problems.append("content uses %s, whose string depends on the quote depth of the element "
+                                            "it matched; write the words in the stylesheet instead" % word)
+                        elif word.lower() not in ("normal", "none", "inherit", "initial", "unset", "revert"):
                             problems.append("content uses the keyword %r, which this reader cannot resolve to text" % word)
                         k = k2
                         continue
@@ -1798,8 +1812,10 @@ check(any("service accounts were created" in t for t in regulated_in(extract_css
           'body { quotes: "The Phase A service accounts were created." ""; } body::before { content: open-quote; }'))),
       "every string a stylesheet carries is copy, whichever declaration paints it")
 check(any("The Phase A service accounts were created." == t.lstrip("| ") for t in extract_css_prose(
-          'body { quotes: "The Phase A service accounts " "were created."; } body::before { content: open-quote close-quote; }').split("\n")),
+          'body { quotes: "The Phase A service accounts " "were created."; }').split("\n")),
       "adjacent stylesheet strings are painted as one run, so they are audited as one claim")
+check(css_content_problems('body::before { content: open-quote open-quote; }'),
+      "which string open-quote paints depends on the element's quote depth, so this reader refuses to guess")
 check(_css_urls('@import url("extra.css");') == ["extra.css"] and _css_urls('@import "\\65 xtra.css";') == ["extra.css"],
       "@import names the file it names, through url() and through an escape")
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { co\\6e tent: "The Phase A service accounts were created."; }'))),
@@ -1814,6 +1830,7 @@ check(any("service accounts were created" in t for t in regulated_in(html_runs('
       "copy a browser shows from an attribute - a button label, an alt text, a tooltip - is audited like element text")
 check(all(transitive_problems(t) for t in ("The IAM bootstrap preset every binding.",
                                            "The IAM bootstrap preset roles.",
+                                           "The IAM bootstrap preset temporary roles.",
                                            "Phase A is not yet done, but the IAM bootstrap preset every binding."))
       and not transitive_problems("The IAM bootstrap must preset every binding.")
       and not transitive_problems("The Phase A tape must show the active configuration name."),
