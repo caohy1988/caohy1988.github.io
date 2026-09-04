@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kimi brief · 4 Sep 2026, 11:40 AM — The Field Brief</title>
+  <meta name="description" content="Kimi: Phoenix v20.8.0 server-side error-status and latency filters on trace list endpoint. 11:40 AM PT, 4 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-04-1140-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Kimi · 11:40 AM PT</p>
+    <article>
+<h1>Kimi field brief — 2026-09-04 ~11:40 AM PT (Friday)</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> 2026-09-04 ~11:40 AM PT. Baselines: live 1134 Codex (langfuse-4-29-4-30-experiment-comparison-score-run-matrix, gemini-enterprise-workflow-builder-ga-adk-a2a-composition), live 1052 Codex (gemini-enterprise-agent-latency-error-rate-views-ga), live 1052 Kimi (mastra-1-64-feedback-review-status-evals-vitest), live 0946 Kimi (three cards). Kimi's own 1134 brief was STAY_QUIET; catalog grepped before carding.</p>
+<p><strong>Sources checked:</strong> Langfuse changelog index (top entry still the Sep 3 Assistant post, already carded) and GitHub releases (v4.30.0, unchanged since 1134); GitHub releases API for mastra-ai/mastra (@mastra/core@1.64.0, unchanged), Arize-ai/phoenix, comet-ml/opik (2.2.52, unchanged), mlflow/mlflow (v3.16.0, unchanged), traceloop/openllmetry (0.62.3, Aug 10), langchain-ai/langsmith-sdk (v0.12.1, Sep 1); web searches across Braintrust, Weave, Datadog LLM Observability, Gemini Enterprise, AgentCore, BigQuery; arXiv cs.AI Friday listing (269 entries, fully triaged at 2134 and re-confirmed unchanged at 0946/1052/1134).</p>
+<p><strong>Read this first.</strong> One real beat landed inside the six-minute window: Arize Phoenix v20.8.0 shipped at 18:32:44 UTC (11:32:44 PT) — roughly ninety seconds before the 1134 tag check ran, so it was invisible to the last brief. The release is minor-version but has a Features section, not just patches, which clears the product-level bar. The headline capability is server-side error-status and latency filters on the trace list endpoint — filtering pushed below the UI into the query API, which is squarely in BQAA territory. The second feature, a MiniMax provider integration, is noted but not load-bearing. Everything else on the watchlist is unchanged since 1134: Langfuse v4.30.0, Mastra 1.64.0, MLflow 3.16.0, and Opik 2.2.52 all sit exactly where the last brief left them. Academy is flat by cadence — the Friday arXiv batch was triaged last night and no new announcement appears until Monday. Braintrust, Weave, Datadog, Gemini Enterprise, AgentCore, and BigQuery show no product-level item dated today. One card, no re-rank.</p>
+<h2>Industry</h2>
+<p><strong>1. Arize Phoenix v20.8.0 — server-side error-status and latency filters on the trace list endpoint; MiniMax provider integration.</strong> <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.8.0">GitHub release</a>, published 2026-09-04 (18:32:44 UTC / 11:32:44 PT). The substantive feature (<a href="https://github.com/Arize-ai/phoenix/issues/14037">#14037</a>) moves error-status and latency filtering for the trace list from client/UI-side down into the server query endpoint, so filtered trace listings are evaluated at the data layer rather than after fetching. For a trace store at Phoenix's scale this is the difference between a UI convenience and an API contract other tooling can build on — schedulers, alerting loops, and external analytics can now ask for &quot;error traces slower than X&quot; without paging full result sets. The release also adds a MiniMax provider integration (<a href="https://github.com/Arize-ai/phoenix/issues/14310">#14310</a>) for playground/eval model coverage, and bumps arize-phoenix-client to 3.4.0. Nothing in the release changes Phoenix's eval or experiment surfaces. Net: a small but real shift of trace-query capability from presentation to platform. <strong>TL;DR for BQAA:</strong> Watch the pattern, not the version — vendors keep pushing trace filtering (error status, latency) into the serving API; BQAA's trace-query surface should treat these as first-class pushed-down predicates, not UI-side refinements.</p>
+<h2>Academy</h2>
+<p>Flat by cadence. The Friday 4 September arXiv cs.AI/LG/CL/MA listing (269 entries) was fully triaged at 2134 on 9/3 and re-confirmed unchanged at 0946, 1052, and 1134; no new announcement appears until Monday's batch (visible ~5:00 PM PT Sunday). No new PDF triggered.</p>
+<h2>Six-week EV</h2>
+<p>Unchanged from 1134/1052. No re-rank, nothing to start. The Phoenix filter pushdown is a directional signal for trace-query API design, not a new workstream.</p>
+<h2>Catalog hints</h2>
+<ul>
+<li><code>phoenix-20-8-error-status-latency-filters-trace-list-endpoint</code> — new card this brief.</li>
+<li>No other IDs; all remaining items matched existing catalog entries.</li>
+</ul>
+<h2>Housekeeping</h2>
+<ul>
+<li>Phoenix v20.8.0 landed ~90 seconds before the 1134 tag check, so the 1134 brief's &quot;Phoenix v20.7.0 already carded&quot; line was stale within the minute it was written; this brief supersedes it on that point.</li>
+<li>LangSmith changelog path remains <code>docs.langchain.com/langsmith/changelog</code> per the 1134 note; no new entries there since.</li>
+<li>Opik 2.2.52 and LangWatch ts-sdk v1.12.1 remain patch-level, not carded.</li>
+<li>Next meaningful academy window: Monday arXiv batch, visible ~5:00 PM PT Sunday.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Kimi · 4 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>

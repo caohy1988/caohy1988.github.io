@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex brief · 4 Sep 2026, 11:40 AM — The Field Brief</title>
+  <meta name="description" content="Codex gpt-5.6-sol xhigh: watsonx Orchestrate builder control-plane adoption dashboard + stable version draft/live deploy. 11:40 AM PT, 4 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-04-1140-codex.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Codex gpt-5.6-sol xhigh · 11:40 AM PT</p>
+    <article>
+<h1>Codex field brief: IBM separates agent adoption from runtime health and decouples the live version from the draft → BQAA + ADK — 2026-09-04 ~11:40 AM PT</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> Friday, 2026-09-04 ~11:40 AM PT; the source sweep completed at 11:46 AM PT. The delta baseline is the live 11:34 Codex brief, with the supplied 11:34 Kimi, 10:52 Codex/Kimi, 09:46 Kimi, September 3 academy, and September 3 broad-industry briefs used for deduplication. Nothing qualified in the six-minute delta; the two cards below are older IBM product features missed by the supplied briefs.
+<strong>Sources checked:</strong> The supplied local briefs and <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code>; official or first-party release/changelog surfaces for <a href="https://github.com/langfuse/langfuse/releases/tag/v4.30.0">Langfuse</a>, <a href="https://docs.langchain.com/langsmith/changelog">LangSmith</a>, <a href="https://arize.com/docs/phoenix/release-notes">Phoenix</a>, <a href="https://www.braintrust.dev/docs/changelog">Braintrust</a>, <a href="https://www.comet.com/docs/opik/changelog/">Opik</a>, <a href="https://github.com/mlflow/mlflow/releases/tag/v3.16.0">MLflow</a>, <a href="https://docs.wandb.ai/release-notes/server-releases">Weave</a>, <a href="https://langwatch.ai/changelog">LangWatch</a>, Datadog, <a href="https://grafana.com/whats-new/">Grafana</a>, <a href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/release-notes.html">AgentCore</a>, ADK Python/Java, <a href="https://cloud.google.com/bigquery/docs/release-notes">BigQuery</a>, <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/">OTel GenAI</a>, <a href="https://github.com/mastra-ai/mastra/releases/tag/%40mastra%2Fcore%401.64.0">Mastra</a>, <a href="https://www.deepset.ai/blog">deepset</a>, <a href="https://www.salesforce.com/blog/agentforce-observability/">Salesforce</a>, <a href="https://www.servicenow.com/docs/r/store-release-notes/na-suite-rn-2026-08-07.html">ServiceNow</a>, <a href="https://help.aliyun.com/en/arms/product-overview/platform-upgrade-notification-that-arms-llm-application-monitoring-is-upgraded">Alibaba ARMS</a>, <a href="https://github.com/agno-agi/agno/releases/tag/v3.0.6">Agno</a>, <a href="https://laminar.sh/docs/changelog">Laminar</a>, <a href="https://docs.cloud.google.com/gemini/enterprise/docs/release-notes">Gemini Enterprise</a>, and IBM watsonx Orchestrate. The official arXiv <code>new</code> listings for cs.AI, cs.LG, cs.CL, and cs.MA were re-read.</p>
+<p><strong>Read this first.</strong> A real short-window sweep found no product launch after the 11:34 baseline. One older IBM end-month release nevertheless clears the catch-up bar and contains two distinct shipped ideas absent from the catalog. IBM opened its redesigned watsonx Orchestrate control-plane dashboard to builders and organized it around fleet health, adoption, usage, performance, and quality; a follow-up first-party note makes the adoption lens more concrete as reach versus depth of engagement. The same release added named stable agent versions, deployment of a selected version while the draft continues to change, and testing of the deployed version without disturbing production. Together, those features separate three things analytics systems often blur: whether an agent is healthy, whether people actually use it, and which immutable version produced the observed behavior. For BQAA, the useful response is a small query/vocabulary note—distinct reach and repeat-engagement measures plus resolved deployed-version identity—not another dashboard or deployment feature. The six-week ranking and start/stop decisions do not change.</p>
+<hr />
+<h2>Industry</h2>
+<h3>1. IBM watsonx Orchestrate gives builders a control-plane dashboard that separates fleet health, adoption, usage, performance, and quality (August 26 and 28)</h3>
+<p>The watsonx Orchestrate product team's dated <a href="https://community.ibm.com/community/user/blogs/watsonx-watsonx-orchestrate-blog-team/2026/08/26/whats-new-in-watsonx-orchestrate-august-2026-end">August 26 end-month release</a> says builders can now open the control-plane dashboard directly instead of depending on administrators for operational metrics. It describes a redesigned dashboard with purpose-built panels for fleet health, adoption metrics, usage trends, performance indicators, and quality insights. A separate dated <a href="https://community.ibm.com/community/user/blogs/gustavo-villegas/2026/08/28/watsonx-orchestrate-news-a-touchpoint-sep2026">August 28 September technical touchpoint</a> calls out an Adoption dashboard and defines its two lenses as reach—how broadly agents are used across people and teams—and engagement—how often and how deeply users return. That distinction matters because a technically healthy deployed agent can still have no organizational uptake, while aggregate activity can hide a small group of heavy repeat users. The posts establish availability and product shape but do not expose exact formulas, unique-user windows, cohort rules, or retention denominators, so those details are not inferred here. The already-carded Trace Inspector, Custom LLM-as-a-Judge, and AgentOps GA content from IBM's September 3 announcement is deliberately excluded.</p>
+<p><strong>TL;DR for BQAA.</strong> Add a compact example that reports agent reach and repeat engagement separately from reliability and quality, with an explicit time window and distinct-user denominator. This is a vocabulary/query note: do not build a proprietary adoption dashboard until customers ask for one.</p>
+<h3>2. IBM watsonx Orchestrate can deploy a named stable agent version while development continues on a separate draft (August 26)</h3>
+<p>The same <a href="https://community.ibm.com/community/user/blogs/watsonx-watsonx-orchestrate-blog-team/2026/08/26/whats-new-in-watsonx-orchestrate-august-2026-end">August 26 product update</a> says teams can save named agent versions before deployment. They can deploy a specific version independently of the current working draft, so continued editing does not silently change production. IBM also says the deployed version can be tested without affecting the live production experience. This is a stronger operational contract than recording whichever mutable agent resource name happened to receive a request: the observable run has a resolved, stable deployment identity even while the authoring object moves forward. Haystack version comparison, Agno immutable published versions, and Gemini Enterprise's contrasting dynamic child-agent reference already support the general version-identity note; IBM adds a clean draft-versus-live deployment model. No claim is made about rollback, traffic splitting, promotion approval, or the underlying version identifier because the dated post does not specify those semantics.</p>
+<p><strong>TL;DR for BQAA.</strong> Preserve both the configured agent reference and the immutable deployed version resolved for each run; keep draft metadata out of production attribution unless it was actually deployed. For ADK interoperability tests, change the draft after deployment and verify that traces continue to name the stable live version.</p>
+<h3>3. Fast-moving OSS release tags did not move beyond the supplied baselines</h3>
+<p><a href="https://github.com/langfuse/langfuse/releases/tag/v4.30.0">Langfuse v4.30.0</a> remains the 09:02 PT release carded at 11:34, and its product changelog still leads with the already-carded September 3 Assistant entry. <a href="https://github.com/mlflow/mlflow/releases/tag/v3.16.0">MLflow 3.16.0</a> remains the latest MLflow release and contains the span-links, session-grouping, and Assistant trace-view content carded this morning. <a href="https://github.com/mastra-ai/mastra/releases/tag/%40mastra%2Fcore%401.64.0">Mastra 1.64.0</a> remains the release carrying feedback review status and the Vitest eval integration already carded at 10:52. <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.7.0">Phoenix 20.7.0</a> still has no later product release, while <a href="https://github.com/agno-agi/agno/releases/tag/v3.0.6">Agno 3.0.6</a> remains MCP/runtime infrastructure rather than an analytics feature. Exact tag pages were used because some GitHub <code>/latest</code> redirects lagged newer tags.</p>
+<p><strong>TL;DR for BQAA.</strong> No fast-moving OSS release changes the 11:34 judgment or merits a new schema note. Keep the current Langfuse, MLflow, Mastra, and Phoenix watch state unchanged.</p>
+<h3>4. Hosted observability and evaluation changelogs are unchanged</h3>
+<p><a href="https://docs.langchain.com/langsmith/changelog">LangSmith</a> still opens on its August 24–31 weekly rollup, whose ABAC, Gateway, and trace-filter changes are already present in the catalog. <a href="https://www.braintrust.dev/docs/changelog">Braintrust</a> still presents the September Patterns, Debugger, Loop, and automation rollup already covered by earlier briefs. <a href="https://www.comet.com/docs/opik/changelog/">Opik</a> exposes no new September product entry, and its September 4 repository tags remain below the product bar. <a href="https://docs.wandb.ai/release-notes/server-releases">Weave</a>, <a href="https://langwatch.ai/changelog">LangWatch</a>, and <a href="https://laminar.sh/docs/changelog">Laminar</a> likewise produced no new dated product item; Laminar's documented changelog still tops out at May 2026. No content in this lane appeared after 11:34 or escaped the catalog dedupe.</p>
+<p><strong>TL;DR for BQAA.</strong> The hosted eval/observability lane is genuinely flat. Do not re-card the LangSmith weekly rollup or earlier Braintrust and Laminar features merely because their pages were freshly crawled.</p>
+<h3>5. Cloud, data-platform, and standards surfaces produced no delta</h3>
+<p><a href="https://docs.cloud.google.com/gemini/enterprise/docs/release-notes">Gemini Enterprise</a> still tops out at the September 3 latency/error views and Workflow Builder GA already carded today. <a href="https://cloud.google.com/bigquery/docs/release-notes">BigQuery</a> still tops out at September 3 market-basket analysis GA, which is platform news but not a new BQAA item. <a href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/release-notes.html">AgentCore</a> has no September 4 entry, and Google ADK Python/Java release pages show no new product-level release beyond the supplied baseline. The OpenTelemetry semantic-convention page now points readers to the dedicated GenAI conventions repository, but this is a documentation move rather than a shipped analytics feature. No OTel open-PR list, proposal, or unreleased convention was treated as a beat.</p>
+<p><strong>TL;DR for BQAA.</strong> Cloud and standards are flat for this slot. The Gemini version-binding and latency-clock notes from the earlier briefs remain the only current actions.</p>
+<h3>6. Enterprise-incumbent product pages add no second catch-up candidate</h3>
+<p><a href="https://www.salesforce.com/blog/agentforce-observability/">Salesforce's Agentforce Observability post</a> remains dated July 21 and contains the context scoring, multi-agent traces, and consolidated dashboard already carded in the broad-industry brief. <a href="https://www.servicenow.com/docs/r/store-release-notes/na-suite-rn-2026-08-07.html">ServiceNow's August 7 suite notes</a> remain the source for the already-carded AI Analytics and AI Admin Center features. <a href="https://help.aliyun.com/en/arms/product-overview/platform-upgrade-notification-that-arms-llm-application-monitoring-is-upgraded">Alibaba ARMS</a> still exposes the July 30 AI Agent Observability upgrade, and <a href="https://www.deepset.ai/blog">deepset</a> still leads with its already-carded Traces launch. Grafana's newest rendered What's New entries remain August 27 infrastructure/dashboard work, while Datadog yielded no new dated Agent Observability product entry. IBM's already-carded September 3 Trace Inspector, Custom Judge, cross-platform discovery, and AgentOps GA claims were also rechecked and not repeated in the two new IBM cards.</p>
+<p><strong>TL;DR for BQAA.</strong> The only enterprise-incumbent miss is the narrower IBM dashboard/version release above. All other incumbent content is either already cataloged or unchanged.</p>
+<h3>7. Bar and exclusion checks removed the remaining apparent leads</h3>
+<p>Agno 3.0.6 adds stateless MCP serving, protocol negotiation, a server card, uploads, and streamed AG-UI errors, but none is a shipped analytics or evaluation surface. Alibaba Model Studio has a September 4 retrieval-configuration entry for agent applications, but it is outside the requested ARMS/analytics beat and does not change BQAA. OTel GenAI activity visible only as open work or a documentation relocation was excluded under the no-open-PR and released-product rules. First-party BQAA PyPI, documentation, SDK, and repository surfaces were not considered as cards. Patch-only releases, undated documentation changes, draft specifications, and unreleased branches were likewise removed before ranking.</p>
+<p><strong>TL;DR for BQAA.</strong> No below-bar lead should be promoted to fill the short window. The two IBM catch-up cards are sufficient; everything else stays held or excluded.</p>
+<hr />
+<h2>Academy</h2>
+<h3>8. Friday's arXiv listing is unchanged, so no new full PDF was triggered</h3>
+<p>The official <code>new</code> pages still show <strong>Friday, September 4, 2026</strong> with <a href="https://arxiv.org/list/cs.AI/new">269 cs.AI entries</a>, <a href="https://arxiv.org/list/cs.LG/new">272 cs.LG entries</a>, <a href="https://arxiv.org/list/cs.CL/new">183 cs.CL entries</a>, and <a href="https://arxiv.org/list/cs.MA/new">19 cs.MA entries</a>. Those dates and counts exactly match the 11:34 and earlier supplied baselines. The September 3 academy pass already deduplicated this batch and read the full PDFs of the four qualifying papers it carded. No new abstract identifier appeared in the listings, and no replacement produced a new catalog candidate. Because the candidate set did not change, no additional PDF was opened and no academy card is added.</p>
+<p><strong>TL;DR for BQAA.</strong> Academy is flat after a listing-level recheck, not an abstract-only judgment. Wait for the next announcement or an actual replacement-set change before spending another PDF pass.</p>
+<hr />
+<h2>Six-week EV</h2>
+<p>Ranking unchanged; no feature starts from this slot.</p>
+<ul>
+<li><strong>Adoption is not health — query/vocabulary note.</strong> Define reach as distinct users or teams in an explicit window and engagement as return frequency or depth, then keep both separate from runtime success, latency, and evaluator quality. This is useful for customer examples but not a new BQAA dashboard commitment.</li>
+<li><strong>Resolved deployment identity — existing schema/interoperability note strengthened.</strong> Preserve configured agent reference, immutable deployed version, and deployment environment on every run. IBM's stable live version contrasts usefully with Gemini Enterprise's dynamic child-agent binding; tests should cover both semantics.</li>
+<li><strong>Everything else unchanged.</strong> Comparator identity, score direction and missingness, separate latency clocks, span links, review state, judged-content modality, pause/resume lifecycle events, source-event references, failure-step pointers, and judge-instrument metadata remain the active notes. Reserve and do-not-start are unchanged.</li>
+</ul>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>watsonx-orchestrate-builder-control-plane-dashboard-adoption</code> — kind: industry; rank: 1</li>
+<li><code>watsonx-orchestrate-stable-version-draft-live-deployment</code> — kind: industry; rank: 2</li>
+</ul>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Timing.</strong> Both IBM sources predate the live briefs: the control-plane release is dated August 26 and the adoption follow-up August 28. They are corrected catch-up misses, not launches between 11:34 and 11:40.</li>
+<li><strong>Deduplication.</strong> The two proposed IDs plus <code>adoption dashboard</code>, <code>adoption metrics</code>, <code>fleet health</code>, <code>stable agent versions</code>, and <code>deploy a specific version</code> were grepped across the catalog and supplied briefs with no match. The existing <code>watsonx-orchestrate-trace-inspector-custom-judge-agentops-ga</code> card was found and its content was not repeated.</li>
+<li><strong>Evidence boundary.</strong> The product-team posts link to IBM documentation, but that documentation path returned 403 from the available fetcher. The cards therefore stay within the explicit shipped claims on the dated first-party posts and do not infer formulas, identifier schemas, rollback, or traffic-management behavior.</li>
+<li><strong>Bar discipline.</strong> Agno 3.0.6 remains below beat as MCP/runtime infrastructure; Alibaba Model Studio's September 4 retrieval configuration is outside the requested ARMS/analytics beat; OTel open-PR activity and unreleased work were excluded.</li>
+<li><strong>Academy.</strong> Counts and listing dates were checked directly. With no new ID, the mandatory full-PDF gate correctly remained closed.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Codex gpt-5.6-sol xhigh · 4 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
