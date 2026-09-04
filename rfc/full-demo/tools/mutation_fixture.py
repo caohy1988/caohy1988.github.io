@@ -38,6 +38,15 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m28 "As planned the operator created the Phase A service accounts." (Codex r9: status as manner)
   m29 same as m26 with a 15-token subject (r9: the eight-token FINITE_PAST ceiling is gone)
   m30 "The tape will be recorded, and Codex verified that the operator granted the custom role." (r9 cousin)
+  m31 "The docs must say that the operator created the three Phase A service accounts." (Codex r10: subordinate)
+  m32 "The docs must be updated after service accounts were created." (Codex r10: temporal adjunct clause)
+  m33 "Check 6 denied the request with PERMISSION_DENIED." (Codex r10: the generator produced "denyed")
+  m34 "The operator grants temporary Phase A roles." (Codex r10: present tense with a modifier before the object)
+  m35 "The operator will create the service accounts and revoked the custom role." (Kimi r10: verb-initial finite past)
+  m36 "The sync writer must validate the bundle and committed it on tape." (Kimi r10)
+  m37 "The plan must document the workflow, and okf-setup created the service accounts." (r10 cousin: identifier subject)
+  m38 "In the demo project the operator created the service accounts." (r10 cousin: leading adjunct)
+  m39 "The setup job has run on tape." (r10 cousin: ambiguous participle, finite only after an auxiliary)
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
 """
@@ -199,6 +208,17 @@ m28 = _append("plan.md", "As planned the operator created the Phase A service ac
 m29 = _append("intent.md", "The docs must describe the workflow, and the operator responsible for the Phase A bootstrap in the demo project on 2026-09-03 created the three service accounts.")
 m30 = _append("CUSTOMER_STORIES.md", "The tape will be recorded, and Codex verified that the operator granted the custom role.")
 
+# Codex r10: subordinate clause, temporal adjunct, past/present inflection. Kimi r10: verb-initial finite coordination.
+m31 = _append("ARCHITECTURE.md", "The docs must say that the operator created the three Phase A service accounts.")
+m32 = _append("spec.md", "The docs must be updated after service accounts were created.")
+m33 = _append("plan.md", "Check 6 denied the request with PERMISSION_DENIED.")
+m34 = _append("intent.md", "The operator grants temporary Phase A roles.")
+m35 = _append("CUSTOMER_STORIES.md", "The operator will create the service accounts and revoked the custom role.")
+m36 = _append("README.md", "The sync writer must validate the bundle and committed it on tape.")
+m37 = _append("ARCHITECTURE.md", "The plan must document the workflow, and okf-setup created the service accounts.")
+m38 = _append("spec.md", "In the demo project the operator created the service accounts.")
+m39 = _append("plan.md", "The setup job has run on tape.")
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -225,7 +245,16 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m27 'must document …, and the operator makes every binding' (simple present)", m27),
              ("m28 'As planned the operator created …' (status describes manner)", m28),
              ("m29 long subject (>8 tokens) after ', and' (no token ceiling)", m29),
-             ("m30 proper-noun subject 'Codex verified that the operator granted …'", m30)]
+             ("m30 proper-noun subject 'Codex verified that the operator granted …'", m30),
+             ("m31 subordinate 'must say that the operator created …' (Codex r10)", m31),
+             ("m32 temporal adjunct 'must be updated after service accounts were created' (Codex r10)", m32),
+             ("m33 'Check 6 denied the request with PERMISSION_DENIED' (past inflection)", m33),
+             ("m34 'grants temporary Phase A roles' (present, modifier before object)", m34),
+             ("m35 'will create … and revoked the custom role' (Kimi r10: verb-initial finite past)", m35),
+             ("m36 'must validate … and committed it on tape' (Kimi r10)", m36),
+             ("m37 identifier subject 'and okf-setup created the service accounts'", m37),
+             ("m38 leading adjunct 'In the demo project the operator created …'", m38),
+             ("m39 'The setup job has run on tape.' (ambiguous participle after an auxiliary)", m39)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
