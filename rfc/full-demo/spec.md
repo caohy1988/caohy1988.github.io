@@ -146,7 +146,7 @@ than the sync writer.
 4. Positive checks 1–3 and negative checks 1–5.
 5. Operator: revoke every `okf-setup` role and the dataset `dataOwner`; run check 6; revoke Token Creator on `okf-setup`; run check 7; delete EntryGroup `okf-rfc-demo-boundary`; revoke the operator's own setup-only roles.
 
-**Positive checks** (Phase A, not yet run; each allowed operation to be exercised once on tape, expected `OK`):
+**Positive checks** (Phase A, not yet run; each allowed operation to be exercised on tape exactly once, expected `OK`):
 
 1. `okf-setup`: `aspect-types create okf-context-runtime`; `entries patch` on `okf-rfc-demo-boundary/entries/boundary-probe` (expected `OK`, so that negative check 2 below can fail only on IAM); `sql/setup_runtime_tables.sql` piped to `bq query` under configuration `okf-setup`.
 2. `okf-sync-writer-okf-rfc-demo`: `entries create` of type `okf-bundle` with the `okf` aspect in `okf-rfc-demo`; `entries patch` adding `okf-context-runtime`; `MERGE` into `publications`, `INSERT` into `deployment_heads`; `entries delete` of a ledger-owned entry.

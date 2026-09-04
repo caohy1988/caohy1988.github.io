@@ -47,6 +47,16 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m37 "The plan must document the workflow, and okf-setup created the service accounts." (r10 cousin: identifier subject)
   m38 "In the demo project the operator created the service accounts." (r10 cousin: leading adjunct)
   m39 "The setup job has run on tape." (r10 cousin: ambiguous participle, finite only after an auxiliary)
+  m40 "The docs must explain how the operator created the Phase A service accounts." (Codex/Kimi r11: wh-complement)
+  m41 "The docs must report the operator created the Phase A service accounts." (Codex r11: null complement)
+  m42 "The operator will record the tape once Phase A has been executed." (Codex r11: temporal boundary)
+  m43 "The operators grant temporary Phase A roles." (Codex r11: finite base-present with a plural subject)
+  m44 "The operator grants very narrowly scoped temporary Phase A roles." (Codex r11: no modifier ceiling)
+  m45 "The tape will show how the operator created the service accounts." (Kimi r11)
+  m46 / m47 why- and what-complements (r11 cousins)
+
+Positive controls p1-p5 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
+"grants" as a noun, bare-infinitive coordination, the proper noun "Run") and must leave the checker at exit 0.
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
 """
@@ -219,6 +229,27 @@ m37 = _append("ARCHITECTURE.md", "The plan must document the workflow, and okf-s
 m38 = _append("spec.md", "In the demo project the operator created the service accounts.")
 m39 = _append("plan.md", "The setup job has run on tape.")
 
+# Codex r11: wh-complement, null complement, unconditional temporal boundary, finite base-present, no modifier ceiling.
+# Kimi r11: how / why complementizers.
+m40 = _append("ARCHITECTURE.md", "The docs must explain how the operator created the Phase A service accounts.")
+m41 = _append("spec.md", "The docs must report the operator created the Phase A service accounts.")
+m42 = _append("plan.md", "The operator will record the tape once Phase A has been executed.")
+m43 = _append("intent.md", "The operators grant temporary Phase A roles.")
+m44 = _append("CUSTOMER_STORIES.md", "The operator grants very narrowly scoped temporary Phase A roles.")
+m45 = _append("README.md", "The tape will show how the operator created the service accounts.")
+m46 = _append("ARCHITECTURE.md", "The docs must explain why the operator granted the custom role.")
+m47 = _append("spec.md", "The report must record what the operator revoked on tape.")
+
+# Positive controls (Codex r11 #3): honest RFC-only prose that must NOT be flagged. Appending any of these to a clean
+# copy must leave the checker at exit 0; a fail here means the guard has started rejecting truthful future-tense text.
+POSITIVE_CONTROLS = [
+    ("p1 shared modal + coordinated participle", _append("ARCHITECTURE.md", "Every Phase A role must be created and granted on tape.")),
+    ("p2 'that' as a determiner, not a complementizer", _append("spec.md", "The operator must record that Phase A binding on tape.")),
+    ("p3 'grants' as a noun", _append("plan.md", "BigQuery grants use the table-level IAM policy for the custom role.")),
+    ("p4 bare-infinitive coordination", _append("intent.md", "The operator will create the service accounts and revoke the custom role.")),
+    ("p5 proper noun 'Run' and infinitive after a modal", _append("README.md", "The Cloud Run Job will run as the sync writer.")),
+]
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -254,7 +285,15 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m36 'must validate … and committed it on tape' (Kimi r10)", m36),
              ("m37 identifier subject 'and okf-setup created the service accounts'", m37),
              ("m38 leading adjunct 'In the demo project the operator created …'", m38),
-             ("m39 'The setup job has run on tape.' (ambiguous participle after an auxiliary)", m39)]
+             ("m39 'The setup job has run on tape.' (ambiguous participle after an auxiliary)", m39),
+             ("m40 'must explain how the operator created …' (Codex/Kimi r11: wh-complement)", m40),
+             ("m41 'must report the operator created …' (Codex r11: null complement)", m41),
+             ("m42 'will record the tape once Phase A has been executed' (Codex r11: temporal)", m42),
+             ("m43 'The operators grant temporary Phase A roles.' (finite base-present)", m43),
+             ("m44 'grants very narrowly scoped temporary Phase A roles' (no modifier ceiling)", m44),
+             ("m45 'The tape will show how the operator created …' (Kimi r11)", m45),
+             ("m46 'must explain why the operator granted …' (r11 cousin: why)", m46),
+             ("m47 'must record what the operator revoked on tape' (r11 cousin: what)", m47)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
@@ -264,6 +303,16 @@ with tempfile.TemporaryDirectory() as tmp:
     if rc != 0:
         bad.append("clean")
         print(re.sub(r"(?m)^OK .*\n", "", out)[-1500:])
+for name, fn in POSITIVE_CONTROLS:
+    with tempfile.TemporaryDirectory() as tmp:
+        d = make_copy(tmp)
+        fn(d)
+        rc, out = run_checker(d)
+        clean = rc == 0
+        print(("OK   " if clean else "FAIL ") + "%s → checker exit %d (%s)" % (name, rc, "stays clean" if clean else "FALSE POSITIVE"))
+        if not clean:
+            bad.append(name)
+            print("      " + "\n      ".join([l for l in out.split("\n") if l.startswith("FAIL")][:3]))
 for name, fn in MUTATIONS:
     with tempfile.TemporaryDirectory() as tmp:
         d = make_copy(tmp)

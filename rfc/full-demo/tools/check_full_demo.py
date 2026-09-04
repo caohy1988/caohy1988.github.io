@@ -417,14 +417,25 @@ PRESENT_FORMS = sorted({pres for _, pres in VERB_FORMS.values()})
 # An object head: a determiner / quantifier / possessive, a Titlecase word ("Phase"), or a Phase A object. ALL-CAPS
 # identifiers (IAM, PERMISSION_DENIED) are not object heads, so "BigQuery grants use table-level IAM" reads as a noun.
 OBJECT_HEAD = r"(?:the|a|an|every|each|all|its|their|our|this|that|these|those|one|two|three|any|some|no|(?-i:[A-Z][a-z]+))"
+# Between a finite verb and its object head only MODIFIER-shaped words may stand: hyphenated, or a recognisable
+# adjective / adverb ending, or a degree word. No token ceiling. This is what separates a verb from a noun:
+# "grants very narrowly scoped temporary Phase A roles" (all modifiers → verb) vs "grants use the … policy"
+# ("use" is not modifier-shaped, so "grants" heads a noun phrase and "use" is the real verb).
+MODIFIER = r"(?-i:(?:[a-z]+-[a-z-]+|[a-z]+(?:ly|ed|ing|al|ary|ory|ic|ous|able|ible|ive|ent|ant|ful|less|est|er|y)|very|more|most|only|just|quite|fairly|all|both|such))"
+OBJECT_LOOKAHEAD = r"(?=(?:\s+" + MODIFIER + r")*\s+(?:" + OBJECT_HEAD + r"\b|" + PHASE_A_OBJECT.pattern + r"))"
 PAST_VERB = re.compile(r"\b(" + "|".join(PAST_FORMS) + r")\b|\b(?:was|were|is|are|been|be|has|have|had)\s+(?:not\s+|already\s+)?(?:" + "|".join(AMBIGUOUS_PARTICIPLE) + r")\b", re.I)
 # A simple-present form is a finite verb only when an object noun phrase follows, tolerating up to three lowercase
 # modifiers ("grants temporary Phase A roles" is a verb; "the table-level grants" and "BigQuery grants use IAM" are nouns).
-PRESENT_VERB = re.compile(r"\b(" + "|".join(PRESENT_FORMS) + r")\b(?=(?:\s+(?-i:[a-z][a-z-]*)){0,3}\s+(?:" + OBJECT_HEAD + r"\b|" + PHASE_A_OBJECT.pattern + r"))", re.I)
+PRESENT_VERB = re.compile(r"\b(" + "|".join(PRESENT_FORMS) + r")\b" + OBJECT_LOOKAHEAD, re.I)
+# Finite base-present ("The operators grant temporary Phase A roles"): the same bare form is an infinitive after a modal
+# or "to", so it is finite only when a subject stands before it in the clause and no modal / "to" governs it.
+BASE_VERB = re.compile(r"\b(" + "|".join(sorted(LEMMAS)) + r")\b" + OBJECT_LOOKAHEAD)  # lowercase only: "Run"/"Create" are proper nouns or imperatives
 AUX_WORDS = r"was|were|is|are|be|been|being|has|have|had|having|does|do|did"
 AUX = r"(?:" + AUX_WORDS + r")"
 FINITE_FORM = re.compile(r"\b(" + "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b", re.I)
-VERB_PHRASE_TAIL = r"(?:\s+(?:" + AUX_WORDS + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS + AMBIGUOUS_PARTICIPLE) + r"|not|already|then|also))+\s*$"
+# The tail of a span may be the predicate's own verb phrase, including a coordinated participle chain under one modal
+# ("must be created and granted on tape": "be created and" is that predicate's own frame, not an intervening claim).
+VERB_PHRASE_TAIL = r"(?:\s*(?:,|\band\b|\bor\b)?\s+(?:" + AUX_WORDS + r"|" + "|".join(PAST_FORMS + PRESENT_FORMS + AMBIGUOUS_PARTICIPLE) + r"|not|already|then|also))+\s*(?:,|\band\b|\bor\b)?\s*$"
 EXECUTED = [re.compile(rx, re.I) for rx in [
     r"recorded on tape", r"on tape under", r"\bon tape\b", r"\bthe tape shows\b", r"\bthe tape demonstrates\b",
     r"\bdemonstrated, not asserted\b", r"\b(is|was|were|are|been) demonstrated\b", r"\bprove[sd]? (the|that|it)\b", r"\bdenial checks prove\b",
@@ -436,18 +447,30 @@ EXECUTED = [re.compile(rx, re.I) for rx in [
 
 # Known limit (Kimi r10, not a bypass of the qualifier rules): an anaphoric object escapes the co-occurrence test —
 # "…, then the operator created them." names no Phase A object in its own clause, so no predicate is recognised there.
+def base_is_finite(cl, start):
+    """A bare lemma is a finite base-present verb only when a subject stands before it in the clause and no modal or
+    infinitive "to" governs it: "The operators grant …" is finite, "must create …" / "to create …" are not."""
+    before = cl[:start]
+    if MODAL.search(before) or re.search(r"\bto\b\s*$|\bto\b\s+\w+\s*$", before, re.I):
+        return False
+    return bool(SUBJECT_TOKEN.search(before))
+
 def executed_preds(cl):
-    """Return the start offsets of EVERY executed predicate in the clause (phrase matches, and finite past / present
-    verb forms when the clause also names a Phase A object)."""
-    starts = set()
+    """Return (offset, kind) for EVERY executed predicate in the clause. kind is "verb" for a finite past / present /
+    base-present form (which must have a subject, so an intervening subject means a new clause) and "phrase" for a
+    fixed EXECUTED phrase such as "on tape" (which has no subject of its own)."""
+    found = {}
     for rx in EXECUTED:
         for m in rx.finditer(cl):
-            starts.add(m.start())
+            found.setdefault(m.start(), "phrase")
     if PHASE_A_OBJECT.search(cl):
         for rx in (PAST_VERB, PRESENT_VERB):
             for m in rx.finditer(cl):
-                starts.add(m.start())
-    return sorted(starts)
+                found[m.start()] = "verb"
+        for m in BASE_VERB.finditer(cl):
+            if base_is_finite(cl, m.start()):
+                found[m.start()] = "verb"
+    return sorted(found.items())
 
 MODAL = re.compile(r"\b(must|will|would|shall|expected|is to|are to|to be (recorded|run|exercised|made|created|revoked|deleted|granted|stamped|demonstrated|shown))\b", re.I)
 STATUS = re.compile(r"\b(not yet|not done|not run|not started|not created|not built|not met|not (been )?executed|has not run|none (has|have|was|were) (been )?run|"
@@ -455,7 +478,7 @@ STATUS = re.compile(r"\b(not yet|not done|not run|not started|not created|not bu
 NEGATION = re.compile(r"\b(not|no|none|nothing|never|cannot|without)\b", re.I)
 # Adversative / causal connectors always end a modal's reach; sequential and temporal ones end it unless the clause they
 # open is itself a bare-verb continuation ("must create the SAs, then record every binding on tape").
-RESET_ALWAYS = re.compile(r"^(but|while|whereas|although|though|however|because|so)$", re.I)
+RESET_ALWAYS = re.compile(r"^(but|while|whereas|although|though|however|because|so|\|)$", re.I)
 RESET_IF_FINITE = re.compile(r"^(then|and then|after|before|until|when|once)$", re.I)
 
 # ---- structural binding (Codex rounds 9–10), fail-closed ---------------------------------------------------------
@@ -468,21 +491,34 @@ RESET_IF_FINITE = re.compile(r"^(then|and then|after|before|until|when|once)$", 
 #   * after leading function words the span must not begin with a subject opener ("As planned the operator created …").
 # Subject openers are determiners, pronouns, possessives and Titlecase words; ALL-CAPS and snake_case identifiers are not.
 SUBJECT_OPENER = re.compile(r"(the|a|an|this|that|these|those|every|each|all|its|their|our|his|her|my|your|it|they|we|he|she|one|someone|everyone|nobody|somebody|who|which)|[A-Z][a-z]+")
-CLAUSE_OPENER = re.compile(r"\b(that|which|who|whom|whose|where|whether|if)\b", re.I)
+# Complementizers and interrogatives that open a subordinate clause. "that" is also a determiner ("that Phase A
+# binding"), so a clause opener only breaks the binding of a VERB-kind predicate — a phrase predicate such as
+# "on tape" has no embedded subject for the opener to introduce.
+CLAUSE_OPENER = re.compile(r"\b(that|which|who|whom|whose|where|whether|if|how|why|what|when)\b", re.I)
+# One token that can head a subject noun phrase. A verb-kind predicate needs a subject, so any of these standing between
+# the qualifier and the verb means the verb belongs to a different clause ("must report the operator created …").
+SUBJECT_TOKEN = re.compile(r"\b(the|a|an|this|that|these|those|every|each|all|its|their|our|his|her|my|your|it|they|we|he|she|one|someone|everyone|nobody|somebody)\b|(?-i:\b[A-Z][a-z]+\b)")
 LEADING_FUNCTION = re.compile(r"^(?:\W+|\b(?:as|so|then|also|already|now|still|indeed|only|just|even)\b\s*)*", re.I)
 # The tail of the span may be the predicate's own verb phrase ("must be recorded on tape": between "must" and the
 # "on tape" predicate stands "be recorded", which is that same predicate's verb phrase, not an intervening claim).
 TRAILING_AUX = re.compile(VERB_PHRASE_TAIL, re.I)
 
-def phrase_bound(cl, qual_end, pred_start):
-    """True when the qualifier heads the predicate's governing phrase. Fail-closed: any clause opener, any intervening
-    finite verb, or a subject opener at the head of the span breaks the binding."""
+def phrase_bound(cl, qual_end, pred_start, kind="phrase"):
+    """True when the qualifier heads the predicate's governing phrase. Fail-closed. The predicate's own verb phrase
+    (auxiliaries, coordinated participles) is stripped from the tail of the span first; then:
+      * an intervening finite verb always breaks the binding;
+      * for a VERB-kind predicate, a clause opener (that / how / why / …) or ANY subject token in the span breaks it,
+        because a finite verb takes a subject and that subject starts a new clause;
+      * for a PHRASE-kind predicate ("on tape"), only a subject token at the HEAD of the span breaks it, so
+        "must record that Phase A binding on tape" stays bound while "As planned the operator created …" does not."""
     if qual_end > pred_start:
         return False
     span = cl[qual_end:pred_start]
     core = TRAILING_AUX.sub(" ", span)          # in "no service account was created", "was" belongs to the predicate
-    if CLAUSE_OPENER.search(core) or FINITE_FORM.search(core):
+    if FINITE_FORM.search(core):
         return False
+    if kind == "verb":
+        return not (CLAUSE_OPENER.search(core) or SUBJECT_TOKEN.search(core))
     rest = LEADING_FUNCTION.sub("", span, count=1)
     first = re.match(r"^(\S+)", rest)
     return not (first and SUBJECT_OPENER.fullmatch(first.group(1).strip(",.;:()\"'")))
@@ -493,23 +529,30 @@ def nearest_before(rx, cl, pred_start):
     ms = [m for m in rx.finditer(cl) if m.start() < pred_start]
     return ms[-1] if ms else None
 
-def negation_bound(cl, pred_start):
+def negation_bound(cl, pred_start, kind):
     """A negation governs THIS predicate only if it is the nearest qualifier before it and heads its phrase."""
     m = nearest_before(NEGATION, cl, pred_start)
-    return bool(m and phrase_bound(cl, m.end(), pred_start))
+    return bool(m and phrase_bound(cl, m.end(), pred_start, kind))
 
-def modal_before(cl, pred_start):
+def modal_before(cl, pred_start, kind):
     """A modal governs the predicate when the predicate sits inside the modal span ("to be revoked") or when the modal
     heads the predicate's phrase ("must install every binding on tape")."""
     if any(m.start() <= pred_start < m.end() for m in MODAL.finditer(cl)):
         return True
     m = nearest_before(MODAL, cl, pred_start)
-    return bool(m and phrase_bound(cl, m.end(), pred_start))
+    return bool(m and phrase_bound(cl, m.end(), pred_start, kind))
 
-def status_before(cl, pred_start):
+def status_before(cl, pred_start, kind):
     """A status marker governs the predicate only when it heads the predicate's phrase."""
     m = nearest_before(STATUS, cl, pred_start)
-    return bool(m and phrase_bound(cl, m.end(), pred_start))
+    return bool(m and phrase_bound(cl, m.end(), pred_start, kind))
+
+PASSIVE_FRAME = re.compile(r"\b(be|been|being)\b", re.I)
+
+def participle_continuation(cl):
+    """A clause headed by a past participle continues a passive modal frame ("must be created and granted on tape")."""
+    m = re.match(r"^\W*([\w'’\-]+)", cl)
+    return bool(m and m.group(1).strip(",.;:()\"'").lower() in {f.lower() for f in PAST_FORMS})
 
 def bare_verb_continuation(cl):
     """POSITIVE recognition, fail-closed: a coordinated clause inherits an earlier modal only when it is a shared-subject
@@ -552,8 +595,8 @@ def strip_markdown(text):
     text = re.sub(r"[*`]", "", text)
     return re.sub(r"(?<![A-Za-z0-9])_+|_+(?![A-Za-z0-9])", "", text)
 
-CONNECTOR_WORDS = r"and then|while|whereas|but|although|though|however|and|or|then|after|before|until|when|because|so|once(?=\s+(?:the|a|an|it|they|we|every|all|that|this|those|these|each|its|their)\b)"
-CONNECTOR = re.compile(r",\s*(?:\b(" + CONNECTOR_WORDS + r")\b\s+)?|\s+\b(" + CONNECTOR_WORDS + r")\b\s+", re.I)
+CONNECTOR_WORDS = r"and then|while|whereas|but|although|though|however|and|or|then|after|before|until|when|because|so|once"
+CONNECTOR = re.compile(r"\s*\|\s*|,\s*(?:\b(" + CONNECTOR_WORDS + r")\b\s+)?|\s+\b(" + CONNECTOR_WORDS + r")\b\s+", re.I)
 
 def clauses(sentence):
     """Split one sentence into (connector, clause) pairs; connector is the token that introduced the clause ('' for the first)."""
@@ -563,7 +606,7 @@ def clauses(sentence):
         if piece.strip():
             out.append((conn, piece))
         tok = (m.group(1) or m.group(2) or "").strip()
-        conn = tok.lower() if tok else ","
+        conn = tok.lower() if tok else ("|" if "|" in m.group(0) else ",")
         pos = m.end()
     tail = sentence[pos:]
     if tail.strip():
@@ -576,19 +619,23 @@ def scan_executed(text, fname="<text>"):
     out = []
     for start_line, block in md_blocks(strip_markdown(text)):
         for sent in re.split(r"(?<=[.;:])\s+", block):
-            latch = False
+            latch = passive = False
             for conn, cl in clauses(sent):
                 preds = executed_preds(cl)
-                if RESET_ALWAYS.match(conn) or (RESET_IF_FINITE.match(conn) and not bare_verb_continuation(cl)):
-                    latch = False
-                inherits = latch and conn != "" and bare_verb_continuation(cl)
-                for pred in preds:
-                    ok = inherits or modal_before(cl, pred) or status_before(cl, pred) or negation_bound(cl, pred)
+                continues = bare_verb_continuation(cl) or (passive and participle_continuation(cl))
+                if RESET_ALWAYS.match(conn) or (RESET_IF_FINITE.match(conn) and not continues):
+                    latch = passive = False
+                    continues = False
+                inherits = latch and conn != "" and continues
+                for pred, kind in preds:
+                    ok = (inherits or modal_before(cl, pred, kind) or status_before(cl, pred, kind)
+                          or negation_bound(cl, pred, kind))
                     if not ok:
                         out.append("%s:%d: %s" % (fname, start_line, cl.strip()[:130]))
                         break
                 if MODAL.search(cl):
                     latch = True
+                    passive = bool(PASSIVE_FRAME.search(cl[MODAL.search(cl).end():]))
     return out
 
 offenders = []
@@ -646,7 +693,16 @@ NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
        "The okf-setup roles have been revoked.",                                                      # r10 cousin: perfect passive
        "The operator will document the plan and denies every Phase A grant.",                         # r10 cousin: present form after coordination
        "The setup job has run on tape.",                                                              # r10 cousin: ambiguous participle after an auxiliary
-       "The docs must be updated because service accounts were created."]                             # r10 cousin: causal reset
+       "The docs must be updated because service accounts were created.",                             # r10 cousin: causal reset
+       "The docs must explain how the operator created the Phase A service accounts.",                # r11 Codex: wh-complement
+       "The docs must report the operator created the Phase A service accounts.",                     # r11 Codex: null complement
+       "The operator will record the tape once Phase A has been executed.",                           # r11 Codex: unconditional temporal boundary
+       "The operators grant temporary Phase A roles.",                                                # r11 Codex: finite base-present, plural subject
+       "The operator grants very narrowly scoped temporary Phase A roles.",                           # r11 Codex: no modifier ceiling
+       "The tape will show how the operator created the service accounts.",                           # r11 Kimi: how
+       "The docs must explain why the operator granted the custom role.",                             # r11 cousin: why
+       "The tape will show the operator granted the custom role.",                                    # r11 cousin: null complement after show
+       "The report must record what the operator revoked on tape."]                                   # r11 cousin: what
 POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Each call is expected to return PERMISSION_DENIED; none has been run.",
        "The legacy handle was bound to two publications before Phase A.",
@@ -667,7 +723,10 @@ POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "The Cloud Run Job will run as the sync writer.",
        "The operator must run the DDL jobs and record every binding on tape.",
        "Every grant below names the resource it is bound to.",
-       "BigQuery grants use table-level IAM so the sync writer never touches agent_events."]
+       "BigQuery grants use table-level IAM so the sync writer never touches agent_events.",
+       "Every Phase A role must be created and granted on tape.",
+       "The operator must record that Phase A binding on tape.",
+       "BigQuery grants use the table-level IAM policy for the custom role."]
 check(all(scan_executed(t) for t in NEG), "scan flags every negative fixture (active past, perfect, after-verb status/modal, finite claims after coordination, once/then/after resets, block boundaries, bare Phase A, unbound negation, case, identifiers): %s" % [t[:50] for t in NEG if not scan_executed(t)])
 check(not any(scan_executed(t) for t in POS), "scan accepts preceding modals latched over nonfinite coordination, preceding status markers, bound negations and legacy data facts: %s" % [scan_executed(t) for t in POS if scan_executed(t)])
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")
