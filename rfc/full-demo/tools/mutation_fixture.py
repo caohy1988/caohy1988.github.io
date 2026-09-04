@@ -91,8 +91,15 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m91 "throw /'/" before a dishonest literal must not desynchronise the lexer (Codex r17)
   m92 an escaped line continuation inside a claim is joined, not lost (Codex r17)
   m93 a hidden span cannot qualify the claim the reader actually sees (Codex r17)
+  m94 "The docs must report the operator spoke softly on tape." (Kimi r18: post-verbal adverb)
+  m95 "… the experienced operator quietly spoke on tape." (Codex r18: adjective inside the subject phrase)
+  m96 "The operator grants narrowly constrained Phase A roles." (Codex r18: attributive participle after an adverb)
+  m97 "holder.throw / '/' / 2" is property access and division, not a regex (Codex r18)
+  m98 a regex after a control-flow head does not desynchronise the lexer (Codex r18)
+  m99 "style = 'display:none'" hides its content whatever the spacing (Codex r18)
+  m100 "data-hidden='false'" is a visible element and its claim is read (Codex r18)
 
-Positive controls p1-p30 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
+Positive controls p1-p33 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
 "grants" as a noun, bare-infinitive coordination, the proper noun "Run") and must leave the checker at exit 0.
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
@@ -317,6 +324,9 @@ POSITIVE_CONTROLS = [
     ("p28 non-ly adverb 'often' before a continuation head", _append("spec.md", "The operator must create the service accounts and often record every binding on tape.")),
     ("p29 non-ly adverb 'sometimes' before a continuation head", _append("plan.md", "The operator must create the service accounts and sometimes record every binding on tape.")),
     ("p30 adverb between a noun and its governance verb", _append("intent.md", "Project grants narrowly constrain Phase A access to the custom role.")),
+    ("p31 object noun phrase ending in a noun ('must record the custom role on tape')", _append("ARCHITECTURE.md", "The operator must record the custom role on tape.")),
+    ("p32 'more carefully' before a continuation head", _append("spec.md", "The operator must create the service accounts and more carefully record every binding on tape.")),
+    ("p33 'often' between a noun and its governance verb", _append("plan.md", "Project grants often constrain Phase A access to the custom role.")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -402,6 +412,16 @@ m90 = _append("ARCHITECTURE.md", "The docs must report the operator quietly spok
 m91 = _append_js("app.js", "var r17a = function () { throw /'/; };\nvar r17b = 'The operator created the Phase A service accounts.';")
 m92 = _append_js("app.js", 'var r17c = "The operator crea\\\nted the Phase A service accounts.";')
 m93 = _append_js("app.js", 'var r17d = "The service <span hidden>not yet</span> accounts were created for this capture.";')
+
+# Kimi / Codex r18: a post-verbal adverb after an intransitive verb, an adjective inside the subject phrase, an
+# attributive participle after an adverb, and three JavaScript / HTML readings.
+m94 = _append("ARCHITECTURE.md", "The docs must report the operator spoke softly on tape.")
+m95 = _append("spec.md", "The docs must report the experienced operator quietly spoke on tape.")
+m96 = _append("plan.md", "The operator grants narrowly constrained Phase A roles.")
+m97 = _append_js("app.js", "var r18a = holder.throw / '/' / 2;\nvar r18b = 'The operator created the Phase A service accounts.';")
+m98 = _append_js("app.js", "var r18c = function () { if (ready) /'/.test(x); };\nvar r18d = 'The operator created the Phase A service accounts.';")
+m99 = _append_js("app.js", 'var r18e = "<span style = \'display:none\'>not yet</span> The service accounts were created for this capture.";')
+m100 = _append_js("app.js", 'var r18f = "<span data-hidden=\'false\'>The operator created the Phase A service accounts.</span>";')
 
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
@@ -492,7 +512,14 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m90 'must report the operator quietly spoke on tape' (Codex r17: irregular verb)", m90),
              ("m91 'throw /\'/' before a dishonest literal (Codex r17: regex after throw)", m91),
              ("m92 escaped line continuation inside a claim (Codex r17)", m92),
-             ("m93 hidden span cannot qualify the visible claim (Codex r17)", m93)]
+             ("m93 hidden span cannot qualify the visible claim (Codex r17)", m93),
+             ("m94 'the operator spoke softly on tape' (Kimi r18: post-verbal adverb)", m94),
+             ("m95 'the experienced operator quietly spoke on tape' (Codex r18)", m95),
+             ("m96 'grants narrowly constrained Phase A roles' (Codex r18: attributive participle)", m96),
+             ("m97 'holder.throw / \'/\' / 2' is property access and division (Codex r18)", m97),
+             ("m98 regex after a control-flow head does not desynchronise (Codex r18)", m98),
+             ("m99 'style = \'display:none\'' is hidden, spaces and all (Codex r18)", m99),
+             ("m100 'data-hidden=\'false\'' is visible and its claim is read (Codex r18)", m100)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

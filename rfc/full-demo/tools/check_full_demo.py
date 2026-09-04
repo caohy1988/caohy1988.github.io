@@ -459,7 +459,17 @@ DET_SET = _word_set(DETERMINER)
 PREP_SET = _word_set(PREPOSITION) | {"to"}
 CONJ_SET = {"and", "or", "but", "then", "nor", "plus"}
 AUX_SET = _word_set(AUX_WORDS) | _word_set(MODAL_WORDS)
-VERB_SHAPED = re.compile(r"(?-i:[a-z]+ed)$|^(?:" + "|".join(PAST_FORMS + PRESENT_FORMS) + r")$", re.I)
+# English past tenses are either regular (-ed) or drawn from a closed list of irregular forms. Listing the irregulars
+# describes the language, like the non-ly adverbs; it is not a list of accepted phrasings. A word that is neither is a
+# noun as far as this scanner is concerned, so "the custom role" is a noun phrase and "the operator spoke" is a clause.
+IRREGULAR_PAST = {
+    "spoke", "knew", "went", "saw", "took", "gave", "told", "wrote", "began", "broke", "chose", "drove", "fell",
+    "felt", "found", "got", "grew", "held", "kept", "led", "left", "lost", "met", "paid", "put", "read", "said",
+    "sold", "sent", "set", "shot", "sat", "slept", "spent", "stood", "taught", "thought", "threw", "understood",
+    "wore", "won", "came", "did", "ate", "drew", "flew", "heard", "hit", "let", "lay", "rose", "sang", "sank",
+    "shook", "showed", "shut", "sought", "spread", "struck", "swore", "swept", "took", "woke", "withdrew", "wound",
+}
+VERB_SHAPED = re.compile(r"(?-i:[a-z]+ed)$|^(?:" + "|".join(PAST_FORMS + PRESENT_FORMS + sorted(IRREGULAR_PAST)) + r")$", re.I)
 
 def _kind(tok):
     low = tok.lower()
@@ -484,7 +494,10 @@ def _kind(tok):
 DEGREE_ADVERB = {"very", "quite", "always", "never", "again", "now", "then", "also", "still", "already",
                  "afterwards", "first", "duly", "once", "twice", "only", "just", "even", "rather", "fairly", "soon",
                  "often", "sometimes", "seldom", "rarely", "usually", "occasionally", "ever", "yet", "here", "there",
-                 "thus", "hence", "therefore", "indeed", "instead", "meanwhile", "later", "earlier", "anyway"}
+                 "thus", "hence", "therefore", "indeed", "instead", "meanwhile", "later", "earlier", "anyway",
+                 "more", "most", "less", "least", "well", "far", "much", "too", "so", "almost", "nearly"}
+# Every path that skips adverbs uses this one definition, so the token grammar and the noun/verb test cannot disagree.
+ADVERB = r"(?-i:[a-z]+ly)|" + "|".join(sorted(DEGREE_ADVERB))
 
 def _is_adverb(tok, kind):
     return kind == "ADV" or tok.lower() in DEGREE_ADVERB
@@ -506,17 +519,18 @@ def contains_finite_clause(span, tail_subject_verb=False):
     ("… operator spoke" | on tape) is a subject and its verb, whatever that verb's spelling."""
     toks = [(t, _kind(t)) for t in TOKEN.findall(span)]
     if tail_subject_verb and toks:
-        # The span of a phrase predicate keeps its own words, so a span that ENDS in "<noun> <adverbs> <lowercase word>"
-        # is a subject and its verb, whatever the verb's spelling ("… the operator quietly spoke" | on tape). The
-        # subject must start its own phrase — preceded by a determiner or by nothing — so a name compound
-        # ("the Phase A binding", where "binding" follows the noun "A") is not read as a clause.
+        # The span of a phrase predicate keeps its own words, so a span ending in "<noun> <adverbs> <verb> <adverbs>"
+        # is a subject and its verb ("… the operator quietly spoke softly" | on tape). The final word must be a verb
+        # by morphology (-ed) or by the closed irregular list, so "the custom role" and "the Phase A binding" — whose
+        # last word is a noun — are noun phrases, not clauses.
         last_i = len(toks) - 1
-        tok, kind = toks[last_i]
-        if kind == "WORD" and tok[:1].islower():
-            subj_i = _subject_index(toks, last_i)
-            if subj_i >= 0 and toks[subj_i][1] == "WORD":
-                before_i = _subject_index(toks, subj_i)
-                if before_i < 0 or toks[before_i][1] == "DET":
+        while last_i >= 0 and _is_adverb(*toks[last_i]):
+            last_i -= 1                               # a trailing adverb run: "spoke softly", "recorded verbatim"
+        if last_i >= 0:
+            tok, kind = toks[last_i]
+            if kind == "WORD" and tok[:1].islower() and VERB_SHAPED.search(tok):
+                subj_i = _subject_index(toks, last_i)
+                if subj_i >= 0 and toks[subj_i][1] == "WORD":
                     return True
     for i, (tok, kind) in enumerate(toks):
         if _is_adverb(tok, kind):
@@ -551,7 +565,6 @@ PREP_BEFORE = re.compile(r"\b(?:" + PREPOSITION + r")\s+$", re.I)
 NONOBJECT_AFTER = re.compile(r"^\s+(?:(?:to|" + PREPOSITION + r"|" + MODAL_WORDS + r"|" + AUX_WORDS + r"|" + RELATIONAL + r"|" +
                              "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b)|^\s*[)\],.;:|]", re.I)
 
-ADVERB = r"(?-i:[a-z]+ly)|very|more|most|quite|fairly|only|just|even|also|then|now|still|already|first|again"
 OBJECT_HEAD_TOKEN = re.compile(r"^\s+(?:" + DETERMINER + r"\b|(?-i:[A-Z][a-z]+)\b|" + PHASE_A_OBJECT.pattern + r")", re.I)
 ADJECTIVE_TOKEN = re.compile(r"^\s+(?!(?:" + PREPOSITION + r"|to|" + MODAL_WORDS + r"|" + AUX_WORDS + r"|" + RELATIONAL + r"|" +
                              "|".join(PAST_FORMS + PRESENT_FORMS) + r")\b)(?-i:[a-z][\w-]*)", re.I)
@@ -590,8 +603,17 @@ def reads_as_noun(cl, m):
     if ADVERB_THEN_END.match(after):
         return True
     after_adverbs = re.sub(r"^(?:\s+(?:" + ADVERB + r"))+", "", after, flags=re.I)
-    if NONOBJECT_AFTER.match(after) or NONOBJECT_AFTER.match(after_adverbs):
-        return True                                   # "grants narrowly constrain …": the adverb modifies the verb
+    for candidate in (after, after_adverbs):
+        m2 = NONOBJECT_AFTER.match(candidate)
+        if not m2:
+            continue
+        follower = candidate[m2.start():m2.end()].strip()
+        # A past participle after the candidate is attributive unless it takes a determiner-headed object of its own:
+        # "grant named THE custom role" is a verb (so "grant" is a noun), while "grants narrowly constrained Phase A
+        # roles" modifies the roles (so "grants" is the verb).
+        if re.fullmatch(r"(?-i:[a-z]+ed)", follower) and not re.match(r"\s*(?:" + DETERMINER + r")\b", candidate[m2.end():], re.I):
+            continue
+        return True
     return not has_subject(before)
 
 PAST_VERB = re.compile(r"\b(" + "|".join(PAST_FORMS) + r")\b|\b(?:was|were|is|are|been|be|has|have|had)\s+(?:not\s+|already\s+)?(?:" + "|".join(AMBIGUOUS_PARTICIPLE) + r")\b", re.I)
@@ -840,7 +862,8 @@ def _code_span(inner):
     visible to the scanner; a shell / SQL fragment collapses to one opaque token so it is not parsed as a sentence."""
     return inner if not CLI_SHAPE.search(inner) else "code"
 
-REGEX_PRECEDER = re.compile(r"(?:^|=>|[(,=:\[!&|?{};+\-*%~^<>]|\b(?:return|throw|typeof|instanceof|in|of|new|delete|void|case|do|else|yield|await)\b)\s*$")
+REGEX_PRECEDER = re.compile(r"(?:^|=>|[(,=:\[!&|?{};+\-*%~^<>]|(?<![.\w])(?:return|throw|typeof|instanceof|in|of|new|delete|void|case|do|else|yield|await)\b"
+                            r"|\b(?:if|for|while|switch|catch)\s*\([^()]*\))\s*$")
 
 ESCAPES = {"n": " ", "t": " ", "r": " ", "b": "", "f": "", "v": "", "0": "", "\n": ""}
 
@@ -958,7 +981,8 @@ BLOCK_TAG = re.compile(r"</?(?:div|p|li|ul|ol|tr|td|th|table|section|article|hea
 INLINE_TAG = re.compile(r"</?[a-zA-Z][^>]*>")
 
 HIDDEN_ELEMENT = re.compile(
-    r'''<(\w+)[^>]*\b(?:hidden\b|aria-hidden=["']?true|style=["'][^"']*display\s*:\s*none)[^>]*>.*?</\1\s*>''',
+    r'''<(\w+)[^>]*(?:(?<![\w-])hidden(?![\w-])|(?<![\w-])aria-hidden\s*=\s*["']?true|'''
+    r'''(?<![\w-])style\s*=\s*["'][^"']*display\s*:\s*none)[^>]*>.*?</\1\s*>''',
     re.I | re.S)
 
 def html_runs(text):
@@ -1133,7 +1157,10 @@ NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
        "The planned operator spoke on tape.",                                                         # r16 Codex: irregular verb, bare subject+verb span
        "The docs must explain the RFC, and operators grant temporary Phase A roles.",                  # r16 Codex: coordinated bare subject
        "The docs must explain the RFC, and operators routinely record every binding on tape.",         # r16 Codex: bare subject with an adverb
-       "The docs must report the operator quietly spoke on tape."]                                    # r17 Codex: irregular verb after a reporting head keeps the object
+       "The docs must report the operator quietly spoke on tape.",                                    # r17 Codex: irregular verb after a reporting head
+       "The docs must report the operator spoke softly on tape.",                                     # r18 Kimi: post-verbal adverb, intransitive verb
+       "The docs must report the experienced operator quietly spoke on tape.",                        # r18 Codex: adjective in the subject phrase
+       "The operator grants narrowly constrained Phase A roles."]                                     # r18 Codex: attributive participle after an adverb keeps the object
 POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Each call is expected to return PERMISSION_DENIED; none has been run.",
        "The legacy handle was bound to two publications before Phase A.",
@@ -1181,7 +1208,10 @@ POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Project grants constrain Phase A access to the custom role.",
        "The operator must create the service accounts and often record every binding on tape.",
        "The operator must create the service accounts and sometimes record every binding on tape.",
-       "Project grants narrowly constrain Phase A access to the custom role."]
+       "Project grants narrowly constrain Phase A access to the custom role.",
+       "The operator must record the custom role on tape.",
+       "The operator must create the service accounts and more carefully record every binding on tape.",
+       "Project grants often constrain Phase A access to the custom role."]
 check(all(scan_fixture(t) for t in NEG), "scan flags every negative fixture (active past, perfect, after-verb status/modal, finite claims after coordination, once/then/after resets, block boundaries, bare Phase A, unbound negation, case, identifiers): %s" % [t[:50] for t in NEG if not scan_executed(t)])
 check(not any(scan_fixture(t) for t in POS), "scan accepts preceding modals latched over nonfinite coordination, preceding status markers, bound negations and legacy data facts: %s" % [scan_fixture(t) for t in POS if scan_fixture(t)])
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")
