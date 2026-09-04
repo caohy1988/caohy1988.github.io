@@ -546,6 +546,8 @@ POSITIVE_CONTROLS = [
     ("p71 a path bound once and never written again (Codex r30)", _single_write_capture),
     ("p72 a hyphenated object under a modal (Codex r31)", _append_audited("intent.md", "The IAM bootstrap must preset project-level roles.")),
     ("p73 a $-prefixed path bound once (Codex r31)", _dollar_path_capture),
+    ("p74 a slashed compound object under a modal (Codex r32)", _append_audited("README.md", "The IAM bootstrap must preset reader/writer roles.")),
+    ("p75 a keyword quotes: value is readable (Codex r32)", _append_audited_css("styles.css", "blockquote { quotes: auto; }")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -1130,6 +1132,44 @@ def m200(d):
     _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap preset project-level roles.")
 
 
+# Codex r32. A destructuring assignment writes a name without ever putting it before the operator, and a destructured
+# parameter binds one the same way (m201-m202); a custom property can hold the quote set (m203); and an object may
+# carry any ordinary compound punctuation (m204).
+def m201(d):
+    """`[hiddenPath] = [...]` writes the path from inside a pattern."""
+    _hidden_json(d)
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace(
+        "  var TOTAL = 6;",
+        '  var TOTAL = 6;\n  var hiddenPath = "";\n  [hiddenPath] = [["extra", ".json"].join("")];\n'
+        '  fetchJson(hiddenPath);', 1), "utf-8")
+
+
+def m202(d):
+    """A destructured parameter binds the same name a literal binding elsewhere claims."""
+    _hidden_json(d)
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace(
+        "  var TOTAL = 6;",
+        '  var TOTAL = 6;\n  var hiddenPath = "matrix.json";\n'
+        '  function loadPack({ hiddenPath }) { return fetchJson(hiddenPath); }\n'
+        '  loadPack({ hiddenPath: ["extra", ".json"].join("") });', 1), "utf-8")
+
+
+def m203(d):
+    """A custom property holds the quote set, so the quotes: value never contains a string."""
+    p = d / "styles.css"
+    p.write_text(p.read_text("utf-8")
+                 + '\n:root { --quote-run: "The Phase A service accounts " ". " "were created." ""; }\n'
+                   'body { quotes: var(--quote-run); }\n', "utf-8")
+    idx = d / "index.html"
+    idx.write_text(idx.read_text("utf-8").replace("</body>", "<p><q><q></q></q></p></body>", 1), "utf-8")
+
+
+def m204(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap preset reader/writer roles.")
+
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -1326,7 +1366,11 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m197 INV-6: a $-prefixed identifier is written like any other (Codex r31)", m197),
              ("m198 INV-6: a destructured binding is not a literal to trust (Codex r31)", m198),
              ("m199 a <q> element applies a quote set implicitly (Codex r31)", m199),
-             ("m200 a compound noun keeps its hyphens (Codex r31)", m200)]
+             ("m200 a compound noun keeps its hyphens (Codex r31)", m200),
+             ("m201 INV-6: a destructuring assignment writes the path (Codex r32)", m201),
+             ("m202 INV-6: a destructured parameter binds the name too (Codex r32)", m202),
+             ("m203 quotes: var(...) is still a quote set this reader cannot read (Codex r32)", m203),
+             ("m204 an object may carry any compound punctuation (Codex r32)", m204)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

@@ -610,7 +610,7 @@ PERFECT_RUN = r"(?:\s+(?i:has|have|had|was|were|is|are|been|being))*"
 PREDICATE_SLOT = (r"(?!(?:" + NP_STOP + r"|cannot|can't|won't|shan't|don't|doesn't|didn't)\b)"
                   r"(?!(?i:[a-z]+(?:s|ing|ly))\b)(?-i:[a-z][\w'’]*)")
 PREDICATE_OBJECT = (r"(?:\s+(?-i:" + DETERMINER_WORD + r")\b[^,;:.|]*"
-                    r"|(?:\s+(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’\u2010\u2011\u2013\u2014-]*)+)\s*(?=[;:.)\]|]|$)")
+                    r"|(?:\s+(?!(?:" + NP_STOP + r")\b)[A-Za-z][^\s,;:.|]*)+)\s*(?=[;:.)\]|]|$)")
 TRANSITIVE_VERB = re.compile(PERFECT_RUN + ADVERB_RUN + r"\s+(?<![-\w])(" + PREDICATE_SLOT + r")" + PREDICATE_OBJECT)
 # The licence for an unclassified predicate is a frame reaching it, exactly as for a past one: a qualifier and only
 # verb-phrase material between. A qualifier somewhere else in the sentence licenses nothing, so "Phase A is not yet
@@ -801,9 +801,12 @@ JS_EDGE = r"(?<![\w$])"
 JS_LITERAL_BINDING = re.compile(JS_EDGE + r"(?:var|let|const)\s+(" + JS_IDENT + r")\s*=\s*(" + JS_STRING + r")\s*[;,\n]")
 JS_ANY_BINDING = re.compile(JS_EDGE + r"(?:var|let|const)\s+(" + JS_IDENT + r")\s*=")
 JS_MAP_BINDING = re.compile(JS_EDGE + r"(?:var|let|const)\s+(" + JS_IDENT + r")\s*=\s*\{")
-# Names this reader cannot follow at all: bound by destructuring, or by a catch clause. They are disqualified rather
-# than guessed at, so a fetch argument that resolves to one is an error.
+# Names this reader cannot follow at all: bound by a destructuring DECLARATION, by a destructuring ASSIGNMENT
+# (`[hiddenPath] = […]` writes hiddenPath without ever putting it before the operator), or by a catch clause. Every
+# identifier inside such a pattern is disqualified rather than guessed at, so a fetch argument that resolves to one
+# is an error.
 JS_PATTERN_BINDING = re.compile(JS_EDGE + r"(?:(?:var|let|const)\s*[\{\[]([^\}\]]*)[\}\]]|catch\s*\(([^)]*)\))")
+JS_PATTERN_WRITE = re.compile(r"[\[\{]([^\[\]\{\}]*)[\]\}]\s*=(?![=>])")
 JS_PARAMS = re.compile(r"\bfunction\s*[A-Za-z_$][\w$]*?\s*\(([^)]*)\)|\(([^)]*)\)\s*=>")
 
 def _js_functions(masked):
@@ -832,12 +835,12 @@ def _js_symbols(body, masked):
     for m in re.finditer(JS_EDGE + r"(?:var|let|const)\s+(" + JS_IDENT + r")", masked):
         declared[m.group(1)] = declared.get(m.group(1), 0) + 1
     shadowed = set()
-    for m in JS_PARAMS.finditer(masked):
-        for group in m.groups():
-            shadowed |= {p.strip() for p in (group or "").split(",") if p.strip()}
-    for m in JS_PATTERN_BINDING.finditer(masked):
-        for group in m.groups():
-            shadowed |= set(re.findall(JS_IDENT, group or ""))
+    for rx in (JS_PARAMS, JS_PATTERN_BINDING, JS_PATTERN_WRITE):
+        for m in rx.finditer(masked):
+            for group in m.groups():
+                # Every identifier in a parameter list or a destructuring pattern, however it is written: a
+                # destructured parameter binds its names just as a plain one does.
+                shadowed |= set(re.findall(JS_IDENT, group or ""))
     for name in list(literals):
         if writes.get(name, 0) > 1 or declared.get(name, 0) > 1 or name in shadowed:
             literals.pop(name, None)                  # this reader cannot say which value a fetch would see
@@ -1159,14 +1162,17 @@ def css_quote_problems(src):
             while k < n and src[k] in " \t\n":
                 k += 1
             if name.lower() == "quotes" and k < n and src[k] == ":":
-                k, carries = k + 1, False
+                k, value = k + 1, []
                 while k < n and src[k] not in ";}":
                     if src[k] in "\"'":
-                        _, k = _css_string(src, k)
-                        carries = True
+                        text, k = _css_string(src, k)
+                        value.append("\"" + text + "\"")
                         continue
+                    value.append(src[k])
                     k += 1
-                if carries:
+                # Only a keyword value says what it paints. A string set, a var() holding one, anything else: this
+                # reader cannot resolve it, so it refuses rather than guessing.
+                if "".join(value).strip().lower() not in ("auto", "none", "inherit", "initial", "unset", "revert", ""):
                     out.append("a quotes: declaration supplies strings whose painting depends on each element's "
                                "quote depth, and a <q> element applies them implicitly; write the marks into the "
                                "text instead")
@@ -1863,6 +1869,7 @@ check(any("The Phase A service accounts were created." == t.lstrip("| ") for t i
       "adjacent stylesheet strings are painted as one run, so they are audited as one claim")
 check(css_content_problems('body::before { content: open-quote open-quote; }')
       and css_quote_problems('body { quotes: "The Phase A service accounts " ". " "were created." ""; }')
+      and css_quote_problems('body { quotes: var(--quote-run); }')
       and not css_quote_problems('body { quotes: auto; }'),
       "a quote set this reader cannot resolve to text is an error, whether a content declaration names it or a <q> element applies it")
 check(_css_urls('@import url("extra.css");') == ["extra.css"] and _css_urls('@import "\\65 xtra.css";') == ["extra.css"],
@@ -1881,6 +1888,7 @@ check(all(transitive_problems(t) for t in ("The IAM bootstrap preset every bindi
                                            "The IAM bootstrap preset roles.",
                                            "The IAM bootstrap preset temporary roles.",
                                            "The IAM bootstrap preset project-level roles.",
+                                           "The IAM bootstrap preset reader/writer roles.",
                                            "Phase A is not yet done, but the IAM bootstrap preset every binding."))
       and not transitive_problems("The IAM bootstrap must preset every binding.")
       and not transitive_problems("The Phase A tape must show the active configuration name."),
