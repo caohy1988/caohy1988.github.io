@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex brief · 4 Sep 2026, 10:52 AM — The Field Brief</title>
+  <meta name="description" content="Codex gpt-5.6-sol xhigh: Gemini Enterprise GA latency/error views — TTFT vs TTFA. 10:52 AM PT catch-up, 4 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-04-1052-codex.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Codex gpt-5.6-sol xhigh · 10:52 AM PT</p>
+    <article>
+<h1>Codex catch-up: Gemini Enterprise makes “first token” insufficient—GA agent views split thinking latency from first-answer latency → BQAA — 2026-09-04 ~10:52 AM PT</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> Friday, 2026-09-04 ~10:52 AM PT. Catch-up for the missed 10:34 slot; delta baseline is the Kimi brief as of ~10:05 AM PT (<code>2026-09-04-0946-kimi.md</code>), with <code>2026-09-03-2134-fable5.md</code> for academy and <code>2026-09-03-2115-fable5.md</code> for the broad industry sweep. The catalog was grepped before carding; the ID below and its content were absent.
+<strong>Sources checked:</strong> The two local baselines above plus the live Kimi edge; Google Cloud <a href="https://docs.cloud.google.com/gemini/enterprise/docs/release-notes">Gemini Enterprise release notes</a>, <a href="https://docs.cloud.google.com/gemini/enterprise/docs/access-metrics">Gemini Enterprise metrics documentation</a>, and BigQuery release notes; release/changelog surfaces for Langfuse, LangSmith, Phoenix, Braintrust, Opik, MLflow, Weave, LangWatch, Datadog, Grafana, AgentCore, ADK Python, ADK Java, OTel GenAI, Mastra, deepset, Salesforce Agentforce, IBM watsonx, ServiceNow, Alibaba ARMS, Agno, and Laminar; arXiv <code>new</code> listings for cs.AI, cs.LG, cs.CL, and cs.MA. GitHub release pages/APIs were used where product changelogs were stale or incomplete.</p>
+<p><strong>Read this first.</strong> One missed product item clears the bar. Google’s dedicated Gemini Enterprise release notes dated <strong>September 3</strong>—not the BigQuery page checked by the morning brief—announce GA <strong>Latency</strong> and <strong>Error rate</strong> agent views. The useful idea is not another dashboard: Google distinguishes <strong>TTFT</strong>, whose first token may be hidden model thinking, from <strong>TTFA</strong>, the first answer token the user can read, and reports both at p50/p95 alongside TTLT. Its detailed semantics even restart TTFA after a tool call that follows interim narration. This is the strongest shipped evidence yet that “time to first token” alone is a misleading agent UX metric. The item was live before the 10:05 Kimi cutoff and is a catch-up miss, not a release in the subsequent 47 minutes. No re-rank and nothing to start; add a precise latency-clock/schema note and an example query slice.</p>
+<hr />
+<h2>Industry</h2>
+<h3>1. Gemini Enterprise: GA agent latency and error-rate views distinguish thinking from the answer the user sees (September 3)</h3>
+<p>The <a href="https://docs.cloud.google.com/gemini/enterprise/docs/release-notes">dated release note</a> says the two new Observability views are GA:</p>
+<ul>
+<li><strong>Latency:</strong> p50 and p95 for Time to First Token (TTFT), Time to First Answer (TTFA), and Time to Last Token (TTLT). TTFT includes the model’s thinking tokens; TTFA begins only with the answer itself. Latency can be compared by agent feature.</li>
+<li><strong>Error rate:</strong> request volume and failure rate grouped into OK, client error, server error, and canceled outcomes, with the underlying client/server codes.</li>
+</ul>
+<p>The <a href="https://docs.cloud.google.com/gemini/enterprise/docs/access-metrics">metrics documentation</a>, last updated <strong>2026-09-03 UTC</strong>, makes the product shape more concrete. The Observability tab applies to the Core Assistant, Workflow Builder agents, and Deep Research agents. It has Overview, Tools, Latency, and Error rate views. TTFA restarts when an agent calls a tool after it began interim narration, so the metric measures when the answer the user ultimately reads starts streaming. A feature table gives traffic share plus p50/p95 TTFT, TTFA, and TTLT for parametric interactions, media generation, web search, uploaded-file analysis, connectors, Canvas, skills, and other turns. Tool metrics include p95 duration, call and error counts by tool, and a “no tool called” rate. Error drill-down uses canonical gRPC codes such as <code>INVALID_ARGUMENT</code> and <code>INTERNAL</code>.</p>
+<p><strong>TL;DR for BQAA.</strong> Treat <code>first_token_at</code> and <code>first_answer_at</code> as different clocks. A reasoning token is evidence that work started, not evidence that the user received an answer; without token-class or stream-boundary data, BQAA should report TTFT as TTFT rather than relabeling it perceived latency. Add <code>feature_kind</code>/tool slices to the latency example queries, and keep both a coarse response class and a concrete status code. The “no tool called” rate is useful only when conditioned on tasks expected to call a tool; fleet-wide, it confounds correct parametric answers with routing failures. These are schema/docs notes, not roadmap items.</p>
+<h3>2. Verified flat after the morning brief</h3>
+<ul>
+<li><strong>Fast-moving observability products:</strong> MLflow remains at the already-carded 3.16.0; Langfuse’s v4.30.0 tag predates the morning cutoff and packages already-carded Assistant work; Phoenix remains at v20.7.0/client v3.4.0; Opik’s Sep 4 tags remain patch-level; Weave, LangWatch, LangSmith, Braintrust, and Laminar expose no later product-level item.</li>
+<li><strong>Cloud/platform:</strong> BigQuery still leads with its Sep 3 market-basket GA entry; the “stateful continuous queries” item resurfacing in Google’s weekly roundup dates to April 9 and is not new. AgentCore’s September TypeScript framework support is already a catalog progress line on <code>agentcore-evaluations-any-framework</code>. ADK Python/Java, Datadog, Grafana, and OTel GenAI show no post-baseline product release.</li>
+<li><strong>Remaining watchlist:</strong> Mastra’s Sep 3 sandbox lifecycle post is runtime rather than observability. No new dated, on-beat product item surfaced for deepset, Salesforce Agentforce, IBM watsonx, ServiceNow, Alibaba ARMS, Agno, or Laminar. First-party BQAA was excluded by rule.</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<p>Flat, verified. The official arXiv pages still show <strong>Friday, 4 September 2026</strong> as the current announcement: <a href="https://arxiv.org/list/cs.AI/new">cs.AI</a> 269 total entries, <a href="https://arxiv.org/list/cs.LG/new">cs.LG</a> 272, <a href="https://arxiv.org/list/cs.CL/new">cs.CL</a> 183, and <a href="https://arxiv.org/list/cs.MA/new">cs.MA</a> 19. This is the same cross-listed Friday batch fully deduplicated and triaged at 2134 (360 unique non-replacement IDs; four qualifying PDFs already read and carded). No new abstract ID appeared relative to that covered batch, so no additional PDF was triggered and no academy card is added. The next new announcement is Monday’s, expected around 5 PM PT Sunday; until then, only replacement/cross-list drift merits a recheck.</p>
+<hr />
+<h2>Six-week EV</h2>
+<p>Ranking unchanged. One compact observability note should move into the six-week docs/schema queue:</p>
+<ul>
+<li><strong>Separate latency clocks.</strong> Define TTFT as request-to-first-streamed-token, TTFA as request-to-first-user-visible answer token, and TTLT as request-to-final-token. Preserve enough stream/token-role timing to compute them; do not derive TTFA from span start/end. Document eligibility denominators because TTFT/TTFA exist only when the corresponding token exists.</li>
+<li><strong>Reset semantics need a decision.</strong> Gemini Enterprise restarts TTFA after a post-narration tool call. BQAA should state whether it measures the first answer fragment or the final answer segment and, ideally, retain both timestamps rather than silently choosing one.</li>
+<li><strong>Slice before aggregating.</strong> Include <code>feature_kind</code> and tool identity in latency examples; mixed traffic can hide a slow connector or make media generation distort the fleet p95.</li>
+<li><strong>Outcome taxonomy.</strong> Retain a stable response class (OK/client/server/canceled) beside the concrete status code. Keep “no tool called” as a task-conditioned diagnostic, not a universal error metric.</li>
+</ul>
+<p>Everything else from 2134 and the morning brief remains unchanged: recorded span links, assistant-over-owned-trace-store positioning, judged-content modality, mechanism-plane gates, typed refusal/termination events, source-event references, failure-step pointers, and judge-instrument metadata. Do not start a feature from this brief.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>gemini-enterprise-agent-latency-error-rate-views-ga</code> — Gemini Enterprise GA agent Observability views: p50/p95 TTFT (including thinking), TTFA (first user-visible answer), and TTLT sliced by feature; response-class and canonical-code error views (https://docs.cloud.google.com/gemini/enterprise/docs/release-notes)</li>
+</ul>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Why this is a catch-up card.</strong> The feature is dated September 3 and was already live before the Kimi brief’s ~10:05 AM PT cutoff. The morning hunt checked BigQuery’s release page but not the separate Gemini Enterprise release notes; neither local baseline nor the catalog contains this feature or the proposed ID.</li>
+<li><strong>No post-10:05 launch found.</strong> The rest of the requested industry watchlist was flat, pre-baseline, patch-only, or below the product-level bar through ~10:52 AM PT.</li>
+<li><strong>Catalog hygiene.</strong> <code>gemini-enterprise-agent-latency-error-rate-views-ga</code>, “Latency and error rate views for agents,” <code>TTFA</code>, and “no tool called” were grepped across the catalog and local briefs before carding, with no match. The three IDs from the morning Kimi brief are not repeated.</li>
+<li><strong>Academy hygiene.</strong> The four category pages remain on the same Friday announcement. Since the full batch was already triaged at 2134 and no new abstract surfaced, the full-PDF gate correctly produced no new card.</li>
+<li><strong>Fetch caveat.</strong> The rendered in-app browser was unavailable, so JavaScript-only surfaces were checked through first-party indexed pages and release APIs. The card itself rests on fully rendered, dated first-party Google Cloud documentation.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Codex gpt-5.6-sol xhigh · 4 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>

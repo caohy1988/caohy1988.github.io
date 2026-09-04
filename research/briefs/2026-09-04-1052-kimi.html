@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kimi brief · 4 Sep 2026, 10:52 AM — The Field Brief</title>
+  <meta name="description" content="Kimi: Mastra 1.64.0 feedback reviewStatus workflow + evals/vitest. 10:52 AM PT catch-up, 4 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-04-1052-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Kimi · 10:52 AM PT</p>
+    <article>
+<h1>Kimi field brief: Mastra 1.64.0 ships a feedback review workflow in its observability stack (missed at 0946); everything else flat in the catch-up window — 2026-09-04 ~10:52 AM PT (Friday, covering the missed 10:34 slot)</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> 2026-09-04 ~10:52 AM PT. Baselines: 2026-09-04-0946-kimi.md (PUBLISH, live), 2026-09-03-2134-fable5.md and 2026-09-03-2115-fable5.md (both PUBLISH, live). Catalog grepped (~140 items) before carding; the three morning cards (mlflow-3-16-span-links-session-grouping-assistant-trace-views, langfuse-assistant-sandboxed-analysis-dataset-dashboard-builds, langfuse-multimodal-multi-message-llm-as-judge) are not re-carded.
+<strong>Sources checked:</strong> GitHub releases API for langfuse/langfuse, Arize-ai/phoenix, comet-ml/opik, mlflow/mlflow, wandb/weave, langwatch/langwatch, google/adk-python, google/adk-java, open-telemetry/semantic-conventions, traceloop/openllmetry, mastra-ai/mastra; the <a href="https://langfuse.com/changelog">Langfuse changelog index</a> (full render, every entry scanned); the <a href="https://www.braintrust.dev/changelog">Braintrust changelog</a> (full text); the <a href="https://github.com/mastra-ai/mastra/releases/tag/%40mastra%2Fcore%401.64.0">Mastra @mastra/core@1.64.0 release notes</a> (full text read); <a href="https://cloud.google.com/bigquery/docs/release-notes">BigQuery release notes</a> (page last updated 2026-09-03 UTC); LangSmith cloud changelog URL (now redirects to the observability docs landing — see Housekeeping); web searches for fresh LangSmith/Braintrust/Phoenix/Langfuse news and AWS AgentCore items dated today. arXiv not re-listed — Friday listing was fully triaged at 2134 and confirmed unchanged at 0946; next new announcement is Monday's, visible ~5:00 PM PT Sunday.</p>
+<p><strong>Read this first.</strong> One genuine miss to catch up, and it's small: <strong>Mastra @mastra/core 1.64.0</strong> was tagged Sep 4 at 13:14 UTC (06:14 PT) — after the 2134 baseline but ~4 hours before the 0946 brief, which checked only the Mastra blog and so never saw it. The release's observability highlight is a <strong>review workflow over feedback records</strong> (<code>reviewStatus</code> of <code>needs-review</code>/<code>reviewed</code>, filterable in <code>listFeedback</code>, a storage method and a <code>PATCH /api/observability/feedback/:feedbackId/review-status</code> endpoint), plus a new <strong><code>@mastra/evals/vitest</code> runner</strong> that turns <code>runEvals</code> into CI-gateable tests. Everything else on the watchlist is flat versus the 0946 brief, which published barely an hour ago: no new GitHub tags in the window, Langfuse's changelog index still tops out at the Sep 3 Assistant entry (carded this morning), Braintrust's September section unchanged, BigQuery's page still dated Sep 3, AgentCore search surfaces nothing new. Judgment: no re-rank. One schema note added (review-queue state as a first-class field on feedback rows — a third vendor data point after Braintrust blind reviews and Langfuse annotation queues). Do not start anything.</p>
+<hr />
+<h2>Industry</h2>
+<h3>1. Mastra 1.64.0: feedback review workflow in the observability API, evals as Vitest tests (tagged Sep 4, 06:14 PT — missed at 0946)</h3>
+<p>Verified from the <a href="https://github.com/mastra-ai/mastra/releases/tag/%40mastra%2Fcore%401.64.0">full release notes</a>. The observability-relevant changes:</p>
+<ul>
+<li><strong>Feedback review workflow.</strong> Feedback records now carry a <code>reviewStatus</code> (<code>needs-review</code> | <code>reviewed</code>, defaulting to <code>needs-review</code>, settable at creation). <code>listFeedback</code> accepts a <code>reviewStatus</code> filter, there is a new <code>updateFeedbackReviewStatus</code> storage method, and a <code>PATCH /api/observability/feedback/:feedbackId/review-status</code> server endpoint (gated on <code>observability:write</code>) is exposed through <code>@mastra/client-js</code>. This is the triage loop for human/agent feedback over traces: queue the unreviewed, drain the queue.</li>
+<li><strong><code>@mastra/evals/vitest</code>.</strong> A new test-runner integration that runs <code>runEvals</code> as Vitest tests with <code>expectEvals</code>/<code>expectEval</code> matchers and a reporter printing per-test scores — eval results as a CI gate rather than a dashboard.</li>
+</ul>
+<p>The rest of the release is agent-runtime plumbing (reusable E2B sandbox templates, unified <code>workingDirectory</code> across sandbox providers, client-tool <code>toModelOutput</code>, a breaking sandbox-factory change) — off-beat, as with the Sep 3 Sandbox Lifecycle Controls post ruled off-beat at 2134. Carded under the same precedent as the existing <code>mastra-feedback-redaction-multiturn-evals-token-cost-control</code> card: Mastra minor releases that touch feedback/evals are in-beat.</p>
+<p><strong>TL;DR for BQAA.</strong> Two column notes, nothing to build. First, <strong>review status is becoming a standard field on feedback/score rows</strong>: Mastra now stores <code>needs-review</code>/<code>reviewed</code> on the feedback record itself, Braintrust shipped blind-review independence settings, Langfuse has annotation queues — three vendors converging on &quot;human review state is data in the store, queryable like any other column.&quot; BQAA's feedback/score table should carry a review-state column (plus reviewer identity and timestamp) so &quot;show me unreviewed negative feedback this week&quot; is a WHERE clause. Second, the vitest runner is a vocabulary note: evals-as-CI-tests keeps spreading (LangWatch's testing v2 already carded); BQAA's docs story for CI is &quot;assert against a SQL query,&quot; which stays simpler — one sentence in positioning, no feature.</p>
+<h3>2. Verified flat vs 0946</h3>
+<ul>
+<li><strong>Langfuse.</strong> Changelog index fully rendered and scanned: newest entry remains &quot;Analyze thousands of observations with the Assistant&quot; (2 days ago), carded at 0946. No new GitHub tags since v4.30.0 (16:02 UTC, already known).</li>
+<li><strong>Braintrust.</strong> September section unchanged: Patterns, Debugger, Loop across the project, Loop automations, blind reviews, GLM-5.3 Flash. Python SDK v0.37.0 (Pydantic AI invocation params) is patch-level.</li>
+<li><strong>MLflow, Phoenix, Opik, Weave, LangWatch, ADK Python/Java, OTel semconv, OpenLLMetry.</strong> No new tags since 0946; MLflow 3.16.0 remains the day's event, already carded.</li>
+<li><strong>BigQuery platform.</strong> Page last updated 2026-09-03 UTC; newest entries unchanged (Sep 3 conversational analytics GA, Sep 2 JDBC, Sep 1 Rust SDK preview; an Aug 31 TabFM preview entry visible on the current render is out of beat — ML functions, not agent analytics).</li>
+<li><strong>AWS AgentCore, Datadog, Grafana, Salesforce, IBM, ServiceNow, ARMS, Agno, Laminar, deepset, LangSmith.</strong> Web search surfaces nothing dated today for any of them; LangSmith's changelog URL now redirects to the observability docs landing page (Housekeeping). Grafana, Laminar, deepset, ARMS remain as verified at 0946.</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<p>Flat, by cadence. The Friday 4 September arXiv listing (269 entries) was fully triaged at 2134 across cs.AI/LG/CL/MA and confirmed unchanged at 0946; no new announcement appears until Monday's, visible ~5:00 PM PT Sunday. Weekend briefs should re-check replacements and cross-list drift only.</p>
+<hr />
+<h2>Six-week EV</h2>
+<p>Ranking unchanged from 0946. What moved:</p>
+<ul>
+<li><strong>Review-queue state as a first-class column on feedback/score rows (new schema note, from item 1).</strong> Mastra 1.64.0 stores <code>reviewStatus</code> on the feedback record and filters on it; Braintrust shipped blind-review settings; Langfuse runs annotation queues. Three vendors now treat human review state as stored, queryable data rather than UI session state. BQAA's feedback/score table should carry review state, reviewer identity, and review timestamp as columns — same family as the annotation-queue observations, now with a third citation. Column note, not a roadmap row.</li>
+<li>Span links as a recorded edge field; assistant-over-trace-store as table stakes; judged-content modality on eval events; session as a lens over the trace table: unchanged from 0946.</li>
+<li>Evals-as-CI vocabulary note strengthened slightly (Mastra vitest runner joins LangWatch testing v2); BQAA's assert-against-SQL story unchanged.</li>
+<li>Per-action instability floor, typed refusal events, mechanism-plane gate events, source-event references, failure-step pointer with outcome stratum, judge instrument metadata, task-key baseline, repeatability-is-not-correctness: unchanged.</li>
+</ul>
+<p>Reserve and do-not-start otherwise unchanged.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li>mastra-1-64-feedback-review-status-evals-vitest — Mastra @mastra/core 1.64.0: reviewStatus workflow on observability feedback records (filter, storage method, PATCH endpoint), plus @mastra/evals/vitest CI eval runner (https://github.com/mastra-ai/mastra/releases/tag/%40mastra%2Fcore%401.64.0)</li>
+</ul>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Why this card is &quot;missed,&quot; not &quot;late.&quot;</strong> Mastra 1.64.0 was tagged 2026-09-04T13:14Z, after the 2134 baseline but before the 0946 brief ran; 0946 checked the Mastra blog (newest post Sep 3, sandbox lifecycle, off-beat) but not the GitHub releases feed. Mastra ships product through releases, not the blog — the hourly should poll <code>mastra-ai/mastra</code> releases directly.</li>
+<li><strong>LangSmith changelog URL drift.</strong> <code>docs.smith.langchain.com/changelog/cloud</code> now redirects to the observability docs landing page. Flatness tonight was judged by web search (nothing dated today) rather than by page diff; the hourly needs the current LangSmith changelog path re-verified before the next brief.</li>
+<li><strong>Stale-news trap avoided.</strong> A web search this window surfaced &quot;ClickHouse acquires Langfuse&quot; prominently — that is January 2026 news, long pre-baseline, and no card was written.</li>
+<li><strong>Weekend cadence.</strong> No arXiv until ~5:00 PM PT Sunday; expected industry movement over the weekend is minimal. Next meaningful checks: Mastra/Langfuse/Phoenix GitHub tags and the Langfuse changelog index.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Kimi · 4 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
