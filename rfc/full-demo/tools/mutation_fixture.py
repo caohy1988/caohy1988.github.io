@@ -73,8 +73,15 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m68 twelve modifiers before "Phase A roles" (Codex r14: the 12-modifier scan ceiling is gone)
   m69 "granted the `custom role (okfCatalogSearch)` at project scope." (Codex r14: punctuation in inline code)
   m70 a claim in an app.js string literal under a "Future" comment (Codex r14: real source boundaries)
+  m71 "The docs must explain the operator audited the bindings on tape." (Kimi r15: null complement, unlisted -ed verb)
+  m72 / m73 "must report operators were on tape" / "The planned operator was on tape." (Codex r15: phrase claims)
+  m74 / m75 unlisted present ("reviewers audit …") and irregular past ("No reviewer knew …") (Codex r15)
+  m76 / m77 "Operators grant temporary Phase A roles." / "okf-setup returns PERMISSION_DENIED." (Codex r15: subjects)
+  m78 inline code with an equals sign keeps its object (Codex r15)
+  m79 a claim split across concatenated literals, and a claim wrapped in inline HTML (Codex r15)
+  m80 a punctuation-free comment beside a dishonest literal (Codex r15)
 
-Positive controls p1-p18 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
+Positive controls p1-p24 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
 "grants" as a noun, bare-infinitive coordination, the proper noun "Run") and must leave the checker at exit 0.
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
@@ -287,6 +294,12 @@ POSITIVE_CONTROLS = [
     ("p16 adverb before a coordinated continuation head ('and carefully record …')", _append("plan.md", "The operator must create the service accounts and carefully record every binding on tape.")),
     ("p17 executable app.js code is not prose", _append_js("app.js", "function r14Control() { return roles; }")),
     ("p18 honest app.js literal stays clean", _append_js("app.js", 'var r14Ok = "The operator must create the Phase A service accounts.";')),
+    ("p19 honest passive future ('The operator must be recorded on tape.')", _append("ARCHITECTURE.md", "The operator must be recorded on tape.")),
+    ("p20 modal over a coordinated head and its object phrase", _append("spec.md", "The docs must explain the RFC and record the Phase A binding on tape.")),
+    ("p21 attributive participle inside the object", _append("plan.md", "The docs must explain the RFC and record the previously scoped Phase A binding on tape.")),
+    ("p22 denial whose subject carries a prepositional phrase", _append("intent.md", "No service account in the Phase A project was created.")),
+    ("p23 determiner-headed compound noun with an unlisted verb", _append("CUSTOMER_STORIES.md", "The project grants govern Phase A access to the custom role.")),
+    ("p24 non-ly adverb before a coordinated continuation head", _append("README.md", "The operator must create the service accounts and always record every binding on tape.")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -326,6 +339,33 @@ def m70(d):
     """A claim inside an app.js string literal must be caught, and a "Future" comment above it must not qualify it."""
     p = d / "app.js"
     p.write_text(p.read_text("utf-8") + '\n// Future work is planned here.\nvar r14Claim = "The operator created the Phase A service accounts.";\n', "utf-8")
+
+
+# Codex / Kimi r15: null-complement claims reached by a direct modal or status marker, unlisted present and irregular
+# verbs, bare-plural and identifier subjects, inline code with an equals sign, and real JavaScript source shapes.
+m71 = _append("ARCHITECTURE.md", "The docs must explain the operator audited the bindings on tape.")
+m72 = _append("spec.md", "The docs must report operators were on tape.")
+m73 = _append("plan.md", "The planned operator was on tape.")
+m74 = _append("intent.md", "The docs must explain why reviewers audit the service accounts on tape.")
+m75 = _append("CUSTOMER_STORIES.md", "No reviewer knew okf-setup created the service accounts.")
+m76 = _append("README.md", "Operators grant temporary Phase A roles.")
+m77 = _append("ARCHITECTURE.md", "okf-setup returns PERMISSION_DENIED.")
+m78 = _append("spec.md", "The operator granted the `custom role = okfCatalogSearch` at project scope.")
+
+
+def m79(d):
+    """A claim split across concatenated string literals, with a code-only line between them, is still a claim; and a
+    claim wrapped in inline HTML must survive tag removal."""
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8") +
+                 '\nvar r15a = "The operator created " +\n  D.pad +\n  "the Phase A service accounts.";\n'
+                 '\nvar r15b = "The service <strong>accounts</strong> were created for this capture.";\n', "utf-8")
+
+
+def m80(d):
+    """A punctuation-free comment must not qualify a claim in the literal next to it."""
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8") + '\n// Future work is planned here\nvar r15c = "All seven negative checks are on tape.";\n', "utf-8")
 
 
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
@@ -394,7 +434,17 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m67 'All positive checks return success.' (Codex r14: base-present, bare object)", m67),
              ("m68 twelve modifiers before 'Phase A roles' (Codex r14: no scan ceiling)", m68),
              ("m69 inline code with punctuation keeps the object (Codex r14)", m69),
-             ("m70 claim in an app.js string literal, 'Future' comment above it (Codex r14)", m70)]
+             ("m70 claim in an app.js string literal, 'Future' comment above it (Codex r14)", m70),
+             ("m71 'must explain the operator audited …' (Kimi r15: null complement, unlisted -ed)", m71),
+             ("m72 'must report operators were on tape' (Codex r15: null-complement phrase claim)", m72),
+             ("m73 'The planned operator was on tape.' (Codex r15: status on the subject)", m73),
+             ("m74 'why reviewers audit the service accounts' (Codex r15: unlisted present verb)", m74),
+             ("m75 'No reviewer knew okf-setup created …' (Codex r15: irregular past)", m75),
+             ("m76 'Operators grant temporary Phase A roles.' (Codex r15: bare plural subject)", m76),
+             ("m77 'okf-setup returns PERMISSION_DENIED.' (Codex r15: identifier subject)", m77),
+             ("m78 inline code with an equals sign keeps the object (Codex r15)", m78),
+             ("m79 claim split across literals; claim inside inline HTML (Codex r15)", m79),
+             ("m80 punctuation-free comment beside a dishonest literal (Codex r15)", m80)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
