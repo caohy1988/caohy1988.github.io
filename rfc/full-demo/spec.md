@@ -222,7 +222,7 @@ after dual LGTM (see `plan.md`).
   events matched on both handle and publication through one resolution view, `publications` joined
   by id only, receipt-only rows banded, non-event evidence in `demo_evidence`.
 - Every capability row in §2 is either shown on a beat or marked `RFC text only` on the page.
-- (Phase A; not yet met on PR 16.) The bootstrap operator installs every binding on tape; every positive check returns `OK`; all seven negative checks (nine API calls) return `PERMISSION_DENIED`, including the two post-cleanup checks that prove `okf-setup` is retired; each BigQuery step's `user_email` on tape matches the declared identity. Today every `user_email` on record is the operator's.
+- (Phase A; not yet met on PR 16.) The bootstrap operator must install every binding on tape; every positive check must return `OK`; all seven negative checks (nine API calls) must return `PERMISSION_DENIED`, including the two post-cleanup checks that would show `okf-setup` is retired; and each BigQuery step's `user_email` on tape must match the declared identity. Today every `user_email` on record is the operator's.
 - Never-emit scan over every agent-facing payload on the page returns 0 hits.
 - `python3 rfc/full-demo/tools/check_full_demo.py` (Phase C) exits 0: beats present, session ids and
   publication ids match the checked-in transcripts, no `ATTESTED` string outside the labelled Phase 4 shape,

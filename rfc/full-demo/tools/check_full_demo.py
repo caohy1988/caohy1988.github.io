@@ -304,8 +304,6 @@ check(not list(LIVE.glob("bq_job_*.json")), "no bq show -j identity-fallback sna
 # query text (bq show -j, kept in provenance_sessions_summary.json) ↔ committed SQL file ↔ result file ↔ app consumer.
 # The provenance file is NOT an identity source: user_email comes only from the inventory and is cross-checked.
 import hashlib
-def norm_sql(text):
-    return re.sub(r"\s+", " ", re.sub(r"--[^\n]*", "", text)).strip().rstrip(";")
 summary_job = (LIVE / "sessions_summary.jobid").read_text().strip()
 srow = inventory.get(summary_job)
 check(bool(srow) and srow["state"] == "DONE" and srow["statement_type"] == "SELECT" and srow["user_email"] == jobs[0]["user_email"],
@@ -314,8 +312,13 @@ prov = load("provenance_sessions_summary.json")
 check(prov["job_id"] == summary_job and prov["state"] == "DONE" and prov["statement_type"] == "SELECT", "provenance artifact names the same job id, DONE, SELECT")
 check(prov["user_email_as_shown_by_bq_show"] == (srow or {}).get("user_email"), "provenance artifact's user_email agrees with the inventory row (cross-check, not a fallback)")
 sql_text = (DEMO / "sql/sessions_summary.sql").read_text("utf-8")
-check(norm_sql(prov["executed_query"]) == norm_sql(sql_text), "normalized executed query text == normalized sql/sessions_summary.sql")
-check(hashlib.sha256(norm_sql(sql_text).encode()).hexdigest() == prov["sql_file_sha256_normalized"] == prov["executed_query_sha256_normalized"], "normalized SHA-256 of the SQL file matches the executed query hash recorded in the artifact")
+# Byte-identical, no normalization: comment stripping or whitespace folding would let two queries that differ
+# inside a quoted literal (e.g. '--x' vs '--y') hash the same. The live query and the committed file are identical bytes.
+check(prov["executed_query"] == sql_text, "executed query text is byte-identical to sql/sessions_summary.sql (no normalization)")
+raw_sql_hash = hashlib.sha256(sql_text.encode("utf-8")).hexdigest()
+check(hashlib.sha256(prov["executed_query"].encode("utf-8")).hexdigest() == prov["executed_query_sha256_raw"] == prov["sql_file_sha256_raw"] == raw_sql_hash,
+      "raw SHA-256 of the executed query and of the SQL file agree with both hashes recorded in the artifact")
+check("normalized" not in json.dumps(prov), "provenance artifact carries no normalized hash that a literal collision could satisfy")
 check(re.search(r"FROM `test-project-0728-467323\.okf_rfc_demo\.agent_events`", sql_text) and "COUNT(*)" in sql_text and "TOOL_COMPLETED" in sql_text and "GROUP BY 1, 2" in sql_text,
       "the committed summary SQL is the per-session aggregate over agent_events (COUNT(*), TOOL_COMPLETED, GROUP BY 1, 2)")
 check(hashlib.sha256((LIVE / "sessions_summary.json").read_bytes()).hexdigest() == prov["result_sha256"], "sessions_summary.json bytes match the result hash in the artifact")
@@ -338,27 +341,69 @@ check("Phase A; not yet met" in spec, "spec.md §4 marks the bootstrap/negative-
 arch = (DEMO / "ARCHITECTURE.md").read_text("utf-8")
 check("not yet shown" in arch, "ARCHITECTURE.md marks FAIL_STALE / history as not yet shown")
 
-# ---- executed-language scan (Codex round 3): deferred Phase A must read as future / RFC text only -------------
+# ---- executed-language scan (Codex rounds 3–4): deferred Phase A must read as future / not done / RFC text only ----
+# Sentence-level. A sentence that narrates a Phase A action as executed passes only if the SAME sentence carries an
+# explicit qualifier (must / will / expected / not yet / not done / RFC text only / never / prior ...). The bare words
+# "Phase A" qualify nothing. Paragraph lines are joined first so a qualifier on the next wrapped line still governs.
 EXECUTED = [r"recorded on tape", r"on tape under", r"\bon tape\b", r"\bthe tape shows\b", r"\bthe tape demonstrates\b",
-            r"\bdemonstrated, not asserted\b", r"\bis demonstrated\b", r"\bprove[sd]? (the|that|it)\b", r"\bdenial checks prove\b",
-            r"\bmakes every binding\b", r"\bevery binding call is made\b", r"\bcreates the (three )?service accounts\b", r"\bare revoked\b",
-            r"\beach (binding )?command (is )?recorded\b", r"\b(is|are) recorded (on|in) the tape\b", r"returned `?PERMISSION_DENIED",
+            r"\bdemonstrated, not asserted\b", r"\b(is|was|were|are|been) demonstrated\b", r"\bprove[sd]? (the|that|it)\b", r"\bdenial checks prove\b",
+            r"\bmakes every binding\b", r"\bevery binding call is made\b", r"\bcreates? the (three )?service accounts\b", r"\b(are|were|was|is|been) revoked\b",
+            r"\beach (binding )?command (is |was )?recorded\b", r"\b(is|are|was|were|been) recorded (on|in) the tape\b", r"returned `?PERMISSION_DENIED",
             r"\bran as `?okf-(setup|sync-writer|runtime-reader)", r"\bexercised once on tape\b", r"\bimpersonated `?user_email`? (from|after)\b",
-            r"\bidentity is demonstrated\b", r"\bshows? the impersonated\b"]
-SCOPED = [r"Phase A", r"not done", r"Not done", r"not yet", r"NOT yet", r"RFC text only", r"future", r"\bmust\b", r"\bwill\b", r"\bwould\b",
-          r"\bshall\b", r"to be recorded", r"expected", r"target", r"planned", r"not run", r"none (was|were) run", r"not created",
-          r"has not run", r"none happened", r"neither happened", r"prior", r"never"]
-scan_files = ["spec.md", "ARCHITECTURE.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json"]
+            r"\bidentity is demonstrated\b", r"\bshows? the impersonated\b", r"\b(was|were|has been|have been) executed\b",
+            r"\b(was|were) (created|granted|revoked|proved|recorded)\b", r"\b(was|were|is|are) denied\b", r"\bPERMISSION_DENIED\b[^.;]*\bon tape\b"]
+QUALIFIER = [r"\bmust\b", r"\bwill\b", r"\bwould\b", r"\bshall\b", r"\bto be (recorded|run|exercised|made|created|revoked|deleted|granted)\b", r"\bexpected\b",
+             r"\bnot yet\b", r"\bNOT yet\b", r"\bnot done\b", r"\bNot done\b", r"\bnot run\b", r"\bnot started\b", r"\bnot created\b", r"\bnot built\b", r"\bNot built\b",
+             r"\bnone (of|was|were|has|have)\b", r"\bno (such )?tape\b", r"\b[Nn]othing\b", r"RFC text only", r"\bfuture\b", r"\bdeferred\b", r"\bplanned\b",
+             r"\bhas not run\b", r"\bnone happened\b", r"\bneither happened\b", r"\bprior\b", r"\bnever\b", r"\bdoes not exist\b", r"\brequirement\b",
+             r"\bacceptance criterion\b", r"\bnot (been )?executed\b", r"\bnot met\b"]
+SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json"]
+
+def scan_executed(text, fname="<text>"):
+    """Return offending sentences: executed-language without an explicit qualifier in the same sentence."""
+    out = []
+    lines = text.split("\n")
+    i = 0
+    while i < len(lines):
+        if not lines[i].strip():
+            i += 1
+            continue
+        start_line = i + 1
+        para = []
+        while i < len(lines) and lines[i].strip():
+            para.append(lines[i].strip())
+            i += 1
+        for sent in re.split(r"(?<=[.;])\s+", " ".join(para)):
+            if any(re.search(rx, sent) for rx in EXECUTED) and not any(re.search(rx, sent) for rx in QUALIFIER):
+                out.append("%s:%d: %s" % (fname, start_line, sent.strip()[:130]))
+    return out
+
 offenders = []
-for fname in scan_files:
-    for i, ln in enumerate((DEMO / fname).read_text("utf-8").split("\n"), 1):
-        if any(re.search(rx, ln) for rx in EXECUTED) and not any(re.search(rx, ln) for rx in SCOPED):
-            offenders.append("%s:%d: %s" % (fname, i, ln.strip()[:110]))
-check(not offenders, "no line narrates deferred Phase A (SA create/revoke, bindings on tape, denials proved, outcomes demonstrated) as executed without a future / not-done / RFC-text-only scope:\n      " + "\n      ".join(offenders[:12]))
+for fname in SCAN_FILES:
+    offenders += scan_executed((DEMO / fname).read_text("utf-8"), fname)
+check(not offenders, "no sentence narrates deferred Phase A (SA create/revoke, bindings on tape, denials proved, outcomes demonstrated, PERMISSION_DENIED returned) as executed without an explicit future / not-done / RFC-text-only qualifier in the same sentence:\n      " + "\n      ".join(offenders[:12]))
+# in-memory negative fixtures: the scan itself must catch these (bare "Phase A" is not a qualifier)
+NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
+       "The operator created the service accounts and every binding was recorded on tape under the okf-setup identity.",
+       "Check 6 returned PERMISSION_DENIED on tape.",
+       "Phase A: the tape shows the impersonated user_email after each step."]
+POS = ["In Phase A the operator must make every binding on tape (not yet run).",
+       "Each call is expected to return PERMISSION_DENIED; none has been run.",
+       "The legacy handle was bound to two publications before Phase A."]
+check(all(scan_executed(t) for t in NEG), "scan flags each negative fixture (bare 'Phase A' does not qualify)")
+check(not any(scan_executed(t) for t in POS), "scan accepts qualified future-tense sentences and legacy data facts")
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")
 check("Status on 2026-09-03 (PR 16): none of this section has run" in arch, "ARCHITECTURE.md sync-leg prose carries the not-run scope note")
 plan_md = (DEMO / "plan.md").read_text("utf-8")
 check("Status on 2026-09-03 (PR 16)" in plan_md and "Phase A has not started" in plan_md, "plan.md carries a status note that Phase A has not started")
+
+# ---- mutation fixture: a clean copy with a known bad edit must make this checker exit non-zero -----------------
+if not __import__("os").environ.get("CHECK_FULL_DEMO_NO_MUTATION"):
+    try:
+        out = subprocess.run([sys.executable, str(HERE / "mutation_fixture.py")], capture_output=True, text=True, timeout=600)
+        check(out.returncode == 0, "tools/mutation_fixture.py: every mutated copy fails and the clean copy passes\n      " + out.stdout.strip().replace("\n", "\n      ") + out.stderr.strip())
+    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+        check(False, "tools/mutation_fixture.py could not run: %s" % e)
 
 # ---- wiring ---------------------------------------------------------------------------------------
 check('href="./full-demo/"' in (RFC / "index.html").read_text("utf-8"), "rfc/index.html Prototype callout links ./full-demo/")
