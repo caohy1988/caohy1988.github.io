@@ -313,6 +313,13 @@ def _append_audited_js(rel, code, verdict="PENDING", evidence="-"):
     return fn
 
 
+def _unwired_pinned_capture(d):
+    """A capture may land under live/ before a pane uses it - but it is pinned from the moment it lands."""
+    rel = "live/beat7_new_capture.json"
+    (d / rel).write_text('[{"note": "not yet run"}]\n', "utf-8")
+    _pin(d, rel)
+
+
 def _new_pinned_capture(d):
     """The authoring workflow INV-6 defines: a new pane fetches a new capture, and the capture is pinned."""
     rel = "live/beat7_new_capture.json"
@@ -320,6 +327,14 @@ def _new_pinned_capture(d):
     p = d / "app.js"
     p.write_text(p.read_text("utf-8").replace('matrix: "matrix.json"', 'extra: "' + rel + '", matrix: "matrix.json"', 1), "utf-8")
     _pin(d, rel)
+
+
+def _append_audited_html(rel, markup, verdict="PENDING", evidence="-"):
+    def fn(d):
+        p = d / rel
+        p.write_text(p.read_text("utf-8").replace("</body>", markup + "</body>", 1), "utf-8")
+        _audit(d, _rows_for(rel, GATE["html_runs"](markup), verdict, evidence))
+    return fn
 
 
 def _append_audited_css(rel, css, verdict="PENDING", evidence="-"):
@@ -436,6 +451,9 @@ POSITIVE_CONTROLS = [
     ("p52 a negation on a passive subject with a prepositional modifier (Codex r23)", _append_audited("spec.md", "No service account in the Phase A project was created.")),
     ("p53 audited generated content behind a property comment (Codex r23)", _append_audited_css("styles.css", 'body::after { content/**/: "Phase A must still be recorded on tape."; }')),
     ("p54 a new capture, fetched by the viewer and pinned", _new_pinned_capture),
+    ("p55 an audited button label (Codex r24)", _append_audited_html("index.html", '<input type="button" value="Phase A must still be recorded on tape.">')),
+    ("p56 audited generated content split across adjacent strings (Codex r24)", _append_audited_css("styles.css", 'body::after { content: "Phase A must still " "be recorded on tape."; }')),
+    ("p57 a capture added under live/ and pinned, before anything fetches it", _unwired_pinned_capture),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -739,6 +757,51 @@ def m153(d):
     css.write_text(css.read_text("utf-8") + "\nbody::before { content: attr(data-claim); }\n", "utf-8")
 
 
+# Codex r24. The inventory is every file under live/ and sql/ plus every path literal in app.js, so quoting style and
+# call site buy nothing (m154-m156); a verb closing the artefact's noun phrase is refused by every verdict whatever
+# its case or how many nouns precede it (m157-m158); CSS is read after identifier escapes and string concatenation
+# (m159-m160); and copy a browser prints from an attribute is audited like element text (m161-m162).
+def m154(d):
+    """A single-quoted map value: valid JavaScript the round-23 scraper walked straight past."""
+    (d / "live" / "beat7_new_capture.json").write_text('[{"note": "The Phase A service accounts were created."}]\n', "utf-8")
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace('matrix: "matrix.json"', "extra: 'live/beat7_new_capture.json', matrix: \"matrix.json\"", 1), "utf-8")
+
+
+def m155(d):
+    """A direct fetch, outside the maps entirely."""
+    (d / "live" / "beat7_new_capture.json").write_text('[{"note": "The Phase A service accounts were created."}]\n', "utf-8")
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace("  var TOTAL = 6;", "  var TOTAL = 6;\n  fetchJson('live/beat7_new_capture.json');", 1), "utf-8")
+
+
+def m156(d):
+    """A capture dropped into live/ and not wired up yet is still in the inventory."""
+    (d / "live" / "beat7_new_capture.json").write_text('[{"note": "The Phase A service accounts were created."}]\n', "utf-8")
+
+
+def m157(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap SUCCEEDED.")
+
+
+def m158(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap effort succeeded.")
+
+
+m159 = _append("styles.css", 'body::after { co\\6e tent: "The Phase A service accounts were created."; }')
+m160 = _append("styles.css", 'body::after { content: "The Phase A service " "accounts were created."; }')
+
+
+def m161(d):
+    p = d / "index.html"
+    p.write_text(p.read_text("utf-8").replace("</body>", '<input type="button" value="The Phase A service accounts were created."></body>', 1), "utf-8")
+
+
+def m162(d):
+    p = d / "index.html"
+    p.write_text(p.read_text("utf-8").replace("</body>", '<img src="x.png" alt="The Phase A service accounts were created."></body>', 1), "utf-8")
+
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -888,7 +951,16 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m150 a negation cannot reach across a second noun phrase (Codex r23)", m150),
              ("m151 an escaped JSON value is literal text on the screen (Codex r23)", m151),
              ("m152 'content/**/:' is still a content declaration (Codex r23)", m152),
-             ("m153 attr() prints an unquoted attribute (Codex r23)", m153)]
+             ("m153 attr() prints an unquoted attribute (Codex r23)", m153),
+             ("m154 INV-6: a single-quoted map value is still a dependency (Codex r24)", m154),
+             ("m155 INV-6: a direct fetchJson path is still a dependency (Codex r24)", m155),
+             ("m156 INV-6: an unwired capture under live/ is still in the inventory (Codex r24)", m156),
+             ("m157 'The IAM bootstrap SUCCEEDED.' takes no verdict (Codex r24)", m157),
+             ("m158 'The IAM bootstrap effort succeeded.' likewise (Codex r24)", m158),
+             ("m159 'co\\6e tent' is the content property (Codex r24)", m159),
+             ("m160 adjacent content strings are concatenated (Codex r24)", m160),
+             ("m161 an input's value label is visible copy (Codex r24)", m161),
+             ("m162 an image's alt text is visible copy (Codex r24)", m162)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

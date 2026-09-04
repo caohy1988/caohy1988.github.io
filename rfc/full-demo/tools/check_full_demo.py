@@ -508,12 +508,22 @@ LICENCE_FRAMES = [
                + r"(?:\s+(?:" + FRAME_ADVERB + r"|been))*\s+" + PAST_TOKEN + r"\b", re.I),
 ]
 COMPLETION_VERB = re.compile(r"\b" + PAST_TOKEN + r"\b", re.I)
-# A verb standing straight after the artefact it is about is a claim about that artefact, whatever the verb is. The
-# test is position plus the -ed shape, so "The IAM bootstrap succeeded." needs a frame or an evidenced verdict even
-# though "succeeded" is in no list, while "each call expected PERMISSION_DENIED" - where the participle comes BEFORE
-# the artefact - is untouched.
-POSTPOSED_VERB = re.compile(r"(?:\s+(?:(?-i:[a-z]+ly)|not|never|also|already|then|still|now|only|just|even|yet))*"
-                            r"\s+((?-i:[a-z]+ed)|" + PAST_TOKEN + r")\b", re.I)
+# A verb closing the noun phrase that names a deferred artefact is a claim about that artefact, whatever the verb is
+# and however it is capitalised: "The IAM bootstrap SUCCEEDED.", "The IAM bootstrap effort succeeded." Between the
+# artefact and the verb only BARE words may stand - the rest of one noun phrase - so a determiner, preposition,
+# coordinator, auxiliary or subordinator ends the reach, and "an isolated gcloud configuration" or "and asserted by
+# the checker" is not a claim about the artefact before it. The verb must also close its clause, which is what makes
+# it a predicate rather than a participle modifying whatever follows ("the aspect type owned by the setup identity").
+AUXILIARY_WORD = r"is|are|was|were|be|been|being|has|have|had|having|does|do|did|" + MODAL_WORDS
+SUBORDINATOR_WORD = (r"because|since|so|when|while|if|unless|until|after|before|although|though|whereas|that|which|"
+                     r"who|whom|whose|whether|how|why|where")
+COORDINATOR_WORD = r"and|or|but|nor|plus|then"
+NP_STOP = (r"(?-i:" + DETERMINER_WORD + r")|(?i:" + PREPOSITION_WORD + r"|" + AUXILIARY_WORD + r"|"
+           + SUBORDINATOR_WORD + r"|" + COORDINATOR_WORD + r")")
+ADVERB_RUN = r"(?:\s+(?:(?i:[a-z]+ly)|not|never|also|already|then|still|now|only|just|even|yet))*"
+POSTPOSED_VERB = re.compile(r"(?:\s+(?!(?:" + NP_STOP + r")\b)[\w'’-]+){0,3}" + ADVERB_RUN
+                            + r"\s+((?i:[a-z]+ed)|" + PAST_TOKEN + r")\b(?:\s+(?i:[a-z]+ly))*"
+                            + r"(?=\s*(?:[,;:.)\]|]|$))", re.I)
 
 def postposed_problems(sent):
     """PENDING says nothing here was executed. A past verb directly after a deferred artefact says otherwise unless a
@@ -589,23 +599,44 @@ NOT_DONE = re.compile(r"\b(not|no|none|never|without|nothing|neither|yet|deferre
 
 SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json", "styles.css"]
 
-# ---- the viewer's data dependencies, read out of app.js (Codex round 23) -----------------------------------------
-# Everything the page fetches is either COPY, audited sentence by sentence in the register, or a CAPTURE, pinned byte
-# for byte in tools/live_manifest.tsv. The inventory is not hand-maintained: it is the FILES and TEXTS maps app.js
-# actually fetches, so a new pane that loads a new file cannot slip past the audit by not being listed here.
+# ---- the inventory (Codex rounds 23-24), fail-closed --------------------------------------------------------------
+# Everything the page can put on the screen is either COPY, audited sentence by sentence in the register, or a
+# CAPTURE, pinned byte for byte in tools/live_manifest.tsv. Round 23 scraped app.js's FILES / TEXTS maps for
+# double-quoted paths, which a single-quoted value or a direct fetchJson(...) walked straight past. The inventory no
+# longer reads the code's SHAPE at all:
+#   * every file under live/ and sql/ is in the inventory, whether or not anything fetches it yet;
+#   * plus every path-shaped STRING LITERAL in app.js, read through the same tokenizer the prose reader uses, so
+#     quoting style and call site are irrelevant.
+# Forgetting to wire a capture up is therefore not a way to avoid pinning it.
 def viewer_files():
-    src = (DEMO / "app.js").read_text("utf-8")
-    out = []
-    for name in ("FILES", "TEXTS"):
-        m = re.search(r"\bvar\s+" + name + r"\s*=\s*\{(.*?)\n  \};?", src, re.S)
-        if not m:
-            m = re.search(r"\bvar\s+" + name + r"\s*=\s*\{([^{}]*)\}", src, re.S)
-        if m:
-            out += re.findall(r"\"((?:live/|sql/)?[\w./-]+\.(?:json|txt|out|sql|md))\"", m.group(1))
-    return sorted(set(out))
+    out = set()
+    for root in ("live", "sql"):
+        base = DEMO / root
+        if base.is_dir():
+            out |= {str(f.relative_to(DEMO)) for f in base.rglob("*") if f.is_file()}
+    literals = " \n".join(t for _, kind, t, _, _ in _js_pieces((DEMO / "app.js").read_text("utf-8")) if kind == "lit")
+    for cand in re.findall(r"[\w./-]+\.[A-Za-z0-9]{1,6}", literals):
+        cand = cand.lstrip("./")
+        if (DEMO / cand).is_file():
+            out.add(cand)
+    return sorted(out)
 
 # A declaration value ends at the first semicolon or brace OUTSIDE a string, so a quoted value may contain either.
 CSS_COMMENT = re.compile(r"/\*.*?\*/", re.S)
+# A CSS identifier may spell any of its characters as an escape, so `co\6e tent` IS `content` to a browser. Escapes
+# are decoded before anything is parsed, exactly as the tokenizer decodes them, so no spelling of the property hides
+# a rule that prints prose.
+CSS_ESCAPE = re.compile(r"\\(?:([0-9a-fA-F]{1,6})[ \t\n]?|(.))", re.S)
+
+def decode_css(src):
+    def one(m):
+        if m.group(1):
+            try:
+                return chr(int(m.group(1), 16))
+            except (ValueError, OverflowError):
+                return ""
+        return m.group(2)
+    return CSS_ESCAPE.sub(one, src)
 CSS_CONTENT = re.compile(r"\bcontent\s*:\s*((?:\"[^\"]*\"|'[^']*'|[^;}])*)", re.I)
 CSS_STRING = re.compile(r"\"([^\"]*)\"|'([^']*)'")
 CSS_ATTR = re.compile(r"\battr\(\s*([-\w]+)", re.I)
@@ -632,12 +663,15 @@ def extract_css_prose(src):
     removes them, so `content/**/: "…"` is still a content declaration. A content value that uses a generated-content
     function this reader does not model is reported as prose to audit, not silently dropped."""
     out, unmodelled = [], []
+    src = decode_css(src)
     for m in re.finditer(r"/\*(.*?)\*/", src, re.S):
         out.append(m.group(1).replace("\n", " ").strip())
     for m in CSS_CONTENT.finditer(CSS_COMMENT.sub(" ", src)):
         value = m.group(1)
-        for lit in CSS_STRING.finditer(value):
-            out.append((lit.group(1) or lit.group(2) or "").strip())
+        # Adjacent strings in one content value are concatenated by the browser, so they are one run of copy.
+        joined = "".join(lit.group(1) or lit.group(2) or "" for lit in CSS_STRING.finditer(value)).strip()
+        if joined:
+            out.append(joined)
         bare = CSS_STRING.sub(" ", value)
         for at in CSS_ATTR.finditer(bare):
             values = _attribute_values(at.group(1))
@@ -924,15 +958,47 @@ def _drop_hidden(text):
             j = c.end()
         i = j
 
+# Attributes that carry no copy a reader can meet: plumbing, geometry and identifiers. EVERY other attribute value is
+# read as copy, because a browser can put one on the screen (`value`, `alt`, `placeholder`, `title`, `aria-label`, a
+# `data-` attribute a stylesheet prints with attr()). The list is an EXCLUSION list on purpose: forgetting an entry
+# adds rows to audit, it never drops a claim.
+NON_TEXT_ATTR = {
+    "class", "id", "href", "src", "srcset", "style", "type", "rel", "target", "role", "name", "for", "width",
+    "height", "colspan", "rowspan", "xmlns", "viewbox", "d", "fill", "stroke", "stroke-width", "stroke-linecap",
+    "stroke-linejoin", "lang", "charset", "http-equiv", "property", "media", "sizes", "integrity", "crossorigin",
+    "referrerpolicy", "loading", "decoding", "async", "defer", "hidden", "open", "disabled", "checked", "selected",
+    "readonly", "required", "multiple", "novalidate", "autocomplete", "autofocus", "tabindex", "colspan", "scope",
+    "aria-hidden", "aria-live", "aria-current", "aria-controls", "aria-expanded", "aria-selected", "data-beat",
+    "data-tone", "viewport", "preserveaspectratio", "points", "cx", "cy", "r", "x", "y", "x1", "x2", "y1", "y2",
+    "rx", "ry", "transform", "offset", "stop-color", "gradientunits", "patternunits", "clip-path", "version",
+}
+
+def attribute_copy(text):
+    """The copy a reader can meet through an attribute rather than through element text: a button's `value`, an
+    image's `alt`, a tooltip's `title`, a label a stylesheet prints. Each is its own run."""
+    out = []
+    for m in OPEN_TAG.finditer(text):
+        for a in ATTR.finditer(m.group(2)):
+            name = a.group(1).lower()
+            value = html.unescape((a.group(2) or "").strip("\"'")).strip()
+            if name in NON_TEXT_ATTR or not value or not re.search(r"[A-Za-z]", value):
+                continue
+            out.append(value)
+    return out
+
 def html_runs(text):
     """What the reader sees. Hidden elements are dropped whole, so text the browser never renders can neither make a
     claim nor qualify one; block-level tags separate text runs; inline tags are removed so a phrase the reader sees as
-    one ("The service <strong>accounts</strong> were created") stays one clause."""
+    one ("The service <strong>accounts</strong> were created") stays one clause. Copy a browser shows from an
+    ATTRIBUTE - a button label, an alt text, a tooltip - is emitted as its own run rather than thrown away with the
+    tag that carried it."""
     text = HTML_COMMENT.sub(" ", text)            # a comment is not rendered, and its tags open no element
     text = _drop_hidden(text)
+    attrs = attribute_copy(text)
     text = INLINE_TAG.sub("", BLOCK_TAG.sub(" | ", text))
     text = html.unescape(text)                        # &#66;Q_COMMITTED is BQ_COMMITTED on the screen
-    return re.sub(r"[ \t]{2,}", " ", text)            # removing an element must not split "service  accounts"
+    text = re.sub(r"[ \t]{2,}", " ", text)            # removing an element must not split "service  accounts"
+    return text + ("\n" + "\n".join("| " + a for a in attrs) if attrs else "")
 
 def strip_markdown(text):
     """Collapse inline code to one opaque token, then remove emphasis markers (*, stray backticks, and _ at word
@@ -1168,9 +1234,8 @@ check(not bad, "every register row is bound to its claim (licence spans open wit
 # ---- INV-6: every file the viewer loads is either audited copy or a pinned capture --------------------------------
 MANIFEST = HERE / "live_manifest.tsv"
 viewer = viewer_files()
-check(len(viewer) >= 25 and all((DEMO / f).exists() for f in viewer),
-      "the viewer's FILES / TEXTS maps parse out of app.js and every path they fetch exists (%d found): %s"
-      % (len(viewer), [f for f in viewer if not (DEMO / f).exists()][:4]))
+check(len(viewer) >= 40 and all((DEMO / f).is_file() for f in viewer),
+      "the inventory is every file under live/ and sql/ plus every path literal in app.js (%d found)" % len(viewer))
 pinned = {}
 manifest_problems = []
 for i, ln in enumerate(MANIFEST.read_text("utf-8").split("\n"), 1):
@@ -1282,6 +1347,15 @@ check(any("service accounts were created" in t for t in regulated_in(extract_css
       "a stylesheet that prints prose is copy, semicolons and all: generated content reaches the gate")
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { content/**/: "The Phase A service accounts were created."; }'))),
       "a comment between the property and its colon is removed the way a browser removes it")
+check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { co\\6e tent: "The Phase A service accounts were created."; }'))),
+      "a CSS identifier escape spells the same property: co\\6e tent is content")
+check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { content: "The Phase A service " "accounts were created."; }'))),
+      "adjacent strings in one content value are concatenated the way a browser concatenates them")
+check(any("service accounts were created" in t for t in regulated_in(html_runs('<input type="button" value="The Phase A service accounts were created.">'))),
+      "copy a browser shows from an attribute - a button label, an alt text, a tooltip - is audited like element text")
+check(all(postposed_problems(t) and distance_problems(t) and anchor_problems(t, ["live/bq_jobs_identity.json"])
+          for t in ("The IAM bootstrap SUCCEEDED.", "The IAM bootstrap effort succeeded.", "The IAM bootstrap succeeded.")),
+      "a verb closing the phrase that names a spec-declared deferred piece is refused by all three verdicts, whatever its case and however many nouns precede it")
 check("UNMODELLED" in extract_css_prose('body::after { content: attr(data-nothing-uses-this); }'),
       "generated content this reader cannot resolve is reported for audit, not silently dropped")
 check(any("service accounts were created" in t for t in regulated_in(extract_json_prose('{"status": "<span hidden>The Phase A service accounts were created.</span>"}'))),
