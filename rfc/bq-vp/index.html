@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Five minutes before a board meeting, 118% retention turns out to be 96%. An illustrative customer story about the proposed BigQuery runtime for Knowledge Catalog + OKF.">
+  <meta name="description" content="A $4 million board decision. An agent says 118% retention; the right number is 96%. An illustrative story about why Knowledge Catalog + OKF need a BigQuery runtime.">
   <meta name="theme-color" content="#1e302d">
   <link rel="canonical" href="https://caohy1988.github.io/rfc/bq-vp/">
-  <title>The board meets at 9. Retention is wrong. · BigQuery VP brief</title>
+  <title>118% in the board pack. 96% retained. · BigQuery VP brief</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -19,74 +19,77 @@
   <main id="main" tabindex="-1">
     <section class="hero shell" aria-labelledby="story-title">
       <p class="eyebrow scenario-label">Illustrative scenario · invented company, people &amp; numbers</p>
-      <h1 id="story-title">The board meets at 9. <br><em>Retention is wrong.</em></h1>
-      <p class="opening"><strong>8:55 a.m.</strong> Maya Chen, VP of Finance at subscription software company <strong>Alder</strong>, opens the final board pack. A $4 million customer-expansion plan rests on one claim: existing customers are spending more. Her finance agent reports <strong>118% net revenue retention. “Verified.”</strong></p>
-    </section>
+      <h1 id="story-title">The board pack says <span class="wrong-number">118%.</span> <br><em>Retention is <span class="right-number">96%.</span></em></h1>
+      <p class="opening"><strong>8:55 a.m.</strong> Maya Chen, VP of Finance at subscription software company <strong>Alder</strong>, has five minutes before the board decides on a <strong>$4 million plan to expand sales to existing customers.</strong> Her agent calls 118% retention “verified.” Revenue from those customers actually fell 4%.</p>
 
-    <section class="near-miss shell" aria-labelledby="miss-title">
-      <div class="narrative">
-        <p class="eyebrow">Five minutes to catch it</p>
-        <h2 id="miss-title">“Did that include <br>new customers?”</h2>
-        <p>An analyst spots the problem. The agent reused an old query for total annual recurring revenue (ARR) and labeled its answer retention. It cited Finance’s metric page, but no computation receipt connected that definition to the number.</p>
-        <p><strong>The opening customer cohort actually shrank.</strong> Maya pulls the slide. The board will need a different case for the spending.</p>
-      </div>
       <figure class="reconciliation">
-        <figcaption>The board-pack correction <span>Illustrative quarter · annual recurring revenue (ARR)</span></figcaption>
-        <dl class="inputs">
-          <div><dt>Opening customer cohort</dt><dd>$10.0m</dd></div>
-          <div><dt>Same customers, quarter end</dt><dd>$9.6m</dd></div>
-          <div class="new-customers"><dt>New customers, quarter end</dt><dd>+$2.2m</dd></div>
-        </dl>
-        <div class="calculation draft">
-          <div><span class="calc-label">Agent’s draft · includes new customers</span><p>($9.6m + $2.2m) ÷ $10.0m</p></div>
-          <strong>118%</strong>
-        </div>
-        <div class="calculation corrected">
-          <div><span class="calc-label">Correct retention · same cohort</span><p>$9.6m ÷ $10.0m</p></div>
-          <strong>96%</strong>
+        <figcaption>The mistake in one calculation <span>One quarter · annual recurring revenue (ARR) · $10m from existing customers at the start</span></figcaption>
+        <div class="calculation-pair">
+          <div class="calculation draft">
+            <h2>Wrong · counts new customers</h2>
+            <div class="numerator">
+              <span class="term"><span>Same customers</span><b>$9.6m</b></span>
+              <span class="operator">+</span>
+              <span class="term mistaken-term"><span>New customers</span><b>$2.2m</b></span>
+            </div>
+            <div class="quotient"><span>÷ $10m at the start</span><strong>= 118%</strong></div>
+          </div>
+          <div class="calculation corrected">
+            <h2>Correct · same customers only</h2>
+            <div class="numerator">
+              <span class="term"><span>Same customers</span><b>$9.6m</b></span>
+            </div>
+            <div class="quotient"><span>÷ $10m at the start</span><strong>= 96%</strong></div>
+          </div>
         </div>
       </figure>
+      <p class="near-miss"><strong>An analyst catches it. Maya pulls the slide.</strong> The agent cited Finance’s definition but reused a total-ARR query. New business made a shrinking customer base look like growth.</p>
     </section>
 
     <section class="runtime" aria-labelledby="runtime-title">
       <div class="shell">
         <div class="runtime-heading">
-          <p class="eyebrow">What would change · RFC proposal, not built</p>
-          <h2 id="runtime-title">Give Maya the receipt before the meeting.</h2>
-          <p>Knowledge Catalog would help the agent discover Finance’s approved retention definition in Open Knowledge Format (OKF). BigQuery would be the runtime of that context, beside Alder’s revenue data.</p>
+          <p class="eyebrow">Why BigQuery · proposed runtime · RFC, not built</p>
+          <h2 id="runtime-title">A definition lookup isn’t a computation receipt.</h2>
+          <p>Catalog alone can find the approved definition. It doesn’t run Maya’s calculation or bind the answer to a query job. Alder already keeps its revenue data in BigQuery, alongside query jobs and data access controls.</p>
         </div>
-        <ol class="runtime-beats">
-          <li>
-            <h3>Find the right “retention.”</h3>
-            <p>The Catalog entry would point to Finance’s OKF definition: start with the opening cohort; exclude new customers. The approved computation would travel with it.</p>
-          </li>
-          <li>
-            <h3>Pin it. Compute the 96%.</h3>
-            <p>The runtime would hold that context revision fixed and run its declared query for the quarter. A receipt would bind the revision, parameters and BigQuery job to the result. Missing execution evidence would mean “unproven.”</p>
-          </li>
-          <li>
-            <h3>Trace the board-pack answer.</h3>
-            <p>Maya’s reviewer could trace the answer to the finance agent, its execution identity, the pinned context and the receipt, under explicit access grants. A later definition change would not rewrite that record.</p>
-          </li>
-        </ol>
+        <div class="runtime-roles">
+          <section aria-labelledby="catalog-role">
+            <p class="role-name">Knowledge Catalog</p>
+            <h3 id="catalog-role">Find the definition.</h3>
+            <p>Discover Finance’s approved retention metric: follow the customers present at the start of the quarter. Exclude new customers.</p>
+          </section>
+          <section aria-labelledby="okf-role">
+            <p class="role-name">Open Knowledge Format (OKF)</p>
+            <h3 id="okf-role">Pin the instructions.</h3>
+            <p>Author the definition, declared query and parameters in an OKF bundle. The runtime pins one revision for Maya’s run, so later edits don’t change the context it used.</p>
+          </section>
+          <section class="bigquery-role" aria-labelledby="bigquery-role">
+            <p class="role-name">BigQuery</p>
+            <h3 id="bigquery-role">Run it. Account for it.</h3>
+            <p>Run the declared query against Alder’s revenue tables. Bind <strong>job + pinned context + quarter parameters + result</strong> in a computation receipt.</p>
+            <p>Trace the answer to <strong>the agent and the identity that ran the job.</strong> Use IAM to separate who can publish context, run the query and read the evidence.</p>
+          </section>
+        </div>
+        <p class="runtime-rule"><strong>No execution evidence → “unproven.”</strong> Finding the right definition is not proof that the calculation used it.</p>
       </div>
     </section>
 
     <div class="punchline shell">
-      <p>An agent’s boardroom number should come with a <em>BigQuery receipt.</em></p>
+      <p>Find it in Catalog. Run it in BigQuery. <em>Bring the receipt.</em></p>
     </div>
 
     <section class="ask shell" aria-labelledby="ask-title">
       <p class="eyebrow">One ask of the BigQuery VP</p>
       <div>
         <h2 id="ask-title">Sponsor one retention pilot with a Finance owner.</h2>
-        <p>Use one quarter of cohort data. Prove the path from Catalog discovery to an attributable, computed answer—and show that a missing receipt leaves the answer unproven.</p>
+        <p>Test this quarter’s 96% with a pinned definition, a receipt and an accountable agent. Remove the execution evidence: the answer must stay unproven.</p>
       </div>
     </section>
   </main>
 
   <footer class="shell">
-    <p><strong>Scenario, not customer evidence.</strong> No Alder query ran. The runtime above is proposed. Existing demo attesters are stubs; receipts are <code>UNVERIFIABLE</code>. Governed sync and Phase A IAM remain unbuilt.</p>
+    <p><strong>Illustrative scenario; no Alder query ran.</strong> The runtime above is proposed. Existing demo attesters are stubs; receipts are <code>UNVERIFIABLE</code>. Governed sync and Phase A IAM remain unbuilt.</p>
     <a href="/rfc/full-demo/">Evidence deep dive <span aria-hidden="true">↗</span><span class="link-detail">Separate recorded demo + limitations</span></a>
   </footer>
 </body>

@@ -2,7 +2,7 @@
 
 ## Audience and problem
 
-A BigQuery VP should be able to retell a customer moment after one skim. The previous page led with a runtime thesis, three abstract benefits and a thin Germany revenue question. Replace it with a complete illustrative near-miss, readable in two to three minutes on one continuous page.
+A BigQuery VP should grasp the customer moment in 30 seconds and understand why BigQuery is the runtime for Knowledge Catalog + OKF in two to three minutes. The previous page led with a runtime thesis, three abstract benefits and a thin Germany revenue question. Replace it with a complete illustrative near-miss, readable in two to three minutes on one continuous page.
 
 ## Chosen story
 
@@ -12,9 +12,11 @@ The agent reused a total-ARR query and cited the retention definition without co
 
 ## The opportunity and ask
 
-Knowledge Catalog would make Finance's approved OKF definition and declared computation discoverable. BigQuery would serve as the runtime: pin the context, run the computation, bind a receipt to the result, and support attribution to the agent and execution identity under explicit access grants.
+Make the roles explicit: Catalog finds the approved definition; OKF supplies the authored definition, query and parameters that the runtime pins; BigQuery runs the computation and binds job, context, parameters and result in a receipt. Catalog discovery alone does not execute the query or produce that receipt.
 
-The repeatable punchline is: **An agent’s boardroom number should come with a BigQuery receipt.**
+Alder's revenue data is already in BigQuery in this scenario. The proposed runtime places computation and evidence beside the data, job records and access controls. Explain attribution as the agent plus the identity running the job, and IAM as who can publish context, execute the query and read evidence.
+
+The repeatable punchline is: **Find it in Catalog. Run it in BigQuery. Bring the receipt.**
 
 Ask the VP to sponsor one retention pilot with a Finance owner, using one quarter of cohort data and a missing-receipt negative case.
 
@@ -22,4 +24,4 @@ Ask the VP to sponsor one retention pilot with a Finance owner, using one quarte
 
 Alder, Maya, the quotation and every number are invented. Label that before the story. The proposed runtime did not produce 96%; it is illustrative arithmetic. Existing full-demo recordings concern a different scenario and are only an optional evidence deep dive. No customer claim, new cloud execution, successful attestation, completed sync or Phase A IAM is implied.
 
-Rewrite this page and its local documentation; update the RFC entry link. Keep the full demo unchanged. Commit and push `feat/rfc-bq-vp-story`, create a PR against `main`, save the actual session ID under `/tmp/okf-vp-story/`, and report PR URL and HEAD. Do not merge.
+Sharpen the page and its local documentation on the existing `feat/rfc-bq-vp-story` branch. Keep the RFC entry link accurate and the full demo unchanged. Commit and push to PR 20, preserve the session record under `/tmp/okf-vp-story/`, and report the new HEAD. Do not create another PR or merge.

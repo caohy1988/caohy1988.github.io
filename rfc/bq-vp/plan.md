@@ -1,37 +1,37 @@
-# Plan — replace the thesis with a customer moment
+# Plan — a concrete story with a clear BigQuery case
 
 ## Scope
 
 | File | Change |
 | --- | --- |
-| `rfc/bq-vp/index.html` | Alder board-pack story, arithmetic figure, three proposed beats, punchline, ask, honesty footer |
+| `rfc/bq-vp/index.html` | Both numbers in the hero, one arithmetic comparison, three named roles with BigQuery emphasized, punchline, ask and honesty footer |
 | `rfc/bq-vp/styles.css` | Compact editorial layout; responsive figure, keyboard focus and print styling |
 | `rfc/bq-vp/STORY.md` | Invented scenario, arithmetic, rationale and counterfactual boundaries |
 | `rfc/bq-vp/intent.md` | Customer-first goal and pilot ask |
 | `rfc/bq-vp/spec.md` | Story, honesty, scope and usability requirements |
 | `rfc/bq-vp/plan.md` | Execution and validation record |
-| `rfc/index.html` | Update the existing VP link title and blurb |
+| `rfc/index.html` | Existing link remains accurate; unchanged in the follow-up |
 
 Keep `/rfc/full-demo/`, dependencies and deployment configuration unchanged. Use gpt-6-astra only.
 
 ## Implementation
 
-1. Read the existing RFC and full-demo evidence boundaries. Invent one independent story with checkable arithmetic; record the rationale in `STORY.md`.
-2. Write the complete static story and compact responsive design. Put the company, human, deadline and wrong number ahead of the technical thesis.
-3. Verify the served page in Chromium at desktop, tablet and narrow mobile widths. Inspect screenshots, page length, calculation labels, keyboard navigation, links, console and network behavior. Check the print view.
-4. Run the unchanged full-demo evidence checker and `git diff --check`. Confirm only the seven scoped files changed.
-5. Commit the final change, push `feat/rfc-bq-vp-story`, and use `gh pr create --base main`. Save actual session identifiers to `/tmp/okf-vp-story/sessions.json`. Report PR URL and HEAD; do not merge.
+1. Keep Alder, Maya, the deadline, $4 million decision and the 118% / 96% arithmetic. Put all of them in the hero, with both percentages in the headline.
+2. Replace the input ledger with one comparison showing the mistaken addition of new-customer ARR. Name Catalog, OKF and BigQuery directly in the technical section, and explain execution, job/context/result receipts, attribution and access grants.
+3. Update `STORY.md`, intent and spec to capture the sharper framing. Keep the unbuilt RFC label and compact evidence footer.
+4. Verify desktop, tablet and narrow mobile layout, arithmetic, 30-second skim content, keyboard access, links, contrast and print. Run the existing full-demo checker and `git diff --check`.
+5. Commit and push the six changed files to existing PR 20 on `feat/rfc-bq-vp-story`. Refresh the PR description to match the final framing and measured page. Save follow-up session/validation metadata under `/tmp/okf-vp-story/`. Print the new HEAD; do not create another PR or merge.
 
 ## Acceptance checks
 
 - A skim answers: who is Maya, why does 9 a.m. matter, why is 118% wrong, what is 96%, and what would the proposed runtime add?
 - Arithmetic: `(9.6 + 2.2) / 10 = 1.18`; `9.6 / 10 = .96`. All figures use ARR consistently.
 - The illustrative label appears before the story; proposal labeling precedes all runtime promises; the footer separates the unrelated recorded demo from this invented scenario.
-- Main page is 400–550 visible words, around two desktop screens, with three runtime beats and one ask. No real or invented execution IDs appear in the story.
+- Main page is roughly 400–500 visible words, around two desktop screens, with three named roles and one ask. No real or invented execution IDs appear in the story.
 - HTTP 200, correct navigation, no horizontal overflow at desktop/768/375/320 widths, no script requirement, usable heading order and keyboard focus.
 - Relevant existing checker passes. No new test suite for this reversible editorial change; browser inspection and targeted checks provide the relevant validation.
 
-## Validation record
+## Initial validation — HEAD 691ad08
 
 - Chromium: 416 visible words; page height 1,345 px at 1280 × 720. The complete correction figure ends at y=665, within the first viewport.
 - Responsive checks at 1280, 768, 375 and 320 px: no document or element horizontal overflow. Desktop, tablet and mobile screenshots inspected; fixed a hidden-line-break spacing issue and the narrow-screen headline wrap.
@@ -41,3 +41,7 @@ Keep `/rfc/full-demo/`, dependencies and deployment configuration unchanged. Use
 - `python3 rfc/full-demo/tools/check_full_demo.py`: exit 0, all checks passed, including the negative mutation fixtures and the clean-copy control. `/rfc/full-demo/` has no diff.
 - `git diff --check`: passed. Only the seven scoped files are staged for the delivery commit.
 - QA artifacts and the actual Codex session ID are saved in `/tmp/okf-vp-story/`; session metadata confirms `gpt-6-astra`.
+
+## Sharpening validation — follow-up
+
+Pending final browser measurements and checks before commit. Artifacts live in `/tmp/okf-vp-story/sharpen/`.

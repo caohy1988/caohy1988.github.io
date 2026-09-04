@@ -3,15 +3,17 @@
 ## Page contract
 
 - Static HTML and page-local CSS at `/rfc/bq-vp/`; no JavaScript, build, external assets or cloud calls.
-- One continuous brief with four sections: the board-pack moment, the near-miss, three proposed runtime beats, and one VP ask. The punchline follows the runtime section. No stepper, tabs, drawers, alternate scenarios or abstract benefit cards as the lead.
-- At 1280 × 720 the first viewport must show the illustrative label, Maya's situation, both 118% and 96%, and why the first number was wrong. Target approximately two desktop viewport heights and 400–550 visible words for a two-to-three-minute read. Reading time is an editorial estimate, not a user-study result.
-- A clearly labeled arithmetic figure shows the $10.0m opening cohort, $9.6m same-customer closing ARR, $2.2m new-customer ARR, and both calculations. It is a board-pack illustration, not a rendered execution receipt.
-- The company, persona, deadline and $4 million decision are concrete. The story comes before the Knowledge Catalog + OKF / BigQuery thesis.
+- One continuous brief: the complete board-pack near-miss and arithmetic in the hero, the three named runtime roles, and one VP ask. The punchline follows the runtime section. No stepper, tabs, drawers, alternate scenarios or abstract benefit cards as the lead.
+- At 1280 × 720 the first viewport must show the illustrative label, Maya's situation, both 118% and 96%, and why the first number was wrong. Target approximately two desktop viewport heights and roughly 400–500 visible words for a two-to-three-minute read. Reading time is an editorial estimate, not a user-study result.
+- One arithmetic figure compares the 118% trap and the correct 96% side by side on desktop and stacked on mobile. Label the $9.6m from the same customers, mark the extra $2.2m from new customers as the mistake, and show both numerators divided by the $10m opening cohort. It is a board-pack illustration, not a rendered execution receipt.
+- The hero itself names Maya, Alder, the five-minute deadline, the $4 million decision, and both 118% and 96%. Both percentages are in the headline. No architecture language precedes these facts. The headline, highlighted story facts and arithmetic labels must explain the near-miss on a 30-second skim.
 - Define ARR and expand OKF on first use. Explain retention through the same-customer arithmetic.
 
 ## Runtime and evidence contract
 
-- Explicitly label the entire counterfactual “RFC proposal, not built”; use conditional language.
+- Explicitly label the entire technical section as an unbuilt RFC proposal. Use direct, imperative descriptions of the proposed responsibilities; do not repeat conditional boilerplate in each sentence. The story is direct under its illustrative label.
+- Explicitly distinguish Knowledge Catalog (find the approved definition), OKF (authored definition, query and parameters), and BigQuery (execution, computation receipt, attribution and IAM). Explain that Catalog alone does not run the calculation or bind its answer to a query job.
+- Give BigQuery the most space. In this illustrative scenario Alder already keeps revenue data there, with query jobs and data access controls. State what the runtime adds relative to discovery without claiming a universal database monopoly.
 - Tie discovery to Finance's approved OKF definition and declared computation, context pinning to a revision held fixed for the run, and the computation receipt to the revision, quarter parameters, BigQuery job and result.
 - Missing execution evidence must leave the answer unproven. A citation or pinned context alone does not verify it.
 - Make the agent and its execution identity attributable under explicit access grants. Preserve the historical context; do not promise arbitrary data replay or identical answers across agents.
@@ -29,4 +31,4 @@
 
 ## Delivery
 
-Only the requested page, its `intent.md`, `spec.md`, `plan.md`, `STORY.md`, and the one RFC entry link change. QA artifacts and actual session identifiers go in `/tmp/okf-vp-story/`. Commit, push `feat/rfc-bq-vp-story`, create a PR targeting `main`, report PR URL and HEAD, and do not merge.
+Only the requested page and its `intent.md`, `spec.md`, `plan.md`, and `STORY.md` change in this follow-up. The RFC entry link remains accurate. QA artifacts and actual session identifiers go in `/tmp/okf-vp-story/`. Commit and push `feat/rfc-bq-vp-story` to existing PR 20; report its URL and the new HEAD. Do not open a second PR or merge.
