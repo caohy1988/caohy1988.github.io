@@ -44,7 +44,7 @@
       <span class="badge model">gemini-3.8-flash · google-adk · BQAA plugin</span>
     </div>
     <section class="vp" aria-labelledby="vp-thesis">
-      <p class="vp-thesis" id="vp-thesis"><b>BigQuery is the runtime of Knowledge Catalog + OKF.</b> The finance team gets its Germany number from pinned, governed context — not from whatever a Catalog shelf hands back.</p>
+      <p class="vp-thesis" id="vp-thesis"><b>BigQuery is the runtime of Knowledge Catalog + OKF.</b> The point of a runtime is that the finance team’s Germany number would come from pinned, governed context rather than from whatever a Catalog shelf hands back. Here is the moment that makes the case, and how far this page gets.</p>
       <div class="vp-story">
         <p class="vp-ask"><span class="vp-k">The customer moment</span> Leadership asks the finance analytics team one question: <b>what is active-customer revenue in Germany, and can I trust the number?</b></p>
         <div class="vp-paths">
@@ -52,13 +52,13 @@
             <p class="vp-pk">Catalog path · session <code>04fa3d56</code></p>
             <p class="vp-q">“You can trust the number because it is verified.”</p>
             <p class="vp-pb">The agent read a Catalog-shaped lookup, took its <code>ok</code> flag for an answer, and handed leadership the word “verified”. Nothing computed the number.</p>
-            <p class="vp-c"><a href="#beat=3">beat 3</a> <span class="src live">live</span> the transcript and the system prompt behind it</p>
+            <p class="vp-c"><a href="#beat=3" data-goto="3">beat 3</a> <span class="src live">live</span> the transcript and the system prompt behind it · this tool records <code>tool_origin: LOCAL</code> too — the difference between the two sides is the contract, not the runtime under it</p>
           </div>
           <div class="vp-path good">
-            <p class="vp-pk">BigQuery runtime path · session <code>f21ee192</code></p>
+            <p class="vp-pk">Verdict-carrying path · session <code>f21ee192</code></p>
             <p class="vp-q">“No. The number is unproven.”</p>
             <p class="vp-pb">This agent’s tool carried a verdict field, so it had a verdict to report. It calls the number unproven in 12 of 12 final answers, and one of them puts it in four words.</p>
-            <p class="vp-c"><a href="#beat=2">beat 2</a> <a href="#beat=5">beat 5</a> <span class="src live">live</span> 180 events, 24 tool calls · illustration, not a controlled comparison</p>
+            <p class="vp-c"><a href="#beat=2" data-goto="2">beat 2</a> <a href="#beat=5" data-goto="5">beat 5</a> <span class="src live">live</span> 180 events, 24 tool calls · <span class="src stub">stubbed attester · no-execution</span> both tools in this session record <code>tool_origin: LOCAL</code>, the pin is the in-process demo catalog’s own rather than an authored publication, and the receipt reads <code>no-execution; observer-only demo</code> · what a BigQuery runtime would put behind that verdict field is <span class="src rfc">RFC text only</span> · illustration, not a controlled comparison</p>
           </div>
         </div>
       </div>
@@ -67,22 +67,22 @@
           <p class="vp-k">The value · 1</p>
           <h2 class="vp-h">Trust you can defend</h2>
           <p class="vp-b">Your agent hands back a verdict it had to report, or an honest “unproven” — never a word it picked up from a lookup. Leadership hears the difference, and so does whoever audits the quarter.</p>
-          <p class="vp-c"><a href="#beat=3">beat 3</a> <span class="src live">live</span> the 13-field Catalog template carries no verdict field at all · <a href="#beat=5">beat 5</a> <span class="src seeded">seeded</span> every receipt on this page reads <code>UNVERIFIABLE</code></p>
+          <p class="vp-c"><a href="#beat=3" data-goto="3">beat 3</a> <span class="src live">live</span> the 13-field Catalog template carries no verdict field at all · <a href="#beat=5" data-goto="5">beat 5</a> <span class="src seeded">seeded</span> every receipt on this page reads <code>UNVERIFIABLE</code></p>
         </li>
         <li class="vp-card pin">
           <p class="vp-k">The value · 2</p>
           <h2 class="vp-h">One answer, not EntryGroup roulette</h2>
-          <p class="vp-b">The next agent reads the same pinned publication the last one did, and the run it produced joins back to a receipt. Catalog distributes the concept; the runtime says which revision answered.</p>
-          <p class="vp-c"><a href="#beat=6">beat 6</a> <span class="src live">live</span> 14 attributed, 13 receipt-only · <a href="#beat=3">beat 3</a> <span class="src live">live</span> the Catalog lookup renders no <code>okf</code> field and takes ten resources a call · refusing a stale pin stays <span class="src rfc">RFC text only</span> while no head exists</p>
+          <p class="vp-b">Catalog distributes the concept; the runtime is the thing that would say which revision answered. The next agent would read the same pinned publication the last one did, and the run would join back to a receipt keyed to it.</p>
+          <p class="vp-c"><a href="#beat=6" data-goto="6">beat 6</a> <span class="src live">live</span> 14 attributed, 13 receipt-only — the attributed rows resolve through legacy bindings to seeded publications, and every receipt-only row carries no publication id · <a href="#beat=3" data-goto="3">beat 3</a> <span class="src live">live</span> the Catalog lookup renders no <code>okf</code> field and takes ten resources a call · <code>deployment_heads</code> is empty, so pinning to a head and refusing a stale pin both stay <span class="src rfc">RFC text only</span></p>
         </li>
         <li class="vp-card iam">
           <p class="vp-k">The value · 3</p>
           <h2 class="vp-h">IAM you can explain</h2>
           <p class="vp-b">Today a reader on the EntryGroup reads every policy body inside it. The runtime answer is a blast radius the size of one deployment — a sentence a security review accepts on the first pass.</p>
-          <p class="vp-c"><a href="#beat=3">beat 3</a> <span class="src live">live</span> the EntryGroup IAM policy, and the policy body the Catalog lookup returns · the BigQuery side is <span class="src rfc">RFC text only</span>: Phase A service accounts and table-level grants are not built, and this page claims neither</p>
+          <p class="vp-c"><a href="#beat=3" data-goto="3">beat 3</a> <span class="src live">live</span> the EntryGroup IAM policy, and the policy body the Catalog lookup returns · the BigQuery side is <span class="src rfc">RFC text only</span>: Phase A service accounts and table-level grants are not built, and this page claims neither</p>
         </li>
       </ol>
-      <p class="vp-close"><b>What it costs you:</b> nothing new to collect. The traces are already in BigQuery — <code>okf_rfc_demo.agent_events</code> holds these four sessions today. The runtime is what turns them into context the next agent can trust.</p>
+      <p class="vp-close"><b>What it costs you:</b> nothing new to collect. The traces are already in BigQuery — <code>okf_rfc_demo.agent_events</code> holds these four sessions today. The runtime is what would turn them into context the next agent can trust.</p>
       <p class="vp-note">BigQuery Graph can walk the OKF chain — observation → snapshot → publication — the easy way; on this page that chain is relational evidence on beat 4 and beat 5, and the graph projection is <span class="src rfc">RFC text only</span> and optional. Normative text here is OKF v0.2 core plus an optional runtime profile, so “OKF 2.0” in a walkthrough is shorthand for that runtime story and not a claim of a published core change.</p>
     </section>
     <p class="ask-callout"><b>What this demo is asking.</b> Take context an agent already earned the hard way, observe it with BigQuery Agent Analytics, and project it into derived OKF the next agent can discover; then show what the BigQuery runtime adds on top of the Catalog projection Google shipped on 2026-08-26. It is <b>not</b> human-in-the-loop or sentiment promotion, <b>not</b> trusting BQAA as truth, and <b>not</b> a claim that Dataplex or BigQuery syncs anything on their own. Sync is an external CLI you run; Catalog is the discovery projection; BigQuery is the serving authority; every receipt on this page is <code>UNVERIFIABLE</code>.</p>
