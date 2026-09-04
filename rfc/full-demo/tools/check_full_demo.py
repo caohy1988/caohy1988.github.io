@@ -392,6 +392,14 @@ check("not yet shown" in arch, "ARCHITECTURE.md marks FAIL_STALE / history as no
 # Binding is structural (a subject opener between qualifier and predicate breaks it), with no token-count ceilings.
 # The bare words "Phase A" qualify nothing. Only emphasis is stripped (*, backticks, edge underscores); identifiers such
 # as PERMISSION_DENIED, agent_events and user_email survive. Matching is case-insensitive.
+# The shape classes. A project identifier is one of three lexical shapes, none of them a word list: SCREAMING_SNAKE
+# (BQ_COMMITTED, CATALOG_STAMPED, FAIL_STALE, PERMISSION_DENIED), the okf namespace (okf-context-runtime, okf-setup,
+# okf:env-demo), or snake_case (deployment_heads, agent_events, context_ref). Widening any of these only regulates
+# more sentences.
+SCREAMING_ID = re.compile(r"(?-i:\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b)")
+OKF_ID = re.compile(r"\bokf[-_:][\w-]*", re.I)
+SNAKE_ID = re.compile(r"(?-i:\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b)")
+
 PHASE_A_OBJECT = re.compile(r"\b(service accounts?|SAs?|bindings?|binding calls?|grants?|roles?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|okf-runtime-reader|okfCatalogSearch|custom role|Token Creator|boundary(-probe)?|denials?|negative checks?|positive checks?|checks? [1-7]|PERMISSION_DENIED|(the|Phase A|on) tape|impersonation|user_email)\b", re.I)
 # ---- the action verbs, as an audited form table (Codex round 10) -------------------------------------------------
 # lemma -> (past/participle forms, simple-present 3sg form). Written out and audited: a generator produced "denyed" /
@@ -418,10 +426,13 @@ PAST_FORMS = sorted({f for past, _ in VERB_FORMS.values() for f in past if f not
 # that was not listed, a participle shape that was not matched - because that question is open-domain and a regex
 # grammar can only ever approximate it. Each patch moved the ceiling; none removed it. The gate is now structural:
 #
-#   INV-1  COVERAGE.  Every sentence of the demo copy that NAMES a Phase A artefact must appear, verbatim after
-#          whitespace normalisation, in tools/audited_claims.tsv. No grammar is consulted: a sentence is regulated
-#          because it names one of our artefacts, full stop. New, edited or moved prose fails until it is audited,
-#          whatever words it uses, so no vocabulary list can make this fail open. There is nothing here to bypass.
+#   INV-1  COVERAGE.  Every sentence of the demo copy that TOUCHES this project must appear, verbatim after whitespace
+#          normalisation and under its own source path, in tools/audited_claims.tsv. "Touches" is a union of four
+#          over-broad tests, three of them pure shape: a project identifier (SCREAMING_SNAKE, the okf namespace, or
+#          snake_case), completion language, or a named Phase A artefact. Each test can only ADD coverage, so no one
+#          of them can license unaudited prose by being incomplete - `BQ_COMMITTED` happened, okf-context sync
+#          committed, deployment_heads advanced and the IAM bootstrap completed are all regulated by shape or by
+#          verb, without anybody having listed them. New, edited or MOVED prose fails until it is audited.
 #   INV-2  EVIDENCE.  Every CAPTURED row cites a file under live/ or sql/ that exists in the tree.
 #   INV-3  CONTAINMENT.  A CAPTURED row may not name a deferred Phase A artefact unless it also carries a not-done
 #          marker, so no row can present a thing that does not exist as a thing that was done. Growing
@@ -467,15 +478,33 @@ QUALIFIER = re.compile("(?:%s)|(?:%s)|(?:%s)" % (MODAL.pattern, STATUS.pattern, 
 COMPLETION = re.compile(r"\b(?:" + "|".join(PAST_FORMS) + r")\b|" + "|".join("(?:%s)" % rx.pattern for rx in EXECUTED), re.I)
 # The artefacts that do not exist on this PR. Narrower than PHASE_A_OBJECT on purpose: legacy context_ref bindings,
 # BigQuery grants and user_email rows are real, so naming them is not a Phase A claim.
-DEFERRED_ARTEFACT = re.compile(r"\b(service accounts?|SAs?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|okf-runtime-reader|"
-                               r"okfCatalogSearch|custom (search )?role|table-level grants?|boundary(-| )?probe|"
-                               r"boundary EntryGroup|negative checks?|positive checks?|denial checks?|denials?|"
-                               r"binding calls?|PERMISSION_DENIED|BQ_COMMITTED|CATALOG_STAMPED|Token Creator|"
+DEFERRED_ARTEFACT = re.compile(r"\b(Phase[- ]A|service accounts?|SAs?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|"
+                               r"okf-runtime-reader|okf-context[- ](sync|runtime)|okfCatalogSearch|"
+                               r"custom (search )?role|table-level grants?|boundary(-| )?probe|boundary EntryGroup|"
+                               r"negative checks?|positive checks?|denial checks?|denials?|binding calls?|"
+                               r"PERMISSION_DENIED|BQ_COMMITTED|CATALOG_STAMPED|FAIL_STALE|Token Creator|"
                                r"impersonation|(on|the) tape)\b", re.I)
+def regulated(sent):
+    """True when a sentence touches this project and therefore needs an audited verdict. Four over-broad tests, any
+    one of which is enough; widening any of them can only regulate more."""
+    return bool(SCREAMING_ID.search(sent) or OKF_ID.search(sent) or SNAKE_ID.search(sent)
+                or COMPLETION.search(sent) or PHASE_A_OBJECT.search(sent))
+
 NOT_DONE = re.compile(r"\b(not|no|none|never|without|nothing|neither|yet|deferred|planned|future|prior|pending|"
                       r"requirements?|acceptance|expected|must|will|would|shall|should)\b|RFC text only", re.I)
 
-SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json"]
+SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json", "styles.css"]
+
+def extract_css_prose(src):
+    """The only parts of a stylesheet a reader can see: generated `content` strings and comments. A rule that prints
+    prose (body::after { content: "…" }) is copy like any other and is audited like any other."""
+    out = []
+    for m in re.finditer(r"/\*(.*?)\*/", src, re.S):
+        out.append(m.group(1).replace("\n", " ").strip())
+    for m in re.finditer(r"\bcontent\s*:\s*([^;}]*)", src, re.I):
+        for lit in re.finditer(r"\"([^\"]*)\"|'([^']*)'", m.group(1)):
+            out.append((lit.group(1) or lit.group(2) or "").strip())
+    return "\n".join("| " + t for t in out if t)
 BLOCK_START = re.compile(r"^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s?|\|)")
 
 def md_blocks(text):
@@ -626,6 +655,11 @@ def _js_pieces(src):
                 i += 1
             prev_value, prev_dot, last_word = True, False, None
             continue
+        if src.startswith("++", i) or src.startswith("--", i):
+            # Postfix after a value leaves a value behind ("x++ / 2" divides); prefix leaves the operand's own state.
+            i += 2
+            prev_dot, last_word = False, None
+            continue
         if ch == "(":
             parens.append(last_word in JS_CONTROL)
             prev_value, prev_dot, last_word = False, False, None
@@ -708,14 +742,13 @@ def _style_display(value):
     return important if important is not None else normal
 
 def _is_hidden(attrs):
-    """True when the browser does not render the element: a `hidden` attribute, aria-hidden="true", or a computed
-    display of none. Attributes are read as name / value pairs, so title="hidden" and data-hidden="false" are visible
-    elements whose text the reader sees."""
+    """True when the browser does not render the element: a `hidden` attribute or a computed display of none.
+    aria-hidden is NOT here: it takes an element out of the accessibility tree while leaving it on the screen, so its
+    text is read by a sighted reader and must be audited. Attributes are read as name / value pairs, so title="hidden"
+    and data-hidden="false" are visible elements whose text the reader sees."""
     for m in ATTR.finditer(attrs):
         name, val = m.group(1).lower(), (m.group(2) or "").strip("\"'")
         if name == "hidden":
-            return True
-        if name == "aria-hidden" and val.strip().lower() == "true":
             return True
         if name == "style" and _style_display(val) == "none":
             return True
@@ -763,126 +796,232 @@ def strip_markdown(text):
     text = re.sub(r"[*`]", "", text)
     return re.sub(r"(?<![A-Za-z0-9])_+|_+(?![A-Za-z0-9])", "", text)
 
-# ---- the register: coverage, evidence, containment, qualification, staleness -------------------------------------
+# ---- the register: coverage, binding, evidence, containment, qualification, staleness ----------------------------
 REGISTER = HERE / "audited_claims.tsv"
-VERDICTS = ("PENDING", "CAPTURED")
+VERDICTS = ("PENDING", "CAPTURED", "NOT_PHASE_A")
+EVIDENCE_ROOTS = [(DEMO / d).resolve() for d in ("live", "sql")]
+NOT_DONE_WINDOW = 40                                  # characters, about six words: the reach of "(not okf-setup)"
+
+def read_copy(fname):
+    """The demo copy as a reader meets it: JavaScript through its literals and comments, HTML through what the browser
+    renders, CSS through its generated content, Markdown and JSON as they are."""
+    raw = (DEMO / fname).read_text("utf-8")
+    if fname.endswith(".js"):
+        return extract_js_prose(raw)
+    if fname.endswith(".html"):
+        return html_runs(raw)
+    if fname.endswith(".css"):
+        return extract_css_prose(raw)
+    return raw
 
 def regulated_sentences(text, fname="<text>"):
-    """Yield (line, sentence) for every sentence of the demo copy that names a Phase A artefact. The test is naming,
-    not grammar: no tense, adverb, participle or clause structure is consulted anywhere in this function."""
+    """Yield (line, sentence) for every sentence that touches this project. The test is `regulated`: shape, completion
+    language or a named artefact. No tense, adverb, participle or clause structure is consulted anywhere here."""
     for start_line, block in md_blocks(strip_markdown(text)):
         for raw in re.split(r"(?<=[.;:])\s+", block):
             sent = " ".join(raw.split())
-            if sent and PHASE_A_OBJECT.search(sent):
+            if sent and regulated(sent):
                 yield start_line, sent
 
+def derive_licences(sent):
+    """One licence span per completion token: from the nearest qualifier that opens before that token to the end of
+    the token. None when a completion token has no qualifier before it at all - which is what makes "The operator
+    created the service accounts as expected." impossible to register as PENDING rather than merely discouraged."""
+    spans, quals = [], list(QUALIFIER.finditer(sent))
+    for m in COMPLETION.finditer(sent):
+        before = [q for q in quals if q.start() < m.start()]
+        if not before:
+            return None
+        span = sent[before[-1].start():m.end()]
+        if span not in spans:
+            spans.append(span)
+    return spans
+
+def licence_problems(sent, licences):
+    """Every completion token must sit inside a recorded span, and every span must OPEN with a qualifier. A qualifier
+    that follows its verb therefore licenses nothing, without the checker parsing a clause."""
+    out = []
+    spans = []
+    for lic in licences:
+        at = sent.find(lic)
+        if at < 0:
+            out.append("licence %r is not a substring of the sentence" % lic[:40])
+            continue
+        q = QUALIFIER.match(lic)
+        if not q or q.start() != 0:
+            out.append("licence %r does not open with a qualifier" % lic[:40])
+            continue
+        spans.append((at, at + len(lic)))
+    for m in COMPLETION.finditer(sent):
+        if not any(a <= m.start() and m.end() <= b for a, b in spans):
+            out.append("completion %r sits outside every licence span" % m.group(0)[:30])
+    return out
+
+def evidence_problems(paths):
+    out = []
+    if not paths:
+        out.append("CAPTURED needs at least one evidence file")
+    for rel in paths:
+        try:
+            full = (DEMO / rel).resolve()
+        except OSError:
+            out.append("evidence %r cannot be resolved" % rel)
+            continue
+        if not any(full == root or root in full.parents for root in EVIDENCE_ROOTS):
+            out.append("evidence %r resolves outside live/ and sql/" % rel)   # live/../../index.html is not evidence
+        elif not full.is_file():
+            out.append("evidence %r is not a file" % rel)
+    return out
+
+def containment_problems(sent):
+    """A CAPTURED sentence may name a deferred artefact only right after a not-done marker, so the disclaimer sits on
+    the artefact it disclaims: "(not okf-setup) ran the DDL" is captured work, "the service accounts were created
+    although no unrelated query was run" is not."""
+    out = []
+    for m in DEFERRED_ARTEFACT.finditer(sent):
+        window = sent[max(0, m.start() - NOT_DONE_WINDOW):m.start()]
+        if not NOT_DONE.search(window):
+            out.append("names %r with no not-done marker in the %d characters before it" % (m.group(0)[:30], NOT_DONE_WINDOW))
+    return out
+
+def distance_problems(sent):
+    """NOT_PHASE_A says the completion language in this sentence is not about deferred Phase A work. The machine test
+    is distance: no completion token may sit within NOT_DONE_WINDOW characters of a deferred artefact on either side,
+    so "labels ... what is recorded" a hundred characters away from `okf-context sync` is fine while "okf-context sync
+    committed successfully" is not."""
+    out = []
+    for a in DEFERRED_ARTEFACT.finditer(sent):
+        for c in COMPLETION.finditer(sent):
+            if c.start() < a.end() + NOT_DONE_WINDOW and a.start() < c.end() + NOT_DONE_WINDOW:
+                out.append("NOT_PHASE_A puts %r within %d characters of %r"
+                           % (c.group(0)[:24], NOT_DONE_WINDOW, a.group(0)[:24]))
+                break
+    return out
+
 def load_register():
-    """verdict, evidence and sentence per row; malformed rows are errors, not silently skipped."""
+    """verdict, source file, evidence, licence spans and sentence per row; malformed rows are errors, never skipped."""
     rows, problems = {}, []
     for i, ln in enumerate(REGISTER.read_text("utf-8").split("\n"), 1):
         if not ln.strip() or ln.lstrip().startswith("#"):
             continue
         parts = ln.split("\t")
-        if len(parts) != 3:
-            problems.append("line %d: expected verdict<TAB>evidence<TAB>sentence, got %d fields" % (i, len(parts)))
+        if len(parts) != 5:
+            problems.append("line %d: expected verdict/file/evidence/licence/sentence, got %d fields" % (i, len(parts)))
             continue
-        verdict, evidence, sentence = (x.strip() for x in parts)
+        verdict, fname, evidence, licence, sentence = (x.strip() for x in parts)
         sentence = " ".join(sentence.split())
         if verdict not in VERDICTS:
             problems.append("line %d: unknown verdict %r (expected one of %s)" % (i, verdict, ", ".join(VERDICTS)))
             continue
-        if sentence in rows:
-            problems.append("line %d: duplicate row for %r" % (i, sentence[:60]))
+        if fname not in SCAN_FILES:
+            problems.append("line %d: %r is not a scanned file" % (i, fname))
             continue
-        rows[sentence] = (verdict, evidence, i)
+        key = (fname, sentence)
+        if key in rows:
+            problems.append("line %d: duplicate row for %s / %r" % (i, fname, sentence[:50]))
+            continue
+        rows[key] = (verdict,
+                     [x.strip() for x in evidence.split(",") if x.strip() and x.strip() != "-"],
+                     [x for x in licence.split("~") if x and x != "-"],
+                     i)
     return rows, problems
 
 register, reg_problems = load_register()
-check(not reg_problems, "tools/audited_claims.tsv parses: one verdict / evidence / sentence per row\n      " + "\n      ".join(reg_problems[:8]))
+check(not reg_problems, "tools/audited_claims.tsv parses: verdict / file / evidence / licence / sentence per row\n      " + "\n      ".join(reg_problems[:8]))
 
 unregistered, seen = [], set()
 for fname in SCAN_FILES:
-    raw = (DEMO / fname).read_text("utf-8")
-    if fname.endswith(".js"):
-        raw = extract_js_prose(raw)
-    elif fname.endswith(".html"):
-        raw = html_runs(raw)
-    for line, sent in regulated_sentences(raw, fname):
-        seen.add(sent)
-        if sent not in register:
+    for line, sent in regulated_sentences(read_copy(fname), fname):
+        seen.add((fname, sent))
+        if (fname, sent) not in register:
             unregistered.append("%s:%d: %s" % (fname, line, sent[:110]))
 
 check("def extract_js_prose(" in open(str(HERE / "check_full_demo.py"), encoding="utf-8").read() and not extract_js_prose("function current() { return roles; }").strip(),
       "app.js is scanned through its string literals and comments only: executable code carries no prose")
 check(not unregistered,
-      "INV-1: every sentence naming a Phase A artefact is audited in tools/audited_claims.tsv; these are not:\n      "
+      "INV-1: every sentence touching this project is audited under its own file in tools/audited_claims.tsv; these are not:\n      "
       + "\n      ".join(unregistered[:12]) + ("\n      (+%d more)" % (len(unregistered) - 12) if len(unregistered) > 12 else ""))
 
 bad = []
-for sent, (verdict, evidence, i) in sorted(register.items(), key=lambda kv: kv[1][2]):
+for (fname, sent), (verdict, evidence, licences, i) in sorted(register.items(), key=lambda kv: kv[1][3]):
+    where = "line %d (%s)" % (i, fname)
     if verdict == "CAPTURED":
-        if not re.match(r"(live|sql)/", evidence) or not (DEMO / evidence).exists():
-            bad.append("INV-2 line %d: CAPTURED needs an existing live/ or sql/ file, got %r" % (i, evidence))
-        if DEFERRED_ARTEFACT.search(sent) and not NOT_DONE.search(sent):
-            bad.append("INV-3 line %d: CAPTURED names a deferred artefact with no not-done marker: %s" % (i, sent[:90]))
+        bad += ["INV-2 %s: %s" % (where, m) for m in evidence_problems(evidence)]
+        bad += ["INV-3 %s: %s" % (where, m) for m in containment_problems(sent)]
+        if licences:
+            bad.append("INV-3 %s: a CAPTURED row states what happened, so it carries no licence span" % where)
+    elif verdict == "NOT_PHASE_A":
+        bad += ["INV-3 %s: %s" % (where, m) for m in distance_problems(sent)]
+        if evidence or licences:
+            bad.append("INV-3 %s: NOT_PHASE_A states nothing about Phase A, so it carries no evidence or licence span" % where)
     else:
-        if COMPLETION.search(sent) and not QUALIFIER.search(sent):
-            bad.append("INV-4 line %d: completion language with no qualifier in the sentence: %s" % (i, sent[:90]))
-check(not bad, "every register row is internally consistent (evidence exists, nothing deferred is claimed done, completion language carries a qualifier):\n      " + "\n      ".join(bad[:12]))
+        if evidence:
+            bad.append("INV-4 %s: a PENDING row cites evidence" % where)
+        bad += ["INV-4 %s: %s" % (where, m) for m in licence_problems(sent, licences)]
+check(not bad, "every register row is bound to its claim (licence spans open with a qualifier and cover every completion token; CAPTURED evidence resolves inside live//sql/ and disclaims what it names):\n      " + "\n      ".join(bad[:12]) + ("\n      (+%d more)" % (len(bad) - 12) if len(bad) > 12 else ""))
 
-stale = [sent for sent in register if sent not in seen]
-check(not stale, "INV-5: no register row survives the prose it audited (%d stale):\n      " % len(stale) + "\n      ".join(s[:110] for s in stale[:8]))
+stale = [k for k in register if k not in seen]
+check(not stale, "INV-5: no register row survives the prose it audited, in the file it audited it in (%d stale):\n      " % len(stale) + "\n      ".join("%s: %s" % (f, t[:100]) for f, t in stale[:8]))
 
 # ---- in-memory fixtures ------------------------------------------------------------------------------------------
-def regulated(text):
+def regulated_in(text):
     """The sentences the gate would demand an audit for. JavaScript fragments go through the same reader app.js does."""
     src = extract_js_prose(text) if text.lstrip().startswith(("function ", "var ", "const ", "//")) else text
     return [s for _, s in regulated_sentences(src)]
 
-# Prose that must never ship unaudited. Each of these is a sentence a past review round produced as a bypass of the
-# old parser: an unlisted irregular past, a subject the old subject-head guard missed, a noun / verb homograph, a
-# comparative adverb. None of that matters now - they name a Phase A artefact, so they are regulated on sight.
+# Prose that must never ship unaudited. Each is a sentence some review round produced as a bypass: an unlisted
+# irregular past, a noun / verb homograph, a comparative adverb, an artefact nobody had listed. None of that matters -
+# the sentence touches this project, so it is regulated on sight.
 NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
        "The operator created the three Phase A service accounts.",
        "Check 6 returned PERMISSION_DENIED on tape.",
-       "The operator has revoked every okf-setup role and has proved the denials on tape.",
        "THE OPERATOR CREATED THE SERVICE ACCOUNTS.",
        "The operator created the service accounts as expected.",
-       "The docs must report the operator froze on tape.",                                            # r20 Codex 1
-       "The docs must report the Phase A operator quit on tape.",                                     # r20 Codex 1
-       "The docs must report the operator spoke softly on tape.",
-       "No reviewer knew okf-setup created the service accounts.",
-       "It is not a secret that the denials were proved on tape.",
+       "The docs must report the operator froze on tape.",
+       "The docs must report the Phase A operator quit on tape.",
+       "The sync stamped okf-context-runtime and advanced deployment_heads.",                          # r21 Codex 1
+       "The IAM bootstrap completed successfully.",                                                    # r21 Codex 1
+       "okf-context sync committed successfully.",                                                     # r21 Codex 1
+       "BQ_COMMITTED happened.",                                                                       # r21 Codex 1
        "Without a tape, the operator created the service accounts."]
-check(all(regulated(t) for t in NEG),
-      "INV-1 regulates every claim fixture, whatever its verb morphology: %s" % [t[:50] for t in NEG if not regulated(t)])
+check(all(regulated_in(t) for t in NEG),
+      "INV-1 regulates every claim fixture, whatever its verb morphology or artefact: %s" % [t[:50] for t in NEG if not regulated_in(t)])
 
-# Honest prose that a reviewer must be able to write and audit without the gate arguing about its grammar. Every one
-# of these was a false positive of the old parser in some round; under INV-4 they are clean because the qualifier is
-# simply present in the sentence.
-POS = ["The operator must record the service account binding on tape.",                               # r20 Codex 1
-       "The operator must better record every binding on tape.",                                      # r20 Codex 2
-       "The operator must create the service accounts and much better record every binding on tape.",  # r20 Codex 2
-       "Project grants widely known to reviewers are Phase A requirements.",                          # r20 Codex 3
-       "Project grants narrowly constrained only by policy are Phase A requirements.",                # r20 Codex 3
+# Honest prose a reviewer must be able to write and audit. Each was a false positive of the old parser; under INV-4
+# they are clean because a qualifier opens the span that covers the completion token.
+POS = ["The operator must record the service account binding on tape.",
+       "The operator must better record every binding on tape.",
+       "The operator must create the service accounts and much better record every binding on tape.",
+       "Project grants widely known to reviewers are Phase A requirements.",
+       "Project grants narrowly constrained only by policy are Phase A requirements.",
        "The operator must record the Phase A cache hit on tape.",
-       "The operator must often record every binding on tape.",
        "In Phase A the operator must make every binding on tape (not yet run).",
        "No Phase A service account was created.",
        "The three service accounts were not created; they are deferred.",
        "Every Phase A role must be created and granted on tape.",
        "Not yet run: the operator must create EntryGroup okf-rfc-demo-boundary."]
-unqualified = [s for t in POS for s in regulated(t) if COMPLETION.search(s) and not QUALIFIER.search(s)]
-check(not unqualified, "INV-4 accepts honest prose with the qualifier anywhere in the sentence: %s" % unqualified[:3])
+unlicensed = [(s, licence_problems(s, derive_licences(s) or [])) for t in POS for s in regulated_in(t)]
+check(not [x for x in unlicensed if x[1]], "INV-4 licenses honest prose from a qualifier that opens before the verb: %s" % [x for x in unlicensed if x[1]][:2])
+
+# A qualifier that follows its verb licenses nothing, so these cannot be registered PENDING at all.
+UNLICENSABLE = ["The operator created the service accounts as expected.",
+                "The operator granted the custom role as planned.",
+                "Phase A was executed; every binding call is made and recorded on tape."]
+check(all(derive_licences(t) is None for t in UNLICENSABLE),
+      "a sentence whose completion language has no qualifier before it cannot be registered PENDING: %s" % [t[:50] for t in UNLICENSABLE if derive_licences(t) is not None])
 
 # ---- extraction: what the reader sees must reach the gate ---------------------------------------------------------
-# These are the load-bearing fixtures. A claim that extraction drops is never regulated, so every one of them asserts
-# that a visible claim survives, and that genuinely hidden text does not surface.
+# These are the load-bearing fixtures. A claim that extraction drops is never regulated, so every one asserts that a
+# visible claim survives, and that genuinely hidden text does not surface.
 VISIBLE = [
     ("member access is division, not a regex",
      "var q = holder.if(ready) / '/' / 2;\nvar c = 'The operator created the Phase A service accounts.';"),
     ("member access with spaces around the dot",
      "var q = holder . if(ready) / '/' / 2;\nvar c = 'The operator created the Phase A service accounts.';"),
+    ("postfix ++ leaves a value, so the next slash divides",
+     "var x = 1; x++ / '/' / 2;\nvar c = 'The operator created the Phase A service accounts.';"),
+    ("postfix -- likewise",
+     "var x = 1; x-- / '/' / 2;\nvar c = 'The operator created the Phase A service accounts.';"),
     ("a regex after a nested condition does not desynchronise",
      "var r = function () { if (((ready))) /'/.test(x); };\nvar c = 'The operator created the Phase A service accounts.';"),
     ("a long condition has no lookback ceiling",
@@ -894,22 +1033,25 @@ VISIBLE = [
      'var h = "<span title=\'hidden\'>The operator created the Phase A service accounts.</span>";'),
     ("data-hidden=\"false\" is a visible element",
      'var h = "<span data-hidden=\'false\'>The operator created the Phase A service accounts.</span>";'),
+    ("aria-hidden hides from the accessibility tree, not from the screen",
+     'var h = "<span aria-hidden=\'true\'>The operator created the Phase A service accounts.</span>";'),
     ("the last display declaration wins when neither is important",
      'var h = "<span style=\'display:none; display:inline\'>The operator created the Phase A service accounts.</span>";'),
     ("a tag inside an HTML comment does not open an element",
      'var h = "<span hidden><!-- <span> --></span> The operator created the Phase A service accounts.";'),
 ]
-missed = [why for why, src in VISIBLE if not regulated(src)]
+missed = [why for why, src in VISIBLE if not regulated_in(src)]
 check(not missed, "every visible claim survives extraction and reaches the gate: %s" % missed)
+check(regulated_in(extract_css_prose('body::after { content: "The Phase A service accounts were created."; }')),
+      "a stylesheet that prints prose is copy: generated content reaches the gate")
 
 HIDDEN = [
     ("the hidden attribute", 'var h = "<span hidden>The operator created the Phase A service accounts.</span> Nothing else here.";'),
-    ("aria-hidden=true", 'var h = "<span aria-hidden=\'true\'>The operator created the Phase A service accounts.</span> Nothing else here.";'),
     ("an unquoted style attribute", 'var h = "<span style=display:none>The operator created the Phase A service accounts.</span> Nothing else here.";'),
     ("!important beats a later normal declaration", 'var h = "<span style=\'display:none!important;display:inline\'>The operator created the Phase A service accounts.</span> Nothing else here.";'),
     ("same-tag nesting is balanced", 'var h = "<span hidden><span>x</span> The operator created the Phase A service accounts.</span> Nothing else here.";'),
 ]
-shown = [why for why, src in HIDDEN if regulated(src)]
+shown = [why for why, src in HIDDEN if regulated_in(src)]
 check(not shown, "text the browser does not render never reaches the gate: %s" % shown)
 
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")

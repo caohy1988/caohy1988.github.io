@@ -42,12 +42,15 @@ negative checks, and the `okf-context sync` CLI. Phase D (a new tape) follows th
 - `sql/`: `sessions_by_context_ref.sql` (v0), `never_emit_scan.sql`, `serve_probes.sql`,
   `attribution_two_key.sql` (reader, SELECT only), `setup_runtime_tables.sql` (setup, DDL + seeds).
 - `tools/check_full_demo.py`: the checker. Exit 0 required.
-- `tools/audited_claims.tsv`: the audited claim register. Every sentence in the files above that names a Phase A
-  artefact appears here with a verdict — `PENDING` (claims nothing was executed) or `CAPTURED` (states what this
-  capture did, with the `live/` or `sql/` file behind it). The checker fails on any such sentence that is not
-  registered, so new or edited copy has to be re-audited before it ships. It does not try to parse English; the
-  register is the audit, and `tools/check_full_demo.py` documents that boundary and its non-goals.
-- `tools/mutation_fixture.py`: 121 mutations that must each make the checker exit non-zero, and 45 positive controls
+- `tools/audited_claims.tsv`: the audited claim register. Every sentence in the files above that touches this project
+  appears here under its own source file with a verdict — `PENDING` (claims nothing was executed; every completion
+  word sits inside a licence span that opens with a qualifier), `CAPTURED` (what this capture did, with the `live/` or
+  `sql/` files behind it), or `NOT_PHASE_A` (completion language about something other than the deferred work). A
+  sentence is regulated when it carries a project identifier, completion language, or a named Phase A artefact — three
+  of those four tests are pure shape, and each can only widen coverage. The checker fails on any regulated sentence
+  that is not registered, so new, edited or moved copy has to be re-audited before it ships. It does not try to parse
+  English; the register is the audit, and `tools/check_full_demo.py` documents that boundary and its non-goals.
+- `tools/mutation_fixture.py`: 134 mutations that must each make the checker exit non-zero, and 48 positive controls
   (honest prose plus its register row) that must leave it at exit 0.
 
 ## Run it locally

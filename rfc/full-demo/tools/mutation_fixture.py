@@ -263,7 +263,7 @@ def _append(rel, text):
 # cannot drift from the gate it is testing.
 def _gate():
     src = (HERE / "check_full_demo.py").read_text("utf-8")
-    seg = (src[src.index("PHASE_A_OBJECT = re.compile"):src.index("# ---- the register:")]
+    seg = (src[src.index("SCREAMING_ID = re.compile"):src.index("# ---- the register:")]
            + src[src.index("def regulated_sentences("):src.index("def load_register(")])
     g = {"re": re}
     exec(seg, g)
@@ -273,8 +273,20 @@ def _gate():
 GATE = _gate()
 
 
-def _rows_for(text, verdict, evidence):
-    return ["%s\t%s\t%s" % (verdict, evidence, s) for _, s in GATE["regulated_sentences"](text)]
+def _rows_for(rel, text, verdict, evidence):
+    """The register rows the appended prose needs: one per regulated sentence, with the licence spans a PENDING row
+    must carry. A sentence whose completion language has no qualifier before it cannot be registered PENDING at all,
+    so a fixture that tries is a fixture error, not a silent pass."""
+    rows = []
+    for _, s in GATE["regulated_sentences"](text):
+        licence = "-"
+        if verdict == "PENDING":
+            spans = GATE["derive_licences"](s)
+            if spans is None:
+                raise SystemExit("fixture error: %r cannot be registered PENDING" % s[:70])
+            licence = "~".join(spans) or "-"
+        rows.append("\t".join((verdict, rel, evidence, licence, s)))
+    return rows
 
 
 def _audit(d, rows):
@@ -283,12 +295,12 @@ def _audit(d, rows):
 
 
 def _append_audited(rel, text, verdict="PENDING", evidence="-"):
-    """Append prose AND audit it. This is the authoring workflow INV-1 defines: adding a sentence that names a Phase A
-    artefact without adding its register row is exactly what the gate must reject, so a positive control does both."""
+    """Append prose AND audit it. This is the authoring workflow INV-1 defines: adding a sentence that touches this
+    project without adding its register row is exactly what the gate must reject, so a positive control does both."""
     def fn(d):
         p = d / rel
         p.write_text(p.read_text("utf-8") + "\n\n" + text + "\n", "utf-8")
-        _audit(d, _rows_for(text, verdict, evidence))
+        _audit(d, _rows_for(rel, text, verdict, evidence))
     return fn
 
 
@@ -296,7 +308,15 @@ def _append_audited_js(rel, code, verdict="PENDING", evidence="-"):
     def fn(d):
         p = d / rel
         p.write_text(p.read_text("utf-8") + "\n" + code + "\n", "utf-8")
-        _audit(d, _rows_for(GATE["extract_js_prose"](code), verdict, evidence))
+        _audit(d, _rows_for(rel, GATE["extract_js_prose"](code), verdict, evidence))
+    return fn
+
+
+def _append_audited_css(rel, css, verdict="PENDING", evidence="-"):
+    def fn(d):
+        p = d / rel
+        p.write_text(p.read_text("utf-8") + "\n" + css + "\n", "utf-8")
+        _audit(d, _rows_for(rel, GATE["extract_css_prose"](css), verdict, evidence))
     return fn
 
 
@@ -397,6 +417,9 @@ POSITIVE_CONTROLS = [
     ("p43 an adverb between a participle and its by-phrase (Codex r20)", _append_audited("intent.md", "Project grants narrowly constrained only by policy are Phase A requirements.")),
     ("p44 a compound object ending in a noun (Codex r20)", _append_audited("README.md", "The operator must record the service account binding on tape.")),
     ("p45 an audited CAPTURED row with its evidence", _append_audited("live/README.md", "The summary query ran once as the operator and its job id is on record.", "CAPTURED", "live/bq_jobs_identity.json")),
+    ("p46 aria-hidden prose is visible, and audited like any other (Codex r21)", _append_audited_js("app.js", 'var r21p = "<span aria-hidden=\'true\'>Every Phase A binding must be recorded on tape.</span>";')),
+    ("p47 audited generated content in the stylesheet (Codex r21)", _append_audited_css("styles.css", 'body::after { content: "Phase A must still be recorded on tape."; }')),
+    ("p48 a CAPTURED row citing two evidence files (Codex r21)", _append_audited("live/README.md", "The attribution bands were read once as the operator.", "CAPTURED", "live/beat6_attribution.json,live/bq_jobs_identity.json")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -511,7 +534,12 @@ m108 = _append_js("app.js", 'var r19h = "<span title=\'hidden\'>The operator cre
 m109 = _append("ARCHITECTURE.md", "The docs must report the operator froze on tape.")
 m110 = _append("spec.md", "The docs must report the Phase A operator quit on tape.")
 m111 = _append("plan.md", "The operator must record the service account binding on tape and the denials were proved.")
-m112 = _append_audited("intent.md", "Phase A was executed; every binding call is made and recorded on tape.")
+def m112(d):
+    """A PENDING row that records no licence span at all leaves its completion language unbound."""
+    p = d / "intent.md"
+    p.write_text(p.read_text("utf-8") + "\n\nPhase A was executed; every binding call is made and recorded on tape.\n", "utf-8")
+    _audit(d, ["PENDING\tintent.md\t-\t-\tPhase A was executed;",
+               "PENDING\tintent.md\t-\t-\tevery binding call is made and recorded on tape."])
 m113 = _append_audited("README.md", "The operator created the three Phase A service accounts.", "CAPTURED", "live/bq_jobs_identity.json")
 m114 = _append_audited("CUSTOMER_STORIES.md", "The operator must create the three Phase A service accounts on tape.", "CAPTURED", "live/no_such_file.json")
 
@@ -525,7 +553,7 @@ def m116(d):
     """Dropping a row leaves shipped prose unaudited."""
     p = d / "tools" / "audited_claims.tsv"
     lines = p.read_text("utf-8").split("\n")
-    keep = [ln for ln in lines if not ln.startswith("CAPTURED\tlive/setup_runtime_tables.out")]
+    keep = [ln for ln in lines if not ln.startswith("CAPTURED\t")]
     assert len(keep) < len(lines)
     p.write_text("\n".join(keep), "utf-8")
 
@@ -535,6 +563,31 @@ m118 = _append_js("app.js", "var r20c = function () { if (((ready))) /'/.test(x)
 m119 = _append_js("app.js", "var r20e = function () { if (%s) /'/.test(x); };\nvar r20f = 'The operator created the Phase A service accounts.';" % " && ".join("flag%02d" % i for i in range(1, 26)))
 m120 = _append_js("app.js", 'var r20g = "<span style=\'--x:display:none\'>The operator created the Phase A service accounts.</span>";')
 m121 = _append_js("app.js", 'var r20h = "<span hidden><!-- <span> --></span> The operator created the Phase A service accounts.";')
+
+# Codex r21. The regulation trigger is now four over-broad tests, three of them pure shape, so an artefact nobody
+# listed is still regulated (m122-m125); a register row is bound to its own file, evidence and qualifier scope
+# (m126-m129); and the readers stay load-bearing for postfix operators, aria-hidden and stylesheets (m130-m134).
+m122 = _append("ARCHITECTURE.md", "The sync stamped okf-context-runtime and advanced deployment_heads.")
+m123 = _append("spec.md", "The IAM bootstrap completed successfully.")
+m124 = _append("plan.md", "`okf-context sync` committed successfully.")
+m125 = _append("intent.md", "`BQ_COMMITTED` happened.")
+m126 = _append("README.md", "Runtime tables were created and seeded by the operator, not yet by the Phase A service accounts.")
+m127 = _append_audited("CUSTOMER_STORIES.md", "The operator ran every capture query for this page.", "CAPTURED", "live/../../index.html")
+m128 = _append_audited("ARCHITECTURE.md", "The Phase A service accounts were created although no unrelated query was run.", "CAPTURED", "live/bq_jobs_identity.json")
+
+
+def m129(d):
+    """A licence span that does not open with a qualifier licenses nothing."""
+    p = d / "spec.md"
+    p.write_text(p.read_text("utf-8") + "\n\nThe operator created the service accounts as expected.\n", "utf-8")
+    _audit(d, ["PENDING\tspec.md\t-\tthe operator created\tThe operator created the service accounts as expected."])
+
+
+m130 = _append_js("app.js", "var r21a = 1; r21a++ / '/' / 2;\nvar r21b = 'The operator created the Phase A service accounts.';")
+m131 = _append_js("app.js", "var r21c = 1; r21c-- / '/' / 2;\nvar r21d = 'The operator created the Phase A service accounts.';")
+m132 = _append_js("app.js", 'var r21e = "<span aria-hidden=\'true\'>The operator created the Phase A service accounts.</span>";')
+m133 = _append("styles.css", 'body::after { content: "The Phase A service accounts were created."; }')
+m134 = _append("styles.css", '/* The operator created the Phase A service accounts. */')
 
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
@@ -653,7 +706,20 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m118 a regex after a triple-nested condition does not desynchronise (Codex r20)", m118),
              ("m119 a long condition has no lookback ceiling (Codex r20)", m119),
              ("m120 '--x:display:none' is a custom property, not a display (Codex r20)", m120),
-             ("m121 a tag inside an HTML comment opens no element (Codex r20)", m121)]
+             ("m121 a tag inside an HTML comment opens no element (Codex r20)", m121),
+             ("m122 'stamped okf-context-runtime … deployment_heads' is unaudited (Codex r21)", m122),
+             ("m123 'The IAM bootstrap completed successfully.' is unaudited (Codex r21)", m123),
+             ("m124 'okf-context sync committed successfully.' is unaudited (Codex r21)", m124),
+             ("m125 'BQ_COMMITTED happened.' is unaudited by shape alone (Codex r21)", m125),
+             ("m126 INV-1: an audited sentence moved to another file is unaudited there (Codex r21)", m126),
+             ("m127 INV-2: 'live/../../index.html' is not evidence (Codex r21)", m127),
+             ("m128 INV-3: a distant 'no' does not disclaim the artefact (Codex r21)", m128),
+             ("m129 INV-4: a licence span that does not open with a qualifier (Codex r21)", m129),
+             ("m130 postfix ++ leaves a value, so the next slash divides (Codex r21)", m130),
+             ("m131 postfix -- likewise (Codex r21)", m131),
+             ("m132 aria-hidden text is on the screen and is audited (Codex r21)", m132),
+             ("m133 a stylesheet that prints prose is copy (Codex r21)", m133),
+             ("m134 a stylesheet comment is read like any other comment (Codex r21)", m134)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
