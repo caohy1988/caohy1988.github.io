@@ -42,6 +42,12 @@ Keep `/rfc/full-demo/`, dependencies and deployment configuration unchanged. Use
 - `git diff --check`: passed. Only the seven scoped files are staged for the delivery commit.
 - QA artifacts and the actual Codex session ID are saved in `/tmp/okf-vp-story/`; session metadata confirms `gpt-6-astra`.
 
-## Sharpening validation — follow-up
+## Sharpening validation — follow-up (HEAD 7c5c243)
 
-Pending final browser measurements and checks before commit. Artifacts live in `/tmp/okf-vp-story/sharpen/`.
+- Chromium (independent re-review): ~420 visible words; page height ~1,312 px at 1280 × 720 (~1.8 viewports). Hero carries Maya / Alder / five-minute deadline / \$4M / 118% / 96% before architecture language; arithmetic figure teaches the new-customer trap on a 30-second skim.
+- Responsive checks at 1280, 768, 375 and 320 px: no document or element horizontal overflow (headless Chromium).
+- HTTP 200 on page + stylesheet; zero console errors; heading order valid (h1→h2→h3).
+- Decimal arithmetic: `(9.6 + 2.2) / 10 = 1.18`; `9.6 / 10 = 0.96`.
+- `python3 rfc/full-demo/tools/check_full_demo.py`: exit 0 (including mutation fixtures). `/rfc/full-demo/` untouched.
+- `git diff --check`: clean for the polish commit.
+- Artifacts under `/tmp/okf-vp-story/sharpen/`; Codex session `01a06e87-a6fd-7993-88b5-9c489219e68c` (`gpt-6-astra`).
