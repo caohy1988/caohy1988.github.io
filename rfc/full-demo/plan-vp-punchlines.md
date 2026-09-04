@@ -1,5 +1,6 @@
-# Plan — VP punchline strip (refined)
+# Plan v4
 
-1. Implement strip per refined `spec-vp-punchlines.md` (deterministic retrieval + easier IAM are mandatory beats).
-2. Meta/og lead with “BigQuery is the runtime of KC + OKF — deterministic retrieval and manageable IAM.”
-3. Checker + node --check; commit including intent/spec/plan; push; `gh pr create`; print PR URL + NEW_SHA. Do not merge.
+1. Rewrite `index.html` / `styles.css` punchline strip per spec v4 (customer story + value first).
+2. Update meta/og to lead with customer story + BQ runtime value.
+3. Refresh audited claims if prose changes; checker + node --check.
+4. Commit push same PR 17 branch; print NEW_SHA. Do not merge.

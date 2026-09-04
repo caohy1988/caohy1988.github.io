@@ -1,12 +1,11 @@
-# Intent — VP punchline strip on /rfc/full-demo/
+# Intent — VP punchline strip (customer-story first)
 
-Haiyuan 2026-09-04 (iterated): VP of BigQuery needs punchlines.
+Haiyuan 2026-09-04 1:05 PM PT: **focus on the customer story and the value we add.**
 
-**Thesis:** BigQuery is the **runtime** of Knowledge Catalog + OKF.
+Prior strip led with mechanism (deterministic retrieval, IAM, Graph). That is secondary. VP must feel the story and the value in ~20 seconds.
 
-**Why BQ (Haiyuan):**
-1. More **deterministic retrieval** from OKF that lives in KC.
-2. **Easier IAM** (deployment-scoped vs EntryGroup cascade).
-3. **BigQuery Graph** retrieves the **OKF chain** via the OKF standard the easy way (Observation → Snapshot → Publication → edges) — platform Graph GA; on this page the chain is shown via SQL/evidence today; Graph path is the RFC optional projection (relational remains authoritative). Do **not** invent a live Graph query capture.
+**Customer:** finance analytics team asking about Germany active-customer revenue (live sessions in `okf_rfc_demo.agent_events`).
 
-Honesty: OKF core on this site is **v0.2**. If punchline says “OKF 2.0,” treat it as Haiyuan’s VP shorthand for the runtime-standard story and keep a quiet honesty note that normative text is OKF v0.2 + optional runtime profile — do not claim a published OKF 2.0 core change.
+**Story spine:** leadership asked “can I trust the number?” — Catalog-shaped path said “verified” with no computation; BigQuery runtime path said “unproven” with a verdict. That is the customer moment.
+
+**Value we add (BQ as runtime of KC + OKF):** agents don’t overclaim trust; retrieval is pinned to one publication; IAM blast radius is a deployment not the whole EntryGroup; OKF chain is joinable/walkable. Mechanisms support the value — they are not the headline.
