@@ -313,6 +313,15 @@ def _append_audited_js(rel, code, verdict="PENDING", evidence="-"):
     return fn
 
 
+def _new_pinned_capture(d):
+    """The authoring workflow INV-6 defines: a new pane fetches a new capture, and the capture is pinned."""
+    rel = "live/beat7_new_capture.json"
+    (d / rel).write_text('[{"note": "not yet run"}]\n', "utf-8")
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace('matrix: "matrix.json"', 'extra: "' + rel + '", matrix: "matrix.json"', 1), "utf-8")
+    _pin(d, rel)
+
+
 def _append_audited_css(rel, css, verdict="PENDING", evidence="-"):
     def fn(d):
         p = d / rel
@@ -424,6 +433,9 @@ POSITIVE_CONTROLS = [
     ("p49 audited generated content with a semicolon inside it (Codex r22)", _append_audited_css("styles.css", 'body::after { content: "Note; Phase A must still be recorded on tape."; }')),
     ("p50 a negation on the subject of a passive is a licence frame (Codex r22)", _append_audited("spec.md", "No Phase A service account was created for this capture.")),
     ("p51 a modal over a coordinated verb phrase is one frame (Codex r22)", _append_audited("ARCHITECTURE.md", "Every Phase A role must be created and granted on tape.")),
+    ("p52 a negation on a passive subject with a prepositional modifier (Codex r23)", _append_audited("spec.md", "No service account in the Phase A project was created.")),
+    ("p53 audited generated content behind a property comment (Codex r23)", _append_audited_css("styles.css", 'body::after { content/**/: "Phase A must still be recorded on tape."; }')),
+    ("p54 a new capture, fetched by the viewer and pinned", _new_pinned_capture),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -650,6 +662,83 @@ def m143(d):
     _audit(d, ["NOT_PHASE_A\tindex.html\t-\t-\tBQ&#95;COMMITTED happened."])
 
 
+# Codex r23. Everything the viewer fetches is either audited copy or a byte pin (m144-m146); no verdict is reachable
+# for a claim it does not fit (m147-m150); JSON is audited as esc() renders it (m151); and generated content is read
+# the way a browser reads it (m152-m153).
+def _pin(d, rel):
+    """Re-pin a capture after an honest edit, the way the workflow expects."""
+    p = d / "tools" / "live_manifest.tsv"
+    lines = [ln for ln in p.read_text("utf-8").split("\n") if not ln.endswith("\t" + rel)]
+    lines.append("%s\t%s" % (hashlib.sha256((d / rel).read_bytes()).hexdigest(), rel))
+    p.write_text("\n".join(lines) + "\n", "utf-8")
+
+
+def m144(d):
+    """A claim written into a live capture the viewer renders on beat 6."""
+    p = d / "live" / "beat6_demo_evidence.json"
+    rows = json.loads(p.read_text("utf-8"))
+    rows[0]["note"] = "The Phase A service accounts were created. " + str(rows[0].get("note", ""))
+    p.write_text(json.dumps(rows, indent=1), "utf-8")
+
+
+def m145(d):
+    """The same, in a session capture beat 1 renders."""
+    p = d / "live" / "session_f21ee192.json"
+    rows = json.loads(p.read_text("utf-8"))
+    rows[0]["text_summary"] = "The Phase A service accounts were created."
+    p.write_text(json.dumps(rows, indent=1), "utf-8")
+
+
+def m146(d):
+    """A new pane fetching a file that is neither audited copy nor a pinned capture."""
+    (d / "live" / "beat7_new_capture.json").write_text('[{"note": "The Phase A service accounts were created."}]\n', "utf-8")
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace('matrix: "matrix.json"', 'extra: "live/beat7_new_capture.json", matrix: "matrix.json"', 1), "utf-8")
+
+
+def _register_claim(d, verdict, evidence, licence, sentence, rel="README.md"):
+    p = d / rel
+    p.write_text(p.read_text("utf-8") + "\n\n" + sentence + "\n", "utf-8")
+    _audit(d, ["\t".join((verdict, rel, evidence, licence, sentence))])
+
+
+def m147(d):
+    _register_claim(d, "CAPTURED", "live/bq_jobs_identity.json", "-", "The IAM bootstrap succeeded.")
+
+
+def m148(d):
+    _register_claim(d, "NOT_PHASE_A", "-", "-", "The IAM bootstrap succeeded.")
+
+
+def m149(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap succeeded.")
+
+
+def m150(d):
+    sent = "No reviewer knew the Phase A service accounts were created."
+    _register_claim(d, "PENDING", "-", sent[:-1], sent)
+
+
+def m151(d):
+    """A story status that renders as literal text, because app.js escapes it before innerHTML."""
+    p = d / "stories.json"
+    raw = p.read_text("utf-8")
+    marker = '"status": "'
+    at = raw.index(marker) + len(marker)
+    p.write_text(raw[:at] + '<span hidden>The Phase A service accounts were created.</span> ' + raw[at:], "utf-8")
+
+
+m152 = _append("styles.css", 'body::after { content/**/: "The Phase A service accounts were created."; }')
+
+
+def m153(d):
+    """attr() prints an unquoted attribute onto the screen; an HTML scan of tags never sees it."""
+    idx = d / "index.html"
+    idx.write_text(idx.read_text("utf-8").replace("<body>", "<body data-claim=Phase-A-service-accounts-were-created>", 1), "utf-8")
+    css = d / "styles.css"
+    css.write_text(css.read_text("utf-8") + "\nbody::before { content: attr(data-claim); }\n", "utf-8")
+
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -789,7 +878,17 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m140 a semicolon inside a quoted CSS content value (Codex r22)", m140),
              ("m141 content: attr(x) prints an attribute onto the screen (Codex r22)", m141),
              ("m142 JSON is audited after JSON.parse, not as source bytes (Codex r22)", m142),
-             ("m143 HTML entities are decoded before the reader sees them (Codex r22)", m143)]
+             ("m143 HTML entities are decoded before the reader sees them (Codex r22)", m143),
+             ("m144 INV-6: a claim written into a rendered live capture (Codex r23)", m144),
+             ("m145 INV-6: the same in a session capture (Codex r23)", m145),
+             ("m146 INV-6: a new pane fetching an unpinned file (Codex r23)", m146),
+             ("m147 'The IAM bootstrap succeeded.' cannot be CAPTURED (Codex r23)", m147),
+             ("m148 … nor NOT_PHASE_A: the spec declares that piece undone (Codex r23)", m148),
+             ("m149 … nor PENDING: the verb stands straight after the artefact (Codex r23)", m149),
+             ("m150 a negation cannot reach across a second noun phrase (Codex r23)", m150),
+             ("m151 an escaped JSON value is literal text on the screen (Codex r23)", m151),
+             ("m152 'content/**/:' is still a content declaration (Codex r23)", m152),
+             ("m153 attr() prints an unquoted attribute (Codex r23)", m153)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
