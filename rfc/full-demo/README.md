@@ -58,7 +58,7 @@ negative checks, and the `okf-context sync` CLI. Phase D (a new tape) follows th
   entities, CSS escapes, the effective `<base href>` — and a URL the reader cannot evaluate (one built by
   concatenation) is an error rather than a dependency it silently misses. Anything the graph reaches that is itself
   copy (a stylesheet, a page, a script) has to be audited, not merely pinned.
-- `tools/mutation_fixture.py`: 187 mutations that must each make the checker exit non-zero, and 67 positive controls
+- `tools/mutation_fixture.py`: 192 mutations that must each make the checker exit non-zero, and 69 positive controls
   (honest prose plus its register row, or a new capture plus its pin) that must leave it at exit 0.
 
 ## Run it locally

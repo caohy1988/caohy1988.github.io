@@ -601,35 +601,41 @@ def negation_scope_problems(sent, licences):
     return []
 
 # A determiner cannot follow a noun: something has to stand between them, and in English that something is a verb.
-# So `<artefact> … <word> <determiner>` puts <word> in a predicate slot whatever the word is - which is how "The IAM
-# bootstrap preset every binding." is caught without "preset" appearing on any list. The slot excludes the closed
-# classes that are not verbs, a present-tense -s or -ing form (neither asserts completion), and a bare verb under a
-# modal ("must show the active configuration name" is a requirement, not a claim).
+# The same is true of a bare object - "preset roles" - so the object may be a determiner-headed phrase, a bare plural
+# or a proper name, as long as it closes its clause. The slot itself is lowercase (a finite verb is not capitalised
+# mid-sentence), is not a present -s / -ing form and not an adverb, and stands directly after the artefact's own noun
+# phrase, so "the Phase A service accounts, custom role, …" is a compound rather than a predicate. That is how "The
+# IAM bootstrap preset roles." is caught without "preset" appearing on any list.
 PERFECT_RUN = r"(?:\s+(?i:has|have|had|was|were|is|are|been|being))*"
-PREDICATE_SLOT = r"(?!(?:" + NP_STOP + r")\b)(?!(?i:[a-z]+(?:s|ing))\b)[A-Za-z][\w'’]*"
-TRANSITIVE_VERB = re.compile(BARE_RUN + PP_RUN + PERFECT_RUN + ADVERB_RUN + r"\s+(?<![-\w])(" + PREDICATE_SLOT
-                             + r")\s+(?-i:" + DETERMINER_WORD + r")\b")
+PREDICATE_SLOT = (r"(?!(?:" + NP_STOP + r"|cannot|can't|won't|shan't|don't|doesn't|didn't)\b)"
+                  r"(?!(?i:[a-z]+(?:s|ing|ly))\b)(?-i:[a-z][\w'’]*)")
+PREDICATE_OBJECT = (r"\s+(?:(?-i:" + DETERMINER_WORD + r")\b[^,;:.|]*|(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*)"
+                    r"\s*(?=[;:.)\]|]|$)")
+TRANSITIVE_VERB = re.compile(PERFECT_RUN + ADVERB_RUN + r"\s+(?<![-\w])(" + PREDICATE_SLOT + r")" + PREDICATE_OBJECT)
+# The licence for an unclassified predicate is a frame reaching it, exactly as for a past one: a qualifier and only
+# verb-phrase material between. A qualifier somewhere else in the sentence licenses nothing, so "Phase A is not yet
+# done, but the IAM bootstrap preset every binding." is still a claim.
+UNCLASSIFIED_FRAME = re.compile(r"\b(?:" + MODAL_WORDS + r"|expected|not|never|no|none|nothing|neither|without|to)\b"
+                                + VERB_PHRASE_FILL + r"\s+" + PREDICATE_SLOT, re.I)
 
 def transitive_problems(sent):
-    """A word standing between a deferred artefact and a new determiner-headed noun phrase is a verb taking that
-    phrase as its object. PENDING says nothing here was executed, so it needs a licence frame like any other."""
+    """A word standing between a deferred artefact and its object is a verb taking that object. PENDING says nothing
+    here was executed, so it needs a licence frame reaching it like any other predicate."""
     out = []
     frames = [(m.start(), m.end()) for rx in LICENCE_FRAMES for m in rx.finditer(sent)]
+    frames += [(m.start(), m.end()) for m in UNCLASSIFIED_FRAME.finditer(sent)]
+    artefacts = [(m.start(), m.end()) for m in DEFERRED_ARTEFACT.finditer(sent)]
     for a in DEFERRED_ARTEFACT.finditer(sent):
         m = TRANSITIVE_VERB.match(sent[a.end():])
         if not m:
             continue
         at, end = a.end() + m.start(1), a.end() + m.end(1)
-        before = re.search(r"([\w'’-]+)\s*$", sent[:at])
-        before = before.group(1).lower() if before else ""
-        if re.fullmatch(DETERMINER_WORD, before, re.I):
-            continue                                  # attributive, not a predicate
+        if any(x <= at and end <= y for x, y in artefacts):
+            continue                                  # the "verb" is a word inside another artefact's own name
         if any(x <= at and end <= y for x, y in frames):
             continue
-        if QUALIFIER.search(sent):
-            continue                                  # an unclassified word is only a claim when nothing qualifies it
-        out.append("%r takes an object after %r and nothing in the sentence qualifies it"
-                   % (m.group(1)[:24], a.group(0)[:24]))
+        out.append("%r takes the object %r after %r with no licence frame reaching it"
+                   % (m.group(1)[:24], m.group(0).strip()[len(m.group(1)):].strip()[:24], a.group(0)[:24]))
     return out
 
 def postposed_problems(sent):
@@ -793,9 +799,27 @@ JS_ANY_BINDING = re.compile(r"\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=")
 JS_MAP_BINDING = re.compile(r"\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=\s*\{")
 JS_PARAMS = re.compile(r"\bfunction\s*[A-Za-z_$][\w$]*?\s*\(([^)]*)\)|\(([^)]*)\)\s*=>")
 
+def _js_functions(masked):
+    """name -> (parameter list, body span), from the code with strings and comments masked out."""
+    out = {}
+    for m in re.finditer(r"\bfunction\s+([A-Za-z_$][\w$]*)\s*\(([^)]*)\)\s*\{", masked):
+        depth, i, n = 1, m.end(), len(masked)
+        while i < n and depth:
+            depth += (masked[i] == "{") - (masked[i] == "}")
+            i += 1
+        out[m.group(1)] = ([p.strip() for p in m.group(2).split(",") if p.strip()], (m.end(), i))
+    return out
+
 def _js_symbols(body, masked):
     """(single-literal bindings, map name -> its literal values, names bound to something else, parameter names)."""
     literals = {m.group(1): m.group(2)[1:-1] for m in JS_LITERAL_BINDING.finditer(body)}
+    # A name that is assigned anywhere else - a second binding, a plain re-assignment - is no longer one literal.
+    assigned = {}
+    for m in re.finditer(r"\b([A-Za-z_$][\w$]*)\s*=(?!=)", masked):
+        assigned[m.group(1)] = assigned.get(m.group(1), 0) + 1
+    for name, count in assigned.items():
+        if count > 1:
+            literals.pop(name, None)                  # reassigned: this reader cannot say which value a fetch sees
     maps, impure = {}, set()
     for m in JS_MAP_BINDING.finditer(body):
         depth, i, n = 1, m.end(), len(body)
@@ -828,23 +852,50 @@ def _refs(rel):
             code[start:end] = " " * (end - start)
         code = "".join(code)
         literals, maps, impure, bound, params = _js_symbols(body, code)
+        functions = _js_functions(code)
+
+        def resolve(arg, seen):
+            """The literals a fetch argument can be, or a reason it cannot be resolved. A parameter is resolved by
+            looking at every call site of the function that declares it, so a wrapper is not a way out."""
+            arg = arg.strip()
+            if re.fullmatch(JS_STRING, arg):
+                return [arg[1:-1]], None
+            head = re.match(r"([A-Za-z_$][\w$]*)\s*(?:\[[^\]]*\]|\.[\w$]+)?\s*$", arg)
+            if not head:
+                return [], "cannot resolve to a literal: %s" % arg[:60]
+            name = head.group(1)
+            if name in literals:
+                return [literals[name]], None
+            if name in maps and name not in impure:
+                return list(maps[name]), None
+            if name in bound:
+                return [], "cannot resolve to a literal: %s" % arg[:60]
+            owner = next((fn for fn, (ps, span) in functions.items()
+                          if name in ps and span[0] <= callsite < span[1]), None)
+            if owner is None or owner in seen:
+                return [], "cannot resolve to a literal: %s" % arg[:60]
+            index = functions[owner][0].index(name)
+            out, sites = [], [m2 for m2 in re.finditer(r"(?<![.\w])" + re.escape(owner) + r"\s*\(([^()\n{};]*)\)", code)
+                             if not re.search(r"\bfunction\s+$", code[:m2.start()])]
+            if not sites:
+                return [], "%s is never called with a literal this reader can read" % owner
+            for site in sites:
+                pieces = [x for x in site.group(1).split(",")] if site.group(1).strip() else []
+                if index >= len(pieces):
+                    return [], "%s is called without argument %d" % (owner, index + 1)
+                got, why = resolve(pieces[index], seen | {owner})
+                if why:
+                    return [], why
+                out += got
+            return out, None
         refs = [t for _, kind, t, _, _ in _js_pieces(body) if kind == "lit" and PATHY.match(t.strip())]
         bad = []
         for m in FETCH_CALL.finditer(code):
-            arg = m.group(1).strip()
-            if re.fullmatch(JS_STRING, arg):
-                refs.append(arg[1:-1])
-                continue
-            head = re.match(r"([A-Za-z_$][\w$]*)\s*(?:\[[^\]]*\]|\.[\w$]+)?\s*$", arg)
-            name = head.group(1) if head else None
-            if name and name in literals:
-                refs.append(literals[name])
-            elif name and name in maps and name not in impure:
-                refs += maps[name]
-            elif name and name not in bound and name in params:
-                continue                              # the wrapper's own parameter; its call sites are checked here
-            else:
-                bad.append("%s asks for a URL this reader cannot resolve to a literal: fetch(%s)" % (rel, arg[:60]))
+            callsite = m.start()
+            got, why = resolve(m.group(1), frozenset())
+            if why:
+                bad.append("%s asks for a URL this reader cannot resolve: %s" % (rel, why))
+            refs += got
         return refs, "", bad
     if rel.endswith(".css"):
         return _css_urls(body), "", []
@@ -1026,11 +1077,24 @@ def css_strings(src, consumed=()):
     while i < n:
         if src[i] in "\"'":
             start = i
-            text, i = _css_string(src, i)
+            # Adjacent strings are painted as one run - `quotes: "The Phase A service accounts " "were created."` is
+            # one claim on the screen, whichever of open-quote / close-quote prints which half - so they are audited
+            # as one. A comma between them (a font stack) keeps them apart.
+            pieces = []
+            while i < n and src[i] in "\"'":
+                text, i = _css_string(src, i)
+                pieces.append(text)
+                j = i
+                while j < n and src[j] in " \t\n":
+                    j += 1
+                if j < n and src[j] in "\"'":
+                    i = j
+                    continue
+                break
             # A string inside a `content` declaration is painted as part of that declaration's assembled value, not
             # on its own, so it is audited there rather than twice and in pieces.
             if not any(a <= start and i <= b for a, b in consumed):
-                out.append(text)
+                out.append("".join(pieces))
             continue
         i += 1
     return out
@@ -1733,6 +1797,9 @@ check(css_content_problems('body::after { content: attr(data-target); }') and cs
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose(
           'body { quotes: "The Phase A service accounts were created." ""; } body::before { content: open-quote; }'))),
       "every string a stylesheet carries is copy, whichever declaration paints it")
+check(any("The Phase A service accounts were created." == t.lstrip("| ") for t in extract_css_prose(
+          'body { quotes: "The Phase A service accounts " "were created."; } body::before { content: open-quote close-quote; }').split("\n")),
+      "adjacent stylesheet strings are painted as one run, so they are audited as one claim")
 check(_css_urls('@import url("extra.css");') == ["extra.css"] and _css_urls('@import "\\65 xtra.css";') == ["extra.css"],
       "@import names the file it names, through url() and through an escape")
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { co\\6e tent: "The Phase A service accounts were created."; }'))),
@@ -1745,10 +1812,12 @@ check(any("service accounts were created" in t for t in regulated_in(extract_css
       "a CSS line continuation vanishes the way a browser drops it, so the claim stays one run")
 check(any("service accounts were created" in t for t in regulated_in(html_runs('<input type="button" value="The Phase A service accounts were created.">'))),
       "copy a browser shows from an attribute - a button label, an alt text, a tooltip - is audited like element text")
-check(transitive_problems("The IAM bootstrap preset every binding.")
+check(all(transitive_problems(t) for t in ("The IAM bootstrap preset every binding.",
+                                           "The IAM bootstrap preset roles.",
+                                           "Phase A is not yet done, but the IAM bootstrap preset every binding."))
       and not transitive_problems("The IAM bootstrap must preset every binding.")
       and not transitive_problems("The Phase A tape must show the active configuration name."),
-      "a word between a deferred artefact and a determiner-headed object is a predicate, whatever the word is")
+      "a word between a deferred artefact and its object - determiner-headed, bare plural or proper name - is a predicate, and only a frame reaching it licenses it")
 check(all(postposed_problems(t) and distance_problems(t) and anchor_problems(t, ["live/bq_jobs_identity.json"])
           for t in ("The IAM bootstrap SUCCEEDED.", "The IAM bootstrap effort succeeded.", "The IAM bootstrap succeeded.",
                     "The IAM bootstrap has succeeded.", "The IAM bootstrap in staging succeeded.",

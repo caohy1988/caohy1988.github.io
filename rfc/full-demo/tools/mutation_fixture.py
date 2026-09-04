@@ -520,6 +520,8 @@ POSITIVE_CONTROLS = [
     ("p65 an audited stylesheet string (Codex r28)", _append_audited_css("styles.css", 'body { quotes: "Phase A must still be recorded on tape." ""; }')),
     ("p66 a capture reached through a map of literals (Codex r28)", _map_literal_capture),
     ("p67 an unclassified verb under a modal (Codex r28)", _append_audited("spec.md", "The IAM bootstrap must preset every binding on tape.")),
+    ("p68 an unclassified verb under a negation (Codex r29)", _append_audited("plan.md", "The IAM bootstrap has not preset roles.")),
+    ("p69 a font stack is not one composed string (Codex r29)", _append_audited_css("styles.css", "body { font-family: 'Phase A Sans', 'Phase A Mono'; }")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -1001,6 +1003,41 @@ def m187(d):
     _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap preset every binding.")
 
 
+# Codex r29. A wrapper is not a way out of literal provenance (m188-m189); adjacent stylesheet strings are one
+# painted claim (m190); and an unclassified predicate needs a frame reaching it, with bare-plural objects counted
+# (m191-m192).
+def m188(d):
+    """A helper around fetch, called with a URL assembled at run time."""
+    (d / "extra.json").write_text('[{"note": "The Phase A service accounts were created."}]\n', "utf-8")
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace(
+        "  var TOTAL = 6;",
+        '  var TOTAL = 6;\n  function loadHidden(path) { return fetch(path); }\n'
+        '  loadHidden(["extra", ".json"].join(""));', 1), "utf-8")
+
+
+def m189(d):
+    """A name bound to a literal once and reassigned later is not one literal."""
+    (d / "extra.json").write_text('[{"note": "The Phase A service accounts were created."}]\n', "utf-8")
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace(
+        "  var TOTAL = 6;",
+        '  var TOTAL = 6;\n  var laterPath = "matrix.json";\n  laterPath = "extra" + ".json";\n'
+        '  fetchJson(laterPath);', 1), "utf-8")
+
+
+m190 = _append("styles.css", 'body { quotes: "The Phase A service accounts " "were created."; }\n'
+                             'body::before { content: open-quote close-quote; }')
+
+
+def m191(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap preset roles.")
+
+
+def m192(d):
+    _register_claim(d, "PENDING", "-", "-", "Phase A is not yet done, but the IAM bootstrap preset every binding.")
+
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -1184,7 +1221,12 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m184 INV-6: @import url() names a file (Codex r28)", m184),
              ("m185 a quotes: string is painted copy (Codex r28)", m185),
              ("m186 a custom counter style paints symbols this reader cannot compute (Codex r28)", m186),
-             ("m187 'The IAM bootstrap preset every binding.' takes no verdict (Codex r28)", m187)]
+             ("m187 'The IAM bootstrap preset every binding.' takes no verdict (Codex r28)", m187),
+             ("m188 INV-6: a wrapper around fetch is traced to its call sites (Codex r29)", m188),
+             ("m189 INV-6: a reassigned name is not one literal (Codex r29)", m189),
+             ("m190 adjacent quotes strings paint one claim (Codex r29)", m190),
+             ("m191 a bare-plural object is still an object (Codex r29)", m191),
+             ("m192 a qualifier in another clause licenses nothing (Codex r29)", m192)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
