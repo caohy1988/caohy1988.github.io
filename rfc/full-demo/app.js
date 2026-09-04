@@ -41,10 +41,10 @@
   var SHOW = [
     { time: "45 sec", say: "Finance is asking for permission to act on a number. A successful lookup is not enough to give that permission.", look: "Read the customer question and the two captured answers. Leave the twelve-question transcript for Q&A.", evidence: "The 12 questions, full answers, and session checks" },
     { time: "45 sec", say: "The agent already paid the cost of finding context. BigQuery holds the evidence we can use to make that work reusable.", look: "Point to the event and tool counts. These are observations, not proof that the revenue is correct.", evidence: "Event histogram, payload scan, and all tool completions" },
-    { time: "60 sec", say: "Catalog helps us find the right concept. A lookup success must not become a computation verdict.", look: "Point to the missing verdict field. Open the evidence to inspect the prompt and the Catalog response side by side.", evidence: "Catalog responses, both system prompts, and EntryGroup IAM" },
+    { time: "60 sec", say: "Catalog helps us find the right concept. A lookup success must not become a computation verdict.", look: "Point to “0 per-run computation verdicts”. The visible note distinguishes static declarations from beat 5’s stubbed receipt.", evidence: "Catalog responses, both system prompts, and EntryGroup IAM" },
     { time: "45 sec", say: "The proposed bridge publishes the bundle to BigQuery first, then stamps Catalog so discovery points to that publication.", look: "Read the proposed direction once. The operator captures below show setup and Catalog push. Sync has not run.", evidence: "Proposed sync algorithm, operator captures, and IAM contract" },
     { time: "75 sec", say: "An honest unproven is useful. The runtime contract should tie the answer to a publication and a receipt, and refuse to guess.", look: "Point to UNVERIFIABLE, then the resolution results. The empty head is the gap the next implementation must close.", evidence: "Serve queries, empty heads, stub receipt, and lifecycle evidence" },
-    { time: "60 sec", say: "Now we can ask which context a run used. The next step is to prove one governed Germany deployment end to end.", look: "Read the two attribution bands separately. Close on trust you can defend, one pinned answer, and IAM you can explain.", evidence: "Two-key attribution SQL, publication sources, and non-event evidence" }
+    { time: "90 sec", say: "Now we can ask which context a run used. The next step is to prove one governed Germany deployment end to end.", look: "Read the two attribution bands separately. Close on trust you can defend, one pinned answer, and IAM you can explain.", evidence: "Two-key attribution SQL, publication sources, and non-event evidence" }
   ];
 
   var stage = document.getElementById("stage");
@@ -109,9 +109,9 @@
         '<p class="honest">The scan covers ' + D.scanned + ' tool payloads across four sessions. Zero hits is scoped to these eight keys and these captures. BQAA is observer-only; the receipt tool is ' + src("stub", "stubbed · no-execution") + '.</p>';
     }
     if (n === 3) {
-      return '<div class="show-stats"><p><b>' + D.shipped.length + '</b>shipped OKF entries</p><p><b>' + D.aspectFields.length + '</b>fields in the OKF aspect template</p><p><b>' + D.aspectFields.filter(function (k) { return k === "verdict"; }).length + '</b>verdict fields in that template</p></div>' +
+      return '<div class="show-stats"><p><b>' + D.shipped.length + '</b>shipped OKF entries</p><p><b>' + D.aspectFields.length + '</b>fields in the OKF aspect template</p><p><b>' + D.aspectFields.filter(function (k) { return k === "verdict"; }).length + '</b>per-run computation verdicts</p></div>' +
         caption(src("live", "live GCP captures") + ' ' + fileLink("live/catalog_aspect_type_okf.json", "aspect template") + ' · ' + fileLink("live/lookup_context_shipped_metric.json", "lookup response") + ' · ' + fileLink("live/catalog_entry_group_iam.json", "EntryGroup IAM")) +
-        '<p class="honest">The local Catalog-shaped tool returned <code>ok: true</code>; its agent said “verified”. The shipped Catalog captures establish discovery behavior separately. Deployment-scoped runtime IAM remains ' + src("rfc", "RFC text only") + '.</p>';
+        '<p class="honest"><code>verified</code>, <code>executor</code>, and <code>attester</code> are static concept declarations, not the outcome of a specific run. <a href="#beat=5" data-goto="5">Beat 5’s stubbed receipt</a> reports <code>UNVERIFIABLE</code> for the observed invocation, with no execution. The local agent transcript and shipped Catalog captures are separate evidence. Deployment-scoped runtime IAM remains ' + src("rfc", "RFC text only") + '.</p>';
     }
     if (n === 4) {
       return '<div class="show-flow"><span>Derived OKF bundle</span><span aria-hidden="true">→</span><span>BigQuery publication</span><span aria-hidden="true">→</span><span>Catalog stamp</span></div>' +
@@ -360,7 +360,7 @@
     var searchDep = (D.searchDep.results || []).map(function (r) { return r.dataplexEntry.entrySource.displayName; });
     var searchType = (D.searchType.results || []).map(function (r) { return r.dataplexEntry.entrySource.displayName; });
     return beatHead(3, "catalog", "Catalog path: where it stops", "Found does not mean verified.",
-      "The shipped Catalog mapping makes OKF discoverable. Its 13-field template has no computation verdict.") +
+      "The shipped Catalog mapping makes OKF discoverable. Its 13-field template has no per-run computation verdict.") +
       showProof(3) + evidenceOpen(3) +
       must("shipped OKF-in-KC is real on screen · <code>lookupContext</code> omits the <code>okf</code> aspect · eleven resources → 400 · no <code>verdict</code> field exists in the 13-field template · both system prompts shown · <code>okf-derived-germany</code> labelled prior") +
       '<div class="grid3">' +

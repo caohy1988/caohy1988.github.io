@@ -38,9 +38,9 @@ This is a static viewer of checked-in GCP captures from September 3, 2026. It do
 
 ## Beat 3 — Catalog path · 2:00–3:00
 
-**Click:** **3**. Point to eight shipped entries, the 13-field template, and zero verdict fields. If asked, open **Evidence** for the Catalog responses and both prompts.
+**Click:** **3**. Point to eight shipped entries, the 13-field template, and zero per-run computation verdicts. Keep the visible distinction between static declarations and a run outcome in view. If asked, open **Evidence** for the full field list, Catalog responses, and both prompts.
 
-**Say:** “Catalog does useful work: it distributes the concepts and makes them discoverable. But this template has no computation verdict. The local Catalog-shaped tool returned ‘ok’, and its agent turned that into ‘verified’. The runtime opportunity is a contract that distinguishes finding context from proving an answer.”
+**Say:** “Catalog does useful work: it distributes the concepts and makes them discoverable. Its `verified`, `executor`, and `attester` fields are static concept declarations, not the outcome of a specific run. There is no per-run computation verdict here. Beat 5’s stubbed receipt reports `UNVERIFIABLE` for the observed invocation, with no execution. The local Catalog-shaped tool returned ‘ok’, and its agent turned that into ‘verified’. The runtime opportunity is a contract that distinguishes finding context from proving an answer.”
 
 **Add:** “IAM should also be explainable. The captured EntryGroup policy is real. The proposed deployment boundary still needs its own implementation and access checks.”
 
