@@ -52,10 +52,11 @@ negative checks, and the `okf-context sync` CLI. Phase D (a new tape) follows th
   `content`. New, edited or moved copy has to be re-audited before it ships. It does not try to parse English; the
   register is the audit, and `tools/check_full_demo.py` documents that boundary and its non-goals.
 - `tools/live_manifest.tsv`: a byte pin (SHA-256) for every capture. The inventory is every file under `live/` and
-  `sql/` plus every path literal in `app.js`, read through the same tokenizer as the prose, so quoting style, call
-  site and whether anything fetches the file yet all buy nothing: everything the page can render is either audited
-  copy or a pinned capture.
-- `tools/mutation_fixture.py`: 162 mutations that must each make the checker exit non-zero, and 57 positive controls
+  `sql/` plus everything a resolved dependency graph reaches from `index.html` — each reference resolved against the
+  file that made it, the way a browser resolves a URL — so quoting style, call site, `@import` and whether anything
+  fetches the file yet all buy nothing. Anything the graph reaches that is itself copy (a stylesheet, a page, a
+  script) has to be audited, not merely pinned.
+- `tools/mutation_fixture.py`: 170 mutations that must each make the checker exit non-zero, and 60 positive controls
   (honest prose plus its register row, or a new capture plus its pin) that must leave it at exit 0.
 
 ## Run it locally

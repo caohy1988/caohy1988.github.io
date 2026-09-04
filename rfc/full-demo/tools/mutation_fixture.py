@@ -265,7 +265,7 @@ def _append(rel, text):
 def _gate():
     src = (HERE / "check_full_demo.py").read_text("utf-8")
     seg = (src[src.index("PHASE_A_OBJECT = re.compile"):src.index("# ---- the register:")]
-           + src[src.index("def regulated_sentences("):src.index("def load_register(")])
+           + src[src.index("def read_copy("):src.index("def load_register(")])
     g = {"re": re, "json": json, "html": html, "DEMO": DEMO}
     exec(seg, g)
     return g
@@ -311,6 +311,52 @@ def _append_audited_js(rel, code, verdict="PENDING", evidence="-"):
         p.write_text(p.read_text("utf-8") + "\n" + code + "\n", "utf-8")
         _audit(d, _rows_for(rel, GATE["extract_js_prose"](code), verdict, evidence))
     return fn
+
+
+def _reaudit(d, rels):
+    """Re-read what the page now says and audit the difference - the workflow an author follows after editing copy.
+    The readers run against the MUTATED copy, so a generated value that depends on an attribute is audited as the
+    copy assembles it, not as the pristine tree would."""
+    root = GATE["DEMO"]
+    GATE["DEMO"] = d
+    try:
+        have, reg = set(), d / "tools" / "audited_claims.tsv"
+        for ln in reg.read_text("utf-8").split("\n"):
+            parts = ln.split("\t")
+            if len(parts) == 5:
+                have.add((parts[1].strip(), " ".join(parts[4].split())))
+        rows = []
+        for rel in rels:
+            for _, s in GATE["regulated_sentences"](GATE["read_copy"](rel), rel):
+                if (rel, s) in have:
+                    continue
+                have.add((rel, s))
+                spans = GATE["derive_licences"](s)
+                if spans is None:
+                    raise SystemExit("fixture error: %r cannot be registered PENDING" % s[:70])
+                rows.append("\t".join(("PENDING", rel, "-", "~".join(spans) or "-", s)))
+        _audit(d, rows)
+    finally:
+        GATE["DEMO"] = root
+
+
+def _audited_generated_value(d):
+    """The workflow for generated content: the value the browser assembles is one sentence, audited as one row."""
+    idx = d / "index.html"
+    idx.write_text(idx.read_text("utf-8").replace("<body>", '<body data-target="Phase A bindings">', 1), "utf-8")
+    css = d / "styles.css"
+    css.write_text(css.read_text("utf-8") + '\nbody::before { content: "Every " attr(data-target) " must still be recorded on tape."; }\n', "utf-8")
+    _reaudit(d, ["styles.css", "index.html"])
+
+
+def _nested_pinned_capture(d):
+    """A capture in a subdirectory, fetched by a relative URL and pinned under the path the browser resolves."""
+    rel = "live/sub/beat7_new_capture.json"
+    (d / "live" / "sub").mkdir(parents=True, exist_ok=True)
+    (d / rel).write_text('[{"note": "not yet run"}]\n', "utf-8")
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace('matrix: "matrix.json"', 'extra: "' + rel + '", matrix: "matrix.json"', 1), "utf-8")
+    _pin(d, rel)
 
 
 def _unwired_pinned_capture(d):
@@ -454,6 +500,9 @@ POSITIVE_CONTROLS = [
     ("p55 an audited button label (Codex r24)", _append_audited_html("index.html", '<input type="button" value="Phase A must still be recorded on tape.">')),
     ("p56 audited generated content split across adjacent strings (Codex r24)", _append_audited_css("styles.css", 'body::after { content: "Phase A must still " "be recorded on tape."; }')),
     ("p57 a capture added under live/ and pinned, before anything fetches it", _unwired_pinned_capture),
+    ("p58 an audited generated value assembled from a string and an attribute (Codex r25)", _audited_generated_value),
+    ("p59 a negation frame over an unlisted participle (Codex r25)", _append_audited("plan.md", "The IAM bootstrap has not succeeded.")),
+    ("p60 a capture in a subdirectory, fetched and pinned (Codex r25)", _nested_pinned_capture),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -802,6 +851,46 @@ def m162(d):
     p.write_text(p.read_text("utf-8").replace("</body>", '<img src="x.png" alt="The Phase A service accounts were created."></body>', 1), "utf-8")
 
 
+# Codex r25. The inventory is a resolved dependency graph, so a reference is a dependency of the file that MADE it
+# (m163-m164); a verb predicated of a deferred artefact is refused however English attaches it (m165-m167); and the
+# CSS reader tokenizes the way the syntax spec does, assembling one generated value (m168-m170).
+def m163(d):
+    """fetchText("../index.html") is a dependency on rfc/index.html, not on this directory's."""
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace("  var TOTAL = 6;", '  var TOTAL = 6;\n  fetchText("../index.html");', 1), "utf-8")
+
+
+def m164(d):
+    """An @import pulls in a stylesheet, and a stylesheet is copy: pinning it would not audit what it prints."""
+    (d / "extra.css").write_text('body::after { content: "The Phase A service accounts were created."; }\n', "utf-8")
+    p = d / "styles.css"
+    p.write_text('@import "extra.css";\n' + p.read_text("utf-8"), "utf-8")
+
+
+def m165(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap has succeeded.")
+
+
+def m166(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap in staging succeeded.")
+
+
+def m167(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap succeeded yesterday.")
+
+
+m168 = _append("styles.css", 'body::after { content: "\\"The Phase A service accounts were created."; }')
+m169 = _append("styles.css", 'body::after { content: "The Phase A service accounts \\\n were created."; }')
+
+
+def m170(d):
+    """A string, an attribute and another string are one generated value on the screen."""
+    idx = d / "index.html"
+    idx.write_text(idx.read_text("utf-8").replace("<body>", '<body data-target="Phase A service accounts">', 1), "utf-8")
+    css = d / "styles.css"
+    css.write_text(css.read_text("utf-8") + '\nbody::before { content: "The " attr(data-target) " were created."; }\n', "utf-8")
+
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -960,7 +1049,15 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m159 'co\\6e tent' is the content property (Codex r24)", m159),
              ("m160 adjacent content strings are concatenated (Codex r24)", m160),
              ("m161 an input's value label is visible copy (Codex r24)", m161),
-             ("m162 an image's alt text is visible copy (Codex r24)", m162)]
+             ("m162 an image's alt text is visible copy (Codex r24)", m162),
+             ("m163 INV-6: a reference resolves against the file that made it (Codex r25)", m163),
+             ("m164 INV-6: an @import pulls in copy, which must be audited (Codex r25)", m164),
+             ("m165 'The IAM bootstrap has succeeded.' takes no verdict (Codex r25)", m165),
+             ("m166 '… in staging succeeded.' likewise (Codex r25)", m166),
+             ("m167 '… succeeded yesterday.' likewise (Codex r25)", m167),
+             ("m168 an escaped quote is a character, not a delimiter (Codex r25)", m168),
+             ("m169 a CSS line continuation vanishes (Codex r25)", m169),
+             ("m170 a string, an attr() and a string are one generated value (Codex r25)", m170)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

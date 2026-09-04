@@ -19,6 +19,7 @@ Usage: python3 rfc/full-demo/tools/check_full_demo.py   (exit 0 on pass)
 """
 import html
 import json
+import posixpath
 import re
 import subprocess
 import sys
@@ -478,6 +479,9 @@ NEGATION = re.compile(r"\b(not|no|none|nothing|never|cannot|without)\b", re.I)
 #     proved" and "No reviewer KNEW okf-setup created the service accounts" are not frames - the first embeds its
 #     claim, the second has no auxiliary at all between the negation and the verb.
 PAST_TOKEN = r"(?:" + "|".join(PAST_FORMS) + r")"
+# Inside a frame the verb may be ANY regular past participle: a qualifier that reaches its verb licenses that verb
+# whatever it is, so "none happened" and "must be deployed" are frames like "must be recorded".
+ANY_PAST = r"(?:(?i:[a-z]+ed)|" + PAST_TOKEN + r")"
 FRAME_ADVERB = r"(?-i:[a-z]+ly)|yet|ever|already|also|then|still|now|only|just|even|again|duly|once|first|never|not"
 VERB_PHRASE_FILL = r"(?:\s+(?:be|been|being|is|are|was|were|has|have|had|and|or|to|" + PAST_TOKEN + r"|" + FRAME_ADVERB + r"))*"
 CLAUSE_FILL = r"(?:[^,;:.]|\.(?=\w))"               # one clause: no clause boundary, but "§1.3" is one token
@@ -486,7 +490,7 @@ CLAUSE_FILL = r"(?:[^,;:.]|\.(?=\w))"               # one clause: no clause boun
 # "No service account IN THE Phase A project was created" is one subject while "No reviewer knew THE Phase A service
 # accounts were created" is two clauses, without the checker knowing that "knew" is a verb.
 DETERMINER_WORD = (r"the|a|an|this|that|these|those|its|their|our|his|her|my|your|each|every|all|both|either|neither|"
-                   r"such|any|some|no|another|one|two|three|four|five|six|seven|eight|nine|ten|many|few|several|most")
+                   r"such|any|some|no|another|own|one|two|three|four|five|six|seven|eight|nine|ten|many|few|several|most")
 PREPOSITION_WORD = (r"at|in|on|of|for|by|with|from|into|per|via|under|over|during|through|across|between|within|"
                     r"without|about|as|than|below|above|beside|beyond|behind|beneath|to|onto|upon|among")
 # The determiner test is case-sensitive on purpose: a lone capital "A" is a name part ("Phase A"), not the article.
@@ -494,39 +498,50 @@ SUBJECT_FILL = (r"(?:\s+(?:(?:" + PREPOSITION_WORD + r")\s+(?-i:" + DETERMINER_W
                 r"|(?!(?-i:" + DETERMINER_WORD + r")\b)[\w'’.§%$/·—–-]+))*")
 COMPLEMENTIZER = r"that|which|who|whom|whose|why|how|when|where|whether|if"
 LICENCE_FRAMES = [
-    re.compile(r"\b(?:" + MODAL_WORDS + r"|expected)\b" + VERB_PHRASE_FILL + r"\s+" + PAST_TOKEN + r"\b", re.I),
-    re.compile(r"\bto\b" + VERB_PHRASE_FILL + r"\s+" + PAST_TOKEN + r"\b", re.I),
+    re.compile(r"\b(?:" + MODAL_WORDS + r"|expected)\b" + VERB_PHRASE_FILL + r"\s+" + ANY_PAST + r"\b", re.I),
+    re.compile(r"\bto\b" + VERB_PHRASE_FILL + r"\s+" + ANY_PAST + r"\b", re.I),
     re.compile(r"\b(?:not|never|no|none|nothing|neither|without)\b(?:\s+(?:" + FRAME_ADVERB + r"|been|be|being))*\s+"
-               + PAST_TOKEN + r"\b", re.I),
+               + ANY_PAST + r"\b", re.I),
     re.compile(r"\b(?:no|none|nothing|neither|not)\b(?!" + CLAUSE_FILL + r"*\b(?:" + COMPLEMENTIZER + r")\b)"
                + SUBJECT_FILL + r"\s+(?:was|were|is|are|been)\b(?:\s+(?:" + FRAME_ADVERB + r"|been))*\s+"
-               + PAST_TOKEN + r"\b", re.I),
+               + ANY_PAST + r"\b", re.I),
     # A non-factive complement leaves its clause unasserted, so a completion token inside one is a question, not a
     # claim: "must verify WHETHER the service accounts were created". The auxiliary must still be inside the frame,
     # so "report whether the operator created …" is not one.
     re.compile(r"\b(?:whether|if)\b" + CLAUSE_FILL + r"{0,60}?\s(?:was|were|is|are|been|has|have|had)\b"
-               + r"(?:\s+(?:" + FRAME_ADVERB + r"|been))*\s+" + PAST_TOKEN + r"\b", re.I),
+               + r"(?:\s+(?:" + FRAME_ADVERB + r"|been))*\s+" + ANY_PAST + r"\b", re.I),
 ]
 COMPLETION_VERB = re.compile(r"\b" + PAST_TOKEN + r"\b", re.I)
-# A verb closing the noun phrase that names a deferred artefact is a claim about that artefact, whatever the verb is
-# and however it is capitalised: "The IAM bootstrap SUCCEEDED.", "The IAM bootstrap effort succeeded." Between the
-# artefact and the verb only BARE words may stand - the rest of one noun phrase - so a determiner, preposition,
-# coordinator, auxiliary or subordinator ends the reach, and "an isolated gcloud configuration" or "and asserted by
-# the checker" is not a claim about the artefact before it. The verb must also close its clause, which is what makes
-# it a predicate rather than a participle modifying whatever follows ("the aspect type owned by the setup identity").
+COMPLETION_PHRASE = re.compile("|".join("(?:%s)" % rx.pattern for rx in EXECUTED), re.I)
+# A disclaimer FRAME sits immediately on the artefact it disclaims - "(not okf-setup)", "not yet by the Phase A
+# service accounts", "no service account" - so a negation belonging to some other clause cannot stand in for one.
+DISCLAIMER_FRAME = re.compile(r"\b(?:not|no|never|nothing|neither|without)\b"
+                              r"(?:\s+(?:yet|as|by|from|for|to|of|in|on|the|a|an|any|its|their|each|every|one|"
+                              r"(?-i:Phase)|(?-i:A)))*\s*$", re.I)
+# A verb PREDICATED of a deferred artefact is a claim about it, whatever the verb is. Round 24 could only see a verb
+# closing the artefact's own noun phrase; a browser reader sees the predicate wherever the ordinary machinery of
+# English puts it, so the reach now spans the rest of one noun phrase, at most one prepositional phrase, an auxiliary
+# chain and an adverbial tail: "The IAM bootstrap has succeeded.", "… in staging succeeded.", "… succeeded yesterday."
+# What still ends the reach is structure, not distance: a determiner or a coordinator or a second preposition opens
+# something new, punctuation ends the clause, a determiner immediately before the verb makes it attributive ("an
+# isolated configuration"), and a following "by" without an auxiliary makes it a reduced relative ("the aspect type
+# owned by the setup identity").
 AUXILIARY_WORD = r"is|are|was|were|be|been|being|has|have|had|having|does|do|did|" + MODAL_WORDS
 SUBORDINATOR_WORD = (r"because|since|so|when|while|if|unless|until|after|before|although|though|whereas|that|which|"
                      r"who|whom|whose|whether|how|why|where")
 COORDINATOR_WORD = r"and|or|but|nor|plus|then"
 NP_STOP = (r"(?-i:" + DETERMINER_WORD + r")|(?i:" + PREPOSITION_WORD + r"|" + AUXILIARY_WORD + r"|"
            + SUBORDINATOR_WORD + r"|" + COORDINATOR_WORD + r")")
+BARE_RUN = r"(?:\s+(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*){0,3}"
+ONE_PP = r"(?:\s+(?i:" + PREPOSITION_WORD + r")(?:\s+(?-i:" + DETERMINER_WORD + r"))?" + BARE_RUN + r")?"
+AUX_RUN = r"(?:\s+(?i:" + AUXILIARY_WORD + r"))*"
 ADVERB_RUN = r"(?:\s+(?:(?i:[a-z]+ly)|not|never|also|already|then|still|now|only|just|even|yet))*"
-POSTPOSED_VERB = re.compile(r"(?:\s+(?!(?:" + NP_STOP + r")\b)[\w'’-]+){0,3}" + ADVERB_RUN
-                            + r"\s+((?i:[a-z]+ed)|" + PAST_TOKEN + r")\b(?:\s+(?i:[a-z]+ly))*"
-                            + r"(?=\s*(?:[,;:.)\]|]|$))", re.I)
+ADVERBIAL_TAIL = r"(?:\s+(?:(?i:[a-z]+ly)|(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*)){0,2}"
+POSTPOSED_VERB = re.compile(BARE_RUN + ONE_PP + AUX_RUN + ADVERB_RUN + r"\s+(?<![-\w])(" + ANY_PAST + r")\b"
+                            + ADVERBIAL_TAIL + r"\s*(?=[,;:.)\]|]|$)")
 
 def postposed_problems(sent):
-    """PENDING says nothing here was executed. A past verb directly after a deferred artefact says otherwise unless a
+    """PENDING says nothing here was executed. A verb predicated of a deferred artefact says otherwise unless a
     licence frame covers it."""
     out = []
     frames = [(m.start(), m.end()) for rx in LICENCE_FRAMES for m in rx.finditer(sent)]
@@ -535,16 +550,17 @@ def postposed_problems(sent):
         if not m:
             continue
         at, end = a.end() + m.start(1), a.end() + m.end(1)
+        before = re.search(r"([\w'’-]+)\s*$", sent[:at])
+        before = before.group(1).lower() if before else ""
+        if re.fullmatch(DETERMINER_WORD, before, re.I):
+            continue                                  # attributive: "an isolated gcloud configuration"
+        if sent[end:].lstrip()[:3].lower() == "by " and not re.fullmatch(AUXILIARY_WORD, before, re.I):
+            continue                                  # reduced relative: "the aspect type owned by the service"
         if any(x <= at and end <= y for x, y in frames):
             continue
-        out.append("%r stands straight after %r with no licence frame" % (m.group(1)[:24], a.group(0)[:24]))
+        out.append("%r is predicated of %r with no licence frame" % (m.group(1)[:24], a.group(0)[:24]))
     return out
-COMPLETION_PHRASE = re.compile("|".join("(?:%s)" % rx.pattern for rx in EXECUTED), re.I)
-# A disclaimer FRAME sits immediately on the artefact it disclaims - "(not okf-setup)", "not yet by the Phase A
-# service accounts", "no service account" - so a negation belonging to some other clause cannot stand in for one.
-DISCLAIMER_FRAME = re.compile(r"\b(?:not|no|never|nothing|neither|without)\b"
-                              r"(?:\s+(?:yet|as|by|from|for|to|of|in|on|the|a|an|any|its|their|each|every|one|"
-                              r"(?-i:Phase)|(?-i:A)))*\s*$", re.I)
+
 
 # The qualifier vocabulary. It is used only to ask "is a qualifier present in this sentence", never to bind one to a
 # predicate, so a missing word here can at most demand an audit note - it cannot license an unaudited claim.
@@ -553,7 +569,7 @@ QUALIFIER = re.compile("(?:%s)|(?:%s)|(?:%s)" % (MODAL.pattern, STATUS.pattern, 
 COMPLETION = re.compile(r"\b(?:" + "|".join(PAST_FORMS) + r")\b|" + "|".join("(?:%s)" % rx.pattern for rx in EXECUTED), re.I)
 # The artefacts that do not exist on this PR. Narrower than PHASE_A_OBJECT on purpose: legacy context_ref bindings,
 # BigQuery grants and user_email rows are real, so naming them is not a Phase A claim.
-DEFERRED_ARTEFACT = re.compile(r"\b(Phase[- ]A|service accounts?|SAs?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|"
+DEFERRED_ARTEFACT = re.compile(r"\b(?<![-\w])(?<!pre-)(?<!post-)(Phase[- ]A|service accounts?|SAs?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|"
                                r"okf-runtime-reader|okf-context[- ](sync|runtime)|okfCatalogSearch|"
                                r"custom (search )?role|table-level grants?|boundary(-| )?probe|boundary EntryGroup|"
                                r"negative checks?|positive checks?|denial checks?|denials?|binding calls?|"
@@ -599,47 +615,123 @@ NOT_DONE = re.compile(r"\b(not|no|none|never|without|nothing|neither|yet|deferre
 
 SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json", "styles.css"]
 
-# ---- the inventory (Codex rounds 23-24), fail-closed --------------------------------------------------------------
+# ---- the dependency graph (Codex rounds 23-25), fail-closed -------------------------------------------------------
 # Everything the page can put on the screen is either COPY, audited sentence by sentence in the register, or a
-# CAPTURE, pinned byte for byte in tools/live_manifest.tsv. Round 23 scraped app.js's FILES / TEXTS maps for
-# double-quoted paths, which a single-quoted value or a direct fetchJson(...) walked straight past. The inventory no
-# longer reads the code's SHAPE at all:
-#   * every file under live/ and sql/ is in the inventory, whether or not anything fetches it yet;
-#   * plus every path-shaped STRING LITERAL in app.js, read through the same tokenizer the prose reader uses, so
-#     quoting style and call site are irrelevant.
-# Forgetting to wire a capture up is therefore not a way to avoid pinning it.
+# CAPTURE, pinned byte for byte in tools/live_manifest.tsv. Round 23 scraped app.js's FILES / TEXTS maps; round 24
+# widened that to every path literal; both still read a path as a bare string. A browser resolves a URL against the
+# document that asked for it, so this reader does too: every reference is resolved from ITS OWN loading file, which
+# is what makes fetchText("../index.html") a dependency on rfc/index.html rather than an alias of this directory's.
+# The graph is walked from index.html through its stylesheet and script, and through @import, so an unregistered
+# stylesheet cannot smuggle generated content in. Anything that resolves to a real file - inside this directory or
+# above it - has to be pinned or audited.
+HTML_REF = re.compile(r"(?:href|src)\s*=\s*(?:\"([^\"]*)\"|'([^']*)'|([^\s\"'>=`]+))", re.I)
+CSS_REF = re.compile(r"@import\s+(?:url\(\s*)?(?:\"([^\"]*)\"|'([^']*)'|([^\s;)]+))|url\(\s*(?:\"([^\"]*)\"|'([^']*)'|([^\s)]+))", re.I)
+PATHY = re.compile(r"^[\w./-]+\.[A-Za-z0-9]{1,6}$")
+
+def _refs(rel):
+    """Every URL a source file asks the browser for, as written."""
+    try:
+        body = (DEMO / rel).read_text("utf-8")
+    except OSError:
+        return []
+    if rel.endswith(".js"):
+        return [t for _, kind, t, _, _ in _js_pieces(body) if kind == "lit" and PATHY.match(t.strip())]
+    if rel.endswith(".css"):
+        return [g for m in CSS_REF.finditer(body) for g in m.groups() if g]
+    if rel.endswith((".html", ".htm")):
+        return [g for m in HTML_REF.finditer(body) for g in m.groups() if g]
+    return []
+
+def dependency_graph():
+    """Resolve the graph from index.html outwards, each reference against the directory of the file that made it.
+    Returns (paths relative to this directory, including "../" ones, sorted; unresolvable references)."""
+    seen, queue, outside = set(), ["index.html"], []
+    while queue:
+        rel = queue.pop()
+        if rel in seen:
+            continue
+        seen.add(rel)
+        base = posixpath.dirname(rel)
+        for ref in _refs(rel):
+            ref = ref.split("#", 1)[0].split("?", 1)[0].strip()
+            if not ref or "://" in ref or ref.startswith(("mailto:", "data:", "//")):
+                continue
+            target = posixpath.normpath(posixpath.join(base, ref)) if not ref.startswith("/") else ref.lstrip("/")
+            if not (DEMO / target).is_file():
+                if PATHY.match(ref):
+                    outside.append("%s asks for %s, which resolves to no file" % (rel, ref))
+                continue
+            queue.append(target)
+    return sorted(seen), outside
+
 def viewer_files():
+    """The inventory: every file under live/ and sql/, whether or not anything fetches it yet, plus every file the
+    dependency graph reaches from index.html."""
     out = set()
     for root in ("live", "sql"):
         base = DEMO / root
         if base.is_dir():
             out |= {str(f.relative_to(DEMO)) for f in base.rglob("*") if f.is_file()}
-    literals = " \n".join(t for _, kind, t, _, _ in _js_pieces((DEMO / "app.js").read_text("utf-8")) if kind == "lit")
-    for cand in re.findall(r"[\w./-]+\.[A-Za-z0-9]{1,6}", literals):
-        cand = cand.lstrip("./")
-        if (DEMO / cand).is_file():
-            out.add(cand)
-    return sorted(out)
+    reached, _ = dependency_graph()
+    return sorted(out | set(reached))
+
 
 # A declaration value ends at the first semicolon or brace OUTSIDE a string, so a quoted value may contain either.
+# ---- a stateful CSS tokenizer (Codex round 25) --------------------------------------------------------------------
+# Round 24 decoded escapes over the whole sheet before tokenizing, which is not what a browser does: an escaped quote
+# inside a string became a real delimiter, and a backslash-newline survived as whitespace instead of vanishing. The
+# reader now tokenizes the way the CSS syntax spec does - escapes are decoded IN TOKEN CONTEXT - and assembles each
+# `content` declaration into the one string the browser paints, so strings, attr() and counters interleave into a
+# single run of copy instead of separate fragments.
 CSS_COMMENT = re.compile(r"/\*.*?\*/", re.S)
-# A CSS identifier may spell any of its characters as an escape, so `co\6e tent` IS `content` to a browser. Escapes
-# are decoded before anything is parsed, exactly as the tokenizer decodes them, so no spelling of the property hides
-# a rule that prints prose.
-CSS_ESCAPE = re.compile(r"\\(?:([0-9a-fA-F]{1,6})[ \t\n]?|(.))", re.S)
 
-def decode_css(src):
-    def one(m):
-        if m.group(1):
-            try:
-                return chr(int(m.group(1), 16))
-            except (ValueError, OverflowError):
-                return ""
-        return m.group(2)
-    return CSS_ESCAPE.sub(one, src)
-CSS_CONTENT = re.compile(r"\bcontent\s*:\s*((?:\"[^\"]*\"|'[^']*'|[^;}])*)", re.I)
-CSS_STRING = re.compile(r"\"([^\"]*)\"|'([^']*)'")
-CSS_ATTR = re.compile(r"\battr\(\s*([-\w]+)", re.I)
+def _css_escape(src, i):
+    """Decode one escape starting at src[i] == '\\'; returns (text, next index). A backslash-newline is a line
+    continuation and contributes nothing, and \\6e is 'n' whether or not a space closes it."""
+    j = i + 1
+    if j >= len(src):
+        return "", j
+    if src[j] == "\n":
+        return "", j + 1                              # line continuation: the browser drops it entirely
+    m = re.match(r"[0-9a-fA-F]{1,6}", src[j:j + 6])
+    if m:
+        j += len(m.group(0))
+        if j < len(src) and src[j] in " \t\n":
+            j += 1                                    # one whitespace closes a hex escape and is not literal
+        try:
+            return chr(int(m.group(0), 16)), j
+        except (ValueError, OverflowError):
+            return "", j
+    return src[j], j + 1
+
+def _css_string(src, i):
+    """Read a quoted string starting at the quote; returns (text, next index)."""
+    quote, out, i = src[i], [], i + 1
+    while i < len(src) and src[i] != quote:
+        if src[i] == "\\":
+            text, i = _css_escape(src, i)
+            out.append(text)
+            continue
+        if src[i] == "\n":
+            break                                     # an unterminated string ends at the newline
+        out.append(src[i])
+        i += 1
+    return "".join(out), i + 1
+
+def _css_ident(src, i):
+    """Read an identifier, decoding escapes in token context, so `co\\6e tent` reads as `content`."""
+    out = []
+    while i < len(src):
+        if src[i] == "\\":
+            text, i = _css_escape(src, i)
+            out.append(text)
+            continue
+        if src[i].isalnum() or src[i] in "-_":
+            out.append(src[i])
+            i += 1
+            continue
+        break
+    return "".join(out), i
 
 def _attribute_values(name):
     """What `content: attr(x)` prints: the x attribute of any element the page ships - written into index.html, or
@@ -657,32 +749,74 @@ def _attribute_values(name):
         out += [html.unescape(a or b or c) for a, b, c in pattern.findall(body)]
     return out
 
+def css_content_values(src):
+    """Yield (assembled generated value, unmodelled functions) for every `content` declaration in a stylesheet. The
+    value is assembled in source order - "The " attr(data-target) " were created." is ONE run - because that is what
+    the browser paints."""
+    src = CSS_COMMENT.sub(" ", src)
+    i, n = 0, len(src)
+    while i < n:
+        ch = src[i]
+        if ch in "\"'":
+            _, i = _css_string(src, i)
+            continue
+        if ch.isalpha() or ch in "-_\\":
+            name, j = _css_ident(src, i)
+            k = j
+            while k < n and src[k] in " \t\n":
+                k += 1
+            if name.lower() == "content" and k < n and src[k] == ":":
+                pieces, unmodelled, k = [], [], k + 1
+                while k < n and src[k] not in ";}":
+                    if src[k] in "\"'":
+                        text, k = _css_string(src, k)
+                        pieces.append(text)
+                        continue
+                    if src[k].isalpha() or src[k] in "-_\\":
+                        fn, k2 = _css_ident(src, k)
+                        k3 = k2
+                        while k3 < n and src[k3] in " \t":
+                            k3 += 1
+                        if k3 < n and src[k3] == "(":
+                            depth, k4 = 1, k3 + 1
+                            while k4 < n and depth:
+                                if src[k4] in "\"'":
+                                    _, k4 = _css_string(src, k4)
+                                    continue
+                                depth += (src[k4] == "(") - (src[k4] == ")")
+                                k4 += 1
+                            args = src[k3 + 1:k4 - 1]
+                            if fn.lower() == "attr":
+                                attr = _css_ident(args.strip(), 0)[0]
+                                values = _attribute_values(attr)
+                                if not values:
+                                    unmodelled.append("attr(%s) resolves to no attribute this checker can read" % attr)
+                                pieces.append(" ".join(values))
+                            elif fn.lower() not in ("counter", "counters", "url", "image-set", "linear-gradient"):
+                                unmodelled.append("content uses %s(), which this checker does not model" % fn)
+                            k = k4
+                            continue
+                        k = k2
+                        continue
+                    k += 1
+                yield "".join(pieces).strip(), unmodelled
+                i = k
+                continue
+            i = j
+            continue
+        i += 1
+
 def extract_css_prose(src):
-    """The only parts of a stylesheet a reader can see: generated `content` - its string literals and whatever attr()
-    pulls onto the screen - and comments. Comments are removed before declarations are read, exactly as a browser
-    removes them, so `content/**/: "…"` is still a content declaration. A content value that uses a generated-content
-    function this reader does not model is reported as prose to audit, not silently dropped."""
+    """The only parts of a stylesheet a reader can see: the value each `content` declaration paints, and comments. A
+    generated-content function this reader cannot model is reported for audit rather than dropped."""
     out, unmodelled = [], []
-    src = decode_css(src)
     for m in re.finditer(r"/\*(.*?)\*/", src, re.S):
         out.append(m.group(1).replace("\n", " ").strip())
-    for m in CSS_CONTENT.finditer(CSS_COMMENT.sub(" ", src)):
-        value = m.group(1)
-        # Adjacent strings in one content value are concatenated by the browser, so they are one run of copy.
-        joined = "".join(lit.group(1) or lit.group(2) or "" for lit in CSS_STRING.finditer(value)).strip()
-        if joined:
-            out.append(joined)
-        bare = CSS_STRING.sub(" ", value)
-        for at in CSS_ATTR.finditer(bare):
-            values = _attribute_values(at.group(1))
-            if not values:
-                unmodelled.append("attr(%s) resolves to no attribute this checker can read" % at.group(1))
-            out += [v.strip() for v in values]
-        for fn in re.finditer(r"\b([-\w]+)\s*\(", CSS_ATTR.sub(" ", bare)):
-            if fn.group(1).lower() not in ("counter", "counters", "url", "image-set", "linear-gradient"):
-                unmodelled.append("content uses %s(), which this checker does not model" % fn.group(1))
+    for value, problems in css_content_values(src):
+        out.append(value)
+        unmodelled += problems
     out += ["UNMODELLED GENERATED CONTENT: " + u for u in sorted(set(unmodelled))]
-    return "\n".join("| " + t for t in out if t)
+    return "\n".join("| " + t.replace("\n", " ") for t in out if t)
 BLOCK_START = re.compile(r"^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s?|\|)")
 
 def md_blocks(text):
@@ -1234,8 +1368,14 @@ check(not bad, "every register row is bound to its claim (licence spans open wit
 # ---- INV-6: every file the viewer loads is either audited copy or a pinned capture --------------------------------
 MANIFEST = HERE / "live_manifest.tsv"
 viewer = viewer_files()
+reached, unresolved = dependency_graph()
+check(not unresolved, "every reference in the dependency graph resolves to a file:\n      " + "\n      ".join(unresolved[:8]))
 check(len(viewer) >= 40 and all((DEMO / f).is_file() for f in viewer),
-      "the inventory is every file under live/ and sql/ plus every path literal in app.js (%d found)" % len(viewer))
+      "the inventory is every file under live/ and sql/ plus everything the dependency graph reaches (%d found)" % len(viewer))
+copy_like = [f for f in reached if f.endswith((".css", ".html", ".js", ".md")) and f not in SCAN_FILES]
+check(not copy_like,
+      "every stylesheet, page and script the graph reaches is audited copy - a pin would fix its bytes without ever "
+      "reading what it prints. Bring it into this directory and add it to SCAN_FILES, or stop fetching it: %s" % copy_like[:4])
 pinned = {}
 manifest_problems = []
 for i, ln in enumerate(MANIFEST.read_text("utf-8").split("\n"), 1):
@@ -1351,11 +1491,19 @@ check(any("service accounts were created" in t for t in regulated_in(extract_css
       "a CSS identifier escape spells the same property: co\\6e tent is content")
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { content: "The Phase A service " "accounts were created."; }'))),
       "adjacent strings in one content value are concatenated the way a browser concatenates them")
+check(any("service accounts were created" in t for t in regulated_in(extract_css_prose(r'body::after { content: "\"The Phase A service accounts were created."; }'))),
+      "an escaped quote inside a CSS string is a character, not a delimiter")
+check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { content: "The Phase A service accounts \\\n were created."; }'))),
+      "a CSS line continuation vanishes the way a browser drops it, so the claim stays one run")
 check(any("service accounts were created" in t for t in regulated_in(html_runs('<input type="button" value="The Phase A service accounts were created.">'))),
       "copy a browser shows from an attribute - a button label, an alt text, a tooltip - is audited like element text")
 check(all(postposed_problems(t) and distance_problems(t) and anchor_problems(t, ["live/bq_jobs_identity.json"])
-          for t in ("The IAM bootstrap SUCCEEDED.", "The IAM bootstrap effort succeeded.", "The IAM bootstrap succeeded.")),
-      "a verb closing the phrase that names a spec-declared deferred piece is refused by all three verdicts, whatever its case and however many nouns precede it")
+          for t in ("The IAM bootstrap SUCCEEDED.", "The IAM bootstrap effort succeeded.", "The IAM bootstrap succeeded.",
+                    "The IAM bootstrap has succeeded.", "The IAM bootstrap in staging succeeded.",
+                    "The IAM bootstrap succeeded yesterday.")),
+      "a verb predicated of a spec-declared deferred piece is refused by all three verdicts - through an auxiliary chain, a prepositional phrase or an adverbial tail")
+check(not postposed_problems("The human operator must impersonate each service account through an isolated gcloud configuration."),
+      "an attributive participle inside a prepositional phrase is not a predicate")
 check("UNMODELLED" in extract_css_prose('body::after { content: attr(data-nothing-uses-this); }'),
       "generated content this reader cannot resolve is reported for audit, not silently dropped")
 check(any("service accounts were created" in t for t in regulated_in(extract_json_prose('{"status": "<span hidden>The Phase A service accounts were created.</span>"}'))),

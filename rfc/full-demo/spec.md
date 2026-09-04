@@ -161,7 +161,7 @@ to be recorded on tape and asserted by the checker; check 6 is three calls):
 4. `okf-runtime-reader`: `entries patch` on an entry that carries the runtime pin → expected `PERMISSION_DENIED`.
 5. `okf-runtime-reader`: `INSERT INTO deployment_heads` → expected `PERMISSION_DENIED`.
 6. Post-cleanup, `okf-setup` (still impersonable after step 5 removes its roles), three calls: (6a) `aspect-types update okf --description=x`, (6b) `aspect-types delete okf-context-runtime`, (6c) `aspect-types set-iam-policy okf` → each expected `PERMISSION_DENIED`, which would show the project-wide AspectType authority is gone.
-7. Post-cleanup, operator (default configuration): `gcloud auth print-access-token --impersonate-service-account=okf-setup@…` → expected `PERMISSION_DENIED` on `generateAccessToken`, which would show the impersonation path is closed; the `okf-setup` gcloud configuration is then to be deleted.
+7. Post-cleanup, operator (default configuration): `gcloud auth print-access-token --impersonate-service-account=okf-setup@…` → expected `PERMISSION_DENIED` on `generateAccessToken`, which would show a closed impersonation path; the `okf-setup` gcloud configuration is then to be deleted.
 
 What this buys and what it does not: the table set, the EntryGroup, and the type resources are the
 enforceable boundary. Inside one EntryGroup, `catalogEditor` can delete any entry, so the ownership
@@ -222,7 +222,7 @@ after dual LGTM (see `plan.md`).
   events matched on both handle and publication through one resolution view, `publications` joined
   by id only, receipt-only rows banded, non-event evidence in `demo_evidence`.
 - Every capability row in §2 is either shown on a beat or marked `RFC text only` on the page.
-- (Phase A; not yet met on PR 16.) The bootstrap operator must install every binding on tape; every positive check must return `OK`; all seven negative checks (nine API calls) must return `PERMISSION_DENIED`, including the two post-cleanup checks that would show `okf-setup` is retired; and the tape must show each BigQuery step's `user_email` matching the declared identity. Today every `user_email` on record is the operator's.
+- (Phase A; not yet met on PR 16.) The bootstrap operator must install every binding on tape; every positive check must return `OK`; all seven negative checks (nine API calls) must return `PERMISSION_DENIED`, including the two post-cleanup checks that would show a retired `okf-setup`; and the tape must show each BigQuery step's `user_email` matching the declared identity. Today every `user_email` on record is the operator's.
 - Never-emit scan over every agent-facing payload on the page returns 0 hits.
 - `python3 rfc/full-demo/tools/check_full_demo.py` (Phase C) exits 0: beats present, session ids and
   publication ids match the checked-in transcripts, no `ATTESTED` string outside the labelled Phase 4 shape,

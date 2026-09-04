@@ -18,7 +18,7 @@
 #                sample scripts, the RFC's own history) and names no deferred artefact at all.
 #
 # Format: verdict<TAB>file<TAB>evidence-or-dash<TAB>licence-frames-or-dash (~ separated)<TAB>sentence.
-# Rows: 1920 (1803 PENDING, 21 CAPTURED, 96 NOT_PHASE_A).
+# Rows: 1920 (1802 PENDING, 21 CAPTURED, 97 NOT_PHASE_A).
 
 # --- spec.md
 PENDING	spec.md	-	-	# Spec — full-version demo:
@@ -289,7 +289,7 @@ PENDING	spec.md	-	-	INSERT INTO deployment_heads → expected PERMISSION_DENIED.
 PENDING	spec.md	-	-	Post-cleanup, okf-setup (still impersonable after step 5 removes its roles), three calls:
 PENDING	spec.md	-	-	(6a) code, (6b) code, (6c) code → each expected PERMISSION_DENIED, which would show the project-wide AspectType authority is gone.
 PENDING	spec.md	-	-	Post-cleanup, operator (default configuration):
-PENDING	spec.md	-	-	code → expected PERMISSION_DENIED on generateAccessToken, which would show the impersonation path is closed;
+PENDING	spec.md	-	-	code → expected PERMISSION_DENIED on generateAccessToken, which would show a closed impersonation path;
 PENDING	spec.md	-	to be deleted	the okf-setup gcloud configuration is then to be deleted.
 PENDING	spec.md	-	-	What this buys and what it does not:
 PENDING	spec.md	-	-	the table set, the EntryGroup, and the type resources are the enforceable boundary.
@@ -491,7 +491,7 @@ NOT_PHASE_A	spec.md	-	-	- Every capability row in §2 is either shown on a beat 
 PENDING	spec.md	-	-	- (Phase A;
 PENDING	spec.md	-	must install every binding on tape	not yet met on PR 16.) The bootstrap operator must install every binding on tape;
 PENDING	spec.md	-	-	every positive check must return OK;
-PENDING	spec.md	-	-	all seven negative checks (nine API calls) must return PERMISSION_DENIED, including the two post-cleanup checks that would show okf-setup is retired;
+PENDING	spec.md	-	-	all seven negative checks (nine API calls) must return PERMISSION_DENIED, including the two post-cleanup checks that would show a retired okf-setup;
 PENDING	spec.md	-	-	and the tape must show each BigQuery step's user_email matching the declared identity.
 CAPTURED	spec.md	live/bq_jobs_identity.json	-	Today every user_email on record is the operator's.
 PENDING	spec.md	-	-	- Never-emit scan over every agent-facing payload on the page returns 0 hits.
@@ -530,7 +530,7 @@ PENDING	ARCHITECTURE.md	-	-	| plan | same | nothing | diff vs deployment_heads p
 PENDING	ARCHITECTURE.md	-	-	absence = delete |
 PENDING	ARCHITECTURE.md	-	-	| commit | same → BigQuery (table-level dataEditor on the nine runtime tables;
 PENDING	ARCHITECTURE.md	-	-	no dataset grant) | staged rows under sync_id, then publications, deployment_heads, deployment_heads_history, context_ref_bindings (append-only, one ref → one publication, never rebound), ledger | BQ_COMMITTED |
-PENDING	ARCHITECTURE.md	-	-	| stamp | same → Knowledge Catalog (catalogEditor on the one EntryGroup) | okf-context-runtime aspect on owned entries;
+PENDING	ARCHITECTURE.md	-	-	| stamp | same → Knowledge Catalog (catalogEditor on the one EntryGroup) | okf-context-runtime aspect on the entries it owns;
 PENDING	ARCHITECTURE.md	-	-	delete ledger-owned entries for removed concepts | CATALOG_STAMPED (or CATALOG_PENDING on partial failure;
 PENDING	ARCHITECTURE.md	-	-	rerun completes without a new publication) |
 NOT_PHASE_A	ARCHITECTURE.md	-	-	| status | same | nothing | lag = publications committed − publications stamped |
@@ -1156,10 +1156,10 @@ PENDING	README.md	-	-	It does not try to parse English;
 PENDING	README.md	-	-	the register is the audit, and tools/check_full_demo.py documents that boundary and its non-goals.
 PENDING	README.md	-	-	- tools/live_manifest.tsv:
 PENDING	README.md	-	-	a byte pin (SHA-256) for every capture.
-PENDING	README.md	-	-	The inventory is every file under live/ and sql/ plus every path literal in app.js, read through the same tokenizer as the prose, so quoting style, call site and whether anything fetches the file yet all buy nothing:
-PENDING	README.md	-	-	everything the page can render is either audited copy or a pinned capture.
+NOT_PHASE_A	README.md	-	-	The inventory is every file under live/ and sql/ plus everything a resolved dependency graph reaches from index.html — each reference resolved against the file that made it, the way a browser resolves a URL — so quoting style, call site, @import and whether anything fetches the file yet all buy nothing.
+PENDING	README.md	-	-	Anything the graph reaches that is itself copy (a stylesheet, a page, a script) has to be audited, not merely pinned.
 PENDING	README.md	-	-	- tools/mutation_fixture.py:
-PENDING	README.md	-	-	162 mutations that must each make the checker exit non-zero, and 57 positive controls (honest prose plus its register row, or a new capture plus its pin) that must leave it at exit 0.
+PENDING	README.md	-	-	170 mutations that must each make the checker exit non-zero, and 60 positive controls (honest prose plus its register row, or a new capture plus its pin) that must leave it at exit 0.
 PENDING	README.md	-	-	## Run it locally
 PENDING	README.md	-	-	bash python3 -m http.server 8000 # from the repo root open http://localhost:8000/rfc/full-demo/ python3 rfc/full-demo/tools/check_full_demo.py
 # --- live/README.md

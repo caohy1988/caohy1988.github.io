@@ -53,7 +53,7 @@ Colour key matches the RFC tokens: telemetry (purple), catalog (blue), runtime (
 | validate · observe · snapshot | `okf-context sync` as `okf-sync-writer-<deployment>` | nothing | identities computed |
 | plan | same | nothing | diff vs `deployment_heads` printed; absence = delete |
 | commit | same → BigQuery (table-level `dataEditor` on the nine runtime tables; no dataset grant) | staged rows under `sync_id`, then `publications`, `deployment_heads`, `deployment_heads_history`, `context_ref_bindings` (append-only, one ref → one publication, never rebound), ledger | `BQ_COMMITTED` |
-| stamp | same → Knowledge Catalog (`catalogEditor` on the one EntryGroup) | `okf-context-runtime` aspect on owned entries; delete ledger-owned entries for removed concepts | `CATALOG_STAMPED` (or `CATALOG_PENDING` on partial failure; rerun completes without a new publication) |
+| stamp | same → Knowledge Catalog (`catalogEditor` on the one EntryGroup) | `okf-context-runtime` aspect on the entries it owns; delete ledger-owned entries for removed concepts | `CATALOG_STAMPED` (or `CATALOG_PENDING` on partial failure; rerun completes without a new publication) |
 | status | same | nothing | lag = publications committed − publications stamped |
 
 Status on 2026-09-03 (PR 16): none of this section has run. The sync leg, the service accounts, the
