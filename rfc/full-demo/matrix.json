@@ -1,0 +1,86 @@
+{
+  "_source": "spec.md §2, condensed for the page. 'shown' lists beats where the page renders live or recorded evidence; 'rfc_text_only' names the part the page only quotes.",
+  "rows": [
+    {
+      "n": 1,
+      "capability": "Pin-or-fail-stale",
+      "kc": "Can display the pin Phase A would stamp (okf-context-runtime.publication_id) and filter on it with a search predicate. Cannot compare it to deployment_heads or refuse a stale request; LookupContext does not render custom aspects at all.",
+      "bq": "deployment_heads is the comparison target; a request presenting a non-head publication_id returns FAIL_STALE.",
+      "evidence": "Live: lookupContext on the pushed metric entry omits every okf field (beat 3). Live: the resolution query returns NO_HEAD for a bound handle and FAIL_CLOSED for an unbound one because no sync has committed a head yet (beat 5). Prior, legacy: okf-derived-germany names a25e1c0c… only as prose in entrySource.description.",
+      "shown": [3, 5],
+      "rfc_text_only": "FAIL_STALE itself, until a head exists"
+    },
+    {
+      "n": 2,
+      "capability": "deployment_heads history",
+      "kc": "One mutable state per entry, createTime / updateTime only. “Which publication was current for this deployment at time T” has no answer.",
+      "bq": "deployment_heads_history (deployment_key, publication_id, snapshot_id, committed_at, sync_id) answers which publication was current at T. It holds no revenue values.",
+      "evidence": "Session f21ee192 question 4 (“How did Germany compare to the prior quarter?”): the tool returned the same six current items. The history query runs today and returns 0 rows (beat 5).",
+      "shown": [5],
+      "rfc_text_only": "numerical prior-quarter comparison"
+    },
+    {
+      "n": 3,
+      "capability": "Attested execution and verdicts",
+      "kc": "Displays runtime, parameters, computation, executor, attester and stops. No verdict field exists in the 13-field okf template.",
+      "bq": "run_attested_computation returns verdict ∈ {ATTESTED, UNVERIFIABLE, REJECTED} with reason and receipt_id; the demo verdict is always UNVERIFIABLE.",
+      "evidence": "Session 04fa3d56 (no-verdict lookup): “You can trust the number because it is verified”. Session f21ee192 (verdict field): “No. The number is unproven.” Illustration, not a controlled comparison.",
+      "shown": [3, 5],
+      "rfc_text_only": null
+    },
+    {
+      "n": 4,
+      "capability": "SQL join of context and evidence",
+      "kc": "Catalog is not queryable with SQL and cannot be joined to agent_events.",
+      "bq": "Events match the context_ref_resolution view on both event-carried context_ref and event-carried publication_id, then join publications by id; receipt-only rows are banded separately; non-event evidence lives in demo_evidence.",
+      "evidence": "Live query: band attributed Σ 14, band receipt_only Σ 13, two demo_evidence rows (beat 6).",
+      "shown": [6],
+      "rfc_text_only": null
+    },
+    {
+      "n": 5,
+      "capability": "BQAA context_ref seam",
+      "kc": "No place for an opaque runtime handle; extra round-trips into authored frontmatter via pull.ts.",
+      "bq": "context_ref on every tool result, never-emit list enforced, immutable binding to one publication from Phase A on.",
+      "evidence": "Live scan: 27 of 27 TOOL_COMPLETED rows carry context_ref; 0 hits on all eight never-emit keys (beat 2).",
+      "shown": [2],
+      "rfc_text_only": "immutable binding (no Phase A binding exists yet)"
+    },
+    {
+      "n": 6,
+      "capability": "Sub-EntryGroup policy",
+      "kc": "Enforcement unit is the EntryGroup; IAM cascades; overview exposes full bodies. Any catalogViewer on the group reads the Policy body.",
+      "bq": "RFC: one security domain per deployment, caller-delegated authorization, policy_context_commitment, mixed-policy fail-closed. Not implemented in Phase A/B.",
+      "evidence": "Live: EntryGroup IAM policy read (no bindings; the operator is a project Owner), the policy body in lookupContext/overview, and question 7's governed_by edge (beat 3).",
+      "shown": [3],
+      "rfc_text_only": "the BigQuery side entirely"
+    },
+    {
+      "n": 7,
+      "capability": "Observation → Snapshot → Publication chain",
+      "kc": "Identities are Dataplex timestamps. Every push writes every Entry. Two agents cannot prove they read the same revision.",
+      "bq": "Three content identities plus immutable publications rows; identical republish is a no-op; unchanged-snapshot republish is a provenance event.",
+      "evidence": "Recorded: the SDK adapter on main reproduced observation 85ea62a9…, snapshot f18befd0…, publication 53bd1651… before the push (beat 4). Seeded: three publications rows (beat 5).",
+      "shown": [4, 5],
+      "rfc_text_only": "no-op and republish semantics (sync not built)"
+    },
+    {
+      "n": 8,
+      "capability": "Delete-as-absence ledger vs kcmd no-delete",
+      "kc": "Generic kcmd push creates or patches; sync.ts carries “TODO: Handle creates and deletes”. A superseded concept is served until someone deletes the entry or the whole EntryGroup.",
+      "bq": "Deletion is absence from the next snapshot; the ledger removes only owned entries. current mode excludes superseded concepts at query time.",
+      "evidence": "Live: searchEntries finds Customer revenue (legacy) with status=deprecated after the push (beat 3). Live: excluded in 13 of 13 retrievals across f21ee192 and 1e6dfed7 (beat 5).",
+      "shown": [3, 5],
+      "rfc_text_only": "the ledger delete (sync not built)"
+    },
+    {
+      "n": 9,
+      "capability": "LookupContext limits",
+      "kc": "Up to ten resources per call; single location in the endpoint; does not follow links out of a concept body; does not render custom aspects; permission-filtered, empty response without permission.",
+      "bq": "Bounded SQL traversal over snapshot_membership and relationship_assertions returns the governed closure with an explicit depth bound; the Context Envelope carries publication_id, lifecycle mode, manifest and envelope_id.",
+      "evidence": "Live: eleven resources → 400 “Only ten resources are supported at this time.”; endpoint path is projects/{p}/locations/{l}:lookupContext; the okf aspect is absent from the response on the same entry entries.get returns it for (beat 3).",
+      "shown": [3],
+      "rfc_text_only": "no-link-following (docs claim, not exercised) and the permission-filtered empty response"
+    }
+  ]
+}

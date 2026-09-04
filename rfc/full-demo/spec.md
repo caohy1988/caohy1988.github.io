@@ -53,22 +53,34 @@ reports `BQ_COMMITTED, CATALOG_PENDING`; a rerun of `sync` completes the stamp w
 
 ### 1.2 What is real, recorded, stubbed, and future in the full demo
 
-| Piece | v1 demo status |
-|---|---|
-| BQAA trace in `okf_rfc_demo.agent_events` | Real. 212 rows, 4 sessions. Not re-run. |
-| Adapter trace → derived bundle | Real, SDK `main` after PR 474. Reproduced against `476d37dc`. |
-| Shipped `okf-bundle` entries + `okf` aspect | Real, after running the sample `setup.ts` + `push.ts` in Phase A (today the project has only the older `okf-concept` type and one aspect-less entry). |
-| `okf-context sync` commit into BigQuery runtime tables | Real BigQuery DDL/DML into `okf_rfc_demo` (new tables). Built in Phase A. |
-| Catalog stamp on `okf-context-runtime` | Real Catalog write, aspect type created by the setup identity in Phase A. |
-| IAM bootstrap, identities, positive and negative checks, setup retirement (§1.3) | Real, recorded in the Phase A tape. |
-| Scheduler / Cloud Run Job | Stubbed: job YAML shown, CLI run by hand. |
-| Attester / `ATTESTED` verdict | Stubbed: verdict `UNVERIFIABLE`, reason `no-execution`. Nothing on the page says `ATTESTED`. |
-| Numerical execution (quarter comparison, roll-up) | Future executor/attester work. `RFC text only`. |
-| Caller-delegated policy authorization, `policy_context_commitment`, mixed-policy fail-closed | `RFC text only`. Not implemented in Phase A/B. |
-| `sync --from-catalog` | Future. `RFC text only`. |
-| Page | Viewer of recorded runs, same as today. Browser never calls GCP. |
+The second column is the v1 target this spec sets. The third column is what `/rfc/full-demo/`
+(PR 16) actually captured on 2026-09-03; it was added after Codex review so that no deferred item
+reads as executed. Everything in the third column marked **Not done** or **Not built** is shown on
+the page as `RFC text only`, and `tools/check_full_demo.py` asserts those labels.
+
+| Piece | v1 target | Status on 2026-09-03 (PR 16) |
+|---|---|---|
+| BQAA trace in `okf_rfc_demo.agent_events` | Real. 212 rows, 4 sessions. Not re-run. | **Captured.** Live per-session count (4 sessions, 212 rows); three sessions pulled (209 rows); `a63c3e86…` (3 rows, no tool call) counted, not pulled. |
+| Adapter trace → derived bundle | Real, SDK `main` after PR 474. Reproduced against `476d37dc`. | **Captured.** SDK `main` `4f54b5c` reproduced `53bd1651…` before the push. |
+| Shipped `okf-bundle` entries + `okf` aspect | Real, after running the sample `setup.ts` + `push.ts` in Phase A. | **Captured**, run by the operator (not `okf-setup` / sync-writer): AspectType `okf`, EntryType `okf-bundle`, 8 entries; `entries.get` vs `lookupContext` on record. |
+| `okf-context sync` commit into BigQuery runtime tables | Real BigQuery DDL/DML into `okf_rfc_demo` (new tables). Built in Phase A. | **Not built.** Only the DDL + seeds ran (as the operator). `deployment_heads`, history and `context_ref_bindings` are empty. No `BQ_COMMITTED`, no `no-op`. `RFC text only` on beat 4. |
+| Catalog stamp on `okf-context-runtime` | Real Catalog write, aspect type to be created by the setup identity in Phase A. | **Not done.** No `okf-context-runtime` AspectType, no pin, no `CATALOG_STAMPED`. `RFC text only` on beats 3 and 4. |
+| IAM bootstrap, identities, positive and negative checks, setup retirement (§1.3) | Real; to be recorded in the Phase A tape. | **Not done.** No service account, custom role, table-level grant, boundary probe or `PERMISSION_DENIED` check is in place yet; every job ran as the operator (`bq_jobs_identity.json`). `RFC text only` on beat 4. |
+| Pin-or-fail-stale (`FAIL_STALE`) | Real query against `deployment_heads`. | **Partly.** `FAIL_CLOSED`, `NO_HEAD`, `AMBIGUOUS_LEGACY` are live query results; `FAIL_STALE` needs a head and none exists. `RFC text only` on beat 5. |
+| Scheduler / Cloud Run Job | Stubbed: job YAML shown, CLI run by hand. | Not shown; `RFC text only`. |
+| Attester / `ATTESTED` verdict | Stubbed: verdict `UNVERIFIABLE`, reason `no-execution`. Nothing on the page says `ATTESTED`. | As specified: every receipt `UNVERIFIABLE`; beat 5 labels the pane live trace + stubbed attester. |
+| Numerical execution (quarter comparison, roll-up) | Future executor/attester work. `RFC text only`. | `RFC text only`. |
+| Caller-delegated policy authorization, `policy_context_commitment`, mixed-policy fail-closed | `RFC text only`. Not implemented in Phase A/B. | `RFC text only`. |
+| `sync --from-catalog` | Future. `RFC text only`. | `RFC text only`. |
+| Page | Viewer of recorded runs, same as today. Browser never calls GCP. | As specified. |
 
 ### 1.3 IAM contract for the bridge (normative, resource-specific, bootstrappable)
+
+**Scope.** This section is the Phase A contract, written as requirements. Nothing in §1.3 has been executed on PR 16: no
+service account, custom role, table-level grant, boundary EntryGroup, positive check or negative check exists, and no tape
+has been recorded. Every capture behind `/rfc/full-demo/` ran as the operator (`live/bq_jobs_identity.json`). Where a
+sentence below says what the tape "must" show, that is the acceptance criterion for Phase A, labelled `RFC text only`
+on the page until it is met.
 
 Four principals in `test-project-0728-467323`: one human **bootstrap operator** and three service
 accounts. Every grant below names the resource it is bound to; nothing is granted at a wider scope
@@ -80,29 +92,29 @@ are granted on the **type resource**; `searchEntries` needs `dataplex.projects.s
 AspectTypes in `roles/dataplex.aspectTypeOwner`. BigQuery grants use table-level IAM
 (`bq add-iam-policy-binding … project:dataset.table`) so the sync writer never touches `agent_events`.
 
-**Who installs the boundary.** Service accounts cannot grant themselves anything, and
+**Who must install the boundary.** Service accounts cannot grant themselves anything, and
 `roles/iam.serviceAccountAdmin` cannot create custom roles, edit project IAM, or set Dataplex IAM.
-So every binding call is made by the **bootstrap operator**: the human project Owner account that
-already runs `gcloud` in this project. That account holds, for the duration of setup only, the exact
-policy-owner roles below, and each binding command is recorded on tape under that identity. After
-setup the operator keeps only what the demo needs at run time (impersonation of the sync writer and
-the reader).
+So every binding call must be made by the **bootstrap operator**: the human project Owner account that
+already runs `gcloud` in this project. In Phase A that account will hold, for the duration of setup only, the exact
+policy-owner roles below, and each binding command must be recorded on tape under that identity. After
+setup the operator must keep only what the demo needs at run time (impersonation of the sync writer and
+the reader). None of these bindings exists yet (PR 16 status: not done).
 
 | Principal | Resource | Grant | Why | Lifetime |
 |---|---|---|---|---|
-| bootstrap operator (human Owner) | project | `roles/iam.roleAdmin` | create custom role `okfCatalogSearch` | setup only, revoked |
-| | project | `roles/resourcemanager.projectIamAdmin` | bind project-level roles to the three SAs | setup only, revoked |
-| | project | `roles/iam.serviceAccountAdmin` | create the three SAs; bind `serviceAccountTokenCreator` on each SA resource | setup only, revoked |
-| | project | `roles/dataplex.catalogAdmin` | `entryGroups.setIamPolicy`, `entryTypes.setIamPolicy` on `okf-rfc-demo`, `okf-rfc-demo-boundary`, `okf-bundle` | setup only, revoked |
-| | project | `roles/dataplex.aspectTypeOwner` | `aspectTypes.setIamPolicy` on `okf`, `okf-context-runtime` | setup only, revoked |
-| | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | `bigquery.tables.setIamPolicy` for the nine table-level bindings | setup only, revoked |
+| bootstrap operator (human Owner) | project | `roles/iam.roleAdmin` | create custom role `okfCatalogSearch` | setup only; to be revoked |
+| | project | `roles/resourcemanager.projectIamAdmin` | bind project-level roles to the three SAs | setup only; to be revoked |
+| | project | `roles/iam.serviceAccountAdmin` | create the three SAs; bind `serviceAccountTokenCreator` on each SA resource | setup only; to be revoked |
+| | project | `roles/dataplex.catalogAdmin` | `entryGroups.setIamPolicy`, `entryTypes.setIamPolicy` on `okf-rfc-demo`, `okf-rfc-demo-boundary`, `okf-bundle` | setup only; to be revoked |
+| | project | `roles/dataplex.aspectTypeOwner` | `aspectTypes.setIamPolicy` on `okf`, `okf-context-runtime` | setup only; to be revoked |
+| | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | `bigquery.tables.setIamPolicy` for the nine table-level bindings | setup only; to be revoked |
 | | SA `okf-sync-writer-okf-rfc-demo`, SA `okf-runtime-reader` | `roles/iam.serviceAccountTokenCreator` on each SA | run the demo by impersonation | kept |
-| | SA `okf-setup` | `roles/iam.serviceAccountTokenCreator` | run setup by impersonation | setup only, revoked (check 7) |
-| `okf-setup` (one-time) | project | `roles/dataplex.catalogEditor` (`entryGroups.create`, `entryTypes.create`) and `roles/dataplex.aspectTypeOwner` (`aspectTypes.create`) | type and group creation is checked on the project, not on the group | setup only, revoked (check 6) |
-| | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | table DDL, the `context_ref_resolution` view, seed `MERGE`s (`sql/setup_runtime_tables.sql`) | setup only, revoked |
-| | project | `roles/bigquery.jobUser` | run the DDL jobs | setup only, revoked |
+| | SA `okf-setup` | `roles/iam.serviceAccountTokenCreator` | run setup by impersonation | setup only; to be revoked (check 7) |
+| `okf-setup` (one-time) | project | `roles/dataplex.catalogEditor` (`entryGroups.create`, `entryTypes.create`) and `roles/dataplex.aspectTypeOwner` (`aspectTypes.create`) | type and group creation is checked on the project, not on the group | setup only; to be revoked (check 6) |
+| | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | table DDL, the `context_ref_resolution` view, seed `MERGE`s (`sql/setup_runtime_tables.sql`) | setup only; to be revoked |
+| | project | `roles/bigquery.jobUser` | run the DDL jobs | setup only; to be revoked |
 | `okf-sync-writer-okf-rfc-demo` | EntryGroup `okf-rfc-demo` | `roles/dataplex.catalogEditor` | `entries.create/patch/delete` inside this group only | kept |
-| | EntryType `okf-bundle` | `roles/dataplex.entryTypeUser` | create entries of that type (`push.ts` runs as this identity) | kept |
+| | EntryType `okf-bundle` | `roles/dataplex.entryTypeUser` | create entries of that type (the identity the sample `push.ts` uses) | kept |
 | | AspectType `okf`, AspectType `okf-context-runtime` | `roles/dataplex.aspectTypeUser` on each | attach the shipped aspect; stamp the profile aspect | kept |
 | | tables `publications`, `deployments`, `deployment_heads`, `deployment_heads_history`, `concept_versions`, `snapshot_membership`, `relationship_assertions`, `context_ref_bindings`, `catalog_ownership` | `roles/bigquery.dataEditor` **per table** | no dataset grant, so `agent_events`, `legacy_context_ref_bindings`, and `demo_evidence` are unreachable | kept |
 | | project | `roles/bigquery.jobUser` | run the commit jobs | kept |
@@ -111,21 +123,22 @@ the reader).
 | | dataset `okf_rfc_demo` | `roles/bigquery.dataViewer` | `SELECT` over runtime tables, the view, legacy bindings, `demo_evidence`, `agent_events` | kept |
 | | project | `roles/bigquery.jobUser` | run the serve and attribution queries (SELECT only; `sql/attribution_two_key.sql`) | kept |
 
-**Credential acquisition.** The human operator impersonates each service account through an
+**Credential acquisition.** The human operator must impersonate each service account through an
 **isolated gcloud configuration** (`gcloud config configurations create <name> --no-activate`,
 `CLOUDSDK_ACTIVE_CONFIG_NAME=<name>`, `gcloud config set auth/impersonate_service_account <sa>`), one
 configuration per SA, never the default configuration. `bq` reads that setting; it has no
-impersonation flag of its own (bq 2.1.28 rejects `--impersonate_service_account`; verified
-2026-09-03, and with the gcloud setting bq reports "All API calls will be executed as [<sa>]").
+flag of its own (bq 2.1.28 rejects `--impersonate_service_account`, as the operator
+verified on 2026-09-03; with the gcloud setting bq reports "All API calls will be executed as [<sa>]").
 `gcloud` commands may also pass `--impersonate-service-account` explicitly. Every SQL statement is
 piped over stdin, never passed as a positional argument. Impersonation requires
-`roles/iam.serviceAccountTokenCreator` granted **on each service account resource** to the operator,
-one binding per SA. The tape shows the active configuration name before each step and the
-impersonated `user_email` from `INFORMATION_SCHEMA.JOBS` after each BigQuery step, so the identity
-is demonstrated, not asserted. The Cloud Run Job runs as the sync writer directly (no
-impersonation). No identity is granted to the job other than the sync writer.
+`roles/iam.serviceAccountTokenCreator` **on each service account resource** for the operator,
+one binding per SA. The Phase A tape must show the active configuration name before each step and, after each
+BigQuery step, the `user_email` that `INFORMATION_SCHEMA.JOBS` reports for the acting service account (Phase A, not yet run), so that the identity
+will be demonstrated rather than asserted; today the only `user_email` on record is the operator's. The Cloud
+Run Job will run as the sync writer directly (no impersonation). No identity is to be granted to the job other
+than the sync writer.
 
-**Setup order on tape** (each command recorded under the identity that runs it):
+**Setup order for the Phase A tape** (each command to be recorded under its own acting identity, not yet run):
 
 1. Operator: create SAs; create `okfCatalogSearch`; bind setup roles; bind Token Creator on `okf-setup`.
 2. `okf-setup` (isolated configuration `okf-setup`): sample `setup.ts` (shipped `okf-bundle`, `okf`); `aspect-types create okf-context-runtime`; create EntryGroup `okf-rfc-demo-boundary` and one disposable entry `boundary-probe` of type `okf-bundle` in it; `sql/setup_runtime_tables.sql` piped to `bq query` (tables, view, seed `MERGE`s).
@@ -133,22 +146,22 @@ impersonation). No identity is granted to the job other than the sync writer.
 4. Positive checks 1–3 and negative checks 1–5.
 5. Operator: revoke every `okf-setup` role and the dataset `dataOwner`; run check 6; revoke Token Creator on `okf-setup`; run check 7; delete EntryGroup `okf-rfc-demo-boundary`; revoke the operator's own setup-only roles.
 
-**Positive checks** (each allowed operation exercised once on tape, expected `OK`):
+**Positive checks** (Phase A, not yet run; each allowed operation to be exercised on tape exactly once, expected `OK`):
 
-1. `okf-setup`: `aspect-types create okf-context-runtime`; `entries patch` on `okf-rfc-demo-boundary/entries/boundary-probe` (proves the probe is patchable, so check 2 below fails only on IAM); `sql/setup_runtime_tables.sql` piped to `bq query` under configuration `okf-setup`.
+1. `okf-setup`: `aspect-types create okf-context-runtime`; `entries patch` on `okf-rfc-demo-boundary/entries/boundary-probe` (expected `OK`, so that negative check 2 below can fail only on IAM); `sql/setup_runtime_tables.sql` piped to `bq query` under configuration `okf-setup`.
 2. `okf-sync-writer-okf-rfc-demo`: `entries create` of type `okf-bundle` with the `okf` aspect in `okf-rfc-demo`; `entries patch` adding `okf-context-runtime`; `MERGE` into `publications`, `INSERT` into `deployment_heads`; `entries delete` of a ledger-owned entry.
 3. `okf-runtime-reader`: `entries get --view=ALL`; `lookupContext` on one entry; `searchEntries` with `aspect:…okf.okf_type=metric`; the two marked `SELECT`s in `sql/attribution_two_key.sql`, each piped to `bq query` as its own invocation under configuration `okf-reader`.
 
-**Negative checks** (seven checks, nine real API calls, each call expected `PERMISSION_DENIED`,
-recorded on tape and asserted by the checker; check 6 is three calls):
+**Negative checks** (Phase A, not yet run: seven checks, nine real API calls, each call expected `PERMISSION_DENIED`,
+to be recorded on tape and asserted by the checker; check 6 is three calls):
 
-1. `okf-sync-writer-okf-rfc-demo`: `SELECT COUNT(*) FROM agent_events` → `PERMISSION_DENIED` (no dataset grant, no table grant).
-2. `okf-sync-writer-okf-rfc-demo`: the **same** `entries patch` on `okf-rfc-demo-boundary/entries/boundary-probe` that `okf-setup` just ran successfully → `PERMISSION_DENIED`. Custom group, existing user-created entry, identical request body; the only variable is the missing cross-group grant.
-3. `okf-sync-writer-okf-rfc-demo`: `aspect-types create okf-context-runtime-2` → `PERMISSION_DENIED` (no project-level type creation).
-4. `okf-runtime-reader`: `entries patch` on a stamped entry → `PERMISSION_DENIED`.
-5. `okf-runtime-reader`: `INSERT INTO deployment_heads` → `PERMISSION_DENIED`.
-6. Post-cleanup, `okf-setup` (still impersonable, roles revoked), three calls: (6a) `aspect-types update okf --description=x`, (6b) `aspect-types delete okf-context-runtime`, (6c) `aspect-types set-iam-policy okf` → each `PERMISSION_DENIED`. Proves the project-wide AspectType authority is gone.
-7. Post-cleanup, operator (default configuration): `gcloud auth print-access-token --impersonate-service-account=okf-setup@…` → `PERMISSION_DENIED` on `generateAccessToken`. Proves the impersonation path is closed; the `okf-setup` gcloud configuration is then deleted.
+1. `okf-sync-writer-okf-rfc-demo`: `SELECT COUNT(*) FROM agent_events` → expected `PERMISSION_DENIED` (no dataset grant, no table grant).
+2. `okf-sync-writer-okf-rfc-demo`: the **same** `entries patch` on `okf-rfc-demo-boundary/entries/boundary-probe` that `okf-setup` will have just completed successfully → expected `PERMISSION_DENIED`. Custom group, existing user-created entry, identical request body; the only variable is the missing cross-group grant.
+3. `okf-sync-writer-okf-rfc-demo`: `aspect-types create okf-context-runtime-2` → expected `PERMISSION_DENIED` (no project-level type creation).
+4. `okf-runtime-reader`: `entries patch` on an entry that carries the runtime pin → expected `PERMISSION_DENIED`.
+5. `okf-runtime-reader`: `INSERT INTO deployment_heads` → expected `PERMISSION_DENIED`.
+6. Post-cleanup, `okf-setup` (still impersonable after step 5 removes its roles), three calls: (6a) `aspect-types update okf --description=x`, (6b) `aspect-types delete okf-context-runtime`, (6c) `aspect-types set-iam-policy okf` → each expected `PERMISSION_DENIED`, which would show the project-wide AspectType authority is gone.
+7. Post-cleanup, operator (default configuration): `gcloud auth print-access-token --impersonate-service-account=okf-setup@…` → expected `PERMISSION_DENIED` on `generateAccessToken`, which would show a closed impersonation path; the `okf-setup` gcloud configuration is then to be deleted.
 
 What this buys and what it does not: the table set, the EntryGroup, and the type resources are the
 enforceable boundary. Inside one EntryGroup, `catalogEditor` can delete any entry, so the ownership
@@ -165,7 +178,7 @@ project and document the wider grant; no Dataplex built-in is assumed.
 
 | # | Capability | KC-only | BigQuery deployment | Live evidence | Shown on |
 |---|---|---|---|---|---|
-| 1 | **Pin-or-fail-stale** | **Can display** a stamped pin (`okf-context-runtime.publication_id` after Phase A) and filter on it with a search predicate. **Cannot compare** it to `deployment_heads` or refuse a stale request; LookupContext does not render it at all. | `deployment_heads` is the comparison target; a request presenting a non-head `publication_id` returns `FAIL_STALE`. | After Phase A: stamped `okf-bundle` entries. Prior evidence, labelled legacy: `okf-derived-germany` (type `okf-concept`, no aspects) names `a25e1c0c…` only as prose in `entrySource.description` while `674153c5…` and `53bd1651…` also exist. | 3, 5 |
+| 1 | **Pin-or-fail-stale** | **Can display** the pin Phase A would stamp (`okf-context-runtime.publication_id`) and filter on it with a search predicate. **Cannot compare** it to `deployment_heads` or refuse a stale request; LookupContext does not render it at all. | `deployment_heads` is the comparison target; a request presenting a non-head `publication_id` returns `FAIL_STALE`. | After Phase A: stamped `okf-bundle` entries. Prior evidence, labelled legacy: `okf-derived-germany` (type `okf-concept`, no aspects) names `a25e1c0c…` only as prose in `entrySource.description` while `674153c5…` and `53bd1651…` also exist. | 3, 5 |
 | 2 | **`deployment_heads` history** | One mutable state per entry, `createTime` / `updateTime` only. "Which publication was current for this deployment at time T" has no answer. | `deployment_heads_history (deployment_key, publication_id, snapshot_id, committed_at, sync_id)` answers **which publication** was current at T. It holds no revenue values; numerical prior-quarter comparison is future executor/attester work. | Session `f21ee192` question 4 ("How did Germany compare to the prior quarter?"): the tool returned the same six current items; the historical publication selection is unanswerable from Catalog. | 5 (selection); numbers `RFC text only` |
 | 3 | **Attested execution and verdicts** | Displays `runtime`, `parameters`, `computation`, `executor`, `attester` and stops. No verdict field exists in the contract. | `run_attested_computation` returns `verdict` ∈ {ATTESTED, UNVERIFIABLE, REJECTED} with reason and `receipt_id`; demo verdict is always `UNVERIFIABLE`. | Session `04fa3d56` (no-verdict lookup, prompt allowed "sanctioned computation" language): "You can trust the number because it is verified." Session `f21ee192` (verdict field, prompt required "unproven" unless `ATTESTED`): "No. The number is unproven." Illustration, not a controlled comparison (see story 1). | 3, 5 |
 | 4 | **SQL join of context and evidence** | Catalog is not queryable with SQL and cannot be joined to `agent_events`. | Events match the `context_ref_resolution` view (legacy ∪ Phase-A bindings) on **both** event-carried `context_ref` and event-carried `publication_id`, then join `publications` by `publication_id`; receipt-only rows (NULL publication) are banded separately; adapter-tape and Catalog observations are seeded `demo_evidence` rows, not event rows. | Real query today returns 5 (session, tool, context_ref, publication) groups; Catalog can display none of them. | 6 |
@@ -182,14 +195,17 @@ the runtime tables is the only boundary that is enforceable today; the ledger is
 
 ## 3. Demo beats (`/rfc/full-demo/`, six beats, deep-linkable `#beat=1…6`)
 
-| # | Beat | What the visitor sees | Source (all recorded; page is static) | Must prove |
-|---|---|---|---|---|
-| 1 | **Ask** | The real question and the 12 follow-ups from session `f21ee192`. Two traps: the dead metric, and over-claiming trust. | `agent_events` `USER_MESSAGE_RECEIVED` rows | Nothing is fictional. |
-| 2 | **Observe** | One SQL query and its result: event histogram (Σ 180), the 24 tool calls, the `context_ref` on every result, the never-emit scan (0 hits). | `bq query` transcript, checked in | BQAA is observer-only; telemetry is not the bundle. |
-| 3 | **Catalog path: where it stops** | Recorded **after** `setup.ts` + `push.ts`: (a) `entries.get --view=ALL` on the pushed `okf-bundle` metric entry showing the real 13-field `okf` aspect and, after Phase A, the stamped `okf-context-runtime` pin; (b) `lookupContext` on the same entry returning the YAML `context` with **no** `okf` fields and no pin, plus the ten-resource and no-link-following limits called out; (c) session `04fa3d56`'s transcript: "You can trust the number because it is verified", with its system prompt shown beside it. The legacy entry `okf-derived-germany` (type `okf-concept`, no aspects) appears collapsed, labelled "prior experiment, not shipped OKF-in-KC". | `gcloud` transcripts; `agent_events` session `04fa3d56` | Discovery works and can display a pin; it cannot carry a verdict, compare a pin to a head, or follow links. |
-| 4 | **Sync (CLI)** | `okf-context sync` as the sync-writer identity: validate → observe → snapshot → plan (adds 8, removes 0) → `BQ_COMMITTED` → heads advanced → new `context_ref` minted → `CATALOG_STAMPED` → status. Second run: `no-op`. Then the positive checks, boundary checks 1–5, and post-cleanup checks 6–7 (nine `PERMISSION_DENIED` calls in all). | asciinema tape of the Phase A CLI | Sync is external, idempotent, explicit-state, least-privilege. |
-| 5 | **Serve (BigQuery)** | Four SQL results: `deployment_heads` for the deployment; `deployment_heads_history` answering "which publication was current at T"; retrieve `current` returning the six items and the one exclusion, with the declared `parameter_schema` (`region`, `quarter_start`, `quarter_end`); `run_attested_computation` receipt `UNVERIFIABLE` with reason; a non-head `context_ref` → `FAIL_STALE`; junk → `FAIL_CLOSED`. Session `f21ee192` transcript beside it: "No. The number is unproven." Caption: numerical comparison and roll-up are future executor/attester work. | `bq query` transcripts; existing CLI tape | Pin, history selection, lifecycle, honest verdict, fail-stale, fail-closed. |
-| 6 | **Attribution** | Two tables. (a) Event-sourced: `agent_events` matched on both event-carried `context_ref` and event-carried `publication_id` against the `context_ref_resolution` view, then joined to `publications` by `publication_id`; one row per (session, tool, context_ref, publication); the 13 receipt-only rows (NULL event publication) appear as a labelled band attributed by handle only. (b) Separately sourced: `demo_evidence` rows for the adapter tape's `53bd1651…` and the legacy Catalog description's `a25e1c0c…`, each with its source column. Caption: the legacy handle `okf:env-observe#674153c572f6` was bound to two publications before Phase A; refs minted by `sync` are immutable. SQL: the two `SELECT`s in `sql/attribution_two_key.sql`, run as `okf-runtime-reader` under an isolated gcloud configuration, each piped over stdin as its own invocation; DDL lives in the setup-owned `sql/setup_runtime_tables.sql`. | two `bq query` transcripts; `demo_evidence` seed table | The gap is a SQL result, not a slide, and no event is misattributed. |
+The **Source** column is the target tape. **Captured on PR 16** says what the page shows today;
+anything else in the row is quoted as `RFC text only` on the page.
+
+| # | Beat | What the visitor sees | Source (target; page is static) | Must prove | Captured on PR 16 |
+|---|---|---|---|---|---|
+| 1 | **Ask** | The real question and the 12 follow-ups from session `f21ee192`. Two traps: the dead metric, and over-claiming trust. | `agent_events` `USER_MESSAGE_RECEIVED` rows | Nothing is fictional. | Yes: 12 questions from the pulled rows. |
+| 2 | **Observe** | One SQL query and its result: event histogram (Σ 180), the 24 tool calls, the `context_ref` on every result, the never-emit scan (0 hits). | `bq query` transcript, checked in | BQAA is observer-only; telemetry is not the bundle. | Yes: histogram, 24 tool calls, never-emit scan over 27 payloads. |
+| 3 | **Catalog path: where it stops** | Recorded **after** `setup.ts` + `push.ts`: (a) `entries.get --view=ALL` on the pushed `okf-bundle` metric entry showing the real 13-field `okf` aspect and, after Phase A, the `okf-context-runtime` pin it would then carry; (b) `lookupContext` on the same entry returning the YAML `context` with **no** `okf` fields and no pin, plus the ten-resource and no-link-following limits called out; (c) session `04fa3d56`'s transcript: "You can trust the number because it is verified", with its system prompt shown beside it. The legacy entry `okf-derived-germany` (type `okf-concept`, no aspects) appears collapsed, labelled "prior experiment, not shipped OKF-in-KC". | `gcloud` transcripts; `agent_events` session `04fa3d56` | Discovery works and can display a pin; it cannot carry a verdict, compare a pin to a head, or follow links. | Mostly: shipped aspect, `lookupContext` omission, ten-resource error, transcript, legacy entry. **Not** the `okf-context-runtime` pin (no sync). No-link-following not exercised. |
+| 4 | **Sync (CLI)** | `okf-context sync` as the sync-writer identity: validate → observe → snapshot → plan (adds 8, removes 0) → `BQ_COMMITTED` → heads advanced → new `context_ref` minted → `CATALOG_STAMPED` → status. Second run: `no-op`. Then the positive checks, boundary checks 1–5, and post-cleanup checks 6–7 (nine `PERMISSION_DENIED` calls in all). | asciinema tape of the Phase A CLI | Sync is external, idempotent, explicit-state, least-privilege. | **No.** Syncer not built. The page prints `BQ_COMMITTED`, `CATALOG_STAMPED`, `no-op` and `PERMISSION_DENIED` only inside the quoted `RFC text only` algorithm and IAM contract; none is shown as an executed or live outcome. Page shows the algorithm and IAM contract as `RFC text only` plus the operator-run `setup.ts` / `push.ts` / DDL. |
+| 5 | **Serve (BigQuery)** | Four SQL results: `deployment_heads` for the deployment; `deployment_heads_history` answering "which publication was current at T"; retrieve `current` returning the six items and the one exclusion, with the declared `parameter_schema` (`region`, `quarter_start`, `quarter_end`); `run_attested_computation` receipt `UNVERIFIABLE` with reason; a non-head `context_ref` → `FAIL_STALE`; junk → `FAIL_CLOSED`. Session `f21ee192` transcript beside it: "No. The number is unproven." Caption: numerical comparison and roll-up are future executor/attester work. | `bq query` transcripts; existing CLI tape | Pin, history selection, lifecycle, honest verdict, fail-stale, fail-closed. | Partly: heads and history queries run and return 0 rows; `FAIL_CLOSED` / `NO_HEAD` / `AMBIGUOUS_LEGACY` live; receipt and answers live. **Not** `FAIL_STALE` (needs a head). |
+| 6 | **Attribution** | Two tables. (a) Event-sourced: `agent_events` matched on both event-carried `context_ref` and event-carried `publication_id` against the `context_ref_resolution` view, then joined to `publications` by `publication_id`; one row per (session, tool, context_ref, publication); the 13 receipt-only rows (NULL event publication) appear as a labelled band attributed by handle only. (b) Separately sourced: `demo_evidence` rows for the adapter tape's `53bd1651…` and the legacy Catalog description's `a25e1c0c…`, each with its source column. Caption: the legacy handle `okf:env-observe#674153c572f6` was bound to two publications before Phase A; refs minted by `sync` are immutable. SQL: the two `SELECT`s in `sql/attribution_two_key.sql`, run as `okf-runtime-reader` under an isolated gcloud configuration, each piped over stdin as its own invocation; DDL lives in the setup-owned `sql/setup_runtime_tables.sql`. | two `bq query` transcripts; `demo_evidence` seed table | The gap is a SQL result, not a slide, and no event is misattributed. | Yes, run as the operator (not yet `okf-runtime-reader`): 14 / 13, two evidence rows. |
 
 Beats 1, 2, 5 reuse material already on `/rfc/demo/`. Beats 3, 4, 6 are new. The existing
 `okf-bqaa-cli.mp4` stays as the Observe → Publish → Next-agent tape; a new ~90 s tape covers 3 → 6
@@ -197,7 +213,7 @@ after dual LGTM (see `plan.md`).
 
 ## 4. Success criteria
 
-- A cold reader can state the sync answer in one sentence after beat 4: "an external CLI I run or
+- (Met on PR 16 as text; the tape is Phase A.) A cold reader can state the sync answer in one sentence after beat 4: "an external CLI I run or
   schedule; bundle to BigQuery first, Catalog stamp second; Catalog-to-BigQuery import is not v1."
 - Beat 3 shows shipped OKF-in-KC (`okf-bundle` + `okf` aspect via `entries.get view=ALL`) and
   LookupContext omitting it; the legacy `okf-concept` entry is labelled prior.
@@ -206,7 +222,7 @@ after dual LGTM (see `plan.md`).
   events matched on both handle and publication through one resolution view, `publications` joined
   by id only, receipt-only rows banded, non-event evidence in `demo_evidence`.
 - Every capability row in §2 is either shown on a beat or marked `RFC text only` on the page.
-- The bootstrap operator installs every binding on tape; every positive check returns `OK`; all seven negative checks (nine API calls) return `PERMISSION_DENIED`, including the two post-cleanup checks that prove `okf-setup` is retired; each BigQuery step's `user_email` on tape matches the declared identity.
+- (Phase A; not yet met on PR 16.) The bootstrap operator must install every binding on tape; every positive check must return `OK`; all seven negative checks (nine API calls) must return `PERMISSION_DENIED`, including the two post-cleanup checks that would show a retired `okf-setup`; and the tape must show each BigQuery step's `user_email` matching the declared identity. Today every `user_email` on record is the operator's.
 - Never-emit scan over every agent-facing payload on the page returns 0 hits.
 - `python3 rfc/full-demo/tools/check_full_demo.py` (Phase C) exits 0: beats present, session ids and
   publication ids match the checked-in transcripts, no `ATTESTED` string outside the labelled Phase 4 shape,

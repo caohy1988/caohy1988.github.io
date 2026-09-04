@@ -1,0 +1,1967 @@
+# Audited claim register for /rfc/full-demo/ — see the INV-1..INV-5 comment in tools/check_full_demo.py.
+#
+# EVERY sentence of the demo copy appears here, under its own source file, verbatim after whitespace normalisation,
+# with a verdict. There is no test deciding which sentences count: coverage is total, so no vocabulary anywhere can
+# license unaudited prose. What a READER sees is what is audited — JavaScript through its literals and comments,
+# HTML after tags and entities, JSON after JSON.parse, CSS through its generated content.
+#
+# This file IS the audit. The checker guarantees that nothing ships unaudited and that each verdict is bound to its
+# own claim; it does not re-derive the verdict from the sentence's meaning.
+#
+#   PENDING      claims nothing was executed. Every completion token sits inside a recorded licence FRAME — one
+#                bounded pattern holding the qualifier, its auxiliary chain and the verb — so a qualifier that
+#                follows its verb or belongs to another clause licenses nothing.
+#   CAPTURED     states what this capture executed, by the operator (raincoatrun@gmail.com). Evidence names the
+#                live/ or sql/ files behind it; any deferred artefact the sentence names carries a disclaimer frame
+#                sitting on that artefact.
+#   NOT_PHASE_A  carries completion language that is not about the deferred work (the observe run, the page, the
+#                sample scripts, the RFC's own history) and names no deferred artefact at all.
+#
+# Format: verdict<TAB>file<TAB>evidence-or-dash<TAB>licence-frames-or-dash (~ separated)<TAB>sentence.
+# Rows: 1933 (1815 PENDING, 21 CAPTURED, 97 NOT_PHASE_A).
+
+# --- spec.md
+PENDING	spec.md	-	-	# Spec — full-version demo:
+PENDING	spec.md	-	-	sync architecture, KC vs BQ capability matrix, beats, success criteria
+PENDING	spec.md	-	-	Slice of intent.md.
+PENDING	spec.md	-	-	Normative.
+PENDING	spec.md	-	-	Evidence cited here was read live on 2026-09-03 from test-project-0728-467323 (code, code).
+PENDING	spec.md	-	-	See CUSTOMER_STORIES.md for the transcripts and ARCHITECTURE.md for the diagram.
+PENDING	spec.md	-	-	Revised after Codex review of PR 15 (eight P1s):
+PENDING	spec.md	-	-	v1 is source-bundle-authoritative, the bridge has an IAM contract, beat 3 tests shipped OKF-in-Catalog, and everything Phase A/B does not implement is marked RFC text only.
+PENDING	spec.md	-	-	## 1.
+PENDING	spec.md	-	-	Decision:
+PENDING	spec.md	-	-	is sync built into the services or an external command line?
+PENDING	spec.md	-	-	Answer to Haiyuan's Q1, one sentence.
+PENDING	spec.md	-	-	Sync is an external CLI in v1, not a Dataplex or BigQuery built-in;
+PENDING	spec.md	-	-	its direction is authored/derived bundle → BigQuery commit → Catalog stamp, and a Catalog → BigQuery import is not v1 (future, lossy, stubbed).
+PENDING	spec.md	-	-	Knowledge Catalog stays the distribution and discovery projection that kcmd push already writes.
+PENDING	spec.md	-	-	BigQuery stays the serving authority.
+PENDING	spec.md	-	-	The bridge is okf-context sync, a CLI subcommand of the RFC's planned toolbox/okf-context package, run by a person in the demo and by a Cloud Run Job or CI step in production.
+PENDING	spec.md	-	-	Hybrid (option C) describes the authority split;
+PENDING	spec.md	-	-	"external CLI" describes the mechanism.
+PENDING	spec.md	-	-	Nothing inside Dataplex or BigQuery performs this step today, and the demo says so.
+PENDING	spec.md	-	-	| Question | Decision | Why |
+PENDING	spec.md	-	-	|---|---|---|
+PENDING	spec.md	-	-	| Built-in or external? | External CLI / job | BigQuery has no reader for Catalog entries or custom aspects (INFORMATION_SCHEMA exposes none).
+PENDING	spec.md	-	-	Dataplex has no "materialize EntryGroup into a dataset" action.
+PENDING	spec.md	-	-	No cross-service transaction exists (RFC "Explicit states instead of pretended atomicity").
+PENDING	spec.md	-	-	The hashing rules (observation_id, snapshot_id, publication_id) belong to the profile, not to either service.
+PENDING	spec.md	-	-	|
+PENDING	spec.md	-	-	| Which of A / B / C? | C, hybrid | A alone under-describes the target (a managed path is plausible later).
+PENDING	spec.md	-	-	B alone is theatre.
+PENDING	spec.md	-	-	C names the authority split honestly and gives a path to managed without changing agent-facing contracts.
+PENDING	spec.md	-	-	| Source of truth for v1 sync | The bundle on disk (authored, or derived by the PR 474 adapter).
+PENDING	spec.md	-	-	Catalog is an output of sync, never its input, in v1.
+PENDING	spec.md	-	-	| The syncer must hash bundle bytes for source_manifest_hash.
+PENDING	spec.md	-	-	Catalog holds overview bodies and the okf aspect, but links stay prose and extra round-trips into frontmatter, so a Catalog-only read cannot reproduce authored identity.
+PENDING	spec.md	-	-	| Catalog → BigQuery import | Not v1.
+PENDING	spec.md	-	-	Future code, labelled lossy (derived-from-catalog), stubbed in the demo.
+PENDING	spec.md	-	-	| Customers with bundles only in Catalog need it eventually;
+PENDING	spec.md	-	-	shipping it now would give two answers to Q1.
+PENDING	spec.md	-	-	| Trigger | Manual in demo;
+PENDING	spec.md	-	No push-completion event was verified	Cloud Run Job on Cloud Scheduler, or a CI job after kcmd push, in production | No push-completion event was verified;
+PENDING	spec.md	-	-	polling the EntryGroup updateTime is the documented fallback.
+PENDING	spec.md	-	-	| Unit of sync | One deployment = one bundle root + one EntryGroup + one set of runtime tables in one dataset | Matches the post's "one EntryGroup per bundle-owning team" and the RFC's one security domain per deployment.
+PENDING	spec.md	-	-	The table set, EntryGroup and type resources are the IAM boundary (§1.3).
+PENDING	spec.md	-	-	| Idempotency | no-op is defined on deployment_heads, not on row existence:
+PENDING	spec.md	-	-	if the head for the deployment already equals the computed publication_id, nothing is written.
+PENDING	spec.md	-	-	publications is written by MERGE on publication_id;
+PENDING	spec.md	-	-	a pre-seeded row (source = seeded_pre_phase_a, e.g.
+PENDING	spec.md	-	-	53bd1651…) is matched, its source becomes sync and seeded_at is preserved, and the head still advances because no head existed.
+PENDING	spec.md	-	-	New observation of an unchanged snapshot → new publication row (provenance, not silent).
+PENDING	spec.md	-	-	| RFC §06 republish semantics.
+PENDING	spec.md	-	-	kcmd push rewrites every entry every time;
+PENDING	spec.md	-	-	the syncer must not inherit that.
+PENDING	spec.md	-	-	| Ownership | BigQuery ledger keyed by deterministic deployment-scoped entry ids;
+PENDING	spec.md	-	-	code stamps on okf-context-runtime | Generic kcmd push never deletes;
+PENDING	spec.md	-	-	delete-as-absence has to be carried by the syncer.
+PENDING	spec.md	-	-	The ledger is a convention;
+PENDING	spec.md	-	-	the authorization boundary is §1.3.
+PENDING	spec.md	-	-	| context_ref binding | Immutable and non-rebindable from Phase A on:
+PENDING	spec.md	-	-	one context_ref → exactly one publication_id, forever.
+PENDING	spec.md	-	-	A new publication mints a new context_ref.
+PENDING	spec.md	-	-	| Today one handle (okf:env-observe#674153c572f6) is bound to two publications;
+PENDING	spec.md	-	-	that is legacy evidence, not the contract.
+PENDING	spec.md	-	-	See beat 6.
+PENDING	spec.md	-	-	| Relationship to today's tools | kcmd / push.ts:
+PENDING	spec.md	-	-	Catalog write, unchanged.
+PENDING	spec.md	-	-	SDK examples/okf_bqaa_adapter/run.py:
+PENDING	spec.md	-	-	trace → derived bundle, unchanged (PR 474 merged).
+PENDING	spec.md	-	-	okf-context sync:
+PENDING	spec.md	-	-	new.
+PENDING	spec.md	-	-	The demo chains them.
+PENDING	spec.md	-	-	| No rewrite of shipped code.
+PENDING	spec.md	-	-	### 1.1 The sync algorithm (normative for Phase A of plan.md)
+PENDING	spec.md	-	-	okf-context sync --bundle <root> --deployment <key> --entry-group <eg> [--project --location --dataset] runs as the deployment-scoped sync-writer identity (§1.3)
+PENDING	spec.md	-	-	1.
+PENDING	spec.md	-	-	validate bundle parses;
+PENDING	spec.md	-	-	zero new OKF keys required
+PENDING	spec.md	-	-	2.
+PENDING	spec.md	-	-	observe source_manifest_hash over every regular file → observation_id
+PENDING	spec.md	-	-	3.
+PENDING	spec.md	-	-	snapshot compile concepts, versions, edges, membership → snapshot_id (domain-separated)
+PENDING	spec.md	-	-	4.
+PENDING	spec.md	-	-	plan diff against deployment_heads;
+PENDING	spec.md	-	-	print adds / changes / removals (absence = delete)
+PENDING	spec.md	-	-	5.
+PENDING	spec.md	-	-	commit stage rows under sync_id → MERGE publications ON publication_id (seeded row matched, not duplicated) → BQ_COMMITTED → advance deployment_heads, append deployment_heads_history, mint context_ref → publication_id binding (append-only, never rebound)
+PENDING	spec.md	-	-	6.
+PENDING	spec.md	-	-	stamp for each owned Catalog entry:
+PENDING	spec.md	-	-	upsert okf-context-runtime {publication_id, published_snapshot_id, managed_by} → CATALOG_STAMPED;
+PENDING	spec.md	-	-	unowned entries untouched;
+PENDING	spec.md	-	-	removed concepts:
+PENDING	spec.md	-	-	delete only ledger-owned entries
+PENDING	spec.md	-	-	7.
+NOT_PHASE_A	spec.md	-	-	status print lag (publications committed vs stamped), entry counts, receipt UNVERIFIABLE until an attester runs
+PENDING	spec.md	-	-	Exit non-zero and leave deployment_heads untouched if step 5 fails.
+PENDING	spec.md	-	-	If step 6 fails after 5, status reports BQ_COMMITTED, CATALOG_PENDING;
+PENDING	spec.md	-	-	a rerun of sync completes the stamp without a new publication.
+NOT_PHASE_A	spec.md	-	-	### 1.2 What is real, recorded, stubbed, and future in the full demo
+PENDING	spec.md	-	-	The second column is the v1 target this spec sets.
+PENDING	spec.md	-	-	The third column is what /rfc/full-demo/ (PR 16) actually captured on 2026-09-03;
+NOT_PHASE_A	spec.md	-	-	it was added after Codex review so that no deferred item reads as executed.
+PENDING	spec.md	-	Not done or Not built is shown	Everything in the third column marked Not done or Not built is shown on the page as RFC text only, and tools/check_full_demo.py asserts those labels.
+PENDING	spec.md	-	-	| Piece | v1 target | Status on 2026-09-03 (PR 16) |
+PENDING	spec.md	-	-	| BQAA trace in okf_rfc_demo.agent_events | Real.
+PENDING	spec.md	-	-	212 rows, 4 sessions.
+PENDING	spec.md	-	-	Not re-run.
+PENDING	spec.md	-	-	| Captured.
+PENDING	spec.md	-	-	Live per-session count (4 sessions, 212 rows);
+PENDING	spec.md	-	-	three sessions pulled (209 rows);
+PENDING	spec.md	-	-	a63c3e86… (3 rows, no tool call) counted, not pulled.
+PENDING	spec.md	-	-	| Adapter trace → derived bundle | Real, SDK main after PR 474.
+PENDING	spec.md	-	-	Reproduced against 476d37dc.
+PENDING	spec.md	-	-	SDK main 4f54b5c reproduced 53bd1651… before the push.
+PENDING	spec.md	-	-	| Shipped okf-bundle entries + okf aspect | Real, after running the sample setup.ts + push.ts in Phase A.
+CAPTURED	spec.md	live/bq_jobs_identity.json,live/README.md	-	| Captured, run by the operator (not okf-setup / sync-writer):
+PENDING	spec.md	-	-	AspectType okf, EntryType okf-bundle, 8 entries;
+PENDING	spec.md	-	-	code vs lookupContext on record.
+PENDING	spec.md	-	-	| okf-context sync commit into BigQuery runtime tables | Real BigQuery DDL/DML into okf_rfc_demo (new tables).
+PENDING	spec.md	-	-	Built in Phase A.
+PENDING	spec.md	-	-	| Not built.
+NOT_PHASE_A	spec.md	-	-	Only the DDL + seeds ran (as the operator).
+PENDING	spec.md	-	-	deployment_heads, history and context_ref_bindings are empty.
+PENDING	spec.md	-	-	No BQ_COMMITTED, no no-op.
+PENDING	spec.md	-	-	RFC text only on beat 4.
+PENDING	spec.md	-	to be created	| Catalog stamp on okf-context-runtime | Real Catalog write, aspect type to be created by the setup identity in Phase A.
+PENDING	spec.md	-	-	| Not done.
+PENDING	spec.md	-	-	No okf-context-runtime AspectType, no pin, no CATALOG_STAMPED.
+PENDING	spec.md	-	-	RFC text only on beats 3 and 4.
+PENDING	spec.md	-	-	| IAM bootstrap, identities, positive and negative checks, setup retirement (§1.3) | Real;
+PENDING	spec.md	-	to be recorded	to be recorded in the Phase A tape.
+PENDING	spec.md	-	-	No service account, custom role, table-level grant, boundary probe or PERMISSION_DENIED check is in place yet;
+NOT_PHASE_A	spec.md	-	-	every job ran as the operator (bq_jobs_identity.json).
+PENDING	spec.md	-	-	| Pin-or-fail-stale (FAIL_STALE) | Real query against deployment_heads.
+PENDING	spec.md	-	-	| Partly.
+PENDING	spec.md	-	-	FAIL_CLOSED, NO_HEAD, AMBIGUOUS_LEGACY are live query results;
+PENDING	spec.md	-	-	FAIL_STALE needs a head and none exists.
+PENDING	spec.md	-	-	RFC text only on beat 5.
+PENDING	spec.md	-	-	| Scheduler / Cloud Run Job | Stubbed:
+NOT_PHASE_A	spec.md	-	-	job YAML shown, CLI run by hand.
+PENDING	spec.md	-	Not shown	| Not shown;
+PENDING	spec.md	-	-	RFC text only.
+PENDING	spec.md	-	-	| Attester / ATTESTED verdict | Stubbed:
+PENDING	spec.md	-	-	verdict UNVERIFIABLE, reason no-execution.
+PENDING	spec.md	-	-	Nothing on the page says ATTESTED.
+PENDING	spec.md	-	-	| As specified:
+PENDING	spec.md	-	-	every receipt UNVERIFIABLE;
+PENDING	spec.md	-	-	beat 5 labels the pane live trace + stubbed attester.
+PENDING	spec.md	-	-	| Numerical execution (quarter comparison, roll-up) | Future executor/attester work.
+PENDING	spec.md	-	-	| RFC text only.
+PENDING	spec.md	-	-	| Caller-delegated policy authorization, policy_context_commitment, mixed-policy fail-closed | RFC text only.
+PENDING	spec.md	-	-	Not implemented in Phase A/B.
+PENDING	spec.md	-	-	| code | Future.
+NOT_PHASE_A	spec.md	-	-	| Page | Viewer of recorded runs, same as today.
+PENDING	spec.md	-	-	Browser never calls GCP.
+PENDING	spec.md	-	-	| As specified.
+PENDING	spec.md	-	-	### 1.3 IAM contract for the bridge (normative, resource-specific, bootstrappable)
+PENDING	spec.md	-	-	Scope.
+PENDING	spec.md	-	-	This section is the Phase A contract, written as requirements.
+PENDING	spec.md	-	Nothing in §1.3 has been executed	Nothing in §1.3 has been executed on PR 16:
+PENDING	spec.md	-	no tape has been recorded	no service account, custom role, table-level grant, boundary EntryGroup, positive check or negative check exists, and no tape has been recorded.
+NOT_PHASE_A	spec.md	-	-	Every capture behind /rfc/full-demo/ ran as the operator (live/bq_jobs_identity.json).
+PENDING	spec.md	-	-	Where a sentence below says what the tape "must" show, that is the acceptance criterion for Phase A, labelled RFC text only on the page until it is met.
+PENDING	spec.md	-	-	Four principals in test-project-0728-467323:
+PENDING	spec.md	-	-	one human bootstrap operator and three service accounts.
+PENDING	spec.md	-	-	Every grant below names the resource it is bound to;
+PENDING	spec.md	-	nothing is granted	nothing is granted at a wider scope than the row says.
+PENDING	spec.md	-	-	Role and permission facts are from the Dataplex IAM roles page (docs.cloud.google.com/dataplex/docs/iam-roles):
+PENDING	spec.md	-	-	EntryGroup, EntryType and AspectType creation permissions are checked on the project;
+NOT_PHASE_A	spec.md	-	-	code and code are granted on the type resource;
+PENDING	spec.md	-	-	searchEntries needs code on the project;
+PENDING	spec.md	-	-	setIamPolicy on EntryGroups and EntryTypes is in roles/dataplex.catalogAdmin, and on AspectTypes in roles/dataplex.aspectTypeOwner.
+PENDING	spec.md	-	-	BigQuery grants use table-level IAM (code) so the sync writer never touches agent_events.
+PENDING	spec.md	-	-	Who must install the boundary.
+PENDING	spec.md	-	-	Service accounts cannot grant themselves anything, and roles/iam.serviceAccountAdmin cannot create custom roles, edit project IAM, or set Dataplex IAM.
+PENDING	spec.md	-	must be made	So every binding call must be made by the bootstrap operator:
+PENDING	spec.md	-	-	the human project Owner account that already runs code in this project.
+PENDING	spec.md	-	must be recorded~must be recorded on tape	In Phase A that account will hold, for the duration of setup only, the exact policy-owner roles below, and each binding command must be recorded on tape under that identity.
+PENDING	spec.md	-	-	After setup the operator must keep only what the demo needs at run time (impersonation of the sync writer and the reader).
+PENDING	spec.md	-	-	None of these bindings exists yet (PR 16 status:
+PENDING	spec.md	-	-	not done).
+PENDING	spec.md	-	-	| Principal | Resource | Grant | Why | Lifetime |
+PENDING	spec.md	-	-	|---|---|---|---|---|
+PENDING	spec.md	-	-	| bootstrap operator (human Owner) | project | roles/iam.roleAdmin | create custom role okfCatalogSearch | setup only;
+PENDING	spec.md	-	to be revoked	to be revoked |
+PENDING	spec.md	-	-	| | project | roles/resourcemanager.projectIamAdmin | bind project-level roles to the three SAs | setup only;
+PENDING	spec.md	-	-	| | project | roles/iam.serviceAccountAdmin | create the three SAs;
+PENDING	spec.md	-	-	bind serviceAccountTokenCreator on each SA resource | setup only;
+PENDING	spec.md	-	-	| | project | roles/dataplex.catalogAdmin | entryGroups.setIamPolicy, entryTypes.setIamPolicy on okf-rfc-demo, okf-rfc-demo-boundary, okf-bundle | setup only;
+PENDING	spec.md	-	-	| | project | roles/dataplex.aspectTypeOwner | aspectTypes.setIamPolicy on okf, okf-context-runtime | setup only;
+PENDING	spec.md	-	-	| | dataset okf_rfc_demo | roles/bigquery.dataOwner | bigquery.tables.setIamPolicy for the nine table-level bindings | setup only;
+PENDING	spec.md	-	-	| | SA okf-sync-writer-okf-rfc-demo, SA okf-runtime-reader | roles/iam.serviceAccountTokenCreator on each SA | run the demo by impersonation | kept |
+PENDING	spec.md	-	-	| | SA okf-setup | roles/iam.serviceAccountTokenCreator | run setup by impersonation | setup only;
+PENDING	spec.md	-	to be revoked	to be revoked (check 7) |
+PENDING	spec.md	-	-	| okf-setup (one-time) | project | roles/dataplex.catalogEditor (entryGroups.create, entryTypes.create) and roles/dataplex.aspectTypeOwner (aspectTypes.create) | type and group creation is checked on the project, not on the group | setup only;
+PENDING	spec.md	-	to be revoked	to be revoked (check 6) |
+PENDING	spec.md	-	-	| | dataset okf_rfc_demo | roles/bigquery.dataOwner | table DDL, the context_ref_resolution view, seed MERGEs (sql/setup_runtime_tables.sql) | setup only;
+PENDING	spec.md	-	-	| | project | roles/bigquery.jobUser | run the DDL jobs | setup only;
+PENDING	spec.md	-	-	| okf-sync-writer-okf-rfc-demo | EntryGroup okf-rfc-demo | roles/dataplex.catalogEditor | code inside this group only | kept |
+PENDING	spec.md	-	-	| | EntryType okf-bundle | roles/dataplex.entryTypeUser | create entries of that type (the identity the sample push.ts uses) | kept |
+PENDING	spec.md	-	-	| | AspectType okf, AspectType okf-context-runtime | roles/dataplex.aspectTypeUser on each | attach the shipped aspect;
+PENDING	spec.md	-	-	stamp the profile aspect | kept |
+PENDING	spec.md	-	-	| | tables publications, deployments, deployment_heads, deployment_heads_history, concept_versions, snapshot_membership, relationship_assertions, context_ref_bindings, catalog_ownership | roles/bigquery.dataEditor per table | no dataset grant, so agent_events, legacy_context_ref_bindings, and demo_evidence are unreachable | kept |
+PENDING	spec.md	-	-	| | project | roles/bigquery.jobUser | run the commit jobs | kept |
+PENDING	spec.md	-	-	| okf-runtime-reader | EntryGroup okf-rfc-demo | roles/dataplex.catalogViewer | code and lookupContext on entries in this group | kept |
+PENDING	spec.md	-	-	| | project | custom role okfCatalogSearch = {code} | searchEntries is project-scoped;
+PENDING	spec.md	-	-	the custom role limits the project grant to one permission | kept |
+PENDING	spec.md	-	-	| | dataset okf_rfc_demo | roles/bigquery.dataViewer | code over runtime tables, the view, legacy bindings, demo_evidence, agent_events | kept |
+PENDING	spec.md	-	-	| | project | roles/bigquery.jobUser | run the serve and attribution queries (SELECT only;
+PENDING	spec.md	-	-	sql/attribution_two_key.sql) | kept |
+PENDING	spec.md	-	-	Credential acquisition.
+PENDING	spec.md	-	-	The human operator must impersonate each service account through an isolated gcloud configuration (code, code, code), one configuration per SA, never the default configuration.
+PENDING	spec.md	-	-	code reads that setting;
+NOT_PHASE_A	spec.md	-	-	it has no flag of its own (bq 2.1.28 rejects code, as the operator verified on 2026-09-03;
+PENDING	spec.md	-	will be executed	with the gcloud setting bq reports "All API calls will be executed as [<sa>]").
+PENDING	spec.md	-	-	code commands may also pass code explicitly.
+PENDING	spec.md	-	-	Every SQL statement is piped over stdin, never passed as a positional argument.
+PENDING	spec.md	-	-	Impersonation requires roles/iam.serviceAccountTokenCreator on each service account resource for the operator, one binding per SA.
+PENDING	spec.md	-	will be demonstrated	The Phase A tape must show the active configuration name before each step and, after each BigQuery step, the user_email that INFORMATION_SCHEMA.JOBS reports for the acting service account (Phase A, not yet run), so that the identity will be demonstrated rather than asserted;
+CAPTURED	spec.md	live/bq_jobs_identity.json	-	today the only user_email on record is the operator's.
+PENDING	spec.md	-	-	The Cloud Run Job will run as the sync writer directly (no impersonation).
+PENDING	spec.md	-	to be granted	No identity is to be granted to the job other than the sync writer.
+PENDING	spec.md	-	to be recorded	Setup order for the Phase A tape (each command to be recorded under its own acting identity, not yet run):
+PENDING	spec.md	-	-	Operator:
+PENDING	spec.md	-	-	create SAs;
+PENDING	spec.md	-	-	create okfCatalogSearch;
+PENDING	spec.md	-	-	bind setup roles;
+PENDING	spec.md	-	-	bind Token Creator on okf-setup.
+PENDING	spec.md	-	-	okf-setup (isolated configuration okf-setup):
+PENDING	spec.md	-	-	sample setup.ts (shipped okf-bundle, okf);
+PENDING	spec.md	-	-	code;
+PENDING	spec.md	-	-	create EntryGroup okf-rfc-demo-boundary and one disposable entry boundary-probe of type okf-bundle in it;
+PENDING	spec.md	-	-	sql/setup_runtime_tables.sql piped to code (tables, view, seed MERGEs).
+PENDING	spec.md	-	-	Operator (default configuration):
+PENDING	spec.md	-	-	bind sync-writer and reader roles on the now-existing type, group, and table resources;
+PENDING	spec.md	-	-	bind Token Creator on the two run-time SAs.
+PENDING	spec.md	-	-	Positive checks 1–3 and negative checks 1–5.
+PENDING	spec.md	-	-	revoke every okf-setup role and the dataset dataOwner;
+PENDING	spec.md	-	-	run check 6;
+PENDING	spec.md	-	-	revoke Token Creator on okf-setup;
+PENDING	spec.md	-	-	run check 7;
+PENDING	spec.md	-	-	delete EntryGroup okf-rfc-demo-boundary;
+PENDING	spec.md	-	-	revoke the operator's own setup-only roles.
+PENDING	spec.md	-	-	Positive checks (Phase A, not yet run;
+PENDING	spec.md	-	to be exercised~to be exercised on tape	each allowed operation to be exercised on tape exactly once, expected OK):
+PENDING	spec.md	-	-	okf-setup:
+PENDING	spec.md	-	-	code on okf-rfc-demo-boundary/entries/boundary-probe (expected OK, so that negative check 2 below can fail only on IAM);
+PENDING	spec.md	-	-	sql/setup_runtime_tables.sql piped to code under configuration okf-setup.
+PENDING	spec.md	-	-	okf-sync-writer-okf-rfc-demo:
+PENDING	spec.md	-	-	code of type okf-bundle with the okf aspect in okf-rfc-demo;
+PENDING	spec.md	-	-	code adding okf-context-runtime;
+PENDING	spec.md	-	-	MERGE into publications, INSERT into deployment_heads;
+PENDING	spec.md	-	-	code of a ledger-owned entry.
+PENDING	spec.md	-	-	okf-runtime-reader:
+PENDING	spec.md	-	-	lookupContext on one entry;
+PENDING	spec.md	-	-	searchEntries with aspect:…okf.okf_type=metric;
+PENDING	spec.md	-	-	the two marked codes in sql/attribution_two_key.sql, each piped to code as its own invocation under configuration okf-reader.
+PENDING	spec.md	-	-	Negative checks (Phase A, not yet run:
+PENDING	spec.md	-	to be recorded~expected PERMISSION_DENIED, to be recorded on tape	seven checks, nine real API calls, each call expected PERMISSION_DENIED, to be recorded on tape and asserted by the checker;
+PENDING	spec.md	-	-	check 6 is three calls):
+PENDING	spec.md	-	-	code → expected PERMISSION_DENIED (no dataset grant, no table grant).
+PENDING	spec.md	-	will have just completed	the same code on okf-rfc-demo-boundary/entries/boundary-probe that okf-setup will have just completed successfully → expected PERMISSION_DENIED.
+NOT_PHASE_A	spec.md	-	-	Custom group, existing user-created entry, identical request body;
+PENDING	spec.md	-	-	the only variable is the missing cross-group grant.
+PENDING	spec.md	-	-	code → expected PERMISSION_DENIED (no project-level type creation).
+PENDING	spec.md	-	-	code on an entry that carries the runtime pin → expected PERMISSION_DENIED.
+PENDING	spec.md	-	-	INSERT INTO deployment_heads → expected PERMISSION_DENIED.
+PENDING	spec.md	-	-	Post-cleanup, okf-setup (still impersonable after step 5 removes its roles), three calls:
+PENDING	spec.md	-	-	(6a) code, (6b) code, (6c) code → each expected PERMISSION_DENIED, which would show the project-wide AspectType authority is gone.
+PENDING	spec.md	-	-	Post-cleanup, operator (default configuration):
+PENDING	spec.md	-	-	code → expected PERMISSION_DENIED on generateAccessToken, which would show a closed impersonation path;
+PENDING	spec.md	-	to be deleted	the okf-setup gcloud configuration is then to be deleted.
+PENDING	spec.md	-	-	What this buys and what it does not:
+PENDING	spec.md	-	-	the table set, the EntryGroup, and the type resources are the enforceable boundary.
+PENDING	spec.md	-	-	Inside one EntryGroup, catalogEditor can delete any entry, so the ownership ledger remains a discipline, not an authorization control.
+PENDING	spec.md	-	-	If EntryGroup- or type-level bindings are rejected by the API for any role above, the plan's risk table says to fall back to a dedicated project and document the wider grant;
+PENDING	spec.md	-	-	no Dataplex built-in is assumed.
+PENDING	spec.md	-	-	## 2.
+PENDING	spec.md	-	-	Capability matrix:
+PENDING	spec.md	-	-	what OKF-in-Catalog cannot do that the BigQuery deployment can
+PENDING	spec.md	-	-	"KC-only" means the shipped path after setup.ts + push.ts:
+PENDING	spec.md	-	-	okf-bundle entries, the 13-field okf aspect, searchEntries, LookupContext, code, EntryGroup IAM.
+NOT_PHASE_A	spec.md	-	-	The "Shown on" column is the honesty flag:
+NOT_PHASE_A	spec.md	-	-	a beat number means the page shows it from a recorded run;
+PENDING	spec.md	-	-	RFC text only means the page quotes the RFC and says so.
+NOT_PHASE_A	spec.md	-	-	| # | Capability | KC-only | BigQuery deployment | Live evidence | Shown on |
+PENDING	spec.md	-	-	|---|---|---|---|---|---|
+PENDING	spec.md	-	-	| 1 | Pin-or-fail-stale | Can display the pin Phase A would stamp (okf-context-runtime.publication_id) and filter on it with a search predicate.
+PENDING	spec.md	-	-	Cannot compare it to deployment_heads or refuse a stale request;
+PENDING	spec.md	-	-	LookupContext does not render it at all.
+PENDING	spec.md	-	-	| deployment_heads is the comparison target;
+PENDING	spec.md	-	-	a request presenting a non-head publication_id returns FAIL_STALE.
+PENDING	spec.md	-	-	| After Phase A:
+NOT_PHASE_A	spec.md	-	-	stamped okf-bundle entries.
+PENDING	spec.md	-	-	Prior evidence, labelled legacy:
+PENDING	spec.md	-	-	okf-derived-germany (type okf-concept, no aspects) names a25e1c0c… only as prose in entrySource.description while 674153c5… and 53bd1651… also exist.
+PENDING	spec.md	-	-	| 3, 5 |
+PENDING	spec.md	-	-	| 2 | deployment_heads history | One mutable state per entry, createTime / updateTime only.
+PENDING	spec.md	-	-	"Which publication was current for this deployment at time T" has no answer.
+PENDING	spec.md	-	-	| deployment_heads_history (deployment_key, publication_id, snapshot_id, committed_at, sync_id) answers which publication was current at T.
+PENDING	spec.md	-	-	It holds no revenue values;
+PENDING	spec.md	-	-	numerical prior-quarter comparison is future executor/attester work.
+PENDING	spec.md	-	-	| Session f21ee192 question 4 ("How did Germany compare to the prior quarter?"):
+NOT_PHASE_A	spec.md	-	-	the tool returned the same six current items;
+PENDING	spec.md	-	-	the historical publication selection is unanswerable from Catalog.
+PENDING	spec.md	-	-	| 5 (selection);
+PENDING	spec.md	-	-	numbers RFC text only |
+PENDING	spec.md	-	-	| 3 | Attested execution and verdicts | Displays runtime, parameters, computation, executor, attester and stops.
+PENDING	spec.md	-	-	No verdict field exists in the contract.
+PENDING	spec.md	-	-	| run_attested_computation returns verdict ∈ {ATTESTED, UNVERIFIABLE, REJECTED} with reason and receipt_id;
+PENDING	spec.md	-	-	demo verdict is always UNVERIFIABLE.
+PENDING	spec.md	-	-	| Session 04fa3d56 (no-verdict lookup, prompt allowed "sanctioned computation" language):
+NOT_PHASE_A	spec.md	-	-	"You can trust the number because it is verified." Session f21ee192 (verdict field, prompt required "unproven" unless ATTESTED):
+PENDING	spec.md	-	-	"No.
+PENDING	spec.md	-	-	The number is unproven." Illustration, not a controlled comparison (see story 1).
+PENDING	spec.md	-	-	| 4 | SQL join of context and evidence | Catalog is not queryable with SQL and cannot be joined to agent_events.
+PENDING	spec.md	-	-	| Events match the context_ref_resolution view (legacy ∪ Phase-A bindings) on both event-carried context_ref and event-carried publication_id, then join publications by publication_id;
+PENDING	spec.md	-	-	receipt-only rows (NULL publication) are banded separately;
+PENDING	spec.md	-	-	adapter-tape and Catalog observations are seeded demo_evidence rows, not event rows.
+PENDING	spec.md	-	-	| Real query today returns 5 (session, tool, context_ref, publication) groups;
+PENDING	spec.md	-	-	Catalog can display none of them.
+PENDING	spec.md	-	-	| 6 |
+PENDING	spec.md	-	-	| 5 | BQAA context_ref seam | No place for an opaque runtime handle;
+PENDING	spec.md	-	-	extra round-trips into authored frontmatter via pull.ts.
+PENDING	spec.md	-	-	| context_ref on every tool result, never-emit list enforced, immutable binding to one publication.
+PENDING	spec.md	-	-	| 27 of 27 TOOL_COMPLETED rows carry context_ref;
+PENDING	spec.md	-	-	0 carry concept_version_id, paths, principal, SQL.
+PENDING	spec.md	-	-	| 2 |
+PENDING	spec.md	-	-	| 6 | Sub-EntryGroup policy | Enforcement unit is the EntryGroup;
+PENDING	spec.md	-	-	IAM cascades;
+PENDING	spec.md	-	-	overview exposes full bodies.
+PENDING	spec.md	-	-	Any catalogViewer on the group reads the Policy body.
+PENDING	spec.md	-	-	| RFC:
+PENDING	spec.md	-	-	one security domain per deployment, caller-delegated authorization, policy_context_commitment, mixed-policy fail-closed.
+PENDING	spec.md	-	-	| Real:
+PENDING	spec.md	-	-	EntryGroup IAM structure and question 7's governed_by edge.
+PENDING	spec.md	-	-	| Catalog side 3;
+PENDING	spec.md	-	-	BigQuery side RFC text only |
+PENDING	spec.md	-	-	| 7 | Observation → Snapshot → Publication chain | Identities are Dataplex timestamps.
+PENDING	spec.md	-	-	"Every push writes every Entry." Two agents cannot prove they read the same revision.
+PENDING	spec.md	-	-	| Three content identities plus immutable publications rows;
+PENDING	spec.md	-	-	identical republish is a no-op;
+PENDING	spec.md	-	-	unchanged-snapshot republish is a provenance event.
+PENDING	spec.md	-	-	| Adapter output on record:
+PENDING	spec.md	-	-	observation 85ea62a9…, snapshot f18befd0…, publication 53bd1651…;
+PENDING	spec.md	-	-	in-process pin 674153c5…;
+PENDING	spec.md	-	-	Catalog pin a25e1c0c….
+PENDING	spec.md	-	-	| 4 |
+PENDING	spec.md	-	-	| 8 | Delete-as-absence ledger vs kcmd no-delete | Generic kcmd push creates or patches;
+PENDING	spec.md	-	-	sync.ts has "TODO:
+PENDING	spec.md	-	-	Handle creates and deletes".
+PENDING	spec.md	-	-	A superseded concept is served until someone deletes the entry or the whole EntryGroup.
+PENDING	spec.md	-	-	| Deletion is absence from the next snapshot;
+PENDING	spec.md	-	-	the ledger removes only owned entries.
+PENDING	spec.md	-	-	current mode excludes superseded concepts at query time.
+PENDING	spec.md	-	-	| Customer revenue (legacy), out of force since 2026-06-20, excluded in 13 of 13 retrievals across f21ee192 and 1e6dfed7.
+PENDING	spec.md	-	-	| 4, 5 |
+PENDING	spec.md	-	-	| 9 | LookupContext limits | Per Google's docs and the post:
+PENDING	spec.md	-	-	up to ten resources per call;
+PENDING	spec.md	-	-	single location in the endpoint;
+PENDING	spec.md	-	-	does not follow links out of a concept body (the agent must name referenced concepts);
+PENDING	spec.md	-	-	does not render custom aspects (the okf fields need code);
+PENDING	spec.md	-	-	permission-filtered, and an empty response if the caller has no permission on the requested resources.
+PENDING	spec.md	-	-	| Bounded SQL traversal and join over snapshot_membership and relationship_assertions returns the governed closure in one query with an explicit depth bound, and the Context Envelope carries publication_id, lifecycle mode, manifest and envelope_id.
+PENDING	spec.md	-	-	LookupContext on the pushed okf-bundle entry returns the YAML context without the okf aspect;
+PENDING	spec.md	-	-	code returns it.
+PENDING	spec.md	-	-	Sources:
+PENDING	spec.md	-	-	KC blog 2026-08-26;
+PENDING	spec.md	-	-	docs.cloud.google.com/dataplex/docs/retrieve-data-context.
+PENDING	spec.md	-	-	| 3 (omission, 10-limit, no-link-following);
+PENDING	spec.md	-	-	permission-empty RFC text only |
+PENDING	spec.md	-	-	Honest limits, to be printed on the page:
+PENDING	spec.md	-	-	the Catalog mapping itself (one entry per concept, okf aspect, overview body, index and log entries, parent hierarchy) is shipped and complete;
+PENDING	spec.md	-	-	the RFC adds pins and a ledger to it, not a rival projection.
+PENDING	spec.md	-	-	IAM on the EntryGroup, the type resources and the runtime tables is the only boundary that is enforceable today;
+PENDING	spec.md	-	-	the ledger is a discipline.
+PENDING	spec.md	-	-	## 3.
+PENDING	spec.md	-	-	Demo beats (/rfc/full-demo/, six beats, deep-linkable #beat=1…6)
+PENDING	spec.md	-	-	The Source column is the target tape.
+PENDING	spec.md	-	-	Captured on PR 16 says what the page shows today;
+PENDING	spec.md	-	-	anything else in the row is quoted as RFC text only on the page.
+PENDING	spec.md	-	-	| # | Beat | What the visitor sees | Source (target;
+PENDING	spec.md	-	-	page is static) | Must prove | Captured on PR 16 |
+PENDING	spec.md	-	-	| 1 | Ask | The real question and the 12 follow-ups from session f21ee192.
+PENDING	spec.md	-	-	Two traps:
+PENDING	spec.md	-	-	the dead metric, and over-claiming trust.
+PENDING	spec.md	-	-	| agent_events USER_MESSAGE_RECEIVED rows | Nothing is fictional.
+PENDING	spec.md	-	-	| Yes:
+PENDING	spec.md	-	-	12 questions from the pulled rows.
+PENDING	spec.md	-	-	| 2 | Observe | One SQL query and its result:
+PENDING	spec.md	-	-	event histogram (Σ 180), the 24 tool calls, the context_ref on every result, the never-emit scan (0 hits).
+PENDING	spec.md	-	-	| code transcript, checked in | BQAA is observer-only;
+PENDING	spec.md	-	-	telemetry is not the bundle.
+PENDING	spec.md	-	-	histogram, 24 tool calls, never-emit scan over 27 payloads.
+PENDING	spec.md	-	-	| 3 | Catalog path:
+NOT_PHASE_A	spec.md	-	-	where it stops | Recorded after setup.ts + push.ts:
+PENDING	spec.md	-	-	(a) code on the pushed okf-bundle metric entry showing the real 13-field okf aspect and, after Phase A, the okf-context-runtime pin it would then carry;
+PENDING	spec.md	-	-	(b) lookupContext on the same entry returning the YAML context with no okf fields and no pin, plus the ten-resource and no-link-following limits called out;
+PENDING	spec.md	-	-	(c) session 04fa3d56's transcript:
+NOT_PHASE_A	spec.md	-	-	"You can trust the number because it is verified", with its system prompt shown beside it.
+PENDING	spec.md	-	-	The legacy entry okf-derived-germany (type okf-concept, no aspects) appears collapsed, labelled "prior experiment, not shipped OKF-in-KC".
+PENDING	spec.md	-	-	| code transcripts;
+PENDING	spec.md	-	-	agent_events session 04fa3d56 | Discovery works and can display a pin;
+PENDING	spec.md	-	-	it cannot carry a verdict, compare a pin to a head, or follow links.
+PENDING	spec.md	-	-	| Mostly:
+PENDING	spec.md	-	-	shipped aspect, lookupContext omission, ten-resource error, transcript, legacy entry.
+PENDING	spec.md	-	-	Not the okf-context-runtime pin (no sync).
+PENDING	spec.md	-	not exercised	No-link-following not exercised.
+PENDING	spec.md	-	-	| 4 | Sync (CLI) | okf-context sync as the sync-writer identity:
+PENDING	spec.md	-	-	validate → observe → snapshot → plan (adds 8, removes 0) → BQ_COMMITTED → heads advanced → new context_ref minted → CATALOG_STAMPED → status.
+PENDING	spec.md	-	-	Second run:
+PENDING	spec.md	-	-	no-op.
+PENDING	spec.md	-	-	Then the positive checks, boundary checks 1–5, and post-cleanup checks 6–7 (nine PERMISSION_DENIED calls in all).
+PENDING	spec.md	-	-	| asciinema tape of the Phase A CLI | Sync is external, idempotent, explicit-state, least-privilege.
+PENDING	spec.md	-	-	| No.
+PENDING	spec.md	-	-	Syncer not built.
+PENDING	spec.md	-	-	The page prints BQ_COMMITTED, CATALOG_STAMPED, no-op and PERMISSION_DENIED only inside the quoted RFC text only algorithm and IAM contract;
+NOT_PHASE_A	spec.md	-	-	none is shown as an executed or live outcome.
+PENDING	spec.md	-	-	Page shows the algorithm and IAM contract as RFC text only plus the operator-run setup.ts / push.ts / DDL.
+PENDING	spec.md	-	-	| 5 | Serve (BigQuery) | Four SQL results:
+PENDING	spec.md	-	-	deployment_heads for the deployment;
+PENDING	spec.md	-	-	deployment_heads_history answering "which publication was current at T";
+PENDING	spec.md	-	-	retrieve current returning the six items and the one exclusion, with the declared parameter_schema (region, quarter_start, quarter_end);
+PENDING	spec.md	-	-	run_attested_computation receipt UNVERIFIABLE with reason;
+PENDING	spec.md	-	-	a non-head context_ref → FAIL_STALE;
+PENDING	spec.md	-	-	junk → FAIL_CLOSED.
+PENDING	spec.md	-	-	Session f21ee192 transcript beside it:
+PENDING	spec.md	-	-	The number is unproven." Caption:
+PENDING	spec.md	-	-	numerical comparison and roll-up are future executor/attester work.
+PENDING	spec.md	-	-	existing CLI tape | Pin, history selection, lifecycle, honest verdict, fail-stale, fail-closed.
+PENDING	spec.md	-	-	| Partly:
+PENDING	spec.md	-	-	heads and history queries run and return 0 rows;
+PENDING	spec.md	-	-	FAIL_CLOSED / NO_HEAD / AMBIGUOUS_LEGACY live;
+PENDING	spec.md	-	-	receipt and answers live.
+PENDING	spec.md	-	-	Not FAIL_STALE (needs a head).
+PENDING	spec.md	-	-	| 6 | Attribution | Two tables.
+PENDING	spec.md	-	-	(a) Event-sourced:
+PENDING	spec.md	-	-	agent_events matched on both event-carried context_ref and event-carried publication_id against the context_ref_resolution view, then joined to publications by publication_id;
+PENDING	spec.md	-	-	one row per (session, tool, context_ref, publication);
+PENDING	spec.md	-	-	the 13 receipt-only rows (NULL event publication) appear as a labelled band attributed by handle only.
+PENDING	spec.md	-	-	(b) Separately sourced:
+PENDING	spec.md	-	-	demo_evidence rows for the adapter tape's 53bd1651… and the legacy Catalog description's a25e1c0c…, each with its source column.
+PENDING	spec.md	-	-	Caption:
+PENDING	spec.md	-	-	the legacy handle okf:env-observe#674153c572f6 was bound to two publications before Phase A;
+PENDING	spec.md	-	-	refs minted by sync are immutable.
+PENDING	spec.md	-	-	SQL:
+PENDING	spec.md	-	-	the two codes in sql/attribution_two_key.sql, run as okf-runtime-reader under an isolated gcloud configuration, each piped over stdin as its own invocation;
+PENDING	spec.md	-	-	DDL lives in the setup-owned sql/setup_runtime_tables.sql.
+PENDING	spec.md	-	-	| two code transcripts;
+PENDING	spec.md	-	-	demo_evidence seed table | The gap is a SQL result, not a slide, and no event is misattributed.
+CAPTURED	spec.md	live/bq_jobs_identity.json,live/beat6_attribution.json	-	| Yes, run as the operator (not yet okf-runtime-reader):
+PENDING	spec.md	-	-	14 / 13, two evidence rows.
+PENDING	spec.md	-	-	Beats 1, 2, 5 reuse material already on /rfc/demo/.
+PENDING	spec.md	-	-	Beats 3, 4, 6 are new.
+PENDING	spec.md	-	-	The existing okf-bqaa-cli.mp4 stays as the Observe → Publish → Next-agent tape;
+PENDING	spec.md	-	-	a new ~90 s tape covers 3 → 6 after dual LGTM (see plan.md).
+PENDING	spec.md	-	-	## 4.
+PENDING	spec.md	-	-	Success criteria
+PENDING	spec.md	-	-	- (Met on PR 16 as text;
+PENDING	spec.md	-	-	the tape is Phase A.) A cold reader can state the sync answer in one sentence after beat 4:
+PENDING	spec.md	-	-	"an external CLI I run or schedule;
+PENDING	spec.md	-	-	bundle to BigQuery first, Catalog stamp second;
+PENDING	spec.md	-	-	Catalog-to-BigQuery import is not v1."
+PENDING	spec.md	-	-	- Beat 3 shows shipped OKF-in-KC (okf-bundle + okf aspect via code) and LookupContext omitting it;
+PENDING	spec.md	-	-	the legacy okf-concept entry is labelled prior.
+PENDING	spec.md	-	-	- Beat 3 quotes one real overclaim verbatim with its session id and its system prompt.
+PENDING	spec.md	-	-	- Beat 6 is a real query result over okf_rfc_demo that a visitor could rerun with code:
+PENDING	spec.md	-	-	events matched on both handle and publication through one resolution view, publications joined by id only, receipt-only rows banded, non-event evidence in demo_evidence.
+NOT_PHASE_A	spec.md	-	-	- Every capability row in §2 is either shown on a beat or marked RFC text only on the page.
+PENDING	spec.md	-	-	- (Phase A;
+PENDING	spec.md	-	must install every binding on tape	not yet met on PR 16.) The bootstrap operator must install every binding on tape;
+PENDING	spec.md	-	-	every positive check must return OK;
+PENDING	spec.md	-	-	all seven negative checks (nine API calls) must return PERMISSION_DENIED, including the two post-cleanup checks that would show a retired okf-setup;
+PENDING	spec.md	-	-	and the tape must show each BigQuery step's user_email matching the declared identity.
+CAPTURED	spec.md	live/bq_jobs_identity.json	-	Today every user_email on record is the operator's.
+PENDING	spec.md	-	-	- Never-emit scan over every agent-facing payload on the page returns 0 hits.
+PENDING	spec.md	-	-	- code (Phase C) exits 0:
+PENDING	spec.md	-	-	beats present, session ids and publication ids match the checked-in transcripts, no ATTESTED string outside the labelled Phase 4 shape, every RFC text only row carries that label in the rendered matrix.
+PENDING	spec.md	-	-	- No change to OKF v0.2 core, PROFILE.md hashing, SDK PR 474, or the 180-row export.
+# --- ARCHITECTURE.md
+PENDING	ARCHITECTURE.md	-	-	# Architecture — bundle → BigQuery commit → Catalog stamp (v1 sync) and the Observe → Adapt → Project → Consume flow
+PENDING	ARCHITECTURE.md	-	-	Recommendation:
+PENDING	ARCHITECTURE.md	-	-	hybrid (option C), external CLI in v1.
+PENDING	ARCHITECTURE.md	-	-	Knowledge Catalog is the distribution and discovery projection written by kcmd push.
+PENDING	ARCHITECTURE.md	-	-	BigQuery is the serving authority.
+PENDING	ARCHITECTURE.md	-	-	The sync leg is okf-context sync, an external CLI whose v1 direction is bundle → BigQuery commit → Catalog stamp.
+PENDING	ARCHITECTURE.md	-	-	The only place the words "Catalog → BigQuery" apply is the future importer (code), which is lossy, stubbed, and not v1.
+PENDING	ARCHITECTURE.md	-	-	Decisions, evidence, and the IAM contract are in spec.md §1.
+PENDING	ARCHITECTURE.md	-	-	## One diagram
+PENDING	ARCHITECTURE.md	-	-	mermaid flowchart LR subgraph OBSERVE["1 · Observe (real:
+PENDING	ARCHITECTURE.md	-	-	okf_rfc_demo.agent_events, 212 rows)"] A1["ADK agent<br/>okf_rfc_observe_agent<br/>gemini-3.8-flash"] -->|BQAA plugin| A2[("agent_events<br/>DAY partition<br/>clustered event_type, agent, user_id")] end
+PENDING	ARCHITECTURE.md	-	-	subgraph ADAPT["2 · Adapt (real:
+PENDING	ARCHITECTURE.md	-	-	SDK examples/okf_bqaa_adapter, PR 474 merged 4f54b5c)"] A2 -->|"run.py (observer-only, one-way)"| B1["derived OKF bundle on disk<br/>8 stubs · label derived/demo<br/>SOURCE OF TRUTH FOR SYNC (v1)"] end
+PENDING	ARCHITECTURE.md	-	-	subgraph PROJECT["3 · Project"] direction TB B1 -->|"kcmd push (shipped, Catalog side only)<br/>identity:
+PENDING	ARCHITECTURE.md	-	-	catalogEditor on EntryGroup"| C1["Knowledge Catalog<br/>EntryGroup okf-rfc-demo<br/>okf-bundle entries + okf aspect<br/>overview bodies · IAM cascade"] B1 -->|"okf-context sync ← NEW, external CLI<br/>identity:
+PENDING	ARCHITECTURE.md	-	-	okf-sync-writer (nine tables + one EntryGroup + type use)"| C2[("BigQuery runtime<br/>publications · deployments<br/>deployment_heads(+history)<br/>concept_versions · membership<br/>context_ref_bindings (immutable)<br/>legacy_context_ref_bindings · demo_evidence<br/>view context_ref_resolution<br/>catalog_ownership ledger")] C2 -->|"stamp after BQ_COMMITTED<br/>okf-context-runtime aspect<br/>{publication_id, published_snapshot_id, managed_by}"| C1 C1 -.->|"FUTURE, not v1:<br/>sync --from-catalog (lossy import, stubbed)"| C2 end
+PENDING	ARCHITECTURE.md	-	-	subgraph CONSUME["4 · Consume"] direction TB D1["Human / console<br/>searchEntries · LookupContext (≤10, one location,<br/>no link-following, no custom aspects)<br/>entries.get view=ALL"] --> C1 D2["Next agent (ADK)<br/>identity:
+PENDING	ARCHITECTURE.md	-	-	okf-runtime-reader<br/>okf_retrieve_context<br/>okf_run_attested_computation (UNVERIFIABLE)"] -->|"pin-or-fail-stale<br/>current / historical / all"| C2 C2 -->|"Context Envelope<br/>context_ref only on results"| D2 D2 -->|BQAA| A2 end
+PENDING	ARCHITECTURE.md	-	-	A2 -->|"beat 6:
+PENDING	ARCHITECTURE.md	-	-	match on event context_ref AND<br/>event publication_id via context_ref_resolution view,<br/>then join publications by publication_id"| C2
+PENDING	ARCHITECTURE.md	-	-	classDef tel fill:#EFE7FA,stroke:#7B5EA7,color:#2B1E45 classDef cat fill:#E6F1FB,stroke:#3A6EA5,color:#16233B classDef run fill:#FDF1E1,stroke:#B4690E,color:#3B2A0E class A1,A2 tel class C1,D1 cat class C2,D2,B1 run
+PENDING	ARCHITECTURE.md	-	-	Colour key matches the RFC tokens:
+PENDING	ARCHITECTURE.md	-	-	telemetry (purple), catalog (blue), runtime (amber).
+PENDING	ARCHITECTURE.md	-	-	## The sync leg, step by step
+PENDING	ARCHITECTURE.md	-	-	| Step | Actor / identity | Writes | State after |
+PENDING	ARCHITECTURE.md	-	-	|---|---|---|---|
+PENDING	ARCHITECTURE.md	-	-	| validate · observe · snapshot | okf-context sync as code | nothing | identities computed |
+PENDING	ARCHITECTURE.md	-	-	| plan | same | nothing | diff vs deployment_heads printed;
+PENDING	ARCHITECTURE.md	-	-	absence = delete |
+PENDING	ARCHITECTURE.md	-	-	| commit | same → BigQuery (table-level dataEditor on the nine runtime tables;
+PENDING	ARCHITECTURE.md	-	-	no dataset grant) | staged rows under sync_id, then publications, deployment_heads, deployment_heads_history, context_ref_bindings (append-only, one ref → one publication, never rebound), ledger | BQ_COMMITTED |
+PENDING	ARCHITECTURE.md	-	-	| stamp | same → Knowledge Catalog (catalogEditor on the one EntryGroup) | okf-context-runtime aspect on the entries it owns;
+PENDING	ARCHITECTURE.md	-	-	delete ledger-owned entries for removed concepts | CATALOG_STAMPED (or CATALOG_PENDING on partial failure;
+PENDING	ARCHITECTURE.md	-	-	rerun completes without a new publication) |
+NOT_PHASE_A	ARCHITECTURE.md	-	-	| status | same | nothing | lag = publications committed − publications stamped |
+PENDING	ARCHITECTURE.md	-	-	Status on 2026-09-03 (PR 16):
+PENDING	ARCHITECTURE.md	-	-	none of this section has run.
+PENDING	ARCHITECTURE.md	-	-	The sync leg, the service accounts, the grants and the checks below are the Phase A contract, RFC text only on the page.
+PENDING	ARCHITECTURE.md	-	-	What PR 16 did run, as the operator, is the shipped sample (setup.ts + push.ts, Catalog side only) and the runtime DDL + seeds;
+PENDING	ARCHITECTURE.md	-	-	see spec.md §1.2 for the row-by-row status.
+PENDING	ARCHITECTURE.md	-	will hold time-boxed policy-owner roles, create the service accounts~will hold time-boxed policy-owner roles, create the service accounts and the custom search role, and make every binding on tape	In Phase A a human bootstrap operator (the project Owner) will hold time-boxed policy-owner roles, create the service accounts and the custom search role, and make every binding on tape (Phase A, not yet run).
+PENDING	ARCHITECTURE.md	-	-	Setup (okf-setup, one-time, project-level type and group creation) will create the tables, the context_ref_resolution view and the seed rows (sql/setup_runtime_tables.sql), the okf-context-runtime AspectType, and run the sample setup.ts for the shipped okf-bundle / okf types;
+PENDING	ARCHITECTURE.md	-	must be revoked	afterwards every okf-setup role and its impersonation grant must be revoked and two denial checks must show it.
+PENDING	ARCHITECTURE.md	-	-	The sync writer will additionally hold entryTypeUser on okf-bundle and aspectTypeUser on okf and okf-context-runtime.
+PENDING	ARCHITECTURE.md	-	-	Readers (okf-runtime-reader) will hold dataViewer on the dataset, catalogViewer on the EntryGroup, and a custom role with only code at project level for searchEntries.
+PENDING	ARCHITECTURE.md	-	-	Positive and negative permission checks, including the boundary-probe EntryGroup, are specified in spec.md §1.3.
+PENDING	ARCHITECTURE.md	-	-	Trigger options, in the order the demo would show them:
+PENDING	ARCHITECTURE.md	-	-	manual CLI (the Phase A tape;
+PENDING	ARCHITECTURE.md	-	not yet recorded	not yet recorded), Cloud Run Job on Cloud Scheduler polling the EntryGroup updateTime (production default), CI step after kcmd push.
+PENDING	ARCHITECTURE.md	-	-	## Why not a built-in service, and what "managed" would need
+PENDING	ARCHITECTURE.md	-	-	- BigQuery cannot read Catalog entries or custom aspects (no connector, no INFORMATION_SCHEMA view).
+PENDING	ARCHITECTURE.md	-	-	- Dataplex cannot materialize an EntryGroup into a dataset and does not own the profile's hashing rules, republish semantics, or deployment_heads.
+PENDING	ARCHITECTURE.md	-	-	- No cross-service transaction exists, so explicit BQ_COMMITTED / CATALOG_STAMPED states remain a requirement either way;
+PENDING	ARCHITECTURE.md	-	-	a managed job would still expose them.
+PENDING	ARCHITECTURE.md	-	-	- A managed version would be:
+PENDING	ARCHITECTURE.md	-	-	the same CLI packaged as a Dataplex-triggered job, with the okf-context-runtime aspect template owned by the service, and the ledger held in a service-managed dataset.
+PENDING	ARCHITECTURE.md	-	-	If Dataplex metadata export jobs cover custom aspects, the read leg of a future code could become a BigQuery load from that export;
+PENDING	ARCHITECTURE.md	-	-	this is UNVERIFIED and not part of v1.
+PENDING	ARCHITECTURE.md	-	-	No Dataplex roadmap item is claimed.
+PENDING	ARCHITECTURE.md	-	-	## What the two stores are each allowed to answer
+PENDING	ARCHITECTURE.md	-	-	rows that say a beat show a live query or capture on that beat;
+PENDING	ARCHITECTURE.md	-	not yet shown~no stamped	the syncer has not run, so deployment_heads and its history are empty, FAIL_STALE is not yet shown (only FAIL_CLOSED, NO_HEAD, AMBIGUOUS_LEGACY), and no stamped pin exists.
+PENDING	ARCHITECTURE.md	-	-	| Question | Catalog | BigQuery | Demo status |
+PENDING	ARCHITECTURE.md	-	-	| Does concept X exist, who owns it, what does it say? | yes | yes | beat 3 / 5 |
+NOT_PHASE_A	ARCHITECTURE.md	-	-	| Which publication is current for deployment D? | display only (stamped pin, code) | authoritative (deployment_heads) | beat 3 / 5 (pin not yet stamped;
+PENDING	ARCHITECTURE.md	-	-	heads empty) |
+PENDING	ARCHITECTURE.md	-	-	| Which publication was current at time t? | no | deployment_heads_history | beat 5 (query runs;
+PENDING	ARCHITECTURE.md	-	-	0 rows until a sync commits) |
+PENDING	ARCHITECTURE.md	-	-	| What was the number at time t? | no | future executor/attester | RFC text only |
+PENDING	ARCHITECTURE.md	-	-	| Is this context_ref stale? | no | pin-or-fail-stale | beat 5 for FAIL_CLOSED / NO_HEAD;
+PENDING	ARCHITECTURE.md	-	not yet shown	FAIL_STALE not yet shown, RFC text only |
+PENDING	ARCHITECTURE.md	-	-	| Was the number attested? | no | verdict + receipt_id (always UNVERIFIABLE in demo) | beat 5 |
+PENDING	ARCHITECTURE.md	-	-	| Which sessions used which publication? | no | two-key match through the context_ref_resolution view, then publications by id | beat 6 |
+PENDING	ARCHITECTURE.md	-	-	| Who may read the policy body? | EntryGroup IAM (coarse, real) | caller-delegated per deployment | RFC text only |
+# --- plan.md
+PENDING	plan.md	-	-	# Plan — building the full-version demo
+PENDING	plan.md	-	-	> Status on 2026-09-03 (PR 16):
+PENDING	plan.md	-	-	Phase C (the page) shipped against live captures;
+PENDING	plan.md	-	-	Phase A has not started.
+PENDING	plan.md	-	-	> Every item below that mentions a tape, a recording, PERMISSION_DENIED, BQ_COMMITTED, CATALOG_STAMPED or no-op
+PENDING	plan.md	-	-	> is a future deliverable, and /rfc/full-demo/ labels each one RFC text only.
+NOT_PHASE_A	plan.md	-	-	The only writes made for PR 16 were the
+PENDING	plan.md	-	-	> operator-run sample setup.ts + push.ts (Catalog) and sql/setup_runtime_tables.sql (DDL + seeds).
+PENDING	plan.md	-	-	Implement from this file after Haiyuan merges the plan PR.
+PENDING	plan.md	-	-	Repo caohy1988/caohy1988.github.io;
+PENDING	plan.md	-	-	syncer code lives in the RFC's toolbox/okf-context package (location per RFC §04;
+PENDING	plan.md	-	-	name is bikeshed) and is not part of this PR.
+PENDING	plan.md	-	-	Implementer:
+PENDING	plan.md	-	-	Fable 5.1.
+PENDING	plan.md	-	-	Reviewers:
+PENDING	plan.md	-	-	Codex + Kimi on GitHub.
+PENDING	plan.md	-	-	Do not merge anything below yourself.
+PENDING	plan.md	-	-	v1 direction, restated so no phase contradicts it:
+PENDING	plan.md	-	-	bundle on disk → BigQuery commit → Catalog stamp, run by an external CLI.
+PENDING	plan.md	-	-	Catalog → BigQuery import is future work and appears nowhere below as a deliverable.
+PENDING	plan.md	-	-	## Phase A — okf-context sync CLI, identities, and shipped Catalog types (needs real GCP)
+PENDING	plan.md	-	-	Deliverable:
+PENDING	plan.md	-	-	a CLI that runs steps 1–7 of spec.md §1.1 end to end against test-project-0728-467323 under the identities of spec.md §1.3.
+PENDING	plan.md	-	-	| Item | Detail |
+PENDING	plan.md	-	-	|---|---|
+PENDING	plan.md	-	-	| Language | TypeScript, kcmd imported as a library for ApiContext and entry patching (RFC §04).
+PENDING	plan.md	-	-	Python is acceptable if kcmd library import proves unusable;
+PENDING	plan.md	-	-	state which in the PR.
+PENDING	plan.md	-	-	|
+PENDING	plan.md	-	-	| Input | code = the derived bundle produced by run.py on PR 474 main (label derived/demo preserved).
+PENDING	plan.md	-	-	code.
+PENDING	plan.md	-	-	No code flag in v1.
+PENDING	plan.md	-	-	| Bootstrap and identities (operator, human Owner) | Phase A requirement, not yet run:
+PENDING	plan.md	-	must make every binding on tape under	the bootstrap operator must hold the setup-only policy-owner roles of spec.md §1.3 (roleAdmin, projectIamAdmin, serviceAccountAdmin, catalogAdmin, aspectTypeOwner, dataset dataOwner) for the duration of setup, must create okf-setup, okf-sync-writer-okf-rfc-demo, okf-runtime-reader and the custom role okfCatalogSearch, and must make every binding on tape under its own identity in the order §1.3 gives:
+PENDING	plan.md	-	-	project-level type/group creation for setup only;
+PENDING	plan.md	-	-	entryTypeUser on okf-bundle and aspectTypeUser on okf and okf-context-runtime for the sync writer;
+PENDING	plan.md	-	-	catalogEditor on the one EntryGroup;
+PENDING	plan.md	-	-	table-level dataEditor on the nine runtime tables (no dataset grant, so agent_events is unreachable);
+PENDING	plan.md	-	-	okfCatalogSearch at project level for the reader;
+PENDING	plan.md	-	-	serviceAccountTokenCreator per SA.
+PENDING	plan.md	-	-	After setup it must revoke every okf-setup role, run denial check 6, revoke its Token Creator, run check 7, delete the boundary EntryGroup, and revoke the operator's own setup-only roles.
+PENDING	plan.md	-	-	Impersonation of each SA must happen through its own isolated gcloud configuration, never the default one;
+PENDING	plan.md	-	-	code reads auth/impersonate_service_account from that configuration (bq has no impersonation flag).
+PENDING	plan.md	-	-	| BigQuery DDL (as okf-setup via the isolated okf-setup gcloud configuration, sql/setup_runtime_tables.sql piped to code) | New tables in okf_rfc_demo:
+PENDING	plan.md	-	-	publications (keyed by publication_id;
+PENDING	plan.md	-	-	source ∈ sync, seeded_pre_phase_a;
+PENDING	plan.md	-	-	seeded_at;
+PENDING	plan.md	-	-	owns no context_ref column), deployments, deployment_heads, deployment_heads_history, concept_versions, snapshot_membership, relationship_assertions, context_ref_bindings (append-only;
+PENDING	plan.md	-	-	unique on context_ref;
+PENDING	plan.md	-	-	Phase A on), catalog_ownership, legacy_context_ref_bindings (context_ref, publication_id, origin;
+PENDING	plan.md	-	-	may repeat a handle), demo_evidence (source, context_ref, publication_id, note).
+PENDING	plan.md	-	-	One view:
+PENDING	plan.md	-	-	context_ref_resolution = context_ref_bindings ∪ legacy_context_ref_bindings with a binding_source column.
+PENDING	plan.md	-	-	Table DDL, the view, and the seed MERGEs are all in the setup-owned file;
+PENDING	plan.md	-	-	the reader file sql/attribution_two_key.sql contains codes only.
+PENDING	plan.md	-	-	Never touch agent_events.
+PENDING	plan.md	-	-	| Seed pre-Phase-A rows (as okf-setup, same file) | MERGE into publications on publication_id (WHEN NOT MATCHED THEN INSERT) for a25e1c0c…, 674153c5…, 53bd1651… with source = seeded_pre_phase_a, seeded_at = CURRENT_TIMESTAMP().
+PENDING	plan.md	-	-	legacy_context_ref_bindings:
+PENDING	plan.md	-	-	okf:env-demo#a25e1c0ccbca → a25e1c0c…, okf:env-observe#674153c572f6 → 674153c5…, okf:env-observe#674153c572f6 → 53bd1651… (never into context_ref_bindings).
+PENDING	plan.md	-	-	demo_evidence:
+PENDING	plan.md	-	-	adapter tape (53bd1651…, source adapter_tape_pr474_476d37dc) and legacy Catalog description (a25e1c0c…, source legacy_catalog_description).
+PENDING	plan.md	-	-	First-sync contract for 53bd1651…:
+PENDING	plan.md	-	-	the sync writer's commit MERGEs publications on publication_id;
+PENDING	plan.md	-	no duplicate is created	the seeded row is matched (source → sync, seeded_at kept), no duplicate is created, and because deployment_heads has no head for okf-rfc-demo the head advances and a fresh context_ref is minted.
+PENDING	plan.md	-	-	The second run finds head = 53bd1651… and prints no-op.
+PENDING	plan.md	-	-	no-op is a statement about deployment_heads, never about whether the publication row pre-existed.
+PENDING	plan.md	-	-	| Catalog prerequisites (as okf-setup) | Run the sample setup.ts to register shipped okf-bundle + okf in the project (today only the older okf-concept type exists).
+PENDING	plan.md	-	-	Create the profile-owned okf-context-runtime AspectType (publication_id, published_snapshot_id, managed_by_deployment, managed_by_sync_id).
+PENDING	plan.md	-	-	Push the derived bundle with the sample push.ts (as the sync-writer, which holds catalogEditor on the group) so the syncer has shipped-type entries to stamp.
+PENDING	plan.md	-	-	Leave okf-derived-germany (type okf-concept, no aspects) in place, labelled prior.
+PENDING	plan.md	-	-	| Boundary probe (as okf-setup) | Phase A requirement, not yet run:
+PENDING	plan.md	-	-	create EntryGroup okf-rfc-demo-boundary and one disposable entry boundary-probe of type okf-bundle.
+PENDING	plan.md	-	-	okf-setup patches it (OK, positive check 1);
+PENDING	plan.md	-	-	the sync writer's identical patch is negative check 2 (PERMISSION_DENIED).
+NOT_PHASE_A	plan.md	-	-	Deleted in cleanup.
+PENDING	plan.md	-	-	No system entry (@bigquery etc.) is used for any check.
+PENDING	plan.md	-	-	| Beat 3 recording (as okf-runtime-reader) | After the push:
+PENDING	plan.md	-	-	code showing the 13-field okf aspect and, after the first sync, the okf-context-runtime pin;
+PENDING	plan.md	-	-	code on the same entry showing the YAML context without those fields;
+PENDING	plan.md	-	-	one call with 11 resources to show the ten-resource limit;
+PENDING	plan.md	-	-	the legacy entry lookup, labelled prior.
+PENDING	plan.md	-	-	| context_ref rule | Minted at commit, bound to one publication_id, never rebound.
+PENDING	plan.md	-	-	A rerun with a new observation mints a new handle.
+PENDING	plan.md	-	-	Resolution goes through the context_ref_resolution view;
+PENDING	plan.md	-	-	a legacy handle is ambiguous there and is only attributed when the event also carries the publication_id.
+PENDING	plan.md	-	-	| Identities | Reuse PROFILE.md hashing exactly as derived_vectors.py / vectors_gen.py do.
+PENDING	plan.md	-	-	Do not invent hashes;
+PENDING	plan.md	-	-	assert the CLI reproduces 53bd1651… for the bundle on record before committing anything.
+PENDING	plan.md	-	-	| Gate | Second run prints no-op and writes nothing.
+PENDING	plan.md	-	-	Kill the process between BQ_COMMITTED and stamp;
+PENDING	plan.md	-	-	rerun completes stamp without a new publication.
+PENDING	plan.md	-	-	Removing one concept file removes only the ledger-owned entry.
+PENDING	plan.md	-	-	deployment_heads_history shows two rows after a deliberate republish of an unchanged snapshot.
+PENDING	plan.md	-	must return PERMISSION_DENIED on tape	All seven negative checks (nine API calls) in spec.md §1.3 must return PERMISSION_DENIED on tape, including the two post-cleanup checks for okf-setup;
+PENDING	plan.md	-	-	none has been run yet.
+PENDING	plan.md	-	-	| Out | Attester.
+PENDING	plan.md	-	-	Scheduler (show the Cloud Run Job YAML naming the sync-writer only).
+PENDING	plan.md	-	-	code (future).
+PENDING	plan.md	-	-	Sub-concept policy enforcement.
+PENDING	plan.md	-	-	## Phase B — BigQuery serve path against real tables (as okf-runtime-reader)
+PENDING	plan.md	-	-	| Retrieve | okf_retrieve_context reads deployment_heads → snapshot_membership → concept_versions with mode:
+PENDING	plan.md	-	-	current excluding superseded.
+PENDING	plan.md	-	-	Result shape unchanged from the trace on record (six items, one exclusion, context_ref).
+PENDING	plan.md	-	-	| Historical selection | okf_retrieve_context with mode:
+PENDING	plan.md	-	-	historical and an as_of date resolves the publication via deployment_heads_history and retrieves against it.
+PENDING	plan.md	-	-	This answers "which publication was current at T".
+PENDING	plan.md	-	-	It does not produce numbers.
+PENDING	plan.md	-	-	| Pin-or-fail-stale | A context_ref bound to a non-head publication returns FAIL_STALE;
+PENDING	plan.md	-	-	junk returns FAIL_CLOSED.
+PENDING	plan.md	-	must be exercised	Both must be exercised in the tape.
+PENDING	plan.md	-	-	| Attested computation | Still UNVERIFIABLE, reason no-execution.
+NOT_PHASE_A	plan.md	-	-	The declared parameter_schema is returned and shown.
+PENDING	plan.md	-	-	Do not run SQL under the demo identity and call it attested.
+PENDING	plan.md	-	-	Numerical comparison and roll-up remain future executor/attester work, labelled RFC text only.
+PENDING	plan.md	-	-	| Attribution query (as okf-runtime-reader, code only) | sql/attribution_two_key.sql holds two marked statements, each piped over stdin to code as its own invocation under the isolated okf-reader gcloud configuration (bq has no impersonation flag;
+PENDING	plan.md	-	-	the setting lives on gcloud), each result captured as its own JSON snapshot.
+PENDING	plan.md	-	-	Statement 1:
+PENDING	plan.md	-	-	TOOL_COMPLETED events matched against context_ref_resolution on both code and the event-carried publication id (code or code);
+PENDING	plan.md	-	-	publications then joined by publication_id only.
+PENDING	plan.md	-	-	Band attributed:
+PENDING	plan.md	-	-	retrieve/lookup rows (14 today).
+PENDING	plan.md	-	-	Band receipt_only:
+PENDING	plan.md	-	-	the 13 okf_run_attested_computation rows whose event publication is NULL, kept and attributed by handle only, never merged.
+PENDING	plan.md	-	-	Statement 2:
+PENDING	plan.md	-	-	code over demo_evidence.
+PENDING	plan.md	-	-	No DDL in this file.
+PENDING	plan.md	-	-	v0 (events only, runnable today) stays in sql/sessions_by_context_ref.sql.
+PENDING	plan.md	-	-	| Transcript for beat 5 | Replay the existing observe-agent session f21ee192 rows (it is the observe agent, not a consume agent).
+PENDING	plan.md	-	-	No new agent run;
+PENDING	plan.md	-	-	do not pad agent_events.
+PENDING	plan.md	-	-	| Gate | Never-emit scan over every tool result:
+PENDING	plan.md	-	-	0 hits.
+PENDING	plan.md	-	-	Queries are checked in with their results as JSON snapshots and the code job id.
+PENDING	plan.md	-	-	Attribution query:
+PENDING	plan.md	-	-	band attributed sums to 14, band receipt_only sums to 13, no event row appears twice despite the legacy double-bound handle.
+PENDING	plan.md	-	-	## Phase C — /rfc/full-demo/ page
+PENDING	plan.md	-	-	| Shape | Static viewer, vanilla JS, RFC tokens, six-beat stepper, deep links #beat=1…6.
+PENDING	plan.md	-	-	Same honesty chrome as /rfc/demo/ (browser never calls GCP;
+PENDING	plan.md	-	-	identities pinned from CLI).
+PENDING	plan.md	-	-	| Beat 3 | Three panes:
+NOT_PHASE_A	plan.md	-	-	code with the real okf aspect and stamped pin;
+PENDING	plan.md	-	-	lookupContext output without them plus the ten-resource / single-location / no-link-following notes;
+NOT_PHASE_A	plan.md	-	-	the 04fa3d56 transcript with its system prompt and the sentence "You can trust the number because it is verified" highlighted.
+PENDING	plan.md	-	-	Caption:
+PENDING	plan.md	-	-	"discovery works and can show a pin;
+PENDING	plan.md	-	-	it cannot carry a verdict, compare the pin to a head, or follow links." Legacy okf-derived-germany collapsed, labelled prior.
+PENDING	plan.md	-	-	| Beat 4 | The Phase A asciinema tape, with BQ_COMMITTED, CATALOG_STAMPED, each positive-check OK, and each of the nine PERMISSION_DENIED calls (seven checks) as named marks, plus the active gcloud configuration name before every identity switch.
+PENDING	plan.md	-	-	| Beat 5 | The history-selection query, the parameter_schema, the UNVERIFIABLE receipt, FAIL_STALE, FAIL_CLOSED;
+PENDING	plan.md	-	-	a visible "numbers:
+PENDING	plan.md	-	-	future executor/attester, RFC text only" label.
+PENDING	plan.md	-	-	| Beat 6 | Two tables from the two code invocations of sql/attribution_two_key.sql:
+PENDING	plan.md	-	-	event-sourced attribution with the attributed and receipt_only bands, and demo_evidence, each with a source column.
+NOT_PHASE_A	plan.md	-	-	| Capability matrix | Rendered from spec.md §2 with the "Shown on" column;
+PENDING	plan.md	-	-	RFC text only rows carry that label visibly.
+PENDING	plan.md	-	-	| Checker | rfc/full-demo/tools/check_full_demo.py:
+PENDING	plan.md	-	-	beats present, session ids and publication prefixes match the checked-in snapshots, ATTESTED appears only inside the labelled non-normative shape, never-emit list absent from all tool JSON, okf-derived-germany labelled prior, every RFC text only row labelled, both system prompts present on beat 3.
+PENDING	plan.md	-	-	| RFC wiring | One clause added to the existing Prototype callout on rfc/index.html linking ./full-demo/.
+PENDING	plan.md	-	-	No restyle.
+PENDING	plan.md	-	-	| Gate | Checker exits 0;
+PENDING	plan.md	-	-	code on the page JS;
+PENDING	plan.md	-	-	manual six-beat click-through with no console errors.
+PENDING	plan.md	-	-	## Phase D — recording (after Codex + Kimi dual LGTM on the Phase C PR)
+PENDING	plan.md	-	-	- One asciinema cast of beats 3 → 6 (code / lookupContext, okf-context sync twice, the negative checks, the serve queries, the attribution query), rendered to gif and a ~90 s H.264 mp4 with the attribution tables as the poster frame.
+PENDING	plan.md	-	-	- Keep okf-bqaa-cli.mp4 as the Observe → Publish → Next-agent tape;
+PENDING	plan.md	-	-	do not re-record it.
+PENDING	plan.md	-	-	- Push with -c http.postBuffer=524288000 and verify code before gh pr create.
+PENDING	plan.md	-	-	## What stays CLI, what needs real GCP, what is stubbed or future
+PENDING	plan.md	-	-	| Concern | Answer |
+PENDING	plan.md	-	-	| Stays CLI | kcmd push (Catalog), run.py (adapter), okf-context sync (bridge), code (serve and attribution).
+PENDING	plan.md	-	-	| Needs real GCP | A human bootstrap operator with time-boxed policy-owner roles;
+PENDING	plan.md	-	-	service accounts and resource-specific IAM bindings (type-level, EntryGroup-level, table-level);
+PENDING	plan.md	-	-	a disposable boundary EntryGroup;
+PENDING	plan.md	-	-	BigQuery DDL/DML for the runtime, legacy-binding, evidence tables and the resolution view;
+PENDING	plan.md	-	-	Catalog aspect-type creation and entry stamping;
+PENDING	plan.md	-	-	sample setup.ts + push.ts for shipped types.
+PENDING	plan.md	-	-	All in test-project-0728-467323, us-central1, dataset okf_rfc_demo.
+PENDING	plan.md	-	-	| Stubbed in demo | Attester and ATTESTED verdict;
+PENDING	plan.md	-	-	scheduler.
+PENDING	plan.md	-	-	| Future / RFC text only | code;
+PENDING	plan.md	-	-	numerical execution (comparison, roll-up);
+PENDING	plan.md	-	-	caller-delegated policy authorization, policy_context_commitment, mixed-policy fail-closed;
+PENDING	plan.md	-	-	permission-filtered empty LookupContext response.
+PENDING	plan.md	-	-	| Never | Re-run the observe agent;
+PENDING	plan.md	-	-	pad agent_events;
+PENDING	plan.md	-	-	rewrite the authored Cymbal fixture;
+PENDING	plan.md	-	-	change OKF v0.2 core, PROFILE.md, or SDK PR 474;
+PENDING	plan.md	-	-	start #435;
+PENDING	plan.md	-	-	claim a Dataplex built-in or roadmap item.
+PENDING	plan.md	-	-	## Order and rough sizing
+PENDING	plan.md	-	-	1.
+PENDING	plan.md	-	-	Phase A (largest;
+PENDING	plan.md	-	-	identities, shipped types, seeds, the syncer).
+PENDING	plan.md	-	-	Own PR in the toolbox repo;
+PENDING	plan.md	-	-	link from here.
+PENDING	plan.md	-	-	2.
+PENDING	plan.md	-	-	Phase B queries and snapshots.
+PENDING	plan.md	-	-	Small;
+PENDING	plan.md	-	-	can start once Phase A tables exist.
+PENDING	plan.md	-	-	3.
+PENDING	plan.md	-	-	Phase C page.
+PENDING	plan.md	-	-	One PR here.
+PENDING	plan.md	-	-	Codex + Kimi.
+PENDING	plan.md	-	-	4.
+PENDING	plan.md	-	-	Phase D recording.
+PENDING	plan.md	-	-	Follow-up after dual LGTM.
+PENDING	plan.md	-	-	## Risks
+PENDING	plan.md	-	-	| Risk | Mitigation |
+PENDING	plan.md	-	-	| kcmd library import is not usable for aspect patching | Fall back to code from the CLI;
+PENDING	plan.md	-	-	note it in the PR.
+PENDING	plan.md	-	-	| Shipped okf AspectType cannot be registered beside the older okf-concept type in this project | They are independent types;
+PENDING	plan.md	-	-	keep both, label okf-concept prior.
+PENDING	plan.md	-	-	If Dataplex rejects, use a fresh EntryGroup okf-rfc-demo-v2 and rebind the identities to it.
+PENDING	plan.md	-	-	| Legacy handle okf:env-observe#674153c572f6 bound to two publications | Kept out of context_ref_bindings;
+PENDING	plan.md	-	-	resolved only with the event-carried publication_id;
+PENDING	plan.md	-	-	new handles are immutable.
+PENDING	plan.md	-	-	| EntryGroup-, type- or table-level bindings are rejected for a role above | Verify with the positive and negative checks before recording;
+PENDING	plan.md	-	-	if a level is unsupported, fall back to a dedicated project for the deployment or document the wider grant honestly.
+PENDING	plan.md	-	-	| Reviewer reads beat 3 as "Catalog is bad" | Beat 3 caption and the matrix's honest-limits line say Catalog's discovery projection is shipped and complete;
+PENDING	plan.md	-	-	the runtime sits on it.
+# --- intent.md
+PENDING	intent.md	-	-	# Intent — the full-version OKF demo (bundle → BigQuery → Catalog-stamp sync, KC gaps, real customer stories)
+PENDING	intent.md	-	-	Status:
+PENDING	intent.md	-	-	plan only, from Haiyuan's ask of 2026-09-03.
+PENDING	intent.md	-	-	No syncer code, no re-recording, no SDK change in this PR.
+PENDING	intent.md	-	-	Haiyuan merges;
+PENDING	intent.md	-	-	Codex + Kimi review on GitHub after the PR URL exists.
+PENDING	intent.md	-	-	## Problem
+PENDING	intent.md	-	-	The live demo at <https://caohy1988.github.io/rfc/demo/> proves one seam:
+PENDING	intent.md	-	-	a BQAA-observed agent session becomes derived OKF that the next agent can look up by context_ref.
+PENDING	intent.md	-	-	It stops there.
+PENDING	intent.md	-	-	Three questions a cold customer asks after watching it are still answered only in RFC prose:
+PENDING	intent.md	-	-	1.
+PENDING	intent.md	-	-	"My bundles are already in Knowledge Catalog via kcmd push.
+PENDING	intent.md	-	-	How do they get into BigQuery?" Is that a built-in Dataplex / BigQuery service, or something I run? The answer this plan gives, once and consistently:
+PENDING	intent.md	-	-	an external CLI in v1, direction bundle → BigQuery commit → Catalog stamp;
+PENDING	intent.md	-	-	a Catalog → BigQuery import is not v1.
+PENDING	intent.md	-	-	2.
+PENDING	intent.md	-	-	"What does the BigQuery deployment give me that Catalog does not?" The RFC lists it (§05, §06, §09) but nothing on screen fails in Catalog and then succeeds in BigQuery.
+PENDING	intent.md	-	-	3.
+PENDING	intent.md	-	-	"Who is this for, with what evidence?" The value proposition today is a Cymbal finance fixture.
+PENDING	intent.md	-	-	We now have four real ADK sessions in okf_rfc_demo.agent_events and one real Catalog entry, and one of those sessions shows an agent overclaiming trust from a Catalog-shaped lookup.
+PENDING	intent.md	-	-	## Why now
+PENDING	intent.md	-	-	- Google's 2026-08-26 post ships the distribution half (okf-bundle EntryType, 13-field okf AspectType, kcmd push, searchEntries, LookupContext, EntryGroup IAM).
+PENDING	intent.md	-	-	It stops at push, search, lookup.
+PENDING	intent.md	-	-	The window to position the RFC as the runtime profile on that distribution, and to show the gap on a screen, is open now and narrows as readers assume Catalog is the runtime.
+PENDING	intent.md	-	-	- SDK PR 474 merged (4f54b5c), so the adapter is on main and the observe/adapt/lookup path is reproducible by anyone.
+PENDING	intent.md	-	-	The next demo can build on that instead of a fixture.
+PENDING	intent.md	-	-	- Live evidence exists today and is not going to get cleaner:
+PENDING	intent.md	-	-	session f21ee192-… (180 events, 12 real questions, verdict honoured), session 04fa3d56-… (14 events, trust overclaimed), and Catalog entry okf-derived-germany pinned to the oldest of three publications.
+PENDING	intent.md	-	-	## Constraints (do not break)
+PENDING	intent.md	-	-	- OKF v0.2 core unchanged.
+PENDING	intent.md	-	-	The profile stays optional.
+PENDING	intent.md	-	-	Shipped okf-bundle + okf types are the Catalog baseline;
+PENDING	intent.md	-	-	profile pins live on the profile-owned okf-context-runtime aspect (post-PR13).
+PENDING	intent.md	-	-	- BQAA is observer-only.
+PENDING	intent.md	-	-	Traces are never a source of truth.
+PENDING	intent.md	-	-	Never emit concept_version_id, bundle paths, principal, query text, parameter values, or raw destination table names on agent payloads.
+PENDING	intent.md	-	-	- The ask remains:
+PENDING	intent.md	-	-	hard-path agent context → derived OKF for discovery.
+PENDING	intent.md	-	-	Not trust-BQAA-as-truth.
+PENDING	intent.md	-	-	Not human-in-the-loop or sentiment promotion.
+PENDING	intent.md	-	-	The number stays unproven until an attester runs.
+PENDING	intent.md	-	-	- Do not touch SDK PR 474, do not start the #435 clock, do not re-run the observe agent or pad the 180-row export, do not re-record okf-bqaa-cli.mp4 in this PR.
+PENDING	intent.md	-	-	- Honesty labels on every pane:
+NOT_PHASE_A	intent.md	-	-	live GCP vs recorded vs stubbed vs RFC text only.
+PENDING	intent.md	-	-	- The bridge runs under least-privilege identities scoped to one dataset and one EntryGroup (spec.md §1.3);
+PENDING	intent.md	-	-	nothing relies on a Dataplex built-in or an unannounced roadmap item.
+PENDING	intent.md	-	-	## Non-goals
+PENDING	intent.md	-	-	- Implementing the syncer.
+PENDING	intent.md	-	-	This PR specifies it;
+PENDING	intent.md	-	-	the build is Phase A of plan.md.
+PENDING	intent.md	-	-	- A managed Dataplex or BigQuery feature.
+PENDING	intent.md	-	-	We say what one would need to be;
+PENDING	intent.md	-	-	we do not pretend it exists.
+PENDING	intent.md	-	-	- A Catalog → BigQuery importer (code).
+PENDING	intent.md	-	-	Future, lossy, out of v1.
+PENDING	intent.md	-	-	- Fortune-500 stories.
+PENDING	intent.md	-	-	Every story cites a session id, a table, and concept titles we can query.
+PENDING	intent.md	-	-	- A second finance narrative.
+PENDING	intent.md	-	-	Germany active-customer revenue stays the spine.
+PENDING	intent.md	-	-	## Success
+PENDING	intent.md	-	-	A visitor who has read only the Google post can, in under five minutes on /rfc/full-demo/, say back:
+NOT_PHASE_A	intent.md	-	-	"sync is an external CLI I run (or schedule) that commits the bundle to BigQuery and stamps the Catalog entry with the publication it committed;
+PENDING	intent.md	-	-	Catalog finds, BigQuery serves;
+PENDING	intent.md	-	-	here are three things I saw shipped OKF-in-Catalog stop at and BigQuery answer with a SQL query, and here is what the page marked as RFC text only." Every number on the page traces to test-project-0728-467323.okf_rfc_demo.agent_events or to a Catalog entry we can code today.
+# --- CUSTOMER_STORIES.md
+PENDING	CUSTOMER_STORIES.md	-	-	# Customer stories — grounded in real traces in test-project-0728-467323.okf_rfc_demo.agent_events
+PENDING	CUSTOMER_STORIES.md	-	-	Every story below cites a session id, the table, concept titles, and the exact failure mode a Catalog-only deployment has.
+PENDING	CUSTOMER_STORIES.md	-	-	Nothing here is invented:
+PENDING	CUSTOMER_STORIES.md	-	-	the quotes are content fields read with code on 2026-09-03;
+PENDING	CUSTOMER_STORIES.md	-	-	the Catalog entry was read with code.
+PENDING	CUSTOMER_STORIES.md	-	-	"The customer" is the finance analytics team asking about Germany active-customer revenue, the only narrative these traces contain.
+PENDING	CUSTOMER_STORIES.md	-	-	We do not dress it up as a named enterprise.
+PENDING	CUSTOMER_STORIES.md	-	-	Where the BigQuery side is not implemented in Phase A/B, the story says RFC text only.
+PENDING	CUSTOMER_STORIES.md	-	-	Shared facts:
+PENDING	CUSTOMER_STORIES.md	-	-	| Item | Value |
+PENDING	CUSTOMER_STORIES.md	-	-	|---|---|
+PENDING	CUSTOMER_STORIES.md	-	-	| Table | test-project-0728-467323.okf_rfc_demo.agent_events (DAY partition on timestamp, clustered event_type, agent, user_id, 212 rows) |
+PENDING	CUSTOMER_STORIES.md	-	-	| Sessions | f21ee192-d989-4c38-894f-66b6b82eaf18 (180 rows, observe agent, 12 invocations) · 1e6dfed7-27ce-4c4d-b2e7-c45de7c241d1 (15) · 04fa3d56-f2f1-413e-8c2b-ec116835af84 (14, consume agent) · a63c3e86-5897-40cc-bdf3-77bfcf750b12 (3, consume agent, no tool call) |
+PENDING	CUSTOMER_STORIES.md	-	-	| Agents / model | okf_rfc_observe_agent, okf_rfc_consume_agent;
+PENDING	CUSTOMER_STORIES.md	-	-	gemini-3.8-flash |
+PENDING	CUSTOMER_STORIES.md	-	-	| Tools observed | okf_retrieve_context (13 completions), okf_run_attested_computation (13), lookup_okf_context (1) |
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	| Concepts returned (rank order) | Active-customer revenue (Metric) · Active-customer revenue by region and quarter (Attested Computation) · Active customer (Business Concept) · Revenue recognition eligibility (Policy) · Billing invoice lines (BigQuery Table) · CRM customers (BigQuery Table);
+PENDING	CUSTOMER_STORIES.md	-	-	excluded:
+PENDING	CUSTOMER_STORIES.md	-	-	Customer revenue (legacy) (Metric, "superseded;
+PENDING	CUSTOMER_STORIES.md	-	-	out of force since 2026-06-20") |
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	| Catalog entry (legacy, prior experiment) | projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/okf-derived-germany, type okf-concept, created 2026-09-02T23:03:22Z, no aspects, publication pin only inside entrySource.description.
+PENDING	CUSTOMER_STORIES.md	-	-	Not shipped OKF-in-KC;
+PENDING	CUSTOMER_STORIES.md	-	-	the shipped okf-bundle + okf types are set up in Phase A.
+PENDING	CUSTOMER_STORIES.md	-	-	|
+PENDING	CUSTOMER_STORIES.md	-	-	| Publications in play | In agent_events:
+PENDING	CUSTOMER_STORIES.md	-	-	a25e1c0c… (consume session) and 674153c5… (observe sessions).
+PENDING	CUSTOMER_STORIES.md	-	-	Outside agent_events:
+PENDING	CUSTOMER_STORIES.md	-	-	53bd1651… (adapter CLI tape) and the legacy Catalog description (a25e1c0c…).
+PENDING	CUSTOMER_STORIES.md	-	-	Three distinct publications across two kinds of source.
+PENDING	CUSTOMER_STORIES.md	-	-	---
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	## Story 1 — The agent that said "verified"
+PENDING	CUSTOMER_STORIES.md	-	-	Who.
+PENDING	CUSTOMER_STORIES.md	-	-	A leadership-demo user (user_id = leadership-demo) asking the consume agent.
+PENDING	CUSTOMER_STORIES.md	-	-	Session.
+PENDING	CUSTOMER_STORIES.md	-	-	04fa3d56-f2f1-413e-8c2b-ec116835af84, 2026-09-02 23:05:08–23:05:12 UTC.
+PENDING	CUSTOMER_STORIES.md	-	-	What happened.
+PENDING	CUSTOMER_STORIES.md	-	-	The user asked:
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	"What was active-customer revenue in Germany last quarter, and can I trust the number? Use context_ref=okf:env-demo#a25e1c0ccbca." The agent called lookup_okf_context, which returned exactly what a Catalog-shaped lookup can return:
+PENDING	CUSTOMER_STORIES.md	-	-	json {"context_ref":"okf:env-demo#a25e1c0ccbca","ok":true, "publication_id":"sha256:a25e1c0ccbcad270bf9e3b7a8f792167795381b6880bdc8a1ccde8df40ea52c5", "note":"derived/demo bundle;
+PENDING	CUSTOMER_STORIES.md	-	-	not canonical authoring"}
+PENDING	CUSTOMER_STORIES.md	-	-	The agent then answered:
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	"You can trust the number because it is verified and derived through sanctioned computation bound in okf:env-demo#a25e1c0ccbca, and BQAA is observer-only." No computation ran.
+PENDING	CUSTOMER_STORIES.md	-	-	No verdict existed.
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	The word "verified" was produced from an ok:
+PENDING	CUSTOMER_STORIES.md	-	-	true.
+PENDING	CUSTOMER_STORIES.md	-	-	Disclosure:
+PENDING	CUSTOMER_STORIES.md	-	-	this is an illustration, not a controlled comparison.
+PENDING	CUSTOMER_STORIES.md	-	-	The two sessions differ in more than one field.
+PENDING	CUSTOMER_STORIES.md	-	-	Their system prompts, read from the LLM_REQUEST rows:
+PENDING	CUSTOMER_STORIES.md	-	-	- 04fa3d56 (consume agent):
+PENDING	CUSTOMER_STORIES.md	-	-	"If asked about Germany active-customer revenue, say the number is produced by the sanctioned computation bound in that context_ref, and that BQAA is observer-only." One tool, lookup_okf_context, whose contract has no verdict.
+PENDING	CUSTOMER_STORIES.md	-	-	- f21ee192 (observe agent):
+PENDING	CUSTOMER_STORIES.md	-	-	"Report the receipt verdict and verdict_reason verbatim;
+PENDING	CUSTOMER_STORIES.md	-	-	if the verdict is not ATTESTED, say plainly that the number is unproven." Two tools, including okf_run_attested_computation, whose contract has a verdict.
+PENDING	CUSTOMER_STORIES.md	-	-	So the prompt, the tool set, and the question set all differ.
+PENDING	CUSTOMER_STORIES.md	-	-	What the pair shows is narrower and still useful:
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	a contract with no verdict field permits an agent to say "verified", and a prompt that leans on "sanctioned computation" language will do so.
+PENDING	CUSTOMER_STORIES.md	-	-	It does not show that adding the field alone would have changed the answer.
+PENDING	CUSTOMER_STORIES.md	-	-	KC-only failure mode.
+PENDING	CUSTOMER_STORIES.md	-	-	The shipped okf aspect displays runtime, computation, executor, attester;
+PENDING	CUSTOMER_STORIES.md	-	-	LookupContext does not render those fields at all;
+PENDING	CUSTOMER_STORIES.md	-	-	neither carries a verdict.
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	An agent reading Catalog sees the words "Attested Computation" and has nothing that says whether one ran.
+PENDING	CUSTOMER_STORIES.md	-	-	What BigQuery deployment changes.
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	In session f21ee192, okf_run_attested_computation returned verdict:
+PENDING	CUSTOMER_STORIES.md	-	-	UNVERIFIABLE, verdict_reason:
+PENDING	CUSTOMER_STORIES.md	-	-	"no-execution;
+PENDING	CUSTOMER_STORIES.md	-	-	observer-only demo, nothing attested", receipt_id:
+PENDING	CUSTOMER_STORIES.md	-	-	rcpt-observe-noexec, and the agent called the number unproven in every answer:
+PENDING	CUSTOMER_STORIES.md	-	-	12 of 12 final answers contain the word "unproven" (semantic count, asserted by tools/check_full_demo.py).
+PENDING	CUSTOMER_STORIES.md	-	-	The exact sentence "No.
+PENDING	CUSTOMER_STORIES.md	-	-	The number is unproven." appears exactly once, in invocation 1;
+PENDING	CUSTOMER_STORIES.md	-	-	the other eleven phrase it differently ("The number is unproven", "the comparison and underlying numbers are unproven").
+PENDING	CUSTOMER_STORIES.md	-	-	The runtime contract makes the verdict a field the agent must carry;
+PENDING	CUSTOMER_STORIES.md	-	-	the prompt then has something to report verbatim.
+PENDING	CUSTOMER_STORIES.md	-	-	Value proposition.
+PENDING	CUSTOMER_STORIES.md	-	-	A finance answer carries its receipt or says it has none.
+PENDING	CUSTOMER_STORIES.md	-	-	The demo shows both transcripts side by side with both system prompts (beat 3 vs beat 5).
+PENDING	CUSTOMER_STORIES.md	-	-	## Story 2 — Twelve questions, one frozen context pack
+PENDING	CUSTOMER_STORIES.md	-	-	The same finance user, in a multi-turn session.
+PENDING	CUSTOMER_STORIES.md	-	-	f21ee192-d989-4c38-894f-66b6b82eaf18, 2026-09-03 04:08:33–04:10:11 UTC, 12 invocations.
+PENDING	CUSTOMER_STORIES.md	-	-	The twelve real questions, in order:
+PENDING	CUSTOMER_STORIES.md	-	-	1.
+PENDING	CUSTOMER_STORIES.md	-	-	What was active-customer revenue in Germany last quarter — and can I trust the number?
+PENDING	CUSTOMER_STORIES.md	-	-	2.
+PENDING	CUSTOMER_STORIES.md	-	-	Same question for France last quarter — what does the receipt say?
+PENDING	CUSTOMER_STORIES.md	-	-	3.
+PENDING	CUSTOMER_STORIES.md	-	-	Same for the United Kingdom last quarter.
+PENDING	CUSTOMER_STORIES.md	-	-	4.
+PENDING	CUSTOMER_STORIES.md	-	-	How did Germany compare to the prior quarter?
+PENDING	CUSTOMER_STORIES.md	-	-	5.
+PENDING	CUSTOMER_STORIES.md	-	-	What does the trust / receipt verdict actually mean for this number?
+PENDING	CUSTOMER_STORIES.md	-	-	6.
+PENDING	CUSTOMER_STORIES.md	-	-	Why is the legacy customer-revenue metric excluded from current reporting?
+PENDING	CUSTOMER_STORIES.md	-	-	7.
+PENDING	CUSTOMER_STORIES.md	-	-	What policy governs active-customer revenue recognition?
+PENDING	CUSTOMER_STORIES.md	-	-	8.
+PENDING	CUSTOMER_STORIES.md	-	-	Which BigQuery tables back this metric?
+PENDING	CUSTOMER_STORIES.md	-	-	9.
+PENDING	CUSTOMER_STORIES.md	-	-	What is the observed definition of an active customer?
+PENDING	CUSTOMER_STORIES.md	-	-	10.
+PENDING	CUSTOMER_STORIES.md	-	-	Can I get a region roll-up for Germany, France, and the UK together?
+PENDING	CUSTOMER_STORIES.md	-	-	11.
+PENDING	CUSTOMER_STORIES.md	-	-	If the number is unproven, what would make the receipt attested?
+PENDING	CUSTOMER_STORIES.md	-	-	12.
+PENDING	CUSTOMER_STORIES.md	-	-	Which excluded items must I not use for last-quarter reporting?
+PENDING	CUSTOMER_STORIES.md	-	-	All twelve okf_retrieve_context calls used mode:
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	current and returned the identical pack:
+PENDING	CUSTOMER_STORIES.md	-	-	item_count:
+PENDING	CUSTOMER_STORIES.md	-	-	6, excluded_count:
+PENDING	CUSTOMER_STORIES.md	-	-	1, publication_id:
+PENDING	CUSTOMER_STORIES.md	-	-	674153c5….
+PENDING	CUSTOMER_STORIES.md	-	-	Questions 4, 10, and 11 are the ones a static pack cannot serve.
+PENDING	CUSTOMER_STORIES.md	-	-	Catalog has one mutable state per entry with createTime / updateTime.
+PENDING	CUSTOMER_STORIES.md	-	-	"Which publication was current last quarter" is not a question it can hold.
+PENDING	CUSTOMER_STORIES.md	-	-	code is an array field and is not server-side searchable.
+PENDING	CUSTOMER_STORIES.md	-	-	Nothing executes.
+PENDING	CUSTOMER_STORIES.md	-	-	What BigQuery deployment changes, in Phase B.
+PENDING	CUSTOMER_STORIES.md	-	-	deployment_heads_history (deployment_key, publication_id, snapshot_id, committed_at, sync_id) answers which publication was current at the prior quarter's date, so the agent can retrieve in historical mode against that publication and say which definition of the metric applied then.
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	The declared parameter_schema on record (region STRING, quarter_start DATE, quarter_end DATE) is shown as the contract the executor would bind.
+PENDING	CUSTOMER_STORIES.md	-	-	Question 11's answer is the RFC's ATTESTED requirement list, and the agent recited it correctly from the receipt fields.
+PENDING	CUSTOMER_STORIES.md	-	-	What stays future.
+PENDING	CUSTOMER_STORIES.md	-	-	The history table holds no revenue values.
+PENDING	CUSTOMER_STORIES.md	-	-	A numerical prior-quarter comparison (question 4) and a three-region roll-up (question 10) need an executor and an attester;
+PENDING	CUSTOMER_STORIES.md	-	-	Phase B keeps every receipt UNVERIFIABLE / no-execution.
+PENDING	CUSTOMER_STORIES.md	-	-	Beat 5 labels both as RFC text only.
+PENDING	CUSTOMER_STORIES.md	-	-	The runtime turns a static pack into something that can be pinned to a point in time and has a declared parameter contract;
+PENDING	CUSTOMER_STORIES.md	-	-	Catalog can only be searched.
+PENDING	CUSTOMER_STORIES.md	-	-	The numbers come later, and the demo says so.
+PENDING	CUSTOMER_STORIES.md	-	-	## Story 3 — One handle, three publications, and the legacy Catalog entry names the oldest
+PENDING	CUSTOMER_STORIES.md	-	-	Whoever audits the demo after the fact.
+PENDING	CUSTOMER_STORIES.md	-	-	Evidence.
+PENDING	CUSTOMER_STORIES.md	-	-	All four sessions, the adapter tape, and the legacy Catalog entry.
+PENDING	CUSTOMER_STORIES.md	-	-	Two kinds of evidence, kept in separate tables because only one is event data.
+PENDING	CUSTOMER_STORIES.md	-	-	Event-sourced (agent_events, grouped by session, tool, context_ref, publication):
+PENDING	CUSTOMER_STORIES.md	-	-	| session | tool | context_ref | publication carried by the event |
+PENDING	CUSTOMER_STORIES.md	-	-	|---|---|---|---|
+PENDING	CUSTOMER_STORIES.md	-	-	| 04fa3d56 | lookup_okf_context | okf:env-demo#a25e1c0ccbca | a25e1c0c… |
+PENDING	CUSTOMER_STORIES.md	-	-	| 1e6dfed7 | okf_retrieve_context | okf:env-observe#674153c572f6 | 674153c5… (in-process pin) |
+PENDING	CUSTOMER_STORIES.md	-	-	| f21ee192 | okf_retrieve_context ×12 | okf:env-observe#674153c572f6 | 674153c5… |
+PENDING	CUSTOMER_STORIES.md	-	-	Separately sourced (not agent_events rows):
+PENDING	CUSTOMER_STORIES.md	-	-	| source | context_ref | publication | note |
+PENDING	CUSTOMER_STORIES.md	-	-	| adapter CLI tape, PR 474 476d37dc | okf:env-observe#674153c572f6 | 53bd1651… | same handle as the observe sessions, different publication |
+PENDING	CUSTOMER_STORIES.md	-	-	| legacy Catalog entry okf-derived-germany, entrySource.description | okf:env-demo#a25e1c0ccbca | a25e1c0c… | prose, no aspect |
+PENDING	CUSTOMER_STORIES.md	-	-	So the agents saw two publications, the tape binds the same observe handle to a third, and the only Catalog pin in the project names the oldest.
+PENDING	CUSTOMER_STORIES.md	-	-	Catalog cannot say which publication an agent read, whether two agents read the same one, or whether the entry is stale relative to what is being served.
+PENDING	CUSTOMER_STORIES.md	-	-	After Phase A it can display the pin sync would stamp;
+PENDING	CUSTOMER_STORIES.md	-	-	a search predicate on it filters entries;
+PENDING	CUSTOMER_STORIES.md	-	-	it cannot compare the pin to a head or refuse a stale request.
+PENDING	CUSTOMER_STORIES.md	-	-	What BigQuery deployment changes, and the attribution contract.
+PENDING	CUSTOMER_STORIES.md	-	-	From Phase A on, a context_ref is bound to exactly one publication_id and never rebound;
+PENDING	CUSTOMER_STORIES.md	-	-	a new publication mints a new handle.
+PENDING	CUSTOMER_STORIES.md	-	-	The three pre-Phase-A publications are seeded into publications (keyed by publication_id only;
+PENDING	CUSTOMER_STORIES.md	-	-	it owns no context_ref column) with a seeded_pre_phase_a source.
+PENDING	CUSTOMER_STORIES.md	-	-	The legacy handles go into legacy_context_ref_bindings, and one view, context_ref_resolution, unions legacy and Phase-A bindings.
+PENDING	CUSTOMER_STORIES.md	-	-	Beat 6 matches each event on both its event-carried context_ref and its event-carried publication_id against that view, then joins publications by publication_id.
+PENDING	CUSTOMER_STORIES.md	-	-	The 13 okf_run_attested_computation rows carry a context_ref but a NULL publication;
+PENDING	CUSTOMER_STORIES.md	-	-	they are kept in a separate "receipt-only" band, attributed via the handle alone and labelled as such, never merged into the publication rows.
+PENDING	CUSTOMER_STORIES.md	-	-	So the legacy double binding of okf:env-observe#674153c572f6 cannot duplicate or misattribute a row.
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	The adapter-tape and legacy-Catalog rows are seeded into demo_evidence with a source column and shown as a second table.
+PENDING	CUSTOMER_STORIES.md	-	-	"Which version did the agent use" becomes a query, not an incident review, and the demo is honest that the legacy handle was bound twice before the contract existed.
+PENDING	CUSTOMER_STORIES.md	-	-	## Story 4 — The metric that died on 2026-06-20
+PENDING	CUSTOMER_STORIES.md	-	-	The finance user asking questions 6 and 12 above.
+PENDING	CUSTOMER_STORIES.md	-	-	Sessions.
+PENDING	CUSTOMER_STORIES.md	-	-	f21ee192 and 1e6dfed7;
+PENDING	CUSTOMER_STORIES.md	-	-	13 retrievals in total.
+PENDING	CUSTOMER_STORIES.md	-	-	Every retrieval excluded Customer revenue (legacy) (Metric) with reason "superseded;
+PENDING	CUSTOMER_STORIES.md	-	-	out of force since 2026-06-20".
+PENDING	CUSTOMER_STORIES.md	-	-	Question 12's answer on record:
+PENDING	CUSTOMER_STORIES.md	-	-	"You must not use the following item:
+PENDING	CUSTOMER_STORIES.md	-	-	Customer revenue (legacy) … Reason:
+PENDING	CUSTOMER_STORIES.md	-	-	superseded;
+PENDING	CUSTOMER_STORIES.md	-	-	out of force since 2026-06-20." The derived bundle on record carries the legacy metric marked deprecated so the next agent can see why it is excluded, not just that it is absent.
+PENDING	CUSTOMER_STORIES.md	-	-	Generic kcmd push creates or patches and never deletes (sync.ts:
+PENDING	CUSTOMER_STORIES.md	-	-	"TODO:
+PENDING	CUSTOMER_STORIES.md	-	-	Handle creates and deletes").
+PENDING	CUSTOMER_STORIES.md	-	-	status and stale_after are search predicates;
+PENDING	CUSTOMER_STORIES.md	-	-	LookupContext returns whatever is in the EntryGroup.
+PENDING	CUSTOMER_STORIES.md	-	-	A superseded metric stays discoverable and readable until an operator deletes the entry by hand or removes the whole EntryGroup with cleanup.ts.
+PENDING	CUSTOMER_STORIES.md	-	-	What BigQuery deployment changes (Phase A/B).
+PENDING	CUSTOMER_STORIES.md	-	-	Retirement is a property of the data:
+PENDING	CUSTOMER_STORIES.md	-	-	snapshot membership, current / historical / all modes, "exclusion follows affirmation", and delete-as-absence in the ledger so the syncer removes only what it owns.
+PENDING	CUSTOMER_STORIES.md	-	-	The legacy metric is still in historical mode for audit and absent from current.
+PENDING	CUSTOMER_STORIES.md	-	-	The dead metric cannot be picked by accident, and the reason it died is one row away.
+PENDING	CUSTOMER_STORIES.md	-	-	## Story 5 — Who may read the policy (RFC text only on the BigQuery side)
+PENDING	CUSTOMER_STORIES.md	-	-	The finance user asking question 7;
+PENDING	CUSTOMER_STORIES.md	-	-	the Catalog administrator granting catalogViewer.
+PENDING	CUSTOMER_STORIES.md	-	-	f21ee192, invocation e-68d2e6b9-….
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	Retrieval returned Revenue recognition eligibility (Policy) at rank 4 and one edge:
+PENDING	CUSTOMER_STORIES.md	-	-	Active-customer revenue —governed_by→ Revenue recognition eligibility.
+PENDING	CUSTOMER_STORIES.md	-	-	In the Catalog projection that policy is one okf-bundle entry with its full body in the overview aspect, sitting in the same EntryGroup as Billing invoice lines and CRM customers.
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	KC-only structure (real, shown on beat 3).
+PENDING	CUSTOMER_STORIES.md	-	-	The enforcement unit is the EntryGroup and IAM cascades to every entry in it (KC blog:
+PENDING	CUSTOMER_STORIES.md	-	-	"IAM on the EntryGroup cascades to its Entries").
+PENDING	CUSTOMER_STORIES.md	-	-	Anyone with roles/dataplex.catalogViewer on okf-rfc-demo can read the policy body via code.
+PENDING	CUSTOMER_STORIES.md	-	-	OKF frontmatter is not an ACL, and the post's multi-team answer is one EntryGroup per team, which does not separate concepts inside one bundle.
+PENDING	CUSTOMER_STORIES.md	-	-	This is structure, not an observed leak, and the page says so.
+PENDING	CUSTOMER_STORIES.md	-	-	What the RFC proposes (RFC text only;
+PENDING	CUSTOMER_STORIES.md	-	-	not implemented in Phase A/B).
+PENDING	CUSTOMER_STORIES.md	-	-	One security domain per deployment with caller-delegated BigQuery authorization;
+PENDING	CUSTOMER_STORIES.md	-	-	a policy_context_commitment inside the Context Envelope;
+PENDING	CUSTOMER_STORIES.md	-	-	mixed-policy bundles failing closed at projection time.
+PENDING	CUSTOMER_STORIES.md	-	-	The demo's runtime reader holds dataViewer on the one dataset and nothing finer.
+PENDING	CUSTOMER_STORIES.md	-	-	The page and tape quote the RFC and label the row accordingly;
+PENDING	CUSTOMER_STORIES.md	-	-	they do not show it working.
+PENDING	CUSTOMER_STORIES.md	-	-	Value proposition (as proposed).
+PENDING	CUSTOMER_STORIES.md	-	-	Policy text would reach the agent through an authorized runtime path rather than through whoever can browse the catalog.
+PENDING	CUSTOMER_STORIES.md	-	-	Today the honest claim is narrower:
+PENDING	CUSTOMER_STORIES.md	-	-	the dataset and the EntryGroup are the boundary, and both are real.
+PENDING	CUSTOMER_STORIES.md	-	-	## How the stories map to the beats
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	| Story | Beat where it lands | Evidence shown | Status |
+NOT_PHASE_A	CUSTOMER_STORIES.md	-	-	| 1 Verified | 3 (Catalog stops) and 5 (BQ serves) | two transcripts with both system prompts, 04fa3d56 vs f21ee192 | illustration, not causal |
+PENDING	CUSTOMER_STORIES.md	-	-	| 2 Twelve questions | 1 (Ask) and 5 | the 12 USER_MESSAGE_RECEIVED rows;
+PENDING	CUSTOMER_STORIES.md	-	-	deployment_heads_history selection;
+PENDING	CUSTOMER_STORIES.md	-	-	parameter_schema | numbers RFC text only |
+PENDING	CUSTOMER_STORIES.md	-	-	| 3 Three publications | 6 (Attribution) | event-sourced join on handle + publication;
+PENDING	CUSTOMER_STORIES.md	-	-	separately sourced adapter/Catalog rows | real after seeding |
+PENDING	CUSTOMER_STORIES.md	-	-	| 4 Dead metric | 4, 5 | retrieve current result;
+PENDING	CUSTOMER_STORIES.md	-	-	ledger row for absence | real in Phase A/B |
+PENDING	CUSTOMER_STORIES.md	-	-	| 5 Policy | 3 | EntryGroup IAM structure, governed_by edge | BQ side RFC text only |
+# --- README.md
+PENDING	README.md	-	-	# Catalog finds, BigQuery serves — the full-version OKF runtime demo (/rfc/full-demo/)
+PENDING	README.md	-	-	Live at <https://caohy1988.github.io/rfc/full-demo/> once merged.
+PENDING	README.md	-	-	Static files, no build.
+PENDING	README.md	-	-	Plan docs:
+PENDING	README.md	-	-	intent.md, spec.md, plan.md, CUSTOMER_STORIES.md, ARCHITECTURE.md (merged in PR 15).
+PENDING	README.md	-	-	## Six beats
+PENDING	README.md	-	-	1.
+PENDING	README.md	-	-	Ask.
+PENDING	README.md	-	-	The twelve real questions of session f21ee192… and the over-claim from session 04fa3d56….
+PENDING	README.md	-	-	2.
+PENDING	README.md	-	-	Observe.
+PENDING	README.md	-	-	Histogram Σ 180, 24 tool completions, the live never-emit scan (0 hits on 8 keys over 27 payloads).
+PENDING	README.md	-	-	3.
+PENDING	README.md	-	-	Catalog path:
+PENDING	README.md	-	-	where it stops.
+PENDING	README.md	-	-	Shipped okf-bundle + okf aspect via code;
+PENDING	README.md	-	-	lookupContext on the same entry omitting every okf field;
+PENDING	README.md	-	-	eleven resources → 400;
+PENDING	README.md	-	-	the 04fa3d56 transcript with both system prompts;
+PENDING	README.md	-	-	searchEntries still finding the deprecated metric;
+PENDING	README.md	-	-	EntryGroup IAM;
+PENDING	README.md	-	-	the legacy okf-derived-germany entry collapsed and labelled prior.
+PENDING	README.md	-	-	4.
+PENDING	README.md	-	-	Sync (CLI).
+PENDING	README.md	-	-	The okf-context sync algorithm and IAM contract as RFC text;
+PENDING	README.md	-	-	what was actually run (sample setup.ts + push.ts, the DDL) under the operator identity;
+PENDING	README.md	-	no BQ_COMMITTED / CATALOG_STAMPED is shown	no BQ_COMMITTED / CATALOG_STAMPED is shown because the syncer is not built.
+PENDING	README.md	-	-	5.
+PENDING	README.md	-	-	Serve (BigQuery).
+PENDING	README.md	-	-	Five real codes:
+PENDING	README.md	-	-	empty deployment_heads, empty history, the resolution probe (NO_HEAD, AMBIGUOUS_LEGACY, FAIL_CLOSED), seeded publications, the view;
+PENDING	README.md	-	-	the UNVERIFIABLE receipt;
+PENDING	README.md	-	-	12 of 12 answers contain “unproven” (one verbatim “No.
+PENDING	README.md	-	-	The number is unproven.”);
+PENDING	README.md	-	-	13 of 13 exclusions of the dead metric.
+PENDING	README.md	-	-	6.
+PENDING	README.md	-	-	Attribution.
+PENDING	README.md	-	-	The two-key query:
+PENDING	README.md	-	-	band attributed Σ 14, band receipt_only Σ 13, demo_evidence, and the v0 events-only query.
+PENDING	README.md	-	-	Below the stepper:
+NOT_PHASE_A	README.md	-	-	the capability matrix from spec.md §2 with a Shown on column and RFC text only labels, and the five customer stories with real session ids.
+PENDING	README.md	-	-	## What was done for this page, and what was deferred
+PENDING	README.md	-	-	Done on 2026-09-03 as the operator (raincoatrun@gmail.com, project Owner):
+PENDING	README.md	-	-	every capture in live/ (see live/README.md);
+PENDING	README.md	-	-	sql/setup_runtime_tables.sql run once (11 tables, 1 view, seeds);
+NOT_PHASE_A	README.md	-	-	the sample setup.ts + push.ts run against the derived bundle the SDK adapter regenerated from the committed 180-row export (publication sha256:53bd1651… reproduced first).
+PENDING	README.md	-	-	Deferred to Phase A:
+PENDING	README.md	-	-	the three service accounts, custom role, table-level grants, boundary probe, negative checks, and the okf-context sync CLI.
+PENDING	README.md	-	-	Phase D (a new tape) follows the review of this PR.
+NOT_PHASE_A	README.md	-	-	okf-bqaa-cli.mp4 was not re-recorded.
+PENDING	README.md	-	-	## Files
+PENDING	README.md	-	-	- index.html, app.js, styles.css:
+PENDING	README.md	-	-	the viewer.
+PENDING	README.md	-	-	styles.css is /rfc/demo/styles.css plus additions.
+PENDING	README.md	-	-	- matrix.json, stories.json:
+PENDING	README.md	-	-	the capability matrix and stories as data, checked by the tool below.
+PENDING	README.md	-	-	- live/:
+PENDING	README.md	-	-	captures, job ids, transcripts.
+PENDING	README.md	-	-	live/README.md lists every file and the command behind it.
+PENDING	README.md	-	-	- sql/:
+PENDING	README.md	-	-	sessions_by_context_ref.sql (v0), never_emit_scan.sql, serve_probes.sql, attribution_two_key.sql (reader, SELECT only), setup_runtime_tables.sql (setup, DDL + seeds).
+PENDING	README.md	-	-	- tools/check_full_demo.py:
+PENDING	README.md	-	-	the checker.
+PENDING	README.md	-	-	Exit 0 required.
+PENDING	README.md	-	-	- tools/audited_claims.tsv:
+PENDING	README.md	-	-	the audited claim register.
+PENDING	README.md	-	nothing was executed	Every sentence of the files above appears here under its own source file with a verdict — PENDING (claims nothing was executed;
+PENDING	README.md	-	-	every completion word sits inside a licence frame holding the qualifier, its auxiliary chain and the verb), CAPTURED (what this capture did, with the live/ or sql/ files behind it and a disclaimer sitting on any deferred artefact it names), or NOT_PHASE_A (completion language about something else, naming no deferred artefact).
+PENDING	README.md	-	-	There is no test deciding which sentences count, so no vocabulary can license unaudited prose, and what a reader sees is what is audited:
+PENDING	README.md	-	-	JavaScript through its literals and comments, HTML after tags and entities, JSON after JSON.parse, CSS through its generated content.
+PENDING	README.md	-	-	New, edited or moved copy has to be re-audited before it ships.
+PENDING	README.md	-	-	It does not try to parse English;
+PENDING	README.md	-	-	the register is the audit, and tools/check_full_demo.py documents that boundary and its non-goals.
+PENDING	README.md	-	-	- tools/live_manifest.tsv:
+PENDING	README.md	-	-	a byte pin (SHA-256) for every capture.
+NOT_PHASE_A	README.md	-	-	The inventory is every file under live/ and sql/ plus everything a resolved dependency graph reaches from index.html — each reference resolved against the file that made it, the way a browser resolves a URL — so quoting style, call site, @import and whether anything fetches the file yet all buy nothing.
+PENDING	README.md	-	-	URLs are decoded and resolved the way a browser resolves them — HTML entities, CSS escapes, the effective code — and a URL the reader cannot evaluate (one built by concatenation) is an error rather than a dependency it silently misses.
+PENDING	README.md	-	-	Anything the graph reaches that is itself copy (a stylesheet, a page, a script) has to be audited, not merely pinned.
+PENDING	README.md	-	-	- tools/mutation_fixture.py:
+PENDING	README.md	-	-	204 mutations that must each make the checker exit non-zero, and 75 positive controls (honest prose plus its register row, or a new capture plus its pin) that must leave it at exit 0.
+PENDING	README.md	-	-	## Run it locally
+PENDING	README.md	-	-	bash python3 -m http.server 8000 # from the repo root open http://localhost:8000/rfc/full-demo/ python3 rfc/full-demo/tools/check_full_demo.py
+# --- live/README.md
+PENDING	live/README.md	-	-	# live/ — captures read from test-project-0728-467323 on 2026-09-03
+PENDING	live/README.md	-	-	Every file here was produced by one code, code, code, or sample-script invocation run by the operator (raincoatrun@gmail.com, project Owner, dataset OWNER, default gcloud configuration).
+PENDING	live/README.md	-	not created	The Phase A service accounts (okf-setup, okf-sync-writer-okf-rfc-demo, okf-runtime-reader), the custom role, the table-level grants, the boundary probe, and the negative checks of spec.md §1.3 were not created for this capture;
+PENDING	live/README.md	-	-	they are the Phase A follow-up.
+PENDING	live/README.md	-	-	The page says so on beat 4.
+PENDING	live/README.md	-	-	agent_events received no DML and no agent was re-run.
+NOT_PHASE_A	live/README.md	-	-	Each code file holds the explicit code its neighbour ran under.
+CAPTURED	live/README.md	live/bq_jobs_identity.json	-	bq_jobs_identity.json is the INFORMATION_SCHEMA.JOBS_BY_USER row set for every okf_full_demo% job id, so the user_email behind each query is on record.
+PENDING	live/README.md	-	-	## BigQuery (SELECT only unless stated)
+PENDING	live/README.md	-	-	| File | Statement | Result |
+PENDING	live/README.md	-	-	|---|---|---|
+PENDING	live/README.md	-	-	| sessions_by_context_ref.json | sql/sessions_by_context_ref.sql (v0, events only) | 5 rows |
+PENDING	live/README.md	-	-	| session_f21ee192.json | all rows for session f21ee192-d989-4c38-894f-66b6b82eaf18 | 180 rows, 12 invocations, 9 event types |
+PENDING	live/README.md	-	-	| session_04fa3d56.json | all rows for session 04fa3d56-f2f1-413e-8c2b-ec116835af84 | 14 rows, 1 invocation |
+PENDING	live/README.md	-	-	| session_1e6dfed7.json | all rows for session 1e6dfed7-27ce-4c4d-b2e7-c45de7c241d1 | 15 rows, 1 invocation (second observe session) |
+PENDING	live/README.md	-	-	| sessions_summary.json | sql/sessions_summary.sql, row and tool-call count per session (aggregate;
+PENDING	live/README.md	-	-	no row pull) | 4 sessions, 212 rows;
+PENDING	live/README.md	-	-	the fourth session a63c3e86-5897-40cc-bdf3-77bfcf750b12 (3 rows, 0 tool calls) is counted here and not pulled |
+PENDING	live/README.md	-	-	| never_emit_scan.json | sql/never_emit_scan.sql over all 27 TOOL_COMPLETED payloads | 0 hits on all 8 keys;
+PENDING	live/README.md	-	-	27 of 27 carry context_ref |
+CAPTURED	live/README.md	live/setup_runtime_tables.out,sql/setup_runtime_tables.sql	-	| setup_runtime_tables.out | DDL + seed MERGEs, sql/setup_runtime_tables.sql, run once as the operator (not yet as okf-setup) | 11 tables + 1 view created;
+PENDING	live/README.md	-	-	3 + 3 + 2 rows seeded |
+PENDING	live/README.md	-	-	| beat6_attribution.json | sql/attribution_two_key.sql STATEMENT 1 | 5 rows;
+PENDING	live/README.md	-	-	band attributed Σ 14, band receipt_only Σ 13 |
+PENDING	live/README.md	-	-	| beat6_demo_evidence.json | sql/attribution_two_key.sql STATEMENT 2 | 2 rows |
+PENDING	live/README.md	-	-	| beat5_serve_stmt1.json | sql/serve_probes.sql STATEMENT 1, deployment_heads for okf-rfc-demo | 0 rows (no sync has run) |
+PENDING	live/README.md	-	-	| beat5_serve_stmt2.json | STATEMENT 2, deployment_heads_history as of 2026-06-30 | 0 rows (no sync has run) |
+PENDING	live/README.md	-	-	| beat5_serve_stmt3.json | STATEMENT 3, pin-or-fail-stale resolution for three handles | NO_HEAD, AMBIGUOUS_LEGACY, FAIL_CLOSED |
+PENDING	live/README.md	-	-	| beat5_serve_stmt4.json | STATEMENT 4, publications | 3 rows, all seeded_pre_phase_a |
+PENDING	live/README.md	-	-	| beat5_serve_stmt5.json | STATEMENT 5, context_ref_resolution view | 3 legacy rows, 0 phase_a rows |
+CAPTURED	live/README.md	live/bq_jobs_identity.json	-	| bq_jobs_identity.json | INFORMATION_SCHEMA.JOBS_BY_USER for okf_full_demo% | every row user_email = raincoatrun@gmail.com |
+PENDING	live/README.md	-	-	| provenance_sessions_summary.json | code of the summary job:
+NOT_PHASE_A	live/README.md	-	-	job id, state, executed query text, raw SHA-256 of that text and of sql/sessions_summary.sql (byte-identical, no normalization), result file hash and columns | binds job ↔ query ↔ SQL file ↔ result;
+PENDING	live/README.md	-	-	not an identity source (identity comes only from bq_jobs_identity.json) |
+PENDING	live/README.md	-	-	## Knowledge Catalog (Dataplex Universal Catalog), us-central1
+PENDING	live/README.md	-	-	Legacy entry, read before any write:
+PENDING	live/README.md	-	-	| File | Command |
+PENDING	live/README.md	-	-	|---|---|
+PENDING	live/README.md	-	-	| catalog_entry_okf-derived-germany.json | code (type okf-concept, no aspects) |
+PENDING	live/README.md	-	-	| catalog_entry_type_okf-concept.json | code |
+PENDING	live/README.md	-	-	| catalog_entry_group_okf-rfc-demo.json | code |
+CAPTURED	live/README.md	live/catalog_entry_group_iam.json	-	| catalog_entry_group_iam.json | code (no bindings;
+PENDING	live/README.md	-	-	etag:
+PENDING	live/README.md	-	-	ACAB) |
+PENDING	live/README.md	-	-	| lookup_context_okf-derived-germany.json | code |
+PENDING	live/README.md	-	-	| lookup_context_11_resources.json | same call with 11 resources → 400 Only ten resources are supported at this time.
+PENDING	live/README.md	-	-	|
+PENDING	live/README.md	-	-	| lookup_context_json_format.json | same call with options.format=json |
+PENDING	live/README.md	-	-	| lookup_context_missing_entry.json | same call on a non-existent entry → code |
+PENDING	live/README.md	-	-	| lookup_context_two_entries.json | same call on the legacy entry and the EntryGroup's own entry |
+PENDING	live/README.md	-	-	| lookup_context_discovery.txt | the lookupContext method and request/response schemas from the Dataplex v1 discovery document |
+PENDING	live/README.md	-	-	Shipped types, written by the operator for this page with the sample scripts from GoogleCloudPlatform/knowledge-catalog @ fbbc797 (toolbox/mdcode/demo/okf, kcmd built from source because the checked-in lockfile pointed at a private registry):
+NOT_PHASE_A	live/README.md	-	-	| catalog_setup_transcript.txt | code → created AspectType okf (13 fields) and EntryType okf-bundle;
+PENDING	live/README.md	-	-	reused the existing EntryGroup |
+PENDING	live/README.md	-	-	| catalog_push_transcript.txt | code (SDK main @ 4f54b5c) regenerated the derived bundle and reproduced publication_id sha256:53bd1651…;
+PENDING	live/README.md	-	-	then code |
+PENDING	live/README.md	-	-	| catalog_entries_list_after_push.json | code → 10 entries:
+PENDING	live/README.md	-	-	8 okf-bundle, the legacy okf-concept, the group entry |
+PENDING	live/README.md	-	-	| catalog_shipped_entry_metric_viewALL.json | code (real okf aspect + overview) |
+PENDING	live/README.md	-	-	| catalog_shipped_entry_computation_viewALL.json | same for computations/active-customer-revenue-by-region-and-quarter |
+PENDING	live/README.md	-	-	| catalog_shipped_entry_legacy_metric_viewALL.json | same for metrics/customer-revenue-legacy (status:
+PENDING	live/README.md	-	-	deprecated, still discoverable) |
+PENDING	live/README.md	-	-	| lookup_context_shipped_metric.json | lookupContext on the metric entry:
+PENDING	live/README.md	-	-	type, description, overview, labels;
+PENDING	live/README.md	-	-	no okf fields |
+PENDING	live/README.md	-	-	| lookup_context_shipped_computation.json | lookupContext on the computation entry:
+PENDING	live/README.md	-	-	same shape, no runtime / parameters / executor / attester |
+PENDING	live/README.md	-	-	| search_entries_okf_type_metric.json | code → both metrics, including the deprecated one |
+PENDING	live/README.md	-	-	| search_entries_okf_status_deprecated.json | code → the legacy metric |
+PENDING	live/README.md	-	-	| catalog_aspect_type_okf.json, catalog_entry_type_okf-bundle.json | code, code |
+PENDING	live/README.md	-	-	| catalog_aspect_types_us-central1.json, catalog_entry_types_us-central1.json | type lists after setup |
+PENDING	live/README.md	-	-	The legacy entry okf-derived-germany was re-read after the push and is byte-identical to the pre-push snapshot (updateTime 2026-09-02T23:03:22Z, still no aspects).
+PENDING	live/README.md	-	-	It stays labelled prior.
+PENDING	live/README.md	-	-	## Not captured (and why)
+PENDING	live/README.md	-	-	- No okf-context-runtime aspect, no BQ_COMMITTED, no CATALOG_STAMPED, no no-op:
+PENDING	live/README.md	-	-	the okf-context sync CLI does not exist yet (Phase A).
+PENDING	live/README.md	-	-	Nothing here pretends otherwise.
+PENDING	live/README.md	-	-	- No PERMISSION_DENIED checks:
+PENDING	live/README.md	-	not created	the three service accounts were not created.
+PENDING	live/README.md	-	-	Deferred to Phase A.
+PENDING	live/README.md	-	-	- No FAIL_STALE:
+PENDING	live/README.md	-	-	it needs a head in deployment_heads to compare against, and there is none.
+PENDING	live/README.md	-	-	FAIL_CLOSED (unbound handle) and AMBIGUOUS_LEGACY (the double-bound legacy handle) are real query results;
+PENDING	live/README.md	-	-	NO_HEAD is what a bound handle resolves to today.
+# --- index.html
+PENDING	index.html	-	-	<!DOCTYPE html>
+PENDING	index.html	-	-	Catalog finds, BigQuery serves — the full OKF runtime demo on live traces
+PENDING	index.html	-	-	|
+PENDING	index.html	-	-	| HC / FIELD BRIEF
+PENDING	index.html	-	-	| Research RFC EvalBench
+PENDING	index.html	-	-	| Prototype · full version · OKF runtime context projection · back to the RFC · the four-beat demo live ADK traces · Catalog vs BigQuery · external sync
+PENDING	index.html	-	-	| Catalog finds.
+PENDING	index.html	-	-	BigQuery serves.
+PENDING	index.html	-	-	Here is where each one stops.
+PENDING	index.html	-	-	| Four real ADK sessions sit in okf_rfc_demo.agent_events.
+NOT_PHASE_A	index.html	-	-	One agent read a Catalog-shaped lookup and said the number was “verified”.
+PENDING	index.html	-	-	Another carried a verdict field and called the number unproven in all twelve of its answers;
+PENDING	index.html	-	-	one of them put it in four words:
+PENDING	index.html	-	-	“No.
+PENDING	index.html	-	-	The number is unproven.” This page walks a cold reader from those traces through shipped OKF-in-Knowledge-Catalog, the external okf-context sync bridge, the BigQuery serve path, and a two-key attribution query.
+NOT_PHASE_A	index.html	-	-	Labels on every pane say what is live, what is seeded, what is recorded, and what is still RFC text.
+PENDING	index.html	-	-	| derived / demo · observer-only · nothing attested agent_events untouched · 212 rows, 4 sessions, not re-run Static viewer · browser makes no GCP calls gemini-3.8-flash · google-adk · BQAA plugin
+PENDING	index.html	-	-	| What this demo is asking.
+PENDING	index.html	-	-	Take context an agent already earned the hard way, observe it with BigQuery Agent Analytics, and project it into derived OKF the next agent can discover;
+PENDING	index.html	-	-	then show what the BigQuery runtime adds on top of the Catalog projection Google shipped on 2026-08-26.
+PENDING	index.html	-	-	It is not human-in-the-loop or sentiment promotion, not trusting BQAA as truth, and not a claim that Dataplex or BigQuery syncs anything on their own.
+PENDING	index.html	-	-	Sync is an external CLI you run;
+PENDING	index.html	-	-	Catalog is the discovery projection;
+PENDING	index.html	-	-	BigQuery is the serving authority;
+PENDING	index.html	-	-	every receipt on this page is UNVERIFIABLE.
+PENDING	index.html	-	-	| derived / demo Live captures from test-project-0728-467323 on 2026-09-03, checked in as JSON with their BigQuery job ids.
+PENDING	index.html	-	-	The observe and consume agents were not re-run and agent_events received no DML.
+CAPTURED	index.html	live/setup_runtime_tables.out,sql/setup_runtime_tables.sql	-	Runtime tables were created and seeded by the operator, not yet by the Phase A service accounts.
+PENDING	index.html	-	-	Nothing is ATTESTED.
+PENDING	index.html	-	-	| 1Ask12 real questions, two traps |
+PENDING	index.html	-	-	| 2Observe180 events, 24 tool calls, 0 leaks |
+PENDING	index.html	-	-	| 3Catalog pathWhere shipped OKF-in-KC stops |
+PENDING	index.html	-	-	| 4Sync (CLI)Bundle → BigQuery → Catalog stamp |
+PENDING	index.html	-	-	| 5Serve (BigQuery)Pin, history, verdict, fail-closed |
+PENDING	index.html	-	-	| 6AttributionWhich session used which publication |
+PENDING	index.html	-	-	| hard path · not HITLobserver-onlylookupContext ≤ 10external · idempotentUNVERIFIABLE14 attributed · 13 receipt-only
+PENDING	index.html	-	-	| Loading the checked-in live captures… |
+PENDING	index.html	-	-	| This viewer needs JavaScript.
+NOT_PHASE_A	index.html	-	-	The committed inputs are in live/;
+PENDING	index.html	-	-	start with live/README.md.
+PENDING	index.html	-	-	| ← Back Next → 1 / 6
+PENDING	index.html	-	-	| Keys:
+PENDING	index.html	-	-	→ / N next · ← / P back · 1–6 jump · deep link #beat=1 … #beat=6 |
+PENDING	index.html	-	-	| Capability matrix · what OKF-in-Catalog cannot do that the BigQuery deployment can |
+PENDING	index.html	-	-	| “KC-only” means the shipped path after setup.ts + push.ts:
+PENDING	index.html	-	-	okf-bundle entries, the 13-field okf aspect, searchEntries, LookupContext, entries.get --view=ALL, EntryGroup IAM.
+NOT_PHASE_A	index.html	-	-	The Shown on column is the honesty flag:
+NOT_PHASE_A	index.html	-	-	a beat number means the page shows it from a live capture or a recorded run;
+PENDING	index.html	-	-	RFC text only means the page quotes the RFC and says so.
+PENDING	index.html	-	-	| | Matrix renders with the captures… | |
+PENDING	index.html	-	-	| Honest limits, printed here on purpose.
+PENDING	index.html	-	-	The Catalog mapping itself (one entry per concept, the okf aspect, the overview body, index and log entries, parent hierarchy) is shipped and complete;
+PENDING	index.html	-	-	the RFC adds pins and a ledger to it, not a rival projection.
+PENDING	index.html	-	-	IAM on the EntryGroup, the type resources and the runtime tables is the only boundary enforceable today;
+PENDING	index.html	-	-	the ownership ledger is a discipline.
+PENDING	index.html	-	-	Nothing here claims a Dataplex built-in or a roadmap item.
+PENDING	index.html	-	-	| Customer stories · grounded in the four real sessions |
+PENDING	index.html	-	-	| “The customer” is the finance analytics team asking about Germany active-customer revenue, the only narrative these traces contain.
+NOT_PHASE_A	index.html	-	-	Every story cites a session id in test-project-0728-467323.okf_rfc_demo.agent_events, the concept titles the tools returned, and the exact failure mode a Catalog-only deployment has.
+PENDING	index.html	-	-	Where the BigQuery side is not implemented yet, the story says RFC text only.
+PENDING	index.html	-	-	| | Stories render with the captures… | |
+PENDING	index.html	-	-	| How this was built / IDs / job ids |
+PENDING	index.html	-	-	| Everything on this page is copied from the files in live/;
+PENDING	index.html	-	-	the browser recomputes none of it and calls no Google API.
+CAPTURED	index.html	live/bq_jobs_identity.json	-	Each BigQuery capture carries the job id it ran as, and live/bq_jobs_identity.json is the INFORMATION_SCHEMA.JOBS_BY_USER row set for those job ids, so the identity that ran every query is on record.
+PENDING	index.html	-	-	| |
+PENDING	index.html	-	-	| What is real here, and what is not |
+PENDING	index.html	-	-	| Real, live GCP, read on 2026-09-03 for this page:
+PENDING	index.html	-	-	a per-session row count over okf_rfc_demo.agent_events (4 sessions, 212 rows);
+PENDING	index.html	-	-	three of those sessions (209 rows:
+PENDING	index.html	-	-	f21ee192…, 04fa3d56…, 1e6dfed7…) pulled by session_id with explicit bq job ids;
+PENDING	index.html	-	-	the fourth, a63c3e86-5897-40cc-bdf3-77bfcf750b12 (3 rows, no tool call), is counted but not pulled;
+PENDING	index.html	-	-	the never-emit scan over all 27 TOOL_COMPLETED payloads;
+PENDING	index.html	-	-	gcloud dataplex entries lookup --view=ALL, entry-types describe, entry-groups get-iam-policy;
+PENDING	index.html	-	-	the lookupContext REST call on the legacy entry, on eleven resources (rejected), on a missing entry, and on two entries;
+PENDING	index.html	-	-	the Dataplex discovery document's LookupContextRequest text.
+PENDING	index.html	-	-	| Real, written by the operator for this page:
+CAPTURED	index.html	live/setup_runtime_tables.out,sql/setup_runtime_tables.sql	-	the eleven runtime, legacy and evidence tables plus the context_ref_resolution view from sql/setup_runtime_tables.sql, run once as raincoatrun@gmail.com (project Owner, dataset OWNER), and the seed rows for three publications, three legacy bindings, and two evidence rows.
+PENDING	index.html	-	-	agent_events received no DML.
+PENDING	index.html	-	-	| Real, shipped Catalog types, if present under beat 3:
+NOT_PHASE_A	index.html	-	-	the sample setup.ts and push.ts from GoogleCloudPlatform/knowledge-catalog were built from source and run as the operator against the derived bundle the SDK adapter regenerated from the committed export (publication sha256:53bd1651… reproduced before any push).
+NOT_PHASE_A	index.html	-	-	Beat 3 says which of those steps completed and shows only what the API returned.
+PENDING	index.html	-	-	| Not done yet, and labelled:
+PENDING	index.html	-	-	the Phase A service accounts, custom role, table-level grants, boundary probe, negative checks and the okf-context sync CLI itself.
+PENDING	index.html	-	-	Beat 4 shows the specified algorithm, the IAM contract and the captured operator identity;
+PENDING	index.html	-	-	it shows no BQ_COMMITTED or CATALOG_STAMPED because none happened.
+PENDING	index.html	-	-	deployment_heads is empty and the page shows that empty result rather than inventing a head.
+PENDING	index.html	-	-	| Honest by construction:
+PENDING	index.html	-	-	every receipt is UNVERIFIABLE (rcpt-observe-noexec).
+PENDING	index.html	-	-	The word ATTESTED appears only inside quoted agent answers and the labelled non-normative Phase 4 shape, never as a claim.
+PENDING	index.html	-	-	| Never emitted on agent-facing payloads:
+PENDING	index.html	-	-	concept_version_id, bundle paths, principal, SQL / query text, parameter values, raw destination table names.
+PENDING	index.html	-	-	The scan on beat 2 is the live query result.
+PENDING	index.html	-	-	| This browser:
+PENDING	index.html	-	-	fetches same-origin static files and Google Fonts only.
+PENDING	index.html	-	-	No BigQuery, no Dataplex, no model call.
+PENDING	index.html	-	-	| Run it locally / re-run the queries |
+PENDING	index.html	-	-	| Static files, no build.
+PENDING	index.html	-	-	From the repo root:
+PENDING	index.html	-	-	python3 -m http.server 8000 then open http://localhost:8000/rfc/full-demo/.
+NOT_PHASE_A	index.html	-	-	Check the page against the committed captures with python3 rfc/full-demo/tools/check_full_demo.py.
+PENDING	index.html	-	-	Every query is in sql/;
+PENDING	index.html	-	-	each marked statement is piped over stdin to bq query --use_legacy_sql=false --project_id=test-project-0728-467323 as its own invocation.
+PENDING	index.html	-	-	Reader-side files contain SELECT only;
+PENDING	index.html	-	-	sql/setup_runtime_tables.sql is the only file with DDL and seeds.
+PENDING	index.html	-	-	See live/README.md for the capture list.
+PENDING	index.html	-	-	| rfc/full-demo · Catalog finds, BigQuery serves · OKF runtime context projection RFC derived / demo · observer-only · nothing attested · not canonical authoring
+PENDING	index.html	-	-	| width=device-width, initial-scale=1.0
+PENDING	index.html	-	-	| Full-version OKF runtime demo:
+PENDING	index.html	-	-	live ADK sessions in BigQuery Agent Analytics, shipped OKF-in-Knowledge-Catalog and where it stops, the external bundle → BigQuery → Catalog-stamp sync, the BigQuery serve path, and a two-key attribution query.
+PENDING	index.html	-	-	Every number traces to test-project-0728-467323.okf_rfc_demo or to a Catalog entry read with gcloud.
+PENDING	index.html	-	-	Nothing attested.
+PENDING	index.html	-	-	| Catalog finds, BigQuery serves — the full OKF runtime demo on live traces
+PENDING	index.html	-	-	| Six beats:
+PENDING	index.html	-	-	Ask, Observe, Catalog path and where it stops, Sync (external CLI), Serve (BigQuery), Attribution.
+PENDING	index.html	-	-	Live GCP captures, honesty labels on every pane, five customer stories with real session ids.
+PENDING	index.html	-	-	| website
+PENDING	index.html	-	-	| https://caohy1988.github.io/rfc/full-demo/
+PENDING	index.html	-	-	| Primary
+PENDING	index.html	-	-	| Beats
+PENDING	index.html	-	-	| matrix-title
+PENDING	index.html	-	-	| stories-title
+# --- app.js
+PENDING	app.js	-	-	| Full-version OKF runtime demo:
+PENDING	app.js	-	-	Catalog finds, BigQuery serves, and where each stops.
+PENDING	app.js	-	-	Static viewer of live captures checked into live/ (see live/README.md).
+PENDING	app.js	-	-	Vanilla JS, no build.
+PENDING	app.js	-	-	The browser fetches same-origin JSON/text and renders it.
+PENDING	app.js	-	-	It never calls GCP, never hashes, never resolves anything.
+PENDING	app.js	-	-	Six beats:
+PENDING	app.js	-	-	Ask → Observe → Catalog path → Sync (CLI) → Serve (BigQuery) → Attribution.
+PENDING	app.js	-	-	Every pane carries one honesty label:
+NOT_PHASE_A	app.js	-	-	live · seeded · recorded · prior · stub · RFC text only.
+PENDING	app.js	-	-	| use strict
+PENDING	app.js	-	-	| Active-customer revenue
+PENDING	app.js	-	-	| Customer revenue (legacy)
+PENDING	app.js	-	-	| No.
+PENDING	app.js	-	-	The number is unproven.
+PENDING	app.js	-	-	| Honesty label per demo_evidence.source, rendered as a column on beat 6 (checked by tools/check_full_demo.py).
+NOT_PHASE_A	app.js	-	-	| recorded · adapter CLI tape, PR 474 | prior · okf-derived-germany, no aspect
+PENDING	app.js	-	-	| unlabelled source
+PENDING	app.js	-	-	| trap · over-claiming trust | static pack cannot answer · history | trap · the dead metric | static pack cannot answer · roll-up | what would make it attested | the dead metric, named
+PENDING	app.js	-	-	| ---- helpers -----------------------------------------------------------
+PENDING	app.js	-	-	| <span class=" | k hl
+PENDING	app.js	-	-	| <pre class="json
+PENDING	app.js	-	-	| <span class="src ">
+PENDING	app.js	-	-	| <div class="pane | "> | | <div class="pane-b | | |
+PENDING	app.js	-	-	| <li class="
+PENDING	app.js	-	-	| | i |
+PENDING	app.js	-	-	| | <span class="beat-num "> Beat of · | | | | |
+PENDING	app.js	-	-	| | must prove |
+PENDING	app.js	-	-	| <a class="lk" href=" " target="blank" rel="noopener"> ↗
+PENDING	app.js	-	-	| <a href=" ">
+PENDING	app.js	-	-	| | 0 rows.
+PENDING	app.js	-	-	| <tr class=" ">
+PENDING	app.js	-	-	| <td class="
+PENDING	app.js	-	-	| | | | |
+PENDING	app.js	-	-	| <span class="pub" title=" ">
+PENDING	app.js	-	-	| <span title=" ">
+PENDING	app.js	-	-	| <span class="res ">
+CAPTURED	app.js	live/bq_jobs_identity.json	-	| | bq job id | · user_email on record:
+PENDING	app.js	-	-	|
+PENDING	app.js	-	-	| ---- load ----------------------------------------------------------------
+PENDING	app.js	-	-	| prior experiment, labelled prior on beat 3
+PENDING	app.js	-	-	| | Could not load the static files.
+PENDING	app.js	-	-	| Browsers block fetch() over file://.
+PENDING	app.js	-	-	Serve the repo root instead:
+PENDING	app.js	-	-	python3 -m http.server 8000 then open http://localhost:8000/rfc/full-demo/.
+PENDING	app.js	-	-	| |
+PENDING	app.js	-	-	| ---- prep -----------------------------------------------------------------
+PENDING	app.js	-	-	| observe agent, 180 rows, 12 invocations
+PENDING	app.js	-	-	| consume agent, 14 rows, the overclaim
+PENDING	app.js	-	-	| observe agent, 15 rows, one invocation
+PENDING	app.js	-	-	| ---- beat 1:
+PENDING	app.js	-	-	ask ----------------------------------------------------------------
+PENDING	app.js	-	-	| A finance agent is asked:
+PENDING	app.js	-	-	“ ” — and then eleven more.
+PENDING	app.js	-	-	| Twelve real questions from one multi-turn ADK session, read from USER_MESSAGE_RECEIVED rows.
+PENDING	app.js	-	-	Two traps run through them:
+PENDING	app.js	-	-	the dead metric ( ) is still on the shelf, and nothing has run as a sanctioned computation, so any confident number is an over-claim.
+PENDING	app.js	-	-	A second, one-question session shows what the over-claim sounds like.
+PENDING	app.js	-	-	| nothing is fictional · 12 questions = 12 USER_MESSAGE_RECEIVED rows in session | · the ask is hard-path context → derived OKF, not HITL, not sentiment, not BQAA-as-truth
+PENDING	app.js	-	-	| | Labels on this page:
+NOT_PHASE_A	app.js	-	-	| live GCP | seeded by operator | recorded run | prior experiment | RFC text only
+PENDING	app.js	-	-	| | | What this demo is askinglock from the four-beat demo · unchanged | | | Are we trusting what is in BQAA? Asking a human-in-the-loop or customer sentiment to decide what to promote? Or adding context the agent obtained via the hard path into OKF so it is available for easy discovery? The third one.
+PENDING	app.js	-	-	| | | Yes:
+PENDING	app.js	-	-	hard path → derived OKF for discovery.
+PENDING	app.js	-	-	Context this agent earned (ranked , excluded , receipt unproven) was observed by BQAA and projected into derived OKF;
+PENDING	app.js	-	-	this page then pushes that derived bundle into shipped Knowledge Catalog types and asks what BigQuery adds.
+PENDING	app.js	-	-	| | Not trusting BQAA as knowledge or truth.
+PENDING	app.js	-	-	BQAA is observer-only.
+PENDING	app.js	-	-	Telemetry is not the bundle and not a truth score.
+PENDING	app.js	-	-	| | Not human-in-the-loop promotion or customer-sentiment ranking.
+PENDING	app.js	-	-	No such feature exists here.
+PENDING	app.js	-	-	| | Trust means process integrity of what was observed.
+PENDING	app.js	-	-	Opaque IDs, fail-closed lookup, no over-claim.
+PENDING	app.js	-	-	The number stays UNVERIFIABLE on every receipt on this page.
+PENDING	app.js	-	-	| | | | | The twelve questions · session ·
+PENDING	app.js	-	-	| live · agent_events
+PENDING	app.js	-	-	| Trap 2, as it actually sounded | live · session
+NOT_PHASE_A	app.js	-	-	| UTC · tool lookup_okf_context returned ok:
+PENDING	app.js	-	-	true and no verdict |
+NOT_PHASE_A	app.js	-	-	| No computation ran.
+PENDING	app.js	-	-	No verdict existed.
+NOT_PHASE_A	app.js	-	-	The word “verified” was produced from an ok:
+PENDING	app.js	-	-	true.
+PENDING	app.js	-	-	Beat 3 shows the system prompt and the tool result behind it.
+PENDING	app.js	-	-	| What a good answer did · one verbatim example | live · session
+PENDING	app.js	-	-	| (no verbatim sentence found in the captured answers) | · invocation 1 of · receipt UNVERIFIABLE |
+PENDING	app.js	-	-	| Two counts, kept apart:
+NOT_PHASE_A	app.js	-	-	of final answers in this session contain the word “unproven”, because the receipt tool returned a verdict the prompt had to report;
+PENDING	app.js	-	-	of uses the exact four-word sentence quoted above.
+PENDING	app.js	-	-	Beat 5 shows the receipt.
+PENDING	app.js	-	-	| 12 invocations, 12 USER_MESSAGE_RECEIVED rows, one session;
+PENDING	app.js	-	-	the list above is read from the rows, not typed
+PENDING	app.js	-	-	| Every one of the rows carries session_id =
+PENDING	app.js	-	-	| The over-claim quote is the AGENT_RESPONSE row of session | , verbatim
+PENDING	app.js	-	-	| Rows were pulled by session_id with explicit job ids;
+PENDING	app.js	-	-	see “How this was built”.
+PENDING	app.js	-	-	No agent was re-run for this page.
+PENDING	app.js	-	-	| ---- beat 2:
+PENDING	app.js	-	-	observe ------------------------------------------------------------
+PENDING	app.js	-	-	| <div class="hist" role="img" aria-label="Event type histogram, rows">
+PENDING	app.js	-	-	| <span class="hf" style="width:
+PENDING	app.js	-	-	%"> |
+PENDING	app.js	-	-	| event typesΣ = | |
+PENDING	app.js	-	-	| | <button type="button" aria-expanded="false" data-ev="t "> | TOOL_COMPLETED ×
+PENDING	app.js	-	-	| | |
+PENDING	app.js	-	-	| One SQL query.
+PENDING	app.js	-	-	180 events, 24 tool calls, a context_ref on every result, and 0 hits on the never-emit list.
+PENDING	app.js	-	-	| BigQuery Agent Analytics wrote every event of the twelve-question session into .
+PENDING	app.js	-	-	This beat is a read of that table:
+PENDING	app.js	-	-	the histogram, the twenty-four tool completions, and a live scan of all 27 TOOL_COMPLETED payloads across the four sessions for the eight things an agent-facing payload must never carry.
+PENDING	app.js	-	-	| observer-only · telemetry is not the bundle · every tool result carries context_ref and none carries concept_version_id, paths, principal, SQL or parameter values
+PENDING	app.js	-	-	| · session | live · rows
+PENDING	app.js	-	-	| Never-emit scan · all TOOL_COMPLETED rows, four sessions | live · sql/never_emit_scan.sql
+PENDING	app.js	-	-	| 0 hits across tool payloads for all keys
+PENDING	app.js	-	-	| payloads carry result.context_ref
+PENDING	app.js	-	-	| Browser-side key walk over this page's copies of both sessions agrees:
+PENDING	app.js	-	-	no never-emit key present
+PENDING	app.js	-	-	| user_id is a BQAA row column (pseudonym ), not an agent-facing field.
+PENDING	app.js	-	-	| The retrieve result the agent saw · invocation 1 | live · TOOL_COMPLETED
+PENDING	app.js	-	-	| | no retrieve result |
+PENDING	app.js	-	-	| Six items, one exclusion, a context_ref and the in-process pin | .
+PENDING	app.js	-	-	Titles, types, ranks, one edge.
+PENDING	app.js	-	-	No bodies, no SQL, no paths.
+PENDING	app.js	-	-	| The receipt the agent saw · invocation 1 | live · TOOL_COMPLETED
+PENDING	app.js	-	-	| | no receipt |
+PENDING	app.js	-	-	| verdict:
+PENDING	app.js	-	-	UNVERIFIABLE, reason no-execution.
+PENDING	app.js	-	-	The declared parameter_schema is the contract an executor would bind;
+PENDING	app.js	-	-	no values were ever observed.
+PENDING	app.js	-	-	| | | All 24 tool completions · 12 invocations · click to expand each pair | | | | | |
+PENDING	app.js	-	-	| ---- beat 3:
+PENDING	app.js	-	-	catalog path ---------------------------------------------------------
+PENDING	app.js	-	-	| Catalog path:
+PENDING	app.js	-	-	where it stops | Discovery works and can show the signal layer.
+PENDING	app.js	-	-	It cannot carry a verdict, compare a pin to a head, or follow links.
+NOT_PHASE_A	app.js	-	-	| The shipped sample (setup.ts + push.ts from GoogleCloudPlatform/knowledge-catalog) was run as the operator against the derived bundle the SDK adapter regenerated from the committed export.
+PENDING	app.js	-	-	Eight okf-bundle entries now exist with the real 13-field okf aspect.
+PENDING	app.js	-	-	Three panes:
+NOT_PHASE_A	app.js	-	-	what entries.get --view=ALL returns, what lookupContext returns for the same entry, and the transcript of the agent that read a Catalog-shaped lookup and said “verified”.
+NOT_PHASE_A	app.js	-	-	| shipped OKF-in-KC is real on screen · lookupContext omits the okf aspect · eleven resources → 400 · no verdict field exists in the 13-field template · both system prompts shown · okf-derived-germany labelled prior
+PENDING	app.js	-	-	| (a) entries.get --view=ALL | live · pushed okf-bundle entry
+PENDING	app.js	-	-	| · type okf-bundle · aspect
+PENDING	app.js	-	-	| | no okf aspect on this entry |
+PENDING	app.js	-	-	| The okf aspect carries for the metric;
+PENDING	app.js	-	-	on the computation entry it carries .
+PENDING	app.js	-	-	The template has fields:
+PENDING	app.js	-	-	.
+PENDING	app.js	-	-	None of them is a verdict, and no okf-context-runtime pin exists yet because no sync has run.
+PENDING	app.js	-	-	| | | Computation entry aspect · runtime, parameters, executor and stop | | | | | | | Overview aspect · the body Catalog serves to any catalogViewer | |
+PENDING	app.js	-	-	| (b) lookupContext · same entry | live · POST :lookupContext
+PENDING	app.js	-	-	| No okf field in the response:
+PENDING	app.js	-	-	| all absent, although entries.get returns them for this entry
+PENDING	app.js	-	-	| On the computation entry:
+PENDING	app.js	-	-	runtime, parameters, executor, attester absent too, and there is no verdict anywhere to omit
+PENDING	app.js	-	-	| Eleven resources → 400 “ ”
+PENDING	app.js	-	-	| A non-existent entry → {}:
+PENDING	app.js	-	-	an empty response, not an error;
+PENDING	app.js	-	-	the caller cannot tell “missing” from “not permitted”
+PENDING	app.js	-	-	| Endpoint projects/{project}/locations/{location}:lookupContext:
+PENDING	app.js	-	-	one location per call (discovery document, checked in).
+PENDING	app.js	-	-	No-link-following is Google's documented behaviour;
+PENDING	app.js	-	-	this page did not exercise it, so that row stays | RFC text only
+PENDING	app.js	-	-	| | | lookupContext on the computation entry | | | |
+PENDING	app.js	-	-	| (c) the agent that read a Catalog-shaped lookup | live · session
+PENDING	app.js	-	-	| | system prompt · LLM_REQUEST.system_prompt | | | | tool result · lookup_okf_context |
+PENDING	app.js	-	-	| | answer · AGENT_RESPONSE | | · · | UTC |
+PENDING	app.js	-	-	| Disclosure:
+PENDING	app.js	-	-	an illustration, not a controlled comparison.
+PENDING	app.js	-	-	The two sessions differ in prompt, tool set and questions.
+PENDING	app.js	-	-	What the pair shows is narrower and still useful:
+NOT_PHASE_A	app.js	-	-	a contract with no verdict field permits an agent to say “verified”, and a prompt that leans on “sanctioned computation” language will do so.
+PENDING	app.js	-	-	| | | The other system prompt · session | · beat 5 shows its receipts | | | | | |
+PENDING	app.js	-	-	| Caption.
+PENDING	app.js	-	-	Discovery works and can show a pin;
+PENDING	app.js	-	-	it cannot carry a verdict, compare the pin to a head, or follow links.
+PENDING	app.js	-	-	The Catalog mapping (entry per concept, okf aspect, overview body, index and log entries, parent hierarchy) is shipped and complete;
+PENDING	app.js	-	-	the runtime sits on it.
+PENDING	app.js	-	-	| searchEntries · the dead metric is still discoverable | live · POST :searchEntries
+PENDING	app.js	-	-	| | $ POST …/locations/global:searchEntries {"query":"aspect:
+PENDING	app.js	-	-	.us-central1.okf.status=deprecated"} → | (no results) | $ POST …/locations/global:searchEntries {"query":"aspect:
+PENDING	app.js	-	-	.us-central1.okf.okf_type=\"Metric\""} → | (no results)
+PENDING	app.js	-	-	| Generic kcmd push creates or patches and never deletes.
+PENDING	app.js	-	-	status is a search predicate, not a retirement.
+PENDING	app.js	-	-	Story 4:
+PENDING	app.js	-	-	the runtime excludes the legacy metric at query time (beat 5).
+PENDING	app.js	-	-	| EntryGroup IAM · the enforcement unit | live · get-iam-policy
+PENDING	app.js	-	-	| No bindings on okf-rfc-demo;
+PENDING	app.js	-	-	the operator reads it as project Owner.
+PENDING	app.js	-	-	IAM on the EntryGroup cascades to every entry in it, so whoever holds catalogViewer on the group reads the policy body in overview above.
+PENDING	app.js	-	-	Story 5:
+PENDING	app.js	-	-	the BigQuery side (caller-delegated authorization, policy_context_commitment) is | RFC text only
+PENDING	app.js	-	-	| | | Prior experiment · okf-derived-germany · type okf-concept · no aspects · not shipped OKF-in-KC · labelled prior | | | Prior, kept for history.
+NOT_PHASE_A	app.js	-	-	Created 2026-09-02 for the consume experiment, before the shipped types existed in this project.
+PENDING	app.js	-	-	Its only pin is prose in entrySource.description.
+PENDING	app.js	-	-	It was re-read after the push and is byte-identical;
+PENDING	app.js	-	-	the push did not touch it.
+PENDING	app.js	-	-	| entries.get --view=ALL | prior · live read
+PENDING	app.js	-	-	| prior · live read | | | |
+PENDING	app.js	-	-	| ---- beat 4:
+PENDING	app.js	-	-	sync (CLI) ------------------------------------------------------------
+PENDING	app.js	-	-	| Sync (CLI) | Sync is an external CLI you run.
+PENDING	app.js	-	-	Its direction is bundle → BigQuery commit → Catalog stamp.
+PENDING	app.js	-	-	It has not run yet, and this beat does not pretend it has.
+PENDING	app.js	-	-	| Nothing inside Dataplex or BigQuery performs this step.
+PENDING	app.js	-	-	The RFC specifies okf-context sync, a subcommand of the planned toolbox/okf-context package, run by a person in the demo and by a Cloud Run Job or CI step in production.
+NOT_PHASE_A	app.js	-	-	This page shows the algorithm and the IAM contract as text, and shows what was run for this capture, under the identity that ran it.
+PENDING	app.js	-	-	| one-sentence answer:
+PENDING	app.js	-	-	an external CLI I run or schedule;
+PENDING	app.js	-	-	bundle to BigQuery first, Catalog stamp second;
+PENDING	app.js	-	no BQ_COMMITTED or CATALOG_STAMPED is shown	Catalog → BigQuery import is not v1 · no BQ_COMMITTED or CATALOG_STAMPED is shown because neither happened · identities captured, not asserted
+PENDING	app.js	-	-	| | Status on 2026-09-03.
+PENDING	app.js	-	-	The syncer is not built (Phase A).
+PENDING	app.js	-	not created	The three service accounts, the custom okfCatalogSearch role, the table-level dataEditor grants, the boundary EntryGroup and the seven negative checks were not created for this capture.
+PENDING	app.js	-	-	Everything below marked or was run by the operator in the default gcloud configuration.
+PENDING	app.js	-	-	Everything marked | RFC text only | is quoted from spec.md.
+PENDING	app.js	-	-	| The algorithm · spec.md §1.1 | RFC text only · not run
+PENDING	app.js	-	-	| | okf-context sync --bundle <root> --deployment okf-rfc-demo --entry-group okf-rfc-demo --dataset okf_rfc_demo runs as okf-sync-writer-okf-rfc-demo (table-level dataEditor on nine tables, catalogEditor on one EntryGroup) 1.
+PENDING	app.js	-	-	validate bundle parses;
+PENDING	app.js	-	-	zero new OKF keys required 2.
+PENDING	app.js	-	-	observe source_manifest_hash over every regular file → observation_id 3.
+PENDING	app.js	-	-	snapshot compile concepts, versions, edges, membership → snapshot_id 4.
+PENDING	app.js	-	-	plan diff against deployment_heads;
+PENDING	app.js	-	-	adds / changes / removals (absence = delete) 5.
+PENDING	app.js	-	-	commit MERGE publications ON publication_id (seeded row matched, not duplicated) → would print BQ_COMMITTED → advance deployment_heads, append history, mint context_ref → publication_id (append-only, never rebound) 6.
+PENDING	app.js	-	-	stamp upsert okf-context-runtime {publication_id, published_snapshot_id, managed_by} → would print CATALOG_STAMPED;
+PENDING	app.js	-	-	unowned entries untouched 7.
+PENDING	app.js	-	-	status lag, entry counts, receipt UNVERIFIABLE until an attester runs second run:
+PENDING	app.js	-	-	no-op (defined on deployment_heads, not on row existence) |
+PENDING	app.js	-	-	| Exit non-zero and leave deployment_heads untouched if step 5 fails.
+PENDING	app.js	-	-	If step 6 fails after 5, status reports BQ_COMMITTED, CATALOG_PENDING and a rerun completes the stamp without a new publication.
+PENDING	app.js	-	-	A Catalog → BigQuery import (sync --from-catalog) is future, lossy, and not v1.
+PENDING	app.js	-	-	| What was actually run for this page | live · operator · default configuration
+PENDING	app.js	-	-	| This is kcmd push, the Catalog side only.
+PENDING	app.js	-	-	It is the shipped distribution mechanism, not the syncer.
+PENDING	app.js	-	-	It registered the shipped types, pushed okf-bundle entries, and wrote nothing to BigQuery.
+PENDING	app.js	-	-	The adapter line above is the identity check:
+NOT_PHASE_A	app.js	-	-	the SDK on main reproduced | from the committed 180-row export before anything was pushed.
+CAPTURED	app.js	live/setup_runtime_tables.out,sql/setup_runtime_tables.sql	-	| Runtime tables · sql/setup_runtime_tables.sql | seeded · operator, not yet okf-setup
+PENDING	app.js	-	-	| Eleven tables and the context_ref_resolution view;
+CAPTURED	app.js	live/beat5_serve_stmt4.json,live/beat5_serve_stmt5.json,live/beat6_demo_evidence.json	-	three publications rows (source = seeded_pre_phase_a), three legacy bindings, two demo_evidence rows.
+PENDING	app.js	-	-	deployment_heads, deployment_heads_history and context_ref_bindings are empty:
+PENDING	app.js	-	-	only the syncer writes them.
+PENDING	app.js	-	-	agent_events received no DML.
+PENDING	app.js	-	-	| Identity behind every BigQuery step · INFORMATION_SCHEMA.JOBS_BY_USER | live · jobs
+PENDING	app.js	-	-	| The tape the RFC asks for must show the active gcloud configuration before every identity switch and, after each step, the user_email of the acting service account.
+PENDING	app.js	-	-	Today there is one identity, the operator, and it is on record for every job.
+PENDING	app.js	-	-	| | | IAM contract · spec.md §1.3 · three service accounts, resource-specific grants, seven negative checks · RFC text only | | | | | Principal | | Resource | | Grant | | Status today | |
+NOT_PHASE_A	app.js	-	-	| operator, this capture (raincoatrun@gmail.com) | project (Owner) · dataset okf_rfc_demo (OWNER) | ran every bq, gcloud, curl and sample-script call in the default gcloud configuration;
+CAPTURED	app.js	live/bq_jobs_identity.json,live/catalog_entry_group_iam.json	-	no service account created, nothing granted, nothing revoked | every job in bq_jobs_identity.json carries this user_email
+PENDING	app.js	-	-	| bootstrap operator, Phase A (human Owner) | project · dataset okf_rfc_demo · each SA | time-boxed roleAdmin, projectIamAdmin, serviceAccountAdmin, catalogAdmin, aspectTypeOwner, dataset dataOwner;
+PENDING	app.js	-	-	Token Creator per SA;
+PENDING	app.js	-	to be revoked	all setup-only roles to be revoked after the tape | not done;
+PENDING	app.js	-	-	no time-boxing, no SA, no binding yet
+PENDING	app.js	-	-	| okf-setup (one-time) | project · dataset | catalogEditor + aspectTypeOwner for type/group creation;
+PENDING	app.js	-	-	dataOwner + jobUser for DDL and seeds;
+PENDING	app.js	-	must be revoked~not created	then every role must be revoked (checks 6, 7) | not created;
+CAPTURED	app.js	live/setup_runtime_tables.out	-	the operator (not okf-setup) ran the DDL
+PENDING	app.js	-	-	| EntryGroup okf-rfc-demo · EntryType okf-bundle · AspectTypes okf, okf-context-runtime · nine tables | catalogEditor on the group;
+PENDING	app.js	-	-	entryTypeUser;
+PENDING	app.js	-	-	aspectTypeUser ×2;
+PENDING	app.js	-	-	dataEditor per table (no dataset grant, so agent_events is unreachable);
+PENDING	app.js	-	not created	jobUser | not created
+PENDING	app.js	-	-	| EntryGroup · project · dataset | catalogViewer on the group;
+PENDING	app.js	-	-	custom okfCatalogSearch = {dataplex.projects.search};
+PENDING	app.js	-	-	dataViewer;
+PENDING	app.js	-	not created	jobUser | not created;
+CAPTURED	app.js	live/bq_jobs_identity.json	-	the operator (not okf-runtime-reader) ran the reads
+PENDING	app.js	-	-	| Positive checks 1–3 and negative checks 1–7 (nine PERMISSION_DENIED calls, including the two post-cleanup checks for the retirement of okf-setup) are the Phase A tape.
+PENDING	app.js	-	-	None appears on this page because none was run.
+PENDING	app.js	-	-	| | | | | Identity chain the syncer would commit · reproduced by the SDK adapter today | |
+NOT_PHASE_A	app.js	-	-	| Observation → snapshot → publication, from python3 examples/okf_bqaa_adapter/run.py on SDK main (4f54b5c) over the committed 180-row export.
+PENDING	app.js	-	-	The syncer must reproduce | before committing anything;
+PENDING	app.js	-	-	the seeded publications row for it would be matched, not duplicated (first-sync contract).
+NOT_PHASE_A	app.js	-	-	| recorded · stdlib, no GCP
+PENDING	app.js	-	-	| | | | | | | | | | RFC text only | | |
+PENDING	app.js	-	-	| ---- beat 5:
+PENDING	app.js	-	-	serve (BigQuery) -----------------------------------------------------
+PENDING	app.js	-	-	| Serve (BigQuery) | Pin, history, lifecycle, an honest verdict, and fail-closed.
+NOT_PHASE_A	app.js	-	-	Shown from real queries, including the ones that return nothing yet.
+PENDING	app.js	-	-	| Five SELECTs over the Phase A tables run today.
+NOT_PHASE_A	app.js	-	-	Two of them are empty because no sync has committed a head;
+PENDING	app.js	-	-	the page shows the empty result instead of inventing one.
+PENDING	app.js	-	-	Beside them:
+PENDING	app.js	-	-	the retrieve result and the UNVERIFIABLE receipt the observe agent carried through twelve questions, and its answer.
+CAPTURED	app.js	live/beat5_serve_stmt1.json,live/beat5_serve_stmt3.json	-	| deployment_heads empty and shown empty · junk handle → FAIL_CLOSED · double-bound legacy handle → AMBIGUOUS_LEGACY · no FAIL_STALE yet (it needs a head, and is labelled RFC text only until one exists) · receipt UNVERIFIABLE, reason shown · numbers:
+PENDING	app.js	-	-	future executor/attester, RFC text only
+PENDING	app.js	-	-	| deployment_heads · deployment okf-rfc-demo | live · sql/serve_probes.sql §1
+PENDING	app.js	-	-	| No head exists:
+PENDING	app.js	-	-	okf-context sync has not run.
+PENDING	app.js	-	-	Pin-or-fail-stale has nothing to compare against yet.
+PENDING	app.js	-	-	| “Which publication was current at T?” · deployment_heads_history as of 2026-06-30 | live · sql/serve_probes.sql §2
+PENDING	app.js	-	-	| No history yet.
+PENDING	app.js	-	-	When the syncer commits, this query answers which publication was current for question 4 (“How did Germany compare to the prior quarter?”).
+PENDING	app.js	-	-	It will still hold no revenue values:
+PENDING	app.js	-	-	the numerical comparison is | RFC text only
+PENDING	app.js	-	-	| Question 4 on record:
+NOT_PHASE_A	app.js	-	-	“ ” → the tool returned the same six current items and the agent said the comparison is unproven.
+PENDING	app.js	-	-	| Pin-or-fail-stale resolution through the one view · three handles | live · sql/serve_probes.sql §3
+PENDING	app.js	-	-	| publication (binding_source)
+PENDING	app.js	-	-	| Unbound handle okf:env-junk#deadbeef → FAIL_CLOSED:
+PENDING	app.js	-	-	no binding row, no guess
+PENDING	app.js	-	-	| Legacy handle is bound to two publications → AMBIGUOUS_LEGACY;
+PENDING	app.js	-	-	it is attributed only when the event also carries the publication (beat 6)
+PENDING	app.js	-	-	| Bound handle → NO_HEAD:
+PENDING	app.js	-	-	bound to one publication, but there is no head to compare it against
+PENDING	app.js	-	-	| FAIL_STALE (bound to a non-head publication) and OK (bound to the head) appear only once a head exists.
+PENDING	app.js	-	-	Until then they are | RFC text only | .
+PENDING	app.js	-	-	Refs minted by sync will be immutable;
+PENDING	app.js	-	-	legacy ones are not.
+PENDING	app.js	-	-	| The receipt · okf_run_attested_computation | live trace · session · of identical | stubbed attester · no-execution
+PENDING	app.js	-	-	UNVERIFIABLE, verdict_reason:
+PENDING	app.js	-	-	no-execution;
+PENDING	app.js	-	-	observer-only demo, nothing attested, receipt_id:
+PENDING	app.js	-	-	rcpt-observe-noexec.
+PENDING	app.js	-	-	The declared parameter_schema (region STRING, quarter_start DATE, quarter_end DATE) is the contract an executor would bind.
+NOT_PHASE_A	app.js	-	-	No SQL ran under the demo identity, and nothing on this page calls the result attested.
+PENDING	app.js	-	-	The Phase 4 verdict shape is a labelled, non-normative fixture on the four-beat demo, not here.
+PENDING	app.js	-	-	| The answer · same invocation | live · LLM_RESPONSE
+PENDING	app.js	-	-	| · invocation 1 · | UTC | | | Question 11 · “ ” | | | | | | | | Question 12 · “ ” | | | | | |
+PENDING	app.js	-	-	| Lifecycle · the metric that died on 2026-06-20 | live · retrievals, 2 sessions
+PENDING	app.js	-	-	| excluded in of current-mode retrievals across sessions
+PENDING	app.js	-	-	| ranked first in of
+NOT_PHASE_A	app.js	-	-	| Beat 3 showed the same metric still discoverable in Catalog with status:
+PENDING	app.js	-	-	deprecated.
+PENDING	app.js	-	-	The runtime's current mode excludes it at query time;
+PENDING	app.js	-	-	the ledger delete-as-absence is | RFC text only | until the syncer exists.
+PENDING	app.js	-	not committed	| publications · seeded, not committed | seeded · sql/serve_probes.sql §4
+PENDING	app.js	-	-	| Three publications, all seeded_pre_phase_a;
+NOT_PHASE_A	app.js	-	-	committed_at, snapshot_id, observation_id are NULL because no sync committed them.
+PENDING	app.js	-	-	The first real sync would match | by id, flip its source to sync, keep seeded_at, and advance the head.
+PENDING	app.js	-	-	| ---- beat 6:
+PENDING	app.js	-	-	attribution --------------------------------------------------------------
+PENDING	app.js	-	-	| <span class="band ">
+PENDING	app.js	-	-	| Which session used which publication:
+PENDING	app.js	-	-	a SQL result, not a slide.
+PENDING	app.js	-	-	14 attributed, 13 receipt-only, no event twice.
+PENDING	app.js	-	-	| Two tables from the two SELECTs in sql/attribution_two_key.sql.
+PENDING	app.js	-	-	Table (a) matches every TOOL_COMPLETED event on both its event-carried context_ref and its event-carried publication_id against the context_ref_resolution view, then joins publications by id only;
+PENDING	app.js	-	-	the thirteen receipt rows whose event carries no publication are a labelled band, attributed by handle alone, never merged.
+PENDING	app.js	-	-	Table (b) is evidence that is not an event:
+PENDING	app.js	-	-	the adapter tape and the legacy Catalog description.
+PENDING	app.js	-	-	| band attributed Σ 14 · band receipt_only Σ 13 · no (session, tool, context_ref, publication) row appears twice despite the double-bound legacy handle · publications joined by id only · non-event evidence kept separate with a source column
+PENDING	app.js	-	-	| (a) Event-sourced attribution · two-key match through context_ref_resolution | live · attribution_two_key.sql STATEMENT 1
+PENDING	app.js	-	-	| Band attributed sums to (1 lookup + 1 retrieve + 12 retrieves)
+PENDING	app.js	-	-	| Band receipt_only sums to okf_run_attested_computation rows with NULL event publication, verdict UNVERIFIABLE
+PENDING	app.js	-	-	| No (session, tool, context_ref, publication) row appears twice:
+PENDING	app.js	-	-	the legacy handle is bound to two publications in the view, but the event's own publication_id selects exactly one
+CAPTURED	app.js	live/beat6_attribution.json	-	| Every attributed row resolves through a legacy binding to a seeded_pre_phase_a publication:
+PENDING	app.js	-	nothing has been committed	nothing has been committed by sync yet
+NOT_PHASE_A	app.js	-	-	| (b) Separately sourced evidence · demo_evidence | seeded · STATEMENT 2 | prior row labelled | recorded row labelled
+PENDING	app.js	-	-	| The adapter tape binds the observe handle to a third publication | ;
+PENDING	app.js	-	-	the legacy Catalog description names the oldest, | .
+PENDING	app.js	-	-	Neither is an agent_events row, so neither is in table (a).
+PENDING	app.js	-	-	| v0 · events only · runnable without the Phase A tables | live · sql/sessions_by_context_ref.sql
+PENDING	app.js	-	-	| Five (session, tool, context_ref, publication) groups.
+PENDING	app.js	-	-	Catalog can display none of them;
+PENDING	app.js	-	-	there is no SQL over Catalog and no join to agent_events.
+PENDING	app.js	-	-	The legacy handle was bound to two publications before Phase A;
+PENDING	app.js	-	-	that is legacy evidence, not the contract.
+PENDING	app.js	-	-	Refs minted by sync are immutable:
+PENDING	app.js	-	-	one context_ref → exactly one publication_id, forever, and a new publication mints a new handle.
+PENDING	app.js	-	-	A visitor can rerun both statements with bq query as any dataViewer on okf_rfc_demo;
+PENDING	app.js	-	-	the DDL lives in the setup-owned file only.
+PENDING	app.js	-	-	| ---- matrix / stories / ids ---------------------------------------------------------------
+PENDING	app.js	-	-	| <a href="#beat= " data-goto=" ">beat
+PENDING	app.js	-	-	| <span class="rfc-only" title=" ">RFC text only |
+PENDING	app.js	-	-	| | | | | | | | | | | | | | | |
+NOT_PHASE_A	app.js	-	-	| | | | # | | Capability | | KC-only (shipped) | | BigQuery deployment | | Live evidence | | Shown on | | |
+PENDING	app.js	-	-	| | | · | <a href="#beat= " data-goto=" ">beat
+PENDING	app.js	-	-	| | | session | | | | agent | | | | context_ref | | | | publication | | … | | | KC-only failure mode.
+PENDING	app.js	-	-	| | What the BigQuery deployment changes.
+PENDING	app.js	-	-	| | Status.
+PENDING	app.js	-	-	| RFC text only | | |
+PENDING	app.js	-	-	| Live captures | | Sessions | | observe · 180 rows | | consume · 14 rows | | observe · 15 rows | | not pulled ·
+PENDING	app.js	-	-	| rows · tool calls | rows on this page · in the table (live count, sessions) | | | Publicationsthree, two kinds of source | | consume / legacy Catalog | | in-process pin · observe | | adapter tape · derived bundle | | | | Catalogus-central1 · EntryGroup okf-rfc-demo | | shipped entries okf-bundle · aspect okf ( fields) | | prior entryokf-derived-germany · okf-concept · no aspects · prior |
+PENDING	app.js	-	-	| | BigQuery jobs behind this page · live/bq_jobs_identity.json |
+NOT_PHASE_A	app.js	-	-	| Every job ran as , the operator.
+PENDING	app.js	-	-	The Phase A identities (okf-setup, okf-sync-writer-okf-rfc-demo, okf-runtime-reader) are a follow-up;
+PENDING	app.js	-	-	the page says so wherever their absence matters.
+PENDING	app.js	-	-	Full capture list:
+PENDING	app.js	-	-	| ---- stepper ---------------------------------------------------------------------
+PENDING	app.js	-	-	| ↺ Restart | Next →
+# --- stories.json
+PENDING	stories.json	-	-	| CUSTOMER_STORIES.md, condensed.
+PENDING	stories.json	-	-	Every id below appears in a file under live/.
+PENDING	stories.json	-	-	| test-project-0728-467323.okf_rfc_demo.agent_events
+NOT_PHASE_A	stories.json	-	-	| The agent that said “verified”
+PENDING	stories.json	-	-	| A leadership-demo user (user_id leadership-demo) asking the consume agent.
+PENDING	stories.json	-	-	| 04fa3d56-f2f1-413e-8c2b-ec116835af84
+PENDING	stories.json	-	-	| okf_rfc_consume_agent
+PENDING	stories.json	-	-	| okf:env-demo#a25e1c0ccbca
+PENDING	stories.json	-	-	| a25e1c0c
+PENDING	stories.json	-	-	| The shipped okf aspect displays runtime, computation, executor, attester;
+PENDING	stories.json	-	-	LookupContext does not render those fields at all;
+PENDING	stories.json	-	-	neither carries a verdict.
+PENDING	stories.json	-	-	A tool contract with ok:
+NOT_PHASE_A	stories.json	-	-	true and no verdict field let the agent say “verified”.
+NOT_PHASE_A	stories.json	-	-	| In session f21ee192 the runtime tool returned verdict UNVERIFIABLE with a reason and receipt_id, and the agent called the number unproven in all twelve answers (12 of 12 final responses contain “unproven”);
+PENDING	stories.json	-	-	one of them, invocation 1, put it verbatim:
+PENDING	stories.json	-	-	“No.
+PENDING	stories.json	-	-	The number is unproven.”
+PENDING	stories.json	-	-	| illustration, not a controlled comparison (prompt, tool set and questions all differ)
+PENDING	stories.json	-	-	| Twelve questions, one frozen context pack
+PENDING	stories.json	-	-	| The same finance user, in a multi-turn session.
+PENDING	stories.json	-	-	| f21ee192-d989-4c38-894f-66b6b82eaf18
+PENDING	stories.json	-	-	| okf_rfc_observe_agent
+PENDING	stories.json	-	-	| okf:env-observe#674153c572f6
+PENDING	stories.json	-	-	| 674153c5
+PENDING	stories.json	-	-	| Catalog has one mutable state per entry.
+PENDING	stories.json	-	-	“Which publication was current last quarter” is not a question it can hold;
+PENDING	stories.json	-	-	parameters[] is not server-side searchable;
+PENDING	stories.json	-	-	nothing executes.
+PENDING	stories.json	-	-	| deployment_heads_history answers which publication was current at T (the query runs today and is empty until a sync commits).
+PENDING	stories.json	-	-	The declared parameter_schema (region, quarter_start, quarter_end) is on record as the contract an executor would bind.
+PENDING	stories.json	-	-	| history selection real-but-empty;
+PENDING	stories.json	-	-	the numbers for questions 4 and 10 are RFC text only
+PENDING	stories.json	-	-	| One handle, three publications, and the legacy Catalog entry names the oldest
+PENDING	stories.json	-	-	| Whoever audits the demo after the fact.
+PENDING	stories.json	-	-	| 04fa3d56 · 1e6dfed7 · f21ee192 (the three captured sessions;
+PENDING	stories.json	-	-	the fourth, a63c3e86…, has 3 rows and no tool call), the adapter tape, the legacy entry
+PENDING	stories.json	-	-	| both agents
+PENDING	stories.json	-	-	| okf:env-observe#674153c572f6 (bound twice) · okf:env-demo#a25e1c0ccbca
+PENDING	stories.json	-	-	| a25e1c0c · 674153c5 · 53bd1651
+PENDING	stories.json	-	-	| Catalog cannot say which publication an agent read, whether two agents read the same one, or whether an entry is stale relative to what is served.
+PENDING	stories.json	-	-	| Events match the context_ref_resolution view on both keys, publications join by id only, receipt-only rows are banded, adapter-tape and legacy-Catalog evidence sit in demo_evidence.
+PENDING	stories.json	-	-	The live result:
+PENDING	stories.json	-	-	14 attributed, 13 receipt-only, no row twice despite the double-bound legacy handle.
+CAPTURED	stories.json	live/setup_runtime_tables.out	-	| real after seeding (operator, not yet okf-setup)
+PENDING	stories.json	-	-	| The metric that died on 2026-06-20
+PENDING	stories.json	-	-	| The finance user asking questions 6 and 12.
+PENDING	stories.json	-	-	| f21ee192 · 1e6dfed7
+PENDING	stories.json	-	-	| Generic kcmd push never deletes.
+PENDING	stories.json	-	-	After the push, searchEntries still finds Customer revenue (legacy) (status deprecated) and LookupContext will return whatever is in the EntryGroup.
+PENDING	stories.json	-	-	| Retirement is a property of the data:
+PENDING	stories.json	-	-	every current-mode retrieval on record excluded the legacy metric with reason “superseded;
+PENDING	stories.json	-	-	out of force since 2026-06-20”.
+PENDING	stories.json	-	-	| exclusion real in 13 of 13 retrievals;
+PENDING	stories.json	-	-	the ledger delete is RFC text only until sync exists
+PENDING	stories.json	-	-	| Who may read the policy
+PENDING	stories.json	-	-	| The finance user asking question 7;
+PENDING	stories.json	-	-	the Catalog administrator granting catalogViewer.
+PENDING	stories.json	-	-	| f21ee192 (invocation e-68d2e6b9-ff1d-4f09-8811-b2f50f4f3a0d)
+PENDING	stories.json	-	-	| The enforcement unit is the EntryGroup and IAM cascades to every entry in it;
+PENDING	stories.json	-	-	the policy body is in the overview aspect and in the lookupContext response for anyone with catalogViewer on okf-rfc-demo.
+PENDING	stories.json	-	-	Structure, not an observed leak.
+PENDING	stories.json	-	-	| RFC text only:
+PENDING	stories.json	-	-	one security domain per deployment, caller-delegated BigQuery authorization, policy_context_commitment, mixed-policy fail-closed.
+PENDING	stories.json	-	-	Not implemented in Phase A/B.
+PENDING	stories.json	-	-	| Catalog side real (beat 3);
+PENDING	stories.json	-	-	BigQuery side RFC text only
+# --- matrix.json
+PENDING	matrix.json	-	-	| spec.md §2, condensed for the page.
+NOT_PHASE_A	matrix.json	-	-	'shown' lists beats where the page renders live or recorded evidence;
+PENDING	matrix.json	-	-	'rfc_text_only' names the part the page only quotes.
+PENDING	matrix.json	-	-	| Pin-or-fail-stale
+PENDING	matrix.json	-	-	| Can display the pin Phase A would stamp (okf-context-runtime.publication_id) and filter on it with a search predicate.
+PENDING	matrix.json	-	-	Cannot compare it to deployment_heads or refuse a stale request;
+PENDING	matrix.json	-	-	LookupContext does not render custom aspects at all.
+PENDING	matrix.json	-	-	| deployment_heads is the comparison target;
+PENDING	matrix.json	-	-	a request presenting a non-head publication_id returns FAIL_STALE.
+PENDING	matrix.json	-	-	| Live:
+PENDING	matrix.json	-	-	lookupContext on the pushed metric entry omits every okf field (beat 3).
+PENDING	matrix.json	-	-	Live:
+NOT_PHASE_A	matrix.json	-	-	the resolution query returns NO_HEAD for a bound handle and FAIL_CLOSED for an unbound one because no sync has committed a head yet (beat 5).
+PENDING	matrix.json	-	-	Prior, legacy:
+PENDING	matrix.json	-	-	okf-derived-germany names a25e1c0c… only as prose in entrySource.description.
+PENDING	matrix.json	-	-	| FAIL_STALE itself, until a head exists
+PENDING	matrix.json	-	-	| deployment_heads history
+PENDING	matrix.json	-	-	| One mutable state per entry, createTime / updateTime only.
+PENDING	matrix.json	-	-	“Which publication was current for this deployment at time T” has no answer.
+PENDING	matrix.json	-	-	| deployment_heads_history (deployment_key, publication_id, snapshot_id, committed_at, sync_id) answers which publication was current at T.
+PENDING	matrix.json	-	-	It holds no revenue values.
+PENDING	matrix.json	-	-	| Session f21ee192 question 4 (“How did Germany compare to the prior quarter?”):
+NOT_PHASE_A	matrix.json	-	-	the tool returned the same six current items.
+PENDING	matrix.json	-	-	The history query runs today and returns 0 rows (beat 5).
+PENDING	matrix.json	-	-	| numerical prior-quarter comparison
+PENDING	matrix.json	-	-	| Attested execution and verdicts
+PENDING	matrix.json	-	-	| Displays runtime, parameters, computation, executor, attester and stops.
+PENDING	matrix.json	-	-	No verdict field exists in the 13-field okf template.
+PENDING	matrix.json	-	-	| run_attested_computation returns verdict ∈ {ATTESTED, UNVERIFIABLE, REJECTED} with reason and receipt_id;
+PENDING	matrix.json	-	-	the demo verdict is always UNVERIFIABLE.
+PENDING	matrix.json	-	-	| Session 04fa3d56 (no-verdict lookup):
+NOT_PHASE_A	matrix.json	-	-	“You can trust the number because it is verified”.
+PENDING	matrix.json	-	-	Session f21ee192 (verdict field):
+PENDING	matrix.json	-	-	“No.
+PENDING	matrix.json	-	-	The number is unproven.” Illustration, not a controlled comparison.
+PENDING	matrix.json	-	-	| SQL join of context and evidence
+PENDING	matrix.json	-	-	| Catalog is not queryable with SQL and cannot be joined to agent_events.
+PENDING	matrix.json	-	-	| Events match the context_ref_resolution view on both event-carried context_ref and event-carried publication_id, then join publications by id;
+PENDING	matrix.json	-	-	receipt-only rows are banded separately;
+PENDING	matrix.json	-	-	non-event evidence lives in demo_evidence.
+PENDING	matrix.json	-	-	| Live query:
+PENDING	matrix.json	-	-	band attributed Σ 14, band receipt_only Σ 13, two demo_evidence rows (beat 6).
+PENDING	matrix.json	-	-	| BQAA context_ref seam
+PENDING	matrix.json	-	-	| No place for an opaque runtime handle;
+PENDING	matrix.json	-	-	extra round-trips into authored frontmatter via pull.ts.
+PENDING	matrix.json	-	-	| context_ref on every tool result, never-emit list enforced, immutable binding to one publication from Phase A on.
+PENDING	matrix.json	-	-	| Live scan:
+PENDING	matrix.json	-	-	27 of 27 TOOL_COMPLETED rows carry context_ref;
+PENDING	matrix.json	-	-	0 hits on all eight never-emit keys (beat 2).
+PENDING	matrix.json	-	-	| immutable binding (no Phase A binding exists yet)
+PENDING	matrix.json	-	-	| Sub-EntryGroup policy
+PENDING	matrix.json	-	-	| Enforcement unit is the EntryGroup;
+PENDING	matrix.json	-	-	IAM cascades;
+PENDING	matrix.json	-	-	overview exposes full bodies.
+PENDING	matrix.json	-	-	Any catalogViewer on the group reads the Policy body.
+PENDING	matrix.json	-	-	| RFC:
+PENDING	matrix.json	-	-	one security domain per deployment, caller-delegated authorization, policy_context_commitment, mixed-policy fail-closed.
+PENDING	matrix.json	-	-	Not implemented in Phase A/B.
+CAPTURED	matrix.json	live/catalog_entry_group_iam.json	-	EntryGroup IAM policy read (no bindings;
+PENDING	matrix.json	-	-	the operator is a project Owner), the policy body in lookupContext/overview, and question 7's governed_by edge (beat 3).
+PENDING	matrix.json	-	-	| the BigQuery side entirely
+PENDING	matrix.json	-	-	| Observation → Snapshot → Publication chain
+PENDING	matrix.json	-	-	| Identities are Dataplex timestamps.
+PENDING	matrix.json	-	-	Every push writes every Entry.
+PENDING	matrix.json	-	-	Two agents cannot prove they read the same revision.
+PENDING	matrix.json	-	-	| Three content identities plus immutable publications rows;
+PENDING	matrix.json	-	-	identical republish is a no-op;
+PENDING	matrix.json	-	-	unchanged-snapshot republish is a provenance event.
+NOT_PHASE_A	matrix.json	-	-	| Recorded:
+PENDING	matrix.json	-	-	the SDK adapter on main reproduced observation 85ea62a9…, snapshot f18befd0…, publication 53bd1651… before the push (beat 4).
+PENDING	matrix.json	-	-	Seeded:
+PENDING	matrix.json	-	-	three publications rows (beat 5).
+PENDING	matrix.json	-	-	| no-op and republish semantics (sync not built)
+PENDING	matrix.json	-	-	| Delete-as-absence ledger vs kcmd no-delete
+PENDING	matrix.json	-	-	| Generic kcmd push creates or patches;
+PENDING	matrix.json	-	-	sync.ts carries “TODO:
+PENDING	matrix.json	-	-	Handle creates and deletes”.
+PENDING	matrix.json	-	-	A superseded concept is served until someone deletes the entry or the whole EntryGroup.
+PENDING	matrix.json	-	-	| Deletion is absence from the next snapshot;
+PENDING	matrix.json	-	-	the ledger removes only owned entries.
+PENDING	matrix.json	-	-	current mode excludes superseded concepts at query time.
+PENDING	matrix.json	-	-	searchEntries finds Customer revenue (legacy) with status=deprecated after the push (beat 3).
+PENDING	matrix.json	-	-	excluded in 13 of 13 retrievals across f21ee192 and 1e6dfed7 (beat 5).
+PENDING	matrix.json	-	-	| the ledger delete (sync not built)
+PENDING	matrix.json	-	-	| LookupContext limits
+PENDING	matrix.json	-	-	| Up to ten resources per call;
+PENDING	matrix.json	-	-	single location in the endpoint;
+PENDING	matrix.json	-	-	does not follow links out of a concept body;
+PENDING	matrix.json	-	-	does not render custom aspects;
+PENDING	matrix.json	-	-	permission-filtered, empty response without permission.
+PENDING	matrix.json	-	-	| Bounded SQL traversal over snapshot_membership and relationship_assertions returns the governed closure with an explicit depth bound;
+PENDING	matrix.json	-	-	the Context Envelope carries publication_id, lifecycle mode, manifest and envelope_id.
+PENDING	matrix.json	-	-	eleven resources → 400 “Only ten resources are supported at this time.”;
+PENDING	matrix.json	-	-	endpoint path is projects/{p}/locations/{l}:lookupContext;
+PENDING	matrix.json	-	-	the okf aspect is absent from the response on the same entry entries.get returns it for (beat 3).
+PENDING	matrix.json	-	not exercised	| no-link-following (docs claim, not exercised) and the permission-filtered empty response
+# --- styles.css
+PENDING	styles.css	-	-	| Full-version OKF demo — RFC tokens shared with /rfc/demo/ (copied, then extended at the end of this file).
+PENDING	styles.css	-	-	| ---- site chrome (shared with /rfc/ and /evalbench/) ----
+PENDING	styles.css	-	-	| ---- masthead ----
+PENDING	styles.css	-	-	| ---- derived banner + identity strip ----
+PENDING	styles.css	-	-	| ---- stepper ----
+PENDING	styles.css	-	-	| ---- stage ----
+PENDING	styles.css	-	-	| ---- observe:
+PENDING	styles.css	-	-	event list ----
+PENDING	styles.css	-	-	| ---- adapt:
+PENDING	styles.css	-	-	file tree + viewer ----
+PENDING	styles.css	-	-	| ---- project:
+PENDING	styles.css	-	-	catalog cards + BQ tables ----
+PENDING	styles.css	-	-	| ---- consume:
+PENDING	styles.css	-	-	ADK chrome ----
+PENDING	styles.css	-	-	| ---- controls ----
+PENDING	styles.css	-	-	| ---- extras / footer ----
+PENDING	styles.css	-	-	| ---- live GCP strip + cards ----
+PENDING	styles.css	-	-	| ---- CLI viewer:
+PENDING	styles.css	-	-	transcript, histogram, lookup tapes, walkthrough media ----
+PENDING	styles.css	-	-	| ---- why-slice:
+PENDING	styles.css	-	-	hero question, trap cards, payoff, IDs panel ----
+PENDING	styles.css	-	-	| ask callout under the hero badges:
+PENDING	styles.css	-	-	the three-way question, answered
+PENDING	styles.css	-	-	| ===== full-demo additions (six beats, capability matrix, stories, SQL result tables) =====
+PENDING	styles.css	-	-	| honesty labels:
+PENDING	styles.css	-	-	every pane carries exactly one
+PENDING	styles.css	-	-	| three-pane rows and generic grids
+PENDING	styles.css	-	-	| SQL result tables
+PENDING	styles.css	-	-	| capability matrix
+PENDING	styles.css	-	-	| stories
+PENDING	styles.css	-	-	| sync algorithm listing + flow
+PENDING	styles.css	-	-	| +
+PENDING	styles.css	-	-	| –
+PENDING	styles.css	-	-	| IBM Plex Mono
+PENDING	styles.css	-	-	| Space Grotesk
+PENDING	styles.css	-	-	| Source Serif 4
+PENDING	styles.css	-	-	| page
+PENDING	styles.css	-	-	| telemetry
+PENDING	styles.css	-	-	| source
+PENDING	styles.css	-	-	| split
+PENDING	styles.css	-	-	| ink
+PENDING	styles.css	-	-	| step
+PENDING	styles.css	-	-	| true
+PENDING	styles.css	-	-	| catalog
+PENDING	styles.css	-	-	| runtime

@@ -16,10 +16,14 @@
 --   unset CLOUDSDK_ACTIVE_CONFIG_NAME                                # back to the default config
 --   gcloud config configurations delete okf-setup --quiet             # after cleanup, when okf-setup is retired
 --
--- The tape shows the configuration name and the impersonated account in the bq job's
--- user_email (INFORMATION_SCHEMA.JOBS) so the DDL is demonstrably run as okf-setup.
+-- Phase A requirement (NOT yet met): the tape must show the configuration name and the
+-- impersonated account in the bq job's user_email (INFORMATION_SCHEMA.JOBS) so the DDL is
+-- demonstrably run as okf-setup. No such tape exists; okf-setup has not been created.
 --
--- Not runnable until Phase A; committed so the schema and seed contract are concrete.
+-- Run once on 2026-09-03 as the operator (raincoatrun@gmail.com, dataset OWNER) for the
+-- /rfc/full-demo/ capture: 11 tables + 1 view created, 3 + 3 + 2 rows seeded
+-- (live/setup_runtime_tables.out, job okf_full_demo_setup_runtime_tables_20260903T222531Z).
+-- Phase A re-runs it as okf-setup under the isolated configuration; every statement is idempotent.
 
 -- ---------- runtime tables (sync writer holds table-level dataEditor on these nine) ----------
 CREATE TABLE IF NOT EXISTS `test-project-0728-467323.okf_rfc_demo.publications` (

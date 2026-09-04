@@ -53,30 +53,36 @@ Colour key matches the RFC tokens: telemetry (purple), catalog (blue), runtime (
 | validate · observe · snapshot | `okf-context sync` as `okf-sync-writer-<deployment>` | nothing | identities computed |
 | plan | same | nothing | diff vs `deployment_heads` printed; absence = delete |
 | commit | same → BigQuery (table-level `dataEditor` on the nine runtime tables; no dataset grant) | staged rows under `sync_id`, then `publications`, `deployment_heads`, `deployment_heads_history`, `context_ref_bindings` (append-only, one ref → one publication, never rebound), ledger | `BQ_COMMITTED` |
-| stamp | same → Knowledge Catalog (`catalogEditor` on the one EntryGroup) | `okf-context-runtime` aspect on owned entries; delete ledger-owned entries for removed concepts | `CATALOG_STAMPED` (or `CATALOG_PENDING` on partial failure; rerun completes without a new publication) |
+| stamp | same → Knowledge Catalog (`catalogEditor` on the one EntryGroup) | `okf-context-runtime` aspect on the entries it owns; delete ledger-owned entries for removed concepts | `CATALOG_STAMPED` (or `CATALOG_PENDING` on partial failure; rerun completes without a new publication) |
 | status | same | nothing | lag = publications committed − publications stamped |
 
-A human bootstrap operator (the project Owner) holds time-boxed policy-owner roles, creates the
-service accounts and the custom search role, and makes every binding on tape. Setup (`okf-setup`,
-one-time, project-level type and group creation) creates the tables, the `context_ref_resolution`
-view and the seed rows (`sql/setup_runtime_tables.sql`), the `okf-context-runtime` AspectType, and
-runs the sample `setup.ts` for the shipped `okf-bundle` / `okf` types; afterwards every `okf-setup`
-role and its impersonation grant are revoked and two denial checks prove it. The sync writer additionally holds
-`entryTypeUser` on `okf-bundle` and `aspectTypeUser` on `okf` and `okf-context-runtime`. Readers
-(`okf-runtime-reader`) hold `dataViewer` on the dataset, `catalogViewer` on the EntryGroup, and a
-custom role with only `dataplex.projects.search` at project level for `searchEntries`. Positive and
-negative permission checks, including the boundary-probe EntryGroup, are listed in `spec.md` §1.3.
+Status on 2026-09-03 (PR 16): none of this section has run. The sync leg, the service accounts, the
+grants and the checks below are the Phase A contract, `RFC text only` on the page. What PR 16 did run,
+as the operator, is the shipped sample (`setup.ts` + `push.ts`, Catalog side only) and the runtime
+DDL + seeds; see `spec.md` §1.2 for the row-by-row status.
 
-Trigger options, in order of what the demo shows: manual CLI (demo), Cloud Run Job on Cloud
-Scheduler polling the EntryGroup `updateTime` (production default), CI step after `kcmd push`.
+In Phase A a human bootstrap operator (the project Owner) will hold time-boxed policy-owner roles, create
+the service accounts and the custom search role, and make every binding on tape (Phase A, not yet run). Setup (`okf-setup`,
+one-time, project-level type and group creation) will create the tables, the `context_ref_resolution`
+view and the seed rows (`sql/setup_runtime_tables.sql`), the `okf-context-runtime` AspectType, and
+run the sample `setup.ts` for the shipped `okf-bundle` / `okf` types; afterwards every `okf-setup`
+role and its impersonation grant must be revoked and two denial checks must show it. The sync writer will
+additionally hold `entryTypeUser` on `okf-bundle` and `aspectTypeUser` on `okf` and `okf-context-runtime`.
+Readers (`okf-runtime-reader`) will hold `dataViewer` on the dataset, `catalogViewer` on the EntryGroup,
+and a custom role with only `dataplex.projects.search` at project level for `searchEntries`. Positive and
+negative permission checks, including the boundary-probe EntryGroup, are specified in `spec.md` §1.3.
+
+Trigger options, in the order the demo would show them: manual CLI (the Phase A tape; not yet recorded),
+Cloud Run Job on Cloud Scheduler polling the EntryGroup `updateTime` (production default), CI step after
+`kcmd push`.
 
 ## Why not a built-in service, and what "managed" would need
 
 - BigQuery cannot read Catalog entries or custom aspects (no connector, no INFORMATION_SCHEMA view).
 - Dataplex cannot materialize an EntryGroup into a dataset and does not own the profile's hashing
   rules, republish semantics, or `deployment_heads`.
-- No cross-service transaction exists, so explicit `BQ_COMMITTED` / `CATALOG_STAMPED` states are
-  required either way; a managed job would still expose them.
+- No cross-service transaction exists, so explicit `BQ_COMMITTED` / `CATALOG_STAMPED` states remain
+  a requirement either way; a managed job would still expose them.
 - A managed version would be: the same CLI packaged as a Dataplex-triggered job, with the
   `okf-context-runtime` aspect template owned by the service, and the ledger held in a
   service-managed dataset. If Dataplex metadata export jobs cover custom aspects, the read leg of a
@@ -85,13 +91,17 @@ Scheduler polling the EntryGroup `updateTime` (production default), CI step afte
 
 ## What the two stores are each allowed to answer
 
+Status on 2026-09-03 (PR 16): rows that say a beat show a live query or capture on that beat; the
+syncer has not run, so `deployment_heads` and its history are empty, `FAIL_STALE` is **not yet
+shown** (only `FAIL_CLOSED`, `NO_HEAD`, `AMBIGUOUS_LEGACY`), and no stamped pin exists.
+
 | Question | Catalog | BigQuery | Demo status |
 |---|---|---|---|
 | Does concept X exist, who owns it, what does it say? | yes | yes | beat 3 / 5 |
-| Which publication is current for deployment D? | display only (stamped pin, `entries.get view=ALL`) | authoritative (`deployment_heads`) | beat 3 / 5 |
-| Which publication was current at time t? | no | `deployment_heads_history` | beat 5 |
+| Which publication is current for deployment D? | display only (stamped pin, `entries.get view=ALL`) | authoritative (`deployment_heads`) | beat 3 / 5 (pin not yet stamped; heads empty) |
+| Which publication was current at time t? | no | `deployment_heads_history` | beat 5 (query runs; 0 rows until a sync commits) |
 | What was the number at time t? | no | future executor/attester | `RFC text only` |
-| Is this `context_ref` stale? | no | pin-or-fail-stale | beat 5 |
+| Is this `context_ref` stale? | no | pin-or-fail-stale | beat 5 for `FAIL_CLOSED` / `NO_HEAD`; `FAIL_STALE` not yet shown, `RFC text only` |
 | Was the number attested? | no | `verdict` + `receipt_id` (always `UNVERIFIABLE` in demo) | beat 5 |
 | Which sessions used which publication? | no | two-key match through the `context_ref_resolution` view, then `publications` by id | beat 6 |
 | Who may read the policy body? | EntryGroup IAM (coarse, real) | caller-delegated per deployment | `RFC text only` |

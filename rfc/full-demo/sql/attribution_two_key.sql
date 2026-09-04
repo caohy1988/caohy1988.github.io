@@ -2,7 +2,9 @@
 -- Runs as okf-runtime-reader (dataset dataViewer + project jobUser). No DDL here:
 -- tables, the context_ref_resolution view and the seed MERGEs live in the
 -- setup-owned sql/setup_runtime_tables.sql, run once as okf-setup.
--- Not runnable until Phase A setup has run. Committed so the contract is concrete.
+-- Runnable since 2026-09-03: setup_runtime_tables.sql was run once as the operator (Phase A re-runs
+-- it as okf-setup). Both statements were captured as live/beat6_attribution.json and
+-- live/beat6_demo_evidence.json with their bq job ids (attributed Σ 14, receipt_only Σ 13).
 --
 -- bq has no impersonation flag; impersonation is set on gcloud in an ISOLATED configuration
 -- (same pattern as setup_runtime_tables.sql), and each marked SELECT is piped over stdin
@@ -22,7 +24,9 @@
 --
 -- Verified 2026-09-03: with this configuration bq attempts the impersonation (it fails
 -- only because the SA does not exist yet), and each piped statement reaches query
--- validation. The tape shows user_email = okf-runtime-reader@… in INFORMATION_SCHEMA.JOBS.
+-- validation. Phase A requirement (NOT yet met): the tape must show
+-- user_email = okf-runtime-reader@… in INFORMATION_SCHEMA.JOBS. The checked-in captures
+-- (live/beat6_*.json, live/bq_jobs_identity.json) all ran as the operator raincoatrun@gmail.com.
 --
 -- Relations read (all in okf_rfc_demo):
 --   publications                 (publication_id, …, source)   -- owns NO context_ref column
@@ -72,7 +76,7 @@ ORDER BY band, session_id, tool;
 -- END STATEMENT 1
 
 -- STATEMENT 2 — Table (b): separately sourced evidence (not agent_events rows).
--- Seeded by okf-setup in sql/setup_runtime_tables.sql.
+-- Seeded by sql/setup_runtime_tables.sql (Phase A: as okf-setup; the 2026-09-03 capture: as the operator).
 SELECT source, context_ref, publication_id, note
 FROM `test-project-0728-467323.okf_rfc_demo.demo_evidence`
 ORDER BY source;
