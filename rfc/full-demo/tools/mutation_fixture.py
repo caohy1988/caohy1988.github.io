@@ -80,8 +80,15 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m78 inline code with an equals sign keeps its object (Codex r15)
   m79 a claim split across concatenated literals, and a claim wrapped in inline HTML (Codex r15)
   m80 a punctuation-free comment beside a dishonest literal (Codex r15)
+  m81 "The docs must explain the operator quietly audited the bindings on tape." (Kimi r16: adverb between subject/verb)
+  m82 / m83 an adverb before the auxiliary and inside a negation span (Codex r16)
+  m84 "The planned operator spoke on tape." (Codex r16: irregular verb in a bare subject+verb span)
+  m85 / m86 ", and operators grant …" / ", and operators routinely record …" (Codex r16: coordinated bare subjects)
+  m87 a claim split across a one-word concatenated literal (Codex r16)
+  m88 a regex literal holding a quote must not desynchronise the lexer (Codex r16)
+  m89 a \\u escape is decoded, so the claim it spells is visible (Codex r16)
 
-Positive controls p1-p24 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
+Positive controls p1-p27 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
 "grants" as a noun, bare-infinitive coordination, the proper noun "Run") and must leave the checker at exit 0.
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
@@ -300,6 +307,9 @@ POSITIVE_CONTROLS = [
     ("p22 denial whose subject carries a prepositional phrase", _append("intent.md", "No service account in the Phase A project was created.")),
     ("p23 determiner-headed compound noun with an unlisted verb", _append("CUSTOMER_STORIES.md", "The project grants govern Phase A access to the custom role.")),
     ("p24 non-ly adverb before a coordinated continuation head", _append("README.md", "The operator must create the service accounts and always record every binding on tape.")),
+    ("p25 three adverbs before a coordinated continuation head", _append("ARCHITECTURE.md", "The operator must create the service accounts and very carefully always record every binding on tape.")),
+    ("p26 compound noun with an unlisted governance verb ('Project grants constrain …')", _append("spec.md", "Project grants constrain Phase A access to the custom role.")),
+    ("p27 unrelated neighbouring literals are not merged", _append_js("app.js", 'var r16e = "This is future work.";\nvar r16f = "The tape will show every binding.";')),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -367,6 +377,18 @@ def m80(d):
     p = d / "app.js"
     p.write_text(p.read_text("utf-8") + '\n// Future work is planned here\nvar r15c = "All seven negative checks are on tape.";\n', "utf-8")
 
+
+# Codex / Kimi r16: an adverb between subject and verb, coordinated bare subjects, and JavaScript source shapes that
+# the hand lexer used to mis-read (concatenated one-word literals, a regex literal holding a quote, \u escapes).
+m81 = _append("ARCHITECTURE.md", "The docs must explain the operator quietly audited the bindings on tape.")
+m82 = _append("spec.md", "The docs must report operators definitely were on tape.")
+m83 = _append("plan.md", "No reviewer clearly knew okf-setup created the service accounts.")
+m84 = _append("intent.md", "The planned operator spoke on tape.")
+m85 = _append("CUSTOMER_STORIES.md", "The docs must explain the RFC, and operators grant temporary Phase A roles.")
+m86 = _append("README.md", "The docs must explain the RFC, and operators routinely record every binding on tape.")
+m87 = _append_js("app.js", 'var r16a = "The operator " + "created" + " the Phase A service accounts.";')
+m88 = _append_js("app.js", "var r16b = function () { return /'/; };\nvar r16c = 'The operator created the Phase A service accounts.';")
+m89 = _append_js("app.js", 'var r16d = "The operator cr\\u0065ated the Phase A service accounts.";')
 
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
@@ -444,7 +466,16 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m77 'okf-setup returns PERMISSION_DENIED.' (Codex r15: identifier subject)", m77),
              ("m78 inline code with an equals sign keeps the object (Codex r15)", m78),
              ("m79 claim split across literals; claim inside inline HTML (Codex r15)", m79),
-             ("m80 punctuation-free comment beside a dishonest literal (Codex r15)", m80)]
+             ("m80 punctuation-free comment beside a dishonest literal (Codex r15)", m80),
+             ("m81 'the operator quietly audited …' (Kimi r16: adverb between subject and verb)", m81),
+             ("m82 'operators definitely were on tape' (Codex r16: adverb before the auxiliary)", m82),
+             ("m83 'No reviewer clearly knew okf-setup created …' (Codex r16)", m83),
+             ("m84 'The planned operator spoke on tape.' (Codex r16: irregular verb)", m84),
+             ("m85 ', and operators grant temporary Phase A roles' (Codex r16: coordinated bare subject)", m85),
+             ("m86 ', and operators routinely record every binding on tape' (Codex r16)", m86),
+             ("m87 claim split across a one-word concatenated literal (Codex r16)", m87),
+             ("m88 regex literal holding a quote does not desynchronise the lexer (Codex r16)", m88),
+             ("m89 \\u escape decoded, so the claim is visible (Codex r16)", m89)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
