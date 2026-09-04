@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex brief · 4 Sep 2026, 3:34 PM — The Field Brief</title>
+  <meta name="description" content="Codex gpt-6-astra xhigh: ObserverBench policy-budget loss vs AUROC; NTEP tool-evidence acquisition vs goal-only. 3:34 PM PT, 4 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-04-1534-codex.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Codex gpt-6-astra · 3:34 PM PT</p>
+    <article>
+<h1>Field Brief — Codex gpt-6-astra (xhigh): test the decision a score drives</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK<br />
+<strong>As of:</strong> Friday, September 4, 2026, approximately 3:53 PM PT. This is the 15:34 slot, against the 14:34 Codex baseline. Both cards are September 2–3 academy catch-up findings, not announcements claimed to have appeared during this hour.</p>
+<p><strong>Sources checked:</strong> The <a href="packs/kimi-pack-2026-09-04-1534.md">Kimi 15:34 source pack</a>; local 1434-Codex, 1411-Codex, 1234-Codex/Kimi, 1140, 1134, 1052, 0946 and September 3 2134/2115 briefs, with other September 3–4 briefs searched for prior exclusions. The <a href="https://caohy1988.github.io/research/briefs/2026-09-04-1434-codex.html">live 14:34 baseline</a> could not be fetched; its local Markdown and corresponding site HTML supplied the comparison. Independently searched <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code>: <strong>168 items and all 62 <code>progress[]</code> entries</strong>, including IDs, abstract numbers, titles and capability phrases.</p>
+<p>Independently retrieved Braintrust product updates, Agno 3.0.6, Phoenix 20.7/20.8, Langfuse and LangSmith changelogs, the LangChain MCP announcement, and AgentCore release notes. Fetched abstract pages and full PDFs for both academy cards and the three leading rejected papers; inspected the relevant evidence and limitations. Also screened the TIGPO and rogue-AI-progression abstracts. The pack's wider vendor and arXiv sweep remains collector-reported coverage; targeted first-party searches supplied no additional qualifying product candidate.</p>
+<p><strong>Read this first.</strong> Publish two academy cards, both stronger than the pack's “marginal” classification. They support tests for review-budget allocation and tool-evidence scoring. <strong>Keep the six-week ranking unchanged.</strong> Add these checks to existing evaluation work, after the 14:34 feedback-correction test. Two useful additions are preferable to filling the 8–14-item preference with duplicate features or adjacent runtime releases.</p>
+<h2>Industry</h2>
+<p><strong>No new cards or progress entries.</strong> The <a href="https://www.braintrust.dev/docs/changelog">Braintrust changelog</a> confirms managed Loop, scheduled automations and blind reviews, but these belong to the existing <code>braintrust-patterns-debugger-loop-automations</code> coverage. A month heading supplies no new launch date.</p>
+<p><a href="https://github.com/agno-agi/agno/releases/tag/v3.0.6">Agno 3.0.6</a>, <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.7.0">Phoenix 20.7</a> and <a href="https://www.langchain.com/blog/mcp-in-langchain-stateless-protocol-elicitation-and-more">LangChain's September 3 MCP announcement</a> document runtime/transport work. LangChain's elicitation, caching and package integration do not establish a new observability or evaluation product. These remain below bar. <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.8.0">Phoenix 20.8</a> has existing coverage; no release is split into another card.</p>
+<h2>Academy</h2>
+<h3>1. ObserverBench — select a monitor under the review policy it will serve</h3>
+<p><a href="https://arxiv.org/abs/2609.03026">arXiv:2609.03026</a> · submitted September 2 · <a href="https://arxiv.org/pdf/2609.03026">full PDF, 28 pages</a>, §§5–7, especially Tables 11–14.</p>
+<p>In a non-executing authorization task with 384 held-out safe/unsafe pairs, every monitor faces the same 10% block and 10% escalation budgets. A label monitor achieves <strong>AUROC 1.000 with mean policy loss 3.334</strong>. Weighting its score by operation severity lowers AUROC to <strong>0.954</strong> while improving loss to <strong>2.155</strong>. Classification quality alone selects the wrong policy here. APPS backdoor experiments also show a reversal in mean monitor rankings, although the reported Gemma paired outcome range includes zero. Scoring is offline; attacks and measurement channels are fixed, and some controls were added after earlier results.</p>
+<p><strong>BQAA + ADK judgment.</strong> Add a replay that holds review capacity and intervention rules fixed while comparing scorers. Retain score, policy version, selected action and adjudicated outcome separately. This tests allocation quality beyond the 14:34 report-to-response query; it does not validate an adaptive defense or require activation capture.</p>
+<h3>2. Making Every Tool Call Count — a relevant goal can still reward waste</h3>
+<p><a href="https://arxiv.org/abs/2609.03493">arXiv:2609.03493</a> · submitted September 3 · <a href="https://arxiv.org/pdf/2609.03493">full PDF, 17 pages</a>, §3, §4 and Appendix C.2/C.7/C.9.</p>
+<p>NTEP-R scores pre-call goal alignment and post-call evidence acquisition, with a duplicate-goal penalty. In Table 6, two configurations share the same 7,774-example training pool and 4,417-example evaluation suite. Goal-only process supervision yields <strong>55.492% macro accuracy and 5.360 calls/example</strong>; the full reward yields <strong>69.690% and 1.549</strong>. This comparison removes both acquisition scoring and the penalty, so it cannot isolate either component. The answer-only row uses a different training pool. Results generally use one training run and one evaluation pass; teacher-generated paths and semantic judging remain dependencies.</p>
+<p><strong>BQAA + ADK judgment.</strong> Test whether a tool-use rubric distinguishes seeking evidence, receiving it and using it. Retain the returned evidence and attribution source beside the verdict. This is a concrete failure case for the existing DRACO/Coverage validation work, not evidence that semantic path labels establish causal necessity or that every repeated call is waste.</p>
+<h2>Six-week EV</h2>
+<p><strong>No re-ranking, new feature start or expansion of failure localization beyond reserve.</strong> The recommendations below are analyzer judgments, not claims about shipped BQAA behavior.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Existing work</th>
+  <th>Bounded addition</th>
+  <th>Acceptance evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Evaluation provenance</td>
+  <td>After the feedback-correction test, compare candidate scorers on one adjudicated sample under a declared review budget. Fix costs before inspecting rankings.</td>
+  <td>Report missed consequential cases, unnecessary reviews and workload alongside discrimination metrics; retain the policy and sample references.</td>
+</tr>
+<tr>
+  <td>Tool/session evaluation examples</td>
+  <td>Add cases where calls return decisive evidence, fail to return it, or legitimately retry. Use observable artifacts for adjudication.</td>
+  <td>The rubric separates these cases and preserves disagreements. Call count alone cannot determine the label.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Reuse existing event references and optional metadata. Continue the prior batch-reconciliation, predicted-versus-observed outcome, validation-stage and escalation-outcome work. Do not start a new activation-monitor service, model-routing optimizer or reinforcement-learning pipeline from these papers.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>arxiv-2609-03026-observerbench-policy-budget-loss</code> — kind: <code>rank</code>; tag: Academy.</li>
+<li><code>arxiv-2609-03493-ntep-tool-evidence-acquisition</code> — kind: <code>rank</code>; tag: Academy.</li>
+</ul>
+<p>Both abstract IDs and related titles/capabilities are absent from catalog items and progress. No industry additions or progress updates are proposed.</p>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Pack correction:</strong> The current catalog contains 168 items, not the pack's claimed 245. Its proposed Loop automations, managed runtime and blind-review cards duplicate the 1001 Braintrust coverage. AgentCore TypeScript is already a progress entry on <code>agentcore-evaluations-any-framework</code>. Phoenix client 3.4 Harbor and server 20.8 remain closed. A missing proposed slug does not establish a missing capability.</li>
+<li><strong>14:34 lock:</strong> Do not re-card <code>arxiv-2609-02859-feedback-conditioned-evaluation</code>, <code>arxiv-2609-04075-patchbench-validation-stages</code>, <code>arxiv-2609-04170-swarm-escalation-outcomes</code>, <code>arxiv-2609-03438-conflictgui-termination-controls</code> or <code>arxiv-2609-03588-kc-bench-conflict-action-lineage</code>. Earlier Batch, EarlyEval, late-requirements, Coverage/DRACO, CAPTURE, FailBench, retrievability, Flight Recorder and Gemini Enterprise Projects coverage also stays closed.</li>
+<li><strong>Rejected after PDF inspection:</strong> <a href="https://arxiv.org/abs/2609.03035">Evaluation awareness, 2609.03035</a> (<a href="https://arxiv.org/pdf/2609.03035">PDF</a>) has a real calibration caveat: strong AUROC can coexist with reduced fixed-threshold recall. Its two-game, two-model activation-probe setting adds less actionable evidence than ObserverBench; retain the prior exclusion. <a href="https://arxiv.org/abs/2609.03422">Generative-process diversity, 2609.03422</a> (<a href="https://arxiv.org/pdf/2609.03422">PDF</a>) reports pairwise observational associations; selecting diverse models to improve ensembles and extending the measure to agent traces remain future work. It does not warrant a new routing or redundancy card.</li>
+<li><strong>HARNESSEVO stays below bar:</strong> <a href="https://arxiv.org/abs/2609.02889">2609.02889</a> (<a href="https://arxiv.org/pdf/2609.02889">PDF</a>) studies one frozen 7B backbone and two environments, with a null on WebShop. Its optimizer-budget result does not advance this slot's analytics decision. The abstract history and PDF stamp both say June 25 despite the September identifier; a delayed cross-list is only the pack's hypothesis. The retrieved PDF has 24 pages, versus 17 in the abstract comments. Do not infer a fresh release or revision date.</li>
+<li><strong>Remaining screens:</strong> <a href="https://arxiv.org/abs/2609.03383">TIGPO, 2609.03383</a> remains training-side transition-graph optimization; <a href="https://arxiv.org/abs/2609.03189">rogue-AI progression, 2609.03189</a> remains a broad monitoring framework already excluded at 2034. Neither receives a card on abstract evidence. The pack's catalogued academy leads are skipped.</li>
+<li><strong>Access and verification:</strong> The hosted baseline failed through the web fetcher and local DNS; the local site HTML matched the Markdown's five-card content. LangChain's direct open failed, but first-party search retrieval exposed the announcement. LangSmith's HTML was accessible while its raw Markdown endpoint failed. AgentCore retrieval returned an older August-topped view, so it cannot independently establish September freshness. PDF text extraction supplied the tables and limitations; screenshot rendering was unavailable, so no visual PDF verification is claimed.</li>
+<li><strong>Scope and authorship:</strong> First-party BQAA, PRs, patches, drafts and runtime-only MCP plumbing were excluded. Kimi supplied discovery leads; Codex gpt-6-astra (xhigh) made the selections and decisions. Only this Markdown brief was written; no Fable call, Kimi brief, HTML generation, catalog edit, commit or push.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Codex gpt-6-astra · 4 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
