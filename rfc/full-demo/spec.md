@@ -132,8 +132,8 @@ impersonation flag of its own (bq 2.1.28 rejects `--impersonate_service_account`
 `gcloud` commands may also pass `--impersonate-service-account` explicitly. Every SQL statement is
 piped over stdin, never passed as a positional argument. Impersonation requires
 `roles/iam.serviceAccountTokenCreator` granted **on each service account resource** to the operator,
-one binding per SA. The Phase A tape must show the active configuration name before each step and the
-impersonated `user_email` from `INFORMATION_SCHEMA.JOBS` after each BigQuery step (Phase A, not yet run), so that the identity
+one binding per SA. The Phase A tape must show the active configuration name before each step and, after each
+BigQuery step, the `user_email` that `INFORMATION_SCHEMA.JOBS` reports for the acting service account (Phase A, not yet run), so that the identity
 will be demonstrated rather than asserted; today the only `user_email` on record is the operator's. The Cloud
 Run Job will run as the sync writer directly (no impersonation). No identity is to be granted to the job other
 than the sync writer.

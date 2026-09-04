@@ -376,7 +376,7 @@
         caption("Eleven tables and the <code>context_ref_resolution</code> view; three <code>publications</code> rows (<code>source = seeded_pre_phase_a</code>), three legacy bindings, two <code>demo_evidence</code> rows. <code>deployment_heads</code>, <code>deployment_heads_history</code> and <code>context_ref_bindings</code> are <b>empty</b>: only the syncer writes them. <code>agent_events</code> received no DML.") + jobs(jobsFor("setup_runtime_tables")), "runtime") +
       pane("", "Identity behind every BigQuery step · INFORMATION_SCHEMA.JOBS_BY_USER", src("live", "live · " + D.jobs.length + " jobs"),
         table([{ key: "job_id", render: function (v) { return "<code>" + esc(v.replace(/_\d{8}T\d{6}Z$/, "")) + "</code>"; } }, { key: "type" }, { key: "user_email", render: function (v) { return "<code>" + esc(v) + "</code>"; } }], idRows) +
-        caption("The tape the RFC asks for must show the active gcloud configuration before every identity switch and the impersonated <code>user_email</code> after each step. Today there is one identity, the operator, and it is on record for every job."), "") +
+        caption("The tape the RFC asks for must show the active gcloud configuration before every identity switch and, after each step, the <code>user_email</code> of the acting service account. Today there is one identity, the operator, and it is on record for every job."), "") +
       "</div>" +
       '<details class="nn"><summary>IAM contract · spec.md §1.3 · three service accounts, resource-specific grants, seven negative checks · RFC text only</summary><div class="nn-b">' +
       '<table class="iam"><thead><tr><th>Principal</th><th>Resource</th><th>Grant</th><th>Status today</th></tr></thead><tbody>' +

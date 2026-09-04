@@ -29,6 +29,10 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m19 "Future documentation is planned, then the operator created the three service accounts." (Codex r7: then resets)
   m20 "The service account was not created after the operator granted the custom role." (Codex r7: per-predicate negation)
   m21 "The operator granted the custom role, as planned." (r7 cousin: trailing status in a later clause)
+  m22 "The operator granted the custom role as planned." (Codex r8: status marker after the predicate, no comma)
+  m23 "The documentation will explain the RFC, and the operator created the Phase A service accounts." (Codex r8)
+  m24 "The operator will record the tape once the service accounts were created." (Codex r8: once resets)
+  m25 "The operator must document the RFC and the service accounts were created by the operator." (r8 cousin)
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
 """
@@ -177,6 +181,12 @@ m19 = _append("spec.md", "Future documentation is planned, then the operator cre
 m20 = _append("plan.md", "The service account was not created after the operator granted the custom role.")
 m21 = _append("CUSTOMER_STORIES.md", "The operator granted the custom role, as planned.")
 
+# Codex r8: status after the predicate without a comma; finite new claim after ", and"; 'once' reset
+m22 = _append("ARCHITECTURE.md", "The operator granted the custom role as planned.")
+m23 = _append("spec.md", "The documentation will explain the RFC, and the operator created the Phase A service accounts.")
+m24 = _append("plan.md", "The operator will record the tape once the service accounts were created.")
+m25 = _append("intent.md", "The operator must document the RFC and the service accounts were created by the operator.")
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -194,7 +204,11 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m18 'created the service accounts as expected' (modal after verb)", m18),
              ("m19 'is planned, then the operator created …' (then resets scope)", m19),
              ("m20 'was not created after the operator granted …' (negation bound to its own predicate)", m20),
-             ("m21 'granted the custom role, as planned.' (trailing status in another clause)", m21)]
+             ("m21 'granted the custom role, as planned.' (trailing status in another clause)", m21),
+             ("m22 'granted the custom role as planned.' (status after the predicate, same clause)", m22),
+             ("m23 'will explain the RFC, and the operator created …' (finite claim after coordination)", m23),
+             ("m24 'will record the tape once the service accounts were created.' (once resets)", m24),
+             ("m25 'must document … and the service accounts were created …' (finite passive after and)", m25)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
