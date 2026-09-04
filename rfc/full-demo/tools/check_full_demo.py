@@ -610,7 +610,7 @@ PERFECT_RUN = r"(?:\s+(?i:has|have|had|was|were|is|are|been|being))*"
 PREDICATE_SLOT = (r"(?!(?:" + NP_STOP + r"|cannot|can't|won't|shan't|don't|doesn't|didn't)\b)"
                   r"(?!(?i:[a-z]+(?:s|ing|ly))\b)(?-i:[a-z][\w'’]*)")
 PREDICATE_OBJECT = (r"(?:\s+(?-i:" + DETERMINER_WORD + r")\b[^,;:.|]*"
-                    r"|(?:\s+(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’]*)+)\s*(?=[;:.)\]|]|$)")
+                    r"|(?:\s+(?!(?:" + NP_STOP + r")\b)[A-Za-z][\w'’\u2010\u2011\u2013\u2014-]*)+)\s*(?=[;:.)\]|]|$)")
 TRANSITIVE_VERB = re.compile(PERFECT_RUN + ADVERB_RUN + r"\s+(?<![-\w])(" + PREDICATE_SLOT + r")" + PREDICATE_OBJECT)
 # The licence for an unclassified predicate is a frame reaching it, exactly as for a past one: a qualifier and only
 # verb-phrase material between. A qualifier somewhere else in the sentence licenses nothing, so "Phase A is not yet
@@ -794,9 +794,16 @@ def _css_urls(body):
 # literals. Anything else - a concatenation, a computed name, an identifier bound to an expression - is an error, so
 # `var hiddenPath = "extra" + ".json"; fetchJson(hiddenPath)` cannot be a dependency nobody noticed.
 JS_STRING = r"(?:\"[^\"\n]*\"|'[^'\n]*')"
-JS_LITERAL_BINDING = re.compile(r"\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=\s*(" + JS_STRING + r")\s*[;,\n]")
-JS_ANY_BINDING = re.compile(r"\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=")
-JS_MAP_BINDING = re.compile(r"\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=\s*\{")
+# A JavaScript identifier may start with $ or _, so every place this reader looks for one uses a token boundary that
+# knows that. "\b" does not: it sees no boundary before "$hiddenPath", which is how a write to one went unnoticed.
+JS_IDENT = r"[A-Za-z_$][\w$]*"
+JS_EDGE = r"(?<![\w$])"
+JS_LITERAL_BINDING = re.compile(JS_EDGE + r"(?:var|let|const)\s+(" + JS_IDENT + r")\s*=\s*(" + JS_STRING + r")\s*[;,\n]")
+JS_ANY_BINDING = re.compile(JS_EDGE + r"(?:var|let|const)\s+(" + JS_IDENT + r")\s*=")
+JS_MAP_BINDING = re.compile(JS_EDGE + r"(?:var|let|const)\s+(" + JS_IDENT + r")\s*=\s*\{")
+# Names this reader cannot follow at all: bound by destructuring, or by a catch clause. They are disqualified rather
+# than guessed at, so a fetch argument that resolves to one is an error.
+JS_PATTERN_BINDING = re.compile(JS_EDGE + r"(?:(?:var|let|const)\s*[\{\[]([^\}\]]*)[\}\]]|catch\s*\(([^)]*)\))")
 JS_PARAMS = re.compile(r"\bfunction\s*[A-Za-z_$][\w$]*?\s*\(([^)]*)\)|\(([^)]*)\)\s*=>")
 
 def _js_functions(masked):
@@ -818,16 +825,19 @@ def _js_symbols(body, masked):
     # write form counts here - compound, logical, increment - and so does a second declaration or a parameter of the
     # same name, because a shadowed name is not the name this reader read.
     writes = {}
-    for m in re.finditer(r"\b([A-Za-z_$][\w$]*)\s*(?:\+\+|--|(?:\*\*|<<|>>>|>>|\|\||&&|\?\?|[-+*/%&|^])?=(?![=>]))",
+    for m in re.finditer(JS_EDGE + r"(" + JS_IDENT + r")\s*(?:\+\+|--|(?:\*\*|<<|>>>|>>|\|\||&&|\?\?|[-+*/%&|^])?=(?![=>]))",
                          masked):
         writes[m.group(1)] = writes.get(m.group(1), 0) + 1
     declared = {}
-    for m in re.finditer(r"\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)", masked):
+    for m in re.finditer(JS_EDGE + r"(?:var|let|const)\s+(" + JS_IDENT + r")", masked):
         declared[m.group(1)] = declared.get(m.group(1), 0) + 1
     shadowed = set()
     for m in JS_PARAMS.finditer(masked):
         for group in m.groups():
             shadowed |= {p.strip() for p in (group or "").split(",") if p.strip()}
+    for m in JS_PATTERN_BINDING.finditer(masked):
+        for group in m.groups():
+            shadowed |= set(re.findall(JS_IDENT, group or ""))
     for name in list(literals):
         if writes.get(name, 0) > 1 or declared.get(name, 0) > 1 or name in shadowed:
             literals.pop(name, None)                  # this reader cannot say which value a fetch would see
@@ -1130,9 +1140,46 @@ def extract_css_prose(src):
             unique.append(t)
     return "\n".join("| " + t for t in unique)
 
+def css_quote_problems(src):
+    """A non-default `quotes:` set cannot be modelled. Which of its strings reaches the screen depends on the quote
+    depth of each element the rule matches, and a <q> element applies the quote operations implicitly - no `content`
+    declaration has to name them. So a quotes: declaration that carries strings is an error: write the marks you want
+    into the text, or into a `content` string this reader can read."""
+    out = []
+    src = CSS_COMMENT.sub(" ", src)
+    i, n = 0, len(src)
+    while i < n:
+        ch = src[i]
+        if ch in "\"'":
+            _, i = _css_string(src, i)
+            continue
+        if ch.isalpha() or ch in "-_\\":
+            name, j = _css_ident(src, i)
+            k = j
+            while k < n and src[k] in " \t\n":
+                k += 1
+            if name.lower() == "quotes" and k < n and src[k] == ":":
+                k, carries = k + 1, False
+                while k < n and src[k] not in ";}":
+                    if src[k] in "\"'":
+                        _, k = _css_string(src, k)
+                        carries = True
+                        continue
+                    k += 1
+                if carries:
+                    out.append("a quotes: declaration supplies strings whose painting depends on each element's "
+                               "quote depth, and a <q> element applies them implicitly; write the marks into the "
+                               "text instead")
+                i = k
+                continue
+            i = j
+            continue
+        i += 1
+    return out
+
 def css_content_problems(src):
     """Content expressions this reader cannot compute exactly. They are errors, not sentences to audit."""
-    return [p for _, problems, _, _ in css_content_values(src) for p in problems]
+    return [p for _, problems, _, _ in css_content_values(src) for p in problems] + css_quote_problems(src)
 BLOCK_START = re.compile(r"^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s?|\|)")
 
 def md_blocks(text):
@@ -1814,8 +1861,10 @@ check(any("service accounts were created" in t for t in regulated_in(extract_css
 check(any("The Phase A service accounts were created." == t.lstrip("| ") for t in extract_css_prose(
           'body { quotes: "The Phase A service accounts " "were created."; }').split("\n")),
       "adjacent stylesheet strings are painted as one run, so they are audited as one claim")
-check(css_content_problems('body::before { content: open-quote open-quote; }'),
-      "which string open-quote paints depends on the element's quote depth, so this reader refuses to guess")
+check(css_content_problems('body::before { content: open-quote open-quote; }')
+      and css_quote_problems('body { quotes: "The Phase A service accounts " ". " "were created." ""; }')
+      and not css_quote_problems('body { quotes: auto; }'),
+      "a quote set this reader cannot resolve to text is an error, whether a content declaration names it or a <q> element applies it")
 check(_css_urls('@import url("extra.css");') == ["extra.css"] and _css_urls('@import "\\65 xtra.css";') == ["extra.css"],
       "@import names the file it names, through url() and through an escape")
 check(any("service accounts were created" in t for t in regulated_in(extract_css_prose('body::after { co\\6e tent: "The Phase A service accounts were created."; }'))),
@@ -1831,6 +1880,7 @@ check(any("service accounts were created" in t for t in regulated_in(html_runs('
 check(all(transitive_problems(t) for t in ("The IAM bootstrap preset every binding.",
                                            "The IAM bootstrap preset roles.",
                                            "The IAM bootstrap preset temporary roles.",
+                                           "The IAM bootstrap preset project-level roles.",
                                            "Phase A is not yet done, but the IAM bootstrap preset every binding."))
       and not transitive_problems("The IAM bootstrap must preset every binding.")
       and not transitive_problems("The Phase A tape must show the active configuration name."),

@@ -358,6 +358,16 @@ def _nested_pinned_capture(d):
     _pin(d, rel)
 
 
+def _dollar_path_capture(d):
+    """A $-prefixed name bound to one literal and never written again is still a name this reader can follow."""
+    rel = "live/beat7_new_capture.json"
+    (d / rel).write_text('[{"note": "not yet run"}]\n', "utf-8")
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace(
+        "  var TOTAL = 6;", '  var TOTAL = 6;\n  var $extraPath = "' + rel + '";\n  fetchJson($extraPath);', 1), "utf-8")
+    _pin(d, rel)
+
+
 def _single_write_capture(d):
     """A path bound to one literal and never written again: the reader can say what it is, so it can require the pin."""
     rel = "live/beat7_new_capture.json"
@@ -527,13 +537,15 @@ POSITIVE_CONTROLS = [
     ("p62 a long noun phrase under a modal (Codex r26)", _append_audited("intent.md", "The IAM bootstrap extensive production migration preparation effort must still be recorded on tape.")),
     ("p63 two prepositional phrases under a modal (r27)", _append_audited("plan.md", "The IAM bootstrap in staging after review must still be recorded on tape.")),
     ("p64 a negation distributed over a coordination (r27)", _append_audited("README.md", "No BQ_COMMITTED or CATALOG_STAMPED is shown for this capture.")),
-    ("p65 an audited stylesheet string (Codex r28)", _append_audited_css("styles.css", 'body { quotes: "Phase A must still be recorded on tape." ""; }')),
+    ("p65 an audited stylesheet string that is never painted (Codex r28)", _append_audited_css("styles.css", '.card[data-note="Phase A must still be recorded on tape"] { color: inherit; }')),
     ("p66 a capture reached through a map of literals (Codex r28)", _map_literal_capture),
     ("p67 an unclassified verb under a modal (Codex r28)", _append_audited("spec.md", "The IAM bootstrap must preset every binding on tape.")),
     ("p68 an unclassified verb under a negation (Codex r29)", _append_audited("plan.md", "The IAM bootstrap has not preset roles.")),
     ("p69 a font stack is not one composed string (Codex r29)", _append_audited_css("styles.css", "body { font-family: 'Phase A Sans', 'Phase A Mono'; }")),
     ("p70 a whole bare noun phrase under a modal (Codex r30)", _append_audited("plan.md", "The IAM bootstrap must preset temporary roles.")),
     ("p71 a path bound once and never written again (Codex r30)", _single_write_capture),
+    ("p72 a hyphenated object under a modal (Codex r31)", _append_audited("intent.md", "The IAM bootstrap must preset project-level roles.")),
+    ("p73 a $-prefixed path bound once (Codex r31)", _dollar_path_capture),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -1083,6 +1095,41 @@ def m196(d):
     _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap preset temporary roles.")
 
 
+# Codex r31. A JavaScript identifier may start with $ or _, and may be bound by a pattern or a catch clause
+# (m197-m198); a <q> element applies a quote set with no content declaration naming it (m199); and a compound noun
+# keeps its hyphens (m200).
+def m197(d):
+    """A write to a $-prefixed identifier is still a write."""
+    _hidden_json(d)
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace(
+        "  var TOTAL = 6;",
+        '  var TOTAL = 6;\n  var $hiddenPath = "";\n  $hiddenPath ||= ["extra", ".json"].join("");\n'
+        '  fetchJson($hiddenPath);', 1), "utf-8")
+
+
+def m198(d):
+    """A name this reader cannot follow - bound by destructuring - is not a literal it may trust."""
+    _hidden_json(d)
+    p = d / "app.js"
+    p.write_text(p.read_text("utf-8").replace(
+        "  var TOTAL = 6;",
+        '  var TOTAL = 6;\n  var hiddenPath = "extra.json";\n  var { hiddenPath: alias } = { hiddenPath: hiddenPath };\n'
+        '  fetchJson(hiddenPath);', 1), "utf-8")
+
+
+def m199(d):
+    """A <q> element applies the quote operations implicitly: no content declaration names them."""
+    p = d / "styles.css"
+    p.write_text(p.read_text("utf-8") + '\nbody { quotes: "The Phase A service accounts " ". " "were created." ""; }\n', "utf-8")
+    idx = d / "index.html"
+    idx.write_text(idx.read_text("utf-8").replace("</body>", "<p><q><q></q></q></p></body>", 1), "utf-8")
+
+
+def m200(d):
+    _register_claim(d, "PENDING", "-", "-", "The IAM bootstrap preset project-level roles.")
+
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -1275,7 +1322,11 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m193 INV-6: ||= writes the path too (Codex r30)", m193),
              ("m194 INV-6: += writes the path too (Codex r30)", m194),
              ("m195 open-quote paints a string this reader cannot pick (Codex r30)", m195),
-             ("m196 a bare object is a whole noun phrase (Codex r30)", m196)]
+             ("m196 a bare object is a whole noun phrase (Codex r30)", m196),
+             ("m197 INV-6: a $-prefixed identifier is written like any other (Codex r31)", m197),
+             ("m198 INV-6: a destructured binding is not a literal to trust (Codex r31)", m198),
+             ("m199 a <q> element applies a quote set implicitly (Codex r31)", m199),
+             ("m200 a compound noun keeps its hyphens (Codex r31)", m200)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
