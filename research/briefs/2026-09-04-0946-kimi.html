@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kimi brief · 4 Sep 2026, 9:46 AM — The Field Brief</title>
+  <meta name="description" content="Kimi: MLflow 3.16.0 span links, session grouping, Custom Trace Views; Langfuse Assistant sandboxed analysis + multimodal judges. 9:46 AM PT catch-up, 4 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-04-0946-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Kimi · 9:46 AM PT</p>
+    <article>
+<h1>Kimi field brief: MLflow 3.16.0 makes span links and session grouping the default trace experience; Langfuse Assistant now runs code over thousands of observations in a sandbox → BQAA — 2026-09-04 ~10:05 AM PT (Friday morning, covering the missed midnight + morning window)</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>As of:</strong> 2026-09-04 ~10:05 AM PT. Baseline for flatness and cards: 2026-09-03-2134-fable5.md (PUBLISH, live) and 2026-09-03-2115-fable5.md (PUBLISH, live). Catalog grepped (140 items) before carding; no carded ID is re-carded here.
+<strong>Sources checked:</strong> GitHub releases API for langfuse/langfuse, Arize-ai/phoenix, comet-ml/opik, mlflow/mlflow, wandb/weave, langwatch/langwatch, google/adk-python, google/adk-java, open-telemetry/semantic-conventions, traceloop/openllmetry; Langfuse changelog index plus the dated entry pages <a href="https://langfuse.com/changelog/2026-09-03-langfuse-assistant">2026-09-03 Langfuse Assistant</a> and <a href="https://langfuse.com/changelog/2026-09-01-multi-message-prompts-and-multimodal-inputs">2026-09-01 multi-message/multimodal judges</a>; <a href="https://github.com/mlflow/mlflow/releases/tag/v3.16.0">MLflow v3.16.0 release notes</a> (full text read); Braintrust changelog September section; LangSmith Cloud changelog and self-hosted changelog; Phoenix product release notes; BigQuery release notes (page last updated 2026-09-03 UTC); Grafana Cloud What's New; Mastra blog; Laminar docs changelog; arXiv cs.AI new listing (still the Friday, 4 September 2026 announcement — the same 269-entry listing fully triaged at 2134 across cs.AI/LG/CL/MA). <strong>Unrenderable:</strong> AWS AgentCore release notes (JS shell; What's New September index 404 — web search found no new AgentCore item since the two known at 1934), Agno blog (newsletter shell; newest known post Sep 1, carded at 2115). IBM What's New, Salesforce newsroom and ServiceNow docs remain unrenderable, as at 2134.</p>
+<p><strong>Read this first.</strong> Two product-level moves, both converging on BQAA's home turf. First, <strong>MLflow 3.16.0</strong> (tagged Sep 4, 08:30 UTC, after baseline) is the biggest MLflow observability release this cycle: first-class <strong>span links</strong> (relationships between spans recorded in the SDK and navigable in a Links tab), a rebuilt trace explorer that is now the default with <strong>session grouping inline</strong> (the old experiment Sessions tab is deprecated in favor of it), and <strong>Custom Trace Views</strong> — describe the trace UI you want in plain English and the MLflow Assistant builds and saves it per experiment. Second, a <strong>Langfuse changelog entry dated Sep 3</strong> that the baseline missed (2134 checked GitHub tags only): the Langfuse Assistant now <strong>builds datasets and dashboards on request and runs code over thousands of observations in a sandbox</strong>, with background runs and per-tool approval gating — &quot;ask the trace store a question and let an agent do the SQL-shaped work&quot; is now shipped by Langfuse, MLflow, Laminar, Phoenix and Braintrust. A smaller missed Langfuse entry from Sep 1: LLM-as-a-Judge evaluators now take <strong>multi-message prompts and multi-modal inputs</strong> (images, audio, video, PDFs captured in observations). Everything else on the watchlist is flat or patch-level (Opik 2.2.50–52, LangWatch TS SDK 1.12.1, Langfuse v4.29.0/v4.30.0 tags this morning are packaging). Academy is flat: the arXiv listing is unchanged from the Friday batch fully covered at 2134, and the next new announcement is Monday's, visible ~5:00 PM PT Sunday. Judgment: no re-rank. One schema note strengthened (span links are now a shipped primitive in a second vendor — record edges, don't infer them), one convergence note strengthened (assistant-over-trace-store is table stakes; BQAA's wedge is that the store is the customer's own warehouse), one eval-schema note (judges now consume media payloads, so eval events need a modality field). Do not start anything.</p>
+<hr />
+<h2>Industry</h2>
+<h3>1. MLflow 3.16.0: span links, session grouping by default, and Assistant-built Custom Trace Views (Sep 4)</h3>
+<p>Verified from the <a href="https://github.com/mlflow/mlflow/releases/tag/v3.16.0">v3.16.0 release notes</a>, tagged 2026-09-04T08:30 UTC, after the 2134 baseline. Three major features:</p>
+<ul>
+<li><strong>Span Links.</strong> &quot;Spans rarely stand alone. MLflow 3.16.0 adds first-class span links so relationships between spans — a retrieval step, a tool call, a downstream trace — are captured and navigable. Record links in your SDK and the trace explorer surfaces them in a dedicated Links tab to jump straight to the destination span.&quot; TypeScript SDK support landed in the same release, and the trace explorer normalizes span links arriving over OTLP.</li>
+<li><strong>Redesigned Trace Experience, now default.</strong> Rebuilt trace explorer with tighter row density, reorderable columns, configurable custom columns from any trace tag or metadata field, and <strong>session grouping</strong> to &quot;find multi-turn conversations inline.&quot; The experiment <strong>Sessions tab is deprecated in favor of Traces session grouping</strong>.</li>
+<li><strong>Custom Trace Views.</strong> &quot;Design your own trace UI in plain English — describe the view you want and the MLflow Assistant builds it for you, laying out exactly the fields you care about with no config files or custom code. Save, name, and reuse views per experiment so your whole team shares the same lens on your traces.&quot;</li>
+</ul>
+<p>Also in the release, product-level and on-beat: an <strong>Assistant analyze action on evaluation runs</strong>; <code>logFeedback</code> and typed trace assessments in the TypeScript SDK; per-user budget policies in the AI Gateway; built-in judges can use UC model services; <code>make_judge</code> exposes <code>generate_rationale_first</code>; the OpenCode tracing plugin now includes reasoning/thinking content in spans; the Claude Code plugin gains workspace support; and a docs fix for the online evaluator skipping long-running traces (a completion buffer).</p>
+<p><strong>TL;DR for BQAA.</strong> Three reads. First, <strong>span links are the shippable form of the edge schema</strong> the academy thread keeps asking for (AgentEval: &quot;attribution works when the schema records the edges&quot;): MLflow now records span-to-span and span-to-trace relationships as data, not as parent-child inference. BQAA's event/step table should carry a links field (target span/trace id plus a typed relationship) rather than reconstructing causality from ordering — column note, not a feature. Second, <strong>session grouping displacing a dedicated Sessions tab</strong> is a second vendor (after Laminar's session timeline) deciding the session is a lens over the trace table, not a separate object — that is exactly BQAA's session-row-over-event-table shape, and the docs can now cite MLflow and Laminar as prior art. Third, Custom Trace Views plus the Sep 3 Langfuse entry below make five vendors shipping &quot;assistant does analysis over the trace store&quot; (Laminar Agent SQL, Phoenix AI Query, Braintrust Loop, Langfuse Assistant, MLflow Assistant). The differentiation sentence for BQAA gets sharper: the assistants are bound to each vendor's store; BQAA's store is the customer's BigQuery, where the same questions are plain SQL the customer already owns.</p>
+<h3>2. Langfuse: the Assistant now builds datasets and dashboards and runs code over thousands of observations in a sandbox (changelog Sep 3, missed at baseline) — plus multimodal LLM-as-a-Judge (Sep 1, missed)</h3>
+<p>Verified from the dated entry pages. The Sep 3 entry (<a href="https://langfuse.com/changelog/2026-09-03-langfuse-assistant">link</a>): ask the Langfuse Assistant to <strong>build a dataset</strong> (&quot;create a dataset from the failed generations of last week&quot;), <strong>build a dashboard</strong> (&quot;error rate and p95 latency for the last 7 days&quot;), or <strong>run code over thousands of observations in a sandbox</strong> rather than loading payloads into model context (&quot;cluster the main error types across the failed observations of the last 7 days,&quot; &quot;find what the slowest 100 traces from yesterday have in common&quot;). Runs continue in the background with completion notifications; anything that changes data or configuration waits for approval, with a per-tool &quot;Always approve&quot; escape. This entry was live before the 2134 baseline ran, but 2134 checked only Langfuse's GitHub tags (v4.28.1), so it was never carded; it post-dates the Sep 2 evaluator-alerts card. This morning's v4.29.0 (14:59 UTC) and v4.30.0 (16:02 UTC) tags are the packaging for it.</p>
+<p>The Sep 1 entry (<a href="https://langfuse.com/changelog/2026-09-01-multi-message-prompts-and-multimodal-inputs">link</a>), also missed: LLM-as-a-Judge evaluators now support <strong>multi-message prompts</strong> (system criteria, user content, assistant example) and <strong>multi-modal inputs</strong> — judges can evaluate images, audio, video, PDFs or text files captured in observations, with <code>LANGFUSE_EVALUATOR_MEDIA_*</code> env controls for self-hosters.</p>
+<p><strong>TL;DR for BQAA.</strong> The sandboxed-analysis half is the fourth citation this week that the read path over a trace store is an agent loop with code execution, and Langfuse's approval-gating wording (&quot;anything that changes data or configuration still waits for your approval&quot;) is the governance line BQAA's own assistant story should copy verbatim. Note the division of labor Langfuse chose: the assistant writes into datasets and dashboards, i.e. into the same store it reads — the BQAA analog is the assistant materializing BigQuery tables and Looker views, which is a docs example, not a feature. The multimodal-judge half is a column note: if judges consume image/audio/PDF payloads, the eval event needs the judged content's modality and a media reference, or score comparisons across modalities are meaningless. Both are notes; nothing to start.</p>
+<h3>3. Verified flat vs 2134</h3>
+<ul>
+<li><strong>Arize Phoenix.</strong> Newest tags are arize-phoenix v20.7.0 (Sep 3, 20:59 UTC) and arize-phoenix-client v3.4.0 (Sep 3, 19:39 PT) — both predate the 21:34 PT baseline, which already noted the client tag. Product release notes still end in August (08.25.2026). Trace-replay datagen sidecar and Harbor bridge stay on hold pending a product note.</li>
+<li><strong>Braintrust.</strong> September section unchanged from 2134: Patterns, Debugger, Loop across the project, Loop automations, blind reviews, model additions. All carded at 1001 or ruled below bar.</li>
+<li><strong>LangSmith.</strong> Cloud changelog content unchanged from the Aug 24–31 rollup reviewed at 2134 (the page's date headers do not survive rendering, but every section present tonight was present at baseline, including the Fleet Outlook item). The self-hosted changelog's newest entries are 0.17.0-rc repackages of already-shipped cloud features — not new product news.</li>
+<li><strong>Opik, LangWatch, Weave, ADK Python, ADK Java, OTel semconv, OpenLLMetry.</strong> Opik 2.2.50–2.2.52 today are patch bumps; LangWatch typescript-sdk v1.12.1 is an SDK patch; Weave 0.53.7, adk-python v1.39.1/v2.8.0, adk-java v1.9.0, semconv v1.44.0, OpenLLMetry 0.62.3 all unchanged. Nothing product-level for an observer.</li>
+<li><strong>BigQuery platform.</strong> Page last updated 2026-09-03 UTC; newest entries remain Sep 3 conversational-analytics GA, Sep 2 JDBC, Sep 1 Rust SDK preview. Out of beat.</li>
+<li><strong>Mastra.</strong> Newest post is Sep 3 Sandbox Lifecycle Controls, already reviewed at 2134 and ruled agent-runtime, not observability.</li>
+<li><strong>Laminar.</strong> Changelog still tops out at August (flush-by-size, Signals CLI). Flat.</li>
+<li><strong>Grafana.</strong> What's New leads with thresholds variable interpolation, cross-filtering, a Database Observability tool for Grafana Assistant, alert enrichment GA and k6 Studio — infrastructure observability, nothing agent/LLM-level, nothing dated after baseline.</li>
+<li><strong>AWS AgentCore, IBM watsonx, Salesforce Agentforce, ServiceNow, Alibaba ARMS, Datadog, deepset, Agno, Portkey, Helicone, Confident AI.</strong> AgentCore and Agno pages unrenderable tonight, but web search surfaces no new item for either since baseline; the rest unchanged from 2134 (ARMS release notes still &quot;Last Updated: Jun 16, 2026&quot;; Datadog blog index unchanged; deepset still leads with the Jul 30 Traces post).</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<p>Flat, verified. <code>arxiv.org/list/cs.AI/new</code> still shows the Friday, 4 September 2026 announcement (269 entries) — the identical listing that 2134 triaged across all four categories (cs.AI/LG/CL/MA, 360 unique non-replacement entries, every title read, four full PDFs carded: 2609.03221, 2609.03192, 2609.02925, 2609.04194). Replacements were re-checked for on-beat IDs and none is new to the catalog. The scout-flagged 2608.14680 (AgentChaosBench) remains an August ID from the web index, not in any current listing; per the full-PDF rule and with the Friday batch already covered, it stays uncatalogued rather than carded stale. Next new announcement is Monday's, appearing ~5:00 PM PT Sunday.</p>
+<hr />
+<h2>Six-week EV</h2>
+<p>Ranking unchanged from 2134. What moved:</p>
+<ul>
+<li><strong>Span links as a recorded edge field (schema note, strengthened to shipped-primitive status by item 1).</strong> MLflow 3.16.0 records span-to-span and span-to-trace relationships (retrieval, tool call, downstream trace) as first-class SDK data with a Links tab — the second vendor after Langfuse's v4 graph work to ship edges as data. BQAA's step/event table should carry a nullable links field (target id + relationship type) so attribution queries don't reconstruct causality from timestamps. Companion to AgentEval's &quot;the schema records the edges&quot; and the source-event-references note; still a column note, not a roadmap row.</li>
+<li><strong>Assistant-over-trace-store is table stakes (positioning note, strengthened by items 1 and 2).</strong> Five vendors now ship it: Laminar Agent (SQL), Phoenix AI Query, Braintrust Loop, Langfuse Assistant (sandboxed code over observations, approval-gated writes), MLflow Assistant (plain-English trace views, analyze action on eval runs). All five are bound to the vendor's own store. BQAA's wedge sentence: the store is the customer's BigQuery, the assistant's outputs are tables and views the customer keeps, and the read path is governed SQL the customer can audit. Belongs in the docs' positioning section; no feature.</li>
+<li><strong>Judged-content modality on eval events (new column note, from item 2).</strong> Langfuse judges now consume image/audio/video/PDF payloads captured in observations. Any aggregation of judge scores needs the judged content's modality (and a media reference) on the eval row, or cross-modality score comparisons are noise. Same family as the judge instrument metadata note from 1934.</li>
+<li><strong>Session as a lens over the trace table (vocabulary note, strengthened by item 1).</strong> MLflow deprecated its dedicated Sessions tab in favor of session grouping inside the trace explorer; Laminar made a session one timeline of runs, evals and notes. Two vendors now implement BQAA's session-row-over-event-table shape; cite both in the schema docs.</li>
+<li>Per-action instability floor, typed refusal events, mechanism-plane gate events, source-event references, failure-step pointer with outcome stratum, judge instrument metadata, task-key baseline, repeatability-is-not-correctness: unchanged from 2134.</li>
+</ul>
+<p>Reserve and do-not-start otherwise unchanged.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li>mlflow-3-16-span-links-session-grouping-assistant-trace-views — MLflow 3.16.0: first-class span links with Links tab, redesigned trace explorer default with session grouping (Sessions tab deprecated), Assistant-built Custom Trace Views per experiment (https://github.com/mlflow/mlflow/releases/tag/v3.16.0)</li>
+<li>langfuse-assistant-sandboxed-analysis-dataset-dashboard-builds — Langfuse Assistant builds datasets and dashboards and runs code over thousands of observations in a sandbox, background runs, approval-gated writes (https://langfuse.com/changelog/2026-09-03-langfuse-assistant)</li>
+<li>langfuse-multimodal-multi-message-llm-as-judge — Langfuse LLM-as-a-Judge evaluators accept multi-message prompts and image/audio/video/PDF observation payloads (https://langfuse.com/changelog/2026-09-01-multi-message-prompts-and-multimodal-inputs)</li>
+</ul>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Why two Langfuse cards are &quot;missed,&quot; not &quot;late.&quot;</strong> The 2134 baseline checked Langfuse via the GitHub releases API only; the changelog index was known to 404 for some renderers at 0746 Sep 2 but renders tonight. The Sep 3 Assistant entry and the Sep 1 multimodal-judge entry were both live before baseline and in no prior brief; carded on verification tonight. The hourly should fetch the Langfuse changelog index directly, not infer from tags — v4.29.0 and v4.30.0 tagged this morning are packaging for the Sep 3 entry.</li>
+<li><strong>Phoenix hold list unchanged:</strong> trace-replay datagen sidecar and Harbor jobs-and-rewards bridge, both awaiting a product release note; v20.7.0 and client v3.4.0 predate baseline.</li>
+<li><strong>LangSmith dating caveat.</strong> The Cloud changelog's date headers do not survive text extraction; flatness was judged by section content against the Aug 24–31 rollup reviewed at 2134. If a dated September section appears, re-pull from a rendered path.</li>
+<li><strong>arXiv cadence.</strong> No new listing until Monday's announcement (~5:00 PM PT Sunday); weekend briefs should re-check replacements and cross-list drift only.</li>
+<li><strong>Pages to recheck when they render:</strong> AWS AgentCore release notes, Agno blog, Confident AI docs changelog, Weave docs release notes, ServiceNow Now Assist release notes, IBM What's New, Salesforce newsroom. None carried a known September item at 2134; none surfaced one in tonight's web search either.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Kimi · 4 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
