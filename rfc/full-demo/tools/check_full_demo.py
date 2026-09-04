@@ -375,35 +375,57 @@ check("Phase A; not yet met" in spec, "spec.md §4 marks the bootstrap/negative-
 arch = (DEMO / "ARCHITECTURE.md").read_text("utf-8")
 check("not yet shown" in arch, "ARCHITECTURE.md marks FAIL_STALE / history as not yet shown")
 
-# ---- executed-language scan (Codex rounds 3–5): deferred Phase A must read as future / not done / RFC text only ----
+# ---- executed-language scan (Codex rounds 3–6): deferred Phase A must read as future / not done / RFC text only ----
 # Block → sentence → clause. Markdown structure is preserved: a heading, list item, table row, blockquote line or blank
-# line starts a new block, and only indented/plain continuation lines join the block above, so a qualifier in a later
-# list item or paragraph never covers an earlier clause. Inside a sentence a qualifier governs its own clause and the
-# clauses that FOLLOW it (a modal such as "must" scopes forward over coordination); a trailing qualifier does not reach
-# back over an earlier executed clause ("… was recorded on tape, while future work is planned" fails). The bare words
-# "Phase A" qualify nothing. Markdown emphasis and backticks are stripped before matching so "**not** created" reads as
-# "not created".
-PHASE_A_OBJECT = r"\b(service accounts?|SAs?|bindings?|binding calls?|grants?|roles?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|okf-runtime-reader|okfCatalogSearch|custom role|Token Creator|boundary(-probe)?|denials?|negative checks?|checks? [1-7]|PERMISSION_DENIED|(the|Phase A|on) tape|impersonation|user_email)\b"
-# A past-tense / perfect verb counts as executed language only when the same clause names a Phase A object
-# (either side of the verb): "the operator created the three service accounts", "the service accounts were created",
-# "has revoked every okf-setup role". "Runtime tables were created by the operator" names no Phase A object and passes.
-PAST_VERB = r"\b(created|revoked|granted|installed|recorded|exercised|proved|demonstrated|deleted|executed|ran|denied)\b"
-EXECUTED = [r"recorded on tape", r"on tape under", r"\bon tape\b", r"\bthe tape shows\b", r"\bthe tape demonstrates\b",
-            r"\bdemonstrated, not asserted\b", r"\b(is|was|were|are|been) demonstrated\b", r"\bprove[sd]? (the|that|it)\b", r"\bdenial checks prove\b",
-            r"\bmakes every binding\b", r"\bevery binding call is made\b", r"\bcreates? the (three )?service accounts\b", r"\b(are|were|was|is|been) revoked\b",
-            r"\beach (binding )?command (is |was )?recorded\b", r"\b(is|are|was|were|been) recorded (on|in) the tape\b", r"returned `?PERMISSION_DENIED",
-            r"\bran as `?okf-(setup|sync-writer|runtime-reader)", r"\bexercised once on tape\b", r"\bimpersonated `?user_email`? (from|after)\b",
-            r"\bidentity is demonstrated\b", r"\bshows? the impersonated\b",
-            r"\b(was|were|is|are) denied\b", r"\bPERMISSION_DENIED\b[^.;]*\bon tape\b",
-            r"\bPhase A (was|has been|is) (executed|done|complete|completed|run|recorded)\b"]
+# line starts a new block and only continuation lines join it, so a qualifier in a later item or paragraph never covers
+# an earlier clause. Sentences split into clauses at commas (including ", and" / ", or") and connectors.
+# Three qualifier classes, bound differently:
+#   FORWARD  true forward-scoping modals and status phrases (must / will / shall / expected / not yet / not done /
+#            RFC text only / future / deferred / planned / has not run / none has been run …). They govern their own
+#            clause and every clause AFTER them in the same sentence, never an earlier one. Clauses split at commas
+#            and at bare "and", so "… was recorded on tape and future work is planned" still fails.
+#   CLAUSE   words that only qualify the clause they sit in (prior, requirement, acceptance criterion, requires).
+#   NEGATION not / no / none / nothing / never / cannot / without. A negation exempts an executed predicate only when it
+#            is bound to it: at most 4 words between the negation and the predicate, inside the same clause. A bare "No"
+#            in "No DML touched agent_events" does not exempt "the service accounts were created" in the next clause, and
+#            "It is not a secret that the denials were proved" is still an execution claim.
+# The bare words "Phase A" qualify nothing. Only Markdown emphasis is stripped (*, backticks, and _ at word edges);
+# underscores inside identifiers (PERMISSION_DENIED, agent_events, user_email) are preserved. Matching is case-insensitive.
+PHASE_A_OBJECT = re.compile(r"\b(service accounts?|SAs?|bindings?|binding calls?|grants?|roles?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|okf-runtime-reader|okfCatalogSearch|custom role|Token Creator|boundary(-probe)?|denials?|negative checks?|positive checks?|checks? [1-7]|PERMISSION_DENIED|(the|Phase A|on) tape|impersonation|user_email)\b", re.I)
+# Past / perfect verbs count as executed language only when the same clause names a Phase A object (either side).
+PAST_VERB = re.compile(r"\b(created|revoked|granted|installed|recorded|exercised|proved|proven|demonstrated|deleted|executed|ran|denied|made|returned|completed|performed|showed|confirmed|impersonated)\b", re.I)
+EXECUTED = [re.compile(rx, re.I) for rx in [
+    r"recorded on tape", r"on tape under", r"\bon tape\b", r"\bthe tape shows\b", r"\bthe tape demonstrates\b",
+    r"\bdemonstrated, not asserted\b", r"\b(is|was|were|are|been) demonstrated\b", r"\bprove[sd]? (the|that|it)\b", r"\bdenial checks prove\b",
+    r"\bmakes every binding\b", r"\bevery binding call is made\b", r"\bcreates? the (three )?service accounts\b", r"\b(are|were|was|is|been) revoked\b",
+    r"\beach (binding )?command (is |was )?recorded\b", r"\b(is|are|was|were|been) recorded (on|in) the tape\b", r"returned `?PERMISSION_DENIED",
+    r"\bran as `?okf-(setup|sync-writer|runtime-reader)", r"\bexercised once on tape\b", r"\bimpersonated `?user_email`? (from|after)\b",
+    r"\bidentity is demonstrated\b", r"\bshows? the impersonated\b", r"\b(was|were|is|are) denied\b", r"\bPERMISSION_DENIED\b[^.;]*\bon tape\b",
+    r"\bPhase A (was|has been|is) (executed|done|complete|completed|run|recorded)\b"]]
 
-def executed_clause(cl):
-    return any(re.search(rx, cl) for rx in EXECUTED) or (re.search(PAST_VERB, cl) and re.search(PHASE_A_OBJECT, cl))
-QUALIFIER = [r"\bmust\b", r"\bwill\b", r"\bwould\b", r"\bshall\b", r"\bto be (recorded|run|exercised|made|created|revoked|deleted|granted)\b", r"\bexpected\b",
-             r"\bnot yet\b", r"\bNOT yet\b", r"\bnot done\b", r"\bNot done\b", r"\bnot run\b", r"\bnot started\b", r"\bnot created\b", r"\bnot built\b", r"\bNot built\b",
-             r"\bnone (of|was|were|has|have)\b", r"\bno (such )?tape\b", r"\b[Nn]othing\b", r"RFC text only", r"\bfuture\b", r"\bdeferred\b", r"\bplanned\b",
-             r"\bhas not run\b", r"\bnone happened\b", r"\bneither happened\b", r"\bprior\b", r"\bnever\b", r"\bdoes not exist\b", r"\brequirement\b",
-             r"\bacceptance criterion\b", r"\bnot (been )?executed\b", r"\bnot met\b", r"\b[Nn]ot\b", r"\b[Nn]o\b", r"\bcannot\b", r"\bwithout\b", r"\brequires?\b"]
+def executed_span(cl):
+    """Return the start offset of the executed predicate in the clause, or None."""
+    starts = [m.start() for rx in EXECUTED for m in [rx.search(cl)] if m]
+    if PHASE_A_OBJECT.search(cl):
+        m = PAST_VERB.search(cl)
+        if m:
+            starts.append(m.start())
+    return min(starts) if starts else None
+
+FORWARD = re.compile(r"\b(must|will|would|shall|expected|not yet|NOT yet|not done|not run|not started|not created|not built|not met|not (been )?executed|"
+                     r"has not run|none (has|have|was|were) (been )?run|none happened|neither happened|future|deferred|planned|to be (recorded|run|exercised|made|created|revoked|deleted|granted|stamped))\b|RFC text only", re.I)
+CLAUSE = re.compile(r"\b(prior|requirement|acceptance criterion|requires?|does not exist|no (such )?tape)\b", re.I)
+NEGATION = re.compile(r"\b(not|no|none|nothing|never|cannot|without)\b", re.I)
+
+def negation_bound(cl, pred_start):
+    """True when a negation precedes the executed predicate with at most 4 words in between (same clause)."""
+    for m in NEGATION.finditer(cl):
+        if m.end() <= pred_start:
+            between = cl[m.end():pred_start].split()
+            if len(between) <= 4:
+                return True
+    return False
+
 SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json"]
 BLOCK_START = re.compile(r"^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s?|\|)")
 
@@ -426,22 +448,30 @@ def md_blocks(text):
     if cur:
         yield start, " ".join(cur)
 
+def strip_markdown(text):
+    """Remove emphasis markers only: *, backticks, and _ at word edges. Identifier underscores survive."""
+    text = re.sub(r"[*`]", "", text)
+    return re.sub(r"(?<![A-Za-z0-9])_+|_+(?![A-Za-z0-9])", "", text)
+
 def clauses(sentence):
-    """Split one sentence into clauses at commas and subordinating/coordinating connectors."""
-    return [c for c in re.split(r",\s+|\s+\b(?:while|whereas|but|although|though|however|yet|and then|then)\b\s+", sentence) if c and c.strip()]
+    """Split one sentence into clauses at commas (incl. ', and' / ', or') and subordinating/coordinating connectors."""
+    return [c for c in re.split(r",\s+(?:and\s+|or\s+)?|\s+\b(?:while|whereas|but|although|though|however|and|then)\b\s+", sentence) if c and c.strip()]
 
 def scan_executed(text, fname="<text>"):
-    """Return offending clauses: executed-language whose clause (or an earlier clause of the same sentence) carries no qualifier."""
+    """Return offending clauses: executed predicates not governed by a forward modal, a clause qualifier, or a bound negation."""
     out = []
-    plain = re.sub(r"[*_`]", "", text)
-    for start_line, block in md_blocks(plain):
+    for start_line, block in md_blocks(strip_markdown(text)):
         for sent in re.split(r"(?<=[.;:])\s+", block):
-            qualified_so_far = False
+            forward = False
             for cl in clauses(sent):
-                if any(re.search(rx, cl) for rx in QUALIFIER):
-                    qualified_so_far = True
-                if executed_clause(cl) and not qualified_so_far:
-                    out.append("%s:%d: %s" % (fname, start_line, cl.strip()[:130]))
+                pred = executed_span(cl)
+                fwd_here = FORWARD.search(cl)
+                if pred is not None:
+                    ok = forward or bool(fwd_here) or CLAUSE.search(cl) or negation_bound(cl, pred)
+                    if not ok:
+                        out.append("%s:%d: %s" % (fname, start_line, cl.strip()[:130]))
+                if fwd_here:
+                    forward = True
     return out
 
 offenders = []
@@ -458,15 +488,24 @@ NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
        "The operator has revoked every okf-setup role and has proved the denials on tape.",  # perfect forms
        "- Every binding was recorded on tape.\n- Future work: the rest is planned.",       # list boundary
        "Every binding was recorded on tape.\n\nThe rest is future work.",                 # paragraph boundary
-       "## Status\nAll seven negative checks returned PERMISSION_DENIED on tape.\n\nPhase A is future work."]
+       "## Status\nAll seven negative checks returned PERMISSION_DENIED on tape.\n\nPhase A is future work.",
+       "No DML touched agent_events, and the three Phase A service accounts were created.",   # r6: bare "No" must not latch forward
+       "The operator made every Phase A binding.",                                            # r6: 'made' + binding
+       "Check 6 returned PERMISSION_DENIED.",                                                 # r6: identifier underscore preserved
+       "It is not a secret that the denials were proved on tape.",                            # r6 cousin: unbound negation
+       "Without a tape, the operator created the service accounts.",                          # r6 cousin: negation in another clause
+       "THE OPERATOR CREATED THE SERVICE ACCOUNTS.",                                          # r6 cousin: case
+       "Phase A is not blocked; the custom role okfCatalogSearch was granted at project level."]  # r6 cousin: negation in other clause
 POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Each call is expected to return PERMISSION_DENIED; none has been run.",
        "The legacy handle was bound to two publications before Phase A.",
        "The operator must create the service accounts, bind every role on tape, and revoke them afterwards.",  # modal scopes forward
        "No service account was created for this capture; the three SAs are the Phase A follow-up.",
-       "The three service accounts were **not** created; they are deferred."]
-check(all(scan_executed(t) for t in NEG), "scan flags every negative fixture (active past, perfect, trailing qualifier, list and paragraph boundaries, bare 'Phase A')")
-check(not any(scan_executed(t) for t in POS), "scan accepts forward-scoped modals, negations and legacy data facts")
+       "The three service accounts were **not** created; they are deferred.",
+       "Nothing in §1.3 has been executed on PR 16.",
+       "No `PERMISSION_DENIED` check was recorded; the three service accounts were not created."]
+check(all(scan_executed(t) for t in NEG), "scan flags every negative fixture (active past, perfect, trailing qualifier, block boundaries, bare Phase A, unbound negation, case, identifiers): %s" % [t[:50] for t in NEG if not scan_executed(t)])
+check(not any(scan_executed(t) for t in POS), "scan accepts forward-scoped modals, bound negations and legacy data facts: %s" % [scan_executed(t) for t in POS if scan_executed(t)])
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")
 check("Status on 2026-09-03 (PR 16): none of this section has run" in arch, "ARCHITECTURE.md sync-leg prose carries the not-run scope note")
 plan_md = (DEMO / "plan.md").read_text("utf-8")

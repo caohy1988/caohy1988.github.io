@@ -19,6 +19,12 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m9  executed claim in one list item / paragraph, qualifier only in the next (Codex r5: block boundaries)
   m10 SQL file rewritten LF → CRLF only (Codex r5: read_text universal newlines hid the byte change)
   m11 constant SELECT with the required tokens only in -- comments, hashes recomputed (Codex r5: comment smuggling)
+  m12 "No DML touched agent_events, and the three Phase A service accounts were created." (Codex r6: bare No latch)
+  m13 "The operator made every Phase A binding." (Codex r6: verb vocabulary)
+  m14 "Check 6 returned PERMISSION_DENIED." (Codex r6: underscore stripping broke the identifier)
+  m15 "It is not a secret that the denials were proved on tape." (r6 cousin: negation not bound to the predicate)
+  m16 "Without a tape, the operator created the service accounts." (r6 cousin: negation in another clause)
+  m17 upper-case executed claim (r6 cousin: case-insensitive matching)
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
 """
@@ -146,6 +152,21 @@ def m11(d):
     prov_p.write_text(json.dumps(prov, indent=1), "utf-8")
 
 
+def _append(rel, text):
+    def fn(d):
+        p = d / rel
+        p.write_text(p.read_text("utf-8") + "\n\n" + text + "\n", "utf-8")
+    return fn
+
+
+# Codex r6: bare "No" latched forward over ", and …"; 'made' missing from the verb list; "_" stripping broke PERMISSION_DENIED
+m12 = _append("ARCHITECTURE.md", "No DML touched agent_events, and the three Phase A service accounts were created.")
+m13 = _append("spec.md", "The operator made every Phase A binding.")
+m14 = _append("plan.md", "Check 6 returned PERMISSION_DENIED.")
+m15 = _append("CUSTOMER_STORIES.md", "It is not a secret that the denials were proved on tape.")
+m16 = _append("intent.md", "Without a tape, the operator created the service accounts.")
+m17 = _append("README.md", "THE OPERATOR GRANTED THE CUSTOM ROLE okfCatalogSearch AT PROJECT LEVEL.")
+
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
              ("m5 summary job missing from inventory", m5), ("m6 prior label regressed to seeded", m6),
@@ -153,7 +174,13 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m8 trailing qualifier after executed clause", m8),
              ("m9 qualifier in next list item / paragraph", m9),
              ("m10 CRLF rewrite of the SQL file only", m10),
-             ("m11 comment-smuggled tokens around a constant SELECT", m11)]
+             ("m11 comment-smuggled tokens around a constant SELECT", m11),
+             ("m12 bare 'No' in an earlier clause, SA creation in the next", m12),
+             ("m13 'made every Phase A binding'", m13),
+             ("m14 'Check 6 returned PERMISSION_DENIED' (identifier underscore)", m14),
+             ("m15 unbound negation 'not a secret that … were proved'", m15),
+             ("m16 'Without a tape,' negation in another clause", m16),
+             ("m17 upper-case executed claim", m17)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:

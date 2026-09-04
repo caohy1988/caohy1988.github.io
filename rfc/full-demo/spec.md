@@ -110,7 +110,7 @@ the reader). None of these bindings exists yet (PR 16 status: not done).
 | | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | `bigquery.tables.setIamPolicy` for the nine table-level bindings | setup only, revoked |
 | | SA `okf-sync-writer-okf-rfc-demo`, SA `okf-runtime-reader` | `roles/iam.serviceAccountTokenCreator` on each SA | run the demo by impersonation | kept |
 | | SA `okf-setup` | `roles/iam.serviceAccountTokenCreator` | run setup by impersonation | setup only; to be revoked (check 7) |
-| `okf-setup` (one-time) | project | `roles/dataplex.catalogEditor` (`entryGroups.create`, `entryTypes.create`) and `roles/dataplex.aspectTypeOwner` (`aspectTypes.create`) | type and group creation is checked on the project, not on the group | setup only, revoked (check 6) |
+| `okf-setup` (one-time) | project | `roles/dataplex.catalogEditor` (`entryGroups.create`, `entryTypes.create`) and `roles/dataplex.aspectTypeOwner` (`aspectTypes.create`) | type and group creation is checked on the project, not on the group | setup only; to be revoked (check 6) |
 | | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | table DDL, the `context_ref_resolution` view, seed `MERGE`s (`sql/setup_runtime_tables.sql`) | setup only, revoked |
 | | project | `roles/bigquery.jobUser` | run the DDL jobs | setup only, revoked |
 | `okf-sync-writer-okf-rfc-demo` | EntryGroup `okf-rfc-demo` | `roles/dataplex.catalogEditor` | `entries.create/patch/delete` inside this group only | kept |
@@ -155,11 +155,11 @@ than the sync writer.
 **Negative checks** (Phase A, not yet run: seven checks, nine real API calls, each call expected `PERMISSION_DENIED`,
 to be recorded on tape and asserted by the checker; check 6 is three calls):
 
-1. `okf-sync-writer-okf-rfc-demo`: `SELECT COUNT(*) FROM agent_events` → `PERMISSION_DENIED` (no dataset grant, no table grant).
+1. `okf-sync-writer-okf-rfc-demo`: `SELECT COUNT(*) FROM agent_events` → expected `PERMISSION_DENIED` (no dataset grant, no table grant).
 2. `okf-sync-writer-okf-rfc-demo`: the **same** `entries patch` on `okf-rfc-demo-boundary/entries/boundary-probe` that `okf-setup` will have just completed successfully → expected `PERMISSION_DENIED`. Custom group, existing user-created entry, identical request body; the only variable is the missing cross-group grant.
-3. `okf-sync-writer-okf-rfc-demo`: `aspect-types create okf-context-runtime-2` → `PERMISSION_DENIED` (no project-level type creation).
-4. `okf-runtime-reader`: `entries patch` on a stamped entry → `PERMISSION_DENIED`.
-5. `okf-runtime-reader`: `INSERT INTO deployment_heads` → `PERMISSION_DENIED`.
+3. `okf-sync-writer-okf-rfc-demo`: `aspect-types create okf-context-runtime-2` → expected `PERMISSION_DENIED` (no project-level type creation).
+4. `okf-runtime-reader`: `entries patch` on a stamped entry → expected `PERMISSION_DENIED`.
+5. `okf-runtime-reader`: `INSERT INTO deployment_heads` → expected `PERMISSION_DENIED`.
 6. Post-cleanup, `okf-setup` (still impersonable after step 5 removes its roles), three calls: (6a) `aspect-types update okf --description=x`, (6b) `aspect-types delete okf-context-runtime`, (6c) `aspect-types set-iam-policy okf` → each expected `PERMISSION_DENIED`, which would show the project-wide AspectType authority is gone.
 7. Post-cleanup, operator (default configuration): `gcloud auth print-access-token --impersonate-service-account=okf-setup@…` → expected `PERMISSION_DENIED` on `generateAccessToken`, which would show the impersonation path is closed; the `okf-setup` gcloud configuration is then to be deleted.
 
