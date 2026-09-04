@@ -479,8 +479,12 @@ def _kind(tok):
         return "ADV"
     return "WORD"
 
+# Adverbs that do not end in -ly. Unlike verbs, these are a genuinely closed class in English, so listing them is a
+# description of the language rather than an allowlist of accepted phrasings.
 DEGREE_ADVERB = {"very", "quite", "always", "never", "again", "now", "then", "also", "still", "already",
-                 "afterwards", "first", "duly", "once", "only", "just", "even", "rather", "fairly", "soon"}
+                 "afterwards", "first", "duly", "once", "twice", "only", "just", "even", "rather", "fairly", "soon",
+                 "often", "sometimes", "seldom", "rarely", "usually", "occasionally", "ever", "yet", "here", "there",
+                 "thus", "hence", "therefore", "indeed", "instead", "meanwhile", "later", "earlier", "anyway"}
 
 def _is_adverb(tok, kind):
     return kind == "ADV" or tok.lower() in DEGREE_ADVERB
@@ -501,12 +505,19 @@ def contains_finite_clause(span, tail_subject_verb=False):
     predicate, whose span keeps its own words: a span that is exactly a bare noun plus a lowercase word
     ("… operator spoke" | on tape) is a subject and its verb, whatever that verb's spelling."""
     toks = [(t, _kind(t)) for t in TOKEN.findall(span)]
-    if tail_subject_verb:
-        content = [(t, k) for t, k in toks if not _is_adverb(t, k)]
-        if (len(content) == 2 and content[0][1] == "WORD" and content[1][1] == "WORD"
-                and content[1][0][:1].islower() and toks and not _is_adverb(*toks[0])
-                and toks[0][1] == "WORD"):
-            return True
+    if tail_subject_verb and toks:
+        # The span of a phrase predicate keeps its own words, so a span that ENDS in "<noun> <adverbs> <lowercase word>"
+        # is a subject and its verb, whatever the verb's spelling ("… the operator quietly spoke" | on tape). The
+        # subject must start its own phrase — preceded by a determiner or by nothing — so a name compound
+        # ("the Phase A binding", where "binding" follows the noun "A") is not read as a clause.
+        last_i = len(toks) - 1
+        tok, kind = toks[last_i]
+        if kind == "WORD" and tok[:1].islower():
+            subj_i = _subject_index(toks, last_i)
+            if subj_i >= 0 and toks[subj_i][1] == "WORD":
+                before_i = _subject_index(toks, subj_i)
+                if before_i < 0 or toks[before_i][1] == "DET":
+                    return True
     for i, (tok, kind) in enumerate(toks):
         if _is_adverb(tok, kind):
             continue
@@ -576,8 +587,11 @@ def reads_as_noun(cl, m):
         return True
     if not re.match(r"^\s+\S", after):             # nothing follows: these verbs are transitive here
         return True
-    if NONOBJECT_AFTER.match(after) or ADVERB_THEN_END.match(after):
+    if ADVERB_THEN_END.match(after):
         return True
+    after_adverbs = re.sub(r"^(?:\s+(?:" + ADVERB + r"))+", "", after, flags=re.I)
+    if NONOBJECT_AFTER.match(after) or NONOBJECT_AFTER.match(after_adverbs):
+        return True                                   # "grants narrowly constrain …": the adverb modifies the verb
     return not has_subject(before)
 
 PAST_VERB = re.compile(r"\b(" + "|".join(PAST_FORMS) + r")\b|\b(?:was|were|is|are|been|be|has|have|had)\s+(?:not\s+|already\s+)?(?:" + "|".join(AMBIGUOUS_PARTICIPLE) + r")\b", re.I)
@@ -826,9 +840,9 @@ def _code_span(inner):
     visible to the scanner; a shell / SQL fragment collapses to one opaque token so it is not parsed as a sentence."""
     return inner if not CLI_SHAPE.search(inner) else "code"
 
-REGEX_PRECEDER = re.compile(r"(?:^|=>|[(,=:\[!&|?{};+\-*%~^<>]|\b(?:return|typeof|instanceof|in|of|new|delete|void|case|do|else)\b)\s*$")
+REGEX_PRECEDER = re.compile(r"(?:^|=>|[(,=:\[!&|?{};+\-*%~^<>]|\b(?:return|throw|typeof|instanceof|in|of|new|delete|void|case|do|else|yield|await)\b)\s*$")
 
-ESCAPES = {"n": "\n", "t": "\t", "r": "\r", "b": "", "f": "", "v": "", "0": ""}
+ESCAPES = {"n": " ", "t": " ", "r": " ", "b": "", "f": "", "v": "", "0": "", "\n": ""}
 
 def _decode_escape(src, i):
     """Decode a JavaScript escape so its character survives into the prose: \\u0065 is "e", \\' is an apostrophe."""
@@ -943,10 +957,17 @@ def extract_js_prose(src):
 BLOCK_TAG = re.compile(r"</?(?:div|p|li|ul|ol|tr|td|th|table|section|article|header|footer|nav|details|summary|pre|blockquote|h[1-6]|br|dl|dt|dd|form|figure)\b[^>]*>", re.I)
 INLINE_TAG = re.compile(r"</?[a-zA-Z][^>]*>")
 
+HIDDEN_ELEMENT = re.compile(
+    r'''<(\w+)[^>]*\b(?:hidden\b|aria-hidden=["']?true|style=["'][^"']*display\s*:\s*none)[^>]*>.*?</\1\s*>''',
+    re.I | re.S)
+
 def html_runs(text):
-    """Block-level tags separate text runs; inline tags are removed so a phrase the reader sees as one
-    ("The service <strong>accounts</strong> were created") stays one clause."""
-    return INLINE_TAG.sub("", BLOCK_TAG.sub(" | ", text))
+    """What the reader sees. Hidden elements are dropped whole, so text the browser never renders can neither make a
+    claim nor qualify one; block-level tags separate text runs; inline tags are removed so a phrase the reader sees as
+    one ("The service <strong>accounts</strong> were created") stays one clause."""
+    text = HIDDEN_ELEMENT.sub(" ", text)
+    text = INLINE_TAG.sub("", BLOCK_TAG.sub(" | ", text))
+    return re.sub(r"[ \t]{2,}", " ", text)            # removing an element must not split "service  accounts"
 
 def strip_markdown(text):
     """Collapse inline code to one opaque token, then remove emphasis markers (*, stray backticks, and _ at word
@@ -1111,7 +1132,8 @@ NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
        "No reviewer clearly knew okf-setup created the service accounts.",                            # r16 Codex: adverb inside a negation span
        "The planned operator spoke on tape.",                                                         # r16 Codex: irregular verb, bare subject+verb span
        "The docs must explain the RFC, and operators grant temporary Phase A roles.",                  # r16 Codex: coordinated bare subject
-       "The docs must explain the RFC, and operators routinely record every binding on tape."]         # r16 Codex: bare subject with an adverb keeps the object
+       "The docs must explain the RFC, and operators routinely record every binding on tape.",         # r16 Codex: bare subject with an adverb
+       "The docs must report the operator quietly spoke on tape."]                                    # r17 Codex: irregular verb after a reporting head keeps the object
 POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Each call is expected to return PERMISSION_DENIED; none has been run.",
        "The legacy handle was bound to two publications before Phase A.",
@@ -1156,7 +1178,10 @@ POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "The project grants govern Phase A access to the custom role.",
        "The operator must create the service accounts and always record every binding on tape.",
        "The operator must create the service accounts and very carefully always record every binding on tape.",
-       "Project grants constrain Phase A access to the custom role."]
+       "Project grants constrain Phase A access to the custom role.",
+       "The operator must create the service accounts and often record every binding on tape.",
+       "The operator must create the service accounts and sometimes record every binding on tape.",
+       "Project grants narrowly constrain Phase A access to the custom role."]
 check(all(scan_fixture(t) for t in NEG), "scan flags every negative fixture (active past, perfect, after-verb status/modal, finite claims after coordination, once/then/after resets, block boundaries, bare Phase A, unbound negation, case, identifiers): %s" % [t[:50] for t in NEG if not scan_executed(t)])
 check(not any(scan_fixture(t) for t in POS), "scan accepts preceding modals latched over nonfinite coordination, preceding status markers, bound negations and legacy data facts: %s" % [scan_fixture(t) for t in POS if scan_fixture(t)])
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")

@@ -87,8 +87,12 @@ the unmodified copy. Each mutation reproduces a hole a reviewer found:
   m87 a claim split across a one-word concatenated literal (Codex r16)
   m88 a regex literal holding a quote must not desynchronise the lexer (Codex r16)
   m89 a \\u escape is decoded, so the claim it spells is visible (Codex r16)
+  m90 "The docs must report the operator quietly spoke on tape." (Codex r17: irregular verb after a reporting head)
+  m91 "throw /'/" before a dishonest literal must not desynchronise the lexer (Codex r17)
+  m92 an escaped line continuation inside a claim is joined, not lost (Codex r17)
+  m93 a hidden span cannot qualify the claim the reader actually sees (Codex r17)
 
-Positive controls p1-p27 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
+Positive controls p1-p30 append honest RFC-only prose (shared modal + coordinated participle, "that" as a determiner,
 "grants" as a noun, bare-infinitive coordination, the proper noun "Run") and must leave the checker at exit 0.
 
 Usage: python3 rfc/full-demo/tools/mutation_fixture.py   (exit 0 when every fixture behaves)
@@ -310,6 +314,9 @@ POSITIVE_CONTROLS = [
     ("p25 three adverbs before a coordinated continuation head", _append("ARCHITECTURE.md", "The operator must create the service accounts and very carefully always record every binding on tape.")),
     ("p26 compound noun with an unlisted governance verb ('Project grants constrain …')", _append("spec.md", "Project grants constrain Phase A access to the custom role.")),
     ("p27 unrelated neighbouring literals are not merged", _append_js("app.js", 'var r16e = "This is future work.";\nvar r16f = "The tape will show every binding.";')),
+    ("p28 non-ly adverb 'often' before a continuation head", _append("spec.md", "The operator must create the service accounts and often record every binding on tape.")),
+    ("p29 non-ly adverb 'sometimes' before a continuation head", _append("plan.md", "The operator must create the service accounts and sometimes record every binding on tape.")),
+    ("p30 adverb between a noun and its governance verb", _append("intent.md", "Project grants narrowly constrain Phase A access to the custom role.")),
 ]
 
 # Codex r12: null complements with arbitrary subjects, factive "why" over a phrase predicate, status modifying the
@@ -389,6 +396,12 @@ m86 = _append("README.md", "The docs must explain the RFC, and operators routine
 m87 = _append_js("app.js", 'var r16a = "The operator " + "created" + " the Phase A service accounts.";')
 m88 = _append_js("app.js", "var r16b = function () { return /'/; };\nvar r16c = 'The operator created the Phase A service accounts.';")
 m89 = _append_js("app.js", 'var r16d = "The operator cr\\u0065ated the Phase A service accounts.";')
+
+# Codex r17: an irregular verb after a reporting head, and three JavaScript / HTML shapes the lexer mis-read.
+m90 = _append("ARCHITECTURE.md", "The docs must report the operator quietly spoke on tape.")
+m91 = _append_js("app.js", "var r17a = function () { throw /'/; };\nvar r17b = 'The operator created the Phase A service accounts.';")
+m92 = _append_js("app.js", 'var r17c = "The operator crea\\\nted the Phase A service accounts.";')
+m93 = _append_js("app.js", 'var r17d = "The service <span hidden>not yet</span> accounts were created for this capture.";')
 
 MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past SA claims in plan.md", m2),
              ("m3 quoted-literal SQL collision", m3), ("m4 unrelated GROUP BY 1, 2 query", m4),
@@ -475,7 +488,11 @@ MUTATIONS = [("m1 executed-language with bare Phase A", m1), ("m2 passive-past S
              ("m86 ', and operators routinely record every binding on tape' (Codex r16)", m86),
              ("m87 claim split across a one-word concatenated literal (Codex r16)", m87),
              ("m88 regex literal holding a quote does not desynchronise the lexer (Codex r16)", m88),
-             ("m89 \\u escape decoded, so the claim is visible (Codex r16)", m89)]
+             ("m89 \\u escape decoded, so the claim is visible (Codex r16)", m89),
+             ("m90 'must report the operator quietly spoke on tape' (Codex r17: irregular verb)", m90),
+             ("m91 'throw /\'/' before a dishonest literal (Codex r17: regex after throw)", m91),
+             ("m92 escaped line continuation inside a claim (Codex r17)", m92),
+             ("m93 hidden span cannot qualify the visible claim (Codex r17)", m93)]
 
 bad = []
 with tempfile.TemporaryDirectory() as tmp:
