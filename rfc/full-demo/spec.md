@@ -65,7 +65,7 @@ the page as `RFC text only`, and `tools/check_full_demo.py` asserts those labels
 | Shipped `okf-bundle` entries + `okf` aspect | Real, after running the sample `setup.ts` + `push.ts` in Phase A. | **Captured**, run by the operator (not `okf-setup` / sync-writer): AspectType `okf`, EntryType `okf-bundle`, 8 entries; `entries.get` vs `lookupContext` on record. |
 | `okf-context sync` commit into BigQuery runtime tables | Real BigQuery DDL/DML into `okf_rfc_demo` (new tables). Built in Phase A. | **Not built.** Only the DDL + seeds ran (as the operator). `deployment_heads`, history and `context_ref_bindings` are empty. No `BQ_COMMITTED`, no `no-op`. `RFC text only` on beat 4. |
 | Catalog stamp on `okf-context-runtime` | Real Catalog write, aspect type created by the setup identity in Phase A. | **Not done.** No `okf-context-runtime` AspectType, no pin, no `CATALOG_STAMPED`. `RFC text only` on beats 3 and 4. |
-| IAM bootstrap, identities, positive and negative checks, setup retirement (§1.3) | Real, recorded in the Phase A tape. | **Not done.** No service account, custom role, table-level grant, boundary probe or `PERMISSION_DENIED` check exists; every job ran as the operator (`bq_jobs_identity.json`). `RFC text only` on beat 4. |
+| IAM bootstrap, identities, positive and negative checks, setup retirement (§1.3) | Real; to be recorded in the Phase A tape. | **Not done.** No service account, custom role, table-level grant, boundary probe or `PERMISSION_DENIED` check exists; every job ran as the operator (`bq_jobs_identity.json`). `RFC text only` on beat 4. |
 | Pin-or-fail-stale (`FAIL_STALE`) | Real query against `deployment_heads`. | **Partly.** `FAIL_CLOSED`, `NO_HEAD`, `AMBIGUOUS_LEGACY` are live query results; `FAIL_STALE` needs a head and none exists. `RFC text only` on beat 5. |
 | Scheduler / Cloud Run Job | Stubbed: job YAML shown, CLI run by hand. | Not shown; `RFC text only`. |
 | Attester / `ATTESTED` verdict | Stubbed: verdict `UNVERIFIABLE`, reason `no-execution`. Nothing on the page says `ATTESTED`. | As specified: every receipt `UNVERIFIABLE`; beat 5 labels the pane live trace + stubbed attester. |
@@ -109,7 +109,7 @@ the reader). None of these bindings exists yet (PR 16 status: not done).
 | | project | `roles/dataplex.aspectTypeOwner` | `aspectTypes.setIamPolicy` on `okf`, `okf-context-runtime` | setup only, revoked |
 | | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | `bigquery.tables.setIamPolicy` for the nine table-level bindings | setup only, revoked |
 | | SA `okf-sync-writer-okf-rfc-demo`, SA `okf-runtime-reader` | `roles/iam.serviceAccountTokenCreator` on each SA | run the demo by impersonation | kept |
-| | SA `okf-setup` | `roles/iam.serviceAccountTokenCreator` | run setup by impersonation | setup only, revoked (check 7) |
+| | SA `okf-setup` | `roles/iam.serviceAccountTokenCreator` | run setup by impersonation | setup only; to be revoked (check 7) |
 | `okf-setup` (one-time) | project | `roles/dataplex.catalogEditor` (`entryGroups.create`, `entryTypes.create`) and `roles/dataplex.aspectTypeOwner` (`aspectTypes.create`) | type and group creation is checked on the project, not on the group | setup only, revoked (check 6) |
 | | dataset `okf_rfc_demo` | `roles/bigquery.dataOwner` | table DDL, the `context_ref_resolution` view, seed `MERGE`s (`sql/setup_runtime_tables.sql`) | setup only, revoked |
 | | project | `roles/bigquery.jobUser` | run the DDL jobs | setup only, revoked |
@@ -156,11 +156,11 @@ than the sync writer.
 to be recorded on tape and asserted by the checker; check 6 is three calls):
 
 1. `okf-sync-writer-okf-rfc-demo`: `SELECT COUNT(*) FROM agent_events` → `PERMISSION_DENIED` (no dataset grant, no table grant).
-2. `okf-sync-writer-okf-rfc-demo`: the **same** `entries patch` on `okf-rfc-demo-boundary/entries/boundary-probe` that `okf-setup` just ran successfully → `PERMISSION_DENIED`. Custom group, existing user-created entry, identical request body; the only variable is the missing cross-group grant.
+2. `okf-sync-writer-okf-rfc-demo`: the **same** `entries patch` on `okf-rfc-demo-boundary/entries/boundary-probe` that `okf-setup` will have just completed successfully → expected `PERMISSION_DENIED`. Custom group, existing user-created entry, identical request body; the only variable is the missing cross-group grant.
 3. `okf-sync-writer-okf-rfc-demo`: `aspect-types create okf-context-runtime-2` → `PERMISSION_DENIED` (no project-level type creation).
 4. `okf-runtime-reader`: `entries patch` on a stamped entry → `PERMISSION_DENIED`.
 5. `okf-runtime-reader`: `INSERT INTO deployment_heads` → `PERMISSION_DENIED`.
-6. Post-cleanup, `okf-setup` (still impersonable, roles revoked), three calls: (6a) `aspect-types update okf --description=x`, (6b) `aspect-types delete okf-context-runtime`, (6c) `aspect-types set-iam-policy okf` → each expected `PERMISSION_DENIED`, which would show the project-wide AspectType authority is gone.
+6. Post-cleanup, `okf-setup` (still impersonable after step 5 removes its roles), three calls: (6a) `aspect-types update okf --description=x`, (6b) `aspect-types delete okf-context-runtime`, (6c) `aspect-types set-iam-policy okf` → each expected `PERMISSION_DENIED`, which would show the project-wide AspectType authority is gone.
 7. Post-cleanup, operator (default configuration): `gcloud auth print-access-token --impersonate-service-account=okf-setup@…` → expected `PERMISSION_DENIED` on `generateAccessToken`, which would show the impersonation path is closed; the `okf-setup` gcloud configuration is then to be deleted.
 
 What this buys and what it does not: the table set, the EntryGroup, and the type resources are the

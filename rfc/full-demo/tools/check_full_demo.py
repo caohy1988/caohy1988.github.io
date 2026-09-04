@@ -311,21 +311,55 @@ check(bool(srow) and srow["state"] == "DONE" and srow["statement_type"] == "SELE
 prov = load("provenance_sessions_summary.json")
 check(prov["job_id"] == summary_job and prov["state"] == "DONE" and prov["statement_type"] == "SELECT", "provenance artifact names the same job id, DONE, SELECT")
 check(prov["user_email_as_shown_by_bq_show"] == (srow or {}).get("user_email"), "provenance artifact's user_email agrees with the inventory row (cross-check, not a fallback)")
-sql_text = (DEMO / "sql/sessions_summary.sql").read_text("utf-8")
-# Byte-identical, no normalization: comment stripping or whitespace folding would let two queries that differ
-# inside a quoted literal (e.g. '--x' vs '--y') hash the same. The live query and the committed file are identical bytes.
-check(prov["executed_query"] == sql_text, "executed query text is byte-identical to sql/sessions_summary.sql (no normalization)")
-raw_sql_hash = hashlib.sha256(sql_text.encode("utf-8")).hexdigest()
+# True bytes, no universal-newline rewrite: read_bytes() vs executed_query.encode("utf-8"). A CRLF rewrite of the file
+# changes its real SHA-256 and must fail here even though read_text() would have hidden it.
+sql_bytes = (DEMO / "sql/sessions_summary.sql").read_bytes()
+sql_text = sql_bytes.decode("utf-8")
+check(b"\r" not in sql_bytes, "sql/sessions_summary.sql has LF line endings only (no CR bytes)")
+check(prov["executed_query"].encode("utf-8") == sql_bytes, "executed query bytes are identical to the sql/sessions_summary.sql file bytes (no normalization, no newline rewrite)")
+raw_sql_hash = hashlib.sha256(sql_bytes).hexdigest()
 check(hashlib.sha256(prov["executed_query"].encode("utf-8")).hexdigest() == prov["executed_query_sha256_raw"] == prov["sql_file_sha256_raw"] == raw_sql_hash,
-      "raw SHA-256 of the executed query and of the SQL file agree with both hashes recorded in the artifact")
+      "raw SHA-256 of the executed query bytes and of the SQL file bytes agree with both hashes recorded in the artifact")
+# Independently verified pin, outside the mutable (SQL file, provenance) pair: the hash of the query the operator ran on
+# 2026-09-03 (bq show -j okf_full_demo_sessions_summary_20260903T231025Z). Changing the file and the artifact together
+# cannot satisfy this line.
+PINNED_SUMMARY_SQL_SHA256 = "59436c24faf964798fe54d9de1b551ea46e776037833f868d1b8b9f92ad7107e"
+check(raw_sql_hash == PINNED_SUMMARY_SQL_SHA256, "SQL file bytes match the independently pinned hash of the executed summary query")
 check("normalized" not in json.dumps(prov), "provenance artifact carries no normalized hash that a literal collision could satisfy")
-check(re.search(r"FROM `test-project-0728-467323\.okf_rfc_demo\.agent_events`", sql_text) and "COUNT(*)" in sql_text and "TOOL_COMPLETED" in sql_text and "GROUP BY 1, 2" in sql_text,
-      "the committed summary SQL is the per-session aggregate over agent_events (COUNT(*), TOOL_COMPLETED, GROUP BY 1, 2)")
+
+def strip_sql_comments(text):
+    """Remove -- comments outside single/double/backtick quoted regions (quote-aware; keeps everything executable)."""
+    out, i, n, q = [], 0, len(text), None
+    while i < n:
+        ch = text[i]
+        if q:
+            out.append(ch)
+            if ch == q:
+                q = None
+            i += 1
+            continue
+        if ch in ("'", '"', "`"):
+            q = ch
+            out.append(ch)
+            i += 1
+            continue
+        if text.startswith("--", i):
+            while i < n and text[i] != "\n":
+                i += 1
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+sql_body = strip_sql_comments(sql_text)
+check(re.search(r"FROM `test-project-0728-467323\.okf_rfc_demo\.agent_events`", sql_body) and "COUNT(*)" in sql_body and "TOOL_COMPLETED" in sql_body and "GROUP BY 1, 2" in sql_body,
+      "the EXECUTABLE body (comments stripped, quote-aware) is the per-session aggregate over agent_events (COUNT(*), TOOL_COMPLETED, GROUP BY 1, 2)")
+check(re.search(r"(?is)^\s*SELECT\b.*\bFROM\b.*\bGROUP BY\b", sql_body) and "agent_events" in sql_body.split("FROM", 1)[-1], "the executable body is a single SELECT … FROM agent_events … GROUP BY statement")
 check(hashlib.sha256((LIVE / "sessions_summary.json").read_bytes()).hexdigest() == prov["result_sha256"], "sessions_summary.json bytes match the result hash in the artifact")
 expected_cols = {"session_id", "agent", "rows_in_table", "tool_completed", "t0", "t1"}
 check(set(prov["result_columns"]) == expected_cols and all(set(r) == expected_cols for r in summary) and len(summary) == prov["result_rows"] == 4,
       "result schema (6 columns) and row count (4) bound between the artifact, the result file and the SELECT list")
-check(all(re.search(r"\b%s\b" % c, sql_text) for c in ("session_id", "agent", "rows_in_table", "tool_completed", "t0", "t1")), "every result column is named in the committed SELECT list")
+check(all(re.search(r"\b%s\b" % c, sql_body) for c in ("session_id", "agent", "rows_in_table", "tool_completed", "t0", "t1")), "every result column is named in the executable SELECT list (not in a comment)")
 check("summary: \"live/sessions_summary.json\"" in app and "D.summary" in app and "rows_in_table" in app and "tool_completed" in app and "D.fourth" in app and "D.tableRows" in app,
       "app.js consumes sessions_summary.json through D.summary (rows_in_table, tool_completed → D.tableRows, D.fourth)")
 check("provenance_sessions_summary.json" in (LIVE / "README.md").read_text("utf-8") and "sessions_summary.json" in (LIVE / "README.md").read_text("utf-8"), "live/README.md lists the summary result and its provenance artifact")
@@ -341,57 +375,98 @@ check("Phase A; not yet met" in spec, "spec.md §4 marks the bootstrap/negative-
 arch = (DEMO / "ARCHITECTURE.md").read_text("utf-8")
 check("not yet shown" in arch, "ARCHITECTURE.md marks FAIL_STALE / history as not yet shown")
 
-# ---- executed-language scan (Codex rounds 3–4): deferred Phase A must read as future / not done / RFC text only ----
-# Sentence-level. A sentence that narrates a Phase A action as executed passes only if the SAME sentence carries an
-# explicit qualifier (must / will / expected / not yet / not done / RFC text only / never / prior ...). The bare words
-# "Phase A" qualify nothing. Paragraph lines are joined first so a qualifier on the next wrapped line still governs.
+# ---- executed-language scan (Codex rounds 3–5): deferred Phase A must read as future / not done / RFC text only ----
+# Block → sentence → clause. Markdown structure is preserved: a heading, list item, table row, blockquote line or blank
+# line starts a new block, and only indented/plain continuation lines join the block above, so a qualifier in a later
+# list item or paragraph never covers an earlier clause. Inside a sentence a qualifier governs its own clause and the
+# clauses that FOLLOW it (a modal such as "must" scopes forward over coordination); a trailing qualifier does not reach
+# back over an earlier executed clause ("… was recorded on tape, while future work is planned" fails). The bare words
+# "Phase A" qualify nothing. Markdown emphasis and backticks are stripped before matching so "**not** created" reads as
+# "not created".
+PHASE_A_OBJECT = r"\b(service accounts?|SAs?|bindings?|binding calls?|grants?|roles?|okf-setup|okf-sync-writer(-okf-rfc-demo)?|okf-runtime-reader|okfCatalogSearch|custom role|Token Creator|boundary(-probe)?|denials?|negative checks?|checks? [1-7]|PERMISSION_DENIED|(the|Phase A|on) tape|impersonation|user_email)\b"
+# A past-tense / perfect verb counts as executed language only when the same clause names a Phase A object
+# (either side of the verb): "the operator created the three service accounts", "the service accounts were created",
+# "has revoked every okf-setup role". "Runtime tables were created by the operator" names no Phase A object and passes.
+PAST_VERB = r"\b(created|revoked|granted|installed|recorded|exercised|proved|demonstrated|deleted|executed|ran|denied)\b"
 EXECUTED = [r"recorded on tape", r"on tape under", r"\bon tape\b", r"\bthe tape shows\b", r"\bthe tape demonstrates\b",
             r"\bdemonstrated, not asserted\b", r"\b(is|was|were|are|been) demonstrated\b", r"\bprove[sd]? (the|that|it)\b", r"\bdenial checks prove\b",
             r"\bmakes every binding\b", r"\bevery binding call is made\b", r"\bcreates? the (three )?service accounts\b", r"\b(are|were|was|is|been) revoked\b",
             r"\beach (binding )?command (is |was )?recorded\b", r"\b(is|are|was|were|been) recorded (on|in) the tape\b", r"returned `?PERMISSION_DENIED",
             r"\bran as `?okf-(setup|sync-writer|runtime-reader)", r"\bexercised once on tape\b", r"\bimpersonated `?user_email`? (from|after)\b",
-            r"\bidentity is demonstrated\b", r"\bshows? the impersonated\b", r"\b(was|were|has been|have been) executed\b",
-            r"\b(was|were) (created|granted|revoked|proved|recorded)\b", r"\b(was|were|is|are) denied\b", r"\bPERMISSION_DENIED\b[^.;]*\bon tape\b"]
+            r"\bidentity is demonstrated\b", r"\bshows? the impersonated\b",
+            r"\b(was|were|is|are) denied\b", r"\bPERMISSION_DENIED\b[^.;]*\bon tape\b",
+            r"\bPhase A (was|has been|is) (executed|done|complete|completed|run|recorded)\b"]
+
+def executed_clause(cl):
+    return any(re.search(rx, cl) for rx in EXECUTED) or (re.search(PAST_VERB, cl) and re.search(PHASE_A_OBJECT, cl))
 QUALIFIER = [r"\bmust\b", r"\bwill\b", r"\bwould\b", r"\bshall\b", r"\bto be (recorded|run|exercised|made|created|revoked|deleted|granted)\b", r"\bexpected\b",
              r"\bnot yet\b", r"\bNOT yet\b", r"\bnot done\b", r"\bNot done\b", r"\bnot run\b", r"\bnot started\b", r"\bnot created\b", r"\bnot built\b", r"\bNot built\b",
              r"\bnone (of|was|were|has|have)\b", r"\bno (such )?tape\b", r"\b[Nn]othing\b", r"RFC text only", r"\bfuture\b", r"\bdeferred\b", r"\bplanned\b",
              r"\bhas not run\b", r"\bnone happened\b", r"\bneither happened\b", r"\bprior\b", r"\bnever\b", r"\bdoes not exist\b", r"\brequirement\b",
-             r"\bacceptance criterion\b", r"\bnot (been )?executed\b", r"\bnot met\b"]
+             r"\bacceptance criterion\b", r"\bnot (been )?executed\b", r"\bnot met\b", r"\b[Nn]ot\b", r"\b[Nn]o\b", r"\bcannot\b", r"\bwithout\b", r"\brequires?\b"]
 SCAN_FILES = ["spec.md", "ARCHITECTURE.md", "plan.md", "intent.md", "CUSTOMER_STORIES.md", "README.md", "live/README.md", "index.html", "app.js", "stories.json", "matrix.json"]
+BLOCK_START = re.compile(r"^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s?|\|)")
+
+def md_blocks(text):
+    """Yield (start_line, block_text). New block at blank line, heading, list item, table row or blockquote line."""
+    lines = text.split("\n")
+    cur, start = [], None
+    for i, ln in enumerate(lines, 1):
+        if not ln.strip():
+            if cur:
+                yield start, " ".join(cur)
+            cur, start = [], None
+            continue
+        if BLOCK_START.match(ln) and cur:
+            yield start, " ".join(cur)
+            cur, start = [], None
+        if not cur:
+            start = i
+        cur.append(ln.strip())
+    if cur:
+        yield start, " ".join(cur)
+
+def clauses(sentence):
+    """Split one sentence into clauses at commas and subordinating/coordinating connectors."""
+    return [c for c in re.split(r",\s+|\s+\b(?:while|whereas|but|although|though|however|yet|and then|then)\b\s+", sentence) if c and c.strip()]
 
 def scan_executed(text, fname="<text>"):
-    """Return offending sentences: executed-language without an explicit qualifier in the same sentence."""
+    """Return offending clauses: executed-language whose clause (or an earlier clause of the same sentence) carries no qualifier."""
     out = []
-    lines = text.split("\n")
-    i = 0
-    while i < len(lines):
-        if not lines[i].strip():
-            i += 1
-            continue
-        start_line = i + 1
-        para = []
-        while i < len(lines) and lines[i].strip():
-            para.append(lines[i].strip())
-            i += 1
-        for sent in re.split(r"(?<=[.;])\s+", " ".join(para)):
-            if any(re.search(rx, sent) for rx in EXECUTED) and not any(re.search(rx, sent) for rx in QUALIFIER):
-                out.append("%s:%d: %s" % (fname, start_line, sent.strip()[:130]))
+    plain = re.sub(r"[*_`]", "", text)
+    for start_line, block in md_blocks(plain):
+        for sent in re.split(r"(?<=[.;:])\s+", block):
+            qualified_so_far = False
+            for cl in clauses(sent):
+                if any(re.search(rx, cl) for rx in QUALIFIER):
+                    qualified_so_far = True
+                if executed_clause(cl) and not qualified_so_far:
+                    out.append("%s:%d: %s" % (fname, start_line, cl.strip()[:130]))
     return out
 
 offenders = []
 for fname in SCAN_FILES:
     offenders += scan_executed((DEMO / fname).read_text("utf-8"), fname)
-check(not offenders, "no sentence narrates deferred Phase A (SA create/revoke, bindings on tape, denials proved, outcomes demonstrated, PERMISSION_DENIED returned) as executed without an explicit future / not-done / RFC-text-only qualifier in the same sentence:\n      " + "\n      ".join(offenders[:12]))
-# in-memory negative fixtures: the scan itself must catch these (bare "Phase A" is not a qualifier)
+check(not offenders, "no clause narrates deferred Phase A (SA create/revoke, bindings on tape, denials proved, outcomes demonstrated, PERMISSION_DENIED returned) as executed without a future / not-done / RFC-text-only qualifier in that clause or an earlier clause of the same sentence:\n      " + "\n      ".join(offenders[:12]))
+# in-memory negative fixtures: the scan itself must catch each of these
 NEG = ["Phase A was executed; every binding call is made and recorded on tape.",
        "The operator created the service accounts and every binding was recorded on tape under the okf-setup identity.",
        "Check 6 returned PERMISSION_DENIED on tape.",
-       "Phase A: the tape shows the impersonated user_email after each step."]
+       "Phase A: the tape shows the impersonated user_email after each step.",
+       "The operator created the three Phase A service accounts.",                      # active past, bare Phase A
+       "Every binding was recorded on tape, while future documentation is planned.",     # trailing qualifier must not reach back
+       "The operator has revoked every okf-setup role and has proved the denials on tape.",  # perfect forms
+       "- Every binding was recorded on tape.\n- Future work: the rest is planned.",       # list boundary
+       "Every binding was recorded on tape.\n\nThe rest is future work.",                 # paragraph boundary
+       "## Status\nAll seven negative checks returned PERMISSION_DENIED on tape.\n\nPhase A is future work."]
 POS = ["In Phase A the operator must make every binding on tape (not yet run).",
        "Each call is expected to return PERMISSION_DENIED; none has been run.",
-       "The legacy handle was bound to two publications before Phase A."]
-check(all(scan_executed(t) for t in NEG), "scan flags each negative fixture (bare 'Phase A' does not qualify)")
-check(not any(scan_executed(t) for t in POS), "scan accepts qualified future-tense sentences and legacy data facts")
+       "The legacy handle was bound to two publications before Phase A.",
+       "The operator must create the service accounts, bind every role on tape, and revoke them afterwards.",  # modal scopes forward
+       "No service account was created for this capture; the three SAs are the Phase A follow-up.",
+       "The three service accounts were **not** created; they are deferred."]
+check(all(scan_executed(t) for t in NEG), "scan flags every negative fixture (active past, perfect, trailing qualifier, list and paragraph boundaries, bare 'Phase A')")
+check(not any(scan_executed(t) for t in POS), "scan accepts forward-scoped modals, negations and legacy data facts")
 check("Nothing in §1.3 has been executed on PR 16" in spec, "spec.md §1.3 opens with the not-executed scope note")
 check("Status on 2026-09-03 (PR 16): none of this section has run" in arch, "ARCHITECTURE.md sync-leg prose carries the not-run scope note")
 plan_md = (DEMO / "plan.md").read_text("utf-8")
