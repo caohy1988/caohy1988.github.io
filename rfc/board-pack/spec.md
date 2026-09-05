@@ -29,6 +29,13 @@
 - Explain authored-bundle authority and the initial node/edge projection. Publication pins never bypass current permissions; shared service accounts alone do not identify the requester. The integration remains proposed, including per-node enforcement and validated receipts.
 - Match the existing brief's typography/colors. Provide a visible focus ring and a decorative disclosure indicator excluded from the accessible name. Native Enter/Space toggles must work. Print includes the design even when closed on screen; allow sensible page breaks within it.
 
+## System diagram
+
+- One figure at the top of `.design-body`, before the existing intro/prose. Label it proposed/RFC and illustrative. Use inline SVG with shared node definitions, a wide flow and a stacked mobile layout; no external image or JavaScript.
+- Map the three numbered flows: KC discovery and authored OKF graph → BigQuery publication pin and SQL/bounded walk → definition, cohort rule and declared computation for Maya; authenticated requester → current policy enforcement on projected assets → returned-node/policy record; selected declaration and versioned facts → BigQuery job plus validation → result/receipt or unproven.
+- Make access gate retrieval, not appear as a check performed after disclosure. A cited definition cannot validate the wrong query. The diagram's 96% and substituted 118% remain illustrative outcomes, with missing execution evidence unproven.
+- Each visible SVG has a title/description; decorative shared definitions are hidden from assistive technology. Keep one source for node labels across wide/mobile layouts. Use the existing dark palette, consistent arrows, legible labels and monochrome print styles. The diagram prints even when the disclosure is closed.
+
 ## Honesty and ask
 
 - Keep the hero's illustrative-scenario label, the runtime's proposed/RFC and unbuilt label, and all comparison notes, including the job-ID caveat and UNVERIFIABLE demo receipts. The page ends with the pilot ask; no footer or evidence deep-dive link is required.
@@ -44,4 +51,4 @@
 - No horizontal overflow at 1280, 768, 375 or 320 px with details closed or open. Inspect desktop/mobile screenshots, readable contrast and print layout. Keep each comparison pair together in print.
 - Move all page files to `rfc/board-pack/`. Update its canonical and the `rfc/index.html` href; keep Board-pack near-miss → as the visible label. `/rfc/bq-vp/index.html` is redirect-only: immediate meta refresh, new canonical and a usable fallback link. No other files remain in that legacy directory.
 - Full-demo, including its audience-specific show notes, stays untouched unless an old brief href needs updating. Search the repo for stale path references and audience labels; references documenting the legacy redirect are intentional.
-- Commit and push `feat/rfc-retention-runtime-details`; create a new PR against main. Save session and QA artifacts under `/tmp/okf-vp-details/`, report PR URL and HEAD, and do not merge. Opus + Kimi are the requested review gate.
+- Commit and push `feat/rfc-board-pack-diagram`; create a new PR against main. Save session and QA artifacts under `/tmp/okf-vp-diagram/`, report PR URL and HEAD, and do not merge. Opus + Kimi are the requested review gate.

@@ -112,6 +112,76 @@
             <summary aria-controls="technical-design-body"><span class="design-summary"><span>Technical design</span><span class="design-status">RFC proposal</span><span class="disclosure-mark" aria-hidden="true"></span></span></summary>
           </details>
           <div class="design-body" id="technical-design-body">
+            <figure class="system-plot" aria-labelledby="plot-caption">
+              <figcaption id="plot-caption"><strong>Three checks for Alder’s board pack</strong><span>Proposed runtime · illustrative</span></figcaption>
+              <svg class="diagram-definitions" width="0" height="0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <marker id="plot-arrowhead" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path class="plot-arrow-tip" d="M0 0L8 4L0 8Z"/></marker>
+                  <g id="plot-graph"><rect class="plot-node" width="260" height="90" rx="5"/><text class="plot-node-title" x="16" y="29">Finance’s retention graph</text><text class="plot-node-copy" x="16" y="52">KC discovers · OKF authors</text><text class="plot-node-copy" x="16" y="72">Definitions and linked rules</text></g>
+                  <g id="plot-query"><rect class="plot-node" width="260" height="90" rx="5"/><text class="plot-node-title" x="16" y="29">BigQuery graph projection</text><text class="plot-node-copy" x="16" y="52">Pin publication</text><text class="plot-node-copy" x="16" y="72">SQL / bounded walk</text></g>
+                  <g id="plot-context"><rect class="plot-node" width="260" height="90" rx="5"/><text class="plot-node-title" x="16" y="29">Context for Maya’s agent</text><text class="plot-node-copy" x="16" y="52">Definition + cohort rule</text><text class="plot-node-copy" x="16" y="72">+ declared computation</text></g>
+                  <g id="plot-identity"><rect class="plot-node" width="260" height="90" rx="5"/><text class="plot-node-title" x="16" y="29">Maya’s agent</text><text class="plot-node-copy" x="16" y="52">Authenticated requester</text><text class="plot-node-copy" x="16" y="72">Bound to execution identity</text></g>
+                  <g id="plot-policy"><rect class="plot-node" width="260" height="90" rx="5"/><text class="plot-node-title" x="16" y="29">Enforce current policy</text><text class="plot-node-copy" x="16" y="52">Check projected assets</text><text class="plot-node-copy" x="16" y="72">Before returning any nodes</text></g>
+                  <g id="plot-access"><rect class="plot-node" width="260" height="90" rx="5"/><text class="plot-node-title" x="16" y="29">Access record</text><text class="plot-node-copy" x="16" y="52">Who received which nodes</text><text class="plot-node-copy" x="16" y="72">Under which policy</text></g>
+                  <g id="plot-declaration"><rect class="plot-node" width="260" height="112" rx="5"/><text class="plot-node-title" x="16" y="29">Selected declaration</text><text class="plot-node-copy" x="16" y="52">Retention: starting cohort only</text><text class="plot-node-copy" x="16" y="72">+ versioned cohort facts</text></g>
+                  <g id="plot-job"><rect class="plot-node" width="260" height="112" rx="5"/><text class="plot-node-title" x="16" y="29">BigQuery job + validation</text><text class="plot-node-copy" x="16" y="52">Check declared calculation</text><text class="plot-node-copy" x="16" y="72">Job ↔ context ↔ result</text></g>
+                  <g id="plot-outcome"><rect class="plot-node plot-outcome" width="260" height="112" rx="5"/><text class="plot-node-title" x="16" y="27">Pass → 96% + receipt</text><text class="plot-node-copy" x="16" y="48">Matches declared calculation</text><path class="plot-divider" d="M16 60H244"/><text class="plot-node-copy" x="16" y="81">118% wrong query / no evidence</text><text class="plot-unproven" x="16" y="101">UNPROVEN</text></g>
+                </defs>
+              </svg>
+              <svg class="system-diagram diagram-wide" viewBox="0 0 900 520" width="900" height="520" role="img" aria-labelledby="plot-title-wide plot-desc-wide" xmlns="http://www.w3.org/2000/svg">
+                <title id="plot-title-wide">Proposed runtime: three checks for Alder’s board pack</title>
+                <desc id="plot-desc-wide">01: Catalog discovers the OKF-authored retention graph. BigQuery pins a publication and uses SQL or a bounded walk to select the definition, cohort rule and declared computation for Maya’s agent. 02: Current policy gates retrieval using the authenticated requester and projected assets, recording which nodes were returned to whom. 03: A BigQuery job is checked against the selected declaration, with a job–context–result receipt. The illustrative 96% can pass that check; the substituted 118% query or missing evidence leaves the number unproven.</desc>
+                <text class="plot-column" x="20" y="22">INPUTS</text>
+                <text class="plot-column" x="320" y="22">BIGQUERY RUNTIME</text>
+                <text class="plot-column" x="620" y="22">CONTEXT &amp; EVIDENCE</text>
+                <text class="plot-lane-title" x="20" y="56">01  Replayable context</text>
+                <use href="#plot-graph" x="20" y="72"/>
+                <use href="#plot-query" x="320" y="72"/>
+                <use href="#plot-context" x="620" y="72"/>
+                <path class="plot-arrow" d="M284 117h30" marker-end="url(#plot-arrowhead)"/>
+                <path class="plot-arrow" d="M584 117h30" marker-end="url(#plot-arrowhead)"/>
+                <text class="plot-lane-title" x="20" y="216">02  Explainable access</text>
+                <use href="#plot-identity" x="20" y="232"/>
+                <use href="#plot-policy" x="320" y="232"/>
+                <use href="#plot-access" x="620" y="232"/>
+                <path class="plot-arrow" d="M284 277h30" marker-end="url(#plot-arrowhead)"/>
+                <path class="plot-arrow" d="M584 277h30" marker-end="url(#plot-arrowhead)"/>
+                <text class="plot-lane-title" x="20" y="376">03  Verifiable execution</text>
+                <use href="#plot-declaration" x="20" y="392"/>
+                <use href="#plot-job" x="320" y="392"/>
+                <use href="#plot-outcome" x="620" y="392"/>
+                <path class="plot-arrow" d="M284 448h30" marker-end="url(#plot-arrowhead)"/>
+                <path class="plot-arrow" d="M584 448h30" marker-end="url(#plot-arrowhead)"/>
+                <path class="plot-arrow" d="M450 228V168" marker-end="url(#plot-arrowhead)"/>
+                <text class="plot-gate" x="466" y="198">gates retrieval</text>
+              </svg>
+              <svg class="system-diagram diagram-narrow" viewBox="0 0 300 1244" width="300" height="1244" role="img" aria-labelledby="plot-title-narrow plot-desc-narrow" xmlns="http://www.w3.org/2000/svg">
+                <title id="plot-title-narrow">Proposed runtime: three checks for Alder’s board pack</title>
+                <desc id="plot-desc-narrow">01: Catalog discovers the OKF-authored retention graph. BigQuery pins a publication and uses SQL or a bounded walk to select the definition, cohort rule and declared computation for Maya’s agent. 02: Current policy gates retrieval using the authenticated requester and projected assets, recording which nodes were returned to whom. 03: A BigQuery job is checked against the selected declaration, with a job–context–result receipt. The illustrative 96% can pass that check; the substituted 118% query or missing evidence leaves the number unproven.</desc>
+                <text class="plot-lane-title" x="20" y="28">01  Replayable context</text>
+                <use href="#plot-graph" x="20" y="46"/>
+                <use href="#plot-query" x="20" y="162"/>
+                <use href="#plot-context" x="20" y="278"/>
+                <path class="plot-arrow" d="M150 141v16" marker-end="url(#plot-arrowhead)"/>
+                <path class="plot-arrow" d="M150 257v16" marker-end="url(#plot-arrowhead)"/>
+                <text class="plot-lane-title" x="20" y="414">02  Explainable access</text>
+                <use href="#plot-identity" x="20" y="450"/>
+                <use href="#plot-policy" x="20" y="566"/>
+                <use href="#plot-access" x="20" y="682"/>
+                <path class="plot-arrow" d="M150 545v16" marker-end="url(#plot-arrowhead)"/>
+                <path class="plot-arrow" d="M150 661v16" marker-end="url(#plot-arrowhead)"/>
+                <text class="plot-lane-title" x="20" y="818">03  Verifiable execution</text>
+                <use href="#plot-declaration" x="20" y="836"/>
+                <use href="#plot-job" x="20" y="974"/>
+                <use href="#plot-outcome" x="20" y="1112"/>
+                <path class="plot-arrow" d="M150 953v16" marker-end="url(#plot-arrowhead)"/>
+                <path class="plot-arrow" d="M150 1091v16" marker-end="url(#plot-arrowhead)"/>
+                <path class="plot-arrow plot-policy-gate" d="M20 611H6V207H14" marker-end="url(#plot-arrowhead)"/>
+                <path class="plot-arrow" d="M6 386H16"/>
+                <text class="plot-gate" x="22" y="391">gates retrieval</text>
+              </svg>
+              <p class="plot-note">A cited definition cannot validate a different query. No execution evidence → unproven.</p>
+            </figure>
             <p class="design-intro">Proposed integration, not an implemented runtime. The OKF bundle stays authoritative; BigQuery hosts a publication’s node/edge projection and versioned facts. The graph can be the first workload, but it must enter BigQuery before retrieval can run there.</p>
             <section class="design-part" aria-labelledby="design-context">
               <h3 id="design-context">Retrieve a fixed context</h3>
