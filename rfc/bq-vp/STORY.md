@@ -22,11 +22,15 @@ Maya's agent needs a connected set of context: the approved retention definition
 
 The revised BigQuery case begins with knowledge retrieval. It does not depend on Alder already having revenue tables in BigQuery. Existing data placement is not part of the page's argument.
 
-## Three distinct roles — proposed runtime
+## Three distinct advantages — proposed runtime
 
-1. **Knowledge Catalog discovers and governs.** Find Finance's approved concept and its owner. Discovery of an entry is different from deterministically traversing the linked OKF graph to select an agent's context.
-2. **OKF authors the graph.** Definitions, relationships, computation declarations and versions are authored in an Open Knowledge Format bundle. OKF supplies the graph and context; the format itself is not a query engine for agents at scale or pinning service.
-3. **BigQuery projects and retrieves.** Materialize the graph's nodes, edges, publication membership and related facts in queryable structures. Resolve one pinned publication, then use explicit SQL or bounded graph walks to retrieve the context. A proposed retrieval receipt records the query, pins and returned context. Metric execution follows separately, with a computation receipt connecting its job, context and result, plus agent/execution-identity attribution under IAM.
+Keep the service roles in one short introduction: Knowledge Catalog discovers/governs; OKF authors the graph. Replace the page's former role cards with three paired comparisons of **KC + OKF** and **+ BQ runtime**. Each pair carries one story takeaway.
+
+1. **Replayable context:** KC discovery and authored OKF relations leave context assembly to the retriever. The BigQuery projection, pinned publication and explicit SQL/bounded walks select the retention definition, cohort rule and declared computation together. This controls the context received by the agent, not the computation it ultimately executes.
+2. **Explainable access:** custom entries use an EntryGroup access boundary in this design; that is not a universal statement about all KC permissions. The proposed runtime joins identity, policy and projected assets, binds the authenticated requester to the execution identity, enforces access along the retrieval path and records returned nodes. The payoff is explaining why this agent could see a specific asset. No new permissions incident is invented for Alder.
+3. **Verifiable execution:** finding Finance's declaration does not establish that retention was computed. Run the metric and validate a job ↔ context ↔ result receipt against that declaration. A total-ARR substitution or missing evidence leaves the claim unproven. This closes Maya's actual near-miss and is distinct from context replay and permission evaluation.
+
+Access relationships stored as metadata are not authorization controls by themselves. Source permissions must stay current; metadata visibility does not grant access to the underlying file. A shared service account alone does not identify the requesting user or agent. Per-node enforcement and the requester/execution binding are proposed integration work, not a built property of Graph-over-OKF. Historical context pins must never bypass current authorization.
 
 ## Determinism is a contract, not a slogan
 
@@ -44,8 +48,8 @@ The OKF bundle remains the authored source. Catalog and BigQuery are projections
 
 ## The VP skim and punchline
 
-Keep Maya, Alder, the five-minute deadline, $4 million decision, 118% and 96% in the hero, before architecture language. One arithmetic figure makes the new-customer mistake visible. The runtime section explains replayable retrieval first, using the same story's linked context. One Finance pilot is the ask.
+Keep Maya, Alder, the five-minute deadline, $4 million decision, 118% and 96% in the hero, before architecture language. One arithmetic figure makes the new-customer mistake visible. The runtime section compares the three advantages side by side, beginning with replayable retrieval. On mobile, each labeled KC + OKF / + BQ pair stays together. One Finance pilot tests retrieval, access boundaries and computation evidence.
 
-**BigQuery turns the OKF graph into replayable context for agents.**
+**BigQuery turns the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.**
 
-Graph-over-OKF, retrieval receipts and the governed runtime remain RFC proposals. Existing full-demo captures concern a different scenario and do not prove this graph retrieval or the Alder figures. Keep them as an optional evidence deep dive, with the unbuilt/stub boundaries in the page footer.
+Graph-over-OKF, per-node authorization, validated receipts and the governed runtime remain RFC proposals. Existing full-demo captures concern a different scenario and do not prove this graph retrieval or the Alder figures. Keep them as an optional evidence deep dive, with the unbuilt/stub boundaries in the page footer.

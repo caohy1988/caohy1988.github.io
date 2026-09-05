@@ -1,36 +1,36 @@
-# Spec — concrete story, deterministic graph retrieval
+# Spec — KC + OKF versus a BigQuery runtime
 
 ## Page contract
 
 - Static HTML and page-local CSS at `/rfc/bq-vp/`. No JavaScript, external assets, build dependencies or cloud calls.
-- Preserve the Alder/Maya board-pack lead, one arithmetic figure, three named runtime roles, one punchline and one VP ask. No stepper, drawers, matrix or alternative stories.
-- Hero: illustrative label, Maya, Alder, the five-minute deadline, $4 million decision, 118% and 96%, all before architecture. Both percentages remain in the headline. The mistake must be visible from the arithmetic alone.
-- Keep the $10m opening ARR, $9.6m same-customer closing ARR and erroneous $2.2m new-customer addition. All figures are invented.
-- Target roughly 400–500 visible words and around two desktop viewports for a two-to-three-minute read. These are editorial/geometry checks, not measured human comprehension.
+- Preserve the Alder/Maya hero and arithmetic byte-for-byte. Maya, Alder, the five-minute deadline, $4 million decision, 118% and 96% appear before architecture.
+- Keep the invented $10m opening ARR, $9.6m same-customer closing ARR and erroneous $2.2m new-customer addition.
+- One coherent technical section replaces the former role cards: three paired comparisons, one punchline, one Finance pilot ask. No stepper, drawers or second technical essay.
+- Target approximately 500–550 visible words and no more than about two-and-a-half desktop viewports at 1280 × 720. These are editorial/geometry checks, not measured comprehension.
 
-## First-class retrieval contract
+## Three paired comparisons
 
-- The “Why BigQuery” heading and role copy emphasize replayable context and deterministic OKF-graph retrieval, before metric execution.
-- Catalog discovers/governs concepts and entries. Finding an entry is not the explicit traversal that selects the linked context.
-- OKF authors definitions, relationships, computation declarations and versions. It is not itself a query engine for agents at scale; pinning belongs to the runtime.
-- BigQuery hosts a projection of the graph and related facts. Retrieval uses a pinned publication plus explicit SQL or bounded graph walks, with deterministic query semantics.
-- State the determinism boundary: fixed query, parameters, publication, fact versions, authorization scope and stable ordering yield the same selected context and result shape. Do not imply identical LLM answers or that a publication pin freezes fact tables.
-- Contrast ranked document passages/model-chosen paths with explicit graph traversal. Do not claim all vector retrieval is inherently nondeterministic.
-- Tie graph retrieval to Maya's retention definition, starting-cohort rule and declared computation.
-- Distinguish proposed retrieval receipts (query, pins and selected context) from computation receipts (metric job, context and result). Retrieval alone does not prove the number; a substituted query or missing execution evidence leaves it unproven. Preserve agent/execution-identity attribution and IAM.
-- Include a short empty-BigQuery case: the OKF graph projection and versioned facts can be the first workload, before a revenue warehouse. No projection means no BigQuery retrieval; do not make preexisting revenue data the reason BigQuery is useful.
-- Use the exact punchline: **BigQuery turns the OKF graph into replayable context for agents.**
+- Labels are **KC + OKF** and **+ BQ runtime**, repeated for each point so the pair stays clear on mobile. Side-by-side at desktop/tablet widths; each labeled pair stacks together on narrow screens.
+- Briefly define Knowledge Catalog (KC) and Open Knowledge Format (OKF). KC discovers/governs; OKF authors the graph. Do not turn the comparison into another three-role essay.
+- **Replayable context:** KC discovers, OKF authors, and the retriever assembles linked context. BigQuery hosts the OKF projection; pinned publication + explicit SQL/bounded walks select repeatable context. Name fixed query, parameters, fact versions, access scope and ordering. Story takeaway: same retention definition, cohort rule and declared computation.
+- State next to retrieval that vector search can be deterministic and replayable context does not promise identical LLM answers. Similarity ranking does not itself pin linked context. Do not imply a publication freezes mutable facts or access policies.
+- **Explainable access:** qualify the EntryGroup boundary as custom-entry access in this design. The right side joins identity ↔ policy ↔ projected assets, binds the requesting user/agent to the execution identity, enforces the retrieval path and records nodes returned to whom under which policy. Story takeaway: explain access to a specific asset.
+- State next to access that metadata needs enforcement, source permissions stay current, and metadata access does not grant file access. Do not imply universal KC EntryGroup-only IAM or automatic native per-node ACLs in BigQuery Graph.
+- **Verifiable execution:** discovering the declaration does not prove execution. Run retention and validate the separate job ↔ context ↔ result receipt against the declared computation. A substituted query or missing evidence leaves the number unproven. Story takeaway: Maya can check whether the board number used the retention calculation.
+- Keep retrieval selection, authorization and computation evidence distinct. A retrieval receipt does not prove the metric ran; a job ID alone does not validate the computation.
 
 ## Honesty and ask
 
-- Keep the entire runtime explicitly labeled as an unbuilt RFC proposal. Direct/imperative descriptions within that scope are proposed responsibilities, not claims of delivered services.
-- Footer explicitly labels Graph-over-OKF and retrieval receipts as RFC proposals, says no Alder query ran, and preserves existing demo stub/`UNVERIFIABLE` and unbuilt governed sync/Phase A IAM limitations. No `ATTESTED`, `BQ_COMMITTED` or Graph-completion claim.
-- Preserve authored-bundle authority. Do not suggest a built Catalog-to-BigQuery import or invent job/session/receipt IDs.
-- One Finance pilot: repeat pinned retrieval and compare context, then compute retention for one quarter of real pilot data. Withhold execution evidence and the number remains unproven. Do not impose Alder's invented 96% on the real pilot.
-- Keep the optional `/rfc/full-demo/` link; its content and artifacts remain unchanged.
+- Label the entire runtime as proposed/RFC and unbuilt. Footer specifically covers Graph-over-OKF, per-node authorization and validated receipts, no Alder execution, stub computation attesters, UNVERIFIABLE receipts, and unbuilt governed sync/Phase A IAM.
+- No ATTESTED, BQ_COMMITTED, Graph-over-OKF completion, implemented import or invented execution identifiers.
+- Short first-workload line: land the OKF projection and version needed facts; an existing revenue warehouse is not required. Preserve authored-bundle authority.
+- Extended punchline: **BigQuery turns the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.**
+- One Finance pilot tests repeated retrieval, access boundaries and retention execution. Missing execution evidence leaves the number unproven. Do not impose illustrative Alder's 96% on real pilot data.
+- Preserve `/rfc/full-demo/` as the optional evidence deep dive; leave its content and artifacts unchanged.
 
 ## Usability and delivery
 
-- Semantic heading order, visible keyboard focus, working skip link and valid local links. No horizontal overflow at 1280, 768, 375 or 320 px; readable contrast and print view.
-- Scope: `index.html`, optional page-local `styles.css`, and `STORY.md`, `intent.md`, `spec.md`, `plan.md` under `rfc/bq-vp/`. The existing illustrative RFC masthead blurb remains accurate.
-- Commit and push `feat/rfc-bq-vp-det-retrieval`; create a PR against `main`. Save session and QA artifacts under `/tmp/okf-vp-det/`, report PR URL and HEAD, and do not merge.
+- Semantic heading order, labeled comparison sections, visible keyboard focus, working skip link and valid local links.
+- No horizontal overflow at 1280, 768, 375 or 320 px. Inspect desktop/mobile screenshots, readable contrast and print layout. Keep each comparison pair together in print.
+- Scope is the six files under `rfc/bq-vp/`: index.html, styles.css, STORY.md, intent.md, spec.md and plan.md. The existing RFC masthead story blurb remains accurate.
+- Commit and push `feat/rfc-bq-vp-3pts`; create a PR against main. Save session and QA artifacts under `/tmp/okf-vp-3pts-page/`, report PR URL and HEAD, and do not merge.
