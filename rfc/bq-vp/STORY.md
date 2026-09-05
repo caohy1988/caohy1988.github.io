@@ -6,7 +6,7 @@
 
 Maya Chen, VP of Finance at subscription software company Alder, checks the board pack at 8:55 a.m. before a 9 a.m. meeting. A $4 million plan to expand sales to existing customers rests on an agent's claim of 118% retention, labeled “verified.” An analyst catches the inclusion of new customers. Maya pulls the slide; the investment needs a different justification.
 
-The agent cited Finance's definition without pinning its linked cohort rule and declared computation together, then reused a total-ARR query. Maya cannot trace which policy allowed this agent to use that asset. The “verified” label has no execution receipt connecting the query, the declared retention calculation and the reported result. These are the three unanswered questions after she pulls the slide: context not pinned, access not explainable, execution not proven. The access gap is missing explanation, not evidence of forbidden access.
+The agent found Finance's definition but missed the accompanying rule: count revenue only from customers there at the start. It reused a total-ARR query. Maya cannot trace which policy allowed this agent to use that asset. The “verified” label has no execution receipt connecting the query, the declared retention calculation and the reported result. These are the three unanswered questions after she pulls the slide: a missing linked rule, access not explainable, execution not proven. The access gap is missing explanation, not evidence of forbidden access.
 
 New sales hid a decline among the opening customer cohort. All amounts below are annual recurring revenue (ARR), measured at the opening and close of one illustrative quarter.
 
