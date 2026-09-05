@@ -54,4 +54,4 @@ Keep Maya, Alder, the five-minute deadline, $4 million decision, 118% and 96% in
 
 **BigQuery turns the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.**
 
-Graph-over-OKF, per-node authorization, validated receipts and the governed runtime remain RFC proposals. Existing full-demo captures concern a different scenario and do not prove this graph retrieval or the Alder figures. Keep them as an optional evidence deep dive, with the unbuilt/stub boundaries in the page footer.
+Graph-over-OKF, per-node authorization, validated receipts and the governed runtime remain RFC proposals. Existing full-demo captures concern a different scenario and do not prove this graph retrieval or the Alder figures. The page ends with the pilot ask. Keep the hero's illustrative label, the runtime's RFC/unbuilt label and the comparison notes; no footer or evidence deep-dive link is required.

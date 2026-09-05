@@ -7,7 +7,7 @@
 - In one short near-miss paragraph: the definition's linked cohort rule and declared computation were not pinned together; Maya cannot trace why this agent could use the total-ARR asset; no execution receipt binds its query and result to the declared retention calculation. Do not turn this into another comparison or assert a permissions violation.
 - Keep the invented $10m opening ARR, $9.6m same-customer closing ARR and erroneous $2.2m new-customer addition.
 - One coherent technical section replaces the former role cards: three paired comparisons, one punchline, one Finance pilot ask. No stepper, drawers or second technical essay.
-- Target approximately 550–600 visible words and around two-and-a-half desktop viewports at 1280 × 720. These are editorial/geometry checks, not measured comprehension.
+- Target approximately 500–550 visible words and around two-and-a-half desktop viewports at 1280 × 720. These are editorial/geometry checks, not measured comprehension.
 - Use neutral customer/runtime framing in the title, pilot eyebrow, RFC index link and local docs. Keep the URL `/rfc/bq-vp/`, the product masthead and Why BigQuery thesis. Maya's Finance job title remains part of the story.
 
 ## Three paired comparisons
@@ -23,12 +23,12 @@
 
 ## Honesty and ask
 
-- Label the entire runtime as proposed/RFC and unbuilt. Footer specifically covers Graph-over-OKF, per-node authorization and validated receipts, no Alder execution, stub computation attesters, UNVERIFIABLE receipts, and unbuilt governed sync/Phase A IAM.
+- Keep the hero's illustrative-scenario label, the runtime's proposed/RFC and unbuilt label, and all comparison notes, including the job-ID caveat and UNVERIFIABLE demo receipts. The page ends with the pilot ask; no footer or evidence deep-dive link is required.
 - No ATTESTED, BQ_COMMITTED, Graph-over-OKF completion, implemented import or invented execution identifiers.
 - Short first-workload line: land the OKF projection and version needed facts; an existing revenue warehouse is not required. Preserve authored-bundle authority.
 - Extended punchline: **BigQuery turns the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.**
 - One Finance pilot tests repeated retrieval, access boundaries and retention execution. Missing execution evidence leaves the number unproven. Do not impose illustrative Alder's 96% on real pilot data.
-- Preserve `/rfc/full-demo/` as the optional evidence deep dive; leave its content and artifacts unchanged.
+- Leave `/rfc/full-demo/` content and artifacts unchanged.
 
 ## Usability and delivery
 

@@ -24,12 +24,20 @@ Leave the arithmetic figure, three comparison pairs, guardrail notes, extended p
 5. Run targeted source checks, `git diff --check` and the existing `python3 rfc/full-demo/tools/check_full_demo.py` regression checker. Confirm the full-demo tree is unchanged. No new test suite for this static editorial change.
 6. Commit named files, push the branch and create a PR against main. Save session/model, validation, PR URL and HEAD to `/tmp/okf-vp-story3/sessions.json`. Do not merge. The requested review gate is Opus + Kimi; do not claim reviews have run.
 
-## Validation record
+## Previous story revision — validation record
 
 - Chromium: 566 visible words; 1,820 px tall at 1280 × 720. The full hero ends at y=674; the arithmetic figure ends at y=564. The expanded story fits before the technical section in the first desktop viewport.
 - The headline and arithmetic figure match main at `d011a0d` byte-for-byte. Targeted checks confirm all three story gaps, preserved comparison notes/decorative-number accessibility, and absence of product-executive audience labels from the page, RFC link and local docs.
 - Desktop 1280, tablet 768, mobile 375 and narrow 320 px: no document/element horizontal overflow, invalid heading labels or authored scripts; comparison pairs retain their intended side-by-side/stacked geometry. Desktop/mobile screenshots inspected. CSS is unchanged.
-- Keyboard focus and skip-to-main behavior pass. The neutral Board-pack near-miss link navigates from the RFC index to the unchanged URL; the evidence link reaches full-demo. No console errors.
-- Two-page A4 print inspected; each comparison pair stays together. Headline, arithmetic, first-workload case, punchline and honesty footer are preserved. The full-demo tree, including show notes, is unchanged.
+- Keyboard focus and skip-to-main behavior pass. The neutral Board-pack near-miss link navigates from the RFC index to the unchanged URL. No console errors.
+- Two-page A4 print inspected; each comparison pair stays together. Headline, arithmetic, first-workload case and punchline are preserved. The full-demo tree, including show notes, is unchanged.
 - `python3 rfc/full-demo/tools/check_full_demo.py`: exit 0, all checks passed, including mutation fixtures and clean-copy control. `git diff --check` passes.
 - Session metadata confirms `gpt-6-astra` and resumed session `01a06e87-a6fd-7993-88b5-9c489219e68c`; artifacts are under `/tmp/okf-vp-story3/`. This verifies a static editorial change, not implementation of the proposed runtime.
+
+## Footer removal
+
+Remove the footer and its evidence deep-dive link, then delete footer-only styles, including mobile and print rules. The pilot ask is the page ending. Preserve all preceding page content, including the illustrative label, runtime RFC/unbuilt eyebrow and comparison notes. Drop the footer/link requirements in spec and STORY; intent has no such requirement. Leave `/rfc/full-demo/` untouched.
+
+Check the source diff and desktop/mobile/print ending. Commit and push `feat/rfc-bq-vp-nofooter`, open a new PR against main, and record the session, PR and HEAD under `/tmp/okf-vp-nofooter/`. Do not merge; Opus + Kimi remain the requested review gate.
+
+Validation: the HTML differs only by footer removal; all preceding content and the full-demo tree are unchanged. Chromium shows 528 visible words and a 1,724 px page at 1280 × 720. Checks at 1280, 375 and 320 px found no horizontal overflow or invalid heading labels; no console errors. Desktop/mobile endings and both A4 print pages were inspected; comparison pairs stay together. `git diff --check` passes. Artifacts are under `/tmp/okf-vp-nofooter/`.
