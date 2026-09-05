@@ -6,6 +6,8 @@ This short customer/runtime brief should make the Alder near-miss clear in 30 se
 
 At 8:55, Maya Chen, VP of Finance at fictional subscription software company Alder, opens a board pack supporting a $4 million expansion plan. An analyst catches new customers in the agent's “verified” 118% retention figure; the starting cohort retained 96%. Maya pulls the slide with three gaps unresolved: the linked cohort rule and declared computation were not pinned with Finance's definition, she cannot trace the policy allowing this agent to use the total-ARR asset, and no execution receipt binds its query and result to the declared retention calculation.
 
+Publish the brief at `/rfc/board-pack/`. One native Technical design disclosure follows the comparisons and first-workload line, before the punchline. Keep it closed by default so the skim stays short; readers can expand the proposed retrieval, access and execution mechanisms. The details must be keyboard accessible and included in print.
+
 ## The comparison
 
 Replace the former role cards with three paired comparisons, labeled **KC + OKF** and **+ BQ runtime**. Retain a short role introduction: Catalog discovers and governs; OKF authors the graph. The right column describes proposed runtime responsibilities.
@@ -28,4 +30,4 @@ Ask for one Finance-owned retention pilot: repeat pinned retrieval, test access 
 
 Alder, Maya and the figures are illustrative. Graph-over-OKF, per-node authorization and validated receipts remain RFC proposals. Existing full-demo computation attesters are stubs; receipts are UNVERIFIABLE. Governed sync and Phase A IAM remain unbuilt. Native BigQuery capabilities do not establish completion of this proposed integration.
 
-Edit the customer/runtime page and its local story/intent/spec/plan; give its RFC entry link a neutral story label. Keep `/rfc/bq-vp/` as the URL and leave `/rfc/full-demo/` unchanged, including its show notes. Work on `feat/rfc-bq-vp-story3` from main at `d011a0d` (including merged PR 22); commit, push, open a PR against main, and report its URL and HEAD. Save the session record under `/tmp/okf-vp-story3/`. Do not merge.
+Move all brief files to `rfc/board-pack/`, update the canonical and RFC index href, and keep the visible Board-pack near-miss label. Leave only a meta-refresh redirect with a fallback link at `/rfc/bq-vp/`. Preserve the hero, arithmetic, three comparisons, punchline, pilot ask and existing honesty labels; do not restore the footer or evidence deep-dive link. Leave `/rfc/full-demo/` unchanged unless an old brief href needs updating. Work on `feat/rfc-retention-runtime-details` from main at `de43648`; commit, push, open a PR against main, and report its URL and HEAD. Save the session record under `/tmp/okf-vp-details/`. Do not merge; Opus + Kimi are the requested review gate.
