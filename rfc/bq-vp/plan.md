@@ -47,5 +47,11 @@ Keep the illustrative RFC masthead link accurate. Do not edit `/rfc/full-demo/`,
 
 ## Opus r1 fix (post a3daa3c)
 
-- Runtime opener: similarity search as candidate finder (not a VECTOR_SEARCH own-goal); replayability payoff tied to Maya’s 118% (same definition/cohort/declared computation — no total-ARR substitute).
+- Runtime opener: similarity search as candidate finder (not a VECTOR_SEARCH own-goal); replayability payoff tied to Maya’s 118% (same definition/cohort/declared computation in context).
 - Empty-BQ line: “facts that retrieval needs.”
+
+## Opus P2 polish (post 6cd9e14)
+
+- Use “declared computation” consistently in the runtime opener.
+- Pinned retrieval returns the same linked context. The separate computation receipt binds execution to that context; a substituted query or missing execution evidence leaves the number unproven.
+- Validation: targeted checks confirm the story, arithmetic, empty-BQ case, punchline, ask and honesty footer are unchanged. Chromium shows 470 visible words, 1,445 px desktop height, no overflow at 1280/375/320 px and no console errors; desktop/mobile screenshots inspected. `git diff --check` passes.

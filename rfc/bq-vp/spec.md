@@ -16,8 +16,8 @@
 - BigQuery hosts a projection of the graph and related facts. Retrieval uses a pinned publication plus explicit SQL or bounded graph walks, with deterministic query semantics.
 - State the determinism boundary: fixed query, parameters, publication, fact versions, authorization scope and stable ordering yield the same selected context and result shape. Do not imply identical LLM answers or that a publication pin freezes fact tables.
 - Contrast ranked document passages/model-chosen paths with explicit graph traversal. Do not claim all vector retrieval is inherently nondeterministic.
-- Tie graph retrieval to Maya's retention definition, starting-cohort rule and approved computation.
-- Distinguish proposed retrieval receipts (query, pins and selected context) from computation receipts (metric job, context and result). Retrieval alone does not prove the number. Preserve agent/execution-identity attribution and IAM.
+- Tie graph retrieval to Maya's retention definition, starting-cohort rule and declared computation.
+- Distinguish proposed retrieval receipts (query, pins and selected context) from computation receipts (metric job, context and result). Retrieval alone does not prove the number; a substituted query or missing execution evidence leaves it unproven. Preserve agent/execution-identity attribution and IAM.
 - Include a short empty-BigQuery case: the OKF graph projection and versioned facts can be the first workload, before a revenue warehouse. No projection means no BigQuery retrieval; do not make preexisting revenue data the reason BigQuery is useful.
 - Use the exact punchline: **BigQuery turns the OKF graph into replayable context for agents.**
 

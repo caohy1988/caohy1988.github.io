@@ -51,7 +51,7 @@
         <div class="runtime-heading">
           <p class="eyebrow">Why BigQuery · proposed runtime · RFC, not built</p>
           <h2 id="runtime-title">Make the agent’s context replayable.</h2>
-          <p>Similarity search finds candidate passages; it doesn’t fix which linked context the agent actually used. Maya needs a repeatable walk from the retention definition to its cohort rule and approved computation. Walk the same graph twice and the agent gets the same definition, cohort rule and declared computation — no room to substitute a total-ARR query.</p>
+          <p>Similarity search finds candidate passages; it doesn’t fix which linked context the agent actually used. Maya needs a repeatable walk from the retention definition to its cohort rule and declared computation. Repeat the pinned retrieval to get that same context.</p>
         </div>
         <div class="runtime-roles">
           <section aria-labelledby="catalog-role">
@@ -69,7 +69,7 @@
             <h3 id="bigquery-role">Retrieve deterministically.</h3>
             <p>Project the graph into BigQuery. Pin a publication and retrieve linked context with <strong>explicit SQL or bounded graph walks.</strong></p>
             <p><strong>Same fixed inputs → same context and result shape.</strong> Fix the query, parameters, fact versions, access scope and ordering. A retrieval receipt records the query, pins and selected context.</p>
-            <p>Then compute retention with a separate <strong>job ↔ context ↔ result</strong> receipt; trace the agent and execution identity under IAM.</p>
+            <p>Then bind the retention job to that context with a separate <strong>job ↔ context ↔ result</strong> computation receipt. A substituted query or missing execution evidence leaves the number unproven. Trace the agent and execution identity under IAM.</p>
           </section>
         </div>
         <p class="runtime-rule"><strong>The knowledge graph can be the first workload.</strong> Starting with an empty BigQuery project, land the OKF projection and version the facts that retrieval needs there. No revenue warehouse is required to start retrieving context.</p>
