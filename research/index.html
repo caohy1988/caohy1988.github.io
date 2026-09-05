@@ -663,12 +663,12 @@
       if (!list.length) return "";
       const items = list.map(b => `
         <a class="brief-link" href="${escapeHtml(b.href)}">
-          <span class="when">${escapeHtml(b.displayTime || "")} · ${escapeHtml(b.analyzer || "Fable 5")}</span>
+          <span class="when">${escapeHtml(b.displayTime || "")} · ${escapeHtml(b.analyzer || "Field Brief")}</span>
           <b>${escapeHtml(b.title)}</b>
           <p>Open the deep brief</p>
         </a>`).join("");
       return `<div class="briefs">
-          <p class="rail-kicker">Fable 5</p>
+          <p class="rail-kicker">Field Brief</p>
           <h2>Deep briefs</h2>
           ${items}
         </div>`;
@@ -695,7 +695,7 @@
         : `Living catalog`;
       const latestBrief = (STATE.briefs || [])[0];
       $("edition-meta").textContent = latestRun
-        ? `Last pass ${latestRun.displayTime} · ${STATE.items.length} items kept · append only` + (latestBrief ? ` · Fable 5 ${latestBrief.displayTime}` : "")
+        ? `Last pass ${latestRun.displayTime} · ${STATE.items.length} items kept · append only` + (latestBrief ? ` · ${(latestBrief.analyzer || "Field Brief")} ${latestBrief.displayTime}` : "")
         : `${STATE.items.length} items`;
 
       const tags = allTags(STATE.items);
@@ -718,7 +718,7 @@
         </aside>`;
       bind();
       const briefStamp = latestBrief
-        ? ` · Fable 5 ${latestBrief.displayTime}`
+        ? ` · ${(latestBrief.analyzer || "Field Brief")} ${latestBrief.displayTime}`
         : "";
       document.title = "The Field Brief · catalog" + briefStamp;
     }
