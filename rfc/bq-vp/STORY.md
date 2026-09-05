@@ -6,7 +6,9 @@
 
 Maya Chen, VP of Finance at subscription software company Alder, checks the board pack at 8:55 a.m. before a 9 a.m. meeting. A $4 million plan to expand sales to existing customers rests on an agent's claim of 118% retention, labeled “verified.” An analyst catches the inclusion of new customers. Maya pulls the slide; the investment needs a different justification.
 
-The agent cited Finance's definition but reused a total-ARR query. New sales hid a decline among the opening customer cohort. All amounts below are annual recurring revenue (ARR), measured at the opening and close of one illustrative quarter.
+The agent cited Finance's definition without pinning its linked cohort rule and declared computation together, then reused a total-ARR query. Maya cannot trace which policy allowed this agent to use that asset. The “verified” label has no execution receipt connecting the query, the declared retention calculation and the reported result. These are the three unanswered questions after she pulls the slide: context not pinned, access not explainable, execution not proven. The access gap is missing explanation, not evidence of forbidden access.
+
+New sales hid a decline among the opening customer cohort. All amounts below are annual recurring revenue (ARR), measured at the opening and close of one illustrative quarter.
 
 | Input | Amount |
 | --- | ---: |
@@ -27,7 +29,7 @@ The revised BigQuery case begins with knowledge retrieval. It does not depend on
 Keep the service roles in one short introduction: Knowledge Catalog discovers/governs; OKF authors the graph. Replace the page's former role cards with three paired comparisons of **KC + OKF** and **+ BQ runtime**. Each pair carries one story takeaway.
 
 1. **Replayable context:** KC discovery and authored OKF relations leave context assembly to the retriever. The BigQuery projection, pinned publication and explicit SQL/bounded walks select the retention definition, cohort rule and declared computation together. This controls the context received by the agent, not the computation it ultimately executes.
-2. **Explainable access:** custom entries use an EntryGroup access boundary in this design; that is not a universal statement about all KC permissions. The proposed runtime joins identity, policy and projected assets, binds the authenticated requester to the execution identity, enforces access along the retrieval path and records returned nodes. The payoff is explaining why this agent could see a specific asset. No new permissions incident is invented for Alder.
+2. **Explainable access:** custom entries use an EntryGroup access boundary today; that is not a universal statement about all KC permissions. The proposed runtime joins identity, policy and projected assets, binds the authenticated requester to the execution identity, enforces access along the retrieval path and records returned nodes. The payoff is explaining why Maya's agent could use the total-ARR asset. No unauthorized access is asserted.
 3. **Verifiable execution:** finding Finance's declaration does not establish that retention was computed. Run the metric and validate a job ↔ context ↔ result receipt against that declaration. A total-ARR substitution or missing evidence leaves the claim unproven. This closes Maya's actual near-miss and is distinct from context replay and permission evaluation.
 
 Access relationships stored as metadata are not authorization controls by themselves. Source permissions must stay current; metadata visibility does not grant access to the underlying file. A shared service account alone does not identify the requesting user or agent. Per-node enforcement and the requester/execution binding are proposed integration work, not a built property of Graph-over-OKF. Historical context pins must never bypass current authorization.
@@ -46,9 +48,9 @@ Land the OKF graph projection and version any facts retrieval needs in BigQuery.
 
 The OKF bundle remains the authored source. Catalog and BigQuery are projections with different roles. Do not imply an implemented Catalog-to-BigQuery import or change the full RFC's source-bundle authority.
 
-## The VP skim and punchline
+## The story skim and punchline
 
-Keep Maya, Alder, the five-minute deadline, $4 million decision, 118% and 96% in the hero, before architecture language. One arithmetic figure makes the new-customer mistake visible. The runtime section compares the three advantages side by side, beginning with replayable retrieval. On mobile, each labeled KC + OKF / + BQ pair stays together. One Finance pilot tests retrieval, access boundaries and computation evidence.
+Keep Maya, Alder, the five-minute deadline, $4 million decision, 118% and 96% in the hero. One arithmetic figure makes the new-customer mistake visible. The near-miss previews all three unanswered questions in one short paragraph; the runtime comparison answers them in the same order. On mobile, each labeled KC + OKF / + BQ pair stays together. One Finance pilot tests retrieval, access boundaries and computation evidence. Use a neutral title, pilot eyebrow and RFC link label; the page is a customer/runtime brief, not addressed to a named product-executive audience.
 
 **BigQuery turns the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.**
 
