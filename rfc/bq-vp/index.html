@@ -3,124 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="An illustrative $4 million board decision: the agent says 118% retention; the right number is 96%. Compare KC + OKF with a proposed BigQuery runtime: replayable context, explainable access and verifiable execution.">
-  <meta name="theme-color" content="#1e302d">
-  <link rel="canonical" href="https://caohy1988.github.io/rfc/bq-vp/">
-  <title>118% in the board pack. 96% retained.</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta http-equiv="refresh" content="0; url=/rfc/board-pack/">
+  <link rel="canonical" href="https://caohy1988.github.io/rfc/board-pack/">
+  <title>Redirect to the board-pack near-miss</title>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to the story</a>
-  <header class="masthead shell">
-    <a class="brand" href="/rfc/"><strong>HC</strong> / FIELD BRIEF</a>
-    <p>BIGQUERY <span aria-hidden="true">/</span> 2–3 MIN READ</p>
-  </header>
-
-  <main id="main" tabindex="-1">
-    <section class="hero shell" aria-labelledby="story-title">
-      <p class="eyebrow scenario-label">Illustrative scenario · invented company, people &amp; numbers</p>
-      <h1 id="story-title">The board pack says <span class="wrong-number">118%.</span> <br><em>Retention is <span class="right-number">96%.</span></em></h1>
-      <p class="opening"><strong>8:55 a.m.</strong> Maya Chen, VP of Finance at subscription software company <strong>Alder</strong>, opens the board pack for a <strong>$4 million plan to expand sales to existing customers.</strong> The meeting starts in five minutes. Her agent calls 118% retention “verified.” An analyst spots new customers in the calculation. Revenue from existing customers fell 4%.</p>
-
-      <figure class="reconciliation">
-        <figcaption>The mistake in one calculation <span>One quarter · annual recurring revenue (ARR) · $10m from existing customers at the start</span></figcaption>
-        <div class="calculation-pair">
-          <div class="calculation draft">
-            <h2>Wrong · counts new customers</h2>
-            <div class="numerator">
-              <span class="term"><span>Same customers</span><b>$9.6m</b></span>
-              <span class="operator">+</span>
-              <span class="term mistaken-term"><span>New customers</span><b>$2.2m</b></span>
-            </div>
-            <div class="quotient"><span>÷ $10m at the start</span><strong>= 118%</strong></div>
-          </div>
-          <div class="calculation corrected">
-            <h2>Correct · same customers only</h2>
-            <div class="numerator">
-              <span class="term"><span>Same customers</span><b>$9.6m</b></span>
-            </div>
-            <div class="quotient"><span>÷ $10m at the start</span><strong>= 96%</strong></div>
-          </div>
-        </div>
-      </figure>
-      <p class="near-miss"><strong>Maya pulls the slide. Three questions go unanswered.</strong> The agent found Finance’s definition but missed the accompanying rule: count revenue only from customers there at the start. It reused a total-ARR query; Maya cannot trace the policy allowing this agent to use that asset. And no execution receipt connects the query, the declared retention calculation and the reported result.</p>
-    </section>
-
-    <section class="runtime" aria-labelledby="runtime-title">
-      <div class="shell">
-        <div class="runtime-heading">
-          <p class="eyebrow">Why BigQuery · proposed runtime · RFC, not built</p>
-          <h2 id="runtime-title">What BigQuery adds to the story.</h2>
-          <p>Knowledge Catalog (KC) discovers and governs. Open Knowledge Format (OKF) authors the graph.</p>
-        </div>
-        <div class="comparison">
-          <section class="comparison-point" aria-labelledby="context-point">
-            <div class="point-heading">
-              <h3 id="context-point"><span aria-hidden="true">01</span> Replayable context</h3>
-              <p>Same retention definition, cohort rule and declared computation.</p>
-            </div>
-            <div class="comparison-pair">
-              <div class="comparison-cell">
-                <h4>KC + OKF</h4>
-                <p>KC discovers; OKF authors the graph. Similarity ranks candidates; it does not pin linked context. The retriever assembles it.</p>
-              </div>
-              <div class="comparison-cell with-runtime">
-                <h4>+ BQ runtime</h4>
-                <p>Host the OKF projection. Pin a publication; use <strong>explicit SQL or bounded walks.</strong> Fix query, parameters, fact versions, access scope and ordering → <strong>same selected context and shape.</strong></p>
-              </div>
-            </div>
-            <p class="comparison-note">Vector search can be deterministic. Replayable context does not promise identical LLM answers.</p>
-          </section>
-          <section class="comparison-point" aria-labelledby="access-point">
-            <div class="point-heading">
-              <h3 id="access-point"><span aria-hidden="true">02</span> Explainable access</h3>
-              <p>Maya can trace why this agent could use the total-ARR asset.</p>
-            </div>
-            <div class="comparison-pair">
-              <div class="comparison-cell">
-                <h4>KC + OKF</h4>
-                <p>Custom-entry access uses an <strong>EntryGroup boundary today.</strong> Per-node policy evaluation is separate.</p>
-              </div>
-              <div class="comparison-cell with-runtime">
-                <h4>+ BQ runtime</h4>
-                <p>Join <strong>identity ↔ policy ↔ projected assets.</strong> Bind the requesting user/agent to the execution identity. Enforce access along the retrieval path; record which nodes were returned to whom under which policy.</p>
-              </div>
-            </div>
-            <p class="comparison-note">Access metadata needs enforcement. Keep source permissions current; metadata access does not grant file access.</p>
-          </section>
-          <section class="comparison-point" aria-labelledby="execution-point">
-            <div class="point-heading">
-              <h3 id="execution-point"><span aria-hidden="true">03</span> Verifiable execution</h3>
-              <p>Maya can check whether the board number used the retention calculation.</p>
-            </div>
-            <div class="comparison-pair">
-              <div class="comparison-cell">
-                <h4>KC + OKF</h4>
-                <p>Finding the definition and its computation declaration does not prove the calculation ran.</p>
-              </div>
-              <div class="comparison-cell with-runtime">
-                <h4>+ BQ runtime</h4>
-                <p>Run retention; validate a <strong>job ↔ context ↔ result</strong> receipt against the declared computation. A substituted query or missing evidence leaves the number <strong>unproven.</strong></p>
-              </div>
-            </div>
-            <p class="comparison-note">A job ID alone does not validate the computation. Demo receipts remain <code>UNVERIFIABLE</code>.</p>
-          </section>
-        </div>
-        <p class="runtime-rule"><strong>The graph can be the first BigQuery workload.</strong> Land the OKF projection and version the facts retrieval needs. No existing revenue warehouse is required.</p>
-      </div>
-    </section>
-
-    <div class="punchline shell">
-      <p>BigQuery turns the OKF graph into <em>replayable context for agents</em>—with explainable access and evidence that the declared computation ran.</p>
-    </div>
-
-    <section class="ask shell" aria-labelledby="ask-title">
-      <p class="eyebrow">One pilot</p>
-      <div>
-        <h2 id="ask-title">Sponsor one retention pilot with a Finance owner.</h2>
-        <p>Pilot Finance’s graph and one quarter of cohort data. Repeat the pinned retrieval, test access boundaries, then compute retention. Withhold execution evidence: the number must remain unproven.</p>
-      </div>
-    </section>
+  <main>
+    <p>Redirect only. This brief has moved to <a href="/rfc/board-pack/">Board-pack near-miss →</a>.</p>
   </main>
 </body>
 </html>
