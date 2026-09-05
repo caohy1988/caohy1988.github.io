@@ -1,0 +1,53 @@
+# Content map — main RFC update
+
+Baseline: `rfc/index.html` at `b2b3c90`. All locations below refer to that file; use IDs and text anchors rather than line numbers. [Draft blocks](full-update-DRAFT.md) are keyed B01–B14. They are replacement copy unless marked as an addition.
+
+## Reading order
+
+Keep the existing numbered sections and public anchors. The first reading path is lede → three proposed guarantees → Alder motivation → architecture. A deeper reader continues through decisions, publication consistency, design detail, reproducibility, acceptance and delivery phases. Keep the short board-pack link near the lede; place its fuller story callout in motivation only.
+
+| Location | Action and resulting content | Draft | Preserve |
+| --- | --- | --- | --- |
+| Document title, masthead `h1`, `.subtitle`, badges | Retain the formal RFC name; add the runtime thesis and proposed status. Remove broad present-tense “attestably computed” benefit claims. Previous reviews apply to the baseline, not an endorsement of this update. | B01 | Canonical `/rfc/`, site chrome, optional v0.2 profile label |
+| Masthead board-pack link | Keep `./board-pack/` and “Board-pack near-miss →”; retain illustrative/2–3 minute description. No old path is currently present. | B01 | Short story page and redirect untouched |
+| `.credo` | Compress the four service roles into one short role line or thin four-column strip. Let the three comparisons carry the benefit story; do not keep two equally prominent benefit grids. | B01 | BQAA observer role |
+| Masthead “On the name” and “Shipped baseline” notes | Move the long source/sample history to a native disclosure inside `#decision`, after its six decisions. Keep the source facts and links; replace only their broad runtime benefit ending. Add `id="baseline"`. | B05 | Normative repo vs frozen snapshot distinction; dated source audit; type/aspect compatibility |
+| `#summary` | Replace summary prose; add `id="runtime-guarantees"` to one compact three-row comparison. Add adjacent guardrails and the graph-as-first-workload paragraph. Include a short jump list to `#motivation`, `#architecture`, `#details`, `#repro`, `#accept`, `#phases`. | B02–B03 | Two projections; source authority; proposed package; observer seam |
+| `#motivation` | Replace Germany question, path block and generic motivation with Alder callout, arithmetic and three unanswered questions. Close with the proposed resolution and a clearly separate fixture note. | B04 | Germany remains Phase 0 fixture; no new recorded claim |
+| `#architecture` plane table and intro | Rewrite role descriptions around authoring, discovery, replayable serving and observation. Add the crosswalk from three outcomes to enforcing components. | B05 | Four planes plus compiler/publication plane; identity chain |
+| `#architecture` main SVG and caption | Update runtime search box to “01 Replayable retrieval”; make “02 Current access” explicit on the agent path before selection/expansion/disclosure; label execution “03 Verifiable execution.” State proposed architecture in accessible text and caption. Keep a visible text description of policy gating every step, not a post-return audit-only check. | B05 | Arrows/ownership; full identity rail; independent attester; no invented deployed component |
+| `#decision` six decisions | Preserve recommendations; align “sanctioned” reader-facing prose to “declared” where it names OKF declarations. In Scope keep §11 inspection versus named-validator-run distinction. In Placement say a runtime “is proposed,” not “exists.” Append the relocated baseline disclosure. | B06 + editorial rules | Optionality, package, push-only workflow, convention order, separate runtime aspect |
+| `#statemachine` | Retain exact states and transitions. Introduce them as the proposed publication protocol. Update publication-pinning bullet with scoped September 3 capture evidence instead of the old unverified LookupContext claim. Caption says proposed, not completed. | B07 | Atomic head swap; Catalog lag; pin-or-fail-stale; history |
+| `#details` Identity disclosure | Preserve formulas, closure and membership. Change `receipt_id` gloss to “one execution-evidence record, including an unproven verdict” so a receipt does not imply attestation. Align snapshot shorthand with compile-input identity. | B08 | Random envelope ID; canonical hashing; paths; separate runtime config |
+| `#details` Relationships disclosure | Keep existing rules; add one Alder bridge: follow authored linked rules; never infer a typed cohort predicate from prose. | B08 | Untyped core links, unresolved assertions, provenance and resource versions |
+| `#details` Runtime schema disclosure | Distinguish deterministic compilation from controlled retrieval. State graph-as-relational-projection versus optional Property Graph. Replace stale generic Graph-over-views uncertainty with the narrower profile compatibility gate. | B08 | Tables, current views, relational authority; no formula changes |
+| `#details` Retrieval disclosure | Rewrite opening and add bounded retrieval contract + retrieval-evidence subsection. Qualify free discovery; preserve lifecycle behavior and manifest privacy. Replace universal Catalog IAM wording with custom-entry scope; add requester binding/current-policy audit requirements. | B09–B10 | Fail-closed checks, single-domain v1, instruction boundary, no denied counts, random envelope ID |
+| `#details` Attested Computation disclosure | Keep exact normative attestation semantics. Replace opening with context-versus-execution separation; explicitly tie execution evidence to publication/envelope and reported result. Add Alder substitution/missing-evidence example. | B11 | Independent attester, named parameters, complete evidence, two receipt artifacts, signatures/keys/threat model |
+| `#details` BQAA and Catalog ownership disclosures | Add a short observer/privacy bridge; keep public `context_ref` unchanged. Limit EntryGroup-only wording to the custom-entry body projection. Do not move pins to shared `okf`, or introduce Catalog→source/BQ import. | B06, B10–B11 | Ownership ledger, reconciler discipline, BQAA privacy seam |
+| `#repro` | Replace the ladder text with distinct identity, reconstruction, controlled retrieval, computation-contract and result-reproduction levels. Remove blanket “rerunning retrieval is not guaranteed” contradiction while retaining its free-discovery caveat. | B12 | Retention limits, current authorization, conditional data reproduction |
+| `#accept` | Add three concrete acceptance items (retrieval/access/execution) and the empty-BQ case; preserve existing core/identity/ownership items. Clarify acceptance is a target, not a completed checklist; avoid “no blocking questions remain” as a blanket readiness claim. | B13 | Optional profile, v0.2 conformance gate, BQAA seam |
+| `#phases` intro, phase summary table and Phase 1–4 rows | Add crosswalk: Phase 1 builds projection, Phase 2 aligns Catalog pins, Phase 3 delivers retrieval + access evidence, Phase 4 validates computation. Apply matching gate additions in both summary table and detailed rows. Keep numeric phase order. | B13 | Existing Germany fixture, Phase 0 evidence limits, Phase 5 hardening/pilot |
+| `#phases` Phase 0 / prototype notes | Keep dated off-site status; no new completion claims. Replace promotional demo note with a scoped evidence box and accurate cross-links. Distinguish actual SELECT jobs from governed commits or attested computations. | B14 | Germany, demo “no Catalog write on this path,” separate full-demo sample push |
+| `#phases` risk table and `#closing` | Add risks for unpinned retrieval inputs and stale policy. Close on the locked punchline plus a gated Finance pilot ask, not an abstract sum of products. | B13–B14 | Existing substantive risks; no real Alder deployment claim |
+| Main footer | Keep main RFC provenance/footer. Date this design update and separate historical review credit from current review status. No new endorsement or blanket completion badge. | B14 | The earlier footer removal applied to board-pack only |
+
+## Exact terminology edits
+
+| Existing phrase or ambiguity | Required handling |
+| --- | --- |
+| “makes it searchable, traversable, and attestably computed” | Replace with the three proposed outcomes; reserve Attested Computation for the defined execution protocol. |
+| “For agents, BigQuery is the read path; for humans, Catalog is the read path” | Say Catalog can discover the seed for either human or agent; authorized runtime tools assemble the pinned context. Avoid a false users-versus-agents API restriction. |
+| “snapshot permanently identifies the compiled state” | Say it identifies the complete compile-input closure under compiler semantics; a hash alone does not prove compiled output. |
+| “same inputs” | Name input/version/access/ordering scope; do not claim a publication pin freezes facts or access. |
+| “re-running retrieval is not guaranteed to reproduce an envelope” | Split free discovery from controlled selection and retained-manifest reconstruction (B12). |
+| “the enforcement unit is the EntryGroup” / “only IAM boundary” | Qualify to this custom-entry/body projection and the relevant operations; retain other source/entry/aspect checks. |
+| “receipt_id — one attested execution” | A receipt can record `UNVERIFIABLE` or `REJECTED`; ID existence implies no verdict. |
+| “LookupContext does not carry custom aspects … unverified” | State only the tested metric/computation capture result; runtime pins were not captured. |
+| “BigQuery Graph is Pre-GA” / “whether Graph accepts views is to be confirmed” | Do not recycle an undated product-status assertion. Current overview documents tables/views; keep this profile's optional Phase 5 compatibility/equivalence gate. Do not infer profile completion or GA from that documentation. |
+| “Full version … external sync” | “Recorded probes and proposed sync design →”; no implemented governed sync implied. |
+
+## Existing assets and links
+
+No page-local `rfc/styles.css` exists: main styles are inside `rfc/index.html`. All existing section IDs are `summary`, `motivation`, `architecture`, `decision`, `statemachine`, `details`, `repro`, `accept`, `phases`, `closing`. Keep them. New IDs `runtime-guarantees` and `baseline` must be unique.
+
+Do not alter `rfc/board-pack/`, `rfc/bq-vp/index.html`, the recorded data under `rfc/full-demo/live/`, the demo fixture/derived bundles, or `rfc/full-demo/tools/audited_claims.tsv`. The old path may appear in implementation documentation when explicitly describing the redirect; it must not become a new brief link.
