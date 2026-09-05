@@ -28,5 +28,11 @@ Commit named files, push the branch and create a PR against main. Save the sessi
 - Source comparison confirms the prior brief is unchanged outside the new disclosure and canonical URL. The RFC index changes only its href. Full-demo is unchanged; remaining legacy-path references document the redirect.
 - Chromium at 1280, 768, 375 and 320 px passes in both states: no horizontal overflow, invalid heading references or authored scripts; no console errors. Collapsed: 532 visible words and 1,795 px tall at 1280 × 720. Expanded: 771 words. Desktop/mobile and focus screenshots inspected.
 - Tab reaches the native summary; Enter and Space both open and close it. The focus ring is visible; the skip link focuses main. Both the RFC index link and old URL reach `/rfc/board-pack/`, with the updated canonical.
-- Closed/open A4 print text is identical and includes all three design sections and the pilot. The expanded content fits two pages; print layout inspected. Print uses `::details-content` to expose folded content without JavaScript, verified in Chromium 145.
+- Closed/open A4 print text is identical and includes all three design sections and the pilot. The expanded content fits two pages; print layout inspected. Initial print verification used Chromium 145; the P2 follow-up below removes the reliance on `::details-content`.
 - `git diff --check` passes. Session and QA artifacts: `/tmp/okf-vp-details/`. This validates the static page, not implementation of the proposed runtime.
+
+## P2 — print independently of the native disclosure slot
+
+Keep one content block adjacent to the native details toggle, inside a shared visual frame. The summary identifies that body with `aria-controls`; `[open] + .design-body` controls screen visibility. Print explicitly resets the real body's display, height, max-height, visibility, content-visibility and overflow. The native pseudo-element remains a progressive enhancement, not the print fallback. No JavaScript or duplicated content is introduced; all page text is unchanged.
+
+Verified closed-state Chromium 145 PDF and Firefox 146.0.1 / WebKit 26.0 print-media layouts: Retrieve, Evaluate, Validate and the pilot render, including with native pseudo-element visibility disabled. Chromium PDF text matches the previous two-page output. Safari itself was not automated; WebKit is the tested engine. Native Enter/Space, focus, the control relationship and desktop/mobile open/closed states pass in all three engines. Evidence is under `/tmp/okf-vp-details/p2/`. Push to PR 25 and stop; no merge or re-review wait.

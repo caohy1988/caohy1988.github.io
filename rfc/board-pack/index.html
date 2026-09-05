@@ -107,9 +107,11 @@
           </section>
         </div>
         <p class="runtime-rule"><strong>The graph can be the first BigQuery workload.</strong> Land the OKF projection and version the facts retrieval needs. No existing revenue warehouse is required.</p>
-        <details class="technical-design">
-          <summary><span class="design-summary"><span>Technical design</span><span class="design-status">RFC proposal</span><span class="disclosure-mark" aria-hidden="true"></span></span></summary>
-          <div class="design-body">
+        <div class="technical-design-frame">
+          <details class="technical-design">
+            <summary aria-controls="technical-design-body"><span class="design-summary"><span>Technical design</span><span class="design-status">RFC proposal</span><span class="disclosure-mark" aria-hidden="true"></span></span></summary>
+          </details>
+          <div class="design-body" id="technical-design-body">
             <p class="design-intro">Proposed integration, not an implemented runtime. The OKF bundle stays authoritative; BigQuery hosts a publication’s node/edge projection and versioned facts. The graph can be the first workload, but it must enter BigQuery before retrieval can run there.</p>
             <section class="design-part" aria-labelledby="design-context">
               <h3 id="design-context">Retrieve a fixed context</h3>
@@ -124,7 +126,7 @@
               <p>Run retention separately. Bind the BigQuery job, executed query and parameters, input versions, pinned context and result in a computation receipt. Validate that execution against the declared retention calculation: the total-ARR substitution must fail that check. A retrieval receipt or job ID alone is insufficient. Missing evidence leaves the number unproven; existing demo computation attesters are stubs and receipts remain <code>UNVERIFIABLE</code>.</p>
             </section>
           </div>
-        </details>
+        </div>
       </div>
     </section>
 
