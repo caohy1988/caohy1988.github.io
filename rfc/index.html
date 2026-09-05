@@ -176,10 +176,10 @@
 
   /* ladder */
   .ladder{display:grid;gap:0;margin:20px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
-  .rung{display:grid;grid-template-columns:56px 1fr;border-bottom:1px solid var(--line-soft)}
+  .rung{display:grid;grid-template-columns:56px minmax(0,1fr);border-bottom:1px solid var(--line-soft)}
   .rung:last-child{border-bottom:none}
   .rung .n{display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:18px;background:var(--paper);border-right:1px solid var(--line-soft)}
-  .rung .t{padding:13px 18px;font-family:var(--display);font-size:14.5px;line-height:1.5}
+  .rung .t{padding:13px 18px;font-family:var(--display);font-size:14.5px;line-height:1.5;min-width:0;overflow-wrap:break-word}
   .rung .t b{display:block;font-size:15px}
   .rung.g .n{color:#1C6B45}.rung.c .n{color:var(--runtime)}
 
@@ -189,14 +189,14 @@
   .phase .ph{display:flex;align-items:baseline;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line-soft);background:var(--paper)}
   .phase .ph .n{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--ink-soft)}
   .phase .ph .t{font-family:var(--display);font-weight:700;font-size:17px}
-  .phase .row{display:grid;grid-template-columns:96px 1fr;border-bottom:1px solid var(--line-soft)}
+  .phase .row{display:grid;grid-template-columns:96px minmax(0,1fr);border-bottom:1px solid var(--line-soft)}
   .phase .row:last-child{border-bottom:none}
   .phase .row .l{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:12px 0 12px 18px;color:var(--ink-soft)}
-  .phase .row .v{font-family:var(--display);font-size:14.5px;line-height:1.55;padding:12px 18px 12px 0}
+  .phase .row .v{font-family:var(--display);font-size:14.5px;line-height:1.55;padding:12px 18px 12px 0;min-width:0;overflow-wrap:break-word}
   .phase .row.gate .l{color:var(--catalog)}
   .phase .row.out .l{color:var(--runtime)}
   .phase .row.alder .l{color:var(--runtime)}
-  @media(max-width:640px){.phase .row{grid-template-columns:1fr}.phase .row .v{padding-left:18px;padding-top:0}}
+  @media(max-width:640px){.phase .row{grid-template-columns:minmax(0,1fr)}.phase .row .v{padding-left:18px;padding-top:0}}
 
   footer{margin-top:70px;border-top:1px solid var(--line);background:var(--panel)}
   footer .wrap{padding:26px 22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
@@ -207,14 +207,13 @@
 
   .flowline{stroke-dasharray:6 6;animation:march 1.6s linear infinite}
   @keyframes march{to{stroke-dashoffset:-24}}
-  @media(prefers-reduced-motion:reduce){.flowline{animation:none}}
+  @media(prefers-reduced-motion:reduce){.flowline{animation:none}html{scroll-behavior:auto}}
   @media(max-width:640px){body{font-size:16px}.decision{padding-left:54px}.badge{white-space:normal}}
 
   @media print{
     .site-topbar{display:none}
     body{background:#fff;font-size:11pt}
     .fold-body{display:block!important}
-    details.fold::details-content{content-visibility:visible!important}
     details::details-content{content-visibility:visible!important}
     .flowline{animation:none}
     table.compare td.bq{background:#fff}
@@ -250,7 +249,7 @@
     <div class="eyebrow"><span class="dot"></span>Request for comments · GoogleCloudPlatform / knowledge-catalog</div>
     <h1>OKF runtime context projection<br><span class="thin">a proposed Knowledge Catalog + BigQuery runtime profile for OKF v0.2</span></h1>
     <p class="thesis">BigQuery turns the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.</p>
-    <p class="subtitle">An optional runtime profile and reference implementation that compiles an authored Open Knowledge Format (OKF) bundle into two derived projections — Knowledge Catalog for discovery and governance, BigQuery for replayable retrieval, current-policy enforcement and execution evidence — without changing OKF core.</p>
+    <p class="subtitle">A proposed optional runtime profile and reference implementation that would compile an authored Open Knowledge Format (OKF) bundle into two derived projections — Knowledge Catalog for discovery and governance, BigQuery for replayable retrieval, current-policy enforcement and execution evidence — without changing OKF core.</p>
     <div class="status-note"><b>Status: RFC proposal.</b> The profile defines the integration to build; the recorded demos do not yet implement these guarantees. OKF v0.2 stays unchanged and usable without this runtime.</div>
     <p><a href="./board-pack/"><strong>Board-pack near-miss →</strong></a> <span>The pack says 118%. Retention is 96%. Illustrative · 2–3 minutes.</span></p>
     <div class="badges">
@@ -302,18 +301,18 @@
   </table>
   <p style="margin-top:14px">These are the guarantees proposed by this profile, not claims that KC or OKF cannot be combined with another deterministic retriever. BigQuery brings the graph projection, related fact queries, authorization checks and job evidence into one runtime design.</p>
 
-  <ul class="jump" aria-label="Jump to">
+  <nav aria-label="Jump to"><ul class="jump">
     <li><a href="#motivation">02 · Motivation</a></li>
     <li><a href="#architecture">03 · System design</a></li>
     <li><a href="#details">06 · Proposed model</a></li>
     <li><a href="#repro">07 · Reproducibility</a></li>
     <li><a href="#accept">08 · Acceptance</a></li>
     <li><a href="#phases">09 · Phases</a></li>
-  </ul>
+  </ul></nav>
 
   <p><strong>The graph can be the first BigQuery workload.</strong> Project the authored OKF bundle into versioned node, relationship and computation records, and version the facts a query needs. An existing revenue warehouse is not a prerequisite. If no projection enters BigQuery, retrieval does not run there; an empty project supplies no evidence by itself.</p>
   <p>The proposed <code>toolbox/okf-context</code> package compiles the source bundle, publishes immutable runtime state and reconciles a Catalog discovery projection through <code>kcmd</code>; that projection is a delta on the shipped <code>toolbox/mdcode/demo/okf</code> sample (the same <code>okf-bundle</code> type and <code>okf</code> aspect, plus a profile-owned pin aspect and an ownership ledger), not a second one. <strong style="color:var(--runtime)">BigQuery</strong> relational state is the serving authority. Each <strong>publication</strong> pins one source observation to one deterministic semantic snapshot and one deployment, so provenance, compiled state and rollout are never conflated. A Catalog-discovered seed carries the publication it describes: the runtime serves that retained, authorized publication or fails stale. It never silently substitutes the latest head; when the two projections disagree, <code>status</code> says by how many publications.</p>
-  <p><strong style="color:var(--catalog)">Catalog</strong> discovery can start a human or agent request. Runtime tools assemble the authorized context. <strong style="color:var(--telemetry)">BQAA</strong> — BigQuery Agent Analytics — observes their use through <code>context_ref</code>; it does not own authored definitions, access policy or attestation verdicts, and nothing here defines a telemetry schema. The reference implementation remains push-only, relational-first and subject to the phase gates below.</p>
+  <p><strong style="color:var(--catalog)">Catalog</strong> discovery can start a human or agent request. Runtime tools assemble the authorized context. <strong style="color:var(--telemetry)">BQAA</strong> — BigQuery Agent Analytics — observes their use through <code>context_ref</code>; it does not own authored definitions, access policy or attestation verdicts, and nothing here defines a telemetry schema. The reference implementation is specified as push-only, relational-first and subject to the phase gates below.</p>
 </section>
 
 <!-- ============ MOTIVATION ============ -->
@@ -395,7 +394,7 @@
         <text x="238" y="152" fill="#44536E">core keys consumed · #195 / #183 / #253 keys tolerated</text>
         <rect x="694" y="94" width="452" height="66" rx="9" fill="#fff" stroke="#C7D2F5"/>
         <text x="710" y="116" fill="#16233B" font-weight="600">references/</text>
-        <text x="710" y="135" fill="#44536E">declared SQL computations (named-parameter templates) · executors</text>
+        <text x="710" y="135" fill="#44536E">declared SQL (named-parameter templates) · executors</text>
         <text x="710" y="152" fill="#44536E">attesters · vocabularies</text>
       </g>
     </g>
@@ -441,10 +440,10 @@
         <text x="238" y="584" fill="#44536E">okf-computation aspect: runtime-derived, on §10 concepts</text>
         <rect x="222" y="600" width="406" height="40" rx="9" fill="#fff" stroke="#BCDEDC"/>
         <text x="238" y="617" fill="#16233B" font-weight="600">Entry links</text>
-        <text x="238" y="633" fill="#44536E">to existing BigQuery asset entries · partial; ledger in BQ</text>
+        <text x="238" y="633" fill="#44536E">to existing BQ asset entries · partial; ledger in BQ</text>
         <rect x="222" y="648" width="406" height="40" rx="9" fill="#fff" stroke="#BCDEDC"/>
         <text x="238" y="665" fill="#16233B" font-weight="600">Ownership + pinning</text>
-        <text x="238" y="681" fill="#44536E">publication_id on every entry · pin-or-fail-stale · lag SLO</text>
+        <text x="238" y="681" fill="#44536E">publication_id per entry · pin-or-fail-stale · lag SLO</text>
         <rect x="222" y="696" width="406" height="44" rx="9" fill="#fff" stroke="#D6C7EE" stroke-dasharray="4 4"/>
         <text x="238" y="713" fill="#7048A8" font-weight="600">optional, opaque: BQAA-owned health aspect</text>
         <text x="238" y="729" fill="#44536E">windowed · sample_count · never part of KC_APPLIED</text>
@@ -467,17 +466,17 @@
         <text x="742" y="584" fill="#44536E">deployment_heads → *_current · deployment_heads_history</text>
         <rect x="726" y="600" width="200" height="56" rx="9" fill="#fff" stroke="#B4690E" stroke-width="1.4"/>
         <text x="742" y="618" fill="#16233B" font-weight="600">01 Replayable retrieval</text>
-        <text x="742" y="634" fill="#44536E">pinned publication · bounded SQL</text>
-        <text x="742" y="649" fill="#44536E">explicit order · index_build_id</text>
+        <text x="742" y="634" fill="#44536E">pinned publication · SQL</text>
+        <text x="742" y="649" fill="#44536E">ordered · index_build_id</text>
         <rect x="938" y="600" width="200" height="56" rx="9" fill="#fff" stroke="#EBD3AC" stroke-dasharray="4 4"/>
         <text x="954" y="618" fill="#16233B" font-weight="600">Optional Property Graph</text>
-        <text x="954" y="634" fill="#44536E">Phase 5 · relational ≡ GQL gate</text>
+        <text x="954" y="634" fill="#44536E">Phase 5 · GQL ≡ SQL paths</text>
         <text x="954" y="649" fill="#44536E">no gate may require it</text>
         <rect x="726" y="664" width="412" height="40" rx="9" fill="#fff" stroke="#EBD3AC"/>
         <text x="742" y="681" fill="#16233B" font-weight="600">execution_receipts</text>
         <text x="742" y="697" fill="#44536E">keyed commitments · integrity proofs · attester pinned</text>
         <rect x="726" y="712" width="412" height="30" rx="9" fill="#fff" stroke="#EBD3AC"/>
-        <text x="742" y="732" fill="#44536E"><tspan fill="#16233B" font-weight="600">envelope manifests</tspan> · selection record · runtime-dataset IAM</text>
+        <text x="742" y="732" fill="#44536E"><tspan fill="#16233B" font-weight="600">envelope manifests</tspan> · selection record · dataset IAM</text>
       </g>
     </g>
 
@@ -502,7 +501,7 @@
       <rect x="560" y="814" width="600" height="134" rx="14" fill="#fff" stroke="#44536E" stroke-width="1.6"/>
       <text x="582" y="844" class="svgt" font-size="15" font-weight="700" fill="#16233B">AGENT / MCP CLIENT</text>
       <text x="1138" y="844" text-anchor="end" class="svgm" font-size="11.5" fill="#B4690E" font-weight="600">02 Current access · every hop</text>
-      <text x="582" y="866" class="svgm" font-size="11.5" fill="#44536E">authenticated requester bound to execution identity → current policy evaluated before disclosure</text>
+      <text x="582" y="866" class="svgm" font-size="11.5" fill="#44536E">authenticated requester → execution identity · policy before disclosure</text>
       <text x="582" y="882" class="svgm" font-size="11.5" fill="#44536E">seed → filter → bounded expansion → rank → pack · each hop checked · fail closed</text>
       <rect x="582" y="892" width="556" height="40" rx="9" fill="#F6F8FA" stroke="#D9E1EB"/>
       <text x="600" y="909" class="svgm" font-size="11.5" fill="#16233B" font-weight="600">Context Envelope · opaque envelope_id · context_ref on every result</text>
@@ -540,7 +539,7 @@
       <text x="372" y="1028" class="svgm" font-size="11" fill="#7048A8">observer · BQAA</text>
       <g class="svgm" font-size="11.5" fill="#44536E">
         <text x="222" y="1052">receives: publication_id · envelope_id ·</text>
-        <text x="222" y="1069">receipt_id · bq_job_id · buckets · warning codes</text>
+        <text x="222" y="1069">receipt_id · bq_job_id · buckets · warnings</text>
         <text x="222" y="1090">owns: spans · events · privacy · evaluation ·</text>
         <text x="222" y="1107">citation · Knowledge Health</text>
         <text x="222" y="1124" fill="#7048A8">never a source of truth · no schema here</text>
