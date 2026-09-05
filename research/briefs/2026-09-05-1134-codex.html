@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex brief · 5 Sep 2026, 11:34 AM — The Field Brief</title>
+  <meta name="description" content="Codex gpt-6-astra xhigh: LoCoMo-Conv memory-use evaluation; spurious CoT termination budget accounting. 11:34 AM PT, 5 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-05-1134-codex.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Codex gpt-6-astra · 11:34 AM PT</p>
+    <article>
+<h1>Field Brief — Codex gpt-6-astra (xhigh): measure memory use and the work after a stop signal</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK<br />
+<strong>As of:</strong> Saturday, September 5, 2026, approximately 11:34 AM PT. Hunt window: midnight–11:34 AM PT, or 07:00–18:34 UTC. The missing 08:34–10:34 checks are included in the industry sweep. Both academy selections are September 3 submissions, presented as newly verified catch-up findings; neither is an overnight announcement.</p>
+<p><strong>Sources checked:</strong> The complete <a href="packs/kimi-pack-2026-09-05-1134.md">Kimi 11:34 source pack</a>, <strong>9,780 bytes, ending in <code>PACK_DONE</code></strong>, supplied the primary candidate list. Codex independently retrieved all ten candidate abstracts and full PDFs, examined the selected papers’ methods/results/limitations and relevant exclusion passages, and checked prior screening history. Independently opened the official industry sources linked below, extending discovery to Scale Labs and Apollo Research. The <a href="https://arxiv.org/list/cs.AI/new">arXiv cs.AI listing</a> still identifies the Friday, September 4 batch; catalog absence does not establish a fresh announcement.</p>
+<p>Compared the <a href="https://caohy1988.github.io/research/briefs/2026-09-05-0000-codex.html">midnight baseline</a> and <a href="https://caohy1988.github.io/research/briefs/2026-09-04-2034-codex.html">20:34 PUBLISH</a> through local Markdown and site HTML after hosted fetches failed. Checked the requested September 4 history and earlier exclusion mentions. Searched the authoritative <a href="/Users/haiyuancao/caohy1988.github.io/research/catalog.json">catalog</a>: <strong>179 items and all 62 nested <code>progress[]</code> entries</strong>, using abstract IDs, slug forms, titles and capability phrases. The midnight five are present; all ten pack academy candidates are absent.</p>
+<p><strong>Read this first.</strong> <strong>Two academy cards; no industry cards. Keep the six-week ranking unchanged.</strong> LoCoMo-Conv provides a concrete test of whether retrieved evidence helps the response when the user does not explicitly request recall. The termination paper shows why reasoning-budget claims need the complete generation, including work after an injected delimiter. Use both within existing evaluation and usage-provenance work. The remaining pack leads are older, previously rejected, redundant with stronger coverage, or insufficiently actionable.</p>
+<h2>Industry</h2>
+<p><strong>No qualifying product addition was verified in the overnight/morning window.</strong></p>
+<ul>
+<li><strong>Datadog workflows: hold on freshness.</strong> The independently retrieved <a href="https://www.datadoghq.com/blog/build-datadog-workflows-ai-agents/">Workflow Automation/Bits Chat article</a> displays <strong>September 3</strong>, correcting the pack’s September 4 date. It describes building, executing and debugging workflows through Bits Chat and coding agents, including inspecting failed executions and checking recovery. That is product behavior, but no in-window launch or expansion was established. <strong>BQAA TL;DR:</strong> useful background on operational feedback loops; no fresh competitive response required.</li>
+<li><strong>Core observability products: covered or below bar.</strong> <a href="https://github.com/Arize-ai/phoenix/releases">Phoenix</a> still leads with 20.8.0; <a href="https://github.com/mlflow/mlflow/releases">MLflow</a> with 3.16.0; <a href="https://github.com/mastra-ai/mastra/releases">Mastra</a> with the September 3-labelled core 1.64.0 release. Their relevant capabilities are already covered. <a href="https://github.com/comet-ml/opik/releases">Opik 2.2.52</a> remains patch work, and <a href="https://github.com/wandb/weave/releases">Weave</a> still leads with August 27 v0.53.7. <strong>BQAA TL;DR:</strong> no newly verified product capability changes the peer comparison.</li>
+<li><strong>Hosted changelogs: no dated qualifying delta.</strong> <a href="https://langfuse.com/changelog">Langfuse</a> still leads with the covered Assistant analysis/dataset/dashboard work; <a href="https://docs.langchain.com/langsmith/changelog">LangSmith</a> with August 24–31; <a href="https://langwatch.ai/changelog">LangWatch</a> with August 30 Agent Testing v2. <a href="https://www.braintrust.dev/docs/changelog">Braintrust</a> retains Patterns, Debugger, Loop and Blind reviews; individual publication times do not establish overnight freshness. In this retrieval, <code>changelog.langchain.com</code> redirects to the weekly LangSmith page, so the pack’s separate undated entries were not independently reproduced. <strong>BQAA TL;DR:</strong> retain existing coverage and the dating holds.</li>
+<li><strong>Broader product sweep: no fresh launch.</strong> <a href="https://docs.cloud.google.com/gemini/enterprise/docs/release-notes">Gemini Enterprise</a> still leads with September 4 Projects, already catalogued. <a href="https://github.com/google/adk-python/releases">ADK Python</a> exposes August 27 v1.39.1 as its leading release. <a href="https://grafana.com/whats-new/">Grafana’s update index</a> leads with August 26. The additional <a href="https://labs.scale.com/blog">Scale Labs check</a> dates READY’s introduction to September 3; its research is already under <code>ready-reliable-enterprise-agent-deployment</code>. <strong>BQAA TL;DR:</strong> no overnight capability warrants a new card or progress entry.</li>
+</ul>
+<h2>Academy</h2>
+<h3>1. LoCoMo-Conv — distinguish retrieved evidence from useful memory use</h3>
+<p><a href="https://arxiv.org/abs/2609.03467">When Users Don’t Ask, arXiv:2609.03467</a> · September 3 · <a href="https://arxiv.org/pdf/2609.03467">full PDF, 21 pages</a>, §§4–7, Table 4, §7.3 and limitations. Reconsidered after the September 3 20:34 abstract-level exclusion.</p>
+<p>The benchmark holds conversation memories fixed and varies query framing. Across five systems, it scores evidence retrieval separately from generated responses. AnchorMem’s recall@10 is <strong>0.659 for direct conversational questions versus 0.368 for implicit requests</strong>. On a selected <strong>332 cases where oracle memory still earns zero explicit-fact credit</strong>, oracle responses receive a <strong>55.1-point faithfulness preference margin over no-memory responses</strong>. That is a judge win-rate difference on a conditioned subset, not an overall accuracy gain.</p>
+<p>The full text supplies the reason to reconsider: absent explicit fact recall can coexist with useful contextual support. Limits include ten underlying conversations, generated rewrites, one main answer model and model-based judgments; human rewrite validation covers 40 items per style. These results do not establish production memory-system rankings.</p>
+<p><strong>BQAA TL;DR:</strong> pair explicit and implicit requests over the same evidence. Preserve retrieved-record references and distinguish retrieval recall, fact use and response support. Add no-memory and irrelevant-memory controls before attributing usefulness to retrieval.</p>
+<h3>2. Spurious CoT termination — count the generation after the injected boundary</h3>
+<p><a href="https://arxiv.org/abs/2609.03633">“&lt;/think&gt; Doesn’t Stop Reasoning,” arXiv:2609.03633</a> · September 3 · <a href="https://arxiv.org/pdf/2609.03633">full PDF, 35 pages</a>, §§3–6, Figure 2 and limitations.</p>
+<p>Across <strong>four open reasoning models, five benchmarks and two early-exit methods</strong>, an injected end-of-think token can be followed by reasoning-like text and another end-of-think token. In the R1-Distill-14B/DEER/MATH slice, regeneration is absent in <strong>51 natural-exit cases</strong> and occurs in <strong>21.7% of 23 budget-limit cases</strong>; early-exit results vary with compression. Those are conditional counts, not a general failure rate.</p>
+<p>Attention intervention reduces the behavior, but the authors explicitly cannot verify the model’s internal cognitive state. Their evidence concerns observable generation under injected-token controls. It does not establish a provider billing error or failure of an API-enforced output limit.</p>
+<p><strong>BQAA TL;DR:</strong> record the requested budget, how the exit occurred and complete token usage. Compare total generation and task quality when claiming savings. Treat delimiter-derived phases as parser labels. This adds an efficiency-measurement case beyond the already-covered tool-call censoring paper, without reopening that card.</p>
+<h2>Six-week EV</h2>
+<p><strong>No re-ranking or new workstream.</strong> Keep the existing feedback-correction, review-budget, tool-evidence, finding-revision and cross-criterion checks ahead of these additions. Failure localization remains in reserve.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Existing work</th>
+  <th>Bounded addition</th>
+  <th>Acceptance evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Evaluation provenance</td>
+  <td>One explicit/implicit memory-query pair with controlled evidence variants.</td>
+  <td>Retrieval, fact-use and response-support verdicts remain separately inspectable.</td>
+</tr>
+<tr>
+  <td>Usage and execution provenance</td>
+  <td>One complete-generation comparison under natural and injected exits.</td>
+  <td>Any claimed saving reconciles with total usage and observed task quality.</td>
+</tr>
+</tbody>
+</table></div>
+<p>These are analyzer recommendations. Reuse existing source references and optional metadata; neither result justifies a memory engine or inference-control service.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>arxiv-2609-03467-locomo-conv-memory-use-evaluation</code> — kind: <code>rank</code>; tag: Academy; controlled query framing with separate retrieval and response evaluation.</li>
+<li><code>arxiv-2609-03633-spurious-cot-termination-budget-accounting</code> — kind: <code>rank</code>; tag: Academy; complete-generation accounting around injected reasoning boundaries.</li>
+</ul>
+<p>Both are absent from catalog items and progress. LoCoMo-Conv is an explicit reconsideration of earlier screening. No industry addition or progress update is proposed; the catalog itself was not edited.</p>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Prior PDF rejections remain closed.</strong> <a href="https://arxiv.org/abs/2609.03035">Evaluation awareness, 2609.03035</a> (<a href="https://arxiv.org/pdf/2609.03035">18-page PDF</a>) still has the already-noted fixed-threshold recall caveat despite strong ranking performance. <a href="https://arxiv.org/abs/2609.03422">Generative-process diversity, 2609.03422</a> (<a href="https://arxiv.org/pdf/2609.03422">31-page PDF</a>) remains observational; demonstrating better ensembles through model selection is future work. <a href="https://arxiv.org/abs/2609.02889">HARNESSEVO, 2609.02889</a> (<a href="https://arxiv.org/pdf/2609.02889">24-page PDF</a>) retains its narrow optimizer-budget result and WebShop null. The September 4 15:34/20:34 dispositions stand. <strong>BQAA TL;DR:</strong> no new monitor stack, diversity router or harness optimizer.</li>
+<li><strong>Contamination: background, not a card.</strong> <a href="https://arxiv.org/abs/2609.02899">2609.02899</a> (<a href="https://arxiv.org/pdf/2609.02899">21-page PDF</a>) reports 0.997 pooled rank correlation, but clean-model paraphrase difficulty can mimic contamination, and paraphrase leakage defeats that axis unless another reference is used. The experiment concerns four static benchmarks; its displayed submission date is July 5. <strong>BQAA TL;DR:</strong> preserve reference construction in evaluation provenance; do not generalize leaderboard stability to agent acceptance thresholds.</li>
+<li><strong>A-CEGIS: retain the hold.</strong> <a href="https://arxiv.org/abs/2609.02892">2609.02892</a> (<a href="https://arxiv.org/pdf/2609.02892">5-page PDF</a>) reports 27/30 solved with diagnostic feedback versus 8/30 with generic correction under four-turn limits. Its longer run reaches 30/30 hidden-test success but only 23/30 robust success after probing. One model, 30 regex tasks and a July 1 submission date limit the incremental case beyond existing feedback and validation-stage coverage. <strong>BQAA TL;DR:</strong> useful fixture background, no separate priority.</li>
+<li><strong>Other academy holds.</strong> <a href="https://arxiv.org/abs/2609.03900">Continual updating, 2609.03900</a> (<a href="https://arxiv.org/pdf/2609.03900">13-page PDF</a>) demonstrates timing/capacity-dependent winner reversals in a narrow factual-update setting. <a href="https://arxiv.org/abs/2609.03407">Narrative captivity, 2609.03407</a> (<a href="https://arxiv.org/pdf/2609.03407">36-page PDF</a>) uses fixed five-turn moral-advice conversations and binary stances. <a href="https://arxiv.org/abs/2609.04127">Epistemic warrant, 2609.04127</a> (<a href="https://arxiv.org/pdf/2609.04127">43-page PDF</a>) explicitly distinguishes reliance support from correctness; human consensus is not ground truth. <strong>BQAA TL;DR:</strong> retain timing, evidence and judge-context discipline already in the queue; no additional cards.</li>
+<li><strong>Collector corrections.</strong> “Not in catalog” did not mean “never screened”: eight of the ten academy leads have prior exclusion mentions. June/July histories on 2609.02889/02892/02899 are visible in the source; delayed announcement or cross-listing remains unverified. Braintrust Python 0.37.0 is also not an undiscovered gap: the <a href="2026-09-04-1434-codex.md">September 4 14:34 brief</a> verified its invocation-settings change and rejected it as too small for a product card. Its direct release fetch failed in this run.</li>
+<li><strong>Dedupe locks.</strong> Do not re-card the midnight five, HookPry, DuplexSpeechBench-IFEval, EquiReview-R, DECO, ObserverBench, NTEP, the five 14:34 cards, Flight Recorder or 2609.03966. Black Box remains rejected; no overturning evidence was found. Braintrust Blind reviews/Batch tracing, LangWatchQL REST/v1.12.x and the covered September 4 product releases stay closed. Datadog’s September 1 traces-to-experiments hold is unchanged.</li>
+<li><strong>Coverage limits.</strong> AgentCore’s retrieved release notes were a cached, pre-September view and cannot independently establish morning flatness. Apollo’s <a href="https://watcher.apolloresearch.ai/blog/announcing-watcher-live/">Watcher Live announcement</a> appeared in first-party search as an older item, but direct retrieval failed; no in-window event was verified. Other vendor checks reported only in the Kimi pack remain collector coverage. Full-PDF text retrieval succeeded for all ten candidates; local download failed on DNS, and screenshot calls supplied no usable visual verification. No visual-check claim is made.</li>
+<li><strong>Authorship and output.</strong> Codex gpt-6-astra (xhigh) performed verification, selection and synthesis. First-party BQAA, PRs, patches, drafts and runtime-only MCP plumbing were excluded from cards. Only this Markdown deliverable was written; no Fable call, Kimi brief, HTML generation, catalog mutation, commit or push.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Codex gpt-6-astra · 5 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
