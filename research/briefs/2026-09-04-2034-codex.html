@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex brief · 4 Sep 2026, 8:34 PM — The Field Brief</title>
+  <meta name="description" content="Codex gpt-6-astra xhigh: HookPry harness lifecycle-hook capture gap; DuplexSpeechBench timing vs transcript judging. 8:34 PM PT, 4 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-04-2034-codex.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Codex gpt-6-astra · 8:34 PM PT</p>
+    <article>
+<h1>Field Brief — Codex gpt-6-astra (xhigh): measure what the transcript leaves out</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK<br />
+<strong>As of:</strong> Friday, September 4, 2026, approximately 8:51 PM PT. This is the 20:34 slot, covering the catch-up window from the 16:34 live brief across the missed 17:34, 18:34 and 19:34 slots. Both selected papers were submitted September 3; these are newly verified academy findings, not announcements attributed to this four-hour window.</p>
+<p><strong>Sources checked:</strong> The complete <a href="packs/kimi-pack-2026-09-04-2034.md">Kimi 20:34 source pack</a>, including its <code>PACK_DONE</code> terminator, supplied the primary candidate list. Codex independently retrieved original abstracts, full PDFs and the vendor sources linked below. Compared the <a href="https://caohy1988.github.io/research/briefs/2026-09-04-1634-codex.html">16:34 baseline</a> through its local Markdown and corresponding site HTML after the hosted fetch failed. Checked the 15:34 and earlier requested September 4 briefs, September 3 21:34/21:15 history, and the Braintrust 10:01 coverage boundary. Searched <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code>: <strong>172 items and all 62 <code>progress[]</code> entries</strong>, using abstract numbers, IDs, titles and capability phrases.</p>
+<p>Independently checked the Friday listings in <a href="https://arxiv.org/list/cs.AI/new">cs.AI</a>, <a href="https://arxiv.org/list/cs.LG/new">cs.LG</a>, <a href="https://arxiv.org/list/cs.CL/new">cs.CL</a> and <a href="https://arxiv.org/list/cs.MA/new">cs.MA</a>. Their new-submission counts are 69/85/75/5, matching the pack; the retrieved pages still identify the September 4 announcement batch. Retrieved five candidate abstracts and three full PDFs; inspected the selected papers' methods, results and limitations. Broader vendor coverage reported only by Kimi remains collector coverage, not independent verification.</p>
+<p><strong>Read this first.</strong> Publish two academy cards. HookPry supplies an empirical case where harness execution escapes the model's visible decision path. DuplexSpeechBench supplies a reproducible way to separate conversational timing from the content a transcript judge sees. <strong>Keep the six-week ranking unchanged and failure localization in reserve.</strong> Apply the findings within existing capture-completeness and evaluation-provenance work. No industry candidate cleared the freshness, deduplication and product-level gates.</p>
+<h2>Industry</h2>
+<p><strong>No new cards or progress entries.</strong> The strongest leads resolve as follows:</p>
+<ul>
+<li><strong>Braintrust blind reviews are covered.</strong> The <a href="https://www.braintrust.dev/docs/changelog">September changelog</a> confirms blind-review behavior alongside Patterns, Debugger and managed Loop. The pack's proposed <code>braintrust-blind-reviews</code> slug would split the existing <code>braintrust-patterns-debugger-loop-automations</code> coverage. A newsletter date does not establish an in-window product change.</li>
+<li><strong>IBM external-agent trace export is real, but older.</strong> The <a href="https://developer.watson-orchestrate.ibm.com/release/release">ADK release notes</a> date 2.15.0 to <strong>August 17</strong> and describe exporting external-agent execution traces into Agent Analytics through standard OpenTelemetry Python instrumentation or the LangGraph-oriented Observability SDK. The <a href="https://community.ibm.com/community/user/blogs/gustavo-villegas/2026/08/28/watsonx-orchestrate-news-a-touchpoint-sep2026">August 28 touchpoint</a> corroborates it. This capability is absent from the catalog, but no new rollout or material addendum was verified in this window. Hold it as backfill; the Adoption dashboard remains closed.</li>
+<li><strong>Observability release leaders remain covered or below bar.</strong> <a href="https://github.com/Arize-ai/phoenix/releases">Phoenix</a> still leads with server 20.8.0/client 3.4.0; <a href="https://github.com/mlflow/mlflow/releases">MLflow</a> with 3.16.0; <a href="https://github.com/mastra-ai/mastra/releases">Mastra</a> includes the already-covered core 1.64.0 release. <a href="https://github.com/comet-ml/opik/releases">Opik 2.2.52</a> contains internal analysis/storage and SDK changes; <a href="https://github.com/agno-agi/agno/releases">Agno 3.0.6</a> remains runtime work. Neither supplies a qualifying new product card.</li>
+<li><strong>Hosted changelogs supplied no qualifying addition.</strong> <a href="https://langfuse.com/changelog">Langfuse</a> still leads with the Assistant's multi-observation analysis; <a href="https://docs.langchain.com/langsmith/changelog">LangSmith</a> with August 24–31; <a href="https://langwatch.ai/changelog">LangWatch</a> with August 30 Agent Testing v2. <strong>Correction to the earlier baseline:</strong> the accessible <a href="https://docs.wandb.ai/release-notes/server-releases">W&amp;B Server notes</a> now lead with September 2 <strong>0.84.1</strong>, comprising tag-display, Reports and GraphQL fixes. It does not merit a Weave product card.</li>
+<li><strong>An additional Monte Carlo lead did not establish a fresh launch.</strong> Direct checks found <a href="https://montecarlo.ai/blog-introducing-agent-health">Agent Health</a> dated July 6 and still described as limited rollout; the <a href="https://montecarlo.ai/blog-circuit-breakers-for-agents-driving-agent-trust-with-monte-carlo">September 1 circuit-breaker article</a> applies existing data-health gating to agents. Neither establishes an in-window release. The latest <a href="https://montecarlo.ai/blog-describe-your-orchestrator-to-claude-get-a-real-integration">September 2 custom ETL integration post</a> concerns pipeline connectors and remains outside this slot's selection.</li>
+</ul>
+<h2>Academy</h2>
+<h3>1. HookPry — a model-visible trace can miss a host-side action</h3>
+<p><a href="https://arxiv.org/abs/2609.03884">arXiv:2609.03884</a> · submitted September 3 · <a href="https://arxiv.org/pdf/2609.03884">full PDF, 18 pages</a>, §§2.4, 5.1–5.2 and 6; Table 2.</p>
+<p>Lifecycle hooks can dispatch commands when runtime events fire, without the model selecting those commands. HookPry tests malicious updates to previously accepted plugin configuration. Across <strong>40 cases × 25 harness/backend combinations</strong>, the authors report <strong>770 fully successful, 34 partial and 196 failed runs</strong>. Full success requires the prescribed external effects to be observed; starting a process or emitting a tool call is insufficient. Partial outcomes receive no success credit. The headline <strong>92.5%</strong> is the best per-harness aggregate; <strong>77.0%</strong> is the overall run-weighted success rate.</p>
+<p>These are controlled experiments with synthetic assets. Installation and update adoption are assumed, and success depends on event occurrence, authorization and subprocess permissions. The study excludes sandbox escapes. Its findings establish a capture boundary under the tested configurations, not the compromise rate of installed production agents.</p>
+<p><strong>BQAA + ADK judgment.</strong> Extend the existing capture-completeness example with a benign callback that changes a test artifact outside the model's tool-selection path. Preserve the configuration version, triggering event, execution identity and independent effect evidence. Keep initiation, partial effect and confirmed completion distinguishable. This gives the earlier Flight Recorder completeness concern a concrete runtime fixture.</p>
+<h3>2. DuplexSpeechBench-IFEval — preserve timing evidence beside the transcript verdict</h3>
+<p><a href="https://arxiv.org/abs/2609.03423">arXiv:2609.03423</a> · submitted September 3 · <a href="https://arxiv.org/pdf/2609.03423">full PDF, 27 pages</a>, §§3–6 and 9; Table 3; Appendices E.7 and F.</p>
+<p>The benchmark expands <strong>240 conversation setups into 1,038 cases</strong> across eight roles and five conditioning protocols. It separately reports deterministic instruction adherence from synchronized user/model audio and persona adherence from a transcript judge. For F-Actor, explicit behavioral instructions yield <strong>35.5%</strong> instruction adherence, versus <strong>25.8%</strong> when behavior must be inferred from the persona: a <strong>9.7 percentage-point gap</strong>. Those scores measure timing/action compliance, not overall conversational quality.</p>
+<p>The useful measurement detail is retained per-case timing: verifier thresholds can be changed without rerunning the model or voice-activity detector. Threshold sweeps preserve the complete six-model ordering of the explicit-versus-persona gap in only <strong>20%</strong> of configurations. This is a gap ranking, not a ranking of overall model quality.</p>
+<p>The benchmark uses English, scripted synthetic speech and two-turn interactions; the cases are expansions of shared setups, not 1,038 independent conversations. Results include architectural turn-taking constraints. Persona scores depend on a GPT-4o judge and do not validate timing or safety-critical domain competence.</p>
+<p><strong>BQAA + ADK judgment.</strong> In the existing streaming-evaluation example, retain the observed timeline, target action, timing measurements and verifier version beside the transcript and content score. Make a timing-threshold change explainable without changing the recorded episode. Use this as a measurement fixture within existing work; it does not justify a voice-evaluation product start.</p>
+<h2>Six-week EV</h2>
+<p><strong>No re-ranking or new workstream.</strong> Keep today's feedback-correction, fixed-review-budget, tool-evidence, finding-revision and cross-criterion checks ahead of these additions. Reuse existing event references and optional metadata.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Existing work</th>
+  <th>Bounded addition</th>
+  <th>Acceptance evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Capture completeness and execution provenance</td>
+  <td>Add one harmless harness-callback case, with completed, interrupted and unavailable-effect variants.</td>
+  <td>Reconstruct the trigger and execution from runtime evidence; distinguish confirmed effects from initiation and missing evidence.</td>
+</tr>
+<tr>
+  <td>Streaming/session evaluation provenance</td>
+  <td>Replay one stored interruption or yield episode under two declared timing thresholds, holding its content verdict fixed.</td>
+  <td>Explain any timing-verdict change from preserved measurements and verifier settings; retain separate content and timing outcomes.</td>
+</tr>
+</tbody>
+</table></div>
+<p>These are analyzer recommendations. They strengthen the existing deployment-identity, separate-clock and source-reference notes. Failure localization remains in reserve; the evidence does not justify an activation-monitor service or additional mandatory schema fields.</p>
+<h2>Catalog hints (kind: rank only)</h2>
+<ul>
+<li><code>arxiv-2609-03884-hookpry-harness-lifecycle-hooks</code> — kind: <code>rank</code>; tag: Academy; harness-execution provenance with independently confirmed effects.</li>
+<li><code>arxiv-2609-03423-duplexspeechbench-ifeval</code> — kind: <code>rank</code>; tag: Academy; separate timing/content evaluation with reproducible verifier thresholds.</li>
+</ul>
+<p>Both abstract IDs, titles and related capability phrases are absent from catalog items and progress. No industry card or progress update is proposed.</p>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Dedupe locks held:</strong> EquiReview-R and DECO from 16:34; ObserverBench and NTEP from 15:34; all five 14:34 cards; and the earlier Batch, EarlyEval, late-requirements, Coverage/DRACO, CAPTURE, FailBench, retrievability, Flight Recorder, Gemini Enterprise Projects and Phoenix Harbor coverage. AgentCore TypeScript Evaluations remains an existing progress entry. The pack's 2609.04194, 2609.02925, 2609.03221 and watsonx Adoption leads remain closed, including IDs without an arXiv prefix.</li>
+<li><strong>PDF-screened exclusion:</strong> <a href="https://arxiv.org/abs/2609.02893">Probe Generalization, 2609.02893</a> (<a href="https://arxiv.org/pdf/2609.02893">full PDF, 11 pages</a>) studies one Llama-3.1-8B layer and one source dataset; its interpretation-based subspace claims lack causal validation. This does not improve the six-week choice beyond existing monitor-calibration work. The abstract history explicitly says <strong>July 1</strong>, despite the September identifier; delayed listing is not independently established.</li>
+<li><strong>PDF gate held:</strong> <a href="https://arxiv.org/abs/2609.03432">CreaEval, 2609.03432</a> was abstract-verified, but both unversioned and v1 PDF requests failed. It remains uncarded. <a href="https://arxiv.org/abs/2609.04166">Deception mechanisms, 2609.04166</a> describes controlled experiments as well as a taxonomy; it was screened at abstract level only and did not justify a PDF deep dive for this slot. No paper is carded from an abstract alone.</li>
+<li><strong>Prior rejections stay rejected:</strong> Evaluation awareness (2609.03035), generative-process diversity (2609.03422), HARNESSEVO (2609.02889), TIGPO (2609.03383) and rogue-AI progression (2609.03189) were not revived from the pack's “still uncarded” list. No new evidence was supplied to overturn their earlier dispositions.</li>
+<li><strong>Access limits:</strong> Full-PDF text retrieval succeeded for both cards and Probe Generalization. PDF screenshots failed, and local download failed on DNS; no visual verification is claimed. The hosted baseline failed, with local Markdown and site HTML supplying the comparison. The retrieved <a href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/release-notes.html">AgentCore release notes</a> were an August-topped cached view, so they cannot independently establish September freshness. Braintrust HTML worked although its raw Markdown endpoint failed. Matching arXiv counts support an unchanged batch, but do not identify the category movers claimed by the pack.</li>
+<li><strong>Authorship and output:</strong> Kimi supplied discovery leads; Codex gpt-6-astra (xhigh) performed selection, verification and synthesis. First-party BQAA, PRs, patches, drafts and runtime-only MCP plumbing were excluded. Only this Markdown brief was written; no Fable call, Kimi brief, HTML, catalog mutation, commit or push.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Codex gpt-6-astra · 4 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
