@@ -79,6 +79,20 @@ figcaption span { color: var(--muted); font-size: 10px; font-weight: 400; }
 .comparison-note { margin-top: 8px; color: #d8e1d8; font-size: 12px; line-height: 1.5; }
 .runtime-rule { border-top: 1px solid #53645c; margin-top: 19px; padding-top: 13px; font-size: 12px; line-height: 1.6; color: #d8e1d8; }
 .runtime-rule strong { color: #e2c493; margin-right: 5px; }
+.technical-design { margin-top: 18px; border: 1px solid #53645c; }
+.technical-design summary { padding: 14px 18px; cursor: pointer; list-style: none; font-size: 15px; font-weight: 600; line-height: 1.5; }
+.design-summary { display: flex; align-items: center; gap: 14px; }
+.technical-design summary::-webkit-details-marker { display: none; }
+.technical-design summary:hover { background: #30483e; }
+.technical-design summary:focus-visible { outline: 3px solid #e2c493; outline-offset: 3px; }
+.design-status { margin-left: auto; color: #e2c493; font-size: 11px; font-weight: 400; }
+.disclosure-mark { width: 8px; height: 8px; margin: 0 2px 4px; flex-shrink: 0; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
+.technical-design[open] .disclosure-mark { transform: rotate(225deg); margin-bottom: -4px; }
+.design-body { padding: 0 18px 18px; color: #d8e1d8; font-size: 13px; line-height: 1.6; }
+.design-intro { padding-top: 14px; border-top: 1px solid #53645c; }
+.design-part { margin-top: 16px; }
+.design-part h3 { margin-bottom: 5px; color: #fffdf8; font-size: 15px; line-height: 1.4; }
+.design-part p, .design-intro { max-width: 105ch; }
 .punchline { padding-block: 24px; border-bottom: 1px solid var(--line); }
 .punchline p { font-size: clamp(25px, 2.8vw, 33px); font-weight: 550; line-height: 1.2; letter-spacing: -.035em; text-wrap: balance; }
 .punchline em { color: var(--green); }
@@ -127,6 +141,10 @@ code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size
   .comparison-note, .point-heading > p { font-size: 13px; }
   .runtime-rule { font-size: 13px; }
   .runtime-rule strong { display: block; margin-bottom: 3px; }
+  .technical-design summary { padding: 13px 14px; font-size: 14px; }
+  .design-summary { gap: 10px; }
+  .design-status { font-size: 10px; }
+  .design-body { padding-inline: 14px; font-size: 14px; }
   .punchline { padding-block: 22px; }
   .punchline p { font-size: 28px; text-wrap: initial; }
   .ask { grid-template-columns: 1fr; gap: 10px; padding-block: 22px; }
@@ -162,7 +180,20 @@ code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size
   .comparison-cell.with-runtime { border-top: 0; }
   .comparison-cell h4, .comparison-note { font-size: 8pt; }
   .runtime-rule { border-color: #aaa; margin-top: 12px; padding-top: 9px; font-size: 8pt; }
-  .punchline, .ask { padding-block: 13px; }
+  .technical-design { margin-top: 12px; border-color: #aaa; }
+  /* Print the full design even when its disclosure is closed on screen. */
+  .technical-design::details-content { content-visibility: visible; }
+  .technical-design > .design-body { display: block; }
+  .technical-design summary { padding: 8px 12px; font-size: 11pt; break-after: avoid; }
+  .design-status, .design-body, .design-part h3 { color: #333; }
+  .design-status { font-size: 8pt; }
+  .disclosure-mark { display: none; }
+  .design-body { padding: 0 12px 8px; font-size: 8.5pt; line-height: 1.35; }
+  .design-part p, .design-intro { max-width: none; }
+  .design-intro { padding-top: 8px; border-color: #aaa; }
+  .design-part { margin-top: 8px; break-inside: avoid; }
+  .design-part h3 { font-size: 10pt; }
+  .punchline, .ask { padding-block: 8px; }
   .punchline p { font-size: 18pt; }
   .ask h2 { font-size: 14pt; }
   .ask div > p { font-size: 9pt; }

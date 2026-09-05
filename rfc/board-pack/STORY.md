@@ -55,3 +55,9 @@ Keep Maya, Alder, the five-minute deadline, $4 million decision, 118% and 96% in
 **BigQuery turns the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.**
 
 Graph-over-OKF, per-node authorization, validated receipts and the governed runtime remain RFC proposals. Existing full-demo captures concern a different scenario and do not prove this graph retrieval or the Alder figures. The page ends with the pilot ask. Keep the hero's illustrative label, the runtime's RFC/unbuilt label and the comparison notes; no footer or evidence deep-dive link is required.
+
+## Optional design detail and public address
+
+The brief lives at `/rfc/board-pack/`, with Board-pack near-miss → as its RFC index label. The legacy `/rfc/bq-vp/` address only redirects there.
+
+Place one closed-by-default Technical design disclosure after the comparisons and first-workload line, before the punchline. It expands the same three mechanisms: retrieve Finance's linked rules under fixed inputs and bounded traversal; enforce current access for an authenticated requester; separately validate the computation job against the declared calculation. Include the graph projection's relationship to the authored OKF bundle, receipt contents and current-authorization boundary. These are RFC design details, not implementation claims. The closed page preserves the story skim; keyboard users can expand the detail, and print includes it regardless of screen state.
