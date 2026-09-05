@@ -44,3 +44,8 @@ Keep the illustrative RFC masthead link accurate. Do not edit `/rfc/full-demo/`,
 - `python3 rfc/full-demo/tools/check_full_demo.py`: exit 0, all checks passed, including mutation fixtures and the clean-copy control. Full demo and RFC entry page are unchanged.
 - Manual review confirms fixed-input retrieval semantics, the empty-project projection requirement, separate receipt types and explicit unbuilt Graph/retrieval-receipt labels. This is page verification, not a test of an implemented graph runtime.
 - `git diff --check` passed. Session metadata confirms `gpt-6-astra` and session `01a06e87-a6fd-7993-88b5-9c489219e68c`; artifacts are under `/tmp/okf-vp-det/`.
+
+## Opus r1 fix (post a3daa3c)
+
+- Runtime opener: similarity search as candidate finder (not a VECTOR_SEARCH own-goal); replayability payoff tied to Maya’s 118% (same definition/cohort/declared computation — no total-ARR substitute).
+- Empty-BQ line: “facts that retrieval needs.”
