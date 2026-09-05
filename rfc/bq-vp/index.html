@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A $4 million board decision. An agent says 118% retention; the right number is 96%. An illustrative story about the proposed BigQuery runtime that turns an OKF graph into replayable context for agents.">
+  <meta name="description" content="An illustrative $4 million board decision: the agent says 118% retention; the right number is 96%. Compare KC + OKF with a proposed BigQuery runtime: replayable context, explainable access and verifiable execution.">
   <meta name="theme-color" content="#1e302d">
   <link rel="canonical" href="https://caohy1988.github.io/rfc/bq-vp/">
   <title>118% in the board pack. 96% retained. · BigQuery VP brief</title>
@@ -50,47 +50,80 @@
       <div class="shell">
         <div class="runtime-heading">
           <p class="eyebrow">Why BigQuery · proposed runtime · RFC, not built</p>
-          <h2 id="runtime-title">Make the agent’s context replayable.</h2>
-          <p>Similarity search finds candidate passages; it doesn’t fix which linked context the agent actually used. Maya needs a repeatable walk from the retention definition to its cohort rule and declared computation. Repeat the pinned retrieval to get that same context.</p>
+          <h2 id="runtime-title">What BigQuery adds to the story.</h2>
+          <p>Knowledge Catalog (KC) discovers and governs. Open Knowledge Format (OKF) authors the graph. The proposed BigQuery runtime adds three things.</p>
         </div>
-        <div class="runtime-roles">
-          <section aria-labelledby="catalog-role">
-            <p class="role-name">Knowledge Catalog</p>
-            <h3 id="catalog-role">Discover and govern.</h3>
-            <p>Find Finance’s approved retention concept and its owner. Discovering an entry is not a deterministic traversal of its linked OKF context.</p>
+        <div class="comparison">
+          <section class="comparison-point" aria-labelledby="context-point">
+            <div class="point-heading">
+              <h3 id="context-point"><span>01</span> Replayable context</h3>
+              <p>Same retention definition, cohort rule and declared computation.</p>
+            </div>
+            <div class="comparison-pair">
+              <div class="comparison-cell">
+                <h4>KC + OKF</h4>
+                <p>KC discovers; OKF authors the graph. Similarity ranks candidates; it does not pin linked context. The retriever assembles it.</p>
+              </div>
+              <div class="comparison-cell with-runtime">
+                <h4>+ BQ runtime</h4>
+                <p>Host the OKF projection. Pin a publication; use <strong>explicit SQL or bounded walks.</strong> Fix query, parameters, fact versions, access scope and ordering → <strong>same selected context and shape.</strong></p>
+              </div>
+            </div>
+            <p class="comparison-note">Vector search can be deterministic. Replayable context does not promise identical LLM answers.</p>
           </section>
-          <section aria-labelledby="okf-role">
-            <p class="role-name">Open Knowledge Format (OKF)</p>
-            <h3 id="okf-role">Author the graph.</h3>
-            <p>Author definitions, relationships, computation declarations and versions. OKF supplies the authored graph, not a query engine.</p>
+          <section class="comparison-point" aria-labelledby="access-point">
+            <div class="point-heading">
+              <h3 id="access-point"><span>02</span> Explainable access</h3>
+              <p>Explain why this agent could see this specific asset.</p>
+            </div>
+            <div class="comparison-pair">
+              <div class="comparison-cell">
+                <h4>KC + OKF</h4>
+                <p>Custom-entry access uses an <strong>EntryGroup boundary in this design.</strong> Per-node policy evaluation is separate.</p>
+              </div>
+              <div class="comparison-cell with-runtime">
+                <h4>+ BQ runtime</h4>
+                <p>Join <strong>identity ↔ policy ↔ projected assets.</strong> Bind the requesting user/agent to the execution identity. Enforce access along the retrieval path; record which nodes were returned to whom under which policy.</p>
+              </div>
+            </div>
+            <p class="comparison-note">Access metadata needs enforcement. Keep source permissions current; metadata access does not grant file access.</p>
           </section>
-          <section class="bigquery-role" aria-labelledby="bigquery-role">
-            <p class="role-name">BigQuery</p>
-            <h3 id="bigquery-role">Retrieve deterministically.</h3>
-            <p>Project the graph into BigQuery. Pin a publication and retrieve linked context with <strong>explicit SQL or bounded graph walks.</strong></p>
-            <p><strong>Same fixed inputs → same context and result shape.</strong> Fix the query, parameters, fact versions, access scope and ordering. A retrieval receipt records the query, pins and selected context.</p>
-            <p>Then bind the retention job to that context with a separate <strong>job ↔ context ↔ result</strong> computation receipt. A substituted query or missing execution evidence leaves the number unproven. Trace the agent and execution identity under IAM.</p>
+          <section class="comparison-point" aria-labelledby="execution-point">
+            <div class="point-heading">
+              <h3 id="execution-point"><span>03</span> Verifiable execution</h3>
+              <p>Maya can check whether the board number used the retention calculation.</p>
+            </div>
+            <div class="comparison-pair">
+              <div class="comparison-cell">
+                <h4>KC + OKF</h4>
+                <p>Finding the definition and its computation declaration does not prove the calculation ran.</p>
+              </div>
+              <div class="comparison-cell with-runtime">
+                <h4>+ BQ runtime</h4>
+                <p>Run retention; validate a <strong>job ↔ context ↔ result</strong> receipt against the declared computation. A substituted query or missing evidence leaves the number <strong>unproven.</strong></p>
+              </div>
+            </div>
           </section>
         </div>
-        <p class="runtime-rule"><strong>The knowledge graph can be the first workload.</strong> Starting with an empty BigQuery project, land the OKF projection and version the facts that retrieval needs there. No revenue warehouse is required to start retrieving context.</p>
+        <p class="runtime-rule"><strong>The graph can be the first BigQuery workload.</strong> Land the OKF projection and version the facts retrieval needs. No existing revenue warehouse is required.</p>
       </div>
     </section>
 
     <div class="punchline shell">
-      <p>BigQuery turns the OKF graph into <em>replayable context for agents.</em></p>
+      <p>BigQuery turns the OKF graph into <em>replayable context for agents</em>—with explainable access and evidence that the declared computation ran.</p>
     </div>
 
     <section class="ask shell" aria-labelledby="ask-title">
       <p class="eyebrow">One ask of the BigQuery VP</p>
       <div>
         <h2 id="ask-title">Sponsor one retention pilot with a Finance owner.</h2>
-        <p>Pilot Finance’s graph and one quarter of cohort data. Repeat the pinned retrieval and compare context; then compute retention. Withhold execution evidence: the number must remain unproven.</p>
+        <p>Pilot Finance’s graph and one quarter of cohort data. Repeat the pinned retrieval, test access boundaries, then compute retention. Withhold execution evidence: the number must remain unproven.</p>
       </div>
     </section>
   </main>
 
   <footer class="shell">
-    <p><strong>Illustrative scenario; no Alder query ran.</strong> Graph-over-OKF and retrieval receipts are RFC proposals. Existing demo computation attesters are stubs; receipts are <code>UNVERIFIABLE</code>. Governed sync and Phase A IAM remain unbuilt.</p>
+    <p><strong>Illustrative scenario; no Alder query ran.</strong> Graph-over-OKF, per-node authorization and validated receipts are RFC proposals. Existing demo computation attesters are stubs; receipts are <code>UNVERIFIABLE</code>. Governed sync and Phase A IAM remain unbuilt.</p>
     <a href="/rfc/full-demo/">Evidence deep dive <span aria-hidden="true">↗</span><span class="link-detail">Separate recorded demo + limitations</span></a>
   </footer>
 </body>
