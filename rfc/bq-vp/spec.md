@@ -1,34 +1,36 @@
-# Spec — a story the VP can retell
+# Spec — concrete story, deterministic graph retrieval
 
 ## Page contract
 
-- Static HTML and page-local CSS at `/rfc/bq-vp/`; no JavaScript, build, external assets or cloud calls.
-- One continuous brief: the complete board-pack near-miss and arithmetic in the hero, the three named runtime roles, and one VP ask. The punchline follows the runtime section. No stepper, tabs, drawers, alternate scenarios or abstract benefit cards as the lead.
-- At 1280 × 720 the first viewport must show the illustrative label, Maya's situation, both 118% and 96%, and why the first number was wrong. Target approximately two desktop viewport heights and roughly 400–500 visible words for a two-to-three-minute read. Reading time is an editorial estimate, not a user-study result.
-- One arithmetic figure compares the 118% trap and the correct 96% side by side on desktop and stacked on mobile. Label the $9.6m from the same customers, mark the extra $2.2m from new customers as the mistake, and show both numerators divided by the $10m opening cohort. It is a board-pack illustration, not a rendered execution receipt.
-- The hero itself names Maya, Alder, the five-minute deadline, the $4 million decision, and both 118% and 96%. Both percentages are in the headline. No architecture language precedes these facts. The headline, highlighted story facts and arithmetic labels must explain the near-miss on a 30-second skim.
-- Define ARR and expand OKF on first use. Explain retention through the same-customer arithmetic.
+- Static HTML and page-local CSS at `/rfc/bq-vp/`. No JavaScript, external assets, build dependencies or cloud calls.
+- Preserve the Alder/Maya board-pack lead, one arithmetic figure, three named runtime roles, one punchline and one VP ask. No stepper, drawers, matrix or alternative stories.
+- Hero: illustrative label, Maya, Alder, the five-minute deadline, $4 million decision, 118% and 96%, all before architecture. Both percentages remain in the headline. The mistake must be visible from the arithmetic alone.
+- Keep the $10m opening ARR, $9.6m same-customer closing ARR and erroneous $2.2m new-customer addition. All figures are invented.
+- Target roughly 400–500 visible words and around two desktop viewports for a two-to-three-minute read. These are editorial/geometry checks, not measured human comprehension.
 
-## Runtime and evidence contract
+## First-class retrieval contract
 
-- Explicitly label the entire technical section as an unbuilt RFC proposal. Use direct, imperative descriptions of the proposed responsibilities; do not repeat conditional boilerplate in each sentence. The story is direct under its illustrative label.
-- Explicitly distinguish Knowledge Catalog (find the approved definition), OKF (authored definition, query and parameters), and BigQuery (execution, computation receipt, attribution and IAM). Explain that Catalog alone does not run the calculation or bind its answer to a query job.
-- Give BigQuery the most space. In this illustrative scenario Alder already keeps revenue data there, with query jobs and data access controls. State what the runtime adds relative to discovery without claiming a universal database monopoly.
-- Tie discovery to Finance's approved OKF definition and declared computation, context pinning to a revision held fixed for the run, and the computation receipt to the revision, quarter parameters, BigQuery job and result.
-- Missing execution evidence must leave the answer unproven. A citation or pinned context alone does not verify it.
-- Make the agent and its execution identity attributable under explicit access grants. Preserve the historical context; do not promise arbitrary data replay or identical answers across agents.
-- Keep v1 source-bundle authority intact; never imply an automatic Catalog-to-BigQuery import or an existing built-in runtime service.
-- Label the invented scenario before the headline and distinguish it from evidence in the footer. Do not borrow session IDs or recordings to support the Alder numbers.
-- Footer: no Alder query ran; the runtime is proposed; demo attesters are stubs and receipts are `UNVERIFIABLE`; governed sync and Phase A IAM remain unbuilt. No claims of `ATTESTED`, `BQ_COMMITTED` or Phase A completion.
-- Offer `/rfc/full-demo/` as a separate recorded evidence deep dive with limitations. Its content and artifacts remain unchanged.
+- The “Why BigQuery” heading and role copy emphasize replayable context and deterministic OKF-graph retrieval, before metric execution.
+- Catalog discovers/governs concepts and entries. Finding an entry is not the explicit traversal that selects the linked context.
+- OKF authors definitions, relationships, computation declarations and versions. It is not itself a query engine for agents at scale; pinning belongs to the runtime.
+- BigQuery hosts a projection of the graph and related facts. Retrieval uses a pinned publication plus explicit SQL or bounded graph walks, with deterministic query semantics.
+- State the determinism boundary: fixed query, parameters, publication, fact versions, authorization scope and stable ordering yield the same selected context and result shape. Do not imply identical LLM answers or that a publication pin freezes fact tables.
+- Contrast ranked document passages/model-chosen paths with explicit graph traversal. Do not claim all vector retrieval is inherently nondeterministic.
+- Tie graph retrieval to Maya's retention definition, starting-cohort rule and declared computation.
+- Distinguish proposed retrieval receipts (query, pins and selected context) from computation receipts (metric job, context and result). Retrieval alone does not prove the number; a substituted query or missing execution evidence leaves it unproven. Preserve agent/execution-identity attribution and IAM.
+- Include a short empty-BigQuery case: the OKF graph projection and versioned facts can be the first workload, before a revenue warehouse. No projection means no BigQuery retrieval; do not make preexisting revenue data the reason BigQuery is useful.
+- Use the exact punchline: **BigQuery turns the OKF graph into replayable context for agents.**
 
-## Ask and usability
+## Honesty and ask
 
-- Ask for one retention pilot with a Finance owner, one quarter of data, and a missing-receipt negative case.
-- Make the RFC masthead link accurately describe the new story and illustrative status.
-- Semantic headings, an accessible calculation figure, visible keyboard focus, working skip link, readable contrast and no mobile horizontal overflow at 375 px or 320 px. No essential content depends on color or script.
-- Keep the print view legible. Avoid fixed/sticky elements covering text.
+- Keep the entire runtime explicitly labeled as an unbuilt RFC proposal. Direct/imperative descriptions within that scope are proposed responsibilities, not claims of delivered services.
+- Footer explicitly labels Graph-over-OKF and retrieval receipts as RFC proposals, says no Alder query ran, and preserves existing demo stub/`UNVERIFIABLE` and unbuilt governed sync/Phase A IAM limitations. No `ATTESTED`, `BQ_COMMITTED` or Graph-completion claim.
+- Preserve authored-bundle authority. Do not suggest a built Catalog-to-BigQuery import or invent job/session/receipt IDs.
+- One Finance pilot: repeat pinned retrieval and compare context, then compute retention for one quarter of real pilot data. Withhold execution evidence and the number remains unproven. Do not impose Alder's invented 96% on the real pilot.
+- Keep the optional `/rfc/full-demo/` link; its content and artifacts remain unchanged.
 
-## Delivery
+## Usability and delivery
 
-The follow-up may change the page plus `intent.md`, `spec.md`, `plan.md`, `STORY.md`, and the `rfc/index.html` masthead blurb (must keep illustrative status). The RFC entry link remains accurate. QA artifacts and actual session identifiers go in `/tmp/okf-vp-story/`. Commit and push `feat/rfc-bq-vp-story` to existing PR 20; report its URL and the new HEAD. Do not open a second PR or merge.
+- Semantic heading order, visible keyboard focus, working skip link and valid local links. No horizontal overflow at 1280, 768, 375 or 320 px; readable contrast and print view.
+- Scope: `index.html`, optional page-local `styles.css`, and `STORY.md`, `intent.md`, `spec.md`, `plan.md` under `rfc/bq-vp/`. The existing illustrative RFC masthead blurb remains accurate.
+- Commit and push `feat/rfc-bq-vp-det-retrieval`; create a PR against `main`. Save session and QA artifacts under `/tmp/okf-vp-det/`, report PR URL and HEAD, and do not merge.

@@ -1,27 +1,29 @@
-# Intent — the board meets at 9
+# Intent — the board story and replayable context
 
-## Audience and problem
+## Audience and goal
 
-A BigQuery VP should grasp the customer moment in 30 seconds and understand why BigQuery is the runtime for Knowledge Catalog + OKF in two to three minutes. The previous page led with a runtime thesis, three abstract benefits and a thin Germany revenue question. Replace it with a complete illustrative near-miss, readable in two to three minutes on one continuous page.
+A BigQuery VP should understand the Alder near-miss in 30 seconds, then understand the technical reason to bring BigQuery into Knowledge Catalog + OKF in two to three minutes. Keep one continuous page, with the concrete story before the architecture.
 
-## Chosen story
+At 8:55, Maya Chen, VP of Finance at fictional subscription software company Alder, catches an agent's 118% retention figure in a board pack supporting a $4 million expansion plan. It includes new customers. The starting cohort retained 96%; Maya pulls the slide before the 9 a.m. meeting.
 
-At 8:55 a.m., Maya Chen, VP of Finance at fictional subscription software company Alder, sees 118% net revenue retention in a board pack supporting a $4 million customer-expansion plan. An analyst catches the inclusion of new customers. The opening cohort retained 96%; Maya pulls the slide before the 9 a.m. meeting.
+## The reason for BigQuery
 
-The agent reused a total-ARR query and cited the retention definition without connecting that definition to its computation. The arithmetic, stakes and human intervention must be understandable before the runtime proposal appears. See `STORY.md` for the scenario and rationale.
+**BigQuery turns the OKF graph into replayable context for agents.**
 
-## The opportunity and ask
+Catalog discovers and governs concepts. OKF authors their definitions, relationships, computation declarations and versions. The proposed BigQuery runtime projects that graph and retrieves context through explicit SQL or bounded graph walks against a pinned publication. Fixed queries, parameters, fact versions, access scope and ordering make the selected context and result shape reproducible.
 
-Make the roles explicit: Catalog finds the approved definition; OKF supplies the authored definition, query and parameters that the runtime pins; BigQuery runs the computation and binds job, context, parameters and result in a receipt. Catalog discovery alone does not execute the query or produce that receipt.
+Make this distinction first-class: discovery is not deterministic graph retrieval. Vector similarity and model-directed exploration can help find candidates; the proposed graph queries define which linked context is selected and make that selection replayable and recordable in a retrieval receipt.
 
-Alder's revenue data is already in BigQuery in this scenario. The proposed runtime places computation and evidence beside the data, job records and access controls. Explain attribution as the agent plus the identity running the job, and IAM as who can publish context, execute the query and read evidence.
+BigQuery can begin by hosting the knowledge-graph projection and versioned facts. Its value does not depend on an existing revenue warehouse. The projection must actually enter BigQuery to be queried there.
 
-The repeatable punchline is: **Find it in Catalog. Run it in BigQuery. Bring the receipt.**
+## Story connection and ask
 
-Ask the VP to sponsor one retention pilot with a Finance owner, using one quarter of cohort data and a missing-receipt negative case.
+Maya needs the linked retention definition, starting-cohort rule and approved computation as one repeatable context selection. Execution of the metric follows separately: a computation receipt binds job, context and result; attribution names the agent and execution identity under IAM. A retrieval receipt is not evidence that the metric ran.
+
+Ask for one Finance-owned retention pilot. Repeat the same pinned retrieval and compare returned context, then compute retention for one quarter of cohort data. Withholding execution evidence must leave the number unproven.
 
 ## Honesty and scope
 
-Alder, Maya, the quotation and every number are invented. Label that before the story. The proposed runtime did not produce 96%; it is illustrative arithmetic. Existing full-demo recordings concern a different scenario and are only an optional evidence deep dive. No customer claim, new cloud execution, successful attestation, completed sync or Phase A IAM is implied.
+The company, people, quote and numbers are illustrative. Graph-over-OKF, retrieval receipts and the governed runtime are proposed/RFC. Existing full-demo recordings are optional supporting evidence for a different scenario, not proof of this retrieval or Alder's figures. Do not claim built Graph, successful attestation, completed sync or Phase A IAM.
 
-Sharpen the page and its local documentation on the existing `feat/rfc-bq-vp-story` branch. Keep the RFC entry link accurate and the full demo unchanged. Commit and push to PR 20, preserve the session record under `/tmp/okf-vp-story/`, and report the new HEAD. Do not create another PR or merge.
+Edit the VP page and its local story/intent/spec/plan. Preserve the accurate RFC entry link and leave `/rfc/full-demo/` unchanged. Work on `feat/rfc-bq-vp-det-retrieval` from main at `bf92ee8`; commit, push, open a new PR against `main`, and report its URL and HEAD. Save the session record under `/tmp/okf-vp-det/`. Do not merge.
