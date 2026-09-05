@@ -139,6 +139,40 @@
       line-height: 1.1;
     }
     .edition-meta { color: var(--ink-soft); font-size: 0.92rem; }
+    .latest-brief {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px 14px;
+      margin: 0 0 18px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      background: var(--cream);
+      border-radius: 6px;
+      text-decoration: none;
+    }
+    .latest-brief:hover { border-color: var(--accent); }
+    .latest-brief .lb-kicker {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+    }
+    .latest-brief .lb-title {
+      flex: 1 1 220px;
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .latest-brief .lb-meta {
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+    }
     .live {
       display: inline-flex;
       align-items: center;
@@ -537,6 +571,7 @@
       <h2 class="edition-date" id="edition-date">Loading edition…</h2>
       <p class="edition-meta" id="edition-meta"></p>
     </div>
+    <div id="latest-brief-slot"></div>
     <div class="controls" id="controls" hidden></div>
     <div class="layout" id="app">
       <p class="empty">Fetching today’s brief…</p>
@@ -694,9 +729,26 @@
         ? `Catalog · ${escapeHtml(day)}`
         : `Living catalog`;
       const latestBrief = (STATE.briefs || [])[0];
+      const addedN = latestRun && Array.isArray(latestRun.added) ? latestRun.added.length : null;
+      const flatNote = latestRun && addedN === 0 ? " · verified flat" : (latestRun && addedN != null ? ` · ${addedN} new card${addedN === 1 ? "" : "s"}` : "");
       $("edition-meta").textContent = latestRun
-        ? `Last pass ${latestRun.displayTime} · ${STATE.items.length} items kept · append only` + (latestBrief ? ` · ${(latestBrief.analyzer || "Field Brief")} ${latestBrief.displayTime}` : "")
+        ? `Last pass ${latestRun.displayTime} · ${STATE.items.length} items kept · append only` + flatNote + (latestBrief ? ` · ${(latestBrief.analyzer || "Field Brief")}` : "")
         : `${STATE.items.length} items`;
+      const lb = $("latest-brief-slot");
+      if (lb) {
+        if (latestBrief && latestBrief.href) {
+          const when = latestBrief.displayTime || "";
+          const who = latestBrief.analyzer || "Field Brief";
+          const status = addedN === 0 ? "Verified flat — open the write-up" : "Open the deep brief";
+          lb.innerHTML = `<a class="latest-brief" href="${escapeHtml(latestBrief.href)}">
+            <span class="lb-kicker">Latest · ${escapeHtml(when)} · ${escapeHtml(who)}</span>
+            <span class="lb-title">${escapeHtml(latestBrief.title || "Field Brief")}</span>
+            <span class="lb-meta">${escapeHtml(status)}</span>
+          </a>`;
+        } else {
+          lb.innerHTML = "";
+        }
+      }
 
       const tags = allTags(STATE.items);
       $("controls").hidden = false;
@@ -764,7 +816,7 @@
 
     async function boot() {
       try {
-        const res = await fetch("/research/catalog.json", { cache: "no-store" });
+        const res = await fetch("/research/catalog.json?v=" + Date.now(), { cache: "no-store" });
         const data = await res.json();
         const raw = data.items || [];
         STATE.items = raw.filter(i => i.kind !== "desk" && i.kind !== "open");
