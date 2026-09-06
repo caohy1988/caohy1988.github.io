@@ -1,0 +1,409 @@
+{
+  "project": "test-project-0728-467323",
+  "location": "US",
+  "windows": [
+    {
+      "label": "smoke-1",
+      "opened_at": "2026-09-05T23:43:43Z",
+      "steps": [
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation --edition=ENTERPRISE --slots=0 --autoscale_max_slots=100 --ignore_idle_slots=true okf-graph-spike-20260905",
+          "rc": 0,
+          "at": "2026-09-05T23:43:45Z",
+          "stdout": "{\n  \"autoscale\": {\n    \"maxSlots\": \"100\"\n  },\n  \"creationTime\": \"2026-09-05T23:43:45.716260Z\",\n  \"edition\": \"ENTERPRISE\",\n  \"ignoreIdleSlots\": true,\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n  \"updateTime\": \"2026-09-05T23:43:45.716260Z\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation_assignment --reservation_id=okf-graph-spike-20260905 --assignee_id=test-project-0728-467323 --assignee_type=PROJECT --job_type=QUERY",
+          "rc": 0,
+          "at": "2026-09-05T23:43:48Z",
+          "stdout": "{\n  \"assignee\": \"projects/test-project-0728-467323\",\n  \"jobType\": \"QUERY\",\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/6422525903903109563\",\n  \"state\": \"ACTIVE\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-05T23:43:51Z",
+          "stdout": "[\n  {\n    \"autoscale\": {\n      \"maxSlots\": \"100\"\n    },\n    \"creationTime\": \"2026-09-05T23:43:45.716260Z\",\n    \"edition\": \"ENTERPRISE\",\n    \"ignoreIdleSlots\": true,\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n    \"updateTime\": \"2026-09-05T23:43:45.716260Z\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-05T23:43:53Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/6422525903903109563\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-05T23:46:30Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/6422525903903109563\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation_assignment reservations/okf-graph-spike-20260905/assignments/6422525903903109563",
+          "rc": 1,
+          "at": "2026-09-05T23:46:33Z",
+          "stdout": "BigQuery error in rm operation: Failed to delete reservation assignment\n'reservations/okf-graph-spike-20260905/assignments/6422525903903109563': Could\nnot parse reservation assignment identifier: reservations/okf-graph-\nspike-20260905/assignments/6422525903903109563",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation okf-graph-spike-20260905",
+          "rc": 1,
+          "at": "2026-09-05T23:46:36Z",
+          "stdout": "BigQuery error in rm operation: Failed to delete reservation 'okf-graph-\nspike-20260905': Cannot delete reservation with assignments for Project ID:\n[test-project-0728-467323], Location: [US], and Assignment ID(s):\n[6422525903903109563]. Please delete the assignments first.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-05T23:46:39Z",
+          "stdout": "[\n  {\n    \"autoscale\": {\n      \"maxSlots\": \"100\"\n    },\n    \"creationTime\": \"2026-09-05T23:43:45.716260Z\",\n    \"edition\": \"ENTERPRISE\",\n    \"ignoreIdleSlots\": true,\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n    \"updateTime\": \"2026-09-05T23:43:45.716260Z\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-05T23:46:42Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/6422525903903109563\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-05T23:47:09Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/6422525903903109563\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation_assignment okf-graph-spike-20260905.6422525903903109563",
+          "rc": 0,
+          "at": "2026-09-05T23:47:12Z",
+          "stdout": "Reservation assignment 'okf-graph-spike-20260905.6422525903903109563' successfully deleted.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation okf-graph-spike-20260905",
+          "rc": 0,
+          "at": "2026-09-05T23:47:15Z",
+          "stdout": "Reservation 'okf-graph-spike-20260905' successfully deleted.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-05T23:47:17Z",
+          "stdout": "No reservations found.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-05T23:47:20Z",
+          "stdout": "No reservation assignments found.",
+          "stderr": ""
+        }
+      ],
+      "max_slots": 100,
+      "closing_at": "2026-09-05T23:47:07Z",
+      "closed_at": "2026-09-05T23:47:20Z",
+      "verified_gone": true
+    },
+    {
+      "label": "integration-0007",
+      "opened_at": "2026-09-06T00:07:32Z",
+      "steps": [
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation --edition=ENTERPRISE --slots=0 --autoscale_max_slots=100 --ignore_idle_slots=true okf-graph-spike-20260905",
+          "rc": 0,
+          "at": "2026-09-06T00:07:36Z",
+          "stdout": "{\n  \"autoscale\": {\n    \"maxSlots\": \"100\"\n  },\n  \"creationTime\": \"2026-09-06T00:07:36.101554Z\",\n  \"edition\": \"ENTERPRISE\",\n  \"ignoreIdleSlots\": true,\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n  \"updateTime\": \"2026-09-06T00:07:36.101554Z\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation_assignment --reservation_id=okf-graph-spike-20260905 --assignee_id=test-project-0728-467323 --assignee_type=PROJECT --job_type=QUERY",
+          "rc": 0,
+          "at": "2026-09-06T00:07:39Z",
+          "stdout": "{\n  \"assignee\": \"projects/test-project-0728-467323\",\n  \"jobType\": \"QUERY\",\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/2212724281181740675\",\n  \"state\": \"ACTIVE\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-06T00:07:42Z",
+          "stdout": "[\n  {\n    \"autoscale\": {\n      \"maxSlots\": \"100\"\n    },\n    \"creationTime\": \"2026-09-06T00:07:36.101554Z\",\n    \"edition\": \"ENTERPRISE\",\n    \"ignoreIdleSlots\": true,\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n    \"updateTime\": \"2026-09-06T00:07:36.101554Z\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-06T00:07:45Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/2212724281181740675\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-06T00:08:57Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/2212724281181740675\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation_assignment okf-graph-spike-20260905.2212724281181740675",
+          "rc": 0,
+          "at": "2026-09-06T00:09:00Z",
+          "stdout": "Reservation assignment 'okf-graph-spike-20260905.2212724281181740675' successfully deleted.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation okf-graph-spike-20260905",
+          "rc": 0,
+          "at": "2026-09-06T00:09:03Z",
+          "stdout": "Reservation 'okf-graph-spike-20260905' successfully deleted.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-06T00:09:06Z",
+          "stdout": "No reservations found.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-06T00:09:09Z",
+          "stdout": "No reservation assignments found.",
+          "stderr": ""
+        }
+      ],
+      "max_slots": 100,
+      "closing_at": "2026-09-06T00:08:54Z",
+      "closed_at": "2026-09-06T00:09:09Z",
+      "verified_gone": true
+    },
+    {
+      "label": "integration-0009",
+      "opened_at": "2026-09-06T00:09:57Z",
+      "steps": [
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation --edition=ENTERPRISE --slots=0 --autoscale_max_slots=100 --ignore_idle_slots=true okf-graph-spike-20260905",
+          "rc": 0,
+          "at": "2026-09-06T00:10:00Z",
+          "stdout": "{\n  \"autoscale\": {\n    \"maxSlots\": \"100\"\n  },\n  \"creationTime\": \"2026-09-06T00:10:00.310074Z\",\n  \"edition\": \"ENTERPRISE\",\n  \"ignoreIdleSlots\": true,\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n  \"updateTime\": \"2026-09-06T00:10:00.310074Z\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation_assignment --reservation_id=okf-graph-spike-20260905 --assignee_id=test-project-0728-467323 --assignee_type=PROJECT --job_type=QUERY",
+          "rc": 0,
+          "at": "2026-09-06T00:10:03Z",
+          "stdout": "{\n  \"assignee\": \"projects/test-project-0728-467323\",\n  \"jobType\": \"QUERY\",\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/10529999974630532128\",\n  \"state\": \"ACTIVE\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-06T00:10:06Z",
+          "stdout": "[\n  {\n    \"autoscale\": {\n      \"maxSlots\": \"100\"\n    },\n    \"creationTime\": \"2026-09-06T00:10:00.310074Z\",\n    \"edition\": \"ENTERPRISE\",\n    \"ignoreIdleSlots\": true,\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n    \"updateTime\": \"2026-09-06T00:10:00.310074Z\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-06T00:10:09Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/10529999974630532128\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        }
+      ],
+      "max_slots": 100
+    },
+    {
+      "label": "safety-0011",
+      "steps": [
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-06T00:11:04Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/10529999974630532128\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation_assignment okf-graph-spike-20260905.10529999974630532128",
+          "rc": 0,
+          "at": "2026-09-06T00:11:07Z",
+          "stdout": "Reservation assignment 'okf-graph-spike-20260905.10529999974630532128' successfully deleted.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation okf-graph-spike-20260905",
+          "rc": 0,
+          "at": "2026-09-06T00:11:10Z",
+          "stdout": "Reservation 'okf-graph-spike-20260905' successfully deleted.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-06T00:11:13Z",
+          "stdout": "No reservations found.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-06T00:11:16Z",
+          "stdout": "No reservation assignments found.",
+          "stderr": ""
+        }
+      ],
+      "closing_at": "2026-09-06T00:11:01Z",
+      "closed_at": "2026-09-06T00:11:16Z",
+      "verified_gone": true
+    },
+    {
+      "label": "all-0012",
+      "opened_at": "2026-09-06T00:12:38Z",
+      "steps": [
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation --edition=ENTERPRISE --slots=0 --autoscale_max_slots=100 --ignore_idle_slots=true okf-graph-spike-20260905",
+          "rc": 0,
+          "at": "2026-09-06T00:12:41Z",
+          "stdout": "{\n  \"autoscale\": {\n    \"maxSlots\": \"100\"\n  },\n  \"creationTime\": \"2026-09-06T00:12:41.833850Z\",\n  \"edition\": \"ENTERPRISE\",\n  \"ignoreIdleSlots\": true,\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n  \"updateTime\": \"2026-09-06T00:12:41.833850Z\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation_assignment --reservation_id=okf-graph-spike-20260905 --assignee_id=test-project-0728-467323 --assignee_type=PROJECT --job_type=QUERY",
+          "rc": 0,
+          "at": "2026-09-06T00:12:44Z",
+          "stdout": "{\n  \"assignee\": \"projects/test-project-0728-467323\",\n  \"jobType\": \"QUERY\",\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/12363401580111279822\",\n  \"state\": \"ACTIVE\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-06T00:12:47Z",
+          "stdout": "[\n  {\n    \"autoscale\": {\n      \"maxSlots\": \"100\"\n    },\n    \"creationTime\": \"2026-09-06T00:12:41.833850Z\",\n    \"edition\": \"ENTERPRISE\",\n    \"ignoreIdleSlots\": true,\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n    \"updateTime\": \"2026-09-06T00:12:41.833850Z\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-06T00:12:50Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/12363401580111279822\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-06T00:15:43Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/12363401580111279822\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation_assignment okf-graph-spike-20260905.12363401580111279822",
+          "rc": 0,
+          "at": "2026-09-06T00:15:47Z",
+          "stdout": "Reservation assignment 'okf-graph-spike-20260905.12363401580111279822' successfully deleted.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation okf-graph-spike-20260905",
+          "rc": 0,
+          "at": "2026-09-06T00:15:50Z",
+          "stdout": "Reservation 'okf-graph-spike-20260905' successfully deleted.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-06T00:15:53Z",
+          "stdout": "No reservations found.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-06T00:15:55Z",
+          "stdout": "No reservation assignments found.",
+          "stderr": ""
+        }
+      ],
+      "max_slots": 100,
+      "closing_at": "2026-09-06T00:15:40Z",
+      "closed_at": "2026-09-06T00:15:55Z",
+      "verified_gone": true
+    },
+    {
+      "label": "all-0017",
+      "opened_at": "2026-09-06T00:17:56Z",
+      "steps": [
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation --edition=ENTERPRISE --slots=0 --autoscale_max_slots=100 --ignore_idle_slots=true okf-graph-spike-20260905",
+          "rc": 0,
+          "at": "2026-09-06T00:17:59Z",
+          "stdout": "{\n  \"autoscale\": {\n    \"maxSlots\": \"100\"\n  },\n  \"creationTime\": \"2026-09-06T00:17:59.244650Z\",\n  \"edition\": \"ENTERPRISE\",\n  \"ignoreIdleSlots\": true,\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n  \"updateTime\": \"2026-09-06T00:17:59.244650Z\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation_assignment --reservation_id=okf-graph-spike-20260905 --assignee_id=test-project-0728-467323 --assignee_type=PROJECT --job_type=QUERY",
+          "rc": 0,
+          "at": "2026-09-06T00:18:02Z",
+          "stdout": "{\n  \"assignee\": \"projects/test-project-0728-467323\",\n  \"jobType\": \"QUERY\",\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/9034570747782009444\",\n  \"state\": \"ACTIVE\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-06T00:18:05Z",
+          "stdout": "[\n  {\n    \"autoscale\": {\n      \"maxSlots\": \"100\"\n    },\n    \"creationTime\": \"2026-09-06T00:17:59.244650Z\",\n    \"edition\": \"ENTERPRISE\",\n    \"ignoreIdleSlots\": true,\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n    \"updateTime\": \"2026-09-06T00:17:59.244650Z\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-06T00:18:08Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/9034570747782009444\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        }
+      ],
+      "max_slots": 100
+    }
+  ],
+  "resources": [
+    {
+      "kind": "reservation",
+      "name": "projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905",
+      "created_at": "2026-09-05T23:43:43Z",
+      "state": "deleted",
+      "deleted_at": "2026-09-06T00:15:55Z"
+    },
+    {
+      "kind": "reservation",
+      "name": "projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905",
+      "created_at": "2026-09-06T00:07:32Z",
+      "state": "deleted",
+      "deleted_at": "2026-09-06T00:15:55Z"
+    },
+    {
+      "kind": "reservation",
+      "name": "projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905",
+      "created_at": "2026-09-06T00:09:57Z",
+      "state": "deleted",
+      "deleted_at": "2026-09-06T00:15:55Z"
+    },
+    {
+      "kind": "reservation",
+      "name": "projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905",
+      "created_at": "2026-09-06T00:12:38Z",
+      "state": "deleted",
+      "deleted_at": "2026-09-06T00:15:55Z"
+    },
+    {
+      "kind": "reservation",
+      "name": "projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905",
+      "created_at": "2026-09-06T00:17:56Z",
+      "state": "open"
+    }
+  ]
+}

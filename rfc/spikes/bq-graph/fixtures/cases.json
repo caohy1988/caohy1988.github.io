@@ -1,0 +1,18 @@
+{
+  "as_of": "2026-09-05T00:00:00Z",
+  "natural_queries": [
+    {"id": "q_gm_exact", "text": "How do we calculate gross margin, exactly?"},
+    {"id": "q_revenue_recognized", "text": "When is an order recognized as revenue?"},
+    {"id": "q_cogs", "text": "Which cost components are included in COGS?"},
+    {"id": "q_legacy_margin", "text": "What was the old gross margin definition before FY2026?"},
+    {"id": "q_orders_grain", "text": "What is the grain of the orders table and which columns feed revenue?"},
+    {"id": "q_attester", "text": "How does the attester verify a BigQuery receipt?"}
+  ],
+  "forced_seeds": [
+    {"id": "f_legacy", "text": "forced:metrics/gross-margin-legacy.md", "expect_hops": 2, "expect_computation": "computations/gross-margin-period.md"},
+    {"id": "f_current", "text": "forced:metrics/gross-margin.md", "expect_hops": 1, "expect_computation": "computations/gross-margin-period.md"},
+    {"id": "f_revenue", "text": "forced:metrics/revenue.md", "expect_hops": 1, "expect_computation": "computations/revenue-ytd.md"}
+  ],
+  "impact_target": "policies/margin-standard.md",
+  "expected_impact_min": ["metrics/gross-margin", "computations/gross-margin-period"]
+}
