@@ -1,0 +1,552 @@
+{
+ "started_at": "2026-09-06T19:49:55.427419+00:00",
+ "principal": "sa:okf-receipt-restricted",
+ "engine": "fallback",
+ "publication_id": "pub_190192147fd7fd78",
+ "as_of": "2026-09-05T00:00:00Z",
+ "cases": {
+  "hidden_intermediate": {
+   "description": "hidden intermediate under the second principal (RLS + walk): path removed, no hidden id in context or explain",
+   "label": "MEASURED",
+   "verdict": "ENFORCED",
+   "status": "OK",
+   "concepts": 1,
+   "paths": 0,
+   "computations": 0,
+   "leaks_hidden_id": false,
+   "replacement": {
+    "concept": null,
+    "label": "NONE"
+   },
+   "warnings": [
+    "forced seed: harness-only deterministic override, not a semantic ranking",
+    "FALLBACK engine: relational joins, not BigQuery Graph"
+   ],
+   "timing_ms": 2659.4,
+   "sa_jobs": {
+    "jobs": 3,
+    "bound_to_sa": true
+   },
+   "full_result": {
+    "status": "OK",
+    "concepts": [
+     {
+      "concept": "<id:97dc35b4>",
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:97dc35b4>",
+      "path": "<id:97dc35b4>.md",
+      "title": "Gross Margin (legacy, pre-FY2026)",
+      "type": "Metric",
+      "lifecycle_status": "deprecated",
+      "trust_tier": "human-reviewed",
+      "verifications": [
+       {
+        "by": "human:jsmith@acme",
+        "kind": "human",
+        "at": "2024-01-15T10:00:00Z"
+       }
+      ],
+      "freshness": {
+       "verdict": "UNKNOWN_DEADLINE",
+       "stale_after": null
+      },
+      "provenance": [],
+      "replacement": {
+       "concept": null,
+       "label": "NONE"
+      },
+      "matched_sections": [],
+      "forced": true
+     }
+    ],
+    "paths": [],
+    "computations": [],
+    "warnings": [
+     "forced seed: harness-only deterministic override, not a semantic ranking",
+     "FALLBACK engine: relational joins, not BigQuery Graph"
+    ],
+    "scope": {
+     "bundle_id": "acme_retail",
+     "publication_id": "pub_190192147fd7fd78",
+     "engine": "fallback",
+     "requester": "sa:okf-receipt-restricted",
+     "as_of": "2026-09-05T00:00:00Z",
+     "top_k": 5
+    },
+    "timing": {
+     "stages_ms": {
+      "seed": 0.0,
+      "walk": 1359.5,
+      "nodes": 1176.9,
+      "context": 1298.2,
+      "assembly": 0.1
+     },
+     "total_ms": 2659.4,
+     "jobs": [
+      {
+       "stage": "walk",
+       "job_id": "b3b1a1f5-1cdf-4b6c-b429-0cd510aecc53",
+       "slot_ms": 688,
+       "bytes_processed": null,
+       "bytes_billed": null,
+       "cache_hit": false,
+       "reservation_id": null,
+       "edition": null,
+       "created": "2026-09-06T19:50:07.621000+00:00",
+       "started": "2026-09-06T19:50:07.827000+00:00",
+       "ended": "2026-09-06T19:50:08.406000+00:00"
+      },
+      {
+       "stage": "nodes",
+       "job_id": "b6fb81d0-e9cc-451b-a62e-a095c1766434",
+       "slot_ms": 25,
+       "bytes_processed": null,
+       "bytes_billed": null,
+       "cache_hit": false,
+       "reservation_id": null,
+       "edition": null,
+       "created": "2026-09-06T19:50:09.034000+00:00",
+       "started": "2026-09-06T19:50:09.261000+00:00",
+       "ended": "2026-09-06T19:50:09.506000+00:00"
+      },
+      {
+       "stage": "context",
+       "job_id": "8b19cd28-f711-41c2-8209-03d8df2ddbcb",
+       "slot_ms": 296,
+       "bytes_processed": null,
+       "bytes_billed": null,
+       "cache_hit": false,
+       "reservation_id": null,
+       "edition": null,
+       "created": "2026-09-06T19:50:08.992000+00:00",
+       "started": "2026-09-06T19:50:09.178000+00:00",
+       "ended": "2026-09-06T19:50:09.642000+00:00"
+      }
+     ]
+    }
+   }
+  },
+  "denied_bundle": {
+   "description": "same path in a denied bundle under the second identity: zero rows, no id in the error text",
+   "label": "MEASURED",
+   "verdict": "DENIED_NO_LEAK",
+   "status": "DENIED",
+   "concepts": 0,
+   "paths": 0,
+   "computations": 0,
+   "leaked_id_count": 0,
+   "warnings": [
+    "authorization error: Forbidden"
+   ],
+   "api_error_class": "Forbidden",
+   "api_error_redacted": "Forbidden: 403 Access Denied: Table test-project-0728-467323:okf_graph_spike_20260905.edges: User does not have permission to query table test-project-0728-467323:okf_graph_spike_20260905.edges, or perhaps it does not exist.; reason: accessDenied, message: Access Denied: Table test-project-0728-4673",
+   "sa_jobs": {
+    "jobs": 0,
+    "bound_to_sa": false
+   },
+   "full_result": {
+    "status": "DENIED",
+    "concepts": [],
+    "paths": [],
+    "computations": [],
+    "warnings": [
+     "authorization error: Forbidden"
+    ],
+    "scope": {
+     "bundle_id": "acme_retail",
+     "publication_id": "pub_190192147fd7fd78",
+     "engine": "fallback",
+     "requester": "sa:okf-receipt-restricted",
+     "as_of": "2026-09-05T00:00:00Z",
+     "top_k": 5
+    },
+    "timing": {
+     "stages_ms": {
+      "seed": 0.0
+     },
+     "total_ms": 431.0,
+     "jobs": []
+    }
+   }
+  },
+  "output_denied_seed_visible": {
+   "description": "output denied despite seed access: vectors visible, nodes/edges denied, no denied id named",
+   "label": "MEASURED",
+   "verdict": "OUTPUT_DENIED_NO_LEAK",
+   "status": "NO_SEED",
+   "seed_visible": true,
+   "seed_visibility_evidence": "row count of section_vectors under the principal (not VECTOR_SEARCH)",
+   "walk_denied": true,
+   "concepts": 0,
+   "paths": 0,
+   "computations": 0,
+   "leaked_id_count": 0,
+   "warnings": [
+    "forced seed: harness-only deterministic override, not a semantic ranking",
+    "seed <id:97dc35b4> not found in pinned publication",
+    "FALLBACK engine: relational joins, not BigQuery Graph"
+   ],
+   "probe": {
+    "nodes": 0,
+    "hidden": 0,
+    "edges": 0,
+    "vectors": 19
+   },
+   "propagation_s": 1,
+   "sa_jobs": {
+    "jobs": 3,
+    "bound_to_sa": true
+   },
+   "full_result": {
+    "status": "NO_SEED",
+    "concepts": [],
+    "paths": [],
+    "computations": [],
+    "warnings": [
+     "forced seed: harness-only deterministic override, not a semantic ranking",
+     "seed <id:97dc35b4> not found in pinned publication",
+     "FALLBACK engine: relational joins, not BigQuery Graph"
+    ],
+    "scope": {
+     "bundle_id": "acme_retail",
+     "publication_id": "pub_190192147fd7fd78",
+     "engine": "fallback",
+     "requester": "sa:okf-receipt-restricted",
+     "as_of": "2026-09-05T00:00:00Z",
+     "top_k": 5
+    },
+    "timing": {
+     "stages_ms": {
+      "seed": 0.0,
+      "walk": 1726.7,
+      "nodes": 989.5,
+      "context": 1147.5,
+      "assembly": 0.0
+     },
+     "total_ms": 2876.2,
+     "jobs": [
+      {
+       "stage": "walk",
+       "job_id": "e1a4b180-d53a-4fb7-b136-eed471c45814",
+       "slot_ms": 570,
+       "bytes_processed": null,
+       "bytes_billed": null,
+       "cache_hit": false,
+       "reservation_id": null,
+       "edition": null,
+       "created": "2026-09-06T19:50:44.106000+00:00",
+       "started": "2026-09-06T19:50:44.463000+00:00",
+       "ended": "2026-09-06T19:50:44.845000+00:00"
+      },
+      {
+       "stage": "nodes",
+       "job_id": "74f10709-ec7c-4dde-a3e0-f08a03b7acf5",
+       "slot_ms": 7,
+       "bytes_processed": null,
+       "bytes_billed": null,
+       "cache_hit": false,
+       "reservation_id": null,
+       "edition": null,
+       "created": "2026-09-06T19:50:45.841000+00:00",
+       "started": "2026-09-06T19:50:46.065000+00:00",
+       "ended": "2026-09-06T19:50:46.327000+00:00"
+      },
+      {
+       "stage": "context",
+       "job_id": "8b2f84da-3112-43d2-a007-c27b4c9769c5",
+       "slot_ms": 388,
+       "bytes_processed": null,
+       "bytes_billed": null,
+       "cache_hit": false,
+       "reservation_id": null,
+       "edition": null,
+       "created": "2026-09-06T19:50:45.842000+00:00",
+       "started": "2026-09-06T19:50:46.115000+00:00",
+       "ended": "2026-09-06T19:50:46.441000+00:00"
+      }
+     ]
+    }
+   },
+   "natural_seed": {
+    "label": "MEASURED",
+    "verdict": "OUTPUT_DENIED_NO_LEAK",
+    "status": "DENIED",
+    "seed_visible": true,
+    "seed_visibility_evidence": "row count of section_vectors under the principal (not VECTOR_SEARCH)",
+    "walk_denied": true,
+    "concepts": 0,
+    "paths": 0,
+    "computations": 0,
+    "leaked_id_count": 0,
+    "warnings": [
+     "authorization error: Forbidden"
+    ],
+    "probe": {
+     "nodes": 0,
+     "hidden": 0,
+     "edges": 0,
+     "vectors": 19
+    },
+    "seed_hits": 0,
+    "full_result": {
+     "status": "DENIED",
+     "concepts": [],
+     "paths": [],
+     "computations": [],
+     "warnings": [
+      "authorization error: Forbidden"
+     ],
+     "scope": {
+      "bundle_id": "acme_retail",
+      "publication_id": "pub_190192147fd7fd78",
+      "engine": "fallback",
+      "requester": "sa:okf-receipt-restricted",
+      "as_of": "2026-09-05T00:00:00Z",
+      "top_k": 5
+     },
+     "timing": {
+      "stages_ms": {},
+      "total_ms": 355.9,
+      "jobs": []
+     }
+    }
+   }
+  },
+  "owner_fallback_negative": {
+   "description": "owner-credential fallback negative: every SA job is bound to the SA (jobs.get user_email), results differ at the hidden set",
+   "label": "MEASURED",
+   "verdict": "NO_FALLBACK",
+   "sa_jobs": 3,
+   "sa_jobs_bound_to_sa": true,
+   "owner_jobs": 3,
+   "owner_jobs_bound_to_operator": true,
+   "owner_saw_hidden": true,
+   "sa_saw_hidden": false,
+   "owner_computations": 1,
+   "sa_computations": 0,
+   "note": "owner arm runs on the ungoverned base dataset; SA arm on the governed fixture",
+   "owner_on_restricted_fixture": {
+    "status": "OK",
+    "saw_hidden": false,
+    "computations": 0
+   },
+   "owner_paths": [
+    {
+     "seed": "<id:97dc35b4>",
+     "concept_hops": 2,
+     "via": [
+      "<id:97dc35b4>",
+      "<id:567bd799>",
+      "<id:b6c2a45a>"
+     ]
+    }
+   ],
+   "sa_paths": []
+  },
+  "revocation_before_cached_replay": {
+   "description": "grant, run, cache, revoke dataset reader, replay from cache under the SA: replay refused",
+   "label": "MEASURED",
+   "verdict": "FAIL_CLOSED",
+   "revocation_observed": true,
+   "warm": [
+    "OK",
+    "MISS_STORED",
+    1
+   ],
+   "hit": [
+    "OK",
+    "HIT_RECHECKED"
+   ],
+   "replay": {
+    "status": "DENIED",
+    "cache": "HIT_DENIED",
+    "concepts": 0,
+    "paths": 0,
+    "computations": 0,
+    "leaked_id_count": 0
+   },
+   "fresh_after_revoke": {
+    "status": "DENIED",
+    "cache": null,
+    "concepts": 0,
+    "paths": 0,
+    "computations": 0,
+    "leaked_id_count": 0
+   },
+   "revoked_at": "2026-09-06T19:50:23.670689+00:00",
+   "revocation_propagation_s": 11,
+   "revocation_observation": "Forbidden",
+   "replay_warnings": [
+    "cached replay: current authorization check failed or unknown"
+   ],
+   "sa_jobs": {
+    "jobs": 3,
+    "bound_to_sa": true
+   },
+   "cross_principal_replay": {
+    "label": "MEASURED",
+    "verdict": "CACHE_BOUND_TO_CREDENTIAL",
+    "owner_entry_computations": 1,
+    "sa_replay": {
+     "status": "DENIED",
+     "cache": "HIT_DENIED",
+     "concepts": 0,
+     "paths": 0,
+     "computations": 0,
+     "leaked_id_count": 0
+    }
+   }
+  }
+ },
+ "grants": [
+  {
+   "at": "2026-09-06T19:49:59.466262+00:00",
+   "ds": "okf_graph_spike_20260905_rls",
+   "principal": "sa:okf-receipt-restricted",
+   "reader": true
+  },
+  {
+   "policies": {
+    "at": "2026-09-06T19:49:59.466494+00:00",
+    "nodes": "695a5047-eadb-4cd1-ad44-fd1cfc0ae9d9",
+    "edges": "c6753345-23c6-4fe5-8d89-11105a03c656",
+    "section_vectors": "9403cb38-34c4-447a-bf43-e817e2142f1a"
+   },
+   "grantees": [
+    "operator",
+    "sa:okf-receipt-restricted"
+   ],
+   "shape": "hidden-intermediate"
+  },
+  {
+   "at": "2026-09-06T19:50:23.670689+00:00",
+   "ds": "okf_graph_spike_20260905_rls",
+   "principal": "sa:okf-receipt-restricted",
+   "reader": false
+  },
+  {
+   "at": "2026-09-06T19:50:38.676491+00:00",
+   "ds": "okf_graph_spike_20260905_rls",
+   "principal": "sa:okf-receipt-restricted",
+   "reader": true
+  },
+  {
+   "policies": {
+    "at": "2026-09-06T19:50:38.676630+00:00",
+    "nodes": "7e1579a1-5c77-41d9-af1d-80bfa0bdacca",
+    "edges": "7022c3e7-9bda-46c6-80d6-bfda05264194",
+    "section_vectors": "8c618c3e-1afa-4460-b848-194e6e2def8c"
+   },
+   "grantees": {
+    "nodes_edges": [
+     "operator"
+    ],
+    "section_vectors": [
+     "operator",
+     "sa:okf-receipt-restricted"
+    ]
+   },
+   "shape": "hidden-intermediate"
+  }
+ ],
+ "stages": [
+  "denied_id_universe",
+  "phase_a_grants",
+  "phase_a_propagation",
+  "allowed_control",
+  "cases"
+ ],
+ "teardown": {
+  "steps": {
+   "remove_dataset_reader": {
+    "ok": true
+   },
+   "restore_policies": {
+    "ok": true
+   },
+   "readback_grantees": {
+    "ok": true
+   },
+   "sa_denied_after_teardown": {
+    "ok": true
+   }
+  },
+  "reader_removed_at": "2026-09-06T19:50:48.575522+00:00",
+  "policies_restored": {
+   "at": "2026-09-06T19:50:48.575586+00:00",
+   "nodes": "795a4c53-fc08-45ba-b18e-5e26cb5d527e",
+   "edges": "13e41f47-694b-49d9-9809-0293981ddbde",
+   "section_vectors": "ad7982fa-e0d8-4bd5-9e59-89aa4dcea40d"
+  },
+  "rls_grantees_after": {
+   "nodes": [
+    "user:operator"
+   ],
+   "edges": [
+    "user:operator"
+   ],
+   "section_vectors": [
+    "user:operator"
+   ]
+  },
+  "sa_still_in_grantees": false,
+  "sa_denied_after_teardown": true,
+  "waited_s": 92,
+  "status": "VERIFIED"
+ },
+ "window_gate": {
+  "open": false,
+  "reason": "RuntimeError: job cleanup is unverified for smoke-1; reconcile its journal before opening another"
+ },
+ "engine_note": "relational fallback (on-demand): the same RLS policies apply to the same base tables, but this is not a GQL traversal (labelled FALLBACK in every result)",
+ "gql_variant": {
+  "label": "BLOCKED",
+  "reason": "GQL variant not run: requires the bounded window lifecycle for both clients (not wired in this slice); window gate also refuses: RuntimeError: job cleanup is unverified for smoke-1; reconcile its journal before opening another"
+ },
+ "preflight": {
+  "principal": "sa:okf-receipt-restricted",
+  "at": "2026-09-06T19:49:55.428386+00:00",
+  "status": "OK",
+  "job": "954a8bc1-7671-4b0c-badb-643e35556d87"
+ },
+ "denied_id_universe": 44,
+ "phase_a_propagation": {
+  "ready": true,
+  "waited_s": 1,
+  "probe": {
+   "nodes": 40,
+   "hidden": 0,
+   "edges": 84,
+   "vectors": 19
+  }
+ },
+ "allowed_control": {
+  "ok": true,
+  "allowed": {
+   "status": "OK",
+   "concepts": 1,
+   "paths": 1,
+   "computations": 1,
+   "leaks_hidden_id": false
+  },
+  "negative_seed_visible": true,
+  "negative_status": "OK",
+  "reason": null,
+  "allowed_jobs": {
+   "jobs": 3,
+   "bound_to_sa": true
+  }
+ },
+ "finished_at": "2026-09-06T19:52:26.045223+00:00",
+ "summary": {
+  "hidden_intermediate": "MEASURED",
+  "denied_bundle": "MEASURED",
+  "output_denied_seed_visible": "MEASURED",
+  "owner_fallback_negative": "MEASURED",
+  "revocation_before_cached_replay": "MEASURED"
+ },
+ "id_sanitization": {
+  "masked_ids": 44,
+  "universe_known": true,
+  "token": "<id:sha256[:8]>"
+ }
+}
