@@ -1,33 +1,39 @@
-# Intent — the board story and three runtime advantages
+# Intent — board pack after the two spike merges
 
-## Audience and goal
+Prepared by Astra for Fable 5.1, 2026-09-06 UTC / 2026-09-05 PT; implemented by Fable 5.1 on `feat/board-pack-post-spike` from `origin/main` `b05e278` the same day. Target: `caohy1988/caohy1988.github.io`, `/rfc/board-pack/`. Supersedes the earlier diagram-only intent (implemented 2026-09-05 on `feat/rfc-board-pack-diagram`).
 
-This short customer/runtime brief should make the Alder near-miss clear in 30 seconds, then explain three distinct reasons to add a BigQuery runtime to Knowledge Catalog + OKF in two to three minutes. Keep one continuous static page, with the concrete story before the architecture and no audience label addressing a product executive.
+## Reader outcome
 
-At 8:55, Maya Chen, VP of Finance at fictional subscription software company Alder, opens a board pack supporting a $4 million expansion plan. An analyst catches new customers in the agent's “verified” 118% retention figure; the starting cohort retained 96%. Maya pulls the slide with three gaps unresolved: the linked cohort rule and declared computation were not pinned with Finance's definition, she cannot trace the policy allowing this agent to use the total-ARR asset, and no execution receipt binds its query and result to the declared retention calculation.
+A reader should understand Maya's near-miss, the three proposed runtime advantages, and exactly what the merged experiments now support. Preserve the short customer/runtime brief: story first, three paired comparisons, optional Technical design, a qualified punchline, and one Finance pilot ask.
 
-Publish the brief at `/rfc/board-pack/`. One native Technical design disclosure follows the comparisons and first-workload line, before the punchline. Keep it closed by default so the skim stays short; readers can expand the proposed retrieval, access and execution mechanisms. The details must be keyboard accessible and included in print. Opening the section shows a system diagram first: three numbered flows connect Finance’s authored graph, current authorization and execution evidence to Maya’s board-pack number. The diagram must separate context selection from proof of computation and stay readable on mobile and in black-and-white print.
+Keep the invented Alder scenario intact: 8:55 a.m., Maya Chen, the $4 million existing-customer expansion proposal, the wrong 118% retention figure and corrected 96%. Keep the $10m / $9.6m / $2.2m arithmetic and the three unanswered questions. Missing access explanation is not proof of unauthorized access. Neither spike produced these retention figures: both use Acme gross-margin material, and neither ran this board-pack story.
 
-## The comparison
+## Position after the merges
 
-Replace the former role cards with three paired comparisons, labeled **KC + OKF** and **+ BQ runtime**. Retain a short role introduction: Catalog discovers and governs; OKF authors the graph. The right column describes proposed runtime responsibilities.
+**Opportunity: HIGH (scoped).** Carry JOINT's complete scope with the label: analytical agents whose relevant facts already live in BigQuery, using Enterprise or Enterprise Plus capacity, within customer-accepted latency, freshness, concurrency and cost budgets. This remains a conditional opportunity assessment; the spike has not established a customer-accepted operating envelope. The broader general Knowledge Catalog serving-tier opportunity is MODERATE+. Reassess the conditional HIGH at the existing 2026-09-19 evidence checkpoint; under JOINT's downgrade triggers the scoped opportunity falls to MODERATE+, and inconclusive measurements do not preserve it indefinitely.
 
-1. **Replayable context.** Catalog discovery and the authored OKF graph do not themselves assemble pinned linked context. BigQuery hosts the projection and retrieves it with a pinned publication and explicit SQL or bounded walks. Fixed query, parameters, fact versions, access scope and ordering return the same selected context and shape. Maya's agent receives the retention definition, cohort rule and declared computation together.
-2. **Explainable access.** Scope the EntryGroup statement to custom entries today. The proposed runtime joins identity, policy and projected assets, binds the requester to the execution identity, enforces access along the retrieval path and records returned nodes. It can explain why Maya's agent could use the total-ARR asset. The story describes an unexplained authorization path, not a proven permissions violation.
-3. **Verifiable execution.** Finding a declaration does not prove the calculation ran. The runtime runs retention and validates a job ↔ context ↔ result receipt against the declared computation. A substituted query or missing evidence leaves the number unproven.
+**Combined delivery: LOW.** Two merged experiments do not constitute a connected runtime. Promotion requires KC discovery → pinned publication → governed retrieval → caller-delegated computation → result-bound receipt → enforced consumption, with publication consistency and negative authorization evidence.
 
-The graph projection and versioned facts can be the first BigQuery workload; an existing revenue warehouse is not required. Data must actually enter the projection to be queried there. The case is the combined runtime contract, not a claim that no other engine could implement it.
+**Receipt delivery: MODERATE for the demonstrated example only.** SDK PR 479 merged at `120da78`, reviewed head `6719eb5`. The report records a real caller-owned BigQuery job, result readback, fresh-process verification and consumer-enforced release, with substitutions and missing evidence handled separately. This is example code under `examples/okf_attested_computation/`, not a new SDK API, product release or independent service-principal attestation. Astra's final review says APPROVE; it discloses that Astra also authored the last fix.
 
-**BigQuery turns the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.**
+**Graph evidence: a demonstrated retrieval slice, with substantial gaps.** Site PR 28 merged at `b05e278`, head `cf20d4a`. Its report assesses the passed gates G1–G5 (capacity, projection, retrieval, impact/stub backlog, and negative-fixture isolation cases) as supporting MODERATE for demonstrated graph retrieval only. Attribute that assessment to the report. G6 authorization and G7 publication consistency remain PARTIAL; distinct-principal graph tests remain BLOCKED; G8 benchmarks are INCOMPLETE, with 0/9 cells complete. The Enterprise reservation was torn down. Merging the artifacts is not production Graph-over-OKF or customer-envelope acceptance.
 
-## Guardrails and ask
+The two experiments followed **parallel-spike, receipts-gated** sequencing. The next connected pilot must preserve receipt progress independently of graph completion. A graph pass cannot compensate for a broken result-evidence boundary.
 
-Similarity ranks candidates but does not pin linked context; vector search is not inherently nondeterministic. Replayable context does not promise identical LLM answers. Access metadata requires enforcement; source permissions must stay current, and metadata visibility does not grant access to the underlying file. Per-node decisions need an authenticated requester binding, not a self-reported agent label.
+## Keep the three comparisons
 
-Ask for one Finance-owned retention pilot: repeat pinned retrieval, test access boundaries, and compute retention over one quarter of cohort data. Withholding execution evidence must leave the number unproven.
+1. **Replayable context:** KC discovers and OKF authors; a runtime selects linked context from a pinned projection with explicit, bounded semantics. The graph spike now supplies retrieval evidence, not evidence that the selected calculation ran.
+2. **Explainable access:** current policy must gate retrieval and replay for an authenticated requester. The graph's partial governance results do not establish complete caller-specific authorization. Metadata visibility still does not grant source-file access.
+3. **Verifiable execution:** a declared computation needs a job, authoritative result evidence and an enforcing consumer. The merged receipt example demonstrates a narrow version of this boundary. Full-RFC/demo computation attesters remain stubs and the full demo's receipts remain UNVERIFIABLE.
 
-## Honesty and scope
+BigQuery's case is authority over its own execution and an integration opportunity. Other retrievers can call BigQuery and consume the same evidence; receipt construction is not an exclusive capability.
 
-Alder, Maya and the figures are illustrative. Graph-over-OKF, per-node authorization and validated receipts remain RFC proposals. Existing full-demo computation attesters are stubs; receipts are UNVERIFIABLE. Governed sync and Phase A IAM remain unbuilt. Native BigQuery capabilities do not establish completion of this proposed integration.
+## Editorial and delivery boundary
 
-Add the diagram inside the existing `.design-body` at `/rfc/board-pack/`. Preserve the story, comparisons, prose design sections, disclosure behavior, redirect and existing honesty labels. Do not restore the footer or change full-demo. Work on `feat/rfc-board-pack-diagram` from main at `c370007`; commit, push, open a PR against main, and report its URL and HEAD. Save the session record under `/tmp/okf-vp-diagram/`. Do not merge; Opus + Kimi are the requested review gate.
+Put short evidence links beside the relevant comparisons and fuller boundaries inside the existing Technical design disclosure. The closed skim must show the scoped opportunity, receipt-only advance and LOW combined delivery. Keep the illustrative diagram as a proposed design; identify Enterprise/Plus for GQL and make clear its arrows have not been exercised as one connected path. Preserve native keyboard behavior, mobile layouts, print inclusion and the removed footer.
+
+The graph may be a first workload on Enterprise capacity after projection, but an empty-project adoption route sits outside the HIGH-scoped facts-already-in-BigQuery case. Do not add a new data-placement claim to fictional Alder.
+
+Fable implemented one PR from `origin/main` `b05e278` on `feat/board-pack-post-spike`, using `spec.md` for copy and acceptance requirements and `plan.md` for file scope and verification. The three handoff documents were copied into `rfc/board-pack/` in that PR and `STORY.md` was reconciled. `/rfc/bq-vp/` remains a redirect. Haiyuan retains the merge gate.
+
+Evidence URLs and exact revisions are in `spec.md`.

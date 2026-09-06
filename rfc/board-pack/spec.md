@@ -1,54 +1,77 @@
-# Spec — KC + OKF versus a BigQuery runtime
+# Spec — post-spike claims and page contract
 
-## Page contract
+Prepared by Astra, 2026-09-06 UTC; copied here by Fable's implementation PR. This replaces the prior diagram-only spec (implemented 2026-09-05). Sources are frozen to the merged spike revisions below. Live evidence is recorded evidence inspected for this handoff, not a new cloud run.
 
-- Static HTML and page-local CSS at `/rfc/board-pack/`. No JavaScript, external assets, build dependencies or cloud calls.
-- Preserve the full hero and arithmetic figure byte-for-byte. Keep Maya, Alder, 8:55 a.m., the five-minute deadline, $4 million decision, 118% and 96% in the hero.
-- Preserve the short near-miss paragraph: the agent missed the accompanying cohort rule; Maya cannot trace why this agent could use the total-ARR asset; no execution receipt binds its query and result to the declared retention calculation. Do not turn this into another comparison or assert a permissions violation.
-- Keep the invented $10m opening ARR, $9.6m same-customer closing ARR and erroneous $2.2m new-customer addition.
-- One coherent technical section: three paired comparisons, one optional Technical design disclosure, one punchline, one Finance pilot ask. No stepper, nested disclosures or second comparison table.
-- With details closed, target approximately 500–550 visible words and around two-and-a-half desktop viewports at 1280 × 720. These are editorial/geometry checks, not measured comprehension.
-- Use neutral customer/runtime framing in the title, pilot eyebrow, RFC index link and local docs. Keep the product masthead and Why BigQuery thesis. Maya's Finance job title remains part of the story.
+## Requirements
 
-## Three paired comparisons
+### Story and reader flow
 
-- Labels are **KC + OKF** and **+ BQ runtime**, repeated for each point so the pair stays clear on mobile. Side-by-side at desktop/tablet widths; each labeled pair stacks together on narrow screens.
-- Briefly define Knowledge Catalog (KC) and Open Knowledge Format (OKF). KC discovers/governs; OKF authors the graph. Do not turn the comparison into another three-role essay.
-- **Replayable context:** KC discovers, OKF authors, and the retriever assembles linked context. BigQuery hosts the OKF projection; pinned publication + explicit SQL/bounded walks select repeatable context. Name fixed query, parameters, fact versions, access scope and ordering. Story takeaway: same retention definition, cohort rule and declared computation.
-- State next to retrieval that vector search can be deterministic and replayable context does not promise identical LLM answers. Similarity ranking does not itself pin linked context. Do not imply a publication freezes mutable facts or access policies.
-- **Explainable access:** qualify the EntryGroup boundary as custom-entry access today. The right side joins identity ↔ policy ↔ projected assets, binds the requesting user/agent to the execution identity, enforces the retrieval path and records nodes returned to whom under which policy. Story takeaway: Maya can trace access to the total-ARR asset.
-- State next to access that metadata needs enforcement, source permissions stay current, and metadata access does not grant file access. Do not imply universal KC EntryGroup-only IAM or automatic native per-node ACLs in BigQuery Graph.
-- **Verifiable execution:** discovering the declaration does not prove execution. Run retention and validate the separate job ↔ context ↔ result receipt against the declared computation. A substituted query or missing evidence leaves the number unproven. Story takeaway: Maya can check whether the board number used the retention calculation.
-- Keep retrieval selection, authorization and computation evidence distinct. A retrieval receipt does not prove the metric ran; a job ID alone does not validate the computation.
+- R1. Preserve the entire existing `.hero` from the implementation base byte-for-byte, including the illustrative label, Maya/Alder scene, arithmetic and near-miss paragraph. Retain the three comparisons in order and their repeated **KC + OKF** / **+ BQ runtime** labels. Keep all three caution notes' meanings: deterministic vector search is possible; metadata needs enforcement; a job ID is insufficient.
+- R2. Keep the page order: hero → runtime introduction and compact current assessment → three comparisons → capacity/first-workload line → one closed-by-default Technical design disclosure → qualified punchline → Finance pilot ask. Place evidence beside its claim. Add no footer, evidence appendix, second comparison table, nested disclosure or stepper.
 
-## Foldable technical design
+### Assessment and evidence
 
-- One native `<details>` / `<summary>` after the three comparisons and first-workload line, before the punchline. Closed by default; summary reads Technical design with an RFC proposal label. No scripted state or dependency.
-- The body describes the proposed mechanism in three sections: bounded retrieval from Finance's definition to its linked cohort rule and computation declaration; authenticated requester binding and current policy enforcement; separate job ↔ context ↔ result validation against the declared calculation.
-- State the retrieval inputs, explicit bounds, stable tie-breaking/schema/ordering, and returned-node evidence. Distinguish a retrieval receipt from evidence of computation. Record query/parameters, input versions, context and result with the computation job; a substituted query or missing evidence remains unproven.
-- Explain authored-bundle authority and the initial node/edge projection. Publication pins never bypass current permissions; shared service accounts alone do not identify the requester. The integration remains proposed, including per-node enforcement and validated receipts.
-- Match the existing brief's typography/colors. Provide a visible focus ring and a decorative disclosure indicator excluded from the accessible name. Native Enter/Space toggles must work. Print includes the design even when closed on screen; allow sensible page breaks within it.
+- R3. Show **Opportunity HIGH (scoped)** with the complete scope from `intent.md` immediately adjacent. Show **Combined delivery LOW — connected path unproven** in the closed skim. State that the customer operating envelope remains unaccepted; HIGH is conditional, not a passed checkpoint. The expanded design retains the 2026-09-19 reassessment and MODERATE+ broader-serving-tier boundary.
+- R4. Show **Receipts MODERATE — demonstrated example only**, linked to E1/E2. Do not describe the whole runtime, SDK or all receipts as MODERATE. The verified example is Acme gross margin on synthetic fixtures; the Alder retention calculation remains illustrative. Distinguish fresh-process verification from a separately constrained verifier principal. Example `VERIFIED` is an evidence verdict, not `ATTESTED`, GA, accounting correctness, or product readiness.
+- R5. Link graph results to E4/E5 and say a merged spike demonstrates the tested retrieval cases (report gates G1–G5, where G1 is capacity and the stub/ambiguity cases use the `bundle_b` negative fixture; do not present G1–G5 as five retrieval cases). If displaying its rating, use **Graph report: MODERATE for demonstrated retrieval only**. Keep G6/G7 PARTIAL, distinct-principal graph tests BLOCKED, G8 INCOMPLETE (0/9 cells), and the unaccepted operating envelope adjacent to that assessment in the expanded design. Do not convert offline fixes or merge status into fresh live passes. State that the recorded Enterprise reservation was torn down, without claiming all cloud resources or pending jobs were independently audited away.
+- R6. Preserve full-RFC/demo truth with explicit scope: **full-demo computation attesters remain stubs; full-demo receipts remain UNVERIFIABLE**. Separate this from the example evidence now available. Governed sync, Phase A IAM and the connected runtime remain proposed. No change to `rfc/full-demo/` or spike artifacts is part of this PR.
+- R7. Preserve JOINT's promotion rule and sequencing. A credible isolated spike earns MODERATE only for its demonstrated slice. Combined delivery can rise only after the connected chain in `intent.md`, publication-consistency tests, denied-intermediate-node tests, revocation before cached replay, and unauthorized-output tests. Receipt progress must not wait for the graph benchmark. Avoid a time-to-production promise.
 
-## System diagram
+### Technical and presentation boundaries
 
-- One figure at the top of `.design-body`, before the existing intro/prose. Label it proposed/RFC and illustrative. Use inline SVG with shared node definitions, a wide flow and a stacked mobile layout; no external image or JavaScript.
-- Map the three numbered flows: KC discovery and authored OKF graph → BigQuery publication pin and SQL/bounded walk → definition, cohort rule and declared computation for Maya; authenticated requester → current policy enforcement on projected assets → returned-node/policy record; selected declaration and versioned facts → BigQuery job plus validation → result/receipt or unproven.
-- Make access gate retrieval, not appear as a check performed after disclosure. A cited definition cannot validate the wrong query. The diagram's 96% and substituted 118% remain illustrative outcomes, with missing execution evidence unproven.
-- Each visible SVG has a title/description; decorative shared definitions are hidden from assistive technology. Keep one source for node labels across wide/mobile layouts. Use the existing dark palette, consistent arrows, legible labels and monochrome print styles. The diagram prints even when the disclosure is closed.
+- R8. State **GQL requires Enterprise or Enterprise Plus** beside the first-workload line and in the technical/diagram context. Ordinary relational SQL/vector retrieval on-demand remains an alternative; do not imply all BigQuery retrieval or the receipt example needs Enterprise. The demonstrated graph route used GA `VECTOR_SEARCH` plus GQL; graph-native semantic search remains a separately labeled Preview option, not the demonstrated route. Preserve authored OKF bundle authority; a source pin is not a working live KC discovery integration.
+- R9. Preserve the diagram's three flows and policy gate before returned context. Make the hypothetical nature of the entire connected design explicit in the caption, visible note and both SVG descriptions. The retention outcomes remain illustrative; no arrow or badge may imply the spikes jointly produced a verified 96%. Keep shared SVG node definitions and the existing wide/mobile layouts.
+- R10. Keep the static HTML/CSS contract: no authored JavaScript, external assets, new build dependency or cloud call. Preserve the native disclosure's adjacent `.design-body` mechanism and its print override. Evidence links must work by keyboard, wrap at 320 px and remain readable in monochrome print.
+- R11. Preserve the canonical `/rfc/board-pack/`, the `rfc/index.html` label **Board-pack near-miss →**, and the immediate meta-refresh/canonical/fallback link in `rfc/bq-vp/index.html`. Update the board-pack's four Markdown companions together, removing obsolete branch/reviewer instructions and replacing old completion claims with clearly dated historical context or fresh implementation evidence. Haiyuan is the merge gate.
 
-## Honesty and ask
+## Copy map
 
-- Keep the hero's illustrative-scenario label, the runtime's proposed/RFC and unbuilt label, and all comparison notes, including the job-ID caveat and UNVERIFIABLE demo receipts. The page ends with the pilot ask; no footer or evidence deep-dive link is required.
-- No ATTESTED, BQ_COMMITTED, Graph-over-OKF completion, implemented import or invented execution identifiers.
-- Short first-workload line: land the OKF projection and version needed facts; an existing revenue warehouse is not required. Preserve authored-bundle authority.
-- Extended punchline: **BigQuery turns the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.**
-- One Finance pilot tests repeated retrieval, access boundaries and retention execution. Missing execution evidence leaves the number unproven. Do not impose illustrative Alder's 96% on real pilot data.
-- Leave `/rfc/full-demo/` content and artifacts unchanged.
+Fable may tighten connective prose, but the scope and distinctions below are mandatory. Use the existing typography and paragraph hierarchy. Keep assessment copy in the runtime introduction, not above the story.
 
-## Usability and delivery
+| Current location | Required replacement or addition |
+| --- | --- |
+| `.runtime-heading .eyebrow`: “RFC, not built” | “Why BigQuery · proposed runtime · merged spike evidence”. Follow with R3's scoped opportunity and LOW combined delivery. Keep the short KC/OKF role introduction. |
+| Runtime assessment | Working copy: “Opportunity HIGH (scoped): analytical agents whose relevant facts already live in BigQuery, on Enterprise or Enterprise Plus, within customer-accepted latency, freshness, concurrency and cost budgets. That operating envelope is not yet accepted. Combined delivery LOW: the connected path remains unproven.” |
+| `#context-point` comparison note | Retain vector/LLM caveat. Add a short linked “Graph spike: tested retrieval demonstrated; governance and benchmarks incomplete” pointing to E5. Detailed G-labels belong inside the disclosure. |
+| `#access-point` comparison note | Retain source-permission and metadata caveats. Add “Graph governance evidence is partial.” The proposed right-hand mechanism must not read as fully implemented caller IAM. |
+| `#execution-point` comparison note | Replace unscoped “Demo receipts remain UNVERIFIABLE” with: “A job ID alone is insufficient. Receipt example: MODERATE for this slice; recorded VERIFIED path with enforced consumption. Full-demo attesters are still stubs; the full demo’s receipts remain UNVERIFIABLE.” Link the example to E2 and PR 479 to E1. |
+| `.runtime-rule` | “GQL needs Enterprise or Enterprise Plus. A projected graph can be the first workload there after its inputs are loaded; that empty-project route is outside the scoped opportunity above.” The existing-warehouse-independent argument must no longer override R3. |
+| `.design-status` / `.design-intro` | Use “Proposed integration · spike evidence”. Explain bundle authority, separate graph and receipt implementations, no live connected KC-to-result path and no product claim. |
+| `#design-context` | Keep fixed publication/query/parameters/fact versions, bounded traversal, tie-breaking and stable schema/ordering. Add E4/E5 for Acme's deprecated-anchor two-hop retrieval, impact and stub backlog. Returned sanctioned SQL has `NOT_EXECUTED` semantics. Label GA SQL/vector/GQL composition separately from Preview graph-native semantic search. |
+| `#design-access` | Preserve current authorization before disclosure/replay and requester binding. Summarize G6/G7 as partial; distinct-principal graph cases blocked, no-hidden-identifier evidence inconclusive and mixed-publication protection not proven live. Link E5. Distinguish these graph gaps from receipt-specific caller/revocation evidence. |
+| `#design-execution` | Keep the separate job/context/result mechanism. Add E2/E3 for example verification via authoritative job/result reads and enforced consumer release. The example uses the requester's delegation, local HMAC custody and a narrow gross-margin fixture; independent service identity, portable signatures and general accounting correctness are not demonstrated. State full-demo stub status separately. |
+| Technical evidence/checkpoint prose | Include E1/E4 merge/head hashes, receipt approval pointer E3, graph G8 0/9, recorded reservation teardown and customer envelope unaccepted. Restate R7's connected promotion gate and 2026-09-19 checkpoint. Name the downgrade target: under JOINT the scoped opportunity falls to MODERATE+, distinct from the broader serving-tier MODERATE+. Triggers: unacceptable budgets/Enterprise cost, simpler retrieval meeting the need, unsupported semantics/authorization/publication guarantees, or failure to bind and enforce result evidence. No new sidebar or footer. |
+| `.punchline` | Qualify the original proposition: “The proposed BigQuery runtime would turn the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.” Preserve its visual role. |
+| `.ask` | One Finance-owned retention pilot connects pinned retrieval, current authorization and result-bound consumption on real cohort data, with an agreed operating budget. Wrong-query and missing-evidence cases must withhold the claim. Do not use 96% as a real-data acceptance target. |
 
-- Semantic heading order, labeled comparison sections, visible keyboard focus, working skip link and valid local links.
-- No horizontal overflow at 1280, 768, 375 or 320 px with details closed or open. Inspect desktop/mobile screenshots, readable contrast and print layout. Keep each comparison pair together in print.
-- Move all page files to `rfc/board-pack/`. Update its canonical and the `rfc/index.html` href; keep Board-pack near-miss → as the visible label. `/rfc/bq-vp/index.html` is redirect-only: immediate meta refresh, new canonical and a usable fallback link. No other files remain in that legacy directory.
-- Full-demo, including its audience-specific show notes, stays untouched unless an old brief href needs updating. Search the repo for stale path references and audience labels; references documenting the legacy redirect are intentional.
-- Commit and push `feat/rfc-board-pack-diagram`; create a new PR against main. Save session and QA artifacts under `/tmp/okf-vp-diagram/`, report PR URL and HEAD, and do not merge. Opus + Kimi are the requested review gate.
+## Diagram requirements
+
+Keep the figure at the top of `.design-body`. Set its caption status to **Proposed connected design · Alder figures illustrative**. Extend `.plot-note` with **GQL requires Enterprise or Enterprise Plus. Separate Acme spikes do not verify Alder's 96% or this connected path**.
+
+In shared `#plot-query`, preserve the publication pin and use **SQL / bounded GQL walk** for the traversal line; the visible note spells out GQL's Enterprise or Enterprise Plus requirement, while adjacent prose preserves the on-demand SQL alternative. Avoid an unqualified “Enterprise required” label on every lane. In `#plot-job`, name the enforcing consumer as well as the job/result validation: issuer `verify()` returning VERIFIED alone is not release evidence. Both SVG title/description pairs must describe a proposed connected design, current policy before disclosure, consumer-enforced output, and the same evidence limits. Replace `Pass → 96% + receipt` with **Illustrative pass: 96%**, retaining receipt explanation nearby. Keep `UNPROVEN` for missing execution evidence.
+
+## Evidence links
+
+Use descriptive link text including **spike** or **example**. Pin artifacts to reviewed/merged heads; PR links carry merge history. Use these browser URLs, not `/tmp`, vault paths, raw private captures, or the graph Pages directory.
+
+| ID | Link and allowed use |
+| --- | --- |
+| E1 | [Receipt example — merged SDK PR 479](https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/479). Merge `120da786c6f47122ac48ebeef5c8dfa9c7cd95b1`; head `6719eb535667963fa640dd4535e508b550eb6cb1`. Example/tests change, no SDK API change. |
+| E2 | [Receipt example — recorded live evidence and limitations](https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/6719eb535667963fa640dd4535e508b550eb6cb1/examples/okf_attested_computation/evidence/receipt/report.md). Associated [live case records](https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/6719eb535667963fa640dd4535e508b550eb6cb1/examples/okf_attested_computation/evidence/receipt/live_cases.json) and [CLI cases](https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/6719eb535667963fa640dd4535e508b550eb6cb1/examples/okf_attested_computation/evidence/receipt/cases.json). |
+| E3 | [Astra receipt-example APPROVE review](https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/479#issuecomment-5556160003). Review comment, not a claim of independent authorship or a formal GitHub approval by Astra. |
+| E4 | [Graph spike — merged site PR 28](https://github.com/caohy1988/caohy1988.github.io/pull/28). Merge `b05e278b0c459f3dc035d7cae48841c75d6fa89f`; head `cf20d4ad3ab6da04596319e9fa6a767e49158a9d`. [Spike source/README](https://github.com/caohy1988/caohy1988.github.io/tree/b05e278b0c459f3dc035d7cae48841c75d6fa89f/rfc/spikes/bq-graph). |
+| E5 | [Graph spike — retrieval results and open gates](https://github.com/caohy1988/caohy1988.github.io/blob/b05e278b0c459f3dc035d7cae48841c75d6fa89f/rfc/spikes/bq-graph/evidence/report.md). [Benchmark completeness](https://github.com/caohy1988/caohy1988.github.io/blob/b05e278b0c459f3dc035d7cae48841c75d6fa89f/rfc/spikes/bq-graph/evidence/summary.json), [recorded capacity teardown](https://github.com/caohy1988/caohy1988.github.io/blob/b05e278b0c459f3dc035d7cae48841c75d6fa89f/rfc/spikes/bq-graph/evidence/reservation_changes.json), and [comparison with evidence labels](https://github.com/caohy1988/caohy1988.github.io/blob/b05e278b0c459f3dc035d7cae48841c75d6fa89f/rfc/spikes/bq-graph/evidence/comparison.md). |
+| E6 | Official boundaries: [BigQuery editions](https://docs.cloud.google.com/bigquery/docs/editions-intro), [graph-native semantic search](https://docs.cloud.google.com/bigquery/docs/graph-search), [BigQuery/Spanner graph placement](https://docs.cloud.google.com/bigquery/docs/graph-compare). These document platform capabilities, not completion of this integration. |
+
+The live board pack returned HTTP 200 and matched the inspected source. `/rfc/spikes/bq-graph/` returned HTTP 404 and has no `index.html` in the merge tree. Link E4/E5 directly; adding a graph landing page is outside this PR.
+
+## Acceptance examples
+
+- AE1 (R1–R4). With details closed, the reader sees the unchanged fictional story, three comparison pairs, HIGH with its scope and unaccepted envelope, receipt-example MODERATE, and combined LOW. They can follow a receipt or graph evidence link without expanding the technical design.
+- AE2 (R4–R9). With details open, the reader can distinguish an illustrative retention outcome, a recorded gross-margin receipt, a retrieval-only graph experiment, and the still-proposed connected path. Graph tests remain partial/incomplete despite both PRs being merged.
+- AE3 (R9–R11). Direct navigation, the RFC index and the legacy redirect reach the same canonical page. Native Enter/Space toggling reveals one diagram layout. Closed-state printing includes the complete design, evidence qualifications and pilot; both print and mobile preserve all score qualifiers.
+- AE4 (R7). A proposed future promotion based solely on two merged PRs is rejected by the written gate. A connected Finance pilot must test publication consistency and authorization negatives, not merely reproduce a green receipt label.
+
+## Presentation acceptance
+
+Inspect 1280, 768, 375 and 320 px with details closed/open, plus monochrome print. No horizontal overflow, clipped node labels or broken focus/links. Preserve the adjacent-body print fix. Aim for at most 700 closed-state words, extending the former 500–550-word target to fit evidence and scope without shrinking type; record the actual count and desktop height. Use concise links and replace stale prose instead of appending a history dump. Report static-page checks separately from historical spike test results.
