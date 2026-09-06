@@ -37,3 +37,7 @@ The graph may be a first workload on Enterprise capacity after projection, but a
 Fable implemented one PR from `origin/main` `b05e278` on `feat/board-pack-post-spike`, using `spec.md` for copy and acceptance requirements and `plan.md` for file scope and verification. The three handoff documents were copied into `rfc/board-pack/` in that PR and `STORY.md` was reconciled. `/rfc/bq-vp/` remains a redirect. Haiyuan retains the merge gate.
 
 Evidence URLs and exact revisions are in `spec.md`.
+
+## Tone pass (2026-09-06, Fable 5.1, `feat/board-pack-human-tone`)
+
+Haiyuan asked for the board pack to read as a human brief: no scoreboard labels (HIGH / MODERATE / LOW, PARTIAL, BLOCKED, INCOMPLETE, UNVERIFIABLE) on the closed skim or comparison notes, no engineering shorthand (PR numbers, "spike", JOINT, gate codes, commit hashes, reviewer names, SDK, HMAC) in visible prose, and evidence links with friendly text. The **position above is unchanged in substance**: the opportunity is strongest for facts-already-in-BigQuery customers on Enterprise capacity within an agreed budget; the receipt check and graph walk are recorded examples; the connected path is still to prove and is the pilot's job. The page now says that in plain words. This addendum records the mapping; the sections above remain the dated source of the underlying assessment.

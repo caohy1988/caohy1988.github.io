@@ -152,3 +152,16 @@ Static-page checks on the implementation branch, served locally from the worktre
 Opus review (2026-09-06): APPROVE with four non-blocking nits, all applied in the follow-up commit: meta description shortened to 164 characters; clear antecedent for the full demo's UNVERIFIABLE receipts; accurate gate wording in the retrieval design section instead of the G1–G5 shorthand; explicit MODERATE+ downgrade target for the scoped opportunity, kept distinct from the serving-tier MODERATE+. Three-engine QA re-run passed.
 
 Not done: no cloud run, no spike rerun, no merge. Haiyuan retains the merge gate.
+
+## Validation record — tone pass (Fable, 2026-09-06 UTC, `feat/board-pack-human-tone`)
+
+Scope: `rfc/board-pack/{index.html,STORY.md,intent.md,spec.md,plan.md}` only. `styles.css`, the `.hero`, `rfc/bq-vp/index.html`, `rfc/index.html`, `rfc/full-demo/` and `rfc/spikes/` are unchanged. No authored JavaScript, external assets or build steps.
+
+- **Content audit.** Visible prose contains none of: HIGH, MODERATE, LOW, PARTIAL, BLOCKED, INCOMPLETE, INCONCLUSIVE, UNVERIFIABLE, UNPROVEN, JOINT, spike, PR 479, PR 28, G1–G8, SDK, HMAC, worktree, commit hashes or reviewer names (grep over `index.html` and `STORY.md` excluding `href` values). The E2, E5 and E6 URLs are unchanged behind plain link text; E1, E3 and E4 remain linked inside the expanded design. The substantive limits are all still stated in plain words: no agreed customer budget, recorded examples only, connected path still to prove, wider-demo receipts not yet verifiable, graph access checks unfinished, benchmarks 0 of 9.
+- **Engines.** Chromium, Firefox and WebKit pass at 1280, 768, 375 and 320 px, closed and open: no overflow, one visible diagram when open, pairs together on narrow widths, no duplicate IDs, all `use` references resolve, no SVG label (including the renamed `NOT PROVEN · WITHHELD` and `SQL / bounded graph walk`) exceeds its rect, both SVG descriptions still name the proposed connected design, Enterprise capacity, consumer enforcement and the illustrative outcome. No console, page or request errors. Native Enter/Space toggle with a visible focus ring; comparison-note links focus with the `#e2c493` ring.
+- **Closed state.** 700 visible words (identical in all three engines), 2,007 px tall at 1280 × 720 in Chromium (1,986 WebKit); open state 3,814 px. Two evidence links reachable without expanding: the recorded graph walk and the recorded receipt check.
+- **Print.** Closed-state print media in all three engines shows the design body, wide diagram, evidence section and pilot; narrow diagram hidden; monochrome fills. Chromium A4 PDF saved.
+- **Navigation.** `/rfc/bq-vp/` still redirects to `/rfc/board-pack/`; `rfc/index.html` still labels the page **Board-pack near-miss →**.
+- **Artifacts.** `/tmp/okf-boardpack-tone/qa/` (`check.cjs`, `results.json`, Chromium PNGs per viewport/state, crops of the assessment block, diagram and evidence section, `chromium-closed-print.pdf`).
+
+Not done: no cloud run, no experiment rerun, no merge. Haiyuan retains the merge gate.
