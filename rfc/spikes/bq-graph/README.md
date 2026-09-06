@@ -20,6 +20,7 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `okf_bq_graph/retrieve.py` | `retrieve / impact / stub_backlog` with engines `gql` (GA `VECTOR_SEARCH` seed + GQL walk), `fallback` (relational joins, on-demand), `oracle`; cache with re-check at disclosure; fail-closed |
 | `okf_bq_graph/scale.py` | Synthetic 100 / 1,000 namespace-isolated copies in their own datasets (vectors reused by text digest) |
 | `okf_bq_graph/authz.py` | Governance fixtures: RLS dataset (hidden intermediate), metadata-only dataset, authorized views + graph over views; `cases` runs the five second-principal negatives under the existing restricted SA via impersonation (`OKF_SPIKE_RESTRICTED_SA`, no new principal) → `evidence/authz_cases.json` |
+| `okf_bq_graph/chain.py` | Connected chain (2026-09-06): fixture seed → pinned publication → governed retrieval returns the Attested Computation declaration + SQL → bind to the SDK receipt example's pinned publication (data files only) → SDK CLI as a subprocess executes and verifies under the caller → consumer releases only on VERIFIED; two fail-closed substitution cases → `evidence/chain/` |
 | `okf_bq_graph/benchmark.py`, `run.py`, `lifecycle.py`, `safety.py`, `partial.py`, `bin/safety_teardown.sh` | Bounded runner (20 warmups + 100 measured per cell, nearest-rank percentiles, failures retained), the window orchestrator (signal-safe cleanup lifecycle, job cancel, independent watcher), and the honest aggregation of interrupted cells (INCOMPLETE / NOT_RUN) |
 | `okf_bq_graph/cost.py`, `report.py`, `assemble.py` | Slot attribution (exact named reservation vs other pools) and the charged autoscale slot-seconds bill from `INFORMATION_SCHEMA.RESERVATIONS_TIMELINE`; non-mutating report tables; report assembly |
 | `sql/*.sql` | `schema.sql`, `graph.sql` (property graph DDL), `seed.sql` (vector seed), `governed.sql` (two-hop GQL), `context.sql`, `impact.sql`, `stubs.sql`, `fallback.sql` |
@@ -68,6 +69,85 @@ bundle. It is a publication-hygiene measure, not secrecy.
 grant was attempted) change the evidence shape on failure paths only; the recorded measurements are unchanged.
 The next live pass regenerates the file in the current shape.
 
+## Connected chain (2026-09-06)
+
+`python3 -m okf_bq_graph.chain --hermetic` (default) or `--live` runs one Acme path end to end and records every stage in
+`evidence/chain/chain_<mode>.json`, with the SDK CLI's own per-case diagnostics under `evidence/chain/receipt/<run_id>/`
+(the live artifacts from runner `chain/0.2.0` sit directly under `receipt/`, the layout of that runner version):
+
+1. **Seed — fixture.** `forced:metrics/gross-margin.md`, the harness override (not a semantic ranking). Live Knowledge
+   Catalog discovery is out of scope for this chain; nothing here calls a KC endpoint.
+2. **Pinned publication.** `pub_190192147fd7fd78`, read from the `active_publication` pointer (live) or the compiled
+   projection (hermetic) and checked against the pin.
+3. **Governed retrieval.** This spike's `retrieve` reaches `computations/gross-margin-period.md` in one hop and returns the
+   Attested Computation declaration (type, runtime, parameters, `file_sha256`, read from the `nodes` table under the same
+   client) and its SQL, still `runtime_verdict = NOT_EXECUTED`.
+4. **Bind.** The declaration is matched to the SDK receipt example's pinned fixture publication using its data files only
+   (`fixtures/publication.json` + the copied Acme bytes): same file SHA-256 (`5e96ae11…`, also the manifest's
+   `computation_sha256`), same SQL text, same parameter list, same source pin `31da799`, type `Attested Computation`,
+   runtime `bigquery`, FRESH at `as_of`, lifecycle `stable`. Any failed check is `MISMATCH` and nothing executes.
+5. **Receipt.** `examples/okf_attested_computation/run.py` at SDK `6719eb5`, invoked as a subprocess (no SDK source edits),
+   executes the sanctioned computation under the caller's credential; its independent verifier re-reads `jobs.get` /
+   `getQueryResults` and seals a receipt. The verdict is read from the CLI's per-case JSON, never from stdout.
+6. **Consume.** The number is released only when the CLI exits 0, both the sealed receipt and the consumer output say
+   `VERIFIED` with `execution_match = MATCH`, the receipt's `computation_digest` equals the digest recomputed here from the
+   bound bytes (`sha256("okf-receipt:computation-bytes" || 0x00 || bytes)`, the domain constant copied from the SDK's
+   `contracts.py` at the pin), and the receipt's publication id / context ref are the bound ones. `UNVERIFIABLE` or
+   `REJECTED` anywhere → `REFUSED`, no number.
+
+Fail-closed cases run in the same pass: **`sql-substitution`** (the SDK's fixed case: a product-cost-only formula is
+executed for the approved request and 600 is claimed; verifier `REJECTED sql_mismatch`, consumer `REFUSED`, no number) and
+**`declaration-mismatch`** (graph-side swap: a different reachable computation, `computations/revenue-ytd.md`, is offered
+in place of the bound one; bind `MISMATCH` on file digest, SQL text and path, and the receipt CLI is never invoked). The
+CLI has no free-form case, so a "total ARR" swap is not what executes; the executed-SQL swap is the SDK's formula swap.
+
+Labels carried in the evidence: **same requester** (graph leg and receipt leg under the operator's own ADC credential;
+`sa:okf-receipt-restricted` is not exercised by this chain); **hermetic** = oracle graph engine + the SDK's SYNTHETIC API
+emulation, `same_requester = NOT_APPLICABLE`; **live** = relational `fallback` engine on the published tables (on-demand,
+**not** BigQuery Graph; `--engine gql` needs an Enterprise window this module does not open; `--live --engine oracle` is
+refused) + SDK `--live` (real BigQuery jobs against the SDK's SYNTHETIC fixture dataset), plus a `jobs.get` check that
+**every** job the chain submitted (the pointer lookup, the retrieval and declaration jobs of all three cases, both
+receipt jobs) carries one **known** `user_email` (`same_requester = SAME`; any missing identity or unreadable job is
+UNKNOWN, never SAME).
+
+Verdict rule (`verdict_rule` in the evidence). Before any case executes, a **provenance gate** requires the pointer to
+equal the publication pin, the SDK head to equal `6719eb5` and the whole SDK checkout to be clean (unknown git state
+counts as not clean); otherwise no case runs and the verdict is `CHAIN_BROKEN` at `provenance`. In live mode exactly one
+query job precedes the gate, the `active_publication` pointer lookup; its job id is recorded and it is part of the
+identity set. Each case then carries an
+**acceptance** record separate from the fail-closed consumer decision: `MET` only when the case reached its intended
+stage and produced its specific evidence — `approved`: reached, bound, CLI exit 0, VERIFIED, RELEASED;
+`sql-substitution`: reached, bound, CLI invoked with a fresh diagnostic, exit 2, both verdicts REJECTED, `execution_match`
+MISMATCH, reason `sql_mismatch`, not released, REFUSED; `declaration-mismatch`: the alternate computation reached and its
+declaration visible, bind MISMATCH with `file_sha256` and `sql_text` among the failed checks, CLI never invoked, REFUSED.
+`NOT_REACHED` (an upstream or child failure before the intended stage on any leg, `approved` included: still refused,
+but the stage never ran) gives `CHAIN_INCOMPLETE`; `WRONG` (the stage was reached and contradicts the expectation, e.g. a released substitution or a
+rejection for a different reason) gives `CHAIN_BROKEN`. `CHAIN_CONNECTED` needs every case `MET` and, live, the identity
+check `SAME`. Every run owns `receipt/<run_id>/`: each receipt launch writes its diagnostic into an invocation-private
+directory inside it that no other launch can see, the file must be newer than the launch, and it is moved (never copied
+over a shared name) to `receipt/<run_id>/case_<case>_<mode>.json`. Each receipt record carries the diagnostic's
+`request_id` and SHA-256, the chain record carries its `run_id`, `chain_<mode>.json` is written atomically and also
+retained inside the run directory, and no run deletes anything outside its own directory. Two successful overlapping
+runs therefore keep and reference only their own evidence (regression: a full chain completes inside another chain's
+substitution launch; every reference reconciles by request id and digest).
+
+Hermetic result: `CHAIN_CONNECTED` (`evidence/chain/chain_hermetic.json`; provenance ok, all ten bind checks hold,
+`approved` RELEASED `$400.00 USD · VERIFIED` on the synthetic fixture, both substitutions REFUSED, all three acceptances
+`MET`). Live result (2026-09-06 21:52Z, one foreground pass, `evidence/chain/chain_live.json`): **CHAIN_CONNECTED** —
+provenance ok (pointer = pin, SDK head = pin, checkout clean); relational fallback engine (on-demand, three retrieval jobs
++ one declaration job per case, 2.2 s retrieval) reached the computation in one hop, all ten bind checks hold; SDK
+`--live` executed the sanctioned SQL under the operator's credential (receipt job `okf_rcpt_fbec89a0…`, verifier VERIFIED
+/ MATCH, access probe ALLOWED, 5.7 s CLI wall) and the consumer RELEASED `$400.00 USD · VERIFIED` on the SDK's synthetic
+fixture dataset; `sql-substitution` reached, executed, REJECTED `sql_mismatch` → REFUSED (exit 2, no number);
+`declaration-mismatch` reached revenue-ytd, MISMATCH on file digest, parameters, path and SQL text → REFUSED, CLI never
+invoked; all three acceptances `MET`; `same_requester = SAME` over 14 jobs (12 graph jobs + 2 receipt jobs, one known
+`user_email`, masked as `operator`). The whole pass took 23 s. The earlier 21:35Z pass (commit `cef88d7`) reached the same
+decisions under the pre-acceptance verdict rule and a three-job identity sample; it was re-run so the committed artifact is
+the output of the rule it claims. The retained live artifact is the output of runner `chain/0.2.0` at `a615a7c`: its
+identity set is the 14 case jobs and does not include the pointer-lookup job, which the current runner (`chain/0.3.0`)
+adds; the later changes (invocation-private and run-owned diagnostics, `approved` outage labelled NOT_REACHED) alter no
+recorded field of a passing run, so it was not re-run.
+
 ## Graph model (spec §3)
 
 Node kinds `Concept | Section | Source | Actor | Artifact | LogEntry`; stubs are `Concept{stub=true}`. Relations
@@ -97,6 +177,8 @@ python3 -m okf_bq_graph.capacity US us-central1 EU           # read-only invento
 python3 -m okf_bq_graph.compile <bundle_root> evidence/projection_acme.json
 python3 -m okf_bq_graph.publish <bundle_root>                # on-demand: tables, vectors, graph DDL, pointer
 OKF_LIVE_ENGINE=fallback python3 -m pytest tests/test_retrieve.py -q   # live, on-demand
+python3 -m okf_bq_graph.chain --hermetic                  # connected chain, no cloud (oracle graph + SDK emulation)
+python3 -m okf_bq_graph.chain --live                      # connected chain, on-demand fallback engine + SDK --live
 python3 -m okf_bq_graph.run integration --minutes 25         # opens the Enterprise window, runs GQL cases, closes it
 python3 -m okf_bq_graph.run benchmark --minutes 85           # benchmark cells from fixtures/scale.json
 python3 -m okf_bq_graph.run all --minutes 85                 # both in one window

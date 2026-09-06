@@ -351,3 +351,27 @@ paths are covered offline and were not exercised in a new live window. Temporary
 `okf_graph_spike_20260905{,_x100,_x1000,_rls,_meta,_av}` and their remote embedding models carry a 14-day default table
 expiration (dataset objects themselves are not auto-deleted); they retain the governed evidence and can be dropped earlier
 by the operator. No shared assignment or resource outside this spike was touched.
+
+## Addendum 2026-09-06: connected chain (fixture seed, same requester)
+
+`okf_bq_graph/chain.py` ran the path this report's outcome section called missing, with two honest narrowings: the seed is
+the harness fixture (no KC discovery) and both legs run under the operator's own credential. Fixture seed → pinned
+publication `pub_190192147fd7fd78` → governed retrieval returns the Attested Computation declaration and SQL for
+`computations/gross-margin-period.md` (`NOT_EXECUTED`) → bind to the SDK receipt example's pinned publication by data files
+(file SHA-256 `5e96ae11…`, SQL text, parameters, source pin `31da799`) → SDK CLI at `6719eb5` as a subprocess executes and
+independently verifies → consumer releases only on VERIFIED with the receipt's `computation_digest` recomputed from the bound
+bytes. Hermetic (oracle graph engine + SDK SYNTHETIC emulation): **CHAIN_CONNECTED** — `approved` RELEASED, the SDK's
+`sql-substitution` REFUSED (`REJECTED sql_mismatch`, no number), `declaration-mismatch` (revenue-ytd offered instead) REFUSED
+before any execution (`evidence/chain/chain_hermetic.json`). Live (relational fallback engine, on-demand, not BigQuery
+Graph; SDK `--live`, 2026-09-06 21:52Z, one foreground pass, `evidence/chain/chain_live.json`): **CHAIN_CONNECTED** —
+provenance gate ok (pointer = pin, SDK head = pin, checkout clean), one-hop reach in 2.2 s (three on-demand jobs + one
+declaration job per case), all ten bind checks hold, receipt job `okf_rcpt_fbec89a0…` VERIFIED / MATCH under the operator's
+credential, consumer RELEASED `$400.00 USD` on the SDK's synthetic fixture dataset, both substitutions REFUSED with their
+acceptance `MET` (the negative reached its stage and produced its specific rejection: `sql_mismatch` at exit 2; bind
+MISMATCH on file digest and SQL text with the CLI never invoked), `same_requester = SAME` (`jobs.get user_email` one known
+identity over the 14 case jobs: 12 graph + 2 receipt; the pointer-lookup job that precedes the provenance gate joined the
+identity set in runner `chain/0.3.0`, after this pass), 23 s end to end. The 21:35Z pass at `cef88d7` reached the same
+decisions under a weaker rule (refusal alone counted, three-job identity sample) and was re-run under the current rule. This is the connected **publication → retrieval → execution → receipt → consumer** path
+under one requester on the relational engine; it is not connected KC discovery (fixture seed), not the GQL engine, and not
+a second principal, so the combined-delivery verdict in the outcome section is for the JOINT checkpoint to revise, not this
+addendum.
