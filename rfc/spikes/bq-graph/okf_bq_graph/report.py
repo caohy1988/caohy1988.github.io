@@ -60,8 +60,26 @@ def natural_table(allj: dict) -> str:
     return "\n".join(out)
 
 
+import re
+HIDDEN_RE = re.compile(r"metrics/gross-margin(?![-\w])")   # matches the concept and its sections (#sN), not -legacy
+
+
+def _leak(obj) -> bool:
+    """Strict hidden-identifier check over the stored disclosure surfaces (recomputed post hoc; the runtime
+    check used a plain substring and false-positived on metrics/gross-margin-legacy)."""
+    return bool(HIDDEN_RE.search(json.dumps(obj, default=str)))
+
+
 def governance_table(allj: dict) -> str:
     g = allj.get("governance", {})
+    for key in ("rls_hidden_intermediate", "rls_natural", "rls_impact", "authorized_views"):
+        if key in g:
+            surf = {k: v for k, v in g[key].items() if k not in ("leaks_hidden_id", "verdict", "timing", "status")}
+            g[key]["leaks_hidden_id"] = _leak(surf)
+            if key == "rls_hidden_intermediate":
+                g[key]["verdict"] = "ENFORCED" if (g[key].get("computations") == 0 and not g[key]["leaks_hidden_id"]) else "LEAK_OR_UNEXPECTED"
+            if key == "authorized_views" and "computations" in g[key]:
+                g[key]["verdict"] = "ENFORCED" if (g[key].get("computations") == 0 and not g[key]["leaks_hidden_id"]) else "LEAK_OR_UNEXPECTED"
     rows = ["| case | dataset / mechanism | observed | verdict |", "|---|---|---|---|"]
     h = g.get("rls_hidden_intermediate", {})
     rows.append(f"| hidden intermediate (`metrics/gross-margin`) inside GQL walk | `_rls`: ROW ACCESS POLICY on nodes/edges/vectors | status {h.get('status')}, computations {h.get('computations')}, paths {h.get('paths')}, replacement {h.get('replacement')}, hidden id in output: {h.get('leaks_hidden_id')} | {h.get('verdict')} |")
