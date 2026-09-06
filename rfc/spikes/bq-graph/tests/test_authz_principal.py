@@ -342,8 +342,79 @@ def test_teardown_continues_after_first_step_fails():
     assert td["sa_denied_after_teardown"] is True and td["status"] == "UNVERIFIED"
     owner2 = _Owner(fail_restore=True)
     td2 = AZ.teardown(owner2, None, SA, PUB, wait_s=0)
-    assert td2["steps"]["remove_dataset_reader"]["ok"] and not td2["steps"]["restore_policies"]["ok"]
+    assert td2["steps"]["remove_dataset_reader"]["ok"] and owner2.log.count("restore") == 3      # every policy attempted
+    assert all(not td2["steps"][f"restore_policy_{t}"]["ok"] for t in ("nodes", "edges", "section_vectors"))
     assert td2["steps"]["readback_grantees"]["ok"] and not td2["steps"]["sa_denied_after_teardown"]["ok"] and td2["status"] == "UNVERIFIED"
+
+
+class _OwnerNodesPolicyFails(_Owner):
+    """Only the nodes policy statement fails; edges and section_vectors must still be restored (P1 #7 residual)."""
+    def query(self, q, job_config=None, location=None):
+        if "ROW ACCESS POLICY" in q:
+            self.log.append("restore:" + ("nodes" if ".nodes`" in q else "edges" if ".edges`" in q else "section_vectors"))
+            if ".nodes`" in q:
+                raise RuntimeError(f"nodes policy failed near {HID}")
+            return _FakeJob()
+        return super().query(q, job_config, location)
+
+
+def test_each_policy_restoration_is_isolated():
+    owner = _OwnerNodesPolicyFails(fail_reader=True)
+    td = AZ.teardown(owner, None, SA, PUB, wait_s=0)
+    assert owner.log.count("restore:nodes") == 1 and "restore:edges" in owner.log and "restore:section_vectors" in owner.log
+    assert not td["steps"]["restore_policy_nodes"]["ok"] and td["steps"]["restore_policy_edges"]["ok"] and td["steps"]["restore_policy_section_vectors"]["ok"]
+    assert HID not in json.dumps(td) and "<id:" in td["steps"]["restore_policy_nodes"]["error"] and td["status"] == "UNVERIFIED"
+    with pytest.raises(RuntimeError, match="nodes"):        # strict callers still fail, after every statement was attempted
+        AZ.set_rls(owner, [AZ.operator()])
+    assert owner.log.count("restore:edges") == 2
+
+
+# ---- P1 #5 residual: every log line is masked, not only the final JSON
+def test_record_case_log_line_masks_ids_and_emails(capsys):
+    cases = {"k": {"description": "d", "label": "BLOCKED", "reason": "not reached"}}
+    AZ.record_case(cases, "k", lambda: (_ for _ in ()).throw(RuntimeError(f"{SA} could not read {HID}.md or {SEED}")), SA, IDS)
+    out = capsys.readouterr().out
+    assert HID not in out and SEED not in out and SA not in out and "<id:" in out and AZ.SA_ALIAS in out
+    assert HID not in cases["k"]["reason"] and "<id:" in cases["k"]["reason"]
+    AZ.record_case(cases, "k", lambda: {"label": "NOT_APPLICABLE", "verdict": "X", "reason": f"no entry for {HID}"}, SA, IDS)
+    assert HID not in capsys.readouterr().out
+
+
+def test_shared_setup_abort_log_is_masked(capsys, tmp_path):
+    out = AZ.second_principal_cases(_Owner(), PUB, "2026-09-05T00:00:00Z", sa_email=SA, factory=lambda p: _SAClient(),
+                                    out_path=str(tmp_path / "a.json"), wait_s=0)
+    captured = capsys.readouterr().out
+    assert "ABORT at denied_id_universe" in captured and HID not in captured and SA not in captured and OP not in captured
+    assert HID not in json.dumps(out) and out["abort"]["stage"] == "denied_id_universe"
+
+
+# ---- residual P2: executed failures survive aggregation
+def test_fold_variant_failed_child_overrides_any_parent_label():
+    na = {"label": "NOT_APPLICABLE", "verdict": "NO_CACHE_ENTRY", "reason": "warm run did not store"}
+    bad = {"label": "FAILED", "verdict": "LEAK_OR_UNEXPECTED"}
+    folded = AZ.fold_variant(dict(na), "cross_principal_replay", bad)
+    assert folded["label"] == "FAILED" and folded["verdict"] == "CROSS_PRINCIPAL_REPLAY_LEAK_OR_UNEXPECTED" and folded["label_before_variant"] == "NOT_APPLICABLE"
+    assert AZ.fold_variant({"label": "BLOCKED", "reason": "x"}, "v", bad)["label"] == "FAILED"
+    assert AZ.fold_variant({"label": "MEASURED"}, "v", {"label": "NOT_RUN"})["label"] == "MEASURED"
+
+
+def test_record_case_retains_partial_failed_observation_when_later_step_raises(capsys):
+    cases = {"k": {"description": "d", "label": "BLOCKED", "reason": "not reached"}}
+
+    def fn(partial):
+        partial["replay_observation"] = {"label": "FAILED", "verdict": "REPLAY_LEAK_OR_UNEXPECTED", "concepts": 1}
+        raise RuntimeError(f"fresh request raised for {HID}")
+    AZ.record_case(cases, "k", fn, SA, IDS)
+    c = cases["k"]
+    assert c["label"] == "FAILED" and c["verdict"] == "PARTIAL_REPLAY_OBSERVATION_REPLAY_LEAK_OR_UNEXPECTED"
+    assert c["replay_observation"]["concepts"] == 1 and "executed observation failed" in c["reason"] and HID not in c["reason"]
+    assert HID not in capsys.readouterr().out
+
+    def fn_ok_then_raise(partial):
+        partial["replay_observation"] = {"label": "MEASURED", "verdict": "REPLAY_CLOSED"}
+        raise RuntimeError("fresh request raised")
+    AZ.record_case(cases, "k", fn_ok_then_raise, SA, IDS)
+    assert cases["k"]["label"] == "BLOCKED" and cases["k"]["replay_observation"]["label"] == "MEASURED"
 
 
 def test_labels_are_closed_set():

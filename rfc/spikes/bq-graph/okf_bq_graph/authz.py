@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import datetime as _dt
 import hashlib
+import inspect
 import json
 import os as _os
 import re
@@ -74,6 +75,7 @@ CASES = {
     "revocation_before_cached_replay": "grant, run, cache, revoke dataset reader, replay from cache under the SA: replay refused",
 }
 LABELS = ("MEASURED", "FAILED", "BLOCKED", "NOT_APPLICABLE")
+FIXTURE_IDS = (HIDDEN, "metrics/gross-margin-legacy", "metrics/revenue", "computations/revenue-ytd", "computations/gross-margin-period")
 _EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 
 
@@ -180,11 +182,21 @@ def rls_statements(grantees: list[str], vector_grantees: Optional[list[str]] = N
             "section_vectors": f"CREATE OR REPLACE ROW ACCESS POLICY hide_intermediate_vectors ON `{rls}.section_vectors` GRANT TO ({vg}) FILTER USING ({f_vec})"}
 
 
-def set_rls(client: bigquery.Client, grantees: list[str], vector_grantees: Optional[list[str]] = None, hide: bool = True) -> dict:
+def set_rls(client: bigquery.Client, grantees: list[str], vector_grantees: Optional[list[str]] = None, hide: bool = True,
+            strict: bool = True) -> dict:
+    """Apply the three `_rls` policies. Every statement is attempted even if an earlier one failed (each table's
+    policy is an independent grant); per-table outcome is a job id or {"error": ...}. strict=True raises after all
+    three were attempted so callers that need the full shape still fail; teardown uses strict=False."""
     from .publish import run
-    out = {"at": _dt.datetime.now(_dt.timezone.utc).isoformat()}
+    out: dict = {"at": _dt.datetime.now(_dt.timezone.utc).isoformat()}
+    errors = []
     for t, q in rls_statements(grantees, vector_grantees, hide).items():
-        out[t] = run(client, q).job_id
+        try:
+            out[t] = run(client, q).job_id
+        except Exception as e:  # noqa: BLE001 - keep going: the other tables' grants are independent
+            out[t] = {"error": f"{type(e).__name__}: {str(e)[:300]}"}; errors.append(t)
+    if errors and strict:
+        raise RuntimeError(f"row access policy statements failed for {errors}: " + "; ".join(out[t]["error"] for t in errors))
     return out
 
 
@@ -283,9 +295,9 @@ def revoke(client: bigquery.Client) -> dict:
     return set_rls(client, [_operator_member()], hide=False)
 
 
-def restore(client: bigquery.Client) -> dict:
+def restore(client: bigquery.Client, strict: bool = True) -> dict:
     """Operator-only hidden-intermediate policies (the 2026-09-05 fixture shape)."""
-    return set_rls(client, [_operator_member()], hide=True)
+    return set_rls(client, [_operator_member()], hide=True, strict=strict)
 
 
 # ----------------------------------------------------------------------------- judges (pure; hermetically tested)
@@ -362,7 +374,8 @@ def fold_variant(case: dict, name: str, variant: dict) -> dict:
     """An executed variant (e.g. the natural-language seed) keeps its own label and verdict, and a FAILED variant
     fails the enclosing case. A variant that could not execute (NOT_RUN) is recorded and does not grade the case."""
     case[name] = variant
-    if variant.get("label") == "FAILED" and case.get("label") == "MEASURED":
+    if variant.get("label") == "FAILED" and case.get("label") != "FAILED":
+        case["label_before_variant"] = case.get("label")
         case["label"] = "FAILED"; case["verdict"] = f"{name.upper()}_{variant.get('verdict')}"
     return case
 
@@ -467,19 +480,35 @@ def _bound(owner: bigquery.Client, result: dict, sa: str) -> dict:
     return {"jobs": len(emails), "bound_to_sa": bool(emails) and all(e == sa for e in emails)}
 
 
-def _err(e: BaseException, sa: str, n: int = 400) -> str:
-    return redact(f"{type(e).__name__}: {str(e)[:n]}", sa)
+def mask(text: Any, sa: str, ids: tuple | list = ()) -> Any:
+    """Every emitted or stored failure text: e-mails redacted AND publication identifiers masked (the known
+    universe plus the fixture constants), so no log line or reason can name a denied identifier."""
+    return sanitize_ids(redact(text, sa), list(FIXTURE_IDS) + list(ids))
 
 
-def record_case(cases: dict, key: str, fn: Callable[[], dict], sa: str) -> None:
-    """Merge a judge result into the case slot: the placeholder reason is dropped first so a judge-supplied reason
-    (NOT_APPLICABLE / BLOCKED) survives; an exception is a recorded blocker, never a pass."""
+def _err(e: BaseException, sa: str, n: int = 400, ids: tuple | list = ()) -> str:
+    return mask(f"{type(e).__name__}: {str(e)[:n]}", sa, ids)
+
+
+def record_case(cases: dict, key: str, fn: Callable[..., dict], sa: str, ids: tuple | list = ()) -> None:
+    """Merge a judge result into the case slot. The placeholder reason is dropped first so a judge-supplied reason
+    (NOT_APPLICABLE / BLOCKED) survives. `fn` may accept a `partial` dict and judge each completed observation into
+    it promptly; on an exception those observations are retained, and an executed FAILED observation takes
+    precedence over the blocker (an exception after a leak is not a pass and not merely BLOCKED). The log line is
+    masked before it is written."""
     cases[key].pop("reason", None)
+    partial: dict = {}
     try:
-        cases[key].update(fn())
+        cases[key].update(fn(partial) if inspect.signature(fn).parameters else fn())
     except Exception as e:  # noqa: BLE001
-        cases[key].update(label="BLOCKED", reason=_err(e, sa))
-    print(key, cases[key].get("label"), cases[key].get("verdict") or cases[key].get("reason"), flush=True)
+        cases[key].update(partial)
+        failed = [n for n, v in partial.items() if isinstance(v, dict) and v.get("label") == "FAILED"]
+        if failed:
+            cases[key].update(label="FAILED", verdict=f"PARTIAL_{failed[0].upper()}_{partial[failed[0]].get('verdict')}",
+                              reason=f"executed observation failed before the case completed; then {_err(e, sa, ids=ids)}")
+        else:
+            cases[key].update(label="BLOCKED", reason=_err(e, sa, ids=ids))
+    print(key, cases[key].get("label"), mask(cases[key].get("verdict") or cases[key].get("reason"), sa, ids), flush=True)
 
 
 def teardown(owner: bigquery.Client, sa_client: Any, sa: str, pub: str, wait_s: int) -> dict:
@@ -491,10 +520,14 @@ def teardown(owner: bigquery.Client, sa_client: Any, sa: str, pub: str, wait_s: 
         try:
             v = fn(); td["steps"][name] = {"ok": True}; return v
         except Exception as e:  # noqa: BLE001
-            td["steps"][name] = {"ok": False, "error": _err(e, sa, 300)}; return None
+            td["steps"][name] = {"ok": False, "error": _err(e, sa, 300)}; return None  # ids masked by _err
 
     td["reader_removed_at"] = step("remove_dataset_reader", lambda: set_dataset_reader(owner, RLS_DS, sa, False))
-    td["policies_restored"] = step("restore_policies", lambda: restore(owner))
+    restored = step("restore_policies", lambda: restore(owner, strict=False)) or {}
+    for t in ("nodes", "edges", "section_vectors"):   # each policy is an independent grant: attempted and recorded separately
+        r = restored.get(t)
+        td["steps"][f"restore_policy_{t}"] = {"ok": isinstance(r, str)} if isinstance(r, str) else {"ok": False, "error": mask((r or {}).get("error", "not attempted"), sa)}
+    td["policies_restored"] = {k: (v if isinstance(v, str) else mask(v, sa)) for k, v in restored.items()}
     grantees = step("readback_grantees", lambda: rls_grantees(owner))
     if grantees is not None:
         td["rls_grantees_after"] = redact(grantees, sa)
@@ -584,7 +617,7 @@ def second_principal_cases(owner: bigquery.Client, pub: str, as_of: str, engine:
             def case1():
                 j = judge_hidden_intermediate(r1, control); j["timing_ms"] = r1["timing"]["total_ms"]; j["sa_jobs"] = _bound(owner, r1, sa); j["full_result"] = r1
                 return j
-            record_case(cases, "hidden_intermediate", case1, sa)
+            record_case(cases, "hidden_intermediate", case1, sa, denied_ids)
 
             def case4():
                 r_owner = retrieve(legacy, BUNDLE_ID, pub, "operator", as_of, {"engine": engine, "bq": owner, "ds": DATASET})
@@ -592,9 +625,9 @@ def second_principal_cases(owner: bigquery.Client, pub: str, as_of: str, engine:
                 j = judge_owner_fallback(r_owner, r1, _job_emails(owner, r1), sa, _job_emails(owner, r_owner), op_email, owner_on_restricted=r_owner_rls)
                 j["owner_paths"] = r_owner["paths"]; j["sa_paths"] = r1["paths"]
                 return j
-            record_case(cases, "owner_fallback_negative", case4, sa)
+            record_case(cases, "owner_fallback_negative", case4, sa, denied_ids)
 
-            def case5():
+            def case5(partial: dict):
                 cache: dict = {}
                 cc = dict(sa_rls, cache=cache)
                 warm = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, cc)
@@ -603,16 +636,19 @@ def second_principal_cases(owner: bigquery.Client, pub: str, as_of: str, engine:
                 xc: dict = {}
                 owner_warm = retrieve(legacy, BUNDLE_ID, pub, "operator", as_of, {"engine": engine, "bq": owner, "ds": DATASET, "cache": xc})
                 sa_replay = retrieve(legacy, BUNDLE_ID, pub, "operator", as_of, {"engine": engine, "bq": sa_client, "ds": DATASET, "cache": xc})
+                partial["cross_principal_replay"] = judge_cross_principal_replay(owner_warm, sa_replay, denied_ids)   # judged promptly
                 revoked_at = set_dataset_reader(owner, RLS_DS, sa, False)
                 ev["grants"].append({"at": revoked_at, "ds": RLS_DS, "principal": SA_ALIAS, "reader": False})
                 seen, obs, waited = _wait(lambda: _probe(sa_client, RLS_DS, pub), _is_denied, wait_s)
                 replay = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, cc)
+                r_ok, r = _closed(replay, denied_ids)
+                partial["replay_observation"] = {"label": _label(r_ok and r["cache"] == "HIT_DENIED"), "verdict": "REPLAY_CLOSED" if r_ok else "REPLAY_LEAK_OR_UNEXPECTED", **r}
                 fresh = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
                 j = judge_revocation(warm, hit, replay, fresh, seen, denied_ids)
                 j.update(revoked_at=revoked_at, revocation_propagation_s=waited, revocation_observation=type(obs).__name__,
                          replay_warnings=replay.get("warnings"), sa_jobs=_bound(owner, warm, sa))
-                return fold_variant(j, "cross_principal_replay", judge_cross_principal_replay(owner_warm, sa_replay, denied_ids))
-            record_case(cases, "revocation_before_cached_replay", case5, sa)
+                return fold_variant(j, "cross_principal_replay", partial["cross_principal_replay"])
+            record_case(cases, "revocation_before_cached_replay", case5, sa, denied_ids)
 
             # ---- phase B: never granted on the base dataset
             def case2():
@@ -625,10 +661,10 @@ def second_principal_cases(owner: bigquery.Client, pub: str, as_of: str, engine:
                 j["api_error_redacted"] = redact(api_err[:300], sa) if api_err else None
                 j["sa_jobs"] = _bound(owner, r2, sa); j["full_result"] = r2
                 return j
-            record_case(cases, "denied_bundle", case2, sa)
+            record_case(cases, "denied_bundle", case2, sa, denied_ids)
 
             # ---- phase C: vectors visible, nodes/edges denied (policy grantees exclude the SA on nodes/edges only)
-            def case3():
+            def case3(partial: dict):
                 ev["grants"].append({"at": set_dataset_reader(owner, RLS_DS, sa, True), "ds": RLS_DS, "principal": SA_ALIAS, "reader": True})
                 ev["grants"].append({"policies": set_rls(owner, [_operator_member()], vector_grantees=[_operator_member(), member]),
                                      "grantees": {"nodes_edges": ["operator"], "section_vectors": ["operator", SA_ALIAS]}, "shape": "hidden-intermediate"})
@@ -638,17 +674,18 @@ def second_principal_cases(owner: bigquery.Client, pub: str, as_of: str, engine:
                     raise RuntimeError(f"phase C grants did not propagate within {wait_s}s: {redact(str(obs)[:200], sa)}")
                 r3 = retrieve(legacy, BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
                 j = judge_output_denied(r3, obs, denied_ids, seed_local, control)
+                partial["forced_seed"] = {k: j[k] for k in ("label", "verdict", "status", "leaked_id_count")}   # judged promptly
                 j["propagation_s"] = waited; j["sa_jobs"] = _bound(owner, r3, sa); j["full_result"] = r3
                 try:  # natural seed exercises the vector store itself; the remote embedding model may not be usable by the SA
                     rn = retrieve("How do we calculate gross margin, exactly?", BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
                     jn = judge_output_denied(rn, obs, denied_ids, "", control)
                     jn.update(seed_hits=len(rn["concepts"]), full_result=rn)
                 except Exception as e:  # noqa: BLE001 - could not execute: recorded, not graded
-                    jn = {"label": "NOT_RUN", "verdict": None, "error": _err(e, sa, 200)}
+                    jn = {"label": "NOT_RUN", "verdict": None, "error": _err(e, sa, 200, denied_ids)}
                 return fold_variant(j, "natural_seed", jn)
-            record_case(cases, "output_denied_seed_visible", case3, sa)
+            record_case(cases, "output_denied_seed_visible", case3, sa, denied_ids)
         except Exception as e:  # noqa: BLE001 - shared setup failed: block what was not reached, keep cleaning up, still finalize
-            ev["abort"] = {"stage": stage, "reason": _err(e, sa)}
+            ev["abort"] = {"stage": stage, "reason": _err(e, sa, ids=denied_ids)}
             for c in cases.values():
                 if c.get("reason") == "not reached":
                     c["reason"] = f"aborted at {stage}: {ev['abort']['reason']}"
@@ -664,7 +701,7 @@ def _finish(ev: dict, out_path: Optional[str], sa: str, denied_ids: list[str]) -
     named). Verified before writing; a violation raises instead of publishing."""
     ev["finished_at"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
     ev["summary"] = {k: c.get("label") for k, c in ev["cases"].items()}
-    ids = sorted(set(denied_ids) | {HIDDEN, "metrics/gross-margin-legacy", "metrics/revenue", "computations/revenue-ytd", "computations/gross-margin-period"})
+    ids = sorted(set(denied_ids) | set(FIXTURE_IDS))
     ev["id_sanitization"] = {"masked_ids": len(ids), "universe_known": bool(denied_ids), "token": "<id:sha256[:8]>"}
     ev = sanitize_ids(redact(ev, sa), ids)
     text = json.dumps(ev, default=str)
