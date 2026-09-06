@@ -95,3 +95,13 @@ The copy map above records the wording implemented on `feat/board-pack-post-spik
 | Diagram `UNPROVEN` | `NOT PROVEN · WITHHELD` |
 
 E1 (the PR page itself) is no longer linked from the closed skim; the receipt report E2 is. Acceptance examples AE1–AE4 hold with the plain-language equivalents.
+
+## Later questions slice addendum (2026-09-06)
+
+Scope: one visible panel in `index.html` (`#later-questions`, a `section` reusing the existing `.runtime-rule` and `.comparison-note` typography) placed immediately after `.comparison` closes and before the capacity line, plus this document, `intent.md`, `plan.md` and `STORY.md`. No change to `styles.css`, SVGs, `rfc/index.html`, `rfc/bq-vp/`, `rfc/full-demo/` or spike artifacts. R1–R11 continue to apply.
+
+- R12. The panel carries exactly three questions, in the order of `#context-point`, `#access-point` and `#execution-point`, each answered by evidence the proposed runtime would keep: saved context (selected versions and links), a protected access record (which identity and policy permitted access at the time), and a checked execution receipt (evidence, a mismatch, or why the result remains unproven). The panel is self-contained and adds no link into the closed design body.
+- R13. Wording is conditional ("could ask", "would identify") and states both limits: answers hold only while the evidence is retained and while the reader is permitted to see it now. No retention horizon, no "explain every decision", no new score and no shipped-feature language. The panel does not claim to explain the model's private reasoning.
+- R14. Hero, arithmetic, near-miss paragraph, three comparisons and their notes, Technical design, punchline and pilot ask are unchanged. The panel is not a fourth comparison and no experiment is said to have produced Alder's number.
+
+Acceptance: AE1–AE4 still hold with the panel present; closed and open views at 320 px and desktop show the panel without overflow; the disclosure still toggles by keyboard; monochrome print with the disclosure closed shows the panel with the rest of the runtime section; all IDs are unique and the new anchor resolves.

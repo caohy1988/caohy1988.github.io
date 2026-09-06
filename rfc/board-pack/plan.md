@@ -165,3 +165,21 @@ Scope: `rfc/board-pack/{index.html,STORY.md,intent.md,spec.md,plan.md}` only. `s
 - **Artifacts.** `/tmp/okf-boardpack-tone/qa/` (`check.cjs`, `results.json`, Chromium PNGs per viewport/state, crops of the assessment block, diagram and evidence section, `chromium-closed-print.pdf`).
 
 Not done: no cloud run, no experiment rerun, no merge. Haiyuan retains the merge gate.
+
+## Later questions slice (Fable 5.1, 2026-09-06 PT, `feat/board-pack-ask-later` from `origin/main` `9182405`)
+
+**Scope:** Astra's Slice 1 ("Three later questions in the board pack"), chosen first by Haiyuan over the full-RFC §07 table. Files: `rfc/board-pack/{index.html,STORY.md,intent.md,spec.md,plan.md}`. Unchanged: `styles.css`, SVGs, `rfc/index.html`, `rfc/bq-vp/`, `rfc/full-demo/`, `rfc/spikes/`. No authored JavaScript, external assets, build steps, cloud runs or experiment reruns.
+
+**Change:** one `section#later-questions` after `.comparison` closes and before the capacity line, built from the existing `.runtime-rule` and `.comparison-note` classes: a lead line, three question/answer lines in the order of the three comparisons, and one boundary sentence (105 words). Companion docs carry the dated scope (`intent.md`), R12–R14 and acceptance (`spec.md`) and the later-audit beat (`STORY.md`).
+
+### Validation record
+
+Static checks served from the worktree with Playwright-managed Chromium, Firefox and WebKit; artifacts under `/tmp/okf-boardpack-later/qa/` (`check.cjs`, `results.json`, Chromium PNGs per viewport/state, panel crops, `chromium-closed-print.pdf`, print-media screenshot).
+
+- **Acceptance 1 (story intact).** `.hero` is byte-identical to `origin/main`. Three `.comparison-point` sections; the punchline, pilot ask, illustrative label, 118%/96% and $4 million are unchanged. No experiment is said to have produced Alder's number.
+- **Acceptance 2 (mapping, self-contained).** Lines 1–3 correspond to `#context-point` / `#design-context`, `#access-point` / `#design-access`, `#execution-point` / `#design-execution`. The panel adds no links, so no fragment navigation into the closed design body. `aria-labelledby` resolves; no duplicate IDs in any engine.
+- **Acceptance 3 (conditional wording).** "could ask" / "would identify"; "goals for the connected pilot"; "holds only while that evidence is retained and the reader is permitted to see it now"; "none explains the model's private reasoning". Grep over `index.html` and `STORY.md` (excluding `href` values) finds none of: Semantica, Palantir, causal, decision graph, guaranteed, forever, always, six-month, or the scoreboard labels HIGH / LOW / MODERATE / PARTIAL / BLOCKED / INCOMPLETE / UNVERIFIABLE.
+- **Acceptance 4 (QA).** 1280 px and 320 px, disclosure closed and open, in all three engines: no horizontal overflow; the panel sits between the comparison block and the capacity line; no page or console errors. Native Enter opens and Space closes the disclosure with `.technical-design[open] + .design-body` intact. Print media with the disclosure closed: panel `display: block`, text `#333`, border `#aaa`, 8pt; the design body still prints. Closed state: 805 visible words (all engines), 2,163 px tall at 1280 × 720 in Chromium (2,165 Firefox, 2,142 WebKit); open state 3,970 px. The closed skim is 105 words over the tone pass's 700; Astra's plan accepts about 100 words for this panel, so the copy was not shortened further.
+- **Acceptance 5 (diff).** `git diff --name-only` lists only the five files; `git diff --check` passes.
+
+Not done: no cloud run, no experiment rerun, no merge. Haiyuan retains the merge gate. Full-RFC evidence map (Slice 2) and auditor acceptance cases (Slice 3) are separate later work.
