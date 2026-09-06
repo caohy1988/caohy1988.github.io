@@ -28,17 +28,31 @@ class WindowStopped(RuntimeError):
 
 
 class _ResultHTTP:
-    """Recheck at actual HTTP dispatch, after SDK request preparation."""
+    """Guard a job-local session, including sends after auth preparation/retries."""
     def __init__(self, raw, remaining):
-        self.raw, self.remaining = raw, remaining
+        self.raw, self.remaining = copy.copy(raw), remaining
+        # Session's pickle-based copy omits AuthorizedSession's auth fields.
+        # Retain credentials, auth transport and caller configuration, but put
+        # the send override only on this copy, never the cancellation client.
+        self.raw.__dict__.update(raw.__dict__)
+        self._send = self.raw.send
+        self.raw.send = self.send
 
     def __getattr__(self, name):
         return getattr(self.raw, name)
 
-    def request(self, *args, **kwargs):
+    def _timeout(self, requested):
         remaining = self.remaining()
-        requested = kwargs.get("timeout")
-        kwargs["timeout"] = min(1, remaining, requested if isinstance(requested, (int, float)) else 1)
+        return min(1, remaining, requested if isinstance(requested, (int, float)) else 1)
+
+    def send(self, request, **kwargs):
+        # AuthorizedSession prepares credentials and may retry a 401 inside
+        # request(). Every resulting send needs a fresh admission/time budget.
+        kwargs["timeout"] = self._timeout(kwargs.get("timeout"))
+        return self._send(request, **kwargs)
+
+    def request(self, *args, **kwargs):
+        kwargs["timeout"] = self._timeout(kwargs.get("timeout"))
         response = self.raw.request(*args, **kwargs)
         self.remaining()
         return response
