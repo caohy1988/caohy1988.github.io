@@ -105,22 +105,27 @@ Labels carried in the evidence: **same requester** (graph leg and receipt leg un
 emulation, `same_requester = NOT_APPLICABLE`; **live** = relational `fallback` engine on the published tables (on-demand,
 **not** BigQuery Graph; `--engine gql` needs an Enterprise window this module does not open; `--live --engine oracle` is
 refused) + SDK `--live` (real BigQuery jobs against the SDK's SYNTHETIC fixture dataset), plus a `jobs.get` check that
-**every** job the chain submitted (retrieval and declaration jobs of all three cases, both receipt jobs) carries one
-**known** `user_email` (`same_requester = SAME`; any missing identity or unreadable job is UNKNOWN, never SAME).
+**every** job the chain submitted (the pointer lookup, the retrieval and declaration jobs of all three cases, both
+receipt jobs) carries one **known** `user_email` (`same_requester = SAME`; any missing identity or unreadable job is
+UNKNOWN, never SAME).
 
-Verdict rule (`verdict_rule` in the evidence). Before any job runs, a **provenance gate** requires the pointer to equal the
-publication pin, the SDK head to equal `6719eb5` and the whole SDK checkout to be clean (unknown git state counts as not
-clean); otherwise nothing executes and the verdict is `CHAIN_BROKEN` at `provenance`. Each case then carries an
+Verdict rule (`verdict_rule` in the evidence). Before any case executes, a **provenance gate** requires the pointer to
+equal the publication pin, the SDK head to equal `6719eb5` and the whole SDK checkout to be clean (unknown git state
+counts as not clean); otherwise no case runs and the verdict is `CHAIN_BROKEN` at `provenance`. In live mode exactly one
+query job precedes the gate, the `active_publication` pointer lookup; its job id is recorded and it is part of the
+identity set. Each case then carries an
 **acceptance** record separate from the fail-closed consumer decision: `MET` only when the case reached its intended
 stage and produced its specific evidence — `approved`: reached, bound, CLI exit 0, VERIFIED, RELEASED;
 `sql-substitution`: reached, bound, CLI invoked with a fresh diagnostic, exit 2, both verdicts REJECTED, `execution_match`
 MISMATCH, reason `sql_mismatch`, not released, REFUSED; `declaration-mismatch`: the alternate computation reached and its
 declaration visible, bind MISMATCH with `file_sha256` and `sql_text` among the failed checks, CLI never invoked, REFUSED.
-`NOT_REACHED` (an upstream or child failure before the intended stage: still refused, but the negative never ran) gives
-`CHAIN_INCOMPLETE`; `WRONG` (the stage was reached and contradicts the expectation, e.g. a released substitution or a
+`NOT_REACHED` (an upstream or child failure before the intended stage on any leg, `approved` included: still refused,
+but the stage never ran) gives `CHAIN_INCOMPLETE`; `WRONG` (the stage was reached and contradicts the expectation, e.g. a released substitution or a
 rejection for a different reason) gives `CHAIN_BROKEN`. `CHAIN_CONNECTED` needs every case `MET` and, live, the identity
-check `SAME`. The receipt diagnostic path is cleared before each launch and must be newer than the launch, so a stale
-per-case file is never attributed to the current run.
+check `SAME`. Each receipt launch writes its diagnostic into an invocation-private directory that no other launch can
+see, the file must be newer than the launch, and the retained `receipt/case_<case>_<mode>.json` is copied only from that
+private artifact (retained copies are cleared at the start of every run), so neither a stale nor an overlapping run's
+file can be attributed to the current one.
 
 Hermetic result: `CHAIN_CONNECTED` (`evidence/chain/chain_hermetic.json`; provenance ok, all ten bind checks hold,
 `approved` RELEASED `$400.00 USD · VERIFIED` on the synthetic fixture, both substitutions REFUSED, all three acceptances
@@ -134,7 +139,10 @@ fixture dataset; `sql-substitution` reached, executed, REJECTED `sql_mismatch` �
 invoked; all three acceptances `MET`; `same_requester = SAME` over 14 jobs (12 graph jobs + 2 receipt jobs, one known
 `user_email`, masked as `operator`). The whole pass took 23 s. The earlier 21:35Z pass (commit `cef88d7`) reached the same
 decisions under the pre-acceptance verdict rule and a three-job identity sample; it was re-run so the committed artifact is
-the output of the rule it claims.
+the output of the rule it claims. The retained live artifact is the output of runner `chain/0.2.0` at `a615a7c`: its
+identity set is the 14 case jobs and does not include the pointer-lookup job, which the current runner (`chain/0.3.0`)
+adds; the later changes (invocation-private diagnostics, `approved` outage labelled NOT_REACHED) alter no recorded field
+of a passing run, so it was not re-run.
 
 ## Graph model (spec §3)
 

@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -189,9 +190,10 @@ def test_chain_stops_before_execution_when_retrieval_is_denied(sdk_root, tmp_pat
                               "scope": {"publication_id": "p"}, "timing": {"jobs": []}}
     monkeypatch.setattr(CH, "governed", denied)
     out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "oracle"},
-                       projection={"publication_id": "p", "nodes": []}, requester="t", as_of=AS_OF, runner=runner)
-    assert out["verdict"] == "CHAIN_BROKEN" and calls == []
+                       projection={"publication_id": CH.PUBLICATION_PIN, "nodes": []}, requester="t", as_of=AS_OF, runner=runner)
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and calls == []          # an outage is unproven, not a contradiction
     assert all(c["consume"]["decision"] == "REFUSED" for c in out["cases"])
+    assert all(c["acceptance"]["status"] == "NOT_REACHED" for c in out["cases"])
 
 
 def test_module_cli_hermetic(sdk_root, sample_root, tmp_path):
@@ -212,19 +214,19 @@ def test_receipt_evidence_dir_is_resolved_before_the_subprocess_changes_cwd(tmp_
 
     monkeypatch.chdir(tmp_path)
     CH.run_receipt("approved", str(tmp_path / "sdk"), "rel/receipt", live=False, runner=runner)
-    assert seen["argv"][seen["argv"].index("--evidence-dir") + 1] == str((tmp_path / "rel" / "receipt").resolve())
+    ev = seen["argv"][seen["argv"].index("--evidence-dir") + 1]
+    assert ev.startswith(str((tmp_path / "rel" / "receipt").resolve()) + "/.inv_approved_hermetic_")
 
 
 def test_live_pointer_lookup_uses_the_default_dataset_when_clients_omit_ds(sdk_root, tmp_path, monkeypatch):
-    import okf_bq_graph.publish as PUB
     from okf_bq_graph import DATASET
     seen = {}
 
-    def fake_resolve(client, bundle_id, ds=DATASET):
+    def fake_resolve(client, ds=DATASET):
         seen["ds"] = ds
-        return None
+        return None, "pointer-job"
 
-    monkeypatch.setattr(PUB, "resolve_pointer", fake_resolve)
+    monkeypatch.setattr(CH, "resolve_pointer_job", fake_resolve)
     out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "fallback", "bq": object()},
                        requester="t", as_of=AS_OF, runner=lambda *a, **k: (_ for _ in ()).throw(AssertionError("must not run")))
     assert seen["ds"] == DATASET and out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "publication"
@@ -253,8 +255,15 @@ def test_accept_approved():
     assert CH.accept(_case("approved"))["status"] == "MET"
     a = CH.accept(_case("approved", consume={"decision": "REFUSED"}))
     assert a["status"] == "WRONG"
-    a = CH.accept(_case("approved", retrieval={"status": "DENIED", "reached": False}))
+    a = CH.accept(_case("approved", retrieval={"status": "DENIED", "reached": False}, bind={"status": "NOT_BOUND"},
+                        receipt={"invoked": False}, consume={"decision": "REFUSED"}))
     assert a["status"] == "NOT_REACHED" and any("retrieval" in f for f in a["failed"])
+    # child died before a diagnostic: refused, but the stage was never reached
+    a = CH.accept(_case("approved", receipt={"invoked": True, "exit_code": 1, "diag_present": False}, consume={"decision": "REFUSED"}))
+    assert a["status"] == "NOT_REACHED" and not any("RELEASED" in f for f in a["failed"])
+    # bind mismatch on the approved leg is a genuine contradiction, not an outage
+    a = CH.accept(_case("approved", bind={"status": "MISMATCH", "checks": {}}, receipt={"invoked": False}, consume={"decision": "REFUSED"}))
+    assert a["status"] == "WRONG"
 
 
 def test_accept_sql_substitution_needs_its_specific_rejection_evidence():
@@ -375,16 +384,17 @@ def test_run_receipt_ignores_a_stale_diagnostic(tmp_path):
     rec = CH.run_receipt("approved", str(tmp_path / "sdk"), str(tmp_path), live=False, runner=runner)
     assert rec["exit_code"] == -1 and rec["diag"] is None and rec["diag_present"] is False
     assert rec["receipt"]["verdict"] == "UNVERIFIABLE" and "stalejob_zz9" not in json.dumps(rec)
-    assert not stale.exists()
+    assert rec["diag_path"] is None and not Path(rec["invocation_dir"]).exists()
 
 
 def test_run_receipt_rejects_a_diagnostic_older_than_the_launch(tmp_path):
     import os as _os
     stale = tmp_path / "case_approved_hermetic.json"
 
-    def runner(argv, **kw):   # writes a file but back-dates it: not this launch's artifact
-        stale.write_text(json.dumps({"issue_out": {"receipt": {"verdict": "VERIFIED"}}, "output": {"verdict": "VERIFIED"}, "released": True}))
-        _os.utime(stale, (1, 1))
+    def runner(argv, **kw):   # writes into the private dir but back-dates it: not this launch's artifact
+        priv = Path(argv[argv.index("--evidence-dir") + 1]) / "case_approved_hermetic.json"
+        priv.write_text(json.dumps({"issue_out": {"receipt": {"verdict": "VERIFIED"}}, "output": {"verdict": "VERIFIED"}, "released": True}))
+        _os.utime(priv, (1, 1))
         return subprocess.CompletedProcess(argv, 0, stdout="x VERIFIED", stderr="")
 
     rec = CH.run_receipt("approved", str(tmp_path / "sdk"), str(tmp_path), live=False, runner=runner)
@@ -443,3 +453,96 @@ def test_live_with_oracle_engine_is_rejected(sdk_root, tmp_path):
         CH.run_chain(engine="oracle", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "oracle"}, projection={"publication_id": "p", "nodes": []})
     with pytest.raises(SystemExit):
         CH.main(["--live", "--engine", "oracle", "--out", str(tmp_path)])
+
+
+# ---- residual P2s @ a615a7c
+def test_chain_is_incomplete_when_the_approved_child_dies(clients, projection, sdk_root, tmp_path):
+    stale = tmp_path / "receipt" / "case_approved_hermetic.json"          # a retained copy from an earlier run must not survive
+    stale.parent.mkdir(parents=True); stale.write_text("{}")
+
+    def runner(argv, **kw):
+        if "approved" in argv:
+            return subprocess.CompletedProcess(argv, 1, stdout="", stderr="Traceback: simulated crash before any diagnostic")
+        return subprocess.run(argv, **kw)
+
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients, projection=projection,
+                       requester="t", as_of=AS_OF, runner=runner)
+    cases = {c["case"]: c for c in out["cases"]}
+    assert cases["approved"]["consume"]["decision"] == "REFUSED"
+    assert cases["approved"]["acceptance"]["status"] == "NOT_REACHED"
+    assert cases["sql-substitution"]["acceptance"]["status"] == "MET" and cases["declaration-mismatch"]["acceptance"]["status"] == "MET"
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "approved"
+    assert not stale.exists() and cases["approved"]["receipt"]["diag_path"] is None
+
+
+def test_chain_is_incomplete_when_only_the_approved_graph_leg_errors(clients, projection, sdk_root, tmp_path, monkeypatch):
+    real = CH.governed
+    calls = {"n": 0}
+
+    def flaky(query, *a, **k):
+        calls["n"] += 1
+        if query == CH.SEED and calls["n"] == 1:      # first approved retrieval only
+            raise RuntimeError("simulated retrieval outage on the approved leg")
+        return real(query, *a, **k)
+
+    monkeypatch.setattr(CH, "governed", flaky)
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients, projection=projection,
+                       requester="t", as_of=AS_OF)
+    assert out["acceptance"] == {"approved": "NOT_REACHED", "sql-substitution": "MET", "declaration-mismatch": "MET"}
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "approved"
+
+
+def test_overlapping_receipt_invocations_cannot_exchange_diagnostics(sdk_root, tmp_path):
+    """Astra: A clears the shared path, B writes its diagnostic, A fails afterwards -> A must not adopt B's file."""
+    from pathlib import Path
+    b_result = {}
+
+    def runner_a(argv, **kw):
+        b_result["rec"] = CH.run_receipt("approved", sdk_root, str(tmp_path), live=False)   # B runs to completion inside A's launch window
+        raise FileNotFoundError("simulated launch failure of A after B completed")
+
+    a = CH.run_receipt("approved", sdk_root, str(tmp_path), live=False, runner=runner_a)
+    b = b_result["rec"]
+    assert b["diag_present"] and b["receipt"]["verdict"] == "VERIFIED"
+    assert a["exit_code"] == -1 and a["diag_present"] is False and a["receipt"]["verdict"] == "UNVERIFIABLE"
+    assert b["receipt"]["request_id"] not in json.dumps(a)
+    assert a["invocation_dir"] != b["invocation_dir"]
+    assert Path(b["diag_path"]).exists() and json.loads(Path(b["diag_path"]).read_text())["request_id"] == b["receipt"]["request_id"]
+    assert not Path(a["invocation_dir"]).exists() and not Path(b["invocation_dir"]).exists()   # private dirs do not linger
+
+
+def test_receipt_diag_is_read_from_the_private_dir_and_retained_under_out_dir(sdk_root, tmp_path):
+    rec = CH.run_receipt("sql-substitution", sdk_root, str(tmp_path), live=False)
+    assert rec["argv"][rec["argv"].index("--evidence-dir") + 1] == rec["invocation_dir"]
+    assert rec["invocation_dir"].startswith(str(tmp_path.resolve())) and rec["diag_path"] == str(tmp_path.resolve() / "case_sql-substitution_hermetic.json")
+    assert rec["diag_present"] and rec["output"]["reason_codes"] == ["sql_mismatch"]
+
+
+class _PointerJob:
+    job_id = "pointer-job-1"
+
+    def result(self):
+        return [{"publication_id": CH.PUBLICATION_PIN}]
+
+
+class _PointerClient:
+    def query(self, q, job_config=None, location=None):
+        assert "active_publication" in q
+        return _PointerJob()
+
+
+def test_pointer_lookup_records_its_job_id():
+    pub, job_id = CH.resolve_pointer_job(_PointerClient())
+    assert pub == CH.PUBLICATION_PIN and job_id == "pointer-job-1"
+
+
+def test_job_ids_of_includes_the_pointer_job():
+    ids = CH.job_ids_of([{"case": "approved", "retrieval": {"timing": {"jobs": [{"job_id": "w"}]}}, "receipt": {"invoked": False}}],
+                        pointer_job_id="pointer-job-1")
+    assert ids["graph"] == ["pointer-job-1", "w"]
+
+
+def test_live_without_a_bq_client_still_writes_a_verdict(sdk_root, tmp_path):
+    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "fallback"},
+                       requester="t", as_of=AS_OF, runner=lambda *a, **k: (_ for _ in ()).throw(AssertionError("must not run")))
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "publication" and (tmp_path / "chain_live.json").exists()

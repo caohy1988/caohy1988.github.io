@@ -25,8 +25,10 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -164,17 +166,21 @@ def bind(comp: dict, decl: dict, sdk_pub: dict, as_of: str) -> dict:
 def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner = subprocess.run,
                 timeout: int = 900) -> dict:
     """Invoke the SDK example CLI for one case. The verdict is read from the CLI's own per-case diagnostic JSON, not
-    from stdout. The diagnostic path is cleared before the launch and must be newer than the launch: a missing, stale
-    or unparsable diagnostic is UNVERIFIABLE and `diag_present = False` (Astra P2 #3)."""
+    from stdout. The CLI writes into an invocation-private directory that no other launch can see (overlapping runs
+    cannot exchange evidence: Astra P2), the file must be newer than the launch, and the retained copy under `out_dir`
+    is written only from that private artifact. A missing, stale or unparsable diagnostic is UNVERIFIABLE and
+    `diag_present = False`."""
     out_dir = str(Path(out_dir).resolve())   # the CLI runs with the SDK root as cwd: never let a relative path land there
-    argv = [sys.executable, str(Path(root) / EXAMPLE_REL / "run.py"), "--case", case, "--evidence-dir", out_dir]
+    Path(out_dir).mkdir(parents=True, exist_ok=True)
+    mode = "live" if live else "hermetic"
+    inv_dir = tempfile.mkdtemp(prefix=f".inv_{case}_{mode}_", dir=out_dir)
+    argv = [sys.executable, str(Path(root) / EXAMPLE_REL / "run.py"), "--case", case, "--evidence-dir", inv_dir]
     env = dict(os.environ)
     if live:
         argv.append("--live")
         env["GOOGLE_CLOUD_PROJECT"] = PROJECT
-    Path(out_dir).mkdir(parents=True, exist_ok=True)
-    diag_path = Path(out_dir) / f"case_{case}_{'live' if live else 'hermetic'}.json"
-    diag_path.unlink(missing_ok=True)
+    private_diag = Path(inv_dir) / f"case_{case}_{mode}.json"
+    diag_path = Path(out_dir) / f"case_{case}_{mode}.json"   # retained copy, written only from this invocation's artifact
     launched_at = time.time()
     t0 = time.monotonic()
     try:
@@ -183,17 +189,21 @@ def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner =
     except (OSError, subprocess.TimeoutExpired) as e:  # the CLI never ran to completion: nothing to verify
         exit_code, stdout, stderr = -1, "", f"{type(e).__name__}: {str(e)[:300]}"
     elapsed = round((time.monotonic() - t0) * 1000, 1)
-    diag, reason = None, "diag_missing"
+    diag, reason, raw = None, "diag_missing", None
     try:
-        if diag_path.stat().st_mtime < launched_at - 1.0:   # 1 s tolerance for filesystem timestamp granularity
+        if private_diag.stat().st_mtime < launched_at - 1.0:   # 1 s tolerance for filesystem timestamp granularity
             reason = "diag_stale"
         else:
-            diag = json.loads(diag_path.read_text(encoding="utf-8"))
+            raw = private_diag.read_bytes()
+            diag = json.loads(raw.decode("utf-8"))
     except (OSError, ValueError):
         diag = None
+    if diag is not None and raw is not None:
+        diag_path.write_bytes(raw)
+    shutil.rmtree(inv_dir, ignore_errors=True)
     rec = {"case": case, "invoked": True, "argv": argv, "cwd": root, "live": live, "exit_code": exit_code, "elapsed_ms": elapsed,
-           "stdout": stdout[-2000:], "stderr_tail": stderr[-1500:], "diag_path": str(diag_path), "diag": diag,
-           "diag_present": diag is not None}
+           "stdout": stdout[-2000:], "stderr_tail": stderr[-1500:], "invocation_dir": inv_dir,
+           "diag_path": str(diag_path) if diag is not None else None, "diag": diag, "diag_present": diag is not None}
     if diag is None:
         rec["receipt"] = {"verdict": UNVERIFIABLE, "execution_match": "UNKNOWN", "reason": reason}
         rec["output"] = {"verdict": UNVERIFIABLE, "execution_match": "UNKNOWN", "reason_codes": [reason]}
@@ -272,10 +282,11 @@ def accept(c: dict) -> dict:
         elif rec.get("exit_code") == -1 or not rec.get("diag_present"):
             not_reached.append(f"receipt child did not complete: exit_code={rec.get('exit_code')} diag_present={rec.get('diag_present')}")
     if case == "approved":
-        if rec.get("invoked") and rec.get("diag_present") and rec.get("exit_code") != 0:
-            failed.append(f"exit_code={rec.get('exit_code')} != 0")
-        if decision != "RELEASED":
-            failed.append(f"consume decision={decision} != RELEASED")
+        if not not_reached:   # an unreached stage ends REFUSED by design: that is unproven, not contradictory
+            if rec.get("exit_code") != 0:
+                failed.append(f"exit_code={rec.get('exit_code')} != 0")
+            if decision != "RELEASED":
+                failed.append(f"consume decision={decision} != RELEASED")
     elif case == "sql-substitution":
         if decision != "REFUSED":
             failed.append(f"consume decision={decision}: a substitution was released")
@@ -315,10 +326,21 @@ def accept(c: dict) -> dict:
 
 
 # ----------------------------------------------------------------------------- identity (live only)
-def job_ids_of(cases: list[dict]) -> dict:
-    """Every job the chain submitted: retrieval jobs and the declaration job of each case (graph leg) and every
-    receipt job (SDK leg). The identity claim covers all of them, not a capped sample (Astra P2 #4)."""
-    graph: list[str] = []
+def resolve_pointer_job(client: Any, ds: str = DATASET) -> tuple[Optional[str], Optional[str]]:
+    """`active_publication` pointer under the caller's client, returning the job id too: this one query job precedes the
+    provenance gate and belongs in the identity set."""
+    from google.cloud import bigquery
+    from .publish import run
+    job = run(client, f"SELECT publication_id FROM `{PROJECT}.{ds}.active_publication` WHERE bundle_id = @b",
+              [bigquery.ScalarQueryParameter("b", "STRING", BUNDLE_ID)], labels={"okf_spike": "bq_graph_20260905", "stage": "chain_pointer"})
+    rows = list(job.result())
+    return (rows[0]["publication_id"] if rows else None), job.job_id
+
+
+def job_ids_of(cases: list[dict], pointer_job_id: Optional[str] = None) -> dict:
+    """Every job the chain submitted: the pointer lookup, retrieval jobs and the declaration job of each case (graph
+    leg) and every receipt job (SDK leg). The identity claim covers all of them, not a capped sample (Astra P2 #4)."""
+    graph: list[str] = [pointer_job_id] if pointer_job_id else []
     receipt: list[dict] = []
     for c in cases:
         for j in ((c.get("retrieval") or {}).get("timing") or {}).get("jobs", []) or []:
@@ -374,14 +396,15 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         raise ValueError("hermetic mode uses the oracle engine only")
     as_of = as_of or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     mode = "live" if live else "hermetic"
-    out = {"chain": "okf_bq_graph.chain/0.2.0", "mode": mode, "engine": engine, "started_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+    out = {"chain": "okf_bq_graph.chain/0.3.0", "mode": mode, "engine": engine, "started_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
            "as_of": as_of, "bundle_id": BUNDLE_ID, "source_pin": SOURCE_PIN,
            "seed": {"mode": "fixture", "query": SEED, "note": "forced seed: harness-only deterministic override, not a semantic ranking; "
                                                                 "live Knowledge Catalog discovery is out of scope for this chain"},
            "requester": {"mode": "same-requester", "note": "graph leg and receipt leg both under the operator's ADC credential"},
-           "verdict_rule": "CHAIN_CONNECTED only when provenance pins hold, every case is MET (reached its stage with its specific "
-                           "evidence) and, live, every submitted job carries one known user_email; CHAIN_INCOMPLETE when a case never "
-                           "reached its stage; CHAIN_BROKEN when a reached stage contradicts the expectation or a pin fails"}
+           "verdict_rule": "CHAIN_CONNECTED only when provenance pins hold before any case executes, every case is MET (reached its "
+                           "stage with its specific evidence) and, live, every submitted job (pointer lookup, retrieval, declaration, "
+                           "receipt) carries one known user_email; CHAIN_INCOMPLETE when a case never reached its stage (outage on any "
+                           "leg, including approved); CHAIN_BROKEN when a reached stage contradicts the expectation or a pin fails"}
     # SDK pin
     try:
         sdk_pub = sdk_publication(sdk_root)
@@ -405,15 +428,18 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             from google.cloud import bigquery
             clients = {"engine": engine, "bq": bigquery.Client(project=PROJECT, location=LOCATION)}
     requester = requester or operator()
-    # pinned publication
+    # pinned publication (live: one query job, submitted before the gate and counted in the identity set)
+    pointer_job_id = None
     try:
         if engine == "oracle":
             pub = projection["publication_id"]
             out["publication"] = {"status": "OK", "publication_id": pub, "source": "compiled projection (deterministic from the pinned bytes)"}
         else:
-            from .publish import resolve_pointer
-            pub = resolve_pointer(clients["bq"], BUNDLE_ID, clients.get("ds", DATASET))
-            out["publication"] = {"status": "OK" if pub else "NO_PUBLICATION", "publication_id": pub, "source": "active_publication pointer"}
+            if clients.get("bq") is None:
+                raise RuntimeError("live mode needs a BigQuery client in clients['bq']")
+            pub, pointer_job_id = resolve_pointer_job(clients["bq"], clients.get("ds", DATASET))
+            out["publication"] = {"status": "OK" if pub else "NO_PUBLICATION", "publication_id": pub, "source": "active_publication pointer",
+                                  "job_id": pointer_job_id}
         out["publication"]["matches_pin"] = pub == PUBLICATION_PIN
         out["publication"]["pin"] = PUBLICATION_PIN
     except Exception as e:  # noqa: BLE001
@@ -421,14 +447,14 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     if not pub:
         out["verdict"] = "CHAIN_BROKEN"; out["broken_at"] = "publication"; out["cases"] = []
         return _finish(out, out_dir, mode, redact)
-    # provenance gate (Astra P2 #2): nothing executes on an unknown or mismatched pin
+    # provenance gate (Astra P2 #2): no case executes on an unknown or mismatched pin (only the pointer lookup precedes it)
     prov = {"publication_pin": out["publication"]["matches_pin"], "sdk_head_pin": bool(sdk_pub["sdk_head_matches_pin"]),
             "sdk_clean": sdk_pub["sdk_repo_dirty"] is False, "sdk_git_state_known": sdk_pub["sdk_repo_dirty"] is not None}
     prov["ok"] = prov["publication_pin"] and prov["sdk_head_pin"] and prov["sdk_clean"]
     out["provenance"] = prov
     if not prov["ok"]:
         out["verdict"] = "CHAIN_BROKEN"; out["broken_at"] = "provenance"; out["cases"] = []
-        out["same_requester"] = {"status": "NOT_RUN", "reason": "provenance gate refused before any job"}
+        out["same_requester"] = {"status": "NOT_RUN", "reason": "provenance gate refused before any case executed"}
         return _finish(out, out_dir, mode, redact)
 
     def graph_leg(seed: str, path: str) -> tuple[dict, Optional[dict], Optional[dict]]:
@@ -457,6 +483,8 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
 
     out["cases"] = []
     receipt_dir = str(Path(out_dir) / "receipt")
+    for stale in Path(receipt_dir).glob(f"case_*_{mode}.json"):   # retained copies belong to this run only
+        stale.unlink()
     for case in cases:
         seed, path = (MISMATCH_SEED, MISMATCH_PATH) if case == "declaration-mismatch" else (SEED, COMPUTATION_PATH)
         c: dict[str, Any] = {"case": case, "expected": EXPECTED.get(case)}
@@ -480,9 +508,10 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         out["cases"].append(c)
     out["decisions"] = {c["case"]: c["consume"]["decision"] for c in out["cases"]}
     out["acceptance"] = {c["case"]: c["acceptance"]["status"] for c in out["cases"]}
-    ids = job_ids_of(out["cases"])
+    ids = job_ids_of(out["cases"], pointer_job_id)
     if live:
-        out["same_requester"] = same_requester(clients["bq"], ids["graph"], ids["receipt"])
+        out["same_requester"] = same_requester(clients.get("bq"), ids["graph"], ids["receipt"]) if clients.get("bq") is not None \
+            else {"status": "UNKNOWN", "reason": "no BigQuery client"}
     else:
         out["same_requester"] = {"status": "NOT_APPLICABLE", "reason": "hermetic mode: oracle graph + SDK SYNTHETIC emulation submit no BigQuery jobs"}
     statuses = [c["acceptance"]["status"] for c in out["cases"]]

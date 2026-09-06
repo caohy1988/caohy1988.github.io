@@ -369,7 +369,8 @@ declaration job per case), all ten bind checks hold, receipt job `okf_rcpt_fbec8
 credential, consumer RELEASED `$400.00 USD` on the SDK's synthetic fixture dataset, both substitutions REFUSED with their
 acceptance `MET` (the negative reached its stage and produced its specific rejection: `sql_mismatch` at exit 2; bind
 MISMATCH on file digest and SQL text with the CLI never invoked), `same_requester = SAME` (`jobs.get user_email` one known
-identity over all 14 submitted jobs: 12 graph + 2 receipt), 23 s end to end. The 21:35Z pass at `cef88d7` reached the same
+identity over the 14 case jobs: 12 graph + 2 receipt; the pointer-lookup job that precedes the provenance gate joined the
+identity set in runner `chain/0.3.0`, after this pass), 23 s end to end. The 21:35Z pass at `cef88d7` reached the same
 decisions under a weaker rule (refusal alone counted, three-job identity sample) and was re-run under the current rule. This is the connected **publication → retrieval → execution → receipt → consumer** path
 under one requester on the relational engine; it is not connected KC discovery (fixture seed), not the GQL engine, and not
 a second principal, so the combined-delivery verdict in the outcome section is for the JOINT checkpoint to revise, not this
