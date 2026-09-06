@@ -1,0 +1,30 @@
+-- GA-only relational fallback (works on-demand, no reservation): the same two-hop walk with plain joins.
+-- Labelled FALLBACK in evidence; it is not a BigQuery Graph result.
+WITH n AS (
+  SELECT * FROM `{ds}.nodes` WHERE publication_id = @publication_id
+),
+e AS (
+  SELECT edge_id, src_id, dst_id FROM `{ds}.edges`
+  WHERE publication_id = @publication_id AND relation = 'LINKS_TO'
+),
+c AS (SELECT node_id, status FROM n WHERE node_id IN UNNEST(@seeds)),
+-- Each frontier contains only visible, pinned nodes. Visible edges alone do not
+-- authorize their endpoints (node-only row policies can hide an intermediate).
+hop1 AS (
+  SELECT c.node_id AS seed, c.status AS seed_status, e.dst_id AS n1, [e.edge_id] AS edge_ids
+  FROM c JOIN e ON e.src_id = c.node_id JOIN n dst ON dst.node_id = e.dst_id
+),
+hop2 AS (
+  SELECT h.seed, h.seed_status, h.n1, e.dst_id AS n2, ARRAY_CONCAT(h.edge_ids, [e.edge_id]) AS edge_ids
+  FROM hop1 h JOIN e ON e.src_id = h.n1 JOIN n dst ON dst.node_id = e.dst_id
+),
+cand AS (
+  SELECT seed, n1 AS computation_id, [seed, n1] AS hop_ids, edge_ids, 1 AS concept_hops FROM hop1
+  UNION ALL
+  SELECT seed, n2, [seed, n1, n2], edge_ids, 2 FROM hop2 WHERE seed_status = 'deprecated'
+)
+SELECT cand.seed AS seed_id, cand.concept_hops, cand.hop_ids, cand.edge_ids, ac.node_id AS computation_id, ac.path AS computation_path, ac.status AS computation_status
+FROM cand JOIN n ac ON ac.node_id = cand.computation_id
+WHERE ac.kind = 'Concept' AND ac.type = 'Attested Computation'
+  AND NOT ac.stub AND COALESCE(ac.status, 'stable') <> 'deprecated'
+ORDER BY seed_id, concept_hops, computation_id

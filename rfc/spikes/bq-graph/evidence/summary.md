@@ -1,0 +1,17 @@
+# Summary — BigQuery Graph spike (2026-09-05/06) — post-review state
+
+| Gate | Outcome | Evidence |
+|---|---|---|
+| G1 capacity | **PASSED (measured)** — no reservations/assignments in the probed locations US, us-central1, EU; on-demand GQL rejected with the edition error; Enterprise pay-as-you-go autoscaling reservation (0 baseline, ≤100) created, GQL smoke job on it (edition ENTERPRISE, 21,410 slot-ms), torn down; every CREATE has a platform DELETE (last 00:27:27Z; 18.7 min cumulative). Assignment propagation 120.9 s / 140.4 s in the two measured windows, non-atomic. | `capacity-gate.md`, `capacity.json`, `sku_receipt.json`, `smoke_*`, `cleanup_manifest.json`, `reservation_changes.json` |
+| G2 projection | **PASSED** — deterministic, scoped, closed; 44 nodes / 109 edges / 22 sections; unknown frontmatter preserved; negatives fixture behaves as specified | `projection_acme.json`, `tests/` |
+| G3 landmine | **PASSED on compared fields** — deprecated anchor → current metric → sanctioned SQL in 2 hops in GQL; hops, computation, SQL digest, trust, replacement, freshness, path and provenance resource set equal the oracle; declaration-scoped provenance signals not compared (incomplete). Natural question seeds current + policy + deprecated side by side. | `all_all-0017.json`, `report.md` |
+| G4 impact / backlog | **PASSED on names + min hops** — GQL `ACYCLIC {1,6}` impact set equals oracle; stub backlog equals oracle (Acme empty, bundle_b 3 stubs) | `all_all-0017.json` |
+| G5 duplicates / scope / ambiguity / stale | **PASSED** (cached-freshness defect found by review fixed in code with offline test) | `all_all-0017.json`, `tests/` |
+| G6 authorization | **PARTIAL** — RLS removes the hidden two-hop path inside the GQL walk (path removal corroborated; *no-hidden-id* claim INCONCLUSIVE: detector defect, payload not retained); impact on RLS ENFORCED; Section-denied → SQL withheld; all-rows revoke-before-cached-replay fails closed (edge-only revocation not exercised live; code fixed + offline test); graph over authorized views ACCEPTED (same identity), with disclosure INCONCLUSIVE. **BLOCKED**: every case needing a distinct real principal. | `authz_setup.json`, `all_all-0017.json` |
+| G7 publication | **PARTIAL** — failed publish leaves old pointer (PASS); concurrent single-pin claim not verifiable at measurement time (checker defect; replaced + unit-tested offline) | `all_all-0017.json`, `publish_log.jsonl` |
+| G8 benchmark / cost | **INCOMPLETE** — 0 of 9 cells complete; `acme_c1` 28/100 measured (p50 4.38 s, p95 5.44 s over 28, all OK); all eight remaining cells (including `x100_c10`) NOT_RUN_BUDGET, with targets and null percentiles. Capacity bill from charged autoscale slot-seconds ≈ **$0.36** (21,750 slot-s), named-reservation attribution $0.033, default-pipeline 26 jobs separate, on-demand $0.0074 list — provisional. Storage/embedding/upkeep NOT_MEASURED; 10k/day NOT_MODELED. | `summary.json`, `requests.jsonl`, `cost.json` |
+| G9 comparison | Neo4j RECORDED, Spanner DOCUMENTED/NOT_RUN, KC+SQL fallback MEASURED on-demand (forced 2.1–2.6 s n=2; natural 5.7 s n=1; no GQL impact), BQ Graph MEASURED for single requests only. Envelope **UNACCEPTED**; p95 at C=5 NOT_RUN. | `comparison.md` |
+
+**Delivery input for the joint checkpoint:** MODERATE for the graph-retrieval slice only, with the operating-envelope half
+NOT_RUN; combined delivery stays LOW (no connected receipt path). Downgrade-trigger watch: per-burst one-minute 50-slot
+minimum and round-trip-bound latency.

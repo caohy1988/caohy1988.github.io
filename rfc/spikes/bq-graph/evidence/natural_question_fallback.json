@@ -1,0 +1,290 @@
+{
+ "status": "OK",
+ "concepts": [
+  {
+   "concept": "metrics/gross-margin",
+   "path": "metrics/gross-margin.md",
+   "title": "Gross Margin",
+   "type": "Metric",
+   "lifecycle_status": "stable",
+   "trust_tier": "human-reviewed",
+   "verifications": [
+    {
+     "by": "human:jsmith@acme",
+     "kind": "human",
+     "at": "2026-07-01T09:00:00Z"
+    }
+   ],
+   "freshness": {
+    "verdict": "FRESH",
+    "stale_after": "2026-12-31T00:00:00Z"
+   },
+   "provenance": [
+    {
+     "resource": "policies/margin-standard.md",
+     "title": "Cost Allocation & Margin Standard (FY2026)",
+     "declaration": "frontmatter.sources[0]",
+     "resolution": null
+    },
+    {
+     "resource": "policies/revenue-recognition.md",
+     "title": "Revenue Recognition Policy (FY2026)",
+     "declaration": "frontmatter.sources[1]",
+     "resolution": null
+    }
+   ],
+   "replacement": null,
+   "matched_sections": [
+    {
+     "section_id": "acme_retail|pub_190192147fd7fd78|Section|metrics/gross-margin#s0",
+     "heading": "Definition",
+     "distance": 0.2572287155043723
+    },
+    {
+     "section_id": "acme_retail|pub_190192147fd7fd78|Section|metrics/gross-margin#s1",
+     "heading": "What changed in FY2026",
+     "distance": 0.28070852326512497
+    }
+   ],
+   "forced": false
+  },
+  {
+   "concept": "policies/margin-standard",
+   "path": "policies/margin-standard.md",
+   "title": "Acme Retail \u2014 Cost Allocation & Margin Standard (FY2026)",
+   "type": "Policy",
+   "lifecycle_status": "stable",
+   "trust_tier": "human-reviewed",
+   "verifications": [
+    {
+     "by": "human:jsmith@acme",
+     "kind": "human",
+     "at": "2026-06-15T09:00:00Z"
+    }
+   ],
+   "freshness": {
+    "verdict": "FRESH",
+    "stale_after": "2026-12-31T00:00:00Z"
+   },
+   "provenance": [],
+   "replacement": null,
+   "matched_sections": [
+    {
+     "section_id": "acme_retail|pub_190192147fd7fd78|Section|policies/margin-standard#s0",
+     "heading": "Acme Retail Cost Allocation & Margin Standard \u2014 FY2026",
+     "distance": 0.2664800958194006
+    }
+   ],
+   "forced": false
+  },
+  {
+   "concept": "metrics/gross-margin-legacy",
+   "path": "metrics/gross-margin-legacy.md",
+   "title": "Gross Margin (legacy, pre-FY2026)",
+   "type": "Metric",
+   "lifecycle_status": "deprecated",
+   "trust_tier": "human-reviewed",
+   "verifications": [
+    {
+     "by": "human:jsmith@acme",
+     "kind": "human",
+     "at": "2024-01-15T10:00:00Z"
+    }
+   ],
+   "freshness": {
+    "verdict": "UNKNOWN_DEADLINE",
+    "stale_after": null
+   },
+   "provenance": [],
+   "replacement": {
+    "concept": "metrics/gross-margin",
+    "label": "inferred",
+    "reason": "unique stable same-type LINKS_TO candidate; no supersedes declaration"
+   },
+   "matched_sections": [
+    {
+     "section_id": "acme_retail|pub_190192147fd7fd78|Section|metrics/gross-margin-legacy#s1",
+     "heading": "Legacy definition (for reproducibility only)",
+     "distance": 0.27079059758013335
+    },
+    {
+     "section_id": "acme_retail|pub_190192147fd7fd78|Section|metrics/gross-margin-legacy#s0",
+     "heading": "Deprecated",
+     "distance": 0.2811794994969179
+    }
+   ],
+   "forced": false
+  }
+ ],
+ "paths": [
+  {
+   "seed": "metrics/gross-margin",
+   "concept_hops": 1,
+   "via": []
+  },
+  {
+   "seed": "policies/margin-standard",
+   "concept_hops": 1,
+   "via": []
+  },
+  {
+   "seed": "metrics/gross-margin-legacy",
+   "concept_hops": 2,
+   "via": []
+  }
+ ],
+ "computations": [
+  {
+   "seed": "metrics/gross-margin",
+   "concept": "computations/gross-margin-period",
+   "path": "computations/gross-margin-period.md",
+   "concept_hops": 1,
+   "via": [],
+   "status": "stable",
+   "runtime": "bigquery",
+   "trust_tier": "human-reviewed",
+   "freshness": {
+    "verdict": "FRESH",
+    "stale_after": "2026-12-31T00:00:00Z"
+   },
+   "sql": "WITH recognized_orders AS (\n  SELECT\n    o.order_id,\n    CASE\n      WHEN o.currency = 'USD' THEN o.net_amount\n      ELSE o.net_amount * fx.rate_to_usd\n    END AS revenue_usd\n  FROM `acme.sales.orders` AS o\n  LEFT JOIN `acme.finance.fx_daily_rates` AS fx\n    ON fx.currency = o.currency\n    AND fx.rate_date = DATE(o.order_ts)\n  WHERE o.order_status = 'delivered'\n    AND DATE_DIFF(CURRENT_DATE(), DATE(o.order_ts), DAY) >= 30\n    AND DATE(o.order_ts) BETWEEN @period_start AND @period_end\n),\ncogs_full AS (\n  SELECT\n    ol.order_id,\n    SUM(ol.quantity * p.cost) AS product_cost,\n    SUM(fc.allocated_cost) AS fulfillment_cost,\n    SUM(sc.shipping_cost) AS shipping_cost,\n    SUM(pf.fee_amount) AS payment_fee\n  FROM `acme.sales.order_lines` AS ol\n  JOIN `acme.catalog.products` AS p ON p.product_id = ol.product_id\n  LEFT JOIN `acme.logistics.fulfillment_cost` AS fc ON fc.order_id = ol.order_id\n  LEFT JOIN `acme.logistics.shipment_cost` AS sc ON sc.order_id = ol.order_id\n  LEFT JOIN `acme.finance.payment_fees` AS pf ON pf.order_id = ol.order_id\n  GROUP BY ol.order_id\n)\nSELECT\n  SUM(r.revenue_usd) - SUM(\n    COALESCE(c.product_cost, 0)\n    + COALESCE(c.fulfillment_cost, 0)\n    + COALESCE(c.shipping_cost, 0)\n    + COALESCE(c.payment_fee, 0)\n  ) AS gross_margin_usd\nFROM recognized_orders AS r\nLEFT JOIN cogs_full AS c USING (order_id)",
+   "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+   "runtime_verdict": "NOT_EXECUTED"
+  },
+  {
+   "seed": "policies/margin-standard",
+   "concept": "computations/gross-margin-period",
+   "path": "computations/gross-margin-period.md",
+   "concept_hops": 1,
+   "via": [],
+   "status": "stable",
+   "runtime": "bigquery",
+   "trust_tier": "human-reviewed",
+   "freshness": {
+    "verdict": "FRESH",
+    "stale_after": "2026-12-31T00:00:00Z"
+   },
+   "sql": "WITH recognized_orders AS (\n  SELECT\n    o.order_id,\n    CASE\n      WHEN o.currency = 'USD' THEN o.net_amount\n      ELSE o.net_amount * fx.rate_to_usd\n    END AS revenue_usd\n  FROM `acme.sales.orders` AS o\n  LEFT JOIN `acme.finance.fx_daily_rates` AS fx\n    ON fx.currency = o.currency\n    AND fx.rate_date = DATE(o.order_ts)\n  WHERE o.order_status = 'delivered'\n    AND DATE_DIFF(CURRENT_DATE(), DATE(o.order_ts), DAY) >= 30\n    AND DATE(o.order_ts) BETWEEN @period_start AND @period_end\n),\ncogs_full AS (\n  SELECT\n    ol.order_id,\n    SUM(ol.quantity * p.cost) AS product_cost,\n    SUM(fc.allocated_cost) AS fulfillment_cost,\n    SUM(sc.shipping_cost) AS shipping_cost,\n    SUM(pf.fee_amount) AS payment_fee\n  FROM `acme.sales.order_lines` AS ol\n  JOIN `acme.catalog.products` AS p ON p.product_id = ol.product_id\n  LEFT JOIN `acme.logistics.fulfillment_cost` AS fc ON fc.order_id = ol.order_id\n  LEFT JOIN `acme.logistics.shipment_cost` AS sc ON sc.order_id = ol.order_id\n  LEFT JOIN `acme.finance.payment_fees` AS pf ON pf.order_id = ol.order_id\n  GROUP BY ol.order_id\n)\nSELECT\n  SUM(r.revenue_usd) - SUM(\n    COALESCE(c.product_cost, 0)\n    + COALESCE(c.fulfillment_cost, 0)\n    + COALESCE(c.shipping_cost, 0)\n    + COALESCE(c.payment_fee, 0)\n  ) AS gross_margin_usd\nFROM recognized_orders AS r\nLEFT JOIN cogs_full AS c USING (order_id)",
+   "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+   "runtime_verdict": "NOT_EXECUTED"
+  },
+  {
+   "seed": "metrics/gross-margin-legacy",
+   "concept": "computations/gross-margin-period",
+   "path": "computations/gross-margin-period.md",
+   "concept_hops": 2,
+   "via": [],
+   "status": "stable",
+   "runtime": "bigquery",
+   "trust_tier": "human-reviewed",
+   "freshness": {
+    "verdict": "FRESH",
+    "stale_after": "2026-12-31T00:00:00Z"
+   },
+   "sql": "WITH recognized_orders AS (\n  SELECT\n    o.order_id,\n    CASE\n      WHEN o.currency = 'USD' THEN o.net_amount\n      ELSE o.net_amount * fx.rate_to_usd\n    END AS revenue_usd\n  FROM `acme.sales.orders` AS o\n  LEFT JOIN `acme.finance.fx_daily_rates` AS fx\n    ON fx.currency = o.currency\n    AND fx.rate_date = DATE(o.order_ts)\n  WHERE o.order_status = 'delivered'\n    AND DATE_DIFF(CURRENT_DATE(), DATE(o.order_ts), DAY) >= 30\n    AND DATE(o.order_ts) BETWEEN @period_start AND @period_end\n),\ncogs_full AS (\n  SELECT\n    ol.order_id,\n    SUM(ol.quantity * p.cost) AS product_cost,\n    SUM(fc.allocated_cost) AS fulfillment_cost,\n    SUM(sc.shipping_cost) AS shipping_cost,\n    SUM(pf.fee_amount) AS payment_fee\n  FROM `acme.sales.order_lines` AS ol\n  JOIN `acme.catalog.products` AS p ON p.product_id = ol.product_id\n  LEFT JOIN `acme.logistics.fulfillment_cost` AS fc ON fc.order_id = ol.order_id\n  LEFT JOIN `acme.logistics.shipment_cost` AS sc ON sc.order_id = ol.order_id\n  LEFT JOIN `acme.finance.payment_fees` AS pf ON pf.order_id = ol.order_id\n  GROUP BY ol.order_id\n)\nSELECT\n  SUM(r.revenue_usd) - SUM(\n    COALESCE(c.product_cost, 0)\n    + COALESCE(c.fulfillment_cost, 0)\n    + COALESCE(c.shipping_cost, 0)\n    + COALESCE(c.payment_fee, 0)\n  ) AS gross_margin_usd\nFROM recognized_orders AS r\nLEFT JOIN cogs_full AS c USING (order_id)",
+   "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+   "runtime_verdict": "NOT_EXECUTED"
+  }
+ ],
+ "warnings": [
+  "FALLBACK engine: relational joins, not BigQuery Graph"
+ ],
+ "scope": {
+  "bundle_id": "acme_retail",
+  "publication_id": "pub_190192147fd7fd78",
+  "engine": "fallback",
+  "requester": "operator",
+  "as_of": "2026-09-05T00:00:00Z",
+  "top_k": 5
+ },
+ "timing": {
+  "stages_ms": {
+   "seed": 1474.6,
+   "walk": 723.3,
+   "context": 819.2,
+   "nodes": 787.0,
+   "assembly": 0.9
+  },
+  "total_ms": 5665.3,
+  "jobs": [
+   {
+    "stage": "seed",
+    "job_id": "57a66f46-2275-4aa6-83e9-cc8675a38b84",
+    "slot_ms": 409,
+    "bytes_processed": 139376,
+    "bytes_billed": 20971520,
+    "cache_hit": false,
+    "reservation_id": null,
+    "edition": null,
+    "created": "2026-09-05T23:57:07.225000+00:00",
+    "started": "2026-09-05T23:57:07.361000+00:00",
+    "ended": "2026-09-05T23:57:07.993000+00:00"
+   },
+   {
+    "stage": "walk",
+    "job_id": "70a1c8c9-383c-4a17-8ce0-0d42f575cf12",
+    "slot_ms": 67,
+    "bytes_processed": 23830,
+    "bytes_billed": 20971520,
+    "cache_hit": false,
+    "reservation_id": null,
+    "edition": null,
+    "created": "2026-09-05T23:57:08.519000+00:00",
+    "started": "2026-09-05T23:57:08.621000+00:00",
+    "ended": "2026-09-05T23:57:08.817000+00:00"
+   },
+   {
+    "stage": "walk",
+    "job_id": "2900e2c1-c52e-4ed3-a4c2-d6d9892532c3",
+    "slot_ms": 58,
+    "bytes_processed": 23830,
+    "bytes_billed": 20971520,
+    "cache_hit": false,
+    "reservation_id": null,
+    "edition": null,
+    "created": "2026-09-05T23:57:09.350000+00:00",
+    "started": "2026-09-05T23:57:09.448000+00:00",
+    "ended": "2026-09-05T23:57:09.876000+00:00"
+   },
+   {
+    "stage": "walk",
+    "job_id": "e159f882-4ac4-42f3-8de5-c51b1bf8d211",
+    "slot_ms": 73,
+    "bytes_processed": 23830,
+    "bytes_billed": 20971520,
+    "cache_hit": false,
+    "reservation_id": null,
+    "edition": null,
+    "created": "2026-09-05T23:57:10.351000+00:00",
+    "started": "2026-09-05T23:57:10.418000+00:00",
+    "ended": "2026-09-05T23:57:10.618000+00:00"
+   },
+   {
+    "stage": "context",
+    "job_id": "f41ccced-2781-44d4-9c81-87659148786e",
+    "slot_ms": 32,
+    "bytes_processed": 110488,
+    "bytes_billed": 20971520,
+    "cache_hit": false,
+    "reservation_id": null,
+    "edition": null,
+    "created": "2026-09-05T23:57:11.077000+00:00",
+    "started": "2026-09-05T23:57:11.190000+00:00",
+    "ended": "2026-09-05T23:57:11.442000+00:00"
+   },
+   {
+    "stage": "nodes",
+    "job_id": "da4a5ee1-8dd2-4e8d-929d-e096e99af856",
+    "slot_ms": 22,
+    "bytes_processed": 7474,
+    "bytes_billed": 10485760,
+    "cache_hit": false,
+    "reservation_id": null,
+    "edition": null,
+    "created": "2026-09-05T23:57:11.885000+00:00",
+    "started": "2026-09-05T23:57:11.998000+00:00",
+    "ended": "2026-09-05T23:57:12.199000+00:00"
+   }
+  ]
+ }
+}
