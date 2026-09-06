@@ -57,8 +57,16 @@ lifecycle for both the owner and the impersonated client; `--engine gql` is refu
 wired, and the window gate also refuses while a legacy job journal is unreconciled. Under the SA the natural-language
 seed is DENIED (the remote embedding model is not usable by that principal), so seed visibility was shown by a plain
 row count, not by `VECTOR_SEARCH`. Judges run on the original payloads; the published evidence carries the SA alias
-only and masks every identifier of the pinned publication as `<id:sha256[:8]>`, so neither a passing nor a failing
-run can republish a denied identifier.
+only and masks every identifier of the pinned publication as `<id:sha256[:8]>`. The token is the unsalted SHA-256
+prefix of the local id: anyone holding the pinned bundle can recompute it and audit the evidence, so it is
+reversible by design for bundle holders and only prevents naming identifiers to readers who do not have the
+bundle. It is a publication-hygiene measure, not secrecy.
+
+`evidence/authz_cases.json` is the artifact of the harness at commit `0d07e47`. Later hermetic-only fix passes
+(masked log lines, per-policy teardown steps `restore_policy_<table>`, per-observation fields such as
+`replay_observation` / `fresh_observation` / `revocation_judgment`, the `NOT_NEEDED` teardown status when no
+grant was attempted) change the evidence shape on failure paths only; the recorded measurements are unchanged.
+The next live pass regenerates the file in the current shape.
 
 ## Graph model (spec §3)
 

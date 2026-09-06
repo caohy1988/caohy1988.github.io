@@ -166,14 +166,17 @@ def test_natural_seed_variant_propagates_failure(): # P1 #6
 def test_judge_owner_fallback():
     owner = _res(computations=[_comp(SEED, [SEED, HID, "computations/gross-margin-period"])])
     sa = _res()
-    ok = AZ.judge_owner_fallback(owner, sa, [SA, SA, SA], SA, [OP, OP, OP], OP, owner_on_restricted=_res())
+    ok = AZ.judge_owner_fallback(owner, sa, [SA, SA, SA], SA, [OP, OP, OP], OP, owner_on_restricted=_res(), control=CONTROL)
     assert ok["label"] == "MEASURED" and ok["verdict"] == "NO_FALLBACK" and ok["sa_jobs"] == 3 and ok["owner_saw_hidden"] and not ok["sa_saw_hidden"]
     assert ok["owner_on_restricted_fixture"]["saw_hidden"] is False and "ungoverned base dataset" in ok["note"]
-    fell_back = AZ.judge_owner_fallback(owner, sa, [SA, OP, SA], SA, [OP], OP)
+    fell_back = AZ.judge_owner_fallback(owner, sa, [SA, OP, SA], SA, [OP], OP, control=CONTROL)
     assert fell_back["label"] == "FAILED" and not fell_back["sa_jobs_bound_to_sa"]
-    assert AZ.judge_owner_fallback(owner, sa, [], SA, [OP], OP)["label"] == "FAILED"
-    same_view = AZ.judge_owner_fallback(owner, owner, [SA], SA, [OP], OP)
+    assert AZ.judge_owner_fallback(owner, sa, [], SA, [OP], OP, control=CONTROL)["label"] == "FAILED"
+    same_view = AZ.judge_owner_fallback(owner, owner, [SA], SA, [OP], OP, control=CONTROL)
     assert same_view["label"] == "FAILED" and same_view["sa_saw_hidden"]
+    for ctl in (NO_CONTROL, None):   # C1: an SA that cannot retrieve at all trivially "does not see" the hidden set
+        gated = AZ.judge_owner_fallback(owner, sa, [SA], SA, [OP], OP, control=ctl)
+        assert gated["label"] == "BLOCKED" and gated["verdict"] == "NO_ALLOWED_CONTROL"
 
 
 WARM = _res(cache="MISS_STORED", computations=[_comp("metrics/revenue", ["metrics/revenue", "computations/revenue-ytd"], "computations/revenue-ytd")])
@@ -213,11 +216,11 @@ def test_judge_cross_principal_replay():
 
 def test_record_case_keeps_judge_reason():  # P2 #8
     cases = {"k": {"description": "d", "label": "BLOCKED", "reason": "not reached"}}
-    AZ.record_case(cases, "k", lambda: {"label": "NOT_APPLICABLE", "verdict": "NO_CACHE_ENTRY", "reason": "warm run did not store"}, SA)
+    AZ.record_case(cases, "k", lambda partial: {"label": "NOT_APPLICABLE", "verdict": "NO_CACHE_ENTRY", "reason": "warm run did not store"}, SA)
     assert cases["k"]["label"] == "NOT_APPLICABLE" and cases["k"]["reason"] == "warm run did not store"
-    AZ.record_case(cases, "k", lambda: {"label": "MEASURED", "verdict": "X"}, SA)
+    AZ.record_case(cases, "k", lambda partial: {"label": "MEASURED", "verdict": "X"}, SA)
     assert "reason" not in cases["k"]
-    AZ.record_case(cases, "k", lambda: (_ for _ in ()).throw(RuntimeError(f"boom {SA}")), SA)
+    AZ.record_case(cases, "k", lambda partial: (_ for _ in ()).throw(RuntimeError(f"boom {SA}")), SA)
     assert cases["k"]["label"] == "BLOCKED" and SA not in cases["k"]["reason"] and "boom" in cases["k"]["reason"]
 
 
@@ -229,7 +232,7 @@ def _ev(cases):
 def test_finish_masks_ids_on_failed_and_passing_surfaces(tmp_path):
     failed = AZ.judge_hidden_intermediate(_res(computations=[_comp(SEED, [SEED, HID, "computations/gross-margin-period"])]), CONTROL)
     failed["full_result"] = _res(computations=[_comp(SEED, [SEED, HID, "computations/gross-margin-period"])], warnings=[f"seed {SEED}"])
-    passing = AZ.judge_owner_fallback(_res(computations=[_comp(SEED, [SEED, HID, "computations/gross-margin-period"])]), _res(), [SA], SA, [OP], OP)
+    passing = AZ.judge_owner_fallback(_res(computations=[_comp(SEED, [SEED, HID, "computations/gross-margin-period"])]), _res(), [SA], SA, [OP], OP, control=CONTROL)
     passing["owner_paths"] = [{"seed": SEED, "via": [SEED, HID, "computations/gross-margin-period"]}]
     blocked = {"label": "BLOCKED", "reason": f"RuntimeError: {SA} could not read {HID}.md"}
     out = AZ._finish(_ev({"a": failed, "b": passing, "c": blocked}), str(tmp_path / "e.json"), SA, IDS)
@@ -264,12 +267,16 @@ def test_gql_engine_refused_before_preflight(tmp_path, monkeypatch):
 
 def test_cases_all_blocked_when_preflight_fails(tmp_path):
     def boom(principal):
-        raise PermissionError(f"403 {principal} getAccessToken denied")
-    out = AZ.second_principal_cases(_Never(), PUB, "2026-09-05T00:00:00Z", sa_email=SA, factory=boom, out_path=str(tmp_path / "c.json"))
+        raise PermissionError(f"403 {principal} getAccessToken denied; last read {HID}")
+    owner = _Owner(universe_ok=True)
+    out = AZ.second_principal_cases(owner, PUB, "2026-09-05T00:00:00Z", sa_email=SA, factory=boom, out_path=str(tmp_path / "c.json"))
     assert all(c["label"] == "BLOCKED" and "preflight" in c["reason"] for c in out["cases"].values())
     text = (tmp_path / "c.json").read_text()
-    assert SA not in text and OP not in text and out["summary"] == {k: "BLOCKED" for k in AZ.CASES}
+    assert SA not in text and OP not in text and HID not in text and out["summary"] == {k: "BLOCKED" for k in AZ.CASES}
     assert out["gql_variant"]["label"] == "BLOCKED"
+    assert out["stages"] == ["denied_id_universe", "preflight"] and out["denied_id_universe"] == len(IDS) and out["id_sanitization"]["universe_known"]
+    assert out["teardown"]["status"] == "NOT_NEEDED" and owner.log == []     # O1: universe first; no grant -> no cleanup DDL
+    assert json.loads((tmp_path / "c.json").read_text())["teardown"]["status"] == "NOT_NEEDED"   # the file carries the teardown record too
 
 
 class _FakeJob:
@@ -289,13 +296,21 @@ class _SAClient:
         raise gexc.Forbidden("403 denied")
 
 
+class _Row:
+    def __init__(self, local_id):
+        self.local_id = local_id
+
+
 class _Owner:
-    """Owner whose universe query fails (shared setup abort); teardown steps behave per flags."""
-    def __init__(self, fail_reader=False, fail_restore=False):
-        self.fail_reader, self.fail_restore, self.log = fail_reader, fail_restore, []
+    """Owner stub: universe query fails unless universe_ok (shared setup abort); READER grants fail when fail_grant;
+    teardown steps behave per flags."""
+    def __init__(self, fail_reader=False, fail_restore=False, universe_ok=False, fail_grant=False):
+        self.fail_reader, self.fail_restore, self.universe_ok, self.fail_grant, self.log = fail_reader, fail_restore, universe_ok, fail_grant, []
 
     def query(self, q, job_config=None, location=None):
         if "DISTINCT local_id" in q:
+            if self.universe_ok:
+                return _FakeJob([_Row(i) for i in IDS])
             raise RuntimeError(f"owner denied_ids query failed for {HID}")
         if "ROW ACCESS POLICY" in q:
             self.log.append("restore")
@@ -314,6 +329,8 @@ class _Owner:
 
     def update_dataset(self, d, fields):
         self.log.append("update_dataset")
+        if self.fail_grant and any(e.role == "READER" for e in d.access_entries):
+            raise RuntimeError(f"grant failed while adding {SA} near {HID}")
 
     class _Conn:
         def api_request(self, method, path, data=None):
@@ -328,10 +345,21 @@ def test_shared_setup_failure_is_persisted_and_torn_down(tmp_path):
     assert (tmp_path / "a.json").exists()
     assert out["abort"]["stage"] == "denied_id_universe" and "<id:" in out["abort"]["reason"] and HID not in json.dumps(out)
     assert all(c["label"] == "BLOCKED" and c["reason"].startswith("aborted at denied_id_universe") for c in out["cases"].values())
-    td = out["teardown"]
-    assert "restore" in owner.log and td["steps"]["remove_dataset_reader"]["ok"] and td["steps"]["restore_policies"]["ok"]
-    assert td["sa_still_in_grantees"] is False and td["sa_denied_after_teardown"] is True and td["status"] == "VERIFIED"
+    assert out["teardown"]["status"] == "NOT_NEEDED" and "restore" not in owner.log and not out["id_sanitization"]["universe_known"]
     assert SA not in (tmp_path / "a.json").read_text()
+
+
+def test_grant_failure_after_universe_is_persisted_and_torn_down(tmp_path, capsys):
+    owner = _Owner(universe_ok=True, fail_grant=True)
+    out = AZ.second_principal_cases(owner, PUB, "2026-09-05T00:00:00Z", sa_email=SA, factory=lambda p: _SAClient(),
+                                    out_path=str(tmp_path / "b.json"), wait_s=0)
+    assert out["abort"]["stage"] == "phase_a_grants" and "<id:" in out["abort"]["reason"] and HID not in json.dumps(out)
+    assert all(c["label"] == "BLOCKED" and c["reason"].startswith("aborted at phase_a_grants") for c in out["cases"].values())
+    td = out["teardown"]     # a grant was attempted -> full cleanup, every step, verified
+    assert "restore" in owner.log and td["steps"]["remove_dataset_reader"]["ok"] and all(td["steps"][f"restore_policy_{x}"]["ok"] for x in ("nodes", "edges", "section_vectors"))
+    assert td["sa_still_in_grantees"] is False and td["sa_denied_after_teardown"] is True and td["status"] == "VERIFIED"
+    captured = capsys.readouterr().out
+    assert "ABORT at phase_a_grants" in captured and HID not in captured and SA not in captured and "universe unknown" not in captured
 
 
 def test_teardown_continues_after_first_step_fails():
@@ -372,12 +400,15 @@ def test_each_policy_restoration_is_isolated():
 # ---- P1 #5 residual: every log line is masked, not only the final JSON
 def test_record_case_log_line_masks_ids_and_emails(capsys):
     cases = {"k": {"description": "d", "label": "BLOCKED", "reason": "not reached"}}
-    AZ.record_case(cases, "k", lambda: (_ for _ in ()).throw(RuntimeError(f"{SA} could not read {HID}.md or {SEED}")), SA, IDS)
+    AZ.record_case(cases, "k", lambda partial: (_ for _ in ()).throw(RuntimeError(f"{SA} could not read {HID}.md or {SEED}")), SA, IDS)
     out = capsys.readouterr().out
-    assert HID not in out and SEED not in out and SA not in out and "<id:" in out and AZ.SA_ALIAS in out
+    assert HID not in out and SEED not in out and SA not in out and "<id:" in out and AZ.SA_ALIAS in out and "universe unknown" not in out
     assert HID not in cases["k"]["reason"] and "<id:" in cases["k"]["reason"]
-    AZ.record_case(cases, "k", lambda: {"label": "NOT_APPLICABLE", "verdict": "X", "reason": f"no entry for {HID}"}, SA, IDS)
+    AZ.record_case(cases, "k", lambda partial: {"label": "NOT_APPLICABLE", "verdict": "X", "reason": f"no entry for {HID}"}, SA, IDS)
     assert HID not in capsys.readouterr().out
+    AZ.record_case(cases, "k", lambda partial: (_ for _ in ()).throw(RuntimeError(f"boom {HID}")), SA, [])   # O1: universe not known
+    out = capsys.readouterr().out
+    assert "(universe unknown: fixture ids only)" in out and HID not in out
 
 
 def test_shared_setup_abort_log_is_masked(capsys, tmp_path):
@@ -385,6 +416,7 @@ def test_shared_setup_abort_log_is_masked(capsys, tmp_path):
                                     out_path=str(tmp_path / "a.json"), wait_s=0)
     captured = capsys.readouterr().out
     assert "ABORT at denied_id_universe" in captured and HID not in captured and SA not in captured and OP not in captured
+    assert "(universe unknown: fixture ids only)" in captured
     assert HID not in json.dumps(out) and out["abort"]["stage"] == "denied_id_universe"
 
 
@@ -446,3 +478,60 @@ def test_gql_window_gate_reports_reason(monkeypatch):
     monkeypatch.setattr(R, "require_clean_windows", lambda m: (_ for _ in ()).throw(RuntimeError("job cleanup is unverified for smoke-1")))
     g = AZ.gql_window_gate()
     assert not g["open"] and "smoke-1" in g["reason"]
+
+
+# ---- A1 / O3: partial observations are merged on normal return too, and a FAILED one outranks the returned label
+def test_record_case_merges_partial_and_folds_failed_on_normal_return(capsys):
+    cases = {"k": {"description": "d", "label": "BLOCKED", "reason": "not reached"}}
+
+    def fn(partial):
+        partial["replay_observation"] = {"label": "MEASURED", "verdict": "REPLAY_CLOSED"}
+        partial["fresh_observation"] = {"label": "FAILED", "verdict": "FRESH_LEAK_OR_UNEXPECTED", "concepts": 1}
+        return {"label": "MEASURED", "verdict": "FAIL_CLOSED"}
+    AZ.record_case(cases, "k", fn, SA, IDS)
+    c = cases["k"]
+    assert c["replay_observation"]["verdict"] == "REPLAY_CLOSED" and c["fresh_observation"]["concepts"] == 1   # published on success
+    assert c["label"] == "FAILED" and c["verdict"] == "FRESH_OBSERVATION_FRESH_LEAK_OR_UNEXPECTED" and c["label_before_variant"] == "MEASURED"
+    assert "FAILED" in capsys.readouterr().out
+
+    def fn_ok(partial):
+        partial["replay_observation"] = {"label": "MEASURED", "verdict": "REPLAY_CLOSED"}
+        return {"label": "MEASURED", "verdict": "FAIL_CLOSED"}
+    cases = {"k": {"description": "d", "label": "BLOCKED", "reason": "not reached"}}   # fresh slot, as in the runner
+    AZ.record_case(cases, "k", fn_ok, SA, IDS)
+    assert cases["k"]["label"] == "MEASURED" and cases["k"]["replay_observation"]["label"] == "MEASURED" and "label_before_variant" not in cases["k"]
+
+
+def test_replay_observation_label_and_verdict_share_one_condition():   # O4
+    closed = AZ.replay_observation(_res("DENIED", cache="HIT_DENIED"), IDS)
+    assert (closed["label"], closed["verdict"]) == ("MEASURED", "REPLAY_CLOSED")
+    served_empty = AZ.replay_observation(_res("DENIED", cache="HIT_RECHECKED"), IDS)       # closed on content but not served as denied
+    assert (served_empty["label"], served_empty["verdict"]) == ("FAILED", "REPLAY_LEAK_OR_UNEXPECTED")
+    leaky = AZ.replay_observation(_res("DENIED", cache="HIT_DENIED", warnings=[HID]), IDS)
+    assert (leaky["label"], leaky["verdict"]) == ("FAILED", "REPLAY_LEAK_OR_UNEXPECTED") and leaky["leaked_id_count"] == 1
+
+
+def test_finish_violation_keeps_teardown_receipt(tmp_path, monkeypatch):   # C3
+    monkeypatch.setattr(AZ, "sanitize_ids", lambda obj, ids: obj)          # simulate a masking defect
+    ev = _ev({"a": {"label": "BLOCKED", "reason": f"saw {HID}"}}); ev["teardown"] = {"status": "VERIFIED", "steps": {"x": {"ok": True}}}
+    with pytest.raises(RuntimeError, match="survived"):
+        AZ._finish(ev, str(tmp_path / "v.json"), SA, IDS)
+    receipt = json.loads((tmp_path / "v.json").read_text())
+    assert receipt["status"] == "SANITIZATION_FAILED" and receipt["teardown"]["status"] == "VERIFIED" and receipt["summary"] == {"a": "BLOCKED"}
+    assert HID not in json.dumps(receipt)
+    ev2 = _ev({"a": {"label": "BLOCKED"}}); ev2["teardown"] = {"status": "UNVERIFIED", "steps": {"x": {"ok": False, "error": f"near {HID}"}}}
+    with pytest.raises(RuntimeError):
+        AZ._finish(ev2, str(tmp_path / "w.json"), SA, IDS)
+    receipt2 = json.loads((tmp_path / "w.json").read_text())
+    assert receipt2["teardown_status"] == "UNVERIFIED" and "teardown" not in receipt2 and HID not in json.dumps(receipt2)
+
+
+def test_teardown_detects_alias_in_redacted_grantees():   # C4
+    class OwnerWithSA(_Owner):
+        class _Conn:
+            def api_request(self, method, path, data=None):
+                return {"rowAccessPolicies": [{"rowAccessPolicyReference": {"policyId": "p"}}]} if method == "GET" else \
+                       {"bindings": [{"members": [AZ.operator(), f"serviceAccount:{SA}"]}]}
+        _connection = _Conn()
+    td = AZ.teardown(OwnerWithSA(), _SAClient(), SA, PUB, wait_s=0)
+    assert td["sa_still_in_grantees"] is True and td["status"] == "UNVERIFIED" and SA not in json.dumps(td)
