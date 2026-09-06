@@ -146,3 +146,17 @@ paths are covered offline and were not exercised in a new live window. Temporary
 `okf_graph_spike_20260905{,_x100,_x1000,_rls,_meta,_av}` and their remote embedding models carry a 14-day default table
 expiration (dataset objects themselves are not auto-deleted); they retain the governed evidence and can be dropped earlier
 by the operator. No shared assignment or resource outside this spike was touched.
+
+## Addendum 2026-09-06: connected chain (fixture seed, same requester)
+
+`okf_bq_graph/chain.py` ran the path this report's outcome section called missing, with two honest narrowings: the seed is
+the harness fixture (no KC discovery) and both legs run under the operator's own credential. Fixture seed → pinned
+publication `pub_190192147fd7fd78` → governed retrieval returns the Attested Computation declaration and SQL for
+`computations/gross-margin-period.md` (`NOT_EXECUTED`) → bind to the SDK receipt example's pinned publication by data files
+(file SHA-256 `5e96ae11…`, SQL text, parameters, source pin `31da799`) → SDK CLI at `6719eb5` as a subprocess executes and
+independently verifies → consumer releases only on VERIFIED with the receipt's `computation_digest` recomputed from the bound
+bytes. Hermetic (oracle graph engine + SDK SYNTHETIC emulation): **CHAIN_CONNECTED** — `approved` RELEASED, the SDK's
+`sql-substitution` REFUSED (`REJECTED sql_mismatch`, no number), `declaration-mismatch` (revenue-ytd offered instead) REFUSED
+before any execution (`evidence/chain/chain_hermetic.json`). Live (relational fallback engine, on-demand, not BigQuery
+Graph; SDK `--live`): NOT_RUN until a dated line is appended here. Combined delivery stays as the outcome section states
+until the live line exists; connected KC discovery remains unproven either way.

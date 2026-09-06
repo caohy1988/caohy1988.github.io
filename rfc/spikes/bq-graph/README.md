@@ -20,6 +20,7 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `okf_bq_graph/retrieve.py` | `retrieve / impact / stub_backlog` with engines `gql` (GA `VECTOR_SEARCH` seed + GQL walk), `fallback` (relational joins, on-demand), `oracle`; cache with re-check at disclosure; fail-closed |
 | `okf_bq_graph/scale.py` | Synthetic 100 / 1,000 namespace-isolated copies in their own datasets (vectors reused by text digest) |
 | `okf_bq_graph/authz.py` | Governance fixtures: RLS dataset (hidden intermediate), metadata-only dataset, authorized views + graph over views; `cases` runs the five second-principal negatives under the existing restricted SA via impersonation (`OKF_SPIKE_RESTRICTED_SA`, no new principal) → `evidence/authz_cases.json` |
+| `okf_bq_graph/chain.py` | Connected chain (2026-09-06): fixture seed → pinned publication → governed retrieval returns the Attested Computation declaration + SQL → bind to the SDK receipt example's pinned publication (data files only) → SDK CLI as a subprocess executes and verifies under the caller → consumer releases only on VERIFIED; two fail-closed substitution cases → `evidence/chain/` |
 | `okf_bq_graph/benchmark.py`, `run.py`, `lifecycle.py`, `safety.py`, `partial.py`, `bin/safety_teardown.sh` | Bounded runner (20 warmups + 100 measured per cell, nearest-rank percentiles, failures retained), the window orchestrator (signal-safe cleanup lifecycle, job cancel, independent watcher), and the honest aggregation of interrupted cells (INCOMPLETE / NOT_RUN) |
 | `okf_bq_graph/cost.py`, `report.py`, `assemble.py` | Slot attribution (exact named reservation vs other pools) and the charged autoscale slot-seconds bill from `INFORMATION_SCHEMA.RESERVATIONS_TIMELINE`; non-mutating report tables; report assembly |
 | `sql/*.sql` | `schema.sql`, `graph.sql` (property graph DDL), `seed.sql` (vector seed), `governed.sql` (two-hop GQL), `context.sql`, `impact.sql`, `stubs.sql`, `fallback.sql` |
@@ -68,6 +69,49 @@ bundle. It is a publication-hygiene measure, not secrecy.
 grant was attempted) change the evidence shape on failure paths only; the recorded measurements are unchanged.
 The next live pass regenerates the file in the current shape.
 
+## Connected chain (2026-09-06)
+
+`python3 -m okf_bq_graph.chain --hermetic` (default) or `--live` runs one Acme path end to end and records every stage in
+`evidence/chain/chain_<mode>.json`, with the SDK CLI's own per-case diagnostics under `evidence/chain/receipt/`:
+
+1. **Seed — fixture.** `forced:metrics/gross-margin.md`, the harness override (not a semantic ranking). Live Knowledge
+   Catalog discovery is out of scope for this chain; nothing here calls a KC endpoint.
+2. **Pinned publication.** `pub_190192147fd7fd78`, read from the `active_publication` pointer (live) or the compiled
+   projection (hermetic) and checked against the pin.
+3. **Governed retrieval.** This spike's `retrieve` reaches `computations/gross-margin-period.md` in one hop and returns the
+   Attested Computation declaration (type, runtime, parameters, `file_sha256`, read from the `nodes` table under the same
+   client) and its SQL, still `runtime_verdict = NOT_EXECUTED`.
+4. **Bind.** The declaration is matched to the SDK receipt example's pinned fixture publication using its data files only
+   (`fixtures/publication.json` + the copied Acme bytes): same file SHA-256 (`5e96ae11…`, also the manifest's
+   `computation_sha256`), same SQL text, same parameter list, same source pin `31da799`, type `Attested Computation`,
+   runtime `bigquery`, FRESH at `as_of`, lifecycle `stable`. Any failed check is `MISMATCH` and nothing executes.
+5. **Receipt.** `examples/okf_attested_computation/run.py` at SDK `6719eb5`, invoked as a subprocess (no SDK source edits),
+   executes the sanctioned computation under the caller's credential; its independent verifier re-reads `jobs.get` /
+   `getQueryResults` and seals a receipt. The verdict is read from the CLI's per-case JSON, never from stdout.
+6. **Consume.** The number is released only when the CLI exits 0, both the sealed receipt and the consumer output say
+   `VERIFIED` with `execution_match = MATCH`, the receipt's `computation_digest` equals the digest recomputed here from the
+   bound bytes (`sha256("okf-receipt:computation-bytes" || 0x00 || bytes)`, the domain constant copied from the SDK's
+   `contracts.py` at the pin), and the receipt's publication id / context ref are the bound ones. `UNVERIFIABLE` or
+   `REJECTED` anywhere → `REFUSED`, no number.
+
+Fail-closed cases run in the same pass: **`sql-substitution`** (the SDK's fixed case: a product-cost-only formula is
+executed for the approved request and 600 is claimed; verifier `REJECTED sql_mismatch`, consumer `REFUSED`, no number) and
+**`declaration-mismatch`** (graph-side swap: a different reachable computation, `computations/revenue-ytd.md`, is offered
+in place of the bound one; bind `MISMATCH` on file digest, SQL text and path, and the receipt CLI is never invoked). The
+CLI has no free-form case, so a "total ARR" swap is not what executes; the executed-SQL swap is the SDK's formula swap.
+
+Labels carried in the evidence: **same requester** (graph leg and receipt leg under the operator's own ADC credential;
+`sa:okf-receipt-restricted` is not exercised by this chain); **hermetic** = oracle graph engine + the SDK's SYNTHETIC API
+emulation, `same_requester = NOT_APPLICABLE`; **live** = relational `fallback` engine on the published tables (on-demand,
+**not** BigQuery Graph; `--engine gql` needs an Enterprise window this module does not open) + SDK `--live` (real
+BigQuery jobs against the SDK's SYNTHETIC fixture dataset), plus a `jobs.get` check that the graph jobs and the receipt
+job carry one `user_email` (`same_requester = SAME`). The verdict is `CHAIN_CONNECTED` only when `approved` is RELEASED,
+both substitutions are REFUSED and (live) the requester check is SAME.
+
+Hermetic result: `CHAIN_CONNECTED` (`evidence/chain/chain_hermetic.json`; all ten bind checks hold, `approved` RELEASED
+`$400.00 USD · VERIFIED` on the synthetic fixture, both substitutions REFUSED). Live result: see the dated line below
+this paragraph once the foreground live pass has run; until then the live path is NOT_RUN.
+
 ## Graph model (spec §3)
 
 Node kinds `Concept | Section | Source | Actor | Artifact | LogEntry`; stubs are `Concept{stub=true}`. Relations
@@ -97,6 +141,8 @@ python3 -m okf_bq_graph.capacity US us-central1 EU           # read-only invento
 python3 -m okf_bq_graph.compile <bundle_root> evidence/projection_acme.json
 python3 -m okf_bq_graph.publish <bundle_root>                # on-demand: tables, vectors, graph DDL, pointer
 OKF_LIVE_ENGINE=fallback python3 -m pytest tests/test_retrieve.py -q   # live, on-demand
+python3 -m okf_bq_graph.chain --hermetic                  # connected chain, no cloud (oracle graph + SDK emulation)
+python3 -m okf_bq_graph.chain --live                      # connected chain, on-demand fallback engine + SDK --live
 python3 -m okf_bq_graph.run integration --minutes 25         # opens the Enterprise window, runs GQL cases, closes it
 python3 -m okf_bq_graph.run benchmark --minutes 85           # benchmark cells from fixtures/scale.json
 python3 -m okf_bq_graph.run all --minutes 85                 # both in one window
