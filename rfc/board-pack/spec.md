@@ -87,7 +87,7 @@ The copy map above records the wording implemented on `feat/board-pack-post-spik
 | Receipts MODERATE, one merged example | "one worked example ties the query, its inputs and its result together and withholds the number when they do not match" |
 | Graph report MODERATE for demonstrated retrieval only | "Its report counts this as demonstrated retrieval only: the SQL it returned was found, not run" |
 | G6/G7 PARTIAL, distinct-principal BLOCKED, no-hidden-identifier INCONCLUSIVE | "access checks are unfinished… only partly tested, tests with two different requesters could not run, we could not confirm that no hidden identifiers leak" |
-| G8 INCOMPLETE, 0/9 | "speed benchmarks have not run yet (0 of 9 cells)" |
+| G8 INCOMPLETE, 0/9 | "speed benchmarks are not finished yet (0 of 9 cells complete)" |
 | Full-demo attesters stubs, receipts UNVERIFIABLE | "The wider demo's computation checks are still placeholders, so its receipts cannot be verified yet" |
 | `NOT_EXECUTED` / `VERIFIED` / `ATTESTED` | "found, not run" / "a passed check is an evidence verdict for that example, not a product-readiness claim" |
 | GQL needs Enterprise or Enterprise Plus | "Graph walks need Enterprise or Enterprise Plus capacity" |
