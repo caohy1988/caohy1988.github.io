@@ -1,5 +1,5 @@
 {
- "started_at": "2026-09-06T19:30:03.333218+00:00",
+ "started_at": "2026-09-06T19:49:55.427419+00:00",
  "principal": "sa:okf-receipt-restricted",
  "engine": "fallback",
  "publication_id": "pub_190192147fd7fd78",
@@ -10,8 +10,9 @@
    "label": "MEASURED",
    "verdict": "ENFORCED",
    "status": "OK",
+   "concepts": 1,
+   "paths": 0,
    "computations": 0,
-   "paths": [],
    "leaks_hidden_id": false,
    "replacement": {
     "concept": null,
@@ -21,7 +22,11 @@
     "forced seed: harness-only deterministic override, not a semantic ranking",
     "FALLBACK engine: relational joins, not BigQuery Graph"
    ],
-   "timing_ms": 3902.4,
+   "timing_ms": 2659.4,
+   "sa_jobs": {
+    "jobs": 3,
+    "bound_to_sa": true
+   },
    "full_result": {
     "status": "OK",
     "concepts": [
@@ -70,51 +75,51 @@
     "timing": {
      "stages_ms": {
       "seed": 0.0,
-      "walk": 2658.0,
-      "nodes": 949.6,
-      "context": 1240.1,
-      "assembly": 0.0
+      "walk": 1359.5,
+      "nodes": 1176.9,
+      "context": 1298.2,
+      "assembly": 0.1
      },
-     "total_ms": 3902.4,
+     "total_ms": 2659.4,
      "jobs": [
       {
        "stage": "walk",
-       "job_id": "50fc3f64-2d0d-44f0-aa72-dab6809e5b2f",
-       "slot_ms": 912,
+       "job_id": "b3b1a1f5-1cdf-4b6c-b429-0cd510aecc53",
+       "slot_ms": 688,
        "bytes_processed": null,
        "bytes_billed": null,
        "cache_hit": false,
        "reservation_id": null,
        "edition": null,
-       "created": "2026-09-06T19:30:13.353000+00:00",
-       "started": "2026-09-06T19:30:13.671000+00:00",
-       "ended": "2026-09-06T19:30:15.430000+00:00"
+       "created": "2026-09-06T19:50:07.621000+00:00",
+       "started": "2026-09-06T19:50:07.827000+00:00",
+       "ended": "2026-09-06T19:50:08.406000+00:00"
       },
       {
        "stage": "nodes",
-       "job_id": "f9b20929-7f82-41da-935f-cd3124871dd5",
-       "slot_ms": 28,
+       "job_id": "b6fb81d0-e9cc-451b-a62e-a095c1766434",
+       "slot_ms": 25,
        "bytes_processed": null,
        "bytes_billed": null,
        "cache_hit": false,
        "reservation_id": null,
        "edition": null,
-       "created": "2026-09-06T19:30:16.009000+00:00",
-       "started": "2026-09-06T19:30:16.202000+00:00",
-       "ended": "2026-09-06T19:30:16.441000+00:00"
+       "created": "2026-09-06T19:50:09.034000+00:00",
+       "started": "2026-09-06T19:50:09.261000+00:00",
+       "ended": "2026-09-06T19:50:09.506000+00:00"
       },
       {
        "stage": "context",
-       "job_id": "60c74814-e7b1-4943-a4c4-6c858b3fa1d6",
-       "slot_ms": 400,
+       "job_id": "8b19cd28-f711-41c2-8209-03d8df2ddbcb",
+       "slot_ms": 296,
        "bytes_processed": null,
        "bytes_billed": null,
        "cache_hit": false,
        "reservation_id": null,
        "edition": null,
-       "created": "2026-09-06T19:30:16.104000+00:00",
-       "started": "2026-09-06T19:30:16.329000+00:00",
-       "ended": "2026-09-06T19:30:16.665000+00:00"
+       "created": "2026-09-06T19:50:08.992000+00:00",
+       "started": "2026-09-06T19:50:09.178000+00:00",
+       "ended": "2026-09-06T19:50:09.642000+00:00"
       }
      ]
     }
@@ -125,13 +130,19 @@
    "label": "MEASURED",
    "verdict": "DENIED_NO_LEAK",
    "status": "DENIED",
-   "rows": 0,
+   "concepts": 0,
+   "paths": 0,
+   "computations": 0,
    "leaked_id_count": 0,
    "warnings": [
     "authorization error: Forbidden"
    ],
    "api_error_class": "Forbidden",
    "api_error_redacted": "Forbidden: 403 Access Denied: Table test-project-0728-467323:okf_graph_spike_20260905.edges: User does not have permission to query table test-project-0728-467323:okf_graph_spike_20260905.edges, or perhaps it does not exist.; reason: accessDenied, message: Access Denied: Table test-project-0728-4673",
+   "sa_jobs": {
+    "jobs": 0,
+    "bound_to_sa": false
+   },
    "full_result": {
     "status": "DENIED",
     "concepts": [],
@@ -152,7 +163,7 @@
      "stages_ms": {
       "seed": 0.0
      },
-     "total_ms": 272.2,
+     "total_ms": 431.0,
      "jobs": []
     }
    }
@@ -163,7 +174,10 @@
    "verdict": "OUTPUT_DENIED_NO_LEAK",
    "status": "NO_SEED",
    "seed_visible": true,
+   "seed_visibility_evidence": "row count of section_vectors under the principal (not VECTOR_SEARCH)",
    "walk_denied": true,
+   "concepts": 0,
+   "paths": 0,
    "computations": 0,
    "leaked_id_count": 0,
    "warnings": [
@@ -178,6 +192,10 @@
     "vectors": 19
    },
    "propagation_s": 1,
+   "sa_jobs": {
+    "jobs": 3,
+    "bound_to_sa": true
+   },
    "full_result": {
     "status": "NO_SEED",
     "concepts": [],
@@ -199,63 +217,98 @@
     "timing": {
      "stages_ms": {
       "seed": 0.0,
-      "walk": 1388.7,
-      "context": 1120.7,
-      "nodes": 1447.8,
+      "walk": 1726.7,
+      "nodes": 989.5,
+      "context": 1147.5,
       "assembly": 0.0
      },
-     "total_ms": 2838.6,
+     "total_ms": 2876.2,
      "jobs": [
       {
        "stage": "walk",
-       "job_id": "f8423a33-024c-4961-a378-f8b22dc84ef4",
-       "slot_ms": 467,
+       "job_id": "e1a4b180-d53a-4fb7-b136-eed471c45814",
+       "slot_ms": 570,
        "bytes_processed": null,
        "bytes_billed": null,
        "cache_hit": false,
        "reservation_id": null,
        "edition": null,
-       "created": "2026-09-06T19:30:56.071000+00:00",
-       "started": "2026-09-06T19:30:56.374000+00:00",
-       "ended": "2026-09-06T19:30:56.812000+00:00"
-      },
-      {
-       "stage": "context",
-       "job_id": "3956f77d-a2ac-40f8-8abf-9b39664094c1",
-       "slot_ms": 139,
-       "bytes_processed": null,
-       "bytes_billed": null,
-       "cache_hit": false,
-       "reservation_id": null,
-       "edition": null,
-       "created": "2026-09-06T19:30:57.453000+00:00",
-       "started": "2026-09-06T19:30:57.728000+00:00",
-       "ended": "2026-09-06T19:30:58.040000+00:00"
+       "created": "2026-09-06T19:50:44.106000+00:00",
+       "started": "2026-09-06T19:50:44.463000+00:00",
+       "ended": "2026-09-06T19:50:44.845000+00:00"
       },
       {
        "stage": "nodes",
-       "job_id": "14caf930-3dd9-409a-9131-664db80b7dee",
-       "slot_ms": 8,
+       "job_id": "74f10709-ec7c-4dde-a3e0-f08a03b7acf5",
+       "slot_ms": 7,
        "bytes_processed": null,
        "bytes_billed": null,
        "cache_hit": false,
        "reservation_id": null,
        "edition": null,
-       "created": "2026-09-06T19:30:57.467000+00:00",
-       "started": "2026-09-06T19:30:57.679000+00:00",
-       "ended": "2026-09-06T19:30:57.869000+00:00"
+       "created": "2026-09-06T19:50:45.841000+00:00",
+       "started": "2026-09-06T19:50:46.065000+00:00",
+       "ended": "2026-09-06T19:50:46.327000+00:00"
+      },
+      {
+       "stage": "context",
+       "job_id": "8b2f84da-3112-43d2-a007-c27b4c9769c5",
+       "slot_ms": 388,
+       "bytes_processed": null,
+       "bytes_billed": null,
+       "cache_hit": false,
+       "reservation_id": null,
+       "edition": null,
+       "created": "2026-09-06T19:50:45.842000+00:00",
+       "started": "2026-09-06T19:50:46.115000+00:00",
+       "ended": "2026-09-06T19:50:46.441000+00:00"
       }
      ]
     }
    },
    "natural_seed": {
+    "label": "MEASURED",
+    "verdict": "OUTPUT_DENIED_NO_LEAK",
     "status": "DENIED",
-    "seed_hits": 0,
+    "seed_visible": true,
+    "seed_visibility_evidence": "row count of section_vectors under the principal (not VECTOR_SEARCH)",
+    "walk_denied": true,
+    "concepts": 0,
+    "paths": 0,
     "computations": 0,
     "leaked_id_count": 0,
     "warnings": [
      "authorization error: Forbidden"
-    ]
+    ],
+    "probe": {
+     "nodes": 0,
+     "hidden": 0,
+     "edges": 0,
+     "vectors": 19
+    },
+    "seed_hits": 0,
+    "full_result": {
+     "status": "DENIED",
+     "concepts": [],
+     "paths": [],
+     "computations": [],
+     "warnings": [
+      "authorization error: Forbidden"
+     ],
+     "scope": {
+      "bundle_id": "acme_retail",
+      "publication_id": "pub_190192147fd7fd78",
+      "engine": "fallback",
+      "requester": "sa:okf-receipt-restricted",
+      "as_of": "2026-09-05T00:00:00Z",
+      "top_k": 5
+     },
+     "timing": {
+      "stages_ms": {},
+      "total_ms": 355.9,
+      "jobs": []
+     }
+    }
    }
   },
   "owner_fallback_negative": {
@@ -270,6 +323,12 @@
    "sa_saw_hidden": false,
    "owner_computations": 1,
    "sa_computations": 0,
+   "note": "owner arm runs on the ungoverned base dataset; SA arm on the governed fixture",
+   "owner_on_restricted_fixture": {
+    "status": "OK",
+    "saw_hidden": false,
+    "computations": 0
+   },
    "owner_paths": [
     {
      "seed": "<id:97dc35b4>",
@@ -290,45 +349,67 @@
    "revocation_observed": true,
    "warm": [
     "OK",
-    "MISS_STORED"
+    "MISS_STORED",
+    1
    ],
    "hit": [
     "OK",
     "HIT_RECHECKED"
    ],
-   "replay": [
-    "DENIED",
-    "HIT_DENIED",
-    0
-   ],
-   "fresh_after_revoke": [
-    "DENIED",
-    0,
-    [
-     "authorization error: Forbidden"
-    ]
-   ],
-   "revoked_at": "2026-09-06T19:30:25.816894+00:00",
-   "revocation_propagation_s": 23,
+   "replay": {
+    "status": "DENIED",
+    "cache": "HIT_DENIED",
+    "concepts": 0,
+    "paths": 0,
+    "computations": 0,
+    "leaked_id_count": 0
+   },
+   "fresh_after_revoke": {
+    "status": "DENIED",
+    "cache": null,
+    "concepts": 0,
+    "paths": 0,
+    "computations": 0,
+    "leaked_id_count": 0
+   },
+   "revoked_at": "2026-09-06T19:50:23.670689+00:00",
+   "revocation_propagation_s": 11,
    "revocation_observation": "Forbidden",
    "replay_warnings": [
     "cached replay: current authorization check failed or unknown"
-   ]
+   ],
+   "sa_jobs": {
+    "jobs": 3,
+    "bound_to_sa": true
+   },
+   "cross_principal_replay": {
+    "label": "MEASURED",
+    "verdict": "CACHE_BOUND_TO_CREDENTIAL",
+    "owner_entry_computations": 1,
+    "sa_replay": {
+     "status": "DENIED",
+     "cache": "HIT_DENIED",
+     "concepts": 0,
+     "paths": 0,
+     "computations": 0,
+     "leaked_id_count": 0
+    }
+   }
   }
  },
  "grants": [
   {
-   "at": "2026-09-06T19:30:07.601875+00:00",
+   "at": "2026-09-06T19:49:59.466262+00:00",
    "ds": "okf_graph_spike_20260905_rls",
    "principal": "sa:okf-receipt-restricted",
    "reader": true
   },
   {
    "policies": {
-    "at": "2026-09-06T19:30:07.602001+00:00",
-    "nodes": "3ecdf60b-8e95-42d0-9655-e8578a6b5e22",
-    "edges": "f01937ef-1e20-4c5a-aebd-649aee83450a",
-    "section_vectors": "c4efabea-b6b3-46ab-ba5b-e3b2ff11eef8"
+    "at": "2026-09-06T19:49:59.466494+00:00",
+    "nodes": "695a5047-eadb-4cd1-ad44-fd1cfc0ae9d9",
+    "edges": "c6753345-23c6-4fe5-8d89-11105a03c656",
+    "section_vectors": "9403cb38-34c4-447a-bf43-e817e2142f1a"
    },
    "grantees": [
     "operator",
@@ -337,23 +418,23 @@
    "shape": "hidden-intermediate"
   },
   {
-   "at": "2026-09-06T19:30:25.816894+00:00",
+   "at": "2026-09-06T19:50:23.670689+00:00",
    "ds": "okf_graph_spike_20260905_rls",
    "principal": "sa:okf-receipt-restricted",
    "reader": false
   },
   {
-   "at": "2026-09-06T19:30:51.293034+00:00",
+   "at": "2026-09-06T19:50:38.676491+00:00",
    "ds": "okf_graph_spike_20260905_rls",
    "principal": "sa:okf-receipt-restricted",
    "reader": true
   },
   {
    "policies": {
-    "at": "2026-09-06T19:30:51.293164+00:00",
-    "nodes": "9fdadd9c-4403-45d8-b4b5-f1e2c80671c1",
-    "edges": "1cc0099a-34f4-4cd9-9b3d-3439d3e3a8c9",
-    "section_vectors": "cb2c018f-e0a9-41a9-8d04-f22e32d039d3"
+    "at": "2026-09-06T19:50:38.676630+00:00",
+    "nodes": "7e1579a1-5c77-41d9-af1d-80bfa0bdacca",
+    "edges": "7022c3e7-9bda-46c6-80d6-bfda05264194",
+    "section_vectors": "8c618c3e-1afa-4460-b848-194e6e2def8c"
    },
    "grantees": {
     "nodes_edges": [
@@ -367,13 +448,34 @@
    "shape": "hidden-intermediate"
   }
  ],
+ "stages": [
+  "denied_id_universe",
+  "phase_a_grants",
+  "phase_a_propagation",
+  "allowed_control",
+  "cases"
+ ],
  "teardown": {
-  "reader_removed_at": "2026-09-06T19:31:00.002611+00:00",
+  "steps": {
+   "remove_dataset_reader": {
+    "ok": true
+   },
+   "restore_policies": {
+    "ok": true
+   },
+   "readback_grantees": {
+    "ok": true
+   },
+   "sa_denied_after_teardown": {
+    "ok": true
+   }
+  },
+  "reader_removed_at": "2026-09-06T19:50:48.575522+00:00",
   "policies_restored": {
-   "at": "2026-09-06T19:31:00.002635+00:00",
-   "nodes": "c64fffde-e246-4af4-8300-f6526fe9b386",
-   "edges": "70d04d67-e882-4af8-bd50-84eb86c26278",
-   "section_vectors": "a3258693-0b3a-46ae-a89a-38f99debecdc"
+   "at": "2026-09-06T19:50:48.575586+00:00",
+   "nodes": "795a4c53-fc08-45ba-b18e-5e26cb5d527e",
+   "edges": "13e41f47-694b-49d9-9809-0293981ddbde",
+   "section_vectors": "ad7982fa-e0d8-4bd5-9e59-89aa4dcea40d"
   },
   "rls_grantees_after": {
    "nodes": [
@@ -388,19 +490,23 @@
   },
   "sa_still_in_grantees": false,
   "sa_denied_after_teardown": true,
-  "waited_s": 0,
+  "waited_s": 92,
   "status": "VERIFIED"
+ },
+ "window_gate": {
+  "open": false,
+  "reason": "RuntimeError: job cleanup is unverified for smoke-1; reconcile its journal before opening another"
  },
  "engine_note": "relational fallback (on-demand): the same RLS policies apply to the same base tables, but this is not a GQL traversal (labelled FALLBACK in every result)",
  "gql_variant": {
   "label": "BLOCKED",
-  "reason": "GQL needs an Enterprise reservation window and the spike's admission gate refuses: RuntimeError: job cleanup is unverified for smoke-1; reconcile its journal before opening another"
+  "reason": "GQL variant not run: requires the bounded window lifecycle for both clients (not wired in this slice); window gate also refuses: RuntimeError: job cleanup is unverified for smoke-1; reconcile its journal before opening another"
  },
  "preflight": {
   "principal": "sa:okf-receipt-restricted",
-  "at": "2026-09-06T19:30:03.333973+00:00",
+  "at": "2026-09-06T19:49:55.428386+00:00",
   "status": "OK",
-  "job": "9740ca7a-f20e-48c3-96c7-2c1823613bf7"
+  "job": "954a8bc1-7671-4b0c-badb-643e35556d87"
  },
  "denied_id_universe": 44,
  "phase_a_propagation": {
@@ -413,7 +519,24 @@
    "vectors": 19
   }
  },
- "finished_at": "2026-09-06T19:31:05.323933+00:00",
+ "allowed_control": {
+  "ok": true,
+  "allowed": {
+   "status": "OK",
+   "concepts": 1,
+   "paths": 1,
+   "computations": 1,
+   "leaks_hidden_id": false
+  },
+  "negative_seed_visible": true,
+  "negative_status": "OK",
+  "reason": null,
+  "allowed_jobs": {
+   "jobs": 3,
+   "bound_to_sa": true
+  }
+ },
+ "finished_at": "2026-09-06T19:52:26.045223+00:00",
  "summary": {
   "hidden_intermediate": "MEASURED",
   "denied_bundle": "MEASURED",
@@ -422,9 +545,8 @@
   "revocation_before_cached_replay": "MEASURED"
  },
  "id_sanitization": {
-  "masked_ids": 5,
-  "universe_known": false,
-  "token": "<id:sha256[:8]>",
-  "note": "offline post-processing of the 2026-09-06T19:30Z run (fix pass P1#5); superseded by the next live run"
+  "masked_ids": 44,
+  "universe_known": true,
+  "token": "<id:sha256[:8]>"
  }
 }

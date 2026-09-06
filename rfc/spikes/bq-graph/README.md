@@ -38,14 +38,27 @@ The 2026-09-05 run recorded every case that needs a second real principal as BLO
 denied). No principal was created since: `python3 -m okf_bq_graph.authz cases` impersonates the receipt spike's
 existing restricted service account (`OKF_SPIKE_RESTRICTED_SA`, alias `sa:okf-receipt-restricted`; the operator needs
 `roles/iam.serviceAccountTokenCreator` on it) and runs five negatives with temporary dataset-reader and row-policy
-grants on the `_rls` fixture, removed and read back in `finally`. Result (`evidence/authz_cases.json`, relational
-fallback engine, on-demand): 5/5 MEASURED — hidden intermediate ENFORCED, denied bundle DENIED with no identifier in
-the response or the API error, output denied with the vector store visible, owner-credential fallback NO_FALLBACK
-(`jobs.get user_email` bound to the SA for every SA job), revocation before cached replay FAIL_CLOSED; teardown
-VERIFIED. The same cases inside a GQL traversal are still BLOCKED: GQL needs an Enterprise window and the window
-gate refuses while a legacy job journal is unreconciled. Under the SA the natural-language seed is DENIED (the remote
-embedding model is not usable by that principal), so seed visibility was shown by a plain row count, not by
-`VECTOR_SEARCH`. Evidence carries the alias only and counts of denied identifiers, never the identifiers.
+grants on the `_rls` fixture, removed step by step and read back in `finally` (each teardown step is attempted even
+if an earlier one fails; VERIFIED only when all succeed, the grantees exclude the SA and the SA is observed denied).
+
+No negative is graded without a working **allowed control** on the same restricted fixture under the same principal
+(an allowed seed returns OK with a computation; the negative's own seed is visible); otherwise the case is BLOCKED.
+Result (`evidence/authz_cases.json`, relational fallback engine, on-demand): 5/5 MEASURED — hidden intermediate
+ENFORCED, denied bundle DENIED with no identifier in the response or the API error, output denied with the vector
+store visible (natural-language seed DENIED under the SA and folded into the verdict), owner-credential fallback
+NO_FALLBACK (`jobs.get user_email` bound to the SA for every SA job; the owner arm runs on the ungoverned base dataset,
+and the owner on the governed fixture sees no hidden path either), revocation before cached replay FAIL_CLOSED on every
+disclosure surface, plus an owner-stored cache entry replayed under the SA is DENIED (the re-check runs under the
+caller's credential, not the requester label). A shared-setup failure blocks the unreached cases with the stage and
+reason and still finalizes the evidence.
+
+Still BLOCKED: the same cases inside a GQL traversal. GQL needs an Enterprise window, i.e. the spike's bounded window
+lifecycle for both the owner and the impersonated client; `--engine gql` is refused before preflight until that is
+wired, and the window gate also refuses while a legacy job journal is unreconciled. Under the SA the natural-language
+seed is DENIED (the remote embedding model is not usable by that principal), so seed visibility was shown by a plain
+row count, not by `VECTOR_SEARCH`. Judges run on the original payloads; the published evidence carries the SA alias
+only and masks every identifier of the pinned publication as `<id:sha256[:8]>`, so neither a passing nor a failing
+run can republish a denied identifier.
 
 ## Graph model (spec §3)
 
