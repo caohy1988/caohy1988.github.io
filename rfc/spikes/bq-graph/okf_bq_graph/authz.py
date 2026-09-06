@@ -13,12 +13,14 @@ restricted service account (alias `sa:okf-receipt-restricted`, env OKF_SPIKE_RES
 impersonation, the same pattern as the receipt spike's broker.open_impersonated_session (copied, not imported, so
 this spike stays self-contained). Grants are dataset-level READER entries and row-policy grantees on the temporary
 fixture datasets only, removed again in `finally`. Each case ends MEASURED / FAILED / BLOCKED-with-reason /
-NOT_APPLICABLE-with-reason; a skipped run is never acceptance evidence. Evidence never carries the raw service
-account e-mail (alias only) and never names a denied identifier (see `redact`).
+NOT_APPLICABLE-with-reason; a skipped run is never acceptance evidence. Judges run on the original payloads; the
+published evidence JSON then carries the SA alias only (`redact`) and masks every identifier of the pinned publication
+(`sanitize_ids`), so neither a passing nor a failing run can republish a denied identifier.
 """
 from __future__ import annotations
 
 import datetime as _dt
+import hashlib
 import json
 import os as _os
 import re
@@ -35,12 +37,32 @@ META_DS = f"{DATASET}_meta"
 AV_DS = f"{DATASET}_av"
 
 
-def _operator() -> str:
-    e = _os.environ.get("OKF_OPERATOR_EMAIL") or _sp.run(["gcloud", "config", "get-value", "account"], capture_output=True, text=True).stdout.strip()
-    return f"user:{e}"
+_OPERATOR: Optional[str] = None
 
 
-OPERATOR = _operator()   # never committed; resolved from the active gcloud account or OKF_OPERATOR_EMAIL
+def operator(refresh: bool = False) -> str:
+    """`user:<email>` of the operator: OKF_OPERATOR_EMAIL, else the active gcloud account. Resolved lazily (never at
+    import: hermetic tests and offline imports must not touch gcloud) and tolerant of a missing/silent gcloud, in
+    which case the result is `user:` and any live grant that needs it raises a clear error."""
+    global _OPERATOR
+    if _OPERATOR is None or refresh:
+        e = _os.environ.get("OKF_OPERATOR_EMAIL")
+        if not e:
+            try:
+                e = _sp.run(["gcloud", "config", "get-value", "account"], capture_output=True, text=True).stdout.strip()
+            except (FileNotFoundError, OSError):
+                e = ""
+        _OPERATOR = f"user:{e}"
+    return _OPERATOR
+
+
+def _operator_member() -> str:
+    op = operator()
+    if op == "user:":
+        raise RuntimeError("operator identity unknown: set OKF_OPERATOR_EMAIL or log in to gcloud")
+    return op
+
+
 HIDDEN = "metrics/gross-margin"
 SA_ALIAS = "sa:okf-receipt-restricted"
 SA_DEFAULT = f"okf-receipt-restricted@{PROJECT}.iam.gserviceaccount.com"
@@ -64,7 +86,7 @@ def redact(obj: Any, sa_email: Optional[str] = None) -> Any:
     """Evidence hygiene: the SA e-mail becomes its alias, the operator e-mail becomes `user:operator`, any other
     e-mail becomes `<email>`. Works on any JSON-serialisable object; returns the same shape."""
     text = json.dumps(obj, default=str)
-    for secret, alias in ((sa_email or restricted_sa(), SA_ALIAS), (OPERATOR.split(":", 1)[-1], "operator")):
+    for secret, alias in ((sa_email or restricted_sa(), SA_ALIAS), (operator().split(":", 1)[-1], "operator")):
         if secret:
             text = text.replace(secret, alias)
     text = _EMAIL_RE.sub("<email>", text)
@@ -79,6 +101,21 @@ def leaks(obj: Any, needle: str) -> bool:
 
 def leaked_ids(obj: Any, ids: list[str]) -> list[str]:
     return sorted(i for i in set(ids) if leaks(obj, i))
+
+
+def id_token(local_id: str) -> str:
+    return "<id:" + hashlib.sha256(local_id.encode()).hexdigest()[:8] + ">"
+
+
+def sanitize_ids(obj: Any, ids: list[str]) -> Any:
+    """Mask every publication identifier (exact match, longest first, so `x-legacy` is masked before `x`) in any
+    JSON-serialisable object: bare local ids, scoped node/edge ids, section ids (`#sN`) and paths (`.md`) all
+    become `<id:sha256[:8]>`. Judges run on the original payloads; only published surfaces are masked."""
+    text = json.dumps(obj, default=str)
+    for i in sorted(set(ids), key=len, reverse=True):
+        if i:
+            text = re.sub(re.escape(i) + r"(?![-\w])", id_token(i), text)
+    return json.loads(text)
 
 
 # ----------------------------------------------------------------------------- impersonation (receipt pattern, by copy)
@@ -198,6 +235,7 @@ def setup(client: bigquery.Client, base_pub: str) -> dict:
         run(client, f"CREATE MODEL IF NOT EXISTS `{full}.text_embedding` REMOTE WITH CONNECTION `{PROJECT}.us.bq-llm` OPTIONS (ENDPOINT = 'text-embedding-005')")
         log[f"graph_{ds}"] = ensure_graph(client, ds)
     meta = f"{PROJECT}.{META_DS}"
+    OPERATOR = _operator_member()
     pol = list(rls_statements([OPERATOR]).values()) + [
         f"CREATE OR REPLACE ROW ACCESS POLICY hide_sections_nodes ON `{meta}.nodes` GRANT TO ('{OPERATOR}') FILTER USING (kind <> 'Section')",
         f"CREATE OR REPLACE ROW ACCESS POLICY hide_sections_edges ON `{meta}.edges` GRANT TO ('{OPERATOR}') FILTER USING (relation NOT IN ('HAS_SECTION', 'NEXT', 'CITES', 'MENTIONS'))",
@@ -242,12 +280,12 @@ def setup(client: bigquery.Client, base_pub: str) -> dict:
 
 def revoke(client: bigquery.Client) -> dict:
     """Real policy change: the operator's grant on `_rls` becomes FILTER USING (FALSE) (zero rows)."""
-    return set_rls(client, [OPERATOR], hide=False)
+    return set_rls(client, [_operator_member()], hide=False)
 
 
 def restore(client: bigquery.Client) -> dict:
     """Operator-only hidden-intermediate policies (the 2026-09-05 fixture shape)."""
-    return set_rls(client, [OPERATOR], hide=True)
+    return set_rls(client, [_operator_member()], hide=True)
 
 
 # ----------------------------------------------------------------------------- judges (pure; hermetically tested)
@@ -255,69 +293,136 @@ def _label(ok: bool) -> str:
     return "MEASURED" if ok else "FAILED"
 
 
-def judge_hidden_intermediate(result: dict, hidden: str = HIDDEN) -> dict:
+def _content(result: dict) -> dict:
+    return {k: len(result.get(k) or []) for k in ("concepts", "paths", "computations")}
+
+
+def allowed_control(allowed: dict, negative: dict, seed_local: str, hidden: str = HIDDEN) -> dict:
+    """The restricted principal must be able to retrieve when it is allowed to, on the SAME restricted fixture:
+    an allowed seed returns OK with at least one computation and no hidden id, and the negative case's own seed is
+    visible (its concept is returned). Without this control an empty answer could be a stale fixture or a broken
+    client, not enforcement."""
+    a_ok = allowed.get("status") == "OK" and len(allowed.get("computations") or []) >= 1 and not leaks(allowed, hidden)
+    seeds = [c.get("concept") for c in negative.get("concepts") or []]
+    n_ok = negative.get("status") == "OK" and seeds == [seed_local]
+    ok = a_ok and n_ok
+    return {"ok": ok, "allowed": {"status": allowed.get("status"), **_content(allowed), "leaks_hidden_id": leaks(allowed, hidden)},
+            "negative_seed_visible": n_ok, "negative_status": negative.get("status"),
+            "reason": None if ok else ("allowed retrieval on the restricted fixture did not succeed" if not a_ok else "negative case's seed concept not visible to the principal")}
+
+
+def _blocked_by_control(control: Optional[dict]) -> Optional[dict]:
+    if control is None or not control.get("ok"):
+        return {"label": "BLOCKED", "verdict": "NO_ALLOWED_CONTROL",
+                "reason": "no working allowed control on the same restricted fixture: " + str((control or {}).get("reason") or "control not run")}
+    return None
+
+
+def judge_hidden_intermediate(result: dict, control: Optional[dict] = None, hidden: str = HIDDEN) -> dict:
     """Path through the hidden concept removed AND the hidden id absent from the whole answer surface
-    (concepts, paths, warnings = the "explain" the caller sees)."""
+    (concepts, paths, warnings = the "explain" the caller sees). Graded only behind a working allowed control."""
+    if (b := _blocked_by_control(control)):
+        return b
     leak = leaks(result, hidden)
-    ok = result.get("status") in ("OK", "DENIED", "NO_SEED") and result.get("computations") == [] and not leak
+    ok = result.get("status") == "OK" and result.get("computations") == [] and result.get("paths") == [] and not leak
     return {"label": _label(ok), "verdict": "ENFORCED" if ok else "LEAK_OR_UNEXPECTED", "status": result.get("status"),
-            "computations": len(result.get("computations") or []), "paths": result.get("paths"), "leaks_hidden_id": leak,
+            **_content(result), "leaks_hidden_id": leak,
             "replacement": (result.get("concepts") or [{}])[0].get("replacement") if result.get("concepts") else None,
             "warnings": result.get("warnings")}
 
 
-def judge_denied_bundle(result: dict, denied_ids: list[str], api_error: Optional[str] = None) -> dict:
+def judge_denied_bundle(result: dict, denied_ids: list[str], api_error: Optional[str] = None, control: Optional[dict] = None) -> dict:
     """No grant at all: DENIED with empty content, and neither the response nor the raw API error names an id."""
+    if (b := _blocked_by_control(control)):
+        return b
     leaked = leaked_ids(result, denied_ids) + (leaked_ids(api_error, denied_ids) if api_error else [])
     ok = (result.get("status") == "DENIED" and result.get("computations") == [] and result.get("concepts") == []
           and result.get("paths") == [] and not leaked)
     return {"label": _label(ok), "verdict": "DENIED_NO_LEAK" if ok else "LEAK_OR_UNEXPECTED", "status": result.get("status"),
-            "rows": len(result.get("concepts") or []) + len(result.get("computations") or []), "leaked_id_count": len(leaked),
+            **_content(result), "leaked_id_count": len(leaked),
             "warnings": result.get("warnings"), "api_error_class": (api_error or "").split(":", 1)[0] or None}
 
 
-def judge_output_denied(result: dict, probe: dict, denied_ids: list[str], seed_local: str) -> dict:
-    """Seed store visible (vectors > 0) while nodes/edges yield zero rows: no computation, no SQL, and no id other than
-    the caller-supplied seed appears anywhere in the answer."""
+def judge_output_denied(result: dict, probe: dict, denied_ids: list[str], seed_local: str, control: Optional[dict] = None) -> dict:
+    """Seed store visible (vectors > 0, measured by a plain row count under the same principal) while nodes/edges
+    yield zero rows: no computation, no SQL, and no id other than the caller-supplied seed appears anywhere."""
+    if (b := _blocked_by_control(control)):
+        return b
     others = [i for i in denied_ids if i != seed_local and not i.startswith(seed_local + "#")]
     leaked = leaked_ids(result, others)
     seed_visible = (probe.get("vectors") or 0) > 0
     walk_denied = (probe.get("nodes") or 0) == 0 and (probe.get("edges") or 0) == 0
-    ok = (seed_visible and walk_denied and result.get("computations") == [] and not leaked
-          and all(c.get("sql") is None for c in result.get("computations") or []))
+    ok = (seed_visible and walk_denied and result.get("computations") == [] and result.get("paths") == [] and not leaked)
     return {"label": _label(ok), "verdict": "OUTPUT_DENIED_NO_LEAK" if ok else "LEAK_OR_UNEXPECTED", "status": result.get("status"),
-            "seed_visible": seed_visible, "walk_denied": walk_denied, "computations": len(result.get("computations") or []),
-            "leaked_id_count": len(leaked), "warnings": result.get("warnings"), "probe": probe}
+            "seed_visible": seed_visible, "seed_visibility_evidence": "row count of section_vectors under the principal (not VECTOR_SEARCH)",
+            "walk_denied": walk_denied, **_content(result), "leaked_id_count": len(leaked), "warnings": result.get("warnings"), "probe": probe}
+
+
+def fold_variant(case: dict, name: str, variant: dict) -> dict:
+    """An executed variant (e.g. the natural-language seed) keeps its own label and verdict, and a FAILED variant
+    fails the enclosing case. A variant that could not execute (NOT_RUN) is recorded and does not grade the case."""
+    case[name] = variant
+    if variant.get("label") == "FAILED" and case.get("label") == "MEASURED":
+        case["label"] = "FAILED"; case["verdict"] = f"{name.upper()}_{variant.get('verdict')}"
+    return case
 
 
 def judge_owner_fallback(owner_result: dict, sa_result: dict, sa_job_emails: list[str], sa_email: str,
-                         owner_job_emails: list[str], operator_email: str, hidden: str = HIDDEN) -> dict:
+                         owner_job_emails: list[str], operator_email: str, hidden: str = HIDDEN,
+                         owner_on_restricted: Optional[dict] = None) -> dict:
     """Every job the SA session created is bound to the SA (jobs.get user_email), every owner job to the operator,
-    and the two answers differ exactly at the hidden set: owner sees the hidden path, SA does not."""
+    and the two answers differ at the hidden set: the owner on the ungoverned base dataset sees the hidden path, the
+    SA on the governed fixture does not. The owner arm runs on a different dataset, so the differential is a property
+    of the fixture as much as of the principal; the identity binding is what earns NO_FALLBACK."""
     sa_bound = bool(sa_job_emails) and all(e == sa_email for e in sa_job_emails)
     owner_bound = bool(owner_job_emails) and all(e == operator_email for e in owner_job_emails)
     owner_saw, sa_saw = leaks(owner_result, hidden), leaks(sa_result, hidden)
     ok = sa_bound and owner_bound and owner_saw and not sa_saw and sa_result.get("computations") == []
-    return {"label": _label(ok), "verdict": "NO_FALLBACK" if ok else "FALLBACK_OR_UNEXPECTED",
-            "sa_jobs": len(sa_job_emails), "sa_jobs_bound_to_sa": sa_bound,
-            "owner_jobs": len(owner_job_emails), "owner_jobs_bound_to_operator": owner_bound,
-            "owner_saw_hidden": owner_saw, "sa_saw_hidden": sa_saw,
-            "owner_computations": len(owner_result.get("computations") or []), "sa_computations": len(sa_result.get("computations") or [])}
+    out = {"label": _label(ok), "verdict": "NO_FALLBACK" if ok else "FALLBACK_OR_UNEXPECTED",
+           "sa_jobs": len(sa_job_emails), "sa_jobs_bound_to_sa": sa_bound,
+           "owner_jobs": len(owner_job_emails), "owner_jobs_bound_to_operator": owner_bound,
+           "owner_saw_hidden": owner_saw, "sa_saw_hidden": sa_saw,
+           "owner_computations": len(owner_result.get("computations") or []), "sa_computations": len(sa_result.get("computations") or []),
+           "note": "owner arm runs on the ungoverned base dataset; SA arm on the governed fixture"}
+    if owner_on_restricted is not None:
+        out["owner_on_restricted_fixture"] = {"status": owner_on_restricted.get("status"), "saw_hidden": leaks(owner_on_restricted, hidden),
+                                              "computations": len(owner_on_restricted.get("computations") or [])}
+    return out
 
 
-def judge_revocation(warm: dict, hit: dict, replay: dict, fresh: dict, revocation_observed: bool) -> dict:
-    """Cached entry stored under the SA, replayed after the SA's dataset grant was removed: replay refused with no
-    content; a fresh request is refused too. NOT_APPLICABLE only when no entry was ever stored."""
-    wc, hc, rc = (x.get("scope", {}).get("cache") for x in (warm, hit, replay))
+def _closed(result: dict, denied_ids: list[str]) -> tuple[bool, dict]:
+    """Explicit denial with nothing disclosed on any surface: status DENIED, every content array empty, and no
+    publication identifier anywhere in the payload (warnings included)."""
+    leaked = leaked_ids(result, denied_ids)
+    ok = (result.get("status") == "DENIED" and result.get("concepts") == [] and result.get("paths") == []
+          and result.get("computations") == [] and not leaked)
+    return ok, {"status": result.get("status"), "cache": result.get("scope", {}).get("cache"), **_content(result), "leaked_id_count": len(leaked)}
+
+
+def judge_revocation(warm: dict, hit: dict, replay: dict, fresh: dict, revocation_observed: bool, denied_ids: list[str]) -> dict:
+    """Cached entry stored under the SA, replayed after the SA's dataset grant was removed: the replay AND a fresh
+    request are explicitly DENIED with nothing on any disclosure surface. NOT_APPLICABLE only when no entry was stored."""
+    wc, hc = (x.get("scope", {}).get("cache") for x in (warm, hit))
     if warm.get("status") != "OK" or wc != "MISS_STORED":
         return {"label": "NOT_APPLICABLE", "verdict": "NO_CACHE_ENTRY", "reason": f"warm run did not store a cache entry (status {warm.get('status')}, cache {wc})",
                 "warm": (warm.get("status"), wc)}
-    ok = (revocation_observed and hc == "HIT_RECHECKED" and replay.get("status") != "OK" and replay.get("computations") == []
-          and rc == "HIT_DENIED" and fresh.get("status") != "OK" and fresh.get("computations") == [])
+    r_ok, r = _closed(replay, denied_ids)
+    f_ok, f = _closed(fresh, denied_ids)
+    ok = revocation_observed and hc == "HIT_RECHECKED" and r_ok and r["cache"] == "HIT_DENIED" and f_ok
     return {"label": _label(ok), "verdict": "FAIL_CLOSED" if ok else "LEAK_OR_UNEXPECTED", "revocation_observed": revocation_observed,
-            "warm": (warm.get("status"), wc), "hit": (hit.get("status"), hc),
-            "replay": (replay.get("status"), rc, len(replay.get("computations") or [])),
-            "fresh_after_revoke": (fresh.get("status"), len(fresh.get("computations") or []), (fresh.get("warnings") or [])[:2])}
+            "warm": (warm.get("status"), wc, len(warm.get("computations") or [])), "hit": (hit.get("status"), hc), "replay": r, "fresh_after_revoke": f}
+
+
+def judge_cross_principal_replay(owner_warm: dict, sa_replay: dict, denied_ids: list[str]) -> dict:
+    """An entry the owner stored (ungoverned dataset, hidden path inside) replayed under the SA with the same cache
+    and the same requester label: the SA must get an explicit DENIED with nothing disclosed (re-check runs under the
+    SA's own credential), never the owner's content."""
+    stored = owner_warm.get("status") == "OK" and owner_warm.get("scope", {}).get("cache") == "MISS_STORED"
+    if not stored:
+        return {"label": "NOT_APPLICABLE", "verdict": "NO_CACHE_ENTRY", "reason": "owner warm run did not store a cache entry"}
+    ok, r = _closed(sa_replay, denied_ids)
+    return {"label": _label(ok and r["cache"] == "HIT_DENIED"), "verdict": "CACHE_BOUND_TO_CREDENTIAL" if ok and r["cache"] == "HIT_DENIED" else "LEAK_OR_UNEXPECTED",
+            "owner_entry_computations": len(owner_warm.get("computations") or []), "sa_replay": r}
 
 
 # ----------------------------------------------------------------------------- live runner
@@ -357,137 +462,216 @@ def _job_emails(owner: bigquery.Client, result: dict) -> list[str]:
     return [owner.get_job(j["job_id"], location=LOCATION).user_email for j in result.get("timing", {}).get("jobs", []) if j.get("job_id")]
 
 
+def _bound(owner: bigquery.Client, result: dict, sa: str) -> dict:
+    emails = _job_emails(owner, result)
+    return {"jobs": len(emails), "bound_to_sa": bool(emails) and all(e == sa for e in emails)}
+
+
+def _err(e: BaseException, sa: str, n: int = 400) -> str:
+    return redact(f"{type(e).__name__}: {str(e)[:n]}", sa)
+
+
+def record_case(cases: dict, key: str, fn: Callable[[], dict], sa: str) -> None:
+    """Merge a judge result into the case slot: the placeholder reason is dropped first so a judge-supplied reason
+    (NOT_APPLICABLE / BLOCKED) survives; an exception is a recorded blocker, never a pass."""
+    cases[key].pop("reason", None)
+    try:
+        cases[key].update(fn())
+    except Exception as e:  # noqa: BLE001
+        cases[key].update(label="BLOCKED", reason=_err(e, sa))
+    print(key, cases[key].get("label"), cases[key].get("verdict") or cases[key].get("reason"), flush=True)
+
+
+def teardown(owner: bigquery.Client, sa_client: Any, sa: str, pub: str, wait_s: int) -> dict:
+    """Independent cleanup steps, each attempted even when an earlier one failed; VERIFIED only when every step
+    succeeded, the read-back grantees exclude the SA, and the SA is observed denied on the fixture."""
+    td: dict = {"steps": {}}
+
+    def step(name: str, fn: Callable[[], Any]) -> Any:
+        try:
+            v = fn(); td["steps"][name] = {"ok": True}; return v
+        except Exception as e:  # noqa: BLE001
+            td["steps"][name] = {"ok": False, "error": _err(e, sa, 300)}; return None
+
+    td["reader_removed_at"] = step("remove_dataset_reader", lambda: set_dataset_reader(owner, RLS_DS, sa, False))
+    td["policies_restored"] = step("restore_policies", lambda: restore(owner))
+    grantees = step("readback_grantees", lambda: rls_grantees(owner))
+    if grantees is not None:
+        td["rls_grantees_after"] = redact(grantees, sa)
+        td["sa_still_in_grantees"] = any(sa in g or SA_ALIAS in g for gs in td["rls_grantees_after"].values() for g in gs)
+    if sa_client is not None:
+        obs = step("sa_denied_after_teardown", lambda: _wait(lambda: _probe(sa_client, RLS_DS, pub), _is_denied, wait_s))
+        if obs is not None:
+            td["sa_denied_after_teardown"], td["waited_s"] = obs[0], obs[2]
+    else:
+        td["steps"]["sa_denied_after_teardown"] = {"ok": False, "error": "no impersonated client to observe with"}
+    td["status"] = ("VERIFIED" if all(s["ok"] for s in td["steps"].values()) and td.get("sa_still_in_grantees") is False
+                    and td.get("sa_denied_after_teardown") is True else "UNVERIFIED")
+    return td
+
+
 def second_principal_cases(owner: bigquery.Client, pub: str, as_of: str, engine: str = "fallback", wait_s: int = 240,
                            sa_email: Optional[str] = None, factory: Callable[[str], Any] = impersonated_client,
                            out_path: Optional[str] = "evidence/authz_cases.json") -> dict:
-    """Run the five second-principal negatives live. Every case ends with a label from LABELS; grants are removed in
-    `finally`; the evidence written is redacted (alias only, no denied ids: only counts and booleans about them)."""
+    """Run the five second-principal negatives live. Every case ends with a label from LABELS (a shared-setup
+    failure blocks the unreached cases with the stage and reason); grants are removed by `teardown` whatever
+    happened; the evidence is always finalized (`_finish`: alias only, every publication identifier masked)."""
     from .retrieve import retrieve
     sa = sa_email or restricted_sa()
     member = f"serviceAccount:{sa}"
-    op_email = OPERATOR.split(":", 1)[-1]
-    legacy, revenue = "forced:metrics/gross-margin-legacy.md", "forced:metrics/revenue.md"
+    op_email = operator().split(":", 1)[-1]
+    seed_local = "metrics/gross-margin-legacy"
+    legacy, revenue = f"forced:{seed_local}.md", "forced:metrics/revenue.md"
     ev: dict = {"started_at": _dt.datetime.now(_dt.timezone.utc).isoformat(), "principal": SA_ALIAS, "engine": engine,
                 "publication_id": pub, "as_of": as_of, "cases": {k: {"description": v, "label": "BLOCKED", "reason": "not reached"} for k, v in CASES.items()},
-                "grants": [], "teardown": {}}
-    if engine != "gql":
-        gate = gql_window_gate()
-        ev["engine_note"] = ("relational fallback (on-demand): the same RLS policies apply to the same base tables, but this is not a "
-                             "GQL traversal (labelled FALLBACK in every result)")
-        ev["gql_variant"] = ({"label": "NOT_RUN", "reason": "window gate open; GQL variant not requested in this pass"} if gate["open"] else
-                             {"label": "BLOCKED", "reason": f"GQL needs an Enterprise reservation window and the spike's admission gate refuses: {gate['reason']}"})
+                "grants": [], "stages": [], "teardown": {}}
+    cases = ev["cases"]
+    gate = gql_window_gate()
+    ev["window_gate"] = gate
+    if engine == "gql":
+        # GQL needs an Enterprise reservation, i.e. this spike's bounded window lifecycle (WindowJobs admission, deadline,
+        # job journal, cancellation, separate capacity and job-cleanup receipts) for BOTH clients. This slice does not
+        # wire the impersonated client into that lifecycle, so no GQL job is submitted: every case is BLOCKED.
+        reason = ("engine=gql refused before preflight: GQL requires the bounded window lifecycle for both the owner and "
+                  "the impersonated client (not wired in this slice); " + ("window gate open" if gate["open"] else f"window gate: {gate['reason']}"))
+        for c in cases.values():
+            c.update(label="BLOCKED", reason=reason)
+        ev["gql_variant"] = {"label": "BLOCKED", "reason": reason}
+        return _finish(ev, out_path, sa, [])
+    ev["engine_note"] = ("relational fallback (on-demand): the same RLS policies apply to the same base tables, but this is not a "
+                         "GQL traversal (labelled FALLBACK in every result)")
+    ev["gql_variant"] = {"label": "BLOCKED", "reason": "GQL variant not run: requires the bounded window lifecycle for both clients (not wired in this slice)"
+                         + ("" if gate["open"] else f"; window gate also refuses: {gate['reason']}")}
     pre, sa_client = preflight(sa, factory)
     ev["preflight"] = pre
     if pre["status"] != "OK":
-        for c in ev["cases"].values():
+        for c in cases.values():
             c.update(label="BLOCKED", reason=f"impersonation preflight failed: {pre['error']}")
-        return _finish(ev, out_path, sa)
-    cases = ev["cases"]
+        return _finish(ev, out_path, sa, [])
+    denied_ids: list[str] = []
+    stage = "start"
 
-    def run_case(key: str, fn: Callable[[], dict]) -> None:
-        try:
-            cases[key].update(fn()); cases[key].pop("reason", None)
-        except Exception as e:  # noqa: BLE001 - a case that cannot run is a recorded blocker, not a pass
-            cases[key].update(label="BLOCKED", reason=redact(f"{type(e).__name__}: {str(e)[:400]}", sa))
-        print(key, cases[key].get("label"), cases[key].get("verdict") or cases[key].get("reason"), flush=True)
+    def mark(s: str) -> None:
+        nonlocal stage
+        stage = s; ev["stages"].append(s)
 
     try:
-        denied_ids = [r.local_id for r in owner.query(f"SELECT DISTINCT local_id FROM `{PROJECT}.{DATASET}.nodes` WHERE publication_id = @p",
-                                                      job_config=bigquery.QueryJobConfig(query_parameters=[bigquery.ScalarQueryParameter("p", "STRING", pub)]),
-                                                      location=LOCATION).result()]
-        ev["denied_id_universe"] = len(denied_ids)
-        # ---- phase A: SA is a reader of `_rls` with the same hidden-intermediate policy as the operator
-        ev["grants"].append({"at": set_dataset_reader(owner, RLS_DS, sa, True), "ds": RLS_DS, "principal": SA_ALIAS, "reader": True})
-        ev["grants"].append({"policies": set_rls(owner, [OPERATOR, member]), "grantees": ["operator", SA_ALIAS], "shape": "hidden-intermediate"})
-        ok, obs, waited = _wait(lambda: _probe(sa_client, RLS_DS, pub), lambda o: isinstance(o, dict) and o["nodes"] > 0 and o["hidden"] == 0, wait_s)
-        ev["phase_a_propagation"] = {"ready": ok, "waited_s": waited, "probe": obs if isinstance(obs, dict) else redact(str(obs)[:200], sa)}
-        if not ok:
-            raise RuntimeError(f"SA grant on {RLS_DS} did not propagate within {wait_s}s: {redact(str(obs)[:200], sa)}")
-        sa_rls = {"engine": engine, "bq": sa_client, "ds": RLS_DS}
-        r1 = retrieve(legacy, BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
-
-        def case1():
-            j = judge_hidden_intermediate(r1); j["timing_ms"] = r1["timing"]["total_ms"]; j["full_result"] = r1
-            return j
-        run_case("hidden_intermediate", case1)
-
-        def case4():
-            r_owner = retrieve(legacy, BUNDLE_ID, pub, "operator", as_of, {"engine": engine, "bq": owner, "ds": DATASET})
-            j = judge_owner_fallback(r_owner, r1, _job_emails(owner, r1), sa, _job_emails(owner, r_owner), op_email)
-            j["owner_paths"] = r_owner["paths"]; j["sa_paths"] = r1["paths"]
-            return j
-        run_case("owner_fallback_negative", case4)
-
-        def case5():
-            cache: dict = {}
-            cc = dict(sa_rls, cache=cache)
-            warm = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, cc)
-            hit = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, cc)
-            revoked_at = set_dataset_reader(owner, RLS_DS, sa, False)
-            ev["grants"].append({"at": revoked_at, "ds": RLS_DS, "principal": SA_ALIAS, "reader": False})
-            seen, obs, waited = _wait(lambda: _probe(sa_client, RLS_DS, pub), _is_denied, wait_s)
-            replay = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, cc)
-            fresh = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
-            j = judge_revocation(warm, hit, replay, fresh, seen)
-            j.update(revoked_at=revoked_at, revocation_propagation_s=waited, revocation_observation=type(obs).__name__,
-                     replay_warnings=replay.get("warnings"))
-            return j
-        run_case("revocation_before_cached_replay", case5)
-
-        # ---- phase B: never granted on the base dataset
-        def case2():
-            r2 = retrieve(legacy, BUNDLE_ID, pub, SA_ALIAS, as_of, {"engine": engine, "bq": sa_client, "ds": DATASET})
-            try:
-                _probe(sa_client, DATASET, pub); api_err = None
-            except Exception as e:  # noqa: BLE001
-                api_err = f"{type(e).__name__}: {str(e)}"
-            j = judge_denied_bundle(r2, denied_ids, api_err)
-            j["api_error_redacted"] = redact(api_err[:300], sa) if api_err else None
-            j["full_result"] = r2
-            return j
-        run_case("denied_bundle", case2)
-
-        # ---- phase C: vectors visible, nodes/edges denied (policy grantees exclude the SA on nodes/edges only)
-        def case3():
-            ev["grants"].append({"at": set_dataset_reader(owner, RLS_DS, sa, True), "ds": RLS_DS, "principal": SA_ALIAS, "reader": True})
-            ev["grants"].append({"policies": set_rls(owner, [OPERATOR], vector_grantees=[OPERATOR, member]),
-                                 "grantees": {"nodes_edges": ["operator"], "section_vectors": ["operator", SA_ALIAS]}, "shape": "hidden-intermediate"})
-            ok, obs, waited = _wait(lambda: _probe(sa_client, RLS_DS, pub),
-                                    lambda o: isinstance(o, dict) and o["vectors"] > 0 and o["nodes"] == 0 and o["edges"] == 0, wait_s)
-            if not ok:
-                raise RuntimeError(f"phase C grants did not propagate within {wait_s}s: {redact(str(obs)[:200], sa)}")
-            r3 = retrieve(legacy, BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
-            j = judge_output_denied(r3, obs, denied_ids, "metrics/gross-margin-legacy")
-            j["propagation_s"] = waited; j["full_result"] = r3
-            try:  # natural seed exercises the vector store itself; the remote embedding model may not be usable by the SA
-                rn = retrieve("How do we calculate gross margin, exactly?", BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
-                jn = judge_output_denied(rn, obs, denied_ids, "")
-                j["natural_seed"] = {"status": rn["status"], "seed_hits": len(rn["concepts"]), "computations": len(rn["computations"]),
-                                     "leaked_id_count": jn["leaked_id_count"], "warnings": rn["warnings"]}
-            except Exception as e:  # noqa: BLE001
-                j["natural_seed"] = {"status": "NOT_RUN", "error": redact(f"{type(e).__name__}: {str(e)[:200]}", sa)}
-            return j
-        run_case("output_denied_seed_visible", case3)
-    finally:
-        td = ev["teardown"]
         try:
-            td["reader_removed_at"] = set_dataset_reader(owner, RLS_DS, sa, False)
-            td["policies_restored"] = restore(owner)
-            td["rls_grantees_after"] = redact(rls_grantees(owner), sa)
-            td["sa_still_in_grantees"] = any(SA_ALIAS in g or sa in g for gs in td["rls_grantees_after"].values() for g in gs)
-            seen, obs, waited = _wait(lambda: _probe(sa_client, RLS_DS, pub), _is_denied, wait_s)
-            td["sa_denied_after_teardown"] = seen; td["waited_s"] = waited
-            td["status"] = "VERIFIED" if seen and not td["sa_still_in_grantees"] else "UNVERIFIED"
-        except Exception as e:  # noqa: BLE001
-            td["status"] = "UNVERIFIED"; td["error"] = redact(f"{type(e).__name__}: {str(e)[:300]}", sa)
-    return _finish(ev, out_path, sa)
+            mark("denied_id_universe")
+            denied_ids = [r.local_id for r in owner.query(f"SELECT DISTINCT local_id FROM `{PROJECT}.{DATASET}.nodes` WHERE publication_id = @p",
+                                                          job_config=bigquery.QueryJobConfig(query_parameters=[bigquery.ScalarQueryParameter("p", "STRING", pub)]),
+                                                          location=LOCATION).result()]
+            ev["denied_id_universe"] = len(denied_ids)
+            # ---- phase A: SA is a reader of `_rls` with the same hidden-intermediate policy as the operator
+            mark("phase_a_grants")
+            ev["grants"].append({"at": set_dataset_reader(owner, RLS_DS, sa, True), "ds": RLS_DS, "principal": SA_ALIAS, "reader": True})
+            ev["grants"].append({"policies": set_rls(owner, [_operator_member(), member]), "grantees": ["operator", SA_ALIAS], "shape": "hidden-intermediate"})
+            mark("phase_a_propagation")
+            ok, obs, waited = _wait(lambda: _probe(sa_client, RLS_DS, pub), lambda o: isinstance(o, dict) and o["nodes"] > 0 and o["hidden"] == 0, wait_s)
+            ev["phase_a_propagation"] = {"ready": ok, "waited_s": waited, "probe": obs if isinstance(obs, dict) else redact(str(obs)[:200], sa)}
+            if not ok:
+                raise RuntimeError(f"SA grant on {RLS_DS} did not propagate within {wait_s}s: {redact(str(obs)[:200], sa)}")
+            sa_rls = {"engine": engine, "bq": sa_client, "ds": RLS_DS}
+            # ---- allowed control on the same restricted fixture, same principal: must succeed before any negative is graded
+            mark("allowed_control")
+            r_ctl = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
+            r1 = retrieve(legacy, BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
+            control = allowed_control(r_ctl, r1, seed_local)
+            control["allowed_jobs"] = _bound(owner, r_ctl, sa)
+            ev["allowed_control"] = control
+            mark("cases")
+
+            def case1():
+                j = judge_hidden_intermediate(r1, control); j["timing_ms"] = r1["timing"]["total_ms"]; j["sa_jobs"] = _bound(owner, r1, sa); j["full_result"] = r1
+                return j
+            record_case(cases, "hidden_intermediate", case1, sa)
+
+            def case4():
+                r_owner = retrieve(legacy, BUNDLE_ID, pub, "operator", as_of, {"engine": engine, "bq": owner, "ds": DATASET})
+                r_owner_rls = retrieve(legacy, BUNDLE_ID, pub, "operator", as_of, {"engine": engine, "bq": owner, "ds": RLS_DS})
+                j = judge_owner_fallback(r_owner, r1, _job_emails(owner, r1), sa, _job_emails(owner, r_owner), op_email, owner_on_restricted=r_owner_rls)
+                j["owner_paths"] = r_owner["paths"]; j["sa_paths"] = r1["paths"]
+                return j
+            record_case(cases, "owner_fallback_negative", case4, sa)
+
+            def case5():
+                cache: dict = {}
+                cc = dict(sa_rls, cache=cache)
+                warm = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, cc)
+                hit = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, cc)
+                # cross-principal: an entry the OWNER stored on the ungoverned dataset, replayed under the SA with the same cache and label
+                xc: dict = {}
+                owner_warm = retrieve(legacy, BUNDLE_ID, pub, "operator", as_of, {"engine": engine, "bq": owner, "ds": DATASET, "cache": xc})
+                sa_replay = retrieve(legacy, BUNDLE_ID, pub, "operator", as_of, {"engine": engine, "bq": sa_client, "ds": DATASET, "cache": xc})
+                revoked_at = set_dataset_reader(owner, RLS_DS, sa, False)
+                ev["grants"].append({"at": revoked_at, "ds": RLS_DS, "principal": SA_ALIAS, "reader": False})
+                seen, obs, waited = _wait(lambda: _probe(sa_client, RLS_DS, pub), _is_denied, wait_s)
+                replay = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, cc)
+                fresh = retrieve(revenue, BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
+                j = judge_revocation(warm, hit, replay, fresh, seen, denied_ids)
+                j.update(revoked_at=revoked_at, revocation_propagation_s=waited, revocation_observation=type(obs).__name__,
+                         replay_warnings=replay.get("warnings"), sa_jobs=_bound(owner, warm, sa))
+                return fold_variant(j, "cross_principal_replay", judge_cross_principal_replay(owner_warm, sa_replay, denied_ids))
+            record_case(cases, "revocation_before_cached_replay", case5, sa)
+
+            # ---- phase B: never granted on the base dataset
+            def case2():
+                r2 = retrieve(legacy, BUNDLE_ID, pub, SA_ALIAS, as_of, {"engine": engine, "bq": sa_client, "ds": DATASET})
+                try:
+                    _probe(sa_client, DATASET, pub); api_err = None
+                except Exception as e:  # noqa: BLE001
+                    api_err = f"{type(e).__name__}: {str(e)}"
+                j = judge_denied_bundle(r2, denied_ids, api_err, control)
+                j["api_error_redacted"] = redact(api_err[:300], sa) if api_err else None
+                j["sa_jobs"] = _bound(owner, r2, sa); j["full_result"] = r2
+                return j
+            record_case(cases, "denied_bundle", case2, sa)
+
+            # ---- phase C: vectors visible, nodes/edges denied (policy grantees exclude the SA on nodes/edges only)
+            def case3():
+                ev["grants"].append({"at": set_dataset_reader(owner, RLS_DS, sa, True), "ds": RLS_DS, "principal": SA_ALIAS, "reader": True})
+                ev["grants"].append({"policies": set_rls(owner, [_operator_member()], vector_grantees=[_operator_member(), member]),
+                                     "grantees": {"nodes_edges": ["operator"], "section_vectors": ["operator", SA_ALIAS]}, "shape": "hidden-intermediate"})
+                ok, obs, waited = _wait(lambda: _probe(sa_client, RLS_DS, pub),
+                                        lambda o: isinstance(o, dict) and o["vectors"] > 0 and o["nodes"] == 0 and o["edges"] == 0, wait_s)
+                if not ok:
+                    raise RuntimeError(f"phase C grants did not propagate within {wait_s}s: {redact(str(obs)[:200], sa)}")
+                r3 = retrieve(legacy, BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
+                j = judge_output_denied(r3, obs, denied_ids, seed_local, control)
+                j["propagation_s"] = waited; j["sa_jobs"] = _bound(owner, r3, sa); j["full_result"] = r3
+                try:  # natural seed exercises the vector store itself; the remote embedding model may not be usable by the SA
+                    rn = retrieve("How do we calculate gross margin, exactly?", BUNDLE_ID, pub, SA_ALIAS, as_of, sa_rls)
+                    jn = judge_output_denied(rn, obs, denied_ids, "", control)
+                    jn.update(seed_hits=len(rn["concepts"]), full_result=rn)
+                except Exception as e:  # noqa: BLE001 - could not execute: recorded, not graded
+                    jn = {"label": "NOT_RUN", "verdict": None, "error": _err(e, sa, 200)}
+                return fold_variant(j, "natural_seed", jn)
+            record_case(cases, "output_denied_seed_visible", case3, sa)
+        except Exception as e:  # noqa: BLE001 - shared setup failed: block what was not reached, keep cleaning up, still finalize
+            ev["abort"] = {"stage": stage, "reason": _err(e, sa)}
+            for c in cases.values():
+                if c.get("reason") == "not reached":
+                    c["reason"] = f"aborted at {stage}: {ev['abort']['reason']}"
+            print("ABORT at", stage, ev["abort"]["reason"], flush=True)
+    finally:
+        ev["teardown"] = teardown(owner, sa_client, sa, pub, wait_s)
+    return _finish(ev, out_path, sa, denied_ids)
 
 
-def _finish(ev: dict, out_path: Optional[str], sa: str) -> dict:
+def _finish(ev: dict, out_path: Optional[str], sa: str, denied_ids: list[str]) -> dict:
+    """Finalize and publish: labels summarized, e-mails redacted, every publication identifier masked (the known
+    universe plus the fixture constants, so a run that never learned the universe still masks what it could have
+    named). Verified before writing; a violation raises instead of publishing."""
     ev["finished_at"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
     ev["summary"] = {k: c.get("label") for k, c in ev["cases"].items()}
-    ev = redact(ev, sa)
-    assert sa not in json.dumps(ev), "raw service-account e-mail must never reach evidence"
+    ids = sorted(set(denied_ids) | {HIDDEN, "metrics/gross-margin-legacy", "metrics/revenue", "computations/revenue-ytd", "computations/gross-margin-period"})
+    ev["id_sanitization"] = {"masked_ids": len(ids), "universe_known": bool(denied_ids), "token": "<id:sha256[:8]>"}
+    ev = sanitize_ids(redact(ev, sa), ids)
+    text = json.dumps(ev, default=str)
+    if sa in text or (operator().split(":", 1)[-1] or "\x00") in text:
+        raise RuntimeError("raw principal e-mail must never reach evidence")
+    if any(leaks(text, i) for i in ids):
+        raise RuntimeError("publication identifier survived sanitization")
     if out_path:
         with open(out_path, "w") as fh:
             json.dump(ev, fh, indent=1, default=str)
@@ -510,4 +694,4 @@ if __name__ == "__main__":
         pub = sys.argv[sys.argv.index("--pub") + 1] if "--pub" in sys.argv else resolve_pointer(client, BUNDLE_ID)
         as_of = sys.argv[sys.argv.index("--as-of") + 1] if "--as-of" in sys.argv else "2026-09-05T00:00:00Z"
         o = second_principal_cases(client, pub, as_of, engine=engine)
-        print(json.dumps({"summary": o["summary"], "preflight": o["preflight"], "teardown": o["teardown"]}, indent=1, default=str))
+        print(json.dumps({"summary": o["summary"], "preflight": o.get("preflight"), "abort": o.get("abort"), "teardown": o["teardown"]}, indent=1, default=str))
