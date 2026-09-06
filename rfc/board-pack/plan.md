@@ -183,3 +183,39 @@ Static checks served from the worktree with Playwright-managed Chromium, Firefox
 - **Acceptance 5 (diff).** `git diff --name-only` lists only the five files; `git diff --check` passes.
 
 Not done: no cloud run, no experiment rerun, no merge. Haiyuan retains the merge gate. Full-RFC evidence map (Slice 2) and auditor acceptance cases (Slice 3) are separate later work.
+
+## PR 33 honesty slice (Fable 5.1, 2026-09-06 PT, `feat/board-pack-pr33-honesty` from `origin/main` `bb88df4`)
+
+**Why:** PR 33 (merge `bb88df4`, head `114e81a`) was a fresh live pass: five distinct-principal negatives MEASURED under the impersonated `sa:okf-receipt-restricted` on the relational fallback engine, teardown VERIFIED. The board pack and three full-RFC sentences still said the two-requester tests "could not run". Spec R5 forbids treating merge status as a live pass; this was a live pass, so the pack was wrong, not merely incomplete. JOINT (Fable + Astra, 2026-09-06 ~13:43 PT) ranked this correction first, ahead of the connected graph→receipt chain.
+
+**Scope:** `rfc/board-pack/{index.html,STORY.md,intent.md,spec.md,plan.md}` plus the three short handoff notes `intent-pr33-honesty.md`, `spec-pr33-honesty.md`, `plan-pr33-honesty.md`, and in `rfc/index.html` only the two-requester sentences: the explainable-access "Where the evidence stands" paragraph, the current-evidence note's access paragraph, and the Phase 3 "Still required as evidence" cells in the phase table and the phase drill (the table cell was included so the two Phase 3 cells agree). Unchanged: `styles.css`, SVGs, `#later-questions`, `.hero`, capacity line, `.punchline`, `.ask`, 2026-09-19 checkpoint text, `rfc/bq-vp/`, `rfc/full-demo/`, `rfc/spikes/`, and every other full-RFC paragraph (including its remaining `b05e278` report links, which are dated history). No cloud run, no experiment rerun, no styling.
+
+### Claim-to-source map
+
+| Reader-facing claim (this branch) | Source at `bb88df4` |
+| --- | --- |
+| "A separate restricted identity passed five denial checks on the SQL path, not yet inside graph queries" (`#access-point` note); "speed benchmarks and graph-query access checks are still to come" (`#context-point` note) | `evidence/authz_cases.json` line 4 `engine: fallback`, line 540 summary (five MEASURED), line 501 `gql_variant` BLOCKED; `evidence/summary.json` 0/9 |
+| `#design-access`: five named checks (hidden intermediate stayed hidden; denied bundle returned no identifiers in reply or error text; output withheld with the starting point visible; no owner-credential fallback; revocation before cached replay failed closed); graded behind an allowed request; temporary grants removed and read back | `authz_cases.json` cases `hidden_intermediate` ENFORCED, `denied_bundle` DENIED_NO_LEAK, `output_denied_seed_visible`, `owner_fallback_negative` NO_FALLBACK, `revocation_before_cached_replay` FAIL_CLOSED; `allowed_control` line 522; `teardown` line 458, VERIFIED line 494; README "Second principal (2026-09-06)" |
+| "have not yet run inside graph queries, which need an Enterprise capacity window this run could not open" | `gql_variant.reason` (bounded window lifecycle for both clients not wired; window gate refuses on unreconciled legacy job journal); README lines 55–58 |
+| "Under the operator's own identity we still could not confirm that no hidden identifiers leak" | `evidence/report.md` G6 rows: authorized-views and RLS no-leak INCONCLUSIVE (substring detector, payload not retained, no re-run) |
+| "protection across mixed publications is not proven live" | `evidence/report.md` G7 PARTIAL |
+| "cover three of those tests in isolation, not yet as part of one chain" (`#design-evidence`) | connected chain not run (`comparison.md` row 1: MEASURED second principal on relational fallback; no connected KC evidence); promotion rule unchanged |
+| "temporary grants on one fixture, removed and read back… a narrower cleanup record than the reservation teardown" | `teardown.steps` remove_dataset_reader / restore_policies ok; `reservation_changes.json` unchanged since `b05e278` |
+| Historical: "run on a measured Enterprise reservation on 5 September 2026" (STORY) | `evidence/report.md` 2026-09-05 rows kept above the line-159 addendum |
+
+Link pins: every graph link inside the touched paragraphs now points at merge `bb88df4` (tree identical to head `114e81a` for `rfc/spikes/bq-graph`; `summary.json` and `reservation_changes.json` are byte-identical to `b05e278`, so no history is lost). New links: `evidence/authz_cases.json` and `README.md#second-principal-2026-09-06`. Receipt links stay at `6719eb5`. Spec E4/E5 keep their dated `b05e278` pins; E7 records the new pin.
+
+Earlier validation records above (2026-09-06 UTC post-spike, tone pass, later-questions slice) are historical for this branch; their "distinct-principal BLOCKED" content audit lines describe the page as it was at those commits and are not restated as current.
+
+### Validation record (Fable 5.1, 2026-09-06 PT)
+
+Static checks served from the worktree with Playwright-managed Chromium, Firefox and WebKit (Playwright 1.58.2); artifacts under `/tmp/okf-bp-pr33/qa/` (`check.cjs`, `results.json`, `run.log`, Chromium PNGs at 1280/320 closed/open, `chromium-closed-print.pdf`, print-media screenshot).
+
+- **Claims.** Grep over the five board-pack files and `rfc/index.html` finds no "could not run" / "two different requesters" / "two-requester tests could" text. Visible prose of `index.html` and `STORY.md` (href values and Markdown link targets stripped) contains none of: HIGH, MODERATE, LOW, PARTIAL, BLOCKED, INCOMPLETE, INCONCLUSIVE, MEASURED, VERIFIED, UNVERIFIABLE, PR numbers, spike, JOINT, gate codes, SDK, HMAC, service-account names or commit hashes. Remaining gaps stated in plain words: graph-query checks still to come, operator-identity hidden-identifier check unconfirmed, mixed publications unproven, 0 of 9 benchmark cells, no agreed budget, connected path unproven, three checks in isolation not as one chain.
+- **Protected content.** `.hero`, `#later-questions`, the capacity line, `.punchline` and `.ask` are byte-identical to `bb88df4`. Page order unchanged; no new section, ID or class; `styles.css` and SVGs untouched.
+- **Links.** All eight distinct new/re-pinned GitHub URLs (report, comparison, summary, reservation changes, authz cases, README, spike tree at `bb88df4`) returned HTTP 200 on 2026-09-06; every target path exists in the `bb88df4` tree (`git cat-file -e`); the README heading `## Second principal (2026-09-06)` exists at that pin, giving the `#second-principal-2026-09-06` fragment.
+- **Engines.** Chromium, Firefox and WebKit at 1280 and 320 px, disclosure closed and open: no horizontal overflow (scroll width equals viewport), no duplicate IDs, panel order intact between the comparison block and the capacity line, no page or console errors. Native Enter opens and Space closes the disclosure (`#technical-design-body` display block → none). Print media with the disclosure closed: later-questions panel `display: block`, text and strong `#333`, border `#aaa`, design body still printed; Chromium A4 PDF saved.
+- **Closed state.** 813 visible words in all three engines (805 + 8 from the two comparison-note swaps); 2,181 px tall at 1280 × 720 in Chromium (2,183 Firefox, 2,160 WebKit); open state 4,134 px Chromium. The word ceiling is amended to 820 in `spec.md` with this slice.
+- **Diff.** `git diff --check` passes; changed tracked files are the five board-pack files and `rfc/index.html`; the three `*-pr33-honesty.md` handoff notes are added.
+
+Not done: no cloud run, no experiment rerun, no merge. Reviewers: Astra (mandatory, claim review against `report.md` / `authz_cases.json`) and Opus; Haiyuan retains the merge gate.
