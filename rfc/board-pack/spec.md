@@ -75,3 +75,23 @@ The live board pack returned HTTP 200 and matched the inspected source. `/rfc/sp
 ## Presentation acceptance
 
 Inspect 1280, 768, 375 and 320 px with details closed/open, plus monochrome print. No horizontal overflow, clipped node labels or broken focus/links. Preserve the adjacent-body print fix. Aim for at most 700 closed-state words, extending the former 500–550-word target to fit evidence and scope without shrinking type; record the actual count and desktop height. Use concise links and replace stale prose instead of appending a history dump. Report static-page checks separately from historical spike test results.
+
+## Tone pass addendum (2026-09-06)
+
+The copy map above records the wording implemented on `feat/board-pack-post-spike`. A later tone pass (branch `feat/board-pack-human-tone`) replaced the reader-facing wording while keeping every distinction in R1–R11. Mapping of the visible labels:
+
+| Former visible wording | Current visible wording |
+| --- | --- |
+| Opportunity HIGH (scoped) + envelope not accepted | "Especially strong when" the facts already live in BigQuery on Enterprise or Enterprise Plus, within a budget the customer has agreed to; "No customer has yet agreed an operating budget" in the expanded design |
+| Combined delivery LOW | "What we still need to prove: those pieces running as one connected path… That is the pilot's job" |
+| Receipts MODERATE, one merged example | "one worked example ties the query, its inputs and its result together and withholds the number when they do not match" |
+| Graph report MODERATE for demonstrated retrieval only | "Its report counts this as demonstrated retrieval only: the SQL it returned was found, not run" |
+| G6/G7 PARTIAL, distinct-principal BLOCKED, no-hidden-identifier INCONCLUSIVE | "access checks are unfinished… only partly tested, tests with two different requesters could not run, we could not confirm that no hidden identifiers leak" |
+| G8 INCOMPLETE, 0/9 | "speed benchmarks have not run yet (0 of 9 cells)" |
+| Full-demo attesters stubs, receipts UNVERIFIABLE | "The wider demo's computation checks are still placeholders, so its receipts cannot be verified yet" |
+| `NOT_EXECUTED` / `VERIFIED` / `ATTESTED` | "found, not run" / "a passed check is an evidence verdict for that example, not a product-readiness claim" |
+| GQL needs Enterprise or Enterprise Plus | "Graph walks need Enterprise or Enterprise Plus capacity" |
+| Merge/head hashes, PR 479, PR 28, Astra APPROVE | Removed from prose; E1–E5 URLs unchanged behind link text such as "See the recorded graph walk", "See the recorded receipt check", "the reviewer's approval note" |
+| Diagram `UNPROVEN` | `NOT PROVEN · WITHHELD` |
+
+E1 (the PR page itself) is no longer linked from the closed skim; the receipt report E2 is. Acceptance examples AE1–AE4 hold with the plain-language equivalents.
