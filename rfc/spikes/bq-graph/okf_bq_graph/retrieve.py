@@ -87,19 +87,34 @@ def _denied(reason: str, scope: dict, timer: Timer, status: str = "DENIED") -> d
 
 
 def _cache_key(ds, bundle_id, publication_id, requester, query, as_of, top_k) -> str:
-    bucket = as_of[:13]   # hour bucket of the as-of instant
-    return "|".join([ds, bundle_id, publication_id, str(requester), query, bucket, str(top_k)])
+    # exact normalized as-of instant: two requests straddling a stale_after boundary never share an entry
+    inst = parse_ts(as_of).astimezone(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return "|".join([ds, bundle_id, publication_id, str(requester), query, inst, str(top_k)])
 
 
-def _recheck(clients: dict, full: str, publication_id: str, ids: list[str], timer: Timer) -> bool:
-    """Every disclosure re-checks CURRENT authorization under the requester's own client: all previously
-    disclosed node ids must still be visible. Unknown/failed check blocks."""
+def _recheck(clients: dict, full: str, publication_id: str, node_ids: list[str], edge_ids: list[str], timer: Timer) -> bool:
+    """Every disclosure re-checks CURRENT authorization under the requester's own client: every previously
+    disclosed node AND every edge that authorized the disclosed paths/provenance must still be visible.
+    Unknown/failed check blocks. (Edge-only revocation previously slipped through: Astra P1#4.)"""
     try:
-        rows = _run(clients, "recheck", f"SELECT COUNT(DISTINCT node_id) AS n FROM `{full}.nodes` WHERE node_id IN UNNEST(@ids) AND publication_id = @p",
-                    [bigquery.ArrayQueryParameter("ids", "STRING", ids), _p("p", "STRING", publication_id)], timer)
-        return rows[0]["n"] == len(ids)
+        rows = _run(clients, "recheck", f"""
+            SELECT (SELECT COUNT(DISTINCT node_id) FROM `{full}.nodes` WHERE node_id IN UNNEST(@nids) AND publication_id = @p) AS n,
+                   (SELECT COUNT(DISTINCT edge_id) FROM `{full}.edges` WHERE edge_id IN UNNEST(@eids) AND publication_id = @p) AS e""",
+                    [bigquery.ArrayQueryParameter("nids", "STRING", node_ids), bigquery.ArrayQueryParameter("eids", "STRING", edge_ids),
+                     _p("p", "STRING", publication_id)], timer)
+        return rows[0]["n"] == len(node_ids) and rows[0]["e"] == len(edge_ids)
     except Exception:  # noqa: BLE001 - unknown policy-check state blocks
         return False
+
+
+def _refresh(out: dict, as_of: str) -> dict:
+    """Re-evaluate every freshness verdict at the caller's as_of (cached replay must not carry an old verdict)."""
+    for c in out.get("concepts", []):
+        c["freshness"] = _freshness(c["freshness"].get("stale_after"), as_of)
+    for c in out.get("computations", []):
+        c["freshness"] = _freshness(c["freshness"].get("stale_after"), as_of)
+    out["scope"] = dict(out.get("scope", {}), as_of=as_of)
+    return out
 
 
 def retrieve(query: str, bundle_id: str, publication_id: str, requester: Any, as_of: str,
@@ -116,8 +131,8 @@ def retrieve(query: str, bundle_id: str, publication_id: str, requester: Any, as
     ckey = _cache_key(ds, bundle_id, publication_id, requester, query, as_of, top_k) if cache is not None else None
     if ckey is not None and ckey in cache and publication_id != "active":
         cached = cache[ckey]
-        if _recheck(clients, full, publication_id, cached["disclosed_ids"], timer):
-            out = json.loads(json.dumps(cached["result"]))
+        if _recheck(clients, full, publication_id, cached["disclosed_ids"], cached["disclosed_edge_ids"], timer):
+            out = _refresh(json.loads(json.dumps(cached["result"])), as_of)
             out["scope"] = dict(out["scope"], cache="HIT_RECHECKED"); out["timing"] = timer.done()
             return out
         return _denied("cached replay: current authorization check failed or unknown", dict(scope, cache="HIT_DENIED"), timer)
@@ -187,14 +202,16 @@ def retrieve(query: str, bundle_id: str, publication_id: str, requester: Any, as
     out["timing"] = timer.done()
     if ckey is not None and out["status"] == "OK":
         disclosed = sorted({n["node_id"] for n in seed_nodes} | {r["other_id"] for r in ctx})
-        cache[ckey] = {"disclosed_ids": disclosed, "result": json.loads(json.dumps(out, default=str))}
+        edge_ids = sorted({r["edge_id"] for r in ctx if r.get("edge_id")} |
+                          {x for ws in walks.values() for w in ws for x in (w.get("edge_ids") or [])})
+        cache[ckey] = {"disclosed_ids": disclosed, "disclosed_edge_ids": edge_ids, "result": json.loads(json.dumps(out, default=str))}
         out["scope"] = dict(out["scope"], cache="MISS_STORED")
     return out
 
 
 def _context_fallback(full: str) -> str:
     return f"""
-    SELECT c.node_id AS concept_id, e.relation, e.declaration AS edge_declaration, e.authored_at AS edge_at,
+    SELECT c.node_id AS concept_id, e.edge_id AS edge_id, e.relation, e.declaration AS edge_declaration, e.authored_at AS edge_at,
            e.resolution AS edge_resolution, e.inferred AS edge_inferred, o.node_id AS other_id, o.kind AS other_kind,
            o.local_id AS other_local_id, o.title AS other_title, o.type AS other_type, o.status AS other_status,
            o.actor_kind AS other_actor_kind, o.stub AS other_stub
@@ -249,7 +266,9 @@ def _assemble(seeds, walks, ctx, seed_nodes, as_of, warnings, scope, engine) -> 
             continue
         tier, vers = trust(cid)
         prov = [{"resource": r["other_local_id"][4:] if r["other_local_id"].startswith("src:") else r["other_local_id"],
-                 "title": r["other_title"], "declaration": r["edge_declaration"], "resolution": r["edge_resolution"]}
+                 "title": r["other_title"], "declaration": r["edge_declaration"], "resolution": r["edge_resolution"],
+                 "source_id": r["other_id"],
+                 "note": "declaration-scoped signals (usage_count/window) and resolves_to are not exposed as graph properties; fetch from edges/nodes tables if needed"}
                 for r in by_c.get(cid, []) if r["relation"] == "DERIVES_FROM"]
         replacement = None
         if (n["status"] or "stable") == "deprecated":
@@ -261,7 +280,7 @@ def _assemble(seeds, walks, ctx, seed_nodes, as_of, warnings, scope, engine) -> 
                 replacement = {"concept": None, "label": "AMBIGUOUS", "candidates": cands}
             else:
                 replacement = {"concept": None, "label": "NONE"}
-        concepts.append({"concept": local(cid), "path": n["path"], "title": n["title"], "type": n["type"],
+        concepts.append({"concept": local(cid), "concept_id": cid, "path": n["path"], "title": n["title"], "type": n["type"],
                          "lifecycle_status": n["status"] or "stable", "trust_tier": tier, "verifications": vers,
                          "freshness": _freshness(n["stale_after"], as_of), "provenance": sorted(prov, key=lambda x: x["declaration"]),
                          "replacement": replacement, "matched_sections": s["sections"], "forced": s["forced"]})
@@ -277,7 +296,8 @@ def _assemble(seeds, walks, ctx, seed_nodes, as_of, warnings, scope, engine) -> 
             via = [local(x) for x in w["hop_ids"]] if "hop_ids" in w else list(w.get("hop_concepts") or [])
             if sq is None:
                 warnings.append("SOURCE_DENIED_OR_MISSING: sanctioned computation reachable but its Computation section is not visible; SQL withheld")
-            computations.append({"seed": local(cid), "concept": local(w["computation_id"]), "path": w["computation_path"],
+            computations.append({"seed": local(cid), "concept": local(w["computation_id"]), "computation_id": w["computation_id"],
+                                 "section_id": sq["section_id"] if sq else None, "path": w["computation_path"],
                                  "concept_hops": w["concept_hops"], "via": via, "status": w["computation_status"],
                                  "runtime": ac.get("runtime"), "trust_tier": ct, "freshness": _freshness(ac.get("stale_after"), as_of),
                                  "sql": sq["sql"] if sq else None, "sql_sha256": sq["sql_sha256"] if sq else None,

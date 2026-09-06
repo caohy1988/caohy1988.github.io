@@ -12,6 +12,7 @@ FROM GRAPH_TABLE(`{ds}.okf_graph`
   COLUMNS (c.node_id AS seed_id, c.local_id AS seed,
            ARRAY(SELECT n.local_id FROM UNNEST(NODES(p)) AS n) AS hop_concepts,
            ARRAY_LENGTH(e) AS concept_hops,
+           ARRAY(SELECT x.edge_id FROM UNNEST(e) AS x) AS edge_ids,
            ac.node_id AS computation_id, ac.path AS computation_path,
            ac.status AS computation_status, ac.runtime AS computation_runtime)
 )

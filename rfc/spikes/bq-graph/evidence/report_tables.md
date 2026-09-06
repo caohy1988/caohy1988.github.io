@@ -2,11 +2,11 @@
 
 ## Forced-seed landmine parity (GQL vs oracle)
 
-| forced seed | GQL status | hops | computation | SQL digest = oracle | trust = oracle | replacement = oracle | freshness = oracle | via = oracle | total ms |
-|---|---|---|---|---|---|---|---|---|---|
-| f_legacy | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 4,399 |
-| f_current | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 3,946 |
-| f_revenue | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 5,433 |
+| forced seed | GQL status | hops | computation | SQL digest = oracle | trust = oracle | replacement = oracle | freshness = oracle | via = oracle | provenance resources = oracle (post hoc) | total ms |
+|---|---|---|---|---|---|---|---|---|---|---|
+| f_legacy | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (resource set) | 4,399 |
+| f_current | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (resource set) | 3,946 |
+| f_revenue | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (resource set) | 5,433 |
 
 ## Natural question (GQL, vector seed top-k=5)
 
@@ -50,38 +50,61 @@ GQL status OK, parity {'same_set': True, 'same_min_hops': True}, 4,389 ms; oracl
 
 ## Governance (spec §5)
 
-| case | dataset / mechanism | observed | verdict |
+| case | dataset / mechanism | observed (recorded, unmodified) | recorded verdict / flag | post-hoc note (does not change the record) | published label |
+|---|---|---|---|---|---|
+| hidden intermediate (`metrics/gross-margin`) inside GQL walk | `_rls`: ROW ACCESS POLICY on nodes/edges/vectors | status OK, computations 0, paths [], replacement {'concept': None, 'label': 'NONE'} | `leaks_hidden_id=True`, `LEAK_OR_UNEXPECTED` | INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run | INCONCLUSIVE (path removal corroborated: computations 0, paths [], replacement NONE, RLS probe hidden=0; no-leak claim unverified) |
+| natural question on RLS dataset | `_rls` vector seed + walk | seeds ['policies/margin-standard', 'metrics/gross-margin-legacy', 'computations/gross-margin-period'], computations [['policies/margin-standard', 'computations/gross-margin-period', 1], ['computations/gross-margin-period', 'computations/revenue-ytd', 1]] | `leaks_hidden_id=True` | INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run | INCONCLUSIVE (legacy seed reached no computation; no-leak claim unverified) |
+| impact on RLS dataset | `_rls` ACYCLIC {1,6} | impacted [['computations/gross-margin-period', 2], ['policies/revenue-recognition', 3], ['computations/revenue-ytd', 5], ['metrics/revenue', 5], ['tables/orders', 5]] | `leaks_hidden_id=False` | runtime flag false (substring detector); full payload not retained | ENFORCED (hidden concept absent from impacted set; recorded flag false) |
+| metadata visible, source (Section rows) denied | `_meta`: policy hides every Section row | paths [{'seed': 'metrics/gross-margin-legacy', 'concept_hops': 2, 'via': ['metrics/gross-margin-legacy', 'metrics/gross-margin', 'computations/gross-margin-period']}], SQL withheld: True | `WITHHELD` | SQL null with `SOURCE_DENIED_OR_MISSING` warning; operator identity | WITHHELD |
+| revoke before cached replay (all rows) | `_rls`: policy replaced with FILTER USING (FALSE) at 2026-09-06T00:21:32.021914+00:00 | warm ['OK', 'MISS_STORED'], hit ['OK', 'HIT_RECHECKED'], replay ['DENIED', 'HIT_DENIED', 0], fresh ['NO_SEED', 0, ['forced seed: harness-only deterministic override, not a semantic ranking', 'seed metrics/revenue not found in pinned publication']] | `FAIL_CLOSED` | edge-only revocation was NOT exercised live; the node-only re-check defect (Astra P1#4) is fixed in code with an offline regression test, not re-measured | FAIL_CLOSED (all-rows case only) |
+| authorized views as graph inputs | `_av`: views over base dataset; CREATE PROPERTY GRAPH over views: ACCEPTED | status OK, computations 0, 4,503 ms | `leaks_hidden_id=True`, `LEAK_OR_UNEXPECTED` | INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run | ACCEPTED (filtered view removes the node; same operator identity; no second principal; no-leak claim unverified) |
+| publication consistency (concurrent requests during re-publish) | `bundle_b` re-published pub_562cafe452c881f4 → pub_325e71b935f9246f | pins seen ['pub_562cafe452c881f4'], all single-pin: True | recorded by scope-only checker (invalid: could not detect a mixed payload) | PARTIAL — six requests all reported the old pin by scope; payload-level single-pin was not verifiable at measurement time; checker replaced and unit-tested offline, not re-measured | PARTIAL |
+| failed publish leaves old pointer | injected failure before pointer switch (pub_ab76f5cbc116563e) | raised: True, pointer after: pub_325e71b935f9246f | `True` | pointer read back after the raised failure | PASS |
+| distinct restricted principal (service account) | — | IAM principal creation denied by session permission classifier | — | — | BLOCKED |
+| same path in a denied bundle under a second identity | — | needs distinct principal | — | — | BLOCKED |
+| output denied despite seed access under a second identity | — | needs distinct principal | — | — | BLOCKED |
+| owner-credential fallback negative | — | needs distinct principal | — | — | BLOCKED |
+
+## Benchmark cells (spec §6)
+
+| cell | corpus | C | n measured / target | state | ok rate | errors | timeouts | p50 all (ms) | p95 all (ms) | max (ms) | p50 seed | p50 walk | p50 context | p50 nodes | jobs | slot-ms | slot attribution USD |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| acme_c1 | acme | 1 | 28 / 100 | INCOMPLETE | 100.0% | 0 | 0 | 4,384 | 5,441 | 10,869 | 1,389 | 2,068 | 1,278 | 802 | 101 | 609,261 | 0.0102 |
+| acme_c5 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| x100_c1 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| x100_c5 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| acme_c10 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| x1000_c1 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| x1000_c5 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| x1000_c10 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+
+## Cost reconciliation (provisional)
+
+Window 2026-09-05T23:40:00Z → 2026-09-06T00:35:00Z. Named reservation `test-project-0728-467323:US.okf-graph-spike-20260905`: 323 jobs, 1,988,844 slot-ms → attribution $0.0331. Other pool(s) ['default-pipeline']: 26 jobs, 86,674 slot-ms (not billed at the Enterprise rate here). On-demand: 171 jobs, 1,293,942,784 bytes billed → $0.0074 at list rate (free tier not applied). Charged autoscale slot-seconds from RESERVATIONS_TIMELINE: 21,750 → **$0.3625** capacity bill estimate (baseline slot-seconds 0); legacy snapshot sum 850 slot-minutes shown for comparison only. Timeline last row: 2026-09-06 00:27:00+00:00.
+
+| minute (UTC) | baseline slots | autoscaled slots (snapshot) | charged autoscale slot-seconds |
 |---|---|---|---|
-| hidden intermediate (`metrics/gross-margin`) inside GQL walk | `_rls`: ROW ACCESS POLICY on nodes/edges/vectors | status OK, computations 0, paths [], replacement {'concept': None, 'label': 'NONE'}, hidden id in output: False | ENFORCED |
-| natural question on RLS dataset | `_rls` vector seed + walk | seeds ['policies/margin-standard', 'metrics/gross-margin-legacy', 'computations/gross-margin-period'], computations [['policies/margin-standard', 'computations/gross-margin-period', 1], ['computations/gross-margin-period', 'computations/revenue-ytd', 1]], hidden id leak: False | ENFORCED |
-| impact on RLS dataset | `_rls` ACYCLIC {1,6} | impacted [['computations/gross-margin-period', 2], ['policies/revenue-recognition', 3], ['computations/revenue-ytd', 5], ['metrics/revenue', 5], ['tables/orders', 5]], hidden id leak: False | ENFORCED |
-| metadata visible, source (Section rows) denied | `_meta`: policy hides every Section row | paths [{'seed': 'metrics/gross-margin-legacy', 'concept_hops': 2, 'via': ['metrics/gross-margin-legacy', 'metrics/gross-margin', 'computations/gross-margin-period']}], SQL withheld: True, warnings ['forced seed: harness-only deterministic override, not a semantic ranking', 'SOURCE_DENIED_OR_MISSING: sanctioned computation reachable but its Computation section is not visible; SQL withheld'] | WITHHELD |
-| revoke before cached replay | `_rls`: policy replaced with FILTER USING (FALSE) at 2026-09-06T00:21:32.021914+00:00 | warm ['OK', 'MISS_STORED'], hit ['OK', 'HIT_RECHECKED'], replay ['DENIED', 'HIT_DENIED', 0], fresh ['NO_SEED', 0, ['forced seed: harness-only deterministic override, not a semantic ranking', 'seed metrics/revenue not found in pinned publication']] | FAIL_CLOSED |
-| authorized views as graph inputs | `_av`: views over base dataset; CREATE PROPERTY GRAPH over views: ACCEPTED | status OK, computations 0, hidden id leak: False, 4,503 ms | ENFORCED |
-| publication consistency (concurrent requests during re-publish) | `bundle_b` re-published pub_562cafe452c881f4 → pub_325e71b935f9246f | pins seen ['pub_562cafe452c881f4'], all single-pin: True, pins ⊆ {old,new}: True | PASS |
-| failed publish leaves old pointer | injected failure before pointer switch (pub_ab76f5cbc116563e) | raised: True, pointer after: pub_325e71b935f9246f | PASS |
-| distinct restricted principal (service account) | — | IAM principal creation denied by session permission classifier | BLOCKED |
-| same path in a denied bundle under a second identity | — | needs distinct principal | BLOCKED |
-| output denied despite seed access under a second identity | — | needs distinct principal | BLOCKED |
-| owner-credential fallback negative | — | needs distinct principal | BLOCKED |
-
-## Cost reconciliation
-
-Window 2026-09-05T23:40:00Z → 2026-09-06T00:22:00Z: 99 reservation jobs, 153 on-demand jobs; slot-ms on reservation 660,022 → attribution $0.011; allocated autoscale slot-minutes 250 → capacity bill $0.25; on-demand bytes billed 1,293,942,784 → $0.0074.
-
-| minute (UTC) | baseline slots | autoscaled slots |
-|---|---|---|
-| 2026-09-05 23:43 | 0 | 0 |
-| 2026-09-05 23:45 | None | 50 |
-| 2026-09-05 23:46 | None | 0 |
-| 2026-09-05 23:47 | 0 | 0 |
-| 2026-09-06 00:07 | 0 | 0 |
-| 2026-09-06 00:08 | None | 50 |
-| 2026-09-06 00:09 | 0 | 50 |
-| 2026-09-06 00:10 | 0 | 0 |
-| 2026-09-06 00:11 | 0 | 0 |
-| 2026-09-06 00:12 | 0 | 0 |
-| 2026-09-06 00:13 | None | 50 |
-| 2026-09-06 00:14 | None | 50 |
-| 2026-09-06 00:15 | 0 | 0 |
-| 2026-09-06 00:17 | 0 | 0 |
+| 2026-09-05 23:43 | 0 | 0 | 0 |
+| 2026-09-05 23:45 | None | 50 | 1450 |
+| 2026-09-05 23:46 | None | 0 | 0 |
+| 2026-09-05 23:47 | 0 | 0 | 0 |
+| 2026-09-06 00:07 | 0 | 0 | 0 |
+| 2026-09-06 00:08 | None | 50 | 600 |
+| 2026-09-06 00:09 | 0 | 50 | 2850 |
+| 2026-09-06 00:10 | 0 | 0 | 0 |
+| 2026-09-06 00:11 | 0 | 0 | 0 |
+| 2026-09-06 00:12 | 0 | 0 | 0 |
+| 2026-09-06 00:13 | None | 50 | 850 |
+| 2026-09-06 00:14 | None | 50 | 450 |
+| 2026-09-06 00:15 | 0 | 100 | 2400 |
+| 2026-09-06 00:17 | 0 | 0 | 0 |
+| 2026-09-06 00:18 | None | 50 | 500 |
+| 2026-09-06 00:19 | None | 50 | 250 |
+| 2026-09-06 00:20 | None | 100 | 600 |
+| 2026-09-06 00:21 | None | 50 | 300 |
+| 2026-09-06 00:22 | None | 50 | 2900 |
+| 2026-09-06 00:23 | None | 50 | 2750 |
+| 2026-09-06 00:24 | None | 50 | 2250 |
+| 2026-09-06 00:25 | None | 50 | 1900 |
+| 2026-09-06 00:26 | None | 50 | 1700 |
+| 2026-09-06 00:27 | 0 | 0 | 0 |

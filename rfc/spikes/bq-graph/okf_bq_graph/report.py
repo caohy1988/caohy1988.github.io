@@ -35,12 +35,17 @@ def benchmark_table(summary: dict) -> str:
 
 def parity_table(allj: dict) -> str:
     rows = ["| forced seed | GQL status | hops | computation | SQL digest = oracle | trust = oracle | replacement = oracle | freshness = oracle | via = oracle | total ms |", "|---|---|---|---|---|---|---|---|---|---|"]
+    rows[0] = rows[0].replace("| via = oracle |", "| via = oracle | provenance resources = oracle (post hoc) |")
+    rows[1] += "---|"
     for k, v in allj.get("forced", {}).items():
         p = v["parity"]
         t = lambda b: "✓" if b else "✗"
+        gp = {x.get("resource") for x in (v["result"]["concepts"][0].get("provenance") if v["result"].get("concepts") else [])}
+        op = {x.get("resource") for x in v["oracle"].get("provenance", [])}
+        prov = "✓ (resource set)" if gp == op else f"✗ {sorted(gp)} vs {sorted(op)}"
         rows.append(f"| {k} | {p['gql_status']} | {t(p['hops_ok'])} | {t(p['computation_ok'])} | {t(p['sql_sha_matches_oracle'])} | "
                     f"{t(p['trust_matches_oracle'])} | {t(p['replacement_matches_oracle'])} | {t(p['freshness_matches_oracle'])} | "
-                    f"{t(p['via_matches_oracle'])} | {fmt(p['timing']['total_ms'])} |")
+                    f"{t(p['via_matches_oracle'])} | {prov} | {fmt(p['timing']['total_ms'])} |")
     return "\n".join(rows)
 
 
@@ -61,44 +66,46 @@ def natural_table(allj: dict) -> str:
 
 
 import re
-HIDDEN_RE = re.compile(r"metrics/gross-margin(?![-\w])")   # matches the concept and its sections (#sN), not -legacy
+HIDDEN_RE = re.compile(r"metrics/gross-margin(?![-\w])")
 
 
-def _leak(obj) -> bool:
-    """Strict hidden-identifier check over the stored disclosure surfaces (recomputed post hoc; the runtime
-    check used a plain substring and false-positived on metrics/gross-margin-legacy)."""
-    return bool(HIDDEN_RE.search(json.dumps(obj, default=str)))
+def _recheck_note(case: dict) -> str:
+    """Post-hoc note only. NEVER changes the recorded verdict. If the full answer surface was retained
+    (`full_result`, added after review), an exact regex check is reported; otherwise the case is INCONCLUSIVE
+    because the runtime detector was a plain substring that matched `metrics/gross-margin-legacy`."""
+    if not case:
+        return "NOT_RUN"
+    if "full_result" in case:
+        leak = bool(HIDDEN_RE.search(json.dumps(case["full_result"], default=str)))
+        return f"exact regex over retained full payload: {'HIDDEN ID PRESENT' if leak else 'no hidden id'}"
+    if case.get("leaks_hidden_id"):
+        return "INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run"
+    return "runtime flag false (substring detector); full payload not retained"
 
 
 def governance_table(allj: dict) -> str:
     g = allj.get("governance", {})
-    for key in ("rls_hidden_intermediate", "rls_natural", "rls_impact", "authorized_views"):
-        if key in g:
-            surf = {k: v for k, v in g[key].items() if k not in ("leaks_hidden_id", "verdict", "timing", "status")}
-            g[key]["leaks_hidden_id"] = _leak(surf)
-            if key == "rls_hidden_intermediate":
-                g[key]["verdict"] = "ENFORCED" if (g[key].get("computations") == 0 and not g[key]["leaks_hidden_id"]) else "LEAK_OR_UNEXPECTED"
-            if key == "authorized_views" and "computations" in g[key]:
-                g[key]["verdict"] = "ENFORCED" if (g[key].get("computations") == 0 and not g[key]["leaks_hidden_id"]) else "LEAK_OR_UNEXPECTED"
-    rows = ["| case | dataset / mechanism | observed | verdict |", "|---|---|---|---|"]
+    rows = ["| case | dataset / mechanism | observed (recorded, unmodified) | recorded verdict / flag | post-hoc note (does not change the record) | published label |",
+            "|---|---|---|---|---|---|"]
     h = g.get("rls_hidden_intermediate", {})
-    rows.append(f"| hidden intermediate (`metrics/gross-margin`) inside GQL walk | `_rls`: ROW ACCESS POLICY on nodes/edges/vectors | status {h.get('status')}, computations {h.get('computations')}, paths {h.get('paths')}, replacement {h.get('replacement')}, hidden id in output: {h.get('leaks_hidden_id')} | {h.get('verdict')} |")
+    rows.append(f"| hidden intermediate (`metrics/gross-margin`) inside GQL walk | `_rls`: ROW ACCESS POLICY on nodes/edges/vectors | status {h.get('status')}, computations {h.get('computations')}, paths {h.get('paths')}, replacement {h.get('replacement')} | `leaks_hidden_id={h.get('leaks_hidden_id')}`, `{h.get('verdict')}` | {_recheck_note(h)} | {'INCONCLUSIVE (path removal corroborated: computations 0, paths [], replacement NONE, RLS probe hidden=0; no-leak claim unverified)' if h.get('leaks_hidden_id') and 'full_result' not in h else h.get('verdict')} |")
     n = g.get("rls_natural", {})
-    rows.append(f"| natural question on RLS dataset | `_rls` vector seed + walk | seeds {n.get('seeds')}, computations {n.get('computations')}, hidden id leak: {n.get('leaks_hidden_id')} | {'ENFORCED' if n and not n.get('leaks_hidden_id') else 'LEAK/NOT_RUN'} |")
+    rows.append(f"| natural question on RLS dataset | `_rls` vector seed + walk | seeds {n.get('seeds')}, computations {n.get('computations')} | `leaks_hidden_id={n.get('leaks_hidden_id')}` | {_recheck_note(n)} | {'INCONCLUSIVE (legacy seed reached no computation; no-leak claim unverified)' if n.get('leaks_hidden_id') and 'full_result' not in n else ('ENFORCED' if n and not n.get('leaks_hidden_id') else 'NOT_RUN')} |")
     i = g.get("rls_impact", {})
-    rows.append(f"| impact on RLS dataset | `_rls` ACYCLIC {{1,6}} | impacted {i.get('impacted')}, hidden id leak: {i.get('leaks_hidden_id')} | {'ENFORCED' if i and not i.get('leaks_hidden_id') else 'LEAK/NOT_RUN'} |")
+    rows.append(f"| impact on RLS dataset | `_rls` ACYCLIC {{1,6}} | impacted {i.get('impacted')} | `leaks_hidden_id={i.get('leaks_hidden_id')}` | {_recheck_note(i)} | {'ENFORCED (hidden concept absent from impacted set; recorded flag false)' if i and not i.get('leaks_hidden_id') else ('INCONCLUSIVE' if i else 'NOT_RUN')} |")
     m = g.get("meta_source_denied", {})
-    rows.append(f"| metadata visible, source (Section rows) denied | `_meta`: policy hides every Section row | paths {m.get('paths')}, SQL withheld: {m.get('sql_withheld')}, warnings {m.get('warnings')} | {m.get('verdict')} |")
+    rows.append(f"| metadata visible, source (Section rows) denied | `_meta`: policy hides every Section row | paths {m.get('paths')}, SQL withheld: {m.get('sql_withheld')} | `{m.get('verdict')}` | SQL null with `SOURCE_DENIED_OR_MISSING` warning; operator identity | {m.get('verdict')} |")
     r = g.get("revoke_before_cached_replay", {})
-    rows.append(f"| revoke before cached replay | `_rls`: policy replaced with FILTER USING (FALSE) at {r.get('revoked_at')} | warm {r.get('warm')}, hit {r.get('hit')}, replay {r.get('replay')}, fresh {r.get('fresh_after_revoke')} | {r.get('verdict')} |")
+    rows.append(f"| revoke before cached replay (all rows) | `_rls`: policy replaced with FILTER USING (FALSE) at {r.get('revoked_at')} | warm {r.get('warm')}, hit {r.get('hit')}, replay {r.get('replay')}, fresh {r.get('fresh_after_revoke')} | `{r.get('verdict')}` | edge-only revocation was NOT exercised live; the node-only re-check defect (Astra P1#4) is fixed in code with an offline regression test, not re-measured | {r.get('verdict')} (all-rows case only) |")
     a = g.get("authorized_views", {})
-    rows.append(f"| authorized views as graph inputs | `_av`: views over base dataset; CREATE PROPERTY GRAPH over views: {a.get('graph_over_views')} | status {a.get('status')}, computations {a.get('computations')}, hidden id leak: {a.get('leaks_hidden_id')}, {fmt(a.get('timing'))} ms | {a.get('verdict')} |")
+    rows.append(f"| authorized views as graph inputs | `_av`: views over base dataset; CREATE PROPERTY GRAPH over views: {a.get('graph_over_views')} | status {a.get('status')}, computations {a.get('computations')}, {fmt(a.get('timing'))} ms | `leaks_hidden_id={a.get('leaks_hidden_id')}`, `{a.get('verdict')}` | {_recheck_note(a)} | ACCEPTED (filtered view removes the node; same operator identity; no second principal; no-leak claim {'unverified' if a.get('leaks_hidden_id') and 'full_result' not in a else 'checked'}) |")
     p = g.get("publication_consistency", {})
-    rows.append(f"| publication consistency (concurrent requests during re-publish) | `bundle_b` re-published {p.get('pointer_before')} → {p.get('published')} | pins seen {p.get('pins_seen')}, all single-pin: {p.get('all_single_pin')}, pins ⊆ {{old,new}}: {p.get('pins_subset_of_old_new')} | {'PASS' if p.get('all_single_pin') and p.get('pins_subset_of_old_new') else 'FAIL/NOT_RUN'} |")
-    rows.append(f"| failed publish leaves old pointer | injected failure before pointer switch ({p.get('failed_publication_id')}) | raised: {p.get('failed_publish_raised')}, pointer after: {p.get('pointer_after_failed_publish')} | {'PASS' if p.get('failed_publish_left_pointer') else 'FAIL/NOT_RUN'} |")
+    partial = p.get("checker") is None
+    rows.append(f"| publication consistency (concurrent requests during re-publish) | `bundle_b` re-published {p.get('pointer_before')} → {p.get('published')} | pins seen {p.get('pins_seen')}, all single-pin: {p.get('all_single_pin')} | recorded by {'scope-only checker (invalid: could not detect a mixed payload)' if partial else 'single_pin() over all scoped ids + SQL digests'} | {'PARTIAL — six requests all reported the old pin by scope; payload-level single-pin was not verifiable at measurement time; checker replaced and unit-tested offline, not re-measured' if partial else 'verified'} | {'PARTIAL' if partial else ('PASS' if p.get('all_single_pin') else 'FAIL')} |")
+    rows.append(f"| failed publish leaves old pointer | injected failure before pointer switch ({p.get('failed_publication_id')}) | raised: {p.get('failed_publish_raised')}, pointer after: {p.get('pointer_after_failed_publish')} | `{p.get('failed_publish_left_pointer')}` | pointer read back after the raised failure | {'PASS' if p.get('failed_publish_left_pointer') else 'FAIL/NOT_RUN'} |")
     for b in g.get("blocked", []):
         head, _, tail = b.partition(" — ")
-        rows.append(f"| {head} | — | {tail} | BLOCKED |")
+        rows.append(f"| {head} | — | {tail} | — | — | BLOCKED |")
     return "\n".join(rows)
 
 
@@ -131,14 +138,16 @@ def main():
         parts += ["## Benchmark cells (spec §6)", "", benchmark_table(_load("evidence/summary.json")), ""]
     if os.path.exists("evidence/cost.json"):
         c = _load("evidence/cost.json")
-        parts += ["## Cost reconciliation", "",
-                  f"Window {c['window']['since']} → {c['window']['until']}: {c['reservation_jobs']} reservation jobs, {c['ondemand_jobs']} on-demand jobs; "
-                  f"slot-ms on reservation {c['slot_ms_on_reservation']:,} → attribution ${c['slot_attribution_usd']}; "
-                  f"allocated autoscale slot-minutes {c['allocated_slot_minutes']} → capacity bill ${c['allocated_capacity_usd']}; "
-                  f"on-demand bytes billed {c['ondemand_bytes_billed']:,} → ${c['ondemand_usd']}.", "",
-                  "| minute (UTC) | baseline slots | autoscaled slots |", "|---|---|---|"]
+        parts += ["## Cost reconciliation (provisional)", "",
+                  f"Window {c['window']['since']} → {c['window']['until']}. Named reservation `{c['named_reservation']}`: {c['named_reservation_jobs']} jobs, "
+                  f"{c['slot_ms_named']:,} slot-ms → attribution ${c['slot_attribution_named_usd']}. Other pool(s) {c['other_pools']}: {c['other_pool_jobs']} jobs, "
+                  f"{c['slot_ms_other_pool']:,} slot-ms (not billed at the Enterprise rate here). On-demand: {c['ondemand_jobs']} jobs, {c['ondemand_bytes_billed']:,} bytes billed "
+                  f"→ ${c['ondemand_list_usd']} at list rate (free tier not applied). Charged autoscale slot-seconds from RESERVATIONS_TIMELINE: "
+                  f"{c['charged_autoscale_slot_seconds']:,} → **${c['charged_autoscale_usd']}** capacity bill estimate (baseline slot-seconds {c['baseline_slot_seconds']}); "
+                  f"legacy snapshot sum {c['snapshot_slot_minutes_legacy']} slot-minutes shown for comparison only. Timeline last row: {c['timeline_last_period_start']}.", "",
+                  "| minute (UTC) | baseline slots | autoscaled slots (snapshot) | charged autoscale slot-seconds |", "|---|---|---|---|"]
         for r in c["timeline"]:
-            parts.append(f"| {str(r['period_start'])[:16]} | {r['slot_capacity']} | {r['autoscale_current_slots']} |")
+            parts.append(f"| {str(r['period_start'])[:16]} | {r['slot_capacity']} | {r['autoscale_current_slots']} | {r.get('period_autoscale_slot_seconds')} |")
     with open("evidence/report_tables.md", "w") as fh:
         fh.write("\n".join(parts) + "\n")
     print("wrote evidence/report_tables.md from", files[-1] if files else "no all_*.json")

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import datetime as _dt
 import json
+import re
 import subprocess
 import sys
 from typing import Any
@@ -59,11 +60,15 @@ def inspect_capacity(project: str, locations: list[str], session: AuthorizedSess
         creds, _ = google.auth.default()
         session = AuthorizedSession(creds)
     ev: dict[str, Any] = {"project": project, "started_at": _now(), "locations": {}}
-    ev["principal"] = _cli(["gcloud", "config", "get-value", "account"])["stdout"]
+    principal = _cli(["gcloud", "config", "get-value", "account"])["stdout"]
+    ev["principal"] = "<operator>" if principal else None   # identity class only; the address is not committed
+    ev["principal_class"] = "user (project Owner)"
     ev["cli_versions"] = {"bq": _cli(["bq", "version"])["stdout"],
                           "gcloud": _cli(["gcloud", "version", "--format=value(core)"])["stdout"]}
     ev["ancestry"] = _cli(["gcloud", "projects", "get-ancestors", project])
-    ev["billing"] = _cli(["gcloud", "billing", "projects", "describe", project, "--format=json"])
+    b = _cli(["gcloud", "billing", "projects", "describe", project, "--format=json"])
+    b["stdout"] = re.sub(r"billingAccounts/[A-Z0-9-]+", "billingAccounts/REDACTED", b["stdout"])
+    ev["billing"] = b
     ev["iam_test"] = {"at": _now()}
     r = session.post(f"{CRM}/projects/{project}:testIamPermissions", json={"permissions": NEEDED_PERMS})
     ev["iam_test"].update({"status": r.status_code, "granted": r.json().get("permissions", []) if r.ok else r.text[:500]})

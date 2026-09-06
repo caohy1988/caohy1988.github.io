@@ -1,6 +1,6 @@
 # G1 capacity gate — measured 2026-09-05 (UTC)
 
-Principal: `raincoatrun@gmail.com` (project Owner). Project `test-project-0728-467323` (number 201486563047), no parent folder/organization (`gcloud projects get-ancestors` returns only the project), so no inherited assignment is possible. Billing enabled. `bq 2.1.28`, `gcloud 559.0.0`.
+Principal: operator user account (project Owner; address redacted from committed evidence). Project `test-project-0728-467323` (number 201486563047), no parent folder/organization (`gcloud projects get-ancestors` returns only the project), so no inherited assignment is possible. Billing enabled. `bq 2.1.28`, `gcloud 559.0.0`.
 
 ## Inventory (read-only) — `capacity.json`
 
@@ -12,7 +12,7 @@ Principal: `raincoatrun@gmail.com` (project Owner). Project `test-project-0728-4
 
 Datasets in the project: 83 in `US`, 9 in `us-central1`. The spike dataset `okf_graph_spike_20260905` was created in `US` (default table expiration 14 days). IAM `testIamPermissions` granted all seven required permissions (reservations create/delete/list, assignments create/delete, datasets.create, jobs.create). State: `READY_TO_PROVISION`.
 
-## Public SKU prices (Cloud Billing Catalog API, read 2026-09-05T23:41Z)
+## Public SKU prices (Cloud Billing Catalog API, read by curl 2026-09-05T23:40Z — receipt `sku_receipt.json`; the later `capacity.py` read got 403 SERVICE_DISABLED, so `capacity.json.skus.rows` is empty)
 
 | SKU | Description | USD |
 |---|---|---|
@@ -45,6 +45,6 @@ Job `okf_graph_smoke_ondemand_20260905234252` on a disposable 3-node/2-edge grap
 | `bq rm --reservation okf-graph-spike-20260905` | 23:47:15 | deleted |
 | verify (`bq ls`, REST reservations.list, searchAssignments) | 23:47:21 | none / `{}` / `{}` |
 
-Observed: the first GQL job on a cold zero-baseline reservation took ~40.5 s wall (start→end) for a 29-byte scan; 21.4 slot-seconds attributed. Reservation lifetime 3.5 min. Capacity-bill estimate for the window: one autoscale step of 50 slots for ≥1 min ≈ 50 × (1/60) × $0.06 ≈ **$0.05** (provisional until the billing export reconciles; see `cost-reconciliation.md`).
+Observed: the first GQL job on a cold zero-baseline reservation took ~40.5 s wall (start→end) for a 29-byte scan; 21.4 slot-seconds attributed. Reservation lifetime 3.5 min. Capacity-bill estimate for the window: one autoscale step of 50 slots for ≥1 min ≈ 50 × (1/60) × $0.06 ≈ **$0.05** (provisional until the billing export reconciles; see `cost.json` and `report.md` §G8).
 
 **G1 outcome: PASSED (measured).** GQL executes on the named Enterprise reservation with job reference, reservation id and edition recorded; teardown verified.

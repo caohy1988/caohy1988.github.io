@@ -216,7 +216,12 @@
           "stderr": ""
         }
       ],
-      "max_slots": 100
+      "max_slots": 100,
+      "closed_at": "2026-09-06T00:11:16Z",
+      "closed_by": "safety-0011",
+      "verified_gone": true,
+      "state": "CLOSED_BY_SAFETY_WATCHER",
+      "note": "driver process was killed by session teardown (no kill timestamp retained); the independent safety watcher deleted the reservation; platform RESERVATION_CHANGES shows DELETE at 2026-09-06T00:11:10.002698Z"
     },
     {
       "label": "safety-0011",
@@ -367,7 +372,11 @@
           "stderr": ""
         }
       ],
-      "max_slots": 100
+      "max_slots": 100,
+      "closed_at": "2026-09-06T00:27:27Z",
+      "verified_gone": true,
+      "state": "CLOSED_RECONSTRUCTED_FROM_PLATFORM_RECORD",
+      "note": "driver interrupted (SIGINT 00:24:54Z) for cost control; the in-process close did not log; platform RESERVATION_CHANGES records DELETE at 2026-09-06T00:27:27.393115Z; safety watcher confirmed 'reservation already gone' at 00:27:33Z; independent read-only checks at 00:44:23Z and 00:55:52Z found no reservation/assignment"
     }
   ],
   "resources": [
@@ -403,7 +412,28 @@
       "kind": "reservation",
       "name": "projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905",
       "created_at": "2026-09-06T00:17:56Z",
-      "state": "open"
+      "state": "deleted",
+      "deleted_at": "2026-09-06T00:27:27Z",
+      "closed_by": "platform RESERVATION_CHANGES DELETE receipt (evidence/reservation_changes.json)"
     }
-  ]
+  ],
+  "platform_receipt": {
+    "source": "region-us.INFORMATION_SCHEMA.RESERVATION_CHANGES (evidence/reservation_changes.json)",
+    "creates": [
+      "2026-09-05 23:43:45.716260+00:00",
+      "2026-09-06 00:07:36.101554+00:00",
+      "2026-09-06 00:10:00.310074+00:00",
+      "2026-09-06 00:12:41.833850+00:00",
+      "2026-09-06 00:17:59.244650+00:00"
+    ],
+    "deletes": [
+      "2026-09-05 23:47:14.975665+00:00",
+      "2026-09-06 00:09:03.581507+00:00",
+      "2026-09-06 00:11:10.002698+00:00",
+      "2026-09-06 00:15:49.770869+00:00",
+      "2026-09-06 00:27:27.393115+00:00"
+    ],
+    "note": "every CREATE has a matching DELETE; last DELETE 2026-09-06T00:27:27Z"
+  },
+  "cumulative_reservation_minutes_platform": 18.7
 }

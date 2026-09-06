@@ -8,33 +8,48 @@ Plans: `/tmp/okf-spikes/graph/{intent,spec,plan}.md`. Code and raw evidence: thi
 assumed). The Acme bundle compiles deterministically into a scoped, immutable publication (G2), and the deprecated
 `metrics/gross-margin-legacy` anchor reaches the sanctioned `computations/gross-margin-period` SQL in exactly two `LINKS_TO`
 hops through the current metric, with status, derived trust, freshness, provenance and the exact SQL digest matching the
-relational oracle (G3). Impact analysis and stub backlog match the oracle set-for-set (G4). Row-level security is honoured
-inside a GQL traversal and authorized views are accepted as graph inputs (G6, operator identity only). Publication switch
-and failed-publish behaviour are as specified (G7). Benchmark and cost cells are in the tables below with their sample sizes;
-anything not measured is labelled NOT_RUN or BLOCKED, never zero. **This is retrieval evidence only.** No receipt verdict,
-no runtime ATTESTED label and no connected KC discovery are claimed; combined delivery stays LOW per JOINT §4.
+relational oracle on the compared fields (G3). Impact analysis and stub backlog match the oracle set-for-set on names and
+minimum hops (G4). Governance (G6) is **partial**: under the operator identity, a row-level policy removes the hidden
+two-hop path inside the GQL walk and `CREATE PROPERTY GRAPH` accepts authorized views; the *no-hidden-identifier* claim is
+INCONCLUSIVE for the RLS/authorized-view cases because the runtime leak detector was defective and full payloads were not
+retained, and every case needing a second real principal is BLOCKED. Failed publish leaves the old pointer (G7); the
+concurrent single-pin claim is PARTIAL. **G8 benchmark: 0 of 8 cells completed** — `acme_c1` reached 28/100 measured
+requests before the driver was interrupted for cost control; C=5, C=10 and both synthetic scale corpora are NOT_RUN_BUDGET.
+Nothing unmeasured is given a number. **This is retrieval evidence only.** No receipt verdict, no runtime ATTESTED label and
+no connected KC discovery are claimed; combined delivery stays LOW per JOINT §4.
+
+Review status: Astra (six P1, six P2) and Opus (F1–F3) reviews of `be5a8a1` were addressed in the fix pass recorded in the
+PR; where a finding could only be closed by a new Enterprise run, the label was downgraded instead of re-spending.
 
 ## G1 — capacity (MEASURED, PASSED)
 
 See `capacity-gate.md`, `capacity.json`, `smoke_*.json`, `cleanup_manifest.json`.
-No reservation, commitment or assignment existed in US / us-central1 / EU; the project has no parent, so no inherited
-assignment is possible; the operator holds the seven required permissions; billing is enabled. Public SKU (Billing Catalog
-API): Enterprise US multi-region pay-as-you-go **$0.06 / slot-hour**; on-demand $6.25 / TiB. On-demand GQL fails with
+No reservation, commitment or assignment existed in the three probed locations US / us-central1 / EU (no other locations
+were probed); the project has no parent, so no inherited assignment is possible; the operator (a user principal with the
+project Owner role; address redacted in committed evidence) holds the seven required permissions; billing is enabled.
+Public SKU prices: Enterprise US multi-region pay-as-you-go **$0.06 / slot-hour**, on-demand $6.25 / TiB — the receipt is
+`sku_receipt.json` (Cloud Billing Catalog API read by curl at 23:40Z; the later `capacity.py` read through an
+AuthorizedSession got 403 SERVICE_DISABLED for the quota project, which is why `capacity.json.skus.rows` is empty). On-demand GQL fails with
 `BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition` (job
 `okf_graph_smoke_ondemand_20260905234252`); `CREATE PROPERTY GRAPH` itself works on-demand. Smoke job
 `okf_graph_smoke_ent_20260905234528_1` ran on `test-project-0728-467323:US.okf-graph-spike-20260905`, edition ENTERPRISE,
 21,410 slot-ms. Reservation created 23:43:45, deleted 23:47:15, verified gone.
 
 Operational findings: (1) **assignment propagation is not atomic** — after `bq mk --reservation_assignment`, jobs route
-inconsistently between the reservation and on-demand for roughly two minutes (measured 121 s to six consecutive successes
-in the last window; an earlier window saw one success followed by an on-demand failure). The orchestrator now waits for six
-consecutive successes and the client retries a mis-routed job at most twice, recording `routing_retries`. (2) A cold
-zero-baseline reservation took ~40 s wall for the first trivial GQL job (autoscale to 50 slots). (3) Deleting a reservation
-requires deleting its assignment first; the `bq rm --reservation_assignment` id format is `<reservation>.<assignment_id>`.
-(4) One orphaned window (`integration-0007`/`safety-0011`) was closed by the independent safety watcher 3.5 minutes after the
-driver process was killed, which is exactly why the plan required an independent watchdog.
+inconsistently between the reservation and on-demand for roughly two minutes: 120.9 s / 11 probes to six consecutive
+successes in window `all-0012`, 140.4 s / 13 probes in window `all-0017`; window `integration-0007` saw one routed request
+succeed and the next fall to on-demand. Individual failed probe job ids were not retained in those windows (the runner now
+records every probe). The runner waits for six consecutive successes and retries a mis-routed job at most twice, recording
+`routing_retries`. (2) The one cold zero-baseline smoke job took 40.5 s wall (start→end) — a single sample, not a
+percentile. (3) Deleting a reservation requires deleting its assignment first; the `bq rm --reservation_assignment` id
+format is `<reservation>.<assignment_id>`. (4) Window `integration-0009` was orphaned when the driver process was killed by
+a session teardown; the independent safety watcher deleted the reservation (platform record: DELETE 00:11:10Z). Window
+`all-0017` was interrupted by SIGINT for cost control and the in-process close did not log; the platform record shows its
+DELETE at 00:27:27Z. Both closures are reconstructed in `cleanup_manifest.json` from `reservation_changes.json`
+(INFORMATION_SCHEMA.RESERVATION_CHANGES), which shows a matching DELETE for every CREATE.
 
-Cumulative reservation time across windows is recorded in `cleanup_manifest.json` and stays inside the two-hour allowance.
+Cumulative reservation lifetime from the platform CREATE/DELETE pairs is 18.7 minutes (see `cleanup_manifest.json`), inside
+the two-hour allowance.
 
 ## G2 — deterministic scoped projection (MEASURED, PASSED)
 
@@ -60,7 +75,9 @@ digest mismatches) → `READY` → atomic `MERGE` of `active_publication` (21 s 
 * Latency is caller wall time from request to fully assembled governed context, measured on this Mac against the US
   multi-region: embedding+seed (`VECTOR_SEARCH` with the query embedded in the same job), walk (one GQL job for all seeds),
   context and node fetch (two jobs in flight), assembly. Answer-generation LLM latency is excluded. Query-result cache is
-  disabled. Each BigQuery job carries ~0.7–1.5 s of scheduling overhead, so a request is 2–4 sequential job latencies.
+  disabled. Stage clocks are caller-side round trips (submit → result), so they include client polling and network time;
+  the statement that a request is "2–4 sequential job round trips of roughly a second each" is an **inference** from those
+  clocks, not a measured BigQuery queue time.
 * Percentiles are nearest-rank over all measured attempts including failures/timeouts; warmups are excluded; every attempt
   is in `requests.jsonl` before aggregation.
 * Scale cells are namespace-isolated copies of Acme in their own datasets (`_x100`, `_x1000`) with vectors reused by text
@@ -75,11 +92,11 @@ digest mismatches) → `READY` → atomic `MERGE` of `active_publication` (21 s 
 
 ## Forced-seed landmine parity (GQL vs oracle)
 
-| forced seed | GQL status | hops | computation | SQL digest = oracle | trust = oracle | replacement = oracle | freshness = oracle | via = oracle | total ms |
-|---|---|---|---|---|---|---|---|---|---|
-| f_legacy | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 4,399 |
-| f_current | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 3,946 |
-| f_revenue | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 5,433 |
+| forced seed | GQL status | hops | computation | SQL digest = oracle | trust = oracle | replacement = oracle | freshness = oracle | via = oracle | provenance resources = oracle (post hoc) | total ms |
+|---|---|---|---|---|---|---|---|---|---|---|
+| f_legacy | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (resource set) | 4,399 |
+| f_current | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (resource set) | 3,946 |
+| f_revenue | OK | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (resource set) | 5,433 |
 
 ## Natural question (GQL, vector seed top-k=5)
 
@@ -123,46 +140,72 @@ GQL status OK, parity {'same_set': True, 'same_min_hops': True}, 4,389 ms; oracl
 
 ## Governance (spec §5)
 
-| case | dataset / mechanism | observed | verdict |
+| case | dataset / mechanism | observed (recorded, unmodified) | recorded verdict / flag | post-hoc note (does not change the record) | published label |
+|---|---|---|---|---|---|
+| hidden intermediate (`metrics/gross-margin`) inside GQL walk | `_rls`: ROW ACCESS POLICY on nodes/edges/vectors | status OK, computations 0, paths [], replacement {'concept': None, 'label': 'NONE'} | `leaks_hidden_id=True`, `LEAK_OR_UNEXPECTED` | INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run | INCONCLUSIVE (path removal corroborated: computations 0, paths [], replacement NONE, RLS probe hidden=0; no-leak claim unverified) |
+| natural question on RLS dataset | `_rls` vector seed + walk | seeds ['policies/margin-standard', 'metrics/gross-margin-legacy', 'computations/gross-margin-period'], computations [['policies/margin-standard', 'computations/gross-margin-period', 1], ['computations/gross-margin-period', 'computations/revenue-ytd', 1]] | `leaks_hidden_id=True` | INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run | INCONCLUSIVE (legacy seed reached no computation; no-leak claim unverified) |
+| impact on RLS dataset | `_rls` ACYCLIC {1,6} | impacted [['computations/gross-margin-period', 2], ['policies/revenue-recognition', 3], ['computations/revenue-ytd', 5], ['metrics/revenue', 5], ['tables/orders', 5]] | `leaks_hidden_id=False` | runtime flag false (substring detector); full payload not retained | ENFORCED (hidden concept absent from impacted set; recorded flag false) |
+| metadata visible, source (Section rows) denied | `_meta`: policy hides every Section row | paths [{'seed': 'metrics/gross-margin-legacy', 'concept_hops': 2, 'via': ['metrics/gross-margin-legacy', 'metrics/gross-margin', 'computations/gross-margin-period']}], SQL withheld: True | `WITHHELD` | SQL null with `SOURCE_DENIED_OR_MISSING` warning; operator identity | WITHHELD |
+| revoke before cached replay (all rows) | `_rls`: policy replaced with FILTER USING (FALSE) at 2026-09-06T00:21:32.021914+00:00 | warm ['OK', 'MISS_STORED'], hit ['OK', 'HIT_RECHECKED'], replay ['DENIED', 'HIT_DENIED', 0], fresh ['NO_SEED', 0, ['forced seed: harness-only deterministic override, not a semantic ranking', 'seed metrics/revenue not found in pinned publication']] | `FAIL_CLOSED` | edge-only revocation was NOT exercised live; the node-only re-check defect (Astra P1#4) is fixed in code with an offline regression test, not re-measured | FAIL_CLOSED (all-rows case only) |
+| authorized views as graph inputs | `_av`: views over base dataset; CREATE PROPERTY GRAPH over views: ACCEPTED | status OK, computations 0, 4,503 ms | `leaks_hidden_id=True`, `LEAK_OR_UNEXPECTED` | INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run | ACCEPTED (filtered view removes the node; same operator identity; no second principal; no-leak claim unverified) |
+| publication consistency (concurrent requests during re-publish) | `bundle_b` re-published pub_562cafe452c881f4 → pub_325e71b935f9246f | pins seen ['pub_562cafe452c881f4'], all single-pin: True | recorded by scope-only checker (invalid: could not detect a mixed payload) | PARTIAL — six requests all reported the old pin by scope; payload-level single-pin was not verifiable at measurement time; checker replaced and unit-tested offline, not re-measured | PARTIAL |
+| failed publish leaves old pointer | injected failure before pointer switch (pub_ab76f5cbc116563e) | raised: True, pointer after: pub_325e71b935f9246f | `True` | pointer read back after the raised failure | PASS |
+| distinct restricted principal (service account) | — | IAM principal creation denied by session permission classifier | — | — | BLOCKED |
+| same path in a denied bundle under a second identity | — | needs distinct principal | — | — | BLOCKED |
+| output denied despite seed access under a second identity | — | needs distinct principal | — | — | BLOCKED |
+| owner-credential fallback negative | — | needs distinct principal | — | — | BLOCKED |
+
+## Benchmark cells (spec §6)
+
+| cell | corpus | C | n measured / target | state | ok rate | errors | timeouts | p50 all (ms) | p95 all (ms) | max (ms) | p50 seed | p50 walk | p50 context | p50 nodes | jobs | slot-ms | slot attribution USD |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| acme_c1 | acme | 1 | 28 / 100 | INCOMPLETE | 100.0% | 0 | 0 | 4,384 | 5,441 | 10,869 | 1,389 | 2,068 | 1,278 | 802 | 101 | 609,261 | 0.0102 |
+| acme_c5 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| x100_c1 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| x100_c5 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| acme_c10 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| x1000_c1 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| x1000_c5 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| x1000_c10 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+
+## Cost reconciliation (provisional)
+
+Window 2026-09-05T23:40:00Z → 2026-09-06T00:35:00Z. Named reservation `test-project-0728-467323:US.okf-graph-spike-20260905`: 323 jobs, 1,988,844 slot-ms → attribution $0.0331. Other pool(s) ['default-pipeline']: 26 jobs, 86,674 slot-ms (not billed at the Enterprise rate here). On-demand: 171 jobs, 1,293,942,784 bytes billed → $0.0074 at list rate (free tier not applied). Charged autoscale slot-seconds from RESERVATIONS_TIMELINE: 21,750 → **$0.3625** capacity bill estimate (baseline slot-seconds 0); legacy snapshot sum 850 slot-minutes shown for comparison only. Timeline last row: 2026-09-06 00:27:00+00:00.
+
+| minute (UTC) | baseline slots | autoscaled slots (snapshot) | charged autoscale slot-seconds |
 |---|---|---|---|
-| hidden intermediate (`metrics/gross-margin`) inside GQL walk | `_rls`: ROW ACCESS POLICY on nodes/edges/vectors | status OK, computations 0, paths [], replacement {'concept': None, 'label': 'NONE'}, hidden id in output: False | ENFORCED |
-| natural question on RLS dataset | `_rls` vector seed + walk | seeds ['policies/margin-standard', 'metrics/gross-margin-legacy', 'computations/gross-margin-period'], computations [['policies/margin-standard', 'computations/gross-margin-period', 1], ['computations/gross-margin-period', 'computations/revenue-ytd', 1]], hidden id leak: False | ENFORCED |
-| impact on RLS dataset | `_rls` ACYCLIC {1,6} | impacted [['computations/gross-margin-period', 2], ['policies/revenue-recognition', 3], ['computations/revenue-ytd', 5], ['metrics/revenue', 5], ['tables/orders', 5]], hidden id leak: False | ENFORCED |
-| metadata visible, source (Section rows) denied | `_meta`: policy hides every Section row | paths [{'seed': 'metrics/gross-margin-legacy', 'concept_hops': 2, 'via': ['metrics/gross-margin-legacy', 'metrics/gross-margin', 'computations/gross-margin-period']}], SQL withheld: True, warnings ['forced seed: harness-only deterministic override, not a semantic ranking', 'SOURCE_DENIED_OR_MISSING: sanctioned computation reachable but its Computation section is not visible; SQL withheld'] | WITHHELD |
-| revoke before cached replay | `_rls`: policy replaced with FILTER USING (FALSE) at 2026-09-06T00:21:32.021914+00:00 | warm ['OK', 'MISS_STORED'], hit ['OK', 'HIT_RECHECKED'], replay ['DENIED', 'HIT_DENIED', 0], fresh ['NO_SEED', 0, ['forced seed: harness-only deterministic override, not a semantic ranking', 'seed metrics/revenue not found in pinned publication']] | FAIL_CLOSED |
-| authorized views as graph inputs | `_av`: views over base dataset; CREATE PROPERTY GRAPH over views: ACCEPTED | status OK, computations 0, hidden id leak: False, 4,503 ms | ENFORCED |
-| publication consistency (concurrent requests during re-publish) | `bundle_b` re-published pub_562cafe452c881f4 → pub_325e71b935f9246f | pins seen ['pub_562cafe452c881f4'], all single-pin: True, pins ⊆ {old,new}: True | PASS |
-| failed publish leaves old pointer | injected failure before pointer switch (pub_ab76f5cbc116563e) | raised: True, pointer after: pub_325e71b935f9246f | PASS |
-| distinct restricted principal (service account) | — | IAM principal creation denied by session permission classifier | BLOCKED |
-| same path in a denied bundle under a second identity | — | needs distinct principal | BLOCKED |
-| output denied despite seed access under a second identity | — | needs distinct principal | BLOCKED |
-| owner-credential fallback negative | — | needs distinct principal | BLOCKED |
-
-## Cost reconciliation
-
-Window 2026-09-05T23:40:00Z → 2026-09-06T00:22:00Z: 99 reservation jobs, 153 on-demand jobs; slot-ms on reservation 660,022 → attribution $0.011; allocated autoscale slot-minutes 250 → capacity bill $0.25; on-demand bytes billed 1,293,942,784 → $0.0074.
-
-| minute (UTC) | baseline slots | autoscaled slots |
-|---|---|---|
-| 2026-09-05 23:43 | 0 | 0 |
-| 2026-09-05 23:45 | None | 50 |
-| 2026-09-05 23:46 | None | 0 |
-| 2026-09-05 23:47 | 0 | 0 |
-| 2026-09-06 00:07 | 0 | 0 |
-| 2026-09-06 00:08 | None | 50 |
-| 2026-09-06 00:09 | 0 | 50 |
-| 2026-09-06 00:10 | 0 | 0 |
-| 2026-09-06 00:11 | 0 | 0 |
-| 2026-09-06 00:12 | 0 | 0 |
-| 2026-09-06 00:13 | None | 50 |
-| 2026-09-06 00:14 | None | 50 |
-| 2026-09-06 00:15 | 0 | 0 |
-| 2026-09-06 00:17 | 0 | 0 |
+| 2026-09-05 23:43 | 0 | 0 | 0 |
+| 2026-09-05 23:45 | None | 50 | 1450 |
+| 2026-09-05 23:46 | None | 0 | 0 |
+| 2026-09-05 23:47 | 0 | 0 | 0 |
+| 2026-09-06 00:07 | 0 | 0 | 0 |
+| 2026-09-06 00:08 | None | 50 | 600 |
+| 2026-09-06 00:09 | 0 | 50 | 2850 |
+| 2026-09-06 00:10 | 0 | 0 | 0 |
+| 2026-09-06 00:11 | 0 | 0 | 0 |
+| 2026-09-06 00:12 | 0 | 0 | 0 |
+| 2026-09-06 00:13 | None | 50 | 850 |
+| 2026-09-06 00:14 | None | 50 | 450 |
+| 2026-09-06 00:15 | 0 | 100 | 2400 |
+| 2026-09-06 00:17 | 0 | 0 | 0 |
+| 2026-09-06 00:18 | None | 50 | 500 |
+| 2026-09-06 00:19 | None | 50 | 250 |
+| 2026-09-06 00:20 | None | 100 | 600 |
+| 2026-09-06 00:21 | None | 50 | 300 |
+| 2026-09-06 00:22 | None | 50 | 2900 |
+| 2026-09-06 00:23 | None | 50 | 2750 |
+| 2026-09-06 00:24 | None | 50 | 2250 |
+| 2026-09-06 00:25 | None | 50 | 1900 |
+| 2026-09-06 00:26 | None | 50 | 1700 |
+| 2026-09-06 00:27 | 0 | 0 | 0 |
 
 ## G3 — landmine and natural retrieval (MEASURED, PASSED for the tested cases)
 
-Forced seeds are a harness override, not a ranking claim. All three forced seeds match the oracle on hops, computation,
-SQL digest, trust, replacement, freshness and path (table above). For the deprecated anchor the answer surface carries
+Forced seeds are a harness override, not a ranking claim. All three forced seeds match the oracle on the compared fields —
+hops, computation, SQL digest, trust tier, replacement, freshness verdict, path — and on the provenance *resource set*
+(post-hoc column). Full provenance parity is **incomplete**: the GQL answer carries resource, title, declaration and
+resolution, but not the declaration-scoped signals (`usage_count`, `usage_window`) or `resolves_to`, which the oracle
+includes; those are not graph properties and would need a join to the edges/nodes tables. For the deprecated anchor the answer surface carries
 `lifecycle_status = deprecated`, `trust_tier = human-reviewed (human:jsmith@acme, 2024-01-15)`, `freshness = UNKNOWN_DEADLINE`
 (no `stale_after` — not proof of freshness), replacement `metrics/gross-margin` labelled **inferred** (no supersedes
 declaration exists in Acme), and the full-COGS SQL from `computations/gross-margin-period` with its SHA-256, and
@@ -179,7 +222,7 @@ evaluated at an explicit `as_of`; provenance edges record `resolution` and `infe
 ## G4 — impact and stub backlog (MEASURED, PASSED)
 
 Impact from `policies/margin-standard` (GQL `MATCH p = ACYCLIC … {1,6}`) returns the same seven concepts with the same
-minimum hops as the oracle (table above); the current metric and its computation are reached at two edges through the
+minimum hops as the oracle (table above; names and minimum hops are compared, the oracle's trust/truncation fields are not); the current metric and its computation are reached at two edges through the
 `Source` node (`DERIVES_FROM` → `RESOLVES_TO`), and `tables/orders` at five. The oracle's deeper bound finds nothing more, so
 the six-edge result is not truncated for Acme. Stub backlog: Acme empty (matches oracle and Lyon); `bundle_b` returns the
 three injected stubs with referrers and counts in GQL, set-equal to the oracle, and no stub ever yields SQL.
@@ -193,65 +236,105 @@ pins Acme's seed against `bundle_b`'s publication returns `NO_SEED` with no cont
 `bundle_b`'s deprecated anchor returns `AMBIGUOUS` with both candidates and still reaches the real computation via the
 legitimate two-hop path, never the stub; the `../` escape is rejected at compile time.
 
-## G6 — authorization (PARTIALLY MEASURED under the operator identity; distinct principals BLOCKED)
+## G6 — authorization (PARTIAL; operator identity only; distinct principals BLOCKED)
 
 Creating service accounts and project IAM bindings was **denied by this session's permission classifier**, so every case
-that needs a second real principal is BLOCKED (listed in the governance table). What was measured with real BigQuery policy
-objects under the operator identity: row-level security *is* honoured inside the GQL traversal (the hidden intermediate
-removes the two-hop path; no hidden identifier, path or count appears in the answer surface); the metadata-only dataset
-returns the reachable computation but withholds SQL with an explicit `SOURCE_DENIED_OR_MISSING` warning; a real policy
-change to `FILTER USING (FALSE)` before a cached replay makes the re-check fail closed; `CREATE PROPERTY GRAPH` accepts
-authorized views as node/edge tables and GQL runs over them. Time-based side channels were not tested. Verdicts per case
-are in the table; anything marked LEAK_OR_UNEXPECTED is reported as-is.
+that needs a second real principal is BLOCKED (listed in the governance table). Measured with real BigQuery policy objects
+under the operator identity:
 
-## G7 — atomic publication, revocation, cached replay (MEASURED)
+* **Hidden intermediate inside the GQL walk (RLS):** the two-hop path disappears — recorded `computations 0`, `paths []`,
+  `replacement NONE`, and the RLS dataset probe shows the hidden concept absent for the operator. The recorded runtime flag
+  is `leaks_hidden_id=true` / `LEAK_OR_UNEXPECTED`; that detector was a plain substring that also matches
+  `metrics/gross-margin-legacy` (the forced seed), and the full answer payload was not retained, so the *no-hidden-identifier*
+  claim is **INCONCLUSIVE** — path removal is corroborated, absence of any hidden identifier is not verified. The
+  detector is now exact and full payloads are persisted (`run.py`), but no re-run was made (no new spend).
+* **Natural question on the RLS dataset:** same INCONCLUSIVE label for the same reason; circumstantially the legacy seed
+  reached no computation (it reaches one at two hops without RLS).
+* **Impact on the RLS dataset:** recorded flag false; the hidden concept is absent from the impacted set — ENFORCED.
+* **Metadata visible, Section rows denied:** the reachable computation is returned with `sql = null` and an explicit
+  `SOURCE_DENIED_OR_MISSING` warning — WITHHELD.
+* **Revoke before cached replay (all rows → FILTER USING (FALSE)):** cached replay re-check fails closed (`HIT_DENIED`).
+  Edge-only revocation was **not** exercised live; review found the re-check counted nodes only, so a hidden edge could
+  survive replay. The cache now re-checks every disclosed node *and* edge and uses the exact `as_of` instant, with an
+  offline regression test (`tests/test_cache.py`); this is a code fix, not a new measurement.
+* **Authorized views:** `CREATE PROPERTY GRAPH` accepts views as node/edge tables and GQL runs over them; the view predicate
+  removes the hidden node. Published label: ACCEPTED (filtered view; same operator identity; no second principal) — not
+  "enforced against a principal".
 
-See the two publication rows in the governance table: concurrent `active`-pointer requests during a re-publish of
-`bundle_b` each carry a single publication id from {old, new}; an injected failure before the pointer switch raises and
-leaves the old pointer. Old versions are retained (append-only tables); their cleanup is by table expiration in this spike.
+Time-based side channels were not tested. The governance table shows the recorded verdicts unmodified alongside the
+post-hoc note; the renderer no longer rewrites any verdict.
 
-## G8 — benchmark and cost (MEASURED where a cell says COMPLETE; otherwise NOT_RUN / INCOMPLETE)
+## G7 — atomic publication, revocation, cached replay (PARTIAL)
 
-The benchmark table lists every cell of `fixtures/scale.json` with its state. Cells not present or marked
-`NOT_RUN_BUDGET` / `INCOMPLETE` were not completed inside the accepted window when this report was assembled; **no p50/p95
-is claimed for them**. The window driver keeps running detached after this report; any later cells are appended in a
-follow-up commit to `summary.json` / `requests.jsonl` with their own timestamps. Individual measured request latencies from
-the integration runs (uncached, C=1) are: forced seed 3.9–5.4 s; natural question 5.5–5.7 s after batching the walk (18.2 s
-before batching, when one walk job ran per seed); impact 3.5–4.4 s; relational fallback on-demand 2.1–2.6 s. Each request
-is 2–4 sequential BigQuery jobs, and per-job scheduling overhead (~0.7–1.5 s) dominates at this corpus size, not graph
-work (tens of slot-seconds per job).
+Failed publish (injected failure before the pointer switch) raises and leaves the old pointer — PASS, read back live.
+Concurrent `active`-pointer requests during the re-publish of `bundle_b` all reported the old pin by `scope.publication_id`,
+but the checker used at measurement time compared only that scope field (it tried to parse publication ids out of SQL
+digests, which never contain one) and could not have detected a mixed payload — **PARTIAL**. The checker is replaced by
+`single_pin()` (every scoped id on the answer surface plus each SQL digest against the publication's expected digest),
+answer surfaces now carry scoped ids, and an injected mixed-version response fails the unit test
+(`tests/test_governance_checks.py`); the live case was not re-run. Old versions are retained (append-only tables).
 
-Cost (see `cost.json`, provisional until billing export reconciles): across the smoke, integration and this window up to
-00:22 UTC the reservation ran 99 jobs for 660,022 slot-ms (attribution **$0.011**), while the autoscale timeline shows 250
-allocated slot-minutes (5 × 50-slot minutes) → capacity bill **$0.25**; on-demand publication/fallback jobs billed 1.29 GB
-→ **$0.007**; embeddings for 22 + 6 sections and storage are negligible. The capacity bill, not slot attribution, is the
-number that matters: a zero-baseline reservation bills 50 slots for at least a minute whenever any GQL job runs, so
-sparse, bursty analytical-agent traffic pays ~$0.05 per active minute regardless of how little work each query does.
+## G8 — benchmark and cost (INCOMPLETE)
+
+**0 of 8 benchmark cells completed.** `acme_c1` (GQL, C=1, uncached) reached 20 warmups + **28 of 100** measured requests
+(00:22:31→00:26:27Z) before the driver was interrupted for cost control; C=5, C=10 and both synthetic scale corpora
+(`copies_100`, `copies_1000`, published but never queried under the benchmark) are **NOT_RUN_BUDGET**. The per-cell table
+above is generated from `summary.json` (`partial.py` aggregates the raw `requests.jsonl`); the INCOMPLETE row's
+nearest-rank p50/p95 over 28 attempts are shown with that sample size and are **not** a completed cell. No concurrency or
+scale SLO result exists; the proposed p95-at-C=5 target is therefore **NOT_RUN**, and any statement about it below is a
+hypothesis.
+
+Individual integration-run latencies (each n=1, uncached, C=1, from `all_all-0017.json`): forced seeds 4.40 / 3.95 / 5.43 s;
+natural questions 5.47 / 5.71 s after batching the walk (18.22 s in `all_all-0012.json` when one walk job ran per seed);
+impact 4.39 s (3.46 s in `all-0012`). Relational fallback on-demand: **natural** question 5.67 s (n=1,
+`natural_question_fallback.json`, includes query embedding + vector seed); **forced** seed 2.61 s and 2.13 s (n=2,
+`landmine_forced_fallback.json`, `all-0017`). Forced and natural shapes are not comparable to each other.
+
+Cost (`cost.json`, span 23:40→00:35Z, provisional until the billing export reconciles): the named Enterprise reservation
+ran 323 jobs for 1,988,844 slot-ms → attribution **$0.033**; 26 jobs (86,674 slot-ms) landed on `default-pipeline` and are
+reported separately; on-demand jobs billed 1.29 GB → $0.0074 at list rate (free tier not applied, so likely $0.00 invoiced).
+The capacity bill uses the platform's charged quantity, `period_autoscale_slot_seconds` from
+`INFORMATION_SCHEMA.RESERVATIONS_TIMELINE`: **21,750 slot-seconds → $0.36** across all windows (timeline coverage through
+00:27, matching the last DELETE at 00:27:27Z; the earlier "$0.25 from 250 snapshot slot-minutes" was a snapshot sum, not the
+charged quantity). Storage, embeddings (22 + 6 + 2×7 sections plus query embeddings) and publication upkeep were **not
+quantified** (NOT_MEASURED); the 10,000-requests/day utilization model was **not built** (NOT_MODELED). The decision-relevant
+observation stands: a zero-baseline reservation charges 50 slots for at least a minute whenever any GQL job runs, so sparse,
+bursty analytical-agent traffic pays about $0.05 per active minute regardless of how little work each query does.
 
 ## G9 — comparison and envelope decision
 
 `comparison.md` carries the four-way table with evidence labels. Against the proposed (unaccepted) envelope of p95 ≤ 5 s at
-C=5, ≥99% success, ≤60 s publication visibility and ≤$0.05 amortized per request at 10k/day: publication visibility is
-~21 s (measured); single-request latency at C=1 is already at or above 5 s because of job scheduling overhead, so p95 at C=5
-is unlikely to meet the target without a persistent baseline or a different serving layer (see benchmark table for any
-completed cells); cost at 10k/day depends on the utilization model and is reported separately in `cost.json`
-(`OPERATING_ENVELOPE_UNACCEPTED` — no customer acceptance was recorded). Neo4j is RECORDED semantics only; Spanner Graph is
-DOCUMENTED/NOT_RUN; KC + ordinary SQL/vector reproduces the same two-hop context on-demand in ~2 s with no reservation, but
-with fixture-driven discovery (no live KC call) and without GQL impact analysis.
+C=5, ≥99% success, ≤60 s publication visibility and ≤$0.05 amortized per request at 10k/day: publication visibility was
+21.3 s for the one Acme publish (n=1, not a distribution); p95 at C=5 is **NOT_RUN** — the *hypothesis* from 28 C=1 samples
+(p50 4.4 s, p95 5.4 s) is that it would not meet 5 s without a warm baseline or a different serving layer; the 10k/day cost
+model is NOT_MODELED (`OPERATING_ENVELOPE_UNACCEPTED` — no customer acceptance was recorded). Neo4j is RECORDED semantics
+only; Spanner Graph is DOCUMENTED/NOT_RUN; KC + ordinary SQL/vector reproduces the same forced two-hop context on-demand in
+2.1–2.6 s (n=2) and the natural question in 5.7 s (n=1) with no reservation, with fixture-driven discovery (no live KC call)
+and without GQL impact analysis — no matched concurrency or cost-per-success comparison exists.
 
 ## Outcome and joint-decision inputs
 
-* **GQL passed** for the demonstrated slice (G1–G5, G7; G6 partial); capacity was not blocked; semantics/policy did not
-  fail in the measured cases. Per JOINT §4 this earns **MODERATE delivery for graph retrieval only**; combined delivery
-  remains **LOW** (no connected KC discovery → publication → walk → caller computation → result-bound receipt path was run).
+* **GQL passed** for the demonstrated retrieval slice (G1–G5); G6 and G7 are PARTIAL; G8 is INCOMPLETE (0/8 cells).
+  Capacity was not blocked; semantics did not fail in the measured cases. Per JOINT §4 this supports **MODERATE delivery for
+  graph retrieval only**, with the operating-envelope half of the question (p50/p95 at concurrency and scale) explicitly
+  NOT_RUN; combined delivery remains **LOW** (no connected KC discovery → publication → walk → caller computation →
+  result-bound receipt path was run).
 * Downgrade-trigger watch: Enterprise economics for bursty per-request retrieval (one-minute 50-slot minimum per burst) and
   job-overhead-bound latency both point toward "ordinary KC/SQL retrieval or an online engine plus BigQuery execution" unless
   a customer accepts a warm baseline; this must be revisited at the 2026-09-19 checkpoint with the completed cells.
-* BLOCKED list: distinct-principal authorization negatives (classifier denial), Neo4j/Spanner matched runs, live KC seed.
+* BLOCKED / INCONCLUSIVE / NOT_RUN list: distinct-principal authorization negatives (classifier denial); no-hidden-identifier
+  claim for the RLS/authorized-view cases (detector defect, payload not retained); mixed-payload single-pin claim (checker
+  defect); edge-only cached revocation (not exercised live); benchmark concurrency/scale cells; Neo4j/Spanner matched runs;
+  live KC seed; storage/embedding/upkeep cost and the 10k/day model.
 
 ## Teardown status
 
-Reservation windows are opened and deleted per measurement (`cleanup_manifest.json`, verified `No reservations found` after
-each close; the independent safety watcher closed one orphaned window). Temporary datasets `okf_graph_spike_20260905{,_x100,_x1000,_rls,_meta,_av}`
-and the remote embedding models carry a 14-day default expiration; they retain the governed evidence and can be dropped
-earlier by the operator. No shared assignment or resource outside this spike was touched.
+Every reservation CREATE has a matching platform DELETE (`reservation_changes.json`; last DELETE 00:27:27Z; cumulative
+lifetime 18.7 min). Two windows were closed outside the driver (`integration-0009` by the safety watcher, `all-0017` after a
+SIGINT) and are reconstructed in `cleanup_manifest.json` from the platform record. `reservation.py` now reports
+DELETE_UNVERIFIED unless every delete succeeded and a successful listing shows nothing left; `run.py` wraps provisioning and
+propagation in the cleanup lifecycle, converts SIGTERM/SIGINT into cleanup, cancels running spike jobs, and spawns
+`bin/safety_teardown.sh` as an independent watcher (offline-tested; not exercised in a new live window). Temporary datasets
+`okf_graph_spike_20260905{,_x100,_x1000,_rls,_meta,_av}` and their remote embedding models carry a 14-day default table
+expiration (dataset objects themselves are not auto-deleted); they retain the governed evidence and can be dropped earlier
+by the operator. No shared assignment or resource outside this spike was touched.

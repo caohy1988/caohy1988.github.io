@@ -25,7 +25,15 @@ from . import PROJECT, LOCATION, DATASET
 RLS_DS = f"{DATASET}_rls"
 META_DS = f"{DATASET}_meta"
 AV_DS = f"{DATASET}_av"
-OPERATOR = "user:raincoatrun@gmail.com"
+import os as _os, subprocess as _sp
+
+
+def _operator() -> str:
+    e = _os.environ.get("OKF_OPERATOR_EMAIL") or _sp.run(["gcloud", "config", "get-value", "account"], capture_output=True, text=True).stdout.strip()
+    return f"user:{e}"
+
+
+OPERATOR = _operator()   # never committed; resolved from the active gcloud account or OKF_OPERATOR_EMAIL
 HIDDEN = "metrics/gross-margin"
 BLOCKED_CASES = [
     "distinct restricted principal (service account) — IAM principal creation denied by session permission classifier",
