@@ -156,6 +156,8 @@ GQL status OK, parity {'same_set': True, 'same_min_hops': True}, 4,389 ms; oracl
 | output denied despite seed access under a second identity | — | needs distinct principal | — | — | BLOCKED |
 | owner-credential fallback negative | — | needs distinct principal | — | — | BLOCKED |
 
+The four BLOCKED rows above are the 2026-09-05 record and are kept as recorded. On 2026-09-06 the same cases (plus revocation before cached replay) were measured under the receipt spike's existing restricted service account via impersonation on the relational fallback engine: 5/5 MEASURED, teardown VERIFIED; inside a GQL traversal they remain BLOCKED (Enterprise window gate). Evidence: `evidence/authz_cases.json`; summary in `comparison.md` row 1.
+
 ## Benchmark cells (spec §6)
 
 | run | cell | corpus | C | n measured / target | state | ok rate | errors | timeouts | p50 all (ms) | p95 all (ms) | max (ms) | p50 seed | p50 walk | p50 context | p50 nodes | jobs | slot-ms | slot attribution USD |

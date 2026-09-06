@@ -152,11 +152,30 @@ def set_rls(client: bigquery.Client, grantees: list[str], vector_grantees: Optio
 
 
 def rls_grantees(client: bigquery.Client, ds: str = RLS_DS) -> dict[str, list[str]]:
-    """Current grantee lists per `_rls` table (redacted by the caller)."""
-    out = {}
+    """Current grantee lists per `_rls` table, read back from the service (REST: rowAccessPolicies.list, then
+    getIamPolicy per policy; grantees are the filteredDataViewer members). Redacted by the caller."""
+    out: dict[str, list[str]] = {}
+    api = client._connection.api_request
     for t in ("nodes", "edges", "section_vectors"):
-        out[t] = sorted(g for p in client.list_row_access_policies(f"{PROJECT}.{ds}.{t}") for g in (p.grantees or []))
+        base = f"/projects/{PROJECT}/datasets/{ds}/tables/{t}/rowAccessPolicies"
+        members: list[str] = []
+        for pol in api(method="GET", path=base).get("rowAccessPolicies", []):
+            pid = pol["rowAccessPolicyReference"]["policyId"]
+            iam = api(method="POST", path=f"{base}/{pid}:getIamPolicy", data={})
+            members += [m for b in iam.get("bindings", []) for m in b.get("members", [])]
+        out[t] = sorted(set(members))
     return out
+
+
+def gql_window_gate() -> dict:
+    """Whether this spike's Enterprise-window admission gate would let a GQL variant run right now. GQL needs an
+    Enterprise reservation; the gate refuses when any earlier window's job cleanup is unverified."""
+    from .reservation import require_clean_windows, _load
+    try:
+        require_clean_windows(_load())
+        return {"open": True}
+    except Exception as e:  # noqa: BLE001 - the gate's own message is the reason
+        return {"open": False, "reason": f"{type(e).__name__}: {str(e)[:300]}"}
 
 
 def _mk_ds(client: bigquery.Client, ds: str, desc: str) -> None:
@@ -352,8 +371,11 @@ def second_principal_cases(owner: bigquery.Client, pub: str, as_of: str, engine:
                 "publication_id": pub, "as_of": as_of, "cases": {k: {"description": v, "label": "BLOCKED", "reason": "not reached"} for k, v in CASES.items()},
                 "grants": [], "teardown": {}}
     if engine != "gql":
-        ev["engine_note"] = ("relational fallback (on-demand): the same RLS policies apply to the base tables, but this is not a "
-                             "GQL traversal; the GQL variant needs an Enterprise window and is recorded separately")
+        gate = gql_window_gate()
+        ev["engine_note"] = ("relational fallback (on-demand): the same RLS policies apply to the same base tables, but this is not a "
+                             "GQL traversal (labelled FALLBACK in every result)")
+        ev["gql_variant"] = ({"label": "NOT_RUN", "reason": "window gate open; GQL variant not requested in this pass"} if gate["open"] else
+                             {"label": "BLOCKED", "reason": f"GQL needs an Enterprise reservation window and the spike's admission gate refuses: {gate['reason']}"})
     pre, sa_client = preflight(sa, factory)
     ev["preflight"] = pre
     if pre["status"] != "OK":

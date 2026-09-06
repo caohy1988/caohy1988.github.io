@@ -32,6 +32,21 @@ Source pin: `/Users/haiyuancao/knowledge-catalog/okf/bundles/acme_retail` @ know
 (17 markdown files + 2 artifacts; per-file SHA-256 in `evidence/projection_acme.json`). Publication id
 `pub_190192147fd7fd78` is derived from the source manifest digest, not from PR 474's observation publication.
 
+## Second principal (2026-09-06)
+
+The 2026-09-05 run recorded every case that needs a second real principal as BLOCKED (IAM principal creation was
+denied). No principal was created since: `python3 -m okf_bq_graph.authz cases` impersonates the receipt spike's
+existing restricted service account (`OKF_SPIKE_RESTRICTED_SA`, alias `sa:okf-receipt-restricted`; the operator needs
+`roles/iam.serviceAccountTokenCreator` on it) and runs five negatives with temporary dataset-reader and row-policy
+grants on the `_rls` fixture, removed and read back in `finally`. Result (`evidence/authz_cases.json`, relational
+fallback engine, on-demand): 5/5 MEASURED — hidden intermediate ENFORCED, denied bundle DENIED with no identifier in
+the response or the API error, output denied with the vector store visible, owner-credential fallback NO_FALLBACK
+(`jobs.get user_email` bound to the SA for every SA job), revocation before cached replay FAIL_CLOSED; teardown
+VERIFIED. The same cases inside a GQL traversal are still BLOCKED: GQL needs an Enterprise window and the window
+gate refuses while a legacy job journal is unreconciled. Under the SA the natural-language seed is DENIED (the remote
+embedding model is not usable by that principal), so seed visibility was shown by a plain row count, not by
+`VECTOR_SEARCH`. Evidence carries the alias only and counts of denied identifiers, never the identifiers.
+
 ## Graph model (spec §3)
 
 Node kinds `Concept | Section | Source | Actor | Artifact | LogEntry`; stubs are `Concept{stub=true}`. Relations

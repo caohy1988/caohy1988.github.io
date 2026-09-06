@@ -149,3 +149,27 @@ def test_cases_all_blocked_when_preflight_fails(tmp_path):
 def test_labels_are_closed_set():
     assert AZ.LABELS == ("MEASURED", "FAILED", "BLOCKED", "NOT_APPLICABLE")
     assert set(AZ.CASES) == {"hidden_intermediate", "denied_bundle", "output_denied_seed_visible", "owner_fallback_negative", "revocation_before_cached_replay"}
+
+
+def test_rls_grantees_reads_policy_iam_members():
+    class Conn:
+        def api_request(self, method, path, data=None):
+            if method == "GET":
+                return {"rowAccessPolicies": [{"rowAccessPolicyReference": {"policyId": "hide_" + path.split("/tables/")[1].split("/")[0]}}]}
+            assert method == "POST" and path.endswith(":getIamPolicy")
+            return {"bindings": [{"role": "roles/bigquery.filteredDataViewer", "members": [AZ.OPERATOR, f"serviceAccount:{SA}"]}]}
+
+    class Client:
+        _connection = Conn()
+    g = AZ.rls_grantees(Client())
+    assert set(g) == {"nodes", "edges", "section_vectors"} and all(v == sorted([AZ.OPERATOR, f"serviceAccount:{SA}"]) for v in g.values())
+    assert any(SA in m for ms in AZ.redact(g, SA).values() for m in ms) is False  # alias only after redaction
+
+
+def test_gql_window_gate_reports_reason(monkeypatch):
+    import okf_bq_graph.reservation as R
+    monkeypatch.setattr(R, "_load", lambda: {"windows": []})
+    assert AZ.gql_window_gate() == {"open": True}
+    monkeypatch.setattr(R, "require_clean_windows", lambda m: (_ for _ in ()).throw(RuntimeError("job cleanup is unverified for smoke-1")))
+    g = AZ.gql_window_gate()
+    assert not g["open"] and "smoke-1" in g["reason"]
