@@ -109,8 +109,14 @@ job carry one `user_email` (`same_requester = SAME`). The verdict is `CHAIN_CONN
 both substitutions are REFUSED and (live) the requester check is SAME.
 
 Hermetic result: `CHAIN_CONNECTED` (`evidence/chain/chain_hermetic.json`; all ten bind checks hold, `approved` RELEASED
-`$400.00 USD · VERIFIED` on the synthetic fixture, both substitutions REFUSED). Live result: see the dated line below
-this paragraph once the foreground live pass has run; until then the live path is NOT_RUN.
+`$400.00 USD · VERIFIED` on the synthetic fixture, both substitutions REFUSED). Live result (2026-09-06 21:35Z, one foreground pass, `evidence/chain/chain_live.json`): **CHAIN_CONNECTED** — pointer
+resolved to the pin; relational fallback engine (on-demand, three retrieval jobs + one declaration job, 2.4 s retrieval)
+reached the computation in one hop, all ten bind checks hold; SDK `--live` executed the sanctioned SQL under the operator's
+credential (receipt job `okf_rcpt_b30edb60…`, verifier VERIFIED / MATCH, access probe ALLOWED, 5.4 s CLI wall) and the
+consumer RELEASED `$400.00 USD · VERIFIED` on the SDK's synthetic fixture dataset; `sql-substitution` REJECTED
+`sql_mismatch` → REFUSED (exit 2, no number); `declaration-mismatch` MISMATCH on file digest, parameters, path and SQL text
+→ REFUSED, CLI never invoked; `same_requester = SAME` (`jobs.get user_email` identical for the three graph jobs and the
+receipt job, masked as `operator`); SDK head `6719eb5` = pin, example tree clean. The whole pass took 21 s.
 
 ## Graph model (spec §3)
 

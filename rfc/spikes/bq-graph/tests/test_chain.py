@@ -213,3 +213,18 @@ def test_receipt_evidence_dir_is_resolved_before_the_subprocess_changes_cwd(tmp_
     monkeypatch.chdir(tmp_path)
     CH.run_receipt("approved", str(tmp_path / "sdk"), "rel/receipt", live=False, runner=runner)
     assert seen["argv"][seen["argv"].index("--evidence-dir") + 1] == str((tmp_path / "rel" / "receipt").resolve())
+
+
+def test_live_pointer_lookup_uses_the_default_dataset_when_clients_omit_ds(sdk_root, tmp_path, monkeypatch):
+    import okf_bq_graph.publish as PUB
+    from okf_bq_graph import DATASET
+    seen = {}
+
+    def fake_resolve(client, bundle_id, ds=DATASET):
+        seen["ds"] = ds
+        return None
+
+    monkeypatch.setattr(PUB, "resolve_pointer", fake_resolve)
+    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "fallback", "bq": object()},
+                       requester="t", as_of=AS_OF, runner=lambda *a, **k: (_ for _ in ()).throw(AssertionError("must not run")))
+    assert seen["ds"] == DATASET and out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "publication"

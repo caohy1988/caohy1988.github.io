@@ -31,7 +31,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from . import BUNDLE_ID, LOCATION, PROJECT, SOURCE_PIN
+from . import BUNDLE_ID, DATASET, LOCATION, PROJECT, SOURCE_PIN
 from .model import node_id as _node_id
 from .retrieve import retrieve, _freshness
 
@@ -108,7 +108,6 @@ def declaration(clients: dict, computation_id: str, publication_id: str) -> dict
     else:
         from google.cloud import bigquery
         from .publish import run
-        from . import DATASET
         full = f"{PROJECT}.{clients.get('ds', DATASET)}"
         job = run(clients["bq"], f"""SELECT node_id, kind, local_id, path, type, runtime, status, stale_after, file_sha256, attrs
                                     FROM `{full}.nodes` WHERE node_id = @id AND publication_id = @p""",
@@ -302,7 +301,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             out["publication"] = {"status": "OK", "publication_id": pub, "source": "compiled projection (deterministic from the pinned bytes)"}
         else:
             from .publish import resolve_pointer
-            pub = resolve_pointer(clients["bq"], BUNDLE_ID, clients.get("ds"))
+            pub = resolve_pointer(clients["bq"], BUNDLE_ID, clients.get("ds", DATASET))
             out["publication"] = {"status": "OK" if pub else "NO_PUBLICATION", "publication_id": pub, "source": "active_publication pointer"}
         out["publication"]["matches_pin"] = pub == PUBLICATION_PIN
         out["publication"]["pin"] = PUBLICATION_PIN
