@@ -108,16 +108,13 @@ def integration(client: bigquery.Client, cases: dict, pub: str, out: dict) -> No
 import re
 
 
-def _leaks(obj, needle: str) -> bool:
-    """Exact hidden-identifier check: matches the concept id and its sections (`#sN`) but not
-    `metrics/gross-margin-legacy` (the earlier plain-substring check false-positived on it)."""
-    return bool(re.search(re.escape(needle) + r"(?![-\w])", json.dumps(obj, default=str)))
+from .authz import leaks as _leaks  # exact hidden-identifier check (no `-legacy` false positive); shared with the second-principal cases
 
 
 def governance(client: bigquery.Client, pub: str, as_of: str, out: dict) -> None:
     """Spec §5 cases measurable under the operator identity with real policy objects (see authz.py)."""
-    from .authz import RLS_DS, META_DS, AV_DS, HIDDEN, BLOCKED_CASES, revoke, restore
-    gov: dict = {"blocked": BLOCKED_CASES}
+    from .authz import RLS_DS, META_DS, AV_DS, HIDDEN, revoke, restore
+    gov: dict = {"second_principal": "run separately: python3 -m okf_bq_graph.authz cases -> evidence/authz_cases.json"}
     legacy = "forced:metrics/gross-margin-legacy.md"
     # (1) hidden intermediate inside GQL traversal (RLS)
     c = {"engine": "gql", "bq": client, "ds": RLS_DS}
