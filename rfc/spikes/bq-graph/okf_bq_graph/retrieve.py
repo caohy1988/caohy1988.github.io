@@ -22,10 +22,12 @@ from google.cloud import bigquery
 
 from . import DATASET, LOCATION, PROJECT
 from .model import node_id as _node_id
+from .lifecycle import window_executor
 from .oracle import Graph, SQL_FENCE_RE, parse_ts
 from .publish import sql, resolve_pointer
 
 FORCED = "forced:"
+CACHE_DEPENDENCY_VERSION = 2  # prior entries may omit the second traversal edge
 
 
 def _p(name: str, typ: str, val: Any) -> bigquery.ScalarQueryParameter:
@@ -117,6 +119,51 @@ def _refresh(out: dict, as_of: str) -> dict:
     return out
 
 
+def _cache_dependencies(seeds, walks, ctx, seed_nodes, bundle_id, publication_id):
+    """Cache only when every path/context row supplies its full authorization dependencies.
+
+    Context for seeds and reached computations cannot reconstruct an omitted edge
+    leaving an intermediate node. Never substitute context edges for walk edges.
+    """
+    prefix = f"{bundle_id}|{publication_id}|"
+
+    def scoped_id(value):
+        return isinstance(value, str) and value.startswith(prefix) and len(value) > len(prefix)
+
+    nodes = {n["node_id"] for n in seed_nodes}
+    nodes.update(s["concept_id"] for s in seeds)
+    nodes.update(section["section_id"] for s in seeds for section in s["sections"])
+    edges = set()
+    for ws in walks.values():
+        for w in ws:
+            hops, path_edges = w.get("concept_hops"), w.get("edge_ids")
+            if (type(hops) is not int or hops not in (1, 2)
+                    or not isinstance(path_edges, (list, tuple)) or len(path_edges) != hops
+                    or not all(scoped_id(edge) for edge in path_edges)
+                    or len(set(path_edges)) != hops):
+                return None
+            path_nodes = w.get("hop_ids")  # relational fallback returns scoped node IDs
+            if path_nodes is None:
+                local_ids = w.get("hop_concepts")  # GQL returns ordered local concept IDs
+                if not isinstance(local_ids, (list, tuple)) or not all(isinstance(x, str) and x for x in local_ids):
+                    return None
+                path_nodes = [_node_id(bundle_id, publication_id, "Concept", x) for x in local_ids]
+            if (not isinstance(path_nodes, (list, tuple)) or len(path_nodes) != hops + 1
+                    or not all(scoped_id(node) for node in path_nodes)
+                    or path_nodes[0] != w["seed_id"] or path_nodes[-1] != w["computation_id"]):
+                return None
+            nodes.update(path_nodes)
+            edges.update(path_edges)
+    for row in ctx:
+        if not scoped_id(row.get("edge_id")):
+            return None
+        nodes.update((row["concept_id"], row["other_id"]))
+        edges.add(row["edge_id"])
+    if not all(scoped_id(node) for node in nodes):
+        return None
+    return sorted(nodes), sorted(edges)
+
+
 def retrieve(query: str, bundle_id: str, publication_id: str, requester: Any, as_of: str,
              clients: dict, top_k: int = 5) -> dict:
     timer = Timer()
@@ -131,11 +178,13 @@ def retrieve(query: str, bundle_id: str, publication_id: str, requester: Any, as
     ckey = _cache_key(ds, bundle_id, publication_id, requester, query, as_of, top_k) if cache is not None else None
     if ckey is not None and ckey in cache and publication_id != "active":
         cached = cache[ckey]
-        if _recheck(clients, full, publication_id, cached["disclosed_ids"], cached["disclosed_edge_ids"], timer):
-            out = _refresh(json.loads(json.dumps(cached["result"])), as_of)
-            out["scope"] = dict(out["scope"], cache="HIT_RECHECKED"); out["timing"] = timer.done()
-            return out
-        return _denied("cached replay: current authorization check failed or unknown", dict(scope, cache="HIT_DENIED"), timer)
+        if cached.get("dependency_version") == CACHE_DEPENDENCY_VERSION:
+            if _recheck(clients, full, publication_id, cached["disclosed_ids"], cached["disclosed_edge_ids"], timer):
+                out = _refresh(json.loads(json.dumps(cached["result"])), as_of)
+                out["scope"] = dict(out["scope"], cache="HIT_RECHECKED"); out["timing"] = timer.done()
+                return out
+            return _denied("cached replay: current authorization check failed or unknown", dict(scope, cache="HIT_DENIED"), timer)
+        cache.pop(ckey, None)  # legacy entries must rerun governed retrieval, not recheck partial dependencies
     try:
         # resolve pointer once; pin for seed, walk and SQL fetch
         if publication_id == "active":
@@ -182,10 +231,9 @@ def retrieve(query: str, bundle_id: str, publication_id: str, requester: Any, as
                       FROM ({ctx_sql.replace('ORDER BY concept_id, relation, other_id', '')}) g
                       LEFT JOIN `{full}.nodes` n ON n.node_id = g.other_id AND n.publication_id = @publication_id
                       ORDER BY concept_id, relation, other_id"""
-        from concurrent.futures import ThreadPoolExecutor
         nodes_sql = f"""SELECT node_id, local_id, path, title, type, status, stale_after, stub, runtime
                         FROM `{full}.nodes` WHERE node_id IN UNNEST(@ids) AND publication_id = @publication_id"""
-        with ThreadPoolExecutor(max_workers=2) as ex:   # two independent jobs in flight; caller latency counts the longer one
+        with window_executor(clients["bq"], max_workers=2) as ex:   # two independent jobs; latency counts the longer one
             f_ctx = ex.submit(_run, clients, "context", ctx_sql,
                               [bigquery.ArrayQueryParameter("concept_ids", "STRING", ids), _p("publication_id", "STRING", publication_id)], timer)
             f_nodes = ex.submit(_run, clients, "nodes", nodes_sql,
@@ -201,10 +249,13 @@ def retrieve(query: str, bundle_id: str, publication_id: str, requester: Any, as
     timer.stage("assembly", t)
     out["timing"] = timer.done()
     if ckey is not None and out["status"] == "OK":
-        disclosed = sorted({n["node_id"] for n in seed_nodes} | {r["other_id"] for r in ctx})
-        edge_ids = sorted({r["edge_id"] for r in ctx if r.get("edge_id")} |
-                          {x for ws in walks.values() for w in ws for x in (w.get("edge_ids") or [])})
-        cache[ckey] = {"disclosed_ids": disclosed, "disclosed_edge_ids": edge_ids, "result": json.loads(json.dumps(out, default=str))}
+        dependencies = _cache_dependencies(seeds, walks, ctx, seed_nodes, bundle_id, publication_id)
+        if dependencies is None:
+            out["scope"] = dict(out["scope"], cache="BYPASS_INCOMPLETE_DEPENDENCIES")
+            return out
+        disclosed, edge_ids = dependencies
+        cache[ckey] = {"dependency_version": CACHE_DEPENDENCY_VERSION, "disclosed_ids": disclosed,
+                       "disclosed_edge_ids": edge_ids, "result": json.loads(json.dumps(out, default=str))}
         out["scope"] = dict(out["scope"], cache="MISS_STORED")
     return out
 

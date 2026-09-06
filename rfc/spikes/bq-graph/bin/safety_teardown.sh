@@ -1,14 +1,10 @@
 #!/bin/bash
 # Independent safety watcher: waits for the driver pid to exit, then closes the recorded reservation window
-# if the reservation still exists. Spawned detached by okf_bq_graph.run; can also be started by hand:
-#   bin/safety_teardown.sh <driver_pid> <window_label>
-PID=${1:?driver pid}; LABEL=${2:-safety}
-cd "$(dirname "$0")/.."
+# using strict readback, even when an inventory command fails or the resource is already absent.
+#   bin/safety_teardown.sh <driver_pid> <original_window_label> [python_executable]
+set -euo pipefail
+PID=${1:?driver pid}; LABEL=${2:?original window label}; PYTHON=${3:-python3}
+cd "${OKF_SPIKE_DIR:-$(dirname "$0")/..}"
 while kill -0 "$PID" 2>/dev/null; do sleep 15; done
-sleep 20
-if bq --project_id=test-project-0728-467323 --location=US ls --reservation 2>/dev/null | grep -q okf-graph-spike; then
-  echo "$(date -u +%FT%TZ) SAFETY: reservation still present after driver $PID exit; closing window $LABEL"
-  python3 -m okf_bq_graph.reservation close "safety-$LABEL-$(date -u +%H%M)"
-else
-  echo "$(date -u +%FT%TZ) SAFETY: reservation already gone after driver $PID exit"
-fi
+echo "$(date -u +%FT%TZ) SAFETY: cancelling jobs and verifying original window $LABEL after driver $PID exit"
+exec "$PYTHON" -m okf_bq_graph.safety "$LABEL"

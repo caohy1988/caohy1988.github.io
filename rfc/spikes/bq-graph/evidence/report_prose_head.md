@@ -13,13 +13,14 @@ minimum hops (G4). Governance (G6) is **partial**: under the operator identity, 
 two-hop path inside the GQL walk and `CREATE PROPERTY GRAPH` accepts authorized views; the *no-hidden-identifier* claim is
 INCONCLUSIVE for the RLS/authorized-view cases because the runtime leak detector was defective and full payloads were not
 retained, and every case needing a second real principal is BLOCKED. Failed publish leaves the old pointer (G7); the
-concurrent single-pin claim is PARTIAL. **G8 benchmark: 0 of 8 cells completed** — `acme_c1` reached 28/100 measured
+concurrent single-pin claim is PARTIAL. **G8 benchmark: 0 of 9 cells completed** — `acme_c1` reached 28/100 measured
 requests before the driver was interrupted for cost control; C=5, C=10 and both synthetic scale corpora are NOT_RUN_BUDGET.
 Nothing unmeasured is given a number. **This is retrieval evidence only.** No receipt verdict, no runtime ATTESTED label and
 no connected KC discovery are claimed; combined delivery stays LOW per JOINT §4.
 
-Review status: Astra (six P1, six P2) and Opus (F1–F3) reviews of `be5a8a1` were addressed in the fix pass recorded in the
-PR; where a finding could only be closed by a new Enterprise run, the label was downgraded instead of re-spending.
+Review status: the fix pass at `aafdca3` closed Opus F1–F3; Astra's re-review found residual cache, lifecycle and evidence
+defects. This second pass adds offline regressions and repairs the code and derived reports while preserving historical
+raw records. Live INCONCLUSIVE/PARTIAL/NOT_RUN cases retain those labels; no new Enterprise measurements are claimed.
 
 ## G1 — capacity (MEASURED, PASSED)
 

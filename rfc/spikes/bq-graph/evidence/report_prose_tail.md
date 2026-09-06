@@ -53,15 +53,18 @@ under the operator identity:
 * **Metadata visible, Section rows denied:** the reachable computation is returned with `sql = null` and an explicit
   `SOURCE_DENIED_OR_MISSING` warning — WITHHELD.
 * **Revoke before cached replay (all rows → FILTER USING (FALSE)):** cached replay re-check fails closed (`HIT_DENIED`).
-  Edge-only revocation was **not** exercised live; review found the re-check counted nodes only, so a hidden edge could
-  survive replay. The cache now re-checks every disclosed node *and* edge and uses the exact `as_of` instant, with an
-  offline regression test (`tests/test_cache.py`); this is a code fix, not a new measurement.
-* **Authorized views:** `CREATE PROPERTY GRAPH` accepts views as node/edge tables and GQL runs over them; the view predicate
-  removes the hidden node. Published label: ACCEPTED (filtered view; same operator identity; no second principal) — not
-  "enforced against a principal".
+  Edge-only revocation was **not** exercised live. The first fix still dropped traversal `edge_ids` at the outer SQL
+  projection, allowing a revoked second-hop edge to survive replay. The outer SELECT now returns those IDs; version-2
+  cache entries require complete traversal/context edge dependencies, intermediate nodes and seed sections. Incomplete
+  or legacy cache entries trigger fresh retrieval. Offline regressions in `tests/test_cache.py` cover second-hop
+  revocation using actual result columns; this is a code fix, not a new measurement.
+* **Authorized views:** `CREATE PROPERTY GRAPH` accepts views as node/edge tables and GQL runs over them — graph-input
+  acceptance: ACCEPTED (same operator identity; no second principal). Disclosure: **INCONCLUSIVE**, because the recorded
+  leak flag is true and the full payload was not retained. Acceptance of views does not establish absence of hidden IDs.
 
 Time-based side channels were not tested. The governance table shows the recorded verdicts unmodified alongside the
-post-hoc note; the renderer no longer rewrites any verdict.
+post-hoc note; the renderer does not mutate any recorded verdict. For future retained payloads, an exact positive hidden-ID
+check publishes **FAIL/LEAK**, including when the recorded runtime flag disagrees; graph-input acceptance stays separate.
 
 ## G7 — atomic publication, revocation, cached replay (PARTIAL)
 
@@ -69,16 +72,20 @@ Failed publish (injected failure before the pointer switch) raises and leaves th
 Concurrent `active`-pointer requests during the re-publish of `bundle_b` all reported the old pin by `scope.publication_id`,
 but the checker used at measurement time compared only that scope field (it tried to parse publication ids out of SQL
 digests, which never contain one) and could not have detected a mixed payload — **PARTIAL**. The checker is replaced by
-`single_pin()` (every scoped id on the answer surface plus each SQL digest against the publication's expected digest),
-answer surfaces now carry scoped ids, and an injected mixed-version response fails the unit test
-(`tests/test_governance_checks.py`); the live case was not re-run. Old versions are retained (append-only tables).
+`single_pin()` now checks scoped identifiers including provenance `source_id`, and hashes returned SQL bytes against
+independently pinned expected digests. Its guarantee explicitly excludes unscoped paths, section headings/text and
+provenance attributes; those fields do not establish content integrity. Negative offline tests cover substituted SQL
+and foreign provenance (`tests/test_governance_checks.py`); the live case was not re-run, and G7 remains PARTIAL.
+Old versions are retained (append-only tables).
 
 ## G8 — benchmark and cost (INCOMPLETE)
 
-**0 of 8 benchmark cells completed.** `acme_c1` (GQL, C=1, uncached) reached 20 warmups + **28 of 100** measured requests
+**0 of 9 benchmark cells completed.** `acme_c1` (GQL, C=1, uncached) reached 20 warmups + **28 of 100** measured requests
 (00:22:31→00:26:27Z) before the driver was interrupted for cost control; C=5, C=10 and both synthetic scale corpora
 (`copies_100`, `copies_1000`, published but never queried under the benchmark) are **NOT_RUN_BUDGET**. The per-cell table
-above is generated from `summary.json` (`partial.py` aggregates the raw `requests.jsonl`); the INCOMPLETE row's
+above is generated from `summary.json` (`partial.py` refreshes unfinished rows from raw `requests.jsonl`, separated by
+`run_id`; the retained run is `legacy-unlabeled`). All nine combinations include their corpus, concurrency and target;
+the eight unrun cells include `x100_c10`, with zero measured requests and null percentiles. The INCOMPLETE row's
 nearest-rank p50/p95 over 28 attempts are shown with that sample size and are **not** a completed cell. No concurrency or
 scale SLO result exists; the proposed p95-at-C=5 target is therefore **NOT_RUN**, and any statement about it below is a
 hypothesis.
@@ -113,7 +120,7 @@ and without GQL impact analysis — no matched concurrency or cost-per-success c
 
 ## Outcome and joint-decision inputs
 
-* **GQL passed** for the demonstrated retrieval slice (G1–G5); G6 and G7 are PARTIAL; G8 is INCOMPLETE (0/8 cells).
+* **GQL passed** for the demonstrated retrieval slice (G1–G5); G6 and G7 are PARTIAL; G8 is INCOMPLETE (0/9 cells).
   Capacity was not blocked; semantics did not fail in the measured cases. Per JOINT §4 this supports **MODERATE delivery for
   graph retrieval only**, with the operating-envelope half of the question (p50/p95 at concurrency and scale) explicitly
   NOT_RUN; combined delivery remains **LOW** (no connected KC discovery → publication → walk → caller computation →
@@ -131,9 +138,11 @@ and without GQL impact analysis — no matched concurrency or cost-per-success c
 Every reservation CREATE has a matching platform DELETE (`reservation_changes.json`; last DELETE 00:27:27Z; cumulative
 lifetime 18.7 min). Two windows were closed outside the driver (`integration-0009` by the safety watcher, `all-0017` after a
 SIGINT) and are reconstructed in `cleanup_manifest.json` from the platform record. `reservation.py` now reports
-DELETE_UNVERIFIED unless every delete succeeded and a successful listing shows nothing left; `run.py` wraps provisioning and
-propagation in the cleanup lifecycle, converts SIGTERM/SIGINT into cleanup, cancels running spike jobs, and spawns
-`bin/safety_teardown.sh` as an independent watcher (offline-tested; not exercised in a new live window). Temporary datasets
+DELETE_UNVERIFIED unless every delete succeeded and a successful listing shows nothing left; a verified retry clears that
+outstanding state and stamps the verified deletion time. The window job gate stops readiness, integration, publication and
+benchmark submissions before canceling journaled job IDs and tearing down capacity. `bin/safety_teardown.sh` independently
+cancels those jobs and retries strict cleanup for the original window label; failed inventory remains unverified. These
+paths are covered offline and were not exercised in a new live window. Temporary datasets
 `okf_graph_spike_20260905{,_x100,_x1000,_rls,_meta,_av}` and their remote embedding models carry a 14-day default table
 expiration (dataset objects themselves are not auto-deleted); they retain the governed evidence and can be dropped earlier
 by the operator. No shared assignment or resource outside this spike was touched.

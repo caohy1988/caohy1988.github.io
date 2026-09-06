@@ -13,13 +13,14 @@ minimum hops (G4). Governance (G6) is **partial**: under the operator identity, 
 two-hop path inside the GQL walk and `CREATE PROPERTY GRAPH` accepts authorized views; the *no-hidden-identifier* claim is
 INCONCLUSIVE for the RLS/authorized-view cases because the runtime leak detector was defective and full payloads were not
 retained, and every case needing a second real principal is BLOCKED. Failed publish leaves the old pointer (G7); the
-concurrent single-pin claim is PARTIAL. **G8 benchmark: 0 of 8 cells completed** — `acme_c1` reached 28/100 measured
+concurrent single-pin claim is PARTIAL. **G8 benchmark: 0 of 9 cells completed** — `acme_c1` reached 28/100 measured
 requests before the driver was interrupted for cost control; C=5, C=10 and both synthetic scale corpora are NOT_RUN_BUDGET.
 Nothing unmeasured is given a number. **This is retrieval evidence only.** No receipt verdict, no runtime ATTESTED label and
 no connected KC discovery are claimed; combined delivery stays LOW per JOINT §4.
 
-Review status: Astra (six P1, six P2) and Opus (F1–F3) reviews of `be5a8a1` were addressed in the fix pass recorded in the
-PR; where a finding could only be closed by a new Enterprise run, the label was downgraded instead of re-spending.
+Review status: the fix pass at `aafdca3` closed Opus F1–F3; Astra's re-review found residual cache, lifecycle and evidence
+defects. This second pass adds offline regressions and repairs the code and derived reports while preserving historical
+raw records. Live INCONCLUSIVE/PARTIAL/NOT_RUN cases retain those labels; no new Enterprise measurements are claimed.
 
 ## G1 — capacity (MEASURED, PASSED)
 
@@ -143,11 +144,11 @@ GQL status OK, parity {'same_set': True, 'same_min_hops': True}, 4,389 ms; oracl
 | case | dataset / mechanism | observed (recorded, unmodified) | recorded verdict / flag | post-hoc note (does not change the record) | published label |
 |---|---|---|---|---|---|
 | hidden intermediate (`metrics/gross-margin`) inside GQL walk | `_rls`: ROW ACCESS POLICY on nodes/edges/vectors | status OK, computations 0, paths [], replacement {'concept': None, 'label': 'NONE'} | `leaks_hidden_id=True`, `LEAK_OR_UNEXPECTED` | INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run | INCONCLUSIVE (path removal corroborated: computations 0, paths [], replacement NONE, RLS probe hidden=0; no-leak claim unverified) |
-| natural question on RLS dataset | `_rls` vector seed + walk | seeds ['policies/margin-standard', 'metrics/gross-margin-legacy', 'computations/gross-margin-period'], computations [['policies/margin-standard', 'computations/gross-margin-period', 1], ['computations/gross-margin-period', 'computations/revenue-ytd', 1]] | `leaks_hidden_id=True` | INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run | INCONCLUSIVE (legacy seed reached no computation; no-leak claim unverified) |
-| impact on RLS dataset | `_rls` ACYCLIC {1,6} | impacted [['computations/gross-margin-period', 2], ['policies/revenue-recognition', 3], ['computations/revenue-ytd', 5], ['metrics/revenue', 5], ['tables/orders', 5]] | `leaks_hidden_id=False` | runtime flag false (substring detector); full payload not retained | ENFORCED (hidden concept absent from impacted set; recorded flag false) |
+| natural question on RLS dataset | `_rls` vector seed + walk | seeds ['policies/margin-standard', 'metrics/gross-margin-legacy', 'computations/gross-margin-period'], computations [['policies/margin-standard', 'computations/gross-margin-period', 1], ['computations/gross-margin-period', 'computations/revenue-ytd', 1]] | `leaks_hidden_id=True`, `None` | INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run | INCONCLUSIVE (no-leak claim unverified) |
+| impact on RLS dataset | `_rls` ACYCLIC {1,6} | impacted [['computations/gross-margin-period', 2], ['policies/revenue-recognition', 3], ['computations/revenue-ytd', 5], ['metrics/revenue', 5], ['tables/orders', 5]] | `leaks_hidden_id=False`, `None` | runtime flag false (substring detector); full payload not retained | ENFORCED (hidden concept absent from impacted set; recorded flag false) |
 | metadata visible, source (Section rows) denied | `_meta`: policy hides every Section row | paths [{'seed': 'metrics/gross-margin-legacy', 'concept_hops': 2, 'via': ['metrics/gross-margin-legacy', 'metrics/gross-margin', 'computations/gross-margin-period']}], SQL withheld: True | `WITHHELD` | SQL null with `SOURCE_DENIED_OR_MISSING` warning; operator identity | WITHHELD |
-| revoke before cached replay (all rows) | `_rls`: policy replaced with FILTER USING (FALSE) at 2026-09-06T00:21:32.021914+00:00 | warm ['OK', 'MISS_STORED'], hit ['OK', 'HIT_RECHECKED'], replay ['DENIED', 'HIT_DENIED', 0], fresh ['NO_SEED', 0, ['forced seed: harness-only deterministic override, not a semantic ranking', 'seed metrics/revenue not found in pinned publication']] | `FAIL_CLOSED` | edge-only revocation was NOT exercised live; the node-only re-check defect (Astra P1#4) is fixed in code with an offline regression test, not re-measured | FAIL_CLOSED (all-rows case only) |
-| authorized views as graph inputs | `_av`: views over base dataset; CREATE PROPERTY GRAPH over views: ACCEPTED | status OK, computations 0, 4,503 ms | `leaks_hidden_id=True`, `LEAK_OR_UNEXPECTED` | INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run | ACCEPTED (filtered view removes the node; same operator identity; no second principal; no-leak claim unverified) |
+| revoke before cached replay (all rows) | `_rls`: policy replaced with FILTER USING (FALSE) at 2026-09-06T00:21:32.021914+00:00 | warm ['OK', 'MISS_STORED'], hit ['OK', 'HIT_RECHECKED'], replay ['DENIED', 'HIT_DENIED', 0], fresh ['NO_SEED', 0, ['forced seed: harness-only deterministic override, not a semantic ranking', 'seed metrics/revenue not found in pinned publication']] | `FAIL_CLOSED` | edge-only revocation was NOT exercised live; outer SQL now projects traversal edge_ids, version-2 cache requires complete dependencies, and incomplete/legacy entries trigger fresh retrieval; second-hop revocation has offline coverage using actual result columns, not new live evidence | FAIL_CLOSED (all-rows case only) |
+| authorized views as graph inputs | `_av`: views over base dataset; graph-input acceptance: ACCEPTED | status OK, computations 0, 4,503 ms | `leaks_hidden_id=True`, `LEAK_OR_UNEXPECTED` | INCONCLUSIVE — runtime flag came from a substring detector that also matches `-legacy`; full payload not retained; no re-run; same operator identity, no second principal | INCONCLUSIVE (no-leak claim unverified) |
 | publication consistency (concurrent requests during re-publish) | `bundle_b` re-published pub_562cafe452c881f4 → pub_325e71b935f9246f | pins seen ['pub_562cafe452c881f4'], all single-pin: True | recorded by scope-only checker (invalid: could not detect a mixed payload) | PARTIAL — six requests all reported the old pin by scope; payload-level single-pin was not verifiable at measurement time; checker replaced and unit-tested offline, not re-measured | PARTIAL |
 | failed publish leaves old pointer | injected failure before pointer switch (pub_ab76f5cbc116563e) | raised: True, pointer after: pub_325e71b935f9246f | `True` | pointer read back after the raised failure | PASS |
 | distinct restricted principal (service account) | — | IAM principal creation denied by session permission classifier | — | — | BLOCKED |
@@ -157,16 +158,17 @@ GQL status OK, parity {'same_set': True, 'same_min_hops': True}, 4,389 ms; oracl
 
 ## Benchmark cells (spec §6)
 
-| cell | corpus | C | n measured / target | state | ok rate | errors | timeouts | p50 all (ms) | p95 all (ms) | max (ms) | p50 seed | p50 walk | p50 context | p50 nodes | jobs | slot-ms | slot attribution USD |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| acme_c1 | acme | 1 | 28 / 100 | INCOMPLETE | 100.0% | 0 | 0 | 4,384 | 5,441 | 10,869 | 1,389 | 2,068 | 1,278 | 802 | 101 | 609,261 | 0.0102 |
-| acme_c5 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
-| x100_c1 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
-| x100_c5 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
-| acme_c10 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
-| x1000_c1 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
-| x1000_c5 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
-| x1000_c10 | — | — | 0 / — | NOT_RUN_BUDGET | — | — | — | — | — | — | — | — | — | — | — | — | — |
+| run | cell | corpus | C | n measured / target | state | ok rate | errors | timeouts | p50 all (ms) | p95 all (ms) | max (ms) | p50 seed | p50 walk | p50 context | p50 nodes | jobs | slot-ms | slot attribution USD |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| legacy-unlabeled | acme_c1 | acme | 1 | 28 / 100 | INCOMPLETE | 100.0% | 0 | 0 | 4,384 | 5,441 | 10,869 | 1,389 | 2,068 | 1,278 | 802 | 101 | 609,261 | 0.0102 |
+| legacy-unlabeled | acme_c5 | acme | 5 | 0 / 100 | NOT_RUN_BUDGET | — | 0 | 0 | — | — | — | — | — | — | — | 0 | 0 | 0.0000 |
+| legacy-unlabeled | x100_c1 | copies_100 | 1 | 0 / 100 | NOT_RUN_BUDGET | — | 0 | 0 | — | — | — | — | — | — | — | 0 | 0 | 0.0000 |
+| legacy-unlabeled | x100_c5 | copies_100 | 5 | 0 / 100 | NOT_RUN_BUDGET | — | 0 | 0 | — | — | — | — | — | — | — | 0 | 0 | 0.0000 |
+| legacy-unlabeled | acme_c10 | acme | 10 | 0 / 100 | NOT_RUN_BUDGET | — | 0 | 0 | — | — | — | — | — | — | — | 0 | 0 | 0.0000 |
+| legacy-unlabeled | x1000_c1 | copies_1000 | 1 | 0 / 100 | NOT_RUN_BUDGET | — | 0 | 0 | — | — | — | — | — | — | — | 0 | 0 | 0.0000 |
+| legacy-unlabeled | x1000_c5 | copies_1000 | 5 | 0 / 100 | NOT_RUN_BUDGET | — | 0 | 0 | — | — | — | — | — | — | — | 0 | 0 | 0.0000 |
+| legacy-unlabeled | x1000_c10 | copies_1000 | 10 | 0 / 100 | NOT_RUN_BUDGET | — | 0 | 0 | — | — | — | — | — | — | — | 0 | 0 | 0.0000 |
+| legacy-unlabeled | x100_c10 | copies_100 | 10 | 0 / 100 | NOT_RUN_BUDGET | — | 0 | 0 | — | — | — | — | — | — | — | 0 | 0 | 0.0000 |
 
 ## Cost reconciliation (provisional)
 
@@ -254,15 +256,18 @@ under the operator identity:
 * **Metadata visible, Section rows denied:** the reachable computation is returned with `sql = null` and an explicit
   `SOURCE_DENIED_OR_MISSING` warning — WITHHELD.
 * **Revoke before cached replay (all rows → FILTER USING (FALSE)):** cached replay re-check fails closed (`HIT_DENIED`).
-  Edge-only revocation was **not** exercised live; review found the re-check counted nodes only, so a hidden edge could
-  survive replay. The cache now re-checks every disclosed node *and* edge and uses the exact `as_of` instant, with an
-  offline regression test (`tests/test_cache.py`); this is a code fix, not a new measurement.
-* **Authorized views:** `CREATE PROPERTY GRAPH` accepts views as node/edge tables and GQL runs over them; the view predicate
-  removes the hidden node. Published label: ACCEPTED (filtered view; same operator identity; no second principal) — not
-  "enforced against a principal".
+  Edge-only revocation was **not** exercised live. The first fix still dropped traversal `edge_ids` at the outer SQL
+  projection, allowing a revoked second-hop edge to survive replay. The outer SELECT now returns those IDs; version-2
+  cache entries require complete traversal/context edge dependencies, intermediate nodes and seed sections. Incomplete
+  or legacy cache entries trigger fresh retrieval. Offline regressions in `tests/test_cache.py` cover second-hop
+  revocation using actual result columns; this is a code fix, not a new measurement.
+* **Authorized views:** `CREATE PROPERTY GRAPH` accepts views as node/edge tables and GQL runs over them — graph-input
+  acceptance: ACCEPTED (same operator identity; no second principal). Disclosure: **INCONCLUSIVE**, because the recorded
+  leak flag is true and the full payload was not retained. Acceptance of views does not establish absence of hidden IDs.
 
 Time-based side channels were not tested. The governance table shows the recorded verdicts unmodified alongside the
-post-hoc note; the renderer no longer rewrites any verdict.
+post-hoc note; the renderer does not mutate any recorded verdict. For future retained payloads, an exact positive hidden-ID
+check publishes **FAIL/LEAK**, including when the recorded runtime flag disagrees; graph-input acceptance stays separate.
 
 ## G7 — atomic publication, revocation, cached replay (PARTIAL)
 
@@ -270,16 +275,20 @@ Failed publish (injected failure before the pointer switch) raises and leaves th
 Concurrent `active`-pointer requests during the re-publish of `bundle_b` all reported the old pin by `scope.publication_id`,
 but the checker used at measurement time compared only that scope field (it tried to parse publication ids out of SQL
 digests, which never contain one) and could not have detected a mixed payload — **PARTIAL**. The checker is replaced by
-`single_pin()` (every scoped id on the answer surface plus each SQL digest against the publication's expected digest),
-answer surfaces now carry scoped ids, and an injected mixed-version response fails the unit test
-(`tests/test_governance_checks.py`); the live case was not re-run. Old versions are retained (append-only tables).
+`single_pin()` now checks scoped identifiers including provenance `source_id`, and hashes returned SQL bytes against
+independently pinned expected digests. Its guarantee explicitly excludes unscoped paths, section headings/text and
+provenance attributes; those fields do not establish content integrity. Negative offline tests cover substituted SQL
+and foreign provenance (`tests/test_governance_checks.py`); the live case was not re-run, and G7 remains PARTIAL.
+Old versions are retained (append-only tables).
 
 ## G8 — benchmark and cost (INCOMPLETE)
 
-**0 of 8 benchmark cells completed.** `acme_c1` (GQL, C=1, uncached) reached 20 warmups + **28 of 100** measured requests
+**0 of 9 benchmark cells completed.** `acme_c1` (GQL, C=1, uncached) reached 20 warmups + **28 of 100** measured requests
 (00:22:31→00:26:27Z) before the driver was interrupted for cost control; C=5, C=10 and both synthetic scale corpora
 (`copies_100`, `copies_1000`, published but never queried under the benchmark) are **NOT_RUN_BUDGET**. The per-cell table
-above is generated from `summary.json` (`partial.py` aggregates the raw `requests.jsonl`); the INCOMPLETE row's
+above is generated from `summary.json` (`partial.py` refreshes unfinished rows from raw `requests.jsonl`, separated by
+`run_id`; the retained run is `legacy-unlabeled`). All nine combinations include their corpus, concurrency and target;
+the eight unrun cells include `x100_c10`, with zero measured requests and null percentiles. The INCOMPLETE row's
 nearest-rank p50/p95 over 28 attempts are shown with that sample size and are **not** a completed cell. No concurrency or
 scale SLO result exists; the proposed p95-at-C=5 target is therefore **NOT_RUN**, and any statement about it below is a
 hypothesis.
@@ -314,7 +323,7 @@ and without GQL impact analysis — no matched concurrency or cost-per-success c
 
 ## Outcome and joint-decision inputs
 
-* **GQL passed** for the demonstrated retrieval slice (G1–G5); G6 and G7 are PARTIAL; G8 is INCOMPLETE (0/8 cells).
+* **GQL passed** for the demonstrated retrieval slice (G1–G5); G6 and G7 are PARTIAL; G8 is INCOMPLETE (0/9 cells).
   Capacity was not blocked; semantics did not fail in the measured cases. Per JOINT §4 this supports **MODERATE delivery for
   graph retrieval only**, with the operating-envelope half of the question (p50/p95 at concurrency and scale) explicitly
   NOT_RUN; combined delivery remains **LOW** (no connected KC discovery → publication → walk → caller computation →
@@ -332,9 +341,11 @@ and without GQL impact analysis — no matched concurrency or cost-per-success c
 Every reservation CREATE has a matching platform DELETE (`reservation_changes.json`; last DELETE 00:27:27Z; cumulative
 lifetime 18.7 min). Two windows were closed outside the driver (`integration-0009` by the safety watcher, `all-0017` after a
 SIGINT) and are reconstructed in `cleanup_manifest.json` from the platform record. `reservation.py` now reports
-DELETE_UNVERIFIED unless every delete succeeded and a successful listing shows nothing left; `run.py` wraps provisioning and
-propagation in the cleanup lifecycle, converts SIGTERM/SIGINT into cleanup, cancels running spike jobs, and spawns
-`bin/safety_teardown.sh` as an independent watcher (offline-tested; not exercised in a new live window). Temporary datasets
+DELETE_UNVERIFIED unless every delete succeeded and a successful listing shows nothing left; a verified retry clears that
+outstanding state and stamps the verified deletion time. The window job gate stops readiness, integration, publication and
+benchmark submissions before canceling journaled job IDs and tearing down capacity. `bin/safety_teardown.sh` independently
+cancels those jobs and retries strict cleanup for the original window label; failed inventory remains unverified. These
+paths are covered offline and were not exercised in a new live window. Temporary datasets
 `okf_graph_spike_20260905{,_x100,_x1000,_rls,_meta,_av}` and their remote embedding models carry a 14-day default table
 expiration (dataset objects themselves are not auto-deleted); they retain the governed evidence and can be dropped earlier
 by the operator. No shared assignment or resource outside this spike was touched.

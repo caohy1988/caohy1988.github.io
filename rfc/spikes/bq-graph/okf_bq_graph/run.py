@@ -16,11 +16,13 @@ from google.cloud import bigquery
 
 from . import PROJECT, LOCATION, DATASET, BUNDLE_ID
 from .compile import compile_bundle
+from .model import sha256_text
 from .oracle import Graph
 from .publish import resolve_pointer
 from .reservation import open_window, close_window
 from .retrieve import retrieve, impact, stub_backlog
 from .benchmark import measure
+from .lifecycle import WindowJobs, WindowClient, WindowStopped, window_executor
 
 ACME_ROOT = "/Users/haiyuancao/knowledge-catalog/okf/bundles/acme_retail"
 
@@ -29,12 +31,13 @@ def _now() -> str:
     return _dt.datetime.now(_dt.timezone.utc).isoformat()
 
 
-def _client_factory():
+def _client_factory(window=None):
     local = threading.local()
 
     def get() -> dict:
         if not hasattr(local, "c"):
-            local.c = bigquery.Client(project=PROJECT, location=LOCATION)
+            raw = bigquery.Client(project=PROJECT, location=LOCATION)
+            local.c = window.bind(raw) if window else raw
         return {"engine": "gql", "bq": local.c, "use_cache": False}
     return get
 
@@ -188,7 +191,6 @@ def _sha_of_projection(proj: dict) -> dict:
 def _expected_sql_sha(client: bigquery.Client, bundle_id: str, pub: str) -> dict:
     """Expected digests for an already-published publication, read from the nodes table's Computation sections."""
     from .oracle import SQL_FENCE_RE
-    import hashlib
     rows = client.query(f"""SELECT c.local_id, s.text FROM `{PROJECT}.{DATASET}.edges` e
                             JOIN `{PROJECT}.{DATASET}.nodes` c ON c.node_id = e.src_id JOIN `{PROJECT}.{DATASET}.nodes` s ON s.node_id = e.dst_id
                             WHERE e.publication_id = @p AND e.relation = 'HAS_SECTION' AND c.type = 'Attested Computation' AND s.heading LIKE 'Computation%'""",
@@ -197,23 +199,30 @@ def _expected_sql_sha(client: bigquery.Client, bundle_id: str, pub: str) -> dict
     for r in rows:
         m = SQL_FENCE_RE.search(r["text"] or "")
         sql = m.group(1) if m else (r["text"] or "")
-        out[r["local_id"]] = hashlib.sha256(sql.encode()).hexdigest()
+        out[r["local_id"]] = sha256_text(sql)
     return out
 
 
 def single_pin(result: dict, expected_sql: dict) -> dict:
-    """Independent mixed-publication check over the whole answer surface. `expected_sql` maps publication_id ->
-    {computation local id -> expected sanctioned SQL sha256}. Fails on any second publication in any scoped id or on a
-    digest that does not belong to the response's pin."""
+    """Check scoped identifiers (including provenance) and actual SQL bytes against independent digests.
+
+    Unscoped paths, section headings/text and provenance attributes are NOT content-validated here.
+    G7 stays PARTIAL until pinned artifact comparisons and live old/new coverage are retained.
+    """
     pin = result.get("scope", {}).get("publication_id")
     ids = []
     for c in result.get("concepts", []):
         ids.append(c.get("concept_id"))
         ids += [s.get("section_id") for s in c.get("matched_sections", [])]
+        ids += [p.get("source_id") for p in c.get("provenance", [])]
     for c in result.get("computations", []):
         ids += [c.get("computation_id"), c.get("section_id")]
-    ids = [i for i in ids if i]
-    pins = {i.split("|")[1] for i in ids if i.count("|") >= 2}
+    if not pin or not ids or any(not isinstance(i, str) or len(i.split("|", 3)) != 4 for i in ids):
+        return {"ok": False, "pins": [], "reason": "missing or malformed scoped identifier"}
+    pins = {i.split("|")[1] for i in ids}
+    bundle = result.get("scope", {}).get("bundle_id")
+    if len({i.split("|")[0] for i in ids} | ({bundle} if bundle else set())) != 1:
+        return {"ok": False, "pins": sorted(pins), "reason": "mixed bundle identifiers"}
     if pin:
         pins_all = pins | {pin}
     else:
@@ -222,9 +231,13 @@ def single_pin(result: dict, expected_sql: dict) -> dict:
         return {"ok": False, "pins": sorted(pins_all), "reason": "more than one publication in payload/scope" if pins_all else "no scoped ids"}
     for c in result.get("computations", []):
         exp = (expected_sql.get(pin) or {}).get(c.get("concept"))
-        if exp is None or c.get("sql_sha256") != exp:
+        actual_sql = c.get("sql")
+        actual_sha = sha256_text(actual_sql) if isinstance(actual_sql, str) else None
+        if exp is None or c.get("sql_sha256") != exp or actual_sha != exp:
             return {"ok": False, "pins": sorted(pins_all), "reason": f"sql digest for {c.get('concept')} does not match publication {pin}"}
-    return {"ok": True, "pins": sorted(pins_all), "reason": None}
+    return {"ok": True, "pins": sorted(pins_all), "reason": None,
+            "checked": "scoped identifiers and sanctioned SQL bytes",
+            "not_checked": ["unscoped paths", "section headings/text", "provenance attributes"]}
 
 
 def publication_consistency(client: bigquery.Client, pub: str, as_of: str) -> dict:
@@ -232,7 +245,6 @@ def publication_consistency(client: bigquery.Client, pub: str, as_of: str) -> di
     every response must carry exactly one publication id across seed/walk/SQL. Then a failed publish
     (injected before pointer switch) must leave the old pointer."""
     import shutil, tempfile
-    from concurrent.futures import ThreadPoolExecutor
     from .publish import publish, resolve_pointer
     tmp = tempfile.mkdtemp()
     shutil.copytree("fixtures/bundle_b", f"{tmp}/bundle_b")
@@ -245,13 +257,13 @@ def publication_consistency(client: bigquery.Client, pub: str, as_of: str) -> di
     expected_sql = {before: _expected_sql_sha(client, "bundle_b", before), proj["publication_id"]: _sha_of_projection(proj)}
 
     def req(i):
-        c = {"engine": "gql", "bq": bigquery.Client(project=PROJECT, location=LOCATION)}
+        c = {"engine": "gql", "bq": client}
         r = retrieve("forced:metrics/gross-margin-legacy.md", "bundle_b", "active", f"consistency-{i}", as_of, c)
         chk = single_pin(r, expected_sql)
         return {"i": i, "status": r["status"], "publication_id": r["scope"]["publication_id"], "pins_in_payload": sorted(chk["pins"]),
                 "n_pubs_seen": len(chk["pins"]), "single_pin": chk["ok"], "reason": chk["reason"], "hops": [p["concept_hops"] for p in r["paths"]],
                 "full_result": r}
-    with ThreadPoolExecutor(max_workers=4) as ex:
+    with window_executor(client, max_workers=4) as ex:
         futs = [ex.submit(req, i) for i in range(6)]
         pubres = publish(proj, client, manifest_path="evidence/publish_log.jsonl")
         results = [f.result() for f in futs]
@@ -269,14 +281,14 @@ def publication_consistency(client: bigquery.Client, pub: str, as_of: str) -> di
     seen = {p for r in results for p in r["pins_in_payload"]}
     return {"pointer_before": before, "published": pubres["publication_id"], "pointer_after": after, "concurrent": results,
             "all_single_pin": all(r["single_pin"] for r in results), "pins_seen": sorted(seen),
-            "checker": "single_pin(): every scoped id in concepts/matched_sections/computations/section_id must share one publication "
-                       "equal to scope.publication_id, and each sanctioned SQL digest must equal that publication's expected digest",
+            "checker": "single_pin(): concept/section/computation/provenance source IDs share the scope pin; hash returned SQL bytes "
+                       "against independently pinned digests. Unscoped paths, section headings/text and provenance attributes are not validated; G7 PARTIAL.",
             "pins_subset_of_old_new": seen <= {before, pubres["publication_id"]},
             "failed_publish_raised": failed_ok, "pointer_after_failed_publish": after_failed,
             "failed_publish_left_pointer": after_failed == after, "failed_publication_id": proj3["publication_id"]}
 
 
-def benchmark(client: bigquery.Client, cases: dict, pub: str, out: dict, deadline: float, cells_spec: list[dict]) -> None:
+def benchmark(client: WindowClient, cases: dict, pub: str, out: dict, cells_spec: list[dict]) -> None:
     queries = [dict(q, bundle_id=BUNDLE_ID) for q in cases["natural_queries"]] + \
               [dict(q, bundle_id=BUNDLE_ID) for q in cases["forced_seeds"]]
     cells = []
@@ -297,107 +309,133 @@ def benchmark(client: bigquery.Client, cases: dict, pub: str, out: dict, deadlin
                       "publication_id": spec.get("publication_id", pub), "concurrency": spec["concurrency"],
                       "warmups": spec.get("warmups", 20), "measured": spec.get("measured", 100), "as_of": cases["as_of"],
                       "seed": spec.get("seed", 20260905), "timeout_s": 60, "model": "text-embedding-005"})
-    cfg = {"cells": cells, "queries": queries, "budget": {"cell_seconds": 1500, "deadline_monotonic": deadline}}
-    out["benchmark"] = measure(cfg, _client_factory())
-
-
-def _cancel_running_jobs(client: bigquery.Client) -> list:
-    """Stop submissions and cancel this spike's still-running jobs before teardown (best effort)."""
-    cancelled = []
-    try:
-        for j in client.list_jobs(max_results=200, state_filter="running"):
-            labels = getattr(j, "labels", {}) or {}
-            if labels.get("okf_spike") == "bq_graph_20260905" or (j.job_id or "").startswith("okf_graph_"):
-                try:
-                    client.cancel_job(j.job_id, location=LOCATION); cancelled.append(j.job_id)
-                except Exception:  # noqa: BLE001
-                    pass
-    except Exception:  # noqa: BLE001
-        pass
-    return cancelled
+    window = client.window
+    cfg = {"cells": cells, "queries": queries, "budget": {"cell_seconds": 1500, "deadline_monotonic": window.deadline}}
+    cfg["budget"]["window"] = window
+    cfg["run_id"] = out["label"]
+    out["benchmark"] = measure(cfg, _client_factory(window))
 
 
 def main(argv: list[str]) -> int:
+    import os
+    import signal
+    import subprocess
+    from pathlib import Path
+
     mode = argv[1]
     minutes = int(argv[argv.index("--minutes") + 1]) if "--minutes" in argv else (25 if mode == "integration" else 85)
-    # cumulative allowance guard: two hours across all windows (spec §6)
     used = 0.0
     try:
-        for w in json.load(open("evidence/cleanup_manifest.json"))["windows"]:
-            if w.get("opened_at") and w.get("closed_at"):
-                used += (_dt.datetime.fromisoformat(w["closed_at"].replace("Z", "+00:00")) - _dt.datetime.fromisoformat(w["opened_at"].replace("Z", "+00:00"))).total_seconds() / 60
-    except Exception:  # noqa: BLE001
-        pass
+        manifest = json.loads(Path("evidence/cleanup_manifest.json").read_text())
+    except FileNotFoundError:
+        manifest = {"windows": []}
+    for w in manifest["windows"]:
+        if not w.get("opened_at"):
+            continue
+        if not w.get("verified_gone") or not w.get("closed_at"):
+            print("outstanding reservation window; verified cleanup required:", w["label"], flush=True)
+            return 1
+        used += (_dt.datetime.fromisoformat(w["closed_at"].replace("Z", "+00:00")) -
+                 _dt.datetime.fromisoformat(w["opened_at"].replace("Z", "+00:00"))).total_seconds() / 60
     minutes = int(min(minutes, max(0, 120 - used - 2)))
     print(f"cumulative reservation minutes used so far: {used:.1f}; this window budget: {minutes} min", flush=True)
-    cases = json.load(open("fixtures/cases.json"))
-    client = bigquery.Client(project=PROJECT, location=LOCATION)
-    pub = resolve_pointer(client, BUNDLE_ID)
-    label = f"{mode}-{_dt.datetime.now(_dt.timezone.utc).strftime('%H%M')}"
-    out: dict = {"mode": mode, "label": label, "publication_id": pub, "started_at": _now()}
+    if minutes <= 0:
+        return 1  # no submissions and no paid resources when the budget is already exhausted
+    cases = json.loads(Path("fixtures/cases.json").read_text())
+    label = f"{mode}-{_dt.datetime.now(_dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f')}"
+    out: dict = {"mode": mode, "label": label, "started_at": _now()}
     deadline = time.monotonic() + minutes * 60
-    stop = threading.Event()
-    import signal, subprocess, os
+    window = WindowJobs(label, deadline, f"evidence/jobs_{label}.json")
+    client = window.bind(bigquery.Client(project=PROJECT, location=LOCATION))
+    interrupted = False
 
-    def _interrupt(signum, frame):   # SIGTERM/SIGINT -> KeyboardInterrupt so the finally block runs
+    def _interrupt(signum, frame):
+        nonlocal interrupted
+        if interrupted:
+            return
+        interrupted = True
+        # Never acquire locks or perform network I/O from a signal handler.
+        # window_executor / run_cell cancel before waiting for workers.
+        window.stop.set()
         raise KeyboardInterrupt(f"signal {signum}")
-    signal.signal(signal.SIGTERM, _interrupt)
-    signal.signal(signal.SIGINT, _interrupt)
+
+    old_handlers = {sig: signal.signal(sig, _interrupt) for sig in (signal.SIGTERM, signal.SIGINT)}
 
     def watchdog():
-        while not stop.wait(15):
-            if time.monotonic() > deadline + 120:
-                print("WATCHDOG: hard deadline exceeded; closing window", flush=True)
-                close_window(label)
-                stop.set()
-    threading.Thread(target=watchdog, daemon=True).start()
-    # independent process watcher (survives this driver): closes the recorded window once this pid is gone
-    watcher = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bin", "safety_teardown.sh")
-    if os.path.exists(watcher):
-        subprocess.Popen(["/bin/bash", watcher, str(os.getpid()), label], stdout=open("evidence/safety_teardown.log", "a"),
-                         stderr=subprocess.STDOUT, start_new_session=True)
-        out["safety_watcher"] = "spawned"
+        if not window.stop.wait(max(0, deadline - time.monotonic())):
+            print("WATCHDOG: deadline reached; stopping submissions and cancelling jobs", flush=True)
+            out["deadline_reached"] = True
+            window.stop_and_cancel()
+
+    deadline_thread = threading.Thread(target=watchdog, daemon=True)
+    deadline_thread.start()
     try:
-        w = open_window(label)          # persists the paid resource to the manifest before anything else
+        # Spawn before provisioning so even interruption during open has an independent closer.
+        watcher = Path(__file__).resolve().parents[1] / "bin" / "safety_teardown.sh"
+        with open("evidence/safety_teardown.log", "a") as log:
+            subprocess.Popen(["/bin/bash", str(watcher), str(os.getpid()), label, sys.executable],
+                             stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+        out["safety_watcher"] = "spawned"
+        window.check()
+        w = open_window(label)
         out["window_open"] = {"opened_at": w["opened_at"], "state": w.get("state")}
-        # assignment propagation is not atomic: jobs route inconsistently for a few minutes. Require 6 consecutive
-        # successful trivial GQL jobs (≥10 s apart) before measuring; record how long propagation took and each probe.
+        window.check()
+        pub = resolve_pointer(client, BUNDLE_ID)
+        out["publication_id"] = pub
         ok_streak, attempts, t_prop = 0, 0, time.monotonic()
         out["assignment_probes"] = []
         while ok_streak < 6 and attempts < 60:
+            window.check()
             attempts += 1
             try:
                 j = client.query(f"SELECT COUNT(*) FROM GRAPH_TABLE(`{PROJECT}.{DATASET}.okf_graph` MATCH (n:Node) COLUMNS (n.node_id))",
                                  job_config=bigquery.QueryJobConfig(use_query_cache=False), location=LOCATION)
-                j.result(); ok_streak += 1; out["assignment_ready_job"] = j.job_id
+                j.result()
+                ok_streak += 1
+                out["assignment_ready_job"] = j.job_id
                 out["assignment_probes"].append({"at": _now(), "job_id": j.job_id, "ok": True})
-            except Exception as e:  # noqa: BLE001
-                ok_streak = 0; msg = str(e).split("\n")[0][:100]
+            except WindowStopped:
+                raise
+            except Exception as exc:
+                ok_streak = 0
+                msg = str(exc).split("\n")[0][:100]
                 out["assignment_probes"].append({"at": _now(), "ok": False, "error": msg})
                 print("waiting for assignment:", msg, flush=True)
-            time.sleep(10)
+            if ok_streak < 6:
+                window.wait(10)
         out["assignment_propagation_s"] = round(time.monotonic() - t_prop, 1)
         out["assignment_probe_attempts"] = attempts
-        print("assignment propagation seconds:", out["assignment_propagation_s"], "attempts", attempts, flush=True)
+        if ok_streak < 6:
+            raise RuntimeError("assignment never reached six successful probes")
+        window.check()
         if mode in ("integration", "all"):
             integration(client, cases, pub, out)
-            with open(f"evidence/{mode}_{label}.json", "w") as fh:
-                json.dump(out, fh, indent=1, default=str)
+            Path(f"evidence/{mode}_{label}.json").write_text(json.dumps(out, indent=1, default=str))
+        window.check()
         if mode in ("benchmark", "all"):
-            spec = json.load(open("fixtures/scale.json"))["cells"]
-            benchmark(client, cases, pub, out, deadline, spec)
+            spec = json.loads(Path("fixtures/scale.json").read_text())["cells"]
+            benchmark(client, cases, pub, out, spec)
+        window.check()
     except (Exception, KeyboardInterrupt):
         out["error"] = traceback.format_exc()
-        print(out["error"])
+        print(out["error"], flush=True)
     finally:
-        stop.set()
-        out["cancelled_jobs"] = _cancel_running_jobs(client)
-        out["window_close"] = {k: v for k, v in close_window(label).items() if k != "steps"}
+        # Repeated signals must not interrupt cancellation or reservation readback.
+        for sig in old_handlers:
+            signal.signal(sig, signal.SIG_IGN)
+        out["job_cancellation"] = window.stop_and_cancel()
+        deadline_thread.join()
+        try:
+            out["window_close"] = {k: v for k, v in close_window(label).items() if k != "steps"}
+        except Exception:
+            out["window_close"] = {"verified_gone": False, "error": traceback.format_exc()}
         out["finished_at"] = _now()
-        with open(f"evidence/{mode}_{label}.json", "w") as fh:
-            json.dump(out, fh, indent=1, default=str)
-        print("window closed:", out["window_close"])
-    return 0
+        Path(f"evidence/{mode}_{label}.json").write_text(json.dumps(out, indent=1, default=str))
+        for sig, handler in old_handlers.items():
+            signal.signal(sig, handler)
+        print("window closed:", out["window_close"], flush=True)
+    return 0 if not out.get("error") and out["window_close"]["verified_gone"] and all(
+        j["verified_done"] for j in out["job_cancellation"]) else 1
 
 
 if __name__ == "__main__":

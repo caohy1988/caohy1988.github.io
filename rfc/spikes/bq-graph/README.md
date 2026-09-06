@@ -20,7 +20,7 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `okf_bq_graph/retrieve.py` | `retrieve / impact / stub_backlog` with engines `gql` (GA `VECTOR_SEARCH` seed + GQL walk), `fallback` (relational joins, on-demand), `oracle`; cache with re-check at disclosure; fail-closed |
 | `okf_bq_graph/scale.py` | Synthetic 100 / 1,000 namespace-isolated copies in their own datasets (vectors reused by text digest) |
 | `okf_bq_graph/authz.py` | Governance fixtures: RLS dataset (hidden intermediate), metadata-only dataset, authorized views + graph over views |
-| `okf_bq_graph/benchmark.py`, `run.py`, `partial.py`, `bin/safety_teardown.sh` | Bounded runner (20 warmups + 100 measured per cell, nearest-rank percentiles, failures retained), the window orchestrator (signal-safe cleanup lifecycle, job cancel, independent watcher), and the honest aggregation of interrupted cells (INCOMPLETE / NOT_RUN) |
+| `okf_bq_graph/benchmark.py`, `run.py`, `lifecycle.py`, `safety.py`, `partial.py`, `bin/safety_teardown.sh` | Bounded runner (20 warmups + 100 measured per cell, nearest-rank percentiles, failures retained), the window orchestrator (signal-safe cleanup lifecycle, job cancel, independent watcher), and the honest aggregation of interrupted cells (INCOMPLETE / NOT_RUN) |
 | `okf_bq_graph/cost.py`, `report.py`, `assemble.py` | Slot attribution (exact named reservation vs other pools) and the charged autoscale slot-seconds bill from `INFORMATION_SCHEMA.RESERVATIONS_TIMELINE`; non-mutating report tables; report assembly |
 | `sql/*.sql` | `schema.sql`, `graph.sql` (property graph DDL), `seed.sql` (vector seed), `governed.sql` (two-hop GQL), `context.sql`, `impact.sql`, `stubs.sql`, `fallback.sql` |
 | `fixtures/bundle_b/` | Negative fixture: identical relative paths, missing targets, duplicate hits, ambiguous replacement, `../` escape |
@@ -56,7 +56,7 @@ bq query --use_legacy_sql=false "CREATE MODEL IF NOT EXISTS okf_graph_spike_2026
 ## Run
 
 ```bash
-python3 -m pytest tests -q                                   # 25 tests, oracle engine + offline regressions
+env -u OKF_LIVE_ENGINE python3 -m pytest tests -q             # oracle engine + offline regressions
 python3 -m okf_bq_graph.capacity US us-central1 EU           # read-only inventory
 python3 -m okf_bq_graph.compile <bundle_root> evidence/projection_acme.json
 python3 -m okf_bq_graph.publish <bundle_root>                # on-demand: tables, vectors, graph DDL, pointer
@@ -70,6 +70,24 @@ python3 -m okf_bq_graph.partial && python3 -m okf_bq_graph.assemble      # hones
 
 The `run` modes create a paid reservation; `bin/safety_teardown.sh` is spawned automatically as an independent watcher.
 
+Benchmark requests and summaries carry a `run_id`; `partial` refreshes unfinished cells from matching raw records and
+keeps repeated cell names in separate runs. The retained 48 historical requests have no run ID and remain unchanged;
+their summaries use `legacy-unlabeled`. Duplicate request IDs within a cell/run stop recovery before writing, since their
+run boundaries cannot be inferred safely. Completed driver summaries remain unchanged. All nine corpus/concurrency
+combinations appear, including zero-sample `NOT_RUN_BUDGET` rows with known targets and null percentiles. Recovery does
+not turn an interrupted run into `COMPLETE`, even if its retained attempt count reaches the target.
+
 Everything cloud-side lives in `okf_graph_spike_20260905{,_x100,_x1000,_rls,_meta,_av}` (US, 14-day default expiration)
 and in the temporary reservation `okf-graph-spike-20260905` (Enterprise, 0 baseline, autoscale ≤100, no idle borrowing),
 which is created only inside a measured window and deleted at its end (`evidence/cleanup_manifest.json`).
+
+Deadline cleanup uses one admission gate for all driver query/load clients. Jobs have explicit window IDs journaled in
+`evidence/jobs_<window>.json` before submission. Interrupt handlers only stop admission and unwind; executor cleanup
+cancels jobs before waiting for workers, then the driver deletes capacity with strict readback. The independent watcher
+uses the same Python interpreter, retries the original window label, and appends diagnostics to
+`evidence/watcher_<window>.jsonl`. It does not rewrite the shared manifest after cleanup, so a late watcher cannot erase
+a newer window. Already verified original windows retain their existing deletion receipt.
+
+A new measurement run preserves previous run summaries and requires a fresh `run_id`; raw attempts retain that ID.
+Run `partial` to recover interrupted cells. It refreshes incomplete rows without merging separate runs or promoting
+recovered partial evidence to a completed driver measurement.

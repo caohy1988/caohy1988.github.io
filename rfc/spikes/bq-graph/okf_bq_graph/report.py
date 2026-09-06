@@ -19,15 +19,17 @@ def fmt(v, nd=0):
 
 
 def benchmark_table(summary: dict) -> str:
-    rows = ["| cell | corpus | C | n measured / target | state | ok rate | errors | timeouts | p50 all (ms) | p95 all (ms) | max (ms) | p50 seed | p50 walk | p50 context | p50 nodes | jobs | slot-ms | slot attribution USD |",
-            "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    rows = ["| run | cell | corpus | C | n measured / target | state | ok rate | errors | timeouts | p50 all (ms) | p95 all (ms) | max (ms) | p50 seed | p50 walk | p50 context | p50 nodes | jobs | slot-ms | slot attribution USD |",
+            "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for c in summary["cells"]:
+        run_id = c.get("run_id") or "legacy-unlabeled"
         if "measured_n" not in c:
-            rows.append(f"| {c['cell']} | — | — | 0 / — | {c['state']} | — | — | — | — | — | — | — | — | — | — | — | — | — |")
+            rows.append(f"| {run_id} | {c['cell']} | — | — | 0 / — | {c['state']} | — | — | — | — | — | — | — | — | — | — | — | — | — |")
             continue
         sp = c.get("stage_p50_ms", {})
-        rows.append(f"| {c['cell']} | {c['corpus']} | {c['concurrency']} | {c['measured_n']} / {c['measured_target']} | {c['state']} | "
-                    f"{fmt(c['success_rate'] * 100 if c['success_rate'] is not None else None, 1)}% | {c['errors']} | {c['timeouts']} | "
+        success = f"{fmt(c['success_rate'] * 100, 1)}%" if c['success_rate'] is not None else "—"
+        rows.append(f"| {run_id} | {c['cell']} | {c['corpus']} | {c['concurrency']} | {c['measured_n']} / {c['measured_target']} | {c['state']} | "
+                    f"{success} | {c['errors']} | {c['timeouts']} | "
                     f"{fmt(c['p50_ms_all'])} | {fmt(c['p95_ms_all'])} | {fmt(c['max_ms_all'])} | {fmt(sp.get('seed'))} | {fmt(sp.get('walk'))} | "
                     f"{fmt(sp.get('context'))} | {fmt(sp.get('nodes'))} | {c['jobs_total']} | {fmt(c['slot_ms_total'])} | {c['slot_attribution_usd']:.4f} |")
     return "\n".join(rows)
@@ -83,25 +85,44 @@ def _recheck_note(case: dict) -> str:
     return "runtime flag false (substring detector); full payload not retained"
 
 
+def _disclosure_label(case: dict, clean_label="ENFORCED", legacy_note="no-leak claim unverified") -> str:
+    """Publish negative evidence explicitly, leaving every recorded field intact."""
+    if not case:
+        return "NOT_RUN"
+    if "full_result" in case:
+        if HIDDEN_RE.search(json.dumps(case["full_result"], default=str)):
+            return "FAIL/LEAK (hidden ID present in retained full payload)"
+        if case.get("leaks_hidden_id"):
+            return "FAIL (recorded positive leak flag; retained payload check disagrees)"
+    elif case.get("leaks_hidden_id"):
+        return f"INCONCLUSIVE ({legacy_note})"
+    if case.get("verdict") in ("LEAK_OR_UNEXPECTED", "FAIL", "LEAK"):
+        return f"FAIL ({case['verdict']}; retained record)"
+    if case.get("status") != "OK" or case.get("leaks_hidden_id") is not False:
+        return "INCONCLUSIVE (no successful negative disclosure check)"
+    return clean_label
+
+
 def governance_table(allj: dict) -> str:
     g = allj.get("governance", {})
     rows = ["| case | dataset / mechanism | observed (recorded, unmodified) | recorded verdict / flag | post-hoc note (does not change the record) | published label |",
             "|---|---|---|---|---|---|"]
     h = g.get("rls_hidden_intermediate", {})
-    rows.append(f"| hidden intermediate (`metrics/gross-margin`) inside GQL walk | `_rls`: ROW ACCESS POLICY on nodes/edges/vectors | status {h.get('status')}, computations {h.get('computations')}, paths {h.get('paths')}, replacement {h.get('replacement')} | `leaks_hidden_id={h.get('leaks_hidden_id')}`, `{h.get('verdict')}` | {_recheck_note(h)} | {'INCONCLUSIVE (path removal corroborated: computations 0, paths [], replacement NONE, RLS probe hidden=0; no-leak claim unverified)' if h.get('leaks_hidden_id') and 'full_result' not in h else h.get('verdict')} |")
+    hidden_label = _disclosure_label(h, legacy_note="path removal corroborated: computations 0, paths [], replacement NONE, RLS probe hidden=0; no-leak claim unverified")
+    rows.append(f"| hidden intermediate (`metrics/gross-margin`) inside GQL walk | `_rls`: ROW ACCESS POLICY on nodes/edges/vectors | status {h.get('status')}, computations {h.get('computations')}, paths {h.get('paths')}, replacement {h.get('replacement')} | `leaks_hidden_id={h.get('leaks_hidden_id')}`, `{h.get('verdict')}` | {_recheck_note(h)} | {hidden_label} |")
     n = g.get("rls_natural", {})
-    rows.append(f"| natural question on RLS dataset | `_rls` vector seed + walk | seeds {n.get('seeds')}, computations {n.get('computations')} | `leaks_hidden_id={n.get('leaks_hidden_id')}` | {_recheck_note(n)} | {'INCONCLUSIVE (legacy seed reached no computation; no-leak claim unverified)' if n.get('leaks_hidden_id') and 'full_result' not in n else ('ENFORCED' if n and not n.get('leaks_hidden_id') else 'NOT_RUN')} |")
+    rows.append(f"| natural question on RLS dataset | `_rls` vector seed + walk | seeds {n.get('seeds')}, computations {n.get('computations')} | `leaks_hidden_id={n.get('leaks_hidden_id')}`, `{n.get('verdict')}` | {_recheck_note(n)} | {_disclosure_label(n)} |")
     i = g.get("rls_impact", {})
-    rows.append(f"| impact on RLS dataset | `_rls` ACYCLIC {{1,6}} | impacted {i.get('impacted')} | `leaks_hidden_id={i.get('leaks_hidden_id')}` | {_recheck_note(i)} | {'ENFORCED (hidden concept absent from impacted set; recorded flag false)' if i and not i.get('leaks_hidden_id') else ('INCONCLUSIVE' if i else 'NOT_RUN')} |")
+    rows.append(f"| impact on RLS dataset | `_rls` ACYCLIC {{1,6}} | impacted {i.get('impacted')} | `leaks_hidden_id={i.get('leaks_hidden_id')}`, `{i.get('verdict')}` | {_recheck_note(i)} | {_disclosure_label(i, 'ENFORCED (hidden concept absent from impacted set; recorded flag false)')} |")
     m = g.get("meta_source_denied", {})
     rows.append(f"| metadata visible, source (Section rows) denied | `_meta`: policy hides every Section row | paths {m.get('paths')}, SQL withheld: {m.get('sql_withheld')} | `{m.get('verdict')}` | SQL null with `SOURCE_DENIED_OR_MISSING` warning; operator identity | {m.get('verdict')} |")
     r = g.get("revoke_before_cached_replay", {})
-    rows.append(f"| revoke before cached replay (all rows) | `_rls`: policy replaced with FILTER USING (FALSE) at {r.get('revoked_at')} | warm {r.get('warm')}, hit {r.get('hit')}, replay {r.get('replay')}, fresh {r.get('fresh_after_revoke')} | `{r.get('verdict')}` | edge-only revocation was NOT exercised live; the node-only re-check defect (Astra P1#4) is fixed in code with an offline regression test, not re-measured | {r.get('verdict')} (all-rows case only) |")
+    rows.append(f"| revoke before cached replay (all rows) | `_rls`: policy replaced with FILTER USING (FALSE) at {r.get('revoked_at')} | warm {r.get('warm')}, hit {r.get('hit')}, replay {r.get('replay')}, fresh {r.get('fresh_after_revoke')} | `{r.get('verdict')}` | edge-only revocation was NOT exercised live; outer SQL now projects traversal edge_ids, version-2 cache requires complete dependencies, and incomplete/legacy entries trigger fresh retrieval; second-hop revocation has offline coverage using actual result columns, not new live evidence | {r.get('verdict')} (all-rows case only) |")
     a = g.get("authorized_views", {})
-    rows.append(f"| authorized views as graph inputs | `_av`: views over base dataset; CREATE PROPERTY GRAPH over views: {a.get('graph_over_views')} | status {a.get('status')}, computations {a.get('computations')}, {fmt(a.get('timing'))} ms | `leaks_hidden_id={a.get('leaks_hidden_id')}`, `{a.get('verdict')}` | {_recheck_note(a)} | ACCEPTED (filtered view removes the node; same operator identity; no second principal; no-leak claim {'unverified' if a.get('leaks_hidden_id') and 'full_result' not in a else 'checked'}) |")
+    rows.append(f"| authorized views as graph inputs | `_av`: views over base dataset; graph-input acceptance: {a.get('graph_over_views', 'NOT_RUN')} | status {a.get('status')}, computations {a.get('computations')}, {fmt(a.get('timing'))} ms | `leaks_hidden_id={a.get('leaks_hidden_id')}`, `{a.get('verdict')}` | {_recheck_note(a)}; same operator identity, no second principal | {_disclosure_label(a)} |")
     p = g.get("publication_consistency", {})
     partial = p.get("checker") is None
-    rows.append(f"| publication consistency (concurrent requests during re-publish) | `bundle_b` re-published {p.get('pointer_before')} → {p.get('published')} | pins seen {p.get('pins_seen')}, all single-pin: {p.get('all_single_pin')} | recorded by {'scope-only checker (invalid: could not detect a mixed payload)' if partial else 'single_pin() over all scoped ids + SQL digests'} | {'PARTIAL — six requests all reported the old pin by scope; payload-level single-pin was not verifiable at measurement time; checker replaced and unit-tested offline, not re-measured' if partial else 'verified'} | {'PARTIAL' if partial else ('PASS' if p.get('all_single_pin') else 'FAIL')} |")
+    rows.append(f"| publication consistency (concurrent requests during re-publish) | `bundle_b` re-published {p.get('pointer_before')} → {p.get('published')} | pins seen {p.get('pins_seen')}, all single-pin: {p.get('all_single_pin')} | recorded by {'scope-only checker (invalid: could not detect a mixed payload)' if partial else 'single_pin() over scoped identifiers/provenance and hashes of returned SQL bytes'} | {'PARTIAL — six requests all reported the old pin by scope; payload-level single-pin was not verifiable at measurement time; checker replaced and unit-tested offline, not re-measured' if partial else 'Unscoped paths, section text and provenance attributes excluded from checker; full content integrity remains PARTIAL'} | {'FAIL' if not partial and p.get('all_single_pin') is False else 'PARTIAL'} |")
     rows.append(f"| failed publish leaves old pointer | injected failure before pointer switch ({p.get('failed_publication_id')}) | raised: {p.get('failed_publish_raised')}, pointer after: {p.get('pointer_after_failed_publish')} | `{p.get('failed_publish_left_pointer')}` | pointer read back after the raised failure | {'PASS' if p.get('failed_publish_left_pointer') else 'FAIL/NOT_RUN'} |")
     for b in g.get("blocked", []):
         head, _, tail = b.partition(" — ")

@@ -1,7 +1,7 @@
 -- Governed two-hop walk in GQL (spec §4). Seed concept -> LINKS_TO{1,2} -> Attested Computation.
 -- Hop 2 is only allowed when the anchor is deprecated (pinned Neo4j semantics).
 -- Every element carries the publication predicate.
-SELECT seed_id, seed, hop_concepts, concept_hops, computation_id, computation_path, computation_status, computation_runtime
+SELECT seed_id, seed, hop_concepts, concept_hops, edge_ids, computation_id, computation_path, computation_status, computation_runtime
 FROM GRAPH_TABLE(`{ds}.okf_graph`
   MATCH p = (c:Node WHERE c.node_id IN UNNEST(@seeds) AND c.publication_id = @publication_id AND c.bundle_id = @bundle_id)
             -[e:Edge WHERE e.relation = 'LINKS_TO' AND e.publication_id = @publication_id]->{1,2}

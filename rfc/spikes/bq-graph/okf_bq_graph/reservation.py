@@ -25,7 +25,12 @@ def _now() -> str:
 
 def _bq(*args: str) -> dict:
     cmd = ["bq", f"--project_id={PROJECT}", f"--location={LOCATION}", "--format=prettyjson", *args]
-    p = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    except subprocess.TimeoutExpired:
+        return {"cmd": " ".join(cmd), "rc": 124, "at": _now(), "stdout": "", "stderr": "bq command timed out"}
+    except OSError as exc:
+        return {"cmd": " ".join(cmd), "rc": 126, "at": _now(), "stdout": "", "stderr": f"bq could not start: {exc}"[:2000]}
     return {"cmd": " ".join(cmd), "rc": p.returncode, "at": _now(),
             "stdout": p.stdout.strip()[:6000], "stderr": p.stderr.strip()[:2000]}
 
@@ -38,8 +43,10 @@ def _load() -> dict:
 
 
 def _save(m: dict) -> None:
-    with open(MANIFEST, "w") as fh:
+    temporary = f"{MANIFEST}.{os.getpid()}.tmp"
+    with open(temporary, "w") as fh:
         json.dump(m, fh, indent=2)
+    os.replace(temporary, MANIFEST)
 
 
 def _parse_list(step: dict) -> Optional[list]:
@@ -50,14 +57,16 @@ def _parse_list(step: dict) -> Optional[list]:
     if "No reservations found" in out or "No reservation assignments found" in out:
         return []
     try:
-        val = json.loads(out) if out else []
-        return val if isinstance(val, list) else None
+        val = json.loads(out)
+        return val if isinstance(val, list) and all(isinstance(r, dict) and isinstance(r.get("name"), str) for r in val) else None
     except ValueError:
         return None
 
 
 def open_window(label: str, max_slots: int = 100) -> dict:
     m = _load()
+    if any(w.get("opened_at") and not w.get("verified_gone") for w in m["windows"]):
+        raise RuntimeError("an earlier reservation window is outstanding; verify its cleanup before opening another")
     w = {"label": label, "opened_at": _now(), "steps": [], "max_slots": max_slots, "state": "OPENING"}
     m["windows"].append(w)
     _save(m)
@@ -85,12 +94,15 @@ def open_window(label: str, max_slots: int = 100) -> dict:
     return w
 
 
-def close_window(label: str) -> dict:
+def close_window(label: str, closer: str = "driver") -> dict:
     m = _load()
     w = next((x for x in reversed(m["windows"]) if x["label"] == label), None)
     if w is None:
-        w = {"label": label, "steps": []}
-        m["windows"].append(w)
+        raise ValueError(f"unknown reservation window: {label}; use the original opening label")
+    if w.get("verified_gone") and w.get("closed_at"):
+        # Its verified receipt remains valid if a newer window has reused the same
+        # reservation name. A late watcher must not delete that newer resource.
+        return w
     w["closing_at"] = _now()
     errors: list[str] = []
     ls = _bq("ls", "--reservation_assignment")
@@ -124,15 +136,26 @@ def close_window(label: str) -> dict:
         gone = not still_res and not still_asg
         if still_res or still_asg:
             errors.append("resource still listed after delete")
-    w["closed_at"] = _now()
+    attempted_at = _now()
     w["errors"] = errors
     w["verified_gone"] = bool(gone and not errors)
     w["state"] = "CLOSED_VERIFIED" if w["verified_gone"] else "DELETE_UNVERIFIED"
+    w.setdefault("cleanup_attempts", []).append({"at": attempted_at, "closer": closer,
+                                                "verified_gone": w["verified_gone"], "errors": list(errors)})
+    if w["verified_gone"]:
+        w.setdefault("closed_at", attempted_at)
+        w["closed_by"] = closer
+    else:
+        w.pop("closed_at", None)
     for r in m["resources"]:
-        if r.get("state") == "open" and (r.get("window") == label or r.get("window") is None):
+        if r.get("state") in ("open", "DELETE_UNVERIFIED") and r.get("window") == label and r.get("kind") in ("reservation", "assignment"):
             r["state"] = "deleted" if w["verified_gone"] else "DELETE_UNVERIFIED"
-            r["closed_by"] = label
-            r["deleted_at"] = w["closed_at"]
+            r["cleanup_attempted_at"] = attempted_at
+            if w["verified_gone"]:
+                r["closed_by"] = closer
+                r["deleted_at"] = w["closed_at"]
+            else:
+                r.pop("deleted_at", None)
     _save(m)
     return w
 
@@ -144,3 +167,4 @@ if __name__ == "__main__":
     print(json.dumps({k: v for k, v in out.items() if k != "steps"}, indent=2))
     for s in out["steps"]:
         print(s["at"], "rc=%s" % s["rc"], s["cmd"].split("--format=prettyjson ")[1][:90], "|", (s["stdout"] or s["stderr"])[:160].replace("\n", " "))
+    sys.exit(0 if action == "open" or out["verified_gone"] else 1)

@@ -27,6 +27,21 @@ def test_transport_failure_is_delete_unverified(monkeypatch, tmp_path):
     assert m["resources"][0]["state"] == "DELETE_UNVERIFIED"
 
 
+def test_retry_clears_outstanding_resource_only_after_verified_readback(monkeypatch, tmp_path):
+    failed, manifest = _run_close(monkeypatch, tmp_path, [("", {"rc": 1, "stdout": "", "stderr": "offline"})])
+    assert "deleted_at" not in manifest["resources"][0]
+    assert "closed_at" not in failed
+    monkeypatch.setattr(R, "_bq", lambda *args: {"cmd": " ".join(args), "rc": 0, "at": "retry", "stdout": "[]", "stderr": ""})
+    closed = R.close_window("w", closer="safety-watcher")
+    manifest = R._load()
+    assert closed["verified_gone"] and closed["closed_by"] == "safety-watcher"
+    assert len(manifest["windows"]) == 1
+    assert manifest["resources"][0]["state"] == "deleted"
+    assert manifest["resources"][0]["deleted_at"] == closed["closed_at"]
+    assert closed["cleanup_attempts"][0]["errors"]
+    assert not closed["cleanup_attempts"][-1]["errors"]
+
+
 def test_still_listed_is_delete_unverified(monkeypatch, tmp_path):
     listed = json.dumps([{"name": f"projects/p/locations/US/reservations/{R.RESERVATION}"}])
     w, m = _run_close(monkeypatch, tmp_path, [
