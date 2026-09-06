@@ -22,7 +22,7 @@ The wrong calculation is `(9.6 + 2.2) / 10.0 = 118%`. Correct retention is `9.6 
 
 Maya's agent needs a connected set of context: the approved retention definition, its starting-cohort rule and its declared computation. Citing the definition alone leaves room to use an unrelated total-ARR query. The proposed runtime retrieves that connected context through an explicit query against a pinned OKF publication, then separately runs and accounts for the metric computation.
 
-The revised BigQuery case begins with knowledge retrieval. It does not depend on Alder already having revenue tables in BigQuery. Existing data placement is not part of the page's argument.
+The BigQuery case begins with knowledge retrieval. The scoped opportunity (JOINT, 2026-09-06) is HIGH only for analytical agents whose relevant facts already live in BigQuery, on Enterprise or Enterprise Plus capacity, within customer-accepted latency, freshness, concurrency and cost budgets. That envelope is not yet accepted. The page makes no claim about where fictional Alder keeps its revenue tables.
 
 ## Three distinct advantages — proposed runtime
 
@@ -42,22 +42,32 @@ Vector similarity ranks likely passages; an LLM can choose different excerpts or
 
 A retrieval receipt records how context was selected. It does not prove that the retention computation ran or returned 96%. The pilot must test both the retrieval contract and the separate computation-evidence boundary. Withhold execution evidence and the number stays unproven.
 
-## Starting with an empty BigQuery project
+## Capacity and the first-workload route
 
-Land the OKF graph projection and version any facts retrieval needs in BigQuery. The knowledge graph can be the first workload, before a revenue warehouse exists. If no graph or facts enter BigQuery, no BigQuery retrieval occurs. The page proposes this architectural step; it does not claim that OKF or Catalog inherently require BigQuery for every use.
+GQL requires Enterprise or Enterprise Plus capacity; ordinary relational SQL and vector retrieval also run on-demand. A projected graph can be the first workload on such capacity after its inputs are loaded, but that empty-project route sits outside the HIGH-scoped facts-already-in-BigQuery case and must be labeled so. If no graph or facts enter BigQuery, no BigQuery retrieval occurs.
 
-The OKF bundle remains the authored source. Catalog and BigQuery are projections with different roles. Do not imply an implemented Catalog-to-BigQuery import or change the full RFC's source-bundle authority.
+The OKF bundle remains the authored source. Catalog and BigQuery are projections with different roles. Do not imply an implemented Catalog-to-BigQuery import or change the full RFC's source-bundle authority. A source pin is not a working live KC discovery integration.
+
+## What the merged spikes establish (2026-09-06)
+
+Two separate Acme gross-margin experiments merged. Neither ran the Alder story or produced its retention figures.
+
+- **Receipt example** (SDK PR 479, merge `120da78`, reviewed head `6719eb5`): a real caller-owned BigQuery job, authoritative job and result reads, fresh-process verification and consumer-enforced release; wrong-query, wrong-parameter, tampered, replayed and missing-evidence cases released nothing. This supports **MODERATE for that demonstrated slice only**. It is example code, not an SDK API, product release or independent service-principal attestation. `VERIFIED` is an evidence verdict, not `ATTESTED`.
+- **Graph spike** (site PR 28, merge `b05e278`, head `cf20d4a`): its report rates G1–G5 retrieval MODERATE for demonstrated retrieval only. G6 authorization and G7 publication consistency remain PARTIAL, distinct-principal graph tests BLOCKED, G8 benchmarks INCOMPLETE (0 of 9 cells). The Enterprise reservation was recorded as torn down; that is not an audit of every job or fixture resource. Returned sanctioned SQL is `NOT_EXECUTED` retrieval evidence.
+- **Combined delivery stays LOW.** Promotion needs one connected chain (KC discovery → pinned publication → governed retrieval → caller-delegated computation → result-bound receipt → enforced consumption) plus publication-consistency, denied-intermediate-node, revocation-before-cached-replay and unauthorized-output tests. Receipt progress must not wait for the graph benchmark. Reassess the conditional HIGH at the 2026-09-19 checkpoint.
+
+Full-demo computation attesters remain stubs and full-demo receipts remain `UNVERIFIABLE`; that boundary is separate from the merged example's evidence.
 
 ## The story skim and punchline
 
-Keep Maya, Alder, the five-minute deadline, $4 million decision, 118% and 96% in the hero. One arithmetic figure makes the new-customer mistake visible. The near-miss previews all three unanswered questions in one short paragraph; the runtime comparison answers them in the same order. On mobile, each labeled KC + OKF / + BQ pair stays together. One Finance pilot tests retrieval, access boundaries and computation evidence. Use a neutral title, pilot eyebrow and RFC link label; the page is a customer/runtime brief, not addressed to a named product-executive audience.
+Keep Maya, Alder, the five-minute deadline, $4 million decision, 118% and 96% in the hero. One arithmetic figure makes the new-customer mistake visible. The near-miss previews all three unanswered questions in one short paragraph; the runtime comparison answers them in the same order. On mobile, each labeled KC + OKF / + BQ pair stays together. One Finance pilot connects pinned retrieval, current authorization and result-bound consumption. Use a neutral title, pilot eyebrow and RFC link label; the page is a customer/runtime brief, not addressed to a named product-executive audience.
 
-**BigQuery turns the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.**
+**The proposed BigQuery runtime would turn the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.**
 
-Graph-over-OKF, per-node authorization, validated receipts and the governed runtime remain RFC proposals. Existing full-demo captures concern a different scenario and do not prove this graph retrieval or the Alder figures. The page ends with the pilot ask. Keep the hero's illustrative label, the runtime's RFC/unbuilt label and the comparison notes; no footer or evidence deep-dive link is required.
+Graph-over-OKF as a connected runtime, per-node authorization, and governed sync remain proposals; the merged spikes supply narrow retrieval and receipt evidence with links beside each claim. Existing full-demo captures concern a different scenario and do not prove this graph retrieval or the Alder figures. The page ends with the pilot ask: one Finance-owned pilot on real cohort data with an agreed operating budget, where a wrong query or missing evidence withholds the claim; 96% is not a real-data acceptance target. Keep the hero's illustrative label, the runtime's proposed/spike-evidence labels and the comparison notes; no footer or evidence appendix is required.
 
 ## Optional design detail and public address
 
 The brief lives at `/rfc/board-pack/`, with Board-pack near-miss → as its RFC index label. The legacy `/rfc/bq-vp/` address only redirects there.
 
-Place one closed-by-default Technical design disclosure after the comparisons and first-workload line, before the punchline. It expands the same three mechanisms: retrieve Finance's linked rules under fixed inputs and bounded traversal; enforce current access for an authenticated requester; separately validate the computation job against the declared calculation. Include the graph projection's relationship to the authored OKF bundle, receipt contents and current-authorization boundary. These are RFC design details, not implementation claims. The closed page preserves the story skim; keyboard users can expand the detail, and print includes it regardless of screen state.
+Place one closed-by-default Technical design disclosure after the comparisons and first-workload line, before the punchline. It expands the same three mechanisms: retrieve Finance's linked rules under fixed inputs and bounded traversal; enforce current access for an authenticated requester; separately validate the computation job against the declared calculation. Include the graph projection's relationship to the authored OKF bundle, receipt contents and current-authorization boundary, then a short evidence-and-checkpoint section with the merge hashes, open graph gates and the connected promotion gate. The diagram is a proposed connected design; its arrows have not been exercised as one path, and its 96% pass is illustrative. The closed page preserves the story skim; keyboard users can expand the detail, and print includes it regardless of screen state.
