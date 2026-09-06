@@ -176,7 +176,10 @@ def test_chain_hermetic_end_to_end(clients, projection, sdk_root, tmp_path, monk
     written = json.loads((tmp_path / "chain_hermetic.json").read_text())
     assert "operator@example.test" not in json.dumps(written)     # evidence hygiene
     assert written["sdk"]["head"] == out["sdk"]["head"]
-    assert (tmp_path / "receipt" / "case_approved_hermetic.json").exists()
+    dp = Path(cases["approved"]["receipt"]["diag_path"])
+    assert dp.exists() and out["run_id"] in str(dp) and dp.parent == tmp_path / "receipt" / out["run_id"]
+    assert cases["approved"]["receipt"]["request_id"] == json.loads(dp.read_text())["request_id"]
+    assert cases["approved"]["receipt"]["diag_sha256"] == CH.sha256_hex(dp.read_bytes())
 
 
 def test_chain_stops_before_execution_when_retrieval_is_denied(sdk_root, tmp_path, monkeypatch):
@@ -457,7 +460,7 @@ def test_live_with_oracle_engine_is_rejected(sdk_root, tmp_path):
 
 # ---- residual P2s @ a615a7c
 def test_chain_is_incomplete_when_the_approved_child_dies(clients, projection, sdk_root, tmp_path):
-    stale = tmp_path / "receipt" / "case_approved_hermetic.json"          # a retained copy from an earlier run must not survive
+    stale = tmp_path / "receipt" / "case_approved_hermetic.json"          # a foreign file in the shared dir: neither referenced nor touched
     stale.parent.mkdir(parents=True); stale.write_text("{}")
 
     def runner(argv, **kw):
@@ -472,7 +475,7 @@ def test_chain_is_incomplete_when_the_approved_child_dies(clients, projection, s
     assert cases["approved"]["acceptance"]["status"] == "NOT_REACHED"
     assert cases["sql-substitution"]["acceptance"]["status"] == "MET" and cases["declaration-mismatch"]["acceptance"]["status"] == "MET"
     assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "approved"
-    assert not stale.exists() and cases["approved"]["receipt"]["diag_path"] is None
+    assert stale.exists() and stale.read_text() == "{}" and cases["approved"]["receipt"]["diag_path"] is None
 
 
 def test_chain_is_incomplete_when_only_the_approved_graph_leg_errors(clients, projection, sdk_root, tmp_path, monkeypatch):
@@ -546,3 +549,49 @@ def test_live_without_a_bq_client_still_writes_a_verdict(sdk_root, tmp_path):
     out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "fallback"},
                        requester="t", as_of=AS_OF, runner=lambda *a, **k: (_ for _ in ()).throw(AssertionError("must not run")))
     assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "publication" and (tmp_path / "chain_live.json").exists()
+
+
+# ---- Astra re-review 2: two SUCCESSFUL overlapping chains must keep their own retained evidence
+def _reconcile(out: dict) -> None:
+    """Every retained diagnostic a chain record references lives in that run's own directory and carries the request id
+    the record claims."""
+    for c in out["cases"]:
+        rec = c["receipt"]
+        if not rec.get("invoked"):
+            continue
+        dp = Path(rec["diag_path"])
+        assert dp.parent.name == out["run_id"], (dp, out["run_id"])
+        d = json.loads(dp.read_text())
+        assert d["request_id"] == rec["request_id"] == rec["receipt"]["request_id"]
+        assert CH.sha256_hex(dp.read_bytes()) == rec["diag_sha256"]
+
+
+def test_two_successful_overlapping_chains_keep_their_own_evidence(clients, projection, sdk_root, tmp_path):
+    inner = {}
+
+    def runner_a(argv, **kw):
+        if "sql-substitution" in argv and "rec" not in inner:     # A paused at its substitution launch: B runs to completion
+            inner["rec"] = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients,
+                                        projection=projection, requester="t", as_of=AS_OF)
+        return subprocess.run(argv, **kw)
+
+    a = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients, projection=projection,
+                     requester="t", as_of=AS_OF, runner=runner_a)
+    b = inner["rec"]
+    assert a["verdict"] == b["verdict"] == "CHAIN_CONNECTED" and a["run_id"] != b["run_id"]
+    _reconcile(a); _reconcile(b)
+    ids_a = {c["receipt"]["request_id"] for c in a["cases"] if c["receipt"].get("invoked")}
+    ids_b = {c["receipt"]["request_id"] for c in b["cases"] if c["receipt"].get("invoked")}
+    assert ids_a and ids_b and not (ids_a & ids_b)
+    final = json.loads((tmp_path / "chain_hermetic.json").read_text())       # last writer: A, and it references only A's files
+    assert final["run_id"] == a["run_id"]
+    _reconcile(final)
+    assert not list((tmp_path / "receipt").glob(".inv_*")) and not list((tmp_path / "receipt" / a["run_id"]).glob(".inv_*"))
+
+
+def test_chain_record_is_also_retained_inside_its_run_dir(clients, projection, sdk_root, tmp_path):
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients, projection=projection,
+                       requester="t", as_of=AS_OF)
+    own = tmp_path / "receipt" / out["run_id"] / "chain_hermetic.json"
+    assert own.exists() and json.loads(own.read_text())["run_id"] == out["run_id"]
+    assert json.loads((tmp_path / "chain_hermetic.json").read_text()) == json.loads(own.read_text())

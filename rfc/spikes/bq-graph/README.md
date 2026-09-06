@@ -72,7 +72,8 @@ The next live pass regenerates the file in the current shape.
 ## Connected chain (2026-09-06)
 
 `python3 -m okf_bq_graph.chain --hermetic` (default) or `--live` runs one Acme path end to end and records every stage in
-`evidence/chain/chain_<mode>.json`, with the SDK CLI's own per-case diagnostics under `evidence/chain/receipt/`:
+`evidence/chain/chain_<mode>.json`, with the SDK CLI's own per-case diagnostics under `evidence/chain/receipt/<run_id>/`
+(the live artifacts from runner `chain/0.2.0` sit directly under `receipt/`, the layout of that runner version):
 
 1. **Seed — fixture.** `forced:metrics/gross-margin.md`, the harness override (not a semantic ranking). Live Knowledge
    Catalog discovery is out of scope for this chain; nothing here calls a KC endpoint.
@@ -122,10 +123,13 @@ declaration visible, bind MISMATCH with `file_sha256` and `sql_text` among the f
 `NOT_REACHED` (an upstream or child failure before the intended stage on any leg, `approved` included: still refused,
 but the stage never ran) gives `CHAIN_INCOMPLETE`; `WRONG` (the stage was reached and contradicts the expectation, e.g. a released substitution or a
 rejection for a different reason) gives `CHAIN_BROKEN`. `CHAIN_CONNECTED` needs every case `MET` and, live, the identity
-check `SAME`. Each receipt launch writes its diagnostic into an invocation-private directory that no other launch can
-see, the file must be newer than the launch, and the retained `receipt/case_<case>_<mode>.json` is copied only from that
-private artifact (retained copies are cleared at the start of every run), so neither a stale nor an overlapping run's
-file can be attributed to the current one.
+check `SAME`. Every run owns `receipt/<run_id>/`: each receipt launch writes its diagnostic into an invocation-private
+directory inside it that no other launch can see, the file must be newer than the launch, and it is moved (never copied
+over a shared name) to `receipt/<run_id>/case_<case>_<mode>.json`. Each receipt record carries the diagnostic's
+`request_id` and SHA-256, the chain record carries its `run_id`, `chain_<mode>.json` is written atomically and also
+retained inside the run directory, and no run deletes anything outside its own directory. Two successful overlapping
+runs therefore keep and reference only their own evidence (regression: a full chain completes inside another chain's
+substitution launch; every reference reconciles by request id and digest).
 
 Hermetic result: `CHAIN_CONNECTED` (`evidence/chain/chain_hermetic.json`; provenance ok, all ten bind checks hold,
 `approved` RELEASED `$400.00 USD · VERIFIED` on the synthetic fixture, both substitutions REFUSED, all three acceptances
@@ -141,8 +145,8 @@ invoked; all three acceptances `MET`; `same_requester = SAME` over 14 jobs (12 g
 decisions under the pre-acceptance verdict rule and a three-job identity sample; it was re-run so the committed artifact is
 the output of the rule it claims. The retained live artifact is the output of runner `chain/0.2.0` at `a615a7c`: its
 identity set is the 14 case jobs and does not include the pointer-lookup job, which the current runner (`chain/0.3.0`)
-adds; the later changes (invocation-private diagnostics, `approved` outage labelled NOT_REACHED) alter no recorded field
-of a passing run, so it was not re-run.
+adds; the later changes (invocation-private and run-owned diagnostics, `approved` outage labelled NOT_REACHED) alter no
+recorded field of a passing run, so it was not re-run.
 
 ## Graph model (spec §3)
 

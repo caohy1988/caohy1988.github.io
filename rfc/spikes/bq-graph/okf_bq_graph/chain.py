@@ -25,6 +25,7 @@ import hashlib
 import json
 import os
 import re
+import secrets
 import shutil
 import subprocess
 import sys
@@ -167,8 +168,10 @@ def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner =
                 timeout: int = 900) -> dict:
     """Invoke the SDK example CLI for one case. The verdict is read from the CLI's own per-case diagnostic JSON, not
     from stdout. The CLI writes into an invocation-private directory that no other launch can see (overlapping runs
-    cannot exchange evidence: Astra P2), the file must be newer than the launch, and the retained copy under `out_dir`
-    is written only from that private artifact. A missing, stale or unparsable diagnostic is UNVERIFIABLE and
+    cannot exchange evidence: Astra P2), the file must be newer than the launch, and the retained file is moved from
+    that private artifact into `out_dir`, which the caller owns for this run alone (run_chain passes its own run
+    directory, so two successful overlapping runs never share a retained path). The record carries the diagnostic's
+    request id and SHA-256 so every reference reconciles. A missing, stale or unparsable diagnostic is UNVERIFIABLE and
     `diag_present = False`."""
     out_dir = str(Path(out_dir).resolve())   # the CLI runs with the SDK root as cwd: never let a relative path land there
     Path(out_dir).mkdir(parents=True, exist_ok=True)
@@ -180,7 +183,7 @@ def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner =
         argv.append("--live")
         env["GOOGLE_CLOUD_PROJECT"] = PROJECT
     private_diag = Path(inv_dir) / f"case_{case}_{mode}.json"
-    diag_path = Path(out_dir) / f"case_{case}_{mode}.json"   # retained copy, written only from this invocation's artifact
+    diag_path = Path(out_dir) / f"case_{case}_{mode}.json"   # retained artifact, moved from this invocation's private dir only
     launched_at = time.time()
     t0 = time.monotonic()
     try:
@@ -199,11 +202,13 @@ def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner =
     except (OSError, ValueError):
         diag = None
     if diag is not None and raw is not None:
-        diag_path.write_bytes(raw)
+        os.replace(private_diag, diag_path)
     shutil.rmtree(inv_dir, ignore_errors=True)
     rec = {"case": case, "invoked": True, "argv": argv, "cwd": root, "live": live, "exit_code": exit_code, "elapsed_ms": elapsed,
            "stdout": stdout[-2000:], "stderr_tail": stderr[-1500:], "invocation_dir": inv_dir,
-           "diag_path": str(diag_path) if diag is not None else None, "diag": diag, "diag_present": diag is not None}
+           "diag_path": str(diag_path) if diag is not None else None, "diag": diag, "diag_present": diag is not None,
+           "diag_sha256": sha256_hex(raw) if diag is not None and raw is not None else None,
+           "request_id": (diag or {}).get("request_id")}
     if diag is None:
         rec["receipt"] = {"verdict": UNVERIFIABLE, "execution_match": "UNKNOWN", "reason": reason}
         rec["output"] = {"verdict": UNVERIFIABLE, "execution_match": "UNKNOWN", "reason_codes": [reason]}
@@ -396,7 +401,9 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         raise ValueError("hermetic mode uses the oracle engine only")
     as_of = as_of or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     mode = "live" if live else "hermetic"
-    out = {"chain": "okf_bq_graph.chain/0.3.0", "mode": mode, "engine": engine, "started_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+    run_id = f"{mode}-{_dt.datetime.now(_dt.timezone.utc):%Y%m%dT%H%M%SZ}-{secrets.token_hex(4)}"
+    out = {"chain": "okf_bq_graph.chain/0.4.0", "run_id": run_id, "mode": mode, "engine": engine,
+           "started_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
            "as_of": as_of, "bundle_id": BUNDLE_ID, "source_pin": SOURCE_PIN,
            "seed": {"mode": "fixture", "query": SEED, "note": "forced seed: harness-only deterministic override, not a semantic ranking; "
                                                                 "live Knowledge Catalog discovery is out of scope for this chain"},
@@ -482,9 +489,8 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         return rec, comp, decl
 
     out["cases"] = []
-    receipt_dir = str(Path(out_dir) / "receipt")
-    for stale in Path(receipt_dir).glob(f"case_*_{mode}.json"):   # retained copies belong to this run only
-        stale.unlink()
+    receipt_dir = str(Path(out_dir) / "receipt" / run_id)   # owned by this run: no shared retained path, no foreign cleanup
+    Path(receipt_dir).mkdir(parents=True, exist_ok=True)
     for case in cases:
         seed, path = (MISMATCH_SEED, MISMATCH_PATH) if case == "declaration-mismatch" else (SEED, COMPUTATION_PATH)
         c: dict[str, Any] = {"case": case, "expected": EXPECTED.get(case)}
@@ -528,10 +534,20 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
 
 
 def _finish(out: dict, out_dir: str, mode: str, redact: Callable) -> dict:
+    """Publish the record: atomically to `chain_<mode>.json` (last writer wins, but it references only its own run
+    directory) and as a retained copy inside the run directory when one exists."""
     out["finished_at"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
     out = redact(out)
     Path(out_dir).mkdir(parents=True, exist_ok=True)
-    (Path(out_dir) / f"chain_{mode}.json").write_text(json.dumps(out, indent=1, sort_keys=True, default=str) + "\n", encoding="utf-8")
+    text = json.dumps(out, indent=1, sort_keys=True, default=str) + "\n"
+    final = Path(out_dir) / f"chain_{mode}.json"
+    tmp = final.with_name(f".{final.name}.{out.get('run_id', 'norun')}.tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, final)
+    if out.get("run_id"):
+        own = Path(out_dir) / "receipt" / out["run_id"]
+        if own.is_dir():
+            (own / final.name).write_text(text, encoding="utf-8")
     return out
 
 
