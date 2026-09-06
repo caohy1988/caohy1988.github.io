@@ -103,20 +103,38 @@ CLI has no free-form case, so a "total ARR" swap is not what executes; the execu
 Labels carried in the evidence: **same requester** (graph leg and receipt leg under the operator's own ADC credential;
 `sa:okf-receipt-restricted` is not exercised by this chain); **hermetic** = oracle graph engine + the SDK's SYNTHETIC API
 emulation, `same_requester = NOT_APPLICABLE`; **live** = relational `fallback` engine on the published tables (on-demand,
-**not** BigQuery Graph; `--engine gql` needs an Enterprise window this module does not open) + SDK `--live` (real
-BigQuery jobs against the SDK's SYNTHETIC fixture dataset), plus a `jobs.get` check that the graph jobs and the receipt
-job carry one `user_email` (`same_requester = SAME`). The verdict is `CHAIN_CONNECTED` only when `approved` is RELEASED,
-both substitutions are REFUSED and (live) the requester check is SAME.
+**not** BigQuery Graph; `--engine gql` needs an Enterprise window this module does not open; `--live --engine oracle` is
+refused) + SDK `--live` (real BigQuery jobs against the SDK's SYNTHETIC fixture dataset), plus a `jobs.get` check that
+**every** job the chain submitted (retrieval and declaration jobs of all three cases, both receipt jobs) carries one
+**known** `user_email` (`same_requester = SAME`; any missing identity or unreadable job is UNKNOWN, never SAME).
 
-Hermetic result: `CHAIN_CONNECTED` (`evidence/chain/chain_hermetic.json`; all ten bind checks hold, `approved` RELEASED
-`$400.00 USD · VERIFIED` on the synthetic fixture, both substitutions REFUSED). Live result (2026-09-06 21:35Z, one foreground pass, `evidence/chain/chain_live.json`): **CHAIN_CONNECTED** — pointer
-resolved to the pin; relational fallback engine (on-demand, three retrieval jobs + one declaration job, 2.4 s retrieval)
-reached the computation in one hop, all ten bind checks hold; SDK `--live` executed the sanctioned SQL under the operator's
-credential (receipt job `okf_rcpt_b30edb60…`, verifier VERIFIED / MATCH, access probe ALLOWED, 5.4 s CLI wall) and the
-consumer RELEASED `$400.00 USD · VERIFIED` on the SDK's synthetic fixture dataset; `sql-substitution` REJECTED
-`sql_mismatch` → REFUSED (exit 2, no number); `declaration-mismatch` MISMATCH on file digest, parameters, path and SQL text
-→ REFUSED, CLI never invoked; `same_requester = SAME` (`jobs.get user_email` identical for the three graph jobs and the
-receipt job, masked as `operator`); SDK head `6719eb5` = pin, example tree clean. The whole pass took 21 s.
+Verdict rule (`verdict_rule` in the evidence). Before any job runs, a **provenance gate** requires the pointer to equal the
+publication pin, the SDK head to equal `6719eb5` and the whole SDK checkout to be clean (unknown git state counts as not
+clean); otherwise nothing executes and the verdict is `CHAIN_BROKEN` at `provenance`. Each case then carries an
+**acceptance** record separate from the fail-closed consumer decision: `MET` only when the case reached its intended
+stage and produced its specific evidence — `approved`: reached, bound, CLI exit 0, VERIFIED, RELEASED;
+`sql-substitution`: reached, bound, CLI invoked with a fresh diagnostic, exit 2, both verdicts REJECTED, `execution_match`
+MISMATCH, reason `sql_mismatch`, not released, REFUSED; `declaration-mismatch`: the alternate computation reached and its
+declaration visible, bind MISMATCH with `file_sha256` and `sql_text` among the failed checks, CLI never invoked, REFUSED.
+`NOT_REACHED` (an upstream or child failure before the intended stage: still refused, but the negative never ran) gives
+`CHAIN_INCOMPLETE`; `WRONG` (the stage was reached and contradicts the expectation, e.g. a released substitution or a
+rejection for a different reason) gives `CHAIN_BROKEN`. `CHAIN_CONNECTED` needs every case `MET` and, live, the identity
+check `SAME`. The receipt diagnostic path is cleared before each launch and must be newer than the launch, so a stale
+per-case file is never attributed to the current run.
+
+Hermetic result: `CHAIN_CONNECTED` (`evidence/chain/chain_hermetic.json`; provenance ok, all ten bind checks hold,
+`approved` RELEASED `$400.00 USD · VERIFIED` on the synthetic fixture, both substitutions REFUSED, all three acceptances
+`MET`). Live result (2026-09-06 21:52Z, one foreground pass, `evidence/chain/chain_live.json`): **CHAIN_CONNECTED** —
+provenance ok (pointer = pin, SDK head = pin, checkout clean); relational fallback engine (on-demand, three retrieval jobs
++ one declaration job per case, 2.2 s retrieval) reached the computation in one hop, all ten bind checks hold; SDK
+`--live` executed the sanctioned SQL under the operator's credential (receipt job `okf_rcpt_fbec89a0…`, verifier VERIFIED
+/ MATCH, access probe ALLOWED, 5.7 s CLI wall) and the consumer RELEASED `$400.00 USD · VERIFIED` on the SDK's synthetic
+fixture dataset; `sql-substitution` reached, executed, REJECTED `sql_mismatch` → REFUSED (exit 2, no number);
+`declaration-mismatch` reached revenue-ytd, MISMATCH on file digest, parameters, path and SQL text → REFUSED, CLI never
+invoked; all three acceptances `MET`; `same_requester = SAME` over 14 jobs (12 graph jobs + 2 receipt jobs, one known
+`user_email`, masked as `operator`). The whole pass took 23 s. The earlier 21:35Z pass (commit `cef88d7`) reached the same
+decisions under the pre-acceptance verdict rule and a three-job identity sample; it was re-run so the committed artifact is
+the output of the rule it claims.
 
 ## Graph model (spec §3)
 

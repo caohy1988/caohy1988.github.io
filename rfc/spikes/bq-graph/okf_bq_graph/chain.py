@@ -79,10 +79,11 @@ def sdk_publication(root: str) -> dict:
     fences = SDK_FENCE_RE.findall(raw.decode("utf-8"))
     head = _git(root, "rev-parse", "HEAD")
     dirty = _git(root, "status", "--porcelain", "--", EXAMPLE_REL)
+    repo_dirty = _git(root, "status", "--porcelain")   # the example imports SDK modules: the whole checkout must be clean
     return {"manifest": manifest, "computation_sha256": sha256_hex(raw), "computation_digest": computation_digest(raw),
             "sanctioned_sql": fences[0] if len(fences) == 1 else None, "fence_count": len(fences),
             "sdk_head": head, "sdk_head_matches_pin": head == SDK_PIN, "sdk_dirty": bool(dirty) if dirty is not None else None,
-            "run_py": str(ex / "run.py")}
+            "sdk_repo_dirty": bool(repo_dirty) if repo_dirty is not None else None, "run_py": str(ex / "run.py")}
 
 
 # ----------------------------------------------------------------------------- graph leg
@@ -163,7 +164,8 @@ def bind(comp: dict, decl: dict, sdk_pub: dict, as_of: str) -> dict:
 def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner = subprocess.run,
                 timeout: int = 900) -> dict:
     """Invoke the SDK example CLI for one case. The verdict is read from the CLI's own per-case diagnostic JSON, not
-    from stdout; a missing or unparsable diagnostic is UNVERIFIABLE."""
+    from stdout. The diagnostic path is cleared before the launch and must be newer than the launch: a missing, stale
+    or unparsable diagnostic is UNVERIFIABLE and `diag_present = False` (Astra P2 #3)."""
     out_dir = str(Path(out_dir).resolve())   # the CLI runs with the SDK root as cwd: never let a relative path land there
     argv = [sys.executable, str(Path(root) / EXAMPLE_REL / "run.py"), "--case", case, "--evidence-dir", out_dir]
     env = dict(os.environ)
@@ -171,6 +173,9 @@ def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner =
         argv.append("--live")
         env["GOOGLE_CLOUD_PROJECT"] = PROJECT
     Path(out_dir).mkdir(parents=True, exist_ok=True)
+    diag_path = Path(out_dir) / f"case_{case}_{'live' if live else 'hermetic'}.json"
+    diag_path.unlink(missing_ok=True)
+    launched_at = time.time()
     t0 = time.monotonic()
     try:
         r = runner(argv, cwd=root if os.path.isdir(root) else None, env=env, capture_output=True, text=True, timeout=timeout)
@@ -178,17 +183,20 @@ def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner =
     except (OSError, subprocess.TimeoutExpired) as e:  # the CLI never ran to completion: nothing to verify
         exit_code, stdout, stderr = -1, "", f"{type(e).__name__}: {str(e)[:300]}"
     elapsed = round((time.monotonic() - t0) * 1000, 1)
-    diag_path = Path(out_dir) / f"case_{case}_{'live' if live else 'hermetic'}.json"
-    diag = None
+    diag, reason = None, "diag_missing"
     try:
-        diag = json.loads(diag_path.read_text(encoding="utf-8"))
+        if diag_path.stat().st_mtime < launched_at - 1.0:   # 1 s tolerance for filesystem timestamp granularity
+            reason = "diag_stale"
+        else:
+            diag = json.loads(diag_path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         diag = None
     rec = {"case": case, "invoked": True, "argv": argv, "cwd": root, "live": live, "exit_code": exit_code, "elapsed_ms": elapsed,
-           "stdout": stdout[-2000:], "stderr_tail": stderr[-1500:], "diag_path": str(diag_path), "diag": diag}
+           "stdout": stdout[-2000:], "stderr_tail": stderr[-1500:], "diag_path": str(diag_path), "diag": diag,
+           "diag_present": diag is not None}
     if diag is None:
-        rec["receipt"] = {"verdict": UNVERIFIABLE, "execution_match": "UNKNOWN", "reason": "diag_missing"}
-        rec["output"] = {"verdict": UNVERIFIABLE, "execution_match": "UNKNOWN", "reason_codes": ["diag_missing"]}
+        rec["receipt"] = {"verdict": UNVERIFIABLE, "execution_match": "UNKNOWN", "reason": reason}
+        rec["output"] = {"verdict": UNVERIFIABLE, "execution_match": "UNKNOWN", "reason_codes": [reason]}
         rec["released"] = False
         return rec
     issued = diag.get("issue_out") or {}
@@ -238,22 +246,117 @@ def consume(b: dict, rec: dict) -> dict:
     return {"decision": "RELEASED", "reasons": [], "display": lines[0]}
 
 
+# ----------------------------------------------------------------------------- acceptance (Astra P1)
+EXPECTED = {"approved": "RELEASED", "sql-substitution": "REFUSED", "declaration-mismatch": "REFUSED"}
+
+
+def accept(c: dict) -> dict:
+    """Did this case reach its intended stage AND produce its specific evidence? A refused consumer decision is not
+    proof that a negative executed: each case must show the stage it was meant to reach and the exact rejection it was
+    meant to trigger. `NOT_REACHED` = infrastructure or upstream failure before the intended stage (fail-closed but
+    unproven); `WRONG` = the stage was reached and the outcome contradicts the expectation; `MET` = as designed."""
+    case = c["case"]
+    failed: list[str] = []
+    not_reached: list[str] = []
+    r = c.get("retrieval") or {}
+    if r.get("status") != "OK" or not r.get("reached"):
+        not_reached.append(f"retrieval status={r.get('status')} reached={r.get('reached')}")
+    if (c.get("declaration") or {}).get("status") != "OK":
+        not_reached.append(f"declaration status={(c.get('declaration') or {}).get('status')}")
+    b, rec, decision = c.get("bind") or {}, c.get("receipt") or {}, (c.get("consume") or {}).get("decision")
+    if case in ("approved", "sql-substitution"):
+        if not not_reached and b.get("status") != "BOUND":
+            failed.append(f"bind status={b.get('status')} (graph and SDK publication disagree)")
+        if not rec.get("invoked"):
+            not_reached.append("receipt not invoked")
+        elif rec.get("exit_code") == -1 or not rec.get("diag_present"):
+            not_reached.append(f"receipt child did not complete: exit_code={rec.get('exit_code')} diag_present={rec.get('diag_present')}")
+    if case == "approved":
+        if rec.get("invoked") and rec.get("diag_present") and rec.get("exit_code") != 0:
+            failed.append(f"exit_code={rec.get('exit_code')} != 0")
+        if decision != "RELEASED":
+            failed.append(f"consume decision={decision} != RELEASED")
+    elif case == "sql-substitution":
+        if decision != "REFUSED":
+            failed.append(f"consume decision={decision}: a substitution was released")
+        if rec.get("invoked") and rec.get("diag_present"):
+            rc, o = rec.get("receipt") or {}, rec.get("output") or {}
+            if rec.get("exit_code") != 2:
+                failed.append(f"exit_code={rec.get('exit_code')} != 2 (the CLI's blocked exit)")
+            for label, v in (("receipt.verdict", rc.get("verdict")), ("output.verdict", o.get("verdict"))):
+                if v != REJECTED:
+                    failed.append(f"{label}={v} != REJECTED")
+            if rc.get("execution_match") != "MISMATCH" or o.get("execution_match") != "MISMATCH":
+                failed.append(f"execution_match={rc.get('execution_match')}/{o.get('execution_match')} != MISMATCH")
+            if "sql_mismatch" not in (o.get("reason_codes") or []):
+                failed.append(f"reason_codes={o.get('reason_codes')} lack sql_mismatch")
+            if rec.get("released"):
+                failed.append("CLI reported released=true on a substitution")
+    elif case == "declaration-mismatch":
+        if decision != "REFUSED":
+            failed.append(f"consume decision={decision}: an unbound declaration was released")
+        if not not_reached:
+            if b.get("status") != "MISMATCH":
+                failed.append(f"bind status={b.get('status')} != MISMATCH")
+            else:
+                bad = {k for k, v in (b.get("checks") or {}).items() if not v.get("ok")}
+                for must in ("file_sha256", "sql_text"):
+                    if must not in bad:
+                        failed.append(f"bind check {must} did not fail: the alternate declaration was not distinguished by content")
+        if rec.get("invoked"):
+            failed.append("receipt invoked on an unbound declaration")
+    else:
+        failed.append(f"unknown case {case}")
+    if failed:
+        return {"status": "WRONG", "expected": EXPECTED.get(case), "failed": failed + not_reached}
+    if not_reached:
+        return {"status": "NOT_REACHED", "expected": EXPECTED.get(case), "failed": not_reached}
+    return {"status": "MET", "expected": EXPECTED.get(case), "failed": []}
+
+
 # ----------------------------------------------------------------------------- identity (live only)
-def same_requester(client: Any, retrieval_job_ids: list[str], receipt_job: Optional[dict]) -> dict:
-    """jobs.get under the operator: the graph leg's jobs and the receipt leg's job must carry one user_email."""
-    if not receipt_job or not receipt_job.get("job_id"):
-        return {"status": "UNKNOWN", "reason": "no receipt job id"}
+def job_ids_of(cases: list[dict]) -> dict:
+    """Every job the chain submitted: retrieval jobs and the declaration job of each case (graph leg) and every
+    receipt job (SDK leg). The identity claim covers all of them, not a capped sample (Astra P2 #4)."""
+    graph: list[str] = []
+    receipt: list[dict] = []
+    for c in cases:
+        for j in ((c.get("retrieval") or {}).get("timing") or {}).get("jobs", []) or []:
+            if j.get("job_id"):
+                graph.append(j["job_id"])
+        d = c.get("declaration") or {}
+        if d.get("job_id"):
+            graph.append(d["job_id"])
+        rec = c.get("receipt") or {}
+        job = (rec.get("receipt") or {}).get("job") if rec.get("invoked") else None
+        if job and job.get("job_id"):
+            receipt.append(job)
+    return {"graph": graph, "receipt": receipt}
+
+
+def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dict]) -> dict:
+    """jobs.get under the operator: every graph-leg job and every receipt-leg job must carry one KNOWN user_email.
+    Nothing to compare, an unreadable job, or a missing identity is UNKNOWN (never SAME); more than one identity is
+    DIFFERENT."""
+    receipt_ids = [j for j in receipt_jobs if j.get("job_id")]
+    if not graph_job_ids or not receipt_ids:
+        return {"status": "UNKNOWN", "reason": f"nothing to compare: graph_jobs={len(graph_job_ids)} receipt_jobs={len(receipt_ids)}"}
+    emails: dict[str, Any] = {}
     try:
-        emails = {}
-        for jid in retrieval_job_ids[:3]:
+        for jid in graph_job_ids:
             emails[jid] = client.get_job(jid, project=PROJECT, location=LOCATION).user_email
-        rj = client.get_job(receipt_job["job_id"], project=receipt_job.get("project", PROJECT), location=receipt_job.get("location", LOCATION))
-        emails[receipt_job["job_id"]] = rj.user_email
+        for job in receipt_ids:
+            emails[job["job_id"]] = client.get_job(job["job_id"], project=job.get("project", PROJECT), location=job.get("location", LOCATION)).user_email
     except Exception as e:  # noqa: BLE001 - unknown identity blocks the claim, never invents it
-        return {"status": "UNKNOWN", "reason": f"{type(e).__name__}: {str(e)[:200]}"}
+        return {"status": "UNKNOWN", "reason": f"{type(e).__name__}: {str(e)[:200]}", "jobs_compared": len(emails)}
+    missing = [jid for jid, em in emails.items() if not em]
+    if missing:
+        return {"status": "UNKNOWN", "reason": f"identity missing on {len(missing)} job(s): equality of absent identities proves nothing",
+                "jobs": emails, "jobs_compared": len(emails)}
     distinct = sorted(set(emails.values()))
-    return {"status": "SAME" if len(distinct) == 1 and retrieval_job_ids else "DIFFERENT", "user_email": distinct,
-            "jobs": emails, "note": "operator ADC on both legs; the restricted SA is not exercised in this chain"}
+    return {"status": "SAME" if len(distinct) == 1 else "DIFFERENT", "user_email": distinct, "jobs": emails,
+            "jobs_compared": len(emails), "graph_jobs": len(graph_job_ids), "receipt_jobs": len(receipt_ids),
+            "note": "operator ADC on both legs; the restricted SA is not exercised in this chain"}
 
 
 # ----------------------------------------------------------------------------- whole chain
@@ -265,21 +368,29 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
               requester: Any = None, as_of: Optional[str] = None, runner: Runner = subprocess.run, cases: tuple = CASES,
               acme_root: Optional[str] = None) -> dict:
     from .authz import operator, redact
+    if live and engine == "oracle":
+        raise ValueError("live mode needs a BigQuery graph engine (fallback|gql): oracle + SDK --live is not a mode")
+    if not live and engine != "oracle":
+        raise ValueError("hermetic mode uses the oracle engine only")
     as_of = as_of or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     mode = "live" if live else "hermetic"
-    out = {"chain": "okf_bq_graph.chain/0.1.0", "mode": mode, "engine": engine, "started_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+    out = {"chain": "okf_bq_graph.chain/0.2.0", "mode": mode, "engine": engine, "started_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
            "as_of": as_of, "bundle_id": BUNDLE_ID, "source_pin": SOURCE_PIN,
            "seed": {"mode": "fixture", "query": SEED, "note": "forced seed: harness-only deterministic override, not a semantic ranking; "
                                                                 "live Knowledge Catalog discovery is out of scope for this chain"},
-           "requester": {"mode": "same-requester", "note": "graph leg and receipt leg both under the operator's ADC credential"}}
+           "requester": {"mode": "same-requester", "note": "graph leg and receipt leg both under the operator's ADC credential"},
+           "verdict_rule": "CHAIN_CONNECTED only when provenance pins hold, every case is MET (reached its stage with its specific "
+                           "evidence) and, live, every submitted job carries one known user_email; CHAIN_INCOMPLETE when a case never "
+                           "reached its stage; CHAIN_BROKEN when a reached stage contradicts the expectation or a pin fails"}
     # SDK pin
     try:
         sdk_pub = sdk_publication(sdk_root)
     except (OSError, ValueError, KeyError) as e:
-        out["sdk"] = _stage_error(e); out["verdict"] = "CHAIN_BROKEN"; out["broken_at"] = "sdk"
+        out["sdk"] = _stage_error(e); out["verdict"] = "CHAIN_BROKEN"; out["broken_at"] = "sdk"; out["cases"] = []
         return _finish(out, out_dir, mode, redact)
     out["sdk"] = {"root": sdk_root, "head": sdk_pub["sdk_head"], "pin": SDK_PIN, "head_matches_pin": sdk_pub["sdk_head_matches_pin"],
-                  "example_dirty": sdk_pub["sdk_dirty"], "publication_id": sdk_pub["manifest"]["publication_id"],
+                  "example_dirty": sdk_pub["sdk_dirty"], "repo_dirty": sdk_pub["sdk_repo_dirty"],
+                  "publication_id": sdk_pub["manifest"]["publication_id"],
                   "computation_sha256": sdk_pub["computation_sha256"], "computation_digest": sdk_pub["computation_digest"],
                   "synthetic_fixture": bool(sdk_pub["manifest"].get("synthetic")), "invocation": "subprocess run.py (no SDK source edits)"}
     # clients + requester
@@ -310,12 +421,21 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     if not pub:
         out["verdict"] = "CHAIN_BROKEN"; out["broken_at"] = "publication"; out["cases"] = []
         return _finish(out, out_dir, mode, redact)
+    # provenance gate (Astra P2 #2): nothing executes on an unknown or mismatched pin
+    prov = {"publication_pin": out["publication"]["matches_pin"], "sdk_head_pin": bool(sdk_pub["sdk_head_matches_pin"]),
+            "sdk_clean": sdk_pub["sdk_repo_dirty"] is False, "sdk_git_state_known": sdk_pub["sdk_repo_dirty"] is not None}
+    prov["ok"] = prov["publication_pin"] and prov["sdk_head_pin"] and prov["sdk_clean"]
+    out["provenance"] = prov
+    if not prov["ok"]:
+        out["verdict"] = "CHAIN_BROKEN"; out["broken_at"] = "provenance"; out["cases"] = []
+        out["same_requester"] = {"status": "NOT_RUN", "reason": "provenance gate refused before any job"}
+        return _finish(out, out_dir, mode, redact)
 
     def graph_leg(seed: str, path: str) -> tuple[dict, Optional[dict], Optional[dict]]:
         try:
             r = governed(seed, pub, requester, as_of, clients)
         except Exception as e:  # noqa: BLE001 - e.g. GQL without an Enterprise window
-            return {"retrieval": dict(_stage_error(e), seed=seed)}, None, None
+            return {"retrieval": dict(_stage_error(e), seed=seed, reached=False)}, None, None
         rec = {"retrieval": {"seed": seed, "status": r["status"], "warnings": r.get("warnings", []), "scope": r.get("scope"),
                              "concepts": [c.get("concept") for c in r.get("concepts", [])],
                              "paths": r.get("paths", []), "computations": [c.get("path") for c in r.get("computations", [])],
@@ -337,19 +457,14 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
 
     out["cases"] = []
     receipt_dir = str(Path(out_dir) / "receipt")
-    retrieval_job_ids: list[str] = []
-    receipt_job = None
     for case in cases:
         seed, path = (MISMATCH_SEED, MISMATCH_PATH) if case == "declaration-mismatch" else (SEED, COMPUTATION_PATH)
-        c: dict[str, Any] = {"case": case}
+        c: dict[str, Any] = {"case": case, "expected": EXPECTED.get(case)}
         c["attack"] = {"approved": None,
                        "sql-substitution": "SDK case: agent executes a product-cost-only formula for the approved request and claims 600 (executed-SQL swap)",
                        "declaration-mismatch": "graph-side swap: a different reachable Attested Computation (revenue-ytd) is offered in place of the bound one"}[case]
         leg, comp, decl = graph_leg(seed, path)
         c.update(leg)
-        for j in (leg.get("retrieval", {}).get("timing") or {}).get("jobs", []):
-            if j.get("job_id"):
-                retrieval_job_ids.append(j["job_id"])
         if comp is None or decl is None or decl.get("status") != "OK":
             c["bind"] = {"status": "NOT_BOUND", "reason": "computation not reached or declaration not visible"}
         else:
@@ -358,26 +473,28 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             sdk_case = "sql-substitution" if case == "sql-substitution" else "approved"
             c["receipt"] = run_receipt(sdk_case, sdk_root, receipt_dir, live, runner=runner)
             c["receipt"]["diag"] = None if c["receipt"].get("diag") is None else f"see {c['receipt']['diag_path']}"
-            if case == "approved":
-                receipt_job = (c["receipt"].get("receipt") or {}).get("job")
         else:
             c["receipt"] = {"invoked": False, "reason": "bind did not hold: nothing was executed"}
         c["consume"] = consume(c["bind"], c["receipt"])
+        c["acceptance"] = accept(c)
         out["cases"].append(c)
-    decisions = {c["case"]: c["consume"]["decision"] for c in out["cases"]}
-    expected = {"approved": "RELEASED", "sql-substitution": "REFUSED", "declaration-mismatch": "REFUSED"}
-    connected = all(decisions.get(k) == v for k, v in expected.items() if k in cases)
-    out["expected"] = {k: v for k, v in expected.items() if k in cases}
-    out["decisions"] = decisions
-    if live and clients.get("bq") is not None:
-        out["same_requester"] = same_requester(clients["bq"], retrieval_job_ids, receipt_job)
-        if out["same_requester"]["status"] != "SAME":
-            connected = False
+    out["decisions"] = {c["case"]: c["consume"]["decision"] for c in out["cases"]}
+    out["acceptance"] = {c["case"]: c["acceptance"]["status"] for c in out["cases"]}
+    ids = job_ids_of(out["cases"])
+    if live:
+        out["same_requester"] = same_requester(clients["bq"], ids["graph"], ids["receipt"])
     else:
-        out["same_requester"] = {"status": "NOT_APPLICABLE", "reason": "hermetic: oracle graph + SYNTHETIC receipt emulation, no jobs"}
-    out["verdict"] = "CHAIN_CONNECTED" if connected else "CHAIN_BROKEN"
-    if not connected:
-        out["broken_at"] = next((c["case"] for c in out["cases"] if decisions[c["case"]] != expected.get(c["case"])), "same_requester")
+        out["same_requester"] = {"status": "NOT_APPLICABLE", "reason": "hermetic mode: oracle graph + SDK SYNTHETIC emulation submit no BigQuery jobs"}
+    statuses = [c["acceptance"]["status"] for c in out["cases"]]
+    if any(s == "WRONG" for s in statuses) or (live and out["same_requester"]["status"] == "DIFFERENT"):
+        out["verdict"] = "CHAIN_BROKEN"
+    elif any(s == "NOT_REACHED" for s in statuses) or (live and out["same_requester"]["status"] != "SAME"):
+        out["verdict"] = "CHAIN_INCOMPLETE"
+    else:
+        out["verdict"] = "CHAIN_CONNECTED"
+    if out["verdict"] != "CHAIN_CONNECTED":
+        out["broken_at"] = next((c["case"] for c in out["cases"] if c["acceptance"]["status"] == "WRONG"),
+                                next((c["case"] for c in out["cases"] if c["acceptance"]["status"] == "NOT_REACHED"), "same_requester"))
     return _finish(out, out_dir, mode, redact)
 
 
@@ -403,15 +520,20 @@ def main(argv: Optional[list[str]] = None) -> int:
     if a.live and a.hermetic:
         ap.error("--live and --hermetic are exclusive")
     live = bool(a.live)
-    engine = (a.engine or "fallback") if live else "oracle"
+    if live and a.engine == "oracle":
+        ap.error("--live needs --engine fallback|gql: the oracle engine submits no jobs, so a live identity claim cannot be made")
     if not live and a.engine not in (None, "oracle"):
         ap.error("--engine other than oracle requires --live")
+    engine = (a.engine or "fallback") if live else "oracle"
     out = run_chain(engine=engine, live=live, sdk_root=a.sdk_root, out_dir=a.out, as_of=a.as_of, acme_root=a.acme_root)
     for c in out.get("cases", []):
-        print(f"{c['case']:22s} bind={c.get('bind', {}).get('status'):9s} receipt={(c.get('receipt') or {}).get('output', {}).get('verdict', 'NOT_INVOKED') if (c.get('receipt') or {}).get('invoked') else 'NOT_INVOKED':13s} "
-              f"consume={c['consume']['decision']}" + (f" reasons={'; '.join(c['consume']['reasons'])[:160]}" if c['consume']['reasons'] else ""))
-    print(f"same_requester={out.get('same_requester', {}).get('status')} engine={out['engine']} mode={out['mode']} "
-          f"sdk_head={str(out.get('sdk', {}).get('head'))[:7]} pin_ok={out.get('sdk', {}).get('head_matches_pin')}")
+        rec = c.get("receipt") or {}
+        rv = (rec.get("output") or {}).get("verdict", "NOT_INVOKED") if rec.get("invoked") else "NOT_INVOKED"
+        acc = c.get("acceptance", {})
+        print(f"{c['case']:22s} bind={c.get('bind', {}).get('status'):9s} receipt={rv:13s} consume={c['consume']['decision']:8s} "
+              f"acceptance={acc.get('status')}" + (f" failed={'; '.join(acc.get('failed', []))[:200]}" if acc.get("failed") else ""))
+    print(f"provenance_ok={out.get('provenance', {}).get('ok')} same_requester={out.get('same_requester', {}).get('status')} "
+          f"engine={out['engine']} mode={out['mode']} sdk_head={str(out.get('sdk', {}).get('head'))[:7]}")
     print(f"verdict={out['verdict']}" + (f" broken_at={out.get('broken_at')}" if out['verdict'] != 'CHAIN_CONNECTED' else ""))
     return 0 if out["verdict"] == "CHAIN_CONNECTED" else 1
 

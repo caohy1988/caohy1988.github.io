@@ -158,11 +158,14 @@ independently verifies → consumer releases only on VERIFIED with the receipt's
 bytes. Hermetic (oracle graph engine + SDK SYNTHETIC emulation): **CHAIN_CONNECTED** — `approved` RELEASED, the SDK's
 `sql-substitution` REFUSED (`REJECTED sql_mismatch`, no number), `declaration-mismatch` (revenue-ytd offered instead) REFUSED
 before any execution (`evidence/chain/chain_hermetic.json`). Live (relational fallback engine, on-demand, not BigQuery
-Graph; SDK `--live`, 2026-09-06 21:35Z, one foreground pass, `evidence/chain/chain_live.json`): **CHAIN_CONNECTED** — pointer
-= pin, one-hop reach in 2.4 s (three on-demand jobs + one declaration job), all ten bind checks hold, receipt job
-`okf_rcpt_b30edb60…` VERIFIED / MATCH under the operator's credential, consumer RELEASED `$400.00 USD` on the SDK's synthetic
-fixture dataset, both substitutions REFUSED, `same_requester = SAME` (`jobs.get user_email` identical on the graph jobs and
-the receipt job), 21 s end to end. This is the connected **publication → retrieval → execution → receipt → consumer** path
+Graph; SDK `--live`, 2026-09-06 21:52Z, one foreground pass, `evidence/chain/chain_live.json`): **CHAIN_CONNECTED** —
+provenance gate ok (pointer = pin, SDK head = pin, checkout clean), one-hop reach in 2.2 s (three on-demand jobs + one
+declaration job per case), all ten bind checks hold, receipt job `okf_rcpt_fbec89a0…` VERIFIED / MATCH under the operator's
+credential, consumer RELEASED `$400.00 USD` on the SDK's synthetic fixture dataset, both substitutions REFUSED with their
+acceptance `MET` (the negative reached its stage and produced its specific rejection: `sql_mismatch` at exit 2; bind
+MISMATCH on file digest and SQL text with the CLI never invoked), `same_requester = SAME` (`jobs.get user_email` one known
+identity over all 14 submitted jobs: 12 graph + 2 receipt), 23 s end to end. The 21:35Z pass at `cef88d7` reached the same
+decisions under a weaker rule (refusal alone counted, three-job identity sample) and was re-run under the current rule. This is the connected **publication → retrieval → execution → receipt → consumer** path
 under one requester on the relational engine; it is not connected KC discovery (fixture seed), not the GQL engine, and not
 a second principal, so the combined-delivery verdict in the outcome section is for the JOINT checkpoint to revise, not this
 addendum.

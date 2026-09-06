@@ -30,6 +30,7 @@ bind to the SDK receipt example's pinned publication (file SHA-256, SQL text, pa
 (operator ADC; the restricted SA is not exercised). Hermetic (oracle graph + SDK SYNTHETIC emulation): `CHAIN_CONNECTED`,
 `approved` RELEASED, `sql-substitution` REFUSED (`REJECTED sql_mismatch`), `declaration-mismatch` REFUSED before any
 execution (`chain_hermetic.json`). Live (relational fallback engine, on-demand, not BigQuery Graph; SDK `--live` real jobs
-on the synthetic fixture dataset, 2026-09-06 21:35Z, one foreground pass, `chain_live.json`): `CHAIN_CONNECTED` — the same
-three decisions, `same_requester = SAME` by `jobs.get user_email` on the three graph jobs and the receipt job, 21 s end to end. The seed is a fixture: this is a connected
+on the synthetic fixture dataset, 2026-09-06 21:52Z, one foreground pass, `chain_live.json`): `CHAIN_CONNECTED` — the same
+three decisions, each case's acceptance `MET` (reached its stage with its specific evidence, not merely refused), provenance
+gate ok, `same_requester = SAME` by `jobs.get user_email` over all 14 submitted jobs (12 graph + 2 receipt), 23 s end to end. The seed is a fixture: this is a connected
 **publication → retrieval → execution → receipt → consumer** path, not connected KC discovery, which stays unproven.
