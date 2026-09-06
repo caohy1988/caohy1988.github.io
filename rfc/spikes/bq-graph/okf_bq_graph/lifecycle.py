@@ -18,12 +18,30 @@ from pathlib import Path
 
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
+from google.cloud.bigquery import Client as BigQueryClient
 
 from . import PROJECT, LOCATION
 
 
 class WindowStopped(RuntimeError):
     pass
+
+
+class _ResultHTTP:
+    """Recheck at actual HTTP dispatch, after SDK request preparation."""
+    def __init__(self, raw, remaining):
+        self.raw, self.remaining = raw, remaining
+
+    def __getattr__(self, name):
+        return getattr(self.raw, name)
+
+    def request(self, *args, **kwargs):
+        remaining = self.remaining()
+        requested = kwargs.get("timeout")
+        kwargs["timeout"] = min(1, remaining, requested if isinstance(requested, (int, float)) else 1)
+        response = self.raw.request(*args, **kwargs)
+        self.remaining()
+        return response
 
 
 @contextmanager
@@ -132,6 +150,8 @@ class WindowJobs:
                 self._cancelled[job_id] = result
                 if result["verified_done"]:
                     self.finished(job_id)
+            with self._lock:
+                _save_cleanup(self.journal, json.loads(self.journal.read_text()), list(self._cancelled.values()))
             return list(self._cancelled.values())
 
 
@@ -152,6 +172,7 @@ class WindowClient:
 class WindowJob:
     def __init__(self, job, window, job_id, is_query):
         self.raw, self.window, self.job_id, self.is_query = job, window, job_id, is_query
+        self._query_client = job._client if isinstance(job, bigquery.QueryJob) else None
 
     def __getattr__(self, name):
         return getattr(self.raw, name)
@@ -170,6 +191,32 @@ class WindowJob:
         kwargs["retry"] = None
         if self.is_query:
             kwargs["job_retry"] = None
+            if self._query_client is not None:
+                # QueryJob.result raises getQueryResults RPC timeouts to >=120s.
+                # Bind a job-local client AFTER that conversion, at _call_api.
+                # RowIterator retains this client for every lazy page. Never
+                # mutate the shared client used for other jobs or cancellation.
+                client = BigQueryClient(project=self._query_client.project,
+                                        location=self._query_client.location,
+                                        credentials=self._query_client._credentials,
+                                        client_options={"api_endpoint": self._query_client._connection.API_BASE_URL},
+                                        _http=_ResultHTTP(self._query_client._http, lambda: self._remaining(end)))
+                raw_call = client._call_api
+
+                def call_api(retry, **rpc):
+                    remaining = self._remaining(end)
+                    requested = rpc.get("timeout")
+                    rpc["timeout"] = min(1, remaining, requested if isinstance(requested, (int, float)) else 1)
+                    if "/queries/" in rpc.get("path", ""):
+                        params = dict(rpc.get("query_params") or {})
+                        params["timeoutMs"] = min(params.get("timeoutMs", 1000), int(rpc["timeout"] * 1000))
+                        rpc["query_params"] = params
+                    response = raw_call(None, **rpc)  # disable hidden retry/backoff on every page
+                    self._remaining(end)  # discard a response arriving after stop
+                    return response
+
+                client._call_api = call_api
+                self.raw._client = client
         while True:
             self._check()
             remaining = end - time.monotonic()
@@ -187,12 +234,31 @@ class WindowJob:
                     result = self.raw.result(timeout=0, **kwargs)  # already DONE; preserves SDK job errors
                 self.window.finished(self.job_id)
                 self._check()
-                return result
+                return self._rows(result, end) if self.is_query else result
             except TimeoutError:
                 continue
             except (KeyboardInterrupt, SystemExit):
                 self.window.stop_and_cancel()
                 raise
+
+    def _remaining(self, end):
+        self.window.check()
+        remaining = end - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("job result timeout")
+        return remaining
+
+    def _rows(self, rows, end):
+        # Guard buffered rows too, including the SDK's cached first page.
+        iterator = iter(rows)
+        while True:
+            self._remaining(end)
+            try:
+                row = next(iterator)
+            except StopIteration:
+                return
+            self._remaining(end)
+            yield row
 
 
 def cancel_journal(client, label: str, path: str | Path) -> list[dict]:
@@ -200,4 +266,35 @@ def cancel_journal(client, label: str, path: str | Path) -> list[dict]:
     if journal["label"] != label or journal["project"] != PROJECT or journal["location"] != LOCATION:
         raise ValueError("job journal does not belong to this reservation window")
     finished = set(journal.get("finished_job_ids", []))
-    return cancel_jobs(client, [i for i in journal["job_ids"] if i not in finished])
+    results = cancel_jobs(client, [i for i in journal["job_ids"] if i not in finished])
+    _save_cleanup(Path(path), journal, results)
+    return results
+
+
+def _save_cleanup(path: Path, journal: dict, results: list[dict]):
+    """Separate receipt: a late watcher never rewrites the driver's job inventory."""
+    done = set(journal.get("finished_job_ids", []))
+    done.update(r["job_id"] for r in results if r.get("verified_done"))
+    receipt = {"label": journal["label"], "project": journal["project"], "location": journal["location"],
+               "job_ids": journal["job_ids"], "verified_done_job_ids": sorted(done), "jobs": results,
+               "verified": set(journal["job_ids"]) <= done}
+    target = path.with_suffix(".cleanup.json")
+    tmp = target.with_suffix(f".{os.getpid()}.{threading.get_ident()}.tmp")
+    tmp.write_text(json.dumps(receipt, indent=2))
+    os.replace(tmp, target)
+
+
+def job_cleanup_verified(label: str, path: str | Path) -> bool:
+    """Missing/legacy/mismatched evidence cannot authorize another paid window."""
+    try:
+        path = Path(path)
+        journal = json.loads(path.read_text())
+        receipt = json.loads(path.with_suffix(".cleanup.json").read_text())
+        return (all(isinstance(j, dict) and j.get("label") == label and j.get("project") == PROJECT and j.get("location") == LOCATION
+                    for j in (journal, receipt)) and receipt.get("verified") is True
+                and all(isinstance(ids, list) and all(isinstance(i, str) and i for i in ids)
+                        for ids in (journal["job_ids"], receipt["job_ids"], receipt["verified_done_job_ids"]))
+                and set(journal["job_ids"]) == set(receipt["job_ids"])
+                and set(journal["job_ids"]) <= set(receipt["verified_done_job_ids"]))
+    except (OSError, ValueError, KeyError, TypeError):
+        return False

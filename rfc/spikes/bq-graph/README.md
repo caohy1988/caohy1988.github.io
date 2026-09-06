@@ -82,11 +82,30 @@ and in the temporary reservation `okf-graph-spike-20260905` (Enterprise, 0 basel
 which is created only inside a measured window and deleted at its end (`evidence/cleanup_manifest.json`).
 
 Deadline cleanup uses one admission gate for all driver query/load clients. Jobs have explicit window IDs journaled in
-`evidence/jobs_<window>.json` before submission. Interrupt handlers only stop admission and unwind; executor cleanup
-cancels jobs before waiting for workers, then the driver deletes capacity with strict readback. The independent watcher
-uses the same Python interpreter, retries the original window label, and appends diagnostics to
-`evidence/watcher_<window>.jsonl`. It does not rewrite the shared manifest after cleanup, so a late watcher cannot erase
-a newer window. Already verified original windows retain their existing deletion receipt.
+`evidence/jobs_<window>.json` before submission. Query results use a job-local SDK client: both API entry and actual HTTP
+dispatch enforce the remaining deadline, disable SDK retries, and cap RPC timeouts at one second. Every lazy page and
+buffered row checks stop/deadline; late responses are discarded. The private SDK adapter is tested with real
+Client/QueryJob/RowIterator objects and pins BigQuery **3.45.0**; revalidate it before changing that dependency.
+
+Interrupt handlers only stop admission and unwind. The driver's watchdog starts capacity deletion on stop/deadline
+independently of result I/O, executor joins and cancellation. The offline blocked-page regression requires deletion
+to start within 0.5 seconds of the deadline while the HTTP call is still blocked. This is a local scheduling assertion,
+not a measured cloud deletion SLA: individual `bq` commands still have their own 30-second limits. Workers are joined
+before driver completion. The detached watcher closes capacity first, then reconciles jobs and records diagnostics in
+`evidence/watcher_<window>.jsonl`. Open/close operations share a process-safe manifest lock; verified original capacity
+receipts remain valid when the reservation name is reused.
+
+Capacity deletion and job cleanup have separate receipts. Both preflight and `open_window` require a verified
+`evidence/jobs_<window>.cleanup.json` matching the complete journal inventory before opening another window. Failed,
+missing, stale or malformed job receipts block admission even when capacity is `CLOSED_VERIFIED`. The watcher retries
+job reconciliation without rewriting the driver journal or the valid capacity receipt. Legacy windows with no job
+journal remain blocked until their job inventory is explicitly reconciled; historical capacity receipts alone do not
+prove this. No legacy receipt was upgraded and no cloud workload was run in fix pass 3.
+
+The fallback walk requires visible node rows from the pinned publication at each endpoint before extending either hop.
+Offline execution of the shipped SQL covers a hidden intermediate with both edges still visible and an intermediate
+from another publication. This repairs the conditional authorization defect; fallback governance remains unmeasured
+live and existing G6/G7 uncertainty labels remain unchanged.
 
 A new measurement run preserves previous run summaries and requires a fresh `run_id`; raw attempts retain that ID.
 Run `partial` to recover interrupted cells. It refreshes incomplete rows without merging separate runs or promoting

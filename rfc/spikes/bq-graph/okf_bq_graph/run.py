@@ -19,7 +19,7 @@ from .compile import compile_bundle
 from .model import sha256_text
 from .oracle import Graph
 from .publish import resolve_pointer
-from .reservation import open_window, close_window
+from .reservation import open_window, close_window, require_clean_windows
 from .retrieve import retrieve, impact, stub_backlog
 from .benchmark import measure
 from .lifecycle import WindowJobs, WindowClient, WindowStopped, window_executor
@@ -329,6 +329,11 @@ def main(argv: list[str]) -> int:
         manifest = json.loads(Path("evidence/cleanup_manifest.json").read_text())
     except FileNotFoundError:
         manifest = {"windows": []}
+    try:
+        require_clean_windows(manifest)
+    except RuntimeError as exc:
+        print(str(exc), flush=True)
+        return 1
     for w in manifest["windows"]:
         if not w.get("opened_at"):
             continue
@@ -360,12 +365,28 @@ def main(argv: list[str]) -> int:
         raise KeyboardInterrupt(f"signal {signum}")
 
     old_handlers = {sig: signal.signal(sig, _interrupt) for sig in (signal.SIGTERM, signal.SIGINT)}
+    provisioning_finished = threading.Event()
+    close_lock = threading.Lock()
+
+    def close_capacity():
+        # Neither result I/O, worker joins nor job cancellation owns this lock.
+        # Serialize this driver's closers; reservation.py also serializes the
+        # detached watcher across processes.
+        with close_lock:
+            if out.get("window_close", {}).get("verified_gone"):
+                return
+            try:
+                out["window_close"] = {k: v for k, v in close_window(label).items() if k != "steps"}
+            except Exception:
+                out["window_close"] = {"verified_gone": False, "error": traceback.format_exc()}
 
     def watchdog():
-        if not window.stop.wait(max(0, deadline - time.monotonic())):
-            print("WATCHDOG: deadline reached; stopping submissions and cancelling jobs", flush=True)
+        if not window.stop.wait(max(0, window.deadline - time.monotonic())):
+            print("WATCHDOG: deadline reached; stopping submissions and closing capacity", flush=True)
             out["deadline_reached"] = True
-            window.stop_and_cancel()
+        window.stop.set()
+        provisioning_finished.wait()
+        close_capacity()  # starts even while a worker is stuck in uncancellable HTTP
 
     deadline_thread = threading.Thread(target=watchdog, daemon=True)
     deadline_thread.start()
@@ -377,7 +398,10 @@ def main(argv: list[str]) -> int:
                              stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
         out["safety_watcher"] = "spawned"
         window.check()
-        w = open_window(label)
+        try:
+            w = open_window(label)
+        finally:
+            provisioning_finished.set()
         out["window_open"] = {"opened_at": w["opened_at"], "state": w.get("state")}
         window.check()
         pub = resolve_pointer(client, BUNDLE_ID)
@@ -423,12 +447,11 @@ def main(argv: list[str]) -> int:
         # Repeated signals must not interrupt cancellation or reservation readback.
         for sig in old_handlers:
             signal.signal(sig, signal.SIG_IGN)
+        window.stop.set()
+        provisioning_finished.set()
+        close_capacity()
         out["job_cancellation"] = window.stop_and_cancel()
         deadline_thread.join()
-        try:
-            out["window_close"] = {k: v for k, v in close_window(label).items() if k != "steps"}
-        except Exception:
-            out["window_close"] = {"verified_gone": False, "error": traceback.format_exc()}
         out["finished_at"] = _now()
         Path(f"evidence/{mode}_{label}.json").write_text(json.dumps(out, indent=1, default=str))
         for sig, handler in old_handlers.items():

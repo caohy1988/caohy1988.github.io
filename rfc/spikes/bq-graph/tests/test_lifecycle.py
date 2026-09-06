@@ -144,6 +144,21 @@ def test_load_jobs_are_journaled_and_cancelled(tmp_path):
     assert events == ["load", "cancel", "readback"]
 
 
+def test_watcher_closes_capacity_before_job_cancellation_io(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / 'evidence').mkdir()
+    events = []
+    monkeypatch.setattr(safety, 'close_window', lambda *a, **kw: events.append('close') or {'verified_gone': True})
+    monkeypatch.setattr(safety.bigquery, 'Client', lambda **kw: object())
+    def cancel(*args):
+        assert events == ['close']
+        events.append('cancel')
+        return []
+    monkeypatch.setattr(safety, 'cancel_journal', cancel)
+    assert safety.cleanup('old', attempts=1)
+    assert events == ['close', 'cancel']
+
+
 @pytest.mark.parametrize("recover", [False, True])
 def test_actual_shell_watcher_retries_failed_inventory_with_original_label(tmp_path, recover):
     root = Path(__file__).resolve().parents[1]
@@ -380,7 +395,7 @@ def test_invalid_job_journal_does_not_skip_capacity_cleanup_or_claim_success(mon
 
     def close(label, **kwargs):
         calls.append(label)
-        if recover:
+        if recover and len(calls) == 2:
             path.write_text(json.dumps(journal))
         return {"verified_gone": True}
 

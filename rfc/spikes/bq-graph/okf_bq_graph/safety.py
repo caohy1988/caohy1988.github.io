@@ -13,18 +13,18 @@ from .reservation import close_window
 def cleanup(label: str, attempts: int = 3, retry_seconds: float = 15) -> bool:
     for attempt in range(attempts):
         errors = []
-        try:
-            client = bigquery.Client(project=PROJECT, location=LOCATION)
-            jobs = cancel_journal(client, label, f"evidence/jobs_{label}.json")
-        except Exception as exc:
-            jobs = [{"verified_done": False, "error": f"{type(exc).__name__}: {exc}"[:300]}]
-        # Cost control still tears down capacity if cancellation cannot be verified;
-        # the outstanding job evidence is retained and this process returns failure.
+        # Capacity deletion must not wait for job cancellation I/O. The separate
+        # job-cleanup gate prevents reopening until cancellation is verified.
         try:
             gone = close_window(label, closer="safety-watcher")["verified_gone"]
         except Exception as exc:
             gone = False
             errors.append(f"cleanup raised {type(exc).__name__}: {exc}"[:300])
+        try:
+            client = bigquery.Client(project=PROJECT, location=LOCATION)
+            jobs = cancel_journal(client, label, f"evidence/jobs_{label}.json")
+        except Exception as exc:
+            jobs = [{"verified_done": False, "error": f"{type(exc).__name__}: {exc}"[:300]}]
         receipt = {"label": label, "closer": "safety-watcher", "attempt": attempt + 1,
                    "verified_gone": gone, "jobs": jobs, "errors": errors}
         try:

@@ -9,14 +9,32 @@ Zero baseline, no idle-slot borrowing, autoscale max 100. Pay-as-you-go.
 from __future__ import annotations
 
 import datetime as _dt
+import fcntl
+from functools import wraps
 import json
 import os
 import subprocess
 from typing import Optional
+from pathlib import Path
 
 from . import PROJECT, LOCATION, RESERVATION
+from .lifecycle import job_cleanup_verified
 
 MANIFEST = "evidence/cleanup_manifest.json"
+
+
+def _serialized(fn):
+    @wraps(fn)
+    def locked(*args, **kwargs):
+        # Coordinate driver watchdog, foreground cleanup and detached processes.
+        # Read the manifest only AFTER acquiring the lock, including open gates.
+        with open(f"{MANIFEST}.lock", "a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            try:
+                return fn(*args, **kwargs)
+            finally:
+                fcntl.flock(lock, fcntl.LOCK_UN)
+    return locked
 
 
 def _now() -> str:
@@ -63,10 +81,18 @@ def _parse_list(step: dict) -> Optional[list]:
         return None
 
 
-def open_window(label: str, max_slots: int = 100) -> dict:
-    m = _load()
+def require_clean_windows(m: dict):
     if any(w.get("opened_at") and not w.get("verified_gone") for w in m["windows"]):
         raise RuntimeError("an earlier reservation window is outstanding; verify its cleanup before opening another")
+    for w in m["windows"]:
+        if w.get("opened_at") and not job_cleanup_verified(w["label"], Path(MANIFEST).parent / f'jobs_{w["label"]}.json'):
+            raise RuntimeError(f'job cleanup is unverified for {w["label"]}; reconcile its journal before opening another')
+
+
+@_serialized
+def open_window(label: str, max_slots: int = 100) -> dict:
+    m = _load()
+    require_clean_windows(m)
     w = {"label": label, "opened_at": _now(), "steps": [], "max_slots": max_slots, "state": "OPENING"}
     m["windows"].append(w)
     _save(m)
@@ -94,6 +120,7 @@ def open_window(label: str, max_slots: int = 100) -> dict:
     return w
 
 
+@_serialized
 def close_window(label: str, closer: str = "driver") -> dict:
     m = _load()
     w = next((x for x in reversed(m["windows"]) if x["label"] == label), None)
