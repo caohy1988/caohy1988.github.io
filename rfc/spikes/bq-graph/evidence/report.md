@@ -375,3 +375,28 @@ decisions under a weaker rule (refusal alone counted, three-job identity sample)
 under one requester on the relational engine; it is not connected KC discovery (fixture seed), not the GQL engine, and not
 a second principal, so the combined-delivery verdict in the outcome section is for the JOINT checkpoint to revise, not this
 addendum.
+
+## Addendum 2026-09-06 (later): restricted requester, hermetic only (Slice A)
+
+`chain.py --requester restricted` runs both legs of the connected chain through a requester broker for
+`sa:okf-receipt-restricted` (`okf_bq_graph/principal.py`) instead of the operator, with four cases graded by the same
+stage-reachability rule as the chain above (`MET` only when the case reached its stage and produced its specific
+evidence). Hermetic result (runner `chain/0.5.0`, `evidence/chain/chain_hermetic_restricted.json`): **CHAIN_CONNECTED** —
+`approved-restricted` reached, bound, authorized, executed and RELEASED; `denied-intermediate` (row policy hides
+`metrics/gross-margin`, seed `metrics/gross-margin-legacy` whose only path runs through it) retrieval OK with the seed
+visible, no path, no computation, hidden id absent from the full result and every surface the requester received (the
+harness's own policy record names it by design), bind NOT_REACHED
+(`retrieval_denied`), CLI never invoked, REFUSED; `unauthorized-output` (seed and declaration visible, no read on the SDK
+fixture's dependency tables) reached and bound, then the new pre-execution authorization probe under the requester's own
+credential returned DENIED on all seven dependency tables, CLI never invoked, REFUSED naming the denial;
+`revocation-before-replay` released once (cache MISS_STORED), then after the grants were revoked the cached replay was
+HIT_DENIED with nothing disclosed, the authorization probe DENIED and the consumer REFUSED on the stored receipt, with the
+CLI invoked exactly once. The consumer now refuses anything but ALLOWED at decision time, so a receipt sealed before a
+revocation cannot be replayed into a release. What this is not: the hermetic broker is a policy emulation over the
+compiled projection (the principal is a label, no IAM call, no BigQuery job, `identity = NOT_APPLICABLE`); nothing in it is
+platform enforcement, and it changes no live evidence. The live broker (IAM impersonation for the graph leg, an
+`impersonated_service_account` ADC file for the SDK subprocess, dataset reader grants added only where the SA holds no
+entry and waited for under the SA, the ACL of every touched dataset restored to its pre-run snapshot and read back at
+teardown, identity BOUND only when every job including the pointer lookup and the cached-replay re-check job carries the
+SA's `user_email`) is wired and exercised only against fakes; it has not run: the retained live chain is still `same-requester`, and the second principal remains "not exercised
+in this chain" on every published surface until the live Slice B lands its own evidence under review.
