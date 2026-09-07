@@ -21,7 +21,7 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `okf_bq_graph/scale.py` | Synthetic 100 / 1,000 namespace-isolated copies in their own datasets (vectors reused by text digest) |
 | `okf_bq_graph/authz.py` | Governance fixtures: RLS dataset (hidden intermediate), metadata-only dataset, authorized views + graph over views; `cases` runs the five second-principal negatives under the existing restricted SA via impersonation (`OKF_SPIKE_RESTRICTED_SA`, no new principal) → `evidence/authz_cases.json` |
 | `okf_bq_graph/chain.py` | Connected chain (2026-09-06): fixture seed → pinned publication → governed retrieval returns the Attested Computation declaration + SQL → bind to the SDK receipt example's pinned publication (data files only) → SDK CLI as a subprocess executes and verifies under the caller → consumer releases only on VERIFIED; two fail-closed substitution cases → `evidence/chain/` |
-| `okf_bq_graph/job_audit.py` | Reconciles a retained live chain record's job inventory against the platform's own `jobs.list`/`jobs.get` for that record's window (read-only; no query, no grant change). A requester job in the window the record never claimed is `INCOMPLETE`; another identity's job is reported, not condemned → `evidence/chain/job_audit_chain_live_restricted.json` |
+| `okf_bq_graph/job_audit.py` | Reconciles a retained live chain record's job inventory against the platform's own `jobs.list`/`jobs.get` for that record's window (read-only; no query, no grant change). A requester job in the window the record never claimed, or an administrative statement the record admits it could not name, is `INCOMPLETE`; a listing that stopped with pages left is `INDETERMINATE`; another identity's job is reported, not condemned → `evidence/chain/job_audit_chain_live_restricted.json` |
 | `okf_bq_graph/principal.py` | Requester brokers for the chain (2026-09-06 Slice A): a hermetic policy-emulating broker (no IAM, no job) exercised by `chain.py --requester restricted`, and the IAM-impersonation broker for the restricted SA (graph leg via `authz.impersonated_client`, SDK subprocess via an `impersonated_service_account` ADC file plus a `userinfo.email` scope shim, `_rls` row-policy grantee snapshot/restore, dry-run authorization probe per dependency table) exercised live in Slice B → `evidence/chain/chain_hermetic_restricted.json`, `evidence/chain/chain_live_restricted.json` |
 | `okf_bq_graph/benchmark.py`, `run.py`, `lifecycle.py`, `safety.py`, `partial.py`, `bin/safety_teardown.sh` | Bounded runner (20 warmups + 100 measured per cell, nearest-rank percentiles, failures retained), the window orchestrator (signal-safe cleanup lifecycle, job cancel, independent watcher), and the honest aggregation of interrupted cells (INCOMPLETE / NOT_RUN) |
 | `okf_bq_graph/cost.py`, `report.py`, `assemble.py` | Slot attribution (exact named reservation vs other pools) and the charged autoscale slot-seconds bill from `INFORMATION_SCHEMA.RESERVATIONS_TIMELINE`; non-mutating report tables; report assembly |
@@ -219,9 +219,13 @@ runs, so a summary carried over from an earlier run describes nothing.
   is invisible to it by construction. `python3 -m okf_bq_graph.job_audit evidence/chain/chain_live_restricted.json`
   reads `jobs.list`/`jobs.get` for the record's own window under the operator — no query submitted, no grant changed —
   and compares. Retained as `evidence/chain/job_audit_chain_live_restricted.json`: **`RECONCILED`**, 30 jobs listed in
-  the window, all 29 inventory jobs matched, **0 requester jobs unaccounted for**, 0 inventory jobs the platform did not
-  list. The one extra is an unrelated scheduled query under a third identity: reported, not condemned, because the
-  project is shared and the run's claim is about the requester.
+  the window and the listing drained (`truncated: false`), all 29 inventory jobs matched, **0 requester jobs unaccounted
+  for**, 0 inventory jobs the platform did not list, and the record declares no administrative statement it could not
+  name. The one extra is an unrelated scheduled query under a third identity: reported, not condemned, because the
+  project is shared and the run's claim is about the requester. A listing that stops with pages left is
+  `INDETERMINATE`, never a pass: matching an inventory against a prefix of the window proves nothing about the rest of
+  it, and `max_results` caps the whole iterator rather than the page, so paging is sized with `page_size` and the
+  iterator is drained.
 * **Graph leg.** `authz.impersonated_client` (IAM `generateAccessToken`).
 * **Receipt leg.** The SDK example as a subprocess under an `impersonated_service_account` ADC file, run.py unedited.
   The SDK establishes its requester from `oauth2/tokeninfo`, which returns no e-mail for a token minted for
@@ -246,6 +250,19 @@ runs, so a summary carried over from an earlier run describes nothing.
 * **Teardown.** Every touched dataset's ACL restored to the snapshot taken before the broker's first mutation and read
   back; the `_rls` grantee lists and predicates restored and read back (`sa_in_grantees_after: false`); the credential
   directory removed. `VERIFIED` only with at least one step and every read-back equal to its snapshot.
+* **Administrative statements are accounted for one by one.** `authz.set_rls` attempts all three policy statements and
+  only then raises if any failed, so a caller that retains job references from its return value loses the whole batch —
+  the statements that succeeded, and the one whose job was submitted before its result failed — the moment one of them
+  fails. References are therefore kept at submission through `publish.run`'s `on_submit` hook, each statement is settled
+  `DONE`/`FAILED` individually, and a statement that was attempted without ever naming a job is `UNRESOLVED`: it makes
+  the identity `UNKNOWN`, the chain `CHAIN_INCOMPLETE`, and the reconciliation refuse to certify the record. That last
+  point matters because an unnamed job of the run's own would otherwise be indistinguishable from the unrelated operator
+  work the audit is entitled to ignore.
+* **The retained run predates that fix and is not affected by it.** It was produced by runner `chain/0.8.0`; the current
+  runner is `chain/0.9.0`. All nine of its policy statements succeeded — the record lists nine `policy_admin` jobs, and
+  its teardown is `VERIFIED` with both `restore_rls_policies` and `readback_rls_policies` `ok` — so no batch of its
+  partially failed, and there is nothing the fix would have caused it to retain differently. It is left exactly as it
+  was rather than re-run.
 * **The superseded first pass is kept, not rewritten.** `live_restricted-20260907T221038Z-900abfcd` is the run Astra
   reviewed at `11ae4c9` under runner `chain/0.7.0`. Its own measurements stand (it refused `unauthorized-output` with
   5/7 dependencies denied and observed the revocation at 0 s/1 s), but its identity gate checked 18 jobs while the run

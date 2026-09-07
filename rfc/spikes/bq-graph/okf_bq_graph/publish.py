@@ -9,7 +9,7 @@ import datetime as _dt
 import json
 import os
 import time
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from google.cloud import bigquery
 
@@ -40,10 +40,14 @@ def _ts(s: Optional[str]) -> Optional[str]:
 
 
 def run(client: bigquery.Client, query: str, params: Optional[list] = None, labels: Optional[dict] = None,
-        use_cache: bool = False) -> bigquery.QueryJob:
+        use_cache: bool = False, on_submit: Optional[Callable[[Any], None]] = None) -> bigquery.QueryJob:
+    """One statement, submitted and waited on. `on_submit` is called with the job the moment it exists and before the
+    wait, so a caller that must account for every job it submitted keeps the reference even when the result fails."""
     cfg = bigquery.QueryJobConfig(query_parameters=params or [], use_query_cache=use_cache,
                                   labels=labels or {"okf_spike": "bq_graph_20260905"})
     job = client.query(query, job_config=cfg, location=LOCATION)
+    if on_submit is not None:
+        on_submit(job)
     job.result()
     return job
 

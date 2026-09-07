@@ -541,10 +541,13 @@ def test_impersonated_credential_file_shape_and_permissions(tmp_path):
 
 
 class _Rows:
-    def __init__(self, rows, job_id="fake-job"):
-        self._rows, self.job_id = rows, job_id
+    def __init__(self, rows, job_id="fake-job", fail=None):
+        self._rows, self.job_id, self.fail = rows, job_id, fail
+        self.project, self.location = P, "US"
 
     def result(self):
+        if self.fail is not None:      # the job was submitted; its result was not returned
+            raise self.fail
         return iter(self._rows)
 
 
@@ -608,7 +611,13 @@ class _AclOwner(_Owner):
         # beside the existing one instead of replacing it (Astra PR 45 #2)
         self.policies = {t: [{"policy_id": ids[t], "grantees": [OPERATOR_MEMBER], "predicate": pred[t]}] for t in PR.RLS_TABLES}
         self.rls_ddl = []
+        self._ddl_fail: dict = {}
         self._connection = _RlsApi(self)
+
+    def fail_ddl(self, policy_id, mode="result"):
+        """Make the next DDL for this policy fail. "submit": the call raises before a job exists. "result": the job is
+        submitted and its result raises - the case where a reference exists and must not be thrown away."""
+        self._ddl_fail[policy_id] = mode
 
     def query(self, q, job_config=None, location=None):
         """Only the `authz.set_rls` DDL reaches the owner in these tests: parse it back into the policy fixture."""
@@ -618,12 +627,21 @@ class _AclOwner(_Owner):
         pid = q.split("ROW ACCESS POLICY ", 1)[1].split(" ", 1)[0]
         grantees = sorted(x.strip().strip("'") for x in q.split("GRANT TO (", 1)[1].split(")", 1)[0].split(","))
         predicate = " ".join(q.split("FILTER USING (", 1)[1].rsplit(")", 1)[0].split())
+        mode = self._ddl_fail.pop(pid, None)
+        if mode == "submit":
+            from google.api_core import exceptions as gexc
+            raise gexc.ServiceUnavailable("503 backend error before the job existed")
+        job = _Rows([], job_id=f"ddl-{pid}-{len(self.rls_ddl)}")
+        if mode == "result":
+            from google.api_core import exceptions as gexc
+            job.fail = gexc.ServiceUnavailable("503 the job was submitted, its result was not returned")
+            return job                                  # the statement did not complete: the fixture is unchanged
         existing = next((p for p in self.policies[table] if p["policy_id"] == pid), None)
         if existing is None:   # CREATE OR REPLACE replaces by NAME: another name is another policy on the same table
             self.policies[table].append({"policy_id": pid, "grantees": grantees, "predicate": predicate})
         else:
             existing.update(grantees=grantees, predicate=predicate)
-        return _Rows([f"ddl-{pid}-{len(self.rls_ddl)}"])
+        return job
 
     def policy(self, table, index=0):
         return self.policies[table][index]
@@ -775,6 +793,113 @@ def test_a_denied_cached_replay_recheck_stays_in_the_job_inventory():   # Astra 
     # and the chain's inventory collects it from the replay, so the identity audit reads it back
     case = {"case": "revocation-before-replay", "replay": {"retrieval": {"timing": timer.done()}}}
     assert CH.job_ids_of([case]) == {"graph": ["recheck-job"], "receipt": []}
+
+
+def test_a_failed_policy_statement_does_not_discard_the_batch_it_submitted(monkeypatch):   # Astra PR 45 re-review #1
+    """`authz.set_rls` attempts all three statements and only then raises, so retaining references from its return
+    value loses every reference in the batch: the statements that succeeded, and the one whose job was submitted before
+    its result failed. Each reference is now kept at submission."""
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert [j["state"] for j in b.admin_jobs] == ["DONE"] * 3
+
+    owner.fail_ddl(PR.hide_policy_ids()["edges"], "result")
+    with pytest.raises(RuntimeError, match=r"row access policy statements failed for \['edges'\]"):
+        b.apply(PR.policy())
+    ids = [j["job_id"] for j in b.admin_jobs]
+    assert len(ids) == 6 and len(set(ids)) == 6                       # was 3: the whole failed batch used to vanish
+    assert [j["state"] for j in b.admin_jobs[3:]] == ["DONE", "FAILED", "DONE"]
+    assert "ServiceUnavailable" in b.admin_jobs[4]["error"]
+    assert b.admin_unresolved() == []                                 # every statement named the job it submitted
+    assert [op["state"] for op in b.admin_ops] == ["DONE"] * 3 + ["DONE", "FAILED", "DONE"]
+
+    # the identity audit can therefore still read every administrative job back
+    owner.emails.update({j: OPERATOR_MEMBER.split(":", 1)[1] for j in ids}
+                        | {j["job_id"]: SA for j in b.probe_jobs} | {"g1": SA, "r1": SA})
+    b._operator_email = OPERATOR_MEMBER.split(":", 1)[1]
+    ident = b.identity(["g1"], [{"job_id": "r1"}])
+    assert ident["status"] == "BOUND" and ident["roles"]["policy_admin"]["jobs"] == 6
+    assert ident["admin_ops"] == {"attempted": 6, "by_state": {"DONE": 5, "FAILED": 1}}
+
+
+def test_a_statement_that_never_named_a_job_blocks_the_completeness_claim(monkeypatch):   # Astra PR 45 re-review #1
+    """A statement that failed before a job reference existed is UNRESOLVED: what it did on the platform cannot be read
+    back, so the run must not claim a complete inventory - and an audit must not write those jobs off as somebody
+    else's unrelated operator work."""
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    owner.fail_ddl(PR.hide_policy_ids()["nodes"], "submit")
+    with pytest.raises(RuntimeError, match=r"failed for \['nodes'\]"):
+        b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    unresolved = b.admin_unresolved()
+    assert [u["table"] for u in unresolved] == ["nodes"] and unresolved[0]["state"] == "UNRESOLVED"
+    assert len(b.admin_jobs) == 2 and [j["state"] for j in b.admin_jobs] == ["DONE", "DONE"]   # the other two are named
+
+    owner.emails.update({j["job_id"]: OPERATOR_MEMBER.split(":", 1)[1] for j in b.admin_jobs}
+                        | {j["job_id"]: SA for j in b.probe_jobs} | {"g1": SA, "r1": SA})
+    b._operator_email = OPERATOR_MEMBER.split(":", 1)[1]
+    ident = b.identity(["g1"], [{"job_id": "r1"}])
+    assert ident["status"] == "UNKNOWN" and ident["roles"]["policy_admin"]["status"] == "UNKNOWN"
+    assert ident["roles"]["policy_admin"]["unresolved"] == 1 and "without a retained job reference" in ident["reason"]
+    assert ident["admin_ops"]["by_state"] == {"DONE": 2, "UNRESOLVED": 1}
+
+
+def test_unresolved_admin_work_reaches_the_record_and_the_audit(sdk_root, projection, tmp_path, monkeypatch):
+    """End to end: the chain records what the broker could not account for, the verdict is CHAIN_INCOMPLETE, and the
+    reconciliation refuses to certify the record even when every job it DID name is present on the platform."""
+    import okf_bq_graph.job_audit as JA
+
+    class Broker(PR.HermeticBroker):
+        hermetic = False
+
+        def __init__(self, projection):
+            super().__init__(projection, sa_email=SA)
+            self.admin_ops = [{"transition": "restore", "table": "edges", "job_id": None, "state": "UNRESOLVED",
+                               "error": "ServiceUnavailable: 503 backend error before the job existed"},
+                              {"transition": "restore", "table": "nodes", "job_id": "ddl-nodes-1", "state": "DONE", "error": None}]
+            self.admin_jobs = [PR.job_ref("ddl-nodes-1", stage="rls_restore_nodes")]
+
+        def graph_clients(self):
+            return dict(super().graph_clients(), bq="SA-CLIENT")
+
+        def identity(self, graph_job_ids, receipt_jobs):
+            return {"status": "UNKNOWN", "expected": SA_ALIAS,
+                    "reason": "policy_admin: UNKNOWN (1 administrative statement(s) were attempted without a retained job reference)",
+                    "roles": {"policy_admin": {"status": "UNKNOWN", "unresolved": 1}}}
+
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda client, ds=DATASET: (CH.PUBLICATION_PIN, "pointer-job"))
+
+    def runner(argv, **kw):
+        r = subprocess.run([x for x in argv if x != "--live"], **kw)
+        d = Path(argv[argv.index("--evidence-dir") + 1])
+        os.replace(d / "case_approved_hermetic.json", d / "case_approved_live.json")
+        return r
+
+    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), requester_mode="restricted",
+                       broker=Broker(projection), as_of=AS_OF, runner=runner)
+    assert out["acceptance"] == {c: "MET" for c in CH.RESTRICTED_CASES}         # the cases themselves behaved
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "identity"
+    inv = out["job_inventory"]
+    assert [op["table"] for op in inv["policy_admin_unresolved"]] == ["edges"] and len(inv["policy_admin_ops"]) == 2
+
+    # and the audit refuses to certify it, although every named job is on the platform and nothing else is wrong
+    class _It:
+        next_page_token = None
+
+        def __iter__(self):
+            class J:
+                def __init__(s, i, e):
+                    s.job_id, s.user_email, s.state, s.job_type, s.created, s.error_result = i, e, "DONE", "query", None, None
+            for jid in inv["graph"] + [j for j in inv["receipt"] if j] + inv["policy_admin"]:
+                yield J(jid, SA)
+
+    class _Client:
+        def list_jobs(self, **kw):
+            return _It()
+
+    audited = JA.audit(out, client=_Client(), requester_email=SA)
+    assert audited["status"] == "INCOMPLETE" and audited["declared_admin_unresolved"] == 1
+    assert audited["unaccounted_requester_jobs"] == [] and audited["not_listed"] == []
+    assert "never named a job for" in audited["reason"]
 
 
 def test_live_broker_refuses_policy_names_its_restore_helper_cannot_restore(monkeypatch):   # Astra PR 45 #2

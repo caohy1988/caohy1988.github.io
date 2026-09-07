@@ -394,6 +394,7 @@ class RestrictedBroker:
         self._rls_granted = False
         self.probe_jobs: list[dict] = []            # real jobs the broker submitted UNDER THE REQUESTER to observe the platform
         self.admin_jobs: list[dict] = []            # row-policy DDL the broker submitted under the OPERATOR (administrative)
+        self.admin_ops: list[dict] = []             # one entry per DDL statement attempted, whatever became of it
         self._operator_email: Optional[str] = None
         if owner is None:
             from google.cloud import bigquery
@@ -502,14 +503,43 @@ class RestrictedBroker:
                   note="hidden-intermediate policies re-issued with the SA added to / removed from the fixture's grantee list")
 
     def _set_rls(self, grantees: list[str], vector_grantees: list[str], transition: str) -> dict:
-        """`authz.set_rls`, with every DDL job it submits retained as an administrative job under the operator. These
-        are real jobs in the run window; leaving them out of the inventory understates what the run submitted."""
+        """`authz.set_rls`, with every DDL job retained AT SUBMISSION and settled per statement.
+
+        The helper attempts all three statements and only then raises if any of them failed, so retaining references
+        from its return value loses the entire batch - the statements that succeeded included - the moment one result
+        fails (Astra PR 45 re-review #1). The submission hook keeps each reference before its wait; the batch is then
+        settled statement by statement, and this method raises for the failures itself so the caller's contract is
+        unchanged. A statement that was attempted without producing a job reference is UNRESOLVED: what it did on the
+        platform cannot be read back, and that must block any claim of a complete inventory."""
         from .authz import set_rls
-        jobs = set_rls(self.owner, grantees, vector_grantees=vector_grantees, hide=True)
+        submitted: dict[str, dict] = {}
+
+        def retain(table: str, job: Any) -> None:
+            ref = job_ref(getattr(job, "job_id", None), getattr(job, "project", None), getattr(job, "location", None),
+                          stage=f"rls_{transition}_{table}", state="SUBMITTED")
+            submitted[table] = ref
+            if ref["job_id"]:
+                self.admin_jobs.append(ref)
+
+        jobs = set_rls(self.owner, grantees, vector_grantees=vector_grantees, hide=True, strict=False, on_submit=retain)
+        failed = []
         for t in RLS_TABLES:
-            jid = jobs.get(t)
-            if isinstance(jid, str):
-                self.admin_jobs.append(job_ref(jid, stage=f"rls_{transition}_{t}"))
+            res = jobs.get(t)
+            ok = isinstance(res, str)
+            err = None if ok else (res or {}).get("error", "not attempted")
+            ref = submitted.get(t)
+            jid = res if ok else ((res or {}).get("job_id") or (ref or {}).get("job_id"))
+            if ref is not None:
+                ref.update(state="DONE" if ok else "FAILED", error=err)
+            elif jid:   # submitted, but the hook never saw it: it is still this run's job
+                self.admin_jobs.append(job_ref(jid, stage=f"rls_{transition}_{t}", state="DONE" if ok else "FAILED", error=err))
+            self.admin_ops.append({"transition": transition, "table": t, "job_id": jid,
+                                   "state": ("DONE" if ok else "FAILED") if jid else "UNRESOLVED", "error": err})
+            if not ok:
+                failed.append(t)
+        if failed:
+            raise RuntimeError(f"row access policy statements failed for {failed}: "
+                               + "; ".join(str((jobs.get(t) or {}).get("error")) for t in failed))
         return jobs
 
     def _rls_rows(self) -> dict:
@@ -646,9 +676,28 @@ class RestrictedBroker:
             self._operator_email = operator().split(":", 1)[-1] or ""
         return self._operator_email or None
 
+    def admin_unresolved(self) -> list[dict]:
+        """Administrative statements this broker attempted without keeping a job reference. Their effect on the platform
+        cannot be read back, and an audit must not be able to write them off as somebody else's unrelated work."""
+        return [op for op in self.admin_ops if not op.get("job_id")]
+
     def identity(self, graph_job_ids: list[str], receipt_jobs: list[dict]) -> dict:
-        return bound_to(self.owner, graph_job_ids, receipt_jobs, self.email, probe_jobs=self.probe_jobs,
-                        admin_jobs=self.admin_jobs, operator_email=self.operator_email())
+        out = bound_to(self.owner, graph_job_ids, receipt_jobs, self.email, probe_jobs=self.probe_jobs,
+                       admin_jobs=self.admin_jobs, operator_email=self.operator_email())
+        out["admin_ops"] = {"attempted": len(self.admin_ops),
+                            "by_state": {st: sum(1 for op in self.admin_ops if op["state"] == st)
+                                         for st in sorted({op["state"] for op in self.admin_ops})}}
+        unresolved = self.admin_unresolved()
+        if unresolved:
+            out["admin_ops"]["unresolved"] = [{k: op[k] for k in ("transition", "table", "error")} for op in unresolved]
+            out["roles"]["policy_admin"].update(
+                status="UNKNOWN", unresolved=len(unresolved),
+                reason=f"{len(unresolved)} administrative statement(s) were attempted without a retained job reference")
+            if out["status"] != "UNBOUND":
+                out["status"] = "UNKNOWN"
+            out["reason"] = "; ".join(f"{n}: {r['status']}" + (f" ({r['reason']})" if r.get("reason") else "")
+                                      for n, r in out["roles"].items() if r["status"] not in ("BOUND", "NONE"))
+        return out
 
     def teardown(self) -> dict:
         """Restore every dataset this broker touched to the ACL snapshot taken before its first mutation (grants it added

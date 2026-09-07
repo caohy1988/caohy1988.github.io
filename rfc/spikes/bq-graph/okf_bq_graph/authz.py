@@ -182,18 +182,29 @@ def rls_statements(grantees: list[str], vector_grantees: Optional[list[str]] = N
 
 
 def set_rls(client: bigquery.Client, grantees: list[str], vector_grantees: Optional[list[str]] = None, hide: bool = True,
-            strict: bool = True) -> dict:
+            strict: bool = True, on_submit: Optional[Callable[[str, Any], None]] = None) -> dict:
     """Apply the three `_rls` policies. Every statement is attempted even if an earlier one failed (each table's
-    policy is an independent grant); per-table outcome is a job id or {"error": ...}. strict=True raises after all
-    three were attempted so callers that need the full shape still fail; teardown uses strict=False."""
+    policy is an independent grant); per-table outcome is a job id, or `{"error": ..., "job_id": ...}` carrying the id
+    of the job that WAS submitted before its result failed. `on_submit(table, job)` fires the moment each job exists and
+    before its wait, so a caller accounting for every submitted job keeps the reference whatever happens next; relying
+    on the return value alone loses the whole batch as soon as one statement raises. strict=True raises after all three
+    were attempted so callers that need the full shape still fail; teardown uses strict=False."""
     from .publish import run
     out: dict = {"at": _dt.datetime.now(_dt.timezone.utc).isoformat()}
     errors = []
     for t, q in rls_statements(grantees, vector_grantees, hide).items():
+        seen: dict = {}
+
+        def submitted(job: Any, _t: str = t, _seen: dict = seen) -> None:
+            _seen["job"] = job
+            if on_submit is not None:
+                on_submit(_t, job)
+
         try:
-            out[t] = run(client, q).job_id
+            out[t] = run(client, q, on_submit=submitted).job_id
         except Exception as e:  # noqa: BLE001 - keep going: the other tables' grants are independent
-            out[t] = {"error": f"{type(e).__name__}: {str(e)[:300]}"}; errors.append(t)
+            out[t] = {"error": f"{type(e).__name__}: {str(e)[:300]}", "job_id": getattr(seen.get("job"), "job_id", None)}
+            errors.append(t)
     if errors and strict:
         raise RuntimeError(f"row access policy statements failed for {errors}: " + "; ".join(out[t]["error"] for t in errors))
     return out

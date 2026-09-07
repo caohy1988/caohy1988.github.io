@@ -573,7 +573,7 @@ def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dic
 
 
 # ----------------------------------------------------------------------------- whole chain
-CHAIN_VERSION = "okf_bq_graph.chain/0.8.0"   # 0.8.0: identity audit by job role over every submitted job, failed jobs included (Astra PR 45 #1)
+CHAIN_VERSION = "okf_bq_graph.chain/0.9.0"   # 0.9.0: administrative DDL accounted per statement, unresolved ones block completeness (re-review #1)
 SEED_MODES = ("fixture", "catalog")
 
 
@@ -976,6 +976,11 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         admin_jobs = list(getattr(broker, "admin_jobs", []) or [])       # operator-submitted row-policy DDL
         out["job_inventory"]["requester_probe"] = [j["job_id"] for j in probe_jobs]
         out["job_inventory"]["policy_admin"] = [j["job_id"] for j in admin_jobs]
+        admin_ops = list(getattr(broker, "admin_ops", []) or [])
+        out["job_inventory"]["policy_admin_ops"] = admin_ops
+        # statements the broker attempted without keeping a job reference: the record says so itself, so a later audit
+        # cannot certify the run and cannot write those jobs off as somebody else's (Astra PR 45 re-review #1)
+        out["job_inventory"]["policy_admin_unresolved"] = [op for op in admin_ops if not op.get("job_id")]
         out["job_inventory"]["refs"].update({j["job_id"]: {"project": j.get("project"), "location": j.get("location"), "stage": j.get("stage")}
                                              for j in probe_jobs + admin_jobs})
         out["identity"] = broker.identity(ids["graph"], ids["receipt"])
