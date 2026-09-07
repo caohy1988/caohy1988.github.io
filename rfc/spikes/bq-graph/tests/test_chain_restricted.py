@@ -338,7 +338,7 @@ def restricted_run(projection, sdk_root, tmp_path_factory):
 
 def test_restricted_chain_hermetic_end_to_end(restricted_run):
     out, out_dir, launches = restricted_run
-    assert out["verdict"] == "CHAIN_CONNECTED" and out["chain"] == "okf_bq_graph.chain/0.5.0"
+    assert out["verdict"] == "CHAIN_CONNECTED" and out["chain"] == CH.CHAIN_VERSION
     assert out["requester"]["mode"] == "restricted-sa" and out["requester"]["principal"] == SA_ALIAS and out["requester"]["broker"]["iam"] is False
     assert out["seed"]["mode"] == "fixture" and out["engine"] == "oracle" and out["mode"] == "hermetic"
     assert out["acceptance"] == {c: "MET" for c in CH.RESTRICTED_CASES}

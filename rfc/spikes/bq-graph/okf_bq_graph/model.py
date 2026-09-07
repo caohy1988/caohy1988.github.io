@@ -13,6 +13,8 @@ from dataclasses import dataclass, field, asdict
 from typing import Any, Optional
 
 COMPILER_VERSION = "okf_bq_graph.compile/0.1.0"
+PROVENANCE_NOTE = ("declaration-scoped signals (usage_count/window) and resolves_to are not exposed as graph properties; "
+                   "fetch from edges/nodes tables if needed")   # the relational engines' provenance note, compared verbatim by the payload guard
 
 NODE_KINDS = ("Concept", "Section", "Source", "Actor", "Artifact", "LogEntry")
 RELATIONS = (

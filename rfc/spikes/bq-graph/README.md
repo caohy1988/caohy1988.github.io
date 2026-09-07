@@ -27,7 +27,8 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `sql/*.sql` | `schema.sql`, `graph.sql` (property graph DDL), `seed.sql` (vector seed), `governed.sql` (two-hop GQL), `context.sql`, `impact.sql`, `stubs.sql`, `fallback.sql` |
 | `fixtures/bundle_b/` | Negative fixture: identical relative paths, missing targets, duplicate hits, ambiguous replacement, `../` escape |
 | `fixtures/cases.json`, `fixtures/scale.json` | Query set and benchmark cell matrix |
-| `tests/` | `test_compile.py`, `test_oracle.py`, `test_retrieve.py` (contract runs against oracle by default; `OKF_LIVE_ENGINE=gql|fallback` runs it live) |
+| `okf_bq_graph/catalog.py`, `seed.py`, `publication.py`, `journal.py`, `catalog_lifecycle.py` | Catalog-seeded chain (2026-09-06): Dataplex list/get reader + trusted-config parser, exact `ConceptSeed`, retained-publication resolution + trusted-source compilation + payload consistency guard, run-owned job journal, isolated relational-only lifecycle driver for the owned republish experiment |
+| `tests/` | `test_compile.py`, `test_oracle.py`, `test_retrieve.py` (contract runs against oracle by default; `OKF_LIVE_ENGINE=gql|fallback` runs it live); `test_catalog.py`, `test_catalog_publication.py`, `test_catalog_lifecycle.py` + the catalog cases in `test_chain.py` (all hermetic, injected Catalog responses) |
 | `evidence/` | Raw captures: capacity gate, smoke jobs, projection, publish log, integration/governance JSON, `requests.jsonl`, `summary.json`, `cost.json`, comparison, report |
 
 Source pin: `/Users/haiyuancao/knowledge-catalog/okf/bundles/acme_retail` @ knowledge-catalog `31da799a9aef176df12e91abbd119ea9385b75ec`
@@ -206,6 +207,137 @@ exercised only against fakes (a fake SA client and an owner holding real `Access
 but **no live pass has run**: the retained live chain evidence is still `requester.mode = same-requester`, and the second principal
 remains "not exercised in this chain" on every published surface until Slice B lands its own evidence.
 
+## Catalog-seeded chain (2026-09-06, Slice A hermetic; runner `chain/0.6.0` after the PR 40 merge)
+
+`python3 -m okf_bq_graph.chain --seed-mode catalog` replaces the fixture seed with a **fresh Dataplex Catalog read**: paginated
+`entries.list` on the configured entry group selects the configured entry by exact name (no other entry body is fetched), then
+`entries.get(view=ALL)` returns the `okf-context-runtime` aspect with its values (the default FULL view can expose only keys for
+optional aspects). Authored `okf` / `overview` aspects are recorded as present and never used as runtime input. Modules:
+`okf_bq_graph/catalog.py` (reader + parser + trusted `CatalogConfig` allowlist), `seed.py` (`ConceptSeed`, an exact scoped
+Concept id that is never wrapped in `forced:`), `publication.py` (retained store, exact pin resolution, trusted source,
+payload guard), `journal.py` (run-owned job journal + raw retention), `catalog_lifecycle.py` (Slice B2 driver, hermetically
+tested only).
+
+The returned pin is **validated, then frozen**: every field typed and non-empty, `runtime_contract` in the supported set,
+project / dataset / location / bundle / source repository+root / managed profile+deployment / compiler version equal to trusted
+configuration (Catalog values can never widen the allowlist or name a SQL destination), `pub_<16 hex>` / 40-hex source pin /
+64-hex digests, a safe bundle-relative `concept_path`, and `concept_id` exactly `bundle|publication|Concept|path` (case-sensitive).
+Refusals are typed (`CATALOG_ERROR` for 403/404/429/timeout/non-JSON, `PAGE_CAP`, `ENTRY_NOT_FOUND`, `ENTRY_AMBIGUOUS`,
+`ENTRY_MISMATCH`, `ASPECT_MISSING`, `ASPECT_KEYS_ONLY`, `INVALID_PIN`, `UNSUPPORTED_CONTRACT`, `SCOPE_REFUSED`) and end the run at
+`broken_at = seed` with no store read, no retrieval, no SDK call and no fixture / head / vector / saved-JSON fallback. A live
+invocation configured with a mock or saved-response reader is `READER_REFUSED`; a hermetic invocation with the HTTP reader
+likewise.
+
+The pin is then resolved with **parameterised reads against the configured dataset only**: exactly one retained `publications`
+row (must be `READY`) plus exactly one visible seed node row whose path and `file_sha256` equal the pin; the retained row's
+source pin, source manifest and compiler version must equal the pin (`PIN_MISMATCH` otherwise); missing / non-READY / duplicate
+publication or absent seed is `FAIL_STALE`; a transport or IAM failure is `ERROR` (blocked, never a pass). The current head
+(`active_publication`) is read for observation only and is never followed: a P1 pin is served exactly while the head is P2.
+The exact clean pinned source is then compiled as the **trusted projection** (`trusted_source`: git HEAD == pin, bundle tree
+clean, bundle path == `source_root`, compiled publication id / manifest / seed digest == pin; anything unknown is
+`SOURCE_UNVERIFIED` and refuses). The provenance gate adds `source_verified` to the SDK head/clean checks.
+
+Each case then runs governed retrieval with the exact Concept id and, before binding, a **payload consistency guard**
+(`verify_payload`): the full retained node and edge rows for the publication (excluding only the storage-derived
+`stale_after_ts`) must equal the trusted rows, the node/edge manifests are recomputed from the retained rows and compared
+to the publication's digests, every retained Section text is re-hashed, the result's scope, seed concept fields, every path's
+scoped endpoints and LINKS_TO continuity, the computation's section membership, its SQL bytes and recomputed `sql_sha256`, and
+the declaration's node id / file digest (also against the source manifest) / type / runtime / lifecycle / `stale_after` /
+parameters are all checked against the trusted projection. The separately selected computation object is re-verified byte
+for byte. The **disclosed `paths` list itself** is validated (scoped endpoints, LINKS_TO continuity, hop count, exact match
+with the computations' vias) and the **governance fields the caller consumes** — trust tier, verifications, provenance,
+freshness as the whole `{verdict, stale_after}` record at `scope.as_of`, deprecated-seed replacement, for the seed and each
+computation — are recomputed from the trusted VERIFIED_BY / DERIVES_FROM / RESOLVES_TO / LINKS_TO edges. The chain passes
+the engine it **configured and ran** into the guard; the result's own `scope.engine` label must equal it (`engine` check)
+and the provenance shape is selected from that trusted engine, never from the returned label — a valid fallback-shaped
+provenance under a `fallback` label coming out of an oracle run fails on both counts (Astra re-review 3, R1). Provenance is
+checked against the **complete item shape of that engine**: the oracle emits exactly
+`resource, title, declaration, declared, intrinsic, resolves_to`; the relational engines emit exactly
+`resource, title, declaration, resolution, source_id, note` (the note verbatim, `model.PROVENANCE_NOTE`). Every required key
+must be present, no other key may be present, and every value must equal the trusted one; an unknown engine has no shape
+and fails (Astra PR 41 P1, re-review R1 and re-review 2: computation-derived checks are not the returned payload, a reduced
+field subset is not the field, and a missing key is not an empty value). The governed input itself is retained per case
+under `retrieval/retrieval_<case>.json` with its SHA-256, not only the re-read rows. `INCONSISTENT` leaves the case `NOT_BOUND`, never invokes the SDK, and grades `WRONG` (a reached stage that
+contradicts the pinned publication is not an outage); `ERROR` is `NOT_REACHED`. Regressions cover: a P2 endpoint or a
+non-existent edge mixed into a P1 path, a section's text changed under its old hash and P1 labels, SQL changed after preflight
+under the old digest label, a declaration changed after preflight, a P2 result relabelled as P1, and a run with the guard
+bypassed (which releases a corrupted non-computation section that the SDK bind cannot see).
+
+`bind` now takes the verified source revision from the validated pin and requires the SDK fixture manifest's `derived_from`
+to end with the full 40-hex revision; the check's note records that this lineage label is free text at the pinned SDK commit,
+not a Git attestation. The chain record names `graph_publication` (bundle, publication, source pin, source manifest, node/edge
+digests) and `sdk_publication` (the receipt example's fixture publication and context ref) separately. `approved` and
+`sql-substitution` use the Catalog-derived seed; `declaration-mismatch` uses an explicitly labelled injected fixture seed
+(`seed_origin = injected-fixture-seed`, `metrics/revenue` under the same pinned publication), never a second Catalog discovery.
+The cache is disabled for concept seeds (`scope.cache = DISABLED_CONCEPT_SEED`); the oracle engine now refuses to serve a
+publication other than the one requested (`NO_PUBLICATION`) instead of relabelling whatever graph it holds.
+
+**Evidence begins before the Catalog read.** Catalog mode writes everything under `evidence/catalog-chain/<run_id>/`: raw
+`catalog/catalog_list_<n>.json` and `catalog_entry.json` responses with SHA-256, `retrieval/retrieval_<case>.json` (the
+governed input), `journal.jsonl`, `receipt/case_<case>_<mode>.json` diagnostics, and the run's own `chain_<mode>.json`;
+`evidence/catalog-chain/chain_<mode>.json` is the atomically written latest record. Early refusals keep the same retained final
+record. **Job journal.** In live catalog mode every BigQuery query the chain submits goes through `publication.run_journaled`:
+pin resolution, seed visibility, observed head, payload rows (nodes + edges), the three retrieval stages (`retrieval_walk`,
+`retrieval_context`, `retrieval_nodes`, via `retrieve._run` when `clients["journal"]` is set) and the declaration read
+(`chain_declaration`, via `BigQueryStore.declaration` on every engine). The job reference is one `(project, location, job_id)`
+chosen by the chain and written to the journal **before the send**: the project is the client's billing project (passed
+explicitly to `client.query`), recorded separately from the dataset project, and the same reference is used by
+`reconcile_job` and by the `same_requester` identity check (Astra re-review R4: a job submitted under the client's project
+is never looked up under the dataset project). An empty read keeps its id (`EMPTY`); a local exception at submit or
+`result()` never becomes a terminal state on its own — `reconcile_job` reads `jobs.get` under that reference (bounded, no
+retries): not found → `NOT_SUBMITTED`, server DONE → `DONE`/`ERROR`, RUNNING → one cancel + readback → `CANCELLED`, anything
+unreadable stays `UNKNOWN` with its id and the run is `CHAIN_INCOMPLETE` at `unresolved_jobs`. Every journaled id enters the
+`same_requester` identity set once (`job_inventory.graph`, deduplicated; `job_inventory.refs` carries each reference).
+The hermetic store journals the same roles with no job id (`actual_jobs = 0`). The configured runtime dataset is the single
+destination for pin resolution, payload rows, retrieval and declaration: a client or store wired to a different dataset is
+refused as `DESTINATION_MISMATCH` before the first store read, whether the client or a supplied store diverges (Opus PR 41 P2;
+the B2 lifecycle configuration routes everything to the owned dataset). Fixture mode (`--seed-mode fixture`, the default) is unchanged apart from the journal and keeps `evidence/chain/`;
+its live declaration read now also keeps its job id when the lookup is empty.
+These live-branch behaviours are exercised hermetically against a fake BigQuery client that serves the chain's real SQL
+(`tests/test_chain.py::FakeBigQuery`); no live job has run.
+
+Hermetic result (`evidence/catalog-chain/chain_hermetic.json`, injected responses, `seed.mode = catalog-mock`): `CHAIN_CONNECTED`
+— pin OK, publication OK with head observed = pin, source OK, all three payloads `CONSISTENT`, `approved` RELEASED on the SDK's
+synthetic fixture, `sql-substitution` REJECTED `sql_mismatch` → REFUSED, `declaration-mismatch` MISMATCH → REFUSED, CLI never
+invoked; all acceptances `MET`. **This is a hermetic contract result, not a live Catalog success**: no Catalog, BigQuery or
+receipt job ran. Live B1/B2 (fresh read of the KC entry, owned dataset + entry lifecycle, P1→P2 head switch, FAIL_STALE,
+live-backed mixed-payload injection, cleanup readback) are the next pass.
+
+`okf_bq_graph/catalog_lifecycle.py` is the isolated Slice B2 driver: owned dataset `okf_catalog_chain_<run_suffix>` (US,
+relational tables only — never `graph.sql`, `section_vectors` embedding, reservations or IAM), owned entries under
+`<group>/entries/acme-retail-catalog-chain/<run_id>/`, deployment `acme-retail-catalog-chain-<run_id>`; the allowlist is derived
+from this local configuration before any Catalog read, so a returned pin cannot authorize its own destination. It snapshots the
+original entry and head read-only, publishes with a full-row readback (READY only when the retained rows, recomputed digests,
+section hashes, dangling and distinctness checks all hold), advances the head with one MERGE only for a READY owned publication
+(`inject_failure="before_head"` leaves the old head; `"before_ready"` leaves loaded rows that can never become READY or head),
+generates owned pins from the verified rows, preserves authored aspects with explicit aspect keys (no delete-missing), and
+cleans up only exact owned resources with absence readback (`cleanup.json` is `COMPLETE` only then). **Ownership is a
+stamp, not a name:** every `Lifecycle` instance has an invocation stamp (`okf_owner` label on the dataset, `entrySource.labels`
+on entries) written at creation; ownership of a pending create is persisted to `ownership.json` **before** the write, and a
+pending resource read back later is adopted **only** if it carries this invocation's stamp — a resource under the same
+(normalised) name with another or no stamp is `FOREIGN_PRESERVED`, left untouched, and blocks `COMPLETE` (Astra re-review R2:
+`review-run-A` and `review_run_a` share a dataset name but never a stamp). A timed-out create is a **pending attempt** with
+its own `attempt_id` (passed to `create_dataset` / `create_entry` and written onto the resource as the `okf_attempt` stamp
+beside the owner stamp); an absent readback never closes it and **elapsed time is not an outcome**: it stays
+`ABSENT_PENDING` (receipt `INCOMPLETE`, `recheck_after_s = settle_s` only schedules the next look) until either the resource
+appears carrying this invocation's stamp **and this attempt's stamp** (adopted and deleted on that cleanup run) or the adapter
+establishes through `attempt_outcome(kind, name, attempt_id)` that this exact attempt terminated without applying
+(`NOT_APPLIED_VERIFIED`). One present resource discharges exactly the attempt that produced it: a resource stamped by
+another of our attempts is `OTHER_ATTEMPT_PRESENT` and leaves this attempt pending, and a second create for a target that
+still has an unresolved attempt is refused (`ScopeViolation`) until cleanup has reconciled the first (Astra re-review 3, R3). The in-memory fake returns no outcome by default, so a lost create stays pending across every
+rerun until it materialises; a real adapter may only answer from its own request/operation bookkeeping (Astra re-review R3
+and re-review 2; cleanup is rerunnable and a create that completes after any window is still owned and removed). Job-backed
+BigQuery operations (DDL, loads, inserts, updates, MERGE, SELECTs) get a driver-chosen `(project, location, job_id)` journaled
+before dispatch; a call that raises is reconciled through `job_state` (not found → `NOT_SUBMITTED`, DONE → `DONE`/`ERROR`,
+RUNNING → one cancel + readback → `CANCELLED`, unreadable / still running → `UNKNOWN`), and cleanup re-reads every unresolved
+job under its own reference: **deleting the target dataset is never evidence about the job** (Astra re-review R5; the former
+`MOOT` state is gone). `withdraw`/`restore` apply only to publications this run verified READY; `restore` requires the
+current row to be `WITHDRAWN` and re-runs the full-row readback before reinstating READY (`RESTORE_REFUSED` otherwise), so an
+`INVALID_READBACK` or corrupted publication can never be promoted (Astra PR 41 P2). P2 comes from
+`prepare_derived_source`: a retained temporary copy with one non-computation policy file changed, pinned as
+`<base>+local.<manifest16>` and recorded in `derivation.json`, never labelled as the clean upstream commit. Hermetic tests
+run it against an in-memory fake cloud; the live resources do not exist yet.
+
 ## Graph model (spec §3)
 
 Node kinds `Concept | Section | Source | Actor | Artifact | LogEntry`; stubs are `Concept{stub=true}`. Relations
@@ -238,6 +370,8 @@ OKF_LIVE_ENGINE=fallback python3 -m pytest tests/test_retrieve.py -q   # live, o
 python3 -m okf_bq_graph.chain --hermetic                  # connected chain, no cloud (oracle graph + SDK emulation)
 python3 -m okf_bq_graph.chain --hermetic --requester restricted   # restricted-requester chain, no cloud (policy-emulating broker)
 python3 -m okf_bq_graph.chain --live                      # connected chain, on-demand fallback engine + SDK --live
+python3 -m okf_bq_graph.chain --hermetic --seed-mode catalog --catalog-responses fixtures/catalog_responses.json   # Catalog contract, injected responses (catalog-mock)
+python3 -m okf_bq_graph.chain --live --seed-mode catalog  # fresh Dataplex list/get of the KC-unblock entry -> retained publication -> receipt (Slice B1; not yet run)
 python3 -m okf_bq_graph.run integration --minutes 25         # opens the Enterprise window, runs GQL cases, closes it
 python3 -m okf_bq_graph.run benchmark --minutes 85           # benchmark cells from fixtures/scale.json
 python3 -m okf_bq_graph.run all --minutes 85                 # both in one window

@@ -80,6 +80,14 @@ class PolicyGraph:
         self._projection, self._state = projection, state
         self._key: Optional[tuple] = None
         self._graph: Optional[Graph] = None
+        # the scope the oracle engine checks a request against (retrieve._retrieve_oracle refuses any other publication)
+        self.bundle_id, self.publication_id = projection["bundle_id"], projection["publication_id"]
+
+    def sanctioned_sql(self, comp_nid: str) -> Optional[dict]:
+        """The Computation section under the CURRENT policy: a revoked grant or a hidden section discloses nothing."""
+        if not self._state["dataset_reader"]:
+            return None
+        return self._current().sanctioned_sql(comp_nid)
 
     def _current(self) -> Graph:
         key = tuple(sorted(self._state["hidden"]))
