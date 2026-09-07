@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="At-a-glance Mac CLI + Grok agent model usage quotas for Haiyuan Cao.">
+  <meta name="theme-color" content="#101828">
+  <title>Agent Model Usage — Field Brief</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #101828;
+      --navy-2: #17233a;
+      --paper: #f4efe6;
+      --paper-2: #ebe4d8;
+      --cream: #fbf7f0;
+      --ink: #161410;
+      --ink-soft: #5c564c;
+      --ink-faint: #8a8378;
+      --line: #d9d0c3;
+      --accent: #e87324;
+      --accent-dark: #b7480d;
+      --mint: #0f766e;
+      --warn: #b45309;
+      --bad: #b91c1c;
+      --ok: #0f766e;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(1100px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--serif);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #fff;
+    }
+    .brand span {
+      display: inline-grid;
+      place-items: center;
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a {
+      color: #b7c2d0;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    header.hero {
+      padding: 36px 0 8px;
+    }
+    .kicker {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+      margin: 0 0 8px;
+    }
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      font-weight: 600;
+      margin: 0 0 10px;
+      letter-spacing: -0.02em;
+    }
+    .lede {
+      color: var(--ink-soft);
+      max-width: 62ch;
+      margin: 0 0 18px;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+      margin-bottom: 28px;
+    }
+    .meta strong { color: var(--ink); font-weight: 600; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+      padding-bottom: 40px;
+    }
+    .card {
+      background: var(--cream);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 18px 16px;
+      box-shadow: 0 1px 0 rgba(16,24,40,0.03);
+    }
+    .card h2 {
+      font-family: var(--serif);
+      font-size: 1.25rem;
+      margin: 0 0 4px;
+      font-weight: 600;
+    }
+    .card .sub {
+      font-size: 0.82rem;
+      color: var(--ink-faint);
+      margin: 0 0 14px;
+    }
+    .metric { margin-bottom: 14px; }
+    .metric-label {
+      font-weight: 600;
+      font-size: 0.92rem;
+      margin-bottom: 6px;
+    }
+    .metric-reset {
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+      margin-top: 4px;
+    }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+    .bar-track {
+      height: 10px;
+      background: var(--paper-2);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--ok);
+    }
+    .bar-fill.warn { background: var(--warn); }
+    .bar-fill.bad { background: var(--bad); }
+    .bar-fill.unk { background: var(--ink-faint); width: 8% !important; opacity: 0.45; }
+    .bar-pct {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      min-width: 3.2rem;
+      text-align: right;
+      color: var(--ok);
+    }
+    .bar-pct.warn { color: var(--warn); }
+    .bar-pct.bad { color: var(--bad); }
+    .bar-pct.unk { color: var(--ink-faint); }
+    .status-chip {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--paper-2);
+      margin-bottom: 8px;
+    }
+    .status-chip.ok { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+    .status-chip.warn { background: #ffedd5; color: #9a3412; border-color: #fed7aa; }
+    .status-chip.bad { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+    .status-chip.unk { background: var(--paper-2); color: var(--ink-soft); }
+    .pill {
+      display: inline-block;
+      font-size: 0.84rem;
+      background: var(--paper-2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 10px;
+      margin: 0 0 12px;
+    }
+    .muted { color: var(--ink-faint); font-size: 0.84rem; }
+    .err { color: var(--bad); font-size: 0.9rem; }
+    .mono { font-family: var(--mono); font-size: 0.82rem; word-break: break-all; }
+    .pack-status {
+      font-size: 0.84rem;
+      color: var(--ink-soft);
+      margin: 8px 0 0;
+    }
+    .roster {
+      margin: 0 0 12px;
+      padding-left: 1.1rem;
+    }
+    .roster li { margin-bottom: 6px; }
+    .note {
+      background: var(--navy);
+      color: #e8edf4;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin: 0 0 36px;
+    }
+    .note h3 {
+      font-family: var(--serif);
+      margin: 0 0 6px;
+      font-size: 1.05rem;
+    }
+    .note code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      background: rgba(255,255,255,0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .note a { color: #f5c39a; text-decoration: underline; }
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 18px 0 32px;
+      color: var(--ink-faint);
+      font-size: 0.82rem;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+      margin: -8px 0 22px;
+    }
+    .legend i {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    .legend .ok { background: var(--ok); }
+    .legend .warn { background: var(--warn); }
+    .legend .bad { background: var(--bad); }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/">Research</a>
+        <a href="/research/usage/" aria-current="page">Usage</a>
+        <a href="/rfc/">RFC</a>
+        <a href="/evalbench/">EvalBench</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <header class="hero">
+      <p class="kicker">Mac CLIs · Grok roster</p>
+      <h1>Agent model usage</h1>
+      <p class="lede">At-a-glance quotas for Claude/Fable, Codex/Astra, Kimi, Agy, and the Grok Bot roster. Snapshot only — refresh locally to update.</p>
+      <div class="meta">
+        <span>Last refreshed <strong>2026-09-07 09:20:37 PDT</strong></span>
+        <span>Timezone <strong>America/Los_Angeles</strong></span>
+      </div>
+      <div class="legend">
+        <span><i class="ok"></i>&lt;70% green</span>
+        <span><i class="warn"></i>70–89% amber</span>
+        <span><i class="bad"></i>≥90% / blocked red</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card" id="claude">
+        <h2>Claude / Fable</h2>
+        <p class="sub">claude -p /usage</p>
+        
+        <div class="metric">
+          <div class="metric-label">Current session</div>
+          
+    <div class="bar-row">
+      <div class="bar-track"><div class="bar-fill ok" style="width:16.0%"></div></div>
+      <div class="bar-pct ok">16%</div>
+    </div>
+          <div class="metric-reset">Resets Sep 7 at 1:20pm (America/Los_Angeles)</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Current week (all models)</div>
+          
+    <div class="bar-row">
+      <div class="bar-track"><div class="bar-fill ok" style="width:60.0%"></div></div>
+      <div class="bar-pct ok">60%</div>
+    </div>
+          <div class="metric-reset">Resets Sep 8 at 3pm (America/Los_Angeles)</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Current week (Fable)</div>
+          
+    <div class="bar-row">
+      <div class="bar-track"><div class="bar-fill bad" style="width:100%"></div></div>
+      <div class="bar-pct bad">100%</div>
+    </div>
+          <div class="metric-reset">Resets Sep 8 at 3pm (America/Los_Angeles)</div>
+        </div>
+      </section>
+
+      <section class="card" id="codex">
+        <h2>Codex / Astra</h2>
+        <p class="sub">wham/usage · plan + primary window</p>
+        
+        <p class="pill">plan: <strong>pro</strong> · gpt-6-astra: <strong>available</strong></p>
+        
+        <div class="metric">
+          <div class="metric-label">Primary window</div>
+          
+    <div class="bar-row">
+      <div class="bar-track"><div class="bar-fill ok" style="width:65.0%"></div></div>
+      <div class="bar-pct ok">65%</div>
+    </div>
+          <div class="metric-reset">Resets 2026-09-12 20:09 PDT</div>
+        </div>
+        
+        <div class="metric">
+          <div class="metric-label">GPT-5.3-Codex-Spark</div>
+          
+    <div class="bar-row">
+      <div class="bar-track"><div class="bar-fill ok" style="width:0%"></div></div>
+      <div class="bar-pct ok">0%</div>
+    </div>
+          <div class="metric-reset">Resets 2026-09-07 14:20 PDT</div>
+        </div>
+        <p class="muted">Credits: has=False balance=0 unlimited=False</p>
+        
+      </section>
+
+      <section class="card" id="kimi">
+        <h2>Kimi</h2>
+        <p class="sub">derived status (no public usage API)</p>
+        
+      <div class="status-chip bad">blocked_quota</div>
+      <p>Recent DONE_BLOCKED / weekly quota / 403 markers in Wiki Daily or Hunt.</p>
+      <p class="muted">No reliable public usage API with current token — derived from vault markers.</p>
+    
+      </section>
+
+      <section class="card" id="agy">
+        <h2>Agy</h2>
+        <p class="sub">CLI + latest pack + MCP quota</p>
+        
+      <p class="pill">CLI <strong>1.1.27</strong></p>
+      <div class="metric">
+        <div class="metric-label">Latest pack</div>
+        <div class="mono">agy-pack-2026-09-07-0832.md</div>
+        <div class="metric-reset">mtime 2026-09-07 08:55:09 PDT</div>
+        <p class="pack-status">PACK_DONE (First regular hourly collection pack following Mac reconnect and 0824 catch-up; window spans ~08:24–08:52 PT Mon 2026-09-07; feed target is Codex `gpt-6-astra` 12:34 PT Field Brief pipeline; verified Astra'…</p>
+      </div>
+      <div class="metric">
+        <div class="metric-label">social-superpowers MCP</div>
+        <div class="status-chip bad">blocked_quota</div>
+        <p class="muted">Daily 120-call quota · resets midnight UTC / 17:00 PT</p>
+        <p class='metric-reset'>Reached 08:27 PT</p>
+      </div>
+      <p class="muted">No clean Gemini quota API — pack/MCP status only.</p>
+    
+      </section>
+
+      <section class="card" id="grok">
+        <h2>Grok Bot agents</h2>
+        <p class="sub">static roster · not Mac-metered</p>
+        
+      <ul class="roster"><li><strong>Agent Analytics Collection Bot</strong> <span class="muted">— Collection / vault ops</span></li><li><strong>Github Bot CHY1988</strong> <span class="muted">— GitHub / hub publish</span></li><li><strong>Medium Bot</strong> <span class="muted">— Medium (id was Linkedin)</span></li><li><strong>New Bot</strong> <span class="muted">— General / new workstreams</span></li></ul>
+      <p class="muted">Cursor/Grok Bot usage not exposed via Mac CLI</p>
+    
+      </section>
+    </div>
+
+    <aside class="note">
+      <h3>How to refresh</h3>
+      <p>On the Mac, run <code>usage-dashboard/refresh.sh</code> (full path:
+      <code>/Users/haiyuancao/Documents/agent-analytics-research/usage-dashboard/refresh.sh</code>),
+      then commit/push the hub — or wait for the routine that does it.</p>
+    </aside>
+  </main>
+  <footer>
+    <div class="shell">Public research hub · secrets redacted from snapshot · Haiyuan Cao</div>
+  </footer>
+</body>
+</html>
