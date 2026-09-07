@@ -311,7 +311,7 @@ Re-verification: the paraphrase-plus-keyword audit over `index.html` and `STORY.
 
 Wording only, both pages, one PR. No spike rerun, no cloud, no `styles.css` or SVG geometry change. Applied by exact-match replacement (each old string asserted to occur once): 14 replacements in `rfc/board-pack/index.html`, 10 in `rfc/index.html`. The full before/after map is in `spec.md`.
 
-- **Protected blocks.** Board pack `.hero`, `#later-questions`, capacity line, `.punchline`, `.ask`, the "call it proven" bar sentence and all SVG geometry (every `svg`/`use`/`path`/`rect`/`text`/`marker`/`g` line with `<desc>` text masked) hash identically before and after. Full RFC: the nine PR 38 regions (`context_ref`, identity formulas, all `pre` blocks, SVG formula text, §04 decisions, §08 checklist, §09 phase table, §09 phase cards, §02 motivation) hash identically to `aeee7b7`. Zero lines containing `2026-09-19` or `19 September` appear in the diff.
+- **Protected blocks.** Board pack `.hero`, `#later-questions`, capacity line, `.punchline`, `.ask`, the "call it proven" bar sentence and all SVG geometry (every `svg`/`use`/`path`/`rect`/`text`/`marker`/`g` line with `<desc>` text masked) hash identically before and after. Full RFC: the nine PR 38 regions (`context_ref`, identity formulas, all `pre` blocks, SVG formula text, §04 decisions, §08 checklist, §09 phase table, §09 phase cards, §02 motivation) hash identically to `aeee7b7`. No changed line in either HTML page contains `2026-09-19` or `19 September`; the only diff lines that do are context lines and the sentences in `intent.md`, `plan.md` and `spec.md` that state the checkpoint is unchanged.
 - **R18.** The paraphrase-plus-keyword scan over the board pack's visible text (including SVG `<desc>`) finds every describing site with all three qualifiers in the chain sentence or the next one. Residuals are the enumerated carve-outs plus one new bare pointer in `.design-intro` ("The chain section below has the detail.").
 - **Banned words / labels.** Added lines contain none of the banned words and no scoreboard label; the only case-insensitive hits are the lowercase verbs "verified", "released" and "measured" carried on replaced lines. The single arrow on an added line is the required "Board-pack near-miss →" label on the read-time line.
 - **Links.** Every external href on a changed line returns HTTP 200 (twelve distinct URLs, all pre-existing pins). The new in-page anchor `#design-chain` resolves; no in-page anchor on either page is dangling; no duplicate ids.
@@ -320,3 +320,14 @@ Wording only, both pages, one PR. No spike rerun, no cloud, no `styles.css` or S
 - **Diff.** `git diff --check` clean; changed tracked files are `rfc/index.html` and the five board-pack files.
 
 Not done: no cloud run, no experiment rerun, no merge. Haiyuan retains the merge gate.
+
+### Review fix pass (Fable 5.1, 2026-09-06 PT, same branch)
+
+Opus (CHANGES: 1 P1, 2 P2) and Astra (CHANGES) reviewed `65fde6b`. Applied, wording only, no spike rerun:
+
+- **Graph-walk overclaim** (Opus P1, Astra P1; `#context-point` note, `spec.md` map row): "it found the linked rules in every tested case" became "it behaved correctly in every case we tested". The record includes correct empty and ambiguous outcomes (a mismatched seed returns no content, a deprecated anchor on the test bundle is ambiguous, a hidden intermediate yields no paths), so a universal positive find was stronger than the evidence and contradicted the graph-walk paragraph below it.
+- **Access line** (Astra P2; `#access-point` note, `spec.md` map row): "was correctly refused in five checks" became "passed five access checks on the SQL path", matching the prior honesty wording; "not yet inside graph queries" kept.
+- **Conditional mood** (Opus P2; `rfc/index.html` masthead subtitle, §01 lede, §07 opener): "is then published" → "would then be published"; "connects three things" → "would connect three things"; "These guarantees hold" → "These proposed guarantees would hold".
+- **Checkpoint claim** (Opus P2; this file): the "zero lines in the diff" sentence above is rescoped to the two HTML pages; the companion Markdown sentences that mention the checkpoint are the only other hits.
+
+Re-verification: protected-region hashes on both pages unchanged; no changed HTML line contains the checkpoint date; closed-state word count re-measured after the fix: 910 in Chromium, Firefox and WebKit at 1280 and 320 px (913 before the fix; ceiling 920), overflow 0 closed and open, toggle and closed-state print intact; `rfc/index.html` overflow 0 at 1280/768/320 with the ask-later table at 876/876, 724/724 and scrolling inside its wrapper at 320; `git diff --check` clean. Not done: no cloud run, no merge; Haiyuan retains the merge gate.
