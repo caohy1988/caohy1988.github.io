@@ -204,8 +204,8 @@ def impersonated_credential_file(sa_email: str, source_path: Optional[str] = Non
 
 
 USERINFO_EMAIL = "https://www.googleapis.com/auth/userinfo.email"
-_SCOPE_SHIM = '''"""Written by okf_bq_graph.principal for the SDK receipt subprocess: it is on PYTHONPATH, so Python imports it
-at interpreter start-up, before the SDK example runs.
+_SCOPE_SHIM = '''"""Written by okf_bq_graph.principal for the SDK receipt subprocess as `usercustomize.py`: it is on PYTHONPATH, so
+Python imports it at interpreter start-up (after the interpreter's own `sitecustomize`), before the SDK example runs.
 
 The SDK's `broker.open_live_session` asks `google.auth.default` for ["cloud-platform"] and then reads the requester's
 verified e-mail from `oauth2/tokeninfo`. An impersonated access token minted with that scope alone carries no e-mail, and
@@ -216,28 +216,64 @@ already carries by default.
 
 This shim adds exactly that scope. It changes the SCOPE of the credential, never the identity: the token still belongs to
 the impersonated service account, tokeninfo reports that account, and every BigQuery job carries it. No SDK source file is
-edited or read differently; the SDK still establishes the requester from the platform, not from an argument.
+edited.
+
+The wrap is deferred to the moment `google.auth` is imported: at customisation time `sys.path` is still incomplete, so an
+eager import here would fail. The loader hook runs when the SDK itself imports the module, with `sys.path` whole.
 """
-try:
-    import google.auth as _ga
+import sys as _sys
 
-    _EMAIL = "{email}"
-    _inner = _ga.default
+_EMAIL = "{email}"
 
-    def default(scopes=None, *args, **kwargs):
-        if scopes and _EMAIL not in scopes:
-            scopes = list(scopes) + [_EMAIL]
-        return _inner(scopes, *args, **kwargs)
 
-    _ga.default = default
-except Exception:   # noqa: BLE001 - a subprocess without google-auth must still start
-    pass
+def _with_email(scopes):
+    """The SDK's own scope list, plus the e-mail scope. Nothing is invented when no scopes were requested."""
+    if scopes and _EMAIL not in scopes:
+        return list(scopes) + [_EMAIL]
+    return scopes
+
+
+class _EmailScope:
+    """Meta-path finder that wraps `google.auth.default` once, as the real module finishes loading."""
+
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname != "google.auth":
+            return None
+        try:
+            _sys.meta_path.remove(self)     # the delegation below must not re-enter this hook
+        except ValueError:
+            return None
+        from importlib.machinery import PathFinder
+        spec = PathFinder.find_spec(fullname, path, target)
+        if spec is None or spec.loader is None or not hasattr(spec.loader, "exec_module"):
+            return None
+        _exec = spec.loader.exec_module
+
+        def exec_module(module):
+            _exec(module)
+            _inner = module.default
+
+            def default(scopes=None, *args, **kwargs):
+                return _inner(_with_email(scopes), *args, **kwargs)
+
+            module.default = default
+
+        spec.loader.exec_module = exec_module
+        return spec
+
+
+_sys.meta_path.insert(0, _EmailScope())
 '''
 
 
+
 def scope_shim_file(directory: str) -> str:
-    """`sitecustomize.py` in a private directory the broker puts on the subprocess's PYTHONPATH."""
-    path = os.path.join(directory, "sitecustomize.py")
+    """`usercustomize.py` in a private directory the broker puts on the subprocess's PYTHONPATH. Deliberately NOT
+    `sitecustomize.py`: this interpreter already ships one (Homebrew's, which appends the site-packages directory that
+    carries google-auth), and a PYTHONPATH `sitecustomize` shadows it instead of running beside it -- the subprocess then
+    dies on `No module named 'google'`. `usercustomize` is imported straight after the real `sitecustomize`, so the path
+    is whole and nothing is displaced."""
+    path = os.path.join(directory, "usercustomize.py")
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(_SCOPE_SHIM.format(email=USERINFO_EMAIL))
     return path
@@ -544,7 +580,7 @@ class RestrictedBroker:
                 td["steps"]["readback_rls_policies"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}"}
         if self._cred_dir:
             shutil.rmtree(self._cred_dir, ignore_errors=True)
-            td["steps"]["remove_credential_file"] = {"ok": not os.path.exists(self._cred_dir), "held": ["adc.json", "sitecustomize.py"]}
+            td["steps"]["remove_credential_file"] = {"ok": not os.path.exists(self._cred_dir), "held": ["adc.json", "usercustomize.py"]}
         if not td["steps"]:
             td["status"] = "NOT_NEEDED"; td["reason"] = "no dataset or row access policy touched and no credential file written"
         else:
