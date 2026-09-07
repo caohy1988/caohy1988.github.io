@@ -329,3 +329,70 @@ def test_journal_is_append_only_and_retains_originals(tmp_path):
     lines = [json.loads(l) for l in (tmp_path / "r" / "journal.jsonl").read_text().splitlines()]
     assert [l["event"] for l in lines] == ["opened", "intended", "submitted", "terminal", "retained"]
     assert j.summary()["unresolved"] == 0 and j.job_ids() == ["job-1"] and j.summary()["actual_jobs"] == 1
+
+
+# ---- BigQueryStore: the real client boundary with a fake client (journal before waiting, ids at submission, failures retained)
+class _Job:
+    def __init__(self, job_id, rows=None, fail=None):
+        self.job_id, self._rows, self._fail = job_id, rows or [], fail
+        self.total_bytes_billed, self.total_bytes_processed = 10485760, 1234
+
+    def result(self):
+        if self._fail:
+            raise self._fail
+        return list(self._rows)
+
+
+class _Client:
+    def __init__(self, plan):
+        self.plan, self.calls = list(plan), []
+
+    def query(self, query, job_config=None, location=None):
+        self.calls.append({"query": query, "params": {p.name: p.value for p in job_config.query_parameters}, "location": location,
+                           "max_bytes": job_config.maximum_bytes_billed, "cache": job_config.use_query_cache, "labels": dict(job_config.labels),
+                           "timeout_ms": job_config.job_timeout_ms})
+        nxt = self.plan.pop(0)
+        if isinstance(nxt, Exception):
+            raise nxt
+        return nxt
+
+
+def test_bigquery_store_journals_each_read_with_its_job_identity(tmp_path, pin):
+    j = Journal(tmp_path / "r", "r1")
+    client = _Client([_Job("j-pub", [{"publication_id": pin.publication_id, "validation_status": "READY"}]), _Job("j-seed", []),
+                      _Job("j-head", [{"bundle_id": "acme_retail", "publication_id": "pub_x"}])])
+    s = PUB.BigQueryStore(client, "proj", "ds", "US", j)
+    rows, e = s.publication(pin.bundle_id, pin.publication_id)
+    assert rows[0]["publication_id"] == pin.publication_id and e["job_id"] == "j-pub" and e["state"] == "DONE" and e["actual"]
+    rows, e = s.seed(pin.concept_id, pin.bundle_id, pin.publication_id)
+    assert rows == [] and e["job_id"] == "j-seed" and e["state"] == "EMPTY"           # an empty lookup is still a journaled job
+    rows, e = s.head(pin.bundle_id)
+    assert e["role"] == "observed_head" and e["job_id"] == "j-head"
+    c = client.calls
+    assert c[0]["params"] == {"b": pin.bundle_id, "p": pin.publication_id} and "`proj.ds.publications`" in c[0]["query"] and "WHERE bundle_id = @b AND publication_id = @p" in c[0]["query"]
+    assert c[1]["params"] == {"id": pin.concept_id, "p": pin.publication_id, "b": pin.bundle_id}
+    assert all(x["max_bytes"] == PUB.MAX_BYTES_BILLED and x["cache"] is False and x["location"] == "US" and int(x["timeout_ms"]) == 60000 for x in c)
+    assert [x["labels"]["stage"] for x in c] == ["pin-resolution", "seed-visibility", "observed-head"]
+    assert j.job_ids() == ["j-pub", "j-seed", "j-head"] and j.summary()["unresolved"] == 0
+    assert pin.publication_id not in c[0]["query"]                                          # values travel as parameters, never as SQL text
+
+
+def test_bigquery_store_retains_failed_and_unsubmitted_reads(tmp_path, pin):
+    j = Journal(tmp_path / "r", "r1")
+    client = _Client([_Job("j-fail", fail=PermissionError("403 denied")), ConnectionError("submit failed")])
+    s = PUB.BigQueryStore(client, "proj", "ds", "US", j)
+    with pytest.raises(PermissionError):
+        s.publication(pin.bundle_id, pin.publication_id)
+    with pytest.raises(ConnectionError):
+        s.head(pin.bundle_id)
+    jobs = j.jobs()
+    assert [x["state"] for x in jobs] == ["ERROR", "NOT_SUBMITTED"] and jobs[0]["job_id"] == "j-fail" and jobs[1]["job_id"] is None
+    assert "PermissionError" in jobs[0]["error"] and all(x["terminal"] for x in jobs)
+
+
+def test_bigquery_store_rows_returns_two_journaled_jobs(tmp_path, pin):
+    j = Journal(tmp_path / "r", "r1")
+    client = _Client([_Job("j-nodes", [{"node_id": "n"}]), _Job("j-edges", [])])
+    nodes, edges, jobs = PUB.BigQueryStore(client, "proj", "ds", "US", j).rows(pin.bundle_id, pin.publication_id)
+    assert nodes == [{"node_id": "n"}] and edges == [] and jobs["nodes_job"]["job_id"] == "j-nodes" and jobs["edges_job"]["job_id"] == "j-edges"
+    assert "EXCEPT(stale_after_ts)" in client.calls[0]["query"] and "ORDER BY node_id" in client.calls[0]["query"]

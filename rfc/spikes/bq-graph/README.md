@@ -26,7 +26,8 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `sql/*.sql` | `schema.sql`, `graph.sql` (property graph DDL), `seed.sql` (vector seed), `governed.sql` (two-hop GQL), `context.sql`, `impact.sql`, `stubs.sql`, `fallback.sql` |
 | `fixtures/bundle_b/` | Negative fixture: identical relative paths, missing targets, duplicate hits, ambiguous replacement, `../` escape |
 | `fixtures/cases.json`, `fixtures/scale.json` | Query set and benchmark cell matrix |
-| `tests/` | `test_compile.py`, `test_oracle.py`, `test_retrieve.py` (contract runs against oracle by default; `OKF_LIVE_ENGINE=gql|fallback` runs it live) |
+| `okf_bq_graph/catalog.py`, `seed.py`, `publication.py`, `journal.py`, `catalog_lifecycle.py` | Catalog-seeded chain (2026-09-06): Dataplex list/get reader + trusted-config parser, exact `ConceptSeed`, retained-publication resolution + trusted-source compilation + payload consistency guard, run-owned job journal, isolated relational-only lifecycle driver for the owned republish experiment |
+| `tests/` | `test_compile.py`, `test_oracle.py`, `test_retrieve.py` (contract runs against oracle by default; `OKF_LIVE_ENGINE=gql|fallback` runs it live); `test_catalog.py`, `test_catalog_publication.py`, `test_catalog_lifecycle.py` + the catalog cases in `test_chain.py` (all hermetic, injected Catalog responses) |
 | `evidence/` | Raw captures: capacity gate, smoke jobs, projection, publish log, integration/governance JSON, `requests.jsonl`, `summary.json`, `cost.json`, comparison, report |
 
 Source pin: `/Users/haiyuancao/knowledge-catalog/okf/bundles/acme_retail` @ knowledge-catalog `31da799a9aef176df12e91abbd119ea9385b75ec`
@@ -148,6 +149,86 @@ identity set is the 14 case jobs and does not include the pointer-lookup job, wh
 adds; the later changes (invocation-private and run-owned diagnostics, `approved` outage labelled NOT_REACHED) alter no
 recorded field of a passing run, so it was not re-run.
 
+## Catalog-seeded chain (2026-09-06, Slice A hermetic; runner `chain/0.5.0`)
+
+`python3 -m okf_bq_graph.chain --seed-mode catalog` replaces the fixture seed with a **fresh Dataplex Catalog read**: paginated
+`entries.list` on the configured entry group selects the configured entry by exact name (no other entry body is fetched), then
+`entries.get(view=ALL)` returns the `okf-context-runtime` aspect with its values (the default FULL view can expose only keys for
+optional aspects). Authored `okf` / `overview` aspects are recorded as present and never used as runtime input. Modules:
+`okf_bq_graph/catalog.py` (reader + parser + trusted `CatalogConfig` allowlist), `seed.py` (`ConceptSeed`, an exact scoped
+Concept id that is never wrapped in `forced:`), `publication.py` (retained store, exact pin resolution, trusted source,
+payload guard), `journal.py` (run-owned job journal + raw retention), `catalog_lifecycle.py` (Slice B2 driver, hermetically
+tested only).
+
+The returned pin is **validated, then frozen**: every field typed and non-empty, `runtime_contract` in the supported set,
+project / dataset / location / bundle / source repository+root / managed profile+deployment / compiler version equal to trusted
+configuration (Catalog values can never widen the allowlist or name a SQL destination), `pub_<16 hex>` / 40-hex source pin /
+64-hex digests, a safe bundle-relative `concept_path`, and `concept_id` exactly `bundle|publication|Concept|path` (case-sensitive).
+Refusals are typed (`CATALOG_ERROR` for 403/404/429/timeout/non-JSON, `PAGE_CAP`, `ENTRY_NOT_FOUND`, `ENTRY_AMBIGUOUS`,
+`ENTRY_MISMATCH`, `ASPECT_MISSING`, `ASPECT_KEYS_ONLY`, `INVALID_PIN`, `UNSUPPORTED_CONTRACT`, `SCOPE_REFUSED`) and end the run at
+`broken_at = seed` with no store read, no retrieval, no SDK call and no fixture / head / vector / saved-JSON fallback. A live
+invocation configured with a mock or saved-response reader is `READER_REFUSED`; a hermetic invocation with the HTTP reader
+likewise.
+
+The pin is then resolved with **parameterised reads against the configured dataset only**: exactly one retained `publications`
+row (must be `READY`) plus exactly one visible seed node row whose path and `file_sha256` equal the pin; the retained row's
+source pin, source manifest and compiler version must equal the pin (`PIN_MISMATCH` otherwise); missing / non-READY / duplicate
+publication or absent seed is `FAIL_STALE`; a transport or IAM failure is `ERROR` (blocked, never a pass). The current head
+(`active_publication`) is read for observation only and is never followed: a P1 pin is served exactly while the head is P2.
+The exact clean pinned source is then compiled as the **trusted projection** (`trusted_source`: git HEAD == pin, bundle tree
+clean, bundle path == `source_root`, compiled publication id / manifest / seed digest == pin; anything unknown is
+`SOURCE_UNVERIFIED` and refuses). The provenance gate adds `source_verified` to the SDK head/clean checks.
+
+Each case then runs governed retrieval with the exact Concept id and, before binding, a **payload consistency guard**
+(`verify_payload`): the full retained node and edge rows for the publication (excluding only the storage-derived
+`stale_after_ts`) must equal the trusted rows, the node/edge manifests are recomputed from the retained rows and compared
+to the publication's digests, every retained Section text is re-hashed, the result's scope, seed concept fields, every path's
+scoped endpoints and LINKS_TO continuity, the computation's section membership, its SQL bytes and recomputed `sql_sha256`, and
+the declaration's node id / file digest (also against the source manifest) / type / runtime / lifecycle / `stale_after` /
+parameters are all checked against the trusted projection. The separately selected computation object is re-verified byte
+for byte. `INCONSISTENT` leaves the case `NOT_BOUND`, never invokes the SDK, and grades `WRONG` (a reached stage that
+contradicts the pinned publication is not an outage); `ERROR` is `NOT_REACHED`. Regressions cover: a P2 endpoint or a
+non-existent edge mixed into a P1 path, a section's text changed under its old hash and P1 labels, SQL changed after preflight
+under the old digest label, a declaration changed after preflight, a P2 result relabelled as P1, and a run with the guard
+bypassed (which releases a corrupted non-computation section that the SDK bind cannot see).
+
+`bind` now takes the verified source revision from the validated pin and requires the SDK fixture manifest's `derived_from`
+to end with the full 40-hex revision; the check's note records that this lineage label is free text at the pinned SDK commit,
+not a Git attestation. The chain record names `graph_publication` (bundle, publication, source pin, source manifest, node/edge
+digests) and `sdk_publication` (the receipt example's fixture publication and context ref) separately. `approved` and
+`sql-substitution` use the Catalog-derived seed; `declaration-mismatch` uses an explicitly labelled injected fixture seed
+(`seed_origin = injected-fixture-seed`, `metrics/revenue` under the same pinned publication), never a second Catalog discovery.
+The cache is disabled for concept seeds (`scope.cache = DISABLED_CONCEPT_SEED`); the oracle engine now refuses to serve a
+publication other than the one requested (`NO_PUBLICATION`) instead of relabelling whatever graph it holds.
+
+**Evidence begins before the Catalog read.** Catalog mode writes everything under `evidence/catalog-chain/<run_id>/`: raw
+`catalog/catalog_list_<n>.json` and `catalog_entry.json` responses with SHA-256, `journal.jsonl` (every store read journaled
+before it is waited on — pin resolution, seed visibility, observed head, payload rows, declaration — including empty and failed
+reads; live reads carry the BigQuery job id at submission), `receipt/case_<case>_<mode>.json` diagnostics, and the run's own
+`chain_<mode>.json`; `evidence/catalog-chain/chain_<mode>.json` is the atomically written latest record. Early refusals keep
+the same retained final record. Live catalog mode adds every journaled job id to the `same_requester` identity set. Fixture mode
+(`--seed-mode fixture`, the default) is unchanged apart from the journal and keeps `evidence/chain/`.
+
+Hermetic result (`evidence/catalog-chain/chain_hermetic.json`, injected responses, `seed.mode = catalog-mock`): `CHAIN_CONNECTED`
+— pin OK, publication OK with head observed = pin, source OK, all three payloads `CONSISTENT`, `approved` RELEASED on the SDK's
+synthetic fixture, `sql-substitution` REJECTED `sql_mismatch` → REFUSED, `declaration-mismatch` MISMATCH → REFUSED, CLI never
+invoked; all acceptances `MET`. **This is a hermetic contract result, not a live Catalog success**: no Catalog, BigQuery or
+receipt job ran. Live B1/B2 (fresh read of the KC entry, owned dataset + entry lifecycle, P1→P2 head switch, FAIL_STALE,
+live-backed mixed-payload injection, cleanup readback) are the next pass.
+
+`okf_bq_graph/catalog_lifecycle.py` is the isolated Slice B2 driver: owned dataset `okf_catalog_chain_<run_suffix>` (US,
+relational tables only — never `graph.sql`, `section_vectors` embedding, reservations or IAM), owned entries under
+`<group>/entries/acme-retail-catalog-chain/<run_id>/`, deployment `acme-retail-catalog-chain-<run_id>`; the allowlist is derived
+from this local configuration before any Catalog read, so a returned pin cannot authorize its own destination. It snapshots the
+original entry and head read-only, publishes with a full-row readback (READY only when the retained rows, recomputed digests,
+section hashes, dangling and distinctness checks all hold), advances the head with one MERGE only for a READY owned publication
+(`inject_failure="before_head"` leaves the old head; `"before_ready"` leaves loaded rows that can never become READY or head),
+generates owned pins from the verified rows, preserves authored aspects with explicit aspect keys (no delete-missing), and
+cleans up only exact owned resources with absence readback (`cleanup.json` is `COMPLETE` only then). P2 comes from
+`prepare_derived_source`: a retained temporary copy with one non-computation policy file changed, pinned as
+`<base>+local.<manifest16>` and recorded in `derivation.json`, never labelled as the clean upstream commit. Hermetic tests
+run it against an in-memory fake cloud; the live resources do not exist yet.
+
 ## Graph model (spec §3)
 
 Node kinds `Concept | Section | Source | Actor | Artifact | LogEntry`; stubs are `Concept{stub=true}`. Relations
@@ -179,6 +260,8 @@ python3 -m okf_bq_graph.publish <bundle_root>                # on-demand: tables
 OKF_LIVE_ENGINE=fallback python3 -m pytest tests/test_retrieve.py -q   # live, on-demand
 python3 -m okf_bq_graph.chain --hermetic                  # connected chain, no cloud (oracle graph + SDK emulation)
 python3 -m okf_bq_graph.chain --live                      # connected chain, on-demand fallback engine + SDK --live
+python3 -m okf_bq_graph.chain --hermetic --seed-mode catalog --catalog-responses fixtures/catalog_responses.json   # Catalog contract, injected responses (catalog-mock)
+python3 -m okf_bq_graph.chain --live --seed-mode catalog  # fresh Dataplex list/get of the KC-unblock entry -> retained publication -> receipt (Slice B1; not yet run)
 python3 -m okf_bq_graph.run integration --minutes 25         # opens the Enterprise window, runs GQL cases, closes it
 python3 -m okf_bq_graph.run benchmark --minutes 85           # benchmark cells from fixtures/scale.json
 python3 -m okf_bq_graph.run all --minutes 85                 # both in one window
