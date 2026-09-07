@@ -193,7 +193,7 @@ def run_journaled(client: Any, journal: Any, role: str, desc: str, query: str, j
                        job_ref_complete=bool(jp and location), **meta)
     journal.submitted(e, job_id=jid, project=jp, location=location)   # the full reference is known and retained before the send
     try:
-        job = client.query(query, job_config=job_config, location=location, job_id=jid, project=jp)
+        job = client.query(query, job_config=job_config, location=location, job_id=jid, project=jp, job_retry=None)   # a fixed job id is never retried
     except Exception as ex:  # noqa: BLE001
         reconcile_job(client, journal, e, f"submit {type(ex).__name__}: {str(ex)[:300]}", timeout=reconcile_timeout)
         raise

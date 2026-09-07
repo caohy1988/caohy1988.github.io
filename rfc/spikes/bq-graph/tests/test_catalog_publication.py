@@ -361,7 +361,7 @@ class _Client:
         self.get_fail, self.cancel_fail, self.after_cancel = get_fail, cancel_fail, after_cancel
         self.gets, self.cancels = [], []
 
-    def query(self, query, job_config=None, location=None, job_id=None, project=None):
+    def query(self, query, job_config=None, location=None, job_id=None, project=None, **kw):
         self.calls.append({"query": query, "params": {p.name: p.value for p in job_config.query_parameters}, "location": location, "job_id": job_id,
                            "project": project, "max_bytes": job_config.maximum_bytes_billed, "cache": job_config.use_query_cache,
                            "labels": dict(job_config.labels), "timeout_ms": job_config.job_timeout_ms})
@@ -440,9 +440,9 @@ def test_submit_exception_but_server_has_the_job_reconciles_to_its_real_state(tm
     # the job landed server-side despite the lost response: we learn that from jobs.get, not from the exception
     real_query = client.query
 
-    def landed(query, job_config=None, location=None, job_id=None, project=None):
+    def landed(query, job_config=None, location=None, job_id=None, project=None, **kw):
         client.server[(project, job_id)] = _Job(state="DONE")
-        return real_query(query, job_config, location, job_id, project)
+        return real_query(query, job_config, location, job_id, project, **kw)
     client.query = landed
     with pytest.raises(TimeoutError):
         s.head(pin.bundle_id)

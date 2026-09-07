@@ -982,7 +982,7 @@ class FakeBigQuery:
             return [{k: n[k] for k in ("node_id", "local_id", "path", "title", "type", "status", "stale_after", "stub", "runtime")} for n in proj["nodes"] if n["node_id"] in prm["ids"]]
         raise AssertionError("unrouted query: " + q[:120])
 
-    def query(self, q, job_config=None, location=None, job_id=None, project=None):
+    def query(self, q, job_config=None, location=None, job_id=None, project=None, **kw):
         assert job_id, "the chain must choose the job id before the send"
         assert project == self.project, "the chain must submit under the journaled (client) project"
         prm = self._params(job_config)
