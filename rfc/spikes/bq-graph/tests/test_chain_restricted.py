@@ -56,9 +56,10 @@ def test_policy_graph_follows_the_current_policy(projection):
     state["hidden"] = (HIDDEN,)
     r = g.governed("metrics/gross-margin-legacy", AS_OF)
     assert r["status"] == "OK" and r["paths"] == [] and r["computations"] == [] and not any(HIDDEN in json.dumps(x) for x in (r["paths"], r["replacement"]))
-    assert g.visible(["metrics/gross-margin-legacy"]) and not g.visible([HIDDEN])
+    nid = lambda local: f"acme_retail|{projection['publication_id']}|Concept|{local}"
+    assert g.visible([nid("metrics/gross-margin-legacy")]) and not g.visible([nid(HIDDEN)])
     state["dataset_reader"] = False
-    assert g.governed("metrics/gross-margin", AS_OF)["status"] == "DENIED" and not g.visible(["metrics/gross-margin"])
+    assert g.governed("metrics/gross-margin", AS_OF)["status"] == "DENIED" and not g.visible([nid("metrics/gross-margin")])
 
 
 def test_oracle_cached_replay_rechecks_visibility_and_denies_after_revocation(projection):
@@ -85,7 +86,9 @@ def test_oracle_cached_replay_rechecks_authorizing_edges_too(projection):   # Op
     first = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)
     assert first["scope"]["cache"] == "MISS_STORED" and first["computations"] and "edge_ids" not in first["computations"][0]
     entry = next(iter(clients["cache"].values()))
-    assert entry["dependency_version"] == RT.CACHE_DEPENDENCY_VERSION and len(entry["disclosed_edge_ids"]) == 1 and entry["disclosed_edge_ids"][0].startswith("acme_retail|")
+    walk_edge = next(e["edge_id"] for e in projection["edges"] if e["dst_id"] == comp and e["relation"] == "LINKS_TO" and e["src_id"].endswith("|Concept|metrics/gross-margin"))
+    assert entry["dependency_version"] == RT.CACHE_DEPENDENCY_VERSION and walk_edge in entry["disclosed_edge_ids"] and comp in entry["disclosed_ids"]
+    assert all(i.startswith("acme_retail|") for i in entry["disclosed_ids"] + entry["disclosed_edge_ids"])
     clients["graph"] = Graph(edge_revoked)
     fresh = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "other", AS_OF, clients)
     assert fresh["status"] == "OK" and fresh["paths"] == [] and fresh["computations"] == []                      # a fresh request discloses nothing ...
@@ -97,6 +100,80 @@ def test_oracle_cached_replay_rechecks_authorizing_edges_too(projection):   # Op
     assert RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)["scope"]["cache"] == "MISS_STORED"
     unpinned = RT.retrieve(CH.SEED, "acme_retail", "active", "r", AS_OF, clients)                               # an unpinned publication is never cached
     assert "cache" not in unpinned["scope"]
+
+
+def _node(projection, kind, local):
+    return next(n["node_id"] for n in projection["nodes"] if n["kind"] == kind and n["local_id"] == local)
+
+
+def _without_edges(projection, pred):
+    dropped = [e for e in projection["edges"] if pred(e)]
+    assert dropped, "the fixture must contain the edge being revoked"
+    return dict(projection, edges=[e for e in projection["edges"] if not pred(e)])
+
+
+def _warm(projection, graph=None):
+    clients = {"engine": "oracle", "graph": graph or Graph(projection), "projection": projection, "cache": {}}
+    first = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)
+    assert first["scope"]["cache"] == "MISS_STORED" and len(first["computations"][0]["sql"] or "") > 1000
+    return clients, first
+
+
+def test_oracle_cached_replay_rechecks_the_sql_section_edge(projection):   # Astra residual P1: HAS_SECTION edge only, nodes untouched
+    comp = _node(projection, "Concept", "computations/gross-margin-period")
+    section = _node(projection, "Section", "computations/gross-margin-period#s0")
+    clients, first = _warm(projection)
+    entry = next(iter(clients["cache"].values()))
+    sec_edge = next(e["edge_id"] for e in projection["edges"] if e["src_id"] == comp and e["dst_id"] == section and e["relation"] == "HAS_SECTION")
+    assert section in entry["disclosed_ids"] and sec_edge in entry["disclosed_edge_ids"]
+    clients["graph"] = Graph(_without_edges(projection, lambda e: e["src_id"] == comp and e["dst_id"] == section and e["relation"] == "HAS_SECTION"))
+    fresh = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "other", AS_OF, clients)
+    assert fresh["status"] == "OK" and fresh["computations"] and fresh["computations"][0]["sql"] is None          # a fresh requester gets no SQL ...
+    replay = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)
+    assert replay["status"] == "DENIED" and replay["scope"]["cache"] == "HIT_DENIED" and replay["computations"] == []   # ... and the replay serves none either
+
+
+def test_oracle_cached_replay_rechecks_a_hidden_computation_section_under_policy(projection):   # Astra residual P1, PolicyGraph shape
+    state = dict(PR.policy())
+    clients, first = _warm(projection, PR.PolicyGraph(projection, state))
+    state["hidden"] = ("computations/gross-margin-period#s0",)                                    # the Computation section row only
+    fresh = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "other", AS_OF, clients)
+    assert fresh["status"] == "OK" and fresh["computations"][0]["sql"] is None
+    replay = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)
+    assert replay["scope"]["cache"] == "HIT_DENIED" and replay["computations"] == []
+    state["hidden"] = ()
+    assert RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)["scope"]["cache"] == "HIT_RECHECKED"
+
+
+@pytest.mark.parametrize("relation, anchor, field", [
+    ("VERIFIED_BY", "computations/gross-margin-period", "trust_tier"),      # verification of the computation
+    ("VERIFIED_BY", "metrics/gross-margin", "trust_tier"),                  # verification of the seed
+    ("DERIVES_FROM", "metrics/gross-margin", "provenance"),                 # provenance of the seed
+])
+def test_oracle_cached_replay_rechecks_verification_and_provenance_edges(projection, relation, anchor, field):   # Astra residual P1 / Opus P2
+    src = _node(projection, "Concept", anchor)
+    clients, first = _warm(projection)
+    revoked = Graph(_without_edges(projection, lambda e: e["src_id"] == src and e["relation"] == relation))
+    clients["graph"] = revoked
+    fresh = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "other", AS_OF, clients)
+    before = first["computations"][0][field] if field == "trust_tier" and anchor.startswith("computations") else first["concepts"][0][field]
+    after = fresh["computations"][0][field] if field == "trust_tier" and anchor.startswith("computations") else fresh["concepts"][0][field]
+    assert before != after, (relation, anchor)                                                     # the revocation changes the fresh answer ...
+    replay = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)
+    assert replay["scope"]["cache"] == "HIT_DENIED" and replay["concepts"] == [] and replay["computations"] == []   # ... and is never replayed around
+
+
+def test_oracle_answer_with_unestablished_dependencies_is_never_cached(projection):   # BigQuery BYPASS_INCOMPLETE_DEPENDENCIES parity
+    comp = _node(projection, "Concept", "computations/gross-margin-period")
+    broken = dict(projection, edges=[dict(e, edge_id=None) if (e["src_id"] == comp and e["relation"] == "VERIFIED_BY") else e for e in projection["edges"]])
+    clients = {"engine": "oracle", "graph": Graph(broken), "projection": broken, "cache": {}}
+    r = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)
+    assert r["status"] == "OK" and r["computations"] and r["scope"]["cache"] == "BYPASS_INCOMPLETE_DEPENDENCIES" and clients["cache"] == {}
+    assert Graph(broken).governed("metrics/gross-margin", AS_OF)["dependencies"] is None
+    deps = Graph(projection).governed("metrics/gross-margin", AS_OF)["dependencies"]
+    assert deps and all(i.startswith(f"acme_retail|{projection['publication_id']}|") for i in deps["node_ids"] + deps["edge_ids"])
+    kinds = {i.split("|")[2] for i in deps["node_ids"]}
+    assert {"Concept", "Section", "Actor", "Source"} <= kinds                                       # not only concepts: the whole context
 
 
 def test_job_ids_of_includes_the_cached_replay_recheck_job():   # Astra P2 #2

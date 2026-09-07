@@ -172,10 +172,13 @@ by four cases with the same stage-reachability acceptance (`MET` / `NOT_REACHED`
   a probe that produced no platform decision is `NOT_REACHED`.
 * **`revocation-before-replay`**: the first pass runs the full path and is `RELEASED` (cache `MISS_STORED`); the broker
   then revokes the requester's dataset grant and its SDK-table read; the same request is replayed from the case-private
-  cache and is `HIT_DENIED` with nothing disclosed (the oracle engine now carries the BigQuery engines' `_recheck`
-  contract: a hit is served only after the graph re-confirms every disclosed concept AND every edge that authorized the
-  disclosed paths is still visible, so an edge-only revocation with the nodes untouched is `HIT_DENIED` too; a legacy
-  dependency version is rerun, an unpinned publication is never cached);
+  cache and is `HIT_DENIED` with nothing disclosed (the oracle engine now carries the BigQuery engines'
+  `_cache_dependencies` / `_recheck` contract: the entry records every node and edge the answer depends on, the walk
+  hops, the Computation section and its `HAS_SECTION` edge, the `VERIFIED_BY` actors, the `DERIVES_FROM` sources and
+  their `RESOLVES_TO` targets, the `LINKS_TO` context, and a hit is served only after the graph re-confirms all of them
+  by scoped id, so an edge-only revocation with every node untouched, a hidden Computation section or a revoked
+  verification is `HIT_DENIED` too; an answer whose dependencies cannot be established is never cached
+  (`BYPASS_INCOMPLETE_DEPENDENCIES`), a legacy dependency version is rerun, an unpinned publication is never cached);
   the authorization probe is `DENIED`; the consumer re-decides the stored receipt and `REFUSED`; the CLI was invoked exactly
   once. A released replay, a replay served after revocation, an `ALLOWED` probe or a second CLI launch is `WRONG`; a
   first pass that never released or a replay that was not a cache hit is `NOT_REACHED`.

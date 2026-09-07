@@ -92,10 +92,10 @@ class PolicyGraph:
             return {"status": "DENIED", "concept": local}
         return self._current().governed(local, as_of)
 
-    def visible(self, locals_: list[str], edge_ids: list[str] | tuple = ()) -> bool:
+    def visible(self, node_ids: list[str] | tuple, edge_ids: list[str] | tuple = ()) -> bool:
         if not self._state["dataset_reader"]:
             return False
-        return self._current().visible(locals_, edge_ids)
+        return self._current().visible(node_ids, edge_ids)
 
 
 # ----------------------------------------------------------------------------- hermetic broker (exercised in this slice)
