@@ -36,6 +36,7 @@ class Graph:
             self.out[e["src_id"]].append(e)
             self.inc[e["dst_id"]].append(e)
         self.by_local: dict[tuple, str] = {(n["kind"], n["local_id"]): n["node_id"] for n in projection["nodes"]}
+        self.edge_ids: set[str] = {e["edge_id"] for e in projection["edges"]}
 
     # -- lookups
     def concept(self, local: str) -> Optional[dict]:
@@ -48,10 +49,12 @@ class Graph:
     def neighbors(self, nid: str, rel: str) -> list[tuple[dict, dict]]:
         return [(e, self.nodes[e["dst_id"]]) for e in self.out[nid] if e["relation"] == rel]
 
-    def visible(self, locals_: list[str]) -> bool:
-        """Cached-replay re-check (retrieve.py): every previously disclosed concept must still be in the projection this
-        graph answers from. A policy-filtered projection (principal.PolicyGraph) answers False for hidden rows."""
-        return all(("Concept", x) in self.by_local for x in locals_)
+    def visible(self, locals_: list[str], edge_ids: list[str] | tuple = ()) -> bool:
+        """Cached-replay re-check (retrieve.py), the BigQuery `_recheck` contract: every previously disclosed concept AND
+        every edge that authorized the disclosed paths must still be in the projection this graph answers from. A
+        policy-filtered projection (principal.PolicyGraph) answers False for hidden rows; an edge-only revocation
+        (nodes untouched, an authorizing LINKS_TO row gone) answers False too."""
+        return all(("Concept", x) in self.by_local for x in locals_) and all(e in self.edge_ids for e in edge_ids)
 
     # -- derived properties (spec §4)
     def trust(self, nid: str) -> dict:
@@ -102,7 +105,7 @@ class Graph:
         # hop 1
         for e1, n1 in self.neighbors(cid, "LINKS_TO"):
             if n1["type"] == "Attested Computation" and (n1["status"] or "stable") != "deprecated" and not n1["stub"]:
-                computations.append((1, [self.local(cid), self.local(n1["node_id"])], n1))
+                computations.append((1, [self.local(cid), self.local(n1["node_id"])], n1, [e1["edge_id"]]))
         # hop 2 only for deprecated anchors (pinned Neo4j semantics)
         if (c["status"] or "stable") == "deprecated":
             for e1, n1 in self.neighbors(cid, "LINKS_TO"):
@@ -110,16 +113,16 @@ class Graph:
                     continue
                 for e2, n2 in self.neighbors(n1["node_id"], "LINKS_TO"):
                     if n2["type"] == "Attested Computation" and (n2["status"] or "stable") != "deprecated" and not n2["stub"]:
-                        computations.append((2, [self.local(cid), self.local(n1["node_id"]), self.local(n2["node_id"])], n2))
+                        computations.append((2, [self.local(cid), self.local(n1["node_id"]), self.local(n2["node_id"])], n2, [e1["edge_id"], e2["edge_id"]]))
         best: dict[str, tuple] = {}
-        for hops, path, n in computations:
+        for hops, path, n, edges in computations:
             if n["node_id"] not in best or hops < best[n["node_id"]][0]:
-                best[n["node_id"]] = (hops, path, n)
+                best[n["node_id"]] = (hops, path, n, edges)
         comps = []
-        for hops, path, n in sorted(best.values(), key=lambda x: (x[0], x[2]["node_id"])):
+        for hops, path, n, edges in sorted(best.values(), key=lambda x: (x[0], x[2]["node_id"])):
             sql = self.sanctioned_sql(n["node_id"])
             comps.append({"path": n["path"], "concept": self.local(n["node_id"]), "concept_hops": hops,
-                          "via": path, "runtime": n["runtime"], "status": n["status"],
+                          "via": path, "edge_ids": edges, "runtime": n["runtime"], "status": n["status"],
                           "trust_tier": self.trust(n["node_id"])["trust_tier"],
                           "freshness": self.freshness(n, as_of), "sql": sql["sql"] if sql else None,
                           "sql_sha256": sql["sql_sha256"] if sql else None,

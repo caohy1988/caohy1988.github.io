@@ -78,6 +78,38 @@ def test_oracle_cached_replay_rechecks_visibility_and_denies_after_revocation(pr
     assert fresh["status"] == "DENIED" and "cache" not in fresh["scope"]
 
 
+def test_oracle_cached_replay_rechecks_authorizing_edges_too(projection):   # Opus P1: the BigQuery `_recheck` contract, nodes AND edges
+    comp = next(n["node_id"] for n in projection["nodes"] if n["local_id"] == "computations/gross-margin-period" and n["kind"] == "Concept")
+    edge_revoked = dict(projection, edges=[e for e in projection["edges"] if not (e["dst_id"] == comp and e["relation"] == "LINKS_TO")])   # nodes untouched
+    clients = {"engine": "oracle", "graph": Graph(projection), "projection": projection, "cache": {}}
+    first = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)
+    assert first["scope"]["cache"] == "MISS_STORED" and first["computations"] and "edge_ids" not in first["computations"][0]
+    entry = next(iter(clients["cache"].values()))
+    assert entry["dependency_version"] == RT.CACHE_DEPENDENCY_VERSION and len(entry["disclosed_edge_ids"]) == 1 and entry["disclosed_edge_ids"][0].startswith("acme_retail|")
+    clients["graph"] = Graph(edge_revoked)
+    fresh = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "other", AS_OF, clients)
+    assert fresh["status"] == "OK" and fresh["paths"] == [] and fresh["computations"] == []                      # a fresh request discloses nothing ...
+    replay = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)
+    assert replay["status"] == "DENIED" and replay["scope"]["cache"] == "HIT_DENIED" and replay["computations"] == []   # ... and neither does the replay
+    clients["graph"] = Graph(projection)
+    assert RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)["scope"]["cache"] == "HIT_RECHECKED"
+    entry["dependency_version"] = 1                                                                             # a legacy entry is rerun, never rechecked partially
+    assert RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "r", AS_OF, clients)["scope"]["cache"] == "MISS_STORED"
+    unpinned = RT.retrieve(CH.SEED, "acme_retail", "active", "r", AS_OF, clients)                               # an unpinned publication is never cached
+    assert "cache" not in unpinned["scope"]
+
+
+def test_job_ids_of_includes_the_cached_replay_recheck_job():   # Astra P2 #2
+    case = {"case": "revocation-before-replay", "retrieval": {"timing": {"jobs": [{"job_id": "w1"}]}}, "declaration": {"job_id": "d1"},
+            "receipt": {"invoked": True, "receipt": {"job": {"job_id": "r1"}}},
+            "replay": {"retrieval": {"status": "DENIED", "cache": "HIT_DENIED", "timing": {"jobs": [{"stage": "recheck", "job_id": "rc1"}]}}}}
+    ids = CH.job_ids_of([case], "pointer-job")
+    assert ids["graph"] == ["pointer-job", "w1", "d1", "rc1"] and [j["job_id"] for j in ids["receipt"]] == ["r1"]
+    owner = _Owner({"pointer-job": SA, "w1": SA, "d1": SA, "r1": SA, "rc1": "operator@x"})
+    assert PR.bound_to(owner, ids["graph"], ids["receipt"], SA)["status"] == "UNBOUND"      # a replay job under another principal breaks the claim
+    assert PR.bound_to(owner, ids["graph"][:-1], ids["receipt"], SA)["status"] == "BOUND"    # the old set would have missed it
+
+
 def test_oracle_without_a_cache_is_unchanged(projection):
     clients = {"engine": "oracle", "graph": Graph(projection), "projection": projection}
     r = RT.retrieve(CH.SEED, "acme_retail", projection["publication_id"], "t", AS_OF, clients)
@@ -237,6 +269,7 @@ def test_restricted_chain_hermetic_end_to_end(restricted_run):
     assert out["identity"]["status"] == "NOT_APPLICABLE" and out["same_requester"]["status"] == "NOT_APPLICABLE"
     assert out["teardown"]["status"] == "NOT_NEEDED" and out["grant"]["event"] == "apply"
     assert len(launches) == 2 and all(cred is None for _, cred in launches)        # approved-restricted + the replay case's first pass, hermetic env
+    assert out["receipt_launches"] == {"chain_counted": 2, "broker_counted": 2} and "synthetic" in out["identity"]["job_set"]["note"]
     assert [j["event"] for j in out["broker_journal"]] == ["apply", "apply", "apply", "apply", "apply", "revoke"]
 
 
@@ -258,6 +291,7 @@ def test_restricted_cases_reach_their_stages(restricted_run):
     assert rv["revocation"]["observed"] is True and rv["revocation"]["policy"]["dataset_reader"] is False
     assert rv["replay"]["retrieval"]["status"] == "DENIED" and rv["replay"]["retrieval"]["cache"] == "HIT_DENIED" and rv["replay"]["retrieval"]["disclosed_anything"] is False
     assert rv["replay"]["authorization"]["status"] == "DENIED" and rv["replay"]["consume"]["decision"] == "REFUSED" and rv["consume"]["decision"] == "REFUSED"
+    assert "timing" in rv["replay"]["retrieval"] and out["identity"]["job_set"]["replay_jobs_included"] is True
 
 
 def test_restricted_evidence_is_hygienic_and_retained(restricted_run):
@@ -394,15 +428,11 @@ def test_impersonated_credential_file_shape_and_permissions(tmp_path):
         PR.impersonated_credential_file(SA, source_path=str(src), directory=str(d))
 
 
-class _Forbidden(Exception):
-    pass
-
-
 class _SAClient:
     """Impersonated client whose dry runs are decided by a visibility table (no job is ever created)."""
 
     def __init__(self, allowed):
-        self.allowed, self.queries = allowed, []
+        self.allowed, self.queries = set(allowed), []
 
     def query(self, q, job_config=None, location=None):
         from google.api_core import exceptions as gexc
@@ -414,42 +444,150 @@ class _SAClient:
         return object()
 
 
-def _live_broker(monkeypatch, allowed, credfile=None):
-    monkeypatch.setattr(PR, "set_dataset_reader", None, raising=False)
-    grants = []
-    import okf_bq_graph.authz as AZ
-    monkeypatch.setattr(AZ, "set_dataset_reader", lambda owner, ds, principal, grant: grants.append((ds, principal, grant)) or "t")
-    monkeypatch.setattr(PR.time, "sleep", lambda s: None)
-    sa = _SAClient(allowed)
-    b = PR.RestrictedBroker("fallback", "okf_receipt_spike_20260905", sa_email=SA, factory=lambda p: sa, owner=_Owner({}), wait_s=0,
-                            credential_file=credfile or (lambda email, directory=None: os.path.join(directory, "adc.json")))
-    return b, sa, grants
+class _Dataset:
+    def __init__(self, ref, entries):
+        self.ref, self.access_entries = ref, list(entries)
+
+
+class _AclOwner(_Owner):
+    """Owner client with real `bigquery.AccessEntry` ACLs per dataset, so the real `authz.set_dataset_reader` and the
+    broker's snapshot/restore run unmodified (the API returns copies; `update_dataset` writes back)."""
+
+    def __init__(self, acl):
+        super().__init__({})
+        self.acl = {ds: list(entries) for ds, entries in acl.items()}
+        self.updates = []
+
+    def get_dataset(self, ref):
+        ds = ref.split(".", 1)[1]
+        return _Dataset(ds, self.acl.setdefault(ds, []))
+
+    def update_dataset(self, d, fields):
+        assert fields == ["access_entries"]
+        self.acl[d.ref] = list(d.access_entries); self.updates.append(d.ref)
+
+    def roles(self, ds, principal=SA):
+        return sorted(e.role for e in self.acl.get(ds, []) if (e.entity_id or "").replace("serviceAccount:", "") == principal)
+
+
+SDK_DS = "okf_receipt_spike_20260905"
+P = "test-project-0728-467323"
+SDK_DEPS = [f"{P}.{SDK_DS}.orders", f"{P}.{SDK_DS}.order_lines"]
+ALL_ALLOWED = {f"{P}.{DATASET}.nodes", f"{P}.{RLS_DS}.nodes", *SDK_DEPS}
+
+
+def _entry(role):
+    from google.cloud import bigquery
+    return bigquery.AccessEntry(role, "userByEmail", SA)
+
+
+def _live_broker(monkeypatch, allowed, acl=None, deps=SDK_DEPS, credfile=None, **kw):
+    """A RestrictedBroker exactly as chain.py builds it (dependencies from the SDK publication, default wait), against a
+    fake SA client, a fake ACL-bearing owner and a fake clock (so an unpropagated grant times out in test time)."""
+    t = [0.0]
+    monkeypatch.setattr(PR.time, "monotonic", lambda: t[0])
+    monkeypatch.setattr(PR.time, "sleep", lambda s: t.__setitem__(0, t[0] + s))
+    sa, owner = _SAClient(allowed), _AclOwner(acl or {})
+    b = PR.RestrictedBroker("fallback", SDK_DS, dependencies=deps, sa_email=SA, factory=lambda p: sa, owner=owner,
+                            credential_file=credfile or (lambda email, directory=None: os.path.join(directory, "adc.json")), **kw)
+    return b, sa, owner
 
 
 def test_live_broker_probes_under_the_sa_and_maps_forbidden_to_denied(monkeypatch):
-    b, sa, grants = _live_broker(monkeypatch, allowed={"p.d.orders"})
+    b, sa, owner = _live_broker(monkeypatch, allowed={"p.d.orders"})
     a = b.authorize(["p.d.orders", "p.d.order_lines"])
     assert a["status"] == "DENIED" and a["denied"] == 1 and [t["status"] for t in a["tables"]] == ["ALLOWED", "DENIED"]
     assert a["tables"][1]["error_class"] == "Forbidden" and len(sa.queries) == 2 and all("WHERE FALSE" in q for q in sa.queries)
     assert b.authorize([])["status"] == "UNKNOWN"
     assert b.authorize(["p.d.orders"])["status"] == "ALLOWED"
     assert b.describe()["iam"] is True and SA not in json.dumps(b.describe()) and b.graph_clients()["bq"] is sa and b.graph_clients()["ds"] == DATASET
+    assert b.teardown()["status"] == "NOT_NEEDED"                                             # nothing touched is never VERIFIED
 
 
-def test_live_broker_apply_grants_both_datasets_and_waits_for_the_platform(monkeypatch):
-    b, sa, grants = _live_broker(monkeypatch, allowed={f"test-project-0728-467323.{DATASET}.nodes", f"test-project-0728-467323.{RLS_DS}.nodes", "x.okf_receipt_spike_20260905.t"})
-    b.dependencies = ["x.okf_receipt_spike_20260905.t"]
-    e = b.grant()
-    assert e["observed"] is True and grants == [(DATASET, SA, True), ("okf_receipt_spike_20260905", SA, True)] and b.granted == {DATASET, "okf_receipt_spike_20260905"}
+def test_live_broker_fresh_from_the_constructor_grants_without_hand_wiring(monkeypatch):   # Astra P2 #1
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    e = b.grant()                                                                             # no b.dependencies assignment, default wait_s
+    assert e["observed"] is True and e["sdk"]["status"] == "ALLOWED" and e["graph"]["status"] == "ALLOWED" and e["sdk"]["waited_s"] == 0
+    assert owner.roles(DATASET) == ["READER"] and owner.roles(SDK_DS) == ["READER"] and b.granted == {DATASET, SDK_DS}
+    assert sa.queries and all(q.split("`")[1] in ALL_ALLOWED for q in sa.queries)
+
+
+def test_live_broker_never_touches_or_downgrades_preexisting_grants_and_restores_them(monkeypatch):   # Astra P1 / Opus
+    acl = {DATASET: [_entry("READER")], SDK_DS: [_entry("WRITER")], RLS_DS: []}
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED, acl=acl)
+    b.grant()
+    assert owner.updates == [] and owner.roles(DATASET) == ["READER"] and owner.roles(SDK_DS) == ["WRITER"]   # pre-existing: untouched, WRITER not downgraded
+    assert b.granted == set() and [j["event"] for j in b.journal[:-1]] == ["grant_preexisting", "grant_preexisting"]
     b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
-    assert grants[-2:] == [(RLS_DS, SA, True), ("okf_receipt_spike_20260905", SA, True)] and b.graph_clients()["ds"] == RLS_DS
-    with pytest.raises(RuntimeError):                  # the platform never shows the requested state: no case may run on a guess
-        b.apply(PR.policy(dataset="base", sdk_tables=False))
+    assert owner.roles(RLS_DS) == ["READER"] and b.granted == {RLS_DS} and b.graph_clients()["ds"] == RLS_DS
+    b.apply(PR.policy())
     sa.allowed = set()
-    r = b.revoke()
-    assert r["observed"] is True and grants[-2:] == [(DATASET, SA, False), ("okf_receipt_spike_20260905", SA, False)]
+    r = b.revoke()                                                                             # the revocation case must observe a denial: pre-existing entries go too ...
+    assert r["observed"] is True and owner.roles(DATASET) == [] and owner.roles(SDK_DS) == [] and owner.roles(RLS_DS) == ["READER"]
+    td = b.teardown()                                                                          # ... and come back exactly, while the broker's own grant is gone
+    assert td["status"] == "VERIFIED" and all(s["ok"] for s in td["steps"].values())
+    assert owner.roles(DATASET) == ["READER"] and owner.roles(SDK_DS) == ["WRITER"] and owner.roles(RLS_DS) == []
+    assert td["datasets"][SDK_DS] == {"original_roles": ["WRITER"], "roles_after": ["WRITER"], "added_by_broker": False}
+    assert td["datasets"][RLS_DS] == {"original_roles": [], "roles_after": [], "added_by_broker": True}
+    assert set(td["steps"]) == {f"{k}_{ds}" for k in ("restore", "readback") for ds in (DATASET, SDK_DS, RLS_DS)}
+
+
+def test_live_broker_failed_setup_still_restores_the_original_acl(monkeypatch):   # Astra P1: failed launch through the real helper
+    acl = {DATASET: [_entry("READER")], SDK_DS: []}
+    b, sa, owner = _live_broker(monkeypatch, allowed={f"{P}.{DATASET}.nodes"})            # SDK tables never become readable
+    b.owner.acl.update({k: list(v) for k, v in acl.items()})
+    with pytest.raises(RuntimeError, match="did not propagate"):
+        b.grant()
+    assert owner.roles(SDK_DS) == ["READER"] and b.granted == {SDK_DS}                     # the broker's own grant is in place when the wait gave up
+    assert b.journal[-1]["observed"] is False and b.journal[-1]["sdk"]["waited_s"] >= b.wait_s
     td = b.teardown()
-    assert td["status"] == "VERIFIED" and set(td["steps"]) == {"remove_reader_" + RLS_DS}     # only the grant still held; revoked ones are gone already
+    assert td["status"] == "VERIFIED" and owner.roles(SDK_DS) == [] and owner.roles(DATASET) == ["READER"]
+    assert td["steps"][f"readback_{SDK_DS}"]["ok"] and td["steps"][f"readback_{DATASET}"]["ok"]
+
+
+def test_live_broker_teardown_is_unverified_when_a_readback_disagrees(monkeypatch):
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    b.grant()
+    real_restore = b._restore
+    b._restore = lambda ds: None                                                              # restore silently does nothing
+    td = b.teardown()
+    assert td["status"] == "UNVERIFIED" and not td["steps"][f"readback_{DATASET}"]["ok"] and owner.roles(DATASET) == ["READER"]
+    real_restore(DATASET); real_restore(SDK_DS)
+    assert owner.roles(DATASET) == [] and owner.roles(SDK_DS) == []
+
+
+def test_live_restricted_chain_builds_the_broker_with_the_sdk_dependencies_and_tears_down_on_a_failed_grant(sdk_root, tmp_path, monkeypatch):
+    """Astra P2 #1 through the actual chain: the broker chain.py constructs knows the bound publication's tables before
+    its first grant probe, so an all-allowing platform gets past `grant`; and a platform that never propagates leaves
+    the chain CHAIN_INCOMPLETE at grant with the ACL restored."""
+    seen = {}
+    t = [0.0]
+    monkeypatch.setattr(PR.time, "monotonic", lambda: t[0]); monkeypatch.setattr(PR.time, "sleep", lambda s: t.__setitem__(0, t[0] + s))
+    deps = CH.sdk_publication(sdk_root)["dependencies"]
+
+    def make(allowed, acl):
+        sa, owner = _SAClient(allowed), _AclOwner(acl)
+
+        def factory(engine, sdk_dataset, dependencies=None, **kw):
+            seen["dependencies"], seen["sdk_dataset"] = list(dependencies or []), sdk_dataset
+            return PR.RestrictedBroker(engine, sdk_dataset, dependencies=dependencies, sa_email=SA, factory=lambda p: sa, owner=owner,
+                                       credential_file=lambda email, directory=None: os.path.join(directory, "adc.json"))
+        return factory, owner
+
+    factory, owner = make({f"{P}.{DATASET}.nodes", *deps}, {DATASET: [_entry("READER")]})
+    monkeypatch.setattr(CH, "RestrictedBroker", factory)
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda client, ds=DATASET: (None, "pointer-job"))
+    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), requester_mode="restricted", as_of=AS_OF,
+                       runner=lambda *a, **k: (_ for _ in ()).throw(AssertionError("must not run")))
+    assert seen["dependencies"] == deps and len(deps) == 7 and seen["sdk_dataset"] == SDK_DS
+    assert out["grant"]["observed"] is True and out["broken_at"] == "publication"             # past the grant, stopped by the (fake) empty pointer
+    assert out["teardown"]["status"] == "VERIFIED" and owner.roles(DATASET) == ["READER"] and owner.roles(SDK_DS) == []
+    factory, owner = make(set(), {DATASET: [_entry("READER")]})
+    monkeypatch.setattr(CH, "RestrictedBroker", factory)
+    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), requester_mode="restricted", as_of=AS_OF,
+                       runner=lambda *a, **k: (_ for _ in ()).throw(AssertionError("must not run")))
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "grant" and out["cases"] == [] and "did not propagate" in out["grant"]["error"]
+    assert out["teardown"]["status"] == "VERIFIED" and owner.roles(DATASET) == ["READER"] and owner.roles(SDK_DS) == []
 
 
 def test_live_broker_receipt_env_points_the_sdk_at_the_impersonated_file_and_teardown_removes_it(monkeypatch, tmp_path):
@@ -459,12 +597,12 @@ def test_live_broker_receipt_env_points_the_sdk_at_the_impersonated_file_and_tea
         seen["email"], seen["dir"] = email, directory
         p = os.path.join(directory, "adc.json"); Path(p).write_text("{}"); return p
 
-    b, sa, grants = _live_broker(monkeypatch, allowed=set(), credfile=credfile)
+    b, sa, owner = _live_broker(monkeypatch, allowed=set(), credfile=credfile)
     env = b.receipt_env()
     assert seen["email"] == SA and env == {"GOOGLE_APPLICATION_CREDENTIALS": os.path.join(seen["dir"], "adc.json")} and os.path.exists(env["GOOGLE_APPLICATION_CREDENTIALS"])
     assert b.receipt_env() == env and b.receipt_launches == 2                                # one file per broker, reused
     td = b.teardown()
-    assert td["steps"]["remove_credential_file"]["ok"] and not os.path.exists(seen["dir"])
+    assert td["status"] == "VERIFIED" and td["steps"] == {"remove_credential_file": {"ok": True}} and not os.path.exists(seen["dir"])
 
 
 def test_live_restricted_chain_runs_the_pointer_lookup_under_the_broker_client_and_tears_down(sdk_root, tmp_path, monkeypatch):

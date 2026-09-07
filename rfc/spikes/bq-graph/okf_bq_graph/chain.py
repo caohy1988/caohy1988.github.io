@@ -63,7 +63,8 @@ RESTRICTED = {   # per case: seed, the policy the broker applies before the grap
                             "expects": "grants present: reached, bound, authorized, executed under the requester, VERIFIED, RELEASED"},
     "denied-intermediate": {"seed": LEGACY_SEED, "policy": _policy(dataset="rls", hidden=(HIDDEN,)),
                             "attack": f"row policy hides the intermediate concept {HIDDEN}: the only path from the legacy seed to the computation runs through it",
-                            "expects": "seed visible, no path, no computation, hidden id absent from every surface; bind NOT_REACHED (retrieval_denied); CLI never invoked; REFUSED"},
+                            "expects": "seed visible, no path, no computation, hidden id absent from every surface the requester received (the harness's "
+                                       "own policy record names it by design); bind NOT_REACHED (retrieval_denied); CLI never invoked; REFUSED"},
     "unauthorized-output": {"seed": SEED, "policy": _policy(sdk_tables=False),
                             "attack": "seed and declaration visible, but the requester cannot read the computation's dependency tables (no read on the SDK fixture dataset)",
                             "expects": "reached and bound; pre-execution authorization DENIED under the requester's credential; CLI never invoked; REFUSED before execution"},
@@ -494,6 +495,9 @@ def job_ids_of(cases: list[dict], pointer_job_id: Optional[str] = None) -> dict:
         d = c.get("declaration") or {}
         if d.get("job_id"):
             graph.append(d["job_id"])
+        for j in (((c.get("replay") or {}).get("retrieval") or {}).get("timing") or {}).get("jobs", []) or []:   # the cached-replay re-check job
+            if j.get("job_id"):
+                graph.append(j["job_id"])
         rec = c.get("receipt") or {}
         job = (rec.get("receipt") or {}).get("job") if rec.get("invoked") else None
         if job and job.get("job_id"):
@@ -590,7 +594,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                                     BUNDLE_ID, SOURCE_PIN)
     if restricted:
         if broker is None:
-            broker = HermeticBroker(projection) if not live else RestrictedBroker(engine, sdk_pub["dataset"])
+            broker = HermeticBroker(projection) if not live else RestrictedBroker(engine, sdk_pub["dataset"], dependencies=sdk_pub["dependencies"])
         out["requester"]["broker"] = broker.describe()
         requester = requester or SA_ALIAS
         try:
@@ -752,7 +756,8 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                 rp["retrieval"] = {"status": r2["status"], "cache": (r2.get("scope") or {}).get("cache"), "warnings": r2.get("warnings", []),
                                    "concepts": [x.get("concept") for x in r2.get("concepts", [])], "paths": r2.get("paths", []),
                                    "computations": [x.get("path") for x in r2.get("computations", [])],
-                                   "disclosed_anything": bool(r2.get("concepts") or r2.get("paths") or r2.get("computations"))}
+                                   "disclosed_anything": bool(r2.get("concepts") or r2.get("paths") or r2.get("computations")),
+                                   "timing": r2.get("timing")}   # the re-check job belongs to the identity set (job_ids_of)
             except Exception as e:  # noqa: BLE001
                 rp["retrieval"] = dict(_stage_error(e), reached=False)
             rp["authorization"] = broker.authorize(sdk_pub["dependencies"])
@@ -775,7 +780,13 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     statuses = [c["acceptance"]["status"] for c in out["cases"]]
     if restricted:
         out["identity"] = broker.identity(ids["graph"], ids["receipt"])
-        out["identity"]["job_set"] = {"graph": len(ids["graph"]), "receipt": len(ids["receipt"]), "pointer_lookup_included": pointer_job_id is not None}
+        out["identity"]["job_set"] = {"graph": len(ids["graph"]), "receipt": len(ids["receipt"]), "pointer_lookup_included": pointer_job_id is not None,
+                                      "replay_jobs_included": True}
+        if out["identity"]["status"] == "NOT_APPLICABLE":
+            out["identity"]["job_set"]["note"] = ("counts are the SDK emulation's synthetic receipt ids (okf_rcpt_…); no BigQuery job exists in "
+                                                  "hermetic mode, so there is no identity to read")
+        out["receipt_launches"] = {"chain_counted": sum(c.get("receipt_invocations", 0) for c in out["cases"]),
+                                   "broker_counted": getattr(broker, "receipt_launches", None)}
         out["same_requester"] = {"status": "NOT_APPLICABLE", "reason": "restricted-sa mode: the identity claim is `identity` (every job bound to the SA)"}
         ident_broken = live and out["identity"]["status"] == "UNBOUND"
         ident_incomplete = live and out["identity"]["status"] != "BOUND"

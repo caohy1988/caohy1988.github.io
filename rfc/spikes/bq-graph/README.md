@@ -160,7 +160,9 @@ by four cases with the same stage-reachability acceptance (`MET` / `NOT_REACHED`
 * **`denied-intermediate`** (the `_rls` shape: the row policy hides `metrics/gross-margin`; seed
   `forced:metrics/gross-margin-legacy.md`, whose only path to the computation runs through it): retrieval `OK` with the
   seed concept visible, no path, no computation, the hidden id absent from the full retrieval result and from every
-  recorded surface; bind `NOT_REACHED` with reason `retrieval_denied`; CLI never invoked; `REFUSED`. A traversed hidden
+  surface the requester received (retrieval, declaration, bind, authorization, receipt, consumer; the harness's own
+  policy record in the same case object names the id by design); bind `NOT_REACHED` with reason `retrieval_denied`; CLI
+  never invoked; `REFUSED`. A traversed hidden
   row, a leaked id or an invoked CLI is `WRONG`; a seed that is not visible is `NOT_REACHED` (enforcement cannot be told
   from an outage).
 * **`unauthorized-output`** (seed and declaration visible, no read on the SDK fixture's dependency tables): reached and
@@ -170,8 +172,10 @@ by four cases with the same stage-reachability acceptance (`MET` / `NOT_REACHED`
   a probe that produced no platform decision is `NOT_REACHED`.
 * **`revocation-before-replay`**: the first pass runs the full path and is `RELEASED` (cache `MISS_STORED`); the broker
   then revokes the requester's dataset grant and its SDK-table read; the same request is replayed from the case-private
-  cache and is `HIT_DENIED` with nothing disclosed (the oracle engine now carries the same cached-replay re-check contract
-  as the BigQuery engines: a hit is served only after the graph re-confirms every disclosed concept is still visible);
+  cache and is `HIT_DENIED` with nothing disclosed (the oracle engine now carries the BigQuery engines' `_recheck`
+  contract: a hit is served only after the graph re-confirms every disclosed concept AND every edge that authorized the
+  disclosed paths is still visible, so an edge-only revocation with the nodes untouched is `HIT_DENIED` too; a legacy
+  dependency version is rerun, an unpinned publication is never cached);
   the authorization probe is `DENIED`; the consumer re-decides the stored receipt and `REFUSED`; the CLI was invoked exactly
   once. A released replay, a replay served after revocation, an `ALLOWED` probe or a second CLI launch is `WRONG`; a
   first pass that never released or a replay that was not a cache hit is `NOT_REACHED`.
@@ -189,10 +193,14 @@ revocation it did not apply makes the replay `RELEASED` and `WRONG`; a grant tha
 acceptances `MET`, no e-mail in the record. Live (`--live --requester restricted`): the IAM impersonation broker is wired
 (graph leg through `authz.impersonated_client`; SDK subprocess under an `impersonated_service_account` ADC file written to a
 private 0700 directory and removed in teardown, run.py unedited; dataset-level reader grants through
-`authz.set_dataset_reader`, waited for by probing under the SA; identity `BOUND` only when the operator's `jobs.get`
-shows the SA's `user_email` on every job including the pointer lookup, `UNBOUND` → `CHAIN_BROKEN`, `UNKNOWN` →
-`CHAIN_INCOMPLETE`; teardown removes only the grants the broker added) and covered by unit tests against fakes, but **no
-live pass has run**: the retained live chain evidence is still `requester.mode = same-requester`, and the second principal
+`authz.set_dataset_reader` only where the SA holds no entry (a pre-existing READER, WRITER or OWNER is left as it is,
+never downgraded), waited for by probing under the SA, with the bound SDK publication's dependency tables known before
+the first probe; identity `BOUND` only when the operator's `jobs.get` shows the SA's `user_email` on every job including
+the pointer lookup and the cached-replay re-check job, `UNBOUND` → `CHAIN_BROKEN`, `UNKNOWN` → `CHAIN_INCOMPLETE`;
+teardown restores every touched dataset's ACL to the snapshot taken before the broker's first mutation and reads it
+back, `VERIFIED` only with at least one step and every read-back equal, `NOT_NEEDED` when nothing was touched) and
+exercised only against fakes (a fake SA client and an owner holding real `AccessEntry` ACLs, through the real helper),
+but **no live pass has run**: the retained live chain evidence is still `requester.mode = same-requester`, and the second principal
 remains "not exercised in this chain" on every published surface until Slice B lands its own evidence.
 
 ## Graph model (spec §3)

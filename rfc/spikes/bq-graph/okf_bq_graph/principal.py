@@ -92,10 +92,10 @@ class PolicyGraph:
             return {"status": "DENIED", "concept": local}
         return self._current().governed(local, as_of)
 
-    def visible(self, locals_: list[str]) -> bool:
+    def visible(self, locals_: list[str], edge_ids: list[str] | tuple = ()) -> bool:
         if not self._state["dataset_reader"]:
             return False
-        return self._current().visible(locals_)
+        return self._current().visible(locals_, edge_ids)
 
 
 # ----------------------------------------------------------------------------- hermetic broker (exercised in this slice)
@@ -210,10 +210,13 @@ class RestrictedBroker:
     mode = "restricted-sa"
     hermetic = False
 
-    def __init__(self, engine: str, sdk_dataset: str, sa_email: Optional[str] = None, factory: Optional[Callable[[str], Any]] = None,
-                 owner: Any = None, wait_s: int = 240, credential_file: Callable[..., str] = impersonated_credential_file):
+    def __init__(self, engine: str, sdk_dataset: str, dependencies: Optional[list[str]] = None, sa_email: Optional[str] = None,
+                 factory: Optional[Callable[[str], Any]] = None, owner: Any = None, wait_s: int = 240,
+                 credential_file: Callable[..., str] = impersonated_credential_file):
         from .authz import impersonated_client
         self.engine, self.sdk_dataset = engine, sdk_dataset
+        self.dependencies: list[str] = list(dependencies or [])   # the bound SDK publication's tables: known BEFORE the first grant probe
+        self.original: dict[str, list] = {}                         # per touched dataset: the principal's ACL entries before this broker's first mutation
         self.email = sa_email or restricted_sa()
         self.principal = SA_ALIAS
         self.wait_s = wait_s
@@ -242,10 +245,39 @@ class RestrictedBroker:
         return entry
 
     # -- grants (dataset-level reader entries through authz.py; the `_rls` row policies are the authz fixture's)
+    def _mine(self, ds: str) -> list:
+        """The principal's current ACL entries on `ds` (the same match `authz.set_dataset_reader` uses)."""
+        d = self.owner.get_dataset(f"{PROJECT}.{ds}")
+        return [e for e in d.access_entries
+                if e.entity_type in ("userByEmail", "iamMember") and (e.entity_id or "").replace("serviceAccount:", "") == self.email]
+
     def _reader(self, ds: str, grant: bool) -> None:
+        """Grant: only when the principal holds NO entry on the dataset (an existing READER/WRITER/OWNER already reads and
+        is never downgraded). Revoke: removes the principal's entries, pre-existing ones included (a revocation case must
+        observe the denial), and `teardown` restores the snapshot taken before this broker's first mutation."""
         from .authz import set_dataset_reader
-        set_dataset_reader(self.owner, ds, self.email, grant)
-        (self.granted.add if grant else self.granted.discard)(ds)
+        if ds not in self.original:
+            self.original[ds] = list(self._mine(ds))
+        mine = self._mine(ds)
+        if grant:
+            if mine:
+                self._log("grant_preexisting", ds=ds, roles=sorted({e.role or "" for e in mine}), note="left untouched; not this broker's to change")
+                return
+            set_dataset_reader(self.owner, ds, self.email, True)
+            self.granted.add(ds)
+        else:
+            if mine:
+                set_dataset_reader(self.owner, ds, self.email, False)
+            self.granted.discard(ds)
+
+    def _restore(self, ds: str) -> None:
+        """Put the principal's ACL entries on `ds` back to the snapshot: nothing this broker added survives, everything
+        that pre-existed (whatever its role) is back."""
+        d = self.owner.get_dataset(f"{PROJECT}.{ds}")
+        keep = [e for e in d.access_entries
+                if not (e.entity_type in ("userByEmail", "iamMember") and (e.entity_id or "").replace("serviceAccount:", "") == self.email)]
+        d.access_entries = keep + list(self.original[ds])
+        self.owner.update_dataset(d, ["access_entries"])
 
     def _graph_ds(self) -> str:
         return RLS_DS if self.state["dataset"] == "rls" else DATASET
@@ -265,7 +297,7 @@ class RestrictedBroker:
         self._reader(self._graph_ds(), pol["dataset_reader"])
         self._reader(self.sdk_dataset, pol["sdk_tables"])
         g_ok, g_obs, g_s = self._wait(lambda: self._probe_table(f"{PROJECT}.{self._graph_ds()}.nodes"), ALLOWED if pol["dataset_reader"] else DENIED)
-        s_ok, s_obs, s_s = self._wait(lambda: self.authorize(self._sdk_dependencies()), ALLOWED if pol["sdk_tables"] else DENIED)
+        s_ok, s_obs, s_s = self._wait(lambda: self.authorize(self.dependencies), ALLOWED if pol["sdk_tables"] else DENIED)
         entry = self._log("apply", policy=dict(self.state, hidden=list(self.state["hidden"])), observed=g_ok and s_ok,
                           graph={"waited_s": g_s, "status": g_obs.get("status")}, sdk={"waited_s": s_s, "status": s_obs.get("status")})
         if not (g_ok and s_ok):
@@ -280,12 +312,10 @@ class RestrictedBroker:
         self._reader(self._graph_ds(), False)
         self._reader(self.sdk_dataset, False)
         g_ok, g_obs, g_s = self._wait(lambda: self._probe_table(f"{PROJECT}.{self._graph_ds()}.nodes"), DENIED)
-        s_ok, s_obs, s_s = self._wait(lambda: self.authorize(self._sdk_dependencies()), DENIED)
+        s_ok, s_obs, s_s = self._wait(lambda: self.authorize(self.dependencies), DENIED)
         return self._log("revoke", policy=dict(self.state, hidden=list(self.state["hidden"])), observed=g_ok and s_ok,
                          graph={"waited_s": g_s, "status": g_obs.get("status")}, sdk={"waited_s": s_s, "status": s_obs.get("status")})
 
-    def _sdk_dependencies(self) -> list[str]:
-        return getattr(self, "dependencies", [])
 
     # -- clients / env / probes
     def graph_clients(self) -> dict:
@@ -312,7 +342,6 @@ class RestrictedBroker:
             return {"table": table, "status": UNKNOWN, "error_class": type(e).__name__}
 
     def authorize(self, dependencies: list[str]) -> dict:
-        self.dependencies = list(dependencies)
         tables = [self._probe_table(t) for t in dependencies]
         statuses = {t["status"] for t in tables}
         status = UNKNOWN if not tables or UNKNOWN in statuses else (DENIED if DENIED in statuses else ALLOWED)
@@ -323,16 +352,29 @@ class RestrictedBroker:
         return bound_to(self.owner, graph_job_ids, receipt_jobs, self.email)
 
     def teardown(self) -> dict:
-        """Remove every grant this broker added (only those: the SA's pre-existing grants from the receipt spike are not
-        this broker's to remove) and the credential file; each step is attempted independently."""
-        td: dict = {"steps": {}}
-        for ds in sorted(self.granted):
+        """Restore every dataset this broker touched to the ACL snapshot taken before its first mutation (grants it added
+        are gone, pre-existing entries are back with their original role) and read each one back; remove the credential
+        file. Each step is attempted independently; VERIFIED needs at least one step, every step ok and every read-back
+        equal to the snapshot; nothing touched is NOT_NEEDED, never VERIFIED."""
+        td: dict = {"steps": {}, "datasets": {}}
+        for ds in sorted(self.original):
             try:
-                self._reader(ds, False); td["steps"][f"remove_reader_{ds}"] = {"ok": True}
+                self._restore(ds); td["steps"][f"restore_{ds}"] = {"ok": True}
             except Exception as e:  # noqa: BLE001
-                td["steps"][f"remove_reader_{ds}"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}"}
+                td["steps"][f"restore_{ds}"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}"}
+            try:
+                want = sorted((e.role or "", e.entity_type or "") for e in self.original[ds])
+                have = sorted((e.role or "", e.entity_type or "") for e in self._mine(ds))
+                td["datasets"][ds] = {"original_roles": [r for r, _ in want], "roles_after": [r for r, _ in have], "added_by_broker": ds in self.granted}
+                td["steps"][f"readback_{ds}"] = {"ok": want == have}
+            except Exception as e:  # noqa: BLE001
+                td["steps"][f"readback_{ds}"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}"}
+        self.granted.clear()
         if self._cred_dir:
             shutil.rmtree(self._cred_dir, ignore_errors=True)
             td["steps"]["remove_credential_file"] = {"ok": not os.path.exists(self._cred_dir)}
-        td["status"] = "VERIFIED" if all(s["ok"] for s in td["steps"].values()) else "UNVERIFIED"
+        if not td["steps"]:
+            td["status"] = "NOT_NEEDED"; td["reason"] = "no dataset touched and no credential file written"
+        else:
+            td["status"] = "VERIFIED" if all(s["ok"] for s in td["steps"].values()) else "UNVERIFIED"
         return td

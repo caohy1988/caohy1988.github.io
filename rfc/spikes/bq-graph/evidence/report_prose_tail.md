@@ -179,7 +179,8 @@ stage-reachability rule as the chain above (`MET` only when the case reached its
 evidence). Hermetic result (runner `chain/0.5.0`, `evidence/chain/chain_hermetic_restricted.json`): **CHAIN_CONNECTED** —
 `approved-restricted` reached, bound, authorized, executed and RELEASED; `denied-intermediate` (row policy hides
 `metrics/gross-margin`, seed `metrics/gross-margin-legacy` whose only path runs through it) retrieval OK with the seed
-visible, no path, no computation, hidden id absent from the full result and every recorded surface, bind NOT_REACHED
+visible, no path, no computation, hidden id absent from the full result and every surface the requester received (the
+harness's own policy record names it by design), bind NOT_REACHED
 (`retrieval_denied`), CLI never invoked, REFUSED; `unauthorized-output` (seed and declaration visible, no read on the SDK
 fixture's dependency tables) reached and bound, then the new pre-execution authorization probe under the requester's own
 credential returned DENIED on all seven dependency tables, CLI never invoked, REFUSED naming the denial;
@@ -189,7 +190,8 @@ CLI invoked exactly once. The consumer now refuses anything but ALLOWED at decis
 revocation cannot be replayed into a release. What this is not: the hermetic broker is a policy emulation over the
 compiled projection (the principal is a label, no IAM call, no BigQuery job, `identity = NOT_APPLICABLE`); nothing in it is
 platform enforcement, and it changes no live evidence. The live broker (IAM impersonation for the graph leg, an
-`impersonated_service_account` ADC file for the SDK subprocess, dataset reader grants waited for under the SA, identity
-BOUND only when every job including the pointer lookup carries the SA's `user_email`) is wired and unit-tested against
-fakes but has not run: the retained live chain is still `same-requester`, and the second principal remains "not exercised
+`impersonated_service_account` ADC file for the SDK subprocess, dataset reader grants added only where the SA holds no
+entry and waited for under the SA, the ACL of every touched dataset restored to its pre-run snapshot and read back at
+teardown, identity BOUND only when every job including the pointer lookup and the cached-replay re-check job carries the
+SA's `user_email`) is wired and exercised only against fakes; it has not run: the retained live chain is still `same-requester`, and the second principal remains "not exercised
 in this chain" on every published surface until the live Slice B lands its own evidence under review.

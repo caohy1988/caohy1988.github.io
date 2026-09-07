@@ -366,19 +366,23 @@ def _retrieve_oracle(query, bundle_id, publication_id, as_of, clients, top_k, sc
         return _denied("oracle engine supports forced seeds only (no vectors)", scope, timer, "NO_SEED")
     local = query[len(FORCED):]
     local = local[:-3] if local.endswith(".md") else local
-    # cached replay, same contract as the BigQuery engines: a hit is served only after the graph re-confirms that every
-    # previously disclosed concept is still visible to it (principal.PolicyGraph answers under the current policy);
-    # a graph without a re-check, or a failed one, is HIT_DENIED
+    # cached replay under the BigQuery engines' `_recheck` contract: a hit is served only after the graph re-confirms
+    # that every previously disclosed concept AND every edge that authorized the disclosed paths is still visible to it
+    # (principal.PolicyGraph answers under the current policy); a graph without a re-check, a failed one, a stale
+    # dependency version or an unpinned publication is never served from cache
     cache = clients.get("cache")
-    ckey = _cache_key("oracle", bundle_id, publication_id, scope["requester"], query, as_of, top_k) if cache is not None else None
+    ckey = (_cache_key("oracle", bundle_id, publication_id, scope["requester"], query, as_of, top_k)
+            if cache is not None and publication_id != "active" else None)
     if ckey is not None and ckey in cache:
         cached = cache[ckey]
-        visible = getattr(g, "visible", None)
-        if visible is not None and visible(cached["disclosed"]):
-            out = _refresh(json.loads(json.dumps(cached["result"])), as_of)
-            out["scope"] = dict(out["scope"], cache="HIT_RECHECKED"); out["timing"] = timer.done()
-            return out
-        return _denied("cached replay: current authorization check failed or unknown", dict(scope, cache="HIT_DENIED"), timer)
+        if cached.get("dependency_version") == CACHE_DEPENDENCY_VERSION:
+            visible = getattr(g, "visible", None)
+            if visible is not None and visible(cached["disclosed_ids"], cached["disclosed_edge_ids"]):
+                out = _refresh(json.loads(json.dumps(cached["result"])), as_of)
+                out["scope"] = dict(out["scope"], cache="HIT_RECHECKED"); out["timing"] = timer.done()
+                return out
+            return _denied("cached replay: current authorization check failed or unknown", dict(scope, cache="HIT_DENIED"), timer)
+        cache.pop(ckey, None)
     r = g.governed(local, as_of)
     if r["status"] == "DENIED":   # the policy-emulating graph's Forbidden
         return _denied("authorization error: policy denied (oracle emulation)", scope, timer)
@@ -387,14 +391,16 @@ def _retrieve_oracle(query, bundle_id, publication_id, as_of, clients, top_k, sc
     concept = {k: r[k] for k in ("concept", "path", "title", "type", "lifecycle_status", "trust_tier", "verifications",
                                  "freshness", "provenance", "replacement")}
     concept.update({"matched_sections": [], "forced": True})
-    comps = [dict(c, seed=r["concept"]) for c in r["computations"]]
+    edge_ids = sorted({e for c in r["computations"] for e in c.get("edge_ids", [])})   # the authorizing edges stay in the cache entry, not the answer
+    comps = [dict({k: v for k, v in c.items() if k != "edge_ids"}, seed=r["concept"]) for c in r["computations"]]
     out = {"status": "OK", "concepts": [concept], "paths": [dict(p, seed=r["concept"]) for p in r["paths"]],
            "computations": comps, "warnings": ["forced seed: harness-only deterministic override, not a semantic ranking",
                                                 "ORACLE engine: in-process reference, not BigQuery"],
            "scope": scope, "timing": timer.done()}
     if ckey is not None:
         disclosed = sorted({r["concept"]} | {x for p in r["paths"] for x in p["via"]} | {c["concept"] for c in comps})
-        cache[ckey] = {"disclosed": disclosed, "result": json.loads(json.dumps(out, default=str))}
+        cache[ckey] = {"dependency_version": CACHE_DEPENDENCY_VERSION, "disclosed_ids": disclosed, "disclosed_edge_ids": edge_ids,
+                       "result": json.loads(json.dumps(out, default=str))}
         out["scope"] = dict(out["scope"], cache="MISS_STORED")
     return out
 
