@@ -340,10 +340,12 @@ class RestrictedBroker:
         return {"kind": "iam-impersonation-broker", "iam": True, "principal": self.principal, "engine": self.engine,
                 "graph_leg": "authz.impersonated_client (IAM generateAccessToken; jobs carry the SA user_email)",
                 "receipt_leg": "SDK subprocess under an impersonated_service_account ADC file (GOOGLE_APPLICATION_CREDENTIALS), "
-                               "plus a PYTHONPATH sitecustomize that adds the userinfo.email scope to google.auth.default: the SDK "
-                               "reads the requester from oauth2 tokeninfo, which returns no e-mail for a cloud-platform-only "
-                               "impersonated token, and google-auth ignores the ADC file's own `scopes` when the caller passes them. "
-                               "The shim changes the credential's scope, never its identity, and edits no SDK source",
+                               "plus a PYTHONPATH `usercustomize.py` that adds the userinfo.email scope to google.auth.default "
+                               "(NOT `sitecustomize.py`: this interpreter ships one that completes sys.path, and a copy on "
+                               "PYTHONPATH shadows it). The SDK reads the requester from oauth2 tokeninfo, which returns no "
+                               "e-mail for a cloud-platform-only impersonated token, and google-auth ignores the ADC file's own "
+                               "`scopes` when the caller passes them, as the SDK does. The shim changes the credential's scope, "
+                               "never its identity, and edits no SDK source",
                 "authorization_probe": "dry-run SELECT per dependency table under the impersonated client",
                 "rls_grantee": "a case on the `_rls` fixture adds the SA to the three hidden-intermediate row access policies "
                                "(authz.set_rls) and observes the rows it can actually read; teardown restores the snapshot"}
