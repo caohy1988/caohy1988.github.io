@@ -21,6 +21,7 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `okf_bq_graph/scale.py` | Synthetic 100 / 1,000 namespace-isolated copies in their own datasets (vectors reused by text digest) |
 | `okf_bq_graph/authz.py` | Governance fixtures: RLS dataset (hidden intermediate), metadata-only dataset, authorized views + graph over views; `cases` runs the five second-principal negatives under the existing restricted SA via impersonation (`OKF_SPIKE_RESTRICTED_SA`, no new principal) → `evidence/authz_cases.json` |
 | `okf_bq_graph/chain.py` | Connected chain (2026-09-06): fixture seed → pinned publication → governed retrieval returns the Attested Computation declaration + SQL → bind to the SDK receipt example's pinned publication (data files only) → SDK CLI as a subprocess executes and verifies under the caller → consumer releases only on VERIFIED; two fail-closed substitution cases → `evidence/chain/` |
+| `okf_bq_graph/job_audit.py` | Reconciles a retained live chain record's job inventory against the platform's own `jobs.list`/`jobs.get` for that record's window (read-only; no query, no grant change). A requester job in the window the record never claimed is `INCOMPLETE`; another identity's job is reported, not condemned → `evidence/chain/job_audit_chain_live_restricted.json` |
 | `okf_bq_graph/principal.py` | Requester brokers for the chain (2026-09-06 Slice A): a hermetic policy-emulating broker (no IAM, no job) exercised by `chain.py --requester restricted`, and the IAM-impersonation broker for the restricted SA (graph leg via `authz.impersonated_client`, SDK subprocess via an `impersonated_service_account` ADC file plus a `userinfo.email` scope shim, `_rls` row-policy grantee snapshot/restore, dry-run authorization probe per dependency table) exercised live in Slice B → `evidence/chain/chain_hermetic_restricted.json`, `evidence/chain/chain_live_restricted.json` |
 | `okf_bq_graph/benchmark.py`, `run.py`, `lifecycle.py`, `safety.py`, `partial.py`, `bin/safety_teardown.sh` | Bounded runner (20 warmups + 100 measured per cell, nearest-rank percentiles, failures retained), the window orchestrator (signal-safe cleanup lifecycle, job cancel, independent watcher), and the honest aggregation of interrupted cells (INCOMPLETE / NOT_RUN) |
 | `okf_bq_graph/cost.py`, `report.py`, `assemble.py` | Slot attribution (exact named reservation vs other pools) and the charged autoscale slot-seconds bill from `INFORMATION_SCHEMA.RESERVATIONS_TIMELINE`; non-mutating report tables; report assembly |
@@ -200,15 +201,27 @@ acceptances `MET`, no e-mail in the record.
 
 #### Live restricted pass (Slice B, 2026-09-07)
 
-`python3 -m okf_bq_graph.chain --live --requester restricted` (runner `chain/0.7.0`, record
+`python3 -m okf_bq_graph.chain --live --requester restricted` (runner `chain/0.8.0`, record
 `evidence/chain/chain_live_restricted.json`, run directory
-`evidence/chain/receipt/live_restricted-20260907T221038Z-900abfcd`). Result: **`CHAIN_CONNECTED`**, all four acceptances
-`MET`, `identity = BOUND`, `teardown = VERIFIED`, no e-mail in the record. Both legs ran under
-`sa:okf-receipt-restricted`, not the operator: the operator's credential only granted, revoked and read job identities.
+`evidence/chain/receipt/live_restricted-20260907T224831Z-f32d6d1b`). Result: **`CHAIN_CONNECTED`**, all four acceptances
+`MET`, `identity = BOUND`, `teardown = VERIFIED`, no e-mail in the record. The execution legs ran under
+`sa:okf-receipt-restricted`, not the operator: the operator's credential only granted, revoked, restored and read job
+identities. Every number below is read off that record; dependency-denial counts and propagation waits differ between
+runs, so a summary carried over from an earlier run describes nothing.
 
-* **Identity.** The operator's `jobs.get` over **all 18 jobs** the run submitted (16 graph-leg jobs, including the
-  pointer lookup and the cached-replay re-check, plus the 2 receipt-leg jobs) returns one `user_email`, the SA's. No
-  other identity appears. `UNBOUND` would be `CHAIN_BROKEN`, `UNKNOWN` `CHAIN_INCOMPLETE`.
+* **Identity.** The operator's `jobs.get` over **all 29 jobs the run submitted**, each checked against the principal of
+  the role that submitted it: **20 under the requester** (17 graph-leg jobs, including the pointer lookup and the
+  cached-replay re-check; 2 receipt-leg jobs; 1 broker row-policy observation) and **9 under the operator** (the
+  grant/drop/restore row-policy DDL, administrative work rather than execution). No third identity appears. A required
+  role with nothing to compare, an unreadable job, a missing identity or an unknown expected principal is `UNKNOWN`
+  (`CHAIN_INCOMPLETE`); an unexpected identity is `UNBOUND` (`CHAIN_BROKEN`).
+* **The record cannot audit itself.** An inventory is a claim about the run's own bookkeeping: a job it failed to retain
+  is invisible to it by construction. `python3 -m okf_bq_graph.job_audit evidence/chain/chain_live_restricted.json`
+  reads `jobs.list`/`jobs.get` for the record's own window under the operator — no query submitted, no grant changed —
+  and compares. Retained as `evidence/chain/job_audit_chain_live_restricted.json`: **`RECONCILED`**, 30 jobs listed in
+  the window, all 29 inventory jobs matched, **0 requester jobs unaccounted for**, 0 inventory jobs the platform did not
+  list. The one extra is an unrelated scheduled query under a third identity: reported, not condemned, because the
+  project is shared and the run's claim is about the requester.
 * **Graph leg.** `authz.impersonated_client` (IAM `generateAccessToken`).
 * **Receipt leg.** The SDK example as a subprocess under an `impersonated_service_account` ADC file, run.py unedited.
   The SDK establishes its requester from `oauth2/tokeninfo`, which returns no e-mail for a token minted for
@@ -226,10 +239,26 @@ acceptances `MET`, no e-mail in the record.
   rows even with dataset READER, which is an outage, not enforcement. The broker snapshots those policies' grantees and
   predicates, adds the SA only while a case runs on `_rls`, drops it again when a case leaves, and refuses to touch a
   fixture it could not restore. It observes the effect with a real row-count query under the SA, not a dry run (a dry
-  run passes on dataset READER alone): the run recorded **40 rows visible, 0 of them the hidden intermediate**.
+  run passes on dataset READER alone): the run recorded **40 rows visible, 0 of them the hidden intermediate**. Because
+  `authz.set_rls` replaces a policy by name and BigQuery has no other replace semantics, the broker also refuses a
+  fixture whose policies carry unexpected ids: replacing them by the fixture's names would add policies beside them and
+  leave a table it could not restore.
 * **Teardown.** Every touched dataset's ACL restored to the snapshot taken before the broker's first mutation and read
   back; the `_rls` grantee lists and predicates restored and read back (`sa_in_grantees_after: false`); the credential
   directory removed. `VERIFIED` only with at least one step and every read-back equal to its snapshot.
+* **The superseded first pass is kept, not rewritten.** `live_restricted-20260907T221038Z-900abfcd` is the run Astra
+  reviewed at `11ae4c9` under runner `chain/0.7.0`. Its own measurements stand (it refused `unauthorized-output` with
+  5/7 dependencies denied and observed the revocation at 0 s/1 s), but its identity gate checked 18 jobs while the run
+  had submitted 29, and its denied replay re-check was dropped before it could be counted. It is retained as history;
+  the shared `chain_live_restricted.json` and every claim above are the `224831Z` run.
+* **The four cases, as this record measured them.** `approved-restricted`: 7/7 dependencies `ALLOWED`, receipt
+  `VERIFIED`, `RELEASED`. `denied-intermediate`: seed visible, no path, no computation, no hidden id, CLI never invoked,
+  `REFUSED`. `unauthorized-output`: `BOUND`, then 7/7 dependency probes `DENIED` under the requester's own credential,
+  CLI never invoked, `REFUSED` before execution. `revocation-before-replay`: `RELEASED` once (`MISS_STORED`), revocation
+  observed by the requester (graph 92 s, SDK 2 s — a poll interval, not a propagation bound), replay `HIT_DENIED`
+  disclosing nothing with its denied re-check job retained, 7/7 replay probes `DENIED`, `REFUSED`, CLI invoked exactly
+  once. A refusal needs only one denied dependency, since the computation requires them all: an earlier run refused the
+  same two cases with 5/7 and 2/7 denied while the ACL change was still propagating.
 
 What this pass does not claim: the SDK still runs against its own SYNTHETIC fixture dataset, the graph engine is the
 relational `fallback` (not BigQuery Graph / GQL), the seed is the forced fixture seed, and the receipt is verified by
@@ -472,6 +501,7 @@ OKF_LIVE_ENGINE=fallback python3 -m pytest tests/test_retrieve.py -q   # live, o
 python3 -m okf_bq_graph.chain --hermetic                  # connected chain, no cloud (oracle graph + SDK emulation)
 python3 -m okf_bq_graph.chain --hermetic --requester restricted   # restricted-requester chain, no cloud (policy-emulating broker)
 python3 -m okf_bq_graph.chain --live --requester restricted       # Slice B: both legs under sa:okf-receipt-restricted (IAM impersonation), ~5 min
+python3 -m okf_bq_graph.job_audit evidence/chain/chain_live_restricted.json   # read-only: reconcile that record's inventory against jobs.list
 python3 -m okf_bq_graph.chain --live                      # connected chain, on-demand fallback engine + SDK --live
 python3 -m okf_bq_graph.chain --hermetic --seed-mode catalog --catalog-responses fixtures/catalog_responses.json   # Catalog contract, injected responses (catalog-mock)
 python3 -m okf_bq_graph.chain --live --seed-mode catalog  # fresh Dataplex list/get of the KC-unblock entry -> retained publication -> receipt (Slice B1)
