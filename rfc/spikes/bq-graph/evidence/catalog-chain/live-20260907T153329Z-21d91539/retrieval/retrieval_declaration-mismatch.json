@@ -1,0 +1,140 @@
+{
+ "computations": [
+  {
+   "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd",
+   "concept": "computations/revenue-ytd",
+   "concept_hops": 1,
+   "freshness": {
+    "stale_after": "2026-12-31T00:00:00Z",
+    "verdict": "FRESH"
+   },
+   "path": "computations/revenue-ytd.md",
+   "runtime": "bigquery",
+   "runtime_verdict": "NOT_EXECUTED",
+   "section_id": "acme_retail|pub_190192147fd7fd78|Section|computations/revenue-ytd#s0",
+   "seed": "metrics/revenue",
+   "sql": "SELECT\n  SUM(\n    CASE\n      WHEN o.currency = 'USD' THEN o.net_amount\n      ELSE o.net_amount * fx.rate_to_usd\n    END\n  ) AS revenue_usd\nFROM `acme.sales.orders` AS o\nLEFT JOIN `acme.finance.fx_daily_rates` AS fx\n  ON fx.currency = o.currency\n  AND fx.rate_date = DATE(o.order_ts)\nWHERE o.order_status = 'delivered'\n  AND DATE_DIFF(CURRENT_DATE(), DATE(o.order_ts), DAY) >= 30\n  AND EXTRACT(YEAR FROM o.order_ts) = @year",
+   "sql_sha256": "113434ee15583b3d8c38774fb5480acba7eca49cb89359b07c2b0643ba7d4b76",
+   "status": "stable",
+   "trust_tier": "human-reviewed",
+   "via": [
+    "metrics/revenue",
+    "computations/revenue-ytd"
+   ]
+  }
+ ],
+ "concepts": [
+  {
+   "concept": "metrics/revenue",
+   "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/revenue",
+   "forced": false,
+   "freshness": {
+    "stale_after": "2026-12-31T00:00:00Z",
+    "verdict": "FRESH"
+   },
+   "lifecycle_status": "stable",
+   "matched_sections": [],
+   "path": "metrics/revenue.md",
+   "provenance": [
+    {
+     "declaration": "frontmatter.sources[0]",
+     "note": "declaration-scoped signals (usage_count/window) and resolves_to are not exposed as graph properties; fetch from edges/nodes tables if needed",
+     "resolution": null,
+     "resource": "policies/revenue-recognition.md",
+     "source_id": "acme_retail|pub_190192147fd7fd78|Source|src:policies/revenue-recognition.md",
+     "title": "Revenue Recognition Policy (FY2026)"
+    }
+   ],
+   "replacement": null,
+   "seed_origin": "injected-fixture-seed",
+   "title": "Revenue",
+   "trust_tier": "human-reviewed",
+   "type": "Metric",
+   "verifications": [
+    {
+     "at": "2026-07-01T09:00:00Z",
+     "by": "human:jsmith@acme",
+     "kind": "human"
+    }
+   ]
+  }
+ ],
+ "paths": [
+  {
+   "concept_hops": 1,
+   "seed": "metrics/revenue",
+   "via": [
+    "metrics/revenue",
+    "computations/revenue-ytd"
+   ]
+  }
+ ],
+ "scope": {
+  "as_of": "2026-09-07T15:33:29Z",
+  "bundle_id": "acme_retail",
+  "engine": "fallback",
+  "publication_id": "pub_190192147fd7fd78",
+  "requester": "user:operator",
+  "seed": {
+   "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/revenue",
+   "origin": "injected-fixture-seed"
+  },
+  "top_k": 5
+ },
+ "status": "OK",
+ "timing": {
+  "jobs": [
+   {
+    "bytes_billed": 20971520,
+    "bytes_processed": 58680,
+    "cache_hit": false,
+    "created": "2026-09-07T15:33:56.954000+00:00",
+    "edition": null,
+    "ended": "2026-09-07T15:33:57.654000+00:00",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_018e4fdfa905",
+    "reservation_id": null,
+    "slot_ms": 772,
+    "stage": "walk",
+    "started": "2026-09-07T15:33:57.121000+00:00"
+   },
+   {
+    "bytes_billed": 10485760,
+    "bytes_processed": 16752,
+    "cache_hit": false,
+    "created": "2026-09-07T15:33:58.214000+00:00",
+    "edition": null,
+    "ended": "2026-09-07T15:33:58.738000+00:00",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_991353dd5e2e",
+    "reservation_id": null,
+    "slot_ms": 38,
+    "stage": "nodes",
+    "started": "2026-09-07T15:33:58.467000+00:00"
+   },
+   {
+    "bytes_billed": 20971520,
+    "bytes_processed": 157239,
+    "cache_hit": false,
+    "created": "2026-09-07T15:33:58.229000+00:00",
+    "edition": null,
+    "ended": "2026-09-07T15:33:58.834000+00:00",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_2d33ea3c7c6c",
+    "reservation_id": null,
+    "slot_ms": 101,
+    "stage": "context",
+    "started": "2026-09-07T15:33:58.537000+00:00"
+   }
+  ],
+  "stages_ms": {
+   "assembly": 0.2,
+   "context": 1174.2,
+   "nodes": 1116.5,
+   "seed": 0.0,
+   "walk": 1266.8
+  },
+  "total_ms": 2442.4
+ },
+ "warnings": [
+  "injected-fixture-seed seed: exact Concept id supplied by the runtime pin, not a semantic ranking",
+  "FALLBACK engine: relational joins, not BigQuery Graph"
+ ]
+}
