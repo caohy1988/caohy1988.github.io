@@ -3,16 +3,20 @@
 Read-only. Rebuilds the EXACT job set from the committed evidence (driver journal + every child chain record,
 including the early-refusal chains whose jobs appear only in their own journal), reads each one back from BigQuery
 under its own (project, location, job id), and applies the same `identity_gate` the driver applies in-run.
-`jobs.get` submits no job, so this cannot change the set it audits.
+`jobs.get` submits no job, so this cannot change the set it audits, but it is still bounded by a wall cap
+(argv[2], default 900 s): remaining jobs are retained unread rather than read past the budget.
+
+    python3 bin/followup_job_audit.py evidence/catalog-chain/<run_id> [cap_s]
 """
-import json, sys
+import json, sys, time
 from pathlib import Path
 
 sys.path.insert(0, "/Users/haiyuancao/caohy1988.github.io-catalog-live/rfc/spikes/bq-graph")
 from google.cloud import bigquery
 from okf_bq_graph import LOCATION, PROJECT
 from okf_bq_graph.authz import redact
-from okf_bq_graph.catalog_live import B2Experiment, LiveCloud, identity_gate, _jsonable, _now
+from okf_bq_graph.catalog_live import (B2Experiment, BudgetedCloud, BudgetExceeded, LiveCloud, identity_gate,
+                                       _jsonable, _now)
 
 root = Path(sys.argv[1])
 rows = [{"source": "lifecycle", "leg": "lifecycle", "role": e.get("role"), "job_id": e["job_id"],
@@ -26,14 +30,25 @@ for d in sorted((root / "chains").iterdir()):
     rows.extend(B2Experiment._chain_job_refs(d.name, rec))
     unresolved.extend((rec.get("job_inventory") or {}).get("unresolved") or [])
 
-cloud = LiveCloud(bigquery.Client(project=PROJECT, location=LOCATION))
-out = []
+# Bounded exactly like the in-run audit: one jobs.get per job at the per-operation timeout can otherwise outlast any
+# sane allowance. When the budget is gone we stop dispatching and keep the rest as submitted-but-unread -- never
+# relabelled NOT_SUBMITTED, since those jobs were submitted (Astra PR42 re-review P2 #1).
+CAP_S = float(sys.argv[2]) if len(sys.argv) > 2 else 900.0
+cloud = BudgetedCloud(LiveCloud(bigquery.Client(project=PROJECT, location=LOCATION)), time.monotonic, CAP_S, phase="followup-audit")
+out, exhausted = [], None
 for r in rows:
     rec = dict(r)
+    if exhausted is not None:
+        rec.update(read="NOT_READ_BUDGET", state=None, user_email=None, error=exhausted)
+        out.append(rec)
+        continue
     try:
         st = cloud.job_state(r["job_id"], timeout=30.0, project=r.get("project"), location=r.get("location"))
         rec.update(read="OK", state=st.get("state"), user_email=st.get("user_email"), error=_jsonable(st.get("error"))) if st \
             else rec.update(read="NOT_FOUND", state=None, user_email=None, error=None)
+    except BudgetExceeded as e:
+        exhausted = str(e)
+        rec.update(read="NOT_READ_BUDGET", state=None, user_email=None, error=exhausted)
     except Exception as e:                                        # noqa: BLE001 - unreadable leaves the gate incomplete
         rec.update(read="ERROR", state=None, user_email=None, error=f"{type(e).__name__}: {str(e)[:200]}")
     out.append(rec)
@@ -43,6 +58,7 @@ audit = {"kind": "follow-up job-identity audit (read-only jobs.get over the exac
          "run_id": root.name, "at": _now(), "audited_by": "okf_bq_graph.catalog_live/0.2.0 identity_gate",
          "overall": identity_gate(out, unresolved), "lifecycle": identity_gate([j for j in out if j["source"] == "lifecycle"], []),
          "by_chain": by_chain,
+         "budget": {"cap_s": CAP_S, "exhausted": exhausted},
          "counts": {"lifecycle_bigquery_jobs": len([j for j in out if j["source"] == "lifecycle"]),
                     "chain_jobs": len([j for j in out if j["source"] != "lifecycle"]), "total_jobs": len(out)},
          "jobs": out}

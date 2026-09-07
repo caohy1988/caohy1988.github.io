@@ -302,6 +302,71 @@ def test_delete_entry_requires_a_200(bq):
         cloud.delete_entry(ENTRY, 8)
 
 
+# ---------------------------------------------------------------------------- deadline INSIDE a composite adapter call
+def test_a_composite_op_rechecks_the_deadline_before_the_write_after_the_schema_read(bq):
+    """Astra PR42 re-review P2 #2. `BudgetedCloud` can only check on METHOD entry, but `load_rows` and `insert_row`
+    are two network dispatches: read the table schema, then submit a mutating job. A schema read that consumes the
+    whole budget must not be followed by a write issued anyway with the original timeout. An atomic FakeCloud cap
+    test cannot see this — it needs the real adapter over a fake transport."""
+    for op in ("load_rows", "insert_row"):
+        clock = Clock()
+        live = LV.LiveCloud(bq)
+        wrapped = LV.BudgetedCloud(live, clock, 1.0)
+        seen = []
+        real_get, real_load, real_query = bq.get_table, bq.load_table_from_json, bq.query
+
+        def schema(*a, **kw):
+            seen.append(("get_table", kw["timeout"]))
+            clock.advance(kw["timeout"])          # the read finishes exactly at the deadline
+            return real_get(*a, **kw)
+
+        def load(*a, **kw):
+            seen.append(("load_table_from_json", kw["timeout"])); return real_load(*a, **kw)
+
+        def query(*a, **kw):
+            seen.append(("query", kw.get("timeout"))); return real_query(*a, **kw)
+        bq.get_table, bq.load_table_from_json, bq.query = schema, load, query
+        try:
+            with pytest.raises(LV.BudgetExceeded) as e:
+                if op == "load_rows":
+                    wrapped.load_rows("okf_catalog_chain_x", "publications", [{"publication_id": "pub_1"}], job_id="j_load", timeout=5)
+                else:
+                    wrapped.insert_row("okf_catalog_chain_x", "publications", {"publication_id": "pub_1"}, job_id="j_insert", timeout=5)
+        finally:
+            bq.get_table, bq.load_table_from_json, bq.query = real_get, real_load, real_query
+        assert [x[0] for x in seen] == ["get_table"], f"{op} dispatched a write past the deadline: {seen}"
+        assert "was not dispatched" in str(e.value) and wrapped.remaining() == 0
+        assert [r["where"] for r in wrapped.refused] == ["mid-call"]     # entry was inside budget; the WRITE was refused
+
+
+def test_the_entry_check_still_clamps_and_a_dispatch_inside_budget_is_not_refused(bq):
+    """The complement: the recheck must not make ordinary in-budget work fail, and the entry check still clamps a
+    caller timeout down to the time actually left."""
+    clock = Clock()
+    wrapped = LV.BudgetedCloud(LV.LiveCloud(bq), clock, 3.0)
+    wrapped.load_rows("okf_catalog_chain_x", "publications", [{"publication_id": "pub_1"}], job_id="j_ok", timeout=99)
+    assert wrapped.refused == [] and bq.loads[-1]["job_id"] == "j_ok"
+    assert bq.loads[-1]["timeout"] == 3.0                     # clamped to the remaining budget, not the requested 99
+    assert bq.calls[-1][-1] == 3.0 if bq.calls[-1][0] == "get_table" else True
+
+
+def test_two_patches_in_one_entry_update_are_two_dispatches(bq):
+    """`patch_entry` issues an upsert PATCH and then a delete PATCH: the second is its own dispatch."""
+    clock = Clock()
+    sess = FakeSession([FakeResp(200, {})])
+    live = LV.LiveCloud(bq, session=sess)
+    wrapped = LV.BudgetedCloud(live, clock, 2.0)
+    real = sess.request
+
+    def timed(*a, **kw):
+        clock.advance(2.0)                                     # the first PATCH uses the whole budget
+        return real(*a, **kw)
+    sess.request = timed
+    with pytest.raises(LV.BudgetExceeded):
+        wrapped.patch_entry("g/entries/e", {"aspects": {"k": {"data": {}}}}, ["k", "gone"], timeout=2)
+    assert len(sess.calls) == 1                                # only the upsert went out; the delete PATCH was refused
+
+
 # ============================================================================ B2Experiment against the U4 FakeCloud
 RUN = "b2-t-0001"
 CFG = LifecycleConfig(run_id=RUN, timeout_s=5.0)
@@ -589,6 +654,64 @@ def test_the_identity_audit_covers_graph_only_refusals_and_a_foreign_reference(t
     audit = json.loads((exp.run_dir / "job_identity.json").read_text())
     assert audit["counts"]["total_jobs"] == len(audit["jobs"]) and audit["counts"]["lifecycle_bigquery_jobs"] < audit["counts"]["lifecycle_operations"]
     assert {j["source"] for j in audit["jobs"]} >= {"lifecycle", "chain:b2-control", "chain:fail-stale-withdrawn"}
+
+
+def test_the_identity_audit_is_bounded_by_the_cleanup_budget_and_keeps_unread_jobs(tmp_path, sample_root):
+    """Astra PR42 re-review P2 #1. The audit is read-only but not free: one `jobs.get` per job at the per-operation
+    timeout can outlast the whole teardown allowance. When the cleanup budget runs out it must stop dispatching and
+    retain the rest as submitted-but-unread — which leaves the gate INCOMPLETE — and it must never relabel a job that
+    WAS submitted as `NOT_SUBMITTED` just because nobody got to look at it."""
+    cloud, clock = FakeCloud(), Clock()
+    mod = SimpleNamespace(resolve_publication=PUB.resolve_publication, governed=real_governed)
+    real_read, reads = cloud.job_state, []
+
+    def slow_read(job_id, timeout, project=None, location=None):
+        reads.append({"job_id": job_id, "at": clock.t - 1_000_000, "timeout": timeout})
+        clock.advance(timeout)                       # each read takes exactly the timeout it was granted
+        return real_read(job_id, timeout, project=project, location=location)
+    cloud.job_state = slow_read
+    exp = LV.B2Experiment(str(tmp_path / "ev"), CFG, cloud, object(), lambda: SimpleNamespace(mode="catalog"), "/sdk", sample_root,
+                          stub_chain_factory(cloud, mod, []), chain_module=mod, wall_cap_s=1200, cleanup_cap_s=30, clock=clock)
+    s = exp.run()
+    phase = next(st for st in s["steps"] if st["step"] == "cleanup_phase_opened")
+    deadline = phase["elapsed_s"] + phase["budget_s"]
+    audit = json.loads((exp.run_dir / "job_identity.json").read_text())
+    # nothing is dispatched at or after the cleanup deadline, and the run stops there rather than at 79 x 5 s
+    assert reads and not [r for r in reads if r["at"] >= deadline], reads
+    assert s["elapsed_s"] <= deadline and len(reads) < audit["counts"]["total_jobs"]
+    # every job is still listed, with its full reference; the unread ones are unread, NOT "not submitted"
+    unread = [j for j in audit["jobs"] if j["read"] == "NOT_READ_BUDGET"]
+    assert unread and audit["counts"]["unread_budget"] == len(unread)
+    assert all(j.get("project") and j.get("location") for j in unread)
+    assert all(j["state"] is None and j["user_email"] is None for j in unread)
+    assert not any(j["state"] == "NOT_SUBMITTED" for j in unread)
+    # ... so the gate cannot claim completeness, and neither can the run
+    assert audit["overall"]["status"] == "INCOMPLETE"
+    assert any("submitted but unread" in r for r in audit["overall"]["reasons"])
+    assert s["verdict"] != "B2_ALL_MET" and next(c for c in s["cases"] if c["case"] == "job-identity")["status"] == "NOT_REACHED"
+    # the teardown itself still completed: the owned resources are gone
+    assert CFG.dataset not in cloud.datasets and not any(n.startswith(CFG.entry_prefix) for n in cloud.entries)
+    assert next(c for c in s["cases"] if c["case"] == "cleanup")["behaviour"] == "MET"
+
+
+def test_a_never_dispatched_job_is_distinguished_from_one_the_audit_could_not_reach(tmp_path, sample_root):
+    """Two different unknowns that must not be conflated: `NOT_SUBMITTED` is established locally (the job was refused
+    before the send), while `NOT_READ_BUDGET` means the job exists and we ran out of time to look."""
+    cloud, clock = FakeCloud(), Clock()
+    mod = SimpleNamespace(resolve_publication=PUB.resolve_publication, governed=real_governed)
+    exp = LV.B2Experiment(str(tmp_path / "ev"), CFG, cloud, object(), lambda: SimpleNamespace(mode="catalog"), "/sdk", sample_root,
+                          stub_chain_factory(cloud, mod, []), chain_module=mod, clock=clock)
+    exp._setup()
+    # one journal entry that never reached the server, one that did
+    e = exp.journal.intend("refused_write", "a write the budget refused", "cloud", actual=True)
+    exp.journal.submitted(e, job_id="okf_cc_never_sent", project=CFG.project, location=CFG.location)
+    exp.journal.terminal(e, "NOT_SUBMITTED", error="BudgetExceeded: not dispatched")
+    audit = exp._job_audit()
+    never = next(j for j in audit["jobs"] if j["job_id"] == "okf_cc_never_sent")
+    assert never["read"] == "NOT_DISPATCHED" and never["state"] == "NOT_SUBMITTED"
+    # a never-dispatched id carries no identity requirement, so the lifecycle gate is unaffected by it
+    assert audit["lifecycle"]["status"] == "COMPLETE" and "okf_cc_never_sent" in audit["lifecycle"]["not_dispatched"]
+    assert "okf_cc_never_sent" not in audit["lifecycle"]["not_read_back"]
 
 
 def test_an_early_refusal_chain_hides_its_jobs_in_job_inventory_but_not_in_its_journal():

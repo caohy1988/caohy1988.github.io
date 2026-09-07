@@ -99,6 +99,11 @@ class LiveCloud:
         self.attempts: dict[str, dict] = {}
         self.calls: list[dict] = []
         self._n = 0
+        # Set by `BudgetedCloud` when it wraps this adapter: how many seconds are left in the current phase. The
+        # wrapper can only check on METHOD entry, and several CloudOps methods are composite -- `load_rows` and
+        # `insert_row` read a schema and then submit a job; `patch_entry` can issue two PATCHes. Each of those is a
+        # separate network dispatch, so the deadline is rechecked here, immediately before each one.
+        self.remaining: Optional[Callable[[], float]] = None
 
     # -- BigQuery helpers
     def _ref(self, dataset: str) -> str:
@@ -109,6 +114,19 @@ class LiveCloud:
         if not IDENT_RE.fullmatch(name):
             raise ValueError(f"unsafe identifier: {name!r}")
         return name
+
+    def _dispatch(self, op: str, requested: float) -> float:
+        """Recheck the phase deadline immediately before THIS network dispatch and clamp its timeout to what is left.
+        A schema read that consumed the whole budget must not be followed by a write issued anyway: the entry-time
+        check cannot speak for a second dispatch (Astra PR42 re-review P2 #2). Raises before anything is sent, so the
+        journal closes the entry NOT_SUBMITTED -- which is only ever used when the job itself was never sent."""
+        if self.remaining is None:
+            return requested
+        left = self.remaining()
+        if left <= 0:
+            self.calls.append({"op": op, "refused": "budget", "remaining_s": left, "at": _now()})
+            raise BudgetExceeded(f"phase budget exhausted (remaining {left}s): {op} was not dispatched")
+        return min(requested, left)
 
     def _job_config(self, role: str, params: Optional[list] = None) -> Any:
         from google.cloud import bigquery
@@ -121,9 +139,12 @@ class LiveCloud:
         for bad in FORBIDDEN_SQL:
             if bad.upper() in up:
                 raise ScopeViolation(f"forbidden statement on the relational-only path: {bad}")
+        timeout = self._dispatch(role, timeout)
         self.calls.append({"op": role, "job_id": job_id, "at": _now()})
         job = self.client.query(sql, job_config=self._job_config(role, params), location=self.location, job_id=job_id, project=self.project,
                                 retry=None, job_retry=None, timeout=timeout)
+        # the job IS submitted now: waiting for it is not a new dispatch, so it is bounded by the submit's timeout and
+        # never refused -- refusing here would abandon a live job the journal would then have to reconcile
         rows = [_jsonable(dict(r)) for r in job.result(timeout=timeout)]
         return rows, job
 
@@ -136,8 +157,8 @@ class LiveCloud:
             value = _dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
         return bigquery.ScalarQueryParameter(name, field_type, value)
 
-    def _schema(self, dataset: str, table: str, timeout: float) -> Any:
-        return self.client.get_table(f"{self._ref(dataset)}.{table}", retry=None, timeout=timeout)
+    def _schema(self, dataset: str, table: str, timeout: float, op: str = "get_schema") -> Any:
+        return self.client.get_table(f"{self._ref(dataset)}.{table}", retry=None, timeout=self._dispatch(op, timeout))
 
     # -- CloudOps: datasets
     def get_dataset(self, dataset: str, timeout: float) -> Optional[dict]:
@@ -184,12 +205,13 @@ class LiveCloud:
 
     def load_rows(self, dataset: str, table: str, rows: list[dict], job_id: str, timeout: float) -> dict:
         from google.cloud import bigquery
-        t = self._schema(dataset, self._ident(table), timeout)
+        t = self._schema(dataset, self._ident(table), timeout, op="load_rows.schema")
         cfg = bigquery.LoadJobConfig(schema=t.schema, write_disposition="WRITE_APPEND", source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON)
+        submit_timeout = self._dispatch("load_rows.submit", timeout)      # the schema read may have used the whole budget
         self.calls.append({"op": "load_rows", "job_id": job_id, "target": f"{dataset}.{table}", "rows": len(rows), "at": _now()})
         job = self.client.load_table_from_json([_jsonable(r) for r in rows], f"{self._ref(dataset)}.{table}", job_config=cfg, job_id=job_id,
-                                               location=self.location, project=self.project, timeout=timeout)
-        job.result(timeout=timeout)
+                                               location=self.location, project=self.project, timeout=submit_timeout)
+        job.result(timeout=submit_timeout)
         if job.error_result:
             raise RuntimeError(f"load job {job_id} finished with error: {job.error_result}")
         return {"job_id": job.job_id, "output_rows": getattr(job, "output_rows", None)}
@@ -205,7 +227,7 @@ class LiveCloud:
         return rows
 
     def insert_row(self, dataset: str, table: str, row: dict, job_id: str, timeout: float) -> dict:
-        t = self._schema(dataset, self._ident(table), timeout)
+        t = self._schema(dataset, self._ident(table), timeout, op="insert_row.schema")   # the INSERT goes through _query, rechecked there
         types = {f.name: (f.field_type, f.mode) for f in t.schema}
         from google.cloud import bigquery
         cols, params = [], []
@@ -270,6 +292,7 @@ class LiveCloud:
         return self._session
 
     def _http(self, op: str, method: str, url: str, timeout: float, params: Optional[dict] = None, body: Optional[dict] = None) -> tuple[int, Any, bytes]:
+        timeout = self._dispatch(op, timeout)         # patch_entry issues two PATCHes: each is its own dispatch
         self._n += 1
         self.calls.append({"op": op, "method": method, "url": url, "params": params, "at": _now()})
         r = self._sess().request(method, url, params=params or {}, json=body, timeout=(10, timeout), allow_redirects=False)
@@ -377,7 +400,9 @@ def identity_gate(all_rows: list[dict], unresolved: list[dict]) -> dict:
     if missing_ref:
         reasons.append(f"{len(missing_ref)} job(s) without a complete (project, location) reference")
     if unread:
-        reasons.append(f"{len(unread)} job(s) not read back")
+        skipped = [j["job_id"] for j in rows if j.get("read") == "NOT_READ_BUDGET"]
+        reasons.append(f"{len(unread)} job(s) not read back" +
+                       (f" ({len(skipped)} of them submitted but unread: the audit ran out of teardown budget)" if skipped else ""))
     if non_terminal:
         reasons.append(f"{len(non_terminal)} job(s) not DONE")
     if no_identity:
@@ -430,6 +455,11 @@ class BudgetedCloud:
         object.__setattr__(self, "phase", phase)
         object.__setattr__(self, "deadline", clock() + budget_s)
         object.__setattr__(self, "refused", [])
+        # An adapter that can recheck mid-call gets the live remaining-time function, so a composite operation
+        # (schema read then job submit, or two PATCHes) is bounded at EACH dispatch and not only on method entry.
+        # The closure reads `self.deadline`, so `open_phase` re-points it without any further wiring.
+        if hasattr(inner, "remaining"):
+            inner.remaining = self.remaining
 
     def open_phase(self, phase: str, budget_s: float) -> dict:
         object.__setattr__(self, "phase", phase)
@@ -447,12 +477,17 @@ class BudgetedCloud:
         def bounded(*a: Any, **kw: Any) -> Any:
             left = self.remaining()
             if left <= 0:
-                rec = {"op": name, "phase": self.phase, "mutates": name in MUTATING_OPS, "at": _now(), "over_by_s": -left}
+                rec = {"op": name, "phase": self.phase, "mutates": name in MUTATING_OPS, "at": _now(), "remaining_s": left, "where": "entry"}
                 self.refused.append(rec)
-                raise BudgetExceeded(f"{self.phase} budget exhausted {-left}s ago: {name} was not dispatched")
+                raise BudgetExceeded(f"{self.phase} budget exhausted (remaining {left}s): {name} was not dispatched")
             if isinstance(kw.get("timeout"), (int, float)):
                 kw["timeout"] = min(kw["timeout"], left)      # a blocking call never outlives the phase it was issued under
-            return attr(*a, **kw)
+            try:
+                return attr(*a, **kw)
+            except BudgetExceeded as e:                       # the adapter refused a later dispatch inside this call
+                self.refused.append({"op": name, "phase": self.phase, "mutates": name in MUTATING_OPS, "at": _now(),
+                                     "where": "mid-call", "detail": str(e)})
+                raise
         return bounded
 
 
@@ -1085,12 +1120,18 @@ class B2Experiment:
         exact job set — lifecycle + every child chain, graph-only refusals included — and records the actual principal,
         terminal state and error for each. A job it cannot read leaves the gate incomplete; it never invents identity.
 
-        Read-only: `jobs.get` submits no job, so auditing cannot grow the set it is auditing."""
+        Read-only, but NOT unbounded: `jobs.get` submits no job, so auditing cannot grow the set it is auditing — yet
+        one read per job at the per-operation timeout can still outlast the whole teardown allowance (at the retained
+        170-job scale, a 30 s timeout each is ~85 minutes against a 300 s cleanup cap). Every read therefore goes
+        through the budgeted façade of the phase this runs in, and when that phase is out of time the remaining jobs
+        are retained as UNREAD — which leaves the gate INCOMPLETE. A job whose audit read was skipped is NEVER
+        relabelled `NOT_SUBMITTED`: it was submitted, we simply did not get to look at it (Astra PR42 re-review P2 #1)."""
         t = timeout if timeout is not None else self.cfg.timeout_s
         refs = self._lifecycle_job_refs()
         for label, rows in self.chain_jobs.items():
             refs.extend(rows)
-        jobs, seen = [], set()
+        jobs, seen, exhausted = [], set(), None
+        accepts_ref = _accepts_ref(self.raw_cloud.job_state)      # inspect the ADAPTER: the façade's wrapper is (*a, **kw)
         for r in refs:
             key = (r.get("project"), r.get("location"), r["job_id"])
             if key in seen:
@@ -1098,16 +1139,24 @@ class B2Experiment:
             seen.add(key)
             rec = dict(r)
             if not r.get("dispatched", True):
+                # established locally, before anything was sent -- not an audit outcome
                 rec.update(read="NOT_DISPATCHED", state="NOT_SUBMITTED", user_email=None, error=None)
                 jobs.append(rec)
                 continue
+            if exhausted is not None:
+                rec.update(read="NOT_READ_BUDGET", state=None, user_email=None, error=exhausted)
+                jobs.append(rec)
+                continue
             try:
-                st = self.raw_cloud.job_state(r["job_id"], timeout=t, project=r.get("project"), location=r.get("location")) \
-                    if _accepts_ref(self.raw_cloud.job_state) else self.raw_cloud.job_state(r["job_id"], timeout=t)
+                st = self.cloud.job_state(r["job_id"], timeout=t, project=r.get("project"), location=r.get("location")) \
+                    if accepts_ref else self.cloud.job_state(r["job_id"], timeout=t)
                 if st is None:
                     rec.update(read="NOT_FOUND", state=None, user_email=None, error=None)
                 else:
                     rec.update(read="OK", state=st.get("state"), user_email=st.get("user_email"), error=_jsonable(st.get("error")))
+            except BudgetExceeded as e:      # out of teardown time: stop dispatching, keep the rest as submitted-but-unread
+                exhausted = str(e)
+                rec.update(read="NOT_READ_BUDGET", state=None, user_email=None, error=exhausted)
             except Exception as e:  # noqa: BLE001 - an unreadable job leaves the gate incomplete; it is never assumed terminal
                 rec.update(read="ERROR", state=None, user_email=None, error=f"{type(e).__name__}: {str(e)[:200]}")
             jobs.append(rec)
@@ -1122,7 +1171,10 @@ class B2Experiment:
                          "OPERATIONS are counted separately from lifecycle BigQuery JOBS",
                  "overall": overall, "lifecycle": lifecycle, "by_chain": by_chain,
                  "counts": {"lifecycle_operations": ops["entries"], "lifecycle_bigquery_jobs": ops["with_job_id"],
-                            "chain_jobs": sum(len(v) for v in self.chain_jobs.values()), "total_jobs": len(jobs)},
+                            "chain_jobs": sum(len(v) for v in self.chain_jobs.values()), "total_jobs": len(jobs),
+                            "read": len([j for j in jobs if j.get("read") == "OK"]),
+                            "unread_budget": len([j for j in jobs if j.get("read") == "NOT_READ_BUDGET"])},
+                 "budget_exhausted": exhausted,
                  "jobs": jobs, "at": _now()}
         raw = (json.dumps(self.redact(_jsonable(audit)), indent=1, sort_keys=True, default=str) + "\n").encode("utf-8")
         (self.run_dir / "job_identity.json").write_bytes(raw)
