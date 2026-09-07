@@ -203,6 +203,46 @@ def impersonated_credential_file(sa_email: str, source_path: Optional[str] = Non
     return path
 
 
+USERINFO_EMAIL = "https://www.googleapis.com/auth/userinfo.email"
+_SCOPE_SHIM = '''"""Written by okf_bq_graph.principal for the SDK receipt subprocess: it is on PYTHONPATH, so Python imports it
+at interpreter start-up, before the SDK example runs.
+
+The SDK's `broker.open_live_session` asks `google.auth.default` for ["cloud-platform"] and then reads the requester's
+verified e-mail from `oauth2/tokeninfo`. An impersonated access token minted with that scope alone carries no e-mail, and
+the `scopes` key of an `impersonated_service_account` ADC file is ignored whenever the caller passes scopes explicitly
+(google-auth 2.49.2, `impersonated_credentials.from_impersonated_service_account_info`: `scopes = scopes or info.get("scopes")`).
+So the impersonated credential cannot reach the SDK's identity check without the scope the operator's own gcloud ADC
+already carries by default.
+
+This shim adds exactly that scope. It changes the SCOPE of the credential, never the identity: the token still belongs to
+the impersonated service account, tokeninfo reports that account, and every BigQuery job carries it. No SDK source file is
+edited or read differently; the SDK still establishes the requester from the platform, not from an argument.
+"""
+try:
+    import google.auth as _ga
+
+    _EMAIL = "{email}"
+    _inner = _ga.default
+
+    def default(scopes=None, *args, **kwargs):
+        if scopes and _EMAIL not in scopes:
+            scopes = list(scopes) + [_EMAIL]
+        return _inner(scopes, *args, **kwargs)
+
+    _ga.default = default
+except Exception:   # noqa: BLE001 - a subprocess without google-auth must still start
+    pass
+'''
+
+
+def scope_shim_file(directory: str) -> str:
+    """`sitecustomize.py` in a private directory the broker puts on the subprocess's PYTHONPATH."""
+    path = os.path.join(directory, "sitecustomize.py")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(_SCOPE_SHIM.format(email=USERINFO_EMAIL))
+    return path
+
+
 def bound_to(client: Any, graph_job_ids: list[str], receipt_jobs: list[dict], expected_email: str) -> dict:
     """jobs.get under the OWNER: every graph-leg job (pointer lookup included) and every receipt-leg job must carry
     `user_email == expected_email`. Nothing to compare, an unreadable job or a missing identity is UNKNOWN (never
@@ -234,7 +274,8 @@ class RestrictedBroker:
 
     def __init__(self, engine: str, sdk_dataset: str, dependencies: Optional[list[str]] = None, sa_email: Optional[str] = None,
                  factory: Optional[Callable[[str], Any]] = None, owner: Any = None, wait_s: int = 240,
-                 credential_file: Callable[..., str] = impersonated_credential_file):
+                 credential_file: Callable[..., str] = impersonated_credential_file,
+                 scope_shim: Optional[Callable[[str], str]] = scope_shim_file):
         from .authz import impersonated_client
         self.engine, self.sdk_dataset = engine, sdk_dataset
         self.dependencies: list[str] = list(dependencies or [])   # the bound SDK publication's tables: known BEFORE the first grant probe
@@ -246,8 +287,10 @@ class RestrictedBroker:
         self.journal: list[dict] = []
         self.receipt_launches = 0
         self._credential_file = credential_file
+        self._scope_shim = scope_shim or (lambda directory: "")
         self._cred_dir: Optional[str] = None
         self._cred_path: Optional[str] = None
+        self._shim_path: Optional[str] = None
         self.granted: set[str] = set()
         self._rls_original: Optional[dict] = None   # the `_rls` policies' grantees + predicates before this broker's first mutation
         self._rls_granted = False
@@ -260,7 +303,11 @@ class RestrictedBroker:
     def describe(self) -> dict:
         return {"kind": "iam-impersonation-broker", "iam": True, "principal": self.principal, "engine": self.engine,
                 "graph_leg": "authz.impersonated_client (IAM generateAccessToken; jobs carry the SA user_email)",
-                "receipt_leg": "SDK subprocess under an impersonated_service_account ADC file (GOOGLE_APPLICATION_CREDENTIALS)",
+                "receipt_leg": "SDK subprocess under an impersonated_service_account ADC file (GOOGLE_APPLICATION_CREDENTIALS), "
+                               "plus a PYTHONPATH sitecustomize that adds the userinfo.email scope to google.auth.default: the SDK "
+                               "reads the requester from oauth2 tokeninfo, which returns no e-mail for a cloud-platform-only "
+                               "impersonated token, and google-auth ignores the ADC file's own `scopes` when the caller passes them. "
+                               "The shim changes the credential's scope, never its identity, and edits no SDK source",
                 "authorization_probe": "dry-run SELECT per dependency table under the impersonated client",
                 "rls_grantee": "a case on the `_rls` fixture adds the SA to the three hidden-intermediate row access policies "
                                "(authz.set_rls) and observes the rows it can actually read; teardown restores the snapshot"}
@@ -418,11 +465,20 @@ class RestrictedBroker:
         return {"engine": self.engine, "bq": self.sa, "ds": self._graph_ds(), "cache": {}}
 
     def receipt_env(self) -> dict:
+        """The SDK subprocess's credential: the impersonated ADC file, plus the `userinfo.email` scope shim on
+        PYTHONPATH without which the SDK's own identity check cannot resolve an impersonated token (see `_SCOPE_SHIM`).
+        Both live in the private 0700 directory `teardown` removes."""
         if self._cred_path is None:
             self._cred_dir = tempfile.mkdtemp(prefix=".okf_sa_adc_")
+            os.chmod(self._cred_dir, stat.S_IRWXU)
             self._cred_path = self._credential_file(self.email, directory=self._cred_dir)
+            self._shim_path = self._scope_shim(self._cred_dir)
         self.receipt_launches += 1
-        return {"GOOGLE_APPLICATION_CREDENTIALS": self._cred_path}
+        env = {"GOOGLE_APPLICATION_CREDENTIALS": self._cred_path}
+        if self._shim_path:
+            existing = os.environ.get("PYTHONPATH")
+            env["PYTHONPATH"] = os.path.dirname(self._shim_path) + (os.pathsep + existing if existing else "")
+        return env
 
     def _probe_table(self, table: str) -> dict:
         """Dry-run read of one table under the impersonated client: no job, no bytes, but the platform's own access
@@ -488,7 +544,7 @@ class RestrictedBroker:
                 td["steps"]["readback_rls_policies"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}"}
         if self._cred_dir:
             shutil.rmtree(self._cred_dir, ignore_errors=True)
-            td["steps"]["remove_credential_file"] = {"ok": not os.path.exists(self._cred_dir)}
+            td["steps"]["remove_credential_file"] = {"ok": not os.path.exists(self._cred_dir), "held": ["adc.json", "sitecustomize.py"]}
         if not td["steps"]:
             td["status"] = "NOT_NEEDED"; td["reason"] = "no dataset or row access policy touched and no credential file written"
         else:

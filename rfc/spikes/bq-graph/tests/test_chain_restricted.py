@@ -776,12 +776,40 @@ def test_live_broker_receipt_env_points_the_sdk_at_the_impersonated_file_and_tea
         seen["email"], seen["dir"] = email, directory
         p = os.path.join(directory, "adc.json"); Path(p).write_text("{}"); return p
 
+    monkeypatch.delenv("PYTHONPATH", raising=False)
     b, sa, owner = _live_broker(monkeypatch, allowed=set(), credfile=credfile)
     env = b.receipt_env()
-    assert seen["email"] == SA and env == {"GOOGLE_APPLICATION_CREDENTIALS": os.path.join(seen["dir"], "adc.json")} and os.path.exists(env["GOOGLE_APPLICATION_CREDENTIALS"])
+    assert seen["email"] == SA and os.path.exists(env["GOOGLE_APPLICATION_CREDENTIALS"])
+    assert env == {"GOOGLE_APPLICATION_CREDENTIALS": os.path.join(seen["dir"], "adc.json"), "PYTHONPATH": seen["dir"]}
     assert b.receipt_env() == env and b.receipt_launches == 2                                # one file per broker, reused
+    # the shim is the SDK's own credential path with one extra scope: it never names an identity
+    shim = Path(seen["dir"], "sitecustomize.py").read_text()
+    assert "userinfo.email" in shim and "google.auth" in shim and SA not in shim and "gserviceaccount" not in shim
+    assert stat.S_IMODE(os.stat(seen["dir"]).st_mode) == 0o700
     td = b.teardown()
-    assert td["status"] == "VERIFIED" and td["steps"] == {"remove_credential_file": {"ok": True}} and not os.path.exists(seen["dir"])
+    assert td["status"] == "VERIFIED" and not os.path.exists(seen["dir"])
+    assert td["steps"] == {"remove_credential_file": {"ok": True, "held": ["adc.json", "sitecustomize.py"]}}
+
+
+def test_live_broker_scope_shim_adds_only_the_email_scope_and_keeps_the_identity(monkeypatch, tmp_path):
+    """The shim must add the scope the SDK's tokeninfo check needs and change nothing else: same call-through, same
+    credential, no scope invented when the caller already asked for it."""
+    shim = tmp_path / "shim"; shim.mkdir()
+    PR.scope_shim_file(str(shim))
+    import google.auth
+    calls = []
+
+    def recorder(scopes=None, request=None, quota_project_id=None, default_scopes=None):
+        calls.append(scopes)
+        return "CREDS", "PROJECT"
+
+    monkeypatch.setattr(google.auth, "default", recorder)                 # monkeypatch restores the real one at teardown
+    exec(compile((shim / "sitecustomize.py").read_text(), "sitecustomize.py", "exec"), {})
+    cp = "https://www.googleapis.com/auth/cloud-platform"
+    assert google.auth.default(scopes=[cp]) == ("CREDS", "PROJECT")       # the SDK's exact call, and its result, untouched
+    assert calls[-1] == [cp, PR.USERINFO_EMAIL]                           # its scope list, plus the e-mail scope
+    google.auth.default(scopes=[cp, PR.USERINFO_EMAIL]); assert calls[-1] == [cp, PR.USERINFO_EMAIL]   # already asked for: unchanged
+    google.auth.default(); assert calls[-1] is None                       # no scopes requested: nothing invented
 
 
 def test_live_restricted_chain_runs_the_pointer_lookup_under_the_broker_client_and_tears_down(sdk_root, tmp_path, monkeypatch):
