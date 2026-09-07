@@ -573,7 +573,7 @@ def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dic
 
 
 # ----------------------------------------------------------------------------- whole chain
-CHAIN_VERSION = "okf_bq_graph.chain/0.6.0"
+CHAIN_VERSION = "okf_bq_graph.chain/0.7.0"   # 0.7.0: the live restricted broker also holds the `_rls` row-policy grantee (Slice B)
 SEED_MODES = ("fixture", "catalog")
 
 

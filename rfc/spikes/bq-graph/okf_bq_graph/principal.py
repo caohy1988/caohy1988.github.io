@@ -10,11 +10,13 @@ contract:
   the `_rls` fixture shape, read on the SDK fixture tables). It submits no BigQuery job and proves nothing about the
   platform; it proves that the chain's stages, refusals and acceptance rules behave as designed against enforced
   denials, so a live pass can be judged against the same record shape.
-* `RestrictedBroker` (wired, NOT exercised in this slice): IAM impersonation of the receipt spike's restricted service
+* `RestrictedBroker` (Slice B, 2026-09-07: exercised live): IAM impersonation of the receipt spike's restricted service
   account through authz.py's `impersonated_client` (the receipt broker pattern, copied not imported) for the graph leg,
   an `impersonated_service_account` credential file for the SDK subprocess (run.py has no impersonation flag and is
-  not edited), dataset-level reader grants through authz.py's `set_dataset_reader`, and a dry-run probe per dependency
-  table as the pre-execution authorization check (the SDK's own `probe_sources` shape). The live pass is Slice B.
+  not edited), dataset-level reader grants through authz.py's `set_dataset_reader`, the SA added to the `_rls` fixture's
+  hidden-intermediate row access policies for a case that runs on it (authz.py's `set_rls`: dataset READER alone leaves a
+  non-grantee reading zero rows, which is an outage, not enforcement), and a dry-run probe per dependency table as the
+  pre-execution authorization check (the SDK's own `probe_sources` shape).
 
 Evidence hygiene: brokers describe themselves by the SA alias only; the raw e-mail stays in memory and chain.py's
 `redact` masks every e-mail before anything is written.
@@ -31,15 +33,27 @@ import time
 from typing import Any, Callable, Optional
 
 from . import DATASET, LOCATION, PROJECT
-from .authz import SA_ALIAS, RLS_DS, restricted_sa
+from .authz import HIDDEN, SA_ALIAS, RLS_DS, restricted_sa
 from .oracle import Graph
 
 ALLOWED, DENIED, UNKNOWN = "ALLOWED", "DENIED", "UNKNOWN"
+RLS_TABLES = ("nodes", "edges", "section_vectors")
 IAM_CREDENTIALS = "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/{sa}:generateAccessToken"
 
 
 def _now() -> str:
     return _dt.datetime.now(_dt.timezone.utc).isoformat()
+
+
+def _norm_predicate(text: str) -> str:
+    return " ".join((text or "").split())
+
+
+def hide_predicates() -> dict:
+    """The filter expression of each hidden-intermediate `_rls` policy, taken from `authz.rls_statements` itself so the
+    live broker never carries a second copy of the fixture's shape."""
+    from .authz import rls_statements
+    return {t: _norm_predicate(stmt.split("FILTER USING (", 1)[1].rsplit(")", 1)[0]) for t, stmt in rls_statements(["x"]).items()}
 
 
 # ----------------------------------------------------------------------------- policy (what a case asks the broker for)
@@ -235,6 +249,8 @@ class RestrictedBroker:
         self._cred_dir: Optional[str] = None
         self._cred_path: Optional[str] = None
         self.granted: set[str] = set()
+        self._rls_original: Optional[dict] = None   # the `_rls` policies' grantees + predicates before this broker's first mutation
+        self._rls_granted = False
         if owner is None:
             from google.cloud import bigquery
             owner = bigquery.Client(project=PROJECT, location=LOCATION)
@@ -245,7 +261,9 @@ class RestrictedBroker:
         return {"kind": "iam-impersonation-broker", "iam": True, "principal": self.principal, "engine": self.engine,
                 "graph_leg": "authz.impersonated_client (IAM generateAccessToken; jobs carry the SA user_email)",
                 "receipt_leg": "SDK subprocess under an impersonated_service_account ADC file (GOOGLE_APPLICATION_CREDENTIALS)",
-                "authorization_probe": "dry-run SELECT per dependency table under the impersonated client"}
+                "authorization_probe": "dry-run SELECT per dependency table under the impersonated client",
+                "rls_grantee": "a case on the `_rls` fixture adds the SA to the three hidden-intermediate row access policies "
+                               "(authz.set_rls) and observes the rows it can actually read; teardown restores the snapshot"}
 
     def _log(self, event: str, **kw: Any) -> dict:
         entry = {"at": _now(), "event": event, **kw}
@@ -278,6 +296,69 @@ class RestrictedBroker:
                 set_dataset_reader(self.owner, ds, self.email, False)
             self.granted.discard(ds)
 
+    # -- `_rls` row access policies (dataset READER alone leaves a non-grantee reading zero rows: RLS decides the rows)
+    def _rls_state(self) -> dict:
+        """Grantees and filter predicate of each `_rls` row access policy, read back from the service under the owner
+        (REST rowAccessPolicies.list + getIamPolicy, the shape `authz.rls_grantees` uses)."""
+        api = self.owner._connection.api_request
+        state: dict = {}
+        for t in RLS_TABLES:
+            base = f"/projects/{PROJECT}/datasets/{RLS_DS}/tables/{t}/rowAccessPolicies"
+            pols = api(method="GET", path=base).get("rowAccessPolicies", [])
+            if len(pols) != 1:
+                raise RuntimeError(f"{RLS_DS}.{t} carries {len(pols)} row access policies: the governance fixture is exactly one per table")
+            pid = pols[0]["rowAccessPolicyReference"]["policyId"]
+            members = [m for b in api(method="POST", path=f"{base}/{pid}:getIamPolicy", data={}).get("bindings", []) for m in b.get("members", [])]
+            state[t] = {"policy_id": pid, "grantees": sorted(set(members)), "predicate": _norm_predicate(pols[0].get("filterPredicate") or "")}
+        return state
+
+    def _rls_grantee(self, want: bool) -> None:
+        """Add or remove the SA from the three `_rls` policies. The first call snapshots them and refuses to touch a
+        fixture that is not the hidden-intermediate shape (a case graded against unknown policies proves nothing);
+        `want=False` before any mutation is a no-op, so a broker that never ran an `_rls` case changes nothing."""
+        from .authz import set_rls
+        if self._rls_original is None:
+            if not want:
+                return
+            snap = self._rls_state()
+            want_pred = hide_predicates()
+            wrong = sorted(t for t in RLS_TABLES if snap[t]["predicate"] != want_pred[t])
+            if wrong:
+                raise RuntimeError(f"`{RLS_DS}` row access policies are not the hidden-intermediate fixture shape on {wrong}: "
+                                   "the broker will not overwrite policies it cannot restore")
+            if snap["nodes"]["grantees"] != snap["edges"]["grantees"]:
+                raise RuntimeError("`_rls` nodes and edges policies carry different grantee lists: the broker's restore assumes the fixture's shared list")
+            self._rls_original = snap
+        if want == self._rls_granted:
+            return
+        member = f"serviceAccount:{self.email}"
+        base_ne = set(self._rls_original["nodes"]["grantees"])
+        base_v = set(self._rls_original["section_vectors"]["grantees"])
+        ne = sorted(base_ne | {member} if want else base_ne - {member})
+        vec = sorted(base_v | {member} if want else base_v - {member})
+        jobs = set_rls(self.owner, ne, vector_grantees=vec, hide=True)
+        self._rls_granted = want
+        self._log("rls_policies", sa_grantee=want, ds=RLS_DS, jobs={t: jobs.get(t) for t in RLS_TABLES},
+                  note="hidden-intermediate policies re-issued with the SA added to / removed from the fixture's grantee list")
+
+    def _rls_rows(self) -> dict:
+        """What the requester actually reads on the `_rls` fixture (a real query under the impersonated client, not a
+        dry run: a dry run passes on dataset READER alone and never observes the row policy). ALLOWED only when rows are
+        visible AND the hidden intermediate is gone; a non-grantee reads zero rows, which is DENIED here."""
+        from google.api_core import exceptions as gexc
+        from google.cloud import bigquery
+        q = (f"SELECT COUNT(*) AS visible, COUNTIF(local_id = '{HIDDEN}' OR STARTS_WITH(local_id, '{HIDDEN}#')) AS hidden "
+             f"FROM `{PROJECT}.{RLS_DS}.nodes`")
+        cfg = bigquery.QueryJobConfig(use_query_cache=False, labels={"okf_spike": "bq_graph_20260905", "stage": "rls_rows"})
+        try:
+            row = dict(list(self.sa.query(q, job_config=cfg, location=LOCATION).result())[0])
+        except (gexc.Forbidden, gexc.Unauthorized, gexc.NotFound) as e:
+            return {"status": DENIED, "error_class": type(e).__name__}
+        except Exception as e:  # noqa: BLE001 - not a platform decision: unknown, never allowed
+            return {"status": UNKNOWN, "error_class": type(e).__name__}
+        return {"status": ALLOWED if row["visible"] > 0 and row["hidden"] == 0 else DENIED,
+                "visible": row["visible"], "hidden": row["hidden"]}
+
     def _restore(self, ds: str) -> None:
         """Put the principal's ACL entries on `ds` back to the snapshot: nothing this broker added survives, everything
         that pre-existed (whatever its role) is back."""
@@ -302,14 +383,20 @@ class RestrictedBroker:
         """Bring the platform to the case's policy and wait until the requester observes it: reader grants on the graph
         dataset and the SDK fixture dataset are added or removed, then probed under the impersonated client."""
         self.state.update(dataset=pol["dataset"], dataset_reader=pol["dataset_reader"], hidden=tuple(pol["hidden"]), sdk_tables=pol["sdk_tables"])
+        rls = self.state["dataset"] == "rls" and pol["dataset_reader"]
         self._reader(self._graph_ds(), pol["dataset_reader"])
         self._reader(self.sdk_dataset, pol["sdk_tables"])
+        self._rls_grantee(rls)
         g_ok, g_obs, g_s = self._wait(lambda: self._probe_table(f"{PROJECT}.{self._graph_ds()}.nodes"), ALLOWED if pol["dataset_reader"] else DENIED)
         s_ok, s_obs, s_s = self._wait(lambda: self.authorize(self.dependencies), ALLOWED if pol["sdk_tables"] else DENIED)
-        entry = self._log("apply", policy=dict(self.state, hidden=list(self.state["hidden"])), observed=g_ok and s_ok,
-                          graph={"waited_s": g_s, "status": g_obs.get("status")}, sdk={"waited_s": s_s, "status": s_obs.get("status")})
-        if not (g_ok and s_ok):
-            raise RuntimeError(f"policy did not propagate within {self.wait_s}s: graph={g_obs.get('status')} sdk={s_obs.get('status')}")
+        # a `_rls` case needs the row policy in force for the requester too: dataset READER alone reads zero rows
+        r_ok, r_obs, r_s = self._wait(self._rls_rows, ALLOWED) if rls else (True, {}, 0)
+        entry = self._log("apply", policy=dict(self.state, hidden=list(self.state["hidden"])), observed=g_ok and s_ok and r_ok,
+                          graph={"waited_s": g_s, "status": g_obs.get("status")}, sdk={"waited_s": s_s, "status": s_obs.get("status")},
+                          rls=({"waited_s": r_s, **r_obs} if rls else {"status": "NOT_APPLICABLE", "reason": "case does not use the `_rls` fixture"}))
+        if not (g_ok and s_ok and r_ok):
+            raise RuntimeError(f"policy did not propagate within {self.wait_s}s: graph={g_obs.get('status')} sdk={s_obs.get('status')} "
+                               f"rls={r_obs.get('status') if rls else 'NOT_APPLICABLE'}")
         return entry
 
     def grant(self) -> dict:
@@ -319,6 +406,7 @@ class RestrictedBroker:
         self.state.update(REVOKED)
         self._reader(self._graph_ds(), False)
         self._reader(self.sdk_dataset, False)
+        self._rls_grantee(False)
         g_ok, g_obs, g_s = self._wait(lambda: self._probe_table(f"{PROJECT}.{self._graph_ds()}.nodes"), DENIED)
         s_ok, s_obs, s_s = self._wait(lambda: self.authorize(self.dependencies), DENIED)
         return self._log("revoke", policy=dict(self.state, hidden=list(self.state["hidden"])), observed=g_ok and s_ok,
@@ -378,11 +466,31 @@ class RestrictedBroker:
             except Exception as e:  # noqa: BLE001
                 td["steps"][f"readback_{ds}"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}"}
         self.granted.clear()
+        if self._rls_original is not None:
+            from .authz import set_rls
+            try:
+                set_rls(self.owner, self._rls_original["nodes"]["grantees"],
+                        vector_grantees=self._rls_original["section_vectors"]["grantees"], hide=True, strict=True)
+                self._rls_granted = False
+                td["steps"]["restore_rls_policies"] = {"ok": True}
+            except Exception as e:  # noqa: BLE001
+                td["steps"]["restore_rls_policies"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}"}
+            try:
+                after = self._rls_state()
+                member = f"serviceAccount:{self.email}"
+                same = all(after[t]["grantees"] == self._rls_original[t]["grantees"]
+                           and after[t]["predicate"] == self._rls_original[t]["predicate"] for t in RLS_TABLES)
+                td["rls"] = {"tables": len(RLS_TABLES), "restored_to_snapshot": same,
+                             "sa_in_grantees_after": any(member in after[t]["grantees"] for t in RLS_TABLES),
+                             "grantees_after": {t: len(after[t]["grantees"]) for t in RLS_TABLES}}
+                td["steps"]["readback_rls_policies"] = {"ok": same and not td["rls"]["sa_in_grantees_after"]}
+            except Exception as e:  # noqa: BLE001
+                td["steps"]["readback_rls_policies"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}"}
         if self._cred_dir:
             shutil.rmtree(self._cred_dir, ignore_errors=True)
             td["steps"]["remove_credential_file"] = {"ok": not os.path.exists(self._cred_dir)}
         if not td["steps"]:
-            td["status"] = "NOT_NEEDED"; td["reason"] = "no dataset touched and no credential file written"
+            td["status"] = "NOT_NEEDED"; td["reason"] = "no dataset or row access policy touched and no credential file written"
         else:
             td["status"] = "VERIFIED" if all(s["ok"] for s in td["steps"].values()) else "UNVERIFIED"
         return td

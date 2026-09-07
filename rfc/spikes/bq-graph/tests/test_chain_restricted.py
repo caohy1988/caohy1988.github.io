@@ -505,20 +505,34 @@ def test_impersonated_credential_file_shape_and_permissions(tmp_path):
         PR.impersonated_credential_file(SA, source_path=str(src), directory=str(d))
 
 
-class _SAClient:
-    """Impersonated client whose dry runs are decided by a visibility table (no job is ever created)."""
+class _Rows:
+    def __init__(self, rows, job_id="fake-job"):
+        self._rows, self.job_id = rows, job_id
 
-    def __init__(self, allowed):
-        self.allowed, self.queries = set(allowed), []
+    def result(self):
+        return iter(self._rows)
+
+
+class _SAClient:
+    """Impersonated client whose dry runs are decided by a visibility table (no job is ever created). The `_rls`
+    row-count query the broker uses to observe the row policy is answered like BigQuery RLS does: a principal that is
+    not a grantee of the policy reads zero rows even with dataset READER."""
+
+    def __init__(self, allowed, owner=None):
+        self.allowed, self.queries, self.owner = set(allowed), [], owner
 
     def query(self, q, job_config=None, location=None):
         from google.api_core import exceptions as gexc
         self.queries.append(q)
-        assert job_config.dry_run is True
         table = q.split("`")[1]
         if table not in self.allowed:
             raise gexc.Forbidden("403 access denied")
-        return object()
+        if job_config is not None and job_config.dry_run:
+            return object()
+        assert "COUNT(*) AS visible" in q, f"the live broker submits no other real query under the SA: {q[:80]}"
+        grantee = self.owner is not None and f"serviceAccount:{SA}" in self.owner.policies["nodes"]["grantees"]
+        hidden = 0 if self.owner is None or "gross-margin" in self.owner.policies["nodes"]["predicate"] else 3
+        return _Rows([{"visible": 42 if grantee else 0, "hidden": hidden if grantee else 0}])
 
 
 class _Dataset:
@@ -526,14 +540,45 @@ class _Dataset:
         self.ref, self.access_entries = ref, list(entries)
 
 
+class _RlsApi:
+    """The REST surface `RestrictedBroker._rls_state` reads: rowAccessPolicies.list + getIamPolicy per policy."""
+
+    def __init__(self, owner):
+        self.owner = owner
+
+    def api_request(self, method=None, path=None, data=None):
+        table = path.split("/tables/", 1)[1].split("/", 1)[0]
+        pol = self.owner.policies[table]
+        if method == "GET":
+            return {"rowAccessPolicies": [{"rowAccessPolicyReference": {"policyId": pol["policy_id"]}, "filterPredicate": pol["predicate"]}]}
+        return {"bindings": [{"role": "roles/bigquery.filteredDataViewer", "members": list(pol["grantees"])}]}
+
+
 class _AclOwner(_Owner):
     """Owner client with real `bigquery.AccessEntry` ACLs per dataset, so the real `authz.set_dataset_reader` and the
-    broker's snapshot/restore run unmodified (the API returns copies; `update_dataset` writes back)."""
+    broker's snapshot/restore run unmodified (the API returns copies; `update_dataset` writes back). It also models the
+    three `_rls` row access policies, so the real `authz.set_rls` DDL and the broker's grantee snapshot/restore run
+    against a readable-back fixture."""
 
-    def __init__(self, acl):
+    def __init__(self, acl, predicates=None):
         super().__init__({})
         self.acl = {ds: list(entries) for ds, entries in acl.items()}
         self.updates = []
+        pred = predicates or PR.hide_predicates()
+        self.policies = {t: {"policy_id": f"hide_intermediate_{t}", "grantees": [OPERATOR_MEMBER], "predicate": pred[t]}
+                         for t in PR.RLS_TABLES}
+        self.rls_ddl = []
+        self._connection = _RlsApi(self)
+
+    def query(self, q, job_config=None, location=None):
+        """Only the `authz.set_rls` DDL reaches the owner in these tests: parse it back into the policy fixture."""
+        assert "ROW ACCESS POLICY" in q, f"unexpected owner query: {q[:80]}"
+        self.rls_ddl.append(q)
+        table = q.split("` GRANT TO", 1)[0].rsplit(".", 1)[1]
+        grantees = sorted(x.strip().strip("'") for x in q.split("GRANT TO (", 1)[1].split(")", 1)[0].split(","))
+        predicate = " ".join(q.split("FILTER USING (", 1)[1].rsplit(")", 1)[0].split())
+        self.policies[table].update(grantees=grantees, predicate=predicate)
+        return _Rows([])
 
     def get_dataset(self, ref):
         ds = ref.split(".", 1)[1]
@@ -547,6 +592,7 @@ class _AclOwner(_Owner):
         return sorted(e.role for e in self.acl.get(ds, []) if (e.entity_id or "").replace("serviceAccount:", "") == principal)
 
 
+OPERATOR_MEMBER = "user:operator@example.test"
 SDK_DS = "okf_receipt_spike_20260905"
 P = "test-project-0728-467323"
 SDK_DEPS = [f"{P}.{SDK_DS}.orders", f"{P}.{SDK_DS}.order_lines"]
@@ -564,7 +610,8 @@ def _live_broker(monkeypatch, allowed, acl=None, deps=SDK_DEPS, credfile=None, *
     t = [0.0]
     monkeypatch.setattr(PR.time, "monotonic", lambda: t[0])
     monkeypatch.setattr(PR.time, "sleep", lambda s: t.__setitem__(0, t[0] + s))
-    sa, owner = _SAClient(allowed), _AclOwner(acl or {})
+    owner = _AclOwner(acl or {})
+    sa = _SAClient(allowed, owner=owner)
     b = PR.RestrictedBroker("fallback", SDK_DS, dependencies=deps, sa_email=SA, factory=lambda p: sa, owner=owner,
                             credential_file=credfile or (lambda email, directory=None: os.path.join(directory, "adc.json")), **kw)
     return b, sa, owner
@@ -597,7 +644,11 @@ def test_live_broker_never_touches_or_downgrades_preexisting_grants_and_restores
     assert b.granted == set() and [j["event"] for j in b.journal[:-1]] == ["grant_preexisting", "grant_preexisting"]
     b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
     assert owner.roles(RLS_DS) == ["READER"] and b.granted == {RLS_DS} and b.graph_clients()["ds"] == RLS_DS
+    # the `_rls` case needs the row policy's grantee list too: dataset READER alone leaves a non-grantee reading zero rows
+    assert owner.policies["nodes"]["grantees"] == sorted([OPERATOR_MEMBER, f"serviceAccount:{SA}"]) and len(owner.rls_ddl) == 3
+    assert all(pol["predicate"] == PR.hide_predicates()[t] for t, pol in owner.policies.items())   # the hidden-intermediate shape is unchanged
     b.apply(PR.policy())
+    assert owner.policies["nodes"]["grantees"] == [OPERATOR_MEMBER]                                # leaving the fixture drops the grantee again
     sa.allowed = set()
     r = b.revoke()                                                                             # the revocation case must observe a denial: pre-existing entries go too ...
     assert r["observed"] is True and owner.roles(DATASET) == [] and owner.roles(SDK_DS) == [] and owner.roles(RLS_DS) == ["READER"]
@@ -606,7 +657,57 @@ def test_live_broker_never_touches_or_downgrades_preexisting_grants_and_restores
     assert owner.roles(DATASET) == ["READER"] and owner.roles(SDK_DS) == ["WRITER"] and owner.roles(RLS_DS) == []
     assert td["datasets"][SDK_DS] == {"original_roles": ["WRITER"], "roles_after": ["WRITER"], "added_by_broker": False}
     assert td["datasets"][RLS_DS] == {"original_roles": [], "roles_after": [], "added_by_broker": True}
-    assert set(td["steps"]) == {f"{k}_{ds}" for k in ("restore", "readback") for ds in (DATASET, SDK_DS, RLS_DS)}
+    assert set(td["steps"]) == ({f"{k}_{ds}" for k in ("restore", "readback") for ds in (DATASET, SDK_DS, RLS_DS)}
+                                | {"restore_rls_policies", "readback_rls_policies"})
+    assert td["rls"] == {"tables": 3, "restored_to_snapshot": True, "sa_in_grantees_after": False,
+                         "grantees_after": {t: 1 for t in PR.RLS_TABLES}}
+    assert owner.policies["nodes"]["grantees"] == [OPERATOR_MEMBER] and owner.policies["section_vectors"]["grantees"] == [OPERATOR_MEMBER]
+
+
+def test_live_broker_leaves_rls_policies_alone_unless_a_case_runs_on_them(monkeypatch):
+    """A broker whose cases never touch the `_rls` fixture issues no policy DDL and reports nothing to restore."""
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    b.grant(); sa.allowed = set(); b.revoke()
+    td = b.teardown()
+    assert owner.rls_ddl == [] and b._rls_original is None and owner.policies["nodes"]["grantees"] == [OPERATOR_MEMBER]
+    assert "restore_rls_policies" not in td["steps"] and "rls" not in td
+
+
+def test_live_broker_refuses_rls_policies_it_could_not_restore(monkeypatch):
+    """Grading a hidden-intermediate case against unknown policies proves nothing: an unexpected predicate, an unexpected
+    policy count and a split nodes/edges grantee list each refuse before any DDL is issued."""
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    owner.policies["edges"]["predicate"] = "TRUE"
+    with pytest.raises(RuntimeError, match="hidden-intermediate fixture shape"):
+        b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert owner.rls_ddl == [] and b._rls_original is None
+
+    b2, sa2, owner2 = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    owner2.policies["edges"]["grantees"] = [OPERATOR_MEMBER, "user:someone-else@example.test"]
+    with pytest.raises(RuntimeError, match="different grantee lists"):
+        b2.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert owner2.rls_ddl == []
+
+    b3, sa3, owner3 = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    owner3._connection.api_request = lambda method=None, path=None, data=None: {"rowAccessPolicies": []}
+    with pytest.raises(RuntimeError, match="row access policies"):
+        b3.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert owner3.rls_ddl == []
+
+
+def test_live_broker_rls_case_waits_for_the_row_policy_not_just_the_dry_run(monkeypatch):
+    """The dry run passes on dataset READER alone, so a non-grantee would look ALLOWED. The broker refuses until it
+    actually reads rows on the fixture, and the refusal names the `_rls` observation."""
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    real = b._rls_grantee
+    b._rls_grantee = lambda want: None          # the grant never lands: dataset READER is in place, the row policy is not
+    with pytest.raises(RuntimeError, match="rls=DENIED"):
+        b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert [q for q in sa.queries if "COUNT(*) AS visible" in q]          # a real query under the SA, not a dry run
+    b._rls_grantee = real
+    entry = b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert entry["observed"] is True and entry["rls"]["status"] == "ALLOWED" and entry["rls"]["visible"] > 0 and entry["rls"]["hidden"] == 0
+    assert b.apply(PR.policy())["rls"] == {"status": "NOT_APPLICABLE", "reason": "case does not use the `_rls` fixture"}
 
 
 def test_live_broker_failed_setup_still_restores_the_original_acl(monkeypatch):   # Astra P1: failed launch through the real helper
@@ -643,7 +744,8 @@ def test_live_restricted_chain_builds_the_broker_with_the_sdk_dependencies_and_t
     deps = CH.sdk_publication(sdk_root)["dependencies"]
 
     def make(allowed, acl):
-        sa, owner = _SAClient(allowed), _AclOwner(acl)
+        owner = _AclOwner(acl)
+        sa = _SAClient(allowed, owner=owner)
 
         def factory(engine, sdk_dataset, dependencies=None, **kw):
             seen["dependencies"], seen["sdk_dataset"] = list(dependencies or []), sdk_dataset
