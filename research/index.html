@@ -174,21 +174,34 @@
       color: var(--ink-soft);
     }
 
-    .medium-angles {
+    /* Latest brief + Medium angles share one rail */
+    .brief-rail {
       margin: 0 0 22px;
-      padding: 16px 16px 6px;
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
       background: var(--cream);
+      overflow: hidden;
     }
-    .medium-angles .ma-head {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 8px 14px;
-      margin: 0 0 12px;
+    .brief-rail .latest-brief {
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+    }
+    .brief-rail .latest-brief:hover {
+      background: rgba(232, 115, 36, 0.06);
+    }
+    .medium-angles {
+      margin: 0;
+      padding: 12px 16px 14px;
+      background: transparent;
+      border: 0;
     }
     .medium-angles .ma-kicker {
+      display: block;
+      margin: 0 0 10px;
       font-family: var(--mono);
       font-size: 0.68rem;
       font-weight: 600;
@@ -196,54 +209,37 @@
       text-transform: uppercase;
       color: var(--mint);
     }
-    .medium-angles h2 {
-      margin: 0;
-      flex: 1 1 200px;
-      font-family: var(--serif);
-      font-size: 1.35rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-    .medium-angles .ma-note {
-      margin: 0 0 12px;
-      color: var(--ink-soft);
-      font-size: 0.9rem;
-    }
-    .medium-angles .ma-brief {
-      margin: 0 0 12px;
-      font-size: 0.9rem;
-    }
-    .medium-angles .ma-brief a { color: var(--accent-dark); }
-    .ma-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 12px;
-      margin: 0 0 10px;
+    .ma-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
     }
     .ma-card {
-      padding: 12px 14px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #fff;
+      padding: 10px 0;
+      border: 0;
+      border-top: 1px dashed var(--line);
+      border-radius: 0;
+      background: transparent;
     }
+    .ma-card:first-child { border-top: 0; padding-top: 0; }
     .ma-card h3 {
-      margin: 0 0 6px;
+      margin: 0 0 4px;
       font-family: var(--serif);
-      font-size: 1.05rem;
+      font-size: 1.02rem;
       font-weight: 600;
       letter-spacing: -0.02em;
-      line-height: 1.25;
+      line-height: 1.3;
     }
     .ma-card .ma-thesis {
-      margin: 0 0 8px;
+      margin: 0 0 6px;
       color: var(--ink-soft);
-      font-size: 0.92rem;
+      font-size: 0.9rem;
     }
     .ma-card .ma-ids {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin: 0 0 8px;
+      margin: 0 0 6px;
     }
     .ma-card .ma-id {
       font-family: var(--mono);
@@ -256,18 +252,16 @@
     }
     .ma-card .ma-id:hover { color: var(--accent-dark); }
     .ma-card .ma-companions {
-      margin: 0 0 8px;
+      margin: 0 0 6px;
       padding: 0;
       list-style: none;
-      font-size: 0.88rem;
+      font-size: 0.86rem;
     }
     .ma-card .ma-companions a { color: var(--accent-dark); }
     .ma-card .ma-guard {
       margin: 0;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: var(--ink-faint);
-      border-top: 1px dashed var(--line);
-      padding-top: 8px;
     }
 
     .live {
@@ -669,8 +663,7 @@
       <h2 class="edition-date" id="edition-date">Loading edition…</h2>
       <p class="edition-meta" id="edition-meta"></p>
     </div>
-    <div id="latest-brief-slot"></div>
-    <div id="medium-angles-slot"></div>
+    <div id="brief-rail-slot"></div>
     <div class="controls" id="controls" hidden></div>
     <div class="layout" id="app">
       <p class="empty">Fetching today’s brief…</p>
@@ -792,11 +785,8 @@
 
 
 
-    function mediumAnglesHtml() {
-      const pack = STATE.mediumAngles;
-      if (!pack || !Array.isArray(pack.entries) || !pack.entries.length) return "";
-      const entry = pack.entries[0];
-      const angles = entry.angles || [];
+    function mediumAnglesInnerHtml(entry) {
+      const angles = (entry && entry.angles) || [];
       if (!angles.length) return "";
       const cards = angles.map((a) => {
         const ids = (a.catalogIds || []).map((id) =>
@@ -810,18 +800,42 @@
           <p class="ma-thesis">${escapeHtml(a.thesis || "")}</p>
           ${ids ? `<div class="ma-ids">${ids}</div>` : ""}
           ${comps ? `<ul class="ma-companions">${comps}</ul>` : ""}
-          ${a.doNotOverclaim ? `<p class="ma-guard"><strong>Do not overclaim:</strong> ${escapeHtml(a.doNotOverclaim)}</p>` : ""}
+          ${a.doNotOverclaim ? `<p class="ma-guard">Do not overclaim: ${escapeHtml(a.doNotOverclaim)}</p>` : ""}
         </article>`;
       }).join("");
-      return `<section class="medium-angles" aria-label="Medium angles">
-        <div class="ma-head">
-          <span class="ma-kicker">Medium Bot · draft hooks</span>
-          <h2>Medium angles</h2>
-        </div>
-        <p class="ma-note">Draft hooks from Field Briefs · not published to Medium</p>
-        <p class="ma-brief"><a href="${escapeHtml(entry.briefHref || "#")}">${escapeHtml(entry.displayTime || "")} · ${escapeHtml(entry.briefTitle || "Field Brief")}</a></p>
-        <div class="ma-grid">${cards}</div>
+      return `<section class="medium-angles" aria-label="Medium draft angles from this brief">
+        <span class="ma-kicker">Then write · Medium draft angles · not published</span>
+        <div class="ma-list">${cards}</div>
       </section>`;
+    }
+
+    function matchingMediumEntry(latestBrief) {
+      const pack = STATE.mediumAngles;
+      if (!pack || !Array.isArray(pack.entries) || !pack.entries.length) return null;
+      const entry = pack.entries[0];
+      if (!entry || !(entry.angles || []).length) return null;
+      if (!latestBrief) return entry;
+      const href = (latestBrief.href || "").replace(/\/$/, "");
+      const eh = (entry.briefHref || "").replace(/\/$/, "");
+      if (entry.briefId && latestBrief.id && entry.briefId === latestBrief.id) return entry;
+      if (href && eh && (href.endsWith(eh) || eh.endsWith(href) || href.includes(eh) || eh.includes(href))) return entry;
+      // Still show newest angles under Latest — organic companion even if ids drift
+      return entry;
+    }
+
+    function briefRailHtml(latestBrief, addedN) {
+      const entry = matchingMediumEntry(latestBrief);
+      const ma = entry ? mediumAnglesInnerHtml(entry) : "";
+      if (!latestBrief || !latestBrief.href) return ma;
+      const when = latestBrief.displayTime || "";
+      const who = latestBrief.analyzer || "Field Brief";
+      const status = addedN === 0 ? "Verified flat — open the write-up" : "Open the deep brief";
+      const lb = `<a class="latest-brief" href="${escapeHtml(latestBrief.href)}">
+            <span class="lb-kicker">Latest · ${escapeHtml(when)} · ${escapeHtml(who)}</span>
+            <span class="lb-title">${escapeHtml(latestBrief.title || "Field Brief")}</span>
+            <span class="lb-meta">${escapeHtml(status)}</span>
+          </a>`;
+      return `<div class="brief-rail">${lb}${ma}</div>`;
     }
 
     function briefsHtml(day) {
@@ -866,23 +880,8 @@
       $("edition-meta").textContent = latestRun
         ? `Last pass ${latestRun.displayTime} · ${STATE.items.length} items kept · append only` + flatNote + (latestBrief ? ` · ${(latestBrief.analyzer || "Field Brief")}` : "")
         : `${STATE.items.length} items`;
-      const lb = $("latest-brief-slot");
-      if (lb) {
-        if (latestBrief && latestBrief.href) {
-          const when = latestBrief.displayTime || "";
-          const who = latestBrief.analyzer || "Field Brief";
-          const status = addedN === 0 ? "Verified flat — open the write-up" : "Open the deep brief";
-          lb.innerHTML = `<a class="latest-brief" href="${escapeHtml(latestBrief.href)}">
-            <span class="lb-kicker">Latest · ${escapeHtml(when)} · ${escapeHtml(who)}</span>
-            <span class="lb-title">${escapeHtml(latestBrief.title || "Field Brief")}</span>
-            <span class="lb-meta">${escapeHtml(status)}</span>
-          </a>`;
-        } else {
-          lb.innerHTML = "";
-        }
-      }
-      const ma = $("medium-angles-slot");
-      if (ma) ma.innerHTML = mediumAnglesHtml();
+      const rail = $("brief-rail-slot");
+      if (rail) rail.innerHTML = briefRailHtml(latestBrief, addedN);
 
       const tags = allTags(STATE.items);
       $("controls").hidden = false;
