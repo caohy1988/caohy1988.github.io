@@ -366,17 +366,37 @@ def _retrieve_oracle(query, bundle_id, publication_id, as_of, clients, top_k, sc
         return _denied("oracle engine supports forced seeds only (no vectors)", scope, timer, "NO_SEED")
     local = query[len(FORCED):]
     local = local[:-3] if local.endswith(".md") else local
+    # cached replay, same contract as the BigQuery engines: a hit is served only after the graph re-confirms that every
+    # previously disclosed concept is still visible to it (principal.PolicyGraph answers under the current policy);
+    # a graph without a re-check, or a failed one, is HIT_DENIED
+    cache = clients.get("cache")
+    ckey = _cache_key("oracle", bundle_id, publication_id, scope["requester"], query, as_of, top_k) if cache is not None else None
+    if ckey is not None and ckey in cache:
+        cached = cache[ckey]
+        visible = getattr(g, "visible", None)
+        if visible is not None and visible(cached["disclosed"]):
+            out = _refresh(json.loads(json.dumps(cached["result"])), as_of)
+            out["scope"] = dict(out["scope"], cache="HIT_RECHECKED"); out["timing"] = timer.done()
+            return out
+        return _denied("cached replay: current authorization check failed or unknown", dict(scope, cache="HIT_DENIED"), timer)
     r = g.governed(local, as_of)
+    if r["status"] == "DENIED":   # the policy-emulating graph's Forbidden
+        return _denied("authorization error: policy denied (oracle emulation)", scope, timer)
     if r["status"] != "OK":
         return _denied("seed not found", scope, timer, "NO_SEED")
     concept = {k: r[k] for k in ("concept", "path", "title", "type", "lifecycle_status", "trust_tier", "verifications",
                                  "freshness", "provenance", "replacement")}
     concept.update({"matched_sections": [], "forced": True})
     comps = [dict(c, seed=r["concept"]) for c in r["computations"]]
-    return {"status": "OK", "concepts": [concept], "paths": [dict(p, seed=r["concept"]) for p in r["paths"]],
-            "computations": comps, "warnings": ["forced seed: harness-only deterministic override, not a semantic ranking",
-                                                 "ORACLE engine: in-process reference, not BigQuery"],
-            "scope": scope, "timing": timer.done()}
+    out = {"status": "OK", "concepts": [concept], "paths": [dict(p, seed=r["concept"]) for p in r["paths"]],
+           "computations": comps, "warnings": ["forced seed: harness-only deterministic override, not a semantic ranking",
+                                                "ORACLE engine: in-process reference, not BigQuery"],
+           "scope": scope, "timing": timer.done()}
+    if ckey is not None:
+        disclosed = sorted({r["concept"]} | {x for p in r["paths"] for x in p["via"]} | {c["concept"] for c in comps})
+        cache[ckey] = {"disclosed": disclosed, "result": json.loads(json.dumps(out, default=str))}
+        out["scope"] = dict(out["scope"], cache="MISS_STORED")
+    return out
 
 
 def impact(target: str, bundle_id: str, publication_id: str, requester: Any, clients: dict, max_depth: int = 6) -> dict:

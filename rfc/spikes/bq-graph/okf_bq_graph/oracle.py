@@ -48,6 +48,11 @@ class Graph:
     def neighbors(self, nid: str, rel: str) -> list[tuple[dict, dict]]:
         return [(e, self.nodes[e["dst_id"]]) for e in self.out[nid] if e["relation"] == rel]
 
+    def visible(self, locals_: list[str]) -> bool:
+        """Cached-replay re-check (retrieve.py): every previously disclosed concept must still be in the projection this
+        graph answers from. A policy-filtered projection (principal.PolicyGraph) answers False for hidden rows."""
+        return all(("Concept", x) in self.by_local for x in locals_)
+
     # -- derived properties (spec §4)
     def trust(self, nid: str) -> dict:
         vers = [(e, self.nodes[e["dst_id"]]) for e in self.out[nid] if e["relation"] == "VERIFIED_BY"]

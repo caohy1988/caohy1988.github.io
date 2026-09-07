@@ -21,6 +21,7 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `okf_bq_graph/scale.py` | Synthetic 100 / 1,000 namespace-isolated copies in their own datasets (vectors reused by text digest) |
 | `okf_bq_graph/authz.py` | Governance fixtures: RLS dataset (hidden intermediate), metadata-only dataset, authorized views + graph over views; `cases` runs the five second-principal negatives under the existing restricted SA via impersonation (`OKF_SPIKE_RESTRICTED_SA`, no new principal) → `evidence/authz_cases.json` |
 | `okf_bq_graph/chain.py` | Connected chain (2026-09-06): fixture seed → pinned publication → governed retrieval returns the Attested Computation declaration + SQL → bind to the SDK receipt example's pinned publication (data files only) → SDK CLI as a subprocess executes and verifies under the caller → consumer releases only on VERIFIED; two fail-closed substitution cases → `evidence/chain/` |
+| `okf_bq_graph/principal.py` | Requester brokers for the chain (2026-09-06 Slice A): a hermetic policy-emulating broker (no IAM, no job) exercised by `chain.py --requester restricted`, and the IAM-impersonation broker for the restricted SA (graph leg via `authz.impersonated_client`, SDK subprocess via an `impersonated_service_account` ADC file, dry-run authorization probe per dependency table) wired for the live Slice B, not exercised → `evidence/chain/chain_hermetic_restricted.json` |
 | `okf_bq_graph/benchmark.py`, `run.py`, `lifecycle.py`, `safety.py`, `partial.py`, `bin/safety_teardown.sh` | Bounded runner (20 warmups + 100 measured per cell, nearest-rank percentiles, failures retained), the window orchestrator (signal-safe cleanup lifecycle, job cancel, independent watcher), and the honest aggregation of interrupted cells (INCOMPLETE / NOT_RUN) |
 | `okf_bq_graph/cost.py`, `report.py`, `assemble.py` | Slot attribution (exact named reservation vs other pools) and the charged autoscale slot-seconds bill from `INFORMATION_SCHEMA.RESERVATIONS_TIMELINE`; non-mutating report tables; report assembly |
 | `sql/*.sql` | `schema.sql`, `graph.sql` (property graph DDL), `seed.sql` (vector seed), `governed.sql` (two-hop GQL), `context.sql`, `impact.sql`, `stubs.sql`, `fallback.sql` |
@@ -148,6 +149,52 @@ identity set is the 14 case jobs and does not include the pointer-lookup job, wh
 adds; the later changes (invocation-private and run-owned diagnostics, `approved` outage labelled NOT_REACHED) alter no
 recorded field of a passing run, so it was not re-run.
 
+### Restricted requester (2026-09-06 Slice A, hermetic only)
+
+`python3 -m okf_bq_graph.chain --hermetic --requester restricted` runs both legs through a requester broker for
+`sa:okf-receipt-restricted` (`okf_bq_graph/principal.py`) instead of the operator: `requester.mode = restricted-sa`, the
+record is `evidence/chain/chain_hermetic_restricted.json` (runner `chain/0.5.0`), and the three original cases are replaced
+by four cases with the same stage-reachability acceptance (`MET` / `NOT_REACHED` / `WRONG`; a refusal alone never counts):
+
+* **`approved-restricted`** (grants present): reached, bound, authorized, executed, VERIFIED, `RELEASED`.
+* **`denied-intermediate`** (the `_rls` shape: the row policy hides `metrics/gross-margin`; seed
+  `forced:metrics/gross-margin-legacy.md`, whose only path to the computation runs through it): retrieval `OK` with the
+  seed concept visible, no path, no computation, the hidden id absent from the full retrieval result and from every
+  recorded surface; bind `NOT_REACHED` with reason `retrieval_denied`; CLI never invoked; `REFUSED`. A traversed hidden
+  row, a leaked id or an invoked CLI is `WRONG`; a seed that is not visible is `NOT_REACHED` (enforcement cannot be told
+  from an outage).
+* **`unauthorized-output`** (seed and declaration visible, no read on the SDK fixture's dependency tables): reached and
+  bound, then a new **pre-execution authorization** stage probes every dependency table of the bound publication under the
+  requester's own credential (hermetic: the broker's policy; live: a dry-run `SELECT` per table, the SDK's own
+  `probe_sources` shape) and returns `DENIED`; CLI never invoked; `REFUSED` naming the denial. `ALLOWED` here is `WRONG`,
+  a probe that produced no platform decision is `NOT_REACHED`.
+* **`revocation-before-replay`**: the first pass runs the full path and is `RELEASED` (cache `MISS_STORED`); the broker
+  then revokes the requester's dataset grant and its SDK-table read; the same request is replayed from the case-private
+  cache and is `HIT_DENIED` with nothing disclosed (the oracle engine now carries the same cached-replay re-check contract
+  as the BigQuery engines: a hit is served only after the graph re-confirms every disclosed concept is still visible);
+  the authorization probe is `DENIED`; the consumer re-decides the stored receipt and `REFUSED`; the CLI was invoked exactly
+  once. A released replay, a replay served after revocation, an `ALLOWED` probe or a second CLI launch is `WRONG`; a
+  first pass that never released or a replay that was not a cache hit is `NOT_REACHED`.
+
+The consumer now takes the authorization probe as an input and refuses anything but `ALLOWED` at decision time, so a
+receipt sealed before a revocation cannot be replayed into a release. Each retained diagnostic is named after the chain
+case (`case_<chain-case>_<mode>.json`), since two chain cases run the SDK's `approved`.
+
+What the hermetic record is and is not. The broker is a policy emulation over the compiled projection: the principal is a
+label, no IAM call and no BigQuery job happen, `identity = NOT_APPLICABLE`, and nothing in it is platform enforcement. It
+proves that the harness reaches each stage, refuses for the stated reason and grades itself honestly (regressions: a
+broker that ignores hidden rows makes `denied-intermediate` `WRONG` and the chain `CHAIN_BROKEN`; one that claims a
+revocation it did not apply makes the replay `RELEASED` and `WRONG`; a grant that never takes effect leaves
+`approved-restricted` `NOT_REACHED` and the chain `CHAIN_INCOMPLETE`). Hermetic result: **`CHAIN_CONNECTED`**, all four
+acceptances `MET`, no e-mail in the record. Live (`--live --requester restricted`): the IAM impersonation broker is wired
+(graph leg through `authz.impersonated_client`; SDK subprocess under an `impersonated_service_account` ADC file written to a
+private 0700 directory and removed in teardown, run.py unedited; dataset-level reader grants through
+`authz.set_dataset_reader`, waited for by probing under the SA; identity `BOUND` only when the operator's `jobs.get`
+shows the SA's `user_email` on every job including the pointer lookup, `UNBOUND` → `CHAIN_BROKEN`, `UNKNOWN` →
+`CHAIN_INCOMPLETE`; teardown removes only the grants the broker added) and covered by unit tests against fakes, but **no
+live pass has run**: the retained live chain evidence is still `requester.mode = same-requester`, and the second principal
+remains "not exercised in this chain" on every published surface until Slice B lands its own evidence.
+
 ## Graph model (spec §3)
 
 Node kinds `Concept | Section | Source | Actor | Artifact | LogEntry`; stubs are `Concept{stub=true}`. Relations
@@ -178,6 +225,7 @@ python3 -m okf_bq_graph.compile <bundle_root> evidence/projection_acme.json
 python3 -m okf_bq_graph.publish <bundle_root>                # on-demand: tables, vectors, graph DDL, pointer
 OKF_LIVE_ENGINE=fallback python3 -m pytest tests/test_retrieve.py -q   # live, on-demand
 python3 -m okf_bq_graph.chain --hermetic                  # connected chain, no cloud (oracle graph + SDK emulation)
+python3 -m okf_bq_graph.chain --hermetic --requester restricted   # restricted-requester chain, no cloud (policy-emulating broker)
 python3 -m okf_bq_graph.chain --live                      # connected chain, on-demand fallback engine + SDK --live
 python3 -m okf_bq_graph.run integration --minutes 25         # opens the Enterprise window, runs GQL cases, closes it
 python3 -m okf_bq_graph.run benchmark --minutes 85           # benchmark cells from fixtures/scale.json

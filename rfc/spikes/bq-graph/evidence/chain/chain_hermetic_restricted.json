@@ -1,0 +1,1242 @@
+{
+ "acceptance": {
+  "approved-restricted": "MET",
+  "denied-intermediate": "MET",
+  "revocation-before-replay": "MET",
+  "unauthorized-output": "MET"
+ },
+ "as_of": "2026-09-07T05:01:57Z",
+ "broker_journal": [
+  {
+   "at": "2026-09-07T05:01:57.880208+00:00",
+   "event": "apply",
+   "observed": true,
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": true,
+    "hidden": [],
+    "sdk_tables": true
+   }
+  },
+  {
+   "at": "2026-09-07T05:01:57.880336+00:00",
+   "event": "apply",
+   "observed": true,
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": true,
+    "hidden": [],
+    "sdk_tables": true
+   }
+  },
+  {
+   "at": "2026-09-07T05:01:57.967481+00:00",
+   "event": "apply",
+   "observed": true,
+   "policy": {
+    "dataset": "rls",
+    "dataset_reader": true,
+    "hidden": [
+     "metrics/gross-margin"
+    ],
+    "sdk_tables": true
+   }
+  },
+  {
+   "at": "2026-09-07T05:01:57.967947+00:00",
+   "event": "apply",
+   "observed": true,
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": true,
+    "hidden": [],
+    "sdk_tables": false
+   }
+  },
+  {
+   "at": "2026-09-07T05:01:57.968194+00:00",
+   "event": "apply",
+   "observed": true,
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": true,
+    "hidden": [],
+    "sdk_tables": true
+   }
+  },
+  {
+   "at": "2026-09-07T05:01:58.054808+00:00",
+   "event": "revoke",
+   "observed": true,
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": false,
+    "hidden": [],
+    "sdk_tables": false
+   }
+  }
+ ],
+ "bundle_id": "acme_retail",
+ "cases": [
+  {
+   "acceptance": {
+    "expected": "RELEASED",
+    "failed": [],
+    "status": "MET"
+   },
+   "attack": null,
+   "authorization": {
+    "at": "2026-09-07T05:01:57.880799+00:00",
+    "checked_by": "hermetic policy broker (emulated; no dry run, no job)",
+    "denied": 0,
+    "status": "ALLOWED",
+    "tables": [
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fulfillment_cost"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fx_daily_rates"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.order_lines"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.orders"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.payment_fees"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.products"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.shipment_cost"
+     }
+    ]
+   },
+   "bind": {
+    "checks": {
+     "declared_type": {
+      "graph": "Attested Computation",
+      "ok": true
+     },
+     "file_sha256": {
+      "graph": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "ok": true,
+      "sdk_bytes": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "freshness": {
+      "as_of": "2026-09-07T05:01:57Z",
+      "ok": true,
+      "stale_after": "2026-12-31T00:00:00Z",
+      "verdict": "FRESH"
+     },
+     "lifecycle": {
+      "graph": "stable",
+      "ok": true
+     },
+     "not_executed_by_graph": {
+      "graph": "NOT_EXECUTED",
+      "ok": true
+     },
+     "parameters": {
+      "graph": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ],
+      "ok": true,
+      "sdk": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ]
+     },
+     "path": {
+      "graph": "computations/gross-margin-period.md",
+      "ok": true,
+      "sdk": "acme_retail/gross-margin-period.md"
+     },
+     "runtime": {
+      "graph": "bigquery",
+      "ok": true,
+      "sdk": "bigquery"
+     },
+     "source_pin": {
+      "graph": "31da799a9aef176df12e91abbd119ea9385b75ec",
+      "ok": true,
+      "sdk": "knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec"
+     },
+     "sql_text": {
+      "graph_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+      "note": "compared after trailing-whitespace normalisation: the graph fence regex drops the final newline the SDK keeps",
+      "ok": true,
+      "sdk_fence_sha256": "d1f76cb93bcf69dc87ee721b91ef8d1478df7a4b0aa9ec86ef1abda9e56934bd"
+     }
+    },
+    "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+    "concept_hops": 1,
+    "sdk_context_ref": "okf:acme-retail-derived#gross-margin-period",
+    "sdk_publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+    "status": "BOUND",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/gross-margin",
+     "computations/gross-margin-period"
+    ]
+   },
+   "case": "approved-restricted",
+   "computation": {
+    "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+    "concept": "computations/gross-margin-period",
+    "concept_hops": 1,
+    "freshness": {
+     "stale_after": "2026-12-31T00:00:00Z",
+     "verdict": "FRESH"
+    },
+    "path": "computations/gross-margin-period.md",
+    "runtime": "bigquery",
+    "runtime_verdict": "NOT_EXECUTED",
+    "section_id": null,
+    "sql_chars": 1341,
+    "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+    "status": "stable",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/gross-margin",
+     "computations/gross-margin-period"
+    ]
+   },
+   "consume": {
+    "decision": "RELEASED",
+    "display": "[HERMETIC (synthetic fixture)] Gross margin: $400.00 USD \u00b7 VERIFIED",
+    "reasons": []
+   },
+   "declaration": {
+    "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+    "job_id": null,
+    "lifecycle_status": "stable",
+    "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+    "parameters": [
+     {
+      "name": "period_start",
+      "required": true,
+      "type": "date"
+     },
+     {
+      "name": "period_end",
+      "required": true,
+      "type": "date"
+     }
+    ],
+    "path": "computations/gross-margin-period.md",
+    "receipt_fields": [
+     "job_id",
+     "executed_sql",
+     "result"
+    ],
+    "runtime": "bigquery",
+    "stale_after": "2026-12-31T00:00:00Z",
+    "status": "OK",
+    "type": "Attested Computation"
+   },
+   "expected": "RELEASED",
+   "expects": "grants present: reached, bound, authorized, executed under the requester, VERIFIED, RELEASED",
+   "grant": {
+    "at": "2026-09-07T05:01:57.880336+00:00",
+    "event": "apply",
+    "observed": true,
+    "policy": {
+     "dataset": "base",
+     "dataset_reader": true,
+     "hidden": [],
+     "sdk_tables": true
+    }
+   },
+   "hidden": [],
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": true,
+    "hidden": [],
+    "sdk_tables": true
+   },
+   "receipt": {
+    "argv": [
+     "/usr/local/opt/python@3.13/bin/python3.13",
+     "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike/examples/okf_attested_computation/run.py",
+     "--case",
+     "approved",
+     "--evidence-dir",
+     "/Users/haiyuancao/caohy1988.github.io-restricted-chain/rfc/spikes/bq-graph/evidence/chain/receipt/hermetic_restricted-20260907T050157Z-8bbd58a0/.inv_approved_hermetic_4553_b7a"
+    ],
+    "case": "approved",
+    "cwd": "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike",
+    "diag": "see /Users/haiyuancao/caohy1988.github.io-restricted-chain/rfc/spikes/bq-graph/evidence/chain/receipt/hermetic_restricted-20260907T050157Z-8bbd58a0/case_approved-restricted_hermetic.json",
+    "diag_path": "/Users/haiyuancao/caohy1988.github.io-restricted-chain/rfc/spikes/bq-graph/evidence/chain/receipt/hermetic_restricted-20260907T050157Z-8bbd58a0/case_approved-restricted_hermetic.json",
+    "diag_present": true,
+    "diag_sha256": "2e454f52706c9e8d138d6e487f1e7398744ce62bc3fcf5539b59b640c833c1c7",
+    "elapsed_ms": 85.7,
+    "env_injected": [],
+    "exit_code": 0,
+    "invocation_dir": "/Users/haiyuancao/caohy1988.github.io-restricted-chain/rfc/spikes/bq-graph/evidence/chain/receipt/hermetic_restricted-20260907T050157Z-8bbd58a0/.inv_approved_hermetic_4553_b7a",
+    "invoked": true,
+    "live": false,
+    "output": {
+     "access_probe": {
+      "outcome": "ALLOWED",
+      "output": "ALLOWED",
+      "probed_at": 1788757317,
+      "sources": "ALLOWED"
+     },
+     "execution_match": "MATCH",
+     "job": {
+      "job_id": "okf_rcpt_e9489d89926ba6820bd4e2cb_988b5ab48abb1a3f",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reason_codes": [],
+     "receipt_id": "rcpt-642b199961002723fc17e643",
+     "request_id": "req-e9489d89926ba6820bd4e2cb",
+     "verdict": "VERIFIED"
+    },
+    "receipt": {
+     "attester_artifact_hash": "e9bb803540f56ceab8faaac915b9f6e72dd8d64fed7d1c6126b9c75ea1e9365e",
+     "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+     "context_ref": "okf:acme-retail-derived#gross-margin-period",
+     "execution_match": "MATCH",
+     "expires_at": 1788757617,
+     "issued_at": 1788757317,
+     "job": {
+      "job_id": "okf_rcpt_e9489d89926ba6820bd4e2cb_988b5ab48abb1a3f",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "policy_version": "okf-receipt-spike-policy/2026-09-05",
+     "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+     "reason_codes": [],
+     "receipt_id": "rcpt-642b199961002723fc17e643",
+     "request_id": "req-e9489d89926ba6820bd4e2cb",
+     "verdict": "VERIFIED"
+    },
+    "released": true,
+    "request_id": "req-e9489d89926ba6820bd4e2cb",
+    "retained_as": "approved-restricted",
+    "stderr_tail": "",
+    "stdout": "[HERMETIC (synthetic fixture)] Gross margin: $400.00 USD \u00b7 VERIFIED\n"
+   },
+   "receipt_invocations": 1,
+   "retrieval": {
+    "computations": [
+     "computations/gross-margin-period.md"
+    ],
+    "concepts": [
+     "metrics/gross-margin"
+    ],
+    "hidden_id_in_full_result": [],
+    "paths": [
+     {
+      "concept_hops": 1,
+      "seed": "metrics/gross-margin",
+      "via": [
+       "metrics/gross-margin",
+       "computations/gross-margin-period"
+      ]
+     }
+    ],
+    "reached": true,
+    "scope": {
+     "as_of": "2026-09-07T05:01:57Z",
+     "bundle_id": "acme_retail",
+     "cache": "MISS_STORED",
+     "engine": "oracle",
+     "publication_id": "pub_190192147fd7fd78",
+     "requester": "sa:okf-receipt-restricted",
+     "top_k": 5
+    },
+    "seed": "forced:metrics/gross-margin.md",
+    "status": "OK",
+    "timing": {
+     "jobs": [],
+     "stages_ms": {},
+     "total_ms": 0.2
+    },
+    "warnings": [
+     "forced seed: harness-only deterministic override, not a semantic ranking",
+     "ORACLE engine: in-process reference, not BigQuery"
+    ]
+   }
+  },
+  {
+   "acceptance": {
+    "expected": "REFUSED",
+    "failed": [],
+    "status": "MET"
+   },
+   "attack": "row policy hides the intermediate concept metrics/gross-margin: the only path from the legacy seed to the computation runs through it",
+   "authorization": {
+    "reason": "nothing bound: no dependency to authorize",
+    "status": "NOT_RUN"
+   },
+   "bind": {
+    "detail": "governed retrieval returned no authorized path to the computation (seed visible, status OK)",
+    "reason": "retrieval_denied",
+    "status": "NOT_REACHED"
+   },
+   "case": "denied-intermediate",
+   "consume": {
+    "decision": "REFUSED",
+    "reasons": [
+     "bind status NOT_REACHED: declaration not bound to the executed publication",
+     "receipt not invoked: nothing executed, nothing verifiable"
+    ]
+   },
+   "expected": "REFUSED",
+   "expects": "seed visible, no path, no computation, hidden id absent from every surface; bind NOT_REACHED (retrieval_denied); CLI never invoked; REFUSED",
+   "grant": {
+    "at": "2026-09-07T05:01:57.967481+00:00",
+    "event": "apply",
+    "observed": true,
+    "policy": {
+     "dataset": "rls",
+     "dataset_reader": true,
+     "hidden": [
+      "metrics/gross-margin"
+     ],
+     "sdk_tables": true
+    }
+   },
+   "hidden": [
+    "metrics/gross-margin"
+   ],
+   "policy": {
+    "dataset": "rls",
+    "dataset_reader": true,
+    "hidden": [
+     "metrics/gross-margin"
+    ],
+    "sdk_tables": true
+   },
+   "receipt": {
+    "invoked": false,
+    "reason": "bind NOT_REACHED: nothing was executed"
+   },
+   "receipt_invocations": 0,
+   "retrieval": {
+    "computations": [],
+    "concepts": [
+     "metrics/gross-margin-legacy"
+    ],
+    "hidden_id_in_full_result": [],
+    "paths": [],
+    "reached": false,
+    "scope": {
+     "as_of": "2026-09-07T05:01:57Z",
+     "bundle_id": "acme_retail",
+     "cache": "MISS_STORED",
+     "engine": "oracle",
+     "publication_id": "pub_190192147fd7fd78",
+     "requester": "sa:okf-receipt-restricted",
+     "top_k": 5
+    },
+    "seed": "forced:metrics/gross-margin-legacy.md",
+    "status": "OK",
+    "timing": {
+     "jobs": [],
+     "stages_ms": {},
+     "total_ms": 0.2
+    },
+    "warnings": [
+     "forced seed: harness-only deterministic override, not a semantic ranking",
+     "ORACLE engine: in-process reference, not BigQuery"
+    ]
+   }
+  },
+  {
+   "acceptance": {
+    "expected": "REFUSED",
+    "failed": [],
+    "status": "MET"
+   },
+   "attack": "seed and declaration visible, but the requester cannot read the computation's dependency tables (no read on the SDK fixture dataset)",
+   "authorization": {
+    "at": "2026-09-07T05:01:57.968177+00:00",
+    "checked_by": "hermetic policy broker (emulated; no dry run, no job)",
+    "denied": 7,
+    "status": "DENIED",
+    "tables": [
+     {
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fulfillment_cost"
+     },
+     {
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fx_daily_rates"
+     },
+     {
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.order_lines"
+     },
+     {
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.orders"
+     },
+     {
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.payment_fees"
+     },
+     {
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.products"
+     },
+     {
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.shipment_cost"
+     }
+    ]
+   },
+   "bind": {
+    "checks": {
+     "declared_type": {
+      "graph": "Attested Computation",
+      "ok": true
+     },
+     "file_sha256": {
+      "graph": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "ok": true,
+      "sdk_bytes": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "freshness": {
+      "as_of": "2026-09-07T05:01:57Z",
+      "ok": true,
+      "stale_after": "2026-12-31T00:00:00Z",
+      "verdict": "FRESH"
+     },
+     "lifecycle": {
+      "graph": "stable",
+      "ok": true
+     },
+     "not_executed_by_graph": {
+      "graph": "NOT_EXECUTED",
+      "ok": true
+     },
+     "parameters": {
+      "graph": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ],
+      "ok": true,
+      "sdk": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ]
+     },
+     "path": {
+      "graph": "computations/gross-margin-period.md",
+      "ok": true,
+      "sdk": "acme_retail/gross-margin-period.md"
+     },
+     "runtime": {
+      "graph": "bigquery",
+      "ok": true,
+      "sdk": "bigquery"
+     },
+     "source_pin": {
+      "graph": "31da799a9aef176df12e91abbd119ea9385b75ec",
+      "ok": true,
+      "sdk": "knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec"
+     },
+     "sql_text": {
+      "graph_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+      "note": "compared after trailing-whitespace normalisation: the graph fence regex drops the final newline the SDK keeps",
+      "ok": true,
+      "sdk_fence_sha256": "d1f76cb93bcf69dc87ee721b91ef8d1478df7a4b0aa9ec86ef1abda9e56934bd"
+     }
+    },
+    "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+    "concept_hops": 1,
+    "sdk_context_ref": "okf:acme-retail-derived#gross-margin-period",
+    "sdk_publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+    "status": "BOUND",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/gross-margin",
+     "computations/gross-margin-period"
+    ]
+   },
+   "case": "unauthorized-output",
+   "computation": {
+    "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+    "concept": "computations/gross-margin-period",
+    "concept_hops": 1,
+    "freshness": {
+     "stale_after": "2026-12-31T00:00:00Z",
+     "verdict": "FRESH"
+    },
+    "path": "computations/gross-margin-period.md",
+    "runtime": "bigquery",
+    "runtime_verdict": "NOT_EXECUTED",
+    "section_id": null,
+    "sql_chars": 1341,
+    "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+    "status": "stable",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/gross-margin",
+     "computations/gross-margin-period"
+    ]
+   },
+   "consume": {
+    "decision": "REFUSED",
+    "reasons": [
+     "authorization DENIED at decision time: the requester's credential cannot read every dependency of the bound computation (7 denied)",
+     "receipt not invoked: nothing executed, nothing verifiable"
+    ]
+   },
+   "declaration": {
+    "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+    "job_id": null,
+    "lifecycle_status": "stable",
+    "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+    "parameters": [
+     {
+      "name": "period_start",
+      "required": true,
+      "type": "date"
+     },
+     {
+      "name": "period_end",
+      "required": true,
+      "type": "date"
+     }
+    ],
+    "path": "computations/gross-margin-period.md",
+    "receipt_fields": [
+     "job_id",
+     "executed_sql",
+     "result"
+    ],
+    "runtime": "bigquery",
+    "stale_after": "2026-12-31T00:00:00Z",
+    "status": "OK",
+    "type": "Attested Computation"
+   },
+   "expected": "REFUSED",
+   "expects": "reached and bound; pre-execution authorization DENIED under the requester's credential; CLI never invoked; REFUSED before execution",
+   "grant": {
+    "at": "2026-09-07T05:01:57.967947+00:00",
+    "event": "apply",
+    "observed": true,
+    "policy": {
+     "dataset": "base",
+     "dataset_reader": true,
+     "hidden": [],
+     "sdk_tables": false
+    }
+   },
+   "hidden": [],
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": true,
+    "hidden": [],
+    "sdk_tables": false
+   },
+   "receipt": {
+    "invoked": false,
+    "reason": "authorization DENIED under the requester's credential: nothing was executed"
+   },
+   "receipt_invocations": 0,
+   "retrieval": {
+    "computations": [
+     "computations/gross-margin-period.md"
+    ],
+    "concepts": [
+     "metrics/gross-margin"
+    ],
+    "hidden_id_in_full_result": [],
+    "paths": [
+     {
+      "concept_hops": 1,
+      "seed": "metrics/gross-margin",
+      "via": [
+       "metrics/gross-margin",
+       "computations/gross-margin-period"
+      ]
+     }
+    ],
+    "reached": true,
+    "scope": {
+     "as_of": "2026-09-07T05:01:57Z",
+     "bundle_id": "acme_retail",
+     "cache": "MISS_STORED",
+     "engine": "oracle",
+     "publication_id": "pub_190192147fd7fd78",
+     "requester": "sa:okf-receipt-restricted",
+     "top_k": 5
+    },
+    "seed": "forced:metrics/gross-margin.md",
+    "status": "OK",
+    "timing": {
+     "jobs": [],
+     "stages_ms": {},
+     "total_ms": 0.1
+    },
+    "warnings": [
+     "forced seed: harness-only deterministic override, not a semantic ranking",
+     "ORACLE engine: in-process reference, not BigQuery"
+    ]
+   }
+  },
+  {
+   "acceptance": {
+    "expected": "REFUSED",
+    "failed": [],
+    "status": "MET"
+   },
+   "attack": "grant, retrieve, execute and release once; revoke the requester's grants; replay the same request from cache and re-decide the consumer",
+   "authorization": {
+    "at": "2026-09-07T05:01:57.968335+00:00",
+    "checked_by": "hermetic policy broker (emulated; no dry run, no job)",
+    "denied": 0,
+    "status": "ALLOWED",
+    "tables": [
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fulfillment_cost"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fx_daily_rates"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.order_lines"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.orders"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.payment_fees"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.products"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.shipment_cost"
+     }
+    ]
+   },
+   "bind": {
+    "checks": {
+     "declared_type": {
+      "graph": "Attested Computation",
+      "ok": true
+     },
+     "file_sha256": {
+      "graph": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "ok": true,
+      "sdk_bytes": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "freshness": {
+      "as_of": "2026-09-07T05:01:57Z",
+      "ok": true,
+      "stale_after": "2026-12-31T00:00:00Z",
+      "verdict": "FRESH"
+     },
+     "lifecycle": {
+      "graph": "stable",
+      "ok": true
+     },
+     "not_executed_by_graph": {
+      "graph": "NOT_EXECUTED",
+      "ok": true
+     },
+     "parameters": {
+      "graph": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ],
+      "ok": true,
+      "sdk": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ]
+     },
+     "path": {
+      "graph": "computations/gross-margin-period.md",
+      "ok": true,
+      "sdk": "acme_retail/gross-margin-period.md"
+     },
+     "runtime": {
+      "graph": "bigquery",
+      "ok": true,
+      "sdk": "bigquery"
+     },
+     "source_pin": {
+      "graph": "31da799a9aef176df12e91abbd119ea9385b75ec",
+      "ok": true,
+      "sdk": "knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec"
+     },
+     "sql_text": {
+      "graph_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+      "note": "compared after trailing-whitespace normalisation: the graph fence regex drops the final newline the SDK keeps",
+      "ok": true,
+      "sdk_fence_sha256": "d1f76cb93bcf69dc87ee721b91ef8d1478df7a4b0aa9ec86ef1abda9e56934bd"
+     }
+    },
+    "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+    "concept_hops": 1,
+    "sdk_context_ref": "okf:acme-retail-derived#gross-margin-period",
+    "sdk_publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+    "status": "BOUND",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/gross-margin",
+     "computations/gross-margin-period"
+    ]
+   },
+   "case": "revocation-before-replay",
+   "computation": {
+    "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+    "concept": "computations/gross-margin-period",
+    "concept_hops": 1,
+    "freshness": {
+     "stale_after": "2026-12-31T00:00:00Z",
+     "verdict": "FRESH"
+    },
+    "path": "computations/gross-margin-period.md",
+    "runtime": "bigquery",
+    "runtime_verdict": "NOT_EXECUTED",
+    "section_id": null,
+    "sql_chars": 1341,
+    "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+    "status": "stable",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/gross-margin",
+     "computations/gross-margin-period"
+    ]
+   },
+   "consume": {
+    "decision": "REFUSED",
+    "reasons": [
+     "authorization DENIED at decision time: the requester's credential cannot read every dependency of the bound computation (7 denied)"
+    ]
+   },
+   "declaration": {
+    "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+    "job_id": null,
+    "lifecycle_status": "stable",
+    "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+    "parameters": [
+     {
+      "name": "period_start",
+      "required": true,
+      "type": "date"
+     },
+     {
+      "name": "period_end",
+      "required": true,
+      "type": "date"
+     }
+    ],
+    "path": "computations/gross-margin-period.md",
+    "receipt_fields": [
+     "job_id",
+     "executed_sql",
+     "result"
+    ],
+    "runtime": "bigquery",
+    "stale_after": "2026-12-31T00:00:00Z",
+    "status": "OK",
+    "type": "Attested Computation"
+   },
+   "expected": "REFUSED",
+   "expects": "first pass RELEASED; after revocation the cached replay is HIT_DENIED with nothing disclosed, authorization DENIED, consumer REFUSED; CLI invoked once",
+   "first_pass": {
+    "authorization": "ALLOWED",
+    "cache": "MISS_STORED",
+    "decision": "RELEASED",
+    "reasons": [],
+    "receipt_verdict": "VERIFIED"
+   },
+   "grant": {
+    "at": "2026-09-07T05:01:57.968194+00:00",
+    "event": "apply",
+    "observed": true,
+    "policy": {
+     "dataset": "base",
+     "dataset_reader": true,
+     "hidden": [],
+     "sdk_tables": true
+    }
+   },
+   "hidden": [],
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": true,
+    "hidden": [],
+    "sdk_tables": true
+   },
+   "receipt": {
+    "argv": [
+     "/usr/local/opt/python@3.13/bin/python3.13",
+     "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike/examples/okf_attested_computation/run.py",
+     "--case",
+     "approved",
+     "--evidence-dir",
+     "/Users/haiyuancao/caohy1988.github.io-restricted-chain/rfc/spikes/bq-graph/evidence/chain/receipt/hermetic_restricted-20260907T050157Z-8bbd58a0/.inv_approved_hermetic_5snjd0cq"
+    ],
+    "case": "approved",
+    "cwd": "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike",
+    "diag": "see /Users/haiyuancao/caohy1988.github.io-restricted-chain/rfc/spikes/bq-graph/evidence/chain/receipt/hermetic_restricted-20260907T050157Z-8bbd58a0/case_revocation-before-replay_hermetic.json",
+    "diag_path": "/Users/haiyuancao/caohy1988.github.io-restricted-chain/rfc/spikes/bq-graph/evidence/chain/receipt/hermetic_restricted-20260907T050157Z-8bbd58a0/case_revocation-before-replay_hermetic.json",
+    "diag_present": true,
+    "diag_sha256": "46af3c20f2e0e0fc495f08aeeadc26492b64b5c4fcf875847cb9d56d6378a5cb",
+    "elapsed_ms": 85.8,
+    "env_injected": [],
+    "exit_code": 0,
+    "invocation_dir": "/Users/haiyuancao/caohy1988.github.io-restricted-chain/rfc/spikes/bq-graph/evidence/chain/receipt/hermetic_restricted-20260907T050157Z-8bbd58a0/.inv_approved_hermetic_5snjd0cq",
+    "invoked": true,
+    "live": false,
+    "output": {
+     "access_probe": {
+      "outcome": "ALLOWED",
+      "output": "ALLOWED",
+      "probed_at": 1788757318,
+      "sources": "ALLOWED"
+     },
+     "execution_match": "MATCH",
+     "job": {
+      "job_id": "okf_rcpt_66f4d1e1b4420a2b0c2c82e3_b202201d42c4712d",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reason_codes": [],
+     "receipt_id": "rcpt-5169250bce7e79aa4edb4bfe",
+     "request_id": "req-66f4d1e1b4420a2b0c2c82e3",
+     "verdict": "VERIFIED"
+    },
+    "receipt": {
+     "attester_artifact_hash": "e9bb803540f56ceab8faaac915b9f6e72dd8d64fed7d1c6126b9c75ea1e9365e",
+     "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+     "context_ref": "okf:acme-retail-derived#gross-margin-period",
+     "execution_match": "MATCH",
+     "expires_at": 1788757618,
+     "issued_at": 1788757318,
+     "job": {
+      "job_id": "okf_rcpt_66f4d1e1b4420a2b0c2c82e3_b202201d42c4712d",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "policy_version": "okf-receipt-spike-policy/2026-09-05",
+     "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+     "reason_codes": [],
+     "receipt_id": "rcpt-5169250bce7e79aa4edb4bfe",
+     "request_id": "req-66f4d1e1b4420a2b0c2c82e3",
+     "verdict": "VERIFIED"
+    },
+    "released": true,
+    "request_id": "req-66f4d1e1b4420a2b0c2c82e3",
+    "retained_as": "revocation-before-replay",
+    "stderr_tail": "",
+    "stdout": "[HERMETIC (synthetic fixture)] Gross margin: $400.00 USD \u00b7 VERIFIED\n"
+   },
+   "receipt_invocations": 1,
+   "replay": {
+    "authorization": {
+     "at": "2026-09-07T05:01:58.054924+00:00",
+     "checked_by": "hermetic policy broker (emulated; no dry run, no job)",
+     "denied": 7,
+     "status": "DENIED",
+     "tables": [
+      {
+       "status": "DENIED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.fulfillment_cost"
+      },
+      {
+       "status": "DENIED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.fx_daily_rates"
+      },
+      {
+       "status": "DENIED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.order_lines"
+      },
+      {
+       "status": "DENIED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.orders"
+      },
+      {
+       "status": "DENIED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.payment_fees"
+      },
+      {
+       "status": "DENIED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.products"
+      },
+      {
+       "status": "DENIED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.shipment_cost"
+      }
+     ]
+    },
+    "consume": {
+     "decision": "REFUSED",
+     "reasons": [
+      "authorization DENIED at decision time: the requester's credential cannot read every dependency of the bound computation (7 denied)"
+     ]
+    },
+    "note": "same request, same requester, same case-private cache; the stored receipt is re-decided, never re-executed",
+    "retrieval": {
+     "cache": "HIT_DENIED",
+     "computations": [],
+     "concepts": [],
+     "disclosed_anything": false,
+     "paths": [],
+     "status": "DENIED",
+     "warnings": [
+      "cached replay: current authorization check failed or unknown"
+     ]
+    }
+   },
+   "retrieval": {
+    "computations": [
+     "computations/gross-margin-period.md"
+    ],
+    "concepts": [
+     "metrics/gross-margin"
+    ],
+    "hidden_id_in_full_result": [],
+    "paths": [
+     {
+      "concept_hops": 1,
+      "seed": "metrics/gross-margin",
+      "via": [
+       "metrics/gross-margin",
+       "computations/gross-margin-period"
+      ]
+     }
+    ],
+    "reached": true,
+    "scope": {
+     "as_of": "2026-09-07T05:01:57Z",
+     "bundle_id": "acme_retail",
+     "cache": "MISS_STORED",
+     "engine": "oracle",
+     "publication_id": "pub_190192147fd7fd78",
+     "requester": "sa:okf-receipt-restricted",
+     "top_k": 5
+    },
+    "seed": "forced:metrics/gross-margin.md",
+    "status": "OK",
+    "timing": {
+     "jobs": [],
+     "stages_ms": {},
+     "total_ms": 0.1
+    },
+    "warnings": [
+     "forced seed: harness-only deterministic override, not a semantic ranking",
+     "ORACLE engine: in-process reference, not BigQuery"
+    ]
+   },
+   "revocation": {
+    "at": "2026-09-07T05:01:58.054808+00:00",
+    "event": "revoke",
+    "observed": true,
+    "policy": {
+     "dataset": "base",
+     "dataset_reader": false,
+     "hidden": [],
+     "sdk_tables": false
+    }
+   }
+  }
+ ],
+ "chain": "okf_bq_graph.chain/0.5.0",
+ "decisions": {
+  "approved-restricted": "RELEASED",
+  "denied-intermediate": "REFUSED",
+  "revocation-before-replay": "REFUSED",
+  "unauthorized-output": "REFUSED"
+ },
+ "engine": "oracle",
+ "finished_at": "2026-09-07T05:01:58.055026+00:00",
+ "grant": {
+  "at": "2026-09-07T05:01:57.880208+00:00",
+  "event": "apply",
+  "observed": true,
+  "policy": {
+   "dataset": "base",
+   "dataset_reader": true,
+   "hidden": [],
+   "sdk_tables": true
+  }
+ },
+ "identity": {
+  "expected": "sa:okf-receipt-restricted",
+  "job_set": {
+   "graph": 0,
+   "pointer_lookup_included": false,
+   "receipt": 2
+  },
+  "reason": "hermetic mode: oracle graph + SDK SYNTHETIC emulation submit no BigQuery jobs; the emulated principal is a policy label, not an IAM identity",
+  "status": "NOT_APPLICABLE"
+ },
+ "mode": "hermetic",
+ "provenance": {
+  "ok": true,
+  "publication_pin": true,
+  "sdk_clean": true,
+  "sdk_git_state_known": true,
+  "sdk_head_pin": true
+ },
+ "publication": {
+  "matches_pin": true,
+  "pin": "pub_190192147fd7fd78",
+  "publication_id": "pub_190192147fd7fd78",
+  "source": "compiled projection (deterministic from the pinned bytes)",
+  "status": "OK"
+ },
+ "requester": {
+  "broker": {
+   "iam": false,
+   "kind": "hermetic-policy-broker",
+   "note": "emulated policy over the compiled projection (dataset grant, hidden rows in the `_rls` shape, SDK fixture table reads); the principal is a label, no BigQuery job is submitted, nothing here is platform enforcement",
+   "principal": "sa:okf-receipt-restricted"
+  },
+  "cases": {
+   "approved-restricted": {
+    "expects": "grants present: reached, bound, authorized, executed under the requester, VERIFIED, RELEASED",
+    "policy": {
+     "dataset": "base",
+     "dataset_reader": true,
+     "hidden": [],
+     "sdk_tables": true
+    },
+    "seed": "forced:metrics/gross-margin.md"
+   },
+   "denied-intermediate": {
+    "expects": "seed visible, no path, no computation, hidden id absent from every surface; bind NOT_REACHED (retrieval_denied); CLI never invoked; REFUSED",
+    "policy": {
+     "dataset": "rls",
+     "dataset_reader": true,
+     "hidden": [
+      "metrics/gross-margin"
+     ],
+     "sdk_tables": true
+    },
+    "seed": "forced:metrics/gross-margin-legacy.md"
+   },
+   "revocation-before-replay": {
+    "expects": "first pass RELEASED; after revocation the cached replay is HIT_DENIED with nothing disclosed, authorization DENIED, consumer REFUSED; CLI invoked once",
+    "policy": {
+     "dataset": "base",
+     "dataset_reader": true,
+     "hidden": [],
+     "sdk_tables": true
+    },
+    "seed": "forced:metrics/gross-margin.md"
+   },
+   "unauthorized-output": {
+    "expects": "reached and bound; pre-execution authorization DENIED under the requester's credential; CLI never invoked; REFUSED before execution",
+    "policy": {
+     "dataset": "base",
+     "dataset_reader": true,
+     "hidden": [],
+     "sdk_tables": false
+    },
+    "seed": "forced:metrics/gross-margin.md"
+   }
+  },
+  "mode": "restricted-sa",
+  "note": "graph leg and receipt leg both under the restricted service account through a requester broker; the operator's credential only grants, revokes and reads job identities",
+  "principal": "sa:okf-receipt-restricted"
+ },
+ "run_id": "hermetic_restricted-20260907T050157Z-8bbd58a0",
+ "same_requester": {
+  "reason": "restricted-sa mode: the identity claim is `identity` (every job bound to the SA)",
+  "status": "NOT_APPLICABLE"
+ },
+ "sdk": {
+  "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+  "computation_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+  "dependencies": [
+   "test-project-0728-467323.okf_receipt_spike_20260905.fulfillment_cost",
+   "test-project-0728-467323.okf_receipt_spike_20260905.fx_daily_rates",
+   "test-project-0728-467323.okf_receipt_spike_20260905.order_lines",
+   "test-project-0728-467323.okf_receipt_spike_20260905.orders",
+   "test-project-0728-467323.okf_receipt_spike_20260905.payment_fees",
+   "test-project-0728-467323.okf_receipt_spike_20260905.products",
+   "test-project-0728-467323.okf_receipt_spike_20260905.shipment_cost"
+  ],
+  "example_dirty": false,
+  "head": "6719eb535667963fa640dd4535e508b550eb6cb1",
+  "head_matches_pin": true,
+  "invocation": "subprocess run.py (no SDK source edits)",
+  "pin": "6719eb535667963fa640dd4535e508b550eb6cb1",
+  "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+  "repo_dirty": false,
+  "root": "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike",
+  "synthetic_fixture": true
+ },
+ "seed": {
+  "mode": "fixture",
+  "note": "forced seed: harness-only deterministic override, not a semantic ranking; live Knowledge Catalog discovery is out of scope for this chain",
+  "query": "forced:metrics/gross-margin.md"
+ },
+ "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec",
+ "started_at": "2026-09-07T05:01:57.800200+00:00",
+ "teardown": {
+  "reason": "hermetic policy broker holds no grant",
+  "status": "NOT_NEEDED"
+ },
+ "verdict": "CHAIN_CONNECTED",
+ "verdict_rule": "CHAIN_CONNECTED only when provenance pins hold before any case executes, every case is MET (reached its stage with its specific evidence: approved-restricted RELEASED; denied-intermediate seed visible, no path, no hidden id, CLI never invoked; unauthorized-output bound, authorization DENIED under the requester's credential, CLI never invoked; revocation-before-replay released once, then HIT_DENIED replay, authorization DENIED and REFUSED with the CLI invoked once) and, live, every submitted job (pointer lookup, retrieval, declaration, receipt) carries the SA's user_email (identity BOUND); CHAIN_INCOMPLETE when a case never reached its stage or the identity is UNKNOWN; CHAIN_BROKEN when a reached stage contradicts the expectation, a job carries another identity or a pin fails; hermetic runs prove the harness, not the platform"
+}
