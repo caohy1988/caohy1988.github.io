@@ -174,7 +174,7 @@
       color: var(--ink-soft);
     }
 
-    /* Latest brief + Medium angles share one rail */
+    /* Latest brief rail */
     .brief-rail {
       margin: 0 0 22px;
       border: 1px solid var(--line);
@@ -187,83 +187,11 @@
       margin: 0;
       border: 0;
       border-radius: 0;
-      border-bottom: 1px solid var(--line);
       background: transparent;
     }
     .brief-rail .latest-brief:hover {
       background: rgba(232, 115, 36, 0.06);
     }
-    .medium-angles {
-      margin: 0;
-      padding: 12px 16px 14px;
-      background: transparent;
-      border: 0;
-    }
-    .medium-angles .ma-kicker {
-      display: block;
-      margin: 0 0 10px;
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--mint);
-    }
-    .ma-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-    .ma-card {
-      padding: 10px 0;
-      border: 0;
-      border-top: 1px dashed var(--line);
-      border-radius: 0;
-      background: transparent;
-    }
-    .ma-card:first-child { border-top: 0; padding-top: 0; }
-    .ma-card h3 {
-      margin: 0 0 4px;
-      font-family: var(--serif);
-      font-size: 1.02rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      line-height: 1.3;
-    }
-    .ma-card .ma-thesis {
-      margin: 0 0 6px;
-      color: var(--ink-soft);
-      font-size: 0.9rem;
-    }
-    .ma-card .ma-ids {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 0 0 6px;
-    }
-    .ma-card .ma-id {
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: var(--paper-2);
-      color: var(--ink-soft);
-      text-decoration: none;
-    }
-    .ma-card .ma-id:hover { color: var(--accent-dark); }
-    .ma-card .ma-companions {
-      margin: 0 0 6px;
-      padding: 0;
-      list-style: none;
-      font-size: 0.86rem;
-    }
-    .ma-card .ma-companions a { color: var(--accent-dark); }
-    .ma-card .ma-guard {
-      margin: 0;
-      font-size: 0.8rem;
-      color: var(--ink-faint);
-    }
-
     .live {
       display: inline-flex;
       align-items: center;
@@ -680,7 +608,7 @@
   <script>
     const $ = (id) => document.getElementById(id);
     const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    const STATE = { items: [], runs: [], briefs: [], mediumAngles: null, calY: null, calM: null };
+    const STATE = { items: [], runs: [], briefs: [], calY: null, calM: null };
 
     function escapeHtml(s) {
       return String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -785,48 +713,9 @@
 
 
 
-    function mediumAnglesInnerHtml(entry) {
-      const angles = (entry && entry.angles) || [];
-      if (!angles.length) return "";
-      const cards = angles.map((a) => {
-        const ids = (a.catalogIds || []).map((id) =>
-          `<a class="ma-id" href="?q=${encodeURIComponent(id)}">${escapeHtml(id)}</a>`
-        ).join("");
-        const comps = (a.companionUrls || []).map((c) =>
-          `<li><a href="${escapeHtml(c.href)}" rel="noopener noreferrer" target="_blank">${escapeHtml(c.label || c.href)}</a></li>`
-        ).join("");
-        return `<article class="ma-card">
-          <h3>${escapeHtml(a.workingTitle || "Untitled angle")}</h3>
-          <p class="ma-thesis">${escapeHtml(a.thesis || "")}</p>
-          ${ids ? `<div class="ma-ids">${ids}</div>` : ""}
-          ${comps ? `<ul class="ma-companions">${comps}</ul>` : ""}
-          ${a.doNotOverclaim ? `<p class="ma-guard">Do not overclaim: ${escapeHtml(a.doNotOverclaim)}</p>` : ""}
-        </article>`;
-      }).join("");
-      return `<section class="medium-angles" aria-label="Medium draft angles from this brief">
-        <span class="ma-kicker">Then write · Medium draft angles · not published</span>
-        <div class="ma-list">${cards}</div>
-      </section>`;
-    }
-
-    function matchingMediumEntry(latestBrief) {
-      const pack = STATE.mediumAngles;
-      if (!pack || !Array.isArray(pack.entries) || !pack.entries.length) return null;
-      const entry = pack.entries[0];
-      if (!entry || !(entry.angles || []).length) return null;
-      if (!latestBrief) return entry;
-      const href = (latestBrief.href || "").replace(/\/$/, "");
-      const eh = (entry.briefHref || "").replace(/\/$/, "");
-      if (entry.briefId && latestBrief.id && entry.briefId === latestBrief.id) return entry;
-      if (href && eh && (href.endsWith(eh) || eh.endsWith(href) || href.includes(eh) || eh.includes(href))) return entry;
-      // Still show newest angles under Latest — organic companion even if ids drift
-      return entry;
-    }
 
     function briefRailHtml(latestBrief, addedN) {
-      const entry = matchingMediumEntry(latestBrief);
-      const ma = entry ? mediumAnglesInnerHtml(entry) : "";
-      if (!latestBrief || !latestBrief.href) return ma;
+      if (!latestBrief || !latestBrief.href) return "";
       const when = latestBrief.displayTime || "";
       const who = latestBrief.analyzer || "Field Brief";
       const status = addedN === 0 ? "Verified flat — open the write-up" : "Open the deep brief";
@@ -835,7 +724,7 @@
             <span class="lb-title">${escapeHtml(latestBrief.title || "Field Brief")}</span>
             <span class="lb-meta">${escapeHtml(status)}</span>
           </a>`;
-      return `<div class="brief-rail">${lb}${ma}</div>`;
+      return `<div class="brief-rail">${lb}</div>`;
     }
 
     function briefsHtml(day) {
@@ -958,12 +847,6 @@
       } catch (err) {
         $("app").innerHTML = '<p class="empty">Could not load catalog.json.</p>';
         return;
-      }
-      try {
-        const maRes = await fetch("/research/medium-angles.json?v=" + Date.now(), { cache: "no-store" });
-        if (maRes.ok) STATE.mediumAngles = await maRes.json();
-      } catch (err) {
-        STATE.mediumAngles = null;
       }
       render();
       window.addEventListener("hashchange", render);
