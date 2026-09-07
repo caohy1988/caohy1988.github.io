@@ -21,7 +21,7 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `okf_bq_graph/scale.py` | Synthetic 100 / 1,000 namespace-isolated copies in their own datasets (vectors reused by text digest) |
 | `okf_bq_graph/authz.py` | Governance fixtures: RLS dataset (hidden intermediate), metadata-only dataset, authorized views + graph over views; `cases` runs the five second-principal negatives under the existing restricted SA via impersonation (`OKF_SPIKE_RESTRICTED_SA`, no new principal) → `evidence/authz_cases.json` |
 | `okf_bq_graph/chain.py` | Connected chain (2026-09-06): fixture seed → pinned publication → governed retrieval returns the Attested Computation declaration + SQL → bind to the SDK receipt example's pinned publication (data files only) → SDK CLI as a subprocess executes and verifies under the caller → consumer releases only on VERIFIED; two fail-closed substitution cases → `evidence/chain/` |
-| `okf_bq_graph/principal.py` | Requester brokers for the chain (2026-09-06 Slice A): a hermetic policy-emulating broker (no IAM, no job) exercised by `chain.py --requester restricted`, and the IAM-impersonation broker for the restricted SA (graph leg via `authz.impersonated_client`, SDK subprocess via an `impersonated_service_account` ADC file, dry-run authorization probe per dependency table) wired for the live Slice B, not exercised → `evidence/chain/chain_hermetic_restricted.json` |
+| `okf_bq_graph/principal.py` | Requester brokers for the chain (2026-09-06 Slice A): a hermetic policy-emulating broker (no IAM, no job) exercised by `chain.py --requester restricted`, and the IAM-impersonation broker for the restricted SA (graph leg via `authz.impersonated_client`, SDK subprocess via an `impersonated_service_account` ADC file plus a `userinfo.email` scope shim, `_rls` row-policy grantee snapshot/restore, dry-run authorization probe per dependency table) exercised live in Slice B → `evidence/chain/chain_hermetic_restricted.json`, `evidence/chain/chain_live_restricted.json` |
 | `okf_bq_graph/benchmark.py`, `run.py`, `lifecycle.py`, `safety.py`, `partial.py`, `bin/safety_teardown.sh` | Bounded runner (20 warmups + 100 measured per cell, nearest-rank percentiles, failures retained), the window orchestrator (signal-safe cleanup lifecycle, job cancel, independent watcher), and the honest aggregation of interrupted cells (INCOMPLETE / NOT_RUN) |
 | `okf_bq_graph/cost.py`, `report.py`, `assemble.py` | Slot attribution (exact named reservation vs other pools) and the charged autoscale slot-seconds bill from `INFORMATION_SCHEMA.RESERVATIONS_TIMELINE`; non-mutating report tables; report assembly |
 | `sql/*.sql` | `schema.sql`, `graph.sql` (property graph DDL), `seed.sql` (vector seed), `governed.sql` (two-hop GQL), `context.sql`, `impact.sql`, `stubs.sql`, `fallback.sql` |
@@ -104,8 +104,9 @@ executed for the approved request and 600 is claimed; verifier `REJECTED sql_mis
 in place of the bound one; bind `MISMATCH` on file digest, SQL text and path, and the receipt CLI is never invoked). The
 CLI has no free-form case, so a "total ARR" swap is not what executes; the executed-SQL swap is the SDK's formula swap.
 
-Labels carried in the evidence: **same requester** (graph leg and receipt leg under the operator's own ADC credential;
-`sa:okf-receipt-restricted` is not exercised by this chain); **hermetic** = oracle graph engine + the SDK's SYNTHETIC API
+Labels carried in the evidence (this section is the operator-requester chain, `--requester operator`, the default; the
+restricted requester has its own record and its own labels below): **same requester** (graph leg and receipt leg under
+the operator's own ADC credential; `sa:okf-receipt-restricted` is not exercised by this chain); **hermetic** = oracle graph engine + the SDK's SYNTHETIC API
 emulation, `same_requester = NOT_APPLICABLE`; **live** = relational `fallback` engine on the published tables (on-demand,
 **not** BigQuery Graph; `--engine gql` needs an Enterprise window this module does not open; `--live --engine oracle` is
 refused) + SDK `--live` (real BigQuery jobs against the SDK's SYNTHETIC fixture dataset), plus a `jobs.get` check that
@@ -151,7 +152,7 @@ identity set is the 14 case jobs and does not include the pointer-lookup job, wh
 adds; the later changes (invocation-private and run-owned diagnostics, `approved` outage labelled NOT_REACHED) alter no
 recorded field of a passing run, so it was not re-run.
 
-### Restricted requester (2026-09-06 Slice A, hermetic only)
+### Restricted requester (2026-09-06 Slice A hermetic; 2026-09-07 Slice B live)
 
 `python3 -m okf_bq_graph.chain --hermetic --requester restricted` runs both legs through a requester broker for
 `sa:okf-receipt-restricted` (`okf_bq_graph/principal.py`) instead of the operator: `requester.mode = restricted-sa`, the
@@ -195,18 +196,44 @@ proves that the harness reaches each stage, refuses for the stated reason and gr
 broker that ignores hidden rows makes `denied-intermediate` `WRONG` and the chain `CHAIN_BROKEN`; one that claims a
 revocation it did not apply makes the replay `RELEASED` and `WRONG`; a grant that never takes effect leaves
 `approved-restricted` `NOT_REACHED` and the chain `CHAIN_INCOMPLETE`). Hermetic result: **`CHAIN_CONNECTED`**, all four
-acceptances `MET`, no e-mail in the record. Live (`--live --requester restricted`): the IAM impersonation broker is wired
-(graph leg through `authz.impersonated_client`; SDK subprocess under an `impersonated_service_account` ADC file written to a
-private 0700 directory and removed in teardown, run.py unedited; dataset-level reader grants through
-`authz.set_dataset_reader` only where the SA holds no entry (a pre-existing READER, WRITER or OWNER is left as it is,
-never downgraded), waited for by probing under the SA, with the bound SDK publication's dependency tables known before
-the first probe; identity `BOUND` only when the operator's `jobs.get` shows the SA's `user_email` on every job including
-the pointer lookup and the cached-replay re-check job, `UNBOUND` → `CHAIN_BROKEN`, `UNKNOWN` → `CHAIN_INCOMPLETE`;
-teardown restores every touched dataset's ACL to the snapshot taken before the broker's first mutation and reads it
-back, `VERIFIED` only with at least one step and every read-back equal, `NOT_NEEDED` when nothing was touched) and
-exercised only against fakes (a fake SA client and an owner holding real `AccessEntry` ACLs, through the real helper),
-but **no live pass has run**: the retained live chain evidence is still `requester.mode = same-requester`, and the second principal
-remains "not exercised in this chain" on every published surface until Slice B lands its own evidence.
+acceptances `MET`, no e-mail in the record.
+
+#### Live restricted pass (Slice B, 2026-09-07)
+
+`python3 -m okf_bq_graph.chain --live --requester restricted` (runner `chain/0.7.0`, record
+`evidence/chain/chain_live_restricted.json`, run directory
+`evidence/chain/receipt/live_restricted-20260907T221038Z-900abfcd`). Result: **`CHAIN_CONNECTED`**, all four acceptances
+`MET`, `identity = BOUND`, `teardown = VERIFIED`, no e-mail in the record. Both legs ran under
+`sa:okf-receipt-restricted`, not the operator: the operator's credential only granted, revoked and read job identities.
+
+* **Identity.** The operator's `jobs.get` over **all 18 jobs** the run submitted (16 graph-leg jobs, including the
+  pointer lookup and the cached-replay re-check, plus the 2 receipt-leg jobs) returns one `user_email`, the SA's. No
+  other identity appears. `UNBOUND` would be `CHAIN_BROKEN`, `UNKNOWN` `CHAIN_INCOMPLETE`.
+* **Graph leg.** `authz.impersonated_client` (IAM `generateAccessToken`).
+* **Receipt leg.** The SDK example as a subprocess under an `impersonated_service_account` ADC file, run.py unedited.
+  The SDK establishes its requester from `oauth2/tokeninfo`, which returns no e-mail for a token minted for
+  `cloud-platform` alone, and google-auth ignores an impersonated ADC file's own `scopes` when the caller passes them
+  explicitly (2.49.2, `from_impersonated_service_account_info`: `scopes = scopes or info.get("scopes")`). The broker
+  therefore writes a `usercustomize.py` beside the ADC file and puts its directory on the subprocess's `PYTHONPATH`; it
+  adds the `userinfo.email` scope the operator's own gcloud ADC already carries, and nothing else. It is deliberately
+  **not** `sitecustomize.py`, which would shadow the interpreter's own and leave `sys.path` incomplete. The shim changes
+  the credential's scope, never its identity: tokeninfo reports the SA, and every receipt job carries it. Both artifacts
+  live in the private 0700 directory teardown removes.
+* **Grants.** Dataset-level reader entries through `authz.set_dataset_reader`, only where the SA holds no entry (a
+  pre-existing READER, WRITER or OWNER is left as it is, never downgraded), each waited for by probing under the SA,
+  with the bound SDK publication's dependency tables known before the first probe. `denied-intermediate` also needs the
+  SA in the `_rls` fixture's three hidden-intermediate row access policies: under BigQuery RLS a non-grantee reads zero
+  rows even with dataset READER, which is an outage, not enforcement. The broker snapshots those policies' grantees and
+  predicates, adds the SA only while a case runs on `_rls`, drops it again when a case leaves, and refuses to touch a
+  fixture it could not restore. It observes the effect with a real row-count query under the SA, not a dry run (a dry
+  run passes on dataset READER alone): the run recorded **40 rows visible, 0 of them the hidden intermediate**.
+* **Teardown.** Every touched dataset's ACL restored to the snapshot taken before the broker's first mutation and read
+  back; the `_rls` grantee lists and predicates restored and read back (`sa_in_grantees_after: false`); the credential
+  directory removed. `VERIFIED` only with at least one step and every read-back equal to its snapshot.
+
+What this pass does not claim: the SDK still runs against its own SYNTHETIC fixture dataset, the graph engine is the
+relational `fallback` (not BigQuery Graph / GQL), the seed is the forced fixture seed, and the receipt is verified by
+the SDK's own verifier, not by an independent attester.
 
 ## Catalog-seeded chain (2026-09-06, Slice A hermetic; runner `chain/0.6.0` after the PR 40 merge)
 
@@ -408,8 +435,9 @@ behaved correctly **and** that chain's identity evidence is complete; the bounda
 ### What these runs do not establish
 
 Not the connected bar, not RFC Phase A/2, and no upgrade to the board pack, STORY or the older `chain/0.2.0` fixture
-run. A single operator holds both legs, so there is no restricted-SA enforcement and no independent constrained
-attester; the receipt boundary still binds to a synthetic SDK fixture publication. Enterprise/GQL, least privilege,
+run. In **these** runs a single operator holds both legs, so they establish no restricted-SA enforcement (the separate
+restricted-requester chain does, and only for itself: "Live restricted pass (Slice B, 2026-09-07)" above) and no
+independent constrained attester; the receipt boundary still binds to a synthetic SDK fixture publication. Enterprise/GQL, least privilege,
 scalability, performance and operating acceptance all stay out of scope.
 
 ## Graph model (spec §3)
@@ -443,6 +471,7 @@ python3 -m okf_bq_graph.publish <bundle_root>                # on-demand: tables
 OKF_LIVE_ENGINE=fallback python3 -m pytest tests/test_retrieve.py -q   # live, on-demand
 python3 -m okf_bq_graph.chain --hermetic                  # connected chain, no cloud (oracle graph + SDK emulation)
 python3 -m okf_bq_graph.chain --hermetic --requester restricted   # restricted-requester chain, no cloud (policy-emulating broker)
+python3 -m okf_bq_graph.chain --live --requester restricted       # Slice B: both legs under sa:okf-receipt-restricted (IAM impersonation), ~5 min
 python3 -m okf_bq_graph.chain --live                      # connected chain, on-demand fallback engine + SDK --live
 python3 -m okf_bq_graph.chain --hermetic --seed-mode catalog --catalog-responses fixtures/catalog_responses.json   # Catalog contract, injected responses (catalog-mock)
 python3 -m okf_bq_graph.chain --live --seed-mode catalog  # fresh Dataplex list/get of the KC-unblock entry -> retained publication -> receipt (Slice B1)
