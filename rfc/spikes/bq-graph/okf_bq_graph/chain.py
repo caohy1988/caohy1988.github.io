@@ -17,8 +17,13 @@ Honesty labels carried in the evidence:
   explicitly labelled injected fixture seed in either mode, never a second Catalog discovery.
 * engine: "oracle" (in-process reference, hermetic), "fallback" (relational joins on the published tables, on-demand;
   NOT BigQuery Graph) or "gql" (GA GQL; needs an Enterprise window this module does not open).
-* same requester: the graph leg and the receipt leg run under the operator's own ADC credential; the second
-  principal (`sa:okf-receipt-restricted`) is not exercised here.
+* requester: `--requester operator` (default) runs both legs under the operator's own ADC credential (same requester;
+  the second principal is not exercised). `--requester restricted` (2026-09-06 Slice A) runs both legs through a
+  requester broker for `sa:okf-receipt-restricted` (principal.py): four cases with stage-reachability acceptance
+  (approved-restricted, denied-intermediate, unauthorized-output, revocation-before-replay), a pre-execution
+  authorization probe under the requester's credential before the SDK CLI is invoked, and an identity check that expects
+  the SA e-mail on every job including the pointer lookup. Hermetic = policy-emulating broker over the projection (no
+  IAM, no job); live = IAM impersonation broker (wired, exercised in Slice B).
 * the SDK is invoked as a subprocess (`examples/okf_attested_computation/run.py`); its fixture publication is bound to
   the graph's declaration by file digest and SQL text, and the sealed receipt's `computation_digest` is recomputed
   here from the same bytes (domain constant copied from the SDK's contracts.py at the pinned commit).
@@ -50,6 +55,8 @@ from .model import node_id as _node_id
 from .publication import BigQueryStore, ProjectionStore, resolve_publication, trusted_source, verify_payload
 from .retrieve import retrieve, _freshness
 from .seed import ConceptSeed
+from .authz import HIDDEN, SA_ALIAS, leaks
+from .principal import ALLOWED, DENIED, HermeticBroker, RestrictedBroker, policy as _policy
 
 SDK_ROOT_DEFAULT = "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike"
 SDK_PIN = "6719eb535667963fa640dd4535e508b550eb6cb1"
@@ -62,6 +69,22 @@ MISMATCH_PATH = "computations/revenue-ytd.md"
 DOMAIN_COMPUTATION = "okf-receipt:computation-bytes"     # SDK contracts.DOMAIN_COMPUTATION at SDK_PIN (copied, not imported)
 SDK_FENCE_RE = re.compile(r"```sql\n(.*?)```", re.DOTALL)  # SDK publication._FENCE_RE at SDK_PIN
 CASES = ("approved", "sql-substitution", "declaration-mismatch")
+LEGACY_SEED = "forced:metrics/gross-margin-legacy.md"        # deprecated anchor: reaches the computation only THROUGH metrics/gross-margin
+RESTRICTED_CASES = ("approved-restricted", "denied-intermediate", "unauthorized-output", "revocation-before-replay")
+RESTRICTED = {   # per case: seed, the policy the broker applies before the graph leg, the attack the case models
+    "approved-restricted": {"seed": SEED, "policy": _policy(), "attack": None,
+                            "expects": "grants present: reached, bound, authorized, executed under the requester, VERIFIED, RELEASED"},
+    "denied-intermediate": {"seed": LEGACY_SEED, "policy": _policy(dataset="rls", hidden=(HIDDEN,)),
+                            "attack": f"row policy hides the intermediate concept {HIDDEN}: the only path from the legacy seed to the computation runs through it",
+                            "expects": "seed visible, no path, no computation, hidden id absent from every surface the requester received (the harness's "
+                                       "own policy record names it by design); bind NOT_REACHED (retrieval_denied); CLI never invoked; REFUSED"},
+    "unauthorized-output": {"seed": SEED, "policy": _policy(sdk_tables=False),
+                            "attack": "seed and declaration visible, but the requester cannot read the computation's dependency tables (no read on the SDK fixture dataset)",
+                            "expects": "reached and bound; pre-execution authorization DENIED under the requester's credential; CLI never invoked; REFUSED before execution"},
+    "revocation-before-replay": {"seed": SEED, "policy": _policy(),
+                                 "attack": "grant, retrieve, execute and release once; revoke the requester's grants; replay the same request from cache and re-decide the consumer",
+                                 "expects": "first pass RELEASED; after revocation the cached replay is HIT_DENIED with nothing disclosed, authorization DENIED, consumer REFUSED; CLI invoked once"},
+}
 VERIFIED, UNVERIFIABLE, REJECTED = "VERIFIED", "UNVERIFIABLE", "REJECTED"
 Runner = Callable[..., subprocess.CompletedProcess]
 
@@ -96,8 +119,10 @@ def sdk_publication(root: str) -> dict:
     head = _git(root, "rev-parse", "HEAD")
     dirty = _git(root, "status", "--porcelain", "--", EXAMPLE_REL)
     repo_dirty = _git(root, "status", "--porcelain")   # the example imports SDK modules: the whole checkout must be clean
+    deps = sorted(f"{manifest['project']}.{manifest['dataset']}.{t}" for t in (manifest.get("table_map") or {}).values())   # SDK publication.py's `dependencies`
     return {"manifest": manifest, "computation_sha256": sha256_hex(raw), "computation_digest": computation_digest(raw),
             "sanctioned_sql": fences[0] if len(fences) == 1 else None, "fence_count": len(fences),
+            "dependencies": deps, "dataset": manifest.get("dataset"),
             "sdk_head": head, "sdk_head_matches_pin": head == SDK_PIN, "sdk_dirty": bool(dirty) if dirty is not None else None,
             "sdk_repo_dirty": bool(repo_dirty) if repo_dirty is not None else None, "run_py": str(ex / "run.py")}
 
@@ -190,14 +215,15 @@ def bind(comp: dict, decl: dict, sdk_pub: dict, as_of: str, source_pin: str = SO
 
 # ----------------------------------------------------------------------------- receipt leg (subprocess)
 def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner = subprocess.run,
-                timeout: int = 900) -> dict:
+                timeout: int = 900, env_extra: Optional[dict] = None, label: Optional[str] = None) -> dict:
     """Invoke the SDK example CLI for one case. The verdict is read from the CLI's own per-case diagnostic JSON, not
     from stdout. The CLI writes into an invocation-private directory that no other launch can see (overlapping runs
     cannot exchange evidence: Astra P2), the file must be newer than the launch, and the retained file is moved from
     that private artifact into `out_dir`, which the caller owns for this run alone (run_chain passes its own run
     directory, so two successful overlapping runs never share a retained path). The record carries the diagnostic's
     request id and SHA-256 so every reference reconciles. A missing, stale or unparsable diagnostic is UNVERIFIABLE and
-    `diag_present = False`."""
+    `diag_present = False`. `label` names the retained file after the CHAIN case when several chain cases run the same
+    SDK case (the restricted chain runs `approved` twice): two retained diagnostics never share a name inside one run."""
     out_dir = str(Path(out_dir).resolve())   # the CLI runs with the SDK root as cwd: never let a relative path land there
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     mode = "live" if live else "hermetic"
@@ -207,8 +233,9 @@ def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner =
     if live:
         argv.append("--live")
         env["GOOGLE_CLOUD_PROJECT"] = PROJECT
+    env.update(env_extra or {})   # requester broker: e.g. GOOGLE_APPLICATION_CREDENTIALS of the impersonated SA (live restricted)
     private_diag = Path(inv_dir) / f"case_{case}_{mode}.json"
-    diag_path = Path(out_dir) / f"case_{case}_{mode}.json"   # retained artifact, moved from this invocation's private dir only
+    diag_path = Path(out_dir) / f"case_{label or case}_{mode}.json"   # retained artifact, moved from this invocation's private dir only
     launched_at = time.time()
     t0 = time.monotonic()
     try:
@@ -230,6 +257,7 @@ def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner =
         os.replace(private_diag, diag_path)
     shutil.rmtree(inv_dir, ignore_errors=True)
     rec = {"case": case, "invoked": True, "argv": argv, "cwd": root, "live": live, "exit_code": exit_code, "elapsed_ms": elapsed,
+           "env_injected": sorted(env_extra or {}), "retained_as": label or case,
            "stdout": stdout[-2000:], "stderr_tail": stderr[-1500:], "invocation_dir": inv_dir,
            "diag_path": str(diag_path) if diag is not None else None, "diag": diag, "diag_present": diag is not None,
            "diag_sha256": sha256_hex(raw) if diag is not None and raw is not None else None,
@@ -252,11 +280,17 @@ def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner =
 
 
 # ----------------------------------------------------------------------------- consumer
-def consume(b: dict, rec: dict) -> dict:
-    """Deterministic consumer: every binding must hold or the number is withheld. Reasons name the failed check."""
+def consume(b: dict, rec: dict, authz: Optional[dict] = None) -> dict:
+    """Deterministic consumer: every binding must hold or the number is withheld. Reasons name the failed check. When
+    the chain runs under a requester broker, `authz` is the authorization probe taken under the requester's own
+    credential at decision time (before execution, and again on a replay): anything but ALLOWED refuses, so a receipt
+    sealed before a revocation cannot be replayed into a release."""
     reasons: list[str] = []
     if b.get("status") != "BOUND":
         reasons.append(f"bind status {b.get('status')}: declaration not bound to the executed publication")
+    if authz is not None and authz.get("status") != ALLOWED:
+        reasons.append(f"authorization {authz.get('status')} at decision time: the requester's credential cannot read every dependency "
+                       f"of the bound computation ({authz.get('denied', '?')} denied)")
     if not rec.get("invoked"):
         reasons.append("receipt not invoked: nothing executed, nothing verifiable")
         return {"decision": "REFUSED", "reasons": reasons}
@@ -287,7 +321,116 @@ def consume(b: dict, rec: dict) -> dict:
 
 
 # ----------------------------------------------------------------------------- acceptance (Astra P1)
-EXPECTED = {"approved": "RELEASED", "sql-substitution": "REFUSED", "declaration-mismatch": "REFUSED"}
+EXPECTED = {"approved": "RELEASED", "sql-substitution": "REFUSED", "declaration-mismatch": "REFUSED",
+            "approved-restricted": "RELEASED", "denied-intermediate": "REFUSED", "unauthorized-output": "REFUSED", "revocation-before-replay": "REFUSED"}
+
+
+# what the requester sees: every stage output. The harness's own policy record (`policy`, `hidden`, `grant`, `attack`,
+# `expects`) names the hidden id by design and is not a disclosure.
+DISCLOSURE_SURFACE = ("retrieval", "computation", "declaration", "bind", "authorization", "receipt", "consume", "first_pass", "replay")
+
+
+def _verdict(case: str, failed: list[str], not_reached: list[str]) -> dict:
+    if failed:
+        return {"status": "WRONG", "expected": EXPECTED.get(case), "failed": failed + not_reached}
+    if not_reached:
+        return {"status": "NOT_REACHED", "expected": EXPECTED.get(case), "failed": not_reached}
+    return {"status": "MET", "expected": EXPECTED.get(case), "failed": []}
+
+
+def accept_restricted(c: dict) -> dict:
+    """Stage-reachability acceptance for the four restricted-requester cases (same rule as PR 35: a refusal alone never
+    counts; each case must name the stage it reached and its specific rejection). `NOT_REACHED` = an upstream outage or
+    an unpropagated grant before the intended stage (refused, unproven); `WRONG` = the stage was reached and the outcome
+    contradicts the expectation (a traversed hidden row, a leaked id, an invoked CLI, a released replay)."""
+    case = c["case"]
+    failed: list[str] = []
+    not_reached: list[str] = []
+    r, b, rec, az = c.get("retrieval") or {}, c.get("bind") or {}, c.get("receipt") or {}, c.get("authorization") or {}
+    decision = (c.get("consume") or {}).get("decision")
+    if r.get("status") != "OK":   # every case needs the seed visible to the requester; DENIED/ERROR is an outage or an unpropagated grant
+        not_reached.append(f"retrieval status={r.get('status')}: seed not visible to the requester, enforcement cannot be told from an outage")
+    if case == "denied-intermediate":
+        if decision != "REFUSED":
+            failed.append(f"consume decision={decision}: released through a hidden intermediate")
+        if rec.get("invoked"):
+            failed.append("receipt invoked although no path was authorized")
+        if not not_reached:
+            if r.get("reached") or r.get("computations") or r.get("paths"):
+                failed.append(f"hidden intermediate traversed: reached={r.get('reached')} paths={r.get('paths')} computations={r.get('computations')}")
+            if b.get("status") != "NOT_REACHED" or b.get("reason") != "retrieval_denied":
+                failed.append(f"bind status={b.get('status')} reason={b.get('reason')} != NOT_REACHED/retrieval_denied")
+        for hid in c.get("hidden") or ():
+            if leaks({k: c.get(k) for k in DISCLOSURE_SURFACE}, hid):
+                failed.append("hidden identifier present on the case's disclosure surface")
+        if r.get("hidden_id_in_full_result"):
+            failed.append("hidden identifier present in the full retrieval result the requester received")
+        return _verdict(case, failed, not_reached)
+    # the other three must reach the computation and bind it
+    if not r.get("reached"):
+        not_reached.append(f"retrieval reached={r.get('reached')}")
+    if (c.get("declaration") or {}).get("status") != "OK":
+        not_reached.append(f"declaration status={(c.get('declaration') or {}).get('status')}")
+    if not not_reached and b.get("status") != "BOUND":
+        failed.append(f"bind status={b.get('status')} (graph and SDK publication disagree)")
+    if case == "approved-restricted":
+        if az.get("status") == DENIED and not not_reached:
+            not_reached.append("authorization DENIED with grants present: grant not effective, execution stage never reached")
+        elif az.get("status") not in (ALLOWED, DENIED):
+            not_reached.append(f"authorization status={az.get('status')}")
+        if not rec.get("invoked"):
+            not_reached.append("receipt not invoked")
+        elif rec.get("exit_code") == -1 or not rec.get("diag_present"):
+            not_reached.append(f"receipt child did not complete: exit_code={rec.get('exit_code')} diag_present={rec.get('diag_present')}")
+        if not not_reached:
+            if rec.get("exit_code") != 0:
+                failed.append(f"exit_code={rec.get('exit_code')} != 0")
+            if decision != "RELEASED":
+                failed.append(f"consume decision={decision} != RELEASED")
+    elif case == "unauthorized-output":
+        if decision != "REFUSED":
+            failed.append(f"consume decision={decision}: released without authorization")
+        if rec.get("invoked"):
+            failed.append("receipt invoked although authorization was denied")
+        if not not_reached:
+            if az.get("status") == ALLOWED:
+                failed.append("authorization ALLOWED: the missing read on the dependency tables was not enforced")
+            elif az.get("status") != DENIED:
+                not_reached.append(f"authorization status={az.get('status')}: probe did not produce a platform decision")
+            elif not az.get("denied"):
+                failed.append("authorization DENIED without a denied table")
+            if decision == "REFUSED" and not any("authorization" in x for x in (c.get("consume") or {}).get("reasons", [])):
+                failed.append("refusal does not name the authorization denial")
+    elif case == "revocation-before-replay":
+        first, rev, rp = c.get("first_pass") or {}, c.get("revocation") or {}, c.get("replay") or {}
+        if decision != "REFUSED":
+            failed.append(f"consume decision={decision}: a replay after revocation was released")
+        if c.get("receipt_invocations", 0) > 1:
+            failed.append(f"receipt invoked {c.get('receipt_invocations')} times: a replay must not re-execute")
+        if not not_reached:
+            if first.get("decision") != "RELEASED":
+                not_reached.append(f"first pass decision={first.get('decision')}: the grant never produced a release, so nothing was revoked from")
+            if not rev.get("observed"):
+                not_reached.append("revocation not observed by the requester")
+        if not not_reached:
+            rr = rp.get("retrieval") or {}
+            if rr.get("status") == "OK" or rr.get("disclosed_anything") or rr.get("computations") or rr.get("paths"):
+                failed.append(f"replay retrieval status={rr.get('status')} served content after revocation")
+            elif rr.get("cache") != "HIT_DENIED":
+                not_reached.append(f"replay cache={rr.get('cache')}: the cached-replay path was not exercised")
+            for hid in c.get("hidden") or ():
+                if leaks(rp, hid):
+                    failed.append("identifier present on the replay surface")
+            ra = rp.get("authorization") or {}
+            if ra.get("status") == ALLOWED:
+                failed.append("authorization ALLOWED after revocation")
+            elif ra.get("status") != DENIED:
+                not_reached.append(f"replay authorization status={ra.get('status')}")
+            if (rp.get("consume") or {}).get("decision") != "REFUSED":
+                failed.append(f"replay consume decision={(rp.get('consume') or {}).get('decision')} != REFUSED")
+    else:
+        failed.append(f"unknown case {case}")
+    return _verdict(case, failed, not_reached)
 
 
 def accept(c: dict) -> dict:
@@ -296,6 +439,8 @@ def accept(c: dict) -> dict:
     meant to trigger. `NOT_REACHED` = infrastructure or upstream failure before the intended stage (fail-closed but
     unproven); `WRONG` = the stage was reached and the outcome contradicts the expectation; `MET` = as designed."""
     case = c["case"]
+    if case in RESTRICTED_CASES:
+        return accept_restricted(c)
     failed: list[str] = []
     not_reached: list[str] = []
     r = c.get("retrieval") or {}
@@ -354,11 +499,7 @@ def accept(c: dict) -> dict:
             failed.append("receipt invoked on an unbound declaration")
     else:
         failed.append(f"unknown case {case}")
-    if failed:
-        return {"status": "WRONG", "expected": EXPECTED.get(case), "failed": failed + not_reached}
-    if not_reached:
-        return {"status": "NOT_REACHED", "expected": EXPECTED.get(case), "failed": not_reached}
-    return {"status": "MET", "expected": EXPECTED.get(case), "failed": []}
+    return _verdict(case, failed, not_reached)
 
 
 # ----------------------------------------------------------------------------- identity (live only)
@@ -393,6 +534,9 @@ def job_ids_of(cases: list[dict], pointer_job_id: Optional[str] = None, journal_
             for jj in (j.values() if isinstance(j, dict) and "nodes_job" in j else [j]):
                 if isinstance(jj, dict) and jj.get("job_id") and jj["job_id"] not in graph:
                     graph.append(jj["job_id"])
+        for j in (((c.get("replay") or {}).get("retrieval") or {}).get("timing") or {}).get("jobs", []) or []:   # the cached-replay re-check job (restricted)
+            if j.get("job_id") and j["job_id"] not in graph:
+                graph.append(j["job_id"])
         rec = c.get("receipt") or {}
         job = (rec.get("receipt") or {}).get("job") if rec.get("invoked") else None
         if job and job.get("job_id"):
@@ -429,7 +573,7 @@ def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dic
 
 
 # ----------------------------------------------------------------------------- whole chain
-CHAIN_VERSION = "okf_bq_graph.chain/0.5.4"
+CHAIN_VERSION = "okf_bq_graph.chain/0.6.0"
 SEED_MODES = ("fixture", "catalog")
 
 
@@ -437,17 +581,21 @@ def _stage_error(e: BaseException) -> dict:
     return {"status": "ERROR", "error": f"{type(e).__name__}: {str(e)[:400]}"}
 
 
-def _broken(out: dict, at: str, run_dir: str, out_dir: str, mode: str, redact: Callable, journal: Optional[Journal]) -> dict:
+def _broken(out: dict, at: str, run_dir: str, out_dir: str, mode: str, redact: Callable, journal: Optional[Journal], tag: str = "") -> dict:
     out["verdict"] = "CHAIN_BROKEN"; out["broken_at"] = at; out["cases"] = []
     out.setdefault("same_requester", {"status": "NOT_RUN", "reason": f"refused at {at} before any case executed"})
-    return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal)
+    return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
 
 
 def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Optional[dict] = None, projection: Optional[dict] = None,
-              requester: Any = None, as_of: Optional[str] = None, runner: Runner = subprocess.run, cases: tuple = CASES,
+              requester: Any = None, as_of: Optional[str] = None, runner: Runner = subprocess.run, cases: Optional[tuple] = None,
               acme_root: Optional[str] = None, seed_mode: str = "fixture", catalog_reader: Any = None,
-              catalog_cfg: Optional[CatalogConfig] = None, store: Any = None) -> dict:
+              catalog_cfg: Optional[CatalogConfig] = None, store: Any = None, requester_mode: str = "operator", broker: Any = None) -> dict:
     from .authz import operator, redact
+    if requester_mode not in ("operator", "restricted"):
+        raise ValueError(f"requester_mode must be operator|restricted, not {requester_mode!r}")
+    restricted = requester_mode == "restricted"
+    cases = tuple(cases or (RESTRICTED_CASES if restricted else CASES))
     if live and engine == "oracle":
         raise ValueError("live mode needs a BigQuery graph engine (fallback|gql): oracle + SDK --live is not a mode")
     if not live and engine != "oracle":
@@ -455,12 +603,15 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     if seed_mode not in SEED_MODES:
         raise ValueError(f"seed_mode must be one of {SEED_MODES}")
     catalog = seed_mode == "catalog"
+    if catalog and restricted:
+        raise ValueError("catalog seed mode with the restricted requester is not a mode in Slice A (the broker runs the fixture seed)")
     if catalog and catalog_reader is None:
         raise ValueError("catalog seed mode needs a Catalog reader (HttpReader live; an injected reader hermetic)")
     acme_root = acme_root or os.environ.get("OKF_ACME_ROOT", "/Users/haiyuancao/knowledge-catalog/okf/bundles/acme_retail")
     as_of = as_of or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     mode = "live" if live else "hermetic"
-    run_id = f"{mode}-{_dt.datetime.now(_dt.timezone.utc):%Y%m%dT%H%M%SZ}-{secrets.token_hex(4)}"
+    tag = "_restricted" if restricted else ""
+    run_id = f"{mode}{tag}-{_dt.datetime.now(_dt.timezone.utc):%Y%m%dT%H%M%SZ}-{secrets.token_hex(4)}"
     # KTD5: the run-owned evidence directory exists before any external operation (Catalog, BigQuery, SDK)
     run_dir = str(Path(out_dir) / run_id) if catalog else str(Path(out_dir) / "receipt" / run_id)
     Path(run_dir).mkdir(parents=True, exist_ok=True)
@@ -483,25 +634,53 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     else:
         out["seed"] = {"mode": "fixture", "query": SEED, "note": "forced seed: harness-only deterministic override, not a semantic ranking; "
                                                                   "live Knowledge Catalog discovery is out of scope for this chain"}
+    if restricted:
+        out["requester"] = {"mode": "restricted-sa", "principal": SA_ALIAS,
+                            "note": "graph leg and receipt leg both under the restricted service account through a requester broker; "
+                                    "the operator's credential only grants, revokes and reads job identities",
+                            "cases": {k: {"seed": v["seed"], "policy": dict(v["policy"], hidden=list(v["policy"]["hidden"])), "expects": v["expects"]}
+                                      for k, v in RESTRICTED.items() if k in cases}}
+        out["verdict_rule"] = ("CHAIN_CONNECTED only when provenance pins hold before any case executes, every case is MET (reached its "
+                               "stage with its specific evidence: approved-restricted RELEASED; denied-intermediate seed visible, no path, "
+                               "no hidden id, CLI never invoked; unauthorized-output bound, authorization DENIED under the requester's "
+                               "credential, CLI never invoked; revocation-before-replay released once, then HIT_DENIED replay, authorization "
+                               "DENIED and REFUSED with the CLI invoked once) and, live, every submitted job (pointer lookup, retrieval, "
+                               "declaration, receipt) carries the SA's user_email (identity BOUND); CHAIN_INCOMPLETE when a case never "
+                               "reached its stage or the identity is UNKNOWN; CHAIN_BROKEN when a reached stage contradicts the expectation, "
+                               "a job carries another identity or a pin fails; hermetic runs prove the harness, not the platform")
     # SDK pin
     try:
         sdk_pub = sdk_publication(sdk_root)
     except (OSError, ValueError, KeyError) as e:
         out["sdk"] = _stage_error(e)
-        return _broken(out, "sdk", run_dir, out_dir, mode, redact, journal)
+        return _broken(out, "sdk", run_dir, out_dir, mode, redact, journal, tag)
     out["sdk"] = {"root": sdk_root, "head": sdk_pub["sdk_head"], "pin": SDK_PIN, "head_matches_pin": sdk_pub["sdk_head_matches_pin"],
                   "example_dirty": sdk_pub["sdk_dirty"], "repo_dirty": sdk_pub["sdk_repo_dirty"],
                   "publication_id": sdk_pub["manifest"]["publication_id"],
                   "computation_sha256": sdk_pub["computation_sha256"], "computation_digest": sdk_pub["computation_digest"],
+                  "dependencies": sdk_pub["dependencies"],
                   "synthetic_fixture": bool(sdk_pub["manifest"].get("synthetic")), "invocation": "subprocess run.py (no SDK source edits)"}
     out["sdk_publication"] = {"publication_id": sdk_pub["manifest"]["publication_id"], "context_ref": sdk_pub["manifest"]["context_ref"],
                               "computation_sha256": sdk_pub["computation_sha256"], "derived_from": sdk_pub["manifest"].get("derived_from"),
                               "note": "the SDK receipt example's fixture publication: a separate identity from the graph publication, joined only by bytes"}
     # clients + requester
-    if clients is None:
+    if engine == "oracle" and projection is None and not catalog and (clients is None or restricted):
+        from .compile import compile_bundle
+        projection = compile_bundle(acme_root, BUNDLE_ID, SOURCE_PIN)
+    if restricted:
+        if broker is None:
+            broker = HermeticBroker(projection) if not live else RestrictedBroker(engine, sdk_pub["dataset"], dependencies=sdk_pub["dependencies"])
+        out["requester"]["broker"] = broker.describe()
+        requester = requester or SA_ALIAS
+        try:
+            out["grant"] = broker.grant()   # before the pointer lookup: that job runs under the requester too
+        except Exception as e:  # noqa: BLE001 - a grant the platform refused blocks every case (nothing is invented)
+            out["grant"] = _stage_error(e); out["verdict"] = "CHAIN_INCOMPLETE"; out["broken_at"] = "grant"; out["cases"] = []
+            out["teardown"] = broker.teardown()
+            return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
+        clients = broker.graph_clients()
+    elif clients is None:
         if engine == "oracle" and not catalog:
-            from .compile import compile_bundle
-            projection = projection or compile_bundle(acme_root, BUNDLE_ID, SOURCE_PIN)
             from .oracle import Graph
             clients = {"engine": "oracle", "graph": Graph(projection), "projection": projection}
         elif engine == "oracle":
@@ -608,7 +787,9 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         except Exception as e:  # noqa: BLE001
             out["publication"] = _stage_error(e); pub = None
         if not pub:
-            return _broken(out, "publication", run_dir, out_dir, mode, redact, journal)
+            if restricted:
+                out["teardown"] = broker.teardown()
+            return _broken(out, "publication", run_dir, out_dir, mode, redact, journal, tag)
         prov = {"publication_pin": out["publication"]["matches_pin"], "sdk_head_pin": bool(sdk_pub["sdk_head_matches_pin"]),
                 "sdk_clean": sdk_pub["sdk_repo_dirty"] is False, "sdk_git_state_known": sdk_pub["sdk_repo_dirty"] is not None}
         out["graph_publication"] = {"bundle_id": BUNDLE_ID, "publication_id": pub, "source_pin": SOURCE_PIN,
@@ -618,11 +799,14 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     out["provenance"] = prov
     if not prov["ok"]:
         out["same_requester"] = {"status": "NOT_RUN", "reason": "provenance gate refused before any case executed"}
-        return _broken(out, "provenance", run_dir, out_dir, mode, redact, journal)
+        if restricted:
+            out["teardown"] = broker.teardown()
+        return _broken(out, "provenance", run_dir, out_dir, mode, redact, journal, tag)
 
-    def graph_leg(seed: Any, path: str) -> tuple[dict, Optional[dict], Optional[dict], Optional[dict]]:
+    def graph_leg(seed: Any, path: str, cl: Optional[dict] = None, hidden: tuple = ()) -> tuple[dict, Optional[dict], Optional[dict], Optional[dict]]:
+        cl = clients if cl is None else cl
         try:
-            r = governed(seed, pub, requester, as_of, clients)
+            r = governed(seed, pub, requester, as_of, cl)
         except Exception as e:  # noqa: BLE001 - e.g. GQL without an Enterprise window
             return {"retrieval": dict(_stage_error(e), seed=str(seed), reached=False)}, None, None, None
         rec = {"retrieval": {"seed": str(seed), "seed_origin": getattr(seed, "origin", "forced"), "status": r["status"],
@@ -630,6 +814,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                              "concepts": [c.get("concept") for c in r.get("concepts", [])],
                              "paths": r.get("paths", []), "computations": [c.get("path") for c in r.get("computations", [])],
                              "timing": r.get("timing")}}
+        rec["retrieval"]["hidden_id_in_full_result"] = [h for h in hidden if leaks(r, h)]   # the FULL answer the requester got, not this trimmed record
         comp = pick_computation(r, path) if r["status"] == "OK" else None
         if comp is None:
             rec["retrieval"]["reached"] = False
@@ -639,7 +824,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                                                         "runtime", "trust_tier", "freshness", "sql_sha256", "runtime_verdict")}
         rec["computation"]["sql_chars"] = len(comp.get("sql") or "")
         try:
-            decl = declaration(clients, comp["computation_id"], pub)
+            decl = declaration(cl, comp["computation_id"], pub)
         except Exception as e:  # noqa: BLE001
             decl = _stage_error(e)
         rec["declaration"] = decl
@@ -647,7 +832,8 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
 
     out["cases"] = []
     Path(receipt_dir).mkdir(parents=True, exist_ok=True)
-    for case in cases:
+
+    def operator_case(case: str) -> dict:
         if catalog:
             if case == "declaration-mismatch":
                 seed: Any = ConceptSeed(_node_id(pin.bundle_id, pub, "Concept", MISMATCH_SEED[len("forced:"):-3]), origin="injected-fixture-seed")
@@ -684,7 +870,85 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             c["receipt"] = {"invoked": False, "reason": "bind did not hold: nothing was executed"}
         c["consume"] = consume(c["bind"], c["receipt"])
         c["acceptance"] = accept(c)
-        out["cases"].append(c)
+        return c
+
+    def restricted_case(case: str) -> dict:
+        """One restricted-requester case: the broker applies the case's policy, the graph leg runs under the requester's
+        clients, a BOUND declaration is authorized under the requester's credential BEFORE the CLI is invoked, and the
+        revocation case then revokes, replays from cache and re-decides the consumer on the stored receipt."""
+        spec = RESTRICTED[case]
+        c: dict[str, Any] = {"case": case, "expected": EXPECTED[case], "attack": spec["attack"], "expects": spec["expects"],
+                             "policy": dict(spec["policy"], hidden=list(spec["policy"]["hidden"])), "hidden": list(spec["policy"]["hidden"]),
+                             "receipt_invocations": 0}
+        try:
+            c["grant"] = broker.apply(spec["policy"])
+        except Exception as e:  # noqa: BLE001 - the policy never took effect: the stage is unreached, not contradicted
+            c["grant"] = _stage_error(e)
+            c["retrieval"] = {"status": "NOT_RUN", "reached": False, "reason": "policy not applied"}
+            c["bind"] = {"status": "NOT_REACHED", "reason": "policy_not_applied"}
+            c["authorization"] = {"status": "NOT_RUN", "reason": "policy not applied"}
+            c["receipt"] = {"invoked": False, "reason": "policy not applied: nothing was executed"}
+            c["consume"] = consume(c["bind"], c["receipt"])
+            c["acceptance"] = accept(c)
+            return c
+        cc = broker.graph_clients()
+        leg, comp, decl, _full = graph_leg(spec["seed"], COMPUTATION_PATH, cc, hidden=spec["policy"]["hidden"])
+        c.update(leg)
+        r = c["retrieval"]
+        if not r.get("reached"):
+            c["bind"] = {"status": "NOT_REACHED",
+                         "reason": "retrieval_denied" if r.get("status") in ("OK", "DENIED") else "retrieval_error",
+                         "detail": ("governed retrieval returned no authorized path to the computation (seed visible, status OK)" if r.get("status") == "OK"
+                                    else f"governed retrieval status {r.get('status')}")}
+        elif decl is None or decl.get("status") != "OK":
+            c["bind"] = {"status": "NOT_BOUND", "reason": "declaration not visible"}
+        else:
+            c["bind"] = bind(comp, decl, sdk_pub, as_of)
+        if c["bind"]["status"] == "BOUND":
+            c["authorization"] = broker.authorize(sdk_pub["dependencies"])
+            if c["authorization"]["status"] == ALLOWED:
+                c["receipt"] = run_receipt("approved", sdk_root, receipt_dir, live, runner=runner, env_extra=broker.receipt_env(), label=case)
+                c["receipt"]["diag"] = None if c["receipt"].get("diag") is None else f"see {c['receipt']['diag_path']}"
+                c["receipt_invocations"] = 1
+            else:
+                c["receipt"] = {"invoked": False, "reason": f"authorization {c['authorization']['status']} under the requester's credential: nothing was executed"}
+        else:
+            c["authorization"] = {"status": "NOT_RUN", "reason": "nothing bound: no dependency to authorize"}
+            c["receipt"] = {"invoked": False, "reason": f"bind {c['bind']['status']}: nothing was executed"}
+        az = c["authorization"] if c["authorization"].get("status") in (ALLOWED, DENIED, "UNKNOWN") else None
+        c["consume"] = consume(c["bind"], c["receipt"], az)
+        if case == "revocation-before-replay":
+            c["first_pass"] = {"decision": c["consume"]["decision"], "reasons": c["consume"]["reasons"],
+                               "cache": (r.get("scope") or {}).get("cache"), "authorization": c["authorization"].get("status"),
+                               "receipt_verdict": (c["receipt"].get("output") or {}).get("verdict") if c["receipt"].get("invoked") else None}
+            try:
+                c["revocation"] = broker.revoke()
+            except Exception as e:  # noqa: BLE001
+                c["revocation"] = dict(_stage_error(e), observed=False)
+            rp: dict[str, Any] = {"note": "same request, same requester, same case-private cache; the stored receipt is re-decided, never re-executed"}
+            try:
+                r2 = governed(spec["seed"], pub, requester, as_of, cc)
+                rp["retrieval"] = {"status": r2["status"], "cache": (r2.get("scope") or {}).get("cache"), "warnings": r2.get("warnings", []),
+                                   "concepts": [x.get("concept") for x in r2.get("concepts", [])], "paths": r2.get("paths", []),
+                                   "computations": [x.get("path") for x in r2.get("computations", [])],
+                                   "disclosed_anything": bool(r2.get("concepts") or r2.get("paths") or r2.get("computations")),
+                                   "timing": r2.get("timing")}   # the re-check job belongs to the identity set (job_ids_of)
+            except Exception as e:  # noqa: BLE001
+                rp["retrieval"] = dict(_stage_error(e), reached=False)
+            rp["authorization"] = broker.authorize(sdk_pub["dependencies"])
+            rp["consume"] = consume(c["bind"], c["receipt"], rp["authorization"])
+            c["replay"] = rp
+            c["consume"] = rp["consume"]   # the case's decision is the replay's: a release here is the failure the case exists to catch
+        c["acceptance"] = accept(c)
+        return c
+
+    try:
+        for case in cases:
+            out["cases"].append(restricted_case(case) if restricted else operator_case(case))
+    finally:
+        if restricted:
+            out["teardown"] = broker.teardown()
+            out["broker_journal"] = list(getattr(broker, "journal", []))
     out["decisions"] = {c["case"]: c["consume"]["decision"] for c in out["cases"]}
     out["acceptance"] = {c["case"]: c["acceptance"]["status"] for c in out["cases"]}
     ids = job_ids_of(out["cases"], pointer_job_id, journal.job_ids())
@@ -692,30 +956,47 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     out["job_inventory"] = {"graph": ids["graph"], "receipt": [j.get("job_id") for j in ids["receipt"]],
                             "refs": {k: {"project": v[0], "location": v[1]} for k, v in refs.items()},
                             "journal": journal.summary(), "note": "every submitted job once, including empty/failed lookups; roles and (project, location, job_id) in journal.jsonl"}
-    if live:
-        out["same_requester"] = same_requester(clients.get("bq"), ids["graph"], ids["receipt"], refs=refs) if clients.get("bq") is not None \
-            else {"status": "UNKNOWN", "reason": "no BigQuery client"}
-    else:
-        out["same_requester"] = {"status": "NOT_APPLICABLE", "reason": "hermetic mode: oracle graph + SDK SYNTHETIC emulation submit no BigQuery jobs"}
     statuses = [c["acceptance"]["status"] for c in out["cases"]]
     unresolved = journal.unresolved()
     out["job_inventory"]["unresolved"] = [{"seq": e["seq"], "role": e["role"], "job_id": e.get("job_id"), "state": e["state"], "error": e.get("error")} for e in unresolved]
-    if any(s == "WRONG" for s in statuses) or (live and out["same_requester"]["status"] == "DIFFERENT"):
+    if restricted:
+        out["identity"] = broker.identity(ids["graph"], ids["receipt"])
+        out["identity"]["job_set"] = {"graph": len(ids["graph"]), "receipt": len(ids["receipt"]), "pointer_lookup_included": pointer_job_id is not None,
+                                      "replay_jobs_included": True}
+        if out["identity"]["status"] == "NOT_APPLICABLE":
+            out["identity"]["job_set"]["note"] = ("counts are the SDK emulation's synthetic receipt ids (okf_rcpt_…); no BigQuery job exists in "
+                                                  "hermetic mode, so there is no identity to read")
+        out["receipt_launches"] = {"chain_counted": sum(c.get("receipt_invocations", 0) for c in out["cases"]),
+                                   "broker_counted": getattr(broker, "receipt_launches", None)}
+        out["same_requester"] = {"status": "NOT_APPLICABLE", "reason": "restricted-sa mode: the identity claim is `identity` (every job bound to the SA)"}
+        ident_broken = live and out["identity"]["status"] == "UNBOUND"
+        ident_incomplete = live and out["identity"]["status"] != "BOUND"
+        fallback_at = "identity"
+    else:
+        if live:
+            out["same_requester"] = same_requester(clients.get("bq"), ids["graph"], ids["receipt"], refs=refs) if clients.get("bq") is not None \
+                else {"status": "UNKNOWN", "reason": "no BigQuery client"}
+        else:
+            out["same_requester"] = {"status": "NOT_APPLICABLE", "reason": "hermetic mode: oracle graph + SDK SYNTHETIC emulation submit no BigQuery jobs"}
+        ident_broken = live and out["same_requester"]["status"] == "DIFFERENT"
+        ident_incomplete = live and out["same_requester"]["status"] != "SAME"
+        fallback_at = "same_requester"
+    if any(s == "WRONG" for s in statuses) or ident_broken:
         out["verdict"] = "CHAIN_BROKEN"
-    elif any(s == "NOT_REACHED" for s in statuses) or (live and out["same_requester"]["status"] != "SAME") or unresolved:
+    elif any(s == "NOT_REACHED" for s in statuses) or ident_incomplete or unresolved:
         out["verdict"] = "CHAIN_INCOMPLETE"      # a job whose server state was never verified leaves the inventory unproven
     else:
         out["verdict"] = "CHAIN_CONNECTED"
     if out["verdict"] != "CHAIN_CONNECTED":
         out["broken_at"] = next((c["case"] for c in out["cases"] if c["acceptance"]["status"] == "WRONG"),
                                 next((c["case"] for c in out["cases"] if c["acceptance"]["status"] == "NOT_REACHED"),
-                                     "unresolved_jobs" if unresolved else "same_requester"))
-    return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal)
+                                     "unresolved_jobs" if unresolved else fallback_at))
+    return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
 
 
-def _finish(out: dict, out_dir: str, mode: str, redact: Callable, run_dir: Optional[str] = None, journal: Optional[Journal] = None) -> dict:
-    """Publish the record: atomically to `chain_<mode>.json` (last writer wins, but it references only its own run
-    directory) and as a retained copy inside the run directory. Early refusals get the same retained final record."""
+def _finish(out: dict, out_dir: str, mode: str, redact: Callable, run_dir: Optional[str] = None, journal: Optional[Journal] = None, tag: str = "") -> dict:
+    """Publish the record: atomically to `chain_<mode>[_restricted].json` (last writer wins, but it references only its
+    own run directory) and as a retained copy inside the run directory. Early refusals get the same retained final record."""
     out["finished_at"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
     if journal is not None:
         out["journal"] = journal.record()
@@ -724,7 +1005,7 @@ def _finish(out: dict, out_dir: str, mode: str, redact: Callable, run_dir: Optio
     out = redact(out)
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     text = json.dumps(out, indent=1, sort_keys=True, default=str) + "\n"
-    final = Path(out_dir) / f"chain_{mode}.json"
+    final = Path(out_dir) / f"chain_{mode}{tag}.json"
     tmp = final.with_name(f".{final.name}.{out.get('run_id', 'norun')}.tmp")
     tmp.write_text(text, encoding="utf-8")
     os.replace(tmp, final)
@@ -741,7 +1022,10 @@ def _mock_reader_from_file(path: str) -> Any:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    ap = argparse.ArgumentParser(description="connected graph -> receipt chain (fixture or Catalog seed; same requester)")
+    ap = argparse.ArgumentParser(description="connected graph -> receipt chain (fixture or Catalog seed; operator or restricted requester)")
+    ap.add_argument("--requester", choices=("operator", "restricted"), default="operator",
+                    help="operator (default): both legs under the operator's ADC; restricted: both legs under sa:okf-receipt-restricted "
+                         "through the requester broker (hermetic: policy emulation; live: IAM impersonation), four restricted cases")
     ap.add_argument("--hermetic", action="store_true", help="oracle graph engine + SDK synthetic emulation (default)")
     ap.add_argument("--live", action="store_true", help="published tables under ADC + SDK --live (real BigQuery jobs)")
     ap.add_argument("--engine", choices=("oracle", "fallback", "gql"), default=None,
@@ -764,6 +1048,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     if not live and a.engine not in (None, "oracle"):
         ap.error("--engine other than oracle requires --live")
     engine = (a.engine or "fallback") if live else "oracle"
+    if a.requester == "restricted" and a.seed_mode == "catalog":
+        ap.error("--requester restricted with --seed-mode catalog is not a mode in Slice A: the restricted broker runs the fixture seed")
     out_dir = a.out or ("evidence/catalog-chain" if a.seed_mode == "catalog" else "evidence/chain")
     reader, cfg, store = None, None, None
     if a.seed_mode == "catalog":
@@ -787,7 +1073,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     elif a.catalog_group or a.catalog_entry or a.catalog_responses:
         ap.error("--catalog-* flags need --seed-mode catalog")
     out = run_chain(engine=engine, live=live, sdk_root=a.sdk_root, out_dir=out_dir, as_of=a.as_of, acme_root=a.acme_root,
-                    seed_mode=a.seed_mode, catalog_reader=reader, catalog_cfg=cfg, store=store)
+                    seed_mode=a.seed_mode, catalog_reader=reader, catalog_cfg=cfg, store=store, requester_mode=a.requester)
     for c in out.get("cases", []):
         rec = c.get("receipt") or {}
         rv = (rec.get("output") or {}).get("verdict", "NOT_INVOKED") if rec.get("invoked") else "NOT_INVOKED"
@@ -795,8 +1081,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         pl = f" payload={c['payload']['status']:12s}" if c.get("payload") else ""
         print(f"{c['case']:22s}{pl} bind={c.get('bind', {}).get('status'):9s} receipt={rv:13s} consume={c['consume']['decision']:8s} "
               f"acceptance={acc.get('status')}" + (f" failed={'; '.join(acc.get('failed', []))[:200]}" if acc.get("failed") else ""))
+    ident = f"identity={out['identity']['status']}" if "identity" in out else f"same_requester={out.get('same_requester', {}).get('status')}"
     print(f"seed_mode={out['seed'].get('mode')} seed_status={out['seed'].get('status', 'fixture')} publication={out.get('publication', {}).get('status')} "
-          f"provenance_ok={out.get('provenance', {}).get('ok')} same_requester={out.get('same_requester', {}).get('status')} "
+          f"provenance_ok={out.get('provenance', {}).get('ok')} {ident} requester={out.get('requester', {}).get('mode')} "
           f"engine={out['engine']} mode={out['mode']} sdk_head={str(out.get('sdk', {}).get('head'))[:7]} run_dir={out.get('run_dir')}")
     print(f"verdict={out['verdict']}" + (f" broken_at={out.get('broken_at')}" if out['verdict'] != 'CHAIN_CONNECTED' else ""))
     return 0 if out["verdict"] == "CHAIN_CONNECTED" else 1

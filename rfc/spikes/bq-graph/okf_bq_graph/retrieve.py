@@ -400,7 +400,8 @@ def _retrieve_oracle(query, bundle_id, publication_id, as_of, clients, top_k, sc
             return _denied("requested publication is not retained by this engine", scope, timer, "NO_PUBLICATION")
     else:
         g = clients["graph"] if "graph" in clients else Graph(clients["projection"])
-    if publication_id == "active":
+    pinned = publication_id != "active"           # an unpinned request is never cached (PR 40)
+    if not pinned:
         scope["publication_id"] = publication_id = g.publication_id
     if g.bundle_id != bundle_id or g.publication_id != publication_id:
         return _denied(f"engine holds {g.bundle_id}|{g.publication_id}, not the requested scope", scope, timer, "NO_PUBLICATION")
@@ -415,7 +416,31 @@ def _retrieve_oracle(query, bundle_id, publication_id, as_of, clients, top_k, sc
         forced = True
     else:
         return _denied("oracle engine supports forced or concept seeds only (no vectors)", scope, timer, "NO_SEED")
+    # cached replay under the BigQuery engines' `_cache_dependencies` / `_recheck` contract (PR 40): the entry carries every node
+    # and edge the answer depends on (walk, SQL section, verifications, provenance, context), a hit is served only after
+    # the graph re-confirms all of them by scoped id (principal.PolicyGraph answers under the current policy), an answer
+    # whose dependencies cannot be established is never stored (BYPASS_INCOMPLETE_DEPENDENCIES), and a graph without a
+    # re-check, a failed one, a stale dependency version or an unpinned publication is never served from cache.
+    # A Catalog concept seed never fills or replays a cache (plan KTD6), on this engine as on the BigQuery ones.
+    cache = clients.get("cache")
+    if isinstance(query, ConceptSeed) and cache is not None:
+        cache = None
+        scope["cache"] = CACHE_DISABLED_CONCEPT_SEED
+    ckey = (_cache_key("oracle", bundle_id, publication_id, scope["requester"], str(query), as_of, top_k)
+            if cache is not None and pinned else None)
+    if ckey is not None and ckey in cache:
+        cached = cache[ckey]
+        if cached.get("dependency_version") == CACHE_DEPENDENCY_VERSION:
+            visible = getattr(g, "visible", None)
+            if visible is not None and visible(cached["disclosed_ids"], cached["disclosed_edge_ids"]):
+                out = _refresh(json.loads(json.dumps(cached["result"])), as_of)
+                out["scope"] = dict(out["scope"], cache="HIT_RECHECKED"); out["timing"] = timer.done()
+                return out
+            return _denied("cached replay: current authorization check failed or unknown", dict(scope, cache="HIT_DENIED"), timer)
+        cache.pop(ckey, None)
     r = g.governed(local, as_of)
+    if r["status"] == "DENIED":   # the policy-emulating graph's Forbidden
+        return _denied("authorization error: policy denied (oracle emulation)", scope, timer)
     if r["status"] != "OK":
         return _denied("seed not found", scope, timer, "NO_SEED")
     cid = _node_id(bundle_id, publication_id, "Concept", r["concept"])
@@ -423,14 +448,23 @@ def _retrieve_oracle(query, bundle_id, publication_id, as_of, clients, top_k, sc
                                  "freshness", "provenance", "replacement")}
     concept.update({"concept_id": cid, "matched_sections": [], "forced": forced,
                     "seed_origin": query.origin if isinstance(query, ConceptSeed) else "forced"})
+    deps = r.get("dependencies")   # the authorizing nodes and edges stay in the cache entry, not the answer (PR 40)
     comps = []
     for c in r["computations"]:
         comp_id = _node_id(bundle_id, publication_id, "Concept", c["concept"])
         sq = g.sanctioned_sql(comp_id)
         comps.append(dict(c, seed=r["concept"], computation_id=comp_id, section_id=sq["section_id"] if sq else None))
-    return {"status": "OK", "concepts": [concept], "paths": [dict(p, seed=r["concept"]) for p in r["paths"]],
-            "computations": comps, "warnings": [seed_warning, "ORACLE engine: in-process reference, not BigQuery"],
-            "scope": scope, "timing": timer.done()}
+    out = {"status": "OK", "concepts": [concept], "paths": [dict(p, seed=r["concept"]) for p in r["paths"]],
+           "computations": comps, "warnings": [seed_warning, "ORACLE engine: in-process reference, not BigQuery"],
+           "scope": scope, "timing": timer.done()}
+    if ckey is not None:
+        if deps is None:
+            out["scope"] = dict(out["scope"], cache="BYPASS_INCOMPLETE_DEPENDENCIES")
+            return out
+        cache[ckey] = {"dependency_version": CACHE_DEPENDENCY_VERSION, "disclosed_ids": deps["node_ids"], "disclosed_edge_ids": deps["edge_ids"],
+                       "result": json.loads(json.dumps(out, default=str))}
+        out["scope"] = dict(out["scope"], cache="MISS_STORED")
+    return out
 
 
 def impact(target: str, bundle_id: str, publication_id: str, requester: Any, clients: dict, max_depth: int = 6) -> dict:
