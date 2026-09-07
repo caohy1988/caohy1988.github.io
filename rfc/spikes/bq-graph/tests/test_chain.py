@@ -595,3 +595,329 @@ def test_chain_record_is_also_retained_inside_its_run_dir(clients, projection, s
     own = tmp_path / "receipt" / out["run_id"] / "chain_hermetic.json"
     assert own.exists() and json.loads(own.read_text())["run_id"] == out["run_id"]
     assert json.loads((tmp_path / "chain_hermetic.json").read_text()) == json.loads(own.read_text())
+
+
+# =============================================================================== Catalog-seeded mode (2026-09-06, plan U3)
+import okf_bq_graph.catalog as C
+from okf_bq_graph.journal import Journal
+from okf_bq_graph.publication import ProjectionStore
+from okf_bq_graph.seed import ConceptSeed
+
+CCFG = C.CatalogConfig()
+
+
+def _pin_entry(projection, **overrides):
+    base = dict(publication_id=projection["publication_id"], source_manifest_sha256=projection["source_manifest_sha256"],
+                concept_id=f"acme_retail|{projection['publication_id']}|Concept|metrics/gross-margin",
+                concept_file_sha256=next(m["sha256"] for m in projection["source_manifest"] if m["path"] == "metrics/gross-margin.md"))
+    return C.sample_entry(**dict(base, **overrides))
+
+
+def _reader(projection, **overrides):
+    return C.MockReader(C.mock_pages([f"{CCFG.group}/entries/other/{i}" for i in range(6)] + [CCFG.entry], 4), {CCFG.entry: _pin_entry(projection, **overrides)})
+
+
+@pytest.fixture
+def p2(sample_root, tmp_path_factory):
+    import shutil
+    root = tmp_path_factory.mktemp("p2_chain") / "acme_retail"
+    shutil.copytree(sample_root, root)
+    policy = root / "policies" / "revenue-recognition.md"
+    policy.write_text(policy.read_text(encoding="utf-8") + "\n\n# Revision note\n\nFY2027 review scheduled.\n", encoding="utf-8")
+    return compile_bundle(str(root), "acme_retail", SOURCE_PIN + "+local.fedcba9876543210")
+
+
+def _store(projection, head=None, p2=None):
+    s = ProjectionStore(journal=None)
+    s.add(projection)
+    if p2 is not None:
+        s.add(p2)
+    s.set_head("acme_retail", head or projection["publication_id"])
+    return s
+
+
+def _run_catalog(projection, sdk_root, tmp_path, sample_root, reader=None, store=None, live=False, engine="oracle", **kw):
+    return CH.run_chain(engine=engine, live=live, sdk_root=sdk_root, out_dir=str(tmp_path), requester="t", as_of=AS_OF,
+                        seed_mode="catalog", catalog_reader=reader if reader is not None else _reader(projection),
+                        store=store if store is not None else _store(projection), acme_root=sample_root, **kw)
+
+
+def test_catalog_mock_chain_end_to_end(projection, sdk_root, tmp_path, sample_root):
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root)
+    assert out["chain"] == CH.CHAIN_VERSION and out["seed"]["mode"] == "catalog-mock" and out["seed"]["status"] == "OK"
+    assert "not a live Catalog read" in out["seed"]["note"]
+    assert out["publication"]["status"] == "OK" and out["publication"]["head"]["matches_pin"] is True
+    assert out["source"]["status"] == "OK" and out["provenance"]["ok"] and out["provenance"]["source_verified"]
+    assert out["source_pin"] == out["seed"]["pin"]["source_pin"] == SOURCE_PIN
+    cases = {c["case"]: c for c in out["cases"]}
+    for name, c in cases.items():
+        assert c["payload"]["status"] == "CONSISTENT", (name, c["payload"].get("failed"))
+        assert c["retrieval"]["seed"].startswith("concept:acme_retail|") and "forced:" not in c["retrieval"]["seed"]
+    assert cases["approved"]["retrieval"]["seed_origin"] == "catalog-mock" and cases["approved"]["consume"]["decision"] == "RELEASED"
+    assert cases["sql-substitution"]["consume"]["decision"] == "REFUSED" and "sql_mismatch" in cases["sql-substitution"]["receipt"]["output"]["reason_codes"]
+    dm = cases["declaration-mismatch"]
+    assert dm["retrieval"]["seed_origin"] == "injected-fixture-seed" and "not a Catalog discovery" in dm["attack"]
+    assert dm["bind"]["status"] == "MISMATCH" and dm["receipt"]["invoked"] is False and dm["consume"]["decision"] == "REFUSED"
+    assert out["acceptance"] == {"approved": "MET", "sql-substitution": "MET", "declaration-mismatch": "MET"}
+    assert out["verdict"] == "CHAIN_CONNECTED"
+    # separate graph / SDK publication identities; the bind uses the validated pin, not the module constant
+    assert out["graph_publication"]["publication_id"] == projection["publication_id"] != out["sdk_publication"]["publication_id"]
+    assert out["graph_publication"]["source_manifest_sha256"] == projection["source_manifest_sha256"]
+    sp = cases["approved"]["bind"]["checks"]["source_pin"]
+    assert sp["ok"] and sp["graph"] == out["seed"]["pin"]["source_pin"] and sp["sdk"].endswith("@ " + SOURCE_PIN) and "not a Git attestation" in sp["note"]
+    # run-owned evidence under the catalog namespace: raw Catalog responses, journal, receipt diagnostics, final record
+    run_dir = Path(out["run_dir"])
+    assert run_dir == tmp_path / out["run_id"] and (run_dir / "journal.jsonl").exists() and (run_dir / "chain_hermetic.json").exists()
+    assert {p.name for p in (run_dir / "catalog").iterdir()} == {"catalog_list_0.json", "catalog_list_1.json", "catalog_entry.json"}
+    assert Path(cases["approved"]["receipt"]["diag_path"]).parent == run_dir / "receipt"
+    roles = [j["role"] for j in out["journal"]["jobs"]]
+    assert roles[:3] == ["pin_resolution", "seed_visibility", "observed_head"]
+    assert roles.count("payload_rows") == 3 and roles.count("chain_declaration") == 3 and out["journal"]["summary"]["unresolved"] == 0
+    assert out["job_inventory"]["journal"]["actual_jobs"] == 0          # hermetic store: no BigQuery job identities to claim
+    written = json.loads((tmp_path / "chain_hermetic.json").read_text())
+    assert written["run_id"] == out["run_id"] and "writer@example.test" not in json.dumps(written)   # aspect principal redacted
+
+
+def test_catalog_p1_is_served_while_head_is_p2(projection, p2, sdk_root, tmp_path, sample_root):
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, store=_store(projection, head=p2["publication_id"], p2=p2))
+    assert out["verdict"] == "CHAIN_CONNECTED" and out["publication"]["head"]["publication_id"] == p2["publication_id"]
+    assert out["publication"]["head"]["matches_pin"] is False and out["publication"]["publication_id"] == projection["publication_id"]
+    for c in out["cases"]:
+        assert c["retrieval"]["scope"]["publication_id"] == projection["publication_id"]
+        assert c["payload"]["status"] == "CONSISTENT"
+
+
+@pytest.mark.parametrize("mutate, reasons", [
+    (lambda s, p: s.set_status(p["publication_id"], "WITHDRAWN"), ["PUBLICATION_NOT_READY:WITHDRAWN"]),
+    (lambda s, p: s.remove(p["publication_id"]), ["PUBLICATION_MISSING", "SEED_MISSING"]),
+])
+def test_catalog_stale_pin_never_becomes_head_or_fixture(projection, p2, sdk_root, tmp_path, sample_root, mutate, reasons):
+    calls = []
+    store = _store(projection, head=p2["publication_id"], p2=p2)
+    mutate(store, projection)
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, store=store, runner=lambda argv, **k: calls.append(argv))
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "publication" and out["cases"] == [] and calls == []
+    assert out["publication"]["status"] == "FAIL_STALE" and out["publication"]["reasons"] == reasons
+    assert out["publication"]["head"]["publication_id"] == p2["publication_id"]       # observed, not served
+    assert out["publication"]["publication_id"] == projection["publication_id"]
+    assert (Path(out["run_dir"]) / "chain_hermetic.json").exists()                     # early refusal keeps its final record
+    states = [j["state"] for j in out["journal"]["jobs"]]
+    assert states and all(j["terminal"] for j in out["journal"]["jobs"]) and ("EMPTY" in states or "DONE" in states)
+
+
+@pytest.mark.parametrize("override, status", [
+    ({"concept_id": "acme_retail|pub_0000000000000000|Concept|metrics/gross-margin"}, "INVALID_PIN"),
+    ({"runtime_dataset": "somewhere_else"}, "SCOPE_REFUSED"),
+    ({"runtime_contract": "graph-spike-v9"}, "UNSUPPORTED_CONTRACT"),
+])
+def test_catalog_invalid_pin_refuses_before_any_store_read_or_sdk_call(projection, sdk_root, tmp_path, sample_root, override, status):
+    calls = []
+    store = _store(projection)
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, reader=_reader(projection, **override), store=store,
+                       runner=lambda argv, **k: calls.append(argv))
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "seed" and out["cases"] == [] and calls == []
+    assert out["seed"]["status"] == status and out["seed"]["mode"] == "catalog-mock" and "publication" not in out
+    assert out["journal"]["jobs"] == []                                   # no store read happened
+    assert {r["name"] for r in out["journal"]["retained"]} >= {"catalog_entry"}
+    assert (Path(out["run_dir"]) / "chain_hermetic.json").exists()
+
+
+def test_catalog_read_failure_is_blocked_not_a_pass(projection, sdk_root, tmp_path, sample_root):
+    rd = C.MockReader([(403, {"error": {"code": 403, "message": "denied"}})], {})
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, reader=rd, runner=lambda argv, **k: (_ for _ in ()).throw(AssertionError("no")))
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "seed" and out["seed"]["status"] == "CATALOG_ERROR" and out["seed"]["http_status"] == 403
+
+
+def test_catalog_reader_mode_gates(projection, sdk_root, tmp_path, sample_root):
+    class Sess:
+        def request(self, *a, **k):
+            raise AssertionError("hermetic mode must never send")
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, reader=C.HttpReader(session=Sess()))
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "seed" and out["seed"]["status"] == "READER_REFUSED"
+    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "fallback", "bq": object()},
+                       requester="t", as_of=AS_OF, seed_mode="catalog", catalog_reader=_reader(projection),
+                       runner=lambda *a, **k: (_ for _ in ()).throw(AssertionError("must not run")))
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "seed" and out["seed"]["status"] == "READER_REFUSED"
+    assert "mock" in out["seed"]["reason"]
+    with pytest.raises(ValueError):
+        CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), seed_mode="catalog")
+    with pytest.raises(ValueError):
+        CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), seed_mode="vector")
+
+
+def test_catalog_hermetic_without_a_store_is_refused(projection, sdk_root, tmp_path, sample_root):
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), requester="t", as_of=AS_OF,
+                       seed_mode="catalog", catalog_reader=_reader(projection), acme_root=sample_root)
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "publication" and out["publication"]["status"] == "ERROR"
+
+
+def test_catalog_source_unverified_refuses_before_cases(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    import okf_bq_graph.publication as PUB
+    monkeypatch.setattr(PUB, "_git", lambda root, *a: None)
+    calls = []
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, runner=lambda argv, **k: calls.append(argv))
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "source" and out["source"]["status"] == "SOURCE_UNVERIFIED" and calls == []
+
+
+def test_catalog_mixed_payload_is_refused_before_the_sdk(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    real = CH.governed
+    calls = []
+
+    def tampered(seed, *a, **k):
+        r = real(seed, *a, **k)
+        if isinstance(seed, ConceptSeed) and seed.origin == "catalog-mock" and r["status"] == "OK":
+            for c in r["computations"]:          # SQL changed under unchanged P1 labels and digest
+                c["sql"] = c["sql"].replace("payment_fee", "0 * payment_fee")
+        return r
+
+    monkeypatch.setattr(CH, "governed", tampered)
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, runner=lambda argv, **k: calls.append(argv))
+    cases = {c["case"]: c for c in out["cases"]}
+    assert calls == []                                                        # no SDK execution on an inconsistent payload
+    for name in ("approved", "sql-substitution"):
+        c = cases[name]
+        assert c["payload"]["status"] == "INCONSISTENT" and "computations" in c["payload"]["failed"]
+        assert c["bind"]["status"] == "NOT_BOUND" and c["receipt"]["invoked"] is False and c["consume"]["decision"] == "REFUSED"
+        assert c["acceptance"]["status"] == "WRONG" and any("payload INCONSISTENT" in f for f in c["acceptance"]["failed"])
+    assert cases["declaration-mismatch"]["payload"]["status"] == "CONSISTENT"      # the injected seed was not tampered
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "approved"
+
+
+def test_catalog_declaration_changed_after_preflight_is_refused(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    real = CH.declaration
+    monkeypatch.setattr(CH, "declaration", lambda clients, cid, pub: dict(real(clients, cid, pub), file_sha256="a" * 64))
+    calls = []
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, runner=lambda argv, **k: calls.append(argv))
+    assert calls == [] and out["verdict"] == "CHAIN_BROKEN"
+    assert all(c["payload"]["status"] == "INCONSISTENT" and "declaration" in c["payload"]["failed"] for c in out["cases"])
+
+
+def test_catalog_payload_guard_cannot_be_bypassed_by_labels(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    """If the guard were skipped, the tampered approved leg would bind and execute: prove the run only connects with it."""
+    import okf_bq_graph.publication as PUB
+    real_verify = CH.verify_payload
+    monkeypatch.setattr(CH, "verify_payload", lambda *a, **k: dict(real_verify(*a, **k), status="CONSISTENT", failed=[]))
+    real = CH.governed
+    monkeypatch.setattr(CH, "governed", lambda seed, *a, **k: (lambda r: ([c.__setitem__("sql", c["sql"] + "\n-- x") for c in r.get("computations", [])], r)[1])(real(seed, *a, **k)))
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root)
+    assert {c["case"]: c["bind"]["status"] for c in out["cases"]}["approved"] == "MISMATCH"    # the SDK bind still catches SQL bytes ...
+    assert out["verdict"] == "CHAIN_BROKEN"
+    # ... but a non-computation corruption is caught only by the guard
+    monkeypatch.setattr(CH, "governed", real)
+    store = _store(projection)
+    sec = next(n for n in store.nodes[projection["publication_id"]] if n["kind"] == "Section" and n["local_id"].startswith("policies/margin-standard#"))
+    store.tamper_node(projection["publication_id"], sec["node_id"], text="corrupted")
+    bypassed = _run_catalog(projection, sdk_root, tmp_path, sample_root, store=store)
+    assert bypassed["verdict"] == "CHAIN_CONNECTED"                                   # guard bypassed: corruption released
+    monkeypatch.setattr(CH, "verify_payload", real_verify)
+    guarded = _run_catalog(projection, sdk_root, tmp_path, sample_root, store=_store(projection))
+    assert guarded["verdict"] == "CHAIN_CONNECTED"
+    store2 = _store(projection); store2.tamper_node(projection["publication_id"], sec["node_id"], text="corrupted")
+    guarded_bad = _run_catalog(projection, sdk_root, tmp_path, sample_root, store=store2)
+    assert guarded_bad["verdict"] == "CHAIN_BROKEN" and all(c["payload"]["status"] == "INCONSISTENT" for c in guarded_bad["cases"])
+    assert all("section_text_hashes" in c["payload"]["failed"] for c in guarded_bad["cases"])
+
+
+def test_catalog_outage_on_approved_is_not_reached(projection, sdk_root, tmp_path, sample_root):
+    def runner(argv, **kw):
+        if "approved" in argv:
+            return subprocess.CompletedProcess(argv, 1, stdout="", stderr="Traceback: simulated crash")
+        return subprocess.run(argv, **kw)
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, runner=runner)
+    assert out["acceptance"] == {"approved": "NOT_REACHED", "sql-substitution": "MET", "declaration-mismatch": "MET"}
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "approved"
+
+
+def test_catalog_unknown_store_read_is_blocked(projection, sdk_root, tmp_path, sample_root):
+    store = _store(projection)
+    store.rows = lambda *a, **k: (_ for _ in ()).throw(ConnectionError("simulated outage on payload rows"))
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, store=store, runner=lambda argv, **k: (_ for _ in ()).throw(AssertionError("no")))
+    assert all(c["payload"]["status"] == "ERROR" and c["acceptance"]["status"] == "NOT_REACHED" for c in out["cases"])
+    assert out["verdict"] == "CHAIN_INCOMPLETE"
+
+
+def test_catalog_two_overlapping_runs_and_an_early_refusal_keep_their_own_evidence(projection, sdk_root, tmp_path, sample_root):
+    inner = {}
+
+    def runner_a(argv, **kw):
+        if "sql-substitution" in argv and "rec" not in inner:
+            inner["rec"] = _run_catalog(projection, sdk_root, tmp_path, sample_root)
+            inner["refused"] = _run_catalog(projection, sdk_root, tmp_path, sample_root, reader=_reader(projection, runtime_contract="nope"))
+        return subprocess.run(argv, **kw)
+
+    a = _run_catalog(projection, sdk_root, tmp_path, sample_root, runner=runner_a)
+    b, r = inner["rec"], inner["refused"]
+    assert a["verdict"] == b["verdict"] == "CHAIN_CONNECTED" and r["verdict"] == "CHAIN_BROKEN"
+    assert len({a["run_id"], b["run_id"], r["run_id"]}) == 3
+    for out in (a, b):
+        for c in out["cases"]:
+            rec = c["receipt"]
+            if rec.get("invoked"):
+                dp = Path(rec["diag_path"])
+                assert dp.parent == Path(out["run_dir"]) / "receipt"
+                assert json.loads(dp.read_text())["request_id"] == rec["request_id"] == rec["receipt"]["request_id"]
+                assert CH.sha256_hex(dp.read_bytes()) == rec["diag_sha256"]
+        for kept in out["journal"]["retained"]:
+            assert Path(kept["path"]).parent.parent == Path(out["run_dir"]) and CH.sha256_hex(Path(kept["path"]).read_bytes()) == kept["sha256"]
+    assert Path(r["run_dir"]).is_dir() and (Path(r["run_dir"]) / "chain_hermetic.json").exists() and json.loads((Path(r["run_dir"]) / "chain_hermetic.json").read_text())["run_id"] == r["run_id"]
+    ids_a = {c["receipt"]["request_id"] for c in a["cases"] if c["receipt"].get("invoked")}
+    ids_b = {c["receipt"]["request_id"] for c in b["cases"] if c["receipt"].get("invoked")}
+    assert ids_a and ids_b and not (ids_a & ids_b)
+    final = json.loads((tmp_path / "chain_hermetic.json").read_text())
+    assert final["run_id"] == a["run_id"] and final["run_dir"] == a["run_dir"]
+
+
+def test_job_ids_of_includes_journal_and_payload_jobs():
+    cases = [{"case": "approved", "retrieval": {"timing": {"jobs": [{"job_id": "w"}]}}, "declaration": {"job_id": "d1"},
+              "payload": {"jobs": [{"nodes_job": {"job_id": "pn"}, "edges_job": {"job_id": "pe"}}]},
+              "receipt": {"invoked": True, "receipt": {"job": {"job_id": "r1"}}}}]
+    ids = CH.job_ids_of(cases, None, ["pin1", "seed1", "head1", None, "pin1"])
+    assert ids["graph"] == ["pin1", "seed1", "head1", "w", "d1", "pn", "pe"] and [j["job_id"] for j in ids["receipt"]] == ["r1"]
+
+
+def test_catalog_live_identity_covers_every_journaled_job(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    """Live catalog mode: pin-resolution / head / payload / declaration / retrieval jobs all enter the identity set."""
+    import okf_bq_graph.publication as PUB
+    seen = {}
+
+    class FakeStore(PUB.ProjectionStore):
+        engine = "bigquery-fake"
+
+        def _job(self, role, desc, rows):
+            e = self.journal.intend(role, desc, self.engine, actual=True)
+            self.journal.submitted(e, job_id=f"job-{role}-{e['seq']}", project="p", location="US")
+            self.journal.terminal(e, "DONE" if rows else "EMPTY", rows=len(rows))
+            return e
+
+    store = FakeStore(journal=None); store.add(projection); store.set_head("acme_retail", projection["publication_id"])
+    monkeypatch.setattr(CH, "same_requester", lambda client, g, r: seen.update(graph=list(g), receipt=list(r)) or {"status": "UNKNOWN", "reason": "fake"})
+    monkeypatch.setattr(CH, "is_live_reader", lambda r: True)                 # the live gate is tested separately; this test is about the job set
+    monkeypatch.setattr(CH, "governed", lambda seed, pub, req, as_of, cl: CH.retrieve(seed, "acme_retail", pub, req, as_of, {"engine": "oracle", "graphs": store.graphs}))
+    real_decl = CH.declaration
+    monkeypatch.setattr(CH, "declaration", lambda cl, cid, pub: real_decl({"engine": "oracle", "store": store}, cid, pub))
+    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "fallback", "bq": object()},
+                       requester="t", as_of=AS_OF, seed_mode="catalog", catalog_reader=_reader(projection), store=store, acme_root=sample_root,
+                       runner=lambda argv, **k: subprocess.CompletedProcess(argv, 1, stdout="", stderr="no live SDK in this test"))
+    assert out["verdict"] == "CHAIN_INCOMPLETE"
+    journal_ids = [j["job_id"] for j in out["journal"]["jobs"]]
+    assert len(journal_ids) >= 9 and set(journal_ids) <= set(seen["graph"]) and set(journal_ids) == set(out["job_inventory"]["graph"])
+    assert out["job_inventory"]["journal"]["actual_jobs"] == len(journal_ids)
+
+
+def test_module_cli_catalog_mock(sdk_root, sample_root, projection, tmp_path):
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    resp = tmp_path / "responses.json"
+    names = [f"{CCFG.group}/entries/other/{i}" for i in range(3)] + [CCFG.entry]
+    resp.write_text(json.dumps({"pages": C.mock_pages(names, 2), "entries": {CCFG.entry: _pin_entry(projection)}}))
+    env = dict(os.environ, OKF_OPERATOR_EMAIL="operator@example.test", PYTHONPATH=root, OKF_ACME_ROOT=sample_root)
+    r = subprocess.run([sys.executable, "-m", "okf_bq_graph.chain", "--hermetic", "--seed-mode", "catalog", "--catalog-responses", str(resp),
+                        "--out", str(tmp_path / "ev"), "--sdk-root", sdk_root], env=env, capture_output=True, text=True, cwd=root)
+    assert r.returncode == 0, r.stderr[-800:]
+    assert "CHAIN_CONNECTED" in r.stdout and "seed_mode=catalog-mock" in r.stdout and (tmp_path / "ev" / "chain_hermetic.json").exists()
+    for bad in (["--live", "--seed-mode", "catalog", "--catalog-responses", str(resp)],
+                ["--hermetic", "--seed-mode", "catalog"],
+                ["--hermetic", "--catalog-responses", str(resp)],
+                ["--hermetic", "--seed-mode", "catalog", "--catalog-group", "g", "--catalog-responses", str(resp)]):
+        r = subprocess.run([sys.executable, "-m", "okf_bq_graph.chain", *bad, "--out", str(tmp_path / "ev2"), "--sdk-root", sdk_root],
+                           env=env, capture_output=True, text=True, cwd=root)
+        assert r.returncode == 2 and not (tmp_path / "ev2").exists(), (bad, r.stderr[-300:])

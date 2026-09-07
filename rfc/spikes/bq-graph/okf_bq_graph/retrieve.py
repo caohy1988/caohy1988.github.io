@@ -25,9 +25,11 @@ from .model import node_id as _node_id
 from .lifecycle import window_executor
 from .oracle import Graph, SQL_FENCE_RE, parse_ts
 from .publish import sql, resolve_pointer
+from .seed import ConceptSeed
 
 FORCED = "forced:"
 CACHE_DEPENDENCY_VERSION = 2  # prior entries may omit the second traversal edge
+CACHE_DISABLED_CONCEPT_SEED = "DISABLED_CONCEPT_SEED"   # Catalog-seeded requests never fill or replay a cache (plan KTD6)
 
 
 def _p(name: str, typ: str, val: Any) -> bigquery.ScalarQueryParameter:
@@ -164,18 +166,29 @@ def _cache_dependencies(seeds, walks, ctx, seed_nodes, bundle_id, publication_id
     return sorted(nodes), sorted(edges)
 
 
-def retrieve(query: str, bundle_id: str, publication_id: str, requester: Any, as_of: str,
+def retrieve(query: "str | ConceptSeed", bundle_id: str, publication_id: str, requester: Any, as_of: str,
              clients: dict, top_k: int = 5) -> dict:
+    """`query` is a natural-language string (vector seed), a `forced:<local path>` fixture override, or a
+    `ConceptSeed` carrying one exact scoped Concept id (the Catalog-returned seed). A concept seed must lie inside the
+    requested (bundle, publication); it is never resolved against the active head, and it disables the cache."""
     timer = Timer()
     engine = clients.get("engine", "gql")
     ds = clients.get("ds", DATASET)
     full = f"{PROJECT}.{ds}"
+    concept_seed = query if isinstance(query, ConceptSeed) else None
     scope: dict[str, Any] = {"bundle_id": bundle_id, "publication_id": publication_id, "engine": engine,
                              "requester": str(requester), "as_of": as_of, "top_k": top_k}
+    if concept_seed is not None:
+        scope["seed"] = {"concept_id": concept_seed.concept_id, "origin": concept_seed.origin}
+        if publication_id == "active" or concept_seed.bundle_id != bundle_id or concept_seed.publication_id != publication_id:
+            return _denied("concept seed outside the requested pinned scope", scope, timer, "MIXED_PUBLICATION")
     if engine == "oracle":
         return _retrieve_oracle(query, bundle_id, publication_id, as_of, clients, top_k, scope, timer)
     cache = clients.get("cache")
-    ckey = _cache_key(ds, bundle_id, publication_id, requester, query, as_of, top_k) if cache is not None else None
+    if concept_seed is not None and cache is not None:
+        cache = None
+        scope["cache"] = CACHE_DISABLED_CONCEPT_SEED
+    ckey = _cache_key(ds, bundle_id, publication_id, requester, str(query), as_of, top_k) if cache is not None else None
     if ckey is not None and ckey in cache and publication_id != "active":
         cached = cache[ckey]
         if cached.get("dependency_version") == CACHE_DEPENDENCY_VERSION:
@@ -196,7 +209,11 @@ def retrieve(query: str, bundle_id: str, publication_id: str, requester: Any, as
             scope["publication_id"] = publication_id
         warnings: list[str] = []
         # --- seed
-        if query.startswith(FORCED):
+        if concept_seed is not None:
+            seeds = [{"concept_id": concept_seed.concept_id, "sections": [], "forced": False, "origin": concept_seed.origin}]
+            warnings.append(f"{concept_seed.origin} seed: exact Concept id supplied by the runtime pin, not a semantic ranking")
+            timer.stage("seed", time.monotonic())
+        elif query.startswith(FORCED):
             local = query[len(FORCED):]
             local = local[:-3] if local.endswith(".md") else local
             seeds = [{"concept_id": _node_id(bundle_id, publication_id, "Concept", local), "sections": [], "forced": True}]
@@ -334,7 +351,8 @@ def _assemble(seeds, walks, ctx, seed_nodes, as_of, warnings, scope, engine) -> 
         concepts.append({"concept": local(cid), "concept_id": cid, "path": n["path"], "title": n["title"], "type": n["type"],
                          "lifecycle_status": n["status"] or "stable", "trust_tier": tier, "verifications": vers,
                          "freshness": _freshness(n["stale_after"], as_of), "provenance": sorted(prov, key=lambda x: x["declaration"]),
-                         "replacement": replacement, "matched_sections": s["sections"], "forced": s["forced"]})
+                         "replacement": replacement, "matched_sections": s["sections"], "forced": s["forced"],
+                         "seed_origin": s.get("origin", "forced" if s["forced"] else "vector")})
         best: dict[str, dict] = {}
         for w in walks.get(cid, []):
             k = w["computation_id"]
@@ -361,21 +379,47 @@ def _assemble(seeds, walks, ctx, seed_nodes, as_of, warnings, scope, engine) -> 
 
 
 def _retrieve_oracle(query, bundle_id, publication_id, as_of, clients, top_k, scope, timer) -> dict:
-    g: Graph = clients["graph"] if "graph" in clients else Graph(clients["projection"])
-    if not query.startswith(FORCED):
-        return _denied("oracle engine supports forced seeds only (no vectors)", scope, timer, "NO_SEED")
-    local = query[len(FORCED):]
-    local = local[:-3] if local.endswith(".md") else local
+    """In-process reference. `clients["graphs"]` (publication_id -> Graph) models a retained store holding several
+    publications; the requested publication must be present and the selected Graph must carry the requested scope. A
+    request for a publication the engine does not hold is NO_PUBLICATION with no content: the oracle never serves
+    another publication under the requested label (Astra seams: retrieve.py:363 previously ignored the request)."""
+    graphs = clients.get("graphs")
+    if graphs is not None:
+        g: Optional[Graph] = graphs.get(publication_id)
+        if g is None:
+            return _denied("requested publication is not retained by this engine", scope, timer, "NO_PUBLICATION")
+    else:
+        g = clients["graph"] if "graph" in clients else Graph(clients["projection"])
+    if publication_id == "active":
+        scope["publication_id"] = publication_id = g.publication_id
+    if g.bundle_id != bundle_id or g.publication_id != publication_id:
+        return _denied(f"engine holds {g.bundle_id}|{g.publication_id}, not the requested scope", scope, timer, "NO_PUBLICATION")
+    if isinstance(query, ConceptSeed):
+        local = query.local
+        seed_warning = f"{query.origin} seed: exact Concept id supplied by the runtime pin, not a semantic ranking"
+        forced = False
+    elif query.startswith(FORCED):
+        local = query[len(FORCED):]
+        local = local[:-3] if local.endswith(".md") else local
+        seed_warning = "forced seed: harness-only deterministic override, not a semantic ranking"
+        forced = True
+    else:
+        return _denied("oracle engine supports forced or concept seeds only (no vectors)", scope, timer, "NO_SEED")
     r = g.governed(local, as_of)
     if r["status"] != "OK":
         return _denied("seed not found", scope, timer, "NO_SEED")
+    cid = _node_id(bundle_id, publication_id, "Concept", r["concept"])
     concept = {k: r[k] for k in ("concept", "path", "title", "type", "lifecycle_status", "trust_tier", "verifications",
                                  "freshness", "provenance", "replacement")}
-    concept.update({"matched_sections": [], "forced": True})
-    comps = [dict(c, seed=r["concept"]) for c in r["computations"]]
+    concept.update({"concept_id": cid, "matched_sections": [], "forced": forced,
+                    "seed_origin": query.origin if isinstance(query, ConceptSeed) else "forced"})
+    comps = []
+    for c in r["computations"]:
+        comp_id = _node_id(bundle_id, publication_id, "Concept", c["concept"])
+        sq = g.sanctioned_sql(comp_id)
+        comps.append(dict(c, seed=r["concept"], computation_id=comp_id, section_id=sq["section_id"] if sq else None))
     return {"status": "OK", "concepts": [concept], "paths": [dict(p, seed=r["concept"]) for p in r["paths"]],
-            "computations": comps, "warnings": ["forced seed: harness-only deterministic override, not a semantic ranking",
-                                                 "ORACLE engine: in-process reference, not BigQuery"],
+            "computations": comps, "warnings": [seed_warning, "ORACLE engine: in-process reference, not BigQuery"],
             "scope": scope, "timing": timer.done()}
 
 
