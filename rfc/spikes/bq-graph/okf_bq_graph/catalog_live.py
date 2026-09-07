@@ -360,6 +360,43 @@ def _try_json(raw: bytes) -> Any:
 
 
 # ----------------------------------------------------------------------------- budget
+def identity_gate(all_rows: list[dict], unresolved: list[dict]) -> dict:
+    """The B2 identity criterion, in one place so the in-run audit and any follow-up audit apply the SAME rule:
+    every dispatched job read back under its own reference, terminal, carrying exactly one known principal, with no
+    unresolved child job. Anything unknown leaves the gate INCOMPLETE - it is never assumed."""
+    # a never-dispatched id is listed but carries no identity requirement: there is no job on the server to read
+    rows = [j for j in all_rows if j.get("dispatched", True)]
+    not_dispatched = [j["job_id"] for j in all_rows if not j.get("dispatched", True)]
+    missing_ref = [j["job_id"] for j in rows if not (j.get("project") and j.get("location"))]
+    unread = [j["job_id"] for j in rows if j.get("read") != "OK"]
+    non_terminal = [j["job_id"] for j in rows if j.get("read") == "OK" and j.get("state") != "DONE"]
+    errored = [j["job_id"] for j in rows if j.get("read") == "OK" and j.get("error")]
+    no_identity = [j["job_id"] for j in rows if j.get("read") == "OK" and not j.get("user_email")]
+    principals = sorted({j["user_email"] for j in rows if j.get("user_email")})
+    reasons = []
+    if missing_ref:
+        reasons.append(f"{len(missing_ref)} job(s) without a complete (project, location) reference")
+    if unread:
+        reasons.append(f"{len(unread)} job(s) not read back")
+    if non_terminal:
+        reasons.append(f"{len(non_terminal)} job(s) not DONE")
+    if no_identity:
+        reasons.append(f"{len(no_identity)} job(s) with no principal: equality of absent identities proves nothing")
+    if len(principals) > 1:
+        reasons.append(f"{len(principals)} distinct principals: {principals}")
+    if unresolved:
+        reasons.append(f"{len(unresolved)} unresolved child-chain job(s)")
+    # An empty job set is COMPLETE, not incomplete: a boundary that refused before submitting anything (the
+    # missing-aspect case refuses at seed) has no job whose identity could be unknown. What that case must
+    # still prove is its BEHAVIOUR, which `grade_refusal` checks independently.
+    return {"status": "COMPLETE" if not reasons else "INCOMPLETE",
+            "jobs": len(rows), "principals": principals, "reasons": reasons,
+            "note": None if rows else "no job was submitted at this boundary",
+            "missing_reference": missing_ref, "not_read_back": unread, "not_terminal": non_terminal,
+            "errored": errored, "without_principal": no_identity, "not_dispatched": not_dispatched,
+            "unresolved_child_jobs": unresolved}
+
+
 class BudgetExceeded(NotDispatched):
     """The phase deadline passed before this operation was dispatched. Nothing was sent, so the journal closes the
     entry NOT_SUBMITTED instead of leaving an unresolved UNKNOWN that would block a clean teardown."""
@@ -1075,39 +1112,7 @@ class B2Experiment:
                 rec.update(read="ERROR", state=None, user_email=None, error=f"{type(e).__name__}: {str(e)[:200]}")
             jobs.append(rec)
 
-        def gate(all_rows: list[dict], unresolved: list[dict]) -> dict:
-            # a never-dispatched id is listed but carries no identity requirement: there is no job on the server to read
-            rows = [j for j in all_rows if j.get("dispatched", True)]
-            not_dispatched = [j["job_id"] for j in all_rows if not j.get("dispatched", True)]
-            missing_ref = [j["job_id"] for j in rows if not (j.get("project") and j.get("location"))]
-            unread = [j["job_id"] for j in rows if j.get("read") != "OK"]
-            non_terminal = [j["job_id"] for j in rows if j.get("read") == "OK" and j.get("state") != "DONE"]
-            errored = [j["job_id"] for j in rows if j.get("read") == "OK" and j.get("error")]
-            no_identity = [j["job_id"] for j in rows if j.get("read") == "OK" and not j.get("user_email")]
-            principals = sorted({j["user_email"] for j in rows if j.get("user_email")})
-            reasons = []
-            if missing_ref:
-                reasons.append(f"{len(missing_ref)} job(s) without a complete (project, location) reference")
-            if unread:
-                reasons.append(f"{len(unread)} job(s) not read back")
-            if non_terminal:
-                reasons.append(f"{len(non_terminal)} job(s) not DONE")
-            if no_identity:
-                reasons.append(f"{len(no_identity)} job(s) with no principal: equality of absent identities proves nothing")
-            if len(principals) > 1:
-                reasons.append(f"{len(principals)} distinct principals: {principals}")
-            if unresolved:
-                reasons.append(f"{len(unresolved)} unresolved child-chain job(s)")
-            # An empty job set is COMPLETE, not incomplete: a boundary that refused before submitting anything (the
-            # missing-aspect case refuses at seed) has no job whose identity could be unknown. What that case must
-            # still prove is its BEHAVIOUR, which `grade_refusal` checks independently.
-            return {"status": "COMPLETE" if not reasons else "INCOMPLETE",
-                    "jobs": len(rows), "principals": principals, "reasons": reasons,
-                    "note": None if rows else "no job was submitted at this boundary",
-                    "missing_reference": missing_ref, "not_read_back": unread, "not_terminal": non_terminal,
-                    "errored": errored, "without_principal": no_identity, "not_dispatched": not_dispatched,
-                    "unresolved_child_jobs": unresolved}
-
+        gate = identity_gate
         by_chain = {label: gate([j for j in jobs if j["source"] == f"chain:{label}"], self.chain_unresolved.get(label, []))
                     for label in self.chain_jobs}
         lifecycle = gate([j for j in jobs if j["source"] == "lifecycle"], [])
