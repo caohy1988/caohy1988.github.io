@@ -1,0 +1,148 @@
+{
+ "computations": [
+  {
+   "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+   "concept": "computations/gross-margin-period",
+   "concept_hops": 1,
+   "freshness": {
+    "stale_after": "2026-12-31T00:00:00Z",
+    "verdict": "FRESH"
+   },
+   "path": "computations/gross-margin-period.md",
+   "runtime": "bigquery",
+   "runtime_verdict": "NOT_EXECUTED",
+   "section_id": "acme_retail|pub_ae9b6cb130731d01|Section|computations/gross-margin-period#s0",
+   "seed": "metrics/gross-margin",
+   "sql": "WITH recognized_orders AS (\n  SELECT\n    o.order_id,\n    CASE\n      WHEN o.currency = 'USD' THEN o.net_amount\n      ELSE o.net_amount * fx.rate_to_usd\n    END AS revenue_usd\n  FROM `acme.sales.orders` AS o\n  LEFT JOIN `acme.finance.fx_daily_rates` AS fx\n    ON fx.currency = o.currency\n    AND fx.rate_date = DATE(o.order_ts)\n  WHERE o.order_status = 'delivered'\n    AND DATE_DIFF(CURRENT_DATE(), DATE(o.order_ts), DAY) >= 30\n    AND DATE(o.order_ts) BETWEEN @period_start AND @period_end\n),\ncogs_full AS (\n  SELECT\n    ol.order_id,\n    SUM(ol.quantity * p.cost) AS product_cost,\n    SUM(fc.allocated_cost) AS fulfillment_cost,\n    SUM(sc.shipping_cost) AS shipping_cost,\n    SUM(pf.fee_amount) AS payment_fee\n  FROM `acme.sales.order_lines` AS ol\n  JOIN `acme.catalog.products` AS p ON p.product_id = ol.product_id\n  LEFT JOIN `acme.logistics.fulfillment_cost` AS fc ON fc.order_id = ol.order_id\n  LEFT JOIN `acme.logistics.shipment_cost` AS sc ON sc.order_id = ol.order_id\n  LEFT JOIN `acme.finance.payment_fees` AS pf ON pf.order_id = ol.order_id\n  GROUP BY ol.order_id\n)\nSELECT\n  SUM(r.revenue_usd) - SUM(\n    COALESCE(c.product_cost, 0)\n    + COALESCE(c.fulfillment_cost, 0)\n    + COALESCE(c.shipping_cost, 0)\n    + COALESCE(c.payment_fee, 0)\n  ) AS gross_margin_usd\nFROM recognized_orders AS r\nLEFT JOIN cogs_full AS c USING (order_id)",
+   "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+   "status": "stable",
+   "trust_tier": "human-reviewed",
+   "via": [
+    "metrics/gross-margin",
+    "computations/gross-margin-period"
+   ]
+  }
+ ],
+ "concepts": [
+  {
+   "concept": "metrics/gross-margin",
+   "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+   "forced": false,
+   "freshness": {
+    "stale_after": "2026-12-31T00:00:00Z",
+    "verdict": "FRESH"
+   },
+   "lifecycle_status": "stable",
+   "matched_sections": [],
+   "path": "metrics/gross-margin.md",
+   "provenance": [
+    {
+     "declaration": "frontmatter.sources[0]",
+     "note": "declaration-scoped signals (usage_count/window) and resolves_to are not exposed as graph properties; fetch from edges/nodes tables if needed",
+     "resolution": null,
+     "resource": "policies/margin-standard.md",
+     "source_id": "acme_retail|pub_190192147fd7fd78|Source|src:policies/margin-standard.md",
+     "title": "Cost Allocation & Margin Standard (FY2026)"
+    },
+    {
+     "declaration": "frontmatter.sources[1]",
+     "note": "declaration-scoped signals (usage_count/window) and resolves_to are not exposed as graph properties; fetch from edges/nodes tables if needed",
+     "resolution": null,
+     "resource": "policies/revenue-recognition.md",
+     "source_id": "acme_retail|pub_190192147fd7fd78|Source|src:policies/revenue-recognition.md",
+     "title": "Revenue Recognition Policy (FY2026)"
+    }
+   ],
+   "replacement": null,
+   "seed_origin": "catalog",
+   "title": "Gross Margin",
+   "trust_tier": "human-reviewed",
+   "type": "Metric",
+   "verifications": [
+    {
+     "at": "2026-07-01T09:00:00Z",
+     "by": "human:jsmith@acme",
+     "kind": "human"
+    }
+   ]
+  }
+ ],
+ "paths": [
+  {
+   "concept_hops": 1,
+   "seed": "metrics/gross-margin",
+   "via": [
+    "metrics/gross-margin",
+    "computations/gross-margin-period"
+   ]
+  }
+ ],
+ "scope": {
+  "as_of": "2026-09-07T16:29:33Z",
+  "bundle_id": "acme_retail",
+  "engine": "fallback",
+  "publication_id": "pub_190192147fd7fd78",
+  "requester": "user:operator",
+  "seed": {
+   "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+   "origin": "catalog"
+  },
+  "top_k": 5
+ },
+ "status": "OK",
+ "timing": {
+  "jobs": [
+   {
+    "bytes_billed": 20971520,
+    "bytes_processed": 63336,
+    "cache_hit": false,
+    "created": "2026-09-07T16:29:37.417000+00:00",
+    "edition": null,
+    "ended": "2026-09-07T16:29:38.167000+00:00",
+    "job_id": "okf_cc_live-20260907T162933Z-62daab48_retrieval_walk_b45dfd8d0c4d",
+    "reservation_id": null,
+    "slot_ms": 10989,
+    "stage": "walk",
+    "started": "2026-09-07T16:29:37.497000+00:00"
+   },
+   {
+    "bytes_billed": 10485760,
+    "bytes_processed": 7474,
+    "cache_hit": false,
+    "created": "2026-09-07T16:29:38.649000+00:00",
+    "edition": null,
+    "ended": "2026-09-07T16:29:39.075000+00:00",
+    "job_id": "okf_cc_live-20260907T162933Z-62daab48_retrieval_nodes_996f5c57982e",
+    "reservation_id": null,
+    "slot_ms": 23,
+    "stage": "nodes",
+    "started": "2026-09-07T16:29:38.729000+00:00"
+   },
+   {
+    "bytes_billed": 20971520,
+    "bytes_processed": 125853,
+    "cache_hit": false,
+    "created": "2026-09-07T16:29:38.642000+00:00",
+    "edition": null,
+    "ended": "2026-09-07T16:29:39.111000+00:00",
+    "job_id": "okf_cc_live-20260907T162933Z-62daab48_retrieval_context_099455bd0363",
+    "reservation_id": null,
+    "slot_ms": 92,
+    "stage": "context",
+    "started": "2026-09-07T16:29:38.777000+00:00"
+   }
+  ],
+  "stages_ms": {
+   "assembly": 0.2,
+   "context": 909.9,
+   "nodes": 894.9,
+   "seed": 0.0,
+   "walk": 1209.3
+  },
+  "total_ms": 2120.8
+ },
+ "warnings": [
+  "catalog seed: exact Concept id supplied by the runtime pin, not a semantic ranking",
+  "FALLBACK engine: relational joins, not BigQuery Graph"
+ ]
+}

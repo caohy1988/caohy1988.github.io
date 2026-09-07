@@ -1,0 +1,53 @@
+{
+ "calls": [
+  {
+   "call": 1,
+   "live_status": "OK",
+   "mutations": [
+    {
+     "after": "acme_retail|pub_ae9b6cb130731d01|Section|computations/gross-margin-period#s0",
+     "before": "acme_retail|pub_190192147fd7fd78|Section|computations/gross-margin-period#s0",
+     "field": "computations[].section_id",
+     "kind": "P2 section id mixed into P1 result"
+    }
+   ],
+   "raw_retained": {
+    "path": "evidence/catalog-chain/b2-20260907t162636z-cd45/injection/raw_live_result_1.json",
+    "sha256": "1eb573f55c691b44d592a4a13a69c9af146a1708836926adc5746b9149e89695"
+   },
+   "seed": "concept:acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+   "seed_origin": "catalog"
+  },
+  {
+   "call": 2,
+   "live_status": "OK",
+   "mutations": [
+    {
+     "field": "computations[].sql",
+     "kind": "SQL bytes changed under the unchanged sql_sha256 / P1 labels",
+     "label_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c"
+    }
+   ],
+   "raw_retained": {
+    "path": "evidence/catalog-chain/b2-20260907t162636z-cd45/injection/raw_live_result_2.json",
+    "sha256": "8283e077c9bc250f97edc0bb5d144f875c633e63e81d6a2eb0d9ed4169e7de07"
+   },
+   "seed": "concept:acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+   "seed_origin": "catalog"
+  },
+  {
+   "call": 3,
+   "live_status": "OK",
+   "mutations": [],
+   "raw_retained": {
+    "path": "evidence/catalog-chain/b2-20260907t162636z-cd45/injection/raw_live_result_3.json",
+    "sha256": "fc05f6b3f871ad157d730515ea0b2a0e6ceabbdb99e8a04bf48b50b4438ab207"
+   },
+   "seed": "concept:acme_retail|pub_190192147fd7fd78|Concept|metrics/revenue",
+   "seed_origin": "injected-fixture-seed"
+  }
+ ],
+ "kind": "live-backed client fault injection",
+ "note": "BigQuery did not return a torn publication; the retrieval result was altered in the client",
+ "where": "after the live BigQuery governed retrieval returned, before the payload guard"
+}
