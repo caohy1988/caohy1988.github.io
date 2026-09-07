@@ -42,6 +42,11 @@ class ScopeViolation(RuntimeError):
     """A mutation targeted something this run does not own. Raised before any cloud call."""
 
 
+class NotDispatched(RuntimeError):
+    """The operation was refused locally and NOTHING was sent. Unlike a timeout or a transport failure, this leaves no
+    doubt about the server: the entry closes NOT_SUBMITTED rather than becoming an unresolved UNKNOWN."""
+
+
 # ----------------------------------------------------------------------------- configuration (the allowlist)
 @dataclass(frozen=True)
 class LifecycleConfig:
@@ -246,6 +251,9 @@ class Lifecycle:
             kw["job_id"] = jid
         try:
             out = fn(*args, timeout=self.cfg.timeout_s, **kw)
+        except NotDispatched as ex:               # refused before the send: definitively nothing reached the server
+            self.journal.terminal(e, "NOT_SUBMITTED", error=f"{type(ex).__name__}: {str(ex)[:300]}")
+            raise
         except Exception as ex:  # noqa: BLE001
             err = f"{type(ex).__name__}: {str(ex)[:300]}"
             if job_backed:

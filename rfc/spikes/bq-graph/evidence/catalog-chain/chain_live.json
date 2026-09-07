@@ -1,0 +1,2398 @@
+{
+ "acceptance": {
+  "approved": "MET",
+  "declaration-mismatch": "MET",
+  "sql-substitution": "MET"
+ },
+ "as_of": "2026-09-07T15:33:29Z",
+ "bundle_id": "acme_retail",
+ "cases": [
+  {
+   "acceptance": {
+    "expected": "RELEASED",
+    "failed": [],
+    "status": "MET"
+   },
+   "attack": null,
+   "bind": {
+    "checks": {
+     "declared_type": {
+      "graph": "Attested Computation",
+      "ok": true
+     },
+     "file_sha256": {
+      "graph": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "ok": true,
+      "sdk_bytes": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "freshness": {
+      "as_of": "2026-09-07T15:33:29Z",
+      "ok": true,
+      "stale_after": "2026-12-31T00:00:00Z",
+      "verdict": "FRESH"
+     },
+     "lifecycle": {
+      "graph": "stable",
+      "ok": true
+     },
+     "not_executed_by_graph": {
+      "graph": "NOT_EXECUTED",
+      "ok": true
+     },
+     "parameters": {
+      "graph": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ],
+      "ok": true,
+      "sdk": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ]
+     },
+     "path": {
+      "graph": "computations/gross-margin-period.md",
+      "ok": true,
+      "sdk": "acme_retail/gross-margin-period.md"
+     },
+     "runtime": {
+      "graph": "bigquery",
+      "ok": true,
+      "sdk": "bigquery"
+     },
+     "source_pin": {
+      "graph": "31da799a9aef176df12e91abbd119ea9385b75ec",
+      "note": "the SDK fixture manifest's derived_from is a free-text lineage label at the pinned SDK commit, compared against the full verified graph revision; it is not a Git attestation of that revision",
+      "ok": true,
+      "sdk": "knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec"
+     },
+     "sql_text": {
+      "graph_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+      "note": "compared after trailing-whitespace normalisation: the graph fence regex drops the final newline the SDK keeps",
+      "ok": true,
+      "sdk_fence_sha256": "d1f76cb93bcf69dc87ee721b91ef8d1478df7a4b0aa9ec86ef1abda9e56934bd"
+     }
+    },
+    "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+    "concept_hops": 1,
+    "sdk_context_ref": "okf:acme-retail-derived#gross-margin-period",
+    "sdk_publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+    "status": "BOUND",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/gross-margin",
+     "computations/gross-margin-period"
+    ]
+   },
+   "case": "approved",
+   "computation": {
+    "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+    "concept": "computations/gross-margin-period",
+    "concept_hops": 1,
+    "freshness": {
+     "stale_after": "2026-12-31T00:00:00Z",
+     "verdict": "FRESH"
+    },
+    "path": "computations/gross-margin-period.md",
+    "runtime": "bigquery",
+    "runtime_verdict": "NOT_EXECUTED",
+    "section_id": "acme_retail|pub_190192147fd7fd78|Section|computations/gross-margin-period#s0",
+    "sql_chars": 1341,
+    "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+    "status": "stable",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/gross-margin",
+     "computations/gross-margin-period"
+    ]
+   },
+   "consume": {
+    "decision": "RELEASED",
+    "display": "[LIVE] Gross margin: $400.00 USD \u00b7 VERIFIED",
+    "reasons": []
+   },
+   "declaration": {
+    "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5b6541904c18",
+    "lifecycle_status": "stable",
+    "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+    "parameters": [
+     {
+      "name": "period_start",
+      "required": true,
+      "type": "date"
+     },
+     {
+      "name": "period_end",
+      "required": true,
+      "type": "date"
+     }
+    ],
+    "path": "computations/gross-margin-period.md",
+    "receipt_fields": [
+     "job_id",
+     "executed_sql",
+     "result"
+    ],
+    "runtime": "bigquery",
+    "stale_after": "2026-12-31T00:00:00Z",
+    "status": "OK",
+    "type": "Attested Computation"
+   },
+   "expected": "RELEASED",
+   "payload": {
+    "checks": {
+     "computations": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+        "fields": true,
+        "section_membership": true,
+        "sql_bytes": true,
+        "trusted_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c"
+       }
+      ],
+      "ok": true
+     },
+     "declaration": {
+      "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+      "ok": true,
+      "source_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "trusted_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "engine": {
+      "basis": "configured engine supplied by the caller",
+      "ok": true,
+      "returned": "fallback",
+      "trusted": "fallback"
+     },
+     "governance": {
+      "engine": "fallback",
+      "engine_source": "trusted (caller-configured)",
+      "items": [
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+        "ok": true,
+        "provenance": true,
+        "replacement": true,
+        "trust_tier": true,
+        "verifications": true
+       },
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+        "ok": true,
+        "trust_tier": true
+       }
+      ],
+      "note": "trust tier, verifications, the engine's complete provenance item shape (every required key present, no extra key, every value equal: oracle declared/intrinsic/resolves_to, relational source_id/resolution/note), freshness as the whole {verdict, stale_after} record, and replacement, all recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
+      "ok": true,
+      "provenance_shape": [
+       "declaration",
+       "note",
+       "resolution",
+       "resource",
+       "source_id",
+       "title"
+      ]
+     },
+     "paths": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+         "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period"
+        ]
+       }
+      ],
+      "ok": true
+     },
+     "recomputed_manifests": {
+      "edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b",
+      "ok": true,
+      "trusted_edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "trusted_nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b"
+     },
+     "result_paths": {
+      "items": [
+       {
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+         "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period"
+        ]
+       }
+      ],
+      "matches_computations": true,
+      "ok": true
+     },
+     "result_scope": {
+      "ok": true,
+      "scope": {
+       "bundle_id": "acme_retail",
+       "publication_id": "pub_190192147fd7fd78"
+      }
+     },
+     "retained_edge_rows": {
+      "ok": true,
+      "retained": 109,
+      "trusted": 109
+     },
+     "retained_node_rows": {
+      "first_diff": null,
+      "ok": true,
+      "retained": 44,
+      "trusted": 44
+     },
+     "section_text_hashes": {
+      "mismatched": [],
+      "ok": true,
+      "sections": 22
+     },
+     "seed_concept": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+      "expected": "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+      "ok": true
+     },
+     "selected_computation": {
+      "bytes_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+       "fields": true,
+       "section_membership": true,
+       "sql_bytes": true,
+       "trusted_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c"
+      },
+      "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+      "ok": true,
+      "path": "computations/gross-margin-period.md",
+      "path_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+       "edges_continuous": true,
+       "endpoints": true,
+       "nodes_in_trusted": true,
+       "via": [
+        "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+        "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period"
+       ]
+      }
+     }
+    },
+    "failed": [],
+    "jobs": [
+     {
+      "edges_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 61408,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained edge rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-07T15:33:39.939297+00:00",
+       "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_b6e15e44816e",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_b6e15e44816e",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+       "role": "payload_rows",
+       "rows": 109,
+       "seq": 9,
+       "state": "DONE",
+       "submitted_at": "2026-09-07T15:33:39.939531+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-07T15:33:40.933649+00:00"
+      },
+      "nodes_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 117477,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained node rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-07T15:33:39.003938+00:00",
+       "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_03f0e1bfee37",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_03f0e1bfee37",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+       "role": "payload_rows",
+       "rows": 44,
+       "seq": 8,
+       "state": "DONE",
+       "submitted_at": "2026-09-07T15:33:39.004124+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-07T15:33:39.938608+00:00"
+      }
+     }
+    ],
+    "note": "full retained rows, recomputed manifests/section hashes, scoped path endpoints/edges, SQL and declaration bytes compared to the trusted compilation of the pinned source; labels and digests alone are not accepted",
+    "status": "CONSISTENT"
+   },
+   "receipt": {
+    "argv": [
+     "/usr/local/opt/python@3.13/bin/python3.13",
+     "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike/examples/okf_attested_computation/run.py",
+     "--case",
+     "approved",
+     "--evidence-dir",
+     "/Users/haiyuancao/caohy1988.github.io-catalog-live/rfc/spikes/bq-graph/evidence/catalog-chain/live-20260907T153329Z-21d91539/receipt/.inv_approved_live_vky43go7",
+     "--live"
+    ],
+    "case": "approved",
+    "cwd": "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike",
+    "diag": "see /Users/haiyuancao/caohy1988.github.io-catalog-live/rfc/spikes/bq-graph/evidence/catalog-chain/live-20260907T153329Z-21d91539/receipt/case_approved_live.json",
+    "diag_path": "/Users/haiyuancao/caohy1988.github.io-catalog-live/rfc/spikes/bq-graph/evidence/catalog-chain/live-20260907T153329Z-21d91539/receipt/case_approved_live.json",
+    "diag_present": true,
+    "diag_sha256": "957b17ba302f4d3919494a24beaa10c3613570c5ea7d133daa52c539b1fd4e67",
+    "elapsed_ms": 6470.8,
+    "env_injected": [],
+    "exit_code": 0,
+    "invocation_dir": "/Users/haiyuancao/caohy1988.github.io-catalog-live/rfc/spikes/bq-graph/evidence/catalog-chain/live-20260907T153329Z-21d91539/receipt/.inv_approved_live_vky43go7",
+    "invoked": true,
+    "live": true,
+    "output": {
+     "access_probe": {
+      "outcome": "ALLOWED",
+      "output": "ALLOWED",
+      "probed_at": 1788795227,
+      "sources": "ALLOWED"
+     },
+     "execution_match": "MATCH",
+     "job": {
+      "job_id": "okf_rcpt_6b12a39e87fc9e06a2ae58d8_ae3ba60f5d830126",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reason_codes": [],
+     "receipt_id": "rcpt-7e6b65ea60a58fbc896ec601",
+     "request_id": "req-6b12a39e87fc9e06a2ae58d8",
+     "verdict": "VERIFIED"
+    },
+    "receipt": {
+     "attester_artifact_hash": "e9bb803540f56ceab8faaac915b9f6e72dd8d64fed7d1c6126b9c75ea1e9365e",
+     "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+     "context_ref": "okf:acme-retail-derived#gross-margin-period",
+     "execution_match": "MATCH",
+     "expires_at": 1788795523,
+     "issued_at": 1788795225,
+     "job": {
+      "job_id": "okf_rcpt_6b12a39e87fc9e06a2ae58d8_ae3ba60f5d830126",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "policy_version": "okf-receipt-spike-policy/2026-09-05",
+     "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+     "reason_codes": [],
+     "receipt_id": "rcpt-7e6b65ea60a58fbc896ec601",
+     "request_id": "req-6b12a39e87fc9e06a2ae58d8",
+     "verdict": "VERIFIED"
+    },
+    "released": true,
+    "request_id": "req-6b12a39e87fc9e06a2ae58d8",
+    "retained_as": "approved",
+    "stderr_tail": "",
+    "stdout": "[LIVE] Gross margin: $400.00 USD \u00b7 VERIFIED\n"
+   },
+   "retrieval": {
+    "computations": [
+     "computations/gross-margin-period.md"
+    ],
+    "concepts": [
+     "metrics/gross-margin"
+    ],
+    "hidden_id_in_full_result": [],
+    "paths": [
+     {
+      "concept_hops": 1,
+      "seed": "metrics/gross-margin",
+      "via": [
+       "metrics/gross-margin",
+       "computations/gross-margin-period"
+      ]
+     }
+    ],
+    "reached": true,
+    "retained": {
+     "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/retrieval/retrieval_approved.json",
+     "redacted": true,
+     "sha256": "2675ef2962fb16bbf22a3cecce889135a843dc07c6fc1e5d2c7ab313fd2c9beb"
+    },
+    "scope": {
+     "as_of": "2026-09-07T15:33:29Z",
+     "bundle_id": "acme_retail",
+     "engine": "fallback",
+     "publication_id": "pub_190192147fd7fd78",
+     "requester": "user:operator",
+     "seed": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+      "origin": "catalog"
+     },
+     "top_k": 5
+    },
+    "seed": "concept:acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+    "seed_origin": "catalog",
+    "status": "OK",
+    "timing": {
+     "jobs": [
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 58680,
+       "cache_hit": false,
+       "created": "2026-09-07T15:33:35.883000+00:00",
+       "edition": null,
+       "ended": "2026-09-07T15:33:36.576000+00:00",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_00e518d7829f",
+       "reservation_id": null,
+       "slot_ms": 767,
+       "stage": "walk",
+       "started": "2026-09-07T15:33:36.018000+00:00"
+      },
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 157239,
+       "cache_hit": false,
+       "created": "2026-09-07T15:33:37.202000+00:00",
+       "edition": null,
+       "ended": "2026-09-07T15:33:37.608000+00:00",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_ebbaa05d9e3d",
+       "reservation_id": null,
+       "slot_ms": 33,
+       "stage": "context",
+       "started": "2026-09-07T15:33:37.333000+00:00"
+      },
+      {
+       "bytes_billed": 10485760,
+       "bytes_processed": 16752,
+       "cache_hit": false,
+       "created": "2026-09-07T15:33:37.274000+00:00",
+       "edition": null,
+       "ended": "2026-09-07T15:33:37.655000+00:00",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_a01489482829",
+       "reservation_id": null,
+       "slot_ms": 17,
+       "stage": "nodes",
+       "started": "2026-09-07T15:33:37.412000+00:00"
+      }
+     ],
+     "stages_ms": {
+      "assembly": 0.3,
+      "context": 1013.9,
+      "nodes": 1017.6,
+      "seed": 0.0,
+      "walk": 1305.7
+     },
+     "total_ms": 2326.3
+    },
+    "warnings": [
+     "catalog seed: exact Concept id supplied by the runtime pin, not a semantic ranking",
+     "FALLBACK engine: relational joins, not BigQuery Graph"
+    ]
+   }
+  },
+  {
+   "acceptance": {
+    "expected": "REFUSED",
+    "failed": [],
+    "status": "MET"
+   },
+   "attack": "SDK case: agent executes a product-cost-only formula for the approved request and claims 600 (executed-SQL swap)",
+   "bind": {
+    "checks": {
+     "declared_type": {
+      "graph": "Attested Computation",
+      "ok": true
+     },
+     "file_sha256": {
+      "graph": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "ok": true,
+      "sdk_bytes": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "freshness": {
+      "as_of": "2026-09-07T15:33:29Z",
+      "ok": true,
+      "stale_after": "2026-12-31T00:00:00Z",
+      "verdict": "FRESH"
+     },
+     "lifecycle": {
+      "graph": "stable",
+      "ok": true
+     },
+     "not_executed_by_graph": {
+      "graph": "NOT_EXECUTED",
+      "ok": true
+     },
+     "parameters": {
+      "graph": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ],
+      "ok": true,
+      "sdk": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ]
+     },
+     "path": {
+      "graph": "computations/gross-margin-period.md",
+      "ok": true,
+      "sdk": "acme_retail/gross-margin-period.md"
+     },
+     "runtime": {
+      "graph": "bigquery",
+      "ok": true,
+      "sdk": "bigquery"
+     },
+     "source_pin": {
+      "graph": "31da799a9aef176df12e91abbd119ea9385b75ec",
+      "note": "the SDK fixture manifest's derived_from is a free-text lineage label at the pinned SDK commit, compared against the full verified graph revision; it is not a Git attestation of that revision",
+      "ok": true,
+      "sdk": "knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec"
+     },
+     "sql_text": {
+      "graph_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+      "note": "compared after trailing-whitespace normalisation: the graph fence regex drops the final newline the SDK keeps",
+      "ok": true,
+      "sdk_fence_sha256": "d1f76cb93bcf69dc87ee721b91ef8d1478df7a4b0aa9ec86ef1abda9e56934bd"
+     }
+    },
+    "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+    "concept_hops": 1,
+    "sdk_context_ref": "okf:acme-retail-derived#gross-margin-period",
+    "sdk_publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+    "status": "BOUND",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/gross-margin",
+     "computations/gross-margin-period"
+    ]
+   },
+   "case": "sql-substitution",
+   "computation": {
+    "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+    "concept": "computations/gross-margin-period",
+    "concept_hops": 1,
+    "freshness": {
+     "stale_after": "2026-12-31T00:00:00Z",
+     "verdict": "FRESH"
+    },
+    "path": "computations/gross-margin-period.md",
+    "runtime": "bigquery",
+    "runtime_verdict": "NOT_EXECUTED",
+    "section_id": "acme_retail|pub_190192147fd7fd78|Section|computations/gross-margin-period#s0",
+    "sql_chars": 1341,
+    "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+    "status": "stable",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/gross-margin",
+     "computations/gross-margin-period"
+    ]
+   },
+   "consume": {
+    "decision": "REFUSED",
+    "reasons": [
+     "exit_code 2 != 0",
+     "receipt.verdict REJECTED: consumer refuses on UNVERIFIABLE/REJECTED",
+     "output.verdict REJECTED: consumer refuses on UNVERIFIABLE/REJECTED",
+     "execution_match MISMATCH/MISMATCH != MATCH",
+     "reason_codes sql_mismatch",
+     "CLI consumer did not report released=true",
+     "stdout is not exactly one VERIFIED release line"
+    ]
+   },
+   "declaration": {
+    "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5ac18da7f952",
+    "lifecycle_status": "stable",
+    "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+    "parameters": [
+     {
+      "name": "period_start",
+      "required": true,
+      "type": "date"
+     },
+     {
+      "name": "period_end",
+      "required": true,
+      "type": "date"
+     }
+    ],
+    "path": "computations/gross-margin-period.md",
+    "receipt_fields": [
+     "job_id",
+     "executed_sql",
+     "result"
+    ],
+    "runtime": "bigquery",
+    "stale_after": "2026-12-31T00:00:00Z",
+    "status": "OK",
+    "type": "Attested Computation"
+   },
+   "expected": "REFUSED",
+   "payload": {
+    "checks": {
+     "computations": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+        "fields": true,
+        "section_membership": true,
+        "sql_bytes": true,
+        "trusted_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c"
+       }
+      ],
+      "ok": true
+     },
+     "declaration": {
+      "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+      "ok": true,
+      "source_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "trusted_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "engine": {
+      "basis": "configured engine supplied by the caller",
+      "ok": true,
+      "returned": "fallback",
+      "trusted": "fallback"
+     },
+     "governance": {
+      "engine": "fallback",
+      "engine_source": "trusted (caller-configured)",
+      "items": [
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+        "ok": true,
+        "provenance": true,
+        "replacement": true,
+        "trust_tier": true,
+        "verifications": true
+       },
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+        "ok": true,
+        "trust_tier": true
+       }
+      ],
+      "note": "trust tier, verifications, the engine's complete provenance item shape (every required key present, no extra key, every value equal: oracle declared/intrinsic/resolves_to, relational source_id/resolution/note), freshness as the whole {verdict, stale_after} record, and replacement, all recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
+      "ok": true,
+      "provenance_shape": [
+       "declaration",
+       "note",
+       "resolution",
+       "resource",
+       "source_id",
+       "title"
+      ]
+     },
+     "paths": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+         "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period"
+        ]
+       }
+      ],
+      "ok": true
+     },
+     "recomputed_manifests": {
+      "edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b",
+      "ok": true,
+      "trusted_edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "trusted_nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b"
+     },
+     "result_paths": {
+      "items": [
+       {
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+         "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period"
+        ]
+       }
+      ],
+      "matches_computations": true,
+      "ok": true
+     },
+     "result_scope": {
+      "ok": true,
+      "scope": {
+       "bundle_id": "acme_retail",
+       "publication_id": "pub_190192147fd7fd78"
+      }
+     },
+     "retained_edge_rows": {
+      "ok": true,
+      "retained": 109,
+      "trusted": 109
+     },
+     "retained_node_rows": {
+      "first_diff": null,
+      "ok": true,
+      "retained": 44,
+      "trusted": 44
+     },
+     "section_text_hashes": {
+      "mismatched": [],
+      "ok": true,
+      "sections": 22
+     },
+     "seed_concept": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+      "expected": "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+      "ok": true
+     },
+     "selected_computation": {
+      "bytes_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+       "fields": true,
+       "section_membership": true,
+       "sql_bytes": true,
+       "trusted_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c"
+      },
+      "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+      "ok": true,
+      "path": "computations/gross-margin-period.md",
+      "path_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
+       "edges_continuous": true,
+       "endpoints": true,
+       "nodes_in_trusted": true,
+       "via": [
+        "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+        "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period"
+       ]
+      }
+     }
+    },
+    "failed": [],
+    "jobs": [
+     {
+      "edges_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 61408,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained edge rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-07T15:33:51.652241+00:00",
+       "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_1a56d65e6de7",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_1a56d65e6de7",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+       "role": "payload_rows",
+       "rows": 109,
+       "seq": 15,
+       "state": "DONE",
+       "submitted_at": "2026-09-07T15:33:51.652558+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-07T15:33:52.679693+00:00"
+      },
+      "nodes_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 117477,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained node rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-07T15:33:50.575906+00:00",
+       "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_216bc75b3617",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_216bc75b3617",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+       "role": "payload_rows",
+       "rows": 44,
+       "seq": 14,
+       "state": "DONE",
+       "submitted_at": "2026-09-07T15:33:50.576067+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-07T15:33:51.651552+00:00"
+      }
+     }
+    ],
+    "note": "full retained rows, recomputed manifests/section hashes, scoped path endpoints/edges, SQL and declaration bytes compared to the trusted compilation of the pinned source; labels and digests alone are not accepted",
+    "status": "CONSISTENT"
+   },
+   "receipt": {
+    "argv": [
+     "/usr/local/opt/python@3.13/bin/python3.13",
+     "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike/examples/okf_attested_computation/run.py",
+     "--case",
+     "sql-substitution",
+     "--evidence-dir",
+     "/Users/haiyuancao/caohy1988.github.io-catalog-live/rfc/spikes/bq-graph/evidence/catalog-chain/live-20260907T153329Z-21d91539/receipt/.inv_sql-substitution_live_8gsoo460",
+     "--live"
+    ],
+    "case": "sql-substitution",
+    "cwd": "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike",
+    "diag": "see /Users/haiyuancao/caohy1988.github.io-catalog-live/rfc/spikes/bq-graph/evidence/catalog-chain/live-20260907T153329Z-21d91539/receipt/case_sql-substitution_live.json",
+    "diag_path": "/Users/haiyuancao/caohy1988.github.io-catalog-live/rfc/spikes/bq-graph/evidence/catalog-chain/live-20260907T153329Z-21d91539/receipt/case_sql-substitution_live.json",
+    "diag_present": true,
+    "diag_sha256": "92d20e33645c9376575d4bb71d4492e276dc54c1d0d317068e1440095e44c846",
+    "elapsed_ms": 4156.4,
+    "env_injected": [],
+    "exit_code": 2,
+    "invocation_dir": "/Users/haiyuancao/caohy1988.github.io-catalog-live/rfc/spikes/bq-graph/evidence/catalog-chain/live-20260907T153329Z-21d91539/receipt/.inv_sql-substitution_live_8gsoo460",
+    "invoked": true,
+    "live": true,
+    "output": {
+     "access_probe": null,
+     "execution_match": "MISMATCH",
+     "job": null,
+     "reason_codes": [
+      "sql_mismatch"
+     ],
+     "receipt_id": "rcpt-e146f26ea1cb5425eddacad1",
+     "request_id": "req-90941b427f4a77df63c9c0bc",
+     "verdict": "REJECTED"
+    },
+    "receipt": {
+     "attester_artifact_hash": "e9bb803540f56ceab8faaac915b9f6e72dd8d64fed7d1c6126b9c75ea1e9365e",
+     "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+     "context_ref": "okf:acme-retail-derived#gross-margin-period",
+     "execution_match": "MISMATCH",
+     "expires_at": 1788795535,
+     "issued_at": 1788795236,
+     "job": {
+      "job_id": "okf_rcpt_90941b427f4a77df63c9c0bc_9b48f640df10b309",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "policy_version": "okf-receipt-spike-policy/2026-09-05",
+     "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+     "reason_codes": [
+      "sql_mismatch"
+     ],
+     "receipt_id": "rcpt-e146f26ea1cb5425eddacad1",
+     "request_id": "req-90941b427f4a77df63c9c0bc",
+     "verdict": "REJECTED"
+    },
+    "released": false,
+    "request_id": "req-90941b427f4a77df63c9c0bc",
+    "retained_as": "sql-substitution",
+    "stderr_tail": "",
+    "stdout": "[LIVE] BLOCKED verdict=REJECTED execution_match=MISMATCH reasons=sql_mismatch\n"
+   },
+   "retrieval": {
+    "computations": [
+     "computations/gross-margin-period.md"
+    ],
+    "concepts": [
+     "metrics/gross-margin"
+    ],
+    "hidden_id_in_full_result": [],
+    "paths": [
+     {
+      "concept_hops": 1,
+      "seed": "metrics/gross-margin",
+      "via": [
+       "metrics/gross-margin",
+       "computations/gross-margin-period"
+      ]
+     }
+    ],
+    "reached": true,
+    "retained": {
+     "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/retrieval/retrieval_sql-substitution.json",
+     "redacted": true,
+     "sha256": "5c2e69b7ed49d099f259e744b780004ae47c2b3d416f5bdc6ecdfc4ed4488eaf"
+    },
+    "scope": {
+     "as_of": "2026-09-07T15:33:29Z",
+     "bundle_id": "acme_retail",
+     "engine": "fallback",
+     "publication_id": "pub_190192147fd7fd78",
+     "requester": "user:operator",
+     "seed": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+      "origin": "catalog"
+     },
+     "top_k": 5
+    },
+    "seed": "concept:acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+    "seed_origin": "catalog",
+    "status": "OK",
+    "timing": {
+     "jobs": [
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 58680,
+       "cache_hit": false,
+       "created": "2026-09-07T15:33:47.520000+00:00",
+       "edition": null,
+       "ended": "2026-09-07T15:33:48.042000+00:00",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_05fd82c6ecbc",
+       "reservation_id": null,
+       "slot_ms": 625,
+       "stage": "walk",
+       "started": "2026-09-07T15:33:47.650000+00:00"
+      },
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 157239,
+       "cache_hit": false,
+       "created": "2026-09-07T15:33:48.756000+00:00",
+       "edition": null,
+       "ended": "2026-09-07T15:33:49.108000+00:00",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_c6b4c6853a48",
+       "reservation_id": null,
+       "slot_ms": 37,
+       "stage": "context",
+       "started": "2026-09-07T15:33:48.860000+00:00"
+      },
+      {
+       "bytes_billed": 10485760,
+       "bytes_processed": 16752,
+       "cache_hit": false,
+       "created": "2026-09-07T15:33:48.839000+00:00",
+       "edition": null,
+       "ended": "2026-09-07T15:33:49.197000+00:00",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_19c83b4d4aad",
+       "reservation_id": null,
+       "slot_ms": 13,
+       "stage": "nodes",
+       "started": "2026-09-07T15:33:48.955000+00:00"
+      }
+     ],
+     "stages_ms": {
+      "assembly": 0.3,
+      "context": 957.1,
+      "nodes": 993.1,
+      "seed": 0.0,
+      "walk": 1223.1
+     },
+     "total_ms": 2218.7
+    },
+    "warnings": [
+     "catalog seed: exact Concept id supplied by the runtime pin, not a semantic ranking",
+     "FALLBACK engine: relational joins, not BigQuery Graph"
+    ]
+   }
+  },
+  {
+   "acceptance": {
+    "expected": "REFUSED",
+    "failed": [],
+    "status": "MET"
+   },
+   "attack": "graph-side swap: a different reachable Attested Computation (revenue-ytd) is offered in place of the bound one; its seed is an explicit harness injection under the pinned publication, not a Catalog discovery",
+   "bind": {
+    "checks": {
+     "declared_type": {
+      "graph": "Attested Computation",
+      "ok": true
+     },
+     "file_sha256": {
+      "graph": "d4584e831dff9f6a284b1f9116ca41a16cfc5c26ca377fa6faa46ea0e9b5c5e7",
+      "ok": false,
+      "sdk_bytes": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "freshness": {
+      "as_of": "2026-09-07T15:33:29Z",
+      "ok": true,
+      "stale_after": "2026-12-31T00:00:00Z",
+      "verdict": "FRESH"
+     },
+     "lifecycle": {
+      "graph": "stable",
+      "ok": true
+     },
+     "not_executed_by_graph": {
+      "graph": "NOT_EXECUTED",
+      "ok": true
+     },
+     "parameters": {
+      "graph": [
+       [
+        "year",
+        "INTEGER"
+       ]
+      ],
+      "ok": false,
+      "sdk": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ]
+     },
+     "path": {
+      "graph": "computations/revenue-ytd.md",
+      "ok": false,
+      "sdk": "acme_retail/gross-margin-period.md"
+     },
+     "runtime": {
+      "graph": "bigquery",
+      "ok": true,
+      "sdk": "bigquery"
+     },
+     "source_pin": {
+      "graph": "31da799a9aef176df12e91abbd119ea9385b75ec",
+      "note": "the SDK fixture manifest's derived_from is a free-text lineage label at the pinned SDK commit, compared against the full verified graph revision; it is not a Git attestation of that revision",
+      "ok": true,
+      "sdk": "knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec"
+     },
+     "sql_text": {
+      "graph_sql_sha256": "113434ee15583b3d8c38774fb5480acba7eca49cb89359b07c2b0643ba7d4b76",
+      "note": "compared after trailing-whitespace normalisation: the graph fence regex drops the final newline the SDK keeps",
+      "ok": false,
+      "sdk_fence_sha256": "d1f76cb93bcf69dc87ee721b91ef8d1478df7a4b0aa9ec86ef1abda9e56934bd"
+     }
+    },
+    "computation_digest": null,
+    "concept_hops": 1,
+    "sdk_context_ref": "okf:acme-retail-derived#gross-margin-period",
+    "sdk_publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+    "status": "MISMATCH",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/revenue",
+     "computations/revenue-ytd"
+    ]
+   },
+   "case": "declaration-mismatch",
+   "computation": {
+    "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd",
+    "concept": "computations/revenue-ytd",
+    "concept_hops": 1,
+    "freshness": {
+     "stale_after": "2026-12-31T00:00:00Z",
+     "verdict": "FRESH"
+    },
+    "path": "computations/revenue-ytd.md",
+    "runtime": "bigquery",
+    "runtime_verdict": "NOT_EXECUTED",
+    "section_id": "acme_retail|pub_190192147fd7fd78|Section|computations/revenue-ytd#s0",
+    "sql_chars": 422,
+    "sql_sha256": "113434ee15583b3d8c38774fb5480acba7eca49cb89359b07c2b0643ba7d4b76",
+    "status": "stable",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "metrics/revenue",
+     "computations/revenue-ytd"
+    ]
+   },
+   "consume": {
+    "decision": "REFUSED",
+    "reasons": [
+     "bind status MISMATCH: declaration not bound to the executed publication",
+     "receipt not invoked: nothing executed, nothing verifiable"
+    ]
+   },
+   "declaration": {
+    "file_sha256": "d4584e831dff9f6a284b1f9116ca41a16cfc5c26ca377fa6faa46ea0e9b5c5e7",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_bbd0bff011aa",
+    "lifecycle_status": "stable",
+    "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd",
+    "parameters": [
+     {
+      "name": "year",
+      "required": true,
+      "type": "integer"
+     }
+    ],
+    "path": "computations/revenue-ytd.md",
+    "receipt_fields": [
+     "job_id",
+     "executed_sql",
+     "result"
+    ],
+    "runtime": "bigquery",
+    "stale_after": "2026-12-31T00:00:00Z",
+    "status": "OK",
+    "type": "Attested Computation"
+   },
+   "expected": "REFUSED",
+   "payload": {
+    "checks": {
+     "computations": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd",
+        "fields": true,
+        "section_membership": true,
+        "sql_bytes": true,
+        "trusted_sql_sha256": "113434ee15583b3d8c38774fb5480acba7eca49cb89359b07c2b0643ba7d4b76"
+       }
+      ],
+      "ok": true
+     },
+     "declaration": {
+      "file_sha256": "d4584e831dff9f6a284b1f9116ca41a16cfc5c26ca377fa6faa46ea0e9b5c5e7",
+      "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd",
+      "ok": true,
+      "source_file_sha256": "d4584e831dff9f6a284b1f9116ca41a16cfc5c26ca377fa6faa46ea0e9b5c5e7",
+      "trusted_file_sha256": "d4584e831dff9f6a284b1f9116ca41a16cfc5c26ca377fa6faa46ea0e9b5c5e7"
+     },
+     "engine": {
+      "basis": "configured engine supplied by the caller",
+      "ok": true,
+      "returned": "fallback",
+      "trusted": "fallback"
+     },
+     "governance": {
+      "engine": "fallback",
+      "engine_source": "trusted (caller-configured)",
+      "items": [
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/revenue",
+        "ok": true,
+        "provenance": true,
+        "replacement": true,
+        "trust_tier": true,
+        "verifications": true
+       },
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd",
+        "ok": true,
+        "trust_tier": true
+       }
+      ],
+      "note": "trust tier, verifications, the engine's complete provenance item shape (every required key present, no extra key, every value equal: oracle declared/intrinsic/resolves_to, relational source_id/resolution/note), freshness as the whole {verdict, stale_after} record, and replacement, all recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
+      "ok": true,
+      "provenance_shape": [
+       "declaration",
+       "note",
+       "resolution",
+       "resource",
+       "source_id",
+       "title"
+      ]
+     },
+     "paths": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd",
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|metrics/revenue",
+         "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd"
+        ]
+       }
+      ],
+      "ok": true
+     },
+     "recomputed_manifests": {
+      "edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b",
+      "ok": true,
+      "trusted_edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "trusted_nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b"
+     },
+     "result_paths": {
+      "items": [
+       {
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|metrics/revenue",
+         "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd"
+        ]
+       }
+      ],
+      "matches_computations": true,
+      "ok": true
+     },
+     "result_scope": {
+      "ok": true,
+      "scope": {
+       "bundle_id": "acme_retail",
+       "publication_id": "pub_190192147fd7fd78"
+      }
+     },
+     "retained_edge_rows": {
+      "ok": true,
+      "retained": 109,
+      "trusted": 109
+     },
+     "retained_node_rows": {
+      "first_diff": null,
+      "ok": true,
+      "retained": 44,
+      "trusted": 44
+     },
+     "section_text_hashes": {
+      "mismatched": [],
+      "ok": true,
+      "sections": 22
+     },
+     "seed_concept": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/revenue",
+      "expected": "acme_retail|pub_190192147fd7fd78|Concept|metrics/revenue",
+      "ok": true
+     },
+     "selected_computation": {
+      "bytes_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd",
+       "fields": true,
+       "section_membership": true,
+       "sql_bytes": true,
+       "trusted_sql_sha256": "113434ee15583b3d8c38774fb5480acba7eca49cb89359b07c2b0643ba7d4b76"
+      },
+      "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd",
+      "ok": true,
+      "path": "computations/revenue-ytd.md",
+      "path_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd",
+       "edges_continuous": true,
+       "endpoints": true,
+       "nodes_in_trusted": true,
+       "via": [
+        "acme_retail|pub_190192147fd7fd78|Concept|metrics/revenue",
+        "acme_retail|pub_190192147fd7fd78|Concept|computations/revenue-ytd"
+       ]
+      }
+     }
+    },
+    "failed": [],
+    "jobs": [
+     {
+      "edges_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 61408,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained edge rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-07T15:34:01.142739+00:00",
+       "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_d6df781391f2",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_d6df781391f2",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+       "role": "payload_rows",
+       "rows": 109,
+       "seq": 21,
+       "state": "DONE",
+       "submitted_at": "2026-09-07T15:34:01.142843+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-07T15:34:02.000661+00:00"
+      },
+      "nodes_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 117477,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained node rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-07T15:34:00.198720+00:00",
+       "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_95e0f5fab52f",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_95e0f5fab52f",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+       "role": "payload_rows",
+       "rows": 44,
+       "seq": 20,
+       "state": "DONE",
+       "submitted_at": "2026-09-07T15:34:00.198858+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-07T15:34:01.142312+00:00"
+      }
+     }
+    ],
+    "note": "full retained rows, recomputed manifests/section hashes, scoped path endpoints/edges, SQL and declaration bytes compared to the trusted compilation of the pinned source; labels and digests alone are not accepted",
+    "status": "CONSISTENT"
+   },
+   "receipt": {
+    "invoked": false,
+    "reason": "bind did not hold: nothing was executed"
+   },
+   "retrieval": {
+    "computations": [
+     "computations/revenue-ytd.md"
+    ],
+    "concepts": [
+     "metrics/revenue"
+    ],
+    "hidden_id_in_full_result": [],
+    "paths": [
+     {
+      "concept_hops": 1,
+      "seed": "metrics/revenue",
+      "via": [
+       "metrics/revenue",
+       "computations/revenue-ytd"
+      ]
+     }
+    ],
+    "reached": true,
+    "retained": {
+     "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/retrieval/retrieval_declaration-mismatch.json",
+     "redacted": true,
+     "sha256": "816eb9d2258bb8150cd72646ed3f8be6705abb42542b8bf9cf087340dd4abd64"
+    },
+    "scope": {
+     "as_of": "2026-09-07T15:33:29Z",
+     "bundle_id": "acme_retail",
+     "engine": "fallback",
+     "publication_id": "pub_190192147fd7fd78",
+     "requester": "user:operator",
+     "seed": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/revenue",
+      "origin": "injected-fixture-seed"
+     },
+     "top_k": 5
+    },
+    "seed": "concept:acme_retail|pub_190192147fd7fd78|Concept|metrics/revenue",
+    "seed_origin": "injected-fixture-seed",
+    "status": "OK",
+    "timing": {
+     "jobs": [
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 58680,
+       "cache_hit": false,
+       "created": "2026-09-07T15:33:56.954000+00:00",
+       "edition": null,
+       "ended": "2026-09-07T15:33:57.654000+00:00",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_018e4fdfa905",
+       "reservation_id": null,
+       "slot_ms": 772,
+       "stage": "walk",
+       "started": "2026-09-07T15:33:57.121000+00:00"
+      },
+      {
+       "bytes_billed": 10485760,
+       "bytes_processed": 16752,
+       "cache_hit": false,
+       "created": "2026-09-07T15:33:58.214000+00:00",
+       "edition": null,
+       "ended": "2026-09-07T15:33:58.738000+00:00",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_991353dd5e2e",
+       "reservation_id": null,
+       "slot_ms": 38,
+       "stage": "nodes",
+       "started": "2026-09-07T15:33:58.467000+00:00"
+      },
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 157239,
+       "cache_hit": false,
+       "created": "2026-09-07T15:33:58.229000+00:00",
+       "edition": null,
+       "ended": "2026-09-07T15:33:58.834000+00:00",
+       "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_2d33ea3c7c6c",
+       "reservation_id": null,
+       "slot_ms": 101,
+       "stage": "context",
+       "started": "2026-09-07T15:33:58.537000+00:00"
+      }
+     ],
+     "stages_ms": {
+      "assembly": 0.2,
+      "context": 1174.2,
+      "nodes": 1116.5,
+      "seed": 0.0,
+      "walk": 1266.8
+     },
+     "total_ms": 2442.4
+    },
+    "warnings": [
+     "injected-fixture-seed seed: exact Concept id supplied by the runtime pin, not a semantic ranking",
+     "FALLBACK engine: relational joins, not BigQuery Graph"
+    ]
+   }
+  }
+ ],
+ "catalog": {
+  "api": "dataplex v1 entries.list + entries.get(view=ALL)",
+  "aspect_key": "201486563047.us-central1.okf-context-runtime",
+  "entry": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kc-unblock/metrics/gross-margin",
+  "group": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo",
+  "reader": "HttpReader",
+  "reader_mode": "catalog"
+ },
+ "chain": "okf_bq_graph.chain/0.6.0",
+ "decisions": {
+  "approved": "RELEASED",
+  "declaration-mismatch": "REFUSED",
+  "sql-substitution": "REFUSED"
+ },
+ "engine": "fallback",
+ "evidence": {
+  "journal": "evidence/catalog-chain/live-20260907T153329Z-21d91539/journal.jsonl",
+  "retained": [
+   {
+    "name": "catalog_list_0",
+    "sha256": "723712c4cd9f1914192636b8de38f9ae2c2d1361d4343eb585877e59df2f179e"
+   },
+   {
+    "name": "catalog_entry",
+    "sha256": "ad1115df694304a0c12e011387635f59bedacd6606f62c7abc83340df3f610ed"
+   },
+   {
+    "name": "retrieval_approved",
+    "sha256": "2675ef2962fb16bbf22a3cecce889135a843dc07c6fc1e5d2c7ab313fd2c9beb"
+   },
+   {
+    "name": "retrieval_sql-substitution",
+    "sha256": "5c2e69b7ed49d099f259e744b780004ae47c2b3d416f5bdc6ecdfc4ed4488eaf"
+   },
+   {
+    "name": "retrieval_declaration-mismatch",
+    "sha256": "816eb9d2258bb8150cd72646ed3f8be6705abb42542b8bf9cf087340dd4abd64"
+   }
+  ],
+  "run_dir": "evidence/catalog-chain/live-20260907T153329Z-21d91539",
+  "unresolved_jobs": 0
+ },
+ "finished_at": "2026-09-07T15:34:05.129835+00:00",
+ "graph_publication": {
+  "bundle_id": "acme_retail",
+  "compiler_version": "okf_bq_graph.compile/0.1.0",
+  "edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+  "nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b",
+  "note": "the graph publication / source manifest identity, separate from the SDK fixture publication",
+  "publication_id": "pub_190192147fd7fd78",
+  "source_manifest_sha256": "190192147fd7fd780b0da94c596045e363b29b4c23963959503cc677f1a3b5d5",
+  "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec"
+ },
+ "job_inventory": {
+  "graph": [
+   "okf_cc_live-20260907T153329Z-21d91539_pin_resolution_e65a44c27691",
+   "okf_cc_live-20260907T153329Z-21d91539_seed_visibility_a34e33c71762",
+   "okf_cc_live-20260907T153329Z-21d91539_observed_head_80a1aa2b59fa",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_00e518d7829f",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_ebbaa05d9e3d",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_a01489482829",
+   "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5b6541904c18",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_03f0e1bfee37",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_b6e15e44816e",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_05fd82c6ecbc",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_c6b4c6853a48",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_19c83b4d4aad",
+   "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5ac18da7f952",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_216bc75b3617",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_1a56d65e6de7",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_018e4fdfa905",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_991353dd5e2e",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_2d33ea3c7c6c",
+   "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_bbd0bff011aa",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_95e0f5fab52f",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_d6df781391f2"
+  ],
+  "journal": {
+   "actual_jobs": 21,
+   "by_state": {
+    "DONE": 21
+   },
+   "entries": 21,
+   "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/journal.jsonl",
+   "retained_files": 5,
+   "unresolved": 0,
+   "with_job_id": 21
+  },
+  "note": "every submitted job once, including empty/failed lookups; roles and (project, location, job_id) in journal.jsonl",
+  "receipt": [
+   "okf_rcpt_6b12a39e87fc9e06a2ae58d8_ae3ba60f5d830126",
+   "okf_rcpt_90941b427f4a77df63c9c0bc_9b48f640df10b309"
+  ],
+  "refs": {
+   "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5ac18da7f952": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5b6541904c18": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_bbd0bff011aa": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_observed_head_80a1aa2b59fa": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_03f0e1bfee37": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_1a56d65e6de7": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_216bc75b3617": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_95e0f5fab52f": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_b6e15e44816e": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_d6df781391f2": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_pin_resolution_e65a44c27691": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_2d33ea3c7c6c": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_c6b4c6853a48": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_ebbaa05d9e3d": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_19c83b4d4aad": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_991353dd5e2e": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_a01489482829": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_00e518d7829f": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_018e4fdfa905": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_05fd82c6ecbc": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   "okf_cc_live-20260907T153329Z-21d91539_seed_visibility_a34e33c71762": {
+    "location": "US",
+    "project": "test-project-0728-467323"
+   }
+  },
+  "unresolved": []
+ },
+ "journal": {
+  "jobs": [
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 1243,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "retained publication row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:32.012241+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_pin_resolution_e65a44c27691",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_pin_resolution_e65a44c27691",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "a0c216227f4f4627d7b0eaf921db1900f42506245ca4f409f269208f616f5ead",
+    "role": "pin_resolution",
+    "rows": 1,
+    "seq": 1,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:32.012410+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:33.628886+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 14665,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "exact seed node row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:33.629587+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_seed_visibility_a34e33c71762",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_seed_visibility_a34e33c71762",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "5a17f13fc3a380194d1438d8f0ddf8bb43850126c8812fe9fdf2b7d4fff0410e",
+    "role": "seed_visibility",
+    "rows": 1,
+    "seq": 2,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:33.629923+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:34.635128+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 67,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "active_publication (observation only; never followed)",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:34.635422+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_observed_head_80a1aa2b59fa",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_observed_head_80a1aa2b59fa",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "468285771bb69398b2780f3e9518a4bbc1857825a480feca71c68efcae1344f4",
+    "role": "observed_head",
+    "rows": 1,
+    "seq": 3,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:34.635676+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:35.674012+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 58680,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage walk",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:35.776037+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_00e518d7829f",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_00e518d7829f",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047",
+    "role": "retrieval_walk",
+    "rows": 1,
+    "seq": 4,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:35.776198+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:37.080894+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 157239,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage context",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:37.083331+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_ebbaa05d9e3d",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_ebbaa05d9e3d",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "29aff0d7ac7f67ee0655c2f6c483c16d39888d1f67a5517f4bbcb275b35fae6a",
+    "role": "retrieval_context",
+    "rows": 19,
+    "seq": 5,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:37.083897+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:38.096184+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 16752,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage nodes",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:37.084603+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_a01489482829",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_a01489482829",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "55f972cfdbd7a208f20dc7d231b0992b9ccde4c00c7517f23eccbd4d1908c8ac",
+    "role": "retrieval_nodes",
+    "rows": 2,
+    "seq": 6,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:37.085159+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:38.100840+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 21351,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "Attested Computation declaration row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:38.102194+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5b6541904c18",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5b6541904c18",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b790feadc52b45041beb10f8645503250de42269219cf4e97d579f7bdad6f2d3",
+    "role": "chain_declaration",
+    "rows": 1,
+    "seq": 7,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:38.102449+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:39.001726+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 117477,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained node rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:39.003938+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_03f0e1bfee37",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_03f0e1bfee37",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+    "role": "payload_rows",
+    "rows": 44,
+    "seq": 8,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:39.004124+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:39.938608+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 61408,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained edge rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:39.939297+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_b6e15e44816e",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_b6e15e44816e",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+    "role": "payload_rows",
+    "rows": 109,
+    "seq": 9,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:39.939531+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:40.933649+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 58680,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage walk",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:47.414112+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_05fd82c6ecbc",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_05fd82c6ecbc",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047",
+    "role": "retrieval_walk",
+    "rows": 1,
+    "seq": 10,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:47.414316+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:48.636662+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 157239,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage context",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:48.638265+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_c6b4c6853a48",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_c6b4c6853a48",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "29aff0d7ac7f67ee0655c2f6c483c16d39888d1f67a5517f4bbcb275b35fae6a",
+    "role": "retrieval_context",
+    "rows": 19,
+    "seq": 11,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:48.638893+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:49.594756+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 16752,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage nodes",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:48.640045+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_19c83b4d4aad",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_19c83b4d4aad",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "55f972cfdbd7a208f20dc7d231b0992b9ccde4c00c7517f23eccbd4d1908c8ac",
+    "role": "retrieval_nodes",
+    "rows": 2,
+    "seq": 12,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:48.640198+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:49.631268+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 21351,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "Attested Computation declaration row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:49.632822+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5ac18da7f952",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5ac18da7f952",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b790feadc52b45041beb10f8645503250de42269219cf4e97d579f7bdad6f2d3",
+    "role": "chain_declaration",
+    "rows": 1,
+    "seq": 13,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:49.633220+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:50.573447+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 117477,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained node rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:50.575906+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_216bc75b3617",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_216bc75b3617",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+    "role": "payload_rows",
+    "rows": 44,
+    "seq": 14,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:50.576067+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:51.651552+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 61408,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained edge rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:51.652241+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_1a56d65e6de7",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_1a56d65e6de7",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+    "role": "payload_rows",
+    "rows": 109,
+    "seq": 15,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:51.652558+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:52.679693+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 58680,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage walk",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:56.840794+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_018e4fdfa905",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_018e4fdfa905",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047",
+    "role": "retrieval_walk",
+    "rows": 1,
+    "seq": 16,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:56.841022+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:58.107005+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 16752,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage nodes",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:58.108564+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_991353dd5e2e",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_991353dd5e2e",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "55f972cfdbd7a208f20dc7d231b0992b9ccde4c00c7517f23eccbd4d1908c8ac",
+    "role": "retrieval_nodes",
+    "rows": 2,
+    "seq": 17,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:58.108864+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:59.224507+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 157239,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage context",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:58.110057+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_2d33ea3c7c6c",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_2d33ea3c7c6c",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "29aff0d7ac7f67ee0655c2f6c483c16d39888d1f67a5517f4bbcb275b35fae6a",
+    "role": "retrieval_context",
+    "rows": 14,
+    "seq": 18,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:58.110393+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:33:59.282080+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 21351,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "Attested Computation declaration row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:33:59.283391+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_bbd0bff011aa",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_bbd0bff011aa",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b790feadc52b45041beb10f8645503250de42269219cf4e97d579f7bdad6f2d3",
+    "role": "chain_declaration",
+    "rows": 1,
+    "seq": 19,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:33:59.283672+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:34:00.196805+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 117477,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained node rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:34:00.198720+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_95e0f5fab52f",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_95e0f5fab52f",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+    "role": "payload_rows",
+    "rows": 44,
+    "seq": 20,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:34:00.198858+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:34:01.142312+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 61408,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained edge rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-07T15:34:01.142739+00:00",
+    "intended_job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_d6df781391f2",
+    "job_id": "okf_cc_live-20260907T153329Z-21d91539_payload_rows_d6df781391f2",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+    "role": "payload_rows",
+    "rows": 109,
+    "seq": 21,
+    "state": "DONE",
+    "submitted_at": "2026-09-07T15:34:01.142843+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-07T15:34:02.000661+00:00"
+   }
+  ],
+  "retained": [
+   {
+    "bytes": 9198,
+    "name": "catalog_list_0",
+    "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/catalog/catalog_list_0.json",
+    "retained_at": "2026-09-07T15:33:31.836089+00:00",
+    "sha256": "723712c4cd9f1914192636b8de38f9ae2c2d1361d4343eb585877e59df2f179e"
+   },
+   {
+    "bytes": 5858,
+    "name": "catalog_entry",
+    "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/catalog/catalog_entry.json",
+    "retained_at": "2026-09-07T15:33:32.011301+00:00",
+    "sha256": "ad1115df694304a0c12e011387635f59bedacd6606f62c7abc83340df3f610ed"
+   },
+   {
+    "bytes": 5781,
+    "name": "retrieval_approved",
+    "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/retrieval/retrieval_approved.json",
+    "retained_at": "2026-09-07T15:33:39.003600+00:00",
+    "sha256": "2675ef2962fb16bbf22a3cecce889135a843dc07c6fc1e5d2c7ab313fd2c9beb"
+   },
+   {
+    "bytes": 5779,
+    "name": "retrieval_sql-substitution",
+    "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/retrieval/retrieval_sql-substitution.json",
+    "retained_at": "2026-09-07T15:33:50.575545+00:00",
+    "sha256": "5c2e69b7ed49d099f259e744b780004ae47c2b3d416f5bdc6ecdfc4ed4488eaf"
+   },
+   {
+    "bytes": 4347,
+    "name": "retrieval_declaration-mismatch",
+    "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/retrieval/retrieval_declaration-mismatch.json",
+    "retained_at": "2026-09-07T15:34:00.198393+00:00",
+    "sha256": "816eb9d2258bb8150cd72646ed3f8be6705abb42542b8bf9cf087340dd4abd64"
+   }
+  ],
+  "summary": {
+   "actual_jobs": 21,
+   "by_state": {
+    "DONE": 21
+   },
+   "entries": 21,
+   "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/journal.jsonl",
+   "retained_files": 5,
+   "unresolved": 0,
+   "with_job_id": 21
+  }
+ },
+ "mode": "live",
+ "provenance": {
+  "ok": true,
+  "publication_pin": true,
+  "sdk_clean": true,
+  "sdk_git_state_known": true,
+  "sdk_head_pin": true,
+  "seed_mode": "catalog",
+  "source_verified": true
+ },
+ "publication": {
+  "checks": {
+   "compiler_version": true,
+   "seed_file_sha256": true,
+   "seed_kind": true,
+   "seed_path": true,
+   "seed_scope": true,
+   "source_manifest_sha256": true,
+   "source_pin": true
+  },
+  "error": null,
+  "head": {
+   "matches_pin": true,
+   "note": "observed only; the requested pin is served or refused, the head is never followed",
+   "publication_id": "pub_190192147fd7fd78",
+   "rows": 1
+  },
+  "matches_pin": true,
+  "pin": "pub_190192147fd7fd78",
+  "publication_id": "pub_190192147fd7fd78",
+  "reasons": [],
+  "source": "Catalog pin resolved against the retained publications/nodes tables (parameterised)",
+  "status": "OK"
+ },
+ "requester": {
+  "mode": "same-requester",
+  "note": "graph leg and receipt leg both under the operator's ADC credential"
+ },
+ "run_dir": "evidence/catalog-chain/live-20260907T153329Z-21d91539",
+ "run_id": "live-20260907T153329Z-21d91539",
+ "same_requester": {
+  "graph_jobs": 21,
+  "jobs": {
+   "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5ac18da7f952": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_5b6541904c18": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_chain_declaration_bbd0bff011aa": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_observed_head_80a1aa2b59fa": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_03f0e1bfee37": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_1a56d65e6de7": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_216bc75b3617": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_95e0f5fab52f": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_b6e15e44816e": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_payload_rows_d6df781391f2": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_pin_resolution_e65a44c27691": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_2d33ea3c7c6c": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_c6b4c6853a48": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_context_ebbaa05d9e3d": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_19c83b4d4aad": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_991353dd5e2e": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_nodes_a01489482829": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_00e518d7829f": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_018e4fdfa905": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_retrieval_walk_05fd82c6ecbc": "operator",
+   "okf_cc_live-20260907T153329Z-21d91539_seed_visibility_a34e33c71762": "operator",
+   "okf_rcpt_6b12a39e87fc9e06a2ae58d8_ae3ba60f5d830126": "operator",
+   "okf_rcpt_90941b427f4a77df63c9c0bc_9b48f640df10b309": "operator"
+  },
+  "jobs_compared": 23,
+  "note": "operator ADC on both legs; the restricted SA is not exercised in this chain",
+  "receipt_jobs": 2,
+  "status": "SAME",
+  "user_email": [
+   "operator"
+  ]
+ },
+ "sdk": {
+  "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+  "computation_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+  "dependencies": [
+   "test-project-0728-467323.okf_receipt_spike_20260905.fulfillment_cost",
+   "test-project-0728-467323.okf_receipt_spike_20260905.fx_daily_rates",
+   "test-project-0728-467323.okf_receipt_spike_20260905.order_lines",
+   "test-project-0728-467323.okf_receipt_spike_20260905.orders",
+   "test-project-0728-467323.okf_receipt_spike_20260905.payment_fees",
+   "test-project-0728-467323.okf_receipt_spike_20260905.products",
+   "test-project-0728-467323.okf_receipt_spike_20260905.shipment_cost"
+  ],
+  "example_dirty": false,
+  "head": "6719eb535667963fa640dd4535e508b550eb6cb1",
+  "head_matches_pin": true,
+  "invocation": "subprocess run.py (no SDK source edits)",
+  "pin": "6719eb535667963fa640dd4535e508b550eb6cb1",
+  "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+  "repo_dirty": false,
+  "root": "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike",
+  "synthetic_fixture": true
+ },
+ "sdk_publication": {
+  "computation_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+  "context_ref": "okf:acme-retail-derived#gross-margin-period",
+  "derived_from": "knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec",
+  "note": "the SDK receipt example's fixture publication: a separate identity from the graph publication, joined only by bytes",
+  "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period"
+ },
+ "seed": {
+  "aspect_key": "201486563047.us-central1.okf-context-runtime",
+  "authored_aspects": [
+   "201486563047.us-central1.okf",
+   "655216118709.global.overview"
+  ],
+  "discovery": {
+   "entries_listed": 11,
+   "entry_sha256": "ad1115df694304a0c12e011387635f59bedacd6606f62c7abc83340df3f610ed",
+   "list_sha256": [
+    "723712c4cd9f1914192636b8de38f9ae2c2d1361d4343eb585877e59df2f179e"
+   ],
+   "matches": 1,
+   "page_size": 100,
+   "pages": 1
+  },
+  "entry": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kc-unblock/metrics/gross-margin",
+  "mode": "catalog",
+  "note": "fresh Dataplex list + get(view=ALL) under the operator's ADC credential; Catalog attests no principal",
+  "pin": {
+   "binding_verified_at": "2026-09-07T05:14:10.847600+00:00",
+   "bundle_id": "acme_retail",
+   "compiler_version": "okf_bq_graph.compile/0.1.0",
+   "concept_file_sha256": "912be604fe7f681322b2ba6414b5791e9eb91b73aad1cae7afa666cedfe7d3c9",
+   "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin",
+   "concept_path": "metrics/gross-margin.md",
+   "managed_by_deployment": "acme-retail-kc-unblock-20260906",
+   "managed_by_principal": "operator",
+   "managed_by_profile": "okf-kc-self-unblock/1",
+   "publication_id": "pub_190192147fd7fd78",
+   "published_snapshot_id": null,
+   "runtime_contract": "graph-spike-v1",
+   "runtime_dataset": "okf_graph_spike_20260905",
+   "runtime_location": "US",
+   "runtime_project": "test-project-0728-467323",
+   "source_manifest_sha256": "190192147fd7fd780b0da94c596045e363b29b4c23963959503cc677f1a3b5d5",
+   "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec",
+   "source_repository": "https://github.com/GoogleCloudPlatform/knowledge-catalog",
+   "source_root": "okf/bundles/acme_retail"
+  },
+  "raw_entry_sha256": "ad1115df694304a0c12e011387635f59bedacd6606f62c7abc83340df3f610ed",
+  "retained": [
+   {
+    "bytes": 9198,
+    "name": "catalog_list_0",
+    "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/catalog/catalog_list_0.json",
+    "retained_at": "2026-09-07T15:33:31.836089+00:00",
+    "sha256": "723712c4cd9f1914192636b8de38f9ae2c2d1361d4343eb585877e59df2f179e"
+   },
+   {
+    "bytes": 5858,
+    "name": "catalog_entry",
+    "path": "evidence/catalog-chain/live-20260907T153329Z-21d91539/catalog/catalog_entry.json",
+    "retained_at": "2026-09-07T15:33:32.011301+00:00",
+    "sha256": "ad1115df694304a0c12e011387635f59bedacd6606f62c7abc83340df3f610ed"
+   }
+  ],
+  "status": "OK"
+ },
+ "source": {
+  "bundle_root": "/Users/haiyuancao/knowledge-catalog/okf/bundles/acme_retail",
+  "checks": {
+   "bundle_git_prefix": "okf/bundles/acme_retail",
+   "bundle_prefix_matches_source_root": true,
+   "bundle_tree_clean": true,
+   "compiler_version_matches_pin": true,
+   "derived": false,
+   "git_head": "31da799a9aef176df12e91abbd119ea9385b75ec",
+   "git_head_matches_pin": true,
+   "publication_id_matches_pin": true,
+   "seed_file_sha256_matches_pin": true,
+   "seed_present": true,
+   "source_manifest_matches_pin": true
+  },
+  "note": "compiled from the clean pinned checkout (git HEAD == pin, bundle tree clean)",
+  "status": "OK"
+ },
+ "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec",
+ "started_at": "2026-09-07T15:33:29.189491+00:00",
+ "store": {
+  "dataset": "okf_graph_spike_20260905",
+  "engine": "bigquery"
+ },
+ "verdict": "CHAIN_CONNECTED",
+ "verdict_rule": "CHAIN_CONNECTED only when provenance pins hold before any case executes, every case is MET (reached its stage with its specific evidence), no journaled job is left in an unverified (UNKNOWN) state and, live, every submitted job (pointer lookup, pin resolution, head observation, payload rows, retrieval, declaration, receipt) carries one known user_email; CHAIN_INCOMPLETE when a case never reached its stage (outage on any leg, including approved) or a job's server state was never reconciled; CHAIN_BROKEN when a reached stage contradicts the expectation, a payload is inconsistent with the pinned publication, or a pin/seed refuses (stale, invalid, unavailable, out of scope)"
+}
