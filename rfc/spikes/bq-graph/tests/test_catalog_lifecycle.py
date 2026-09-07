@@ -20,6 +20,9 @@ FOREIGN_ENTRY = f"{CFG.catalog_group}/entries/acme-retail-catalog-chain/other-ru
 GM = "metrics/gross-margin.md"
 
 
+PRINCIPAL = "operator@example.test"
+
+
 class FakeCloud:
     """Protocol-level fake with a server-side job registry. Every op records (op, target, timeout, mutates); `fail[op]`
     raises on that op BEFORE any effect (the job never reaches the server); `running[op]` applies the effect, registers
@@ -43,9 +46,9 @@ class FakeCloud:
         assert job_id and job_id.startswith("okf_cc_"), "job-backed ops need a driver-chosen id"
         assert job_id not in self.jobs, "job ids are unique"
         if op in self.running:
-            self.jobs[job_id] = {"state": "RUNNING", "error": None}
+            self.jobs[job_id] = {"state": "RUNNING", "error": None, "user_email": PRINCIPAL}
             raise TimeoutError(f"{op} timed out; server job still RUNNING")
-        self.jobs[job_id] = {"state": "DONE", "error": None}
+        self.jobs[job_id] = {"state": "DONE", "error": None, "user_email": PRINCIPAL}
         return {"job_id": job_id}
 
     def mutations(self):
@@ -100,8 +103,12 @@ class FakeCloud:
         t[:] = [r for r in t if r["bundle_id"] != bundle_id] + [{"bundle_id": bundle_id, "publication_id": publication_id}]
         return self._job("merge_head", job_id)
 
-    def job_state(self, job_id, timeout):
+    def job_state(self, job_id, timeout, project=None, location=None):
+        """A job is read back under its own reference; a wrong (project, location) finds nothing, exactly as
+        `jobs.get` behaves. `project=None` means "this fake's own project" (the driver's lifecycle jobs)."""
         self._rec("job_state", job_id, timeout)
+        if project is not None and (project, location) != (CFG.project, CFG.location):
+            return None
         return copy.deepcopy(self.jobs.get(job_id))
 
     def cancel_job(self, job_id, timeout):

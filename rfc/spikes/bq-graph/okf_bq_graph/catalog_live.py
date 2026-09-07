@@ -20,7 +20,16 @@ entry/dataset, writing its own run directory under `<run_dir>/chains/<label>/`):
                           changed under the unchanged P1 digest label). BigQuery did not return a torn publication.
   recovery-control        valid pin restored, fresh chain passes again
   cleanup                 originals re-read (must be unchanged), owned entry + dataset deleted with absence readback, every
-                          lifecycle job terminal
+                          lifecycle operation terminal
+  job-identity            the follow-up audit: every job this run submitted -- lifecycle AND every child chain, graph-only
+                          refusals included -- read back under its own (project, location, job id) for actual principal,
+                          terminal state and error
+
+A case is `MET` only when its boundary behaved correctly AND the identity evidence for that chain's jobs is complete;
+`behaviour` keeps the boundary verdict separately, so an incomplete-evidence downgrade never erases a correct refusal.
+`WRONG` is reserved for a boundary that was actually reached and answered incorrectly: an outage (an absent SDK, an
+unreadable store) is `NOT_REACHED` with the blocker named. The experiment and the teardown hold separate budgets, and
+`BudgetedCloud` refuses new mutations once the experiment cap is gone rather than only skipping the next chain.
 """
 from __future__ import annotations
 
@@ -38,11 +47,11 @@ from typing import Any, Callable, Optional
 
 from . import BUNDLE_ID, LOCATION, PROJECT, SOURCE_PIN
 from .catalog import CATALOG_API
-from .catalog_lifecycle import FORBIDDEN_SQL, Lifecycle, LifecycleConfig, ScopeViolation, prepare_derived_source
+from .catalog_lifecycle import FORBIDDEN_SQL, Lifecycle, LifecycleConfig, NotDispatched, ScopeViolation, prepare_derived_source
 from .journal import Journal
 from .publication import MAX_BYTES_BILLED
 
-B2_VERSION = "okf_bq_graph.catalog_live/0.1.0"
+B2_VERSION = "okf_bq_graph.catalog_live/0.2.0"
 IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 ENTRY_LOCAL = "metrics/gross-margin"
 CONCEPT_PATH = "metrics/gross-margin.md"
@@ -227,14 +236,19 @@ class LiveCloud:
         _rows, job = self._query("merge_head", sql, [self._scalar("b", bundle_id), self._scalar("p", publication_id)], job_id, timeout)
         return {"job_id": job.job_id, "rows": getattr(job, "num_dml_affected_rows", None)}
 
-    def job_state(self, job_id: str, timeout: float) -> Optional[dict]:
+    def job_state(self, job_id: str, timeout: float, project: Optional[str] = None, location: Optional[str] = None) -> Optional[dict]:
+        """Read one job back under its OWN journaled reference. `project`/`location` default to this adapter's, but a
+        child chain's jobs carry their own reference and must be read under it — reading a job under the wrong
+        (project, location) returns NotFound, which is not evidence that the job does not exist."""
         from google.api_core.exceptions import NotFound
-        self.calls.append({"op": "job_state", "job_id": job_id, "at": _now()})
+        proj, loc = project or self.project, location or self.location
+        self.calls.append({"op": "job_state", "job_id": job_id, "project": proj, "location": loc, "at": _now()})
         try:
-            job = self.client.get_job(job_id, project=self.project, location=self.location, retry=None, timeout=timeout)
+            job = self.client.get_job(job_id, project=proj, location=loc, retry=None, timeout=timeout)
         except NotFound:
             return None
-        return {"state": job.state, "error": _jsonable(job.error_result), "user_email": getattr(job, "user_email", None)}
+        return {"state": job.state, "error": _jsonable(job.error_result), "user_email": getattr(job, "user_email", None),
+                "project": proj, "location": loc}
 
     def cancel_job(self, job_id: str, timeout: float) -> dict:
         self.calls.append({"op": "cancel_job", "job_id": job_id, "at": _now()})
@@ -328,11 +342,81 @@ class LiveCloud:
         return {"deleted": name}
 
 
+def _accepts_ref(fn: Any) -> bool:
+    """Older `CloudOps` adapters take `job_state(job_id, timeout)` only; the audit reads a child chain's jobs under
+    their own reference where the adapter supports it and records the missing reference where it does not."""
+    import inspect
+    try:
+        return "project" in inspect.signature(fn).parameters
+    except (TypeError, ValueError):
+        return False
+
+
 def _try_json(raw: bytes) -> Any:
     try:
         return json.loads(raw.decode("utf-8")) if raw else None
     except (UnicodeDecodeError, ValueError):
         return None
+
+
+# ----------------------------------------------------------------------------- budget
+class BudgetExceeded(NotDispatched):
+    """The phase deadline passed before this operation was dispatched. Nothing was sent, so the journal closes the
+    entry NOT_SUBMITTED instead of leaving an unresolved UNKNOWN that would block a clean teardown."""
+
+
+# every CloudOps call the driver's phase budget bounds; the ones that change cloud state are refused outright once the
+# experiment deadline passes, so a cap expiry cannot leave new experimental mutations behind (Astra PR42 P2 #1).
+MUTATING_OPS = frozenset({"create_dataset", "delete_dataset", "run_ddl", "load_rows", "insert_row", "update_status",
+                          "merge_head", "create_entry", "patch_entry", "delete_entry"})
+READ_OPS = frozenset({"get_dataset", "select_rows", "job_state", "cancel_job", "get_entry", "attempt_outcome"})
+CLOUD_OPS = MUTATING_OPS | READ_OPS
+
+
+class BudgetedCloud:
+    """A `CloudOps` façade that enforces the driver's phase deadline on the operations themselves, not only between
+    cases. Two things happen on every call:
+
+      * **Refusal after expiry.** Once the phase deadline has passed no further call is dispatched — `BudgetExceeded`
+        is raised before anything reaches the network. The experiment phase therefore cannot advance a head, withdraw a
+        publication or patch an entry after its cap (the defect Astra's cap probe reproduced).
+      * **Deadline propagation.** The caller's `timeout` is clamped to the time actually left in the phase, so one
+        blocking call cannot outlive the budget it was issued under.
+
+    `open_phase` starts a new, separately bounded phase. Cleanup runs in its own phase with its own deadline, so an
+    exhausted experiment budget never prevents teardown — the deletes and their absence readbacks still get a bounded
+    allowance of their own."""
+
+    def __init__(self, inner: Any, clock: Callable[[], float], budget_s: float, phase: str = "experiment"):
+        object.__setattr__(self, "inner", inner)
+        object.__setattr__(self, "clock", clock)
+        object.__setattr__(self, "phase", phase)
+        object.__setattr__(self, "deadline", clock() + budget_s)
+        object.__setattr__(self, "refused", [])
+
+    def open_phase(self, phase: str, budget_s: float) -> dict:
+        object.__setattr__(self, "phase", phase)
+        object.__setattr__(self, "deadline", self.clock() + budget_s)
+        return {"phase": phase, "budget_s": budget_s, "opens_at": _now()}
+
+    def remaining(self) -> float:
+        return round(self.deadline - self.clock(), 3)
+
+    def __getattr__(self, name: str) -> Any:
+        attr = getattr(self.inner, name)
+        if name not in CLOUD_OPS or not callable(attr):
+            return attr
+
+        def bounded(*a: Any, **kw: Any) -> Any:
+            left = self.remaining()
+            if left <= 0:
+                rec = {"op": name, "phase": self.phase, "mutates": name in MUTATING_OPS, "at": _now(), "over_by_s": -left}
+                self.refused.append(rec)
+                raise BudgetExceeded(f"{self.phase} budget exhausted {-left}s ago: {name} was not dispatched")
+            if isinstance(kw.get("timeout"), (int, float)):
+                kw["timeout"] = min(kw["timeout"], left)      # a blocking call never outlives the phase it was issued under
+            return attr(*a, **kw)
+        return bounded
 
 
 # ----------------------------------------------------------------------------- experiment driver
@@ -360,9 +444,11 @@ class B2Experiment:
 
     def __init__(self, out_root: str, cfg: LifecycleConfig, cloud: Any, bq_client: Any, reader_factory: Callable[[], Any], sdk_root: str,
                  acme_root: str, chain_runner: Callable[..., dict], chain_module: Any = None, wall_cap_s: float = 1200.0,
-                 clock: Callable[[], float] = time.monotonic, redact: Optional[Callable[[Any], Any]] = None):
-        self.cfg, self.cloud, self.bq, self.reader_factory, self.sdk_root, self.acme_root = cfg, cloud, bq_client, reader_factory, sdk_root, acme_root
+                 clock: Callable[[], float] = time.monotonic, redact: Optional[Callable[[Any], Any]] = None,
+                 cleanup_cap_s: float = 300.0, chain_min_s: float = 120.0):
+        self.cfg, self.bq, self.reader_factory, self.sdk_root, self.acme_root = cfg, bq_client, reader_factory, sdk_root, acme_root
         self.chain_runner, self.wall_cap_s, self.clock = chain_runner, wall_cap_s, clock
+        self.cleanup_cap_s, self.chain_min_s = cleanup_cap_s, chain_min_s
         if chain_module is None:
             from . import chain as chain_module
         self.chain_module = chain_module
@@ -372,7 +458,10 @@ class B2Experiment:
         self.journal = Journal(self.run_dir, cfg.run_id)
         if getattr(cloud, "retain", None) is None and hasattr(cloud, "retain"):
             cloud.retain = lambda name, raw: self.journal.retain(name, raw, subdir="catalog_ops")
-        self.life = Lifecycle(cfg, cloud, self.journal)
+        # the lifecycle only ever sees the budgeted façade: its deadline bounds the operations, not just the gaps between cases
+        self.raw_cloud = cloud
+        self.cloud = BudgetedCloud(cloud, clock, wall_cap_s, phase="experiment")
+        self.life = Lifecycle(cfg, self.cloud, self.journal)
         self.t0 = self.clock()
         self.summary: dict[str, Any] = {"b2": B2_VERSION, "run_id": cfg.run_id, "run_dir": str(self.run_dir), "started_at": _now(),
                                         "allowlist": cfg.allowlist(), "invocation_id": self.life.invocation_id, "owner_stamp": self.life.owner_stamp,
@@ -381,10 +470,13 @@ class B2Experiment:
                                                    "sdk_subprocess": "chain.run_receipt, 900 s per invocation, at most 2 per full chain (approved, sql-substitution)",
                                                    "cloud_timeout_s": cfg.timeout_s},
                                         "cases": [], "steps": [], "chains": {}, "publications": {}, "verdict": None}
+        self.summary["budget"].update(cleanup_cap_s=cleanup_cap_s, chain_min_s=chain_min_s)
         self.P1: Optional[str] = None
         self.P2: Optional[str] = None
         self.p2_projection: Optional[dict] = None
         self.blocked_reason: Optional[str] = None
+        self.chain_jobs: dict[str, list[dict]] = {}          # chain label -> full (project, location, job_id) references it submitted
+        self.chain_unresolved: dict[str, list[dict]] = {}
 
     # -- bookkeeping
     def _elapsed(self) -> float:
@@ -397,9 +489,13 @@ class B2Experiment:
         self._flush()
         return r
 
-    def _case(self, name: str, gate: str, expected: str, status: str, **rec: Any) -> dict:
+    def _case(self, name: str, gate: str, expected: str, status: str, chain_label: Optional[str] = None, **rec: Any) -> dict:
+        """`status` is the case's BEHAVIOUR at its boundary. It can still be downgraded once `_job_audit` has run:
+        a correct refusal whose job identities were never established is not a complete result (Astra PR42 P1). The
+        behaviour verdict is preserved separately so the downgrade never erases what the boundary actually did."""
         assert status in GRADES, status
-        c = {"case": name, "origin_gate": gate, "expected": expected, "status": status, "at": _now(), "elapsed_s": self._elapsed(), **rec}
+        c = {"case": name, "origin_gate": gate, "expected": expected, "status": status, "behaviour": status,
+             "chain_label": chain_label, "at": _now(), "elapsed_s": self._elapsed(), **rec}
         self.summary["cases"].append(_jsonable(c))
         self.journal.note("b2_case", **_jsonable(c))
         self._flush()
@@ -416,6 +512,22 @@ class B2Experiment:
             return self.blocked_reason
         if self._elapsed() > self.wall_cap_s:
             return f"wall cap {self.wall_cap_s}s exceeded at {self._elapsed()}s"
+        return None
+
+    def _guard(self, what: str) -> None:
+        """Refuse to BEGIN new experimental work once the cap is gone. `BudgetedCloud` refuses the individual
+        operations too; this stops a case before it has half-mutated the owned resources."""
+        over = self._over_budget()
+        if over:
+            raise BudgetExceeded(f"{what} not started: {over}")
+
+    def _chain_budget(self) -> Optional[str]:
+        """`run_chain` takes no deadline, so the driver cannot interrupt one that is already running. What it can do is
+        refuse to START a chain that cannot plausibly finish inside the cap (`chain_min_s`), and bound every lifecycle
+        operation around it through `BudgetedCloud`. This limitation is recorded rather than papered over."""
+        left = round(self.wall_cap_s - self._elapsed(), 3)
+        if left < self.chain_min_s:
+            return f"only {left}s of the {self.wall_cap_s}s cap left; a chain needs at least {self.chain_min_s}s"
         return None
 
     # -- one chain invocation against the owned entry/dataset
@@ -439,19 +551,62 @@ class B2Experiment:
                                         "acceptance": (c.get("acceptance") or {}).get("status")} for c in out.get("cases", [])},
                   "same_requester": (out.get("same_requester") or {}).get("status"), "unresolved_jobs": (out.get("evidence") or {}).get("unresolved_jobs"),
                   "graph_jobs": len((out.get("job_inventory") or {}).get("graph", [])), "receipt_jobs": (out.get("job_inventory") or {}).get("receipt")}
+        self.chain_jobs[label] = self._chain_job_refs(label, out)
+        unresolved = list((out.get("job_inventory") or {}).get("unresolved") or [])
+        if not unresolved:      # an early refusal has no job_inventory: fall back to the chain journal's own entries
+            unresolved = [{"role": e.get("role"), "job_id": e.get("job_id"), "state": e.get("state")}
+                          for e in (out.get("journal") or {}).get("jobs") or [] if not e.get("terminal")]
+        self.chain_unresolved[label] = unresolved
+        digest["job_refs"] = len(self.chain_jobs[label])
         self.summary["chains"][label] = _jsonable(digest)
         self.journal.note("chain_finished", label=label, **_jsonable(digest))
         self._flush()
         return out
 
+    @staticmethod
+    def _chain_job_refs(label: str, out: dict) -> list[dict]:
+        """Every job a child chain submitted, as a FULL `(project, location, job_id)` reference. Graph-leg ids and their
+        references come from the chain's journal-backed inventory; receipt-leg jobs carry their own reference on the
+        case record (the flattened `job_inventory.receipt` list keeps only ids). A chain that refused early submits
+        graph jobs and no receipt job at all — those still need identity evidence, which is exactly the gap the chain's
+        own `same_requester` cannot close because it exits when either leg is empty."""
+        ji = out.get("job_inventory") or {}
+        refs, rows, seen = ji.get("refs") or {}, [], set()
+        # A chain that refuses early returns through `_broken()`, which never builds `job_inventory` at all — yet those
+        # runs DID submit pin-resolution / seed-visibility / head-observation jobs. Their references live only in the
+        # chain's own journal, so the audit starts there: an invisible job is the worst kind of missing evidence.
+        for e in (out.get("journal") or {}).get("jobs") or []:
+            if e.get("job_id") and e["job_id"] not in seen:
+                seen.add(e["job_id"])
+                rows.append({"source": f"chain:{label}", "leg": "graph", "role": e.get("role"), "job_id": e["job_id"],
+                             "project": e.get("project"), "location": e.get("location"), "journal_state": e.get("state"),
+                             "dispatched": e.get("state") != "NOT_SUBMITTED"})
+        for jid in ji.get("graph") or []:
+            if jid and jid not in seen:
+                seen.add(jid)
+                r = refs.get(jid) or {}
+                rows.append({"source": f"chain:{label}", "leg": "graph", "job_id": jid, "project": r.get("project"), "location": r.get("location")})
+        for c in out.get("cases", []) or []:
+            rec = c.get("receipt") or {}
+            job = (rec.get("receipt") or {}).get("job") if rec.get("invoked") else None
+            if job and job.get("job_id") and job["job_id"] not in seen:
+                seen.add(job["job_id"])
+                rows.append({"source": f"chain:{label}", "leg": "receipt", "case": c.get("case"), "job_id": job["job_id"],
+                             "project": job.get("project"), "location": job.get("location")})
+        return rows
+
     def _chain_or_error(self, label: str, **kw: Any) -> tuple[Optional[dict], Optional[str]]:
-        over = self._over_budget()
+        over = self._over_budget() or self._chain_budget()
         if over:
             self.summary["chains"][label] = {"error": f"not started: {over}"}
             self.journal.note("chain_skipped", label=label, reason=over)
             return None, f"not started: {over}"
         try:
             return self._chain(label, **kw), None
+        except BudgetExceeded as e:
+            self.summary["chains"][label] = {"error": f"budget: {e}"}
+            self.journal.note("chain_budget_exceeded", label=label, error=str(e))
+            raise
         except Exception as e:  # noqa: BLE001
             err = f"{type(e).__name__}: {str(e)[:300]}"
             self.summary["chains"][label] = {"error": err}
@@ -459,6 +614,23 @@ class B2Experiment:
             return None, err
 
     # -- graders (pure)
+    @staticmethod
+    def blocker(out: dict) -> Optional[str]:
+        """The reached-stage blocker, if this chain never got to the boundary the case is about.
+
+        A stage that returned `ERROR` is an OUTAGE — an absent SDK checkout, an unreadable store, a transport failure —
+        not a boundary that behaved incorrectly. `WRONG` must stay reserved for a boundary that was actually reached and
+        got the wrong answer, so a missing prerequisite grades `NOT_REACHED` with the blocker named and leaves the later
+        cases `BLOCKED` (Astra PR42 P2 #2). A typed refusal such as `FAIL_STALE` is NOT an error: it is a reached
+        boundary, and stays gradeable."""
+        if out.get("verdict") == "CHAIN_INCOMPLETE":
+            return f"chain incomplete at {out.get('broken_at')}"
+        at = out.get("broken_at")
+        rec = out.get(at) if isinstance(out.get(at), dict) else None
+        if rec and rec.get("status") == "ERROR":
+            return f"{at} unavailable: {str(rec.get('error'))[:200]}"
+        return None
+
     @staticmethod
     def grade_connected(out: dict, cfg: Any, served: str, expected_head: Optional[str]) -> tuple[str, list[str]]:
         """MET only when the fresh live read controlled the chain end to end on the owned resources."""
@@ -489,7 +661,10 @@ class B2Experiment:
         if out.get("verdict") != "CHAIN_CONNECTED":
             failed.append(f"verdict {out.get('verdict')} at {out.get('broken_at')}")
         if failed:
-            return ("NOT_REACHED" if out.get("verdict") == "CHAIN_INCOMPLETE" else "WRONG"), failed
+            blocker = B2Experiment.blocker(out)
+            if blocker:
+                return "NOT_REACHED", [f"BLOCKER {blocker}"] + failed
+            return "WRONG", failed
         return "MET", []
 
     @staticmethod
@@ -508,8 +683,9 @@ class B2Experiment:
         if any((c.get("receipt") or {}).get("invoked") for c in out.get("cases", [])):
             failed.append("a receipt was invoked")
         if failed:
-            if (out.get(stage) or {}).get("status") == "ERROR" or out.get("verdict") == "CHAIN_INCOMPLETE":
-                return "NOT_REACHED", failed
+            blocker = B2Experiment.blocker(out)
+            if blocker:
+                return "NOT_REACHED", [f"BLOCKER {blocker}"] + failed
             return "WRONG", failed
         return "MET", []
 
@@ -537,12 +713,14 @@ class B2Experiment:
         if out.get("verdict") != "CHAIN_BROKEN":
             failed.append(f"verdict {out.get('verdict')} != CHAIN_BROKEN (the chain must report the torn payload)")
         if failed:
-            return ("NOT_REACHED" if not cases or out.get("verdict") == "CHAIN_INCOMPLETE" else "WRONG"), failed
+            blocker = B2Experiment.blocker(out)
+            if blocker or not cases:
+                return "NOT_REACHED", ([f"BLOCKER {blocker}"] if blocker else ["BLOCKER no case ran"]) + failed
+            return "WRONG", failed
         return "MET", []
 
     # -- the experiment
     def run(self) -> dict:
-        cfg, life = self.cfg, self.life
         try:
             self._setup()
             self._control()
@@ -552,10 +730,15 @@ class B2Experiment:
             self._wrong_pins()
             self._mixed_payload()
             self._recovery()
+        except BudgetExceeded as e:      # the cap stops NEW experimental work; teardown gets its own budget below
+            self.blocked_reason = self.blocked_reason or f"BudgetExceeded: {e}"
+            self._step("experiment_budget_exhausted", error=str(e), refused_operations=list(self.cloud.refused))
         except Exception as e:  # noqa: BLE001 - every remaining case is BLOCKED with the reason; cleanup still runs
             self.blocked_reason = self.blocked_reason or f"{type(e).__name__}: {str(e)[:300]}"
             self._step("experiment_aborted", error=self.blocked_reason)
         finally:
+            # a separately bounded teardown phase: an exhausted experiment budget must never block cleanup
+            self._step("cleanup_phase_opened", **self.cloud.open_phase("cleanup", self.cleanup_cap_s))
             self._cleanup()
         done = {c["case"] for c in self.summary["cases"]}
         for name, gate in (("b2-control", "R1/R2"), ("historical-inflight", "R3"), ("historical-fresh", "R3"), ("fail-stale-withdrawn", "R3/R6"),
@@ -563,17 +746,31 @@ class B2Experiment:
                            ("mixed-payload-injection", "R4"), ("recovery-control", "R6"), ("cleanup", "R7/R8")):
             if name not in done:
                 self._case(name, gate, "-", "BLOCKED", reason=self.blocked_reason or "not reached (earlier case blocked the sequence)")
+        # the follow-up audit runs LAST, so it covers the teardown jobs too, and inside the cleanup budget
+        try:
+            audit = self._job_audit()
+        except Exception as e:  # noqa: BLE001 - an audit that cannot run leaves every identity gate incomplete
+            audit = {"overall": {"status": "INCOMPLETE", "reasons": [f"audit failed: {type(e).__name__}: {str(e)[:200]}"], "jobs": 0, "principals": []},
+                     "lifecycle": {"status": "INCOMPLETE", "reasons": ["audit failed"], "jobs": 0, "principals": []}, "by_chain": {}, "counts": {}}
+        self.summary["job_identity"] = {k: v for k, v in audit.items() if k != "jobs"}
+        self._apply_identity_gate(audit)
+        self._case("job-identity", "R5", "every lifecycle and child-chain job read back under its own reference: terminal, one principal",
+                   "MET" if audit["overall"]["status"] == "COMPLETE" else "NOT_REACHED",
+                   failed=audit["overall"]["reasons"], counts=audit.get("counts"), principals=audit["overall"]["principals"],
+                   retained=audit.get("retained"))
         statuses = [c["status"] for c in self.summary["cases"]]
         self.summary["verdict"] = ("B2_ALL_MET" if all(s == "MET" for s in statuses) else "B2_WRONG" if "WRONG" in statuses else "B2_INCOMPLETE")
         self.summary["finished_at"] = _now()
         self.summary["elapsed_s"] = self._elapsed()
         self.summary["lifecycle_journal"] = self.journal.summary()
+        self.summary["budget"]["refused_after_cap"] = list(self.cloud.refused)
         self.summary["publications"] = {"P1": self.P1, "P2": self.P2}
         self._flush()
         (self.run_dir / "b2_summary.md").write_text(self.markdown(), encoding="utf-8")
         return self.summary
 
     def _setup(self) -> None:
+        self._guard("setup")
         cfg, life = self.cfg, self.life
         # 0. originals (read only), authored aspects copied from the original entry
         snap = life.snapshot_originals()
@@ -618,6 +815,7 @@ class B2Experiment:
             raise RuntimeError(self.blocked_reason)
 
     def _control(self) -> None:
+        self._guard("b2-control")
         cfgc = self.cfg.catalog_config(ENTRY_LOCAL)
         out, err = self._chain_or_error("b2-control")
         if out is None:
@@ -625,12 +823,15 @@ class B2Experiment:
             self.blocked_reason = f"control chain did not run: {err}"
             raise RuntimeError(self.blocked_reason)
         status, failed = self.grade_connected(out, cfgc, self.P1, self.P1)
-        self._case("b2-control", "R1/R2", "CHAIN_CONNECTED on the owned entry/dataset with head = P1", status, failed=failed, chain=self.summary["chains"]["b2-control"])
+        self._case("b2-control", "R1/R2", "CHAIN_CONNECTED on the owned entry/dataset with head = P1", status, chain_label="b2-control",
+                   failed=failed, chain=self.summary["chains"]["b2-control"])
         if status != "MET":
-            self.blocked_reason = f"control not MET: {failed}"
+            blocker = self.blocker(out)
+            self.blocked_reason = (f"control blocked: {blocker}" if blocker else f"control not MET: {failed}")
             raise RuntimeError(self.blocked_reason)
 
     def _historical(self) -> None:
+        self._guard("historical-inflight")
         cfgc, life = self.cfg.catalog_config(ENTRY_LOCAL), self.life
         real = self.chain_module.resolve_publication
         barrier: dict[str, Any] = {"fired": False}
@@ -655,19 +856,21 @@ class B2Experiment:
             note = None
             if status != "MET" and (out.get("publication") or {}).get("status") == "FAIL_STALE":
                 note = "historical serving unavailable: FAIL_STALE is a safe refusal, not a retained serve"
-            self._case("historical-inflight", "R3", "P1 served exactly while the head moved to P2 mid-request", status, failed=failed, note=note,
-                       barrier=barrier, chain=self.summary["chains"]["historical-inflight"])
+            self._case("historical-inflight", "R3", "P1 served exactly while the head moved to P2 mid-request", status, chain_label="historical-inflight",
+                       failed=failed, note=note, barrier=barrier, chain=self.summary["chains"]["historical-inflight"])
         # a fresh Catalog-P1 request after the switch
+        self._guard("historical-fresh")
         head_now = life.read_head()
         out2, err2 = self._chain_or_error("historical-fresh")
         if out2 is None:
             self._case("historical-fresh", "R3", "fresh P1 request after the switch: head observed = P2, P1 served exactly", "NOT_REACHED", error=err2, head=head_now)
         else:
             status, failed = self.grade_connected(out2, cfgc, self.P1, self.P2)
-            self._case("historical-fresh", "R3", "fresh P1 request after the switch: head observed = P2, P1 served exactly", status, failed=failed,
-                       head=head_now, chain=self.summary["chains"]["historical-fresh"])
+            self._case("historical-fresh", "R3", "fresh P1 request after the switch: head observed = P2, P1 served exactly", status,
+                       chain_label="historical-fresh", failed=failed, head=head_now, chain=self.summary["chains"]["historical-fresh"])
 
     def _fail_stale(self) -> None:
+        self._guard("fail-stale-withdrawn")
         life = self.life
         w = life.withdraw(self.P1)
         self._step("withdraw_p1", **w)
@@ -680,7 +883,8 @@ class B2Experiment:
                 self._case("fail-stale-withdrawn", "R3/R6", "FAIL_STALE, no content, no receipt", "NOT_REACHED", error=err)
                 return
             status, failed = self.grade_refusal(out, "publication", "FAIL_STALE", "PUBLICATION_NOT_READY:WITHDRAWN")
-            self._case("fail-stale-withdrawn", "R3/R6", "FAIL_STALE, no content, no receipt", status, failed=failed, chain=self.summary["chains"]["fail-stale-withdrawn"])
+            self._case("fail-stale-withdrawn", "R3/R6", "FAIL_STALE, no content, no receipt", status, chain_label="fail-stale-withdrawn",
+                       failed=failed, chain=self.summary["chains"]["fail-stale-withdrawn"])
         finally:
             r = life.restore(self.P1)
             self._step("restore_p1", **r)
@@ -689,6 +893,7 @@ class B2Experiment:
                 raise RuntimeError(self.blocked_reason)
 
     def _missing_aspect(self) -> None:
+        self._guard("missing-runtime-aspect")
         life = self.life
         rm = life.remove_runtime_aspect(ENTRY_LOCAL)
         self._step("remove_runtime_aspect", **rm)
@@ -705,8 +910,8 @@ class B2Experiment:
             if sorted(rm.get("authored_aspects") or []) != expected_authored:
                 failed.append(f"authored aspects after removal {rm.get('authored_aspects')} != {expected_authored}")
                 status = "WRONG" if status == "MET" else status
-            self._case("missing-runtime-aspect", "R1/R6", "ASPECT_MISSING at seed, authored aspects intact", status, failed=failed,
-                       chain=self.summary["chains"]["missing-runtime-aspect"])
+            self._case("missing-runtime-aspect", "R1/R6", "ASPECT_MISSING at seed, authored aspects intact", status,
+                       chain_label="missing-runtime-aspect", failed=failed, chain=self.summary["chains"]["missing-runtime-aspect"])
         finally:
             self._restore_pin("after_missing_aspect")
 
@@ -718,6 +923,7 @@ class B2Experiment:
             raise RuntimeError(self.blocked_reason)
 
     def _wrong_pins(self) -> None:
+        self._guard("wrong-pins")
         life, B = self.life, self.cfg.bundle_id
         ghost = "pub_" + hashlib.sha256(f"never-retained:{self.cfg.run_id}".encode()).hexdigest()[:16]
         for name, override, prefix in (
@@ -731,11 +937,13 @@ class B2Experiment:
                     self._case(name, "R6", f"FAIL_STALE ({prefix}), no content, no receipt", "NOT_REACHED", error=err, override=override)
                     continue
                 status, failed = self.grade_refusal(out, "publication", "FAIL_STALE", prefix)
-                self._case(name, "R6", f"FAIL_STALE ({prefix}), no content, no receipt", status, failed=failed, override=override, chain=self.summary["chains"][name])
+                self._case(name, "R6", f"FAIL_STALE ({prefix}), no content, no receipt", status, chain_label=name, failed=failed,
+                           override=override, chain=self.summary["chains"][name])
             finally:
                 self._restore_pin(name)
 
     def _mixed_payload(self) -> None:
+        self._guard("mixed-payload-injection")
         real = self.chain_module.governed
         inj_dir = self.run_dir / "injection"
         inj_dir.mkdir(exist_ok=True)
@@ -777,17 +985,19 @@ class B2Experiment:
             self._case("mixed-payload-injection", "R4", "tampered cases refused by the payload guard before the SDK", "NOT_REACHED", reason="no mutation was applied", injection=meta)
             return
         status, failed = self.grade_injection(out)
-        self._case("mixed-payload-injection", "R4", "tampered cases refused by the payload guard before the SDK", status, failed=failed, injection=meta,
-                   chain=self.summary["chains"]["mixed-payload-injection"])
+        self._case("mixed-payload-injection", "R4", "tampered cases refused by the payload guard before the SDK", status,
+                   chain_label="mixed-payload-injection", failed=failed, injection=meta, chain=self.summary["chains"]["mixed-payload-injection"])
 
     def _recovery(self) -> None:
+        self._guard("recovery-control")
         cfgc = self.cfg.catalog_config(ENTRY_LOCAL)
         out, err = self._chain_or_error("recovery-control")
         if out is None:
             self._case("recovery-control", "R6", "valid pin restored: CHAIN_CONNECTED again (head = P2, P1 served)", "NOT_REACHED", error=err)
             return
         status, failed = self.grade_connected(out, cfgc, self.P1, self.P2)
-        self._case("recovery-control", "R6", "valid pin restored: CHAIN_CONNECTED again (head = P2, P1 served)", status, failed=failed, chain=self.summary["chains"]["recovery-control"])
+        self._case("recovery-control", "R6", "valid pin restored: CHAIN_CONNECTED again (head = P2, P1 served)", status,
+                   chain_label="recovery-control", failed=failed, chain=self.summary["chains"]["recovery-control"])
 
     def _cleanup(self) -> None:
         life = self.life
@@ -800,15 +1010,132 @@ class B2Experiment:
             rec["cleanup"] = life.cleanup()
         except Exception as e:  # noqa: BLE001
             rec["cleanup"] = {"status": "ERROR", "error": f"{type(e).__name__}: {str(e)[:200]}"}
-        rec["unresolved_jobs"] = len(self.journal.unresolved())
+        rec["unresolved_operations"] = len(self.journal.unresolved())
+        # operations != BigQuery jobs: the journal also holds Catalog GET/PATCH/DELETE and dataset create/delete, which
+        # submit no job at all. Reporting the operation count as a job count is what Astra's PR42 P1 caught.
+        js = self.journal.summary()
+        rec["counts"] = {"lifecycle_operations": js["entries"], "lifecycle_bigquery_jobs": js["with_job_id"]}
         rec["derived_tree"] = self._prune_derived()
         self._step("cleanup", **rec)
-        ok = rec["originals"].get("status") == "UNCHANGED" and rec["cleanup"].get("status") == "COMPLETE" and rec["unresolved_jobs"] == 0
-        failed = [] if ok else [f"originals {rec['originals'].get('status')}", f"cleanup {rec['cleanup'].get('status')}", f"unresolved_jobs {rec['unresolved_jobs']}"]
-        self._case("cleanup", "R7/R8", "originals UNCHANGED, owned resources absent on readback, every lifecycle job terminal",
+        ok = rec["originals"].get("status") == "UNCHANGED" and rec["cleanup"].get("status") == "COMPLETE" and rec["unresolved_operations"] == 0
+        failed = [] if ok else [f"originals {rec['originals'].get('status')}", f"cleanup {rec['cleanup'].get('status')}",
+                                f"unresolved_operations {rec['unresolved_operations']}"]
+        self._case("cleanup", "R7/R8", "originals UNCHANGED, owned resources absent on readback, every lifecycle operation terminal",
                    "MET" if ok else "NOT_REACHED", failed=failed, originals=rec["originals"], cleanup_status=rec["cleanup"].get("status"),
                    cleanup_steps=[{k: s.get(k) for k in ("resource", "kind", "deleted", "absent_verified", "reconciled", "error")} for s in rec["cleanup"].get("steps", [])],
-                   unresolved_jobs=rec["unresolved_jobs"])
+                   counts=rec["counts"], unresolved_operations=rec["unresolved_operations"])
+
+    # -- job identity (Astra PR42 P1)
+    def _lifecycle_job_refs(self) -> list[dict]:
+        """The driver's OWN job-backed operations, as full references. `journal.jobs()` also holds the non-job cloud
+        operations (Catalog GETs/PATCHes, dataset create/delete); those are operations, not BigQuery jobs, and are
+        counted separately — conflating the two is what produced the wrong '78 lifecycle jobs' wording."""
+        return [{"source": "lifecycle", "leg": "lifecycle", "role": e.get("role"), "job_id": e["job_id"],
+                 "project": e.get("project"), "location": e.get("location"), "journal_state": e.get("state"),
+                 "journal_terminal": bool(e.get("terminal")),
+                 # a job id is chosen before dispatch, so the journal can hold one for a job that never existed. NOT_SUBMITTED
+                 # is established locally (refused before the send) or by jobs.get; either way there is no job to identify.
+                 "dispatched": e.get("state") != "NOT_SUBMITTED"}
+                for e in self.journal.jobs() if e.get("job_id")]
+
+    def _job_audit(self, timeout: Optional[float] = None) -> dict:
+        """Read every job this run submitted back under its own full reference and retain what the server says.
+
+        The gap this closes: the chain's `same_requester` needs BOTH legs populated, so it returns `UNKNOWN` for any
+        adversary that correctly refused before the SDK (graph jobs, no receipt) and `NOT_RUN` for one that refused
+        before any case. That is the *expected* shape of those negatives, which meant the strongest B2 results were the
+        ones with the weakest identity evidence. This audit does not depend on either leg being non-empty: it walks the
+        exact job set — lifecycle + every child chain, graph-only refusals included — and records the actual principal,
+        terminal state and error for each. A job it cannot read leaves the gate incomplete; it never invents identity.
+
+        Read-only: `jobs.get` submits no job, so auditing cannot grow the set it is auditing."""
+        t = timeout if timeout is not None else self.cfg.timeout_s
+        refs = self._lifecycle_job_refs()
+        for label, rows in self.chain_jobs.items():
+            refs.extend(rows)
+        jobs, seen = [], set()
+        for r in refs:
+            key = (r.get("project"), r.get("location"), r["job_id"])
+            if key in seen:
+                continue
+            seen.add(key)
+            rec = dict(r)
+            if not r.get("dispatched", True):
+                rec.update(read="NOT_DISPATCHED", state="NOT_SUBMITTED", user_email=None, error=None)
+                jobs.append(rec)
+                continue
+            try:
+                st = self.raw_cloud.job_state(r["job_id"], timeout=t, project=r.get("project"), location=r.get("location")) \
+                    if _accepts_ref(self.raw_cloud.job_state) else self.raw_cloud.job_state(r["job_id"], timeout=t)
+                if st is None:
+                    rec.update(read="NOT_FOUND", state=None, user_email=None, error=None)
+                else:
+                    rec.update(read="OK", state=st.get("state"), user_email=st.get("user_email"), error=_jsonable(st.get("error")))
+            except Exception as e:  # noqa: BLE001 - an unreadable job leaves the gate incomplete; it is never assumed terminal
+                rec.update(read="ERROR", state=None, user_email=None, error=f"{type(e).__name__}: {str(e)[:200]}")
+            jobs.append(rec)
+
+        def gate(all_rows: list[dict], unresolved: list[dict]) -> dict:
+            # a never-dispatched id is listed but carries no identity requirement: there is no job on the server to read
+            rows = [j for j in all_rows if j.get("dispatched", True)]
+            not_dispatched = [j["job_id"] for j in all_rows if not j.get("dispatched", True)]
+            missing_ref = [j["job_id"] for j in rows if not (j.get("project") and j.get("location"))]
+            unread = [j["job_id"] for j in rows if j.get("read") != "OK"]
+            non_terminal = [j["job_id"] for j in rows if j.get("read") == "OK" and j.get("state") != "DONE"]
+            errored = [j["job_id"] for j in rows if j.get("read") == "OK" and j.get("error")]
+            no_identity = [j["job_id"] for j in rows if j.get("read") == "OK" and not j.get("user_email")]
+            principals = sorted({j["user_email"] for j in rows if j.get("user_email")})
+            reasons = []
+            if missing_ref:
+                reasons.append(f"{len(missing_ref)} job(s) without a complete (project, location) reference")
+            if unread:
+                reasons.append(f"{len(unread)} job(s) not read back")
+            if non_terminal:
+                reasons.append(f"{len(non_terminal)} job(s) not DONE")
+            if no_identity:
+                reasons.append(f"{len(no_identity)} job(s) with no principal: equality of absent identities proves nothing")
+            if len(principals) > 1:
+                reasons.append(f"{len(principals)} distinct principals: {principals}")
+            if unresolved:
+                reasons.append(f"{len(unresolved)} unresolved child-chain job(s)")
+            # An empty job set is COMPLETE, not incomplete: a boundary that refused before submitting anything (the
+            # missing-aspect case refuses at seed) has no job whose identity could be unknown. What that case must
+            # still prove is its BEHAVIOUR, which `grade_refusal` checks independently.
+            return {"status": "COMPLETE" if not reasons else "INCOMPLETE",
+                    "jobs": len(rows), "principals": principals, "reasons": reasons,
+                    "note": None if rows else "no job was submitted at this boundary",
+                    "missing_reference": missing_ref, "not_read_back": unread, "not_terminal": non_terminal,
+                    "errored": errored, "without_principal": no_identity, "not_dispatched": not_dispatched,
+                    "unresolved_child_jobs": unresolved}
+
+        by_chain = {label: gate([j for j in jobs if j["source"] == f"chain:{label}"], self.chain_unresolved.get(label, []))
+                    for label in self.chain_jobs}
+        lifecycle = gate([j for j in jobs if j["source"] == "lifecycle"], [])
+        overall = gate(jobs, [u for v in self.chain_unresolved.values() for u in v])
+        ops = self.journal.summary()
+        audit = {"note": "every job this run submitted, read back under its own (project, location, job id); lifecycle "
+                         "OPERATIONS are counted separately from lifecycle BigQuery JOBS",
+                 "overall": overall, "lifecycle": lifecycle, "by_chain": by_chain,
+                 "counts": {"lifecycle_operations": ops["entries"], "lifecycle_bigquery_jobs": ops["with_job_id"],
+                            "chain_jobs": sum(len(v) for v in self.chain_jobs.values()), "total_jobs": len(jobs)},
+                 "jobs": jobs, "at": _now()}
+        raw = (json.dumps(self.redact(_jsonable(audit)), indent=1, sort_keys=True, default=str) + "\n").encode("utf-8")
+        (self.run_dir / "job_identity.json").write_bytes(raw)
+        audit["retained"] = {"path": str(self.run_dir / "job_identity.json"), "sha256": hashlib.sha256(raw).hexdigest()}
+        return audit
+
+    def _apply_identity_gate(self, audit: dict) -> None:
+        """A correct boundary with unknown job identity is not a complete result. The behaviour verdict is kept in
+        `behaviour`; `status` carries the combined result the run is allowed to claim."""
+        for c in self.summary["cases"]:
+            label = c.get("chain_label")
+            g = audit["by_chain"].get(label) if label else (audit["lifecycle"] if c["case"] == "cleanup" else None)
+            if g is None:
+                continue
+            c["identity"] = {k: g[k] for k in ("status", "jobs", "principals", "reasons")}
+            if c["status"] == "MET" and g["status"] != "COMPLETE":
+                c["status"] = "NOT_REACHED"
+                c.setdefault("failed", []).append(f"job identity evidence incomplete: {'; '.join(g['reasons'])}")
 
     def _prune_derived(self) -> dict:
         """The retained P2 tree is a full copy of the pinned bundle; after the run only `derivation.json` and the changed
@@ -839,14 +1166,23 @@ class B2Experiment:
         lines = [f"# Slice B2 owned lifecycle — {s['run_id']}", "",
                  f"verdict `{s['verdict']}` · P1 `{s['publications'].get('P1')}` · P2 `{s['publications'].get('P2')}` · elapsed {s.get('elapsed_s')} s · "
                  f"dataset `{s['allowlist']['dataset']}` · entry prefix `{s['allowlist']['entry_prefix']}`", "",
-                 "| case | gate | expected | status | detail |", "|---|---|---|---|---|"]
+                 "| case | gate | expected | status | job identity | detail |", "|---|---|---|---|---|---|"]
         for c in s["cases"]:
             detail = "; ".join(c.get("failed") or []) or c.get("note") or c.get("reason") or c.get("error") or ""
             ch = c.get("chain") or {}
             if ch.get("verdict"):
                 detail = (detail + " " if detail else "") + f"chain {ch['verdict']}" + (f" at {ch['broken_at']}" if ch.get("broken_at") else "") + \
                     f", head {((ch.get('publication') or {}).get('head') or {}).get('publication_id')}"
-            lines.append(f"| {c['case']} | {c['origin_gate']} | {c['expected']} | **{c['status']}** | {detail[:300]} |")
+            beh = c.get("behaviour")
+            status = f"**{c['status']}**" + (f" (boundary {beh})" if beh and beh != c["status"] else "")
+            ident = (c.get("identity") or {}).get("status") or "-"
+            lines.append(f"| {c['case']} | {c['origin_gate']} | {c['expected']} | {status} | {ident} | {detail[:300]} |")
+        ji = s.get("job_identity") or {}
+        counts = ji.get("counts") or {}
+        if counts:
+            lines += ["", f"Job set: {counts.get('lifecycle_operations')} lifecycle operations of which "
+                          f"{counts.get('lifecycle_bigquery_jobs')} are BigQuery jobs, plus {counts.get('chain_jobs')} child-chain jobs "
+                          f"= {counts.get('total_jobs')} jobs audited; principals {(ji.get('overall') or {}).get('principals')}."]
         return "\n".join(lines) + "\n"
 
 
@@ -860,7 +1196,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--acme-root", default=os.environ.get("OKF_ACME_ROOT", "/Users/haiyuancao/knowledge-catalog/okf/bundles/acme_retail"))
     ap.add_argument("--sdk-root", default=None)
     ap.add_argument("--timeout-s", type=float, default=30.0, help="per cloud operation (harness limit, not an SLO)")
-    ap.add_argument("--wall-cap-s", type=float, default=1200.0)
+    ap.add_argument("--wall-cap-s", type=float, default=1200.0, help="experiment phase; new mutations are refused once it expires")
+    ap.add_argument("--cleanup-cap-s", type=float, default=300.0, help="separate teardown budget, unaffected by the experiment cap")
+    ap.add_argument("--chain-min-s", type=float, default=120.0, help="a chain is not started with less than this left of the cap")
     a = ap.parse_args(argv)
     if not a.live:
         ap.error("--live is required: the B2 driver only runs against real BigQuery + Dataplex (hermetic coverage is tests/test_catalog_live.py)")
@@ -872,13 +1210,16 @@ def main(argv: Optional[list[str]] = None) -> int:
     cfg = LifecycleConfig(run_id=run_id, timeout_s=a.timeout_s)
     client = bigquery.Client(project=PROJECT, location=LOCATION)
     cloud = LiveCloud(client)
-    exp = B2Experiment(a.out, cfg, cloud, client, HttpReader, a.sdk_root or sdk_root(), a.acme_root, run_chain, wall_cap_s=a.wall_cap_s, redact=redact)
+    exp = B2Experiment(a.out, cfg, cloud, client, HttpReader, a.sdk_root or sdk_root(), a.acme_root, run_chain, wall_cap_s=a.wall_cap_s,
+                       redact=redact, cleanup_cap_s=a.cleanup_cap_s, chain_min_s=a.chain_min_s)
     print(f"run_id={run_id} run_dir={exp.run_dir} dataset={cfg.dataset} entry_prefix={cfg.entry_prefix}", flush=True)
     s = exp.run()
     for c in s["cases"]:
         print(f"{c['case']:24s} {c['status']:12s} {'; '.join(c.get('failed') or [])[:160]}", flush=True)
+    ji = s.get("job_identity") or {}
     print(f"verdict={s['verdict']} elapsed_s={s['elapsed_s']} cleanup={next((c.get('cleanup_status') for c in s['cases'] if c['case'] == 'cleanup'), None)} "
-          f"lifecycle_unresolved={s['lifecycle_journal']['unresolved']} summary={exp.run_dir / 'b2_summary.json'}", flush=True)
+          f"lifecycle_unresolved={s['lifecycle_journal']['unresolved']} job_identity={(ji.get('overall') or {}).get('status')} "
+          f"jobs_audited={(ji.get('counts') or {}).get('total_jobs')} summary={exp.run_dir / 'b2_summary.json'}", flush=True)
     return 0 if s["verdict"] == "B2_ALL_MET" else 1
 
 
