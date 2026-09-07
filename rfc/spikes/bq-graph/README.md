@@ -28,7 +28,7 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `fixtures/bundle_b/` | Negative fixture: identical relative paths, missing targets, duplicate hits, ambiguous replacement, `../` escape |
 | `fixtures/cases.json`, `fixtures/scale.json` | Query set and benchmark cell matrix |
 | `okf_bq_graph/catalog.py`, `seed.py`, `publication.py`, `journal.py`, `catalog_lifecycle.py` | Catalog-seeded chain (2026-09-06): Dataplex list/get reader + trusted-config parser, exact `ConceptSeed`, retained-publication resolution + trusted-source compilation + payload consistency guard, run-owned job journal, isolated relational-only lifecycle driver for the owned republish experiment |
-| `okf_bq_graph/catalog_live.py` | Slice B2 live glue (2026-09-07): the `CloudOps` adapter against real BigQuery + Dataplex (bounded, no client retries, typed create-attempt outcomes) and the owned-lifecycle experiment driver that runs the Catalog-seeded chain against run-owned resources and grades every case MET / WRONG / NOT_REACHED / BLOCKED → `evidence/catalog-chain/<run_id>/` |
+| `okf_bq_graph/catalog_live.py` | Slice B2 live glue (2026-09-07): the `CloudOps` adapter against real BigQuery + Dataplex (bounded, no client retries, typed create-attempt outcomes), `BudgetedCloud` (the phase deadline bounds the operations, not just the gaps between cases), the job-identity audit over the exact submitted job set, and the owned-lifecycle experiment driver that runs the Catalog-seeded chain against run-owned resources and grades every case MET / WRONG / NOT_REACHED / BLOCKED → `evidence/catalog-chain/<run_id>/` |
 | `tests/` | `test_compile.py`, `test_oracle.py`, `test_retrieve.py` (contract runs against oracle by default; `OKF_LIVE_ENGINE=gql|fallback` runs it live); `test_catalog.py`, `test_catalog_publication.py`, `test_catalog_lifecycle.py`, `test_catalog_live.py` + the catalog cases in `test_chain.py` (all hermetic, injected Catalog responses / fake cloud) |
 | `evidence/` | Raw captures: capacity gate, smoke jobs, projection, publish log, integration/governance JSON, `requests.jsonl`, `summary.json`, `cost.json`, comparison, report |
 
@@ -375,7 +375,8 @@ P2 `pub_ae9b6cb130731d01`, and runs nine full chains against them.
 | `wrong-seed-pin` | **MET** | `FAIL_STALE` `SEED_MISSING` |
 | `mixed-payload-injection` | **MET** | both tampered cases `INCONSISTENT` → `NOT_BOUND` → no receipt → `REFUSED`; the untouched `declaration-mismatch` case stayed `CONSISTENT` |
 | `recovery-control` | **MET** | valid pin restored, `CHAIN_CONNECTED` again (head = P2, P1 served) |
-| `cleanup` | **MET** | originals `UNCHANGED` (identical entry SHA-256 and head before/after), owned entry and dataset deleted with absence readback, 78 lifecycle jobs `DONE`, 0 unresolved |
+| `cleanup` | **MET** | originals `UNCHANGED` (identical entry SHA-256 and head before/after), owned entry and dataset deleted with absence readback, 78 lifecycle **operations** `DONE` (of which **48 are BigQuery jobs**; the rest are Catalog GET/PATCH/DELETE and dataset create/delete, which submit no job), 0 unresolved |
+| `job-identity` | **MET** | all **170** jobs the run submitted — 48 lifecycle + 114 graph + 8 receipt — read back under their own `(project, location, job id)`: every one `DONE`, one principal, none unread or without an identity |
 
 P2 is a real compilation of a retained temporary tree with one **non-computation** policy file changed, pinned
 `<base>+local.<manifest16>` and recorded in `derivation.json` — never labelled as the clean upstream commit. The tree
@@ -386,10 +387,23 @@ BigQuery returned it and before the payload guard: a P2 section id mixed into th
 changed under an *unchanged* `sql_sha256` label. **BigQuery did not return a torn publication.** Each raw live result
 is retained with its SHA-256 *before* mutation under `injection/`.
 
-**Checked after the run against the cloud, not against the driver's own receipt:** every job in the run window is
-`DONE` (170/170, 0 errored) under one principal, the largest single job billed 70 MiB against the 100 MiB cap, the
-Catalog group is back to exactly 11 entries with no `catalog-chain` entry left, the owned dataset is absent, and
+**Checked after the run against the cloud, not against the driver's own receipt.** Two separate checks, and the
+distinction matters. A time-window `INFORMATION_SCHEMA` aggregate showed 170 jobs `DONE`, 0 errored, one principal,
+largest single job 70 MiB against the 100 MiB cap — but an aggregate over a window counts jobs, it does not
+enumerate or reconcile them. The **follow-up audit** (`bin/followup_job_audit.py`,
+[`job_identity_followup.json`](./evidence/catalog-chain/b2-20260907t162636z-cd45/job_identity_followup.json)) does:
+it rebuilds the exact job set from the retained evidence and reads all **170 back individually** under their own
+references — 170/170 `OK`, all `DONE`, one principal, none missing an identity. Separately, `entries.list` is back
+to exactly 11 entries with no `catalog-chain` entry left, the owned dataset is absent, and
 `okf_graph_spike_20260905` is untouched.
+
+Why the follow-up audit exists: the chain's own `same_requester` needs both legs populated, so it says `UNKNOWN` for
+the mixed-payload chain (21 graph jobs, no receipt — the *expected* shape of that adversary) and `NOT_RUN` for the
+early refusals. The strongest negatives therefore had the weakest identity evidence. Three refusal chains are worse
+still: they return through `chain._broken()`, which never builds a `job_inventory`, so their 3 jobs each existed only
+in their own chain journal. The driver now audits the exact set in-run and a case is `MET` only when its boundary
+behaved correctly **and** that chain's identity evidence is complete; the boundary verdict is kept separately in
+`behaviour`, so an incomplete-evidence downgrade never erases a correct refusal.
 
 ### What these runs do not establish
 
@@ -433,6 +447,7 @@ python3 -m okf_bq_graph.chain --live                      # connected chain, on-
 python3 -m okf_bq_graph.chain --hermetic --seed-mode catalog --catalog-responses fixtures/catalog_responses.json   # Catalog contract, injected responses (catalog-mock)
 python3 -m okf_bq_graph.chain --live --seed-mode catalog  # fresh Dataplex list/get of the KC-unblock entry -> retained publication -> receipt (Slice B1)
 python3 -m okf_bq_graph.catalog_live --live --wall-cap-s 900 --timeout-s 30   # Slice B2: owned dataset + entry lifecycle around that chain, then cleanup (~4 min)
+python3 bin/followup_job_audit.py evidence/catalog-chain/<run_id>                # read-only: re-read every job of a retained run under its own reference
 python3 -m okf_bq_graph.run integration --minutes 25         # opens the Enterprise window, runs GQL cases, closes it
 python3 -m okf_bq_graph.run benchmark --minutes 85           # benchmark cells from fixtures/scale.json
 python3 -m okf_bq_graph.run all --minutes 85                 # both in one window
