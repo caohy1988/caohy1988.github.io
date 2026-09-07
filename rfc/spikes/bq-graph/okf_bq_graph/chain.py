@@ -384,10 +384,10 @@ def job_ids_of(cases: list[dict], pointer_job_id: Optional[str] = None, journal_
     receipt: list[dict] = []
     for c in cases:
         for j in ((c.get("retrieval") or {}).get("timing") or {}).get("jobs", []) or []:
-            if j.get("job_id"):
+            if j.get("job_id") and j["job_id"] not in graph:
                 graph.append(j["job_id"])
         d = c.get("declaration") or {}
-        if d.get("job_id"):
+        if d.get("job_id") and d["job_id"] not in graph:
             graph.append(d["job_id"])
         for j in (c.get("payload") or {}).get("jobs") or []:          # catalog mode: payload row reads (BigQueryStore returns two)
             for jj in (j.values() if isinstance(j, dict) and "nodes_job" in j else [j]):
@@ -400,17 +400,20 @@ def job_ids_of(cases: list[dict], pointer_job_id: Optional[str] = None, journal_
     return {"graph": graph, "receipt": receipt}
 
 
-def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dict]) -> dict:
+def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dict], refs: Optional[dict] = None) -> dict:
     """jobs.get under the operator: every graph-leg job and every receipt-leg job must carry one KNOWN user_email.
     Nothing to compare, an unreadable job, or a missing identity is UNKNOWN (never SAME); more than one identity is
-    DIFFERENT."""
+    DIFFERENT. `refs` maps a graph job id to the (project, location) it was submitted under (the journal's reference);
+    ids without a reference are read under the module defaults, as the fixture chain always did."""
     receipt_ids = [j for j in receipt_jobs if j.get("job_id")]
     if not graph_job_ids or not receipt_ids:
         return {"status": "UNKNOWN", "reason": f"nothing to compare: graph_jobs={len(graph_job_ids)} receipt_jobs={len(receipt_ids)}"}
     emails: dict[str, Any] = {}
+    refs = refs or {}
     try:
         for jid in graph_job_ids:
-            emails[jid] = client.get_job(jid, project=PROJECT, location=LOCATION).user_email
+            proj, loc = refs.get(jid, (PROJECT, LOCATION))
+            emails[jid] = client.get_job(jid, project=proj or PROJECT, location=loc or LOCATION).user_email
         for job in receipt_ids:
             emails[job["job_id"]] = client.get_job(job["job_id"], project=job.get("project", PROJECT), location=job.get("location", LOCATION)).user_email
     except Exception as e:  # noqa: BLE001 - unknown identity blocks the claim, never invents it
@@ -426,7 +429,7 @@ def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dic
 
 
 # ----------------------------------------------------------------------------- whole chain
-CHAIN_VERSION = "okf_bq_graph.chain/0.5.1"
+CHAIN_VERSION = "okf_bq_graph.chain/0.5.2"
 SEED_MODES = ("fixture", "catalog")
 
 
@@ -557,6 +560,10 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                 return _broken(out, "publication", run_dir, out_dir, mode, redact, journal)
         elif getattr(store, "journal", None) is not journal:
             store.journal = journal                 # every store read is journaled under this run
+        if live and getattr(store, "dataset", None) != cfg.runtime_dataset:   # checked BEFORE the first store read
+            out["publication"] = {"status": "DESTINATION_MISMATCH", "publication_id": pin.publication_id, "configured": cfg.runtime_dataset,
+                                  "store_dataset": getattr(store, "dataset", None), "error": "retained store dataset differs from the configured runtime dataset"}
+            return _broken(out, "publication", run_dir, out_dir, mode, redact, journal)
         out["store"] = {"engine": getattr(store, "engine", None), "dataset": getattr(store, "dataset", None)}
         # ---- exact retained publication + seed (head observed only)
         res = resolve_publication(store, pin)
@@ -581,10 +588,6 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         clients = dict(clients, store=store)          # declaration reads go through the journaled store on every engine
         if engine == "oracle":
             clients["graphs"] = getattr(store, "graphs", {})
-        if live and getattr(store, "dataset", None) != cfg.runtime_dataset:
-            out["publication"] = {"status": "DESTINATION_MISMATCH", "publication_id": pin.publication_id, "configured": cfg.runtime_dataset,
-                                  "store_dataset": getattr(store, "dataset", None), "error": "retained store dataset differs from the configured runtime dataset"}
-            return _broken(out, "publication", run_dir, out_dir, mode, redact, journal)
         prov = {"publication_pin": trusted["publication_id"] == pub, "sdk_head_pin": bool(sdk_pub["sdk_head_matches_pin"]),
                 "sdk_clean": sdk_pub["sdk_repo_dirty"] is False, "sdk_git_state_known": sdk_pub["sdk_repo_dirty"] is not None,
                 "source_verified": True, "seed_mode": out["seed"]["mode"]}
@@ -685,10 +688,12 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     out["decisions"] = {c["case"]: c["consume"]["decision"] for c in out["cases"]}
     out["acceptance"] = {c["case"]: c["acceptance"]["status"] for c in out["cases"]}
     ids = job_ids_of(out["cases"], pointer_job_id, journal.job_ids())
+    refs = {e["job_id"]: (e.get("project"), e.get("location")) for e in journal.jobs() if e.get("job_id")}
     out["job_inventory"] = {"graph": ids["graph"], "receipt": [j.get("job_id") for j in ids["receipt"]],
-                            "journal": journal.summary(), "note": "every submitted job including empty/failed lookups; roles in journal.jsonl"}
+                            "refs": {k: {"project": v[0], "location": v[1]} for k, v in refs.items()},
+                            "journal": journal.summary(), "note": "every submitted job once, including empty/failed lookups; roles and (project, location, job_id) in journal.jsonl"}
     if live:
-        out["same_requester"] = same_requester(clients.get("bq"), ids["graph"], ids["receipt"]) if clients.get("bq") is not None \
+        out["same_requester"] = same_requester(clients.get("bq"), ids["graph"], ids["receipt"], refs=refs) if clients.get("bq") is not None \
             else {"status": "UNKNOWN", "reason": "no BigQuery client"}
     else:
         out["same_requester"] = {"status": "NOT_APPLICABLE", "reason": "hermetic mode: oracle graph + SDK SYNTHETIC emulation submit no BigQuery jobs"}

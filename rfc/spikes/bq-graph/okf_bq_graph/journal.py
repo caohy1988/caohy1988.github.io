@@ -15,8 +15,8 @@ import threading
 from pathlib import Path
 from typing import Any, Optional
 
-TERMINAL = ("DONE", "ERROR", "EMPTY", "NOT_SUBMITTED", "CANCELLED", "APPLIED", "NOT_APPLIED", "MOOT")
-# MOOT: an UNKNOWN write whose target resource was afterwards deleted and its absence read back; its own outcome no longer matters
+TERMINAL = ("DONE", "ERROR", "EMPTY", "NOT_SUBMITTED", "CANCELLED", "APPLIED", "NOT_APPLIED")
+# Resource absence never closes a job-backed entry: only the job's own server state (or NOT_SUBMITTED from jobs.get) does
 UNKNOWN = "UNKNOWN"   # a local exception left the server-side state unverified: NOT terminal until reconciled
 
 

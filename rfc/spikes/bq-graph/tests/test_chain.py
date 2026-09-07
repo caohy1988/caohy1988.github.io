@@ -884,10 +884,12 @@ class FakeBigQuery:
     the caller-chosen id; `fail_stage` makes that stage's result() raise; `hide_declaration` returns zero rows for the
     declaration read (the Opus PR41 P1 probe)."""
 
+    project = "billing-project"      # the client's project: where the jobs run; the dataset project is the module PROJECT
+
     def __init__(self, projections, head, fail_stage=None, hide_declaration=False, email="op@x"):
         self.pubs = {p["publication_id"]: p for p in projections}
         self.head, self.fail_stage, self.hide_declaration, self.email = head, fail_stage, hide_declaration, email
-        self.jobs, self.calls = {}, []
+        self.jobs, self.calls = {}, []            # jobs keyed by (project, job_id)
 
     @staticmethod
     def _params(cfg):
@@ -943,24 +945,25 @@ class FakeBigQuery:
             return [{k: n[k] for k in ("node_id", "local_id", "path", "title", "type", "status", "stale_after", "stub", "runtime")} for n in proj["nodes"] if n["node_id"] in prm["ids"]]
         raise AssertionError("unrouted query: " + q[:120])
 
-    def query(self, q, job_config=None, location=None, job_id=None):
+    def query(self, q, job_config=None, location=None, job_id=None, project=None):
         assert job_id, "the chain must choose the job id before the send"
+        assert project == self.project, "the chain must submit under the journaled (client) project"
         prm = self._params(job_config)
         stage = job_config.labels.get("stage")
-        self.calls.append({"stage": stage, "job_id": job_id})
+        self.calls.append({"stage": stage, "job_id": job_id, "project": project})
         fail = RuntimeError(f"simulated failure at {stage}") if stage == self.fail_stage else None
         job = _BQJob(job_id, self._rows(q, prm), fail=fail, state="DONE", user_email=self.email)
-        self.jobs[job_id] = job
+        self.jobs[(project, job_id)] = job
         return job
 
     def get_job(self, job_id, project=None, location=None, retry=None, timeout=None):
-        if job_id not in self.jobs:
+        if (project, job_id) not in self.jobs:
             from google.api_core import exceptions as gexc
-            raise gexc.NotFound(job_id)
-        return self.jobs[job_id]
+            raise gexc.NotFound(f"{job_id} not in {project}")
+        return self.jobs[(project, job_id)]
 
-    def cancel_job(self, job_id, **kw):
-        self.jobs[job_id].state = "DONE"
+    def cancel_job(self, job_id, project=None, **kw):
+        self.jobs[(project, job_id)].state = "DONE"
 
 
 def _live_catalog(projection, sdk_root, tmp_path, sample_root, bq, monkeypatch, **kw):
@@ -988,9 +991,12 @@ def test_catalog_live_branch_journals_every_job_including_the_declaration(projec
     ids = [j["job_id"] for j in out["journal"]["jobs"]]
     assert all(ids) and len(set(ids)) == len(ids) == len(bq.calls) and set(ids) == {c["job_id"] for c in bq.calls}
     assert set(out["job_inventory"]["graph"]) == set(ids) and out["job_inventory"]["unresolved"] == []
+    assert len(out["job_inventory"]["graph"]) == len(set(out["job_inventory"]["graph"])) == len(bq.calls)     # every job once (Opus P3)
+    assert all(out["job_inventory"]["refs"][i] == {"project": "billing-project", "location": "US"} for i in ids)
+    assert all(c["project"] == "billing-project" for c in bq.calls)
     assert out["same_requester"]["status"] == "UNKNOWN" and out["same_requester"]["reason"].startswith("nothing to compare")   # no receipt job from the stub
     decl_ids = {c["declaration"]["job_id"] for c in cases.values()}
-    assert decl_ids <= set(ids) and all(bq.jobs[i].state == "DONE" for i in decl_ids)
+    assert decl_ids <= set(ids) and all(bq.jobs[("billing-project", i)].state == "DONE" for i in decl_ids)
     assert all(j["terminal"] for j in out["journal"]["jobs"]) and out["job_inventory"]["journal"]["actual_jobs"] == len(ids)
 
 
@@ -1022,6 +1028,7 @@ def test_catalog_live_unresolved_job_is_never_connected(projection, sdk_root, tm
     unresolved = out["job_inventory"]["unresolved"]
     assert unresolved and all(u["role"] == "chain_declaration" and u["state"] == "UNKNOWN" and u["job_id"] for u in unresolved)
     assert out["evidence"]["unresolved_jobs"] == len(unresolved) and out["broken_at"] == "approved"
+    assert not any(j["job_backed"] if "job_backed" in j else False for j in out["journal"]["jobs"])   # chain entries carry the full ref, not a driver flag
     # unresolved alone (every case reached, nothing WRONG) still blocks CONNECTED and names itself
     bq2 = FakeBigQuery([projection], head=projection["publication_id"], fail_stage="observed-head")
     bq2.get_job = lambda *a, **k: (_ for _ in ()).throw(ConnectionError("jobs.get unreachable"))
@@ -1045,6 +1052,7 @@ def test_catalog_live_dataset_mismatch_is_refused_before_any_read(projection, sd
                        requester="t", as_of=AS_OF, seed_mode="catalog", catalog_reader=_reader(projection), acme_root=sample_root, store=store,
                        runner=lambda argv, **k: (_ for _ in ()).throw(AssertionError("must not run")))
     assert out["verdict"] == "CHAIN_BROKEN" and out["publication"]["status"] == "DESTINATION_MISMATCH" and out["publication"]["store_dataset"] == "okf_catalog_chain_other"
+    assert bq.calls == [] and out["journal"]["jobs"] == []                       # refused before the first store read, on this arm too
     # the B2 configuration routes every read to the owned dataset
     from okf_bq_graph.catalog_lifecycle import LifecycleConfig
     cfg = LifecycleConfig(run_id="t-b2-0001").catalog_config("metrics/gross-margin")
@@ -1100,3 +1108,24 @@ def test_module_cli_catalog_mock(sdk_root, sample_root, projection, tmp_path):
         r = subprocess.run([sys.executable, "-m", "okf_bq_graph.chain", *bad, "--out", str(tmp_path / "ev2"), "--sdk-root", sdk_root],
                            env=env, capture_output=True, text=True, cwd=root)
         assert r.returncode == 2 and not (tmp_path / "ev2").exists(), (bad, r.stderr[-300:])
+
+
+def test_same_requester_reads_each_graph_job_under_its_journaled_reference():
+    """Astra re-review R4: identity is checked where the job ran, not under the module defaults."""
+    seen = []
+
+    class Client:
+        def get_job(self, jid, project=None, location=None):
+            seen.append((jid, project, location))
+            return _Job("op@x")
+    refs = {"g1": ("billing-project", "US"), "g2": ("billing-project", "EU")}
+    r = CH.same_requester(Client(), ["g1", "g2", "g3"], [{"job_id": "r1", "project": "p-r", "location": "US"}], refs=refs)
+    assert r["status"] == "SAME" and seen == [("g1", "billing-project", "US"), ("g2", "billing-project", "EU"), ("g3", CH.PROJECT, CH.LOCATION), ("r1", "p-r", "US")]
+
+
+def test_job_ids_of_never_double_counts():
+    cases = [{"case": "approved", "retrieval": {"timing": {"jobs": [{"job_id": "w"}, {"job_id": "w"}]}}, "declaration": {"job_id": "d1"},
+              "receipt": {"invoked": False}},
+             {"case": "sql-substitution", "retrieval": {"timing": {"jobs": [{"job_id": "w"}]}}, "declaration": {"job_id": "d1"}, "receipt": {"invoked": False}}]
+    ids = CH.job_ids_of(cases, "w", ["d1", "w"])
+    assert ids["graph"] == ["w", "d1"]

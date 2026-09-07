@@ -348,36 +348,38 @@ class _Client:
     """`plan` items are _Job (served for the next query) or Exception (raised at submit). `server` maps job ids to the
     job the server would return from jobs.get; `after_cancel` is the state a cancelled job reports."""
 
+    project = "billing-project"      # the client's (billing) project: where BigQuery runs a job when no project is given
+
     def __init__(self, plan, server=None, get_fail=None, cancel_fail=None, after_cancel="DONE"):
-        self.plan, self.calls, self.server = list(plan), [], server or {}
+        self.plan, self.calls, self.server = list(plan), [], server or {}     # server keyed by (project, job_id), as BigQuery is
         self.get_fail, self.cancel_fail, self.after_cancel = get_fail, cancel_fail, after_cancel
         self.gets, self.cancels = [], []
 
-    def query(self, query, job_config=None, location=None, job_id=None):
+    def query(self, query, job_config=None, location=None, job_id=None, project=None):
         self.calls.append({"query": query, "params": {p.name: p.value for p in job_config.query_parameters}, "location": location, "job_id": job_id,
-                           "max_bytes": job_config.maximum_bytes_billed, "cache": job_config.use_query_cache, "labels": dict(job_config.labels),
-                           "timeout_ms": job_config.job_timeout_ms})
+                           "project": project, "max_bytes": job_config.maximum_bytes_billed, "cache": job_config.use_query_cache,
+                           "labels": dict(job_config.labels), "timeout_ms": job_config.job_timeout_ms})
         nxt = self.plan.pop(0)
         if isinstance(nxt, Exception):
             raise nxt
         nxt.job_id = job_id
-        self.server.setdefault(job_id, nxt)
+        self.server.setdefault((project or self.project, job_id), nxt)
         return nxt
 
     def get_job(self, job_id, project=None, location=None, retry=None, timeout=None):
-        self.gets.append((job_id, retry, timeout))
+        self.gets.append((job_id, project, retry, timeout))
         if self.get_fail:
             raise self.get_fail
-        if job_id not in self.server:
+        if (project or self.project, job_id) not in self.server:
             from google.api_core import exceptions as gexc
-            raise gexc.NotFound("no such job")
-        return self.server[job_id]
+            raise gexc.NotFound("no such job in that project")
+        return self.server[(project or self.project, job_id)]
 
     def cancel_job(self, job_id, project=None, location=None, retry=None, timeout=None):
         self.cancels.append(job_id)
         if self.cancel_fail:
             raise self.cancel_fail
-        self.server[job_id].state = self.after_cancel
+        self.server[(project or self.project, job_id)].state = self.after_cancel
         return True
 
 
@@ -422,7 +424,7 @@ def test_submit_exception_with_no_server_job_is_not_submitted(tmp_path, pin):
         PUB.BigQueryStore(client, "proj", "ds", "US", j).head(pin.bundle_id)
     e = j.jobs()[0]
     assert e["state"] == "NOT_SUBMITTED" and e["terminal"] and e["reconciled"] and e["observed"] == "jobs.get NotFound"
-    assert client.gets[0][0] == e["job_id"] and client.gets[0][1] is None and client.gets[0][2] == 10.0    # bounded, no retries
+    assert client.gets[0][0] == e["job_id"] and client.gets[0][2] is None and client.gets[0][3] == 10.0    # bounded, no retries
 
 
 def test_submit_exception_but_server_has_the_job_reconciles_to_its_real_state(tmp_path, pin):
@@ -432,9 +434,9 @@ def test_submit_exception_but_server_has_the_job_reconciles_to_its_real_state(tm
     # the job landed server-side despite the lost response: we learn that from jobs.get, not from the exception
     real_query = client.query
 
-    def landed(query, job_config=None, location=None, job_id=None):
-        client.server[job_id] = _Job(state="DONE")
-        return real_query(query, job_config, location, job_id)
+    def landed(query, job_config=None, location=None, job_id=None, project=None):
+        client.server[(project, job_id)] = _Job(state="DONE")
+        return real_query(query, job_config, location, job_id, project)
     client.query = landed
     with pytest.raises(TimeoutError):
         s.head(pin.bundle_id)
@@ -546,3 +548,76 @@ def test_foreign_provenance_changed_trust_or_freshness_are_detected(store, pin, 
     assert v["checks"]["governance"]["ok"] and v["checks"]["result_paths"]["ok"]
     r["concepts"][0]["replacement"]["concept"] = "metrics/revenue"
     assert not PUB.verify_payload(store, pin, p1, r, _comp(r), None, expected_path=GM, seed_id=legacy.concept_id)["checks"]["governance"]["ok"]
+
+
+# ---- Astra re-review R4: one (project, location, job_id) reference for submit, reconcile and identity
+def test_job_reference_uses_the_clients_billing_project_not_the_dataset_project(tmp_path, pin):
+    """The store's `project` is the dataset project; the job runs in the client's project. Submit passes that project
+    explicitly, the journal records it, and reconciliation reads the same project (never the dataset project)."""
+    j = Journal(tmp_path / "r", "r1")
+    client = _Client([_Job(fail=TimeoutError("result timed out"), state="RUNNING")])
+    with pytest.raises(TimeoutError):
+        PUB.BigQueryStore(client, "runtime-project", "owned_ds", "US", j).head(pin.bundle_id)
+    e = j.jobs()[0]
+    assert client.calls[0]["project"] == "billing-project" and e["project"] == "billing-project" and e["dataset_project"] == "runtime-project"
+    assert e["location"] == "US" and e["job_ref_complete"] and "`runtime-project.owned_ds.active_publication`" in client.calls[0]["query"]
+    assert all(g[1] == "billing-project" for g in client.gets) and e["state"] == "CANCELLED"     # reconciled where the job actually is
+    # a store whose client reports no project records an incomplete reference rather than inventing one
+    class NoProject(_Client):
+        project = None
+    j2 = Journal(tmp_path / "r2", "r2")
+    rows, e2 = PUB.BigQueryStore(NoProject([_Job([])]), "runtime-project", "owned_ds", "US", j2).head(pin.bundle_id)
+    assert e2["project"] is None and e2["job_ref_complete"] is False
+
+
+# ---- Astra re-review R1: full engine-specific provenance and the actual freshness deadline
+def test_omitted_provenance_and_freshness_fields_are_now_compared(store, pin, p1):
+    import copy
+    base = _retrieve(store, pin)
+    comp = _comp(base)
+    ok = PUB.verify_payload(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM)
+    assert ok["status"] == "CONSISTENT", ok["failed"]
+    prov0 = base["concepts"][0]["provenance"][0]
+    assert {"declared", "intrinsic", "resolves_to"} <= set(prov0)          # oracle shape
+    attacks = {
+        "declared": lambda r: r["concepts"][0]["provenance"][0]["declared"].__setitem__("usage_count", 999),
+        "intrinsic": lambda r: r["concepts"][0]["provenance"][0]["intrinsic"].__setitem__("author", "human:mallory@acme"),
+        "resolves_to": lambda r: r["concepts"][0]["provenance"][0].__setitem__("resolves_to", ["policies/other"]),
+        "resolves_to_dropped": lambda r: r["concepts"][0]["provenance"][0].__setitem__("resolves_to", []),
+        "seed_stale_after": lambda r: r["concepts"][0]["freshness"].__setitem__("stale_after", "2099-01-01T00:00:00Z"),
+        "computation_stale_after": lambda r: r["computations"][0]["freshness"].__setitem__("stale_after", "2099-01-01T00:00:00Z"),
+        "freshness_extra_key": lambda r: r["concepts"][0]["freshness"].__setitem__("reason", "forged"),
+        "engine_fields_stripped": lambda r: [pv.pop("declared") or pv.pop("intrinsic") or pv.pop("resolves_to") for pv in r["concepts"][0]["provenance"]],
+    }
+    for name, attack in attacks.items():
+        r = copy.deepcopy(base)
+        attack(r)
+        v = PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
+        assert v["status"] == "INCONSISTENT" and "governance" in v["failed"], name
+        assert any(not it.get("provenance", True) or not it.get("freshness", True) for it in v["checks"]["governance"]["items"]), name
+
+
+def test_fallback_shaped_provenance_source_id_and_resolution_are_compared(store, pin, p1):
+    """The fallback engine emits source_id/resolution instead of declared/intrinsic/resolves_to: build that shape from the
+    trusted edges, confirm it passes, then change only the omitted fields."""
+    import copy
+    base = _retrieve(store, pin)
+    comp = _comp(base)
+    tn = {n["node_id"]: n for n in p1["nodes"]}
+    fb = []
+    for e in p1["edges"]:
+        if e["src_id"] == pin.concept_id and e["relation"] == "DERIVES_FROM":
+            src = tn[e["dst_id"]]
+            fb.append({"resource": src["resource"], "title": src["title"], "declaration": e["declaration"], "resolution": e["resolution"], "source_id": src["node_id"],
+                       "note": "declaration-scoped signals ... fetch from edges/nodes tables if needed"})
+    base["concepts"][0]["provenance"] = fb
+    ok = PUB.verify_payload(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM)
+    assert ok["status"] == "CONSISTENT", ok["failed"]
+    for name, attack in {"source_id": lambda r: r["concepts"][0]["provenance"][0].__setitem__("source_id", f"acme_retail|pub_0000000000000000|Source|src:x"),
+                         "resolution": lambda r: r["concepts"][0]["provenance"][0].__setitem__("resolution", "root_fallback"),
+                         "no_engine_fields": lambda r: [pv.pop("source_id") for pv in r["concepts"][0]["provenance"]]}.items():
+        r = copy.deepcopy(base)
+        attack(r)
+        v = PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
+        assert v["status"] == "INCONSISTENT" and "governance" in v["failed"], name
+        assert v["checks"]["governance"]["items"][0]["provenance_diffs"], name

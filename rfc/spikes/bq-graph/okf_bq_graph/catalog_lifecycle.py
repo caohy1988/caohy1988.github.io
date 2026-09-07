@@ -16,9 +16,13 @@ cleanup receipt is COMPLETE only when every owned resource's absence was read ba
 from __future__ import annotations
 
 import datetime as _dt
+import hashlib
 import json
 import re
+import secrets
 import shutil
+import time
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Optional, Protocol
@@ -55,10 +59,15 @@ class LifecycleConfig:
     source_root: str = "okf/bundles/acme_retail"
     compiler_version: str = "okf_bq_graph.compile/0.1.0"
     timeout_s: float = DEFAULT_TIMEOUT
+    settle_s: Optional[float] = None    # how long after a timed-out create an ABSENT readback may count as NOT_APPLIED (default 2 x timeout_s)
 
     def __post_init__(self) -> None:
         if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{3,63}", self.run_id):
             raise ValueError("run_id must be 4-64 chars of [A-Za-z0-9._-]")
+
+    @property
+    def settle(self) -> float:
+        return self.settle_s if self.settle_s is not None else 2.0 * self.timeout_s
 
     @property
     def run_suffix(self) -> str:
@@ -100,20 +109,29 @@ class LifecycleConfig:
 
 # ----------------------------------------------------------------------------- cloud operations (bounded, protocol-level)
 class CloudOps(Protocol):
-    """Every call takes `timeout` (seconds) and returns when the operation is terminal or raises."""
-    def dataset_exists(self, dataset: str, timeout: float) -> bool: ...
-    def create_dataset(self, dataset: str, location: str, timeout: float) -> dict: ...
+    """Every call takes `timeout` (seconds) and returns when the operation is terminal or raises. Job-backed BigQuery
+    operations receive a driver-chosen `job_id` (journaled with project/location BEFORE dispatch) so a timed-out call
+    can be reconciled through `job_state`; resources are created with an ownership stamp (`labels`) that adoption
+    after a lost response must match."""
+    def get_dataset(self, dataset: str, timeout: float) -> Optional[dict]: ...           # {"labels": {...}} or None
+    def create_dataset(self, dataset: str, location: str, labels: dict, timeout: float) -> dict: ...
     def delete_dataset(self, dataset: str, timeout: float) -> dict: ...
-    def run_ddl(self, dataset: str, statement: str, timeout: float) -> dict: ...
-    def load_rows(self, dataset: str, table: str, rows: list[dict], timeout: float) -> dict: ...
-    def select_rows(self, dataset: str, table: str, where: dict, timeout: float, exclude: tuple = ()) -> list[dict]: ...
-    def insert_row(self, dataset: str, table: str, row: dict, timeout: float) -> dict: ...
-    def update_status(self, dataset: str, publication_id: str, status: str, timeout: float) -> dict: ...
-    def merge_head(self, dataset: str, bundle_id: str, publication_id: str, timeout: float) -> dict: ...
+    def run_ddl(self, dataset: str, statement: str, job_id: str, timeout: float) -> dict: ...
+    def load_rows(self, dataset: str, table: str, rows: list[dict], job_id: str, timeout: float) -> dict: ...
+    def select_rows(self, dataset: str, table: str, where: dict, job_id: str, timeout: float, exclude: tuple = ()) -> list[dict]: ...
+    def insert_row(self, dataset: str, table: str, row: dict, job_id: str, timeout: float) -> dict: ...
+    def update_status(self, dataset: str, publication_id: str, status: str, job_id: str, timeout: float) -> dict: ...
+    def merge_head(self, dataset: str, bundle_id: str, publication_id: str, job_id: str, timeout: float) -> dict: ...
+    def job_state(self, job_id: str, timeout: float) -> Optional[dict]: ...              # {"state": ..., "error": ...} or None when the server has no such job
+    def cancel_job(self, job_id: str, timeout: float) -> dict: ...
     def get_entry(self, name: str, timeout: float) -> Optional[dict]: ...
     def create_entry(self, name: str, body: dict, timeout: float) -> dict: ...
     def patch_entry(self, name: str, body: dict, aspect_keys: list[str], timeout: float) -> dict: ...
     def delete_entry(self, name: str, timeout: float) -> dict: ...
+
+
+OWNER_LABEL = "okf_owner"           # BigQuery dataset label / Catalog entrySource label carrying the invocation stamp
+JOB_OPS = ("run_ddl", "load_rows", "select_rows", "insert_row", "update_status", "merge_head")
 
 
 def relational_schema(ds_full: str) -> list[str]:
@@ -172,45 +190,101 @@ class Owned:
     publications: list[str] = field(default_factory=list)
     ready_verified: list[str] = field(default_factory=list)   # publications whose full-row readback was READY (restore may only reinstate these)
     entries: list[str] = field(default_factory=list)
-    pending: list[dict] = field(default_factory=list)          # {"kind": "dataset"|"entry"|"rows", "name": ..., "seq": journal seq}
+    pending: list[dict] = field(default_factory=list)          # {"kind": "dataset"|"entry", "name": ..., "at", "at_ts", "state"}
+    foreign: list[dict] = field(default_factory=list)          # resources under our names that carry another stamp: preserved, never touched
     head_set: bool = False
 
     def record(self) -> dict:
         return {"dataset": self.dataset, "tables": list(self.tables), "publications": list(self.publications), "ready_verified": list(self.ready_verified),
-                "entries": list(self.entries), "pending": [dict(x) for x in self.pending], "head_set": self.head_set}
+                "entries": list(self.entries), "pending": [dict(x) for x in self.pending], "foreign": [dict(x) for x in self.foreign], "head_set": self.head_set}
 
 
 class Lifecycle:
-    def __init__(self, cfg: LifecycleConfig, cloud: CloudOps, journal: Any):
-        self.cfg, self.cloud, self.journal = cfg, cloud, journal
+    def __init__(self, cfg: LifecycleConfig, cloud: CloudOps, journal: Any, clock: Callable[[], float] = time.time):
+        self.cfg, self.cloud, self.journal, self.clock = cfg, cloud, journal, clock
         self.owned = Owned()
         self._projections: dict[str, dict] = {}
         self.snapshot: dict[str, Any] = {}
-        self.journal.note("lifecycle_allowlist", **cfg.allowlist())
+        # the invocation stamp: unique per Lifecycle instance, written onto every created resource, required for adoption.
+        # A run id that merely normalises to the same dataset name (review-run-A vs review_run_a) never matches it.
+        self.invocation_id = f"{cfg.run_id}-{secrets.token_hex(6)}"
+        self.owner_stamp = hashlib.sha256(self.invocation_id.encode()).hexdigest()[:32]
+        self.journal.note("lifecycle_allowlist", invocation_id=self.invocation_id, owner_stamp=self.owner_stamp, **cfg.allowlist())
         self._ownership_file = Path(journal.run_dir) / "ownership.json"
         self._write_ownership("init")
 
+    def stamp_labels(self) -> dict:
+        return {OWNER_LABEL: self.owner_stamp, "okf_run": self.cfg.run_suffix[:63]}
+
+    def _stamped_by_us(self, labels: Optional[dict]) -> bool:
+        return isinstance(labels, dict) and labels.get(OWNER_LABEL) == self.owner_stamp
+
     # -- bounded, journaled operation
-    def _op(self, role: str, description: str, fn: Callable[..., Any], *args: Any, mutates: bool = False, target: Optional[str] = None, **kw: Any) -> Any:
-        e = self.journal.intend(role, description, "cloud", actual=True, mutates=mutates, target=target, timeout_s=self.cfg.timeout_s)
-        self.journal.submitted(e, job_id=None)
+    def _op(self, role: str, description: str, fn: Callable[..., Any], *args: Any, mutates: bool = False, target: Optional[str] = None,
+            job: bool = False, **kw: Any) -> Any:
+        """One bounded, journaled cloud call. Job-backed BigQuery operations (`job=True`) get a driver-chosen job id
+        journaled with (project, location) BEFORE dispatch; if the call raises, the job's own server state decides
+        (never the target resource's presence). Non-job writes that raise are UNKNOWN until their resource is read
+        back with our stamp."""
+        job_backed = job
+        jid = f"okf_cc_{self.cfg.run_suffix}_{role}_{uuid.uuid4().hex[:12]}"[:1024] if job_backed else None
+        e = self.journal.intend(role, description, "cloud", actual=True, mutates=mutates, target=target, timeout_s=self.cfg.timeout_s,
+                                job_backed=job_backed)
+        self.journal.submitted(e, job_id=jid, project=self.cfg.project if job_backed else None, location=self.cfg.location if job_backed else None)
         self._last_entry = e
+        if job_backed:
+            kw["job_id"] = jid
         try:
             out = fn(*args, timeout=self.cfg.timeout_s, **kw)
         except Exception as ex:  # noqa: BLE001
             err = f"{type(ex).__name__}: {str(ex)[:300]}"
-            if mutates:
-                self.journal.unknown(e, err)          # the write may have landed: unresolved until the resource is read back
+            if job_backed:
+                self.journal.unknown(e, err)
+                self._reconcile_job_entry(e)        # jobs.get decides: NOT_SUBMITTED / DONE / ERROR / CANCELLED, or stays UNKNOWN
+            elif mutates:
+                self.journal.unknown(e, err)          # the write may have landed: unresolved until the resource is read back with our stamp
             else:
                 self.journal.terminal(e, "ERROR", error=err)
             raise
-        jid = out.get("job_id") if isinstance(out, dict) else None
-        e["job_id"] = jid
         self.journal.terminal(e, "DONE", rows=len(out) if isinstance(out, list) else None)
         return out
 
+    def _reconcile_job_entry(self, e: dict, cancel: bool = True) -> dict:
+        """Read the job's actual server state under its journaled reference. Unreadable or still running after one
+        cancel attempt leaves the entry unresolved with its id."""
+        jid = e.get("job_id")
+        if not jid or e.get("terminal"):
+            return e
+        try:
+            st = self.cloud.job_state(jid, timeout=self.cfg.timeout_s)
+        except Exception as ex:  # noqa: BLE001
+            e["reconcile_error"] = f"{type(ex).__name__}: {str(ex)[:200]}"
+            self.journal.note("reconcile_failed", seq=e["seq"], job_id=jid, error=e["reconcile_error"])
+            return e
+        if st is None:
+            return self.journal.reconcile(e, "NOT_SUBMITTED", observed="job_state: no such job")
+        state = st.get("state")
+        if state == "DONE":
+            return self.journal.reconcile(e, "ERROR" if st.get("error") else "DONE", observed="DONE", error=st.get("error") or e.get("error"))
+        if cancel:
+            try:
+                self.cloud.cancel_job(jid, timeout=self.cfg.timeout_s)
+                st2 = self.cloud.job_state(jid, timeout=self.cfg.timeout_s)
+            except Exception as ex:  # noqa: BLE001
+                e["reconcile_error"] = f"cancel/readback {type(ex).__name__}: {str(ex)[:200]}"
+                e["observed"] = state
+                self.journal.note("reconcile_failed", seq=e["seq"], job_id=jid, error=e["reconcile_error"])
+                return e
+            if st2 is not None and st2.get("state") == "DONE":
+                return self.journal.reconcile(e, "CANCELLED", observed=f"{state} -> DONE after cancel", error=st2.get("error") or e.get("error"))
+            e["observed"] = (st2 or {}).get("state", state)
+        else:
+            e["observed"] = state
+        self.journal.note("job_unresolved", seq=e["seq"], job_id=jid, observed=e["observed"])
+        return e
+
     def _pending(self, kind: str, name: str) -> dict:
-        rec = {"kind": kind, "name": name, "at": _now()}
+        rec = {"kind": kind, "name": name, "at": _now(), "at_ts": self.clock(), "state": "IN_FLIGHT", "owner_stamp": self.owner_stamp}
         self.owned.pending.append(rec)
         self._write_ownership(f"pending_{kind}")
         return rec
@@ -242,7 +316,7 @@ class Lifecycle:
     def snapshot_originals(self) -> dict:
         entry = self._op("snapshot_original_entry", "GET original entry view=ALL (read only)", self.cloud.get_entry, self.cfg.original_entry, target=self.cfg.original_entry)
         head = self._op("snapshot_original_head", "original active_publication (read only)", self.cloud.select_rows, self.cfg.original_dataset, "active_publication",
-                        {"bundle_id": self.cfg.bundle_id}, target=f"{self.cfg.original_dataset}.active_publication")
+                        {"bundle_id": self.cfg.bundle_id}, target=f"{self.cfg.original_dataset}.active_publication", job=True)
         snap = {"entry_present": entry is not None, "entry_sha256": sha256_text(stable_json(entry)) if entry is not None else None,
                 "runtime_aspect_present": bool(entry and self.cfg.aspect_key in (entry.get("aspects") or {})),
                 "head": head[0]["publication_id"] if len(head) == 1 else None, "head_rows": len(head), "at": _now()}
@@ -253,7 +327,7 @@ class Lifecycle:
     def verify_originals_unchanged(self) -> dict:
         entry = self._op("reread_original_entry", "GET original entry after experiment (read only)", self.cloud.get_entry, self.cfg.original_entry, target=self.cfg.original_entry)
         head = self._op("reread_original_head", "original active_publication after experiment (read only)", self.cloud.select_rows, self.cfg.original_dataset,
-                        "active_publication", {"bundle_id": self.cfg.bundle_id}, target=f"{self.cfg.original_dataset}.active_publication")
+                        "active_publication", {"bundle_id": self.cfg.bundle_id}, target=f"{self.cfg.original_dataset}.active_publication", job=True)
         now = {"entry_sha256": sha256_text(stable_json(entry)) if entry is not None else None, "head": head[0]["publication_id"] if len(head) == 1 else None}
         unchanged = now["entry_sha256"] == self.snapshot.get("entry_sha256") and now["head"] == self.snapshot.get("head")
         rec = {"status": "UNCHANGED" if unchanged else "CHANGED_EXTERNALLY_PRESERVED", "before": {k: self.snapshot.get(k) for k in ("entry_sha256", "head")}, "after": now,
@@ -265,17 +339,17 @@ class Lifecycle:
     def provision(self) -> dict:
         ds = self.cfg.dataset
         self._guard_dataset(ds)
-        if self._op("dataset_exists", "owned dataset must not pre-exist", self.cloud.dataset_exists, ds, target=ds):
+        if self._op("dataset_exists", "owned dataset must not pre-exist", self.cloud.get_dataset, ds, target=ds) is not None:
             raise ScopeViolation(f"dataset {ds} already exists: not created by this run, refusing to adopt it")
-        pend = self._pending("dataset", ds)                  # persisted before the write: a lost response still owns the name
-        self._op("create_dataset", "create owned dataset", self.cloud.create_dataset, ds, self.cfg.location, mutates=True, target=ds)
+        pend = self._pending("dataset", ds)                  # persisted before the write: a lost response still owns the attempt
+        self._op("create_dataset", "create owned dataset (stamped)", self.cloud.create_dataset, ds, self.cfg.location, self.stamp_labels(), mutates=True, target=ds)
         self._confirm(pend)
         self.owned.dataset = ds
         self._write_ownership("dataset_created")
         for stmt in relational_schema(f"{self.cfg.project}.{ds}"):
             self._guard_sql(stmt)
             table = re.search(r"CREATE TABLE IF NOT EXISTS `[^`]+\.(\w+)`", stmt).group(1)
-            self._op("create_table", f"create {table}", self.cloud.run_ddl, ds, stmt, mutates=True, target=f"{ds}.{table}")
+            self._op("create_table", f"create {table}", self.cloud.run_ddl, ds, stmt, mutates=True, target=f"{ds}.{table}", job=True)
             self.owned.tables.append(table)
         self._write_ownership("tables_created")
         return {"dataset": ds, "tables": list(self.owned.tables)}
@@ -297,22 +371,22 @@ class Lifecycle:
             rec["state"] = "REJECTED"
             self.journal.note("publish", **rec)
             return rec
-        existing = self._op("publication_exists", "owned publications row must not pre-exist", self.cloud.select_rows, ds, "publications", {"publication_id": P}, target=f"{ds}.publications")
+        existing = self._op("publication_exists", "owned publications row must not pre-exist", self.cloud.select_rows, ds, "publications", {"publication_id": P}, target=f"{ds}.publications", job=True)
         if existing:
             raise ScopeViolation(f"publication {P} already present in owned dataset")
         nodes = [dict(n, stale_after_ts=None) for n in projection["nodes"]]
         self.owned.publications.append(P)                    # rows are owned from the first write attempt, not from its response
         self._projections[P] = projection
         self._write_ownership("rows_loading")
-        self._op("load_nodes", f"load {len(nodes)} node rows", self.cloud.load_rows, ds, "nodes", nodes, mutates=True, target=f"{ds}.nodes")
-        self._op("load_edges", f"load {len(projection['edges'])} edge rows", self.cloud.load_rows, ds, "edges", projection["edges"], mutates=True, target=f"{ds}.edges")
+        self._op("load_nodes", f"load {len(nodes)} node rows", self.cloud.load_rows, ds, "nodes", nodes, mutates=True, target=f"{ds}.nodes", job=True)
+        self._op("load_edges", f"load {len(projection['edges'])} edge rows", self.cloud.load_rows, ds, "edges", projection["edges"], mutates=True, target=f"{ds}.edges", job=True)
         self._write_ownership("rows_loaded")
         if inject_failure == "before_ready":
             rec["state"] = "INTERRUPTED_BEFORE_READY"
             self.journal.note("publish", **rec)
             raise RuntimeError("injected failure before READY: rows loaded, no publication row, never READY")
-        r_nodes = self._op("readback_nodes", "full retained node rows", self.cloud.select_rows, ds, "nodes", {"publication_id": P, "bundle_id": B}, exclude=("stale_after_ts",), target=f"{ds}.nodes")
-        r_edges = self._op("readback_edges", "full retained edge rows", self.cloud.select_rows, ds, "edges", {"publication_id": P, "bundle_id": B}, target=f"{ds}.edges")
+        r_nodes = self._op("readback_nodes", "full retained node rows", self.cloud.select_rows, ds, "nodes", {"publication_id": P, "bundle_id": B}, exclude=("stale_after_ts",), target=f"{ds}.nodes", job=True)
+        r_edges = self._op("readback_edges", "full retained edge rows", self.cloud.select_rows, ds, "edges", {"publication_id": P, "bundle_id": B}, target=f"{ds}.edges", job=True)
         rn, re_ = canonical_rows(r_nodes), canonical_rows(r_edges)
         om = projection["output_manifest"]
         ids = {n["node_id"] for n in rn}
@@ -327,7 +401,7 @@ class Lifecycle:
                "node_count": om["nodes"], "edge_count": om["edges"], "section_count": sum(1 for n in rn if n["kind"] == "Section"), "vector_count": 0,
                "embedding_model": None, "validation_status": status, "validation_reasons": [k for k, ok in checks.items() if not ok],
                "created_at": _now(), "ready_at": _now() if status == "READY" else None}
-        self._op("insert_publication", f"publications row {status}", self.cloud.insert_row, ds, "publications", row, mutates=True, target=f"{ds}.publications")
+        self._op("insert_publication", f"publications row {status}", self.cloud.insert_row, ds, "publications", row, mutates=True, target=f"{ds}.publications", job=True)
         if status == "READY":
             self.owned.ready_verified.append(P)
             self._write_ownership("ready_verified")
@@ -336,7 +410,7 @@ class Lifecycle:
         return rec
 
     def _ready(self, P: str) -> bool:
-        rows = self._op("publication_status", "owned publication status", self.cloud.select_rows, self.cfg.dataset, "publications", {"publication_id": P}, target=f"{self.cfg.dataset}.publications")
+        rows = self._op("publication_status", "owned publication status", self.cloud.select_rows, self.cfg.dataset, "publications", {"publication_id": P}, target=f"{self.cfg.dataset}.publications", job=True)
         return len(rows) == 1 and rows[0].get("validation_status") == "READY"
 
     # -- 3. head switch (atomic MERGE; only a READY owned publication; injectable interruption before the switch)
@@ -351,7 +425,7 @@ class Lifecycle:
         if inject_failure == "before_head":
             self.journal.note("head_switch", state="INTERRUPTED_BEFORE_HEAD", from_=before, to=P)
             raise RuntimeError("injected failure before head switch: old head keeps serving")
-        self._op("merge_head", f"active_publication -> {P}", self.cloud.merge_head, ds, self.cfg.bundle_id, P, mutates=True, target=f"{ds}.active_publication")
+        self._op("merge_head", f"active_publication -> {P}", self.cloud.merge_head, ds, self.cfg.bundle_id, P, mutates=True, target=f"{ds}.active_publication", job=True)
         self.owned.head_set = True
         self._write_ownership("head_switched")
         after = self.read_head()
@@ -360,17 +434,17 @@ class Lifecycle:
         return rec
 
     def read_head(self) -> Optional[str]:
-        rows = self._op("read_head", "owned active_publication", self.cloud.select_rows, self.cfg.dataset, "active_publication", {"bundle_id": self.cfg.bundle_id}, target=f"{self.cfg.dataset}.active_publication")
+        rows = self._op("read_head", "owned active_publication", self.cloud.select_rows, self.cfg.dataset, "active_publication", {"bundle_id": self.cfg.bundle_id}, target=f"{self.cfg.dataset}.active_publication", job=True)
         return rows[0]["publication_id"] if len(rows) == 1 else None
 
     # -- 4. owned Catalog pin generated from verified rows, authored aspects preserved by explicit keys
     def pin_from_rows(self, P: str, concept_path: str) -> dict:
         ds = self.cfg.dataset
-        pub = self._op("pin_source_publication", "owned publication row for the pin", self.cloud.select_rows, ds, "publications", {"publication_id": P}, target=f"{ds}.publications")
+        pub = self._op("pin_source_publication", "owned publication row for the pin", self.cloud.select_rows, ds, "publications", {"publication_id": P}, target=f"{ds}.publications", job=True)
         if len(pub) != 1 or pub[0]["validation_status"] != "READY":
             raise RuntimeError(f"{P} is not a single READY owned publication; no pin can be generated")
         seed = self._op("pin_source_seed", "owned seed node row for the pin", self.cloud.select_rows, ds, "nodes",
-                        {"publication_id": P, "bundle_id": self.cfg.bundle_id, "path": concept_path, "kind": "Concept"}, target=f"{ds}.nodes")
+                        {"publication_id": P, "bundle_id": self.cfg.bundle_id, "path": concept_path, "kind": "Concept"}, target=f"{ds}.nodes", job=True)
         if len(seed) != 1:
             raise RuntimeError(f"seed {concept_path} is not exactly one Concept row in {P}")
         p, s = pub[0], seed[0]
@@ -391,7 +465,8 @@ class Lifecycle:
         aspects = {self.cfg.aspect_key: {"data": data}}
         for k, v in (authored_aspects or {}).items():
             aspects[k] = {"data": v}
-        body = {"name": name, "entryType": self.cfg.entry_type, "entrySource": {"system": "okf-catalog-chain", "labels": {"bundle": self.cfg.bundle_id, "run": self.cfg.run_id}},
+        body = {"name": name, "entryType": self.cfg.entry_type,
+                "entrySource": {"system": "okf-catalog-chain", "labels": {"bundle": self.cfg.bundle_id, "run": self.cfg.run_id, **self.stamp_labels()}},
                 "aspects": aspects}
         exists = self._op("entry_exists", "owned entry pre-read", self.cloud.get_entry, name, target=name) is not None
         if exists and name not in self.owned.entries:
@@ -432,15 +507,15 @@ class Lifecycle:
             raise ScopeViolation(f"{P} not owned")
         if P not in self.owned.ready_verified:
             raise RuntimeError(f"{P} was never verified READY by this run: only a verified READY publication is withdrawn as an adversary")
-        self._op("withdraw", f"publications.validation_status -> WITHDRAWN for {P}", self.cloud.update_status, self.cfg.dataset, P, "WITHDRAWN", mutates=True, target=f"{self.cfg.dataset}.publications")
+        self._op("withdraw", f"publications.validation_status -> WITHDRAWN for {P}", self.cloud.update_status, self.cfg.dataset, P, "WITHDRAWN", mutates=True, target=f"{self.cfg.dataset}.publications", job=True)
         return {"publication_id": P, "ready": self._ready(P)}
 
     def _readback_checks(self, P: str) -> dict:
         """The same full-row validation `publish_relational` uses, against the current retained rows."""
         ds, B = self.cfg.dataset, self.cfg.bundle_id
         projection = self._projections[P]
-        r_nodes = self._op("readback_nodes", "full retained node rows", self.cloud.select_rows, ds, "nodes", {"publication_id": P, "bundle_id": B}, exclude=("stale_after_ts",), target=f"{ds}.nodes")
-        r_edges = self._op("readback_edges", "full retained edge rows", self.cloud.select_rows, ds, "edges", {"publication_id": P, "bundle_id": B}, target=f"{ds}.edges")
+        r_nodes = self._op("readback_nodes", "full retained node rows", self.cloud.select_rows, ds, "nodes", {"publication_id": P, "bundle_id": B}, exclude=("stale_after_ts",), target=f"{ds}.nodes", job=True)
+        r_edges = self._op("readback_edges", "full retained edge rows", self.cloud.select_rows, ds, "edges", {"publication_id": P, "bundle_id": B}, target=f"{ds}.edges", job=True)
         rn, re_ = canonical_rows(r_nodes), canonical_rows(r_edges)
         om = projection["output_manifest"]
         ids = {n["node_id"] for n in rn}
@@ -457,46 +532,73 @@ class Lifecycle:
             raise ScopeViolation(f"{P} not owned")
         if P not in self.owned.ready_verified:
             raise RuntimeError(f"{P} was never verified READY by this run: nothing to restore")
-        rows = self._op("publication_status", "owned publication status before restore", self.cloud.select_rows, self.cfg.dataset, "publications", {"publication_id": P}, target=f"{self.cfg.dataset}.publications")
+        rows = self._op("publication_status", "owned publication status before restore", self.cloud.select_rows, self.cfg.dataset, "publications", {"publication_id": P}, target=f"{self.cfg.dataset}.publications", job=True)
         if len(rows) != 1 or rows[0].get("validation_status") != "WITHDRAWN":
             raise RuntimeError(f"{P} is not a single WITHDRAWN row (status={[r.get('validation_status') for r in rows]}): restore refused")
         checks = self._readback_checks(P)
         if not all(v for k, v in checks.items() if k != "sections"):
             self.journal.note("restore_refused", publication_id=P, readback=checks)
             return {"publication_id": P, "ready": False, "state": "RESTORE_REFUSED", "readback": checks}
-        self._op("restore", f"publications.validation_status -> READY for {P}", self.cloud.update_status, self.cfg.dataset, P, "READY", mutates=True, target=f"{self.cfg.dataset}.publications")
+        self._op("restore", f"publications.validation_status -> READY for {P}", self.cloud.update_status, self.cfg.dataset, P, "READY", mutates=True, target=f"{self.cfg.dataset}.publications", job=True)
         return {"publication_id": P, "ready": self._ready(P), "state": "RESTORED", "readback": checks}
 
     # -- 6. cleanup: exact owned resources only, readback of absence, receipt
     def _reconcile_pending(self) -> list[dict]:
-        """Read back every pending write (lost response). Present -> it is owned and will be deleted below; absent ->
-        reconciled as NOT_APPLIED. Unreadable -> stays pending and blocks COMPLETE."""
+        """Read back every pending write (lost response) under its own name. The outcome is decided by evidence, never
+        by presence alone:
+          PRESENT_ADOPTED            present AND carries this invocation's stamp -> ours; deleted below
+          FOREIGN_PRESERVED          present with another / no stamp -> not ours; left untouched, stays pending (INCOMPLETE)
+          ABSENT_UNSETTLED           absent but the timed-out create may still be in flight -> stays pending (INCOMPLETE)
+          NOT_APPLIED_AFTER_SETTLE   absent after the settle window (cfg.settle) -> NOT_APPLIED
+        Unreadable -> stays pending and blocks COMPLETE. Rerunning cleanup re-reads what is still pending."""
         steps: list[dict] = []
+        now = self.clock()
         for rec in list(self.owned.pending):
-            step = {"resource": rec["name"], "kind": f"pending_{rec['kind']}", "deleted": False, "absent_verified": False, "reconciled": None}
+            step = {"resource": rec["name"], "kind": f"pending_{rec['kind']}", "deleted": False, "absent_verified": False, "reconciled": None,
+                    "age_s": round(now - rec.get("at_ts", now), 3), "settle_s": self.cfg.settle}
             try:
                 if rec["kind"] == "entry":
-                    present = self._op("reconcile_pending_entry", "GET pending entry", self.cloud.get_entry, rec["name"], target=rec["name"]) is not None
-                    if present:
-                        if rec["name"] not in self.owned.entries:
-                            self.owned.entries.append(rec["name"])
+                    body = self._op("reconcile_pending_entry", "GET pending entry", self.cloud.get_entry, rec["name"], target=rec["name"])
+                    present = body is not None
+                    ours = present and self._stamped_by_us(((body or {}).get("entrySource") or {}).get("labels"))
                 elif rec["kind"] == "dataset":
-                    present = self._op("reconcile_pending_dataset", "pending dataset exists", self.cloud.dataset_exists, rec["name"], target=rec["name"])
-                    if present:
-                        self.owned.dataset = rec["name"]
+                    meta = self._op("reconcile_pending_dataset", "GET pending dataset (labels)", self.cloud.get_dataset, rec["name"], target=rec["name"])
+                    present = meta is not None
+                    ours = present and self._stamped_by_us((meta or {}).get("labels"))
                 else:
-                    present = False
-                step["reconciled"] = "PRESENT_ADOPTED" if present else "ABSENT"
-                step["absent_verified"] = not present
-                self._confirm(rec)
-                for e in self.journal.entries:
-                    if not e.get("terminal") and e.get("target") == rec["name"] and e.get("mutates"):
-                        self.journal.reconcile(e, "APPLIED" if present else "NOT_APPLIED", observed=step["reconciled"])
+                    present, ours = False, False
+                if present and ours:
+                    step["reconciled"] = "PRESENT_ADOPTED"
+                    if rec["kind"] == "entry" and rec["name"] not in self.owned.entries:
+                        self.owned.entries.append(rec["name"])
+                    if rec["kind"] == "dataset":
+                        self.owned.dataset = rec["name"]
+                    self._confirm(rec)
+                    self._close_pending_journal(rec, "APPLIED", step["reconciled"])
+                elif present:
+                    step["reconciled"] = "FOREIGN_PRESERVED"
+                    rec["state"] = "FOREIGN"
+                    if not any(f["name"] == rec["name"] for f in self.owned.foreign):
+                        self.owned.foreign.append({"kind": rec["kind"], "name": rec["name"], "observed_at": _now()})
+                elif step["age_s"] >= self.cfg.settle:
+                    step["reconciled"] = "NOT_APPLIED_AFTER_SETTLE"
+                    step["absent_verified"] = True
+                    self._confirm(rec)
+                    self._close_pending_journal(rec, "NOT_APPLIED", step["reconciled"])
+                else:
+                    step["reconciled"] = "ABSENT_UNSETTLED"
+                    rec["state"] = "ABSENT_UNSETTLED"
+                    rec["recheck_after_s"] = round(self.cfg.settle - step["age_s"], 3)
             except Exception as e:  # noqa: BLE001
                 step["error"] = f"{type(e).__name__}: {str(e)[:200]}"
             steps.append(step)
         self._write_ownership("pending_reconciled")
         return steps
+
+    def _close_pending_journal(self, rec: dict, state: str, observed: str) -> None:
+        for e in self.journal.entries:
+            if not e.get("terminal") and e.get("target") == rec["name"] and e.get("mutates") and not e.get("job_backed"):
+                self.journal.reconcile(e, state, observed=observed)
 
     def cleanup(self) -> dict:
         steps: list[dict] = self._reconcile_pending()
@@ -507,6 +609,8 @@ class Lifecycle:
                 self._op("delete_entry", "delete owned entry", self.cloud.delete_entry, name, mutates=True, target=name)
                 step["deleted"] = True
                 step["absent_verified"] = self._op("readback_entry_absent", "GET owned entry after delete", self.cloud.get_entry, name, target=name) is None
+                if step["absent_verified"]:
+                    self.owned.entries.remove(name)              # verified gone: a rerun of cleanup (pending re-checks) does not delete it again
             except Exception as e:  # noqa: BLE001 - each step is attempted; the receipt says which failed
                 step["error"] = f"{type(e).__name__}: {str(e)[:200]}"
             steps.append(step)
@@ -518,27 +622,35 @@ class Lifecycle:
                 self._op("delete_dataset", "delete owned dataset (all owned tables)", self.cloud.delete_dataset, ds, mutates=True, target=ds)
                 step["deleted"] = True
                 step["absent_verified"] = not self._op("readback_dataset_absent", "dataset exists after delete", self.cloud.dataset_exists, ds, target=ds)
+                if step["absent_verified"]:
+                    self.owned.dataset = None
             except Exception as e:  # noqa: BLE001
                 step["error"] = f"{type(e).__name__}: {str(e)[:200]}"
             steps.append(step)
-        # a mutating op that raised leaves an UNKNOWN entry; every deleted-and-verified resource closes the ones aimed at it
-        for st in steps:
-            if st.get("deleted") and st.get("absent_verified"):
-                for e in self.journal.entries:
-                    if not e.get("terminal") and (e.get("target") or "").startswith(st["resource"]):
-                        self.journal.reconcile(e, "MOOT", observed="target resource deleted and absence read back; the write's own outcome is unknown and moot")
+        # job-backed operations that raised are re-read under their own (project, location, job_id): resource deletion is
+        # never evidence about a server job (Astra PR41 re-review R5). Still running / unreadable stays unresolved.
+        job_steps = []
+        for e in list(self.journal.entries):
+            if not e.get("terminal") and e.get("job_backed"):
+                self._reconcile_job_entry(e)
+                job_steps.append({"seq": e["seq"], "role": e["role"], "job_id": e.get("job_id"), "state": e["state"], "observed": e.get("observed")})
         unresolved = self.journal.unresolved()
         pending = list(self.owned.pending)
-        def step_ok(s: dict) -> bool:   # a pending write is closed by its readback (ABSENT) or by the delete step that follows adoption
+        foreign = list(self.owned.foreign)
+        self._write_ownership("cleanup")
+
+        def step_ok(s: dict) -> bool:   # a pending write is closed by a stamped adoption (then deleted below) or by settled absence
             if s["kind"].startswith("pending_"):
-                return "error" not in s and s.get("reconciled") in ("ABSENT", "PRESENT_ADOPTED")
+                return "error" not in s and s.get("reconciled") in ("NOT_APPLIED_AFTER_SETTLE", "PRESENT_ADOPTED")
             return bool(s["deleted"] and s["absent_verified"])
-        complete = bool(steps) and all(step_ok(s) for s in steps) and not unresolved and not pending
-        status = "COMPLETE" if complete else ("NOTHING_OWNED" if not steps and not unresolved else "INCOMPLETE")
-        receipt = {"status": status, "steps": steps, "at": _now(), "unresolved_jobs": len(unresolved), "pending": pending,
-                   "unresolved": [{"seq": e["seq"], "role": e["role"], "target": e.get("target"), "error": e.get("error")} for e in unresolved],
-                   "note": "only exact run-owned resources; no prefix or glob deletion; a missing absence readback, a pending write "
-                           "that could not be read back or an unreconciled UNKNOWN operation is INCOMPLETE"}
+        complete = bool(steps) and all(step_ok(s) for s in steps) and not unresolved and not pending and not foreign
+        status = "COMPLETE" if complete else ("NOTHING_OWNED" if not steps and not unresolved and not pending and not foreign else "INCOMPLETE")
+        receipt = {"status": status, "steps": steps, "job_reconciliation": job_steps, "at": _now(), "unresolved_jobs": len(unresolved), "pending": pending,
+                   "foreign_preserved": foreign, "owner_stamp": self.owner_stamp,
+                   "unresolved": [{"seq": e["seq"], "role": e["role"], "target": e.get("target"), "job_id": e.get("job_id"), "error": e.get("error")} for e in unresolved],
+                   "note": "only exact run-owned (stamped) resources; no prefix or glob deletion; a missing absence readback, a pending write that is "
+                           "unreadable / possibly still in flight / present under a foreign stamp, or a job whose server state was not read back is INCOMPLETE; "
+                           "rerun cleanup to re-check pending resources after the settle window"}
         (Path(self.journal.run_dir) / "cleanup.json").write_text(json.dumps(receipt, indent=1, sort_keys=True) + "\n", encoding="utf-8")
         self.journal.note("cleanup", **receipt)
         return receipt

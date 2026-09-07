@@ -149,7 +149,7 @@ identity set is the 14 case jobs and does not include the pointer-lookup job, wh
 adds; the later changes (invocation-private and run-owned diagnostics, `approved` outage labelled NOT_REACHED) alter no
 recorded field of a passing run, so it was not re-run.
 
-## Catalog-seeded chain (2026-09-06, Slice A hermetic; runner `chain/0.5.1`)
+## Catalog-seeded chain (2026-09-06, Slice A hermetic; runner `chain/0.5.2`)
 
 `python3 -m okf_bq_graph.chain --seed-mode catalog` replaces the fixture seed with a **fresh Dataplex Catalog read**: paginated
 `entries.list` on the configured entry group selects the configured entry by exact name (no other entry body is fetched), then
@@ -187,10 +187,13 @@ scoped endpoints and LINKS_TO continuity, the computation's section membership, 
 the declaration's node id / file digest (also against the source manifest) / type / runtime / lifecycle / `stale_after` /
 parameters are all checked against the trusted projection. The separately selected computation object is re-verified byte
 for byte. The **disclosed `paths` list itself** is validated (scoped endpoints, LINKS_TO continuity, hop count, exact match
-with the computations' vias) and the **governance fields the caller consumes** — trust tier, verifications, provenance,
-freshness at `scope.as_of`, deprecated-seed replacement, for the seed and each computation — are recomputed from the trusted
-VERIFIED_BY / DERIVES_FROM / LINKS_TO edges (Astra PR 41 P1: computation-derived checks are not the returned payload). The
-governed input itself is retained per case under `retrieval/retrieval_<case>.json` with its SHA-256, not only the re-read rows. `INCONSISTENT` leaves the case `NOT_BOUND`, never invokes the SDK, and grades `WRONG` (a reached stage that
+with the computations' vias) and the **governance fields the caller consumes** — trust tier, verifications, the full
+engine-specific provenance (resource / title / declaration plus the fallback engine's `source_id` / `resolution` or the
+oracle's `declared` / `intrinsic` / `resolves_to`; an item without any engine field is a mismatch), freshness as the whole
+`{verdict, stale_after}` record at `scope.as_of`, deprecated-seed replacement, for the seed and each computation — are
+recomputed from the trusted VERIFIED_BY / DERIVES_FROM / RESOLVES_TO / LINKS_TO edges (Astra PR 41 P1 + re-review R1:
+computation-derived checks are not the returned payload, and a reduced field subset is not the field). The governed input
+itself is retained per case under `retrieval/retrieval_<case>.json` with its SHA-256, not only the re-read rows. `INCONSISTENT` leaves the case `NOT_BOUND`, never invokes the SDK, and grades `WRONG` (a reached stage that
 contradicts the pinned publication is not an outage); `ERROR` is `NOT_REACHED`. Regressions cover: a P2 endpoint or a
 non-existent edge mixed into a P1 path, a section's text changed under its old hash and P1 labels, SQL changed after preflight
 under the old digest label, a declaration changed after preflight, a P2 result relabelled as P1, and a run with the guard
@@ -212,15 +215,19 @@ governed input), `journal.jsonl`, `receipt/case_<case>_<mode>.json` diagnostics,
 record. **Job journal.** In live catalog mode every BigQuery query the chain submits goes through `publication.run_journaled`:
 pin resolution, seed visibility, observed head, payload rows (nodes + edges), the three retrieval stages (`retrieval_walk`,
 `retrieval_context`, `retrieval_nodes`, via `retrieve._run` when `clients["journal"]` is set) and the declaration read
-(`chain_declaration`, via `BigQueryStore.declaration` on every engine). The job id is chosen by the chain and written to the
-journal **before the send**; an empty read keeps its id (`EMPTY`); a local exception at submit or `result()` never becomes a
-terminal state on its own — `reconcile_job` reads `jobs.get` (bounded, no retries): not found → `NOT_SUBMITTED`, server DONE →
-`DONE`/`ERROR`, RUNNING → one cancel + readback → `CANCELLED`, anything unreadable stays `UNKNOWN` with its id and the run is
-`CHAIN_INCOMPLETE` at `unresolved_jobs`. Every journaled id enters the `same_requester` identity set (`job_inventory.graph`).
+(`chain_declaration`, via `BigQueryStore.declaration` on every engine). The job reference is one `(project, location, job_id)`
+chosen by the chain and written to the journal **before the send**: the project is the client's billing project (passed
+explicitly to `client.query`), recorded separately from the dataset project, and the same reference is used by
+`reconcile_job` and by the `same_requester` identity check (Astra re-review R4: a job submitted under the client's project
+is never looked up under the dataset project). An empty read keeps its id (`EMPTY`); a local exception at submit or
+`result()` never becomes a terminal state on its own — `reconcile_job` reads `jobs.get` under that reference (bounded, no
+retries): not found → `NOT_SUBMITTED`, server DONE → `DONE`/`ERROR`, RUNNING → one cancel + readback → `CANCELLED`, anything
+unreadable stays `UNKNOWN` with its id and the run is `CHAIN_INCOMPLETE` at `unresolved_jobs`. Every journaled id enters the
+`same_requester` identity set once (`job_inventory.graph`, deduplicated; `job_inventory.refs` carries each reference).
 The hermetic store journals the same roles with no job id (`actual_jobs = 0`). The configured runtime dataset is the single
 destination for pin resolution, payload rows, retrieval and declaration: a client or store wired to a different dataset is
-refused as `DESTINATION_MISMATCH` before any read (Opus PR 41 P2; the B2 lifecycle configuration routes everything to the
-owned dataset). Fixture mode (`--seed-mode fixture`, the default) is unchanged apart from the journal and keeps `evidence/chain/`;
+refused as `DESTINATION_MISMATCH` before the first store read, whether the client or a supplied store diverges (Opus PR 41 P2;
+the B2 lifecycle configuration routes everything to the owned dataset). Fixture mode (`--seed-mode fixture`, the default) is unchanged apart from the journal and keeps `evidence/chain/`;
 its live declaration read now also keeps its job id when the lookup is empty.
 These live-branch behaviours are exercised hermetically against a fake BigQuery client that serves the chain's real SQL
 (`tests/test_chain.py::FakeBigQuery`); no live job has run.
@@ -240,11 +247,20 @@ original entry and head read-only, publishes with a full-row readback (READY onl
 section hashes, dangling and distinctness checks all hold), advances the head with one MERGE only for a READY owned publication
 (`inject_failure="before_head"` leaves the old head; `"before_ready"` leaves loaded rows that can never become READY or head),
 generates owned pins from the verified rows, preserves authored aspects with explicit aspect keys (no delete-missing), and
-cleans up only exact owned resources with absence readback (`cleanup.json` is `COMPLETE` only then). Ownership of a dataset,
-entry or row load is persisted to `ownership.json` **before** the write (`pending`); a mutating call that raises leaves an
-`UNKNOWN` journal entry, and cleanup first reads every pending resource back (present → adopted and deleted; absent →
-`NOT_APPLIED`; unreadable → `INCOMPLETE`), so a committed write with a lost response is never orphaned behind a `COMPLETE`
-receipt (Astra PR 41 P1). `withdraw`/`restore` apply only to publications this run verified READY; `restore` requires the
+cleans up only exact owned resources with absence readback (`cleanup.json` is `COMPLETE` only then). **Ownership is a
+stamp, not a name:** every `Lifecycle` instance has an invocation stamp (`okf_owner` label on the dataset, `entrySource.labels`
+on entries) written at creation; ownership of a pending create is persisted to `ownership.json` **before** the write, and a
+pending resource read back later is adopted **only** if it carries this invocation's stamp — a resource under the same
+(normalised) name with another or no stamp is `FOREIGN_PRESERVED`, left untouched, and blocks `COMPLETE` (Astra re-review R2:
+`review-run-A` and `review_run_a` share a dataset name but never a stamp). One absent readback does not close a create that
+may still be in flight: it is `ABSENT_UNSETTLED` and stays pending until `settle_s` (default 2 × the op timeout) has elapsed
+since the failed attempt, after which a still-absent resource is `NOT_APPLIED_AFTER_SETTLE`; a resource that appears in
+between is adopted by stamp and deleted on the next cleanup run (Astra re-review R3; cleanup is rerunnable). Job-backed
+BigQuery operations (DDL, loads, inserts, updates, MERGE, SELECTs) get a driver-chosen `(project, location, job_id)` journaled
+before dispatch; a call that raises is reconciled through `job_state` (not found → `NOT_SUBMITTED`, DONE → `DONE`/`ERROR`,
+RUNNING → one cancel + readback → `CANCELLED`, unreadable / still running → `UNKNOWN`), and cleanup re-reads every unresolved
+job under its own reference: **deleting the target dataset is never evidence about the job** (Astra re-review R5; the former
+`MOOT` state is gone). `withdraw`/`restore` apply only to publications this run verified READY; `restore` requires the
 current row to be `WITHDRAWN` and re-runs the full-row readback before reinstating READY (`RESTORE_REFUSED` otherwise), so an
 `INVALID_READBACK` or corrupted publication can never be promoted (Astra PR 41 P2). P2 comes from
 `prepare_derived_source`: a retained temporary copy with one non-computation policy file changed, pinned as

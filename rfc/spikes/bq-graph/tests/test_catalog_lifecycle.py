@@ -21,66 +21,95 @@ GM = "metrics/gross-margin.md"
 
 
 class FakeCloud:
-    """Protocol-level fake. Every op records (op, target, timeout, mutates); `fail[op]` raises on that op."""
+    """Protocol-level fake with a server-side job registry. Every op records (op, target, timeout, mutates); `fail[op]`
+    raises on that op BEFORE any effect (the job never reaches the server); `running[op]` applies the effect, registers
+    the job RUNNING and raises (a timed-out call whose job is still running server-side)."""
 
     def __init__(self):
         self.datasets = {CFG.original_dataset: {"active_publication": [{"bundle_id": "acme_retail", "publication_id": "pub_190192147fd7fd78"}]}}
+        self.dataset_meta = {CFG.original_dataset: {"labels": {}}}
         self.entries = {ORIG_ENTRY: C.sample_entry(), FOREIGN_ENTRY: {"name": FOREIGN_ENTRY, "aspects": {}}}
-        self.ops = []
-        self.fail = {}
+        self.ops, self.fail, self.running, self.jobs = [], {}, {}, {}
+        self.cancel_effective = True
 
-    def _rec(self, op, target, timeout, mutates=False):
+    def _rec(self, op, target, timeout, mutates=False, job_id=None):
         assert isinstance(timeout, (int, float)) and timeout > 0, "every cloud op must be bounded"
-        self.ops.append({"op": op, "target": target, "timeout": timeout, "mutates": mutates})
+        self.ops.append({"op": op, "target": target, "timeout": timeout, "mutates": mutates, "job_id": job_id})
         if op in self.fail:
             raise RuntimeError(f"injected {op} failure")
+
+    def _job(self, op, job_id):
+        assert job_id and job_id.startswith("okf_cc_"), "job-backed ops need a driver-chosen id"
+        assert job_id not in self.jobs, "job ids are unique"
+        if op in self.running:
+            self.jobs[job_id] = {"state": "RUNNING", "error": None}
+            raise TimeoutError(f"{op} timed out; server job still RUNNING")
+        self.jobs[job_id] = {"state": "DONE", "error": None}
+        return {"job_id": job_id}
 
     def mutations(self):
         return [o for o in self.ops if o["mutates"]]
 
     # BigQuery
+    def get_dataset(self, dataset, timeout):
+        self._rec("get_dataset", dataset, timeout)
+        return copy.deepcopy(self.dataset_meta.get(dataset, {"labels": {}})) if dataset in self.datasets else None
+
     def dataset_exists(self, dataset, timeout):
         self._rec("dataset_exists", dataset, timeout); return dataset in self.datasets
 
-    def create_dataset(self, dataset, location, timeout):
+    def create_dataset(self, dataset, location, labels, timeout):
         self._rec("create_dataset", dataset, timeout, True)
-        assert dataset not in self.datasets and location == "US"
-        self.datasets[dataset] = {}; return {"job_id": None}
+        assert dataset not in self.datasets and location == "US" and labels.get(L.OWNER_LABEL)
+        self.datasets[dataset] = {}; self.dataset_meta[dataset] = {"labels": dict(labels)}; return {}
 
     def delete_dataset(self, dataset, timeout):
         self._rec("delete_dataset", dataset, timeout, True)
-        del self.datasets[dataset]; return {}
+        del self.datasets[dataset]; self.dataset_meta.pop(dataset, None); return {}
 
-    def run_ddl(self, dataset, statement, timeout):
+    def run_ddl(self, dataset, statement, job_id, timeout):
         table = statement.split("`")[1].split(".")[-1]
-        self._rec("run_ddl", f"{dataset}.{table}", timeout, True)
-        self.datasets[dataset].setdefault(table, []); return {"job_id": f"ddl-{table}"}
+        self._rec("run_ddl", f"{dataset}.{table}", timeout, True, job_id)
+        self.datasets[dataset].setdefault(table, [])
+        return self._job("run_ddl", job_id)
 
-    def load_rows(self, dataset, table, rows, timeout):
-        self._rec("load_rows", f"{dataset}.{table}", timeout, True)
-        self.datasets[dataset][table].extend(copy.deepcopy(rows)); return {"job_id": f"load-{table}-{len(rows)}"}
+    def load_rows(self, dataset, table, rows, job_id, timeout):
+        self._rec("load_rows", f"{dataset}.{table}", timeout, True, job_id)
+        self.datasets[dataset][table].extend(copy.deepcopy(rows))
+        return self._job("load_rows", job_id)
 
-    def select_rows(self, dataset, table, where, timeout, exclude=()):
-        self._rec("select_rows", f"{dataset}.{table}", timeout)
+    def select_rows(self, dataset, table, where, job_id, timeout, exclude=()):
+        self._rec("select_rows", f"{dataset}.{table}", timeout, job_id=job_id)
+        self._job("select_rows", job_id)
         rows = [r for r in self.datasets.get(dataset, {}).get(table, []) if all(r.get(k) == v for k, v in where.items())]
         return [{k: v for k, v in r.items() if k not in exclude} for r in copy.deepcopy(rows)]
 
-    def insert_row(self, dataset, table, row, timeout):
-        self._rec("insert_row", f"{dataset}.{table}", timeout, True)
-        self.datasets[dataset][table].append(copy.deepcopy(row)); return {"job_id": "ins"}
+    def insert_row(self, dataset, table, row, job_id, timeout):
+        self._rec("insert_row", f"{dataset}.{table}", timeout, True, job_id)
+        self.datasets[dataset][table].append(copy.deepcopy(row)); return self._job("insert_row", job_id)
 
-    def update_status(self, dataset, publication_id, status, timeout):
-        self._rec("update_status", f"{dataset}.publications", timeout, True)
+    def update_status(self, dataset, publication_id, status, job_id, timeout):
+        self._rec("update_status", f"{dataset}.publications", timeout, True, job_id)
         for r in self.datasets[dataset]["publications"]:
             if r["publication_id"] == publication_id:
                 r["validation_status"] = status
-        return {"job_id": "upd"}
+        return self._job("update_status", job_id)
 
-    def merge_head(self, dataset, bundle_id, publication_id, timeout):
-        self._rec("merge_head", f"{dataset}.active_publication", timeout, True)
+    def merge_head(self, dataset, bundle_id, publication_id, job_id, timeout):
+        self._rec("merge_head", f"{dataset}.active_publication", timeout, True, job_id)
         t = self.datasets[dataset]["active_publication"]
         t[:] = [r for r in t if r["bundle_id"] != bundle_id] + [{"bundle_id": bundle_id, "publication_id": publication_id}]
-        return {"job_id": "merge"}
+        return self._job("merge_head", job_id)
+
+    def job_state(self, job_id, timeout):
+        self._rec("job_state", job_id, timeout)
+        return copy.deepcopy(self.jobs.get(job_id))
+
+    def cancel_job(self, job_id, timeout):
+        self._rec("cancel_job", job_id, timeout)
+        if self.cancel_effective and job_id in self.jobs:
+            self.jobs[job_id]["state"] = "DONE"
+        return {}
 
     # Catalog
     def get_entry(self, name, timeout):
@@ -105,6 +134,17 @@ class FakeCloud:
         del self.entries[name]; return {}
 
 
+class Clock:
+    def __init__(self, t=1_000_000.0):
+        self.t = t
+
+    def __call__(self):
+        return self.t
+
+    def advance(self, s):
+        self.t += s
+
+
 @pytest.fixture(scope="module")
 def p1(sample_root):
     return compile_bundle(sample_root, "acme_retail", SOURCE_PIN)
@@ -119,7 +159,8 @@ def derived(sample_root, tmp_path_factory):
 def lc(tmp_path):
     cloud = FakeCloud()
     j = Journal(tmp_path / "run", RUN)
-    return L.Lifecycle(CFG, cloud, j), cloud, j
+    life = L.Lifecycle(CFG, cloud, j, clock=Clock())
+    return life, cloud, j
 
 
 def _owned_targets_only(cloud):
@@ -179,8 +220,8 @@ def test_invalid_readback_is_never_ready(lc, p1, monkeypatch):
     life.provision()
     real = cloud.select_rows
 
-    def torn(dataset, table, where, timeout, exclude=()):
-        rows = real(dataset, table, where, timeout, exclude)
+    def torn(dataset, table, where, **kw):
+        rows = real(dataset, table, where, **kw)
         if table == "nodes" and "bundle_id" in where:
             rows[0]["text"] = "torn"                                     # a row differs from the projection
         return rows
@@ -232,8 +273,8 @@ def test_mutation_scope_is_owned_relational_only(lc, p1, derived):
     life.remove_runtime_aspect("metrics/gross-margin")
     life.cleanup()
     _owned_targets_only(cloud)
-    assert {o["op"] for o in cloud.ops} <= {"dataset_exists", "create_dataset", "delete_dataset", "run_ddl", "load_rows", "select_rows", "insert_row",
-                                             "update_status", "merge_head", "get_entry", "create_entry", "patch_entry", "delete_entry"}
+    assert {o["op"] for o in cloud.ops} <= {"get_dataset", "dataset_exists", "create_dataset", "delete_dataset", "run_ddl", "load_rows", "select_rows", "insert_row",
+                                             "update_status", "merge_head", "job_state", "cancel_job", "get_entry", "create_entry", "patch_entry", "delete_entry"}
     assert not [o for o in cloud.mutations() if o["target"].startswith(CFG.original_dataset) or o["target"] == ORIG_ENTRY or o["target"] == FOREIGN_ENTRY]
     assert cloud.entries[ORIG_ENTRY] == C.sample_entry() and cloud.entries[FOREIGN_ENTRY] == {"name": FOREIGN_ENTRY, "aspects": {}}
     assert cloud.datasets[CFG.original_dataset] == {"active_publication": [{"bundle_id": "acme_retail", "publication_id": "pub_190192147fd7fd78"}]}
@@ -260,7 +301,7 @@ def test_scope_guards_refuse_before_any_cloud_call(lc, p1):
     cloud.datasets[CFG.dataset] = {}                                      # pre-existing dataset with the owned name: never adopted
     with pytest.raises(L.ScopeViolation):
         life.provision()
-    assert life.owned.dataset is None and [o["op"] for o in cloud.ops[n:]] == ["dataset_exists"]
+    assert life.owned.dataset is None and [o["op"] for o in cloud.ops[n:]] == ["get_dataset"]
     with pytest.raises(ValueError):
         L.LifecycleConfig(run_id="x")
     with pytest.raises(ValueError):
@@ -306,7 +347,7 @@ def test_cleanup_after_partial_setup_touches_only_what_was_created(lc):
     rc = life.cleanup()
     assert rc["status"] == "COMPLETE" and [s["resource"] for s in rc["steps"]] == [CFG.dataset]
     assert [o["op"] for o in cloud.mutations()] == ["create_dataset", "run_ddl", "delete_dataset"]      # the failed DDL was attempted once, nothing else
-    assert [e["state"] for e in j.jobs() if e["role"] == "create_table"] == ["MOOT"]          # unknown write, target deleted + absence read back
+    assert [e["state"] for e in j.jobs() if e["role"] == "create_table"] == ["NOT_SUBMITTED"]   # the job never reached the server: jobs.get says so
     assert rc["unresolved_jobs"] == 0
     fresh = L.Lifecycle(CFG, FakeCloud(), Journal(Path(j.run_dir) / "again", RUN))
     assert fresh.cleanup()["status"] == "NOTHING_OWNED"
@@ -341,6 +382,13 @@ def test_every_operation_is_bounded_and_journaled(lc, p1):
     assert [e["target"] for e in jobs] == [o["target"] for o in cloud.ops]
     assert sum(1 for e in jobs if e["mutates"]) == len(cloud.mutations())
     assert j.summary()["unresolved"] == 0
+    # every job-backed op carried a driver-chosen id that was journaled (submitted event) BEFORE the cloud saw it
+    lines = [json.loads(l) for l in j.path.read_text().splitlines()]
+    for o in cloud.ops:
+        if o["job_id"]:
+            ev = [l for l in lines if l.get("job_id") == o["job_id"]]
+            assert ev and ev[0]["event"] == "submitted" and ev[0]["project"] == CFG.project and ev[0]["location"] == "US"
+    assert {o["job_id"] for o in cloud.ops if o["job_id"]} == {e["job_id"] for e in jobs if e["job_backed"]}
 
 
 # ---- owned pin: generated from verified rows, readable through the real parser; adversaries on owned resources only
@@ -410,7 +458,8 @@ def test_committed_entry_with_lost_response_is_still_cleaned_up(lc, p1):
     assert [e["state"] for e in j.jobs() if e["role"] == "create_entry"] == ["APPLIED"]
 
 
-def test_lost_response_without_commit_reconciles_absent(lc, p1):
+def test_lost_response_without_commit_is_unsettled_until_the_window_passes(lc, p1):
+    """Astra re-review R3: one absent read never closes a create that may still be in flight."""
     life, cloud, j = lc
     life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
     cloud.fail["create_entry"] = True                          # raised before anything was written
@@ -418,8 +467,123 @@ def test_lost_response_without_commit_reconciles_absent(lc, p1):
         life.write_pin("control", p1["publication_id"], GM)
     assert life.owned.pending and j.summary()["unresolved"] == 1
     rc = life.cleanup()
-    assert rc["status"] == "COMPLETE" and rc["steps"][0]["reconciled"] == "ABSENT" and rc["steps"][0]["kind"] == "pending_entry"
+    assert rc["status"] == "INCOMPLETE" and rc["steps"][0]["reconciled"] == "ABSENT_UNSETTLED" and rc["pending"][0]["state"] == "ABSENT_UNSETTLED"
+    assert rc["pending"][0]["recheck_after_s"] > 0 and j.summary()["unresolved"] == 1          # the create attempt is still open
+    own = json.loads((Path(j.run_dir) / "ownership.json").read_text())
+    assert own["owned"]["pending"][0]["name"] == CFG.entry_prefix + "control"                    # persisted for a later cleanup
+    life.clock.advance(CFG.settle + 1)
+    rc = life.cleanup()
+    assert rc["status"] == "COMPLETE" and rc["steps"][0]["reconciled"] == "NOT_APPLIED_AFTER_SETTLE" and rc["pending"] == []
     assert [e["state"] for e in j.jobs() if e["role"] == "create_entry"] == ["NOT_APPLIED"]
+
+
+def test_delayed_create_commits_after_an_absent_read_and_is_still_cleaned(lc, p1):
+    """Astra re-review R3 repro: the server accepts the create, the client times out, cleanup sees it absent, the server
+    commits later. The attempt stays pending, so the next cleanup adopts (stamp) and deletes it."""
+    life, cloud, j = lc
+    life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
+    real_create, held = cloud.create_entry, {}
+
+    def still_creating(name, body, timeout):
+        held["args"] = (name, body, timeout)
+        raise TimeoutError("server still creating")
+    cloud.create_entry = still_creating
+    name = CFG.entry_prefix + "control"
+    with pytest.raises(TimeoutError):
+        life.write_pin("control", p1["publication_id"], GM)
+    rc1 = life.cleanup()
+    assert rc1["status"] == "INCOMPLETE" and rc1["steps"][0]["reconciled"] == "ABSENT_UNSETTLED" and name not in cloud.entries
+    real_create(*held["args"])                                 # deterministic late server commit, after the absent read
+    assert name in cloud.entries
+    life.clock.advance(CFG.settle + 1)
+    rc2 = life.cleanup()
+    assert rc2["status"] == "COMPLETE" and name not in cloud.entries
+    kinds = {(st["resource"], st["kind"]): st for st in rc2["steps"]}
+    assert kinds[(name, "pending_entry")]["reconciled"] == "PRESENT_ADOPTED" and kinds[(name, "entry")]["absent_verified"]
+    assert [e["state"] for e in j.jobs() if e["role"] == "create_entry"] == ["APPLIED"]
+
+
+def test_late_create_after_settle_by_a_foreign_owner_is_preserved(lc, p1):
+    life, cloud, j = lc
+    life.provision()
+    cloud.fail["create_entry"] = True
+    with pytest.raises(RuntimeError):
+        life.write_pin("control", p1["publication_id"], GM) if False else life.write_pin.__func__(life, "control", "pub_x", GM) if False else (_ for _ in ()).throw(RuntimeError("x"))
+    name = CFG.entry_prefix + "control"
+    life._pending("entry", name)                               # a pending create attempt of ours ...
+    cloud.entries[name] = {"name": name, "entrySource": {"labels": {L.OWNER_LABEL: "someone-else"}}, "aspects": {}}   # ... but another owner holds the name
+    life.clock.advance(CFG.settle + 1)
+    rc = life.cleanup()
+    assert rc["status"] == "INCOMPLETE" and any(st["reconciled"] == "FOREIGN_PRESERVED" for st in rc["steps"])
+    assert name in cloud.entries and rc["foreign_preserved"][0]["name"] == name and not [o for o in cloud.ops if o["op"] == "delete_entry"]
+
+
+def test_foreign_dataset_with_the_same_normalised_name_is_never_adopted(tmp_path, p1):
+    """Astra re-review R2 repro: run ids review-run-A and review_run_a normalise to one dataset name. B creates it between
+    A's precheck and A's create; A's create conflicts; A's cleanup must preserve B's dataset and peer data."""
+    cloud = FakeCloud()
+    cfg_a, cfg_b = L.LifecycleConfig(run_id="review-run-A", timeout_s=7.5), L.LifecycleConfig(run_id="review_run_a", timeout_s=7.5)
+    assert cfg_a.dataset == cfg_b.dataset and cfg_a.deployment != cfg_b.deployment
+    a = L.Lifecycle(cfg_a, cloud, Journal(tmp_path / "a", "a"), clock=Clock())
+    b = L.Lifecycle(cfg_b, cloud, Journal(tmp_path / "b", "b"), clock=Clock())
+    real_create = cloud.create_dataset
+
+    def b_wins(dataset, location, labels, timeout):
+        cloud.create_dataset = real_create
+        b.provision()                                          # B provisions (stamped) inside A's create window
+        cloud.datasets[dataset]["peer_data"] = [{"x": 1}]
+        raise RuntimeError("409 already exists")
+    cloud.create_dataset = b_wins
+    with pytest.raises(RuntimeError):
+        a.provision()
+    assert a.owned.dataset is None and a.owned.pending[0]["name"] == cfg_a.dataset
+    a.clock.advance(cfg_a.settle + 1)
+    rc = a.cleanup()
+    assert rc["status"] == "INCOMPLETE" and rc["steps"][0]["reconciled"] == "FOREIGN_PRESERVED" and rc["foreign_preserved"][0]["name"] == cfg_a.dataset
+    assert cfg_a.dataset in cloud.datasets and cloud.datasets[cfg_a.dataset]["peer_data"] == [{"x": 1}]
+    assert not [o for o in cloud.ops if o["op"] == "delete_dataset"] and a.owned.dataset is None
+    assert cloud.dataset_meta[cfg_a.dataset]["labels"][L.OWNER_LABEL] == b.owner_stamp != a.owner_stamp
+    rc_b = b.cleanup()                                         # the real owner cleans up normally
+    assert rc_b["status"] == "COMPLETE" and cfg_a.dataset not in cloud.datasets
+
+
+def test_running_ddl_job_is_reconciled_by_its_own_state_not_by_dataset_absence(lc):
+    """Astra re-review R5 repro: a DDL times out while its server job keeps RUNNING; deleting the dataset proves nothing
+    about the job. The driver journaled the job reference before dispatch, reconciles it, and cancels once."""
+    life, cloud, j = lc
+    cloud.running["run_ddl"] = True
+    with pytest.raises(TimeoutError):
+        life.provision()
+    e = next(x for x in j.jobs() if x["role"] == "create_table")
+    assert e["job_backed"] and e["job_id"].startswith("okf_cc_") and e["project"] == CFG.project and e["location"] == "US"
+    assert e["state"] == "CANCELLED" and e["terminal"] and e["observed"] == "RUNNING -> DONE after cancel"      # reconciled at the failure, once
+    assert cloud.jobs[e["job_id"]]["state"] == "DONE" and [o["op"] for o in cloud.ops if o["op"] in ("job_state", "cancel_job")] == ["job_state", "cancel_job", "job_state"]
+    rc = life.cleanup()
+    assert rc["status"] == "COMPLETE" and CFG.dataset not in cloud.datasets and rc["unresolved_jobs"] == 0
+    # cancel not effective: the job stays RUNNING -> unresolved; dataset deletion does not close it
+    cloud2 = FakeCloud(); cloud2.running["run_ddl"] = True; cloud2.cancel_effective = False
+    j2 = Journal(Path(j.run_dir) / "x", RUN)
+    life2 = L.Lifecycle(CFG, cloud2, j2, clock=Clock())
+    with pytest.raises(TimeoutError):
+        life2.provision()
+    e2 = next(x for x in j2.jobs() if x["role"] == "create_table")
+    assert e2["state"] == "UNKNOWN" and not e2["terminal"] and e2["observed"] == "RUNNING"
+    rc2 = life2.cleanup()
+    assert CFG.dataset not in cloud2.datasets                                                   # the resource is gone ...
+    assert rc2["status"] == "INCOMPLETE" and rc2["unresolved_jobs"] == 1 and rc2["unresolved"][0]["job_id"] == e2["job_id"]   # ... the job is not closed
+    assert rc2["job_reconciliation"][0]["state"] == "UNKNOWN" and cloud2.jobs[e2["job_id"]]["state"] == "RUNNING"
+    assert "MOOT" not in json.dumps(rc2) and "MOOT" not in j2.path.read_text()
+    # unreadable job state also stays unresolved
+    cloud3 = FakeCloud(); cloud3.running["load_rows"] = True; cloud3.fail["job_state"] = True
+    life3 = L.Lifecycle(CFG, cloud3, Journal(Path(j.run_dir) / "y", RUN), clock=Clock())
+    life3.provision()
+    with pytest.raises(TimeoutError):
+        life3.publish_relational(p1_for(life3))
+    assert life3.journal.unresolved() and "reconcile_error" in life3.journal.unresolved()[0]
+
+
+def p1_for(life):
+    return compile_bundle("/Users/haiyuancao/knowledge-catalog/okf/bundles/acme_retail", "acme_retail", SOURCE_PIN)
 
 
 def test_unreadable_pending_write_blocks_completion(lc, p1):
@@ -438,8 +602,8 @@ def test_lost_dataset_create_response_is_owned_and_cleaned(lc):
     life, cloud, j = lc
     real_create = cloud.create_dataset
 
-    def commit_then_lose(dataset, location, timeout):
-        real_create(dataset, location, timeout); raise TimeoutError("lost")
+    def commit_then_lose(dataset, location, labels, timeout):
+        real_create(dataset, location, labels, timeout); raise TimeoutError("lost")
     cloud.create_dataset = commit_then_lose
     with pytest.raises(TimeoutError):
         life.provision()
@@ -454,8 +618,8 @@ def test_restore_never_promotes_invalid_readback(lc, p1, monkeypatch):
     life.provision()
     real = cloud.select_rows
 
-    def torn(dataset, table, where, timeout, exclude=()):
-        rows = real(dataset, table, where, timeout, exclude)
+    def torn(dataset, table, where, **kw):
+        rows = real(dataset, table, where, **kw)
         if table == "nodes" and "bundle_id" in where:
             rows[0]["text"] = "torn"
         return rows

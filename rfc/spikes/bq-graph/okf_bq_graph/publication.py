@@ -178,16 +178,22 @@ def reconcile_job(client: Any, journal: Any, entry: dict, error: str, cancel: bo
 
 
 def run_journaled(client: Any, journal: Any, role: str, desc: str, query: str, job_config: Any, location: str, project: Optional[str] = None,
-                  job_id: Optional[str] = None, engine: str = "bigquery", reconcile_timeout: float = 10.0, **meta: Any) -> tuple[list[dict], Any, dict]:
-    """Submit one query job with a caller-chosen job id journaled BEFORE the send, wait for rows, and close the entry
-    at a verified terminal state. Any exception in submit or result() goes through `reconcile_job`, then re-raises."""
+                  job_id: Optional[str] = None, engine: str = "bigquery", reconcile_timeout: float = 10.0, job_project: Optional[str] = None,
+                  **meta: Any) -> tuple[list[dict], Any, dict]:
+    """Submit one query job with a caller-chosen `(project, location, job_id)` reference journaled BEFORE the send, wait
+    for rows, and close the entry at a verified terminal state. The job project is the client's billing project (or an
+    explicit `job_project`), never the dataset project (`project`, recorded separately as `dataset_project`): submit,
+    reconcile and identity all use this one reference (Astra PR41 re-review R4). Any exception in submit or result()
+    goes through `reconcile_job`, then re-raises."""
     import uuid
     jid = job_id or f"okf_cc_{journal.run_id}_{role}_{uuid.uuid4().hex[:12]}"
     jid = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in jid)[:1024]
-    e = journal.intend(role, desc, engine, actual=True, query_sha256=_sha(query.encode()), intended_job_id=jid, **meta)
-    journal.submitted(e, job_id=jid, project=project, location=location)   # the id is known and retained before the send
+    jp = job_project or getattr(client, "project", None)
+    e = journal.intend(role, desc, engine, actual=True, query_sha256=_sha(query.encode()), intended_job_id=jid, dataset_project=project,
+                       job_ref_complete=bool(jp and location), **meta)
+    journal.submitted(e, job_id=jid, project=jp, location=location)   # the full reference is known and retained before the send
     try:
-        job = client.query(query, job_config=job_config, location=location, job_id=jid)
+        job = client.query(query, job_config=job_config, location=location, job_id=jid, project=jp)
     except Exception as ex:  # noqa: BLE001
         reconcile_job(client, journal, e, f"submit {type(ex).__name__}: {str(ex)[:300]}", timeout=reconcile_timeout)
         raise
@@ -225,7 +231,8 @@ class BigQueryStore:
                                       labels=dict(self.labels, stage=role.replace("_", "-")[:63]))
         cfg.job_timeout_ms = self.job_timeout_ms
         rows, _job, e = run_journaled(self.client, self.journal, role, desc, query, cfg, self.location, project=self.project,
-                                      engine=self.engine, reconcile_timeout=self.reconcile_timeout, dataset=self.dataset)
+                                      engine=self.engine, reconcile_timeout=self.reconcile_timeout, dataset=self.dataset,
+                                      job_project=getattr(self.client, "project", None))
         return rows, e
 
     @staticmethod
@@ -359,6 +366,13 @@ def trusted_source(pin: Any, bundle_root: str, compile_fn: Any = None, derivatio
 
 
 # ----------------------------------------------------------------------------- payload consistency
+def _freshness_equal(result: Any, trusted: dict) -> bool:
+    """Verdict and the actual deadline (and any parse reason) must both agree; a verdict alone is a label."""
+    if not isinstance(result, dict):
+        return False
+    return all(result.get(k) == trusted.get(k) for k in ("verdict", "stale_after", "reason")) and set(result) <= {"verdict", "stale_after", "reason"}
+
+
 def _fence(text: str) -> str:
     m = SQL_FENCE_RE.search(text or "")
     return m.group(1) if m else (text or "")
@@ -460,13 +474,39 @@ def verify_payload(store: Any, pin: Any, trusted: dict, result: dict, comp: Opti
         tier = "unverified" if not kinds else ("human-reviewed" if "human" in kinds else "machine-confirmed")
         return tier, sorted(({"by": a["title"], "kind": a["actor_kind"], "at": e["authored_at"]} for e, a in vs), key=lambda x: (x["at"] or "", x["by"]))
 
-    def trusted_provenance(cid: str) -> list[tuple]:
+    PROV_FIELDS = ("resource", "title", "declaration", "source_id", "resolution", "declared", "intrinsic", "resolves_to")
+
+    def trusted_provenance(cid: str) -> list[dict]:
+        """Every field either engine emits for a DERIVES_FROM disclosure, from the trusted edge + Source node: the
+        fallback engine adds `source_id`/`resolution`, the oracle adds `declared`/`intrinsic`/`resolves_to`."""
         out = []
         for e in out_edges.get(cid, []):
             if e["relation"] == "DERIVES_FROM" and e["dst_id"] in tn:
                 src = tn[e["dst_id"]]
-                out.append((src.get("resource"), src.get("title"), e["declaration"]))
-        return sorted(out, key=lambda x: (x[2], x[0] or ""))
+                resolves = sorted(tn[x["dst_id"]]["local_id"] for x in out_edges.get(src["node_id"], []) if x["relation"] == "RESOLVES_TO" and x["dst_id"] in tn)
+                out.append({"resource": src.get("resource"), "title": src.get("title"), "declaration": e["declaration"], "source_id": src["node_id"],
+                            "resolution": e.get("resolution"), "declared": json.loads(e.get("attrs") or "{}"), "intrinsic": json.loads(src.get("attrs") or "{}"),
+                            "resolves_to": resolves})
+        return sorted(out, key=lambda x: (x["declaration"], x["resource"] or ""))
+
+    def compare_provenance(cid: str, items: list) -> tuple[bool, list]:
+        trusted_items = trusted_provenance(cid)
+        r_items = sorted((dict(pv) for pv in (items or []) if isinstance(pv, dict)), key=lambda x: (x.get("declaration") or "", x.get("resource") or ""))
+        if len(r_items) != len(trusted_items) or len(r_items) != len(items or []):
+            return False, [{"reason": "count", "result": len(items or []), "trusted": len(trusted_items)}]
+        diffs = []
+        for r, t in zip(r_items, trusted_items):
+            for f in ("resource", "title", "declaration"):
+                if f not in r or r[f] != t[f]:
+                    diffs.append({"declaration": t["declaration"], "field": f})
+            for f in PROV_FIELDS[3:]:
+                if f in r:
+                    rv = sorted(r[f]) if f == "resolves_to" and isinstance(r[f], list) else r[f]
+                    if rv != t[f]:
+                        diffs.append({"declaration": t["declaration"], "field": f})
+            if not any(f in r for f in ("source_id", "declared")):
+                diffs.append({"declaration": t["declaration"], "field": "engine_fields_missing"})
+        return not diffs, diffs
 
     def trusted_replacement(node: dict) -> Optional[dict]:
         if (node.get("status") or "stable") != "deprecated":
@@ -485,13 +525,15 @@ def verify_payload(store: Any, pin: Any, trusted: dict, result: dict, comp: Opti
             gov_items.append({"node_id": cid, "ok": False, "reason": "not in trusted projection"}); continue
         tier, vers = trusted_trust(cid)
         r_vers = [{"by": v.get("by"), "kind": v.get("kind"), "at": v.get("at")} for v in (c.get("verifications") or [])]
-        r_prov = sorted(((pv.get("resource"), pv.get("title"), pv.get("declaration")) for pv in (c.get("provenance") or [])), key=lambda x: (x[2] or "", x[0] or ""))
+        prov_ok, prov_diffs = compare_provenance(cid, c.get("provenance"))
         rep, t_rep = c.get("replacement"), trusted_replacement(node)
         rep_ok = (rep is None and t_rep is None) or (isinstance(rep, dict) and t_rep is not None and rep.get("concept") == t_rep["concept"] and rep.get("label") == t_rep["label"])
-        item = {"node_id": cid, "trust_tier": c.get("trust_tier") == tier, "verifications": r_vers == vers, "provenance": r_prov == trusted_provenance(cid),
-                "freshness": (c.get("freshness") or {}).get("verdict") == Graph.freshness(node, as_of)["verdict"] if as_of else False,
+        item = {"node_id": cid, "trust_tier": c.get("trust_tier") == tier, "verifications": r_vers == vers, "provenance": prov_ok,
+                "freshness": bool(as_of) and _freshness_equal(c.get("freshness"), Graph.freshness(node, as_of)),
                 "replacement": rep_ok}
-        item["ok"] = all(v for k, v in item.items() if k != "node_id")
+        if prov_diffs:
+            item["provenance_diffs"] = prov_diffs[:8]
+        item["ok"] = all(v for k, v in item.items() if k not in ("node_id", "provenance_diffs"))
         gov_items.append(item)
     for comp_r in result.get("computations") or []:
         cid = comp_r.get("computation_id") or _node_id(B, P, "Concept", comp_r.get("concept", ""))
@@ -500,11 +542,13 @@ def verify_payload(store: Any, pin: Any, trusted: dict, result: dict, comp: Opti
             continue   # already failed in `paths`/`computations`
         tier, _ = trusted_trust(cid)
         item = {"node_id": cid, "trust_tier": comp_r.get("trust_tier") == tier,
-                "freshness": (comp_r.get("freshness") or {}).get("verdict") == Graph.freshness(node, as_of)["verdict"] if as_of else False}
+                "freshness": bool(as_of) and _freshness_equal(comp_r.get("freshness"), Graph.freshness(node, as_of))}
         item["ok"] = item["trust_tier"] and item["freshness"]
         gov_items.append(item)
     checks["governance"] = {"ok": bool(gov_items) and all(i["ok"] for i in gov_items), "items": gov_items,
-                            "note": "trust tier, verifications, provenance, freshness and replacement recomputed from trusted VERIFIED_BY/DERIVES_FROM/LINKS_TO edges at scope.as_of"}
+                            "note": "trust tier, verifications, full engine-specific provenance (resource/title/declaration + source_id/resolution or "
+                                    "declared/intrinsic/resolves_to), freshness verdict AND stale_after, and replacement recomputed from trusted "
+                                    "VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of"}
     if comp is not None:
         # the selected computation object is re-verified byte for byte: a change after preflight (SQL, section, path)
         # under an unchanged id/label fails here even if the result list still agrees with the trusted projection
