@@ -331,10 +331,11 @@ def test_journal_is_append_only_and_retains_originals(tmp_path):
     assert j.summary()["unresolved"] == 0 and j.job_ids() == ["job-1"] and j.summary()["actual_jobs"] == 1
 
 
-# ---- BigQueryStore: the real client boundary with a fake client (journal before waiting, ids at submission, failures retained)
+# ---- BigQueryStore: the real client boundary with a fake client (id journaled before the send, reconcile on failure)
 class _Job:
-    def __init__(self, job_id, rows=None, fail=None):
-        self.job_id, self._rows, self._fail = job_id, rows or [], fail
+    def __init__(self, rows=None, fail=None, state="DONE", error_result=None, user_email="op@x"):
+        self.job_id, self._rows, self._fail = None, rows or [], fail
+        self.state, self.error_result, self.user_email = state, error_result, user_email
         self.total_bytes_billed, self.total_bytes_processed = 10485760, 1234
 
     def result(self):
@@ -344,55 +345,204 @@ class _Job:
 
 
 class _Client:
-    def __init__(self, plan):
-        self.plan, self.calls = list(plan), []
+    """`plan` items are _Job (served for the next query) or Exception (raised at submit). `server` maps job ids to the
+    job the server would return from jobs.get; `after_cancel` is the state a cancelled job reports."""
 
-    def query(self, query, job_config=None, location=None):
-        self.calls.append({"query": query, "params": {p.name: p.value for p in job_config.query_parameters}, "location": location,
+    def __init__(self, plan, server=None, get_fail=None, cancel_fail=None, after_cancel="DONE"):
+        self.plan, self.calls, self.server = list(plan), [], server or {}
+        self.get_fail, self.cancel_fail, self.after_cancel = get_fail, cancel_fail, after_cancel
+        self.gets, self.cancels = [], []
+
+    def query(self, query, job_config=None, location=None, job_id=None):
+        self.calls.append({"query": query, "params": {p.name: p.value for p in job_config.query_parameters}, "location": location, "job_id": job_id,
                            "max_bytes": job_config.maximum_bytes_billed, "cache": job_config.use_query_cache, "labels": dict(job_config.labels),
                            "timeout_ms": job_config.job_timeout_ms})
         nxt = self.plan.pop(0)
         if isinstance(nxt, Exception):
             raise nxt
+        nxt.job_id = job_id
+        self.server.setdefault(job_id, nxt)
         return nxt
+
+    def get_job(self, job_id, project=None, location=None, retry=None, timeout=None):
+        self.gets.append((job_id, retry, timeout))
+        if self.get_fail:
+            raise self.get_fail
+        if job_id not in self.server:
+            from google.api_core import exceptions as gexc
+            raise gexc.NotFound("no such job")
+        return self.server[job_id]
+
+    def cancel_job(self, job_id, project=None, location=None, retry=None, timeout=None):
+        self.cancels.append(job_id)
+        if self.cancel_fail:
+            raise self.cancel_fail
+        self.server[job_id].state = self.after_cancel
+        return True
 
 
 def test_bigquery_store_journals_each_read_with_its_job_identity(tmp_path, pin):
     j = Journal(tmp_path / "r", "r1")
-    client = _Client([_Job("j-pub", [{"publication_id": pin.publication_id, "validation_status": "READY"}]), _Job("j-seed", []),
-                      _Job("j-head", [{"bundle_id": "acme_retail", "publication_id": "pub_x"}])])
+    client = _Client([_Job([{"publication_id": pin.publication_id, "validation_status": "READY"}]), _Job([]),
+                      _Job([{"bundle_id": "acme_retail", "publication_id": "pub_x"}])])
     s = PUB.BigQueryStore(client, "proj", "ds", "US", j)
     rows, e = s.publication(pin.bundle_id, pin.publication_id)
-    assert rows[0]["publication_id"] == pin.publication_id and e["job_id"] == "j-pub" and e["state"] == "DONE" and e["actual"]
+    assert rows[0]["publication_id"] == pin.publication_id and e["state"] == "DONE" and e["actual"]
+    assert e["job_id"] == client.calls[0]["job_id"] == e["intended_job_id"] and e["job_id"].startswith("okf_cc_r1_pin_resolution_")
     rows, e = s.seed(pin.concept_id, pin.bundle_id, pin.publication_id)
-    assert rows == [] and e["job_id"] == "j-seed" and e["state"] == "EMPTY"           # an empty lookup is still a journaled job
+    assert rows == [] and e["job_id"] == client.calls[1]["job_id"] and e["state"] == "EMPTY"     # an empty lookup is still a journaled job with its id
     rows, e = s.head(pin.bundle_id)
-    assert e["role"] == "observed_head" and e["job_id"] == "j-head"
+    assert e["role"] == "observed_head" and e["job_id"] == client.calls[2]["job_id"]
     c = client.calls
     assert c[0]["params"] == {"b": pin.bundle_id, "p": pin.publication_id} and "`proj.ds.publications`" in c[0]["query"] and "WHERE bundle_id = @b AND publication_id = @p" in c[0]["query"]
     assert c[1]["params"] == {"id": pin.concept_id, "p": pin.publication_id, "b": pin.bundle_id}
     assert all(x["max_bytes"] == PUB.MAX_BYTES_BILLED and x["cache"] is False and x["location"] == "US" and int(x["timeout_ms"]) == 60000 for x in c)
     assert [x["labels"]["stage"] for x in c] == ["pin-resolution", "seed-visibility", "observed-head"]
-    assert j.job_ids() == ["j-pub", "j-seed", "j-head"] and j.summary()["unresolved"] == 0
+    assert len(j.job_ids()) == 3 and j.summary()["unresolved"] == 0
     assert pin.publication_id not in c[0]["query"]                                          # values travel as parameters, never as SQL text
+    # the id is in the journal file BEFORE the send (submitted event precedes terminal, both carry the id)
+    lines = [json.loads(l) for l in j.path.read_text().splitlines()]
+    ev = [(l["event"], l.get("job_id")) for l in lines if l.get("seq") == 1]
+    assert ev == [("intended", None), ("submitted", c[0]["job_id"]), ("terminal", c[0]["job_id"])]
 
 
-def test_bigquery_store_retains_failed_and_unsubmitted_reads(tmp_path, pin):
+def test_bigquery_store_declaration_read_is_journaled_even_when_empty(tmp_path, pin):
     j = Journal(tmp_path / "r", "r1")
-    client = _Client([_Job("j-fail", fail=PermissionError("403 denied")), ConnectionError("submit failed")])
-    s = PUB.BigQueryStore(client, "proj", "ds", "US", j)
-    with pytest.raises(PermissionError):
-        s.publication(pin.bundle_id, pin.publication_id)
+    client = _Client([_Job([])])
+    rows, e = PUB.BigQueryStore(client, "proj", "ds", "US", j).declaration("acme_retail|pub_x|Concept|computations/x", "pub_x")
+    assert rows == [] and e["role"] == "chain_declaration" and e["state"] == "EMPTY" and e["job_id"] == client.calls[0]["job_id"]
+    assert "FROM `proj.ds.nodes` WHERE node_id = @id AND publication_id = @p" in client.calls[0]["query"]
+
+
+# ---- Astra PR41 P1 #3: a local exception is not a terminal state until the server state is read back
+def test_submit_exception_with_no_server_job_is_not_submitted(tmp_path, pin):
+    j = Journal(tmp_path / "r", "r1")
+    client = _Client([ConnectionError("submit failed")])
     with pytest.raises(ConnectionError):
+        PUB.BigQueryStore(client, "proj", "ds", "US", j).head(pin.bundle_id)
+    e = j.jobs()[0]
+    assert e["state"] == "NOT_SUBMITTED" and e["terminal"] and e["reconciled"] and e["observed"] == "jobs.get NotFound"
+    assert client.gets[0][0] == e["job_id"] and client.gets[0][1] is None and client.gets[0][2] == 10.0    # bounded, no retries
+
+
+def test_submit_exception_but_server_has_the_job_reconciles_to_its_real_state(tmp_path, pin):
+    j = Journal(tmp_path / "r", "r1")
+    client = _Client([TimeoutError("response lost")])
+    s = PUB.BigQueryStore(client, "proj", "ds", "US", j)
+    # the job landed server-side despite the lost response: we learn that from jobs.get, not from the exception
+    real_query = client.query
+
+    def landed(query, job_config=None, location=None, job_id=None):
+        client.server[job_id] = _Job(state="DONE")
+        return real_query(query, job_config, location, job_id)
+    client.query = landed
+    with pytest.raises(TimeoutError):
         s.head(pin.bundle_id)
-    jobs = j.jobs()
-    assert [x["state"] for x in jobs] == ["ERROR", "NOT_SUBMITTED"] and jobs[0]["job_id"] == "j-fail" and jobs[1]["job_id"] is None
-    assert "PermissionError" in jobs[0]["error"] and all(x["terminal"] for x in jobs)
+    e = j.jobs()[0]
+    assert e["state"] == "DONE" and e["reconciled"] and e["observed"] == "DONE" and "submit TimeoutError" in e["error"]
+
+
+def test_result_timeout_with_running_job_cancels_and_reads_back(tmp_path, pin):
+    j = Journal(tmp_path / "r", "r1")
+    client = _Client([_Job(fail=TimeoutError("result timed out"), state="RUNNING")], after_cancel="DONE")
+    with pytest.raises(TimeoutError):
+        PUB.BigQueryStore(client, "proj", "ds", "US", j).head(pin.bundle_id)
+    e = j.jobs()[0]
+    assert e["state"] == "CANCELLED" and e["terminal"] and e["observed"] == "RUNNING -> DONE after cancel"
+    assert client.cancels == [e["job_id"]] and len(client.gets) == 2 and j.summary()["unresolved"] == 0
+
+
+def test_result_timeout_with_server_done_is_done_not_error(tmp_path, pin):
+    j = Journal(tmp_path / "r", "r1")
+    client = _Client([_Job(fail=TimeoutError("page read timed out"), state="DONE")])
+    with pytest.raises(TimeoutError):
+        PUB.BigQueryStore(client, "proj", "ds", "US", j).head(pin.bundle_id)
+    e = j.jobs()[0]
+    assert e["state"] == "DONE" and e["reconciled"] and client.cancels == []
+    client = _Client([_Job(fail=RuntimeError("x"), state="DONE", error_result={"reason": "invalidQuery"})])
+    with pytest.raises(RuntimeError):
+        PUB.BigQueryStore(client, "proj", "ds", "US", Journal(tmp_path / "r2", "r2")).head(pin.bundle_id)
+
+
+def test_unreadable_server_state_stays_unresolved_with_its_id(tmp_path, pin):
+    j = Journal(tmp_path / "r", "r1")
+    client = _Client([_Job(fail=TimeoutError("result timed out"), state="RUNNING")], get_fail=ConnectionError("jobs.get unreachable"))
+    with pytest.raises(TimeoutError):
+        PUB.BigQueryStore(client, "proj", "ds", "US", j).head(pin.bundle_id)
+    e = j.jobs()[0]
+    assert e["state"] == "UNKNOWN" and not e["terminal"] and e["job_id"] and "jobs.get unreachable" in e["reconcile_error"]
+    assert j.summary()["unresolved"] == 1 and j.unresolved()[0]["job_id"] == e["job_id"]
+    lines = [json.loads(l) for l in j.path.read_text().splitlines()]
+    assert [l["event"] for l in lines if l.get("seq") == 1 or l.get("event") == "reconcile_failed"] == ["intended", "submitted", "unknown", "reconcile_failed"]
+    # a cancel that fails likewise stays unresolved
+    client = _Client([_Job(fail=TimeoutError("t"), state="RUNNING")], cancel_fail=ConnectionError("cancel unreachable"))
+    j2 = Journal(tmp_path / "r2", "r2")
+    with pytest.raises(TimeoutError):
+        PUB.BigQueryStore(client, "proj", "ds", "US", j2).head(pin.bundle_id)
+    assert j2.unresolved() and j2.unresolved()[0]["state"] == "UNKNOWN" and "cancel/readback" in j2.unresolved()[0]["reconcile_error"]
+    # a job still RUNNING after cancel is also unresolved
+    client = _Client([_Job(fail=TimeoutError("t"), state="RUNNING")], after_cancel="RUNNING")
+    j3 = Journal(tmp_path / "r3", "r3")
+    with pytest.raises(TimeoutError):
+        PUB.BigQueryStore(client, "proj", "ds", "US", j3).head(pin.bundle_id)
+    assert j3.unresolved() and j3.unresolved()[0]["observed"] == "RUNNING"
 
 
 def test_bigquery_store_rows_returns_two_journaled_jobs(tmp_path, pin):
     j = Journal(tmp_path / "r", "r1")
-    client = _Client([_Job("j-nodes", [{"node_id": "n"}]), _Job("j-edges", [])])
+    client = _Client([_Job([{"node_id": "n"}]), _Job([])])
     nodes, edges, jobs = PUB.BigQueryStore(client, "proj", "ds", "US", j).rows(pin.bundle_id, pin.publication_id)
-    assert nodes == [{"node_id": "n"}] and edges == [] and jobs["nodes_job"]["job_id"] == "j-nodes" and jobs["edges_job"]["job_id"] == "j-edges"
+    assert nodes == [{"node_id": "n"}] and edges == [] and jobs["nodes_job"]["job_id"] == client.calls[0]["job_id"] and jobs["edges_job"]["job_id"] == client.calls[1]["job_id"]
     assert "EXCEPT(stale_after_ts)" in client.calls[0]["query"] and "ORDER BY node_id" in client.calls[0]["query"]
+
+
+# ---- Astra PR41 P1 #1: the disclosed paths list and the governance fields are validated, not only the rows underneath
+def test_returned_paths_with_a_nonexistent_intermediate_are_detected(store, pin, p1):
+    r = _retrieve(store, pin)
+    comp = _comp(r)
+    r["paths"] = [{"seed": "metrics/gross-margin", "concept_hops": 2, "via": ["metrics/gross-margin", "metrics/does-not-exist", "computations/gross-margin-period"]}]
+    v = PUB.verify_payload(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
+    assert v["status"] == "INCONSISTENT" and v["failed"] == ["result_paths"]
+    it = v["checks"]["result_paths"]["items"][0]
+    assert not it["nodes_in_trusted"] and not it["edges_continuous"] and not v["checks"]["result_paths"]["matches_computations"]
+    assert v["checks"]["paths"]["ok"] and v["checks"]["computations"]["ok"]          # the computation-derived checks alone were blind to it
+
+
+def test_returned_paths_must_match_the_computations(store, pin, p1):
+    r = _retrieve(store, pin)
+    comp = _comp(r)
+    for bad in ([], r["paths"] + r["paths"], [dict(r["paths"][0], concept_hops=2)], [dict(r["paths"][0], seed="metrics/revenue")]):
+        rr = dict(r, paths=bad)
+        v = PUB.verify_payload(store, pin, p1, rr, comp, _decl(store, pin, comp), expected_path=GM)
+        assert v["status"] == "INCONSISTENT" and "result_paths" in v["failed"], bad
+
+
+def test_foreign_provenance_changed_trust_or_freshness_are_detected(store, pin, p1, p2):
+    base = _retrieve(store, pin)
+    comp = _comp(base)
+    ok = PUB.verify_payload(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM)
+    assert ok["status"] == "CONSISTENT" and ok["checks"]["governance"]["ok"]
+    import copy
+    attacks = {
+        "foreign provenance": lambda r: r["concepts"][0]["provenance"].append({"resource": "policies/other.md", "title": "Other", "declaration": f"frontmatter.sources[9]", "source_id": f"acme_retail|{p2['publication_id']}|Source|src:policies/other.md"}),
+        "dropped provenance": lambda r: r["concepts"][0]["provenance"].pop(),
+        "trust tier": lambda r: r["concepts"][0].__setitem__("trust_tier", "machine-confirmed"),
+        "verification actor": lambda r: r["concepts"][0]["verifications"][0].__setitem__("by", "human:mallory@acme"),
+        "freshness": lambda r: r["concepts"][0]["freshness"].__setitem__("verdict", "STALE"),
+        "computation trust": lambda r: r["computations"][0].__setitem__("trust_tier", "human-reviewed") if r["computations"][0]["trust_tier"] != "human-reviewed" else r["computations"][0].__setitem__("trust_tier", "unverified"),
+        "computation freshness": lambda r: r["computations"][0]["freshness"].__setitem__("verdict", "STALE"),
+        "replacement": lambda r: r["concepts"][0].__setitem__("replacement", {"concept": "metrics/revenue", "label": "inferred"}),
+    }
+    for name, attack in attacks.items():
+        r = copy.deepcopy(base)
+        attack(r)
+        v = PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
+        assert v["status"] == "INCONSISTENT" and "governance" in v["failed"], name
+    # a deprecated seed's replacement is recomputed from trusted LINKS_TO candidates
+    legacy = ConceptSeed(f"acme_retail|{pin.publication_id}|Concept|metrics/gross-margin-legacy", origin="catalog-mock")
+    r = _retrieve(store, pin, seed=legacy)
+    assert r["concepts"][0]["replacement"]["concept"] == "metrics/gross-margin"
+    v = PUB.verify_payload(store, pin, p1, r, _comp(r), None, expected_path=GM, seed_id=legacy.concept_id)
+    assert v["checks"]["governance"]["ok"] and v["checks"]["result_paths"]["ok"]
+    r["concepts"][0]["replacement"]["concept"] = "metrics/revenue"
+    assert not PUB.verify_payload(store, pin, p1, r, _comp(r), None, expected_path=GM, seed_id=legacy.concept_id)["checks"]["governance"]["ok"]

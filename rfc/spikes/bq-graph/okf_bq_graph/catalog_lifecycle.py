@@ -165,20 +165,26 @@ def prepare_derived_source(clean_root: str, base_pin: str, work_dir: str, change
 # ----------------------------------------------------------------------------- driver
 @dataclass
 class Owned:
+    """Confirmed resources plus `pending`: writes whose response was lost. A pending resource may exist server-side,
+    so it is persisted BEFORE the write and blocks a COMPLETE cleanup until its actual state was read back."""
     dataset: Optional[str] = None
     tables: list[str] = field(default_factory=list)
     publications: list[str] = field(default_factory=list)
+    ready_verified: list[str] = field(default_factory=list)   # publications whose full-row readback was READY (restore may only reinstate these)
     entries: list[str] = field(default_factory=list)
+    pending: list[dict] = field(default_factory=list)          # {"kind": "dataset"|"entry"|"rows", "name": ..., "seq": journal seq}
     head_set: bool = False
 
     def record(self) -> dict:
-        return {"dataset": self.dataset, "tables": list(self.tables), "publications": list(self.publications), "entries": list(self.entries), "head_set": self.head_set}
+        return {"dataset": self.dataset, "tables": list(self.tables), "publications": list(self.publications), "ready_verified": list(self.ready_verified),
+                "entries": list(self.entries), "pending": [dict(x) for x in self.pending], "head_set": self.head_set}
 
 
 class Lifecycle:
     def __init__(self, cfg: LifecycleConfig, cloud: CloudOps, journal: Any):
         self.cfg, self.cloud, self.journal = cfg, cloud, journal
         self.owned = Owned()
+        self._projections: dict[str, dict] = {}
         self.snapshot: dict[str, Any] = {}
         self.journal.note("lifecycle_allowlist", **cfg.allowlist())
         self._ownership_file = Path(journal.run_dir) / "ownership.json"
@@ -188,15 +194,29 @@ class Lifecycle:
     def _op(self, role: str, description: str, fn: Callable[..., Any], *args: Any, mutates: bool = False, target: Optional[str] = None, **kw: Any) -> Any:
         e = self.journal.intend(role, description, "cloud", actual=True, mutates=mutates, target=target, timeout_s=self.cfg.timeout_s)
         self.journal.submitted(e, job_id=None)
+        self._last_entry = e
         try:
             out = fn(*args, timeout=self.cfg.timeout_s, **kw)
         except Exception as ex:  # noqa: BLE001
-            self.journal.terminal(e, "ERROR", error=f"{type(ex).__name__}: {str(ex)[:300]}")
+            err = f"{type(ex).__name__}: {str(ex)[:300]}"
+            if mutates:
+                self.journal.unknown(e, err)          # the write may have landed: unresolved until the resource is read back
+            else:
+                self.journal.terminal(e, "ERROR", error=err)
             raise
         jid = out.get("job_id") if isinstance(out, dict) else None
         e["job_id"] = jid
         self.journal.terminal(e, "DONE", rows=len(out) if isinstance(out, list) else None)
         return out
+
+    def _pending(self, kind: str, name: str) -> dict:
+        rec = {"kind": kind, "name": name, "at": _now()}
+        self.owned.pending.append(rec)
+        self._write_ownership(f"pending_{kind}")
+        return rec
+
+    def _confirm(self, rec: dict) -> None:
+        self.owned.pending = [x for x in self.owned.pending if x is not rec]
 
     def _write_ownership(self, event: str) -> None:
         rec = {"event": event, "at": _now(), "run_id": self.cfg.run_id, "allowlist": self.cfg.allowlist(), "owned": self.owned.record()}
@@ -247,7 +267,9 @@ class Lifecycle:
         self._guard_dataset(ds)
         if self._op("dataset_exists", "owned dataset must not pre-exist", self.cloud.dataset_exists, ds, target=ds):
             raise ScopeViolation(f"dataset {ds} already exists: not created by this run, refusing to adopt it")
+        pend = self._pending("dataset", ds)                  # persisted before the write: a lost response still owns the name
         self._op("create_dataset", "create owned dataset", self.cloud.create_dataset, ds, self.cfg.location, mutates=True, target=ds)
+        self._confirm(pend)
         self.owned.dataset = ds
         self._write_ownership("dataset_created")
         for stmt in relational_schema(f"{self.cfg.project}.{ds}"):
@@ -279,9 +301,11 @@ class Lifecycle:
         if existing:
             raise ScopeViolation(f"publication {P} already present in owned dataset")
         nodes = [dict(n, stale_after_ts=None) for n in projection["nodes"]]
+        self.owned.publications.append(P)                    # rows are owned from the first write attempt, not from its response
+        self._projections[P] = projection
+        self._write_ownership("rows_loading")
         self._op("load_nodes", f"load {len(nodes)} node rows", self.cloud.load_rows, ds, "nodes", nodes, mutates=True, target=f"{ds}.nodes")
         self._op("load_edges", f"load {len(projection['edges'])} edge rows", self.cloud.load_rows, ds, "edges", projection["edges"], mutates=True, target=f"{ds}.edges")
-        self.owned.publications.append(P)
         self._write_ownership("rows_loaded")
         if inject_failure == "before_ready":
             rec["state"] = "INTERRUPTED_BEFORE_READY"
@@ -304,6 +328,9 @@ class Lifecycle:
                "embedding_model": None, "validation_status": status, "validation_reasons": [k for k, ok in checks.items() if not ok],
                "created_at": _now(), "ready_at": _now() if status == "READY" else None}
         self._op("insert_publication", f"publications row {status}", self.cloud.insert_row, ds, "publications", row, mutates=True, target=f"{ds}.publications")
+        if status == "READY":
+            self.owned.ready_verified.append(P)
+            self._write_ownership("ready_verified")
         rec.update(state=status, readback=checks, row=row)
         self.journal.note("publish", **rec)
         return rec
@@ -372,7 +399,9 @@ class Lifecycle:
         if exists:
             self._op("patch_entry", f"patch owned entry aspects {sorted(aspects)}", self.cloud.patch_entry, name, body, sorted(aspects), mutates=True, target=name)
         else:
+            pend = self._pending("entry", name)
             self._op("create_entry", "create owned entry", self.cloud.create_entry, name, body, mutates=True, target=name)
+            self._confirm(pend)
             self.owned.entries.append(name)
             self._write_ownership("entry_created")
         back = self._op("readback_entry", "GET owned entry view=ALL", self.cloud.get_entry, name, target=name)
@@ -401,19 +430,76 @@ class Lifecycle:
         self._guard_dataset(self.cfg.dataset)
         if P not in self.owned.publications:
             raise ScopeViolation(f"{P} not owned")
+        if P not in self.owned.ready_verified:
+            raise RuntimeError(f"{P} was never verified READY by this run: only a verified READY publication is withdrawn as an adversary")
         self._op("withdraw", f"publications.validation_status -> WITHDRAWN for {P}", self.cloud.update_status, self.cfg.dataset, P, "WITHDRAWN", mutates=True, target=f"{self.cfg.dataset}.publications")
         return {"publication_id": P, "ready": self._ready(P)}
 
+    def _readback_checks(self, P: str) -> dict:
+        """The same full-row validation `publish_relational` uses, against the current retained rows."""
+        ds, B = self.cfg.dataset, self.cfg.bundle_id
+        projection = self._projections[P]
+        r_nodes = self._op("readback_nodes", "full retained node rows", self.cloud.select_rows, ds, "nodes", {"publication_id": P, "bundle_id": B}, exclude=("stale_after_ts",), target=f"{ds}.nodes")
+        r_edges = self._op("readback_edges", "full retained edge rows", self.cloud.select_rows, ds, "edges", {"publication_id": P, "bundle_id": B}, target=f"{ds}.edges")
+        rn, re_ = canonical_rows(r_nodes), canonical_rows(r_edges)
+        om = projection["output_manifest"]
+        ids = {n["node_id"] for n in rn}
+        return {"node_rows": rn == canonical_rows(projection["nodes"]), "edge_rows": re_ == canonical_rows(projection["edges"]),
+                "nodes_sha256": sha256_text(stable_json(rn)) == om["nodes_sha256"], "edges_sha256": sha256_text(stable_json(re_)) == om["edges_sha256"],
+                "section_hashes": all(sha256_text(n["text"] or "") == n["text_sha256"] for n in rn if n["kind"] == "Section"),
+                "dangling": all(e["src_id"] in ids and e["dst_id"] in ids for e in re_), "distinct": len(ids) == len(rn), "sections": sum(1 for n in rn if n["kind"] == "Section")}
+
     def restore(self, P: str) -> dict:
+        """Reinstate READY only for a publication this run verified READY, only from WITHDRAWN, and only after the
+        retained rows re-validate (Astra PR41 P2: restore must not promote INVALID_READBACK or corrupted rows)."""
         self._guard_dataset(self.cfg.dataset)
         if P not in self.owned.publications:
             raise ScopeViolation(f"{P} not owned")
+        if P not in self.owned.ready_verified:
+            raise RuntimeError(f"{P} was never verified READY by this run: nothing to restore")
+        rows = self._op("publication_status", "owned publication status before restore", self.cloud.select_rows, self.cfg.dataset, "publications", {"publication_id": P}, target=f"{self.cfg.dataset}.publications")
+        if len(rows) != 1 or rows[0].get("validation_status") != "WITHDRAWN":
+            raise RuntimeError(f"{P} is not a single WITHDRAWN row (status={[r.get('validation_status') for r in rows]}): restore refused")
+        checks = self._readback_checks(P)
+        if not all(v for k, v in checks.items() if k != "sections"):
+            self.journal.note("restore_refused", publication_id=P, readback=checks)
+            return {"publication_id": P, "ready": False, "state": "RESTORE_REFUSED", "readback": checks}
         self._op("restore", f"publications.validation_status -> READY for {P}", self.cloud.update_status, self.cfg.dataset, P, "READY", mutates=True, target=f"{self.cfg.dataset}.publications")
-        return {"publication_id": P, "ready": self._ready(P)}
+        return {"publication_id": P, "ready": self._ready(P), "state": "RESTORED", "readback": checks}
 
     # -- 6. cleanup: exact owned resources only, readback of absence, receipt
-    def cleanup(self) -> dict:
+    def _reconcile_pending(self) -> list[dict]:
+        """Read back every pending write (lost response). Present -> it is owned and will be deleted below; absent ->
+        reconciled as NOT_APPLIED. Unreadable -> stays pending and blocks COMPLETE."""
         steps: list[dict] = []
+        for rec in list(self.owned.pending):
+            step = {"resource": rec["name"], "kind": f"pending_{rec['kind']}", "deleted": False, "absent_verified": False, "reconciled": None}
+            try:
+                if rec["kind"] == "entry":
+                    present = self._op("reconcile_pending_entry", "GET pending entry", self.cloud.get_entry, rec["name"], target=rec["name"]) is not None
+                    if present:
+                        if rec["name"] not in self.owned.entries:
+                            self.owned.entries.append(rec["name"])
+                elif rec["kind"] == "dataset":
+                    present = self._op("reconcile_pending_dataset", "pending dataset exists", self.cloud.dataset_exists, rec["name"], target=rec["name"])
+                    if present:
+                        self.owned.dataset = rec["name"]
+                else:
+                    present = False
+                step["reconciled"] = "PRESENT_ADOPTED" if present else "ABSENT"
+                step["absent_verified"] = not present
+                self._confirm(rec)
+                for e in self.journal.entries:
+                    if not e.get("terminal") and e.get("target") == rec["name"] and e.get("mutates"):
+                        self.journal.reconcile(e, "APPLIED" if present else "NOT_APPLIED", observed=step["reconciled"])
+            except Exception as e:  # noqa: BLE001
+                step["error"] = f"{type(e).__name__}: {str(e)[:200]}"
+            steps.append(step)
+        self._write_ownership("pending_reconciled")
+        return steps
+
+    def cleanup(self) -> dict:
+        steps: list[dict] = self._reconcile_pending()
         for name in list(self.owned.entries):
             step = {"resource": name, "kind": "entry", "deleted": False, "absent_verified": False}
             try:
@@ -435,10 +521,24 @@ class Lifecycle:
             except Exception as e:  # noqa: BLE001
                 step["error"] = f"{type(e).__name__}: {str(e)[:200]}"
             steps.append(step)
-        complete = bool(steps) and all(s["deleted"] and s["absent_verified"] for s in steps)
-        status = "COMPLETE" if complete else ("NOTHING_OWNED" if not steps else "INCOMPLETE")
-        receipt = {"status": status, "steps": steps, "at": _now(), "unresolved_jobs": self.journal.summary()["unresolved"],
-                   "note": "only exact run-owned resources; no prefix or glob deletion; a missing absence readback is INCOMPLETE"}
+        # a mutating op that raised leaves an UNKNOWN entry; every deleted-and-verified resource closes the ones aimed at it
+        for st in steps:
+            if st.get("deleted") and st.get("absent_verified"):
+                for e in self.journal.entries:
+                    if not e.get("terminal") and (e.get("target") or "").startswith(st["resource"]):
+                        self.journal.reconcile(e, "MOOT", observed="target resource deleted and absence read back; the write's own outcome is unknown and moot")
+        unresolved = self.journal.unresolved()
+        pending = list(self.owned.pending)
+        def step_ok(s: dict) -> bool:   # a pending write is closed by its readback (ABSENT) or by the delete step that follows adoption
+            if s["kind"].startswith("pending_"):
+                return "error" not in s and s.get("reconciled") in ("ABSENT", "PRESENT_ADOPTED")
+            return bool(s["deleted"] and s["absent_verified"])
+        complete = bool(steps) and all(step_ok(s) for s in steps) and not unresolved and not pending
+        status = "COMPLETE" if complete else ("NOTHING_OWNED" if not steps and not unresolved else "INCOMPLETE")
+        receipt = {"status": status, "steps": steps, "at": _now(), "unresolved_jobs": len(unresolved), "pending": pending,
+                   "unresolved": [{"seq": e["seq"], "role": e["role"], "target": e.get("target"), "error": e.get("error")} for e in unresolved],
+                   "note": "only exact run-owned resources; no prefix or glob deletion; a missing absence readback, a pending write "
+                           "that could not be read back or an unreconciled UNKNOWN operation is INCOMPLETE"}
         (Path(self.journal.run_dir) / "cleanup.json").write_text(json.dumps(receipt, indent=1, sort_keys=True) + "\n", encoding="utf-8")
         self.journal.note("cleanup", **receipt)
         return receipt

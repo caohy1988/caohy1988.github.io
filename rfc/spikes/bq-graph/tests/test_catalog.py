@@ -243,3 +243,33 @@ def test_concept_seed_rejects_malformed_ids():
             ConceptSeed(bad)
     s = ConceptSeed("acme_retail|pub_190192147fd7fd78|Concept|metrics/gross-margin")
     assert (s.bundle_id, s.publication_id, s.local) == ("acme_retail", "pub_190192147fd7fd78", "metrics/gross-margin")
+
+
+def test_http_reader_builds_a_bounded_authorized_session(monkeypatch):
+    """The real `_sess()` wiring: ADC with the cloud-platform scope, one bounded refresh attempt, bounded auth request."""
+    import types
+    seen = {}
+
+    class FakeSession:
+        def __init__(self, creds, auth_request=None, max_refresh_attempts=None):
+            seen["creds"], seen["auth_request"], seen["max_refresh_attempts"] = creds, auth_request, max_refresh_attempts
+
+        def request(self, method, url, params=None, timeout=None, allow_redirects=True):
+            seen["timeout"] = timeout
+            return types.SimpleNamespace(status_code=404, content=b'{"error":{"code":404,"message":"gone"}}')
+
+    class FakeRequest:
+        def __call__(self, *a, **kw):
+            seen["auth_kw"] = kw
+            return "auth-response"
+
+    import google.auth
+    import google.auth.transport.requests as gatr
+    monkeypatch.setattr(google.auth, "default", lambda scopes=None: (seen.setdefault("scopes", scopes) and ("creds-obj", "proj")))
+    monkeypatch.setattr(gatr, "AuthorizedSession", FakeSession)
+    monkeypatch.setattr(gatr, "Request", FakeRequest)
+    rd = C.HttpReader(timeout=(3, 7))
+    r = rd.get_entry(CFG.entry, "ALL")
+    assert r.status == 404 and seen["scopes"] == ["https://www.googleapis.com/auth/cloud-platform"] and seen["creds"] == "creds-obj"
+    assert seen["max_refresh_attempts"] == 1 and seen["timeout"] == (3, 7)
+    assert seen["auth_request"]("x", timeout=None) == "auth-response" and seen["auth_kw"]["timeout"] == 7   # the auth transport is bounded too

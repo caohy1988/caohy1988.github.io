@@ -122,21 +122,97 @@ class ProjectionStore:
         rows = [{"bundle_id": bundle, "publication_id": self.heads[bundle]}] if bundle in self.heads else []
         return rows, self._job("observed_head", "active_publication WHERE bundle_id=@b (observation only)", rows)
 
+    def declaration(self, node_id: str, pub: str) -> tuple[list[dict], dict]:
+        rows = [dict(n) for n in self.nodes.get(pub, []) if n["node_id"] == node_id]
+        return rows, self._job("chain_declaration", "nodes WHERE node_id=@id AND publication_id=@p (declaration)", rows)
+
     def rows(self, bundle: str, pub: str) -> tuple[list[dict], list[dict], dict]:
         nodes = [dict(n) for n in self.nodes.get(pub, []) if n["bundle_id"] == bundle]
         edges = [dict(e) for e in self.edges.get(pub, []) if e["bundle_id"] == bundle]
         return nodes, edges, self._job("payload_rows", "nodes/edges WHERE bundle_id=@b AND publication_id=@p (full retained rows)", nodes + edges)
 
 
+def _job_state(job: Any) -> tuple[str, Optional[str]]:
+    """(state, error) of a re-read job: DONE/ERROR when the server says DONE, else the server's state."""
+    st = getattr(job, "state", None)
+    if st == "DONE":
+        err = getattr(job, "error_result", None)
+        return ("ERROR", str(err)[:300]) if err else ("DONE", None)
+    return (str(st) if st else "UNKNOWN_STATE", None)
+
+
+def reconcile_job(client: Any, journal: Any, entry: dict, error: str, cancel: bool = True, timeout: float = 10.0) -> dict:
+    """A local exception after a job id was chosen is an UNKNOWN outcome until the server state is read back. Reads
+    `jobs.get` with a bounded timeout and no retries; a RUNNING/PENDING job is cancelled (once) and re-read; an
+    unreadable state leaves the entry unresolved with its id, never a fabricated terminal state."""
+    from google.api_core import exceptions as gexc
+    journal.unknown(entry, error)
+    jid, loc = entry.get("job_id"), entry.get("location")
+    if not jid:
+        return entry
+    try:
+        job = client.get_job(jid, project=entry.get("project"), location=loc, retry=None, timeout=timeout)
+    except gexc.NotFound:
+        return journal.reconcile(entry, "NOT_SUBMITTED", observed="jobs.get NotFound", error=error)
+    except Exception as ex:  # noqa: BLE001 - still unknown; the id stays in the journal for the cleanup owner
+        entry.update(reconcile_error=f"{type(ex).__name__}: {str(ex)[:200]}")
+        journal.note("reconcile_failed", seq=entry["seq"], job_id=jid, error=entry["reconcile_error"])
+        return entry
+    state, err = _job_state(job)
+    if state in ("DONE", "ERROR"):
+        return journal.reconcile(entry, state, observed="DONE", error=err or error)
+    if cancel:
+        try:
+            client.cancel_job(jid, project=entry.get("project"), location=loc, retry=None, timeout=timeout)
+            job = client.get_job(jid, project=entry.get("project"), location=loc, retry=None, timeout=timeout)
+        except Exception as ex:  # noqa: BLE001
+            entry.update(reconcile_error=f"cancel/readback {type(ex).__name__}: {str(ex)[:200]}", observed=state)
+            journal.note("reconcile_failed", seq=entry["seq"], job_id=jid, error=entry["reconcile_error"])
+            return entry
+        state2, err2 = _job_state(job)
+        if state2 in ("DONE", "ERROR"):
+            return journal.reconcile(entry, "CANCELLED", observed=f"{state} -> DONE after cancel", error=err2 or error)
+        entry.update(observed=state2)
+    journal.note("job_unresolved", seq=entry["seq"], job_id=jid, observed=entry.get("observed", state))
+    return entry
+
+
+def run_journaled(client: Any, journal: Any, role: str, desc: str, query: str, job_config: Any, location: str, project: Optional[str] = None,
+                  job_id: Optional[str] = None, engine: str = "bigquery", reconcile_timeout: float = 10.0, **meta: Any) -> tuple[list[dict], Any, dict]:
+    """Submit one query job with a caller-chosen job id journaled BEFORE the send, wait for rows, and close the entry
+    at a verified terminal state. Any exception in submit or result() goes through `reconcile_job`, then re-raises."""
+    import uuid
+    jid = job_id or f"okf_cc_{journal.run_id}_{role}_{uuid.uuid4().hex[:12]}"
+    jid = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in jid)[:1024]
+    e = journal.intend(role, desc, engine, actual=True, query_sha256=_sha(query.encode()), intended_job_id=jid, **meta)
+    journal.submitted(e, job_id=jid, project=project, location=location)   # the id is known and retained before the send
+    try:
+        job = client.query(query, job_config=job_config, location=location, job_id=jid)
+    except Exception as ex:  # noqa: BLE001
+        reconcile_job(client, journal, e, f"submit {type(ex).__name__}: {str(ex)[:300]}", timeout=reconcile_timeout)
+        raise
+    e["job_id"] = getattr(job, "job_id", jid) or jid
+    try:
+        rows = [dict(r) for r in job.result()]
+    except Exception as ex:  # noqa: BLE001
+        reconcile_job(client, journal, e, f"result {type(ex).__name__}: {str(ex)[:300]}", timeout=reconcile_timeout)
+        raise
+    journal.terminal(e, "DONE" if rows else "EMPTY", rows=len(rows), bytes_billed=getattr(job, "total_bytes_billed", None),
+                     bytes_processed=getattr(job, "total_bytes_processed", None))
+    return rows, job, e
+
+
 class BigQueryStore:
-    """Parameterised reads against the configured destination. The job is journaled at submission (job id known
-    before result()) and closed at terminal state; a failed or empty read is still a journaled job."""
+    """Parameterised reads against the configured destination. Every read is a query job whose id is journaled before
+    the send; a failed, timed-out or empty read is still a journaled job, and a local exception never becomes a
+    terminal state without a server readback (`reconcile_job`)."""
     engine = "bigquery"
 
     def __init__(self, client: Any, project: str, dataset: str, location: str, journal: Any,
-                 max_bytes_billed: int = MAX_BYTES_BILLED, job_timeout_ms: int = 60_000, labels: Optional[dict] = None):
+                 max_bytes_billed: int = MAX_BYTES_BILLED, job_timeout_ms: int = 60_000, labels: Optional[dict] = None,
+                 reconcile_timeout: float = 10.0):
         self.client, self.project, self.dataset, self.location, self.journal = client, project, dataset, location, journal
-        self.max_bytes_billed, self.job_timeout_ms = max_bytes_billed, job_timeout_ms
+        self.max_bytes_billed, self.job_timeout_ms, self.reconcile_timeout = max_bytes_billed, job_timeout_ms, reconcile_timeout
         self.labels = labels or {"okf_spike": "bq_graph_20260905"}
 
     @property
@@ -148,20 +224,8 @@ class BigQueryStore:
         cfg = bigquery.QueryJobConfig(query_parameters=params, use_query_cache=False, maximum_bytes_billed=self.max_bytes_billed,
                                       labels=dict(self.labels, stage=role.replace("_", "-")[:63]))
         cfg.job_timeout_ms = self.job_timeout_ms
-        e = self.journal.intend(role, desc, self.engine, actual=True, dataset=self.dataset, query_sha256=_sha(query.encode()))
-        try:
-            job = self.client.query(query, job_config=cfg, location=self.location)
-        except Exception as ex:  # noqa: BLE001
-            self.journal.terminal(e, "NOT_SUBMITTED", error=f"{type(ex).__name__}: {str(ex)[:300]}")
-            raise
-        self.journal.submitted(e, job_id=job.job_id, project=self.project, location=self.location)
-        try:
-            rows = [dict(r) for r in job.result()]
-        except Exception as ex:  # noqa: BLE001
-            self.journal.terminal(e, "ERROR", error=f"{type(ex).__name__}: {str(ex)[:300]}")
-            raise
-        self.journal.terminal(e, "DONE" if rows else "EMPTY", rows=len(rows), bytes_billed=getattr(job, "total_bytes_billed", None),
-                              bytes_processed=getattr(job, "total_bytes_processed", None))
+        rows, _job, e = run_journaled(self.client, self.journal, role, desc, query, cfg, self.location, project=self.project,
+                                      engine=self.engine, reconcile_timeout=self.reconcile_timeout, dataset=self.dataset)
         return rows, e
 
     @staticmethod
@@ -182,6 +246,11 @@ class BigQueryStore:
     def head(self, bundle: str) -> tuple[list[dict], dict]:
         return self._run("observed_head", "active_publication (observation only; never followed)",
                          f"SELECT bundle_id, publication_id FROM `{self.full}.active_publication` WHERE bundle_id = @b", [self._p("b", bundle)])
+
+    def declaration(self, node_id: str, pub: str) -> tuple[list[dict], dict]:
+        return self._run("chain_declaration", "Attested Computation declaration row",
+                         f"SELECT node_id, kind, local_id, path, type, runtime, status, stale_after, file_sha256, attrs FROM `{self.full}.nodes` WHERE node_id = @id AND publication_id = @p",
+                         [self._p("id", node_id), self._p("p", pub)])
 
     def rows(self, bundle: str, pub: str) -> tuple[list[dict], list[dict], dict]:
         nodes, e1 = self._run("payload_rows", "full retained node rows",
@@ -364,6 +433,78 @@ def verify_payload(store: Any, pin: Any, trusted: dict, result: dict, comp: Opti
         path_checks.append(path); comp_checks.append(item)
     checks["paths"] = {"ok": bool(path_checks) and all(p["nodes_in_trusted"] and p["endpoints"] and p["edges_continuous"] for p in path_checks), "items": path_checks}
     checks["computations"] = {"ok": bool(comp_checks) and all(c["section_membership"] and c["sql_bytes"] and c["fields"] for c in comp_checks), "items": comp_checks}
+    # ---- the disclosed `paths` list itself (Astra PR41 P1: computation-derived checks are not the returned paths)
+    comp_vias = sorted(tuple(pc["via"]) for pc in path_checks)
+    rp_items = []
+    for pr in result.get("paths") or []:
+        via = [_node_id(B, P, "Concept", x) for x in (pr.get("via") or [])]
+        last = tn.get(via[-1]) if via else None
+        rp_items.append({"via": via,
+                         "nodes_in_trusted": bool(via) and all(v in tn and tn[v]["kind"] == "Concept" for v in via),
+                         "endpoints": bool(via) and via[0] == seed_id and pr.get("seed") == seed_id.split("|", 3)[3]
+                                      and last is not None and last.get("type") == "Attested Computation" and pr.get("concept_hops") == len(via) - 1,
+                         "edges_continuous": bool(via) and all((a, b) in links for a, b in zip(via, via[1:]))})
+    rp_vias = sorted(tuple(i["via"]) for i in rp_items)
+    checks["result_paths"] = {"ok": bool(rp_items) and all(i["nodes_in_trusted"] and i["endpoints"] and i["edges_continuous"] for i in rp_items) and rp_vias == comp_vias,
+                              "items": rp_items, "matches_computations": rp_vias == comp_vias}
+    # ---- governance fields the caller consumes (trust, verifications, provenance, freshness, replacement) recomputed from trusted edges
+    as_of = scope.get("as_of")
+    out_edges: dict[str, list[dict]] = {}
+    for e in t_edges:
+        out_edges.setdefault(e["src_id"], []).append(e)
+
+    def trusted_trust(cid: str) -> tuple[str, list[dict]]:
+        vs = [(e, tn.get(e["dst_id"])) for e in out_edges.get(cid, []) if e["relation"] == "VERIFIED_BY"]
+        vs = [(e, a) for e, a in vs if a is not None]
+        kinds = [a["actor_kind"] for _, a in vs]
+        tier = "unverified" if not kinds else ("human-reviewed" if "human" in kinds else "machine-confirmed")
+        return tier, sorted(({"by": a["title"], "kind": a["actor_kind"], "at": e["authored_at"]} for e, a in vs), key=lambda x: (x["at"] or "", x["by"]))
+
+    def trusted_provenance(cid: str) -> list[tuple]:
+        out = []
+        for e in out_edges.get(cid, []):
+            if e["relation"] == "DERIVES_FROM" and e["dst_id"] in tn:
+                src = tn[e["dst_id"]]
+                out.append((src.get("resource"), src.get("title"), e["declaration"]))
+        return sorted(out, key=lambda x: (x[2], x[0] or ""))
+
+    def trusted_replacement(node: dict) -> Optional[dict]:
+        if (node.get("status") or "stable") != "deprecated":
+            return None
+        cands = sorted({tn[e["dst_id"]]["local_id"] for e in out_edges.get(node["node_id"], []) if e["relation"] == "LINKS_TO" and e["dst_id"] in tn
+                        and tn[e["dst_id"]]["type"] == node["type"] and (tn[e["dst_id"]]["status"] or "stable") == "stable" and not tn[e["dst_id"]]["stub"]})
+        if len(cands) == 1:
+            return {"concept": cands[0], "label": "inferred"}
+        return {"concept": None, "label": "AMBIGUOUS" if cands else "NONE"}
+
+    gov_items = []
+    for c in concepts:
+        cid = c.get("concept_id") or _node_id(B, P, "Concept", c.get("concept", ""))
+        node = tn.get(cid)
+        if node is None:
+            gov_items.append({"node_id": cid, "ok": False, "reason": "not in trusted projection"}); continue
+        tier, vers = trusted_trust(cid)
+        r_vers = [{"by": v.get("by"), "kind": v.get("kind"), "at": v.get("at")} for v in (c.get("verifications") or [])]
+        r_prov = sorted(((pv.get("resource"), pv.get("title"), pv.get("declaration")) for pv in (c.get("provenance") or [])), key=lambda x: (x[2] or "", x[0] or ""))
+        rep, t_rep = c.get("replacement"), trusted_replacement(node)
+        rep_ok = (rep is None and t_rep is None) or (isinstance(rep, dict) and t_rep is not None and rep.get("concept") == t_rep["concept"] and rep.get("label") == t_rep["label"])
+        item = {"node_id": cid, "trust_tier": c.get("trust_tier") == tier, "verifications": r_vers == vers, "provenance": r_prov == trusted_provenance(cid),
+                "freshness": (c.get("freshness") or {}).get("verdict") == Graph.freshness(node, as_of)["verdict"] if as_of else False,
+                "replacement": rep_ok}
+        item["ok"] = all(v for k, v in item.items() if k != "node_id")
+        gov_items.append(item)
+    for comp_r in result.get("computations") or []:
+        cid = comp_r.get("computation_id") or _node_id(B, P, "Concept", comp_r.get("concept", ""))
+        node = tn.get(cid)
+        if node is None:
+            continue   # already failed in `paths`/`computations`
+        tier, _ = trusted_trust(cid)
+        item = {"node_id": cid, "trust_tier": comp_r.get("trust_tier") == tier,
+                "freshness": (comp_r.get("freshness") or {}).get("verdict") == Graph.freshness(node, as_of)["verdict"] if as_of else False}
+        item["ok"] = item["trust_tier"] and item["freshness"]
+        gov_items.append(item)
+    checks["governance"] = {"ok": bool(gov_items) and all(i["ok"] for i in gov_items), "items": gov_items,
+                            "note": "trust tier, verifications, provenance, freshness and replacement recomputed from trusted VERIFIED_BY/DERIVES_FROM/LINKS_TO edges at scope.as_of"}
     if comp is not None:
         # the selected computation object is re-verified byte for byte: a change after preflight (SQL, section, path)
         # under an unchanged id/label fails here even if the result list still agrees with the trusted projection

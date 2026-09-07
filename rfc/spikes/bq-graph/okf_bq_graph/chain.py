@@ -121,10 +121,12 @@ def pick_computation(result: dict, path: str) -> Optional[dict]:
 def declaration(clients: dict, computation_id: str, publication_id: str) -> dict:
     """The Attested Computation node as the caller sees it (the retained store's node rows or the projection for the
     oracle, `nodes` table otherwise). Catalog mode reads the store so the read is journaled like the live one."""
-    if clients.get("engine") == "oracle" and clients.get("store") is not None:
-        store = clients["store"]
-        rows = [n for n in store.nodes.get(publication_id, []) if n["node_id"] == computation_id]
-        store._job("chain_declaration", "nodes WHERE node_id=@id AND publication_id=@p (declaration)", rows)
+    job_id = None
+    if clients.get("store") is not None:
+        # catalog mode, either engine: the store journals the read as a job before waiting (BigQueryStore: real job id
+        # chosen before the send and reconciled on failure; ProjectionStore: hermetic-store record with no job id)
+        rows, entry = clients["store"].declaration(computation_id, publication_id)
+        job_id = entry.get("job_id")
     elif clients.get("engine") == "oracle":
         rows = [n for n in clients["projection"]["nodes"] if n["node_id"] == computation_id and n["publication_id"] == publication_id]
     else:
@@ -136,14 +138,14 @@ def declaration(clients: dict, computation_id: str, publication_id: str) -> dict
                   [bigquery.ScalarQueryParameter("id", "STRING", computation_id), bigquery.ScalarQueryParameter("p", "STRING", publication_id)],
                   labels={"okf_spike": "bq_graph_20260905", "stage": "chain_declaration"})
         rows = [dict(r) for r in job.result()]
-        rows[0:1] = [dict(rows[0], _job_id=job.job_id)] if rows else []
+        job_id = job.job_id                          # fixture mode: the id is kept even when the lookup is empty
     if not rows:
-        return {"status": "NOT_VISIBLE", "node_id": computation_id}
+        return {"status": "NOT_VISIBLE", "node_id": computation_id, "job_id": job_id}
     n = rows[0]
     attrs = json.loads(n.get("attrs") or "{}") if isinstance(n.get("attrs"), str) else (n.get("attrs") or {})
     return {"status": "OK", "node_id": n["node_id"], "path": n.get("path"), "type": n.get("type"), "runtime": n.get("runtime"),
             "lifecycle_status": n.get("status") or "stable", "stale_after": n.get("stale_after"), "file_sha256": n.get("file_sha256"),
-            "parameters": attrs.get("parameters"), "receipt_fields": attrs.get("receipt"), "job_id": n.get("_job_id")}
+            "parameters": attrs.get("parameters"), "receipt_fields": attrs.get("receipt"), "job_id": job_id}
 
 
 def _norm_sql(s: Optional[str]) -> str:
@@ -424,7 +426,7 @@ def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dic
 
 
 # ----------------------------------------------------------------------------- whole chain
-CHAIN_VERSION = "okf_bq_graph.chain/0.5.0"
+CHAIN_VERSION = "okf_bq_graph.chain/0.5.1"
 SEED_MODES = ("fixture", "catalog")
 
 
@@ -466,9 +468,10 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                            "as_of": as_of, "bundle_id": BUNDLE_ID, "source_pin": SOURCE_PIN,
                            "requester": {"mode": "same-requester", "note": "graph leg and receipt leg both under the operator's ADC credential"},
                            "verdict_rule": "CHAIN_CONNECTED only when provenance pins hold before any case executes, every case is MET (reached its "
-                                           "stage with its specific evidence) and, live, every submitted job (pointer lookup, pin resolution, head "
-                                           "observation, payload rows, retrieval, declaration, receipt) carries one known user_email; CHAIN_INCOMPLETE "
-                                           "when a case never reached its stage (outage on any leg, including approved); CHAIN_BROKEN when a reached "
+                                           "stage with its specific evidence), no journaled job is left in an unverified (UNKNOWN) state and, live, every "
+                                           "submitted job (pointer lookup, pin resolution, head observation, payload rows, retrieval, declaration, receipt) "
+                                           "carries one known user_email; CHAIN_INCOMPLETE when a case never reached its stage (outage on any leg, "
+                                           "including approved) or a job's server state was never reconciled; CHAIN_BROKEN when a reached "
                                            "stage contradicts the expectation, a payload is inconsistent with the pinned publication, or a pin/seed "
                                            "refuses (stale, invalid, unavailable, out of scope)"}
     if catalog:
@@ -535,12 +538,20 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         out["source_pin"] = source_pin
         out["bundle_id"] = pin.bundle_id
         # ---- retained store (configured destination only; the pin cannot name it)
+        # one destination for the pin resolution, the payload rows, the retrieval and the declaration (Opus PR41 P2):
+        # the configured runtime dataset; a client wired to a different dataset is refused, never silently split
+        if live and clients.get("ds") not in (None, cfg.runtime_dataset):
+            out["publication"] = {"status": "DESTINATION_MISMATCH", "publication_id": pin.publication_id, "configured": cfg.runtime_dataset,
+                                  "client_dataset": clients.get("ds"), "error": "clients['ds'] differs from the configured runtime dataset"}
+            return _broken(out, "publication", run_dir, out_dir, mode, redact, journal)
+        if live:
+            clients = dict(clients, ds=cfg.runtime_dataset, journal=journal)
         if store is None:
             if live:
                 if clients.get("bq") is None:
                     out["publication"] = {"status": "ERROR", "error": "live mode needs a BigQuery client in clients['bq']"}
                     return _broken(out, "publication", run_dir, out_dir, mode, redact, journal)
-                store = BigQueryStore(clients["bq"], cfg.runtime_project, clients.get("ds", cfg.runtime_dataset), cfg.runtime_location, journal)
+                store = BigQueryStore(clients["bq"], cfg.runtime_project, cfg.runtime_dataset, cfg.runtime_location, journal)
             else:
                 out["publication"] = {"status": "ERROR", "error": "hermetic catalog mode needs an injected retained store (ProjectionStore)"}
                 return _broken(out, "publication", run_dir, out_dir, mode, redact, journal)
@@ -567,8 +578,13 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                                     "source_manifest_sha256": pin.source_manifest_sha256, "compiler_version": pin.compiler_version,
                                     "nodes_sha256": trusted["output_manifest"]["nodes_sha256"], "edges_sha256": trusted["output_manifest"]["edges_sha256"],
                                     "note": "the graph publication / source manifest identity, separate from the SDK fixture publication"}
+        clients = dict(clients, store=store)          # declaration reads go through the journaled store on every engine
         if engine == "oracle":
-            clients = dict(clients, graphs=getattr(store, "graphs", {}), store=store)
+            clients["graphs"] = getattr(store, "graphs", {})
+        if live and getattr(store, "dataset", None) != cfg.runtime_dataset:
+            out["publication"] = {"status": "DESTINATION_MISMATCH", "publication_id": pin.publication_id, "configured": cfg.runtime_dataset,
+                                  "store_dataset": getattr(store, "dataset", None), "error": "retained store dataset differs from the configured runtime dataset"}
+            return _broken(out, "publication", run_dir, out_dir, mode, redact, journal)
         prov = {"publication_pin": trusted["publication_id"] == pub, "sdk_head_pin": bool(sdk_pub["sdk_head_matches_pin"]),
                 "sdk_clean": sdk_pub["sdk_repo_dirty"] is False, "sdk_git_state_known": sdk_pub["sdk_repo_dirty"] is not None,
                 "source_verified": True, "seed_mode": out["seed"]["mode"]}
@@ -644,6 +660,9 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                                                + ("; its seed is an explicit harness injection under the pinned publication, not a Catalog discovery" if catalog else "")}[case]
         leg, comp, decl, full_result = graph_leg(seed, path)
         c.update(leg)
+        if catalog and full_result is not None:      # the governed input itself is retained (redacted like the record), not only the re-read rows
+            kept = journal.retain(f"retrieval_{case}", (json.dumps(redact(full_result), indent=1, sort_keys=True, default=str) + "\n").encode("utf-8"), subdir="retrieval")
+            c["retrieval"]["retained"] = {"path": kept["path"], "sha256": kept["sha256"], "redacted": True}
         if catalog and full_result is not None and comp is not None and decl is not None and decl.get("status") == "OK":
             c["payload"] = verify_payload(store, pin, trusted, full_result, comp, decl, expected_path=path, seed_id=seed.concept_id)
         elif catalog:
@@ -674,15 +693,18 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     else:
         out["same_requester"] = {"status": "NOT_APPLICABLE", "reason": "hermetic mode: oracle graph + SDK SYNTHETIC emulation submit no BigQuery jobs"}
     statuses = [c["acceptance"]["status"] for c in out["cases"]]
+    unresolved = journal.unresolved()
+    out["job_inventory"]["unresolved"] = [{"seq": e["seq"], "role": e["role"], "job_id": e.get("job_id"), "state": e["state"], "error": e.get("error")} for e in unresolved]
     if any(s == "WRONG" for s in statuses) or (live and out["same_requester"]["status"] == "DIFFERENT"):
         out["verdict"] = "CHAIN_BROKEN"
-    elif any(s == "NOT_REACHED" for s in statuses) or (live and out["same_requester"]["status"] != "SAME"):
-        out["verdict"] = "CHAIN_INCOMPLETE"
+    elif any(s == "NOT_REACHED" for s in statuses) or (live and out["same_requester"]["status"] != "SAME") or unresolved:
+        out["verdict"] = "CHAIN_INCOMPLETE"      # a job whose server state was never verified leaves the inventory unproven
     else:
         out["verdict"] = "CHAIN_CONNECTED"
     if out["verdict"] != "CHAIN_CONNECTED":
         out["broken_at"] = next((c["case"] for c in out["cases"] if c["acceptance"]["status"] == "WRONG"),
-                                next((c["case"] for c in out["cases"] if c["acceptance"]["status"] == "NOT_REACHED"), "same_requester"))
+                                next((c["case"] for c in out["cases"] if c["acceptance"]["status"] == "NOT_REACHED"),
+                                     "unresolved_jobs" if unresolved else "same_requester"))
     return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal)
 
 
@@ -741,8 +763,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     reader, cfg, store = None, None, None
     if a.seed_mode == "catalog":
         kw = {k: v for k, v in (("group", a.catalog_group), ("entry", a.catalog_entry)) if v}
-        if "group" in kw and "entry" not in kw:
-            ap.error("--catalog-group needs --catalog-entry")
+        if len(kw) == 1:
+            ap.error("--catalog-group and --catalog-entry must be given together (the entry must belong to the group)")
         cfg = CatalogConfig(**kw)
         if live:
             if a.catalog_responses:

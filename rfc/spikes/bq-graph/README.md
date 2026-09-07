@@ -149,7 +149,7 @@ identity set is the 14 case jobs and does not include the pointer-lookup job, wh
 adds; the later changes (invocation-private and run-owned diagnostics, `approved` outage labelled NOT_REACHED) alter no
 recorded field of a passing run, so it was not re-run.
 
-## Catalog-seeded chain (2026-09-06, Slice A hermetic; runner `chain/0.5.0`)
+## Catalog-seeded chain (2026-09-06, Slice A hermetic; runner `chain/0.5.1`)
 
 `python3 -m okf_bq_graph.chain --seed-mode catalog` replaces the fixture seed with a **fresh Dataplex Catalog read**: paginated
 `entries.list` on the configured entry group selects the configured entry by exact name (no other entry body is fetched), then
@@ -186,7 +186,11 @@ to the publication's digests, every retained Section text is re-hashed, the resu
 scoped endpoints and LINKS_TO continuity, the computation's section membership, its SQL bytes and recomputed `sql_sha256`, and
 the declaration's node id / file digest (also against the source manifest) / type / runtime / lifecycle / `stale_after` /
 parameters are all checked against the trusted projection. The separately selected computation object is re-verified byte
-for byte. `INCONSISTENT` leaves the case `NOT_BOUND`, never invokes the SDK, and grades `WRONG` (a reached stage that
+for byte. The **disclosed `paths` list itself** is validated (scoped endpoints, LINKS_TO continuity, hop count, exact match
+with the computations' vias) and the **governance fields the caller consumes** — trust tier, verifications, provenance,
+freshness at `scope.as_of`, deprecated-seed replacement, for the seed and each computation — are recomputed from the trusted
+VERIFIED_BY / DERIVES_FROM / LINKS_TO edges (Astra PR 41 P1: computation-derived checks are not the returned payload). The
+governed input itself is retained per case under `retrieval/retrieval_<case>.json` with its SHA-256, not only the re-read rows. `INCONSISTENT` leaves the case `NOT_BOUND`, never invokes the SDK, and grades `WRONG` (a reached stage that
 contradicts the pinned publication is not an outage); `ERROR` is `NOT_REACHED`. Regressions cover: a P2 endpoint or a
 non-existent edge mixed into a P1 path, a section's text changed under its old hash and P1 labels, SQL changed after preflight
 under the old digest label, a declaration changed after preflight, a P2 result relabelled as P1, and a run with the guard
@@ -202,12 +206,24 @@ The cache is disabled for concept seeds (`scope.cache = DISABLED_CONCEPT_SEED`);
 publication other than the one requested (`NO_PUBLICATION`) instead of relabelling whatever graph it holds.
 
 **Evidence begins before the Catalog read.** Catalog mode writes everything under `evidence/catalog-chain/<run_id>/`: raw
-`catalog/catalog_list_<n>.json` and `catalog_entry.json` responses with SHA-256, `journal.jsonl` (every store read journaled
-before it is waited on — pin resolution, seed visibility, observed head, payload rows, declaration — including empty and failed
-reads; live reads carry the BigQuery job id at submission), `receipt/case_<case>_<mode>.json` diagnostics, and the run's own
-`chain_<mode>.json`; `evidence/catalog-chain/chain_<mode>.json` is the atomically written latest record. Early refusals keep
-the same retained final record. Live catalog mode adds every journaled job id to the `same_requester` identity set. Fixture mode
-(`--seed-mode fixture`, the default) is unchanged apart from the journal and keeps `evidence/chain/`.
+`catalog/catalog_list_<n>.json` and `catalog_entry.json` responses with SHA-256, `retrieval/retrieval_<case>.json` (the
+governed input), `journal.jsonl`, `receipt/case_<case>_<mode>.json` diagnostics, and the run's own `chain_<mode>.json`;
+`evidence/catalog-chain/chain_<mode>.json` is the atomically written latest record. Early refusals keep the same retained final
+record. **Job journal.** In live catalog mode every BigQuery query the chain submits goes through `publication.run_journaled`:
+pin resolution, seed visibility, observed head, payload rows (nodes + edges), the three retrieval stages (`retrieval_walk`,
+`retrieval_context`, `retrieval_nodes`, via `retrieve._run` when `clients["journal"]` is set) and the declaration read
+(`chain_declaration`, via `BigQueryStore.declaration` on every engine). The job id is chosen by the chain and written to the
+journal **before the send**; an empty read keeps its id (`EMPTY`); a local exception at submit or `result()` never becomes a
+terminal state on its own — `reconcile_job` reads `jobs.get` (bounded, no retries): not found → `NOT_SUBMITTED`, server DONE →
+`DONE`/`ERROR`, RUNNING → one cancel + readback → `CANCELLED`, anything unreadable stays `UNKNOWN` with its id and the run is
+`CHAIN_INCOMPLETE` at `unresolved_jobs`. Every journaled id enters the `same_requester` identity set (`job_inventory.graph`).
+The hermetic store journals the same roles with no job id (`actual_jobs = 0`). The configured runtime dataset is the single
+destination for pin resolution, payload rows, retrieval and declaration: a client or store wired to a different dataset is
+refused as `DESTINATION_MISMATCH` before any read (Opus PR 41 P2; the B2 lifecycle configuration routes everything to the
+owned dataset). Fixture mode (`--seed-mode fixture`, the default) is unchanged apart from the journal and keeps `evidence/chain/`;
+its live declaration read now also keeps its job id when the lookup is empty.
+These live-branch behaviours are exercised hermetically against a fake BigQuery client that serves the chain's real SQL
+(`tests/test_chain.py::FakeBigQuery`); no live job has run.
 
 Hermetic result (`evidence/catalog-chain/chain_hermetic.json`, injected responses, `seed.mode = catalog-mock`): `CHAIN_CONNECTED`
 — pin OK, publication OK with head observed = pin, source OK, all three payloads `CONSISTENT`, `approved` RELEASED on the SDK's
@@ -224,7 +240,13 @@ original entry and head read-only, publishes with a full-row readback (READY onl
 section hashes, dangling and distinctness checks all hold), advances the head with one MERGE only for a READY owned publication
 (`inject_failure="before_head"` leaves the old head; `"before_ready"` leaves loaded rows that can never become READY or head),
 generates owned pins from the verified rows, preserves authored aspects with explicit aspect keys (no delete-missing), and
-cleans up only exact owned resources with absence readback (`cleanup.json` is `COMPLETE` only then). P2 comes from
+cleans up only exact owned resources with absence readback (`cleanup.json` is `COMPLETE` only then). Ownership of a dataset,
+entry or row load is persisted to `ownership.json` **before** the write (`pending`); a mutating call that raises leaves an
+`UNKNOWN` journal entry, and cleanup first reads every pending resource back (present → adopted and deleted; absent →
+`NOT_APPLIED`; unreadable → `INCOMPLETE`), so a committed write with a lost response is never orphaned behind a `COMPLETE`
+receipt (Astra PR 41 P1). `withdraw`/`restore` apply only to publications this run verified READY; `restore` requires the
+current row to be `WITHDRAWN` and re-runs the full-row readback before reinstating READY (`RESTORE_REFUSED` otherwise), so an
+`INVALID_READBACK` or corrupted publication can never be promoted (Astra PR 41 P2). P2 comes from
 `prepare_derived_source`: a retained temporary copy with one non-computation policy file changed, pinned as
 `<base>+local.<manifest16>` and recorded in `derivation.json`, never labelled as the clean upstream commit. Hermetic tests
 run it against an in-memory fake cloud; the live resources do not exist yet.

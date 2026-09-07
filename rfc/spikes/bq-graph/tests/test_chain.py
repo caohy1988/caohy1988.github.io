@@ -637,7 +637,7 @@ def _store(projection, head=None, p2=None):
 
 
 def _run_catalog(projection, sdk_root, tmp_path, sample_root, reader=None, store=None, live=False, engine="oracle", **kw):
-    return CH.run_chain(engine=engine, live=live, sdk_root=sdk_root, out_dir=str(tmp_path), requester="t", as_of=AS_OF,
+    return CH.run_chain(engine=engine, live=live, sdk_root=sdk_root, out_dir=str(tmp_path), requester=kw.pop("requester", "t"), as_of=AS_OF,
                         seed_mode="catalog", catalog_reader=reader if reader is not None else _reader(projection),
                         store=store if store is not None else _store(projection), acme_root=sample_root, **kw)
 
@@ -867,41 +867,219 @@ def test_catalog_two_overlapping_runs_and_an_early_refusal_keep_their_own_eviden
     assert final["run_id"] == a["run_id"] and final["run_dir"] == a["run_dir"]
 
 
+class _BQJob:
+    def __init__(self, job_id, rows=None, fail=None, state="DONE", user_email="op@x"):
+        self.job_id, self._rows, self._fail, self.state, self.user_email, self.error_result = job_id, rows or [], fail, state, user_email, None
+        self.total_bytes_billed = self.total_bytes_processed = self.slot_millis = 0
+        self.cache_hit, self.created, self.started, self.ended, self._properties = False, None, None, None, {}
+
+    def result(self):
+        if self._fail:
+            raise self._fail
+        return list(self._rows)
+
+
+class FakeBigQuery:
+    """Serves the chain's actual SQL from one or more compiled projections. Every query becomes a server-side job with
+    the caller-chosen id; `fail_stage` makes that stage's result() raise; `hide_declaration` returns zero rows for the
+    declaration read (the Opus PR41 P1 probe)."""
+
+    def __init__(self, projections, head, fail_stage=None, hide_declaration=False, email="op@x"):
+        self.pubs = {p["publication_id"]: p for p in projections}
+        self.head, self.fail_stage, self.hide_declaration, self.email = head, fail_stage, hide_declaration, email
+        self.jobs, self.calls = {}, []
+
+    @staticmethod
+    def _params(cfg):
+        out = {}
+        for p in cfg.query_parameters:
+            out[p.name] = getattr(p, "values", None) if hasattr(p, "values") else p.value
+        return out
+
+    def _rows(self, q, prm):
+        pub = prm.get("p") or prm.get("publication_id")
+        proj = self.pubs.get(pub)
+        if "FROM `" in q and ".publications` WHERE bundle_id = @b AND publication_id = @p" in q:
+            if proj is None or prm["b"] != proj["bundle_id"]:
+                return []
+            om = proj["output_manifest"]
+            return [{"publication_id": pub, "bundle_id": proj["bundle_id"], "source_pin": proj["source_pin"], "compiler_version": proj["compiler_version"],
+                     "source_manifest_sha256": proj["source_manifest_sha256"], "nodes_sha256": om["nodes_sha256"], "edges_sha256": om["edges_sha256"],
+                     "node_count": om["nodes"], "edge_count": om["edges"], "section_count": 0, "validation_status": "READY"}]
+        if ".active_publication` WHERE bundle_id = @b" in q:
+            return [{"bundle_id": prm["b"], "publication_id": self.head}] if self.head else []
+        if "EXCEPT(stale_after_ts)" in q:
+            return [dict(n) for n in proj["nodes"]] if proj else []
+        if ".edges` WHERE bundle_id = @b AND publication_id = @p ORDER BY edge_id" in q:
+            return [dict(e) for e in proj["edges"]] if proj else []
+        if "WHERE node_id = @id AND publication_id = @p" in q:            # seed visibility / declaration
+            if "kind, local_id" in q and self.hide_declaration:
+                return []
+            return [dict(n) for n in (proj or {}).get("nodes", []) if n["node_id"] == prm["id"]]
+        if "hop1" in q:                                                    # fallback.sql walk
+            nodes = {n["node_id"]: n for n in proj["nodes"]}
+            out = []
+            for seed in prm["seeds"]:
+                for e in proj["edges"]:
+                    if e["src_id"] == seed and e["relation"] == "LINKS_TO":
+                        ac = nodes.get(e["dst_id"])
+                        if ac and ac["type"] == "Attested Computation" and not ac["stub"] and (ac["status"] or "stable") != "deprecated":
+                            out.append({"seed_id": seed, "concept_hops": 1, "hop_ids": [seed, ac["node_id"]], "edge_ids": [e["edge_id"]],
+                                        "computation_id": ac["node_id"], "computation_path": ac["path"], "computation_status": ac["status"]})
+            return out
+        if "AS concept_id, e.edge_id AS edge_id" in q:                    # context (fallback) + LEFT JOIN text
+            nodes = {n["node_id"]: n for n in proj["nodes"]}
+            out = []
+            for e in proj["edges"]:
+                if e["src_id"] in prm["concept_ids"] and e["relation"] in ("VERIFIED_BY", "GENERATED_BY", "DERIVES_FROM", "LINKS_TO", "HAS_SECTION"):
+                    o = nodes[e["dst_id"]]
+                    out.append({"concept_id": e["src_id"], "edge_id": e["edge_id"], "relation": e["relation"], "edge_declaration": e["declaration"],
+                                "edge_at": e["authored_at"], "edge_resolution": e["resolution"], "edge_inferred": e["inferred"], "other_id": o["node_id"],
+                                "other_kind": o["kind"], "other_local_id": o["local_id"], "other_title": o["title"], "other_type": o["type"],
+                                "other_status": o["status"], "other_actor_kind": o["actor_kind"], "other_stub": o["stub"], "other_text": o["text"],
+                                "other_text_sha256": o["text_sha256"], "other_stale_after": o["stale_after"], "other_path": o["path"], "other_runtime": o["runtime"]})
+            return out
+        if "WHERE node_id IN UNNEST(@ids)" in q:
+            return [{k: n[k] for k in ("node_id", "local_id", "path", "title", "type", "status", "stale_after", "stub", "runtime")} for n in proj["nodes"] if n["node_id"] in prm["ids"]]
+        raise AssertionError("unrouted query: " + q[:120])
+
+    def query(self, q, job_config=None, location=None, job_id=None):
+        assert job_id, "the chain must choose the job id before the send"
+        prm = self._params(job_config)
+        stage = job_config.labels.get("stage")
+        self.calls.append({"stage": stage, "job_id": job_id})
+        fail = RuntimeError(f"simulated failure at {stage}") if stage == self.fail_stage else None
+        job = _BQJob(job_id, self._rows(q, prm), fail=fail, state="DONE", user_email=self.email)
+        self.jobs[job_id] = job
+        return job
+
+    def get_job(self, job_id, project=None, location=None, retry=None, timeout=None):
+        if job_id not in self.jobs:
+            from google.api_core import exceptions as gexc
+            raise gexc.NotFound(job_id)
+        return self.jobs[job_id]
+
+    def cancel_job(self, job_id, **kw):
+        self.jobs[job_id].state = "DONE"
+
+
+def _live_catalog(projection, sdk_root, tmp_path, sample_root, bq, monkeypatch, **kw):
+    monkeypatch.setattr(CH, "is_live_reader", lambda r: True)      # the reader gate is tested in test_catalog_reader_mode_gates; here the injected reader stands in for the HTTP one
+    return CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "fallback", "bq": bq},
+                        requester="t", as_of=AS_OF, seed_mode="catalog", catalog_reader=_reader(projection), acme_root=sample_root,
+                        runner=kw.pop("runner", lambda argv, **k: subprocess.CompletedProcess(argv, 1, stdout="", stderr="no live SDK in this test")), **kw)
+
+
+def test_catalog_live_branch_journals_every_job_including_the_declaration(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    """The actual live branch (fallback engine, BigQueryStore, journaled retrieve._run, store-routed declaration): no
+    monkeypatch on declaration/governed/store. Every job id is chosen before the send and lands in the identity set."""
+    bq = FakeBigQuery([projection], head=projection["publication_id"])
+    out = _live_catalog(projection, sdk_root, tmp_path, sample_root, bq, monkeypatch)
+    assert out["publication"]["status"] == "OK" and out["source"]["status"] == "OK" and out["store"]["dataset"] == C.CatalogConfig().runtime_dataset
+    cases = {c["case"]: c for c in out["cases"]}
+    for c in cases.values():
+        assert c["retrieval"]["status"] == "OK" and c["retrieval"]["reached"] and c["retrieval"]["scope"]["engine"] == "fallback"
+        assert c["declaration"]["status"] == "OK" and c["declaration"]["job_id"] and c["payload"]["status"] == "CONSISTENT", c["payload"].get("failed")
+    assert cases["approved"]["bind"]["status"] == "BOUND" and cases["declaration-mismatch"]["bind"]["status"] == "MISMATCH"
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "approved"      # only because the SDK child is a stub here
+    roles = [j["role"] for j in out["journal"]["jobs"]]
+    assert roles.count("chain_declaration") == 3 and roles.count("retrieval_walk") == 3 and roles.count("retrieval_context") == 3 and roles.count("retrieval_nodes") == 3
+    assert roles.count("payload_rows") == 6 and roles[:3] == ["pin_resolution", "seed_visibility", "observed_head"]
+    ids = [j["job_id"] for j in out["journal"]["jobs"]]
+    assert all(ids) and len(set(ids)) == len(ids) == len(bq.calls) and set(ids) == {c["job_id"] for c in bq.calls}
+    assert set(out["job_inventory"]["graph"]) == set(ids) and out["job_inventory"]["unresolved"] == []
+    assert out["same_requester"]["status"] == "UNKNOWN" and out["same_requester"]["reason"].startswith("nothing to compare")   # no receipt job from the stub
+    decl_ids = {c["declaration"]["job_id"] for c in cases.values()}
+    assert decl_ids <= set(ids) and all(bq.jobs[i].state == "DONE" for i in decl_ids)
+    assert all(j["terminal"] for j in out["journal"]["jobs"]) and out["job_inventory"]["journal"]["actual_jobs"] == len(ids)
+
+
+def test_catalog_live_empty_declaration_keeps_its_job_id(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    bq = FakeBigQuery([projection], head=projection["publication_id"], hide_declaration=True)
+    out = _live_catalog(projection, sdk_root, tmp_path, sample_root, bq, monkeypatch)
+    for c in out["cases"]:
+        assert c["declaration"]["status"] == "NOT_VISIBLE" and c["declaration"]["job_id"] and c["declaration"]["job_id"] in out["job_inventory"]["graph"]
+        assert c["acceptance"]["status"] == "NOT_REACHED" and c["payload"]["status"] == "NOT_REACHED"
+    empty = [j for j in out["journal"]["jobs"] if j["role"] == "chain_declaration"]
+    assert len(empty) == 3 and all(j["state"] == "EMPTY" and j["job_id"] for j in empty)
+    assert out["verdict"] == "CHAIN_INCOMPLETE"
+
+
+def test_catalog_live_failed_retrieval_job_is_journaled_and_reconciled(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    bq = FakeBigQuery([projection], head=projection["publication_id"], fail_stage="walk")
+    out = _live_catalog(projection, sdk_root, tmp_path, sample_root, bq, monkeypatch)
+    walks = [j for j in out["journal"]["jobs"] if j["role"] == "retrieval_walk"]
+    assert len(walks) == 3 and all(j["state"] == "DONE" and j["reconciled"] and j["job_id"] and "simulated failure" in j["error"] for j in walks)
+    assert all(c["retrieval"]["status"] == "ERROR" and not c["retrieval"]["reached"] for c in out["cases"])
+    assert {j["job_id"] for j in walks} <= set(out["job_inventory"]["graph"]) and out["verdict"] == "CHAIN_INCOMPLETE"
+
+
+def test_catalog_live_unresolved_job_is_never_connected(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    bq = FakeBigQuery([projection], head=projection["publication_id"], fail_stage="chain-declaration")
+    bq.get_job = lambda *a, **k: (_ for _ in ()).throw(ConnectionError("jobs.get unreachable"))
+    out = _live_catalog(projection, sdk_root, tmp_path, sample_root, bq, monkeypatch)
+    assert out["verdict"] == "CHAIN_INCOMPLETE"
+    unresolved = out["job_inventory"]["unresolved"]
+    assert unresolved and all(u["role"] == "chain_declaration" and u["state"] == "UNKNOWN" and u["job_id"] for u in unresolved)
+    assert out["evidence"]["unresolved_jobs"] == len(unresolved) and out["broken_at"] == "approved"
+    # unresolved alone (every case reached, nothing WRONG) still blocks CONNECTED and names itself
+    bq2 = FakeBigQuery([projection], head=projection["publication_id"], fail_stage="observed-head")
+    bq2.get_job = lambda *a, **k: (_ for _ in ()).throw(ConnectionError("jobs.get unreachable"))
+    out2 = _live_catalog(projection, sdk_root, tmp_path, sample_root, bq2, monkeypatch)
+    assert out2["verdict"] == "CHAIN_BROKEN" and out2["publication"]["status"] == "ERROR" and out2["broken_at"] == "publication"     # head observation failed: refused, not silently skipped
+    assert out2["evidence"]["unresolved_jobs"] == 1 and out2["journal"]["summary"]["unresolved"] == 1
+
+
+def test_catalog_live_dataset_mismatch_is_refused_before_any_read(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    bq = FakeBigQuery([projection], head=projection["publication_id"])
+    monkeypatch.setattr(CH, "is_live_reader", lambda r: True)
+    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "fallback", "bq": bq, "ds": "some_other_dataset"},
+                       requester="t", as_of=AS_OF, seed_mode="catalog", catalog_reader=_reader(projection), acme_root=sample_root,
+                       runner=lambda argv, **k: (_ for _ in ()).throw(AssertionError("must not run")))
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "publication" and out["publication"]["status"] == "DESTINATION_MISMATCH"
+    assert out["publication"]["client_dataset"] == "some_other_dataset" and bq.calls == [] and out["journal"]["jobs"] == []
+    # a supplied store on a different dataset is refused the same way
+    import okf_bq_graph.publication as PUB
+    store = PUB.BigQueryStore(bq, "p", "okf_catalog_chain_other", "US", None)
+    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "fallback", "bq": bq},
+                       requester="t", as_of=AS_OF, seed_mode="catalog", catalog_reader=_reader(projection), acme_root=sample_root, store=store,
+                       runner=lambda argv, **k: (_ for _ in ()).throw(AssertionError("must not run")))
+    assert out["verdict"] == "CHAIN_BROKEN" and out["publication"]["status"] == "DESTINATION_MISMATCH" and out["publication"]["store_dataset"] == "okf_catalog_chain_other"
+    # the B2 configuration routes every read to the owned dataset
+    from okf_bq_graph.catalog_lifecycle import LifecycleConfig
+    cfg = LifecycleConfig(run_id="t-b2-0001").catalog_config("metrics/gross-margin")
+    reader = C.MockReader(C.mock_pages([cfg.entry], 5), {cfg.entry: dict(_pin_entry(projection, runtime_dataset=cfg.runtime_dataset, managed_by_profile=cfg.managed_by_profile,
+                                                                                          managed_by_deployment=cfg.managed_by_deployment), name=cfg.entry)})
+    bq3 = FakeBigQuery([projection], head=projection["publication_id"])
+    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "fallback", "bq": bq3}, requester="t", as_of=AS_OF,
+                       seed_mode="catalog", catalog_reader=reader, catalog_cfg=cfg, acme_root=sample_root,
+                       runner=lambda argv, **k: subprocess.CompletedProcess(argv, 1, stdout="", stderr="stub"))
+    assert out["store"]["dataset"] == cfg.runtime_dataset == "okf_catalog_chain_t_b2_0001"
+    assert all(c["retrieval"]["scope"]["publication_id"] == projection["publication_id"] for c in out["cases"])
+    assert all(j.get("dataset") in (None, cfg.runtime_dataset) for j in out["journal"]["jobs"])
+
+
+def test_catalog_retains_the_governed_input_per_case(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    monkeypatch.setenv("OKF_OPERATOR_EMAIL", "operator@example.test")
+    import okf_bq_graph.authz as AZ
+    AZ._OPERATOR = None
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, requester="operator@example.test")
+    for c in out["cases"]:
+        kept = c["retrieval"]["retained"]
+        p = Path(kept["path"])
+        assert p.parent == Path(out["run_dir"]) / "retrieval" and CH.sha256_hex(p.read_bytes()) == kept["sha256"]
+        saved = json.loads(p.read_text())
+        assert saved["scope"]["publication_id"] == projection["publication_id"] and saved["paths"] and saved["computations"][0]["sql"]
+        assert kept["redacted"] and "operator@example.test" not in p.read_text() and saved["scope"]["requester"] == "operator"   # evidence hygiene
+    assert {r["name"] for r in out["journal"]["retained"]} >= {"retrieval_approved", "retrieval_sql-substitution", "retrieval_declaration-mismatch"}
+
+
 def test_job_ids_of_includes_journal_and_payload_jobs():
     cases = [{"case": "approved", "retrieval": {"timing": {"jobs": [{"job_id": "w"}]}}, "declaration": {"job_id": "d1"},
               "payload": {"jobs": [{"nodes_job": {"job_id": "pn"}, "edges_job": {"job_id": "pe"}}]},
               "receipt": {"invoked": True, "receipt": {"job": {"job_id": "r1"}}}}]
     ids = CH.job_ids_of(cases, None, ["pin1", "seed1", "head1", None, "pin1"])
     assert ids["graph"] == ["pin1", "seed1", "head1", "w", "d1", "pn", "pe"] and [j["job_id"] for j in ids["receipt"]] == ["r1"]
-
-
-def test_catalog_live_identity_covers_every_journaled_job(projection, sdk_root, tmp_path, sample_root, monkeypatch):
-    """Live catalog mode: pin-resolution / head / payload / declaration / retrieval jobs all enter the identity set."""
-    import okf_bq_graph.publication as PUB
-    seen = {}
-
-    class FakeStore(PUB.ProjectionStore):
-        engine = "bigquery-fake"
-
-        def _job(self, role, desc, rows):
-            e = self.journal.intend(role, desc, self.engine, actual=True)
-            self.journal.submitted(e, job_id=f"job-{role}-{e['seq']}", project="p", location="US")
-            self.journal.terminal(e, "DONE" if rows else "EMPTY", rows=len(rows))
-            return e
-
-    store = FakeStore(journal=None); store.add(projection); store.set_head("acme_retail", projection["publication_id"])
-    monkeypatch.setattr(CH, "same_requester", lambda client, g, r: seen.update(graph=list(g), receipt=list(r)) or {"status": "UNKNOWN", "reason": "fake"})
-    monkeypatch.setattr(CH, "is_live_reader", lambda r: True)                 # the live gate is tested separately; this test is about the job set
-    monkeypatch.setattr(CH, "governed", lambda seed, pub, req, as_of, cl: CH.retrieve(seed, "acme_retail", pub, req, as_of, {"engine": "oracle", "graphs": store.graphs}))
-    real_decl = CH.declaration
-    monkeypatch.setattr(CH, "declaration", lambda cl, cid, pub: real_decl({"engine": "oracle", "store": store}, cid, pub))
-    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), clients={"engine": "fallback", "bq": object()},
-                       requester="t", as_of=AS_OF, seed_mode="catalog", catalog_reader=_reader(projection), store=store, acme_root=sample_root,
-                       runner=lambda argv, **k: subprocess.CompletedProcess(argv, 1, stdout="", stderr="no live SDK in this test"))
-    assert out["verdict"] == "CHAIN_INCOMPLETE"
-    journal_ids = [j["job_id"] for j in out["journal"]["jobs"]]
-    assert len(journal_ids) >= 9 and set(journal_ids) <= set(seen["graph"]) and set(journal_ids) == set(out["job_inventory"]["graph"])
-    assert out["job_inventory"]["journal"]["actual_jobs"] == len(journal_ids)
 
 
 def test_module_cli_catalog_mock(sdk_root, sample_root, projection, tmp_path):
@@ -917,7 +1095,8 @@ def test_module_cli_catalog_mock(sdk_root, sample_root, projection, tmp_path):
     for bad in (["--live", "--seed-mode", "catalog", "--catalog-responses", str(resp)],
                 ["--hermetic", "--seed-mode", "catalog"],
                 ["--hermetic", "--catalog-responses", str(resp)],
-                ["--hermetic", "--seed-mode", "catalog", "--catalog-group", "g", "--catalog-responses", str(resp)]):
+                ["--hermetic", "--seed-mode", "catalog", "--catalog-group", "g", "--catalog-responses", str(resp)],
+                ["--hermetic", "--seed-mode", "catalog", "--catalog-entry", "e", "--catalog-responses", str(resp)]):
         r = subprocess.run([sys.executable, "-m", "okf_bq_graph.chain", *bad, "--out", str(tmp_path / "ev2"), "--sdk-root", sdk_root],
                            env=env, capture_output=True, text=True, cwd=root)
         assert r.returncode == 2 and not (tmp_path / "ev2").exists(), (bad, r.stderr[-300:])

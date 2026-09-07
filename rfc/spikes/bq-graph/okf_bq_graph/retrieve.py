@@ -67,9 +67,20 @@ def _run(clients: dict, name: str, query: str, params: list, timer: Timer) -> li
     is retried at most twice; the retry count is recorded so the benchmark can report it."""
     cfg = bigquery.QueryJobConfig(query_parameters=params, use_query_cache=clients.get("use_cache", False),
                                   labels={"okf_spike": "bq_graph_20260905", "stage": name})
+    journal = clients.get("journal")      # catalog chain: every retrieval job is journaled before the send, incl. failures
     t = time.monotonic()
     retries = 0
     while True:
+        if journal is not None:
+            from .publication import run_journaled
+            try:
+                rows, job, _entry = run_journaled(clients["bq"], journal, f"retrieval_{name}", f"governed retrieval stage {name}", query, cfg, LOCATION,
+                                                  project=PROJECT, dataset=clients.get("ds", DATASET))
+                break
+            except gexc.GoogleAPICallError as e:
+                if EDITION_ERR in str(e) and retries < 2 and clients.get("engine") == "gql":
+                    retries += 1; time.sleep(2); continue
+                raise
         job = clients["bq"].query(query, job_config=cfg, location=LOCATION)
         try:
             rows = [dict(r) for r in job.result()]

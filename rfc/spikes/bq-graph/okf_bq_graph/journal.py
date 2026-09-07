@@ -15,7 +15,9 @@ import threading
 from pathlib import Path
 from typing import Any, Optional
 
-TERMINAL = ("DONE", "ERROR", "EMPTY", "NOT_SUBMITTED", "CANCELLED", "UNKNOWN")
+TERMINAL = ("DONE", "ERROR", "EMPTY", "NOT_SUBMITTED", "CANCELLED", "APPLIED", "NOT_APPLIED", "MOOT")
+# MOOT: an UNKNOWN write whose target resource was afterwards deleted and its absence read back; its own outcome no longer matters
+UNKNOWN = "UNKNOWN"   # a local exception left the server-side state unverified: NOT terminal until reconciled
 
 
 def _now() -> str:
@@ -61,6 +63,21 @@ class Journal:
             raise ValueError(f"not a terminal state: {state}")
         entry.update(state=state, terminal=True, rows=rows, error=error, terminal_at=_now(), **stats)
         self._append(dict(entry, event="terminal"))
+        return entry
+
+    def unknown(self, entry: dict, error: str, **stats: Any) -> dict:
+        """A local failure (timeout, transport, interrupted write) whose server-side outcome is unverified. The entry
+        stays unresolved; only `reconcile` (after an actual state readback) or `terminal` can close it."""
+        entry.update(state=UNKNOWN, terminal=False, error=error, unknown_at=_now(), **stats)
+        self._append(dict(entry, event="unknown"))
+        return entry
+
+    def reconcile(self, entry: dict, state: str, observed: Optional[str] = None, **stats: Any) -> dict:
+        """Close an UNKNOWN entry after reading the actual resource/job state (`observed` is what was read back)."""
+        if state not in TERMINAL:
+            raise ValueError(f"not a terminal state: {state}")
+        entry.update(state=state, terminal=True, reconciled=True, observed=observed, reconciled_at=_now(), **stats)
+        self._append(dict(entry, event="reconciled"))
         return entry
 
     def note(self, event: str, **fields: Any) -> None:

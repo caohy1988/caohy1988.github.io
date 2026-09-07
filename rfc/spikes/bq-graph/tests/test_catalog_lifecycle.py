@@ -306,7 +306,8 @@ def test_cleanup_after_partial_setup_touches_only_what_was_created(lc):
     rc = life.cleanup()
     assert rc["status"] == "COMPLETE" and [s["resource"] for s in rc["steps"]] == [CFG.dataset]
     assert [o["op"] for o in cloud.mutations()] == ["create_dataset", "run_ddl", "delete_dataset"]      # the failed DDL was attempted once, nothing else
-    assert [e["state"] for e in j.jobs() if e["role"] == "create_table"] == ["ERROR"]
+    assert [e["state"] for e in j.jobs() if e["role"] == "create_table"] == ["MOOT"]          # unknown write, target deleted + absence read back
+    assert rc["unresolved_jobs"] == 0
     fresh = L.Lifecycle(CFG, FakeCloud(), Journal(Path(j.run_dir) / "again", RUN))
     assert fresh.cleanup()["status"] == "NOTHING_OWNED"
 
@@ -324,8 +325,9 @@ def test_cleanup_is_incomplete_when_absence_cannot_be_read_back(lc, p1):
     cloud.datasets[CFG.dataset] = {}
     rc = life.cleanup()
     assert rc["status"] == "INCOMPLETE" and "injected delete_dataset failure" in rc["steps"][-1]["error"]
-    errs = [e for e in j.jobs() if e["state"] == "ERROR"]
-    assert errs and errs[-1]["role"] == "delete_dataset" and all(e["terminal"] for e in j.jobs())
+    unk = [e for e in j.jobs() if e["state"] == "UNKNOWN"]
+    assert unk and unk[-1]["role"] == "delete_dataset" and not unk[-1]["terminal"]      # a failed delete is unverified, never terminal
+    assert rc["unresolved_jobs"] == 1 and rc["unresolved"][0]["role"] == "delete_dataset"
 
 
 # ---- scenario 5: bounded + journaled operations
@@ -381,3 +383,107 @@ def test_owned_pin_round_trips_through_the_catalog_parser_and_adversaries_are_ty
         life.pin_from_rows("pub_0000000000000000", GM)                  # no pin from a non-READY / unknown publication
     with pytest.raises(L.ScopeViolation):
         life.withdraw("pub_0000000000000000")
+
+
+# ---- Astra PR41 P1 #2: ownership persists before the write; a lost response never hides a committed resource
+def test_committed_entry_with_lost_response_is_still_cleaned_up(lc, p1):
+    life, cloud, j = lc
+    life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
+    real_create = cloud.create_entry
+
+    def commit_then_lose(name, body, timeout):
+        real_create(name, body, timeout)                       # the server committed the entry ...
+        raise TimeoutError("response lost after commit")      # ... but the client never saw the response
+    cloud.create_entry = commit_then_lose
+    name = CFG.entry_prefix + "control"
+    with pytest.raises(TimeoutError):
+        life.write_pin("control", p1["publication_id"], GM)
+    own = json.loads((Path(j.run_dir) / "ownership.json").read_text())
+    assert own["owned"]["pending"] and own["owned"]["pending"][0]["name"] == name and name not in own["owned"]["entries"]
+    assert [e for e in j.jobs() if e["role"] == "create_entry"][0]["state"] == "UNKNOWN" and j.summary()["unresolved"] == 1
+    assert name in cloud.entries
+    rc = life.cleanup()
+    assert rc["status"] == "COMPLETE", rc
+    kinds = {(s["resource"], s["kind"]): s for s in rc["steps"]}
+    assert kinds[(name, "pending_entry")]["reconciled"] == "PRESENT_ADOPTED" and kinds[(name, "entry")]["deleted"] and kinds[(name, "entry")]["absent_verified"]
+    assert name not in cloud.entries and rc["unresolved_jobs"] == 0 and rc["pending"] == []
+    assert [e["state"] for e in j.jobs() if e["role"] == "create_entry"] == ["APPLIED"]
+
+
+def test_lost_response_without_commit_reconciles_absent(lc, p1):
+    life, cloud, j = lc
+    life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
+    cloud.fail["create_entry"] = True                          # raised before anything was written
+    with pytest.raises(RuntimeError):
+        life.write_pin("control", p1["publication_id"], GM)
+    assert life.owned.pending and j.summary()["unresolved"] == 1
+    rc = life.cleanup()
+    assert rc["status"] == "COMPLETE" and rc["steps"][0]["reconciled"] == "ABSENT" and rc["steps"][0]["kind"] == "pending_entry"
+    assert [e["state"] for e in j.jobs() if e["role"] == "create_entry"] == ["NOT_APPLIED"]
+
+
+def test_unreadable_pending_write_blocks_completion(lc, p1):
+    life, cloud, j = lc
+    life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
+    cloud.fail["create_entry"] = True
+    with pytest.raises(RuntimeError):
+        life.write_pin("control", p1["publication_id"], GM)
+    cloud.fail["get_entry"] = True                             # the readback itself fails: state stays unknown
+    rc = life.cleanup()
+    assert rc["status"] == "INCOMPLETE" and rc["pending"] and rc["unresolved_jobs"] >= 1
+    assert any(s["kind"] == "pending_entry" and "error" in s for s in rc["steps"])
+
+
+def test_lost_dataset_create_response_is_owned_and_cleaned(lc):
+    life, cloud, j = lc
+    real_create = cloud.create_dataset
+
+    def commit_then_lose(dataset, location, timeout):
+        real_create(dataset, location, timeout); raise TimeoutError("lost")
+    cloud.create_dataset = commit_then_lose
+    with pytest.raises(TimeoutError):
+        life.provision()
+    assert life.owned.dataset is None and life.owned.pending[0]["kind"] == "dataset" and CFG.dataset in cloud.datasets
+    rc = life.cleanup()
+    assert rc["status"] == "COMPLETE" and CFG.dataset not in cloud.datasets
+
+
+# ---- Astra PR41 P2: restore only reinstates a verified READY publication, from WITHDRAWN, after re-validation
+def test_restore_never_promotes_invalid_readback(lc, p1, monkeypatch):
+    life, cloud, j = lc
+    life.provision()
+    real = cloud.select_rows
+
+    def torn(dataset, table, where, timeout, exclude=()):
+        rows = real(dataset, table, where, timeout, exclude)
+        if table == "nodes" and "bundle_id" in where:
+            rows[0]["text"] = "torn"
+        return rows
+    cloud.select_rows = torn
+    r = life.publish_relational(p1)
+    assert r["state"] == "INVALID_READBACK" and p1["publication_id"] not in life.owned.ready_verified
+    with pytest.raises(RuntimeError):
+        life.withdraw(p1["publication_id"])
+    with pytest.raises(RuntimeError):
+        life.restore(p1["publication_id"])
+    assert {x["publication_id"]: x["validation_status"] for x in cloud.datasets[CFG.dataset]["publications"]} == {p1["publication_id"]: "INVALID_READBACK"}
+    with pytest.raises(RuntimeError):
+        life.advance_head(p1["publication_id"])
+
+
+def test_restore_revalidates_rows_and_refuses_when_they_changed(lc, p1):
+    life, cloud, j = lc
+    life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
+    assert life.withdraw(p1["publication_id"])["ready"] is False
+    with pytest.raises(RuntimeError):
+        life.restore("pub_0000000000000000")
+    sec = next(n for n in cloud.datasets[CFG.dataset]["nodes"] if n["kind"] == "Section")
+    sec["text"] = "corrupted after withdrawal"
+    r = life.restore(p1["publication_id"])
+    assert r["state"] == "RESTORE_REFUSED" and r["ready"] is False and not r["readback"]["node_rows"] and not r["readback"]["section_hashes"]
+    assert {x["validation_status"] for x in cloud.datasets[CFG.dataset]["publications"]} == {"WITHDRAWN"}
+    sec["text"] = next(n for n in p1["nodes"] if n["node_id"] == sec["node_id"])["text"]
+    r = life.restore(p1["publication_id"])
+    assert r["state"] == "RESTORED" and r["ready"] is True
+    with pytest.raises(RuntimeError):
+        life.restore(p1["publication_id"])                     # not WITHDRAWN any more: nothing to restore
