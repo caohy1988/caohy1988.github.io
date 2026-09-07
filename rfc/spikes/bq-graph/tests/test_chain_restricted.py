@@ -369,7 +369,9 @@ def test_restricted_cases_reach_their_stages(restricted_run):
     assert rv["revocation"]["observed"] is True and rv["revocation"]["policy"]["dataset_reader"] is False
     assert rv["replay"]["retrieval"]["status"] == "DENIED" and rv["replay"]["retrieval"]["cache"] == "HIT_DENIED" and rv["replay"]["retrieval"]["disclosed_anything"] is False
     assert rv["replay"]["authorization"]["status"] == "DENIED" and rv["replay"]["consume"]["decision"] == "REFUSED" and rv["consume"]["decision"] == "REFUSED"
-    assert "timing" in rv["replay"]["retrieval"] and out["identity"]["job_set"]["replay_jobs_included"] is True
+    assert "timing" in rv["replay"]["retrieval"] and out["identity"]["job_set"]["replay_cases"] == 1
+    # hermetic: no engine job on either pass, so nothing is missing from the inventory
+    assert out["identity"]["job_set"]["replay_jobs"] == 0 and out["identity"]["job_set"]["replay_jobs_missing"] == []
 
 
 def test_restricted_evidence_is_hygienic_and_retained(restricted_run):
@@ -483,13 +485,45 @@ def test_bound_to_requires_the_sa_on_every_job_including_the_pointer_lookup():
     r = PR.bound_to(owner, ids, [{"job_id": "r1"}], SA)
     assert r["status"] == "UNBOUND" and r["other_identities"] == ["operator@x"]
     assert PR.bound_to(_Owner({**{i: SA for i in ids}, "r1": None}), ids, [{"job_id": "r1"}], SA)["status"] == "UNKNOWN"
-    assert PR.bound_to(_Owner({}), [], [{"job_id": "r1"}], SA)["status"] == "UNKNOWN"
-    assert PR.bound_to(_Owner({}), ids, [], SA)["status"] == "UNKNOWN"
+    assert PR.bound_to(_Owner({"r1": SA}), [], [{"job_id": "r1"}], SA)["status"] == "UNKNOWN"   # required role, nothing to compare
+    assert PR.bound_to(_Owner({i: SA for i in ids}), ids, [], SA)["status"] == "UNKNOWN"   # required role, nothing to compare
 
     class Boom(_Owner):
         def get_job(self, *a, **k):
             raise RuntimeError("jobs.get failed")
     assert PR.bound_to(Boom({}), ids, [{"job_id": "r1"}], SA)["status"] == "UNKNOWN"
+
+
+def test_bound_to_audits_broker_probes_and_operator_policy_ddl_in_their_own_roles():   # Astra PR 45 #1
+    """Every job the run submitted, in the role that submitted it: the broker's own platform observations run as the
+    requester, and the row-policy DDL runs as the operator. Neither may be dropped, and neither may be graded against
+    the other's principal."""
+    ids, OP = ["pointer-job", "n1"], "operator@x"
+    emails = {**{i: SA for i in ids}, "r1": SA, "probe1": SA, "ddl1": OP, "ddl2": OP}
+    kw = dict(probe_jobs=[PR.job_ref("probe1", stage="rls_rows")],
+              admin_jobs=[PR.job_ref("ddl1"), PR.job_ref("ddl2")], operator_email=OP)
+    r = PR.bound_to(_Owner(emails), ids, [{"job_id": "r1"}], SA, **kw)
+    assert r["status"] == "BOUND" and r["jobs_compared"] == 6 and r["probe_jobs"] == 1 and r["admin_jobs"] == 2
+    assert {n: v["status"] for n, v in r["roles"].items()} == {
+        "graph": "BOUND", "receipt": "BOUND", "requester_probe": "BOUND", "policy_admin": "BOUND"}
+
+    # a broker probe that ran as the operator is a requester claim the run cannot make
+    bad = PR.bound_to(_Owner({**emails, "probe1": OP}), ids, [{"job_id": "r1"}], SA, **kw)
+    assert bad["status"] == "UNBOUND" and bad["roles"]["requester_probe"]["other_identities"] == [OP]
+
+    # ... and DDL that ran as the SA is not administrative work under the operator
+    bad = PR.bound_to(_Owner({**emails, "ddl2": SA}), ids, [{"job_id": "r1"}], SA, **kw)
+    assert bad["status"] == "UNBOUND" and bad["roles"]["policy_admin"]["other_identities"] == [SA]
+
+    # an unknown operator cannot grade its own role
+    unk = PR.bound_to(_Owner(emails), ids, [{"job_id": "r1"}], SA, **dict(kw, operator_email=None))
+    assert unk["status"] == "UNKNOWN" and unk["roles"]["policy_admin"]["status"] == "UNKNOWN"
+    assert "policy_admin: UNKNOWN" in unk["reason"]
+
+    # optional roles that submitted nothing are NONE, not a silent pass and not UNKNOWN
+    none = PR.bound_to(_Owner(emails), ids, [{"job_id": "r1"}], SA)
+    assert none["status"] == "BOUND" and none["roles"]["requester_probe"]["status"] == "NONE" \
+        and none["roles"]["policy_admin"]["status"] == "NONE"
 
 
 def test_impersonated_credential_file_shape_and_permissions(tmp_path):
@@ -531,8 +565,8 @@ class _SAClient:
         if job_config is not None and job_config.dry_run:
             return object()
         assert "COUNT(*) AS visible" in q, f"the live broker submits no other real query under the SA: {q[:80]}"
-        grantee = self.owner is not None and f"serviceAccount:{SA}" in self.owner.policies["nodes"]["grantees"]
-        hidden = 0 if self.owner is None or "gross-margin" in self.owner.policies["nodes"]["predicate"] else 3
+        grantee = self.owner is not None and f"serviceAccount:{SA}" in self.owner.policy("nodes")["grantees"]
+        hidden = 0 if self.owner is None or "gross-margin" in self.owner.policy("nodes")["predicate"] else 3
         return _Rows([{"visible": 42 if grantee else 0, "hidden": hidden if grantee else 0}])
 
 
@@ -549,9 +583,12 @@ class _RlsApi:
 
     def api_request(self, method=None, path=None, data=None):
         table = path.split("/tables/", 1)[1].split("/", 1)[0]
-        pol = self.owner.policies[table]
+        pols = self.owner.policies[table]
         if method == "GET":
-            return {"rowAccessPolicies": [{"rowAccessPolicyReference": {"policyId": pol["policy_id"]}, "filterPredicate": pol["predicate"]}]}
+            return {"rowAccessPolicies": [{"rowAccessPolicyReference": {"policyId": p["policy_id"]}, "filterPredicate": p["predicate"]}
+                                          for p in pols]}
+        pid = path.rsplit("/", 1)[1].split(":", 1)[0]
+        pol = next(p for p in pols if p["policy_id"] == pid)
         return {"bindings": [{"role": "roles/bigquery.filteredDataViewer", "members": list(pol["grantees"])}]}
 
 
@@ -561,13 +598,15 @@ class _AclOwner(_Owner):
     three `_rls` row access policies, so the real `authz.set_rls` DDL and the broker's grantee snapshot/restore run
     against a readable-back fixture."""
 
-    def __init__(self, acl, predicates=None):
+    def __init__(self, acl, predicates=None, policy_ids=None):
         super().__init__({})
         self.acl = {ds: list(entries) for ds, entries in acl.items()}
         self.updates = []
         pred = predicates or PR.hide_predicates()
-        self.policies = {t: {"policy_id": f"hide_intermediate_{t}", "grantees": [OPERATOR_MEMBER], "predicate": pred[t]}
-                         for t in PR.RLS_TABLES}
+        ids = policy_ids or PR.hide_policy_ids()
+        # keyed by policy NAME per table, the way BigQuery replaces them: DDL under a different name adds a policy
+        # beside the existing one instead of replacing it (Astra PR 45 #2)
+        self.policies = {t: [{"policy_id": ids[t], "grantees": [OPERATOR_MEMBER], "predicate": pred[t]}] for t in PR.RLS_TABLES}
         self.rls_ddl = []
         self._connection = _RlsApi(self)
 
@@ -576,10 +615,18 @@ class _AclOwner(_Owner):
         assert "ROW ACCESS POLICY" in q, f"unexpected owner query: {q[:80]}"
         self.rls_ddl.append(q)
         table = q.split("` GRANT TO", 1)[0].rsplit(".", 1)[1]
+        pid = q.split("ROW ACCESS POLICY ", 1)[1].split(" ", 1)[0]
         grantees = sorted(x.strip().strip("'") for x in q.split("GRANT TO (", 1)[1].split(")", 1)[0].split(","))
         predicate = " ".join(q.split("FILTER USING (", 1)[1].rsplit(")", 1)[0].split())
-        self.policies[table].update(grantees=grantees, predicate=predicate)
-        return _Rows([])
+        existing = next((p for p in self.policies[table] if p["policy_id"] == pid), None)
+        if existing is None:   # CREATE OR REPLACE replaces by NAME: another name is another policy on the same table
+            self.policies[table].append({"policy_id": pid, "grantees": grantees, "predicate": predicate})
+        else:
+            existing.update(grantees=grantees, predicate=predicate)
+        return _Rows([f"ddl-{pid}-{len(self.rls_ddl)}"])
+
+    def policy(self, table, index=0):
+        return self.policies[table][index]
 
     def get_dataset(self, ref):
         ds = ref.split(".", 1)[1]
@@ -605,13 +652,13 @@ def _entry(role):
     return bigquery.AccessEntry(role, "userByEmail", SA)
 
 
-def _live_broker(monkeypatch, allowed, acl=None, deps=SDK_DEPS, credfile=None, **kw):
+def _live_broker(monkeypatch, allowed, acl=None, deps=SDK_DEPS, credfile=None, policy_ids=None, **kw):
     """A RestrictedBroker exactly as chain.py builds it (dependencies from the SDK publication, default wait), against a
     fake SA client, a fake ACL-bearing owner and a fake clock (so an unpropagated grant times out in test time)."""
     t = [0.0]
     monkeypatch.setattr(PR.time, "monotonic", lambda: t[0])
     monkeypatch.setattr(PR.time, "sleep", lambda s: t.__setitem__(0, t[0] + s))
-    owner = _AclOwner(acl or {})
+    owner = _AclOwner(acl or {}, policy_ids=policy_ids)
     sa = _SAClient(allowed, owner=owner)
     b = PR.RestrictedBroker("fallback", SDK_DS, dependencies=deps, sa_email=SA, factory=lambda p: sa, owner=owner,
                             credential_file=credfile or (lambda email, directory=None: os.path.join(directory, "adc.json")), **kw)
@@ -646,10 +693,10 @@ def test_live_broker_never_touches_or_downgrades_preexisting_grants_and_restores
     b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
     assert owner.roles(RLS_DS) == ["READER"] and b.granted == {RLS_DS} and b.graph_clients()["ds"] == RLS_DS
     # the `_rls` case needs the row policy's grantee list too: dataset READER alone leaves a non-grantee reading zero rows
-    assert owner.policies["nodes"]["grantees"] == sorted([OPERATOR_MEMBER, f"serviceAccount:{SA}"]) and len(owner.rls_ddl) == 3
-    assert all(pol["predicate"] == PR.hide_predicates()[t] for t, pol in owner.policies.items())   # the hidden-intermediate shape is unchanged
+    assert owner.policy("nodes")["grantees"] == sorted([OPERATOR_MEMBER, f"serviceAccount:{SA}"]) and len(owner.rls_ddl) == 3
+    assert all(owner.policy(t)["predicate"] == PR.hide_predicates()[t] for t in PR.RLS_TABLES)   # the hidden-intermediate shape is unchanged
     b.apply(PR.policy())
-    assert owner.policies["nodes"]["grantees"] == [OPERATOR_MEMBER]                                # leaving the fixture drops the grantee again
+    assert owner.policy("nodes")["grantees"] == [OPERATOR_MEMBER]                                # leaving the fixture drops the grantee again
     sa.allowed = set()
     r = b.revoke()                                                                             # the revocation case must observe a denial: pre-existing entries go too ...
     assert r["observed"] is True and owner.roles(DATASET) == [] and owner.roles(SDK_DS) == [] and owner.roles(RLS_DS) == ["READER"]
@@ -662,7 +709,7 @@ def test_live_broker_never_touches_or_downgrades_preexisting_grants_and_restores
                                 | {"restore_rls_policies", "readback_rls_policies"})
     assert td["rls"] == {"tables": 3, "restored_to_snapshot": True, "sa_in_grantees_after": False,
                          "grantees_after": {t: 1 for t in PR.RLS_TABLES}}
-    assert owner.policies["nodes"]["grantees"] == [OPERATOR_MEMBER] and owner.policies["section_vectors"]["grantees"] == [OPERATOR_MEMBER]
+    assert owner.policy("nodes")["grantees"] == [OPERATOR_MEMBER] and owner.policy("section_vectors")["grantees"] == [OPERATOR_MEMBER]
 
 
 def test_live_broker_leaves_rls_policies_alone_unless_a_case_runs_on_them(monkeypatch):
@@ -670,7 +717,7 @@ def test_live_broker_leaves_rls_policies_alone_unless_a_case_runs_on_them(monkey
     b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
     b.grant(); sa.allowed = set(); b.revoke()
     td = b.teardown()
-    assert owner.rls_ddl == [] and b._rls_original is None and owner.policies["nodes"]["grantees"] == [OPERATOR_MEMBER]
+    assert owner.rls_ddl == [] and b._rls_original is None and owner.policy("nodes")["grantees"] == [OPERATOR_MEMBER]
     assert "restore_rls_policies" not in td["steps"] and "rls" not in td
 
 
@@ -678,13 +725,13 @@ def test_live_broker_refuses_rls_policies_it_could_not_restore(monkeypatch):
     """Grading a hidden-intermediate case against unknown policies proves nothing: an unexpected predicate, an unexpected
     policy count and a split nodes/edges grantee list each refuse before any DDL is issued."""
     b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
-    owner.policies["edges"]["predicate"] = "TRUE"
+    owner.policy("edges")["predicate"] = "TRUE"
     with pytest.raises(RuntimeError, match="hidden-intermediate fixture shape"):
         b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
     assert owner.rls_ddl == [] and b._rls_original is None
 
     b2, sa2, owner2 = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
-    owner2.policies["edges"]["grantees"] = [OPERATOR_MEMBER, "user:someone-else@example.test"]
+    owner2.policy("edges")["grantees"] = [OPERATOR_MEMBER, "user:someone-else@example.test"]
     with pytest.raises(RuntimeError, match="different grantee lists"):
         b2.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
     assert owner2.rls_ddl == []
@@ -694,6 +741,61 @@ def test_live_broker_refuses_rls_policies_it_could_not_restore(monkeypatch):
     with pytest.raises(RuntimeError, match="row access policies"):
         b3.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
     assert owner3.rls_ddl == []
+
+
+def test_a_denied_cached_replay_recheck_stays_in_the_job_inventory():   # Astra PR 45 #1
+    """The cached-replay re-check is a submitted job even when the platform denies it. Recording a job only after a
+    successful result made precisely the negative path - the one the revocation case exists to produce - vanish from
+    the identity evidence, while `job_ids_of` still forwarded an empty list."""
+    import okf_bq_graph.retrieve as RT
+    from google.api_core import exceptions as gexc
+
+    class _DeniedJob:
+        job_id, project, location = "recheck-job", P, "US"
+        slot_millis = total_bytes_processed = total_bytes_billed = cache_hit = None
+        created = started = ended = None
+        _properties: dict = {"statistics": {}}
+
+        def result(self):
+            raise gexc.Forbidden("403 Access Denied: accessDenied on the revoked dataset")
+
+    class _Client:
+        submitted = 0
+
+        def query(self, q, job_config=None, location=None):
+            type(self).submitted += 1
+            return _DeniedJob()
+
+    timer = RT.Timer()
+    clients = {"bq": _Client(), "engine": "fallback", "ds": DATASET}
+    assert RT._recheck(clients, f"{P}.{DATASET}", "pub_x", ["n1"], ["e1"], timer) is False   # unknown check blocks
+    jobs = timer.done()["jobs"]
+    assert _Client.submitted == 1 and [j["job_id"] for j in jobs] == ["recheck-job"]         # was [] before the fix
+    assert jobs[0]["state"] == "FAILED" and jobs[0]["stage"] == "recheck" and "Forbidden" in jobs[0]["error"]
+    # and the chain's inventory collects it from the replay, so the identity audit reads it back
+    case = {"case": "revocation-before-replay", "replay": {"retrieval": {"timing": timer.done()}}}
+    assert CH.job_ids_of([case]) == {"graph": ["recheck-job"], "receipt": []}
+
+
+def test_live_broker_refuses_policy_names_its_restore_helper_cannot_restore(monkeypatch):   # Astra PR 45 #2
+    """BigQuery replaces a row access policy BY NAME and `authz.set_rls` only issues the fixture's fixed names. A
+    correctly filtered policy under another id would be left in place while the DDL created a second one beside it, and
+    teardown could not put the table back. Refuse before any DDL rather than orphan the fixture."""
+    ids = dict(PR.hide_policy_ids(), section_vectors="tenant_vectors_v2")
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED, policy_ids=ids)
+    with pytest.raises(RuntimeError, match="unexpected ids on \\['section_vectors'\\]"):
+        b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert owner.rls_ddl == [] and b._rls_original is None and b.admin_jobs == []
+    assert [len(owner.policies[t]) for t in PR.RLS_TABLES] == [1, 1, 1]        # nothing added beside the fixture
+    assert owner.policy("section_vectors")["policy_id"] == "tenant_vectors_v2"
+
+    # the guard is what prevents it: without the id check the same fixture ends with two policies on that table
+    b2, sa2, owner2 = _live_broker(monkeypatch, allowed=ALL_ALLOWED, policy_ids=ids)
+    real_state = b2._rls_state
+    b2._rls_state = lambda: {t: dict(s, policy_id=PR.hide_policy_ids()[t]) for t, s in real_state().items()}
+    b2.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert len(owner2.policies["section_vectors"]) == 2                        # the orphan the guard exists to prevent
+    assert b2.teardown()["status"] == "UNVERIFIED"
 
 
 def test_live_broker_rls_case_waits_for_the_row_policy_not_just_the_dry_run(monkeypatch):

@@ -45,15 +45,26 @@ class Timer:
     def stage(self, name: str, start: float) -> None:
         self.stages[name] = round((time.monotonic() - start) * 1000, 1)
 
-    def job(self, name: str, job: bigquery.QueryJob) -> None:
+    def job(self, name: str, job: bigquery.QueryJob, state: str = "DONE", error: Optional[str] = None,
+            at: Optional[int] = None) -> int:
+        """Record one job and return its index. `at` rewrites an entry recorded earlier at submission time, so a job
+        that was submitted and then failed keeps its place in the inventory instead of disappearing (Astra PR 45 #1:
+        a denied cached-replay re-check is still a submitted job, and the identity claim covers it)."""
         st = getattr(job, "_properties", {}).get("statistics", {})
-        self.jobs.append({"stage": name, "job_id": job.job_id, "slot_ms": job.slot_millis,
-                          "bytes_processed": job.total_bytes_processed, "bytes_billed": job.total_bytes_billed,
-                          "cache_hit": job.cache_hit, "reservation_id": st.get("reservation_id"),
-                          "edition": st.get("edition"),
-                          "created": job.created.isoformat() if job.created else None,
-                          "started": job.started.isoformat() if job.started else None,
-                          "ended": job.ended.isoformat() if job.ended else None})
+        entry = {"stage": name, "job_id": job.job_id, "state": state, "error": error,
+                 "project": getattr(job, "project", None), "location": getattr(job, "location", None),
+                 "slot_ms": job.slot_millis,
+                 "bytes_processed": job.total_bytes_processed, "bytes_billed": job.total_bytes_billed,
+                 "cache_hit": job.cache_hit, "reservation_id": st.get("reservation_id"),
+                 "edition": st.get("edition"),
+                 "created": job.created.isoformat() if job.created else None,
+                 "started": job.started.isoformat() if job.started else None,
+                 "ended": job.ended.isoformat() if job.ended else None}
+        if at is None:
+            self.jobs.append(entry)
+            return len(self.jobs) - 1
+        self.jobs[at] = {**self.jobs[at], **entry}
+        return at
 
     def done(self) -> dict:
         return {"stages_ms": self.stages, "total_ms": round((time.monotonic() - self.t0) * 1000, 1), "jobs": self.jobs}
@@ -82,15 +93,19 @@ def _run(clients: dict, name: str, query: str, params: list, timer: Timer) -> li
                     retries += 1; time.sleep(2); continue
                 raise
         job = clients["bq"].query(query, job_config=cfg, location=LOCATION)
+        at = timer.job(name, job, state="SUBMITTED")   # in the inventory before any wait: a failure must not erase it
         try:
             rows = [dict(r) for r in job.result()]
+            timer.job(name, job, at=at)
             break
         except gexc.GoogleAPICallError as e:
+            timer.job(name, job, state="FAILED", error=f"{type(e).__name__}: {str(e)[:200]}", at=at)
             if EDITION_ERR in str(e) and retries < 2 and clients.get("engine") == "gql":
                 retries += 1; time.sleep(2); continue
             raise
     timer.stage(name, t)
-    timer.job(name, job)
+    if journal is not None:
+        timer.job(name, job)
     if retries:
         timer.jobs[-1]["routing_retries"] = retries
     return rows

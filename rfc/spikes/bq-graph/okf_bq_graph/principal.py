@@ -49,6 +49,13 @@ def _norm_predicate(text: str) -> str:
     return " ".join((text or "").split())
 
 
+def hide_policy_ids() -> dict:
+    """The policy id `authz.rls_statements` issues per table. `set_rls` replaces BY NAME, so a snapshot under any other
+    id is one the broker cannot restore."""
+    from .authz import rls_statements
+    return {t: stmt.split("ROW ACCESS POLICY ", 1)[1].split(" ", 1)[0] for t, stmt in rls_statements(["x"]).items()}
+
+
 def hide_predicates() -> dict:
     """The filter expression of each hidden-intermediate `_rls` policy, taken from `authz.rls_statements` itself so the
     live broker never carries a second copy of the fixture's shape."""
@@ -279,27 +286,82 @@ def scope_shim_file(directory: str) -> str:
     return path
 
 
-def bound_to(client: Any, graph_job_ids: list[str], receipt_jobs: list[dict], expected_email: str) -> dict:
-    """jobs.get under the OWNER: every graph-leg job (pointer lookup included) and every receipt-leg job must carry
-    `user_email == expected_email`. Nothing to compare, an unreadable job or a missing identity is UNKNOWN (never
-    BOUND); any job under another identity is UNBOUND."""
+def job_ref(job_id: Optional[str], project: Optional[str] = None, location: Optional[str] = None, **meta: Any) -> dict:
+    """One submitted job as the identity audit needs it: an id and the (project, location) it must be read back with."""
+    return {"job_id": job_id, "project": project or PROJECT, "location": location or LOCATION, **meta}
+
+
+def roles_bound_to(client: Any, roles: list[dict]) -> dict:
+    """`jobs.get` under the OWNER for every job the run submitted, grouped by the ROLE that submitted it and the
+    principal that role is expected to run as (Astra PR 45 #1: an execution subset is not every job, and administrative
+    DDL under the operator belongs in its own role rather than being left out of the inventory).
+
+    Each role is `{"role", "expected", "required", "jobs": [job_ref, ...]}`. A role is BOUND when every one of its jobs
+    carries its expected identity; NONE when it submitted nothing and was not required; UNKNOWN when a job is
+    unreadable, carries no identity, a required role is empty, or the principal it must run as is itself unknown;
+    UNBOUND when any job ran as somebody else. The overall status is the worst of them."""
+    out: dict = {"roles": {}, "jobs": {}, "checked_by": "operator jobs.get", "jobs_compared": 0}
+    for role in roles:
+        name, expected, required = role["role"], role.get("expected"), bool(role.get("required"))
+        refs = [r for r in role.get("jobs") or [] if r.get("job_id")]
+        rec: dict = {"expected": expected, "jobs": len(refs), "required": required}
+        if not refs:
+            rec["status"] = "UNKNOWN" if required else "NONE"
+            if required:
+                rec["reason"] = "a required role submitted no job: nothing to compare"
+        elif not expected:
+            rec.update(status="UNKNOWN", reason="the principal this role must run as is unknown")
+        else:
+            emails: dict[str, Any] = {}
+            failed = None
+            try:
+                for r in refs:
+                    emails[r["job_id"]] = client.get_job(r["job_id"], project=r.get("project", PROJECT),
+                                                        location=r.get("location", LOCATION)).user_email
+            except Exception as e:  # noqa: BLE001 - unknown identity blocks the claim, never invents it
+                failed = f"{type(e).__name__}: {str(e)[:200]}"
+            out["jobs"].update(emails)
+            out["jobs_compared"] += len(emails)
+            missing = [jid for jid, em in emails.items() if not em]
+            other = sorted({em for em in emails.values() if em and em != expected})
+            if failed:
+                rec.update(status="UNKNOWN", reason=failed, read_back=len(emails))
+            elif missing:
+                rec.update(status="UNKNOWN", reason=f"identity missing on {len(missing)} job(s)")
+            elif other:
+                rec.update(status="UNBOUND", other_identities=other)
+            else:
+                rec.update(status="BOUND")
+        out["roles"][name] = rec
+    statuses = {r["status"] for r in out["roles"].values()}
+    out["status"] = "UNBOUND" if "UNBOUND" in statuses else ("UNKNOWN" if "UNKNOWN" in statuses else "BOUND")
+    return out
+
+
+def bound_to(client: Any, graph_job_ids: list[str], receipt_jobs: list[dict], expected_email: str,
+             probe_jobs: Optional[list[dict]] = None, admin_jobs: Optional[list[dict]] = None,
+             operator_email: Optional[str] = None) -> dict:
+    """The restricted chain's identity claim over every job it submitted, in four roles: the graph leg and the receipt
+    leg execute as the requester, the broker's own platform observations are submitted as the requester too, and the
+    grant/revoke/restore row-policy DDL is administrative work under the operator. Nothing to compare on either
+    execution leg, an unreadable job or a missing identity is UNKNOWN (never BOUND); an unexpected identity is
+    UNBOUND."""
     receipt_ids = [j for j in receipt_jobs if j.get("job_id")]
-    if not graph_job_ids or not receipt_ids:
-        return {"status": "UNKNOWN", "reason": f"nothing to compare: graph_jobs={len(graph_job_ids)} receipt_jobs={len(receipt_ids)}"}
-    emails: dict[str, Any] = {}
-    try:
-        for jid in graph_job_ids:
-            emails[jid] = client.get_job(jid, project=PROJECT, location=LOCATION).user_email
-        for job in receipt_ids:
-            emails[job["job_id"]] = client.get_job(job["job_id"], project=job.get("project", PROJECT), location=job.get("location", LOCATION)).user_email
-    except Exception as e:  # noqa: BLE001 - unknown identity blocks the claim, never invents it
-        return {"status": "UNKNOWN", "reason": f"{type(e).__name__}: {str(e)[:200]}", "jobs_compared": len(emails)}
-    missing = [jid for jid, em in emails.items() if not em]
-    if missing:
-        return {"status": "UNKNOWN", "reason": f"identity missing on {len(missing)} job(s)", "jobs": emails, "jobs_compared": len(emails)}
-    other = sorted({em for em in emails.values() if em != expected_email})
-    return {"status": "BOUND" if not other else "UNBOUND", "expected": expected_email, "other_identities": other, "jobs": emails,
-            "jobs_compared": len(emails), "graph_jobs": len(graph_job_ids), "receipt_jobs": len(receipt_ids), "checked_by": "operator jobs.get"}
+    out = roles_bound_to(client, [
+        {"role": "graph", "expected": expected_email, "required": True, "jobs": [job_ref(j) for j in graph_job_ids]},
+        {"role": "receipt", "expected": expected_email, "required": True,
+         "jobs": [job_ref(j["job_id"], j.get("project"), j.get("location")) for j in receipt_ids]},
+        {"role": "requester_probe", "expected": expected_email, "required": False, "jobs": list(probe_jobs or [])},
+        {"role": "policy_admin", "expected": operator_email, "required": False, "jobs": list(admin_jobs or [])},
+    ])
+    out.update(expected=expected_email, graph_jobs=len(graph_job_ids), receipt_jobs=len(receipt_ids),
+               probe_jobs=len([j for j in (probe_jobs or []) if j.get("job_id")]),
+               admin_jobs=len([j for j in (admin_jobs or []) if j.get("job_id")]),
+               other_identities=sorted({o for r in out["roles"].values() for o in r.get("other_identities", [])}))
+    if out["status"] != "BOUND":
+        out["reason"] = "; ".join(f"{n}: {r['status']}" + (f" ({r['reason']})" if r.get("reason") else "")
+                                  for n, r in out["roles"].items() if r["status"] not in ("BOUND", "NONE"))
+    return out
 
 
 class RestrictedBroker:
@@ -328,8 +390,11 @@ class RestrictedBroker:
         self._cred_path: Optional[str] = None
         self._shim_path: Optional[str] = None
         self.granted: set[str] = set()
-        self._rls_original: Optional[dict] = None   # the `_rls` policies' grantees + predicates before this broker's first mutation
+        self._rls_original: Optional[dict] = None   # the `_rls` policies' id, grantees + predicates before this broker's first mutation
         self._rls_granted = False
+        self.probe_jobs: list[dict] = []            # real jobs the broker submitted UNDER THE REQUESTER to observe the platform
+        self.admin_jobs: list[dict] = []            # row-policy DDL the broker submitted under the OPERATOR (administrative)
+        self._operator_email: Optional[str] = None
         if owner is None:
             from google.cloud import bigquery
             owner = bigquery.Client(project=PROJECT, location=LOCATION)
@@ -411,6 +476,16 @@ class RestrictedBroker:
             if wrong:
                 raise RuntimeError(f"`{RLS_DS}` row access policies are not the hidden-intermediate fixture shape on {wrong}: "
                                    "the broker will not overwrite policies it cannot restore")
+            # BigQuery replaces a row access policy BY NAME, and `authz.set_rls` only ever issues the fixture's fixed
+            # names. A correctly filtered policy under a different id would therefore be left in place while the DDL
+            # created a second one beside it, and teardown could not put the table back (Astra PR 45 #2).
+            named = hide_policy_ids()
+            misnamed = sorted(t for t in RLS_TABLES if snap[t]["policy_id"] != named[t])
+            if misnamed:
+                raise RuntimeError(f"`{RLS_DS}` row access policies carry unexpected ids on {misnamed} "
+                                   f"({ {t: snap[t]['policy_id'] for t in misnamed} } vs { {t: named[t] for t in misnamed} }): "
+                                   "`authz.set_rls` replaces by name, so the broker would add policies beside them and could "
+                                   "not restore the fixture")
             if snap["nodes"]["grantees"] != snap["edges"]["grantees"]:
                 raise RuntimeError("`_rls` nodes and edges policies carry different grantee lists: the broker's restore assumes the fixture's shared list")
             self._rls_original = snap
@@ -421,10 +496,21 @@ class RestrictedBroker:
         base_v = set(self._rls_original["section_vectors"]["grantees"])
         ne = sorted(base_ne | {member} if want else base_ne - {member})
         vec = sorted(base_v | {member} if want else base_v - {member})
-        jobs = set_rls(self.owner, ne, vector_grantees=vec, hide=True)
+        jobs = self._set_rls(ne, vec, "grant" if want else "drop")
         self._rls_granted = want
         self._log("rls_policies", sa_grantee=want, ds=RLS_DS, jobs={t: jobs.get(t) for t in RLS_TABLES},
                   note="hidden-intermediate policies re-issued with the SA added to / removed from the fixture's grantee list")
+
+    def _set_rls(self, grantees: list[str], vector_grantees: list[str], transition: str) -> dict:
+        """`authz.set_rls`, with every DDL job it submits retained as an administrative job under the operator. These
+        are real jobs in the run window; leaving them out of the inventory understates what the run submitted."""
+        from .authz import set_rls
+        jobs = set_rls(self.owner, grantees, vector_grantees=vector_grantees, hide=True)
+        for t in RLS_TABLES:
+            jid = jobs.get(t)
+            if isinstance(jid, str):
+                self.admin_jobs.append(job_ref(jid, stage=f"rls_{transition}_{t}"))
+        return jobs
 
     def _rls_rows(self) -> dict:
         """What the requester actually reads on the `_rls` fixture (a real query under the impersonated client, not a
@@ -435,14 +521,29 @@ class RestrictedBroker:
         q = (f"SELECT COUNT(*) AS visible, COUNTIF(local_id = '{HIDDEN}' OR STARTS_WITH(local_id, '{HIDDEN}#')) AS hidden "
              f"FROM `{PROJECT}.{RLS_DS}.nodes`")
         cfg = bigquery.QueryJobConfig(use_query_cache=False, labels={"okf_spike": "bq_graph_20260905", "stage": "rls_rows"})
+        job = None
         try:
-            row = dict(list(self.sa.query(q, job_config=cfg, location=LOCATION).result())[0])
+            job = self.sa.query(q, job_config=cfg, location=LOCATION)
+            row = dict(list(job.result())[0])
         except (gexc.Forbidden, gexc.Unauthorized, gexc.NotFound) as e:
-            return {"status": DENIED, "error_class": type(e).__name__}
+            self._probe_job(job, "rls_rows", "FAILED", e)
+            return {"status": DENIED, "error_class": type(e).__name__, "job_id": getattr(job, "job_id", None)}
         except Exception as e:  # noqa: BLE001 - not a platform decision: unknown, never allowed
-            return {"status": UNKNOWN, "error_class": type(e).__name__}
+            self._probe_job(job, "rls_rows", "FAILED", e)
+            return {"status": UNKNOWN, "error_class": type(e).__name__, "job_id": getattr(job, "job_id", None)}
+        self._probe_job(job, "rls_rows", "DONE")
         return {"status": ALLOWED if row["visible"] > 0 and row["hidden"] == 0 else DENIED,
-                "visible": row["visible"], "hidden": row["hidden"]}
+                "visible": row["visible"], "hidden": row["hidden"], "job_id": job.job_id}
+
+    def _probe_job(self, job: Any, stage: str, state: str, error: Optional[BaseException] = None) -> None:
+        """Retain the reference of a job the broker submitted under the requester, whatever its outcome: a denied
+        observation is still a job that ran as the SA and belongs in the identity audit."""
+        jid = getattr(job, "job_id", None)
+        if not jid or any(r["job_id"] == jid for r in self.probe_jobs):
+            return
+        self.probe_jobs.append(job_ref(jid, getattr(job, "project", None), getattr(job, "location", None),
+                                       stage=stage, state=state,
+                                       error=None if error is None else f"{type(error).__name__}: {str(error)[:200]}"))
 
     def _restore(self, ds: str) -> None:
         """Put the principal's ACL entries on `ds` back to the snapshot: nothing this broker added survives, everything
@@ -538,8 +639,16 @@ class RestrictedBroker:
         return {"status": status, "tables": tables, "denied": sum(t["status"] == DENIED for t in tables),
                 "checked_by": "dry-run SELECT per dependency table under the impersonated client", "at": _now()}
 
+    def operator_email(self) -> Optional[str]:
+        """The principal the administrative DDL must have run as. Resolved once, and only when the audit needs it."""
+        if self._operator_email is None:
+            from .authz import operator
+            self._operator_email = operator().split(":", 1)[-1] or ""
+        return self._operator_email or None
+
     def identity(self, graph_job_ids: list[str], receipt_jobs: list[dict]) -> dict:
-        return bound_to(self.owner, graph_job_ids, receipt_jobs, self.email)
+        return bound_to(self.owner, graph_job_ids, receipt_jobs, self.email, probe_jobs=self.probe_jobs,
+                        admin_jobs=self.admin_jobs, operator_email=self.operator_email())
 
     def teardown(self) -> dict:
         """Restore every dataset this broker touched to the ACL snapshot taken before its first mutation (grants it added
@@ -561,10 +670,9 @@ class RestrictedBroker:
                 td["steps"][f"readback_{ds}"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}"}
         self.granted.clear()
         if self._rls_original is not None:
-            from .authz import set_rls
             try:
-                set_rls(self.owner, self._rls_original["nodes"]["grantees"],
-                        vector_grantees=self._rls_original["section_vectors"]["grantees"], hide=True, strict=True)
+                self._set_rls(self._rls_original["nodes"]["grantees"],
+                              self._rls_original["section_vectors"]["grantees"], "restore")
                 self._rls_granted = False
                 td["steps"]["restore_rls_policies"] = {"ok": True}
             except Exception as e:  # noqa: BLE001
