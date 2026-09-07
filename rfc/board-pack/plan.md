@@ -326,7 +326,7 @@ Not done: no cloud run, no experiment rerun, no merge. Haiyuan retains the merge
 Opus (CHANGES: 1 P1, 2 P2) and Astra (CHANGES) reviewed `65fde6b`. Applied, wording only, no spike rerun:
 
 - **Graph-walk overclaim** (Opus P1, Astra P1; `#context-point` note, `spec.md` map row): "it found the linked rules in every tested case" became "it behaved correctly in every case we tested". The record includes correct empty and ambiguous outcomes (a mismatched seed returns no content, a deprecated anchor on the test bundle is ambiguous, a hidden intermediate yields no paths), so a universal positive find was stronger than the evidence and contradicted the graph-walk paragraph below it.
-- **Access line** (Astra P2; `#access-point` note, `spec.md` map row): "was correctly refused in five checks" became "passed five access checks on the SQL path", matching the prior honesty wording; "not yet inside graph queries" kept.
+- **Access line** (Astra P2; `#access-point` note, `spec.md` map row): "was correctly refused in five checks" became "passed five access-denial checks on the SQL path", matching the prior honesty construction (denial direction kept via access-denial); "not yet inside graph queries" kept.
 - **Conditional mood** (Opus P2; `rfc/index.html` masthead subtitle, §01 lede, §07 opener): "is then published" → "would then be published"; "connects three things" → "would connect three things"; "These guarantees hold" → "These proposed guarantees would hold".
 - **Checkpoint claim** (Opus P2; this file): the "zero lines in the diff" sentence above is rescoped to the two HTML pages; the companion Markdown sentences that mention the checkpoint are the only other hits.
 
