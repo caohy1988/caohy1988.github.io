@@ -70,6 +70,12 @@ def _comp(r, path=GM):
     return next(c for c in r["computations"] if c["path"] == path)
 
 
+def _verify(*a, **kw):
+    """Direct guard calls supply the engine that actually ran (the chain always does); the label alone is never trusted."""
+    kw.setdefault("engine", "oracle")
+    return PUB.verify_payload(*a, **kw)
+
+
 def _decl(store, pin, comp):
     n = next(n for n in store.nodes[pin.publication_id] if n["node_id"] == comp["computation_id"])
     attrs = json.loads(n["attrs"])
@@ -99,7 +105,7 @@ def test_p1_is_served_exactly_while_head_is_p2(store, pin, p1):
     comp = _comp(r)
     assert comp["computation_id"].startswith(f"acme_retail|{p1['publication_id']}|Concept|")
     assert comp["section_id"].startswith(f"acme_retail|{p1['publication_id']}|Section|")
-    v = PUB.verify_payload(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
+    v = _verify(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
     assert v["status"] == "CONSISTENT", v["failed"]
     assert all(v["checks"][k]["ok"] for k in ("retained_node_rows", "retained_edge_rows", "recomputed_manifests", "section_text_hashes",
                                               "result_scope", "seed_concept", "paths", "computations", "selected_computation", "declaration"))
@@ -204,7 +210,7 @@ def test_p2_endpoint_mixed_into_a_p1_path_is_detected(store, pin, p1, p2):
     comp = _comp(r)
     # attacker swaps the computation endpoint for P2's node while every scope label still says P1
     comp["computation_id"] = f"acme_retail|{p2['publication_id']}|Concept|computations/gross-margin-period"
-    v = PUB.verify_payload(store, pin, p1, r, comp, _decl(store, pin, dict(comp, computation_id=f"acme_retail|{p1['publication_id']}|Concept|computations/gross-margin-period")), expected_path=GM)
+    v = _verify(store, pin, p1, r, comp, _decl(store, pin, dict(comp, computation_id=f"acme_retail|{p1['publication_id']}|Concept|computations/gross-margin-period")), expected_path=GM)
     assert v["status"] == "INCONSISTENT" and {"paths", "computations", "selected_computation", "declaration"} <= set(v["failed"])
 
 
@@ -213,7 +219,7 @@ def test_p2_edge_mixed_into_a_p1_path_is_detected(store, pin, p1):
     comp = _comp(r)
     comp["via"] = ["metrics/gross-margin", "metrics/revenue", "computations/gross-margin-period"]    # no such LINKS_TO chain in P1
     comp["concept_hops"] = 2
-    v = PUB.verify_payload(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
+    v = _verify(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
     assert v["status"] == "INCONSISTENT" and "paths" in v["failed"]
     item = v["checks"]["paths"]["items"][0]
     assert item["nodes_in_trusted"] and item["endpoints"] and not item["edges_continuous"]
@@ -224,7 +230,7 @@ def test_section_text_changed_with_old_hash_and_p1_labels_is_detected(store, pin
     store.tamper_node(pin.publication_id, sec["node_id"], text=(sec["text"] or "") + "\n\nrevenue minus product cost only")   # text_sha256 untouched
     r = _retrieve(store, pin)
     comp = _comp(r)
-    v = PUB.verify_payload(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
+    v = _verify(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
     assert v["status"] == "INCONSISTENT"
     assert {"retained_node_rows", "recomputed_manifests", "section_text_hashes"} <= set(v["failed"])
     assert v["checks"]["section_text_hashes"]["mismatched"] == [sec["node_id"]]
@@ -236,7 +242,7 @@ def test_sql_changed_after_preflight_with_the_old_digest_label_is_detected(store
     r = _retrieve(store, pin)
     comp = _comp(r)
     comp["sql"] = comp["sql"].replace("payment_fee", "0 * payment_fee")           # sql_sha256 label left as it was
-    v = PUB.verify_payload(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
+    v = _verify(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
     assert v["status"] == "INCONSISTENT" and v["failed"] == ["computations", "selected_computation"]
     assert not v["checks"]["computations"]["items"][0]["sql_bytes"] and not v["checks"]["selected_computation"]["bytes_check"]["sql_bytes"]
 
@@ -248,7 +254,7 @@ def test_declaration_changed_after_preflight_is_detected(store, pin, p1):
     for bad in (dict(d, file_sha256="a" * 64), dict(d, parameters=[{"name": "period_start", "type": "DATE"}]),
                 dict(d, node_id=f"acme_retail|{p1['publication_id']}|Concept|computations/revenue-ytd"), dict(d, type="Concept"),
                 dict(d, stale_after="2030-01-01T00:00:00Z")):
-        v = PUB.verify_payload(store, pin, p1, r, comp, bad, expected_path=GM)
+        v = _verify(store, pin, p1, r, comp, bad, expected_path=GM)
         assert v["status"] == "INCONSISTENT" and "declaration" in v["failed"], bad
 
 
@@ -256,7 +262,7 @@ def test_section_swapped_for_another_computations_section_is_detected(store, pin
     r = _retrieve(store, pin)
     comp = _comp(r)
     comp["section_id"] = f"acme_retail|{p1['publication_id']}|Section|computations/revenue-ytd#s0"
-    v = PUB.verify_payload(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
+    v = _verify(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
     assert v["status"] == "INCONSISTENT" and not v["checks"]["computations"]["items"][0]["section_membership"]
 
 
@@ -266,7 +272,7 @@ def test_result_relabelled_to_p1_from_a_p2_retrieval_is_detected(store, pin, p1,
     assert r["status"] == "OK"
     r["scope"]["publication_id"] = pin.publication_id                    # label says P1, content is P2
     comp = _comp(r)
-    v = PUB.verify_payload(store, pin, p1, r, comp, None, expected_path=GM)
+    v = _verify(store, pin, p1, r, comp, None, expected_path=GM)
     assert v["status"] == "INCONSISTENT" and "seed_concept" in v["failed"] and "paths" in v["failed"]
 
 
@@ -274,9 +280,9 @@ def test_guard_is_not_a_scope_only_check(store, pin, p1):
     """Bypassing the row/byte checks would let a relabelled result pass: prove the byte checks are what fail."""
     r = _retrieve(store, pin)
     comp = _comp(r)
-    ok = PUB.verify_payload(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
+    ok = _verify(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
     tampered = dict(comp, sql=comp["sql"] + "\n-- x")
-    bad = PUB.verify_payload(store, pin, p1, r, tampered, _decl(store, pin, comp), expected_path=GM)
+    bad = _verify(store, pin, p1, r, tampered, _decl(store, pin, comp), expected_path=GM)
     assert ok["status"] == "CONSISTENT" and bad["status"] == "INCONSISTENT"
     assert bad["checks"]["result_scope"]["ok"] and bad["checks"]["seed_concept"]["ok"]      # labels are fine; bytes are not
 
@@ -503,7 +509,7 @@ def test_returned_paths_with_a_nonexistent_intermediate_are_detected(store, pin,
     r = _retrieve(store, pin)
     comp = _comp(r)
     r["paths"] = [{"seed": "metrics/gross-margin", "concept_hops": 2, "via": ["metrics/gross-margin", "metrics/does-not-exist", "computations/gross-margin-period"]}]
-    v = PUB.verify_payload(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
+    v = _verify(store, pin, p1, r, comp, _decl(store, pin, comp), expected_path=GM)
     assert v["status"] == "INCONSISTENT" and v["failed"] == ["result_paths"]
     it = v["checks"]["result_paths"]["items"][0]
     assert not it["nodes_in_trusted"] and not it["edges_continuous"] and not v["checks"]["result_paths"]["matches_computations"]
@@ -515,14 +521,14 @@ def test_returned_paths_must_match_the_computations(store, pin, p1):
     comp = _comp(r)
     for bad in ([], r["paths"] + r["paths"], [dict(r["paths"][0], concept_hops=2)], [dict(r["paths"][0], seed="metrics/revenue")]):
         rr = dict(r, paths=bad)
-        v = PUB.verify_payload(store, pin, p1, rr, comp, _decl(store, pin, comp), expected_path=GM)
+        v = _verify(store, pin, p1, rr, comp, _decl(store, pin, comp), expected_path=GM)
         assert v["status"] == "INCONSISTENT" and "result_paths" in v["failed"], bad
 
 
 def test_foreign_provenance_changed_trust_or_freshness_are_detected(store, pin, p1, p2):
     base = _retrieve(store, pin)
     comp = _comp(base)
-    ok = PUB.verify_payload(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM)
+    ok = _verify(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM)
     assert ok["status"] == "CONSISTENT" and ok["checks"]["governance"]["ok"]
     import copy
     attacks = {
@@ -538,16 +544,16 @@ def test_foreign_provenance_changed_trust_or_freshness_are_detected(store, pin, 
     for name, attack in attacks.items():
         r = copy.deepcopy(base)
         attack(r)
-        v = PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
+        v = _verify(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
         assert v["status"] == "INCONSISTENT" and "governance" in v["failed"], name
     # a deprecated seed's replacement is recomputed from trusted LINKS_TO candidates
     legacy = ConceptSeed(f"acme_retail|{pin.publication_id}|Concept|metrics/gross-margin-legacy", origin="catalog-mock")
     r = _retrieve(store, pin, seed=legacy)
     assert r["concepts"][0]["replacement"]["concept"] == "metrics/gross-margin"
-    v = PUB.verify_payload(store, pin, p1, r, _comp(r), None, expected_path=GM, seed_id=legacy.concept_id)
+    v = _verify(store, pin, p1, r, _comp(r), None, expected_path=GM, seed_id=legacy.concept_id)
     assert v["checks"]["governance"]["ok"] and v["checks"]["result_paths"]["ok"]
     r["concepts"][0]["replacement"]["concept"] = "metrics/revenue"
-    assert not PUB.verify_payload(store, pin, p1, r, _comp(r), None, expected_path=GM, seed_id=legacy.concept_id)["checks"]["governance"]["ok"]
+    assert not _verify(store, pin, p1, r, _comp(r), None, expected_path=GM, seed_id=legacy.concept_id)["checks"]["governance"]["ok"]
 
 
 # ---- Astra re-review R4: one (project, location, job_id) reference for submit, reconcile and identity
@@ -575,7 +581,7 @@ def test_omitted_provenance_and_freshness_fields_are_now_compared(store, pin, p1
     import copy
     base = _retrieve(store, pin)
     comp = _comp(base)
-    ok = PUB.verify_payload(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM)
+    ok = _verify(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM)
     assert ok["status"] == "CONSISTENT", ok["failed"]
     assert ok["checks"]["governance"]["engine"] == "oracle" and ok["checks"]["governance"]["provenance_shape"] == ["declaration", "declared", "intrinsic", "resolves_to", "resource", "title"]
     prov0 = base["concepts"][0]["provenance"][0]
@@ -601,13 +607,19 @@ def test_omitted_provenance_and_freshness_fields_are_now_compared(store, pin, p1
     for name, attack in attacks.items():
         r = copy.deepcopy(base)
         attack(r)
-        v = PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
+        v = _verify(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
         assert v["status"] == "INCONSISTENT" and "governance" in v["failed"], name
         assert any(not it.get("provenance", True) or not it.get("freshness", True) for it in v["checks"]["governance"]["items"]), name
-    # a result whose engine is unknown cannot claim any provenance shape
+    # a trusted engine with no known shape cannot pass; a returned label that differs from the trusted engine fails on its own
     r = copy.deepcopy(base); r["scope"]["engine"] = "mystery"
-    v = PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
+    v = _verify(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM, engine="mystery")
     assert "governance" in v["failed"] and v["checks"]["governance"]["provenance_shape"] is None
+    v = _verify(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)          # trusted oracle, returned "mystery"
+    assert "engine" in v["failed"] and v["checks"]["engine"] == {"ok": False, "trusted": "oracle", "returned": "mystery", "basis": "configured engine supplied by the caller"}
+    assert v["checks"]["governance"]["provenance_shape"] == ["declaration", "declared", "intrinsic", "resolves_to", "resource", "title"]   # shape from the trusted engine, not the label
+    # no trusted engine at all: the check cannot pass and says why
+    v = PUB.verify_payload(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM)
+    assert "engine" in v["failed"] and "returned label cannot be verified" in v["checks"]["engine"]["basis"] and v["checks"]["governance"]["engine_source"].startswith("returned label")
 
 
 def test_fallback_shaped_provenance_requires_source_id_resolution_and_note(store, pin, p1):
@@ -626,7 +638,7 @@ def test_fallback_shaped_provenance_requires_source_id_resolution_and_note(store
                        "note": PROVENANCE_NOTE})
     base["concepts"][0]["provenance"] = fb
     base["scope"]["engine"] = "fallback"
-    ok = PUB.verify_payload(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM)
+    ok = _verify(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM, engine="fallback")
     assert ok["status"] == "CONSISTENT", ok["failed"]
     assert ok["checks"]["governance"]["provenance_shape"] == ["declaration", "note", "resolution", "resource", "source_id", "title"]
     attacks = {"source_id": lambda r: r["concepts"][0]["provenance"][0].__setitem__("source_id", "acme_retail|pub_0000000000000000|Source|src:x"),
@@ -640,9 +652,16 @@ def test_fallback_shaped_provenance_requires_source_id_resolution_and_note(store
     for name, attack in attacks.items():
         r = copy.deepcopy(base)
         attack(r)
-        v = PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
+        v = _verify(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM, engine="fallback")
         assert v["status"] == "INCONSISTENT" and "governance" in v["failed"], name
         assert v["checks"]["governance"]["items"][0]["provenance_diffs"], name
-    # the oracle shape under a fallback label (or vice versa) is a mismatch too: the shape belongs to the engine that ran
+    # Astra re-review 3 R1: a valid FALLBACK-shaped provenance under a "fallback" label from an ORACLE run. The shape is
+    # selected from the trusted engine (oracle), so the fallback items miss declared/intrinsic/resolves_to, and the label
+    # itself contradicts the trusted engine: both fail.
+    v = _verify(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM, engine="oracle")
+    assert v["status"] == "INCONSISTENT" and {"engine", "governance"} <= set(v["failed"])
+    assert v["checks"]["governance"]["provenance_shape"] == ["declaration", "declared", "intrinsic", "resolves_to", "resource", "title"]
+    assert {d["field"] for d in v["checks"]["governance"]["items"][0]["provenance_diffs"] if d["reason"] == "missing"} == {"declared", "intrinsic", "resolves_to"}
+    # the oracle shape under a fallback label from a fallback run is a mismatch too
     r = copy.deepcopy(_retrieve(store, pin)); r["scope"]["engine"] = "fallback"
-    assert "governance" in PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)["failed"]
+    assert "governance" in _verify(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM, engine="fallback")["failed"]

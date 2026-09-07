@@ -429,7 +429,7 @@ def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dic
 
 
 # ----------------------------------------------------------------------------- whole chain
-CHAIN_VERSION = "okf_bq_graph.chain/0.5.3"
+CHAIN_VERSION = "okf_bq_graph.chain/0.5.4"
 SEED_MODES = ("fixture", "catalog")
 
 
@@ -667,7 +667,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             kept = journal.retain(f"retrieval_{case}", (json.dumps(redact(full_result), indent=1, sort_keys=True, default=str) + "\n").encode("utf-8"), subdir="retrieval")
             c["retrieval"]["retained"] = {"path": kept["path"], "sha256": kept["sha256"], "redacted": True}
         if catalog and full_result is not None and comp is not None and decl is not None and decl.get("status") == "OK":
-            c["payload"] = verify_payload(store, pin, trusted, full_result, comp, decl, expected_path=path, seed_id=seed.concept_id)
+            c["payload"] = verify_payload(store, pin, trusted, full_result, comp, decl, expected_path=path, seed_id=seed.concept_id, engine=engine)
         elif catalog:
             c["payload"] = {"status": "NOT_REACHED", "reason": "computation not reached or declaration not visible: nothing to verify"}
         if comp is None or decl is None or decl.get("status") != "OK":

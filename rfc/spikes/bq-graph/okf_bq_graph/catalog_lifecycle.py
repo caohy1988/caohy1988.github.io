@@ -134,6 +134,7 @@ class CloudOps(Protocol):
 
 
 OWNER_LABEL = "okf_owner"           # BigQuery dataset label / Catalog entrySource label carrying the invocation stamp
+ATTEMPT_LABEL = "okf_attempt"       # ... and the create attempt that produced the resource (one resource discharges one attempt)
 JOB_OPS = ("run_ddl", "load_rows", "select_rows", "insert_row", "update_status", "merge_head")
 
 
@@ -216,15 +217,21 @@ class Lifecycle:
         self._ownership_file = Path(journal.run_dir) / "ownership.json"
         self._write_ownership("init")
 
-    def stamp_labels(self) -> dict:
-        return {OWNER_LABEL: self.owner_stamp, "okf_run": self.cfg.run_suffix[:63]}
+    def stamp_labels(self, attempt_id: Optional[str] = None) -> dict:
+        """Invocation stamp plus, for creates, the attempt stamp: a present resource discharges exactly one attempt."""
+        labels = {OWNER_LABEL: self.owner_stamp, "okf_run": self.cfg.run_suffix[:63]}
+        if attempt_id:
+            labels[ATTEMPT_LABEL] = attempt_id[:63]
+        return labels
 
-    def _stamped_by_us(self, labels: Optional[dict]) -> bool:
-        return isinstance(labels, dict) and labels.get(OWNER_LABEL) == self.owner_stamp
+    def _stamped_by_us(self, labels: Optional[dict], attempt_id: Optional[str] = None) -> bool:
+        if not (isinstance(labels, dict) and labels.get(OWNER_LABEL) == self.owner_stamp):
+            return False
+        return attempt_id is None or labels.get(ATTEMPT_LABEL) == attempt_id[:63]
 
     # -- bounded, journaled operation
     def _op(self, role: str, description: str, fn: Callable[..., Any], *args: Any, mutates: bool = False, target: Optional[str] = None,
-            job: bool = False, **kw: Any) -> Any:
+            job: bool = False, meta: Optional[dict] = None, **kw: Any) -> Any:
         """One bounded, journaled cloud call. Job-backed BigQuery operations (`job=True`) get a driver-chosen job id
         journaled with (project, location) BEFORE dispatch; if the call raises, the job's own server state decides
         (never the target resource's presence). Non-job writes that raise are UNKNOWN until their resource is read
@@ -232,7 +239,7 @@ class Lifecycle:
         job_backed = job
         jid = f"okf_cc_{self.cfg.run_suffix}_{role}_{uuid.uuid4().hex[:12]}"[:1024] if job_backed else None
         e = self.journal.intend(role, description, "cloud", actual=True, mutates=mutates, target=target, timeout_s=self.cfg.timeout_s,
-                                job_backed=job_backed)
+                                job_backed=job_backed, **(meta or {}))
         self.journal.submitted(e, job_id=jid, project=self.cfg.project if job_backed else None, location=self.cfg.location if job_backed else None)
         self._last_entry = e
         if job_backed:
@@ -287,6 +294,12 @@ class Lifecycle:
         return e
 
     def _pending(self, kind: str, name: str) -> dict:
+        """Register a create attempt before the write. A second create for a target that still has an unresolved
+        attempt is refused: two in-flight attempts on one name cannot be told apart by the resource alone (Astra PR41
+        re-review 3, R3) — run cleanup to reconcile the first attempt, then retry."""
+        open_ = [x for x in self.owned.pending if x["kind"] == kind and x["name"] == name]
+        if open_:
+            raise ScopeViolation(f"{kind} {name} has an unresolved create attempt {open_[0]['attempt_id']} ({open_[0]['state']}): reconcile it before retrying")
         rec = {"kind": kind, "name": name, "attempt_id": f"okf_att_{self.cfg.run_suffix}_{uuid.uuid4().hex[:12]}", "at": _now(), "at_ts": self.clock(),
                "state": "IN_FLIGHT", "owner_stamp": self.owner_stamp}
         self.owned.pending.append(rec)
@@ -346,8 +359,8 @@ class Lifecycle:
         if self._op("dataset_precheck", "owned dataset must not pre-exist (GET; absence = None)", self.cloud.get_dataset, ds, target=ds) is not None:
             raise ScopeViolation(f"dataset {ds} already exists: not created by this run, refusing to adopt it")
         pend = self._pending("dataset", ds)                  # persisted before the write: a lost response still owns the attempt
-        self._op("create_dataset", "create owned dataset (stamped)", self.cloud.create_dataset, ds, self.cfg.location, self.stamp_labels(), pend["attempt_id"],
-                 mutates=True, target=ds)
+        self._op("create_dataset", "create owned dataset (stamped)", self.cloud.create_dataset, ds, self.cfg.location, self.stamp_labels(pend["attempt_id"]),
+                 pend["attempt_id"], mutates=True, target=ds, meta={"attempt_id": pend["attempt_id"]})
         self._confirm(pend)
         self.owned.dataset = ds
         self._write_ownership("dataset_created")
@@ -480,7 +493,9 @@ class Lifecycle:
             self._op("patch_entry", f"patch owned entry aspects {sorted(aspects)}", self.cloud.patch_entry, name, body, sorted(aspects), mutates=True, target=name)
         else:
             pend = self._pending("entry", name)
-            self._op("create_entry", "create owned entry", self.cloud.create_entry, name, body, pend["attempt_id"], mutates=True, target=name)
+            body["entrySource"]["labels"].update(self.stamp_labels(pend["attempt_id"]))
+            self._op("create_entry", "create owned entry", self.cloud.create_entry, name, body, pend["attempt_id"], mutates=True, target=name,
+                     meta={"attempt_id": pend["attempt_id"]})
             self._confirm(pend)
             self.owned.entries.append(name)
             self._write_ownership("entry_created")
@@ -553,6 +568,8 @@ class Lifecycle:
         by presence alone and never by elapsed time (Astra PR41 re-review 2, R3):
           PRESENT_ADOPTED        present AND carries this invocation's stamp -> ours; deleted below
           FOREIGN_PRESERVED      present with another / no stamp -> not ours; left untouched, stays pending (INCOMPLETE)
+          OTHER_ATTEMPT_PRESENT  present with our owner stamp but another attempt's stamp -> that attempt adopts it; this one
+                                 stays pending (its own outcome is still unknown)
           NOT_APPLIED_VERIFIED   absent AND the adapter establishes that this exact attempt terminated without applying
           ABSENT_PENDING         absent, outcome unknown -> the attempt stays pending (INCOMPLETE); `recheck_after_s` schedules
                                  the next look (cfg.settle cadence) and a later cleanup re-reads it
@@ -566,14 +583,23 @@ class Lifecycle:
                 if rec["kind"] == "entry":
                     body = self._op("reconcile_pending_entry", "GET pending entry", self.cloud.get_entry, rec["name"], target=rec["name"])
                     present = body is not None
-                    ours = present and self._stamped_by_us(((body or {}).get("entrySource") or {}).get("labels"))
+                    labels = ((body or {}).get("entrySource") or {}).get("labels")
                 elif rec["kind"] == "dataset":
                     meta = self._op("reconcile_pending_dataset", "GET pending dataset (labels)", self.cloud.get_dataset, rec["name"], target=rec["name"])
                     present = meta is not None
-                    ours = present and self._stamped_by_us((meta or {}).get("labels"))
+                    labels = (meta or {}).get("labels")
                 else:
-                    present, ours = False, False
-                if present and ours:
+                    present, labels = False, None
+                ours = present and self._stamped_by_us(labels, rec.get("attempt_id"))          # this exact attempt produced it
+                ours_other_attempt = present and not ours and self._stamped_by_us(labels)   # ours, but another attempt's resource
+                if ours_other_attempt:
+                    # the resource discharges only the attempt that produced it; this attempt's own outcome stays unknown
+                    step["reconciled"] = "OTHER_ATTEMPT_PRESENT"
+                    step["present_attempt"] = (labels or {}).get(ATTEMPT_LABEL)
+                    rec["state"] = "OTHER_ATTEMPT_PRESENT"
+                    rec["rechecks"] = rec.get("rechecks", 0) + 1
+                    rec["last_checked"] = _now()
+                elif present and ours:
                     step["reconciled"] = "PRESENT_ADOPTED"
                     if rec["kind"] == "entry" and rec["name"] not in self.owned.entries:
                         self.owned.entries.append(rec["name"])
@@ -610,8 +636,9 @@ class Lifecycle:
         return steps
 
     def _close_pending_journal(self, rec: dict, state: str, observed: str) -> None:
+        """Close only the journal entry of THIS attempt (matched by attempt_id), never every write aimed at the name."""
         for e in self.journal.entries:
-            if not e.get("terminal") and e.get("target") == rec["name"] and e.get("mutates") and not e.get("job_backed"):
+            if not e.get("terminal") and e.get("attempt_id") == rec.get("attempt_id") and e.get("mutates") and not e.get("job_backed"):
                 self.journal.reconcile(e, state, observed=observed)
 
     def cleanup(self) -> dict:

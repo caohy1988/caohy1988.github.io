@@ -696,3 +696,85 @@ def test_restore_revalidates_rows_and_refuses_when_they_changed(lc, p1):
     assert r["state"] == "RESTORED" and r["ready"] is True
     with pytest.raises(RuntimeError):
         life.restore(p1["publication_id"])                     # not WITHDRAWN any more: nothing to restore
+
+
+# ---- Astra re-review 3 R3: one stamped resource discharges exactly one attempt; a retry on an unresolved target is refused
+@pytest.mark.parametrize("kind", ["entry", "dataset"])
+def test_second_create_on_a_target_with_an_unresolved_attempt_is_refused(lc, p1, kind):
+    life, cloud, j = lc
+    held = []
+    if kind == "entry":
+        life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
+        real = cloud.create_entry
+        def hold(name, body, attempt_id, timeout):
+            held.append((name, body, attempt_id, timeout)); raise TimeoutError("server still creating")
+        cloud.create_entry = hold
+        first = lambda: life.write_pin("control", p1["publication_id"], GM)
+        name, present = CFG.entry_prefix + "control", lambda: name in cloud.entries
+    else:
+        real = cloud.create_dataset
+        def hold(dataset, location, labels, attempt_id, timeout):
+            held.append((dataset, location, labels, attempt_id, timeout)); raise TimeoutError("server still creating")
+        cloud.create_dataset = hold
+        first = life.provision
+        name, present = CFG.dataset, lambda: CFG.dataset in cloud.datasets
+    with pytest.raises(TimeoutError):
+        first()
+    with pytest.raises(L.ScopeViolation) as ex:                # the same-instance retry is refused: the first attempt is unresolved
+        first()
+    assert "unresolved create attempt" in str(ex.value) and len(held) == 1 and len(life.owned.pending) == 1   # no second request was ever dispatched
+    real(*held[0])                                              # the only request completes late
+    assert present()
+    rc = life.cleanup()
+    assert rc["status"] == "COMPLETE" and not present() and rc["pending"] == []
+    assert life.cleanup()["status"] == "NOTHING_OWNED"
+
+
+@pytest.mark.parametrize("kind", ["entry", "dataset"])
+def test_a_present_resource_discharges_only_the_attempt_that_produced_it(lc, p1, kind):
+    """Even with two pending attempts on one name (modelled directly, since the driver now refuses the second create),
+    the resource carries the attempt stamp of the request that made it: the other attempt stays pending."""
+    life, cloud, j = lc
+    held = []
+    if kind == "entry":
+        life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
+        real = cloud.create_entry
+        def hold(name, body, attempt_id, timeout):
+            held.append((name, body, attempt_id, timeout)); raise TimeoutError("server still creating")
+        cloud.create_entry = hold
+        with pytest.raises(TimeoutError):
+            life.write_pin("control", p1["publication_id"], GM)
+        name, present = CFG.entry_prefix + "control", lambda: name in cloud.entries
+        stamp_of = lambda: cloud.entries[name]["entrySource"]["labels"][L.ATTEMPT_LABEL]
+    else:
+        real = cloud.create_dataset
+        def hold(dataset, location, labels, attempt_id, timeout):
+            held.append((dataset, location, labels, attempt_id, timeout)); raise TimeoutError("server still creating")
+        cloud.create_dataset = hold
+        with pytest.raises(TimeoutError):
+            life.provision()
+        name, present = CFG.dataset, lambda: CFG.dataset in cloud.datasets
+        stamp_of = lambda: cloud.dataset_meta[name]["labels"][L.ATTEMPT_LABEL]
+    a1 = life.owned.pending[0]
+    # a second in-flight attempt on the same name (what a resumed/older driver could have left behind)
+    a2 = dict(a1, attempt_id=a1["attempt_id"][:-4] + "beef", at=a1["at"], state="IN_FLIGHT")
+    life.owned.pending.append(a2); life._write_ownership("second_attempt")
+    if kind == "entry":
+        body2 = copy.deepcopy(held[0][1]); body2["entrySource"]["labels"][L.ATTEMPT_LABEL] = a2["attempt_id"]
+        held.append((name, body2, a2["attempt_id"], 7.5))
+    else:
+        labels2 = dict(held[0][2], **{L.ATTEMPT_LABEL: a2["attempt_id"]})
+        held.append((name, "US", labels2, a2["attempt_id"], 7.5))
+    real(*held[0])                                              # only the FIRST request completes
+    assert present() and stamp_of() == a1["attempt_id"][:63]
+    rc = life.cleanup()
+    by = {(st["resource"], st["kind"], st.get("attempt_id")): st for st in rc["steps"]}
+    assert by[(name, f"pending_{kind}", a1["attempt_id"])]["reconciled"] == "PRESENT_ADOPTED"
+    assert by[(name, f"pending_{kind}", a2["attempt_id"])]["reconciled"] == "OTHER_ATTEMPT_PRESENT"
+    assert rc["status"] == "INCOMPLETE" and not present() and [p["attempt_id"] for p in rc["pending"]] == [a2["attempt_id"]]
+    assert [e["state"] for e in j.jobs() if e["role"] == f"create_{kind}"] == ["APPLIED"]      # only attempt 1's journal entry closed
+    real(*held[1])                                              # the SECOND request completes after the first resource was removed
+    assert present() and stamp_of() == a2["attempt_id"][:63]
+    rc = life.cleanup()
+    assert rc["status"] == "COMPLETE" and not present() and rc["pending"] == [] and rc["unresolved_jobs"] == 0
+    assert life.cleanup()["status"] == "NOTHING_OWNED"          # no orphan left behind

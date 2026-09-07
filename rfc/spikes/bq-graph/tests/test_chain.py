@@ -783,6 +783,43 @@ def test_catalog_mixed_payload_is_refused_before_the_sdk(projection, sdk_root, t
     assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] == "approved"
 
 
+def test_catalog_engine_label_and_shape_substitution_is_refused(projection, sdk_root, tmp_path, sample_root, monkeypatch):
+    """Astra re-review 3 R1 (`chain_engine_shape_substitution`): the real oracle runs, the returned provenance is replaced
+    by a VALID trusted fallback-shaped list and only the returned engine label is changed to `fallback`. The guard takes
+    the shape from the configured engine and requires the label to match it: refused before the SDK."""
+    from okf_bq_graph.model import PROVENANCE_NOTE
+    real = CH.governed
+    calls = []
+    tn = {n["node_id"]: n for n in projection["nodes"]}
+
+    def relabel(seed, *a, **k):
+        r = real(seed, *a, **k)
+        if r["status"] == "OK":
+            for c in r["concepts"]:
+                fb = []
+                for e in projection["edges"]:
+                    if e["src_id"] == c["concept_id"] and e["relation"] == "DERIVES_FROM":
+                        src = tn[e["dst_id"]]
+                        fb.append({"resource": src["resource"], "title": src["title"], "declaration": e["declaration"], "resolution": e["resolution"],
+                                   "source_id": src["node_id"], "note": PROVENANCE_NOTE})
+                c["provenance"] = fb                        # valid fallback shape, every value trusted; oracle fields omitted
+            r["scope"]["engine"] = "fallback"
+        return r
+
+    monkeypatch.setattr(CH, "governed", relabel)
+    out = _run_catalog(projection, sdk_root, tmp_path, sample_root, runner=lambda argv, **k: calls.append(argv))
+    assert calls == [] and out["engine"] == "oracle" and out["verdict"] == "CHAIN_BROKEN"
+    for c in out["cases"]:
+        assert c["payload"]["status"] == "INCONSISTENT" and {"engine", "governance"} <= set(c["payload"]["failed"])
+        assert c["payload"]["checks"]["engine"] == {"ok": False, "trusted": "oracle", "returned": "fallback", "basis": "configured engine supplied by the caller"}
+        assert c["payload"]["checks"]["governance"]["engine"] == "oracle" and c["payload"]["checks"]["governance"]["engine_source"].startswith("trusted")
+        assert c["bind"]["status"] == "NOT_BOUND" and c["receipt"]["invoked"] is False and c["acceptance"]["status"] == "WRONG"
+    # control: the untouched oracle run records the trusted engine and passes
+    monkeypatch.setattr(CH, "governed", real)
+    ok = _run_catalog(projection, sdk_root, tmp_path, sample_root)
+    assert ok["verdict"] == "CHAIN_CONNECTED" and all(c["payload"]["checks"]["engine"]["ok"] and c["payload"]["checks"]["governance"]["engine"] == "oracle" for c in ok["cases"])
+
+
 def test_catalog_declaration_changed_after_preflight_is_refused(projection, sdk_root, tmp_path, sample_root, monkeypatch):
     real = CH.declaration
     monkeypatch.setattr(CH, "declaration", lambda clients, cid, pub: dict(real(clients, cid, pub), file_sha256="a" * 64))

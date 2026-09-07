@@ -379,11 +379,14 @@ def _fence(text: str) -> str:
 
 
 def verify_payload(store: Any, pin: Any, trusted: dict, result: dict, comp: Optional[dict], decl: Optional[dict],
-                   expected_path: Optional[str] = None, seed_id: Optional[str] = None) -> dict:
+                   expected_path: Optional[str] = None, seed_id: Optional[str] = None, engine: Optional[str] = None) -> dict:
     """Actual retained rows and the actual retrieval/declaration payload versus the trusted projection of the pin.
     Every check is recorded; any failure is INCONSISTENT and nothing downstream may bind or execute. `seed_id` is the
     concept the request was seeded with (default: the pin's concept; the injected declaration-mismatch adversary
-    names its own, still inside the pinned publication)."""
+    names its own, still inside the pinned publication). `engine` is the engine the caller actually configured and
+    ran: the result's own `scope.engine` label must equal it and the provenance shape is selected from it, never
+    from the returned label (Astra PR41 re-review 3, R1). Without `engine` the returned label is the only source
+    and the check records that weaker basis."""
     B, P = pin.bundle_id, pin.publication_id
     seed_id = seed_id or pin.concept_id
     if seed_id.split("|", 3)[:2] != [B, P]:
@@ -410,6 +413,8 @@ def verify_payload(store: Any, pin: Any, trusted: dict, result: dict, comp: Opti
     has_section = {(e["src_id"], e["dst_id"]) for e in t_edges if e["relation"] == "HAS_SECTION"}
     scope = result.get("scope") or {}
     checks["result_scope"] = {"ok": scope.get("publication_id") == P and scope.get("bundle_id") == B, "scope": {k: scope.get(k) for k in ("bundle_id", "publication_id")}}
+    checks["engine"] = {"ok": engine is not None and scope.get("engine") == engine, "trusted": engine, "returned": scope.get("engine"),
+                        "basis": "configured engine supplied by the caller" if engine is not None else "no trusted engine supplied: the returned label cannot be verified"}
     concepts = result.get("concepts") or []
     seed_ok = len(concepts) == 1 and concepts[0].get("concept_id", _node_id(B, P, "Concept", concepts[0].get("concept", ""))) == seed_id
     seed_node = tn.get(seed_id)
@@ -479,7 +484,7 @@ def verify_payload(store: Any, pin: Any, trusted: dict, result: dict, comp: Opti
     PROV_SHAPES = {"oracle": {"resource", "title", "declaration", "declared", "intrinsic", "resolves_to"},
                    "fallback": {"resource", "title", "declaration", "resolution", "source_id", "note"},
                    "gql": {"resource", "title", "declaration", "resolution", "source_id", "note"}}
-    engine = scope.get("engine")
+    engine = engine if engine is not None else scope.get("engine")   # the shape follows the trusted engine, never the returned label
     required_shape = PROV_SHAPES.get(engine)
 
     def trusted_provenance(cid: str) -> list[dict]:
@@ -553,7 +558,8 @@ def verify_payload(store: Any, pin: Any, trusted: dict, result: dict, comp: Opti
         item["ok"] = item["trust_tier"] and item["freshness"]
         gov_items.append(item)
     checks["governance"] = {"ok": bool(gov_items) and all(i["ok"] for i in gov_items), "items": gov_items,
-                            "engine": engine, "provenance_shape": sorted(required_shape) if required_shape else None,
+                            "engine": engine, "engine_source": "trusted (caller-configured)" if checks["engine"]["trusted"] is not None else "returned label (unverified)",
+                            "provenance_shape": sorted(required_shape) if required_shape else None,
                             "note": "trust tier, verifications, the engine's complete provenance item shape (every required key present, no extra key, "
                                     "every value equal: oracle declared/intrinsic/resolves_to, relational source_id/resolution/note), freshness as the "
                                     "whole {verdict, stale_after} record, and replacement, all recomputed from trusted VERIFIED_BY/DERIVES_FROM/"

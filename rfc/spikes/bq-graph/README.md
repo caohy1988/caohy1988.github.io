@@ -149,7 +149,7 @@ identity set is the 14 case jobs and does not include the pointer-lookup job, wh
 adds; the later changes (invocation-private and run-owned diagnostics, `approved` outage labelled NOT_REACHED) alter no
 recorded field of a passing run, so it was not re-run.
 
-## Catalog-seeded chain (2026-09-06, Slice A hermetic; runner `chain/0.5.3`)
+## Catalog-seeded chain (2026-09-06, Slice A hermetic; runner `chain/0.5.4`)
 
 `python3 -m okf_bq_graph.chain --seed-mode catalog` replaces the fixture seed with a **fresh Dataplex Catalog read**: paginated
 `entries.list` on the configured entry group selects the configured entry by exact name (no other entry body is fetched), then
@@ -189,8 +189,11 @@ parameters are all checked against the trusted projection. The separately select
 for byte. The **disclosed `paths` list itself** is validated (scoped endpoints, LINKS_TO continuity, hop count, exact match
 with the computations' vias) and the **governance fields the caller consumes** — trust tier, verifications, provenance,
 freshness as the whole `{verdict, stale_after}` record at `scope.as_of`, deprecated-seed replacement, for the seed and each
-computation — are recomputed from the trusted VERIFIED_BY / DERIVES_FROM / RESOLVES_TO / LINKS_TO edges. Provenance is
-checked against the **complete item shape of the engine that ran** (`scope.engine`): the oracle emits exactly
+computation — are recomputed from the trusted VERIFIED_BY / DERIVES_FROM / RESOLVES_TO / LINKS_TO edges. The chain passes
+the engine it **configured and ran** into the guard; the result's own `scope.engine` label must equal it (`engine` check)
+and the provenance shape is selected from that trusted engine, never from the returned label — a valid fallback-shaped
+provenance under a `fallback` label coming out of an oracle run fails on both counts (Astra re-review 3, R1). Provenance is
+checked against the **complete item shape of that engine**: the oracle emits exactly
 `resource, title, declaration, declared, intrinsic, resolves_to`; the relational engines emit exactly
 `resource, title, declaration, resolution, source_id, note` (the note verbatim, `model.PROVENANCE_NOTE`). Every required key
 must be present, no other key may be present, and every value must equal the trusted one; an unknown engine has no shape
@@ -256,11 +259,14 @@ on entries) written at creation; ownership of a pending create is persisted to `
 pending resource read back later is adopted **only** if it carries this invocation's stamp — a resource under the same
 (normalised) name with another or no stamp is `FOREIGN_PRESERVED`, left untouched, and blocks `COMPLETE` (Astra re-review R2:
 `review-run-A` and `review_run_a` share a dataset name but never a stamp). A timed-out create is a **pending attempt** with
-its own `attempt_id` (passed to `create_dataset` / `create_entry`); an absent readback never closes it and **elapsed time is
-not an outcome**: it stays `ABSENT_PENDING` (receipt `INCOMPLETE`, `recheck_after_s = settle_s` only schedules the next look)
-until either the resource appears carrying this invocation's stamp (adopted and deleted on that cleanup run) or the adapter
+its own `attempt_id` (passed to `create_dataset` / `create_entry` and written onto the resource as the `okf_attempt` stamp
+beside the owner stamp); an absent readback never closes it and **elapsed time is not an outcome**: it stays
+`ABSENT_PENDING` (receipt `INCOMPLETE`, `recheck_after_s = settle_s` only schedules the next look) until either the resource
+appears carrying this invocation's stamp **and this attempt's stamp** (adopted and deleted on that cleanup run) or the adapter
 establishes through `attempt_outcome(kind, name, attempt_id)` that this exact attempt terminated without applying
-(`NOT_APPLIED_VERIFIED`). The in-memory fake returns no outcome by default, so a lost create stays pending across every
+(`NOT_APPLIED_VERIFIED`). One present resource discharges exactly the attempt that produced it: a resource stamped by
+another of our attempts is `OTHER_ATTEMPT_PRESENT` and leaves this attempt pending, and a second create for a target that
+still has an unresolved attempt is refused (`ScopeViolation`) until cleanup has reconciled the first (Astra re-review 3, R3). The in-memory fake returns no outcome by default, so a lost create stays pending across every
 rerun until it materialises; a real adapter may only answer from its own request/operation bookkeeping (Astra re-review R3
 and re-review 2; cleanup is rerunnable and a create that completes after any window is still owned and removed). Job-backed
 BigQuery operations (DDL, loads, inserts, updates, MERGE, SELECTs) get a driver-chosen `(project, location, job_id)` journaled
