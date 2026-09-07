@@ -173,6 +173,103 @@
       font-size: 0.88rem;
       color: var(--ink-soft);
     }
+
+    .medium-angles {
+      margin: 0 0 22px;
+      padding: 16px 16px 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--cream);
+    }
+    .medium-angles .ma-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px 14px;
+      margin: 0 0 12px;
+    }
+    .medium-angles .ma-kicker {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mint);
+    }
+    .medium-angles h2 {
+      margin: 0;
+      flex: 1 1 200px;
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .medium-angles .ma-note {
+      margin: 0 0 12px;
+      color: var(--ink-soft);
+      font-size: 0.9rem;
+    }
+    .medium-angles .ma-brief {
+      margin: 0 0 12px;
+      font-size: 0.9rem;
+    }
+    .medium-angles .ma-brief a { color: var(--accent-dark); }
+    .ma-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin: 0 0 10px;
+    }
+    .ma-card {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+    }
+    .ma-card h3 {
+      margin: 0 0 6px;
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+    .ma-card .ma-thesis {
+      margin: 0 0 8px;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+    }
+    .ma-card .ma-ids {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 0 0 8px;
+    }
+    .ma-card .ma-id {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--paper-2);
+      color: var(--ink-soft);
+      text-decoration: none;
+    }
+    .ma-card .ma-id:hover { color: var(--accent-dark); }
+    .ma-card .ma-companions {
+      margin: 0 0 8px;
+      padding: 0;
+      list-style: none;
+      font-size: 0.88rem;
+    }
+    .ma-card .ma-companions a { color: var(--accent-dark); }
+    .ma-card .ma-guard {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--ink-faint);
+      border-top: 1px dashed var(--line);
+      padding-top: 8px;
+    }
+
     .live {
       display: inline-flex;
       align-items: center;
@@ -573,6 +670,7 @@
       <p class="edition-meta" id="edition-meta"></p>
     </div>
     <div id="latest-brief-slot"></div>
+    <div id="medium-angles-slot"></div>
     <div class="controls" id="controls" hidden></div>
     <div class="layout" id="app">
       <p class="empty">Fetching today’s brief…</p>
@@ -589,7 +687,7 @@
   <script>
     const $ = (id) => document.getElementById(id);
     const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    const STATE = { items: [], runs: [], briefs: [], calY: null, calM: null };
+    const STATE = { items: [], runs: [], briefs: [], mediumAngles: null, calY: null, calM: null };
 
     function escapeHtml(s) {
       return String(s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -693,6 +791,39 @@
     }
 
 
+
+    function mediumAnglesHtml() {
+      const pack = STATE.mediumAngles;
+      if (!pack || !Array.isArray(pack.entries) || !pack.entries.length) return "";
+      const entry = pack.entries[0];
+      const angles = entry.angles || [];
+      if (!angles.length) return "";
+      const cards = angles.map((a) => {
+        const ids = (a.catalogIds || []).map((id) =>
+          `<a class="ma-id" href="?q=${encodeURIComponent(id)}">${escapeHtml(id)}</a>`
+        ).join("");
+        const comps = (a.companionUrls || []).map((c) =>
+          `<li><a href="${escapeHtml(c.href)}" rel="noopener noreferrer" target="_blank">${escapeHtml(c.label || c.href)}</a></li>`
+        ).join("");
+        return `<article class="ma-card">
+          <h3>${escapeHtml(a.workingTitle || "Untitled angle")}</h3>
+          <p class="ma-thesis">${escapeHtml(a.thesis || "")}</p>
+          ${ids ? `<div class="ma-ids">${ids}</div>` : ""}
+          ${comps ? `<ul class="ma-companions">${comps}</ul>` : ""}
+          ${a.doNotOverclaim ? `<p class="ma-guard"><strong>Do not overclaim:</strong> ${escapeHtml(a.doNotOverclaim)}</p>` : ""}
+        </article>`;
+      }).join("");
+      return `<section class="medium-angles" aria-label="Medium angles">
+        <div class="ma-head">
+          <span class="ma-kicker">Medium Bot · draft hooks</span>
+          <h2>Medium angles</h2>
+        </div>
+        <p class="ma-note">Draft hooks from Field Briefs · not published to Medium</p>
+        <p class="ma-brief"><a href="${escapeHtml(entry.briefHref || "#")}">${escapeHtml(entry.displayTime || "")} · ${escapeHtml(entry.briefTitle || "Field Brief")}</a></p>
+        <div class="ma-grid">${cards}</div>
+      </section>`;
+    }
+
     function briefsHtml(day) {
       let list = STATE.briefs || [];
       if (day) list = list.filter(b => dayKey(b.id) === day.slice(0, 10));
@@ -750,6 +881,8 @@
           lb.innerHTML = "";
         }
       }
+      const ma = $("medium-angles-slot");
+      if (ma) ma.innerHTML = mediumAnglesHtml();
 
       const tags = allTags(STATE.items);
       $("controls").hidden = false;
@@ -826,6 +959,12 @@
       } catch (err) {
         $("app").innerHTML = '<p class="empty">Could not load catalog.json.</p>';
         return;
+      }
+      try {
+        const maRes = await fetch("/research/medium-angles.json?v=" + Date.now(), { cache: "no-store" });
+        if (maRes.ok) STATE.mediumAngles = await maRes.json();
+      } catch (err) {
+        STATE.mediumAngles = null;
       }
       render();
       window.addEventListener("hashchange", render);
