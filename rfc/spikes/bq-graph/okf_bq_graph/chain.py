@@ -429,7 +429,7 @@ def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dic
 
 
 # ----------------------------------------------------------------------------- whole chain
-CHAIN_VERSION = "okf_bq_graph.chain/0.5.2"
+CHAIN_VERSION = "okf_bq_graph.chain/0.5.3"
 SEED_MODES = ("fixture", "catalog")
 
 

@@ -577,17 +577,26 @@ def test_omitted_provenance_and_freshness_fields_are_now_compared(store, pin, p1
     comp = _comp(base)
     ok = PUB.verify_payload(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM)
     assert ok["status"] == "CONSISTENT", ok["failed"]
+    assert ok["checks"]["governance"]["engine"] == "oracle" and ok["checks"]["governance"]["provenance_shape"] == ["declaration", "declared", "intrinsic", "resolves_to", "resource", "title"]
     prov0 = base["concepts"][0]["provenance"][0]
-    assert {"declared", "intrinsic", "resolves_to"} <= set(prov0)          # oracle shape
+    assert set(prov0) == {"resource", "title", "declaration", "declared", "intrinsic", "resolves_to"}          # the oracle's actual shape, in full
     attacks = {
         "declared": lambda r: r["concepts"][0]["provenance"][0]["declared"].__setitem__("usage_count", 999),
         "intrinsic": lambda r: r["concepts"][0]["provenance"][0]["intrinsic"].__setitem__("author", "human:mallory@acme"),
         "resolves_to": lambda r: r["concepts"][0]["provenance"][0].__setitem__("resolves_to", ["policies/other"]),
-        "resolves_to_dropped": lambda r: r["concepts"][0]["provenance"][0].__setitem__("resolves_to", []),
+        "resolves_to_emptied": lambda r: r["concepts"][0]["provenance"][0].__setitem__("resolves_to", []),
         "seed_stale_after": lambda r: r["concepts"][0]["freshness"].__setitem__("stale_after", "2099-01-01T00:00:00Z"),
         "computation_stale_after": lambda r: r["computations"][0]["freshness"].__setitem__("stale_after", "2099-01-01T00:00:00Z"),
         "freshness_extra_key": lambda r: r["concepts"][0]["freshness"].__setitem__("reason", "forged"),
-        "engine_fields_stripped": lambda r: [pv.pop("declared") or pv.pop("intrinsic") or pv.pop("resolves_to") for pv in r["concepts"][0]["provenance"]],
+        # individual KEY deletions (a missing key is not an empty value): each one alone must fail
+        "declared_key_missing": lambda r: r["concepts"][0]["provenance"][0].pop("declared"),
+        "intrinsic_key_missing": lambda r: r["concepts"][0]["provenance"][0].pop("intrinsic"),
+        "resolves_to_key_missing": lambda r: r["concepts"][0]["provenance"][0].pop("resolves_to"),
+        "intrinsic_and_resolves_to_missing_declared_kept": lambda r: [pv.pop("intrinsic") and pv.pop("resolves_to") for pv in r["concepts"][0]["provenance"]],
+        "title_key_missing": lambda r: r["concepts"][0]["provenance"][0].pop("title"),
+        # bounded key set: an added key (incl. the relational engines' `note`) is not the oracle's shape
+        "note_added": lambda r: r["concepts"][0]["provenance"][0].__setitem__("note", "anything"),
+        "extra_key_added": lambda r: r["concepts"][0]["provenance"][0].__setitem__("source_id", "acme_retail|x|Source|src:y"),
     }
     for name, attack in attacks.items():
         r = copy.deepcopy(base)
@@ -595,12 +604,17 @@ def test_omitted_provenance_and_freshness_fields_are_now_compared(store, pin, p1
         v = PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
         assert v["status"] == "INCONSISTENT" and "governance" in v["failed"], name
         assert any(not it.get("provenance", True) or not it.get("freshness", True) for it in v["checks"]["governance"]["items"]), name
+    # a result whose engine is unknown cannot claim any provenance shape
+    r = copy.deepcopy(base); r["scope"]["engine"] = "mystery"
+    v = PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
+    assert "governance" in v["failed"] and v["checks"]["governance"]["provenance_shape"] is None
 
 
-def test_fallback_shaped_provenance_source_id_and_resolution_are_compared(store, pin, p1):
-    """The fallback engine emits source_id/resolution instead of declared/intrinsic/resolves_to: build that shape from the
-    trusted edges, confirm it passes, then change only the omitted fields."""
+def test_fallback_shaped_provenance_requires_source_id_resolution_and_note(store, pin, p1):
+    """The relational engines emit source_id/resolution/note instead of declared/intrinsic/resolves_to: build that exact
+    shape from the trusted edges under scope.engine=fallback, confirm it passes, then delete or alter each field alone."""
     import copy
+    from okf_bq_graph.model import PROVENANCE_NOTE
     base = _retrieve(store, pin)
     comp = _comp(base)
     tn = {n["node_id"]: n for n in p1["nodes"]}
@@ -609,15 +623,26 @@ def test_fallback_shaped_provenance_source_id_and_resolution_are_compared(store,
         if e["src_id"] == pin.concept_id and e["relation"] == "DERIVES_FROM":
             src = tn[e["dst_id"]]
             fb.append({"resource": src["resource"], "title": src["title"], "declaration": e["declaration"], "resolution": e["resolution"], "source_id": src["node_id"],
-                       "note": "declaration-scoped signals ... fetch from edges/nodes tables if needed"})
+                       "note": PROVENANCE_NOTE})
     base["concepts"][0]["provenance"] = fb
+    base["scope"]["engine"] = "fallback"
     ok = PUB.verify_payload(store, pin, p1, base, comp, _decl(store, pin, comp), expected_path=GM)
     assert ok["status"] == "CONSISTENT", ok["failed"]
-    for name, attack in {"source_id": lambda r: r["concepts"][0]["provenance"][0].__setitem__("source_id", f"acme_retail|pub_0000000000000000|Source|src:x"),
-                         "resolution": lambda r: r["concepts"][0]["provenance"][0].__setitem__("resolution", "root_fallback"),
-                         "no_engine_fields": lambda r: [pv.pop("source_id") for pv in r["concepts"][0]["provenance"]]}.items():
+    assert ok["checks"]["governance"]["provenance_shape"] == ["declaration", "note", "resolution", "resource", "source_id", "title"]
+    attacks = {"source_id": lambda r: r["concepts"][0]["provenance"][0].__setitem__("source_id", "acme_retail|pub_0000000000000000|Source|src:x"),
+               "resolution": lambda r: r["concepts"][0]["provenance"][0].__setitem__("resolution", "root_fallback"),
+               "note_changed": lambda r: r["concepts"][0]["provenance"][0].__setitem__("note", "resolves_to is exposed as a graph property"),
+               "source_id_key_missing": lambda r: r["concepts"][0]["provenance"][0].pop("source_id"),
+               "resolution_key_missing_source_id_kept": lambda r: r["concepts"][0]["provenance"][0].pop("resolution"),
+               "note_key_missing": lambda r: r["concepts"][0]["provenance"][0].pop("note"),
+               "oracle_key_added": lambda r: r["concepts"][0]["provenance"][0].__setitem__("declared", {}),
+               "unknown_key_added": lambda r: r["concepts"][0]["provenance"][0].__setitem__("extra", 1)}
+    for name, attack in attacks.items():
         r = copy.deepcopy(base)
         attack(r)
         v = PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)
         assert v["status"] == "INCONSISTENT" and "governance" in v["failed"], name
         assert v["checks"]["governance"]["items"][0]["provenance_diffs"], name
+    # the oracle shape under a fallback label (or vice versa) is a mismatch too: the shape belongs to the engine that ran
+    r = copy.deepcopy(_retrieve(store, pin)); r["scope"]["engine"] = "fallback"
+    assert "governance" in PUB.verify_payload(store, pin, p1, r, _comp(r), _decl(store, pin, comp), expected_path=GM)["failed"]

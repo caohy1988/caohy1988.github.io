@@ -31,6 +31,7 @@ class FakeCloud:
         self.entries = {ORIG_ENTRY: C.sample_entry(), FOREIGN_ENTRY: {"name": FOREIGN_ENTRY, "aspects": {}}}
         self.ops, self.fail, self.running, self.jobs = [], {}, {}, {}
         self.cancel_effective = True
+        self.outcomes = {}                        # attempt_id -> "APPLIED" | "NOT_APPLIED": what the adapter can establish about a create attempt
 
     def _rec(self, op, target, timeout, mutates=False, job_id=None):
         assert isinstance(timeout, (int, float)) and timeout > 0, "every cloud op must be bounded"
@@ -55,10 +56,8 @@ class FakeCloud:
         self._rec("get_dataset", dataset, timeout)
         return copy.deepcopy(self.dataset_meta.get(dataset, {"labels": {}})) if dataset in self.datasets else None
 
-    def dataset_exists(self, dataset, timeout):
-        self._rec("dataset_exists", dataset, timeout); return dataset in self.datasets
-
-    def create_dataset(self, dataset, location, labels, timeout):
+    def create_dataset(self, dataset, location, labels, attempt_id, timeout):
+        assert attempt_id.startswith("okf_att_")
         self._rec("create_dataset", dataset, timeout, True)
         assert dataset not in self.datasets and location == "US" and labels.get(L.OWNER_LABEL)
         self.datasets[dataset] = {}; self.dataset_meta[dataset] = {"labels": dict(labels)}; return {}
@@ -115,9 +114,14 @@ class FakeCloud:
     def get_entry(self, name, timeout):
         self._rec("get_entry", name, timeout); return copy.deepcopy(self.entries.get(name))
 
-    def create_entry(self, name, body, timeout):
+    def create_entry(self, name, body, attempt_id, timeout):
+        assert attempt_id.startswith("okf_att_")
         self._rec("create_entry", name, timeout, True)
         assert name not in self.entries; self.entries[name] = copy.deepcopy(body); return {}
+
+    def attempt_outcome(self, kind, name, attempt_id, timeout):
+        self._rec("attempt_outcome", name, timeout)
+        return self.outcomes.get(attempt_id)      # None: the adapter cannot establish the outcome (the honest default)
 
     def patch_entry(self, name, body, aspect_keys, timeout):
         self._rec("patch_entry", name, timeout, True)
@@ -273,7 +277,7 @@ def test_mutation_scope_is_owned_relational_only(lc, p1, derived):
     life.remove_runtime_aspect("metrics/gross-margin")
     life.cleanup()
     _owned_targets_only(cloud)
-    assert {o["op"] for o in cloud.ops} <= {"get_dataset", "dataset_exists", "create_dataset", "delete_dataset", "run_ddl", "load_rows", "select_rows", "insert_row",
+    assert {o["op"] for o in cloud.ops} <= {"get_dataset", "attempt_outcome", "create_dataset", "delete_dataset", "run_ddl", "load_rows", "select_rows", "insert_row",
                                              "update_status", "merge_head", "job_state", "cancel_job", "get_entry", "create_entry", "patch_entry", "delete_entry"}
     assert not [o for o in cloud.mutations() if o["target"].startswith(CFG.original_dataset) or o["target"] == ORIG_ENTRY or o["target"] == FOREIGN_ENTRY]
     assert cloud.entries[ORIG_ENTRY] == C.sample_entry() and cloud.entries[FOREIGN_ENTRY] == {"name": FOREIGN_ENTRY, "aspects": {}}
@@ -357,11 +361,11 @@ def test_cleanup_is_incomplete_when_absence_cannot_be_read_back(lc, p1):
     life, cloud, j = lc
     life.provision(); life.publish_relational(p1)
     life.write_pin("control", p1["publication_id"], GM) if False else None
-    real_exists = cloud.dataset_exists
-    cloud.dataset_exists = lambda dataset, timeout: (cloud._rec("dataset_exists", dataset, timeout), True)[1]   # deletion "succeeds" but readback still sees it
+    real_get = cloud.get_dataset
+    cloud.get_dataset = lambda dataset, timeout: (cloud._rec("get_dataset", dataset, timeout), {"labels": {}})[1]   # deletion "succeeds" but readback still sees it
     rc = life.cleanup()
     assert rc["status"] == "INCOMPLETE" and rc["steps"][-1]["deleted"] and not rc["steps"][-1]["absent_verified"]
-    cloud.dataset_exists = real_exists
+    cloud.get_dataset = real_get
     cloud.fail["delete_dataset"] = True
     cloud.datasets[CFG.dataset] = {}
     rc = life.cleanup()
@@ -439,8 +443,8 @@ def test_committed_entry_with_lost_response_is_still_cleaned_up(lc, p1):
     life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
     real_create = cloud.create_entry
 
-    def commit_then_lose(name, body, timeout):
-        real_create(name, body, timeout)                       # the server committed the entry ...
+    def commit_then_lose(name, body, attempt_id, timeout):
+        real_create(name, body, attempt_id, timeout)           # the server committed the entry ...
         raise TimeoutError("response lost after commit")      # ... but the client never saw the response
     cloud.create_entry = commit_then_lose
     name = CFG.entry_prefix + "control"
@@ -458,23 +462,64 @@ def test_committed_entry_with_lost_response_is_still_cleaned_up(lc, p1):
     assert [e["state"] for e in j.jobs() if e["role"] == "create_entry"] == ["APPLIED"]
 
 
-def test_lost_response_without_commit_is_unsettled_until_the_window_passes(lc, p1):
-    """Astra re-review R3: one absent read never closes a create that may still be in flight."""
+def test_lost_response_without_commit_stays_pending_until_the_outcome_is_established(lc, p1):
+    """Astra re-review R3 / re-review 2: neither one absent read nor elapsed time closes a create that may still be in
+    flight. Only stamped presence (adopt) or an adapter-established NOT_APPLIED outcome closes the attempt."""
     life, cloud, j = lc
     life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
     cloud.fail["create_entry"] = True                          # raised before anything was written
     with pytest.raises(RuntimeError):
         life.write_pin("control", p1["publication_id"], GM)
-    assert life.owned.pending and j.summary()["unresolved"] == 1
+    attempt = life.owned.pending[0]["attempt_id"]
+    assert attempt.startswith("okf_att_") and j.summary()["unresolved"] == 1
     rc = life.cleanup()
-    assert rc["status"] == "INCOMPLETE" and rc["steps"][0]["reconciled"] == "ABSENT_UNSETTLED" and rc["pending"][0]["state"] == "ABSENT_UNSETTLED"
-    assert rc["pending"][0]["recheck_after_s"] > 0 and j.summary()["unresolved"] == 1          # the create attempt is still open
+    assert rc["status"] == "INCOMPLETE" and rc["steps"][0]["reconciled"] == "ABSENT_PENDING" and rc["steps"][0]["attempt_outcome"] is None
+    assert rc["pending"][0]["state"] == "ABSENT_PENDING" and rc["pending"][0]["recheck_after_s"] == CFG.settle and j.summary()["unresolved"] == 1
+    life.clock.advance(CFG.settle * 10)                        # elapsed time is not an outcome: still pending after ten windows
+    rc = life.cleanup()
+    assert rc["status"] == "INCOMPLETE" and rc["steps"][0]["reconciled"] == "ABSENT_PENDING" and rc["pending"][0]["rechecks"] == 2
     own = json.loads((Path(j.run_dir) / "ownership.json").read_text())
-    assert own["owned"]["pending"][0]["name"] == CFG.entry_prefix + "control"                    # persisted for a later cleanup
-    life.clock.advance(CFG.settle + 1)
+    assert own["owned"]["pending"][0]["attempt_id"] == attempt                                   # persisted for a later cleanup
+    cloud.outcomes[attempt] = "NOT_APPLIED"                     # the adapter establishes that this exact attempt never applied
     rc = life.cleanup()
-    assert rc["status"] == "COMPLETE" and rc["steps"][0]["reconciled"] == "NOT_APPLIED_AFTER_SETTLE" and rc["pending"] == []
+    assert rc["status"] == "COMPLETE" and rc["steps"][0]["reconciled"] == "NOT_APPLIED_VERIFIED" and rc["pending"] == [] and rc["unresolved_jobs"] == 0
     assert [e["state"] for e in j.jobs() if e["role"] == "create_entry"] == ["NOT_APPLIED"]
+
+
+@pytest.mark.parametrize("kind", ["entry", "dataset"])
+def test_create_completing_after_the_settle_window_is_still_owned_and_deleted(lc, p1, kind):
+    """Astra re-review 2 repro (both kinds): hold the dispatched create, time out, advance the clock past settle, cleanup;
+    then complete the same stamped create -> the next cleanup adopts and deletes it; no NOTHING_OWNED orphan."""
+    life, cloud, j = lc
+    held = {}
+    if kind == "entry":
+        life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
+        real = cloud.create_entry
+        def hold(name, body, attempt_id, timeout):
+            held["args"] = (name, body, attempt_id, timeout); raise TimeoutError("server still creating")
+        cloud.create_entry = hold
+        with pytest.raises(TimeoutError):
+            life.write_pin("control", p1["publication_id"], GM)
+        name, present = CFG.entry_prefix + "control", lambda: name in cloud.entries
+    else:
+        real = cloud.create_dataset
+        def hold(dataset, location, labels, attempt_id, timeout):
+            held["args"] = (dataset, location, labels, attempt_id, timeout); raise TimeoutError("server still creating")
+        cloud.create_dataset = hold
+        with pytest.raises(TimeoutError):
+            life.provision()
+        name, present = CFG.dataset, lambda: CFG.dataset in cloud.datasets
+    life.clock.advance(61)
+    rc1 = life.cleanup()
+    assert rc1["status"] == "INCOMPLETE" and not present() and any(st["reconciled"] == "ABSENT_PENDING" and st["resource"] == name for st in rc1["steps"])
+    assert rc1["pending"] and rc1["pending"][0]["name"] == name
+    real(*held["args"])                                        # the same stamped request completes late, after the window
+    assert present()
+    rc2 = life.cleanup()
+    assert rc2["status"] == "COMPLETE" and not present() and rc2["pending"] == []
+    kinds = {(st["resource"], st["kind"]): st for st in rc2["steps"]}
+    assert kinds[(name, f"pending_{kind}")]["reconciled"] == "PRESENT_ADOPTED" and kinds[(name, kind)]["absent_verified"]
+    assert life.cleanup()["status"] == "NOTHING_OWNED"          # only after everything was verified gone
 
 
 def test_delayed_create_commits_after_an_absent_read_and_is_still_cleaned(lc, p1):
@@ -484,15 +529,15 @@ def test_delayed_create_commits_after_an_absent_read_and_is_still_cleaned(lc, p1
     life.provision(); life.publish_relational(p1); life.advance_head(p1["publication_id"])
     real_create, held = cloud.create_entry, {}
 
-    def still_creating(name, body, timeout):
-        held["args"] = (name, body, timeout)
+    def still_creating(name, body, attempt_id, timeout):
+        held["args"] = (name, body, attempt_id, timeout)
         raise TimeoutError("server still creating")
     cloud.create_entry = still_creating
     name = CFG.entry_prefix + "control"
     with pytest.raises(TimeoutError):
         life.write_pin("control", p1["publication_id"], GM)
     rc1 = life.cleanup()
-    assert rc1["status"] == "INCOMPLETE" and rc1["steps"][0]["reconciled"] == "ABSENT_UNSETTLED" and name not in cloud.entries
+    assert rc1["status"] == "INCOMPLETE" and rc1["steps"][0]["reconciled"] == "ABSENT_PENDING" and name not in cloud.entries
     real_create(*held["args"])                                 # deterministic late server commit, after the absent read
     assert name in cloud.entries
     life.clock.advance(CFG.settle + 1)
@@ -528,7 +573,7 @@ def test_foreign_dataset_with_the_same_normalised_name_is_never_adopted(tmp_path
     b = L.Lifecycle(cfg_b, cloud, Journal(tmp_path / "b", "b"), clock=Clock())
     real_create = cloud.create_dataset
 
-    def b_wins(dataset, location, labels, timeout):
+    def b_wins(dataset, location, labels, attempt_id, timeout):
         cloud.create_dataset = real_create
         b.provision()                                          # B provisions (stamped) inside A's create window
         cloud.datasets[dataset]["peer_data"] = [{"x": 1}]
@@ -602,8 +647,8 @@ def test_lost_dataset_create_response_is_owned_and_cleaned(lc):
     life, cloud, j = lc
     real_create = cloud.create_dataset
 
-    def commit_then_lose(dataset, location, labels, timeout):
-        real_create(dataset, location, labels, timeout); raise TimeoutError("lost")
+    def commit_then_lose(dataset, location, labels, attempt_id, timeout):
+        real_create(dataset, location, labels, attempt_id, timeout); raise TimeoutError("lost")
     cloud.create_dataset = commit_then_lose
     with pytest.raises(TimeoutError):
         life.provision()

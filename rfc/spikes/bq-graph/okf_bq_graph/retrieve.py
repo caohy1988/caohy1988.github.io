@@ -21,7 +21,7 @@ from google.api_core import exceptions as gexc
 from google.cloud import bigquery
 
 from . import DATASET, LOCATION, PROJECT
-from .model import node_id as _node_id
+from .model import PROVENANCE_NOTE, node_id as _node_id
 from .lifecycle import window_executor
 from .oracle import Graph, SQL_FENCE_RE, parse_ts
 from .publish import sql, resolve_pointer
@@ -346,8 +346,7 @@ def _assemble(seeds, walks, ctx, seed_nodes, as_of, warnings, scope, engine) -> 
         tier, vers = trust(cid)
         prov = [{"resource": r["other_local_id"][4:] if r["other_local_id"].startswith("src:") else r["other_local_id"],
                  "title": r["other_title"], "declaration": r["edge_declaration"], "resolution": r["edge_resolution"],
-                 "source_id": r["other_id"],
-                 "note": "declaration-scoped signals (usage_count/window) and resolves_to are not exposed as graph properties; fetch from edges/nodes tables if needed"}
+                 "source_id": r["other_id"], "note": PROVENANCE_NOTE}
                 for r in by_c.get(cid, []) if r["relation"] == "DERIVES_FROM"]
         replacement = None
         if (n["status"] or "stable") == "deprecated":

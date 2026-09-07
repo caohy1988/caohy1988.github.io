@@ -28,7 +28,7 @@ import subprocess
 from pathlib import Path
 from typing import Any, Optional
 
-from .model import node_id as _node_id, sha256_text, stable_json
+from .model import PROVENANCE_NOTE, node_id as _node_id, sha256_text, stable_json
 from .oracle import SQL_FENCE_RE, Graph
 
 STORAGE_DERIVED = ("stale_after_ts",)
@@ -474,11 +474,16 @@ def verify_payload(store: Any, pin: Any, trusted: dict, result: dict, comp: Opti
         tier = "unverified" if not kinds else ("human-reviewed" if "human" in kinds else "machine-confirmed")
         return tier, sorted(({"by": a["title"], "kind": a["actor_kind"], "at": e["authored_at"]} for e, a in vs), key=lambda x: (x["at"] or "", x["by"]))
 
-    PROV_FIELDS = ("resource", "title", "declaration", "source_id", "resolution", "declared", "intrinsic", "resolves_to")
+    # the exact provenance item shape each engine emits (retrieve._assemble for the relational engines, oracle.Graph.provenance
+    # for the oracle): the key set is required in full and bounded, and every value is compared (Astra PR41 re-review 2, R1)
+    PROV_SHAPES = {"oracle": {"resource", "title", "declaration", "declared", "intrinsic", "resolves_to"},
+                   "fallback": {"resource", "title", "declaration", "resolution", "source_id", "note"},
+                   "gql": {"resource", "title", "declaration", "resolution", "source_id", "note"}}
+    engine = scope.get("engine")
+    required_shape = PROV_SHAPES.get(engine)
 
     def trusted_provenance(cid: str) -> list[dict]:
-        """Every field either engine emits for a DERIVES_FROM disclosure, from the trusted edge + Source node: the
-        fallback engine adds `source_id`/`resolution`, the oracle adds `declared`/`intrinsic`/`resolves_to`."""
+        """Every field either engine emits for a DERIVES_FROM disclosure, from the trusted edge + Source node."""
         out = []
         for e in out_edges.get(cid, []):
             if e["relation"] == "DERIVES_FROM" and e["dst_id"] in tn:
@@ -486,26 +491,28 @@ def verify_payload(store: Any, pin: Any, trusted: dict, result: dict, comp: Opti
                 resolves = sorted(tn[x["dst_id"]]["local_id"] for x in out_edges.get(src["node_id"], []) if x["relation"] == "RESOLVES_TO" and x["dst_id"] in tn)
                 out.append({"resource": src.get("resource"), "title": src.get("title"), "declaration": e["declaration"], "source_id": src["node_id"],
                             "resolution": e.get("resolution"), "declared": json.loads(e.get("attrs") or "{}"), "intrinsic": json.loads(src.get("attrs") or "{}"),
-                            "resolves_to": resolves})
+                            "resolves_to": resolves, "note": PROVENANCE_NOTE})
         return sorted(out, key=lambda x: (x["declaration"], x["resource"] or ""))
 
     def compare_provenance(cid: str, items: list) -> tuple[bool, list]:
+        """Count, the engine's complete key set (no key missing, no key added) and every value must match."""
+        if required_shape is None:
+            return False, [{"reason": "unknown engine", "engine": engine}]
         trusted_items = trusted_provenance(cid)
         r_items = sorted((dict(pv) for pv in (items or []) if isinstance(pv, dict)), key=lambda x: (x.get("declaration") or "", x.get("resource") or ""))
         if len(r_items) != len(trusted_items) or len(r_items) != len(items or []):
             return False, [{"reason": "count", "result": len(items or []), "trusted": len(trusted_items)}]
         diffs = []
         for r, t in zip(r_items, trusted_items):
-            for f in ("resource", "title", "declaration"):
-                if f not in r or r[f] != t[f]:
-                    diffs.append({"declaration": t["declaration"], "field": f})
-            for f in PROV_FIELDS[3:]:
-                if f in r:
-                    rv = sorted(r[f]) if f == "resolves_to" and isinstance(r[f], list) else r[f]
-                    if rv != t[f]:
-                        diffs.append({"declaration": t["declaration"], "field": f})
-            if not any(f in r for f in ("source_id", "declared")):
-                diffs.append({"declaration": t["declaration"], "field": "engine_fields_missing"})
+            keys = set(r)
+            for f in sorted(required_shape - keys):
+                diffs.append({"declaration": t["declaration"], "field": f, "reason": "missing"})
+            for f in sorted(keys - required_shape):
+                diffs.append({"declaration": t["declaration"], "field": f, "reason": "unexpected"})
+            for f in sorted(required_shape & keys):
+                rv = sorted(r[f]) if f == "resolves_to" and isinstance(r[f], list) else r[f]
+                if rv != t[f]:
+                    diffs.append({"declaration": t["declaration"], "field": f, "reason": "value"})
         return not diffs, diffs
 
     def trusted_replacement(node: dict) -> Optional[dict]:
@@ -546,9 +553,11 @@ def verify_payload(store: Any, pin: Any, trusted: dict, result: dict, comp: Opti
         item["ok"] = item["trust_tier"] and item["freshness"]
         gov_items.append(item)
     checks["governance"] = {"ok": bool(gov_items) and all(i["ok"] for i in gov_items), "items": gov_items,
-                            "note": "trust tier, verifications, full engine-specific provenance (resource/title/declaration + source_id/resolution or "
-                                    "declared/intrinsic/resolves_to), freshness verdict AND stale_after, and replacement recomputed from trusted "
-                                    "VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of"}
+                            "engine": engine, "provenance_shape": sorted(required_shape) if required_shape else None,
+                            "note": "trust tier, verifications, the engine's complete provenance item shape (every required key present, no extra key, "
+                                    "every value equal: oracle declared/intrinsic/resolves_to, relational source_id/resolution/note), freshness as the "
+                                    "whole {verdict, stale_after} record, and replacement, all recomputed from trusted VERIFIED_BY/DERIVES_FROM/"
+                                    "RESOLVES_TO/LINKS_TO edges at scope.as_of"}
     if comp is not None:
         # the selected computation object is re-verified byte for byte: a change after preflight (SQL, section, path)
         # under an unchanged id/label fails here even if the result list still agrees with the trusted projection

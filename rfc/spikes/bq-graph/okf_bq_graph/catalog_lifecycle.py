@@ -59,7 +59,7 @@ class LifecycleConfig:
     source_root: str = "okf/bundles/acme_retail"
     compiler_version: str = "okf_bq_graph.compile/0.1.0"
     timeout_s: float = DEFAULT_TIMEOUT
-    settle_s: Optional[float] = None    # how long after a timed-out create an ABSENT readback may count as NOT_APPLIED (default 2 x timeout_s)
+    settle_s: Optional[float] = None    # recheck cadence for a pending (timed-out) create; NEVER closes the attempt by itself (default 2 x timeout_s)
 
     def __post_init__(self) -> None:
         if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{3,63}", self.run_id):
@@ -113,8 +113,8 @@ class CloudOps(Protocol):
     operations receive a driver-chosen `job_id` (journaled with project/location BEFORE dispatch) so a timed-out call
     can be reconciled through `job_state`; resources are created with an ownership stamp (`labels`) that adoption
     after a lost response must match."""
-    def get_dataset(self, dataset: str, timeout: float) -> Optional[dict]: ...           # {"labels": {...}} or None
-    def create_dataset(self, dataset: str, location: str, labels: dict, timeout: float) -> dict: ...
+    def get_dataset(self, dataset: str, timeout: float) -> Optional[dict]: ...           # {"labels": {...}} or None (absence = None)
+    def create_dataset(self, dataset: str, location: str, labels: dict, attempt_id: str, timeout: float) -> dict: ...
     def delete_dataset(self, dataset: str, timeout: float) -> dict: ...
     def run_ddl(self, dataset: str, statement: str, job_id: str, timeout: float) -> dict: ...
     def load_rows(self, dataset: str, table: str, rows: list[dict], job_id: str, timeout: float) -> dict: ...
@@ -125,7 +125,10 @@ class CloudOps(Protocol):
     def job_state(self, job_id: str, timeout: float) -> Optional[dict]: ...              # {"state": ..., "error": ...} or None when the server has no such job
     def cancel_job(self, job_id: str, timeout: float) -> dict: ...
     def get_entry(self, name: str, timeout: float) -> Optional[dict]: ...
-    def create_entry(self, name: str, body: dict, timeout: float) -> dict: ...
+    def create_entry(self, name: str, body: dict, attempt_id: str, timeout: float) -> dict: ...
+    def attempt_outcome(self, kind: str, name: str, attempt_id: str, timeout: float) -> Optional[str]: ...
+    #   "APPLIED" | "NOT_APPLIED" when the adapter can establish the terminal outcome of that exact create attempt (its own
+    #   request bookkeeping / operation record); None when it cannot. Elapsed time is never an outcome.
     def patch_entry(self, name: str, body: dict, aspect_keys: list[str], timeout: float) -> dict: ...
     def delete_entry(self, name: str, timeout: float) -> dict: ...
 
@@ -284,7 +287,8 @@ class Lifecycle:
         return e
 
     def _pending(self, kind: str, name: str) -> dict:
-        rec = {"kind": kind, "name": name, "at": _now(), "at_ts": self.clock(), "state": "IN_FLIGHT", "owner_stamp": self.owner_stamp}
+        rec = {"kind": kind, "name": name, "attempt_id": f"okf_att_{self.cfg.run_suffix}_{uuid.uuid4().hex[:12]}", "at": _now(), "at_ts": self.clock(),
+               "state": "IN_FLIGHT", "owner_stamp": self.owner_stamp}
         self.owned.pending.append(rec)
         self._write_ownership(f"pending_{kind}")
         return rec
@@ -339,10 +343,11 @@ class Lifecycle:
     def provision(self) -> dict:
         ds = self.cfg.dataset
         self._guard_dataset(ds)
-        if self._op("dataset_exists", "owned dataset must not pre-exist", self.cloud.get_dataset, ds, target=ds) is not None:
+        if self._op("dataset_precheck", "owned dataset must not pre-exist (GET; absence = None)", self.cloud.get_dataset, ds, target=ds) is not None:
             raise ScopeViolation(f"dataset {ds} already exists: not created by this run, refusing to adopt it")
         pend = self._pending("dataset", ds)                  # persisted before the write: a lost response still owns the attempt
-        self._op("create_dataset", "create owned dataset (stamped)", self.cloud.create_dataset, ds, self.cfg.location, self.stamp_labels(), mutates=True, target=ds)
+        self._op("create_dataset", "create owned dataset (stamped)", self.cloud.create_dataset, ds, self.cfg.location, self.stamp_labels(), pend["attempt_id"],
+                 mutates=True, target=ds)
         self._confirm(pend)
         self.owned.dataset = ds
         self._write_ownership("dataset_created")
@@ -475,7 +480,7 @@ class Lifecycle:
             self._op("patch_entry", f"patch owned entry aspects {sorted(aspects)}", self.cloud.patch_entry, name, body, sorted(aspects), mutates=True, target=name)
         else:
             pend = self._pending("entry", name)
-            self._op("create_entry", "create owned entry", self.cloud.create_entry, name, body, mutates=True, target=name)
+            self._op("create_entry", "create owned entry", self.cloud.create_entry, name, body, pend["attempt_id"], mutates=True, target=name)
             self._confirm(pend)
             self.owned.entries.append(name)
             self._write_ownership("entry_created")
@@ -545,17 +550,18 @@ class Lifecycle:
     # -- 6. cleanup: exact owned resources only, readback of absence, receipt
     def _reconcile_pending(self) -> list[dict]:
         """Read back every pending write (lost response) under its own name. The outcome is decided by evidence, never
-        by presence alone:
-          PRESENT_ADOPTED            present AND carries this invocation's stamp -> ours; deleted below
-          FOREIGN_PRESERVED          present with another / no stamp -> not ours; left untouched, stays pending (INCOMPLETE)
-          ABSENT_UNSETTLED           absent but the timed-out create may still be in flight -> stays pending (INCOMPLETE)
-          NOT_APPLIED_AFTER_SETTLE   absent after the settle window (cfg.settle) -> NOT_APPLIED
+        by presence alone and never by elapsed time (Astra PR41 re-review 2, R3):
+          PRESENT_ADOPTED        present AND carries this invocation's stamp -> ours; deleted below
+          FOREIGN_PRESERVED      present with another / no stamp -> not ours; left untouched, stays pending (INCOMPLETE)
+          NOT_APPLIED_VERIFIED   absent AND the adapter establishes that this exact attempt terminated without applying
+          ABSENT_PENDING         absent, outcome unknown -> the attempt stays pending (INCOMPLETE); `recheck_after_s` schedules
+                                 the next look (cfg.settle cadence) and a later cleanup re-reads it
         Unreadable -> stays pending and blocks COMPLETE. Rerunning cleanup re-reads what is still pending."""
         steps: list[dict] = []
         now = self.clock()
         for rec in list(self.owned.pending):
-            step = {"resource": rec["name"], "kind": f"pending_{rec['kind']}", "deleted": False, "absent_verified": False, "reconciled": None,
-                    "age_s": round(now - rec.get("at_ts", now), 3), "settle_s": self.cfg.settle}
+            step = {"resource": rec["name"], "kind": f"pending_{rec['kind']}", "attempt_id": rec.get("attempt_id"), "deleted": False, "absent_verified": False,
+                    "reconciled": None, "age_s": round(now - rec.get("at_ts", now), 3), "settle_s": self.cfg.settle}
             try:
                 if rec["kind"] == "entry":
                     body = self._op("reconcile_pending_entry", "GET pending entry", self.cloud.get_entry, rec["name"], target=rec["name"])
@@ -580,15 +586,23 @@ class Lifecycle:
                     rec["state"] = "FOREIGN"
                     if not any(f["name"] == rec["name"] for f in self.owned.foreign):
                         self.owned.foreign.append({"kind": rec["kind"], "name": rec["name"], "observed_at": _now()})
-                elif step["age_s"] >= self.cfg.settle:
-                    step["reconciled"] = "NOT_APPLIED_AFTER_SETTLE"
-                    step["absent_verified"] = True
-                    self._confirm(rec)
-                    self._close_pending_journal(rec, "NOT_APPLIED", step["reconciled"])
                 else:
-                    step["reconciled"] = "ABSENT_UNSETTLED"
-                    rec["state"] = "ABSENT_UNSETTLED"
-                    rec["recheck_after_s"] = round(self.cfg.settle - step["age_s"], 3)
+                    outcome = None
+                    if rec.get("attempt_id") and hasattr(self.cloud, "attempt_outcome"):
+                        outcome = self._op("reconcile_pending_attempt", "terminal outcome of the create attempt (adapter bookkeeping)",
+                                           self.cloud.attempt_outcome, rec["kind"], rec["name"], rec["attempt_id"], target=rec["name"])
+                    step["attempt_outcome"] = outcome
+                    if outcome == "NOT_APPLIED":
+                        step["reconciled"] = "NOT_APPLIED_VERIFIED"
+                        step["absent_verified"] = True
+                        self._confirm(rec)
+                        self._close_pending_journal(rec, "NOT_APPLIED", step["reconciled"])
+                    else:                                   # unknown (or APPLIED-but-absent: contradictory, keep looking)
+                        step["reconciled"] = "ABSENT_PENDING"
+                        rec["state"] = "ABSENT_PENDING"
+                        rec["rechecks"] = rec.get("rechecks", 0) + 1
+                        rec["recheck_after_s"] = self.cfg.settle
+                        rec["last_checked"] = _now()
             except Exception as e:  # noqa: BLE001
                 step["error"] = f"{type(e).__name__}: {str(e)[:200]}"
             steps.append(step)
@@ -621,7 +635,7 @@ class Lifecycle:
                 self._guard_dataset(ds)
                 self._op("delete_dataset", "delete owned dataset (all owned tables)", self.cloud.delete_dataset, ds, mutates=True, target=ds)
                 step["deleted"] = True
-                step["absent_verified"] = not self._op("readback_dataset_absent", "dataset exists after delete", self.cloud.dataset_exists, ds, target=ds)
+                step["absent_verified"] = self._op("readback_dataset_absent", "GET dataset after delete (absence = None)", self.cloud.get_dataset, ds, target=ds) is None
                 if step["absent_verified"]:
                     self.owned.dataset = None
             except Exception as e:  # noqa: BLE001
@@ -641,16 +655,16 @@ class Lifecycle:
 
         def step_ok(s: dict) -> bool:   # a pending write is closed by a stamped adoption (then deleted below) or by settled absence
             if s["kind"].startswith("pending_"):
-                return "error" not in s and s.get("reconciled") in ("NOT_APPLIED_AFTER_SETTLE", "PRESENT_ADOPTED")
+                return "error" not in s and s.get("reconciled") in ("NOT_APPLIED_VERIFIED", "PRESENT_ADOPTED")
             return bool(s["deleted"] and s["absent_verified"])
         complete = bool(steps) and all(step_ok(s) for s in steps) and not unresolved and not pending and not foreign
         status = "COMPLETE" if complete else ("NOTHING_OWNED" if not steps and not unresolved and not pending and not foreign else "INCOMPLETE")
         receipt = {"status": status, "steps": steps, "job_reconciliation": job_steps, "at": _now(), "unresolved_jobs": len(unresolved), "pending": pending,
                    "foreign_preserved": foreign, "owner_stamp": self.owner_stamp,
                    "unresolved": [{"seq": e["seq"], "role": e["role"], "target": e.get("target"), "job_id": e.get("job_id"), "error": e.get("error")} for e in unresolved],
-                   "note": "only exact run-owned (stamped) resources; no prefix or glob deletion; a missing absence readback, a pending write that is "
-                           "unreadable / possibly still in flight / present under a foreign stamp, or a job whose server state was not read back is INCOMPLETE; "
-                           "rerun cleanup to re-check pending resources after the settle window"}
+                   "note": "only exact run-owned (stamped) resources; no prefix or glob deletion; a missing absence readback, a pending create attempt "
+                           "whose outcome is not established (absent is not non-applied; elapsed time is not an outcome), a resource present under a "
+                           "foreign stamp, or a job whose server state was not read back is INCOMPLETE; rerun cleanup to re-check pending attempts"}
         (Path(self.journal.run_dir) / "cleanup.json").write_text(json.dumps(receipt, indent=1, sort_keys=True) + "\n", encoding="utf-8")
         self.journal.note("cleanup", **receipt)
         return receipt

@@ -4,7 +4,7 @@
   "declaration-mismatch": "MET",
   "sql-substitution": "MET"
  },
- "as_of": "2026-09-07T07:22:22Z",
+ "as_of": "2026-09-07T08:04:12Z",
  "bundle_id": "acme_retail",
  "cases": [
   {
@@ -27,7 +27,7 @@
       "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
      },
      "freshness": {
-      "as_of": "2026-09-07T07:22:22Z",
+      "as_of": "2026-09-07T08:04:12Z",
       "ok": true,
       "stale_after": "2026-12-31T00:00:00Z",
       "verdict": "FRESH"
@@ -175,6 +175,7 @@
       "trusted_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
      },
      "governance": {
+      "engine": "oracle",
       "items": [
        {
         "freshness": true,
@@ -192,8 +193,16 @@
         "trust_tier": true
        }
       ],
-      "note": "trust tier, verifications, full engine-specific provenance (resource/title/declaration + source_id/resolution or declared/intrinsic/resolves_to), freshness verdict AND stale_after, and replacement recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
-      "ok": true
+      "note": "trust tier, verifications, the engine's complete provenance item shape (every required key present, no extra key, every value equal: oracle declared/intrinsic/resolves_to, relational source_id/resolution/note), freshness as the whole {verdict, stale_after} record, and replacement, all recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
+      "ok": true,
+      "provenance_shape": [
+       "declaration",
+       "declared",
+       "intrinsic",
+       "resolves_to",
+       "resource",
+       "title"
+      ]
      },
      "paths": {
       "items": [
@@ -291,7 +300,7 @@
       "description": "nodes/edges WHERE bundle_id=@b AND publication_id=@p (full retained rows)",
       "engine": "hermetic-store",
       "error": null,
-      "intended_at": "2026-09-07T07:22:22.680947+00:00",
+      "intended_at": "2026-09-07T08:04:13.078280+00:00",
       "job_id": null,
       "location": null,
       "project": null,
@@ -299,9 +308,9 @@
       "rows": 153,
       "seq": 5,
       "state": "DONE",
-      "submitted_at": "2026-09-07T07:22:22.680987+00:00",
+      "submitted_at": "2026-09-07T08:04:13.078315+00:00",
       "terminal": true,
-      "terminal_at": "2026-09-07T07:22:22.681028+00:00"
+      "terminal_at": "2026-09-07T08:04:13.078355+00:00"
      }
     ],
     "note": "full retained rows, recomputed manifests/section hashes, scoped path endpoints/edges, SQL and declaration bytes compared to the trusted compilation of the pinned source; labels and digests alone are not accepted",
@@ -314,35 +323,35 @@
      "--case",
      "approved",
      "--evidence-dir",
-     "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/receipt/.inv_approved_hermetic_3s_x4co1"
+     "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/receipt/.inv_approved_hermetic_fwiwmrzz"
     ],
     "case": "approved",
     "cwd": "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike",
-    "diag": "see /Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/receipt/case_approved_hermetic.json",
-    "diag_path": "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/receipt/case_approved_hermetic.json",
+    "diag": "see /Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/receipt/case_approved_hermetic.json",
+    "diag_path": "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/receipt/case_approved_hermetic.json",
     "diag_present": true,
-    "diag_sha256": "87437fd9f413c34c7c49ddca58458d7f62030832f0caa0829873c2b3646f15ba",
-    "elapsed_ms": 84.5,
+    "diag_sha256": "28641f29bca0382275869d1cb827b4683e9e23de145f8575e8e74acf261c1ad2",
+    "elapsed_ms": 86.2,
     "exit_code": 0,
-    "invocation_dir": "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/receipt/.inv_approved_hermetic_3s_x4co1",
+    "invocation_dir": "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/receipt/.inv_approved_hermetic_fwiwmrzz",
     "invoked": true,
     "live": false,
     "output": {
      "access_probe": {
       "outcome": "ALLOWED",
       "output": "ALLOWED",
-      "probed_at": 1788765742,
+      "probed_at": 1788768253,
       "sources": "ALLOWED"
      },
      "execution_match": "MATCH",
      "job": {
-      "job_id": "okf_rcpt_f570932094e34d346f0dcc76_99cd3e4241cf8e0c",
+      "job_id": "okf_rcpt_5fe3e82aff0b24cbe81aed5d_706d61100be82f90",
       "location": "US",
       "project": "test-project-0728-467323"
      },
      "reason_codes": [],
-     "receipt_id": "rcpt-8ac7ac8c8a4f60b0785a699c",
-     "request_id": "req-f570932094e34d346f0dcc76",
+     "receipt_id": "rcpt-b34e1980f075441b714955e4",
+     "request_id": "req-5fe3e82aff0b24cbe81aed5d",
      "verdict": "VERIFIED"
     },
     "receipt": {
@@ -350,22 +359,22 @@
      "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
      "context_ref": "okf:acme-retail-derived#gross-margin-period",
      "execution_match": "MATCH",
-     "expires_at": 1788766042,
-     "issued_at": 1788765742,
+     "expires_at": 1788768553,
+     "issued_at": 1788768253,
      "job": {
-      "job_id": "okf_rcpt_f570932094e34d346f0dcc76_99cd3e4241cf8e0c",
+      "job_id": "okf_rcpt_5fe3e82aff0b24cbe81aed5d_706d61100be82f90",
       "location": "US",
       "project": "test-project-0728-467323"
      },
      "policy_version": "okf-receipt-spike-policy/2026-09-05",
      "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
      "reason_codes": [],
-     "receipt_id": "rcpt-8ac7ac8c8a4f60b0785a699c",
-     "request_id": "req-f570932094e34d346f0dcc76",
+     "receipt_id": "rcpt-b34e1980f075441b714955e4",
+     "request_id": "req-5fe3e82aff0b24cbe81aed5d",
      "verdict": "VERIFIED"
     },
     "released": true,
-    "request_id": "req-f570932094e34d346f0dcc76",
+    "request_id": "req-5fe3e82aff0b24cbe81aed5d",
     "stderr_tail": "",
     "stdout": "[HERMETIC (synthetic fixture)] Gross margin: $400.00 USD \u00b7 VERIFIED\n"
    },
@@ -388,12 +397,12 @@
     ],
     "reached": true,
     "retained": {
-     "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/retrieval/retrieval_approved.json",
+     "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/retrieval/retrieval_approved.json",
      "redacted": true,
-     "sha256": "324bab06838eb981bfcbc687e0154422a5ce9ffbd0154788351d7b06d008a8f0"
+     "sha256": "8e0ab512102d5e8b567a204062f8b4a29b09f28f49430207ca35b6a15ed8755c"
     },
     "scope": {
-     "as_of": "2026-09-07T07:22:22Z",
+     "as_of": "2026-09-07T08:04:12Z",
      "bundle_id": "acme_retail",
      "engine": "oracle",
      "publication_id": "pub_190192147fd7fd78",
@@ -410,7 +419,7 @@
     "timing": {
      "jobs": [],
      "stages_ms": {},
-     "total_ms": 0.2
+     "total_ms": 0.3
     },
     "warnings": [
      "catalog-mock seed: exact Concept id supplied by the runtime pin, not a semantic ranking",
@@ -438,7 +447,7 @@
       "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
      },
      "freshness": {
-      "as_of": "2026-09-07T07:22:22Z",
+      "as_of": "2026-09-07T08:04:12Z",
       "ok": true,
       "stale_after": "2026-12-31T00:00:00Z",
       "verdict": "FRESH"
@@ -593,6 +602,7 @@
       "trusted_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
      },
      "governance": {
+      "engine": "oracle",
       "items": [
        {
         "freshness": true,
@@ -610,8 +620,16 @@
         "trust_tier": true
        }
       ],
-      "note": "trust tier, verifications, full engine-specific provenance (resource/title/declaration + source_id/resolution or declared/intrinsic/resolves_to), freshness verdict AND stale_after, and replacement recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
-      "ok": true
+      "note": "trust tier, verifications, the engine's complete provenance item shape (every required key present, no extra key, every value equal: oracle declared/intrinsic/resolves_to, relational source_id/resolution/note), freshness as the whole {verdict, stale_after} record, and replacement, all recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
+      "ok": true,
+      "provenance_shape": [
+       "declaration",
+       "declared",
+       "intrinsic",
+       "resolves_to",
+       "resource",
+       "title"
+      ]
      },
      "paths": {
       "items": [
@@ -709,7 +727,7 @@
       "description": "nodes/edges WHERE bundle_id=@b AND publication_id=@p (full retained rows)",
       "engine": "hermetic-store",
       "error": null,
-      "intended_at": "2026-09-07T07:22:22.770037+00:00",
+      "intended_at": "2026-09-07T08:04:13.169018+00:00",
       "job_id": null,
       "location": null,
       "project": null,
@@ -717,9 +735,9 @@
       "rows": 153,
       "seq": 7,
       "state": "DONE",
-      "submitted_at": "2026-09-07T07:22:22.770073+00:00",
+      "submitted_at": "2026-09-07T08:04:13.169067+00:00",
       "terminal": true,
-      "terminal_at": "2026-09-07T07:22:22.770107+00:00"
+      "terminal_at": "2026-09-07T08:04:13.169111+00:00"
      }
     ],
     "note": "full retained rows, recomputed manifests/section hashes, scoped path endpoints/edges, SQL and declaration bytes compared to the trusted compilation of the pinned source; labels and digests alone are not accepted",
@@ -732,17 +750,17 @@
      "--case",
      "sql-substitution",
      "--evidence-dir",
-     "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/receipt/.inv_sql-substitution_hermetic_3j_in8n4"
+     "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/receipt/.inv_sql-substitution_hermetic_8hkycgdb"
     ],
     "case": "sql-substitution",
     "cwd": "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike",
-    "diag": "see /Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/receipt/case_sql-substitution_hermetic.json",
-    "diag_path": "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/receipt/case_sql-substitution_hermetic.json",
+    "diag": "see /Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/receipt/case_sql-substitution_hermetic.json",
+    "diag_path": "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/receipt/case_sql-substitution_hermetic.json",
     "diag_present": true,
-    "diag_sha256": "420449effd31c7ee3c822a79c44586a59b928365339cbaef111c7a0c50930431",
-    "elapsed_ms": 83.8,
+    "diag_sha256": "54f71419a80e51cfceef6dec1508d339bc0f34790be6ac55fd13e1179d1cd7cf",
+    "elapsed_ms": 83.7,
     "exit_code": 2,
-    "invocation_dir": "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/receipt/.inv_sql-substitution_hermetic_3j_in8n4",
+    "invocation_dir": "/Users/haiyuancao/caohy1988.github.io-catalog-chain/rfc/spikes/bq-graph/evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/receipt/.inv_sql-substitution_hermetic_8hkycgdb",
     "invoked": true,
     "live": false,
     "output": {
@@ -752,8 +770,8 @@
      "reason_codes": [
       "sql_mismatch"
      ],
-     "receipt_id": "rcpt-43b7df2559495ad6a08a0d93",
-     "request_id": "req-085244ab69069be70d6b294e",
+     "receipt_id": "rcpt-4891aad1e411956110186d24",
+     "request_id": "req-cd13074bfe0f601a5152f364",
      "verdict": "REJECTED"
     },
     "receipt": {
@@ -761,10 +779,10 @@
      "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
      "context_ref": "okf:acme-retail-derived#gross-margin-period",
      "execution_match": "MISMATCH",
-     "expires_at": 1788766042,
-     "issued_at": 1788765742,
+     "expires_at": 1788768553,
+     "issued_at": 1788768253,
      "job": {
-      "job_id": "okf_rcpt_085244ab69069be70d6b294e_4d4d18a262e0a7a1",
+      "job_id": "okf_rcpt_cd13074bfe0f601a5152f364_e7f9f6a73f19189c",
       "location": "US",
       "project": "test-project-0728-467323"
      },
@@ -773,12 +791,12 @@
      "reason_codes": [
       "sql_mismatch"
      ],
-     "receipt_id": "rcpt-43b7df2559495ad6a08a0d93",
-     "request_id": "req-085244ab69069be70d6b294e",
+     "receipt_id": "rcpt-4891aad1e411956110186d24",
+     "request_id": "req-cd13074bfe0f601a5152f364",
      "verdict": "REJECTED"
     },
     "released": false,
-    "request_id": "req-085244ab69069be70d6b294e",
+    "request_id": "req-cd13074bfe0f601a5152f364",
     "stderr_tail": "",
     "stdout": "[HERMETIC (synthetic fixture)] BLOCKED verdict=REJECTED execution_match=MISMATCH reasons=sql_mismatch\n"
    },
@@ -801,12 +819,12 @@
     ],
     "reached": true,
     "retained": {
-     "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/retrieval/retrieval_sql-substitution.json",
+     "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/retrieval/retrieval_sql-substitution.json",
      "redacted": true,
-     "sha256": "4e227e1f2776d64eafe14410eca32c577868d0570ad33438eeb47f5ba7f9697c"
+     "sha256": "d56bea203317c4d42434550c2941c6376f5622b60f877f0d25c1826a79673022"
     },
     "scope": {
-     "as_of": "2026-09-07T07:22:22Z",
+     "as_of": "2026-09-07T08:04:12Z",
      "bundle_id": "acme_retail",
      "engine": "oracle",
      "publication_id": "pub_190192147fd7fd78",
@@ -823,7 +841,7 @@
     "timing": {
      "jobs": [],
      "stages_ms": {},
-     "total_ms": 0.1
+     "total_ms": 0.2
     },
     "warnings": [
      "catalog-mock seed: exact Concept id supplied by the runtime pin, not a semantic ranking",
@@ -851,7 +869,7 @@
       "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
      },
      "freshness": {
-      "as_of": "2026-09-07T07:22:22Z",
+      "as_of": "2026-09-07T08:04:12Z",
       "ok": true,
       "stale_after": "2026-12-31T00:00:00Z",
       "verdict": "FRESH"
@@ -992,6 +1010,7 @@
       "trusted_file_sha256": "d4584e831dff9f6a284b1f9116ca41a16cfc5c26ca377fa6faa46ea0e9b5c5e7"
      },
      "governance": {
+      "engine": "oracle",
       "items": [
        {
         "freshness": true,
@@ -1009,8 +1028,16 @@
         "trust_tier": true
        }
       ],
-      "note": "trust tier, verifications, full engine-specific provenance (resource/title/declaration + source_id/resolution or declared/intrinsic/resolves_to), freshness verdict AND stale_after, and replacement recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
-      "ok": true
+      "note": "trust tier, verifications, the engine's complete provenance item shape (every required key present, no extra key, every value equal: oracle declared/intrinsic/resolves_to, relational source_id/resolution/note), freshness as the whole {verdict, stale_after} record, and replacement, all recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
+      "ok": true,
+      "provenance_shape": [
+       "declaration",
+       "declared",
+       "intrinsic",
+       "resolves_to",
+       "resource",
+       "title"
+      ]
      },
      "paths": {
       "items": [
@@ -1108,7 +1135,7 @@
       "description": "nodes/edges WHERE bundle_id=@b AND publication_id=@p (full retained rows)",
       "engine": "hermetic-store",
       "error": null,
-      "intended_at": "2026-09-07T07:22:22.858051+00:00",
+      "intended_at": "2026-09-07T08:04:13.257122+00:00",
       "job_id": null,
       "location": null,
       "project": null,
@@ -1116,9 +1143,9 @@
       "rows": 153,
       "seq": 9,
       "state": "DONE",
-      "submitted_at": "2026-09-07T07:22:22.858095+00:00",
+      "submitted_at": "2026-09-07T08:04:13.257170+00:00",
       "terminal": true,
-      "terminal_at": "2026-09-07T07:22:22.858142+00:00"
+      "terminal_at": "2026-09-07T08:04:13.257210+00:00"
      }
     ],
     "note": "full retained rows, recomputed manifests/section hashes, scoped path endpoints/edges, SQL and declaration bytes compared to the trusted compilation of the pinned source; labels and digests alone are not accepted",
@@ -1147,12 +1174,12 @@
     ],
     "reached": true,
     "retained": {
-     "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/retrieval/retrieval_declaration-mismatch.json",
+     "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/retrieval/retrieval_declaration-mismatch.json",
      "redacted": true,
-     "sha256": "3b620c834b1bfa9618df15e71217759294432ffa70838963e6327cc36a9d3cd7"
+     "sha256": "e0d2145a838cfb2269b3c656a0e399d51fa6d6614f9fea223c0f1992aeb3ef35"
     },
     "scope": {
-     "as_of": "2026-09-07T07:22:22Z",
+     "as_of": "2026-09-07T08:04:12Z",
      "bundle_id": "acme_retail",
      "engine": "oracle",
      "publication_id": "pub_190192147fd7fd78",
@@ -1186,7 +1213,7 @@
   "reader": "MockReader",
   "reader_mode": "catalog-mock"
  },
- "chain": "okf_bq_graph.chain/0.5.2",
+ "chain": "okf_bq_graph.chain/0.5.3",
  "decisions": {
   "approved": "RELEASED",
   "declaration-mismatch": "REFUSED",
@@ -1194,7 +1221,7 @@
  },
  "engine": "oracle",
  "evidence": {
-  "journal": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/journal.jsonl",
+  "journal": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/journal.jsonl",
   "retained": [
    {
     "name": "catalog_list_0",
@@ -1214,21 +1241,21 @@
    },
    {
     "name": "retrieval_approved",
-    "sha256": "324bab06838eb981bfcbc687e0154422a5ce9ffbd0154788351d7b06d008a8f0"
+    "sha256": "8e0ab512102d5e8b567a204062f8b4a29b09f28f49430207ca35b6a15ed8755c"
    },
    {
     "name": "retrieval_sql-substitution",
-    "sha256": "4e227e1f2776d64eafe14410eca32c577868d0570ad33438eeb47f5ba7f9697c"
+    "sha256": "d56bea203317c4d42434550c2941c6376f5622b60f877f0d25c1826a79673022"
    },
    {
     "name": "retrieval_declaration-mismatch",
-    "sha256": "3b620c834b1bfa9618df15e71217759294432ffa70838963e6327cc36a9d3cd7"
+    "sha256": "e0d2145a838cfb2269b3c656a0e399d51fa6d6614f9fea223c0f1992aeb3ef35"
    }
   ],
-  "run_dir": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7",
+  "run_dir": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca",
   "unresolved_jobs": 0
  },
- "finished_at": "2026-09-07T07:22:22.860859+00:00",
+ "finished_at": "2026-09-07T08:04:13.260063+00:00",
  "graph_publication": {
   "bundle_id": "acme_retail",
   "compiler_version": "okf_bq_graph.compile/0.1.0",
@@ -1247,15 +1274,15 @@
     "DONE": 9
    },
    "entries": 9,
-   "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/journal.jsonl",
+   "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/journal.jsonl",
    "retained_files": 7,
    "unresolved": 0,
    "with_job_id": 0
   },
   "note": "every submitted job once, including empty/failed lookups; roles and (project, location, job_id) in journal.jsonl",
   "receipt": [
-   "okf_rcpt_f570932094e34d346f0dcc76_99cd3e4241cf8e0c",
-   "okf_rcpt_085244ab69069be70d6b294e_4d4d18a262e0a7a1"
+   "okf_rcpt_5fe3e82aff0b24cbe81aed5d_706d61100be82f90",
+   "okf_rcpt_cd13074bfe0f601a5152f364_e7f9f6a73f19189c"
   ],
   "refs": {},
   "unresolved": []
@@ -1268,7 +1295,7 @@
     "description": "publications WHERE bundle_id=@b AND publication_id=@p",
     "engine": "hermetic-store",
     "error": null,
-    "intended_at": "2026-09-07T07:22:22.613363+00:00",
+    "intended_at": "2026-09-07T08:04:13.010064+00:00",
     "job_id": null,
     "location": null,
     "project": null,
@@ -1276,9 +1303,9 @@
     "rows": 1,
     "seq": 1,
     "state": "DONE",
-    "submitted_at": "2026-09-07T07:22:22.613417+00:00",
+    "submitted_at": "2026-09-07T08:04:13.010122+00:00",
     "terminal": true,
-    "terminal_at": "2026-09-07T07:22:22.613463+00:00"
+    "terminal_at": "2026-09-07T08:04:13.010163+00:00"
    },
    {
     "actual": false,
@@ -1286,7 +1313,7 @@
     "description": "nodes WHERE node_id=@id AND publication_id=@p AND bundle_id=@b",
     "engine": "hermetic-store",
     "error": null,
-    "intended_at": "2026-09-07T07:22:22.613549+00:00",
+    "intended_at": "2026-09-07T08:04:13.010224+00:00",
     "job_id": null,
     "location": null,
     "project": null,
@@ -1294,9 +1321,9 @@
     "rows": 1,
     "seq": 2,
     "state": "DONE",
-    "submitted_at": "2026-09-07T07:22:22.613596+00:00",
+    "submitted_at": "2026-09-07T08:04:13.010266+00:00",
     "terminal": true,
-    "terminal_at": "2026-09-07T07:22:22.613630+00:00"
+    "terminal_at": "2026-09-07T08:04:13.010311+00:00"
    },
    {
     "actual": false,
@@ -1304,7 +1331,7 @@
     "description": "active_publication WHERE bundle_id=@b (observation only)",
     "engine": "hermetic-store",
     "error": null,
-    "intended_at": "2026-09-07T07:22:22.613692+00:00",
+    "intended_at": "2026-09-07T08:04:13.010371+00:00",
     "job_id": null,
     "location": null,
     "project": null,
@@ -1312,9 +1339,9 @@
     "rows": 1,
     "seq": 3,
     "state": "DONE",
-    "submitted_at": "2026-09-07T07:22:22.613732+00:00",
+    "submitted_at": "2026-09-07T08:04:13.010412+00:00",
     "terminal": true,
-    "terminal_at": "2026-09-07T07:22:22.613771+00:00"
+    "terminal_at": "2026-09-07T08:04:13.010451+00:00"
    },
    {
     "actual": false,
@@ -1322,7 +1349,7 @@
     "description": "nodes WHERE node_id=@id AND publication_id=@p (declaration)",
     "engine": "hermetic-store",
     "error": null,
-    "intended_at": "2026-09-07T07:22:22.679900+00:00",
+    "intended_at": "2026-09-07T08:04:13.077599+00:00",
     "job_id": null,
     "location": null,
     "project": null,
@@ -1330,9 +1357,9 @@
     "rows": 1,
     "seq": 4,
     "state": "DONE",
-    "submitted_at": "2026-09-07T07:22:22.680037+00:00",
+    "submitted_at": "2026-09-07T08:04:13.077718+00:00",
     "terminal": true,
-    "terminal_at": "2026-09-07T07:22:22.680320+00:00"
+    "terminal_at": "2026-09-07T08:04:13.077765+00:00"
    },
    {
     "actual": false,
@@ -1340,7 +1367,7 @@
     "description": "nodes/edges WHERE bundle_id=@b AND publication_id=@p (full retained rows)",
     "engine": "hermetic-store",
     "error": null,
-    "intended_at": "2026-09-07T07:22:22.680947+00:00",
+    "intended_at": "2026-09-07T08:04:13.078280+00:00",
     "job_id": null,
     "location": null,
     "project": null,
@@ -1348,9 +1375,9 @@
     "rows": 153,
     "seq": 5,
     "state": "DONE",
-    "submitted_at": "2026-09-07T07:22:22.680987+00:00",
+    "submitted_at": "2026-09-07T08:04:13.078315+00:00",
     "terminal": true,
-    "terminal_at": "2026-09-07T07:22:22.681028+00:00"
+    "terminal_at": "2026-09-07T08:04:13.078355+00:00"
    },
    {
     "actual": false,
@@ -1358,7 +1385,7 @@
     "description": "nodes WHERE node_id=@id AND publication_id=@p (declaration)",
     "engine": "hermetic-store",
     "error": null,
-    "intended_at": "2026-09-07T07:22:22.769300+00:00",
+    "intended_at": "2026-09-07T08:04:13.168233+00:00",
     "job_id": null,
     "location": null,
     "project": null,
@@ -1366,9 +1393,9 @@
     "rows": 1,
     "seq": 6,
     "state": "DONE",
-    "submitted_at": "2026-09-07T07:22:22.769442+00:00",
+    "submitted_at": "2026-09-07T08:04:13.168386+00:00",
     "terminal": true,
-    "terminal_at": "2026-09-07T07:22:22.769493+00:00"
+    "terminal_at": "2026-09-07T08:04:13.168448+00:00"
    },
    {
     "actual": false,
@@ -1376,7 +1403,7 @@
     "description": "nodes/edges WHERE bundle_id=@b AND publication_id=@p (full retained rows)",
     "engine": "hermetic-store",
     "error": null,
-    "intended_at": "2026-09-07T07:22:22.770037+00:00",
+    "intended_at": "2026-09-07T08:04:13.169018+00:00",
     "job_id": null,
     "location": null,
     "project": null,
@@ -1384,9 +1411,9 @@
     "rows": 153,
     "seq": 7,
     "state": "DONE",
-    "submitted_at": "2026-09-07T07:22:22.770073+00:00",
+    "submitted_at": "2026-09-07T08:04:13.169067+00:00",
     "terminal": true,
-    "terminal_at": "2026-09-07T07:22:22.770107+00:00"
+    "terminal_at": "2026-09-07T08:04:13.169111+00:00"
    },
    {
     "actual": false,
@@ -1394,7 +1421,7 @@
     "description": "nodes WHERE node_id=@id AND publication_id=@p (declaration)",
     "engine": "hermetic-store",
     "error": null,
-    "intended_at": "2026-09-07T07:22:22.857351+00:00",
+    "intended_at": "2026-09-07T08:04:13.256394+00:00",
     "job_id": null,
     "location": null,
     "project": null,
@@ -1402,9 +1429,9 @@
     "rows": 1,
     "seq": 8,
     "state": "DONE",
-    "submitted_at": "2026-09-07T07:22:22.857498+00:00",
+    "submitted_at": "2026-09-07T08:04:13.256540+00:00",
     "terminal": true,
-    "terminal_at": "2026-09-07T07:22:22.857579+00:00"
+    "terminal_at": "2026-09-07T08:04:13.256619+00:00"
    },
    {
     "actual": false,
@@ -1412,7 +1439,7 @@
     "description": "nodes/edges WHERE bundle_id=@b AND publication_id=@p (full retained rows)",
     "engine": "hermetic-store",
     "error": null,
-    "intended_at": "2026-09-07T07:22:22.858051+00:00",
+    "intended_at": "2026-09-07T08:04:13.257122+00:00",
     "job_id": null,
     "location": null,
     "project": null,
@@ -1420,60 +1447,60 @@
     "rows": 153,
     "seq": 9,
     "state": "DONE",
-    "submitted_at": "2026-09-07T07:22:22.858095+00:00",
+    "submitted_at": "2026-09-07T08:04:13.257170+00:00",
     "terminal": true,
-    "terminal_at": "2026-09-07T07:22:22.858142+00:00"
+    "terminal_at": "2026-09-07T08:04:13.257210+00:00"
    }
   ],
   "retained": [
    {
     "bytes": 628,
     "name": "catalog_list_0",
-    "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/catalog/catalog_list_0.json",
-    "retained_at": "2026-09-07T07:22:22.612703+00:00",
+    "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/catalog/catalog_list_0.json",
+    "retained_at": "2026-09-07T08:04:13.009324+00:00",
     "sha256": "38c230a7197cffe07ff1e51dacaac3f394bfc730421d4ad410be8fa3227b67ff"
    },
    {
     "bytes": 578,
     "name": "catalog_list_1",
-    "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/catalog/catalog_list_1.json",
-    "retained_at": "2026-09-07T07:22:22.612887+00:00",
+    "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/catalog/catalog_list_1.json",
+    "retained_at": "2026-09-07T08:04:13.009543+00:00",
     "sha256": "dbc2204a1e38afd45a6b685f2f925dedd6b3432ba5f3d2e0d48b14018c1774ea"
    },
    {
     "bytes": 445,
     "name": "catalog_list_2",
-    "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/catalog/catalog_list_2.json",
-    "retained_at": "2026-09-07T07:22:22.613038+00:00",
+    "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/catalog/catalog_list_2.json",
+    "retained_at": "2026-09-07T08:04:13.009703+00:00",
     "sha256": "2191a7102587e912d6994235c6f29edb769bd292dd9b6ec5f4cfd6696156c3eb"
    },
    {
     "bytes": 1549,
     "name": "catalog_entry",
-    "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/catalog/catalog_entry.json",
-    "retained_at": "2026-09-07T07:22:22.613209+00:00",
+    "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/catalog/catalog_entry.json",
+    "retained_at": "2026-09-07T08:04:13.009889+00:00",
     "sha256": "fb96b06a99bc8786b7bd6aa8e4e5cf92533193a50cc1111b09f064b538515402"
    },
    {
     "bytes": 4564,
     "name": "retrieval_approved",
-    "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/retrieval/retrieval_approved.json",
-    "retained_at": "2026-09-07T07:22:22.680822+00:00",
-    "sha256": "324bab06838eb981bfcbc687e0154422a5ce9ffbd0154788351d7b06d008a8f0"
+    "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/retrieval/retrieval_approved.json",
+    "retained_at": "2026-09-07T08:04:13.078159+00:00",
+    "sha256": "8e0ab512102d5e8b567a204062f8b4a29b09f28f49430207ca35b6a15ed8755c"
    },
    {
     "bytes": 4564,
     "name": "retrieval_sql-substitution",
-    "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/retrieval/retrieval_sql-substitution.json",
-    "retained_at": "2026-09-07T07:22:22.769898+00:00",
-    "sha256": "4e227e1f2776d64eafe14410eca32c577868d0570ad33438eeb47f5ba7f9697c"
+    "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/retrieval/retrieval_sql-substitution.json",
+    "retained_at": "2026-09-07T08:04:13.168876+00:00",
+    "sha256": "d56bea203317c4d42434550c2941c6376f5622b60f877f0d25c1826a79673022"
    },
    {
     "bytes": 3044,
     "name": "retrieval_declaration-mismatch",
-    "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/retrieval/retrieval_declaration-mismatch.json",
-    "retained_at": "2026-09-07T07:22:22.857915+00:00",
-    "sha256": "3b620c834b1bfa9618df15e71217759294432ffa70838963e6327cc36a9d3cd7"
+    "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/retrieval/retrieval_declaration-mismatch.json",
+    "retained_at": "2026-09-07T08:04:13.256980+00:00",
+    "sha256": "e0d2145a838cfb2269b3c656a0e399d51fa6d6614f9fea223c0f1992aeb3ef35"
    }
   ],
   "summary": {
@@ -1482,7 +1509,7 @@
     "DONE": 9
    },
    "entries": 9,
-   "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/journal.jsonl",
+   "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/journal.jsonl",
    "retained_files": 7,
    "unresolved": 0,
    "with_job_id": 0
@@ -1526,8 +1553,8 @@
   "mode": "same-requester",
   "note": "graph leg and receipt leg both under the operator's ADC credential"
  },
- "run_dir": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7",
- "run_id": "hermetic-20260907T072222Z-6debf8f7",
+ "run_dir": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca",
+ "run_id": "hermetic-20260907T080412Z-0b6692ca",
  "same_requester": {
   "reason": "hermetic mode: oracle graph + SDK SYNTHETIC emulation submit no BigQuery jobs",
   "status": "NOT_APPLICABLE"
@@ -1599,29 +1626,29 @@
    {
     "bytes": 628,
     "name": "catalog_list_0",
-    "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/catalog/catalog_list_0.json",
-    "retained_at": "2026-09-07T07:22:22.612703+00:00",
+    "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/catalog/catalog_list_0.json",
+    "retained_at": "2026-09-07T08:04:13.009324+00:00",
     "sha256": "38c230a7197cffe07ff1e51dacaac3f394bfc730421d4ad410be8fa3227b67ff"
    },
    {
     "bytes": 578,
     "name": "catalog_list_1",
-    "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/catalog/catalog_list_1.json",
-    "retained_at": "2026-09-07T07:22:22.612887+00:00",
+    "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/catalog/catalog_list_1.json",
+    "retained_at": "2026-09-07T08:04:13.009543+00:00",
     "sha256": "dbc2204a1e38afd45a6b685f2f925dedd6b3432ba5f3d2e0d48b14018c1774ea"
    },
    {
     "bytes": 445,
     "name": "catalog_list_2",
-    "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/catalog/catalog_list_2.json",
-    "retained_at": "2026-09-07T07:22:22.613038+00:00",
+    "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/catalog/catalog_list_2.json",
+    "retained_at": "2026-09-07T08:04:13.009703+00:00",
     "sha256": "2191a7102587e912d6994235c6f29edb769bd292dd9b6ec5f4cfd6696156c3eb"
    },
    {
     "bytes": 1549,
     "name": "catalog_entry",
-    "path": "evidence/catalog-chain/hermetic-20260907T072222Z-6debf8f7/catalog/catalog_entry.json",
-    "retained_at": "2026-09-07T07:22:22.613209+00:00",
+    "path": "evidence/catalog-chain/hermetic-20260907T080412Z-0b6692ca/catalog/catalog_entry.json",
+    "retained_at": "2026-09-07T08:04:13.009889+00:00",
     "sha256": "fb96b06a99bc8786b7bd6aa8e4e5cf92533193a50cc1111b09f064b538515402"
    }
   ],
@@ -1646,7 +1673,7 @@
   "status": "OK"
  },
  "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec",
- "started_at": "2026-09-07T07:22:22.548629+00:00",
+ "started_at": "2026-09-07T08:04:12.942922+00:00",
  "store": {
   "dataset": "hermetic-store (clean pinned compile as READY head)",
   "engine": "hermetic-store"

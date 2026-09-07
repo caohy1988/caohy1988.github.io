@@ -149,7 +149,7 @@ identity set is the 14 case jobs and does not include the pointer-lookup job, wh
 adds; the later changes (invocation-private and run-owned diagnostics, `approved` outage labelled NOT_REACHED) alter no
 recorded field of a passing run, so it was not re-run.
 
-## Catalog-seeded chain (2026-09-06, Slice A hermetic; runner `chain/0.5.2`)
+## Catalog-seeded chain (2026-09-06, Slice A hermetic; runner `chain/0.5.3`)
 
 `python3 -m okf_bq_graph.chain --seed-mode catalog` replaces the fixture seed with a **fresh Dataplex Catalog read**: paginated
 `entries.list` on the configured entry group selects the configured entry by exact name (no other entry body is fetched), then
@@ -187,13 +187,16 @@ scoped endpoints and LINKS_TO continuity, the computation's section membership, 
 the declaration's node id / file digest (also against the source manifest) / type / runtime / lifecycle / `stale_after` /
 parameters are all checked against the trusted projection. The separately selected computation object is re-verified byte
 for byte. The **disclosed `paths` list itself** is validated (scoped endpoints, LINKS_TO continuity, hop count, exact match
-with the computations' vias) and the **governance fields the caller consumes** — trust tier, verifications, the full
-engine-specific provenance (resource / title / declaration plus the fallback engine's `source_id` / `resolution` or the
-oracle's `declared` / `intrinsic` / `resolves_to`; an item without any engine field is a mismatch), freshness as the whole
-`{verdict, stale_after}` record at `scope.as_of`, deprecated-seed replacement, for the seed and each computation — are
-recomputed from the trusted VERIFIED_BY / DERIVES_FROM / RESOLVES_TO / LINKS_TO edges (Astra PR 41 P1 + re-review R1:
-computation-derived checks are not the returned payload, and a reduced field subset is not the field). The governed input
-itself is retained per case under `retrieval/retrieval_<case>.json` with its SHA-256, not only the re-read rows. `INCONSISTENT` leaves the case `NOT_BOUND`, never invokes the SDK, and grades `WRONG` (a reached stage that
+with the computations' vias) and the **governance fields the caller consumes** — trust tier, verifications, provenance,
+freshness as the whole `{verdict, stale_after}` record at `scope.as_of`, deprecated-seed replacement, for the seed and each
+computation — are recomputed from the trusted VERIFIED_BY / DERIVES_FROM / RESOLVES_TO / LINKS_TO edges. Provenance is
+checked against the **complete item shape of the engine that ran** (`scope.engine`): the oracle emits exactly
+`resource, title, declaration, declared, intrinsic, resolves_to`; the relational engines emit exactly
+`resource, title, declaration, resolution, source_id, note` (the note verbatim, `model.PROVENANCE_NOTE`). Every required key
+must be present, no other key may be present, and every value must equal the trusted one; an unknown engine has no shape
+and fails (Astra PR 41 P1, re-review R1 and re-review 2: computation-derived checks are not the returned payload, a reduced
+field subset is not the field, and a missing key is not an empty value). The governed input itself is retained per case
+under `retrieval/retrieval_<case>.json` with its SHA-256, not only the re-read rows. `INCONSISTENT` leaves the case `NOT_BOUND`, never invokes the SDK, and grades `WRONG` (a reached stage that
 contradicts the pinned publication is not an outage); `ERROR` is `NOT_REACHED`. Regressions cover: a P2 endpoint or a
 non-existent edge mixed into a P1 path, a section's text changed under its old hash and P1 labels, SQL changed after preflight
 under the old digest label, a declaration changed after preflight, a P2 result relabelled as P1, and a run with the guard
@@ -252,10 +255,14 @@ stamp, not a name:** every `Lifecycle` instance has an invocation stamp (`okf_ow
 on entries) written at creation; ownership of a pending create is persisted to `ownership.json` **before** the write, and a
 pending resource read back later is adopted **only** if it carries this invocation's stamp — a resource under the same
 (normalised) name with another or no stamp is `FOREIGN_PRESERVED`, left untouched, and blocks `COMPLETE` (Astra re-review R2:
-`review-run-A` and `review_run_a` share a dataset name but never a stamp). One absent readback does not close a create that
-may still be in flight: it is `ABSENT_UNSETTLED` and stays pending until `settle_s` (default 2 × the op timeout) has elapsed
-since the failed attempt, after which a still-absent resource is `NOT_APPLIED_AFTER_SETTLE`; a resource that appears in
-between is adopted by stamp and deleted on the next cleanup run (Astra re-review R3; cleanup is rerunnable). Job-backed
+`review-run-A` and `review_run_a` share a dataset name but never a stamp). A timed-out create is a **pending attempt** with
+its own `attempt_id` (passed to `create_dataset` / `create_entry`); an absent readback never closes it and **elapsed time is
+not an outcome**: it stays `ABSENT_PENDING` (receipt `INCOMPLETE`, `recheck_after_s = settle_s` only schedules the next look)
+until either the resource appears carrying this invocation's stamp (adopted and deleted on that cleanup run) or the adapter
+establishes through `attempt_outcome(kind, name, attempt_id)` that this exact attempt terminated without applying
+(`NOT_APPLIED_VERIFIED`). The in-memory fake returns no outcome by default, so a lost create stays pending across every
+rerun until it materialises; a real adapter may only answer from its own request/operation bookkeeping (Astra re-review R3
+and re-review 2; cleanup is rerunnable and a create that completes after any window is still owned and removed). Job-backed
 BigQuery operations (DDL, loads, inserts, updates, MERGE, SELECTs) get a driver-chosen `(project, location, job_id)` journaled
 before dispatch; a call that raises is reconciled through `job_state` (not found → `NOT_SUBMITTED`, DONE → `DONE`/`ERROR`,
 RUNNING → one cancel + readback → `CANCELLED`, unreadable / still running → `UNKNOWN`), and cleanup re-reads every unresolved
