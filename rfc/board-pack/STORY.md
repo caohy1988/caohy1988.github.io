@@ -2,7 +2,7 @@
 
 **Illustrative scenario.** Alder, Maya, the quote, spending proposal and figures are invented. They are not identified customer evidence or a real deployment.
 
-**Tone (2026-09-06 pass).** The reader-facing page uses plain language: what works today, what we still need to prove, what the Finance pilot is for. It carries no scoreboard labels, pull-request numbers, commit hashes or internal gate codes; evidence links use friendly text and point at the same recorded artifacts. The underlying claims and limits are unchanged.
+**Tone (2026-09-06 pass).** The reader-facing page uses plain language: what works today, what we still need to prove, what the Finance pilot is for. It carries no scoreboard labels, pull-request numbers, commit hashes or internal gate codes; evidence links use friendly text and point at the same recorded artifacts. The underlying claims and limits are unchanged. A later leadership pass the same day shortened the sentences further: each chain description states its three limits once, in one sentence, and the design section that describes the chain is titled for what actually ran, retrieval and calculation as one chain.
 
 ## The scene and arithmetic
 
