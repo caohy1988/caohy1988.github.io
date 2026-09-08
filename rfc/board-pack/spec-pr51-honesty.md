@@ -22,6 +22,11 @@ removed, every job it owned finished and accounted for, and nothing left outstan
   a catalog read; both legs ran under one operator, so no second identity or policy decision was involved; only the
   approved case ran, and the substituted-query and mismatched-declaration cases were not run in that window. A
   sentence that states the new fact without these is not honest enough to ship.
+  Every *independently readable* surface counts separately — comparison notes, diagram captions and plot notes,
+  section introductions and footer provenance — because a reader skims one without the others. A caveat in the main
+  body does not qualify a caption. Listing which access tests did not run is also not the same statement as which
+  cases were attempted: say plainly that only the success case ran. After adding an exception to a group of chains,
+  re-read the pronouns that follow it ("those chains") and re-scope them to the group actually meant.
 - **R28 — the combined bar is unchanged.** "One chain that does all of it at once — catalog discovery, a restricted
   identity and graph queries — on real cohort data" stays exactly as strong as before. No single chain has done both
   a live catalog read and a second identity, and now none has done all three. The connected-path bar and the
