@@ -313,3 +313,82 @@ def test_cost_per_success_must_declare_a_formula(plan):
     del next(c for c in broken["cost_cells"] if c["name"] == "cost_per_success")["formula"]
     with pytest.raises(ValueError, match="must state its formula"):
         sb.validate_plan(broken)
+
+
+# --- a later SELECTED fact state must render as one (PR 46 round 2, P2) -----------------------------
+
+SELECTED_VERSION = "okf_receipt_spike_20260905 @ snapshot 2026-09-07T22:00:00Z (fixture digest sha256:0f17ac…)"
+
+
+def _selected(plan, version=SELECTED_VERSION, keep_optional=True):
+    """The committed plan stays UNSELECTED; this is the shape a later selection would take."""
+    facts = copy.deepcopy(plan)["facts"]
+    facts["state"] = "SELECTED"
+    facts["selected_version"] = version
+    facts.pop("blocks", None)
+    if not keep_optional:
+        for key in ("why_it_matters", "what_is_missing", "how_to_select", "observed_in_the_retained_chain"):
+            facts.pop(key, None)
+    return dict(copy.deepcopy(plan), facts=facts)
+
+
+def test_the_committed_plan_is_still_unselected(plan):
+    """This slice fixes rendering. It does not select a fact version for the pack."""
+    assert plan["facts"]["state"] == "UNSELECTED"
+
+
+def test_a_selected_plan_validates(plan):
+    sb.validate_plan(_selected(plan))
+
+
+def test_a_selected_version_may_not_also_block_cells(plan):
+    broken = _selected(plan)
+    broken["facts"]["blocks"] = ["sqlchain_forced_c1"]
+    with pytest.raises(ValueError, match="still blocks cells"):
+        sb.validate_plan(broken)
+
+
+def test_a_selected_version_unblocks_the_consumer_cells(plan):
+    card = sb.build_card(_selected(plan))
+    assert card["facts"]["state"] == "SELECTED"
+    for cell in card["cells"]:
+        assert cell["fact_version_blocked"] is False
+        assert cell["blocked_by"] is None
+        assert "Select a fact-data version first" not in cell["how_to_fill"]
+    sb.assert_no_cell_is_filled(card)
+
+
+def test_markdown_reports_the_selected_state_and_its_version(plan):
+    """The render used to hardcode UNSELECTED, so the JSON and the Markdown disagreed."""
+    text = sb.render_markdown(sb.build_card(_selected(plan)))
+    assert "## Fact data — **SELECTED**" in text
+    assert "UNSELECTED" not in text
+    assert SELECTED_VERSION in text
+    assert "**Selected version.**" in text
+    assert "**Cells this blocks.** None" in text
+    assert "FACTS_UNSELECTED" not in text
+
+
+def test_markdown_renders_a_structured_selected_version(plan):
+    version = {"dataset": "okf_receipt_spike_20260905", "snapshot": "2026-09-07T22:00:00Z", "rows": 4211}
+    text = sb.render_markdown(sb.build_card(_selected(plan, version=version)))
+    for key, value in version.items():
+        assert f"* **{key}:** {value}" in text
+
+
+def test_selected_render_does_not_require_the_unselected_fields(plan):
+    """A selection makes "what is missing" and "how to select one" meaningless; they may be dropped."""
+    card = sb.build_card(_selected(plan, keep_optional=False))
+    text = sb.render_markdown(card)
+    assert "## Fact data — **SELECTED**" in text
+    assert SELECTED_VERSION in text
+    assert "**What is missing.**" not in text
+    assert "Cells this blocks.** None" in text
+
+
+def test_the_two_states_do_not_share_a_hardcoded_heading(plan):
+    unselected = sb.render_markdown(sb.build_card(plan))
+    selected = sb.render_markdown(sb.build_card(_selected(plan)))
+    assert "## Fact data — **UNSELECTED**" in unselected
+    assert "## Fact data — **SELECTED**" in selected
+    assert unselected != selected

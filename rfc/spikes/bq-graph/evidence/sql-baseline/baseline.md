@@ -20,7 +20,7 @@ The task releases a computed number, so a comparison needs the version of the fa
 
 **What is missing.** A data version. The retained chain names those seven tables as the computation's dependencies but pins no snapshot, no as-of and no row version for them, and its own top-level as_of is the run timestamp rather than a fact cutoff. Two runs weeks apart could compute different numbers from the same declaration and both verify.
 
-**What the retained chain does identify**, so the gap is a choice nobody has made rather than an unknown:
+**What the retained chain identifies**, so the gap is a choice nobody has made rather than an unknown:
 
 * Publication `okf-receipt-spike/acme-retail-derived/gross-margin-period` — the SDK receipt example's own fixture publication — a separate identity from the graph publication pub_190192147fd7fd78, joined to it only by the declaration file's bytes. Synthetic fixture: true.
 * SDK pin `6719eb535667963fa640dd4535e508b550eb6cb1`, dataset `test-project-0728-467323.okf_receipt_spike_20260905`, 7 fact tables: `fulfillment_cost`, `fx_daily_rates`, `order_lines`, `orders`, `payment_fees`, `products`, `shipment_cost`.
@@ -29,7 +29,7 @@ The task releases a computed number, so a comparison needs the version of the fa
 
 **Cells this blocks.** `sqlchain_forced_c1`, `sqlchain_forced_c5` — the full request-to-consumer comparison. The retrieval cells are unaffected: retrieval selects context, and returns the sanctioned SQL without executing it.
 
-**How to select one.** Name the fact dataset together with a reproducible version for it — a snapshot decorator, a table-copy revision or the digest of a loaded fixture - and record it beside the corpus pin. Cohort data for the Alder story has never been selected; that is a customer dependency, not an agent's choice.
+**How to select one.** Name the fact dataset together with a reproducible version for it — a snapshot decorator, a table-copy revision or the digest of a loaded fixture — and record it beside the corpus pin. Cohort data for the Alder story has never been selected; that is a customer dependency, not an agent's choice.
 
 ## Two latencies, never substituted
 

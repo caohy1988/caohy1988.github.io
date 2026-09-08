@@ -13,9 +13,11 @@ Three rules the code enforces rather than documents:
   The consumer runner does not exist yet, so those cells carry NOT_IMPLEMENTED and say what is missing.
 * Every number that was not measured is named. `UNMEASURED` cost cells are part of the card, not
   omitted from it, because an absent row reads as zero.
-* A workload field that has not been chosen says so. The corpus pin fixes the authored definitions and
-  the graph projection; it identifies no fact data, so `facts.state` is `UNSELECTED` and the cells it
-  blocks carry that reason rather than looking merely unrun.
+* A workload field that has not been chosen says so, and the card reports whichever state the plan is
+  actually in. The corpus pin fixes the authored definitions and the graph projection but identifies no
+  fact data, so the committed plan is `UNSELECTED` and the cells it blocks carry that reason rather than
+  looking merely unrun. A later `SELECTED` plan prints its version and blocks nothing, in the JSON and in
+  the Markdown alike — `_render_facts` branches on the state instead of assuming one.
 
 Nothing here opens a BigQuery client or spends anything. `python3 -m okf_bq_graph.sql_baseline`
 regenerates `evidence/sql-baseline/{plan.json,baseline.md}` offline.
@@ -98,6 +100,8 @@ def _validate_facts(plan: dict) -> None:
     if facts["state"] == "SELECTED":
         if not facts.get("selected_version"):
             raise ValueError("facts.state is SELECTED but no selected_version is recorded")
+        if facts.get("blocks"):
+            raise ValueError("facts.state is SELECTED but it still blocks cells: clear `blocks` or keep the state UNSELECTED")
         return
     for key in ("why_it_matters", "what_is_missing", "blocks", "how_to_select"):
         if not facts.get(key):
@@ -359,9 +363,56 @@ def _ms(value: float | None) -> str:
     return "—" if value is None else f"{value:,.0f}"
 
 
+def _render_selected_version(version: Any) -> list[str]:
+    if isinstance(version, dict):
+        return [f"* **{key}:** {value}" for key, value in version.items()]
+    return [f"`{version}`"]
+
+
+def _render_facts(card: dict) -> list[str]:
+    """Render whichever fact state the plan is actually in.
+
+    This used to hardcode UNSELECTED, so a plan that selected a version produced a card whose JSON
+    said SELECTED with the cells unblocked while its Markdown still said UNSELECTED and never
+    printed the version. Everything below is read from `facts`; optional sections appear only when
+    the plan carries them.
+    """
+    facts = card["facts"]
+    selected = facts["state"] == "SELECTED"
+    lines = [f"## Fact data — **{facts['state']}**", ""]
+    if selected:
+        lines += ["**Selected version.**"] + _render_selected_version(facts["selected_version"]) + [""]
+    for key, label in (("why_it_matters", None), ("what_is_missing", "**What is missing.** ")):
+        if facts.get(key):
+            lines += [f"{label or ''}{facts[key]}", ""]
+    obs = facts.get("observed_in_the_retained_chain")
+    if obs:
+        lines += [
+            "**What the retained chain identifies**"
+            + ("" if selected else ", so the gap is a choice nobody has made rather than an unknown") + ":",
+            "",
+            f"* Publication `{obs['publication_id']}` — {obs['publication_note']}."
+            f" Synthetic fixture: {str(obs['synthetic_fixture']).lower()}.",
+            f"* SDK pin `{obs['sdk_pin']}`, dataset `{obs['dataset']}`, "
+            f"{len(obs['tables'])} fact tables: {', '.join('`' + t + '`' for t in obs['tables'])}.",
+            f"* Derived from {obs['derived_from']}.",
+            f"* Read from `{obs['source']}`.",
+            "",
+        ]
+    if selected:
+        lines += ["**Cells this blocks.** None: a selected fact version blocks nothing. The request-to-consumer cells "
+                  "stay INCOMPLETE for their own reason, which the cell table gives.", ""]
+    else:
+        lines += [f"**Cells this blocks.** {', '.join('`' + b + '`' for b in facts['blocks'])} — the full "
+                  "request-to-consumer comparison. The retrieval cells are unaffected: retrieval selects context, and "
+                  "returns the sanctioned SQL without executing it.", ""]
+    if facts.get("how_to_select"):
+        lines += [f"**How {'it was selected' if selected else 'to select one'}.** {facts['how_to_select']}", ""]
+    return lines
+
+
 def render_markdown(card: dict) -> str:
     p = card["budget_projection"]
-    obs = card["facts"]["observed_in_the_retained_chain"]
     lines = [
         "# Ordinary-SQL baseline — predeclared, not measured",
         "",
@@ -382,27 +433,7 @@ def render_markdown(card: dict) -> str:
         f"{card['questions']['note']}",
         f"* **Concurrency.** {card['concurrency_note']}",
         "",
-        "## Fact data — **UNSELECTED**",
-        "",
-        f"{card['facts']['why_it_matters']}",
-        "",
-        f"**What is missing.** {card['facts']['what_is_missing']}",
-        "",
-        "**What the retained chain does identify**, so the gap is a choice nobody has made rather than an unknown:",
-        "",
-        f"* Publication `{obs['publication_id']}` — {obs['publication_note']}."
-        f" Synthetic fixture: {str(obs['synthetic_fixture']).lower()}.",
-        f"* SDK pin `{obs['sdk_pin']}`, dataset `{obs['dataset']}`, "
-        f"{len(obs['tables'])} fact tables: {', '.join('`' + t + '`' for t in obs['tables'])}.",
-        f"* Derived from {obs['derived_from']}.",
-        f"* Read from `{obs['source']}`.",
-        "",
-        f"**Cells this blocks.** {', '.join('`' + b + '`' for b in card['facts']['blocks'])} — the full "
-        "request-to-consumer comparison. The retrieval cells are unaffected: retrieval selects context, and returns "
-        "the sanctioned SQL without executing it.",
-        "",
-        f"**How to select one.** {card['facts']['how_to_select']}",
-        "",
+    ] + _render_facts(card) + [
         "## Two latencies, never substituted",
         "",
         f"* **`retrieval_ms`** — {card['metrics']['retrieval_ms']}",

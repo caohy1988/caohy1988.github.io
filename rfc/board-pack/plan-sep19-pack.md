@@ -27,9 +27,19 @@
     resolves on disk, and that every pinned GitHub blob URL into this repository names a path that exists at that
     revision in the local object store.
 
+## Owner-proxy review round 2 (APPROVE, 0 P0 / 0 P1 / 1 P2)
+
+13. **P2 — a later SELECTED fact state rendered as UNSELECTED.** `_validate_facts` accepted `SELECTED` with a
+    `selected_version` and `build_card` unblocked the consumer cells, but `render_markdown` hardcoded the heading and
+    the unselected-only sections and never printed the version: the JSON card and the Markdown card would have
+    disagreed. Rendering now branches on the actual state through `_render_facts`, prints the version as a string or
+    field by field, says "Cells this blocks. None" when a version is selected, and omits sections the plan does not
+    carry. `validate_plan` also refuses a `SELECTED` state that still lists `blocks`. Eight regressions cover the
+    SELECTED path; the committed plan stays `UNSELECTED` and its rendered card is unchanged apart from one clause.
+
 ## Verification results
 
-- `python3 -m pytest -q` in `rfc/spikes/bq-graph`: **498 passed** (448 before this slice, 50 new — 28 at `88d379b`, 22 added by the review round).
+- `python3 -m pytest -q` in `rfc/spikes/bq-graph`: **506 passed** (448 before this slice, 58 new — 28 at `88d379b`, 22 in review round 1, 8 in round 2).
 - `python3 -m okf_bq_graph.sql_baseline` regenerated into a temporary directory is byte-identical to the committed `evidence/sql-baseline/plan.json` and `baseline.md` (asserted by `test_committed_card_matches_its_generator`).
 - Board pack: `#sep19-envelope` is present and unique, every internal anchor resolves, every relative link resolves to a file on disk, the document parses, and no `<details>` wrapping is required for the card to be visible.
 
