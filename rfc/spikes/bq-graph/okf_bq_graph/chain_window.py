@@ -253,7 +253,9 @@ class ChainWindow:
         self._watchdog.start()
         try:
             self.jobs.check()
-            opened = self._opener(self.cfg.label, self.cfg.max_slots)
+            # The opener re-gates prior cleanup, so it must read the directory this controller preflighted against.
+            # Passing cfg through is what makes the two checks incapable of disagreeing about where receipts live.
+            opened = self._opener(self.cfg.label, self.cfg.max_slots, self.cfg.evidence_dir)
         except WindowStopped:
             self._provisioning_done.set()
             raise self._refuse("DEADLINE_DURING_OPENING", "the window deadline passed while capacity was being provisioned")

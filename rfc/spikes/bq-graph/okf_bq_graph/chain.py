@@ -281,7 +281,7 @@ def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner =
 
 
 # ----------------------------------------------------------------------------- consumer
-def consume(b: dict, rec: dict, authz: Optional[dict] = None) -> dict:
+def consume(b: dict, rec: dict, authz: Optional[dict] = None, containment: Optional[dict] = None) -> dict:
     """Deterministic consumer: every binding must hold or the number is withheld. Reasons name the failed check. When
     the chain runs under a requester broker, `authz` is the authorization probe taken under the requester's own
     credential at decision time (before execution, and again on a replay): anything but ALLOWED refuses, so a receipt
@@ -289,6 +289,10 @@ def consume(b: dict, rec: dict, authz: Optional[dict] = None) -> dict:
     reasons: list[str] = []
     if b.get("status") != "BOUND":
         reasons.append(f"bind status {b.get('status')}: declaration not bound to the executed publication")
+    # A receipt is only as good as the containment of the process that produced it. An uncontained child was neither
+    # bounded by the window deadline nor inventoried, so its verdict cannot authorize a release however well-formed.
+    if containment is not None and not containment.get("contained", True):
+        reasons.append(f"receipt containment failed: {containment.get('reason')}")
     if authz is not None and authz.get("status") != ALLOWED:
         reasons.append(f"authorization {authz.get('status')} at decision time: the requester's credential cannot read every dependency "
                        f"of the bound computation ({authz.get('denied', '?')} denied)")
@@ -383,6 +387,11 @@ def accept_restricted(c: dict) -> dict:
             not_reached.append("receipt not invoked")
         elif rec.get("exit_code") == -1 or not rec.get("diag_present"):
             not_reached.append(f"receipt child did not complete: exit_code={rec.get('exit_code')} diag_present={rec.get('diag_present')}")
+        # An uncontained child is a containment outage, not a contradicted expectation: the stage was never reached
+        # under the guarantees the case exists to demonstrate, so it is unproven rather than WRONG.
+        cont = rec.get("containment") or {}
+        if cont and not cont.get("contained", True):
+            not_reached.append(f"receipt child ran uncontained: {cont.get('reason')}")
         if not not_reached:
             if rec.get("exit_code") != 0:
                 failed.append(f"exit_code={rec.get('exit_code')} != 0")
@@ -463,6 +472,11 @@ def accept(c: dict) -> dict:
             not_reached.append("receipt not invoked")
         elif rec.get("exit_code") == -1 or not rec.get("diag_present"):
             not_reached.append(f"receipt child did not complete: exit_code={rec.get('exit_code')} diag_present={rec.get('diag_present')}")
+        # An uncontained child is a containment outage, not a contradicted expectation: the stage was never reached
+        # under the guarantees the case exists to demonstrate, so it is unproven rather than WRONG.
+        cont = rec.get("containment") or {}
+        if cont and not cont.get("contained", True):
+            not_reached.append(f"receipt child ran uncontained: {cont.get('reason')}")
     if case == "approved":
         if not not_reached:   # an unreached stage ends REFUSED by design: that is unproven, not contradictory
             if rec.get("exit_code") != 0:
@@ -872,6 +886,10 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                          "controller": (getattr(window, "record", {}) or {}).get("controller")}
     # ---- KTD3: the receipt child runs inside this window, or the run says so
     receipt_runner = runner
+
+    def _stamp_containment(rec: dict, launched_before: int) -> None:
+        """No bridge, no containment claim: an unbridged run records nothing rather than asserting it was contained."""
+
     if receipt_bridge is not None:
         status = (receipt_bridge.record or {}).get("status")
         out["receipt_bridge"] = {"status": status, "label": getattr(receipt_bridge, "label", None),
@@ -890,6 +908,13 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                                                "grant, query or SDK launch"}
             return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
         receipt_runner = receipt_bridge.runner()
+
+        def _stamp_containment(rec: dict, launched_before: int) -> None:
+            """Record whether THIS invocation's child actually ran inside the bridge, before the consumer decides."""
+            if not rec.get("invoked") or not hasattr(receipt_bridge, "containment"):
+                return
+            rec["containment"] = receipt_bridge.containment(since=launched_before)
+
         if window is not None:
             # stop reaches the child, close joins it BEFORE sealing, and its retained references are adopted
             window.register_worker("receipt_child", stop=receipt_bridge.stop, join=receipt_bridge.join,
@@ -1178,11 +1203,13 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             c["bind"] = bind(comp, decl, sdk_pub, as_of, source_pin=source_pin)
         if c["bind"]["status"] == "BOUND":
             sdk_case = "sql-substitution" if case == "sql-substitution" else "approved"
+            launched = len(getattr(receipt_bridge, "launches", ()) or ())
             c["receipt"] = run_receipt(sdk_case, sdk_root, receipt_dir, live, runner=receipt_runner)
+            _stamp_containment(c["receipt"], launched)
             c["receipt"]["diag"] = None if c["receipt"].get("diag") is None else f"see {c['receipt']['diag_path']}"
         else:
             c["receipt"] = {"invoked": False, "reason": "bind did not hold: nothing was executed"}
-        c["consume"] = consume(c["bind"], c["receipt"])
+        c["consume"] = consume(c["bind"], c["receipt"], containment=c["receipt"].get("containment"))
         c["acceptance"] = accept(c)
         return c
 
@@ -1221,8 +1248,10 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         if c["bind"]["status"] == "BOUND":
             c["authorization"] = broker.authorize(sdk_pub["dependencies"])
             if c["authorization"]["status"] == ALLOWED:
+                launched = len(getattr(receipt_bridge, "launches", ()) or ())
                 c["receipt"] = run_receipt("approved", sdk_root, receipt_dir, live, runner=receipt_runner,
                                            env_extra=broker.receipt_env(), label=case)
+                _stamp_containment(c["receipt"], launched)
                 c["receipt"]["diag"] = None if c["receipt"].get("diag") is None else f"see {c['receipt']['diag_path']}"
                 c["receipt_invocations"] = 1
             else:
@@ -1231,7 +1260,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             c["authorization"] = {"status": "NOT_RUN", "reason": "nothing bound: no dependency to authorize"}
             c["receipt"] = {"invoked": False, "reason": f"bind {c['bind']['status']}: nothing was executed"}
         az = c["authorization"] if c["authorization"].get("status") in (ALLOWED, DENIED, "UNKNOWN") else None
-        c["consume"] = consume(c["bind"], c["receipt"], az)
+        c["consume"] = consume(c["bind"], c["receipt"], az, containment=c["receipt"].get("containment"))
         if case == "revocation-before-replay":
             c["first_pass"] = {"decision": c["consume"]["decision"], "reasons": c["consume"]["reasons"],
                                "cache": (r.get("scope") or {}).get("cache"), "authorization": c["authorization"].get("status"),
@@ -1412,22 +1441,31 @@ def _graph_probe(client: Any) -> Optional[str]:
     return job.job_id
 
 
-def open_gql_window(label: str, minutes: int, manifest: str, evidence_dir: str, max_slots: int = 100) -> Any:
+def open_gql_window(label: str, minutes: int, manifest: str, evidence_dir: str, max_slots: int = 100,
+                    probe_attempts: int = 12, probe_seconds: float = 120.0) -> Any:
     """Build and open the owned Enterprise window the GQL chain admits against.
 
     Every gate lives in the controller: the exclusive lease, the prior-cleanup receipts read from `evidence_dir`, the
-    cumulative budget, the independent closer and the assignment probes. This function adds no waiver of its own."""
+    cumulative budget, the independent closer and the assignment probes. This function adds no waiver of its own.
+
+    `probe_attempts`/`probe_seconds` size only how long readiness may be WAITED for; the number of consecutive
+    successes that count as ready is not theirs to change, and the window's own `minutes` deadline stays the outer
+    bound. A raised budget is an authorization question - the measured cost is more probe jobs inside an
+    already-bounded paid window, not a weaker readiness test."""
     import subprocess as _sp
     from .chain_window import ChainWindow, WindowConfig
     from .reservation import close_window, open_window
 
-    cfg = WindowConfig(label=label, minutes=minutes, manifest=manifest, evidence_dir=evidence_dir, max_slots=max_slots)
+    cfg = WindowConfig(label=label, minutes=minutes, manifest=manifest, evidence_dir=evidence_dir, max_slots=max_slots,
+                       probe_attempts=probe_attempts, probe_seconds=probe_seconds)
 
     def watcher(window_label: str):
         script = Path(__file__).resolve().parents[1] / "bin" / "safety_teardown.sh"
         log = Path(evidence_dir) / "safety_teardown.log"
         with log.open("a") as fh:
-            _sp.Popen(["/bin/bash", str(script), str(os.getpid()), window_label, sys.executable],
+            # The detached closer is handed this window's OWN evidence directory: it journals there, so a watcher
+            # resolving `evidence/jobs_<label>.json` instead would find nothing to cancel and still delete capacity.
+            _sp.Popen(["/bin/bash", str(script), str(os.getpid()), window_label, sys.executable, str(evidence_dir)],
                       stdout=fh, stderr=_sp.STDOUT, start_new_session=True)
         return str(script)
 
@@ -1554,6 +1592,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--gql-evidence-dir", default="evidence",
                     help="where jobs_<label>.json cleanup receipts are read and written")
     ap.add_argument("--gql-max-slots", type=int, default=100)
+    ap.add_argument("--gql-probe-attempts", type=int, default=12,
+                    help="how many assignment probes may be spent waiting for readiness (default 12). This sizes the "
+                         "WAIT only: six consecutive successes are still required, and the window's own deadline is "
+                         "still the outer bound. Raising it is an authorization question, not a runner's default")
+    ap.add_argument("--gql-probe-seconds", type=float, default=120.0,
+                    help="how long assignment probing may run before it is abandoned (default 120s)")
     a = ap.parse_args(argv)
     if a.live and a.hermetic:
         ap.error("--live and --hermetic are exclusive")
@@ -1598,7 +1642,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         bridge = ReceiptBridge(a.sdk_root, label=a.gql_window,
                                deadline_epoch=time.time() + a.gql_window_minutes * 60,
                                directory=Path(out_dir) / "receipt-bridge" / a.gql_window)
-        record = bridge.handshake()
+        # probe the cwd the receipt child will actually run in: `run_receipt` launches with cwd=<sdk_root>
+        record = bridge.handshake(cwd=a.sdk_root)
         Path(out_dir).mkdir(parents=True, exist_ok=True)
         (Path(out_dir) / f"receipt_bridge_{a.gql_window}.json").write_text(
             json.dumps(record, indent=1, sort_keys=True, default=str) + "\n", encoding="utf-8")
@@ -1607,7 +1652,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             print("no window was opened; the live GQL chain stays blocked until the bridge is supported at an explicit pin")
             return 1
         try:
-            window = open_gql_window(a.gql_window, a.gql_window_minutes, a.gql_manifest, a.gql_evidence_dir, a.gql_max_slots)
+            window = open_gql_window(a.gql_window, a.gql_window_minutes, a.gql_manifest, a.gql_evidence_dir,
+                                     a.gql_max_slots, a.gql_probe_attempts, a.gql_probe_seconds)
             # the child's budget is the window's ACTUAL remaining time, in absolute wall-clock seconds
             bridge.deadline_epoch = time.time() + max(0.0, window.deadline - time.monotonic())
         except Exception as e:  # noqa: BLE001 - a refused window is reported, and the chain still records its refusal

@@ -70,7 +70,7 @@ def controller(tmp_path, *, manifest=None, minutes=10, opener=None, closer=None,
     return CW.ChainWindow(cfg, audit_seconds=audit_seconds, audit_max_reads=audit_max_reads,
                           ownership=ownership or (lambda: {"listing_ok": True, "present": False}),
                           rollback=rollback or (lambda label: {"removed": [], "preserved": []}),
-                          opener=opener or (lambda label, slots: {"label": label, "opened_at": OPEN_AT, "state": "OPEN", "steps": []}),
+                          opener=opener or (lambda label, slots, evidence_dir=None: {"label": label, "opened_at": OPEN_AT, "state": "OPEN", "steps": []}),
                           closer=closer or (lambda label: {"label": label, "verified_gone": True, "steps": []}),
                           probe=probe if probe is not None else (lambda client: "probe-job"),
                           clock=clock or time.monotonic, spawn_watcher=spawn_watcher,
@@ -196,7 +196,7 @@ def test_two_worktrees_share_one_canonical_ledger(tmp_path):
 def test_the_independent_closer_is_spawned_before_any_paid_resource(tmp_path):
     order = []
     cw = fast(tmp_path, spawn_watcher=lambda label: order.append(("watcher", label)),
-              opener=lambda label, slots: order.append(("open", label)) or {"opened_at": OPEN_AT, "state": "OPEN", "steps": []})
+              opener=lambda label, slots, evidence_dir=None: order.append(("open", label)) or {"opened_at": OPEN_AT, "state": "OPEN", "steps": []})
     cw.preflight()
     cw.open()
     assert [step[0] for step in order] == ["watcher", "open"]
@@ -237,7 +237,7 @@ def test_deadline_during_opening_refuses_and_closes(tmp_path):
     clock = [0.0]
     closed = []
 
-    def opener(label, slots):
+    def opener(label, slots, evidence_dir=None):
         clock[0] = 10_000        # the deadline passes while capacity is being provisioned
         raise L.WindowStopped("stopped")
 
@@ -634,7 +634,7 @@ def test_the_deadline_during_provisioning_is_exercised_with_one_shared_clock(tmp
     clock = [0.0]
     reached, closed = [], []
 
-    def opener(label, slots):
+    def opener(label, slots, evidence_dir=None):
         reached.append(label)
         clock[0] += 10_000          # the deadline passes DURING provisioning
         return {"opened_at": OPEN_AT, "state": "OPEN", "steps": []}
@@ -659,7 +659,7 @@ def test_a_create_collision_decides_ownership_before_waking_the_watchdog(tmp_pat
               "steps": [{"cmd": "bq mk --reservation --edition=ENTERPRISE okf-graph", "rc": 1,
                          "stderr": "BigQuery error: Reservation already exists", "stdout": ""}]}
 
-    def opener(label, slots):
+    def opener(label, slots, evidence_dir=None):
         cw.jobs.stop.set()          # a stop arrives during the collision, so the watchdog is ready to close
         return opened
 
@@ -923,3 +923,45 @@ def test_close_opens_a_bounded_read_only_audit_channel(tmp_path):
     assert not hasattr(audit, "query")
     with pytest.raises(AttributeError):
         audit.query("SELECT 1")
+
+
+def test_probe_budget_is_configurable_but_the_success_requirement_is_not():
+    """A raised probe budget sizes only the WAIT for assignment propagation.
+
+    Attempt 2 of the live Slice B run (2026-09-08) reached an ACTIVE assignment whose Graph queries were still
+    refused for ~93s, which consumed 8 of 12 probes and left 4 consecutive successes where 6 are required. Raising
+    the budget must therefore be expressible - and must not become a way to lower the bar for `ready`."""
+    from okf_bq_graph.chain import open_gql_window
+    import inspect
+    sig = inspect.signature(open_gql_window)
+    assert sig.parameters["probe_attempts"].default == 12, "the default budget stays B1's original 12"
+    assert sig.parameters["probe_seconds"].default == 120.0, "the default budget stays B1's original 120s"
+    cfg = CW.WindowConfig(label="w", minutes=10, manifest="m.json", evidence_dir="e",
+                          probe_attempts=24, probe_seconds=240.0)
+    assert (cfg.probe_attempts, cfg.probe_seconds) == (24, 240.0)
+    # the readiness bar is not part of the budget and is not raised or lowered with it
+    assert cfg.probe_successes == 6
+    assert cfg.describe()["probes"] == {"successes": 6, "attempts": 24, "interval_s": 10.0, "seconds": 240.0}
+
+
+def test_a_raised_probe_budget_still_requires_six_consecutive_successes(tmp_path):
+    """Five successes inside a 24-probe budget is still NOT ready: the budget cannot substitute for the streak."""
+    results = [False] * 8 + [True] * 5 + [False] + [True] * 5 + [False] * 5
+    calls = {"n": 0}
+
+    def probe(_client):
+        i = calls["n"]
+        calls["n"] += 1
+        if not results[i]:
+            raise RuntimeError("500 BigQuery Graph queries require a reservation with Enterprise edition")
+        return f"job-{i}"
+
+    cw = controller(tmp_path, opener=lambda *a: {"opened_at": OPEN_AT, "state": "OPEN", "steps": []},
+                    probe=probe, closer=lambda *a: {"verified_gone": True},
+                    probe_successes=6, probe_attempts=24, probe_seconds=240.0, probe_interval_s=0)
+    cw.preflight()
+    with pytest.raises(CW.WindowRefused) as e:
+        cw.open()
+    assert e.value.code == "ASSIGNMENT_NOT_READY"
+    # it kept probing past the old 12-attempt ceiling, and still refused on the streak rather than the budget
+    assert calls["n"] > 12

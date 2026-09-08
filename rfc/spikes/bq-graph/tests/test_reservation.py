@@ -182,3 +182,70 @@ def test_missing_or_stale_job_receipt_cannot_reopen(monkeypatch, tmp_path, damag
     with pytest.raises(RuntimeError, match='job cleanup'):
         R.open_window('new')
     assert run.main(['run', 'integration', '--minutes', '1']) == 1
+
+
+def _verified_pair(tmp_path, directory, label):
+    """A journal + verified cleanup receipt for `label`, written into `directory`."""
+    from types import SimpleNamespace
+    from okf_bq_graph import lifecycle as L
+    directory.mkdir(parents=True, exist_ok=True)
+    journal = directory / f'jobs_{label}.json'
+    journal.write_text(json.dumps({'label': label, 'project': L.PROJECT, 'location': L.LOCATION, 'job_ids': ['j']}))
+    client = SimpleNamespace(cancel_job=lambda *a, **kw: None,
+                             get_job=lambda *a, **kw: SimpleNamespace(state='DONE'))
+    L.cancel_journal(client, label, journal)
+    return journal
+
+
+def test_open_window_reads_receipts_from_the_evidence_dir_it_was_given(monkeypatch, tmp_path):
+    """A reconciled window's receipts gate the open from wherever the caller staged them.
+
+    The controller preflights against its configured `evidence_dir`; if the opener re-gates against the manifest's own
+    directory instead, a run whose receipts were reconciled into a subdirectory (PR50) is refused for a window whose
+    cleanup IS verified, and no live window can ever open."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / 'evidence').mkdir()
+    R._save({'windows': [{'label': 'old', 'opened_at': '2026-09-06T01:00:00Z',
+                          'closed_at': '2026-09-06T01:01:00Z', 'verified_gone': True}], 'resources': []})
+    staged = tmp_path / 'evidence' / 'legacy-reconcile'
+    _verified_pair(tmp_path, staged, 'old')
+    monkeypatch.setattr(R, '_bq', lambda *args: pytest.fail('must not create capacity'))
+    # the manifest's own directory holds no receipt for `old`, so the default gate still refuses
+    with pytest.raises(RuntimeError, match='job cleanup'):
+        R.open_window('new')
+    monkeypatch.setattr(R, '_bq', lambda *args: {'cmd': ' '.join(args), 'rc': 0, 'at': 't', 'stdout': '{}', 'stderr': ''})
+    assert R.open_window('new', evidence_dir=str(staged))['state'] == 'OPEN'
+
+
+def test_open_window_evidence_dir_relaxes_nothing(monkeypatch, tmp_path):
+    """Naming a directory is not a waiver: an unverified receipt there refuses exactly as the default does."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / 'evidence').mkdir()
+    R._save({'windows': [{'label': 'old', 'opened_at': '2026-09-06T01:00:00Z',
+                          'closed_at': '2026-09-06T01:01:00Z', 'verified_gone': True}], 'resources': []})
+    staged = tmp_path / 'evidence' / 'legacy-reconcile'
+    journal = _verified_pair(tmp_path, staged, 'old')
+    journal.with_suffix('.cleanup.json').unlink()
+    monkeypatch.setattr(R, '_bq', lambda *args: pytest.fail('must not create capacity'))
+    with pytest.raises(RuntimeError, match='job cleanup is unverified for old'):
+        R.open_window('new', evidence_dir=str(staged))
+
+
+def test_safety_watcher_reads_the_journal_from_the_configured_evidence_dir(monkeypatch, tmp_path):
+    """The independent closer must cancel the jobs the window actually journaled, wherever they were journaled.
+
+    The watcher is a different process spawned with only a label; if it resolves the journal against a directory the
+    window never used, it reports every owned job as unreadable and no cancellation is even attempted."""
+    from types import SimpleNamespace
+    from okf_bq_graph import lifecycle as L, safety
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / 'evidence').mkdir()
+    R._save({'windows': [{'label': 'w', 'steps': []}], 'resources': []})
+    staged = tmp_path / 'evidence' / 'legacy-reconcile'
+    staged.mkdir(parents=True)
+    (staged / 'jobs_w.json').write_text(json.dumps(
+        {'label': 'w', 'project': L.PROJECT, 'location': L.LOCATION, 'job_ids': ['j']}))
+    monkeypatch.setattr(R, '_bq', lambda *args: {'cmd': ' '.join(args), 'rc': 0, 'at': 't', 'stdout': '[]', 'stderr': ''})
+    monkeypatch.setattr(safety.bigquery, 'Client', lambda **kw: SimpleNamespace(
+        cancel_job=lambda *a, **kw: None, get_job=lambda *a, **kw: SimpleNamespace(state='DONE')))
+    assert safety.cleanup('w', attempts=1, evidence_dir=str(staged))

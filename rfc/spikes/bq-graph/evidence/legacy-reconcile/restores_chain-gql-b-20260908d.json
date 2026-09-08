@@ -1,0 +1,47 @@
+{
+  "label": "chain-gql-b-20260908d",
+  "project": "test-project-0728-467323",
+  "location": "US",
+  "at": "2026-09-08T17:46:13.535162+00:00",
+  "obligations": [
+    {
+      "name": "receipt_child:reconciliation",
+      "kind": "worker",
+      "worker": "receipt_child",
+      "ok": true,
+      "state": "RECONCILED",
+      "jobs": [],
+      "error": null
+    },
+    {
+      "name": "receipt_child:JOURNAL_DAMAGED:evidence/chain/receipt-bridge/chain-gql-b-20260908d/journal/launch_001.jsonl",
+      "ok": true,
+      "state": "OPERATOR_CLEARED",
+      "error": "a launch journal the parent allocated does not exist",
+      "journal": "evidence/chain/receipt-bridge/chain-gql-b-20260908d/journal/launch_001.jsonl",
+      "kind": "worker",
+      "cleared_at": "2026-09-08T18:31:39.043685+00:00",
+      "cleared_by": "Haiyuan via EM \u2014 journal RC+fail-closed landed @ 3e08448; unlock attempt 5",
+      "note": "reconcile showed 1 okf_rcpt DONE outside journal + 0 leaked/non-terminal; does not rewrite attempt-4 CHAIN_INCOMPLETE"
+    },
+    {
+      "name": "receipt_child:LAUNCH_UNJOURNALED:chain-gql-b-20260908d-001-e5cea54b",
+      "ok": true,
+      "state": "OPERATOR_CLEARED",
+      "error": "a launch produced no journal record at all: its submissions are unknown",
+      "journal": null,
+      "kind": "worker",
+      "cleared_at": "2026-09-08T18:31:39.043685+00:00",
+      "cleared_by": "Haiyuan via EM \u2014 journal RC+fail-closed landed @ 3e08448; unlock attempt 5",
+      "note": "reconcile showed 1 okf_rcpt DONE outside journal + 0 leaked/non-terminal; does not rewrite attempt-4 CHAIN_INCOMPLETE"
+    }
+  ],
+  "outstanding": [],
+  "note": "a resource this window changed and could not restore. Capacity deletion and job cleanup do not cover it; another window stays prohibited until it is cleared by an owned recovery.",
+  "operator_clear": {
+    "at": "2026-09-08T18:31:39.043685+00:00",
+    "by": "Haiyuan Cao (clear restores + kick live attempt 5)",
+    "reason": "journal path fix + fail-closed on PR51 @ 3e08448; unlock a5; attempt-4 story unchanged",
+    "backup": "restores_chain-gql-b-20260908d.json.pre-clear-20260908"
+  }
+}

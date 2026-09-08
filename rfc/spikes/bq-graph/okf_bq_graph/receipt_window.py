@@ -425,7 +425,12 @@ class ReceiptBridge:
         self.deadline_epoch = float(deadline_epoch)
         from . import LOCATION, PROJECT
         self.project, self.location = PROJECT, LOCATION
-        self.dir = Path(directory)
+        # ABSOLUTE, ALWAYS. This directory is handed to a child that runs with a DIFFERENT cwd (`run_receipt` launches
+        # the SDK example with cwd=<sdk_root>), and it is exported as the child's PYTHONPATH and journal path. A
+        # relative directory silently resolves against the SDK checkout there, so `usercustomize` is never importable,
+        # no guard installs and no journal is written - while the handshake, which runs with the PARENT's cwd, still
+        # reports SUPPORTED. That is exactly how the 2026-09-08 live run released a receipt from an uncontained child.
+        self.dir = Path(directory).resolve()
         self.email_scope, self.max_ops, self.max_jobs = email_scope, max_ops, max_jobs
         # ONE JOURNAL PER LAUNCH. The child's sequence counter restarts in every interpreter, so a shared file makes
         # two launches collide on `seq` and the second silently replaces the first (Astra PR47 #5).
@@ -440,8 +445,12 @@ class ReceiptBridge:
                                                        "never rebased onto a child-sampled start"}
 
     # ---------------------------------------------------------------- handshake
-    def handshake(self, python: Optional[str] = None, timeout: float = 60) -> dict:
-        """Preflight the pin, write the bootstrap, then prove IN A CHILD INTERPRETER that the guards installed."""
+    def handshake(self, python: Optional[str] = None, timeout: float = 60, cwd: Optional[str] = None) -> dict:
+        """Preflight the pin, write the bootstrap, then prove IN A CHILD INTERPRETER that the guards installed.
+
+        `cwd` must be the working directory the REAL child will run in. A handshake that runs with the parent's cwd
+        proves nothing about a child launched elsewhere: it was SUPPORTED for the 2026-09-08 live run whose child
+        never imported the bootstrap at all. It defaults to the SDK root, which is where `run_receipt` launches."""
         pre = preflight(self.sdk_root, self.example_rel)
         self.record["preflight"] = pre
         if pre["status"] != SUPPORTED:
@@ -458,8 +467,10 @@ class ReceiptBridge:
                  "                  'enable_user_site': bool(site.ENABLE_USER_SITE)}))\n")
         env = dict(os.environ, **self.probe_env())   # no launch is allocated and no journal is named
         try:
+            probe_cwd = cwd if cwd is not None else self.sdk_root
             proc = subprocess.run([python or sys.executable, "-c", probe], capture_output=True, text=True,
-                                  timeout=timeout, env=env)
+                                  timeout=timeout, env=env,
+                                  cwd=probe_cwd if probe_cwd and os.path.isdir(probe_cwd) else None)
         except (OSError, subprocess.TimeoutExpired) as e:
             self.record.update(status=UNSUPPORTED, reason=f"the handshake child did not complete: {type(e).__name__}")
             return self.record
@@ -649,6 +660,24 @@ class ReceiptBridge:
                          "state": pending.get("state", "UNRESOLVED"), "invocation": pending.get("invocation"),
                          "confirmed_submitted": False})
         return refs
+
+    def containment(self, since: int = 0) -> dict:
+        """Did every launch this parent allocated actually run INSIDE the bridge?
+
+        The child journals `bridge_installed` at interpreter start-up, before the SDK example runs. Its absence means
+        the guards never installed, so that child had no deadline, no admission bound and no journal - whatever it
+        submitted was neither bounded nor inventoried. That has to refuse the consumer at join time, not merely
+        surface afterwards as a cleanup obligation: on 2026-09-08 a receipt from an uncontained child was RELEASED
+        and only the closeout noticed."""
+        installed = {e.get("invocation") for e in self.entries() if e.get("event") == "bridge_installed"}
+        launches = [{"invocation": launch["invocation"], "journal": launch["journal"],
+                     "bridge_installed": launch["invocation"] in installed} for launch in self.launches[since:]]
+        uncontained = [launch for launch in launches if not launch["bridge_installed"]]
+        return {"contained": not uncontained, "launches": launches, "uncontained": uncontained,
+                "reason": None if not uncontained else
+                          ("the receipt child ran outside the window's containment: no bridge_installed record for "
+                           + ", ".join(u["invocation"] for u in uncontained)
+                           + ". Its submissions were neither bounded by the window deadline nor inventoried")}
 
     def obligations(self) -> list[dict]:
         """Evidence this bridge could not resolve into a job reference at all.

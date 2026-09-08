@@ -1,8 +1,9 @@
 {
  "acceptance": {
-  "approved": "MET"
+  "approved": "NOT_REACHED"
  },
- "as_of": "2026-09-08T18:35:15Z",
+ "as_of": "2026-09-08T17:14:54Z",
+ "broken_at": "window_cleanup",
  "bundle_id": "acme_retail",
  "cache_policy": {
   "exempt_cases": [
@@ -15,8 +16,10 @@
   {
    "acceptance": {
     "expected": "RELEASED",
-    "failed": [],
-    "status": "MET"
+    "failed": [
+     "receipt child did not complete: exit_code=1 diag_present=False"
+    ],
+    "status": "NOT_REACHED"
    },
    "attack": null,
    "bind": {
@@ -32,7 +35,7 @@
       "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
      },
      "freshness": {
-      "as_of": "2026-09-08T18:35:15Z",
+      "as_of": "2026-09-08T17:14:54Z",
       "ok": true,
       "stale_after": "2026-12-31T00:00:00Z",
       "verdict": "FRESH"
@@ -125,13 +128,23 @@
     ]
    },
    "consume": {
-    "decision": "RELEASED",
-    "display": "[LIVE] Gross margin: $400.00 USD \u00b7 VERIFIED",
-    "reasons": []
+    "decision": "REFUSED",
+    "reasons": [
+     "exit_code 1 != 0",
+     "receipt.verdict UNVERIFIABLE: consumer refuses on UNVERIFIABLE/REJECTED",
+     "output.verdict UNVERIFIABLE: consumer refuses on UNVERIFIABLE/REJECTED",
+     "execution_match UNKNOWN/UNKNOWN != MATCH",
+     "reason_codes diag_missing",
+     "computation_digest of the sealed receipt differs from the digest of the retrieved declaration bytes",
+     "publication_id of the receipt is not the bound SDK publication",
+     "context_ref of the receipt is not the bound SDK context_ref",
+     "CLI consumer did not report released=true",
+     "stdout is not exactly one VERIFIED release line"
+    ]
    },
    "declaration": {
     "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
-    "job_id": "okf_graph_chain-gql-b-20260908e_da0679ba7bff414d9c6004d97a5f8a28",
+    "job_id": "okf_graph_chain-gql-b-20260908c_4f57ee2ff9f64c219a2465b7dedd6fcf",
     "lifecycle_status": "stable",
     "node_id": "acme_retail|pub_190192147fd7fd78|Concept|computations/gross-margin-period",
     "parameters": [
@@ -162,21 +175,21 @@
     "jobs": [
      {
       "edition": "ENTERPRISE",
-      "job_id": "okf_graph_chain-gql-b-20260908e_06b5455cd9df4312a90c590bab05d997",
+      "job_id": "okf_graph_chain-gql-b-20260908c_093bcec4d8f64b648c56ffd19a8d0d8d",
       "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
       "stage": "walk",
       "state": "DONE"
      },
      {
       "edition": "ENTERPRISE",
-      "job_id": "okf_graph_chain-gql-b-20260908e_aed08d6394b54f5bbf002c712654e96b",
+      "job_id": "okf_graph_chain-gql-b-20260908c_0cf7be1d1eaa4e5d982539ff6d6c91cf",
       "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
       "stage": "context",
       "state": "DONE"
      },
      {
       "edition": "ENTERPRISE",
-      "job_id": "okf_graph_chain-gql-b-20260908e_7e616f82413047139cd57f81675125d9",
+      "job_id": "okf_graph_chain-gql-b-20260908c_7a60157c6ab74ed0b7b9071f6adb152b",
       "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
       "stage": "nodes",
       "state": "DONE"
@@ -214,75 +227,38 @@
      "--case",
      "approved",
      "--evidence-dir",
-     "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/chain/receipt/online-20260908T183515Z-41934161/.inv_approved_live_klg1v6ou",
+     "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/chain/receipt/online-20260908T171454Z-eea3f7f4/.inv_approved_live_4l8pnsba",
      "--live"
     ],
     "case": "approved",
-    "containment": {
-     "contained": true,
-     "launches": [
-      {
-       "bridge_installed": true,
-       "invocation": "chain-gql-b-20260908e-001-096418b6",
-       "journal": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/chain/receipt-bridge/chain-gql-b-20260908e/journal/launch_001.jsonl"
-      }
-     ],
-     "reason": null,
-     "uncontained": []
-    },
     "cwd": "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike",
-    "diag": "see /Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/chain/receipt/online-20260908T183515Z-41934161/case_approved_live.json",
-    "diag_path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/chain/receipt/online-20260908T183515Z-41934161/case_approved_live.json",
-    "diag_present": true,
-    "diag_sha256": "2bf0a04a705b37f10eb2eeb1648f3918ed919204bbdf1e313512c07c2f9e804d",
-    "elapsed_ms": 4074.7,
+    "diag": null,
+    "diag_path": null,
+    "diag_present": false,
+    "diag_sha256": null,
+    "elapsed_ms": 1098.7,
     "env_injected": [],
-    "exit_code": 0,
-    "invocation_dir": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/chain/receipt/online-20260908T183515Z-41934161/.inv_approved_live_klg1v6ou",
+    "exit_code": 1,
+    "invocation_dir": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/chain/receipt/online-20260908T171454Z-eea3f7f4/.inv_approved_live_4l8pnsba",
     "invoked": true,
     "live": true,
     "output": {
-     "access_probe": {
-      "outcome": "ALLOWED",
-      "output": "ALLOWED",
-      "probed_at": 1788892527,
-      "sources": "ALLOWED"
-     },
-     "execution_match": "MATCH",
-     "job": {
-      "job_id": "okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9",
-      "location": "US",
-      "project": "test-project-0728-467323"
-     },
-     "reason_codes": [],
-     "receipt_id": "rcpt-fd62661f63bd6f101716c1c0",
-     "request_id": "req-b647dd8a20992ef719e6d921",
-     "verdict": "VERIFIED"
+     "execution_match": "UNKNOWN",
+     "reason_codes": [
+      "diag_missing"
+     ],
+     "verdict": "UNVERIFIABLE"
     },
     "receipt": {
-     "attester_artifact_hash": "e9bb803540f56ceab8faaac915b9f6e72dd8d64fed7d1c6126b9c75ea1e9365e",
-     "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
-     "context_ref": "okf:acme-retail-derived#gross-margin-period",
-     "execution_match": "MATCH",
-     "expires_at": 1788892824,
-     "issued_at": 1788892526,
-     "job": {
-      "job_id": "okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9",
-      "location": "US",
-      "project": "test-project-0728-467323"
-     },
-     "policy_version": "okf-receipt-spike-policy/2026-09-05",
-     "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
-     "reason_codes": [],
-     "receipt_id": "rcpt-fd62661f63bd6f101716c1c0",
-     "request_id": "req-b647dd8a20992ef719e6d921",
-     "verdict": "VERIFIED"
+     "execution_match": "UNKNOWN",
+     "reason": "diag_missing",
+     "verdict": "UNVERIFIABLE"
     },
-    "released": true,
-    "request_id": "req-b647dd8a20992ef719e6d921",
+    "released": false,
+    "request_id": null,
     "retained_as": "approved",
-    "stderr_tail": "",
-    "stdout": "[LIVE] Gross margin: $400.00 USD \u00b7 VERIFIED\n"
+    "stderr_tail": "https://oauth2.googleapis.com/tokeninfo?access_token=\" + creds.token\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 189, in urlopen\n    return opener.open(url, data, timeout)\n           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 489, in open\n    response = self._open(req, data)\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 506, in _open\n    result = self._call_chain(self.handle_open, protocol, protocol +\n                              '_open', req)\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 466, in _call_chain\n    result = func(*args)\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 1367, in https_open\n    return self.do_open(http.client.HTTPSConnection, req,\n           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                        context=self._context)\n                        ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py\", line 1322, in do_open\n    raise URLError(err)\nurllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>\n",
+    "stdout": ""
    },
    "retrieval": {
     "computations": [
@@ -304,7 +280,7 @@
     ],
     "reached": true,
     "scope": {
-     "as_of": "2026-09-08T18:35:15Z",
+     "as_of": "2026-09-08T17:14:54Z",
      "bundle_id": "acme_retail",
      "engine": "gql",
      "publication_id": "pub_190192147fd7fd78",
@@ -334,62 +310,62 @@
        "bytes_billed": 20971520,
        "bytes_processed": 62507,
        "cache_hit": false,
-       "created": "2026-09-08T18:35:17.805000+00:00",
+       "created": "2026-09-08T17:14:56.958000+00:00",
        "edition": "ENTERPRISE",
-       "ended": "2026-09-08T18:35:19.498000+00:00",
+       "ended": "2026-09-08T17:14:58.992000+00:00",
        "error": null,
-       "job_id": "okf_graph_chain-gql-b-20260908e_06b5455cd9df4312a90c590bab05d997",
+       "job_id": "okf_graph_chain-gql-b-20260908c_093bcec4d8f64b648c56ffd19a8d0d8d",
        "location": "US",
        "project": "test-project-0728-467323",
        "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
-       "slot_ms": 19383,
+       "slot_ms": 26768,
        "stage": "walk",
-       "started": "2026-09-08T18:35:17.911000+00:00",
+       "started": "2026-09-08T17:14:57.057000+00:00",
        "state": "DONE"
       },
       {
        "bytes_billed": 20971520,
        "bytes_processed": 157239,
        "cache_hit": false,
-       "created": "2026-09-08T18:35:20.161000+00:00",
+       "created": "2026-09-08T17:14:59.753000+00:00",
        "edition": "ENTERPRISE",
-       "ended": "2026-09-08T18:35:21.340000+00:00",
+       "ended": "2026-09-08T17:15:00.432000+00:00",
        "error": null,
-       "job_id": "okf_graph_chain-gql-b-20260908e_aed08d6394b54f5bbf002c712654e96b",
+       "job_id": "okf_graph_chain-gql-b-20260908c_0cf7be1d1eaa4e5d982539ff6d6c91cf",
        "location": "US",
        "project": "test-project-0728-467323",
        "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
-       "slot_ms": 104,
+       "slot_ms": 101,
        "stage": "context",
-       "started": "2026-09-08T18:35:20.314000+00:00",
+       "started": "2026-09-08T17:14:59.900000+00:00",
        "state": "DONE"
       },
       {
        "bytes_billed": 10485760,
        "bytes_processed": 16752,
        "cache_hit": false,
-       "created": "2026-09-08T18:35:21.712000+00:00",
+       "created": "2026-09-08T17:15:00.759000+00:00",
        "edition": "ENTERPRISE",
-       "ended": "2026-09-08T18:35:22.093000+00:00",
+       "ended": "2026-09-08T17:15:01.173000+00:00",
        "error": null,
-       "job_id": "okf_graph_chain-gql-b-20260908e_7e616f82413047139cd57f81675125d9",
+       "job_id": "okf_graph_chain-gql-b-20260908c_7a60157c6ab74ed0b7b9071f6adb152b",
        "location": "US",
        "project": "test-project-0728-467323",
        "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
-       "slot_ms": 75,
+       "slot_ms": 82,
        "stage": "nodes",
-       "started": "2026-09-08T18:35:21.820000+00:00",
+       "started": "2026-09-08T17:15:00.872000+00:00",
        "state": "DONE"
       }
      ],
      "stages_ms": {
-      "assembly": 0.4,
-      "context": 2499.9,
-      "nodes": 2549.3,
+      "assembly": 0.1,
+      "context": 1951.6,
+      "nodes": 2489.0,
       "seed": 0.0,
-      "walk": 2283.7
+      "walk": 2869.5
      },
-     "total_ms": 4840.1
+     "total_ms": 5363.4
     },
     "warnings": [
      "forced seed: harness-only deterministic override, not a semantic ranking"
@@ -398,15 +374,16 @@
   }
  ],
  "chain": "okf_bq_graph.chain/0.11.0",
+ "cleanup_note": "the chain ran inside a window whose closeout is not complete: capacity, job cleanup, resource restoration or a worker join is outstanding, so this run is not a clean closeout whatever its case outcomes were",
  "decisions": {
-  "approved": "RELEASED"
+  "approved": "REFUSED"
  },
  "engine": "gql",
  "engine_admission": {
-  "assignment_probes": 12,
+  "assignment_probes": 14,
   "engine": "gql",
   "status": "OK",
-  "window": "chain-gql-b-20260908e",
+  "window": "chain-gql-b-20260908c",
   "window_state": "OPEN"
  },
  "engine_proof": {
@@ -418,12 +395,12 @@
   "status": "PROVEN"
  },
  "evidence": {
-  "journal": "evidence/chain/receipt/online-20260908T183515Z-41934161/journal.jsonl",
+  "journal": "evidence/chain/receipt/online-20260908T171454Z-eea3f7f4/journal.jsonl",
   "retained": [],
-  "run_dir": "evidence/chain/receipt/online-20260908T183515Z-41934161",
+  "run_dir": "evidence/chain/receipt/online-20260908T171454Z-eea3f7f4",
   "unresolved_jobs": 0
  },
- "finished_at": "2026-09-08T18:35:28.523911+00:00",
+ "finished_at": "2026-09-08T17:15:04.663912+00:00",
  "graph_publication": {
   "bundle_id": "acme_retail",
   "note": "fixture mode: the compiled/pointer publication checked against the module pin constant",
@@ -432,53 +409,65 @@
  },
  "job_inventory": {
   "graph": [
-   "okf_graph_chain-gql-b-20260908e_d53a5389bf6e4f4695820fb8bd0cefa9",
-   "okf_graph_chain-gql-b-20260908e_06b5455cd9df4312a90c590bab05d997",
-   "okf_graph_chain-gql-b-20260908e_aed08d6394b54f5bbf002c712654e96b",
-   "okf_graph_chain-gql-b-20260908e_7e616f82413047139cd57f81675125d9",
-   "okf_graph_chain-gql-b-20260908e_da0679ba7bff414d9c6004d97a5f8a28"
+   "okf_graph_chain-gql-b-20260908c_f89e7cd578dc49048bd5289386dddde9",
+   "okf_graph_chain-gql-b-20260908c_093bcec4d8f64b648c56ffd19a8d0d8d",
+   "okf_graph_chain-gql-b-20260908c_0cf7be1d1eaa4e5d982539ff6d6c91cf",
+   "okf_graph_chain-gql-b-20260908c_7a60157c6ab74ed0b7b9071f6adb152b",
+   "okf_graph_chain-gql-b-20260908c_4f57ee2ff9f64c219a2465b7dedd6fcf"
   ],
   "journal": {
    "actual_jobs": 0,
    "by_state": {},
    "entries": 0,
-   "path": "evidence/chain/receipt/online-20260908T183515Z-41934161/journal.jsonl",
+   "path": "evidence/chain/receipt/online-20260908T171454Z-eea3f7f4/journal.jsonl",
    "retained_files": 0,
    "unresolved": 0,
    "with_job_id": 0
   },
   "note": "every submitted job once, including empty/failed lookups; roles and (project, location, job_id) in journal.jsonl",
-  "receipt": [
-   "okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9"
-  ],
-  "receipt_child": [
-   "okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9"
-  ],
+  "receipt": [],
+  "receipt_child": [],
   "receipt_child_only": [],
   "receipt_child_operations": {
    "blocked": [],
-   "dry_runs": 2,
-   "operations": 13,
+   "dry_runs": 0,
+   "operations": 0,
    "refused": 0
   },
   "receipt_child_sealed_after_join": true,
-  "receipt_child_unresolved": [],
-  "receipt_refs": [
+  "receipt_child_unresolved": [
    {
-    "job_id": "okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9",
-    "location": "US",
-    "project": "test-project-0728-467323"
+    "error": "a launch journal the parent allocated does not exist",
+    "journal": "evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal/launch_001.jsonl",
+    "seq": null,
+    "state": "JOURNAL_DAMAGED"
+   },
+   {
+    "error": "a launch produced no journal record at all: its submissions are unknown",
+    "invocation": "chain-gql-b-20260908c-001-4c1c735f",
+    "seq": null,
+    "state": "LAUNCH_UNJOURNALED"
    }
   ],
+  "receipt_refs": [],
   "receipt_reported_only": [],
-  "refs": {
-   "okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9": {
-    "location": "US",
-    "project": "test-project-0728-467323",
-    "stage": "receipt_child"
+  "refs": {},
+  "unresolved": [
+   {
+    "error": "a launch journal the parent allocated does not exist",
+    "job_id": null,
+    "role": "receipt_child",
+    "seq": null,
+    "state": "JOURNAL_DAMAGED"
+   },
+   {
+    "error": "a launch produced no journal record at all: its submissions are unknown",
+    "job_id": null,
+    "role": "receipt_child",
+    "seq": null,
+    "state": "LAUNCH_UNJOURNALED"
    }
-  },
-  "unresolved": []
+  ]
  },
  "journal": {
   "jobs": [],
@@ -487,7 +476,7 @@
    "actual_jobs": 0,
    "by_state": {},
    "entries": 0,
-   "path": "evidence/chain/receipt/online-20260908T183515Z-41934161/journal.jsonl",
+   "path": "evidence/chain/receipt/online-20260908T171454Z-eea3f7f4/journal.jsonl",
    "retained_files": 0,
    "unresolved": 0,
    "with_job_id": 0
@@ -506,7 +495,7 @@
   "sdk_head_pin": true
  },
  "publication": {
-  "job_id": "okf_graph_chain-gql-b-20260908e_d53a5389bf6e4f4695820fb8bd0cefa9",
+  "job_id": "okf_graph_chain-gql-b-20260908c_f89e7cd578dc49048bd5289386dddde9",
   "matches_pin": true,
   "pin": "pub_190192147fd7fd78",
   "publication_id": "pub_190192147fd7fd78",
@@ -529,7 +518,7 @@
    "missing": []
   },
   "clock_domain": "absolute time.time() epoch seconds, supplied by the parent and never rebased onto a child-sampled start",
-  "label": "chain-gql-b-20260908e",
+  "label": "chain-gql-b-20260908c",
   "preflight": "SUPPORTED",
   "reason": null,
   "status": "SUPPORTED",
@@ -537,55 +526,47 @@
  },
  "receipt_bridge_journal": {
   "blocked": [],
-  "complete": true,
-  "damaged": [],
-  "dry_runs": 2,
-  "entries": 17,
-  "installed": true,
-  "jobs": [
+  "complete": false,
+  "damaged": [
    {
-    "id_mutated": false,
-    "invocation": "chain-gql-b-20260908e-001-096418b6",
-    "job_id": "okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9",
-    "location": "US",
-    "project": "test-project-0728-467323",
-    "requested_job_id": "okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9",
-    "state": "SUBMITTED"
+    "event": "journal_missing",
+    "journal": "evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal/launch_001.jsonl"
    }
   ],
-  "journal_dir": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/chain/receipt-bridge/chain-gql-b-20260908e/journal",
-  "journals": [
-   "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/chain/receipt-bridge/chain-gql-b-20260908e/journal/launch_001.jsonl"
-  ],
+  "dry_runs": 0,
+  "entries": 1,
+  "installed": true,
+  "jobs": [],
+  "journal_dir": "evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal",
+  "journals": [],
   "launches": 1,
   "note": "dry runs are bounded operations with no job id and never enter the cleanup or identity union; a lost real submission, a damaged journal and a silent launch all stay UNRESOLVED",
-  "operations": 13,
+  "operations": 0,
   "refused": 0,
-  "unresolved": []
+  "unresolved": [
+   {
+    "error": "a launch journal the parent allocated does not exist",
+    "journal": "evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal/launch_001.jsonl",
+    "seq": null,
+    "state": "JOURNAL_DAMAGED"
+   },
+   {
+    "error": "a launch produced no journal record at all: its submissions are unknown",
+    "invocation": "chain-gql-b-20260908c-001-4c1c735f",
+    "seq": null,
+    "state": "LAUNCH_UNJOURNALED"
+   }
+  ]
  },
  "requester": {
   "mode": "same-requester",
   "note": "graph leg and receipt leg both under the operator's ADC credential"
  },
- "run_dir": "evidence/chain/receipt/online-20260908T183515Z-41934161",
- "run_id": "online-20260908T183515Z-41934161",
+ "run_dir": "evidence/chain/receipt/online-20260908T171454Z-eea3f7f4",
+ "run_id": "online-20260908T171454Z-eea3f7f4",
  "same_requester": {
-  "graph_jobs": 5,
-  "jobs": {
-   "okf_graph_chain-gql-b-20260908e_06b5455cd9df4312a90c590bab05d997": "operator",
-   "okf_graph_chain-gql-b-20260908e_7e616f82413047139cd57f81675125d9": "operator",
-   "okf_graph_chain-gql-b-20260908e_aed08d6394b54f5bbf002c712654e96b": "operator",
-   "okf_graph_chain-gql-b-20260908e_d53a5389bf6e4f4695820fb8bd0cefa9": "operator",
-   "okf_graph_chain-gql-b-20260908e_da0679ba7bff414d9c6004d97a5f8a28": "operator",
-   "okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9": "operator"
-  },
-  "jobs_compared": 6,
-  "note": "operator ADC on both legs; the restricted SA is not exercised in this chain",
-  "receipt_jobs": 1,
-  "status": "SAME",
-  "user_email": [
-   "operator"
-  ]
+  "reason": "nothing to compare: graph_jobs=5 receipt_jobs=0",
+  "status": "UNKNOWN"
  },
  "scope": {
   "complete_suite": false,
@@ -634,57 +615,75 @@
   "approved"
  ],
  "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec",
- "started_at": "2026-09-08T18:35:15.460783+00:00",
- "verdict": "CHAIN_CONNECTED",
+ "started_at": "2026-09-08T17:14:54.401035+00:00",
+ "verdict": "CHAIN_INCOMPLETE",
  "verdict_rule": "CHAIN_CONNECTED only when provenance pins hold before any case executes, every case is MET (reached its stage with its specific evidence), no journaled job is left in an unverified (UNKNOWN) state and, live, every submitted job (pointer lookup, pin resolution, head observation, payload rows, retrieval, declaration, receipt) carries one known user_email; CHAIN_INCOMPLETE when a case never reached its stage (outage on any leg, including approved) or a job's server state was never reconciled; CHAIN_BROKEN when a reached stage contradicts the expectation, a payload is inconsistent with the pinned publication, or a pin/seed refuses (stale, invalid, unavailable, out of scope)",
  "window": {
   "bound_clients": [
    {
-    "bound_at": "2026-09-08T18:33:09.369859+00:00",
+    "bound_at": "2026-09-08T17:12:30.688922+00:00",
     "principal": null,
     "role": "operator",
     "submission_guarded": true,
     "type": "Client"
    },
    {
-    "bound_at": "2026-09-08T18:35:16.298604+00:00",
+    "bound_at": "2026-09-08T17:14:54.997453+00:00",
     "principal": null,
     "role": "requester",
     "submission_guarded": true,
     "type": "Client"
    }
   ],
-  "clean": true,
+  "clean": false,
   "cleanup": {
-   "adopted_jobs": [
-    "okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9"
-   ],
+   "adopted_jobs": [],
    "capacity_verified_gone": true,
-   "jobs_total": 7,
+   "jobs_total": 8,
    "jobs_unresolved": [],
-   "journal": "evidence/legacy-reconcile/jobs_chain-gql-b-20260908e.json",
+   "journal": "evidence/legacy-reconcile/jobs_chain-gql-b-20260908c.json",
    "note": "capacity deletion is not job cleanup, and neither covers a resource this window changed and could not restore: a failed restore is a durable obligation that blocks another window",
-   "receipt": "evidence/legacy-reconcile/jobs_chain-gql-b-20260908e.cleanup.json",
-   "restore_obligations": "evidence/legacy-reconcile/restores_chain-gql-b-20260908e.json",
+   "receipt": "evidence/legacy-reconcile/jobs_chain-gql-b-20260908c.cleanup.json",
+   "receipt_child_unresolved": 2,
+   "restore_obligations": "evidence/legacy-reconcile/restores_chain-gql-b-20260908c.json",
    "restores_failed": [],
-   "worker_obligations_outstanding": [],
-   "workers_unjoined": []
+   "worker_obligations_outstanding": [
+    "receipt_child:JOURNAL_DAMAGED:evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal/launch_001.jsonl",
+    "receipt_child:LAUNCH_UNJOURNALED:chain-gql-b-20260908c-001-4c1c735f"
+   ],
+   "workers_unjoined": [
+    "receipt_child:JOURNAL_DAMAGED:evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal/launch_001.jsonl",
+    "receipt_child:LAUNCH_UNJOURNALED:chain-gql-b-20260908c-001-4c1c735f"
+   ]
   },
   "controller": "okf_bq_graph.chain_window/0.1.0",
-  "label": "chain-gql-b-20260908e",
+  "label": "chain-gql-b-20260908c",
   "restores": [],
   "state": "CLOSED",
   "workers": [
    {
-    "jobs": [
-     "okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9"
-    ],
+    "jobs": [],
     "join": {
      "joined": true,
      "running": false
     },
     "name": "receipt_child",
-    "obligations": [],
+    "obligations": [
+     {
+      "error": "a launch journal the parent allocated does not exist",
+      "journal": "evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal/launch_001.jsonl",
+      "name": "JOURNAL_DAMAGED:evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal/launch_001.jsonl",
+      "ok": false,
+      "state": "JOURNAL_DAMAGED"
+     },
+     {
+      "error": "a launch produced no journal record at all: its submissions are unknown",
+      "journal": null,
+      "name": "LAUNCH_UNJOURNALED:chain-gql-b-20260908c-001-4c1c735f",
+      "ok": false,
+      "state": "LAUNCH_UNJOURNALED"
+     }
+    ],
     "stop_error": null,
     "stopped": true
    }
