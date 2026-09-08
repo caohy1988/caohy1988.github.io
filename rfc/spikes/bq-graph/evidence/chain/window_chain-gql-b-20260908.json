@@ -1,0 +1,101 @@
+{
+ "audit": {
+  "deadline": 1486885.322171459,
+  "max_reads": 200,
+  "note": "read-only; opened at close for the finalizer's audit and nothing else",
+  "seconds": 60
+ },
+ "budget": {
+  "ceiling_minutes": 120,
+  "cumulative_minutes_used": 19.35,
+  "granted_minutes": 10,
+  "note": "manifest intervals are the driver's own open/close clocks, not a platform billing figure; the remaining allowance is carried conservatively",
+  "requested_minutes": 10,
+  "reserve_minutes": 2
+ },
+ "clean": false,
+ "cleanup": {
+  "adopted_jobs": [],
+  "capacity_verified_gone": false,
+  "jobs_total": 0,
+  "jobs_unresolved": [],
+  "journal": "evidence/legacy-reconcile/jobs_chain-gql-b-20260908.json",
+  "note": "capacity deletion is not job cleanup, and neither covers a resource this window changed and could not restore: a failed restore is a durable obligation that blocks another window",
+  "receipt": "evidence/legacy-reconcile/jobs_chain-gql-b-20260908.cleanup.json",
+  "restore_obligations": null,
+  "restores_failed": [],
+  "worker_obligations_outstanding": [],
+  "workers_unjoined": []
+ },
+ "cleanup_channel": {
+  "deadline": null,
+  "jobs_submitted": 0,
+  "max_jobs": 20
+ },
+ "close_reason": "open_failed",
+ "config": {
+  "budget_minutes": 120,
+  "evidence_dir": "evidence/legacy-reconcile",
+  "label": "chain-gql-b-20260908",
+  "lease": "evidence/cleanup_manifest.lease",
+  "location": "US",
+  "manifest": "evidence/cleanup_manifest.json",
+  "max_slots": 100,
+  "minutes": 10,
+  "probes": {
+   "attempts": 12,
+   "interval_s": 10.0,
+   "seconds": 120.0,
+   "successes": 6
+  },
+  "project": "test-project-0728-467323",
+  "reservation": "okf-graph-spike-20260905"
+ },
+ "controller": "okf_bq_graph.chain_window/0.1.0",
+ "events": [
+  {
+   "at": "2026-09-08T14:13:34.299508+00:00",
+   "event": "preflight_ok",
+   "granted_minutes": 10
+  },
+  {
+   "at": "2026-09-08T14:13:39.345547+00:00",
+   "event": "stopped",
+   "workers": []
+  },
+  {
+   "at": "2026-09-08T14:13:39.348383+00:00",
+   "event": "capacity_close",
+   "verified_gone": false
+  },
+  {
+   "at": "2026-09-08T14:13:39.348999+00:00",
+   "event": "capacity_close",
+   "verified_gone": false
+  },
+  {
+   "at": "2026-09-08T14:13:39.349129+00:00",
+   "clean": false,
+   "event": "closed"
+  }
+ ],
+ "job_cancellation": [],
+ "ownership_precheck": {
+  "assignments": [],
+  "listing_ok": true,
+  "present": false,
+  "reservations": []
+ },
+ "restores": [],
+ "safety_watcher": {
+  "detail": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/bin/safety_teardown.sh",
+  "spawned": true
+ },
+ "state": "CLOSED",
+ "window_close": {
+  "error": "Traceback (most recent call last):\n  File \"/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/okf_bq_graph/chain_window.py\", line 478, in _close_capacity\n    closed = {k: v for k, v in self._closer(self.cfg.label).items() if k != \"steps\"}\n                               ~~~~~~~~~~~~^^^^^^^^^^^^^^^^\n  File \"/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/okf_bq_graph/reservation.py\", line 34, in locked\n    return fn(*args, **kwargs)\n  File \"/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/okf_bq_graph/reservation.py\", line 228, in close_window\n    raise ValueError(f\"unknown reservation window: {label}; use the original opening label\")\nValueError: unknown reservation window: chain-gql-b-20260908; use the original opening label\n",
+  "verified_gone": false
+ },
+ "worker_obligations": [],
+ "workers": []
+}
