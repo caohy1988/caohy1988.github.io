@@ -557,3 +557,228 @@ def test_capacity_bytes_are_preserved_by_a_reconciliation(tmp_path):
     before = manifest.read_bytes()
     RW.stage(run(transport=transport_for(owned_jobs())), tmp_path)
     assert manifest.read_bytes() == before
+
+
+# ----------------------------------------------------------------------------- campaign membership + window exclusivity
+CAMPAIGN = {"label_key": "okf_spike", "label_value": "bq_graph_20260905", "datasets": ["okf_graph_spike_20260905"]}
+W1 = {"label": "smoke-1", "opened_at": OPEN, "closed_at": CLOSE}
+W2 = {"label": "later-2", "opened_at": "2026-09-05T23:50:00Z", "closed_at": "2026-09-05T23:55:00Z"}
+
+
+def spike_job(job_id, *, created=OPEN, query=None, labels=None, **kw):
+    j = job(job_id, created=created, labels=labels, **kw)
+    j["configuration"]["query"] = {"query": query if query is not None else
+                                   "SELECT 1 FROM `p.okf_graph_spike_20260905.nodes`"}
+    return j
+
+
+def classify_one(j, label="smoke-1", windows=(W1, W2), **kw):
+    return RW.classify(j, label=label, start=RW._ts(OPEN), end=RW._ts(CLOSE), campaign=CAMPAIGN,
+                       windows=windows, **kw)
+
+
+def test_campaign_signal_reads_a_driver_label_a_query_and_a_load_destination():
+    assert "labels.okf_spike" in RW.campaign_signal(job("a", labels={"okf_spike": "bq_graph_20260905"}), CAMPAIGN)
+    assert "query text" in RW.campaign_signal(spike_job("b"), CAMPAIGN)
+    load = job("c")
+    load["configuration"]["load"] = {"destinationTable": {"datasetId": "okf_graph_spike_20260905"}}
+    assert "load job writes into" in RW.campaign_signal(load, CAMPAIGN)
+    # a job of a DIFFERENT spike on the same project is not campaign work
+    other = spike_job("d", query="SELECT 1 FROM `p.okf_receipt_spike_20260905.orders`")
+    assert RW.campaign_signal(other, CAMPAIGN) is None
+    assert RW.campaign_signal(spike_job("e"), None) is None       # no campaign configured: the signal is off
+
+
+def test_campaign_work_inside_exactly_one_recorded_interval_is_owned():
+    entry = classify_one(spike_job("x", created="2026-09-05T23:45:00Z"))
+    assert entry["ownership"] == RW.OWNED and entry["signal"] == "campaign_exclusive_window"
+    assert entry["evidence"]["containing_windows"] == ["smoke-1"]
+
+
+def test_a_job_with_no_campaign_signal_is_still_only_ambiguous_in_span():
+    """Time never owns a job on its own: the campaign signal is what the new rule adds, and without it nothing moves."""
+    entry = classify_one(job("y", created="2026-09-05T23:45:00Z"))
+    assert entry["ownership"] == RW.AMBIGUOUS and entry["signal"] == "in_span"
+
+
+def test_overlapping_recorded_intervals_make_the_claim_contested_not_owned():
+    overlapping = {"label": "later-2", "opened_at": "2026-09-05T23:44:00Z", "closed_at": "2026-09-05T23:50:00Z"}
+    entry = classify_one(spike_job("z", created="2026-09-05T23:45:00Z"), windows=(W1, overlapping))
+    assert entry["ownership"] == RW.AMBIGUOUS and entry["signal"] == "campaign_contested_window"
+    assert "later-2" in entry["reason"]
+
+
+def test_an_unbounded_opening_contests_every_instant():
+    """A window that was opened and never recorded a close cannot be shown to exclude a later job."""
+    unbounded = {"label": "later-2", "opened_at": "2026-09-05T23:50:00Z"}
+    entry = classify_one(spike_job("z", created="2026-09-05T23:45:00Z"), windows=(W1, unbounded))
+    assert entry["ownership"] == RW.AMBIGUOUS and entry["signal"] == "campaign_contested_window"
+    assert entry["evidence"]["unbounded_windows"] == ["later-2"]
+
+
+def test_campaign_work_under_another_opening_or_no_opening_is_excluded_with_a_reason():
+    other = classify_one(spike_job("a", created="2026-09-05T23:51:00Z"))
+    assert other["ownership"] == RW.EXCLUDED and other["signal"] == "campaign_other_window"
+    assert other["evidence"]["containing_windows"] == ["later-2"]
+    gap = classify_one(spike_job("b", created="2026-09-05T23:48:30Z"))
+    assert gap["ownership"] == RW.EXCLUDED and gap["signal"] == "campaign_outside_all_intervals"
+
+
+def test_a_job_on_this_reservation_outside_the_interval_stays_unresolved():
+    """The `okf_rcpt_*` tail: capacity deletion propagates late, so a job can carry a reservation the interval says was
+    already gone. That contradiction is surfaced, never resolved by the exclusion rule."""
+    j = spike_job("t", created="2026-09-05T23:48:30Z", reservation=f"p:US.{RW.RESERVATION}")
+    entry = classify_one(j)
+    assert entry["ownership"] == RW.AMBIGUOUS and entry["signal"] == "reservation_outside_interval"
+
+
+def test_a_closer_only_row_declares_no_interval_and_contests_nothing():
+    closer = {"label": "safety-0011", "closed_at": "2026-09-05T23:45:30Z"}
+    entry = classify_one(spike_job("x", created="2026-09-05T23:45:00Z"), windows=(W1, closer))
+    assert entry["ownership"] == RW.OWNED and entry["signal"] == "campaign_exclusive_window"
+    assert RW.containing_windows(RW._ts(OPEN), [closer]) == ([], [])
+
+
+def test_padding_widens_the_listing_but_never_an_ownership_claim():
+    """`pad_s` exists for clock skew between the local stamp and the service's creationTime. A job in the pad is read
+    (so it cannot hide), but it is outside the recorded interval and is not claimed by it."""
+    just_after = spike_job("p", created="2026-09-05T23:47:50Z")            # 30s past the recorded close
+    entry = RW.classify(just_after, label="smoke-1", start=RW._ts(OPEN) - _dt.timedelta(seconds=120),
+                        end=RW._ts(CLOSE) + _dt.timedelta(seconds=120), campaign=CAMPAIGN, windows=[W1])
+    assert entry["ownership"] == RW.EXCLUDED and entry["signal"] == "campaign_outside_all_intervals"
+
+
+def test_reconcile_owns_a_campaign_window_the_local_record_never_named(tmp_path):
+    jobs = [spike_job(f"uuid-{i}", created="2026-09-05T23:45:00Z") for i in range(3)]
+    result = RW.reconcile("smoke-1", transport=transport_for(jobs), window=window(), quiescence=quiescence(),
+                          campaign=CAMPAIGN, windows=[W1, W2])
+    assert result["status"] == RW.RECONCILED, result["blockers"]
+    assert result["owned"] == ["uuid-0", "uuid-1", "uuid-2"]
+    assert {e["signal"] for e in result["ledger"]} == {"campaign_exclusive_window"}
+    assert result["campaign"] == CAMPAIGN
+    assert RW.stage(result, tmp_path)["verified"] is True
+
+
+def test_reconcile_still_blocks_on_an_unresolved_neighbour_of_the_campaign(tmp_path):
+    jobs = [spike_job("uuid-0", created="2026-09-05T23:45:00Z"),
+            job("stranger", created="2026-09-05T23:45:01Z")]         # no campaign signal, inside the span
+    result = RW.reconcile("smoke-1", transport=transport_for(jobs), window=window(), quiescence=quiescence(),
+                          campaign=CAMPAIGN, windows=[W1, W2])
+    assert result["status"] == RW.BLOCKED
+    assert any("stranger" in b for b in result["blockers"])
+    assert RW.stage(result, tmp_path)["staged"] is False
+
+
+# ----------------------------------------------------------------------------- derived quiescence
+def probe_transport(jobs, **kw):
+    return transport_for(jobs, **kw)
+
+
+def local_record(source="window_all.log", stopped_at="2026-09-05T23:47:30Z", note=None):
+    return {"source": source, "stopped_at": stopped_at, "note": note}
+
+
+NOW = _dt.datetime(2026, 9, 8, 0, 0, tzinfo=_dt.timezone.utc)
+
+
+def test_quiescence_probe_derives_an_established_record_from_a_silent_platform():
+    q = RW.quiescence_probe(probe_transport([]), label="smoke-1", project=PROJ, window=W1, until=NOW,
+                            campaign=CAMPAIGN, windows=[W1, W2], local_record=local_record())
+    assert q["established"] is True and q["not_established_because"] == []
+    assert q["stopped_at"] == "2026-09-05T23:47:30+00:00"          # the named local record, later than the close
+    assert "jobs.list drain" in q["evidence"] and q["basis"] == "platform_probe+local_record"
+    assert q["local_record"]["gap"] is False
+    # and it is usable as the reconcile input, unchanged
+    result = RW.reconcile("smoke-1", transport=transport_for([spike_job("u", created="2026-09-05T23:45:00Z")]),
+                          window=window(), quiescence=q, campaign=CAMPAIGN, windows=[W1, W2])
+    assert result["status"] == RW.RECONCILED, result["blockers"]
+
+
+def test_an_attributable_tail_after_the_close_is_not_quiescence():
+    tail = spike_job("tail", created="2026-09-05T23:47:25Z", reservation=f"p:US.{RW.RESERVATION}")
+    q = RW.quiescence_probe(probe_transport([tail]), label="smoke-1", project=PROJ, window=W1, until=NOW,
+                            campaign=CAMPAIGN, windows=[W1, W2], local_record=local_record())
+    assert q["probe"]["attributable_after_close"][0]["ref"]["job_id"] == "tail"
+    assert q["stopped_at"] > "2026-09-05T23:47:25"                 # the stop moment moves to the tail we found
+
+
+def test_a_nonterminal_job_anywhere_refuses_quiescence():
+    running = spike_job("busy", created="2026-09-06T01:00:00Z", state="RUNNING")
+    q = RW.quiescence_probe(probe_transport([running]), label="smoke-1", project=PROJ, window=W1, until=NOW,
+                            campaign=CAMPAIGN, windows=[W1, W2], local_record=local_record())
+    assert q["established"] is False
+    assert any("non-terminal" in r for r in q["not_established_because"])
+
+
+def test_an_incomplete_probe_listing_is_never_silence():
+    t = FakeTransport(pages=[{"jobs": [], "nextPageToken": "1"}, {"jobs": []}], unreachable=["US"])
+    q = RW.quiescence_probe(t, label="smoke-1", project=PROJ, window=W1, until=NOW, campaign=CAMPAIGN,
+                            windows=[W1, W2], local_record=local_record())
+    assert q["established"] is False
+    assert any("incomplete" in r for r in q["not_established_because"])
+
+
+def test_a_short_silence_and_an_unnamed_local_record_both_refuse():
+    soon = _dt.datetime(2026, 9, 5, 23, 48, tzinfo=_dt.timezone.utc)
+    q = RW.quiescence_probe(probe_transport([]), label="smoke-1", project=PROJ, window=W1, until=soon,
+                            campaign=CAMPAIGN, windows=[W1, W2], local_record=local_record())
+    assert q["established"] is False and any("silence" in r for r in q["not_established_because"])
+    q2 = RW.quiescence_probe(probe_transport([]), label="smoke-1", project=PROJ, window=W1, until=NOW,
+                             campaign=CAMPAIGN, windows=[W1, W2], local_record={})
+    assert q2["established"] is False
+    assert any("no local shutdown record" in r for r in q2["not_established_because"])
+
+
+def test_a_retained_gap_in_the_local_record_is_reported_not_filled():
+    """`integration-0009` was killed by session teardown with no kill timestamp retained. The gap stays visible and the
+    stop moment falls back to what the platform shows."""
+    q = RW.quiescence_probe(probe_transport([]), label="smoke-1", project=PROJ, window=W1, until=NOW,
+                            campaign=CAMPAIGN, windows=[W1, W2],
+                            local_record=local_record(stopped_at=None, note="killed by session teardown"))
+    assert q["local_record"] == {"source": "window_all.log", "stopped_at": None, "gap": True,
+                                 "note": "killed by session teardown"}
+    assert q["established"] is True and q["stopped_at"] == RW._ts(CLOSE).isoformat()
+    assert "not proof that the original process object no longer exists" in q["limit"]
+
+
+# ----------------------------------------------------------------------------- plan construction
+def test_recover_job_ids_walks_the_whole_document_and_records_where_it_looked(tmp_path):
+    src = tmp_path / "all_x.json"
+    src.write_text(json.dumps({"assignment_ready_job": "a1",
+                               "cases": [{"timing": {"jobs": [{"job_id": "b1"}, {"job_id": "b2"}]}}],
+                               "nested": {"deep": {"deeper": [{"jobId": "c1"}]}},
+                               "not_a_job": "ignore-me"}))
+    ids = RW.recover_job_ids([src])
+    assert sorted(ids) == ["a1", "b1", "b2", "c1"]
+    assert ids["b1"] == [f"{src}#/cases/0/timing/jobs/0/job_id"]
+    sidecar = tmp_path / "s.jobids"
+    sidecar.write_text("d1\nd2\n")
+    assert sorted(RW.recover_job_ids([sidecar])) == ["d1", "d2"]
+    assert RW.recover_job_ids([tmp_path / "missing.json"]) == {}    # the read error surfaces through source_hashes
+
+
+def test_build_plan_derives_every_opening_and_declares_the_closer_row(tmp_path):
+    manifest = tmp_path / "cleanup_manifest.json"
+    manifest.write_text(json.dumps({"project": PROJ, "location": LOC, "windows": [
+        {"label": "smoke-1", "opened_at": OPEN, "closed_at": CLOSE, "verified_gone": True},
+        {"label": "safety-0011", "closed_at": "2026-09-05T23:50:00Z", "verified_gone": True},
+        {"label": "later-2", "opened_at": W2["opened_at"], "closed_at": W2["closed_at"], "verified_gone": True}]}))
+    (tmp_path / "smoke.jobids").write_text("okf_graph_smoke_ent_1\n")
+    plan = RW.build_plan(manifest, evidence_dir=tmp_path, campaign=CAMPAIGN,
+                         recover_from={"smoke-1": ["smoke.jobids"]},
+                         local_records={"smoke-1": local_record()})
+    assert [w["label"] for w in plan["windows"]] == ["smoke-1", "later-2"]      # the closer row is not an opening
+    assert [d["label"] for d in plan["declared"]] == ["smoke-1", "safety-0011", "later-2"]
+    smoke = plan["windows"][0]
+    assert smoke["recovered"] == ["okf_graph_smoke_ent_1"]
+    assert str(manifest) in smoke["sources"]                                    # the manifest is hashed per window
+    assert smoke["quiescence"]["probe"]["local_record"]["source"] == "window_all.log"
+    assert plan["built_from"][0]["sha256"] and plan["campaign"] == CAMPAIGN
+
+
+def test_build_plan_carries_operator_decisions_through_to_the_right_window(tmp_path):
+    manifest = tmp_path / "m.json"
+    manifest.write_text(json.dumps({"windows": [{"label": "smoke-1", "opened_at": OPEN, "closed_at": CLOSE}]}))
+    decision = {"stranger": {"ownership": RW.EXCLUDED, "reason": "a scheduled query of an unrelated pipeline"}}
+    plan = RW.build_plan(manifest, evidence_dir=tmp_path, decisions={"smoke-1": decision})
+    assert plan["windows"][0]["decisions"] == decision

@@ -213,10 +213,75 @@ def list_window(transport: Any, *, project: str, start: _dt.datetime, end: _dt.d
             "children": children, "listed": len(jobs), "complete": complete}
 
 
+# ----------------------------------------------------------------------------- campaign membership
+def _dataset_of(table: Any) -> Optional[str]:
+    return table.get("datasetId") if isinstance(table, dict) else None
+
+
+def campaign_signal(job: dict, campaign: Optional[dict]) -> Optional[str]:
+    """Positive evidence that a job belongs to a named measurement CAMPAIGN - never to a particular window.
+
+    A campaign is the whole spike (its driver label and its dataset); a window is one paid opening inside it. Keeping
+    the two apart is the point: campaign membership is what lets a window's inventory be reconstructed from platform
+    metadata, and window membership is then decided by the RECORDED capacity interval, in `classify`. Returns the
+    concrete reason, so the ledger records why a job was treated as campaign work, or None."""
+    if not campaign:
+        return None
+    key, value = campaign.get("label_key"), campaign.get("label_value")
+    if key and value is not None and _labels(job).get(key) == value:
+        return f"configuration.labels.{key} == {value!r}"
+    cfg = job.get("configuration") or {}
+    query, load, copy = cfg.get("query") or {}, cfg.get("load") or {}, cfg.get("copy") or {}
+    text = query.get("query") if isinstance(query.get("query"), str) else ""
+    for ds in campaign.get("datasets") or ():
+        if not ds:
+            continue
+        if ds in text:
+            return f"the query text references the campaign dataset {ds!r}"
+        # a LOAD/COPY job carries no query text: its destination is the only reference it has
+        for where, table in (("load", load.get("destinationTable")), ("copy", copy.get("destinationTable")),
+                             ("query", query.get("destinationTable"))):
+            if _dataset_of(table) == ds:
+                return f"the {where} job writes into the campaign dataset {ds!r}"
+    return None
+
+
+def _interval(w: dict) -> Optional[tuple]:
+    """One declared window's RECORDED capacity interval. Unpadded on purpose: padding exists to widen the LISTING
+    against clock skew, and must never widen an ownership claim."""
+    opened = w.get("opened_at")
+    if not opened:
+        return None                                     # a closer-only row is not an opening
+    try:
+        start = _ts(opened)
+        return (start, _ts(w["closed_at"]) if w.get("closed_at") else None)
+    except (TypeError, ValueError):
+        return None
+
+
+def containing_windows(created: Optional[_dt.datetime], windows: Iterable[dict]) -> tuple:
+    """(labels whose recorded interval contains this instant, labels whose interval could not be bounded).
+
+    An opening with no recorded close is UNBOUNDED: it cannot be shown to exclude any later instant, so it contests
+    every one of them rather than silently conceding the job to a neighbour."""
+    inside, unbounded = [], []
+    for w in windows:
+        span = _interval(w)
+        if span is None:
+            continue
+        start, end = span
+        if end is None:
+            unbounded.append(w.get("label"))
+        elif created is not None and start <= created <= end:
+            inside.append(w.get("label"))
+    return inside, unbounded
+
+
 # ----------------------------------------------------------------------------- ownership
 def classify(job: dict, *, label: str, start: _dt.datetime, end: _dt.datetime, recovered: frozenset = frozenset(),
              owned_parents: frozenset = frozenset(), reservation: str = RESERVATION,
-             decisions: Optional[dict] = None) -> dict:
+             decisions: Optional[dict] = None, campaign: Optional[dict] = None,
+             windows: Iterable[dict] = ()) -> dict:
     """One job's ownership decision, with the evidence that produced it.
 
     An explicit operator decision wins, but only when it carries a reason: a bare override is not evidence. Otherwise
@@ -247,7 +312,47 @@ def classify(job: dict, *, label: str, start: _dt.datetime, end: _dt.datetime, r
     if parent and parent in owned_parents:
         return {"ref": ref, "ownership": OWNED, "signal": "script_child", "reason": f"script child of owned parent {parent}"}
     reservation_id = _stats(job).get("reservation_id") or _stats(job).get("reservationId")
-    if reservation and isinstance(reservation_id, str) and reservation_id.endswith(reservation):
+    on_this_reservation = bool(reservation and isinstance(reservation_id, str) and reservation_id.endswith(reservation))
+
+    # Campaign membership + the RECORDED capacity interval. This is the only signal here that can own a job the local
+    # record never named, so all three legs have to hold: positive campaign evidence (a driver label or a reference to
+    # the campaign's own dataset), an instant inside THIS window's recorded interval, and no other declared window
+    # claiming that same instant. Time alone still owns nothing - `in_span` below remains AMBIGUOUS - and the padding
+    # that widens the listing is deliberately not applied here, so slack against clock skew can never widen a claim.
+    signal = campaign_signal(job, campaign)
+    windows = list(windows)
+    if signal and windows:
+        inside, unbounded = containing_windows(created, windows)
+        contested = sorted(set(inside + unbounded) - {label})
+        if label in inside and not contested:
+            return {"ref": ref, "ownership": OWNED, "signal": "campaign_exclusive_window",
+                    "reason": f"campaign work ({signal}) created inside the recorded capacity interval of {label!r} "
+                              f"and of no other declared window",
+                    "evidence": {"created": created.isoformat() if created else None,
+                                 "containing_windows": inside, "campaign_signal": signal}}
+        if label in inside:
+            return {"ref": ref, "ownership": AMBIGUOUS, "signal": "campaign_contested_window",
+                    "reason": f"campaign work inside {label!r} that {contested} also claim (overlapping or unbounded "
+                              f"recorded intervals): resolve it explicitly",
+                    "evidence": {"created": created.isoformat() if created else None,
+                                 "containing_windows": inside, "unbounded_windows": unbounded}}
+        if created is not None and not unbounded:
+            # campaign work that ran under some OTHER opening, or under no opening at all (an on-demand leg of the same
+            # driver run). Excluding it is a positive finding, not an inference from absence - but a job still routed
+            # to THIS window's reservation contradicts that reading and stays unresolved.
+            if on_this_reservation:
+                return {"ref": ref, "ownership": AMBIGUOUS, "signal": "reservation_outside_interval",
+                        "reason": f"campaign work on this window's reservation ({reservation_id}) created OUTSIDE its "
+                                  f"recorded capacity interval: the reservation and the interval disagree",
+                        "evidence": {"created": created.isoformat(), "containing_windows": inside}}
+            return {"ref": ref, "ownership": EXCLUDED,
+                    "signal": "campaign_other_window" if inside else "campaign_outside_all_intervals",
+                    "reason": (f"campaign work inside the recorded capacity interval of {inside} instead" if inside
+                               else "campaign work created outside every recorded capacity interval and routed to no "
+                                    "reservation of this window: a leg of the campaign, not of this paid opening"),
+                    "evidence": {"created": created.isoformat(), "containing_windows": inside,
+                                 "reservation_id": reservation_id}}
+    if on_this_reservation:
         return {"ref": ref, "ownership": AMBIGUOUS, "signal": "reservation_name",
                 "reason": "the job names this window's reservation, but a reservation name alone does not settle "
                           "ownership: resolve it explicitly with invocation evidence"}
@@ -307,21 +412,109 @@ def read_back(transport: Any, refs: list[dict]) -> list[dict]:
     return out
 
 
+# ----------------------------------------------------------------------------- quiescence
+def quiescence_probe(transport: Any, *, label: str, project: str, window: dict, until: Optional[_dt.datetime] = None,
+                     campaign: Optional[dict] = None, windows: Iterable[dict] = (), reservation: str = RESERVATION,
+                     recovered: Iterable[str] = (), decisions: Optional[dict] = None,
+                     local_record: Optional[dict] = None, min_silence_s: int = 3600,
+                     page_size: int = PAGE_SIZE, cap: int = LISTED_CAP) -> dict:
+    """DERIVE the quiescence input `reconcile` demands, from a drained listing of everything after the window closed.
+
+    `reconcile` refuses to treat quiescence as an operator opinion, and it is right to: "the submitters stopped" is the
+    assumption the whole inventory rests on. But the honest way to satisfy it is not a better assertion - it is to go
+    and look. This drains `jobs.list` from the recorded close to now and asks three separate questions:
+
+      * did anything ATTRIBUTABLE to this window appear after it closed? (a tail the inventory would have missed);
+      * is anything on this project still PENDING or RUNNING? (an in-flight job, whoever owns it);
+      * how long has the attributable stream been silent?
+
+    `established` needs all three to come back clean AND a named local record of the shutdown, because a long silence
+    is evidence that submission STOPPED, not proof that a process object no longer exists - and that distinction is
+    written into the returned record rather than smoothed over. Where the local record retained no stop timestamp (the
+    `integration-0009` teardown kill, say) the gap is reported as `local_stopped_at: null` with `gap: true`, and the
+    stop moment falls back to the last attributable job the platform actually shows. An incomplete listing is never
+    silence: it is `established: false` with the reason."""
+    until = until or _dt.datetime.now(_dt.timezone.utc)
+    closed = window.get("closed_at")
+    since = _ts(closed) if closed else _ts(window["opened_at"])
+    listing = drain_listing(transport, project=project, start=since, end=until, page_size=page_size, cap=cap)
+    reasons: list[str] = []
+    if not listing["complete"]:
+        reasons.append("the post-close listing is incomplete (page token, cap, unreachable location or transport "
+                       "error): an unread stream is not silence")
+
+    attributable, nonterminal, latest = [], [], None
+    for job in listing["jobs"]:
+        state = (job.get("status") or {}).get("state")
+        if state not in (DONE, None):
+            nonterminal.append({"ref": job_ref(job), "state": state})
+        entry = classify(job, label=label, start=_ts(window["opened_at"]), end=since,
+                         recovered=frozenset(r for r in recovered if r), reservation=reservation,
+                         decisions=decisions, campaign=campaign, windows=windows)
+        if entry["ownership"] == EXCLUDED:
+            continue
+        attributable.append({"ref": entry["ref"], "ownership": entry["ownership"], "signal": entry["signal"],
+                             "reason": entry["reason"]})
+        for stamp in (_created(job), _epoch_ms(_stats(job).get("endTime"))):
+            if stamp is not None and (latest is None or stamp > latest):
+                latest = stamp
+    if nonterminal:
+        reasons.append(f"{len(nonterminal)} job(s) on this project are still non-terminal after the window closed: "
+                       + ", ".join(sorted(f'{n["ref"]["job_id"]}={n["state"]}' for n in nonterminal))[:300])
+
+    record = dict(local_record or {})
+    local_stopped = record.get("stopped_at")
+    stamps = [s for s in (latest, _ts(local_stopped) if local_stopped else None, since) if s is not None]
+    stopped_at = max(stamps)
+    silence_s = (until - stopped_at).total_seconds()
+    if not record.get("source"):
+        reasons.append("no local shutdown record was named: the platform probe alone does not say WHICH process "
+                       "stopped, so name the launcher/session/driver artifact it corresponds to")
+    if silence_s < min_silence_s:
+        reasons.append(f"only {silence_s:.0f}s of attributable silence, less than the required {min_silence_s}s")
+
+    return {"established": not reasons,
+            "stopped_at": stopped_at.isoformat(),
+            "evidence": (f"derived by reconcile_window.quiescence_probe: a complete jobs.list drain of "
+                         f"{project} from {since.isoformat()} to {until.isoformat()} "
+                         f"({listing['pages']} page(s), {len(listing['jobs'])} job(s)) shows "
+                         f"{len(attributable)} job(s) attributable to {label!r} after it closed, "
+                         f"{len(nonterminal)} non-terminal job(s) project-wide, and {silence_s:.0f}s of silence; "
+                         f"local record: {record.get('source') or 'NONE'}"),
+            "basis": "platform_probe+local_record" if record.get("source") else "platform_probe",
+            "local_record": {"source": record.get("source"), "stopped_at": local_stopped,
+                             "gap": local_stopped is None, "note": record.get("note")},
+            "probe": {"project": project, "since": since.isoformat(), "until": until.isoformat(),
+                      "listing": {k: listing[k] for k in ("pages", "next_page_token", "unreachable", "error",
+                                                          "capped", "complete")},
+                      "listed": len(listing["jobs"]), "min_silence_s": min_silence_s, "silence_s": silence_s,
+                      "last_attributable_at": latest.isoformat() if latest else None,
+                      "attributable_after_close": attributable, "nonterminal": nonterminal},
+            "not_established_because": reasons,
+            "limit": "a silent, complete platform listing shows that submission STOPPED; it is not proof that the "
+                     "original process object no longer exists. Capacity absence is verified separately."}
+
+
 # ----------------------------------------------------------------------------- reconciliation
 def reconcile(label: str, *, transport: Any, window: dict, sources: Iterable[str | os.PathLike] = (),
               recovered: Iterable[str] = (), decisions: Optional[dict] = None,
               quiescence: Optional[dict] = None, project: str = PROJECT, location: str = LOCATION,
               reservation: str = RESERVATION, pad_s: int = PAD_S, page_size: int = PAGE_SIZE,
-              cap: int = LISTED_CAP, passes: int = 2) -> dict:
+              cap: int = LISTED_CAP, passes: int = 2, campaign: Optional[dict] = None,
+              windows: Iterable[dict] = ()) -> dict:
     """Reconstruct one window's job inventory read-only. Returns RECONCILED only when the inventory is complete AND
     every owned job read back terminal AND the original submitters are evidenced quiescent."""
     blockers: list[str] = []
+    windows = list(windows)
     opened, closed = window.get("opened_at"), window.get("closed_at")
     out: dict[str, Any] = {"label": label, "project": project, "location": location, "reconstructed": True,
                            "reconciled_at": _now(), "sources": source_hashes(sources),
                            "recovered_ids": sorted({r for r in recovered if r}),
                            "decisions": {k: dict(v) for k, v in (decisions or {}).items()},
                            "quiescence": dict(quiescence or {"established": False, "evidence": "not supplied"}),
+                           "campaign": dict(campaign) if campaign else None,
+                           "declared_windows": [{k: w.get(k) for k in ("label", "opened_at", "closed_at")}
+                                                for w in windows],
                            "procedure": "read-only jobs.list (all users, FULL, every page, script children) + jobs.get "
                                         "per owned qualified reference; no cancellation, deletion or submission"}
     if not opened:
@@ -376,7 +569,7 @@ def reconcile(label: str, *, transport: Any, window: dict, sources: Iterable[str
         latest = None
         for job in probe["jobs"]:
             entry = classify(job, label=label, start=start, end=end, recovered=frozenset(out["recovered_ids"]),
-                             reservation=reservation, decisions=decisions)
+                             reservation=reservation, decisions=decisions, campaign=campaign, windows=windows)
             if entry["ownership"] == EXCLUDED:
                 continue
             for stamp in (_created(job), _epoch_ms(_stats(job).get("endTime"))):
@@ -409,7 +602,8 @@ def reconcile(label: str, *, transport: Any, window: dict, sources: Iterable[str
     owned_parents: set = set()
     for _round in range(len(listing["jobs"]) + 1):     # to a fixpoint: a chain of script children resolves generation by generation
         ledger = [dict(classify(job, label=label, start=start, end=end, recovered=recovered_set,
-                                owned_parents=frozenset(owned_parents), reservation=reservation, decisions=decisions),
+                                owned_parents=frozenset(owned_parents), reservation=reservation, decisions=decisions,
+                                campaign=campaign, windows=windows),
                        source_job=job)
                   for job in listing["jobs"]]
         grown = {e["ref"]["job_id"] for e in ledger if e["ownership"] == OWNED and e["ref"].get("job_id")}
@@ -447,7 +641,8 @@ def reconcile(label: str, *, transport: Any, window: dict, sources: Iterable[str
         for extra in listings[1:]:
             for job in extra["jobs"]:
                 entry = classify(job, label=label, start=start, end=end, recovered=recovered_set,
-                                 owned_parents=frozenset(owned_parents), reservation=reservation, decisions=decisions)
+                                 owned_parents=frozenset(owned_parents), reservation=reservation, decisions=decisions,
+                                 campaign=campaign, windows=windows)
                 if entry["ownership"] != EXCLUDED:
                     later.add(entry["ref"].get("job_id"))
             if not extra["complete"]:
@@ -538,6 +733,86 @@ def reconcile(label: str, *, transport: Any, window: dict, sources: Iterable[str
     out["blockers"] = blockers
     out["status"] = RECONCILED if not blockers else BLOCKED
     return out
+
+
+# ----------------------------------------------------------------------------- plan construction
+_ID_KEYS = ("job_id", "jobId", "assignment_ready_job")
+
+
+def recover_job_ids(paths: Iterable[str | os.PathLike]) -> dict:
+    """Every job id the retained local evidence names, with the JSON pointer that named it.
+
+    The driver's per-run evidence files carry job ids at many depths (`timing.jobs[].job_id`, `assignment_ready_job`,
+    per-chain records), so this walks the whole document rather than a fixed shape: a leg whose ids sit somewhere the
+    walk does not reach is a leg silently missing from the reconstruction. A `.jobids` sidecar is read as one id per
+    line. Unreadable sources are reported, never skipped - `reconcile` blocks on them through `source_hashes`."""
+    found: dict[str, list] = {}
+
+    def note(value, pointer):
+        if isinstance(value, str) and value.strip():
+            found.setdefault(value.strip(), []).append(pointer)
+
+    def walk(node, pointer, path):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key in _ID_KEYS:
+                    note(value, f"{path}#{pointer}/{key}")
+                walk(value, f"{pointer}/{key}", path)
+        elif isinstance(node, list):
+            for i, value in enumerate(node):
+                walk(value, f"{pointer}/{i}", path)
+
+    for raw in paths:
+        path = Path(raw)
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue                                     # the hash record in `sources` carries the read error
+        if path.suffix == ".jobids":
+            for line in text.split():
+                note(line, f"{path}#line")
+            continue
+        try:
+            walk(json.loads(text), "", str(path))
+        except ValueError:
+            continue
+    return {k: sorted(set(v)) for k, v in found.items()}
+
+
+def build_plan(manifest_path: str | os.PathLike, *, evidence_dir: str | os.PathLike,
+               recover_from: Optional[dict] = None, campaign: Optional[dict] = None,
+               decisions: Optional[dict] = None, local_records: Optional[dict] = None,
+               extra_sources: Iterable[str | os.PathLike] = (), min_silence_s: int = 3600) -> dict:
+    """A reconciliation plan derived from the committed capacity manifest, not hand-written.
+
+    Every row with an `opened_at` becomes a window to reconcile - including any the operator forgot - and every row is
+    passed to each window as a DECLARED interval, which is what makes `classify`'s exclusivity check meaningful. A
+    closer-only row (no `opened_at`, like `safety-0011`) is carried in `declared` so it still contests instants, but is
+    never promoted to a window needing its own journal."""
+    manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    d = Path(evidence_dir)
+    declared = [{"label": w.get("label"), "opened_at": w.get("opened_at"), "closed_at": w.get("closed_at")}
+                for w in manifest.get("windows", [])]
+    shared = [str(Path(manifest_path))] + [str(d / s) for s in extra_sources]
+    windows = []
+    for row in manifest.get("windows", []):
+        label = row.get("label")
+        if not row.get("opened_at"):
+            continue
+        sources = [str(d / s) for s in (recover_from or {}).get(label, [])]
+        recovered = recover_job_ids(sources)
+        windows.append({
+            "label": label, "opened_at": row.get("opened_at"), "closed_at": row.get("closed_at"),
+            "sources": sorted(set(sources + shared)),
+            "recovered": sorted(recovered),
+            "recovered_pointers": recovered,
+            "decisions": (decisions or {}).get(label, {}),
+            "quiescence": {"probe": {"local_record": (local_records or {}).get(label, {}),
+                                     "min_silence_s": min_silence_s}},
+        })
+    return {"project": manifest.get("project", PROJECT), "location": manifest.get("location", LOCATION),
+            "campaign": campaign, "declared": declared, "windows": windows,
+            "built_at": _now(), "built_from": source_hashes([manifest_path])}
 
 
 # ----------------------------------------------------------------------------- staging
@@ -653,12 +928,28 @@ def main(argv: Optional[list[str]] = None) -> int:
         from google.cloud import bigquery
         transport = RestGetTransport(bigquery.Client(project=plan.get("project", PROJECT),
                                                      location=plan.get("location", LOCATION)))
+    project, location = plan.get("project", PROJECT), plan.get("location", LOCATION)
+    campaign, declared = plan.get("campaign"), plan.get("declared", [])
     results = []
     for w in plan.get("windows", []):
+        # quiescence stays an INPUT to `reconcile`; asking for `{"probe": {...}}` means "go and derive it from the
+        # platform" rather than "assume it", and the derived record - including why it was NOT established - is what
+        # gets handed in and retained.
+        quiescence = w.get("quiescence") or {}
+        if "probe" in quiescence:
+            spec = quiescence["probe"] or {}
+            quiescence = (quiescence_probe(transport, label=w["label"], project=project, window=w, campaign=campaign,
+                                           windows=declared, recovered=w.get("recovered", []),
+                                           decisions=w.get("decisions"), local_record=spec.get("local_record"),
+                                           min_silence_s=int(spec.get("min_silence_s", 3600)),
+                                           page_size=a.page_size, cap=a.cap)
+                          if transport is not None else
+                          {"established": False, "evidence": "no read-only GET transport: the probe did not run"})
         result = reconcile(w["label"], transport=transport, window=w, sources=w.get("sources", []),
                            recovered=w.get("recovered", []), decisions=w.get("decisions"),
-                           quiescence=w.get("quiescence"), project=plan.get("project", PROJECT),
-                           location=plan.get("location", LOCATION), pad_s=a.pad_s, page_size=a.page_size, cap=a.cap)
+                           quiescence=quiescence, project=project, location=location,
+                           campaign=campaign, windows=declared,
+                           pad_s=a.pad_s, page_size=a.page_size, cap=a.cap)
         staged = stage(result, a.stage_dir, replace_reconstruction=a.replace_reconstruction)
         Path(a.stage_dir).mkdir(parents=True, exist_ok=True)
         (Path(a.stage_dir) / f"reconcile_{w['label']}.json").write_text(
