@@ -15,38 +15,33 @@
     },
     {
       "name": "receipt_child:JOURNAL_DAMAGED:evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal/launch_001.jsonl",
-      "ok": false,
-      "state": "JOURNAL_DAMAGED",
+      "ok": true,
+      "state": "OPERATOR_CLEARED",
       "error": "a launch journal the parent allocated does not exist",
       "journal": "evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal/launch_001.jsonl",
-      "kind": "worker"
+      "kind": "worker",
+      "cleared_at": "2026-09-08T17:40:27.713742+00:00",
+      "cleared_by": "Haiyuan via EM \u2014 reconcile_receipt_child showed 0 unknown jobs",
+      "reconcile": "evidence/legacy-reconcile/reconcile_receipt_child_chain-gql-b-20260908c.json"
     },
     {
       "name": "receipt_child:LAUNCH_UNJOURNALED:chain-gql-b-20260908c-001-4c1c735f",
-      "ok": false,
-      "state": "LAUNCH_UNJOURNALED",
+      "ok": true,
+      "state": "OPERATOR_CLEARED",
       "error": "a launch produced no journal record at all: its submissions are unknown",
       "journal": null,
-      "kind": "worker"
+      "kind": "worker",
+      "cleared_at": "2026-09-08T17:40:27.713742+00:00",
+      "cleared_by": "Haiyuan via EM \u2014 reconcile_receipt_child showed 0 unknown jobs",
+      "reconcile": "evidence/legacy-reconcile/reconcile_receipt_child_chain-gql-b-20260908c.json"
     }
   ],
-  "outstanding": [
-    {
-      "name": "receipt_child:JOURNAL_DAMAGED:evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal/launch_001.jsonl",
-      "ok": false,
-      "state": "JOURNAL_DAMAGED",
-      "error": "a launch journal the parent allocated does not exist",
-      "journal": "evidence/chain/receipt-bridge/chain-gql-b-20260908c/journal/launch_001.jsonl",
-      "kind": "worker"
-    },
-    {
-      "name": "receipt_child:LAUNCH_UNJOURNALED:chain-gql-b-20260908c-001-4c1c735f",
-      "ok": false,
-      "state": "LAUNCH_UNJOURNALED",
-      "error": "a launch produced no journal record at all: its submissions are unknown",
-      "journal": null,
-      "kind": "worker"
-    }
-  ],
-  "note": "a resource this window changed and could not restore. Capacity deletion and job cleanup do not cover it; another window stays prohibited until it is cleared by an owned recovery."
+  "outstanding": [],
+  "note": "a resource this window changed and could not restore. Capacity deletion and job cleanup do not cover it; another window stays prohibited until it is cleared by an owned recovery.",
+  "operator_clear": {
+    "at": "2026-09-08T17:40:27.713742+00:00",
+    "by": "Haiyuan Cao (do all you think is necessary)",
+    "reason": "platform jobs.list 17:10\u201317:25Z: 19/19 journaled, 0 unknown; unlock attempt 4; does not rewrite CHAIN_INCOMPLETE",
+    "backup": "restores_chain-gql-b-20260908c.json.pre-clear-20260908"
+  }
 }
