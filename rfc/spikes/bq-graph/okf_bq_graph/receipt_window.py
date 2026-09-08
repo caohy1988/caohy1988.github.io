@@ -423,6 +423,8 @@ class ReceiptBridge:
                  example_rel: str = EXAMPLE_REL):
         self.sdk_root, self.label, self.example_rel = str(sdk_root), label, example_rel
         self.deadline_epoch = float(deadline_epoch)
+        from . import LOCATION, PROJECT
+        self.project, self.location = PROJECT, LOCATION
         self.dir = Path(directory)
         self.email_scope, self.max_ops, self.max_jobs = email_scope, max_ops, max_jobs
         # ONE JOURNAL PER LAUNCH. The child's sequence counter restarts in every interpreter, so a shared file makes
@@ -454,8 +456,7 @@ class ReceiptBridge:
                  "b = sys.modules.get('" + BRIDGE_MODULE + "')\n"
                  "print(json.dumps({'installed': (b.installed if b else []), 'imported': b is not None,\n"
                  "                  'enable_user_site': bool(site.ENABLE_USER_SITE)}))\n")
-        env = dict(os.environ, **self.child_env())
-        env.pop("OKF_WINDOW_JOURNAL", None)   # the handshake must not write into the run's own journal
+        env = dict(os.environ, **self.probe_env())   # no launch is allocated and no journal is named
         try:
             proc = subprocess.run([python or sys.executable, "-c", probe], capture_output=True, text=True,
                                   timeout=timeout, env=env)
@@ -517,23 +518,33 @@ class ReceiptBridge:
         return sorted(self.journal_dir.glob("launch_*.jsonl"))
 
     # ---------------------------------------------------------------- child contract
-    def child_env(self) -> dict:
-        """Nonsecret window identity for the child, plus the bootstrap on PYTHONPATH."""
-        if not self.launches:
-            self.next_launch()
+    def _env(self, *, invocation: str, journal: Optional[str]) -> dict:
         existing = os.environ.get("PYTHONPATH")
         env = {"PYTHONPATH": str(self.dir) + (os.pathsep + existing if existing else ""),
                "OKF_WINDOW_LABEL": self.label,
-               "OKF_WINDOW_INVOCATION": self.launches[-1]["invocation"],
+               "OKF_WINDOW_INVOCATION": invocation,
                "OKF_WINDOW_DEADLINE_EPOCH": repr(self.deadline_epoch),
                "OKF_WINDOW_STOP_FILE": str(self.stop_path),
-               "OKF_WINDOW_JOURNAL": str(self.journal_path),
                "OKF_WINDOW_EMAIL_SCOPE": "1" if self.email_scope else "0"}
+        if journal:
+            env["OKF_WINDOW_JOURNAL"] = journal
         if self.max_ops:
             env["OKF_WINDOW_MAX_OPS"] = str(self.max_ops)
         if self.max_jobs:
             env["OKF_WINDOW_MAX_JOBS"] = str(self.max_jobs)
         return env
+
+    def child_env(self) -> dict:
+        """Nonsecret window identity for the child, plus the bootstrap on PYTHONPATH."""
+        if not self.launches:
+            self.next_launch()
+        return self._env(invocation=self.launches[-1]["invocation"], journal=str(self.journal_path))
+
+    def probe_env(self) -> dict:
+        """The HANDSHAKE's environment. It allocates NO workload launch and names no journal, so the probe cannot
+        leave a permanently damaged/unjournaled launch behind in the workload inventory (Astra PR47 re-review R7).
+        The workload journal checks stay fail-closed: this env simply is not one of them."""
+        return self._env(invocation=f"{self.label}-handshake", journal=None)
 
     def stop(self) -> None:
         """Close the child's admission. Checked before every dispatch, including retries and result pages."""
@@ -620,8 +631,38 @@ class ReceiptBridge:
                         "a lost real submission, a damaged journal and a silent launch all stay UNRESOLVED"}
 
     def jobs(self) -> list[dict]:
-        """Qualified references the controller adopts into the window's cleanup union."""
-        return self.ingest()["jobs"]
+        """Every qualified reference the controller must adopt - CONFIRMED and PENDING alike.
+
+        A submission whose response was lost has a known intended id and an unknown server outcome. Handing the window
+        only the confirmed ones leaves that job outside the journal, the cleanup receipt and the reopening gate, so a
+        `clean` close would authorize another window over a job nobody read back (Astra PR47 re-review R1)."""
+        ingested = self.ingest()
+        refs = [dict(job) for job in ingested["jobs"]]
+        known = {job["job_id"] for job in refs}
+        for pending in ingested["unresolved"]:
+            job_id = pending.get("requested_job_id") or pending.get("job_id")
+            if not job_id or job_id in known:
+                continue
+            known.add(job_id)
+            refs.append({"job_id": job_id, "project": pending.get("project") or self.project,
+                         "location": pending.get("location") or self.location,
+                         "state": pending.get("state", "UNRESOLVED"), "invocation": pending.get("invocation"),
+                         "confirmed_submitted": False})
+        return refs
+
+    def obligations(self) -> list[dict]:
+        """Evidence this bridge could not resolve into a job reference at all.
+
+        A damaged or entirely silent launch journal hides submissions that have no id to adopt. It is an outstanding
+        obligation in its own right, and it must reach the durable reopening gate rather than only the chain record."""
+        out = []
+        for pending in self.ingest()["unresolved"]:
+            if pending.get("requested_job_id") or pending.get("job_id"):
+                continue                       # already carried as a reference by `jobs()`
+            out.append({"name": f"{pending.get('state', 'UNRESOLVED')}:{pending.get('invocation') or pending.get('journal')}",
+                        "ok": False, "state": pending.get("state"), "error": pending.get("error"),
+                        "journal": pending.get("journal")})
+        return out
 
     def join(self, timeout: float = 30.0) -> dict:
         """Join the running child before the parent seals its cleanup union.

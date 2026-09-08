@@ -244,9 +244,23 @@ def test_script_children_are_listed_and_owned():
     assert out["owned"] == ["child_of_script", "grandchild", "okf_graph_smoke-1_script"]
 
 
-def test_a_script_parent_with_no_declared_child_count_cannot_be_reconciled():
-    """Without `numChildJobs` an exhausted child page proves nothing about membership."""
-    parent = job("okf_graph_smoke-1_script", children=True)
+def test_an_ordinary_script_leaf_is_not_mistaken_for_a_parent():
+    """Astra PR47 re-review P2: `scriptStatistics` is a CHILD's own context. A terminal leaf declares no children of
+    its own, and reading it as an undeclared parent blocked a perfectly good reconciliation."""
+    parent = job("okf_graph_smoke-1_script")
+    parent["statistics"]["numChildJobs"] = "1"
+    leaf = job("script_leaf", parent="okf_graph_smoke-1_script", children=True)   # scriptStatistics, no numChildJobs
+    t = FakeTransport(pages=[{"jobs": [parent]}], children={"okf_graph_smoke-1_script": [{"jobs": [leaf]}]},
+                      get={j["jobReference"]["jobId"]: j for j in (parent, leaf)})
+    out = run(transport=t)
+    assert out["status"] == RW.RECONCILED, out["blockers"]
+    assert out["owned"] == ["okf_graph_smoke-1_script", "script_leaf"]
+    assert not [c for c in t.calls if c["parent_job_id"] == "script_leaf"], "a leaf has no child listing to drain"
+
+
+def test_a_parent_that_declares_children_but_produces_none_blocks():
+    parent = job("okf_graph_smoke-1_script")
+    parent["statistics"]["numChildJobs"] = "1"
     t = FakeTransport(pages=[{"jobs": [parent]}], children={"okf_graph_smoke-1_script": [{"jobs": []}]},
                       get={"okf_graph_smoke-1_script": parent})
     out = run(transport=t)

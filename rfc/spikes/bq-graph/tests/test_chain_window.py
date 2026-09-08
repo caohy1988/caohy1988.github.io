@@ -648,3 +648,138 @@ def test_the_deadline_during_provisioning_is_exercised_with_one_shared_clock(tmp
     assert e.value.code in ("ASSIGNMENT_NOT_READY", "DEADLINE_DURING_OPENING")
     assert closed == ["chain-gql-1"], "the window it opened must be closed"
     assert cw.record["window_close"]["verified_gone"] is True
+
+
+# =============================================================================== Astra PR47 re-review (RR2)
+def test_a_create_collision_decides_ownership_before_waking_the_watchdog(tmp_path):
+    """RR2 R2: `_provisioning_done` used to be signalled first, letting a woken watchdog delete the peer's capacity."""
+    order, closed = [], []
+    opened = {"opened_at": OPEN_AT, "state": "OPEN_WITH_ERRORS",
+              "steps": [{"cmd": "bq mk --reservation --edition=ENTERPRISE okf-graph", "rc": 1,
+                         "stderr": "BigQuery error: Reservation already exists", "stdout": ""}]}
+
+    def opener(label, slots):
+        cw.jobs.stop.set()          # a stop arrives during the collision, so the watchdog is ready to close
+        return opened
+
+    cw = fast(tmp_path, opener=opener, closer=lambda label: closed.append(label) or {"verified_gone": True},
+              rollback=lambda label: order.append("rollback") or {"removed": [], "preserved": ["theirs"]})
+    cw.preflight()
+    with pytest.raises(CW.WindowRefused) as e:
+        cw.open()
+    cw._watchdog.join(5)
+    assert e.value.code == "RESERVATION_PRE_EXISTING"
+    assert closed == [], "the watchdog ran the production closer on capacity the controller does not own"
+    assert order == ["rollback"]
+    assert cw.record["window_close"]["preserved"] is True
+
+
+def test_a_detached_closer_honours_the_persisted_ownership_record(tmp_path, monkeypatch):
+    """RR2 R2: the in-memory flag protects nothing; the detached watcher is a different process."""
+    from okf_bq_graph import reservation as RES
+
+    manifest = tmp_path / "cleanup_manifest.json"
+    manifest.write_text(json.dumps({"project": CW.PROJECT, "location": CW.LOCATION,
+                                    "windows": [{"label": "racing", "opened_at": OPEN_AT,
+                                                 "state": "REFUSED_PRESERVING_EXISTING"}],
+                                    "resources": [{"kind": "reservation", "window": "racing", "state": "open",
+                                                   "pre_existing": True,
+                                                   "name": f"projects/{CW.PROJECT}/locations/{CW.LOCATION}/reservations/{CW.RESERVATION}"}]}))
+    commands = []
+
+    def bq(*args):
+        commands.append(args)
+        return {"cmd": "bq " + " ".join(args), "rc": 0, "stdout": "[]", "stderr": "", "at": RES._now()}
+
+    monkeypatch.setattr(RES, "MANIFEST", str(manifest))
+    monkeypatch.setattr(RES, "_bq", bq)
+    out = RES.close_window("racing", closer="safety-watcher")
+    assert out["preserved"] is True
+    assert not [c for c in commands if c[:2] == ("rm", "--reservation")], commands
+    assert "belongs to another invocation" in out["reason"]
+
+
+def test_a_restoration_that_returns_unverified_is_a_failure(tmp_path):
+    """RR2 R3: a broker teardown can report UNVERIFIED without raising; that is not a restored resource."""
+    manifest = clean_manifest(tmp_path)
+    cw = fast(tmp_path, manifest=manifest, label="first")
+    cw.preflight()
+    cw.open()
+    cw.register_restore("broker_teardown", lambda: {"status": "UNVERIFIED", "steps": {"restore_rls": {"ok": False}}})
+    cw.close()
+    assert cw.record["restores"][0]["ok"] is False
+    assert cw.record["clean"] is False
+    with pytest.raises(CW.WindowRefused) as e:
+        controller(tmp_path, manifest=manifest, label="second").preflight()
+    assert e.value.code == "CLEANUP_UNVERIFIED"
+
+
+def test_a_restoration_that_returns_verified_passes(tmp_path):
+    cw = fast(tmp_path)
+    cw.preflight()
+    cw.open()
+    cw.register_restore("broker_teardown", lambda: {"status": "VERIFIED", "steps": {"restore_rls": {"ok": True}}})
+    cw.close()
+    assert cw.record["restores"][0]["ok"] is True and cw.record["clean"] is True
+
+
+def test_a_workers_pending_reference_enters_the_journal_and_blocks_reopening(tmp_path):
+    """RR2 R1: an unconfirmed child submission must govern cleanup and reopening, not only the chain JSON."""
+    from google.api_core.exceptions import NotFound
+
+    class Absent(FakeClient):
+        def cancel_job(self, job_id, **kwargs):
+            raise NotFound("absent under this reference")
+
+        def get_job(self, job_id, **kwargs):
+            raise NotFound("absent under this reference")
+
+    manifest = clean_manifest(tmp_path)
+    cw = fast(tmp_path, manifest=manifest, label="first", client_factory=lambda: Absent())
+    cw.preflight()
+    cw.open()
+    cw.register_worker("receipt_child", stop=lambda: None, join=lambda: {"joined": True},
+                       jobs=lambda: [{"job_id": "okf_rcpt_lost", "project": CW.PROJECT, "location": CW.LOCATION,
+                                      "state": "UNRESOLVED"}])
+    cw.close()
+    journal = json.loads((tmp_path / "jobs_first.json").read_text())
+    receipt = json.loads((tmp_path / "jobs_first.cleanup.json").read_text())
+    assert "okf_rcpt_lost" in journal["job_ids"]
+    assert journal["job_refs"]["okf_rcpt_lost"]["notfound_is_done"] is False
+    assert "okf_rcpt_lost" not in receipt["verified_done_job_ids"] and receipt["verified"] is False
+    assert cw.record["clean"] is False
+    with pytest.raises(CW.WindowRefused):
+        controller(tmp_path, manifest=manifest, label="second").preflight()
+
+
+def test_a_worker_obligation_without_a_job_id_still_blocks_reopening(tmp_path):
+    """A damaged or silent child journal hides submissions that have no id to adopt."""
+    manifest = clean_manifest(tmp_path)
+    cw = fast(tmp_path, manifest=manifest, label="first")
+    cw.preflight()
+    cw.open()
+    cw.register_worker("receipt_child", stop=lambda: None, join=lambda: {"joined": True}, jobs=lambda: [],
+                       obligations=lambda: [{"name": "JOURNAL_DAMAGED:launch_001", "ok": False,
+                                             "error": "the launch journal could not be read"}])
+    cw.close()
+    assert cw.record["cleanup"]["worker_obligations_outstanding"] == ["receipt_child:JOURNAL_DAMAGED:launch_001"]
+    assert cw.record["clean"] is False
+    obligation = json.loads((tmp_path / "restores_first.json").read_text())
+    assert [o["name"] for o in obligation["outstanding"]] == ["receipt_child:JOURNAL_DAMAGED:launch_001"]
+    with pytest.raises(CW.WindowRefused) as e:
+        controller(tmp_path, manifest=manifest, label="second").preflight()
+    assert e.value.code == "CLEANUP_UNVERIFIED"
+
+
+def test_a_worker_with_no_obligations_leaves_the_gate_open(tmp_path):
+    manifest = clean_manifest(tmp_path)
+    cw = fast(tmp_path, manifest=manifest, label="first")
+    cw.preflight()
+    cw.open()
+    cw.register_worker("receipt_child", stop=lambda: None, join=lambda: {"joined": True},
+                       jobs=lambda: [{"job_id": "okf_rcpt_ok", "project": CW.PROJECT, "location": CW.LOCATION,
+                                      "state": "SUBMITTED"}],
+                       obligations=lambda: [])
+    cw.close()
+    assert cw.record["clean"] is True
+    controller(tmp_path, manifest=manifest, label="second").preflight()   # no raise

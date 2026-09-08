@@ -683,3 +683,61 @@ def test_jobs_exposes_the_qualified_references_the_controller_adopts(tmp_path):
     refs = bridge.jobs()
     assert [r["job_id"] for r in refs] == ["okf_rcpt_deadbeef_0123456789abcdef"]
     assert refs[0]["project"] == "p" and refs[0]["location"] == "US"
+
+
+# =============================================================================== Astra PR47 re-review (RR2)
+@needs_sdk
+def test_the_handshake_allocates_no_workload_launch(tmp_path):
+    """RR2 R7: the probe used to consume launch001 and suppress its journal, so ingestion reported that launch
+    permanently damaged and every later run was forced CHAIN_INCOMPLETE."""
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 300, directory=tmp_path / "priv")
+    record = bridge.handshake()
+    assert bridge.launches == [], bridge.launches
+    assert bridge.journal_files() == []
+    assert "OKF_WINDOW_JOURNAL" not in bridge.probe_env()
+    assert bridge.probe_env()["OKF_WINDOW_INVOCATION"].endswith("-handshake")
+    if record["status"] != RW.SUPPORTED:
+        pytest.skip("this interpreter cannot bootstrap the child; the launch-accounting claim is unaffected")
+    result, _ = child(tmp_path, "submit", bridge=bridge)
+    ingested = bridge.ingest()
+    assert ingested["launches"] == 1 and len(ingested["jobs"]) == 1
+    assert ingested["unresolved"] == [] and ingested["complete"] is True
+
+
+@needs_sdk
+def test_a_pending_submission_is_handed_to_the_controller_as_a_reference(tmp_path):
+    """RR2 R1: `jobs()` returned only confirmed submissions, so a lost response never reached the window."""
+    result, bridge = child(tmp_path, "lost_response", deadline_offset=8)
+    ingested = bridge.ingest()
+    assert ingested["jobs"] == [] and len(ingested["unresolved"]) == 1
+    refs = bridge.jobs()
+    assert [r["job_id"] for r in refs] == ["okf_rcpt_lost"]
+    assert refs[0]["confirmed_submitted"] is False and refs[0]["state"] == "UNRESOLVED"
+    assert refs[0]["project"] == bridge.project and refs[0]["location"] == bridge.location
+    assert bridge.obligations() == []          # it has an id, so it travels as a reference rather than an obligation
+
+
+def test_evidence_without_a_job_id_becomes_an_obligation(tmp_path):
+    """A damaged or silent launch journal hides submissions with no id to adopt."""
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 300, directory=tmp_path / "priv")
+    launch = bridge.next_launch()
+    bridge.journal_path.parent.mkdir(parents=True, exist_ok=True)
+    bridge.journal_path.write_text(json.dumps({"event": "query", "seq": 1, "state": "SUBMITTED", "actual_job": True,
+                                               "job_id": "j1", "invocation": launch["invocation"]}) + "\n{truncated")
+    assert [r["job_id"] for r in bridge.jobs()] == ["j1"]
+    obligations = bridge.obligations()
+    assert [o["state"] for o in obligations] == ["JOURNAL_DAMAGED"]
+    assert obligations[0]["ok"] is False
+
+
+def test_a_confirmed_submission_travels_as_a_confirmed_reference(tmp_path):
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 300, directory=tmp_path / "priv")
+    launch = bridge.next_launch()
+    bridge.journal_path.parent.mkdir(parents=True, exist_ok=True)
+    bridge.journal_path.write_text(json.dumps({"event": "query", "seq": 1, "state": "SUBMITTED", "actual_job": True,
+                                               "job_id": "j1", "project": "p", "location": "EU",
+                                               "invocation": launch["invocation"]}) + "\n")
+    ref = bridge.jobs()[0]
+    assert ref["project"] == "p" and ref["location"] == "EU" and ref["state"] == "SUBMITTED"
+    assert "confirmed_submitted" not in ref or ref["confirmed_submitted"] is not False
+    assert bridge.obligations() == []

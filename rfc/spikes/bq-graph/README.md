@@ -542,7 +542,10 @@ closure **without** waiting for result I/O or `jobs.cancel`.
   exists, or the listing cannot be read at all, the controller refuses (`RESERVATION_PRE_EXISTING` /
   `OWNERSHIP_UNKNOWN`) having created and deleted nothing. If a race still produces an "already exists" on create, only
   what *this* invocation made is released (`reservation.release_own_resources`) — the production closer, which deletes
-  the reservation and every assignment pointing at it, is never run on capacity we do not own.
+  the reservation and every assignment pointing at it, is never run on capacity we do not own. That decision is made
+  **before** the watchdog's waiter is released, so a stop arriving mid-collision cannot let a woken closer delete the
+  peer's capacity first; and the manifest records the reservation as `pre_existing`, so a **detached** closer or a
+  retry after a partial rollback honours it too — an in-process flag protects nothing across processes.
 * **Restores get a bounded cleanup channel.** Stopping the only submission channel makes a row-policy or ACL restore
   raise, and the obligation disappears. Close now opens a separate bounded channel (`WindowJobs.open_cleanup`) so
   restoration DDL can still be submitted, journaled and read back after workload admission closed.
@@ -551,9 +554,20 @@ closure **without** waiting for result I/O or `jobs.cancel`.
   `require_clean_windows` refuses while any obligation file has outstanding entries — a fresh worktree, a fresh label
   or verified capacity does not clear it.
 * **The actual send re-checks admission.** `submit()` checks, then calls `client.query(...)`; a credential refresh
-  inside that call can outlive the stop and let the job POST leave afterwards. The dispatch is guarded for the duration
-  of the submission only, so cancellation and terminal readbacks — which run after stop by design — keep working on the
-  caller's own untouched transport.
+  inside that call can outlive the stop and let the job POST leave afterwards. Both of the client's transports are
+  guarded — `client._http` **and** `AuthorizedSession._auth_request.session`, the separate plain `requests.Session` an
+  internal 401 refresh actually dispatches through — each getting a fresh remaining budget rather than the timeout
+  copied from the original submission. The guard is installed for the duration of the submission only, so cancellation
+  and terminal readbacks keep working on the caller's own untouched transport.
+* **A worker's obligations are the window's obligations.** A registered worker contributes both job references and
+  evidence it could not resolve into one. References are adopted with their **full** `(project, location)` — a child
+  job in another project read under the module defaults returns NotFound while the real job keeps running — and a
+  reference whose submission the worker never confirmed cannot be closed by that absence. Evidence with no id at all
+  (a damaged or silent child journal) is persisted alongside the restore obligations. `require_clean_windows` also
+  scans the evidence directory for `jobs_*.json` and `restores_*.json`, so a run that crashed before recording its
+  manifest row still blocks the next window.
+* **A dry run is a bounded operation, not a job.** BigQuery returns no `jobReference` for one, so the window neither
+  invents nor journals an id — an invented id's 404 would otherwise read back as `verified_done`.
 
 Unresolved jobs, a failed restore or a worker that could not be joined make the close `clean: false`, and the receipt it
 writes does not satisfy the reopen gate.
@@ -586,7 +600,14 @@ call `broker.open_live_session` makes before any client exists). No SDK source i
   them yields `SDK_WINDOW_BRIDGE_UNSUPPORTED` — no window is opened, and Slice B stays blocked until a separately scoped
   SDK change and an explicit pin update are reviewed. An interpreter with user site-packages disabled (`site.
   ENABLE_USER_SITE` false, as in a `--no-user-site` virtualenv) never runs `usercustomize`, so no start-up guard can be
-  installed: that is reported as `USERCUSTOMIZE_DISABLED` and refused rather than assumed bounded.
+  installed: that is reported as `USERCUSTOMIZE_DISABLED` and refused rather than assumed bounded. The handshake runs
+  on its own probe environment: it allocates no workload launch and names no journal, so a successful preflight cannot
+  leave a permanently "damaged" launch behind in the workload inventory.
+* **Pending work reaches the parent.** `jobs()` hands the controller confirmed *and* pending references, so a lost
+  response enters the window journal, the cleanup receipt and the reopening gate rather than living only in the chain
+  record. The restricted broker's teardown is **registered** as a window restore before its first mutation and runs on
+  the bounded cleanup channel with the cleanup client; a teardown that *returns* `UNVERIFIED` without raising is a
+  failure like any other.
 
 **Engine proof (KTD4).** The retrieval cache key now includes the **engine**, so a relational entry can never be replayed
 under a GQL request, and `scope.templates` records the compiled walk/context template with its SHA-256 and whether it
@@ -611,10 +632,16 @@ reference — and refuses whenever the evidence is short:
 | a job in the span with no ownership signal, or one carrying only the window's reservation **name** | AMBIGUOUS → BLOCKED until resolved by an explicit decision **with a reason** |
 | a declared evidence source that cannot be read | BLOCKED (missing evidence, not a footnote) |
 | a script parent whose declared `numChildJobs` is not matched by the children actually read | BLOCKED (child listings are **not** time-filtered; an exhausted page is not proof of membership) |
+| a parent whose **terminal** snapshot declares more children than every listing pass produced | the new children are drained and read back; still short → BLOCKED |
 | `jobs.get` returns 404, fails, or returns another reference | UNVERIFIED, never `verified_done` |
 | a `PENDING`/`RUNNING` job | BLOCKED |
 | quiescence not evidenced — it needs `established`, a **named record** and the moment the last submitter stopped — or a repeat listing adds references | BLOCKED |
 | no owned job at all for an opened window | BLOCKED (an empty inventory is not evidence of an empty window) |
+
+`numChildJobs` is the parent's declaration; `scriptStatistics` is a *child's* own context, so an ordinary terminal
+script leaf is not mistaken for a parent that owes a child count. A server-side script can also finish a statement
+after every listing pass — submitter shutdown does not stop it — so the **terminal** parent snapshot governs
+membership, and children it reveals are drained and read before anything is sealed.
 
 The listing covers the **submission lifetime**, not the capacity interval: it is bounded by the later of capacity close
 and evidenced submitter shutdown, then extended while owned work reaches its edge, so a job created after capacity was

@@ -529,3 +529,129 @@ def test_a_missing_obligation_file_is_clear_but_a_malformed_one_is_not(tmp_path)
     assert L.restores_clear("never-changed-anything", tmp_path) is True
     (tmp_path / "restores_broken.json").write_text("{not json")
     assert L.restores_clear("broken", tmp_path) is False
+
+
+# =============================================================================== Astra PR47 re-review (RR2)
+def test_the_auth_refresh_session_is_guarded_too(tmp_path):
+    """RR2 R4: AuthorizedSession's internal 401 refresh goes through its OWN plain `_auth_request` Session."""
+    import requests
+    from google.auth.credentials import Credentials
+    from google.cloud import bigquery
+
+    window = L.WindowJobs("refresh", time.monotonic() + 2, tmp_path / "jobs.json")
+    seen = []
+
+    class Creds(Credentials):
+        def __init__(self):
+            super().__init__()
+            self.token = "synthetic-offline-token"
+
+        def refresh(self, request):
+            request("https://offline.invalid/token", method="POST")
+            self.token = "synthetic-refreshed-token"
+
+    class Adapter(requests.adapters.HTTPAdapter):
+        def send(self, req, **kw):
+            seen.append({"url": req.url, "stopped": window.stop.is_set(), "timeout": kw.get("timeout")})
+            response = requests.Response()
+            response.request, response.url, response._content = req, req.url, b"{}"
+            if "/jobs?" in req.url:
+                window.stop.set()          # a concurrent stop, while the platform answers 401
+                response.status_code = 401
+            else:
+                response.status_code = 200
+            return response
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(requests.adapters.HTTPAdapter, "send", Adapter.send)
+        client = bigquery.Client(project=L.PROJECT, location=L.LOCATION, credentials=Creds())
+        original, auth_session = client._http.send, client._http._auth_request.session
+        original_auth = auth_session.send
+        with pytest.raises(L.WindowStopped):
+            window.bind(client).query("SELECT 1")
+        assert [s["url"] for s in seen] == [seen[0]["url"]], f"a refresh dispatched after stop: {seen}"
+        assert seen[0]["stopped"] is False
+        # both of the caller's transports are left exactly as they were, so cancellation still works after stop
+        assert client._http.send == original and auth_session.send == original_auth
+        client.close()
+
+
+def test_transport_sessions_finds_the_auth_request_session():
+    from google.auth.credentials import AnonymousCredentials
+    from google.cloud import bigquery
+
+    client = bigquery.Client(project=L.PROJECT, location=L.LOCATION, credentials=AnonymousCredentials())
+    sessions = L._transport_sessions(client)
+    assert client._http in sessions and client._http._auth_request.session in sessions
+    assert len(sessions) == 2
+    assert L._transport_sessions(SimpleNamespace()) == []
+
+
+def test_a_parent_dry_run_is_a_bounded_operation_not_a_phantom_job(tmp_path):
+    """RR2 P2: BigQuery returns no jobReference for a dry run; inventing one puts a phantom in the cleanup union."""
+    events = []
+    window = L.WindowJobs("dry", time.monotonic() + 60, tmp_path / "jobs.json")
+
+    class Probe:
+        def query(self, sql, **kwargs):
+            events.append(kwargs)
+            assert "job_id" not in kwargs, "a dry run must not be given an invented job id"
+            return SimpleNamespace(job_id=None, result=lambda **kw: [])
+
+        def cancel_job(self, job_id, **kwargs):
+            pytest.fail("a dry run creates no server job to cancel")
+
+    job = window.bind(Probe()).query("SELECT 1 FROM t WHERE FALSE",
+                                     job_config=L.bigquery.QueryJobConfig(dry_run=True))
+    assert job.job_id is None and job.dry_run is True
+    assert events[0]["job_config"].dry_run is True
+    journal = json.loads((tmp_path / "jobs.json").read_text())
+    assert journal["job_ids"] == [] and journal["dry_run_operations"] == 1
+    assert window.stop_and_cancel() == []
+    receipt = json.loads((tmp_path / "jobs.cleanup.json").read_text())
+    assert receipt["job_ids"] == [] and receipt["jobs"] == []   # no phantom id to cancel and 404 into "verified"
+
+
+def test_a_dry_run_still_needs_admission(tmp_path):
+    window = L.WindowJobs("dry-stopped", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.stop.set()
+    with pytest.raises(L.WindowStopped):
+        window.bind(_Terminal()).query("SELECT 1", job_config=L.bigquery.QueryJobConfig(dry_run=True))
+
+
+def test_an_adopted_reference_is_read_back_under_its_own_project_and_location(tmp_path):
+    """RR2 R1: a worker's job in another project read under the module defaults returns NotFound while it runs on."""
+    from google.api_core.exceptions import NotFound
+    seen = []
+
+    class Client:
+        def cancel_job(self, job_id, **kwargs):
+            seen.append(kwargs)
+            raise NotFound("absent under this reference")
+
+        def get_job(self, job_id, **kwargs):
+            raise NotFound("absent under this reference")
+
+    window = L.WindowJobs("adopt-qualified", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.adopt("outside-job", client=Client(), project="other-project", location="EU", state="UNRESOLVED")
+    results = window.stop_and_cancel()
+    assert seen[0]["project"] == "other-project" and seen[0]["location"] == "EU"
+    # the window never confirmed this submission, so an absent job does NOT close the obligation
+    assert results[0]["verified_done"] is False and results[0]["state"] == "NOT_FOUND"
+    assert json.loads((tmp_path / "jobs.cleanup.json").read_text())["verified"] is False
+
+
+def test_a_confirmed_adoption_may_close_on_absence(tmp_path):
+    """A reference the worker confirmed it submitted keeps the journalled-before-submit reading."""
+    from google.api_core.exceptions import NotFound
+
+    class Client:
+        def cancel_job(self, job_id, **kwargs):
+            raise NotFound("gone")
+
+        def get_job(self, job_id, **kwargs):
+            raise NotFound("gone")
+
+    window = L.WindowJobs("adopt-confirmed", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.adopt("child-job", client=Client(), state="SUBMITTED")
+    assert window.stop_and_cancel()[0]["verified_done"] is True

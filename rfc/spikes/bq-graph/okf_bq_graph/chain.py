@@ -533,6 +533,23 @@ def gql_admission(engine: str, live: bool, window: Any) -> dict:
             "assignment_probes": len(((getattr(window, "record", {}) or {}).get("assignment") or {}).get("probes") or [])}
 
 
+DEFERRED_TEARDOWN = "DEFERRED_TO_WINDOW_CLEANUP"
+
+
+def broker_teardown(broker: Any, deferred: bool) -> dict:
+    """The broker's restoration, unless the window owns it.
+
+    Under an owned window the teardown is a REGISTERED restoration: it runs at close, on the bounded cleanup channel,
+    with its outcome persisted as an obligation. Running it inline here would submit its DDL on the workload channel
+    (after stop, so every statement raises) and its failure would never reach the reopening gate (Astra PR47
+    re-review R3)."""
+    if deferred:
+        return {"status": DEFERRED_TEARDOWN,
+                "reason": "registered with the window controller; it runs on the bounded cleanup channel at close and "
+                          "its result is written into this record by finalize_cleanup"}
+    return broker.teardown()
+
+
 def _is_bound(client: Any, window: Any) -> bool:
     from .lifecycle import WindowClient
     return isinstance(client, WindowClient) and client.window is getattr(window, "jobs", None)
@@ -716,6 +733,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     if requester_mode not in ("operator", "restricted"):
         raise ValueError(f"requester_mode must be operator|restricted, not {requester_mode!r}")
     restricted = requester_mode == "restricted"
+    deferred_teardown = False
     suite = RESTRICTED_CASES if restricted else CASES
     cases = tuple(cases or suite)
     unknown = [c for c in cases if c not in suite]
@@ -820,7 +838,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         if window is not None:
             # stop reaches the child, close joins it BEFORE sealing, and its retained references are adopted
             window.register_worker("receipt_child", stop=receipt_bridge.stop, join=receipt_bridge.join,
-                                   jobs=receipt_bridge.jobs)
+                                   jobs=receipt_bridge.jobs, obligations=receipt_bridge.obligations)
             out["receipt_bridge"]["worker"] = "registered with the window controller (stop, join, job union)"
         else:
             out["receipt_bridge"]["worker"] = None
@@ -863,6 +881,12 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                     factory=(lambda email: _bind(impersonated_client(email), "requester", email)),
                     owner=(window.operator if window is not None and window.operator is not None else None))
         out["requester"]["broker"] = broker.describe()
+        # R3: register the restoration BEFORE the first mutation, so a crash between grant and close still leaves the
+        # obligation behind, and so it runs on the bounded cleanup channel rather than the stopped workload channel.
+        deferred_teardown = window is not None and hasattr(window, "register_restore")
+        if deferred_teardown:
+            window.register_restore("broker_teardown", lambda client: broker.teardown(owner=client), takes_client=True)
+            out["requester"]["teardown"] = {"owner": "window controller", "channel": "bounded cleanup"}
         unbound = unbound_clients(clients, broker, window)
         if unbound:
             out["engine_admission"] = {"status": "GQL_CLIENTS_UNBOUND", "engine": engine, "unbound": unbound,
@@ -878,7 +902,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             out["grant"] = broker.grant()   # before the pointer lookup: that job runs under the requester too
         except Exception as e:  # noqa: BLE001 - a grant the platform refused blocks every case (nothing is invented)
             out["grant"] = _stage_error(e); out["verdict"] = "CHAIN_INCOMPLETE"; out["broken_at"] = "grant"; out["cases"] = []
-            out["teardown"] = broker.teardown()
+            out["teardown"] = broker_teardown(broker, deferred_teardown)
             return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
         clients = broker.graph_clients()
     elif clients is None:
@@ -1002,7 +1026,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             out["publication"] = _stage_error(e); pub = None
         if not pub:
             if restricted:
-                out["teardown"] = broker.teardown()
+                out["teardown"] = broker_teardown(broker, deferred_teardown)
             return _broken(out, "publication", run_dir, out_dir, mode, redact, journal, tag)
         prov = {"publication_pin": out["publication"]["matches_pin"], "sdk_head_pin": bool(sdk_pub["sdk_head_matches_pin"]),
                 "sdk_clean": sdk_pub["sdk_repo_dirty"] is False, "sdk_git_state_known": sdk_pub["sdk_repo_dirty"] is not None}
@@ -1014,7 +1038,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     if not prov["ok"]:
         out["same_requester"] = {"status": "NOT_RUN", "reason": "provenance gate refused before any case executed"}
         if restricted:
-            out["teardown"] = broker.teardown()
+            out["teardown"] = broker_teardown(broker, deferred_teardown)
         return _broken(out, "provenance", run_dir, out_dir, mode, redact, journal, tag)
 
     def engine_clients(cl: dict, case: str) -> dict:
@@ -1172,7 +1196,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             out["cases"].append(restricted_case(case) if restricted else operator_case(case))
     finally:
         if restricted:
-            out["teardown"] = broker.teardown()
+            out["teardown"] = broker_teardown(broker, deferred_teardown)
             out["broker_journal"] = list(getattr(broker, "journal", []))
     if live:
         out["engine_proof"] = merge_engine_proof([dict(c["engine_proof"], case=c["case"])
@@ -1224,7 +1248,12 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         for job_id in out["job_inventory"]["receipt_child_only"]:
             unresolved.append({"role": "receipt_child", "job_id": job_id, "state": "JOURNAL_ONLY",
                                "error": "the child journaled a submission the SDK diagnostic never reported"})
-    out["job_inventory"]["unresolved"] = [{"seq": e["seq"], "role": e["role"], "job_id": e.get("job_id"), "state": e["state"], "error": e.get("error")} for e in unresolved]
+    # every unresolved entry, whatever produced it: journal entries carry seq/role, while a receipt-child mismatch or a
+    # damaged child journal carries neither. Reading them positionally crashed the whole record assembly, so the run
+    # wrote no evidence at all (Astra PR47 re-review R5).
+    out["job_inventory"]["unresolved"] = [{"seq": e.get("seq"), "role": e.get("role", "chain"),
+                                           "job_id": e.get("job_id"), "state": e.get("state", "UNKNOWN"),
+                                           "error": e.get("error")} for e in unresolved]
     if restricted:
         probe_jobs = list(getattr(broker, "probe_jobs", []) or [])       # requester-submitted platform observations
         admin_jobs = list(getattr(broker, "admin_jobs", []) or [])       # operator-submitted row-policy DDL
@@ -1361,6 +1390,12 @@ def finalize_cleanup(out: dict, window: Any, out_dir: str, receipt_bridge: Any =
                           "state": getattr(window, "state", None), "clean": clean, "cleanup": cleanup,
                           "restores": (window.record or {}).get("restores"),
                           "workers": (window.record or {}).get("workers")})
+    # the broker's restoration ran at close, on the bounded cleanup channel: its ACTUAL result belongs in the record
+    for restore in ((window.record or {}).get("restores") or []):
+        if restore.get("name") == "broker_teardown":
+            out["teardown"] = restore.get("result") if restore.get("ok") else dict(
+                restore.get("result") or {}, status=(restore.get("result") or {}).get("status", "FAILED"),
+                restore_error=restore.get("error"))
     if receipt_bridge is not None:
         # re-ingest AFTER the child was joined: a submission it made late is still this window's obligation
         ingested = receipt_bridge.ingest()

@@ -1192,8 +1192,8 @@ class _StubWindow:
         self.clients.append({"role": role, "principal": principal})
         return bound
 
-    def register_worker(self, name, stop=None, join=None, jobs=None):
-        self.workers.append({"name": name, "stop": stop, "join": join, "jobs": jobs})
+    def register_worker(self, name, stop=None, join=None, jobs=None, obligations=None):
+        self.workers.append({"name": name, "stop": stop, "join": join, "jobs": jobs, "obligations": obligations})
 
 
 def _gql_result(*, engine="gql", walk="governed.sql", graph_table=True, cache=None, warnings=(),
@@ -1512,3 +1512,128 @@ def test_cli_case_selection(sdk_root, sample_root, tmp_path, capsys):
 def test_cli_refuses_a_window_flag_without_live_gql(sdk_root, tmp_path):
     with pytest.raises(SystemExit):
         CH.main(["--hermetic", "--sdk-root", sdk_root, "--out", str(tmp_path), "--gql-window", "w"])
+
+
+# =============================================================================== Astra PR47 re-review (RR2)
+def test_a_diagnostic_journal_mismatch_writes_a_durable_incomplete_record(sdk_root, tmp_path):
+    """RR2 R5: the mismatch entries carry no `seq`, and reading one positionally crashed the whole assembly, so the
+    run wrote no evidence at all."""
+    class Bridge:
+        record = {"status": "SUPPORTED"}
+        label = "offline-only"
+
+        def runner(self):
+            return subprocess.run
+
+        def stop(self):
+            pass
+
+        def join(self, timeout=30):
+            return {"joined": True}
+
+        def jobs(self):
+            return [{"job_id": "journal-only-job", "project": CH.PROJECT, "location": CH.LOCATION,
+                     "state": "SUBMITTED"}]
+
+        def obligations(self):
+            return []
+
+        def ingest(self):
+            return {"jobs": self.jobs(), "unresolved": [], "dry_runs": 0, "operations": 0, "entries": 0,
+                    "launches": 1, "blocked": [], "refused": 0, "complete": True}
+
+    out = CH.run_chain("oracle", False, sdk_root, str(tmp_path), requester="operator@example.test",
+                       cases=("approved",), as_of=AS_OF, receipt_bridge=Bridge())
+    record = json.loads((tmp_path / "chain_hermetic.json").read_text())
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and record["verdict"] == "CHAIN_INCOMPLETE"
+    states = {u["state"] for u in out["job_inventory"]["unresolved"]}
+    assert "JOURNAL_ONLY" in states and "DIAGNOSTIC_ONLY" in states
+    assert all(u["seq"] is None for u in out["job_inventory"]["unresolved"])
+    assert out["job_inventory"]["receipt_child_only"] == ["journal-only-job"]
+
+
+def test_the_receipt_child_registers_its_obligations_with_the_controller(sdk_root, tmp_path, monkeypatch):
+    """RR2 R1: evidence the bridge could not resolve into a reference must reach the durable gate too."""
+    from okf_bq_graph import receipt_window as RWD
+
+    window = _StubWindow(journal=tmp_path / "jobs.json")
+    bridge = RWD.ReceiptBridge(sdk_root, label="chain-gql-1", deadline_epoch=time.time() + 300,
+                               directory=tmp_path / "bridge")
+    bridge.record["status"] = RWD.SUPPORTED
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (None, "pointer-job"))
+    CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                 clients={"engine": "gql", "bq": window.bind_client(object(), role="requester")},
+                 window=window, receipt_bridge=bridge)
+    worker = next(w for w in window.workers if w["name"] == "receipt_child")
+    assert worker["obligations"] == bridge.obligations
+
+
+def test_a_restricted_run_defers_its_teardown_to_the_window(sdk_root, tmp_path, monkeypatch):
+    """RR2 R3: teardown used to run inline on the stopped workload channel, and its failure never reached the gate."""
+    registered = []
+
+    class Window(_StubWindow):
+        def register_restore(self, name, restore, takes_client=False):
+            registered.append({"name": name, "takes_client": takes_client, "call": restore})
+
+    class Broker:
+        def __init__(self):
+            self.torn_down = []
+
+        def describe(self):
+            return {"kind": "test"}
+
+        def grant(self):
+            raise RuntimeError("grant refused so the run stops right after registration")
+
+        def teardown(self, owner=None):
+            self.torn_down.append(owner)
+            return {"status": "VERIFIED"}
+
+    window = Window(journal=tmp_path / "jobs.json")
+    broker = Broker()
+    broker.sa = window.bind_client(object(), role="requester")
+    broker.owner = window.bind_client(object(), role="operator")
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       requester_mode="restricted", broker=broker, window=window)
+    assert [r["name"] for r in registered] == ["broker_teardown"] and registered[0]["takes_client"] is True
+    assert out["teardown"]["status"] == CH.DEFERRED_TEARDOWN
+    assert broker.torn_down == [], "the teardown must not run inline on the stopped workload channel"
+    # the registered callable hands the broker the window's bounded cleanup client
+    cleanup_client = object()
+    assert registered[0]["call"](cleanup_client) == {"status": "VERIFIED"}
+    assert broker.torn_down == [cleanup_client]
+
+
+def test_without_a_window_the_broker_tears_down_inline_as_before(sdk_root, tmp_path):
+    class Broker:
+        def __init__(self):
+            self.calls = 0
+
+        def describe(self):
+            return {"kind": "test"}
+
+        def grant(self):
+            raise RuntimeError("grant refused")
+
+        def teardown(self, owner=None):
+            self.calls += 1
+            return {"status": "NOT_NEEDED"}
+
+    broker = Broker()
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       requester_mode="restricted", broker=broker)
+    assert broker.calls == 1 and out["teardown"]["status"] == "NOT_NEEDED"
+
+
+def test_finalize_cleanup_records_the_deferred_teardown_result(sdk_root, tmp_path):
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "job_inventory": {},
+           "teardown": {"status": CH.DEFERRED_TEARDOWN}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []},
+                                     "restores": [{"name": "broker_teardown", "ok": True,
+                                                   "result": {"status": "VERIFIED"}}], "workers": []})
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["teardown"] == {"status": "VERIFIED"}
+    assert final["verdict"] == "CHAIN_CONNECTED"

@@ -66,6 +66,23 @@ class _ResultHTTP:
 _MISSING = object()
 
 
+def _transport_sessions(client) -> list:
+    """Every session one submission can dispatch through.
+
+    `AuthorizedSession.request` handles a 401 by refreshing the credential, and that refresh goes through the
+    session's OWN `_auth_request`, a separate plain `requests.Session`. Guarding only `client._http` leaves that
+    refresh unbounded and admitted after stop (Astra PR47 re-review R4)."""
+    session = getattr(client, "_http", None)
+    if session is None:
+        return []
+    sessions = [session]
+    auth_request = getattr(session, "_auth_request", None)
+    inner = getattr(auth_request, "session", None)
+    if inner is not None and inner is not session:
+        sessions.append(inner)
+    return sessions
+
+
 @contextmanager
 def _guarded_send(client, window, cleanup: bool):
     """Guard the ACTUAL HTTP send for the duration of one submission (Astra PR47 #4).
@@ -76,32 +93,38 @@ def _guarded_send(client, window, cleanup: bool):
 
     The override is installed and removed inside `submit`'s lock, so the caller's transport is unchanged before and
     after: cancellation and terminal readbacks, which run after stop by design, keep working on it."""
-    session = getattr(client, "_http", None)
-    if session is None:
+    sessions = _transport_sessions(client)
+    if not sessions:
         yield False
         return
-    previous = session.__dict__.get("send", _MISSING)
-    inner = session.send
 
-    def send(request, **kwargs):
-        window.check(cleanup=cleanup)          # a refresh that crossed stop cannot be followed by a submission
-        remaining = window.remaining(cleanup)
-        requested = kwargs.get("timeout")
-        kwargs["timeout"] = min(remaining, requested) if isinstance(requested, (int, float)) else remaining
-        return inner(request, **kwargs)
+    def guard(inner):
+        def send(request, **kwargs):
+            window.check(cleanup=cleanup)      # a refresh that crossed stop cannot be followed by a submission
+            remaining = window.remaining(cleanup)
+            requested = kwargs.get("timeout")
+            # the refresh must get a FRESH budget, not the timeout copied from the original submission
+            kwargs["timeout"] = min(remaining, requested) if isinstance(requested, (int, float)) else remaining
+            return inner(request, **kwargs)
+        return send
 
+    restore = []
     try:
-        session.send = send
-    except (AttributeError, TypeError):        # a frozen or unusual transport: report it rather than pretend
-        yield False
-        return
-    try:
+        for session in sessions:
+            previous = session.__dict__.get("send", _MISSING)
+            try:
+                session.send = guard(session.send)
+            except (AttributeError, TypeError):   # a frozen transport: report it rather than pretend
+                yield False
+                return
+            restore.append((session, previous))
         yield True
     finally:
-        if previous is _MISSING:
-            session.__dict__.pop("send", None)
-        else:
-            session.send = previous
+        for session, previous in restore:
+            if previous is _MISSING:
+                session.__dict__.pop("send", None)
+            else:
+                session.send = previous
 
 
 @contextmanager
@@ -117,20 +140,49 @@ def window_executor(client, max_workers):
 
 
 def cancel_jobs(client, job_ids: list[str]) -> list[dict]:
-    return _cancel_pending([(job_id, client) for job_id in job_ids])
+    return _cancel_pending([(job_id, client, None) for job_id in job_ids])
 
 
 def _cancel_one(pair) -> dict:
-    job_id, client = pair
+    """Cancel and read back ONE job under its own qualified reference.
+
+    `ref` carries the (project, location) the job was actually submitted under: a worker's job in another
+    project/location read under the module defaults returns NotFound while the real job keeps running.
+    `notfound_is_done` is true only for ids THIS window journaled before submitting - for those an absent job really
+    is a submission that never happened. An adopted id whose submission was never confirmed cannot borrow that
+    reasoning (Astra PR47 re-review R1)."""
+    job_id, client, ref = pair
+    ref = ref or {}
+    project, location = ref.get("project") or PROJECT, ref.get("location") or LOCATION
+    base = {"job_id": job_id, "project": project, "location": location}
+    if ref.get("adopted"):
+        base["adopted"] = True
+    if client is None:
+        return dict(base, state="NO_CLIENT", verified_done=False,
+                    error="no client can read this reference back; the obligation is unresolved")
     try:
-        client.cancel_job(job_id, location=LOCATION, retry=None, timeout=10)
-        job = client.get_job(job_id, location=LOCATION, retry=None, timeout=10)
-        return {"job_id": job_id, "state": job.state, "verified_done": job.state == "DONE"}
+        client.cancel_job(job_id, project=project, location=location, retry=None, timeout=10)
+        job = client.get_job(job_id, project=project, location=location, retry=None, timeout=10)
+        return dict(base, state=job.state, verified_done=job.state == "DONE")
+    except TypeError:   # a client whose cancel/get does not take `project` (the driver's own fakes and older paths)
+        try:
+            client.cancel_job(job_id, location=location, retry=None, timeout=10)
+            job = client.get_job(job_id, location=location, retry=None, timeout=10)
+            return dict(base, state=job.state, verified_done=job.state == "DONE")
+        except NotFound:
+            return dict(base, state="NOT_FOUND", verified_done=bool(ref.get("notfound_is_done", True)),
+                        error=None if ref.get("notfound_is_done", True) else
+                        "absent under this reference, and this window never confirmed its submission")
+        except Exception as exc:  # noqa: BLE001
+            return dict(base, verified_done=False, error=f"{type(exc).__name__}: {exc}"[:300])
     except NotFound:
-        # IDs are journaled before submission; a stopped/failed submission may not exist.
-        return {"job_id": job_id, "state": "NOT_FOUND", "verified_done": True}
-    except Exception as exc:
-        return {"job_id": job_id, "verified_done": False, "error": f"{type(exc).__name__}: {exc}"[:300]}
+        # IDs are journaled before submission; a stopped/failed submission may not exist. An ADOPTED id whose
+        # submission was never confirmed gets no such benefit of the doubt.
+        return dict(base, state="NOT_FOUND", verified_done=bool(ref.get("notfound_is_done", True)),
+                    error=None if ref.get("notfound_is_done", True) else
+                    "absent under this reference, and this window never confirmed its submission")
+    except Exception as exc:  # noqa: BLE001
+        return dict(base, verified_done=False, error=f"{type(exc).__name__}: {exc}"[:300])
 
 
 def _cancel_pending(pending) -> list[dict]:
@@ -151,6 +203,8 @@ class WindowJobs:
         self.cleanup_jobs = 0
         self.cleanup_max_jobs = 0
         self.adopted: dict[str, dict] = {}
+        self.refs: dict[str, dict] = {}          # job_id -> the qualified reference it must be read back with
+        self.dry_runs: list[dict] = []           # bounded operations that create no server job
         self.stop = threading.Event()
         self._lock = threading.RLock()
         self._cancel_lock = threading.Lock()
@@ -162,7 +216,9 @@ class WindowJobs:
     def _save(self):
         tmp = self.journal.with_suffix(".tmp")
         tmp.write_text(json.dumps({"label": self.label, "project": PROJECT, "location": LOCATION,
-                                   "job_ids": list(self._jobs), "finished_job_ids": sorted(self._finished)}, indent=2))
+                                   "job_ids": list(self._jobs), "finished_job_ids": sorted(self._finished),
+                                   "job_refs": {i: dict(r) for i, r in self.refs.items()},
+                                   "dry_run_operations": len(self.dry_runs)}, indent=2))
         os.replace(tmp, self.journal)
 
     def end(self, cleanup: bool = False) -> float:
@@ -203,12 +259,20 @@ class WindowJobs:
     def bind(self, client, cleanup: bool = False):
         return WindowClient(client, self, cleanup=cleanup)
 
-    def adopt(self, job_id: str, client=None, **meta) -> dict:
-        """Take responsibility for a job this process did not submit - a receipt child's, say. It enters the journal
-        and the cleanup union like any other; without a client it can be cancelled only if one is supplied later."""
+    def adopt(self, job_id: str, client=None, project: Optional[str] = None, location: Optional[str] = None,
+              state: Optional[str] = None, **meta) -> dict:
+        """Take responsibility for a job this process did not submit - a receipt child's, say.
+
+        The FULL reference is kept: a child job in another project or location read back under the module defaults
+        returns NotFound while the real job keeps running. A reference whose submission the worker never confirmed
+        (`state` is not SUBMITTED) is unresolved, so an absent job cannot close it."""
         with self._lock:
-            entry = {"job_id": job_id, "adopted_at": _dt_now(), **meta}
+            confirmed = state in (None, "SUBMITTED", "DONE")
+            entry = {"job_id": job_id, "adopted_at": _dt_now(), "project": project or PROJECT,
+                     "location": location or LOCATION, "state": state, "confirmed_submitted": confirmed, **meta}
             self.adopted[job_id] = entry
+            self.refs[job_id] = {"project": entry["project"], "location": entry["location"], "adopted": True,
+                                 "notfound_is_done": confirmed}
             self._jobs.setdefault(job_id, client)
             self._save()
         return entry
@@ -225,24 +289,35 @@ class WindowJobs:
                 cfg = bigquery.QueryJobConfig() if method == "query" else bigquery.LoadJobConfig()
             cfg.labels = dict(cfg.labels or {}, okf_spike="bq_graph_20260905", window=self.label,
                               **({"okf_stage": "cleanup"} if cleanup else {}))
-            job_id = f"okf_graph_{self.label}_{'cleanup_' if cleanup else ''}{uuid.uuid4().hex}"
-            kwargs.update(job_config=cfg, job_id=job_id,
-                          timeout=max(.001, min(30, self.remaining(cleanup))))
+            # A DRY RUN creates no server job: BigQuery returns no jobReference at all. Inventing an id for it puts a
+            # phantom into the cleanup union, whose 404 then reads as `verified_done`. It is a bounded OPERATION, the
+            # same way the receipt child already treats one (Astra PR47 re-review P2).
+            dry = bool(getattr(cfg, "dry_run", False))
+            job_id = None if dry else f"okf_graph_{self.label}_{'cleanup_' if cleanup else ''}{uuid.uuid4().hex}"
+            kwargs.update(job_config=cfg, timeout=max(.001, min(30, self.remaining(cleanup))))
+            if not dry:
+                kwargs["job_id"] = job_id
             if method == "query":
                 kwargs["retry"] = None
                 kwargs["job_retry"] = None  # no invisible resubmissions with new IDs
             else:
                 kwargs["num_retries"] = 0
-            self._jobs[job_id] = client
-            if cleanup:
-                self.cleanup_jobs += 1
+            if dry:
+                self.dry_runs.append({"at": _dt_now(), "method": method, "cleanup": cleanup, "actual_job": False})
+            else:
+                self._jobs[job_id] = client
+                self.refs[job_id] = {"project": PROJECT, "location": LOCATION, "notfound_is_done": True}
+                if cleanup:
+                    self.cleanup_jobs += 1
             self._save()  # survives a lost submit response or killed driver
             # the send guard re-checks admission at the ACTUAL dispatch, including after a credential refresh
             with _guarded_send(client, self, cleanup):
                 job = getattr(client, method)(*args, **kwargs)
-        return WindowJob(job, self, job_id, method == "query", cleanup=cleanup)
+        return WindowJob(job, self, job_id, method == "query", cleanup=cleanup, dry_run=dry)
 
     def finished(self, job_id):
+        if job_id is None:      # a dry run created no job: there is nothing to finish or clean up
+            return
         with self._lock:
             self._finished.add(job_id)
             self._save()
@@ -251,7 +326,7 @@ class WindowJobs:
         self.stop.set()
         with self._cancel_lock:
             with self._lock:
-                pending = [(i, c) for i, c in self._jobs.items() if i not in self._finished]
+                pending = [(i, c, self.refs.get(i)) for i, c in self._jobs.items() if i not in self._finished]
             for result in _cancel_pending(pending):
                 job_id = result["job_id"]
                 self._cancelled[job_id] = result
@@ -279,8 +354,9 @@ class WindowClient:
 
 
 class WindowJob:
-    def __init__(self, job, window, job_id, is_query, cleanup: bool = False):
+    def __init__(self, job, window, job_id, is_query, cleanup: bool = False, dry_run: bool = False):
         self.raw, self.window, self.job_id, self.is_query, self.cleanup = job, window, job_id, is_query, cleanup
+        self.dry_run = dry_run
         self._query_client = job._client if isinstance(job, bigquery.QueryJob) else None
 
     def __getattr__(self, name):

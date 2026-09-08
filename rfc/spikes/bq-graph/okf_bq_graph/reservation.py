@@ -81,7 +81,7 @@ def _parse_list(step: dict) -> Optional[list]:
         return None
 
 
-def require_clean_windows(m: dict, evidence_dir: Optional[str | Path] = None):
+def require_clean_windows(m: dict, evidence_dir: Optional[str | Path] = None, exclude: Optional[str] = None):
     """Capacity deletion AND a separate verified job-cleanup receipt, for every window that was ever opened.
 
     `evidence_dir` names where the journal/receipt pair is read from; it defaults to the manifest's own directory. A
@@ -90,16 +90,23 @@ def require_clean_windows(m: dict, evidence_dir: Optional[str | Path] = None):
     d = Path(evidence_dir) if evidence_dir is not None else Path(MANIFEST).parent
     if any(w.get("opened_at") and not w.get("verified_gone") for w in m["windows"]):
         raise RuntimeError("an earlier reservation window is outstanding; verify its cleanup before opening another")
-    for w in m["windows"]:
-        if w.get("opened_at") and not job_cleanup_verified(w["label"], d / f'jobs_{w["label"]}.json'):
-            raise RuntimeError(f'job cleanup is unverified for {w["label"]}; reconcile its journal before opening another')
+    # Every window that was opened, AND every job journal present in the evidence directory. A run that crashed
+    # before recording its manifest row still submitted the jobs its journal names, so keying the gate only off
+    # manifest rows leaves an unverified receipt able to authorize another window (Astra PR47 re-review R1).
+    journal_labels = {path.name[len("jobs_"):-len(".json")] for path in d.glob("jobs_*.json")
+                      if not path.name.endswith(".cleanup.json")}
+    # `exclude` is the window being opened right now: its own journal is created empty before provisioning, and it
+    # obviously has no cleanup receipt yet.
+    for label in sorted(({w["label"] for w in m["windows"] if w.get("opened_at")} | journal_labels) - {exclude}):
+        if not job_cleanup_verified(label, d / f"jobs_{label}.json"):
+            raise RuntimeError(f"job cleanup is unverified for {label}; reconcile its journal before opening another")
     # A resource this window changed and could not put back is its own outstanding obligation: verified capacity
     # deletion and a complete job receipt say nothing about a row policy or ACL left in place. Every obligation file in
     # the evidence directory is checked, not only the ones whose manifest row survived - a run that crashed before
     # recording its window still left the resource changed (Astra PR47 #3).
     labels = {w["label"] for w in m["windows"] if w.get("opened_at")}
     labels.update(path.name[len("restores_"):-len(".json")] for path in d.glob("restores_*.json"))
-    for label in sorted(labels):
+    for label in sorted(labels - {exclude}):
         if not restores_clear(label, d):
             raise RuntimeError(f"resource restoration is outstanding for {label}; clear restores_{label}.json "
                                "before opening another")
@@ -171,7 +178,7 @@ def release_own_resources(label: str, closer: str = "own-rollback") -> dict:
 @_serialized
 def open_window(label: str, max_slots: int = 100) -> dict:
     m = _load()
-    require_clean_windows(m)
+    require_clean_windows(m, exclude=label)
     w = {"label": label, "opened_at": _now(), "steps": [], "max_slots": max_slots, "state": "OPENING"}
     m["windows"].append(w)
     _save(m)
@@ -201,12 +208,32 @@ def open_window(label: str, max_slots: int = 100) -> dict:
     return w
 
 
+def _preserved(m: dict, w: Optional[dict], label: str) -> bool:
+    """Does the PERSISTED record say this window's reservation belongs to somebody else?
+
+    An in-memory flag on the controller protects nothing: the detached watcher (`safety_teardown.sh` ->
+    `safety.cleanup` -> `close_window`) is a different process, and a retry after a partial rollback would otherwise
+    delete the peer's reservation (Astra PR47 re-review R2)."""
+    if w is not None and w.get("state") == "REFUSED_PRESERVING_EXISTING":
+        return True
+    return any(r.get("window") == label and r.get("kind") == "reservation" and r.get("pre_existing")
+               for r in m.get("resources", []))
+
+
 @_serialized
 def close_window(label: str, closer: str = "driver") -> dict:
     m = _load()
     w = next((x for x in reversed(m["windows"]) if x["label"] == label), None)
     if w is None:
         raise ValueError(f"unknown reservation window: {label}; use the original opening label")
+    if _preserved(m, w, label):
+        # Release only what this invocation created; the reservation itself is not ours to delete, on this attempt or
+        # on any retry by any closer.
+        own = release_own_resources.__wrapped__(label, closer=closer)   # already holding the manifest lock
+        w = next((x for x in reversed(_load()["windows"]) if x["label"] == label), w)
+        return dict(w, preserved=True, own_rollback=own,
+                    reason="the reservation belongs to another invocation: this closer deletes only what this "
+                           "window created")
     if w.get("verified_gone") and w.get("closed_at"):
         # Its verified receipt remains valid if a newer window has reused the same
         # reservation name. A late watcher must not delete that newer resource.

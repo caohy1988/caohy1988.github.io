@@ -186,7 +186,7 @@ class HermeticBroker:
                 "reason": "hermetic mode: oracle graph + SDK SYNTHETIC emulation submit no BigQuery jobs; the emulated principal is a "
                           "policy label, not an IAM identity"}
 
-    def teardown(self) -> dict:
+    def teardown(self, owner: Any = None) -> dict:
         self.state.update(policy())
         return {"status": "NOT_NEEDED", "reason": "hermetic policy broker holds no grant"}
 
@@ -730,11 +730,24 @@ class RestrictedBroker:
                                       for n, r in out["roles"].items() if r["status"] not in ("BOUND", "NONE"))
         return out
 
-    def teardown(self) -> dict:
+    def teardown(self, owner: Any = None) -> dict:
         """Restore every dataset this broker touched to the ACL snapshot taken before its first mutation (grants it added
         are gone, pre-existing entries are back with their original role) and read each one back; remove the credential
         file. Each step is attempted independently; VERIFIED needs at least one step, every step ok and every read-back
-        equal to the snapshot; nothing touched is NOT_NEEDED, never VERIFIED."""
+        equal to the snapshot; nothing touched is NOT_NEEDED, never VERIFIED.
+
+        `owner` swaps in the window's BOUNDED CLEANUP client for the duration. Restoration runs after workload
+        admission closed, so the workload-bound operator would raise `WindowStopped` on every restoring statement and
+        the obligation would be lost (Astra PR47 re-review R3)."""
+        previous = self.owner
+        if owner is not None:
+            self.owner = owner
+        try:
+            return self._teardown()
+        finally:
+            self.owner = previous
+
+    def _teardown(self) -> dict:
         td: dict = {"steps": {}, "datasets": {}}
         for ds in sorted(self.original):
             try:

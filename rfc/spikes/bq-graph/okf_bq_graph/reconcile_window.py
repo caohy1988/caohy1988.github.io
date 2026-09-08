@@ -120,17 +120,26 @@ def _created(job: dict) -> Optional[_dt.datetime]:
     return _epoch_ms(_stats(job).get("creationTime"))
 
 
+def _stats_parent(entry: dict) -> Optional[str]:
+    """The parent id of a ledger entry, from the job resource it was classified from."""
+    return _stats(entry.get("source_job") or {}).get("parentJobId")
+
+
 # ----------------------------------------------------------------------------- listing
 def _declared_children(job: dict) -> Optional[int]:
+    """How many children this job DECLARES.
+
+    `numChildJobs` is the parent's declaration. `scriptStatistics` is the *child's* own context - the Job API defines
+    it as the statistics of a script child, so an ordinary terminal script leaf carries it while declaring nothing
+    about children of its own. Reading a leaf's `scriptStatistics` as an undeclared parent blocked perfectly good
+    reconciliations (Astra PR47 re-review P2)."""
     stats = _stats(job)
     for key in ("numChildJobs", "num_child_jobs"):
         if key in stats:
             try:
                 return int(stats[key])
             except (TypeError, ValueError):
-                return None
-    if stats.get("scriptStatistics"):
-        return None          # a script with no declared count: membership cannot be reconciled by number
+                return None       # a declaration we cannot read is not a count we can reconcile
     return 0
 
 
@@ -172,7 +181,7 @@ def list_window(transport: Any, *, project: str, start: _dt.datetime, end: _dt.d
     top = drain_listing(transport, project=project, start=start, end=end, page_size=page_size, cap=cap)
     jobs = list(top["jobs"])
     children, seen = [], {j.get("jobReference", {}).get("jobId") for j in jobs}
-    frontier = [j for j in jobs if (_stats(j).get("scriptStatistics") or _stats(j).get("numChildJobs"))]
+    frontier = [j for j in jobs if _declared_children(j)]
     complete = top["complete"]
     while frontier:
         parent = frontier.pop()
@@ -198,7 +207,7 @@ def list_window(transport: Any, *, project: str, start: _dt.datetime, end: _dt.d
                 continue
             seen.add(cid)
             jobs.append(child)
-            if _stats(child).get("scriptStatistics") or _stats(child).get("numChildJobs"):
+            if _declared_children(child):
                 frontier.append(child)
     return {"jobs": jobs, "top": {k: top[k] for k in ("pages", "next_page_token", "unreachable", "error", "capped", "complete")},
             "children": children, "listed": len(jobs), "complete": complete}
@@ -285,6 +294,7 @@ def read_back(transport: Any, refs: list[dict]) -> list[dict]:
             rec["readback"] = TERMINAL
             # an errored or cancelled job is terminal: the OBLIGATION is closed even though the work failed
             rec["verified_done"] = True
+            rec["declared_children"] = _declared_children(job)
         elif state in ("PENDING", "RUNNING"):
             rec["readback"] = NONTERMINAL
             rec["verified_done"] = False
@@ -398,8 +408,9 @@ def reconcile(label: str, *, transport: Any, window: dict, sources: Iterable[str
     ledger: list[dict] = []
     owned_parents: set = set()
     for _round in range(len(listing["jobs"]) + 1):     # to a fixpoint: a chain of script children resolves generation by generation
-        ledger = [classify(job, label=label, start=start, end=end, recovered=recovered_set,
-                           owned_parents=frozenset(owned_parents), reservation=reservation, decisions=decisions)
+        ledger = [dict(classify(job, label=label, start=start, end=end, recovered=recovered_set,
+                                owned_parents=frozenset(owned_parents), reservation=reservation, decisions=decisions),
+                       source_job=job)
                   for job in listing["jobs"]]
         grown = {e["ref"]["job_id"] for e in ledger if e["ownership"] == OWNED and e["ref"].get("job_id")}
         if grown == owned_parents:
@@ -447,6 +458,60 @@ def reconcile(label: str, *, transport: Any, window: dict, sources: Iterable[str
             blockers.append(f"a repeated listing produced {len(new)} reference(s) the first pass did not: " + ", ".join(new)[:400])
 
     readbacks = read_back(transport, [e["ref"] for e in owned])
+
+    # The TERMINAL parent snapshot governs child membership. Submitter shutdown does not stop an already-running
+    # server-side script: a parent that listed as RUNNING with one child can finish a second statement between the
+    # last listing pass and its own `jobs.get`. Its terminal `numChildJobs` is the only complete declaration, so a
+    # count that has grown is drained and read again, to a fixpoint (Astra PR47 re-review R6).
+    child_rounds = []
+    for _round in range(4):
+        short = []
+        for rec in readbacks:
+            declared = rec.get("declared_children")
+            if not declared:
+                continue
+            parent_id = rec["ref"]["job_id"]
+            observed = sum(1 for e in owned if _stats_parent(e) == parent_id)
+            if observed < declared:
+                short.append({"parent": parent_id, "declared": declared, "observed": observed})
+        if not short:
+            break
+        child_rounds.append(short)
+        discovered = []
+        for entry in short:
+            page = drain_listing(transport, project=project, start=None, end=None, parent_job_id=entry["parent"],
+                                 page_size=page_size, cap=cap)
+            entry.update({k: page[k] for k in ("pages", "next_page_token", "unreachable", "error", "complete")})
+            if not page["complete"]:
+                continue
+            for child in page["jobs"]:
+                ref = job_ref(child)
+                if ref["job_id"] in owned_ids:
+                    continue
+                if not qualified(ref):
+                    blockers.append(f"a child of {entry['parent']} has no qualified reference: {ref}")
+                    continue
+                owned_ids.add(ref["job_id"])
+                record = {"ref": ref, "ownership": OWNED, "signal": "script_child",
+                          "reason": f"script child of owned parent {entry['parent']}, revealed by its terminal snapshot",
+                          "source_job": child}
+                owned.append(record)
+                ledger.append(record)
+                discovered.append(ref)
+        if not discovered:
+            break
+        readbacks += read_back(transport, discovered)
+    else:
+        blockers.append("script child membership never settled: the terminal parent snapshot kept declaring more "
+                        "children than could be read")
+    still_short = [entry for round_ in child_rounds[-1:] for entry in round_
+                   if sum(1 for e in owned if _stats_parent(e) == entry["parent"]) < entry["declared"]]
+    if still_short:
+        blockers.append("the terminal parent snapshot declares more children than were read: "
+                        + ", ".join(f'{e["parent"]} declares {e["declared"]}, read '
+                                    f'{sum(1 for o in owned if _stats_parent(o) == e["parent"])}' for e in still_short)[:400])
+    out["child_membership"] = child_rounds
+
     by_id = {r["ref"]["job_id"]: r for r in readbacks}
     for entry in owned:
         entry["readback"] = by_id.get(entry["ref"]["job_id"], {})
@@ -463,7 +528,7 @@ def reconcile(label: str, *, transport: Any, window: dict, sources: Iterable[str
         blockers.append("no owned job was established for an opened window: an empty inventory is not evidence of an "
                         "empty window")
 
-    out["ledger"] = ledger
+    out["ledger"] = [{k: v for k, v in e.items() if k != "source_job"} for e in ledger]
     out["owned"] = sorted(owned_ids)
     out["owned_refs"] = sorted((e["ref"] for e in owned), key=lambda r: r["job_id"])
     out["excluded"] = [{"ref": e["ref"], "reason": e["reason"], "signal": e["signal"]} for e in ledger if e["ownership"] == EXCLUDED]
