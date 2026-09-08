@@ -7,6 +7,7 @@ cancellation fails. The detached watcher can retry the same journal after driver
 from __future__ import annotations
 
 import copy
+import datetime as _dt
 import json
 import os
 import threading
@@ -21,6 +22,10 @@ from google.cloud import bigquery
 from google.cloud.bigquery import Client as BigQueryClient
 
 from . import PROJECT, LOCATION
+
+
+def _dt_now() -> str:
+    return _dt.datetime.now(_dt.timezone.utc).isoformat()
 
 
 class WindowStopped(RuntimeError):
@@ -56,6 +61,47 @@ class _ResultHTTP:
         response = self.raw.request(*args, **kwargs)
         self.remaining()
         return response
+
+
+_MISSING = object()
+
+
+@contextmanager
+def _guarded_send(client, window, cleanup: bool):
+    """Guard the ACTUAL HTTP send for the duration of one submission (Astra PR47 #4).
+
+    `submit()` checks admission, then calls `client.query(...)`. Inside that call google-auth may refresh the
+    credential, and a refresh that outlives the stop lets the job POST leave after the window closed. Re-checking at
+    the moment of dispatch closes that race, and the session's own internal 401 retry gets a fresh budget too.
+
+    The override is installed and removed inside `submit`'s lock, so the caller's transport is unchanged before and
+    after: cancellation and terminal readbacks, which run after stop by design, keep working on it."""
+    session = getattr(client, "_http", None)
+    if session is None:
+        yield False
+        return
+    previous = session.__dict__.get("send", _MISSING)
+    inner = session.send
+
+    def send(request, **kwargs):
+        window.check(cleanup=cleanup)          # a refresh that crossed stop cannot be followed by a submission
+        remaining = window.remaining(cleanup)
+        requested = kwargs.get("timeout")
+        kwargs["timeout"] = min(remaining, requested) if isinstance(requested, (int, float)) else remaining
+        return inner(request, **kwargs)
+
+    try:
+        session.send = send
+    except (AttributeError, TypeError):        # a frozen or unusual transport: report it rather than pretend
+        yield False
+        return
+    try:
+        yield True
+    finally:
+        if previous is _MISSING:
+            session.__dict__.pop("send", None)
+        else:
+            session.send = previous
 
 
 @contextmanager
@@ -96,8 +142,15 @@ def _cancel_pending(pending) -> list[dict]:
 
 
 class WindowJobs:
-    def __init__(self, label: str, deadline: float, journal: str | Path):
+    def __init__(self, label: str, deadline: float, journal: str | Path, clock=None):
         self.label, self.deadline, self.journal = label, deadline, Path(journal)
+        # injected so a controller and its gate share one clock. `None` keeps resolving `time.monotonic` through the
+        # module at call time, which is what the existing driver regressions monkeypatch.
+        self._clock = clock or (lambda: time.monotonic())
+        self.cleanup_deadline: float | None = None   # a SEPARATE bounded channel, opened only after workload stop
+        self.cleanup_jobs = 0
+        self.cleanup_max_jobs = 0
+        self.adopted: dict[str, dict] = {}
         self.stop = threading.Event()
         self._lock = threading.RLock()
         self._cancel_lock = threading.Lock()
@@ -112,42 +165,82 @@ class WindowJobs:
                                    "job_ids": list(self._jobs), "finished_job_ids": sorted(self._finished)}, indent=2))
         os.replace(tmp, self.journal)
 
-    def check(self):
-        if time.monotonic() >= self.deadline:
+    def end(self, cleanup: bool = False) -> float:
+        return self.cleanup_deadline if (cleanup and self.cleanup_deadline is not None) else self.deadline
+
+    def remaining(self, cleanup: bool = False) -> float:
+        return max(0.001, self.end(cleanup) - self._clock())
+
+    def check(self, cleanup: bool = False):
+        """Admission. `cleanup=True` uses the separate bounded cleanup channel, which exists so a resource restoration
+        (row-policy DDL, ACL repair) can still be SUBMITTED and journaled after workload admission closed. Without it,
+        stopping the only channel makes every restore raise, and the obligation is silently lost (Astra PR47 #3)."""
+        if cleanup and self.cleanup_deadline is not None:
+            if self._clock() >= self.cleanup_deadline:
+                raise WindowStopped("the cleanup channel deadline passed")
+            if self.cleanup_max_jobs and self.cleanup_jobs >= self.cleanup_max_jobs:
+                raise WindowStopped("the cleanup channel job budget is spent")
+            return
+        if self._clock() >= self.deadline:
             self.stop.set()
         if self.stop.is_set():
             raise WindowStopped("reservation window stopped or deadline reached")
 
+    def open_cleanup(self, seconds: float, max_jobs: int = 20) -> float:
+        """Open the bounded cleanup channel. Called only after workload admission is closed."""
+        self.cleanup_deadline = self._clock() + seconds
+        self.cleanup_max_jobs = max_jobs
+        return self.cleanup_deadline
+
+    def close_cleanup(self) -> None:
+        self.cleanup_deadline = None
+
     def wait(self, seconds: float):
         self.check()
-        self.stop.wait(max(0, min(seconds, self.deadline - time.monotonic())))
+        self.stop.wait(max(0, min(seconds, self.deadline - self._clock())))
         self.check()
 
-    def bind(self, client):
-        return WindowClient(client, self)
+    def bind(self, client, cleanup: bool = False):
+        return WindowClient(client, self, cleanup=cleanup)
+
+    def adopt(self, job_id: str, client=None, **meta) -> dict:
+        """Take responsibility for a job this process did not submit - a receipt child's, say. It enters the journal
+        and the cleanup union like any other; without a client it can be cancelled only if one is supplied later."""
+        with self._lock:
+            entry = {"job_id": job_id, "adopted_at": _dt_now(), **meta}
+            self.adopted[job_id] = entry
+            self._jobs.setdefault(job_id, client)
+            self._save()
+        return entry
 
     def submit(self, client, method, args, kwargs):
         # Lock covers admission + registration + submit, never result waiting.
         # The stop event is set before cancellation takes this lock, closing races.
+        cleanup = bool(kwargs.pop("okf_cleanup", False))
         with self._lock:
-            self.check()
+            self.check(cleanup=cleanup)
             kwargs = dict(kwargs)
             cfg = copy.deepcopy(kwargs.get("job_config"))
             if cfg is None:
                 cfg = bigquery.QueryJobConfig() if method == "query" else bigquery.LoadJobConfig()
-            cfg.labels = dict(cfg.labels or {}, okf_spike="bq_graph_20260905", window=self.label)
-            job_id = f"okf_graph_{self.label}_{uuid.uuid4().hex}"
+            cfg.labels = dict(cfg.labels or {}, okf_spike="bq_graph_20260905", window=self.label,
+                              **({"okf_stage": "cleanup"} if cleanup else {}))
+            job_id = f"okf_graph_{self.label}_{'cleanup_' if cleanup else ''}{uuid.uuid4().hex}"
             kwargs.update(job_config=cfg, job_id=job_id,
-                          timeout=max(.001, min(30, self.deadline - time.monotonic())))
+                          timeout=max(.001, min(30, self.remaining(cleanup))))
             if method == "query":
                 kwargs["retry"] = None
                 kwargs["job_retry"] = None  # no invisible resubmissions with new IDs
             else:
                 kwargs["num_retries"] = 0
             self._jobs[job_id] = client
+            if cleanup:
+                self.cleanup_jobs += 1
             self._save()  # survives a lost submit response or killed driver
-            job = getattr(client, method)(*args, **kwargs)
-        return WindowJob(job, self, job_id, method == "query")
+            # the send guard re-checks admission at the ACTUAL dispatch, including after a credential refresh
+            with _guarded_send(client, self, cleanup):
+                job = getattr(client, method)(*args, **kwargs)
+        return WindowJob(job, self, job_id, method == "query", cleanup=cleanup)
 
     def finished(self, job_id):
         with self._lock:
@@ -170,22 +263,24 @@ class WindowJobs:
 
 
 class WindowClient:
-    def __init__(self, client, window):
-        self.raw, self.window = client, window
+    def __init__(self, client, window, cleanup: bool = False):
+        self.raw, self.window, self.cleanup = client, window, cleanup
+        # a transport we cannot guard is reported, never assumed safe
+        self.submission_guarded = getattr(client, "_http", None) is not None
 
     def query(self, *args, **kwargs):
-        return self.window.submit(self.raw, "query", args, kwargs)
+        return self.window.submit(self.raw, "query", args, dict(kwargs, okf_cleanup=self.cleanup))
 
     def load_table_from_json(self, *args, **kwargs):
-        return self.window.submit(self.raw, "load_table_from_json", args, kwargs)
+        return self.window.submit(self.raw, "load_table_from_json", args, dict(kwargs, okf_cleanup=self.cleanup))
 
     def __getattr__(self, name):
         return getattr(self.raw, name)
 
 
 class WindowJob:
-    def __init__(self, job, window, job_id, is_query):
-        self.raw, self.window, self.job_id, self.is_query = job, window, job_id, is_query
+    def __init__(self, job, window, job_id, is_query, cleanup: bool = False):
+        self.raw, self.window, self.job_id, self.is_query, self.cleanup = job, window, job_id, is_query, cleanup
         self._query_client = job._client if isinstance(job, bigquery.QueryJob) else None
 
     def __getattr__(self, name):
@@ -193,7 +288,8 @@ class WindowJob:
 
     def _check(self):
         try:
-            self.window.check()
+            # a cleanup submission waits on the cleanup channel: the workload stop that preceded it is not its deadline
+            self.window.check(cleanup=self.cleanup)
         except WindowStopped:
             self.window.stop_and_cancel()  # before callers unwind executor contexts
             raise
@@ -201,7 +297,7 @@ class WindowJob:
     def result(self, **kwargs):
         self._check()
         timeout = kwargs.pop("timeout", None)
-        end = min(self.window.deadline, time.monotonic() + (float("inf") if timeout is None else timeout))
+        end = min(self.window.end(self.cleanup), time.monotonic() + (float("inf") if timeout is None else timeout))
         kwargs["retry"] = None
         if self.is_query:
             kwargs["job_retry"] = None
@@ -256,7 +352,7 @@ class WindowJob:
                 raise
 
     def _remaining(self, end):
-        self.window.check()
+        self.window.check(cleanup=self.cleanup)
         remaining = end - time.monotonic()
         if remaining <= 0:
             raise TimeoutError("job result timeout")
@@ -296,6 +392,45 @@ def _save_cleanup(path: Path, journal: dict, results: list[dict]):
     tmp = target.with_suffix(f".{os.getpid()}.{threading.get_ident()}.tmp")
     tmp.write_text(json.dumps(receipt, indent=2))
     os.replace(tmp, target)
+
+
+RESTORES = "restores"
+
+
+def restore_obligations_path(label: str, evidence_dir: str | Path) -> Path:
+    return Path(evidence_dir) / f"restores_{label}.json"
+
+
+def record_restore_obligations(label: str, evidence_dir: str | Path, obligations: list[dict]) -> Path:
+    """Persist this window's resource-restoration obligations so a FAILED restore survives the process.
+
+    Capacity deletion and job cleanup each have a receipt; a row policy or dataset ACL this window changed and could
+    not put back is a third, independent obligation. Written BEFORE the restores are attempted (as pending) and
+    rewritten afterwards, so a crash mid-restore also leaves the blocker behind (Astra PR47 #3)."""
+    path = restore_obligations_path(label, evidence_dir)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    outstanding = [o for o in obligations if not o.get("ok")]
+    body = {"label": label, "project": PROJECT, "location": LOCATION, "at": _dt_now(),
+            "obligations": obligations, "outstanding": outstanding,
+            "note": "a resource this window changed and could not restore. Capacity deletion and job cleanup do not "
+                    "cover it; another window stays prohibited until it is cleared by an owned recovery."}
+    tmp = path.with_suffix(f".{os.getpid()}.tmp")
+    tmp.write_text(json.dumps(body, indent=2, default=str))
+    os.replace(tmp, path)
+    return path
+
+
+def restores_clear(label: str, evidence_dir: str | Path) -> bool:
+    """True when this window declares no outstanding restoration. A missing file means nothing was ever changed;
+    an unreadable or malformed one is NOT clear."""
+    path = restore_obligations_path(label, evidence_dir)
+    if not path.exists():
+        return True
+    try:
+        body = json.loads(path.read_text())
+        return body.get("label") == label and isinstance(body.get("outstanding"), list) and not body["outstanding"]
+    except (OSError, ValueError, TypeError):
+        return False
 
 
 def job_cleanup_verified(label: str, path: str | Path) -> bool:

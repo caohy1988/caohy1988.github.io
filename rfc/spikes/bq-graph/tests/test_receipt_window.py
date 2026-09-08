@@ -13,6 +13,7 @@ import json
 import os
 import shutil
 import subprocess
+import threading
 import sys
 import time
 from pathlib import Path
@@ -69,18 +70,44 @@ def test_an_unsupported_pin_never_launches_a_child(tmp_path, monkeypatch):
 
 
 # ----------------------------------------------------------------------------- handshake
+def user_site_enabled(python=None):
+    """`usercustomize` only runs when user site-packages are enabled. A venv built with --no-user-site never runs the
+    bootstrap, and the bridge must then REFUSE rather than pretend the child is bounded."""
+    proc = subprocess.run([python or sys.executable, "-c", "import site; print(bool(site.ENABLE_USER_SITE))"],
+                          capture_output=True, text=True, timeout=60)
+    return proc.stdout.strip() == "True"
+
+
 @needs_sdk
-def test_handshake_proves_the_guards_in_a_real_child_interpreter(tmp_path):
+def test_handshake_matches_what_the_child_interpreter_can_actually_bootstrap(tmp_path):
+    """Astra PR47 P2: assert the branch this interpreter is actually in, and never weaken the refusal to pass."""
     bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 600, directory=tmp_path / "priv")
     record = bridge.handshake()
-    assert record["status"] == RW.SUPPORTED, record
-    assert record["child"]["missing"] == []
-    assert set(record["child"]["installed"]) >= {
-        "google.auth.default", "google.auth.transport.requests.AuthorizedSession.send",
-        "google.cloud.bigquery.Client.query", "google.cloud.bigquery._http.Connection.api_request",
-        "urllib.request.urlopen"}
-    # the handshake writes nothing into the run's own journal
-    assert not bridge.journal_path.exists()
+    assert not bridge.journal_path.exists()          # the handshake writes nothing into the run's own journal
+    if user_site_enabled():
+        assert record["status"] == RW.SUPPORTED, record
+        assert record["child"]["missing"] == []
+        assert record["child"]["bootstrap_imported"] is True
+        assert set(record["child"]["installed"]) >= {
+            "google.auth.default", "google.auth.transport.requests.AuthorizedSession.send",
+            "google.cloud.bigquery.Client.query", "google.cloud.bigquery._http.Connection.api_request",
+            "urllib.request.urlopen", "requests.Session.send"}
+    else:
+        assert record["status"] == RW.UNSUPPORTED
+        assert record["bootstrap"] == "USERCUSTOMIZE_DISABLED"
+        assert record["child"]["enable_user_site"] is False
+        assert "site.ENABLE_USER_SITE is false" in record["reason"]
+
+
+@needs_sdk
+def test_a_child_interpreter_without_usercustomize_is_refused(tmp_path, monkeypatch):
+    """Forcing the condition on this interpreter: PYTHONNOUSERSITE disables the bootstrap entirely."""
+    monkeypatch.setenv("PYTHONNOUSERSITE", "1")
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 600, directory=tmp_path / "priv")
+    record = bridge.handshake()
+    assert record["status"] == RW.UNSUPPORTED
+    assert record["bootstrap"] == "USERCUSTOMIZE_DISABLED"
+    assert record["child"]["bootstrap_imported"] is False
 
 
 @needs_sdk
@@ -191,13 +218,15 @@ print("OKF_RESULT " + json.dumps(out))
 '''
 
 
-def child(tmp_path, mode, *, deadline_offset=600, stop=False, max_jobs=0, max_ops=0, returned_id=None):
+def child(tmp_path, mode, *, deadline_offset=600, stop=False, max_jobs=0, max_ops=0, returned_id=None, bridge=None):
     """Run one child with the bridge installed and a fully offline transport. Returns (result, bridge)."""
-    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + deadline_offset,
-                              directory=tmp_path / "priv", max_jobs=max_jobs, max_ops=max_ops)
-    RW.bootstrap_files(bridge.dir)
+    if bridge is None:
+        bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + deadline_offset,
+                                  directory=tmp_path / "priv", max_jobs=max_jobs, max_ops=max_ops)
+        RW.bootstrap_files(bridge.dir)
     if stop:
         bridge.stop()
+    bridge.next_launch()
     script = tmp_path / "child.py"
     script.write_text(CHILD)
     env = dict(os.environ, **bridge.child_env())
@@ -467,3 +496,190 @@ def test_two_overlapping_bridges_keep_separate_private_journals(tmp_path):
     assert a.journal_path != b.journal_path and a.stop_path != b.stop_path
     a.stop()
     assert not b.stop_path.exists()          # one invocation's stop never closes another's admission
+
+
+# =============================================================================== Astra PR47 review fixes
+@needs_sdk
+def test_the_credential_refresh_transport_is_guarded(tmp_path):
+    """Astra PR47 #4: `creds.refresh(Request())` sends through a PLAIN `requests.Session`, never AuthorizedSession."""
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 2, directory=tmp_path / "priv")
+    RW.bootstrap_files(bridge.dir)
+    bridge.next_launch()
+    bridge.stop()
+    script = tmp_path / "refresh.py"
+    script.write_text(r'''
+import json, sys
+import okf_window_bridge as bridge
+bridge.install()
+import requests
+from requests.adapters import HTTPAdapter
+import google.auth, google.auth.transport.requests
+sys.path.insert(0, sys.argv[1] + "/examples/okf_attested_computation")
+import broker
+seen = []
+
+
+class Adapter(HTTPAdapter):
+    def send(self, request, **kwargs):
+        seen.append({"url": request.url, "timeout": kwargs.get("timeout")})
+        response = requests.Response()
+        response.status_code = 200
+        response._content = b'{"email": "sa@example.test"}'
+        response.headers["content-type"] = "application/json"
+        response.request = request
+        return response
+
+
+class Credentials:
+    token = "synthetic-not-a-secret"
+
+    def refresh(self, request):
+        request.session.mount("https://", Adapter())
+        request(url="https://oauth2.example.test/refresh", method="POST", body="{}")
+
+
+google.auth.default = lambda *a, **kw: (Credentials(), "p")
+error = None
+try:
+    broker.open_live_session("p", "US")
+except Exception as exc:
+    error = type(exc).__name__
+print("OKF_RESULT " + json.dumps({"seen": seen, "error": error, "stopped": bridge.stopped()}))
+''')
+    proc = subprocess.run([sys.executable, str(script), SDK_ROOT], env=dict(os.environ, **bridge.child_env()),
+                          capture_output=True, text=True, timeout=120)
+    assert proc.returncode == 0, proc.stderr[-2000:]
+    result = json.loads(next(l for l in proc.stdout.splitlines() if l.startswith("OKF_RESULT "))[len("OKF_RESULT "):])
+    assert result["stopped"] is True
+    assert result["seen"] == [], "the credential refresh dispatched after the window stopped"
+    assert result["error"] == "WindowStopped"
+
+
+def test_the_base_requests_session_send_is_the_guarded_seam(tmp_path, monkeypatch):
+    """AuthorizedSession does not define `send`; guarding only the subclass leaves a plain Session unbounded."""
+    bridge = load_bridge(tmp_path, monkeypatch)
+    sends = []
+
+    class Session:
+        def send(self, request, **kwargs):
+            sends.append(kwargs.get("timeout"))
+            return "response"
+
+    class AuthorizedSession(Session):
+        pass
+
+    requests_module = SimpleNamespace(Session=Session)
+    bridge._patch_requests(requests_module)
+    bridge._patch_session(SimpleNamespace(AuthorizedSession=AuthorizedSession))
+    assert "requests.Session.send" in bridge.installed
+    Session().send("plain")
+    AuthorizedSession().send("authorized")
+    assert len(sends) == 2 and all(t is not None for t in sends)
+    # the subclass is not double-wrapped: it inherits the one guard
+    assert AuthorizedSession.__dict__.get("send") is None
+
+
+def test_a_guard_is_never_installed_twice(tmp_path, monkeypatch):
+    bridge = load_bridge(tmp_path, monkeypatch)
+    calls = []
+
+    class Session:
+        def send(self, request, **kwargs):
+            calls.append(1)
+            return "r"
+
+    module = SimpleNamespace(Session=Session)
+    bridge._patch_requests(module)
+    bridge._patch_requests(module)
+    Session().send("x")
+    assert calls == [1]                       # one dispatch, and the checks did not stack
+    assert bridge.counts["operations"] == 1
+
+
+@needs_sdk
+def test_each_child_launch_keeps_its_own_journal(tmp_path):
+    """Astra PR47 #5: the child's sequence counter restarts, so a shared journal loses every launch but the last."""
+    result_a, bridge = child(tmp_path, "submit", returned_id=None)
+    result_b, _ = child(tmp_path, "submit", bridge=bridge)
+    ingested = bridge.ingest()
+    assert ingested["launches"] == 2 and len(ingested["journals"]) == 2
+    assert len(ingested["jobs"]) == 2, ingested["jobs"]
+    assert len({j["invocation"] for j in ingested["jobs"]}) == 2
+    assert ingested["unresolved"] == [] and ingested["complete"] is True
+
+
+@needs_sdk
+def test_an_unwritable_journal_refuses_to_dispatch(tmp_path):
+    """Astra PR47 #6: durable intent BEFORE dispatch, or nothing is dispatched."""
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 300, directory=tmp_path / "priv")
+    RW.bootstrap_files(bridge.dir)
+    bridge.next_launch()
+    bridge.journal_path.parent.mkdir(parents=True, exist_ok=True)
+    bridge.journal_path.mkdir()                       # the journal path is a directory: unwritable
+    script = tmp_path / "child.py"
+    script.write_text(CHILD)
+    proc = subprocess.run([sys.executable, str(script), "submit"], env=dict(os.environ, **bridge.child_env()),
+                          capture_output=True, text=True, timeout=120)
+    assert proc.returncode != 0
+    assert "JournalUnavailable" in proc.stderr
+    ingested = bridge.ingest()
+    assert ingested["jobs"] == []
+    assert ingested["complete"] is False
+    assert any(u["state"] == "JOURNAL_DAMAGED" for u in ingested["unresolved"])
+    assert any(u["state"] == "LAUNCH_UNJOURNALED" for u in ingested["unresolved"])
+
+
+def test_an_unparsable_record_is_an_unresolved_obligation(tmp_path):
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 300, directory=tmp_path / "priv")
+    bridge.next_launch()
+    bridge.journal_path.parent.mkdir(parents=True, exist_ok=True)
+    bridge.journal_path.write_text('{"event": "query", "seq": 1, "state": "SUBMITTED", "actual_job": true, '
+                                   '"job_id": "j1", "invocation": "i1"}\n{truncated write')
+    ingested = bridge.ingest()
+    assert [j["job_id"] for j in ingested["jobs"]] == ["j1"]
+    assert any(u["state"] == "JOURNAL_DAMAGED" for u in ingested["unresolved"])
+    assert ingested["complete"] is False
+
+
+def test_a_launch_that_journaled_nothing_stays_unresolved(tmp_path):
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 300, directory=tmp_path / "priv")
+    bridge.next_launch()
+    ingested = bridge.ingest()
+    assert ingested["complete"] is False
+    assert [u["state"] for u in ingested["unresolved"]] == ["JOURNAL_DAMAGED", "LAUNCH_UNJOURNALED"]
+
+
+@needs_sdk
+def test_join_closes_admission_then_terminates_a_child_that_will_not_exit(tmp_path):
+    """Astra PR47 #1: the parent must be able to stop and join the child BEFORE it seals its cleanup union."""
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 300, directory=tmp_path / "priv")
+    RW.bootstrap_files(bridge.dir)
+    script = tmp_path / "sleeper.py"
+    script.write_text("import time\ntime.sleep(120)\n")
+    done = {}
+    runner = bridge.runner()
+    thread = threading.Thread(target=lambda: done.update(result=runner([sys.executable, str(script)])), daemon=True)
+    thread.start()
+    for _ in range(400):
+        if bridge._process is not None:
+            break
+        time.sleep(0.01)
+    outcome = bridge.join(timeout=1)
+    assert bridge.stop_path.exists(), "admission must close before the process is terminated"
+    assert outcome["joined"] is True and outcome["terminated"] is True
+    assert "does not cancel its server jobs" in outcome["note"]
+    thread.join(30)
+    assert not thread.is_alive()
+
+
+def test_join_is_a_noop_when_no_child_is_running(tmp_path):
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 300, directory=tmp_path / "priv")
+    assert bridge.join() == {"joined": True, "running": False}
+
+
+@needs_sdk
+def test_jobs_exposes_the_qualified_references_the_controller_adopts(tmp_path):
+    result, bridge = child(tmp_path, "submit")
+    refs = bridge.jobs()
+    assert [r["job_id"] for r in refs] == ["okf_rcpt_deadbeef_0123456789abcdef"]
+    assert refs[0]["project"] == "p" and refs[0]["location"] == "US"

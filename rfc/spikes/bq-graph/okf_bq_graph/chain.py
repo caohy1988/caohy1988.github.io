@@ -533,6 +533,27 @@ def gql_admission(engine: str, live: bool, window: Any) -> dict:
             "assignment_probes": len(((getattr(window, "record", {}) or {}).get("assignment") or {}).get("probes") or [])}
 
 
+def _is_bound(client: Any, window: Any) -> bool:
+    from .lifecycle import WindowClient
+    return isinstance(client, WindowClient) and client.window is getattr(window, "jobs", None)
+
+
+def unbound_clients(clients: Optional[dict], broker: Any, window: Any) -> list[str]:
+    """Every BigQuery client that would submit OUTSIDE the controller's single admission gate.
+
+    A window that records a controller but hands the chain an untracked client bounds nothing: the client keeps sending
+    after stop, its jobs never reach the journal, and the window still closes `clean` (Astra PR47 #1)."""
+    if window is None:
+        return []
+    out = []
+    for name, client in (("clients.bq", (clients or {}).get("bq")),
+                         ("broker.requester", getattr(broker, "sa", None)),
+                         ("broker.operator", getattr(broker, "owner", None))):
+        if client is not None and not _is_bound(client, window):
+            out.append(name)
+    return out
+
+
 def engine_proof(requested: str, clients: dict, result: Optional[dict], reservation: str = RESERVATION) -> dict:
     """Was the answer produced by the engine that was asked for?
 
@@ -796,6 +817,13 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                                                "grant, query or SDK launch"}
             return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
         receipt_runner = receipt_bridge.runner()
+        if window is not None:
+            # stop reaches the child, close joins it BEFORE sealing, and its retained references are adopted
+            window.register_worker("receipt_child", stop=receipt_bridge.stop, join=receipt_bridge.join,
+                                   jobs=receipt_bridge.jobs)
+            out["receipt_bridge"]["worker"] = "registered with the window controller (stop, join, job union)"
+        else:
+            out["receipt_bridge"]["worker"] = None
     # ---- KTD4: the first live GQL case must execute; a memoized answer cannot establish that GQL ran
     if live and engine == "gql":
         out["cache_policy"] = {"memoization": "DISABLED", "exempt_cases": list(CACHE_EXEMPT_CASES),
@@ -820,10 +848,31 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     if engine == "oracle" and projection is None and not catalog and (clients is None or restricted):
         from .compile import compile_bundle
         projection = compile_bundle(acme_root, BUNDLE_ID, SOURCE_PIN)
+    def _bind(raw: Any, role: str, principal: Optional[str] = None) -> Any:
+        """Every client the chain builds under an owned window is registered with its single submission gate."""
+        return window.bind_client(raw, role=role, principal=principal) if window is not None else raw
+
     if restricted:
         if broker is None:
-            broker = HermeticBroker(projection) if not live else RestrictedBroker(engine, sdk_pub["dataset"], dependencies=sdk_pub["dependencies"])
+            if not live:
+                broker = HermeticBroker(projection)
+            else:
+                from .authz import impersonated_client
+                broker = RestrictedBroker(
+                    engine, sdk_pub["dataset"], dependencies=sdk_pub["dependencies"],
+                    factory=(lambda email: _bind(impersonated_client(email), "requester", email)),
+                    owner=(window.operator if window is not None and window.operator is not None else None))
         out["requester"]["broker"] = broker.describe()
+        unbound = unbound_clients(clients, broker, window)
+        if unbound:
+            out["engine_admission"] = {"status": "GQL_CLIENTS_UNBOUND", "engine": engine, "unbound": unbound,
+                                       "reason": "a client would submit outside the window's admission gate: its jobs "
+                                                 "would not be journaled, bounded or cleaned up"}
+            out["cases"] = []; out["verdict"] = "CHAIN_INCOMPLETE"; out["broken_at"] = "engine_admission"
+            out["engine_proof"] = {"status": ENGINE_NOT_PROVEN, "reasons": ["the run was refused before retrieval"]}
+            out["same_requester"] = {"status": "NOT_RUN", "reason": "refused before any grant, query or SDK launch"}
+            out["teardown"] = {"status": "NOT_RUN", "reason": "no grant was issued"}
+            return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
         requester = requester or SA_ALIAS
         try:
             out["grant"] = broker.grant()   # before the pointer lookup: that job runs under the requester too
@@ -840,7 +889,19 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             clients = {"engine": "oracle"}      # graphs come from the retained store below
         else:
             from google.cloud import bigquery
-            clients = {"engine": engine, "bq": bigquery.Client(project=PROJECT, location=LOCATION)}
+            clients = {"engine": engine,
+                       "bq": _bind(bigquery.Client(project=PROJECT, location=LOCATION), "requester")}
+    unbound = unbound_clients(clients, broker, window)
+    if unbound:
+        out["engine_admission"] = {"status": "GQL_CLIENTS_UNBOUND", "engine": engine, "unbound": unbound,
+                                   "reason": "a client would submit outside the window's admission gate: its jobs "
+                                             "would not be journaled, bounded or cleaned up"}
+        out["cases"] = []; out["verdict"] = "CHAIN_INCOMPLETE"; out["broken_at"] = "engine_admission"
+        out["engine_proof"] = {"status": ENGINE_NOT_PROVEN, "reasons": ["the run was refused before retrieval"]}
+        out["same_requester"] = {"status": "NOT_RUN", "reason": "refused before any query or SDK launch"}
+        return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
+    if window is not None:
+        out["window"]["bound_clients"] = list(window.clients)
     requester = requester or operator()
     pointer_job_id = None
     source_pin = SOURCE_PIN
@@ -1153,9 +1214,16 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     statuses = [c["acceptance"]["status"] for c in out["cases"]]
     unresolved = journal.unresolved()
     if receipt_bridge is not None:
-        # a submission the child could not resolve is a job the window may owe cleanup for
+        # a submission the child could not resolve is a job the window may owe cleanup for; so is a job the SDK
+        # diagnostic named that the child journal never saw, and the reverse (Astra PR47 #6)
         unresolved = unresolved + [dict(u, role="receipt_child", state=u.get("state", "UNRESOLVED"))
                                    for u in out["job_inventory"]["receipt_child_unresolved"]]
+        for job_id in out["job_inventory"]["receipt_reported_only"]:
+            unresolved.append({"role": "receipt_child", "job_id": job_id, "state": "DIAGNOSTIC_ONLY",
+                               "error": "the SDK diagnostic names a job the child's own journal never recorded"})
+        for job_id in out["job_inventory"]["receipt_child_only"]:
+            unresolved.append({"role": "receipt_child", "job_id": job_id, "state": "JOURNAL_ONLY",
+                               "error": "the child journaled a submission the SDK diagnostic never reported"})
     out["job_inventory"]["unresolved"] = [{"seq": e["seq"], "role": e["role"], "job_id": e.get("job_id"), "state": e["state"], "error": e.get("error")} for e in unresolved]
     if restricted:
         probe_jobs = list(getattr(broker, "probe_jobs", []) or [])       # requester-submitted platform observations
@@ -1278,6 +1346,51 @@ def open_gql_window(label: str, minutes: int, manifest: str, evidence_dir: str, 
     return window
 
 
+def finalize_cleanup(out: dict, window: Any, out_dir: str, receipt_bridge: Any = None) -> dict:
+    """Amend the chain record with the window's ACTUAL closeout, after the controller closed.
+
+    `run_chain` returns before the window closes, so its verdict cannot yet account for cleanup. A chain that reached
+    its stages inside a window whose capacity, jobs, restores or workers are unresolved is not a completed run: the
+    final retained record says so rather than leaving a `CHAIN_CONNECTED` that a later reader would over-read
+    (Astra PR47 #1)."""
+    from .authz import redact
+    cleanup = (window.record or {}).get("cleanup") or {}
+    clean = bool((window.record or {}).get("clean"))
+    out.setdefault("window", {})
+    out["window"].update({"label": getattr(getattr(window, "cfg", None), "label", None),
+                          "state": getattr(window, "state", None), "clean": clean, "cleanup": cleanup,
+                          "restores": (window.record or {}).get("restores"),
+                          "workers": (window.record or {}).get("workers")})
+    if receipt_bridge is not None:
+        # re-ingest AFTER the child was joined: a submission it made late is still this window's obligation
+        ingested = receipt_bridge.ingest()
+        inventory = out.setdefault("job_inventory", {})
+        inventory["receipt_child"] = [j["job_id"] for j in ingested["jobs"]]
+        inventory["receipt_child_unresolved"] = ingested["unresolved"]
+        inventory["receipt_child_sealed_after_join"] = True
+        out["receipt_bridge_journal"] = ingested
+        if ingested["unresolved"]:
+            clean = False
+            out["window"]["clean"] = False
+            cleanup = dict(cleanup, receipt_child_unresolved=len(ingested["unresolved"]))
+            out["window"]["cleanup"] = cleanup
+    if not clean and out.get("verdict") != "CHAIN_BROKEN":
+        out["verdict"] = "CHAIN_INCOMPLETE"
+        out["broken_at"] = "window_cleanup"
+        out["cleanup_note"] = ("the chain ran inside a window whose closeout is not complete: capacity, job cleanup, "
+                               "resource restoration or a worker join is outstanding, so this run is not a clean "
+                               "closeout whatever its case outcomes were")
+    text = json.dumps(redact(out), indent=1, sort_keys=True, default=str) + "\n"
+    final = Path(out_dir) / f"chain_{out['mode']}{'_restricted' if out.get('requester', {}).get('mode') == 'restricted-sa' else ''}.json"
+    tmp = final.with_name(f".{final.name}.{out.get('run_id', 'norun')}.final.tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, final)
+    run_dir = Path(out.get("run_dir") or "")
+    if run_dir.is_dir():
+        (run_dir / final.name).write_text(text, encoding="utf-8")
+    return out
+
+
 def _mock_reader_from_file(path: str) -> Any:
     from .catalog import MockReader
     body = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -1378,16 +1491,19 @@ def main(argv: Optional[list[str]] = None) -> int:
                 (Path(out_dir) / f"window_{a.gql_window}.json").write_text(
                     json.dumps(record, indent=1, sort_keys=True, default=str) + "\n", encoding="utf-8")
             return 1
+    out = None
     try:
         out = run_chain(engine=engine, live=live, sdk_root=a.sdk_root, out_dir=out_dir, as_of=a.as_of, acme_root=a.acme_root,
                         seed_mode=a.seed_mode, catalog_reader=reader, catalog_cfg=cfg, store=store,
                         requester_mode=a.requester, cases=selected, window=window, receipt_bridge=bridge if window else None)
     finally:
         if window is not None:
-            window.close()
+            window.close()          # stops the child, joins it, then seals the union
             Path(out_dir).mkdir(parents=True, exist_ok=True)
             (Path(out_dir) / f"window_{a.gql_window}.json").write_text(
                 json.dumps(window.record, indent=1, sort_keys=True, default=str) + "\n", encoding="utf-8")
+            if out is not None:
+                out = finalize_cleanup(out, window, out_dir, receipt_bridge=bridge)
             print("window cleanup:", json.dumps(window.record.get("cleanup"), default=str))
     for c in out.get("cases", []):
         rec = c.get("receipt") or {}

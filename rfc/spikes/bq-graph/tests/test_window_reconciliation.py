@@ -48,7 +48,7 @@ class FakeTransport:
         self.calls = []
         self.gets = []
 
-    def list_jobs(self, *, project, min_creation_time, max_creation_time, page_token=None, page_size=None,
+    def list_jobs(self, *, project, min_creation_time=None, max_creation_time=None, page_token=None, page_size=None,
                   parent_job_id=None):
         self.calls.append({"project": project, "page_token": page_token, "parent_job_id": parent_job_id,
                            "start": min_creation_time, "end": max_creation_time})
@@ -80,11 +80,20 @@ def window(label="smoke-1", **kw):
     return {"label": label, "opened_at": OPEN, "closed_at": CLOSE, **kw}
 
 
-def run(label="smoke-1", *, transport, recovered=(), decisions=None, quiescent=True, win=None, **kw):
+def quiescence(established=True, evidence="launcher log: the driver exited", stopped_at="2026-09-05T23:48:10Z"):
+    """The reconciler needs an EVIDENCED shutdown: a boolean, a named record and the moment the last submitter
+    stopped, because that moment - not capacity deletion - bounds the submission lifetime."""
+    q = {"established": established}
+    if evidence is not None:
+        q["evidence"] = evidence
+    if stopped_at is not None:
+        q["stopped_at"] = stopped_at
+    return q
+
+
+def run(label="smoke-1", *, transport, recovered=(), decisions=None, quiescent=True, win=None, q=None, **kw):
     return RW.reconcile(label, transport=transport, window=win or window(label), recovered=recovered,
-                        decisions=decisions,
-                        quiescence={"established": quiescent, "evidence": "launcher log shows the driver exited"},
-                        **kw)
+                        decisions=decisions, quiescence=q or quiescence(established=quiescent), **kw)
 
 
 # ----------------------------------------------------------------------------- the success fixture
@@ -109,7 +118,7 @@ def test_reconstructed_journal_says_so_and_names_its_sources(tmp_path):
     src = tmp_path / "cost.json"
     src.write_text('{"rows": []}')
     result = RW.reconcile("smoke-1", transport=transport_for(owned_jobs()), window=window(), sources=[src],
-                          quiescence={"established": True, "evidence": "launcher log"})
+                          quiescence=quiescence())
     RW.stage(result, tmp_path / "stage")
     journal = json.loads((tmp_path / "stage" / "jobs_smoke-1.json").read_text())
     receipt = json.loads((tmp_path / "stage" / "jobs_smoke-1.cleanup.json").read_text())
@@ -222,19 +231,31 @@ def test_extra_owned_job_enters_the_inventory(tmp_path):
 
 def test_script_children_are_listed_and_owned():
     parent = job("okf_graph_smoke-1_script", children=True)
+    parent["statistics"]["numChildJobs"] = "1"
     child = job("child_of_script", parent="okf_graph_smoke-1_script")
     grandchild = job("grandchild", parent="child_of_script")
     t = FakeTransport(pages=[{"jobs": [parent]}],
                       children={"okf_graph_smoke-1_script": [{"jobs": [child]}], "child_of_script": [{"jobs": [grandchild]}]},
                       get={j["jobReference"]["jobId"]: j for j in (parent, child, grandchild)})
     child["statistics"]["scriptStatistics"] = {"evaluationKind": "STATEMENT"}
+    child["statistics"]["numChildJobs"] = "1"
     out = run(transport=t)
     assert out["status"] == RW.RECONCILED
     assert out["owned"] == ["child_of_script", "grandchild", "okf_graph_smoke-1_script"]
 
 
+def test_a_script_parent_with_no_declared_child_count_cannot_be_reconciled():
+    """Without `numChildJobs` an exhausted child page proves nothing about membership."""
+    parent = job("okf_graph_smoke-1_script", children=True)
+    t = FakeTransport(pages=[{"jobs": [parent]}], children={"okf_graph_smoke-1_script": [{"jobs": []}]},
+                      get={"okf_graph_smoke-1_script": parent})
+    out = run(transport=t)
+    assert out["status"] == RW.BLOCKED and any("unreconciled script children" in b for b in out["blockers"])
+
+
 def test_child_listing_that_stops_early_blocks():
     parent = job("okf_graph_smoke-1_script", children=True)
+    parent["statistics"]["numChildJobs"] = "1"
     t = FakeTransport(pages=[{"jobs": [parent]}],
                       children={"okf_graph_smoke-1_script": [{"jobs": [], "nextPageToken": "0"}]},
                       get={"okf_graph_smoke-1_script": parent})
@@ -306,6 +327,72 @@ def test_quiescence_must_be_evidenced():
     assert any("quiescence" in b for b in out["blockers"])
 
 
+def test_a_bare_quiescence_boolean_is_not_evidence():
+    """`{"established": true}` is an operator opinion, not a record of when submitting stopped (Astra PR47 #8)."""
+    out = run(transport=transport_for(owned_jobs()), q={"established": True})
+    assert out["status"] == RW.BLOCKED
+    assert any("no evidence" in b for b in out["blockers"])
+    assert any("no stopped_at" in b for b in out["blockers"])
+
+
+def test_an_unparsable_stopped_at_blocks():
+    out = run(transport=transport_for(owned_jobs()), q=quiescence(stopped_at="last tuesday"))
+    assert out["status"] == RW.BLOCKED and any("not a timestamp" in b for b in out["blockers"])
+
+
+def test_a_declared_source_that_cannot_be_read_blocks(tmp_path):
+    out = RW.reconcile("smoke-1", transport=transport_for(owned_jobs()), window=window(),
+                       sources=[tmp_path / "launcher-that-was-never-written.log"], quiescence=quiescence())
+    assert out["status"] == RW.BLOCKED
+    assert any("could not be read" in b for b in out["blockers"])
+    assert out["sources"][0]["error"]
+
+
+def test_the_listing_covers_the_submission_lifetime_not_the_capacity_interval():
+    """A submitter that outlived capacity deletion could still have created an owned job (Astra PR47 #7)."""
+    late = job("okf_graph_smoke-1_after_capacity_close", created="2026-09-05T23:50:00Z", state="RUNNING")
+    t = transport_for(owned_jobs() + [late])
+    out = run(transport=t, q=quiescence(stopped_at="2026-09-05T23:51:00Z"))
+    assert "okf_graph_smoke-1_after_capacity_close" in [g[2] for g in t.gets], "the tail job was filtered away, not read"
+    assert out["status"] == RW.BLOCKED and any("not terminal" in b for b in out["blockers"])
+    assert out["window"]["submitters_stopped_at"] == "2026-09-05T23:51:00Z"
+
+
+def test_the_window_extends_while_owned_work_reaches_its_edge():
+    tail = job("okf_graph_smoke-1_tail", created="2026-09-05T23:49:00Z")
+    t = transport_for(owned_jobs() + [tail])
+    out = run(transport=t, q=quiescence(stopped_at="2026-09-05T23:48:30Z"))
+    assert out["status"] == RW.RECONCILED, out["blockers"]
+    assert out["window"]["extensions"], "an owned job at the edge must pull the bound forward"
+    assert "okf_graph_smoke-1_tail" in out["owned"]
+
+
+def test_a_script_parent_whose_children_are_not_all_read_blocks():
+    parent = job("okf_graph_smoke-1_script", children=True)
+    parent["statistics"]["numChildJobs"] = "2"
+    child = job("script_child_1", parent="okf_graph_smoke-1_script")
+    t = FakeTransport(pages=[{"jobs": [parent]}],
+                      children={"okf_graph_smoke-1_script": [{"jobs": [child]}]},
+                      get={j["jobReference"]["jobId"]: j for j in (parent, child)})
+    out = run(transport=t)
+    assert out["status"] == RW.BLOCKED
+    assert any("unreconciled script children" in b for b in out["blockers"])
+
+
+def test_child_listings_are_not_time_filtered():
+    """A script child created after the window bound is still a child; a time-filtered page cannot prove membership."""
+    parent = job("okf_graph_smoke-1_script", children=True)
+    parent["statistics"]["numChildJobs"] = "1"
+    child = job("script_child_late", created="2026-09-06T02:00:00Z", parent="okf_graph_smoke-1_script")
+    t = FakeTransport(pages=[{"jobs": [parent]}],
+                      children={"okf_graph_smoke-1_script": [{"jobs": [child]}]},
+                      get={j["jobReference"]["jobId"]: j for j in (parent, child)})
+    out = run(transport=t)
+    child_calls = [c for c in t.calls if c["parent_job_id"]]
+    assert child_calls and all(c["start"] is None and c["end"] is None for c in child_calls)
+    assert out["status"] == RW.RECONCILED and "script_child_late" in out["owned"]
+
+
 def test_a_late_entry_on_the_second_pass_blocks():
     jobs = owned_jobs()
     late = job("okf_graph_smoke-1_late", created="2026-09-05T23:47:00Z")
@@ -318,7 +405,8 @@ def test_a_late_entry_on_the_second_pass_blocks():
         def list_jobs(self, **kw):
             if kw.get("parent_job_id") is None and kw.get("page_token") is None:
                 self.passes += 1
-                if self.passes > 1:
+                # call 1 is the lifetime-extension probe, call 2 the first drained pass, call 3 the repeat pass
+                if self.passes >= 3:
                     return {"jobs": jobs + [late]}
             return super().list_jobs(**kw)
 
@@ -424,6 +512,8 @@ def test_rest_transport_issues_only_get():
     assert [c["method"] for c in seen] == ["GET", "GET"]
     assert seen[0]["query_params"]["allUsers"] is True and seen[0]["query_params"]["projection"] == "FULL"
     assert seen[0]["query_params"]["parentJobId"] == "p"
+    t.list_jobs(project=PROJ, min_creation_time=None, max_creation_time=None, parent_job_id="p")
+    assert "minCreationTime" not in seen[2]["query_params"]   # a child listing is not time-filtered
     assert "stateFilter" not in seen[0]["query_params"]
     assert seen[1]["query_params"] == {"location": LOC}
 

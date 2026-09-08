@@ -63,10 +63,13 @@ class FakeJob:
 
 
 def controller(tmp_path, *, manifest=None, minutes=10, opener=None, closer=None, probe=None, clock=None,
-               spawn_watcher=None, client_factory=None, label="chain-gql-1", **cfg_kw):
+               spawn_watcher=None, client_factory=None, label="chain-gql-1", ownership=None, rollback=None,
+               **cfg_kw):
     cfg = CW.WindowConfig(label=label, minutes=minutes, manifest=manifest or clean_manifest(tmp_path),
                           evidence_dir=tmp_path, lease=tmp_path / "window.lease", **cfg_kw)
     return CW.ChainWindow(cfg,
+                          ownership=ownership or (lambda: {"listing_ok": True, "present": False}),
+                          rollback=rollback or (lambda label: {"removed": [], "preserved": []}),
                           opener=opener or (lambda label, slots: {"label": label, "opened_at": OPEN_AT, "state": "OPEN", "steps": []}),
                           closer=closer or (lambda label: {"label": label, "verified_gone": True, "steps": []}),
                           probe=probe if probe is not None else (lambda client: "probe-job"),
@@ -212,16 +215,22 @@ def test_a_watcher_that_cannot_start_refuses_before_provisioning(tmp_path):
 
 
 def test_a_pre_existing_reservation_is_never_adopted(tmp_path):
-    closed = []
+    """Astra PR47 #2: this test previously expected the production closer to run, which DELETED the other owner's
+    reservation and assignment. Refusing must preserve capacity this controller did not create."""
+    closed, rolled = [], []
     opened = {"opened_at": OPEN_AT, "state": "OPEN_WITH_ERRORS",
               "steps": [{"cmd": "bq mk --reservation --edition=ENTERPRISE okf-graph", "rc": 1,
                          "stderr": "BigQuery error: Reservation already exists", "stdout": ""}]}
-    cw = fast(tmp_path, opener=lambda *a: opened, closer=lambda label: closed.append(label) or {"verified_gone": True})
+    cw = fast(tmp_path, opener=lambda *a: opened,
+              closer=lambda label: closed.append(label) or {"verified_gone": True},
+              rollback=lambda label: rolled.append(label) or {"removed": [], "preserved": ["theirs"]})
     cw.preflight()
     with pytest.raises(CW.WindowRefused) as e:
         cw.open()
     assert e.value.code == "RESERVATION_PRE_EXISTING"
-    assert closed == ["chain-gql-1"]          # the controller closed what it had, rather than running on borrowed capacity
+    assert closed == [], "the production closer deletes a reservation this controller did not create"
+    assert rolled == ["chain-gql-1"], "only this invocation's own resources may be released"
+    assert cw.record["window_close"]["preserved"] is True
 
 
 def test_deadline_during_opening_refuses_and_closes(tmp_path):
@@ -441,3 +450,201 @@ def test_the_record_carries_the_explicit_configuration(tmp_path):
     assert cfg["manifest"].endswith("cleanup_manifest.json") and cfg["evidence_dir"] == str(tmp_path)
     assert cfg["max_slots"] == 100 and cfg["reservation"] == CW.RESERVATION
     cw.close()
+
+
+# =============================================================================== Astra PR47 review fixes
+def preexisting_controller(tmp_path, present, listing_ok=True, **kw):
+    state = {"listing_ok": listing_ok, "present": present,
+             "reservations": [f"projects/p/locations/US/reservations/{CW.RESERVATION}"] if present else [],
+             "assignments": ["projects/p/locations/US/reservations/x/assignments/someone-else"] if present else []}
+    return controller(tmp_path, ownership=lambda: state, probe_successes=1, probe_attempts=1, probe_interval_s=0, **kw)
+
+
+def test_pre_existing_capacity_is_refused_before_anything_is_provisioned(tmp_path):
+    """Astra PR47 #2: nonownership is established BEFORE mutation, so no rollback can delete another owner's window."""
+    touched = []
+    cw = preexisting_controller(tmp_path, present=True,
+                                opener=lambda *a: touched.append("open") or {"state": "OPEN", "steps": []},
+                                closer=lambda *a: touched.append("close") or {"verified_gone": True})
+    cw.preflight()
+    with pytest.raises(CW.WindowRefused) as e:
+        cw.open()
+    assert e.value.code == "RESERVATION_PRE_EXISTING"
+    assert touched == [], "nothing may be created or deleted when the reservation is already someone else's"
+    assert cw.record["ownership_precheck"]["present"] is True
+
+
+def test_an_unreadable_reservation_inventory_refuses(tmp_path):
+    cw = preexisting_controller(tmp_path, present=None, listing_ok=False,
+                                opener=lambda *a: pytest.fail("must not provision on an unknown inventory"))
+    cw.preflight()
+    with pytest.raises(CW.WindowRefused) as e:
+        cw.open()
+    assert e.value.code == "OWNERSHIP_UNKNOWN"
+
+
+def test_an_already_exists_race_rolls_back_only_our_own_resources(tmp_path):
+    """If the create still reports 'already exists', only what THIS invocation made is released."""
+    rolled, closed = [], []
+    opened = {"opened_at": OPEN_AT, "state": "OPEN_WITH_ERRORS",
+              "steps": [{"cmd": "bq mk --reservation --edition=ENTERPRISE okf-graph", "rc": 1,
+                         "stderr": "BigQuery error: Reservation already exists", "stdout": ""}]}
+    cw = preexisting_controller(tmp_path, present=False, opener=lambda *a: opened,
+                                closer=lambda label: closed.append(label) or {"verified_gone": True},
+                                rollback=lambda label: rolled.append(label) or {"removed": [], "preserved": ["theirs"]})
+    cw.preflight()
+    with pytest.raises(CW.WindowRefused) as e:
+        cw.open()
+    assert e.value.code == "RESERVATION_PRE_EXISTING"
+    assert rolled == ["chain-gql-1"] and closed == [], "the production closer deletes capacity we do not own"
+    assert cw.record["own_rollback"]["preserved"] == ["theirs"]
+
+
+def test_a_restore_can_still_submit_on_the_bounded_cleanup_channel(tmp_path):
+    """Astra PR47 #3: stopping the only channel makes every restoring DDL raise and the obligation vanish."""
+    submitted = []
+
+    class Client(FakeClient):
+        def query(self, sql, **kwargs):
+            submitted.append(sql)
+            return super().query(sql, **kwargs)
+
+    cw = fast(tmp_path, client_factory=lambda: Client())
+    cw.preflight()
+    cw.open()
+    cw.register_restore("row_policy_restore",
+                        lambda client: client.query("DROP ROW ACCESS POLICY p ON t").result(), takes_client=True)
+    cw.close()
+    assert cw.record["restores"][0]["ok"] is True
+    assert "DROP ROW ACCESS POLICY p ON t" in submitted
+    assert cw.record["cleanup_channel"]["jobs_submitted"] == 1
+    assert cw.record["clean"] is True
+    # the cleanup submission is journaled like any other job, so it enters the union
+    journal = json.loads((tmp_path / "jobs_chain-gql-1.json").read_text())
+    assert any("cleanup" in job_id for job_id in journal["job_ids"])
+
+
+def test_a_failed_restore_is_a_durable_blocker_on_the_next_window(tmp_path):
+    manifest = clean_manifest(tmp_path)
+    cw = fast(tmp_path, manifest=manifest, label="first")
+    cw.preflight()
+    cw.open()
+    cw.register_restore("row_policies", lambda: (_ for _ in ()).throw(RuntimeError("policy restore refused")))
+    cw.close()
+    assert cw.record["clean"] is False
+    obligation = json.loads((tmp_path / "restores_first.json").read_text())
+    assert [o["name"] for o in obligation["outstanding"]] == ["row_policies"]
+    # a fresh controller, a fresh label and verified capacity do not clear it
+    with pytest.raises(CW.WindowRefused) as e:
+        controller(tmp_path, manifest=manifest, label="second").preflight()
+    assert e.value.code == "CLEANUP_UNVERIFIED" and "restoration is outstanding" in e.value.detail
+
+
+def test_a_successful_restore_leaves_no_blocker(tmp_path):
+    manifest = clean_manifest(tmp_path)
+    cw = fast(tmp_path, manifest=manifest, label="first")
+    cw.preflight()
+    cw.open()
+    cw.register_restore("row_policies", lambda: {"restored": True})
+    cw.close()
+    assert cw.record["clean"] is True
+    assert json.loads((tmp_path / "restores_first.json").read_text())["outstanding"] == []
+    controller(tmp_path, manifest=manifest, label="second").preflight()   # no raise
+
+
+def test_a_registered_worker_is_stopped_joined_and_its_jobs_adopted(tmp_path):
+    """Astra PR47 #1: a receipt child must not be able to submit after a 'clean' close returned."""
+    events = []
+    cw = fast(tmp_path)
+    cw.preflight()
+    cw.open()
+    cw.register_worker("receipt_child",
+                       stop=lambda: events.append("stop"),
+                       join=lambda: events.append("join") or {"joined": True},
+                       jobs=lambda: [{"job_id": "okf_rcpt_child_1", "project": "p", "location": "US"}])
+    cw.close()
+    assert events == ["stop", "join"], "admission closes first, then the child is joined before sealing"
+    assert cw.record["cleanup"]["adopted_jobs"] == ["okf_rcpt_child_1"]
+    journal = json.loads((tmp_path / "jobs_chain-gql-1.json").read_text())
+    assert "okf_rcpt_child_1" in journal["job_ids"]      # the child's job is in the window's union
+    assert cw.record["clean"] is True
+
+
+def test_a_worker_that_cannot_be_joined_blocks_a_clean_close(tmp_path):
+    cw = fast(tmp_path)
+    cw.preflight()
+    cw.open()
+    cw.register_worker("receipt_child", stop=lambda: None,
+                       join=lambda: (_ for _ in ()).throw(RuntimeError("child would not exit")))
+    cw.close()
+    assert cw.record["cleanup"]["workers_unjoined"] == ["receipt_child"]
+    assert cw.record["clean"] is False
+
+
+def test_a_credential_refresh_that_crosses_stop_cannot_submit(tmp_path):
+    """Astra PR47 #4: the real 3.x submission path, with the stop set inside the credential refresh."""
+    import requests
+    from google.auth.credentials import Credentials
+    from google.cloud import bigquery
+
+    cw = fast(tmp_path)
+    cw.preflight()
+    cw.open()
+
+    class RefreshCredentials(Credentials):
+        def __init__(self):
+            super().__init__()
+            self.token = None
+
+        def refresh(self, request):
+            cw.stop()                      # the window closes while the credential is being prepared
+            self.token = "offline-token"
+
+    raw = bigquery.Client(project=CW.PROJECT, location=CW.LOCATION, credentials=RefreshCredentials())
+    original_send = raw._http.send
+    sends = []
+
+    def send(session, request, **kwargs):
+        sends.append(request.url)
+        response = requests.Response()
+        response.status_code = 200
+        response.request = request
+        response._content = b"{}"
+        response.headers["content-type"] = "application/json"
+        return response
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(requests.Session, "send", send)
+        bound = cw.bind_client(raw, role="requester")
+        assert bound.submission_guarded is True
+        with pytest.raises(L.WindowStopped):
+            bound.query("SELECT 42")
+    assert sends == [], "the job POST left after the window stopped"
+    # the caller's own transport is untouched, so cancellation still works after stop
+    assert raw._http.send == original_send
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(raw, "cancel_job", lambda *a, **kw: None)
+        mp.setattr(raw, "get_job", lambda job_id, **kw: FakeJob(job_id))
+        cw.close()
+
+
+def test_the_deadline_during_provisioning_is_exercised_with_one_shared_clock(tmp_path):
+    """Astra PR47 P2: the controller's injected clock must bound `WindowJobs` too, and closure must happen."""
+    clock = [0.0]
+    reached, closed = [], []
+
+    def opener(label, slots):
+        reached.append(label)
+        clock[0] += 10_000          # the deadline passes DURING provisioning
+        return {"opened_at": OPEN_AT, "state": "OPEN", "steps": []}
+
+    cw = fast(tmp_path, minutes=1, clock=lambda: clock[0], opener=opener,
+              closer=lambda label: closed.append(label) or {"verified_gone": True},
+              probe=lambda client: pytest.fail("no probe may run after the deadline"))
+    cw.preflight()
+    with pytest.raises(CW.WindowRefused) as e:
+        cw.open()
+    assert reached == ["chain-gql-1"], "provisioning must actually have been reached"
+    assert e.value.code in ("ASSIGNMENT_NOT_READY", "DEADLINE_DURING_OPENING")
+    assert closed == ["chain-gql-1"], "the window it opened must be closed"
+    assert cw.record["window_close"]["verified_gone"] is True

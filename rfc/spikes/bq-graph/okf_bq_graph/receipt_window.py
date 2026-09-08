@@ -44,6 +44,7 @@ import signal
 import subprocess
 import sys
 import time
+import uuid
 from pathlib import Path
 from typing import Any, Optional
 
@@ -82,6 +83,7 @@ import threading
 import time
 
 LABEL = os.environ.get("OKF_WINDOW_LABEL", "")
+INVOCATION = os.environ.get("OKF_WINDOW_INVOCATION", "")   # distinct per child launch: seq numbers restart in each
 DEADLINE = float(os.environ.get("OKF_WINDOW_DEADLINE_EPOCH") or 0) or None
 STOP_FILE = os.environ.get("OKF_WINDOW_STOP_FILE") or ""
 JOURNAL = os.environ.get("OKF_WINDOW_JOURNAL") or ""
@@ -107,24 +109,44 @@ def stopped():
     return bool(STOP_FILE) and os.path.exists(STOP_FILE)
 
 
+class JournalUnavailable(RuntimeError):
+    """The submission journal could not be written. Nothing may be dispatched: an unjournaled submission is a job
+    nobody can reconcile (Astra PR47 #6)."""
+
+
 def _emit(record):
+    """Durable intent. A write failure is NOT swallowed: it is recorded and reported to the caller."""
     if not JOURNAL:
-        return
+        counts["journal_absent"] = 1
+        return False
     try:
         with open(JOURNAL, "a", encoding="utf-8") as fh:
             fh.write(json.dumps(record, default=str) + "\\n")
             fh.flush()
-    except OSError:
-        pass
+            os.fsync(fh.fileno())
+        return True
+    except (OSError, ValueError) as exc:
+        counts["journal_failures"] = counts.get("journal_failures", 0) + 1
+        counts["journal_error"] = type(exc).__name__ + ": " + str(exc)[:200]
+        return False
 
 
 def journal(event, **fields):
     with _lock:
         counts["seq"] += 1
         seq = counts["seq"]
-    record = dict(fields, event=event, seq=seq, at=time.time(), label=LABEL)
-    _emit(record)
+    record = dict(fields, event=event, seq=seq, at=time.time(), label=LABEL, invocation=INVOCATION)
+    record["journaled"] = _emit(record)
     return record
+
+
+def require_journal(record):
+    """Refuse to dispatch when the intent could not be made durable."""
+    if not record.get("journaled"):
+        raise JournalUnavailable(
+            "the receipt window journal could not be written ("
+            + str(counts.get("journal_error", "no journal path was configured"))
+            + "); refusing to submit work no one could reconcile")
 
 
 def update(record, **fields):
@@ -210,19 +232,46 @@ def _patch_auth(module):
     installed.append("google.auth.default")
 
 
-def _patch_session(module):
-    session = module.AuthorizedSession
-    inner = session.send
+def _guard_send(cls):
+    """Wrap one Session class's `send`, idempotently. Returns True when this call installed the guard."""
+    inner = cls.__dict__.get("send")
+    if inner is None:
+        return False                       # inherited: the base class guard already covers it
+    if getattr(inner, "_okf_guarded", False):
+        return False
 
     def send(self, request, **kwargs):
-        # AuthorizedSession.request() prepares credentials and may retry a 401 internally; every resulting send is a
-        # separate dispatch and gets its own admission and time budget.
+        # `Session.request()` prepares credentials and may retry a 401 internally; every resulting send is a separate
+        # dispatch and gets its own admission and time budget.
         check("http")
         kwargs["timeout"] = budget_timeout(kwargs.get("timeout"))
         return inner(self, request, **kwargs)
 
-    session.send = send
-    installed.append("google.auth.transport.requests.AuthorizedSession.send")
+    send._okf_guarded = True
+    cls.send = send
+    return True
+
+
+def _patch_requests(module):
+    """Guard the PLAIN `requests.Session.send`.
+
+    `AuthorizedSession` does not define `send`; it inherits it. More importantly `Credentials.refresh` is handed a
+    `google.auth.transport.requests.Request`, which owns its OWN plain `requests.Session` - so a credential refresh
+    never touches `AuthorizedSession` at all. Guarding only the subclass leaves the refresh unbounded and admitted
+    after stop (Astra PR47 #4)."""
+    if _guard_send(module.Session):
+        installed.append("requests.Session.send")
+    else:
+        installed.append("requests.Session.send(already-guarded)")
+
+
+def _patch_session(module):
+    session = module.AuthorizedSession
+    if _guard_send(session):
+        installed.append("google.auth.transport.requests.AuthorizedSession.send")
+    else:
+        # it inherits `requests.Session.send`, which the base guard already covers
+        installed.append("google.auth.transport.requests.AuthorizedSession.send")
 
 
 def _job_reference(job):
@@ -242,6 +291,7 @@ def _patch_bigquery(module):
         requested = kwargs.get("job_id")
         entry = journal("query", state="INTENDED", dry_run=dry, actual_job=not dry, job_id=requested,
                         requested_job_id=requested)
+        require_journal(entry)               # durable intent BEFORE dispatch, or nothing is dispatched
         try:
             check("operation" if dry else "job")
         except BaseException as exc:
@@ -303,6 +353,10 @@ def install():
     if counts.get("installed_once"):
         return installed
     counts["installed_once"] = 1
+    if "requests" in sys.modules:
+        _patch_requests(sys.modules["requests"])
+    else:
+        sys.meta_path.insert(0, _Hook("requests", _patch_requests))
     sys.meta_path.insert(0, _Hook("google.auth", _patch_auth))
     sys.meta_path.insert(0, _Hook("google.auth.transport.requests", _patch_session))
     sys.meta_path.insert(0, _Hook("google.cloud.bigquery", _patch_bigquery))
@@ -371,9 +425,14 @@ class ReceiptBridge:
         self.deadline_epoch = float(deadline_epoch)
         self.dir = Path(directory)
         self.email_scope, self.max_ops, self.max_jobs = email_scope, max_ops, max_jobs
-        self.journal_path = self.dir / "receipt_journal.jsonl"
+        # ONE JOURNAL PER LAUNCH. The child's sequence counter restarts in every interpreter, so a shared file makes
+        # two launches collide on `seq` and the second silently replaces the first (Astra PR47 #5).
+        self.journal_dir = self.dir / "journal"
+        self.launches: list[dict] = []
+        self._launch = 0
         self.stop_path = self.dir / "STOP"
-        self.record: dict[str, Any] = {"bridge": "okf_bq_graph.receipt_window/0.1.0", "label": label,
+        self._process: Any = None
+        self.record: dict[str, Any] = {"bridge": "okf_bq_graph.receipt_window/0.2.0", "label": label,
                                        "deadline_epoch": self.deadline_epoch,
                                        "clock_domain": "absolute time.time() epoch seconds, supplied by the parent and "
                                                        "never rebased onto a child-sampled start"}
@@ -388,9 +447,13 @@ class ReceiptBridge:
             self.record["reason"] = pre["reason"]
             return self.record
         self.record["bootstrap"] = bootstrap_files(self.dir, email_scope=self.email_scope)
-        probe = ("import json, sys, " + BRIDGE_MODULE + " as b\n"
-                 "import google.auth, google.auth.transport.requests, google.cloud.bigquery\n"
-                 "print(json.dumps({'installed': b.installed, 'remaining': b.remaining(), 'stopped': b.stopped()}))\n")
+        # The probe reports what start-up ACTUALLY installed. It deliberately does not call `install()` itself: the
+        # question is whether `usercustomize` ran, which is exactly what a live child depends on.
+        probe = ("import json, site, sys\n"
+                 "import google.auth, google.auth.transport.requests, google.cloud.bigquery, requests\n"
+                 "b = sys.modules.get('" + BRIDGE_MODULE + "')\n"
+                 "print(json.dumps({'installed': (b.installed if b else []), 'imported': b is not None,\n"
+                 "                  'enable_user_site': bool(site.ENABLE_USER_SITE)}))\n")
         env = dict(os.environ, **self.child_env())
         env.pop("OKF_WINDOW_JOURNAL", None)   # the handshake must not write into the run's own journal
         try:
@@ -408,25 +471,60 @@ class ReceiptBridge:
             return self.record
         required = {"google.auth.default", "google.auth.transport.requests.AuthorizedSession.send",
                     "google.cloud.bigquery.Client.query", "google.cloud.bigquery._http.Connection.api_request",
-                    "urllib.request.urlopen"}
+                    "urllib.request.urlopen", "requests.Session.send"}
         if not self.email_scope:
             required.discard("google.auth.default")
-        installed = set(observed.get("installed") or [])
+        installed = {name.split("(")[0] for name in (observed.get("installed") or [])}
         gaps = sorted(required - installed)
-        self.record["child"] = {"exit_code": proc.returncode, "installed": sorted(installed), "missing": gaps}
+        self.record["child"] = {"exit_code": proc.returncode, "installed": sorted(observed.get("installed") or []),
+                                "missing": gaps, "bootstrap_imported": bool(observed.get("imported")),
+                                "enable_user_site": observed.get("enable_user_site")}
         if proc.returncode != 0 or gaps:
-            self.record.update(status=UNSUPPORTED,
-                               reason=f"the child interpreter did not install every guard: missing {gaps}")
+            if observed.get("enable_user_site") is False:
+                # `usercustomize` is only imported when user site-packages are enabled. A virtualenv created with
+                # --no-user-site (or PYTHONNOUSERSITE) never runs the bootstrap, so no guard can be installed at
+                # start-up. That is a genuine refusal, not a test to relax (Astra PR47 P2).
+                self.record.update(status=UNSUPPORTED, bootstrap="USERCUSTOMIZE_DISABLED",
+                                   reason="the child interpreter has user site-packages disabled "
+                                          "(site.ENABLE_USER_SITE is false), so `usercustomize` never runs and no "
+                                          "start-up guard can be installed; a bounded receipt child is unsupported on "
+                                          "this interpreter")
+            else:
+                self.record.update(status=UNSUPPORTED,
+                                   reason=f"the child interpreter did not install every guard: missing {gaps}")
             return self.record
         self.record["status"] = SUPPORTED
         return self.record
 
+    # ---------------------------------------------------------------- launches
+    @property
+    def journal_path(self) -> Path:
+        """The CURRENT launch's journal. `ingest()` reconciles every launch, not just this one."""
+        return self.journal_dir / f"launch_{self._launch:03d}.jsonl"
+
+    def next_launch(self, name: Optional[str] = None) -> dict:
+        self._launch += 1
+        self.journal_dir.mkdir(parents=True, exist_ok=True)
+        entry = {"launch": self._launch, "name": name or f"launch-{self._launch}",
+                 "invocation": f"{self.label}-{self._launch:03d}-{uuid.uuid4().hex[:8]}",
+                 "journal": str(self.journal_path), "started_at": time.time()}
+        self.launches.append(entry)
+        return entry
+
+    def journal_files(self) -> list[Path]:
+        if not self.journal_dir.is_dir():
+            return []
+        return sorted(self.journal_dir.glob("launch_*.jsonl"))
+
     # ---------------------------------------------------------------- child contract
     def child_env(self) -> dict:
         """Nonsecret window identity for the child, plus the bootstrap on PYTHONPATH."""
+        if not self.launches:
+            self.next_launch()
         existing = os.environ.get("PYTHONPATH")
         env = {"PYTHONPATH": str(self.dir) + (os.pathsep + existing if existing else ""),
                "OKF_WINDOW_LABEL": self.label,
+               "OKF_WINDOW_INVOCATION": self.launches[-1]["invocation"],
                "OKF_WINDOW_DEADLINE_EPOCH": repr(self.deadline_epoch),
                "OKF_WINDOW_STOP_FILE": str(self.stop_path),
                "OKF_WINDOW_JOURNAL": str(self.journal_path),
@@ -444,54 +542,115 @@ class ReceiptBridge:
 
     # ---------------------------------------------------------------- ingestion
     def entries(self) -> list[dict]:
-        try:
-            lines = self.journal_path.read_text(encoding="utf-8").splitlines()
-        except OSError:
-            return []
-        out = []
-        for line in lines:
+        """Every record from every launch journal, tagged with its file. Read errors are RECORDS, not silence."""
+        out: list[dict] = []
+        files = self.journal_files()
+        expected = {str(l["journal"]) for l in self.launches}
+        for path in sorted({*files, *(Path(p) for p in expected)}):
+            if not path.exists():
+                if str(path) in expected:
+                    out.append({"event": "journal_missing", "journal": str(path),
+                                "error": "a launch journal the parent allocated does not exist"})
+                continue
             try:
-                out.append(json.loads(line))
-            except ValueError:
-                out.append({"event": "unparsable", "raw": line[:200]})
+                lines = path.read_text(encoding="utf-8").splitlines()
+            except OSError as e:
+                out.append({"event": "journal_unreadable", "journal": str(path),
+                            "error": f"{type(e).__name__}: {str(e)[:200]}"})
+                continue
+            for line in lines:
+                try:
+                    record = json.loads(line)
+                    record["journal"] = str(path)
+                    out.append(record)
+                except ValueError:
+                    out.append({"event": "unparsable", "journal": str(path), "raw": line[:200]})
         return out
 
     def ingest(self) -> dict:
-        """Fold the child's private journal into the parent's inventory.
+        """Fold every launch's private journal into the parent's inventory.
 
-        A dry run is a bounded OPERATION with no job id: it never enters the cleanup or identity union. A submission
-        whose response was lost stays UNRESOLVED - it is a job the window may owe cleanup for, and calling it
-        `NOT_SUBMITTED` would be inventing an absence."""
+        Records are keyed by `(invocation, journal, seq)`: the child's counter restarts in each interpreter, so folding
+        on `seq` alone loses every launch but the last. A dry run is a bounded OPERATION with no job id and never
+        enters the cleanup or identity union. A submission whose response was lost, or one whose journal cannot be
+        read, stays UNRESOLVED - calling either an absence would be inventing one."""
         entries = self.entries()
-        by_seq: dict[Any, dict] = {}
+        by_key: dict[tuple, dict] = {}
+        damaged = [e for e in entries if e.get("event") in ("unparsable", "journal_unreadable", "journal_missing")]
         for e in entries:
             seq = e.get("seq")
             if seq is None:
                 continue
-            base = by_seq.setdefault(seq, {})
+            key = (e.get("invocation"), e.get("journal"), seq)
+            base = by_key.setdefault(key, {})
             base.update({k: v for k, v in e.items() if k != "event"})
             base["event"] = e["event"].replace("_update", "")
-        queries = [e for e in by_seq.values() if e.get("event") == "query"]
+        queries = [e for e in by_key.values() if e.get("event") == "query"]
         jobs = [{"job_id": e.get("job_id"), "project": e.get("project"), "location": e.get("location"),
                  "state": e.get("state"), "requested_job_id": e.get("requested_job_id"),
-                 "id_mutated": bool(e.get("id_mutated"))}
+                 "invocation": e.get("invocation"), "id_mutated": bool(e.get("id_mutated"))}
                 for e in queries if e.get("actual_job") and e.get("state") == "SUBMITTED" and e.get("job_id")]
         # UNRESOLVED: the send happened and the outcome is unknown. INTENDED: the child died between the journal
         # entry and the dispatch, so the outcome is unknown too. REFUSED is the only known non-submission, because
         # admission was closed before the call was made.
-        unresolved = [{"seq": e.get("seq"), "requested_job_id": e.get("requested_job_id"), "state": e.get("state"),
-                       "error": e.get("error")}
+        unresolved = [{"seq": e.get("seq"), "invocation": e.get("invocation"), "journal": e.get("journal"),
+                       "requested_job_id": e.get("requested_job_id"), "state": e.get("state"), "error": e.get("error")}
                       for e in queries if e.get("actual_job") and e.get("state") in ("UNRESOLVED", "INTENDED")]
         refused = [e for e in queries if e.get("state") == "REFUSED"]
-        dry_runs = [e for e in queries if not e.get("actual_job")]
-        blocked = [e for e in by_seq.values() if e.get("event") == "blocked"]
-        return {"journal": str(self.journal_path), "entries": len(entries),
+        for record in damaged:
+            # damaged evidence is itself an unresolved lifecycle obligation: what it was hiding cannot be established
+            unresolved.append({"seq": None, "journal": record.get("journal"), "state": "JOURNAL_DAMAGED",
+                               "error": record.get("error") or f"unparsable record: {record.get('raw', '')[:120]}"})
+        launched = len(self.launches)
+        seen = {e.get("invocation") for e in by_key.values() if e.get("invocation")}
+        silent = [l["invocation"] for l in self.launches if l["invocation"] not in seen]
+        for invocation in silent:
+            unresolved.append({"seq": None, "invocation": invocation, "state": "LAUNCH_UNJOURNALED",
+                               "error": "a launch produced no journal record at all: its submissions are unknown"})
+        return {"journal_dir": str(self.journal_dir), "journals": [str(p) for p in self.journal_files()],
+                "launches": launched, "entries": len(entries),
                 "jobs": jobs, "unresolved": unresolved, "refused": len(refused),
-                "dry_runs": len(dry_runs), "operations": len([e for e in by_seq.values() if e.get("event") in
-                                                              ("api_request", "urlopen", "query")]),
-                "blocked": blocked, "installed": bool(self.record.get("status") == SUPPORTED),
+                "damaged": [{"journal": d.get("journal"), "event": d["event"]} for d in damaged],
+                "dry_runs": len([e for e in queries if not e.get("actual_job")]),
+                "operations": len([e for e in by_key.values() if e.get("event") in ("api_request", "urlopen", "query")]),
+                "blocked": [e for e in by_key.values() if e.get("event") == "blocked"],
+                "installed": bool(self.record.get("status") == SUPPORTED),
+                "complete": not unresolved and not damaged and not silent,
                 "note": "dry runs are bounded operations with no job id and never enter the cleanup or identity union; "
-                        "a lost real submission stays UNRESOLVED"}
+                        "a lost real submission, a damaged journal and a silent launch all stay UNRESOLVED"}
+
+    def jobs(self) -> list[dict]:
+        """Qualified references the controller adopts into the window's cleanup union."""
+        return self.ingest()["jobs"]
+
+    def join(self, timeout: float = 30.0) -> dict:
+        """Join the running child before the parent seals its cleanup union.
+
+        Terminating a process cancels no server job, so this closes admission first, waits, and only then terminates -
+        and reports what it had to do."""
+        proc = self._process
+        if proc is None:
+            return {"joined": True, "running": False}
+        self.stop()
+        outcome = {"joined": False, "running": True, "pid": proc.pid, "terminated": False, "killed": False}
+        try:
+            proc.wait(timeout=timeout)
+            outcome.update(joined=True, running=False, returncode=proc.returncode)
+            return outcome
+        except subprocess.TimeoutExpired:
+            pass
+        proc.terminate()
+        outcome["terminated"] = True
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            outcome["killed"] = True
+            proc.wait()
+        outcome.update(joined=True, running=False, returncode=proc.returncode,
+                       note="the child was terminated; terminating a process does not cancel its server jobs, so its "
+                            "retained references stay unresolved until they are read back")
+        return outcome
 
     # ---------------------------------------------------------------- runner
     def runner(self, terminate_grace: float = 10.0):
@@ -502,14 +661,17 @@ class ReceiptBridge:
         child's journal are what the parent reconciles afterwards."""
 
         def run(argv, cwd=None, env=None, capture_output=True, text=True, timeout=None):
+            self.next_launch()               # a fresh journal per launch: sequence numbers restart in every child
             merged = dict(env or os.environ)
             merged.update(self.child_env())
             budget = max(0.0, self.deadline_epoch - time.time())
             limit = budget if timeout is None else min(timeout, budget)
             proc = subprocess.Popen(argv, cwd=cwd, env=merged, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                     text=text, start_new_session=True)
+            self._process = proc             # so the controller can join this child before sealing cleanup
             try:
                 stdout, stderr = proc.communicate(timeout=max(0.001, limit))
+                self._process = None
                 return subprocess.CompletedProcess(argv, proc.returncode, stdout, stderr)
             except subprocess.TimeoutExpired:
                 self.stop()                       # close admission before the process dies
@@ -519,6 +681,7 @@ class ReceiptBridge:
                 except subprocess.TimeoutExpired:
                     proc.kill()
                     stdout, stderr = proc.communicate()
+                self._process = None
                 note = ("\nokf: the receipt child exceeded the window budget; admission was closed and the process was "
                         "terminated. Terminating a process does not cancel its server jobs: the journal's retained "
                         "references are unresolved until they are read back.")

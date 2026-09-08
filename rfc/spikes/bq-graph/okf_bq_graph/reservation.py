@@ -18,7 +18,7 @@ from typing import Optional
 from pathlib import Path
 
 from . import PROJECT, LOCATION, RESERVATION
-from .lifecycle import job_cleanup_verified
+from .lifecycle import job_cleanup_verified, restores_clear
 
 MANIFEST = "evidence/cleanup_manifest.json"
 
@@ -93,6 +93,79 @@ def require_clean_windows(m: dict, evidence_dir: Optional[str | Path] = None):
     for w in m["windows"]:
         if w.get("opened_at") and not job_cleanup_verified(w["label"], d / f'jobs_{w["label"]}.json'):
             raise RuntimeError(f'job cleanup is unverified for {w["label"]}; reconcile its journal before opening another')
+    # A resource this window changed and could not put back is its own outstanding obligation: verified capacity
+    # deletion and a complete job receipt say nothing about a row policy or ACL left in place. Every obligation file in
+    # the evidence directory is checked, not only the ones whose manifest row survived - a run that crashed before
+    # recording its window still left the resource changed (Astra PR47 #3).
+    labels = {w["label"] for w in m["windows"] if w.get("opened_at")}
+    labels.update(path.name[len("restores_"):-len(".json")] for path in d.glob("restores_*.json"))
+    for label in sorted(labels):
+        if not restores_clear(label, d):
+            raise RuntimeError(f"resource restoration is outstanding for {label}; clear restores_{label}.json "
+                               "before opening another")
+
+
+def reservation_state() -> dict:
+    """Read-only: does this reservation name already exist, and whose assignments point at it?
+
+    Nonownership must be established BEFORE any mutation. A listing that failed is `listing_ok: False` - unknown, never
+    "absent" - because provisioning on top of an unreadable inventory is how another invocation's capacity gets deleted
+    by a rollback that thinks it owns it (Astra PR47 #2)."""
+    ls_r, ls_a = _bq("ls", "--reservation"), _bq("ls", "--reservation_assignment")
+    reservations, assignments = _parse_list(ls_r), _parse_list(ls_a)
+    if reservations is None or assignments is None:
+        return {"listing_ok": False, "present": None, "assignments": [], "steps": [ls_r, ls_a],
+                "reason": "the reservation listing failed or was unparseable: ownership cannot be established"}
+    mine = [r for r in reservations if r.get("name", "").endswith(f"/reservations/{RESERVATION}")]
+    asg = [a for a in assignments if f"/reservations/{RESERVATION}/" in a.get("name", "")]
+    return {"listing_ok": True, "present": bool(mine), "assignments": [a.get("name") for a in asg],
+            "reservations": [r.get("name") for r in mine], "steps": [ls_r, ls_a]}
+
+
+@_serialized
+def release_own_resources(label: str, closer: str = "own-rollback") -> dict:
+    """Delete ONLY what this invocation created, from the manifest's own record.
+
+    Used when provisioning refuses after partially succeeding. It never deletes a reservation that was already there
+    (`pre_existing`), and never touches an assignment recorded under another window."""
+    m = _load()
+    w = next((x for x in reversed(m["windows"]) if x["label"] == label), None)
+    steps, removed, preserved = [], [], []
+    for r in m["resources"]:
+        if r.get("window") != label or r.get("state") not in ("open", "DELETE_UNVERIFIED"):
+            continue
+        if r.get("pre_existing"):
+            preserved.append(r.get("name"))
+            r["state"] = "preserved_not_ours"
+            continue
+        if r["kind"] == "assignment":
+            name = r.get("name", "")
+            if "/reservations/" in name and "/assignments/" in name:
+                res_id, asg_id = name.split("/reservations/")[1].split("/assignments/")
+                step = _bq("rm", "--reservation_assignment", f"{res_id}.{asg_id}")
+                steps.append(step)
+                if step["rc"] == 0:
+                    r["state"] = "deleted"; r["deleted_at"] = _now(); removed.append(name)
+                else:
+                    r["state"] = "DELETE_UNVERIFIED"
+        elif r["kind"] == "reservation":
+            step = _bq("rm", "--reservation", RESERVATION)
+            steps.append(step)
+            if step["rc"] == 0 or "not found" in (step["stderr"] + step["stdout"]).lower():
+                r["state"] = "deleted"; r["deleted_at"] = _now(); removed.append(r.get("name"))
+            else:
+                r["state"] = "DELETE_UNVERIFIED"
+    outcome = {"label": label, "closer": closer, "removed": removed, "preserved": preserved,
+               "verified_gone": all(r.get("state") != "DELETE_UNVERIFIED" for r in m["resources"] if r.get("window") == label),
+               "note": "rollback of this invocation's own resources only; capacity another invocation owns is preserved"}
+    if w is not None:
+        w["state"] = "REFUSED_PRESERVING_EXISTING"
+        w["own_rollback"] = dict(outcome, steps=steps)
+        w["verified_gone"] = outcome["verified_gone"]
+        w.setdefault("closed_at", _now())
+    m["resources"] = m["resources"]
+    _save(m)
+    return dict(outcome, steps=steps)
 
 
 @_serialized
@@ -105,10 +178,12 @@ def open_window(label: str, max_slots: int = 100) -> dict:
     mk = _bq("mk", "--reservation", "--edition=ENTERPRISE", "--slots=0",
              f"--autoscale_max_slots={max_slots}", "--ignore_idle_slots=true", RESERVATION)
     w["steps"].append(mk)
-    if mk["rc"] == 0 or "already exists" in (mk["stderr"] + mk["stdout"]).lower():
+    pre_existing = mk["rc"] != 0 and "already exists" in (mk["stderr"] + mk["stdout"]).lower()
+    if mk["rc"] == 0 or pre_existing:
+        # `pre_existing` marks capacity this invocation did NOT create, so a rollback never deletes it
         m["resources"].append({"kind": "reservation", "window": label,
                                "name": f"projects/{PROJECT}/locations/{LOCATION}/reservations/{RESERVATION}",
-                               "created_at": mk["at"], "state": "open"})
+                               "created_at": mk["at"], "state": "open", "pre_existing": pre_existing})
     _save(m)   # persist the paid resource before anything else can fail
     asg = _bq("mk", "--reservation_assignment", f"--reservation_id={RESERVATION}",
               f"--assignee_id={PROJECT}", "--assignee_type=PROJECT", "--job_type=QUERY")

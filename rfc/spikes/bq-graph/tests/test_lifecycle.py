@@ -439,3 +439,93 @@ def test_real_load_job_poll_has_bounded_rpc_timeout(monkeypatch, tmp_path, faile
     else:
         assert wrapped.result(timeout=.05) is job
     assert len(rpc_timeouts) == 1
+
+
+# =============================================================================== Astra PR47: cleanup channel + adoption
+def test_the_cleanup_channel_admits_after_workload_stop(tmp_path):
+    """A restoring DDL must still be submittable and journaled once workload admission closed."""
+    events = []
+    window = L.WindowJobs("cleanup-channel", time.monotonic() + 60, tmp_path / "jobs.json")
+    client = Client(events, lambda **kw: [])
+    workload = window.bind(client)
+    workload.query("SELECT 1")
+    window.stop.set()
+    with pytest.raises(L.WindowStopped):
+        workload.query("SELECT 2")
+    window.open_cleanup(30, max_jobs=2)
+    restore = window.bind(client, cleanup=True)
+    job = restore.query("DROP ROW ACCESS POLICY p ON t")
+    assert window.cleanup_jobs == 1
+    assert "cleanup" in job.job_id
+    journal = json.loads((tmp_path / "jobs.json").read_text())
+    assert job.job_id in journal["job_ids"]          # a cleanup submission is in the union like any other
+
+
+def test_the_cleanup_channel_is_bounded(tmp_path):
+    events = []
+    window = L.WindowJobs("bounded-cleanup", time.monotonic() + 60, tmp_path / "jobs.json")
+    client = Client(events, lambda **kw: [])
+    window.stop.set()
+    window.open_cleanup(30, max_jobs=1)
+    restore = window.bind(client, cleanup=True)
+    restore.query("DROP ONE")
+    with pytest.raises(L.WindowStopped, match="budget"):
+        restore.query("DROP TWO")
+    window.close_cleanup()
+    with pytest.raises(L.WindowStopped):
+        restore.query("DROP THREE")             # the channel is closed again: back to the workload gate
+
+
+def test_a_cleanup_job_waits_on_the_cleanup_deadline_not_the_workload_stop(tmp_path):
+    events = []
+    window = L.WindowJobs("cleanup-result", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.stop.set()
+    window.open_cleanup(30)
+    job = window.bind(Client(events, lambda **kw: []), cleanup=True).query("DROP ROW ACCESS POLICY p ON t")
+    assert list(job.result()) == []             # the stopped workload channel does not abort the restore's readback
+
+
+class _Terminal:
+    """A client that can cancel and read back any id, including one it never submitted."""
+
+    def cancel_job(self, job_id, **kwargs):
+        return None
+
+    def get_job(self, job_id, **kwargs):
+        return SimpleNamespace(state="DONE")
+
+
+def test_adopting_a_workers_job_puts_it_in_the_union_and_the_cleanup(tmp_path):
+    client = _Terminal()
+    window = L.WindowJobs("adopt", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.adopt("okf_rcpt_child_1", client=client, worker="receipt_child")
+    journal = json.loads((tmp_path / "jobs.json").read_text())
+    assert journal["job_ids"] == ["okf_rcpt_child_1"]
+    results = window.stop_and_cancel()
+    assert [r["job_id"] for r in results] == ["okf_rcpt_child_1"]
+    receipt = json.loads((tmp_path / "jobs.cleanup.json").read_text())
+    assert receipt["verified"] is True and receipt["job_ids"] == ["okf_rcpt_child_1"]
+
+
+def test_an_adopted_job_without_a_client_stays_unresolved(tmp_path):
+    window = L.WindowJobs("adopt-unowned", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.adopt("okf_rcpt_orphan")
+    results = window.stop_and_cancel()
+    assert results[0]["verified_done"] is False
+    assert json.loads((tmp_path / "jobs.cleanup.json").read_text())["verified"] is False
+
+
+def test_an_outstanding_restore_obligation_is_durable(tmp_path):
+    L.record_restore_obligations("w", tmp_path, [{"name": "acl", "ok": True},
+                                                 {"name": "row_policies", "ok": False, "error": "refused"}])
+    assert L.restores_clear("w", tmp_path) is False
+    body = json.loads((tmp_path / "restores_w.json").read_text())
+    assert [o["name"] for o in body["outstanding"]] == ["row_policies"]
+    L.record_restore_obligations("w", tmp_path, [{"name": "acl", "ok": True}, {"name": "row_policies", "ok": True}])
+    assert L.restores_clear("w", tmp_path) is True
+
+
+def test_a_missing_obligation_file_is_clear_but_a_malformed_one_is_not(tmp_path):
+    assert L.restores_clear("never-changed-anything", tmp_path) is True
+    (tmp_path / "restores_broken.json").write_text("{not json")
+    assert L.restores_clear("broken", tmp_path) is False

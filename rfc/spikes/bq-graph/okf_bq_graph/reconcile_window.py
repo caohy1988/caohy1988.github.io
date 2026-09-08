@@ -19,8 +19,15 @@ Everything else is a refusal. In particular:
     closed because it journals an id BEFORE submitting it; a legacy submission that was never journaled has no such
     guarantee, so that permissive reading must not be inherited here;
   * a non-terminal (PENDING/RUNNING) job blocks;
-  * quiescence of the original submitters is an INPUT that must be evidenced, not inferred from a stable count. A
-    second drained listing that adds owned references also blocks.
+  * quiescence of the original submitters is an INPUT that must be evidenced - an `established` boolean with a named
+    record AND the moment the last submitter stopped - not inferred from a stable count. A second drained listing that
+    adds owned references also blocks;
+  * the listing covers the SUBMISSION LIFETIME, not the capacity interval. It is bounded by the later of capacity close
+    and evidenced submitter shutdown, then extended while owned work reaches its edge, so a job created after capacity
+    was deleted is read rather than filtered away;
+  * script children are listed WITHOUT a time filter and reconciled against the parent's declared `numChildJobs`: an
+    exhausted time-filtered page is not proof of complete child membership;
+  * a declared evidence source that cannot be read is missing evidence and blocks.
 
 Nothing here cancels, deletes or submits. `reservation.close_window`, `lifecycle.cancel_journal`, `safety.cleanup` and
 `bin/safety_teardown.sh` are mutations and are deliberately not imported.
@@ -114,7 +121,20 @@ def _created(job: dict) -> Optional[_dt.datetime]:
 
 
 # ----------------------------------------------------------------------------- listing
-def drain_listing(transport: Any, *, project: str, start: _dt.datetime, end: _dt.datetime,
+def _declared_children(job: dict) -> Optional[int]:
+    stats = _stats(job)
+    for key in ("numChildJobs", "num_child_jobs"):
+        if key in stats:
+            try:
+                return int(stats[key])
+            except (TypeError, ValueError):
+                return None
+    if stats.get("scriptStatistics"):
+        return None          # a script with no declared count: membership cannot be reconciled by number
+    return 0
+
+
+def drain_listing(transport: Any, *, project: str, start: Optional[_dt.datetime], end: Optional[_dt.datetime],
                   parent_job_id: Optional[str] = None, page_size: int = PAGE_SIZE,
                   cap: int = LISTED_CAP) -> dict:
     """Every page of one `jobs.list` call. Returns jobs plus an explicit completeness verdict.
@@ -160,10 +180,18 @@ def list_window(transport: Any, *, project: str, start: _dt.datetime, end: _dt.d
         if not pid:
             complete = False
             continue
-        page = drain_listing(transport, project=project, start=start, end=end, parent_job_id=pid,
+        # A child listing is NOT time-filtered. A script child can be created long after its parent - and after the
+        # window bound - so exhausting a time-filtered page proves nothing about complete membership. The declared
+        # `numChildJobs` is reconciled against what was actually read (Astra PR47 #7).
+        page = drain_listing(transport, project=project, start=None, end=None, parent_job_id=pid,
                              page_size=page_size, cap=cap)
-        children.append({"parent": pid, **{k: page[k] for k in ("pages", "next_page_token", "unreachable", "error", "capped", "complete")}})
-        complete = complete and page["complete"]
+        found = len(page["jobs"])
+        declared = _declared_children(parent)
+        membership_ok = declared is not None and found >= declared
+        children.append({"parent": pid, "declared_children": declared, "children_read": found,
+                         "membership_reconciled": bool(membership_ok),
+                         **{k: page[k] for k in ("pages", "next_page_token", "unreachable", "error", "capped", "complete")}})
+        complete = complete and page["complete"] and membership_ok
         for child in page["jobs"]:
             cid = (child.get("jobReference") or {}).get("jobId")
             if cid in seen:
@@ -292,13 +320,67 @@ def reconcile(label: str, *, transport: Any, window: dict, sources: Iterable[str
     if transport is None:
         out.update(status=BLOCKED, blockers=["no read-only GET transport was configured: the reconciliation did not run"])
         return out
-    start = _ts(opened) - _dt.timedelta(seconds=pad_s)
-    end = (_ts(closed) if closed else _dt.datetime.now(_dt.timezone.utc)) + _dt.timedelta(seconds=pad_s)
-    out["window"] = {"opened_at": opened, "closed_at": closed, "pad_s": pad_s,
-                     "listing_start": start.isoformat(), "listing_end": end.isoformat(),
-                     "closed_at_present": bool(closed)}
-    if not out["quiescence"].get("established"):
+    # a source the reconstruction declares but cannot read is missing evidence, not a footnote (Astra PR47 #8)
+    unreadable = [src["path"] for src in out["sources"] if src.get("error")]
+    if unreadable:
+        blockers.append(f"{len(unreadable)} declared evidence source(s) could not be read: " + ", ".join(unreadable)[:400])
+
+    # quiescence must be EVIDENCED, not asserted: a bare boolean is an operator opinion, and the moment the last
+    # submitter stopped is what actually bounds the listing (Astra PR47 #7, #8)
+    q = out["quiescence"]
+    stopped_at = None
+    if not q.get("established"):
         blockers.append("quiescence of the original submitters is not established: a later job could still appear")
+    else:
+        if not str(q.get("evidence") or "").strip():
+            blockers.append("quiescence is asserted with no evidence: name the launcher/session record that shows the "
+                            "submitting processes stopped")
+        if not q.get("stopped_at"):
+            blockers.append("quiescence has no stopped_at: without the moment the last submitter stopped, the listing "
+                            "cannot cover the submission lifetime")
+        else:
+            try:
+                stopped_at = _ts(q["stopped_at"])
+            except (TypeError, ValueError):
+                blockers.append(f"quiescence stopped_at {q.get('stopped_at')!r} is not a timestamp")
+
+    start = _ts(opened) - _dt.timedelta(seconds=pad_s)
+    # the listing covers the SUBMISSION LIFETIME, not the capacity interval: a submitter that outlived capacity
+    # deletion could still have created an owned job after it
+    base_end = _ts(closed) if closed else _dt.datetime.now(_dt.timezone.utc)
+    if stopped_at is not None and stopped_at > base_end:
+        base_end = stopped_at
+    end = base_end + _dt.timedelta(seconds=pad_s)
+    out["window"] = {"opened_at": opened, "closed_at": closed, "pad_s": pad_s,
+                     "submitters_stopped_at": q.get("stopped_at"),
+                     "listing_start": start.isoformat(), "listing_end": end.isoformat(),
+                     "closed_at_present": bool(closed),
+                     "bound_note": "the listing is bounded by the later of capacity close and evidenced submitter "
+                                   "shutdown, then extended while owned work reaches the edge"}
+
+    # extend while an owned job reaches the edge of the window: a tail can pull the bound forward
+    extensions = []
+    for _attempt in range(4):
+        probe = list_window(transport, project=project, start=start, end=end, page_size=page_size, cap=cap)
+        edge = end - _dt.timedelta(seconds=pad_s)
+        latest = None
+        for job in probe["jobs"]:
+            entry = classify(job, label=label, start=start, end=end, recovered=frozenset(out["recovered_ids"]),
+                             reservation=reservation, decisions=decisions)
+            if entry["ownership"] == EXCLUDED:
+                continue
+            for stamp in (_created(job), _epoch_ms(_stats(job).get("endTime"))):
+                if stamp is not None and (latest is None or stamp > latest):
+                    latest = stamp
+        if latest is None or latest <= edge:
+            break
+        end = latest + _dt.timedelta(seconds=pad_s)
+        extensions.append({"extended_to": end.isoformat(), "reason": "owned work reached the edge of the window"})
+    else:
+        blockers.append("the window kept extending: owned work never stopped reaching its edge, so the submission "
+                        "lifetime is not bounded")
+    out["window"]["extensions"] = extensions
+    out["window"]["listing_end"] = end.isoformat()
 
     listings = [list_window(transport, project=project, start=start, end=end, page_size=page_size, cap=cap)
                 for _ in range(max(1, passes))]
@@ -306,8 +388,10 @@ def reconcile(label: str, *, transport: Any, window: dict, sources: Iterable[str
     out["listing"] = {"passes": len(listings), "listed": listing["listed"], "complete": listing["complete"],
                       "top": listing["top"], "children": listing["children"]}
     if not listing["complete"]:
-        blockers.append("the platform listing is incomplete (page token, cap, unreachable location or transport error): "
-                        "what was read is a prefix of the window")
+        unreconciled = [c["parent"] for c in listing["children"] if not c.get("membership_reconciled")]
+        detail = (f"; script children unreconciled for {unreconciled}" if unreconciled else "")
+        blockers.append("the platform listing is incomplete (page token, cap, unreachable location, transport error or "
+                        "unreconciled script children): what was read is a prefix of the window" + detail)
 
     recovered_set = frozenset(out["recovered_ids"])
     # two passes: parents first (so a child's parent is already classified), then children of owned parents
@@ -468,11 +552,13 @@ class RestGetTransport:
     def __init__(self, client: Any):
         self.client = client
 
-    def list_jobs(self, *, project: str, min_creation_time, max_creation_time, page_token=None,
+    def list_jobs(self, *, project: str, min_creation_time=None, max_creation_time=None, page_token=None,
                   page_size: int = PAGE_SIZE, parent_job_id: Optional[str] = None) -> dict:
-        params: dict[str, Any] = {"allUsers": True, "projection": "FULL", "maxResults": page_size,
-                                  "minCreationTime": int(min_creation_time.timestamp() * 1000),
-                                  "maxCreationTime": int(max_creation_time.timestamp() * 1000)}
+        params: dict[str, Any] = {"allUsers": True, "projection": "FULL", "maxResults": page_size}
+        if min_creation_time is not None:
+            params["minCreationTime"] = int(min_creation_time.timestamp() * 1000)
+        if max_creation_time is not None:
+            params["maxCreationTime"] = int(max_creation_time.timestamp() * 1000)
         if page_token:
             params["pageToken"] = page_token
         if parent_job_id:

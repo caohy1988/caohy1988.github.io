@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -1171,13 +1172,28 @@ def test_job_ids_of_never_double_counts():
 
 # =============================================================================== U1/U4: engine admission, proof, scope
 class _StubWindow:
-    """A window controller as `chain` sees it: a state, a label and a record. Nothing is opened here."""
+    """A window controller as `chain` sees it: a state, a label, a record and a REAL submission gate, so a client the
+    chain builds is genuinely bound to it (or genuinely is not)."""
 
-    def __init__(self, state="OPEN", label="chain-gql-1", probes=6):
+    def __init__(self, state="OPEN", label="chain-gql-1", probes=6, journal=None, gate=True):
+        import time as _time
+        from okf_bq_graph import lifecycle as _L
         self.state = state
         self.cfg = SimpleNamespace(label=label)
+        self.jobs = _L.WindowJobs(label, _time.monotonic() + 600, journal) if gate and journal else None
+        self.operator = None
+        self.clients = []
+        self.workers = []
         self.record = {"controller": "okf_bq_graph.chain_window/0.1.0",
                        "assignment": {"probes": [{"ok": True}] * probes}}
+
+    def bind_client(self, client, role, principal=None):
+        bound = self.jobs.bind(client)
+        self.clients.append({"role": role, "principal": principal})
+        return bound
+
+    def register_worker(self, name, stop=None, join=None, jobs=None):
+        self.workers.append({"name": name, "stop": stop, "join": join, "jobs": jobs})
 
 
 def _gql_result(*, engine="gql", walk="governed.sql", graph_table=True, cache=None, warnings=(),
@@ -1227,11 +1243,106 @@ def test_a_window_that_never_proved_its_assignment_is_refused(sdk_root, tmp_path
 
 def test_an_open_window_admits_and_is_recorded(sdk_root, tmp_path, monkeypatch):
     monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (None, "pointer-job"))
+    window = _StubWindow(journal=tmp_path / "jobs.json")
     out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
-                       clients={"engine": "gql", "bq": object()}, window=_StubWindow())
+                       clients={"engine": "gql", "bq": window.bind_client(object(), role="requester")},
+                       window=window)
     assert out["engine_admission"]["status"] == "OK" and out["engine_admission"]["assignment_probes"] == 6
     assert out["window"]["label"] == "chain-gql-1" and out["window"]["state"] == "OPEN"
     assert out["broken_at"] == "publication"     # it got past admission and refused on its own evidence
+
+
+# ---- Astra PR47 #1: an admitted window must actually own the clients and the receipt child
+def test_an_unbound_client_is_refused_before_any_query_or_sdk_launch(sdk_root, tmp_path, monkeypatch):
+    """A window that records a controller but hands the chain an untracked client bounds nothing."""
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: pytest.fail("no query may be submitted"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       clients={"engine": "gql", "bq": object()}, window=_StubWindow(journal=tmp_path / "jobs.json"),
+                       runner=lambda *a, **k: pytest.fail("the SDK CLI must not be launched"))
+    assert out["engine_admission"]["status"] == "GQL_CLIENTS_UNBOUND"
+    assert out["engine_admission"]["unbound"] == ["clients.bq"]
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "engine_admission" and out["cases"] == []
+
+
+def test_a_restricted_run_refuses_an_unbound_broker_before_the_grant(sdk_root, tmp_path):
+    class Broker:
+        sa = object()
+        owner = object()
+
+        def describe(self):
+            return {"kind": "unbound"}
+
+        def grant(self):
+            pytest.fail("no grant may be issued while a client sits outside the gate")
+
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       requester_mode="restricted", broker=Broker(),
+                       window=_StubWindow(journal=tmp_path / "jobs.json"))
+    assert out["engine_admission"]["status"] == "GQL_CLIENTS_UNBOUND"
+    assert out["engine_admission"]["unbound"] == ["broker.requester", "broker.operator"]
+    assert out["broken_at"] == "engine_admission"
+
+
+def test_the_chain_builds_its_own_client_through_the_controller(sdk_root, tmp_path, monkeypatch):
+    """With no caller-supplied clients the chain must construct through `window.bind_client`, not `bigquery.Client`."""
+    from google.cloud import bigquery
+    window = _StubWindow(journal=tmp_path / "jobs.json")
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (None, "pointer-job"))
+    monkeypatch.setattr(bigquery, "Client", lambda **kw: SimpleNamespace(project="p", location="US"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF, window=window)
+    assert out["engine_admission"]["status"] == "OK"
+    assert [c["role"] for c in window.clients] == ["requester"]
+    assert out["window"]["bound_clients"][0]["role"] == "requester"
+
+
+def test_the_receipt_child_is_registered_with_the_controller(sdk_root, tmp_path, monkeypatch):
+    from okf_bq_graph import receipt_window as RWD
+    window = _StubWindow(journal=tmp_path / "jobs.json")
+    bridge = RWD.ReceiptBridge(sdk_root, label="chain-gql-1", deadline_epoch=time.time() + 300,
+                               directory=tmp_path / "bridge")
+    bridge.record["status"] = RWD.SUPPORTED
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (None, "pointer-job"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       clients={"engine": "gql", "bq": window.bind_client(object(), role="requester")},
+                       window=window, receipt_bridge=bridge)
+    worker = next(w for w in window.workers if w["name"] == "receipt_child")
+    assert worker["stop"] == bridge.stop and worker["join"] == bridge.join and worker["jobs"] == bridge.jobs
+    assert out["receipt_bridge"]["worker"].startswith("registered")
+
+
+def test_an_unsupported_bridge_refuses_before_the_chain_runs(sdk_root, tmp_path, monkeypatch):
+    from okf_bq_graph import receipt_window as RWD
+    window = _StubWindow(journal=tmp_path / "jobs.json")
+    bridge = RWD.ReceiptBridge(tmp_path / "not-an-sdk", label="w", deadline_epoch=time.time() + 300,
+                               directory=tmp_path / "bridge")
+    bridge.handshake()
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: pytest.fail("no query may be submitted"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       clients={"engine": "gql", "bq": window.bind_client(object(), role="requester")},
+                       window=window, receipt_bridge=bridge)
+    assert out["receipt_bridge"]["status"] == RWD.UNSUPPORTED
+    assert out["broken_at"] == "receipt_bridge" and out["verdict"] == "CHAIN_INCOMPLETE"
+
+
+def test_an_unclean_window_downgrades_the_final_record(sdk_root, tmp_path):
+    """`run_chain` returns before the window closes, so the retained record is amended with the actual closeout."""
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "same-requester"}, "job_inventory": {}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="chain-gql-1"), state="CLOSED",
+                             record={"clean": False, "cleanup": {"jobs_unresolved": ["okf_graph_x"]},
+                                     "restores": [], "workers": []})
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["verdict"] == "CHAIN_INCOMPLETE" and final["broken_at"] == "window_cleanup"
+    assert final["window"]["clean"] is False
+    assert json.loads((tmp_path / "chain_live.json").read_text())["broken_at"] == "window_cleanup"
+
+
+def test_a_clean_window_leaves_the_verdict_alone(sdk_root, tmp_path):
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "same-requester"}, "job_inventory": {}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []})
+    assert CH.finalize_cleanup(out, window, str(tmp_path))["verdict"] == "CHAIN_CONNECTED"
 
 
 def test_a_fallback_run_needs_no_window():
@@ -1330,8 +1441,10 @@ def _live_gql_chain(sdk_root, tmp_path, monkeypatch, result, *, cases=("approved
 
     monkeypatch.setattr(CH, "governed", governed)
     monkeypatch.setattr(CH, "pick_computation", lambda r, path: None)     # stop before bind: the engine is the subject
+    window = _StubWindow(journal=tmp_path / "window_jobs.json")
     return CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
-                        clients={"engine": "gql", "bq": object(), "cache": {}}, window=_StubWindow(), cases=cases,
+                        clients={"engine": "gql", "bq": window.bind_client(object(), role="requester"), "cache": {}},
+                        window=window, cases=cases,
                         runner=lambda *a, **k: pytest.fail("nothing binds, so the CLI must not run"))
 
 

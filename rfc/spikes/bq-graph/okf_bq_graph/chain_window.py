@@ -37,12 +37,14 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from . import LOCATION, PROJECT, RESERVATION
-from .lifecycle import WindowJobs, WindowStopped
-from .reservation import require_clean_windows
+from .lifecycle import WindowJobs, WindowStopped, record_restore_obligations
+from .reservation import release_own_resources, require_clean_windows, reservation_state
 
 REFUSED, READY, OPEN, STOPPED, CLOSED = "REFUSED", "READY", "OPEN", "STOPPED", "CLOSED"
 BUDGET_MINUTES = 120        # the conservative cumulative ceiling the driver has always carried
 RESERVE_MINUTES = 2         # kept back for closure and audit; never spent on workload
+CLEANUP_SECONDS = 90        # the separate bounded channel restores and cleanup DDL submit on, after workload stop
+CLEANUP_MAX_JOBS = 20
 
 
 def _now() -> str:
@@ -125,11 +127,19 @@ class ChainWindow:
     def __init__(self, cfg: WindowConfig, *, opener: Callable[..., dict], closer: Callable[..., dict],
                  clock: Callable[[], float] = time.monotonic, spawn_watcher: Optional[Callable[[str], Any]] = None,
                  probe: Optional[Callable[[Any], Any]] = None, client_factory: Optional[Callable[[], Any]] = None,
-                 holder: str = "chain"):
+                 holder: str = "chain", ownership: Optional[Callable[[], dict]] = None,
+                 rollback: Optional[Callable[[str], dict]] = None,
+                 cleanup_seconds: float = CLEANUP_SECONDS, cleanup_max_jobs: int = CLEANUP_MAX_JOBS):
         self.cfg, self.holder = cfg, holder
         self._opener, self._closer, self._clock = opener, closer, clock
         self._spawn_watcher, self._probe, self._client_factory = spawn_watcher, probe, client_factory
+        self._ownership = ownership if ownership is not None else reservation_state
+        self._rollback = rollback if rollback is not None else release_own_resources
+        self._cleanup_seconds, self._cleanup_max_jobs = cleanup_seconds, cleanup_max_jobs
         self.operator: Any = None
+        self._operator_raw: Any = None
+        self._workers: list[dict] = []
+        self._preserve_capacity = False   # set when the reservation turns out not to be ours: never delete it
         self.lease = Lease(cfg.lease)
         self.state = REFUSED
         self.jobs: Optional[WindowJobs] = None
@@ -208,7 +218,8 @@ class ChainWindow:
         minutes = self.record["budget"]["granted_minutes"]
         self.deadline = self._clock() + minutes * 60
         self.cfg.evidence_dir.mkdir(parents=True, exist_ok=True)
-        self.jobs = WindowJobs(self.cfg.label, self.deadline, self.cfg.journal_path())
+        # the gate shares the controller's clock, so an injected clock bounds provisioning too
+        self.jobs = WindowJobs(self.cfg.label, self.deadline, self.cfg.journal_path(), clock=self._clock)
         # the independent closer exists BEFORE any paid resource, so an interruption during provisioning still has one
         if self._spawn_watcher is not None:
             try:
@@ -216,6 +227,20 @@ class ChainWindow:
             except Exception as e:  # noqa: BLE001 - a watcher that cannot start is a refusal, not a warning
                 self.jobs.stop.set()
                 raise self._refuse("WATCHER_UNAVAILABLE", f"{type(e).__name__}: {str(e)[:200]}")
+        # NONOWNERSHIP FIRST: never provision on top of capacity someone else owns, because the rollback that
+        # follows a refusal would then delete their reservation and assignment (Astra PR47 #2).
+        ownership = self._ownership() if self._ownership is not None else {"listing_ok": True, "present": False}
+        self.record["ownership_precheck"] = {k: v for k, v in ownership.items() if k != "steps"}
+        if not ownership.get("listing_ok"):
+            self._provisioning_done.set()
+            raise self._refuse("OWNERSHIP_UNKNOWN",
+                               "the reservation inventory could not be read, so nonownership is not established; "
+                               "provisioning on an unknown inventory risks deleting another invocation's capacity")
+        if ownership.get("present"):
+            self._provisioning_done.set()
+            raise self._refuse("RESERVATION_PRE_EXISTING",
+                               f"the reservation {self.cfg.reservation} already exists and this controller did not "
+                               "create it; nothing was provisioned and nothing was deleted")
         self._watchdog = threading.Thread(target=self._watch, name=f"chain-window-{self.cfg.label}", daemon=True)
         self._watchdog.start()
         try:
@@ -231,17 +256,28 @@ class ChainWindow:
         finally:
             self._provisioning_done.set()
         self.record["window_open"] = {k: v for k, v in opened.items() if k != "steps"}
-        adopted = self._adopted_existing(opened)
-        if adopted:
-            self.close(reason="adopted_reservation")
+        if self._adopted_existing(opened):
+            # a race: the pre-check saw nothing, but the create found it. Roll back ONLY what this invocation made -
+            # never the production closer, which deletes the reservation and every assignment pointing at it.
+            # set BEFORE stopping, so the watchdog cannot race in and run the production closer on capacity we
+            # have just established is not ours
+            self._preserve_capacity = True
+            self.record["own_rollback"] = self._rollback(self.cfg.label) if self._rollback is not None else None
+            self.stop()
+            self._provisioning_done.set()
+            self.lease.release()
+            self.state = REFUSED
+            self.record["state"] = REFUSED
+            self._event("refused", code="RESERVATION_PRE_EXISTING", preserved=True)
             raise WindowRefused("RESERVATION_PRE_EXISTING",
-                                f"the reservation {self.cfg.reservation} already existed: this controller will not adopt "
-                                "capacity it did not create", self.record)
+                                f"the reservation {self.cfg.reservation} already existed: this controller will not "
+                                "adopt capacity it did not create, and did not delete it", self.record)
         self.state = OPEN
         self.record["state"] = OPEN
         self._event("capacity_open", state=opened.get("state"))
         if self._client_factory is not None:
-            self.operator = self.bind_client(self._client_factory(), role="operator")
+            self._operator_raw = self._client_factory()
+            self.operator = self.bind_client(self._operator_raw, role="operator")
         probes = self._prove_assignment()
         self.record["assignment"] = probes
         if not probes["ready"]:
@@ -302,12 +338,36 @@ class ChainWindow:
         if self.jobs is None:
             raise WindowRefused("NO_WINDOW", "bind_client() needs an opened window", self.record)
         bound = self.jobs.bind(client)
-        self.clients.append({"role": role, "principal": principal, "bound_at": _now(), "type": type(client).__name__})
+        self.clients.append({"role": role, "principal": principal, "bound_at": _now(), "type": type(client).__name__,
+                             "submission_guarded": bound.submission_guarded})
         return bound
 
-    def register_restore(self, name: str, restore: Callable[[], Any]) -> None:
-        """A resource restoration (broker ACLs, row policies) that must run at close even on the failure path."""
-        self._restores.append({"name": name, "call": restore})
+    def cleanup_client(self, client: Any, role: str = "operator-cleanup") -> Any:
+        """A client on the SEPARATE bounded cleanup channel: its submissions are still journaled and still enter the
+        cleanup union, but they are admitted after workload stop."""
+        if self.jobs is None:
+            raise WindowRefused("NO_WINDOW", "cleanup_client() needs an opened window", self.record)
+        bound = self.jobs.bind(client, cleanup=True)
+        self.clients.append({"role": role, "bound_at": _now(), "type": type(client).__name__, "cleanup_channel": True,
+                             "submission_guarded": bound.submission_guarded})
+        return bound
+
+    def register_worker(self, name: str, stop: Optional[Callable[[], Any]] = None,
+                        join: Optional[Callable[[], Any]] = None,
+                        jobs: Optional[Callable[[], list]] = None) -> None:
+        """A child process or thread that can submit inside this window.
+
+        `stop` runs when admission closes, `join` before the cleanup union is sealed, and `jobs` contributes the
+        references the worker retained. A worker that is not registered can submit after a "clean" close returns
+        (Astra PR47 #1)."""
+        self._workers.append({"name": name, "stop": stop, "join": join, "jobs": jobs})
+
+    def register_restore(self, name: str, restore: Callable[..., Any], takes_client: bool = False) -> None:
+        """A resource restoration (broker ACLs, row policies) that must run at close even on the failure path.
+
+        With `takes_client=True` the callable receives the bounded CLEANUP client, so restoration DDL can still be
+        submitted and journaled after workload admission closed."""
+        self._restores.append({"name": name, "call": restore, "takes_client": takes_client})
 
     # ---------------------------------------------------------------- stop and close
     def _watch(self) -> None:
@@ -321,15 +381,29 @@ class ChainWindow:
         self._close_capacity()      # begins even while a worker is stuck in an uncancellable read
 
     def stop(self) -> None:
-        """Close admission. Any send after this raises `WindowStopped` before it reaches the network."""
+        """Close admission everywhere, including registered workers. Any send after this raises before the network."""
         if self.jobs is not None:
             self.jobs.stop.set()
+        for worker in self._workers:
+            if worker.get("stop") is None or worker.get("stopped"):
+                continue
+            try:
+                worker["stop"]()
+                worker["stopped"] = True
+            except Exception as e:  # noqa: BLE001
+                worker["stop_error"] = f"{type(e).__name__}: {str(e)[:200]}"
         self.state = STOPPED
         self.record["state"] = STOPPED
-        self._event("stopped")
+        self._event("stopped", workers=[w["name"] for w in self._workers])
 
     def _close_capacity(self) -> dict:
         with self._close_lock:
+            if self._preserve_capacity:
+                preserved = {"verified_gone": False, "preserved": True,
+                             "reason": "the reservation belongs to another invocation: this controller deletes only "
+                                       "what it created"}
+                self.record["window_close"] = preserved
+                return preserved
             existing = self.record.get("window_close")
             if existing and existing.get("verified_gone"):
                 return existing
@@ -342,32 +416,86 @@ class ChainWindow:
             return closed
 
     def close(self, reason: str = "complete") -> dict:
-        """Stop admission, restore resources, close capacity WITHOUT waiting for job I/O, then reconcile jobs."""
+        """Stop admission everywhere, restore resources on the bounded CLEANUP channel, close capacity WITHOUT waiting
+        for job I/O, join every worker, then seal the job union.
+
+        Order matters. Admission (including each registered worker's) closes first. Restores then run on a separate
+        bounded channel, because stopping the only channel makes a policy-restoring DDL raise and the obligation
+        disappear. Capacity closure starts on its own lock. The union is sealed only after every worker is joined, so a
+        paused receipt child cannot submit after a "clean" close returned (Astra PR47 #1, #3)."""
         self.stop()
         self.record["close_reason"] = reason
+        # a bounded second channel so restoration work can still be submitted and journaled after workload stop
+        cleanup_deadline = None
+        if self.jobs is not None and self._restores:
+            cleanup_deadline = self.jobs.open_cleanup(self._cleanup_seconds, self._cleanup_max_jobs)
+            if self._operator_raw is not None:
+                self.operator = self.cleanup_client(self._operator_raw)
+        # the obligations are written BEFORE they are attempted: a crash mid-restore still leaves the blocker behind
+        pending = [{"name": e["name"], "ok": False, "state": "PENDING"} for e in self._restores]
+        if self._restores:
+            record_restore_obligations(self.cfg.label, self.cfg.evidence_dir, pending)
         restores = []
         for entry in self._restores:
             try:
-                restores.append({"name": entry["name"], "ok": True, "result": entry["call"]()})
-            except Exception as e:  # noqa: BLE001 - a failed restore is a recorded obligation, never a silent pass
-                restores.append({"name": entry["name"], "ok": False, "error": f"{type(e).__name__}: {str(e)[:250]}"})
+                result = entry["call"](self.operator) if entry["takes_client"] else entry["call"]()
+                restores.append({"name": entry["name"], "ok": True, "result": result})
+            except Exception as e:  # noqa: BLE001 - a failed restore is a durable obligation, never a silent pass
+                restores.append({"name": entry["name"], "ok": False, "state": "FAILED",
+                                 "error": f"{type(e).__name__}: {str(e)[:250]}"})
+        if self._restores:
+            self.record["restore_obligations"] = str(
+                record_restore_obligations(self.cfg.label, self.cfg.evidence_dir, restores))
         self.record["restores"] = restores
+        self.record["cleanup_channel"] = {"deadline": cleanup_deadline, "max_jobs": self._cleanup_max_jobs,
+                                          "jobs_submitted": getattr(self.jobs, "cleanup_jobs", 0)}
+        if self.jobs is not None:
+            self.jobs.close_cleanup()
         self._provisioning_done.set()
         closed = self._close_capacity()
+        # every worker is joined BEFORE the union is sealed, and its retained references are adopted
+        workers = []
+        for worker in self._workers:
+            entry = {"name": worker["name"], "stopped": bool(worker.get("stopped")),
+                     "stop_error": worker.get("stop_error")}
+            if worker.get("join") is not None:
+                try:
+                    entry["join"] = worker["join"]()
+                except Exception as e:  # noqa: BLE001
+                    entry["join_error"] = f"{type(e).__name__}: {str(e)[:200]}"
+            if worker.get("jobs") is not None:
+                try:
+                    refs = list(worker["jobs"]() or [])
+                except Exception as e:  # noqa: BLE001
+                    refs, entry["jobs_error"] = [], f"{type(e).__name__}: {str(e)[:200]}"
+                entry["jobs"] = [r.get("job_id") if isinstance(r, dict) else r for r in refs]
+                for ref in refs:
+                    job_id = ref.get("job_id") if isinstance(ref, dict) else ref
+                    if job_id:
+                        self.jobs.adopt(job_id, client=self._operator_raw,
+                                        **({"worker": worker["name"]} if True else {}))
+            workers.append(entry)
+        self.record["workers"] = workers
+        worker_failures = [w["name"] for w in workers if w.get("stop_error") or w.get("join_error") or w.get("jobs_error")]
         cancellation = self.jobs.stop_and_cancel() if self.jobs is not None else []
         self.record["job_cancellation"] = cancellation
         if self._watchdog is not None and self._watchdog.is_alive():
             self._watchdog.join(timeout=30)
         unresolved = [j for j in cancellation if not j.get("verified_done")]
+        failed_restores = [r["name"] for r in restores if not r["ok"]]
         self.record["cleanup"] = {
             "capacity_verified_gone": bool(closed.get("verified_gone")),
             "jobs_total": len(cancellation), "jobs_unresolved": [j.get("job_id") for j in unresolved],
+            "adopted_jobs": sorted(getattr(self.jobs, "adopted", {})),
             "journal": str(self.cfg.journal_path()),
             "receipt": str(self.cfg.journal_path().with_suffix(".cleanup.json")),
-            "restores_failed": [r["name"] for r in restores if not r["ok"]],
-            "note": "capacity deletion is not job cleanup: both receipts must hold, and a failed restore is an "
-                    "outstanding obligation of its own"}
-        self.record["clean"] = bool(closed.get("verified_gone")) and not unresolved and all(r["ok"] for r in restores)
+            "restores_failed": failed_restores,
+            "restore_obligations": self.record.get("restore_obligations"),
+            "workers_unjoined": worker_failures,
+            "note": "capacity deletion is not job cleanup, and neither covers a resource this window changed and could "
+                    "not restore: a failed restore is a durable obligation that blocks another window"}
+        self.record["clean"] = (bool(closed.get("verified_gone")) and not unresolved and not failed_restores
+                                and not worker_failures)
         self.state = CLOSED
         self.record["state"] = CLOSED
         self._event("closed", clean=self.record["clean"])

@@ -522,17 +522,41 @@ verdict = CHAIN_INCOMPLETE, broken_at = engine_admission
 ```
 
 `--gql-window LABEL` supplies the owned controller (`okf_bq_graph.chain_window`); a controller that has not proven an
-open assignment is `GQL_WINDOW_NOT_OPEN`.
+open assignment is `GQL_WINDOW_NOT_OPEN`. Recording a controller is not enough: every BigQuery client the chain or the
+requester broker uses is constructed **through** `window.bind_client`, and a client that would submit outside that gate
+is `GQL_CLIENTS_UNBOUND` — refused before any grant, query or SDK launch. The receipt child registers as a controller
+worker, so stop reaches it, close joins it before the union is sealed, and its retained job references are adopted into
+the window's cleanup. `run_chain` returns before the window closes, so the retained record is amended afterwards: a
+chain that ran inside a window whose capacity, jobs, restores or worker joins are outstanding is downgraded to
+`CHAIN_INCOMPLETE` / `broken_at = window_cleanup` whatever its case outcomes were.
 
 **`okf_bq_graph.chain_window` — one controller for the whole window.** Lifted out of `run.py::main` with the clock,
 opener/closer, watcher, client factory and probe injected. It owns an exclusive `flock` lease over one **explicitly
 named** capacity manifest and evidence directory: a *missing* manifest is a refusal, not an empty ledger, so a fresh
 worktree cannot forget an earlier window's obligations. It refuses a reused label, carries the cumulative
-120-minute ceiling, spawns the independent closer **before** any paid resource, refuses to adopt a pre-existing
-reservation, proves the assignment with real probes (failures retained), hands every operator/requester client out
-already bound to one submission gate, starts capacity closure **without** waiting for result I/O or `jobs.cancel`, and
-runs registered resource restores even on the failure path. Unresolved jobs or a failed restore make the close
-`clean: false`, and the receipt it writes does not satisfy the reopen gate.
+120-minute ceiling, spawns the independent closer **before** any paid resource, proves the assignment with real probes
+(failures retained), hands every operator/requester client out already bound to one submission gate, and starts capacity
+closure **without** waiting for result I/O or `jobs.cancel`.
+
+* **Nonownership is established before any mutation.** The reservation inventory is read first; if the name already
+  exists, or the listing cannot be read at all, the controller refuses (`RESERVATION_PRE_EXISTING` /
+  `OWNERSHIP_UNKNOWN`) having created and deleted nothing. If a race still produces an "already exists" on create, only
+  what *this* invocation made is released (`reservation.release_own_resources`) — the production closer, which deletes
+  the reservation and every assignment pointing at it, is never run on capacity we do not own.
+* **Restores get a bounded cleanup channel.** Stopping the only submission channel makes a row-policy or ACL restore
+  raise, and the obligation disappears. Close now opens a separate bounded channel (`WindowJobs.open_cleanup`) so
+  restoration DDL can still be submitted, journaled and read back after workload admission closed.
+* **A failed restore is a durable blocker.** Obligations are written to `restores_<label>.json` *before* they are
+  attempted and rewritten after, so a crash mid-restore also leaves the blocker behind.
+  `require_clean_windows` refuses while any obligation file has outstanding entries — a fresh worktree, a fresh label
+  or verified capacity does not clear it.
+* **The actual send re-checks admission.** `submit()` checks, then calls `client.query(...)`; a credential refresh
+  inside that call can outlive the stop and let the job POST leave afterwards. The dispatch is guarded for the duration
+  of the submission only, so cancellation and terminal readbacks — which run after stop by design — keep working on the
+  caller's own untouched transport.
+
+Unresolved jobs, a failed restore or a worker that could not be joined make the close `clean: false`, and the receipt it
+writes does not satisfy the reopen gate.
 
 **`okf_bq_graph.receipt_window` — the SDK child inside the window.** `subprocess.run(timeout=…)` bounds a process, not a
 server: killing the child cancels no job. A private `usercustomize.py` (never `sitecustomize.py`) installs guards in the
@@ -543,14 +567,26 @@ call `broker.open_live_session` makes before any client exists). No SDK source i
 
 * The child is handed a **nonsecret** identity: label, an **absolute `time.time()` epoch deadline** (never rebased onto
   a child-sampled start), a stop file and its own journal path.
+* The guarded send seam is the **base `requests.Session.send`**, not just `AuthorizedSession`. `AuthorizedSession` does
+  not define `send`, and more importantly `creds.refresh(Request())` uses the `Request`'s *own* plain `requests.Session`
+  — so guarding only the subclass leaves the credential refresh unbounded and admitted after stop.
 * The SDK's deterministic `execute.job_id_for` id is journaled **before** the send and **never replaced**; automatic job
   retry is disabled, because a retry inside `result()` submits a new job and replaces the id.
 * **Dry runs are bounded operations, not jobs** (`actual_job: false`): no phantom id reaches cleanup or identity.
+* **One journal per launch.** The child's sequence counter restarts in every interpreter, so a shared journal makes two
+  launches collide on `seq` and silently keeps only the last. Each launch gets its own file and its own invocation id,
+  and `ingest()` folds on `(invocation, journal, seq)` and reconciles every launch.
+* **The journal fails closed.** A write failure is not swallowed: intent must be durable *before* dispatch, or
+  `JournalUnavailable` stops it. A missing, unreadable, unparsable or entirely silent launch journal is itself an
+  UNRESOLVED lifecycle obligation, never an empty inventory. A job the SDK diagnostic names that the child never
+  journaled — and the reverse — is unresolved too.
 * A submission whose response is lost stays `UNRESOLVED`; only admission closed *before* a call is a known
   non-submission (`REFUSED`). An unresolved child submission blocks `job_audit`.
 * `preflight()`/`handshake()` prove the seams and the installed guards **before any paid window opens**. A pin without
   them yields `SDK_WINDOW_BRIDGE_UNSUPPORTED` — no window is opened, and Slice B stays blocked until a separately scoped
-  SDK change and an explicit pin update are reviewed.
+  SDK change and an explicit pin update are reviewed. An interpreter with user site-packages disabled (`site.
+  ENABLE_USER_SITE` false, as in a `--no-user-site` virtualenv) never runs `usercustomize`, so no start-up guard can be
+  installed: that is reported as `USERCUSTOMIZE_DISABLED` and refused rather than assumed bounded.
 
 **Engine proof (KTD4).** The retrieval cache key now includes the **engine**, so a relational entry can never be replayed
 under a GQL request, and `scope.templates` records the compiled walk/context template with its SHA-256 and whether it
@@ -573,12 +609,17 @@ reference — and refuses whenever the evidence is short:
 |---|---|
 | a page token left behind, a cap hit, an `unreachable` location, a transport error | BLOCKED (a prefix is not the window) |
 | a job in the span with no ownership signal, or one carrying only the window's reservation **name** | AMBIGUOUS → BLOCKED until resolved by an explicit decision **with a reason** |
+| a declared evidence source that cannot be read | BLOCKED (missing evidence, not a footnote) |
+| a script parent whose declared `numChildJobs` is not matched by the children actually read | BLOCKED (child listings are **not** time-filtered; an exhausted page is not proof of membership) |
 | `jobs.get` returns 404, fails, or returns another reference | UNVERIFIED, never `verified_done` |
 | a `PENDING`/`RUNNING` job | BLOCKED |
-| quiescence of the original submitters not evidenced, or a repeat listing adds references | BLOCKED |
+| quiescence not evidenced — it needs `established`, a **named record** and the moment the last submitter stopped — or a repeat listing adds references | BLOCKED |
 | no owned job at all for an opened window | BLOCKED (an empty inventory is not evidence of an empty window) |
 
-A produced journal says `reconstructed: true`, names its sources with their SHA-256 and is hashed into its receipt;
+The listing covers the **submission lifetime**, not the capacity interval: it is bounded by the later of capacity close
+and evidenced submitter shutdown, then extended while owned work reaches its edge, so a job created after capacity was
+deleted is read rather than filtered away. A produced journal says `reconstructed: true`, names its sources with their
+SHA-256 and is hashed into its receipt;
 `verified` is **derived** from the readbacks, never accepted from an input. Staged files go to a caller-chosen directory
 (`require_clean_windows(..., evidence_dir=…)` can gate them in place); publishing them into `evidence/` is a separate
 authorized step, and an original artifact is never overwritten. Nothing in the module cancels, deletes or submits.
