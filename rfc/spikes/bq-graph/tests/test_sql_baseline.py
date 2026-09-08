@@ -26,7 +26,7 @@ def test_shipped_plan_validates(plan):
     sb.validate_plan(plan)
 
 
-@pytest.mark.parametrize("drop", ["version", "engine", "corpus", "questions", "budget", "metrics",
+@pytest.mark.parametrize("drop", ["version", "engine", "corpus", "questions", "facts", "budget", "metrics",
                                   "retrieval_cells", "consumer_cells", "cost_cells"])
 def test_plan_requires_every_envelope_section(plan, drop):
     broken = {k: v for k, v in plan.items() if k != drop}
@@ -183,3 +183,133 @@ def test_committed_card_matches_its_generator(tmp_path):
         committed = (sb.OUT_DIR / name).read_text()
         assert (tmp_path / name).read_text() == committed, f"{name} is stale; regenerate it"
     assert json.loads((sb.OUT_DIR / "plan.json").read_text())["state"] == "SCAFFOLD_ONLY"
+
+
+# --- fact-data version (PR 46 P1) ------------------------------------------------------------------
+
+def test_fact_version_is_unselected_and_says_so(card):
+    """The corpus pin fixes definitions and the graph projection. It identifies no fact data."""
+    facts = card["facts"]
+    assert facts["state"] == "UNSELECTED"
+    for key in ("why_it_matters", "what_is_missing", "blocks", "how_to_select"):
+        assert facts[key]
+    observed = facts["observed_in_the_retained_chain"]
+    assert observed["synthetic_fixture"] is True
+    assert len(observed["tables"]) == 7
+    assert observed["publication_id"] != card["corpus"]["publication_id"], \
+        "the fact publication is a separate identity from the graph publication"
+
+
+def test_the_recorded_fact_fixture_matches_the_retained_chain():
+    """Read from the chain record, not restated: a drifted copy would be worse than no copy."""
+    chain = json.loads((sb.ROOT / "evidence" / "chain" / "chain_live_restricted.json").read_text())
+    observed = sb.load_plan()["facts"]["observed_in_the_retained_chain"]
+    dataset = observed["dataset"]
+    assert sorted(chain["sdk"]["dependencies"]) == sorted(f"{dataset}.{t}" for t in observed["tables"])
+    assert chain["sdk"]["pin"] == observed["sdk_pin"]
+    assert chain["sdk_publication"]["publication_id"] == observed["publication_id"]
+    assert chain["sdk"]["synthetic_fixture"] == observed["synthetic_fixture"]
+    assert observed["derived_from"] == chain["sdk_publication"]["derived_from"]
+
+
+def test_no_fact_version_is_pinned_anywhere_in_that_chain():
+    """The finding behind the field: the chain names the tables and never versions them."""
+    chain = json.loads((sb.ROOT / "evidence" / "chain" / "chain_live_restricted.json").read_text())
+    assert not any(k in chain["sdk"] for k in ("snapshot", "as_of", "fact_version", "data_version"))
+    assert chain["as_of"] == chain["started_at"][:19] + "Z", \
+        "the chain's as_of is its run timestamp, not a fact cutoff"
+
+
+def test_unselected_facts_block_only_the_consumer_cells(card):
+    blocked = {c["cell"] for c in card["cells"] if c["fact_version_blocked"]}
+    assert blocked == set(card["facts"]["blocks"])
+    for cell in card["cells"]:
+        if cell["fact_version_blocked"]:
+            assert cell["metric"] == "request_to_consumer_ms"
+            assert cell["blocked_by"] and "UNSELECTED" in cell["blocked_by"]
+            assert "Select a fact-data version first" in cell["how_to_fill"]
+        else:
+            assert cell["metric"] == "retrieval_ms"
+            assert cell["blocked_by"] is None
+
+
+def test_a_missing_fact_state_reads_as_chosen_and_is_refused(plan):
+    broken = copy.deepcopy(plan)
+    del broken["facts"]["state"]
+    with pytest.raises(ValueError, match="facts.state must be SELECTED or UNSELECTED"):
+        sb.validate_plan(broken)
+
+
+def test_selecting_a_fact_version_requires_recording_it(plan):
+    broken = copy.deepcopy(plan)
+    broken["facts"]["state"] = "SELECTED"
+    with pytest.raises(ValueError, match="no selected_version is recorded"):
+        sb.validate_plan(broken)
+
+
+@pytest.mark.parametrize("drop", ["why_it_matters", "what_is_missing", "blocks", "how_to_select"])
+def test_an_unselected_fact_version_must_explain_itself(plan, drop):
+    broken = copy.deepcopy(plan)
+    del broken["facts"][drop]
+    with pytest.raises(ValueError, match=drop):
+        sb.validate_plan(broken)
+
+
+def test_facts_cannot_block_a_cell_that_does_not_exist(plan):
+    broken = copy.deepcopy(plan)
+    broken["facts"]["blocks"] = ["sqlchain_forced_c1", "sqlchain_forced_c99"]
+    with pytest.raises(ValueError, match="cells that do not exist"):
+        sb.validate_plan(broken)
+
+
+def test_a_silently_unblocked_cell_fails_the_build(card):
+    tampered = copy.deepcopy(card)
+    for cell in tampered["cells"]:
+        cell["fact_version_blocked"] = False
+    with pytest.raises(ValueError, match="but the card blocks"):
+        sb.assert_no_cell_is_filled(tampered)
+
+
+def test_a_blocked_cell_must_give_its_reason(card):
+    tampered = copy.deepcopy(card)
+    for cell in tampered["cells"]:
+        if cell["fact_version_blocked"]:
+            cell["blocked_by"] = None
+    with pytest.raises(ValueError, match="gives no reason"):
+        sb.assert_no_cell_is_filled(tampered)
+
+
+def test_rendered_card_carries_the_fact_gap(card):
+    text = sb.render_markdown(card)
+    assert "## Fact data — **UNSELECTED**" in text
+    for table in card["facts"]["observed_in_the_retained_chain"]["tables"]:
+        assert f"`{table}`" in text
+    assert card["facts"]["observed_in_the_retained_chain"]["sdk_pin"] in text
+    assert "FACTS_UNSELECTED" in text
+
+
+# --- cost-per-success denominator (PR 46 P2) --------------------------------------------------------
+
+def test_cost_per_success_states_one_formula(plan, card):
+    spec = next(c for c in plan["cost_cells"] if c["name"] == "cost_per_success")
+    cell = next(c for c in card["cost_cells"] if c["cell"] == "cost_per_success")
+    assert spec["formula"] == "total cost of all attempts / released, receipt-verified answers"
+    assert cell["formula"] == spec["formula"]
+    assert sb.render_markdown(card).count(spec["formula"]) == 1
+
+
+def test_failed_attempts_are_never_placed_in_the_denominator(plan, card):
+    """The fixture and the module said opposite things about this until PR 46."""
+    surfaces = [json.dumps(plan), json.dumps(card), sb.render_markdown(card)]
+    for text in surfaces:
+        assert "included in the denominator" not in text
+        assert "in the denominator" not in text or "must not appear in the denominator" in text
+    how = next(c for c in card["cost_cells"] if c["cell"] == "cost_per_success")["how_to_fill"]
+    assert "belongs in the numerator" in how and "must not appear in the denominator" in how
+
+
+def test_cost_per_success_must_declare_a_formula(plan):
+    broken = copy.deepcopy(plan)
+    del next(c for c in broken["cost_cells"] if c["name"] == "cost_per_success")["formula"]
+    with pytest.raises(ValueError, match="must state its formula"):
+        sb.validate_plan(broken)

@@ -70,7 +70,8 @@ The page carries a visible evaluation card (`#sep19-envelope`) so the checkpoint
 | Field | Value | Status |
 | --- | --- | --- |
 | Task | An analyst's agent retrieves a pinned definition, its linked rules and the declared calculation, and releases a number only on a receipt bound to that calculation | PROPOSED |
-| Corpus and fact versions | `acme_retail` at publication `pub_190192147fd7fd78`, source pin `31da799a`, 17 documents + 2 artifacts, question set at `as_of` 2026-09-05 | FIXED (what every experiment used) |
+| Corpus and definition versions | `acme_retail` at publication `pub_190192147fd7fd78`, source pin `31da799a`, 17 documents + 2 artifacts, question set at `as_of` 2026-09-05. Fixes the authored definitions and the graph projection they compile to; identifies no fact data | FIXED (what every experiment retrieved from) |
+| Fact data and its version | The retained chain names the receipt example's own fixture — 7 tables in `test-project-0728-467323.okf_receipt_spike_20260905`, reached through publication `okf-receipt-spike/acme-retail-derived/gross-margin-period` at SDK pin `6719eb5`, a separate identity from the graph publication and joined to it only by the declaration file's bytes — but pins no snapshot, no as-of and no row version for them; the chain's own `as_of` is its run timestamp. Alder cohort data has never been selected | **UNSELECTED / INCOMPLETE** — a prerequisite for the request-to-consumer comparison, and it blocks `sqlchain_forced_c1` / `sqlchain_forced_c5` |
 | Concurrency | 5 concurrent requests; C=1 is the only concurrency any recorded observation covers | PROPOSED (planning default) |
 | Request volume | 10,000 requests/day | PROPOSED, never modelled |
 | Tolerated latency | Retrieval p95 ≤ 5 s at C=5. Reported separately from full request-to-consumer time, for which no threshold is proposed because nothing has sampled it | PROPOSED |
@@ -82,7 +83,7 @@ The page carries a visible evaluation card (`#sep19-envelope`) so the checkpoint
 
 **Decision rule.** On 2026-09-19 we continue, narrow or stop against whichever thresholds the owner has accepted by then. If ordinary SQL meets the need, graph queries must justify their additional cost. If nobody accepts the envelope, the scoped opportunity narrows — more demonstration evidence is not pilot validation.
 
-**Matched baseline.** The ordinary-SQL comparison is predeclared and empty: `rfc/spikes/bq-graph/evidence/sql-baseline/baseline.md`, generated from `fixtures/sql_baseline.json`. Four retrieval cells at C=1 and C=5 across the forced-seed and natural-question shapes, two request-to-consumer cells with no runner yet, five unmeasured cost cells, and a budget projection against declared ceilings. Three recorded prior SQL observations are carried beside the cells and fill none of them. Any GQL comparison is optional and later, and must match this seed shape, corpus, authorization and workload with its reservation cost accounted separately.
+**Matched baseline.** The ordinary-SQL comparison is predeclared and empty: `rfc/spikes/bq-graph/evidence/sql-baseline/baseline.md`, generated from `fixtures/sql_baseline.json`. Four retrieval cells at C=1 and C=5 across the forced-seed and natural-question shapes, two request-to-consumer cells with no runner yet **and no selected fact version**, five unmeasured cost cells (cost per success = total cost of all attempts ÷ released, receipt-verified answers), and a budget projection against declared ceilings. Three recorded prior SQL observations are carried beside the cells and fill none of them. Any GQL comparison is optional and later, and must match this seed shape, corpus, authorization and workload with its reservation cost accounted separately.
 
 ## The story skim and punchline
 

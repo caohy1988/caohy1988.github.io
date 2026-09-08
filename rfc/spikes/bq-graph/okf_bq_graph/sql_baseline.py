@@ -13,6 +13,9 @@ Three rules the code enforces rather than documents:
   The consumer runner does not exist yet, so those cells carry NOT_IMPLEMENTED and say what is missing.
 * Every number that was not measured is named. `UNMEASURED` cost cells are part of the card, not
   omitted from it, because an absent row reads as zero.
+* A workload field that has not been chosen says so. The corpus pin fixes the authored definitions and
+  the graph projection; it identifies no fact data, so `facts.state` is `UNSELECTED` and the cells it
+  blocks carry that reason rather than looking merely unrun.
 
 Nothing here opens a BigQuery client or spends anything. `python3 -m okf_bq_graph.sql_baseline`
 regenerates `evidence/sql-baseline/{plan.json,baseline.md}` offline.
@@ -53,7 +56,7 @@ def load_plan(path: Path | str = PLAN) -> dict:
 
 def validate_plan(plan: dict) -> None:
     """Structural gates. A plan that cannot be compared to an envelope is not a plan."""
-    for key in ("version", "engine", "corpus", "questions", "warmup_and_cache", "budget", "metrics",
+    for key in ("version", "engine", "corpus", "questions", "facts", "warmup_and_cache", "budget", "metrics",
                 "retrieval_cells", "consumer_cells", "cost_cells"):
         if key not in plan:
             raise ValueError(f"sql_baseline plan is missing {key!r}")
@@ -81,6 +84,28 @@ def validate_plan(plan: dict) -> None:
                 "max_usd_ondemand_list", "ondemand_usd_per_tib", "stop_rule"):
         if key not in plan["budget"]:
             raise ValueError(f"budget must predeclare {key!r}")
+    _validate_facts(plan)
+    for cell in plan["cost_cells"]:
+        if cell["name"] == "cost_per_success" and "formula" not in cell:
+            raise ValueError("cost_per_success must state its formula: the denominator is contested and easy to invert")
+
+
+def _validate_facts(plan: dict) -> None:
+    """The corpus pin fixes definitions, not facts. An unchosen fact version has to say so."""
+    facts = plan["facts"]
+    if facts.get("state") not in ("SELECTED", "UNSELECTED"):
+        raise ValueError("facts.state must be SELECTED or UNSELECTED; a missing state reads as chosen")
+    if facts["state"] == "SELECTED":
+        if not facts.get("selected_version"):
+            raise ValueError("facts.state is SELECTED but no selected_version is recorded")
+        return
+    for key in ("why_it_matters", "what_is_missing", "blocks", "how_to_select"):
+        if not facts.get(key):
+            raise ValueError(f"an UNSELECTED fact version must record {key!r}")
+    names = {c["name"] for c in plan["retrieval_cells"] + plan["consumer_cells"]}
+    unknown = [n for n in facts["blocks"] if n not in names]
+    if unknown:
+        raise ValueError(f"facts.blocks names cells that do not exist: {unknown}")
 
 
 def _dig(doc: Any, at: list[str] | None) -> Any:
@@ -186,6 +211,8 @@ def _retrieval_cell(cell: dict, plan: dict, priors: list[dict]) -> dict:
         "success_rate": None, "errors": None, "timeouts": None,
         "bytes_billed": None, "usd_ondemand_list": None,
         "prior_observations": [p for p in priors if p["shape"] == cell["shape"] and p["concurrency"] == cell["concurrency"]],
+        "fact_version_blocked": False,
+        "blocked_by": None,
         "how_to_fill": (
             f"Predeclared: {cell['warmups']} warmups + {cell['measured']} measured at C={cell['concurrency']}, "
             f"timeout {cell['timeout_s']}s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` "
@@ -201,6 +228,8 @@ def _retrieval_cell(cell: dict, plan: dict, priors: list[dict]) -> dict:
 
 
 def _consumer_cell(cell: dict, plan: dict) -> dict:
+    facts = plan["facts"]
+    blocked = facts["state"] == "UNSELECTED" and cell["name"] in facts["blocks"]
     return {
         "cell": cell["name"],
         "metric": "request_to_consumer_ms",
@@ -216,7 +245,13 @@ def _consumer_cell(cell: dict, plan: dict) -> dict:
         "success_rate": None, "errors": None, "timeouts": None,
         "bytes_billed": None, "usd_ondemand_list": None,
         "prior_observations": [],
+        "fact_version_blocked": blocked,
+        "blocked_by": ("facts.state = UNSELECTED: no fact-data version is chosen, so two runs of this cell are not "
+                       "comparable to each other and neither is comparable to an ordinary-SQL alternative") if blocked else None,
         "how_to_fill": (
+            ("Select a fact-data version first (see `facts` above); until then this cell cannot be compared to "
+             "anything. ") if blocked else ""
+        ) + (
             "No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one "
             "wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a "
             "sampled driver that repeats one requester question through bind, the caller-delegated job, "
@@ -232,6 +267,7 @@ def _cost_cell(cell: dict) -> dict:
         "metric": cell["name"],
         "question": cell["question"],
         "unit": cell["unit"],
+        "formula": cell.get("formula"),
         "value": None,
         "state": "UNMEASURED",
         "how_to_fill": {
@@ -246,8 +282,9 @@ def _cost_cell(cell: dict) -> dict:
             ),
             "storage_cost": "Not quantified: projection, section vectors and retained evidence, at the dataset's storage rate.",
             "cost_per_success": (
-                "Not computable until the cells above have a denominator. It divides total cost by *released, "
-                "receipt-verified* answers, so failed and refused attempts stay in the numerator and out of the denominator."
+                "Not computable until the cells above have a numerator. Total cost of all attempts divided by released, "
+                "receipt-verified answers: a failed or refused attempt costs money, so it belongs in the numerator, and "
+                "it answered nothing, so it must not appear in the denominator."
             ),
         }[cell["name"]],
     }
@@ -265,6 +302,7 @@ def build_card(plan: dict, priors: list[dict] | None = None, root: Path | str = 
         "engine_note": plan["engine_note"],
         "corpus": plan["corpus"],
         "questions": plan["questions"],
+        "facts": plan["facts"],
         "warmup_and_cache": plan["warmup_and_cache"],
         "metrics": plan["metrics"],
         "budget": plan["budget"],
@@ -307,6 +345,14 @@ def assert_no_cell_is_filled(card: dict) -> None:
     for cell in card["cost_cells"]:
         if cell["value"] is not None or cell["state"] != "UNMEASURED":
             raise ValueError(f"{cell['cell']}: a scaffold cost cell may not carry a value")
+    facts = card["facts"]
+    if facts["state"] == "UNSELECTED":
+        blocked = {c["cell"] for c in card["cells"] if c["fact_version_blocked"]}
+        if blocked != set(facts["blocks"]):
+            raise ValueError(f"facts.blocks says {sorted(facts['blocks'])} but the card blocks {sorted(blocked)}")
+        for cell in card["cells"]:
+            if cell["fact_version_blocked"] and not cell["blocked_by"]:
+                raise ValueError(f"{cell['cell']}: blocked by an unselected fact version but gives no reason")
 
 
 def _ms(value: float | None) -> str:
@@ -315,6 +361,7 @@ def _ms(value: float | None) -> str:
 
 def render_markdown(card: dict) -> str:
     p = card["budget_projection"]
+    obs = card["facts"]["observed_in_the_retained_chain"]
     lines = [
         "# Ordinary-SQL baseline — predeclared, not measured",
         "",
@@ -335,6 +382,27 @@ def render_markdown(card: dict) -> str:
         f"{card['questions']['note']}",
         f"* **Concurrency.** {card['concurrency_note']}",
         "",
+        "## Fact data — **UNSELECTED**",
+        "",
+        f"{card['facts']['why_it_matters']}",
+        "",
+        f"**What is missing.** {card['facts']['what_is_missing']}",
+        "",
+        "**What the retained chain does identify**, so the gap is a choice nobody has made rather than an unknown:",
+        "",
+        f"* Publication `{obs['publication_id']}` — {obs['publication_note']}."
+        f" Synthetic fixture: {str(obs['synthetic_fixture']).lower()}.",
+        f"* SDK pin `{obs['sdk_pin']}`, dataset `{obs['dataset']}`, "
+        f"{len(obs['tables'])} fact tables: {', '.join('`' + t + '`' for t in obs['tables'])}.",
+        f"* Derived from {obs['derived_from']}.",
+        f"* Read from `{obs['source']}`.",
+        "",
+        f"**Cells this blocks.** {', '.join('`' + b + '`' for b in card['facts']['blocks'])} — the full "
+        "request-to-consumer comparison. The retrieval cells are unaffected: retrieval selects context, and returns "
+        "the sanctioned SQL without executing it.",
+        "",
+        f"**How to select one.** {card['facts']['how_to_select']}",
+        "",
         "## Two latencies, never substituted",
         "",
         f"* **`retrieval_ms`** — {card['metrics']['retrieval_ms']}",
@@ -350,22 +418,25 @@ def render_markdown(card: dict) -> str:
         lines.append(
             f"| `{cell['cell']}` | {cell['metric']} | {cell['shape']} | {cell['concurrency']} | "
             f"{cell['measured_n']} / {cell['measured_target']} | **{cell['state']}** | {_ms(cell['p50_ms'])} | "
-            f"{_ms(cell['p95_ms'])} | {cell['stopped_reason']} |"
+            f"{_ms(cell['p95_ms'])} | {cell['stopped_reason']}"
+            f"{' + FACTS_UNSELECTED' if cell['fact_version_blocked'] else ''} |"
         )
     lines += ["", "How each cell would be filled:", ""]
     for cell in card["cells"]:
-        lines.append(f"* **`{cell['cell']}`** — {cell['how_to_fill']}")
+        blocked = f" *(blocked: {cell['blocked_by']})*" if cell["blocked_by"] else ""
+        lines.append(f"* **`{cell['cell']}`** — {cell['how_to_fill']}{blocked}")
     lines += [
         "",
         "## Cost cells",
         "",
         "Listed rather than omitted: an absent row reads as zero.",
         "",
-        "| Cost | Unit | Value | State | How it would be filled |",
-        "|---|---|---|---|---|",
+        "| Cost | Unit | Formula | Value | State | How it would be filled |",
+        "|---|---|---|---|---|---|",
     ]
     for cell in card["cost_cells"]:
-        lines.append(f"| {cell['question']} | {cell['unit']} | — | **{cell['state']}** | {cell['how_to_fill']} |")
+        lines.append(f"| {cell['question']} | {cell['unit']} | {cell['formula'] or '—'} | — | "
+                     f"**{cell['state']}** | {cell['how_to_fill']} |")
     lines += [
         "",
         "## Budget, and the projection against it",
