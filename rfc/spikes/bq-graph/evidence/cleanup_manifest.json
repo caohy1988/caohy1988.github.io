@@ -377,6 +377,90 @@
       "verified_gone": true,
       "state": "CLOSED_RECONSTRUCTED_FROM_PLATFORM_RECORD",
       "note": "driver interrupted (SIGINT 00:24:54Z) for cost control; the in-process close did not log; platform RESERVATION_CHANGES records DELETE at 2026-09-06T00:27:27.393115Z; safety watcher confirmed 'reservation already gone' at 00:27:33Z; independent read-only checks at 00:44:23Z and 00:55:52Z found no reservation/assignment"
+    },
+    {
+      "label": "chain-gql-b-20260908b",
+      "opened_at": "2026-09-08T16:30:46Z",
+      "steps": [
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation --edition=ENTERPRISE --slots=0 --autoscale_max_slots=100 --ignore_idle_slots=true okf-graph-spike-20260905",
+          "rc": 0,
+          "at": "2026-09-08T16:30:49Z",
+          "stdout": "{\n  \"autoscale\": {\n    \"maxSlots\": \"100\"\n  },\n  \"creationTime\": \"2026-09-08T16:30:49.408037Z\",\n  \"edition\": \"ENTERPRISE\",\n  \"ignoreIdleSlots\": true,\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n  \"updateTime\": \"2026-09-08T16:30:49.408037Z\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson mk --reservation_assignment --reservation_id=okf-graph-spike-20260905 --assignee_id=test-project-0728-467323 --assignee_type=PROJECT --job_type=QUERY",
+          "rc": 0,
+          "at": "2026-09-08T16:30:52Z",
+          "stdout": "{\n  \"assignee\": \"projects/test-project-0728-467323\",\n  \"jobType\": \"QUERY\",\n  \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/2293612610973363195\",\n  \"state\": \"ACTIVE\"\n}",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-08T16:30:55Z",
+          "stdout": "[\n  {\n    \"autoscale\": {\n      \"maxSlots\": \"100\"\n    },\n    \"creationTime\": \"2026-09-08T16:30:49.408037Z\",\n    \"edition\": \"ENTERPRISE\",\n    \"ignoreIdleSlots\": true,\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905\",\n    \"updateTime\": \"2026-09-08T16:30:49.408037Z\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-08T16:30:58Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/2293612610973363195\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-08T16:33:02Z",
+          "stdout": "[\n  {\n    \"assignee\": \"projects/test-project-0728-467323\",\n    \"jobType\": \"QUERY\",\n    \"name\": \"projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/2293612610973363195\",\n    \"state\": \"ACTIVE\"\n  }\n]",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation_assignment okf-graph-spike-20260905.2293612610973363195",
+          "rc": 0,
+          "at": "2026-09-08T16:33:05Z",
+          "stdout": "Reservation assignment 'okf-graph-spike-20260905.2293612610973363195' successfully deleted.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson rm --reservation okf-graph-spike-20260905",
+          "rc": 0,
+          "at": "2026-09-08T16:33:09Z",
+          "stdout": "Reservation 'okf-graph-spike-20260905' successfully deleted.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation",
+          "rc": 0,
+          "at": "2026-09-08T16:33:12Z",
+          "stdout": "No reservations found.",
+          "stderr": ""
+        },
+        {
+          "cmd": "bq --project_id=test-project-0728-467323 --location=US --format=prettyjson ls --reservation_assignment",
+          "rc": 0,
+          "at": "2026-09-08T16:33:15Z",
+          "stdout": "No reservation assignments found.",
+          "stderr": ""
+        }
+      ],
+      "max_slots": 100,
+      "state": "CLOSED_VERIFIED",
+      "closing_at": "2026-09-08T16:32:59Z",
+      "errors": [],
+      "verified_gone": true,
+      "cleanup_attempts": [
+        {
+          "at": "2026-09-08T16:33:15Z",
+          "closer": "driver",
+          "verified_gone": true,
+          "errors": []
+        }
+      ],
+      "closed_at": "2026-09-08T16:33:15Z",
+      "closed_by": "driver"
     }
   ],
   "resources": [
@@ -415,6 +499,27 @@
       "state": "deleted",
       "deleted_at": "2026-09-06T00:27:27Z",
       "closed_by": "platform RESERVATION_CHANGES DELETE receipt (evidence/reservation_changes.json)"
+    },
+    {
+      "kind": "reservation",
+      "window": "chain-gql-b-20260908b",
+      "name": "projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905",
+      "created_at": "2026-09-08T16:30:49Z",
+      "state": "deleted",
+      "pre_existing": false,
+      "cleanup_attempted_at": "2026-09-08T16:33:15Z",
+      "closed_by": "driver",
+      "deleted_at": "2026-09-08T16:33:15Z"
+    },
+    {
+      "kind": "assignment",
+      "window": "chain-gql-b-20260908b",
+      "name": "projects/test-project-0728-467323/locations/US/reservations/okf-graph-spike-20260905/assignments/2293612610973363195",
+      "created_at": "2026-09-08T16:30:52Z",
+      "state": "deleted",
+      "cleanup_attempted_at": "2026-09-08T16:33:15Z",
+      "closed_by": "driver",
+      "deleted_at": "2026-09-08T16:33:15Z"
     }
   ],
   "platform_receipt": {
