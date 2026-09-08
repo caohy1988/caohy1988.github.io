@@ -24,6 +24,7 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `okf_bq_graph/job_audit.py` | Reconciles a retained live chain record's job inventory against the platform's own `jobs.list`/`jobs.get` for that record's window (read-only; no query, no grant change). A requester job in the window the record never claimed, or an administrative statement the record admits it could not name, is `INCOMPLETE`; a listing that stopped with pages left is `INDETERMINATE`; another identity's job is reported, not condemned → `evidence/chain/job_audit_chain_live_restricted.json` |
 | `okf_bq_graph/principal.py` | Requester brokers for the chain (2026-09-06 Slice A): a hermetic policy-emulating broker (no IAM, no job) exercised by `chain.py --requester restricted`, and the IAM-impersonation broker for the restricted SA (graph leg via `authz.impersonated_client`, SDK subprocess via an `impersonated_service_account` ADC file plus a `userinfo.email` scope shim, `_rls` row-policy grantee snapshot/restore, dry-run authorization probe per dependency table) exercised live in Slice B → `evidence/chain/chain_hermetic_restricted.json`, `evidence/chain/chain_live_restricted.json` |
 | `okf_bq_graph/benchmark.py`, `run.py`, `lifecycle.py`, `safety.py`, `partial.py`, `bin/safety_teardown.sh` | Bounded runner (20 warmups + 100 measured per cell, nearest-rank percentiles, failures retained), the window orchestrator (signal-safe cleanup lifecycle, job cancel, independent watcher), and the honest aggregation of interrupted cells (INCOMPLETE / NOT_RUN) |
+| `okf_bq_graph/sql_baseline.py` | Predeclared ordinary-SQL baseline for the 2026-09-19 checkpoint (Slice A, 2026-09-07): validates `fixtures/sql_baseline.json`, reads the recorded prior SQL observations out of the retained evidence, projects the declared samples against the declared budget, and writes a card whose every cell is empty. It opens no client and spends nothing; its own gate refuses a card in which a cell acquired a number or a prior observation claimed to fill one → `evidence/sql-baseline/{plan.json,baseline.md}` |
 | `okf_bq_graph/cost.py`, `report.py`, `assemble.py` | Slot attribution (exact named reservation vs other pools) and the charged autoscale slot-seconds bill from `INFORMATION_SCHEMA.RESERVATIONS_TIMELINE`; non-mutating report tables; report assembly |
 | `sql/*.sql` | `schema.sql`, `graph.sql` (property graph DDL), `seed.sql` (vector seed), `governed.sql` (two-hop GQL), `context.sql`, `impact.sql`, `stubs.sql`, `fallback.sql` |
 | `fixtures/bundle_b/` | Negative fixture: identical relative paths, missing targets, duplicate hits, ambiguous replacement, `../` escape |
@@ -505,6 +506,53 @@ restricted-requester chain does, and only for itself: "Live restricted pass (Sli
 independent constrained attester; the receipt boundary still binds to a synthetic SDK fixture publication. Enterprise/GQL, least privilege,
 scalability, performance and operating acceptance all stay out of scope.
 
+## Ordinary-SQL baseline for the 2026-09-19 checkpoint (2026-09-07, predeclared and empty)
+
+`evidence/sql-baseline/baseline.md` is a plan, not a measurement. It exists because the checkpoint has to compare an
+engine against a stated envelope, and the only ordinary-SQL numbers on record are three single observations from
+integration runs. Regenerate it with `python3 -m okf_bq_graph.sql_baseline`; do not edit it by hand.
+
+What it declares, on the same pinned corpus (`acme_retail` at `pub_190192147fd7fd78`, source pin `31da799a`) and the
+same question set as the GQL cells:
+
+* **Four retrieval cells** on the `fallback` engine — forced-seed and natural-question shapes, each at C=1 and at C=5,
+  20 warmups + 100 measured, 60 s timeout, result cache off. The two shapes are never pooled: the natural shape runs a
+  query embedding and a vector seed that the forced shape does not. C=5 is a planning default, not an accepted
+  concurrency; C=1 is the only concurrency any recorded observation covers.
+* **Two request-to-consumer cells**, `NOT_IMPLEMENTED`. `retrieval_ms` and `request_to_consumer_ms` are separate cells
+  and are never substituted for one another, and the 2026-09-06 23-second three-case chain pass is neither metric.
+  `benchmark.measure` stops at retrieval; `chain.py` runs each case once. Filling these needs a sampled driver that
+  does not exist.
+* **Five cost cells**, all `UNMEASURED` and listed rather than omitted, because an absent row reads as zero:
+  publication visibility, publication upkeep, embeddings, storage, and cost per success with failed and refused
+  attempts in the numerator and out of the denominator.
+* **A budget and a stop rule**: 900 s per cell, 3600 s total, 64 GiB billed, $0.50 on-demand at list, no reservation.
+  The card projects the declared samples from observed bytes per request (37.5 GiB → $0.23 at list) so no cell starts
+  against a ceiling nobody checked. Embeddings, storage and upkeep are not in that projection.
+* **Three recorded prior observations**, read out of `landmine_forced_fallback.json`, `all_all-0017.json` and
+  `natural_question_fallback.json`. Each is n=1 at C=1 from an integration run, with no warmups, no declared sample
+  size and no failure denominator, so none of them fills a cell — `tests/test_sql_baseline.py` fails the build if one
+  starts to.
+
+**Why no driver runs these cells yet.** `okf_bq_graph.run benchmark` reads `fixtures/scale.json`, defaults its cells to
+the `gql` engine, pools the forced and natural questions into one query list, and runs inside an Enterprise reservation
+window. A baseline driver has to read this plan instead, pass one shape's queries per cell, run on-demand with no
+window, and use its own `run_id` so it cannot collide with the retained GQL summary.
+
+**One correction this card carries.** `evidence/report.md` and `evidence/comparison.md` describe both forced fallback
+observations as on-demand. Every job in `all_all-0017.json#fallback_forced` carries the spike's Enterprise reservation,
+so that observation ran on Enterprise capacity. The card reads the edition from the jobs in each record. The dated
+records are left as they are.
+
+**An optional GQL comparison stays optional and later.** It must match this seed shape, corpus, authorization and
+workload, and account for its reservation cost separately. The recorded GQL C=1 cell is 28 of 100 attempts; it is not a
+completed cell and not a comparator.
+
+The envelope those cells would be judged against — task, corpus, concurrency, volume, latency, freshness, retention,
+success, cost ceiling and owner — is on the board pack at
+[`/rfc/board-pack/#sep19-envelope`](../../board-pack/index.html#sep19-envelope), with every threshold labelled
+PROPOSED. Haiyuan Cao (`caohy1988`) is the named owner as of 2026-09-07 and has accepted none of them.
+
 ## Graph model (spec §3)
 
 Node kinds `Concept | Section | Source | Actor | Artifact | LogEntry`; stubs are `Concept{stub=true}`. Relations
@@ -548,6 +596,7 @@ python3 -m okf_bq_graph.run benchmark --minutes 85           # benchmark cells f
 python3 -m okf_bq_graph.run all --minutes 85                 # both in one window
 python3 -m okf_bq_graph.cost 2026-09-05T23:40:00Z 2026-09-06T00:35:00Z   # reconcile jobs + charged reservation timeline
 python3 -m okf_bq_graph.partial && python3 -m okf_bq_graph.assemble      # honest cell summary + report.md
+python3 -m okf_bq_graph.sql_baseline                         # offline: regenerate the predeclared SQL baseline card
 ```
 
 The `run` modes create a paid reservation; `bin/safety_teardown.sh` is spawned automatically as an independent watcher.
