@@ -611,7 +611,11 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     as_of = as_of or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     mode = "live" if live else "hermetic"
     tag = "_restricted" if restricted else ""
-    run_id = f"{mode}{tag}-{_dt.datetime.now(_dt.timezone.utc):%Y%m%dT%H%M%SZ}-{secrets.token_hex(4)}"
+    # run_id must NOT start with "live_" — GitHub secret scanning treats that as a GoCardless
+    # live access token (alerts #1–#5 on 2026-09-07). Keep out["mode"] as live|hermetic; only the
+    # directory / journal id uses a scanner-safe slug.
+    id_mode = "online" if live else "hermetic"
+    run_id = f"{id_mode}{tag}-{_dt.datetime.now(_dt.timezone.utc):%Y%m%dT%H%M%SZ}-{secrets.token_hex(4)}"
     # KTD5: the run-owned evidence directory exists before any external operation (Catalog, BigQuery, SDK)
     run_dir = str(Path(out_dir) / run_id) if catalog else str(Path(out_dir) / "receipt" / run_id)
     Path(run_dir).mkdir(parents=True, exist_ok=True)
