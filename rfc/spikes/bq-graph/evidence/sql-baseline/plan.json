@@ -1,0 +1,473 @@
+{
+  "version": "sql-baseline/0.1.0",
+  "declared_utc": "2026-09-08T01:00:00Z",
+  "state": "SCAFFOLD_ONLY",
+  "state_note": "No baseline cell has been run. Every cell below is INCOMPLETE or UNMEASURED by construction.",
+  "engine": "fallback",
+  "engine_note": "'fallback' is the relational two-hop join path (sql/fallback.sql) plus the GA VECTOR_SEARCH seed for natural questions. It is the ordinary-SQL comparator, not BigQuery Graph / GQL.",
+  "corpus": {
+    "bundle_id": "acme_retail",
+    "publication_id": "pub_190192147fd7fd78",
+    "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec",
+    "source_pin_repo": "knowledge-catalog",
+    "dataset": "okf_graph_spike_20260905",
+    "note": "Acme is invented. This corpus is 17 markdown files and 2 artifacts; it is not customer cohort data and not the Alder retention story."
+  },
+  "questions": {
+    "source": "fixtures/cases.json",
+    "as_of": "2026-09-05T00:00:00Z",
+    "forced_seed_ids": [
+      "f_legacy",
+      "f_current",
+      "f_revenue"
+    ],
+    "natural_query_ids": [
+      "q_gm_exact",
+      "q_revenue_recognized",
+      "q_cogs",
+      "q_legacy_margin",
+      "q_orders_grain",
+      "q_attester"
+    ],
+    "note": "Same pinned question set the GQL cells used. Forced-seed and natural-question shapes are measured in separate cells and are never pooled: the natural shape includes a query embedding and a vector seed that the forced shape does not run."
+  },
+  "facts": {
+    "state": "UNSELECTED",
+    "why_it_matters": "The task releases a computed number, so a comparison needs the version of the fact rows that number was computed from. The corpus pin above fixes the authored definitions and the graph projection it compiles to; it identifies no fact data at all.",
+    "observed_in_the_retained_chain": {
+      "source": "evidence/chain/chain_live_restricted.json",
+      "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+      "publication_note": "the SDK receipt example's own fixture publication \u2014 a separate identity from the graph publication pub_190192147fd7fd78, joined to it only by the declaration file's bytes",
+      "synthetic_fixture": true,
+      "sdk_pin": "6719eb535667963fa640dd4535e508b550eb6cb1",
+      "dataset": "test-project-0728-467323.okf_receipt_spike_20260905",
+      "tables": [
+        "fulfillment_cost",
+        "fx_daily_rates",
+        "order_lines",
+        "orders",
+        "payment_fees",
+        "products",
+        "shipment_cost"
+      ],
+      "derived_from": "knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec"
+    },
+    "what_is_missing": "A data version. The retained chain names those seven tables as the computation's dependencies but pins no snapshot, no as-of and no row version for them, and its own top-level as_of is the run timestamp rather than a fact cutoff. Two runs weeks apart could compute different numbers from the same declaration and both verify.",
+    "blocks": [
+      "sqlchain_forced_c1",
+      "sqlchain_forced_c5"
+    ],
+    "how_to_select": "Name the fact dataset together with a reproducible version for it \u2014 a snapshot decorator, a table-copy revision or the digest of a loaded fixture \u2014 and record it beside the corpus pin. Cohort data for the Alder story has never been selected; that is a customer dependency, not an agent's choice."
+  },
+  "warmup_and_cache": {
+    "warmups_per_cell": 20,
+    "warmups_excluded_from_percentiles": true,
+    "bigquery_result_cache": "disabled (use_cache=false), matching the GQL cells",
+    "retrieval_cache": "the module's own disclosure cache is off for baseline cells; a cached-replay cell is a separate question, not a latency baseline"
+  },
+  "metrics": {
+    "retrieval_ms": "Wall time of one governed retrieval call: seed, walk, context, nodes, assembly. This is what okf_bq_graph.benchmark already measures and what every recorded prior observation covers.",
+    "request_to_consumer_ms": "Wall time from the requester's question to the consumer's release-or-refuse decision: retrieval plus binding, the caller-delegated BigQuery job, independent verification and the consumer check. No repeated-sample runner exists for this today.",
+    "separation_rule": "The two are reported separately and never substituted for one another. The 2026-09-06 chain pass of about 23 seconds covered three cases end to end and is neither metric: it is not a per-request retrieval time and not a sampled request-to-consumer distribution."
+  },
+  "budget": {
+    "max_wall_seconds_per_cell": 900,
+    "max_wall_seconds_total": 3600,
+    "max_bytes_billed_gib": 64,
+    "max_usd_ondemand_list": 0.5,
+    "ondemand_usd_per_tib": 6.25,
+    "reservation": "none: baseline cells run on-demand. Opening an Enterprise window for the SQL baseline would make it a different measurement and needs its own budget line.",
+    "stop_rule": "A cell that reaches max_wall_seconds_per_cell, or a run that reaches any total ceiling, stops and is recorded INCOMPLETE / NOT_RUN_BUDGET with its attempts retained. Percentiles are nearest-rank over all attempts; failures and timeouts count and are never dropped."
+  },
+  "budget_projection": {
+    "cells": [
+      {
+        "cell": "sqlbase_forced_c1",
+        "requests": 120,
+        "bytes_per_request_observed": 52428800,
+        "bytes_billed_projected": 6291456000,
+        "basis": "mean bytes_billed over 2 recorded forced observation(s)"
+      },
+      {
+        "cell": "sqlbase_forced_c5",
+        "requests": 120,
+        "bytes_per_request_observed": 52428800,
+        "bytes_billed_projected": 6291456000,
+        "basis": "mean bytes_billed over 2 recorded forced observation(s)"
+      },
+      {
+        "cell": "sqlbase_natural_c1",
+        "requests": 120,
+        "bytes_per_request_observed": 115343360,
+        "bytes_billed_projected": 13841203200,
+        "basis": "mean bytes_billed over 1 recorded natural observation(s)"
+      },
+      {
+        "cell": "sqlbase_natural_c5",
+        "requests": 120,
+        "bytes_per_request_observed": 115343360,
+        "bytes_billed_projected": 13841203200,
+        "basis": "mean bytes_billed over 1 recorded natural observation(s)"
+      }
+    ],
+    "consumer_cells_projected": false,
+    "consumer_cells_note": "Not projected: the request-to-consumer runner does not exist, so its per-request bytes are unknown.",
+    "bytes_billed_projected_total": 40265318400,
+    "usd_ondemand_list_projected": 0.2289,
+    "usd_note": "List rate on projected bytes. The 1 TiB/month on-demand free tier is not applied, so the invoiced line may be lower. Embeddings, storage and publication upkeep are NOT in this projection.",
+    "ceiling_bytes_billed_gib": 64,
+    "ceiling_usd_ondemand_list": 0.5,
+    "within_budget": true,
+    "shapes_without_observed_bytes": []
+  },
+  "concurrency_note": "C=5 is a planning default chosen so a first concurrency point exists. It is not an accepted concurrency and no customer has asked for it. C=1 is the only concurrency any recorded observation covers.",
+  "cells": [
+    {
+      "cell": "sqlbase_forced_c1",
+      "metric": "retrieval_ms",
+      "engine": "fallback",
+      "shape": "forced",
+      "concurrency": 1,
+      "measured_n": 0,
+      "measured_target": 100,
+      "warmups_target": 20,
+      "state": "INCOMPLETE",
+      "stopped_reason": "NOT_RUN_DRIVER_MISSING",
+      "p50_ms": null,
+      "p95_ms": null,
+      "max_ms": null,
+      "success_rate": null,
+      "errors": null,
+      "timeouts": null,
+      "bytes_billed": null,
+      "usd_ondemand_list": null,
+      "prior_observations": [
+        {
+          "source": "evidence/landmine_forced_fallback.json",
+          "shape": "forced",
+          "query": "forced:metrics/gross-margin-legacy.md",
+          "metric": "retrieval_ms",
+          "n": 1,
+          "concurrency": 1,
+          "retrieval_ms": 2614.9,
+          "stages_ms": {
+            "seed": 0.0,
+            "walk": 1118.6,
+            "context": 678.4,
+            "nodes": 816.2,
+            "assembly": 0.2
+          },
+          "jobs": 3,
+          "bytes_billed": 52428800,
+          "edition": "on-demand",
+          "reservation": null,
+          "status": "OK",
+          "fills_cell": false,
+          "why_not_a_cell": "n=1 at C=1 from an integration run, not a sample from this cell: no warmups, no declared sample size, no failure denominator, and not comparable with the other shape."
+        },
+        {
+          "source": "evidence/all_all-0017.json#fallback_forced",
+          "shape": "forced",
+          "query": "forced:metrics/gross-margin-legacy.md",
+          "metric": "retrieval_ms",
+          "n": 1,
+          "concurrency": 1,
+          "retrieval_ms": 2129.1,
+          "stages_ms": {
+            "seed": 0.0,
+            "walk": 1011.1,
+            "context": 1027.6,
+            "nodes": 1116.0,
+            "assembly": 0.2
+          },
+          "jobs": 3,
+          "bytes_billed": 52428800,
+          "edition": "ENTERPRISE",
+          "reservation": [
+            "test-project-0728-467323:US.okf-graph-spike-20260905"
+          ],
+          "status": "OK",
+          "fills_cell": false,
+          "why_not_a_cell": "n=1 at C=1 from an integration run, not a sample from this cell: no warmups, no declared sample size, no failure denominator, and not comparable with the other shape."
+        }
+      ],
+      "fact_version_blocked": false,
+      "blocked_by": null,
+      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=1, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` already does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. What is missing is a driver that reaches it: `okf_bq_graph.run benchmark` reads fixtures/scale.json, defaults its cells to the `gql` engine, pools forced and natural questions into one query list, and runs inside an Enterprise reservation window. A baseline driver must read this plan instead, pass only this cell's shape as the query list, run on-demand with no window (`budget` needs `cell_seconds` only), and use its own `run_id` so it cannot collide with the retained GQL summary."
+    },
+    {
+      "cell": "sqlbase_forced_c5",
+      "metric": "retrieval_ms",
+      "engine": "fallback",
+      "shape": "forced",
+      "concurrency": 5,
+      "measured_n": 0,
+      "measured_target": 100,
+      "warmups_target": 20,
+      "state": "INCOMPLETE",
+      "stopped_reason": "NOT_RUN_DRIVER_MISSING",
+      "p50_ms": null,
+      "p95_ms": null,
+      "max_ms": null,
+      "success_rate": null,
+      "errors": null,
+      "timeouts": null,
+      "bytes_billed": null,
+      "usd_ondemand_list": null,
+      "prior_observations": [],
+      "fact_version_blocked": false,
+      "blocked_by": null,
+      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=5, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` already does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. What is missing is a driver that reaches it: `okf_bq_graph.run benchmark` reads fixtures/scale.json, defaults its cells to the `gql` engine, pools forced and natural questions into one query list, and runs inside an Enterprise reservation window. A baseline driver must read this plan instead, pass only this cell's shape as the query list, run on-demand with no window (`budget` needs `cell_seconds` only), and use its own `run_id` so it cannot collide with the retained GQL summary."
+    },
+    {
+      "cell": "sqlbase_natural_c1",
+      "metric": "retrieval_ms",
+      "engine": "fallback",
+      "shape": "natural",
+      "concurrency": 1,
+      "measured_n": 0,
+      "measured_target": 100,
+      "warmups_target": 20,
+      "state": "INCOMPLETE",
+      "stopped_reason": "NOT_RUN_DRIVER_MISSING",
+      "p50_ms": null,
+      "p95_ms": null,
+      "max_ms": null,
+      "success_rate": null,
+      "errors": null,
+      "timeouts": null,
+      "bytes_billed": null,
+      "usd_ondemand_list": null,
+      "prior_observations": [
+        {
+          "source": "evidence/natural_question_fallback.json",
+          "shape": "natural",
+          "query": "one natural question (see the record's own scope)",
+          "metric": "retrieval_ms",
+          "n": 1,
+          "concurrency": 1,
+          "retrieval_ms": 5665.3,
+          "stages_ms": {
+            "seed": 1474.6,
+            "walk": 723.3,
+            "context": 819.2,
+            "nodes": 787.0,
+            "assembly": 0.9
+          },
+          "jobs": 6,
+          "bytes_billed": 115343360,
+          "edition": "on-demand",
+          "reservation": null,
+          "status": "OK",
+          "fills_cell": false,
+          "why_not_a_cell": "n=1 at C=1 from an integration run, not a sample from this cell: no warmups, no declared sample size, no failure denominator, and not comparable with the other shape."
+        }
+      ],
+      "fact_version_blocked": false,
+      "blocked_by": null,
+      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=1, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` already does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. What is missing is a driver that reaches it: `okf_bq_graph.run benchmark` reads fixtures/scale.json, defaults its cells to the `gql` engine, pools forced and natural questions into one query list, and runs inside an Enterprise reservation window. A baseline driver must read this plan instead, pass only this cell's shape as the query list, run on-demand with no window (`budget` needs `cell_seconds` only), and use its own `run_id` so it cannot collide with the retained GQL summary."
+    },
+    {
+      "cell": "sqlbase_natural_c5",
+      "metric": "retrieval_ms",
+      "engine": "fallback",
+      "shape": "natural",
+      "concurrency": 5,
+      "measured_n": 0,
+      "measured_target": 100,
+      "warmups_target": 20,
+      "state": "INCOMPLETE",
+      "stopped_reason": "NOT_RUN_DRIVER_MISSING",
+      "p50_ms": null,
+      "p95_ms": null,
+      "max_ms": null,
+      "success_rate": null,
+      "errors": null,
+      "timeouts": null,
+      "bytes_billed": null,
+      "usd_ondemand_list": null,
+      "prior_observations": [],
+      "fact_version_blocked": false,
+      "blocked_by": null,
+      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=5, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` already does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. What is missing is a driver that reaches it: `okf_bq_graph.run benchmark` reads fixtures/scale.json, defaults its cells to the `gql` engine, pools forced and natural questions into one query list, and runs inside an Enterprise reservation window. A baseline driver must read this plan instead, pass only this cell's shape as the query list, run on-demand with no window (`budget` needs `cell_seconds` only), and use its own `run_id` so it cannot collide with the retained GQL summary."
+    },
+    {
+      "cell": "sqlchain_forced_c1",
+      "metric": "request_to_consumer_ms",
+      "engine": "fallback",
+      "shape": "forced",
+      "concurrency": 1,
+      "measured_n": 0,
+      "measured_target": 20,
+      "warmups_target": 2,
+      "state": "INCOMPLETE",
+      "stopped_reason": "NOT_IMPLEMENTED",
+      "p50_ms": null,
+      "p95_ms": null,
+      "max_ms": null,
+      "success_rate": null,
+      "errors": null,
+      "timeouts": null,
+      "bytes_billed": null,
+      "usd_ondemand_list": null,
+      "prior_observations": [],
+      "fact_version_blocked": true,
+      "blocked_by": "facts.state = UNSELECTED: no fact-data version is chosen, so two runs of this cell are not comparable to each other and neither is comparable to an ordinary-SQL alternative",
+      "how_to_fill": "Select a fact-data version first (see `facts` above); until then this cell cannot be compared to anything. No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a sampled driver that repeats one requester question through bind, the caller-delegated job, independent verification and the consumer decision, retaining every attempt including refusals. Sizing it against a real SDK subprocess per request is part of that work, not an afterthought."
+    },
+    {
+      "cell": "sqlchain_forced_c5",
+      "metric": "request_to_consumer_ms",
+      "engine": "fallback",
+      "shape": "forced",
+      "concurrency": 5,
+      "measured_n": 0,
+      "measured_target": 20,
+      "warmups_target": 2,
+      "state": "INCOMPLETE",
+      "stopped_reason": "NOT_IMPLEMENTED",
+      "p50_ms": null,
+      "p95_ms": null,
+      "max_ms": null,
+      "success_rate": null,
+      "errors": null,
+      "timeouts": null,
+      "bytes_billed": null,
+      "usd_ondemand_list": null,
+      "prior_observations": [],
+      "fact_version_blocked": true,
+      "blocked_by": "facts.state = UNSELECTED: no fact-data version is chosen, so two runs of this cell are not comparable to each other and neither is comparable to an ordinary-SQL alternative",
+      "how_to_fill": "Select a fact-data version first (see `facts` above); until then this cell cannot be compared to anything. No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a sampled driver that repeats one requester question through bind, the caller-delegated job, independent verification and the consumer decision, retaining every attempt including refusals. Sizing it against a real SDK subprocess per request is part of that work, not an afterthought."
+    }
+  ],
+  "cost_cells": [
+    {
+      "cell": "publication_visibility",
+      "metric": "publication_visibility",
+      "question": "How long after a publish can a new request see the new publication?",
+      "unit": "seconds",
+      "formula": null,
+      "value": null,
+      "state": "UNMEASURED",
+      "how_to_fill": "Publish repeatedly and time first visibility to a new request. One observation exists (21.3 s for the single Acme publish, n=1, evidence/publish_log.jsonl) and it is not a distribution."
+    },
+    {
+      "cell": "publication_upkeep",
+      "metric": "publication_upkeep",
+      "question": "What does keeping a publication current cost per day, including recompiles and republishes?",
+      "unit": "usd_per_day",
+      "formula": null,
+      "value": null,
+      "state": "UNMEASURED",
+      "how_to_fill": "Not modelled. Needs a republish cadence nobody has agreed yet."
+    },
+    {
+      "cell": "embedding_cost",
+      "metric": "embedding_cost",
+      "question": "What do section embeddings and per-request query embeddings cost?",
+      "unit": "usd",
+      "formula": null,
+      "value": null,
+      "state": "UNMEASURED",
+      "how_to_fill": "Not quantified. The corpus embedded 22 + 6 + 2x7 sections once; natural-question cells add one query embedding per request. Both need the model's own price, which this spike never recorded."
+    },
+    {
+      "cell": "storage_cost",
+      "metric": "storage_cost",
+      "question": "What do the projection, section vectors and retained evidence cost to store?",
+      "unit": "usd_per_month",
+      "formula": null,
+      "value": null,
+      "state": "UNMEASURED",
+      "how_to_fill": "Not quantified: projection, section vectors and retained evidence, at the dataset's storage rate."
+    },
+    {
+      "cell": "cost_per_success",
+      "metric": "cost_per_success",
+      "question": "What does one released, receipt-verified answer cost, once the cost of every failed and refused attempt is counted too?",
+      "unit": "usd_per_success",
+      "formula": "total cost of all attempts / released, receipt-verified answers",
+      "value": null,
+      "state": "UNMEASURED",
+      "how_to_fill": "Not computable until the cells above have a numerator. Total cost of all attempts divided by released, receipt-verified answers: a failed or refused attempt costs money, so it belongs in the numerator, and it answered nothing, so it must not appear in the denominator."
+    }
+  ],
+  "prior_observations": [
+    {
+      "source": "evidence/landmine_forced_fallback.json",
+      "shape": "forced",
+      "query": "forced:metrics/gross-margin-legacy.md",
+      "metric": "retrieval_ms",
+      "n": 1,
+      "concurrency": 1,
+      "retrieval_ms": 2614.9,
+      "stages_ms": {
+        "seed": 0.0,
+        "walk": 1118.6,
+        "context": 678.4,
+        "nodes": 816.2,
+        "assembly": 0.2
+      },
+      "jobs": 3,
+      "bytes_billed": 52428800,
+      "edition": "on-demand",
+      "reservation": null,
+      "status": "OK",
+      "fills_cell": false,
+      "why_not_a_cell": "n=1 at C=1 from an integration run, not a sample from this cell: no warmups, no declared sample size, no failure denominator, and not comparable with the other shape."
+    },
+    {
+      "source": "evidence/all_all-0017.json#fallback_forced",
+      "shape": "forced",
+      "query": "forced:metrics/gross-margin-legacy.md",
+      "metric": "retrieval_ms",
+      "n": 1,
+      "concurrency": 1,
+      "retrieval_ms": 2129.1,
+      "stages_ms": {
+        "seed": 0.0,
+        "walk": 1011.1,
+        "context": 1027.6,
+        "nodes": 1116.0,
+        "assembly": 0.2
+      },
+      "jobs": 3,
+      "bytes_billed": 52428800,
+      "edition": "ENTERPRISE",
+      "reservation": [
+        "test-project-0728-467323:US.okf-graph-spike-20260905"
+      ],
+      "status": "OK",
+      "fills_cell": false,
+      "why_not_a_cell": "n=1 at C=1 from an integration run, not a sample from this cell: no warmups, no declared sample size, no failure denominator, and not comparable with the other shape."
+    },
+    {
+      "source": "evidence/natural_question_fallback.json",
+      "shape": "natural",
+      "query": "one natural question (see the record's own scope)",
+      "metric": "retrieval_ms",
+      "n": 1,
+      "concurrency": 1,
+      "retrieval_ms": 5665.3,
+      "stages_ms": {
+        "seed": 1474.6,
+        "walk": 723.3,
+        "context": 819.2,
+        "nodes": 787.0,
+        "assembly": 0.9
+      },
+      "jobs": 6,
+      "bytes_billed": 115343360,
+      "edition": "on-demand",
+      "reservation": null,
+      "status": "OK",
+      "fills_cell": false,
+      "why_not_a_cell": "n=1 at C=1 from an integration run, not a sample from this cell: no warmups, no declared sample size, no failure denominator, and not comparable with the other shape."
+    }
+  ],
+  "prior_observations_note": "Recorded before this plan existed, on the same corpus and engine. They are retained here so the cells start from evidence rather than from nothing. None of them fills a cell.",
+  "gql_comparison": {
+    "state": "OPTIONAL_LATER",
+    "rule": "Any GQL comparison must match this seed shape, corpus, authorization and workload, and account for its Enterprise reservation cost separately. The recorded GQL C=1 cell is 28 of 100 attempts and is not a completed cell; it is not a comparator."
+  }
+}
