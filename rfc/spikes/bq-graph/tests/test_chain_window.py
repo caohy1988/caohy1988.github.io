@@ -70,7 +70,7 @@ def controller(tmp_path, *, manifest=None, minutes=10, opener=None, closer=None,
     return CW.ChainWindow(cfg, audit_seconds=audit_seconds, audit_max_reads=audit_max_reads,
                           ownership=ownership or (lambda: {"listing_ok": True, "present": False}),
                           rollback=rollback or (lambda label: {"removed": [], "preserved": []}),
-                          opener=opener or (lambda label, slots: {"label": label, "opened_at": OPEN_AT, "state": "OPEN", "steps": []}),
+                          opener=opener or (lambda label, slots, evidence_dir=None: {"label": label, "opened_at": OPEN_AT, "state": "OPEN", "steps": []}),
                           closer=closer or (lambda label: {"label": label, "verified_gone": True, "steps": []}),
                           probe=probe if probe is not None else (lambda client: "probe-job"),
                           clock=clock or time.monotonic, spawn_watcher=spawn_watcher,
@@ -196,7 +196,7 @@ def test_two_worktrees_share_one_canonical_ledger(tmp_path):
 def test_the_independent_closer_is_spawned_before_any_paid_resource(tmp_path):
     order = []
     cw = fast(tmp_path, spawn_watcher=lambda label: order.append(("watcher", label)),
-              opener=lambda label, slots: order.append(("open", label)) or {"opened_at": OPEN_AT, "state": "OPEN", "steps": []})
+              opener=lambda label, slots, evidence_dir=None: order.append(("open", label)) or {"opened_at": OPEN_AT, "state": "OPEN", "steps": []})
     cw.preflight()
     cw.open()
     assert [step[0] for step in order] == ["watcher", "open"]
@@ -237,7 +237,7 @@ def test_deadline_during_opening_refuses_and_closes(tmp_path):
     clock = [0.0]
     closed = []
 
-    def opener(label, slots):
+    def opener(label, slots, evidence_dir=None):
         clock[0] = 10_000        # the deadline passes while capacity is being provisioned
         raise L.WindowStopped("stopped")
 
@@ -634,7 +634,7 @@ def test_the_deadline_during_provisioning_is_exercised_with_one_shared_clock(tmp
     clock = [0.0]
     reached, closed = [], []
 
-    def opener(label, slots):
+    def opener(label, slots, evidence_dir=None):
         reached.append(label)
         clock[0] += 10_000          # the deadline passes DURING provisioning
         return {"opened_at": OPEN_AT, "state": "OPEN", "steps": []}
@@ -659,7 +659,7 @@ def test_a_create_collision_decides_ownership_before_waking_the_watchdog(tmp_pat
               "steps": [{"cmd": "bq mk --reservation --edition=ENTERPRISE okf-graph", "rc": 1,
                          "stderr": "BigQuery error: Reservation already exists", "stdout": ""}]}
 
-    def opener(label, slots):
+    def opener(label, slots, evidence_dir=None):
         cw.jobs.stop.set()          # a stop arrives during the collision, so the watchdog is ready to close
         return opened
 

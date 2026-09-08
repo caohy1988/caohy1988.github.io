@@ -1427,7 +1427,9 @@ def open_gql_window(label: str, minutes: int, manifest: str, evidence_dir: str, 
         script = Path(__file__).resolve().parents[1] / "bin" / "safety_teardown.sh"
         log = Path(evidence_dir) / "safety_teardown.log"
         with log.open("a") as fh:
-            _sp.Popen(["/bin/bash", str(script), str(os.getpid()), window_label, sys.executable],
+            # The detached closer is handed this window's OWN evidence directory: it journals there, so a watcher
+            # resolving `evidence/jobs_<label>.json` instead would find nothing to cancel and still delete capacity.
+            _sp.Popen(["/bin/bash", str(script), str(os.getpid()), window_label, sys.executable, str(evidence_dir)],
                       stdout=fh, stderr=_sp.STDOUT, start_new_session=True)
         return str(script)
 

@@ -176,9 +176,14 @@ def release_own_resources(label: str, closer: str = "own-rollback") -> dict:
 
 
 @_serialized
-def open_window(label: str, max_slots: int = 100) -> dict:
+def open_window(label: str, max_slots: int = 100, evidence_dir: Optional[str | Path] = None) -> dict:
+    """`evidence_dir` names where the prior windows' journal/receipt pairs are read from, and must be the SAME
+    directory the controller preflighted against. An opener that re-gates against the manifest's own directory
+    refuses a window whose cleanup was reconciled elsewhere, which is how the 2026-09-08 Slice B attempt was
+    refused for `all-0012` while its receipts sat verified under `evidence/legacy-reconcile/`. Omitting it keeps
+    the manifest's own directory; naming one relaxes nothing, because the same structural check runs there."""
     m = _load()
-    require_clean_windows(m, exclude=label)
+    require_clean_windows(m, evidence_dir=evidence_dir, exclude=label)
     w = {"label": label, "opened_at": _now(), "steps": [], "max_slots": max_slots, "state": "OPENING"}
     m["windows"].append(w)
     _save(m)

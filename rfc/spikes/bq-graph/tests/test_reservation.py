@@ -197,10 +197,6 @@ def _verified_pair(tmp_path, directory, label):
     return journal
 
 
-@pytest.mark.xfail(strict=True, reason="KNOWN DEFECT (Slice B live attempt 2026-09-08): open_window() takes no "
-                                       "evidence_dir and re-gates against MANIFEST's own directory, so a controller "
-                                       "configured with --gql-evidence-dir is refused at open. Remove this marker "
-                                       "with the fix; strict=True makes an unnoticed fix fail loudly.")
 def test_open_window_reads_receipts_from_the_evidence_dir_it_was_given(monkeypatch, tmp_path):
     """A reconciled window's receipts gate the open from wherever the caller staged them.
 
@@ -221,9 +217,6 @@ def test_open_window_reads_receipts_from_the_evidence_dir_it_was_given(monkeypat
     assert R.open_window('new', evidence_dir=str(staged))['state'] == 'OPEN'
 
 
-@pytest.mark.xfail(strict=True, reason="KNOWN DEFECT (see above): open_window() takes no evidence_dir. This case "
-                                       "pins the safety half of the fix - naming a directory must never waive the "
-                                       "check - so the fix cannot be landed as a bypass.")
 def test_open_window_evidence_dir_relaxes_nothing(monkeypatch, tmp_path):
     """Naming a directory is not a waiver: an unverified receipt there refuses exactly as the default does."""
     monkeypatch.chdir(tmp_path)
@@ -238,12 +231,6 @@ def test_open_window_evidence_dir_relaxes_nothing(monkeypatch, tmp_path):
         R.open_window('new', evidence_dir=str(staged))
 
 
-@pytest.mark.xfail(strict=True, reason="KNOWN DEFECT (Slice B live attempt 2026-09-08): safety.cleanup() hardcodes "
-                                       "'evidence/jobs_<label>.json', so the DETACHED watcher cannot read a journal "
-                                       "staged under a configured --gql-evidence-dir. Observed live in "
-                                       "evidence/watcher_chain-gql-b-20260908.jsonl as FileNotFoundError on all three "
-                                       "attempts. This is the safety-critical half: capacity closes while job cleanup "
-                                       "fails, which is exactly 'capacity deletion is not job cleanup'.")
 def test_safety_watcher_reads_the_journal_from_the_configured_evidence_dir(monkeypatch, tmp_path):
     """The independent closer must cancel the jobs the window actually journaled, wherever they were journaled.
 
