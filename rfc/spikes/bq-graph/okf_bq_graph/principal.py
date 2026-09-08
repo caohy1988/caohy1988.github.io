@@ -512,19 +512,30 @@ class RestrictedBroker:
         unchanged. A statement that was attempted without producing a job reference is UNRESOLVED: what it did on the
         platform cannot be read back, and that must block any claim of a complete inventory."""
         from .authz import set_rls
-        seen: dict[str, list[dict]] = {}
+        ops: dict[tuple, dict] = {}
+        refs: dict[tuple, dict] = {}
 
-        def track(table: str, job: Any, state: str, error: Optional[str]) -> None:
-            """Every attempt, at submission and again at its outcome. A retry is a new job, so it gets its own entry."""
+        def track(table: str, attempt: int, job: Any, state: str, error: Optional[str]) -> None:
+            """One record per ATTEMPT, opened before its request leaves. An attempt whose submission never came back
+            keeps its own entry with no id rather than disappearing behind the previous attempt's (re-review 3)."""
+            key = (table, attempt)
+            op = ops.get(key)
+            if op is None:
+                op = {"transition": transition, "table": table, "attempt": attempt, "job_id": None,
+                      "state": state, "error": error, "hook": "seen"}
+                ops[key] = op
+                self.admin_ops.append(op)
+            else:
+                op.update(state=state, error=error)
             jid = getattr(job, "job_id", None)
             if not jid:
                 return
-            refs = seen.setdefault(table, [])
-            ref = next((r for r in refs if r["job_id"] == jid), None)
+            ref = refs.get(key)
             if ref is None:
+                op["job_id"] = jid
                 ref = job_ref(jid, getattr(job, "project", None), getattr(job, "location", None),
-                              stage=f"rls_{transition}_{table}", attempt=len(refs) + 1, state=state, error=error)
-                refs.append(ref)
+                              stage=f"rls_{transition}_{table}", attempt=attempt, state=state, error=error)
+                refs[key] = ref
                 self.admin_jobs.append(ref)
             else:
                 ref.update(state=state, error=error)
@@ -535,21 +546,19 @@ class RestrictedBroker:
             res = jobs.get(t)
             ok = isinstance(res, str)
             err = None if ok else (res or {}).get("error", "not attempted")
-            refs = seen.get(t, [])
+            mine = [ops[k] for k in sorted(ops) if k[0] == t]
             final = res if ok else (res or {}).get("job_id")
-            if final and not any(r["job_id"] == final for r in refs):
-                # the helper returned an id no hook event carried: something submitted a job this broker did not see, so
-                # the id is kept AND flagged - adding it silently would leave any earlier substitution unaccounted for
-                ref = job_ref(final, stage=f"rls_{transition}_{t}", attempt=len(refs) + 1,
-                              state="DONE" if ok else "FAILED", error=err, hook="missed")
-                refs.append(ref)
-                self.admin_jobs.append(ref)
-                seen[t] = refs
-            for r in refs:
-                self.admin_ops.append({"transition": transition, "table": t, "job_id": r["job_id"], "attempt": r["attempt"],
-                                       "state": r["state"], "error": r.get("error"), "hook": r.get("hook", "seen")})
-            if not refs:
-                self.admin_ops.append({"transition": transition, "table": t, "job_id": None, "attempt": 1,
+            if final and not any(op["job_id"] == final for op in mine):
+                # the helper returned an id no event carried: something submitted a job this broker did not see, so the
+                # id is kept AND flagged - adopting it silently would leave any earlier substitution unaccounted for
+                attempt = (mine[-1]["attempt"] + 1) if mine else 1
+                op = {"transition": transition, "table": t, "attempt": attempt, "job_id": final,
+                      "state": "DONE" if ok else "FAILED", "error": err, "hook": "missed"}
+                self.admin_ops.append(op)
+                self.admin_jobs.append(job_ref(final, stage=f"rls_{transition}_{t}", attempt=attempt,
+                                               state=op["state"], error=err, hook="missed"))
+            elif not mine:
+                self.admin_ops.append({"transition": transition, "table": t, "attempt": 1, "job_id": None,
                                        "state": "UNRESOLVED", "error": err, "hook": "seen"})
             if not ok:
                 failed.append(t)
@@ -697,7 +706,8 @@ class RestrictedBroker:
         a job that appeared without the submission hook seeing it. The first cannot be read back at all; the second
         proves something submitted jobs behind the broker, so earlier attempts may be missing too. Either way an audit
         must not be able to write those jobs off as somebody else's unrelated work."""
-        return [op for op in self.admin_ops if not op.get("job_id") or op.get("hook") == "missed"]
+        return [op for op in self.admin_ops if not op.get("job_id") or op.get("hook") == "missed"
+                or op.get("state") not in ("DONE", "FAILED")]
 
     def identity(self, graph_job_ids: list[str], receipt_jobs: list[dict]) -> dict:
         out = bound_to(self.owner, graph_job_ids, receipt_jobs, self.email, probe_jobs=self.probe_jobs,

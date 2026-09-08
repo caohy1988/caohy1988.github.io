@@ -254,7 +254,11 @@ runs, so a summary carried over from an earlier run describes nothing.
   statements and only then raises if any failed, so a caller that retains job references from its return value loses the
   whole batch — the statements that succeeded, and the one whose job was submitted before its result failed — the moment
   one of them fails. References are therefore kept at submission, through `publish.run`'s `on_job` hook, and each
-  statement is settled `DONE`/`FAILED` individually.
+  statement is settled `DONE`/`FAILED` individually. The hook opens its record **before the request leaves**
+  (`DISPATCHING`), so an attempt whose submission was accepted but whose response never came back keeps its own entry
+  with no id (`UNRESOLVED`) instead of disappearing behind the previous attempt: a failed statement reports the id of
+  *its own* last attempt, or none, and never borrows the id of the attempt before it. Such an attempt is not re-issued
+  either — the request may have been accepted, and retrying it would create a second policy job nobody is watching.
 * **The SDK's own job retry is disabled for anything this spike accounts for.** At the pinned `google-cloud-bigquery`
   3.45.0, a retryable terminal failure makes `QueryJob.result()` submit a **new** job and repoint the object at it
   (measured in `tests/test_sdk_job_retry.py` against the real client: two jobs exist, `job.job_id` changes). A hook that
@@ -263,13 +267,15 @@ runs, so a summary carried over from an earlier run describes nothing.
   is tracking, and retries itself — one accounted attempt at a time, each with its own submission and outcome events, so
   a retried statement puts **both** jobs in the inventory with their own states. An untracked caller keeps the SDK's
   default behaviour.
-* **What the run cannot account for blocks the claim.** A statement attempted without ever naming a job is
-  `UNRESOLVED`, and so is a job that appears without the submission hook seeing it — the second means something
-  submitted jobs behind the broker, so earlier attempts may be missing too. Either makes the identity `UNKNOWN`, the
-  chain `CHAIN_INCOMPLETE`, and the reconciliation refuse to certify the record. That matters because an unnamed job of
-  the run's own would otherwise be indistinguishable from the unrelated operator work the audit is entitled to ignore.
+* **What the run cannot account for blocks the claim.** An attempt that never named a job, an attempt that never
+  reached a terminal state, and a job that appears without the submission hook seeing it are all `UNRESOLVED` — the
+  last means something submitted jobs behind the broker, so earlier attempts may be missing too. Any of them makes the
+  identity `UNKNOWN`, the chain `CHAIN_INCOMPLETE`, and the reconciliation refuse to certify the record. That matters
+  because an unnamed job of the run's own would otherwise be indistinguishable from the unrelated operator work the
+  audit is entitled to ignore. The record publishes the broker's own judgement of this rather than recomputing it, so a
+  narrower copy of the rule cannot quietly drop a category on the way to the audit.
 * **The retained run predates those fixes and is measurably unaffected by them.** It was produced by runner
-  `chain/0.8.0`; the current runner is `chain/0.10.0`. All nine of its policy statements succeeded — the record lists
+  `chain/0.8.0`; the current runner is `chain/0.11.0`. All nine of its policy statements succeeded — the record lists
   nine `policy_admin` jobs and its teardown is `VERIFIED` with both `restore_rls_policies` and `readback_rls_policies`
   `ok` — so no batch of its partially failed. Nor was any job substituted underneath it: its reconciliation lists
   exactly **nine operator jobs in the window, all nine of them claimed**, and the only unaccounted job is an unrelated

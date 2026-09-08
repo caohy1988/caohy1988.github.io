@@ -48,13 +48,18 @@ def job_retryable(job: Any) -> bool:
 
 
 def run(client: bigquery.Client, query: str, params: Optional[list] = None, labels: Optional[dict] = None,
-        use_cache: bool = False, on_job: Optional[Callable[[Any, str, Optional[str]], None]] = None,
+        use_cache: bool = False, on_job: Optional[Callable[[int, Any, str, Optional[str]], None]] = None,
         attempts: int = 1) -> bigquery.QueryJob:
     """One statement, submitted and waited on.
 
-    `on_job(job, state, error)` is called with the job the moment it exists (`SUBMITTED`, before any wait) and again
-    with its terminal outcome (`DONE` or `FAILED`), so a caller accounting for every job it submitted keeps the
-    reference whatever happens next.
+    `on_job(attempt, job, state, error)` reports the life of every attempt: `DISPATCHING` (no job yet - the attempt is
+    owned BEFORE the request leaves, so a submission whose response is lost cannot hide behind an earlier attempt),
+    then either `SUBMITTED` with the job, or `UNRESOLVED` with no job when the request itself raised; and for a
+    submitted job, `DONE` or `FAILED`. A caller accounting for every job it submitted therefore keeps an entry per
+    attempt whatever happens next, and never has to guess which attempt an id belongs to.
+
+    An `UNRESOLVED` attempt is not retried: the request may have been accepted and only its response lost, so
+    re-issuing it could create a second policy job nobody is watching. It is raised, with the ownership recorded.
 
     When `on_job` is given, BigQuery's own job re-submission is turned off (`job_retry=None`). In the pinned 3.45.0 SDK
     a retryable terminal failure makes `QueryJob.result()` submit a NEW job and repoint the object at it, so the id the
@@ -65,19 +70,25 @@ def run(client: bigquery.Client, query: str, params: Optional[list] = None, labe
     cfg = bigquery.QueryJobConfig(query_parameters=params or [], use_query_cache=use_cache,
                                   labels=labels or {"okf_spike": "bq_graph_20260905"})
     for attempt in range(1, max(1, attempts) + 1):
-        job = client.query(query, job_config=cfg, location=LOCATION)
         if on_job is None:
+            job = client.query(query, job_config=cfg, location=LOCATION)
             job.result()
             return job
-        on_job(job, "SUBMITTED", None)
+        on_job(attempt, None, "DISPATCHING", None)
+        try:
+            job = client.query(query, job_config=cfg, location=LOCATION)
+        except Exception as e:  # noqa: BLE001 - the server may have accepted it; this attempt owns a job it cannot name
+            on_job(attempt, None, "UNRESOLVED", f"{type(e).__name__}: {str(e)[:300]}")
+            raise
+        on_job(attempt, job, "SUBMITTED", None)
         try:
             job.result(job_retry=None)
         except Exception as e:  # noqa: BLE001 - the outcome is reported before it is re-raised or retried
-            on_job(job, "FAILED", f"{type(e).__name__}: {str(e)[:300]}")
+            on_job(attempt, job, "FAILED", f"{type(e).__name__}: {str(e)[:300]}")
             if attempt >= attempts or not job_retryable(job):
                 raise
             continue
-        on_job(job, "DONE", None)
+        on_job(attempt, job, "DONE", None)
         return job
     raise AssertionError("unreachable: the loop returns or raises on its last attempt")
 

@@ -10,6 +10,7 @@ returned success, and never learns the id of the job that actually ran.
 from __future__ import annotations
 
 import datetime as _dt
+import json
 from unittest.mock import patch
 
 import pytest
@@ -84,20 +85,31 @@ def test_run_accounts_for_every_attempt_it_makes(client):
     fake = _Fake(fail_on=(1,))
     events: list[tuple] = []
     with patch.object(client._connection, "api_request", fake):
-        job = PUB.run(client, DDL, on_job=lambda j, s, e: events.append((j.job_id, s, e is not None)), attempts=3)
+        job = PUB.run(client, DDL, on_job=lambda n, j, s, e: events.append((n, getattr(j, "job_id", None), s, e is not None)),
+                      attempts=3)
     assert len(fake.submitted) == 2 and job.job_id == fake.submitted[1]
-    assert [(jid, st) for jid, st, _ in events] == [
-        (fake.submitted[0], "SUBMITTED"), (fake.submitted[0], "FAILED"),
-        (fake.submitted[1], "SUBMITTED"), (fake.submitted[1], "DONE")]
-    assert events[1][2] is True and events[3][2] is False        # the failed attempt carries its own error
+    assert [(n, jid, st) for n, jid, st, _ in events] == [
+        (1, None, "DISPATCHING"), (1, fake.submitted[0], "SUBMITTED"), (1, fake.submitted[0], "FAILED"),
+        (2, None, "DISPATCHING"), (2, fake.submitted[1], "SUBMITTED"), (2, fake.submitted[1], "DONE")]
+    assert events[2][3] is True and events[5][3] is False        # the failed attempt carries its own error
+    # every attempt is owned before its request leaves, so an id can never be attributed to the wrong attempt
+    assert [n for n, _, st, _ in events if st == "DISPATCHING"] == [1, 2]
 
     # a failure the SDK would not have re-submitted for is surfaced, not retried
     fake = _Fake(fail_on=(1,), reason="invalidQuery")
     seen: list[str] = []
     with patch.object(client._connection, "api_request", fake):
         with pytest.raises(Exception):
-            PUB.run(client, DDL, on_job=lambda j, s, e: seen.append(s), attempts=3)
-    assert len(fake.submitted) == 1 and seen == ["SUBMITTED", "FAILED"]
+            PUB.run(client, DDL, on_job=lambda n, j, s, e: seen.append(s), attempts=3)
+    assert len(fake.submitted) == 1 and seen == ["DISPATCHING", "SUBMITTED", "FAILED"]
+
+    # a submission whose response never came back owns an attempt with no id, and is not re-issued blindly
+    fake = _Fake()
+    seen = []
+    with patch.object(client._connection, "api_request", side_effect=ValueError("response could not be decoded")):
+        with pytest.raises(ValueError):
+            PUB.run(client, DDL, on_job=lambda n, j, s, e: seen.append((n, getattr(j, "job_id", None), s)), attempts=3)
+    assert seen == [(1, None, "DISPATCHING"), (1, None, "UNRESOLVED")]
 
     # an untracked caller keeps the SDK's default behaviour, unchanged
     fake = _Fake(fail_on=(1,))
@@ -173,7 +185,7 @@ def test_a_job_the_hook_never_saw_blocks_the_completeness_claim(client, monkeypa
                                       labels=labels or {"okf_spike": "bq_graph_20260905"})
         job = cl.query(query, job_config=cfg, location=LOCATION)
         if on_job is not None:
-            on_job(job, "SUBMITTED", None)      # the pre-fix hook fired here and nowhere else
+            on_job(1, job, "SUBMITTED", None)   # the pre-fix hook fired here and nowhere else
         job.result()                            # default job_retry: substitutes, and the hook never learns
         return job
 
@@ -187,8 +199,70 @@ def test_a_job_the_hook_never_saw_blocks_the_completeness_claim(client, monkeypa
     assert len(fake.submitted) == 4 and {j["job_id"] for j in b.admin_jobs} == set(fake.submitted)
     missed = [o for o in b.admin_ops if o["hook"] == "missed"]
     assert [o["job_id"] for o in missed] == [fake.submitted[1]]
-    assert b.admin_unresolved() == missed
+    unresolved = b.admin_unresolved()
+    assert missed[0] in unresolved                                     # the job nobody watched being submitted
+    # and the pre-fix hook also leaves every attempt non-terminal, which is unaccounted for in its own right
+    assert all(o["state"] == "SUBMITTED" for o in unresolved if o["hook"] == "seen")
 
     ident = b.identity(["g1"], [{"job_id": "r1"}])
     assert ident["status"] == "UNKNOWN" and ident["roles"]["policy_admin"]["status"] == "UNKNOWN"
     assert "without the submission hook seeing them" in ident["reason"]
+
+
+def test_a_retry_whose_response_is_lost_cannot_hide_behind_the_failed_attempt(client):
+    """Astra PR 45 re-review 3. A known attempt fails with backendError; the retry IS accepted by the server but its
+    response cannot be decoded, so no job reaches the hook. The failing statement must not be credited with the
+    previous attempt's id: that made the accepted retry vanish from the inventory, left nothing UNRESOLVED, and let the
+    reconciliation classify a job of this run's own as unrelated operator work."""
+    fake = _Fake(fail_on=(1,))
+    b = _broker(client, fake)
+    real_request = client._connection.api_request
+
+    def transport(method=None, path=None, data=None, **kw):
+        body = fake(method=method, path=path, data=data, **kw)
+        if method == "POST" and path.endswith("/jobs") and len(fake.submitted) == 2:
+            raise ValueError("the server accepted the job; its response could not be decoded")
+        return body
+
+    with patch.object(client._connection, "api_request", transport):
+        with pytest.raises(RuntimeError, match=r"failed for \['nodes'\]"):
+            b._set_rls([f"user:{OP}"], [f"user:{OP}"], "restore")
+
+    assert len(fake.submitted) == 4                       # nodes attempt 1 + the accepted retry + edges + vectors
+    nodes = [o for o in b.admin_ops if o["table"] == "nodes"]
+    assert [(o["attempt"], o["state"]) for o in nodes] == [(1, "FAILED"), (2, "UNRESOLVED")]
+    assert nodes[0]["job_id"] == fake.submitted[0]
+    assert nodes[1]["job_id"] is None                     # NOT the previous attempt's id, which is what used to happen
+    assert "could not be decoded" in nodes[1]["error"]
+    assert b.admin_unresolved() == [nodes[1]]
+
+    ident = b.identity(["g1"], [{"job_id": "r1"}])
+    assert ident["status"] == "UNKNOWN" and ident["roles"]["policy_admin"]["status"] == "UNKNOWN"
+    assert ident["admin_ops"]["by_state"]["UNRESOLVED"] == 1
+
+    # through the record the chain serialises, the reconciliation refuses to certify the run - even though the accepted
+    # retry is sitting in the platform listing under the operator, which it would otherwise write off as unrelated
+    record = {"mode": "live", "run_id": "offline-lost-retry-response", "chain": "okf_bq_graph.chain/0.11.0",
+              "started_at": "2026-09-07T22:48:31+00:00", "finished_at": "2026-09-07T22:51:25+00:00",
+              "job_inventory": {"graph": ["g1"], "receipt": ["r1"],
+                                "policy_admin": [j["job_id"] for j in b.admin_jobs],
+                                "policy_admin_ops": b.admin_ops,
+                                "policy_admin_unresolved": b.admin_unresolved()}}
+    assert json.loads(json.dumps(record, default=str)) == record        # it survives the record's own serialisation
+
+    class _It:
+        next_page_token = None
+
+        def __iter__(self):
+            for jid in ["g1", "r1"] + fake.submitted:                   # the accepted retry IS on the platform
+                job = type("J", (), {})()
+                job.job_id, job.state, job.job_type = jid, "DONE", "query"
+                job.user_email = OP if jid in fake.responses else SA
+                job.created = _dt.datetime(2026, 9, 7, 22, 49, tzinfo=_dt.timezone.utc)
+                job.error_result = None
+                yield job
+
+    audited = JA.audit(record, client=type("C", (), {"list_jobs": lambda self, **kw: _It()})(), requester_email=SA)
+    assert audited["status"] == "INCOMPLETE" and audited["declared_admin_unresolved"] == 1
+    assert "never named a job for" in audited["reason"]
+    assert fake.submitted[1] in audited["unaccounted_other_jobs"]        # reported, and no longer able to pass as unrelated
