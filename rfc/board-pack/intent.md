@@ -95,3 +95,16 @@ What this changes on the page, and what it must not imply:
 - **No score moves and no connected-bar claim.** The bar text is unchanged in both pages. The chains cover more of it — a live catalog read through a pinned publication to an enforcing consumer, plus the publication-consistency tests — and still do not clear it. Combined delivery stays LOW; the 2026-09-19 checkpoint owns any revision.
 
 Reader-facing effect: the board pack now says a chain began at a live catalog read and that nine further chains tested republishing, stale pins and tampered payloads on an entry we created for the test, names the single operator and the plain-SQL engine in the same breath, and lists graph queries, a second identity and a policy decision, an independent attester and real cohort data as what remains. Hero, arithmetic, later-questions panel, capacity line, punchline, pilot ask, checkpoint and `styles.css` are unchanged.
+
+## PR 47 graph-in-chain Slice A honesty (2026-09-08, Claude Opus 4.6, `feat/board-pack-pr47-honesty`)
+
+PR 47 (`d002447`, Astra RR7 APPROVE 0/0/0) merged hermetic graph-query wiring for the chain: GQL admission, window controller, receipt bridge, reconcile tooling. **No live chain has used graph queries.** Slice B (live graph-query chain) + five legacy reconciliation windows remain BLOCKED. All live evidence is still plain SQL under one operator; G8 benchmarks stay 0/9; Sep19 thresholds remain PROPOSED.
+
+What this changes on the page, and what it must not imply:
+
+- **Offline graph-query tooling now exists.** The board pack and full RFC now say that the tooling needed to run a chain through graph queries has been built and tested offline, and that no live chain has used it yet. The live graph-query gate is described as closed.
+- **No live GQL claim.** Nothing on the page may credit the hermetic merge as live evidence, Enterprise capacity, or pilot readiness.
+- **Slice B and legacy windows not claimed.** The five legacy reconciliation windows (smoke-1, integration-0007, integration-0009, all-0012, all-0017) are unreconciled and the live graph-query gate (Slice B) is blocked until Haiyuan opens a live Enterprise auth window.
+- **No score moves.** Benchmarks stay 0/9. Sep19 thresholds remain PROPOSED. Combined delivery unchanged. The connected-bar text is unchanged in both pages.
+
+Reader-facing effect: one sentence added to the runtime-assessment, the SVG descriptions and the evidence section; the sentence says offline tooling exists, live chains still use plain SQL, and the live gate is closed. Hero, arithmetic, later-questions panel, capacity line, punchline, pilot ask, checkpoint, Sep19 envelope and `styles.css` are unchanged.

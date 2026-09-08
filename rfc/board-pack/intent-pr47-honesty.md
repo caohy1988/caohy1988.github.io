@@ -1,0 +1,2 @@
+# Intent — board-pack honesty after PR 47 graph-in-chain Slice A
+Update board pack and RFC index so a leadership reader cannot infer live GQL chain success from PR 47's hermetic merge. PR 47 lands offline graph-query wiring (GQL admission, window controller, receipt bridge, reconcile tooling); no live chain has used graph queries, Slice B is gated, and the five legacy windows are unreconciled. Keep human tone, no label spam.
