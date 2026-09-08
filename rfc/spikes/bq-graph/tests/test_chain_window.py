@@ -783,3 +783,68 @@ def test_a_worker_with_no_obligations_leaves_the_gate_open(tmp_path):
     cw.close()
     assert cw.record["clean"] is True
     controller(tmp_path, manifest=manifest, label="second").preflight()   # no raise
+
+
+# =============================================================================== Astra PR47 RR3
+def test_a_restoration_obligation_is_durable_from_registration(tmp_path):
+    """RR3 N2: the first durable record was written at close, so a driver killed between grant and close left
+    nothing behind and `restores_clear` read the missing file as "nothing was ever changed"."""
+    manifest = clean_manifest(tmp_path)
+    cw = fast(tmp_path, manifest=manifest, label="first")
+    cw.preflight()
+    cw.open()
+    assert not (tmp_path / "restores_first.json").exists()
+    cw.register_restore("broker_teardown", lambda client: {"status": "VERIFIED"}, takes_client=True)
+    # the obligation exists BEFORE the caller performs its first mutation
+    obligation = json.loads((tmp_path / "restores_first.json").read_text())
+    assert [o["name"] for o in obligation["outstanding"]] == ["broker_teardown"]
+    assert obligation["outstanding"][0]["state"] == "PENDING"
+    assert "recovery" in obligation["outstanding"][0]
+    assert cw.record["restore_obligations_pending"] == ["broker_teardown"]
+    # a process that never reaches close leaves it outstanding. The OS releases a dead process's flock, so recovery
+    # gets the lease and then meets the durable obligation.
+    cw.lease.release()
+    # the detached watcher does its part: capacity closed and the job receipt verified. The RESTORATION obligation is
+    # what must still block, and it does.
+    L._save_cleanup(tmp_path / "jobs_first.json", json.loads((tmp_path / "jobs_first.json").read_text()), [])
+    with pytest.raises(CW.WindowRefused) as e:
+        controller(tmp_path, manifest=manifest, label="second").preflight()
+    assert e.value.code == "CLEANUP_UNVERIFIED" and "restoration is outstanding" in e.value.detail
+
+
+def test_a_completed_restoration_clears_the_pending_record(tmp_path):
+    manifest = clean_manifest(tmp_path)
+    cw = fast(tmp_path, manifest=manifest, label="first")
+    cw.preflight()
+    cw.open()
+    cw.register_restore("broker_teardown", lambda client: {"status": "VERIFIED"}, takes_client=True)
+    assert json.loads((tmp_path / "restores_first.json").read_text())["outstanding"]
+    cw.close()
+    assert json.loads((tmp_path / "restores_first.json").read_text())["outstanding"] == []
+    assert cw.record["clean"] is True
+    controller(tmp_path, manifest=manifest, label="second").preflight()   # no raise
+
+
+def test_every_registered_restoration_is_pending_before_close(tmp_path):
+    cw = fast(tmp_path)
+    cw.preflight()
+    cw.open()
+    cw.register_restore("dataset_acl", lambda: None)
+    cw.register_restore("row_policies", lambda: None)
+    outstanding = json.loads((tmp_path / "restores_chain-gql-1.json").read_text())["outstanding"]
+    assert [o["name"] for o in outstanding] == ["dataset_acl", "row_policies"]
+    cw.close()
+
+
+def test_post_close_callbacks_are_exposed_to_the_finalizer(tmp_path):
+    """RR3 N4: closing submits the restoration's own DDL, so evidence computed before close must be rebuilt."""
+    cw = fast(tmp_path)
+    cw.preflight()
+    cw.open()
+    seen = []
+    cw.register_post_close("broker_identity", lambda record: seen.append(record) or {"status": "BOUND"})
+    hooks = cw.post_close_callbacks()
+    assert [h["name"] for h in hooks] == ["broker_identity"]
+    assert hooks[0]["call"]({"run": "record"}) == {"status": "BOUND"}
+    assert seen == [{"run": "record"}]
+    cw.close()

@@ -549,20 +549,29 @@ closure **without** waiting for result I/O or `jobs.cancel`.
 * **Restores get a bounded cleanup channel.** Stopping the only submission channel makes a row-policy or ACL restore
   raise, and the obligation disappears. Close now opens a separate bounded channel (`WindowJobs.open_cleanup`) so
   restoration DDL can still be submitted, journaled and read back after workload admission closed.
-* **A failed restore is a durable blocker.** Obligations are written to `restores_<label>.json` *before* they are
-  attempted and rewritten after, so a crash mid-restore also leaves the blocker behind.
-  `require_clean_windows` refuses while any obligation file has outstanding entries — a fresh worktree, a fresh label
-  or verified capacity does not clear it.
-* **The actual send re-checks admission.** `submit()` checks, then calls `client.query(...)`; a credential refresh
-  inside that call can outlive the stop and let the job POST leave afterwards. Both of the client's transports are
-  guarded — `client._http` **and** `AuthorizedSession._auth_request.session`, the separate plain `requests.Session` an
-  internal 401 refresh actually dispatches through — each getting a fresh remaining budget rather than the timeout
-  copied from the original submission. The guard is installed for the duration of the submission only, so cancellation
-  and terminal readbacks keep working on the caller's own untouched transport.
-* **A worker's obligations are the window's obligations.** A registered worker contributes both job references and
-  evidence it could not resolve into one. References are adopted with their **full** `(project, location)` — a child
-  job in another project read under the module defaults returns NotFound while the real job keeps running — and a
-  reference whose submission the worker never confirmed cannot be closed by that absence. Evidence with no id at all
+* **A failed restore is a durable blocker, from the moment it is registered.** `register_restore` writes the
+  obligation to `restores_<label>.json` as PENDING immediately — *before* the caller performs its first mutation — and
+  rewrites it with the outcome at close. A callback that only lives in memory does not survive the failure the
+  detached watcher exists to handle: a driver killed between the grant and the close would otherwise leave no file at
+  all, and `restores_clear` reads a missing file as "nothing was ever changed". `require_clean_windows` refuses while
+  any obligation file has outstanding entries — a fresh worktree, a fresh label or verified capacity does not clear it.
+* **The actual send re-checks admission, on both transports and in both phases.** `submit()` checks, then calls
+  `client.query(...)`; a credential refresh inside that call can outlive the stop and let the job POST leave
+  afterwards. Both of the client's transports are guarded — `client._http` **and**
+  `AuthorizedSession._auth_request.session`, the separate plain `requests.Session` an internal 401 refresh actually
+  dispatches through — each getting a fresh remaining budget rather than the timeout copied from the original
+  submission. The same applies during **result reads**: `_ResultHTTP` copies the session, and `__dict__.update` would
+  otherwise carry the caller's shared `_auth_request` straight onto the copy, so the job-local transport is given its
+  own guarded `Request`. The submission guard is installed for the duration of the submission only, and the result
+  guard lives on the job-local copy, so cancellation and terminal readbacks keep working on the caller's own
+  untouched transport.
+* **A worker's obligations are the window's obligations, in recovery too.** A registered worker contributes both job
+  references and evidence it could not resolve into one. References are adopted with their **full**
+  `(project, location)` — a child job in another project read under the module defaults returns NotFound while the
+  real job keeps running — and a reference whose submission the worker never confirmed cannot be closed by that
+  absence. Those references are written into the journal *and* the receipt, and `cancel_journal` (the path
+  `safety.cleanup` uses) reads them back, so the detached retry cannot re-certify under the defaults what the initial
+  close correctly refused. Evidence with no id at all
   (a damaged or silent child journal) is persisted alongside the restore obligations. `require_clean_windows` also
   scans the evidence directory for `jobs_*.json` and `restores_*.json`, so a run that crashed before recording its
   manifest row still blocks the next window.
@@ -607,7 +616,11 @@ call `broker.open_live_session` makes before any client exists). No SDK source i
   response enters the window journal, the cleanup receipt and the reopening gate rather than living only in the chain
   record. The restricted broker's teardown is **registered** as a window restore before its first mutation and runs on
   the bounded cleanup channel with the cleanup client; a teardown that *returns* `UNVERIFIED` without raising is a
-  failure like any other.
+  failure like any other. Because that restoration submits its own administrative DDL *during* close — after the chain
+  record's inventory and identity verdict were computed — the chain also registers a **post-close** rebuild: the
+  finalizer re-reads the broker's administrative jobs, re-runs the identity audit over the complete set, and lets the
+  rebuilt verdict govern the final record (`CHAIN_BROKEN` at `identity` on an unexpected principal, `CHAIN_INCOMPLETE`
+  on an unresolved statement).
 
 **Engine proof (KTD4).** The retrieval cache key now includes the **engine**, so a relational entry can never be replayed
 under a GQL request, and `scope.templates` records the compiled walk/context template with its SHA-256 and whether it

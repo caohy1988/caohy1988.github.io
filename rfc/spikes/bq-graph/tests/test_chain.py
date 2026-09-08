@@ -1637,3 +1637,137 @@ def test_finalize_cleanup_records_the_deferred_teardown_result(sdk_root, tmp_pat
     final = CH.finalize_cleanup(out, window, str(tmp_path))
     assert final["teardown"] == {"status": "VERIFIED"}
     assert final["verdict"] == "CHAIN_CONNECTED"
+
+
+# =============================================================================== Astra PR47 RR3
+class _Broker:
+    """A broker whose administrative inventory GROWS during teardown, as the real one's restoring DDL does."""
+
+    def __init__(self, identity_after="BOUND"):
+        self.admin_jobs = [{"job_id": "grant-1", "project": CH.PROJECT, "location": CH.LOCATION, "stage": "grant"}]
+        self.admin_ops = [{"job_id": "grant-1"}]
+        self.identity_calls = []
+        self.identity_after = identity_after
+        self.torn_down = False
+
+    def describe(self):
+        return {"kind": "test"}
+
+    def grant(self):
+        return {"status": "OK"}
+
+    def teardown(self, owner=None):
+        self.torn_down = True
+        self.admin_jobs.append({"job_id": "restore-1", "project": CH.PROJECT, "location": CH.LOCATION,
+                                "stage": "restore"})
+        self.admin_ops.append({"job_id": "restore-1"})
+        return {"status": "VERIFIED"}
+
+    def admin_unresolved(self):
+        return [op for op in self.admin_ops if not op.get("job_id")]
+
+    def identity(self, graph_ids, receipt_jobs):
+        self.identity_calls.append({"graph": list(graph_ids), "receipt": list(receipt_jobs),
+                                    "admin": [j["job_id"] for j in self.admin_jobs]})
+        return {"status": self.identity_after if self.torn_down else "BOUND",
+                "roles": {"policy_admin": {"jobs": len(self.admin_jobs)}}}
+
+
+def test_the_identity_inventory_is_rebuilt_after_the_deferred_restoration(sdk_root, tmp_path):
+    """RR3 N4: the record still claimed the grant DDL was 'every job', while restoration submitted three more."""
+    broker = _Broker()
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"},
+           "identity": broker.identity(["g1"], [{"job_id": "r1"}]),
+           "job_inventory": {"graph": ["g1"], "receipt": ["r1"], "receipt_refs": [{"job_id": "r1"}],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    broker.teardown()      # the restoration ran during close
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []},
+                                     "restores": [{"name": "broker_teardown", "ok": True,
+                                                   "result": {"status": "VERIFIED"}}], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(broker, record)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["job_inventory"]["policy_admin"] == ["grant-1", "restore-1"]
+    rebuilt = final["identity"]["rebuilt_after_restoration"]
+    assert rebuilt["policy_admin_before_close"] == 1 and rebuilt["added_by_restoration"] == ["restore-1"]
+    assert broker.identity_calls[-1]["admin"] == ["grant-1", "restore-1"]
+    assert final["verdict"] == "CHAIN_CONNECTED"    # rebuilt and still BOUND
+
+
+def test_a_restoration_job_with_an_unexpected_identity_breaks_the_chain(sdk_root, tmp_path):
+    broker = _Broker(identity_after="UNBOUND")
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "identity": {"status": "BOUND"},
+           "job_inventory": {"graph": ["g1"], "receipt": ["r1"], "receipt_refs": [{"job_id": "r1"}],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    broker.teardown()
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(broker, record)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["identity"]["status"] == "UNBOUND"
+    assert final["verdict"] == "CHAIN_BROKEN" and final["broken_at"] == "identity"
+    assert json.loads((tmp_path / "chain_live_restricted.json").read_text())["verdict"] == "CHAIN_BROKEN"
+
+
+def test_an_unresolved_restoration_statement_leaves_the_chain_incomplete(sdk_root, tmp_path):
+    broker = _Broker()
+    broker.admin_ops.append({"statement": "DROP ROW ACCESS POLICY", "job_id": None})
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "identity": {"status": "BOUND"},
+           "job_inventory": {"graph": ["g1"], "receipt": ["r1"], "receipt_refs": [{"job_id": "r1"}],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    broker.teardown()
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(broker, record)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["job_inventory"]["policy_admin_unresolved"]
+    assert final["verdict"] == "CHAIN_INCOMPLETE" and final["broken_at"] == "identity"
+
+
+def test_a_post_close_callback_that_raises_blocks_a_clean_closeout(sdk_root, tmp_path):
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "same-requester"}, "job_inventory": {}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: (_ for _ in ()).throw(
+                                                                RuntimeError("the audit could not be rebuilt"))}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["post_close"]["broker_identity"]["status"] == "ERROR"
+    assert final["verdict"] == "CHAIN_INCOMPLETE" and final["broken_at"] == "window_cleanup"
+
+
+def test_the_restricted_chain_registers_the_identity_rebuild_with_the_teardown(sdk_root, tmp_path):
+    """The two registrations are a pair: deferring the restoration is what makes the rebuild necessary."""
+    registered = {"restores": [], "post_close": []}
+
+    class Window(_StubWindow):
+        def register_restore(self, name, restore, takes_client=False):
+            registered["restores"].append(name)
+
+        def register_post_close(self, name, callback):
+            registered["post_close"].append(name)
+
+    class Broker:
+        def describe(self):
+            return {"kind": "test"}
+
+        def grant(self):
+            raise RuntimeError("grant refused so the run stops right after registration")
+
+        def teardown(self, owner=None):
+            return {"status": "VERIFIED"}
+
+    window = Window(journal=tmp_path / "jobs.json")
+    broker = Broker()
+    broker.sa = window.bind_client(object(), role="requester")
+    broker.owner = window.bind_client(object(), role="operator")
+    CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                 requester_mode="restricted", broker=broker, window=window)
+    assert registered == {"restores": ["broker_teardown"], "post_close": ["broker_identity"]}

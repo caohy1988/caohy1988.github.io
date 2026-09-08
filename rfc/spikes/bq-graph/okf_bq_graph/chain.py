@@ -536,6 +536,37 @@ def gql_admission(engine: str, live: bool, window: Any) -> dict:
 DEFERRED_TEARDOWN = "DEFERRED_TO_WINDOW_CLEANUP"
 
 
+def rebuild_identity(broker: Any, out: dict) -> dict:
+    """Re-audit the administrative role AFTER the deferred restoration ran.
+
+    The chain computes its identity verdict before `window.close()`, but the registered teardown submits its
+    grant-restoring DDL during close. Those jobs belong to the same "every job the run submitted" claim, so the
+    inventory and the identity verdict are rebuilt over the broker's actual post-restoration state - including
+    attempts it could not resolve (Astra PR47 RR3 N4)."""
+    inv = out.setdefault("job_inventory", {})
+    before = list(inv.get("policy_admin") or [])
+    admin_jobs = [j for j in (getattr(broker, "admin_jobs", None) or []) if j.get("job_id")]
+    admin_ops = list(getattr(broker, "admin_ops", None) or [])
+    inv["policy_admin"] = [j["job_id"] for j in admin_jobs]
+    inv["policy_admin_ops"] = admin_ops
+    inv["policy_admin_unresolved"] = (broker.admin_unresolved() if hasattr(broker, "admin_unresolved")
+                                      else [op for op in admin_ops if not op.get("job_id")])
+    inv.setdefault("refs", {}).update({j["job_id"]: {"project": j.get("project"), "location": j.get("location"),
+                                                     "stage": j.get("stage")} for j in admin_jobs})
+    receipt_refs = inv.get("receipt_refs") or [{"job_id": j} for j in (inv.get("receipt") or []) if j]
+    identity = broker.identity(list(inv.get("graph") or []), receipt_refs)
+    added = sorted(set(inv["policy_admin"]) - set(before))
+    identity["rebuilt_after_restoration"] = {
+        "policy_admin_before_close": len(before), "policy_admin_after_close": len(inv["policy_admin"]),
+        "added_by_restoration": added, "unresolved": len(inv["policy_admin_unresolved"]),
+        "note": "the deferred restoration submits administrative DDL during close; the identity claim covers those "
+                "jobs too, so it is re-audited once they exist"}
+    identity.setdefault("job_set", {}).update({"policy_admin": len(inv["policy_admin"]),
+                                               "policy_admin_added_by_restoration": len(added)})
+    out["identity"] = identity
+    return identity
+
+
 def broker_teardown(broker: Any, deferred: bool) -> dict:
     """The broker's restoration, unless the window owns it.
 
@@ -887,6 +918,9 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         if deferred_teardown:
             window.register_restore("broker_teardown", lambda client: broker.teardown(owner=client), takes_client=True)
             out["requester"]["teardown"] = {"owner": "window controller", "channel": "bounded cleanup"}
+            if hasattr(window, "register_post_close"):
+                # the restoration's own DDL lands during close: the identity claim is rebuilt over it
+                window.register_post_close("broker_identity", lambda record: rebuild_identity(broker, record))
         unbound = unbound_clients(clients, broker, window)
         if unbound:
             out["engine_admission"] = {"status": "GQL_CLIENTS_UNBOUND", "engine": engine, "unbound": unbound,
@@ -1218,6 +1252,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                       and not ((((c["replay"] or {}).get("retrieval") or {}).get("timing") or {}).get("jobs") or [])]
     refs = {e["job_id"]: (e.get("project"), e.get("location")) for e in journal.jobs() if e.get("job_id")}
     out["job_inventory"] = {"graph": ids["graph"], "receipt": [j.get("job_id") for j in ids["receipt"]],
+                            "receipt_refs": ids["receipt"],
                             "refs": {k: {"project": v[0], "location": v[1]} for k, v in refs.items()},
                             "journal": journal.summary(), "note": "every submitted job once, including empty/failed lookups; roles and (project, location, job_id) in journal.jsonl"}
     if receipt_bridge is not None:
@@ -1396,6 +1431,15 @@ def finalize_cleanup(out: dict, window: Any, out_dir: str, receipt_bridge: Any =
             out["teardown"] = restore.get("result") if restore.get("ok") else dict(
                 restore.get("result") or {}, status=(restore.get("result") or {}).get("status", "FAILED"),
                 restore_error=restore.get("error"))
+    # rebuild any evidence that CLOSING itself changed (the deferred restoration's own administrative DDL)
+    for hook in (window.post_close_callbacks() if hasattr(window, "post_close_callbacks") else []):
+        try:
+            out.setdefault("post_close", {})[hook["name"]] = hook["call"](out)
+        except Exception as e:  # noqa: BLE001 - evidence we could not rebuild is not evidence that held
+            out.setdefault("post_close", {})[hook["name"]] = {"status": "ERROR",
+                                                              "error": f"{type(e).__name__}: {str(e)[:250]}"}
+            clean = False
+            out["window"]["clean"] = False
     if receipt_bridge is not None:
         # re-ingest AFTER the child was joined: a submission it made late is still this window's obligation
         ingested = receipt_bridge.ingest()
@@ -1409,6 +1453,22 @@ def finalize_cleanup(out: dict, window: Any, out_dir: str, receipt_bridge: Any =
             out["window"]["clean"] = False
             cleanup = dict(cleanup, receipt_child_unresolved=len(ingested["unresolved"]))
             out["window"]["cleanup"] = cleanup
+    # the rebuilt identity governs the final verdict exactly as the pre-close one did
+    identity = out.get("identity") or {}
+    if out.get("mode") == "live" and "rebuilt_after_restoration" in identity:
+        unresolved_admin = (out.get("job_inventory") or {}).get("policy_admin_unresolved") or []
+        if identity.get("status") == "UNBOUND":
+            out["verdict"] = "CHAIN_BROKEN"
+            out["broken_at"] = "identity"
+            out["identity_note"] = ("a job the run submitted carries an unexpected identity once the restoration's own "
+                                    "administrative DDL is included")
+        elif identity.get("status") != "BOUND" or unresolved_admin:
+            if out.get("verdict") != "CHAIN_BROKEN":
+                out["verdict"] = "CHAIN_INCOMPLETE"
+                out["broken_at"] = "identity"
+                out["identity_note"] = ("the identity of the post-restoration administrative work is not established: "
+                                        f"status {identity.get('status')}, {len(unresolved_admin)} unresolved "
+                                        "statement(s)")
     if not clean and out.get("verdict") != "CHAIN_BROKEN":
         out["verdict"] = "CHAIN_INCOMPLETE"
         out["broken_at"] = "window_cleanup"

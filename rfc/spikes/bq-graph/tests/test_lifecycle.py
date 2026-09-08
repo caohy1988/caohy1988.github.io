@@ -655,3 +655,139 @@ def test_a_confirmed_adoption_may_close_on_absence(tmp_path):
     window = L.WindowJobs("adopt-confirmed", time.monotonic() + 60, tmp_path / "jobs.json")
     window.adopt("child-job", client=Client(), state="SUBMITTED")
     assert window.stop_and_cancel()[0]["verified_done"] is True
+
+
+# =============================================================================== Astra PR47 RR3
+def test_detached_recovery_carries_the_qualified_references(tmp_path):
+    """RR3 N1: `cancel_journal` dropped `job_refs`, so recovery read every job under the module defaults."""
+    from google.api_core.exceptions import NotFound
+    seen = []
+
+    class Client:
+        def cancel_job(self, job_id, **kwargs):
+            seen.append(dict(kwargs, job_id=job_id))
+            if (kwargs.get("project"), kwargs.get("location")) != ("other-project", "EU"):
+                raise NotFound("wrong project/location")
+
+        def get_job(self, job_id, **kwargs):
+            return SimpleNamespace(state="RUNNING")
+
+    journal = tmp_path / "jobs_w.json"
+    journal.write_text(json.dumps({
+        "label": "w", "project": L.PROJECT, "location": L.LOCATION,
+        "job_ids": ["outside-job"], "finished_job_ids": [],
+        "job_refs": {"outside-job": {"project": "other-project", "location": "EU", "adopted": True,
+                                     "notfound_is_done": False}}}))
+    results = L.cancel_journal(Client(), "w", journal)
+    assert seen[0]["project"] == "other-project" and seen[0]["location"] == "EU"
+    assert results[0]["state"] == "RUNNING" and results[0]["verified_done"] is False
+    receipt = json.loads((tmp_path / "jobs_w.cleanup.json").read_text())
+    assert receipt["verified"] is False
+    assert receipt["job_refs"]["outside-job"]["notfound_is_done"] is False   # the refs travel into the receipt too
+
+
+def test_detached_recovery_does_not_certify_an_unconfirmed_absent_job(tmp_path):
+    """A lost-response id: absent under its own reference is still unresolved, not verified completion."""
+    from google.api_core.exceptions import NotFound
+
+    class Client:
+        def cancel_job(self, job_id, **kwargs):
+            raise NotFound("no such job")
+
+        def get_job(self, job_id, **kwargs):
+            raise NotFound("no such job")
+
+    journal = tmp_path / "jobs_w.json"
+    journal.write_text(json.dumps({
+        "label": "w", "project": L.PROJECT, "location": L.LOCATION,
+        "job_ids": ["okf_rcpt_lost"], "finished_job_ids": [],
+        "job_refs": {"okf_rcpt_lost": {"project": L.PROJECT, "location": L.LOCATION, "adopted": True,
+                                       "notfound_is_done": False}}}))
+    results = L.cancel_journal(Client(), "w", journal)
+    assert results[0]["verified_done"] is False and results[0]["state"] == "NOT_FOUND"
+    assert json.loads((tmp_path / "jobs_w.cleanup.json").read_text())["verified"] is False
+
+
+def test_a_legacy_journal_without_refs_still_recovers(tmp_path):
+    """A journal written before `job_refs` existed keeps the journalled-before-submit reading."""
+    from google.api_core.exceptions import NotFound
+
+    class Client:
+        def cancel_job(self, job_id, **kwargs):
+            raise NotFound("gone")
+
+        def get_job(self, job_id, **kwargs):
+            raise NotFound("gone")
+
+    journal = tmp_path / "jobs_w.json"
+    journal.write_text(json.dumps({"label": "w", "project": L.PROJECT, "location": L.LOCATION,
+                                   "job_ids": ["okf_graph_w_1"], "finished_job_ids": []}))
+    assert L.cancel_journal(Client(), "w", journal)[0]["verified_done"] is True
+
+
+def test_the_result_client_guards_its_own_refresh_transport(tmp_path):
+    """RR3 N3: a 401 DURING result reads refreshes through the shared `_auth_request`, which `__dict__.update`
+    carried straight onto the copied session."""
+    import requests
+    from google.auth.credentials import Credentials
+    from google.cloud import bigquery
+
+    window = L.WindowJobs("result-refresh", time.monotonic() + 60, tmp_path / "jobs.json")
+    seen = []
+
+    class Creds(Credentials):
+        def __init__(self):
+            super().__init__()
+            self.token = "offline-token"
+
+        def refresh(self, request):
+            request("https://offline.invalid/token", method="POST")
+            self.token = "offline-refreshed"
+
+    class Adapter(requests.adapters.HTTPAdapter):
+        def send(self, req, **kw):
+            seen.append({"method": req.method, "url": req.url, "stopped": window.stop.is_set()})
+            response = requests.Response()
+            response.request, response.url, response.status_code = req, req.url, 200
+            response.headers["content-type"] = "application/json"
+            if req.method == "POST" and "/jobs?" in req.url:
+                body = json.loads(req.body)
+                data = {"jobReference": body["jobReference"], "configuration": body["configuration"],
+                        "status": {"state": "DONE"}}
+            elif req.method == "GET" and "/queries/" in req.url:
+                window.stop.set()                 # a concurrent stop, while the platform answers 401
+                response.status_code = 401
+                data = {"error": {"message": "offline token expired"}}
+            elif req.url == "https://offline.invalid/token":
+                data = {}
+            else:
+                raise AssertionError(f"unexpected request {req.method} {req.url}")
+            response._content = json.dumps(data).encode()
+            return response
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(requests.adapters.HTTPAdapter, "send", Adapter.send)
+        client = bigquery.Client(project=L.PROJECT, location=L.LOCATION, credentials=Creds())
+        original_request = client._http._auth_request
+        original_send = original_request.session.send
+        with pytest.raises((L.WindowStopped, TimeoutError)):
+            list(window.bind(client).query("SELECT 1").result())
+        assert not [s for s in seen if s["stopped"]], f"a send left after stop: {seen}"
+        assert "https://offline.invalid/token" not in [s["url"] for s in seen]
+        # the caller's own refresh transport is untouched: cancellation still works after stop
+        assert client._http._auth_request is original_request
+        assert original_request.session.send == original_send
+        client.close()
+
+
+def test_the_result_guard_installs_on_the_job_local_copy_only():
+    from google.auth.credentials import AnonymousCredentials
+    from google.cloud import bigquery
+
+    client = bigquery.Client(project=L.PROJECT, location=L.LOCATION, credentials=AnonymousCredentials())
+    original = client._http._auth_request
+    guarded = L._ResultHTTP(client._http, lambda: 5.0)
+    assert guarded.guarded_auth_transport is True
+    assert guarded.raw._auth_request is not original          # the copy has its own Request
+    assert client._http._auth_request is original             # the caller's is untouched
+    client.close()

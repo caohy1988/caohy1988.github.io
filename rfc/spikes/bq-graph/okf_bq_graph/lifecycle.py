@@ -42,6 +42,42 @@ class _ResultHTTP:
         self.raw.__dict__.update(raw.__dict__)
         self._send = self.raw.send
         self.raw.send = self.send
+        self.guarded_auth_transport = self._guard_auth_transport()
+
+    def _guard_auth_transport(self) -> bool:
+        """A 401 DURING RESULT READS refreshes the credential through `AuthorizedSession._auth_request`, which owns a
+        separate plain `requests.Session`. `__dict__.update` carries the caller's shared one straight onto this copy,
+        so overriding only the copied AuthorizedSession's `send` leaves the refresh unbounded and admitted after stop
+        (Astra PR47 RR3 N3).
+
+        The guard is installed on a COPY of that session, mounted on a new `Request` belonging to this job-local
+        transport only, so the caller's own refresh path is never mutated."""
+        request = self.raw.__dict__.get("_auth_request")
+        session = getattr(request, "session", None)
+        if request is None:
+            return False
+        if session is not None:
+            guarded = copy.copy(session)
+            guarded.__dict__.update(session.__dict__)
+            inner = guarded.send
+
+            def auth_send(prepared, **kwargs):
+                kwargs["timeout"] = self._timeout(kwargs.get("timeout"))
+                return inner(prepared, **kwargs)
+
+            guarded.send = auth_send
+            try:
+                self.raw._auth_request = type(request)(guarded)
+                return True
+            except Exception:  # noqa: BLE001 - an unusual Request type: fall through to the callable guard
+                pass
+
+        def guarded_request(url, method="GET", body=None, headers=None, timeout=None, **kwargs):
+            return request(url, method=method, body=body, headers=headers,
+                           timeout=self._timeout(timeout), **kwargs)
+
+        self.raw._auth_request = guarded_request
+        return True
 
     def __getattr__(self, name):
         return getattr(self.raw, name)
@@ -139,8 +175,11 @@ def window_executor(client, max_workers):
             raise
 
 
-def cancel_jobs(client, job_ids: list[str]) -> list[dict]:
-    return _cancel_pending([(job_id, client, None) for job_id in job_ids])
+def cancel_jobs(client, job_ids: list[str], refs: Optional[dict] = None) -> list[dict]:
+    """`refs` maps job_id -> the qualified reference it must be read back with. Dropping it makes every job read under
+    the module defaults, where an absent job then certifies completion (Astra PR47 RR3 N1)."""
+    refs = refs or {}
+    return _cancel_pending([(job_id, client, refs.get(job_id)) for job_id in job_ids])
 
 
 def _cancel_one(pair) -> dict:
@@ -448,11 +487,18 @@ class WindowJob:
 
 
 def cancel_journal(client, label: str, path: str | Path) -> list[dict]:
+    """Detached recovery over a retained journal.
+
+    The journal's `job_refs` travel with it: the project/location each job was submitted under, and whether this
+    window ever confirmed the submission. Without them the detached watcher reads an adopted other-project job under
+    the module defaults, gets NotFound, and rewrites the receipt as verified while the real job is still RUNNING
+    (Astra PR47 RR3 N1)."""
     journal = json.loads(Path(path).read_text())
     if journal["label"] != label or journal["project"] != PROJECT or journal["location"] != LOCATION:
         raise ValueError("job journal does not belong to this reservation window")
     finished = set(journal.get("finished_job_ids", []))
-    results = cancel_jobs(client, [i for i in journal["job_ids"] if i not in finished])
+    refs = journal.get("job_refs") or {}
+    results = cancel_jobs(client, [i for i in journal["job_ids"] if i not in finished], refs=refs)
     _save_cleanup(Path(path), journal, results)
     return results
 
@@ -463,6 +509,9 @@ def _save_cleanup(path: Path, journal: dict, results: list[dict]):
     done.update(r["job_id"] for r in results if r.get("verified_done"))
     receipt = {"label": journal["label"], "project": journal["project"], "location": journal["location"],
                "job_ids": journal["job_ids"], "verified_done_job_ids": sorted(done), "jobs": results,
+               # the references travel INTO the receipt too, so a later reader still knows where each job lives and
+               # which ids this window never confirmed it submitted
+               "job_refs": journal.get("job_refs") or {},
                "verified": set(journal["job_ids"]) <= done}
     target = path.with_suffix(".cleanup.json")
     tmp = target.with_suffix(f".{os.getpid()}.{threading.get_ident()}.tmp")

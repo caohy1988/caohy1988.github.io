@@ -142,6 +142,7 @@ class ChainWindow:
         self.operator: Any = None
         self._operator_raw: Any = None
         self._workers: list[dict] = []
+        self._post_close: list[dict] = []
         self._preserve_capacity = False   # set when the reservation turns out not to be ours: never delete it
         self.lease = Lease(cfg.lease)
         self.state = REFUSED
@@ -359,6 +360,17 @@ class ChainWindow:
                              "submission_guarded": bound.submission_guarded})
         return bound
 
+    def register_post_close(self, name: str, callback: Callable[[dict], Any]) -> None:
+        """A callback the FINALIZER runs after `close()`, to rebuild evidence that closing itself changed.
+
+        Deferring the broker's restoration to the cleanup channel means administrative DDL is submitted DURING close -
+        after the chain record's job inventory and identity verdict were computed. Anything that has to account for
+        those jobs registers here (Astra PR47 RR3 N4)."""
+        self._post_close.append({"name": name, "call": callback})
+
+    def post_close_callbacks(self) -> list[dict]:
+        return list(self._post_close)
+
     def register_worker(self, name: str, stop: Optional[Callable[[], Any]] = None,
                         join: Optional[Callable[[], Any]] = None,
                         jobs: Optional[Callable[[], list]] = None,
@@ -374,8 +386,27 @@ class ChainWindow:
         """A resource restoration (broker ACLs, row policies) that must run at close even on the failure path.
 
         With `takes_client=True` the callable receives the bounded CLEANUP client, so restoration DDL can still be
-        submitted and journaled after workload admission closed."""
+        submitted and journaled after workload admission closed.
+
+        The obligation is made DURABLE here, before the caller performs its first mutation. A callback that only
+        exists in memory does not survive the failure the detached watcher is there to handle: a driver killed
+        between the grant and the close left no `restores_<label>.json` at all, and `restores_clear` reads a missing
+        file as "nothing was ever changed" (Astra PR47 RR3 N2)."""
         self._restores.append({"name": name, "call": restore, "takes_client": takes_client})
+        self._persist_pending_obligations()
+
+    def _persist_pending_obligations(self) -> Optional[str]:
+        """Write every registered-but-unrun restoration as PENDING, so a process exit leaves the blocker behind."""
+        if not self._restores:
+            return None
+        pending = [{"name": e["name"], "ok": False, "state": "PENDING", "registered_at": _now(),
+                    "recovery": "this window registered a resource restoration and has not verified it; run its "
+                                "restoration and record the result before another window may open"}
+                   for e in self._restores]
+        path = str(record_restore_obligations(self.cfg.label, self.cfg.evidence_dir, pending))
+        self.record["restore_obligations"] = path
+        self.record["restore_obligations_pending"] = [e["name"] for e in self._restores]
+        return path
 
     # ---------------------------------------------------------------- stop and close
     def _watch(self) -> None:
