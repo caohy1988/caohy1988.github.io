@@ -15,7 +15,7 @@ OP = "operator@example.test"
 
 
 def _record(**kw):
-    base = {"run_id": "live_restricted-x", "chain": "okf_bq_graph.chain/0.8.0", "mode": "live",
+    base = {"run_id": "online_restricted-x", "chain": "okf_bq_graph.chain/0.8.0", "mode": "live",
             "started_at": "2026-09-07T22:10:38.426058+00:00", "finished_at": "2026-09-07T22:12:07.852479+00:00",
             "job_inventory": {"graph": ["g1", "g2"], "receipt": ["r1"], "requester_probe": ["p1"], "policy_admin": ["d1"]}}
     base.update(kw)

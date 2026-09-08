@@ -204,7 +204,7 @@ acceptances `MET`, no e-mail in the record.
 
 `python3 -m okf_bq_graph.chain --live --requester restricted` (runner `chain/0.8.0`, record
 `evidence/chain/chain_live_restricted.json`, run directory
-`evidence/chain/receipt/live_restricted-20260907T224831Z-f32d6d1b`). Result: **`CHAIN_CONNECTED`**, all four acceptances
+`evidence/chain/receipt/online_restricted-20260907T224831Z-f32d6d1b`). Result: **`CHAIN_CONNECTED`**, all four acceptances
 `MET`, `identity = BOUND`, `teardown = VERIFIED`, no e-mail in the record. The execution legs ran under
 `sa:okf-receipt-restricted`, not the operator: the operator's credential only granted, revoked, restored and read job
 identities. Every number below is read off that record; dependency-denial counts and propagation waits differ between
@@ -283,7 +283,7 @@ runs, so a summary carried over from an earlier run describes nothing.
   scheduled query under a third identity. A hidden retry would have left a tenth operator job in that window with
   nothing claiming it. That is a measurement, not an assumption, which is why the run is left exactly as it is rather
   than re-run.
-* **The superseded first pass is kept, not rewritten.** `live_restricted-20260907T221038Z-900abfcd` is the run Astra
+* **The superseded first pass is kept, not rewritten.** `online_restricted-20260907T221038Z-900abfcd` is the run Astra
   reviewed at `11ae4c9` under runner `chain/0.7.0`. Its own measurements stand (it refused `unauthorized-output` with
   5/7 dependencies denied and observed the revocation at 0 s/1 s), but its identity gate checked 18 jobs while the run
   had submitted 29, and its denied replay re-check was dropped before it could be counted. It is retained as history;
