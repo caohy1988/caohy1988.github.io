@@ -536,7 +536,7 @@ def gql_admission(engine: str, live: bool, window: Any) -> dict:
 DEFERRED_TEARDOWN = "DEFERRED_TO_WINDOW_CLEANUP"
 
 
-def rebuild_identity(broker: Any, out: dict) -> dict:
+def rebuild_identity(broker: Any, out: dict, audit: Any = None) -> dict:
     """Re-audit the administrative role AFTER the deferred restoration ran.
 
     The chain computes its identity verdict before `window.close()`, but the registered teardown submits its
@@ -554,7 +554,15 @@ def rebuild_identity(broker: Any, out: dict) -> dict:
     inv.setdefault("refs", {}).update({j["job_id"]: {"project": j.get("project"), "location": j.get("location"),
                                                      "stage": j.get("stage")} for j in admin_jobs})
     receipt_refs = inv.get("receipt_refs") or [{"job_id": j} for j in (inv.get("receipt") or []) if j]
-    identity = broker.identity(list(inv.get("graph") or []), receipt_refs)
+    # the audit reads through the window's BOUNDED read-only channel; expiry leaves references unread, never assumed
+    previous_owner = getattr(broker, "owner", None)
+    if audit is not None:
+        broker.owner = audit
+    try:
+        identity = broker.identity(list(inv.get("graph") or []), receipt_refs)
+    finally:
+        if audit is not None:
+            broker.owner = previous_owner
     added = sorted(set(inv["policy_admin"]) - set(before))
     identity["rebuilt_after_restoration"] = {
         "policy_admin_before_close": len(before), "policy_admin_after_close": len(inv["policy_admin"]),
@@ -563,6 +571,18 @@ def rebuild_identity(broker: Any, out: dict) -> dict:
                 "jobs too, so it is re-audited once they exist"}
     identity.setdefault("job_set", {}).update({"policy_admin": len(inv["policy_admin"]),
                                                "policy_admin_added_by_restoration": len(added)})
+    if audit is not None:
+        record = audit.record() if hasattr(audit, "record") else {}
+        identity["audit"] = record
+        read = set((identity.get("jobs") or {}))
+        claimed = ({j for j in inv["policy_admin"]} | {j for j in (inv.get("graph") or []) if j}
+                   | {r.get("job_id") for r in receipt_refs if r.get("job_id")})
+        unread = sorted(j for j in claimed if j not in read)
+        identity["audit"]["unread_references"] = unread
+        if (record.get("expired") or unread) and identity.get("status") == "BOUND":
+            identity["status"] = "UNKNOWN"
+            identity["reason"] = (f"the post-close audit did not read {len(unread)} reference(s) before its deadline; "
+                                  "an identity claim cannot rest on references nobody read")
     out["identity"] = identity
     return identity
 
@@ -869,7 +889,12 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         if window is not None:
             # stop reaches the child, close joins it BEFORE sealing, and its retained references are adopted
             window.register_worker("receipt_child", stop=receipt_bridge.stop, join=receipt_bridge.join,
-                                   jobs=receipt_bridge.jobs, obligations=receipt_bridge.obligations)
+                                   jobs=receipt_bridge.jobs, obligations=receipt_bridge.obligations,
+                                   # where a recovery process finds this child's retained references
+                                   evidence={"journal_dir": str(receipt_bridge.journal_dir),
+                                             "bridge_dir": str(receipt_bridge.dir),
+                                             "stop_file": str(receipt_bridge.stop_path),
+                                             "label": receipt_bridge.label})
             out["receipt_bridge"]["worker"] = "registered with the window controller (stop, join, job union)"
         else:
             out["receipt_bridge"]["worker"] = None
@@ -920,7 +945,10 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             out["requester"]["teardown"] = {"owner": "window controller", "channel": "bounded cleanup"}
             if hasattr(window, "register_post_close"):
                 # the restoration's own DDL lands during close: the identity claim is rebuilt over it
-                window.register_post_close("broker_identity", lambda record: rebuild_identity(broker, record))
+                window.register_post_close(
+                    "broker_identity",
+                    lambda record: rebuild_identity(broker, record,
+                                                    audit=window.audit_client() if hasattr(window, "audit_client") else None))
         unbound = unbound_clients(clients, broker, window)
         if unbound:
             out["engine_admission"] = {"status": "GQL_CLIENTS_UNBOUND", "engine": engine, "unbound": unbound,

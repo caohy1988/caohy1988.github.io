@@ -565,6 +565,12 @@ closure **without** waiting for result I/O or `jobs.cancel`.
   own guarded `Request`. The submission guard is installed for the duration of the submission only, and the result
   guard lives on the job-local copy, so cancellation and terminal readbacks keep working on the caller's own
   untouched transport.
+* **Worker membership is durable before the worker's first launch.** `register_worker` persists a PENDING
+  reconciliation obligation — naming the worker and *where* its retained references live — before the child is ever
+  launched. In memory it survived only a normal close: a driver killed after the child had submitted left nothing on
+  disk saying a receipt child existed, so `safety.cleanup` reconciled an empty parent inventory, wrote
+  `verified: true`, never read the child's job, and the next controller opened while it was still RUNNING. The
+  obligation is resolved at close (RECONCILED) or left outstanding (FAILED), and the reopening gate honours it.
 * **A worker's obligations are the window's obligations, in recovery too.** A registered worker contributes both job
   references and evidence it could not resolve into one. References are adopted with their **full**
   `(project, location)` — a child job in another project read under the module defaults returns NotFound while the
@@ -620,7 +626,11 @@ call `broker.open_live_session` makes before any client exists). No SDK source i
   record's inventory and identity verdict were computed — the chain also registers a **post-close** rebuild: the
   finalizer re-reads the broker's administrative jobs, re-runs the identity audit over the complete set, and lets the
   rebuilt verdict govern the final record (`CHAIN_BROKEN` at `identity` on an unexpected principal, `CHAIN_INCOMPLETE`
-  on an unresolved statement).
+  on an unresolved statement). That audit gets its **own bounded read-only channel**, opened at close with an absolute
+  deadline: `WindowAuditClient` exposes `get_job`/`list_jobs` only — no blanket `__getattr__` delegation to the raw
+  client — gives each read an explicit timeout from the remaining budget instead of the SDK's 128-second default, and
+  raises `AuditExpired` once the deadline or read budget is gone. References it did not read stay UNKNOWN and the run
+  finishes `CHAIN_INCOMPLETE`; an audit that outlives its budget is not evidence that the audit completed.
 
 **Engine proof (KTD4).** The retrieval cache key now includes the **engine**, so a relational entry can never be replayed
 under a GQL request, and `scope.templates` records the compiled walk/context template with its SHA-256 and whether it

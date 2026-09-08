@@ -791,3 +791,63 @@ def test_the_result_guard_installs_on_the_job_local_copy_only():
     assert guarded.raw._auth_request is not original          # the copy has its own Request
     assert client._http._auth_request is original             # the caller's is untouched
     client.close()
+
+
+def test_the_audit_client_bounds_every_read_and_exposes_reads_only(tmp_path):
+    """RR5 F2: explicit per-read timeout from the remaining budget, and no blanket delegation."""
+    clock = [100.0]
+    calls = []
+
+    class Client:
+        def get_job(self, job_id, **kwargs):
+            calls.append(dict(kwargs, job_id=job_id))
+            return SimpleNamespace(user_email="operator@example.test")
+
+        def query(self, sql, **kwargs):
+            raise AssertionError("an audit channel must not be able to submit")
+
+    window = L.WindowJobs("audit", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    window.open_audit(30, max_reads=3)
+    audit = window.audit_client(Client())
+    audit.get_job("j1", project="other-project", location="EU")
+    assert calls[0]["project"] == "other-project" and calls[0]["location"] == "EU"
+    assert 0 < calls[0]["timeout"] <= 10 and calls[0]["retry"] is None
+    assert audit.reads == 1 and audit.expired is False
+    assert not hasattr(audit, "query")
+
+
+def test_the_audit_client_expires_and_retains_unread_references(tmp_path):
+    clock = [100.0]
+
+    class Client:
+        def get_job(self, job_id, **kwargs):
+            raise AssertionError("nothing may dispatch after the audit deadline")
+
+    window = L.WindowJobs("audit", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    deadline = window.open_audit(30)
+    audit = window.audit_client(Client())
+    clock[0] = deadline + 1
+    with pytest.raises(L.AuditExpired):
+        audit.get_job("j1")
+    record = audit.record()
+    assert record["expired"] is True and record["reads"] == 0
+    assert record["unread"][0]["job_id"] == "j1"
+    assert "deadline passed" in record["unread"][0]["reason"]
+
+
+def test_the_audit_read_budget_is_enforced(tmp_path):
+    reads = []
+
+    class Client:
+        def get_job(self, job_id, **kwargs):
+            reads.append(job_id)
+            return SimpleNamespace(user_email="e")
+
+    window = L.WindowJobs("audit", time.monotonic() + 600, tmp_path / "jobs.json")
+    window.open_audit(60, max_reads=2)
+    audit = window.audit_client(Client())
+    audit.get_job("j1")
+    audit.get_job("j2")
+    with pytest.raises(L.AuditExpired, match="read budget"):
+        audit.get_job("j3")
+    assert reads == ["j1", "j2"] and audit.unread[0]["job_id"] == "j3"

@@ -32,6 +32,11 @@ class WindowStopped(RuntimeError):
     pass
 
 
+class AuditExpired(RuntimeError):
+    """The bounded read channel's absolute deadline passed, or its read budget is spent. Whatever it had not read
+    stays UNKNOWN: an audit that outlives its budget is not evidence that the audit completed."""
+
+
 class _ResultHTTP:
     """Guard a job-local session, including sends after auth preparation/retries."""
     def __init__(self, raw, remaining):
@@ -239,6 +244,8 @@ class WindowJobs:
         # module at call time, which is what the existing driver regressions monkeypatch.
         self._clock = clock or (lambda: time.monotonic())
         self.cleanup_deadline: float | None = None   # a SEPARATE bounded channel, opened only after workload stop
+        self.audit_deadline: float | None = None     # the bounded READ-ONLY channel the post-close audit uses
+        self.audit_max_reads = 0
         self.cleanup_jobs = 0
         self.cleanup_max_jobs = 0
         self.adopted: dict[str, dict] = {}
@@ -280,6 +287,16 @@ class WindowJobs:
             self.stop.set()
         if self.stop.is_set():
             raise WindowStopped("reservation window stopped or deadline reached")
+
+    def open_audit(self, seconds: float, max_reads: int = 0) -> float:
+        """Open the bounded READ-ONLY channel the post-close identity audit uses. Never admits a submission."""
+        self.audit_deadline = self._clock() + seconds
+        self.audit_max_reads = max_reads
+        return self.audit_deadline
+
+    def audit_client(self, client) -> "WindowAuditClient":
+        deadline = self.audit_deadline if self.audit_deadline is not None else self._clock()
+        return WindowAuditClient(client, deadline, self.audit_max_reads, clock=self._clock)
 
     def open_cleanup(self, seconds: float, max_jobs: int = 20) -> float:
         """Open the bounded cleanup channel. Called only after workload admission is closed."""
@@ -374,6 +391,60 @@ class WindowJobs:
             with self._lock:
                 _save_cleanup(self.journal, json.loads(self.journal.read_text()), list(self._cancelled.values()))
             return list(self._cancelled.values())
+
+
+class WindowAuditClient:
+    """A READ-ONLY, deadline-bounded client for the post-close identity audit (Astra PR47 RR5 F2).
+
+    `WindowClient.__getattr__` delegates anything it does not define straight to the raw client, so
+    `broker.identity(...)` called after `close()` dispatched `jobs.get` with the SDK's own 128-second default and no
+    remaining-budget check at all - outliving the cleanup budget the window had just closed.
+
+    This wrapper exposes only the reads an audit needs, gives each an explicit timeout from the remaining budget, and
+    raises `AuditExpired` once the absolute deadline or the read budget is gone. It deliberately has NO `__getattr__`:
+    a channel that can reach `query` is not a bounded read channel."""
+
+    def __init__(self, client, deadline: float, max_reads: int = 0, clock=None, per_read_timeout: float = 10.0):
+        self.raw, self.deadline, self.max_reads = client, deadline, max_reads
+        self._clock = clock or (lambda: time.monotonic())
+        self._per_read = per_read_timeout
+        self.reads = 0
+        self.expired = False
+        self.unread: list[dict] = []
+
+    def remaining(self) -> float:
+        return self.deadline - self._clock()
+
+    def _budget(self, ref: dict) -> float:
+        remaining = self.remaining()
+        if remaining <= 0:
+            self.expired = True
+            self.unread.append(dict(ref, reason="the audit deadline passed before this reference was read"))
+            raise AuditExpired(f"the post-close audit deadline passed with {len(self.unread)} reference(s) unread")
+        if self.max_reads and self.reads >= self.max_reads:
+            self.expired = True
+            self.unread.append(dict(ref, reason="the audit read budget was spent before this reference was read"))
+            raise AuditExpired(f"the post-close audit read budget ({self.max_reads}) is spent")
+        self.reads += 1
+        return max(0.001, min(self._per_read, remaining))
+
+    def get_job(self, job_id, project=None, location=None, **kwargs):
+        timeout = self._budget({"job_id": job_id, "project": project, "location": location})
+        kwargs.setdefault("retry", None)      # a retry inside an expiring audit is unbounded work
+        kwargs["timeout"] = timeout
+        return self.raw.get_job(job_id, project=project or PROJECT, location=location or LOCATION, **kwargs)
+
+    def list_jobs(self, **kwargs):
+        kwargs.setdefault("retry", None)
+        kwargs["timeout"] = self._budget({"list_jobs": True})
+        return self.raw.list_jobs(**kwargs)
+
+    def record(self) -> dict:
+        return {"deadline": self.deadline, "reads": self.reads, "expired": self.expired,
+                "remaining_s": round(self.remaining(), 3), "unread": list(self.unread),
+                "max_reads": self.max_reads, "per_read_timeout_s": self._per_read,
+                "note": "read-only channel bound to the window's absolute audit deadline; anything it did not read "
+                        "stays UNKNOWN"}
 
 
 class WindowClient:

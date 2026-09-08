@@ -64,10 +64,10 @@ class FakeJob:
 
 def controller(tmp_path, *, manifest=None, minutes=10, opener=None, closer=None, probe=None, clock=None,
                spawn_watcher=None, client_factory=None, label="chain-gql-1", ownership=None, rollback=None,
-               **cfg_kw):
+               audit_seconds=CW.AUDIT_SECONDS, audit_max_reads=CW.AUDIT_MAX_READS, **cfg_kw):
     cfg = CW.WindowConfig(label=label, minutes=minutes, manifest=manifest or clean_manifest(tmp_path),
                           evidence_dir=tmp_path, lease=tmp_path / "window.lease", **cfg_kw)
-    return CW.ChainWindow(cfg,
+    return CW.ChainWindow(cfg, audit_seconds=audit_seconds, audit_max_reads=audit_max_reads,
                           ownership=ownership or (lambda: {"listing_ok": True, "present": False}),
                           rollback=rollback or (lambda label: {"removed": [], "preserved": []}),
                           opener=opener or (lambda label, slots: {"label": label, "opened_at": OPEN_AT, "state": "OPEN", "steps": []}),
@@ -577,7 +577,8 @@ def test_a_worker_that_cannot_be_joined_blocks_a_clean_close(tmp_path):
     cw.register_worker("receipt_child", stop=lambda: None,
                        join=lambda: (_ for _ in ()).throw(RuntimeError("child would not exit")))
     cw.close()
-    assert cw.record["cleanup"]["workers_unjoined"] == ["receipt_child"]
+    # the worker's own name, plus its unresolved reconciliation obligation
+    assert cw.record["cleanup"]["workers_unjoined"] == ["receipt_child", "receipt_child:reconciliation"]
     assert cw.record["clean"] is False
 
 
@@ -848,3 +849,77 @@ def test_post_close_callbacks_are_exposed_to_the_finalizer(tmp_path):
     assert hooks[0]["call"]({"run": "record"}) == {"status": "BOUND"}
     assert seen == [{"run": "record"}]
     cw.close()
+
+
+# =============================================================================== Astra PR47 RR5
+def test_worker_membership_is_durable_before_its_first_launch(tmp_path):
+    """RR5 F1: registration lived only in memory, so a driver killed after the child submitted left nothing on disk
+    saying a receipt child had ever existed - and `safety.cleanup` then certified an empty inventory."""
+    manifest = clean_manifest(tmp_path)
+    cw = fast(tmp_path, manifest=manifest, label="first")
+    cw.preflight()
+    cw.open()
+    assert not (tmp_path / "restores_first.json").exists()
+    cw.register_worker("receipt_child", stop=lambda: None, join=lambda: {"joined": True}, jobs=lambda: [],
+                       evidence={"journal_dir": str(tmp_path / "bridge" / "journal"), "label": "first"})
+    obligation = json.loads((tmp_path / "restores_first.json").read_text())
+    outstanding = obligation["outstanding"]
+    assert [o["name"] for o in outstanding] == ["receipt_child:reconciliation"]
+    assert outstanding[0]["state"] == "PENDING" and outstanding[0]["kind"] == "worker"
+    # the journal location travels with it, so a recovery process can find the child's retained references
+    assert outstanding[0]["evidence"]["journal_dir"].endswith("bridge/journal")
+    # the driver dies here: the OS releases its flock, and the durable obligation is what recovery meets
+    cw.lease.release()
+    L._save_cleanup(tmp_path / "jobs_first.json", json.loads((tmp_path / "jobs_first.json").read_text()), [])
+    with pytest.raises(CW.WindowRefused) as e:
+        controller(tmp_path, manifest=manifest, label="second").preflight()
+    assert e.value.code == "CLEANUP_UNVERIFIED" and "restoration is outstanding" in e.value.detail
+
+
+def test_a_reconciled_worker_clears_its_pending_membership(tmp_path):
+    manifest = clean_manifest(tmp_path)
+    cw = fast(tmp_path, manifest=manifest, label="first")
+    cw.preflight()
+    cw.open()
+    cw.register_worker("receipt_child", stop=lambda: None, join=lambda: {"joined": True},
+                       jobs=lambda: [{"job_id": "okf_rcpt_ok", "project": CW.PROJECT, "location": CW.LOCATION,
+                                      "state": "SUBMITTED"}], obligations=lambda: [])
+    assert json.loads((tmp_path / "restores_first.json").read_text())["outstanding"]
+    cw.close()
+    obligation = json.loads((tmp_path / "restores_first.json").read_text())
+    assert obligation["outstanding"] == []
+    assert [o["state"] for o in obligation["obligations"]] == ["RECONCILED"]
+    assert cw.record["clean"] is True
+    controller(tmp_path, manifest=manifest, label="second").preflight()   # no raise
+
+
+def test_a_worker_that_could_not_be_reconciled_stays_outstanding(tmp_path):
+    manifest = clean_manifest(tmp_path)
+    cw = fast(tmp_path, manifest=manifest, label="first")
+    cw.preflight()
+    cw.open()
+    cw.register_worker("receipt_child", stop=lambda: None,
+                       join=lambda: (_ for _ in ()).throw(RuntimeError("child would not exit")),
+                       jobs=lambda: [])
+    cw.close()
+    obligation = json.loads((tmp_path / "restores_first.json").read_text())
+    assert [o["name"] for o in obligation["outstanding"]] == ["receipt_child:reconciliation"]
+    assert obligation["outstanding"][0]["state"] == "FAILED"
+    with pytest.raises(CW.WindowRefused):
+        controller(tmp_path, manifest=manifest, label="second").preflight()
+
+
+def test_close_opens_a_bounded_read_only_audit_channel(tmp_path):
+    """RR5 F2: the finalizer's audit used to reach the raw client through `WindowClient.__getattr__`."""
+    cw = fast(tmp_path, audit_seconds=30, audit_max_reads=5)
+    cw.preflight()
+    cw.open()
+    cw.close()
+    assert cw.record["audit"]["seconds"] == 30 and cw.record["audit"]["max_reads"] == 5
+    audit = cw.audit_client()
+    assert isinstance(audit, L.WindowAuditClient)
+    assert audit.deadline == cw.record["audit"]["deadline"]
+    # a read channel that can reach `query` is not a bounded read channel
+    assert not hasattr(audit, "query")
+    with pytest.raises(AttributeError):
+        audit.query("SELECT 1")

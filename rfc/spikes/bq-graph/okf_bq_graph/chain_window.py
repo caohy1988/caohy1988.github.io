@@ -45,6 +45,8 @@ BUDGET_MINUTES = 120        # the conservative cumulative ceiling the driver has
 RESERVE_MINUTES = 2         # kept back for closure and audit; never spent on workload
 CLEANUP_SECONDS = 90        # the separate bounded channel restores and cleanup DDL submit on, after workload stop
 CLEANUP_MAX_JOBS = 20
+AUDIT_SECONDS = 60          # the bounded READ-ONLY channel the post-close identity audit gets
+AUDIT_MAX_READS = 200
 #: A restoration that RETURNS one of these did not restore anything, even though it raised nothing. Treating a returned
 #: UNVERIFIED as success is how a broker's failed ACL/policy restore reached a `clean` close (Astra PR47 re-review R3).
 RESTORE_FAILED_STATUS = ("UNVERIFIED", "FAILED", "ERROR", "BLOCKED", "INCOMPLETE", "NOT_RUN")
@@ -132,13 +134,15 @@ class ChainWindow:
                  probe: Optional[Callable[[Any], Any]] = None, client_factory: Optional[Callable[[], Any]] = None,
                  holder: str = "chain", ownership: Optional[Callable[[], dict]] = None,
                  rollback: Optional[Callable[[str], dict]] = None,
-                 cleanup_seconds: float = CLEANUP_SECONDS, cleanup_max_jobs: int = CLEANUP_MAX_JOBS):
+                 cleanup_seconds: float = CLEANUP_SECONDS, cleanup_max_jobs: int = CLEANUP_MAX_JOBS,
+                 audit_seconds: float = AUDIT_SECONDS, audit_max_reads: int = AUDIT_MAX_READS):
         self.cfg, self.holder = cfg, holder
         self._opener, self._closer, self._clock = opener, closer, clock
         self._spawn_watcher, self._probe, self._client_factory = spawn_watcher, probe, client_factory
         self._ownership = ownership if ownership is not None else reservation_state
         self._rollback = rollback if rollback is not None else release_own_resources
         self._cleanup_seconds, self._cleanup_max_jobs = cleanup_seconds, cleanup_max_jobs
+        self._audit_seconds, self._audit_max_reads = audit_seconds, audit_max_reads
         self.operator: Any = None
         self._operator_raw: Any = None
         self._workers: list[dict] = []
@@ -360,6 +364,12 @@ class ChainWindow:
                              "submission_guarded": bound.submission_guarded})
         return bound
 
+    def audit_client(self, client: Any = None) -> Any:
+        """The bounded READ-ONLY client the finalizer audits with. Exposes reads only; expiry is `AuditExpired`."""
+        if self.jobs is None:
+            raise WindowRefused("NO_WINDOW", "audit_client() needs an opened window", self.record)
+        return self.jobs.audit_client(client if client is not None else self._operator_raw)
+
     def register_post_close(self, name: str, callback: Callable[[dict], Any]) -> None:
         """A callback the FINALIZER runs after `close()`, to rebuild evidence that closing itself changed.
 
@@ -374,13 +384,22 @@ class ChainWindow:
     def register_worker(self, name: str, stop: Optional[Callable[[], Any]] = None,
                         join: Optional[Callable[[], Any]] = None,
                         jobs: Optional[Callable[[], list]] = None,
-                        obligations: Optional[Callable[[], list]] = None) -> None:
+                        obligations: Optional[Callable[[], list]] = None,
+                        evidence: Optional[dict] = None) -> None:
         """A child process or thread that can submit inside this window.
 
         `stop` runs when admission closes, `join` before the cleanup union is sealed, and `jobs` contributes the
         references the worker retained. A worker that is not registered can submit after a "clean" close returns
-        (Astra PR47 #1)."""
-        self._workers.append({"name": name, "stop": stop, "join": join, "jobs": jobs, "obligations": obligations})
+        (Astra PR47 #1).
+
+        Membership is made DURABLE here, before the worker's first launch. In memory it survives only a normal close:
+        a driver killed after the child submitted a job left nothing on disk saying a receipt child had ever existed,
+        so `safety.cleanup` reconciled an empty parent inventory, wrote `verified: true`, never read the child's job -
+        and the next controller opened while it was still RUNNING (Astra PR47 RR5 F1). `evidence` names where the
+        worker's retained references live, so a recovery process can find them."""
+        self._workers.append({"name": name, "stop": stop, "join": join, "jobs": jobs, "obligations": obligations,
+                              "evidence": dict(evidence or {})})
+        self._persist_pending_obligations()
 
     def register_restore(self, name: str, restore: Callable[..., Any], takes_client: bool = False) -> None:
         """A resource restoration (broker ACLs, row policies) that must run at close even on the failure path.
@@ -396,16 +415,25 @@ class ChainWindow:
         self._persist_pending_obligations()
 
     def _persist_pending_obligations(self) -> Optional[str]:
-        """Write every registered-but-unrun restoration as PENDING, so a process exit leaves the blocker behind."""
-        if not self._restores:
+        """Write every registered-but-unfinished obligation as PENDING, so a process exit leaves the blocker behind.
+
+        Two kinds: a registered resource restoration that has not run, and a registered worker whose jobs have not been
+        reconciled. Both exist before the work they cover, and both must outlive the driver."""
+        if not self._restores and not self._workers:
             return None
-        pending = [{"name": e["name"], "ok": False, "state": "PENDING", "registered_at": _now(),
+        pending = [{"name": e["name"], "kind": "restore", "ok": False, "state": "PENDING", "registered_at": _now(),
                     "recovery": "this window registered a resource restoration and has not verified it; run its "
                                 "restoration and record the result before another window may open"}
                    for e in self._restores]
+        pending += [{"name": f"{w['name']}:reconciliation", "kind": "worker", "worker": w["name"], "ok": False,
+                     "state": "PENDING", "registered_at": _now(), "evidence": w.get("evidence") or {},
+                     "recovery": "this window registered a worker that submits jobs of its own; read its retained "
+                                 "journal, adopt every reference into this window's inventory and read each one back "
+                                 "to a terminal state before another window may open"}
+                    for w in self._workers]
         path = str(record_restore_obligations(self.cfg.label, self.cfg.evidence_dir, pending))
         self.record["restore_obligations"] = path
-        self.record["restore_obligations_pending"] = [e["name"] for e in self._restores]
+        self.record["restore_obligations_pending"] = [e["name"] for e in pending]
         return path
 
     # ---------------------------------------------------------------- stop and close
@@ -530,8 +558,15 @@ class ChainWindow:
         # Every outstanding obligation - a failed restore, and any evidence a worker could not resolve into a job id -
         # is persisted together, so the reopening gate sees the complete union rather than only the chain JSON
         # (Astra PR47 re-review R1).
-        worker_obligations = [dict(o, name=f"{w['name']}:{o.get('name', 'obligation')}")
-                              for w in workers for o in (w.get("obligations") or [])]
+        worker_obligations = []
+        for w in workers:
+            # the PENDING reconciliation registered before this worker's first launch is now resolved - or not
+            failed = w.get("stop_error") or w.get("join_error") or w.get("jobs_error")
+            worker_obligations.append({"name": f"{w['name']}:reconciliation", "kind": "worker", "worker": w["name"],
+                                       "ok": not failed, "state": "FAILED" if failed else "RECONCILED",
+                                       "jobs": w.get("jobs") or [], "error": failed})
+            worker_obligations += [dict(o, name=f"{w['name']}:{o.get('name', 'obligation')}", kind="worker")
+                                   for o in (w.get("obligations") or [])]
         obligations = restores + worker_obligations
         if obligations:
             self.record["restore_obligations"] = str(
@@ -559,6 +594,13 @@ class ChainWindow:
                     "not restore: a failed restore is a durable obligation that blocks another window"}
         self.record["clean"] = (bool(closed.get("verified_gone")) and not unresolved and not failed_restores
                                 and not worker_failures)
+        # The finalizer still has read-only work to do (the post-close identity audit over the restoration's own DDL).
+        # It gets its OWN bounded channel with an absolute deadline, so it cannot outlive the closeout budget the way
+        # an unbounded `jobs.get` through the raw client did (Astra PR47 RR5 F2).
+        if self.jobs is not None:
+            self.record["audit"] = {"deadline": self.jobs.open_audit(self._audit_seconds, self._audit_max_reads),
+                                    "seconds": self._audit_seconds, "max_reads": self._audit_max_reads,
+                                    "note": "read-only; opened at close for the finalizer's audit and nothing else"}
         self.state = CLOSED
         self.record["state"] = CLOSED
         self._event("closed", clean=self.record["clean"])

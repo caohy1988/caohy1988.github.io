@@ -1192,8 +1192,9 @@ class _StubWindow:
         self.clients.append({"role": role, "principal": principal})
         return bound
 
-    def register_worker(self, name, stop=None, join=None, jobs=None, obligations=None):
-        self.workers.append({"name": name, "stop": stop, "join": join, "jobs": jobs, "obligations": obligations})
+    def register_worker(self, name, stop=None, join=None, jobs=None, obligations=None, evidence=None):
+        self.workers.append({"name": name, "stop": stop, "join": join, "jobs": jobs, "obligations": obligations,
+                             "evidence": dict(evidence or {})})
 
 
 def _gql_result(*, engine="gql", walk="governed.sql", graph_table=True, cache=None, warnings=(),
@@ -1644,6 +1645,7 @@ class _Broker:
     """A broker whose administrative inventory GROWS during teardown, as the real one's restoring DDL does."""
 
     def __init__(self, identity_after="BOUND"):
+        self.owner = None
         self.admin_jobs = [{"job_id": "grant-1", "project": CH.PROJECT, "location": CH.LOCATION, "stage": "grant"}]
         self.admin_ops = [{"job_id": "grant-1"}]
         self.identity_calls = []
@@ -1667,9 +1669,23 @@ class _Broker:
         return [op for op in self.admin_ops if not op.get("job_id")]
 
     def identity(self, graph_ids, receipt_jobs):
+        """Reads every reference back through `self.owner`, exactly as `principal.roles_bound_to` does - which is what
+        makes the post-close audit's channel (and its budget) observable."""
         self.identity_calls.append({"graph": list(graph_ids), "receipt": list(receipt_jobs),
                                     "admin": [j["job_id"] for j in self.admin_jobs]})
-        return {"status": self.identity_after if self.torn_down else "BOUND",
+        emails, failed = {}, None
+        refs = ([{"job_id": j} for j in graph_ids] + list(receipt_jobs)
+                + [{"job_id": j["job_id"], "project": j.get("project"), "location": j.get("location")}
+                   for j in self.admin_jobs])
+        if self.owner is not None:
+            try:
+                for ref in refs:
+                    emails[ref["job_id"]] = self.owner.get_job(
+                        ref["job_id"], project=ref.get("project"), location=ref.get("location")).user_email
+            except Exception as e:  # noqa: BLE001 - an unread reference is UNKNOWN, never assumed
+                failed = f"{type(e).__name__}: {str(e)[:200]}"
+        status = "UNKNOWN" if failed else (self.identity_after if self.torn_down else "BOUND")
+        return {"status": status, "jobs": emails, "reason": failed,
                 "roles": {"policy_admin": {"jobs": len(self.admin_jobs)}}}
 
 
@@ -1771,3 +1787,102 @@ def test_the_restricted_chain_registers_the_identity_rebuild_with_the_teardown(s
     CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
                  requester_mode="restricted", broker=broker, window=window)
     assert registered == {"restores": ["broker_teardown"], "post_close": ["broker_identity"]}
+
+
+def test_the_post_close_audit_is_bounded_and_expires_to_unknown(sdk_root, tmp_path):
+    """RR5 F2: the rebuild's `jobs.get` must not outlive the window's closeout budget."""
+    from okf_bq_graph import lifecycle as L
+
+    broker = _Broker()
+    broker.teardown()
+    reads = []
+
+    class Raw:
+        def get_job(self, job_id, **kwargs):
+            reads.append(dict(kwargs, job_id=job_id))
+            return SimpleNamespace(user_email="operator@example.test")
+
+    clock = [100.0]
+    jobs = L.WindowJobs("w", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    deadline = jobs.open_audit(30)
+    audit = jobs.audit_client(Raw())
+    clock[0] = deadline + 1                    # the closeout budget is gone
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "identity": {"status": "BOUND"},
+           "job_inventory": {"graph": ["g1"], "receipt": ["r1"], "receipt_refs": [{"job_id": "r1"}],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(
+                                                                broker, record, audit=audit)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert reads == [], "nothing may dispatch after the audit deadline"
+    assert final["identity"]["status"] == "UNKNOWN"
+    assert final["identity"]["audit"]["expired"] is True
+    assert final["identity"]["audit"]["unread_references"]
+    assert final["verdict"] == "CHAIN_INCOMPLETE" and final["broken_at"] == "identity"
+
+
+def test_the_post_close_audit_reads_everything_inside_its_budget(sdk_root, tmp_path):
+    from okf_bq_graph import lifecycle as L
+
+    broker = _Broker()
+    broker.teardown()
+    reads = []
+
+    class Raw:
+        def get_job(self, job_id, **kwargs):
+            reads.append(dict(kwargs, job_id=job_id))
+            return SimpleNamespace(user_email="operator@example.test")
+
+    jobs = L.WindowJobs("w", time.monotonic() + 600, tmp_path / "jobs.json")
+    jobs.open_audit(60)
+    audit = jobs.audit_client(Raw())
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "identity": {"status": "BOUND"},
+           "job_inventory": {"graph": [], "receipt": [], "receipt_refs": [],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(
+                                                                broker, record, audit=audit)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert [r["job_id"] for r in reads] == ["grant-1", "restore-1"]
+    assert all(0 < r["timeout"] <= 10 for r in reads)        # bounded, not the SDK's 128-second default
+    assert final["identity"]["audit"]["expired"] is False
+    assert final["identity"]["audit"]["unread_references"] == []
+    assert final["verdict"] == "CHAIN_CONNECTED"
+
+
+def test_the_audit_client_is_restored_to_the_brokers_own_owner(sdk_root, tmp_path):
+    """The audit swap is scoped: the broker keeps its own client afterwards."""
+    from okf_bq_graph import lifecycle as L
+
+    broker = _Broker()
+    broker.owner = object()
+    original = broker.owner
+    jobs = L.WindowJobs("w", time.monotonic() + 600, tmp_path / "jobs.json")
+    jobs.open_audit(60)
+    audit = jobs.audit_client(SimpleNamespace(get_job=lambda job_id, **kw: SimpleNamespace(user_email="e")))
+    CH.rebuild_identity(broker, {"job_inventory": {"graph": [], "receipt": [], "policy_admin": [], "refs": {}}},
+                        audit=audit)
+    assert broker.owner is original
+
+
+def test_the_receipt_child_registration_carries_its_journal_location(sdk_root, tmp_path, monkeypatch):
+    """RR5 F1: recovery needs to know WHERE the child's retained references live."""
+    from okf_bq_graph import receipt_window as RWD
+
+    window = _StubWindow(journal=tmp_path / "jobs.json")
+    bridge = RWD.ReceiptBridge(sdk_root, label="chain-gql-1", deadline_epoch=time.time() + 300,
+                               directory=tmp_path / "bridge")
+    bridge.record["status"] = RWD.SUPPORTED
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (None, "pointer-job"))
+    CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                 clients={"engine": "gql", "bq": window.bind_client(object(), role="requester")},
+                 window=window, receipt_bridge=bridge)
+    evidence = next(w for w in window.workers if w["name"] == "receipt_child")["evidence"]
+    assert evidence["journal_dir"] == str(bridge.journal_dir)
+    assert evidence["bridge_dir"] == str(bridge.dir) and evidence["stop_file"] == str(bridge.stop_path)
