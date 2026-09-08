@@ -33,7 +33,13 @@ direct consequence the controller **adopted** the child's own query into the win
 "adopted_jobs": ["okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9"]
 ```
 
-In attempt 4 that same job existed on the platform and the window never knew about it.
+Attempt 4 produced a receipt-child job in the same **role** — its own `okf_rcpt_…` query — that the window never knew
+about. The two are different jobs from different runs, not one job seen twice:
+
+| Attempt | Receipt-child job | In the window's inventory? |
+|---|---|---|
+| 4 (`…20260908d`) | `okf_rcpt_2d53caf4a58c9484b2498895_d9ea0bca06dd184d` | **no** — unjournaled, found only by reconciling against the platform |
+| 5 (`…20260908e`) | `okf_rcpt_b647dd8a20992ef719e6d921_8618317e23a42ab9` | **yes** — adopted from the child's launch journal |
 
 ## Closeout
 

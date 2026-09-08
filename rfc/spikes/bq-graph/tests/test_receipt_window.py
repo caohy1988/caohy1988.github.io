@@ -753,21 +753,32 @@ CHILD_REPORT = ("import sys, json, os\n"
                 "print(json.dumps({'imported': m is not None}))\n")
 
 
+@needs_sdk
 def test_a_relative_bridge_directory_still_reaches_a_child_with_a_different_cwd(tmp_path, monkeypatch):
     """THE ROOT CAUSE of the 2026-09-08 live run: `run_receipt` launches the SDK example with cwd=<sdk_root>, and the
     bridge directory is exported as the child's PYTHONPATH. A relative directory resolved against the SDK checkout
     instead, so `usercustomize` was never importable: no guard installed, no journal was written, and the receipt
-    child submitted a real BigQuery job that the window never inventoried - while the handshake said SUPPORTED."""
+    child submitted a real BigQuery job that the window never inventoried - while the handshake said SUPPORTED.
+
+    The path resolution is asserted on EVERY interpreter; only the child-bootstrap half needs one that can run
+    `usercustomize` at all, and an interpreter that cannot must still REFUSE rather than be waved through."""
     monkeypatch.chdir(tmp_path)
     b = _bridge(Path("evidence/chain/receipt-bridge/rel"), tmp_path)   # relative, exactly as chain.py builds it
     assert b.dir.is_absolute(), "the bridge must not depend on the launcher's cwd"
-    assert b.handshake()["status"] == RW.SUPPORTED
+    assert b.journal_dir.is_absolute() and b.stop_path.is_absolute()
+    record = b.handshake()
+    if not user_site_enabled():
+        assert record["status"] == RW.UNSUPPORTED      # the refusal is not weakened to make this test pass
+        assert record["bootstrap"] == "USERCUSTOMIZE_DISABLED"
+        pytest.skip("this interpreter cannot bootstrap the child; the path-resolution claim above still held")
+    assert record["status"] == RW.SUPPORTED, record
     cp = b.runner()([sys.executable, "-c", CHILD_REPORT], cwd=SDK_ROOT)
     assert json.loads((cp.stdout or "").strip().splitlines()[-1])["imported"] is True
     assert [p.name for p in b.journal_files()] == ["launch_001.jsonl"]
     assert b.containment()["contained"] is True
 
 
+@needs_sdk
 def test_the_handshake_probes_the_cwd_the_real_child_will_use(tmp_path, monkeypatch):
     """A handshake run in the PARENT's cwd proved nothing about a child launched in the SDK root: it reported
     SUPPORTED for the very run whose child never imported the bootstrap."""
@@ -795,11 +806,18 @@ def test_containment_reports_a_launch_that_never_journaled_bridge_installed(tmp_
 
 
 def test_containment_since_scopes_the_claim_to_this_invocation(tmp_path):
-    """Each `run_receipt` allocates one launch; an earlier launch's failure must not be blamed on a later case."""
+    """Each `run_receipt` allocates one launch; an earlier launch's failure must not be blamed on a later case.
+
+    The scoping is pure bookkeeping over journals, so it is asserted on every interpreter by writing the second
+    launch's `bridge_installed` record directly. The child that really writes it is covered above."""
     b = _bridge(tmp_path / "bridge", tmp_path)
-    assert b.handshake()["status"] == RW.SUPPORTED    # writes the bootstrap the child imports
     b.next_launch()                                   # launch 1: never journals
     before = len(b.launches)
-    b.runner()([sys.executable, "-c", "pass"], cwd=SDK_ROOT)   # launch 2: real, journals
+    second = b.next_launch()                          # launch 2: journals, as a bootstrapped child would
+    Path(second["journal"]).write_text(
+        json.dumps({"event": "bridge_installed", "invocation": second["invocation"], "seq": 1}) + "\n",
+        encoding="utf-8")
     assert b.containment(since=before)["contained"] is True
-    assert b.containment()["contained"] is False      # the whole bridge still carries launch 1
+    whole = b.containment()
+    assert whole["contained"] is False                # the whole bridge still carries launch 1
+    assert [u["invocation"] for u in whole["uncontained"]] == [b.launches[0]["invocation"]]
