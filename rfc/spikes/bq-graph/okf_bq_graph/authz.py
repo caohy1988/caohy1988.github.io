@@ -181,27 +181,35 @@ def rls_statements(grantees: list[str], vector_grantees: Optional[list[str]] = N
             "section_vectors": f"CREATE OR REPLACE ROW ACCESS POLICY hide_intermediate_vectors ON `{rls}.section_vectors` GRANT TO ({vg}) FILTER USING ({f_vec})"}
 
 
+DDL_ATTEMPTS = 3   # accounted here rather than by the SDK, which would substitute a job behind the caller's back
+
+
 def set_rls(client: bigquery.Client, grantees: list[str], vector_grantees: Optional[list[str]] = None, hide: bool = True,
-            strict: bool = True, on_submit: Optional[Callable[[str, Any], None]] = None) -> dict:
+            strict: bool = True, on_job: Optional[Callable[[str, Any, str, Optional[str]], None]] = None,
+            attempts: int = DDL_ATTEMPTS) -> dict:
     """Apply the three `_rls` policies. Every statement is attempted even if an earlier one failed (each table's
     policy is an independent grant); per-table outcome is a job id, or `{"error": ..., "job_id": ...}` carrying the id
-    of the job that WAS submitted before its result failed. `on_submit(table, job)` fires the moment each job exists and
-    before its wait, so a caller accounting for every submitted job keeps the reference whatever happens next; relying
-    on the return value alone loses the whole batch as soon as one statement raises. strict=True raises after all three
-    were attempted so callers that need the full shape still fail; teardown uses strict=False."""
+    of the last job that WAS submitted before its result failed.
+
+    `on_job(table, job, state, error)` fires the moment each job exists and again with its terminal outcome, for every
+    attempt, so a caller accounting for every submitted job keeps each reference whatever happens next: relying on the
+    return value alone loses the whole batch as soon as one statement raises, and relying on the final id alone loses
+    the attempts a retry replaced. Retries are performed by `publish.run` with the SDK's own job re-submission
+    disabled, so no job is created that the hook did not see. strict=True raises after all three were attempted so
+    callers that need the full shape still fail; teardown uses strict=False."""
     from .publish import run
     out: dict = {"at": _dt.datetime.now(_dt.timezone.utc).isoformat()}
     errors = []
     for t, q in rls_statements(grantees, vector_grantees, hide).items():
         seen: dict = {}
 
-        def submitted(job: Any, _t: str = t, _seen: dict = seen) -> None:
+        def event(job: Any, state: str, error: Optional[str], _t: str = t, _seen: dict = seen) -> None:
             _seen["job"] = job
-            if on_submit is not None:
-                on_submit(_t, job)
+            if on_job is not None:
+                on_job(_t, job, state, error)
 
         try:
-            out[t] = run(client, q, on_submit=submitted).job_id
+            out[t] = run(client, q, on_job=event, attempts=attempts).job_id
         except Exception as e:  # noqa: BLE001 - keep going: the other tables' grants are independent
             out[t] = {"error": f"{type(e).__name__}: {str(e)[:300]}", "job_id": getattr(seen.get("job"), "job_id", None)}
             errors.append(t)

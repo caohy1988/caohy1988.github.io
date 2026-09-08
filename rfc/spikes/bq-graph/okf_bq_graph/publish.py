@@ -39,17 +39,47 @@ def _ts(s: Optional[str]) -> Optional[str]:
         return None
 
 
+JOB_RETRY_REASONS = ("backendError", "rateLimitExceeded", "jobRateLimitExceeded", "internalError")
+
+
+def job_retryable(job: Any) -> bool:
+    """Whether a terminal job failure is one BigQuery's own job retry would have re-submitted for."""
+    return ((getattr(job, "error_result", None) or {}).get("reason") or "") in JOB_RETRY_REASONS
+
+
 def run(client: bigquery.Client, query: str, params: Optional[list] = None, labels: Optional[dict] = None,
-        use_cache: bool = False, on_submit: Optional[Callable[[Any], None]] = None) -> bigquery.QueryJob:
-    """One statement, submitted and waited on. `on_submit` is called with the job the moment it exists and before the
-    wait, so a caller that must account for every job it submitted keeps the reference even when the result fails."""
+        use_cache: bool = False, on_job: Optional[Callable[[Any, str, Optional[str]], None]] = None,
+        attempts: int = 1) -> bigquery.QueryJob:
+    """One statement, submitted and waited on.
+
+    `on_job(job, state, error)` is called with the job the moment it exists (`SUBMITTED`, before any wait) and again
+    with its terminal outcome (`DONE` or `FAILED`), so a caller accounting for every job it submitted keeps the
+    reference whatever happens next.
+
+    When `on_job` is given, BigQuery's own job re-submission is turned off (`job_retry=None`). In the pinned 3.45.0 SDK
+    a retryable terminal failure makes `QueryJob.result()` submit a NEW job and repoint the object at it, so the id the
+    hook already recorded is silently replaced: the caller then marks a job that failed as `DONE` and never learns the
+    id of the one that actually ran (Astra PR 45 re-review 2 - measured: 2 jobs submitted, `job.job_id` changed).
+    Retries happen here instead, one accounted attempt at a time, each with its own `on_job` events, so `attempts > 1`
+    keeps the resilience without hiding a job. An untracked caller keeps the SDK's default behaviour unchanged."""
     cfg = bigquery.QueryJobConfig(query_parameters=params or [], use_query_cache=use_cache,
                                   labels=labels or {"okf_spike": "bq_graph_20260905"})
-    job = client.query(query, job_config=cfg, location=LOCATION)
-    if on_submit is not None:
-        on_submit(job)
-    job.result()
-    return job
+    for attempt in range(1, max(1, attempts) + 1):
+        job = client.query(query, job_config=cfg, location=LOCATION)
+        if on_job is None:
+            job.result()
+            return job
+        on_job(job, "SUBMITTED", None)
+        try:
+            job.result(job_retry=None)
+        except Exception as e:  # noqa: BLE001 - the outcome is reported before it is re-raised or retried
+            on_job(job, "FAILED", f"{type(e).__name__}: {str(e)[:300]}")
+            if attempt >= attempts or not job_retryable(job):
+                raise
+            continue
+        on_job(job, "DONE", None)
+        return job
+    raise AssertionError("unreachable: the loop returns or raises on its last attempt")
 
 
 def ensure_schema(client: bigquery.Client, ds: str = DATASET) -> None:

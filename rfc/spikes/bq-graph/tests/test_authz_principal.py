@@ -282,8 +282,11 @@ def test_cases_all_blocked_when_preflight_fails(tmp_path):
 class _FakeJob:
     def __init__(self, rows=()):
         self.rows, self.job_id, self.user_email = list(rows), "job-1", SA
+        self.error_result = None
 
-    def result(self):
+    def result(self, job_retry="unset"):
+        # tracked statements pass job_retry=None: the SDK would otherwise substitute a job behind the caller
+        assert job_retry in ("unset", None), job_retry
         return self.rows
 
 

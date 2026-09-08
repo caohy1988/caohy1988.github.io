@@ -545,7 +545,9 @@ class _Rows:
         self._rows, self.job_id, self.fail = rows, job_id, fail
         self.project, self.location = P, "US"
 
-    def result(self):
+    def result(self, job_retry="unset"):
+        # the broker's DDL is tracked, so it must disable the SDK's own job re-submission
+        assert job_retry in ("unset", None), job_retry
         if self.fail is not None:      # the job was submitted; its result was not returned
             raise self.fail
         return iter(self._rows)

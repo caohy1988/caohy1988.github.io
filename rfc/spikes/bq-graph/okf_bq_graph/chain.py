@@ -573,7 +573,7 @@ def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dic
 
 
 # ----------------------------------------------------------------------------- whole chain
-CHAIN_VERSION = "okf_bq_graph.chain/0.9.0"   # 0.9.0: administrative DDL accounted per statement, unresolved ones block completeness (re-review #1)
+CHAIN_VERSION = "okf_bq_graph.chain/0.10.0"  # 0.10.0: every DDL attempt accounted, SDK job re-submission disabled for tracked statements
 SEED_MODES = ("fixture", "catalog")
 
 

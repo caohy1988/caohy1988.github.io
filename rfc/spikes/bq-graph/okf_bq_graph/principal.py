@@ -512,29 +512,45 @@ class RestrictedBroker:
         unchanged. A statement that was attempted without producing a job reference is UNRESOLVED: what it did on the
         platform cannot be read back, and that must block any claim of a complete inventory."""
         from .authz import set_rls
-        submitted: dict[str, dict] = {}
+        seen: dict[str, list[dict]] = {}
 
-        def retain(table: str, job: Any) -> None:
-            ref = job_ref(getattr(job, "job_id", None), getattr(job, "project", None), getattr(job, "location", None),
-                          stage=f"rls_{transition}_{table}", state="SUBMITTED")
-            submitted[table] = ref
-            if ref["job_id"]:
+        def track(table: str, job: Any, state: str, error: Optional[str]) -> None:
+            """Every attempt, at submission and again at its outcome. A retry is a new job, so it gets its own entry."""
+            jid = getattr(job, "job_id", None)
+            if not jid:
+                return
+            refs = seen.setdefault(table, [])
+            ref = next((r for r in refs if r["job_id"] == jid), None)
+            if ref is None:
+                ref = job_ref(jid, getattr(job, "project", None), getattr(job, "location", None),
+                              stage=f"rls_{transition}_{table}", attempt=len(refs) + 1, state=state, error=error)
+                refs.append(ref)
                 self.admin_jobs.append(ref)
+            else:
+                ref.update(state=state, error=error)
 
-        jobs = set_rls(self.owner, grantees, vector_grantees=vector_grantees, hide=True, strict=False, on_submit=retain)
+        jobs = set_rls(self.owner, grantees, vector_grantees=vector_grantees, hide=True, strict=False, on_job=track)
         failed = []
         for t in RLS_TABLES:
             res = jobs.get(t)
             ok = isinstance(res, str)
             err = None if ok else (res or {}).get("error", "not attempted")
-            ref = submitted.get(t)
-            jid = res if ok else ((res or {}).get("job_id") or (ref or {}).get("job_id"))
-            if ref is not None:
-                ref.update(state="DONE" if ok else "FAILED", error=err)
-            elif jid:   # submitted, but the hook never saw it: it is still this run's job
-                self.admin_jobs.append(job_ref(jid, stage=f"rls_{transition}_{t}", state="DONE" if ok else "FAILED", error=err))
-            self.admin_ops.append({"transition": transition, "table": t, "job_id": jid,
-                                   "state": ("DONE" if ok else "FAILED") if jid else "UNRESOLVED", "error": err})
+            refs = seen.get(t, [])
+            final = res if ok else (res or {}).get("job_id")
+            if final and not any(r["job_id"] == final for r in refs):
+                # the helper returned an id no hook event carried: something submitted a job this broker did not see, so
+                # the id is kept AND flagged - adding it silently would leave any earlier substitution unaccounted for
+                ref = job_ref(final, stage=f"rls_{transition}_{t}", attempt=len(refs) + 1,
+                              state="DONE" if ok else "FAILED", error=err, hook="missed")
+                refs.append(ref)
+                self.admin_jobs.append(ref)
+                seen[t] = refs
+            for r in refs:
+                self.admin_ops.append({"transition": transition, "table": t, "job_id": r["job_id"], "attempt": r["attempt"],
+                                       "state": r["state"], "error": r.get("error"), "hook": r.get("hook", "seen")})
+            if not refs:
+                self.admin_ops.append({"transition": transition, "table": t, "job_id": None, "attempt": 1,
+                                       "state": "UNRESOLVED", "error": err, "hook": "seen"})
             if not ok:
                 failed.append(t)
         if failed:
@@ -677,9 +693,11 @@ class RestrictedBroker:
         return self._operator_email or None
 
     def admin_unresolved(self) -> list[dict]:
-        """Administrative statements this broker attempted without keeping a job reference. Their effect on the platform
-        cannot be read back, and an audit must not be able to write them off as somebody else's unrelated work."""
-        return [op for op in self.admin_ops if not op.get("job_id")]
+        """Administrative work this broker cannot fully account for: a statement attempted without ever naming a job, or
+        a job that appeared without the submission hook seeing it. The first cannot be read back at all; the second
+        proves something submitted jobs behind the broker, so earlier attempts may be missing too. Either way an audit
+        must not be able to write those jobs off as somebody else's unrelated work."""
+        return [op for op in self.admin_ops if not op.get("job_id") or op.get("hook") == "missed"]
 
     def identity(self, graph_job_ids: list[str], receipt_jobs: list[dict]) -> dict:
         out = bound_to(self.owner, graph_job_ids, receipt_jobs, self.email, probe_jobs=self.probe_jobs,
@@ -689,10 +707,13 @@ class RestrictedBroker:
                                          for st in sorted({op["state"] for op in self.admin_ops})}}
         unresolved = self.admin_unresolved()
         if unresolved:
-            out["admin_ops"]["unresolved"] = [{k: op[k] for k in ("transition", "table", "error")} for op in unresolved]
+            out["admin_ops"]["unresolved"] = [{k: op.get(k) for k in ("transition", "table", "attempt", "hook", "error")}
+                                              for op in unresolved]
+            missed = sum(1 for op in unresolved if op.get("hook") == "missed")
             out["roles"]["policy_admin"].update(
                 status="UNKNOWN", unresolved=len(unresolved),
-                reason=f"{len(unresolved)} administrative statement(s) were attempted without a retained job reference")
+                reason=f"{len(unresolved) - missed} administrative statement(s) were attempted without a retained job "
+                       f"reference and {missed} job(s) appeared without the submission hook seeing them")
             if out["status"] != "UNBOUND":
                 out["status"] = "UNKNOWN"
             out["reason"] = "; ".join(f"{n}: {r['status']}" + (f" ({r['reason']})" if r.get("reason") else "")

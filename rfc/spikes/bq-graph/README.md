@@ -250,19 +250,32 @@ runs, so a summary carried over from an earlier run describes nothing.
 * **Teardown.** Every touched dataset's ACL restored to the snapshot taken before the broker's first mutation and read
   back; the `_rls` grantee lists and predicates restored and read back (`sa_in_grantees_after: false`); the credential
   directory removed. `VERIFIED` only with at least one step and every read-back equal to its snapshot.
-* **Administrative statements are accounted for one by one.** `authz.set_rls` attempts all three policy statements and
-  only then raises if any failed, so a caller that retains job references from its return value loses the whole batch —
-  the statements that succeeded, and the one whose job was submitted before its result failed — the moment one of them
-  fails. References are therefore kept at submission through `publish.run`'s `on_submit` hook, each statement is settled
-  `DONE`/`FAILED` individually, and a statement that was attempted without ever naming a job is `UNRESOLVED`: it makes
-  the identity `UNKNOWN`, the chain `CHAIN_INCOMPLETE`, and the reconciliation refuse to certify the record. That last
-  point matters because an unnamed job of the run's own would otherwise be indistinguishable from the unrelated operator
-  work the audit is entitled to ignore.
-* **The retained run predates that fix and is not affected by it.** It was produced by runner `chain/0.8.0`; the current
-  runner is `chain/0.9.0`. All nine of its policy statements succeeded — the record lists nine `policy_admin` jobs, and
-  its teardown is `VERIFIED` with both `restore_rls_policies` and `readback_rls_policies` `ok` — so no batch of its
-  partially failed, and there is nothing the fix would have caused it to retain differently. It is left exactly as it
-  was rather than re-run.
+* **Administrative statements are accounted for attempt by attempt.** `authz.set_rls` attempts all three policy
+  statements and only then raises if any failed, so a caller that retains job references from its return value loses the
+  whole batch — the statements that succeeded, and the one whose job was submitted before its result failed — the moment
+  one of them fails. References are therefore kept at submission, through `publish.run`'s `on_job` hook, and each
+  statement is settled `DONE`/`FAILED` individually.
+* **The SDK's own job retry is disabled for anything this spike accounts for.** At the pinned `google-cloud-bigquery`
+  3.45.0, a retryable terminal failure makes `QueryJob.result()` submit a **new** job and repoint the object at it
+  (measured in `tests/test_sdk_job_retry.py` against the real client: two jobs exist, `job.job_id` changes). A hook that
+  fired at submission would then hold the id of a job that failed, mark it `DONE` because the helper returned success,
+  and never learn the id of the job that actually ran. `publish.run` therefore passes `job_retry=None` whenever a caller
+  is tracking, and retries itself — one accounted attempt at a time, each with its own submission and outcome events, so
+  a retried statement puts **both** jobs in the inventory with their own states. An untracked caller keeps the SDK's
+  default behaviour.
+* **What the run cannot account for blocks the claim.** A statement attempted without ever naming a job is
+  `UNRESOLVED`, and so is a job that appears without the submission hook seeing it — the second means something
+  submitted jobs behind the broker, so earlier attempts may be missing too. Either makes the identity `UNKNOWN`, the
+  chain `CHAIN_INCOMPLETE`, and the reconciliation refuse to certify the record. That matters because an unnamed job of
+  the run's own would otherwise be indistinguishable from the unrelated operator work the audit is entitled to ignore.
+* **The retained run predates those fixes and is measurably unaffected by them.** It was produced by runner
+  `chain/0.8.0`; the current runner is `chain/0.10.0`. All nine of its policy statements succeeded — the record lists
+  nine `policy_admin` jobs and its teardown is `VERIFIED` with both `restore_rls_policies` and `readback_rls_policies`
+  `ok` — so no batch of its partially failed. Nor was any job substituted underneath it: its reconciliation lists
+  exactly **nine operator jobs in the window, all nine of them claimed**, and the only unaccounted job is an unrelated
+  scheduled query under a third identity. A hidden retry would have left a tenth operator job in that window with
+  nothing claiming it. That is a measurement, not an assumption, which is why the run is left exactly as it is rather
+  than re-run.
 * **The superseded first pass is kept, not rewritten.** `live_restricted-20260907T221038Z-900abfcd` is the run Astra
   reviewed at `11ae4c9` under runner `chain/0.7.0`. Its own measurements stand (it refused `unauthorized-output` with
   5/7 dependencies denied and observed the revocation at 0 s/1 s), but its identity gate checked 18 jobs while the run
