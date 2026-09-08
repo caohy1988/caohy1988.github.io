@@ -946,7 +946,7 @@
       "reason": "unknown"
      },
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:55:31.164325+00:00",
+     "read_at": "2026-09-08T11:23:10.616560+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "ed2fb3e3-3e3d-4e62-bd18-6d9364bb4fc2",
@@ -985,7 +985,7 @@
       "reason": "unknown"
      },
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:55:31.294534+00:00",
+     "read_at": "2026-09-08T11:23:10.819942+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "c9fd4fa7-db15-4c2c-9295-9aa6dd992bc3",
@@ -1022,7 +1022,7 @@
      "ended": "2026-09-06T00:09:56.685000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:55:31.451554+00:00",
+     "read_at": "2026-09-08T11:23:10.986518+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "fccaf7f9-eae1-4be1-9738-f304aa1933bb",
@@ -1240,7 +1240,7 @@
   "quiescence": {
    "basis": "platform_probe+local_record",
    "established": true,
-   "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-06T00:11:16+00:00 to 2026-09-08T10:55:27.520666+00:00 (5 page(s), 928 job(s)) shows 0 job(s) attributable to 'integration-0009' after it closed, 0 non-terminal job(s) project-wide, and 211452s of silence; local record: cleanup_manifest.json[integration-0009].note + evidence/integration_run_attempt2_killed.log",
+   "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-06T00:11:16+00:00 to 2026-09-08T11:23:06.837546+00:00 (5 page(s), 927 job(s)) shows 0 job(s) attributable to 'integration-0009' after it closed, 0 non-terminal job(s) project-wide, and 213111s of silence; local record: cleanup_manifest.json[integration-0009].note + evidence/integration_run_attempt2_killed.log",
    "limit": "a silent, complete platform listing shows that submission STOPPED; it is not proof that the original process object no longer exists. Capacity absence is verified separately.",
    "local_record": {
     "gap": true,
@@ -1252,7 +1252,7 @@
    "probe": {
     "attributable_after_close": [],
     "last_attributable_at": null,
-    "listed": 928,
+    "listed": 927,
     "listing": {
      "capped": false,
      "complete": true,
@@ -1264,9 +1264,9 @@
     "min_silence_s": 3600,
     "nonterminal": [],
     "project": "test-project-0728-467323",
-    "silence_s": 211451.520666,
+    "silence_s": 213110.837546,
     "since": "2026-09-06T00:11:16+00:00",
-    "until": "2026-09-08T10:55:27.520666+00:00"
+    "until": "2026-09-08T11:23:06.837546+00:00"
    },
    "stopped_at": "2026-09-06T00:11:16+00:00"
   },
@@ -1281,7 +1281,7 @@
      "reason": "unknown"
     },
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:55:31.164325+00:00",
+    "read_at": "2026-09-08T11:23:10.616560+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "ed2fb3e3-3e3d-4e62-bd18-6d9364bb4fc2",
@@ -1303,7 +1303,7 @@
      "reason": "unknown"
     },
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:55:31.294534+00:00",
+    "read_at": "2026-09-08T11:23:10.819942+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "c9fd4fa7-db15-4c2c-9295-9aa6dd992bc3",
@@ -1322,7 +1322,7 @@
     "ended": "2026-09-06T00:09:56.685000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:55:31.451554+00:00",
+    "read_at": "2026-09-08T11:23:10.986518+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "fccaf7f9-eae1-4be1-9738-f304aa1933bb",
@@ -1335,7 +1335,7 @@
     "verified_done": true
    }
   ],
-  "reconciled_at": "2026-09-08T10:55:30.155300+00:00",
+  "reconciled_at": "2026-09-08T11:23:09.704071+00:00",
   "reconstructed": true,
   "recovered_ids": [],
   "sources": [
@@ -1382,13 +1382,20 @@
   ],
   "status": "RECONCILED",
   "window": {
-   "bound_note": "the listing is bounded by the later of capacity close and evidenced submitter shutdown, then extended while owned work reaches the edge",
+   "bound_note": "the listing starts at the earliest declared invocation/capacity start and ends at the later of that span's end and evidenced submitter shutdown, padded on both sides, then extended while owned work reaches the edge",
    "closed_at": "2026-09-06T00:11:16Z",
    "closed_at_present": true,
    "extensions": [],
+   "invocation": {
+    "finished_at": "2026-09-06T00:11:01Z",
+    "source": "cleanup_manifest.json[integration-0009].opened_at + evidence/safety_teardown.log LINE 1, 2026-09-06T00:11:01Z 'SAFETY: reservation still present after run exit; closing' - the watcher's first retained action, reached only after `pgrep -f okf_bq_graph.run` found no driver and it then slept 20s. (00:11:07Z is the later assignment removal, not the exit signal.) No driver run record survived",
+    "started_at": "2026-09-06T00:09:57Z"
+   },
    "listing_end": "2026-09-06T00:13:16+00:00",
    "listing_start": "2026-09-06T00:07:57+00:00",
    "opened_at": "2026-09-06T00:09:57Z",
+   "ownership_end": "2026-09-06T00:11:16+00:00",
+   "ownership_start": "2026-09-06T00:09:57+00:00",
    "pad_s": 120,
    "submitters_stopped_at": "2026-09-06T00:11:16+00:00"
   }
@@ -1399,9 +1406,9 @@
    "ed2fb3e3-3e3d-4e62-bd18-6d9364bb4fc2",
    "fccaf7f9-eae1-4be1-9738-f304aa1933bb"
   ],
-  "journal": "/tmp/okf-pr50-fix/stage/jobs_integration-0009.json",
-  "journal_sha256": "ca78ce0379c97bcf3ae8019b2956401ae02a70656fe459f439a2a5f86b53c45f",
-  "receipt": "/tmp/okf-pr50-fix/stage/jobs_integration-0009.cleanup.json",
+  "journal": "/tmp/okf-pr50-fix2/stage/jobs_integration-0009.json",
+  "journal_sha256": "0cccc81ee7d1e05fecceff2a517cc81df6761221936d8ea505db3e5f0507dbb9",
+  "receipt": "/tmp/okf-pr50-fix2/stage/jobs_integration-0009.cleanup.json",
   "staged": true,
   "verified": true
  }

@@ -903,8 +903,8 @@ def test_a_short_child_read_keeps_the_window_blocked():
 
 
 def test_only_a_two_sided_invocation_record_may_exclude_work_outside_every_span():
-    """The driver's own `started_at`/`finished_at` (or a watcher that only tears down after `kill -0` fails) bounds the
-    process at both ends, so it positively did not submit a job created outside that span. A one-sided record - the
+    """The driver's own `started_at`/`finished_at` (or a watcher that only tears down once `pgrep` finds no driver)
+    bounds the process at both ends, so it positively did not submit a job created outside that span. A one-sided record - the
     `all-0017` run that never stamped an exit - bounds nothing on that side, and the job stays unresolved."""
     outside = spike_job("o", created="2026-09-05T23:48:30Z")
     both = dict(W1, invocation={"started_at": "2026-09-05T23:43:40Z", "finished_at": "2026-09-05T23:47:30Z"})
@@ -952,3 +952,105 @@ def test_the_decision_generator_accepts_the_committed_listing_envelope(tmp_path)
     out = tmp_path / "d.json"
     mod.main(str(envelope), str(out))
     assert json.loads(out.read_text())["smoke-1"]["okf_rcpt_x"]["ownership"] == "EXCLUDED"
+
+
+# ------------------------------------------------------- Astra PR50 RR2 P1: the LISTING must cover the ownership span
+class FilteringTransport:
+    """A `jobs.list` that actually honours `minCreationTime`/`maxCreationTime`, like the service does.
+
+    `FakeTransport` returns its page whatever the bounds are, so it cannot show a job being missed BECAUSE the listing
+    started too late. That is the whole defect here, so this transport is what the end-to-end regressions use."""
+
+    def __init__(self, jobs):
+        self.jobs = list(jobs)
+        self.lists, self.gets = [], []
+
+    def list_jobs(self, *, project, min_creation_time=None, max_creation_time=None, page_token=None, page_size=None,
+                  parent_job_id=None):
+        self.lists.append({"min": min_creation_time, "max": max_creation_time, "parent": parent_job_id})
+        if parent_job_id:
+            return {"jobs": []}
+        return {"jobs": [j for j in self.jobs
+                         if (min_creation_time is None or RW._created(j) >= min_creation_time)
+                         and (max_creation_time is None or RW._created(j) <= max_creation_time)]}
+
+    def get_job(self, *, project, location, job_id):
+        self.gets.append(job_id)
+        return next(j for j in self.jobs if RW.job_ref(j)["job_id"] == job_id)
+
+
+INVOCATION = {"started_at": "2026-09-05T23:38:00Z", "finished_at": "2026-09-05T23:48:20Z",
+              "source": "retained launcher lifetime"}
+W_INV = dict(W1, invocation=INVOCATION)
+
+
+def setup_and_inside(setup_state="DONE"):
+    """The retained shape: the invocation starts at 23:38, its campaign setup lookup at 23:39 - both EARLIER than
+    `opened_at - pad_s` (23:41:43) - then capacity opens at 23:43:43 and ordinary work runs inside it."""
+    setup = spike_job("setup-2339", created="2026-09-05T23:39:00Z", state=setup_state,
+                      query="SELECT publication_id FROM `p.okf_graph_spike_20260905.active_publication` WHERE b = @b")
+    inside = spike_job("inside-2345", created="2026-09-05T23:45:00Z")
+    return setup, inside
+
+
+def probe_and_reconcile(transport, **kw):
+    q = RW.quiescence_probe(transport, label="smoke-1", project=PROJ, window=W_INV, until=NOW, campaign=CAMPAIGN,
+                            windows=[W_INV], local_record=local_record(stopped_at=INVOCATION["finished_at"]))
+    return q, RW.reconcile("smoke-1", transport=transport, window=W_INV, campaign=CAMPAIGN, windows=[W_INV],
+                           quiescence=q, **kw)
+
+
+def test_the_listing_starts_at_the_invocation_not_at_opened_at_minus_padding():
+    """`_interval` owned setup from the invocation start while `reconcile` still listed from `opened_at - pad_s`, so a
+    23:39 setup job was OWNED in principle and never read in practice - RECONCILED, verified, gate passing, no
+    `jobs.get` for it at all (Astra PR50 RR2 P1)."""
+    setup, inside = setup_and_inside()
+    t = FilteringTransport([setup, inside])
+    q, result = probe_and_reconcile(t)
+    assert result["window"]["ownership_start"] == RW._ts(INVOCATION["started_at"]).isoformat()
+    assert RW._ts(result["window"]["listing_start"]) <= RW._ts("2026-09-05T23:39:00Z")
+    assert result["status"] == RW.RECONCILED, result["blockers"]
+    assert result["owned"] == ["inside-2345", "setup-2339"]
+    assert "setup-2339" in t.gets                      # it was actually read back, not merely classifiable
+    # the inventory drain itself reached back to the invocation start (the post-close quiescence probe, which runs
+    # over a later span by design, is not what covers setup)
+    inventory = [c for c in t.lists if c["parent"] is None and c["min"] is not None
+                 and c["min"] <= RW._ts("2026-09-05T23:38:00Z")]
+    assert inventory, t.lists
+
+
+def test_a_running_setup_job_before_the_capacity_interval_blocks(tmp_path):
+    """The RUNNING-setup variant: the job that the narrow listing hid is not terminal. It must be read and it must
+    block, rather than being invisible to the gate."""
+    setup, inside = setup_and_inside(setup_state="RUNNING")
+    t = FilteringTransport([setup, inside])
+    q, result = probe_and_reconcile(t)
+    assert result["status"] == RW.BLOCKED
+    assert any("setup-2339=RUNNING" in b for b in result["blockers"])
+    assert RW.stage(result, tmp_path)["staged"] is False
+    with pytest.raises(RuntimeError):
+        RES.require_clean_windows({"windows": [dict(W_INV, verified_gone=True)]}, evidence_dir=tmp_path)
+
+
+def test_the_reconciler_refuses_a_listing_narrower_than_the_ownership_span():
+    """A belt-and-braces invariant: if the two bounds ever diverge again, the window blocks instead of reporting a
+    clean inventory over a subset of its own span."""
+    span = RW.effective_span(W_INV, [W_INV], "smoke-1")
+    assert span[0] == RW._ts(INVOCATION["started_at"])
+    assert span[1] == RW._ts(INVOCATION["finished_at"])
+    # a declared row reaching further than the row handed in still widens the listing
+    wider = dict(W1, invocation={"started_at": "2026-09-05T23:30:00Z", "finished_at": "2026-09-05T23:50:00Z"})
+    merged = RW.effective_span(W1, [wider], "smoke-1")
+    assert merged == (RW._ts("2026-09-05T23:30:00Z"), RW._ts("2026-09-05T23:50:00Z"))
+    # an unbounded end anywhere stays unbounded, so the caller searches to now rather than to a close stamp
+    assert RW.effective_span(dict(W1, closed_at=None), [W1], "smoke-1")[1] is None
+
+
+def test_the_quiescence_probe_starts_after_the_ownership_span_not_after_capacity():
+    """`all-0017`'s evidenced exit is later than its capacity close, and that stretch is the invocation's, covered by
+    the main listing. The probe therefore begins where ownership ends."""
+    setup, inside = setup_and_inside()
+    t = FilteringTransport([setup, inside])
+    q, _ = probe_and_reconcile(t)
+    assert q["probe"]["since"] == RW._ts(INVOCATION["finished_at"]).isoformat()   # not closed_at 23:47:20
+    assert q["established"] is True, q["not_established_because"]

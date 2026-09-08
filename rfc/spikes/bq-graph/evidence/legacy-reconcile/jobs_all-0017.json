@@ -2207,7 +2207,7 @@
   "location": "US",
   "project": "test-project-0728-467323",
   "reconstructed": true,
-  "reconstructed_at": "2026-09-08T10:55:41.611829+00:00",
+  "reconstructed_at": "2026-09-08T11:23:21.004239+00:00",
   "reconstruction": {
     "decisions": {
       "0de731e0-637a-4cb5-b764-9c7d2e82c08a": {
@@ -3200,7 +3200,7 @@
     "quiescence": {
       "basis": "platform_probe+local_record",
       "established": true,
-      "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-06T00:27:27+00:00 to 2026-09-08T10:55:39.968396+00:00 (3 page(s), 562 job(s)) shows 0 job(s) attributable to 'all-0017' after it closed, 0 non-terminal job(s) project-wide, and 210493s of silence; local record: cleanup_manifest.json[all-0017].note + evidence/window_all.log + evidence/safety_teardown.log",
+      "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-06T00:27:33+00:00 to 2026-09-08T11:23:19.539966+00:00 (3 page(s), 561 job(s)) shows 0 job(s) attributable to 'all-0017' after it closed, 0 non-terminal job(s) project-wide, and 212147s of silence; local record: cleanup_manifest.json[all-0017].note + evidence/window_all.log + evidence/safety_teardown.log",
       "limit": "a silent, complete platform listing shows that submission STOPPED; it is not proof that the original process object no longer exists. Capacity absence is verified separately.",
       "local_record": {
         "gap": true,
@@ -3212,7 +3212,7 @@
       "probe": {
         "attributable_after_close": [],
         "last_attributable_at": null,
-        "listed": 562,
+        "listed": 561,
         "listing": {
           "capped": false,
           "complete": true,
@@ -3224,11 +3224,11 @@
         "min_silence_s": 3600,
         "nonterminal": [],
         "project": "test-project-0728-467323",
-        "silence_s": 210492.968396,
-        "since": "2026-09-06T00:27:27+00:00",
-        "until": "2026-09-08T10:55:39.968396+00:00"
+        "silence_s": 212146.539966,
+        "since": "2026-09-06T00:27:33+00:00",
+        "until": "2026-09-08T11:23:19.539966+00:00"
       },
-      "stopped_at": "2026-09-06T00:27:27+00:00"
+      "stopped_at": "2026-09-06T00:27:33+00:00"
     },
     "recovered_ids": [
       "1b9f2742-2ef5-4525-b6b1-b32482151df1",
@@ -3307,15 +3307,22 @@
       }
     ],
     "window": {
-      "bound_note": "the listing is bounded by the later of capacity close and evidenced submitter shutdown, then extended while owned work reaches the edge",
+      "bound_note": "the listing starts at the earliest declared invocation/capacity start and ends at the later of that span's end and evidenced submitter shutdown, padded on both sides, then extended while owned work reaches the edge",
       "closed_at": "2026-09-06T00:27:27Z",
       "closed_at_present": true,
       "extensions": [],
-      "listing_end": "2026-09-06T00:29:27+00:00",
+      "invocation": {
+        "finished_at": "2026-09-06T00:27:33Z",
+        "source": "evidence/all_all-0017.json#/started_at; its finished_at is null (SIGINT 00:24:54Z, the in-process close never logged), so the exit bound is evidence/safety_teardown.log line 14, 2026-09-06T00:27:33Z 'SAFETY: reservation already gone' - written at least 20s after `pgrep -f okf_bq_graph.run` found no driver process. The true exit was therefore earlier than this bound, which is the safe direction",
+        "started_at": "2026-09-06T00:17:56.230721+00:00"
+      },
+      "listing_end": "2026-09-06T00:29:33+00:00",
       "listing_start": "2026-09-06T00:15:56+00:00",
       "opened_at": "2026-09-06T00:17:56Z",
+      "ownership_end": "2026-09-06T00:27:33+00:00",
+      "ownership_start": "2026-09-06T00:17:56+00:00",
       "pad_s": 120,
-      "submitters_stopped_at": "2026-09-06T00:27:27+00:00"
+      "submitters_stopped_at": "2026-09-06T00:27:33+00:00"
     }
   },
   "reconstruction_note": "RECONSTRUCTED from read-only platform evidence after the fact. This is NOT the contemporaneous pre-submission journal the driver writes; no such file survived for this window."

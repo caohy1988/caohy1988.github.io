@@ -282,8 +282,8 @@ def closed_invocation(windows: Iterable[dict], label: str) -> Optional[dict]:
     """This window's retained invocation record, but only when it BOUNDS the process at both ends.
 
     A closed record is the one thing that can positively say a window did not submit a job it does not otherwise
-    claim: the driver's own `started_at`/`finished_at`, or a watcher whose teardown runs only after `kill -0` on the
-    driver pid fails. An open-ended record (`all-0017` never stamped an exit) bounds nothing on that side, so work
+    claim: the driver's own `started_at`/`finished_at`, or a watcher whose teardown runs only after the driver process
+    is gone (the episode's watcher polled `pgrep -f "okf_bq_graph.run"`, then slept 20 s before logging). An open-ended record (`all-0017` never stamped an exit) bounds nothing on that side, so work
     outside it stays unresolved instead."""
     for w in windows:
         if w.get("label") != label:
@@ -292,6 +292,30 @@ def closed_invocation(windows: Iterable[dict], label: str) -> Optional[dict]:
         if inv.get("started_at") and inv.get("finished_at"):
             return inv
     return None
+
+
+def effective_span(window: dict, windows: Iterable[dict] = (), label: Optional[str] = None) -> Optional[tuple]:
+    """The ownership span the LISTING has to cover, widened across every declared row for this label.
+
+    `classify` will own a job anywhere in this window's ownership span, but the listing used to start at
+    `opened_at - pad_s`. When a retained invocation began before its capacity did - which is the normal case, since
+    the 2026-09-05 driver resolved its publication pointer before opening - the setup work was owned in principle and
+    never listed in practice: not listed means never `jobs.get`-ed, never blocking, and absent from the receipt, while
+    the window still reported RECONCILED (Astra PR50 RR2 P1).
+
+    So both bounds come from the same place. An unbounded end anywhere stays unbounded, which sends the caller to
+    "now" rather than to a close stamp that would truncate the search."""
+    spans = [s for s in (_interval(window),) if s]
+    for w in windows:
+        if label is not None and w.get("label") != label:
+            continue
+        span = _interval(w)
+        if span:
+            spans.append(span)
+    if not spans:
+        return None
+    ends = [e for _, e in spans]
+    return (min(start for start, _ in spans), None if any(e is None for e in ends) else max(ends))
 
 
 def containing_windows(created: Optional[_dt.datetime], windows: Iterable[dict]) -> tuple:
@@ -494,7 +518,12 @@ def quiescence_probe(transport: Any, *, label: str, project: str, window: dict, 
     silence: it is `established: false` with the reason."""
     until = until or _dt.datetime.now(_dt.timezone.utc)
     closed = window.get("closed_at")
-    since = _ts(closed) if closed else _ts(window["opened_at"])
+    # "after the window" means after its OWNERSHIP span, not after capacity: an invocation evidenced to have outlived
+    # its close owns that stretch, and the main listing already covers it.
+    span = effective_span(window, windows, label)
+    since = max([t for t in ((_ts(closed) if closed else None), span[1] if span else None) if t] or
+                [_ts(window["opened_at"])])
+    span_start = span[0] if span else _ts(window["opened_at"])
     listing = drain_listing(transport, project=project, start=since, end=until, page_size=page_size, cap=cap)
     reasons: list[str] = []
     if not listing["complete"]:
@@ -504,7 +533,7 @@ def quiescence_probe(transport: Any, *, label: str, project: str, window: dict, 
     attributable, nonterminal, latest = [], [], None
     for job in listing["jobs"]:
         state = (job.get("status") or {}).get("state")
-        entry = classify(job, label=label, start=_ts(window["opened_at"]), end=since,
+        entry = classify(job, label=label, start=span_start, end=since,
                          recovered=frozenset(r for r in recovered if r), reservation=reservation,
                          decisions=decisions, campaign=campaign, windows=windows)
         if state not in (DONE, None):
@@ -612,19 +641,31 @@ def reconcile(label: str, *, transport: Any, window: dict, sources: Iterable[str
             except (TypeError, ValueError):
                 blockers.append(f"quiescence stopped_at {q.get('stopped_at')!r} is not a timestamp")
 
-    start = _ts(opened) - _dt.timedelta(seconds=pad_s)
-    # the listing covers the SUBMISSION LIFETIME, not the capacity interval: a submitter that outlived capacity
-    # deletion could still have created an owned job after it
-    base_end = _ts(closed) if closed else _dt.datetime.now(_dt.timezone.utc)
+    # The listing covers the SUBMISSION LIFETIME, not the capacity interval, at BOTH ends. It starts where ownership
+    # starts - the earliest declared invocation start, not `opened_at` - because a span that can own a job the listing
+    # never reads is a hole the gate cannot see (Astra PR50 RR2 P1). Padding is applied afterwards, to the effective
+    # bounds, so it only ever widens them.
+    span = effective_span(window, windows, label) or (_ts(opened), _ts(closed) if closed else None)
+    ownership_start, ownership_end = span
+    start = ownership_start - _dt.timedelta(seconds=pad_s)
+    base_end = ownership_end if ownership_end is not None else _dt.datetime.now(_dt.timezone.utc)
     if stopped_at is not None and stopped_at > base_end:
         base_end = stopped_at
     end = base_end + _dt.timedelta(seconds=pad_s)
     out["window"] = {"opened_at": opened, "closed_at": closed, "pad_s": pad_s,
+                     "invocation": window.get("invocation"),
+                     "ownership_start": ownership_start.isoformat(),
+                     "ownership_end": ownership_end.isoformat() if ownership_end else None,
                      "submitters_stopped_at": q.get("stopped_at"),
                      "listing_start": start.isoformat(), "listing_end": end.isoformat(),
                      "closed_at_present": bool(closed),
-                     "bound_note": "the listing is bounded by the later of capacity close and evidenced submitter "
-                                   "shutdown, then extended while owned work reaches the edge"}
+                     "bound_note": "the listing starts at the earliest declared invocation/capacity start and ends at "
+                                   "the later of that span's end and evidenced submitter shutdown, padded on both "
+                                   "sides, then extended while owned work reaches the edge"}
+    # the listing must never be narrower than what ownership can claim: that is the defect this bound exists to close
+    if start > ownership_start or (ownership_end is not None and end < ownership_end):
+        blockers.append("the listing does not cover the declared ownership span: work this window could own would "
+                        "never be read")
 
     # extend while an owned job reaches the edge of the window: a tail can pull the bound forward
     extensions = []

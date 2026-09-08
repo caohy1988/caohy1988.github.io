@@ -1,5 +1,5 @@
 {
- "built_at": "2026-09-08T10:55:08.874012+00:00",
+ "built_at": "2026-09-08T11:22:46.384924+00:00",
  "built_from": [
   {
    "bytes": 26095,
@@ -43,8 +43,8 @@
   {
    "closed_at": "2026-09-06T00:11:16Z",
    "invocation": {
-    "finished_at": "2026-09-06T00:11:07Z",
-    "source": "cleanup_manifest.json[integration-0009].opened_at + evidence/safety_teardown.log first action 2026-09-06T00:11:07Z, which bin/safety_teardown.sh only reaches after `kill -0` on the driver pid fails. No driver run record survived",
+    "finished_at": "2026-09-06T00:11:01Z",
+    "source": "cleanup_manifest.json[integration-0009].opened_at + evidence/safety_teardown.log LINE 1, 2026-09-06T00:11:01Z 'SAFETY: reservation still present after run exit; closing' - the watcher's first retained action, reached only after `pgrep -f okf_bq_graph.run` found no driver and it then slept 20s. (00:11:07Z is the later assignment removal, not the exit signal.) No driver run record survived",
     "started_at": "2026-09-06T00:09:57Z"
    },
    "label": "integration-0009",
@@ -70,7 +70,7 @@
    "closed_at": "2026-09-06T00:27:27Z",
    "invocation": {
     "finished_at": "2026-09-06T00:27:33Z",
-    "source": "evidence/all_all-0017.json#/started_at; its finished_at is null (SIGINT 00:24:54Z, the in-process close never logged), so the exit bound is evidence/safety_teardown.log 'SAFETY: reservation already gone' at 2026-09-06T00:27:33Z - the watcher only runs after `kill -0` on the driver pid fails, and RESERVATION_CHANGES records the DELETE at 00:27:27.393115Z six seconds earlier",
+    "source": "evidence/all_all-0017.json#/started_at; its finished_at is null (SIGINT 00:24:54Z, the in-process close never logged), so the exit bound is evidence/safety_teardown.log line 14, 2026-09-06T00:27:33Z 'SAFETY: reservation already gone' - written at least 20s after `pgrep -f okf_bq_graph.run` found no driver process. The true exit was therefore earlier than this bound, which is the safe direction",
     "started_at": "2026-09-06T00:17:56.230721+00:00"
    },
    "label": "all-0017",
@@ -2251,8 +2251,8 @@
     }
    },
    "invocation": {
-    "finished_at": "2026-09-06T00:11:07Z",
-    "source": "cleanup_manifest.json[integration-0009].opened_at + evidence/safety_teardown.log first action 2026-09-06T00:11:07Z, which bin/safety_teardown.sh only reaches after `kill -0` on the driver pid fails. No driver run record survived",
+    "finished_at": "2026-09-06T00:11:01Z",
+    "source": "cleanup_manifest.json[integration-0009].opened_at + evidence/safety_teardown.log LINE 1, 2026-09-06T00:11:01Z 'SAFETY: reservation still present after run exit; closing' - the watcher's first retained action, reached only after `pgrep -f okf_bq_graph.run` found no driver and it then slept 20s. (00:11:07Z is the later assignment removal, not the exit signal.) No driver run record survived",
     "started_at": "2026-09-06T00:09:57Z"
    },
    "label": "integration-0009",
@@ -3806,7 +3806,7 @@
    },
    "invocation": {
     "finished_at": "2026-09-06T00:27:33Z",
-    "source": "evidence/all_all-0017.json#/started_at; its finished_at is null (SIGINT 00:24:54Z, the in-process close never logged), so the exit bound is evidence/safety_teardown.log 'SAFETY: reservation already gone' at 2026-09-06T00:27:33Z - the watcher only runs after `kill -0` on the driver pid fails, and RESERVATION_CHANGES records the DELETE at 00:27:27.393115Z six seconds earlier",
+    "source": "evidence/all_all-0017.json#/started_at; its finished_at is null (SIGINT 00:24:54Z, the in-process close never logged), so the exit bound is evidence/safety_teardown.log line 14, 2026-09-06T00:27:33Z 'SAFETY: reservation already gone' - written at least 20s after `pgrep -f okf_bq_graph.run` found no driver process. The true exit was therefore earlier than this bound, which is the safe direction",
     "started_at": "2026-09-06T00:17:56.230721+00:00"
    },
    "label": "all-0017",

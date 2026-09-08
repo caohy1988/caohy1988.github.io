@@ -14,9 +14,9 @@ still BLOCKED** — see "What this does not unblock".
 |---|---|---|---|---|---|
 | `smoke-1` | 1 | DONE ×1 | true | 23:43:43Z .. 23:47:20Z | complete 14-step session log; the submitter was one foreground `bq query` |
 | `integration-0007` | 12 | DONE ×12 | true | 00:07:32.984004Z .. 00:09:09.727229Z | the driver's own run record |
-| `integration-0009` | 3 | DONE ×3 | true | 00:09:57Z .. 00:11:07Z | safety watcher's first action (runs only after `kill -0` fails) |
+| `integration-0009` | 3 | DONE ×3 | true | 00:09:57Z .. 00:11:01Z | watcher line 1, "reservation still present after run exit" |
 | `all-0012` | 36 | DONE ×36 | true | 00:12:38.832828Z .. 00:15:55.901536Z | the driver's own run record |
-| `all-0017` | 314 | DONE ×314 | true | 00:17:56.230721Z .. 00:27:33Z | `finished_at` is null (SIGINT); watcher's "reservation already gone" |
+| `all-0017` | 314 | DONE ×314 | true | 00:17:56.230721Z .. 00:27:33Z | `finished_at` is null (SIGINT); watcher line 14, "reservation already gone" |
 
 366 owned jobs, every one read back DONE under its exact `(project, location, job_id)`. Every listing drained to no
 continuation token, no cap, no `unreachable` location; the repeated pass added no reference. All 56 job ids recoverable
@@ -52,11 +52,34 @@ and three rules apply, in order:
 2. A campaign job inside **another** window's ownership span is excluded to that window. The reservation name cannot
    override this: the spike recreated one name for all five openings.
 3. A campaign job outside **every** span may be excluded **only** by a retained record that bounds this window's
-   driver process at *both* ends — the driver's own `started_at`/`finished_at`, or a watcher whose teardown runs only
-   after `kill -0` on the driver pid fails. Then the process demonstrably did not exist when the job was created.
-   With no such two-sided record the job is **unresolved and blocks**, and only an explicit decision naming it can
-   assign or exclude it. (`bin/safety_teardown.sh` polls every 15 s, so its stamp places the real exit at or *before*
-   it — the span comes out too wide rather than too narrow, which is the safe direction for a cleanup inventory.)
+   driver process at *both* ends — the driver's own `started_at`/`finished_at`, or the watcher (below). Then the
+   process demonstrably did not exist when the job was created. With no such two-sided record the job is
+   **unresolved and blocks**, and only an explicit decision naming it can assign or exclude it.
+
+**The listing is derived from the same spans as ownership.** A span that can own a job the listing never reads is a
+hole the gate cannot see: unread means never `jobs.get`-ed, never blocking, and absent from the receipt while the
+window still reports RECONCILED. So `effective_span()` computes the bounds once, padding is applied to *those* bounds,
+and the reconciler refuses outright if the listing would be narrower than the span. (Astra PR50 RR2 P1: the first fix
+extended ownership to the invocation start but left the listing at `opened_at - pad_s`, so a setup job earlier than
+that was owned in principle and invisible in practice.)
+
+**The watcher that supplies the exit bounds is the episode's, not today's.** `bin/safety_teardown.sh` at HEAD takes a
+driver pid and polls `kill -0`; that script does not exist at the episode's `b6e4f09`. The one that actually ran is
+recovered here as `safety_teardown.episode.sh`
+(sha256 `42766a0d3cd821da4cea34d3f8aea0e52a7975adec04cd6a3670409e6b7bf6ed`), and its messages are the ones in
+`evidence/safety_teardown.log`:
+
+```sh
+while pgrep -f "okf_bq_graph.run" >/dev/null; do sleep 15; done
+sleep 20
+... bq ls --reservation ... ; echo "<stamp> SAFETY: ..." >> evidence/safety_teardown.log
+```
+
+A retained stamp therefore means that at least ~20 s earlier `pgrep` found **no** `okf_bq_graph.run` process at all —
+a stronger statement than one pid having gone, since it covers every driver. The real exit was at or before
+(stamp − 20 s), and the 15 s poll puts it earlier still. Declaring the stamp itself as `finished_at` is deliberately
+looser than the evidence supports: the span comes out **too wide**, which for a cleanup inventory owns more and hides
+less.
 
 **Correction to the first pass's separation claim.** It said the nearest non-member job sits 38–162 s outside each
 boundary. That is false, and the counterexamples are in the retained record: `fccaf7f9-eae1-4be1-9738-f304aa1933bb`
@@ -133,9 +156,11 @@ python3 -m okf_bq_graph.reconcile_window --plan /tmp/stage/plan.json --stage-dir
 ```
 
 `--live` builds a GET-only transport. `reservation.close_window`, `lifecycle.cancel_journal`, `safety.cleanup` and
-`bin/safety_teardown.sh` are mutations and are not imported by the reconciler. No `INFORMATION_SCHEMA` query was run:
+`bin/safety_teardown.sh` are mutations and are not imported by the reconciler. (`safety_teardown.episode.sh` is
+retained here as a recovered historical artifact for provenance; it is never executed.) No `INFORMATION_SCHEMA` query was run:
 that would itself submit a job.
 
-Files: `plan.json` (inputs + source hashes), `reconcile_<label>.json` (full ledger, readbacks, quiescence probe),
-`jobs_<label>.json` + `jobs_<label>.cleanup.json` (the gated pair), `episode_listing_index.json` (trimmed drain the
-decisions rest on).
+Files: `plan.json` (inputs + source hashes), `reconcile_<label>.json` (full ledger, readbacks, quiescence probe,
+and the `ownership_start`/`listing_start` bounds), `jobs_<label>.json` + `jobs_<label>.cleanup.json` (the gated pair),
+`episode_listing_index.json` (trimmed drain the decisions rest on), `safety_teardown.episode.sh` (the recovered
+watcher the exit bounds cite).
