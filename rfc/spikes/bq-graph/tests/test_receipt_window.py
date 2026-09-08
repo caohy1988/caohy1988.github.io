@@ -741,3 +741,65 @@ def test_a_confirmed_submission_travels_as_a_confirmed_reference(tmp_path):
     assert ref["project"] == "p" and ref["location"] == "EU" and ref["state"] == "SUBMITTED"
     assert "confirmed_submitted" not in ref or ref["confirmed_submitted"] is not False
     assert bridge.obligations() == []
+
+
+# ----------------------------------------------------------------------------- the 2026-09-08 live containment miss
+def _bridge(directory, tmp_path, label="rc"):
+    return RW.ReceiptBridge(SDK_ROOT, label=label, deadline_epoch=time.time() + 600, directory=directory)
+
+
+CHILD_REPORT = ("import sys, json, os\n"
+                "m = sys.modules.get('okf_window_bridge')\n"
+                "print(json.dumps({'imported': m is not None}))\n")
+
+
+def test_a_relative_bridge_directory_still_reaches_a_child_with_a_different_cwd(tmp_path, monkeypatch):
+    """THE ROOT CAUSE of the 2026-09-08 live run: `run_receipt` launches the SDK example with cwd=<sdk_root>, and the
+    bridge directory is exported as the child's PYTHONPATH. A relative directory resolved against the SDK checkout
+    instead, so `usercustomize` was never importable: no guard installed, no journal was written, and the receipt
+    child submitted a real BigQuery job that the window never inventoried - while the handshake said SUPPORTED."""
+    monkeypatch.chdir(tmp_path)
+    b = _bridge(Path("evidence/chain/receipt-bridge/rel"), tmp_path)   # relative, exactly as chain.py builds it
+    assert b.dir.is_absolute(), "the bridge must not depend on the launcher's cwd"
+    assert b.handshake()["status"] == RW.SUPPORTED
+    cp = b.runner()([sys.executable, "-c", CHILD_REPORT], cwd=SDK_ROOT)
+    assert json.loads((cp.stdout or "").strip().splitlines()[-1])["imported"] is True
+    assert [p.name for p in b.journal_files()] == ["launch_001.jsonl"]
+    assert b.containment()["contained"] is True
+
+
+def test_the_handshake_probes_the_cwd_the_real_child_will_use(tmp_path, monkeypatch):
+    """A handshake run in the PARENT's cwd proved nothing about a child launched in the SDK root: it reported
+    SUPPORTED for the very run whose child never imported the bootstrap."""
+    monkeypatch.chdir(tmp_path)
+    seen = {}
+    real = RW.subprocess.run
+
+    def spy(argv, **kw):
+        seen["cwd"] = kw.get("cwd")
+        return real(argv, **kw)
+    monkeypatch.setattr(RW.subprocess, "run", spy)
+    _bridge(tmp_path / "bridge", tmp_path).handshake()
+    assert seen["cwd"] == SDK_ROOT, "the probe must run where the receipt child runs"
+
+
+def test_containment_reports_a_launch_that_never_journaled_bridge_installed(tmp_path):
+    """A child that exits without `bridge_installed` had no deadline, no admission bound and no journal."""
+    b = _bridge(tmp_path / "bridge", tmp_path)
+    b.next_launch()
+    c = b.containment()
+    assert c["contained"] is False and len(c["uncontained"]) == 1
+    assert "neither bounded" in c["reason"]
+    # a launch nobody allocated is not an accusation: with no launches there is nothing to contain
+    assert _bridge(tmp_path / "bridge2", tmp_path).containment()["contained"] is True
+
+
+def test_containment_since_scopes_the_claim_to_this_invocation(tmp_path):
+    """Each `run_receipt` allocates one launch; an earlier launch's failure must not be blamed on a later case."""
+    b = _bridge(tmp_path / "bridge", tmp_path)
+    assert b.handshake()["status"] == RW.SUPPORTED    # writes the bootstrap the child imports
+    b.next_launch()                                   # launch 1: never journals
+    before = len(b.launches)
+    b.runner()([sys.executable, "-c", "pass"], cwd=SDK_ROOT)   # launch 2: real, journals
+    assert b.containment(since=before)["contained"] is True
+    assert b.containment()["contained"] is False      # the whole bridge still carries launch 1

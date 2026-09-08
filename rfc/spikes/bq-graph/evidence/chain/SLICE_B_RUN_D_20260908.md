@@ -52,6 +52,13 @@ open. It happened to succeed, which is luck, not containment.
 * `scheduled_query_6b5cf0c6-…` by `bqaa-otlp-consumer@…` — **unrelated project work**, classified explicitly and left
   alone. Not cancelled, not absorbed into this window's inventory.
 
+> **Superseded 2026-09-08:** the cause below was recorded as unestablished. It has since been root-caused,
+> reproduced hermetically and fixed — see `SLICE_B_JOURNAL_ROOT_CAUSE_20260908.md`. In short: the bridge directory was
+> relative, the child runs with `cwd=<sdk_root>`, so its `PYTHONPATH` resolved against the SDK checkout and
+> `usercustomize` was never importable. The handshake ran with the parent's cwd, which is why it still said
+> SUPPORTED. The reproductions below passed because they were given **absolute** paths. This run's
+> `CHAIN_INCOMPLETE` outcome is unchanged.
+
 ### What is and is not known about the cause
 
 The identical code path — `run_receipt` driven by `ReceiptBridge.runner()`, same interpreter, same SDK entry point,

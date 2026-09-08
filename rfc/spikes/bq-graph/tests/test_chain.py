@@ -1925,3 +1925,49 @@ def test_a_late_audit_read_leaves_the_reference_unknown_and_the_chain_incomplete
     assert final["identity"]["status"] == "UNKNOWN"
     assert final["verdict"] == "CHAIN_INCOMPLETE" and final["broken_at"] == "identity"
     assert json.loads((tmp_path / "chain_live_restricted.json").read_text())["verdict"] == "CHAIN_INCOMPLETE"
+
+
+# ----------------------------------------------------------------------------- receipt containment (2026-09-08 RC)
+def _cont_receipt():
+    """A receipt record that is perfect in every respect except the containment of the process that produced it."""
+    return {"invoked": True, "exit_code": 0, "released": True,
+            "stdout": f"{CH.VERIFIED} gross margin released\n",
+            "receipt": {"verdict": CH.VERIFIED, "execution_match": "MATCH", "computation_digest": "dig",
+                        "publication_id": "pub", "context_ref": "ctx"},
+            "output": {"verdict": CH.VERIFIED, "execution_match": "MATCH", "reason_codes": []}}
+
+
+def _cont_bound():
+    return {"status": "BOUND", "computation_digest": "dig", "sdk_publication_id": "pub", "sdk_context_ref": "ctx"}
+
+
+def test_a_contained_receipt_still_releases():
+    """The happy path must keep working: containment that HOLDS changes nothing."""
+    contained = {"contained": True, "launches": [{"invocation": "w-001", "bridge_installed": True}], "uncontained": []}
+    assert CH.consume(_cont_bound(), _cont_receipt(), containment=contained)["decision"] == "RELEASED"
+    assert CH.consume(_cont_bound(), _cont_receipt())["decision"] == "RELEASED"   # no bridge: unchanged behaviour
+
+
+def test_an_uncontained_child_is_refused_before_the_number_is_released():
+    """2026-09-08 attempt 4 released a VERIFIED receipt whose child had no deadline, no admission bound and no
+    journal, and only the closeout noticed. The consumer must refuse it at decision time instead."""
+    uncontained = {"contained": False, "uncontained": [{"invocation": "w-001", "bridge_installed": False}],
+                   "reason": "no bridge_installed record for w-001. Its submissions were neither bounded nor inventoried"}
+    d = CH.consume(_cont_bound(), _cont_receipt(), containment=uncontained)
+    assert d["decision"] == "REFUSED"
+    assert any("containment failed" in r for r in d["reasons"])
+    assert "display" not in d, "no released figure may be carried on a refusal"
+
+
+def test_an_uncontained_approved_case_is_not_reached_rather_than_wrong():
+    """A containment outage is unproven, not a contradiction: the case never ran under the guarantees it exists to
+    demonstrate, so it must not be scored as the product misbehaving."""
+    c = {"case": "approved", "retrieval": {"status": "OK", "reached": True}, "declaration": {"status": "OK"},
+         "bind": _cont_bound(),
+         "receipt": dict(_cont_receipt(), diag_present=True,
+                         containment={"contained": False, "reason": "no bridge_installed record for w-001"}),
+         "consume": {"decision": "REFUSED", "reasons": ["receipt containment failed: no bridge_installed record"]}}
+    a = CH.accept(c)
+    # NOT_REACHED, not WRONG: `_verdict` carries the reasons either way, so the distinction lives in the status
+    assert a["status"] == "NOT_REACHED", "an uncontained run is not evidence the product did the wrong thing"
+    assert any("uncontained" in r for r in a["failed"])
