@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -1166,3 +1167,235 @@ def test_job_ids_of_never_double_counts():
              {"case": "sql-substitution", "retrieval": {"timing": {"jobs": [{"job_id": "w"}]}}, "declaration": {"job_id": "d1"}, "receipt": {"invoked": False}}]
     ids = CH.job_ids_of(cases, "w", ["d1", "w"])
     assert ids["graph"] == ["w", "d1"]
+
+
+# =============================================================================== U1/U4: engine admission, proof, scope
+class _StubWindow:
+    """A window controller as `chain` sees it: a state, a label and a record. Nothing is opened here."""
+
+    def __init__(self, state="OPEN", label="chain-gql-1", probes=6):
+        self.state = state
+        self.cfg = SimpleNamespace(label=label)
+        self.record = {"controller": "okf_bq_graph.chain_window/0.1.0",
+                       "assignment": {"probes": [{"ok": True}] * probes}}
+
+
+def _gql_result(*, engine="gql", walk="governed.sql", graph_table=True, cache=None, warnings=(),
+                reservation=f"{CH.PROJECT}:{CH.LOCATION}.{CH.RESERVATION}", edition="ENTERPRISE", jobs=True):
+    stages = [{"stage": s, "job_id": f"j_{s}", "state": "DONE", "reservation_id": reservation, "edition": edition}
+              for s in ("walk", "context")] if jobs else []
+    return {"status": "OK", "warnings": list(warnings),
+            "scope": {"engine": engine, "cache": cache,
+                      "templates": {"walk": {"name": walk, "sha256": "abc", "graph_table": graph_table},
+                                    "context": {"name": "context.sql", "sha256": "def", "graph_table": True}}},
+            "timing": {"jobs": stages}}
+
+
+def test_bare_live_gql_refuses_before_any_client_grant_or_sdk_launch(sdk_root, tmp_path, monkeypatch):
+    from google.cloud import bigquery
+    monkeypatch.setattr(bigquery, "Client", lambda **kw: pytest.fail("no client may be built for a refused engine"))
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: pytest.fail("no query may be submitted"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       runner=lambda *a, **k: pytest.fail("the SDK CLI must not be launched"))
+    assert out["engine_admission"]["status"] == CH.GQL_WINDOW_NOT_CONFIGURED
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "engine_admission"
+    assert out["cases"] == [] and out["engine_proof"]["status"] == CH.ENGINE_NOT_PROVEN
+    assert "does not open capacity" in out["engine_admission"]["reason"]
+
+
+def test_a_restricted_gql_run_refuses_before_the_broker_grants(sdk_root, tmp_path, monkeypatch):
+    class Broker:
+        def describe(self):
+            pytest.fail("no broker may be described before admission")
+
+        def grant(self):
+            pytest.fail("no grant may be issued for a refused engine")
+
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       requester_mode="restricted", broker=Broker())
+    assert out["engine_admission"]["status"] == CH.GQL_WINDOW_NOT_CONFIGURED
+    assert out["broken_at"] == "engine_admission"
+
+
+def test_a_window_that_never_proved_its_assignment_is_refused(sdk_root, tmp_path, monkeypatch):
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: pytest.fail("no query may be submitted"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       window=_StubWindow(state="READY"))
+    assert out["engine_admission"]["status"] == "GQL_WINDOW_NOT_OPEN"
+    assert out["broken_at"] == "engine_admission"
+
+
+def test_an_open_window_admits_and_is_recorded(sdk_root, tmp_path, monkeypatch):
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (None, "pointer-job"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       clients={"engine": "gql", "bq": object()}, window=_StubWindow())
+    assert out["engine_admission"]["status"] == "OK" and out["engine_admission"]["assignment_probes"] == 6
+    assert out["window"]["label"] == "chain-gql-1" and out["window"]["state"] == "OPEN"
+    assert out["broken_at"] == "publication"     # it got past admission and refused on its own evidence
+
+
+def test_a_fallback_run_needs_no_window():
+    assert CH.gql_admission("fallback", True, None)["status"] == "NOT_REQUIRED"
+    assert CH.gql_admission("oracle", False, None)["status"] == "NOT_REQUIRED"
+
+
+# ---- engine proof
+def test_engine_proof_accepts_a_real_gql_execution():
+    proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result())
+    assert proof["status"] == CH.ENGINE_PROVEN and proof["reasons"] == []
+    assert [j["stage"] for j in proof["jobs"]] == ["walk", "context"]
+
+
+def test_a_client_configured_for_fallback_contradicts_a_gql_request():
+    proof = CH.engine_proof("gql", {"engine": "fallback"}, _gql_result())
+    assert proof["status"] == CH.ENGINE_CONTRADICTED
+    assert "configured for engine 'fallback'" in proof["reasons"][0]
+
+
+def test_a_fallback_template_contradicts_a_gql_claim():
+    proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result(walk="fallback.sql", graph_table=False))
+    assert proof["status"] == CH.ENGINE_CONTRADICTED
+    assert any("fallback.sql" in r and "GRAPH_TABLE" in r for r in proof["reasons"])
+
+
+def test_the_fallback_warning_contradicts_a_gql_claim():
+    proof = CH.engine_proof("gql", {"engine": "gql"},
+                            _gql_result(warnings=["FALLBACK engine: relational joins, not BigQuery Graph"]))
+    assert proof["status"] == CH.ENGINE_CONTRADICTED
+
+
+def test_a_cached_answer_cannot_establish_that_gql_executed():
+    for state in ("HIT_RECHECKED", "HIT_DENIED"):
+        proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result(cache=state, jobs=False))
+        assert proof["status"] == CH.ENGINE_CONTRADICTED
+        assert any("cannot establish" in r for r in proof["reasons"])
+
+
+def test_no_walk_job_is_not_proven():
+    proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result(jobs=False))
+    assert proof["status"] == CH.ENGINE_NOT_PROVEN
+    assert any("nothing executed on the graph" in r for r in proof["reasons"])
+
+
+def test_an_on_demand_or_foreign_reservation_is_not_proven():
+    assert CH.engine_proof("gql", {"engine": "gql"}, _gql_result(reservation=None))["status"] == CH.ENGINE_NOT_PROVEN
+    assert CH.engine_proof("gql", {"engine": "gql"}, _gql_result(reservation="p:US.someone-elses"))["status"] == CH.ENGINE_NOT_PROVEN
+    assert CH.engine_proof("gql", {"engine": "gql"}, _gql_result(edition="STANDARD"))["status"] == CH.ENGINE_NOT_PROVEN
+
+
+def test_an_enterprise_assignment_alone_does_not_turn_sql_into_gql():
+    """Enterprise capacity plus the relational template is still relational."""
+    proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result(walk="fallback.sql", graph_table=False))
+    assert proof["status"] == CH.ENGINE_CONTRADICTED
+    assert all(j["edition"] == "ENTERPRISE" for j in proof["jobs"])
+
+
+def test_a_returned_engine_label_cannot_select_the_verdict_on_its_own():
+    proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result(engine="fallback"))
+    assert proof["status"] == CH.ENGINE_CONTRADICTED
+    assert any("returned scope names engine" in r for r in proof["reasons"])
+
+
+def test_an_unreached_retrieval_is_not_proven():
+    proof = CH.engine_proof("gql", {"engine": "gql"}, None)
+    assert proof["status"] == CH.ENGINE_NOT_PROVEN and "never ran" in proof["reasons"][0]
+
+
+def test_a_plain_sql_chain_stays_plain_sql():
+    proof = CH.engine_proof("fallback", {"engine": "fallback"},
+                            _gql_result(engine="fallback", walk="fallback.sql", graph_table=False,
+                                        warnings=["FALLBACK engine: relational joins, not BigQuery Graph"]))
+    assert proof["status"] == CH.ENGINE_PROVEN      # proven to be what it says it is: relational fallback
+    assert proof["requested"] == "fallback"
+
+
+def test_merge_engine_proof_takes_the_worst_case():
+    proven = {"status": CH.ENGINE_PROVEN, "case": "a", "reasons": []}
+    unproven = {"status": CH.ENGINE_NOT_PROVEN, "case": "b", "reasons": ["no walk job"]}
+    contradicted = {"status": CH.ENGINE_CONTRADICTED, "case": "c", "reasons": ["fallback"]}
+    assert CH.merge_engine_proof([proven, proven])["status"] == CH.ENGINE_PROVEN
+    assert CH.merge_engine_proof([proven, unproven])["status"] == CH.ENGINE_NOT_PROVEN
+    assert CH.merge_engine_proof([proven, unproven, contradicted])["status"] == CH.ENGINE_CONTRADICTED
+    assert CH.merge_engine_proof([])["status"] == CH.ENGINE_NOT_PROVEN
+
+
+# ---- the proof drives the verdict, and memoization is off for the executing cases
+def _live_gql_chain(sdk_root, tmp_path, monkeypatch, result, *, cases=("approved",), capture=None):
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (CH.PUBLICATION_PIN, "pointer-job"))
+
+    def governed(query, publication_id, requester, as_of, clients):
+        if capture is not None:
+            capture.append(clients)
+        return result
+
+    monkeypatch.setattr(CH, "governed", governed)
+    monkeypatch.setattr(CH, "pick_computation", lambda r, path: None)     # stop before bind: the engine is the subject
+    return CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                        clients={"engine": "gql", "bq": object(), "cache": {}}, window=_StubWindow(), cases=cases,
+                        runner=lambda *a, **k: pytest.fail("nothing binds, so the CLI must not run"))
+
+
+def test_a_fallback_answer_under_a_gql_request_breaks_the_chain(sdk_root, tmp_path, monkeypatch):
+    out = _live_gql_chain(sdk_root, tmp_path, monkeypatch,
+                          _gql_result(walk="fallback.sql", graph_table=False,
+                                      warnings=["FALLBACK engine: relational joins, not BigQuery Graph"]))
+    assert out["engine_proof"]["status"] == CH.ENGINE_CONTRADICTED
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] in ("approved", "engine_proof")
+
+
+def test_an_unproven_engine_leaves_the_chain_incomplete(sdk_root, tmp_path, monkeypatch):
+    out = _live_gql_chain(sdk_root, tmp_path, monkeypatch, _gql_result(jobs=False))
+    assert out["engine_proof"]["status"] == CH.ENGINE_NOT_PROVEN
+    assert out["verdict"] == "CHAIN_INCOMPLETE"
+
+
+def test_live_gql_disables_memoization_for_the_executing_cases(sdk_root, tmp_path, monkeypatch):
+    seen = []
+    out = _live_gql_chain(sdk_root, tmp_path, monkeypatch, _gql_result(), capture=seen)
+    assert out["cache_policy"]["memoization"] == "DISABLED"
+    assert out["cache_policy"]["exempt_cases"] == ["revocation-before-replay"]
+    assert seen and all(c.get("cache") is None for c in seen)
+
+
+def test_hermetic_runs_carry_no_engine_proof_claim(clients, projection, sdk_root, tmp_path):
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients,
+                       projection=projection, requester="t", as_of=AS_OF)
+    assert out["engine_proof"]["status"] == "NOT_APPLICABLE"
+    assert "no BigQuery engine executed" in out["engine_proof"]["reason"]
+
+
+# ---- scoped case selection
+def test_a_scoped_run_names_what_it_did_not_run(clients, projection, sdk_root, tmp_path):
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients,
+                       projection=projection, requester="t", as_of=AS_OF, cases=("approved",))
+    assert out["selected_cases"] == ["approved"]
+    assert out["omitted_cases"] == ["sql-substitution", "declaration-mismatch"]
+    assert out["scope"]["complete_suite"] is False
+    assert [c["case"] for c in out["cases"]] == ["approved"]
+    assert out["verdict"] == "CHAIN_CONNECTED"     # scoped, and the record says exactly how scoped
+
+
+def test_the_full_suite_is_marked_complete(clients, projection, sdk_root, tmp_path):
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients,
+                       projection=projection, requester="t", as_of=AS_OF)
+    assert out["omitted_cases"] == [] and out["scope"]["complete_suite"] is True
+
+
+def test_an_unknown_case_is_refused(clients, projection, sdk_root, tmp_path):
+    with pytest.raises(ValueError, match="unknown case"):
+        CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients,
+                     projection=projection, requester="t", as_of=AS_OF, cases=("approved-restricted",))
+
+
+def test_cli_case_selection(sdk_root, sample_root, tmp_path, capsys):
+    assert CH.main(["--hermetic", "--sdk-root", sdk_root, "--out", str(tmp_path), "--acme-root", sample_root,
+                    "--cases", "approved"]) == 0
+    printed = capsys.readouterr().out
+    assert "selected_cases=approved" in printed and "omitted_cases=sql-substitution,declaration-mismatch" in printed
+    record = json.loads((tmp_path / "chain_hermetic.json").read_text())
+    assert record["selected_cases"] == ["approved"] and record["scope"]["complete_suite"] is False
+
+
+def test_cli_refuses_a_window_flag_without_live_gql(sdk_root, tmp_path):
+    with pytest.raises(SystemExit):
+        CH.main(["--hermetic", "--sdk-root", sdk_root, "--out", str(tmp_path), "--gql-window", "w"])

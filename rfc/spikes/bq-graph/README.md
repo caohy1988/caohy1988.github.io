@@ -506,6 +506,95 @@ restricted-requester chain does, and only for itself: "Live restricted pass (Sli
 independent constrained attester; the receipt boundary still binds to a synthetic SDK fixture publication. Enterprise/GQL, least privilege,
 scalability, performance and operating acceptance all stay out of scope.
 
+## Graph engine inside the chain — Slice A, hermetic (2026-09-07)
+
+Every chain run retained so far used the **relational `fallback`** engine (or the in-process oracle). Nothing here
+changes that: **there is still no live GQL chain evidence**, and this slice ran no cloud workload, opened no window and
+upgraded no legacy receipt. What it lands is the plumbing plus the refusals, tested offline.
+
+**`--live --engine gql` now refuses instead of guessing.** `chain.py` opens no Enterprise capacity of its own, so a bare
+GQL request could only end in an edition error or in a relational answer wearing a Graph label. It stops first, with a
+typed record written **before any grant, client query or SDK launch**:
+
+```
+engine_admission = {"status": "GQL_WINDOW_NOT_CONFIGURED", ...}
+verdict = CHAIN_INCOMPLETE, broken_at = engine_admission
+```
+
+`--gql-window LABEL` supplies the owned controller (`okf_bq_graph.chain_window`); a controller that has not proven an
+open assignment is `GQL_WINDOW_NOT_OPEN`.
+
+**`okf_bq_graph.chain_window` — one controller for the whole window.** Lifted out of `run.py::main` with the clock,
+opener/closer, watcher, client factory and probe injected. It owns an exclusive `flock` lease over one **explicitly
+named** capacity manifest and evidence directory: a *missing* manifest is a refusal, not an empty ledger, so a fresh
+worktree cannot forget an earlier window's obligations. It refuses a reused label, carries the cumulative
+120-minute ceiling, spawns the independent closer **before** any paid resource, refuses to adopt a pre-existing
+reservation, proves the assignment with real probes (failures retained), hands every operator/requester client out
+already bound to one submission gate, starts capacity closure **without** waiting for result I/O or `jobs.cancel`, and
+runs registered resource restores even on the failure path. Unresolved jobs or a failed restore make the close
+`clean: false`, and the receipt it writes does not satisfy the reopen gate.
+
+**`okf_bq_graph.receipt_window` — the SDK child inside the window.** `subprocess.run(timeout=…)` bounds a process, not a
+server: killing the child cancels no job. A private `usercustomize.py` (never `sitecustomize.py`) installs guards in the
+child around the *actual* seams — `google.auth.default` (the existing e-mail-scope shim, composed),
+`AuthorizedSession.send` (so a credential refresh and the internal 401 retry each get a fresh budget),
+`Client.query`, `Connection.api_request` (the verifier's direct REST reads) and `urllib.request.urlopen` (the tokeninfo
+call `broker.open_live_session` makes before any client exists). No SDK source is edited and the pin is not moved.
+
+* The child is handed a **nonsecret** identity: label, an **absolute `time.time()` epoch deadline** (never rebased onto
+  a child-sampled start), a stop file and its own journal path.
+* The SDK's deterministic `execute.job_id_for` id is journaled **before** the send and **never replaced**; automatic job
+  retry is disabled, because a retry inside `result()` submits a new job and replaces the id.
+* **Dry runs are bounded operations, not jobs** (`actual_job: false`): no phantom id reaches cleanup or identity.
+* A submission whose response is lost stays `UNRESOLVED`; only admission closed *before* a call is a known
+  non-submission (`REFUSED`). An unresolved child submission blocks `job_audit`.
+* `preflight()`/`handshake()` prove the seams and the installed guards **before any paid window opens**. A pin without
+  them yields `SDK_WINDOW_BRIDGE_UNSUPPORTED` — no window is opened, and Slice B stays blocked until a separately scoped
+  SDK change and an explicit pin update are reviewed.
+
+**Engine proof (KTD4).** The retrieval cache key now includes the **engine**, so a relational entry can never be replayed
+under a GQL request, and `scope.templates` records the compiled walk/context template with its SHA-256 and whether it
+contains `GRAPH_TABLE`. `chain.engine_proof` judges the trusted client configuration, the returned scope, that template
+and the platform's own `reservation_id`/`edition` on the walk jobs. A returned engine label alone decides nothing. A
+fallback template, a `FALLBACK` warning or a cache hit is `CONTRADICTED` → `CHAIN_BROKEN`; a missing walk job, an
+on-demand reservation or a non-Enterprise edition is `NOT_PROVEN` → `CHAIN_INCOMPLETE`. Under a live GQL window
+memoization is disabled for every case except `revocation-before-replay`, whose cached replay *is* its evidence.
+
+**Scoped cases.** `--cases a,b` records `selected_cases`, `omitted_cases` and `scope.complete_suite`. An omitted case is
+NOT_RUN; one approved case passing is never the suite's negative coverage.
+
+**`okf_bq_graph.reconcile_window` — the legacy gate, read-only.** Five opened windows (`smoke-1`, `integration-0007`,
+`integration-0009`, `all-0012`, `all-0017`) have no job journal at all, so the reopen gate cannot pass; `safety-0011` has
+no `opened_at` and is a closer record, not a sixth opening. This module reconstructs a journal/receipt pair from
+`jobs.list` (all users, FULL, every page, plus `parentJobId` child listings) and `jobs.get` per owned qualified
+reference — and refuses whenever the evidence is short:
+
+| Condition | Outcome |
+|---|---|
+| a page token left behind, a cap hit, an `unreachable` location, a transport error | BLOCKED (a prefix is not the window) |
+| a job in the span with no ownership signal, or one carrying only the window's reservation **name** | AMBIGUOUS → BLOCKED until resolved by an explicit decision **with a reason** |
+| `jobs.get` returns 404, fails, or returns another reference | UNVERIFIED, never `verified_done` |
+| a `PENDING`/`RUNNING` job | BLOCKED |
+| quiescence of the original submitters not evidenced, or a repeat listing adds references | BLOCKED |
+| no owned job at all for an opened window | BLOCKED (an empty inventory is not evidence of an empty window) |
+
+A produced journal says `reconstructed: true`, names its sources with their SHA-256 and is hashed into its receipt;
+`verified` is **derived** from the readbacks, never accepted from an input. Staged files go to a caller-chosen directory
+(`require_clean_windows(..., evidence_dir=…)` can gate them in place); publishing them into `evidence/` is a separate
+authorized step, and an original artifact is never overwritten. Nothing in the module cancels, deletes or submits.
+
+```bash
+python3 -m okf_bq_graph.reconcile_window --plan plan.json --stage-dir /tmp/stage         # no transport: BLOCKED
+python3 -m okf_bq_graph.reconcile_window --plan plan.json --stage-dir /tmp/stage --live  # authorized operator GET
+python3 -m okf_bq_graph.chain --live --engine gql                                        # refuses: no owned window
+python3 -m okf_bq_graph.chain --live --engine gql --gql-window <original-label> --cases approved
+```
+
+**What Slice A does not establish.** No live GQL retrieval, no live window, no reconciled legacy receipt, no benchmark
+cell (G8 remains 0/9) and no accepted 2026-09-19 threshold. The hermetic suite ran against the **installed**
+`google-cloud-bigquery 3.40.1`, while `pyproject.toml` pins `3.45.0`: the transport regressions here are real-object
+tests at 3.40.1 and should be re-run at the pinned version before any live claim rests on them.
+
 ## Ordinary-SQL baseline for the 2026-09-19 checkpoint (2026-09-07, predeclared and empty)
 
 `evidence/sql-baseline/baseline.md` is a plan, not a measurement. It exists because the checkpoint has to compare an
@@ -589,6 +678,9 @@ python3 -m okf_bq_graph.job_audit evidence/chain/chain_live_restricted.json   # 
 python3 -m okf_bq_graph.chain --live                      # connected chain, on-demand fallback engine + SDK --live
 python3 -m okf_bq_graph.chain --hermetic --seed-mode catalog --catalog-responses fixtures/catalog_responses.json   # Catalog contract, injected responses (catalog-mock)
 python3 -m okf_bq_graph.chain --live --seed-mode catalog  # fresh Dataplex list/get of the KC-unblock entry -> retained publication -> receipt (Slice B1)
+python3 -m okf_bq_graph.chain --live --engine gql         # Slice A: refuses with a typed record (no owned Enterprise window)
+python3 -m okf_bq_graph.chain --live --engine gql --gql-window <label> --cases approved   # Slice B, gated: owned window + scoped case
+python3 -m okf_bq_graph.reconcile_window --plan plan.json --stage-dir /tmp/stage          # read-only legacy window reconstruction
 python3 -m okf_bq_graph.catalog_live --live --wall-cap-s 900 --timeout-s 30   # Slice B2: owned dataset + entry lifecycle around that chain, then cleanup (~4 min)
 python3 bin/followup_job_audit.py evidence/catalog-chain/<run_id>                # read-only: re-read every job of a retained run under its own reference
 python3 -m okf_bq_graph.run integration --minutes 25         # opens the Enterprise window, runs GQL cases, closes it

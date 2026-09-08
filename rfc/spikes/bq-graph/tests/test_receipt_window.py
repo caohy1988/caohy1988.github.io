@@ -1,0 +1,469 @@
+"""U3: the receipt child's window bridge.
+
+The subprocess tests build a REAL `google.cloud.bigquery.Client` on a REAL `AuthorizedSession` inside the child, and
+serve it from a mounted `requests` adapter, so the whole path - `Client.query` -> `Connection.api_request` ->
+`AuthorizedSession.request` -> the wrapped `send` -> adapter - is exercised offline. No credential, no ADC and no
+network is used: the session carries `AnonymousCredentials` and every host is served by the adapter.
+
+The in-process tests load the generated bridge module WITHOUT calling `install()`, so the guards are applied to fake
+modules and never leak into the test interpreter.
+"""
+import importlib.util
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+from okf_bq_graph import receipt_window as RW
+
+SDK_ROOT = os.environ.get("OKF_SDK_ROOT", "/Users/haiyuancao/BigQuery-Agent-Analytics-SDK-receipt-spike")
+
+
+def sdk_available():
+    return (Path(SDK_ROOT) / RW.EXAMPLE_REL / "run.py").is_file()
+
+
+needs_sdk = pytest.mark.skipif(not sdk_available(), reason="pinned SDK receipt-spike checkout not present")
+
+
+# ----------------------------------------------------------------------------- preflight
+@needs_sdk
+def test_preflight_covers_every_seam_at_the_pin():
+    out = RW.preflight(SDK_ROOT)
+    assert out["status"] == RW.SUPPORTED, out["missing"]
+    assert {(s["file"], s["marker"]) for s in out["covered"]} == set(RW.SEAMS)
+    assert out["missing"] == []
+
+
+def test_a_missing_entrypoint_is_unsupported(tmp_path):
+    out = RW.preflight(tmp_path)
+    assert out["status"] == RW.UNSUPPORTED and "not present" in out["reason"]
+
+
+@needs_sdk
+def test_a_pin_without_a_seam_is_unsupported(tmp_path):
+    """A future pin that no longer exposes the delegated client is an honest refusal, not a silent bypass."""
+    root = tmp_path / "sdk"
+    shutil.copytree(Path(SDK_ROOT) / RW.EXAMPLE_REL, root / RW.EXAMPLE_REL)
+    broker = root / RW.EXAMPLE_REL / "broker.py"
+    broker.write_text(broker.read_text().replace("def delegated_client(self)", "def client_for_caller(self)"))
+    out = RW.preflight(root)
+    assert out["status"] == RW.UNSUPPORTED
+    assert [m["marker"] for m in out["missing"]] == ["def delegated_client(self)"]
+    assert "separately scoped SDK injection" in out["reason"]
+
+
+@needs_sdk
+def test_an_unsupported_pin_never_launches_a_child(tmp_path, monkeypatch):
+    monkeypatch.setattr(RW.subprocess, "run", lambda *a, **kw: pytest.fail("no child may run without a covered pin"))
+    bridge = RW.ReceiptBridge(tmp_path, label="w", deadline_epoch=time.time() + 60, directory=tmp_path / "priv")
+    record = bridge.handshake()
+    assert record["status"] == RW.UNSUPPORTED
+    assert not (tmp_path / "priv").exists()      # nothing was even written
+
+
+# ----------------------------------------------------------------------------- handshake
+@needs_sdk
+def test_handshake_proves_the_guards_in_a_real_child_interpreter(tmp_path):
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 600, directory=tmp_path / "priv")
+    record = bridge.handshake()
+    assert record["status"] == RW.SUPPORTED, record
+    assert record["child"]["missing"] == []
+    assert set(record["child"]["installed"]) >= {
+        "google.auth.default", "google.auth.transport.requests.AuthorizedSession.send",
+        "google.cloud.bigquery.Client.query", "google.cloud.bigquery._http.Connection.api_request",
+        "urllib.request.urlopen"}
+    # the handshake writes nothing into the run's own journal
+    assert not bridge.journal_path.exists()
+
+
+@needs_sdk
+def test_the_bootstrap_is_usercustomize_not_sitecustomize(tmp_path):
+    files = RW.bootstrap_files(tmp_path)
+    assert Path(files["usercustomize"]).name == "usercustomize.py"
+    assert not (tmp_path / "sitecustomize.py").exists()
+    assert "_bridge.install()" in Path(files["usercustomize"]).read_text()
+    # importing the module alone must not install anything: the guards are a deliberate call
+    assert "install()" not in Path(files["bridge"]).read_text().rsplit("return installed", 1)[1]
+
+
+def test_child_env_carries_a_nonsecret_identity_and_an_absolute_deadline(tmp_path):
+    deadline = time.time() + 300
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="chain-gql-1", deadline_epoch=deadline, directory=tmp_path,
+                              max_ops=100, max_jobs=50)
+    env = bridge.child_env()
+    assert env["OKF_WINDOW_LABEL"] == "chain-gql-1"
+    assert float(env["OKF_WINDOW_DEADLINE_EPOCH"]) == deadline      # absolute, not a duration
+    assert env["OKF_WINDOW_MAX_OPS"] == "100" and env["OKF_WINDOW_MAX_JOBS"] == "50"
+    assert env["PYTHONPATH"].split(os.pathsep)[0] == str(tmp_path)
+    blob = json.dumps(env).lower()
+    for secret in ("private_key", "access_token", "refresh_token", "client_secret", "credentials"):
+        assert secret not in blob
+
+
+# ----------------------------------------------------------------------------- child, real SDK objects, offline
+CHILD = r'''
+import json, sys, time
+import okf_window_bridge as bridge
+bridge.install()
+
+import requests
+from requests.adapters import HTTPAdapter
+from google.auth.credentials import AnonymousCredentials
+from google.auth.transport.requests import AuthorizedSession
+from google.cloud import bigquery
+
+MODE = sys.argv[1]
+RETURNED_ID = sys.argv[2] if len(sys.argv) > 2 else None
+seen = []
+
+
+class Adapter(HTTPAdapter):
+    def send(self, request, **kwargs):
+        seen.append({"method": request.method, "url": request.url, "timeout": kwargs.get("timeout")})
+        if MODE == "lost_response":
+            raise requests.exceptions.ConnectionError("connection reset after the request was sent")
+        body = json.loads(request.body or "{}") if request.body else {}
+        ref = (body.get("jobReference") or {})
+        job_id = RETURNED_ID or ref.get("jobId") or "server-assigned"
+        payload = {"jobReference": {"projectId": "p", "location": "US", "jobId": job_id},
+                   "status": {"state": "DONE"},
+                   "configuration": {"query": {"query": "SELECT 1"}, "jobType": "QUERY"},
+                   "statistics": {"query": {"totalBytesProcessed": "0"}}}
+        response = requests.Response()
+        response.status_code = 200
+        response._content = json.dumps(payload).encode()
+        response.headers["content-type"] = "application/json"
+        response.request = request
+        response.url = request.url
+        return response
+
+
+session = AuthorizedSession(AnonymousCredentials())
+session.mount("https://", Adapter())
+session.mount("http://", Adapter())
+client = bigquery.Client(project="p", location="US", credentials=AnonymousCredentials(), _http=session)
+
+out = {"mode": MODE, "error": None}
+try:
+    if MODE == "submit":
+        job = client.query("SELECT 1", job_id="okf_rcpt_deadbeef_0123456789abcdef")
+        out["job_id"] = job.job_id
+    elif MODE == "dry_run":
+        cfg = bigquery.QueryJobConfig(dry_run=True, use_query_cache=False)
+        client.query("SELECT 1 FROM t WHERE FALSE", job_config=cfg)
+    elif MODE == "returned_id_mutation":
+        job = client.query("SELECT 1", job_id="okf_rcpt_original")
+        out["job_id"] = job.job_id
+    elif MODE == "verifier_read":
+        client._connection.api_request(method="GET", path="/projects/p/jobs/okf_rcpt_x",
+                                       query_params={"location": "US"})
+    elif MODE == "tokeninfo":
+        import urllib.request
+        urllib.request.urlopen("data:text/plain,%7B%22email%22%3A%22sa%40x%22%7D").read()
+    elif MODE == "budget":
+        for i in range(3):
+            try:
+                client.query("SELECT 1", job_id="okf_rcpt_%d" % i)
+            except bridge.WindowStopped as exc:
+                out["error"] = "WindowStopped: " + str(exc)
+                break
+    elif MODE == "lost_response":
+        try:
+            client.query("SELECT 1", job_id="okf_rcpt_lost")
+        except Exception as exc:
+            out["error"] = type(exc).__name__
+    elif MODE == "stopped" or MODE == "deadline":
+        try:
+            client.query("SELECT 1", job_id="okf_rcpt_blocked")
+        except bridge.WindowStopped as exc:
+            out["error"] = "WindowStopped: " + str(exc)
+except bridge.WindowStopped as exc:
+    out["error"] = "WindowStopped: " + str(exc)
+out["http"] = seen
+print("OKF_RESULT " + json.dumps(out))
+'''
+
+
+def child(tmp_path, mode, *, deadline_offset=600, stop=False, max_jobs=0, max_ops=0, returned_id=None):
+    """Run one child with the bridge installed and a fully offline transport. Returns (result, bridge)."""
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + deadline_offset,
+                              directory=tmp_path / "priv", max_jobs=max_jobs, max_ops=max_ops)
+    RW.bootstrap_files(bridge.dir)
+    if stop:
+        bridge.stop()
+    script = tmp_path / "child.py"
+    script.write_text(CHILD)
+    env = dict(os.environ, **bridge.child_env())
+    argv = [sys.executable, str(script), mode] + ([returned_id] if returned_id else [])
+    proc = subprocess.run(argv, capture_output=True, text=True, timeout=180, env=env)
+    assert proc.returncode == 0, proc.stderr[-3000:]
+    line = next(l for l in proc.stdout.splitlines() if l.startswith("OKF_RESULT "))
+    return json.loads(line[len("OKF_RESULT "):]), bridge
+
+
+@needs_sdk
+def test_a_real_submission_keeps_the_sdk_deterministic_job_id(tmp_path):
+    result, bridge = child(tmp_path, "submit")
+    assert result["job_id"] == "okf_rcpt_deadbeef_0123456789abcdef"
+    ingested = bridge.ingest()
+    assert [j["job_id"] for j in ingested["jobs"]] == ["okf_rcpt_deadbeef_0123456789abcdef"]
+    assert ingested["jobs"][0]["state"] == "SUBMITTED" and ingested["jobs"][0]["id_mutated"] is False
+    assert ingested["unresolved"] == []
+    # journaled BEFORE the send: the intended id exists even if the response never comes back
+    entries = bridge.entries()
+    intended = next(e for e in entries if e["event"] == "query" and e.get("state") == "INTENDED")
+    posted = next(e for e in entries if e["event"] == "api_request")
+    assert intended["requested_job_id"] == "okf_rcpt_deadbeef_0123456789abcdef"
+    assert intended["seq"] < posted["seq"]
+
+
+@needs_sdk
+def test_a_dry_run_is_a_bounded_operation_not_a_job(tmp_path):
+    result, bridge = child(tmp_path, "dry_run")
+    ingested = bridge.ingest()
+    assert ingested["jobs"] == []            # no phantom id reaches the cleanup or identity union
+    assert ingested["dry_runs"] == 1
+    assert ingested["operations"] >= 2       # the dry run itself plus its HTTP dispatch consume the budget
+    entry = next(e for e in bridge.entries() if e["event"].startswith("query") and e.get("state") == "DRY_RUN")
+    assert entry["actual_job"] is False
+
+
+@needs_sdk
+def test_a_lost_response_stays_unresolved(tmp_path):
+    # a short deadline so the SDK's own transport retry of the failed insert is bounded by the window, not by luck
+    result, bridge = child(tmp_path, "lost_response", deadline_offset=8)
+    assert result["error"]                   # the SDK raised
+    ingested = bridge.ingest()
+    assert ingested["jobs"] == []
+    assert len(ingested["unresolved"]) == 1
+    assert ingested["unresolved"][0]["requested_job_id"] == "okf_rcpt_lost"
+    assert ingested["unresolved"][0]["state"] == "UNRESOLVED"     # never NOT_SUBMITTED
+    assert result["http"], "the request did reach the transport"
+
+
+@needs_sdk
+def test_a_mutated_returned_id_retains_both_references(tmp_path):
+    result, bridge = child(tmp_path, "returned_id_mutation", returned_id="okf_rcpt_replaced_by_retry")
+    ingested = bridge.ingest()
+    job = ingested["jobs"][0]
+    assert job["job_id"] == "okf_rcpt_replaced_by_retry"
+    assert job["requested_job_id"] == "okf_rcpt_original"
+    assert job["id_mutated"] is True
+
+
+@needs_sdk
+def test_the_stop_channel_closes_admission_before_any_http(tmp_path):
+    result, bridge = child(tmp_path, "stopped", stop=True)
+    assert result["error"].startswith("WindowStopped")
+    assert result["http"] == []              # nothing was dispatched
+    ingested = bridge.ingest()
+    assert ingested["jobs"] == [] and ingested["unresolved"] == []
+    assert ingested["refused"] == 1          # admission closed before the call: a KNOWN non-submission
+    assert [b["reason"] for b in ingested["blocked"]] == ["stopped"]
+
+
+@needs_sdk
+def test_a_passed_deadline_closes_admission(tmp_path):
+    result, bridge = child(tmp_path, "deadline", deadline_offset=-1)
+    assert result["error"].startswith("WindowStopped")
+    assert result["http"] == []
+    ingested = bridge.ingest()
+    assert ingested["unresolved"] == [] and ingested["refused"] == 1
+    assert [b["reason"] for b in ingested["blocked"]] == ["deadline"]
+
+
+@needs_sdk
+def test_the_job_budget_stops_further_submissions(tmp_path):
+    result, bridge = child(tmp_path, "budget", max_jobs=2)
+    ingested = bridge.ingest()
+    assert len(ingested["jobs"]) == 2
+    assert [b["reason"] for b in ingested["blocked"]] == ["job_budget"]
+    assert result["error"].startswith("WindowStopped")
+
+
+@needs_sdk
+def test_the_verifier_direct_read_is_bounded_and_journaled(tmp_path):
+    result, bridge = child(tmp_path, "verifier_read")
+    entries = bridge.entries()
+    read = next(e for e in entries if e["event"] == "api_request" and "/jobs/okf_rcpt_x" in str(e.get("path")))
+    assert read["actual_job"] is False
+    assert bridge.ingest()["jobs"] == []          # a read is not a submission
+    assert result["http"][0]["timeout"] is not None and result["http"][0]["timeout"] > 0
+
+
+@needs_sdk
+def test_the_tokeninfo_read_is_bounded_before_any_client_exists(tmp_path):
+    result, bridge = child(tmp_path, "tokeninfo")
+    opened = [e for e in bridge.entries() if e["event"] == "urlopen"]
+    assert len(opened) == 1 and opened[0]["actual_job"] is False
+
+
+@needs_sdk
+def test_every_http_send_carries_the_remaining_budget(tmp_path):
+    result, _ = child(tmp_path, "submit", deadline_offset=30)
+    assert result["http"], "no dispatch observed"
+    for call in result["http"]:
+        assert call["timeout"] is not None and 0 < call["timeout"] <= 30
+
+
+# ----------------------------------------------------------------------------- in-process wrapper unit tests
+def load_bridge(tmp_path, monkeypatch, **env):
+    """Load a generated bridge with a chosen environment, WITHOUT installing its global hooks."""
+    files = RW.bootstrap_files(tmp_path / "priv")
+    for key, value in {"OKF_WINDOW_LABEL": "w", "OKF_WINDOW_DEADLINE_EPOCH": repr(time.time() + 600),
+                       "OKF_WINDOW_STOP_FILE": str(tmp_path / "STOP"),
+                       "OKF_WINDOW_JOURNAL": str(tmp_path / "journal.jsonl"), **env}.items():
+        monkeypatch.setenv(key, str(value))
+    spec = importlib.util.spec_from_file_location(f"bridge_{tmp_path.name}_{len(env)}", files["bridge"])
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_job_retry_is_disabled_so_no_new_id_is_submitted_inside_result(tmp_path, monkeypatch):
+    bridge = load_bridge(tmp_path, monkeypatch)
+    seen = {}
+
+    class Client:
+        def query(self, sql, **kwargs):
+            seen.update(kwargs)
+            return SimpleNamespace(job_id=kwargs.get("job_id"), project="p", location="US")
+
+    module = SimpleNamespace(Client=Client)
+    bridge._patch_bigquery(module)
+    module.Client().query("SELECT 1", job_id="okf_rcpt_x")
+    assert seen["job_retry"] is None
+    assert seen["job_id"] == "okf_rcpt_x"     # the caller's deterministic id is never replaced
+
+
+def test_an_explicit_caller_job_retry_is_preserved(tmp_path, monkeypatch):
+    bridge = load_bridge(tmp_path, monkeypatch)
+    seen = {}
+
+    class Client:
+        def query(self, sql, **kwargs):
+            seen.update(kwargs)
+            return SimpleNamespace(job_id="j", project="p", location="US")
+
+    module = SimpleNamespace(Client=Client)
+    bridge._patch_bigquery(module)
+    sentinel = object()
+    module.Client().query("SELECT 1", job_retry=sentinel)
+    assert seen["job_retry"] is sentinel
+
+
+def test_the_scope_shim_adds_the_email_scope_and_changes_nothing_else(tmp_path, monkeypatch):
+    bridge = load_bridge(tmp_path, monkeypatch)
+    captured = []
+    module = SimpleNamespace(default=lambda scopes=None, *a, **kw: captured.append(scopes) or ("creds", "proj"))
+    bridge._patch_auth(module)
+    module.default(["https://www.googleapis.com/auth/cloud-platform"])
+    assert captured[-1] == ["https://www.googleapis.com/auth/cloud-platform", bridge.USERINFO_EMAIL]
+    module.default(None)
+    assert captured[-1] is None               # nothing is invented when no scopes were requested
+
+
+def test_the_scope_shim_can_be_switched_off(tmp_path, monkeypatch):
+    bridge = load_bridge(tmp_path, monkeypatch, OKF_WINDOW_EMAIL_SCOPE="0")
+    captured = []
+    module = SimpleNamespace(default=lambda scopes=None, *a, **kw: captured.append(scopes) or ("c", "p"))
+    bridge._patch_auth(module)
+    module.default(["scope"])
+    assert captured[-1] == ["scope"]
+    assert bridge.installed == ["google.auth(no-scope-shim)"]
+
+
+def test_the_send_guard_bounds_every_dispatch_including_a_refresh_retry(tmp_path, monkeypatch):
+    """AuthorizedSession.request() can send twice: the original and a 401 retry after a credential refresh."""
+    bridge = load_bridge(tmp_path, monkeypatch, OKF_WINDOW_DEADLINE_EPOCH=repr(time.time() + 5))
+    sends = []
+
+    class AuthorizedSession:
+        def send(self, request, **kwargs):
+            sends.append(kwargs.get("timeout"))
+            return "response"
+
+        def request(self, method, url, **kwargs):
+            self.send("first", timeout=None)      # the original dispatch
+            self.send("retry", timeout=3600)      # the internal 401 retry after a refresh
+            return "done"
+
+    module = SimpleNamespace(AuthorizedSession=AuthorizedSession)
+    bridge._patch_session(module)
+    AuthorizedSession().request("GET", "https://example.test")
+    assert len(sends) == 2
+    assert all(t is not None and 0 < t <= 5 for t in sends)
+
+
+def test_the_send_guard_refuses_after_stop(tmp_path, monkeypatch):
+    bridge = load_bridge(tmp_path, monkeypatch)
+    (tmp_path / "STOP").write_text("{}")
+    sent = []
+
+    class AuthorizedSession:
+        def send(self, request, **kwargs):
+            sent.append(request)
+
+    module = SimpleNamespace(AuthorizedSession=AuthorizedSession)
+    bridge._patch_session(module)
+    with pytest.raises(bridge.WindowStopped):
+        AuthorizedSession().send("request")
+    assert sent == []
+
+
+def test_a_dispatch_after_the_deadline_is_refused_even_mid_run(tmp_path, monkeypatch):
+    bridge = load_bridge(tmp_path, monkeypatch, OKF_WINDOW_DEADLINE_EPOCH=repr(time.time() - 1))
+    with pytest.raises(bridge.WindowStopped):
+        bridge.check("http")
+
+
+def test_the_deadline_is_absolute_and_is_not_rebased(tmp_path, monkeypatch):
+    """A child that started late gets the time that is actually left, not a fresh full budget."""
+    bridge = load_bridge(tmp_path, monkeypatch, OKF_WINDOW_DEADLINE_EPOCH=repr(time.time() + 2))
+    assert 0 < bridge.remaining() <= 2
+    assert bridge.budget_timeout(900) <= 2
+
+
+# ----------------------------------------------------------------------------- the runner
+@needs_sdk
+def test_the_runner_closes_admission_before_terminating_an_overrunning_child(tmp_path):
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 1.0, directory=tmp_path / "priv")
+    RW.bootstrap_files(bridge.dir)
+    script = tmp_path / "slow.py"
+    script.write_text("import time\ntime.sleep(30)\n")
+    run = bridge.runner(terminate_grace=5)
+    started = time.monotonic()
+    result = run([sys.executable, str(script)])
+    assert time.monotonic() - started < 20
+    assert result.returncode != 0
+    assert bridge.stop_path.exists(), "admission must close before the process is terminated"
+    assert "does not cancel its server jobs" in result.stderr
+
+
+@needs_sdk
+def test_the_runner_returns_a_completed_process_for_a_normal_child(tmp_path):
+    bridge = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 120, directory=tmp_path / "priv")
+    RW.bootstrap_files(bridge.dir)
+    script = tmp_path / "quick.py"
+    script.write_text("print('hello')\n")
+    result = bridge.runner()([sys.executable, str(script)])
+    assert result.returncode == 0 and "hello" in result.stdout
+    assert not bridge.stop_path.exists()
+
+
+@needs_sdk
+def test_two_overlapping_bridges_keep_separate_private_journals(tmp_path):
+    a = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 600, directory=tmp_path / "a")
+    b = RW.ReceiptBridge(SDK_ROOT, label="w", deadline_epoch=time.time() + 600, directory=tmp_path / "b")
+    for bridge in (a, b):
+        RW.bootstrap_files(bridge.dir)
+    assert a.journal_path != b.journal_path and a.stop_path != b.stop_path
+    a.stop()
+    assert not b.stop_path.exists()          # one invocation's stop never closes another's admission

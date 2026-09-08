@@ -81,11 +81,17 @@ def _parse_list(step: dict) -> Optional[list]:
         return None
 
 
-def require_clean_windows(m: dict):
+def require_clean_windows(m: dict, evidence_dir: Optional[str | Path] = None):
+    """Capacity deletion AND a separate verified job-cleanup receipt, for every window that was ever opened.
+
+    `evidence_dir` names where the journal/receipt pair is read from; it defaults to the manifest's own directory. A
+    reconstruction staged by `reconcile_window` can therefore be gated in place, before anyone decides to publish it
+    into `evidence/` (Slice A U1). A different directory relaxes nothing: the same structural check runs."""
+    d = Path(evidence_dir) if evidence_dir is not None else Path(MANIFEST).parent
     if any(w.get("opened_at") and not w.get("verified_gone") for w in m["windows"]):
         raise RuntimeError("an earlier reservation window is outstanding; verify its cleanup before opening another")
     for w in m["windows"]:
-        if w.get("opened_at") and not job_cleanup_verified(w["label"], Path(MANIFEST).parent / f'jobs_{w["label"]}.json'):
+        if w.get("opened_at") and not job_cleanup_verified(w["label"], d / f'jobs_{w["label"]}.json'):
             raise RuntimeError(f'job cleanup is unverified for {w["label"]}; reconcile its journal before opening another')
 
 
