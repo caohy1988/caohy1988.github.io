@@ -26,6 +26,18 @@
     "ownership": "EXCLUDED",
     "reason": "created inside the recorded capacity interval of all-0017, which owns it: the driver's own capacity read (`region-us`.INFORMATION_SCHEMA.RESERVATIONS_TIMELINE WHERE reservation_name = @r), created 00:21:17Z inside all-0017's recorded interval and routed to its Enterprise reservation"
    },
+   "8526efa6-c55c-4488-a050-421d3eb580b4": {
+    "evidence": {
+     "created_ms": "1788653875499",
+     "labels": {
+      "okf_spike": "bq_graph_20260905"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier"
+   },
    "afbe7061-813a-439d-afb7-2c9efe06d2e7": {
     "evidence": {
      "created_ms": "1788652876697",
@@ -95,6 +107,18 @@
     },
     "ownership": "EXCLUDED",
     "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "fccaf7f9-eae1-4be1-9738-f304aa1933bb": {
+    "evidence": {
+     "created_ms": "1788653396310",
+     "labels": {
+      "okf_spike": "bq_graph_20260905"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "setup of the integration-0009 invocation, which owns it: the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier"
    },
    "okf_rcpt_0d5dee6d11a98c7551a44b04_c890dce166d831b4": {
     "evidence": {
@@ -716,391 +740,469 @@
   ],
   "excluded": [
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier",
     "ref": {
      "job_id": "8526efa6-c55c-4488-a050-421d3eb580b4",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "operator_decision"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "106f4692-e265-4ac7-b239-a79abd12116f",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "f1f81620-d47f-4c6f-acde-1ba48e4afc01",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "428573e0-e293-468a-9a55-da1457597321",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "f79caa4e-f946-4d96-bef3-8f4cb21fc3e4",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "ab2bb624-83ab-4c75-ac4a-6d98325496ff",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "56cacb6d-a37e-40f5-8f3e-290b918b2871",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "eb953c9e-13c2-4d60-8f72-9dc59606c9c6",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "d582a58d-ecf9-47fd-9113-73a6591bcd22",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "e74f1303-806f-4bdf-aa37-6d5e11b427a0",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "758179c6-e991-46ea-b3bf-99503b7630a2",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "b036fd81-235f-4b5e-9193-6cc53bf3a759",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "77ac29ab-7ca3-4485-b94b-9d413af79847",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "3c1db739-51d2-494c-93b8-491b726d05e9",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "a1de076b-1f75-4374-8a1e-b025ba68e6aa",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "76290217-f198-4bc0-aa64-c1c9adca26cf",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    }
   ],
   "label": "all-0012",
   "ledger": [
    {
     "evidence": {
-     "containing_windows": [],
-     "created": "2026-09-06T00:17:55.499000+00:00",
-     "reservation_id": null
+     "created_ms": "1788653875499",
+     "labels": {
+      "okf_spike": "bq_graph_20260905"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier",
     "ref": {
      "job_id": "8526efa6-c55c-4488-a050-421d3eb580b4",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "operator_decision"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:47.612000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "106f4692-e265-4ac7-b239-a79abd12116f",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:47.604000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "f1f81620-d47f-4c6f-acde-1ba48e4afc01",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:46.406000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "428573e0-e293-468a-9a55-da1457597321",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:45.345000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "f79caa4e-f946-4d96-bef3-8f4cb21fc3e4",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:45.344000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "ab2bb624-83ab-4c75-ac4a-6d98325496ff",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:44.130000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "56cacb6d-a37e-40f5-8f3e-290b918b2871",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:43.199000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "eb953c9e-13c2-4d60-8f72-9dc59606c9c6",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:43.161000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "d582a58d-ecf9-47fd-9113-73a6591bcd22",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:41.808000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "e74f1303-806f-4bdf-aa37-6d5e11b427a0",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:40.568000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "758179c6-e991-46ea-b3bf-99503b7630a2",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:40.541000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "b036fd81-235f-4b5e-9193-6cc53bf3a759",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:39.047000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "77ac29ab-7ca3-4485-b94b-9d413af79847",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:37.881000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "3c1db739-51d2-494c-93b8-491b726d05e9",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:37.812000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "a1de076b-1f75-4374-8a1e-b025ba68e6aa",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-06T00:17:36.468000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "76290217-f198-4bc0-aa64-c1c9adca26cf",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
@@ -1122,7 +1224,7 @@
       "reason": "invalidQuery"
      },
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:28.497970+00:00",
+     "read_at": "2026-09-08T10:55:34.673360+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "6a8404e0-6914-4b2a-b0a8-bd2f8ff5b077",
@@ -1151,7 +1253,7 @@
      "ended": "2026-09-06T00:15:39.305000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:28.616576+00:00",
+     "read_at": "2026-09-08T10:55:34.855355+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "906c7c68-42a4-4dc4-ae28-f5a9cdff792d",
@@ -1180,7 +1282,7 @@
      "ended": "2026-09-06T00:15:36.117000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:28.940205+00:00",
+     "read_at": "2026-09-08T10:55:35.323658+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "875e94d3-4d7b-441a-9b19-8a91480ac4a8",
@@ -1209,7 +1311,7 @@
      "ended": "2026-09-06T00:15:35.218000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:29.087342+00:00",
+     "read_at": "2026-09-08T10:55:35.455171+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "6bef9b0d-ca91-41d3-8f64-90c78fb2bc95",
@@ -1238,7 +1340,7 @@
      "ended": "2026-09-06T00:15:33.789000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:29.202800+00:00",
+     "read_at": "2026-09-08T10:55:35.578894+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "413395a7-b02f-474d-9e09-4e23230e30bf",
@@ -1267,7 +1369,7 @@
      "ended": "2026-09-06T00:15:31.753000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:29.365308+00:00",
+     "read_at": "2026-09-08T10:55:35.728598+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "234f5dff-dcb8-4165-9b8b-3f5776a46b50",
@@ -1296,7 +1398,7 @@
      "ended": "2026-09-06T00:15:29.468000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:29.454450+00:00",
+     "read_at": "2026-09-08T10:55:35.870094+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "631d43b6-b8d2-414a-b62e-ceb485316ef2",
@@ -1325,7 +1427,7 @@
      "ended": "2026-09-06T00:15:27.352000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:29.554328+00:00",
+     "read_at": "2026-09-08T10:55:36.010827+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "e1b2945b-9eda-4299-9776-5d48122dd2ff",
@@ -1354,7 +1456,7 @@
      "ended": "2026-09-06T00:15:25.109000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:29.735090+00:00",
+     "read_at": "2026-09-08T10:55:36.111599+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "466c5c07-6e1c-4149-9456-84c1f8926a11",
@@ -1383,7 +1485,7 @@
      "ended": "2026-09-06T00:15:23.311000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:29.864600+00:00",
+     "read_at": "2026-09-08T10:55:36.308692+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "ff628c13-4ace-42b0-8a1b-d0952de8f731",
@@ -1412,7 +1514,7 @@
      "ended": "2026-09-06T00:15:22.340000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:29.953552+00:00",
+     "read_at": "2026-09-08T10:55:36.458986+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "eb11203e-ecfa-46b5-9bbf-37a73dc38bc1",
@@ -1441,7 +1543,7 @@
      "ended": "2026-09-06T00:15:20.548000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:30.050833+00:00",
+     "read_at": "2026-09-08T10:55:36.571478+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "d13de364-262c-47c2-b7d1-47533283738c",
@@ -1470,7 +1572,7 @@
      "ended": "2026-09-06T00:15:17.692000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:30.153965+00:00",
+     "read_at": "2026-09-08T10:55:36.773504+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "392702b1-b40a-4c20-87e3-77052ac1cbde",
@@ -1499,7 +1601,7 @@
      "ended": "2026-09-06T00:15:15.102000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:30.313195+00:00",
+     "read_at": "2026-09-08T10:55:36.907691+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "217c6763-7a08-4226-94e0-478dde81b641",
@@ -1528,7 +1630,7 @@
      "ended": "2026-09-06T00:15:12.420000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:30.420671+00:00",
+     "read_at": "2026-09-08T10:55:37.021758+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "e603f374-5781-4c9b-a2de-3e4d5b9d32c5",
@@ -1557,7 +1659,7 @@
      "ended": "2026-09-06T00:15:05.143000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:30.516857+00:00",
+     "read_at": "2026-09-08T10:55:37.146933+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "a2471d5a-2455-44fd-bac4-7aa5de094149",
@@ -1586,7 +1688,7 @@
      "ended": "2026-09-06T00:15:04.191000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:30.614409+00:00",
+     "read_at": "2026-09-08T10:55:37.278284+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "dba6c927-1654-4f72-8465-574ff18b739b",
@@ -1615,7 +1717,7 @@
      "ended": "2026-09-06T00:15:02.715000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:30.705067+00:00",
+     "read_at": "2026-09-08T10:55:37.432108+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "00a6e580-888a-44f0-b67a-c4a024c7024f",
@@ -1644,7 +1746,7 @@
      "ended": "2026-09-06T00:15:00.077000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:30.824905+00:00",
+     "read_at": "2026-09-08T10:55:37.556677+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "743bb879-67c0-41e7-ba27-0d5c2594ea9a",
@@ -1673,7 +1775,7 @@
      "ended": "2026-09-06T00:14:59.165000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:30.942908+00:00",
+     "read_at": "2026-09-08T10:55:37.666620+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "b473a66d-1443-4e04-b029-acfd40c8120b",
@@ -1702,7 +1804,7 @@
      "ended": "2026-09-06T00:14:57.666000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:31.082993+00:00",
+     "read_at": "2026-09-08T10:55:37.821400+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "24204912-7a3b-434e-af09-907e8f84e53b",
@@ -1731,7 +1833,7 @@
      "ended": "2026-09-06T00:14:55.988000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:31.220008+00:00",
+     "read_at": "2026-09-08T10:55:37.965957+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "b9bf7ed3-2e09-4ff9-9ca9-8596a5c6400d",
@@ -1760,7 +1862,7 @@
      "ended": "2026-09-06T00:14:54.635000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:31.332817+00:00",
+     "read_at": "2026-09-08T10:55:38.118500+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "c1325cae-42c5-4aa4-8445-0fdd2ac5599c",
@@ -1789,7 +1891,7 @@
      "ended": "2026-09-06T00:14:53.215000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:31.780060+00:00",
+     "read_at": "2026-09-08T10:55:38.277741+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "be1a7cbb-c3f6-479b-8548-f700137d5de1",
@@ -1818,7 +1920,7 @@
      "ended": "2026-09-06T00:14:41.263000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:31.894319+00:00",
+     "read_at": "2026-09-08T10:55:38.449038+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "0323e351-7ab5-4f39-9060-99cfb8843bbf",
@@ -1854,7 +1956,7 @@
      "ended": "2026-09-06T00:14:30.119000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:31.982746+00:00",
+     "read_at": "2026-09-08T10:55:38.574180+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "59293ca7-fbff-46fd-b9be-df4c13fab8a1",
@@ -1890,7 +1992,7 @@
      "ended": "2026-09-06T00:14:18.723000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:32.104785+00:00",
+     "read_at": "2026-09-08T10:55:38.698400+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "b2691c54-ee25-4aa0-9931-a96eae3e47d7",
@@ -1926,7 +2028,7 @@
      "ended": "2026-09-06T00:14:06.943000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:32.231729+00:00",
+     "read_at": "2026-09-08T10:55:38.825487+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "0caa32ab-300f-44a8-a1e1-19f83e4a8133",
@@ -1962,7 +2064,7 @@
      "ended": "2026-09-06T00:13:55.735000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:32.354045+00:00",
+     "read_at": "2026-09-08T10:55:38.953506+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "a7e9b0be-68d2-42aa-b9b8-7a4b4524c2ac",
@@ -1998,7 +2100,7 @@
      "ended": "2026-09-06T00:13:44.135000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:32.469577+00:00",
+     "read_at": "2026-09-08T10:55:39.159258+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "cf463c86-ca66-485e-816b-e481f827abf4",
@@ -2037,7 +2139,7 @@
       "reason": "unknown"
      },
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:32.612747+00:00",
+     "read_at": "2026-09-08T10:55:39.277085+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "a9b86847-6928-41c2-a115-5f02d7aa9496",
@@ -2076,7 +2178,7 @@
       "reason": "unknown"
      },
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:32.737785+00:00",
+     "read_at": "2026-09-08T10:55:39.411957+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "038e98bb-5204-4c45-984c-4a9edf6a8f01",
@@ -2115,7 +2217,7 @@
       "reason": "unknown"
      },
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:32.831316+00:00",
+     "read_at": "2026-09-08T10:55:39.551057+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "edc8f140-681f-4e7b-8de5-8900754f0cfe",
@@ -2154,7 +2256,7 @@
       "reason": "unknown"
      },
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:32.946511+00:00",
+     "read_at": "2026-09-08T10:55:39.669097+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "a55ab554-c75b-48ad-af1f-49950ffb74fd",
@@ -2193,7 +2295,7 @@
       "reason": "unknown"
      },
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:33.098107+00:00",
+     "read_at": "2026-09-08T10:55:39.820760+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "9efbf002-3b07-48c5-b344-ce24b8438e4f",
@@ -2229,7 +2331,7 @@
      "ended": "2026-09-06T00:12:38.328000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:33.235990+00:00",
+     "read_at": "2026-09-08T10:55:39.952975+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "e08c973e-b8d7-4d1f-a23a-21b6e37cecf7",
@@ -2492,7 +2594,7 @@
   "quiescence": {
    "basis": "platform_probe+local_record",
    "established": true,
-   "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-06T00:15:55+00:00 to 2026-09-08T10:22:25.674147+00:00 (4 page(s), 893 job(s)) shows 0 job(s) attributable to 'all-0012' after it closed, 0 non-terminal job(s) project-wide, and 209190s of silence; local record: evidence/all_all-0012.json#/finished_at",
+   "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-06T00:15:55+00:00 to 2026-09-08T10:55:31.460437+00:00 (4 page(s), 892 job(s)) shows 0 job(s) attributable to 'all-0012' after it closed, 0 non-terminal job(s) project-wide, and 211176s of silence; local record: evidence/all_all-0012.json#/finished_at",
    "limit": "a silent, complete platform listing shows that submission STOPPED; it is not proof that the original process object no longer exists. Capacity absence is verified separately.",
    "local_record": {
     "gap": false,
@@ -2504,7 +2606,7 @@
    "probe": {
     "attributable_after_close": [],
     "last_attributable_at": null,
-    "listed": 893,
+    "listed": 892,
     "listing": {
      "capped": false,
      "complete": true,
@@ -2516,9 +2618,9 @@
     "min_silence_s": 3600,
     "nonterminal": [],
     "project": "test-project-0728-467323",
-    "silence_s": 209189.772611,
+    "silence_s": 211175.558901,
     "since": "2026-09-06T00:15:55+00:00",
-    "until": "2026-09-08T10:22:25.674147+00:00"
+    "until": "2026-09-08T10:55:31.460437+00:00"
    },
    "stopped_at": "2026-09-06T00:15:55.901536+00:00"
   },
@@ -2534,7 +2636,7 @@
      "reason": "invalidQuery"
     },
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:28.497970+00:00",
+    "read_at": "2026-09-08T10:55:34.673360+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "6a8404e0-6914-4b2a-b0a8-bd2f8ff5b077",
@@ -2553,7 +2655,7 @@
     "ended": "2026-09-06T00:15:39.305000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:28.616576+00:00",
+    "read_at": "2026-09-08T10:55:34.855355+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "906c7c68-42a4-4dc4-ae28-f5a9cdff792d",
@@ -2572,7 +2674,7 @@
     "ended": "2026-09-06T00:15:36.117000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:28.940205+00:00",
+    "read_at": "2026-09-08T10:55:35.323658+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "875e94d3-4d7b-441a-9b19-8a91480ac4a8",
@@ -2591,7 +2693,7 @@
     "ended": "2026-09-06T00:15:35.218000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:29.087342+00:00",
+    "read_at": "2026-09-08T10:55:35.455171+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "6bef9b0d-ca91-41d3-8f64-90c78fb2bc95",
@@ -2610,7 +2712,7 @@
     "ended": "2026-09-06T00:15:33.789000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:29.202800+00:00",
+    "read_at": "2026-09-08T10:55:35.578894+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "413395a7-b02f-474d-9e09-4e23230e30bf",
@@ -2629,7 +2731,7 @@
     "ended": "2026-09-06T00:15:31.753000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:29.365308+00:00",
+    "read_at": "2026-09-08T10:55:35.728598+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "234f5dff-dcb8-4165-9b8b-3f5776a46b50",
@@ -2648,7 +2750,7 @@
     "ended": "2026-09-06T00:15:29.468000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:29.454450+00:00",
+    "read_at": "2026-09-08T10:55:35.870094+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "631d43b6-b8d2-414a-b62e-ceb485316ef2",
@@ -2667,7 +2769,7 @@
     "ended": "2026-09-06T00:15:27.352000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:29.554328+00:00",
+    "read_at": "2026-09-08T10:55:36.010827+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "e1b2945b-9eda-4299-9776-5d48122dd2ff",
@@ -2686,7 +2788,7 @@
     "ended": "2026-09-06T00:15:25.109000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:29.735090+00:00",
+    "read_at": "2026-09-08T10:55:36.111599+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "466c5c07-6e1c-4149-9456-84c1f8926a11",
@@ -2705,7 +2807,7 @@
     "ended": "2026-09-06T00:15:23.311000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:29.864600+00:00",
+    "read_at": "2026-09-08T10:55:36.308692+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "ff628c13-4ace-42b0-8a1b-d0952de8f731",
@@ -2724,7 +2826,7 @@
     "ended": "2026-09-06T00:15:22.340000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:29.953552+00:00",
+    "read_at": "2026-09-08T10:55:36.458986+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "eb11203e-ecfa-46b5-9bbf-37a73dc38bc1",
@@ -2743,7 +2845,7 @@
     "ended": "2026-09-06T00:15:20.548000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:30.050833+00:00",
+    "read_at": "2026-09-08T10:55:36.571478+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "d13de364-262c-47c2-b7d1-47533283738c",
@@ -2762,7 +2864,7 @@
     "ended": "2026-09-06T00:15:17.692000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:30.153965+00:00",
+    "read_at": "2026-09-08T10:55:36.773504+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "392702b1-b40a-4c20-87e3-77052ac1cbde",
@@ -2781,7 +2883,7 @@
     "ended": "2026-09-06T00:15:15.102000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:30.313195+00:00",
+    "read_at": "2026-09-08T10:55:36.907691+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "217c6763-7a08-4226-94e0-478dde81b641",
@@ -2800,7 +2902,7 @@
     "ended": "2026-09-06T00:15:12.420000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:30.420671+00:00",
+    "read_at": "2026-09-08T10:55:37.021758+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "e603f374-5781-4c9b-a2de-3e4d5b9d32c5",
@@ -2819,7 +2921,7 @@
     "ended": "2026-09-06T00:15:05.143000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:30.516857+00:00",
+    "read_at": "2026-09-08T10:55:37.146933+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "a2471d5a-2455-44fd-bac4-7aa5de094149",
@@ -2838,7 +2940,7 @@
     "ended": "2026-09-06T00:15:04.191000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:30.614409+00:00",
+    "read_at": "2026-09-08T10:55:37.278284+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "dba6c927-1654-4f72-8465-574ff18b739b",
@@ -2857,7 +2959,7 @@
     "ended": "2026-09-06T00:15:02.715000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:30.705067+00:00",
+    "read_at": "2026-09-08T10:55:37.432108+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "00a6e580-888a-44f0-b67a-c4a024c7024f",
@@ -2876,7 +2978,7 @@
     "ended": "2026-09-06T00:15:00.077000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:30.824905+00:00",
+    "read_at": "2026-09-08T10:55:37.556677+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "743bb879-67c0-41e7-ba27-0d5c2594ea9a",
@@ -2895,7 +2997,7 @@
     "ended": "2026-09-06T00:14:59.165000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:30.942908+00:00",
+    "read_at": "2026-09-08T10:55:37.666620+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "b473a66d-1443-4e04-b029-acfd40c8120b",
@@ -2914,7 +3016,7 @@
     "ended": "2026-09-06T00:14:57.666000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:31.082993+00:00",
+    "read_at": "2026-09-08T10:55:37.821400+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "24204912-7a3b-434e-af09-907e8f84e53b",
@@ -2933,7 +3035,7 @@
     "ended": "2026-09-06T00:14:55.988000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:31.220008+00:00",
+    "read_at": "2026-09-08T10:55:37.965957+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "b9bf7ed3-2e09-4ff9-9ca9-8596a5c6400d",
@@ -2952,7 +3054,7 @@
     "ended": "2026-09-06T00:14:54.635000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:31.332817+00:00",
+    "read_at": "2026-09-08T10:55:38.118500+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "c1325cae-42c5-4aa4-8445-0fdd2ac5599c",
@@ -2971,7 +3073,7 @@
     "ended": "2026-09-06T00:14:53.215000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:31.780060+00:00",
+    "read_at": "2026-09-08T10:55:38.277741+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "be1a7cbb-c3f6-479b-8548-f700137d5de1",
@@ -2990,7 +3092,7 @@
     "ended": "2026-09-06T00:14:41.263000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:31.894319+00:00",
+    "read_at": "2026-09-08T10:55:38.449038+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "0323e351-7ab5-4f39-9060-99cfb8843bbf",
@@ -3009,7 +3111,7 @@
     "ended": "2026-09-06T00:14:30.119000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:31.982746+00:00",
+    "read_at": "2026-09-08T10:55:38.574180+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "59293ca7-fbff-46fd-b9be-df4c13fab8a1",
@@ -3028,7 +3130,7 @@
     "ended": "2026-09-06T00:14:18.723000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:32.104785+00:00",
+    "read_at": "2026-09-08T10:55:38.698400+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "b2691c54-ee25-4aa0-9931-a96eae3e47d7",
@@ -3047,7 +3149,7 @@
     "ended": "2026-09-06T00:14:06.943000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:32.231729+00:00",
+    "read_at": "2026-09-08T10:55:38.825487+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "0caa32ab-300f-44a8-a1e1-19f83e4a8133",
@@ -3066,7 +3168,7 @@
     "ended": "2026-09-06T00:13:55.735000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:32.354045+00:00",
+    "read_at": "2026-09-08T10:55:38.953506+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "a7e9b0be-68d2-42aa-b9b8-7a4b4524c2ac",
@@ -3085,7 +3187,7 @@
     "ended": "2026-09-06T00:13:44.135000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:32.469577+00:00",
+    "read_at": "2026-09-08T10:55:39.159258+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "cf463c86-ca66-485e-816b-e481f827abf4",
@@ -3107,7 +3209,7 @@
      "reason": "unknown"
     },
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:32.612747+00:00",
+    "read_at": "2026-09-08T10:55:39.277085+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "a9b86847-6928-41c2-a115-5f02d7aa9496",
@@ -3129,7 +3231,7 @@
      "reason": "unknown"
     },
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:32.737785+00:00",
+    "read_at": "2026-09-08T10:55:39.411957+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "038e98bb-5204-4c45-984c-4a9edf6a8f01",
@@ -3151,7 +3253,7 @@
      "reason": "unknown"
     },
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:32.831316+00:00",
+    "read_at": "2026-09-08T10:55:39.551057+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "edc8f140-681f-4e7b-8de5-8900754f0cfe",
@@ -3173,7 +3275,7 @@
      "reason": "unknown"
     },
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:32.946511+00:00",
+    "read_at": "2026-09-08T10:55:39.669097+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "a55ab554-c75b-48ad-af1f-49950ffb74fd",
@@ -3195,7 +3297,7 @@
      "reason": "unknown"
     },
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:33.098107+00:00",
+    "read_at": "2026-09-08T10:55:39.820760+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "9efbf002-3b07-48c5-b344-ce24b8438e4f",
@@ -3214,7 +3316,7 @@
     "ended": "2026-09-06T00:12:38.328000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:33.235990+00:00",
+    "read_at": "2026-09-08T10:55:39.952975+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "e08c973e-b8d7-4d1f-a23a-21b6e37cecf7",
@@ -3227,7 +3329,7 @@
     "verified_done": true
    }
   ],
-  "reconciled_at": "2026-09-08T10:22:27.732723+00:00",
+  "reconciled_at": "2026-09-08T10:55:33.638779+00:00",
   "reconstructed": true,
   "recovered_ids": [
    "00a6e580-888a-44f0-b67a-c4a024c7024f",
@@ -3354,9 +3456,9 @@
    "edc8f140-681f-4e7b-8de5-8900754f0cfe",
    "ff628c13-4ace-42b0-8a1b-d0952de8f731"
   ],
-  "journal": "/tmp/okf-post47/stage/jobs_all-0012.json",
-  "journal_sha256": "483f79f8e66ef1b9fb7f8b9d8fa288413166910b1ad6ed4841044a2709584b92",
-  "receipt": "/tmp/okf-post47/stage/jobs_all-0012.cleanup.json",
+  "journal": "/tmp/okf-pr50-fix/stage/jobs_all-0012.json",
+  "journal_sha256": "1e64d8acf994b580e49bd27a3a1393163d6937bc21c98590406bf4178466b415",
+  "receipt": "/tmp/okf-pr50-fix/stage/jobs_all-0012.cleanup.json",
   "staged": true,
   "verified": true
  }

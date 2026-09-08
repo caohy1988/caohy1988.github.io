@@ -93,7 +93,7 @@
   "location": "US",
   "project": "test-project-0728-467323",
   "reconstructed": true,
-  "reconstructed_at": "2026-09-08T10:22:20.503714+00:00",
+  "reconstructed_at": "2026-09-08T10:55:25.215022+00:00",
   "reconstruction": {
     "decisions": {
       "0de731e0-637a-4cb5-b764-9c7d2e82c08a": {
@@ -105,6 +105,18 @@
         },
         "ownership": "EXCLUDED",
         "reason": "created inside the recorded capacity interval of all-0017, which owns it: the driver's own capacity read (`region-us`.INFORMATION_SCHEMA.RESERVATIONS_TIMELINE WHERE reservation_name = @r), created 00:21:17Z inside all-0017's recorded interval and routed to its Enterprise reservation"
+      },
+      "8526efa6-c55c-4488-a050-421d3eb580b4": {
+        "evidence": {
+          "created_ms": "1788653875499",
+          "labels": {
+            "okf_spike": "bq_graph_20260905"
+          },
+          "reservation_id": null,
+          "user_email": "raincoatrun@gmail.com"
+        },
+        "ownership": "EXCLUDED",
+        "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier"
       },
       "afbe7061-813a-439d-afb7-2c9efe06d2e7": {
         "evidence": {
@@ -175,6 +187,18 @@
         },
         "ownership": "EXCLUDED",
         "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+      },
+      "fccaf7f9-eae1-4be1-9738-f304aa1933bb": {
+        "evidence": {
+          "created_ms": "1788653396310",
+          "labels": {
+            "okf_spike": "bq_graph_20260905"
+          },
+          "reservation_id": null,
+          "user_email": "raincoatrun@gmail.com"
+        },
+        "ownership": "EXCLUDED",
+        "reason": "setup of the integration-0009 invocation, which owns it: the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier"
       },
       "okf_rcpt_0d5dee6d11a98c7551a44b04_c890dce166d831b4": {
         "evidence": {
@@ -782,229 +806,229 @@
         "signal": "campaign_other_window"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "setup of the integration-0009 invocation, which owns it: the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier",
         "ref": {
           "job_id": "fccaf7f9-eae1-4be1-9738-f304aa1933bb",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "operator_decision"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "bc312386-54e4-4d9c-9b78-431fda6e0d42",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "ccc5a2c2-b469-4b6f-bcb9-d301b3ce82fa",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "532aaff3-ed57-4ccc-96f8-4f45d55ef6e6",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "4de85736-0c6b-405f-be19-40d0a1573093",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "6e58b90b-0848-41b4-a18d-8e6d57b96193",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "c5f3f884-bf86-44b6-9f06-9811280c814c",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "9fa9e87a-bbf2-45ff-8674-a1a5069728da",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "07844fc2-0296-4cc7-b2ba-b5e1fa8592d9",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "20ac6bda-51bb-46a2-923b-c90126b55a5e",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "bb85390e-5ade-4363-9058-8b4fe89ec9c5",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "071d6b41-9278-4ec5-9552-40a31bfb5585",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "56111417-22f8-4501-980c-5adcedb51be4",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "e4a5d6fa-4865-46a9-9cd8-d7693a9e96b6",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "34617cd2-d270-4f46-8185-87374880100d",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "a2edf80c-3458-45c3-b04e-019342da2816",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "271f6ca8-f3a6-4ad3-b6d1-bfeb7812838f",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "0af4903b-eb45-4d62-ad36-1e75cf52bdfe",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "62fdaa53-83c6-4518-8f52-e8f02cc3528d",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "c3235af1-acc9-413c-a317-ee4026a048b6",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "3d59538b-086a-4c74-b82a-4ecd9aad24a0",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "1e0ee8e7-e88a-49b7-b14e-c0bc8b52f181",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "fc949608-a634-4661-9009-4013a002e38b",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "bb0527ee-2ea9-44ab-b26f-a0fee7a28763",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       },
       {
-        "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+        "reason": "campaign work created outside the retained invocation span of 'integration-0007' (2026-09-06T00:07:32.984004+00:00 .. 2026-09-06T00:09:09.727229+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
         "ref": {
           "job_id": "f43a33b3-5ed1-475d-99e0-9eb90f3f1828",
           "location": "US",
           "project": "test-project-0728-467323"
         },
-        "signal": "campaign_outside_all_intervals"
+        "signal": "outside_retained_invocation"
       }
     ],
     "listing": {
@@ -1026,7 +1050,7 @@
     "quiescence": {
       "basis": "platform_probe+local_record",
       "established": true,
-      "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-06T00:09:09+00:00 to 2026-09-08T10:22:17.700403+00:00 (5 page(s), 932 job(s)) shows 0 job(s) attributable to 'integration-0007' after it closed, 0 non-terminal job(s) project-wide, and 209588s of silence; local record: evidence/integration_integration-0007.json#/finished_at",
+      "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-06T00:09:09+00:00 to 2026-09-08T10:55:22.336319+00:00 (5 page(s), 931 job(s)) shows 0 job(s) attributable to 'integration-0007' after it closed, 0 non-terminal job(s) project-wide, and 211573s of silence; local record: evidence/integration_integration-0007.json#/finished_at",
       "limit": "a silent, complete platform listing shows that submission STOPPED; it is not proof that the original process object no longer exists. Capacity absence is verified separately.",
       "local_record": {
         "gap": false,
@@ -1038,7 +1062,7 @@
       "probe": {
         "attributable_after_close": [],
         "last_attributable_at": null,
-        "listed": 932,
+        "listed": 931,
         "listing": {
           "capped": false,
           "complete": true,
@@ -1050,9 +1074,9 @@
         "min_silence_s": 3600,
         "nonterminal": [],
         "project": "test-project-0728-467323",
-        "silence_s": 209587.973174,
+        "silence_s": 211572.60909,
         "since": "2026-09-06T00:09:09+00:00",
-        "until": "2026-09-08T10:22:17.700403+00:00"
+        "until": "2026-09-08T10:55:22.336319+00:00"
       },
       "stopped_at": "2026-09-06T00:09:09.727229+00:00"
     },

@@ -14,7 +14,9 @@ Everything else is a refusal. In particular:
   * an incomplete listing (a page token left behind, a cap hit, an `unreachable` location, a transport error) is
     BLOCKED, never "no more jobs";
   * a job created inside the span with no ownership signal is AMBIGUOUS and blocks; so does a job that only carries the
-    window's reservation NAME, because a reservation name or a timestamp alone cannot settle ownership;
+    window's reservation NAME, because a reservation name or a timestamp alone cannot settle ownership; so does
+    campaign work outside every declared ownership span, because where a job RAN does not establish which invocation
+    SUBMITTED it - setup, other-pool and post-close continuation work all live there;
   * `NotFound` on a `jobs.get` is UNVERIFIED, never `verified_done`. `lifecycle._cancel_one` may treat NOT_FOUND as
     closed because it journals an id BEFORE submitting it; a legacy submission that was never journaled has no such
     guarantee, so that permissive reading must not be inherited here;
@@ -248,16 +250,48 @@ def campaign_signal(job: dict, campaign: Optional[dict]) -> Optional[str]:
 
 
 def _interval(w: dict) -> Optional[tuple]:
-    """One declared window's RECORDED capacity interval. Unpadded on purpose: padding exists to widen the LISTING
-    against clock skew, and must never widen an ownership claim."""
+    """One declared window's OWNERSHIP span: the hull of its recorded capacity interval and, when the driver's own run
+    record survived, its retained invocation span.
+
+    Capacity is the wrong boundary on its own. An invocation submits before it opens and can still be submitting after
+    it closes - setup lookups, jobs routed to another pool, a continuation the watchdog's capacity delete did not stop
+    - and all of that is the invocation's obligation even though none of it ran on the window's slots (Astra PR50 P1).
+    Where a retained `started_at`/`finished_at` exists it therefore extends the span; where it does not, the span is
+    the capacity interval and everything outside it stays unresolved rather than being excluded by rule.
+
+    Unpadded on purpose: padding exists to widen the LISTING against clock skew, and must never widen a claim."""
     opened = w.get("opened_at")
     if not opened:
         return None                                     # a closer-only row is not an opening
+    inv = w.get("invocation") or {}
     try:
         start = _ts(opened)
-        return (start, _ts(w["closed_at"]) if w.get("closed_at") else None)
+        end = _ts(w["closed_at"]) if w.get("closed_at") else None
+        if inv.get("started_at"):
+            start = min(start, _ts(inv["started_at"]))
+        if end is not None and inv.get("finished_at"):
+            end = max(end, _ts(inv["finished_at"]))
+        elif inv.get("finished_at"):
+            end = _ts(inv["finished_at"])
+        return (start, end)
     except (TypeError, ValueError):
         return None
+
+
+def closed_invocation(windows: Iterable[dict], label: str) -> Optional[dict]:
+    """This window's retained invocation record, but only when it BOUNDS the process at both ends.
+
+    A closed record is the one thing that can positively say a window did not submit a job it does not otherwise
+    claim: the driver's own `started_at`/`finished_at`, or a watcher whose teardown runs only after `kill -0` on the
+    driver pid fails. An open-ended record (`all-0017` never stamped an exit) bounds nothing on that side, so work
+    outside it stays unresolved instead."""
+    for w in windows:
+        if w.get("label") != label:
+            continue
+        inv = w.get("invocation") or {}
+        if inv.get("started_at") and inv.get("finished_at"):
+            return inv
+    return None
 
 
 def containing_windows(created: Optional[_dt.datetime], windows: Iterable[dict]) -> tuple:
@@ -348,19 +382,33 @@ def classify(job: dict, *, label: str, start: _dt.datetime, end: _dt.datetime, r
                                   f"window's reservation name is reused across every opening and cannot override that",
                         "evidence": {"created": created.isoformat(), "containing_windows": inside,
                                      "reservation_id": reservation_id}}
-            # It ran under NO opening at all - an on-demand leg of the same driver run. That is a positive finding
-            # rather than an inference from absence, EXCEPT when the job still carries the campaign reservation:
-            # then the platform and the recorded intervals contradict each other and the job stays unresolved.
-            if on_this_reservation:
-                return {"ref": ref, "ownership": AMBIGUOUS, "signal": "reservation_outside_interval",
-                        "reason": f"campaign work on the campaign reservation ({reservation_id}) created outside "
-                                  f"EVERY recorded capacity interval: the reservation and the intervals disagree",
-                        "evidence": {"created": created.isoformat(), "containing_windows": inside}}
-            return {"ref": ref, "ownership": EXCLUDED, "signal": "campaign_outside_all_intervals",
-                    "reason": "campaign work created outside every recorded capacity interval and routed to no "
-                              "campaign reservation: a leg of the campaign, not of this paid opening",
+            # It ran under NO declared ownership span. Where it RAN is not who SUBMITTED it: an invocation's setup
+            # lookup, a job it routed to another pool, or a continuation still running after its capacity was deleted
+            # all sit outside every span while remaining that invocation's obligation. Excluding on location alone
+            # dropped two retained pre-open pointer lookups from these very windows, and would let a live post-close
+            # continuation pass the gate without ever being read back (Astra PR50 P1).
+            #
+            # Only INVOCATION evidence may exclude it, and only of one kind: a retained record that bounds the
+            # driver's process at BOTH ends. Then the process demonstrably did not exist when the job was created, so
+            # it cannot have submitted it. Without such a record this is UNRESOLVED and an explicit decision naming
+            # the job is the only way through.
+            invocation = closed_invocation(windows, label)
+            if invocation:
+                return {"ref": ref, "ownership": EXCLUDED, "signal": "outside_retained_invocation",
+                        "reason": f"campaign work created outside the retained invocation span of {label!r} "
+                                  f"({invocation['started_at']} .. {invocation['finished_at']}): that record bounds "
+                                  f"the driver process at both ends, so it was not running to submit this",
+                        "evidence": {"created": created.isoformat(), "invocation": invocation,
+                                     "reservation_id": reservation_id,
+                                     "on_campaign_reservation": on_this_reservation}}
+            return {"ref": ref, "ownership": AMBIGUOUS, "signal": "campaign_unassigned_invocation",
+                    "reason": ("campaign work created outside every declared ownership span"
+                               + (f", on the campaign reservation ({reservation_id})" if on_this_reservation else "")
+                               + f", and {label!r} has no retained invocation record bounding its driver process at "
+                                 "both ends: where a job ran does not establish which invocation submitted it. "
+                                 "Assign or exclude it explicitly with invocation evidence"),
                     "evidence": {"created": created.isoformat(), "containing_windows": inside,
-                                 "reservation_id": reservation_id}}
+                                 "reservation_id": reservation_id, "on_campaign_reservation": on_this_reservation}}
     if on_this_reservation:
         return {"ref": ref, "ownership": AMBIGUOUS, "signal": "reservation_name",
                 "reason": "the job names this window's reservation, but a reservation name alone does not settle "
@@ -799,16 +847,20 @@ def recover_job_ids(paths: Iterable[str | os.PathLike]) -> dict:
 def build_plan(manifest_path: str | os.PathLike, *, evidence_dir: str | os.PathLike,
                recover_from: Optional[dict] = None, campaign: Optional[dict] = None,
                decisions: Optional[dict] = None, local_records: Optional[dict] = None,
+               invocations: Optional[dict] = None,
                extra_sources: Iterable[str | os.PathLike] = (), min_silence_s: int = 3600) -> dict:
     """A reconciliation plan derived from the committed capacity manifest, not hand-written.
 
     Every row with an `opened_at` becomes a window to reconcile - including any the operator forgot - and every row is
     passed to each window as a DECLARED interval, which is what makes `classify`'s exclusivity check meaningful. A
     closer-only row (no `opened_at`, like `safety-0011`) is carried in `declared` so it still contests instants, but is
-    never promoted to a window needing its own journal."""
+    never promoted to a window needing its own journal. A retained `invocation` span (the driver's own
+    `started_at`/`finished_at`) is attached to both the window and its declared row, so setup and tail work outside the
+    capacity interval is owned rather than left outside every span."""
     manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
     d = Path(evidence_dir)
-    declared = [{"label": w.get("label"), "opened_at": w.get("opened_at"), "closed_at": w.get("closed_at")}
+    declared = [{"label": w.get("label"), "opened_at": w.get("opened_at"), "closed_at": w.get("closed_at"),
+                 "invocation": (invocations or {}).get(w.get("label"))}
                 for w in manifest.get("windows", [])]
     shared = [str(Path(manifest_path))] + [str(d / s) for s in extra_sources]
     windows = []
@@ -820,6 +872,7 @@ def build_plan(manifest_path: str | os.PathLike, *, evidence_dir: str | os.PathL
         recovered = recover_job_ids(sources)
         windows.append({
             "label": label, "opened_at": row.get("opened_at"), "closed_at": row.get("closed_at"),
+            "invocation": (invocations or {}).get(label),
             "sources": sorted(set(sources + shared)),
             "recovered": sorted(recovered),
             "recovered_pointers": recovered,

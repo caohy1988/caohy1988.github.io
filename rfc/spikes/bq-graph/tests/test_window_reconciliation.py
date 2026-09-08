@@ -616,12 +616,15 @@ def test_an_unbounded_opening_contests_every_instant():
     assert entry["evidence"]["unbounded_windows"] == ["later-2"]
 
 
-def test_campaign_work_under_another_opening_or_no_opening_is_excluded_with_a_reason():
+def test_campaign_work_under_another_opening_is_excluded_but_work_under_none_stays_unresolved():
+    """Inside another declared span is a positive assignment. Inside NO span is not: where a job ran does not say
+    which invocation submitted it, so it must stay unresolved until invocation evidence settles it (Astra PR50 P1)."""
     other = classify_one(spike_job("a", created="2026-09-05T23:51:00Z"))
     assert other["ownership"] == RW.EXCLUDED and other["signal"] == "campaign_other_window"
     assert other["evidence"]["containing_windows"] == ["later-2"]
     gap = classify_one(spike_job("b", created="2026-09-05T23:48:30Z"))
-    assert gap["ownership"] == RW.EXCLUDED and gap["signal"] == "campaign_outside_all_intervals"
+    assert gap["ownership"] == RW.AMBIGUOUS and gap["signal"] == "campaign_unassigned_invocation"
+    assert "which invocation submitted it" in gap["reason"]
 
 
 def test_the_shared_reservation_name_cannot_override_another_windows_interval():
@@ -635,10 +638,12 @@ def test_the_shared_reservation_name_cannot_override_another_windows_interval():
 
 def test_a_job_on_this_reservation_outside_the_interval_stays_unresolved():
     """The `okf_rcpt_*` tail: capacity deletion propagates late, so a job can carry a reservation the interval says was
-    already gone. That contradiction is surfaced, never resolved by the exclusion rule."""
+    already gone. That contradiction is surfaced and named, never resolved by an exclusion rule."""
     j = spike_job("t", created="2026-09-05T23:48:30Z", reservation=f"p:US.{RW.RESERVATION}")
     entry = classify_one(j)
-    assert entry["ownership"] == RW.AMBIGUOUS and entry["signal"] == "reservation_outside_interval"
+    assert entry["ownership"] == RW.AMBIGUOUS and entry["signal"] == "campaign_unassigned_invocation"
+    assert entry["evidence"]["on_campaign_reservation"] is True
+    assert f"on the campaign reservation (p:US.{RW.RESERVATION})" in entry["reason"]
 
 
 def test_a_closer_only_row_declares_no_interval_and_contests_nothing():
@@ -650,11 +655,65 @@ def test_a_closer_only_row_declares_no_interval_and_contests_nothing():
 
 def test_padding_widens_the_listing_but_never_an_ownership_claim():
     """`pad_s` exists for clock skew between the local stamp and the service's creationTime. A job in the pad is read
-    (so it cannot hide), but it is outside the recorded interval and is not claimed by it."""
+    (so it cannot hide) and is NOT silently claimed by the interval - but neither is it dismissed: it is unresolved."""
     just_after = spike_job("p", created="2026-09-05T23:47:50Z")            # 30s past the recorded close
     entry = RW.classify(just_after, label="smoke-1", start=RW._ts(OPEN) - _dt.timedelta(seconds=120),
                         end=RW._ts(CLOSE) + _dt.timedelta(seconds=120), campaign=CAMPAIGN, windows=[W1])
-    assert entry["ownership"] == RW.EXCLUDED and entry["signal"] == "campaign_outside_all_intervals"
+    assert entry["ownership"] == RW.AMBIGUOUS and entry["signal"] == "campaign_unassigned_invocation"
+
+
+# ------------------------------------------------------- Astra PR50 P1: setup and tails are the invocation's, not the
+# ------------------------------------------------------- capacity interval's
+def test_a_retained_invocation_span_owns_setup_and_tail_outside_the_capacity_interval():
+    """The 2026-09-05 driver resolved the publication pointer BEFORE it stamped `started_at` and opened capacity
+    (`run.py@b6e4f09:252-265`), and its watchdog could delete capacity while its own submissions continued. Where the
+    driver's run record survived, that span - not the capacity interval - is what owns the work."""
+    w = dict(W1, invocation={"started_at": "2026-09-05T23:43:00Z", "finished_at": "2026-09-05T23:48:30Z"})
+    assert RW._interval(w) == (RW._ts("2026-09-05T23:43:00Z"), RW._ts("2026-09-05T23:48:30Z"))
+    setup = classify_one(spike_job("s", created="2026-09-05T23:43:10Z"), windows=(w, W2))
+    tail = classify_one(spike_job("t", created="2026-09-05T23:48:00Z"), windows=(w, W2))
+    for entry in (setup, tail):
+        assert entry["ownership"] == RW.OWNED and entry["signal"] == "campaign_exclusive_window"
+
+
+def test_a_pre_opening_pointer_lookup_is_never_silently_dropped():
+    """`fccaf7f9…` (00:09:56.310, 0.69s before integration-0009 opens) and `8526efa6…` (00:17:55.499, 0.50s before
+    all-0017 opens) are the retained shape: a campaign-labelled active-publication lookup immediately before an
+    opening. HEAD excluded both. It must not: with no invocation record covering them they are unresolved, and the
+    window blocks until a decision assigns or excludes them."""
+    lookup = spike_job("fccaf7f9", created="2026-09-05T23:43:42.310Z",
+                       query="SELECT publication_id FROM `p.okf_graph_spike_20260905.active_publication` WHERE b = @b")
+    entry = classify_one(lookup)                                   # opens at 23:43:43
+    assert entry["ownership"] == RW.AMBIGUOUS and entry["signal"] == "campaign_unassigned_invocation"
+    result = RW.reconcile("smoke-1", transport=transport_for([lookup] + [spike_job("in", created="2026-09-05T23:45:00Z")]),
+                          window=window(), quiescence=quiescence(), campaign=CAMPAIGN, windows=[W1, W2])
+    assert result["status"] == RW.BLOCKED
+    assert any("fccaf7f9" in b for b in result["blockers"])
+    # and an explicit decision citing the driver's ordering is what resolves it
+    decision = {"fccaf7f9": {"ownership": RW.OWNED, "reason": "run.py@b6e4f09:252 resolves the publication pointer "
+                                                              "before started_at/open_window: this is smoke-1's setup"}}
+    owned = RW.reconcile("smoke-1", transport=transport_for([lookup]), window=window(), quiescence=quiescence(),
+                         campaign=CAMPAIGN, windows=[W1, W2], decisions=decision)
+    assert owned["status"] == RW.RECONCILED and owned["owned"] == ["fccaf7f9"]
+
+
+def test_a_running_post_close_continuation_without_a_reservation_blocks_and_refuses_quiescence(tmp_path):
+    """Astra's PR50 P1 reproduction: one DONE campaign job inside the interval, and a same-invocation campaign job
+    still RUNNING 30s after the close with no reservation, plus a truthful driver-exit record. HEAD excluded the
+    running job, never called `jobs.get` on it, and still produced RECONCILED / verified."""
+    done = spike_job("uuid-done", created="2026-09-05T23:45:00Z")
+    running = spike_job("uuid-running", created="2026-09-05T23:47:50Z", state="RUNNING")
+    t = transport_for([done, running])
+    q = RW.quiescence_probe(t, label="smoke-1", project=PROJ, window=W1, until=NOW, campaign=CAMPAIGN,
+                            windows=[W1, W2], local_record=local_record(stopped_at="2026-09-05T23:48:20Z"))
+    assert q["established"] is False
+    assert any("non-terminal" in r for r in q["not_established_because"])
+    assert [n["ref"]["job_id"] for n in q["probe"]["nonterminal"]] == ["uuid-running"]
+    assert q["probe"]["nonterminal"][0]["ownership"] == RW.AMBIGUOUS
+    result = RW.reconcile("smoke-1", transport=t, window=window(), quiescence=q, campaign=CAMPAIGN, windows=[W1, W2])
+    assert result["status"] == RW.BLOCKED
+    assert any("uuid-running" in b for b in result["blockers"])
+    assert RW.stage(result, tmp_path)["staged"] is False
 
 
 def test_reconcile_owns_a_campaign_window_the_local_record_never_named(tmp_path):
@@ -841,3 +900,55 @@ def test_a_short_child_read_keeps_the_window_blocked():
     result = run(transport=t)
     assert result["status"] == RW.BLOCKED
     assert any("script children unreconciled" in b for b in result["blockers"])
+
+
+def test_only_a_two_sided_invocation_record_may_exclude_work_outside_every_span():
+    """The driver's own `started_at`/`finished_at` (or a watcher that only tears down after `kill -0` fails) bounds the
+    process at both ends, so it positively did not submit a job created outside that span. A one-sided record - the
+    `all-0017` run that never stamped an exit - bounds nothing on that side, and the job stays unresolved."""
+    outside = spike_job("o", created="2026-09-05T23:48:30Z")
+    both = dict(W1, invocation={"started_at": "2026-09-05T23:43:40Z", "finished_at": "2026-09-05T23:47:30Z"})
+    entry = classify_one(outside, windows=(both, W2))
+    assert entry["ownership"] == RW.EXCLUDED and entry["signal"] == "outside_retained_invocation"
+    assert entry["evidence"]["invocation"]["finished_at"] == "2026-09-05T23:47:30Z"
+
+    one_sided = dict(W1, invocation={"started_at": "2026-09-05T23:43:40Z", "finished_at": None})
+    assert RW.closed_invocation([one_sided], "smoke-1") is None
+    assert classify_one(outside, windows=(one_sided, W2))["signal"] == "campaign_unassigned_invocation"
+    assert classify_one(outside, windows=(W1, W2))["signal"] == "campaign_unassigned_invocation"
+
+
+def test_a_closed_invocation_record_does_not_excuse_a_running_job_inside_the_span():
+    """Exclusion by process lifetime applies to work created outside it. A job inside the span is still owned, and if
+    it is not terminal the window blocks - a truthful exit record is not a substitute for a readback."""
+    both = dict(W1, invocation={"started_at": "2026-09-05T23:43:40Z", "finished_at": "2026-09-05T23:47:30Z"})
+    running = spike_job("r", created="2026-09-05T23:45:00Z", state="RUNNING")
+    result = RW.reconcile("smoke-1", transport=transport_for([running]), window=window(), quiescence=quiescence(),
+                          campaign=CAMPAIGN, windows=[both, W2])
+    assert result["status"] == RW.BLOCKED
+    assert any("not terminal" in b and "r=RUNNING" in b for b in result["blockers"])
+
+
+def test_the_decision_generator_accepts_the_committed_listing_envelope(tmp_path):
+    """`episode_listing_index.json` is an object with a `jobs` array, not a bare list; pointing the generator at the
+    retained evidence used to die with AttributeError (Astra PR50 P2)."""
+    import importlib.util
+    import pathlib
+    spec = importlib.util.spec_from_file_location(
+        "legacy_window_decisions",
+        pathlib.Path(__file__).resolve().parent.parent / "bin" / "legacy_window_decisions.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    rows = [{"jobReference": {"projectId": PROJ, "location": LOC, "jobId": "okf_rcpt_x"}, "configuration": {},
+             "statistics": {}, "user_email": "operator@example.test"}]
+    assert mod.listing_jobs(rows) == rows
+    assert mod.listing_jobs({"note": "…", "listing": {}, "jobs": rows}) == rows
+    with pytest.raises(SystemExit):
+        mod.listing_jobs({"note": "no jobs array here"})
+    with pytest.raises(SystemExit):
+        mod.listing_jobs("a string")
+    envelope = tmp_path / "index.json"
+    envelope.write_text(json.dumps({"jobs": rows}))
+    out = tmp_path / "d.json"
+    mod.main(str(envelope), str(out))
+    assert json.loads(out.read_text())["smoke-1"]["okf_rcpt_x"]["ownership"] == "EXCLUDED"

@@ -46,6 +46,39 @@ RECOVER_FROM = {
 EXTRA_SOURCES = ["cost.json", "reservation_changes.json", "capacity-gate.md", "safety_teardown.log",
                  "integration_run.log", "integration_run_attempt2_killed.log", "window_all.log"]
 
+# The driver's OWN run record, where it survived. `run.py@b6e4f09` resolves the publication pointer (L252) before it
+# stamps `started_at` (L254) and opens capacity (L265), and its safety watcher can delete capacity while the driver is
+# still submitting - so an invocation's obligations start before its window opens and can outlast its close. These
+# spans extend each window's ownership span past the capacity interval (Astra PR50 P1). `integration-0009` has no
+# record at all (killed by teardown before writing one) and `all-0017` never stamped an exit (SIGINT), so neither can
+# be extended by evidence; work outside their capacity intervals stays unresolved until a decision names it.
+# `finished_at` is a PROCESS-LIFETIME bound, and only a two-sided one may exclude work (`closed_invocation`). Where
+# the driver stamped its own exit that is the bound. Where it did not, `bin/safety_teardown.sh` supplies one: it runs
+# `while kill -0 "$PID"; do sleep 15; done` and only then tears down, so its FIRST logged action proves the driver had
+# already exited. Its 15 s poll means the real exit was at or before that stamp, so using the watcher's stamp widens
+# the span rather than narrowing it - the safe direction for a cleanup inventory.
+INVOCATIONS = {
+    "smoke-1": {"started_at": "2026-09-05T23:43:43Z", "finished_at": "2026-09-05T23:47:20Z",
+                "source": "cleanup_manifest.json[smoke-1].steps (a complete 14-step session log, 23:43:45Z..23:47:15Z)"
+                          " + evidence/smoke_enterprise.out; the submitter was one foreground `bq query`, not run.py"},
+    "integration-0009": {"started_at": "2026-09-06T00:09:57Z", "finished_at": "2026-09-06T00:11:07Z",
+                         "source": "cleanup_manifest.json[integration-0009].opened_at + evidence/safety_teardown.log "
+                                   "first action 2026-09-06T00:11:07Z, which bin/safety_teardown.sh only reaches "
+                                   "after `kill -0` on the driver pid fails. No driver run record survived"},
+    "integration-0007": {"started_at": "2026-09-06T00:07:32.984004+00:00",
+                         "finished_at": "2026-09-06T00:09:09.727229+00:00",
+                         "source": "evidence/integration_integration-0007.json#/started_at,/finished_at"},
+    "all-0012": {"started_at": "2026-09-06T00:12:38.832828+00:00",
+                 "finished_at": "2026-09-06T00:15:55.901536+00:00",
+                 "source": "evidence/all_all-0012.json#/started_at,/finished_at"},
+    "all-0017": {"started_at": "2026-09-06T00:17:56.230721+00:00", "finished_at": "2026-09-06T00:27:33Z",
+                 "source": "evidence/all_all-0017.json#/started_at; its finished_at is null (SIGINT 00:24:54Z, the "
+                           "in-process close never logged), so the exit bound is evidence/safety_teardown.log "
+                           "'SAFETY: reservation already gone' at 2026-09-06T00:27:33Z - the watcher only runs after "
+                           "`kill -0` on the driver pid fails, and RESERVATION_CHANGES records the DELETE at "
+                           "00:27:27.393115Z six seconds earlier"},
+}
+
 LOCAL_RECORDS = {
     "smoke-1": {
         "source": "evidence/smoke_enterprise.out + cleanup_manifest.json[smoke-1].steps",
@@ -82,7 +115,7 @@ if __name__ == "__main__":
     out.parent.mkdir(parents=True, exist_ok=True)
     plan = build_plan(EVIDENCE / "cleanup_manifest.json", evidence_dir=EVIDENCE, campaign=CAMPAIGN,
                       recover_from=RECOVER_FROM, decisions=DECISIONS, local_records=LOCAL_RECORDS,
-                      extra_sources=EXTRA_SOURCES, min_silence_s=3600)
+                      invocations=INVOCATIONS, extra_sources=EXTRA_SOURCES, min_silence_s=3600)
     out.write_text(json.dumps(plan, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     for w in plan["windows"]:
         print(f"{w['label']:20s} recovered={len(w['recovered']):3d} sources={len(w['sources'])} "

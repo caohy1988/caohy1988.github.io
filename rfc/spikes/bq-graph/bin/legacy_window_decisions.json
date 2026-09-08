@@ -10,6 +10,18 @@
    "ownership": "EXCLUDED",
    "reason": "created inside the recorded capacity interval of all-0017, which owns it: the driver's own capacity read (`region-us`.INFORMATION_SCHEMA.RESERVATIONS_TIMELINE WHERE reservation_name = @r), created 00:21:17Z inside all-0017's recorded interval and routed to its Enterprise reservation"
   },
+  "8526efa6-c55c-4488-a050-421d3eb580b4": {
+   "evidence": {
+    "created_ms": "1788653875499",
+    "labels": {
+     "okf_spike": "bq_graph_20260905"
+    },
+    "reservation_id": null,
+    "user_email": "raincoatrun@gmail.com"
+   },
+   "ownership": "EXCLUDED",
+   "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier"
+  },
   "afbe7061-813a-439d-afb7-2c9efe06d2e7": {
    "evidence": {
     "created_ms": "1788652876697",
@@ -79,6 +91,18 @@
    },
    "ownership": "EXCLUDED",
    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+  },
+  "fccaf7f9-eae1-4be1-9738-f304aa1933bb": {
+   "evidence": {
+    "created_ms": "1788653396310",
+    "labels": {
+     "okf_spike": "bq_graph_20260905"
+    },
+    "reservation_id": null,
+    "user_email": "raincoatrun@gmail.com"
+   },
+   "ownership": "EXCLUDED",
+   "reason": "setup of the integration-0009 invocation, which owns it: the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier"
   },
   "okf_rcpt_0d5dee6d11a98c7551a44b04_c890dce166d831b4": {
    "evidence": {
@@ -677,6 +701,18 @@
    "ownership": "OWNED",
    "reason": "the driver's own capacity read (`region-us`.INFORMATION_SCHEMA.RESERVATIONS_TIMELINE WHERE reservation_name = @r), created 00:21:17Z inside all-0017's recorded interval and routed to its Enterprise reservation"
   },
+  "8526efa6-c55c-4488-a050-421d3eb580b4": {
+   "evidence": {
+    "created_ms": "1788653875499",
+    "labels": {
+     "okf_spike": "bq_graph_20260905"
+    },
+    "reservation_id": null,
+    "user_email": "raincoatrun@gmail.com"
+   },
+   "ownership": "OWNED",
+   "reason": "the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier"
+  },
   "afbe7061-813a-439d-afb7-2c9efe06d2e7": {
    "evidence": {
     "created_ms": "1788652876697",
@@ -746,6 +782,18 @@
    },
    "ownership": "EXCLUDED",
    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+  },
+  "fccaf7f9-eae1-4be1-9738-f304aa1933bb": {
+   "evidence": {
+    "created_ms": "1788653396310",
+    "labels": {
+     "okf_spike": "bq_graph_20260905"
+    },
+    "reservation_id": null,
+    "user_email": "raincoatrun@gmail.com"
+   },
+   "ownership": "EXCLUDED",
+   "reason": "setup of the integration-0009 invocation, which owns it: the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier"
   },
   "okf_rcpt_0d5dee6d11a98c7551a44b04_c890dce166d831b4": {
    "evidence": {
@@ -1344,6 +1392,18 @@
    "ownership": "EXCLUDED",
    "reason": "created inside the recorded capacity interval of all-0017, which owns it: the driver's own capacity read (`region-us`.INFORMATION_SCHEMA.RESERVATIONS_TIMELINE WHERE reservation_name = @r), created 00:21:17Z inside all-0017's recorded interval and routed to its Enterprise reservation"
   },
+  "8526efa6-c55c-4488-a050-421d3eb580b4": {
+   "evidence": {
+    "created_ms": "1788653875499",
+    "labels": {
+     "okf_spike": "bq_graph_20260905"
+    },
+    "reservation_id": null,
+    "user_email": "raincoatrun@gmail.com"
+   },
+   "ownership": "EXCLUDED",
+   "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier"
+  },
   "afbe7061-813a-439d-afb7-2c9efe06d2e7": {
    "evidence": {
     "created_ms": "1788652876697",
@@ -1413,6 +1473,18 @@
    },
    "ownership": "EXCLUDED",
    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+  },
+  "fccaf7f9-eae1-4be1-9738-f304aa1933bb": {
+   "evidence": {
+    "created_ms": "1788653396310",
+    "labels": {
+     "okf_spike": "bq_graph_20260905"
+    },
+    "reservation_id": null,
+    "user_email": "raincoatrun@gmail.com"
+   },
+   "ownership": "EXCLUDED",
+   "reason": "setup of the integration-0009 invocation, which owns it: the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier"
   },
   "okf_rcpt_0d5dee6d11a98c7551a44b04_c890dce166d831b4": {
    "evidence": {
@@ -2011,6 +2083,18 @@
    "ownership": "EXCLUDED",
    "reason": "created inside the recorded capacity interval of all-0017, which owns it: the driver's own capacity read (`region-us`.INFORMATION_SCHEMA.RESERVATIONS_TIMELINE WHERE reservation_name = @r), created 00:21:17Z inside all-0017's recorded interval and routed to its Enterprise reservation"
   },
+  "8526efa6-c55c-4488-a050-421d3eb580b4": {
+   "evidence": {
+    "created_ms": "1788653875499",
+    "labels": {
+     "okf_spike": "bq_graph_20260905"
+    },
+    "reservation_id": null,
+    "user_email": "raincoatrun@gmail.com"
+   },
+   "ownership": "EXCLUDED",
+   "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier"
+  },
   "afbe7061-813a-439d-afb7-2c9efe06d2e7": {
    "evidence": {
     "created_ms": "1788652876697",
@@ -2080,6 +2164,18 @@
    },
    "ownership": "EXCLUDED",
    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+  },
+  "fccaf7f9-eae1-4be1-9738-f304aa1933bb": {
+   "evidence": {
+    "created_ms": "1788653396310",
+    "labels": {
+     "okf_spike": "bq_graph_20260905"
+    },
+    "reservation_id": null,
+    "user_email": "raincoatrun@gmail.com"
+   },
+   "ownership": "OWNED",
+   "reason": "the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier"
   },
   "okf_rcpt_0d5dee6d11a98c7551a44b04_c890dce166d831b4": {
    "evidence": {
@@ -2678,6 +2774,18 @@
    "ownership": "EXCLUDED",
    "reason": "created inside the recorded capacity interval of all-0017, which owns it: the driver's own capacity read (`region-us`.INFORMATION_SCHEMA.RESERVATIONS_TIMELINE WHERE reservation_name = @r), created 00:21:17Z inside all-0017's recorded interval and routed to its Enterprise reservation"
   },
+  "8526efa6-c55c-4488-a050-421d3eb580b4": {
+   "evidence": {
+    "created_ms": "1788653875499",
+    "labels": {
+     "okf_spike": "bq_graph_20260905"
+    },
+    "reservation_id": null,
+    "user_email": "raincoatrun@gmail.com"
+   },
+   "ownership": "EXCLUDED",
+   "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier"
+  },
   "afbe7061-813a-439d-afb7-2c9efe06d2e7": {
    "evidence": {
     "created_ms": "1788652876697",
@@ -2747,6 +2855,18 @@
    },
    "ownership": "EXCLUDED",
    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+  },
+  "fccaf7f9-eae1-4be1-9738-f304aa1933bb": {
+   "evidence": {
+    "created_ms": "1788653396310",
+    "labels": {
+     "okf_spike": "bq_graph_20260905"
+    },
+    "reservation_id": null,
+    "user_email": "raincoatrun@gmail.com"
+   },
+   "ownership": "EXCLUDED",
+   "reason": "setup of the integration-0009 invocation, which owns it: the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier"
   },
   "okf_rcpt_0d5dee6d11a98c7551a44b04_c890dce166d831b4": {
    "evidence": {

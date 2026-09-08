@@ -8,8 +8,12 @@ trusting this rule; re-run it against the same listing to reproduce the file.
 
     python3 bin/legacy_window_decisions.py <episode_listing.json> bin/legacy_window_decisions.json
 
-`episode_listing.json` is a drained read-only `jobs.list` of the episode span (evidence/legacy-reconcile/ has the one
-these decisions were derived from). Nothing here submits, cancels or deletes.
+The listing is a drained read-only `jobs.list` of the episode span. Either form works: a bare array of job resources,
+or the committed `evidence/legacy-reconcile/episode_listing_index.json` envelope (an object whose `jobs` array holds
+them). Nothing here submits, cancels or deletes.
+
+    python3 bin/legacy_window_decisions.py evidence/legacy-reconcile/episode_listing_index.json \
+        bin/legacy_window_decisions.json
 """
 import json
 import sys
@@ -34,6 +38,26 @@ ALL_0017_PROBES = {
         "`SELECT 1` submitted through the bq CLI at 00:20:48Z, inside all-0017's recorded interval and routed to its "
         "Enterprise reservation: the operator's assignment-readiness probe for that window",
 }
+# The retained pre-open publication-pointer lookups. `run.py@b6e4f09` resolves this pointer at L252, BEFORE it stamps
+# `started_at` (L254) and before `open_window` (L265), so an invocation's first job precedes its own recorded opening.
+# Both of these are the identical `active_publication` lookup landing under a second before an opening, and both come
+# long after the PREVIOUS invocation stamped `finished_at`. They are the following window's setup, and HEAD dropped
+# them (Astra PR50 P1). Assigned by id, to one window each.
+PRE_OPEN_SETUP = {
+    "fccaf7f9-eae1-4be1-9738-f304aa1933bb": (
+        "integration-0009",
+        "the invocation's publication-pointer lookup (`SELECT publication_id FROM …active_publication`) at "
+        "00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves "
+        "this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; "
+        "the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier"),
+    "8526efa6-c55c-4488-a050-421d3eb580b4": (
+        "all-0017",
+        "the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at "
+        "00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the "
+        "pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at "
+        "00:15:55.901Z, 120s earlier"),
+}
+
 OUTSIDE_EVERY_INTERVAL = {
     "afbe7061-813a-439d-afb7-2c9efe06d2e7":
         "the same INFORMATION_SCHEMA.RESERVATIONS_TIMELINE capacity read, created 00:01:16Z when no window was open "
@@ -60,8 +84,24 @@ TRANSFER_REASON = (
     "the transfer service owns the job, the window does not")
 
 
+def listing_jobs(raw):
+    """Accept either a bare list of job resources or the committed `episode_listing_index.json` envelope.
+
+    The committed index is an object - completeness verdict, span, `full_listing_sha256`, then `jobs` - so pointing
+    this script at the retained evidence used to die with `AttributeError: 'str' object has no attribute 'get'`
+    (Astra PR50 P2). The retained format is the one a reviewer actually has, so it is the one that must work."""
+    if isinstance(raw, dict):
+        jobs = raw.get("jobs")
+        if not isinstance(jobs, list):
+            raise SystemExit(f"listing object has no `jobs` array (keys: {sorted(raw)})")
+        return jobs
+    if isinstance(raw, list):
+        return raw
+    raise SystemExit(f"listing must be a job array or an object containing one, not {type(raw).__name__}")
+
+
 def main(listing_path, out_path):
-    jobs = json.loads(Path(listing_path).read_text(encoding="utf-8"))
+    jobs = listing_jobs(json.loads(Path(listing_path).read_text(encoding="utf-8")))
     decisions = {w: {} for w in WINDOWS}
     for job in jobs:
         ref = job.get("jobReference") or {}
@@ -87,6 +127,12 @@ def main(listing_path, out_path):
                                      {"ownership": "EXCLUDED", "evidence": evidence,
                                       "reason": "created inside the recorded capacity interval of all-0017, which "
                                                 "owns it: " + ALL_0017_PROBES[jid]})
+        elif jid in PRE_OPEN_SETUP:
+            owner, why = PRE_OPEN_SETUP[jid]
+            for w in WINDOWS:
+                decisions[w][jid] = ({"ownership": "OWNED", "reason": why, "evidence": evidence} if w == owner else
+                                     {"ownership": "EXCLUDED", "evidence": evidence,
+                                      "reason": f"setup of the {owner} invocation, which owns it: " + why})
         elif jid in OUTSIDE_EVERY_INTERVAL:
             for w in WINDOWS:
                 decisions[w][jid] = {"ownership": "EXCLUDED", "reason": OUTSIDE_EVERY_INTERVAL[jid],

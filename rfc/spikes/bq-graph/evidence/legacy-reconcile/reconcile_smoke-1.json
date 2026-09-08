@@ -26,6 +26,18 @@
     "ownership": "EXCLUDED",
     "reason": "created inside the recorded capacity interval of all-0017, which owns it: the driver's own capacity read (`region-us`.INFORMATION_SCHEMA.RESERVATIONS_TIMELINE WHERE reservation_name = @r), created 00:21:17Z inside all-0017's recorded interval and routed to its Enterprise reservation"
    },
+   "8526efa6-c55c-4488-a050-421d3eb580b4": {
+    "evidence": {
+     "created_ms": "1788653875499",
+     "labels": {
+      "okf_spike": "bq_graph_20260905"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier"
+   },
    "afbe7061-813a-439d-afb7-2c9efe06d2e7": {
     "evidence": {
      "created_ms": "1788652876697",
@@ -95,6 +107,18 @@
     },
     "ownership": "EXCLUDED",
     "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "fccaf7f9-eae1-4be1-9738-f304aa1933bb": {
+    "evidence": {
+     "created_ms": "1788653396310",
+     "labels": {
+      "okf_spike": "bq_graph_20260905"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "setup of the integration-0009 invocation, which owns it: the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier"
    },
    "okf_rcpt_0d5dee6d11a98c7551a44b04_c890dce166d831b4": {
     "evidence": {
@@ -716,49 +740,49 @@
   ],
   "excluded": [
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'smoke-1' (2026-09-05T23:43:43Z .. 2026-09-05T23:47:20Z): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "okf_graph_smoke_ondemand_20260905234252",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'smoke-1' (2026-09-05T23:43:43Z .. 2026-09-05T23:47:20Z): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "bqjob_r4c318488e53e1c6d_000001a073f41099_1",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'smoke-1' (2026-09-05T23:43:43Z .. 2026-09-05T23:47:20Z): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "bqjob_r64f807c728e9ef8c_000001a073f3f698_1",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'smoke-1' (2026-09-05T23:43:43Z .. 2026-09-05T23:47:20Z): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "script_job_ff90b948e82ccdb5009cf92869b41800_1",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'smoke-1' (2026-09-05T23:43:43Z .. 2026-09-05T23:47:20Z): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "script_job_25ad030464234f4a67225cc8ada32b47_0",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    }
   ],
   "label": "smoke-1",
@@ -772,7 +796,7 @@
      "ended": "2026-09-05T23:46:12.108000+00:00",
      "error_result": null,
      "parent_job_id": null,
-     "read_at": "2026-09-08T10:22:17.698080+00:00",
+     "read_at": "2026-09-08T10:55:22.328860+00:00",
      "readback": "TERMINAL",
      "ref": {
       "job_id": "okf_graph_smoke_ent_20260905234528_1",
@@ -794,78 +818,103 @@
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-05T23:42:54.547000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-05T23:47:20Z",
+      "source": "cleanup_manifest.json[smoke-1].steps (a complete 14-step session log, 23:43:45Z..23:47:15Z) + evidence/smoke_enterprise.out; the submitter was one foreground `bq query`, not run.py",
+      "started_at": "2026-09-05T23:43:43Z"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'smoke-1' (2026-09-05T23:43:43Z .. 2026-09-05T23:47:20Z): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "okf_graph_smoke_ondemand_20260905234252",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-05T23:42:50.234000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-05T23:47:20Z",
+      "source": "cleanup_manifest.json[smoke-1].steps (a complete 14-step session log, 23:43:45Z..23:47:15Z) + evidence/smoke_enterprise.out; the submitter was one foreground `bq query`, not run.py",
+      "started_at": "2026-09-05T23:43:43Z"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'smoke-1' (2026-09-05T23:43:43Z .. 2026-09-05T23:47:20Z): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "bqjob_r4c318488e53e1c6d_000001a073f41099_1",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-05T23:42:43.604000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-05T23:47:20Z",
+      "source": "cleanup_manifest.json[smoke-1].steps (a complete 14-step session log, 23:43:45Z..23:47:15Z) + evidence/smoke_enterprise.out; the submitter was one foreground `bq query`, not run.py",
+      "started_at": "2026-09-05T23:43:43Z"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'smoke-1' (2026-09-05T23:43:43Z .. 2026-09-05T23:47:20Z): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "bqjob_r64f807c728e9ef8c_000001a073f3f698_1",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-05T23:42:45.501000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-05T23:47:20Z",
+      "source": "cleanup_manifest.json[smoke-1].steps (a complete 14-step session log, 23:43:45Z..23:47:15Z) + evidence/smoke_enterprise.out; the submitter was one foreground `bq query`, not run.py",
+      "started_at": "2026-09-05T23:43:43Z"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'smoke-1' (2026-09-05T23:43:43Z .. 2026-09-05T23:47:20Z): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "script_job_ff90b948e82ccdb5009cf92869b41800_1",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    },
    {
     "evidence": {
-     "containing_windows": [],
      "created": "2026-09-05T23:42:43.738000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-05T23:47:20Z",
+      "source": "cleanup_manifest.json[smoke-1].steps (a complete 14-step session log, 23:43:45Z..23:47:15Z) + evidence/smoke_enterprise.out; the submitter was one foreground `bq query`, not run.py",
+      "started_at": "2026-09-05T23:43:43Z"
+     },
+     "on_campaign_reservation": false,
      "reservation_id": null
     },
     "ownership": "EXCLUDED",
-    "reason": "campaign work created outside every recorded capacity interval and routed to no campaign reservation: a leg of the campaign, not of this paid opening",
+    "reason": "campaign work created outside the retained invocation span of 'smoke-1' (2026-09-05T23:43:43Z .. 2026-09-05T23:47:20Z): that record bounds the driver process at both ends, so it was not running to submit this",
     "ref": {
      "job_id": "script_job_25ad030464234f4a67225cc8ada32b47_0",
      "location": "US",
      "project": "test-project-0728-467323"
     },
-    "signal": "campaign_outside_all_intervals"
+    "signal": "outside_retained_invocation"
    }
   ],
   "listed_keys": 6,
@@ -913,7 +962,7 @@
   "quiescence": {
    "basis": "platform_probe+local_record",
    "established": true,
-   "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-05T23:47:20+00:00 to 2026-09-08T10:22:13.012811+00:00 (5 page(s), 1094 job(s)) shows 0 job(s) attributable to 'smoke-1' after it closed, 0 non-terminal job(s) project-wide, and 210893s of silence; local record: evidence/smoke_enterprise.out + cleanup_manifest.json[smoke-1].steps",
+   "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-05T23:47:20+00:00 to 2026-09-08T10:55:17.704406+00:00 (5 page(s), 1093 job(s)) shows 0 job(s) attributable to 'smoke-1' after it closed, 0 non-terminal job(s) project-wide, and 212878s of silence; local record: evidence/smoke_enterprise.out + cleanup_manifest.json[smoke-1].steps",
    "limit": "a silent, complete platform listing shows that submission STOPPED; it is not proof that the original process object no longer exists. Capacity absence is verified separately.",
    "local_record": {
     "gap": false,
@@ -925,7 +974,7 @@
    "probe": {
     "attributable_after_close": [],
     "last_attributable_at": null,
-    "listed": 1094,
+    "listed": 1093,
     "listing": {
      "capped": false,
      "complete": true,
@@ -937,9 +986,9 @@
     "min_silence_s": 3600,
     "nonterminal": [],
     "project": "test-project-0728-467323",
-    "silence_s": 210893.012811,
+    "silence_s": 212877.704406,
     "since": "2026-09-05T23:47:20+00:00",
-    "until": "2026-09-08T10:22:13.012811+00:00"
+    "until": "2026-09-08T10:55:17.704406+00:00"
    },
    "stopped_at": "2026-09-05T23:47:20+00:00"
   },
@@ -951,7 +1000,7 @@
     "ended": "2026-09-05T23:46:12.108000+00:00",
     "error_result": null,
     "parent_job_id": null,
-    "read_at": "2026-09-08T10:22:17.698080+00:00",
+    "read_at": "2026-09-08T10:55:22.328860+00:00",
     "readback": "TERMINAL",
     "ref": {
      "job_id": "okf_graph_smoke_ent_20260905234528_1",
@@ -964,7 +1013,7 @@
     "verified_done": true
    }
   ],
-  "reconciled_at": "2026-09-08T10:22:16.230508+00:00",
+  "reconciled_at": "2026-09-08T10:55:20.746556+00:00",
   "reconstructed": true,
   "recovered_ids": [
    "okf_graph_smoke_ent_20260905234528_1"
@@ -1038,9 +1087,9 @@
   "job_ids": [
    "okf_graph_smoke_ent_20260905234528_1"
   ],
-  "journal": "/tmp/okf-post47/stage/jobs_smoke-1.json",
-  "journal_sha256": "07a434450469cb1e0857f556842c57bcb840d19a68d43b7b0913aa8317017907",
-  "receipt": "/tmp/okf-post47/stage/jobs_smoke-1.cleanup.json",
+  "journal": "/tmp/okf-pr50-fix/stage/jobs_smoke-1.json",
+  "journal_sha256": "bd29bacebb02a225029977e624408593b871caccff169501ea3e845f45bfa6a6",
+  "receipt": "/tmp/okf-pr50-fix/stage/jobs_smoke-1.cleanup.json",
   "staged": true,
   "verified": true
  }
