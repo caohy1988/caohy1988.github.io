@@ -376,3 +376,35 @@ Astra reviewed `74a34ff` (**REQUEST_CHANGES verdict, 0 P0 / 0 P1 / 1 P2**, poste
 - **Runtime-aspect removal narrated as authored-rule removal** (P2, confidence 10/10; `index.html:213`, `STORY.md:60`, `rfc/index.html:913`, `plan.md:351`). The B2 `missing-runtime-aspect` case calls the driver's `remove_runtime_aspect`, which deletes the **owned Catalog entry's `okf-context-runtime` aspect** — the runtime pin metadata. The retained chain then stops at `seed` with `ASPECT_MISSING`, zero cases run, and the driver verifies both authored aspects are still present. "Removed a required rule" therefore claimed a refusal after deleting an authored knowledge rule, which no run demonstrates, and it collides with the story's central claim about finding linked rules. All four sites now say the catalog metadata needed to select the publication was removed, name the refusal stage (the very first step, before any retrieval ran; `seed` in the full RFC), and state that the authored entries were checked and left intact. `intent.md` gains the same object and stage beside its `ASPECT_MISSING` label. The claim-map row above records the aspect, the stage, the zero-case count and the metadata-versus-authored-rule distinction.
 
 Re-verification after the fix: R18/R21 paraphrase audit unchanged at **15 residuals**, all enumerated carve-outs; banned-label scan 0 hits in `index.html` visible prose; Chromium, Firefox and WebKit at 1280 and 320, closed and open — **932 closed-state words, unchanged** (every added clause sits inside the Technical design disclosure; the closed skim was not touched), overflow 0, no duplicate IDs, no dangling anchors, no console errors; protected regions still hash identically to `50ecaa8` on both pages; `git diff --check` clean. No score change, no spike-evidence edit, no new link, no cloud run, no merge.
+
+### PR 47 graph-in-chain Slice A honesty (Claude Opus 4.6, 2026-09-08 PT, `feat/board-pack-pr47-honesty` from `d002447`)
+
+PR 47 merged hermetic graph-query wiring (GQL admission, window controller, receipt bridge, reconcile tooling). Astra RR7 APPROVE 0/0/0. No live GQL chain evidence. All live chains remain relational/SQL fallback. Slice B + five legacy windows still BLOCKED. G8 benchmarks 0/9. Sep19 thresholds PROPOSED.
+
+**Edits.**
+
+| File | Region | Change |
+| --- | --- | --- |
+| `index.html` | `.runtime-assessment` (still-to-prove) | One sentence: offline tooling built and tested, no live chain has used it, live gate closed |
+| `index.html` | `#plot-desc-wide` SVG desc | Add "in any live chain" and note offline tooling exists |
+| `index.html` | `#plot-desc-narrow` SVG desc | Same |
+| `index.html` | `#design-evidence` (evidence-stands) | One sentence: offline wiring built hermetically, link to README, live chains still plain SQL, gate closed |
+| `STORY.md` | Connected-path-still-to-prove bullet | One sentence: 8 September offline wiring, no live graph-query chain, live gate closed, five legacy windows unreconciled |
+| `rfc/index.html` | Status note | One sentence: offline wiring built and tested hermetically, no live chain has used it, live gate closed |
+| `rfc/index.html` | `#current-evidence` what-remains | Two sentences: 8 September offline wiring, link to README, not live evidence, five legacy windows unreconciled |
+| `rfc/index.html` | Footer | Date: hermetic graph-query wiring acknowledged 2026-09-08 |
+| `intent.md` | Dated addendum | PR 47 context and must-not-imply list |
+| `spec.md` | Dated addendum | R24 (hermetic wiring not live), R25 (benchmarks/Sep19 unchanged) |
+| `plan.md` | This section | Claim map and validation record |
+
+New link: one E10 URL to `README.md#graph-engine-inside-the-chain--slice-a-hermetic-2026-09-07` at pin `d002447`.
+
+**What is unchanged.** `.hero`, `#later-questions`, capacity line, `.punchline`, `.ask`, the "call it proven" bar text in both pages, Sep19 envelope, all phase table cells, `styles.css`, SVG geometry, `rfc/bq-vp/`, `rfc/full-demo/`, spike evidence artifacts. No cloud run, no experiment rerun, no metric invented.
+
+### Review fix pass — Astra PR 49 P1 (Claude Opus 4.6, 2026-09-08 PT, same branch)
+
+Astra reviewed `ccff2dc` (**REQUEST_CHANGES verdict, 0 P0 / 1 P1 / 0 P2**, posted as a comment review because the owner account cannot formally request changes on its own PR). The finding was an overreach introduced by this slice, not an evidence problem, and no experiment was rerun.
+
+- **Live restricted-requester chain erased by an engine-scoped claim** (P1; `STORY.md:62`, `intent.md:101`, `index.html:153`, `index.html:180`). The slice generalised "all live chains use plain SQL" — true — into "all live evidence is under one operator" and "a second identity is untested in any live chain" — both false. The retained PR 45 chain (`evidence/chain/chain_live_restricted.json`) is `mode=live`, `engine=fallback`, `CHAIN_CONNECTED`, identity `BOUND`, with the restricted requester holding both execution legs (20 requester jobs, 9 operator administrative jobs). Engine choice and requester identity are separate evidence dimensions; PR 47 being hermetic retires neither. All four sites now distinguish the operator-only catalog-seeded chains from the separate fixture-seeded restricted chain, state that both used relational SQL, and give the correct residual: no live chain has combined catalog discovery with the restricted requester, and none has used graph queries. Both SVG descriptions gained a sentence naming the restricted chain. `spec.md` gains **R26** to prevent recurrence.
+
+Unchanged by the fix: the offline-wiring, closed-gate and unreconciled-window qualifications; the E10 link; `.hero`, `#later-questions`, capacity line, `.punchline`, `.ask`, both "call it proven" bar sentences, Sep19 envelope, phase tables, `styles.css`, SVG geometry and all spike artifacts. Docs only; no cloud run, no merge.
