@@ -573,7 +573,7 @@ def same_requester(client: Any, graph_job_ids: list[str], receipt_jobs: list[dic
 
 
 # ----------------------------------------------------------------------------- whole chain
-CHAIN_VERSION = "okf_bq_graph.chain/0.6.0"
+CHAIN_VERSION = "okf_bq_graph.chain/0.11.0"  # 0.11.0: each DDL attempt owned before dispatch; a lost submission stays unresolved
 SEED_MODES = ("fixture", "catalog")
 
 
@@ -644,9 +644,12 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                                "stage with its specific evidence: approved-restricted RELEASED; denied-intermediate seed visible, no path, "
                                "no hidden id, CLI never invoked; unauthorized-output bound, authorization DENIED under the requester's "
                                "credential, CLI never invoked; revocation-before-replay released once, then HIT_DENIED replay, authorization "
-                               "DENIED and REFUSED with the CLI invoked once) and, live, every submitted job (pointer lookup, retrieval, "
-                               "declaration, receipt) carries the SA's user_email (identity BOUND); CHAIN_INCOMPLETE when a case never "
-                               "reached its stage or the identity is UNKNOWN; CHAIN_BROKEN when a reached stage contradicts the expectation, "
+                               "DENIED and REFUSED with the CLI invoked once) and, live, every job the run submitted carries the identity "
+                               "of the role that submitted it -- the graph leg (pointer lookup, retrieval, declaration, the cached-replay "
+                               "re-check whether it succeeded or was denied) and the receipt leg execute as the SA, the broker's own platform "
+                               "observations are submitted as the SA, and the row-policy grant/revoke/restore DDL is administrative work under "
+                               "the operator (identity BOUND); CHAIN_INCOMPLETE when a case never reached its stage, the identity is UNKNOWN, "
+                               "or a replay ran without contributing its job reference; CHAIN_BROKEN when a reached stage contradicts the expectation, "
                                "a job carries another identity or a pin fails; hermetic runs prove the harness, not the platform")
     # SDK pin
     try:
@@ -952,6 +955,15 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     out["decisions"] = {c["case"]: c["consume"]["decision"] for c in out["cases"]}
     out["acceptance"] = {c["case"]: c["acceptance"]["status"] for c in out["cases"]}
     ids = job_ids_of(out["cases"], pointer_job_id, journal.job_ids())
+    replay_cases = sum(1 for c in out["cases"] if c.get("replay"))
+    replay_ids = [j["job_id"] for c in out["cases"]
+                  for j in (((c.get("replay") or {}).get("retrieval") or {}).get("timing") or {}).get("jobs", []) or []
+                  if j.get("job_id")]
+    # a replay whose first pass submitted jobs must submit its own: the re-check runs against the engine, and a DENIED
+    # one is still a submitted job. Losing it is exactly how the inventory understated itself (Astra PR 45 #1).
+    replay_missing = [c["case"] for c in out["cases"] if c.get("replay")
+                      and (((c.get("retrieval") or {}).get("timing") or {}).get("jobs") or [])
+                      and not ((((c["replay"] or {}).get("retrieval") or {}).get("timing") or {}).get("jobs") or [])]
     refs = {e["job_id"]: (e.get("project"), e.get("location")) for e in journal.jobs() if e.get("job_id")}
     out["job_inventory"] = {"graph": ids["graph"], "receipt": [j.get("job_id") for j in ids["receipt"]],
                             "refs": {k: {"project": v[0], "location": v[1]} for k, v in refs.items()},
@@ -960,9 +972,32 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     unresolved = journal.unresolved()
     out["job_inventory"]["unresolved"] = [{"seq": e["seq"], "role": e["role"], "job_id": e.get("job_id"), "state": e["state"], "error": e.get("error")} for e in unresolved]
     if restricted:
+        probe_jobs = list(getattr(broker, "probe_jobs", []) or [])       # requester-submitted platform observations
+        admin_jobs = list(getattr(broker, "admin_jobs", []) or [])       # operator-submitted row-policy DDL
+        out["job_inventory"]["requester_probe"] = [j["job_id"] for j in probe_jobs]
+        out["job_inventory"]["policy_admin"] = [j["job_id"] for j in admin_jobs]
+        admin_ops = list(getattr(broker, "admin_ops", []) or [])
+        out["job_inventory"]["policy_admin_ops"] = admin_ops
+        # administrative work the broker cannot fully account for, as the BROKER judges it: an attempt that never named
+        # a job, one that is not terminal, or a job that appeared without the submission hook seeing it. Recomputing
+        # the rule here dropped the last kind, so the missed-hook guard never reached the audit (re-review 3 #3).
+        out["job_inventory"]["policy_admin_unresolved"] = (broker.admin_unresolved() if hasattr(broker, "admin_unresolved")
+                                                           else [op for op in admin_ops if not op.get("job_id")])
+        out["job_inventory"]["refs"].update({j["job_id"]: {"project": j.get("project"), "location": j.get("location"), "stage": j.get("stage")}
+                                             for j in probe_jobs + admin_jobs})
         out["identity"] = broker.identity(ids["graph"], ids["receipt"])
-        out["identity"]["job_set"] = {"graph": len(ids["graph"]), "receipt": len(ids["receipt"]), "pointer_lookup_included": pointer_job_id is not None,
-                                      "replay_jobs_included": True}
+        out["identity"]["job_set"] = {"graph": len(ids["graph"]), "receipt": len(ids["receipt"]),
+                                      "requester_probe": len(probe_jobs), "policy_admin": len(admin_jobs),
+                                      "total": len(ids["graph"]) + len(ids["receipt"]) + len(probe_jobs) + len(admin_jobs),
+                                      "pointer_lookup_included": pointer_job_id is not None,
+                                      "replay_jobs": len(replay_ids), "replay_cases": replay_cases,
+                                      "replay_jobs_missing": replay_missing,
+                                      "note": "every job the run submitted, in the role that submitted it: the graph and receipt legs execute as the "
+                                              "requester, the broker's platform observations are also submitted as the requester, and the "
+                                              "grant/revoke/restore row-policy DDL is administrative work under the operator"}
+        if replay_missing:
+            out["identity"]["job_set"]["replay_note"] = (f"the replay of {replay_missing} contributed no job reference although its first pass did: "
+                                                         "a job the run submitted is missing from the inventory")
         if out["identity"]["status"] == "NOT_APPLICABLE":
             out["identity"]["job_set"]["note"] = ("counts are the SDK emulation's synthetic receipt ids (okf_rcpt_…); no BigQuery job exists in "
                                                   "hermetic mode, so there is no identity to read")
@@ -970,7 +1005,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                                    "broker_counted": getattr(broker, "receipt_launches", None)}
         out["same_requester"] = {"status": "NOT_APPLICABLE", "reason": "restricted-sa mode: the identity claim is `identity` (every job bound to the SA)"}
         ident_broken = live and out["identity"]["status"] == "UNBOUND"
-        ident_incomplete = live and out["identity"]["status"] != "BOUND"
+        ident_incomplete = live and (out["identity"]["status"] != "BOUND" or bool(replay_missing))
         fallback_at = "identity"
     else:
         if live:

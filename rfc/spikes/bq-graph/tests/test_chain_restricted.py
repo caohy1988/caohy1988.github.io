@@ -8,6 +8,7 @@ import re
 import stat
 import subprocess
 import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -368,7 +369,9 @@ def test_restricted_cases_reach_their_stages(restricted_run):
     assert rv["revocation"]["observed"] is True and rv["revocation"]["policy"]["dataset_reader"] is False
     assert rv["replay"]["retrieval"]["status"] == "DENIED" and rv["replay"]["retrieval"]["cache"] == "HIT_DENIED" and rv["replay"]["retrieval"]["disclosed_anything"] is False
     assert rv["replay"]["authorization"]["status"] == "DENIED" and rv["replay"]["consume"]["decision"] == "REFUSED" and rv["consume"]["decision"] == "REFUSED"
-    assert "timing" in rv["replay"]["retrieval"] and out["identity"]["job_set"]["replay_jobs_included"] is True
+    assert "timing" in rv["replay"]["retrieval"] and out["identity"]["job_set"]["replay_cases"] == 1
+    # hermetic: no engine job on either pass, so nothing is missing from the inventory
+    assert out["identity"]["job_set"]["replay_jobs"] == 0 and out["identity"]["job_set"]["replay_jobs_missing"] == []
 
 
 def test_restricted_evidence_is_hygienic_and_retained(restricted_run):
@@ -482,13 +485,45 @@ def test_bound_to_requires_the_sa_on_every_job_including_the_pointer_lookup():
     r = PR.bound_to(owner, ids, [{"job_id": "r1"}], SA)
     assert r["status"] == "UNBOUND" and r["other_identities"] == ["operator@x"]
     assert PR.bound_to(_Owner({**{i: SA for i in ids}, "r1": None}), ids, [{"job_id": "r1"}], SA)["status"] == "UNKNOWN"
-    assert PR.bound_to(_Owner({}), [], [{"job_id": "r1"}], SA)["status"] == "UNKNOWN"
-    assert PR.bound_to(_Owner({}), ids, [], SA)["status"] == "UNKNOWN"
+    assert PR.bound_to(_Owner({"r1": SA}), [], [{"job_id": "r1"}], SA)["status"] == "UNKNOWN"   # required role, nothing to compare
+    assert PR.bound_to(_Owner({i: SA for i in ids}), ids, [], SA)["status"] == "UNKNOWN"   # required role, nothing to compare
 
     class Boom(_Owner):
         def get_job(self, *a, **k):
             raise RuntimeError("jobs.get failed")
     assert PR.bound_to(Boom({}), ids, [{"job_id": "r1"}], SA)["status"] == "UNKNOWN"
+
+
+def test_bound_to_audits_broker_probes_and_operator_policy_ddl_in_their_own_roles():   # Astra PR 45 #1
+    """Every job the run submitted, in the role that submitted it: the broker's own platform observations run as the
+    requester, and the row-policy DDL runs as the operator. Neither may be dropped, and neither may be graded against
+    the other's principal."""
+    ids, OP = ["pointer-job", "n1"], "operator@x"
+    emails = {**{i: SA for i in ids}, "r1": SA, "probe1": SA, "ddl1": OP, "ddl2": OP}
+    kw = dict(probe_jobs=[PR.job_ref("probe1", stage="rls_rows")],
+              admin_jobs=[PR.job_ref("ddl1"), PR.job_ref("ddl2")], operator_email=OP)
+    r = PR.bound_to(_Owner(emails), ids, [{"job_id": "r1"}], SA, **kw)
+    assert r["status"] == "BOUND" and r["jobs_compared"] == 6 and r["probe_jobs"] == 1 and r["admin_jobs"] == 2
+    assert {n: v["status"] for n, v in r["roles"].items()} == {
+        "graph": "BOUND", "receipt": "BOUND", "requester_probe": "BOUND", "policy_admin": "BOUND"}
+
+    # a broker probe that ran as the operator is a requester claim the run cannot make
+    bad = PR.bound_to(_Owner({**emails, "probe1": OP}), ids, [{"job_id": "r1"}], SA, **kw)
+    assert bad["status"] == "UNBOUND" and bad["roles"]["requester_probe"]["other_identities"] == [OP]
+
+    # ... and DDL that ran as the SA is not administrative work under the operator
+    bad = PR.bound_to(_Owner({**emails, "ddl2": SA}), ids, [{"job_id": "r1"}], SA, **kw)
+    assert bad["status"] == "UNBOUND" and bad["roles"]["policy_admin"]["other_identities"] == [SA]
+
+    # an unknown operator cannot grade its own role
+    unk = PR.bound_to(_Owner(emails), ids, [{"job_id": "r1"}], SA, **dict(kw, operator_email=None))
+    assert unk["status"] == "UNKNOWN" and unk["roles"]["policy_admin"]["status"] == "UNKNOWN"
+    assert "policy_admin: UNKNOWN" in unk["reason"]
+
+    # optional roles that submitted nothing are NONE, not a silent pass and not UNKNOWN
+    none = PR.bound_to(_Owner(emails), ids, [{"job_id": "r1"}], SA)
+    assert none["status"] == "BOUND" and none["roles"]["requester_probe"]["status"] == "NONE" \
+        and none["roles"]["policy_admin"]["status"] == "NONE"
 
 
 def test_impersonated_credential_file_shape_and_permissions(tmp_path):
@@ -505,20 +540,39 @@ def test_impersonated_credential_file_shape_and_permissions(tmp_path):
         PR.impersonated_credential_file(SA, source_path=str(src), directory=str(d))
 
 
-class _SAClient:
-    """Impersonated client whose dry runs are decided by a visibility table (no job is ever created)."""
+class _Rows:
+    def __init__(self, rows, job_id="fake-job", fail=None):
+        self._rows, self.job_id, self.fail = rows, job_id, fail
+        self.project, self.location = P, "US"
 
-    def __init__(self, allowed):
-        self.allowed, self.queries = set(allowed), []
+    def result(self, job_retry="unset"):
+        # the broker's DDL is tracked, so it must disable the SDK's own job re-submission
+        assert job_retry in ("unset", None), job_retry
+        if self.fail is not None:      # the job was submitted; its result was not returned
+            raise self.fail
+        return iter(self._rows)
+
+
+class _SAClient:
+    """Impersonated client whose dry runs are decided by a visibility table (no job is ever created). The `_rls`
+    row-count query the broker uses to observe the row policy is answered like BigQuery RLS does: a principal that is
+    not a grantee of the policy reads zero rows even with dataset READER."""
+
+    def __init__(self, allowed, owner=None):
+        self.allowed, self.queries, self.owner = set(allowed), [], owner
 
     def query(self, q, job_config=None, location=None):
         from google.api_core import exceptions as gexc
         self.queries.append(q)
-        assert job_config.dry_run is True
         table = q.split("`")[1]
         if table not in self.allowed:
             raise gexc.Forbidden("403 access denied")
-        return object()
+        if job_config is not None and job_config.dry_run:
+            return object()
+        assert "COUNT(*) AS visible" in q, f"the live broker submits no other real query under the SA: {q[:80]}"
+        grantee = self.owner is not None and f"serviceAccount:{SA}" in self.owner.policy("nodes")["grantees"]
+        hidden = 0 if self.owner is None or "gross-margin" in self.owner.policy("nodes")["predicate"] else 3
+        return _Rows([{"visible": 42 if grantee else 0, "hidden": hidden if grantee else 0}])
 
 
 class _Dataset:
@@ -526,14 +580,73 @@ class _Dataset:
         self.ref, self.access_entries = ref, list(entries)
 
 
+class _RlsApi:
+    """The REST surface `RestrictedBroker._rls_state` reads: rowAccessPolicies.list + getIamPolicy per policy."""
+
+    def __init__(self, owner):
+        self.owner = owner
+
+    def api_request(self, method=None, path=None, data=None):
+        table = path.split("/tables/", 1)[1].split("/", 1)[0]
+        pols = self.owner.policies[table]
+        if method == "GET":
+            return {"rowAccessPolicies": [{"rowAccessPolicyReference": {"policyId": p["policy_id"]}, "filterPredicate": p["predicate"]}
+                                          for p in pols]}
+        pid = path.rsplit("/", 1)[1].split(":", 1)[0]
+        pol = next(p for p in pols if p["policy_id"] == pid)
+        return {"bindings": [{"role": "roles/bigquery.filteredDataViewer", "members": list(pol["grantees"])}]}
+
+
 class _AclOwner(_Owner):
     """Owner client with real `bigquery.AccessEntry` ACLs per dataset, so the real `authz.set_dataset_reader` and the
-    broker's snapshot/restore run unmodified (the API returns copies; `update_dataset` writes back)."""
+    broker's snapshot/restore run unmodified (the API returns copies; `update_dataset` writes back). It also models the
+    three `_rls` row access policies, so the real `authz.set_rls` DDL and the broker's grantee snapshot/restore run
+    against a readable-back fixture."""
 
-    def __init__(self, acl):
+    def __init__(self, acl, predicates=None, policy_ids=None):
         super().__init__({})
         self.acl = {ds: list(entries) for ds, entries in acl.items()}
         self.updates = []
+        pred = predicates or PR.hide_predicates()
+        ids = policy_ids or PR.hide_policy_ids()
+        # keyed by policy NAME per table, the way BigQuery replaces them: DDL under a different name adds a policy
+        # beside the existing one instead of replacing it (Astra PR 45 #2)
+        self.policies = {t: [{"policy_id": ids[t], "grantees": [OPERATOR_MEMBER], "predicate": pred[t]}] for t in PR.RLS_TABLES}
+        self.rls_ddl = []
+        self._ddl_fail: dict = {}
+        self._connection = _RlsApi(self)
+
+    def fail_ddl(self, policy_id, mode="result"):
+        """Make the next DDL for this policy fail. "submit": the call raises before a job exists. "result": the job is
+        submitted and its result raises - the case where a reference exists and must not be thrown away."""
+        self._ddl_fail[policy_id] = mode
+
+    def query(self, q, job_config=None, location=None):
+        """Only the `authz.set_rls` DDL reaches the owner in these tests: parse it back into the policy fixture."""
+        assert "ROW ACCESS POLICY" in q, f"unexpected owner query: {q[:80]}"
+        self.rls_ddl.append(q)
+        table = q.split("` GRANT TO", 1)[0].rsplit(".", 1)[1]
+        pid = q.split("ROW ACCESS POLICY ", 1)[1].split(" ", 1)[0]
+        grantees = sorted(x.strip().strip("'") for x in q.split("GRANT TO (", 1)[1].split(")", 1)[0].split(","))
+        predicate = " ".join(q.split("FILTER USING (", 1)[1].rsplit(")", 1)[0].split())
+        mode = self._ddl_fail.pop(pid, None)
+        if mode == "submit":
+            from google.api_core import exceptions as gexc
+            raise gexc.ServiceUnavailable("503 backend error before the job existed")
+        job = _Rows([], job_id=f"ddl-{pid}-{len(self.rls_ddl)}")
+        if mode == "result":
+            from google.api_core import exceptions as gexc
+            job.fail = gexc.ServiceUnavailable("503 the job was submitted, its result was not returned")
+            return job                                  # the statement did not complete: the fixture is unchanged
+        existing = next((p for p in self.policies[table] if p["policy_id"] == pid), None)
+        if existing is None:   # CREATE OR REPLACE replaces by NAME: another name is another policy on the same table
+            self.policies[table].append({"policy_id": pid, "grantees": grantees, "predicate": predicate})
+        else:
+            existing.update(grantees=grantees, predicate=predicate)
+        return job
+
+    def policy(self, table, index=0):
+        return self.policies[table][index]
 
     def get_dataset(self, ref):
         ds = ref.split(".", 1)[1]
@@ -547,6 +660,7 @@ class _AclOwner(_Owner):
         return sorted(e.role for e in self.acl.get(ds, []) if (e.entity_id or "").replace("serviceAccount:", "") == principal)
 
 
+OPERATOR_MEMBER = "user:operator@example.test"
 SDK_DS = "okf_receipt_spike_20260905"
 P = "test-project-0728-467323"
 SDK_DEPS = [f"{P}.{SDK_DS}.orders", f"{P}.{SDK_DS}.order_lines"]
@@ -558,13 +672,14 @@ def _entry(role):
     return bigquery.AccessEntry(role, "userByEmail", SA)
 
 
-def _live_broker(monkeypatch, allowed, acl=None, deps=SDK_DEPS, credfile=None, **kw):
+def _live_broker(monkeypatch, allowed, acl=None, deps=SDK_DEPS, credfile=None, policy_ids=None, **kw):
     """A RestrictedBroker exactly as chain.py builds it (dependencies from the SDK publication, default wait), against a
     fake SA client, a fake ACL-bearing owner and a fake clock (so an unpropagated grant times out in test time)."""
     t = [0.0]
     monkeypatch.setattr(PR.time, "monotonic", lambda: t[0])
     monkeypatch.setattr(PR.time, "sleep", lambda s: t.__setitem__(0, t[0] + s))
-    sa, owner = _SAClient(allowed), _AclOwner(acl or {})
+    owner = _AclOwner(acl or {}, policy_ids=policy_ids)
+    sa = _SAClient(allowed, owner=owner)
     b = PR.RestrictedBroker("fallback", SDK_DS, dependencies=deps, sa_email=SA, factory=lambda p: sa, owner=owner,
                             credential_file=credfile or (lambda email, directory=None: os.path.join(directory, "adc.json")), **kw)
     return b, sa, owner
@@ -597,7 +712,11 @@ def test_live_broker_never_touches_or_downgrades_preexisting_grants_and_restores
     assert b.granted == set() and [j["event"] for j in b.journal[:-1]] == ["grant_preexisting", "grant_preexisting"]
     b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
     assert owner.roles(RLS_DS) == ["READER"] and b.granted == {RLS_DS} and b.graph_clients()["ds"] == RLS_DS
+    # the `_rls` case needs the row policy's grantee list too: dataset READER alone leaves a non-grantee reading zero rows
+    assert owner.policy("nodes")["grantees"] == sorted([OPERATOR_MEMBER, f"serviceAccount:{SA}"]) and len(owner.rls_ddl) == 3
+    assert all(owner.policy(t)["predicate"] == PR.hide_predicates()[t] for t in PR.RLS_TABLES)   # the hidden-intermediate shape is unchanged
     b.apply(PR.policy())
+    assert owner.policy("nodes")["grantees"] == [OPERATOR_MEMBER]                                # leaving the fixture drops the grantee again
     sa.allowed = set()
     r = b.revoke()                                                                             # the revocation case must observe a denial: pre-existing entries go too ...
     assert r["observed"] is True and owner.roles(DATASET) == [] and owner.roles(SDK_DS) == [] and owner.roles(RLS_DS) == ["READER"]
@@ -606,7 +725,219 @@ def test_live_broker_never_touches_or_downgrades_preexisting_grants_and_restores
     assert owner.roles(DATASET) == ["READER"] and owner.roles(SDK_DS) == ["WRITER"] and owner.roles(RLS_DS) == []
     assert td["datasets"][SDK_DS] == {"original_roles": ["WRITER"], "roles_after": ["WRITER"], "added_by_broker": False}
     assert td["datasets"][RLS_DS] == {"original_roles": [], "roles_after": [], "added_by_broker": True}
-    assert set(td["steps"]) == {f"{k}_{ds}" for k in ("restore", "readback") for ds in (DATASET, SDK_DS, RLS_DS)}
+    assert set(td["steps"]) == ({f"{k}_{ds}" for k in ("restore", "readback") for ds in (DATASET, SDK_DS, RLS_DS)}
+                                | {"restore_rls_policies", "readback_rls_policies"})
+    assert td["rls"] == {"tables": 3, "restored_to_snapshot": True, "sa_in_grantees_after": False,
+                         "grantees_after": {t: 1 for t in PR.RLS_TABLES}}
+    assert owner.policy("nodes")["grantees"] == [OPERATOR_MEMBER] and owner.policy("section_vectors")["grantees"] == [OPERATOR_MEMBER]
+
+
+def test_live_broker_leaves_rls_policies_alone_unless_a_case_runs_on_them(monkeypatch):
+    """A broker whose cases never touch the `_rls` fixture issues no policy DDL and reports nothing to restore."""
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    b.grant(); sa.allowed = set(); b.revoke()
+    td = b.teardown()
+    assert owner.rls_ddl == [] and b._rls_original is None and owner.policy("nodes")["grantees"] == [OPERATOR_MEMBER]
+    assert "restore_rls_policies" not in td["steps"] and "rls" not in td
+
+
+def test_live_broker_refuses_rls_policies_it_could_not_restore(monkeypatch):
+    """Grading a hidden-intermediate case against unknown policies proves nothing: an unexpected predicate, an unexpected
+    policy count and a split nodes/edges grantee list each refuse before any DDL is issued."""
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    owner.policy("edges")["predicate"] = "TRUE"
+    with pytest.raises(RuntimeError, match="hidden-intermediate fixture shape"):
+        b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert owner.rls_ddl == [] and b._rls_original is None
+
+    b2, sa2, owner2 = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    owner2.policy("edges")["grantees"] = [OPERATOR_MEMBER, "user:someone-else@example.test"]
+    with pytest.raises(RuntimeError, match="different grantee lists"):
+        b2.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert owner2.rls_ddl == []
+
+    b3, sa3, owner3 = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    owner3._connection.api_request = lambda method=None, path=None, data=None: {"rowAccessPolicies": []}
+    with pytest.raises(RuntimeError, match="row access policies"):
+        b3.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert owner3.rls_ddl == []
+
+
+def test_a_denied_cached_replay_recheck_stays_in_the_job_inventory():   # Astra PR 45 #1
+    """The cached-replay re-check is a submitted job even when the platform denies it. Recording a job only after a
+    successful result made precisely the negative path - the one the revocation case exists to produce - vanish from
+    the identity evidence, while `job_ids_of` still forwarded an empty list."""
+    import okf_bq_graph.retrieve as RT
+    from google.api_core import exceptions as gexc
+
+    class _DeniedJob:
+        job_id, project, location = "recheck-job", P, "US"
+        slot_millis = total_bytes_processed = total_bytes_billed = cache_hit = None
+        created = started = ended = None
+        _properties: dict = {"statistics": {}}
+
+        def result(self):
+            raise gexc.Forbidden("403 Access Denied: accessDenied on the revoked dataset")
+
+    class _Client:
+        submitted = 0
+
+        def query(self, q, job_config=None, location=None):
+            type(self).submitted += 1
+            return _DeniedJob()
+
+    timer = RT.Timer()
+    clients = {"bq": _Client(), "engine": "fallback", "ds": DATASET}
+    assert RT._recheck(clients, f"{P}.{DATASET}", "pub_x", ["n1"], ["e1"], timer) is False   # unknown check blocks
+    jobs = timer.done()["jobs"]
+    assert _Client.submitted == 1 and [j["job_id"] for j in jobs] == ["recheck-job"]         # was [] before the fix
+    assert jobs[0]["state"] == "FAILED" and jobs[0]["stage"] == "recheck" and "Forbidden" in jobs[0]["error"]
+    # and the chain's inventory collects it from the replay, so the identity audit reads it back
+    case = {"case": "revocation-before-replay", "replay": {"retrieval": {"timing": timer.done()}}}
+    assert CH.job_ids_of([case]) == {"graph": ["recheck-job"], "receipt": []}
+
+
+def test_a_failed_policy_statement_does_not_discard_the_batch_it_submitted(monkeypatch):   # Astra PR 45 re-review #1
+    """`authz.set_rls` attempts all three statements and only then raises, so retaining references from its return
+    value loses every reference in the batch: the statements that succeeded, and the one whose job was submitted before
+    its result failed. Each reference is now kept at submission."""
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert [j["state"] for j in b.admin_jobs] == ["DONE"] * 3
+
+    owner.fail_ddl(PR.hide_policy_ids()["edges"], "result")
+    with pytest.raises(RuntimeError, match=r"row access policy statements failed for \['edges'\]"):
+        b.apply(PR.policy())
+    ids = [j["job_id"] for j in b.admin_jobs]
+    assert len(ids) == 6 and len(set(ids)) == 6                       # was 3: the whole failed batch used to vanish
+    assert [j["state"] for j in b.admin_jobs[3:]] == ["DONE", "FAILED", "DONE"]
+    assert "ServiceUnavailable" in b.admin_jobs[4]["error"]
+    assert b.admin_unresolved() == []                                 # every statement named the job it submitted
+    assert [op["state"] for op in b.admin_ops] == ["DONE"] * 3 + ["DONE", "FAILED", "DONE"]
+
+    # the identity audit can therefore still read every administrative job back
+    owner.emails.update({j: OPERATOR_MEMBER.split(":", 1)[1] for j in ids}
+                        | {j["job_id"]: SA for j in b.probe_jobs} | {"g1": SA, "r1": SA})
+    b._operator_email = OPERATOR_MEMBER.split(":", 1)[1]
+    ident = b.identity(["g1"], [{"job_id": "r1"}])
+    assert ident["status"] == "BOUND" and ident["roles"]["policy_admin"]["jobs"] == 6
+    assert ident["admin_ops"] == {"attempted": 6, "by_state": {"DONE": 5, "FAILED": 1}}
+
+
+def test_a_statement_that_never_named_a_job_blocks_the_completeness_claim(monkeypatch):   # Astra PR 45 re-review #1
+    """A statement that failed before a job reference existed is UNRESOLVED: what it did on the platform cannot be read
+    back, so the run must not claim a complete inventory - and an audit must not write those jobs off as somebody
+    else's unrelated operator work."""
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    owner.fail_ddl(PR.hide_policy_ids()["nodes"], "submit")
+    with pytest.raises(RuntimeError, match=r"failed for \['nodes'\]"):
+        b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    unresolved = b.admin_unresolved()
+    assert [u["table"] for u in unresolved] == ["nodes"] and unresolved[0]["state"] == "UNRESOLVED"
+    assert len(b.admin_jobs) == 2 and [j["state"] for j in b.admin_jobs] == ["DONE", "DONE"]   # the other two are named
+
+    owner.emails.update({j["job_id"]: OPERATOR_MEMBER.split(":", 1)[1] for j in b.admin_jobs}
+                        | {j["job_id"]: SA for j in b.probe_jobs} | {"g1": SA, "r1": SA})
+    b._operator_email = OPERATOR_MEMBER.split(":", 1)[1]
+    ident = b.identity(["g1"], [{"job_id": "r1"}])
+    assert ident["status"] == "UNKNOWN" and ident["roles"]["policy_admin"]["status"] == "UNKNOWN"
+    assert ident["roles"]["policy_admin"]["unresolved"] == 1 and "without a retained job reference" in ident["reason"]
+    assert ident["admin_ops"]["by_state"] == {"DONE": 2, "UNRESOLVED": 1}
+
+
+def test_unresolved_admin_work_reaches_the_record_and_the_audit(sdk_root, projection, tmp_path, monkeypatch):
+    """End to end: the chain records what the broker could not account for, the verdict is CHAIN_INCOMPLETE, and the
+    reconciliation refuses to certify the record even when every job it DID name is present on the platform."""
+    import okf_bq_graph.job_audit as JA
+
+    class Broker(PR.HermeticBroker):
+        hermetic = False
+
+        def __init__(self, projection):
+            super().__init__(projection, sa_email=SA)
+            self.admin_ops = [{"transition": "restore", "table": "edges", "job_id": None, "state": "UNRESOLVED",
+                               "error": "ServiceUnavailable: 503 backend error before the job existed"},
+                              {"transition": "restore", "table": "nodes", "job_id": "ddl-nodes-1", "state": "DONE", "error": None}]
+            self.admin_jobs = [PR.job_ref("ddl-nodes-1", stage="rls_restore_nodes")]
+
+        def graph_clients(self):
+            return dict(super().graph_clients(), bq="SA-CLIENT")
+
+        def identity(self, graph_job_ids, receipt_jobs):
+            return {"status": "UNKNOWN", "expected": SA_ALIAS,
+                    "reason": "policy_admin: UNKNOWN (1 administrative statement(s) were attempted without a retained job reference)",
+                    "roles": {"policy_admin": {"status": "UNKNOWN", "unresolved": 1}}}
+
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda client, ds=DATASET: (CH.PUBLICATION_PIN, "pointer-job"))
+
+    def runner(argv, **kw):
+        r = subprocess.run([x for x in argv if x != "--live"], **kw)
+        d = Path(argv[argv.index("--evidence-dir") + 1])
+        os.replace(d / "case_approved_hermetic.json", d / "case_approved_live.json")
+        return r
+
+    out = CH.run_chain(engine="fallback", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), requester_mode="restricted",
+                       broker=Broker(projection), as_of=AS_OF, runner=runner)
+    assert out["acceptance"] == {c: "MET" for c in CH.RESTRICTED_CASES}         # the cases themselves behaved
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "identity"
+    inv = out["job_inventory"]
+    assert [op["table"] for op in inv["policy_admin_unresolved"]] == ["edges"] and len(inv["policy_admin_ops"]) == 2
+
+    # and the audit refuses to certify it, although every named job is on the platform and nothing else is wrong
+    class _It:
+        next_page_token = None
+
+        def __iter__(self):
+            class J:
+                def __init__(s, i, e):
+                    s.job_id, s.user_email, s.state, s.job_type, s.created, s.error_result = i, e, "DONE", "query", None, None
+            for jid in inv["graph"] + [j for j in inv["receipt"] if j] + inv["policy_admin"]:
+                yield J(jid, SA)
+
+    class _Client:
+        def list_jobs(self, **kw):
+            return _It()
+
+    audited = JA.audit(out, client=_Client(), requester_email=SA)
+    assert audited["status"] == "INCOMPLETE" and audited["declared_admin_unresolved"] == 1
+    assert audited["unaccounted_requester_jobs"] == [] and audited["not_listed"] == []
+    assert "never named a job for" in audited["reason"]
+
+
+def test_live_broker_refuses_policy_names_its_restore_helper_cannot_restore(monkeypatch):   # Astra PR 45 #2
+    """BigQuery replaces a row access policy BY NAME and `authz.set_rls` only issues the fixture's fixed names. A
+    correctly filtered policy under another id would be left in place while the DDL created a second one beside it, and
+    teardown could not put the table back. Refuse before any DDL rather than orphan the fixture."""
+    ids = dict(PR.hide_policy_ids(), section_vectors="tenant_vectors_v2")
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED, policy_ids=ids)
+    with pytest.raises(RuntimeError, match="unexpected ids on \\['section_vectors'\\]"):
+        b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert owner.rls_ddl == [] and b._rls_original is None and b.admin_jobs == []
+    assert [len(owner.policies[t]) for t in PR.RLS_TABLES] == [1, 1, 1]        # nothing added beside the fixture
+    assert owner.policy("section_vectors")["policy_id"] == "tenant_vectors_v2"
+
+    # the guard is what prevents it: without the id check the same fixture ends with two policies on that table
+    b2, sa2, owner2 = _live_broker(monkeypatch, allowed=ALL_ALLOWED, policy_ids=ids)
+    real_state = b2._rls_state
+    b2._rls_state = lambda: {t: dict(s, policy_id=PR.hide_policy_ids()[t]) for t, s in real_state().items()}
+    b2.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert len(owner2.policies["section_vectors"]) == 2                        # the orphan the guard exists to prevent
+    assert b2.teardown()["status"] == "UNVERIFIED"
+
+
+def test_live_broker_rls_case_waits_for_the_row_policy_not_just_the_dry_run(monkeypatch):
+    """The dry run passes on dataset READER alone, so a non-grantee would look ALLOWED. The broker refuses until it
+    actually reads rows on the fixture, and the refusal names the `_rls` observation."""
+    b, sa, owner = _live_broker(monkeypatch, allowed=ALL_ALLOWED)
+    real = b._rls_grantee
+    b._rls_grantee = lambda want: None          # the grant never lands: dataset READER is in place, the row policy is not
+    with pytest.raises(RuntimeError, match="rls=DENIED"):
+        b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert [q for q in sa.queries if "COUNT(*) AS visible" in q]          # a real query under the SA, not a dry run
+    b._rls_grantee = real
+    entry = b.apply(PR.policy(dataset="rls", hidden=(HIDDEN,)))
+    assert entry["observed"] is True and entry["rls"]["status"] == "ALLOWED" and entry["rls"]["visible"] > 0 and entry["rls"]["hidden"] == 0
+    assert b.apply(PR.policy())["rls"] == {"status": "NOT_APPLICABLE", "reason": "case does not use the `_rls` fixture"}
 
 
 def test_live_broker_failed_setup_still_restores_the_original_acl(monkeypatch):   # Astra P1: failed launch through the real helper
@@ -643,7 +974,8 @@ def test_live_restricted_chain_builds_the_broker_with_the_sdk_dependencies_and_t
     deps = CH.sdk_publication(sdk_root)["dependencies"]
 
     def make(allowed, acl):
-        sa, owner = _SAClient(allowed), _AclOwner(acl)
+        owner = _AclOwner(acl)
+        sa = _SAClient(allowed, owner=owner)
 
         def factory(engine, sdk_dataset, dependencies=None, **kw):
             seen["dependencies"], seen["sdk_dataset"] = list(dependencies or []), sdk_dataset
@@ -674,12 +1006,52 @@ def test_live_broker_receipt_env_points_the_sdk_at_the_impersonated_file_and_tea
         seen["email"], seen["dir"] = email, directory
         p = os.path.join(directory, "adc.json"); Path(p).write_text("{}"); return p
 
+    monkeypatch.delenv("PYTHONPATH", raising=False)
     b, sa, owner = _live_broker(monkeypatch, allowed=set(), credfile=credfile)
     env = b.receipt_env()
-    assert seen["email"] == SA and env == {"GOOGLE_APPLICATION_CREDENTIALS": os.path.join(seen["dir"], "adc.json")} and os.path.exists(env["GOOGLE_APPLICATION_CREDENTIALS"])
+    assert seen["email"] == SA and os.path.exists(env["GOOGLE_APPLICATION_CREDENTIALS"])
+    assert env == {"GOOGLE_APPLICATION_CREDENTIALS": os.path.join(seen["dir"], "adc.json"), "PYTHONPATH": seen["dir"]}
     assert b.receipt_env() == env and b.receipt_launches == 2                                # one file per broker, reused
+    # the shim is the SDK's own credential path with one extra scope: it never names an identity
+    shim = Path(seen["dir"], "usercustomize.py").read_text()
+    assert "userinfo.email" in shim and "google.auth" in shim and SA not in shim and "gserviceaccount" not in shim
+    assert stat.S_IMODE(os.stat(seen["dir"]).st_mode) == 0o700
     td = b.teardown()
-    assert td["status"] == "VERIFIED" and td["steps"] == {"remove_credential_file": {"ok": True}} and not os.path.exists(seen["dir"])
+    assert td["status"] == "VERIFIED" and not os.path.exists(seen["dir"])
+    assert td["steps"] == {"remove_credential_file": {"ok": True, "held": ["adc.json", "usercustomize.py"]}}
+
+
+def test_live_broker_scope_shim_adds_only_the_email_scope_and_keeps_the_identity(monkeypatch, tmp_path):
+    """The shim must add the scope the SDK's tokeninfo check needs and change nothing else: it names no identity, it
+    wraps the real `google.auth` loader rather than importing eagerly, and it leaves every other module alone."""
+    import google.auth
+    shim = tmp_path / "shim"; shim.mkdir()
+    written = PR.scope_shim_file(str(shim))
+    # never `sitecustomize`: this interpreter ships one that completes sys.path, and a PYTHONPATH copy shadows it
+    assert Path(written).name == "usercustomize.py" and not (shim / "sitecustomize.py").exists()
+    text = Path(written).read_text()
+    assert PR.USERINFO_EMAIL in text and SA not in text and "gserviceaccount" not in text   # a scope, not an identity
+
+    depth = len(sys.meta_path)
+    ns: dict = {"__name__": "usercustomize"}
+    exec(compile(text, "usercustomize.py", "exec"), ns)
+    hook = sys.meta_path[0]
+    try:
+        cp = "https://www.googleapis.com/auth/cloud-platform"
+        assert ns["_with_email"]([cp]) == [cp, PR.USERINFO_EMAIL]                       # the SDK's exact call
+        assert ns["_with_email"]([cp, PR.USERINFO_EMAIL]) == [cp, PR.USERINFO_EMAIL]    # already asked for: unchanged
+        assert ns["_with_email"](None) is None and ns["_with_email"]([]) == []          # nothing requested: nothing invented
+        assert hook.find_spec("json") is None and sys.meta_path[0] is hook              # every other module is untouched
+        spec = hook.find_spec("google.auth", sys.modules["google"].__path__)   # the parent package's path, as the import system passes it
+        assert spec is not None and hook not in sys.meta_path                           # delegated, and never re-entered
+        mod = types.ModuleType("google.auth")
+        mod.__spec__, mod.__path__ = spec, google.auth.__path__
+        spec.loader.exec_module(mod)                                                    # the real module, then the wrap
+        assert mod.default is not google.auth.default and mod.default.__module__ == "usercustomize"
+    finally:
+        if hook in sys.meta_path:
+            sys.meta_path.remove(hook)
+    assert len(sys.meta_path) == depth and google.auth.default.__module__ == "google.auth._default"   # this interpreter is clean
 
 
 def test_live_restricted_chain_runs_the_pointer_lookup_under_the_broker_client_and_tears_down(sdk_root, tmp_path, monkeypatch):
