@@ -1,0 +1,3472 @@
+{
+ "result": {
+  "ambiguous": [],
+  "blockers": [],
+  "campaign": {
+   "datasets": [
+    "okf_graph_spike_20260905",
+    "okf_graph_spike_20260905_rls",
+    "okf_graph_spike_20260905_meta",
+    "okf_graph_spike_20260905_av",
+    "okf_graph_spike_20260905_x100",
+    "okf_graph_spike_20260905_x1000"
+   ],
+   "label_key": "okf_spike",
+   "label_value": "bq_graph_20260905"
+  },
+  "child_membership": [],
+  "decisions": {
+   "0de731e0-637a-4cb5-b764-9c7d2e82c08a": {
+    "evidence": {
+     "created_ms": "1788654077730",
+     "labels": {},
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "created inside the recorded capacity interval of all-0017, which owns it: the driver's own capacity read (`region-us`.INFORMATION_SCHEMA.RESERVATIONS_TIMELINE WHERE reservation_name = @r), created 00:21:17Z inside all-0017's recorded interval and routed to its Enterprise reservation"
+   },
+   "8526efa6-c55c-4488-a050-421d3eb580b4": {
+    "evidence": {
+     "created_ms": "1788653875499",
+     "labels": {
+      "okf_spike": "bq_graph_20260905"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier"
+   },
+   "afbe7061-813a-439d-afb7-2c9efe06d2e7": {
+    "evidence": {
+     "created_ms": "1788652876697",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "the same INFORMATION_SCHEMA.RESERVATIONS_TIMELINE capacity read, created 00:01:16Z when no window was open and routed to no reservation: a between-windows check, not a job of any paid opening"
+   },
+   "bqjob_r56fb5a9aa6c2e225_000001a073eeffc0_1": {
+    "evidence": {
+     "created_ms": "1788651438282",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "bqjob_r6d8765de230f21e4_000001a073fc6c6f_1": {
+    "evidence": {
+     "created_ms": "1788652318086",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "bqjob_r74ce8f5679562b1c_000001a074165929_1": {
+    "evidence": {
+     "created_ms": "1788654017098",
+     "labels": {},
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "created inside the recorded capacity interval of all-0017, which owns it: `SELECT 1 AS x` submitted through the bq CLI at 00:20:17Z, inside all-0017's recorded interval and routed to its Enterprise reservation: the operator's assignment-readiness probe for that window"
+   },
+   "bqjob_r79062b4a27c75a24_000001a07416d20d_1": {
+    "evidence": {
+     "created_ms": "1788654048036",
+     "labels": {},
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "created inside the recorded capacity interval of all-0017, which owns it: `SELECT 1` submitted through the bq CLI at 00:20:48Z, inside all-0017's recorded interval and routed to its Enterprise reservation: the operator's assignment-readiness probe for that window"
+   },
+   "bqjob_r7b49d7b6a83843eb_000001a073ee7f34_1": {
+    "evidence": {
+     "created_ms": "1788651405419",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "bqjob_rb53f55e41faf967_000001a073eea67a_1": {
+    "evidence": {
+     "created_ms": "1788651415398",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "fccaf7f9-eae1-4be1-9738-f304aa1933bb": {
+    "evidence": {
+     "created_ms": "1788653396310",
+     "labels": {
+      "okf_spike": "bq_graph_20260905"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "setup of the integration-0009 invocation, which owns it: the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier"
+   },
+   "okf_rcpt_0d5dee6d11a98c7551a44b04_c890dce166d831b4": {
+    "evidence": {
+     "created_ms": "1788652583034",
+     "labels": {
+      "okf_request": "0d5dee6d11a98c75"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_1335b9df2747d25634d0a334_8f15846bc2418822": {
+    "evidence": {
+     "created_ms": "1788654477163",
+     "labels": {
+      "okf_request": "1335b9df2747d256"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project. It reports the graph reservation because capacity deletion had not finished propagating: its immediate siblings in the same burst carry NO reservation, so the attribution is propagation lag rather than membership"
+   },
+   "okf_rcpt_133856a68ae510dacfea584f_36799cbeb17dee8a": {
+    "evidence": {
+     "created_ms": "1788652427834",
+     "labels": {
+      "okf_request": "133856a68ae510da"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_1a8e9ba62a3d1b03cc4500d8_cd51d8378c775313": {
+    "evidence": {
+     "created_ms": "1788654630491",
+     "labels": {
+      "requester": "raincoatrun_at_gmail_com"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_236396cc55221c6df44201d4_6bc5866c7d85eccb": {
+    "evidence": {
+     "created_ms": "1788652577093",
+     "labels": {
+      "okf_request": "236396cc55221c6d"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_2af7ac1fcedc0d6dcc17985b_be9060b46c4e965f": {
+    "evidence": {
+     "created_ms": "1788652588972",
+     "labels": {
+      "requester": "raincoatrun_at_gmail_com"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_2ea0fa0cbf2edc215bf7f0fd_8b7abfbb42f636ec": {
+    "evidence": {
+     "created_ms": "1788654480175",
+     "labels": {
+      "okf_request": "2ea0fa0cbf2edc21"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_34d0e6e6e36500cd25a291d9_828bcdd85e599f61": {
+    "evidence": {
+     "created_ms": "1788652414579",
+     "labels": {
+      "okf_request": "34d0e6e6e36500cd"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_41cafa6c39eceba4d993a6c9_8ee362327841e766": {
+    "evidence": {
+     "created_ms": "1788654558818",
+     "labels": {
+      "okf_request": "41cafa6c39eceba4"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_483dca3b434bb2634861dc41_064a0b09ea3ad74b": {
+    "evidence": {
+     "created_ms": "1788654478190",
+     "labels": {
+      "okf_request": "483dca3b434bb263"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_4b1dcf3e4315907c18528cae_88fc36883ad45e45": {
+    "evidence": {
+     "created_ms": "1788654495170",
+     "labels": {
+      "okf_request": "4b1dcf3e4315907c"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_54e0bda756b383f272b3ab1d_a2b4981884150b01": {
+    "evidence": {
+     "created_ms": "1788654626762",
+     "labels": {
+      "okf_request": "54e0bda756b383f2"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_58b543f749a4f604806116b9_3703b2d18d76e090": {
+    "evidence": {
+     "created_ms": "1788654593640",
+     "labels": {
+      "okf_request": "58b543f749a4f604"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_612bdafff221507e69ed882b_0f20462ed54826af": {
+    "evidence": {
+     "created_ms": "1788654485313",
+     "labels": {
+      "okf_request": "612bdafff221507e"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project. It reports the graph reservation because capacity deletion had not finished propagating: its immediate siblings in the same burst carry NO reservation, so the attribution is propagation lag rather than membership"
+   },
+   "okf_rcpt_6825e53075a46d65200f82f4_9fcdff6bebd6c789": {
+    "evidence": {
+     "created_ms": "1788654554501",
+     "labels": {
+      "okf_request": "6825e53075a46d65"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_72517924d1c070745ec94f0a_1f06f6d54473a1e0": {
+    "evidence": {
+     "created_ms": "1788652409373",
+     "labels": {
+      "okf_request": "72517924d1c07074"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_728055d5b86cf409fc1338e8_ba9f6ca2ee33976e": {
+    "evidence": {
+     "created_ms": "1788654493722",
+     "labels": {
+      "okf_request": "728055d5b86cf409"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_75d11380d4c40eac120a4ed7_f29638e467b30064": {
+    "evidence": {
+     "created_ms": "1788652423124",
+     "labels": {
+      "okf_request": "75d11380d4c40eac"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_80715852ef4dfb3e9d65719d_eb12587aae2ebfd2": {
+    "evidence": {
+     "created_ms": "1788654619474",
+     "labels": {
+      "okf_request": "80715852ef4dfb3e"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_8b1b33d86066dbe3ac1386a6_95de70d8ac3ab1dd": {
+    "evidence": {
+     "created_ms": "1788654545130",
+     "labels": {
+      "okf_request": "8b1b33d86066dbe3"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_8ddc7758d2d000af8b432a8a_d3ccbcee8ebf7791": {
+    "evidence": {
+     "created_ms": "1788654637623",
+     "labels": {
+      "okf_request": "8ddc7758d2d000af"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_8fa8a6c78952ab627f08828a_14bb9562aed126cb": {
+    "evidence": {
+     "created_ms": "1788652597078",
+     "labels": {
+      "okf_request": "8fa8a6c78952ab62"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_955a2466e053c9c2e545f74f_7008089c4328de21": {
+    "evidence": {
+     "created_ms": "1788654621736",
+     "labels": {
+      "okf_request": "955a2466e053c9c2"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_96b2b93c9318b5a7b681f7ab_1fc29ab69fa93478": {
+    "evidence": {
+     "created_ms": "1788654588341",
+     "labels": {
+      "okf_request": "96b2b93c9318b5a7"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_9e98122903b09728ef305564_9c851d3d5c44e0c8": {
+    "evidence": {
+     "created_ms": "1788652571064",
+     "labels": {
+      "okf_request": "9e98122903b09728"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_a1ca0ac0d57e3bf5e873f299_210b78e7849efbb3": {
+    "evidence": {
+     "created_ms": "1788652580469",
+     "labels": {
+      "okf_request": "a1ca0ac0d57e3bf5"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_a39df03942574d4b99cf9a42_835abec0538af20a": {
+    "evidence": {
+     "created_ms": "1788652418486",
+     "labels": {
+      "okf_request": "a39df03942574d4b"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_a3f222fd5d082ae75ec3fb68_57863a95f49d1d24": {
+    "evidence": {
+     "created_ms": "1788652585123",
+     "labels": {
+      "okf_request": "a3f222fd5d082ae7"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_b14082d067b4d582be0bc26f_e16294f3edfd5058": {
+    "evidence": {
+     "created_ms": "1788652432345",
+     "labels": {
+      "okf_request": "b14082d067b4d582"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_b477088b0105c26d76abb665_f8510b56fcdc86dc": {
+    "evidence": {
+     "created_ms": "1788654535931",
+     "labels": {
+      "okf_request": "b477088b0105c26d"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_cdb8c6ac514a4f56eb554562_fb0a3e38a7d39955": {
+    "evidence": {
+     "created_ms": "1788652437129",
+     "labels": {
+      "okf_request": "cdb8c6ac514a4f56"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_cfa80316f42228ab90a14537_7ea69d58a509ba43": {
+    "evidence": {
+     "created_ms": "1788654476092",
+     "labels": {
+      "okf_request": "cfa80316f42228ab"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project. It reports the graph reservation because capacity deletion had not finished propagating: its immediate siblings in the same burst carry NO reservation, so the attribution is propagation lag rather than membership"
+   },
+   "okf_rcpt_d2ca9c1345d9d2f01316cb52_a7752aa84ad0889b": {
+    "evidence": {
+     "created_ms": "1788654635891",
+     "labels": {
+      "okf_request": "d2ca9c1345d9d2f0"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_d2f0f0ff9a75fac2810b07ab_0f0deb3f6d823188": {
+    "evidence": {
+     "created_ms": "1788654611375",
+     "labels": {
+      "okf_request": "d2f0f0ff9a75fac2"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_d96a6e9791ef5e4a9ca33bac_8518dc64929a790f": {
+    "evidence": {
+     "created_ms": "1788654549369",
+     "labels": {
+      "okf_request": "d96a6e9791ef5e4a"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_e085885fb7d9839d4bedd15c_13ff7aa2d57a6e2a": {
+    "evidence": {
+     "created_ms": "1788654617483",
+     "labels": {
+      "okf_request": "e085885fb7d9839d"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_e351983f98432d5ac5119a18_7e0d4556bbda7dd2": {
+    "evidence": {
+     "created_ms": "1788652594981",
+     "labels": {
+      "okf_request": "e351983f98432d5a"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_e6a7916675d1f418d2def964_a3825b5f2e7a60f3": {
+    "evidence": {
+     "created_ms": "1788654541089",
+     "labels": {
+      "okf_request": "e6a7916675d1f418"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_ecc2691396a5534643028a48_797deae7b9396c38": {
+    "evidence": {
+     "created_ms": "1788654564073",
+     "labels": {
+      "okf_request": "ecc2691396a55346"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_fd23a18f51260118cdf17e52_106c85abd550505c": {
+    "evidence": {
+     "created_ms": "1788654488523",
+     "labels": {
+      "requester": "raincoatrun_at_gmail_com"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_receipt_preflight_jan_71b3b21715fe": {
+    "evidence": {
+     "created_ms": "1788651470123",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_receipt_preflight_janfeb_4baa03f238fe": {
+    "evidence": {
+     "created_ms": "1788651471084",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_receipt_preflight_wrong_eeeabdb00901": {
+    "evidence": {
+     "created_ms": "1788651471899",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "scheduled_query_6b0f5992-0000-20ed-85fc-94eb2c09b214": {
+    "evidence": {
+     "created_ms": "1788654008591",
+     "labels": {
+      "data_source_id": "scheduled_query",
+      "dts_config_id": "6aa3c943-0000-2845-97ca-3c286d3802a2",
+      "dts_run_id": "6b0f5992-0000-20ed-85fc-94eb2c09b214",
+      "goog-bq-feature-type": "data_transfer_service"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "bqaa-otlp-consumer@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "a recurring BigQuery Data Transfer scheduled query owned by bqaa-otlp-consumer@, merging into `bqaa_hero_demo_20260708.agent_events_otlp`: a different principal, a different dataset and a schedule that runs before and after this episode. Where it reports the graph reservation, that is the window's own assignee_type=PROJECT job_type=QUERY assignment routing unrelated project traffic onto its Enterprise capacity - the transfer service owns the job, the window does not"
+   },
+   "scheduled_query_6b2240f5-0000-2f5a-96b2-fc411692d871": {
+    "evidence": {
+     "created_ms": "1788651303682",
+     "labels": {
+      "data_source_id": "scheduled_query",
+      "dts_config_id": "6aa3c943-0000-2845-97ca-3c286d3802a2",
+      "dts_run_id": "6b2240f5-0000-2f5a-96b2-fc411692d871",
+      "goog-bq-feature-type": "data_transfer_service"
+     },
+     "reservation_id": null,
+     "user_email": "bqaa-otlp-consumer@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "a recurring BigQuery Data Transfer scheduled query owned by bqaa-otlp-consumer@, merging into `bqaa_hero_demo_20260708.agent_events_otlp`: a different principal, a different dataset and a schedule that runs before and after this episode. Where it reports the graph reservation, that is the window's own assignee_type=PROJECT job_type=QUERY assignment routing unrelated project traffic onto its Enterprise capacity - the transfer service owns the job, the window does not"
+   },
+   "scheduled_query_6b22de46-0000-2f5a-96b2-fc411692d871": {
+    "evidence": {
+     "created_ms": "1788654903292",
+     "labels": {
+      "data_source_id": "scheduled_query",
+      "dts_config_id": "6aa3c943-0000-2845-97ca-3c286d3802a2",
+      "dts_run_id": "6b22de46-0000-2f5a-96b2-fc411692d871",
+      "goog-bq-feature-type": "data_transfer_service"
+     },
+     "reservation_id": null,
+     "user_email": "bqaa-otlp-consumer@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "a recurring BigQuery Data Transfer scheduled query owned by bqaa-otlp-consumer@, merging into `bqaa_hero_demo_20260708.agent_events_otlp`: a different principal, a different dataset and a schedule that runs before and after this episode. Where it reports the graph reservation, that is the window's own assignee_type=PROJECT job_type=QUERY assignment routing unrelated project traffic onto its Enterprise capacity - the transfer service owns the job, the window does not"
+   },
+   "scheduled_query_6b3b74f9-0000-22fd-986f-30fd38151e78": {
+    "evidence": {
+     "created_ms": "1788652202248",
+     "labels": {
+      "data_source_id": "scheduled_query",
+      "dts_config_id": "6aa3c943-0000-2845-97ca-3c286d3802a2",
+      "dts_run_id": "6b3b74f9-0000-22fd-986f-30fd38151e78",
+      "goog-bq-feature-type": "data_transfer_service"
+     },
+     "reservation_id": null,
+     "user_email": "bqaa-otlp-consumer@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "a recurring BigQuery Data Transfer scheduled query owned by bqaa-otlp-consumer@, merging into `bqaa_hero_demo_20260708.agent_events_otlp`: a different principal, a different dataset and a schedule that runs before and after this episode. Where it reports the graph reservation, that is the window's own assignee_type=PROJECT job_type=QUERY assignment routing unrelated project traffic onto its Enterprise capacity - the transfer service owns the job, the window does not"
+   },
+   "scheduled_query_6b7240e1-0000-22cb-b727-d43a2cce0dcf": {
+    "evidence": {
+     "created_ms": "1788653105215",
+     "labels": {
+      "data_source_id": "scheduled_query",
+      "dts_config_id": "6aa3c943-0000-2845-97ca-3c286d3802a2",
+      "dts_run_id": "6b7240e1-0000-22cb-b727-d43a2cce0dcf",
+      "goog-bq-feature-type": "data_transfer_service"
+     },
+     "reservation_id": null,
+     "user_email": "bqaa-otlp-consumer@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "a recurring BigQuery Data Transfer scheduled query owned by bqaa-otlp-consumer@, merging into `bqaa_hero_demo_20260708.agent_events_otlp`: a different principal, a different dataset and a schedule that runs before and after this episode. Where it reports the graph reservation, that is the window's own assignee_type=PROJECT job_type=QUERY assignment routing unrelated project traffic onto its Enterprise capacity - the transfer service owns the job, the window does not"
+   }
+  },
+  "declared_windows": [
+   {
+    "closed_at": "2026-09-05T23:47:20Z",
+    "label": "smoke-1",
+    "opened_at": "2026-09-05T23:43:43Z"
+   },
+   {
+    "closed_at": "2026-09-06T00:09:09Z",
+    "label": "integration-0007",
+    "opened_at": "2026-09-06T00:07:32Z"
+   },
+   {
+    "closed_at": "2026-09-06T00:11:16Z",
+    "label": "integration-0009",
+    "opened_at": "2026-09-06T00:09:57Z"
+   },
+   {
+    "closed_at": "2026-09-06T00:11:16Z",
+    "label": "safety-0011",
+    "opened_at": null
+   },
+   {
+    "closed_at": "2026-09-06T00:15:55Z",
+    "label": "all-0012",
+    "opened_at": "2026-09-06T00:12:38Z"
+   },
+   {
+    "closed_at": "2026-09-06T00:27:27Z",
+    "label": "all-0017",
+    "opened_at": "2026-09-06T00:17:56Z"
+   }
+  ],
+  "excluded": [
+   {
+    "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier",
+    "ref": {
+     "job_id": "8526efa6-c55c-4488-a050-421d3eb580b4",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "operator_decision"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "106f4692-e265-4ac7-b239-a79abd12116f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "f1f81620-d47f-4c6f-acde-1ba48e4afc01",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "428573e0-e293-468a-9a55-da1457597321",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "f79caa4e-f946-4d96-bef3-8f4cb21fc3e4",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "ab2bb624-83ab-4c75-ac4a-6d98325496ff",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "56cacb6d-a37e-40f5-8f3e-290b918b2871",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "eb953c9e-13c2-4d60-8f72-9dc59606c9c6",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "d582a58d-ecf9-47fd-9113-73a6591bcd22",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "e74f1303-806f-4bdf-aa37-6d5e11b427a0",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "758179c6-e991-46ea-b3bf-99503b7630a2",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "b036fd81-235f-4b5e-9193-6cc53bf3a759",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "77ac29ab-7ca3-4485-b94b-9d413af79847",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "3c1db739-51d2-494c-93b8-491b726d05e9",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "a1de076b-1f75-4374-8a1e-b025ba68e6aa",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "76290217-f198-4bc0-aa64-c1c9adca26cf",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   }
+  ],
+  "label": "all-0012",
+  "ledger": [
+   {
+    "evidence": {
+     "created_ms": "1788653875499",
+     "labels": {
+      "okf_spike": "bq_graph_20260905"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier",
+    "ref": {
+     "job_id": "8526efa6-c55c-4488-a050-421d3eb580b4",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "operator_decision"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:47.612000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "106f4692-e265-4ac7-b239-a79abd12116f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:47.604000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "f1f81620-d47f-4c6f-acde-1ba48e4afc01",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:46.406000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "428573e0-e293-468a-9a55-da1457597321",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:45.345000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "f79caa4e-f946-4d96-bef3-8f4cb21fc3e4",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:45.344000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "ab2bb624-83ab-4c75-ac4a-6d98325496ff",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:44.130000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "56cacb6d-a37e-40f5-8f3e-290b918b2871",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:43.199000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "eb953c9e-13c2-4d60-8f72-9dc59606c9c6",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:43.161000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "d582a58d-ecf9-47fd-9113-73a6591bcd22",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:41.808000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "e74f1303-806f-4bdf-aa37-6d5e11b427a0",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:40.568000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "758179c6-e991-46ea-b3bf-99503b7630a2",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:40.541000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "b036fd81-235f-4b5e-9193-6cc53bf3a759",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:39.047000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "77ac29ab-7ca3-4485-b94b-9d413af79847",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:37.881000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "3c1db739-51d2-494c-93b8-491b726d05e9",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:37.812000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "a1de076b-1f75-4374-8a1e-b025ba68e6aa",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "created": "2026-09-06T00:17:36.468000+00:00",
+     "invocation": {
+      "finished_at": "2026-09-06T00:15:55.901536+00:00",
+      "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+      "started_at": "2026-09-06T00:12:38.832828+00:00"
+     },
+     "on_campaign_reservation": false,
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work created outside the retained invocation span of 'all-0012' (2026-09-06T00:12:38.832828+00:00 .. 2026-09-06T00:15:55.901536+00:00): that record bounds the driver process at both ends, so it was not running to submit this",
+    "ref": {
+     "job_id": "76290217-f198-4bc0-aa64-c1c9adca26cf",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "outside_retained_invocation"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "configuration.labels.okf_spike == 'bq_graph_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:15:40.179000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:40.179000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:40.894000+00:00",
+     "error_result": {
+      "location": "query",
+      "message": "Property attrs is not exposed by element type GRAPH_EDGE(`test-project-0728-467323`.okf_graph_spike_20260905.okf_graph)<authored_at STRING, bundle_id STRING, declaration STRING, edge_id STRING, inferred BOOL, publication_id STRING, relation STRING, resolution STRING, section_id STRING> at [9:25]",
+      "reason": "invalidQuery"
+     },
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:14.003473+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "6a8404e0-6914-4b2a-b0a8-bd2f8ff5b077",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (configuration.labels.okf_spike == 'bq_graph_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "6a8404e0-6914-4b2a-b0a8-bd2f8ff5b077",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:36.732000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:39.305000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:14.178225+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "906c7c68-42a4-4dc4-ae28-f5a9cdff792d",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "906c7c68-42a4-4dc4-ae28-f5a9cdff792d",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:35.817000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:36.117000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:14.405535+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "875e94d3-4d7b-441a-9b19-8a91480ac4a8",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "875e94d3-4d7b-441a-9b19-8a91480ac4a8",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:34.406000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:35.218000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:14.537173+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "6bef9b0d-ca91-41d3-8f64-90c78fb2bc95",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "6bef9b0d-ca91-41d3-8f64-90c78fb2bc95",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:32.435000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:33.789000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:14.705662+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "413395a7-b02f-474d-9e09-4e23230e30bf",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "413395a7-b02f-474d-9e09-4e23230e30bf",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:29.930000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:31.753000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:14.845616+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "234f5dff-dcb8-4165-9b8b-3f5776a46b50",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "234f5dff-dcb8-4165-9b8b-3f5776a46b50",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:27.980000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:29.468000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:15.039648+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "631d43b6-b8d2-414a-b62e-ceb485316ef2",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "631d43b6-b8d2-414a-b62e-ceb485316ef2",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:25.649000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:27.352000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:15.199054+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "e1b2945b-9eda-4299-9776-5d48122dd2ff",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "e1b2945b-9eda-4299-9776-5d48122dd2ff",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:24.044000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:25.109000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:15.366067+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "466c5c07-6e1c-4149-9456-84c1f8926a11",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "466c5c07-6e1c-4149-9456-84c1f8926a11",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:22.964000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:23.311000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:15.516135+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "ff628c13-4ace-42b0-8a1b-d0952de8f731",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "ff628c13-4ace-42b0-8a1b-d0952de8f731",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:21.199000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:22.340000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:15.721483+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "eb11203e-ecfa-46b5-9bbf-37a73dc38bc1",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "eb11203e-ecfa-46b5-9bbf-37a73dc38bc1",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:18.556000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:20.548000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:15.954955+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "d13de364-262c-47c2-b7d1-47533283738c",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "d13de364-262c-47c2-b7d1-47533283738c",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:15.695000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:17.692000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:16.104011+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "392702b1-b40a-4c20-87e3-77052ac1cbde",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "392702b1-b40a-4c20-87e3-77052ac1cbde",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:13.330000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:15.102000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:16.306852+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "217c6763-7a08-4226-94e0-478dde81b641",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "217c6763-7a08-4226-94e0-478dde81b641",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:05.804000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:12.420000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:16.467000+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "e603f374-5781-4c9b-a2de-3e4d5b9d32c5",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "e603f374-5781-4c9b-a2de-3e4d5b9d32c5",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:04.750000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:05.143000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:16.623880+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "a2471d5a-2455-44fd-bac4-7aa5de094149",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "a2471d5a-2455-44fd-bac4-7aa5de094149",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:03.328000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:04.191000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:16.782206+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "dba6c927-1654-4f72-8465-574ff18b739b",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "dba6c927-1654-4f72-8465-574ff18b739b",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:15:00.803000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:02.715000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:16.996601+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "00a6e580-888a-44f0-b67a-c4a024c7024f",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "00a6e580-888a-44f0-b67a-c4a024c7024f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:14:59.718000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:15:00.077000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:17.118665+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "743bb879-67c0-41e7-ba27-0d5c2594ea9a",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "743bb879-67c0-41e7-ba27-0d5c2594ea9a",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:14:58.228000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:14:59.165000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:17.267117+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "b473a66d-1443-4e04-b029-acfd40c8120b",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "b473a66d-1443-4e04-b029-acfd40c8120b",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:14:56.581000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:14:57.666000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:17.448197+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "24204912-7a3b-434e-af09-907e8f84e53b",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "24204912-7a3b-434e-af09-907e8f84e53b",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:14:55.231000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:14:55.988000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:17.619631+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "b9bf7ed3-2e09-4ff9-9ca9-8596a5c6400d",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "b9bf7ed3-2e09-4ff9-9ca9-8596a5c6400d",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:14:53.839000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:14:54.635000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:17.773577+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "c1325cae-42c5-4aa4-8445-0fdd2ac5599c",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "c1325cae-42c5-4aa4-8445-0fdd2ac5599c",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:14:51.731000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:14:53.215000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:17.908671+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "be1a7cbb-c3f6-479b-8548-f700137d5de1",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "be1a7cbb-c3f6-479b-8548-f700137d5de1",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:14:40.549000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:14:41.263000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:18.039401+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "0323e351-7ab5-4f39-9060-99cfb8843bbf",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the job id appears in retained local evidence for this window",
+    "ref": {
+     "job_id": "0323e351-7ab5-4f39-9060-99cfb8843bbf",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "recovered_local_evidence"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:14:29.243000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:14:29.243000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:14:30.119000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:18.193814+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "59293ca7-fbff-46fd-b9be-df4c13fab8a1",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "59293ca7-fbff-46fd-b9be-df4c13fab8a1",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:14:17.778000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:14:17.778000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:14:18.723000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:18.305603+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "b2691c54-ee25-4aa0-9931-a96eae3e47d7",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "b2691c54-ee25-4aa0-9931-a96eae3e47d7",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:14:06.192000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:14:06.192000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:14:06.943000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:18.438580+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "0caa32ab-300f-44a8-a1e1-19f83e4a8133",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "0caa32ab-300f-44a8-a1e1-19f83e4a8133",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:13:54.568000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:13:54.568000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:13:55.735000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:18.566159+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "a7e9b0be-68d2-42aa-b9b8-7a4b4524c2ac",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "a7e9b0be-68d2-42aa-b9b8-7a4b4524c2ac",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:13:43.385000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:13:43.385000+00:00",
+     "declared_children": 0,
+     "edition": "ENTERPRISE",
+     "ended": "2026-09-06T00:13:44.135000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:18.684055+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "cf463c86-ca66-485e-816b-e481f827abf4",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "cf463c86-ca66-485e-816b-e481f827abf4",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:13:32.761000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:13:32.761000+00:00",
+     "declared_children": 0,
+     "edition": null,
+     "ended": "2026-09-06T00:13:33.185000+00:00",
+     "error_result": {
+      "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+      "reason": "unknown"
+     },
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:18.799310+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "a9b86847-6928-41c2-a115-5f02d7aa9496",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": null,
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "a9b86847-6928-41c2-a115-5f02d7aa9496",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:13:22.250000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:13:22.250000+00:00",
+     "declared_children": 0,
+     "edition": null,
+     "ended": "2026-09-06T00:13:22.574000+00:00",
+     "error_result": {
+      "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+      "reason": "unknown"
+     },
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:18.949988+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "038e98bb-5204-4c45-984c-4a9edf6a8f01",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": null,
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "038e98bb-5204-4c45-984c-4a9edf6a8f01",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:13:11.760000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:13:11.760000+00:00",
+     "declared_children": 0,
+     "edition": null,
+     "ended": "2026-09-06T00:13:12.043000+00:00",
+     "error_result": {
+      "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+      "reason": "unknown"
+     },
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:19.120711+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "edc8f140-681f-4e7b-8de5-8900754f0cfe",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": null,
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "edc8f140-681f-4e7b-8de5-8900754f0cfe",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:13:01.219000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:13:01.219000+00:00",
+     "declared_children": 0,
+     "edition": null,
+     "ended": "2026-09-06T00:13:01.557000+00:00",
+     "error_result": {
+      "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+      "reason": "unknown"
+     },
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:19.277400+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "a55ab554-c75b-48ad-af1f-49950ffb74fd",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": null,
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "a55ab554-c75b-48ad-af1f-49950ffb74fd",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:12:50.787000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:12:50.787000+00:00",
+     "declared_children": 0,
+     "edition": null,
+     "ended": "2026-09-06T00:12:50.996000+00:00",
+     "error_result": {
+      "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+      "reason": "unknown"
+     },
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:19.398345+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "9efbf002-3b07-48c5-b344-ce24b8438e4f",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": null,
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "9efbf002-3b07-48c5-b344-ce24b8438e4f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "configuration.labels.okf_spike == 'bq_graph_20260905'",
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:12:38.016000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:12:38.016000+00:00",
+     "declared_children": 0,
+     "edition": null,
+     "ended": "2026-09-06T00:12:38.328000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:19.524432+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "e08c973e-b8d7-4d1f-a23a-21b6e37cecf7",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": null,
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (configuration.labels.okf_spike == 'bq_graph_20260905') created inside the recorded capacity interval of 'all-0012' and of no other declared window",
+    "ref": {
+     "job_id": "e08c973e-b8d7-4d1f-a23a-21b6e37cecf7",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   }
+  ],
+  "listed_keys": 52,
+  "listing": {
+   "children": [],
+   "complete": true,
+   "listed": 52,
+   "passes": 2,
+   "stable": true,
+   "top": {
+    "capped": false,
+    "complete": true,
+    "error": null,
+    "next_page_token": null,
+    "pages": 1,
+    "unreachable": []
+   }
+  },
+  "location": "US",
+  "owned": [
+   "00a6e580-888a-44f0-b67a-c4a024c7024f",
+   "0323e351-7ab5-4f39-9060-99cfb8843bbf",
+   "038e98bb-5204-4c45-984c-4a9edf6a8f01",
+   "0caa32ab-300f-44a8-a1e1-19f83e4a8133",
+   "217c6763-7a08-4226-94e0-478dde81b641",
+   "234f5dff-dcb8-4165-9b8b-3f5776a46b50",
+   "24204912-7a3b-434e-af09-907e8f84e53b",
+   "392702b1-b40a-4c20-87e3-77052ac1cbde",
+   "413395a7-b02f-474d-9e09-4e23230e30bf",
+   "466c5c07-6e1c-4149-9456-84c1f8926a11",
+   "59293ca7-fbff-46fd-b9be-df4c13fab8a1",
+   "631d43b6-b8d2-414a-b62e-ceb485316ef2",
+   "6a8404e0-6914-4b2a-b0a8-bd2f8ff5b077",
+   "6bef9b0d-ca91-41d3-8f64-90c78fb2bc95",
+   "743bb879-67c0-41e7-ba27-0d5c2594ea9a",
+   "875e94d3-4d7b-441a-9b19-8a91480ac4a8",
+   "906c7c68-42a4-4dc4-ae28-f5a9cdff792d",
+   "9efbf002-3b07-48c5-b344-ce24b8438e4f",
+   "a2471d5a-2455-44fd-bac4-7aa5de094149",
+   "a55ab554-c75b-48ad-af1f-49950ffb74fd",
+   "a7e9b0be-68d2-42aa-b9b8-7a4b4524c2ac",
+   "a9b86847-6928-41c2-a115-5f02d7aa9496",
+   "b2691c54-ee25-4aa0-9931-a96eae3e47d7",
+   "b473a66d-1443-4e04-b029-acfd40c8120b",
+   "b9bf7ed3-2e09-4ff9-9ca9-8596a5c6400d",
+   "be1a7cbb-c3f6-479b-8548-f700137d5de1",
+   "c1325cae-42c5-4aa4-8445-0fdd2ac5599c",
+   "cf463c86-ca66-485e-816b-e481f827abf4",
+   "d13de364-262c-47c2-b7d1-47533283738c",
+   "dba6c927-1654-4f72-8465-574ff18b739b",
+   "e08c973e-b8d7-4d1f-a23a-21b6e37cecf7",
+   "e1b2945b-9eda-4299-9776-5d48122dd2ff",
+   "e603f374-5781-4c9b-a2de-3e4d5b9d32c5",
+   "eb11203e-ecfa-46b5-9bbf-37a73dc38bc1",
+   "edc8f140-681f-4e7b-8de5-8900754f0cfe",
+   "ff628c13-4ace-42b0-8a1b-d0952de8f731"
+  ],
+  "owned_refs": [
+   {
+    "job_id": "00a6e580-888a-44f0-b67a-c4a024c7024f",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "0323e351-7ab5-4f39-9060-99cfb8843bbf",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "038e98bb-5204-4c45-984c-4a9edf6a8f01",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "0caa32ab-300f-44a8-a1e1-19f83e4a8133",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "217c6763-7a08-4226-94e0-478dde81b641",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "234f5dff-dcb8-4165-9b8b-3f5776a46b50",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "24204912-7a3b-434e-af09-907e8f84e53b",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "392702b1-b40a-4c20-87e3-77052ac1cbde",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "413395a7-b02f-474d-9e09-4e23230e30bf",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "466c5c07-6e1c-4149-9456-84c1f8926a11",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "59293ca7-fbff-46fd-b9be-df4c13fab8a1",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "631d43b6-b8d2-414a-b62e-ceb485316ef2",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "6a8404e0-6914-4b2a-b0a8-bd2f8ff5b077",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "6bef9b0d-ca91-41d3-8f64-90c78fb2bc95",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "743bb879-67c0-41e7-ba27-0d5c2594ea9a",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "875e94d3-4d7b-441a-9b19-8a91480ac4a8",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "906c7c68-42a4-4dc4-ae28-f5a9cdff792d",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "9efbf002-3b07-48c5-b344-ce24b8438e4f",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "a2471d5a-2455-44fd-bac4-7aa5de094149",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "a55ab554-c75b-48ad-af1f-49950ffb74fd",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "a7e9b0be-68d2-42aa-b9b8-7a4b4524c2ac",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "a9b86847-6928-41c2-a115-5f02d7aa9496",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "b2691c54-ee25-4aa0-9931-a96eae3e47d7",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "b473a66d-1443-4e04-b029-acfd40c8120b",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "b9bf7ed3-2e09-4ff9-9ca9-8596a5c6400d",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "be1a7cbb-c3f6-479b-8548-f700137d5de1",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "c1325cae-42c5-4aa4-8445-0fdd2ac5599c",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "cf463c86-ca66-485e-816b-e481f827abf4",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "d13de364-262c-47c2-b7d1-47533283738c",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "dba6c927-1654-4f72-8465-574ff18b739b",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "e08c973e-b8d7-4d1f-a23a-21b6e37cecf7",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "e1b2945b-9eda-4299-9776-5d48122dd2ff",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "e603f374-5781-4c9b-a2de-3e4d5b9d32c5",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "eb11203e-ecfa-46b5-9bbf-37a73dc38bc1",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "edc8f140-681f-4e7b-8de5-8900754f0cfe",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "ff628c13-4ace-42b0-8a1b-d0952de8f731",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   }
+  ],
+  "procedure": "read-only jobs.list (all users, FULL, every page, script children) + jobs.get per owned qualified reference; no cancellation, deletion or submission",
+  "project": "test-project-0728-467323",
+  "quiescence": {
+   "basis": "platform_probe+local_record",
+   "established": true,
+   "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-06T00:15:55.901536+00:00 to 2026-09-08T11:23:10.994147+00:00 (4 page(s), 891 job(s)) shows 0 job(s) attributable to 'all-0012' after it closed, 0 non-terminal job(s) project-wide, and 212835s of silence; local record: evidence/all_all-0012.json#/finished_at",
+   "limit": "a silent, complete platform listing shows that submission STOPPED; it is not proof that the original process object no longer exists. Capacity absence is verified separately.",
+   "local_record": {
+    "gap": false,
+    "note": "the driver wrote its own run record and exited",
+    "source": "evidence/all_all-0012.json#/finished_at",
+    "stopped_at": "2026-09-06T00:15:55.901536+00:00"
+   },
+   "not_established_because": [],
+   "probe": {
+    "attributable_after_close": [],
+    "last_attributable_at": null,
+    "listed": 891,
+    "listing": {
+     "capped": false,
+     "complete": true,
+     "error": null,
+     "next_page_token": null,
+     "pages": 4,
+     "unreachable": []
+    },
+    "min_silence_s": 3600,
+    "nonterminal": [],
+    "project": "test-project-0728-467323",
+    "silence_s": 212835.092611,
+    "since": "2026-09-06T00:15:55.901536+00:00",
+    "until": "2026-09-08T11:23:10.994147+00:00"
+   },
+   "stopped_at": "2026-09-06T00:15:55.901536+00:00"
+  },
+  "readbacks": [
+   {
+    "created": "2026-09-06T00:15:40.179000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:40.894000+00:00",
+    "error_result": {
+     "location": "query",
+     "message": "Property attrs is not exposed by element type GRAPH_EDGE(`test-project-0728-467323`.okf_graph_spike_20260905.okf_graph)<authored_at STRING, bundle_id STRING, declaration STRING, edge_id STRING, inferred BOOL, publication_id STRING, relation STRING, resolution STRING, section_id STRING> at [9:25]",
+     "reason": "invalidQuery"
+    },
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:14.003473+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "6a8404e0-6914-4b2a-b0a8-bd2f8ff5b077",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:36.732000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:39.305000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:14.178225+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "906c7c68-42a4-4dc4-ae28-f5a9cdff792d",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:35.817000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:36.117000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:14.405535+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "875e94d3-4d7b-441a-9b19-8a91480ac4a8",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:34.406000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:35.218000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:14.537173+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "6bef9b0d-ca91-41d3-8f64-90c78fb2bc95",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:32.435000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:33.789000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:14.705662+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "413395a7-b02f-474d-9e09-4e23230e30bf",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:29.930000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:31.753000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:14.845616+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "234f5dff-dcb8-4165-9b8b-3f5776a46b50",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:27.980000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:29.468000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:15.039648+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "631d43b6-b8d2-414a-b62e-ceb485316ef2",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:25.649000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:27.352000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:15.199054+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "e1b2945b-9eda-4299-9776-5d48122dd2ff",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:24.044000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:25.109000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:15.366067+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "466c5c07-6e1c-4149-9456-84c1f8926a11",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:22.964000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:23.311000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:15.516135+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "ff628c13-4ace-42b0-8a1b-d0952de8f731",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:21.199000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:22.340000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:15.721483+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "eb11203e-ecfa-46b5-9bbf-37a73dc38bc1",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:18.556000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:20.548000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:15.954955+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "d13de364-262c-47c2-b7d1-47533283738c",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:15.695000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:17.692000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:16.104011+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "392702b1-b40a-4c20-87e3-77052ac1cbde",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:13.330000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:15.102000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:16.306852+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "217c6763-7a08-4226-94e0-478dde81b641",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:05.804000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:12.420000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:16.467000+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "e603f374-5781-4c9b-a2de-3e4d5b9d32c5",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:04.750000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:05.143000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:16.623880+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "a2471d5a-2455-44fd-bac4-7aa5de094149",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:03.328000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:04.191000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:16.782206+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "dba6c927-1654-4f72-8465-574ff18b739b",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:15:00.803000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:02.715000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:16.996601+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "00a6e580-888a-44f0-b67a-c4a024c7024f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:14:59.718000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:15:00.077000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:17.118665+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "743bb879-67c0-41e7-ba27-0d5c2594ea9a",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:14:58.228000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:14:59.165000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:17.267117+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "b473a66d-1443-4e04-b029-acfd40c8120b",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:14:56.581000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:14:57.666000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:17.448197+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "24204912-7a3b-434e-af09-907e8f84e53b",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:14:55.231000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:14:55.988000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:17.619631+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "b9bf7ed3-2e09-4ff9-9ca9-8596a5c6400d",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:14:53.839000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:14:54.635000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:17.773577+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "c1325cae-42c5-4aa4-8445-0fdd2ac5599c",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:14:51.731000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:14:53.215000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:17.908671+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "be1a7cbb-c3f6-479b-8548-f700137d5de1",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:14:40.549000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:14:41.263000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:18.039401+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "0323e351-7ab5-4f39-9060-99cfb8843bbf",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:14:29.243000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:14:30.119000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:18.193814+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "59293ca7-fbff-46fd-b9be-df4c13fab8a1",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:14:17.778000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:14:18.723000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:18.305603+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "b2691c54-ee25-4aa0-9931-a96eae3e47d7",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:14:06.192000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:14:06.943000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:18.438580+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "0caa32ab-300f-44a8-a1e1-19f83e4a8133",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:13:54.568000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:13:55.735000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:18.566159+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "a7e9b0be-68d2-42aa-b9b8-7a4b4524c2ac",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:13:43.385000+00:00",
+    "declared_children": 0,
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-06T00:13:44.135000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:18.684055+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "cf463c86-ca66-485e-816b-e481f827abf4",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:13:32.761000+00:00",
+    "declared_children": 0,
+    "edition": null,
+    "ended": "2026-09-06T00:13:33.185000+00:00",
+    "error_result": {
+     "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+     "reason": "unknown"
+    },
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:18.799310+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "a9b86847-6928-41c2-a115-5f02d7aa9496",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": null,
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:13:22.250000+00:00",
+    "declared_children": 0,
+    "edition": null,
+    "ended": "2026-09-06T00:13:22.574000+00:00",
+    "error_result": {
+     "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+     "reason": "unknown"
+    },
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:18.949988+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "038e98bb-5204-4c45-984c-4a9edf6a8f01",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": null,
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:13:11.760000+00:00",
+    "declared_children": 0,
+    "edition": null,
+    "ended": "2026-09-06T00:13:12.043000+00:00",
+    "error_result": {
+     "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+     "reason": "unknown"
+    },
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:19.120711+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "edc8f140-681f-4e7b-8de5-8900754f0cfe",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": null,
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:13:01.219000+00:00",
+    "declared_children": 0,
+    "edition": null,
+    "ended": "2026-09-06T00:13:01.557000+00:00",
+    "error_result": {
+     "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+     "reason": "unknown"
+    },
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:19.277400+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "a55ab554-c75b-48ad-af1f-49950ffb74fd",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": null,
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:12:50.787000+00:00",
+    "declared_children": 0,
+    "edition": null,
+    "ended": "2026-09-06T00:12:50.996000+00:00",
+    "error_result": {
+     "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+     "reason": "unknown"
+    },
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:19.398345+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "9efbf002-3b07-48c5-b344-ce24b8438e4f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": null,
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:12:38.016000+00:00",
+    "declared_children": 0,
+    "edition": null,
+    "ended": "2026-09-06T00:12:38.328000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:19.524432+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "e08c973e-b8d7-4d1f-a23a-21b6e37cecf7",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": null,
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   }
+  ],
+  "reconciled_at": "2026-09-08T11:23:13.126234+00:00",
+  "reconstructed": true,
+  "recovered_ids": [
+   "00a6e580-888a-44f0-b67a-c4a024c7024f",
+   "0323e351-7ab5-4f39-9060-99cfb8843bbf",
+   "217c6763-7a08-4226-94e0-478dde81b641",
+   "234f5dff-dcb8-4165-9b8b-3f5776a46b50",
+   "24204912-7a3b-434e-af09-907e8f84e53b",
+   "392702b1-b40a-4c20-87e3-77052ac1cbde",
+   "413395a7-b02f-474d-9e09-4e23230e30bf",
+   "466c5c07-6e1c-4149-9456-84c1f8926a11",
+   "631d43b6-b8d2-414a-b62e-ceb485316ef2",
+   "6bef9b0d-ca91-41d3-8f64-90c78fb2bc95",
+   "743bb879-67c0-41e7-ba27-0d5c2594ea9a",
+   "875e94d3-4d7b-441a-9b19-8a91480ac4a8",
+   "906c7c68-42a4-4dc4-ae28-f5a9cdff792d",
+   "a2471d5a-2455-44fd-bac4-7aa5de094149",
+   "b473a66d-1443-4e04-b029-acfd40c8120b",
+   "b9bf7ed3-2e09-4ff9-9ca9-8596a5c6400d",
+   "be1a7cbb-c3f6-479b-8548-f700137d5de1",
+   "c1325cae-42c5-4aa4-8445-0fdd2ac5599c",
+   "d13de364-262c-47c2-b7d1-47533283738c",
+   "dba6c927-1654-4f72-8465-574ff18b739b",
+   "e1b2945b-9eda-4299-9776-5d48122dd2ff",
+   "e603f374-5781-4c9b-a2de-3e4d5b9d32c5",
+   "eb11203e-ecfa-46b5-9bbf-37a73dc38bc1",
+   "ff628c13-4ace-42b0-8a1b-d0952de8f731"
+  ],
+  "sources": [
+   {
+    "bytes": 64411,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/all_all-0012.json",
+    "sha256": "3f2835b709ecb0e670264fa3b22118f3fd0afb2b03e7f97fbee18a8183a6df42"
+   },
+   {
+    "bytes": 4397,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/capacity-gate.md",
+    "sha256": "93e1cceaab3049a845d99c5ca8057a1a79e06ca2a523e5598f084d183e7bdd1f"
+   },
+   {
+    "bytes": 26095,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/cleanup_manifest.json",
+    "sha256": "b0ccf566140b462c7b8138926d99ef37971108597530a6517527c8e66d3de700"
+   },
+   {
+    "bytes": 326560,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/cost.json",
+    "sha256": "1d554ec962bf6ffb894d756602a221f71e00e89749325fab152238404777d8a9"
+   },
+   {
+    "bytes": 250,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/integration_run.log",
+    "sha256": "f5a7c76ed3b5115ddf1ee2f71bd529b52161a2e8eab8529986553b6a62233e7b"
+   },
+   {
+    "bytes": 250,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/integration_run_attempt2_killed.log",
+    "sha256": "f5a7c76ed3b5115ddf1ee2f71bd529b52161a2e8eab8529986553b6a62233e7b"
+   },
+   {
+    "bytes": 10817,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/reservation_changes.json",
+    "sha256": "bf2e08061778f034da00d82e016d38e8b5f1a448bc47ef9e29d796dc653acd7e"
+   },
+   {
+    "bytes": 1021,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/safety_teardown.log",
+    "sha256": "e2714aea3f2730534a42084ccddfff00fb1f660b7353d5990313bcb59bf6a97f"
+   },
+   {
+    "bytes": 5432,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/window_all.log",
+    "sha256": "bf29f5236ffc049653a147e2dbef94cd6daad22d25af676b0d09bb42f7b8c10f"
+   }
+  ],
+  "status": "RECONCILED",
+  "window": {
+   "bound_note": "the listing starts at the earliest declared invocation/capacity start and ends at the later of that span's end and evidenced submitter shutdown, padded on both sides, then extended while owned work reaches the edge",
+   "closed_at": "2026-09-06T00:15:55Z",
+   "closed_at_present": true,
+   "extensions": [],
+   "invocation": {
+    "finished_at": "2026-09-06T00:15:55.901536+00:00",
+    "source": "evidence/all_all-0012.json#/started_at,/finished_at",
+    "started_at": "2026-09-06T00:12:38.832828+00:00"
+   },
+   "listing_end": "2026-09-06T00:17:55.901536+00:00",
+   "listing_start": "2026-09-06T00:10:38+00:00",
+   "opened_at": "2026-09-06T00:12:38Z",
+   "ownership_end": "2026-09-06T00:15:55.901536+00:00",
+   "ownership_start": "2026-09-06T00:12:38+00:00",
+   "pad_s": 120,
+   "submitters_stopped_at": "2026-09-06T00:15:55.901536+00:00"
+  }
+ },
+ "staged": {
+  "job_ids": [
+   "00a6e580-888a-44f0-b67a-c4a024c7024f",
+   "0323e351-7ab5-4f39-9060-99cfb8843bbf",
+   "038e98bb-5204-4c45-984c-4a9edf6a8f01",
+   "0caa32ab-300f-44a8-a1e1-19f83e4a8133",
+   "217c6763-7a08-4226-94e0-478dde81b641",
+   "234f5dff-dcb8-4165-9b8b-3f5776a46b50",
+   "24204912-7a3b-434e-af09-907e8f84e53b",
+   "392702b1-b40a-4c20-87e3-77052ac1cbde",
+   "413395a7-b02f-474d-9e09-4e23230e30bf",
+   "466c5c07-6e1c-4149-9456-84c1f8926a11",
+   "59293ca7-fbff-46fd-b9be-df4c13fab8a1",
+   "631d43b6-b8d2-414a-b62e-ceb485316ef2",
+   "6a8404e0-6914-4b2a-b0a8-bd2f8ff5b077",
+   "6bef9b0d-ca91-41d3-8f64-90c78fb2bc95",
+   "743bb879-67c0-41e7-ba27-0d5c2594ea9a",
+   "875e94d3-4d7b-441a-9b19-8a91480ac4a8",
+   "906c7c68-42a4-4dc4-ae28-f5a9cdff792d",
+   "9efbf002-3b07-48c5-b344-ce24b8438e4f",
+   "a2471d5a-2455-44fd-bac4-7aa5de094149",
+   "a55ab554-c75b-48ad-af1f-49950ffb74fd",
+   "a7e9b0be-68d2-42aa-b9b8-7a4b4524c2ac",
+   "a9b86847-6928-41c2-a115-5f02d7aa9496",
+   "b2691c54-ee25-4aa0-9931-a96eae3e47d7",
+   "b473a66d-1443-4e04-b029-acfd40c8120b",
+   "b9bf7ed3-2e09-4ff9-9ca9-8596a5c6400d",
+   "be1a7cbb-c3f6-479b-8548-f700137d5de1",
+   "c1325cae-42c5-4aa4-8445-0fdd2ac5599c",
+   "cf463c86-ca66-485e-816b-e481f827abf4",
+   "d13de364-262c-47c2-b7d1-47533283738c",
+   "dba6c927-1654-4f72-8465-574ff18b739b",
+   "e08c973e-b8d7-4d1f-a23a-21b6e37cecf7",
+   "e1b2945b-9eda-4299-9776-5d48122dd2ff",
+   "e603f374-5781-4c9b-a2de-3e4d5b9d32c5",
+   "eb11203e-ecfa-46b5-9bbf-37a73dc38bc1",
+   "edc8f140-681f-4e7b-8de5-8900754f0cfe",
+   "ff628c13-4ace-42b0-8a1b-d0952de8f731"
+  ],
+  "journal": "/tmp/okf-pr50-fix2/stage/jobs_all-0012.json",
+  "journal_sha256": "877d77aaf9fced77b3cd9593a645098f02b4c45715d7705b7d5ac796003b3231",
+  "receipt": "/tmp/okf-pr50-fix2/stage/jobs_all-0012.cleanup.json",
+  "staged": true,
+  "verified": true
+ }
+}

@@ -1,0 +1,1415 @@
+{
+ "result": {
+  "ambiguous": [],
+  "blockers": [],
+  "campaign": {
+   "datasets": [
+    "okf_graph_spike_20260905",
+    "okf_graph_spike_20260905_rls",
+    "okf_graph_spike_20260905_meta",
+    "okf_graph_spike_20260905_av",
+    "okf_graph_spike_20260905_x100",
+    "okf_graph_spike_20260905_x1000"
+   ],
+   "label_key": "okf_spike",
+   "label_value": "bq_graph_20260905"
+  },
+  "child_membership": [],
+  "decisions": {
+   "0de731e0-637a-4cb5-b764-9c7d2e82c08a": {
+    "evidence": {
+     "created_ms": "1788654077730",
+     "labels": {},
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "created inside the recorded capacity interval of all-0017, which owns it: the driver's own capacity read (`region-us`.INFORMATION_SCHEMA.RESERVATIONS_TIMELINE WHERE reservation_name = @r), created 00:21:17Z inside all-0017's recorded interval and routed to its Enterprise reservation"
+   },
+   "8526efa6-c55c-4488-a050-421d3eb580b4": {
+    "evidence": {
+     "created_ms": "1788653875499",
+     "labels": {
+      "okf_spike": "bq_graph_20260905"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "setup of the all-0017 invocation, which owns it: the same publication-pointer lookup at 00:17:55.499Z, 0.50s before all-0017's recorded opening at 00:17:56Z and 0.73s before its retained started_at of 00:17:56.230721Z. `run.py@b6e4f09:252` resolves the pointer before `started_at`/`open_window`; the previous invocation (all-0012) stamped finished_at at 00:15:55.901Z, 120s earlier"
+   },
+   "afbe7061-813a-439d-afb7-2c9efe06d2e7": {
+    "evidence": {
+     "created_ms": "1788652876697",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "the same INFORMATION_SCHEMA.RESERVATIONS_TIMELINE capacity read, created 00:01:16Z when no window was open and routed to no reservation: a between-windows check, not a job of any paid opening"
+   },
+   "bqjob_r56fb5a9aa6c2e225_000001a073eeffc0_1": {
+    "evidence": {
+     "created_ms": "1788651438282",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "bqjob_r6d8765de230f21e4_000001a073fc6c6f_1": {
+    "evidence": {
+     "created_ms": "1788652318086",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "bqjob_r74ce8f5679562b1c_000001a074165929_1": {
+    "evidence": {
+     "created_ms": "1788654017098",
+     "labels": {},
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "created inside the recorded capacity interval of all-0017, which owns it: `SELECT 1 AS x` submitted through the bq CLI at 00:20:17Z, inside all-0017's recorded interval and routed to its Enterprise reservation: the operator's assignment-readiness probe for that window"
+   },
+   "bqjob_r79062b4a27c75a24_000001a07416d20d_1": {
+    "evidence": {
+     "created_ms": "1788654048036",
+     "labels": {},
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "created inside the recorded capacity interval of all-0017, which owns it: `SELECT 1` submitted through the bq CLI at 00:20:48Z, inside all-0017's recorded interval and routed to its Enterprise reservation: the operator's assignment-readiness probe for that window"
+   },
+   "bqjob_r7b49d7b6a83843eb_000001a073ee7f34_1": {
+    "evidence": {
+     "created_ms": "1788651405419",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "bqjob_rb53f55e41faf967_000001a073eea67a_1": {
+    "evidence": {
+     "created_ms": "1788651415398",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "fccaf7f9-eae1-4be1-9738-f304aa1933bb": {
+    "evidence": {
+     "created_ms": "1788653396310",
+     "labels": {
+      "okf_spike": "bq_graph_20260905"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "OWNED",
+    "reason": "the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier"
+   },
+   "okf_rcpt_0d5dee6d11a98c7551a44b04_c890dce166d831b4": {
+    "evidence": {
+     "created_ms": "1788652583034",
+     "labels": {
+      "okf_request": "0d5dee6d11a98c75"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_1335b9df2747d25634d0a334_8f15846bc2418822": {
+    "evidence": {
+     "created_ms": "1788654477163",
+     "labels": {
+      "okf_request": "1335b9df2747d256"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project. It reports the graph reservation because capacity deletion had not finished propagating: its immediate siblings in the same burst carry NO reservation, so the attribution is propagation lag rather than membership"
+   },
+   "okf_rcpt_133856a68ae510dacfea584f_36799cbeb17dee8a": {
+    "evidence": {
+     "created_ms": "1788652427834",
+     "labels": {
+      "okf_request": "133856a68ae510da"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_1a8e9ba62a3d1b03cc4500d8_cd51d8378c775313": {
+    "evidence": {
+     "created_ms": "1788654630491",
+     "labels": {
+      "requester": "raincoatrun_at_gmail_com"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_236396cc55221c6df44201d4_6bc5866c7d85eccb": {
+    "evidence": {
+     "created_ms": "1788652577093",
+     "labels": {
+      "okf_request": "236396cc55221c6d"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_2af7ac1fcedc0d6dcc17985b_be9060b46c4e965f": {
+    "evidence": {
+     "created_ms": "1788652588972",
+     "labels": {
+      "requester": "raincoatrun_at_gmail_com"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_2ea0fa0cbf2edc215bf7f0fd_8b7abfbb42f636ec": {
+    "evidence": {
+     "created_ms": "1788654480175",
+     "labels": {
+      "okf_request": "2ea0fa0cbf2edc21"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_34d0e6e6e36500cd25a291d9_828bcdd85e599f61": {
+    "evidence": {
+     "created_ms": "1788652414579",
+     "labels": {
+      "okf_request": "34d0e6e6e36500cd"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_41cafa6c39eceba4d993a6c9_8ee362327841e766": {
+    "evidence": {
+     "created_ms": "1788654558818",
+     "labels": {
+      "okf_request": "41cafa6c39eceba4"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_483dca3b434bb2634861dc41_064a0b09ea3ad74b": {
+    "evidence": {
+     "created_ms": "1788654478190",
+     "labels": {
+      "okf_request": "483dca3b434bb263"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_4b1dcf3e4315907c18528cae_88fc36883ad45e45": {
+    "evidence": {
+     "created_ms": "1788654495170",
+     "labels": {
+      "okf_request": "4b1dcf3e4315907c"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_54e0bda756b383f272b3ab1d_a2b4981884150b01": {
+    "evidence": {
+     "created_ms": "1788654626762",
+     "labels": {
+      "okf_request": "54e0bda756b383f2"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_58b543f749a4f604806116b9_3703b2d18d76e090": {
+    "evidence": {
+     "created_ms": "1788654593640",
+     "labels": {
+      "okf_request": "58b543f749a4f604"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_612bdafff221507e69ed882b_0f20462ed54826af": {
+    "evidence": {
+     "created_ms": "1788654485313",
+     "labels": {
+      "okf_request": "612bdafff221507e"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project. It reports the graph reservation because capacity deletion had not finished propagating: its immediate siblings in the same burst carry NO reservation, so the attribution is propagation lag rather than membership"
+   },
+   "okf_rcpt_6825e53075a46d65200f82f4_9fcdff6bebd6c789": {
+    "evidence": {
+     "created_ms": "1788654554501",
+     "labels": {
+      "okf_request": "6825e53075a46d65"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_72517924d1c070745ec94f0a_1f06f6d54473a1e0": {
+    "evidence": {
+     "created_ms": "1788652409373",
+     "labels": {
+      "okf_request": "72517924d1c07074"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_728055d5b86cf409fc1338e8_ba9f6ca2ee33976e": {
+    "evidence": {
+     "created_ms": "1788654493722",
+     "labels": {
+      "okf_request": "728055d5b86cf409"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_75d11380d4c40eac120a4ed7_f29638e467b30064": {
+    "evidence": {
+     "created_ms": "1788652423124",
+     "labels": {
+      "okf_request": "75d11380d4c40eac"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_80715852ef4dfb3e9d65719d_eb12587aae2ebfd2": {
+    "evidence": {
+     "created_ms": "1788654619474",
+     "labels": {
+      "okf_request": "80715852ef4dfb3e"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_8b1b33d86066dbe3ac1386a6_95de70d8ac3ab1dd": {
+    "evidence": {
+     "created_ms": "1788654545130",
+     "labels": {
+      "okf_request": "8b1b33d86066dbe3"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_8ddc7758d2d000af8b432a8a_d3ccbcee8ebf7791": {
+    "evidence": {
+     "created_ms": "1788654637623",
+     "labels": {
+      "okf_request": "8ddc7758d2d000af"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_8fa8a6c78952ab627f08828a_14bb9562aed126cb": {
+    "evidence": {
+     "created_ms": "1788652597078",
+     "labels": {
+      "okf_request": "8fa8a6c78952ab62"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_955a2466e053c9c2e545f74f_7008089c4328de21": {
+    "evidence": {
+     "created_ms": "1788654621736",
+     "labels": {
+      "okf_request": "955a2466e053c9c2"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_96b2b93c9318b5a7b681f7ab_1fc29ab69fa93478": {
+    "evidence": {
+     "created_ms": "1788654588341",
+     "labels": {
+      "okf_request": "96b2b93c9318b5a7"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_9e98122903b09728ef305564_9c851d3d5c44e0c8": {
+    "evidence": {
+     "created_ms": "1788652571064",
+     "labels": {
+      "okf_request": "9e98122903b09728"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_a1ca0ac0d57e3bf5e873f299_210b78e7849efbb3": {
+    "evidence": {
+     "created_ms": "1788652580469",
+     "labels": {
+      "okf_request": "a1ca0ac0d57e3bf5"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_a39df03942574d4b99cf9a42_835abec0538af20a": {
+    "evidence": {
+     "created_ms": "1788652418486",
+     "labels": {
+      "okf_request": "a39df03942574d4b"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_a3f222fd5d082ae75ec3fb68_57863a95f49d1d24": {
+    "evidence": {
+     "created_ms": "1788652585123",
+     "labels": {
+      "okf_request": "a3f222fd5d082ae7"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_b14082d067b4d582be0bc26f_e16294f3edfd5058": {
+    "evidence": {
+     "created_ms": "1788652432345",
+     "labels": {
+      "okf_request": "b14082d067b4d582"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_b477088b0105c26d76abb665_f8510b56fcdc86dc": {
+    "evidence": {
+     "created_ms": "1788654535931",
+     "labels": {
+      "okf_request": "b477088b0105c26d"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_cdb8c6ac514a4f56eb554562_fb0a3e38a7d39955": {
+    "evidence": {
+     "created_ms": "1788652437129",
+     "labels": {
+      "okf_request": "cdb8c6ac514a4f56"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_cfa80316f42228ab90a14537_7ea69d58a509ba43": {
+    "evidence": {
+     "created_ms": "1788654476092",
+     "labels": {
+      "okf_request": "cfa80316f42228ab"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project. It reports the graph reservation because capacity deletion had not finished propagating: its immediate siblings in the same burst carry NO reservation, so the attribution is propagation lag rather than membership"
+   },
+   "okf_rcpt_d2ca9c1345d9d2f01316cb52_a7752aa84ad0889b": {
+    "evidence": {
+     "created_ms": "1788654635891",
+     "labels": {
+      "okf_request": "d2ca9c1345d9d2f0"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_d2f0f0ff9a75fac2810b07ab_0f0deb3f6d823188": {
+    "evidence": {
+     "created_ms": "1788654611375",
+     "labels": {
+      "okf_request": "d2f0f0ff9a75fac2"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_d96a6e9791ef5e4a9ca33bac_8518dc64929a790f": {
+    "evidence": {
+     "created_ms": "1788654549369",
+     "labels": {
+      "okf_request": "d96a6e9791ef5e4a"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_e085885fb7d9839d4bedd15c_13ff7aa2d57a6e2a": {
+    "evidence": {
+     "created_ms": "1788654617483",
+     "labels": {
+      "okf_request": "e085885fb7d9839d"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_e351983f98432d5ac5119a18_7e0d4556bbda7dd2": {
+    "evidence": {
+     "created_ms": "1788652594981",
+     "labels": {
+      "okf_request": "e351983f98432d5a"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_e6a7916675d1f418d2def964_a3825b5f2e7a60f3": {
+    "evidence": {
+     "created_ms": "1788654541089",
+     "labels": {
+      "okf_request": "e6a7916675d1f418"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_ecc2691396a5534643028a48_797deae7b9396c38": {
+    "evidence": {
+     "created_ms": "1788654564073",
+     "labels": {
+      "okf_request": "ecc2691396a55346"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_rcpt_fd23a18f51260118cdf17e52_106c85abd550505c": {
+    "evidence": {
+     "created_ms": "1788654488523",
+     "labels": {
+      "requester": "raincoatrun_at_gmail_com"
+     },
+     "reservation_id": null,
+     "user_email": "okf-receipt-restricted@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_receipt_preflight_jan_71b3b21715fe": {
+    "evidence": {
+     "created_ms": "1788651470123",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_receipt_preflight_janfeb_4baa03f238fe": {
+    "evidence": {
+     "created_ms": "1788651471084",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "okf_receipt_preflight_wrong_eeeabdb00901": {
+    "evidence": {
+     "created_ms": "1788651471899",
+     "labels": {},
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "concurrent attested-computation receipt work, not graph-window work: the id is an `okf_rcpt_` deterministic receipt reference, the job carries the `okf_request`/`requester` label namespace, and it queries `okf_receipt_spike_20260905.orders` - a different spike's dataset on the same project"
+   },
+   "scheduled_query_6b0f5992-0000-20ed-85fc-94eb2c09b214": {
+    "evidence": {
+     "created_ms": "1788654008591",
+     "labels": {
+      "data_source_id": "scheduled_query",
+      "dts_config_id": "6aa3c943-0000-2845-97ca-3c286d3802a2",
+      "dts_run_id": "6b0f5992-0000-20ed-85fc-94eb2c09b214",
+      "goog-bq-feature-type": "data_transfer_service"
+     },
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905",
+     "user_email": "bqaa-otlp-consumer@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "a recurring BigQuery Data Transfer scheduled query owned by bqaa-otlp-consumer@, merging into `bqaa_hero_demo_20260708.agent_events_otlp`: a different principal, a different dataset and a schedule that runs before and after this episode. Where it reports the graph reservation, that is the window's own assignee_type=PROJECT job_type=QUERY assignment routing unrelated project traffic onto its Enterprise capacity - the transfer service owns the job, the window does not"
+   },
+   "scheduled_query_6b2240f5-0000-2f5a-96b2-fc411692d871": {
+    "evidence": {
+     "created_ms": "1788651303682",
+     "labels": {
+      "data_source_id": "scheduled_query",
+      "dts_config_id": "6aa3c943-0000-2845-97ca-3c286d3802a2",
+      "dts_run_id": "6b2240f5-0000-2f5a-96b2-fc411692d871",
+      "goog-bq-feature-type": "data_transfer_service"
+     },
+     "reservation_id": null,
+     "user_email": "bqaa-otlp-consumer@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "a recurring BigQuery Data Transfer scheduled query owned by bqaa-otlp-consumer@, merging into `bqaa_hero_demo_20260708.agent_events_otlp`: a different principal, a different dataset and a schedule that runs before and after this episode. Where it reports the graph reservation, that is the window's own assignee_type=PROJECT job_type=QUERY assignment routing unrelated project traffic onto its Enterprise capacity - the transfer service owns the job, the window does not"
+   },
+   "scheduled_query_6b22de46-0000-2f5a-96b2-fc411692d871": {
+    "evidence": {
+     "created_ms": "1788654903292",
+     "labels": {
+      "data_source_id": "scheduled_query",
+      "dts_config_id": "6aa3c943-0000-2845-97ca-3c286d3802a2",
+      "dts_run_id": "6b22de46-0000-2f5a-96b2-fc411692d871",
+      "goog-bq-feature-type": "data_transfer_service"
+     },
+     "reservation_id": null,
+     "user_email": "bqaa-otlp-consumer@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "a recurring BigQuery Data Transfer scheduled query owned by bqaa-otlp-consumer@, merging into `bqaa_hero_demo_20260708.agent_events_otlp`: a different principal, a different dataset and a schedule that runs before and after this episode. Where it reports the graph reservation, that is the window's own assignee_type=PROJECT job_type=QUERY assignment routing unrelated project traffic onto its Enterprise capacity - the transfer service owns the job, the window does not"
+   },
+   "scheduled_query_6b3b74f9-0000-22fd-986f-30fd38151e78": {
+    "evidence": {
+     "created_ms": "1788652202248",
+     "labels": {
+      "data_source_id": "scheduled_query",
+      "dts_config_id": "6aa3c943-0000-2845-97ca-3c286d3802a2",
+      "dts_run_id": "6b3b74f9-0000-22fd-986f-30fd38151e78",
+      "goog-bq-feature-type": "data_transfer_service"
+     },
+     "reservation_id": null,
+     "user_email": "bqaa-otlp-consumer@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "a recurring BigQuery Data Transfer scheduled query owned by bqaa-otlp-consumer@, merging into `bqaa_hero_demo_20260708.agent_events_otlp`: a different principal, a different dataset and a schedule that runs before and after this episode. Where it reports the graph reservation, that is the window's own assignee_type=PROJECT job_type=QUERY assignment routing unrelated project traffic onto its Enterprise capacity - the transfer service owns the job, the window does not"
+   },
+   "scheduled_query_6b7240e1-0000-22cb-b727-d43a2cce0dcf": {
+    "evidence": {
+     "created_ms": "1788653105215",
+     "labels": {
+      "data_source_id": "scheduled_query",
+      "dts_config_id": "6aa3c943-0000-2845-97ca-3c286d3802a2",
+      "dts_run_id": "6b7240e1-0000-22cb-b727-d43a2cce0dcf",
+      "goog-bq-feature-type": "data_transfer_service"
+     },
+     "reservation_id": null,
+     "user_email": "bqaa-otlp-consumer@test-project-0728-467323.iam.gserviceaccount.com"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "a recurring BigQuery Data Transfer scheduled query owned by bqaa-otlp-consumer@, merging into `bqaa_hero_demo_20260708.agent_events_otlp`: a different principal, a different dataset and a schedule that runs before and after this episode. Where it reports the graph reservation, that is the window's own assignee_type=PROJECT job_type=QUERY assignment routing unrelated project traffic onto its Enterprise capacity - the transfer service owns the job, the window does not"
+   }
+  },
+  "declared_windows": [
+   {
+    "closed_at": "2026-09-05T23:47:20Z",
+    "label": "smoke-1",
+    "opened_at": "2026-09-05T23:43:43Z"
+   },
+   {
+    "closed_at": "2026-09-06T00:09:09Z",
+    "label": "integration-0007",
+    "opened_at": "2026-09-06T00:07:32Z"
+   },
+   {
+    "closed_at": "2026-09-06T00:11:16Z",
+    "label": "integration-0009",
+    "opened_at": "2026-09-06T00:09:57Z"
+   },
+   {
+    "closed_at": "2026-09-06T00:11:16Z",
+    "label": "safety-0011",
+    "opened_at": null
+   },
+   {
+    "closed_at": "2026-09-06T00:15:55Z",
+    "label": "all-0012",
+    "opened_at": "2026-09-06T00:12:38Z"
+   },
+   {
+    "closed_at": "2026-09-06T00:27:27Z",
+    "label": "all-0017",
+    "opened_at": "2026-09-06T00:17:56Z"
+   }
+  ],
+  "excluded": [
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['all-0012'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "edc8f140-681f-4e7b-8de5-8900754f0cfe",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['all-0012'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "a55ab554-c75b-48ad-af1f-49950ffb74fd",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['all-0012'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "9efbf002-3b07-48c5-b344-ce24b8438e4f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['all-0012'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "e08c973e-b8d7-4d1f-a23a-21b6e37cecf7",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "3391b8bb-2ffc-4bce-b8e2-27b7f42b7a7f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "48ee27d9-1b32-47d6-a62b-6e0338e259b3",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "38a21889-5e72-4136-a5d7-d4681ac05258",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "5794cdf0-1749-41cd-aa9a-c61f54525901",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "e216bcd6-678c-4af8-98cf-45726825cc40",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "84325efd-54e9-444e-b60f-57e90b83efef",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "dde1bb5d-5007-4ac8-b2a5-b1ff421f0a72",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "d9ba143b-c575-4bbb-af0f-77e4426c7f5f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "c9d31b1f-ed2a-40fa-8079-477a627406aa",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   }
+  ],
+  "label": "integration-0009",
+  "ledger": [
+   {
+    "evidence": {
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:13:11.760000+00:00",
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['all-0012'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "edc8f140-681f-4e7b-8de5-8900754f0cfe",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:13:01.219000+00:00",
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['all-0012'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "a55ab554-c75b-48ad-af1f-49950ffb74fd",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:12:50.787000+00:00",
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['all-0012'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "9efbf002-3b07-48c5-b344-ce24b8438e4f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "all-0012"
+     ],
+     "created": "2026-09-06T00:12:38.016000+00:00",
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['all-0012'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "e08c973e-b8d7-4d1f-a23a-21b6e37cecf7",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "integration-0009"
+     ],
+     "created": "2026-09-06T00:10:19.900000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:10:19.900000+00:00",
+     "declared_children": 0,
+     "edition": null,
+     "ended": "2026-09-06T00:10:20.099000+00:00",
+     "error_result": {
+      "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+      "reason": "unknown"
+     },
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:10.616560+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "ed2fb3e3-3e3d-4e62-bd18-6d9364bb4fc2",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": null,
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'integration-0009' and of no other declared window",
+    "ref": {
+     "job_id": "ed2fb3e3-3e3d-4e62-bd18-6d9364bb4fc2",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "campaign_signal": "the query text references the campaign dataset 'okf_graph_spike_20260905'",
+     "containing_windows": [
+      "integration-0009"
+     ],
+     "created": "2026-09-06T00:10:09.282000+00:00"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:10:09.282000+00:00",
+     "declared_children": 0,
+     "edition": null,
+     "ended": "2026-09-06T00:10:09.714000+00:00",
+     "error_result": {
+      "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+      "reason": "unknown"
+     },
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:10.819942+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "c9fd4fa7-db15-4c2c-9295-9aa6dd992bc3",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": null,
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "campaign work (the query text references the campaign dataset 'okf_graph_spike_20260905') created inside the recorded capacity interval of 'integration-0009' and of no other declared window",
+    "ref": {
+     "job_id": "c9fd4fa7-db15-4c2c-9295-9aa6dd992bc3",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_exclusive_window"
+   },
+   {
+    "evidence": {
+     "created_ms": "1788653396310",
+     "labels": {
+      "okf_spike": "bq_graph_20260905"
+     },
+     "reservation_id": null,
+     "user_email": "raincoatrun@gmail.com"
+    },
+    "ownership": "OWNED",
+    "readback": {
+     "created": "2026-09-06T00:09:56.310000+00:00",
+     "declared_children": 0,
+     "edition": null,
+     "ended": "2026-09-06T00:09:56.685000+00:00",
+     "error_result": null,
+     "parent_job_id": null,
+     "read_at": "2026-09-08T11:23:10.986518+00:00",
+     "readback": "TERMINAL",
+     "ref": {
+      "job_id": "fccaf7f9-eae1-4be1-9738-f304aa1933bb",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reservation_id": null,
+     "state": "DONE",
+     "user_email": "raincoatrun@gmail.com",
+     "verified_done": true
+    },
+    "reason": "the invocation's publication-pointer lookup (`SELECT publication_id FROM \u2026active_publication`) at 00:09:56.310Z, 0.69s before integration-0009's recorded opening at 00:09:57Z. `run.py@b6e4f09:252` resolves this pointer before `started_at` (L254) and `open_window` (L265), so it precedes the window it belongs to; the previous invocation (integration-0007) had already stamped finished_at at 00:09:09.727Z, 46s earlier",
+    "ref": {
+     "job_id": "fccaf7f9-eae1-4be1-9738-f304aa1933bb",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "operator_decision"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "integration-0007"
+     ],
+     "created": "2026-09-06T00:08:53.954000+00:00",
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "3391b8bb-2ffc-4bce-b8e2-27b7f42b7a7f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "integration-0007"
+     ],
+     "created": "2026-09-06T00:08:52.782000+00:00",
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "48ee27d9-1b32-47d6-a62b-6e0338e259b3",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "integration-0007"
+     ],
+     "created": "2026-09-06T00:08:51.145000+00:00",
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "38a21889-5e72-4136-a5d7-d4681ac05258",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "integration-0007"
+     ],
+     "created": "2026-09-06T00:08:49.158000+00:00",
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "5794cdf0-1749-41cd-aa9a-c61f54525901",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "integration-0007"
+     ],
+     "created": "2026-09-06T00:08:48.095000+00:00",
+     "reservation_id": "test-project-0728-467323:US.okf-graph-spike-20260905"
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "e216bcd6-678c-4af8-98cf-45726825cc40",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "integration-0007"
+     ],
+     "created": "2026-09-06T00:08:37.397000+00:00",
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "84325efd-54e9-444e-b60f-57e90b83efef",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "integration-0007"
+     ],
+     "created": "2026-09-06T00:08:26.958000+00:00",
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "dde1bb5d-5007-4ac8-b2a5-b1ff421f0a72",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "integration-0007"
+     ],
+     "created": "2026-09-06T00:08:16.577000+00:00",
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "d9ba143b-c575-4bbb-af0f-77e4426c7f5f",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   },
+   {
+    "evidence": {
+     "containing_windows": [
+      "integration-0007"
+     ],
+     "created": "2026-09-06T00:08:06.276000+00:00",
+     "reservation_id": null
+    },
+    "ownership": "EXCLUDED",
+    "reason": "campaign work inside the recorded capacity interval of ['integration-0007'] instead; this window's reservation name is reused across every opening and cannot override that",
+    "ref": {
+     "job_id": "c9d31b1f-ed2a-40fa-8079-477a627406aa",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "signal": "campaign_other_window"
+   }
+  ],
+  "listed_keys": 16,
+  "listing": {
+   "children": [],
+   "complete": true,
+   "listed": 16,
+   "passes": 2,
+   "stable": true,
+   "top": {
+    "capped": false,
+    "complete": true,
+    "error": null,
+    "next_page_token": null,
+    "pages": 1,
+    "unreachable": []
+   }
+  },
+  "location": "US",
+  "owned": [
+   "c9fd4fa7-db15-4c2c-9295-9aa6dd992bc3",
+   "ed2fb3e3-3e3d-4e62-bd18-6d9364bb4fc2",
+   "fccaf7f9-eae1-4be1-9738-f304aa1933bb"
+  ],
+  "owned_refs": [
+   {
+    "job_id": "c9fd4fa7-db15-4c2c-9295-9aa6dd992bc3",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "ed2fb3e3-3e3d-4e62-bd18-6d9364bb4fc2",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   },
+   {
+    "job_id": "fccaf7f9-eae1-4be1-9738-f304aa1933bb",
+    "location": "US",
+    "project": "test-project-0728-467323"
+   }
+  ],
+  "procedure": "read-only jobs.list (all users, FULL, every page, script children) + jobs.get per owned qualified reference; no cancellation, deletion or submission",
+  "project": "test-project-0728-467323",
+  "quiescence": {
+   "basis": "platform_probe+local_record",
+   "established": true,
+   "evidence": "derived by reconcile_window.quiescence_probe: a complete jobs.list drain of test-project-0728-467323 from 2026-09-06T00:11:16+00:00 to 2026-09-08T11:23:06.837546+00:00 (5 page(s), 927 job(s)) shows 0 job(s) attributable to 'integration-0009' after it closed, 0 non-terminal job(s) project-wide, and 213111s of silence; local record: cleanup_manifest.json[integration-0009].note + evidence/integration_run_attempt2_killed.log",
+   "limit": "a silent, complete platform listing shows that submission STOPPED; it is not proof that the original process object no longer exists. Capacity absence is verified separately.",
+   "local_record": {
+    "gap": true,
+    "note": "RETAINED GAP: the driver was killed by session teardown and no kill timestamp was recorded. No run record was written. The independent safety watcher deleted the reservation at 00:11:10Z. The stop moment therefore rests on the platform probe, not on a local stamp",
+    "source": "cleanup_manifest.json[integration-0009].note + evidence/integration_run_attempt2_killed.log",
+    "stopped_at": null
+   },
+   "not_established_because": [],
+   "probe": {
+    "attributable_after_close": [],
+    "last_attributable_at": null,
+    "listed": 927,
+    "listing": {
+     "capped": false,
+     "complete": true,
+     "error": null,
+     "next_page_token": null,
+     "pages": 5,
+     "unreachable": []
+    },
+    "min_silence_s": 3600,
+    "nonterminal": [],
+    "project": "test-project-0728-467323",
+    "silence_s": 213110.837546,
+    "since": "2026-09-06T00:11:16+00:00",
+    "until": "2026-09-08T11:23:06.837546+00:00"
+   },
+   "stopped_at": "2026-09-06T00:11:16+00:00"
+  },
+  "readbacks": [
+   {
+    "created": "2026-09-06T00:10:19.900000+00:00",
+    "declared_children": 0,
+    "edition": null,
+    "ended": "2026-09-06T00:10:20.099000+00:00",
+    "error_result": {
+     "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+     "reason": "unknown"
+    },
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:10.616560+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "ed2fb3e3-3e3d-4e62-bd18-6d9364bb4fc2",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": null,
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:10:09.282000+00:00",
+    "declared_children": 0,
+    "edition": null,
+    "ended": "2026-09-06T00:10:09.714000+00:00",
+    "error_result": {
+     "message": "BigQuery Graph queries require a reservation with Enterprise or Enterprise Plus edition. See https://cloud.google.com/bigquery/docs/editions-intro for more information.",
+     "reason": "unknown"
+    },
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:10.819942+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "c9fd4fa7-db15-4c2c-9295-9aa6dd992bc3",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": null,
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   },
+   {
+    "created": "2026-09-06T00:09:56.310000+00:00",
+    "declared_children": 0,
+    "edition": null,
+    "ended": "2026-09-06T00:09:56.685000+00:00",
+    "error_result": null,
+    "parent_job_id": null,
+    "read_at": "2026-09-08T11:23:10.986518+00:00",
+    "readback": "TERMINAL",
+    "ref": {
+     "job_id": "fccaf7f9-eae1-4be1-9738-f304aa1933bb",
+     "location": "US",
+     "project": "test-project-0728-467323"
+    },
+    "reservation_id": null,
+    "state": "DONE",
+    "user_email": "raincoatrun@gmail.com",
+    "verified_done": true
+   }
+  ],
+  "reconciled_at": "2026-09-08T11:23:09.704071+00:00",
+  "reconstructed": true,
+  "recovered_ids": [],
+  "sources": [
+   {
+    "bytes": 4397,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/capacity-gate.md",
+    "sha256": "93e1cceaab3049a845d99c5ca8057a1a79e06ca2a523e5598f084d183e7bdd1f"
+   },
+   {
+    "bytes": 26095,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/cleanup_manifest.json",
+    "sha256": "b0ccf566140b462c7b8138926d99ef37971108597530a6517527c8e66d3de700"
+   },
+   {
+    "bytes": 326560,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/cost.json",
+    "sha256": "1d554ec962bf6ffb894d756602a221f71e00e89749325fab152238404777d8a9"
+   },
+   {
+    "bytes": 250,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/integration_run.log",
+    "sha256": "f5a7c76ed3b5115ddf1ee2f71bd529b52161a2e8eab8529986553b6a62233e7b"
+   },
+   {
+    "bytes": 250,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/integration_run_attempt2_killed.log",
+    "sha256": "f5a7c76ed3b5115ddf1ee2f71bd529b52161a2e8eab8529986553b6a62233e7b"
+   },
+   {
+    "bytes": 10817,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/reservation_changes.json",
+    "sha256": "bf2e08061778f034da00d82e016d38e8b5f1a448bc47ef9e29d796dc653acd7e"
+   },
+   {
+    "bytes": 1021,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/safety_teardown.log",
+    "sha256": "e2714aea3f2730534a42084ccddfff00fb1f660b7353d5990313bcb59bf6a97f"
+   },
+   {
+    "bytes": 5432,
+    "path": "/Users/haiyuancao/caohy1988.github.io-legacy-reconcile/rfc/spikes/bq-graph/evidence/window_all.log",
+    "sha256": "bf29f5236ffc049653a147e2dbef94cd6daad22d25af676b0d09bb42f7b8c10f"
+   }
+  ],
+  "status": "RECONCILED",
+  "window": {
+   "bound_note": "the listing starts at the earliest declared invocation/capacity start and ends at the later of that span's end and evidenced submitter shutdown, padded on both sides, then extended while owned work reaches the edge",
+   "closed_at": "2026-09-06T00:11:16Z",
+   "closed_at_present": true,
+   "extensions": [],
+   "invocation": {
+    "finished_at": "2026-09-06T00:11:01Z",
+    "source": "cleanup_manifest.json[integration-0009].opened_at + evidence/safety_teardown.log LINE 1, 2026-09-06T00:11:01Z 'SAFETY: reservation still present after run exit; closing' - the watcher's first retained action, reached only after `pgrep -f okf_bq_graph.run` found no driver and it then slept 20s. (00:11:07Z is the later assignment removal, not the exit signal.) No driver run record survived",
+    "started_at": "2026-09-06T00:09:57Z"
+   },
+   "listing_end": "2026-09-06T00:13:16+00:00",
+   "listing_start": "2026-09-06T00:07:57+00:00",
+   "opened_at": "2026-09-06T00:09:57Z",
+   "ownership_end": "2026-09-06T00:11:16+00:00",
+   "ownership_start": "2026-09-06T00:09:57+00:00",
+   "pad_s": 120,
+   "submitters_stopped_at": "2026-09-06T00:11:16+00:00"
+  }
+ },
+ "staged": {
+  "job_ids": [
+   "c9fd4fa7-db15-4c2c-9295-9aa6dd992bc3",
+   "ed2fb3e3-3e3d-4e62-bd18-6d9364bb4fc2",
+   "fccaf7f9-eae1-4be1-9738-f304aa1933bb"
+  ],
+  "journal": "/tmp/okf-pr50-fix2/stage/jobs_integration-0009.json",
+  "journal_sha256": "0cccc81ee7d1e05fecceff2a517cc81df6761221936d8ea505db3e5f0507dbb9",
+  "receipt": "/tmp/okf-pr50-fix2/stage/jobs_integration-0009.cleanup.json",
+  "staged": true,
+  "verified": true
+ }
+}
