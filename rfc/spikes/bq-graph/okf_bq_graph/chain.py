@@ -1412,16 +1412,23 @@ def _graph_probe(client: Any) -> Optional[str]:
     return job.job_id
 
 
-def open_gql_window(label: str, minutes: int, manifest: str, evidence_dir: str, max_slots: int = 100) -> Any:
+def open_gql_window(label: str, minutes: int, manifest: str, evidence_dir: str, max_slots: int = 100,
+                    probe_attempts: int = 12, probe_seconds: float = 120.0) -> Any:
     """Build and open the owned Enterprise window the GQL chain admits against.
 
     Every gate lives in the controller: the exclusive lease, the prior-cleanup receipts read from `evidence_dir`, the
-    cumulative budget, the independent closer and the assignment probes. This function adds no waiver of its own."""
+    cumulative budget, the independent closer and the assignment probes. This function adds no waiver of its own.
+
+    `probe_attempts`/`probe_seconds` size only how long readiness may be WAITED for; the number of consecutive
+    successes that count as ready is not theirs to change, and the window's own `minutes` deadline stays the outer
+    bound. A raised budget is an authorization question - the measured cost is more probe jobs inside an
+    already-bounded paid window, not a weaker readiness test."""
     import subprocess as _sp
     from .chain_window import ChainWindow, WindowConfig
     from .reservation import close_window, open_window
 
-    cfg = WindowConfig(label=label, minutes=minutes, manifest=manifest, evidence_dir=evidence_dir, max_slots=max_slots)
+    cfg = WindowConfig(label=label, minutes=minutes, manifest=manifest, evidence_dir=evidence_dir, max_slots=max_slots,
+                       probe_attempts=probe_attempts, probe_seconds=probe_seconds)
 
     def watcher(window_label: str):
         script = Path(__file__).resolve().parents[1] / "bin" / "safety_teardown.sh"
@@ -1556,6 +1563,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--gql-evidence-dir", default="evidence",
                     help="where jobs_<label>.json cleanup receipts are read and written")
     ap.add_argument("--gql-max-slots", type=int, default=100)
+    ap.add_argument("--gql-probe-attempts", type=int, default=12,
+                    help="how many assignment probes may be spent waiting for readiness (default 12). This sizes the "
+                         "WAIT only: six consecutive successes are still required, and the window's own deadline is "
+                         "still the outer bound. Raising it is an authorization question, not a runner's default")
+    ap.add_argument("--gql-probe-seconds", type=float, default=120.0,
+                    help="how long assignment probing may run before it is abandoned (default 120s)")
     a = ap.parse_args(argv)
     if a.live and a.hermetic:
         ap.error("--live and --hermetic are exclusive")
@@ -1609,7 +1622,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             print("no window was opened; the live GQL chain stays blocked until the bridge is supported at an explicit pin")
             return 1
         try:
-            window = open_gql_window(a.gql_window, a.gql_window_minutes, a.gql_manifest, a.gql_evidence_dir, a.gql_max_slots)
+            window = open_gql_window(a.gql_window, a.gql_window_minutes, a.gql_manifest, a.gql_evidence_dir,
+                                     a.gql_max_slots, a.gql_probe_attempts, a.gql_probe_seconds)
             # the child's budget is the window's ACTUAL remaining time, in absolute wall-clock seconds
             bridge.deadline_epoch = time.time() + max(0.0, window.deadline - time.monotonic())
         except Exception as e:  # noqa: BLE001 - a refused window is reported, and the chain still records its refusal

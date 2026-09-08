@@ -923,3 +923,45 @@ def test_close_opens_a_bounded_read_only_audit_channel(tmp_path):
     assert not hasattr(audit, "query")
     with pytest.raises(AttributeError):
         audit.query("SELECT 1")
+
+
+def test_probe_budget_is_configurable_but_the_success_requirement_is_not():
+    """A raised probe budget sizes only the WAIT for assignment propagation.
+
+    Attempt 2 of the live Slice B run (2026-09-08) reached an ACTIVE assignment whose Graph queries were still
+    refused for ~93s, which consumed 8 of 12 probes and left 4 consecutive successes where 6 are required. Raising
+    the budget must therefore be expressible - and must not become a way to lower the bar for `ready`."""
+    from okf_bq_graph.chain import open_gql_window
+    import inspect
+    sig = inspect.signature(open_gql_window)
+    assert sig.parameters["probe_attempts"].default == 12, "the default budget stays B1's original 12"
+    assert sig.parameters["probe_seconds"].default == 120.0, "the default budget stays B1's original 120s"
+    cfg = CW.WindowConfig(label="w", minutes=10, manifest="m.json", evidence_dir="e",
+                          probe_attempts=24, probe_seconds=240.0)
+    assert (cfg.probe_attempts, cfg.probe_seconds) == (24, 240.0)
+    # the readiness bar is not part of the budget and is not raised or lowered with it
+    assert cfg.probe_successes == 6
+    assert cfg.describe()["probes"] == {"successes": 6, "attempts": 24, "interval_s": 10.0, "seconds": 240.0}
+
+
+def test_a_raised_probe_budget_still_requires_six_consecutive_successes(tmp_path):
+    """Five successes inside a 24-probe budget is still NOT ready: the budget cannot substitute for the streak."""
+    results = [False] * 8 + [True] * 5 + [False] + [True] * 5 + [False] * 5
+    calls = {"n": 0}
+
+    def probe(_client):
+        i = calls["n"]
+        calls["n"] += 1
+        if not results[i]:
+            raise RuntimeError("500 BigQuery Graph queries require a reservation with Enterprise edition")
+        return f"job-{i}"
+
+    cw = controller(tmp_path, opener=lambda *a: {"opened_at": OPEN_AT, "state": "OPEN", "steps": []},
+                    probe=probe, closer=lambda *a: {"verified_gone": True},
+                    probe_successes=6, probe_attempts=24, probe_seconds=240.0, probe_interval_s=0)
+    cw.preflight()
+    with pytest.raises(CW.WindowRefused) as e:
+        cw.open()
+    assert e.value.code == "ASSIGNMENT_NOT_READY"
+    # it kept probing past the old 12-attempt ceiling, and still refused on the streak rather than the budget
+    assert calls["n"] > 12
