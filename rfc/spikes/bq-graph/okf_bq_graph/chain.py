@@ -48,7 +48,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from . import BUNDLE_ID, DATASET, LOCATION, PROJECT, SOURCE_PIN
+from . import BUNDLE_ID, DATASET, LOCATION, PROJECT, RESERVATION, SOURCE_PIN
 from .catalog import CatalogConfig, CatalogRefusal, is_live_reader, read_seed
 from .journal import Journal
 from .model import node_id as _node_id
@@ -71,6 +71,7 @@ SDK_FENCE_RE = re.compile(r"```sql\n(.*?)```", re.DOTALL)  # SDK publication._FE
 CASES = ("approved", "sql-substitution", "declaration-mismatch")
 LEGACY_SEED = "forced:metrics/gross-margin-legacy.md"        # deprecated anchor: reaches the computation only THROUGH metrics/gross-margin
 RESTRICTED_CASES = ("approved-restricted", "denied-intermediate", "unauthorized-output", "revocation-before-replay")
+CACHE_EXEMPT_CASES = ("revocation-before-replay",)   # the cached replay IS this case's evidence; every other case executes
 RESTRICTED = {   # per case: seed, the policy the broker applies before the graph leg, the attack the case models
     "approved-restricted": {"seed": SEED, "policy": _policy(), "attack": None,
                             "expects": "grants present: reached, bound, authorized, executed under the requester, VERIFIED, RELEASED"},
@@ -503,6 +504,193 @@ def accept(c: dict) -> dict:
 
 
 # ----------------------------------------------------------------------------- identity (live only)
+# ----------------------------------------------------------------------------- engine admission and proof (U1/U4)
+GQL_WINDOW_NOT_CONFIGURED = "GQL_WINDOW_NOT_CONFIGURED"
+ENGINE_PROVEN, ENGINE_NOT_PROVEN, ENGINE_CONTRADICTED = "PROVEN", "NOT_PROVEN", "CONTRADICTED"
+
+
+def gql_admission(engine: str, live: bool, window: Any) -> dict:
+    """A bare `--live --engine gql` must refuse BEFORE any grant, client query or SDK launch.
+
+    `chain.py` opens no Enterprise capacity of its own. Without an owned, already-open window controller a GQL request
+    can only end one of two ways: an edition error, or a silent relational answer. Neither is a Graph chain, so the run
+    stops here with a typed record instead of spending anything to find out (Slice A U1, requirement R1)."""
+    if not (live and engine == "gql"):
+        return {"status": "NOT_REQUIRED", "engine": engine, "live": live}
+    if window is None:
+        return {"status": GQL_WINDOW_NOT_CONFIGURED, "engine": engine,
+                "reason": "--live --engine gql needs an owned Enterprise window controller (okf_bq_graph.chain_window); "
+                          "this module does not open capacity, and a GQL request without one either fails on edition "
+                          "or is answered by something that is not BigQuery Graph",
+                "remedy": "supply --gql-window/--gql-manifest (or pass window= to run_chain) once the legacy cleanup "
+                          "gate and an explicit live authorization allow a window to open"}
+    state = getattr(window, "state", None)
+    if state != "OPEN":
+        return {"status": "GQL_WINDOW_NOT_OPEN", "engine": engine, "window_state": state,
+                "reason": "the supplied window controller has not proven an open Enterprise assignment"}
+    return {"status": "OK", "engine": engine, "window": getattr(getattr(window, "cfg", None), "label", None),
+            "window_state": state,
+            "assignment_probes": len(((getattr(window, "record", {}) or {}).get("assignment") or {}).get("probes") or [])}
+
+
+DEFERRED_TEARDOWN = "DEFERRED_TO_WINDOW_CLEANUP"
+
+
+def rebuild_identity(broker: Any, out: dict, audit: Any = None) -> dict:
+    """Re-audit the administrative role AFTER the deferred restoration ran.
+
+    The chain computes its identity verdict before `window.close()`, but the registered teardown submits its
+    grant-restoring DDL during close. Those jobs belong to the same "every job the run submitted" claim, so the
+    inventory and the identity verdict are rebuilt over the broker's actual post-restoration state - including
+    attempts it could not resolve (Astra PR47 RR3 N4)."""
+    inv = out.setdefault("job_inventory", {})
+    before = list(inv.get("policy_admin") or [])
+    admin_jobs = [j for j in (getattr(broker, "admin_jobs", None) or []) if j.get("job_id")]
+    admin_ops = list(getattr(broker, "admin_ops", None) or [])
+    inv["policy_admin"] = [j["job_id"] for j in admin_jobs]
+    inv["policy_admin_ops"] = admin_ops
+    inv["policy_admin_unresolved"] = (broker.admin_unresolved() if hasattr(broker, "admin_unresolved")
+                                      else [op for op in admin_ops if not op.get("job_id")])
+    inv.setdefault("refs", {}).update({j["job_id"]: {"project": j.get("project"), "location": j.get("location"),
+                                                     "stage": j.get("stage")} for j in admin_jobs})
+    receipt_refs = inv.get("receipt_refs") or [{"job_id": j} for j in (inv.get("receipt") or []) if j]
+    # the audit reads through the window's BOUNDED read-only channel; expiry leaves references unread, never assumed
+    previous_owner = getattr(broker, "owner", None)
+    if audit is not None:
+        broker.owner = audit
+    try:
+        identity = broker.identity(list(inv.get("graph") or []), receipt_refs)
+    finally:
+        if audit is not None:
+            broker.owner = previous_owner
+    added = sorted(set(inv["policy_admin"]) - set(before))
+    identity["rebuilt_after_restoration"] = {
+        "policy_admin_before_close": len(before), "policy_admin_after_close": len(inv["policy_admin"]),
+        "added_by_restoration": added, "unresolved": len(inv["policy_admin_unresolved"]),
+        "note": "the deferred restoration submits administrative DDL during close; the identity claim covers those "
+                "jobs too, so it is re-audited once they exist"}
+    identity.setdefault("job_set", {}).update({"policy_admin": len(inv["policy_admin"]),
+                                               "policy_admin_added_by_restoration": len(added)})
+    if audit is not None:
+        record = audit.record() if hasattr(audit, "record") else {}
+        identity["audit"] = record
+        read = set((identity.get("jobs") or {}))
+        claimed = ({j for j in inv["policy_admin"]} | {j for j in (inv.get("graph") or []) if j}
+                   | {r.get("job_id") for r in receipt_refs if r.get("job_id")})
+        unread = sorted(j for j in claimed if j not in read)
+        identity["audit"]["unread_references"] = unread
+        if (record.get("expired") or unread) and identity.get("status") == "BOUND":
+            identity["status"] = "UNKNOWN"
+            identity["reason"] = (f"the post-close audit did not read {len(unread)} reference(s) before its deadline; "
+                                  "an identity claim cannot rest on references nobody read")
+    out["identity"] = identity
+    return identity
+
+
+def broker_teardown(broker: Any, deferred: bool) -> dict:
+    """The broker's restoration, unless the window owns it.
+
+    Under an owned window the teardown is a REGISTERED restoration: it runs at close, on the bounded cleanup channel,
+    with its outcome persisted as an obligation. Running it inline here would submit its DDL on the workload channel
+    (after stop, so every statement raises) and its failure would never reach the reopening gate (Astra PR47
+    re-review R3)."""
+    if deferred:
+        return {"status": DEFERRED_TEARDOWN,
+                "reason": "registered with the window controller; it runs on the bounded cleanup channel at close and "
+                          "its result is written into this record by finalize_cleanup"}
+    return broker.teardown()
+
+
+def _is_bound(client: Any, window: Any) -> bool:
+    from .lifecycle import WindowClient
+    return isinstance(client, WindowClient) and client.window is getattr(window, "jobs", None)
+
+
+def unbound_clients(clients: Optional[dict], broker: Any, window: Any) -> list[str]:
+    """Every BigQuery client that would submit OUTSIDE the controller's single admission gate.
+
+    A window that records a controller but hands the chain an untracked client bounds nothing: the client keeps sending
+    after stop, its jobs never reach the journal, and the window still closes `clean` (Astra PR47 #1)."""
+    if window is None:
+        return []
+    out = []
+    for name, client in (("clients.bq", (clients or {}).get("bq")),
+                         ("broker.requester", getattr(broker, "sa", None)),
+                         ("broker.operator", getattr(broker, "owner", None))):
+        if client is not None and not _is_bound(client, window):
+            out.append(name)
+    return out
+
+
+def engine_proof(requested: str, clients: dict, result: Optional[dict], reservation: str = RESERVATION) -> dict:
+    """Was the answer produced by the engine that was asked for?
+
+    The engine label the caller passes is not evidence, and neither is a label echoed back inside a result: a returned
+    selector can pick a different schema (vault: PR41 fix3). This checks the trusted client configuration, the returned
+    scope, the SQL template that actually compiled, and - for GQL - the platform's own reservation/edition on the jobs
+    that ran. A cached-only answer cannot establish execution, so it is NOT_PROVEN rather than proven."""
+    trusted = clients.get("engine")
+    out: dict[str, Any] = {"requested": requested, "trusted_client_engine": trusted,
+                           "note": "engine identity comes from the trusted client configuration, the compiled template "
+                                   "and the platform's own job metadata; never from a label in the answer"}
+    reasons: list[str] = []
+    if trusted != requested:
+        return dict(out, status=ENGINE_CONTRADICTED,
+                    reasons=[f"the client is configured for engine {trusted!r}, not the requested {requested!r}"])
+    if result is None:
+        return dict(out, status=ENGINE_NOT_PROVEN, reasons=["no retrieval result: the engine never ran"])
+    scope = result.get("scope") or {}
+    out["returned_engine"] = scope.get("engine")
+    out["cache"] = scope.get("cache")
+    out["templates"] = scope.get("templates")
+    out["warnings"] = list(result.get("warnings") or [])
+    if scope.get("engine") != requested:
+        reasons.append(f"the returned scope names engine {scope.get('engine')!r}")
+    jobs = [j for j in ((result.get("timing") or {}).get("jobs") or []) if j.get("job_id")]
+    out["jobs"] = [{"stage": j.get("stage"), "job_id": j.get("job_id"), "state": j.get("state"),
+                    "reservation_id": j.get("reservation_id"), "edition": j.get("edition")} for j in jobs]
+    if requested != "gql":
+        out["status"] = ENGINE_CONTRADICTED if reasons else ENGINE_PROVEN
+        out["reasons"] = reasons
+        return out
+    templates = scope.get("templates") or {}
+    walk = templates.get("walk") or {}
+    if walk.get("name") != "governed.sql" or not walk.get("graph_table"):
+        reasons.append(f"the walk stage compiled {walk.get('name')!r}"
+                       + ("" if walk.get("graph_table") else " and it contains no GRAPH_TABLE clause"))
+    if any("FALLBACK engine" in w for w in out["warnings"]):
+        reasons.append("the answer carries the relational FALLBACK warning")
+    if scope.get("cache") in ("HIT_RECHECKED", "HIT_DENIED"):
+        reasons.append(f"the answer was served from cache ({scope.get('cache')}): a cached entry cannot establish that "
+                       "GQL executed in this window")
+    walk_jobs = [j for j in jobs if j.get("stage") in ("walk", "context")]
+    if not walk_jobs:
+        reasons.append("no walk/context job was submitted: nothing executed on the graph")
+    for j in walk_jobs:
+        if not (j.get("reservation_id") or "").endswith(reservation):
+            reasons.append(f"job {j.get('job_id')} ran under reservation {j.get('reservation_id')!r}, not {reservation}")
+        if (j.get("edition") or "").upper() != "ENTERPRISE":
+            reasons.append(f"job {j.get('job_id')} reports edition {j.get('edition')!r}, not ENTERPRISE")
+    out["reasons"] = reasons
+    contradicted = any(("FALLBACK" in r) or ("compiled" in r) or ("returned scope names" in r) or ("cache" in r)
+                       for r in reasons)
+    out["status"] = ENGINE_PROVEN if not reasons else (ENGINE_CONTRADICTED if contradicted else ENGINE_NOT_PROVEN)
+    return out
+
+
+def merge_engine_proof(per_case: list[dict]) -> dict:
+    """One verdict over every case that actually retrieved. Any contradiction wins; anything unproven blocks."""
+    proofs = [p for p in per_case if p]
+    if not proofs:
+        return {"status": ENGINE_NOT_PROVEN, "cases": 0, "reasons": ["no case reached retrieval"]}
+    statuses = {p["status"] for p in proofs}
+    status = (ENGINE_CONTRADICTED if ENGINE_CONTRADICTED in statuses
+              else (ENGINE_NOT_PROVEN if ENGINE_NOT_PROVEN in statuses else ENGINE_PROVEN))
+    return {"status": status, "cases": len(proofs),
+            "reasons": sorted({r for p in proofs for r in (p.get("reasons") or [])}),
+            "by_case": {p.get("case"): p["status"] for p in proofs if p.get("case")}}
+
+
 def resolve_pointer_job(client: Any, ds: str = DATASET) -> tuple[Optional[str], Optional[str]]:
     """`active_publication` pointer under the caller's client, returning the job id too: this one query job precedes the
     provenance gate and belongs in the identity set."""
@@ -590,12 +778,18 @@ def _broken(out: dict, at: str, run_dir: str, out_dir: str, mode: str, redact: C
 def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Optional[dict] = None, projection: Optional[dict] = None,
               requester: Any = None, as_of: Optional[str] = None, runner: Runner = subprocess.run, cases: Optional[tuple] = None,
               acme_root: Optional[str] = None, seed_mode: str = "fixture", catalog_reader: Any = None,
-              catalog_cfg: Optional[CatalogConfig] = None, store: Any = None, requester_mode: str = "operator", broker: Any = None) -> dict:
+              catalog_cfg: Optional[CatalogConfig] = None, store: Any = None, requester_mode: str = "operator", broker: Any = None,
+              window: Any = None, receipt_bridge: Any = None) -> dict:
     from .authz import operator, redact
     if requester_mode not in ("operator", "restricted"):
         raise ValueError(f"requester_mode must be operator|restricted, not {requester_mode!r}")
     restricted = requester_mode == "restricted"
-    cases = tuple(cases or (RESTRICTED_CASES if restricted else CASES))
+    deferred_teardown = False
+    suite = RESTRICTED_CASES if restricted else CASES
+    cases = tuple(cases or suite)
+    unknown = [c for c in cases if c not in suite]
+    if unknown:
+        raise ValueError(f"unknown case(s) for requester_mode={requester_mode}: {unknown}; the suite is {list(suite)}")
     if live and engine == "oracle":
         raise ValueError("live mode needs a BigQuery graph engine (fallback|gql): oracle + SDK --live is not a mode")
     if not live and engine != "oracle":
@@ -655,6 +849,64 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                                "the operator (identity BOUND); CHAIN_INCOMPLETE when a case never reached its stage, the identity is UNKNOWN, "
                                "or a replay ran without contributing its job reference; CHAIN_BROKEN when a reached stage contradicts the expectation, "
                                "a job carries another identity or a pin fails; hermetic runs prove the harness, not the platform")
+    omitted = [c for c in suite if c not in cases]
+    out["selected_cases"] = list(cases)
+    out["omitted_cases"] = omitted
+    out["scope"] = {"complete_suite": not omitted, "suite": list(suite),
+                    "note": "a scoped run proves the cases it selected. The omitted cases are NOT_RUN: an approved case "
+                            "passing on its own is not the suite's negative coverage"}
+    # ---- explicit engine admission (U1/R1): refuse BEFORE any grant, client query or SDK launch
+    out["engine_admission"] = gql_admission(engine, live, window)
+    if out["engine_admission"]["status"] not in ("OK", "NOT_REQUIRED"):
+        journal.note("engine_admission_refused", status=out["engine_admission"]["status"], engine=engine)
+        out["cases"] = []
+        out["verdict"] = "CHAIN_INCOMPLETE"
+        out["broken_at"] = "engine_admission"
+        out["engine_proof"] = {"status": ENGINE_NOT_PROVEN, "reasons": ["the run was refused before retrieval"]}
+        out["same_requester"] = {"status": "NOT_RUN",
+                                 "reason": "refused at engine_admission before any client, grant or SDK launch"}
+        return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
+    if window is not None:
+        out["window"] = {"label": getattr(getattr(window, "cfg", None), "label", None),
+                         "state": getattr(window, "state", None),
+                         "controller": (getattr(window, "record", {}) or {}).get("controller")}
+    # ---- KTD3: the receipt child runs inside this window, or the run says so
+    receipt_runner = runner
+    if receipt_bridge is not None:
+        status = (receipt_bridge.record or {}).get("status")
+        out["receipt_bridge"] = {"status": status, "label": getattr(receipt_bridge, "label", None),
+                                 "clock_domain": (receipt_bridge.record or {}).get("clock_domain"),
+                                 "preflight": ((receipt_bridge.record or {}).get("preflight") or {}).get("status"),
+                                 "child": (receipt_bridge.record or {}).get("child"),
+                                 "reason": (receipt_bridge.record or {}).get("reason")}
+        if status != "SUPPORTED":
+            journal.note("receipt_bridge_unsupported", status=status)
+            out["cases"] = []
+            out["verdict"] = "CHAIN_INCOMPLETE"
+            out["broken_at"] = "receipt_bridge"
+            out["engine_proof"] = {"status": ENGINE_NOT_PROVEN, "reasons": ["the run was refused before retrieval"]}
+            out["same_requester"] = {"status": "NOT_RUN",
+                                     "reason": "the SDK window bridge is unsupported at this pin: refused before any "
+                                               "grant, query or SDK launch"}
+            return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
+        receipt_runner = receipt_bridge.runner()
+        if window is not None:
+            # stop reaches the child, close joins it BEFORE sealing, and its retained references are adopted
+            window.register_worker("receipt_child", stop=receipt_bridge.stop, join=receipt_bridge.join,
+                                   jobs=receipt_bridge.jobs, obligations=receipt_bridge.obligations,
+                                   # where a recovery process finds this child's retained references
+                                   evidence={"journal_dir": str(receipt_bridge.journal_dir),
+                                             "bridge_dir": str(receipt_bridge.dir),
+                                             "stop_file": str(receipt_bridge.stop_path),
+                                             "label": receipt_bridge.label})
+            out["receipt_bridge"]["worker"] = "registered with the window controller (stop, join, job union)"
+        else:
+            out["receipt_bridge"]["worker"] = None
+    # ---- KTD4: the first live GQL case must execute; a memoized answer cannot establish that GQL ran
+    if live and engine == "gql":
+        out["cache_policy"] = {"memoization": "DISABLED", "exempt_cases": list(CACHE_EXEMPT_CASES),
+                               "reason": "a cached or fallback-filled entry cannot establish GQL execution; the "
+                                         "replay case keeps its cache because the cached replay IS its evidence"}
     # SDK pin
     try:
         sdk_pub = sdk_publication(sdk_root)
@@ -674,16 +926,49 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     if engine == "oracle" and projection is None and not catalog and (clients is None or restricted):
         from .compile import compile_bundle
         projection = compile_bundle(acme_root, BUNDLE_ID, SOURCE_PIN)
+    def _bind(raw: Any, role: str, principal: Optional[str] = None) -> Any:
+        """Every client the chain builds under an owned window is registered with its single submission gate."""
+        return window.bind_client(raw, role=role, principal=principal) if window is not None else raw
+
     if restricted:
         if broker is None:
-            broker = HermeticBroker(projection) if not live else RestrictedBroker(engine, sdk_pub["dataset"], dependencies=sdk_pub["dependencies"])
+            if not live:
+                broker = HermeticBroker(projection)
+            else:
+                from .authz import impersonated_client
+                broker = RestrictedBroker(
+                    engine, sdk_pub["dataset"], dependencies=sdk_pub["dependencies"],
+                    factory=(lambda email: _bind(impersonated_client(email), "requester", email)),
+                    owner=(window.operator if window is not None and window.operator is not None else None))
         out["requester"]["broker"] = broker.describe()
+        # R3: register the restoration BEFORE the first mutation, so a crash between grant and close still leaves the
+        # obligation behind, and so it runs on the bounded cleanup channel rather than the stopped workload channel.
+        deferred_teardown = window is not None and hasattr(window, "register_restore")
+        if deferred_teardown:
+            window.register_restore("broker_teardown", lambda client: broker.teardown(owner=client), takes_client=True)
+            out["requester"]["teardown"] = {"owner": "window controller", "channel": "bounded cleanup"}
+            if hasattr(window, "register_post_close"):
+                # the restoration's own DDL lands during close: the identity claim is rebuilt over it
+                window.register_post_close(
+                    "broker_identity",
+                    lambda record: rebuild_identity(broker, record,
+                                                    audit=window.audit_client() if hasattr(window, "audit_client") else None))
+        unbound = unbound_clients(clients, broker, window)
+        if unbound:
+            out["engine_admission"] = {"status": "GQL_CLIENTS_UNBOUND", "engine": engine, "unbound": unbound,
+                                       "reason": "a client would submit outside the window's admission gate: its jobs "
+                                                 "would not be journaled, bounded or cleaned up"}
+            out["cases"] = []; out["verdict"] = "CHAIN_INCOMPLETE"; out["broken_at"] = "engine_admission"
+            out["engine_proof"] = {"status": ENGINE_NOT_PROVEN, "reasons": ["the run was refused before retrieval"]}
+            out["same_requester"] = {"status": "NOT_RUN", "reason": "refused before any grant, query or SDK launch"}
+            out["teardown"] = {"status": "NOT_RUN", "reason": "no grant was issued"}
+            return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
         requester = requester or SA_ALIAS
         try:
             out["grant"] = broker.grant()   # before the pointer lookup: that job runs under the requester too
         except Exception as e:  # noqa: BLE001 - a grant the platform refused blocks every case (nothing is invented)
             out["grant"] = _stage_error(e); out["verdict"] = "CHAIN_INCOMPLETE"; out["broken_at"] = "grant"; out["cases"] = []
-            out["teardown"] = broker.teardown()
+            out["teardown"] = broker_teardown(broker, deferred_teardown)
             return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
         clients = broker.graph_clients()
     elif clients is None:
@@ -694,7 +979,19 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             clients = {"engine": "oracle"}      # graphs come from the retained store below
         else:
             from google.cloud import bigquery
-            clients = {"engine": engine, "bq": bigquery.Client(project=PROJECT, location=LOCATION)}
+            clients = {"engine": engine,
+                       "bq": _bind(bigquery.Client(project=PROJECT, location=LOCATION), "requester")}
+    unbound = unbound_clients(clients, broker, window)
+    if unbound:
+        out["engine_admission"] = {"status": "GQL_CLIENTS_UNBOUND", "engine": engine, "unbound": unbound,
+                                   "reason": "a client would submit outside the window's admission gate: its jobs "
+                                             "would not be journaled, bounded or cleaned up"}
+        out["cases"] = []; out["verdict"] = "CHAIN_INCOMPLETE"; out["broken_at"] = "engine_admission"
+        out["engine_proof"] = {"status": ENGINE_NOT_PROVEN, "reasons": ["the run was refused before retrieval"]}
+        out["same_requester"] = {"status": "NOT_RUN", "reason": "refused before any query or SDK launch"}
+        return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
+    if window is not None:
+        out["window"]["bound_clients"] = list(window.clients)
     requester = requester or operator()
     pointer_job_id = None
     source_pin = SOURCE_PIN
@@ -795,7 +1092,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             out["publication"] = _stage_error(e); pub = None
         if not pub:
             if restricted:
-                out["teardown"] = broker.teardown()
+                out["teardown"] = broker_teardown(broker, deferred_teardown)
             return _broken(out, "publication", run_dir, out_dir, mode, redact, journal, tag)
         prov = {"publication_pin": out["publication"]["matches_pin"], "sdk_head_pin": bool(sdk_pub["sdk_head_matches_pin"]),
                 "sdk_clean": sdk_pub["sdk_repo_dirty"] is False, "sdk_git_state_known": sdk_pub["sdk_repo_dirty"] is not None}
@@ -807,21 +1104,31 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
     if not prov["ok"]:
         out["same_requester"] = {"status": "NOT_RUN", "reason": "provenance gate refused before any case executed"}
         if restricted:
-            out["teardown"] = broker.teardown()
+            out["teardown"] = broker_teardown(broker, deferred_teardown)
         return _broken(out, "provenance", run_dir, out_dir, mode, redact, journal, tag)
+
+    def engine_clients(cl: dict, case: str) -> dict:
+        """The clients one case retrieves with. Under a live GQL window every case but the cached-replay case runs
+        with memoization off, so its walk/context jobs are real."""
+        if not (live and engine == "gql") or case in CACHE_EXEMPT_CASES:
+            return cl
+        return dict(cl, cache=None)
 
     def graph_leg(seed: Any, path: str, cl: Optional[dict] = None, hidden: tuple = ()) -> tuple[dict, Optional[dict], Optional[dict], Optional[dict]]:
         cl = clients if cl is None else cl
         try:
             r = governed(seed, pub, requester, as_of, cl)
         except Exception as e:  # noqa: BLE001 - e.g. GQL without an Enterprise window
-            return {"retrieval": dict(_stage_error(e), seed=str(seed), reached=False)}, None, None, None
+            return ({"retrieval": dict(_stage_error(e), seed=str(seed), reached=False),
+                     "engine_proof": engine_proof(engine, cl, None) if live else None}, None, None, None)
         rec = {"retrieval": {"seed": str(seed), "seed_origin": getattr(seed, "origin", "forced"), "status": r["status"],
                              "warnings": r.get("warnings", []), "scope": r.get("scope"),
                              "concepts": [c.get("concept") for c in r.get("concepts", [])],
                              "paths": r.get("paths", []), "computations": [c.get("path") for c in r.get("computations", [])],
                              "timing": r.get("timing")}}
         rec["retrieval"]["hidden_id_in_full_result"] = [h for h in hidden if leaks(r, h)]   # the FULL answer the requester got, not this trimmed record
+        if live:
+            rec["engine_proof"] = engine_proof(engine, cl, r)
         comp = pick_computation(r, path) if r["status"] == "OK" else None
         if comp is None:
             rec["retrieval"]["reached"] = False
@@ -854,7 +1161,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                        "sql-substitution": "SDK case: agent executes a product-cost-only formula for the approved request and claims 600 (executed-SQL swap)",
                        "declaration-mismatch": "graph-side swap: a different reachable Attested Computation (revenue-ytd) is offered in place of the bound one"
                                                + ("; its seed is an explicit harness injection under the pinned publication, not a Catalog discovery" if catalog else "")}[case]
-        leg, comp, decl, full_result = graph_leg(seed, path)
+        leg, comp, decl, full_result = graph_leg(seed, path, engine_clients(clients, case))
         c.update(leg)
         if catalog and full_result is not None:      # the governed input itself is retained (redacted like the record), not only the re-read rows
             kept = journal.retain(f"retrieval_{case}", (json.dumps(redact(full_result), indent=1, sort_keys=True, default=str) + "\n").encode("utf-8"), subdir="retrieval")
@@ -871,7 +1178,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             c["bind"] = bind(comp, decl, sdk_pub, as_of, source_pin=source_pin)
         if c["bind"]["status"] == "BOUND":
             sdk_case = "sql-substitution" if case == "sql-substitution" else "approved"
-            c["receipt"] = run_receipt(sdk_case, sdk_root, receipt_dir, live, runner=runner)
+            c["receipt"] = run_receipt(sdk_case, sdk_root, receipt_dir, live, runner=receipt_runner)
             c["receipt"]["diag"] = None if c["receipt"].get("diag") is None else f"see {c['receipt']['diag_path']}"
         else:
             c["receipt"] = {"invoked": False, "reason": "bind did not hold: nothing was executed"}
@@ -899,7 +1206,7 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             c["acceptance"] = accept(c)
             return c
         cc = broker.graph_clients()
-        leg, comp, decl, _full = graph_leg(spec["seed"], COMPUTATION_PATH, cc, hidden=spec["policy"]["hidden"])
+        leg, comp, decl, _full = graph_leg(spec["seed"], COMPUTATION_PATH, engine_clients(cc, case), hidden=spec["policy"]["hidden"])
         c.update(leg)
         r = c["retrieval"]
         if not r.get("reached"):
@@ -914,7 +1221,8 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         if c["bind"]["status"] == "BOUND":
             c["authorization"] = broker.authorize(sdk_pub["dependencies"])
             if c["authorization"]["status"] == ALLOWED:
-                c["receipt"] = run_receipt("approved", sdk_root, receipt_dir, live, runner=runner, env_extra=broker.receipt_env(), label=case)
+                c["receipt"] = run_receipt("approved", sdk_root, receipt_dir, live, runner=receipt_runner,
+                                           env_extra=broker.receipt_env(), label=case)
                 c["receipt"]["diag"] = None if c["receipt"].get("diag") is None else f"see {c['receipt']['diag_path']}"
                 c["receipt_invocations"] = 1
             else:
@@ -954,8 +1262,14 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
             out["cases"].append(restricted_case(case) if restricted else operator_case(case))
     finally:
         if restricted:
-            out["teardown"] = broker.teardown()
+            out["teardown"] = broker_teardown(broker, deferred_teardown)
             out["broker_journal"] = list(getattr(broker, "journal", []))
+    if live:
+        out["engine_proof"] = merge_engine_proof([dict(c["engine_proof"], case=c["case"])
+                                                  for c in out["cases"] if c.get("engine_proof")])
+    else:
+        out["engine_proof"] = {"status": "NOT_APPLICABLE",
+                               "reason": "hermetic mode runs the in-process oracle: no BigQuery engine executed"}
     out["decisions"] = {c["case"]: c["consume"]["decision"] for c in out["cases"]}
     out["acceptance"] = {c["case"]: c["acceptance"]["status"] for c in out["cases"]}
     ids = job_ids_of(out["cases"], pointer_job_id, journal.job_ids())
@@ -970,11 +1284,43 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
                       and not ((((c["replay"] or {}).get("retrieval") or {}).get("timing") or {}).get("jobs") or [])]
     refs = {e["job_id"]: (e.get("project"), e.get("location")) for e in journal.jobs() if e.get("job_id")}
     out["job_inventory"] = {"graph": ids["graph"], "receipt": [j.get("job_id") for j in ids["receipt"]],
+                            "receipt_refs": ids["receipt"],
                             "refs": {k: {"project": v[0], "location": v[1]} for k, v in refs.items()},
                             "journal": journal.summary(), "note": "every submitted job once, including empty/failed lookups; roles and (project, location, job_id) in journal.jsonl"}
+    if receipt_bridge is not None:
+        ingested = receipt_bridge.ingest()
+        out["job_inventory"]["receipt_child"] = [j["job_id"] for j in ingested["jobs"]]
+        out["job_inventory"]["receipt_child_unresolved"] = ingested["unresolved"]
+        out["job_inventory"]["receipt_child_operations"] = {"operations": ingested["operations"],
+                                                            "dry_runs": ingested["dry_runs"],
+                                                            "refused": ingested.get("refused", 0),
+                                                            "blocked": ingested["blocked"]}
+        out["job_inventory"]["refs"].update({j["job_id"]: {"project": j.get("project"), "location": j.get("location"),
+                                                           "stage": "receipt_child"} for j in ingested["jobs"]})
+        # a diagnostic the SDK reported that the child journal never saw, or the reverse, is a gap in the inventory
+        reported = {j.get("job_id") for j in ids["receipt"] if j.get("job_id")}
+        journaled = {j["job_id"] for j in ingested["jobs"]}
+        out["job_inventory"]["receipt_child_only"] = sorted(journaled - reported)
+        out["job_inventory"]["receipt_reported_only"] = sorted(reported - journaled)
     statuses = [c["acceptance"]["status"] for c in out["cases"]]
     unresolved = journal.unresolved()
-    out["job_inventory"]["unresolved"] = [{"seq": e["seq"], "role": e["role"], "job_id": e.get("job_id"), "state": e["state"], "error": e.get("error")} for e in unresolved]
+    if receipt_bridge is not None:
+        # a submission the child could not resolve is a job the window may owe cleanup for; so is a job the SDK
+        # diagnostic named that the child journal never saw, and the reverse (Astra PR47 #6)
+        unresolved = unresolved + [dict(u, role="receipt_child", state=u.get("state", "UNRESOLVED"))
+                                   for u in out["job_inventory"]["receipt_child_unresolved"]]
+        for job_id in out["job_inventory"]["receipt_reported_only"]:
+            unresolved.append({"role": "receipt_child", "job_id": job_id, "state": "DIAGNOSTIC_ONLY",
+                               "error": "the SDK diagnostic names a job the child's own journal never recorded"})
+        for job_id in out["job_inventory"]["receipt_child_only"]:
+            unresolved.append({"role": "receipt_child", "job_id": job_id, "state": "JOURNAL_ONLY",
+                               "error": "the child journaled a submission the SDK diagnostic never reported"})
+    # every unresolved entry, whatever produced it: journal entries carry seq/role, while a receipt-child mismatch or a
+    # damaged child journal carries neither. Reading them positionally crashed the whole record assembly, so the run
+    # wrote no evidence at all (Astra PR47 re-review R5).
+    out["job_inventory"]["unresolved"] = [{"seq": e.get("seq"), "role": e.get("role", "chain"),
+                                           "job_id": e.get("job_id"), "state": e.get("state", "UNKNOWN"),
+                                           "error": e.get("error")} for e in unresolved]
     if restricted:
         probe_jobs = list(getattr(broker, "probe_jobs", []) or [])       # requester-submitted platform observations
         admin_jobs = list(getattr(broker, "admin_jobs", []) or [])       # operator-submitted row-policy DDL
@@ -1020,16 +1366,19 @@ def run_chain(engine: str, live: bool, sdk_root: str, out_dir: str, clients: Opt
         ident_broken = live and out["same_requester"]["status"] == "DIFFERENT"
         ident_incomplete = live and out["same_requester"]["status"] != "SAME"
         fallback_at = "same_requester"
-    if any(s == "WRONG" for s in statuses) or ident_broken:
+    engine_broken = live and engine == "gql" and out["engine_proof"]["status"] == ENGINE_CONTRADICTED
+    engine_incomplete = live and engine == "gql" and out["engine_proof"]["status"] != ENGINE_PROVEN
+    if any(s == "WRONG" for s in statuses) or ident_broken or engine_broken:
         out["verdict"] = "CHAIN_BROKEN"
-    elif any(s == "NOT_REACHED" for s in statuses) or ident_incomplete or unresolved:
+    elif any(s == "NOT_REACHED" for s in statuses) or ident_incomplete or unresolved or engine_incomplete:
         out["verdict"] = "CHAIN_INCOMPLETE"      # a job whose server state was never verified leaves the inventory unproven
     else:
         out["verdict"] = "CHAIN_CONNECTED"
     if out["verdict"] != "CHAIN_CONNECTED":
         out["broken_at"] = next((c["case"] for c in out["cases"] if c["acceptance"]["status"] == "WRONG"),
                                 next((c["case"] for c in out["cases"] if c["acceptance"]["status"] == "NOT_REACHED"),
-                                     "unresolved_jobs" if unresolved else fallback_at))
+                                     "unresolved_jobs" if unresolved else
+                                     ("engine_proof" if (engine_broken or engine_incomplete) else fallback_at)))
     return _finish(out, out_dir, mode, redact, run_dir=run_dir, journal=journal, tag=tag)
 
 
@@ -1051,6 +1400,121 @@ def _finish(out: dict, out_dir: str, mode: str, redact: Callable, run_dir: Optio
     own = Path(run_dir) if run_dir else (Path(out_dir) / "receipt" / out["run_id"] if out.get("run_id") else None)
     if own is not None and own.is_dir():
         (own / final.name).write_text(text, encoding="utf-8")
+    return out
+
+
+def _graph_probe(client: Any) -> Optional[str]:
+    """One real GRAPH_TABLE count under the window's operator client: the assignment is proven, not assumed."""
+    from google.cloud import bigquery
+    job = client.query(f"SELECT COUNT(*) FROM GRAPH_TABLE(`{PROJECT}.{DATASET}.okf_graph` MATCH (n:Node) COLUMNS (n.node_id))",
+                       job_config=bigquery.QueryJobConfig(use_query_cache=False), location=LOCATION)
+    list(job.result())
+    return job.job_id
+
+
+def open_gql_window(label: str, minutes: int, manifest: str, evidence_dir: str, max_slots: int = 100) -> Any:
+    """Build and open the owned Enterprise window the GQL chain admits against.
+
+    Every gate lives in the controller: the exclusive lease, the prior-cleanup receipts read from `evidence_dir`, the
+    cumulative budget, the independent closer and the assignment probes. This function adds no waiver of its own."""
+    import subprocess as _sp
+    from .chain_window import ChainWindow, WindowConfig
+    from .reservation import close_window, open_window
+
+    cfg = WindowConfig(label=label, minutes=minutes, manifest=manifest, evidence_dir=evidence_dir, max_slots=max_slots)
+
+    def watcher(window_label: str):
+        script = Path(__file__).resolve().parents[1] / "bin" / "safety_teardown.sh"
+        log = Path(evidence_dir) / "safety_teardown.log"
+        with log.open("a") as fh:
+            _sp.Popen(["/bin/bash", str(script), str(os.getpid()), window_label, sys.executable],
+                      stdout=fh, stderr=_sp.STDOUT, start_new_session=True)
+        return str(script)
+
+    def factory():
+        from google.cloud import bigquery
+        return bigquery.Client(project=PROJECT, location=LOCATION)
+
+    window = ChainWindow(cfg, opener=open_window, closer=close_window, spawn_watcher=watcher,
+                         probe=_graph_probe, client_factory=factory)
+    window.preflight()
+    window.open()
+    return window
+
+
+def finalize_cleanup(out: dict, window: Any, out_dir: str, receipt_bridge: Any = None) -> dict:
+    """Amend the chain record with the window's ACTUAL closeout, after the controller closed.
+
+    `run_chain` returns before the window closes, so its verdict cannot yet account for cleanup. A chain that reached
+    its stages inside a window whose capacity, jobs, restores or workers are unresolved is not a completed run: the
+    final retained record says so rather than leaving a `CHAIN_CONNECTED` that a later reader would over-read
+    (Astra PR47 #1)."""
+    from .authz import redact
+    cleanup = (window.record or {}).get("cleanup") or {}
+    clean = bool((window.record or {}).get("clean"))
+    out.setdefault("window", {})
+    out["window"].update({"label": getattr(getattr(window, "cfg", None), "label", None),
+                          "state": getattr(window, "state", None), "clean": clean, "cleanup": cleanup,
+                          "restores": (window.record or {}).get("restores"),
+                          "workers": (window.record or {}).get("workers")})
+    # the broker's restoration ran at close, on the bounded cleanup channel: its ACTUAL result belongs in the record
+    for restore in ((window.record or {}).get("restores") or []):
+        if restore.get("name") == "broker_teardown":
+            out["teardown"] = restore.get("result") if restore.get("ok") else dict(
+                restore.get("result") or {}, status=(restore.get("result") or {}).get("status", "FAILED"),
+                restore_error=restore.get("error"))
+    # rebuild any evidence that CLOSING itself changed (the deferred restoration's own administrative DDL)
+    for hook in (window.post_close_callbacks() if hasattr(window, "post_close_callbacks") else []):
+        try:
+            out.setdefault("post_close", {})[hook["name"]] = hook["call"](out)
+        except Exception as e:  # noqa: BLE001 - evidence we could not rebuild is not evidence that held
+            out.setdefault("post_close", {})[hook["name"]] = {"status": "ERROR",
+                                                              "error": f"{type(e).__name__}: {str(e)[:250]}"}
+            clean = False
+            out["window"]["clean"] = False
+    if receipt_bridge is not None:
+        # re-ingest AFTER the child was joined: a submission it made late is still this window's obligation
+        ingested = receipt_bridge.ingest()
+        inventory = out.setdefault("job_inventory", {})
+        inventory["receipt_child"] = [j["job_id"] for j in ingested["jobs"]]
+        inventory["receipt_child_unresolved"] = ingested["unresolved"]
+        inventory["receipt_child_sealed_after_join"] = True
+        out["receipt_bridge_journal"] = ingested
+        if ingested["unresolved"]:
+            clean = False
+            out["window"]["clean"] = False
+            cleanup = dict(cleanup, receipt_child_unresolved=len(ingested["unresolved"]))
+            out["window"]["cleanup"] = cleanup
+    # the rebuilt identity governs the final verdict exactly as the pre-close one did
+    identity = out.get("identity") or {}
+    if out.get("mode") == "live" and "rebuilt_after_restoration" in identity:
+        unresolved_admin = (out.get("job_inventory") or {}).get("policy_admin_unresolved") or []
+        if identity.get("status") == "UNBOUND":
+            out["verdict"] = "CHAIN_BROKEN"
+            out["broken_at"] = "identity"
+            out["identity_note"] = ("a job the run submitted carries an unexpected identity once the restoration's own "
+                                    "administrative DDL is included")
+        elif identity.get("status") != "BOUND" or unresolved_admin:
+            if out.get("verdict") != "CHAIN_BROKEN":
+                out["verdict"] = "CHAIN_INCOMPLETE"
+                out["broken_at"] = "identity"
+                out["identity_note"] = ("the identity of the post-restoration administrative work is not established: "
+                                        f"status {identity.get('status')}, {len(unresolved_admin)} unresolved "
+                                        "statement(s)")
+    if not clean and out.get("verdict") != "CHAIN_BROKEN":
+        out["verdict"] = "CHAIN_INCOMPLETE"
+        out["broken_at"] = "window_cleanup"
+        out["cleanup_note"] = ("the chain ran inside a window whose closeout is not complete: capacity, job cleanup, "
+                               "resource restoration or a worker join is outstanding, so this run is not a clean "
+                               "closeout whatever its case outcomes were")
+    text = json.dumps(redact(out), indent=1, sort_keys=True, default=str) + "\n"
+    final = Path(out_dir) / f"chain_{out['mode']}{'_restricted' if out.get('requester', {}).get('mode') == 'restricted-sa' else ''}.json"
+    tmp = final.with_name(f".{final.name}.{out.get('run_id', 'norun')}.final.tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, final)
+    run_dir = Path(out.get("run_dir") or "")
+    if run_dir.is_dir():
+        (run_dir / final.name).write_text(text, encoding="utf-8")
     return out
 
 
@@ -1078,6 +1542,18 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--out", default=None, help="evidence root (default evidence/chain; evidence/catalog-chain for --seed-mode catalog)")
     ap.add_argument("--as-of", default=None)
     ap.add_argument("--acme-root", default=None)
+    ap.add_argument("--cases", default=None,
+                    help="comma-separated subset of the requester's case suite (default: the whole suite). The record "
+                         "carries selected_cases and omitted_cases; omitted cases are NOT_RUN, never implied to pass")
+    ap.add_argument("--gql-window", default=None, metavar="LABEL",
+                    help="open and own an Enterprise window under this ORIGINAL label for --live --engine gql. Without "
+                         "it a GQL request is refused with a typed record before any grant, query or SDK launch")
+    ap.add_argument("--gql-window-minutes", type=int, default=10)
+    ap.add_argument("--gql-manifest", default="evidence/cleanup_manifest.json",
+                    help="the canonical capacity ledger; it must exist (an absent manifest is refused, never treated as empty)")
+    ap.add_argument("--gql-evidence-dir", default="evidence",
+                    help="where jobs_<label>.json cleanup receipts are read and written")
+    ap.add_argument("--gql-max-slots", type=int, default=100)
     a = ap.parse_args(argv)
     if a.live and a.hermetic:
         ap.error("--live and --hermetic are exclusive")
@@ -1087,6 +1563,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     if not live and a.engine not in (None, "oracle"):
         ap.error("--engine other than oracle requires --live")
     engine = (a.engine or "fallback") if live else "oracle"
+    if a.gql_window and not (live and (a.engine == "gql")):
+        ap.error("--gql-window is only meaningful with --live --engine gql")
     if a.requester == "restricted" and a.seed_mode == "catalog":
         ap.error("--requester restricted with --seed-mode catalog is not a mode in Slice A: the restricted broker runs the fixture seed")
     out_dir = a.out or ("evidence/catalog-chain" if a.seed_mode == "catalog" else "evidence/chain")
@@ -1111,8 +1589,49 @@ def main(argv: Optional[list[str]] = None) -> int:
             store.add(proj); store.set_head(BUNDLE_ID, proj["publication_id"])
     elif a.catalog_group or a.catalog_entry or a.catalog_responses:
         ap.error("--catalog-* flags need --seed-mode catalog")
-    out = run_chain(engine=engine, live=live, sdk_root=a.sdk_root, out_dir=out_dir, as_of=a.as_of, acme_root=a.acme_root,
-                    seed_mode=a.seed_mode, catalog_reader=reader, catalog_cfg=cfg, store=store, requester_mode=a.requester)
+    selected = tuple(c.strip() for c in a.cases.split(",") if c.strip()) if a.cases else None
+    window, bridge = None, None
+    if a.gql_window:
+        # KTD3: the SDK bridge handshake runs BEFORE any paid capacity. An unsupported pin is an honest refusal, not a
+        # window that opens and then discovers it cannot bound its own receipt child.
+        from .receipt_window import SUPPORTED, ReceiptBridge
+        bridge = ReceiptBridge(a.sdk_root, label=a.gql_window,
+                               deadline_epoch=time.time() + a.gql_window_minutes * 60,
+                               directory=Path(out_dir) / "receipt-bridge" / a.gql_window)
+        record = bridge.handshake()
+        Path(out_dir).mkdir(parents=True, exist_ok=True)
+        (Path(out_dir) / f"receipt_bridge_{a.gql_window}.json").write_text(
+            json.dumps(record, indent=1, sort_keys=True, default=str) + "\n", encoding="utf-8")
+        if record["status"] != SUPPORTED:
+            print(f"SDK_WINDOW_BRIDGE_UNSUPPORTED: {record.get('reason')}")
+            print("no window was opened; the live GQL chain stays blocked until the bridge is supported at an explicit pin")
+            return 1
+        try:
+            window = open_gql_window(a.gql_window, a.gql_window_minutes, a.gql_manifest, a.gql_evidence_dir, a.gql_max_slots)
+            # the child's budget is the window's ACTUAL remaining time, in absolute wall-clock seconds
+            bridge.deadline_epoch = time.time() + max(0.0, window.deadline - time.monotonic())
+        except Exception as e:  # noqa: BLE001 - a refused window is reported, and the chain still records its refusal
+            print(f"gql window refused: {type(e).__name__}: {e}")
+            record = getattr(e, "record", None)
+            if record is not None:
+                Path(out_dir).mkdir(parents=True, exist_ok=True)
+                (Path(out_dir) / f"window_{a.gql_window}.json").write_text(
+                    json.dumps(record, indent=1, sort_keys=True, default=str) + "\n", encoding="utf-8")
+            return 1
+    out = None
+    try:
+        out = run_chain(engine=engine, live=live, sdk_root=a.sdk_root, out_dir=out_dir, as_of=a.as_of, acme_root=a.acme_root,
+                        seed_mode=a.seed_mode, catalog_reader=reader, catalog_cfg=cfg, store=store,
+                        requester_mode=a.requester, cases=selected, window=window, receipt_bridge=bridge if window else None)
+    finally:
+        if window is not None:
+            window.close()          # stops the child, joins it, then seals the union
+            Path(out_dir).mkdir(parents=True, exist_ok=True)
+            (Path(out_dir) / f"window_{a.gql_window}.json").write_text(
+                json.dumps(window.record, indent=1, sort_keys=True, default=str) + "\n", encoding="utf-8")
+            if out is not None:
+                out = finalize_cleanup(out, window, out_dir, receipt_bridge=bridge)
+            print("window cleanup:", json.dumps(window.record.get("cleanup"), default=str))
     for c in out.get("cases", []):
         rec = c.get("receipt") or {}
         rv = (rec.get("output") or {}).get("verdict", "NOT_INVOKED") if rec.get("invoked") else "NOT_INVOKED"
@@ -1124,7 +1643,13 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"seed_mode={out['seed'].get('mode')} seed_status={out['seed'].get('status', 'fixture')} publication={out.get('publication', {}).get('status')} "
           f"provenance_ok={out.get('provenance', {}).get('ok')} {ident} requester={out.get('requester', {}).get('mode')} "
           f"engine={out['engine']} mode={out['mode']} sdk_head={str(out.get('sdk', {}).get('head'))[:7]} run_dir={out.get('run_dir')}")
+    print(f"engine_admission={out.get('engine_admission', {}).get('status')} engine_proof={out.get('engine_proof', {}).get('status')} "
+          f"selected_cases={','.join(out.get('selected_cases', []))}"
+          + (f" omitted_cases={','.join(out['omitted_cases'])}" if out.get("omitted_cases") else ""))
     print(f"verdict={out['verdict']}" + (f" broken_at={out.get('broken_at')}" if out['verdict'] != 'CHAIN_CONNECTED' else ""))
+    if window is not None and not window.record.get("clean"):
+        print("window cleanup is NOT complete: the run cannot be reported as a clean closeout")
+        return 1
     return 0 if out["verdict"] == "CHAIN_CONNECTED" else 1
 
 

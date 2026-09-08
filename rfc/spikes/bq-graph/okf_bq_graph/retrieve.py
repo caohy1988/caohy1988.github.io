@@ -116,10 +116,19 @@ def _denied(reason: str, scope: dict, timer: Timer, status: str = "DENIED") -> d
             "scope": scope, "timing": timer.done()}
 
 
-def _cache_key(ds, bundle_id, publication_id, requester, query, as_of, top_k) -> str:
-    # exact normalized as-of instant: two requests straddling a stale_after boundary never share an entry
+def _cache_key(ds, bundle_id, publication_id, requester, query, as_of, top_k, engine) -> str:
+    """The engine is part of the key. A GQL request and a relational-fallback request are different executions over
+    different SQL, and serving one from the other's entry would let a fallback answer be presented as a Graph answer
+    (Slice A U4/KTD4). The exact normalized as-of instant keeps two requests straddling a `stale_after` boundary
+    apart."""
     inst = parse_ts(as_of).astimezone(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    return "|".join([ds, bundle_id, publication_id, str(requester), query, inst, str(top_k)])
+    return "|".join([str(engine), ds, bundle_id, publication_id, str(requester), query, inst, str(top_k)])
+
+
+def _template(name: str, text: str) -> dict:
+    """What was actually compiled for a stage, so a GQL claim can be checked against the SQL that ran."""
+    return {"name": name, "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(), "chars": len(text),
+            "graph_table": "GRAPH_TABLE(" in text.upper()}
 
 
 def _recheck(clients: dict, full: str, publication_id: str, node_ids: list[str], edge_ids: list[str], timer: Timer) -> bool:
@@ -214,7 +223,7 @@ def retrieve(query: "str | ConceptSeed", bundle_id: str, publication_id: str, re
     if concept_seed is not None and cache is not None:
         cache = None
         scope["cache"] = CACHE_DISABLED_CONCEPT_SEED
-    ckey = _cache_key(ds, bundle_id, publication_id, requester, str(query), as_of, top_k) if cache is not None else None
+    ckey = _cache_key(ds, bundle_id, publication_id, requester, str(query), as_of, top_k, engine) if cache is not None else None
     if ckey is not None and ckey in cache and publication_id != "active":
         cached = cache[ckey]
         if cached.get("dependency_version") == CACHE_DEPENDENCY_VERSION:
@@ -260,7 +269,9 @@ def retrieve(query: "str | ConceptSeed", bundle_id: str, publication_id: str, re
             return {"status": "NO_SEED", "concepts": [], "paths": [], "computations": [], "warnings": warnings,
                     "scope": scope, "timing": timer.done()}
         # --- walk (GQL or relational fallback), one job per seed concept
-        walk_sql = sql("governed.sql" if engine == "gql" else "fallback.sql", full)
+        walk_name = "governed.sql" if engine == "gql" else "fallback.sql"
+        walk_sql = sql(walk_name, full)
+        scope["templates"] = {"walk": _template(walk_name, walk_sql)}
         walks: dict[str, list[dict]] = {s["concept_id"]: [] for s in seeds}
         for w in _run(clients, "walk", walk_sql,
                       [bigquery.ArrayQueryParameter("seeds", "STRING", [s["concept_id"] for s in seeds]),
@@ -268,7 +279,9 @@ def retrieve(query: "str | ConceptSeed", bundle_id: str, publication_id: str, re
             walks.setdefault(w["seed_id"], []).append(w)
         # --- context: verifiers, provenance, links, sections (+ section text) for seeds and reached computations
         ids = sorted({s["concept_id"] for s in seeds} | {w["computation_id"] for ws in walks.values() for w in ws})
+        ctx_name = "context.sql" if engine == "gql" else "context.fallback"
         ctx_sql = (sql("context.sql", full) if engine == "gql" else _context_fallback(full))
+        scope["templates"]["context"] = _template(ctx_name, ctx_sql)
         ctx_sql = f"""SELECT g.*, n.text AS other_text, n.text_sha256 AS other_text_sha256, n.stale_after AS other_stale_after,
                              n.path AS other_path, n.runtime AS other_runtime
                       FROM ({ctx_sql.replace('ORDER BY concept_id, relation, other_id', '')}) g
@@ -441,7 +454,7 @@ def _retrieve_oracle(query, bundle_id, publication_id, as_of, clients, top_k, sc
     if isinstance(query, ConceptSeed) and cache is not None:
         cache = None
         scope["cache"] = CACHE_DISABLED_CONCEPT_SEED
-    ckey = (_cache_key("oracle", bundle_id, publication_id, scope["requester"], str(query), as_of, top_k)
+    ckey = (_cache_key("oracle", bundle_id, publication_id, scope["requester"], str(query), as_of, top_k, "oracle")
             if cache is not None and pinned else None)
     if ckey is not None and ckey in cache:
         cached = cache[ckey]

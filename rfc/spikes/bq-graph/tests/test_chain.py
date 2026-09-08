@@ -6,7 +6,9 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -1166,3 +1168,760 @@ def test_job_ids_of_never_double_counts():
              {"case": "sql-substitution", "retrieval": {"timing": {"jobs": [{"job_id": "w"}]}}, "declaration": {"job_id": "d1"}, "receipt": {"invoked": False}}]
     ids = CH.job_ids_of(cases, "w", ["d1", "w"])
     assert ids["graph"] == ["w", "d1"]
+
+
+# =============================================================================== U1/U4: engine admission, proof, scope
+class _StubWindow:
+    """A window controller as `chain` sees it: a state, a label, a record and a REAL submission gate, so a client the
+    chain builds is genuinely bound to it (or genuinely is not)."""
+
+    def __init__(self, state="OPEN", label="chain-gql-1", probes=6, journal=None, gate=True):
+        import time as _time
+        from okf_bq_graph import lifecycle as _L
+        self.state = state
+        self.cfg = SimpleNamespace(label=label)
+        self.jobs = _L.WindowJobs(label, _time.monotonic() + 600, journal) if gate and journal else None
+        self.operator = None
+        self.clients = []
+        self.workers = []
+        self.record = {"controller": "okf_bq_graph.chain_window/0.1.0",
+                       "assignment": {"probes": [{"ok": True}] * probes}}
+
+    def bind_client(self, client, role, principal=None):
+        bound = self.jobs.bind(client)
+        self.clients.append({"role": role, "principal": principal})
+        return bound
+
+    def register_worker(self, name, stop=None, join=None, jobs=None, obligations=None, evidence=None):
+        self.workers.append({"name": name, "stop": stop, "join": join, "jobs": jobs, "obligations": obligations,
+                             "evidence": dict(evidence or {})})
+
+
+def _gql_result(*, engine="gql", walk="governed.sql", graph_table=True, cache=None, warnings=(),
+                reservation=f"{CH.PROJECT}:{CH.LOCATION}.{CH.RESERVATION}", edition="ENTERPRISE", jobs=True):
+    stages = [{"stage": s, "job_id": f"j_{s}", "state": "DONE", "reservation_id": reservation, "edition": edition}
+              for s in ("walk", "context")] if jobs else []
+    return {"status": "OK", "warnings": list(warnings),
+            "scope": {"engine": engine, "cache": cache,
+                      "templates": {"walk": {"name": walk, "sha256": "abc", "graph_table": graph_table},
+                                    "context": {"name": "context.sql", "sha256": "def", "graph_table": True}}},
+            "timing": {"jobs": stages}}
+
+
+def test_bare_live_gql_refuses_before_any_client_grant_or_sdk_launch(sdk_root, tmp_path, monkeypatch):
+    from google.cloud import bigquery
+    monkeypatch.setattr(bigquery, "Client", lambda **kw: pytest.fail("no client may be built for a refused engine"))
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: pytest.fail("no query may be submitted"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       runner=lambda *a, **k: pytest.fail("the SDK CLI must not be launched"))
+    assert out["engine_admission"]["status"] == CH.GQL_WINDOW_NOT_CONFIGURED
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "engine_admission"
+    assert out["cases"] == [] and out["engine_proof"]["status"] == CH.ENGINE_NOT_PROVEN
+    assert "does not open capacity" in out["engine_admission"]["reason"]
+
+
+def test_a_restricted_gql_run_refuses_before_the_broker_grants(sdk_root, tmp_path, monkeypatch):
+    class Broker:
+        def describe(self):
+            pytest.fail("no broker may be described before admission")
+
+        def grant(self):
+            pytest.fail("no grant may be issued for a refused engine")
+
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       requester_mode="restricted", broker=Broker())
+    assert out["engine_admission"]["status"] == CH.GQL_WINDOW_NOT_CONFIGURED
+    assert out["broken_at"] == "engine_admission"
+
+
+def test_a_window_that_never_proved_its_assignment_is_refused(sdk_root, tmp_path, monkeypatch):
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: pytest.fail("no query may be submitted"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       window=_StubWindow(state="READY"))
+    assert out["engine_admission"]["status"] == "GQL_WINDOW_NOT_OPEN"
+    assert out["broken_at"] == "engine_admission"
+
+
+def test_an_open_window_admits_and_is_recorded(sdk_root, tmp_path, monkeypatch):
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (None, "pointer-job"))
+    window = _StubWindow(journal=tmp_path / "jobs.json")
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       clients={"engine": "gql", "bq": window.bind_client(object(), role="requester")},
+                       window=window)
+    assert out["engine_admission"]["status"] == "OK" and out["engine_admission"]["assignment_probes"] == 6
+    assert out["window"]["label"] == "chain-gql-1" and out["window"]["state"] == "OPEN"
+    assert out["broken_at"] == "publication"     # it got past admission and refused on its own evidence
+
+
+# ---- Astra PR47 #1: an admitted window must actually own the clients and the receipt child
+def test_an_unbound_client_is_refused_before_any_query_or_sdk_launch(sdk_root, tmp_path, monkeypatch):
+    """A window that records a controller but hands the chain an untracked client bounds nothing."""
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: pytest.fail("no query may be submitted"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       clients={"engine": "gql", "bq": object()}, window=_StubWindow(journal=tmp_path / "jobs.json"),
+                       runner=lambda *a, **k: pytest.fail("the SDK CLI must not be launched"))
+    assert out["engine_admission"]["status"] == "GQL_CLIENTS_UNBOUND"
+    assert out["engine_admission"]["unbound"] == ["clients.bq"]
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and out["broken_at"] == "engine_admission" and out["cases"] == []
+
+
+def test_a_restricted_run_refuses_an_unbound_broker_before_the_grant(sdk_root, tmp_path):
+    class Broker:
+        sa = object()
+        owner = object()
+
+        def describe(self):
+            return {"kind": "unbound"}
+
+        def grant(self):
+            pytest.fail("no grant may be issued while a client sits outside the gate")
+
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       requester_mode="restricted", broker=Broker(),
+                       window=_StubWindow(journal=tmp_path / "jobs.json"))
+    assert out["engine_admission"]["status"] == "GQL_CLIENTS_UNBOUND"
+    assert out["engine_admission"]["unbound"] == ["broker.requester", "broker.operator"]
+    assert out["broken_at"] == "engine_admission"
+
+
+def test_the_chain_builds_its_own_client_through_the_controller(sdk_root, tmp_path, monkeypatch):
+    """With no caller-supplied clients the chain must construct through `window.bind_client`, not `bigquery.Client`."""
+    from google.cloud import bigquery
+    window = _StubWindow(journal=tmp_path / "jobs.json")
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (None, "pointer-job"))
+    monkeypatch.setattr(bigquery, "Client", lambda **kw: SimpleNamespace(project="p", location="US"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF, window=window)
+    assert out["engine_admission"]["status"] == "OK"
+    assert [c["role"] for c in window.clients] == ["requester"]
+    assert out["window"]["bound_clients"][0]["role"] == "requester"
+
+
+def test_the_receipt_child_is_registered_with_the_controller(sdk_root, tmp_path, monkeypatch):
+    from okf_bq_graph import receipt_window as RWD
+    window = _StubWindow(journal=tmp_path / "jobs.json")
+    bridge = RWD.ReceiptBridge(sdk_root, label="chain-gql-1", deadline_epoch=time.time() + 300,
+                               directory=tmp_path / "bridge")
+    bridge.record["status"] = RWD.SUPPORTED
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (None, "pointer-job"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       clients={"engine": "gql", "bq": window.bind_client(object(), role="requester")},
+                       window=window, receipt_bridge=bridge)
+    worker = next(w for w in window.workers if w["name"] == "receipt_child")
+    assert worker["stop"] == bridge.stop and worker["join"] == bridge.join and worker["jobs"] == bridge.jobs
+    assert out["receipt_bridge"]["worker"].startswith("registered")
+
+
+def test_an_unsupported_bridge_refuses_before_the_chain_runs(sdk_root, tmp_path, monkeypatch):
+    from okf_bq_graph import receipt_window as RWD
+    window = _StubWindow(journal=tmp_path / "jobs.json")
+    bridge = RWD.ReceiptBridge(tmp_path / "not-an-sdk", label="w", deadline_epoch=time.time() + 300,
+                               directory=tmp_path / "bridge")
+    bridge.handshake()
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: pytest.fail("no query may be submitted"))
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       clients={"engine": "gql", "bq": window.bind_client(object(), role="requester")},
+                       window=window, receipt_bridge=bridge)
+    assert out["receipt_bridge"]["status"] == RWD.UNSUPPORTED
+    assert out["broken_at"] == "receipt_bridge" and out["verdict"] == "CHAIN_INCOMPLETE"
+
+
+def test_an_unclean_window_downgrades_the_final_record(sdk_root, tmp_path):
+    """`run_chain` returns before the window closes, so the retained record is amended with the actual closeout."""
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "same-requester"}, "job_inventory": {}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="chain-gql-1"), state="CLOSED",
+                             record={"clean": False, "cleanup": {"jobs_unresolved": ["okf_graph_x"]},
+                                     "restores": [], "workers": []})
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["verdict"] == "CHAIN_INCOMPLETE" and final["broken_at"] == "window_cleanup"
+    assert final["window"]["clean"] is False
+    assert json.loads((tmp_path / "chain_live.json").read_text())["broken_at"] == "window_cleanup"
+
+
+def test_a_clean_window_leaves_the_verdict_alone(sdk_root, tmp_path):
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "same-requester"}, "job_inventory": {}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []})
+    assert CH.finalize_cleanup(out, window, str(tmp_path))["verdict"] == "CHAIN_CONNECTED"
+
+
+def test_a_fallback_run_needs_no_window():
+    assert CH.gql_admission("fallback", True, None)["status"] == "NOT_REQUIRED"
+    assert CH.gql_admission("oracle", False, None)["status"] == "NOT_REQUIRED"
+
+
+# ---- engine proof
+def test_engine_proof_accepts_a_real_gql_execution():
+    proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result())
+    assert proof["status"] == CH.ENGINE_PROVEN and proof["reasons"] == []
+    assert [j["stage"] for j in proof["jobs"]] == ["walk", "context"]
+
+
+def test_a_client_configured_for_fallback_contradicts_a_gql_request():
+    proof = CH.engine_proof("gql", {"engine": "fallback"}, _gql_result())
+    assert proof["status"] == CH.ENGINE_CONTRADICTED
+    assert "configured for engine 'fallback'" in proof["reasons"][0]
+
+
+def test_a_fallback_template_contradicts_a_gql_claim():
+    proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result(walk="fallback.sql", graph_table=False))
+    assert proof["status"] == CH.ENGINE_CONTRADICTED
+    assert any("fallback.sql" in r and "GRAPH_TABLE" in r for r in proof["reasons"])
+
+
+def test_the_fallback_warning_contradicts_a_gql_claim():
+    proof = CH.engine_proof("gql", {"engine": "gql"},
+                            _gql_result(warnings=["FALLBACK engine: relational joins, not BigQuery Graph"]))
+    assert proof["status"] == CH.ENGINE_CONTRADICTED
+
+
+def test_a_cached_answer_cannot_establish_that_gql_executed():
+    for state in ("HIT_RECHECKED", "HIT_DENIED"):
+        proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result(cache=state, jobs=False))
+        assert proof["status"] == CH.ENGINE_CONTRADICTED
+        assert any("cannot establish" in r for r in proof["reasons"])
+
+
+def test_no_walk_job_is_not_proven():
+    proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result(jobs=False))
+    assert proof["status"] == CH.ENGINE_NOT_PROVEN
+    assert any("nothing executed on the graph" in r for r in proof["reasons"])
+
+
+def test_an_on_demand_or_foreign_reservation_is_not_proven():
+    assert CH.engine_proof("gql", {"engine": "gql"}, _gql_result(reservation=None))["status"] == CH.ENGINE_NOT_PROVEN
+    assert CH.engine_proof("gql", {"engine": "gql"}, _gql_result(reservation="p:US.someone-elses"))["status"] == CH.ENGINE_NOT_PROVEN
+    assert CH.engine_proof("gql", {"engine": "gql"}, _gql_result(edition="STANDARD"))["status"] == CH.ENGINE_NOT_PROVEN
+
+
+def test_an_enterprise_assignment_alone_does_not_turn_sql_into_gql():
+    """Enterprise capacity plus the relational template is still relational."""
+    proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result(walk="fallback.sql", graph_table=False))
+    assert proof["status"] == CH.ENGINE_CONTRADICTED
+    assert all(j["edition"] == "ENTERPRISE" for j in proof["jobs"])
+
+
+def test_a_returned_engine_label_cannot_select_the_verdict_on_its_own():
+    proof = CH.engine_proof("gql", {"engine": "gql"}, _gql_result(engine="fallback"))
+    assert proof["status"] == CH.ENGINE_CONTRADICTED
+    assert any("returned scope names engine" in r for r in proof["reasons"])
+
+
+def test_an_unreached_retrieval_is_not_proven():
+    proof = CH.engine_proof("gql", {"engine": "gql"}, None)
+    assert proof["status"] == CH.ENGINE_NOT_PROVEN and "never ran" in proof["reasons"][0]
+
+
+def test_a_plain_sql_chain_stays_plain_sql():
+    proof = CH.engine_proof("fallback", {"engine": "fallback"},
+                            _gql_result(engine="fallback", walk="fallback.sql", graph_table=False,
+                                        warnings=["FALLBACK engine: relational joins, not BigQuery Graph"]))
+    assert proof["status"] == CH.ENGINE_PROVEN      # proven to be what it says it is: relational fallback
+    assert proof["requested"] == "fallback"
+
+
+def test_merge_engine_proof_takes_the_worst_case():
+    proven = {"status": CH.ENGINE_PROVEN, "case": "a", "reasons": []}
+    unproven = {"status": CH.ENGINE_NOT_PROVEN, "case": "b", "reasons": ["no walk job"]}
+    contradicted = {"status": CH.ENGINE_CONTRADICTED, "case": "c", "reasons": ["fallback"]}
+    assert CH.merge_engine_proof([proven, proven])["status"] == CH.ENGINE_PROVEN
+    assert CH.merge_engine_proof([proven, unproven])["status"] == CH.ENGINE_NOT_PROVEN
+    assert CH.merge_engine_proof([proven, unproven, contradicted])["status"] == CH.ENGINE_CONTRADICTED
+    assert CH.merge_engine_proof([])["status"] == CH.ENGINE_NOT_PROVEN
+
+
+# ---- the proof drives the verdict, and memoization is off for the executing cases
+def _live_gql_chain(sdk_root, tmp_path, monkeypatch, result, *, cases=("approved",), capture=None):
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (CH.PUBLICATION_PIN, "pointer-job"))
+
+    def governed(query, publication_id, requester, as_of, clients):
+        if capture is not None:
+            capture.append(clients)
+        return result
+
+    monkeypatch.setattr(CH, "governed", governed)
+    monkeypatch.setattr(CH, "pick_computation", lambda r, path: None)     # stop before bind: the engine is the subject
+    window = _StubWindow(journal=tmp_path / "window_jobs.json")
+    return CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                        clients={"engine": "gql", "bq": window.bind_client(object(), role="requester"), "cache": {}},
+                        window=window, cases=cases,
+                        runner=lambda *a, **k: pytest.fail("nothing binds, so the CLI must not run"))
+
+
+def test_a_fallback_answer_under_a_gql_request_breaks_the_chain(sdk_root, tmp_path, monkeypatch):
+    out = _live_gql_chain(sdk_root, tmp_path, monkeypatch,
+                          _gql_result(walk="fallback.sql", graph_table=False,
+                                      warnings=["FALLBACK engine: relational joins, not BigQuery Graph"]))
+    assert out["engine_proof"]["status"] == CH.ENGINE_CONTRADICTED
+    assert out["verdict"] == "CHAIN_BROKEN" and out["broken_at"] in ("approved", "engine_proof")
+
+
+def test_an_unproven_engine_leaves_the_chain_incomplete(sdk_root, tmp_path, monkeypatch):
+    out = _live_gql_chain(sdk_root, tmp_path, monkeypatch, _gql_result(jobs=False))
+    assert out["engine_proof"]["status"] == CH.ENGINE_NOT_PROVEN
+    assert out["verdict"] == "CHAIN_INCOMPLETE"
+
+
+def test_live_gql_disables_memoization_for_the_executing_cases(sdk_root, tmp_path, monkeypatch):
+    seen = []
+    out = _live_gql_chain(sdk_root, tmp_path, monkeypatch, _gql_result(), capture=seen)
+    assert out["cache_policy"]["memoization"] == "DISABLED"
+    assert out["cache_policy"]["exempt_cases"] == ["revocation-before-replay"]
+    assert seen and all(c.get("cache") is None for c in seen)
+
+
+def test_hermetic_runs_carry_no_engine_proof_claim(clients, projection, sdk_root, tmp_path):
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients,
+                       projection=projection, requester="t", as_of=AS_OF)
+    assert out["engine_proof"]["status"] == "NOT_APPLICABLE"
+    assert "no BigQuery engine executed" in out["engine_proof"]["reason"]
+
+
+# ---- scoped case selection
+def test_a_scoped_run_names_what_it_did_not_run(clients, projection, sdk_root, tmp_path):
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients,
+                       projection=projection, requester="t", as_of=AS_OF, cases=("approved",))
+    assert out["selected_cases"] == ["approved"]
+    assert out["omitted_cases"] == ["sql-substitution", "declaration-mismatch"]
+    assert out["scope"]["complete_suite"] is False
+    assert [c["case"] for c in out["cases"]] == ["approved"]
+    assert out["verdict"] == "CHAIN_CONNECTED"     # scoped, and the record says exactly how scoped
+
+
+def test_the_full_suite_is_marked_complete(clients, projection, sdk_root, tmp_path):
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients,
+                       projection=projection, requester="t", as_of=AS_OF)
+    assert out["omitted_cases"] == [] and out["scope"]["complete_suite"] is True
+
+
+def test_an_unknown_case_is_refused(clients, projection, sdk_root, tmp_path):
+    with pytest.raises(ValueError, match="unknown case"):
+        CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), clients=clients,
+                     projection=projection, requester="t", as_of=AS_OF, cases=("approved-restricted",))
+
+
+def test_cli_case_selection(sdk_root, sample_root, tmp_path, capsys):
+    assert CH.main(["--hermetic", "--sdk-root", sdk_root, "--out", str(tmp_path), "--acme-root", sample_root,
+                    "--cases", "approved"]) == 0
+    printed = capsys.readouterr().out
+    assert "selected_cases=approved" in printed and "omitted_cases=sql-substitution,declaration-mismatch" in printed
+    record = json.loads((tmp_path / "chain_hermetic.json").read_text())
+    assert record["selected_cases"] == ["approved"] and record["scope"]["complete_suite"] is False
+
+
+def test_cli_refuses_a_window_flag_without_live_gql(sdk_root, tmp_path):
+    with pytest.raises(SystemExit):
+        CH.main(["--hermetic", "--sdk-root", sdk_root, "--out", str(tmp_path), "--gql-window", "w"])
+
+
+# =============================================================================== Astra PR47 re-review (RR2)
+def test_a_diagnostic_journal_mismatch_writes_a_durable_incomplete_record(sdk_root, tmp_path):
+    """RR2 R5: the mismatch entries carry no `seq`, and reading one positionally crashed the whole assembly, so the
+    run wrote no evidence at all."""
+    class Bridge:
+        record = {"status": "SUPPORTED"}
+        label = "offline-only"
+
+        def runner(self):
+            return subprocess.run
+
+        def stop(self):
+            pass
+
+        def join(self, timeout=30):
+            return {"joined": True}
+
+        def jobs(self):
+            return [{"job_id": "journal-only-job", "project": CH.PROJECT, "location": CH.LOCATION,
+                     "state": "SUBMITTED"}]
+
+        def obligations(self):
+            return []
+
+        def ingest(self):
+            return {"jobs": self.jobs(), "unresolved": [], "dry_runs": 0, "operations": 0, "entries": 0,
+                    "launches": 1, "blocked": [], "refused": 0, "complete": True}
+
+    out = CH.run_chain("oracle", False, sdk_root, str(tmp_path), requester="operator@example.test",
+                       cases=("approved",), as_of=AS_OF, receipt_bridge=Bridge())
+    record = json.loads((tmp_path / "chain_hermetic.json").read_text())
+    assert out["verdict"] == "CHAIN_INCOMPLETE" and record["verdict"] == "CHAIN_INCOMPLETE"
+    states = {u["state"] for u in out["job_inventory"]["unresolved"]}
+    assert "JOURNAL_ONLY" in states and "DIAGNOSTIC_ONLY" in states
+    assert all(u["seq"] is None for u in out["job_inventory"]["unresolved"])
+    assert out["job_inventory"]["receipt_child_only"] == ["journal-only-job"]
+
+
+def test_the_receipt_child_registers_its_obligations_with_the_controller(sdk_root, tmp_path, monkeypatch):
+    """RR2 R1: evidence the bridge could not resolve into a reference must reach the durable gate too."""
+    from okf_bq_graph import receipt_window as RWD
+
+    window = _StubWindow(journal=tmp_path / "jobs.json")
+    bridge = RWD.ReceiptBridge(sdk_root, label="chain-gql-1", deadline_epoch=time.time() + 300,
+                               directory=tmp_path / "bridge")
+    bridge.record["status"] = RWD.SUPPORTED
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (None, "pointer-job"))
+    CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                 clients={"engine": "gql", "bq": window.bind_client(object(), role="requester")},
+                 window=window, receipt_bridge=bridge)
+    worker = next(w for w in window.workers if w["name"] == "receipt_child")
+    assert worker["obligations"] == bridge.obligations
+
+
+def test_a_restricted_run_defers_its_teardown_to_the_window(sdk_root, tmp_path, monkeypatch):
+    """RR2 R3: teardown used to run inline on the stopped workload channel, and its failure never reached the gate."""
+    registered = []
+
+    class Window(_StubWindow):
+        def register_restore(self, name, restore, takes_client=False):
+            registered.append({"name": name, "takes_client": takes_client, "call": restore})
+
+    class Broker:
+        def __init__(self):
+            self.torn_down = []
+
+        def describe(self):
+            return {"kind": "test"}
+
+        def grant(self):
+            raise RuntimeError("grant refused so the run stops right after registration")
+
+        def teardown(self, owner=None):
+            self.torn_down.append(owner)
+            return {"status": "VERIFIED"}
+
+    window = Window(journal=tmp_path / "jobs.json")
+    broker = Broker()
+    broker.sa = window.bind_client(object(), role="requester")
+    broker.owner = window.bind_client(object(), role="operator")
+    out = CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       requester_mode="restricted", broker=broker, window=window)
+    assert [r["name"] for r in registered] == ["broker_teardown"] and registered[0]["takes_client"] is True
+    assert out["teardown"]["status"] == CH.DEFERRED_TEARDOWN
+    assert broker.torn_down == [], "the teardown must not run inline on the stopped workload channel"
+    # the registered callable hands the broker the window's bounded cleanup client
+    cleanup_client = object()
+    assert registered[0]["call"](cleanup_client) == {"status": "VERIFIED"}
+    assert broker.torn_down == [cleanup_client]
+
+
+def test_without_a_window_the_broker_tears_down_inline_as_before(sdk_root, tmp_path):
+    class Broker:
+        def __init__(self):
+            self.calls = 0
+
+        def describe(self):
+            return {"kind": "test"}
+
+        def grant(self):
+            raise RuntimeError("grant refused")
+
+        def teardown(self, owner=None):
+            self.calls += 1
+            return {"status": "NOT_NEEDED"}
+
+    broker = Broker()
+    out = CH.run_chain(engine="oracle", live=False, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                       requester_mode="restricted", broker=broker)
+    assert broker.calls == 1 and out["teardown"]["status"] == "NOT_NEEDED"
+
+
+def test_finalize_cleanup_records_the_deferred_teardown_result(sdk_root, tmp_path):
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "job_inventory": {},
+           "teardown": {"status": CH.DEFERRED_TEARDOWN}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []},
+                                     "restores": [{"name": "broker_teardown", "ok": True,
+                                                   "result": {"status": "VERIFIED"}}], "workers": []})
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["teardown"] == {"status": "VERIFIED"}
+    assert final["verdict"] == "CHAIN_CONNECTED"
+
+
+# =============================================================================== Astra PR47 RR3
+class _Broker:
+    """A broker whose administrative inventory GROWS during teardown, as the real one's restoring DDL does."""
+
+    def __init__(self, identity_after="BOUND"):
+        self.owner = None
+        self.admin_jobs = [{"job_id": "grant-1", "project": CH.PROJECT, "location": CH.LOCATION, "stage": "grant"}]
+        self.admin_ops = [{"job_id": "grant-1"}]
+        self.identity_calls = []
+        self.identity_after = identity_after
+        self.torn_down = False
+
+    def describe(self):
+        return {"kind": "test"}
+
+    def grant(self):
+        return {"status": "OK"}
+
+    def teardown(self, owner=None):
+        self.torn_down = True
+        self.admin_jobs.append({"job_id": "restore-1", "project": CH.PROJECT, "location": CH.LOCATION,
+                                "stage": "restore"})
+        self.admin_ops.append({"job_id": "restore-1"})
+        return {"status": "VERIFIED"}
+
+    def admin_unresolved(self):
+        return [op for op in self.admin_ops if not op.get("job_id")]
+
+    def identity(self, graph_ids, receipt_jobs):
+        """Reads every reference back through `self.owner`, exactly as `principal.roles_bound_to` does - which is what
+        makes the post-close audit's channel (and its budget) observable."""
+        self.identity_calls.append({"graph": list(graph_ids), "receipt": list(receipt_jobs),
+                                    "admin": [j["job_id"] for j in self.admin_jobs]})
+        emails, failed = {}, None
+        refs = ([{"job_id": j} for j in graph_ids] + list(receipt_jobs)
+                + [{"job_id": j["job_id"], "project": j.get("project"), "location": j.get("location")}
+                   for j in self.admin_jobs])
+        if self.owner is not None:
+            try:
+                for ref in refs:
+                    emails[ref["job_id"]] = self.owner.get_job(
+                        ref["job_id"], project=ref.get("project"), location=ref.get("location")).user_email
+            except Exception as e:  # noqa: BLE001 - an unread reference is UNKNOWN, never assumed
+                failed = f"{type(e).__name__}: {str(e)[:200]}"
+        status = "UNKNOWN" if failed else (self.identity_after if self.torn_down else "BOUND")
+        return {"status": status, "jobs": emails, "reason": failed,
+                "roles": {"policy_admin": {"jobs": len(self.admin_jobs)}}}
+
+
+def test_the_identity_inventory_is_rebuilt_after_the_deferred_restoration(sdk_root, tmp_path):
+    """RR3 N4: the record still claimed the grant DDL was 'every job', while restoration submitted three more."""
+    broker = _Broker()
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"},
+           "identity": broker.identity(["g1"], [{"job_id": "r1"}]),
+           "job_inventory": {"graph": ["g1"], "receipt": ["r1"], "receipt_refs": [{"job_id": "r1"}],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    broker.teardown()      # the restoration ran during close
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []},
+                                     "restores": [{"name": "broker_teardown", "ok": True,
+                                                   "result": {"status": "VERIFIED"}}], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(broker, record)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["job_inventory"]["policy_admin"] == ["grant-1", "restore-1"]
+    rebuilt = final["identity"]["rebuilt_after_restoration"]
+    assert rebuilt["policy_admin_before_close"] == 1 and rebuilt["added_by_restoration"] == ["restore-1"]
+    assert broker.identity_calls[-1]["admin"] == ["grant-1", "restore-1"]
+    assert final["verdict"] == "CHAIN_CONNECTED"    # rebuilt and still BOUND
+
+
+def test_a_restoration_job_with_an_unexpected_identity_breaks_the_chain(sdk_root, tmp_path):
+    broker = _Broker(identity_after="UNBOUND")
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "identity": {"status": "BOUND"},
+           "job_inventory": {"graph": ["g1"], "receipt": ["r1"], "receipt_refs": [{"job_id": "r1"}],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    broker.teardown()
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(broker, record)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["identity"]["status"] == "UNBOUND"
+    assert final["verdict"] == "CHAIN_BROKEN" and final["broken_at"] == "identity"
+    assert json.loads((tmp_path / "chain_live_restricted.json").read_text())["verdict"] == "CHAIN_BROKEN"
+
+
+def test_an_unresolved_restoration_statement_leaves_the_chain_incomplete(sdk_root, tmp_path):
+    broker = _Broker()
+    broker.admin_ops.append({"statement": "DROP ROW ACCESS POLICY", "job_id": None})
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "identity": {"status": "BOUND"},
+           "job_inventory": {"graph": ["g1"], "receipt": ["r1"], "receipt_refs": [{"job_id": "r1"}],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    broker.teardown()
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(broker, record)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["job_inventory"]["policy_admin_unresolved"]
+    assert final["verdict"] == "CHAIN_INCOMPLETE" and final["broken_at"] == "identity"
+
+
+def test_a_post_close_callback_that_raises_blocks_a_clean_closeout(sdk_root, tmp_path):
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "same-requester"}, "job_inventory": {}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: (_ for _ in ()).throw(
+                                                                RuntimeError("the audit could not be rebuilt"))}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert final["post_close"]["broker_identity"]["status"] == "ERROR"
+    assert final["verdict"] == "CHAIN_INCOMPLETE" and final["broken_at"] == "window_cleanup"
+
+
+def test_the_restricted_chain_registers_the_identity_rebuild_with_the_teardown(sdk_root, tmp_path):
+    """The two registrations are a pair: deferring the restoration is what makes the rebuild necessary."""
+    registered = {"restores": [], "post_close": []}
+
+    class Window(_StubWindow):
+        def register_restore(self, name, restore, takes_client=False):
+            registered["restores"].append(name)
+
+        def register_post_close(self, name, callback):
+            registered["post_close"].append(name)
+
+    class Broker:
+        def describe(self):
+            return {"kind": "test"}
+
+        def grant(self):
+            raise RuntimeError("grant refused so the run stops right after registration")
+
+        def teardown(self, owner=None):
+            return {"status": "VERIFIED"}
+
+    window = Window(journal=tmp_path / "jobs.json")
+    broker = Broker()
+    broker.sa = window.bind_client(object(), role="requester")
+    broker.owner = window.bind_client(object(), role="operator")
+    CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                 requester_mode="restricted", broker=broker, window=window)
+    assert registered == {"restores": ["broker_teardown"], "post_close": ["broker_identity"]}
+
+
+def test_the_post_close_audit_is_bounded_and_expires_to_unknown(sdk_root, tmp_path):
+    """RR5 F2: the rebuild's `jobs.get` must not outlive the window's closeout budget."""
+    from okf_bq_graph import lifecycle as L
+
+    broker = _Broker()
+    broker.teardown()
+    reads = []
+
+    class Raw:
+        def get_job(self, job_id, **kwargs):
+            reads.append(dict(kwargs, job_id=job_id))
+            return SimpleNamespace(user_email="operator@example.test")
+
+    clock = [100.0]
+    jobs = L.WindowJobs("w", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    deadline = jobs.open_audit(30)
+    audit = jobs.audit_client(Raw())
+    clock[0] = deadline + 1                    # the closeout budget is gone
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "identity": {"status": "BOUND"},
+           "job_inventory": {"graph": ["g1"], "receipt": ["r1"], "receipt_refs": [{"job_id": "r1"}],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(
+                                                                broker, record, audit=audit)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert reads == [], "nothing may dispatch after the audit deadline"
+    assert final["identity"]["status"] == "UNKNOWN"
+    assert final["identity"]["audit"]["expired"] is True
+    assert final["identity"]["audit"]["unread_references"]
+    assert final["verdict"] == "CHAIN_INCOMPLETE" and final["broken_at"] == "identity"
+
+
+def test_the_post_close_audit_reads_everything_inside_its_budget(sdk_root, tmp_path):
+    from okf_bq_graph import lifecycle as L
+
+    broker = _Broker()
+    broker.teardown()
+    reads = []
+
+    class Raw:
+        def get_job(self, job_id, **kwargs):
+            reads.append(dict(kwargs, job_id=job_id))
+            return SimpleNamespace(user_email="operator@example.test")
+
+    jobs = L.WindowJobs("w", time.monotonic() + 600, tmp_path / "jobs.json")
+    jobs.open_audit(60)
+    audit = jobs.audit_client(Raw())
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "identity": {"status": "BOUND"},
+           "job_inventory": {"graph": [], "receipt": [], "receipt_refs": [],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(
+                                                                broker, record, audit=audit)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert [r["job_id"] for r in reads] == ["grant-1", "restore-1"]
+    assert all(0 < r["timeout"] <= 10 for r in reads)        # bounded, not the SDK's 128-second default
+    assert final["identity"]["audit"]["expired"] is False
+    assert final["identity"]["audit"]["unread_references"] == []
+    assert final["verdict"] == "CHAIN_CONNECTED"
+
+
+def test_the_audit_client_is_restored_to_the_brokers_own_owner(sdk_root, tmp_path):
+    """The audit swap is scoped: the broker keeps its own client afterwards."""
+    from okf_bq_graph import lifecycle as L
+
+    broker = _Broker()
+    broker.owner = object()
+    original = broker.owner
+    jobs = L.WindowJobs("w", time.monotonic() + 600, tmp_path / "jobs.json")
+    jobs.open_audit(60)
+    audit = jobs.audit_client(SimpleNamespace(get_job=lambda job_id, **kw: SimpleNamespace(user_email="e")))
+    CH.rebuild_identity(broker, {"job_inventory": {"graph": [], "receipt": [], "policy_admin": [], "refs": {}}},
+                        audit=audit)
+    assert broker.owner is original
+
+
+def test_the_receipt_child_registration_carries_its_journal_location(sdk_root, tmp_path, monkeypatch):
+    """RR5 F1: recovery needs to know WHERE the child's retained references live."""
+    from okf_bq_graph import receipt_window as RWD
+
+    window = _StubWindow(journal=tmp_path / "jobs.json")
+    bridge = RWD.ReceiptBridge(sdk_root, label="chain-gql-1", deadline_epoch=time.time() + 300,
+                               directory=tmp_path / "bridge")
+    bridge.record["status"] = RWD.SUPPORTED
+    monkeypatch.setattr(CH, "resolve_pointer_job", lambda *a, **k: (None, "pointer-job"))
+    CH.run_chain(engine="gql", live=True, sdk_root=sdk_root, out_dir=str(tmp_path), as_of=AS_OF,
+                 clients={"engine": "gql", "bq": window.bind_client(object(), role="requester")},
+                 window=window, receipt_bridge=bridge)
+    evidence = next(w for w in window.workers if w["name"] == "receipt_child")["evidence"]
+    assert evidence["journal_dir"] == str(bridge.journal_dir)
+    assert evidence["bridge_dir"] == str(bridge.dir) and evidence["stop_file"] == str(bridge.stop_path)
+
+
+def test_a_late_audit_read_leaves_the_reference_unknown_and_the_chain_incomplete(sdk_root, tmp_path):
+    """RR6: the last reference's identity arrived after the absolute budget; accepting it kept the chain BOUND."""
+    from okf_bq_graph import lifecycle as L
+
+    broker = _Broker()
+    broker.teardown()
+    clock = [100.0]
+    reads = []
+
+    class Delegating:
+        """Dispatches through a transport the audit client cannot reach, so only the return check can catch it."""
+
+        def get_job(self, job_id, **kwargs):
+            reads.append(job_id)
+            if job_id == "restore-1":            # the final reference returns just past the deadline
+                clock[0] = deadline + 0.1
+            return SimpleNamespace(user_email="operator@example.test")
+
+    jobs = L.WindowJobs("w", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    deadline = jobs.open_audit(30)
+    audit = jobs.audit_client(Delegating())
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "identity": {"status": "BOUND"},
+           "job_inventory": {"graph": [], "receipt": [], "receipt_refs": [],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(
+                                                                broker, record, audit=audit)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert reads == ["grant-1", "restore-1"]
+    assert final["identity"]["audit"]["expired"] is True
+    assert final["identity"]["audit"]["unread_references"] == ["restore-1"]
+    assert final["identity"]["status"] == "UNKNOWN"
+    assert final["verdict"] == "CHAIN_INCOMPLETE" and final["broken_at"] == "identity"
+    assert json.loads((tmp_path / "chain_live_restricted.json").read_text())["verdict"] == "CHAIN_INCOMPLETE"

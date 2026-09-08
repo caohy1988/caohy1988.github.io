@@ -40,7 +40,11 @@ def inventory(record: dict) -> dict:
     """Every job id the record claims, by the role it claims it under."""
     inv = record.get("job_inventory") or {}
     roles = {"graph": list(inv.get("graph") or []), "receipt": [j for j in (inv.get("receipt") or []) if j],
-             "requester_probe": list(inv.get("requester_probe") or []), "policy_admin": list(inv.get("policy_admin") or [])}
+             "requester_probe": list(inv.get("requester_probe") or []), "policy_admin": list(inv.get("policy_admin") or []),
+             # the receipt child's OWN journal (receipt_window bridge): jobs the SDK subprocess submitted, which the
+             # diagnostic alone does not enumerate. A job the child journaled that the record's receipt role never
+             # reported is still the requester's work and must reconcile.
+             "receipt_child": list(inv.get("receipt_child") or [])}
     return {"roles": roles, "ids": sorted({j for ids in roles.values() for j in ids})}
 
 
@@ -105,8 +109,10 @@ def audit(record: dict, client: Any = None, requester_email: Optional[str] = Non
     # the record's own declaration of administrative work it could not name. An audit must not certify a run that
     # already says it lost track of its own jobs, and must not let those become somebody else's unrelated work.
     unresolved_admin = list((record.get("job_inventory") or {}).get("policy_admin_unresolved") or [])
+    unresolved_child = list((record.get("job_inventory") or {}).get("receipt_child_unresolved") or [])
     out["truncated"] = truncated
     out["declared_admin_unresolved"] = len(unresolved_admin)
+    out["declared_receipt_child_unresolved"] = len(unresolved_child)
     reasons = []
     if unaccounted_requester:
         reasons.append(f"{len(unaccounted_requester)} requester job(s) in the window are absent from the inventory")
@@ -117,6 +123,9 @@ def audit(record: dict, client: Any = None, requester_email: Optional[str] = Non
                                   "read and are absent from the inventory are a definite gap")
     if unresolved_admin:
         reasons.append(f"the record declares {len(unresolved_admin)} administrative statement(s) it never named a job for")
+    if unresolved_child:
+        reasons.append(f"the record declares {len(unresolved_child)} receipt-child submission(s) whose outcome the "
+                       "child could not resolve")
     if reasons:
         out["status"] = "INCOMPLETE"
     elif truncated:

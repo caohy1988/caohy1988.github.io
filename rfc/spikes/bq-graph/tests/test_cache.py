@@ -174,3 +174,40 @@ def test_legacy_cache_without_complete_dependencies_is_retrieved_again(monkeypat
     replay = request()
     assert replay["status"] == "OK" and replay["computations"] == []
     assert state["stages"].count("walk") == 2 and "recheck" not in state["stages"]
+
+
+# =============================================================================== U4/KTD4: engine-keyed cache
+def test_the_cache_key_carries_the_engine():
+    args = ("d", B, PUB, "r", "forced:metrics/gross-margin.md", "2026-09-05T00:10:00Z", 5)
+    gql = RT._cache_key(*args, "gql")
+    fallback = RT._cache_key(*args, "fallback")
+    assert gql != fallback and gql.startswith("gql|") and fallback.startswith("fallback|")
+
+
+def test_a_fallback_entry_is_never_served_to_a_gql_request(monkeypatch):
+    """A relational answer replayed under a GQL request would present joins as BigQuery Graph."""
+    state = {"edge_visible": True}
+    monkeypatch.setattr(RT, "_run", _fake_run_factory(state))
+    cache = {}
+    warm = RT.retrieve("forced:metrics/gross-margin.md", B, PUB, "r", "2026-09-05T00:10:00Z",
+                       {"engine": "fallback", "bq": object(), "cache": cache, "ds": "d"})
+    assert warm["scope"]["cache"] == "MISS_STORED"
+    gql = RT.retrieve("forced:metrics/gross-margin.md", B, PUB, "r", "2026-09-05T00:10:00Z",
+                      {"engine": "gql", "bq": object(), "cache": cache, "ds": "d"})
+    assert gql["scope"]["cache"] == "MISS_STORED"        # a miss on its own key, not a replay of the fallback answer
+    assert len(cache) == 2
+    assert not any("FALLBACK engine" in w for w in gql["warnings"])
+
+
+def test_the_walk_and_context_templates_are_recorded_with_their_digests(monkeypatch):
+    monkeypatch.setattr(RT, "_run", _fake_run_factory({"edge_visible": True}))
+    gql = RT.retrieve("forced:metrics/gross-margin.md", B, PUB, "r", "2026-09-05T00:10:00Z",
+                      {"engine": "gql", "bq": object(), "ds": "d"})
+    fb = RT.retrieve("forced:metrics/gross-margin.md", B, PUB, "r", "2026-09-05T00:10:00Z",
+                     {"engine": "fallback", "bq": object(), "ds": "d"})
+    assert gql["scope"]["templates"]["walk"]["name"] == "governed.sql"
+    assert gql["scope"]["templates"]["walk"]["graph_table"] is True
+    assert fb["scope"]["templates"]["walk"]["name"] == "fallback.sql"
+    assert fb["scope"]["templates"]["walk"]["graph_table"] is False
+    assert gql["scope"]["templates"]["walk"]["sha256"] != fb["scope"]["templates"]["walk"]["sha256"]
+    assert gql["scope"]["templates"]["context"]["name"] == "context.sql"

@@ -18,7 +18,7 @@ from typing import Optional
 from pathlib import Path
 
 from . import PROJECT, LOCATION, RESERVATION
-from .lifecycle import job_cleanup_verified
+from .lifecycle import job_cleanup_verified, restores_clear
 
 MANIFEST = "evidence/cleanup_manifest.json"
 
@@ -81,28 +81,116 @@ def _parse_list(step: dict) -> Optional[list]:
         return None
 
 
-def require_clean_windows(m: dict):
+def require_clean_windows(m: dict, evidence_dir: Optional[str | Path] = None, exclude: Optional[str] = None):
+    """Capacity deletion AND a separate verified job-cleanup receipt, for every window that was ever opened.
+
+    `evidence_dir` names where the journal/receipt pair is read from; it defaults to the manifest's own directory. A
+    reconstruction staged by `reconcile_window` can therefore be gated in place, before anyone decides to publish it
+    into `evidence/` (Slice A U1). A different directory relaxes nothing: the same structural check runs."""
+    d = Path(evidence_dir) if evidence_dir is not None else Path(MANIFEST).parent
     if any(w.get("opened_at") and not w.get("verified_gone") for w in m["windows"]):
         raise RuntimeError("an earlier reservation window is outstanding; verify its cleanup before opening another")
-    for w in m["windows"]:
-        if w.get("opened_at") and not job_cleanup_verified(w["label"], Path(MANIFEST).parent / f'jobs_{w["label"]}.json'):
-            raise RuntimeError(f'job cleanup is unverified for {w["label"]}; reconcile its journal before opening another')
+    # Every window that was opened, AND every job journal present in the evidence directory. A run that crashed
+    # before recording its manifest row still submitted the jobs its journal names, so keying the gate only off
+    # manifest rows leaves an unverified receipt able to authorize another window (Astra PR47 re-review R1).
+    journal_labels = {path.name[len("jobs_"):-len(".json")] for path in d.glob("jobs_*.json")
+                      if not path.name.endswith(".cleanup.json")}
+    # `exclude` is the window being opened right now: its own journal is created empty before provisioning, and it
+    # obviously has no cleanup receipt yet.
+    for label in sorted(({w["label"] for w in m["windows"] if w.get("opened_at")} | journal_labels) - {exclude}):
+        if not job_cleanup_verified(label, d / f"jobs_{label}.json"):
+            raise RuntimeError(f"job cleanup is unverified for {label}; reconcile its journal before opening another")
+    # A resource this window changed and could not put back is its own outstanding obligation: verified capacity
+    # deletion and a complete job receipt say nothing about a row policy or ACL left in place. Every obligation file in
+    # the evidence directory is checked, not only the ones whose manifest row survived - a run that crashed before
+    # recording its window still left the resource changed (Astra PR47 #3).
+    labels = {w["label"] for w in m["windows"] if w.get("opened_at")}
+    labels.update(path.name[len("restores_"):-len(".json")] for path in d.glob("restores_*.json"))
+    for label in sorted(labels - {exclude}):
+        if not restores_clear(label, d):
+            raise RuntimeError(f"resource restoration is outstanding for {label}; clear restores_{label}.json "
+                               "before opening another")
+
+
+def reservation_state() -> dict:
+    """Read-only: does this reservation name already exist, and whose assignments point at it?
+
+    Nonownership must be established BEFORE any mutation. A listing that failed is `listing_ok: False` - unknown, never
+    "absent" - because provisioning on top of an unreadable inventory is how another invocation's capacity gets deleted
+    by a rollback that thinks it owns it (Astra PR47 #2)."""
+    ls_r, ls_a = _bq("ls", "--reservation"), _bq("ls", "--reservation_assignment")
+    reservations, assignments = _parse_list(ls_r), _parse_list(ls_a)
+    if reservations is None or assignments is None:
+        return {"listing_ok": False, "present": None, "assignments": [], "steps": [ls_r, ls_a],
+                "reason": "the reservation listing failed or was unparseable: ownership cannot be established"}
+    mine = [r for r in reservations if r.get("name", "").endswith(f"/reservations/{RESERVATION}")]
+    asg = [a for a in assignments if f"/reservations/{RESERVATION}/" in a.get("name", "")]
+    return {"listing_ok": True, "present": bool(mine), "assignments": [a.get("name") for a in asg],
+            "reservations": [r.get("name") for r in mine], "steps": [ls_r, ls_a]}
+
+
+@_serialized
+def release_own_resources(label: str, closer: str = "own-rollback") -> dict:
+    """Delete ONLY what this invocation created, from the manifest's own record.
+
+    Used when provisioning refuses after partially succeeding. It never deletes a reservation that was already there
+    (`pre_existing`), and never touches an assignment recorded under another window."""
+    m = _load()
+    w = next((x for x in reversed(m["windows"]) if x["label"] == label), None)
+    steps, removed, preserved = [], [], []
+    for r in m["resources"]:
+        if r.get("window") != label or r.get("state") not in ("open", "DELETE_UNVERIFIED"):
+            continue
+        if r.get("pre_existing"):
+            preserved.append(r.get("name"))
+            r["state"] = "preserved_not_ours"
+            continue
+        if r["kind"] == "assignment":
+            name = r.get("name", "")
+            if "/reservations/" in name and "/assignments/" in name:
+                res_id, asg_id = name.split("/reservations/")[1].split("/assignments/")
+                step = _bq("rm", "--reservation_assignment", f"{res_id}.{asg_id}")
+                steps.append(step)
+                if step["rc"] == 0:
+                    r["state"] = "deleted"; r["deleted_at"] = _now(); removed.append(name)
+                else:
+                    r["state"] = "DELETE_UNVERIFIED"
+        elif r["kind"] == "reservation":
+            step = _bq("rm", "--reservation", RESERVATION)
+            steps.append(step)
+            if step["rc"] == 0 or "not found" in (step["stderr"] + step["stdout"]).lower():
+                r["state"] = "deleted"; r["deleted_at"] = _now(); removed.append(r.get("name"))
+            else:
+                r["state"] = "DELETE_UNVERIFIED"
+    outcome = {"label": label, "closer": closer, "removed": removed, "preserved": preserved,
+               "verified_gone": all(r.get("state") != "DELETE_UNVERIFIED" for r in m["resources"] if r.get("window") == label),
+               "note": "rollback of this invocation's own resources only; capacity another invocation owns is preserved"}
+    if w is not None:
+        w["state"] = "REFUSED_PRESERVING_EXISTING"
+        w["own_rollback"] = dict(outcome, steps=steps)
+        w["verified_gone"] = outcome["verified_gone"]
+        w.setdefault("closed_at", _now())
+    m["resources"] = m["resources"]
+    _save(m)
+    return dict(outcome, steps=steps)
 
 
 @_serialized
 def open_window(label: str, max_slots: int = 100) -> dict:
     m = _load()
-    require_clean_windows(m)
+    require_clean_windows(m, exclude=label)
     w = {"label": label, "opened_at": _now(), "steps": [], "max_slots": max_slots, "state": "OPENING"}
     m["windows"].append(w)
     _save(m)
     mk = _bq("mk", "--reservation", "--edition=ENTERPRISE", "--slots=0",
              f"--autoscale_max_slots={max_slots}", "--ignore_idle_slots=true", RESERVATION)
     w["steps"].append(mk)
-    if mk["rc"] == 0 or "already exists" in (mk["stderr"] + mk["stdout"]).lower():
+    pre_existing = mk["rc"] != 0 and "already exists" in (mk["stderr"] + mk["stdout"]).lower()
+    if mk["rc"] == 0 or pre_existing:
+        # `pre_existing` marks capacity this invocation did NOT create, so a rollback never deletes it
         m["resources"].append({"kind": "reservation", "window": label,
                                "name": f"projects/{PROJECT}/locations/{LOCATION}/reservations/{RESERVATION}",
-                               "created_at": mk["at"], "state": "open"})
+                               "created_at": mk["at"], "state": "open", "pre_existing": pre_existing})
     _save(m)   # persist the paid resource before anything else can fail
     asg = _bq("mk", "--reservation_assignment", f"--reservation_id={RESERVATION}",
               f"--assignee_id={PROJECT}", "--assignee_type=PROJECT", "--job_type=QUERY")
@@ -120,12 +208,32 @@ def open_window(label: str, max_slots: int = 100) -> dict:
     return w
 
 
+def _preserved(m: dict, w: Optional[dict], label: str) -> bool:
+    """Does the PERSISTED record say this window's reservation belongs to somebody else?
+
+    An in-memory flag on the controller protects nothing: the detached watcher (`safety_teardown.sh` ->
+    `safety.cleanup` -> `close_window`) is a different process, and a retry after a partial rollback would otherwise
+    delete the peer's reservation (Astra PR47 re-review R2)."""
+    if w is not None and w.get("state") == "REFUSED_PRESERVING_EXISTING":
+        return True
+    return any(r.get("window") == label and r.get("kind") == "reservation" and r.get("pre_existing")
+               for r in m.get("resources", []))
+
+
 @_serialized
 def close_window(label: str, closer: str = "driver") -> dict:
     m = _load()
     w = next((x for x in reversed(m["windows"]) if x["label"] == label), None)
     if w is None:
         raise ValueError(f"unknown reservation window: {label}; use the original opening label")
+    if _preserved(m, w, label):
+        # Release only what this invocation created; the reservation itself is not ours to delete, on this attempt or
+        # on any retry by any closer.
+        own = release_own_resources.__wrapped__(label, closer=closer)   # already holding the manifest lock
+        w = next((x for x in reversed(_load()["windows"]) if x["label"] == label), w)
+        return dict(w, preserved=True, own_rollback=own,
+                    reason="the reservation belongs to another invocation: this closer deletes only what this "
+                           "window created")
     if w.get("verified_gone") and w.get("closed_at"):
         # Its verified receipt remains valid if a newer window has reused the same
         # reservation name. A late watcher must not delete that newer resource.

@@ -439,3 +439,522 @@ def test_real_load_job_poll_has_bounded_rpc_timeout(monkeypatch, tmp_path, faile
     else:
         assert wrapped.result(timeout=.05) is job
     assert len(rpc_timeouts) == 1
+
+
+# =============================================================================== Astra PR47: cleanup channel + adoption
+def test_the_cleanup_channel_admits_after_workload_stop(tmp_path):
+    """A restoring DDL must still be submittable and journaled once workload admission closed."""
+    events = []
+    window = L.WindowJobs("cleanup-channel", time.monotonic() + 60, tmp_path / "jobs.json")
+    client = Client(events, lambda **kw: [])
+    workload = window.bind(client)
+    workload.query("SELECT 1")
+    window.stop.set()
+    with pytest.raises(L.WindowStopped):
+        workload.query("SELECT 2")
+    window.open_cleanup(30, max_jobs=2)
+    restore = window.bind(client, cleanup=True)
+    job = restore.query("DROP ROW ACCESS POLICY p ON t")
+    assert window.cleanup_jobs == 1
+    assert "cleanup" in job.job_id
+    journal = json.loads((tmp_path / "jobs.json").read_text())
+    assert job.job_id in journal["job_ids"]          # a cleanup submission is in the union like any other
+
+
+def test_the_cleanup_channel_is_bounded(tmp_path):
+    events = []
+    window = L.WindowJobs("bounded-cleanup", time.monotonic() + 60, tmp_path / "jobs.json")
+    client = Client(events, lambda **kw: [])
+    window.stop.set()
+    window.open_cleanup(30, max_jobs=1)
+    restore = window.bind(client, cleanup=True)
+    restore.query("DROP ONE")
+    with pytest.raises(L.WindowStopped, match="budget"):
+        restore.query("DROP TWO")
+    window.close_cleanup()
+    with pytest.raises(L.WindowStopped):
+        restore.query("DROP THREE")             # the channel is closed again: back to the workload gate
+
+
+def test_a_cleanup_job_waits_on_the_cleanup_deadline_not_the_workload_stop(tmp_path):
+    events = []
+    window = L.WindowJobs("cleanup-result", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.stop.set()
+    window.open_cleanup(30)
+    job = window.bind(Client(events, lambda **kw: []), cleanup=True).query("DROP ROW ACCESS POLICY p ON t")
+    assert list(job.result()) == []             # the stopped workload channel does not abort the restore's readback
+
+
+class _Terminal:
+    """A client that can cancel and read back any id, including one it never submitted."""
+
+    def cancel_job(self, job_id, **kwargs):
+        return None
+
+    def get_job(self, job_id, **kwargs):
+        return SimpleNamespace(state="DONE")
+
+
+def test_adopting_a_workers_job_puts_it_in_the_union_and_the_cleanup(tmp_path):
+    client = _Terminal()
+    window = L.WindowJobs("adopt", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.adopt("okf_rcpt_child_1", client=client, worker="receipt_child")
+    journal = json.loads((tmp_path / "jobs.json").read_text())
+    assert journal["job_ids"] == ["okf_rcpt_child_1"]
+    results = window.stop_and_cancel()
+    assert [r["job_id"] for r in results] == ["okf_rcpt_child_1"]
+    receipt = json.loads((tmp_path / "jobs.cleanup.json").read_text())
+    assert receipt["verified"] is True and receipt["job_ids"] == ["okf_rcpt_child_1"]
+
+
+def test_an_adopted_job_without_a_client_stays_unresolved(tmp_path):
+    window = L.WindowJobs("adopt-unowned", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.adopt("okf_rcpt_orphan")
+    results = window.stop_and_cancel()
+    assert results[0]["verified_done"] is False
+    assert json.loads((tmp_path / "jobs.cleanup.json").read_text())["verified"] is False
+
+
+def test_an_outstanding_restore_obligation_is_durable(tmp_path):
+    L.record_restore_obligations("w", tmp_path, [{"name": "acl", "ok": True},
+                                                 {"name": "row_policies", "ok": False, "error": "refused"}])
+    assert L.restores_clear("w", tmp_path) is False
+    body = json.loads((tmp_path / "restores_w.json").read_text())
+    assert [o["name"] for o in body["outstanding"]] == ["row_policies"]
+    L.record_restore_obligations("w", tmp_path, [{"name": "acl", "ok": True}, {"name": "row_policies", "ok": True}])
+    assert L.restores_clear("w", tmp_path) is True
+
+
+def test_a_missing_obligation_file_is_clear_but_a_malformed_one_is_not(tmp_path):
+    assert L.restores_clear("never-changed-anything", tmp_path) is True
+    (tmp_path / "restores_broken.json").write_text("{not json")
+    assert L.restores_clear("broken", tmp_path) is False
+
+
+# =============================================================================== Astra PR47 re-review (RR2)
+def test_the_auth_refresh_session_is_guarded_too(tmp_path):
+    """RR2 R4: AuthorizedSession's internal 401 refresh goes through its OWN plain `_auth_request` Session."""
+    import requests
+    from google.auth.credentials import Credentials
+    from google.cloud import bigquery
+
+    window = L.WindowJobs("refresh", time.monotonic() + 2, tmp_path / "jobs.json")
+    seen = []
+
+    class Creds(Credentials):
+        def __init__(self):
+            super().__init__()
+            self.token = "synthetic-offline-token"
+
+        def refresh(self, request):
+            request("https://offline.invalid/token", method="POST")
+            self.token = "synthetic-refreshed-token"
+
+    class Adapter(requests.adapters.HTTPAdapter):
+        def send(self, req, **kw):
+            seen.append({"url": req.url, "stopped": window.stop.is_set(), "timeout": kw.get("timeout")})
+            response = requests.Response()
+            response.request, response.url, response._content = req, req.url, b"{}"
+            if "/jobs?" in req.url:
+                window.stop.set()          # a concurrent stop, while the platform answers 401
+                response.status_code = 401
+            else:
+                response.status_code = 200
+            return response
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(requests.adapters.HTTPAdapter, "send", Adapter.send)
+        client = bigquery.Client(project=L.PROJECT, location=L.LOCATION, credentials=Creds())
+        original, auth_session = client._http.send, client._http._auth_request.session
+        original_auth = auth_session.send
+        with pytest.raises(L.WindowStopped):
+            window.bind(client).query("SELECT 1")
+        assert [s["url"] for s in seen] == [seen[0]["url"]], f"a refresh dispatched after stop: {seen}"
+        assert seen[0]["stopped"] is False
+        # both of the caller's transports are left exactly as they were, so cancellation still works after stop
+        assert client._http.send == original and auth_session.send == original_auth
+        client.close()
+
+
+def test_transport_sessions_finds_the_auth_request_session():
+    from google.auth.credentials import AnonymousCredentials
+    from google.cloud import bigquery
+
+    client = bigquery.Client(project=L.PROJECT, location=L.LOCATION, credentials=AnonymousCredentials())
+    sessions = L._transport_sessions(client)
+    assert client._http in sessions and client._http._auth_request.session in sessions
+    assert len(sessions) == 2
+    assert L._transport_sessions(SimpleNamespace()) == []
+
+
+def test_a_parent_dry_run_is_a_bounded_operation_not_a_phantom_job(tmp_path):
+    """RR2 P2: BigQuery returns no jobReference for a dry run; inventing one puts a phantom in the cleanup union."""
+    events = []
+    window = L.WindowJobs("dry", time.monotonic() + 60, tmp_path / "jobs.json")
+
+    class Probe:
+        def query(self, sql, **kwargs):
+            events.append(kwargs)
+            assert "job_id" not in kwargs, "a dry run must not be given an invented job id"
+            return SimpleNamespace(job_id=None, result=lambda **kw: [])
+
+        def cancel_job(self, job_id, **kwargs):
+            pytest.fail("a dry run creates no server job to cancel")
+
+    job = window.bind(Probe()).query("SELECT 1 FROM t WHERE FALSE",
+                                     job_config=L.bigquery.QueryJobConfig(dry_run=True))
+    assert job.job_id is None and job.dry_run is True
+    assert events[0]["job_config"].dry_run is True
+    journal = json.loads((tmp_path / "jobs.json").read_text())
+    assert journal["job_ids"] == [] and journal["dry_run_operations"] == 1
+    assert window.stop_and_cancel() == []
+    receipt = json.loads((tmp_path / "jobs.cleanup.json").read_text())
+    assert receipt["job_ids"] == [] and receipt["jobs"] == []   # no phantom id to cancel and 404 into "verified"
+
+
+def test_a_dry_run_still_needs_admission(tmp_path):
+    window = L.WindowJobs("dry-stopped", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.stop.set()
+    with pytest.raises(L.WindowStopped):
+        window.bind(_Terminal()).query("SELECT 1", job_config=L.bigquery.QueryJobConfig(dry_run=True))
+
+
+def test_an_adopted_reference_is_read_back_under_its_own_project_and_location(tmp_path):
+    """RR2 R1: a worker's job in another project read under the module defaults returns NotFound while it runs on."""
+    from google.api_core.exceptions import NotFound
+    seen = []
+
+    class Client:
+        def cancel_job(self, job_id, **kwargs):
+            seen.append(kwargs)
+            raise NotFound("absent under this reference")
+
+        def get_job(self, job_id, **kwargs):
+            raise NotFound("absent under this reference")
+
+    window = L.WindowJobs("adopt-qualified", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.adopt("outside-job", client=Client(), project="other-project", location="EU", state="UNRESOLVED")
+    results = window.stop_and_cancel()
+    assert seen[0]["project"] == "other-project" and seen[0]["location"] == "EU"
+    # the window never confirmed this submission, so an absent job does NOT close the obligation
+    assert results[0]["verified_done"] is False and results[0]["state"] == "NOT_FOUND"
+    assert json.loads((tmp_path / "jobs.cleanup.json").read_text())["verified"] is False
+
+
+def test_a_confirmed_adoption_may_close_on_absence(tmp_path):
+    """A reference the worker confirmed it submitted keeps the journalled-before-submit reading."""
+    from google.api_core.exceptions import NotFound
+
+    class Client:
+        def cancel_job(self, job_id, **kwargs):
+            raise NotFound("gone")
+
+        def get_job(self, job_id, **kwargs):
+            raise NotFound("gone")
+
+    window = L.WindowJobs("adopt-confirmed", time.monotonic() + 60, tmp_path / "jobs.json")
+    window.adopt("child-job", client=Client(), state="SUBMITTED")
+    assert window.stop_and_cancel()[0]["verified_done"] is True
+
+
+# =============================================================================== Astra PR47 RR3
+def test_detached_recovery_carries_the_qualified_references(tmp_path):
+    """RR3 N1: `cancel_journal` dropped `job_refs`, so recovery read every job under the module defaults."""
+    from google.api_core.exceptions import NotFound
+    seen = []
+
+    class Client:
+        def cancel_job(self, job_id, **kwargs):
+            seen.append(dict(kwargs, job_id=job_id))
+            if (kwargs.get("project"), kwargs.get("location")) != ("other-project", "EU"):
+                raise NotFound("wrong project/location")
+
+        def get_job(self, job_id, **kwargs):
+            return SimpleNamespace(state="RUNNING")
+
+    journal = tmp_path / "jobs_w.json"
+    journal.write_text(json.dumps({
+        "label": "w", "project": L.PROJECT, "location": L.LOCATION,
+        "job_ids": ["outside-job"], "finished_job_ids": [],
+        "job_refs": {"outside-job": {"project": "other-project", "location": "EU", "adopted": True,
+                                     "notfound_is_done": False}}}))
+    results = L.cancel_journal(Client(), "w", journal)
+    assert seen[0]["project"] == "other-project" and seen[0]["location"] == "EU"
+    assert results[0]["state"] == "RUNNING" and results[0]["verified_done"] is False
+    receipt = json.loads((tmp_path / "jobs_w.cleanup.json").read_text())
+    assert receipt["verified"] is False
+    assert receipt["job_refs"]["outside-job"]["notfound_is_done"] is False   # the refs travel into the receipt too
+
+
+def test_detached_recovery_does_not_certify_an_unconfirmed_absent_job(tmp_path):
+    """A lost-response id: absent under its own reference is still unresolved, not verified completion."""
+    from google.api_core.exceptions import NotFound
+
+    class Client:
+        def cancel_job(self, job_id, **kwargs):
+            raise NotFound("no such job")
+
+        def get_job(self, job_id, **kwargs):
+            raise NotFound("no such job")
+
+    journal = tmp_path / "jobs_w.json"
+    journal.write_text(json.dumps({
+        "label": "w", "project": L.PROJECT, "location": L.LOCATION,
+        "job_ids": ["okf_rcpt_lost"], "finished_job_ids": [],
+        "job_refs": {"okf_rcpt_lost": {"project": L.PROJECT, "location": L.LOCATION, "adopted": True,
+                                       "notfound_is_done": False}}}))
+    results = L.cancel_journal(Client(), "w", journal)
+    assert results[0]["verified_done"] is False and results[0]["state"] == "NOT_FOUND"
+    assert json.loads((tmp_path / "jobs_w.cleanup.json").read_text())["verified"] is False
+
+
+def test_a_legacy_journal_without_refs_still_recovers(tmp_path):
+    """A journal written before `job_refs` existed keeps the journalled-before-submit reading."""
+    from google.api_core.exceptions import NotFound
+
+    class Client:
+        def cancel_job(self, job_id, **kwargs):
+            raise NotFound("gone")
+
+        def get_job(self, job_id, **kwargs):
+            raise NotFound("gone")
+
+    journal = tmp_path / "jobs_w.json"
+    journal.write_text(json.dumps({"label": "w", "project": L.PROJECT, "location": L.LOCATION,
+                                   "job_ids": ["okf_graph_w_1"], "finished_job_ids": []}))
+    assert L.cancel_journal(Client(), "w", journal)[0]["verified_done"] is True
+
+
+def test_the_result_client_guards_its_own_refresh_transport(tmp_path):
+    """RR3 N3: a 401 DURING result reads refreshes through the shared `_auth_request`, which `__dict__.update`
+    carried straight onto the copied session."""
+    import requests
+    from google.auth.credentials import Credentials
+    from google.cloud import bigquery
+
+    window = L.WindowJobs("result-refresh", time.monotonic() + 60, tmp_path / "jobs.json")
+    seen = []
+
+    class Creds(Credentials):
+        def __init__(self):
+            super().__init__()
+            self.token = "offline-token"
+
+        def refresh(self, request):
+            request("https://offline.invalid/token", method="POST")
+            self.token = "offline-refreshed"
+
+    class Adapter(requests.adapters.HTTPAdapter):
+        def send(self, req, **kw):
+            seen.append({"method": req.method, "url": req.url, "stopped": window.stop.is_set()})
+            response = requests.Response()
+            response.request, response.url, response.status_code = req, req.url, 200
+            response.headers["content-type"] = "application/json"
+            if req.method == "POST" and "/jobs?" in req.url:
+                body = json.loads(req.body)
+                data = {"jobReference": body["jobReference"], "configuration": body["configuration"],
+                        "status": {"state": "DONE"}}
+            elif req.method == "GET" and "/queries/" in req.url:
+                window.stop.set()                 # a concurrent stop, while the platform answers 401
+                response.status_code = 401
+                data = {"error": {"message": "offline token expired"}}
+            elif req.url == "https://offline.invalid/token":
+                data = {}
+            else:
+                raise AssertionError(f"unexpected request {req.method} {req.url}")
+            response._content = json.dumps(data).encode()
+            return response
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(requests.adapters.HTTPAdapter, "send", Adapter.send)
+        client = bigquery.Client(project=L.PROJECT, location=L.LOCATION, credentials=Creds())
+        original_request = client._http._auth_request
+        original_send = original_request.session.send
+        with pytest.raises((L.WindowStopped, TimeoutError)):
+            list(window.bind(client).query("SELECT 1").result())
+        assert not [s for s in seen if s["stopped"]], f"a send left after stop: {seen}"
+        assert "https://offline.invalid/token" not in [s["url"] for s in seen]
+        # the caller's own refresh transport is untouched: cancellation still works after stop
+        assert client._http._auth_request is original_request
+        assert original_request.session.send == original_send
+        client.close()
+
+
+def test_the_result_guard_installs_on_the_job_local_copy_only():
+    from google.auth.credentials import AnonymousCredentials
+    from google.cloud import bigquery
+
+    client = bigquery.Client(project=L.PROJECT, location=L.LOCATION, credentials=AnonymousCredentials())
+    original = client._http._auth_request
+    guarded = L._ResultHTTP(client._http, lambda: 5.0)
+    assert guarded.guarded_auth_transport is True
+    assert guarded.raw._auth_request is not original          # the copy has its own Request
+    assert client._http._auth_request is original             # the caller's is untouched
+    client.close()
+
+
+def test_the_audit_client_bounds_every_read_and_exposes_reads_only(tmp_path):
+    """RR5 F2: explicit per-read timeout from the remaining budget, and no blanket delegation."""
+    clock = [100.0]
+    calls = []
+
+    class Client:
+        def get_job(self, job_id, **kwargs):
+            calls.append(dict(kwargs, job_id=job_id))
+            return SimpleNamespace(user_email="operator@example.test")
+
+        def query(self, sql, **kwargs):
+            raise AssertionError("an audit channel must not be able to submit")
+
+    window = L.WindowJobs("audit", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    window.open_audit(30, max_reads=3)
+    audit = window.audit_client(Client())
+    audit.get_job("j1", project="other-project", location="EU")
+    assert calls[0]["project"] == "other-project" and calls[0]["location"] == "EU"
+    assert 0 < calls[0]["timeout"] <= 10 and calls[0]["retry"] is None
+    assert audit.reads == 1 and audit.expired is False
+    assert not hasattr(audit, "query")
+
+
+def test_the_audit_client_expires_and_retains_unread_references(tmp_path):
+    clock = [100.0]
+
+    class Client:
+        def get_job(self, job_id, **kwargs):
+            raise AssertionError("nothing may dispatch after the audit deadline")
+
+    window = L.WindowJobs("audit", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    deadline = window.open_audit(30)
+    audit = window.audit_client(Client())
+    clock[0] = deadline + 1
+    with pytest.raises(L.AuditExpired):
+        audit.get_job("j1")
+    record = audit.record()
+    assert record["expired"] is True and record["reads"] == 0
+    assert record["unread"][0]["job_id"] == "j1"
+    assert "deadline passed" in record["unread"][0]["reason"]
+
+
+def test_the_audit_read_budget_is_enforced(tmp_path):
+    reads = []
+
+    class Client:
+        def get_job(self, job_id, **kwargs):
+            reads.append(job_id)
+            return SimpleNamespace(user_email="e")
+
+    window = L.WindowJobs("audit", time.monotonic() + 600, tmp_path / "jobs.json")
+    window.open_audit(60, max_reads=2)
+    audit = window.audit_client(Client())
+    audit.get_job("j1")
+    audit.get_job("j2")
+    with pytest.raises(L.AuditExpired, match="read budget"):
+        audit.get_job("j3")
+    assert reads == ["j1", "j2"] and audit.unread[0]["job_id"] == "j3"
+
+
+# =============================================================================== Astra PR47 RR6
+def test_the_audit_re_decides_every_send_inside_one_read(tmp_path):
+    """RR6: `retry=None` stops api-core retrying, but AuthorizedSession still refreshes on a 401 and re-sends. The
+    read was admitted once with 5 s left; the refresh must get the 0.5 s that is actually left, and the retry must not
+    dispatch at all once the budget is gone."""
+    from urllib.parse import urlsplit
+    import requests
+    from google.auth.credentials import Credentials
+    from google.cloud import bigquery
+
+    now = [1000.0]
+    state = {"deadline": None, "faulted": False}
+    seen = []
+
+    class Creds(Credentials):
+        def __init__(self):
+            super().__init__()
+            self.token = "offline-synthetic"
+
+        @property
+        def expired(self):
+            return False
+
+        def refresh(self, request):
+            request("https://offline.invalid/token", method="POST")
+            self.token = "offline-refreshed"
+
+    def send(adapter, req, **kw):
+        path = urlsplit(req.url).path
+        seen.append({"path": path, "timeout": kw.get("timeout"), "now": now[0], "deadline": state["deadline"]})
+        response = requests.Response()
+        response.request, response.url, response.status_code = req, req.url, 200
+        response.headers["content-type"] = "application/json"
+        if path == "/token":
+            now[0] = state["deadline"] + 0.1          # the refresh consumes more than was left
+            data = {}
+        elif not state["faulted"]:
+            state["faulted"] = True
+            now[0] = state["deadline"] - 0.5          # the first GET answers 401 near the boundary
+            response.status_code = 401
+            data = {"error": {"message": "offline 401"}}
+        else:
+            data = {"jobReference": {"jobId": "j", "projectId": L.PROJECT, "location": L.LOCATION},
+                    "configuration": {"query": {"query": "SELECT 1", "useLegacySql": False}},
+                    "status": {"state": "DONE"}, "user_email": "operator@example.test"}
+        response._content = json.dumps(data).encode()
+        return response
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(requests.adapters.HTTPAdapter, "send", send)
+        client = bigquery.Client(project=L.PROJECT, location=L.LOCATION, credentials=Creds())
+        original, original_auth = client._http.send, client._http._auth_request.session.send
+        window = L.WindowJobs("audit", 1000.0, tmp_path / "jobs.json", clock=lambda: now[0])
+        state["deadline"] = window.open_audit(30)
+        now[0] = state["deadline"] - 5.0
+        audit = window.audit_client(client)
+        with pytest.raises(L.AuditExpired, match="during this read"):
+            audit.get_job("okf_graph_audit_last")
+        assert audit.record()["guarded_sends"] is True
+        assert seen[0]["timeout"] == 5.0                     # admitted with the budget that was actually left
+        refresh = next(s for s in seen if s["path"] == "/token")
+        assert refresh["timeout"] == pytest.approx(0.5)      # re-decided, not the caller's 5 s
+        assert len(seen) == 2, f"the retry dispatched after the deadline: {seen}"
+        assert not [s for s in seen if s["now"] > s["deadline"]]
+        assert audit.unread[0]["job_id"] == "okf_graph_audit_last"
+        # the caller's transports are left exactly as they were
+        assert client._http.send == original and client._http._auth_request.session.send == original_auth
+        client.close()
+
+
+def test_a_result_that_arrives_after_the_deadline_is_rejected(tmp_path):
+    """RR6: the dispatch guard cannot cover a send already in flight, nor a transport this client cannot reach."""
+    clock = [100.0]
+
+    class Delegating:
+        """A client that dispatches through something the audit cannot see - as a wrapping fixture does."""
+
+        def get_job(self, job_id, **kwargs):
+            clock[0] = deadline + 0.1        # the read returns late
+            return SimpleNamespace(user_email="operator@example.test")
+
+    window = L.WindowJobs("audit", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    deadline = window.open_audit(30)
+    audit = window.audit_client(Delegating())
+    with pytest.raises(L.AuditExpired, match="returned after the audit deadline"):
+        audit.get_job("late-job")
+    record = audit.record()
+    assert record["expired"] is True and record["guarded_sends"] is False
+    assert record["unread"][0]["job_id"] == "late-job"
+    assert record["remaining_s"] < 0
+
+
+def test_a_read_that_returns_inside_the_budget_is_accepted(tmp_path):
+    clock = [100.0]
+
+    class Client:
+        def get_job(self, job_id, **kwargs):
+            clock[0] += 1                    # it took a second, and there was plenty left
+            return SimpleNamespace(user_email="operator@example.test")
+
+    window = L.WindowJobs("audit", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    window.open_audit(30)
+    audit = window.audit_client(Client())
+    assert audit.get_job("j1").user_email == "operator@example.test"
+    assert audit.record()["expired"] is False and audit.unread == []

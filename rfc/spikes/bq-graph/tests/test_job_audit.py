@@ -61,7 +61,8 @@ def test_a_complete_inventory_reconciles_and_reads_the_records_own_window():
     out = JA.audit(_record(), client=(cl := _all()), requester_email=SA)
     assert out["status"] == "RECONCILED" and out["listed"] == 5 and out["matched"] == 5
     assert out["not_listed"] == [] and out["unaccounted_requester_jobs"] == []
-    assert out["inventory"]["by_role"] == {"graph": 2, "receipt": 1, "requester_probe": 1, "policy_admin": 1}
+    assert out["inventory"]["by_role"] == {"graph": 2, "receipt": 1, "requester_probe": 1, "policy_admin": 1,
+                                           "receipt_child": 0}
     call = cl.calls[0]                                   # all users, and the window is the record's own, padded
     assert call["all_users"] is True and call["page_size"] == JA.PAGE_SIZE and out["truncated"] is False
     assert call["start"].isoformat() == "2026-09-07T22:09:38.426058+00:00"
@@ -140,3 +141,32 @@ def test_a_record_that_declares_unresolved_admin_work_cannot_be_certified():   #
     assert out["status"] == "INCOMPLETE" and out["declared_admin_unresolved"] == 1
     assert "never named a job for" in out["reason"]
     assert out["unaccounted_requester_jobs"] == [] and out["not_listed"] == []   # nothing else is wrong: the record's own admission is
+
+
+# =============================================================================== U3: the receipt child's own jobs
+def test_receipt_child_jobs_are_part_of_the_inventory():
+    record = _record(job_inventory={"graph": ["g1"], "receipt": ["r1"], "receipt_child": ["r1", "c2"]})
+    inv = JA.inventory(record)
+    assert inv["roles"]["receipt_child"] == ["r1", "c2"]
+    assert inv["ids"] == ["c2", "g1", "r1"]      # the union counts each job once
+
+
+def test_a_child_job_the_record_forgot_is_reconciled_not_unaccounted():
+    """A job only the child journal saw is still claimed by the record, so it must not read as an outside job."""
+    record = _record(job_inventory={"graph": ["g1", "g2"], "receipt": ["r1"], "requester_probe": ["p1"],
+                                    "policy_admin": ["d1"], "receipt_child": ["r1", "c2"]})
+    out = JA.audit(record, client=_all([_Job("c2", SA)]), requester_email=SA)
+    assert out["status"] == "RECONCILED"
+    assert out["unaccounted_requester_jobs"] == []
+    assert out["inventory"]["by_role"]["receipt_child"] == 2
+
+
+def test_an_unresolved_child_submission_blocks_the_audit():
+    record = _record(job_inventory={"graph": ["g1", "g2"], "receipt": ["r1"], "requester_probe": ["p1"],
+                                    "policy_admin": ["d1"], "receipt_child": ["r1"],
+                                    "receipt_child_unresolved": [{"seq": 4, "requested_job_id": "okf_rcpt_lost",
+                                                                  "state": "UNRESOLVED"}]})
+    out = JA.audit(record, client=_all(), requester_email=SA)
+    assert out["status"] == "INCOMPLETE"
+    assert out["declared_receipt_child_unresolved"] == 1
+    assert "could not resolve" in out["reason"]
