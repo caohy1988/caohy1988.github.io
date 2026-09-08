@@ -1886,3 +1886,42 @@ def test_the_receipt_child_registration_carries_its_journal_location(sdk_root, t
     evidence = next(w for w in window.workers if w["name"] == "receipt_child")["evidence"]
     assert evidence["journal_dir"] == str(bridge.journal_dir)
     assert evidence["bridge_dir"] == str(bridge.dir) and evidence["stop_file"] == str(bridge.stop_path)
+
+
+def test_a_late_audit_read_leaves_the_reference_unknown_and_the_chain_incomplete(sdk_root, tmp_path):
+    """RR6: the last reference's identity arrived after the absolute budget; accepting it kept the chain BOUND."""
+    from okf_bq_graph import lifecycle as L
+
+    broker = _Broker()
+    broker.teardown()
+    clock = [100.0]
+    reads = []
+
+    class Delegating:
+        """Dispatches through a transport the audit client cannot reach, so only the return check can catch it."""
+
+        def get_job(self, job_id, **kwargs):
+            reads.append(job_id)
+            if job_id == "restore-1":            # the final reference returns just past the deadline
+                clock[0] = deadline + 0.1
+            return SimpleNamespace(user_email="operator@example.test")
+
+    jobs = L.WindowJobs("w", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    deadline = jobs.open_audit(30)
+    audit = jobs.audit_client(Delegating())
+    out = {"mode": "live", "run_id": "r1", "run_dir": str(tmp_path), "verdict": "CHAIN_CONNECTED",
+           "requester": {"mode": "restricted-sa"}, "identity": {"status": "BOUND"},
+           "job_inventory": {"graph": [], "receipt": [], "receipt_refs": [],
+                             "policy_admin": ["grant-1"], "refs": {}}}
+    window = SimpleNamespace(cfg=SimpleNamespace(label="w"), state="CLOSED",
+                             record={"clean": True, "cleanup": {"jobs_unresolved": []}, "restores": [], "workers": []},
+                             post_close_callbacks=lambda: [{"name": "broker_identity",
+                                                            "call": lambda record: CH.rebuild_identity(
+                                                                broker, record, audit=audit)}])
+    final = CH.finalize_cleanup(out, window, str(tmp_path))
+    assert reads == ["grant-1", "restore-1"]
+    assert final["identity"]["audit"]["expired"] is True
+    assert final["identity"]["audit"]["unread_references"] == ["restore-1"]
+    assert final["identity"]["status"] == "UNKNOWN"
+    assert final["verdict"] == "CHAIN_INCOMPLETE" and final["broken_at"] == "identity"
+    assert json.loads((tmp_path / "chain_live_restricted.json").read_text())["verdict"] == "CHAIN_INCOMPLETE"

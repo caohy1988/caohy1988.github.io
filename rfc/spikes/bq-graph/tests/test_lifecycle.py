@@ -851,3 +851,110 @@ def test_the_audit_read_budget_is_enforced(tmp_path):
     with pytest.raises(L.AuditExpired, match="read budget"):
         audit.get_job("j3")
     assert reads == ["j1", "j2"] and audit.unread[0]["job_id"] == "j3"
+
+
+# =============================================================================== Astra PR47 RR6
+def test_the_audit_re_decides_every_send_inside_one_read(tmp_path):
+    """RR6: `retry=None` stops api-core retrying, but AuthorizedSession still refreshes on a 401 and re-sends. The
+    read was admitted once with 5 s left; the refresh must get the 0.5 s that is actually left, and the retry must not
+    dispatch at all once the budget is gone."""
+    from urllib.parse import urlsplit
+    import requests
+    from google.auth.credentials import Credentials
+    from google.cloud import bigquery
+
+    now = [1000.0]
+    state = {"deadline": None, "faulted": False}
+    seen = []
+
+    class Creds(Credentials):
+        def __init__(self):
+            super().__init__()
+            self.token = "offline-synthetic"
+
+        @property
+        def expired(self):
+            return False
+
+        def refresh(self, request):
+            request("https://offline.invalid/token", method="POST")
+            self.token = "offline-refreshed"
+
+    def send(adapter, req, **kw):
+        path = urlsplit(req.url).path
+        seen.append({"path": path, "timeout": kw.get("timeout"), "now": now[0], "deadline": state["deadline"]})
+        response = requests.Response()
+        response.request, response.url, response.status_code = req, req.url, 200
+        response.headers["content-type"] = "application/json"
+        if path == "/token":
+            now[0] = state["deadline"] + 0.1          # the refresh consumes more than was left
+            data = {}
+        elif not state["faulted"]:
+            state["faulted"] = True
+            now[0] = state["deadline"] - 0.5          # the first GET answers 401 near the boundary
+            response.status_code = 401
+            data = {"error": {"message": "offline 401"}}
+        else:
+            data = {"jobReference": {"jobId": "j", "projectId": L.PROJECT, "location": L.LOCATION},
+                    "configuration": {"query": {"query": "SELECT 1", "useLegacySql": False}},
+                    "status": {"state": "DONE"}, "user_email": "operator@example.test"}
+        response._content = json.dumps(data).encode()
+        return response
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(requests.adapters.HTTPAdapter, "send", send)
+        client = bigquery.Client(project=L.PROJECT, location=L.LOCATION, credentials=Creds())
+        original, original_auth = client._http.send, client._http._auth_request.session.send
+        window = L.WindowJobs("audit", 1000.0, tmp_path / "jobs.json", clock=lambda: now[0])
+        state["deadline"] = window.open_audit(30)
+        now[0] = state["deadline"] - 5.0
+        audit = window.audit_client(client)
+        with pytest.raises(L.AuditExpired, match="during this read"):
+            audit.get_job("okf_graph_audit_last")
+        assert audit.record()["guarded_sends"] is True
+        assert seen[0]["timeout"] == 5.0                     # admitted with the budget that was actually left
+        refresh = next(s for s in seen if s["path"] == "/token")
+        assert refresh["timeout"] == pytest.approx(0.5)      # re-decided, not the caller's 5 s
+        assert len(seen) == 2, f"the retry dispatched after the deadline: {seen}"
+        assert not [s for s in seen if s["now"] > s["deadline"]]
+        assert audit.unread[0]["job_id"] == "okf_graph_audit_last"
+        # the caller's transports are left exactly as they were
+        assert client._http.send == original and client._http._auth_request.session.send == original_auth
+        client.close()
+
+
+def test_a_result_that_arrives_after_the_deadline_is_rejected(tmp_path):
+    """RR6: the dispatch guard cannot cover a send already in flight, nor a transport this client cannot reach."""
+    clock = [100.0]
+
+    class Delegating:
+        """A client that dispatches through something the audit cannot see - as a wrapping fixture does."""
+
+        def get_job(self, job_id, **kwargs):
+            clock[0] = deadline + 0.1        # the read returns late
+            return SimpleNamespace(user_email="operator@example.test")
+
+    window = L.WindowJobs("audit", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    deadline = window.open_audit(30)
+    audit = window.audit_client(Delegating())
+    with pytest.raises(L.AuditExpired, match="returned after the audit deadline"):
+        audit.get_job("late-job")
+    record = audit.record()
+    assert record["expired"] is True and record["guarded_sends"] is False
+    assert record["unread"][0]["job_id"] == "late-job"
+    assert record["remaining_s"] < 0
+
+
+def test_a_read_that_returns_inside_the_budget_is_accepted(tmp_path):
+    clock = [100.0]
+
+    class Client:
+        def get_job(self, job_id, **kwargs):
+            clock[0] += 1                    # it took a second, and there was plenty left
+            return SimpleNamespace(user_email="operator@example.test")
+
+    window = L.WindowJobs("audit", 100.0, tmp_path / "jobs.json", clock=lambda: clock[0])
+    window.open_audit(30)
+    audit = window.audit_client(Client())
+    assert audit.get_job("j1").user_email == "operator@example.test"
+    assert audit.record()["expired"] is False and audit.unread == []

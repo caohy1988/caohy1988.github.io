@@ -124,15 +124,12 @@ def _transport_sessions(client) -> list:
     return sessions
 
 
-@contextmanager
-def _guarded_send(client, window, cleanup: bool):
-    """Guard the ACTUAL HTTP send for the duration of one submission (Astra PR47 #4).
+def _guarded_sessions(client, budget):
+    """Install a `budget`-enforcing send override on every transport ONE call can dispatch through.
 
-    `submit()` checks admission, then calls `client.query(...)`. Inside that call google-auth may refresh the
-    credential, and a refresh that outlives the stop lets the job POST leave after the window closed. Re-checking at
-    the moment of dispatch closes that race, and the session's own internal 401 retry gets a fresh budget too.
-
-    The override is installed and removed inside `submit`'s lock, so the caller's transport is unchanged before and
+    `budget(requested_timeout) -> timeout` is re-evaluated at each dispatch and may raise to refuse it, so a credential
+    refresh and the session's own internal 401 retry each get a fresh decision rather than inheriting the caller's.
+    The override is installed and removed around that single call, so the caller's transport is unchanged before and
     after: cancellation and terminal readbacks, which run after stop by design, keep working on it."""
     sessions = _transport_sessions(client)
     if not sessions:
@@ -141,11 +138,7 @@ def _guarded_send(client, window, cleanup: bool):
 
     def guard(inner):
         def send(request, **kwargs):
-            window.check(cleanup=cleanup)      # a refresh that crossed stop cannot be followed by a submission
-            remaining = window.remaining(cleanup)
-            requested = kwargs.get("timeout")
-            # the refresh must get a FRESH budget, not the timeout copied from the original submission
-            kwargs["timeout"] = min(remaining, requested) if isinstance(requested, (int, float)) else remaining
+            kwargs["timeout"] = budget(kwargs.get("timeout"))
             return inner(request, **kwargs)
         return send
 
@@ -166,6 +159,27 @@ def _guarded_send(client, window, cleanup: bool):
                 session.__dict__.pop("send", None)
             else:
                 session.send = previous
+
+
+_guarded_sessions = contextmanager(_guarded_sessions)
+
+
+@contextmanager
+def _guarded_send(client, window, cleanup: bool):
+    """Guard the ACTUAL HTTP send for the duration of one submission (Astra PR47 #4).
+
+    `submit()` checks admission, then calls `client.query(...)`. Inside that call google-auth may refresh the
+    credential, and a refresh that outlives the stop lets the job POST leave after the window closed. Re-checking at
+    the moment of dispatch closes that race, and the session's own internal 401 retry gets a fresh budget too."""
+
+    def budget(requested):
+        window.check(cleanup=cleanup)          # a refresh that crossed stop cannot be followed by a submission
+        remaining = window.remaining(cleanup)
+        # the refresh must get a FRESH budget, not the timeout copied from the original submission
+        return min(remaining, requested) if isinstance(requested, (int, float)) else remaining
+
+    with _guarded_sessions(client, budget) as guarded:
+        yield guarded
 
 
 @contextmanager
@@ -409,42 +423,79 @@ class WindowAuditClient:
         self._clock = clock or (lambda: time.monotonic())
         self._per_read = per_read_timeout
         self.reads = 0
+        self.sends = 0
         self.expired = False
         self.unread: list[dict] = []
+        self.guarded_sends = False
 
     def remaining(self) -> float:
         return self.deadline - self._clock()
 
+    def _expire(self, ref: dict, reason: str) -> AuditExpired:
+        self.expired = True
+        self.unread.append(dict(ref, reason=reason))
+        return AuditExpired(f"{reason} ({len(self.unread)} reference(s) unread)")
+
     def _budget(self, ref: dict) -> float:
         remaining = self.remaining()
         if remaining <= 0:
-            self.expired = True
-            self.unread.append(dict(ref, reason="the audit deadline passed before this reference was read"))
-            raise AuditExpired(f"the post-close audit deadline passed with {len(self.unread)} reference(s) unread")
+            raise self._expire(ref, "the audit deadline passed before this reference was read")
         if self.max_reads and self.reads >= self.max_reads:
-            self.expired = True
-            self.unread.append(dict(ref, reason="the audit read budget was spent before this reference was read"))
-            raise AuditExpired(f"the post-close audit read budget ({self.max_reads}) is spent")
+            raise self._expire(ref, "the audit read budget was spent before this reference was read")
         self.reads += 1
         return max(0.001, min(self._per_read, remaining))
 
+    def _send_budget(self, ref: dict):
+        """Re-decided at EVERY dispatch inside one read.
+
+        `retry=None` stops api-core retrying, but `AuthorizedSession` still handles a 401 by refreshing the credential
+        and re-sending, and neither of those is the call this client admitted. Without a fresh decision per send, an
+        initial GET admitted with 5 s left could refresh through the deadline and re-send afterwards
+        (Astra PR47 RR6)."""
+        def budget(requested):
+            remaining = self.remaining()
+            if remaining <= 0:
+                raise self._expire(ref, "the audit deadline passed during this read, before a further send")
+            self.sends += 1
+            allowed = min(self._per_read, remaining)
+            return max(0.001, min(allowed, requested) if isinstance(requested, (int, float)) else allowed)
+        return budget
+
+    def _accept(self, value, ref: dict):
+        """A result that ARRIVED after the deadline is not evidence the audit completed in time.
+
+        The dispatch guard cannot cover a send already in flight when the budget ran out, and a transport this client
+        could not guard at all would otherwise return late identity unnoticed. The reference stays unread."""
+        if self.remaining() <= 0:
+            raise self._expire(ref, "the read returned after the audit deadline")
+        return value
+
+    def _read(self, ref: dict, call):
+        timeout = self._budget(ref)
+        with _guarded_sessions(self.raw, self._send_budget(ref)) as guarded:
+            self.guarded_sends = self.guarded_sends or bool(guarded)
+            value = call(timeout)
+        return self._accept(value, ref)
+
     def get_job(self, job_id, project=None, location=None, **kwargs):
-        timeout = self._budget({"job_id": job_id, "project": project, "location": location})
+        ref = {"job_id": job_id, "project": project, "location": location}
         kwargs.setdefault("retry", None)      # a retry inside an expiring audit is unbounded work
-        kwargs["timeout"] = timeout
-        return self.raw.get_job(job_id, project=project or PROJECT, location=location or LOCATION, **kwargs)
+        return self._read(ref, lambda timeout: self.raw.get_job(
+            job_id, project=project or PROJECT, location=location or LOCATION, timeout=timeout, **kwargs))
 
     def list_jobs(self, **kwargs):
         kwargs.setdefault("retry", None)
-        kwargs["timeout"] = self._budget({"list_jobs": True})
-        return self.raw.list_jobs(**kwargs)
+        return self._read({"list_jobs": True}, lambda timeout: self.raw.list_jobs(timeout=timeout, **kwargs))
 
     def record(self) -> dict:
-        return {"deadline": self.deadline, "reads": self.reads, "expired": self.expired,
+        return {"deadline": self.deadline, "reads": self.reads, "sends": self.sends, "expired": self.expired,
                 "remaining_s": round(self.remaining(), 3), "unread": list(self.unread),
                 "max_reads": self.max_reads, "per_read_timeout_s": self._per_read,
-                "note": "read-only channel bound to the window's absolute audit deadline; anything it did not read "
-                        "stays UNKNOWN"}
+                "guarded_sends": self.guarded_sends,
+                "note": "read-only channel bound to the window's absolute audit deadline. Every dispatch inside a read "
+                        "- including a credential refresh and the session's 401 retry - is re-decided against the "
+                        "remaining budget, and a result that arrived after the deadline is rejected. Anything it did "
+                        "not read stays UNKNOWN"}
 
 
 class WindowClient:

@@ -629,8 +629,13 @@ call `broker.open_live_session` makes before any client exists). No SDK source i
   on an unresolved statement). That audit gets its **own bounded read-only channel**, opened at close with an absolute
   deadline: `WindowAuditClient` exposes `get_job`/`list_jobs` only — no blanket `__getattr__` delegation to the raw
   client — gives each read an explicit timeout from the remaining budget instead of the SDK's 128-second default, and
-  raises `AuditExpired` once the deadline or read budget is gone. References it did not read stay UNKNOWN and the run
-  finishes `CHAIN_INCOMPLETE`; an audit that outlives its budget is not evidence that the audit completed.
+  raises `AuditExpired` once the deadline or read budget is gone. The budget is re-decided at **every dispatch inside
+  one read**, not once per read: `retry=None` stops api-core retrying, but `AuthorizedSession` still answers a 401 by
+  refreshing the credential and re-sending, so a read admitted with five seconds left could otherwise refresh through
+  the deadline and retry afterwards. And because a send already in flight — or a transport this client cannot reach —
+  can still answer late, a result that **arrived** after the deadline is rejected too. References it did not read stay
+  UNKNOWN and the run finishes `CHAIN_INCOMPLETE`; an audit that outlives its budget is not evidence that the audit
+  completed.
 
 **Engine proof (KTD4).** The retrieval cache key now includes the **engine**, so a relational entry can never be replayed
 under a GQL request, and `scope.templates` records the compiled walk/context template with its SHA-256 and whether it
