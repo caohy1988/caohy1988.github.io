@@ -400,3 +400,11 @@ PR 47 merged hermetic graph-query wiring (GQL admission, window controller, rece
 New link: one E10 URL to `README.md#graph-engine-inside-the-chain--slice-a-hermetic-2026-09-07` at pin `d002447`.
 
 **What is unchanged.** `.hero`, `#later-questions`, capacity line, `.punchline`, `.ask`, the "call it proven" bar text in both pages, Sep19 envelope, all phase table cells, `styles.css`, SVG geometry, `rfc/bq-vp/`, `rfc/full-demo/`, spike evidence artifacts. No cloud run, no experiment rerun, no metric invented.
+
+### Review fix pass — Astra PR 49 P1 (Claude Opus 4.6, 2026-09-08 PT, same branch)
+
+Astra reviewed `ccff2dc` (**REQUEST_CHANGES verdict, 0 P0 / 1 P1 / 0 P2**, posted as a comment review because the owner account cannot formally request changes on its own PR). The finding was an overreach introduced by this slice, not an evidence problem, and no experiment was rerun.
+
+- **Live restricted-requester chain erased by an engine-scoped claim** (P1; `STORY.md:62`, `intent.md:101`, `index.html:153`, `index.html:180`). The slice generalised "all live chains use plain SQL" — true — into "all live evidence is under one operator" and "a second identity is untested in any live chain" — both false. The retained PR 45 chain (`evidence/chain/chain_live_restricted.json`) is `mode=live`, `engine=fallback`, `CHAIN_CONNECTED`, identity `BOUND`, with the restricted requester holding both execution legs (20 requester jobs, 9 operator administrative jobs). Engine choice and requester identity are separate evidence dimensions; PR 47 being hermetic retires neither. All four sites now distinguish the operator-only catalog-seeded chains from the separate fixture-seeded restricted chain, state that both used relational SQL, and give the correct residual: no live chain has combined catalog discovery with the restricted requester, and none has used graph queries. Both SVG descriptions gained a sentence naming the restricted chain. `spec.md` gains **R26** to prevent recurrence.
+
+Unchanged by the fix: the offline-wiring, closed-gate and unreconciled-window qualifications; the E10 link; `.hero`, `#later-questions`, capacity line, `.punchline`, `.ask`, both "call it proven" bar sentences, Sep19 envelope, phase tables, `styles.css`, SVG geometry and all spike artifacts. Docs only; no cloud run, no merge.

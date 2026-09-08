@@ -98,7 +98,7 @@ Reader-facing effect: the board pack now says a chain began at a live catalog re
 
 ## PR 47 graph-in-chain Slice A honesty (2026-09-08, Claude Opus 4.6, `feat/board-pack-pr47-honesty`)
 
-PR 47 (`d002447`, Astra RR7 APPROVE 0/0/0) merged hermetic graph-query wiring for the chain: GQL admission, window controller, receipt bridge, reconcile tooling. **No live chain has used graph queries.** Slice B (live graph-query chain) + five legacy reconciliation windows remain BLOCKED. All live evidence is still plain SQL under one operator; G8 benchmarks stay 0/9; Sep19 thresholds remain PROPOSED.
+PR 47 (`d002447`, Astra RR7 APPROVE 0/0/0) merged hermetic graph-query wiring for the chain: GQL admission, window controller, receipt bridge, reconcile tooling. **No live chain has used graph queries.** Slice B (live graph-query chain) + five legacy reconciliation windows remain BLOCKED. Every live chain so far ran on plain SQL: the catalog-seeded ones under one operator, and the separate fixture-seeded chain (PR 45) under the restricted requester with identity BOUND. No live chain combines catalog discovery with the restricted requester, and none has used graph queries. G8 benchmarks stay 0/9; Sep19 thresholds remain PROPOSED.
 
 What this changes on the page, and what it must not imply:
 
