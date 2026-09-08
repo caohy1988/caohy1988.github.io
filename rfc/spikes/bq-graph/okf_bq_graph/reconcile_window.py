@@ -26,7 +26,8 @@ Everything else is a refusal. In particular:
     and evidenced submitter shutdown, then extended while owned work reaches its edge, so a job created after capacity
     was deleted is read rather than filtered away;
   * script children are listed WITHOUT a time filter and reconciled against the parent's declared `numChildJobs`: an
-    exhausted time-filtered page is not proof of complete child membership;
+    exhausted time-filtered page is not proof of complete child membership, and since the API refuses `allUsers`
+    together with `parentJobId` that listing is caller-scoped, so the declared count is what proves membership;
   * a declared evidence source that cannot be read is missing evidence and blocks.
 
 Nothing here cancels, deletes or submits. `reservation.close_window`, `lifecycle.cancel_journal`, `safety.cleanup` and
@@ -337,19 +338,27 @@ def classify(job: dict, *, label: str, start: _dt.datetime, end: _dt.datetime, r
                     "evidence": {"created": created.isoformat() if created else None,
                                  "containing_windows": inside, "unbounded_windows": unbounded}}
         if created is not None and not unbounded:
-            # campaign work that ran under some OTHER opening, or under no opening at all (an on-demand leg of the same
-            # driver run). Excluding it is a positive finding, not an inference from absence - but a job still routed
-            # to THIS window's reservation contradicts that reading and stays unresolved.
+            if inside:
+                # It ran under a DIFFERENT opening. The reservation name deliberately cannot override this: the spike
+                # recreated one name, `okf-graph-spike-20260905`, for every opening and deleted it again at each close
+                # (cleanup_manifest.json records five mk/rm cycles on it), so the name is shared by all five and
+                # discriminates none of them. The recorded interval is the only thing that does.
+                return {"ref": ref, "ownership": EXCLUDED, "signal": "campaign_other_window",
+                        "reason": f"campaign work inside the recorded capacity interval of {inside} instead; this "
+                                  f"window's reservation name is reused across every opening and cannot override that",
+                        "evidence": {"created": created.isoformat(), "containing_windows": inside,
+                                     "reservation_id": reservation_id}}
+            # It ran under NO opening at all - an on-demand leg of the same driver run. That is a positive finding
+            # rather than an inference from absence, EXCEPT when the job still carries the campaign reservation:
+            # then the platform and the recorded intervals contradict each other and the job stays unresolved.
             if on_this_reservation:
                 return {"ref": ref, "ownership": AMBIGUOUS, "signal": "reservation_outside_interval",
-                        "reason": f"campaign work on this window's reservation ({reservation_id}) created OUTSIDE its "
-                                  f"recorded capacity interval: the reservation and the interval disagree",
+                        "reason": f"campaign work on the campaign reservation ({reservation_id}) created outside "
+                                  f"EVERY recorded capacity interval: the reservation and the intervals disagree",
                         "evidence": {"created": created.isoformat(), "containing_windows": inside}}
-            return {"ref": ref, "ownership": EXCLUDED,
-                    "signal": "campaign_other_window" if inside else "campaign_outside_all_intervals",
-                    "reason": (f"campaign work inside the recorded capacity interval of {inside} instead" if inside
-                               else "campaign work created outside every recorded capacity interval and routed to no "
-                                    "reservation of this window: a leg of the campaign, not of this paid opening"),
+            return {"ref": ref, "ownership": EXCLUDED, "signal": "campaign_outside_all_intervals",
+                    "reason": "campaign work created outside every recorded capacity interval and routed to no "
+                              "campaign reservation: a leg of the campaign, not of this paid opening",
                     "evidence": {"created": created.isoformat(), "containing_windows": inside,
                                  "reservation_id": reservation_id}}
     if on_this_reservation:
@@ -425,7 +434,8 @@ def quiescence_probe(transport: Any, *, label: str, project: str, window: dict, 
     and look. This drains `jobs.list` from the recorded close to now and asks three separate questions:
 
       * did anything ATTRIBUTABLE to this window appear after it closed? (a tail the inventory would have missed);
-      * is anything on this project still PENDING or RUNNING? (an in-flight job, whoever owns it);
+      * is anything still PENDING or RUNNING that is not positively resolved away from this window? (every in-flight
+        job is retained either way, but an unrelated recurring transfer running right now is not this window's tail);
       * how long has the attributable stream been silent?
 
     `established` needs all three to come back clean AND a named local record of the shutdown, because a long silence
@@ -446,11 +456,16 @@ def quiescence_probe(transport: Any, *, label: str, project: str, window: dict, 
     attributable, nonterminal, latest = [], [], None
     for job in listing["jobs"]:
         state = (job.get("status") or {}).get("state")
-        if state not in (DONE, None):
-            nonterminal.append({"ref": job_ref(job), "state": state})
         entry = classify(job, label=label, start=_ts(window["opened_at"]), end=since,
                          recovered=frozenset(r for r in recovered if r), reservation=reservation,
                          decisions=decisions, campaign=campaign, windows=windows)
+        if state not in (DONE, None):
+            # Every in-flight job is RETAINED, whoever owns it - a shared project's live traffic is worth seeing. Only
+            # one that is not positively resolved away from this window refuses quiescence, though: a recurring
+            # transfer that happens to be RUNNING right now says nothing about whether a driver killed two days ago
+            # stopped submitting, and treating it as if it did would make quiescence unobtainable on a live project.
+            nonterminal.append({"ref": job_ref(job), "state": state, "ownership": entry["ownership"],
+                                "signal": entry["signal"], "reason": entry["reason"]})
         if entry["ownership"] == EXCLUDED:
             continue
         attributable.append({"ref": entry["ref"], "ownership": entry["ownership"], "signal": entry["signal"],
@@ -458,9 +473,11 @@ def quiescence_probe(transport: Any, *, label: str, project: str, window: dict, 
         for stamp in (_created(job), _epoch_ms(_stats(job).get("endTime"))):
             if stamp is not None and (latest is None or stamp > latest):
                 latest = stamp
-    if nonterminal:
-        reasons.append(f"{len(nonterminal)} job(s) on this project are still non-terminal after the window closed: "
-                       + ", ".join(sorted(f'{n["ref"]["job_id"]}={n["state"]}' for n in nonterminal))[:300])
+    unresolved_running = [n for n in nonterminal if n["ownership"] != EXCLUDED]
+    if unresolved_running:
+        reasons.append(f"{len(unresolved_running)} non-terminal job(s) after the window closed are not resolved away "
+                       f"from it: " + ", ".join(sorted(f'{n["ref"]["job_id"]}={n["state"]}'
+                                                       for n in unresolved_running))[:300])
 
     record = dict(local_record or {})
     local_stopped = record.get("stopped_at")
@@ -894,7 +911,14 @@ class RestGetTransport:
 
     def list_jobs(self, *, project: str, min_creation_time=None, max_creation_time=None, page_token=None,
                   page_size: int = PAGE_SIZE, parent_job_id: Optional[str] = None) -> dict:
-        params: dict[str, Any] = {"allUsers": True, "projection": "FULL", "maxResults": page_size}
+        # `allUsers` and `parentJobId` cannot be combined: the API rejects the pair outright with
+        # "all_users and parent_job_id cannot be combined", so every live child listing failed until this dropped it.
+        # A child listing is therefore scoped to the CALLER, which is why `list_window` reconciles what it read against
+        # the parent's declared `numChildJobs` instead of trusting the page: a scoped-out child shows up as a short
+        # read and keeps the window BLOCKED, never as an empty child set.
+        params: dict[str, Any] = {"projection": "FULL", "maxResults": page_size}
+        if not parent_job_id:
+            params["allUsers"] = True
         if min_creation_time is not None:
             params["minCreationTime"] = int(min_creation_time.timestamp() * 1000)
         if max_creation_time is not None:

@@ -521,15 +521,15 @@ def test_rest_transport_issues_only_get():
 
     t = RW.RestGetTransport(Client())
     start = _dt.datetime(2026, 9, 5, tzinfo=_dt.timezone.utc)
-    t.list_jobs(project=PROJ, min_creation_time=start, max_creation_time=start, parent_job_id="p")
+    t.list_jobs(project=PROJ, min_creation_time=start, max_creation_time=start)
     t.get_job(project=PROJ, location=LOC, job_id="j")
     assert [c["method"] for c in seen] == ["GET", "GET"]
     assert seen[0]["query_params"]["allUsers"] is True and seen[0]["query_params"]["projection"] == "FULL"
-    assert seen[0]["query_params"]["parentJobId"] == "p"
-    t.list_jobs(project=PROJ, min_creation_time=None, max_creation_time=None, parent_job_id="p")
-    assert "minCreationTime" not in seen[2]["query_params"]   # a child listing is not time-filtered
-    assert "stateFilter" not in seen[0]["query_params"]
+    assert "stateFilter" not in seen[0]["query_params"]       # no state filter: a listing must not hide a state
     assert seen[1]["query_params"] == {"location": LOC}
+    t.list_jobs(project=PROJ, min_creation_time=None, max_creation_time=None, parent_job_id="p")
+    assert seen[2]["query_params"]["parentJobId"] == "p"
+    assert "minCreationTime" not in seen[2]["query_params"]   # a child listing is not time-filtered
 
 
 # ----------------------------------------------------------------------------- reservation gate still refuses today
@@ -624,6 +624,15 @@ def test_campaign_work_under_another_opening_or_no_opening_is_excluded_with_a_re
     assert gap["ownership"] == RW.EXCLUDED and gap["signal"] == "campaign_outside_all_intervals"
 
 
+def test_the_shared_reservation_name_cannot_override_another_windows_interval():
+    """The spike recreated ONE reservation name for every opening, so the name is shared by all five and discriminates
+    none of them. A campaign job inside a neighbour's recorded interval belongs to that neighbour, reservation or not."""
+    j = spike_job("n", created="2026-09-05T23:51:00Z", reservation=f"p:US.{RW.RESERVATION}")
+    entry = classify_one(j)
+    assert entry["ownership"] == RW.EXCLUDED and entry["signal"] == "campaign_other_window"
+    assert entry["evidence"]["containing_windows"] == ["later-2"]
+
+
 def test_a_job_on_this_reservation_outside_the_interval_stays_unresolved():
     """The `okf_rcpt_*` tail: capacity deletion propagates late, so a job can carry a reservation the interval says was
     already gone. That contradiction is surfaced, never resolved by the exclusion rule."""
@@ -702,12 +711,25 @@ def test_an_attributable_tail_after_the_close_is_not_quiescence():
     assert q["stopped_at"] > "2026-09-05T23:47:25"                 # the stop moment moves to the tail we found
 
 
-def test_a_nonterminal_job_anywhere_refuses_quiescence():
-    running = spike_job("busy", created="2026-09-06T01:00:00Z", state="RUNNING")
+def test_an_unresolved_nonterminal_job_refuses_quiescence():
+    running = spike_job("busy", created="2026-09-06T01:00:00Z", state="RUNNING",
+                        reservation=f"p:US.{RW.RESERVATION}")     # unresolved: reservation_outside_interval
     q = RW.quiescence_probe(probe_transport([running]), label="smoke-1", project=PROJ, window=W1, until=NOW,
                             campaign=CAMPAIGN, windows=[W1, W2], local_record=local_record())
     assert q["established"] is False
     assert any("non-terminal" in r for r in q["not_established_because"])
+
+
+def test_an_unrelated_running_job_is_retained_but_does_not_refuse_quiescence():
+    """A shared project has live traffic. A recurring transfer that is RUNNING right now says nothing about whether a
+    driver killed two days ago stopped submitting - but it is still written down."""
+    stranger = job("scheduled_query_x", created="2026-09-08T00:00:00Z", state="RUNNING", email="transfer@example.test")
+    q = RW.quiescence_probe(probe_transport([stranger]), label="smoke-1", project=PROJ, window=W1, until=NOW,
+                            campaign=CAMPAIGN, windows=[W1, W2], local_record=local_record())
+    assert q["established"] is True, q["not_established_because"]
+    assert q["probe"]["nonterminal"][0]["ref"]["job_id"] == "scheduled_query_x"
+    assert q["probe"]["nonterminal"][0]["ownership"] == RW.EXCLUDED
+    assert q["probe"]["attributable_after_close"] == []
 
 
 def test_an_incomplete_probe_listing_is_never_silence():
@@ -782,3 +804,40 @@ def test_build_plan_carries_operator_decisions_through_to_the_right_window(tmp_p
     decision = {"stranger": {"ownership": RW.EXCLUDED, "reason": "a scheduled query of an unrelated pipeline"}}
     plan = RW.build_plan(manifest, evidence_dir=tmp_path, decisions={"smoke-1": decision})
     assert plan["windows"][0]["decisions"] == decision
+
+
+def test_a_child_listing_never_asks_for_all_users():
+    """`jobs.list` rejects `allUsers` together with `parentJobId` ("all_users and parent_job_id cannot be combined"),
+    so every live child listing failed until the pair was dropped. The child page is caller-scoped as a result, which
+    is exactly why membership is proved against the parent's declared `numChildJobs` and not against the page."""
+    class Conn:
+        def __init__(self):
+            self.queries = []
+
+        def api_request(self, *, method, path, query_params):
+            self.queries.append((path, dict(query_params)))
+            return {"jobs": []}
+
+    class Client:
+        def __init__(self):
+            self._connection = Conn()
+
+    client = Client()
+    t = RW.RestGetTransport(client)
+    t.list_jobs(project=PROJ)
+    t.list_jobs(project=PROJ, parent_job_id="parent-1")
+    top, child = client._connection.queries
+    assert top[1]["allUsers"] is True and top[1]["projection"] == "FULL"
+    assert "allUsers" not in child[1]
+    assert child[1]["parentJobId"] == "parent-1" and child[1]["projection"] == "FULL"
+
+
+def test_a_short_child_read_keeps_the_window_blocked():
+    """A caller-scoped child listing that comes back short of the declared count is not an empty child set."""
+    parent = job("okf_graph_smoke-1_p")
+    parent["statistics"]["numChildJobs"] = 3
+    t = FakeTransport(pages=[{"jobs": [parent]}], children={"okf_graph_smoke-1_p": [{"jobs": []}]},
+                      get={"okf_graph_smoke-1_p": parent})
+    result = run(transport=t)
+    assert result["status"] == RW.BLOCKED
+    assert any("script children unreconciled" in b for b in result["blockers"])
