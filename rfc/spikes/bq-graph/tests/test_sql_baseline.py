@@ -108,7 +108,7 @@ def test_every_cell_is_empty_and_says_why(card):
     assert card["state"] == "SCAFFOLD_ONLY"
     for cell in card["cells"]:
         assert cell["state"] == "INCOMPLETE"
-        assert cell["stopped_reason"] in ("NOT_RUN_DRIVER_MISSING", "NOT_IMPLEMENTED")
+        assert cell["stopped_reason"] in ("NOT_RUN", "NOT_IMPLEMENTED")
         assert cell["how_to_fill"]
         for field in ("p50_ms", "p95_ms", "max_ms", "success_rate", "bytes_billed", "usd_ondemand_list"):
             assert cell[field] is None
