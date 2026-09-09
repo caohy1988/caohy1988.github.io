@@ -192,6 +192,78 @@
     .brief-rail .latest-brief:hover {
       background: rgba(232, 115, 36, 0.06);
     }
+
+    /* Stories companion rail on Research */
+    .stories-rail {
+      margin: 0 0 22px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--mint);
+      border-radius: 6px;
+      background: var(--cream);
+      padding: 14px 16px 12px;
+    }
+    .stories-rail .sr-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px 14px;
+      margin: 0 0 10px;
+    }
+    .stories-rail .sr-kicker {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mint);
+      margin: 0;
+    }
+    .stories-rail .sr-all {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent-dark);
+      text-decoration: none;
+    }
+    .stories-rail .sr-all:hover { text-decoration: underline; }
+    .stories-rail .sr-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .stories-rail .sr-list a {
+      display: block;
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+    }
+    .stories-rail .sr-list a:hover {
+      background: rgba(15, 118, 110, 0.06);
+      border-color: var(--line);
+    }
+    .stories-rail .sr-meta {
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin: 0 0 2px;
+    }
+    .stories-rail .sr-title {
+      font-family: var(--serif);
+      font-size: 1.02rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+
     .live {
       display: inline-flex;
       align-items: center;
@@ -593,6 +665,7 @@
       <p class="edition-meta" id="edition-meta"></p>
     </div>
     <div id="brief-rail-slot"></div>
+    <div id="stories-rail-slot"></div>
     <div class="controls" id="controls" hidden></div>
     <div class="layout" id="app">
       <p class="empty">Fetching today’s brief…</p>
@@ -726,6 +799,51 @@
             <span class="lb-meta">${escapeHtml(status)}</span>
           </a>`;
       return `<div class="brief-rail">${lb}</div>`;
+    }
+
+    function storiesChannel(e) {
+      const src = String(e.source || "").toLowerCase();
+      const href = String(e.href || "").toLowerCase();
+      if (e.kind === "video" || src.includes("youtube") || href.includes("youtube.com") || href.includes("youtu.be")) return "Video";
+      if (src.includes("medium") || href.includes("medium.com")) return "Medium";
+      if (src.includes("google cloud") || href.includes("cloud.google.com")) return "Google Cloud";
+      return "Community";
+    }
+
+    function storiesRailHtml(entries) {
+      if (!entries || !entries.length) return "";
+      const top = entries.slice().sort((a, b) => {
+        const da = a.date || "";
+        const db = b.date || "";
+        if (db !== da) return db.localeCompare(da);
+        return String(b.id || "").localeCompare(String(a.id || ""));
+      }).slice(0, 3);
+      const items = top.map((e) => {
+        const meta = [storiesChannel(e), e.displayDate || e.date || ""].filter(Boolean).join(" · ");
+        return `<li><a href="${escapeHtml(e.href)}" rel="noopener noreferrer" target="_blank">
+          <p class="sr-meta">${escapeHtml(meta)}</p>
+          <div class="sr-title">${escapeHtml(e.title || "")}</div>
+        </a></li>`;
+      }).join("");
+      return `<div class="stories-rail">
+        <div class="sr-head">
+          <p class="sr-kicker">BigQuery Agent Analytics · Stories</p>
+          <a class="sr-all" href="/research/stories/">All stories →</a>
+        </div>
+        <ul class="sr-list">${items}</ul>
+      </div>`;
+    }
+
+    async function loadStoriesRail() {
+      const slot = $("stories-rail-slot");
+      if (!slot) return;
+      try {
+        const res = await fetch("/research/stories/stories.json?v=" + Date.now(), { cache: "no-store" });
+        const data = await res.json();
+        slot.innerHTML = storiesRailHtml(data.entries || []);
+      } catch (_) {
+        slot.innerHTML = "";
+      }
     }
 
     function briefsHtml(day) {
