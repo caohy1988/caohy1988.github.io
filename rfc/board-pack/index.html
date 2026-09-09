@@ -208,73 +208,73 @@
             <p class="design-intro">A proposed integration, not a product. The OKF bundle stays the authored source; BigQuery would host a projection of each publication. Everything below was exercised on invented gross-margin data for a fictional company, Acme — never on a customer’s cohort.</p>
             <section class="design-part" aria-labelledby="design-context">
               <h3 id="design-context">Retrieve a fixed context</h3>
-              <p>Follow Finance’s retention definition through its authored links to the cohort rule and the declared computation, over plain SQL or a depth-bounded walk. Publication, query, parameters, fact versions, traversal bounds and result shape are pinned in advance, and a retrieval receipt records them with the node IDs returned.</p>
+              <p>Follow Finance’s retention definition through its authored links to the cohort rule and the declared computation, under fixed inputs and bounded traversal, with a retrieval receipt recording what was pinned and what came back.</p>
               <p class="design-cue">Shown</p>
               <ul class="design-points">
-                <li>A walk reached the sanctioned SQL through its authored links and matched a plain relational cross-check (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/bb88df40014dc8030b42165308840c62337af429/rfc/spikes/bq-graph/evidence/report.md">what the walk showed and where it stops</a>).</li>
-                <li>It ran on generally available vector search plus graph queries.</li>
+                <li>On generally available vector search plus graph queries, a walk reached the sanctioned SQL and matched a plain relational cross-check (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/bb88df40014dc8030b42165308840c62337af429/rfc/spikes/bq-graph/evidence/report.md">what the walk showed and where it stops</a>).</li>
               </ul>
-              <p class="design-cue">Not shown</p>
+              <p class="design-cue">Limits</p>
               <ul class="design-points">
-                <li>The walk finds that SQL but never runs it.</li>
-                <li>Its own starting point was pinned by hand, not discovered.</li>
+                <li>The walk finds that SQL but never runs it, from a start pinned by hand, not discovered.</li>
                 <li>Graph-native semantic search is a separate <a href="https://docs.cloud.google.com/bigquery/docs/graph-search">Preview option</a> we did not test.</li>
-                <li>The receipt says which context was chosen — not that retention was computed, and not that the model gives the same answer twice.</li>
+                <li>The receipt says which context was chosen, not that retention was computed or that the model answers the same way twice.</li>
               </ul>
             </section>
             <section class="design-part" aria-labelledby="design-access">
               <h3 id="design-access">Evaluate current access</h3>
-              <p>The requester is authenticated and bound to the identity that actually runs the query. Access joins who is asking, the current policy and the assets the walk wants to touch, enforced along the retrieval path rather than only at the door. The record notes which policy version applied and which nodes went to whom. A pin never bypasses current authorization, metadata about a file is not access to the file, and a shared service account cannot by itself tell us Finance’s agent was asking.</p>
+              <p>The requester is bound to the identity that runs the query; access is checked along the retrieval path, not only at the door, and recorded with the policy version and the nodes released.</p>
               <p class="design-cue">Shown</p>
               <ul class="design-points">
-                <li>A deliberately restricted identity was denied on the same protected tables, and stayed denied after revocation (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/bb88df40014dc8030b42165308840c62337af429/rfc/spikes/bq-graph/evidence/authz_cases.json">the access cases and their limits</a>).</li>
-                <li>Nothing fell back to the owner’s credential.</li>
-                <li>A refusal named no denied node or section — though other identifiers can still appear.</li>
+                <li>A restricted identity was denied on the protected tables, stayed denied after revocation, and never fell back to the owner’s credential (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/bb88df40014dc8030b42165308840c62337af429/rfc/spikes/bq-graph/evidence/authz_cases.json">the access cases and their limits</a>).</li>
+                <li>Refusals named no denied node or section, though other identifiers can still appear.</li>
               </ul>
-              <p class="design-cue">Not shown</p>
+              <p class="design-cue">Limits</p>
               <ul class="design-points">
-                <li>Those denials ran on the ordinary SQL path, never inside graph queries.</li>
-                <li>Whether hidden identifiers leak under the operator’s own identity, and whether protection holds across mixed publications.</li>
-                <li>Per-node graph authorization: the receipt check’s caller-binding and revocation tests cover one job’s owner and one dataset grant.</li>
+                <li>Per-node graph authorization is unshown: those denials ran on plain SQL, never inside graph queries.</li>
+                <li>Leakage of hidden identifiers under the operator’s own identity, and protection across mixed publications, remain untested.</li>
+                <li>A pin never bypasses current authorization, metadata about a file is not access to it, and a shared service account cannot by itself tell us who was asking.</li>
               </ul>
             </section>
             <section class="design-part" aria-labelledby="design-execution">
               <h3 id="design-execution">Validate the calculation</h3>
-              <p>Retention is computed in its own step. The job, its query and parameters, the input versions, the pinned context and the result are bound together in a computation receipt and checked against the declared calculation. Swapping in total ARR, as in the story above, must fail that check; a retrieval receipt or a job ID alone is not enough.</p>
+              <p>Retention is computed in its own step, and a receipt binds job, query, inputs, pinned context and result to the declared calculation; the story’s total-ARR swap must fail that check.</p>
               <p class="design-cue">Shown</p>
               <ul class="design-points">
-                <li>The job ran under the caller, and the check was made independently of the process that produced the result (<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/6719eb535667963fa640dd4535e508b550eb6cb1/examples/okf_attested_computation/evidence/receipt/report.md">what the receipt check showed</a>).</li>
-                <li>The number was released only once query, inputs and result agreed — and withheld wherever they did not.</li>
+                <li>Checked independently of the process that produced it, the job under the caller released its number only when query, inputs and result agreed, and withheld it otherwise (<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/6719eb535667963fa640dd4535e508b550eb6cb1/examples/okf_attested_computation/evidence/receipt/report.md">what the receipt check showed</a>).</li>
               </ul>
-              <p class="design-cue">Not shown</p>
+              <p class="design-cue">Limits</p>
               <ul class="design-points">
-                <li>It ran under the requester’s own delegation, signing key held locally, on one small invented fixture.</li>
-                <li>No independent verifier and no portable signatures; where evidence is missing, the number stays unproven.</li>
+                <li>Requester’s own delegation, signing key held locally, one small invented fixture.</li>
+                <li>No independent verifier, no portable signatures; where evidence is missing the number stays unproven.</li>
               </ul>
             </section>
             <section class="design-part" aria-labelledby="design-chain">
               <h3 id="design-chain">The three as one path</h3>
-              <p>Joined, the three run as one path: a live catalog read says which publication to pin, governed retrieval supplies the declared calculation, and the receipt check verifies the job before any number is released. What each step returns is checked against a copy already trusted, so a catalog entry cannot point the chain at a different project or dataset.</p>
-              <p class="design-cue">Shown — three runs, each reaching a different part of that path</p>
+              <p>Joined: a live catalog read picks the publication to pin, governed retrieval supplies the declared calculation, and the receipt check verifies the job before release, each step checked against a copy already trusted.</p>
+              <p class="design-cue">Shown</p>
               <ul class="design-points">
-                <li>Catalog-seeded runs went from the live read to an enforcing consumer, kept their pinned version while the published head moved, and stopped without calculation or receipt wherever publication or content failed validation (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/50ecaa8976cb5fb633fb1c2b11b70eba3bbcd939/rfc/spikes/bq-graph/evidence/catalog-chain/b2-20260907t162636z-cd45/b2_summary.md">what those cases showed</a>).</li>
-                <li>A restricted-identity run refused the hidden rule, the unauthorized output and the replay after revocation, inside the chain (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/ad18b075524d7b752c5782da17c29e70cee05fb7/rfc/spikes/bq-graph/README.md#live-restricted-pass-slice-b-2026-09-07">how that run worked</a>).</li>
-                <li>One run retrieved through graph queries on Enterprise capacity, releasing only after the declaration matched the publication actually queried and the receipt check passed (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/0ab27d679a1e640cc7dcfdbeea465e44788ab133/rfc/spikes/bq-graph/evidence/chain/SLICE_B_RUN_E_20260908.md">what that run did and did not show</a>).</li>
+                <li>Catalog-seeded runs went from live read to enforcing consumer, held their pinned version while the head moved, and stopped before any calculation or receipt where validation failed (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/50ecaa8976cb5fb633fb1c2b11b70eba3bbcd939/rfc/spikes/bq-graph/evidence/catalog-chain/b2-20260907t162636z-cd45/b2_summary.md">what those cases showed</a>).</li>
+                <li>A restricted identity held inside the chain: access and revocation were enforced and nothing unauthorized was released (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/ad18b075524d7b752c5782da17c29e70cee05fb7/rfc/spikes/bq-graph/README.md#live-restricted-pass-slice-b-2026-09-07">how that run worked and where it stops</a>).</li>
+                <li>One run retrieved through graph queries on Enterprise capacity, releasing only once the declaration matched the publication queried and the receipt check passed (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/0ab27d679a1e640cc7dcfdbeea465e44788ab133/rfc/spikes/bq-graph/evidence/chain/SLICE_B_RUN_E_20260908.md">what that run did and did not show</a>).</li>
               </ul>
-              <p class="design-cue">Not shown</p>
+              <p class="design-cue">Limits</p>
               <ul class="design-points">
-                <li>All three carried a single identity; the catalog-seeded and restricted-identity runs retrieved with plain SQL.</li>
-                <li>The restricted-identity and graph-query runs began from a point we chose rather than one discovered.</li>
-                <li>The graph-query run exercised only the case expected to succeed — a swapped query has never been refused through graph queries.</li>
-                <li>The catalog read is our own, seeded for the experiment; the released number was invented gross margin, not Alder’s retention; the receipt ran on a small synthetic fixture; the formula swap was a fixed test case, not the story’s total-ARR query.</li>
+                <li>All three carried a single identity; the catalog-seeded and restricted-identity runs used plain SQL; the restricted-identity and graph-query runs began from a point we chose rather than one discovered.</li>
+                <li>Graph queries covered only the case expected to succeed; a swapped query has never been refused through graph queries.</li>
+                <li>The catalog read is our own, seeded for the experiment; the number was invented gross margin, not Alder’s retention; the receipt ran on a small synthetic fixture and a fixed test case, not the story’s total-ARR swap.</li>
                 <li>No run used an independent attester.</li>
               </ul>
             </section>
             <section class="design-part" aria-labelledby="design-evidence">
               <h3 id="design-evidence">What is still open</h3>
-              <p><strong>The bar.</strong> We will call the connected path proven only after one run does all of it at once: catalog discovery, a pinned publication, governed retrieval, a computation delegated by the caller, a receipt bound to the result, and a consumer that enforces it — with tests for publication consistency, denied intermediate nodes, revocation before cached replay and unauthorized output. The three runs above each reach a different part of it; none has done two, let alone all three.</p>
-              <p><strong>Also unfinished.</strong> Speed benchmarks are incomplete — none of the nine planned cells — and the ordinary-SQL comparison is <a href="../spikes/bq-graph/evidence/sql-baseline/baseline.md">a declared plan with no numbers in it yet</a>. The work is merged and reviewed in its own code bases, but on the receipt example the reviewer who approved it also wrote the final fix, and merge is not readiness. No customer has agreed an operating budget, and the broader case — BigQuery as a general serving layer for the Catalog — is weaker than the scoped one above.</p>
-              <p><strong>The checkpoint.</strong> Receipt work should not wait for the graph benchmark. The opportunity narrows if budgets or Enterprise cost prove unacceptable, if simpler retrieval meets the need, if semantics, authorization or publication guarantees fail, or if result evidence cannot be bound and enforced. Boundaries: <a href="https://docs.cloud.google.com/bigquery/docs/editions-intro">BigQuery editions</a>, <a href="https://docs.cloud.google.com/bigquery/docs/graph-compare">graph placement</a>.</p>
+              <p><strong>The bar.</strong> Proven means one run doing all of it at once: catalog discovery, a pinned publication, governed retrieval, a computation delegated by the caller, a receipt bound to the result and a consumer that enforces it, with publication, per-node access, revocation and output checks holding throughout. The three runs above each reach a different part; none has done two, let alone all three.</p>
+              <p class="design-cue">Also unfinished</p>
+              <ul class="design-points">
+                <li>Speed benchmarks: none of the nine planned cells is complete, and the ordinary-SQL comparison is <a href="../spikes/bq-graph/evidence/sql-baseline/baseline.md">a declared plan with no numbers in it yet</a>.</li>
+                <li>Merged and reviewed in its own code bases, but on the receipt example the approving reviewer also wrote the final fix; merge is not readiness.</li>
+                <li>No customer has agreed an operating budget, and BigQuery as a general serving layer for the Catalog is a weaker case than the scoped one above.</li>
+              </ul>
+              <p><strong>The checkpoint.</strong> Receipt work should not wait for the graph benchmark. The opportunity narrows if cost, simpler retrieval, semantics, authorization or publication guarantees go against it, or if result evidence cannot be bound and enforced. Boundaries: <a href="https://docs.cloud.google.com/bigquery/docs/editions-intro">BigQuery editions</a>, <a href="https://docs.cloud.google.com/bigquery/docs/graph-compare">graph placement</a>.</p>
             </section>
           </div>
         </div>
