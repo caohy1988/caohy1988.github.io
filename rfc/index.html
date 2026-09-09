@@ -6,6 +6,19 @@
   <meta name="description" content="Illustrative board decision: the agent says 118% retention; the right number is 96%. What Knowledge Catalog and OKF do today, what a proposed BigQuery feature — Knowledge Publications — would add, and what we still need to prove.">
   <meta name="theme-color" content="#1e302d">
   <link rel="canonical" href="https://caohy1988.github.io/rfc/">
+  <script>
+    // Bookmarks into the technical RFC that used to live at /rfc/ open the detailed page, hash intact.
+    // The list is every section id of rfc/detailed-rfc/index.html that this page does not define (tested).
+    (function () {
+      var legacy = ["accept", "arch-crosswalk", "architecture", "baseline", "baseline-body", "closing", "current-evidence", "decision", "details", "motivation", "phases", "repro", "repro-ask-later", "runtime-guarantees", "statemachine", "summary"];
+      function forward() {
+        var h = location.hash.slice(1);
+        if (h && legacy.indexOf(h) !== -1) location.replace("detailed-rfc/#" + h);
+      }
+      forward();
+      window.addEventListener("hashchange", forward);
+    })();
+  </script>
   <title>118% in the board pack. 96% retained.</title>
   <link rel="stylesheet" href="styles.css">
 </head>

@@ -18,3 +18,7 @@ PR 61 (`feat/sqlchain-fact-select`) edits three hunks in `rfc/board-pack/index.h
 - PR 61's `rfc/index.html` hunks belong in `rfc/detailed-rfc/index.html` after this slice.
 
 The content was copied, not git-mv'd through PR 61's files, so git will report plain conflicts rather than silent misapplied renames.
+
+## Fix pass (Astra review 5157689974)
+
+8. Fragment-preserving stubs, legacy-bookmark forwarder, demo nav + register row, browser route check. Rerun link tests, full suite, both demo checkers; push; reply on the PR.

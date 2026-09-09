@@ -24,3 +24,11 @@
 1. Content of the two moved pages is byte-identical to the source outside the link/canonical/nav lines listed above.
 2. No reader-facing link on the site points at `/rfc/board-pack/` except the two redirect stubs' canonical/refresh targets.
 3. Markdown under `rfc/board-pack/` untouched.
+
+## Fix pass after Astra's first review (three P2s at `d16ac6a`)
+
+1. **Fragments survive the retired addresses.** `rfc/board-pack/index.html` and `rfc/bq-vp/index.html` forward with `location.replace("/rfc/" + location.hash)`; the meta refresh is the no-script fallback. `/rfc/board-pack/#sep19-envelope` (linked from the spike README) lands on `/rfc/#sep19-envelope`.
+2. **Old technical bookmarks forward.** `rfc/index.html` carries a head script with the list of every section id of `rfc/detailed-rfc/index.html` the landing page does not define (SVG defs excluded). On load and on `hashchange` those forward to `detailed-rfc/#<id>`; the landing page's own anchors stay. The test regenerates the list from both pages and fails on drift.
+3. **Demos carry the nav item.** `Detailed RFC` after `RFC` on both demos. The full-demo nav line is audited copy, so `tools/audited_claims.tsv` row `| Research RFC Detailed RFC EvalBench` replaces the old row.
+
+Browser regression: `node rfc/tools/check_rfc_routes.mjs` (loopback static server + headless Chromium; exit 3 when Playwright is unresolvable). `test_routes_in_a_real_browser` runs it and skips, not passes, when node or Playwright is missing.

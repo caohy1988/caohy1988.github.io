@@ -10,9 +10,12 @@ returned 404. Two gates, both offline:
 
 Since the /rfc/ restructure the board pack is the landing page at `rfc/index.html` and the full
 technical RFC lives at `rfc/detailed-rfc/index.html`; both are gated. The old
-`rfc/board-pack/` and `rfc/bq-vp/` addresses stay as redirect stubs pointing at `/rfc/`.
+`rfc/board-pack/` and `rfc/bq-vp/` addresses stay as redirect stubs pointing at `/rfc/`, fragment
+intact, and the landing page forwards the old technical RFC's bookmarks to `/rfc/detailed-rfc/`.
 """
+import json
 import re
+import shutil
 import subprocess
 
 import pytest
@@ -74,11 +77,61 @@ def test_the_moved_pages_declare_their_new_canonical_addresses():
 
 
 @pytest.mark.parametrize("stub", REDIRECTS, ids=[p.parent.name for p in REDIRECTS])
-def test_old_addresses_redirect_to_the_landing_page(stub):
+def test_old_addresses_redirect_to_the_landing_page_keeping_the_fragment(stub):
+    """PR 62 Astra P2 #1: a meta refresh drops `#sep19-envelope`; the script forwards it, the refresh is the
+    no-script fallback."""
     text = stub.read_text()
-    assert '<meta http-equiv="refresh" content="0; url=/rfc/">' in text
+    assert '<script>location.replace("/rfc/" + location.hash);</script>' in text
+    assert '<noscript><meta http-equiv="refresh" content="0; url=/rfc/"></noscript>' in text
+    assert text.index("<script>") < text.index("<noscript>")
     assert '<link rel="canonical" href="https://caohy1988.github.io/rfc/">' in text
     assert "/rfc/board-pack/" not in text, "the stub must not send readers back to the retired address"
+
+
+SVG_DEFS = {"marker", "lineargradient", "radialgradient", "filter", "pattern", "clippath", "symbol", "mask"}
+LEGACY_LIST = re.compile(r"var legacy = (\[[^\]]*\]);")
+
+
+def _section_ids(page):
+    return {i for tag, i in re.findall(r'<(\w+)[^>]*\sid="([^"]+)"', page.read_text()) if tag.lower() not in SVG_DEFS}
+
+
+def test_the_landing_page_forwards_every_old_technical_bookmark_and_none_of_its_own():
+    """PR 62 Astra P2 #2: `/rfc/#current-evidence` used to be a technical-RFC bookmark. The landing page
+    forwards exactly the detailed page's section ids it does not define itself, on load and on hash change."""
+    text = PAGE.read_text()
+    m = LEGACY_LIST.search(text)
+    assert m, "the landing page carries the legacy-bookmark forwarder"
+    legacy = set(json.loads(m.group(1)))
+    expected = _section_ids(DETAILED) - _section_ids(PAGE)
+    assert legacy == expected, f"stale forwarder list; regenerate from the pages: {sorted(legacy ^ expected)}"
+    assert {"architecture", "repro", "current-evidence", "summary"} <= legacy
+    assert not (legacy & _section_ids(PAGE)), "the landing page's own anchors must stay on /rfc/"
+    assert "sep19-envelope" in _section_ids(PAGE) and "sep19-envelope" not in legacy
+    assert 'location.replace("detailed-rfc/#" + h)' in text
+    assert 'window.addEventListener("hashchange", forward)' in text
+    assert text.index("var legacy") < text.index("<body"), "forward before the story renders"
+
+
+def test_both_demos_carry_the_detailed_rfc_nav_item():
+    """PR 62 Astra P2 #3."""
+    for demo in ("demo", "full-demo"):
+        text = (REPO / "rfc" / demo / "index.html").read_text()
+        assert '<a href="/rfc/" aria-current="page">RFC</a>\n      <a href="/rfc/detailed-rfc/">Detailed RFC</a>' in text, demo
+
+
+def test_routes_in_a_real_browser():
+    """rfc/tools/check_rfc_routes.mjs drives headless Chromium over a loopback static server: the retired
+    addresses and the old technical bookmarks forward with their fragment, the landing page's own anchors
+    stay, both demos show the nav item. Skipped, not passed, when node or Playwright is not resolvable."""
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
+    out = subprocess.run([node, str(REPO / "rfc" / "tools" / "check_rfc_routes.mjs")], capture_output=True, text=True, timeout=300)
+    if out.returncode == 3:
+        pytest.skip("Playwright is not resolvable: " + out.stderr.strip())
+    assert out.returncode == 0, out.stdout + out.stderr
+    assert "all routes behave" in out.stdout
 
 
 @pytest.mark.parametrize("page", PAGES.values(), ids=list(PAGES))
