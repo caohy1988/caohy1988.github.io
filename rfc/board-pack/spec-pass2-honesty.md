@@ -23,8 +23,9 @@ jobs, 28.1 GiB charged at $0.17 list inside the declared 64 GiB / $0.50 ceiling,
 | `sqlbase_natural_c1` | natural | 1 | 100/100 | 3,724 | 4,459 | 100% |
 | `sqlbase_natural_c5` | natural | 5 | 100/100 | 13,799 | 15,892 | 99% |
 
-Percentiles are nearest-rank over every measured attempt, failures included. Three earlier campaigns measured nothing
-and are retained on the card. The per-request slowdown at C=5 (about 3.4× forced, 3.7× natural) has no established
+Percentiles are nearest-rank over every measured attempt, failures included. Three earlier campaigns completed no retrieval cell
+and are retained on the card: the first two produced no successful retrieval measurement (their measured failed
+attempts are retained), and the third was denied at preflight before sampling. The per-request slowdown at C=5 (about 3.4× forced, 3.7× natural) has no established
 cause; per-job creation-to-start and server execution medians are roughly unchanged from C=1, so queueing is a
 hypothesis, not a finding.
 
