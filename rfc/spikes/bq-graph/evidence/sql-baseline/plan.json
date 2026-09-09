@@ -120,7 +120,7 @@
   },
   "metrics": {
     "retrieval_ms": "Wall time of one governed retrieval call: seed, walk, context, nodes, assembly. This is what okf_bq_graph.benchmark already measures and what every recorded prior observation covers.",
-    "request_to_consumer_ms": "Wall time from the requester's question to the consumer's release-or-refuse decision: retrieval plus binding, the caller-delegated BigQuery job, independent verification and the consumer check. No repeated-sample runner exists for this today.",
+    "request_to_consumer_ms": "Wall time from the requester's question to the consumer's release-or-refuse decision: retrieval plus binding, the caller-delegated BigQuery job, independent verification and the consumer check. The repeated-sample runner (okf_bq_graph.consumer_run, FS-1 2026-09-09) has dry-run and hermetic modes only: no live repeated-sample measurement of this exists today, and a hermetic attempt is not one.",
     "separation_rule": "The two are reported separately and never substituted for one another. The 2026-09-06 chain pass of about 23 seconds covered three cases end to end and is neither metric: it is not a per-request retrieval time and not a sampled request-to-consumer distribution."
   },
   "budget": {
@@ -432,13 +432,13 @@
       "prior_observations": [],
       "hermetic_runs": [
         {
-          "run_id": "consumer-hermetic-20260909T211235Z-f2434072",
+          "run_id": "consumer-hermetic-20260909T215231Z-875d99b0",
           "verdict": "RUNNER_HERMETIC_OK",
           "attempts_retained": 23,
           "released": 22,
           "refused": 1,
           "probe": "REFUSED",
-          "file": "evidence/consumer/run_consumer-hermetic-20260909T211235Z-f2434072.json"
+          "file": "evidence/consumer/run_consumer-hermetic-20260909T215231Z-875d99b0.json"
         }
       ],
       "hermetic_runs_note": "Retained hermetic runs of okf_bq_graph.consumer_run that covered this cell, by id: attempts retained and decisions only. Their orchestration times are in the records and are not this cell's metric; a hermetic attempt never fills a live cell.",
@@ -468,13 +468,13 @@
       "prior_observations": [],
       "hermetic_runs": [
         {
-          "run_id": "consumer-hermetic-20260909T211235Z-f2434072",
+          "run_id": "consumer-hermetic-20260909T215231Z-875d99b0",
           "verdict": "RUNNER_HERMETIC_OK",
           "attempts_retained": 23,
           "released": 22,
           "refused": 1,
           "probe": "REFUSED",
-          "file": "evidence/consumer/run_consumer-hermetic-20260909T211235Z-f2434072.json"
+          "file": "evidence/consumer/run_consumer-hermetic-20260909T215231Z-875d99b0.json"
         }
       ],
       "hermetic_runs_note": "Retained hermetic runs of okf_bq_graph.consumer_run that covered this cell, by id: attempts retained and decisions only. Their orchestration times are in the records and are not this cell's metric; a hermetic attempt never fills a live cell.",

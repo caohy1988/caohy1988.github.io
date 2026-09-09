@@ -44,7 +44,7 @@ from .chain import (COMPUTATION_PATH, EXAMPLE_REL, MISMATCH_PATH, MISMATCH_SEED,
                     accept, bind, consume, declaration, governed, pick_computation, run_receipt, sdk_publication,
                     sdk_root as default_sdk_root)
 
-RUNNER_VERSION = "okf_bq_graph.consumer_run/0.1.0"
+RUNNER_VERSION = "okf_bq_graph.consumer_run/0.1.1"  # 0.1.1: atomic run-id ownership, attempt-boundary retention, retained CLI refusals, SQL NULL/FX oracle semantics
 ROOT = sb.ROOT
 OUT_DIR = ROOT / "evidence" / "consumer"
 FACTS_DIR = ROOT / "fixtures" / "facts"
@@ -98,8 +98,9 @@ def gross_margin_from_manifest(manifest: dict, period_start: _dt.date, period_en
     """The sanctioned SQL's semantics over `okf-fact-content/1` rows, join graph reproduced row for row.
 
     recognized_orders: delivered, DATE(order_ts) at least 30 days before `evaluation_date` (CURRENT_DATE()), inside
-    the period; revenue = net_amount (USD) or net_amount * rate_to_usd via the FX left join (no rate -> NULL, dropped
-    by SUM). cogs_full: order_lines JOIN products LEFT JOIN fulfillment_cost, shipment_cost, payment_fees, summed per
+    the period; the FX LEFT JOIN happens before the CASE, so every matching rate row yields a recognised row (USD too);
+    revenue = net_amount (USD) or net_amount * rate_to_usd (no rate -> NULL, dropped by SUM; all NULL -> the SUM and the
+    whole expression are NULL). cogs_full: order_lines JOIN products LEFT JOIN fulfillment_cost, shipment_cost, payment_fees, summed per
     order over the joined rows exactly as the SQL would (a duplicated join row duplicates its cost). Result:
     SUM(revenue) - SUM(COALESCE(components, 0)) over recognized LEFT JOIN cogs; None when nothing is recognised."""
     fx = {}
@@ -111,11 +112,12 @@ def gross_margin_from_manifest(manifest: dict, period_start: _dt.date, period_en
         if o["order_status"] != "delivered" or (evaluation_date - d).days < 30 or not (period_start <= d <= period_end):
             continue
         net = _dec(o["net_amount"])
-        if o["currency"] == "USD":
-            recognized.append((o["order_id"], net))
-        else:
-            rates = fx.get((o["currency"], d)) or [None]
-            for rate in rates:   # LEFT JOIN: one row per matching rate, or one row with NULL revenue
+        # the SQL LEFT JOINs fx_daily_rates BEFORE the CASE: one recognised row per matching rate row (or one with a NULL
+        # rate), for USD orders too, so duplicated rate rows duplicate the order's revenue exactly as the SQL would
+        for rate in fx.get((o["currency"], d)) or [None]:
+            if o["currency"] == "USD":
+                recognized.append((o["order_id"], net))
+            else:
                 recognized.append((o["order_id"], None if (net is None or rate is None) else net * rate))
     products = {}
     for p in _rows(manifest, "products"):
@@ -136,7 +138,10 @@ def gross_margin_from_manifest(manifest: dict, period_start: _dt.date, period_en
                                 acc[key] = val if acc[key] is None else acc[key] + val
     if not recognized:
         return None
-    revenue = sum((v for _, v in recognized if v is not None), D(0))
+    revenues = [v for _, v in recognized if v is not None]
+    if not revenues:
+        return None          # SUM over all-NULL revenue is NULL, and NULL minus anything is NULL (GoogleSQL SUM)
+    revenue = sum(revenues, D(0))
     total_cogs = D(0)
     for oid, _ in recognized:
         c = cogs.get(oid) or {}
@@ -203,15 +208,17 @@ def admit_live(version: dict, readback_manifest: dict, today: _dt.date, evaluati
     vendored = json.loads((FACTS_DIR / "content.json").read_text())
     theirs, ours = fact_content.per_table_digests(readback_manifest), fact_content.per_table_digests(vendored)
     differing = sorted(t for t in set(theirs) | set(ours) if theirs.get(t) != ours.get(t))
-    counts_match = fact_content.row_counts(readback_manifest) == version["row_counts"]
+    drifted = digest != version["content_manifest_sha256"]      # the verdict, established before any advisory check runs
+    smoke: dict[str, Any] = {"row_counts_match": False, "january_matches": False,
+                             "note": "smoke checks only: a changed non-January amount leaves both true while the content digest changes; "
+                                     "they never decide admission and a failure to evaluate them is a diagnostic, not a crash"}
     try:
+        smoke["row_counts_match"] = fact_content.row_counts(readback_manifest) == version["row_counts"]
         jan = gross_margin_from_manifest(readback_manifest, _dt.date.fromisoformat(JAN["period_start"]), _dt.date.fromisoformat(JAN["period_end"]), evaluation_date)
-        jan_ok = jan is not None and jan == D(str(version["expected_gross_margin_usd_2026_01"]))
-    except KeyError:
-        jan_ok = False
-    smoke = {"row_counts_match": counts_match, "january_matches": jan_ok,
-             "note": "smoke checks only: a changed non-January amount leaves both true while the content digest changes"}
-    if digest != version["content_manifest_sha256"]:
+        smoke["january_matches"] = jan is not None and jan == D(str(version["expected_gross_margin_usd_2026_01"]))
+    except Exception as e:  # noqa: BLE001 - a readback whose schema drifted may not evaluate; the digest already decided
+        smoke["error"] = f"{type(e).__name__}: {str(e)[:200]}"
+    if drifted:
         return {"status": "FACTS_DRIFTED", "readback_digest": digest, "selected_digest": version["content_manifest_sha256"],
                 "differing_tables": differing, "smoke": smoke,
                 "reason": "the readback does not hash to the selected content digest: the campaign stops with no cell filled"}
@@ -235,8 +242,9 @@ def _pinned_questions(cases_path: Path | str) -> dict:
 
 
 def run_gates(plan: dict, cells: list[str], run_id: str, out_dir: Path | str, evaluation_date: _dt.date,
-              cases_path: Path | str = CASES) -> list[dict]:
-    """The subprocess-free gates, in order; the list stops at the first refusal."""
+              cases_path: Path | str = CASES, owned: bool = False) -> list[dict]:
+    """The subprocess-free gates, in order; the list stops at the first refusal. `owned` says this invocation has
+    already claimed the run directory atomically (run_hermetic), so its own directory is not a reuse."""
     gates: list[dict] = []
 
     def add(code: str, ok: bool, detail: str) -> bool:
@@ -268,8 +276,10 @@ def run_gates(plan: dict, cells: list[str], run_id: str, out_dir: Path | str, ev
     if not add("RUN_ID_UNLABELLED", bool(RUN_ID_RE.match(run_id)), f"run_id {run_id}"):
         return gates
     out_dir = Path(out_dir)
-    used = (out_dir / f"run_{run_id}.json").exists() or (out_dir / run_id).exists()
-    if not add("RUN_ID_REUSED", not used, "no retained record or run directory carries this id" if not used else f"{out_dir / ('run_' + run_id + '.json')} already exists"):
+    used = (out_dir / f"run_{run_id}.json").exists() or (not owned and (out_dir / run_id).exists())
+    if not add("RUN_ID_REUSED", not used, ("owned: this invocation created the run directory atomically" if owned else
+                                            "no retained record or run directory carries this id") if not used
+               else f"a record or run directory for {run_id} already exists"):
         return gates
     version = facts["selected_version"]
     valid_from = _dt.date.fromisoformat(version["valid_for_runs_on_or_after"])
@@ -333,13 +343,38 @@ def _stage_error(e: BaseException) -> dict:
 
 # ----------------------------------------------------------------------------- one attempt
 def _attempt(cell: str, index: int, kind: str, ctx: dict) -> dict:
+    """One attempt, with every stage failure retained on the record: a stage that raises leaves what came before it,
+    an `error`, a REFUSED decision and a NOT_REACHED acceptance. Nothing raises out of here (Kimi P1 / Astra #2)."""
     probe = kind == "probe"
-    qid, seed, path = (PROBE_ID, MISMATCH_SEED, MISMATCH_PATH) if probe else (QUESTION_ID, SEED, COMPUTATION_PATH)
-    a: dict[str, Any] = {"cell": cell, "index": index, "kind": kind, "question_id": qid, "seed": seed,
+    a: dict[str, Any] = {"cell": cell, "index": index, "kind": kind,
+                         "question_id": PROBE_ID if probe else QUESTION_ID, "seed": MISMATCH_SEED if probe else SEED,
                          "expected_decision": REFUSED if probe else "RELEASED", "started_utc": _now(),
                          "selected_content_digest": ctx["digest"], "evaluation_date": ctx["evaluation_date"], "error": None}
     t0 = time.monotonic()
+    try:
+        _run_stages(a, probe, ctx, cell, index)
+    except Exception as e:  # noqa: BLE001 - the attempt boundary: retained, never raised into the pool
+        a["error"] = f"{type(e).__name__}: {str(e)[:300]}"
+        a["stage_failed"] = a.get("stage_failed") or "unknown"
+    a.setdefault("retrieval", {"status": "NOT_RUN", "reached": False})
+    a.setdefault("computation", None); a.setdefault("declaration", None)
+    a.setdefault("bind", {"status": "NOT_REACHED", "reason": "a stage before bind failed", "failed_checks": []})
+    a.setdefault("receipt", {"invoked": False, "reason": "a stage before the receipt failed", "diag_present": False})
+    if "consume" not in a:
+        a["consume"] = {"decision": REFUSED, "reasons": [f"stage {a.get('stage_failed')} failed: {a['error']}"], "display": None}
+    a["finished_utc"] = _now()
+    a["request_to_consumer_ms"] = round((time.monotonic() - t0) * 1000, 1)
+    if "acceptance" not in a:
+        a["acceptance"] = {"status": "NOT_REACHED", "failed": [f"stage {a.get('stage_failed')} raised: {a['error']}"],
+                           "rule": "a stage exception is an outage before the intended stage: unproven, not contradicted"}
+    a.pop("_bind_full", None)
+    return a
+
+
+def _run_stages(a: dict, probe: bool, ctx: dict, cell: str, index: int) -> None:
+    seed, path = (MISMATCH_SEED, MISMATCH_PATH) if probe else (SEED, COMPUTATION_PATH)
     comp = decl = None
+    a["stage_failed"] = "retrieval"
     try:
         r0 = time.monotonic()
         r = governed(seed, ctx["pub"], ctx["requester"], ctx["as_of"], ctx["clients"])
@@ -353,6 +388,7 @@ def _attempt(cell: str, index: int, kind: str, ctx: dict) -> dict:
         a["error"] = a["retrieval"]["error"]
     a["computation"] = None if comp is None else {"path": comp.get("path"), "concept_hops": comp.get("concept_hops"),
                                                    "runtime_verdict": comp.get("runtime_verdict"), "sql_chars": len(comp.get("sql") or "")}
+    a["stage_failed"] = "declaration"
     if comp is not None:
         try:
             decl = declaration(ctx["clients"], comp["computation_id"], ctx["pub"])
@@ -360,6 +396,7 @@ def _attempt(cell: str, index: int, kind: str, ctx: dict) -> dict:
             decl = _stage_error(e)
             a["error"] = decl["error"]
     a["declaration"] = None if decl is None else {"status": decl.get("status"), "type": decl.get("type")}
+    a["stage_failed"] = "bind"
     if comp is None or decl is None or decl.get("status") != "OK":
         a["bind"] = {"status": "NOT_BOUND", "reason": "computation not reached or declaration not visible", "failed_checks": []}
     else:
@@ -368,6 +405,7 @@ def _attempt(cell: str, index: int, kind: str, ctx: dict) -> dict:
                      "computation_digest": b.get("computation_digest")}
         a["_bind_full"] = b
     b_full = a.pop("_bind_full", {"status": a["bind"]["status"]})
+    a["stage_failed"] = "receipt"
     if a["bind"]["status"] == "BOUND":
         rec = run_receipt("approved", ctx["sdk_root"], ctx["receipt_dir"], live=False, runner=ctx["runner"], label=f"{cell}_{index:03d}")
         receipt, out = rec.get("receipt") or {}, rec.get("output") or {}
@@ -383,10 +421,10 @@ def _attempt(cell: str, index: int, kind: str, ctx: dict) -> dict:
     else:
         a["receipt"] = {"invoked": False, "reason": f"bind {a['bind']['status']}: nothing was executed", "diag_present": False}
         rec_for_consume = {"invoked": False}
-    a["consume"] = consume(b_full, rec_for_consume)
-    a["consume"] = {"decision": a["consume"]["decision"], "reasons": a["consume"]["reasons"], "display": a["consume"].get("display")}
-    a["finished_utc"] = _now()
-    a["request_to_consumer_ms"] = round((time.monotonic() - t0) * 1000, 1)
+    a["stage_failed"] = "consume"
+    decision = consume(b_full, rec_for_consume)
+    a["consume"] = {"decision": decision["decision"], "reasons": decision["reasons"], "display": decision.get("display")}
+    a["stage_failed"] = "accept"
     shim = {"case": "declaration-mismatch" if probe else "approved",
             "retrieval": {"status": a["retrieval"].get("status"), "reached": a["retrieval"].get("reached")},
             "declaration": {"status": (decl or {}).get("status")}, "bind": b_full,
@@ -395,7 +433,7 @@ def _attempt(cell: str, index: int, kind: str, ctx: dict) -> dict:
     v = accept(shim)
     a["acceptance"] = {"status": v["status"], "failed": v["failed"],
                        "rule": "chain.accept: the question follows the `approved` case, the probe the `declaration-mismatch` case"}
-    return a
+    a["stage_failed"] = None
 
 
 # ----------------------------------------------------------------------------- the campaign
@@ -411,6 +449,11 @@ def run_hermetic(plan: dict, cells: list[str], out_dir: Path | str = OUT_DIR, sd
     as_of = as_of or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     evaluation_date = _dt.date.fromisoformat(as_of[:10])
     run_id = run_id or fresh_run_id()
+    # ---- ownership first (Astra #1): the run directory is claimed atomically before any gate, subprocess or write.
+    # A second invocation with the same id, concurrent or later, cannot own it and retains nothing; the owner's
+    # record and journal are never touched by anyone else.
+    run_dir = out_dir / run_id
+    owned = _claim(run_dir) if RUN_ID_RE.match(run_id) and not (out_dir / f"run_{run_id}.json").exists() else False
     rec: dict[str, Any] = {"runner": RUNNER_VERSION, "run_id": run_id, "mode": "hermetic", "engine": "oracle", "started_utc": _now(),
                            "as_of": as_of, "evaluation_date": evaluation_date.isoformat(), "bundle_id": BUNDLE_ID, "source_pin": SOURCE_PIN,
                            "requester": {"mode": "same-requester", "note": "hermetic: the oracle graph and the SDK emulation submit no job; no identity exists to read"},
@@ -420,7 +463,14 @@ def run_hermetic(plan: dict, cells: list[str], out_dir: Path | str = OUT_DIR, sd
                                      "expected_failed_checks": ["file_sha256", "sql_text"], "sdk_invoked": False,
                                      "note": "a computation the receipt publication does not carry: declared in advance to refuse, never a substituted answer"},
                            "claims": CLAIMS, "attempts": [], "cells": []}
-    gates = run_gates(plan, cells, run_id, out_dir, evaluation_date, cases_path)
+    if not owned:
+        code = "RUN_ID_UNLABELLED" if not RUN_ID_RE.match(run_id) else "RUN_ID_REUSED"
+        rec["gates"] = [_gate(code, False, f"run_id {run_id}: " + ("not labelled consumer-hermetic-<utc>-<hex8>" if code == "RUN_ID_UNLABELLED"
+                                                                   else "another invocation owns this id (its record and journal are left as they are)"))]
+        rec["verdict"] = REFUSED; rec["refusal"] = rec["gates"][0]; rec["retained"] = False
+        rec["finished_utc"] = _now()
+        return redact(rec)
+    gates = run_gates(plan, cells, run_id, out_dir, evaluation_date, cases_path, owned=True)
     rec["gates"] = gates
     refusal = _first_refusal(gates)
     if refusal is None:
@@ -464,11 +514,10 @@ def run_hermetic(plan: dict, cells: list[str], out_dir: Path | str = OUT_DIR, sd
     if refusal is not None:
         rec["verdict"] = REFUSED
         rec["refusal"] = refusal
+        rec["retained"] = True
         rec["finished_utc"] = _now()
-        return _write(rec, out_dir, redact)
-    run_dir = out_dir / run_id
+        return _write(rec, out_dir, run_dir, redact)
     receipt_dir = run_dir / "receipt"
-    run_dir.mkdir(parents=True, exist_ok=True)
     jsonl = run_dir / "attempts.jsonl"
     lock = threading.Lock()
     clients = {"engine": "oracle", "graph": Graph(projection), "projection": projection}
@@ -535,17 +584,29 @@ def run_hermetic(plan: dict, cells: list[str], out_dir: Path | str = OUT_DIR, sd
     rec["verdict_rule"] = (f"{RUNNER_OK} when every gate passed, every attempt was retained, every measured attempt is MET and the probe is MET; "
                            f"{RUNNER_INCOMPLETE} when any attempt is NOT_REACHED (a child that died, a stage exception); "
                            f"{RUNNER_BROKEN} when any is WRONG (a probe released, a measured attempt refused or released without its bindings)")
+    rec["retained"] = True
     rec["finished_utc"] = _now()
-    return _write(rec, out_dir, redact)
+    return _write(rec, out_dir, run_dir, redact)
 
 
-def _write(rec: dict, out_dir: Path, redact: Callable) -> dict:
-    out_dir.mkdir(parents=True, exist_ok=True)
+def _claim(run_dir: Path) -> bool:
+    """Atomic ownership of a run id: create its directory, fail if anyone already has."""
+    try:
+        run_dir.parent.mkdir(parents=True, exist_ok=True)
+        run_dir.mkdir(exist_ok=False)
+        return True
+    except FileExistsError:
+        return False
+
+
+def _write(rec: dict, out_dir: Path, run_dir: Path, redact: Callable) -> dict:
+    """Publish the record without ever overwriting: the bytes are staged inside the owned run directory and linked
+    into place, which fails if a record with this id already exists (no other invocation can be finalised over)."""
     rec = redact(rec)
     final = out_dir / f"run_{rec['run_id']}.json"
-    tmp = final.with_name(f".{final.name}.tmp")
-    tmp.write_text(json.dumps(rec, indent=1, sort_keys=True, default=str) + "\n", encoding="utf-8")
-    os.replace(tmp, final)
+    staged = run_dir / "run.json"
+    staged.write_text(json.dumps(rec, indent=1, sort_keys=True, default=str) + "\n", encoding="utf-8")
+    os.link(staged, final)          # atomic create-or-fail; never os.replace onto another invocation's record
     return rec
 
 
@@ -600,19 +661,23 @@ def main(argv: Optional[list[str]] = None, stdout=None) -> int:
     as_of = args.as_of or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     evaluation_date = _dt.date.fromisoformat(as_of[:10])
     run_id = args.run_id or fresh_run_id()
-    gates = run_gates(plan, cells, run_id, args.out_dir, evaluation_date, args.cases)
-    refusal = _first_refusal(gates)
-    if refusal is not None:
-        print(f"REFUSED: {refusal['code']}: {refusal['detail']}", file=out)
-        return 2
-    print(describe(plan, cells, run_id, gates, evaluation_date), file=out)
-    if args.dry_run:
+    if args.dry_run:      # write-free: the gates run, nothing is claimed, nothing is retained
+        gates = run_gates(plan, cells, run_id, args.out_dir, evaluation_date, args.cases)
+        refusal = _first_refusal(gates)
+        if refusal is not None:
+            print(f"REFUSED: {refusal['code']}: {refusal['detail']}", file=out)
+            return 2
+        print(describe(plan, cells, run_id, gates, evaluation_date), file=out)
         print("dry run: nothing launched, no record retained", file=out)
         return 0
+    # hermetic: every gate refusal is retained under a fresh owned record (Astra #5), except an id this invocation
+    # cannot own, which retains nothing and leaves the owner's files alone
     rec = run_hermetic(plan, cells, out_dir=args.out_dir, sdk_root=args.sdk_root, acme_root=args.acme_root, as_of=as_of, run_id=run_id, cases_path=args.cases)
     if rec["verdict"] == REFUSED:
-        print(f"REFUSED: {rec['refusal']['code']}: {rec['refusal']['detail']}", file=out)
+        where = f" (retained {Path(args.out_dir) / ('run_' + rec['run_id'] + '.json')})" if rec.get("retained") else " (nothing retained: the id is not this invocation's)"
+        print(f"REFUSED: {rec['refusal']['code']}: {rec['refusal']['detail']}{where}", file=out)
         return 2
+    print(describe(plan, cells, run_id, rec["gates"], evaluation_date), file=out)
     for c in rec["cells"]:
         print(f"  {c['cell']}: {c['state']} attempts={c['attempts_total']} released={c['released']} refused={c['refused']} "
               f"probe={c['probe']['decision']}@{c['probe']['bind']} concurrency_achieved={c['concurrency_achieved']}", file=out)

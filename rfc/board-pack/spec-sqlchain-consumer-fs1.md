@@ -25,7 +25,11 @@ name is refused (`NOT_A_CONSUMER_CELL`), never silently measured as something el
   `--live`). Exit 0 on `RUNNER_HERMETIC_OK`, 1 otherwise, 2 on a gate refusal. Every outcome is retained.
 
 Run ids are `consumer-hermetic-<utc>-<hex8>`; a supplied id must carry that label and must not name a retained
-record (`RUN_ID_REUSED`). The id never begins with `live_`.
+record (`RUN_ID_REUSED`). The id never begins with `live_`. In hermetic mode the run directory is claimed
+atomically (create-or-fail) before any gate, subprocess or write; a concurrent or later invocation with the same
+id is refused `RUN_ID_REUSED`, retains nothing and never touches the owner's record or journal. Every other gate
+refusal in hermetic mode is retained as a `REFUSED` record under the fresh owned directory; dry-run retains nothing.
+Records are published by linking a staged file into place, which fails rather than overwrites.
 
 ## 2. The predeclared question and the refusal probe
 
@@ -53,16 +57,18 @@ success numerator, and excluded from the orchestration-time percentiles, which d
 | 3 | `NOT_A_CONSUMER_CELL` / `UNKNOWN_CELL` | a requested name is a retrieval cell or not a cell | both |
 | 4 | `RUN_ID_UNLABELLED` / `RUN_ID_REUSED` | id lacks the `consumer-hermetic-` label, or a record with that id is retained | both |
 | 5 | `VALIDITY_WINDOW` | the evaluation date (the date of `--as-of`, default now UTC) is before `valid_for_runs_on_or_after` — the sanctioned SQL's 30-day recognition clause would not recognise the February order, so the expected results do not hold | both |
-| 6 | `VENDORED_FACTS_DRIFTED` | the hermetic stand-in for the precheck: `fact_content.extract(fixtures/facts/fixture.sql)` canonicalised does not hash to `content_manifest_sha256`, or the vendored `content.json` bytes do not | both |
-| 7 | `ORACLE_DISAGREES` | the row-based oracle (§4) over the vendored manifest at the evaluation date does not return `expected_gross_margin_usd_2026_01` for January, or `expected.json`'s `approved_january_february` value for January–February | both |
-| 8 | `SDK_UNAVAILABLE` / `SDK_PROVENANCE` | no `run.py` at `<sdk-root>/examples/okf_attested_computation`; or the checkout's HEAD is not `sdk_pin`, or the repository is dirty or its Git state unknown (the chain's rule) | hermetic |
-| 9 | `PUBLICATION_PIN` | the compiled projection's publication id is not `pub_190192147fd7fd78` | hermetic |
+| 6 | `QUESTION_PINNED` | `fixtures/cases.json` does not pin `f_current` to `forced:metrics/gross-margin.md` → `computations/gross-margin-period.md` and `f_revenue` to `forced:metrics/revenue.md` → `computations/revenue-ytd.md`, the chain's seeds and computations; the runner samples nothing it did not predeclare | both |
+| 7 | `VENDORED_FACTS_DRIFTED` | the hermetic stand-in for the precheck: `fact_content.extract(fixtures/facts/fixture.sql)` canonicalised does not hash to `content_manifest_sha256`, or the vendored `content.json` bytes do not | both |
+| 8 | `ORACLE_DISAGREES` | the row-based oracle (§4) over the vendored manifest at the evaluation date does not return `expected_gross_margin_usd_2026_01` for January, or `expected.json`'s `approved_january_february` value for January–February | both |
+| 9 | `SDK_UNAVAILABLE` / `SDK_PROVENANCE` | no `run.py` at `<sdk-root>/examples/okf_attested_computation`; or the checkout's HEAD is not `sdk_pin`, or the repository is dirty or its Git state unknown (the chain's rule) | hermetic |
+| 10 | `PUBLICATION_PIN` | the compiled projection's publication id is not `pub_190192147fd7fd78` | hermetic |
 
 **Live admission** (`admit_live(selected_version, readback_manifest, today)`) exists as a pure function and is the
 behaviour FS-2 must call before any attempt: `MATERIALIZATION_EXPIRED` when `today` is on or after the date in
 `materialization_expires_utc` (`about YYYY-MM-DD …`), `FACTS_DRIFTED` when the readback manifest's canonical bytes
 do not hash to `content_manifest_sha256` (per-table digests name which tables differ; row counts and the January
-result are reported as smoke checks beside it and decide nothing), `OK` otherwise with the verified digest to bind
+result are reported as smoke checks beside it and decide nothing — the digest verdict is established first, and a
+smoke check that cannot evaluate a drifted schema is retained as a diagnostic error, never a crash), `OK` otherwise with the verified digest to bind
 to every attempt. In this slice it is exercised only by tests against the vendored manifest, a mutated copy, a
 manifest with a table removed, and dates on either side of the expiry. The hermetic run record carries
 `live_admission: {status: NOT_RUN, reason: hermetic mode reads no live table}` and an `expiry` block (the recorded
@@ -80,6 +86,10 @@ otherwise (no rate → NULL, dropped by SUM); COGS per order is the SQL's join g
 order, so a duplicated join row duplicates its cost exactly as the SQL would); the result is
 `SUM(revenue) − SUM(COALESCE(each COGS component, 0))` over recognised orders left-joined to COGS, `None` when no
 order is recognised. NUMERIC arithmetic is `decimal.Decimal`.
+
+SQL NULL semantics are kept: the FX left join happens before the CASE (so a duplicated rate row duplicates a USD
+order's revenue too), a row without a rate carries NULL revenue, and a SUM over only NULLs is NULL, which makes the
+whole expression NULL rather than a negative COGS figure.
 
 What it establishes: that the vendored rows are consistent with `expected.json` under the sanctioned SQL's semantics as
 re-implemented here, and that the runner reads rows (a test mutates one February amount: January stays `400`,
@@ -101,7 +111,10 @@ engine's stage times), `computation` (`path`, `concept_hops`), `declaration` (`s
 `job_times` = `{submitted_at: null, done_at: null, note}` because the hermetic emulation reports no timestamps and
 submits no job, `issued_at`, `diag_path`, `diag_sha256`), `consume` (`decision`, `reasons`), `acceptance`
 (`MET` | `WRONG` | `NOT_REACHED`, with the failed checks), `selected_content_digest` (= `content_manifest_sha256`),
-`evaluation_date`, `error` (a stage exception, retained rather than raised).
+`evaluation_date`, `error` (a stage exception, retained rather than raised), `stage_failed` (which stage raised, or
+null). The attempt boundary catches a failure at any stage — bind, the receipt launch or its diagnostic retention,
+the consumer decision, acceptance — and retains what came before it with `error`, `REFUSED` and `NOT_REACHED`; the
+cell continues to its remaining attempts and the probe, and the run finalises `RUNNER_HERMETIC_INCOMPLETE`.
 
 Acceptance per attempt follows the chain's rule for `approved` (must reach retrieval, declaration, `BOUND`, an
 invoked and completed child, exit 0, `RELEASED`; an unreached stage is `NOT_REACHED`, a reached stage that
@@ -160,8 +173,8 @@ a latency, a cost, a filled cell.
 
 ## 8. Retained evidence
 
-Two hermetic runs are committed under `evidence/consumer/`: one campaign covering both cells at their predeclared
-2 + 20 (C=1 then C=5) plus one probe each, with every diagnostic. They are cited by the card's `hermetic_runs`.
+One hermetic campaign is committed under `evidence/consumer/` as one run record: both cells at their predeclared
+2 + 20 (C=1 then C=5) plus one probe each, with every diagnostic. The card's `hermetic_runs` cites it once per cell.
 Their numbers are orchestration overhead of an in-process oracle plus a subprocess emulation on one laptop and are
 labelled so in the record; they are not shown on the card and are not the cells' metric.
 

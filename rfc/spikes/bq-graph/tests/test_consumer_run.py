@@ -112,10 +112,17 @@ def test_row_oracle_follows_the_fx_join_for_non_usd_orders(manifest):
     orders = m["tables"]["orders"]["rows"]
     idx = next(i for i, r in enumerate(orders) if r[0] == "ord-2026-01-delivered")
     orders[idx][9] = "EUR"
-    # no rate -> revenue NULL -> dropped by SUM: margin = 0 - 600
-    assert cr.gross_margin_from_manifest(m, _dt.date(2026, 1, 1), _dt.date(2026, 1, 31), EVAL) == D("-600")
+    # no rate -> every revenue NULL -> SUM(revenue) is NULL -> the whole expression is NULL (GoogleSQL SUM over all NULLs)
+    assert cr.gross_margin_from_manifest(m, _dt.date(2026, 1, 1), _dt.date(2026, 1, 31), EVAL) is None
     m["tables"]["fx_daily_rates"]["rows"].append(["EUR", "2026-01-10", "2.000000000"])
     assert cr.gross_margin_from_manifest(m, _dt.date(2026, 1, 1), _dt.date(2026, 1, 31), EVAL) == D("1400")
+
+
+def test_row_oracle_keeps_the_fx_join_multiplicity_for_usd_orders(manifest):
+    """The SQL joins fx_daily_rates BEFORE the CASE picks USD revenue: two matching USD rate rows duplicate the order."""
+    m = copy.deepcopy(manifest)
+    m["tables"]["fx_daily_rates"]["rows"] += [["USD", "2026-01-10", "1.000000000"], ["USD", "2026-01-10", "1.000000000"]]
+    assert cr.gross_margin_from_manifest(m, _dt.date(2026, 1, 1), _dt.date(2026, 1, 31), EVAL) == D("800")
 
 
 def test_row_oracle_check_against_the_plan_passes_and_a_changed_expectation_is_disagreement(plan, manifest):
@@ -458,3 +465,123 @@ def test_committed_card_artifacts_equal_the_generator(tmp_path):
     written = sb.main(tmp_path)
     for name in ("plan.json", "baseline.md"):
         assert (tmp_path / name).read_bytes() == (sb.OUT_DIR / name).read_bytes(), name
+
+
+# ---- fix pass after the Kimi / Astra first reviews of 2358f47
+def test_admit_live_reports_drift_even_when_the_smoke_check_cannot_evaluate(plan, manifest):
+    """Astra #4: schema-and-row drift (order_ts NULLABLE with a null January timestamp) must be FACTS_DRIFTED naming
+    `orders`, with the smoke check retained as a diagnostic error, never a crash."""
+    m = copy.deepcopy(manifest)
+    t = m["tables"]["orders"]
+    ts = next(f for f in t["schema"] if f["name"] == "order_ts"); ts["mode"] = "NULLABLE"
+    idx = next(i for i, r in enumerate(t["rows"]) if r[0] == "ord-2026-01-delivered"); t["rows"][idx][2] = None
+    out = cr.admit_live(plan["facts"]["selected_version"], m, _dt.date(2026, 9, 10), EVAL)
+    assert out["status"] == "FACTS_DRIFTED" and "orders" in out["differing_tables"]
+    assert out["smoke"]["january_matches"] is False and out["smoke"].get("error")
+
+
+def _stage_raises(monkeypatch, name, exc):
+    def boom(*a, **k):
+        raise exc
+    monkeypatch.setattr(cr, name, boom)
+
+
+@pytest.mark.parametrize("stage, exc", [("bind", KeyError("manifest")), ("run_receipt", OSError(5, "EIO on diagnostic rename")),
+                                        ("consume", RuntimeError("consumer crashed"))])
+def test_a_stage_exception_is_retained_as_an_attempt_error_and_the_run_is_incomplete(sdk_root, sample_root, short_plan, tmp_path, monkeypatch, stage, exc):
+    """Kimi P1 / Astra #2: a failure at any stage after retrieval is retained on the attempt (error, REFUSED,
+    NOT_REACHED), the probe still runs, and the run record is written RUNNER_HERMETIC_INCOMPLETE."""
+    _stage_raises(monkeypatch, stage, exc)
+    rec = cr.run_hermetic(sb.load_plan(short_plan), ["sqlchain_forced_c1"], out_dir=tmp_path, sdk_root=sdk_root,
+                          acme_root=sample_root, as_of=AS_OF)
+    assert rec["verdict"] == "RUNNER_HERMETIC_INCOMPLETE"
+    assert len(rec["attempts"]) == 4 and [a["kind"] for a in rec["attempts"]] == ["warmup", "measured", "measured", "probe"]
+    failed = [a for a in rec["attempts"] if a["error"]]
+    assert failed and all(a["consume"]["decision"] == "REFUSED" and a["acceptance"]["status"] == "NOT_REACHED" for a in failed)
+    assert all(type(exc).__name__ in a["error"] for a in failed)
+    written = json.loads((tmp_path / f"run_{rec['run_id']}.json").read_text())
+    assert written["verdict"] == "RUNNER_HERMETIC_INCOMPLETE" and len(written["attempts"]) == 4
+    lines = (tmp_path / rec["run_id"] / "attempts.jsonl").read_text().splitlines()
+    assert len(lines) == 4
+
+
+def test_sequential_run_id_reuse_refuses_without_touching_the_existing_record(sdk_root, sample_root, short_plan, tmp_path):
+    """Astra #1: a second run under an owned id is refused RUN_ID_REUSED and retains nothing; the first record is intact."""
+    plan = sb.load_plan(short_plan)
+    first = cr.run_hermetic(plan, ["sqlchain_forced_c1"], out_dir=tmp_path, sdk_root=sdk_root, acme_root=sample_root, as_of=AS_OF)
+    path = tmp_path / f"run_{first['run_id']}.json"
+    before = path.read_bytes()
+    second = cr.run_hermetic(plan, ["sqlchain_forced_c1"], out_dir=tmp_path, sdk_root=sdk_root, acme_root=sample_root, as_of=AS_OF,
+                             run_id=first["run_id"], runner=lambda *a, **k: (_ for _ in ()).throw(AssertionError("must not launch")))
+    assert second["verdict"] == "REFUSED" and second["refusal"]["code"] == "RUN_ID_REUSED" and second["retained"] is False
+    assert path.read_bytes() == before
+    assert len((tmp_path / first["run_id"] / "attempts.jsonl").read_text().splitlines()) == 4
+
+
+def test_concurrent_cli_invocations_with_one_run_id_yield_exactly_one_owner(sdk_root, sample_root, short_plan, tmp_path):
+    """Astra #1: two processes racing for the same explicit --run-id: one owns it, the other is refused before any
+    attempt; one record, one attempts.jsonl with no duplicate index."""
+    rid = "consumer-hermetic-20260909T000000Z-0badcafe"
+    argv = [sys.executable, "-m", "okf_bq_graph.consumer_run", "--hermetic", "--cells", "sqlchain_forced_c1", "--plan", str(short_plan),
+            "--out-dir", str(tmp_path), "--run-id", rid, "--sdk-root", sdk_root, "--acme-root", sample_root, "--as-of", AS_OF]
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+    procs = [subprocess.Popen(argv, cwd=str(sb.ROOT), env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for _ in range(2)]
+    outs = [p.communicate(timeout=120) for p in procs]
+    codes = sorted(p.returncode for p in procs)
+    assert codes == [0, 2], [(p.returncode, o[0][-300:], o[1][-300:]) for p, o in zip(procs, outs)]
+    refused = next(o[0] for p, o in zip(procs, outs) if p.returncode == 2)
+    assert "REFUSED: RUN_ID_REUSED" in refused
+    rec = json.loads((tmp_path / f"run_{rid}.json").read_text())
+    assert rec["verdict"] == "RUNNER_HERMETIC_OK" and len(rec["attempts"]) == 4
+    lines = [json.loads(l) for l in (tmp_path / rid / "attempts.jsonl").read_text().splitlines()]
+    assert sorted(l["index"] for l in lines) == [0, 1, 2, 3]
+
+
+def test_hermetic_cli_gate_refusal_is_retained_under_a_fresh_owned_record(plan, tmp_path, no_client):
+    """Astra #5: a subprocess-free gate refusal in --hermetic leaves a REFUSED record; --dry-run stays write-free."""
+    p = copy.deepcopy(plan)
+    p["facts"] = {"state": "UNSELECTED", "why_it_matters": "x", "what_is_missing": "y", "blocks": ["sqlchain_forced_c1"], "how_to_select": "z"}
+    path = tmp_path / "plan.json"; path.write_text(json.dumps(p, ensure_ascii=False))
+    out = io.StringIO()
+    rc = cr.main(["--hermetic", "--plan", str(path), "--out-dir", str(tmp_path / "ev")], stdout=out)
+    assert rc == 2 and out.getvalue().startswith("REFUSED: FACTS_UNSELECTED")
+    records = list((tmp_path / "ev").glob("run_consumer-hermetic-*.json"))
+    assert len(records) == 1
+    rec = json.loads(records[0].read_text())
+    assert rec["verdict"] == "REFUSED" and rec["refusal"]["code"] == "FACTS_UNSELECTED" and rec["attempts"] == [] and rec["retained"] is True
+    assert (tmp_path / "ev" / rec["run_id"]).is_dir()
+    out = io.StringIO()
+    assert cr.main(["--dry-run", "--plan", str(path), "--out-dir", str(tmp_path / "dry")], stdout=out) == 2
+    assert not (tmp_path / "dry").exists()
+
+
+def test_hermetic_cli_run_id_reuse_retains_nothing_new(tmp_path, no_client):
+    used = "consumer-hermetic-20260909T000000Z-deadbeef"
+    (tmp_path / f"run_{used}.json").write_text('{"kept": true}')
+    out = io.StringIO()
+    assert cr.main(["--hermetic", "--run-id", used, "--out-dir", str(tmp_path)], stdout=out) == 2
+    assert out.getvalue().startswith("REFUSED: RUN_ID_REUSED")
+    assert (tmp_path / f"run_{used}.json").read_text() == '{"kept": true}' and not (tmp_path / used).exists()
+
+
+def test_readme_module_rows_attribute_live_campaigns_to_the_retrieval_driver_only():
+    """Kimi P1 / Astra #6: the hermetic consumer row must not inherit the retrieval driver's Pass 2 history."""
+    rows = {}
+    for line in (sb.ROOT / "README.md").read_text().splitlines():
+        if line.startswith("| `okf_bq_graph/sql_baseline_run.py` |") or line.startswith("| `okf_bq_graph/consumer_run.py` |"):
+            rows[line.split("`")[1]] = line
+    assert set(rows) == {"okf_bq_graph/sql_baseline_run.py", "okf_bq_graph/consumer_run.py"}
+    consumer, baseline = rows["okf_bq_graph/consumer_run.py"], rows["okf_bq_graph/sql_baseline_run.py"]
+    for token in ("live campaign", "1,678", "$0.17", "RETRIEVAL_MEASURED", "Pass 2", "sqlbase-2026"):
+        assert token not in consumer, token
+    for token in ("Four live campaigns are retained", "1,678 jobs", "Card: RETRIEVAL_MEASURED"):
+        assert token in baseline, token
+    assert "no BigQuery client" in consumer and "RUNNER_HERMETIC_ONLY" in consumer
+
+
+def test_the_metric_definition_names_the_missing_capability_as_live_sampling(plan):
+    text = plan["metrics"]["request_to_consumer_ms"]
+    assert "No repeated-sample runner exists" not in text
+    assert "hermetic" in text and "live" in text
+    card = sb.render_markdown(sb.build_card(plan))
+    assert "No repeated-sample runner exists for this today" not in card
