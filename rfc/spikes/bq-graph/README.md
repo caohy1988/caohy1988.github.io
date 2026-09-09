@@ -25,6 +25,7 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `okf_bq_graph/principal.py` | Requester brokers for the chain (2026-09-06 Slice A): a hermetic policy-emulating broker (no IAM, no job) exercised by `chain.py --requester restricted`, and the IAM-impersonation broker for the restricted SA (graph leg via `authz.impersonated_client`, SDK subprocess via an `impersonated_service_account` ADC file plus a `userinfo.email` scope shim, `_rls` row-policy grantee snapshot/restore, dry-run authorization probe per dependency table) exercised live in Slice B → `evidence/chain/chain_hermetic_restricted.json`, `evidence/chain/chain_live_restricted.json` |
 | `okf_bq_graph/benchmark.py`, `run.py`, `lifecycle.py`, `safety.py`, `partial.py`, `bin/safety_teardown.sh` | Bounded runner (20 warmups + 100 measured per cell, nearest-rank percentiles, failures retained), the window orchestrator (signal-safe cleanup lifecycle, job cancel, independent watcher), and the honest aggregation of interrupted cells (INCOMPLETE / NOT_RUN) |
 | `okf_bq_graph/sql_baseline.py` | Predeclared ordinary-SQL baseline for the 2026-09-19 checkpoint (Slice A, 2026-09-07): validates `fixtures/sql_baseline.json`, reads the recorded prior SQL observations out of the retained evidence, projects the declared samples against the declared budget, and writes a card whose every cell is empty. It opens no client and spends nothing; its own gate refuses a card in which a cell acquired a number or a prior observation claimed to fill one → `evidence/sql-baseline/{plan.json,baseline.md}` |
+| `okf_bq_graph/sql_baseline_run.py` | Driver for the four predeclared retrieval cells (Slice B Pass 1, 2026-09-08, hermetic): reads the sql-baseline plan rather than `fixtures/scale.json`, builds one `benchmark.measure` cell per retrieval cell with **only that cell's shape** as its query list, engine `fallback`, both caches off, on-demand with no reservation window (`cell_seconds` + a `TOTAL_TIME_BUDGET` deadline only), and a fresh `sqlbase-*` run_id checked against the retained GQL summary before any client exists. `--dry-run` prints cells / queries / budget and constructs no client; `--live` (Pass 2) runs foreground and retains `evidence/sql-baseline/run_<run_id>.json`. Consumer cells (`sqlchain_*`) are refused with `FACTS_UNSELECTED + NOT_IMPLEMENTED`. **No cell has been run.** |
 | `okf_bq_graph/cost.py`, `report.py`, `assemble.py` | Slot attribution (exact named reservation vs other pools) and the charged autoscale slot-seconds bill from `INFORMATION_SCHEMA.RESERVATIONS_TIMELINE`; non-mutating report tables; report assembly |
 | `sql/*.sql` | `schema.sql`, `graph.sql` (property graph DDL), `seed.sql` (vector seed), `governed.sql` (two-hop GQL), `context.sql`, `impact.sql`, `stubs.sql`, `fallback.sql` |
 | `fixtures/bundle_b/` | Negative fixture: identical relative paths, missing targets, duplicate hits, ambiguous replacement, `../` escape |
@@ -719,10 +720,18 @@ same question set as the GQL cells:
   size and no failure denominator, so none of them fills a cell — `tests/test_sql_baseline.py` fails the build if one
   starts to.
 
-**Why no driver runs these cells yet.** `okf_bq_graph.run benchmark` reads `fixtures/scale.json`, defaults its cells to
-the `gql` engine, pools the forced and natural questions into one query list, and runs inside an Enterprise reservation
-window. A baseline driver has to read this plan instead, pass one shape's queries per cell, run on-demand with no
-window, and use its own `run_id` so it cannot collide with the retained GQL summary.
+**The driver exists; no cell has been run (Slice B Pass 1, 2026-09-08).** `okf_bq_graph.run benchmark` was never the
+right driver: it reads `fixtures/scale.json`, defaults its cells to the `gql` engine, pools the forced and natural
+questions into one query list, and runs inside an Enterprise reservation window. `okf_bq_graph.sql_baseline_run` reads
+this plan instead, hands each cell only its own shape (`tests/test_sql_baseline_run.py` runs the real
+`benchmark.measure` with a faked `retrieve` and checks that no forced text reaches a natural cell or vice versa),
+runs on-demand with no window, and labels the campaign with a fresh `sqlbase-<utc>-<hex>` run_id that is checked
+against the retained GQL summary before a client is built. `--dry-run` constructs no client; `--live` is Pass 2 and
+needs Haiyuan's paid authorization. `benchmark.run_cell` gained two backward-compatible fields for it: a per-cell
+`queries` list and a `budget["deadline_reason"]` label, so a total-budget stop reads `TOTAL_TIME_BUDGET` here and
+`WINDOW_DEADLINE` in the reservation-window runner as before. The card's retrieval cells therefore read `NOT_RUN` with
+the exact command that fills each; the consumer cells still read `NOT_IMPLEMENTED + FACTS_UNSELECTED`, and the driver
+refuses to run them.
 
 **One correction this card carries.** `evidence/report.md` and `evidence/comparison.md` describe both forced fallback
 observations as on-demand. Every job in `all_all-0017.json#fallback_forced` carries the spike's Enterprise reservation,
@@ -785,6 +794,8 @@ python3 -m okf_bq_graph.run all --minutes 85                 # both in one windo
 python3 -m okf_bq_graph.cost 2026-09-05T23:40:00Z 2026-09-06T00:35:00Z   # reconcile jobs + charged reservation timeline
 python3 -m okf_bq_graph.partial && python3 -m okf_bq_graph.assemble      # honest cell summary + report.md
 python3 -m okf_bq_graph.sql_baseline                         # offline: regenerate the predeclared SQL baseline card
+python3 -m okf_bq_graph.sql_baseline_run --dry-run           # offline: print the baseline campaign (cells, queries, budget); no client
+python3 -m okf_bq_graph.sql_baseline_run --live [--cells sqlbase_forced_c1 ...]   # Pass 2 (paid, on-demand, foreground): fill retrieval cells
 ```
 
 The `run` modes create a paid reservation; `bin/safety_teardown.sh` is spawned automatically as an independent watcher.

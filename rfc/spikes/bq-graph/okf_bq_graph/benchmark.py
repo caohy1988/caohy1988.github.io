@@ -73,8 +73,16 @@ def one_request(cell: dict, i: int, q: dict, clients: dict, timeout_s: float) ->
 
 
 def run_cell(cell: dict, queries: list[dict], clients_factory, budget: dict) -> dict:
-    """cell: name, engine, corpus, publication_id, concurrency, warmups, measured, as_of, seed."""
+    """cell: name, engine, corpus, publication_id, concurrency, warmups, measured, as_of, seed.
+
+    A cell may carry its own `queries` list (the SQL-baseline driver passes one shape per cell so forced
+    seeds and natural questions are never pooled); otherwise the config-wide list is sampled.
+    `budget["deadline_reason"]` labels a total-budget stop; it defaults to WINDOW_DEADLINE for the
+    reservation-window runner, which is the only caller that existed before the baseline driver.
+    """
     cell = dict(cell, run_id=cell.get("run_id") or uuid.uuid4().hex)
+    queries = cell.get("queries") or queries
+    deadline_reason = budget.get("deadline_reason", "WINDOW_DEADLINE")
     rng = random.Random(cell["seed"])
     order = []
     for _ in range(cell["warmups"] + cell["measured"]):
@@ -101,7 +109,7 @@ def run_cell(cell: dict, queries: list[dict], clients_factory, budget: dict) -> 
                 if time.monotonic() - started > budget["cell_seconds"]:
                     stopped_reason = "CELL_TIME_BUDGET"; i = len(order); break
                 if budget.get("deadline_monotonic") and time.monotonic() >= budget["deadline_monotonic"]:
-                    stopped_reason = "WINDOW_DEADLINE"; i = len(order); break
+                    stopped_reason = deadline_reason; i = len(order); break
                 f = ex.submit(one_request, cell, i, order[i], clients_factory(), timeout_s)
                 futures[f] = i; i += 1
             if not futures:
@@ -164,7 +172,8 @@ def measure(config: dict, retrieval_client) -> dict:
             results.append({"cell": cell["name"], "run_id": run_id, "engine": cell["engine"], "corpus": cell["corpus"],
                             "concurrency": cell["concurrency"], "publication_id": cell["publication_id"],
                             "measured_target": cell["measured"], "measured_n": 0, "warmups_done": 0,
-                            "state": "NOT_RUN_BUDGET", "stopped_reason": "WINDOW_DEADLINE",
+                            "state": "NOT_RUN_BUDGET",
+                            "stopped_reason": config["budget"].get("deadline_reason", "WINDOW_DEADLINE"),
                             "success_rate": None, "errors": 0, "timeouts": 0,
                             "p50_ms_all": None, "p95_ms_all": None, "max_ms_all": None,
                             "p50_ms_ok": None, "p95_ms_ok": None, "stage_p50_ms": {}, "stage_p95_ms": {},

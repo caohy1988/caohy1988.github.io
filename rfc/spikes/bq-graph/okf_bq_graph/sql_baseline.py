@@ -210,7 +210,7 @@ def _retrieval_cell(cell: dict, plan: dict, priors: list[dict]) -> dict:
         "measured_target": cell["measured"],
         "warmups_target": cell["warmups"],
         "state": "INCOMPLETE",
-        "stopped_reason": "NOT_RUN_DRIVER_MISSING",
+        "stopped_reason": "NOT_RUN",
         "p50_ms": None, "p95_ms": None, "max_ms": None,
         "success_rate": None, "errors": None, "timeouts": None,
         "bytes_billed": None, "usd_ondemand_list": None,
@@ -220,13 +220,14 @@ def _retrieval_cell(cell: dict, plan: dict, priors: list[dict]) -> dict:
         "how_to_fill": (
             f"Predeclared: {cell['warmups']} warmups + {cell['measured']} measured at C={cell['concurrency']}, "
             f"timeout {cell['timeout_s']}s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` "
-            "already does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and "
-            "keeps a stopped cell INCOMPLETE. What is missing is a driver that reaches it: `okf_bq_graph.run "
-            "benchmark` reads fixtures/scale.json, defaults its cells to the `gql` engine, pools forced and natural "
-            "questions into one query list, and runs inside an Enterprise reservation window. A baseline driver must "
-            "read this plan instead, pass only this cell's shape as the query list, run on-demand with no window "
-            f"(`budget` needs `cell_seconds` only), and use its own `run_id` so it cannot collide with the retained "
-            "GQL summary."
+            "does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a "
+            "stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): "
+            "it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs "
+            "on-demand with no reservation window (`budget` carries `cell_seconds` and the total deadline only), and "
+            "labels the campaign with a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before "
+            f"any client exists. Preview: `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells {cell['name']}`; "
+            f"fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells {cell['name']}` (Pass 2, foreground, "
+            "Haiyuan's paid authorization). It has not been run: this cell is NOT_RUN, not measured."
         ),
     }
 
