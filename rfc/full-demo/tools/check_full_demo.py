@@ -12,7 +12,7 @@ Asserts, per plan.md Phase C:
   - attribution bands sum to 14 / 13 with no duplicate row
   - no BQ_COMMITTED / CATALOG_STAMPED / no-op / FAIL_STALE claim without a "not run" qualifier
   - shipped-type captures agree: entries.get shows the okf aspect, lookupContext omits it
-  - rfc/index.html links to ./full-demo/
+  - rfc/detailed-rfc/index.html links to ../full-demo/
   - node --check on app.js
 
 Usage: python3 rfc/full-demo/tools/check_full_demo.py   (exit 0 on pass)
@@ -1944,7 +1944,7 @@ if not __import__("os").environ.get("CHECK_FULL_DEMO_NO_MUTATION"):
         check(False, "tools/mutation_fixture.py could not run: %s" % e)
 
 # ---- wiring ---------------------------------------------------------------------------------------
-check('href="./full-demo/"' in (RFC / "index.html").read_text("utf-8"), "rfc/index.html Prototype callout links ./full-demo/")
+check('href="../full-demo/"' in (RFC / "detailed-rfc" / "index.html").read_text("utf-8"), "rfc/detailed-rfc/index.html Prototype callout links ../full-demo/")
 for f in ["styles.css", "app.js", "matrix.json", "stories.json", "live/README.md"]:
     check((DEMO / f).exists(), "%s exists" % f)
 try:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Negative fixtures for check_full_demo.py (stdlib only).
 
-Copies rfc/full-demo/ (and the two sibling files the checker reads: rfc/index.html and
+Copies rfc/full-demo/ (and the two sibling files the checker reads: rfc/detailed-rfc/index.html and
 rfc/demo/live/observe/live_identities.json) into a temp directory, applies one mutation at a time,
 runs the checker on the copy, and requires a NON-ZERO exit for every mutation and a ZERO exit for
 the unmodified copy.
@@ -143,7 +143,8 @@ def make_copy(tmp):
     shutil.copytree(DEMO, root / "full-demo", ignore=shutil.ignore_patterns("__pycache__"))
     (root / "demo" / "live" / "observe").mkdir(parents=True)
     shutil.copy(RFC / "demo" / "live" / "observe" / "live_identities.json", root / "demo" / "live" / "observe" / "live_identities.json")
-    shutil.copy(RFC / "index.html", root / "index.html")
+    (root / "detailed-rfc").mkdir()
+    shutil.copy(RFC / "detailed-rfc" / "index.html", root / "detailed-rfc" / "index.html")
     return root / "full-demo"
 
 
