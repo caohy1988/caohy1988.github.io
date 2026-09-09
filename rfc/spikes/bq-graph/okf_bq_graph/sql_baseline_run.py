@@ -13,7 +13,8 @@ What the driver refuses to do, by construction rather than by comment:
 
 * Run a consumer cell (`sqlchain_*`). Those need a request-to-consumer runner that does not exist
   (`NOT_IMPLEMENTED`) and, while `facts.state` is UNSELECTED, a fact-data version nobody has chosen
-  (`FACTS_UNSELECTED`). Asking for one raises `RefusedCell` naming both reasons.
+  (`FACTS_UNSELECTED`). Asking for one raises `RefusedCell` naming every reason that applies; since the
+  2026-09-09 selection of the synthetic fixture digest the committed plan yields `NOT_IMPLEMENTED` alone.
 * Reuse a `run_id`. Every campaign gets a fresh `sqlbase-<utc>-<hex>` id and `assert_run_id_is_fresh`
   checks the retained summary before any client exists; `benchmark.measure` checks again.
 * Open a reservation window, or *assume* on-demand. Omitting a window does not make a job on-demand: an
