@@ -192,7 +192,12 @@
         if (data.blurb) document.getElementById("lede").textContent = data.blurb;
         const n = (data.entries || []).length;
         document.getElementById("meta").textContent = n + " stor" + (n === 1 ? "y" : "ies") + " · public sources";
-        const entries = data.entries || [];
+        const entries = (data.entries || []).slice().sort((a, b) => {
+          const da = a.date || "";
+          const db = b.date || "";
+          if (db !== da) return db.localeCompare(da);
+          return String(b.id || "").localeCompare(String(a.id || ""));
+        });
         if (!entries.length) {
           document.getElementById("list").innerHTML = '<p class="empty">No stories yet.</p>';
           return;
