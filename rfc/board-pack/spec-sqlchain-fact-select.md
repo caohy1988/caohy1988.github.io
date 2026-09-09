@@ -92,6 +92,9 @@ When `facts.state == SELECTED`:
   `about YYYY-MM-DD …` or `unknown …` and refuses null, malformed values and a bare exact timestamp, because an exact
   expiry would need a table `expirationTime` readback the record does not carry.
 - `blocks` must be empty.
+- `facts.customer_data`, when present in **either** state, must be a record with `state` `NOT SELECTED`; the legacy
+  `UNSELECTED` shape without the block stays valid. `render_markdown` refuses a card whose customer block says
+  anything else, so a false customer status cannot be printed from a tampered card either.
 
 Unchanged for `UNSELECTED`: the four explanatory fields stay required and `blocks` must name real cells.
 
@@ -124,9 +127,13 @@ the baseline card, which the page links to.
   "has no runner and no selected fact-data version" → the full path still has no runner; its fact data is a
   selected synthetic fixture, not customer data.
 - `board-pack/index.html` envelope paragraph: "The fact data and its version. Chosen for the comparison, and
-  synthetic." — the rows are the receipt example's own fourteen-row invented fixture, pinned by the digest of the
-  script that loads them and by the job that loaded them; a run checks the live tables against that digest before
-  measuring; it is not customer data and Alder's cohort has never been selected.
+  synthetic." — the rows are the receipt example's own fourteen-row invented fixture, pinned two ways: by the
+  digest of the script that loads them (`fixture_sha256`) and, separately, by the digest of the rows and columns
+  themselves (`content_manifest_sha256`), with the load job on record. Before measuring, a future run must read every
+  table back in full and match the rows and columns to the content digest, not the script digest; counts and a
+  matching answer are not enough, and no runner does this yet. It is not customer data and Alder's cohort has never
+  been selected. The two digests are never conflated on any surface: the readback target is always the content
+  digest.
 - `rfc/index.html` (phase table, review-row, footer): same substitution, plus a footer clause dated 2026-09-09.
 - `README.md`: the two "still read `NOT_IMPLEMENTED + FACTS_UNSELECTED`" sentences become dated history with the
   current state beside them.

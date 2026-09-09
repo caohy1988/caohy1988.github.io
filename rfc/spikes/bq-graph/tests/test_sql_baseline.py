@@ -571,6 +571,42 @@ def test_the_promotion_refusals_say_what_evidence_would_be_needed(plan):
         sb.validate_plan(_selected(plan, customer_data={"state": "SELECTED", "cohort": "Alder cohort"}))
 
 
+@pytest.mark.parametrize("state", ["SELECTED", "PENDING", None])
+def test_the_unselected_path_also_refuses_a_customer_promotion(plan, state):
+    """Astra re-review of 93e3534: the guard ran only for SELECTED, so an UNSELECTED plan printed Alder as SELECTED."""
+    tampered = _unselected(plan)
+    tampered["facts"]["customer_data"] = {"state": state, "cohort": "Alder cohort"}
+    with pytest.raises(ValueError, match="customer_data must be a record with state NOT SELECTED"):
+        sb.validate_plan(tampered)
+    with pytest.raises(ValueError, match="customer_data"):
+        sb.build_card(tampered, records=[])
+
+
+def test_the_legacy_unselected_shape_without_a_customer_block_still_validates(plan):
+    legacy = _unselected(plan)
+    assert "customer_data" not in legacy["facts"]
+    sb.validate_plan(legacy)
+    text = sb.render_markdown(sb.build_card(legacy, records=[]))
+    assert "Customer fact data" not in text and "## Fact data — **UNSELECTED**" in text
+
+
+def test_an_unselected_plan_may_carry_the_honest_customer_block(plan):
+    honest = _unselected(plan)
+    honest["facts"]["customer_data"] = {"state": "NOT SELECTED", "cohort": "Alder cohort", "note": "never selected"}
+    text = sb.render_markdown(sb.build_card(honest, records=[]))
+    assert "**Customer fact data (Alder cohort) — NOT SELECTED.**" in text
+
+
+@pytest.mark.parametrize("state", ["SELECTED", "PENDING"])
+def test_render_fails_closed_on_a_tampered_customer_block(card, unselected_card, state):
+    """A card tampered after validation must not print a customer selection either."""
+    for base in (card, unselected_card):
+        tampered = copy.deepcopy(base)
+        tampered["facts"]["customer_data"] = {"state": state, "cohort": "Alder cohort"}
+        with pytest.raises(ValueError, match="refusing to render"):
+            sb.render_markdown(tampered)
+
+
 def test_the_rendered_card_never_prints_a_selected_customer_cohort(card):
     text = sb.render_markdown(card)
     assert "Alder cohort) — NOT SELECTED" in text

@@ -44,8 +44,9 @@ stay `INCOMPLETE` with `NOT_IMPLEMENTED` as their only reason, and every cost ce
 ## Why it is worth doing on its own
 
 Selecting clears one of the two blockers on the consumer cells and makes the remaining one honest: the next slice
-is a runner, and a runner can now be specified against a named fact version with a live precheck (row counts and
-the expected result) instead of an unnamed one. It also stops four surfaces from repeating a gap that the project
+is a runner, and a runner can now be specified against a named fact version with a live precheck (a full-schema,
+full-row readback of the seven tables matched to the content digest, the digest of the rows and columns rather than
+of the loading script; row counts and the expected result are smoke checks only) instead of an unnamed one. It also stops four surfaces from repeating a gap that the project
 had the power to close.
 
 ## Out of scope

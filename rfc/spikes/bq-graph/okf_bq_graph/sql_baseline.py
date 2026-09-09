@@ -133,11 +133,13 @@ def _validate_facts(plan: dict) -> None:
             raise ValueError("facts.state is SELECTED but no selected_version is recorded")
         if facts.get("blocks"):
             raise ValueError("facts.state is SELECTED but it still blocks cells: clear `blocks` or keep the state UNSELECTED")
+        _validate_customer_data(facts, required=True)
         _validate_selected_version(facts)
         return
     for key in ("why_it_matters", "what_is_missing", "blocks", "how_to_select"):
         if not facts.get(key):
             raise ValueError(f"an UNSELECTED fact version must record {key!r}")
+    _validate_customer_data(facts, required=False)
     names = {c["name"] for c in plan["retrieval_cells"] + plan["consumer_cells"]}
     unknown = [n for n in facts["blocks"] if n not in names]
     if unknown:
@@ -191,10 +193,6 @@ def _validate_selected_version(facts: dict) -> None:
     if not str(version["historical_chain_equivalence"]).startswith("UNPROVEN"):
         raise ValueError("facts.selected_version.historical_chain_equivalence must start with UNPROVEN: the retained chain "
                          "kept no row-level evidence, and a matching number is not byte-equivalence")
-    customer = facts.get("customer_data")
-    if not isinstance(customer, dict) or customer.get("state") != "NOT SELECTED":
-        raise ValueError("a SELECTED synthetic fact version must carry facts.customer_data with state NOT SELECTED: a "
-                         "customer selection is its own record with its own owner and acceptance, which no schema defines yet")
     observed = facts.get("observed_in_the_retained_chain")
     if observed:
         for key in ("dataset", "sdk_pin"):
@@ -243,6 +241,23 @@ ARTIFACT_DIGESTS = (
     ("publication.json", "publication_manifest_sha256"), ("gross-margin-period.md", "computation_sha256"),
     ("content.json", "content_manifest_sha256"),
 )
+
+
+def _validate_customer_data(facts: dict, required: bool) -> None:
+    """Customer (Alder) data is NOT SELECTED in either fact state; a supplied block may not say otherwise.
+
+    Astra re-review of 93e3534: the guard lived only on the SELECTED path, so an UNSELECTED plan could carry
+    `customer_data.state: SELECTED` and the card printed it. Now any supplied block is checked on the common path.
+    The legacy UNSELECTED shape with no block stays valid; a SELECTED synthetic version must carry the block.
+    """
+    customer = facts.get("customer_data")
+    if customer is None and not required:
+        return
+    if not isinstance(customer, dict) or customer.get("state") != "NOT SELECTED":
+        raise ValueError("facts.customer_data must be a record with state NOT SELECTED"
+                         + (" (required beside a SELECTED synthetic version)" if required else "")
+                         + ": a customer selection is its own record with its own owner and acceptance, which no schema "
+                         "defines yet, so no plan may print one")
 
 
 def _verify_selected_artifacts(version: dict, facts_dir: Path = FACTS_DIR) -> None:
@@ -823,6 +838,9 @@ def _render_facts(card: dict) -> list[str]:
         ]
     customer = facts.get("customer_data")
     if customer:
+        if customer.get("state") != "NOT SELECTED":
+            raise ValueError(f"refusing to render facts.customer_data with state {customer.get('state')!r}: no customer "
+                             "selection record exists, so the card may not print one")
         lines += [f"**Customer fact data ({customer.get('cohort', 'customer cohort')}) — {customer['state']}.** "
                   f"{customer.get('note', '')}".rstrip(), ""]
     if selected:

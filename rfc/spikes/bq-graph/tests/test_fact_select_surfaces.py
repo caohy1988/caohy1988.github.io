@@ -58,7 +58,37 @@ def test_no_surface_says_a_count_check_verifies_the_digest():
         text = path.read_text()
         assert not re.search(r"checks? the live (tables|rows) against (that|the) digest", text), name
     page = SURFACES["board-pack/index.html"].read_text()
-    assert "read every table back in full and match it to that digest" in page and "no runner does this yet" in page
+    assert "match the rows and columns to their own digest, not the script’s" in page and "no runner does this yet" in page
+
+
+SDLC_DOCS = {name: REPO / "rfc" / "board-pack" / f"{name}-sqlchain-fact-select.md" for name in ("intent", "spec", "plan")}
+SCRIPT_DIGEST_AS_TARGET = [
+    r"match (it|them) to that digest",                       # "that digest" was the script digest on the page
+    r"checks? the live (tables|rows) against (that|the) digest",
+    r"live precheck \(row counts and",                       # the counts-and-result-only summary
+    r"pinned by the digest of the\s+script that loads them and by the job that loaded them; a run checks",
+]
+
+
+def test_the_readback_target_is_the_content_digest_not_the_script_digest():
+    """Astra re-review of 93e3534: fixture_sha256 (script) and content_manifest_sha256 (rows and columns) are
+    different identities; every surface that names a readback target names the content digest."""
+    page = SURFACES["board-pack/index.html"].read_text()
+    assert "a digest of the rows and columns themselves" in page
+    for name, path in SDLC_DOCS.items():
+        text = path.read_text()
+        hits = [p for p in SCRIPT_DIGEST_AS_TARGET if re.search(p, text)]
+        assert not hits, f"{name}: {hits}"
+    spec = SDLC_DOCS["spec"].read_text()
+    assert "match the rows and columns to the content digest, not the script digest" in spec
+    intent = SDLC_DOCS["intent"].read_text()
+    assert "matched to the content digest, the digest of the rows and columns rather than" in intent
+    plan = SDLC_DOCS["plan"].read_text()
+    assert "matched to the content digest" in plan
+    card = SURFACES["baseline card"].read_text()
+    assert "requires its digest to equal content_manifest_sha256" in card
+    for name, path in SURFACES.items():
+        assert not re.search(r"match (it|them) to that digest", path.read_text()), name
 
 
 @pytest.mark.parametrize("name", ["board-pack/index.html", "board-pack/STORY.md", "board-pack/spec-sep19-pack.md",
