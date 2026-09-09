@@ -51,7 +51,7 @@ def test_no_current_tense_surface_still_says_the_version_is_unchosen(name):
         # the second dated clause is history too (state at the fact selection); the evening clause is the current one
         text = text.replace("consumer cells still have no runner, customer (Alder) data remains unselected, the live rows are "
                             "unverified against the digest, cost cells remain unmeasured and every threshold remains proposed · "
-                            "Updated 2026-09-09 (evening)", "")
+                            "Updated 2026-09-09 (FS-1)", "")
     hits = [pattern for pattern in STALE if re.search(pattern, text)]
     assert not hits, f"{name} still carries {hits}"
 
