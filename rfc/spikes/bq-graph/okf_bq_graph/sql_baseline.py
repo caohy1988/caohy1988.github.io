@@ -475,7 +475,9 @@ def card_state(retrieval_cells: list[dict], records: list[dict]) -> tuple[str, s
     measured = [c["cell"] for c in retrieval_cells if c["measured_n"]]
     n = len(records)
     if len(complete) == len(retrieval_cells):
-        return "RETRIEVAL_MEASURED", (f"Every retrieval cell is COMPLETE from {n} retained campaign(s). The consumer cells and "
+        filling = sorted({c["campaign"] for c in retrieval_cells})
+        return "RETRIEVAL_MEASURED", (f"Every retrieval cell is COMPLETE, filled from campaign(s) {', '.join('`' + f + '`' for f in filling)}; "
+                                      f"{n} campaign(s) are retained and listed below, earlier ones included. The consumer cells and "
                                       "the cost cells are not measured; the table says why.")
     return "INCOMPLETE", (f"{n} campaign(s) retained; {len(complete)} of {len(retrieval_cells)} retrieval cells COMPLETE, "
                           f"{len(measured)} with any measured attempt. Every other cell is INCOMPLETE or UNMEASURED with its reason. "
