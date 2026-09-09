@@ -745,9 +745,25 @@ that drives the real SDK with synthetic API responses:
   job is not submitted and the run stops `BYTES_BUDGET` / `USD_BUDGET`. The prior-observation projection is a
   pre-flight sanity check only.
 
+Astra's re-review narrowed two of those and added one label defect; all three are closed offline with the same kind of
+regression:
+
+* **Unknown billing is liability, not zero.** A submission whose response was lost after the gate journaled its id,
+  or a job whose final statistics could not be read, keeps its full hold as liability against that job id. The room
+  stays consumed until a bounded readback over the sealed gate's audit channel resolves it (terminal statistics charge
+  the actual bytes; a job the server never saw is released); a hold with no journaled id is liability nobody can
+  resolve. A stop caused by unresolved room reads `BYTES_BUDGET_UNRESOLVED`, not `BYTES_BUDGET`.
+* **Failed jobs are verified too.** Every submitted job is observed, successes, failures and unconfirmed outcomes
+  alike. A reservation or edition on a failed job is a violation that stops admission and withholds the edition; a job
+  without terminal statistics is unknown and withholds the edition until a readback resolves it.
+* **Stop reasons are the real cause.** An ordinary error in one stage no longer cancels the whole gate: it is that
+  request's retained failure and the cell continues. A gate stopped for a non-deadline reason reads `GATE_STOPPED`
+  with the failure named; deadline labels appear only when the time condition actually holds.
+
 `benchmark.run_cell` gained backward-compatible hooks for this: a per-cell `queries` list, `budget["deadline_reason"]`,
-`budget["window_for_cell"]` and `budget["stop_check"]`; a cell that stopped for any reason is INCOMPLETE even when its
-n-th attempt was retained. The reservation-window runner's `WINDOW_DEADLINE` label and behaviour are unchanged. The
+`budget["window_for_cell"]`, `budget["stop_check"]` and `budget["on_cell_sealed"]`; a cell that stopped for any reason
+is INCOMPLETE even when its n-th attempt was retained. The reservation-window runner's `WINDOW_DEADLINE` label is
+unchanged; its gate now also survives an ordinary stage error (interrupts and `WindowStopped` still cancel). The
 card's retrieval cells read `NOT_RUN` with the exact command that fills each; the consumer cells still read
 `NOT_IMPLEMENTED + FACTS_UNSELECTED`, and the driver refuses to run them.
 

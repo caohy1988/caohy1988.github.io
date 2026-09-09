@@ -124,10 +124,16 @@ def run_cell(cell: dict, queries: list[dict], clients_factory, budget: dict) -> 
         return bool(budget.get("deadline_monotonic")) and time.monotonic() >= budget["deadline_monotonic"]
 
     def _gate_label() -> str:
-        # A per-cell gate stops for the cell budget or the total deadline; the window runner's gate is its window.
+        # A per-cell gate is labelled by the time condition that actually holds; a gate stopped for another reason
+        # (a cancellation) keeps that reason instead of borrowing a deadline label (Astra PR55 RR #3).
         if owned is None:
             return "WINDOW_DEADLINE"
-        return deadline_reason if _past_total() else "CELL_TIME_BUDGET"
+        now = time.monotonic()
+        if _past_total():
+            return deadline_reason
+        if now - started >= budget["cell_seconds"] or now >= owned.deadline:
+            return "CELL_TIME_BUDGET"
+        return "GATE_STOPPED"
 
     ex = ThreadPoolExecutor(max_workers=cell["concurrency"])
     futures = {}
@@ -171,6 +177,8 @@ def run_cell(cell: dict, queries: list[dict], clients_factory, budget: dict) -> 
             stopped_reason = stop_check()
         if owned is not None:
             owned.stop_and_cancel()   # seal the cell's gate; with every job finished this cancels nothing
+            if budget.get("on_cell_sealed"):
+                budget["on_cell_sealed"](cell, owned)   # e.g. reconcile unresolved job liabilities by bounded readback
     measured = [r for r in recs if not r["warmup"]]
     ok = [r["total_ms"] for r in measured if r["ok"]]
     allv = [r["total_ms"] for r in measured]
@@ -188,6 +196,8 @@ def run_cell(cell: dict, queries: list[dict], clients_factory, budget: dict) -> 
            "measured_n": len(measured), "measured_target": n_target,
            "state": "COMPLETE" if complete else ("INCOMPLETE" if measured else "NOT_RUN_BUDGET"),
            "stopped_reason": stopped_reason,
+           "stopped_detail": (next((r["error"] for r in reversed(recs) if r.get("error")), None)
+                              if stopped_reason == "GATE_STOPPED" else None),
            "success_rate": (len(ok) / len(measured)) if measured else None,
            "errors": sum(1 for r in measured if r["status"] == "ERROR"), "timeouts": sum(1 for r in measured if r["timeout"]),
            "gated": sum(1 for r in measured if r["status"] in ("STOPPED", "BUDGET_EXHAUSTED", "ROUTING_VIOLATION")),

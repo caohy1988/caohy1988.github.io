@@ -58,7 +58,9 @@ from google.cloud import bigquery
 from . import PROJECT, LOCATION
 from . import benchmark
 from . import sql_baseline as sb
-from .lifecycle import WindowJobs
+from google.api_core import exceptions as gexc
+
+from .lifecycle import WindowJobs, AuditExpired
 from .retrieve import RoutingViolation
 
 ROOT = sb.ROOT
@@ -73,6 +75,8 @@ TOTAL_DEADLINE_REASON = "TOTAL_TIME_BUDGET"
 ON_DEMAND_RESERVATION = "none"            # BigQuery job-level routing override: run on-demand regardless of assignments
 PER_JOB_CAP_BYTES = 1 * sb.GIB            # sanity cap on one job; the largest recorded baseline job billed ~110 MiB
 MIN_BILLED_BYTES = 10 * 1024 ** 2         # BigQuery bills at least 10 MiB per on-demand query; less room is no room
+RECONCILE_SECONDS = 60                    # bounded read-only channel per sealed gate for resolving job liabilities
+RECONCILE_MAX_READS = 64
 
 
 class RefusedCell(ValueError):
@@ -221,10 +225,17 @@ class BytesLedger:
     """One shared running account of billed bytes for a whole campaign, thread-safe.
 
     `hold()` reserves room for one job before it is submitted and returns the job's `maximum_bytes_billed`;
-    `settle()` releases the hold and charges what the job actually billed. Holds count against the ceiling
-    while they are out, so concurrent jobs cannot collectively exceed it, and the per-job cap keeps one
-    runaway query from taking the whole campaign's room. The ceiling is the tighter of the declared byte
-    ceiling and the declared USD ceiling at the plan's list rate.
+    `settle()` releases the hold and charges what the job actually billed, once the server reported a terminal
+    job with statistics. A job whose billing is NOT established - a submission whose response was lost after the
+    gate journaled its id, a job whose final statistics could not be read - keeps its hold as *liability* against
+    that job id (`unresolved()`); the liability counts against the ceiling exactly like an outstanding hold until a
+    bounded readback resolves it (`resolve()`: terminal statistics charge the actual bytes, an established
+    non-submission releases the room). A hold that cannot be tied to any job id is liability nobody can resolve, and
+    it stays counted for the rest of the campaign (Astra PR55 RR #1: a lost response is not zero bytes).
+
+    Holds and liabilities count while they are out, so concurrent jobs cannot collectively exceed the ceiling, and
+    the per-job cap keeps one runaway query from taking the whole campaign's room. The ceiling is the tighter of
+    the declared byte ceiling and the declared USD ceiling at the plan's list rate.
     """
 
     def __init__(self, max_bytes: int, usd_per_tib: float, max_usd: float, per_job_cap: int = PER_JOB_CAP_BYTES):
@@ -236,14 +247,20 @@ class BytesLedger:
         self.binding = "BYTES_BUDGET" if self.max_bytes <= self.usd_cap_bytes else "USD_BUDGET"
         self.per_job_cap = int(per_job_cap)
         self.charged = 0
-        self.held = 0
+        self.held = 0                       # active holds + unresolved liabilities
         self.jobs = 0
         self.refused = 0
         self.max_hold_seen = 0
+        self.pending: dict[str, dict] = {}  # job id (or an unresolvable key) -> liability
+        self.resolved: list[dict] = []
+        self._unknown = 0
         self._lock = threading.Lock()
 
     def usd_list(self) -> float:
         return self.charged / sb.TIB * self.usd_per_tib
+
+    def liability(self) -> int:
+        return sum(p["hold"] for p in self.pending.values())
 
     def room(self) -> int:
         return self.cap_bytes - self.charged - self.held
@@ -252,7 +269,10 @@ class BytesLedger:
         return self.room() < MIN_BILLED_BYTES
 
     def stop_reason(self) -> str | None:
-        return self.binding if self.exhausted() else None
+        if not self.exhausted():
+            return None
+        # room that only unresolved liabilities consume is not spent yet; say so rather than call it billed
+        return self.binding if self.room() + self.liability() < MIN_BILLED_BYTES else self.binding + "_UNRESOLVED"
 
     def hold(self) -> int | None:
         with self._lock:
@@ -265,58 +285,144 @@ class BytesLedger:
             self.max_hold_seen = max(self.max_hold_seen, hold)
             return hold
 
-    def settle(self, hold: int, bytes_billed: int) -> None:
+    def settle(self, hold: int, bytes_billed: int, job_id: str | None = None) -> None:
         with self._lock:
             self.held -= hold
             self.charged += int(bytes_billed or 0)
             self.jobs += 1
 
+    def unresolved(self, hold: int, job_id: str | None, reason: str) -> None:
+        """Keep the hold as liability. The room stays consumed until `resolve()` establishes what the job billed."""
+        with self._lock:
+            key = job_id
+            if key is None:
+                self._unknown += 1
+                key = f"unresolvable-{self._unknown}"
+            self.pending[key] = {"job_id": job_id, "hold": hold, "reason": reason, "resolvable": job_id is not None}
+
+    def resolve(self, job_id: str, bytes_billed: int | None = None, absent: bool = False, how: str = "readback") -> bool:
+        """Terminal statistics charge the actual bytes; an established non-submission releases the room."""
+        with self._lock:
+            entry = self.pending.pop(job_id, None)
+            if entry is None:
+                return False
+            self.held -= entry["hold"]
+            if absent:
+                outcome = "released: never submitted"
+            else:
+                self.charged += int(bytes_billed or 0)
+                self.jobs += 1
+                outcome = f"charged {int(bytes_billed or 0)} bytes"
+            self.resolved.append(dict(entry, outcome=outcome, how=how))
+            return True
+
     def snapshot(self) -> dict:
         with self._lock:
+            liability = sum(p["hold"] for p in self.pending.values())
             return {"ceiling_bytes": self.cap_bytes, "ceiling_binding": self.binding,
                     "max_bytes_billed_declared": self.max_bytes, "max_usd_declared": self.max_usd,
                     "usd_per_tib": self.usd_per_tib, "per_job_cap_bytes": self.per_job_cap,
                     "jobs_settled": self.jobs, "jobs_refused_no_room": self.refused,
                     "bytes_billed_charged": self.charged, "usd_list_charged": round(self.usd_list(), 4),
-                    "holds_outstanding_bytes": self.held, "largest_hold_bytes": self.max_hold_seen,
-                    "exhausted": self.exhausted(),
-                    "note": "warmups, failures and concurrent jobs all charge this account; the projection did not"}
+                    "holds_outstanding_bytes": self.held - liability,
+                    "unresolved_liability_bytes": liability, "unresolved_jobs": list(self.pending.values()),
+                    "usd_list_liability": round(liability / sb.TIB * self.usd_per_tib, 4),
+                    "resolved_by_readback": list(self.resolved),
+                    "largest_hold_bytes": self.max_hold_seen,
+                    "exhausted": self.exhausted(), "stop_reason": self.stop_reason(),
+                    "note": ("warmups, failures and concurrent jobs all charge this account; a job whose billing was "
+                             "never established keeps its full hold as liability; the projection did not")}
 
 
 class RoutingGuard:
-    """Require on-demand routing on every job and verify it from the job's own statistics."""
+    """Require on-demand routing on every job and verify it from each job's own terminal statistics.
+
+    Every submitted job is observed: a success, a failure, and a job whose outcome the caller never confirmed. A job
+    counts as verified on-demand only when the server reported it DONE with statistics carrying neither a
+    reservation_id nor an edition. A reservation_id or edition on ANY job - failed ones included - is a violation
+    that stops admission and withholds the campaign's edition. A job without terminal statistics is unknown: it does
+    not certify anything until a readback resolves it, and while any job is unknown the campaign is not labelled
+    on-demand (Astra PR55 RR #2).
+    """
 
     reservation = ON_DEMAND_RESERVATION
 
     def __init__(self) -> None:
         self.jobs = 0
+        self.ok = 0
         self.violations: list[dict] = []
+        self.unknown: dict[str, dict] = {}
+        self._anonymous = 0
         self._lock = threading.Lock()
 
-    def check(self, entry: dict) -> None:
+    @staticmethod
+    def classify(entry: dict) -> str:
+        if entry.get("reservation_id") or entry.get("edition"):
+            return "VIOLATION"
+        if entry.get("server_state") == "DONE" and entry.get("stats_present"):
+            return "OK"
+        return "UNKNOWN"
+
+    def observe(self, entry: dict) -> str:
+        verdict = self.classify(entry)
         with self._lock:
             self.jobs += 1
-            if entry.get("reservation_id") or entry.get("edition"):
-                violation = {"job_id": entry.get("job_id"), "stage": entry.get("stage"),
-                             "reservation_id": entry.get("reservation_id"), "edition": entry.get("edition")}
-                self.violations.append(violation)
-        if entry.get("reservation_id") or entry.get("edition"):
+            if verdict == "OK":
+                self.ok += 1
+            elif verdict == "VIOLATION":
+                self.violations.append({"job_id": entry.get("job_id"), "stage": entry.get("stage"),
+                                        "reservation_id": entry.get("reservation_id"), "edition": entry.get("edition"),
+                                        "job_state": entry.get("state"), "server_state": entry.get("server_state")})
+            else:
+                key = entry.get("job_id")
+                if key is None:
+                    self._anonymous += 1
+                    key = f"unresolvable-{self._anonymous}"
+                self.unknown[key] = {"job_id": entry.get("job_id"), "stage": entry.get("stage"),
+                                     "job_state": entry.get("state"), "server_state": entry.get("server_state"),
+                                     "stats_present": bool(entry.get("stats_present"))}
+        return verdict
+
+    def check(self, entry: dict) -> None:
+        if self.observe(entry) == "VIOLATION":
             raise RoutingViolation(
                 f"job {entry.get('job_id')} ran with reservation_id={entry.get('reservation_id')!r} "
                 f"edition={entry.get('edition')!r} although reservation={self.reservation!r} was requested; "
                 "this campaign is not on-demand and stops here")
 
+    def resolve(self, job_id: str, entry: dict | None, absent: bool = False) -> bool:
+        """A readback settles an unknown job: DONE statistics classify it, an established non-submission drops it."""
+        with self._lock:
+            if job_id not in self.unknown:
+                return False
+            if absent:
+                self.unknown.pop(job_id)
+                self.jobs -= 1                  # it was never a job
+                return True
+        if entry is None:
+            return False
+        verdict = self.classify(entry)
+        if verdict == "UNKNOWN":
+            return False
+        with self._lock:
+            self.unknown.pop(job_id, None)
+            self.jobs -= 1
+        self.observe(entry)
+        return True
+
     def stop_reason(self) -> str | None:
         return "ROUTING_VIOLATION" if self.violations else None
 
     def verified(self) -> bool:
-        return self.jobs > 0 and not self.violations
+        return self.ok > 0 and not self.violations and not self.unknown
 
     def snapshot(self) -> dict:
         with self._lock:
-            return {"job_reservation_requested": self.reservation, "jobs_checked": self.jobs,
-                    "violations": list(self.violations), "verified_on_demand": self.verified(),
-                    "note": ("verified means every checked job reported no reservation_id and no edition; "
+            return {"job_reservation_requested": self.reservation, "jobs_observed": self.jobs,
+                    "jobs_verified_on_demand": self.ok, "violations": list(self.violations),
+                    "unknown": list(self.unknown.values()), "verified_on_demand": self.verified(),
+                    "note": ("verified means every observed job - successes and failures - was reported DONE with "
+                             "statistics carrying no reservation_id and no edition, and no job's outcome is unknown; "
                              "the standing reservation is neither read nor touched")}
 
 
@@ -334,6 +440,8 @@ class CampaignRuntime:
         self.routing = RoutingGuard()
         self.window: WindowJobs | None = None
         self.gates: list[dict] = []
+        self.reconciliations: list[dict] = []
+        self.raw_client: Any = None          # one raw client, kept for bounded readbacks after a gate is sealed
         self._lock = threading.Lock()
 
     def window_for_cell(self, cell: dict, started: float) -> WindowJobs:
@@ -352,6 +460,67 @@ class CampaignRuntime:
     def current_window(self) -> WindowJobs | None:
         with self._lock:
             return self.window
+
+    def note_client(self, raw: Any) -> None:
+        with self._lock:
+            if self.raw_client is None:
+                self.raw_client = raw
+
+    def unresolved_for(self, window: WindowJobs) -> list[str]:
+        ids = set(window.refs)
+        return sorted((set(self.ledger.pending) | set(self.routing.unknown)) & ids)
+
+    def reconcile(self, cell: dict, window: WindowJobs) -> dict:
+        """After a gate is sealed, read back every job of that gate whose billing or routing is still unresolved,
+        over the gate's bounded read-only channel. A DONE job with statistics settles both; a job the gate journaled
+        but the server never saw (NotFound under its own reference) is released. Anything the channel could not read
+        stays liability and unknown, and the room it holds is not spent again (Astra PR55 RR #1 / #2)."""
+        outcome = {"cell": cell["name"], "gate": window.label, "jobs": [], "expired": False, "unread": []}
+        ids = self.unresolved_for(window)
+        if not ids:
+            self.reconciliations.append(outcome)
+            return outcome
+        if self.raw_client is None:
+            outcome["error"] = "no client to read back with"
+            self.reconciliations.append(outcome)
+            return outcome
+        window.open_audit(RECONCILE_SECONDS, max_reads=RECONCILE_MAX_READS)
+        audit = window.audit_client(self.raw_client)
+        for job_id in ids:
+            ref = window.refs.get(job_id) or {}
+            row = {"job_id": job_id, "ledger": None, "routing": None}
+            try:
+                job = audit.get_job(job_id, project=ref.get("project"), location=ref.get("location"))
+                st = getattr(job, "_properties", {}).get("statistics", {}) or {}
+                entry = {"job_id": job_id, "stage": "readback", "state": "READBACK", "server_state": job.state,
+                         "stats_present": bool(st), "bytes_billed": job.total_bytes_billed,
+                         "reservation_id": st.get("reservation_id"), "edition": st.get("edition")}
+                row["server_state"] = job.state
+                if job.state == "DONE" and st and job.total_bytes_billed is not None:
+                    row["ledger"] = "charged" if self.ledger.resolve(job_id, job.total_bytes_billed) else "not pending"
+                else:
+                    row["ledger"] = "still unresolved: no terminal billing"
+                row["routing"] = self.routing.classify(entry)
+                self.routing.resolve(job_id, entry)
+            except gexc.NotFound:
+                if ref.get("notfound_is_done", False) and not ref.get("adopted"):
+                    row["ledger"] = "released" if self.ledger.resolve(job_id, absent=True, how="readback NotFound") else "not pending"
+                    self.routing.resolve(job_id, None, absent=True)
+                    row["routing"] = "released: never submitted"
+                else:
+                    row["ledger"] = row["routing"] = "still unresolved: absent under an unconfirmed reference"
+            except AuditExpired as e:
+                row["ledger"] = row["routing"] = f"still unresolved: {e}"
+                outcome["expired"] = True
+                outcome["jobs"].append(row)
+                break
+            except Exception as e:  # noqa: BLE001 - an unreadable job stays unresolved, and says why
+                row["ledger"] = row["routing"] = f"still unresolved: {type(e).__name__}: {e}"[:200]
+            outcome["jobs"].append(row)
+        outcome["unread"] = [i for i in ids if i not in {r["job_id"] for r in outcome["jobs"]}]
+        outcome["audit"] = audit.record()
+        self.reconciliations.append(outcome)
+        return outcome
 
 
 # --- campaign ---------------------------------------------------------------------------------------
@@ -430,6 +599,7 @@ def measure_config(campaign: dict, started_monotonic: float | None = None, runti
     if runtime is not None:
         budget["window_for_cell"] = runtime.window_for_cell
         budget["stop_check"] = runtime.stop_check
+        budget["on_cell_sealed"] = runtime.reconcile
     return {
         "run_id": campaign["run_id"],
         "cells": [dict(c) for c in campaign["cells"]],
@@ -453,6 +623,7 @@ def client_factory(dataset: str, make_client: Callable[[], Any] | None = None,
             local.c = make()
         clients = {"engine": ENGINE, "bq": local.c, "ds": dataset, "use_cache": False}
         if runtime is not None:
+            runtime.note_client(local.c)
             window = runtime.current_window()
             if window is None:
                 raise RuntimeError("no submission gate is open for this cell; refusing to build an unbounded client")
@@ -521,6 +692,9 @@ def live(campaign: dict, out_dir: Path | str = OUT_DIR, make_client: Callable[[]
         window = runtime.current_window()
         if window is not None:
             window.stop_and_cancel()      # an abort mid-cell still seals the open gate
+            if runtime.unresolved_for(window):
+                runtime.reconcile({"name": "(final)"}, window)
+        record["reconciliations"] = runtime.reconciliations
         record["ended_utc"] = _now()
         record["wall_seconds"] = round(time.monotonic() - started, 1)
         record["billing"] = runtime.ledger.snapshot()
@@ -528,9 +702,12 @@ def live(campaign: dict, out_dir: Path | str = OUT_DIR, make_client: Callable[[]
         record["gates"] = runtime.gates
         verified = runtime.routing.verified()
         record["edition"] = "on-demand" if verified else None
-        record["edition_note"] = ("every checked job reported no reservation_id and no edition" if verified else
-                                  "NOT established: " + ("no job was checked" if runtime.routing.jobs == 0 else
-                                                         f"{len(runtime.routing.violations)} job(s) reported a reservation or edition"))
+        g = runtime.routing
+        record["edition_note"] = ("every observed job, failures included, was reported DONE with no reservation_id and no edition"
+                                  if verified else "NOT established: " + (
+                                      "no job was checked" if g.jobs == 0 else
+                                      f"{len(g.violations)} job(s) reported a reservation or edition" if g.violations else
+                                      f"{len(g.unknown)} job(s) have no terminal statistics (outcome unknown)"))
         (out_dir / f"run_{campaign['run_id']}.json").write_text(json.dumps(record, indent=2, default=str) + "\n")
     return record
 

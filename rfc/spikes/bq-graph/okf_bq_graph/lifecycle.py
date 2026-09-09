@@ -184,12 +184,17 @@ def _guarded_send(client, window, cleanup: bool):
 
 @contextmanager
 def window_executor(client, max_workers):
-    """Cancel before executor.__exit__ waits, including interrupts in nested retrieval."""
+    """Cancel before executor.__exit__ waits, including interrupts in nested retrieval.
+
+    An interrupt (KeyboardInterrupt / SystemExit) or the gate's own `WindowStopped` cancels the whole gate. An
+    ordinary `Exception` from one stage - an `invalidQuery` in the context job, say - is that request's failure and
+    is retained as such by the caller; it does not stop the gate for every other request in flight, and the sibling
+    stage is still awaited under the gate's deadline (Astra PR55 RR #3)."""
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         try:
             yield executor
-        except BaseException:
-            if isinstance(client, WindowClient):
+        except BaseException as e:
+            if isinstance(client, WindowClient) and (not isinstance(e, Exception) or isinstance(e, WindowStopped)):
                 client.window.stop_and_cancel()
             raise
 
@@ -381,8 +386,16 @@ class WindowJobs:
                     self.cleanup_jobs += 1
             self._save()  # survives a lost submit response or killed driver
             # the send guard re-checks admission at the ACTUAL dispatch, including after a credential refresh
-            with _guarded_send(client, self, cleanup):
-                job = getattr(client, method)(*args, **kwargs)
+            try:
+                with _guarded_send(client, self, cleanup):
+                    job = getattr(client, method)(*args, **kwargs)
+            except BaseException as e:
+                # The id was journaled before the send, so a lost response is an accepted job until a readback says
+                # otherwise. The caller learns the id from the exception and keeps its liability (Astra PR55 RR #1).
+                if job_id is not None:
+                    e.okf_job_id = job_id
+                    e.okf_job_ref = dict(self.refs[job_id], job_id=job_id, window=self.label)
+                raise
         return WindowJob(job, self, job_id, method == "query", cleanup=cleanup, dry_run=dry)
 
     def finished(self, job_id):

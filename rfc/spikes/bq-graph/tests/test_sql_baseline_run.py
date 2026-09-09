@@ -424,8 +424,10 @@ def test_card_command_lines_name_this_driver_and_parse(plan):
 # too), with AnonymousCredentials and no network. The clock is injected. These are counterexamples, not measurements.
 
 import time as _time
+from google.api_core.exceptions import ServiceUnavailable
 from google.auth.credentials import AnonymousCredentials
 from google.cloud import bigquery
+from requests.exceptions import ConnectionError, ReadTimeout
 
 
 class SyntheticBigQuery:
@@ -433,11 +435,18 @@ class SyntheticBigQuery:
     the injected clock by `advance_seconds` when the n-th job is inserted; `honor_cap` fails a job whose
     maximumBytesBilled is below `billed`, the way BigQuery refuses a job over its byte limit before running it."""
 
-    def __init__(self, monkeypatch, *, billed=0, enterprise=False, advance_at=None, advance_seconds=0, honor_cap=False):
+    def __init__(self, monkeypatch, *, billed=0, enterprise=False, advance_at=None, advance_seconds=0, honor_cap=False,
+                 bill_hold=False, lose_submit_at=(), lose_result_at=(), readback_unavailable=False,
+                 fail_at=(), fail_enterprise_at=(), omit_stats=False):
         self.clock = [1000.0]
-        self.submissions, self.cancels, self.jobs = [], [], {}
+        self.submissions, self.cancels, self.jobs, self.readbacks = [], [], {}, []
         self.billed, self.enterprise, self.honor_cap = billed, enterprise, honor_cap
         self.advance_at, self.advance_seconds = advance_at, advance_seconds
+        self.bill_hold = bill_hold                       # bill exactly the transmitted cap (min 1 GiB): Astra's ledger probe
+        self.lose_submit_at, self.lose_result_at = set(lose_submit_at), set(lose_result_at)
+        self.readback_unavailable = readback_unavailable
+        self.fail_at, self.fail_enterprise_at, self.omit_stats = set(fail_at), set(fail_enterprise_at), omit_stats
+        self.lost_ids, self.pending_result = set(), set()
         monkeypatch.setattr(_time, "monotonic", lambda: self.clock[0])
         monkeypatch.setattr(bigquery.Client, "_call_api", self.api)
 
@@ -452,27 +461,48 @@ class SyntheticBigQuery:
             self.submissions.append({"at": self.clock[0], "configuration": data["configuration"]})
             if len(self.submissions) == self.advance_at:
                 self.clock[0] += self.advance_seconds
+            n = len(self.submissions)
             refused = self.honor_cap and cap is not None and int(cap) < self.billed
-            billed = 0 if refused else self.billed
+            billed = 0 if refused else (min(run.PER_JOB_CAP_BYTES, int(cap)) if self.bill_hold else self.billed)
             stat = {"creationTime": "1000", "startTime": "1000", "endTime": "1001",
                     "query": {"totalBytesProcessed": str(billed), "totalBytesBilled": str(billed), "totalSlotMs": "1", "cacheHit": False}}
-            if self.enterprise:
+            if self.enterprise or n in self.fail_enterprise_at:
                 stat.update(edition="ENTERPRISE", reservation_id="test-project-0728-467323:US.okf-demo-enterprise")
             status = {"state": "DONE"}
             if refused:
                 err = {"reason": "bytesBilledLimitExceeded", "message": f"Query exceeded limit for bytes billed: {cap}"}
                 status.update(errorResult=err, errors=[err])
-            job = dict(data, status=status, statistics=stat)
-            self.jobs[data["jobReference"]["jobId"]] = job
+            if n in self.fail_at or n in self.fail_enterprise_at:
+                err = {"reason": "invalidQuery", "message": "synthetic invalidQuery"}
+                status.update(errorResult=err, errors=[err])
+            job = dict(data, status=status)
+            if not self.omit_stats:
+                job["statistics"] = stat
+            job_id = data["jobReference"]["jobId"]
+            self.jobs[job_id] = job                       # the server keeps the job even when the client loses the response
+            if n in self.lose_submit_at:
+                self.lost_ids.add(job_id)
+                raise ConnectionError("synthetic: job accepted, connection closed before the response")
+            if n in self.lose_result_at:
+                self.pending_result.add(job_id)
+                return dict(data, status={"state": "RUNNING"}, statistics={"creationTime": "1000"})
             return job
         if method == "GET" and "/queries/" in path:
+            job_id = path.split("/queries/")[1].split("?")[0]
+            if job_id in self.pending_result:                 # the final result stays unreadable until the gate seals
+                raise ReadTimeout("synthetic: result response lost")
             return {"jobComplete": True, "totalRows": "0", "schema": {"fields": []}, "rows": []}
         if method == "POST" and path.endswith("/cancel"):
             job_id = path.split("/jobs/")[1].split("/cancel")[0]
             self.cancels.append(job_id)
+            self.pending_result.discard(job_id)                # after the seal the server's terminal record is readable
             return {"job": self.jobs[job_id]}
         if method == "GET" and "/jobs/" in path:
-            return self.jobs[path.split("/jobs/")[1].split("?")[0]]
+            job_id = path.split("/jobs/")[1].split("?")[0]
+            self.readbacks.append(job_id)
+            if self.readback_unavailable or job_id in self.pending_result:
+                raise ServiceUnavailable("synthetic: job status unavailable")
+            return self.jobs[job_id]
         raise AssertionError(f"unexpected API call: {method} {path}")
 
 
@@ -496,7 +526,7 @@ def test_every_job_carries_the_on_demand_override_and_a_byte_cap(plan, scratch, 
     cell = record["cells"][0]
     assert cell["state"] == "COMPLETE" and cell["stopped_reason"] is None and cell["measured_n"] == 3
     assert record["edition"] == "on-demand" and record["routing"]["verified_on_demand"] is True
-    assert record["routing"]["jobs_checked"] == len(bq.submissions) == 12
+    assert record["routing"]["jobs_observed"] == record["routing"]["jobs_verified_on_demand"] == len(bq.submissions) == 12
     assert record["billing"]["bytes_billed_charged"] == 12 * 50 * 1024 ** 2 and record["billing"]["exhausted"] is False
     assert record["billing"]["holds_outstanding_bytes"] == 0
     assert record["state"] == "COMPLETE"
@@ -527,13 +557,24 @@ def test_inherited_enterprise_assignment_fails_closed(plan, scratch, monkeypatch
 def test_routing_guard_unit():
     guard = run.RoutingGuard()
     assert guard.verified() is False and guard.stop_reason() is None
-    guard.check({"job_id": "a", "reservation_id": None, "edition": None})
+    done = {"server_state": "DONE", "stats_present": True, "reservation_id": None, "edition": None}
+    guard.check(dict(done, job_id="a"))
     assert guard.verified() is True
+    # no terminal statistics: unknown, and unknown withholds the label until a readback resolves it
+    assert guard.observe({"job_id": "u", "server_state": "RUNNING", "stats_present": False}) == "UNKNOWN"
+    assert guard.verified() is False and guard.stop_reason() is None
+    assert guard.resolve("u", {"server_state": "RUNNING", "stats_present": False}) is False
+    assert guard.resolve("u", dict(done, job_id="u")) is True and guard.verified() is True
+    assert guard.observe({"job_id": None, "server_state": None, "stats_present": False}) == "UNKNOWN"
+    assert guard.resolve("unresolvable-1", None, absent=True) is True and guard.verified() is True
+    # a failed job with a reservation is a violation too
+    assert guard.observe(dict(done, job_id="f", state="FAILED", edition="ENTERPRISE")) == "VIOLATION"
     with pytest.raises(run.RoutingViolation, match="not on-demand"):
-        guard.check({"job_id": "b", "reservation_id": None, "edition": "ENTERPRISE"})
+        guard.check({"job_id": "b", "reservation_id": None, "edition": "ENTERPRISE", "server_state": "DONE", "stats_present": True})
     with pytest.raises(run.RoutingViolation):
         guard.check({"job_id": "c", "reservation_id": "p:US.r", "edition": None})
-    assert guard.stop_reason() == "ROUTING_VIOLATION" and guard.verified() is False and guard.jobs == 3
+    assert guard.stop_reason() == "ROUTING_VIOLATION" and guard.verified() is False
+    assert guard.snapshot()["violations"][0]["job_state"] == "FAILED"
 
 
 def test_clock_advance_during_the_last_request_cannot_complete_the_cell(plan, scratch, monkeypatch):
@@ -658,3 +699,202 @@ def test_client_factory_with_a_runtime_refuses_an_unbounded_client(plan, cases, 
     clients = factory()
     assert clients["bq"].window is window and clients["bytes_ledger"] is runtime.ledger and clients["routing"] is runtime.routing
     assert clients["routing"].reservation == "none"
+
+
+# --- Astra PR55 re-review residuals ---------------------------------------------------------------------------------------
+
+def _attempts(scratch):
+    return [json.loads(line) for line in (scratch / "requests.jsonl").read_text().splitlines()]
+
+
+def test_lost_submission_keeps_its_hold_until_the_readback_charges_it(plan, scratch, monkeypatch):
+    """RR #1: an accepted job whose response was lost used to settle as zero bytes."""
+    bq = SyntheticBigQuery(monkeypatch, billed=sb.GIB, lose_submit_at={1})
+    record = _live(_small(plan, ["sqlbase_forced_c1"], warmups=0, measured=4), bq, scratch)
+    attempts = _attempts(scratch)
+    first = attempts[0]
+    assert first["status"] == "ERROR" and "ConnectionError" in first["error"]
+    lost = first["timing"]["jobs"][0]
+    assert lost["state"] == "SUBMISSION_UNCONFIRMED" and lost["job_id"] in bq.lost_ids
+    assert lost["job_ref"]["window"].endswith("sqlbase_forced_c1") and lost["job_ref"]["notfound_is_done"] is True
+    # the lost job is charged after the gate sealed and read it back: 1 (lost) + 3 requests x 3 jobs
+    billing = record["billing"]
+    assert billing["bytes_billed_charged"] == 10 * sb.GIB and billing["unresolved_liability_bytes"] == 0
+    assert billing["resolved_by_readback"][0]["job_id"] == lost["job_id"]
+    assert billing["resolved_by_readback"][0]["outcome"] == f"charged {sb.GIB} bytes"
+    rec = record["reconciliations"][0]
+    assert rec["cell"] == "sqlbase_forced_c1" and rec["jobs"][0]["ledger"] == "charged" and rec["jobs"][0]["routing"] == "OK"
+    assert lost["job_id"] in bq.readbacks and lost["job_id"] in bq.cancels    # cancelled at seal, then read for billing
+    assert record["edition"] == "on-demand" and record["routing"]["unknown"] == []
+    assert record["cells"][0]["state"] == "COMPLETE" and record["cells"][0]["errors"] == 1
+
+
+def test_lost_submissions_cannot_push_the_server_bill_past_the_ceiling(plan, scratch, monkeypatch):
+    """Astra's ledger probe: every job bills exactly its transmitted cap. One lost response used to allow 65 GiB."""
+    bq = SyntheticBigQuery(monkeypatch, bill_hold=True, lose_submit_at={1, 2, 3})
+    campaign = run.build_campaign(plan, run.load_cases(), ["sqlbase_forced_c1"], run_id="sqlbase-20260919T000000Z-regress0")
+    record = _live(campaign, bq, scratch)
+    server_billed = sum(int(s["configuration"]["query"]["maximumBytesBilled"]) for s in bq.submissions)
+    assert server_billed <= 64 * sb.GIB
+    billing = record["billing"]
+    assert billing["bytes_billed_charged"] + billing["unresolved_liability_bytes"] == server_billed
+    assert billing["unresolved_liability_bytes"] == 0          # the seal read all three lost jobs back
+    assert record["cells"][0]["stopped_reason"] in ("BYTES_BUDGET", "BYTES_BUDGET_UNRESOLVED")
+    assert record["state"] == "INCOMPLETE"
+
+
+def test_unavailable_final_billing_keeps_the_hold(plan, scratch, monkeypatch):
+    """RR #1: a job whose result and status could not be read used to settle as zero bytes."""
+    bq = SyntheticBigQuery(monkeypatch, billed=sb.GIB, lose_result_at={1}, readback_unavailable=True)
+    record = _live(_small(plan, ["sqlbase_forced_c1"]), bq, scratch)
+    first = _attempts(scratch)[0]
+    assert first["status"] == "ERROR" and ("ReadTimeout" in first["error"] or "ServiceUnavailable" in first["error"])
+    assert first["timing"]["jobs"][0]["server_state"] == "RUNNING" and first["timing"]["jobs"][0]["bytes_billed"] is None
+    billing = record["billing"]
+    assert billing["unresolved_liability_bytes"] == sb.GIB and len(billing["unresolved_jobs"]) == 1
+    assert billing["unresolved_jobs"][0]["job_id"] == first["timing"]["jobs"][0]["job_id"]
+    assert billing["bytes_billed_charged"] == 9 * sb.GIB      # the other nine jobs; the unknown one is liability, not zero
+    assert record["reconciliations"][0]["jobs"][0]["ledger"].startswith("still unresolved: ServiceUnavailable")
+    assert record["edition"] is None and "1 job(s) have no terminal statistics" in record["edition_note"]
+    assert record["routing"]["unknown"][0]["server_state"] == "RUNNING"
+
+
+def test_unavailable_final_billing_resolves_when_the_readback_succeeds(plan, scratch, monkeypatch):
+    bq = SyntheticBigQuery(monkeypatch, billed=sb.GIB, lose_result_at={1})
+    record = _live(_small(plan, ["sqlbase_forced_c1"]), bq, scratch)
+    billing = record["billing"]
+    assert billing["unresolved_liability_bytes"] == 0 and billing["bytes_billed_charged"] == 10 * sb.GIB
+    assert record["edition"] == "on-demand" and record["routing"]["unknown"] == []
+
+
+def test_unresolved_liability_consumes_room_and_is_named_as_such(plan, scratch, monkeypatch):
+    """Liability nobody can resolve stays counted; the stop reason says the room is unresolved, not billed."""
+    bq = SyntheticBigQuery(monkeypatch, bill_hold=True, lose_result_at=set(range(1, 400)), readback_unavailable=True)
+    campaign = run.build_campaign(plan, run.load_cases(), ["sqlbase_forced_c1"], run_id="sqlbase-20260919T000000Z-regress0")
+    record = _live(campaign, bq, scratch)
+    billing = record["billing"]
+    assert billing["bytes_billed_charged"] == 0
+    assert billing["unresolved_liability_bytes"] == sum(int(s["configuration"]["query"]["maximumBytesBilled"]) for s in bq.submissions)
+    assert billing["unresolved_liability_bytes"] <= 64 * sb.GIB
+    assert record["cells"][0]["stopped_reason"] == "BYTES_BUDGET_UNRESOLVED"
+    assert record["edition"] is None
+
+
+def test_a_hold_with_no_journaled_id_is_liability_nobody_can_resolve():
+    from okf_bq_graph import retrieve as R
+
+    class LosesTheResponse:
+        def query(self, *a, **kw):
+            raise ConnectionError("no gate, no id")
+
+    ledger = run.BytesLedger(max_bytes=64 * sb.GIB, usd_per_tib=6.25, max_usd=0.5)
+    clients = {"engine": "fallback", "bq": LosesTheResponse(), "bytes_ledger": ledger, "routing": run.RoutingGuard()}
+    with pytest.raises(ConnectionError):
+        R._run(clients, "walk", "SELECT 1", [], R.Timer())
+    snap = ledger.snapshot()
+    assert snap["unresolved_liability_bytes"] == run.PER_JOB_CAP_BYTES and snap["unresolved_jobs"][0]["resolvable"] is False
+    assert ledger.room() == ledger.cap_bytes - run.PER_JOB_CAP_BYTES
+    assert ledger.resolve("unresolvable-1", 0) is True     # only the caller's own key can release it; no readback ever will
+
+
+def test_ledger_resolve_unit():
+    ledger = run.BytesLedger(max_bytes=64 * sb.GIB, usd_per_tib=6.25, max_usd=0.5)
+    hold = ledger.hold()
+    ledger.unresolved(hold, "job-a", "lost")
+    assert ledger.room() == ledger.cap_bytes - hold and ledger.liability() == hold
+    assert ledger.resolve("job-a", 123) is True and ledger.charged == 123 and ledger.held == 0
+    hold = ledger.hold(); ledger.unresolved(hold, "job-b", "lost")
+    assert ledger.resolve("job-b", absent=True) is True and ledger.charged == 123 and ledger.held == 0
+    assert ledger.resolve("job-b") is False
+    exhausted = run.BytesLedger(max_bytes=2 * sb.GIB, usd_per_tib=6.25, max_usd=0.5)
+    for jid in ("x", "y"):
+        exhausted.unresolved(exhausted.hold(), jid, "lost")
+    assert exhausted.stop_reason() == "BYTES_BUDGET_UNRESOLVED"
+    exhausted.resolve("x", sb.GIB); exhausted.resolve("y", sb.GIB)
+    assert exhausted.stop_reason() == "BYTES_BUDGET"
+
+
+def test_failed_enterprise_job_is_a_violation_that_stops_admission(plan, scratch, monkeypatch):
+    """RR #2: a failed job carrying ENTERPRISE statistics used to skip verification; 297 jobs followed it."""
+    bq = SyntheticBigQuery(monkeypatch, billed=10 * 1024 ** 2, fail_enterprise_at={2})
+    record = _live(_small(plan, ["sqlbase_forced_c1", "sqlbase_forced_c5"]), bq, scratch)
+    first, second = record["cells"]
+    assert first["stopped_reason"] == "ROUTING_VIOLATION" and first["state"] == "NOT_RUN_BUDGET"
+    assert second["state"] == "NOT_RUN_BUDGET" and second["stopped_reason"] == "ROUTING_VIOLATION"
+    assert len(bq.submissions) <= 3                    # request 1's walk, context, nodes; nothing after the mismatch
+    assert record["edition"] is None and "reported a reservation or edition" in record["edition_note"]
+    violation = record["routing"]["violations"][0]
+    assert violation["job_state"] == "FAILED" and violation["edition"] == "ENTERPRISE"
+    attempts = _attempts(scratch)
+    assert attempts[0]["status"] == "ERROR" and "invalidQuery" in attempts[0]["error"]
+
+
+def test_failed_enterprise_job_on_the_first_warmup(plan, scratch, monkeypatch):
+    bq = SyntheticBigQuery(monkeypatch, billed=10 * 1024 ** 2, fail_enterprise_at={1})
+    record = _live(_small(plan, ["sqlbase_forced_c1"]), bq, scratch)
+    assert len(bq.submissions) == 1 and record["edition"] is None
+    assert record["cells"][0]["stopped_reason"] == "ROUTING_VIOLATION"
+
+
+def test_missing_statistics_leave_routing_unknown(plan, scratch, monkeypatch):
+    """RR #2: jobs without statistics used to certify on-demand."""
+    bq = SyntheticBigQuery(monkeypatch, omit_stats=True)
+    record = _live(_small(plan, ["sqlbase_forced_c1"]), bq, scratch)
+    assert record["cells"][0]["state"] == "COMPLETE"      # unknown routing is withheld, not a stop
+    assert record["edition"] is None and "12 job(s) have no terminal statistics" in record["edition_note"]
+    assert record["routing"]["verified_on_demand"] is False and len(record["routing"]["unknown"]) == 12
+    assert record["billing"]["unresolved_liability_bytes"] == 12 * run.PER_JOB_CAP_BYTES     # unknown billing is liability too
+    assert record["reconciliations"][0]["jobs"][0]["ledger"] == "still unresolved: no terminal billing"
+
+
+def test_ordinary_context_error_is_a_retained_failure_not_a_cell_deadline(plan, scratch, monkeypatch):
+    """RR #3: an invalidQuery in the context job used to cancel the gate and label the cell CELL_TIME_BUDGET at wall 0."""
+    bq = SyntheticBigQuery(monkeypatch, billed=10 * 1024 ** 2, fail_at={2})
+    record = _live(_small(plan, ["sqlbase_forced_c1"], warmups=0, measured=4), bq, scratch)
+    cell = record["cells"][0]
+    assert cell["state"] == "COMPLETE" and cell["stopped_reason"] is None and cell["errors"] == 1
+    assert cell["measured_n"] == 4 and len(bq.submissions) == 12
+    attempts = _attempts(scratch)
+    assert attempts[0]["status"] == "ERROR" and "invalidQuery" in attempts[0]["error"]
+    failed = next(j["job_id"] for j in attempts[0]["timing"]["jobs"] if j["state"] == "FAILED")
+    assert set(bq.cancels) <= {failed}                 # the seal re-checks the failed job only; no live job was cancelled
+    assert record["edition"] == "on-demand"             # the failed job was observed and was on-demand
+
+
+def test_gate_stopped_for_a_non_deadline_reason_keeps_that_reason(plan, cases, scratch, monkeypatch, tmp_path):
+    from okf_bq_graph.lifecycle import WindowJobs
+    gate = {}
+
+    def window_for_cell(cell, started):
+        gate["w"] = WindowJobs("t", started + 900, tmp_path / "jobs.json")
+        return gate["w"]
+
+    def retrieve(*a, **kw):
+        gate["w"].stop.set()                           # something other than a deadline stopped the gate
+        raise RuntimeError("synthetic cancellation cause")
+
+    monkeypatch.setattr(benchmark, "retrieve", retrieve)
+    campaign = _small(plan, ["sqlbase_forced_c1"], warmups=0, measured=5)
+    cfg = run.measure_config(campaign)
+    cfg["budget"]["window_for_cell"] = window_for_cell
+    cell = benchmark.measure(cfg, run.client_factory("ds", make_client=lambda: object()))["cells"][0]
+    assert cell["stopped_reason"] == "GATE_STOPPED" and cell["stopped_detail"] == "RuntimeError: synthetic cancellation cause"
+    assert cell["state"] == "INCOMPLETE" and cell["wall_seconds"] < 900
+
+
+def test_a_gate_refusal_before_journaling_releases_the_hold():
+    """A WindowStopped raised at admission carries no id: nothing was sent, so the room is not liability."""
+    from okf_bq_graph import retrieve as R
+    from okf_bq_graph.lifecycle import WindowStopped
+
+    class RefusesAdmission:
+        def query(self, *a, **kw):
+            raise WindowStopped("reservation window stopped or deadline reached")
+
+    ledger = run.BytesLedger(max_bytes=64 * sb.GIB, usd_per_tib=6.25, max_usd=0.5)
+    guard = run.RoutingGuard()
+    clients = {"engine": "fallback", "bq": RefusesAdmission(), "bytes_ledger": ledger, "routing": guard}
+    with pytest.raises(WindowStopped):
+        R._run(clients, "walk", "SELECT 1", [], R.Timer())
+    assert ledger.room() == ledger.cap_bytes and ledger.liability() == 0 and ledger.jobs == 1
+    assert guard.jobs == 0 and guard.unknown == {}

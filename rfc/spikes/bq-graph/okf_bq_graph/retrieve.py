@@ -22,7 +22,7 @@ from google.cloud import bigquery
 
 from . import DATASET, LOCATION, PROJECT
 from .model import PROVENANCE_NOTE, node_id as _node_id
-from .lifecycle import window_executor
+from .lifecycle import window_executor, WindowStopped
 from .oracle import Graph, SQL_FENCE_RE, parse_ts
 from .publish import sql, resolve_pointer
 from .seed import ConceptSeed
@@ -57,6 +57,9 @@ class Timer:
                  "bytes_processed": job.total_bytes_processed, "bytes_billed": job.total_bytes_billed,
                  "cache_hit": job.cache_hit, "reservation_id": st.get("reservation_id"),
                  "edition": st.get("edition"),
+                 # what the server said about the job itself: routing and billing are established only from a DONE
+                 # job whose statistics were actually returned (absent statistics are unknown, not on-demand / free)
+                 "server_state": getattr(job, "state", None), "stats_present": bool(st),
                  "created": job.created.isoformat() if job.created else None,
                  "started": job.started.isoformat() if job.started else None,
                  "ended": job.ended.isoformat() if job.ended else None}
@@ -87,14 +90,21 @@ def _run(clients: dict, name: str, query: str, params: list, timer: Timer) -> li
 
     Two optional caller policies ride in `clients` (the SQL-baseline driver sets both; every other caller is unchanged):
 
-    * `clients["bytes_ledger"]` — an object with `hold() -> int | None` and `settle(hold, bytes_billed)`. A hold is
-      taken BEFORE submission and becomes the job's `maximum_bytes_billed`, so BigQuery itself refuses a job that would
-      bill past the caller's remaining room; when no hold is available the job is not submitted and `BudgetExhausted`
-      is raised. Every job settles its hold against the bytes it actually billed, failures included.
-    * `clients["routing"]` — an object with a `reservation` string and `check(job_entry)`. The string is written into
-      the job configuration (`"none"` is BigQuery's on-demand override, so an inherited project assignment cannot route
-      the job onto a reservation), and `check` sees the recorded statistics of every job so a reservation_id or edition
-      that contradicts the requested routing fails the request closed with `RoutingViolation`.
+    * `clients["bytes_ledger"]` — an object with `hold() -> int | None`, `settle(hold, bytes_billed, job_id)` and
+      `unresolved(hold, job_id, reason)`. A hold is taken BEFORE submission and becomes the job's
+      `maximum_bytes_billed`, so BigQuery itself refuses a job that would bill past the caller's remaining room; when
+      no hold is available the job is not submitted and `BudgetExhausted` is raised. A job settles its hold against
+      the bytes it actually billed only when the server reported a terminal (DONE) job with statistics, failures
+      included. Anything else - a submission whose response was lost after the gate journaled its id, a job whose
+      final statistics could not be read - keeps the hold as liability against that job id until a readback resolves
+      it (Astra PR55 RR #1). A submission that raised before any id existed is liability nobody can resolve.
+    * `clients["routing"]` — an object with a `reservation` string, `check(job_entry)` and `observe(job_entry)`. The
+      string is written into the job configuration (`"none"` is BigQuery's on-demand override, so an inherited project
+      assignment cannot route the job onto a reservation). EVERY submitted job is observed - successes, failures and
+      jobs whose outcome is unknown - so a reservation_id or edition on a failed job is a recorded violation too, and
+      a job without terminal statistics stays unknown rather than counting as on-demand (Astra PR55 RR #2). A
+      violation on the success path raises `RoutingViolation`; on a failure path the original error propagates and the
+      recorded violation stops admission through the caller's stop check.
     """
     cfg = bigquery.QueryJobConfig(query_parameters=params, use_query_cache=clients.get("use_cache", False),
                                   labels={"okf_spike": "bq_graph_20260905", "stage": name})
@@ -124,9 +134,25 @@ def _run(clients: dict, name: str, query: str, params: list, timer: Timer) -> li
             cfg.maximum_bytes_billed = hold
         try:
             job = clients["bq"].query(query, job_config=cfg, location=LOCATION)
-        except BaseException:
+        except BaseException as e:
+            # A gate journals the id before it sends, so an exception here does not establish non-submission: the
+            # job may be running. The hold stays as liability against that id; routing for it is unknown.
+            lost_id = getattr(e, "okf_job_id", None)
+            if lost_id is not None:
+                timer.jobs.append({"stage": name, "job_id": lost_id, "state": "SUBMISSION_UNCONFIRMED",
+                                   "error": f"{type(e).__name__}: {str(e)[:200]}", "project": PROJECT, "location": LOCATION,
+                                   "bytes_billed": None, "reservation_id": None, "edition": None,
+                                   "server_state": None, "stats_present": False,
+                                   "job_ref": getattr(e, "okf_job_ref", None)})
             if hold is not None:
-                ledger.settle(hold, 0)          # nothing was submitted, so nothing was billed
+                if lost_id is None and isinstance(e, WindowStopped):
+                    ledger.settle(hold, 0)      # the gate refused admission before journaling an id: nothing was sent
+                else:
+                    ledger.unresolved(hold, lost_id, f"submission raised {type(e).__name__} after the id was journaled"
+                                      if lost_id is not None else f"submission raised {type(e).__name__} with no journaled id")
+            if routing is not None and lost_id is not None:
+                routing.observe({"job_id": lost_id, "stage": name, "server_state": None, "stats_present": False,
+                                 "reservation_id": None, "edition": None})
             raise
         at = timer.job(name, job, state="SUBMITTED")   # in the inventory before any wait: a failure must not erase it
         try:
@@ -138,8 +164,15 @@ def _run(clients: dict, name: str, query: str, params: list, timer: Timer) -> li
                 retries += 1; time.sleep(2); continue
             raise
         finally:
+            entry = timer.jobs[at]
+            terminal = entry.get("server_state") == "DONE" and entry.get("stats_present") and entry.get("bytes_billed") is not None
             if hold is not None:
-                ledger.settle(hold, timer.jobs[at].get("bytes_billed") or 0)
+                if terminal:
+                    ledger.settle(hold, entry["bytes_billed"], entry["job_id"])
+                else:
+                    ledger.unresolved(hold, entry["job_id"], f"no terminal billing read for {name} (state {entry.get('server_state')})")
+            if routing is not None and entry["state"] != "DONE":
+                routing.observe(entry)          # failures and unknown outcomes are observed too; the error propagates
         if routing is not None:
             routing.check(timer.jobs[at])
         break
