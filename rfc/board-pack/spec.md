@@ -183,3 +183,12 @@ Acceptance: no "live graph-query chain", "graph queries have run", or "GQL evide
 ## Pass 2 honesty addendum (2026-09-09)
 
 Scope: prose only in `index.html` (`.runtime-assessment` still-open sentence, `#context-point` note, `#sep19-envelope` concurrency / latency / cost notes, `#design-evidence` "Also unfinished" bullet), `STORY.md` (bar paragraph, envelope concurrency and latency rows, matched-baseline paragraph), `rfc/index.html` (`#current-evidence` box, Phase 5 gate cell and card, footer), and the dated notes above. Rules **R34–R40**, the evidence pin **E12** and the acceptance list live in `spec-pass2-honesty.md`; the reader-facing facts are: the ordinary-SQL comparison's four retrieval cells are measured on on-demand capacity (one at a time and five at once, a hundred measured attempts each, every attempt retained); its request-to-consumer cells have no runner and no selected fact-data version; its cost cells are unmeasured; the graph benchmark stays 0 of 9; every threshold stays PROPOSED; a measurement against a proposed threshold is not an acceptance of it; no engine winner is named; the bar, the access story and the Knowledge Publications callout do not move.
+
+## Knowledge Publications proposal addendum (2026-09-09)
+
+Scope: three companion documents (`intent-knowledge-publications.md`, `spec-knowledge-publications.md`,
+`plan-knowledge-publications.md`) that write down the PROPOSED BigQuery Knowledge Publications surface the callout
+already names, plus one linking sentence at the end of the callout paragraph in `index.html` and one in `STORY.md`.
+Rules **K1–K6** live in `spec-knowledge-publications.md`. No other reader-facing sentence changes; the callout's
+substance, the bar, the access story, every threshold and every evidence limit are as they were. Pattern is not
+roadmap: nothing in the addendum or the companions claims a staffed roadmap, a date or customer demand.
