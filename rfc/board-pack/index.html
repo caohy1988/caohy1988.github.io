@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Illustrative board decision: the agent says 118% retention; the right number is 96%. What Knowledge Catalog and OKF do today, what a BigQuery runtime would add, and what we still need to prove.">
+  <meta name="description" content="Illustrative board decision: the agent says 118% retention; the right number is 96%. What Knowledge Catalog and OKF do today, what a proposed BigQuery feature — Knowledge Publications — would add, and what we still need to prove.">
   <meta name="theme-color" content="#1e302d">
   <link rel="canonical" href="https://caohy1988.github.io/rfc/board-pack/">
   <title>118% in the board pack. 96% retained.</title>
@@ -49,11 +49,12 @@
     <section class="runtime" aria-labelledby="runtime-title">
       <div class="shell">
         <div class="runtime-heading">
-          <p class="eyebrow">Why BigQuery · proposed runtime · early experiments</p>
+          <p class="eyebrow">Proposed Knowledge Publications · feasibility evidence</p>
           <h2 id="runtime-title">What BigQuery adds to the story.</h2>
           <p class="runtime-roles">Knowledge Catalog (KC) discovers and governs. Open Knowledge Format (OKF) authors the graph.</p>
-          <p class="runtime-assessment"><strong>Especially strong when</strong> the facts an agent needs already live in BigQuery, on Enterprise or Enterprise Plus capacity, inside a latency, freshness, concurrency and cost budget the customer has agreed.</p>
-          <p class="runtime-assessment"><strong>What we know works.</strong> Retrieval can select a definition together with the rules it links to, so an agent gets the cohort rule as well as the headline metric. A receipt can bind a query to its result and withhold the number when the two disagree. And the whole path has run end to end — retrieval into a checked computation into a consumer that releases nothing unless the check passes — including one run whose retrieval went through graph queries on Enterprise capacity — that one under a single identity, from a starting point we chose rather than one discovered through the catalog, and only for the case expected to succeed.</p>
+          <p class="runtime-assessment"><strong>Proposed: BigQuery Knowledge Publications.</strong> Managed, versioned execution of knowledge-retrieval queries over OKF bundles linked from Knowledge Catalog. The customer job: every analytical agent gets the same approved definition and the rules it links to for a request, without the customer running its own publication and retrieval service. SQL first and on-demand to begin with; graph walks would be an optional later engine on Enterprise capacity. A later execution feature — a <strong>verified job receipt</strong>, also proposed — would bind approved calculations and fact versions to BigQuery results, so a number an agent wants to release is withheld or released on BigQuery’s own attestation. Today’s receipt check is an SDK example with a locally held key, not a BigQuery-issued property; neither surface is committed or shipping.</p>
+          <p class="runtime-assessment"><strong>Especially strong when</strong> the facts an agent needs already live in BigQuery — on Enterprise or Enterprise Plus capacity if graph walks are wanted — inside a latency, freshness, concurrency and cost budget the customer has agreed.</p>
+          <p class="runtime-assessment"><strong>What we have shown so far — feasibility, not the feature.</strong> Retrieval can select a definition together with the rules it links to, so an agent gets the cohort rule as well as the headline metric. A receipt can bind a query to its result and withhold the number when the two disagree. And the whole path has run end to end — retrieval into a checked computation into a consumer that releases nothing unless the check passes — including one run whose retrieval went through graph queries on Enterprise capacity — that one under a single identity, from a starting point we chose rather than one discovered through the catalog, and only for the case expected to succeed. These runs show the proposed surfaces are buildable on what BigQuery already offers; none of them is the surface.</p>
           <p class="runtime-assessment">All of it ran on invented data — never a customer’s cohort. And because the graph-query run tried only the case expected to succeed, we have not yet watched a swapped query be refused through graph queries.</p>
           <p class="runtime-assessment"><strong>What is still open.</strong> Catalog discovery, a separate restricted identity and graph queries have never been combined in one run, on a real cohort. Access denials have been demonstrated against a separate restricted identity, but on the ordinary SQL path, not inside graph queries. Speed benchmarks are unfinished, and nobody has yet accepted an operating budget. That is the pilot’s job.</p>
         </div>
@@ -205,7 +206,7 @@
               </svg>
               <p class="plot-note">A cited definition cannot validate a different query, and without execution evidence the number stays unproven. Graph walks need Enterprise or Enterprise Plus capacity. Nothing we have run verifies Alder’s 96% or the full design; the limits of each run are stated with it below.</p>
             </figure>
-            <p class="design-intro">A proposed integration, not a product. The OKF bundle stays the authored source; BigQuery would host a projection of each publication. Everything below was exercised on invented gross-margin data for a fictional company, Acme — never on a customer’s cohort.</p>
+            <p class="design-intro">A proposed integration, not a product. The OKF bundle stays the authored source; BigQuery would host a projection of each publication. Everything below was exercised on invented gross-margin data for a fictional company, Acme — never on a customer’s cohort. Read each part as evidence for the proposed Knowledge Publications and verified-receipt surfaces, not as the surfaces themselves: the mechanisms ran as spike code and an SDK example on ordinary BigQuery features, not as a BigQuery product feature.</p>
             <section class="design-part" aria-labelledby="design-context">
               <h3 id="design-context">Retrieve a fixed context</h3>
               <p>Follow Finance’s retention definition through its authored links to the cohort rule and the declared computation, under fixed inputs and bounded traversal, with a retrieval receipt recording what was pinned and what came back.</p>
@@ -282,14 +283,15 @@
     </section>
 
     <div class="punchline shell">
-      <p>The proposed BigQuery runtime would turn the OKF graph into <em>replayable context for agents</em>—with explainable access and evidence that the declared computation ran.</p>
+      <p>Proposed BigQuery Knowledge Publications would turn the OKF graph into <em>replayable context for agents</em>—with explainable access—and a later verified receipt would add evidence that the declared computation ran.</p>
     </div>
 
     <section class="ask shell" aria-labelledby="ask-title">
-      <p class="eyebrow">One pilot</p>
+      <p class="eyebrow">Two asks</p>
       <div>
-        <h2 id="ask-title">Sponsor one retention pilot with a Finance owner.</h2>
-        <p>Pilot Finance’s graph on real cohort data with an agreed operating budget. Connect pinned retrieval, current authorization and result-bound consumption in one path. A wrong query or missing evidence must withhold the claim.</p>
+        <h2 id="ask-title">Scope Knowledge Publications. Sponsor one retention pilot.</h2>
+        <p><strong>The product ask, to BigQuery:</strong> assign an owner, with a Knowledge Catalog counterpart, to scope BigQuery Knowledge Publications as a managed Preview — proposed, SQL first — and hold the verified job receipt as the follow-on execution feature. Neither is committed today.</p>
+        <p><strong>The customer ask, to a Finance owner:</strong> pilot Finance’s graph on real cohort data with an agreed operating budget. Connect pinned retrieval, current authorization and result-bound consumption in one path. A wrong query or missing evidence must withhold the claim. The pilot supplies validation data and demand evidence; it is not the product.</p>
       </div>
     </section>
   </main>
