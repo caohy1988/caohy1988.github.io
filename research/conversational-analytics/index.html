@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Customer stories, talks, and essays on BigQuery Agent Analytics, ADK, and agent grounding.">
+  <meta name="description" content="Official posts, docs, customers, and community resources that explicitly name Conversational Analytics in BigQuery.">
   <meta name="theme-color" content="#101828">
-  <title>Stories — BigQuery Agent Analytics</title>
+  <title>Conversational Analytics in BigQuery</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -182,8 +182,8 @@
       <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
       <nav class="nav-links" aria-label="Primary">
         <a href="/research/">Research</a>
-        <a href="/research/stories/" aria-current="page">Stories</a>
-        <a href="/research/conversational-analytics/">CA in BigQuery</a>
+        <a href="/research/stories/">Stories</a>
+        <a href="/research/conversational-analytics/" aria-current="page">CA in BigQuery</a>
         <a href="/research/usage/">Usage</a>
         <a href="/rfc/">RFC</a>
         <a href="/evalbench/">EvalBench</a>
@@ -193,19 +193,19 @@
 
   <main class="shell">
     <header class="hero">
-      <p class="kicker">Field Brief · companion</p>
-      <h1>BigQuery Agent Analytics Stories</h1>
-      <p class="lede" id="lede">Customer posts, talks, and essays in the wild. Pointers only — open the source.</p>
+      <p class="kicker">Product resources · companion</p>
+      <h1>Conversational Analytics in BigQuery</h1>
+      <p class="lede" id="lede">Explicit positive mentions of Conversational Analytics in BigQuery. Pointers only — open the source.</p>
       <p class="meta" id="meta"></p>
       <div class="filters" id="filters" role="group" aria-label="Filter by type"></div>
     </header>
     <section class="list" id="list" aria-live="polite">
-      <p class="empty">Loading stories…</p>
+      <p class="empty">Loading resources…</p>
     </section>
   </main>
 
   <footer>
-    <div class="shell">Every card explicitly features BigQuery Agent Analytics. Companion to the Field Brief — not catalog ranks.</div>
+    <div class="shell">Every card explicitly and positively names Conversational Analytics in BigQuery (or BigQuery Conversational Analytics / the CA API for BigQuery). Not Looker-only CA, not generic NL2SQL, not BigQuery Agent Analytics.</div>
   </footer>
 
   <script>
@@ -223,7 +223,7 @@
         .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
     function kindLabel(k) {
-      return ({ customer: "Customer", video: "Video", community: "Community", essay: "Essay" })[k] || (k || "Story");
+      return ({ customer: "Customer", video: "Video", community: "Community", essay: "Essay", docs: "Docs" })[k] || (k || "Resource");
     }
     /** Channel for type filter: Video / Medium / Google Cloud post / Community */
     function channelOf(e) {
@@ -235,7 +235,14 @@
       if (src.includes("medium") || href.includes("medium.com")) {
         return "medium";
       }
-      if (src.includes("google cloud") || href.includes("cloud.google.com/blog") || href.includes("cloud.google.com/")) {
+      if (
+        e.kind === "docs" ||
+        src.includes("google cloud") ||
+        src.includes("google codelabs") ||
+        href.includes("cloud.google.com/") ||
+        href.includes("docs.cloud.google.com/") ||
+        href.includes("codelabs.developers.google.com/")
+      ) {
         return "google-cloud";
       }
       return "community";
@@ -290,11 +297,11 @@
       const label = FILTERS.find((f) => f.id === activeFilter)?.label || "All";
       document.getElementById("meta").textContent =
         (activeFilter === "all"
-          ? total + " stor" + (total === 1 ? "y" : "ies")
+          ? total + " resource" + (total === 1 ? "" : "s")
           : n + " of " + total + " · " + label) + " · newest first";
 
       if (!filtered.length) {
-        document.getElementById("list").innerHTML = '<p class="empty">No stories in this filter.</p>';
+        document.getElementById("list").innerHTML = '<p class="empty">No resources in this filter.</p>';
         return;
       }
       document.getElementById("list").innerHTML = filtered.map((e) => {
@@ -316,14 +323,14 @@
         const q = params.get("type");
         if (q && FILTERS.some((f) => f.id === q)) activeFilter = q;
 
-        const res = await fetch("/research/stories/stories.json?v=" + Date.now(), { cache: "no-store" });
+        const res = await fetch("/research/conversational-analytics/entries.json?v=" + Date.now(), { cache: "no-store" });
         const data = await res.json();
         if (data.blurb) document.getElementById("lede").textContent = data.blurb;
         allEntries = data.entries || [];
         renderFilters();
         renderList();
       } catch (err) {
-        document.getElementById("list").innerHTML = '<p class="empty">Could not load stories.json.</p>';
+        document.getElementById("list").innerHTML = '<p class="empty">Could not load entries.json.</p>';
       }
     }
     boot();
