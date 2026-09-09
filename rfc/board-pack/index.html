@@ -231,7 +231,7 @@
               <p class="design-cue">Limits</p>
               <ul class="design-points">
                 <li>Per-node graph authorization is unshown: those denials ran on plain SQL, never inside graph queries.</li>
-                <li>Leakage of hidden identifiers under the operator’s own identity, and protection across mixed publications, remain untested.</li>
+                <li>Preventing hidden-identifier leakage under the operator’s own identity, and protection across mixed publications, remain unproven.</li>
                 <li>A pin never bypasses current authorization, metadata about a file is not access to it, and a shared service account cannot by itself tell us who was asking.</li>
               </ul>
             </section>
@@ -253,7 +253,7 @@
               <p>Joined: a live catalog read picks the publication to pin, governed retrieval supplies the declared calculation, and the receipt check verifies the job before release, each step checked against a copy already trusted.</p>
               <p class="design-cue">Shown</p>
               <ul class="design-points">
-                <li>Catalog-seeded runs went from live read to enforcing consumer, held their pinned version while the head moved, and stopped before any calculation or receipt where validation failed (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/50ecaa8976cb5fb633fb1c2b11b70eba3bbcd939/rfc/spikes/bq-graph/evidence/catalog-chain/b2-20260907t162636z-cd45/b2_summary.md">what those cases showed</a>).</li>
+                <li>Catalog-seeded runs went from live read to enforcing consumer, held their pinned version while the head moved, and withheld the number whenever publication or retrieved content failed validation (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/50ecaa8976cb5fb633fb1c2b11b70eba3bbcd939/rfc/spikes/bq-graph/evidence/catalog-chain/b2-20260907t162636z-cd45/b2_summary.md">what those cases showed</a>).</li>
                 <li>A restricted identity held inside the chain: access and revocation were enforced and nothing unauthorized was released (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/ad18b075524d7b752c5782da17c29e70cee05fb7/rfc/spikes/bq-graph/README.md#live-restricted-pass-slice-b-2026-09-07">how that run worked and where it stops</a>).</li>
                 <li>One run retrieved through graph queries on Enterprise capacity, releasing only once the declaration matched the publication queried and the receipt check passed (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/0ab27d679a1e640cc7dcfdbeea465e44788ab133/rfc/spikes/bq-graph/evidence/chain/SLICE_B_RUN_E_20260908.md">what that run did and did not show</a>).</li>
               </ul>
