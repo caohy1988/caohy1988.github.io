@@ -297,14 +297,16 @@ def _unselected(plan):
 
 
 @pytest.mark.parametrize("name", ["sqlchain_forced_c1", "sqlchain_forced_c5"])
-def test_consumer_cells_are_refused_for_the_missing_runner_only(plan, cases, name):
-    """Selecting the synthetic fixture digest cleared FACTS_UNSELECTED; NOT_IMPLEMENTED is the one reason left."""
+def test_consumer_cells_are_refused_for_the_hermetic_only_runner(plan, cases, name):
+    """Selecting the synthetic fixture digest cleared FACTS_UNSELECTED; the FS-1 runner (hermetic only, no live mode)
+    turned NOT_IMPLEMENTED into RUNNER_HERMETIC_ONLY, the one reason left, and this driver still refuses the cell."""
     assert plan["facts"]["state"] == "SELECTED"
     with pytest.raises(run.RefusedCell) as e:
         run.select_cells(plan, [name])
-    assert "NOT_IMPLEMENTED" in str(e.value) and "FACTS_UNSELECTED" not in str(e.value)
+    assert "RUNNER_HERMETIC_ONLY" in str(e.value) and "FACTS_UNSELECTED" not in str(e.value) and "NOT_IMPLEMENTED" not in str(e.value)
+    assert "okf_bq_graph.consumer_run" in str(e.value) and "no live mode" in str(e.value)
     assert "No fact-data version is selected" not in str(e.value)
-    assert run.refusal_reasons(plan, name) == ["NOT_IMPLEMENTED"]
+    assert run.refusal_reasons(plan, name) == ["RUNNER_HERMETIC_ONLY"]
     with pytest.raises(run.RefusedCell):
         run.build_campaign(plan, cases, ["sqlbase_forced_c1", name])
 
@@ -312,10 +314,10 @@ def test_consumer_cells_are_refused_for_the_missing_runner_only(plan, cases, nam
 @pytest.mark.parametrize("name", ["sqlchain_forced_c1", "sqlchain_forced_c5"])
 def test_an_unselected_fact_version_is_still_a_second_refusal_reason(plan, name):
     unselected = _unselected(plan)
-    assert run.refusal_reasons(unselected, name) == ["FACTS_UNSELECTED", "NOT_IMPLEMENTED"]
+    assert run.refusal_reasons(unselected, name) == ["FACTS_UNSELECTED", "RUNNER_HERMETIC_ONLY"]
     with pytest.raises(run.RefusedCell) as e:
         run.select_cells(unselected, [name])
-    assert "FACTS_UNSELECTED + NOT_IMPLEMENTED" in str(e.value)
+    assert "FACTS_UNSELECTED + RUNNER_HERMETIC_ONLY" in str(e.value)
 
 
 def test_default_selection_is_exactly_the_retrieval_cells(plan):
@@ -332,10 +334,10 @@ def test_unknown_and_duplicate_cells_fail(plan):
 
 def test_campaign_records_the_refusals_beside_the_cells(plan, cases):
     campaign = run.build_campaign(plan, cases, run_id="sqlbase-20260919-000000-deadbeef")
-    assert campaign["refused"] == {"sqlchain_forced_c1": ["NOT_IMPLEMENTED"],
-                                   "sqlchain_forced_c5": ["NOT_IMPLEMENTED"]}
+    assert campaign["refused"] == {"sqlchain_forced_c1": ["RUNNER_HERMETIC_ONLY"],
+                                   "sqlchain_forced_c5": ["RUNNER_HERMETIC_ONLY"]}
     text = run.describe(campaign)
-    assert "sqlchain_forced_c1: REFUSED (NOT_IMPLEMENTED)" in text and "FACTS_UNSELECTED" not in text
+    assert "sqlchain_forced_c1: REFUSED (RUNNER_HERMETIC_ONLY)" in text and "FACTS_UNSELECTED" not in text
 
 
 # --- CLI: dry run opens no client ---------------------------------------------------------------------------
@@ -357,7 +359,7 @@ def test_dry_run_opens_no_client_and_prints_the_campaign(no_client, tmp_path):
 def test_dry_run_reports_a_consumer_cell_refusal_without_a_client(no_client, tmp_path):
     out = io.StringIO()
     assert run.main(["--dry-run", "--cells", "sqlchain_forced_c1", "--out-dir", str(tmp_path)], stdout=out) == 2
-    assert out.getvalue().startswith("REFUSED:") and "NOT_IMPLEMENTED" in out.getvalue()
+    assert out.getvalue().startswith("REFUSED:") and "RUNNER_HERMETIC_ONLY" in out.getvalue()
     assert "FACTS_UNSELECTED" not in out.getvalue()
     assert no_client == []
 

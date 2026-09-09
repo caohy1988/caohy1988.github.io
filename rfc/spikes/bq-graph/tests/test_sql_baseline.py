@@ -110,7 +110,7 @@ def test_every_cell_is_empty_and_says_why(card):
     assert card["state"] == "SCAFFOLD_ONLY"
     for cell in card["cells"]:
         assert cell["state"] == "INCOMPLETE"
-        assert cell["stopped_reason"] in ("NOT_RUN", "NOT_IMPLEMENTED")
+        assert cell["stopped_reason"] in ("NOT_RUN", "RUNNER_HERMETIC_ONLY")
         assert cell["how_to_fill"]
         for field in ("p50_ms", "p95_ms", "max_ms", "success_rate", "bytes_billed", "usd_ondemand_list"):
             assert cell[field] is None
@@ -120,10 +120,10 @@ def test_the_two_latencies_are_separate_cells(card):
     metrics = {c["metric"] for c in card["cells"]}
     assert metrics == {"retrieval_ms", "request_to_consumer_ms"}
     consumer = [c for c in card["cells"] if c["metric"] == "request_to_consumer_ms"]
-    assert consumer, "a full request-to-consumer cell must exist even though no runner does"
+    assert consumer, "a full request-to-consumer cell must exist even though no live runner does"
     for cell in consumer:
-        assert cell["stopped_reason"] == "NOT_IMPLEMENTED"
-        assert "No runner exists" in cell["how_to_fill"]
+        assert cell["stopped_reason"] == "RUNNER_HERMETIC_ONLY"
+        assert "no live mode" in cell["how_to_fill"] and "okf_bq_graph.consumer_run" in cell["how_to_fill"]
     for cell in card["cells"]:
         if cell["metric"] == "retrieval_ms":
             assert cell["concurrency"] in {1, 5}
@@ -344,7 +344,7 @@ def test_validity_window_and_expiry_are_recorded(plan):
     assert version["valid_for_runs_on_or_after"] == "2026-03-12"
     assert "CURRENT_DATE()" in version["validity_note"] and "computation_sha256" in version["validity_note"]
     assert "2026-10-05" in version["materialization_expires_utc"]
-    assert version["live_precheck"].startswith("NOT IMPLEMENTED") and "FACTS_DRIFTED" in version["live_precheck"]
+    assert version["live_precheck"].startswith("IMPLEMENTED OFFLINE, NOT RUN LIVE") and "FACTS_DRIFTED" in version["live_precheck"]
 
 
 # --- the UNSELECTED gates still hold on a plan flipped back -------------------------------------------
@@ -702,7 +702,7 @@ def test_counts_and_the_january_answer_do_not_identify_the_content(plan):
     assert fc.sha256(fc.canonical_bytes(mutated)) != version["content_manifest_sha256"]
     assert "full" in version["live_precheck"] and "smoke checks" in version["live_precheck"]
     assert "content_manifest_sha256" in version["live_precheck"]
-    assert version["live_precheck"].startswith("NOT IMPLEMENTED")
+    assert version["live_precheck"].startswith("IMPLEMENTED OFFLINE, NOT RUN LIVE")
 
 
 def test_a_mutated_vendored_row_or_a_dropped_table_changes_the_digest(plan, tmp_path):
@@ -743,7 +743,7 @@ def test_a_selected_version_unblocks_the_consumer_cells_but_fills_nothing(card):
         assert cell["blocked_by"] is None
         assert "Select a fact-data version first" not in cell["how_to_fill"]
         if cell["metric"] == "request_to_consumer_ms":
-            assert cell["stopped_reason"] == "NOT_IMPLEMENTED" and cell["state"] == "INCOMPLETE"
+            assert cell["stopped_reason"] == "RUNNER_HERMETIC_ONLY" and cell["state"] == "INCOMPLETE"
             assert cell["measured_n"] == 0 and cell["p50_ms"] is None
             assert "Fact version: SELECTED" in cell["how_to_fill"] and "synthetic" in cell["how_to_fill"]
             assert "read the live tables back in full" in cell["how_to_fill"]
@@ -768,7 +768,7 @@ def test_markdown_reports_the_selected_state_and_its_version(card):
     assert "**How it was selected.**" in text
     assert "**What is missing.**" not in text
     assert "UNSELECTED**" not in text
-    assert "| NOT_IMPLEMENTED |" in text and "+ FACTS_UNSELECTED" not in text
+    assert "| RUNNER_HERMETIC_ONLY |" in text and "| NOT_IMPLEMENTED |" not in text and "+ FACTS_UNSELECTED" not in text
 
 
 def test_selected_render_does_not_require_the_optional_fields(plan):

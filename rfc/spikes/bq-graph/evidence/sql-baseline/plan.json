@@ -81,7 +81,7 @@
       "valid_for_runs_on_or_after": "2026-03-12",
       "validity_note": "the declaration's compiled SQL uses DATE_DIFF(CURRENT_DATE(), DATE(o.order_ts), DAY) >= 30 and the latest fixture order is 2026-02-10, so the expected results hold for any evaluation date on or after 2026-03-12; the SQL is left as authored because changing it would change computation_sha256 and unbind the retained chain",
       "materialization_expires_utc": "about 2026-10-05 (30-day table expiration set at provisioning); after that the same digest must be re-loaded under the owner's gate and the new load job recorded here",
-      "live_precheck": "NOT IMPLEMENTED, a contract for the runner slice: before any consumer campaign the runner reads every selected table back in full (schema and rows), canonicalises the readback as okf-fact-content/1 and requires its digest to equal content_manifest_sha256, then binds that verified immutable or protected table set to every attempt's evidence; otherwise the campaign stops FACTS_DRIFTED with no cell filled. Per-table row counts equal to row_counts and a January result of expected_gross_margin_usd_2026_01 are smoke checks only: changing one non-January amount leaves both unchanged while the content digest and the January\u2013February result change",
+      "live_precheck": "IMPLEMENTED OFFLINE, NOT RUN LIVE (okf_bq_graph.consumer_run.admit_live, FS-1 2026-09-09; exercised only against the vendored manifest and mutated copies): before any consumer campaign the runner reads every selected table back in full (schema and rows), canonicalises the readback as okf-fact-content/1 and requires its digest to equal content_manifest_sha256, then binds that verified immutable or protected table set to every attempt's evidence; otherwise the campaign stops FACTS_DRIFTED with no cell filled. Per-table row counts equal to row_counts and a January result of expected_gross_margin_usd_2026_01 are smoke checks only: changing one non-January amount leaves both unchanged while the content digest and the January\u2013February result change",
       "selected_utc": "2026-09-09",
       "selected_by": "project owner, after the 2026-09-09 two-lens consult (implementer and reviewer memos, both recommending SELECT now as the synthetic fixture digest)"
     },
@@ -130,7 +130,16 @@
     "max_usd_ondemand_list": 0.5,
     "ondemand_usd_per_tib": 6.25,
     "reservation": "none: baseline cells run on-demand. Opening an Enterprise window for the SQL baseline would make it a different measurement and needs its own budget line.",
-    "stop_rule": "A cell that reaches max_wall_seconds_per_cell, or a run that reaches any total ceiling, stops and is recorded INCOMPLETE / NOT_RUN_BUDGET with its attempts retained. Percentiles are nearest-rank over all attempts; failures and timeouts count and are never dropped."
+    "stop_rule": "A cell that reaches max_wall_seconds_per_cell, or a run that reaches any total ceiling, stops and is recorded INCOMPLETE / NOT_RUN_BUDGET with its attempts retained. Percentiles are nearest-rank over all attempts; failures and timeouts count and are never dropped.",
+    "consumer_sampling": {
+      "state": "DECLARED_NOT_SPENT",
+      "consumer_max_bytes_billed_gib": 8,
+      "consumer_max_usd": 0.05,
+      "consumer_max_wall_seconds_per_cell": 900,
+      "consumer_max_wall_seconds_total": 3600,
+      "basis": "the 2026-09-09 consult's estimate of about 5\u20136 GiB for 2 warmups + 20 measured attempts at C=1 with the receipt leg's child jobs included, with headroom; 8 GiB at $6.25 per TiB is about $0.049",
+      "note": "Declared by the FS-1 slice (2026-09-09) for the live consumer campaign (FS-2) and not spent: the hermetic runner submits no job. It sits inside the campaign ceilings above and is separate from them, so a consumer campaign cannot draw silently on the retrieval allowance. C=5 gets no separate line until C=1 completes; the restricted-identity mode (FS-3) needs its own."
+    }
   },
   "budget_projection": {
     "cells": [
@@ -164,7 +173,16 @@
       }
     ],
     "consumer_cells_projected": false,
-    "consumer_cells_note": "Not projected: the request-to-consumer runner does not exist, so its per-request bytes are unknown.",
+    "consumer_cells_note": "Not projected: the request-to-consumer runner has no live mode (hermetic only), so its per-request bytes are unknown; its own ceilings are declared in budget.consumer_sampling and not spent.",
+    "consumer_sampling": {
+      "state": "DECLARED_NOT_SPENT",
+      "consumer_max_bytes_billed_gib": 8,
+      "consumer_max_usd": 0.05,
+      "consumer_max_wall_seconds_per_cell": 900,
+      "consumer_max_wall_seconds_total": 3600,
+      "basis": "the 2026-09-09 consult's estimate of about 5\u20136 GiB for 2 warmups + 20 measured attempts at C=1 with the receipt leg's child jobs included, with headroom; 8 GiB at $6.25 per TiB is about $0.049",
+      "note": "Declared by the FS-1 slice (2026-09-09) for the live consumer campaign (FS-2) and not spent: the hermetic runner submits no job. It sits inside the campaign ceilings above and is separate from them, so a consumer campaign cannot draw silently on the retrieval allowance. C=5 gets no separate line until C=1 completes; the restricted-identity mode (FS-3) needs its own."
+    },
     "bytes_billed_projected_total": 40265318400,
     "usd_ondemand_list_projected": 0.2289,
     "usd_note": "List rate on projected bytes. The 1 TiB/month on-demand free tier is not applied, so the invoiced line may be lower. Embeddings, storage and publication upkeep are NOT in this projection.",
@@ -402,7 +420,7 @@
       "measured_target": 20,
       "warmups_target": 2,
       "state": "INCOMPLETE",
-      "stopped_reason": "NOT_IMPLEMENTED",
+      "stopped_reason": "RUNNER_HERMETIC_ONLY",
       "p50_ms": null,
       "p95_ms": null,
       "max_ms": null,
@@ -412,9 +430,21 @@
       "bytes_billed": null,
       "usd_ondemand_list": null,
       "prior_observations": [],
+      "hermetic_runs": [
+        {
+          "run_id": "consumer-hermetic-20260909T211235Z-f2434072",
+          "verdict": "RUNNER_HERMETIC_OK",
+          "attempts_retained": 23,
+          "released": 22,
+          "refused": 1,
+          "probe": "REFUSED",
+          "file": "evidence/consumer/run_consumer-hermetic-20260909T211235Z-f2434072.json"
+        }
+      ],
+      "hermetic_runs_note": "Retained hermetic runs of okf_bq_graph.consumer_run that covered this cell, by id: attempts retained and decisions only. Their orchestration times are in the records and are not this cell's metric; a hermetic attempt never fills a live cell.",
       "fact_version_blocked": false,
       "blocked_by": null,
-      "how_to_fill": "Fact version: SELECTED, loaded-fixture-digest (synthetic) (see `facts` above): synthetic fixture-scale rows, live materialization unverified against the digest. Before it samples, the runner must read the live tables back in full and match them to the content digest, then bind that verified set to every attempt; row counts and the January result are smoke checks, not identity. None of that exists yet, and its numbers must be labelled fixture-scale. No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a sampled driver that repeats one requester question through bind, the caller-delegated job, independent verification and the consumer decision, retaining every attempt including refusals. Sizing it against a real SDK subprocess per request is part of that work, not an afterthought."
+      "how_to_fill": "Fact version: SELECTED, loaded-fixture-digest (synthetic) (see `facts` above): synthetic fixture-scale rows, live materialization unverified against the digest. Before it samples, the runner must read the live tables back in full and match them to the content digest, then bind that verified set to every attempt; row counts and the January result are smoke checks, not identity. None of that exists yet, and its numbers must be labelled fixture-scale. The runner is `okf_bq_graph.consumer_run` (FS-1, 2026-09-09) and it has no live mode: `--dry-run` prints the campaign and launches nothing; `--hermetic` repeats the predeclared question (`f_current`) through the in-process oracle graph, bind, the SDK example's hermetic receipt runner, verification and the consumer decision, plus one `f_revenue` probe declared in advance to refuse at bind, retaining every attempt under evidence/consumer/. A hermetic attempt establishes orchestration and refusals, not a latency, a job or data equivalence, so it never fills this cell. Filling it is FS-2: the same loop live, C=1 first, after `admit_live` (full readback matched to the content digest, expiry) passes, on-demand by job-level override, inside budget.consumer_sampling, under the owner's paid gate. `python3 -m okf_bq_graph.consumer_run --dry-run --cells sqlchain_forced_c1`; `python3 -m okf_bq_graph.consumer_run --hermetic --cells sqlchain_forced_c1`."
     },
     {
       "cell": "sqlchain_forced_c5",
@@ -426,7 +456,7 @@
       "measured_target": 20,
       "warmups_target": 2,
       "state": "INCOMPLETE",
-      "stopped_reason": "NOT_IMPLEMENTED",
+      "stopped_reason": "RUNNER_HERMETIC_ONLY",
       "p50_ms": null,
       "p95_ms": null,
       "max_ms": null,
@@ -436,9 +466,21 @@
       "bytes_billed": null,
       "usd_ondemand_list": null,
       "prior_observations": [],
+      "hermetic_runs": [
+        {
+          "run_id": "consumer-hermetic-20260909T211235Z-f2434072",
+          "verdict": "RUNNER_HERMETIC_OK",
+          "attempts_retained": 23,
+          "released": 22,
+          "refused": 1,
+          "probe": "REFUSED",
+          "file": "evidence/consumer/run_consumer-hermetic-20260909T211235Z-f2434072.json"
+        }
+      ],
+      "hermetic_runs_note": "Retained hermetic runs of okf_bq_graph.consumer_run that covered this cell, by id: attempts retained and decisions only. Their orchestration times are in the records and are not this cell's metric; a hermetic attempt never fills a live cell.",
       "fact_version_blocked": false,
       "blocked_by": null,
-      "how_to_fill": "Fact version: SELECTED, loaded-fixture-digest (synthetic) (see `facts` above): synthetic fixture-scale rows, live materialization unverified against the digest. Before it samples, the runner must read the live tables back in full and match them to the content digest, then bind that verified set to every attempt; row counts and the January result are smoke checks, not identity. None of that exists yet, and its numbers must be labelled fixture-scale. No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a sampled driver that repeats one requester question through bind, the caller-delegated job, independent verification and the consumer decision, retaining every attempt including refusals. Sizing it against a real SDK subprocess per request is part of that work, not an afterthought."
+      "how_to_fill": "Fact version: SELECTED, loaded-fixture-digest (synthetic) (see `facts` above): synthetic fixture-scale rows, live materialization unverified against the digest. Before it samples, the runner must read the live tables back in full and match them to the content digest, then bind that verified set to every attempt; row counts and the January result are smoke checks, not identity. None of that exists yet, and its numbers must be labelled fixture-scale. The runner is `okf_bq_graph.consumer_run` (FS-1, 2026-09-09) and it has no live mode: `--dry-run` prints the campaign and launches nothing; `--hermetic` repeats the predeclared question (`f_current`) through the in-process oracle graph, bind, the SDK example's hermetic receipt runner, verification and the consumer decision, plus one `f_revenue` probe declared in advance to refuse at bind, retaining every attempt under evidence/consumer/. A hermetic attempt establishes orchestration and refusals, not a latency, a job or data equivalence, so it never fills this cell. Filling it is FS-2: the same loop live, C=1 first, after `admit_live` (full readback matched to the content digest, expiry) passes, on-demand by job-level override, inside budget.consumer_sampling, under the owner's paid gate. `python3 -m okf_bq_graph.consumer_run --dry-run --cells sqlchain_forced_c5`; `python3 -m okf_bq_graph.consumer_run --hermetic --cells sqlchain_forced_c5`."
     }
   ],
   "cost_cells": [

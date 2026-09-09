@@ -10,7 +10,8 @@ Three rules the code enforces rather than documents:
 * A prior observation never fills a cell. Each one is n=1 or n=2 at C=1 from a different run, and
   `fills_cell` is False for all of them: `assert_no_cell_is_filled` fails the build if that changes.
 * Retrieval latency and full request-to-consumer latency are separate cells with separate runners.
-  The consumer runner does not exist yet, so those cells carry NOT_IMPLEMENTED and say what is missing.
+  The consumer runner (`consumer_run.py`, FS-1, 2026-09-09) has dry-run and hermetic modes only, so those cells
+  carry RUNNER_HERMETIC_ONLY, list the retained hermetic runs by id and carry no number from them.
 * Every number that was not measured is named. `UNMEASURED` cost cells are part of the card, not
   omitted from it, because an absent row reads as zero.
 * A workload field that has not been chosen says so, and the card reports whichever state the plan is
@@ -20,7 +21,8 @@ Three rules the code enforces rather than documents:
   example's *synthetic* fixture script at the pinned SDK commit (`facts.selected_version`, flat so it renders
   field by field), vendored under `fixtures/facts/` with its expected results and a canonical content manifest
   that `_validate_facts` re-hashes and re-derives on every build. Selecting clears `FACTS_UNSELECTED` only: the
-  consumer cells stay `NOT_IMPLEMENTED`, the live rows are recorded `UNVERIFIED` against the digest, customer
+  consumer cells stayed `NOT_IMPLEMENTED` until the FS-1 runner and read `RUNNER_HERMETIC_ONLY` since (still a
+  refusal), the live rows are recorded `UNVERIFIED` against the digest, customer
   (Alder) data stays `NOT SELECTED` as its own block, and `_render_facts` branches on the state either way.
 
 Since Pass 2 (2026-09-09) the card also reads the retained campaign records the driver writes
@@ -105,10 +107,40 @@ def validate_plan(plan: dict) -> None:
                 "max_usd_ondemand_list", "ondemand_usd_per_tib", "stop_rule"):
         if key not in plan["budget"]:
             raise ValueError(f"budget must predeclare {key!r}")
+    _validate_consumer_budget(plan["budget"])
     _validate_facts(plan)
     for cell in plan["cost_cells"]:
         if cell["name"] == "cost_per_success" and "formula" not in cell:
             raise ValueError("cost_per_success must state its formula: the denominator is contested and easy to invert")
+
+
+CONSUMER_BUDGET_CEILINGS = (   # consumer field -> the campaign ceiling it must sit inside
+    ("consumer_max_bytes_billed_gib", "max_bytes_billed_gib"),
+    ("consumer_max_usd", "max_usd_ondemand_list"),
+    ("consumer_max_wall_seconds_per_cell", "max_wall_seconds_per_cell"),
+    ("consumer_max_wall_seconds_total", "max_wall_seconds_total"),
+)
+
+
+def _validate_consumer_budget(budget: dict) -> None:
+    """The consumer sampling block (FS-1, 2026-09-09): declared for the live consumer campaign and not spent.
+
+    Every consumer ceiling must sit inside the campaign ceiling it names, so a consumer campaign cannot draw silently
+    on the retrieval allowance, and the state must be DECLARED_NOT_SPENT: a spent state would need a live campaign
+    record with a ledger, which no schema defines yet.
+    """
+    block = budget.get("consumer_sampling")
+    if not isinstance(block, dict):
+        raise ValueError("budget must declare a consumer_sampling block (the request-to-consumer campaign's own ceilings)")
+    for key, ceiling in CONSUMER_BUDGET_CEILINGS:
+        if key not in block:
+            raise ValueError(f"budget.consumer_sampling must predeclare {key!r}")
+        if not isinstance(block[key], (int, float)) or block[key] <= 0 or block[key] > budget[ceiling]:
+            raise ValueError(f"budget.consumer_sampling.{key} = {block[key]!r} must be positive and at most the campaign ceiling "
+                             f"{ceiling} = {budget[ceiling]!r}")
+    if block.get("state") != "DECLARED_NOT_SPENT":
+        raise ValueError("budget.consumer_sampling.state must be DECLARED_NOT_SPENT: no live consumer campaign record exists, and a spent "
+                         "state would need one with its ledger")
 
 
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -378,7 +410,9 @@ def project_budget(plan: dict, priors: list[dict]) -> dict:
     return {
         "cells": cells,
         "consumer_cells_projected": False,
-        "consumer_cells_note": "Not projected: the request-to-consumer runner does not exist, so its per-request bytes are unknown.",
+        "consumer_cells_note": ("Not projected: the request-to-consumer runner has no live mode (hermetic only), so its per-request "
+                                "bytes are unknown; its own ceilings are declared in budget.consumer_sampling and not spent."),
+        "consumer_sampling": budget.get("consumer_sampling"),
         "bytes_billed_projected_total": total_bytes,
         "usd_ondemand_list_projected": round(usd, 4),
         "usd_note": "List rate on projected bytes. The 1 TiB/month on-demand free tier is not applied, so the invoiced line may be lower. Embeddings, storage and publication upkeep are NOT in this projection.",
@@ -585,7 +619,21 @@ def _retrieval_cell(cell: dict, plan: dict, priors: list[dict]) -> dict:
     }
 
 
-def _consumer_cell(cell: dict, plan: dict) -> dict:
+def hermetic_runs_for(name: str, root: Path | str = ROOT) -> list[dict]:
+    """The retained hermetic consumer runs that covered `name`: ids, verdicts, attempt counts and decisions. No latency
+    and no percentile crosses from a record to the card, by construction."""
+    from okf_bq_graph import consumer_run   # lazy: consumer_run imports this module
+    out = []
+    for rec in consumer_run.consumer_records(Path(root) / "evidence" / "consumer"):
+        for c in rec.get("cells", []):
+            if c.get("cell") == name:
+                out.append({"run_id": rec["run_id"], "verdict": rec.get("verdict"), "attempts_retained": c.get("attempts_total"),
+                            "released": c.get("released"), "refused": c.get("refused"),
+                            "probe": (c.get("probe") or {}).get("decision"), "file": rec["_file"]})
+    return out
+
+
+def _consumer_cell(cell: dict, plan: dict, root: Path | str = ROOT) -> dict:
     facts = plan["facts"]
     blocked = facts["state"] == "UNSELECTED" and cell["name"] in facts["blocks"]
     return {
@@ -598,11 +646,15 @@ def _consumer_cell(cell: dict, plan: dict) -> dict:
         "measured_target": cell["measured"],
         "warmups_target": cell["warmups"],
         "state": "INCOMPLETE",
-        "stopped_reason": "NOT_IMPLEMENTED",
+        "stopped_reason": "RUNNER_HERMETIC_ONLY",
         "p50_ms": None, "p95_ms": None, "max_ms": None,
         "success_rate": None, "errors": None, "timeouts": None,
         "bytes_billed": None, "usd_ondemand_list": None,
         "prior_observations": [],
+        "hermetic_runs": hermetic_runs_for(cell["name"], root),
+        "hermetic_runs_note": ("Retained hermetic runs of okf_bq_graph.consumer_run that covered this cell, by id: attempts retained and "
+                               "decisions only. Their orchestration times are in the records and are not this cell's metric; a hermetic "
+                               "attempt never fills a live cell."),
         "fact_version_blocked": blocked,
         "blocked_by": ("facts.state = UNSELECTED: no fact-data version is chosen, so two runs of this cell are not "
                        "comparable to each other and neither is comparable to an ordinary-SQL alternative") if blocked else None,
@@ -615,11 +667,16 @@ def _consumer_cell(cell: dict, plan: dict) -> dict:
              "counts and the January result are smoke checks, not identity. None of that exists yet, and its numbers must be "
              "labelled fixture-scale. ") if facts["state"] == "SELECTED" else ""
         ) + (
-            "No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one "
-            "wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a "
-            "sampled driver that repeats one requester question through bind, the caller-delegated job, "
-            "independent verification and the consumer decision, retaining every attempt including refusals. "
-            "Sizing it against a real SDK subprocess per request is part of that work, not an afterthought."
+            "The runner is `okf_bq_graph.consumer_run` (FS-1, 2026-09-09) and it has no live mode: `--dry-run` prints the "
+            "campaign and launches nothing; `--hermetic` repeats the predeclared question (`f_current`) through the in-process "
+            "oracle graph, bind, the SDK example's hermetic receipt runner, verification and the consumer decision, plus one "
+            "`f_revenue` probe declared in advance to refuse at bind, retaining every attempt under evidence/consumer/. A "
+            "hermetic attempt establishes orchestration and refusals, not a latency, a job or data equivalence, so it never "
+            "fills this cell. Filling it is FS-2: the same loop live, C=1 first, after `admit_live` (full readback matched "
+            "to the content digest, expiry) passes, on-demand by job-level override, inside budget.consumer_sampling, under "
+            "the owner's paid gate. "
+            f"`python3 -m okf_bq_graph.consumer_run --dry-run --cells {cell['name']}`; "
+            f"`python3 -m okf_bq_graph.consumer_run --hermetic --cells {cell['name']}`."
         ),
     }
 
@@ -704,7 +761,7 @@ def build_card(plan: dict, priors: list[dict] | None = None, root: Path | str = 
         "budget": plan["budget"],
         "budget_projection": project_budget(plan, priors),
         "concurrency_note": plan["concurrency_note"],
-        "cells": retrieval + [_consumer_cell(c, plan) for c in plan["consumer_cells"]],
+        "cells": retrieval + [_consumer_cell(c, plan, root) for c in plan["consumer_cells"]],
         "cost_cells": [_cost_cell(c) for c in plan["cost_cells"]],
         "campaigns": [summarize_campaign(r, attempts[r["run_id"]]) for r in records],
         "campaigns_note": ("Every retained campaign, oldest first, read from evidence/sql-baseline/run_<run_id>.json and its attempts "
@@ -761,7 +818,14 @@ def assert_filled_cells_trace_to_records(card: dict, records: list[dict]) -> Non
 
 
 def assert_no_cell_is_filled(card: dict) -> None:
-    """A scaffold that quietly acquires numbers stops being a scaffold."""
+    """A scaffold that quietly acquires numbers stops being a scaffold; a consumer cell never carries one at all."""
+    for cell in card["cells"]:
+        if cell["metric"] == "request_to_consumer_ms":
+            for field in ("p50_ms", "p95_ms", "max_ms", "success_rate", "bytes_billed", "usd_ondemand_list"):
+                if cell[field] is not None:
+                    raise ValueError(f"{cell['cell']}: {field} is set on a request-to-consumer cell, which no runner fills (hermetic only)")
+            if cell["measured_n"] or cell["state"] != "INCOMPLETE":
+                raise ValueError(f"{cell['cell']}: a request-to-consumer cell may not carry measurements")
     if card["state"] != "SCAFFOLD_ONLY":
         return
     for cell in card["cells"]:
@@ -845,9 +909,10 @@ def _render_facts(card: dict) -> list[str]:
                   f"{customer.get('note', '')}".rstrip(), ""]
     if selected:
         lines += ["**Cells this blocks.** None. Selecting a version clears `FACTS_UNSELECTED` only; the request-to-consumer "
-                  "cells stay INCOMPLETE because no sampled runner exists (NOT_IMPLEMENTED, which the cell table gives), and "
-                  "the live rows have not been verified against the selected digest (a full readback, not a count check, "
-                  "which no runner does yet).", ""]
+                  "cells stay INCOMPLETE because the runner has no live mode (RUNNER_HERMETIC_ONLY, which the cell table gives: "
+                  "its hermetic attempts prove orchestration and refusals, never a latency), and the live rows have not been "
+                  "verified against the selected digest (a full readback, not a count check; `admit_live` implements that "
+                  "check offline and no live run has called it).", ""]
     else:
         lines += [f"**Cells this blocks.** {', '.join('`' + b + '`' for b in facts['blocks'])} — the full "
                   "request-to-consumer comparison. The retrieval cells are unaffected: retrieval selects context, and "
@@ -977,7 +1042,12 @@ def render_markdown(card: dict) -> str:
                       f"{cell['jobs_in_attempts']} jobs, {_mib(cell['bytes_billed'])} billed, edition {cell.get('edition') or 'not established'}"
                       + (f"; stopped {cell['stopped_reason']}" if cell['stopped_reason'] else "")
                       + (f"; first error `{cell['first_error']}`" if cell.get("first_error") else "") + ".")
-        lines.append(f"* **`{cell['cell']}`** — {cell['how_to_fill']}{blocked}{latest}")
+        hermetic = ""
+        if cell.get("hermetic_runs"):
+            runs = "; ".join(f"`{r['run_id']}` {r['verdict']}, {r['attempts_retained']} attempts retained, {r['released']} released, "
+                             f"{r['refused']} refused, probe {r['probe']}" for r in cell["hermetic_runs"])
+            hermetic = f" **Retained hermetic runs (orchestration and refusals only, no latency, nothing filled):** {runs}."
+        lines.append(f"* **`{cell['cell']}`** — {cell['how_to_fill']}{blocked}{latest}{hermetic}")
     lines += [
         "",
         "## Cost cells",
@@ -1004,6 +1074,10 @@ def render_markdown(card: dict) -> str:
         f"{'within' if p['within_budget'] else 'NOT within'} the declared ceiling.",
         f"* {p['usd_note']}",
         f"* {p['consumer_cells_note']}",
+        (f"* Consumer sampling block: {p['consumer_sampling']['state']} — {p['consumer_sampling']['consumer_max_bytes_billed_gib']} GiB, "
+         f"${p['consumer_sampling']['consumer_max_usd']:.2f} at list, {p['consumer_sampling']['consumer_max_wall_seconds_per_cell']} s per cell, "
+         f"{p['consumer_sampling']['consumer_max_wall_seconds_total']} s total; inside the ceilings above and separate from them. "
+         f"{p['consumer_sampling']['note']}") if p.get("consumer_sampling") else "* No consumer sampling block is declared.",
         "",
     ] + _render_campaigns(card) + [
         "## Recorded prior observations",

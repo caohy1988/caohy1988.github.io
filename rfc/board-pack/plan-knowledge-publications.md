@@ -11,7 +11,7 @@ contract in `spec-knowledge-publications.md`. Nothing below changes a spike meas
 | Spike compile, publish, retrieve, authorization, catalog, seed and publication modules | Feasibility evidence on invented Acme data; spike code in this repository | The reference behaviour a conformance suite checks the proposed contract against. Never the product. |
 | SDK receipt example (broker, executor, verifier, consumer) | Example-only; locally held key; same principal executes and verifies | The consumer side of the separate verified-receipt feature. Not part of the publications MVP. |
 | Catalog runtime aspect (`okf-context-runtime`), separate from the shipped authored `okf` aspect | Separately owned runtime pin read live once by the spike; the authored aspect is preserved and never used as runtime input | The Catalog side of the binding contract, co-owned with Catalog. |
-| Ordinary-SQL retrieval measurements and the graph benchmark | Four retrieval cells measured on-demand; the two request-to-consumer cells unfilled because they have no runner (their fact data is a selected synthetic fixture since 2026-09-09, not customer data); the five cost cells unmeasured; graph benchmark unfinished; thresholds proposed | Inputs to the operating limits the product would document. Not acceptance of any threshold. |
+| Ordinary-SQL retrieval measurements and the graph benchmark | Four retrieval cells measured on-demand; the two request-to-consumer cells unfilled because their runner is hermetic-only, never run live (their fact data is a selected synthetic fixture since 2026-09-09, not customer data); the five cost cells unmeasured; graph benchmark unfinished; thresholds proposed | Inputs to the operating limits the product would document. Not acceptance of any threshold. |
 | The connected end-to-end path | One chain, chosen seed, single identity, plain SQL; one graph run, success case only | Evidence that the surfaces are buildable. None of it is a surface. |
 | The Finance retention pilot | Proposed, unsponsored | Validation data and demand evidence for the product owner. Not the product. |
 
@@ -74,7 +74,7 @@ tree that the board pack's ask can point to.
 
 - **Verified job receipt / Knowledge-Bound Jobs.** Needs a fact-version manifest, a receipt trust model, protected
   evidence, canonical result encoding, replay rules and a retention horizon well past ordinary time travel. The
-  recorded request-to-consumer cells stay unfilled because no runner exists (their fact data is a selected synthetic
+  recorded request-to-consumer cells stay unfilled because their runner is hermetic-only, never run live (their fact data is a selected synthetic
   fixture since 2026-09-09; selecting facts alone did not fill them); the five cost cells stay unmeasured. All of it is
   outside every slice above.
 - **Graph-traversal engine behind the contract.** Blocked on measuring access denial inside a graph walk under a
@@ -138,7 +138,7 @@ Filled in after implementation (bottom of this file).
 - **Consult attribution.** The intent now says the two analyses agreed the runtime is a pattern and not a feature,
   and chose different wedges; the board pack adopted the publications recommendation.
 - **Consumer and cost qualifications.** Every retrieval summary in the three documents names the consumer blocker
-  (no runner; the fact-data version was a second blocker until its 2026-09-09 synthetic selection) and keeps the five
+  (no live runner, hermetic-only since 2026-09-09; the fact-data version was a second blocker until its 2026-09-09 synthetic selection) and keeps the five
   unmeasured cost cells beside it.
 - **Checks.** Link, cache and restricted-chain tests: 71 passed offline, bytecode writes off. Stale-phrase and
   banned-token scans over the three documents clean. Reader-facing files unchanged since the first push: one line

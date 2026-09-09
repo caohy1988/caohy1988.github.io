@@ -23,6 +23,12 @@ SURFACES = {
     "baseline card": sb.OUT_DIR / "baseline.md",
 }
 STALE = [
+    r"\bhas no runner\b(?! yet)",                          # FS-1 (2026-09-09): the runner exists, hermetic only
+    r"\bhave no runner\b",
+    r"no sampled runner exists",
+    r"runner does not exist",
+    r"No runner exists",
+    r"\bno runner yet\b",
     r"no selected (version of the )?fact[- ]?data version",
     r"no selected fact version",
     r"no selected version of the fact data",
@@ -42,17 +48,21 @@ def test_no_current_tense_surface_still_says_the_version_is_unchosen(name):
         # the footer keeps its dated history line; only the two current rows and the newest footer clause are gated
         text = text.replace("its request-to-consumer cells have no runner and no selected fact-data version, its cost cells "
                             "remain unmeasured and every threshold remains proposed · Updated 2026-09-09 (later)", "")
+        # the second dated clause is history too (state at the fact selection); the evening clause is the current one
+        text = text.replace("consumer cells still have no runner, customer (Alder) data remains unselected, the live rows are "
+                            "unverified against the digest, cost cells remain unmeasured and every threshold remains proposed · "
+                            "Updated 2026-09-09 (evening)", "")
     hits = [pattern for pattern in STALE if re.search(pattern, text)]
     assert not hits, f"{name} still carries {hits}"
 
 
 def test_the_three_summaries_astra_named_now_say_synthetic_selected_and_alder_unselected():
     story = SURFACES["board-pack/STORY.md"].read_text()
-    assert "two request-to-consumer cells with **no runner yet** (their fact version is now a selected synthetic fixture" in story
+    assert "two request-to-consumer cells with **a hermetic-only runner, no live attempt sampled**" in story and "their fact version is now a selected synthetic fixture" in story
     rfc = SURFACES["rfc/index.html"].read_text()
-    assert "request-to-consumer cells have no runner (their fact data is a selected synthetic fixture, not customer data; the Alder cohort stays unselected)" in rfc
+    assert "request-to-consumer cells have a hermetic-only runner, never run live (their fact data is a selected synthetic fixture, not customer data; the Alder cohort stays unselected)" in rfc
     readme = SURFACES["spike README"].read_text()
-    assert "Consumer cells (`sqlchain_*`) are refused: `NOT_IMPLEMENTED` (no sampled runner), plus `FACTS_UNSELECTED` until the 2026-09-09 synthetic fact selection" in readme
+    assert "Consumer cells (`sqlchain_*`) are refused: `NOT_IMPLEMENTED` (no sampled runner) until the FS-1 hermetic-only runner landed on 2026-09-09 and `RUNNER_HERMETIC_ONLY` since" in readme
 
 
 def test_no_surface_says_a_count_check_verifies_the_digest():
@@ -60,7 +70,7 @@ def test_no_surface_says_a_count_check_verifies_the_digest():
         text = path.read_text()
         assert not re.search(r"checks? the live (tables|rows) against (that|the) digest", text), name
     page = SURFACES["board-pack/index.html"].read_text()
-    assert "match the rows and columns to their own digest, not the script’s" in page and "no runner does this yet" in page
+    assert "match the rows and columns to their own digest, not the script’s" in page and "no live run has done this yet" in page
 
 
 SDLC_DOCS = {name: REPO / "rfc" / "board-pack" / f"{name}-sqlchain-fact-select.md" for name in ("intent", "spec", "plan")}
@@ -112,7 +122,7 @@ def test_selected_never_appears_without_synthetic_in_the_same_sentence_on_the_pa
         for line in SURFACES[name].read_text().splitlines():
             if "**SELECTED" in line:
                 assert "synthetic" in line.lower(), f"{name}: {line[:120]}"
-                assert "NOT_IMPLEMENTED" in line, f"{name}: the SELECTED row must say the consumer cells stay unrun"
+                assert "RUNNER_HERMETIC_ONLY" in line, f"{name}: the SELECTED row must say the consumer cells stay unrun (hermetic only)"
 
 
 def test_reader_facing_prose_carries_no_digest_job_id_or_pr_number():
