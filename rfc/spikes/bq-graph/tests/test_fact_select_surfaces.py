@@ -13,10 +13,12 @@ from okf_bq_graph import sql_baseline as sb
 
 REPO = sb.ROOT.parents[2]
 SURFACES = {
-    "board-pack/index.html": REPO / "rfc" / "board-pack" / "index.html",
+    # PR 62 moved the pages: the board-pack story is the /rfc/ landing page and the full technical RFC lives at
+    # /rfc/detailed-rfc/. The keys keep their pre-move names because the rules below are keyed by surface role.
+    "board-pack/index.html": REPO / "rfc" / "index.html",
     "board-pack/STORY.md": REPO / "rfc" / "board-pack" / "STORY.md",
     "board-pack/spec-sep19-pack.md": REPO / "rfc" / "board-pack" / "spec-sep19-pack.md",
-    "rfc/index.html": REPO / "rfc" / "index.html",
+    "rfc/index.html": REPO / "rfc" / "detailed-rfc" / "index.html",
     "spike README": sb.ROOT / "README.md",
     "baseline card": sb.OUT_DIR / "baseline.md",
 }

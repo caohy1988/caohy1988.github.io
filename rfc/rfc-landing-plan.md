@@ -22,3 +22,7 @@ The content was copied, not git-mv'd through PR 61's files, so git will report p
 ## Fix pass (Astra review 5157689974)
 
 8. Fragment-preserving stubs, legacy-bookmark forwarder, demo nav + register row, browser route check. Rerun link tests, full suite, both demo checkers; push; reply on the PR.
+
+## Rebase after PR 61 merged (`c1121ce`)
+
+9. Rebased onto `origin/main`. Conflicts on the two moved pages were resolved by keeping the IA move and re-targeting PR 61's hunks: its three `rfc/board-pack/index.html` hunks now sit in `rfc/index.html` (with `spikes/…` links), and its four `rfc/index.html` hunks sit in `rfc/detailed-rfc/index.html`. Both pages diff against main's sources only on the documented chrome/link lines. PR 61's `tests/test_fact_select_surfaces.py` reads the moved pages under their pre-move keys. The redirect stub is unchanged.
