@@ -1,8 +1,8 @@
 {
   "version": "sql-baseline/0.1.0",
   "declared_utc": "2026-09-08T01:00:00Z",
-  "state": "SCAFFOLD_ONLY",
-  "state_note": "No baseline cell has been run. Every cell below is INCOMPLETE or UNMEASURED by construction.",
+  "state": "INCOMPLETE",
+  "state_note": "3 campaign(s) retained; 0 of 4 retrieval cells COMPLETE, 1 with any measured attempt. Every other cell is INCOMPLETE or UNMEASURED with its reason. No number below is invented: a cell shows only what its latest campaign's summary carries.",
   "engine": "fallback",
   "engine_note": "'fallback' is the relational two-hop join path (sql/fallback.sql) plus the GA VECTOR_SEARCH seed for natural questions. It is the ordinary-SQL comparator, not BigQuery Graph / GQL.",
   "corpus": {
@@ -128,19 +128,21 @@
       "engine": "fallback",
       "shape": "forced",
       "concurrency": 1,
-      "measured_n": 0,
+      "measured_n": 44,
       "measured_target": 100,
       "warmups_target": 20,
       "state": "INCOMPLETE",
-      "stopped_reason": "NOT_RUN",
-      "p50_ms": null,
-      "p95_ms": null,
-      "max_ms": null,
-      "success_rate": null,
-      "errors": null,
-      "timeouts": null,
-      "bytes_billed": null,
-      "usd_ondemand_list": null,
+      "stopped_reason": "BYTES_BUDGET_UNRESOLVED",
+      "p50_ms": 138.7,
+      "p95_ms": 185.0,
+      "max_ms": 471.3,
+      "success_rate": 0.0,
+      "errors": 44,
+      "timeouts": 0,
+      "bytes_billed": 0,
+      "usd_ondemand_list": 0.0,
+      "edition": null,
+      "campaign": "sqlbase-20260909-063150-d30baa0e",
       "prior_observations": [
         {
           "source": "evidence/landmine_forced_fallback.json",
@@ -193,7 +195,17 @@
       ],
       "fact_version_blocked": false,
       "blocked_by": null,
-      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=1, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs on-demand by job-level override (`reservation = none`, verified from every job's statistics; a reservation or edition on any job stops the campaign unlabelled), with a submission gate per cell so the cell/total deadline stops in-flight jobs, a running billed-byte / USD ledger with per-job `maximum_bytes_billed`, and a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells sqlbase_forced_c1`; fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells sqlbase_forced_c1` (Pass 2, foreground, Haiyuan's paid authorization). It has not been run: this cell is NOT_RUN, not measured."
+      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=1, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs on-demand by job-level override (`reservation = none`, verified from every job's statistics; a reservation or edition on any job stops the campaign unlabelled), with a submission gate per cell so the cell/total deadline stops in-flight jobs, a running billed-byte / USD ledger with per-job `maximum_bytes_billed`, and a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells sqlbase_forced_c1`; fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells sqlbase_forced_c1` (Pass 2, foreground, Haiyuan's paid authorization).",
+      "p50_ms_ok": null,
+      "p95_ms_ok": null,
+      "warmups_done": 20,
+      "attempts_retained": 64,
+      "jobs_in_attempts": 64,
+      "jobs_without_billing": 64,
+      "campaign_state": "INCOMPLETE",
+      "campaign_file": "evidence/sql-baseline/run_sqlbase-20260909-063150-d30baa0e.json",
+      "first_error": "BadRequest: 400 POST https://bigquery.googleapis.com/bigquery/v2/projects/test-project-0728-467323/jobs?prettyPrint=false: Override to 'none' is not enabled. The option 'reservation_override_mode' is set to 'RESERVATION_OVERRIDE_MODE_UNSPECIFIED'. See https://cloud.google.com/bigquery/docs/default-c",
+      "filled_from": "newest retained campaign with a measured attempt of this cell, else the newest that carried it; percentiles are nearest-rank over all measured attempts, failures included"
     },
     {
       "cell": "sqlbase_forced_c5",
@@ -204,20 +216,32 @@
       "measured_n": 0,
       "measured_target": 100,
       "warmups_target": 20,
-      "state": "INCOMPLETE",
-      "stopped_reason": "NOT_RUN",
+      "state": "NOT_RUN_PREFLIGHT",
+      "stopped_reason": "ON_DEMAND_OVERRIDE_DENIED",
       "p50_ms": null,
       "p95_ms": null,
       "max_ms": null,
       "success_rate": null,
-      "errors": null,
-      "timeouts": null,
+      "errors": 0,
+      "timeouts": 0,
       "bytes_billed": null,
       "usd_ondemand_list": null,
+      "edition": null,
+      "campaign": "sqlbase-20260909-064104-4266675c",
       "prior_observations": [],
       "fact_version_blocked": false,
       "blocked_by": null,
-      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=5, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs on-demand by job-level override (`reservation = none`, verified from every job's statistics; a reservation or edition on any job stops the campaign unlabelled), with a submission gate per cell so the cell/total deadline stops in-flight jobs, a running billed-byte / USD ledger with per-job `maximum_bytes_billed`, and a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells sqlbase_forced_c5`; fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells sqlbase_forced_c5` (Pass 2, foreground, Haiyuan's paid authorization). It has not been run: this cell is NOT_RUN, not measured."
+      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=5, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs on-demand by job-level override (`reservation = none`, verified from every job's statistics; a reservation or edition on any job stops the campaign unlabelled), with a submission gate per cell so the cell/total deadline stops in-flight jobs, a running billed-byte / USD ledger with per-job `maximum_bytes_billed`, and a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells sqlbase_forced_c5`; fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells sqlbase_forced_c5` (Pass 2, foreground, Haiyuan's paid authorization).",
+      "p50_ms_ok": null,
+      "p95_ms_ok": null,
+      "warmups_done": 0,
+      "attempts_retained": 0,
+      "jobs_in_attempts": 0,
+      "jobs_without_billing": 0,
+      "campaign_state": "INCOMPLETE",
+      "campaign_file": "evidence/sql-baseline/run_sqlbase-20260909-064104-4266675c.json",
+      "first_error": null,
+      "filled_from": "newest retained campaign with a measured attempt of this cell, else the newest that carried it; percentiles are nearest-rank over all measured attempts, failures included"
     },
     {
       "cell": "sqlbase_natural_c1",
@@ -228,16 +252,18 @@
       "measured_n": 0,
       "measured_target": 100,
       "warmups_target": 20,
-      "state": "INCOMPLETE",
-      "stopped_reason": "NOT_RUN",
+      "state": "NOT_RUN_PREFLIGHT",
+      "stopped_reason": "ON_DEMAND_OVERRIDE_DENIED",
       "p50_ms": null,
       "p95_ms": null,
       "max_ms": null,
       "success_rate": null,
-      "errors": null,
-      "timeouts": null,
+      "errors": 0,
+      "timeouts": 0,
       "bytes_billed": null,
       "usd_ondemand_list": null,
+      "edition": null,
+      "campaign": "sqlbase-20260909-064104-4266675c",
       "prior_observations": [
         {
           "source": "evidence/natural_question_fallback.json",
@@ -265,7 +291,17 @@
       ],
       "fact_version_blocked": false,
       "blocked_by": null,
-      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=1, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs on-demand by job-level override (`reservation = none`, verified from every job's statistics; a reservation or edition on any job stops the campaign unlabelled), with a submission gate per cell so the cell/total deadline stops in-flight jobs, a running billed-byte / USD ledger with per-job `maximum_bytes_billed`, and a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells sqlbase_natural_c1`; fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells sqlbase_natural_c1` (Pass 2, foreground, Haiyuan's paid authorization). It has not been run: this cell is NOT_RUN, not measured."
+      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=1, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs on-demand by job-level override (`reservation = none`, verified from every job's statistics; a reservation or edition on any job stops the campaign unlabelled), with a submission gate per cell so the cell/total deadline stops in-flight jobs, a running billed-byte / USD ledger with per-job `maximum_bytes_billed`, and a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells sqlbase_natural_c1`; fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells sqlbase_natural_c1` (Pass 2, foreground, Haiyuan's paid authorization).",
+      "p50_ms_ok": null,
+      "p95_ms_ok": null,
+      "warmups_done": 0,
+      "attempts_retained": 0,
+      "jobs_in_attempts": 0,
+      "jobs_without_billing": 0,
+      "campaign_state": "INCOMPLETE",
+      "campaign_file": "evidence/sql-baseline/run_sqlbase-20260909-064104-4266675c.json",
+      "first_error": null,
+      "filled_from": "newest retained campaign with a measured attempt of this cell, else the newest that carried it; percentiles are nearest-rank over all measured attempts, failures included"
     },
     {
       "cell": "sqlbase_natural_c5",
@@ -276,20 +312,32 @@
       "measured_n": 0,
       "measured_target": 100,
       "warmups_target": 20,
-      "state": "INCOMPLETE",
-      "stopped_reason": "NOT_RUN",
+      "state": "NOT_RUN_PREFLIGHT",
+      "stopped_reason": "ON_DEMAND_OVERRIDE_DENIED",
       "p50_ms": null,
       "p95_ms": null,
       "max_ms": null,
       "success_rate": null,
-      "errors": null,
-      "timeouts": null,
+      "errors": 0,
+      "timeouts": 0,
       "bytes_billed": null,
       "usd_ondemand_list": null,
+      "edition": null,
+      "campaign": "sqlbase-20260909-064104-4266675c",
       "prior_observations": [],
       "fact_version_blocked": false,
       "blocked_by": null,
-      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=5, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs on-demand by job-level override (`reservation = none`, verified from every job's statistics; a reservation or edition on any job stops the campaign unlabelled), with a submission gate per cell so the cell/total deadline stops in-flight jobs, a running billed-byte / USD ledger with per-job `maximum_bytes_billed`, and a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells sqlbase_natural_c5`; fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells sqlbase_natural_c5` (Pass 2, foreground, Haiyuan's paid authorization). It has not been run: this cell is NOT_RUN, not measured."
+      "how_to_fill": "Predeclared: 20 warmups + 100 measured at C=5, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs on-demand by job-level override (`reservation = none`, verified from every job's statistics; a reservation or edition on any job stops the campaign unlabelled), with a submission gate per cell so the cell/total deadline stops in-flight jobs, a running billed-byte / USD ledger with per-job `maximum_bytes_billed`, and a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells sqlbase_natural_c5`; fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells sqlbase_natural_c5` (Pass 2, foreground, Haiyuan's paid authorization).",
+      "p50_ms_ok": null,
+      "p95_ms_ok": null,
+      "warmups_done": 0,
+      "attempts_retained": 0,
+      "jobs_in_attempts": 0,
+      "jobs_without_billing": 0,
+      "campaign_state": "INCOMPLETE",
+      "campaign_file": "evidence/sql-baseline/run_sqlbase-20260909-064104-4266675c.json",
+      "first_error": null,
+      "filled_from": "newest retained campaign with a measured attempt of this cell, else the newest that carried it; percentiles are nearest-rank over all measured attempts, failures included"
     },
     {
       "cell": "sqlchain_forced_c1",
@@ -392,6 +440,191 @@
       "how_to_fill": "Not computable until the cells above have a numerator. Total cost of all attempts divided by released, receipt-verified answers: a failed or refused attempt costs money, so it belongs in the numerator, and it answered nothing, so it must not appear in the denominator."
     }
   ],
+  "campaigns": [
+    {
+      "run_id": "sqlbase-20260909T062840Z-a3fc21f5",
+      "file": "evidence/sql-baseline/run_sqlbase-20260909T062840Z-a3fc21f5.json",
+      "started_utc": "2026-09-09T06:28:40.895240+00:00",
+      "wall_seconds": 18.2,
+      "state": "INCOMPLETE",
+      "error": null,
+      "sdk": {
+        "google-cloud-bigquery": "3.45.0"
+      },
+      "preflight": null,
+      "cells": [
+        {
+          "cell": "sqlbase_forced_c1",
+          "state": "INCOMPLETE",
+          "measured_n": 44,
+          "stopped_reason": "BYTES_BUDGET_UNRESOLVED"
+        },
+        {
+          "cell": "sqlbase_forced_c5",
+          "state": "NOT_RUN_BUDGET",
+          "measured_n": 0,
+          "stopped_reason": "BYTES_BUDGET_UNRESOLVED"
+        },
+        {
+          "cell": "sqlbase_natural_c1",
+          "state": "NOT_RUN_BUDGET",
+          "measured_n": 0,
+          "stopped_reason": "BYTES_BUDGET_UNRESOLVED"
+        },
+        {
+          "cell": "sqlbase_natural_c5",
+          "state": "NOT_RUN_BUDGET",
+          "measured_n": 0,
+          "stopped_reason": "BYTES_BUDGET_UNRESOLVED"
+        }
+      ],
+      "attempts_retained": 64,
+      "attempts_ok": 0,
+      "attempts_first_error": "BadRequest: 400 POST https://bigquery.googleapis.com/bigquery/v2/projects/test-project-0728-467323/jobs?prettyPrint=false: Label value \"sqlbase-20260909T062840Z-a3fc21f5_sqlbase_forced_c1\" has invalid characters. Location: US Job ID: okf_graph_sqlbase-20260909T062840Z-a3fc21f5_sqlbase_forced_c1_1af6",
+      "jobs_in_attempts": 64,
+      "bytes_billed_charged": 0,
+      "usd_list_charged": 0.0,
+      "unresolved_liability_bytes": 68719476736,
+      "unresolved_jobs": 64,
+      "billing_stop_reason": "BYTES_BUDGET_UNRESOLVED",
+      "jobs_observed": 64,
+      "jobs_verified_on_demand": 0,
+      "verified_on_demand": false,
+      "edition": null,
+      "edition_note": "NOT established: 64 job(s) have no terminal statistics (outcome unknown)"
+    },
+    {
+      "run_id": "sqlbase-20260909-063150-d30baa0e",
+      "file": "evidence/sql-baseline/run_sqlbase-20260909-063150-d30baa0e.json",
+      "started_utc": "2026-09-09T06:31:50.091592+00:00",
+      "wall_seconds": 19.0,
+      "state": "INCOMPLETE",
+      "error": null,
+      "sdk": {
+        "google-cloud-bigquery": "3.45.0"
+      },
+      "preflight": null,
+      "cells": [
+        {
+          "cell": "sqlbase_forced_c1",
+          "state": "INCOMPLETE",
+          "measured_n": 44,
+          "stopped_reason": "BYTES_BUDGET_UNRESOLVED"
+        },
+        {
+          "cell": "sqlbase_forced_c5",
+          "state": "NOT_RUN_BUDGET",
+          "measured_n": 0,
+          "stopped_reason": "BYTES_BUDGET_UNRESOLVED"
+        },
+        {
+          "cell": "sqlbase_natural_c1",
+          "state": "NOT_RUN_BUDGET",
+          "measured_n": 0,
+          "stopped_reason": "BYTES_BUDGET_UNRESOLVED"
+        },
+        {
+          "cell": "sqlbase_natural_c5",
+          "state": "NOT_RUN_BUDGET",
+          "measured_n": 0,
+          "stopped_reason": "BYTES_BUDGET_UNRESOLVED"
+        }
+      ],
+      "attempts_retained": 64,
+      "attempts_ok": 0,
+      "attempts_first_error": "BadRequest: 400 POST https://bigquery.googleapis.com/bigquery/v2/projects/test-project-0728-467323/jobs?prettyPrint=false: Override to 'none' is not enabled. The option 'reservation_override_mode' is set to 'RESERVATION_OVERRIDE_MODE_UNSPECIFIED'. See https://cloud.google.com/bigquery/docs/default-c",
+      "jobs_in_attempts": 64,
+      "bytes_billed_charged": 0,
+      "usd_list_charged": 0.0,
+      "unresolved_liability_bytes": 68719476736,
+      "unresolved_jobs": 64,
+      "billing_stop_reason": "BYTES_BUDGET_UNRESOLVED",
+      "jobs_observed": 64,
+      "jobs_verified_on_demand": 0,
+      "verified_on_demand": false,
+      "edition": null,
+      "edition_note": "NOT established: 64 job(s) have no terminal statistics (outcome unknown)"
+    },
+    {
+      "run_id": "sqlbase-20260909-064104-4266675c",
+      "file": "evidence/sql-baseline/run_sqlbase-20260909-064104-4266675c.json",
+      "started_utc": "2026-09-09T06:41:04.570700+00:00",
+      "wall_seconds": 0.9,
+      "state": "INCOMPLETE",
+      "error": null,
+      "sdk": {
+        "google-cloud-bigquery": "3.45.0"
+      },
+      "preflight": {
+        "state": "DENIED",
+        "reason": "ON_DEMAND_OVERRIDE_DENIED",
+        "server_message": "400 POST https://bigquery.googleapis.com/bigquery/v2/projects/test-project-0728-467323/jobs?prettyPrint=false: Override to 'none' is not enabled. The option 'reservation_override_mode' is set to 'RESERVATION_OVERRIDE_MODE_UNSPECIFIED'. See https://cloud.google.com/bigquery/docs/default-configuration for configuration details. Location: US Job ID: 53820a40-a9e3-436b-954d-056dd8fffe16",
+        "requires": {
+          "option": "reservation_override_mode",
+          "value": "ALLOW_ANY_OVERRIDE",
+          "scope": "project or organization",
+          "docs": "https://docs.cloud.google.com/bigquery/docs/default-configuration"
+        },
+        "remedy": "the project (or its organization) must set reservation_override_mode = 'ALLOW_ANY_OVERRIDE' (BigQuery ALTER PROJECT SET OPTIONS, permission bigquery.config.update); this driver does not change project settings"
+      },
+      "cells": [
+        {
+          "cell": "sqlbase_forced_c1",
+          "state": "NOT_RUN_PREFLIGHT",
+          "measured_n": 0,
+          "stopped_reason": "ON_DEMAND_OVERRIDE_DENIED"
+        },
+        {
+          "cell": "sqlbase_forced_c5",
+          "state": "NOT_RUN_PREFLIGHT",
+          "measured_n": 0,
+          "stopped_reason": "ON_DEMAND_OVERRIDE_DENIED"
+        },
+        {
+          "cell": "sqlbase_natural_c1",
+          "state": "NOT_RUN_PREFLIGHT",
+          "measured_n": 0,
+          "stopped_reason": "ON_DEMAND_OVERRIDE_DENIED"
+        },
+        {
+          "cell": "sqlbase_natural_c5",
+          "state": "NOT_RUN_PREFLIGHT",
+          "measured_n": 0,
+          "stopped_reason": "ON_DEMAND_OVERRIDE_DENIED"
+        }
+      ],
+      "attempts_retained": 0,
+      "attempts_ok": 0,
+      "attempts_first_error": null,
+      "jobs_in_attempts": 0,
+      "bytes_billed_charged": 0,
+      "usd_list_charged": 0.0,
+      "unresolved_liability_bytes": 0,
+      "unresolved_jobs": 0,
+      "billing_stop_reason": null,
+      "jobs_observed": 0,
+      "jobs_verified_on_demand": 0,
+      "verified_on_demand": false,
+      "edition": null,
+      "edition_note": "NOT established: no job was checked"
+    }
+  ],
+  "campaigns_note": "Every retained campaign, oldest first, read from evidence/sql-baseline/run_<run_id>.json and its attempts in evidence/requests.jsonl. Bytes and USD are what the campaign's ledger charged from terminal job statistics; liability is room held for jobs whose billing was never established (Astra PR55 RR).",
+  "blocker": {
+    "campaign": "sqlbase-20260909-064104-4266675c",
+    "stage": "preflight (dry run, no job, nothing billed)",
+    "reason": "ON_DEMAND_OVERRIDE_DENIED",
+    "server_message": "400 POST https://bigquery.googleapis.com/bigquery/v2/projects/test-project-0728-467323/jobs?prettyPrint=false: Override to 'none' is not enabled. The option 'reservation_override_mode' is set to 'RESERVATION_OVERRIDE_MODE_UNSPECIFIED'. See https://cloud.google.com/bigquery/docs/default-configuration for configuration details. Location: US Job ID: 53820a40-a9e3-436b-954d-056dd8fffe16",
+    "requires": {
+      "option": "reservation_override_mode",
+      "value": "ALLOW_ANY_OVERRIDE",
+      "scope": "project or organization",
+      "docs": "https://docs.cloud.google.com/bigquery/docs/default-configuration"
+    },
+    "remedy": "the project (or its organization) must set reservation_override_mode = 'ALLOW_ANY_OVERRIDE' (BigQuery ALTER PROJECT SET OPTIONS, permission bigquery.config.update); this driver does not change project settings",
+    "who": "whoever holds bigquery.config.update on the project (or its organization); not this driver, not an agent",
+    "why_not_worked_around": "running the cells under the standing Enterprise assignment would be a different measurement (the plan's reservation line says so) and the routing guard would stop it as a violation; removing the assignment is out of scope for a baseline run"
+  },
   "prior_observations": [
     {
       "source": "evidence/landmine_forced_fallback.json",

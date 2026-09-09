@@ -19,6 +19,14 @@ Three rules the code enforces rather than documents:
   looking merely unrun. A later `SELECTED` plan prints its version and blocks nothing, in the JSON and in
   the Markdown alike — `_render_facts` branches on the state instead of assuming one.
 
+Since Pass 2 (2026-09-09) the card also reads the retained campaign records the driver writes
+(`evidence/sql-baseline/run_<run_id>.json`, see `sql_baseline_run.py`). A retrieval cell is filled from the
+latest campaign that carried it, and only with what that campaign's `benchmark.measure` summary says: its
+sample count, its state, its stop reason, its nearest-rank percentiles over ALL attempts (failures included).
+A cell whose latest campaign never measured it stays INCOMPLETE with that campaign's reason; a campaign
+record fills nothing it did not measure. `assert_filled_cells_trace_to_records` fails the build if a cell
+carries a number no record carries. Consumer cells and cost cells are never filled from records.
+
 Nothing here opens a BigQuery client or spends anything. `python3 -m okf_bq_graph.sql_baseline`
 regenerates `evidence/sql-baseline/{plan.json,baseline.md}` offline.
 """
@@ -31,6 +39,8 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent
 PLAN = ROOT / "fixtures" / "sql_baseline.json"
 OUT_DIR = ROOT / "evidence" / "sql-baseline"
+REQUESTS = ROOT / "evidence" / "requests.jsonl"
+RECORD_GLOB = "run_sqlbase-*.json"
 
 GIB = 1024 ** 3
 TIB = 1024 ** 4
@@ -199,6 +209,165 @@ def project_budget(plan: dict, priors: list[dict]) -> dict:
     }
 
 
+# --- retained campaign records (Pass 2) -------------------------------------------------------------------
+
+def campaign_records(out_dir: Path | str = OUT_DIR) -> list[dict]:
+    """Every retained `run_sqlbase-*.json`, oldest first by `started_utc`. Nothing is filtered: an aborted or
+    preflight-stopped campaign is part of the history the card reports."""
+    out_dir = Path(out_dir)
+    records = []
+    for path in sorted(out_dir.glob(RECORD_GLOB)):
+        rec = json.loads(path.read_text())
+        rec["_file"] = f"evidence/sql-baseline/{path.name}"
+        records.append(rec)
+    records.sort(key=lambda r: (r.get("started_utc") or "", r["_file"]))
+    return records
+
+
+def attempts_for(run_id: str, requests_path: Path | str = REQUESTS) -> list[dict]:
+    """The retained per-attempt rows of one campaign (warmups included), read from `evidence/requests.jsonl`."""
+    path = Path(requests_path)
+    if not path.exists():
+        return []
+    out = []
+    with path.open() as fh:
+        for line in fh:
+            if run_id in line:
+                rec = json.loads(line)
+                if rec.get("run_id") == run_id:
+                    out.append(rec)
+    return out
+
+
+def _attempt_bytes(attempts: list[dict]) -> dict:
+    """Bytes the retained attempts' jobs report, and how many jobs report none. Warmups count: they were billed too."""
+    billed, jobs, unknown = 0, 0, 0
+    for a in attempts:
+        for j in (a.get("timing") or {}).get("jobs") or []:
+            jobs += 1
+            if j.get("bytes_billed") is None:
+                unknown += 1
+            else:
+                billed += int(j["bytes_billed"])
+    return {"jobs": jobs, "bytes_billed": billed, "jobs_without_billing": unknown}
+
+
+def _one_line(text: str | None, limit: int = 300) -> str | None:
+    return None if text is None else " ".join(str(text).split())[:limit]
+
+
+def _first_error(attempts: list[dict]) -> str | None:
+    for a in attempts:
+        if a.get("error"):
+            return _one_line(a["error"])
+    return None
+
+
+def summarize_campaign(record: dict, attempts: list[dict] | None = None) -> dict:
+    """One row of the card's campaign history, read from the record and its retained attempts only."""
+    attempts = attempts or []
+    billing = record.get("billing") or {}
+    routing = record.get("routing") or {}
+    pre = record.get("preflight")
+    by_cell = _attempt_bytes(attempts)
+    return {
+        "run_id": record["run_id"],
+        "file": record["_file"],
+        "started_utc": record.get("started_utc"),
+        "wall_seconds": record.get("wall_seconds"),
+        "state": record.get("state"),
+        "error": record.get("error"),
+        "sdk": record.get("sdk"),
+        "preflight": ({"state": pre.get("state"), "reason": pre.get("reason"), "server_message": _one_line(pre.get("server_message"), 600),
+                       "requires": pre.get("requires"), "remedy": pre.get("remedy")} if pre else None),
+        "cells": [{"cell": c["cell"], "state": c["state"], "measured_n": c.get("measured_n", 0),
+                   "stopped_reason": c.get("stopped_reason")} for c in record.get("cells", [])],
+        "attempts_retained": len(attempts),
+        "attempts_ok": sum(1 for a in attempts if a.get("ok")),
+        "attempts_first_error": _first_error(attempts),
+        "jobs_in_attempts": by_cell["jobs"],
+        "bytes_billed_charged": billing.get("bytes_billed_charged"),
+        "usd_list_charged": billing.get("usd_list_charged"),
+        "unresolved_liability_bytes": billing.get("unresolved_liability_bytes"),
+        "unresolved_jobs": len(billing.get("unresolved_jobs") or []),
+        "billing_stop_reason": billing.get("stop_reason"),
+        "jobs_observed": routing.get("jobs_observed"),
+        "jobs_verified_on_demand": routing.get("jobs_verified_on_demand"),
+        "verified_on_demand": routing.get("verified_on_demand"),
+        "edition": record.get("edition"),
+        "edition_note": record.get("edition_note"),
+    }
+
+
+def latest_cell_result(records: list[dict], name: str) -> tuple[dict, dict] | None:
+    """The newest campaign with any measured attempt of this cell; failing that, the newest campaign that carried it
+    (NOT_RUN for its reason). An ABORTED campaign carries no cells, so it never fills one. Every campaign, chosen or
+    not, is listed in the card's campaign history."""
+    carried = None
+    for record in reversed(records):
+        for c in record.get("cells", []):
+            if c.get("cell") == name:
+                if c.get("measured_n"):
+                    return record, c
+                carried = carried or (record, c)
+    return carried
+
+
+def blocker_from(records: list[dict]) -> dict | None:
+    """What stops the next campaign, read from the newest record: a preflight that did not pass names the project
+    option the driver cannot set. Older campaigns that failed before the preflight existed are history, not the
+    current blocker."""
+    if not records:
+        return None
+    pre = records[-1].get("preflight")
+    if not pre or pre.get("state") == "OK":
+        return None
+    req = pre.get("requires") or {}
+    return {
+        "campaign": records[-1]["run_id"],
+        "stage": "preflight (dry run, no job, nothing billed)",
+        "reason": pre.get("reason"),
+        "server_message": _one_line(pre.get("server_message"), 600),
+        "requires": req,
+        "remedy": pre.get("remedy"),
+        "who": "whoever holds bigquery.config.update on the project (or its organization); not this driver, not an agent",
+        "why_not_worked_around": ("running the cells under the standing Enterprise assignment would be a different measurement "
+                                  "(the plan's reservation line says so) and the routing guard would stop it as a violation; "
+                                  "removing the assignment is out of scope for a baseline run"),
+    }
+
+
+def _filled_retrieval_cell(base: dict, record: dict, result: dict, attempts: list[dict]) -> dict:
+    """Overlay one campaign's summary of this cell onto the predeclared cell. Only fields the record carries move."""
+    mine = [a for a in attempts if a.get("cell") == base["cell"]]
+    b = _attempt_bytes(mine)
+    filled = dict(base)
+    filled.update({
+        "measured_n": result.get("measured_n", 0),
+        "state": result["state"],
+        "stopped_reason": result.get("stopped_reason"),
+        "p50_ms": result.get("p50_ms_all"), "p95_ms": result.get("p95_ms_all"), "max_ms": result.get("max_ms_all"),
+        "p50_ms_ok": result.get("p50_ms_ok"), "p95_ms_ok": result.get("p95_ms_ok"),
+        "success_rate": result.get("success_rate"),
+        "errors": result.get("errors"), "timeouts": result.get("timeouts"),
+        "warmups_done": result.get("warmups_done", 0),
+        "attempts_retained": len(mine),
+        "jobs_in_attempts": b["jobs"],
+        "bytes_billed": b["bytes_billed"] if b["jobs"] else None,
+        "jobs_without_billing": b["jobs_without_billing"],
+        "usd_ondemand_list": (round(b["bytes_billed"] / TIB * base["_usd_per_tib"], 4) if b["jobs"] else None),
+        "edition": record.get("edition"),
+        "campaign": record["run_id"],
+        "campaign_state": record.get("state"),
+        "campaign_file": record["_file"],
+        "first_error": _first_error(mine),
+        "filled_from": ("newest retained campaign with a measured attempt of this cell, else the newest that carried it; "
+                        "percentiles are nearest-rank over all measured attempts, failures included"),
+    })
+    del filled["_usd_per_tib"]
+    return filled
+
+
 def _retrieval_cell(cell: dict, plan: dict, priors: list[dict]) -> dict:
     return {
         "cell": cell["name"],
@@ -214,6 +383,8 @@ def _retrieval_cell(cell: dict, plan: dict, priors: list[dict]) -> dict:
         "p50_ms": None, "p95_ms": None, "max_ms": None,
         "success_rate": None, "errors": None, "timeouts": None,
         "bytes_billed": None, "usd_ondemand_list": None,
+        "edition": None, "campaign": None,
+        "_usd_per_tib": plan["budget"]["ondemand_usd_per_tib"],
         "prior_observations": [p for p in priors if p["shape"] == cell["shape"] and p["concurrency"] == cell["concurrency"]],
         "fact_version_blocked": False,
         "blocked_by": None,
@@ -229,7 +400,7 @@ def _retrieval_cell(cell: dict, plan: dict, priors: list[dict]) -> dict:
             "a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. "
             f"`python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells {cell['name']}`; "
             f"fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells {cell['name']}` (Pass 2, foreground, "
-            "Haiyuan's paid authorization). It has not been run: this cell is NOT_RUN, not measured."
+            "Haiyuan's paid authorization)."
         ),
     }
 
@@ -297,14 +468,45 @@ def _cost_cell(cell: dict) -> dict:
     }
 
 
-def build_card(plan: dict, priors: list[dict] | None = None, root: Path | str = ROOT) -> dict:
+def card_state(retrieval_cells: list[dict], records: list[dict]) -> tuple[str, str]:
+    if not records:
+        return "SCAFFOLD_ONLY", "No baseline cell has been run. Every cell below is INCOMPLETE or UNMEASURED by construction."
+    complete = [c["cell"] for c in retrieval_cells if c["state"] == "COMPLETE"]
+    measured = [c["cell"] for c in retrieval_cells if c["measured_n"]]
+    n = len(records)
+    if len(complete) == len(retrieval_cells):
+        return "RETRIEVAL_MEASURED", (f"Every retrieval cell is COMPLETE from {n} retained campaign(s). The consumer cells and "
+                                      "the cost cells are not measured; the table says why.")
+    return "INCOMPLETE", (f"{n} campaign(s) retained; {len(complete)} of {len(retrieval_cells)} retrieval cells COMPLETE, "
+                          f"{len(measured)} with any measured attempt. Every other cell is INCOMPLETE or UNMEASURED with its reason. "
+                          "No number below is invented: a cell shows only what its latest campaign's summary carries.")
+
+
+def build_card(plan: dict, priors: list[dict] | None = None, root: Path | str = ROOT, records: list[dict] | None = None,
+               requests_path: Path | str | None = None) -> dict:
     validate_plan(plan)
     priors = prior_observations(root) if priors is None else priors
+    root = Path(root)
+    records = campaign_records(root / "evidence" / "sql-baseline") if records is None else records
+    records = sorted(records, key=lambda r: (r.get("started_utc") or "", r["run_id"]))   # oldest first, whatever order arrived
+    requests_path = (root / "evidence" / "requests.jsonl") if requests_path is None else Path(requests_path)
+    attempts = {r["run_id"]: attempts_for(r["run_id"], requests_path) for r in records}
+    retrieval = []
+    for c in plan["retrieval_cells"]:
+        base = _retrieval_cell(c, plan, priors)
+        hit = latest_cell_result(records, c["name"])
+        if hit is None:
+            del base["_usd_per_tib"]
+            retrieval.append(base)
+        else:
+            record, result = hit
+            retrieval.append(_filled_retrieval_cell(base, record, result, attempts[record["run_id"]]))
+    state, state_note = card_state(retrieval, records)
     card = {
         "version": plan["version"],
         "declared_utc": plan["declared_utc"],
-        "state": "SCAFFOLD_ONLY",
-        "state_note": "No baseline cell has been run. Every cell below is INCOMPLETE or UNMEASURED by construction.",
+        "state": state,
+        "state_note": state_note,
         "engine": plan["engine"],
         "engine_note": plan["engine_note"],
         "corpus": plan["corpus"],
@@ -315,9 +517,13 @@ def build_card(plan: dict, priors: list[dict] | None = None, root: Path | str = 
         "budget": plan["budget"],
         "budget_projection": project_budget(plan, priors),
         "concurrency_note": plan["concurrency_note"],
-        "cells": ([_retrieval_cell(c, plan, priors) for c in plan["retrieval_cells"]]
-                  + [_consumer_cell(c, plan) for c in plan["consumer_cells"]]),
+        "cells": retrieval + [_consumer_cell(c, plan) for c in plan["consumer_cells"]],
         "cost_cells": [_cost_cell(c) for c in plan["cost_cells"]],
+        "campaigns": [summarize_campaign(r, attempts[r["run_id"]]) for r in records],
+        "campaigns_note": ("Every retained campaign, oldest first, read from evidence/sql-baseline/run_<run_id>.json and its attempts "
+                           "in evidence/requests.jsonl. Bytes and USD are what the campaign's ledger charged from terminal job "
+                           "statistics; liability is room held for jobs whose billing was never established (Astra PR55 RR)."),
+        "blocker": blocker_from(records),
         "prior_observations": priors,
         "prior_observations_note": (
             "Recorded before this plan existed, on the same corpus and engine. They are retained here so the "
@@ -333,7 +539,38 @@ def build_card(plan: dict, priors: list[dict] | None = None, root: Path | str = 
         },
     }
     assert_no_cell_is_filled(card)
+    assert_filled_cells_trace_to_records(card, records)
     return card
+
+
+def assert_filled_cells_trace_to_records(card: dict, records: list[dict]) -> None:
+    """A number on the card must be a number some retained campaign carries for that cell. Consumer and cost cells
+    are never filled from records, whatever the records say."""
+    by_run = {r["run_id"]: r for r in records}
+    for cell in card["cells"]:
+        if cell["metric"] != "retrieval_ms":
+            if cell["measured_n"] or cell["p50_ms"] is not None or cell["state"] != "INCOMPLETE":
+                raise ValueError(f"{cell['cell']}: a {cell['metric']} cell cannot be filled by a retrieval campaign")
+            continue
+        if cell.get("campaign") is None:
+            if cell["measured_n"] or cell["p50_ms"] is not None or cell["state"] != "INCOMPLETE":
+                raise ValueError(f"{cell['cell']}: carries a measurement but names no campaign")
+            continue
+        record = by_run.get(cell["campaign"])
+        if record is None:
+            raise ValueError(f"{cell['cell']}: names campaign {cell['campaign']} which is not retained")
+        result = next((c for c in record.get("cells", []) if c.get("cell") == cell["cell"]), None)
+        if result is None:
+            raise ValueError(f"{cell['cell']}: campaign {cell['campaign']} carries no summary of it")
+        for mine, theirs in (("measured_n", "measured_n"), ("state", "state"), ("stopped_reason", "stopped_reason"),
+                             ("p50_ms", "p50_ms_all"), ("p95_ms", "p95_ms_all"), ("success_rate", "success_rate")):
+            if cell[mine] != result.get(theirs):
+                raise ValueError(f"{cell['cell']}.{mine} = {cell[mine]!r} but campaign {cell['campaign']} says {result.get(theirs)!r}")
+        if cell["state"] == "COMPLETE" and (cell["measured_n"] < cell["measured_target"] or cell["stopped_reason"] is not None):
+            raise ValueError(f"{cell['cell']}: COMPLETE with n={cell['measured_n']}/{cell['measured_target']} or a stop reason")
+    for cell in card["cost_cells"]:
+        if cell["value"] is not None or cell["state"] != "UNMEASURED":
+            raise ValueError(f"{cell['cell']}: a cost cell is not filled by a retrieval campaign")
 
 
 def assert_no_cell_is_filled(card: dict) -> None:
@@ -414,18 +651,82 @@ def _render_facts(card: dict) -> list[str]:
     return lines
 
 
+def _pct(value: float | None) -> str:
+    return "—" if value is None else f"{value * 100:.0f}%"
+
+
+def _mib(value: int | None) -> str:
+    return "—" if value is None else f"{value / (1024 ** 2):,.0f} MiB"
+
+
+def _render_blocker(card: dict) -> list[str]:
+    b = card.get("blocker")
+    if not b:
+        return []
+    req = b.get("requires") or {}
+    return [
+        "## Blocked — what the next campaign needs",
+        "",
+        f"Campaign `{b['campaign']}` stopped at the {b['stage']}: **{b['reason']}**.",
+        "",
+        f"* Server: `{b['server_message']}`",
+        f"* Requires: `{req.get('option')} = {req.get('value')}` on the {req.get('scope')} ({req.get('docs')}).",
+        f"* Remedy: {b['remedy']}",
+        f"* Who: {b['who']}",
+        f"* Why it was not worked around: {b['why_not_worked_around']}",
+        "",
+    ]
+
+
+def _render_campaigns(card: dict) -> list[str]:
+    if not card.get("campaigns"):
+        return []
+    lines = [
+        "## Campaigns",
+        "",
+        card["campaigns_note"],
+        "",
+        "| Campaign | Started (UTC) | Wall s | State | Preflight | Cells (state / n / reason) | Attempts ok/retained | Jobs in attempts | Bytes charged | USD list | Liability | Routing verified | Edition |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+    ]
+    for c in card["campaigns"]:
+        pre = c["preflight"]
+        pre_s = "—" if pre is None else (pre["state"] + (f" ({pre['reason']})" if pre.get("reason") else ""))
+        cells = "; ".join(f"`{x['cell']}` {x['state']} n={x['measured_n']} {x['stopped_reason'] or ''}".rstrip() for x in c["cells"]) or "none (aborted)"
+        liability = "—" if c["unresolved_liability_bytes"] is None else f"{c['unresolved_liability_bytes'] / GIB:.0f} GiB / {c['unresolved_jobs']} jobs"
+        usd = "—" if c["usd_list_charged"] is None else f"${c['usd_list_charged']:.4f}"
+        lines.append(
+            f"| `{c['run_id']}` | {c['started_utc']} | {c['wall_seconds']} | **{c['state']}** | {pre_s} | {cells} | "
+            f"{c['attempts_ok']}/{c['attempts_retained']} | {c['jobs_in_attempts']} | {_mib(c['bytes_billed_charged'])} | {usd} | {liability} | "
+            f"{c['jobs_verified_on_demand']}/{c['jobs_observed']} | {c['edition'] or '—'} |"
+        )
+    lines.append("")
+    for c in card["campaigns"]:
+        if c["attempts_first_error"]:
+            lines.append(f"* `{c['run_id']}` first retained error: `{c['attempts_first_error']}`")
+        if c["preflight"] and c["preflight"].get("server_message"):
+            lines.append(f"* `{c['run_id']}` preflight: `{c['preflight']['server_message']}`")
+        if c["error"]:
+            lines.append(f"* `{c['run_id']}` aborted: `{c['error']}`")
+    lines.append("")
+    return lines
+
+
 def render_markdown(card: dict) -> str:
     p = card["budget_projection"]
+    title = {"SCAFFOLD_ONLY": "predeclared, not measured",
+             "RETRIEVAL_MEASURED": "retrieval cells measured"}.get(card["state"], "predeclared, campaigns retained, not measured")
     lines = [
-        "# Ordinary-SQL baseline — predeclared, not measured",
+        f"# Ordinary-SQL baseline — {title}",
         "",
         f"`{card['version']}` · declared {card['declared_utc']} · **{card['state']}**",
         "",
         card["state_note"],
         "",
-        "Generated by `python3 -m okf_bq_graph.sql_baseline` from `fixtures/sql_baseline.json`. It opens no client and",
-        "spends nothing. Regenerate it rather than editing it.",
+        "Generated by `python3 -m okf_bq_graph.sql_baseline` from `fixtures/sql_baseline.json` and the retained campaign",
+        "records under `evidence/sql-baseline/`. It opens no client and spends nothing. Regenerate it rather than editing it.",
         "",
+    ] + _render_blocker(card) + [
         "## What is being measured, and against what",
         "",
         f"* **Engine.** `{card['engine']}` — {card['engine_note']}",
@@ -445,20 +746,32 @@ def render_markdown(card: dict) -> str:
         "",
         "## Cells",
         "",
-        "| Cell | Metric | Shape | C | Measured | State | p50 ms | p95 ms | Why it is empty |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "p50 / p95 are nearest-rank over all measured attempts, failures and timeouts included; `ok` is the success rate",
+        "over the same attempts. A cell shows the latest campaign that carried it and nothing older.",
+        "",
+        "| Cell | Metric | Shape | C | Measured | State | p50 ms | p95 ms | ok | Bytes | Edition | Campaign | Reason |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for cell in card["cells"]:
         lines.append(
             f"| `{cell['cell']}` | {cell['metric']} | {cell['shape']} | {cell['concurrency']} | "
             f"{cell['measured_n']} / {cell['measured_target']} | **{cell['state']}** | {_ms(cell['p50_ms'])} | "
-            f"{_ms(cell['p95_ms'])} | {cell['stopped_reason']}"
+            f"{_ms(cell['p95_ms'])} | {_pct(cell['success_rate'])} | {_mib(cell['bytes_billed'])} | {cell.get('edition') or '—'} | "
+            f"{('`' + cell['campaign'] + '`') if cell.get('campaign') else '—'} | {cell['stopped_reason'] or '—'}"
             f"{' + FACTS_UNSELECTED' if cell['fact_version_blocked'] else ''} |"
         )
-    lines += ["", "How each cell would be filled:", ""]
+    lines += ["", "How each cell is filled, and what its latest campaign did:", ""]
     for cell in card["cells"]:
         blocked = f" *(blocked: {cell['blocked_by']})*" if cell["blocked_by"] else ""
-        lines.append(f"* **`{cell['cell']}`** — {cell['how_to_fill']}{blocked}")
+        latest = ""
+        if cell.get("campaign"):
+            latest = (f" **Latest campaign `{cell['campaign']}` ({cell['campaign_state']}):** {cell['state']}, "
+                      f"n={cell['measured_n']}/{cell['measured_target']}, {cell['attempts_retained']} attempts retained "
+                      f"({cell['warmups_done']} warmups), {cell['errors']} errors, {cell['timeouts']} timeouts, "
+                      f"{cell['jobs_in_attempts']} jobs, {_mib(cell['bytes_billed'])} billed, edition {cell.get('edition') or 'not established'}"
+                      + (f"; stopped {cell['stopped_reason']}" if cell['stopped_reason'] else "")
+                      + (f"; first error `{cell['first_error']}`" if cell.get("first_error") else "") + ".")
+        lines.append(f"* **`{cell['cell']}`** — {cell['how_to_fill']}{blocked}{latest}")
     lines += [
         "",
         "## Cost cells",
@@ -486,6 +799,7 @@ def render_markdown(card: dict) -> str:
         f"* {p['usd_note']}",
         f"* {p['consumer_cells_note']}",
         "",
+    ] + _render_campaigns(card) + [
         "## Recorded prior observations",
         "",
         card["prior_observations_note"],
@@ -528,5 +842,7 @@ def main(out_dir: Path | str = OUT_DIR) -> dict:
 
 if __name__ == "__main__":
     written = main()
-    print(f"{written['state']}: {len(written['cells'])} cells, {len(written['cost_cells'])} cost cells, "
-          f"{len(written['prior_observations'])} prior observations, none filling a cell")
+    filled = [c["cell"] for c in written["cells"] if c.get("campaign")]
+    print(f"{written['state']}: {len(written['cells'])} cells ({len(filled)} carrying a campaign result), "
+          f"{len(written['cost_cells'])} cost cells, {len(written['prior_observations'])} prior observations (none filling a cell), "
+          f"{len(written['campaigns'])} campaign records" + (f"; blocked: {written['blocker']['reason']}" if written.get("blocker") else ""))

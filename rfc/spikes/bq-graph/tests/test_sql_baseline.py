@@ -19,7 +19,8 @@ def plan():
 
 @pytest.fixture(scope="module")
 def card(plan):
-    return sb.build_card(copy.deepcopy(plan))
+    """The scaffold: no campaign record. Cards built from records are covered in test_sql_baseline_card.py."""
+    return sb.build_card(copy.deepcopy(plan), records=[])
 
 
 def test_shipped_plan_validates(plan):
@@ -182,7 +183,11 @@ def test_committed_card_matches_its_generator(tmp_path):
     for name in ("plan.json", "baseline.md"):
         committed = (sb.OUT_DIR / name).read_text()
         assert (tmp_path / name).read_text() == committed, f"{name} is stale; regenerate it"
-    assert json.loads((sb.OUT_DIR / "plan.json").read_text())["state"] == "SCAFFOLD_ONLY"
+    committed = json.loads((sb.OUT_DIR / "plan.json").read_text())
+    records = sb.campaign_records()
+    assert committed["state"] == sb.card_state(
+        [c for c in committed["cells"] if c["metric"] == "retrieval_ms"], records)[0]
+    assert [c["run_id"] for c in committed["campaigns"]] == [r["run_id"] for r in records]
 
 
 # --- fact-data version (PR 46 P1) ------------------------------------------------------------------

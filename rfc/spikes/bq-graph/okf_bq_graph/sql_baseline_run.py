@@ -46,6 +46,7 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import json
+import re
 import secrets
 import sys
 import threading
@@ -71,12 +72,28 @@ EMBEDDING_MODEL = "text-embedding-005"   # the natural shape embeds the question
 SEED = 20260919                           # deterministic query order per cell; the checkpoint date, not a measurement
 FORCED_PREFIX = "forced:"
 RUN_ID_PREFIX = "sqlbase"
+#: BigQuery label values: lowercase letters, digits, `_` and `-`, at most 63 characters. Every cell's gate label
+#: (`<run_id>_<cell>`) becomes the `window` label of every job the cell submits, so a run_id that breaks this rule
+#: is rejected by the server on the first insert. The first live campaign (`sqlbase-20260909T062840Z-a3fc21f5`,
+#: uppercase T and Z from an ISO timestamp) lost all 64 GiB of room to rejected inserts and measured nothing; this
+#: gate is checked offline before any client exists.
+LABEL_RE = re.compile(r"^[a-z0-9_-]{1,63}$")
 TOTAL_DEADLINE_REASON = "TOTAL_TIME_BUDGET"
 ON_DEMAND_RESERVATION = "none"            # BigQuery job-level routing override: run on-demand regardless of assignments
 PER_JOB_CAP_BYTES = 1 * sb.GIB            # sanity cap on one job; the largest recorded baseline job billed ~110 MiB
 MIN_BILLED_BYTES = 10 * 1024 ** 2         # BigQuery bills at least 10 MiB per on-demand query; less room is no room
 RECONCILE_SECONDS = 60                    # bounded read-only channel per sealed gate for resolving job liabilities
 RECONCILE_MAX_READS = 64
+PREFLIGHT_SECONDS = 30                    # one dry-run with the override, before any hold is taken
+PREFLIGHT_DENIED = "ON_DEMAND_OVERRIDE_DENIED"
+PREFLIGHT_ERROR = "PREFLIGHT_ERROR"
+#: What the project must carry for `reservation = "none"` to be accepted (REST Job.configuration.reservation: "requires
+#: the project or organization to have reservation_override_mode set to ALLOW_ANY_OVERRIDE"). The default,
+#: DENY_OVERRIDE_TO_NONE, lets a job move to another reservation but refuses the on-demand override. This driver never
+#: changes that option: it is a project setting, and a paid run under an unchanged setting is a different measurement.
+OVERRIDE_MODE_OPTION = "reservation_override_mode"
+OVERRIDE_MODE_REQUIRED = "ALLOW_ANY_OVERRIDE"
+OVERRIDE_MODE_DOCS = "https://docs.cloud.google.com/bigquery/docs/default-configuration"
 
 
 class RefusedCell(ValueError):
@@ -196,8 +213,21 @@ def cell_config(plan: dict, cell: dict, cases: dict) -> dict:
 # --- run_id -----------------------------------------------------------------------------------------
 
 def fresh_run_id(now: _dt.datetime | None = None, token: str | None = None) -> str:
+    """`sqlbase-<yyyymmdd>-<hhmmss>-<hex8>`, UTC, lowercase throughout so every gate label it seeds is a legal
+    BigQuery label value (see `LABEL_RE`)."""
     now = now or _dt.datetime.now(_dt.timezone.utc)
-    return f"{RUN_ID_PREFIX}-{now.strftime('%Y%m%dT%H%M%SZ')}-{token or secrets.token_hex(4)}"
+    return f"{RUN_ID_PREFIX}-{now.strftime('%Y%m%d-%H%M%S')}-{(token or secrets.token_hex(4)).lower()}"
+
+
+def gate_label(run_id: str, cell_name: str) -> str:
+    """The per-cell submission gate's label; it is also the `window` label on every job the cell submits."""
+    return f"{run_id}_{cell_name}"
+
+
+def assert_label_is_legal(label: str, what: str) -> None:
+    if not LABEL_RE.match(label):
+        raise ValueError(f"{what} {label!r} is not a legal BigQuery label value (lowercase letters, digits, '_' and '-', "
+                         f"at most 63 characters): every job would be rejected at insert and its hold kept as liability")
 
 
 def assert_run_id_is_fresh(run_id: str, summary_path: Path | str | None = None, out_dir: Path | str | None = None) -> None:
@@ -208,6 +238,7 @@ def assert_run_id_is_fresh(run_id: str, summary_path: Path | str | None = None, 
     """
     if not run_id or not run_id.startswith(RUN_ID_PREFIX + "-"):
         raise ValueError(f"run_id {run_id!r} must start with {RUN_ID_PREFIX + '-'!r}: baseline campaigns are labelled")
+    assert_label_is_legal(run_id, "run_id")
     summary = Path(summary_path or benchmark.SUMMARY)
     if summary.exists():
         retained = json.loads(summary.read_text()).get("cells", [])
@@ -448,7 +479,8 @@ class CampaignRuntime:
 
     def window_for_cell(self, cell: dict, started: float) -> WindowJobs:
         deadline = min(started + self.cell_seconds, self.deadline_monotonic)
-        label = f"{self.campaign['run_id']}_{cell['name']}"
+        label = gate_label(self.campaign["run_id"], cell["name"])
+        assert_label_is_legal(label, "gate label")
         window = WindowJobs(label, deadline, self.out_dir / f"jobs_{label}.json")
         with self._lock:
             previous, self.window = self.window, window
@@ -596,6 +628,7 @@ def assert_campaign_is_runnable(campaign: dict) -> None:
     if sum(campaign["budget"]["cell_seconds"] for _ in campaign["cells"]) > campaign["budget"]["total_seconds"]:
         raise ValueError("per-cell ceilings sum past the total ceiling; the total deadline would cut the last cell short by construction")
     for cell in campaign["cells"]:
+        assert_label_is_legal(gate_label(campaign["run_id"], cell["name"]), f"{cell['name']}: gate label")
         shapes = {q["shape"] for q in cell["queries"]}
         prefixes = {q["text"].startswith(FORCED_PREFIX) for q in cell["queries"]}
         if shapes != {cell["shape"]} or prefixes != {cell["shape"] == "forced"}:
@@ -662,6 +695,8 @@ def describe(campaign: dict) -> str:
         f"ledger with per-job maximum_bytes_billed ≤ {b['per_job_cap_bytes'] / sb.GIB:.1f} GiB; projection "
         f"{p['bytes_billed_projected_total'] / sb.GIB:.1f} GiB → ${p['usd_ondemand_list_projected']:.2f} "
         f"({'within' if p['within_budget'] else 'NOT within'} ceiling; a sanity check, not the enforcement)",
+        f"preflight: one dry run of SELECT 1 with reservation={ON_DEMAND_RESERVATION!r} before any hold (no job, no bytes); "
+        f"a denied override ({OVERRIDE_MODE_OPTION} != {OVERRIDE_MODE_REQUIRED}) stops the campaign with every cell NOT_RUN_PREFLIGHT",
         "gates: one submission gate per cell (submission, result polling and pagination stop at the cell/total deadline)",
         "caches: bigquery result cache off, retrieval cache off",
     ]
@@ -673,16 +708,74 @@ def describe(campaign: dict) -> str:
     return "\n".join(lines)
 
 
+# --- preflight ------------------------------------------------------------------------------------------
+
+def preflight_on_demand(make_client: Callable[[], Any], timeout_s: float = PREFLIGHT_SECONDS) -> dict:
+    """One DRY RUN of `SELECT 1` carrying the on-demand override, before any hold is taken and any gate exists.
+
+    A dry run creates no job and bills nothing (the server returns no jobReference), yet it is validated against the
+    project's default configuration exactly like a real insert: when the project denies the override, the dry run fails
+    with the same 400 (`Override to 'none' is not enabled. The option 'reservation_override_mode' is set to ...`) that
+    every paid insert would. The second live campaign (`sqlbase-20260909-063150-d30baa0e`) learned this from 64
+    rejected inserts, each of which kept a 1 GiB hold as liability until the whole ceiling was consumed. Now the
+    campaign stops here, with nothing held and nothing submitted, and the record names the option the project lacks.
+    Anything else that goes wrong (auth, network, an unexpected error) also stops the campaign: a preflight that
+    cannot confirm the override is not a green light."""
+    cfg = bigquery.QueryJobConfig(dry_run=True, use_query_cache=False,
+                                  labels={"okf_spike": "bq_graph_20260905", "okf_stage": "preflight"})
+    cfg.reservation = ON_DEMAND_RESERVATION
+    out = {"kind": "dry_run", "query": "SELECT 1", "job_reservation": ON_DEMAND_RESERVATION, "started_utc": _now(),
+           "creates_job": False, "bills": False,
+           "requires": {"option": OVERRIDE_MODE_OPTION, "value": OVERRIDE_MODE_REQUIRED, "scope": "project or organization",
+                        "docs": OVERRIDE_MODE_DOCS}}
+    try:
+        job = make_client().query("SELECT 1", job_config=cfg, location=LOCATION, timeout=timeout_s)
+    except gexc.BadRequest as e:
+        msg = str(e)
+        denied = OVERRIDE_MODE_OPTION in msg or "Override to 'none'" in msg
+        out.update(state="DENIED" if denied else "ERROR", reason=PREFLIGHT_DENIED if denied else PREFLIGHT_ERROR,
+                   server_message=msg[:600],
+                   remedy=(f"the project (or its organization) must set {OVERRIDE_MODE_OPTION} = {OVERRIDE_MODE_REQUIRED!r} "
+                           "(BigQuery ALTER PROJECT SET OPTIONS, permission bigquery.config.update); this driver does not "
+                           "change project settings") if denied else None)
+        return out
+    except Exception as e:  # noqa: BLE001 - fail closed: an unconfirmed override is not a green light
+        out.update(state="ERROR", reason=PREFLIGHT_ERROR, server_message=f"{type(e).__name__}: {e}"[:600])
+        return out
+    out.update(state="OK", reason=None, job_id=getattr(job, "job_id", None),
+               total_bytes_processed=getattr(job, "total_bytes_processed", None))
+    return out
+
+
+def _not_run_cells(campaign: dict, reason: str, state: str = "NOT_RUN_PREFLIGHT") -> list[dict]:
+    """The cell summaries of a campaign that never reached `benchmark.measure`: n=0, no percentile, the reason named."""
+    return [{"cell": c["name"], "run_id": campaign["run_id"], "engine": c["engine"], "corpus": c["corpus"],
+             "concurrency": c["concurrency"], "publication_id": c["publication_id"],
+             "measured_target": c["measured"], "measured_n": 0, "warmups_done": 0,
+             "state": state, "stopped_reason": reason,
+             "success_rate": None, "errors": 0, "timeouts": 0,
+             "p50_ms_all": None, "p95_ms_all": None, "max_ms_all": None,
+             "p50_ms_ok": None, "p95_ms_ok": None, "stage_p50_ms": {}, "stage_p95_ms": {},
+             "jobs_total": 0, "slot_ms_total": 0, "slot_attribution_usd": 0} for c in campaign["cells"]]
+
+
 # --- live ---------------------------------------------------------------------------------------------
 
 def live(campaign: dict, out_dir: Path | str = OUT_DIR, make_client: Callable[[], Any] | None = None,
-         measure: Callable[[dict, Callable[[], dict]], dict] | None = None) -> dict:
-    """Run the campaign foreground and retain its record. Percentiles come from `benchmark.measure` only."""
+         measure: Callable[[dict, Callable[[], dict]], dict] | None = None,
+         preflight: Callable[[Callable[[], Any]], dict] | None = None) -> dict:
+    """Run the campaign foreground and retain its record. Percentiles come from `benchmark.measure` only.
+
+    Order: the offline gates, then one dry-run preflight of the on-demand override (no job, no bytes, no hold), and
+    only then `benchmark.measure`. A preflight that is not OK retains a record whose cells are NOT_RUN_PREFLIGHT with
+    the reason, and nothing is submitted."""
     assert_campaign_is_runnable(campaign)
     assert_run_id_is_fresh(campaign["run_id"], out_dir=out_dir)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     measure = measure or benchmark.measure
+    preflight = preflight or preflight_on_demand
+    make_client = make_client or (lambda: bigquery.Client(project=PROJECT, location=LOCATION))
     started_utc, started = _now(), time.monotonic()
     runtime = CampaignRuntime(campaign, out_dir, started + campaign["budget"]["total_seconds"])
     record: dict[str, Any] = {k: v for k, v in campaign.items() if k != "cells"}
@@ -698,9 +791,16 @@ def live(campaign: dict, out_dir: Path | str = OUT_DIR, make_client: Callable[[]
                  "is regenerated from this record in a separate reviewed step."),
     })
     try:
-        result = measure(measure_config(campaign, started, runtime), client_factory(campaign["dataset"], make_client, runtime))
-        record["cells"] = result["cells"]
-        record["state"] = "COMPLETE" if all(c["state"] == "COMPLETE" for c in result["cells"]) else "INCOMPLETE"
+        record["preflight"] = pre = preflight(make_client)
+        if pre.get("state") != "OK":
+            record["cells"] = _not_run_cells(campaign, pre.get("reason") or PREFLIGHT_ERROR)
+            record["state"] = "INCOMPLETE"
+            record["not_run_note"] = ("the on-demand preflight did not pass, so no cell reached benchmark.measure: no job was "
+                                      "submitted, no hold was taken and nothing was billed; see `preflight`")
+        else:
+            result = measure(measure_config(campaign, started, runtime), client_factory(campaign["dataset"], make_client, runtime))
+            record["cells"] = result["cells"]
+            record["state"] = "COMPLETE" if all(c["state"] == "COMPLETE" for c in result["cells"]) else "INCOMPLETE"
     except BaseException as e:  # noqa: BLE001 - the record is retained with the failure named
         record["cells"] = []
         record["state"] = "ABORTED"
@@ -767,6 +867,8 @@ def main(argv: list[str] | None = None, stdout=None) -> int:
         print("dry run: no client opened, nothing submitted", file=out)
         return 0
     record = live(campaign, out_dir=args.out_dir)
+    pre = record.get("preflight") or {}
+    print(f"preflight: {pre.get('state')}" + (f" ({pre.get('reason')}): {pre.get('server_message')}" if pre.get("state") != "OK" else ""), file=out)
     for c in record["cells"]:
         print(f"  {c['cell']}: {c['state']} n={c['measured_n']}/{c['measured_target']} "
               f"p50_all={c['p50_ms_all']} p95_all={c['p95_ms_all']} stopped={c['stopped_reason']}", file=out)
