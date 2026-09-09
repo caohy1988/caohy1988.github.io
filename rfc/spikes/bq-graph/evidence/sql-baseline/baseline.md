@@ -14,22 +14,58 @@ records under `evidence/sql-baseline/`. It opens no client and spends nothing. R
 * **Questions.** `fixtures/cases.json` at `as_of` 2026-09-05T00:00:00Z: 3 forced seeds, 6 natural questions. Same pinned question set the GQL cells used. Forced-seed and natural-question shapes are measured in separate cells and are never pooled: the natural shape includes a query embedding and a vector seed that the forced shape does not run.
 * **Concurrency.** C=5 is a planning default chosen so a first concurrency point exists. It is not an accepted concurrency and no customer has asked for it. C=1 is the only concurrency the recorded prior integration observations cover; the C=5 cells below are measured only by a retained campaign, and a measured C=5 cell does not make C=5 an accepted concurrency.
 
-## Fact data — **UNSELECTED**
+## Fact data — **SELECTED**
+
+**Selected version.**
+* **kind:** loaded-fixture-digest (synthetic)
+* **label:** okf_receipt_spike_20260905 = fixture.sql sha256:940aacdc… @ SDK 6719eb5 (synthetic Acme fixture, 14 rows)
+* **synthetic:** true
+* **customer_data:** none. Alder cohort data has never been selected; that is a customer dependency, not an agent's choice (see facts.customer_data)
+* **scope:** engineering comparison only: 14 invented rows measure the chain's overhead, not fact-scan latency or cost at any customer scale; USD only, fx_daily_rates is created empty so the FX join is a no-op
+* **dataset:** test-project-0728-467323.okf_receipt_spike_20260905
+* **location:** US
+* **tables:** `fulfillment_cost`, `fx_daily_rates`, `order_lines`, `orders`, `payment_fees`, `products`, `shipment_cost`
+* **sdk_pin:** 6719eb535667963fa640dd4535e508b550eb6cb1
+* **fixture_path:** examples/okf_attested_computation/fixtures/fixture.sql
+* **fixture_sha256:** 940aacdc125a64c7ef88fdfb6eb16677b072b4b77d19443632b4308c4fe5f124
+* **fixture_bytes:** 3375
+* **expected_results_path:** examples/okf_attested_computation/fixtures/expected.json
+* **expected_results_sha256:** 281981f07495d77172e0fd4dc081643454a8be5d1210c2d04df20919fb6dc25f
+* **publication_manifest_sha256:** 305d6ecdb542ee095d657ec8408d519423edfcacffd5a457b8e7f745f84961ab
+* **computation_sha256:** 5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7
+* **content_manifest_format:** okf-fact-content/1
+* **content_manifest_sha256:** 7264e7df6276463dc4ec7a6b179b87bff08aaa105660ea37611398fc197454f0
+* **vendored_copies:** fixtures/facts/{fixture.sql,expected.json,content.json,SOURCE.md}: the first two are byte-equal to the pinned SDK Git objects; content.json is derived from fixture.sql by okf_bq_graph.fact_content and re-derived by validate_plan
+* **row_counts:** fulfillment_cost=2, fx_daily_rates=0, order_lines=3, orders=3, payment_fees=2, products=2, shipment_cost=2
+* **row_count_total:** 14
+* **expected_gross_margin_usd_2026_01:** 400
+* **loaded_by_job:** test-project-0728-467323:US.bqjob_rb53f55e41faf967_000001a073eea67a_1 (13 child jobs, DONE)
+* **loaded_utc:** 2026-09-05T23:36:55Z to 2026-09-05T23:37:11Z
+* **load_evidence:** evidence/legacy-reconcile/episode_listing_index.json keeps that job's query text as a 600-byte prefix only: it proves a fixture load at that time, not byte identity with fixture_sha256
+* **live_materialization:** UNVERIFIED: this selection made no live read of the dataset; whether its rows equal this digest today is unknown until the runner's live precheck reads them
+* **historical_chain_equivalence:** UNPROVEN: the 2026-09-07 chain released $400.00 VERIFIED, equal to expected.json approved_january, which is consistent with this content but does not prove the live rows were byte-equal to it
+* **conformance_observed:** evidence/chain/chain_live_restricted.json cases[approved-restricted].consume.display = '[LIVE] Gross margin: $400.00 USD · VERIFIED' at 2026-09-07T22:48Z
+* **valid_for_runs_on_or_after:** 2026-03-12
+* **validity_note:** the declaration's compiled SQL uses DATE_DIFF(CURRENT_DATE(), DATE(o.order_ts), DAY) >= 30 and the latest fixture order is 2026-02-10, so the expected results hold for any evaluation date on or after 2026-03-12; the SQL is left as authored because changing it would change computation_sha256 and unbind the retained chain
+* **materialization_expires_utc:** about 2026-10-05 (30-day table expiration set at provisioning); after that the same digest must be re-loaded under the owner's gate and the new load job recorded here
+* **live_precheck:** NOT IMPLEMENTED, a contract for the runner slice: before any consumer campaign, per-table row counts must equal row_counts and the January request must return expected_gross_margin_usd_2026_01, else the campaign stops FACTS_DRIFTED with no cell filled
+* **selected_utc:** 2026-09-09
+* **selected_by:** project owner, after the 2026-09-09 two-lens consult (implementer and reviewer memos, both recommending SELECT now as the synthetic fixture digest)
 
 The task releases a computed number, so a comparison needs the version of the fact rows that number was computed from. The corpus pin above fixes the authored definitions and the graph projection it compiles to; it identifies no fact data at all.
 
-**What is missing.** A data version. The retained chain names those seven tables as the computation's dependencies but pins no snapshot, no as-of and no row version for them, and its own top-level as_of is the run timestamp rather than a fact cutoff. Two runs weeks apart could compute different numbers from the same declaration and both verify.
-
-**What the retained chain identifies**, so the gap is a choice nobody has made rather than an unknown:
+**What the retained chain identifies**:
 
 * Publication `okf-receipt-spike/acme-retail-derived/gross-margin-period` — the SDK receipt example's own fixture publication — a separate identity from the graph publication pub_190192147fd7fd78, joined to it only by the declaration file's bytes. Synthetic fixture: true.
 * SDK pin `6719eb535667963fa640dd4535e508b550eb6cb1`, dataset `test-project-0728-467323.okf_receipt_spike_20260905`, 7 fact tables: `fulfillment_cost`, `fx_daily_rates`, `order_lines`, `orders`, `payment_fees`, `products`, `shipment_cost`.
 * Derived from knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec.
 * Read from `evidence/chain/chain_live_restricted.json`.
 
-**Cells this blocks.** `sqlchain_forced_c1`, `sqlchain_forced_c5` — the full request-to-consumer comparison. The retrieval cells are unaffected: retrieval selects context, and returns the sanctioned SQL without executing it.
+**Customer fact data (Alder cohort) — NOT SELECTED.** Alder is the board-pack story's illustrative customer. Its cohort data is a customer's to give, not ours to invent; no Finance or data owner outside this project has been asked. Selecting the synthetic fixture above changes nothing here; a customer selection would be its own record with its own owner and acceptance.
 
-**How to select one.** Name the fact dataset together with a reproducible version for it — a snapshot decorator, a table-copy revision or the digest of a loaded fixture — and record it beside the corpus pin. Cohort data for the Alder story has never been selected; that is a customer dependency, not an agent's choice.
+**Cells this blocks.** None. Selecting a version clears `FACTS_UNSELECTED` only; the request-to-consumer cells stay INCOMPLETE because no sampled runner exists (NOT_IMPLEMENTED, which the cell table gives), and the live rows have not been verified against the selected digest.
+
+**How it was selected.** Selected on 2026-09-09 as the digest of the loaded fixture: the receipt example's synthetic fixture script at the SDK pin the retained chain already names, with its expected results, load job, validity window and expiry recorded beside it, and the script, expected results and a canonical content manifest vendored so the digests recompute offline. Rejected: a snapshot decorator (BigQuery time travel lasts days, and the tables expire about 2026-10-05) and a table-copy revision as the version (a paid gated write that would still need the digest to say what it holds; optional as a later durable copy). Cohort data for the Alder story stays unselected — a customer dependency, not an agent's choice.
 
 ## Two latencies, never substituted
 
@@ -48,8 +84,8 @@ over the same attempts. A cell shows the latest campaign that carried it and not
 | `sqlbase_forced_c5` | retrieval_ms | forced | 5 | 100 / 100 | **COMPLETE** | 8,700 | 10,770 | 100% | 6,000 MiB | on-demand | `sqlbase-20260909-065734-c50d0411` | — |
 | `sqlbase_natural_c1` | retrieval_ms | natural | 1 | 100 / 100 | **COMPLETE** | 3,724 | 4,459 | 100% | 8,400 MiB | on-demand | `sqlbase-20260909-065734-c50d0411` | — |
 | `sqlbase_natural_c5` | retrieval_ms | natural | 5 | 100 / 100 | **COMPLETE** | 13,799 | 15,892 | 99% | 8,370 MiB | on-demand | `sqlbase-20260909-065734-c50d0411` | — |
-| `sqlchain_forced_c1` | request_to_consumer_ms | forced | 1 | 0 / 20 | **INCOMPLETE** | — | — | — | — | — | — | NOT_IMPLEMENTED + FACTS_UNSELECTED |
-| `sqlchain_forced_c5` | request_to_consumer_ms | forced | 5 | 0 / 20 | **INCOMPLETE** | — | — | — | — | — | — | NOT_IMPLEMENTED + FACTS_UNSELECTED |
+| `sqlchain_forced_c1` | request_to_consumer_ms | forced | 1 | 0 / 20 | **INCOMPLETE** | — | — | — | — | — | — | NOT_IMPLEMENTED |
+| `sqlchain_forced_c5` | request_to_consumer_ms | forced | 5 | 0 / 20 | **INCOMPLETE** | — | — | — | — | — | — | NOT_IMPLEMENTED |
 
 How each cell is filled, and what its latest campaign did:
 
@@ -57,8 +93,8 @@ How each cell is filled, and what its latest campaign did:
 * **`sqlbase_forced_c5`** — Predeclared: 20 warmups + 100 measured at C=5, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs on-demand by job-level override (`reservation = none`, verified from every job's statistics; a reservation or edition on any job stops the campaign unlabelled), with a submission gate per cell so the cell/total deadline stops in-flight jobs, a running billed-byte / USD ledger with per-job `maximum_bytes_billed`, and a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells sqlbase_forced_c5`; fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells sqlbase_forced_c5` (Pass 2, foreground, Haiyuan's paid authorization). **Latest campaign `sqlbase-20260909-065734-c50d0411` (COMPLETE):** COMPLETE, n=100/100, 120 attempts retained (20 warmups), 0 errors, 0 timeouts, 360 jobs, 6,000 MiB billed, edition on-demand.
 * **`sqlbase_natural_c1`** — Predeclared: 20 warmups + 100 measured at C=1, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs on-demand by job-level override (`reservation = none`, verified from every job's statistics; a reservation or edition on any job stops the campaign unlabelled), with a submission gate per cell so the cell/total deadline stops in-flight jobs, a running billed-byte / USD ledger with per-job `maximum_bytes_billed`, and a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells sqlbase_natural_c1`; fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells sqlbase_natural_c1` (Pass 2, foreground, Haiyuan's paid authorization). **Latest campaign `sqlbase-20260909-065734-c50d0411` (COMPLETE):** COMPLETE, n=100/100, 120 attempts retained (20 warmups), 0 errors, 0 timeouts, 480 jobs, 8,400 MiB billed, edition on-demand.
 * **`sqlbase_natural_c5`** — Predeclared: 20 warmups + 100 measured at C=5, timeout 60s, result cache off, engine `fallback`. `okf_bq_graph.benchmark.measure` does the sampling, retains every attempt in evidence/requests.jsonl before aggregating, and keeps a stopped cell INCOMPLETE. The driver that reaches it is `okf_bq_graph.sql_baseline_run` (Slice B, Pass 1): it reads this plan rather than fixtures/scale.json, passes only this cell's shape as the query list, runs on-demand by job-level override (`reservation = none`, verified from every job's statistics; a reservation or edition on any job stops the campaign unlabelled), with a submission gate per cell so the cell/total deadline stops in-flight jobs, a running billed-byte / USD ledger with per-job `maximum_bytes_billed`, and a fresh `sqlbase-*` run_id that is checked against the retained GQL summary before any client exists. `python3 -m okf_bq_graph.sql_baseline_run --dry-run --cells sqlbase_natural_c5`; fill: `python3 -m okf_bq_graph.sql_baseline_run --live --cells sqlbase_natural_c5` (Pass 2, foreground, Haiyuan's paid authorization). **Latest campaign `sqlbase-20260909-065734-c50d0411` (COMPLETE):** COMPLETE, n=100/100, 120 attempts retained (20 warmups), 1 errors, 0 timeouts, 478 jobs, 8,370 MiB billed, edition on-demand; first error `ServiceUnavailable: 503 GET https://bigquery.googleapis.com/bigquery/v2/projects/test-project-0728-467323/queries/okf_graph_sqlbase-20260909-065734-c50d0411_sqlbase_natural_c5_654dd579efcc4fadbc54003a599dda17?fields=jobReference%2CtotalRows%2CpageToken%2Crows&location=US&formatOptions.useInt64Timest`.
-* **`sqlchain_forced_c1`** — Select a fact-data version first (see `facts` above); until then this cell cannot be compared to anything. No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a sampled driver that repeats one requester question through bind, the caller-delegated job, independent verification and the consumer decision, retaining every attempt including refusals. Sizing it against a real SDK subprocess per request is part of that work, not an afterthought. *(blocked: facts.state = UNSELECTED: no fact-data version is chosen, so two runs of this cell are not comparable to each other and neither is comparable to an ordinary-SQL alternative)*
-* **`sqlchain_forced_c5`** — Select a fact-data version first (see `facts` above); until then this cell cannot be compared to anything. No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a sampled driver that repeats one requester question through bind, the caller-delegated job, independent verification and the consumer decision, retaining every attempt including refusals. Sizing it against a real SDK subprocess per request is part of that work, not an afterthought. *(blocked: facts.state = UNSELECTED: no fact-data version is chosen, so two runs of this cell are not comparable to each other and neither is comparable to an ordinary-SQL alternative)*
+* **`sqlchain_forced_c1`** — Fact version: SELECTED, loaded-fixture-digest (synthetic) (see `facts` above): synthetic fixture-scale rows, live materialization unverified against the digest, so the runner must pass the recorded live precheck before it samples and must label its numbers fixture-scale. No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a sampled driver that repeats one requester question through bind, the caller-delegated job, independent verification and the consumer decision, retaining every attempt including refusals. Sizing it against a real SDK subprocess per request is part of that work, not an afterthought.
+* **`sqlchain_forced_c5`** — Fact version: SELECTED, loaded-fixture-digest (synthetic) (see `facts` above): synthetic fixture-scale rows, live materialization unverified against the digest, so the runner must pass the recorded live precheck before it samples and must label its numbers fixture-scale. No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a sampled driver that repeats one requester question through bind, the caller-delegated job, independent verification and the consumer decision, retaining every attempt including refusals. Sizing it against a real SDK subprocess per request is part of that work, not an afterthought.
 
 ## Cost cells
 

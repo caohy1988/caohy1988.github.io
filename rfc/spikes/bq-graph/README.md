@@ -816,15 +816,29 @@ their attempts to `evidence/requests.jsonl` and their cell summaries to `evidenc
 run_ids, as the sampler always does; the GQL cells there are unchanged. The preflight-denied campaign
 `sqlbase-20260909-064104-4266675c` never reached the sampler, so it has no rows in either shared file: its four
 `NOT_RUN_PREFLIGHT` cells exist only in its own record and on the generated card. The card is `RETRIEVAL_MEASURED`: the four
-retrieval cells carry the fourth campaign's numbers, the three earlier campaigns stay listed, the consumer cells stay
-`NOT_IMPLEMENTED + FACTS_UNSELECTED`, the cost cells stay `UNMEASURED`, and every threshold stays PROPOSED.
+retrieval cells carry the fourth campaign's numbers, the three earlier campaigns stay listed, the consumer cells stayed
+`NOT_IMPLEMENTED + FACTS_UNSELECTED` until the fact-data selection below and now read `NOT_IMPLEMENTED`, the cost cells
+stay `UNMEASURED`, and every threshold stays PROPOSED.
 
 `benchmark.run_cell` gained backward-compatible hooks for this: a per-cell `queries` list, `budget["deadline_reason"]`,
 `budget["window_for_cell"]`, `budget["stop_check"]` and `budget["on_cell_sealed"]`; a cell that stopped for any reason
 is INCOMPLETE even when its n-th attempt was retained. The reservation-window runner's `WINDOW_DEADLINE` label is
 unchanged; its gate now also survives an ordinary stage error (interrupts and `WindowStopped` still cancel). The
 card's retrieval cells carry the exact command that fills each and what their latest campaign did; the consumer cells
-still read `NOT_IMPLEMENTED + FACTS_UNSELECTED`, and the driver refuses to run them.
+read `NOT_IMPLEMENTED + FACTS_UNSELECTED` at the time and `NOT_IMPLEMENTED` since, and the driver refuses to run them.
+
+**Fact-data version SELECTED (2026-09-09, synthetic).** `facts.state` is `SELECTED`: the version is the digest of the
+receipt example's synthetic fixture script at the SDK pin the retained chain names (`fixture_sha256 940aacdc…`) plus a
+canonical content manifest (`content_manifest_sha256 7264e7df…`, `okf-fact-content/1`, derived by
+`okf_bq_graph/fact_content.py`). The script, expected results and manifest are vendored under `fixtures/facts/`
+(`SOURCE.md` names the pin) and `validate_plan` re-hashes and re-derives them on every build; a bare-label version, a
+wrong digest or a drifted manifest fails the build. Recorded beside the digest: the 2026-09-05 load job (retained as a
+600-byte query prefix, so it proves a load, not byte identity), the validity window (`CURRENT_DATE()` in the compiled
+SQL; results hold on or after 2026-03-12), the expiry (about 2026-10-05), `live_materialization: UNVERIFIED` (no live
+read was made), `historical_chain_equivalence: UNPROVEN` (the chain's `$400.00` matches `expected.json`, which is
+consistent, not proof), and a `live_precheck` contract for the runner slice. Customer (Alder) data stays `NOT SELECTED`
+as its own block. Selecting clears `FACTS_UNSELECTED` only: both consumer cells stay `INCOMPLETE / NOT_IMPLEMENTED`,
+the cost cells `UNMEASURED`, every threshold PROPOSED. Docs: `rfc/board-pack/{intent,spec,plan}-sqlchain-fact-select.md`.
 
 **One correction this card carries.** `evidence/report.md` and `evidence/comparison.md` describe both forced fallback
 observations as on-demand. Every job in `all_all-0017.json#fallback_forced` carries the spike's Enterprise reservation,

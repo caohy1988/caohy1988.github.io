@@ -9,6 +9,7 @@ import json
 
 import pytest
 
+from okf_bq_graph import fact_content as fc
 from okf_bq_graph import sql_baseline as sb
 
 
@@ -190,19 +191,61 @@ def test_committed_card_matches_its_generator(tmp_path):
     assert [c["run_id"] for c in committed["campaigns"]] == [r["run_id"] for r in records]
 
 
-# --- fact-data version (PR 46 P1) ------------------------------------------------------------------
+# --- fact-data version (PR 46 P1; SELECTED as the synthetic fixture digest on 2026-09-09) --------------
 
-def test_fact_version_is_unselected_and_says_so(card):
-    """The corpus pin fixes definitions and the graph projection. It identifies no fact data."""
+FACTS = sb.FACTS_DIR
+CONSUMER_CELLS = ["sqlchain_forced_c1", "sqlchain_forced_c5"]
+
+
+def _unselected(plan):
+    """The shape the committed plan had before 2026-09-09: the UNSELECTED gates still have to hold."""
+    out = copy.deepcopy(plan)
+    facts = out["facts"]
+    facts["state"] = "UNSELECTED"
+    facts.pop("selected_version", None)
+    facts.pop("customer_data", None)
+    facts["blocks"] = list(CONSUMER_CELLS)
+    facts["what_is_missing"] = "A data version."
+    facts["how_to_select"] = "Name the fact dataset together with a reproducible version for it."
+    return out
+
+
+@pytest.fixture(scope="module")
+def unselected_card(plan):
+    return sb.build_card(_unselected(plan), records=[])
+
+
+def test_fact_version_is_selected_synthetic_and_says_so(card):
+    """Selected on 2026-09-09 as the receipt example's synthetic fixture digest; customer data stays unselected."""
     facts = card["facts"]
-    assert facts["state"] == "UNSELECTED"
-    for key in ("why_it_matters", "what_is_missing", "blocks", "how_to_select"):
-        assert facts[key]
+    assert facts["state"] == "SELECTED"
+    assert facts["blocks"] == []
+    assert "what_is_missing" not in facts
+    version = facts["selected_version"]
+    assert version["synthetic"] is True
+    assert version["kind"].startswith("loaded-fixture-digest") and "synthetic" in version["kind"]
+    assert version["customer_data"].startswith("none")
+    assert facts["customer_data"]["state"] == "NOT SELECTED"
+    assert "Alder" in facts["customer_data"]["cohort"]
+    assert "not ours to invent" in facts["customer_data"]["note"]
+    assert facts["why_it_matters"] and facts["how_to_select"]
     observed = facts["observed_in_the_retained_chain"]
     assert observed["synthetic_fixture"] is True
     assert len(observed["tables"]) == 7
     assert observed["publication_id"] != card["corpus"]["publication_id"], \
         "the fact publication is a separate identity from the graph publication"
+
+
+def test_the_selection_names_what_the_retained_chain_used(plan):
+    """dataset, tables, pin and computation bytes equal the chain record, which the next test reads directly."""
+    chain = json.loads((sb.ROOT / "evidence" / "chain" / "chain_live_restricted.json").read_text())
+    version = plan["facts"]["selected_version"]
+    assert sorted(chain["sdk"]["dependencies"]) == [f"{version['dataset']}.{t}" for t in version["tables"]]
+    assert chain["sdk"]["pin"] == version["sdk_pin"]
+    assert chain["sdk"]["computation_sha256"] == version["computation_sha256"]
+    observed = plan["facts"]["observed_in_the_retained_chain"]
+    assert version["dataset"] == observed["dataset"] and version["sdk_pin"] == observed["sdk_pin"]
+    assert version["tables"] == sorted(observed["tables"])
 
 
 def test_the_recorded_fact_fixture_matches_the_retained_chain():
@@ -218,16 +261,98 @@ def test_the_recorded_fact_fixture_matches_the_retained_chain():
 
 
 def test_no_fact_version_is_pinned_anywhere_in_that_chain():
-    """The finding behind the field: the chain names the tables and never versions them."""
+    """The finding behind the field: the chain names the tables and never versions them. The selection is
+    a new record beside the chain, not a repair of the chain's evidence."""
     chain = json.loads((sb.ROOT / "evidence" / "chain" / "chain_live_restricted.json").read_text())
     assert not any(k in chain["sdk"] for k in ("snapshot", "as_of", "fact_version", "data_version"))
     assert chain["as_of"] == chain["started_at"][:19] + "Z", \
         "the chain's as_of is its run timestamp, not a fact cutoff"
 
 
-def test_unselected_facts_block_only_the_consumer_cells(card):
+def test_every_recorded_digest_is_the_sha256_of_a_vendored_file(plan):
+    version = plan["facts"]["selected_version"]
+    for name, key in (("fixture.sql", "fixture_sha256"), ("expected.json", "expected_results_sha256"),
+                      ("content.json", "content_manifest_sha256")):
+        assert fc.sha256((FACTS / name).read_bytes()) == version[key], name
+    assert (FACTS / "fixture.sql").stat().st_size == version["fixture_bytes"]
+    assert version["sdk_pin"] in (FACTS / "SOURCE.md").read_text()
+    assert version["fixture_sha256"] in (FACTS / "SOURCE.md").read_text()
+
+
+def test_the_content_manifest_re_derives_from_the_vendored_script(plan):
+    """The digest of a script says nothing about its rows; the canonical manifest does, and it must reproduce."""
+    version = plan["facts"]["selected_version"]
+    manifest = fc.extract((FACTS / "fixture.sql").read_text())
+    raw = fc.canonical_bytes(manifest)
+    assert raw == (FACTS / "content.json").read_bytes()
+    assert fc.sha256(raw) == version["content_manifest_sha256"]
+    assert manifest["format"] == version["content_manifest_format"] == "okf-fact-content/1"
+    assert list(manifest["tables"]) == version["tables"]
+
+
+def test_row_counts_derive_from_the_script_including_the_empty_fx_table(plan):
+    version = plan["facts"]["selected_version"]
+    derived = fc.row_counts(fc.extract((FACTS / "fixture.sql").read_text()))
+    assert derived == version["row_counts"]
+    assert derived["fx_daily_rates"] == 0, "the FX table is created and never inserted into; the fixture is USD-only"
+    assert sum(derived.values()) == version["row_count_total"] == 14
+
+
+def test_per_table_digests_match_the_reviewer_lens_audit(plan):
+    """Cross-check against the 2026-09-09 reviewer memo's independently computed per-table digests."""
+    digests = fc.per_table_digests(fc.extract((FACTS / "fixture.sql").read_text()))
+    assert digests == {
+        "fulfillment_cost": "59a07e008af4edc582462b77ef49bbaf40dc10b0f8973fb99c4d13c633749c3c",
+        "fx_daily_rates": "aeb571faba19044c72b137de94c286963eca41b0a381a70f79f05ca6352ddc15",
+        "order_lines": "f1cde5aaa318bc7275f12927ae56ccfc4bed601c5cdf87ff13da5da6366b3801",
+        "orders": "88eac1e0a3ffee154427e04e41f1f5d892a5fc4a51e605146fcea849e420cfe8",
+        "payment_fees": "04396d33c91149c651a0f944348ee80459730219073f37fb635f86040db65b6d",
+        "products": "af055afb384a4f580b8f3be1b2ea1aa9d9a7611e2c66ebc72427332e257256f4",
+        "shipment_cost": "00d583a463d5b0e4c13a0fe41bccdd8de79cc147164c3a25b7424de974671250",
+    }
+
+
+def test_the_january_expectation_is_what_the_chain_released(plan):
+    version = plan["facts"]["selected_version"]
+    expected = json.loads((FACTS / "expected.json").read_text())
+    assert version["expected_gross_margin_usd_2026_01"] == expected["approved_january"]["gross_margin_usd"] == "400"
+    chain = json.loads((sb.ROOT / "evidence" / "chain" / "chain_live_restricted.json").read_text())
+    case = next(c for c in chain["cases"] if c["case"] == "approved-restricted")
+    assert case["consume"]["decision"] == "RELEASED" and "$400.00" in case["consume"]["display"]
+    assert case["consume"]["display"] in version["conformance_observed"]
+    assert version["historical_chain_equivalence"].startswith("UNPROVEN"), \
+        "a matching number is consistent with the content; it is not byte-equivalence"
+    assert version["live_materialization"].startswith("UNVERIFIED"), "nothing in this slice read the live tables"
+
+
+def test_the_load_job_is_on_record_as_a_600_byte_query_prefix_not_the_full_script(plan):
+    """The listing index keeps a trimmed query; the job proves a fixture load at that time, not byte identity."""
+    version = plan["facts"]["selected_version"]
+    job_id = version["loaded_by_job"].split(".")[1].split(" ")[0]
+    index = json.loads((sb.ROOT / "evidence" / "legacy-reconcile" / "episode_listing_index.json").read_text())
+    job = next(j for j in index["jobs"] if j["jobReference"]["jobId"] == job_id)
+    assert job["status"]["state"] == "DONE" and job["statistics"]["numChildJobs"] == "13"
+    assert job["jobReference"]["projectId"] == version["dataset"].split(".")[0]
+    assert job["jobReference"]["location"] == version["location"]
+    prefix = job["configuration"]["query"]["query"]
+    assert len(prefix) == 600 and (FACTS / "fixture.sql").read_text().startswith(prefix)
+    assert "prefix" in version["load_evidence"]
+
+
+def test_validity_window_and_expiry_are_recorded(plan):
+    version = plan["facts"]["selected_version"]
+    assert version["valid_for_runs_on_or_after"] == "2026-03-12"
+    assert "CURRENT_DATE()" in version["validity_note"] and "computation_sha256" in version["validity_note"]
+    assert "2026-10-05" in version["materialization_expires_utc"]
+    assert version["live_precheck"].startswith("NOT IMPLEMENTED") and "FACTS_DRIFTED" in version["live_precheck"]
+
+
+# --- the UNSELECTED gates still hold on a plan flipped back -------------------------------------------
+
+def test_unselected_facts_block_only_the_consumer_cells(unselected_card):
+    card = unselected_card
     blocked = {c["cell"] for c in card["cells"] if c["fact_version_blocked"]}
-    assert blocked == set(card["facts"]["blocks"])
+    assert blocked == set(card["facts"]["blocks"]) == set(CONSUMER_CELLS)
     for cell in card["cells"]:
         if cell["fact_version_blocked"]:
             assert cell["metric"] == "request_to_consumer_ms"
@@ -246,37 +371,38 @@ def test_a_missing_fact_state_reads_as_chosen_and_is_refused(plan):
 
 
 def test_selecting_a_fact_version_requires_recording_it(plan):
-    broken = copy.deepcopy(plan)
+    broken = _unselected(plan)
     broken["facts"]["state"] = "SELECTED"
+    broken["facts"]["blocks"] = []
     with pytest.raises(ValueError, match="no selected_version is recorded"):
         sb.validate_plan(broken)
 
 
 @pytest.mark.parametrize("drop", ["why_it_matters", "what_is_missing", "blocks", "how_to_select"])
 def test_an_unselected_fact_version_must_explain_itself(plan, drop):
-    broken = copy.deepcopy(plan)
+    broken = _unselected(plan)
     del broken["facts"][drop]
     with pytest.raises(ValueError, match=drop):
         sb.validate_plan(broken)
 
 
 def test_facts_cannot_block_a_cell_that_does_not_exist(plan):
-    broken = copy.deepcopy(plan)
+    broken = _unselected(plan)
     broken["facts"]["blocks"] = ["sqlchain_forced_c1", "sqlchain_forced_c99"]
     with pytest.raises(ValueError, match="cells that do not exist"):
         sb.validate_plan(broken)
 
 
-def test_a_silently_unblocked_cell_fails_the_build(card):
-    tampered = copy.deepcopy(card)
+def test_a_silently_unblocked_cell_fails_the_build(unselected_card):
+    tampered = copy.deepcopy(unselected_card)
     for cell in tampered["cells"]:
         cell["fact_version_blocked"] = False
     with pytest.raises(ValueError, match="but the card blocks"):
         sb.assert_no_cell_is_filled(tampered)
 
 
-def test_a_blocked_cell_must_give_its_reason(card):
-    tampered = copy.deepcopy(card)
+def test_a_blocked_cell_must_give_its_reason(unselected_card):
+    tampered = copy.deepcopy(unselected_card)
     for cell in tampered["cells"]:
         if cell["fact_version_blocked"]:
             cell["blocked_by"] = None
@@ -284,12 +410,12 @@ def test_a_blocked_cell_must_give_its_reason(card):
         sb.assert_no_cell_is_filled(tampered)
 
 
-def test_rendered_card_carries_the_fact_gap(card):
-    text = sb.render_markdown(card)
+def test_rendered_unselected_card_carries_the_fact_gap(unselected_card):
+    text = sb.render_markdown(unselected_card)
     assert "## Fact data — **UNSELECTED**" in text
-    for table in card["facts"]["observed_in_the_retained_chain"]["tables"]:
+    for table in unselected_card["facts"]["observed_in_the_retained_chain"]["tables"]:
         assert f"`{table}`" in text
-    assert card["facts"]["observed_in_the_retained_chain"]["sdk_pin"] in text
+    assert unselected_card["facts"]["observed_in_the_retained_chain"]["sdk_pin"] in text
     assert "FACTS_UNSELECTED" in text
 
 
@@ -320,30 +446,122 @@ def test_cost_per_success_must_declare_a_formula(plan):
         sb.validate_plan(broken)
 
 
-# --- a later SELECTED fact state must render as one (PR 46 round 2, P2) -----------------------------
+# --- the SELECTED state: record gates and rendering (PR 46 round 2 P2, tightened 2026-09-09) --------
 
-SELECTED_VERSION = "okf_receipt_spike_20260905 @ snapshot 2026-09-07T22:00:00Z (fixture digest sha256:0f17ac…)"
+BARE_LABEL = "okf_receipt_spike_20260905 @ snapshot 2026-09-07T22:00:00Z (fixture digest sha256:0f17ac…)"
 
 
-def _selected(plan, version=SELECTED_VERSION, keep_optional=True):
-    """The committed plan stays UNSELECTED; this is the shape a later selection would take."""
-    facts = copy.deepcopy(plan)["facts"]
-    facts["state"] = "SELECTED"
-    facts["selected_version"] = version
-    facts.pop("blocks", None)
+def _selected(plan, version=None, keep_optional=True, **facts_overrides):
+    """The committed plan is SELECTED; this returns a copy with the version or fact fields altered."""
+    out = copy.deepcopy(plan)
+    facts = out["facts"]
+    if version is not None:
+        facts["selected_version"] = version
     if not keep_optional:
-        for key in ("why_it_matters", "what_is_missing", "how_to_select", "observed_in_the_retained_chain"):
+        for key in ("why_it_matters", "how_to_select", "observed_in_the_retained_chain"):
             facts.pop(key, None)
-    return dict(copy.deepcopy(plan), facts=facts)
+    facts.update(facts_overrides)
+    return out
 
 
-def test_the_committed_plan_is_still_unselected(plan):
-    """This slice fixes rendering. It does not select a fact version for the pack."""
-    assert plan["facts"]["state"] == "UNSELECTED"
+def _version(plan, **overrides):
+    version = copy.deepcopy(plan["facts"]["selected_version"])
+    version.update(overrides)
+    return version
 
 
-def test_a_selected_plan_validates(plan):
-    sb.validate_plan(_selected(plan))
+def test_the_committed_plan_is_selected(plan):
+    assert plan["facts"]["state"] == "SELECTED"
+    sb.validate_plan(plan)
+
+
+def test_a_bare_label_is_not_a_version_record(plan):
+    """`selected_version: "x"` used to validate. A string identifies nothing recomputable."""
+    with pytest.raises(ValueError, match="bare label"):
+        sb.validate_plan(_selected(plan, version=BARE_LABEL))
+    with pytest.raises(ValueError, match="bare label"):
+        sb.validate_plan(_selected(plan, version="x"))
+
+
+@pytest.mark.parametrize("drop", list(sb.SELECTED_VERSION_REQUIRED))
+def test_every_identity_field_of_the_record_is_required(plan, drop):
+    version = _version(plan)
+    del version[drop]
+    with pytest.raises(ValueError, match="missing"):
+        sb.validate_plan(_selected(plan, version=version))
+
+
+@pytest.mark.parametrize("key", ["fixture_sha256", "expected_results_sha256", "content_manifest_sha256"])
+def test_a_wrong_digest_is_refused(plan, key):
+    wrong = "0" * 64
+    with pytest.raises(ValueError, match="hashes to"):
+        sb.validate_plan(_selected(plan, version=_version(plan, **{key: wrong})))
+    with pytest.raises(ValueError, match="full lowercase SHA-256"):
+        sb.validate_plan(_selected(plan, version=_version(plan, **{key: "940aacdc…"})))
+
+
+def test_a_truncated_pin_or_non_boolean_synthetic_is_refused(plan):
+    with pytest.raises(ValueError, match="full commit hash"):
+        sb.validate_plan(_selected(plan, version=_version(plan, sdk_pin="6719eb5")))
+    with pytest.raises(ValueError, match="must be a boolean"):
+        sb.validate_plan(_selected(plan, version=_version(plan, synthetic="true")))
+
+
+def test_row_counts_must_agree_with_the_script_and_with_the_total(plan):
+    counts = dict(plan["facts"]["selected_version"]["row_counts"], orders=4)
+    with pytest.raises(ValueError, match="row_count_total does not equal"):
+        sb.validate_plan(_selected(plan, version=_version(plan, row_counts=counts)))
+    with pytest.raises(ValueError, match="differ from the script"):
+        sb.validate_plan(_selected(plan, version=_version(plan, row_counts=counts, row_count_total=15)))
+    counts = {k: v for k, v in plan["facts"]["selected_version"]["row_counts"].items() if k != "fx_daily_rates"}
+    with pytest.raises(ValueError, match="one non-negative count per selected table"):
+        sb.validate_plan(_selected(plan, version=_version(plan, row_counts=counts, row_count_total=14)))
+
+
+def test_the_selection_may_not_disagree_with_the_retained_chain(plan):
+    with pytest.raises(ValueError, match="differs from what the retained chain used"):
+        sb.validate_plan(_selected(plan, version=_version(plan, dataset="test-project-0728-467323.other")))
+    with pytest.raises(ValueError, match="differ from what the retained chain used"):
+        sb.validate_plan(_selected(plan, version=_version(
+            plan, tables=["orders"], row_counts={"orders": 3}, row_count_total=3)))
+
+
+def test_a_selected_version_must_state_the_customer_data_status(plan):
+    with pytest.raises(ValueError, match="customer_data"):
+        sb.validate_plan(_selected(plan, customer_data=None))
+    with pytest.raises(ValueError, match="customer_data"):
+        sb.validate_plan(_selected(plan, customer_data={"state": "PENDING"}))
+
+
+def test_verification_states_are_constrained_words(plan):
+    with pytest.raises(ValueError, match="UNVERIFIED or VERIFIED"):
+        sb.validate_plan(_selected(plan, version=_version(plan, live_materialization="probably fine")))
+    with pytest.raises(ValueError, match="UNPROVEN or PROVEN"):
+        sb.validate_plan(_selected(plan, version=_version(plan, historical_chain_equivalence="matched $400")))
+
+
+def test_a_mutated_vendored_row_or_a_dropped_table_changes_the_digest(plan, tmp_path):
+    """Negative checks on the artifacts themselves, against a scratch copy of the vendored directory."""
+    version = plan["facts"]["selected_version"]
+    for name in ("fixture.sql", "expected.json", "content.json"):
+        (tmp_path / name).write_bytes((FACTS / name).read_bytes())
+    sb._verify_selected_artifacts(version, facts_dir=tmp_path)
+    script = (tmp_path / "fixture.sql").read_text()
+    assert "'sku-400', 'Widget'" in script or "sku-400" in script
+    (tmp_path / "fixture.sql").write_text(script.replace("sku-400", "sku-401", 1))
+    with pytest.raises(ValueError, match="fixture.sql hashes to"):
+        sb._verify_selected_artifacts(version, facts_dir=tmp_path)
+    mutated_manifest = fc.extract((tmp_path / "fixture.sql").read_text())
+    assert fc.sha256(fc.canonical_bytes(mutated_manifest)) != version["content_manifest_sha256"]
+    (tmp_path / "fixture.sql").write_bytes((FACTS / "fixture.sql").read_bytes())
+    manifest = json.loads((tmp_path / "content.json").read_text())
+    del manifest["tables"]["fx_daily_rates"]
+    (tmp_path / "content.json").write_bytes(fc.canonical_bytes(manifest))
+    with pytest.raises(ValueError, match="content.json hashes to"):
+        sb._verify_selected_artifacts(version, facts_dir=tmp_path)
+    (tmp_path / "content.json").unlink()
+    with pytest.raises(ValueError, match="is not vendored"):
+        sb._verify_selected_artifacts(version, facts_dir=tmp_path)
 
 
 def test_a_selected_version_may_not_also_block_cells(plan):
@@ -353,47 +571,53 @@ def test_a_selected_version_may_not_also_block_cells(plan):
         sb.validate_plan(broken)
 
 
-def test_a_selected_version_unblocks_the_consumer_cells(plan):
-    card = sb.build_card(_selected(plan))
+def test_a_selected_version_unblocks_the_consumer_cells_but_fills_nothing(card):
     assert card["facts"]["state"] == "SELECTED"
     for cell in card["cells"]:
         assert cell["fact_version_blocked"] is False
         assert cell["blocked_by"] is None
         assert "Select a fact-data version first" not in cell["how_to_fill"]
+        if cell["metric"] == "request_to_consumer_ms":
+            assert cell["stopped_reason"] == "NOT_IMPLEMENTED" and cell["state"] == "INCOMPLETE"
+            assert cell["measured_n"] == 0 and cell["p50_ms"] is None
+            assert "Fact version: SELECTED" in cell["how_to_fill"] and "synthetic" in cell["how_to_fill"]
+            assert "live precheck" in cell["how_to_fill"]
+    for cost in card["cost_cells"]:
+        assert cost["state"] == "UNMEASURED" and cost["value"] is None
     sb.assert_no_cell_is_filled(card)
 
 
-def test_markdown_reports_the_selected_state_and_its_version(plan):
-    """The render used to hardcode UNSELECTED, so the JSON and the Markdown disagreed."""
-    text = sb.render_markdown(sb.build_card(_selected(plan)))
+def test_markdown_reports_the_selected_state_and_its_version(card):
+    text = sb.render_markdown(card)
+    version = card["facts"]["selected_version"]
     assert "## Fact data — **SELECTED**" in text
-    assert "UNSELECTED" not in text
-    assert SELECTED_VERSION in text
     assert "**Selected version.**" in text
-    assert "**Cells this blocks.** None" in text
-    assert "FACTS_UNSELECTED" not in text
+    assert f"* **label:** {version['label']}" in text
+    assert "* **synthetic:** true" in text
+    assert f"* **fixture_sha256:** {version['fixture_sha256']}" in text
+    assert "* **row_counts:** fulfillment_cost=2, fx_daily_rates=0, order_lines=3" in text
+    assert "* **tables:** `fulfillment_cost`, `fx_daily_rates`" in text
+    assert "**Customer fact data (Alder cohort) — NOT SELECTED.**" in text
+    assert "**Cells this blocks.** None" in text and "clears `FACTS_UNSELECTED` only" in text
+    assert "**How it was selected.**" in text
+    assert "**What is missing.**" not in text
+    assert "UNSELECTED**" not in text
+    assert "| NOT_IMPLEMENTED |" in text and "+ FACTS_UNSELECTED" not in text
 
 
-def test_markdown_renders_a_structured_selected_version(plan):
-    version = {"dataset": "okf_receipt_spike_20260905", "snapshot": "2026-09-07T22:00:00Z", "rows": 4211}
-    text = sb.render_markdown(sb.build_card(_selected(plan, version=version)))
-    for key, value in version.items():
-        assert f"* **{key}:** {value}" in text
-
-
-def test_selected_render_does_not_require_the_unselected_fields(plan):
-    """A selection makes "what is missing" and "how to select one" meaningless; they may be dropped."""
+def test_selected_render_does_not_require_the_optional_fields(plan):
+    """With the chain block dropped the chain cross-check is skipped; the artifact gates still run."""
     card = sb.build_card(_selected(plan, keep_optional=False))
     text = sb.render_markdown(card)
     assert "## Fact data — **SELECTED**" in text
-    assert SELECTED_VERSION in text
-    assert "**What is missing.**" not in text
+    assert "**What the retained chain identifies**" not in text
+    assert "**How it was selected.**" not in text
     assert "Cells this blocks.** None" in text
 
 
-def test_the_two_states_do_not_share_a_hardcoded_heading(plan):
-    unselected = sb.render_markdown(sb.build_card(plan))
-    selected = sb.render_markdown(sb.build_card(_selected(plan)))
+def test_the_two_states_do_not_share_a_hardcoded_heading(plan, card, unselected_card):
+    unselected = sb.render_markdown(unselected_card)
+    selected = sb.render_markdown(card)
     assert "## Fact data — **UNSELECTED**" in unselected
     assert "## Fact data — **SELECTED**" in selected
     assert unselected != selected

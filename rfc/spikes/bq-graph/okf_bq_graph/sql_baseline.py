@@ -15,9 +15,13 @@ Three rules the code enforces rather than documents:
   omitted from it, because an absent row reads as zero.
 * A workload field that has not been chosen says so, and the card reports whichever state the plan is
   actually in. The corpus pin fixes the authored definitions and the graph projection but identifies no
-  fact data, so the committed plan is `UNSELECTED` and the cells it blocks carry that reason rather than
-  looking merely unrun. A later `SELECTED` plan prints its version and blocks nothing, in the JSON and in
-  the Markdown alike — `_render_facts` branches on the state instead of assuming one.
+  fact data; until 2026-09-09 the committed plan was `UNSELECTED` and the cells it blocked carried that reason
+  rather than looking merely unrun. Since then it is `SELECTED`: the version is the digest of the receipt
+  example's *synthetic* fixture script at the pinned SDK commit (`facts.selected_version`, flat so it renders
+  field by field), vendored under `fixtures/facts/` with its expected results and a canonical content manifest
+  that `_validate_facts` re-hashes and re-derives on every build. Selecting clears `FACTS_UNSELECTED` only: the
+  consumer cells stay `NOT_IMPLEMENTED`, the live rows are recorded `UNVERIFIED` against the digest, customer
+  (Alder) data stays `NOT SELECTED` as its own block, and `_render_facts` branches on the state either way.
 
 Since Pass 2 (2026-09-09) the card also reads the retained campaign records the driver writes
 (`evidence/sql-baseline/run_<run_id>.json`, see `sql_baseline_run.py`). A retrieval cell is filled from the
@@ -33,10 +37,14 @@ regenerates `evidence/sql-baseline/{plan.json,baseline.md}` offline.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
+from okf_bq_graph import fact_content
+
 ROOT = Path(__file__).resolve().parent.parent
+FACTS_DIR = ROOT / "fixtures" / "facts"
 PLAN = ROOT / "fixtures" / "sql_baseline.json"
 OUT_DIR = ROOT / "evidence" / "sql-baseline"
 REQUESTS = ROOT / "evidence" / "requests.jsonl"
@@ -102,6 +110,17 @@ def validate_plan(plan: dict) -> None:
             raise ValueError("cost_per_success must state its formula: the denominator is contested and easy to invert")
 
 
+_HEX64 = re.compile(r"^[0-9a-f]{64}$")
+_HEX40 = re.compile(r"^[0-9a-f]{40}$")
+_ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+SELECTED_VERSION_REQUIRED = (
+    "kind", "synthetic", "customer_data", "dataset", "location", "tables", "sdk_pin", "fixture_path",
+    "fixture_sha256", "expected_results_sha256", "computation_sha256", "content_manifest_sha256", "row_counts",
+    "row_count_total", "live_materialization", "historical_chain_equivalence", "valid_for_runs_on_or_after",
+    "materialization_expires_utc",
+)
+
+
 def _validate_facts(plan: dict) -> None:
     """The corpus pin fixes definitions, not facts. An unchosen fact version has to say so."""
     facts = plan["facts"]
@@ -112,6 +131,7 @@ def _validate_facts(plan: dict) -> None:
             raise ValueError("facts.state is SELECTED but no selected_version is recorded")
         if facts.get("blocks"):
             raise ValueError("facts.state is SELECTED but it still blocks cells: clear `blocks` or keep the state UNSELECTED")
+        _validate_selected_version(facts)
         return
     for key in ("why_it_matters", "what_is_missing", "blocks", "how_to_select"):
         if not facts.get(key):
@@ -120,6 +140,77 @@ def _validate_facts(plan: dict) -> None:
     unknown = [n for n in facts["blocks"] if n not in names]
     if unknown:
         raise ValueError(f"facts.blocks names cells that do not exist: {unknown}")
+
+
+def _validate_selected_version(facts: dict) -> None:
+    """A selection is a record whose digests recompute from vendored artifacts, not a label.
+
+    Reviewer gate (2026-09-09 consult): `SELECTED` used to require only a truthy version and no blocks, so
+    `selected_version: "x"` validated. Now the record must name the content, the vendored script, expected
+    results and canonical manifest must hash to the recorded digests, the manifest must re-derive from the
+    script with the recorded row counts, and the record must name what the retained chain used. Whether the
+    live rows match is a separate field that stays UNVERIFIED until something reads them.
+    """
+    version = facts["selected_version"]
+    if not isinstance(version, dict):
+        raise ValueError("facts.selected_version must be a record, not a bare label: a string identifies nothing recomputable")
+    missing = [k for k in SELECTED_VERSION_REQUIRED if k not in version]
+    if missing:
+        raise ValueError(f"facts.selected_version is missing {missing}")
+    if version["synthetic"] is not True and version["synthetic"] is not False:
+        raise ValueError("facts.selected_version.synthetic must be a boolean")
+    for key in ("fixture_sha256", "expected_results_sha256", "computation_sha256", "content_manifest_sha256"):
+        if not _HEX64.match(str(version[key])):
+            raise ValueError(f"facts.selected_version.{key} is not a full lowercase SHA-256")
+    if not _HEX40.match(str(version["sdk_pin"])):
+        raise ValueError("facts.selected_version.sdk_pin is not a full commit hash")
+    if not _ISO_DATE.match(str(version["valid_for_runs_on_or_after"])):
+        raise ValueError("facts.selected_version.valid_for_runs_on_or_after must be an ISO date")
+    tables = version["tables"]
+    if not isinstance(tables, list) or not tables or tables != sorted(set(tables)):
+        raise ValueError("facts.selected_version.tables must be a sorted list of distinct table names")
+    counts = version["row_counts"]
+    if not isinstance(counts, dict) or set(counts) != set(tables) or any(not isinstance(v, int) or v < 0 for v in counts.values()):
+        raise ValueError("facts.selected_version.row_counts must give one non-negative count per selected table")
+    if sum(counts.values()) != version["row_count_total"]:
+        raise ValueError("facts.selected_version.row_count_total does not equal the sum of row_counts")
+    if not str(version["live_materialization"]).startswith(("UNVERIFIED", "VERIFIED")):
+        raise ValueError("facts.selected_version.live_materialization must start with UNVERIFIED or VERIFIED")
+    if not str(version["historical_chain_equivalence"]).startswith(("UNPROVEN", "PROVEN")):
+        raise ValueError("facts.selected_version.historical_chain_equivalence must start with UNPROVEN or PROVEN")
+    customer = facts.get("customer_data")
+    if not isinstance(customer, dict) or customer.get("state") not in ("NOT SELECTED", "SELECTED"):
+        raise ValueError("a SELECTED fact version must carry facts.customer_data with state NOT SELECTED or SELECTED")
+    observed = facts.get("observed_in_the_retained_chain")
+    if observed:
+        for key in ("dataset", "sdk_pin"):
+            if version[key] != observed[key]:
+                raise ValueError(f"facts.selected_version.{key} differs from what the retained chain used")
+        if tables != sorted(observed["tables"]):
+            raise ValueError("facts.selected_version.tables differ from what the retained chain used")
+    _verify_selected_artifacts(version)
+
+
+def _verify_selected_artifacts(version: dict, facts_dir: Path = FACTS_DIR) -> None:
+    """The vendored artifacts must hash to the record and the manifest must re-derive from the script."""
+    for name, key in (("fixture.sql", "fixture_sha256"), ("expected.json", "expected_results_sha256"),
+                      ("content.json", "content_manifest_sha256")):
+        path = facts_dir / name
+        if not path.is_file():
+            raise ValueError(f"facts.selected_version names {key} but {path.name} is not vendored under {facts_dir.name}/")
+        digest = fact_content.sha256(path.read_bytes())
+        if digest != version[key]:
+            raise ValueError(f"vendored {path.name} hashes to {digest[:12]}…, not the recorded {key} {version[key][:12]}…")
+    manifest = fact_content.extract((facts_dir / "fixture.sql").read_text())
+    if fact_content.canonical_bytes(manifest) != (facts_dir / "content.json").read_bytes():
+        raise ValueError("fixtures/facts/content.json is not the canonical manifest derived from fixtures/facts/fixture.sql")
+    derived = fact_content.row_counts(manifest)
+    if derived != version["row_counts"]:
+        raise ValueError(f"facts.selected_version.row_counts {version['row_counts']} differ from the script's {derived}")
+    if "expected_gross_margin_usd_2026_01" in version:
+        expected = json.loads((facts_dir / "expected.json").read_text())
+        if str(version["expected_gross_margin_usd_2026_01"]) != str(expected["approved_january"]["gross_margin_usd"]):
+            raise ValueError("facts.selected_version.expected_gross_margin_usd_2026_01 differs from expected.json approved_january")
 
 
 def _dig(doc: Any, at: list[str] | None) -> Any:
@@ -428,7 +519,10 @@ def _consumer_cell(cell: dict, plan: dict) -> dict:
                        "comparable to each other and neither is comparable to an ordinary-SQL alternative") if blocked else None,
         "how_to_fill": (
             ("Select a fact-data version first (see `facts` above); until then this cell cannot be compared to "
-             "anything. ") if blocked else ""
+             "anything. ") if blocked else
+            (f"Fact version: SELECTED, {facts['selected_version']['kind']} (see `facts` above): synthetic fixture-scale "
+             "rows, live materialization unverified against the digest, so the runner must pass the recorded live "
+             "precheck before it samples and must label its numbers fixture-scale. ") if facts["state"] == "SELECTED" else ""
         ) + (
             "No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one "
             "wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a "
@@ -605,9 +699,19 @@ def _ms(value: float | None) -> str:
     return "—" if value is None else f"{value:,.0f}"
 
 
+def _render_value(value: Any) -> str:
+    if isinstance(value, bool):
+        return str(value).lower()
+    if isinstance(value, list):
+        return ", ".join(f"`{v}`" for v in value)
+    if isinstance(value, dict):
+        return ", ".join(f"{k}={v}" for k, v in value.items())
+    return str(value)
+
+
 def _render_selected_version(version: Any) -> list[str]:
     if isinstance(version, dict):
-        return [f"* **{key}:** {value}" for key, value in version.items()]
+        return [f"* **{key}:** {_render_value(value)}" for key, value in version.items()]
     return [f"`{version}`"]
 
 
@@ -641,9 +745,14 @@ def _render_facts(card: dict) -> list[str]:
             f"* Read from `{obs['source']}`.",
             "",
         ]
+    customer = facts.get("customer_data")
+    if customer:
+        lines += [f"**Customer fact data ({customer.get('cohort', 'customer cohort')}) — {customer['state']}.** "
+                  f"{customer.get('note', '')}".rstrip(), ""]
     if selected:
-        lines += ["**Cells this blocks.** None: a selected fact version blocks nothing. The request-to-consumer cells "
-                  "stay INCOMPLETE for their own reason, which the cell table gives.", ""]
+        lines += ["**Cells this blocks.** None. Selecting a version clears `FACTS_UNSELECTED` only; the request-to-consumer "
+                  "cells stay INCOMPLETE because no sampled runner exists (NOT_IMPLEMENTED, which the cell table gives), and "
+                  "the live rows have not been verified against the selected digest.", ""]
     else:
         lines += [f"**Cells this blocks.** {', '.join('`' + b + '`' for b in facts['blocks'])} — the full "
                   "request-to-consumer comparison. The retrieval cells are unaffected: retrieval selects context, and "
