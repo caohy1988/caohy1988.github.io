@@ -41,15 +41,17 @@ Offline only; a new budget block for consumer sampling is declared in the plan b
 
 ### FS-2 — live sampling, C=1 first, under the owner's paid gate
 
-Same-requester mode first. Before any attempt: the live precheck (row counts and the January result against the
-selection), on-demand routing verified per job including the receipt leg's child jobs, and its own budget line
+Same-requester mode first. Before any attempt: the live precheck as recorded on the selection — a full-schema,
+full-row readback of the seven tables canonicalised and matched to the content digest, with that verified immutable
+or protected table set bound to every attempt's evidence; row counts and the January result are smoke checks that
+cannot establish identity — on-demand routing verified per job including the receipt leg's child jobs, and its own budget line
 (`consumer_max_bytes_billed_gib`, `consumer_max_usd`, `consumer_max_wall_seconds_per_cell`) inside the existing
 ceilings (900 s per cell, 3,600 s per campaign, 64 GiB, $0.50 at the declared $6.25 per TiB, which makes the byte
 ceiling the binding one). Two warmups plus twenty measured attempts at C=1; C=5 only after C=1 completes, because
 the retrieval slowdown at five at once has no established cause. Cost per success stays total cost of all attempts
 divided by released, receipt-verified answers; refusals count in the numerator only. Either this runs before the
 materialization expires (about 2026-10-05) or the fixture is re-loaded first under the same gate, same digest, new
-load job recorded on the selection. The passing precheck is a necessary condition, not proof that the rows stayed
+load job recorded on the selection. A passing readback is a necessary condition, not proof that the rows stayed
 equal during the campaign; binding the verified content into each attempt's evidence is the runner's job.
 
 ### FS-3 — restricted-identity mode

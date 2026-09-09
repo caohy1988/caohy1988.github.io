@@ -36,6 +36,7 @@ regenerates `evidence/sql-baseline/{plan.json,baseline.md}` offline.
 """
 from __future__ import annotations
 
+import datetime as _dt
 import json
 import re
 from pathlib import Path
@@ -112,10 +113,11 @@ def validate_plan(plan: dict) -> None:
 
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
 _HEX40 = re.compile(r"^[0-9a-f]{40}$")
-_ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_ABOUT_DATE = re.compile(r"^about (\d{4}-\d{2}-\d{2})\b")
 SELECTED_VERSION_REQUIRED = (
     "kind", "synthetic", "customer_data", "dataset", "location", "tables", "sdk_pin", "fixture_path",
-    "fixture_sha256", "expected_results_sha256", "computation_sha256", "content_manifest_sha256", "row_counts",
+    "fixture_sha256", "expected_results_sha256", "publication_manifest_sha256", "computation_sha256",
+    "content_manifest_sha256", "row_counts",
     "row_count_total", "live_materialization", "historical_chain_equivalence", "valid_for_runs_on_or_after",
     "materialization_expires_utc",
 )
@@ -157,15 +159,20 @@ def _validate_selected_version(facts: dict) -> None:
     missing = [k for k in SELECTED_VERSION_REQUIRED if k not in version]
     if missing:
         raise ValueError(f"facts.selected_version is missing {missing}")
-    if version["synthetic"] is not True and version["synthetic"] is not False:
-        raise ValueError("facts.selected_version.synthetic must be a boolean")
-    for key in ("fixture_sha256", "expected_results_sha256", "computation_sha256", "content_manifest_sha256"):
+    if version["synthetic"] is not True:
+        raise ValueError("facts.selected_version.synthetic must be the boolean true: this record kind supports the synthetic "
+                         "fixture digest only; a non-synthetic selection needs its own evidence and owner record, which no "
+                         "schema defines yet")
+    for key in ("fixture_sha256", "expected_results_sha256", "publication_manifest_sha256", "computation_sha256",
+                "content_manifest_sha256"):
         if not _HEX64.match(str(version[key])):
             raise ValueError(f"facts.selected_version.{key} is not a full lowercase SHA-256")
     if not _HEX40.match(str(version["sdk_pin"])):
         raise ValueError("facts.selected_version.sdk_pin is not a full commit hash")
-    if not _ISO_DATE.match(str(version["valid_for_runs_on_or_after"])):
-        raise ValueError("facts.selected_version.valid_for_runs_on_or_after must be an ISO date")
+    _calendar_date("valid_for_runs_on_or_after", version["valid_for_runs_on_or_after"])
+    if "selected_utc" in version:
+        _calendar_date("selected_utc", version["selected_utc"])
+    _validate_expiry(version["materialization_expires_utc"])
     tables = version["tables"]
     if not isinstance(tables, list) or not tables or tables != sorted(set(tables)):
         raise ValueError("facts.selected_version.tables must be a sorted list of distinct table names")
@@ -174,13 +181,20 @@ def _validate_selected_version(facts: dict) -> None:
         raise ValueError("facts.selected_version.row_counts must give one non-negative count per selected table")
     if sum(counts.values()) != version["row_count_total"]:
         raise ValueError("facts.selected_version.row_count_total does not equal the sum of row_counts")
-    if not str(version["live_materialization"]).startswith(("UNVERIFIED", "VERIFIED")):
-        raise ValueError("facts.selected_version.live_materialization must start with UNVERIFIED or VERIFIED")
-    if not str(version["historical_chain_equivalence"]).startswith(("UNPROVEN", "PROVEN")):
-        raise ValueError("facts.selected_version.historical_chain_equivalence must start with UNPROVEN or PROVEN")
+    # Promotions this record cannot carry. Nothing in this slice reads the live tables or re-derives the 2026-09-07
+    # chain's rows, so VERIFIED / PROVEN would need a separately validated readback or evidence record with its own
+    # schema. Until one exists the only supported states are the unverified ones; a bare word is not evidence.
+    if not str(version["live_materialization"]).startswith("UNVERIFIED"):
+        raise ValueError("facts.selected_version.live_materialization must start with UNVERIFIED: promoting it to VERIFIED "
+                         "requires a full-schema, full-row readback record bound to the content digest, which no schema "
+                         "defines yet")
+    if not str(version["historical_chain_equivalence"]).startswith("UNPROVEN"):
+        raise ValueError("facts.selected_version.historical_chain_equivalence must start with UNPROVEN: the retained chain "
+                         "kept no row-level evidence, and a matching number is not byte-equivalence")
     customer = facts.get("customer_data")
-    if not isinstance(customer, dict) or customer.get("state") not in ("NOT SELECTED", "SELECTED"):
-        raise ValueError("a SELECTED fact version must carry facts.customer_data with state NOT SELECTED or SELECTED")
+    if not isinstance(customer, dict) or customer.get("state") != "NOT SELECTED":
+        raise ValueError("a SELECTED synthetic fact version must carry facts.customer_data with state NOT SELECTED: a "
+                         "customer selection is its own record with its own owner and acceptance, which no schema defines yet")
     observed = facts.get("observed_in_the_retained_chain")
     if observed:
         for key in ("dataset", "sdk_pin"):
@@ -191,16 +205,76 @@ def _validate_selected_version(facts: dict) -> None:
     _verify_selected_artifacts(version)
 
 
+_YMD = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def _calendar_date(key: str, value: Any) -> _dt.date:
+    """A string of the form YYYY-MM-DD that is a real date; fromisoformat alone would also take 20260312."""
+    try:
+        if not isinstance(value, str) or not _YMD.match(value):
+            raise ValueError(value)
+        return _dt.date.fromisoformat(value)
+    except (TypeError, ValueError):
+        raise ValueError(f"facts.selected_version.{key} must be a real calendar date (YYYY-MM-DD), got {value!r}") from None
+
+
+def _validate_expiry(value: Any) -> None:
+    """The expiry is approximate by construction: a 30-day table expiration set at provisioning, never read back.
+
+    Accepted: `about YYYY-MM-DD …` (a real date) or `unknown …`. Refused: null, non-strings, malformed dates, and a
+    bare exact timestamp, because an exact expiry would need a readback of each table's expirationTime that this
+    record does not carry.
+    """
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("facts.selected_version.materialization_expires_utc must be a string: 'about YYYY-MM-DD …' or 'unknown …'")
+    if value.startswith("unknown"):
+        return
+    match = _ABOUT_DATE.match(value)
+    if not match:
+        raise ValueError("facts.selected_version.materialization_expires_utc must read 'about YYYY-MM-DD …' or 'unknown …'; "
+                         "an exact expiry needs a table expirationTime readback this record does not carry")
+    _calendar_date("materialization_expires_utc", match.group(1))
+
+
+#: Which vendored file each recorded digest must equal. The declaration and publication manifest are vendored too,
+#: so `computation_sha256` and `publication_manifest_sha256` are bound to bytes, not accepted as syntax.
+ARTIFACT_DIGESTS = (
+    ("fixture.sql", "fixture_sha256"), ("expected.json", "expected_results_sha256"),
+    ("publication.json", "publication_manifest_sha256"), ("gross-margin-period.md", "computation_sha256"),
+    ("content.json", "content_manifest_sha256"),
+)
+
+
 def _verify_selected_artifacts(version: dict, facts_dir: Path = FACTS_DIR) -> None:
-    """The vendored artifacts must hash to the record and the manifest must re-derive from the script."""
-    for name, key in (("fixture.sql", "fixture_sha256"), ("expected.json", "expected_results_sha256"),
-                      ("content.json", "content_manifest_sha256")):
+    """The vendored artifacts must hash to the record, agree with the provenance pin, and the manifest must re-derive."""
+    source_path = facts_dir / "source.json"
+    if not source_path.is_file():
+        raise ValueError(f"{source_path.name} is not vendored under {facts_dir.name}/: the selection has no offline provenance pin")
+    source = json.loads(source_path.read_text())
+    if version["sdk_pin"] != source["sdk_pin"]:
+        raise ValueError("facts.selected_version.sdk_pin differs from the vendored provenance pin (source.json)")
+    for name, key in ARTIFACT_DIGESTS:
         path = facts_dir / name
         if not path.is_file():
             raise ValueError(f"facts.selected_version names {key} but {path.name} is not vendored under {facts_dir.name}/")
         digest = fact_content.sha256(path.read_bytes())
         if digest != version[key]:
             raise ValueError(f"vendored {path.name} hashes to {digest[:12]}…, not the recorded {key} {version[key][:12]}…")
+        pinned = source["artifacts"].get(name, {})
+        if pinned.get("sha256") != digest:
+            raise ValueError(f"vendored {path.name} hashes to {digest[:12]}…, not what source.json pins for it")
+    for key, name in (("fixture_path", "fixture.sql"), ("expected_results_path", "expected.json")):
+        if key in version and version[key] != source["artifacts"][name]["path"]:
+            raise ValueError(f"facts.selected_version.{key} {version[key]!r} is not the pinned SDK path source.json records")
+    publication = json.loads((facts_dir / "publication.json").read_text())
+    if version["dataset"] != f"{publication['project']}.{publication['dataset']}" or version["location"] != publication["location"]:
+        raise ValueError("facts.selected_version.dataset/location differ from the vendored publication manifest")
+    if version["tables"] != sorted(publication["table_map"].values()):
+        raise ValueError("facts.selected_version.tables differ from the vendored publication manifest's table_map")
+    if version["computation_sha256"] != publication["computation_sha256"]:
+        raise ValueError("facts.selected_version.computation_sha256 differs from the vendored publication manifest")
+    if publication.get("synthetic") is not True:
+        raise ValueError("the vendored publication manifest does not declare the fixture synthetic")
     manifest = fact_content.extract((facts_dir / "fixture.sql").read_text())
     if fact_content.canonical_bytes(manifest) != (facts_dir / "content.json").read_bytes():
         raise ValueError("fixtures/facts/content.json is not the canonical manifest derived from fixtures/facts/fixture.sql")
@@ -521,8 +595,10 @@ def _consumer_cell(cell: dict, plan: dict) -> dict:
             ("Select a fact-data version first (see `facts` above); until then this cell cannot be compared to "
              "anything. ") if blocked else
             (f"Fact version: SELECTED, {facts['selected_version']['kind']} (see `facts` above): synthetic fixture-scale "
-             "rows, live materialization unverified against the digest, so the runner must pass the recorded live "
-             "precheck before it samples and must label its numbers fixture-scale. ") if facts["state"] == "SELECTED" else ""
+             "rows, live materialization unverified against the digest. Before it samples, the runner must read the live "
+             "tables back in full and match them to the content digest, then bind that verified set to every attempt; row "
+             "counts and the January result are smoke checks, not identity. None of that exists yet, and its numbers must be "
+             "labelled fixture-scale. ") if facts["state"] == "SELECTED" else ""
         ) + (
             "No runner exists. okf_bq_graph.chain runs the whole chain once per case and reports one "
             "wall time for the pass; okf_bq_graph.benchmark stops at retrieval. Filling this cell needs a "
@@ -752,7 +828,8 @@ def _render_facts(card: dict) -> list[str]:
     if selected:
         lines += ["**Cells this blocks.** None. Selecting a version clears `FACTS_UNSELECTED` only; the request-to-consumer "
                   "cells stay INCOMPLETE because no sampled runner exists (NOT_IMPLEMENTED, which the cell table gives), and "
-                  "the live rows have not been verified against the selected digest.", ""]
+                  "the live rows have not been verified against the selected digest (a full readback, not a count check, "
+                  "which no runner does yet).", ""]
     else:
         lines += [f"**Cells this blocks.** {', '.join('`' + b + '`' for b in facts['blocks'])} — the full "
                   "request-to-consumer comparison. The retrieval cells are unaffected: retrieval selects context, and "

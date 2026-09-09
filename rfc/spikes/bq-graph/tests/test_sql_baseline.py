@@ -503,7 +503,7 @@ def test_a_wrong_digest_is_refused(plan, key):
 def test_a_truncated_pin_or_non_boolean_synthetic_is_refused(plan):
     with pytest.raises(ValueError, match="full commit hash"):
         sb.validate_plan(_selected(plan, version=_version(plan, sdk_pin="6719eb5")))
-    with pytest.raises(ValueError, match="must be a boolean"):
+    with pytest.raises(ValueError, match="must be the boolean true"):
         sb.validate_plan(_selected(plan, version=_version(plan, synthetic="true")))
 
 
@@ -533,17 +533,146 @@ def test_a_selected_version_must_state_the_customer_data_status(plan):
         sb.validate_plan(_selected(plan, customer_data={"state": "PENDING"}))
 
 
-def test_verification_states_are_constrained_words(plan):
-    with pytest.raises(ValueError, match="UNVERIFIED or VERIFIED"):
-        sb.validate_plan(_selected(plan, version=_version(plan, live_materialization="probably fine")))
-    with pytest.raises(ValueError, match="UNPROVEN or PROVEN"):
-        sb.validate_plan(_selected(plan, version=_version(plan, historical_chain_equivalence="matched $400")))
+# --- Astra P2 #2: the gate refuses promotions this record cannot carry ---------------------------------
+
+PROMOTIONS = {
+    "synthetic_false": dict(version=dict(synthetic=False)),
+    "live_verified": dict(version=dict(live_materialization="VERIFIED")),
+    "chain_proven": dict(version=dict(historical_chain_equivalence="PROVEN")),
+    "live_free_text": dict(version=dict(live_materialization="probably fine")),
+    "chain_free_text": dict(version=dict(historical_chain_equivalence="matched $400")),
+    "customer_selected": dict(customer_data={"state": "SELECTED", "cohort": "Alder cohort"}),
+    "customer_pending": dict(customer_data={"state": "PENDING", "cohort": "Alder cohort"}),
+    "customer_missing": dict(customer_data=None),
+}
+
+
+@pytest.mark.parametrize("name", sorted(PROMOTIONS))
+def test_unsupported_promotions_are_refused_at_validate_and_build(plan, name):
+    """A bare word is not evidence: VERIFIED, PROVEN, a non-synthetic fixture or a selected customer cohort each
+    need a separately validated record that no schema defines yet. Refused at both public boundaries."""
+    change = PROMOTIONS[name]
+    promoted = _selected(plan, version=_version(plan, **change["version"]) if "version" in change else None,
+                         **{k: v for k, v in change.items() if k != "version"})
+    with pytest.raises(ValueError):
+        sb.validate_plan(promoted)
+    with pytest.raises(ValueError):
+        sb.build_card(promoted, records=[])
+
+
+def test_the_promotion_refusals_say_what_evidence_would_be_needed(plan):
+    with pytest.raises(ValueError, match="readback record"):
+        sb.validate_plan(_selected(plan, version=_version(plan, live_materialization="VERIFIED")))
+    with pytest.raises(ValueError, match="not byte-equivalence"):
+        sb.validate_plan(_selected(plan, version=_version(plan, historical_chain_equivalence="PROVEN")))
+    with pytest.raises(ValueError, match="own evidence and owner record"):
+        sb.validate_plan(_selected(plan, version=_version(plan, synthetic=False)))
+    with pytest.raises(ValueError, match="own record with its own owner"):
+        sb.validate_plan(_selected(plan, customer_data={"state": "SELECTED", "cohort": "Alder cohort"}))
+
+
+def test_the_rendered_card_never_prints_a_selected_customer_cohort(card):
+    text = sb.render_markdown(card)
+    assert "Alder cohort) — NOT SELECTED" in text
+    assert "Alder cohort) — SELECTED" not in text
+    assert "* **live_materialization:** UNVERIFIED" in text and "* **historical_chain_equivalence:** UNPROVEN" in text
+
+
+# --- Astra P2 #3: source identity is bound to vendored provenance, not accepted as syntax ---------------
+
+@pytest.mark.parametrize("change,match", [
+    (dict(computation_sha256="0" * 64), "gross-margin-period.md hashes to"),
+    (dict(publication_manifest_sha256="1" * 64), "publication.json hashes to"),
+    (dict(publication_manifest_sha256="x"), "full lowercase SHA-256"),
+    (dict(fixture_path="missing.sql"), "not the pinned SDK path"),
+    (dict(expected_results_path="examples/other/expected.json"), "not the pinned SDK path"),
+    (dict(sdk_pin="f" * 40), "differs from what the retained chain used"),
+    (dict(location="EU"), "differ from the vendored publication manifest"),
+])
+def test_a_false_source_identity_claim_is_refused(plan, change, match):
+    with pytest.raises(ValueError, match=match):
+        sb.validate_plan(_selected(plan, version=_version(plan, **change)))
+
+
+def test_a_pin_that_is_valid_syntax_but_not_the_vendored_one_is_refused_without_the_chain_block(plan):
+    """With the chain cross-check dropped, source.json still binds the pin."""
+    with pytest.raises(ValueError, match="vendored provenance pin"):
+        sb.validate_plan(_selected(plan, version=_version(plan, sdk_pin="f" * 40), keep_optional=False))
+
+
+def test_the_vendored_publication_manifest_and_declaration_are_the_pinned_objects(plan):
+    version = plan["facts"]["selected_version"]
+    source = json.loads((FACTS / "source.json").read_text())
+    assert source["sdk_pin"] == version["sdk_pin"]
+    for name, key in sb.ARTIFACT_DIGESTS:
+        assert fc.sha256((FACTS / name).read_bytes()) == version[key] == source["artifacts"][name]["sha256"], name
+        assert (FACTS / name).stat().st_size == source["artifacts"][name]["bytes"], name
+    publication = json.loads((FACTS / "publication.json").read_text())
+    assert publication["synthetic"] is True
+    assert publication["computation_sha256"] == version["computation_sha256"]
+    assert sorted(publication["table_map"].values()) == version["tables"]
+    assert f"{publication['project']}.{publication['dataset']}" == version["dataset"]
+    assert (FACTS / "gross-margin-period.md").read_text().startswith("---\ntype: Attested Computation")
+
+
+def test_a_missing_or_disagreeing_provenance_pin_is_refused(plan, tmp_path):
+    version = plan["facts"]["selected_version"]
+    for name, _ in sb.ARTIFACT_DIGESTS:
+        (tmp_path / name).write_bytes((FACTS / name).read_bytes())
+    with pytest.raises(ValueError, match="no offline provenance pin"):
+        sb._verify_selected_artifacts(version, facts_dir=tmp_path)
+    source = json.loads((FACTS / "source.json").read_text())
+    source["artifacts"]["publication.json"]["sha256"] = "0" * 64
+    (tmp_path / "source.json").write_text(json.dumps(source))
+    with pytest.raises(ValueError, match="not what source.json pins"):
+        sb._verify_selected_artifacts(version, facts_dir=tmp_path)
+
+
+# --- Astra P2 #4: dates are calendar dates; the expiry is explicitly approximate ------------------------
+
+@pytest.mark.parametrize("value", ["2026-99-99", "2026-3-12", "March 12", None, 20260312])
+def test_the_validity_date_must_be_a_real_calendar_date(plan, value):
+    with pytest.raises(ValueError, match="real calendar date"):
+        sb.validate_plan(_selected(plan, version=_version(plan, valid_for_runs_on_or_after=value)))
+
+
+@pytest.mark.parametrize("value", [None, "", "2026-10-05T00:00:00Z", "2026-10-05", "about 2026-13-01", "soon", 20261005])
+def test_the_expiry_must_be_explicitly_approximate_or_unknown(plan, value):
+    with pytest.raises(ValueError, match="materialization_expires_utc"):
+        sb.validate_plan(_selected(plan, version=_version(plan, materialization_expires_utc=value)))
+
+
+def test_an_unknown_expiry_is_an_honest_value(plan):
+    sb.validate_plan(_selected(plan, version=_version(plan, materialization_expires_utc="unknown: not read back")))
+    sb.validate_plan(_selected(plan, version=_version(plan, materialization_expires_utc="about 2026-10-05")))
+
+
+def test_selected_utc_when_present_is_a_calendar_date(plan):
+    with pytest.raises(ValueError, match="selected_utc"):
+        sb.validate_plan(_selected(plan, version=_version(plan, selected_utc="yesterday")))
+
+
+# --- Astra P2 #1: counts plus the January answer are not content identity --------------------------------
+
+def test_counts_and_the_january_answer_do_not_identify_the_content(plan):
+    """Astra's counterexample: bump the February delivered order's amount. Every count and January's 400 hold;
+    the content digest and the January–February result change. Hence the recorded precheck is a full readback."""
+    version = plan["facts"]["selected_version"]
+    script = (FACTS / "fixture.sql").read_text()
+    needle = "'delivered', NUMERIC '200.00', NUMERIC '0', NUMERIC '200.00'"
+    assert script.count(needle) == 1
+    mutated = fc.extract(script.replace(needle, "'delivered', NUMERIC '200.00', NUMERIC '0', NUMERIC '201.00'"))
+    assert fc.row_counts(mutated) == version["row_counts"]
+    assert fc.sha256(fc.canonical_bytes(mutated)) != version["content_manifest_sha256"]
+    assert "full" in version["live_precheck"] and "smoke checks" in version["live_precheck"]
+    assert "content_manifest_sha256" in version["live_precheck"]
+    assert version["live_precheck"].startswith("NOT IMPLEMENTED")
 
 
 def test_a_mutated_vendored_row_or_a_dropped_table_changes_the_digest(plan, tmp_path):
     """Negative checks on the artifacts themselves, against a scratch copy of the vendored directory."""
     version = plan["facts"]["selected_version"]
-    for name in ("fixture.sql", "expected.json", "content.json"):
+    for name in [n for n, _ in sb.ARTIFACT_DIGESTS] + ["source.json"]:
         (tmp_path / name).write_bytes((FACTS / name).read_bytes())
     sb._verify_selected_artifacts(version, facts_dir=tmp_path)
     script = (tmp_path / "fixture.sql").read_text()
@@ -581,7 +710,8 @@ def test_a_selected_version_unblocks_the_consumer_cells_but_fills_nothing(card):
             assert cell["stopped_reason"] == "NOT_IMPLEMENTED" and cell["state"] == "INCOMPLETE"
             assert cell["measured_n"] == 0 and cell["p50_ms"] is None
             assert "Fact version: SELECTED" in cell["how_to_fill"] and "synthetic" in cell["how_to_fill"]
-            assert "live precheck" in cell["how_to_fill"]
+            assert "read the live tables back in full" in cell["how_to_fill"]
+            assert "smoke checks, not identity" in cell["how_to_fill"]
     for cost in card["cost_cells"]:
         assert cost["state"] == "UNMEASURED" and cost["value"] is None
     sb.assert_no_cell_is_filled(card)

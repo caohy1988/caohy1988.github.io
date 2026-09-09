@@ -39,7 +39,7 @@ number, a boolean, a list of strings or a name→count map; no nested records.
 | `conformance_observed` | the chain record path and display string that carried that `$400.00` |
 | `valid_for_runs_on_or_after`, `validity_note` | `2026-03-12`; the compiled SQL's `CURRENT_DATE()` 30-day recognition window and the latest fixture order date (2026-02-10); the SQL is not changed because that would change `computation_sha256` |
 | `materialization_expires_utc` | about `2026-10-05` (30-day table expiration set at provisioning); after that the same digest must be re-loaded and the new load job recorded |
-| `live_precheck` | a contract for the runner slice, marked not implemented: per-table row counts equal `row_counts` and the January request returns `400`, else the campaign stops `FACTS_DRIFTED` with no cell filled |
+| `live_precheck` | a contract for the runner slice, marked not implemented: the runner reads every selected table back in full (schema and rows), canonicalises the readback as `okf-fact-content/1` and requires its digest to equal `content_manifest_sha256`, then binds that verified immutable or protected table set to every attempt; otherwise the campaign stops `FACTS_DRIFTED` with no cell filled. Row counts and the January `400` are smoke checks only: changing one non-January amount leaves both unchanged while the content digest and the January–February result change |
 | `selected_utc`, `selected_by` | `2026-09-09`; the project owner after the two-lens consult |
 
 **`facts.customer_data`** — its own block and its own row on every surface: `state: NOT SELECTED`, the Alder cohort
@@ -50,9 +50,10 @@ outside this project has been asked, and selecting the synthetic fixture changes
 
 `rfc/spikes/bq-graph/fixtures/facts/`:
 
-- `fixture.sql` and `expected.json` — byte-equal copies of the pinned SDK Git objects (`git show <pin>:<path>`),
-  so the digests can be recomputed without an SDK checkout. `SOURCE.md` names the SDK path, the pin, the branch
-  the pin sits on, and the recompute commands.
+- `fixture.sql`, `expected.json`, `publication.json` and the declaration `gross-margin-period.md` — byte-equal
+  copies of the pinned SDK Git objects (`git show <pin>:<path>`), so every digest recomputes without an SDK checkout.
+  `source.json` is the machine-readable provenance pin (SDK path, digest and size per file, pin and branch);
+  `SOURCE.md` says the same for a reader with the recompute commands.
 - `content.json` — the canonical content manifest (`okf-fact-content/1`): a table map, each table's ordered
   schema fields (`name`, `type`, `mode`) and its rows in schema order; sorted object keys, compact separators,
   ASCII escaping, one trailing newline; rows sorted by their own compact encoding, duplicates retained; NUMERIC as
@@ -78,7 +79,19 @@ When `facts.state == SELECTED`:
   per-table row counts. A wrong hash, a missing artifact or a drifted manifest fails the build.
 - If `observed_in_the_retained_chain` is present, `dataset`, `tables` and `sdk_pin` must equal it: the selection
   names what the chain used.
-- `blocks` must be empty; `facts.customer_data` must be present with `state` `NOT SELECTED` or `SELECTED`.
+- Source identity is bound to offline provenance, not accepted as syntax: `fixtures/facts/source.json` pins the SDK
+  path, digest and size of every vendored file; `sdk_pin`, `fixture_path` and `expected_results_path` must equal it,
+  `publication_manifest_sha256` must equal the vendored `publication.json` and `computation_sha256` the vendored
+  declaration `gross-margin-period.md`, and `dataset`, `location`, `tables` and `computation_sha256` must equal what
+  the vendored publication manifest declares.
+- Unsupported promotions are refused: `synthetic` must be `true`, `live_materialization` must start with
+  `UNVERIFIED`, `historical_chain_equivalence` with `UNPROVEN`, and `facts.customer_data.state` must be
+  `NOT SELECTED`. A future VERIFIED readback, a PROVEN equivalence or a customer selection each needs its own
+  separately validated evidence or owner record, which no schema defines yet; a bare word is not evidence.
+- Dates are real calendar dates (`valid_for_runs_on_or_after`, `selected_utc`); `materialization_expires_utc` reads
+  `about YYYY-MM-DD …` or `unknown …` and refuses null, malformed values and a bare exact timestamp, because an exact
+  expiry would need a table `expirationTime` readback the record does not carry.
+- `blocks` must be empty.
 
 Unchanged for `UNSELECTED`: the four explanatory fields stay required and `blocks` must name real cells.
 

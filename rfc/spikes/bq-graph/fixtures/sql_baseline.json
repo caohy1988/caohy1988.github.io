@@ -59,7 +59,7 @@
       "computation_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
       "content_manifest_format": "okf-fact-content/1",
       "content_manifest_sha256": "7264e7df6276463dc4ec7a6b179b87bff08aaa105660ea37611398fc197454f0",
-      "vendored_copies": "fixtures/facts/{fixture.sql,expected.json,content.json,SOURCE.md}: the first two are byte-equal to the pinned SDK Git objects; content.json is derived from fixture.sql by okf_bq_graph.fact_content and re-derived by validate_plan",
+      "vendored_copies": "fixtures/facts/{fixture.sql,expected.json,publication.json,gross-margin-period.md,content.json,source.json,SOURCE.md}: the SDK files are byte-equal to the pinned Git objects named in source.json; content.json is derived from fixture.sql by okf_bq_graph.fact_content; validate_plan re-hashes all of them, binds every digest and path here to source.json and the publication manifest, and re-derives the manifest on every build",
       "row_counts": {
         "fulfillment_cost": 2,
         "fx_daily_rates": 0,
@@ -80,7 +80,7 @@
       "valid_for_runs_on_or_after": "2026-03-12",
       "validity_note": "the declaration's compiled SQL uses DATE_DIFF(CURRENT_DATE(), DATE(o.order_ts), DAY) >= 30 and the latest fixture order is 2026-02-10, so the expected results hold for any evaluation date on or after 2026-03-12; the SQL is left as authored because changing it would change computation_sha256 and unbind the retained chain",
       "materialization_expires_utc": "about 2026-10-05 (30-day table expiration set at provisioning); after that the same digest must be re-loaded under the owner's gate and the new load job recorded here",
-      "live_precheck": "NOT IMPLEMENTED, a contract for the runner slice: before any consumer campaign, per-table row counts must equal row_counts and the January request must return expected_gross_margin_usd_2026_01, else the campaign stops FACTS_DRIFTED with no cell filled",
+      "live_precheck": "NOT IMPLEMENTED, a contract for the runner slice: before any consumer campaign the runner reads every selected table back in full (schema and rows), canonicalises the readback as okf-fact-content/1 and requires its digest to equal content_manifest_sha256, then binds that verified immutable or protected table set to every attempt's evidence; otherwise the campaign stops FACTS_DRIFTED with no cell filled. Per-table row counts equal to row_counts and a January result of expected_gross_margin_usd_2026_01 are smoke checks only: changing one non-January amount leaves both unchanged while the content digest and the January–February result change",
       "selected_utc": "2026-09-09",
       "selected_by": "project owner, after the 2026-09-09 two-lens consult (implementer and reviewer memos, both recommending SELECT now as the synthetic fixture digest)"
     },
