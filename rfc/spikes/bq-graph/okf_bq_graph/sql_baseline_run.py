@@ -16,8 +16,24 @@ What the driver refuses to do, by construction rather than by comment:
   (`FACTS_UNSELECTED`). Asking for one raises `RefusedCell` naming both reasons.
 * Reuse a `run_id`. Every campaign gets a fresh `sqlbase-<utc>-<hex>` id and `assert_run_id_is_fresh`
   checks the retained summary before any client exists; `benchmark.measure` checks again.
-* Open a reservation window. Baseline cells run on-demand: the budget carries `cell_seconds` and a
-  total deadline, never a `window`, and the module does not import `reservation` or `lifecycle`.
+* Open a reservation window, or *assume* on-demand. Omitting a window does not make a job on-demand: an
+  unset job routing inherits whatever assignment applies to the project, and a standing Enterprise
+  assignment exists in this project. Every job therefore carries BigQuery's job-level override
+  `reservation = "none"` (Astra PR55 #1), and `RoutingGuard` reads every job's recorded statistics: a
+  reservation_id or an edition on any job fails that request closed and stops the campaign. The record
+  says `edition = "on-demand"` only when at least one job ran and none violated; the standing reservation
+  `US.okf-demo-enterprise` is never listed, touched or deleted.
+* Let a deadline stop only the *next* admission. Each cell gets its own `lifecycle.WindowJobs` gate
+  (Astra PR55 #2) whose deadline is the earlier of the cell budget and the campaign deadline, and every
+  job the cell submits goes through it: submission, result polling and row pagination all stop at the
+  deadline and the in-flight jobs are cancelled. A cell stopped that way is INCOMPLETE with the reason
+  named; it is never COMPLETE with `stopped_reason = null`.
+* Spend past the declared bytes / USD ceiling (Astra PR55 #3). `BytesLedger` is one shared running
+  account over the whole campaign — warmups, failures and concurrent jobs included. Every job takes a
+  hold before submission that becomes its `maximum_bytes_billed`, so BigQuery itself refuses a job that
+  would bill past the room left; the hold is settled against the bytes the job actually billed; and when
+  no room is left the next job is not submitted and the cell stops `BYTES_BUDGET` / `USD_BUDGET`. The prior
+  projection is a pre-flight sanity check only; it enforces nothing.
 * Open a client in `--dry-run`. The BigQuery client is constructed lazily inside the per-thread factory
   that only `--live` builds, so a dry run prints the campaign and touches nothing.
 
@@ -42,6 +58,8 @@ from google.cloud import bigquery
 from . import PROJECT, LOCATION
 from . import benchmark
 from . import sql_baseline as sb
+from .lifecycle import WindowJobs
+from .retrieve import RoutingViolation
 
 ROOT = sb.ROOT
 CASES = ROOT / "fixtures" / "cases.json"
@@ -52,6 +70,9 @@ SEED = 20260919                           # deterministic query order per cell; 
 FORCED_PREFIX = "forced:"
 RUN_ID_PREFIX = "sqlbase"
 TOTAL_DEADLINE_REASON = "TOTAL_TIME_BUDGET"
+ON_DEMAND_RESERVATION = "none"            # BigQuery job-level routing override: run on-demand regardless of assignments
+PER_JOB_CAP_BYTES = 1 * sb.GIB            # sanity cap on one job; the largest recorded baseline job billed ~110 MiB
+MIN_BILLED_BYTES = 10 * 1024 ** 2         # BigQuery bills at least 10 MiB per on-demand query; less room is no room
 
 
 class RefusedCell(ValueError):
@@ -194,6 +215,145 @@ def assert_run_id_is_fresh(run_id: str, summary_path: Path | str | None = None, 
         raise ValueError(f"run_id {run_id!r} already has a campaign record at {record}")
 
 
+# --- execution ceilings -------------------------------------------------------------------------------
+
+class BytesLedger:
+    """One shared running account of billed bytes for a whole campaign, thread-safe.
+
+    `hold()` reserves room for one job before it is submitted and returns the job's `maximum_bytes_billed`;
+    `settle()` releases the hold and charges what the job actually billed. Holds count against the ceiling
+    while they are out, so concurrent jobs cannot collectively exceed it, and the per-job cap keeps one
+    runaway query from taking the whole campaign's room. The ceiling is the tighter of the declared byte
+    ceiling and the declared USD ceiling at the plan's list rate.
+    """
+
+    def __init__(self, max_bytes: int, usd_per_tib: float, max_usd: float, per_job_cap: int = PER_JOB_CAP_BYTES):
+        self.max_bytes = int(max_bytes)
+        self.max_usd = float(max_usd)
+        self.usd_per_tib = float(usd_per_tib)
+        self.usd_cap_bytes = int(max_usd / usd_per_tib * sb.TIB)
+        self.cap_bytes = min(self.max_bytes, self.usd_cap_bytes)
+        self.binding = "BYTES_BUDGET" if self.max_bytes <= self.usd_cap_bytes else "USD_BUDGET"
+        self.per_job_cap = int(per_job_cap)
+        self.charged = 0
+        self.held = 0
+        self.jobs = 0
+        self.refused = 0
+        self.max_hold_seen = 0
+        self._lock = threading.Lock()
+
+    def usd_list(self) -> float:
+        return self.charged / sb.TIB * self.usd_per_tib
+
+    def room(self) -> int:
+        return self.cap_bytes - self.charged - self.held
+
+    def exhausted(self) -> bool:
+        return self.room() < MIN_BILLED_BYTES
+
+    def stop_reason(self) -> str | None:
+        return self.binding if self.exhausted() else None
+
+    def hold(self) -> int | None:
+        with self._lock:
+            room = self.room()
+            if room < MIN_BILLED_BYTES:
+                self.refused += 1
+                return None
+            hold = min(room, self.per_job_cap)
+            self.held += hold
+            self.max_hold_seen = max(self.max_hold_seen, hold)
+            return hold
+
+    def settle(self, hold: int, bytes_billed: int) -> None:
+        with self._lock:
+            self.held -= hold
+            self.charged += int(bytes_billed or 0)
+            self.jobs += 1
+
+    def snapshot(self) -> dict:
+        with self._lock:
+            return {"ceiling_bytes": self.cap_bytes, "ceiling_binding": self.binding,
+                    "max_bytes_billed_declared": self.max_bytes, "max_usd_declared": self.max_usd,
+                    "usd_per_tib": self.usd_per_tib, "per_job_cap_bytes": self.per_job_cap,
+                    "jobs_settled": self.jobs, "jobs_refused_no_room": self.refused,
+                    "bytes_billed_charged": self.charged, "usd_list_charged": round(self.usd_list(), 4),
+                    "holds_outstanding_bytes": self.held, "largest_hold_bytes": self.max_hold_seen,
+                    "exhausted": self.exhausted(),
+                    "note": "warmups, failures and concurrent jobs all charge this account; the projection did not"}
+
+
+class RoutingGuard:
+    """Require on-demand routing on every job and verify it from the job's own statistics."""
+
+    reservation = ON_DEMAND_RESERVATION
+
+    def __init__(self) -> None:
+        self.jobs = 0
+        self.violations: list[dict] = []
+        self._lock = threading.Lock()
+
+    def check(self, entry: dict) -> None:
+        with self._lock:
+            self.jobs += 1
+            if entry.get("reservation_id") or entry.get("edition"):
+                violation = {"job_id": entry.get("job_id"), "stage": entry.get("stage"),
+                             "reservation_id": entry.get("reservation_id"), "edition": entry.get("edition")}
+                self.violations.append(violation)
+        if entry.get("reservation_id") or entry.get("edition"):
+            raise RoutingViolation(
+                f"job {entry.get('job_id')} ran with reservation_id={entry.get('reservation_id')!r} "
+                f"edition={entry.get('edition')!r} although reservation={self.reservation!r} was requested; "
+                "this campaign is not on-demand and stops here")
+
+    def stop_reason(self) -> str | None:
+        return "ROUTING_VIOLATION" if self.violations else None
+
+    def verified(self) -> bool:
+        return self.jobs > 0 and not self.violations
+
+    def snapshot(self) -> dict:
+        with self._lock:
+            return {"job_reservation_requested": self.reservation, "jobs_checked": self.jobs,
+                    "violations": list(self.violations), "verified_on_demand": self.verified(),
+                    "note": ("verified means every checked job reported no reservation_id and no edition; "
+                             "the standing reservation is neither read nor touched")}
+
+
+class CampaignRuntime:
+    """The live-only objects: per-cell submission gates, the shared ledger and the routing guard."""
+
+    def __init__(self, campaign: dict, out_dir: Path, deadline_monotonic: float):
+        b = campaign["budget"]
+        self.campaign = campaign
+        self.out_dir = Path(out_dir)
+        self.deadline_monotonic = deadline_monotonic
+        self.cell_seconds = b["cell_seconds"]
+        self.ledger = BytesLedger(b["max_bytes_billed_gib"] * sb.GIB, b["ondemand_usd_per_tib"], b["max_usd_ondemand_list"],
+                                  per_job_cap=b["per_job_cap_bytes"])
+        self.routing = RoutingGuard()
+        self.window: WindowJobs | None = None
+        self.gates: list[dict] = []
+        self._lock = threading.Lock()
+
+    def window_for_cell(self, cell: dict, started: float) -> WindowJobs:
+        deadline = min(started + self.cell_seconds, self.deadline_monotonic)
+        label = f"{self.campaign['run_id']}_{cell['name']}"
+        window = WindowJobs(label, deadline, self.out_dir / f"jobs_{label}.json")
+        with self._lock:
+            self.window = window
+            self.gates.append({"cell": cell["name"], "label": label, "journal": str(window.journal),
+                               "deadline_seconds_from_cell_start": round(deadline - started, 1)})
+        return window
+
+    def stop_check(self) -> str | None:
+        return self.routing.stop_reason() or self.ledger.stop_reason()
+
+    def current_window(self) -> WindowJobs | None:
+        with self._lock:
+            return self.window
+
+
 # --- campaign ---------------------------------------------------------------------------------------
 
 def build_campaign(plan: dict, cases: dict, names: list[str] | None = None, run_id: str | None = None) -> dict:
@@ -206,8 +366,11 @@ def build_campaign(plan: dict, cases: dict, names: list[str] | None = None, run_
         "run_id": run_id or fresh_run_id(),
         "plan_version": plan["version"],
         "engine": ENGINE,
-        "edition": "on-demand",
-        "reservation": None,
+        "edition_requested": "on-demand",
+        "routing": {"job_reservation": ON_DEMAND_RESERVATION,
+                    "verification": "every job's statistics must report no reservation_id and no edition; "
+                                    "one violation stops the campaign and the record is not labelled on-demand"},
+        "reservation_window": None,
         "project": PROJECT,
         "location": LOCATION,
         "dataset": plan["corpus"]["dataset"],
@@ -217,6 +380,10 @@ def build_campaign(plan: dict, cases: dict, names: list[str] | None = None, run_
             "total_seconds": budget["max_wall_seconds_total"],
             "max_bytes_billed_gib": budget["max_bytes_billed_gib"],
             "max_usd_ondemand_list": budget["max_usd_ondemand_list"],
+            "ondemand_usd_per_tib": budget["ondemand_usd_per_tib"],
+            "per_job_cap_bytes": PER_JOB_CAP_BYTES,
+            "enforcement": "shared running ledger over every job (warmups, failures, concurrency); per-job "
+                           "maximum_bytes_billed = min(room left, per_job_cap); exhausted → next job not submitted",
             "deadline_reason": TOTAL_DEADLINE_REASON,
             "stop_rule": budget["stop_rule"],
         },
@@ -231,10 +398,14 @@ def assert_campaign_is_runnable(campaign: dict) -> None:
     """Gates that must hold before a paid request is sent; all evaluable offline."""
     if not campaign["cells"]:
         raise ValueError("no retrieval cells selected")
-    if campaign["reservation"] is not None or "window" in campaign["budget"]:
+    if campaign.get("reservation_window") is not None or "window" in campaign["budget"]:
         raise ValueError("baseline cells run on-demand: no reservation window may be attached")
+    if campaign["routing"]["job_reservation"] != ON_DEMAND_RESERVATION:
+        raise ValueError("baseline jobs must carry the on-demand routing override")
     if not campaign["budget_projection"]["within_budget"]:
         raise ValueError(f"projected bytes/usd exceed the declared ceiling: {campaign['budget_projection']}")
+    if campaign["budget"]["per_job_cap_bytes"] > campaign["budget"]["max_bytes_billed_gib"] * sb.GIB:
+        raise ValueError("per-job cap exceeds the campaign ceiling")
     if sum(campaign["budget"]["cell_seconds"] for _ in campaign["cells"]) > campaign["budget"]["total_seconds"]:
         raise ValueError("per-cell ceilings sum past the total ceiling; the total deadline would cut the last cell short by construction")
     for cell in campaign["cells"]:
@@ -246,31 +417,47 @@ def assert_campaign_is_runnable(campaign: dict) -> None:
             raise ValueError(f"{cell['name']}: engine {cell['engine']!r} is not the ordinary-SQL comparator")
 
 
-def measure_config(campaign: dict, started_monotonic: float | None = None) -> dict:
-    """The `benchmark.measure` config: one shared run_id, per-cell query lists, total deadline, no window."""
+def measure_config(campaign: dict, started_monotonic: float | None = None, runtime: CampaignRuntime | None = None) -> dict:
+    """The `benchmark.measure` config: one shared run_id, per-cell query lists, total deadline, no reservation window.
+
+    With a runtime, every cell also gets its own submission gate and the shared ceiling check."""
     started = time.monotonic() if started_monotonic is None else started_monotonic
+    budget = {
+        "cell_seconds": campaign["budget"]["cell_seconds"],
+        "deadline_monotonic": started + campaign["budget"]["total_seconds"],
+        "deadline_reason": campaign["budget"]["deadline_reason"],
+    }
+    if runtime is not None:
+        budget["window_for_cell"] = runtime.window_for_cell
+        budget["stop_check"] = runtime.stop_check
     return {
         "run_id": campaign["run_id"],
         "cells": [dict(c) for c in campaign["cells"]],
         "queries": [],   # every cell carries its own shape; nothing is pooled here
-        "budget": {
-            "cell_seconds": campaign["budget"]["cell_seconds"],
-            "deadline_monotonic": started + campaign["budget"]["total_seconds"],
-            "deadline_reason": campaign["budget"]["deadline_reason"],
-        },
+        "budget": budget,
     }
 
 
-def client_factory(dataset: str, make_client: Callable[[], Any] | None = None) -> Callable[[], dict]:
+def client_factory(dataset: str, make_client: Callable[[], Any] | None = None,
+                   runtime: CampaignRuntime | None = None) -> Callable[[], dict]:
     """Per-thread `fallback` clients with both caches off. The client is built on first use, never at import
-    or at campaign-build time, which is what keeps `--dry-run` client-free."""
+    or at campaign-build time, which is what keeps `--dry-run` client-free.
+
+    With a runtime the raw client is bound to the current cell's gate, and the ledger and routing guard ride
+    along so `retrieve._run` caps, settles and verifies every job."""
     local = threading.local()
     make = make_client or (lambda: bigquery.Client(project=PROJECT, location=LOCATION))
 
     def get() -> dict:
         if not hasattr(local, "c"):
             local.c = make()
-        return {"engine": ENGINE, "bq": local.c, "ds": dataset, "use_cache": False}
+        clients = {"engine": ENGINE, "bq": local.c, "ds": dataset, "use_cache": False}
+        if runtime is not None:
+            window = runtime.current_window()
+            if window is None:
+                raise RuntimeError("no submission gate is open for this cell; refusing to build an unbounded client")
+            clients.update(bq=window.bind(local.c), bytes_ledger=runtime.ledger, routing=runtime.routing)
+        return clients
     return get
 
 
@@ -279,11 +466,14 @@ def describe(campaign: dict) -> str:
     p = campaign["budget_projection"]
     lines = [
         f"sql-baseline campaign {campaign['run_id']} — plan {campaign['plan_version']}, engine {campaign['engine']}, "
-        f"{campaign['edition']}, reservation none, dataset {campaign['project']}.{campaign['dataset']}",
+        f"requested {campaign['edition_requested']} (job reservation override {campaign['routing']['job_reservation']!r}, "
+        f"verified per job), no reservation window, dataset {campaign['project']}.{campaign['dataset']}",
         f"budget: {b['cell_seconds']} s per cell, {b['total_seconds']} s total ({b['deadline_reason']} when reached), "
-        f"{b['max_bytes_billed_gib']} GiB billed, ${b['max_usd_ondemand_list']:.2f} at list; projection "
+        f"{b['max_bytes_billed_gib']} GiB billed, ${b['max_usd_ondemand_list']:.2f} at list, enforced by a running "
+        f"ledger with per-job maximum_bytes_billed ≤ {b['per_job_cap_bytes'] / sb.GIB:.1f} GiB; projection "
         f"{p['bytes_billed_projected_total'] / sb.GIB:.1f} GiB → ${p['usd_ondemand_list_projected']:.2f} "
-        f"({'within' if p['within_budget'] else 'NOT within'} ceiling)",
+        f"({'within' if p['within_budget'] else 'NOT within'} ceiling; a sanity check, not the enforcement)",
+        "gates: one submission gate per cell (submission, result polling and pagination stop at the cell/total deadline)",
         "caches: bigquery result cache off, retrieval cache off",
     ]
     for c in campaign["cells"]:
@@ -305,6 +495,7 @@ def live(campaign: dict, out_dir: Path | str = OUT_DIR, make_client: Callable[[]
     out_dir.mkdir(parents=True, exist_ok=True)
     measure = measure or benchmark.measure
     started_utc, started = _now(), time.monotonic()
+    runtime = CampaignRuntime(campaign, out_dir, started + campaign["budget"]["total_seconds"])
     record: dict[str, Any] = {k: v for k, v in campaign.items() if k != "cells"}
     record.update({
         "started_utc": started_utc,
@@ -318,7 +509,7 @@ def live(campaign: dict, out_dir: Path | str = OUT_DIR, make_client: Callable[[]
                  "is regenerated from this record in a separate reviewed step."),
     })
     try:
-        result = measure(measure_config(campaign, started), client_factory(campaign["dataset"], make_client))
+        result = measure(measure_config(campaign, started, runtime), client_factory(campaign["dataset"], make_client, runtime))
         record["cells"] = result["cells"]
         record["state"] = "COMPLETE" if all(c["state"] == "COMPLETE" for c in result["cells"]) else "INCOMPLETE"
     except BaseException as e:  # noqa: BLE001 - the record is retained with the failure named
@@ -327,8 +518,19 @@ def live(campaign: dict, out_dir: Path | str = OUT_DIR, make_client: Callable[[]
         record["error"] = f"{type(e).__name__}: {e}"[:500]
         raise
     finally:
+        window = runtime.current_window()
+        if window is not None:
+            window.stop_and_cancel()      # an abort mid-cell still seals the open gate
         record["ended_utc"] = _now()
         record["wall_seconds"] = round(time.monotonic() - started, 1)
+        record["billing"] = runtime.ledger.snapshot()
+        record["routing"] = dict(campaign["routing"], **runtime.routing.snapshot())
+        record["gates"] = runtime.gates
+        verified = runtime.routing.verified()
+        record["edition"] = "on-demand" if verified else None
+        record["edition_note"] = ("every checked job reported no reservation_id and no edition" if verified else
+                                  "NOT established: " + ("no job was checked" if runtime.routing.jobs == 0 else
+                                                         f"{len(runtime.routing.violations)} job(s) reported a reservation or edition"))
         (out_dir / f"run_{campaign['run_id']}.json").write_text(json.dumps(record, indent=2, default=str) + "\n")
     return record
 

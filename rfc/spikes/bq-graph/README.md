@@ -725,13 +725,31 @@ right driver: it reads `fixtures/scale.json`, defaults its cells to the `gql` en
 questions into one query list, and runs inside an Enterprise reservation window. `okf_bq_graph.sql_baseline_run` reads
 this plan instead, hands each cell only its own shape (`tests/test_sql_baseline_run.py` runs the real
 `benchmark.measure` with a faked `retrieve` and checks that no forced text reaches a natural cell or vice versa),
-runs on-demand with no window, and labels the campaign with a fresh `sqlbase-<utc>-<hex>` run_id that is checked
-against the retained GQL summary before a client is built. `--dry-run` constructs no client; `--live` is Pass 2 and
-needs Haiyuan's paid authorization. `benchmark.run_cell` gained two backward-compatible fields for it: a per-cell
-`queries` list and a `budget["deadline_reason"]` label, so a total-budget stop reads `TOTAL_TIME_BUDGET` here and
-`WINDOW_DEADLINE` in the reservation-window runner as before. The card's retrieval cells therefore read `NOT_RUN` with
-the exact command that fills each; the consumer cells still read `NOT_IMPLEMENTED + FACTS_UNSELECTED`, and the driver
-refuses to run them.
+and labels the campaign with a fresh `sqlbase-<utc>-<hex>` run_id that is checked against the retained GQL summary
+before a client is built. `--dry-run` constructs no client; `--live` is Pass 2 and needs Haiyuan's paid authorization.
+Three execution guarantees were added after Astra's first review (PR 55, three P1s), each with an offline regression
+that drives the real SDK with synthetic API responses:
+
+* **On-demand is enforced and verified, not assumed.** Omitting a reservation window does not make a job on-demand;
+  an unset routing inherits the project's assignments, and a standing Enterprise assignment exists. Every job carries
+  BigQuery's job-level override `reservation = "none"`, and `RoutingGuard` reads every job's recorded statistics: a
+  reservation_id or an edition on any job stops the campaign, and the record says `edition = "on-demand"` only when
+  at least one job was checked and none violated. The standing reservation is neither listed nor touched.
+* **Deadlines stop in-flight work.** Each cell gets its own `lifecycle.WindowJobs` gate (the job inventory, no
+  capacity) with its deadline at the earlier of the 900 s cell budget and the 3600 s campaign deadline; submission,
+  result polling and row pagination all stop there and in-flight jobs are cancelled with a receipt. A cell stopped
+  that way is INCOMPLETE with `CELL_TIME_BUDGET` / `TOTAL_TIME_BUDGET`, including when the cut hit its last request.
+* **Bytes and USD are enforced while running.** `BytesLedger` is one shared account over the whole campaign (warmups,
+  failures, concurrent jobs). Each job takes a hold before submission that becomes its `maximum_bytes_billed`
+  (≤ 1 GiB per job, ≤ the room left), settles against the bytes it actually billed, and when no room is left the next
+  job is not submitted and the run stops `BYTES_BUDGET` / `USD_BUDGET`. The prior-observation projection is a
+  pre-flight sanity check only.
+
+`benchmark.run_cell` gained backward-compatible hooks for this: a per-cell `queries` list, `budget["deadline_reason"]`,
+`budget["window_for_cell"]` and `budget["stop_check"]`; a cell that stopped for any reason is INCOMPLETE even when its
+n-th attempt was retained. The reservation-window runner's `WINDOW_DEADLINE` label and behaviour are unchanged. The
+card's retrieval cells read `NOT_RUN` with the exact command that fills each; the consumer cells still read
+`NOT_IMPLEMENTED + FACTS_UNSELECTED`, and the driver refuses to run them.
 
 **One correction this card carries.** `evidence/report.md` and `evidence/comparison.md` describe both forced fallback
 observations as on-demand. Every job in `all_all-0017.json#fallback_forced` carries the spike's Enterprise reservation,

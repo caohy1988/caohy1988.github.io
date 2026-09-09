@@ -73,12 +73,36 @@ class Timer:
 EDITION_ERR = "require a reservation with Enterprise"
 
 
+class BudgetExhausted(RuntimeError):
+    """The caller's shared billed-byte / USD ledger has no room for another job. Nothing was submitted."""
+
+
+class RoutingViolation(RuntimeError):
+    """A job the caller required to run on-demand reports a reservation or an edition in its statistics."""
+
+
 def _run(clients: dict, name: str, query: str, params: list, timer: Timer) -> list[dict]:
     """One BigQuery job. A job that is mis-routed to on-demand during assignment propagation (edition error)
-    is retried at most twice; the retry count is recorded so the benchmark can report it."""
+    is retried at most twice; the retry count is recorded so the benchmark can report it.
+
+    Two optional caller policies ride in `clients` (the SQL-baseline driver sets both; every other caller is unchanged):
+
+    * `clients["bytes_ledger"]` — an object with `hold() -> int | None` and `settle(hold, bytes_billed)`. A hold is
+      taken BEFORE submission and becomes the job's `maximum_bytes_billed`, so BigQuery itself refuses a job that would
+      bill past the caller's remaining room; when no hold is available the job is not submitted and `BudgetExhausted`
+      is raised. Every job settles its hold against the bytes it actually billed, failures included.
+    * `clients["routing"]` — an object with a `reservation` string and `check(job_entry)`. The string is written into
+      the job configuration (`"none"` is BigQuery's on-demand override, so an inherited project assignment cannot route
+      the job onto a reservation), and `check` sees the recorded statistics of every job so a reservation_id or edition
+      that contradicts the requested routing fails the request closed with `RoutingViolation`.
+    """
     cfg = bigquery.QueryJobConfig(query_parameters=params, use_query_cache=clients.get("use_cache", False),
                                   labels={"okf_spike": "bq_graph_20260905", "stage": name})
     journal = clients.get("journal")      # catalog chain: every retrieval job is journaled before the send, incl. failures
+    ledger = clients.get("bytes_ledger")
+    routing = clients.get("routing")
+    if routing is not None:
+        cfg.reservation = routing.reservation
     t = time.monotonic()
     retries = 0
     while True:
@@ -92,17 +116,33 @@ def _run(clients: dict, name: str, query: str, params: list, timer: Timer) -> li
                 if EDITION_ERR in str(e) and retries < 2 and clients.get("engine") == "gql":
                     retries += 1; time.sleep(2); continue
                 raise
-        job = clients["bq"].query(query, job_config=cfg, location=LOCATION)
+        hold = None
+        if ledger is not None:
+            hold = ledger.hold()
+            if hold is None:
+                raise BudgetExhausted(f"{name}: {ledger.stop_reason()}; no job submitted")
+            cfg.maximum_bytes_billed = hold
+        try:
+            job = clients["bq"].query(query, job_config=cfg, location=LOCATION)
+        except BaseException:
+            if hold is not None:
+                ledger.settle(hold, 0)          # nothing was submitted, so nothing was billed
+            raise
         at = timer.job(name, job, state="SUBMITTED")   # in the inventory before any wait: a failure must not erase it
         try:
             rows = [dict(r) for r in job.result()]
             timer.job(name, job, at=at)
-            break
         except gexc.GoogleAPICallError as e:
             timer.job(name, job, state="FAILED", error=f"{type(e).__name__}: {str(e)[:200]}", at=at)
             if EDITION_ERR in str(e) and retries < 2 and clients.get("engine") == "gql":
                 retries += 1; time.sleep(2); continue
             raise
+        finally:
+            if hold is not None:
+                ledger.settle(hold, timer.jobs[at].get("bytes_billed") or 0)
+        if routing is not None:
+            routing.check(timer.jobs[at])
+        break
     timer.stage(name, t)
     if journal is not None:
         timer.job(name, job)
@@ -299,6 +339,11 @@ def retrieve(query: "str | ConceptSeed", bundle_id: str, publication_id: str, re
         return _denied(f"authorization error: {type(e).__name__}", scope, timer)
     except gexc.NotFound as e:
         return _denied(f"not found (treated as denied): {type(e).__name__}", scope, timer)
+    except BaseException as e:
+        # A request cut mid-flight (gate deadline, ceiling, routing) still has a job inventory: the jobs it submitted
+        # before the cut travel with the exception so the retained attempt names them (they are what the gate cancelled).
+        e.okf_timing = timer.done()
+        raise
     # --- assembly (local)
     t = time.monotonic()
     out = _assemble(seeds, walks, ctx, seed_nodes, as_of, warnings, scope, engine)
