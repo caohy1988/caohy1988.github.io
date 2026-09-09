@@ -11,10 +11,11 @@ re-implements them.
 
 What the driver refuses to do, by construction rather than by comment:
 
-* Run a consumer cell (`sqlchain_*`). Those need a request-to-consumer runner that does not exist
-  (`NOT_IMPLEMENTED`) and, while `facts.state` is UNSELECTED, a fact-data version nobody has chosen
-  (`FACTS_UNSELECTED`). Asking for one raises `RefusedCell` naming every reason that applies; since the
-  2026-09-09 selection of the synthetic fixture digest the committed plan yields `NOT_IMPLEMENTED` alone.
+* Run a consumer cell (`sqlchain_*`). Those belong to `okf_bq_graph.consumer_run`, which has dry-run and
+  hermetic modes only (`RUNNER_HERMETIC_ONLY`, FS-1 2026-09-09; `NOT_IMPLEMENTED` before it existed) and,
+  while `facts.state` is UNSELECTED, need a fact-data version nobody has chosen (`FACTS_UNSELECTED`). Asking
+  for one raises `RefusedCell` naming every reason that applies; since the 2026-09-09 selection of the
+  synthetic fixture digest the committed plan yields `RUNNER_HERMETIC_ONLY` alone.
 * Reuse a `run_id`. Every campaign gets a fresh `sqlbase-<utc>-<hex>` id and `assert_run_id_is_fresh`
   checks the retained summary before any client exists; `benchmark.measure` checks again.
 * Open a reservation window, or *assume* on-demand. Omitting a window does not make a job on-demand: an
@@ -120,8 +121,9 @@ def consumer_cell_names(plan: dict) -> list[str]:
 
 
 def refusal_reasons(plan: dict, name: str) -> list[str]:
-    """Why a consumer cell cannot be run here. Always NOT_IMPLEMENTED; FACTS_UNSELECTED while it applies."""
-    reasons = ["NOT_IMPLEMENTED"]
+    """Why a consumer cell cannot be run here. Always RUNNER_HERMETIC_ONLY (the consumer runner has no live mode);
+    FACTS_UNSELECTED while it applies."""
+    reasons = ["RUNNER_HERMETIC_ONLY"]
     facts = plan["facts"]
     if facts["state"] == "UNSELECTED" and name in facts.get("blocks", []):
         reasons.insert(0, "FACTS_UNSELECTED")
@@ -142,7 +144,8 @@ def select_cells(plan: dict, names: list[str] | None = None) -> list[dict]:
                 f"{name}: this driver measures retrieval_ms only and refuses to pretend to fill a "
                 f"request_to_consumer_ms cell ({' + '.join(reasons)}). "
                 + ("No fact-data version is selected, so two runs of it would not be comparable. " if "FACTS_UNSELECTED" in reasons else "")
-                + "No sampled request-to-consumer runner exists; okf_bq_graph.chain runs each case once.")
+                + "The request-to-consumer runner is okf_bq_graph.consumer_run and it has no live mode (dry-run and hermetic only); "
+                  "a hermetic attempt never fills a live cell.")
         if name not in retrieval:
             raise ValueError(f"{name}: not a cell in the sql-baseline plan (retrieval cells: {sorted(retrieval)})")
         if name in {c["name"] for c in chosen}:
