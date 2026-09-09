@@ -1,0 +1,433 @@
+{
+  "run_id": "sqlbase-20260909-065734-c50d0411",
+  "plan_version": "sql-baseline/0.1.0",
+  "engine": "fallback",
+  "edition_requested": "on-demand",
+  "routing": {
+    "job_reservation": "none",
+    "verification": "every job's statistics must report no reservation_id and no edition; one violation stops the campaign and the record is not labelled on-demand",
+    "job_reservation_requested": "none",
+    "jobs_observed": 1678,
+    "jobs_verified_on_demand": 1678,
+    "violations": [],
+    "unknown": [],
+    "verified_on_demand": true,
+    "note": "verified means every observed job - successes and failures - was reported DONE with statistics carrying no reservation_id and no edition, and no job's outcome is unknown; the standing reservation is neither read nor touched"
+  },
+  "reservation_window": null,
+  "project": "test-project-0728-467323",
+  "location": "US",
+  "dataset": "okf_graph_spike_20260905",
+  "budget": {
+    "cell_seconds": 900,
+    "total_seconds": 3600,
+    "max_bytes_billed_gib": 64,
+    "max_usd_ondemand_list": 0.5,
+    "ondemand_usd_per_tib": 6.25,
+    "per_job_cap_bytes": 1073741824,
+    "enforcement": "shared running ledger over every job (warmups, failures, concurrency); per-job maximum_bytes_billed = min(room left, per_job_cap); exhausted \u2192 next job not submitted",
+    "deadline_reason": "TOTAL_TIME_BUDGET",
+    "stop_rule": "A cell that reaches max_wall_seconds_per_cell, or a run that reaches any total ceiling, stops and is recorded INCOMPLETE / NOT_RUN_BUDGET with its attempts retained. Percentiles are nearest-rank over all attempts; failures and timeouts count and are never dropped."
+  },
+  "budget_projection": {
+    "bytes_billed_projected_total": 40265318400,
+    "usd_ondemand_list_projected": 0.2289,
+    "within_budget": true,
+    "shapes_without_observed_bytes": []
+  },
+  "cache": {
+    "bigquery_result_cache": false,
+    "retrieval_cache": false
+  },
+  "refused": {
+    "sqlchain_forced_c1": [
+      "FACTS_UNSELECTED",
+      "NOT_IMPLEMENTED"
+    ],
+    "sqlchain_forced_c5": [
+      "FACTS_UNSELECTED",
+      "NOT_IMPLEMENTED"
+    ]
+  },
+  "started_utc": "2026-09-09T06:57:34.200121+00:00",
+  "cells_declared": [
+    {
+      "name": "sqlbase_forced_c1",
+      "engine": "fallback",
+      "corpus": "acme_retail",
+      "ds": "okf_graph_spike_20260905",
+      "publication_id": "pub_190192147fd7fd78",
+      "bundles": null,
+      "shape": "forced",
+      "concurrency": 1,
+      "warmups": 20,
+      "measured": 100,
+      "timeout_s": 60,
+      "as_of": "2026-09-05T00:00:00Z",
+      "seed": 20260919,
+      "top_k": 5,
+      "model": null,
+      "query_ids": [
+        "f_legacy",
+        "f_current",
+        "f_revenue"
+      ]
+    },
+    {
+      "name": "sqlbase_forced_c5",
+      "engine": "fallback",
+      "corpus": "acme_retail",
+      "ds": "okf_graph_spike_20260905",
+      "publication_id": "pub_190192147fd7fd78",
+      "bundles": null,
+      "shape": "forced",
+      "concurrency": 5,
+      "warmups": 20,
+      "measured": 100,
+      "timeout_s": 60,
+      "as_of": "2026-09-05T00:00:00Z",
+      "seed": 20260919,
+      "top_k": 5,
+      "model": null,
+      "query_ids": [
+        "f_legacy",
+        "f_current",
+        "f_revenue"
+      ]
+    },
+    {
+      "name": "sqlbase_natural_c1",
+      "engine": "fallback",
+      "corpus": "acme_retail",
+      "ds": "okf_graph_spike_20260905",
+      "publication_id": "pub_190192147fd7fd78",
+      "bundles": null,
+      "shape": "natural",
+      "concurrency": 1,
+      "warmups": 20,
+      "measured": 100,
+      "timeout_s": 60,
+      "as_of": "2026-09-05T00:00:00Z",
+      "seed": 20260919,
+      "top_k": 5,
+      "model": "text-embedding-005",
+      "query_ids": [
+        "q_gm_exact",
+        "q_revenue_recognized",
+        "q_cogs",
+        "q_legacy_margin",
+        "q_orders_grain",
+        "q_attester"
+      ]
+    },
+    {
+      "name": "sqlbase_natural_c5",
+      "engine": "fallback",
+      "corpus": "acme_retail",
+      "ds": "okf_graph_spike_20260905",
+      "publication_id": "pub_190192147fd7fd78",
+      "bundles": null,
+      "shape": "natural",
+      "concurrency": 5,
+      "warmups": 20,
+      "measured": 100,
+      "timeout_s": 60,
+      "as_of": "2026-09-05T00:00:00Z",
+      "seed": 20260919,
+      "top_k": 5,
+      "model": "text-embedding-005",
+      "query_ids": [
+        "q_gm_exact",
+        "q_revenue_recognized",
+        "q_cogs",
+        "q_legacy_margin",
+        "q_orders_grain",
+        "q_attester"
+      ]
+    }
+  ],
+  "sdk": {
+    "google-cloud-bigquery": "3.45.0"
+  },
+  "requests_file": "evidence/requests.jsonl",
+  "summary_file": "evidence/summary.json",
+  "note": "retrieval_ms only; every attempt retained before aggregation; a cell stopped by its budget stays INCOMPLETE / NOT_RUN_BUDGET and carries no invented percentile. The card under evidence/sql-baseline is regenerated from this record in a separate reviewed step.",
+  "preflight": {
+    "kind": "dry_run",
+    "query": "SELECT 1",
+    "job_reservation": "none",
+    "started_utc": "2026-09-09T06:57:34.200165+00:00",
+    "creates_job": false,
+    "bills": false,
+    "requires": {
+      "option": "reservation_override_mode",
+      "value": "ALLOW_ANY_OVERRIDE",
+      "scope": "project or organization",
+      "docs": "https://docs.cloud.google.com/bigquery/docs/default-configuration"
+    },
+    "state": "OK",
+    "reason": null,
+    "job_id": null,
+    "total_bytes_processed": 0
+  },
+  "cells": [
+    {
+      "cell": "sqlbase_forced_c1",
+      "engine": "fallback",
+      "corpus": "acme_retail",
+      "concurrency": 1,
+      "run_id": "sqlbase-20260909-065734-c50d0411",
+      "publication_id": "pub_190192147fd7fd78",
+      "warmups_done": 20,
+      "measured_n": 100,
+      "measured_target": 100,
+      "state": "COMPLETE",
+      "stopped_reason": null,
+      "stopped_detail": null,
+      "success_rate": 1.0,
+      "errors": 0,
+      "timeouts": 0,
+      "gated": 0,
+      "p50_ms_all": 2564.2,
+      "p95_ms_all": 3171.3,
+      "max_ms_all": 4124.4,
+      "p50_ms_ok": 2564.2,
+      "p95_ms_ok": 3171.3,
+      "stage_p50_ms": {
+        "seed": 0.0,
+        "walk": 1118.2,
+        "context": 1208.9,
+        "nodes": 1353.7,
+        "assembly": 0.2
+      },
+      "stage_p95_ms": {
+        "seed": 0.0,
+        "walk": 1588.8,
+        "context": 1716.3,
+        "nodes": 1904.3,
+        "assembly": 0.4
+      },
+      "wall_seconds": 316.1,
+      "throughput_rps": 0.316,
+      "slot_ms_total": 96551,
+      "jobs_total": 300,
+      "slot_attribution_usd": 0.001609,
+      "note": "percentiles are nearest-rank; *_all include failures/timeouts; slot attribution is not the invoice"
+    },
+    {
+      "cell": "sqlbase_forced_c5",
+      "engine": "fallback",
+      "corpus": "acme_retail",
+      "concurrency": 5,
+      "run_id": "sqlbase-20260909-065734-c50d0411",
+      "publication_id": "pub_190192147fd7fd78",
+      "warmups_done": 20,
+      "measured_n": 100,
+      "measured_target": 100,
+      "state": "COMPLETE",
+      "stopped_reason": null,
+      "stopped_detail": null,
+      "success_rate": 1.0,
+      "errors": 0,
+      "timeouts": 0,
+      "gated": 0,
+      "p50_ms_all": 8699.9,
+      "p95_ms_all": 10770.5,
+      "max_ms_all": 11211.3,
+      "p50_ms_ok": 8699.9,
+      "p95_ms_ok": 10770.5,
+      "stage_p50_ms": {
+        "seed": 0.0,
+        "walk": 4267.7,
+        "nodes": 4411.9,
+        "context": 4055.9,
+        "assembly": 0.2
+      },
+      "stage_p95_ms": {
+        "seed": 0.0,
+        "walk": 5951.1,
+        "nodes": 5899.6,
+        "context": 4985.6,
+        "assembly": 0.3
+      },
+      "wall_seconds": 217.6,
+      "throughput_rps": 0.46,
+      "slot_ms_total": 83604,
+      "jobs_total": 300,
+      "slot_attribution_usd": 0.001393,
+      "note": "percentiles are nearest-rank; *_all include failures/timeouts; slot attribution is not the invoice"
+    },
+    {
+      "cell": "sqlbase_natural_c1",
+      "engine": "fallback",
+      "corpus": "acme_retail",
+      "concurrency": 1,
+      "run_id": "sqlbase-20260909-065734-c50d0411",
+      "publication_id": "pub_190192147fd7fd78",
+      "warmups_done": 20,
+      "measured_n": 100,
+      "measured_target": 100,
+      "state": "COMPLETE",
+      "stopped_reason": null,
+      "stopped_detail": null,
+      "success_rate": 1.0,
+      "errors": 0,
+      "timeouts": 0,
+      "gated": 0,
+      "p50_ms_all": 3724.5,
+      "p95_ms_all": 4459.2,
+      "max_ms_all": 8744.2,
+      "p50_ms_ok": 3724.5,
+      "p95_ms_ok": 4459.2,
+      "stage_p50_ms": {
+        "seed": 1339.7,
+        "walk": 981.0,
+        "context": 1130.5,
+        "nodes": 1279.4,
+        "assembly": 0.5
+      },
+      "stage_p95_ms": {
+        "seed": 1959.8,
+        "walk": 1387.3,
+        "context": 1675.8,
+        "nodes": 1773.3,
+        "assembly": 0.7
+      },
+      "wall_seconds": 457.8,
+      "throughput_rps": 0.218,
+      "slot_ms_total": 125530,
+      "jobs_total": 400,
+      "slot_attribution_usd": 0.002092,
+      "note": "percentiles are nearest-rank; *_all include failures/timeouts; slot attribution is not the invoice"
+    },
+    {
+      "cell": "sqlbase_natural_c5",
+      "engine": "fallback",
+      "corpus": "acme_retail",
+      "concurrency": 5,
+      "run_id": "sqlbase-20260909-065734-c50d0411",
+      "publication_id": "pub_190192147fd7fd78",
+      "warmups_done": 20,
+      "measured_n": 100,
+      "measured_target": 100,
+      "state": "COMPLETE",
+      "stopped_reason": null,
+      "stopped_detail": null,
+      "success_rate": 0.99,
+      "errors": 1,
+      "timeouts": 0,
+      "gated": 0,
+      "p50_ms_all": 13798.6,
+      "p95_ms_all": 15892.1,
+      "max_ms_all": 17332.8,
+      "p50_ms_ok": 13906.0,
+      "p95_ms_ok": 15901.3,
+      "stage_p50_ms": {
+        "seed": 4811.1,
+        "walk": 4260.9,
+        "context": 4343.0,
+        "nodes": 4512.2,
+        "assembly": 0.4
+      },
+      "stage_p95_ms": {
+        "seed": 6270.8,
+        "walk": 6019.8,
+        "context": 5427.8,
+        "nodes": 5786.1,
+        "assembly": 0.7
+      },
+      "wall_seconds": 333.3,
+      "throughput_rps": 0.3,
+      "slot_ms_total": 119137,
+      "jobs_total": 398,
+      "slot_attribution_usd": 0.001986,
+      "note": "percentiles are nearest-rank; *_all include failures/timeouts; slot attribution is not the invoice"
+    }
+  ],
+  "state": "COMPLETE",
+  "reconciliations": [
+    {
+      "cell": "sqlbase_forced_c1",
+      "gate": "sqlbase-20260909-065734-c50d0411_sqlbase_forced_c1",
+      "jobs": [],
+      "expired": false,
+      "unread": [],
+      "absent_at_readback": []
+    },
+    {
+      "cell": "sqlbase_forced_c5",
+      "gate": "sqlbase-20260909-065734-c50d0411_sqlbase_forced_c5",
+      "jobs": [],
+      "expired": false,
+      "unread": [],
+      "absent_at_readback": []
+    },
+    {
+      "cell": "sqlbase_natural_c1",
+      "gate": "sqlbase-20260909-065734-c50d0411_sqlbase_natural_c1",
+      "jobs": [],
+      "expired": false,
+      "unread": [],
+      "absent_at_readback": []
+    },
+    {
+      "cell": "sqlbase_natural_c5",
+      "gate": "sqlbase-20260909-065734-c50d0411_sqlbase_natural_c5",
+      "jobs": [],
+      "expired": false,
+      "unread": [],
+      "absent_at_readback": []
+    }
+  ],
+  "ended_utc": "2026-09-09T07:19:39.909539+00:00",
+  "wall_seconds": 1325.7,
+  "billing": {
+    "ceiling_bytes": 68719476736,
+    "ceiling_binding": "BYTES_BUDGET",
+    "max_bytes_billed_declared": 68719476736,
+    "max_usd_declared": 0.5,
+    "usd_per_tib": 6.25,
+    "per_job_cap_bytes": 1073741824,
+    "jobs_settled": 1678,
+    "jobs_refused_no_room": 0,
+    "bytes_billed_charged": 30167531520,
+    "usd_list_charged": 0.1715,
+    "holds_outstanding_bytes": 0,
+    "unresolved_liability_bytes": 0,
+    "unresolved_jobs": [],
+    "usd_list_liability": 0.0,
+    "resolved_by_readback": [],
+    "largest_hold_bytes": 1073741824,
+    "exhausted": false,
+    "stop_reason": null,
+    "note": "warmups, failures and concurrent jobs all charge this account; a job whose billing was never established keeps its full hold as liability; the projection did not"
+  },
+  "gates": [
+    {
+      "cell": "sqlbase_forced_c1",
+      "label": "sqlbase-20260909-065734-c50d0411_sqlbase_forced_c1",
+      "journal": "/Users/haiyuancao/caohy1988.github.io-sep19-b/rfc/spikes/bq-graph/evidence/sql-baseline/jobs_sqlbase-20260909-065734-c50d0411_sqlbase_forced_c1.json",
+      "deadline_seconds_from_cell_start": 900.0
+    },
+    {
+      "cell": "sqlbase_forced_c5",
+      "label": "sqlbase-20260909-065734-c50d0411_sqlbase_forced_c5",
+      "journal": "/Users/haiyuancao/caohy1988.github.io-sep19-b/rfc/spikes/bq-graph/evidence/sql-baseline/jobs_sqlbase-20260909-065734-c50d0411_sqlbase_forced_c5.json",
+      "deadline_seconds_from_cell_start": 900.0
+    },
+    {
+      "cell": "sqlbase_natural_c1",
+      "label": "sqlbase-20260909-065734-c50d0411_sqlbase_natural_c1",
+      "journal": "/Users/haiyuancao/caohy1988.github.io-sep19-b/rfc/spikes/bq-graph/evidence/sql-baseline/jobs_sqlbase-20260909-065734-c50d0411_sqlbase_natural_c1.json",
+      "deadline_seconds_from_cell_start": 900.0
+    },
+    {
+      "cell": "sqlbase_natural_c5",
+      "label": "sqlbase-20260909-065734-c50d0411_sqlbase_natural_c5",
+      "journal": "/Users/haiyuancao/caohy1988.github.io-sep19-b/rfc/spikes/bq-graph/evidence/sql-baseline/jobs_sqlbase-20260909-065734-c50d0411_sqlbase_natural_c5.json",
+      "deadline_seconds_from_cell_start": 900.0
+    }
+  ],
+  "edition": "on-demand",
+  "edition_note": "every observed job, failures included, was reported DONE with no reservation_id and no edition"
+}

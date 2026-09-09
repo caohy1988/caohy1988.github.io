@@ -25,7 +25,7 @@ result-bound receipt; the sanctioned SQL it returns is retrieval evidence only (
 | `okf_bq_graph/principal.py` | Requester brokers for the chain (2026-09-06 Slice A): a hermetic policy-emulating broker (no IAM, no job) exercised by `chain.py --requester restricted`, and the IAM-impersonation broker for the restricted SA (graph leg via `authz.impersonated_client`, SDK subprocess via an `impersonated_service_account` ADC file plus a `userinfo.email` scope shim, `_rls` row-policy grantee snapshot/restore, dry-run authorization probe per dependency table) exercised live in Slice B → `evidence/chain/chain_hermetic_restricted.json`, `evidence/chain/chain_live_restricted.json` |
 | `okf_bq_graph/benchmark.py`, `run.py`, `lifecycle.py`, `safety.py`, `partial.py`, `bin/safety_teardown.sh` | Bounded runner (20 warmups + 100 measured per cell, nearest-rank percentiles, failures retained), the window orchestrator (signal-safe cleanup lifecycle, job cancel, independent watcher), and the honest aggregation of interrupted cells (INCOMPLETE / NOT_RUN) |
 | `okf_bq_graph/sql_baseline.py` | Predeclared ordinary-SQL baseline for the 2026-09-19 checkpoint (Slice A, 2026-09-07): validates `fixtures/sql_baseline.json`, reads the recorded prior SQL observations out of the retained evidence, projects the declared samples against the declared budget, and writes a card whose every cell is empty. It opens no client and spends nothing; its own gate refuses a card in which a cell acquired a number or a prior observation claimed to fill one → `evidence/sql-baseline/{plan.json,baseline.md}` |
-| `okf_bq_graph/sql_baseline_run.py` | Driver for the four predeclared retrieval cells (Slice B Pass 1, 2026-09-08, hermetic): reads the sql-baseline plan rather than `fixtures/scale.json`, builds one `benchmark.measure` cell per retrieval cell with **only that cell's shape** as its query list, engine `fallback`, both caches off, on-demand with no reservation window (`cell_seconds` + a `TOTAL_TIME_BUDGET` deadline only), and a fresh `sqlbase-*` run_id checked against the retained GQL summary before any client exists. `--dry-run` prints cells / queries / budget and constructs no client; `--live` (Pass 2) runs foreground and retains `evidence/sql-baseline/run_<run_id>.json`. Consumer cells (`sqlchain_*`) are refused with `FACTS_UNSELECTED + NOT_IMPLEMENTED`. **No cell has been run.** |
+| `okf_bq_graph/sql_baseline_run.py` | Driver for the four predeclared retrieval cells (Slice B Pass 1, 2026-09-08, hermetic): reads the sql-baseline plan rather than `fixtures/scale.json`, builds one `benchmark.measure` cell per retrieval cell with **only that cell's shape** as its query list, engine `fallback`, both caches off, on-demand with no reservation window (`cell_seconds` + a `TOTAL_TIME_BUDGET` deadline only), and a fresh `sqlbase-*` run_id checked against the retained GQL summary before any client exists. `--dry-run` prints cells / queries / budget and constructs no client; `--live` (Pass 2) runs foreground and retains `evidence/sql-baseline/run_<run_id>.json`. Consumer cells (`sqlchain_*`) are refused with `FACTS_UNSELECTED + NOT_IMPLEMENTED`. Pass 2 (2026-09-09) added a dry-run **preflight** of the on-demand override before any hold, and lowercase run_ids (gate labels are BigQuery job labels). **Four live campaigns are retained: three measured nothing (an illegal label, then the project denying `reservation = none` until Haiyuan set `reservation_override_mode = ALLOW_ANY_OVERRIDE`), the fourth (`sqlbase-20260909-065734-c50d0411`) completed all four cells on-demand** — 1,678 jobs verified, 28.1 GiB / $0.17 at list. Card: RETRIEVAL_MEASURED. |
 | `okf_bq_graph/cost.py`, `report.py`, `assemble.py` | Slot attribution (exact named reservation vs other pools) and the charged autoscale slot-seconds bill from `INFORMATION_SCHEMA.RESERVATIONS_TIMELINE`; non-mutating report tables; report assembly |
 | `sql/*.sql` | `schema.sql`, `graph.sql` (property graph DDL), `seed.sql` (vector seed), `governed.sql` (two-hop GQL), `context.sql`, `impact.sql`, `stubs.sql`, `fallback.sql` |
 | `fixtures/bundle_b/` | Negative fixture: identical relative paths, missing targets, duplicate hits, ambiguous replacement, `../` escape |
@@ -704,7 +704,8 @@ same question set as the GQL cells:
 * **Four retrieval cells** on the `fallback` engine — forced-seed and natural-question shapes, each at C=1 and at C=5,
   20 warmups + 100 measured, 60 s timeout, result cache off. The two shapes are never pooled: the natural shape runs a
   query embedding and a vector seed that the forced shape does not. C=5 is a planning default, not an accepted
-  concurrency; C=1 is the only concurrency any recorded observation covers.
+  concurrency; C=1 was the only concurrency any prior integration observation covered (the Pass 2 campaign below
+  measured C=5 too).
 * **Two request-to-consumer cells**, `NOT_IMPLEMENTED`. `retrieval_ms` and `request_to_consumer_ms` are separate cells
   and are never substituted for one another, and the 2026-09-06 23-second three-case chain pass is neither metric.
   `benchmark.measure` stops at retrieval; `chain.py` runs each case once. Filling these needs a sampled driver that
@@ -720,12 +721,12 @@ same question set as the GQL cells:
   size and no failure denominator, so none of them fills a cell — `tests/test_sql_baseline.py` fails the build if one
   starts to.
 
-**The driver exists; no cell has been run (Slice B Pass 1, 2026-09-08).** `okf_bq_graph.run benchmark` was never the
+**The driver exists (Slice B Pass 1, 2026-09-08); Pass 2 ran it live four times on 2026-09-09 — three campaigns measured nothing, the fourth completed every retrieval cell (below).** `okf_bq_graph.run benchmark` was never the
 right driver: it reads `fixtures/scale.json`, defaults its cells to the `gql` engine, pools the forced and natural
 questions into one query list, and runs inside an Enterprise reservation window. `okf_bq_graph.sql_baseline_run` reads
 this plan instead, hands each cell only its own shape (`tests/test_sql_baseline_run.py` runs the real
 `benchmark.measure` with a faked `retrieve` and checks that no forced text reaches a natural cell or vice versa),
-and labels the campaign with a fresh `sqlbase-<utc>-<hex>` run_id that is checked against the retained GQL summary
+and labels the campaign with a fresh `sqlbase-<yyyymmdd>-<hhmmss>-<hex8>` run_id (lowercase: it seeds BigQuery job labels) that is checked against the retained GQL summary
 before a client is built. `--dry-run` constructs no client; `--live` is Pass 2 and needs Haiyuan's paid authorization.
 Three execution guarantees were added after Astra's first review (PR 55, three P1s), each with an offline regression
 that drives the real SDK with synthetic API responses:
@@ -766,12 +767,64 @@ regression:
   before. The only release is a gate refusal before an id existed. What a readback reveals is applied to the sealed
   cell's own verdict, so a late reservation on the final cell's unknown job stops that cell rather than only the next.
 
+**Pass 2 (2026-09-09, Haiyuan's paid authorization): four live campaigns; the first three measured nothing, the
+fourth completed every retrieval cell.** All four records sit under `evidence/sql-baseline/` and the card reads them (`python3 -m okf_bq_graph.sql_baseline`
+now fills a retrieval cell only from the newest retained campaign that measured it, lists every campaign, and
+`assert_filled_cells_trace_to_records` fails the build on a number no record carries).
+
+* `sqlbase-20260909T062840Z-a3fc21f5` (18 s): every insert was rejected 400 — the run_id's uppercase `T`/`Z` made the
+  per-cell gate label `<run_id>_<cell>`, which is the `window` label on every job, an illegal BigQuery label value.
+  Each rejected insert kept its 1 GiB hold as liability (a client exception after the id was journaled is not proof of
+  non-submission), so 64 rejections consumed the whole ceiling: `sqlbase_forced_c1` INCOMPLETE n=44 (all errors), the
+  other three NOT_RUN_BUDGET, `BYTES_BUDGET_UNRESOLVED`, **0 bytes billed, $0**. Fixed offline: run_ids are lowercase
+  and `assert_label_is_legal` refuses an illegal label before any client exists (`--dry-run --run-id` with the old id
+  prints INVALID).
+* `sqlbase-20260909-063150-d30baa0e` (19 s): same shape of failure for a different reason — BigQuery rejected the
+  job-level override: `Override to 'none' is not enabled. The option 'reservation_override_mode' is set to
+  'RESERVATION_OVERRIDE_MODE_UNSPECIFIED'`. Again 64 liabilities, 0 bytes, $0. The REST contract says so
+  (`Job.configuration.reservation`: forcing on-demand "requires the project or organization to have
+  reservation_override_mode set to ALLOW_ANY_OVERRIDE"); the project sits at the default, which allows moving a job to
+  another reservation but not to on-demand. Astra's PR 55 re-review had noted that requirement and that the cloud
+  configuration had not been read.
+* `sqlbase-20260909-064104-4266675c` (0.9 s): the driver now runs one **dry-run preflight** of `SELECT 1` with the
+  override before any hold — a dry run creates no job and bills nothing but is validated against the project
+  configuration exactly like a paid insert. It was DENIED, every cell is `NOT_RUN_PREFLIGHT / ON_DEMAND_OVERRIDE_DENIED`,
+  no job was submitted, no hold taken, no liability. A preflight that errors for any other reason also stops the
+  campaign: an unconfirmed override is not a green light.
+
+* `sqlbase-20260909-065734-c50d0411` (1,326 s, after Haiyuan set `region-us.reservation_override_mode =
+  'ALLOW_ANY_OVERRIDE'` on the project at 06:56 UTC — a setting this driver does not and must not change; the
+  `INFORMATION_SCHEMA.PROJECT_OPTIONS` view confirms it, and the first preflight a few seconds after the ALTER was
+  still DENIED before propagation): preflight OK, then all four cells **COMPLETE, n=100/100 each**, foreground,
+  on-demand. 1,678 jobs submitted (warmups included), every one reported DONE with no reservation_id and no edition
+  (`edition = "on-demand"`, 0 violations, 0 unknown); ledger **28.1 GiB charged → $0.17 at list**, no liability, no
+  refused hold, no gate deadline reached (each cell had 900 s; the longest, natural C=1, used 458 s). One retained
+  failure: a 503 on a result read in natural C=5 (the job itself was DONE and billed), counted in that cell's
+  percentiles (success 99/100). Nearest-rank over all attempts — forced C=1 p50 2,564 ms / p95 3,171 ms; forced C=5
+  p50 8,700 / p95 10,770; natural C=1 p50 3,725 / p95 4,459; natural C=5 p50 13,799 / p95 15,892. The C=5 cells
+  are the same queries issued by five concurrent requesters, on-demand with no reservation; they are about 3.4–3.7×
+  slower per request than C=1, and the retained attempts establish that slowdown but not its cause. Queueing on
+  on-demand slots is a hypothesis, not a finding: the per-job creation-to-start and server execution p50s in the
+  retained job records are roughly unchanged between C=1 and C=5, and those timestamp deltas are not an independent
+  queue diagnostic (Astra, PR 57 review). C=5 remains a planning default that nobody has accepted.
+
+The standing reservation `US.okf-demo-enterprise` was neither read nor touched by any campaign. Where each campaign's
+evidence lives: every campaign has its own `evidence/sql-baseline/run_<run_id>.json` (cells, billing, routing,
+preflight, reconciliations) and, for each cell that opened a gate, a `jobs_<run_id>_<cell>.json` journal with its
+cleanup receipt. The three campaigns that reached `benchmark.measure` (the first, second and fourth) also appended
+their attempts to `evidence/requests.jsonl` and their cell summaries to `evidence/summary.json` under their own
+run_ids, as the sampler always does; the GQL cells there are unchanged. The preflight-denied campaign
+`sqlbase-20260909-064104-4266675c` never reached the sampler, so it has no rows in either shared file: its four
+`NOT_RUN_PREFLIGHT` cells exist only in its own record and on the generated card. The card is `RETRIEVAL_MEASURED`: the four
+retrieval cells carry the fourth campaign's numbers, the three earlier campaigns stay listed, the consumer cells stay
+`NOT_IMPLEMENTED + FACTS_UNSELECTED`, the cost cells stay `UNMEASURED`, and every threshold stays PROPOSED.
+
 `benchmark.run_cell` gained backward-compatible hooks for this: a per-cell `queries` list, `budget["deadline_reason"]`,
 `budget["window_for_cell"]`, `budget["stop_check"]` and `budget["on_cell_sealed"]`; a cell that stopped for any reason
 is INCOMPLETE even when its n-th attempt was retained. The reservation-window runner's `WINDOW_DEADLINE` label is
 unchanged; its gate now also survives an ordinary stage error (interrupts and `WindowStopped` still cancel). The
-card's retrieval cells read `NOT_RUN` with the exact command that fills each; the consumer cells still read
-`NOT_IMPLEMENTED + FACTS_UNSELECTED`, and the driver refuses to run them.
+card's retrieval cells carry the exact command that fills each and what their latest campaign did; the consumer cells
+still read `NOT_IMPLEMENTED + FACTS_UNSELECTED`, and the driver refuses to run them.
 
 **One correction this card carries.** `evidence/report.md` and `evidence/comparison.md` describe both forced fallback
 observations as on-demand. Every job in `all_all-0017.json#fallback_forced` carries the spike's Enterprise reservation,
@@ -833,9 +886,9 @@ python3 -m okf_bq_graph.run benchmark --minutes 85           # benchmark cells f
 python3 -m okf_bq_graph.run all --minutes 85                 # both in one window
 python3 -m okf_bq_graph.cost 2026-09-05T23:40:00Z 2026-09-06T00:35:00Z   # reconcile jobs + charged reservation timeline
 python3 -m okf_bq_graph.partial && python3 -m okf_bq_graph.assemble      # honest cell summary + report.md
-python3 -m okf_bq_graph.sql_baseline                         # offline: regenerate the predeclared SQL baseline card
+python3 -m okf_bq_graph.sql_baseline                         # offline: regenerate the SQL baseline card from the plan + retained campaign records
 python3 -m okf_bq_graph.sql_baseline_run --dry-run           # offline: print the baseline campaign (cells, queries, budget); no client
-python3 -m okf_bq_graph.sql_baseline_run --live [--cells sqlbase_forced_c1 ...]   # Pass 2 (paid, on-demand, foreground): fill retrieval cells
+python3 -m okf_bq_graph.sql_baseline_run --live [--cells sqlbase_forced_c1 ...]   # Pass 2 (paid, on-demand, foreground): dry-run preflight of the override, then the cells
 ```
 
 The `run` modes create a paid reservation; `bin/safety_teardown.sh` is spawned automatically as an independent watcher.
