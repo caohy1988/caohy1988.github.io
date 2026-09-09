@@ -12,7 +12,7 @@ records under `evidence/sql-baseline/`. It opens no client and spends nothing. R
 * **Engine.** `fallback` — 'fallback' is the relational two-hop join path (sql/fallback.sql) plus the GA VECTOR_SEARCH seed for natural questions. It is the ordinary-SQL comparator, not BigQuery Graph / GQL.
 * **Corpus.** `acme_retail` at publication `pub_190192147fd7fd78`, compiled from source pin `31da799a9aef176df12e91abbd119ea9385b75ec`. Acme is invented. This corpus is 17 markdown files and 2 artifacts; it is not customer cohort data and not the Alder retention story.
 * **Questions.** `fixtures/cases.json` at `as_of` 2026-09-05T00:00:00Z: 3 forced seeds, 6 natural questions. Same pinned question set the GQL cells used. Forced-seed and natural-question shapes are measured in separate cells and are never pooled: the natural shape includes a query embedding and a vector seed that the forced shape does not run.
-* **Concurrency.** C=5 is a planning default chosen so a first concurrency point exists. It is not an accepted concurrency and no customer has asked for it. C=1 is the only concurrency any recorded observation covers.
+* **Concurrency.** C=5 is a planning default chosen so a first concurrency point exists. It is not an accepted concurrency and no customer has asked for it. C=1 is the only concurrency the recorded prior integration observations cover; the C=5 cells below are measured only by a retained campaign, and a measured C=5 cell does not make C=5 an accepted concurrency.
 
 ## Fact data — **UNSELECTED**
 

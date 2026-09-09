@@ -704,7 +704,8 @@ same question set as the GQL cells:
 * **Four retrieval cells** on the `fallback` engine — forced-seed and natural-question shapes, each at C=1 and at C=5,
   20 warmups + 100 measured, 60 s timeout, result cache off. The two shapes are never pooled: the natural shape runs a
   query embedding and a vector seed that the forced shape does not. C=5 is a planning default, not an accepted
-  concurrency; C=1 is the only concurrency any recorded observation covers.
+  concurrency; C=1 was the only concurrency any prior integration observation covered (the Pass 2 campaign below
+  measured C=5 too).
 * **Two request-to-consumer cells**, `NOT_IMPLEMENTED`. `retrieval_ms` and `request_to_consumer_ms` are separate cells
   and are never substituted for one another, and the 2026-09-06 23-second three-case chain pass is neither metric.
   `benchmark.measure` stops at retrieval; `chain.py` runs each case once. Filling these needs a sampled driver that
@@ -800,13 +801,21 @@ now fills a retrieval cell only from the newest retained campaign that measured 
   refused hold, no gate deadline reached (each cell had 900 s; the longest, natural C=1, used 458 s). One retained
   failure: a 503 on a result read in natural C=5 (the job itself was DONE and billed), counted in that cell's
   percentiles (success 99/100). Nearest-rank over all attempts — forced C=1 p50 2,564 ms / p95 3,171 ms; forced C=5
-  p50 8,700 / p95 10,770; natural C=1 p50 3,725 / p95 4,459; natural C=5 p50 13,799 / p95 15,892. C=5 is five
-  concurrent requesters on on-demand slots with no reservation; its latency is queueing, not a different query, and
-  C=5 remains a planning default that nobody has accepted.
+  p50 8,700 / p95 10,770; natural C=1 p50 3,725 / p95 4,459; natural C=5 p50 13,799 / p95 15,892. The C=5 cells
+  are the same queries issued by five concurrent requesters, on-demand with no reservation; they are about 3.4–3.7×
+  slower per request than C=1, and the retained attempts establish that slowdown but not its cause. Queueing on
+  on-demand slots is a hypothesis, not a finding: the per-job creation-to-start and server execution p50s in the
+  retained job records are roughly unchanged between C=1 and C=5, and those timestamp deltas are not an independent
+  queue diagnostic (Astra, PR 57 review). C=5 remains a planning default that nobody has accepted.
 
-The standing reservation `US.okf-demo-enterprise` was neither read nor touched by any campaign. All four campaigns
-appended their attempts to `evidence/requests.jsonl` and their cell summaries to `evidence/summary.json` under their
-own run_ids, as the sampler always does; the GQL cells there are unchanged. The card is `RETRIEVAL_MEASURED`: the four
+The standing reservation `US.okf-demo-enterprise` was neither read nor touched by any campaign. Where each campaign's
+evidence lives: every campaign has its own `evidence/sql-baseline/run_<run_id>.json` (cells, billing, routing,
+preflight, reconciliations) and, for each cell that opened a gate, a `jobs_<run_id>_<cell>.json` journal with its
+cleanup receipt. The three campaigns that reached `benchmark.measure` (the first, second and fourth) also appended
+their attempts to `evidence/requests.jsonl` and their cell summaries to `evidence/summary.json` under their own
+run_ids, as the sampler always does; the GQL cells there are unchanged. The preflight-denied campaign
+`sqlbase-20260909-064104-4266675c` never reached the sampler, so it has no rows in either shared file: its four
+`NOT_RUN_PREFLIGHT` cells exist only in its own record and on the generated card. The card is `RETRIEVAL_MEASURED`: the four
 retrieval cells carry the fourth campaign's numbers, the three earlier campaigns stay listed, the consumer cells stay
 `NOT_IMPLEMENTED + FACTS_UNSELECTED`, the cost cells stay `UNMEASURED`, and every threshold stays PROPOSED.
 
