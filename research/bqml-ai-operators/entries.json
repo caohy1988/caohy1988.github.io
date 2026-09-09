@@ -1,17 +1,33 @@
 {
-  "updatedAt": "2026-09-09T16:40:00-07:00",
+  "updatedAt": "2026-09-09T16:55:10-07:00",
   "title": "BigQuery ML & AI Operators",
-  "blurb": "Product impact board for BigQuery ML (BQML) and BigQuery AI operators \u2014 how Google Cloud, customers, partners, and the community introduce and adopt in-SQL ML and AI.* / ML.* generative operators. Built for BQ ML / BQ AI Operator directors and managers tracking GTM. Each card summarizes how BQML or AI operators show up in that source; open the link for the full story.",
+  "blurb": "Product impact board for BigQuery ML (BQML) and BigQuery AI operators — how Google Cloud, customers, partners, and the community introduce and adopt in-SQL ML and AI.* / ML.* generative operators. Built for BQ ML / BQ AI Operator directors and managers tracking GTM. Each card summarizes how BQML or AI operators show up in that source; open the link for the full story.",
   "entries": [
+    {
+      "id": "qiita-na0-bq-ai-cost",
+      "kind": "essay",
+      "source": "Qiita (na0)",
+      "date": "2026-09-04",
+      "displayDate": "Sep 4, 2026",
+      "title": "BigQuery × AI で 300 万円溶かそう",
+      "href": "https://qiita.com/na0/items/e7eb24f896749fd3f190",
+      "why": "A JP engineer's critique shows how AI.GENERATE with gemini-2.5-pro over a large BigQuery table can burn ¥3M in uncapped token billing, especially when LLM agents issue the query. A buyer-side cost-governance signal the AI operator team should answer with quotas and budget caps.",
+      "tags": [
+        "JP",
+        "AI.GENERATE",
+        "cost",
+        "governance"
+      ]
+    },
     {
       "id": "docs-generative-ai-overview",
       "kind": "docs",
       "source": "Google Cloud Docs",
       "date": "2026-09-01",
-      "displayDate": "Docs \u00b7 current",
-      "title": "Generative AI overview \u2014 BigQuery",
+      "displayDate": "Docs · current",
+      "title": "Generative AI overview — BigQuery",
       "href": "https://cloud.google.com/bigquery/docs/generative-ai-overview",
-      "why": "Official map of AI.GENERATE family vs remote-model TVFs (AI.GENERATE_TEXT / ML.GENERATE_TEXT). Impact: the doc directors hand AEs when buyers ask \u201cwhich operator when.\u201d",
+      "why": "Google Cloud Docs lays out the whole BigQuery AI operator family — scalar AI.GENERATE, managed AI.IF/CLASSIFY/SCORE, and remote-model ML.GENERATE_TEXT — in one map. It's the page AEs send when a buyer asks “which operator when.”",
       "tags": [
         "docs",
         "AI.GENERATE",
@@ -23,10 +39,10 @@
       "kind": "docs",
       "source": "Google Cloud Docs",
       "date": "2026-09-01",
-      "displayDate": "Docs \u00b7 current",
+      "displayDate": "Docs · current",
       "title": "Choose a text generation function",
       "href": "https://cloud.google.com/bigquery/docs/choose-text-generation-function",
-      "why": "Decision table comparing AI.GENERATE vs AI.GENERATE_TEXT for BQML generative paths. Impact: reduces buyer confusion between scalar and TVF operators.",
+      "why": "Google Cloud Docs publishes a side-by-side decision table for AI.GENERATE vs AI.GENERATE_TEXT in BigQuery ML. It removes the most common buyer confusion between scalar and table-valued text generation.",
       "tags": [
         "docs",
         "AI.GENERATE_TEXT"
@@ -37,13 +53,90 @@
       "kind": "docs",
       "source": "Google Cloud Docs",
       "date": "2026-09-01",
-      "displayDate": "Docs \u00b7 current",
+      "displayDate": "Docs · current",
       "title": "The AI.GENERATE function",
       "href": "https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-ai-generate",
-      "why": "Reference for scalar AI.GENERATE (endpoint, output_schema, connection). Impact: canonical operator contract for BQ AI Runtime positioning.",
+      "why": "Google Cloud Docs defines the scalar AI.GENERATE contract — endpoint, output_schema, and connection options — for BigQuery. This is the canonical operator spec behind the “BigQuery as AI runtime” positioning.",
       "tags": [
         "docs",
         "AI.GENERATE"
+      ]
+    },
+    {
+      "id": "yt-abit-genai-unstructured",
+      "kind": "video",
+      "source": "YouTube (A Bit of Everything CTR)",
+      "date": "2026-08-27",
+      "displayDate": "Aug 27, 2026",
+      "title": "6. Generative AI in BigQuery: Processing Unstructured Data with SQL",
+      "href": "https://www.youtube.com/watch?v=_iKWJLzR5ew",
+      "why": "A Bit of Everything CTR's course episode teaches the three pillars of BigQuery AI — general-purpose AI.GENERATE_TEXT and scalar AI.GENERATE, specialized functions, and managed operators — for text and image processing in SQL. Structured training content that packages the operator taxonomy for self-serve learners.",
+      "tags": [
+        "video",
+        "course",
+        "AI.GENERATE",
+        "taxonomy"
+      ]
+    },
+    {
+      "id": "yt-abit-mastering-bqml",
+      "kind": "video",
+      "source": "YouTube (A Bit of Everything CTR)",
+      "date": "2026-08-27",
+      "displayDate": "Aug 27, 2026",
+      "title": "4. Mastering BigQuery ML (BQML): Train, Evaluate & Explain Models with SQL",
+      "href": "https://www.youtube.com/watch?v=_57VgMm3mio",
+      "why": "A Bit of Everything CTR's course episode covers the full BigQuery ML loop — CREATE MODEL, ML.EVALUATE, ML.PREDICT, and explainability — across supervised and unsupervised models without moving data. Self-serve BQML training that feeds the predictive-ML adoption funnel.",
+      "tags": [
+        "video",
+        "course",
+        "BQML",
+        "ML.EVALUATE",
+        "ML.PREDICT"
+      ]
+    },
+    {
+      "id": "yt-mister-bi-ai-agg",
+      "kind": "video",
+      "source": "YouTube (Mister Business Intelligence)",
+      "date": "2026-08-20",
+      "displayDate": "Aug 20, 2026",
+      "title": "BigQuery AI Aggregations - Analyze column context with Gemini",
+      "href": "https://www.youtube.com/watch?v=7FtTPcGnE8g",
+      "why": "Mister Business Intelligence demoed AI.AGG in BigQuery generating grouped insights from app reviews inside a GROUP BY. A creator showing the aggregation operator turning unstructured comments into per-segment synthesis without leaving the query engine.",
+      "tags": [
+        "video",
+        "AI.AGG"
+      ]
+    },
+    {
+      "id": "yt-mister-bi-ai-generate-int",
+      "kind": "video",
+      "source": "YouTube (Mister Business Intelligence)",
+      "date": "2026-08-13",
+      "displayDate": "Aug 13, 2026",
+      "title": "Enrich your BigQuery data with AI.GENERATE_INT",
+      "href": "https://www.youtube.com/watch?v=UVQQRtrBkYo",
+      "why": "Mister Business Intelligence used AI.GENERATE_INT in BigQuery to enrich purchase rows with city populations and purchase-date temperatures as typed integers. A creator demo of the schema-safe scalar operator doing inline data enrichment.",
+      "tags": [
+        "video",
+        "AI.GENERATE_INT",
+        "enrichment"
+      ]
+    },
+    {
+      "id": "yt-mister-bi-ai-classify",
+      "kind": "video",
+      "source": "YouTube (Mister Business Intelligence)",
+      "date": "2026-08-08",
+      "displayDate": "Aug 8, 2026",
+      "title": "Categorization in BigQuery with Gemini AI.CLASSIFY",
+      "href": "https://www.youtube.com/watch?v=6WxeuXX-8rw",
+      "why": "Mister Business Intelligence used AI.CLASSIFY in BigQuery to flag Google Play reviews that are support questions, routing tickets with no external API code. A creator demo of the managed operator on a support-triage use case buyers recognize.",
+      "tags": [
+        "video",
+        "AI.CLASSIFY",
+        "support"
       ]
     },
     {
@@ -52,9 +145,9 @@
       "source": "DevelopersIO",
       "date": "2026-07-01",
       "displayDate": "2026",
-      "title": "BigQuery \u306e AI.AGG \u95a2\u6570\u3067\u975e\u69cb\u9020\u5316\u30c7\u30fc\u30bf\u3092\u610f\u5473\u7684\u306b\u96c6\u7d04\u3057\u3066\u307f\u305f",
+      "title": "BigQuery の AI.AGG 関数で非構造化データを意味的に集約してみた",
       "href": "https://dev.classmethod.jp/articles/bigquery-ai-agg/",
-      "why": "JP practitioner walkthrough of AI.AGG with the managed AI.* lineup (AI.GENERATE / CLASSIFY / SCORE / IF). Impact: regional GTM signal that AI operators are landing outside EN docs.",
+      "why": "Classmethod's DevelopersIO ran AI.AGG in BigQuery to semantically aggregate unstructured Japanese text, alongside AI.GENERATE, AI.CLASSIFY, AI.SCORE, and AI.IF. A regional signal that the managed AI operators are landing with JP practitioners ahead of localized docs.",
       "tags": [
         "JP",
         "AI.AGG",
@@ -69,10 +162,26 @@
       "displayDate": "Jun 29, 2026",
       "title": "Deep dive into BigQuery AI.AGG function",
       "href": "https://cloud.google.com/blog/products/data-analytics/deep-dive-into-bigquery-ai-agg-function",
-      "why": "Deep dive on AI.AGG for natural-language aggregation over multimodal / unstructured tables, composed with other managed AI functions. Impact: aggregation operator expands BQ AI beyond row-wise enrich into fleet-scale synthesize.",
+      "why": "Google Cloud's deep dive shows AI.AGG in BigQuery summarizing multimodal and unstructured tables with a natural-language aggregation, composed with the other managed AI functions. It moves BigQuery AI from row-wise enrichment to fleet-scale synthesis in a single GROUP BY.",
       "tags": [
         "AI.AGG",
         "multimodal"
+      ]
+    },
+    {
+      "id": "classmethod-ai-functions-overview",
+      "kind": "customer",
+      "source": "DevelopersIO (Classmethod)",
+      "date": "2026-06-15",
+      "displayDate": "Jun 2026",
+      "title": "BigQuery の AI 関数を自分なりに整理してみた",
+      "href": "https://dev.classmethod.jp/articles/bigquery-ai-functions-overview/",
+      "why": "Classmethod mapped the full BigQuery AI operator taxonomy — AI.GENERATE, AI.CLASSIFY, AI.SIMILARITY, AI.FORECAST and the managed functions — and explained why zero-setup AI.* functions supersede CREATE MODEL plus ML.GENERATE_TEXT. A partner-written GA roundup that doubles as a JP buyer's guide.",
+      "tags": [
+        "JP",
+        "partner",
+        "AI.*",
+        "taxonomy"
       ]
     },
     {
@@ -80,10 +189,10 @@
       "kind": "essay",
       "source": "Medium (Google Cloud Community)",
       "date": "2026-06-01",
-      "displayDate": "2026 \u00b7 Medium (date refine pending)",
-      "title": "BigQuery Is More Than a Warehouse Now. It\u2019s an AI Runtime",
+      "displayDate": "2026 · Medium (date refine pending)",
+      "title": "BigQuery Is More Than a Warehouse Now. It’s an AI Runtime",
       "href": "https://medium.com/google-cloud/bigquery-is-more-than-a-warehouse-now-its-an-ai-runtime-07b7ec8329e7",
-      "why": "Positions SQL as an inference surface spanning AI.GENERATE on ObjectRef, managed AI.CLASSIFY/IF/SCORE, AI.AGG, AI.FORECAST (TimesFM), and AI.SEARCH. Impact: directors\u2019 \u201cwhy BQ AI ops\u201d narrative in one essay.",
+      "why": "A Google Cloud Community essay positions BigQuery as an AI runtime, walking AI.GENERATE over ObjectRef, managed AI.CLASSIFY/IF/SCORE, AI.AGG, AI.FORECAST on TimesFM, and AI.SEARCH. It's the one-piece “why BigQuery AI operators” narrative directors can hand to field teams.",
       "tags": [
         "Medium",
         "AI Runtime",
@@ -95,10 +204,10 @@
       "kind": "essay",
       "source": "Medium (Google Cloud Community)",
       "date": "2026-05-15",
-      "displayDate": "2026 \u00b7 Medium (date refine pending)",
+      "displayDate": "2026 · Medium (date refine pending)",
       "title": "Analyze anything with AI-powered SQL in BigQuery",
       "href": "https://medium.com/google-cloud/analyze-anything-with-ai-powered-sql-in-bigquery-80c0d3113656",
-      "why": "Alicia Williams walks managed AI.SCORE / AI.CLASSIFY / AI.IF vs general-purpose AI.GENERATE* with multimodal examples. Impact: practitioner GTM asset AEs can share for \u201cstart with managed operators.\u201d",
+      "why": "Alicia Williams (Google) compares managed AI.SCORE, AI.CLASSIFY, and AI.IF against general-purpose AI.GENERATE in BigQuery with multimodal examples. A shareable practitioner asset for the “start with managed operators” motion.",
       "tags": [
         "Medium",
         "AI.SCORE",
@@ -110,10 +219,10 @@
       "kind": "essay",
       "source": "Medium (Google Cloud Community)",
       "date": "2026-05-01",
-      "displayDate": "2026 \u00b7 Medium (date refine pending)",
+      "displayDate": "2026 · Medium (date refine pending)",
       "title": "Effortless AI in BigQuery: Meet the New Managed AI Functions",
       "href": "https://medium.com/google-cloud/effortless-ai-in-bigquery-meet-the-new-managed-ai-functions-fc7d8dcefc61",
-      "why": "Rodrigo Souza frames managed AI.IF/SCORE/CLASSIFY as intent-first (BQ picks model/prompt) vs foundational AI.GENERATE workshop tools. Impact: crisp packaging language for BQ AI Operator positioning.",
+      "why": "Rodrigo Souza frames BigQuery's managed AI.IF, AI.SCORE, and AI.CLASSIFY as intent-first operators where BigQuery picks the model and prompt, versus AI.GENERATE as the workshop tool. Clean packaging language for BigQuery AI operator positioning.",
       "tags": [
         "Medium",
         "managed AI functions"
@@ -124,10 +233,10 @@
       "kind": "essay",
       "source": "Medium (Google Cloud Community)",
       "date": "2026-04-15",
-      "displayDate": "2026 \u00b7 Medium (date refine pending)",
+      "displayDate": "2026 · Medium (date refine pending)",
       "title": "Unleash Row-Level AI in BigQuery: Scalar LLM Functions for Smarter SQL",
       "href": "https://medium.com/google-cloud/unleash-row-level-ai-in-bigquery-scalar-llm-functions-for-smarter-sql-a03ec16d4a90",
-      "why": "Deep intro to scalar AI.GENERATE / _BOOL / _INT / _DOUBLE for row-wise enrich/filter/join. Impact: shows operators composing inside SELECT/WHERE/JOIN \u2014 core SQL-native GTM.",
+      "why": "A Google Cloud Community deep dive shows scalar AI.GENERATE and AI.GENERATE_BOOL/INT/DOUBLE enriching, filtering, and joining rows directly in SELECT, WHERE, and JOIN in BigQuery. Proof that AI operators compose like native SQL, the core of the SQL-native GTM story.",
       "tags": [
         "Medium",
         "AI.GENERATE",
@@ -139,13 +248,63 @@
       "kind": "essay",
       "source": "Medium (Google Cloud Community)",
       "date": "2026-04-01",
-      "displayDate": "2026 \u00b7 Medium (date refine pending)",
-      "title": "Deep Dive: Categorize Unstructured Data with BigQuery\u2019s AI.CLASSIFY",
+      "displayDate": "2026 · Medium (date refine pending)",
+      "title": "Deep Dive: Categorize Unstructured Data with BigQuery’s AI.CLASSIFY",
       "href": "https://medium.com/google-cloud/deep-dive-categorize-unstructured-data-with-bigquerys-ai-classify-6e760ac7ebed",
-      "why": "Production AI.CLASSIFY patterns: category descriptions, multi-label output_mode, multimodal object tables, temperature=0. Impact: category-ops playbook for unstructured GTM motions.",
+      "why": "A Google Cloud Community deep dive documents production AI.CLASSIFY patterns in BigQuery: category descriptions, multi-label output_mode, multimodal object tables, and temperature=0. A ready-made category-ops playbook for unstructured-data motions.",
       "tags": [
         "Medium",
         "AI.CLASSIFY"
+      ]
+    },
+    {
+      "id": "kazkida-ai-generate-image",
+      "kind": "community",
+      "source": "kazkida.com (木田 和廣)",
+      "date": "2026-03-25",
+      "displayDate": "Mar 25, 2026",
+      "title": "BigQuery × Geminiで愛犬の「心の声」を覗いてみた — 非構造化データのAI解析入門",
+      "href": "https://kazkida.com/bigquery-ai-generate-image/",
+      "why": "Kazuhiro Kida ran AI.GENERATE over a BigQuery object table of Cloud Storage dog photos to caption images inside a SQL query. A friendly multimodal on-ramp that shows AI operators reading unstructured files without leaving BigQuery.",
+      "tags": [
+        "JP",
+        "community",
+        "AI.GENERATE",
+        "multimodal",
+        "object tables"
+      ]
+    },
+    {
+      "id": "kazkida-ai-generate-search-console",
+      "kind": "community",
+      "source": "kazkida.com (木田 和廣)",
+      "date": "2026-03-23",
+      "displayDate": "Mar 23, 2026",
+      "title": "SQL一発でAI分析！BigQueryのAI.GENERATE関数をSearch Consoleデータに応用してみた",
+      "href": "https://kazkida.com/bigquery-ai-generate-search-console/",
+      "why": "Analytics author Kazuhiro Kida used AI.GENERATE in BigQuery on Search Console export tables to classify SEO query intent with a single SQL call, no Python. An influential JP practitioner voice putting AI operators in front of marketing analysts.",
+      "tags": [
+        "JP",
+        "community",
+        "AI.GENERATE",
+        "Search Console"
+      ]
+    },
+    {
+      "id": "speakerdeck-osaka-gemini-data-platform",
+      "kind": "video",
+      "source": "Speaker Deck (Google AI Meetup Osaka)",
+      "date": "2026-03-23",
+      "displayDate": "Mar 23, 2026",
+      "title": "データ分析基盤でGeminiを使う話",
+      "href": "https://speakerdeck.com/1210yuichi0/20260323-detafen-xi-ji-pan-degeminiwoshi-uhua",
+      "why": "A Google AI Meetup Osaka talk lays out an enterprise blueprint for AI.GENERATE plus managed AI.IF and AI.SCORE in BigQuery, contrasting typed outputs with legacy ML.GENERATE_TEXT JSON strings and insisting on incremental runs to control token spend. Community architecture guidance that mirrors the managed-operator pitch.",
+      "tags": [
+        "JP",
+        "talk",
+        "AI.GENERATE",
+        "AI.IF",
+        "AI.SCORE"
       ]
     },
     {
@@ -153,10 +312,10 @@
       "kind": "essay",
       "source": "Medium (Google Cloud Community)",
       "date": "2026-03-15",
-      "displayDate": "2026 \u00b7 Medium (date refine pending)",
-      "title": "The SQL Fanatics\u2019 Dream: AI Agents Without the Application Code!",
+      "displayDate": "2026 · Medium (date refine pending)",
+      "title": "The SQL Fanatics’ Dream: AI Agents Without the Application Code!",
       "href": "https://medium.com/google-cloud/the-sql-fanatics-dream-ai-agents-without-the-application-code-67779e4cca81",
-      "why": "Contrasts AI.GENERATE vs AI.GENERATE_TABLE (+ typed helpers) for structured warehouse GenAI without app code. Impact: \u201cSQL is enough\u201d pitch for analyst-led AI adoption.",
+      "why": "A Google Cloud Community essay contrasts AI.GENERATE with AI.GENERATE_TABLE and the typed helpers to build agent-style warehouse GenAI in BigQuery with zero application code. The “SQL is enough” pitch for analyst-led AI adoption.",
       "tags": [
         "Medium",
         "AI.GENERATE_TABLE"
@@ -167,10 +326,10 @@
       "kind": "essay",
       "source": "Medium (Google Cloud Community)",
       "date": "2026-03-01",
-      "displayDate": "2026 \u00b7 Medium (date refine pending)",
+      "displayDate": "2026 · Medium (date refine pending)",
       "title": "Typed GenAI in Your Warehouse: BigQueryML Generative AI Functions",
       "href": "https://medium.com/google-cloud/typed-genai-in-your-warehouse-bigqueryml-generative-ai-functions-6340a05eb932",
-      "why": "Explicit BQML GenAI: ML.GENERATE_TEXT / ML.GENERATE_EMBEDDING plus typed AI.GENERATE_* with a healthcare SQL walkthrough. Impact: bridges classic BQML naming to AI.* operators.",
+      "why": "A Google Cloud Community healthcare walkthrough uses BigQuery ML's ML.GENERATE_TEXT and ML.GENERATE_EMBEDDING alongside typed AI.GENERATE_* functions. It bridges classic BQML naming to the newer AI.* operators for buyers who know one but not the other.",
       "tags": [
         "Medium",
         "BQML",
@@ -182,10 +341,10 @@
       "kind": "essay",
       "source": "Medium (Google Cloud Community)",
       "date": "2026-02-15",
-      "displayDate": "2026 \u00b7 Medium (date refine pending)",
+      "displayDate": "2026 · Medium (date refine pending)",
       "title": "SQL is all you need: RAG without a vector database in a dozen lines of BigQuery",
       "href": "https://medium.com/google-cloud/sql-is-all-you-need-rag-without-a-vector-database-in-a-dozen-lines-of-bigquery-ff08ed5d3ac4",
-      "why": "Composes AI.GENERATE_EMBEDDING + VECTOR_SEARCH + AI.GENERATE and clarifies managed vs MODEL-backed text gen. Impact: RAG-in-warehouse competitive narrative without a separate vector DB.",
+      "why": "A Google Cloud Community essay builds RAG in a dozen lines of BigQuery SQL by composing AI.GENERATE_EMBEDDING, VECTOR_SEARCH, and AI.GENERATE, and clarifies managed vs MODEL-backed text generation. A competitive narrative for RAG in the warehouse without a separate vector database.",
       "tags": [
         "Medium",
         "RAG",
@@ -197,15 +356,32 @@
       "kind": "essay",
       "source": "Medium (Google Cloud Community)",
       "date": "2026-02-01",
-      "displayDate": "2026 \u00b7 Medium (date refine pending)",
+      "displayDate": "2026 · Medium (date refine pending)",
       "title": "Forecasting the Future with BigQueryML TimesFM",
       "href": "https://medium.com/google-cloud/forecasting-the-future-with-bigqueryml-timesfm-a-game-changer-in-time-series-analysis-43a627151118",
-      "why": "BigQuery ML TimesFM via AI.FORECAST \u2014 zero-shot SQL forecasting without CREATE MODEL / remote endpoint. Impact: forecasting operator card for predictive + generative BQML GTM.",
+      "why": "A Google Cloud Community post runs zero-shot time-series forecasting with AI.FORECAST on BigQuery ML's built-in TimesFM, with no CREATE MODEL or remote endpoint. Forecasting becomes a one-call SQL operator for the predictive side of the BigQuery ML story.",
       "tags": [
         "Medium",
         "AI.FORECAST",
         "TimesFM",
         "BQML"
+      ]
+    },
+    {
+      "id": "squareshift-bqml-mlflow",
+      "kind": "customer",
+      "source": "SquareShift",
+      "date": "2026-01-20",
+      "displayDate": "Jan 20, 2026",
+      "title": "Simplifying BigQuery ML Pipelines with MLflow: Developer Guide",
+      "href": "https://www.squareshift.co/post/simplifying-ml-pipelines-with-bigquery",
+      "why": "SquareShift, a cloud consulting partner, trained GA4 churn and propensity models in BigQuery ML and scored them with ML.EVALUATE while tracking experiments in MLflow. Partner architecture that shows BQML slotting into an existing MLOps stack rather than replacing it.",
+      "tags": [
+        "partner",
+        "BQML",
+        "ML.EVALUATE",
+        "MLflow",
+        "GA4"
       ]
     },
     {
@@ -216,11 +392,43 @@
       "displayDate": "2026",
       "title": "BigQuery AI Hackathon: Celebrating Innovation and a Look at What's New",
       "href": "https://cloud.google.com/blog/topics/developers-practitioners/bigquery-ai-hackathon-celebrating-innovation-and-a-look-at-whats-new",
-      "why": "Hackathon + product pulse covering AI.IF scale-up, AI.CLASSIFY, AI.SCORE, AI.SEARCH, and autonomous embeddings. Impact: community energy + roadmap proof that AI operators are the growth surface.",
+      "why": "Google Cloud's BigQuery AI Hackathon recap pairs community builds with a product pulse on AI.IF scale-up, AI.CLASSIFY, AI.SCORE, AI.SEARCH, and autonomous embeddings. Community energy plus roadmap proof that AI operators are the growth surface.",
       "tags": [
         "hackathon",
         "AI.SEARCH",
         "AI.IF"
+      ]
+    },
+    {
+      "id": "luup-ai-generate-dashboard-summary",
+      "kind": "customer",
+      "source": "Luup Developers (Zenn)",
+      "date": "2025-12-10",
+      "displayDate": "Dec 10, 2025",
+      "title": "BigQueryからLLMを直接呼び出して、憧れのダッシュボード自動要約を実現する。",
+      "href": "https://zenn.dev/luup_developers/articles/data-mizuki-20251210",
+      "why": "Luup's data platform team replaced ML.GENERATE_TEXT with AI.GENERATE in BigQuery to auto-summarize executive dashboards, calling out the no-connection setup as the reason to migrate. A customer migration signal from the remote-model TVF to the scalar operator.",
+      "tags": [
+        "JP",
+        "customer",
+        "AI.GENERATE",
+        "ML.GENERATE_TEXT"
+      ]
+    },
+    {
+      "id": "ubie-edit-distance-ai-generate",
+      "kind": "customer",
+      "source": "Ubie Engineering (Zenn)",
+      "date": "2025-12-03",
+      "displayDate": "Dec 3, 2025",
+      "title": "BigQuery の EDIT_DISTANCE と AI.GENERATE を組み合わせて病名の名寄せ処理を効率化する",
+      "href": "https://zenn.dev/ubie_dev/articles/eca00ce1ebe8a5",
+      "why": "Ubie's medical engineering team paired EDIT_DISTANCE candidate filtering with AI.GENERATE in BigQuery to map internal disease names to ICD-10 standards entirely in SQL. A healthcare customer using an AI operator for entity resolution — a real production workload, not a demo.",
+      "tags": [
+        "JP",
+        "customer",
+        "AI.GENERATE",
+        "healthcare"
       ]
     },
     {
@@ -231,11 +439,27 @@
       "displayDate": "2025",
       "title": "New BigQuery gen AI functions for better data analysis",
       "href": "https://cloud.google.com/blog/products/data-analytics/new-bigquery-gen-ai-functions-for-better-data-analysis",
-      "why": "GA narrative for AI.GENERATE / AI.GENERATE_TABLE plus embedding/search path \u2014 shows operators maturing from preview to production inference surface. Impact: credibility for sales that BQ AI ops are GA-ready.",
+      "why": "Google Cloud announced GA for AI.GENERATE and AI.GENERATE_TABLE in BigQuery, plus the embedding and search path. Sales credibility that BigQuery AI operators have moved from preview into a production inference surface.",
       "tags": [
         "AI.GENERATE",
         "GA",
         "embeddings"
+      ]
+    },
+    {
+      "id": "ctrldigital-genai-functions-qualitative",
+      "kind": "customer",
+      "source": "Ctrl Digital",
+      "date": "2025-11-28",
+      "displayDate": "Nov 28, 2025",
+      "title": "Generative AI Functions in BigQuery to Analyze Qualitative Data",
+      "href": "https://ctrldigital.com/posts/generative-ai-functions-in-bigquery-to-analyze-qualitative-data/",
+      "why": "Ctrl Digital, a Google Cloud partner, ran AI.GENERATE, AI.CLASSIFY, and AI.SIMILARITY in BigQuery over search terms and Cloud Storage objects to do multimodal qualitative analysis in SQL. They track token cost per query in the same statement — the partner-authored cost-transparency story AEs can reuse.",
+      "tags": [
+        "partner",
+        "AI.GENERATE",
+        "AI.CLASSIFY",
+        "AI.SIMILARITY"
       ]
     },
     {
@@ -246,11 +470,27 @@
       "displayDate": "Nov 21, 2025",
       "title": "Gathering advanced data, agent and ML tools under BigQuery AI",
       "href": "https://cloud.google.com/blog/products/data-analytics/gathering-advanced-data-agent-and-ml-tools-under-bigquery-ai",
-      "why": "Official umbrella narrative that folds BigQuery ML, generative AI SQL functions, vector search, and agents into BigQuery AI. Impact: the GTM frame directors need \u2014 BQML and AI operators as one platform story rather than bolted-on Vertex side tools.",
+      "why": "Google Cloud folded BigQuery ML, the generative AI SQL functions, vector search, and agents under one BigQuery AI umbrella. The GTM frame directors need: BQML and AI operators as one platform story, not bolted-on Vertex side tools.",
       "tags": [
         "BigQuery AI",
         "BQML",
         "platform"
+      ]
+    },
+    {
+      "id": "devoteam-bqml-data-workflow",
+      "kind": "customer",
+      "source": "Devoteam",
+      "date": "2025-11-19",
+      "displayDate": "Nov 19, 2025",
+      "title": "From SQL to AI: How BigQuery ML Revolutionises the Data Workflow",
+      "href": "https://www.devoteam.com/expert-view/bigquery-ml-revolutionises-the-data-workflow/",
+      "why": "Devoteam, a Google Cloud partner, benchmarked BigQuery ML against a Python/scikit-learn MLOps stack with CREATE MODEL and ML.EVALUATE, then deployed to Vertex AI with a single model_registry option. Partner-validated proof that BQML collapses train-evaluate-deploy into SQL.",
+      "tags": [
+        "partner",
+        "BQML",
+        "ML.EVALUATE",
+        "Vertex AI"
       ]
     },
     {
@@ -261,7 +501,7 @@
       "displayDate": "Nov 12, 2025",
       "title": "SQL reimagined for the AI era with BigQuery AI functions",
       "href": "https://cloud.google.com/blog/products/data-analytics/sql-reimagined-for-the-ai-era-with-bigquery-ai-functions",
-      "why": "Public preview of managed AI.IF, AI.CLASSIFY, and AI.SCORE \u2014 intent-first operators that sit beside AI.GENERATE. Impact: clearest board card for \u201cAI operators as SQL verbs\u201d and the cost/quality story vs prompt workshops.",
+      "why": "Google Cloud launched managed AI.IF, AI.CLASSIFY, and AI.SCORE in public preview as intent-first SQL verbs beside AI.GENERATE in BigQuery. The clearest board card for “AI operators as SQL” and the cost/quality story versus prompt workshops.",
       "tags": [
         "AI.IF",
         "AI.CLASSIFY",
@@ -274,10 +514,10 @@
       "kind": "essay",
       "source": "Medium (Google Cloud Community)",
       "date": "2025-11-01",
-      "displayDate": "2025 \u00b7 Medium (date refine pending)",
+      "displayDate": "2025 · Medium (date refine pending)",
       "title": "Supercharge Your Data Quality: Anomaly Detection with BigQueryML",
       "href": "https://medium.com/google-cloud/supercharge-your-data-quality-anomaly-detection-with-bigqueryml-22a46e573cb5",
-      "why": "Classic BQML path: CREATE MODEL then ML.DETECT_ANOMALIES for proactive DQ (ARIMA_PLUS / k-means). Impact: predictive-ML operator board coverage beyond GenAI.",
+      "why": "A Google Cloud Community post uses BigQuery ML's CREATE MODEL and ML.DETECT_ANOMALIES with ARIMA_PLUS and k-means for proactive data-quality monitoring. Keeps predictive BQML operators on the board beside the GenAI functions.",
       "tags": [
         "Medium",
         "BQML",
@@ -285,14 +525,30 @@
       ]
     },
     {
+      "id": "nikkei-research-ml-generate-text-pitfalls",
+      "kind": "customer",
+      "source": "日経リサーチ Data Analytics Team (note)",
+      "date": "2025-10-15",
+      "displayDate": "Oct 15, 2025",
+      "title": "「データ分析×AI」の意外な落とし穴 ～BigQuery のML.GENERATE_TEXT 関数(Vertex AI) を業務利用する時に気をつけたい話～",
+      "href": "https://note.com/nikkei_r_datapro/n/n10df1cb9bec1",
+      "why": "Nikkei Research's Data Analytics Team ran ML.GENERATE_TEXT with Gemini over large survey datasets in BigQuery and published the production pitfalls: quotas, retryable errors, and cost guardrails. Customer-authored operational lessons that shape how AI operators should be packaged for enterprise buyers.",
+      "tags": [
+        "JP",
+        "customer",
+        "ML.GENERATE_TEXT",
+        "operations"
+      ]
+    },
+    {
       "id": "medium-complete-guide-bqml",
       "kind": "essay",
       "source": "Medium (Google Cloud Community)",
       "date": "2025-09-01",
-      "displayDate": "2025 \u00b7 Medium (date refine pending)",
+      "displayDate": "2025 · Medium (date refine pending)",
       "title": "Machine Learning Directly in BigQuery: A Complete Guide to BigQuery ML",
       "href": "https://medium.com/google-cloud/machine-learning-directly-in-bigquery-a-complete-guide-to-bigquery-ml-e3f2eabf5677",
-      "why": "Broad BQML primer spanning predictive AI + generative via ML.GENERATE_TEXT / remote Gemini models. Impact: onboarding baseline card for the BQ ML board.",
+      "why": "A Google Cloud Community primer spans BigQuery ML end to end, from predictive CREATE MODEL to generative ML.GENERATE_TEXT over remote Gemini models. The onboarding baseline card for new BQ ML stakeholders.",
       "tags": [
         "Medium",
         "BQML",
@@ -307,10 +563,58 @@
       "displayDate": "2025",
       "title": "Convert AI-generated unstructured data to a BigQuery table",
       "href": "https://cloud.google.com/blog/products/data-analytics/convert-ai-generated-unstructured-data-to-a-bigquery-table",
-      "why": "Hands-on AI.GENERATE_TABLE on object tables (images \u2192 typed columns), building on ML.GENERATE_TEXT. Impact: multimodal unstructured\u2192structured operator story for data eng buyers.",
+      "why": "Google Cloud demonstrated AI.GENERATE_TABLE on BigQuery object tables, turning images into typed columns on top of ML.GENERATE_TEXT. The multimodal unstructured-to-structured operator story for data-engineering buyers.",
       "tags": [
         "AI.GENERATE_TABLE",
         "object tables"
+      ]
+    },
+    {
+      "id": "owox-bqml-everything",
+      "kind": "customer",
+      "source": "OWOX BI",
+      "date": "2025-05-15",
+      "displayDate": "May 2025",
+      "title": "BigQuery ML: Everything You Need to Know (With Examples)",
+      "href": "https://www.owox.com/blog/articles/bigquery-ml",
+      "why": "OWOX BI, a marketing-analytics partner, published a practitioner manual for BigQuery ML covering logistic regression, ARIMA forecasting via ML.FORECAST, and registering models to Vertex AI with ALTER MODEL. Partner-channel onboarding content that widens BQML's marketing-analyst adoption surface.",
+      "tags": [
+        "partner",
+        "BQML",
+        "ML.FORECAST",
+        "ARIMA"
+      ]
+    },
+    {
+      "id": "dzone-genai-bigquery-guide",
+      "kind": "community",
+      "source": "DZone (Nivedita Kumari)",
+      "date": "2025-05-08",
+      "displayDate": "May 8, 2025",
+      "title": "Getting Started With GenAI on BigQuery: A Step-by-Step Guide",
+      "href": "https://dzone.com/articles/getting-started-with-genai-on-bigquery",
+      "why": "Nivedita Kumari's DZone guide configures a Vertex AI remote model in BigQuery ML and runs ML.GENERATE_TEXT with prompt concatenation over release-notes tables. Third-party developer-channel coverage that broadens the top of the BQML GenAI funnel.",
+      "tags": [
+        "community",
+        "BQML",
+        "ML.GENERATE_TEXT",
+        "DZone"
+      ]
+    },
+    {
+      "id": "principle-bigquery-gemini-sql",
+      "kind": "customer",
+      "source": "Principle Inc.",
+      "date": "2025-05-06",
+      "displayDate": "May 6, 2025",
+      "title": "BigQueryとGeminiの連携で広がるSQLの世界",
+      "href": "https://www.principle-c.com/column/bigquery-gemini-sql-integration/",
+      "why": "Principle Inc., a JP analytics partner, wired ML.GENERATE_TEXT with Gemini 2.0 Flash into Looker Studio over Salesforce and Zoom Phone data marts, and analyzed latency plus dual BigQuery-and-Vertex token billing. Partner field economics for AI operators in BI pipelines.",
+      "tags": [
+        "JP",
+        "partner",
+        "ML.GENERATE_TEXT",
+        "Looker Studio"
       ]
     },
     {
@@ -318,14 +622,60 @@
       "kind": "essay",
       "source": "Google Cloud Blog",
       "date": "2025-04-01",
-      "displayDate": "Next \u201925 era",
+      "displayDate": "Next ’25 era",
       "title": "BigQuery adds new AI capabilities",
       "href": "https://cloud.google.com/blog/products/data-analytics/bigquery-adds-new-ai-capabilities",
-      "why": "Next-era launch post for AI.GENERATE_TABLE, scalar AI.GENERATE, and typed AI.GENERATE_BOOL/INT/DOUBLE inside BigQuery ML. Impact: foundational operator launch card for structured GenAI in SQL.",
+      "why": "Google Cloud's Next '25-era launch introduced AI.GENERATE_TABLE, scalar AI.GENERATE, and typed AI.GENERATE_BOOL/INT/DOUBLE inside BigQuery ML. The foundational launch card for structured GenAI in SQL.",
       "tags": [
         "AI.GENERATE",
         "AI.GENERATE_TABLE",
         "BQML"
+      ]
+    },
+    {
+      "id": "carto-bqml-extension-package",
+      "kind": "customer",
+      "source": "CARTO",
+      "date": "2025-02-20",
+      "displayDate": "Feb 20, 2025",
+      "title": "BigQuery ML now in CARTO: supercharge your spatial analysis with AI",
+      "href": "https://carto.com/blog/bigquery-ml-carto-supercharge-spatial-analysis-with-ai/",
+      "why": "CARTO shipped a BigQuery ML Extension Package for CARTO Workflows, wrapping BQML training, evaluation, and prediction procedures as drag-and-drop spatial-AI components. A partner productizing BQML inside its own canvas — a distribution surface, not just a blog post.",
+      "tags": [
+        "partner",
+        "BQML",
+        "CARTO",
+        "spatial"
+      ]
+    },
+    {
+      "id": "arxiv-bqml-healthcare-2502-07026",
+      "kind": "essay",
+      "source": "arXiv",
+      "date": "2025-02-10",
+      "displayDate": "Feb 10, 2025",
+      "title": "Machine Learning for Everyone: Simplifying Healthcare Analytics with BigQuery ML",
+      "href": "https://arxiv.org/abs/2502.07026",
+      "why": "An arXiv paper evaluates BigQuery ML for healthcare analytics, showing clinical researchers building patient-outcome models in standard SQL without exporting PHI from the governed warehouse. Academic validation of BQML's data-stays-put value in a regulated vertical.",
+      "tags": [
+        "arXiv",
+        "BQML",
+        "healthcare"
+      ]
+    },
+    {
+      "id": "practicalgcp-ml-generate-text",
+      "kind": "essay",
+      "source": "Practical GCP (Substack)",
+      "date": "2024-11-18",
+      "displayDate": "Nov 18, 2024",
+      "title": "Deep Dive on ML.GENERATE_TEXT()",
+      "href": "https://practicalgcp.substack.com/p/deep-dive-on-mlgenerate_text",
+      "why": "Practical GCP stress-tested ML.GENERATE_TEXT with Gemini 1.5 Flash in BigQuery against a Cloud Run pipeline, covering QPM quotas and retries, and priced 1M feedback rows at under $4. Independent economics that make the operator credible for batch enterprise workloads.",
+      "tags": [
+        "ML.GENERATE_TEXT",
+        "cost",
+        "quotas"
       ]
     },
     {
@@ -336,10 +686,41 @@
       "displayDate": "2024",
       "title": "How to use BigQuery machine learning",
       "href": "https://cloud.google.com/blog/products/data-analytics/how-to-use-bigquery-machine-learning",
-      "why": "Canonical BQML + Vertex AI Pipelines operator story \u2014 train/predict in SQL and orchestrate with BQML pipeline components. Impact: classic predictive-ML GTM baseline beside generative AI operators.",
+      "why": "Google Cloud's canonical how-to trains and predicts with BigQuery ML in SQL and orchestrates it through Vertex AI Pipelines BQML components. The classic predictive-ML GTM baseline that the generative AI operators now build on.",
       "tags": [
         "BQML",
         "Vertex AI Pipelines"
+      ]
+    },
+    {
+      "id": "yt-analytics-with-adam-llm-bqml",
+      "kind": "video",
+      "source": "YouTube (Analytics with Adam)",
+      "date": "2024-04-02",
+      "displayDate": "Apr 2, 2024",
+      "title": "How to use LLMs in SQL Statements with Big Query ML",
+      "href": "https://www.youtube.com/watch?v=TmDRdAD9sOI",
+      "why": "Analytics with Adam walks business analysts through creating a Vertex AI connection, CREATE MODEL ... REMOTE WITH CONNECTION, and ML.GENERATE_TEXT in BigQuery ML. Early creator-channel coverage that put LLM-in-SQL in front of a non-engineer audience.",
+      "tags": [
+        "video",
+        "BQML",
+        "ML.GENERATE_TEXT"
+      ]
+    },
+    {
+      "id": "rudderstack-churn-bqml",
+      "kind": "customer",
+      "source": "RudderStack",
+      "date": "2024-03-01",
+      "displayDate": "2024",
+      "title": "Churn Prediction using BigQueryML",
+      "href": "https://www.rudderstack.com/blog/churn-prediction-using-bigqueryml/",
+      "why": "RudderStack, a customer data platform, trained churn models with BigQuery ML directly on the clickstream events its pipelines deliver and scored them with ML.EVALUATE. A CDP vendor making BQML the default ML layer on its own warehouse data.",
+      "tags": [
+        "partner",
+        "BQML",
+        "ML.EVALUATE",
+        "churn"
       ]
     }
   ]
