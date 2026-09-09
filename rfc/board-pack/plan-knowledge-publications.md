@@ -10,8 +10,8 @@ contract in `spec-knowledge-publications.md`. Nothing below changes a spike meas
 | --- | --- | --- |
 | Spike compile, publish, retrieve, authorization, catalog, seed and publication modules | Feasibility evidence on invented Acme data; spike code in this repository | The reference behaviour a conformance suite checks the proposed contract against. Never the product. |
 | SDK receipt example (broker, executor, verifier, consumer) | Example-only; locally held key; same principal executes and verifies | The consumer side of the separate verified-receipt feature. Not part of the publications MVP. |
-| Catalog `okf` aspect plus appended pin fields | Shipped aspect with proposed pin fields, read live once by the spike | The Catalog side of the binding contract, co-owned with Catalog. |
-| Ordinary-SQL retrieval measurements and the graph benchmark | Four retrieval cells measured on-demand; graph benchmark unfinished; thresholds proposed | Inputs to the operating limits the product would document. Not acceptance of any threshold. |
+| Catalog runtime aspect (`okf-context-runtime`), separate from the shipped authored `okf` aspect | Separately owned runtime pin read live once by the spike; the authored aspect is preserved and never used as runtime input | The Catalog side of the binding contract, co-owned with Catalog. |
+| Ordinary-SQL retrieval measurements and the graph benchmark | Four retrieval cells measured on-demand; the two request-to-consumer cells unfilled because they have no runner and no selected fact-data version; the five cost cells unmeasured; graph benchmark unfinished; thresholds proposed | Inputs to the operating limits the product would document. Not acceptance of any threshold. |
 | The connected end-to-end path | One chain, chosen seed, single identity, plain SQL; one graph run, success case only | Evidence that the surfaces are buildable. None of it is a surface. |
 | The Finance retention pilot | Proposed, unsponsored | Validation data and demand evidence for the product owner. Not the product. |
 
@@ -30,19 +30,28 @@ returning no content, determinism of node and link order, and the context-record
 pass today is recorded as a known gap, not hidden. Offline only; no cloud run. Output: a conformance module and a
 gap list in the spike's docs folder. Claims allowed afterwards: "the contract is testable"; not "the contract is met".
 
-### KP-2 — close the cached-replay gap on the relational engine
+### KP-2 — one cache-contract conformance case across every engine
 
-The spec says every link that authorized a disclosure is re-checked at disclosure, including from cache. The reference
-engine does this; the BigQuery engines re-check nodes only, and a cached result was replayed after a link revocation.
-Bring the relational engine to the reference behaviour, prove it with the existing hermetic revocation cases, and only
-then, on an explicit owner go, re-run the restricted-identity denial cases live on the SQL path. Depends on KP-1 so
-the check exists before the fix. No graph-engine work here.
+The spec says every node returned and every link that authorized its disclosure is re-checked at disclosure,
+including when the result comes from a cache. Three facts to keep apart. Historically, a link-only revocation once
+slipped through the BigQuery cached path, and later the reference engine's own re-check lagged behind the BigQuery
+one; both were review findings on earlier slices. As implemented now, the BigQuery retrieval module re-checks the
+disclosed node set and the authorizing link set together on every cached replay, and the hermetic link-only
+revocation cases deny the replay. Still unproven: that behaviour under a real restricted identity live, and inside a
+graph walk at all.
+
+So KP-2 is conformance, not repair. Express the re-check-at-disclosure contract as one KP-1 case that runs unchanged
+against the reference, relational and graph engines, covering node revocation, link-only revocation, a stale cache
+entry from an older dependency version, and a seed that disables the cache; the output is a per-engine table of
+passed, failed and not-runnable. Then, only on an explicit owner go, run the link-only revocation case live under the
+restricted identity on the SQL path. Depends on KP-1. Graph-engine rows stay not-runnable until the graph gate opens.
 
 ### KP-3 — Catalog binding as pointer plus digest
 
 Define the runtime reference the catalog entry would hold (publication id, projection digest, profile version,
-activation state) as fields on the shipped aspect, and make the spike's catalog-seeded resolution refuse on a digest
-mismatch and on a withdrawn state. Write down who may activate, withdraw and delete, and what a republish preserves.
+activation state) as fields on the separately owned Catalog runtime aspect the spike already reads, leaving the
+shipped authored `okf` aspect untouched as the spec requires, and make the spike's catalog-seeded resolution refuse on
+a digest mismatch and on a withdrawn state. Write down who may activate, withdraw and delete, and what a republish preserves.
 Read-only against Catalog; no writes outside run-owned test resources; live steps only on an explicit owner go.
 Output: a binding note beside the Catalog alignment documents and a hermetic test. This is the piece that turns
 "Catalog discovers, BigQuery serves" into a hand-off rather than a hand-typed seed.
@@ -63,10 +72,11 @@ tree that the board pack's ask can point to.
 
 ## Follow-on features, not MVP
 
-- **Verified job receipt / Knowledge-Bound Jobs.** Needs a fact-version manifest that the consumer path is still
-  blocked on, a receipt trust model, protected evidence, canonical result encoding, replay rules and a retention
-  horizon well past ordinary time travel. The recorded consumer cells stay unmeasured until that selection is made,
-  and it is outside every slice above.
+- **Verified job receipt / Knowledge-Bound Jobs.** Needs a fact-version manifest, a receipt trust model, protected
+  evidence, canonical result encoding, replay rules and a retention horizon well past ordinary time travel. The
+  recorded request-to-consumer cells stay unfilled for two separate reasons, a missing runner and no selected
+  fact-data version, and selecting facts alone does not fill them; the five cost cells stay unmeasured. All of it is
+  outside every slice above.
 - **Graph-traversal engine behind the contract.** Blocked on measuring access denial inside a graph walk under a
   restricted identity and on the unfinished graph benchmark. Enterprise or Enterprise Plus capacity; owner-gated.
 - **Natural-language seed.** Blocked on an embedding model callable under the requester's own identity.
@@ -114,3 +124,21 @@ Filled in after implementation (bottom of this file).
 - **Hygiene.** `git diff --check` clean. Documents only: no cloud run, no spike measurement touched, no merge.
 - **Not done.** No three-engine browser pass; the change is one linked sentence in an existing paragraph and the
   closed-state word count has no maintained ceiling (see the Pass 2 record).
+
+### Review fix pass (2026-09-09 PT, same branch)
+
+- **KP-2 rebased on the implemented cache contract.** The plan had scheduled a node-only cache repair on the BigQuery
+  engines. At this branch the spike's retrieval module already re-checks disclosed nodes and authorizing links
+  together on cached replay, and the hermetic link-only revocation cases deny it; the earlier gaps were a historical
+  link-only slip on the BigQuery path and a later reference-engine parity lag, both closed on earlier slices. KP-2 now
+  defines cross-engine conformance for that contract and names the still-unproven live and graph-walk coverage. The
+  matching evidence sentences in the intent and spec were corrected the same way.
+- **Catalog binding location.** The plan's evidence row and KP-3 now name the separately owned Catalog runtime aspect
+  the spike reads, and leave the shipped authored aspect untouched, matching the spec.
+- **Consult attribution.** The intent now says the two analyses agreed the runtime is a pattern and not a feature,
+  and chose different wedges; the board pack adopted the publications recommendation.
+- **Consumer and cost qualifications.** Every retrieval summary in the three documents names both consumer blockers,
+  no runner and no selected fact-data version, and keeps the five unmeasured cost cells beside it.
+- **Checks.** Link, cache and restricted-chain tests: 71 passed offline, bytecode writes off. Stale-phrase and
+  banned-token scans over the three documents clean. Reader-facing files unchanged since the first push: one line
+  each in the page and story document against the base, stylesheet untouched. `git diff --check` clean.

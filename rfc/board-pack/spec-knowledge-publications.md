@@ -92,9 +92,9 @@ composable with ordinary analytics. That is a later addition, also proposed, and
   Refusals return no content.
 - **Current access on the managed read path.** The authenticated requester is bound to the retrieval job. Permission
   is checked at read time for every node returned and for every link that authorized its disclosure, including when a
-  result is served from a cache. The recorded experiments showed a cached result replayed after a link revocation on
-  the BigQuery engines while the reference engine re-checked links; the service contract adopts the reference
-  behaviour. Historical pins do not preserve revoked access.
+  result is served from a cache. The spike's retrieval module implements exactly this re-check of disclosed nodes and
+  authorizing links on cached replay, after an earlier version let a link-only revocation through; the contract adopts
+  the implemented behaviour and requires it of every engine. Historical pins do not preserve revoked access.
 - **Reject, do not downgrade.** A source whose policy needs a mapping the MVP does not support (mixed policy inside one
   publication, per-node or per-link rules, cross-boundary links) is refused at publish time with a named diagnostic.
   The MVP never silently widens or narrows access to make a publish succeed.
@@ -182,7 +182,7 @@ evidence that the part is buildable on existing BigQuery features. No row is the
 | --- | --- | --- |
 | Managed compilation, immutability, atomic activation | Spike compile and publish modules | Deterministic projection, readback validation, pointer switch, failure injection before the pointer. Local code, not a service. |
 | Bounded retrieval, pin, refusals | Spike retrieve module with the relational engine | Governed two-hop retrieval, empty and ambiguous outcomes handled, fail-closed. Invented corpus; chosen seeds. |
-| Current access on the read path | Spike authorization fixtures under an impersonated restricted identity | Five denial checks passed on the SQL path. Not inside a graph walk. Cached replay after a link revocation observed on the BigQuery engines. |
+| Current access on the read path | Spike authorization fixtures under an impersonated restricted identity; spike retrieval module | Five denial checks passed on the SQL path. Not inside a graph walk. Cached replay re-checks disclosed nodes and authorizing links, shown by hermetic link-only revocation cases only; not shown live under the restricted identity. |
 | Catalog binding as pointer plus digest | Spike catalog, seed and publication modules | Live catalog read resolved a retained publication; digest mismatch refused. Operator identity, relational path. |
 | Consumer that releases only on a passing check | Spike chain module plus the SDK receipt example | Released on match, withheld on every substitution tested. Locally held key; same principal verifies and executes; example-only. Belongs to the follow-on feature. |
 | Graph-traversal engine | Spike graph engine on Enterprise capacity | One connected run, chosen seed, single identity, success case only. Benchmark unfinished. |

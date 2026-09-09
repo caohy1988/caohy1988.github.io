@@ -7,9 +7,12 @@ product name, resource, operation and field in this document and its companions
 supported syntax.
 
 Source: the 2026-09-08 product consult on whether "BigQuery as the runtime for OKF and Knowledge Catalog" is a
-shippable BigQuery feature. Two independent analyses reached the same boundary: the runtime is an integration
-*pattern*, and the smallest BigQuery-owned feature inside it is a managed publication and retrieval surface. The board
-pack already carries the resulting callout; this slice writes the intent, surface and next slices behind it.
+shippable BigQuery feature. Two independent analyses agreed on the boundary, that the runtime is an integration
+*pattern* and not itself a feature, and then chose different wedges inside it: one recommended a managed publication
+and retrieval surface owned by BigQuery; the other recommended the verified job receipt as the BigQuery feature, with
+publication and retrieval shipped as an SDK kit. The board pack adopted the publications recommendation, with the
+receipt as the follow-on, and already carries that callout; this slice writes the intent, surface and next slices
+behind it. Reopening the choice is an owner decision recorded in the plan.
 
 ## Problem
 
@@ -59,8 +62,8 @@ themselves, which is exactly what the spike is.
   separate execution feature (proposed as Knowledge-Bound Jobs / a verified job receipt). It is the follow-on, not
   part of this MVP. The first release ships pinned context, not a checked retention number.
 - **Not fact-version pinning.** A publication pins definitions. It does not freeze fact rows, SQL dependencies or
-  policy. The consumer path in the ordinary-SQL comparison stays blocked on fact-version selection, and this proposal
-  does not unblock it.
+  policy. The request-to-consumer cells of the ordinary-SQL comparison stay unfilled for two reasons, no runner and
+  no selected fact-data version, and its five cost cells stay unmeasured; this proposal changes none of that.
 - **Not a managed OKF import into BigQuery Graph as a product of its own.** The graph projection is an internal engine
   choice. Import alone leaves the consistency and evidence contracts unresolved.
 - **Not the Finance pilot, and not a demand claim.** A pilot is a customer-learning exercise that would supply
@@ -80,9 +83,10 @@ themselves, which is exactly what the spike is.
   republish preserves authored aspects, is part of the contract.
 - **Evidence limits carry forward unchanged.** Every recorded experiment used invented Acme gross-margin data. Catalog
   discovery, a separate restricted identity and graph queries have never been combined in one run. Access denial has
-  been shown on the SQL path only, not inside a graph walk. On the BigQuery engines a cached result was replayed after
-  a link revocation; the service contract must close that gap rather than inherit it. The graph benchmark is
-  unfinished. Combining these descriptions does not produce stronger validation.
+  been shown on the SQL path only, not inside a graph walk. A link-only revocation once slipped through the cached
+  path; the retrieval module now re-checks disclosed nodes and authorizing links together on every cached replay, and
+  the hermetic revocation cases deny it, but that has not been shown live under a restricted identity. The graph
+  benchmark is unfinished. Combining these descriptions does not produce stronger validation.
 - **Edition gates are stated where they apply.** Graph queries need Enterprise or Enterprise Plus reservations;
   graph search and graph measures are Preview; fine-grained security has its own edition distinctions.
 - **This slice is documents only.** No live cloud run, no spike measurement change, no board-pack rewrite. The only
