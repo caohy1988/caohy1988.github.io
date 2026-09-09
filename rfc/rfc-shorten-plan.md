@@ -15,3 +15,14 @@ Branch `feat/rfc-shorten-both` from `21b87e5` (origin/main), worktree `caohy1988
    - names removed: the VP, the post's authors, the reviewing agents
 5. Verify: counter under both ceilings; link tests, fact-select tests, new ceiling test; full suite to a log file; `check_full_demo.py` exit 0; `check_cli_viewer.py` at 3 baseline FAILs; browser route check.
 6. Commit, push, open PR with before/after counts. Vault note under `Ship/rfc/`.
+
+## Result (2026-09-09)
+
+| Page | Before (all open / closed) | After (all open / closed) | Ceiling |
+|---|---|---|---|
+| `rfc/index.html` | 3,281 / 2,172 | 1,797 / 1,156 | 1,800 |
+| `rfc/detailed-rfc/index.html` | 14,102 / 10,132 | 7,496 / 5,724 | 7,500 |
+
+Counted by `node rfc/tools/rfc_word_count.mjs`. The architecture diagram's rendered labels alone are about 600 words of the detailed page and the landing diagram about 120; both are unchanged.
+
+Verified offline: link tests, fact-select tests and the new ceiling test (33 passed); full spike suite 958 passed; `check_full_demo.py` exit 0; `check_cli_viewer.py` at its three baseline Prototype-callout failures (the callout was already absent before this slice); `check_rfc_routes.mjs` all routes behave. No section id was removed on either page; the landing forwarder list is unchanged. Links dropped from the detailed page: the demo walkthrough anchor, five full-demo capture files that the earlier-demos note no longer itemises, the graph-overview doc page and one README anchor; none is asserted by a test and every remaining relative link resolves.
