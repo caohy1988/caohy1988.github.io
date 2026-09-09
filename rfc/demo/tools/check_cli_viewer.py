@@ -383,14 +383,14 @@ check("did not write" in readme and "Knowledge Catalog" in readme, "README says 
 walkmd = (DEMO / "WALKTHROUGH.md").read_text("utf-8")
 check(all(c in walkmd for c in CAPTIONS), "WALKTHROUGH.md carries the four caption sentences")
 
-rfc_index = (DEMO.parent / "index.html").read_text("utf-8")
+rfc_index = (DEMO.parent / "detailed-rfc" / "index.html").read_text("utf-8")
 m_call = re.search(r"<div class=\"note\"[^>]*>\s*<span class=\"badge rev\"[^>]*><b>Prototype</b>[\s\S]*?</div>", rfc_index)
 callout = strip_tags(m_call.group(0)) if m_call else ""
-check(m_call is not None and QUESTION in callout, "rfc/index.html Prototype callout leads with the locked question")
-check("legacy" in callout and "unproven" in callout and 'href="./demo/"' in (m_call.group(0) if m_call else ""), "rfc/index.html Prototype callout states the payoff and links ./demo/")
-check(ADAPTER not in callout and re.search(r"\b180\b", callout) is None and "Object.hasOwn" not in callout, "rfc/index.html Prototype callout is why-language, not a feature list")
+check(m_call is not None and QUESTION in callout, "rfc/detailed-rfc/index.html Prototype callout leads with the locked question")
+check("legacy" in callout and "unproven" in callout and 'href="../demo/"' in (m_call.group(0) if m_call else ""), "rfc/detailed-rfc/index.html Prototype callout states the payoff and links ../demo/")
+check(ADAPTER not in callout and re.search(r"\b180\b", callout) is None and "Object.hasOwn" not in callout, "rfc/detailed-rfc/index.html Prototype callout is why-language, not a feature list")
 sentences = [s for s in re.split(r"(?<=[.!?])\s+", callout) if s.strip()]
-check(2 <= len(sentences) <= 6, "rfc/index.html Prototype callout is short (%d sentences)" % len(sentences))
+check(2 <= len(sentences) <= 6, "rfc/detailed-rfc/index.html Prototype callout is short (%d sentences)" % len(sentences))
 
 print()
 if failures:
