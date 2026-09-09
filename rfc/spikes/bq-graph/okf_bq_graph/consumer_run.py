@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import decimal
+import hashlib
 import json
 import math
 import os
@@ -44,7 +45,7 @@ from .chain import (COMPUTATION_PATH, EXAMPLE_REL, MISMATCH_PATH, MISMATCH_SEED,
                     accept, bind, consume, declaration, governed, pick_computation, run_receipt, sdk_publication,
                     sdk_root as default_sdk_root)
 
-RUNNER_VERSION = "okf_bq_graph.consumer_run/0.1.1"  # 0.1.1: atomic run-id ownership, attempt-boundary retention, retained CLI refusals, SQL NULL/FX oracle semantics
+RUNNER_VERSION = "okf_bq_graph.consumer_run/0.1.2"  # 0.1.2: launch evidence tracked across the receipt helper, preflight failures retained; 0.1.1: atomic run-id ownership, attempt-boundary retention, retained CLI refusals, SQL NULL/FX oracle semantics
 ROOT = sb.ROOT
 OUT_DIR = ROOT / "evidence" / "consumer"
 FACTS_DIR = ROOT / "fixtures" / "facts"
@@ -241,8 +242,8 @@ def _pinned_questions(cases_path: Path | str) -> dict:
     return {q["id"]: q for q in cases["forced_seeds"]}
 
 
-def run_gates(plan: dict, cells: list[str], run_id: str, out_dir: Path | str, evaluation_date: _dt.date,
-              cases_path: Path | str = CASES, owned: bool = False) -> list[dict]:
+def run_gates(plan: Optional[dict], cells: Optional[list[str]], run_id: str, out_dir: Path | str, evaluation_date: _dt.date,
+              cases_path: Path | str = CASES, owned: bool = False, plan_error: Optional[str] = None) -> list[dict]:
     """The subprocess-free gates, in order; the list stops at the first refusal. `owned` says this invocation has
     already claimed the run directory atomically (run_hermetic), so its own directory is not a reuse."""
     gates: list[dict] = []
@@ -251,12 +252,17 @@ def run_gates(plan: dict, cells: list[str], run_id: str, out_dir: Path | str, ev
         gates.append(_gate(code, ok, detail))
         return ok
 
+    if plan is None:
+        add("PLAN_INVALID", False, plan_error or "the plan could not be read")
+        return gates
     try:
         sb.validate_plan(plan)
         add("PLAN_INVALID", True, "validate_plan passed (vendored artifacts re-hashed, manifest re-derived)")
-    except (ValueError, KeyError, TypeError, OSError) as e:
+    except (ValueError, KeyError, TypeError, OSError, AttributeError) as e:
         add("PLAN_INVALID", False, f"{type(e).__name__}: {str(e)[:300]}")
         return gates
+    if cells is None:      # derived only after the plan validated: a cell without a name is PLAN_INVALID above, not a crash
+        cells = [c["name"] for c in plan["consumer_cells"]]
     facts = plan["facts"]
     if not add("FACTS_UNSELECTED", facts.get("state") == "SELECTED", f"facts.state = {facts.get('state')}"):
         return gates
@@ -287,7 +293,11 @@ def run_gates(plan: dict, cells: list[str], run_id: str, out_dir: Path | str, ev
                f"evaluation date {evaluation_date.isoformat()} vs valid_for_runs_on_or_after {valid_from.isoformat()}: the sanctioned SQL's 30-day "
                "recognition clause" + (" recognises every fixture order" if evaluation_date >= valid_from else " would not recognise the February order, so the expected results do not hold")):
         return gates
-    q = _pinned_questions(cases_path)
+    try:
+        q = _pinned_questions(cases_path)
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        add("QUESTION_PINNED", False, f"the pinned question set {cases_path} could not be read: {type(e).__name__}: {str(e)[:200]}")
+        return gates
     pinned = (q.get(QUESTION_ID, {}).get("text") == SEED and q.get(QUESTION_ID, {}).get("expect_computation") == COMPUTATION_PATH
               and q.get(PROBE_ID, {}).get("text") == MISMATCH_SEED and q.get(PROBE_ID, {}).get("expect_computation") == MISMATCH_PATH)
     if not add("QUESTION_PINNED", pinned, f"{QUESTION_ID} = {SEED} -> {COMPUTATION_PATH}; {PROBE_ID} = {MISMATCH_SEED} -> {MISMATCH_PATH}"
@@ -359,7 +369,8 @@ def _attempt(cell: str, index: int, kind: str, ctx: dict) -> dict:
     a.setdefault("retrieval", {"status": "NOT_RUN", "reached": False})
     a.setdefault("computation", None); a.setdefault("declaration", None)
     a.setdefault("bind", {"status": "NOT_REACHED", "reason": "a stage before bind failed", "failed_checks": []})
-    a.setdefault("receipt", {"invoked": False, "reason": "a stage before the receipt failed", "diag_present": False})
+    if "receipt" not in a or a["receipt"].get("_pending"):
+        a["receipt"] = _receipt_evidence(a.get("receipt") or {}, a["error"])
     if "consume" not in a:
         a["consume"] = {"decision": REFUSED, "reasons": [f"stage {a.get('stage_failed')} failed: {a['error']}"], "display": None}
     a["finished_utc"] = _now()
@@ -369,6 +380,47 @@ def _attempt(cell: str, index: int, kind: str, ctx: dict) -> dict:
                            "rule": "a stage exception is an outage before the intended stage: unproven, not contradicted"}
     a.pop("_bind_full", None)
     return a
+
+
+def _receipt_evidence(pending: dict, error: Optional[str]) -> dict:
+    """What can be said about the SDK child when the receipt helper did not return normally (Astra RR #1).
+
+    Invocation is asserted only from the runner call itself: no runner call means the child was never launched; a
+    runner that was entered but never returned means invocation is UNKNOWN, retained as uncertainty rather than as
+    non-invocation; a runner that returned means the child completed, and its private diagnostic — still in the
+    invocation directory because the retention step is what failed — is referenced in place with its digest."""
+    launch = pending.get("launch") or {}
+    if not pending.get("_pending"):
+        return {"invoked": False, "launch_attempted": False, "diag_present": False, "reason": "a stage before the receipt failed"}
+    if not launch:
+        return {"invoked": False, "launch_attempted": False, "child_completed": False, "diag_present": False, "sdk_case": pending.get("sdk_case"),
+                "reason": f"the receipt helper raised before calling the runner: nothing was launched ({error})"}
+    out: dict[str, Any] = {"invoked": "UNKNOWN" if "exit_code" not in launch else True, "launch_attempted": True,
+                           "child_completed": "exit_code" in launch, "sdk_case": pending.get("sdk_case"),
+                           "argv": launch.get("argv"), "launched_at_utc": launch.get("launched_at_utc"),
+                           "exit_code": launch.get("exit_code"), "elapsed_ms": launch.get("elapsed_ms"), "stdout": launch.get("stdout"),
+                           "invocation_dir": launch.get("invocation_dir"), "diag_present": False, "diag_path": None, "diag_sha256": None,
+                           "request_id": None, "receipt_id": None, "verdict": None, "execution_match": None,
+                           "retention": f"FAILED: the helper did not return after the launch ({error}); the invocation directory is left in place",
+                           "job_times": {"submitted_at": None, "done_at": None, "note": "hermetic emulation: no BigQuery job"}}
+    if "exit_code" not in launch:
+        out["reason"] = "the runner was entered and raised: whether the child ran to completion cannot be established from here"
+        return out
+    private = Path(launch["invocation_dir"]) / "case_approved_hermetic.json" if launch.get("invocation_dir") else None
+    try:
+        if private is not None and private.is_file():
+            raw = private.read_bytes()
+            diag = json.loads(raw.decode("utf-8"))
+            issued = (diag.get("issue_out") or {}).get("receipt") or {}
+            out.update({"diag_present": True, "diag_path": str(private), "diag_sha256": hashlib.sha256(raw).hexdigest(),
+                        "request_id": diag.get("request_id"), "receipt_id": issued.get("receipt_id"), "verdict": issued.get("verdict"),
+                        "execution_match": issued.get("execution_match"), "released": diag.get("released"), "job": issued.get("job"),
+                        "diag_note": "private diagnostic referenced in place: retention into the run's receipt directory failed"})
+        else:
+            out["diag_note"] = "the child completed but no private diagnostic was found in its invocation directory"
+    except (OSError, ValueError) as e:
+        out["diag_note"] = f"the private diagnostic could not be read: {type(e).__name__}: {str(e)[:120]}"
+    return out
 
 
 def _run_stages(a: dict, probe: bool, ctx: dict, cell: str, index: int) -> None:
@@ -407,7 +459,23 @@ def _run_stages(a: dict, probe: bool, ctx: dict, cell: str, index: int) -> None:
     b_full = a.pop("_bind_full", {"status": a["bind"]["status"]})
     a["stage_failed"] = "receipt"
     if a["bind"]["status"] == "BOUND":
-        rec = run_receipt("approved", ctx["sdk_root"], ctx["receipt_dir"], live=False, runner=ctx["runner"], label=f"{cell}_{index:03d}")
+        launch: dict[str, Any] = {}
+        a["receipt"] = {"_pending": True, "sdk_case": "approved", "launch": launch}   # replaced below; read by _receipt_evidence on failure
+        inner = ctx["runner"]
+
+        def tracking_runner(argv, **kw):
+            """Evidence of the launch survives whatever happens after the runner returns (Astra RR #1)."""
+            launch["argv"] = list(argv)
+            launch["invocation_dir"] = argv[argv.index("--evidence-dir") + 1] if "--evidence-dir" in argv else None
+            launch["launched_at_utc"] = _now()
+            t = time.monotonic()
+            r = inner(argv, **kw)
+            launch["elapsed_ms"] = round((time.monotonic() - t) * 1000, 1)
+            launch["exit_code"] = getattr(r, "returncode", None)
+            launch["stdout"] = (getattr(r, "stdout", "") or "")[-500:]
+            return r
+
+        rec = run_receipt("approved", ctx["sdk_root"], ctx["receipt_dir"], live=False, runner=tracking_runner, label=f"{cell}_{index:03d}")
         receipt, out = rec.get("receipt") or {}, rec.get("output") or {}
         a["receipt"] = {"invoked": True, "sdk_case": "approved", "exit_code": rec["exit_code"], "elapsed_ms": rec["elapsed_ms"],
                         "diag_present": rec["diag_present"], "request_id": rec.get("request_id"), "receipt_id": receipt.get("receipt_id"),
@@ -437,9 +505,11 @@ def _run_stages(a: dict, probe: bool, ctx: dict, cell: str, index: int) -> None:
 
 
 # ----------------------------------------------------------------------------- the campaign
-def run_hermetic(plan: dict, cells: list[str], out_dir: Path | str = OUT_DIR, sdk_root: Optional[str] = None,
+def run_hermetic(plan: Optional[dict], cells: Optional[list[str]], out_dir: Path | str = OUT_DIR, sdk_root: Optional[str] = None,
                  acme_root: Optional[str] = None, as_of: Optional[str] = None, runner: Runner = subprocess.run,
-                 run_id: Optional[str] = None, cases_path: Path | str = CASES) -> dict:
+                 run_id: Optional[str] = None, cases_path: Path | str = CASES, plan_error: Optional[str] = None) -> dict:
+    """`plan=None` with `plan_error` is a preflight failure (unreadable or malformed plan) that still owns a run id and
+    retains its refusal (Astra RR #2); `cells=None` derives the plan's consumer cells after validation."""
     from .authz import operator, redact
     from .compile import compile_bundle
     from .oracle import Graph
@@ -470,7 +540,12 @@ def run_hermetic(plan: dict, cells: list[str], out_dir: Path | str = OUT_DIR, sd
         rec["verdict"] = REFUSED; rec["refusal"] = rec["gates"][0]; rec["retained"] = False
         rec["finished_utc"] = _now()
         return redact(rec)
-    gates = run_gates(plan, cells, run_id, out_dir, evaluation_date, cases_path, owned=True)
+    try:
+        gates = run_gates(plan, cells, run_id, out_dir, evaluation_date, cases_path, owned=True, plan_error=plan_error)
+    except Exception as e:  # noqa: BLE001 - a preflight crash is retained as a refusal, never an empty owned directory
+        gates = [_gate("PREFLIGHT_ERROR", False, f"{type(e).__name__}: {str(e)[:300]}")]
+    if cells is None and plan is not None and _first_refusal(gates) is None:
+        cells = [c["name"] for c in plan["consumer_cells"]]
     rec["gates"] = gates
     refusal = _first_refusal(gates)
     if refusal is None:
@@ -564,7 +639,8 @@ def run_hermetic(plan: dict, cells: list[str], out_dir: Path | str = OUT_DIR, sd
                    "errors": sum(1 for a in attempts if a["error"]),
                    "acceptance": {s: statuses.count(s) for s in ("MET", "WRONG", "NOT_REACHED")},
                    "hermetic_orchestration_ms": {"n": len(ms), "p50": _nearest_rank(ms, 0.5), "p95": _nearest_rank(ms, 0.95),
-                                                 "max": max(ms) if ms else None, "sdk_elapsed_ms_median": _nearest_rank([a["receipt"].get("elapsed_ms") for a in measured if a["receipt"].get("invoked")], 0.5),
+                                                 "max": max(ms) if ms else None, "sdk_elapsed_ms_median": _nearest_rank([a["receipt"]["elapsed_ms"] for a in measured
+                                                                                         if isinstance(a["receipt"].get("elapsed_ms"), (int, float))], 0.5),
                                                  "note": "not request_to_consumer_ms: in-process oracle retrieval plus a subprocess emulation on one machine; "
                                                          "nearest-rank over measured attempts, warmups and the probe excluded; never shown on the card"},
                    "probe": {"decision": probe["consume"]["decision"], "bind": probe["bind"]["status"], "failed_checks": probe["bind"]["failed_checks"],
@@ -652,32 +728,39 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Optional[list[str]] = None, stdout=None) -> int:
     out = stdout or sys.stdout
     args = build_parser().parse_args(argv)
+    plan, plan_error = None, None
     try:
         plan = sb.load_plan(args.plan)
+        if not isinstance(plan, dict):
+            raise ValueError(f"the plan is not a JSON object ({type(plan).__name__})")
     except (OSError, ValueError) as e:
-        print(f"REFUSED: PLAN_INVALID: {type(e).__name__}: {e}", file=out)
-        return 2
-    cells = args.cells or [c["name"] for c in plan.get("consumer_cells", [])]
+        plan_error = f"{type(e).__name__}: {str(e)[:300]} ({args.plan})"
+    cells = args.cells or None       # None: the plan's consumer cells, derived after the plan validates
     as_of = args.as_of or _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     evaluation_date = _dt.date.fromisoformat(as_of[:10])
     run_id = args.run_id or fresh_run_id()
     if args.dry_run:      # write-free: the gates run, nothing is claimed, nothing is retained
-        gates = run_gates(plan, cells, run_id, args.out_dir, evaluation_date, args.cases)
+        try:
+            gates = run_gates(plan, cells, run_id, args.out_dir, evaluation_date, args.cases, plan_error=plan_error)
+        except Exception as e:  # noqa: BLE001
+            gates = [_gate("PREFLIGHT_ERROR", False, f"{type(e).__name__}: {str(e)[:300]}")]
         refusal = _first_refusal(gates)
         if refusal is not None:
             print(f"REFUSED: {refusal['code']}: {refusal['detail']}", file=out)
             return 2
+        cells = cells or [c["name"] for c in plan["consumer_cells"]]
         print(describe(plan, cells, run_id, gates, evaluation_date), file=out)
         print("dry run: nothing launched, no record retained", file=out)
         return 0
     # hermetic: every gate refusal is retained under a fresh owned record (Astra #5), except an id this invocation
     # cannot own, which retains nothing and leaves the owner's files alone
-    rec = run_hermetic(plan, cells, out_dir=args.out_dir, sdk_root=args.sdk_root, acme_root=args.acme_root, as_of=as_of, run_id=run_id, cases_path=args.cases)
+    rec = run_hermetic(plan, cells, out_dir=args.out_dir, sdk_root=args.sdk_root, acme_root=args.acme_root, as_of=as_of, run_id=run_id,
+                       cases_path=args.cases, plan_error=plan_error)
     if rec["verdict"] == REFUSED:
         where = f" (retained {Path(args.out_dir) / ('run_' + rec['run_id'] + '.json')})" if rec.get("retained") else " (nothing retained: the id is not this invocation's)"
         print(f"REFUSED: {rec['refusal']['code']}: {rec['refusal']['detail']}{where}", file=out)
         return 2
-    print(describe(plan, cells, run_id, rec["gates"], evaluation_date), file=out)
+    print(describe(plan, [c["cell"] for c in rec["cells"]], run_id, rec["gates"], evaluation_date), file=out)
     for c in rec["cells"]:
         print(f"  {c['cell']}: {c['state']} attempts={c['attempts_total']} released={c['released']} refused={c['refused']} "
               f"probe={c['probe']['decision']}@{c['probe']['bind']} concurrency_achieved={c['concurrency_achieved']}", file=out)

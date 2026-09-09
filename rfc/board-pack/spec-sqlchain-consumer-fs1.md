@@ -29,7 +29,9 @@ record (`RUN_ID_REUSED`). The id never begins with `live_`. In hermetic mode the
 atomically (create-or-fail) before any gate, subprocess or write; a concurrent or later invocation with the same
 id is refused `RUN_ID_REUSED`, retains nothing and never touches the owner's record or journal. Every other gate
 refusal in hermetic mode is retained as a `REFUSED` record under the fresh owned directory; dry-run retains nothing.
-Records are published by linking a staged file into place, which fails rather than overwrites.
+Records are published by linking a staged file into place, which fails rather than overwrites. Preflight input failures — an unreadable or malformed plan, a plan that fails validation before its cell
+names can be derived, an absent or unreadable question set — are typed refusals (`PLAN_INVALID`, `QUESTION_PINNED`, or
+`PREFLIGHT_ERROR` for anything else) retained the same way; an owned directory is never left empty.
 
 ## 2. The predeclared question and the refusal probe
 
@@ -114,7 +116,12 @@ submits no job, `issued_at`, `diag_path`, `diag_sha256`), `consume` (`decision`,
 `evaluation_date`, `error` (a stage exception, retained rather than raised), `stage_failed` (which stage raised, or
 null). The attempt boundary catches a failure at any stage — bind, the receipt launch or its diagnostic retention,
 the consumer decision, acceptance — and retains what came before it with `error`, `REFUSED` and `NOT_REACHED`; the
-cell continues to its remaining attempts and the probe, and the run finalises `RUNNER_HERMETIC_INCOMPLETE`.
+cell continues to its remaining attempts and the probe, and the run finalises `RUNNER_HERMETIC_INCOMPLETE`. Invocation of
+the SDK child is asserted only from the runner call itself: if the receipt helper raised before calling the runner,
+`invoked` is false with `launch_attempted` false; if the runner was entered and never returned, `invoked` is
+`UNKNOWN`; if the runner returned and the failure came afterwards (a diagnostic retention error), `invoked` is true,
+`child_completed` true, and the child's private diagnostic is referenced in place with its digest, request id and
+verdict, with `retention` naming the failure. Non-invocation is never asserted from a missing diagnostic.
 
 Acceptance per attempt follows the chain's rule for `approved` (must reach retrieval, declaration, `BOUND`, an
 invoked and completed child, exit 0, `RELEASED`; an unreached stage is `NOT_REACHED`, a reached stage that

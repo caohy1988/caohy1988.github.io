@@ -585,3 +585,84 @@ def test_the_metric_definition_names_the_missing_capability_as_live_sampling(pla
     assert "hermetic" in text and "live" in text
     card = sb.render_markdown(sb.build_card(plan))
     assert "No repeated-sample runner exists for this today" not in card
+
+
+# ---- residuals from Astra's re-review of a9d92a3
+def test_receipt_invocation_evidence_survives_a_diagnostic_retention_failure(sdk_root, sample_root, short_plan, tmp_path, monkeypatch):
+    """Astra RR #1: the SDK child completes, then the diagnostic rename fails (EIO). The attempt must say the child WAS
+    invoked and completed, keep the private diagnostic's path, digest and request id, record the retention failure,
+    and still be NOT_REACHED inside an INCOMPLETE run. Only the second real rename fails."""
+    import okf_bq_graph.chain as chain_mod
+    real_replace = os.replace
+    calls = []
+
+    def flaky_replace(src, dst, *a, **k):
+        if Path(src).name == "case_approved_hermetic.json":
+            calls.append(src)
+            if len(calls) == 2:
+                raise OSError(5, "Input/output error (injected on the second diagnostic rename)")
+        return real_replace(src, dst, *a, **k)
+    monkeypatch.setattr(chain_mod.os, "replace", flaky_replace)
+    rec = cr.run_hermetic(sb.load_plan(short_plan), ["sqlchain_forced_c1"], out_dir=tmp_path, sdk_root=sdk_root,
+                          acme_root=sample_root, as_of=AS_OF)
+    assert rec["verdict"] == "RUNNER_HERMETIC_INCOMPLETE" and len(rec["attempts"]) == 4
+    failed = [a for a in rec["attempts"] if a["error"]]
+    assert len(failed) == 1 and failed[0]["index"] == 1 and "OSError" in failed[0]["error"] and failed[0]["stage_failed"] == "receipt"
+    r = failed[0]["receipt"]
+    assert r["invoked"] is True and r["child_completed"] is True and r["exit_code"] == 0
+    assert r["diag_present"] is True and Path(r["diag_path"]).is_file() and r["diag_sha256"] and r["request_id"].startswith("req-")
+    assert str(tmp_path) in r["diag_path"] and r["retention"].startswith("FAILED")
+    assert r["verdict"] == "VERIFIED", "the child's own verdict is read from the diagnostic that survived"
+    assert failed[0]["consume"]["decision"] == "REFUSED" and failed[0]["acceptance"]["status"] == "NOT_REACHED"
+    ok = [a for a in rec["attempts"] if not a["error"]]
+    assert len(ok) == 3 and all(a["acceptance"]["status"] == "MET" for a in ok)
+
+
+def test_a_helper_that_raises_before_launching_says_never_invoked_and_after_launch_says_unknown(sdk_root, sample_root, short_plan, tmp_path, monkeypatch):
+    """Invocation is asserted only from the runner call itself: no runner call -> invoked False; a runner that
+    raised after being entered -> invoked UNKNOWN (retained as uncertainty, never as non-invocation)."""
+    _stage_raises(monkeypatch, "run_receipt", RuntimeError("helper crashed before launching"))
+    rec = cr.run_hermetic(sb.load_plan(short_plan), ["sqlchain_forced_c1"], out_dir=tmp_path, sdk_root=sdk_root, acme_root=sample_root, as_of=AS_OF)
+    r = next(a for a in rec["attempts"] if a["error"])["receipt"]
+    assert r["invoked"] is False and r["launch_attempted"] is False
+    monkeypatch.undo()   # the real helper again; now the runner itself raises after being entered
+
+    def exploding_runner(argv, **k):
+        raise RuntimeError("runner died after being entered")
+    rec = cr.run_hermetic(sb.load_plan(short_plan), ["sqlchain_forced_c1"], out_dir=tmp_path, sdk_root=sdk_root, acme_root=sample_root,
+                          as_of=AS_OF, runner=exploding_runner)
+    r = next(a for a in rec["attempts"] if a["error"])["receipt"]
+    assert r["invoked"] == "UNKNOWN" and r["launch_attempted"] is True and r["child_completed"] is False
+    assert rec["verdict"] == "RUNNER_HERMETIC_INCOMPLETE"
+
+
+@pytest.mark.parametrize("shape, code, needle", [
+    ("malformed_json", "PLAN_INVALID", "JSONDecodeError"),
+    ("missing_cell_name", "PLAN_INVALID", "name"),
+    ("missing_cases", "QUESTION_PINNED", "nonexistent-cases.json"),
+])
+def test_hermetic_cli_retains_preflight_input_failures(plan, tmp_path, no_client, shape, code, needle):
+    """Astra RR #2: an unreadable/malformed plan, a plan that fails validation before cell names can be derived, or an
+    absent --cases file each retain a REFUSED record under an owned directory in --hermetic; --dry-run stays write-free."""
+    path = tmp_path / "plan.json"
+    argv = ["--out-dir", str(tmp_path / "ev")]
+    if shape == "malformed_json":
+        path.write_text("{ not json"); argv += ["--plan", str(path)]
+    elif shape == "missing_cell_name":
+        p = copy.deepcopy(plan); del p["consumer_cells"][0]["name"]
+        path.write_text(json.dumps(p, ensure_ascii=False)); argv += ["--plan", str(path)]
+    else:
+        argv += ["--cases", str(tmp_path / "nonexistent-cases.json")]
+    out = io.StringIO()
+    rc = cr.main(["--hermetic"] + argv, stdout=out)
+    assert rc == 2 and out.getvalue().startswith(f"REFUSED: {code}") and needle in out.getvalue(), out.getvalue()
+    records = list((tmp_path / "ev").glob("run_consumer-hermetic-*.json"))
+    assert len(records) == 1, "the preflight refusal is retained"
+    rec = json.loads(records[0].read_text())
+    assert rec["verdict"] == "REFUSED" and rec["refusal"]["code"] == code and rec["retained"] is True and rec["attempts"] == []
+    owned = tmp_path / "ev" / rec["run_id"]
+    assert owned.is_dir() and any(owned.iterdir()), "no empty owned directory is left behind"
+    out = io.StringIO()
+    dry = [a.replace(str(tmp_path / "ev"), str(tmp_path / "dry")) for a in argv]
+    assert cr.main(["--dry-run"] + dry, stdout=out) == 2 and out.getvalue().startswith(f"REFUSED: {code}")
+    assert not (tmp_path / "dry").exists()
