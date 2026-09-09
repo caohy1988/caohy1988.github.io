@@ -442,6 +442,8 @@ class CampaignRuntime:
         self.gates: list[dict] = []
         self.reconciliations: list[dict] = []
         self.raw_client: Any = None          # one raw client, kept for bounded readbacks after a gate is sealed
+        self.sealed: list[WindowJobs] = []   # every gate that has been sealed; their refs stay readable at later seals
+        self.refs: dict[str, dict] = {}      # job id -> the journaled reference it must be read back under
         self._lock = threading.Lock()
 
     def window_for_cell(self, cell: dict, started: float) -> WindowJobs:
@@ -449,7 +451,9 @@ class CampaignRuntime:
         label = f"{self.campaign['run_id']}_{cell['name']}"
         window = WindowJobs(label, deadline, self.out_dir / f"jobs_{label}.json")
         with self._lock:
-            self.window = window
+            previous, self.window = self.window, window
+            if previous is not None and previous not in self.sealed:
+                self.sealed.append(previous)
             self.gates.append({"cell": cell["name"], "label": label, "journal": str(window.journal),
                                "deadline_seconds_from_cell_start": round(deadline - started, 1)})
         return window
@@ -466,16 +470,32 @@ class CampaignRuntime:
             if self.raw_client is None:
                 self.raw_client = raw
 
-    def unresolved_for(self, window: WindowJobs) -> list[str]:
-        ids = set(window.refs)
-        return sorted((set(self.ledger.pending) | set(self.routing.unknown)) & ids)
+    def unresolved_for(self, window: WindowJobs | None = None) -> list[str]:
+        """Every job id whose billing or routing is still unresolved, with a journaled reference to read it under.
+
+        Not only this gate's ids: a job that was absent at its own gate's seal can commit later, so every later seal
+        reads it again (Astra PR55 RR3 #1: a 404 followed by later presence across a cell boundary)."""
+        with self._lock:
+            for gate in self.sealed + ([window] if window is not None else []):
+                for job_id, ref in gate.refs.items():
+                    self.refs.setdefault(job_id, dict(ref, window=gate.label))   # the gate that journaled it
+            known = set(self.refs)
+        return sorted((set(self.ledger.pending) | set(self.routing.unknown)) & known)
 
     def reconcile(self, cell: dict, window: WindowJobs) -> dict:
-        """After a gate is sealed, read back every job of that gate whose billing or routing is still unresolved,
-        over the gate's bounded read-only channel. A DONE job with statistics settles both; a job the gate journaled
-        but the server never saw (NotFound under its own reference) is released. Anything the channel could not read
-        stays liability and unknown, and the room it holds is not spent again (Astra PR55 RR #1 / #2)."""
-        outcome = {"cell": cell["name"], "gate": window.label, "jobs": [], "expired": False, "unread": []}
+        """After a gate is sealed, read back every job - of this gate and of every earlier one - whose billing or
+        routing is still unresolved, over the sealed gate's bounded read-only channel.
+
+        A DONE job with statistics settles both billing and routing. NOTHING ELSE releases room: a NotFound readback
+        is not proof of non-submission, because a timed-out insert can still commit after a truthful pre-commit 404
+        and a created job can be temporarily unreadable (Astra PR55 RR3 #1; python-bigquery #2134). Such a job stays
+        liability and unknown, is read again at every later seal, and the room it holds is never spent again. A
+        channel that expires leaves everything it did not read exactly as uncertain as before."""
+        with self._lock:
+            if window not in self.sealed:
+                self.sealed.append(window)
+        outcome = {"cell": cell["name"], "gate": window.label, "jobs": [], "expired": False, "unread": [],
+                   "absent_at_readback": []}
         ids = self.unresolved_for(window)
         if not ids:
             self.reconciliations.append(outcome)
@@ -487,8 +507,8 @@ class CampaignRuntime:
         window.open_audit(RECONCILE_SECONDS, max_reads=RECONCILE_MAX_READS)
         audit = window.audit_client(self.raw_client)
         for job_id in ids:
-            ref = window.refs.get(job_id) or {}
-            row = {"job_id": job_id, "ledger": None, "routing": None}
+            ref = self.refs.get(job_id) or {}
+            row = {"job_id": job_id, "gate": ref.get("window", window.label), "ledger": None, "routing": None}
             try:
                 job = audit.get_job(job_id, project=ref.get("project"), location=ref.get("location"))
                 st = getattr(job, "_properties", {}).get("statistics", {}) or {}
@@ -503,12 +523,10 @@ class CampaignRuntime:
                 row["routing"] = self.routing.classify(entry)
                 self.routing.resolve(job_id, entry)
             except gexc.NotFound:
-                if ref.get("notfound_is_done", False) and not ref.get("adopted"):
-                    row["ledger"] = "released" if self.ledger.resolve(job_id, absent=True, how="readback NotFound") else "not pending"
-                    self.routing.resolve(job_id, None, absent=True)
-                    row["routing"] = "released: never submitted"
-                else:
-                    row["ledger"] = row["routing"] = "still unresolved: absent under an unconfirmed reference"
+                # Absent now is not absent for good: the journaled id was assigned before the send, and the send may
+                # still commit. The hold stays liability and the routing stays unknown; the next seal reads it again.
+                row["ledger"] = row["routing"] = "still unresolved: absent at readback (a pending insert can still commit)"
+                outcome["absent_at_readback"].append(job_id)
             except AuditExpired as e:
                 row["ledger"] = row["routing"] = f"still unresolved: {e}"
                 outcome["expired"] = True
@@ -692,8 +710,11 @@ def live(campaign: dict, out_dir: Path | str = OUT_DIR, make_client: Callable[[]
         window = runtime.current_window()
         if window is not None:
             window.stop_and_cancel()      # an abort mid-cell still seals the open gate
-            if runtime.unresolved_for(window):
-                runtime.reconcile({"name": "(final)"}, window)
+            if window not in runtime.sealed and runtime.unresolved_for(window):
+                runtime.reconcile({"name": "(final)"}, window)   # only when the cell never reached its own seal
+        if runtime.ledger.pending or runtime.routing.unknown:
+            record["unresolved_note"] = ("jobs remain with unknown billing and/or routing after every bounded readback; their "
+                                         "holds stayed counted against the ceiling and the campaign is not labelled on-demand")
         record["reconciliations"] = runtime.reconciliations
         record["ended_utc"] = _now()
         record["wall_seconds"] = round(time.monotonic() - started, 1)

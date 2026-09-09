@@ -759,6 +759,12 @@ regression:
 * **Stop reasons are the real cause.** An ordinary error in one stage no longer cancels the whole gate: it is that
   request's retained failure and the cell continues. A gate stopped for a non-deadline reason reads `GATE_STOPPED`
   with the failure named; deadline labels appear only when the time condition actually holds.
+* **A 404 at readback is not proof of non-submission** (third review). A timed-out insert can still commit after a
+  truthful pre-commit 404, and a created job can be temporarily unreadable. An absent job therefore stays liability
+  and unknown, is read again at every later seal (any gate's ids, under their own journaled references), and the room
+  it holds is never spent again; an expired readback channel leaves everything it did not read as uncertain as
+  before. The only release is a gate refusal before an id existed. What a readback reveals is applied to the sealed
+  cell's own verdict, so a late reservation on the final cell's unknown job stops that cell rather than only the next.
 
 `benchmark.run_cell` gained backward-compatible hooks for this: a per-cell `queries` list, `budget["deadline_reason"]`,
 `budget["window_for_cell"]`, `budget["stop_check"]` and `budget["on_cell_sealed"]`; a cell that stopped for any reason

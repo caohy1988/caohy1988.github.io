@@ -179,6 +179,10 @@ def run_cell(cell: dict, queries: list[dict], clients_factory, budget: dict) -> 
             owned.stop_and_cancel()   # seal the cell's gate; with every job finished this cancels nothing
             if budget.get("on_cell_sealed"):
                 budget["on_cell_sealed"](cell, owned)   # e.g. reconcile unresolved job liabilities by bounded readback
+                if stopped_reason is None and stop_check:
+                    # what the readback revealed (a late reservation, a ceiling now spent) is part of THIS cell's
+                    # verdict, not only the next cell's admission (Astra PR55 RR3 #2)
+                    stopped_reason = stop_check()
     measured = [r for r in recs if not r["warmup"]]
     ok = [r["total_ms"] for r in measured if r["ok"]]
     allv = [r["total_ms"] for r in measured]

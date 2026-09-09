@@ -424,7 +424,7 @@ def test_card_command_lines_name_this_driver_and_parse(plan):
 # too), with AnonymousCredentials and no network. The clock is injected. These are counterexamples, not measurements.
 
 import time as _time
-from google.api_core.exceptions import ServiceUnavailable
+from google.api_core.exceptions import NotFound, ServiceUnavailable
 from google.auth.credentials import AnonymousCredentials
 from google.cloud import bigquery
 from requests.exceptions import ConnectionError, ReadTimeout
@@ -437,7 +437,8 @@ class SyntheticBigQuery:
 
     def __init__(self, monkeypatch, *, billed=0, enterprise=False, advance_at=None, advance_seconds=0, honor_cap=False,
                  bill_hold=False, lose_submit_at=(), lose_result_at=(), readback_unavailable=False,
-                 fail_at=(), fail_enterprise_at=(), omit_stats=False):
+                 fail_at=(), fail_enterprise_at=(), omit_stats=False,
+                 defer_insert_at=(), never_commit=False, reveal_enterprise_at_readback=False):
         self.clock = [1000.0]
         self.submissions, self.cancels, self.jobs, self.readbacks = [], [], {}, []
         self.billed, self.enterprise, self.honor_cap = billed, enterprise, honor_cap
@@ -447,6 +448,11 @@ class SyntheticBigQuery:
         self.readback_unavailable = readback_unavailable
         self.fail_at, self.fail_enterprise_at, self.omit_stats = set(fail_at), set(fail_enterprise_at), omit_stats
         self.lost_ids, self.pending_result = set(), set()
+        # Astra RR3 fault model: the insert times out client-side but stays queued remotely; reads and cancels return a
+        # truthful 404 until it commits, which happens when the next gate's first insert arrives (or never).
+        self.defer_insert_at, self.never_commit = set(defer_insert_at), never_commit
+        self.deferred, self.commits = {}, []
+        self.reveal_enterprise_at_readback = reveal_enterprise_at_readback
         monkeypatch.setattr(_time, "monotonic", lambda: self.clock[0])
         monkeypatch.setattr(bigquery.Client, "_call_api", self.api)
 
@@ -479,6 +485,17 @@ class SyntheticBigQuery:
             if not self.omit_stats:
                 job["statistics"] = stat
             job_id = data["jobReference"]["jobId"]
+            window = data["configuration"]["labels"]["window"]
+            if self.deferred and not self.never_commit and any(w != window for _, w in self.deferred.values()):
+                for jid, (deferred_job, _) in list(self.deferred.items()):
+                    self.jobs[jid] = deferred_job         # the queued insert commits once the next gate is at work
+                    self.commits.append(jid)
+                self.deferred.clear()
+            if n in self.defer_insert_at:
+                if self.reveal_enterprise_at_readback:
+                    job["statistics"] = dict(stat, edition="ENTERPRISE", reservation_id="test-project-0728-467323:US.okf-demo-enterprise")
+                self.deferred[job_id] = (job, window)
+                raise ReadTimeout("synthetic: insert queued remotely, no response before the client timeout")
             self.jobs[job_id] = job                       # the server keeps the job even when the client loses the response
             if n in self.lose_submit_at:
                 self.lost_ids.add(job_id)
@@ -495,11 +512,17 @@ class SyntheticBigQuery:
         if method == "POST" and path.endswith("/cancel"):
             job_id = path.split("/jobs/")[1].split("/cancel")[0]
             self.cancels.append(job_id)
+            if job_id in self.deferred or (self.never_commit and job_id not in self.jobs):
+                raise NotFound("synthetic: the insert has not committed")
             self.pending_result.discard(job_id)                # after the seal the server's terminal record is readable
+            if self.reveal_enterprise_at_readback and job_id in self.jobs and "statistics" in self.jobs[job_id]:
+                self.jobs[job_id]["statistics"].update(edition="ENTERPRISE", reservation_id="test-project-0728-467323:US.okf-demo-enterprise")
             return {"job": self.jobs[job_id]}
         if method == "GET" and "/jobs/" in path:
             job_id = path.split("/jobs/")[1].split("?")[0]
             self.readbacks.append(job_id)
+            if job_id in self.deferred or (self.never_commit and job_id not in self.jobs):
+                raise NotFound("synthetic: the insert has not committed")
             if self.readback_unavailable or job_id in self.pending_result:
                 raise ServiceUnavailable("synthetic: job status unavailable")
             return self.jobs[job_id]
@@ -898,3 +921,88 @@ def test_a_gate_refusal_before_journaling_releases_the_hold():
         R._run(clients, "walk", "SELECT 1", [], R.Timer())
     assert ledger.room() == ledger.cap_bytes and ledger.liability() == 0 and ledger.jobs == 1
     assert guard.jobs == 0 and guard.unknown == {}
+
+
+# --- Astra PR55 re-review 3: a NotFound readback is not proof of non-submission --------------------------------------------
+
+def _server_billed(bq):
+    return sum(int(j["statistics"]["query"]["totalBytesBilled"]) for j in bq.jobs.values() if j.get("statistics"))
+
+
+def test_deferred_insert_cannot_push_the_server_bill_past_the_ceiling(plan, scratch, monkeypatch):
+    """Astra RR3 #1 repro at full scale: the first insert times out client-side and stays queued remotely; the 404 at
+    the first seal used to release its hold, the next cell spent that room, and the server billed 65 GiB."""
+    bq = SyntheticBigQuery(monkeypatch, bill_hold=True, defer_insert_at={1})
+    campaign = run.build_campaign(plan, run.load_cases(), ["sqlbase_forced_c1", "sqlbase_forced_c5"], run_id="sqlbase-20260919T000000Z-regress0")
+    record = _live(campaign, bq, scratch)
+    deferred_id = next(iter(bq.deferred))
+    billing = record["billing"]
+    # the queued insert is still liability, so the room it may bill is never spent: server + queued <= ceiling
+    assert _server_billed(bq) + sb.GIB <= 64 * sb.GIB
+    assert billing["bytes_billed_charged"] + billing["unresolved_liability_bytes"] == 64 * sb.GIB
+    assert billing["unresolved_jobs"][0]["job_id"] == deferred_id
+    assert record["cells"][0]["stopped_reason"] == "BYTES_BUDGET_UNRESOLVED"
+    assert record["cells"][1]["state"] == "NOT_RUN_BUDGET" and record["cells"][1]["stopped_reason"] == "BYTES_BUDGET_UNRESOLVED"
+    assert record["edition"] is None and record["unresolved_note"]
+
+
+def test_absent_at_readback_stays_liability_until_a_later_seal_sees_the_job(plan, scratch, monkeypatch):
+    """Astra RR3 #1, the cross-cell path: absent at the first seal, present at the next; charged then, not released."""
+    bq = SyntheticBigQuery(monkeypatch, bill_hold=True, defer_insert_at={1})
+    record = _live(_small(plan, ["sqlbase_forced_c1", "sqlbase_forced_c5"]), bq, scratch)
+    assert bq.commits and _server_billed(bq) <= 64 * sb.GIB
+    first_seal, second_seal = record["reconciliations"][0], record["reconciliations"][1]
+    deferred_id = bq.commits[0]
+    assert first_seal["absent_at_readback"] == [deferred_id]
+    assert first_seal["jobs"][0]["ledger"].startswith("still unresolved: absent at readback")
+    later = next(r for r in second_seal["jobs"] if r["job_id"] == deferred_id)
+    assert later["ledger"] == "charged" and later["routing"] == "OK" and later["gate"].endswith("sqlbase_forced_c1")
+    billing = record["billing"]
+    assert billing["bytes_billed_charged"] + billing["unresolved_liability_bytes"] == _server_billed(bq)
+    assert billing["resolved_by_readback"][0]["job_id"] == deferred_id and billing["resolved_by_readback"][0]["how"] == "readback"
+    assert record["routing"]["jobs_verified_on_demand"] == len(bq.jobs) == 22   # every job, the late one included
+    assert billing["unresolved_liability_bytes"] == 0 and record["edition"] == "on-demand"
+    assert [c["state"] for c in record["cells"]] == ["COMPLETE", "COMPLETE"]
+
+
+def test_a_job_that_never_commits_stays_liability_for_the_whole_campaign(plan, scratch, monkeypatch):
+    bq = SyntheticBigQuery(monkeypatch, billed=sb.GIB, defer_insert_at={1}, never_commit=True)
+    record = _live(_small(plan, ["sqlbase_forced_c1", "sqlbase_forced_c5"]), bq, scratch)
+    lost = next(iter(bq.deferred))
+    billing = record["billing"]
+    assert billing["unresolved_liability_bytes"] == sb.GIB and billing["unresolved_jobs"][0]["job_id"] == lost
+    assert billing["resolved_by_readback"] == []
+    # read again at every seal: this gate's, the next cell's, and never released
+    assert [r["absent_at_readback"] for r in record["reconciliations"]] == [[lost], [lost]]
+    assert bq.readbacks.count(lost) >= 2
+    assert record["edition"] is None and "1 job(s) have no terminal statistics" in record["edition_note"]
+    assert record["unresolved_note"].startswith("jobs remain with unknown billing")
+    assert record["cells"][1]["state"] == "COMPLETE"                       # the other cell ran within the reduced room
+
+
+def test_an_exhausted_readback_channel_preserves_uncertainty(plan, scratch, monkeypatch):
+    monkeypatch.setattr(run, "RECONCILE_SECONDS", 0)
+    bq = SyntheticBigQuery(monkeypatch, billed=sb.GIB, lose_result_at={1})
+    record = _live(_small(plan, ["sqlbase_forced_c1"]), bq, scratch)
+    rec = record["reconciliations"][0]
+    assert rec["expired"] is True and rec["jobs"][0]["ledger"].startswith("still unresolved: the audit deadline passed")
+    assert record["billing"]["unresolved_liability_bytes"] == sb.GIB and record["billing"]["resolved_by_readback"] == []
+    assert record["edition"] is None and len(record["routing"]["unknown"]) == 1
+
+
+def test_reconcile_never_releases_on_notfound():
+    """The only release path is a gate refusal before an id exists; a readback cannot establish non-submission."""
+    import inspect
+    source = inspect.getsource(run.CampaignRuntime.reconcile)
+    assert "absent=True" not in source
+
+
+def test_a_late_enterprise_reveal_at_the_seal_marks_the_final_cell(plan, scratch, monkeypatch):
+    """Astra RR3 #2: the last cell's unknown job revealing ENTERPRISE at readback used to leave COMPLETE / null."""
+    bq = SyntheticBigQuery(monkeypatch, billed=sb.GIB, lose_result_at={12}, reveal_enterprise_at_readback=True)
+    record = _live(_small(plan, ["sqlbase_forced_c1"]), bq, scratch)
+    cell = record["cells"][0]
+    assert cell["state"] == "INCOMPLETE" and cell["stopped_reason"] == "ROUTING_VIOLATION"
+    assert record["state"] == "INCOMPLETE" and record["edition"] is None
+    assert record["routing"]["violations"][0]["stage"] == "readback"
+    assert record["reconciliations"][0]["jobs"][0]["routing"] == "VIOLATION"
