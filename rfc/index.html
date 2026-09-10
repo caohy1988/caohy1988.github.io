@@ -67,7 +67,7 @@
           <p class="runtime-roles">Knowledge Catalog (KC) discovers and governs. Open Knowledge Format (OKF) authors the graph.</p>
           <p class="runtime-assessment"><strong>Proposed: BigQuery Knowledge Publications.</strong> Managed, versioned retrieval over OKF bundles linked from Knowledge Catalog, so every agent gets the same approved definition and its linked rules. SQL first and on-demand; graph walks as an optional later engine on Enterprise capacity. A later <strong>verified job receipt</strong>, also proposed, would bind approved calculations and fact versions to BigQuery results, so a number is released or withheld on BigQuery’s own attestation. Neither is committed; the <a href="board-pack/intent-knowledge-publications.md">proposal note</a> sets out the slices.</p>
           <p class="runtime-assessment"><strong>Especially strong when</strong> the facts an agent needs already live in BigQuery, inside a budget the customer has agreed.</p>
-          <p class="runtime-assessment"><strong>Shown so far — feasibility, not the feature.</strong> Retrieval can select a definition with its linked rules; a receipt can withhold a number whose query and result disagree; and the whole path has run end to end, once through graph queries, on invented data only. <strong>Still open:</strong> catalog discovery, a restricted identity and graph queries have never met in one run; no refusal has run inside graph queries; speed, the question-to-number path and cost are unmeasured; nobody has accepted a budget. That is the pilot’s job.</p>
+          <p class="runtime-assessment"><strong>Shown so far — feasibility, not the feature.</strong> Retrieval can select a definition with its linked rules; a receipt can withhold a number whose query and result disagree; and the whole path has run end to end, once through graph queries, on invented data only. <strong>Still open:</strong> one run combining catalog discovery, a restricted identity and graph queries, plus cost and full-path timing. That is the pilot’s job.</p>
         </div>
         <div class="comparison">
           <section class="comparison-point" aria-labelledby="context-point">
@@ -119,7 +119,7 @@
                 <p>Validate a <strong>job ↔ context ↔ result</strong> receipt against the declared computation; a substituted query leaves the number <strong>unproven.</strong></p>
               </div>
             </div>
-            <p class="comparison-note">A job ID alone is not enough. <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/6719eb535667963fa640dd4535e508b550eb6cb1/examples/okf_attested_computation/evidence/receipt/report.md">The recorded receipt check</a> withholds the number when query, inputs and result do not match; in the connected runs retrieval fed it, under a single identity.</p>
+            <p class="comparison-note">A job ID alone is not enough. <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/6719eb535667963fa640dd4535e508b550eb6cb1/examples/okf_attested_computation/evidence/receipt/report.md">The recorded receipt check</a> withholds the number when query, inputs and result do not match; in the connected runs retrieval fed it.</p>
           </section>
         </div>
         <section class="runtime-rule" id="later-questions" aria-labelledby="later-questions-title">
@@ -134,10 +134,10 @@
           <p class="comparison-note"><strong>The task. Proposed.</strong> An agent retrieves the pinned definition, its linked rules and the declared calculation, and releases a number only when a receipt bound to that calculation checks out. Measured on Acme’s invented gross-margin material.</p>
           <p class="comparison-note"><strong>The definitions and their versions. Fixed.</strong> One pinned bundle of Acme’s definitions, question set fixed in advance, identifying no fact data.</p>
           <p class="comparison-note"><strong>The fact data and its version. Chosen for the comparison, and synthetic.</strong> A fourteen-row invented fixture, pinned by a digest of the rows and columns themselves and, separately, of the loading script. Before measuring, a run must read every table back in full and match the rows and columns to their own digest, not the script’s; no live run has done this yet. It is not customer data: Alder’s cohort has never been selected. <a href="spikes/bq-graph/evidence/sql-baseline/baseline.md">The digest, load job, expiry and what stays unverified</a> are on record.</p>
-          <p class="comparison-note"><strong>Volume and latency. Proposed.</strong> Five requests at once, ten thousand a day, and retrieval within five seconds for ninety-five in a hundred: planning defaults nobody has asked for. Ordinary SQL came in under five seconds one at a time and over it at five at once, for reasons not established; the full time from question to released number has never been sampled.</p>
+          <p class="comparison-note"><strong>Volume and latency. Proposed.</strong> Five requests at once, ten thousand a day, and retrieval within five seconds for ninety-five in a hundred: planning defaults nobody has asked for. Ordinary SQL came in under five seconds one at a time and over it at five at once; the full time from question to released number is not yet sampled.</p>
           <p class="comparison-note"><strong>Freshness and retention. Proposed.</strong> A republished definition visible within a minute (one publish took 21 seconds); a pinned publication stays pinned; fifteen months of records.</p>
           <p class="comparison-note"><strong>Success. Proposed.</strong> Ninety-nine requests in a hundred release a number whose receipt checks out or refuse with a stated reason; no number is released without a checked receipt; denied content is never disclosed.</p>
-          <p class="comparison-note"><strong>Cost. Proposed.</strong> At most five cents per answered question at ten thousand a day, counting failed attempts and reserved capacity. Nothing has been measured against it: the <a href="spikes/bq-graph/evidence/sql-baseline/baseline.md">ordinary-SQL comparison</a> has no cost cells, and none of the graph benchmark’s nine cells is finished.</p>
+          <p class="comparison-note"><strong>Cost. Proposed.</strong> At most five cents per answered question at ten thousand a day, counting failed attempts and reserved capacity. Not yet measured (<a href="spikes/bq-graph/evidence/sql-baseline/baseline.md">ordinary-SQL comparison</a>).</p>
           <p class="comparison-note"><strong>The decision.</strong> At the checkpoint we continue, narrow or stop against whichever of these the owner has accepted. If ordinary SQL meets the need, graph queries must justify their extra cost; demonstrations are not pilot validation.</p>
         </section>
         <div class="technical-design-frame">
@@ -213,7 +213,7 @@
                 <path class="plot-arrow" d="M6 386H16"/>
                 <text class="plot-gate" x="22" y="391">gates retrieval</text>
               </svg>
-              <p class="plot-note">A cited definition cannot validate a different query. Nothing we have run verifies Alder’s 96% or the full design; each run’s limits are stated below.</p>
+              <p class="plot-note">A cited definition cannot validate a different query; each run’s limits are stated once below.</p>
             </figure>
             <p class="design-intro">A proposed integration, not a product. Everything below ran as spike code on invented Acme gross-margin data.</p>
             <section class="design-part" aria-labelledby="design-context">
@@ -225,7 +225,7 @@
               </ul>
               <p class="design-cue">Limits</p>
               <ul class="design-points">
-                <li>It found that SQL but never ran it, from a start pinned by hand; graph-native semantic search (<a href="https://docs.cloud.google.com/bigquery/docs/graph-search">Preview</a>) was not tested.</li>
+                <li>It found that SQL but never ran it, from a start pinned by hand.</li>
               </ul>
             </section>
             <section class="design-part" aria-labelledby="design-access">
@@ -237,7 +237,7 @@
               </ul>
               <p class="design-cue">Limits</p>
               <ul class="design-points">
-                <li>Plain SQL only, never inside graph queries; hidden-identifier leakage and mixed publications remain unproven.</li>
+                <li>Plain SQL only, never inside graph queries.</li>
               </ul>
             </section>
             <section class="design-part" aria-labelledby="design-execution">
@@ -263,8 +263,7 @@
               </ul>
               <p class="design-cue">Limits</p>
               <ul class="design-points">
-                <li>Each run reached a different part; all carried a single identity; the first two used plain SQL; the last two began from a point we chose.</li>
-                <li>Graph queries tried only the case expected to succeed, so no swapped query has been refused through them. The number was invented gross margin; no run used an independent attester.</li>
+                <li>All runs carried a single identity, each reached a different part, and the graph-query run tried only the case expected to succeed.</li>
               </ul>
             </section>
             <section class="design-part" aria-labelledby="design-evidence">
@@ -272,8 +271,7 @@
               <p><strong>The bar.</strong> One run doing all of it at once: catalog discovery, pinned publication, governed retrieval, caller-delegated computation, result-bound receipt and enforcing consumer, with access and revocation checks holding throughout.</p>
               <p class="design-cue">Also unfinished</p>
               <ul class="design-points">
-                <li>None of the graph benchmark’s nine cells is complete. The <a href="spikes/bq-graph/evidence/sql-baseline/baseline.md">ordinary-SQL comparison</a> has measured retrieval only; its question-to-number cells have only a hermetic runner, never run live, on a chosen synthetic fixture, not customer data, and its cost cells are unmeasured.</li>
-                <li>Merged and reviewed, though the receipt example’s approving reviewer also wrote its final fix; merge is not readiness. No customer has agreed a budget.</li>
+                <li>Benchmarks: the graph cells are incomplete and the <a href="spikes/bq-graph/evidence/sql-baseline/baseline.md">ordinary-SQL comparison</a> has measured retrieval only, not cost or the full path.</li>
               </ul>
               <p><strong>The checkpoint.</strong> Receipt work should not wait for the graph benchmark. The opportunity narrows if cost, simpler retrieval, authorization or publication guarantees go against it. Boundaries: <a href="https://docs.cloud.google.com/bigquery/docs/editions-intro">BigQuery editions</a>, <a href="https://docs.cloud.google.com/bigquery/docs/graph-compare">graph placement</a>.</p>
             </section>

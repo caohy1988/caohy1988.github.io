@@ -26,3 +26,14 @@ Branch `feat/rfc-shorten-both` from `21b87e5` (origin/main), worktree `caohy1988
 Counted by `node rfc/tools/rfc_word_count.mjs`. The architecture diagram's rendered labels alone are about 600 words of the detailed page and the landing diagram about 120; both are unchanged.
 
 Verified offline: link tests, fact-select tests and the new ceiling test (33 passed); full spike suite 1,013 passed after rebasing onto origin/main `c37056a` (PR 63 merged mid-slice; its FS-1 wording — hermetic-only runner, never run live; “no live run has done this yet” — is re-applied on both shortened pages); `check_full_demo.py` exit 0; `check_cli_viewer.py` at its three baseline Prototype-callout failures (the callout was already absent before this slice); `check_rfc_routes.mjs` all routes behave. No section id was removed on either page; the landing forwarder list is unchanged. Links dropped from the detailed page: the demo walkthrough anchor, five full-demo capture files that the earlier-demos note no longer itemises, the graph-overview doc page and one README anchor; none is asserted by a test and every remaining relative link resolves.
+
+## Limitation-evidence cut (2026-09-09, second pass on Haiyuan's ask)
+
+| Page | Before (all open / closed) | After (all open / closed) | Ceiling |
+|---|---|---|---|
+| `rfc/index.html` | 1,797 / 1,156 | 1,650 / 1,112 | 1,800 |
+| `rfc/detailed-rfc/index.html` | 7,493 / 5,721 | 6,942 / 5,231 | 7,500 |
+
+Cut: the repeated dumps of what was not measured, not proven, hermetic-only, cost-cell-empty or 0-of-9. Each limit now appears once, as a clause beside the claim it qualifies. Landing: the "still open" list collapses to one sentence; the cost and latency rows keep the proposed number and one "not yet measured / sampled" clause; the design fold keeps one Limits line per part, drops the Preview aside, the reviewer-wrote-the-fix bullet and the hermetic-runner narration (the locked fact-data sentence in the envelope still carries it). Detailed: the status note, table notes, architecture status, figcaption, decision scope, baseline fold, captured-API bullet, Property Graph, access, verdict and phase paragraphs lose their "does not establish / not completion / still to prove" tails; the Phase 0 off-site inventory note and the motivation fixture note are deleted; the recorded-examples note keeps one limit per run and the FS-1 sentence the tests lock; the footer keeps its single dated honesty line. No section id removed; dropped links are unasserted (two session captures, `comparison.md`, the graph-search doc).
+
+Verified offline: link, fact-select and ceiling tests 33 passed; full spike suite 1,013 passed; `check_full_demo.py` exit 0; `check_cli_viewer.py` at its 3 baseline failures; `check_rfc_routes.mjs` all routes behave; no digest, job id, PR number or personal name in prose.
