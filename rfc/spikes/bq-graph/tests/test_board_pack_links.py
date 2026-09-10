@@ -114,10 +114,15 @@ def test_the_landing_page_forwards_every_old_technical_bookmark_and_none_of_its_
 
 
 def test_both_demos_carry_the_detailed_rfc_nav_item():
-    """PR 62 Astra P2 #3."""
+    """PR 62 Astra P2 #3. Since the shared site chrome (research/site-nav-spec.md) both links sit inside the
+    Builds folder of the generated block; the demos still mark /rfc/ as the current page."""
     for demo in ("demo", "full-demo"):
         text = (REPO / "rfc" / demo / "index.html").read_text()
-        assert '<a href="/rfc/" aria-current="page">RFC</a>\n      <a href="/rfc/detailed-rfc/">Detailed RFC</a>' in text, demo
+        block = text[text.index("<!-- site-nav:start -->"):text.index("<!-- site-nav:end -->")]
+        rfc = block.index('<a href="/rfc/" aria-current="page">RFC</a>')
+        detailed = block.index('<a href="/rfc/detailed-rfc/">Detailed RFC</a>')
+        assert rfc < detailed, demo
+        assert block.count('aria-current="page"') == 1, demo
 
 
 def test_routes_in_a_real_browser():

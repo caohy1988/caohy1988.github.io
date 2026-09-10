@@ -54,30 +54,6 @@
     }
     .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
 
-    .topbar { background: var(--navy); color: #e8edf4; }
-    .topbar-inner {
-      min-height: 58px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-    .brand {
-      text-decoration: none;
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.16em;
-    }
-    .brand span { color: var(--accent); }
-    .nav-links { display: flex; gap: 22px; }
-    .nav-links a {
-      color: #b7c2d0;
-      font-size: 0.86rem;
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
 
     .masthead {
       padding: 36px 0 28px;
@@ -688,30 +664,45 @@
       .search { width: 100%; }
     }
     @media print {
-      .topbar, .controls, .cal, .archive, footer { display: none; }
+      .controls, .cal, .archive, footer { display: none; }
       body { background: #fff; }
     }
   </style>
+  <link rel="stylesheet" href="../assets/site-nav.css" data-site-nav>
+  <script defer src="../assets/site-nav.js" data-site-nav></script>
 </head>
 <body>
-  <div class="topbar">
-    <div class="shell topbar-inner">
-      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
-            <nav class="nav-links" aria-label="Primary">
-        <a href="/research/" aria-current="page">Research</a>
-        <a href="/research/stories/">BQAA</a>
-        <a href="/research/conversational-analytics/">CA in BigQuery</a>
-        <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
-        <a href="/research/bigquery-graph/">BQ Graph</a>
-        <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
-        <a href="/research/bigquery-search/">BQ Search</a>
-        <a href="/research/usage/">Usage</a>
-        <a href="/rfc/">RFC</a>
-        <a href="/rfc/detailed-rfc/">Detailed RFC</a>
-        <a href="/evalbench/">EvalBench</a>
-      </nav>
-    </div>
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav>
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
+      <a href="/research/" aria-current="page">Research</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+        </div>
+      </div>
+    </nav>
   </div>
+</div>
+<!-- site-nav:end -->
 
   <header class="masthead">
     <div class="shell">
