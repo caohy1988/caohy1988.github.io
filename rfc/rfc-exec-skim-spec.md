@@ -64,7 +64,7 @@ Audited label: the masthead kicker `3–4 MIN READ` and the detailed page's back
 |---|---|---|
 | G1 rendered words | `rfc/tools/rfc_word_count.mjs` (`rendered`) | ≤ 950 |
 | G2 folds-open words | same (`open`) | ≤ 1,800 (existing `test_rfc_word_ceilings`) |
-| G3 decision above the fold | new `rfc/tools/rfc_skim_check.mjs` | first 450 rendered words contain `proposed`, `invented`, `Knowledge Publications`, `pilot`, `2026-09-19` |
+| G3 decision above the fold | new `rfc/tools/rfc_skim_check.mjs` | first 450 rendered words contain `proposed`, `invented`, `Knowledge Publications`, `pilot`, `2026-09-19` (case-insensitive, so the eyebrow's `Proposed` counts) |
 | G4 read time | same | rendered ÷ 230 ≤ 5.0 minutes |
 | G5 pinned strings | `test_fact_select_surfaces`, `test_board_pack_links` | green |
 | G6 routes | `rfc/tools/check_rfc_routes.mjs` | all routes behave (`#sep19-envelope`, `#story-title`, legacy fragments `#architecture`, `#current-evidence`, `#repro`, `#summary` forward) |

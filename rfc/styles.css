@@ -252,3 +252,62 @@ code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size
   .ask div > p { font-size: 9pt; }
   .reconciliation, .runtime-heading, .ask { break-inside: avoid; }
 }
+
+/* rfc-exec-skim: decision brief blocks (rfc/rfc-exec-skim-spec.md) */
+.decision { margin-top: 22px; padding: 18px 22px; border: 1px solid var(--line); border-left: 4px solid var(--green); background: #fffdf8; }
+.decision .eyebrow { color: var(--green); margin-bottom: 10px; }
+.decision-lede { max-width: 100ch; font-size: 17px; line-height: 1.5; letter-spacing: -.01em; }
+.decision-lede strong { font-weight: 650; }
+.decision-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--line); }
+.decision-grid div { min-width: 0; }
+.decision-grid dt { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--accent); }
+.decision-grid dd { margin: 6px 0 0; font-size: 13.5px; line-height: 1.55; }
+.roles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; margin: 14px 0 0; padding: 0; list-style: none; background: #53645c; border: 1px solid #53645c; }
+.roles li { padding: 12px 14px; background: #263a35; font-size: 13px; line-height: 1.55; color: #d8e1d8; }
+.roles li b { display: block; margin-bottom: 4px; color: #fffdf8; font-weight: 600; }
+.roles li:nth-child(3) { border-top: 2px solid #b9cfb5; background: #30483e; }
+.role-tag { display: inline-block; margin-left: 6px; padding: 1px 6px; border: 1px solid #e2c493; border-radius: 3px; color: #e2c493; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 9px; font-style: normal; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; vertical-align: 2px; }
+.evidence-rows { display: grid; grid-template-columns: 1fr; gap: 0; margin: 10px 0 0; border: 1px solid #53645c; }
+.evidence-rows > div { display: grid; grid-template-columns: 180px 1fr; gap: 16px; padding: 11px 14px; border-top: 1px solid #53645c; background: #263a35; }
+.evidence-rows > div:first-child { border-top: 0; }
+.evidence-rows dt { color: #e2c493; font-weight: 600; font-size: 13px; line-height: 1.5; }
+.evidence-rows dd { margin: 0; color: #d8e1d8; font-size: 13px; line-height: 1.55; }
+.evidence-rows .scope { display: block; margin-top: 4px; color: #b9c9be; font-size: 12px; }
+.thresholds-frame { margin-top: 14px; }
+.risks { display: grid; grid-template-columns: 215px 1fr; gap: 28px; padding-block: 24px; border-bottom: 1px solid var(--line); }
+.risks > .eyebrow { color: var(--muted); padding-top: 5px; }
+.risks h2 { font-size: 23px; text-wrap: initial; }
+.risk-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin: 12px 0 0; }
+.risk-rows dt { font-weight: 650; font-size: 14px; line-height: 1.45; }
+.risk-rows dd { margin: 3px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.risk-more { margin-top: 12px; color: var(--muted); font-size: 13px; }
+.ask-roles { border-top: 1px solid var(--line); padding-top: 9px; }
+
+@media (max-width: 900px) {
+  .roles { grid-template-columns: 1fr 1fr; }
+  .risks { grid-template-columns: 175px 1fr; gap: 20px; }
+}
+@media (max-width: 650px) {
+  .decision { padding: 15px 16px; }
+  .decision-lede { font-size: 16px; }
+  .decision-grid { grid-template-columns: 1fr; gap: 12px; }
+  .roles { grid-template-columns: 1fr; }
+  .roles li, .evidence-rows dd, .evidence-rows dt { font-size: 14px; }
+  .evidence-rows > div { grid-template-columns: 1fr; gap: 4px; }
+  .risks { grid-template-columns: 1fr; gap: 10px; padding-block: 22px; }
+  .risk-rows { grid-template-columns: 1fr; }
+}
+@media print {
+  .decision { padding: 8px 12px; border-left-color: #333; break-inside: avoid; }
+  .decision-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .decision-lede { font-size: 10.5pt; }
+  .decision-grid dd, .risk-rows dd, .risk-more { font-size: 8.5pt; }
+  .roles { background: #aaa; border-color: #aaa; }
+  .roles li, .roles li:nth-child(3) { background: #fff; color: #000; font-size: 8.5pt; border-top: 0; }
+  .roles li b { color: #000; }
+  .role-tag { color: #333; border-color: #333; }
+  .evidence-rows, .evidence-rows > div { border-color: #aaa; background: #fff; }
+  .evidence-rows dt, .evidence-rows dd, .evidence-rows .scope { color: #000; font-size: 8.5pt; }
+  .risks { padding-block: 8px; break-inside: avoid; }
+  .risks h2 { font-size: 14pt; }
+}
