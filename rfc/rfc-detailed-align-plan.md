@@ -12,6 +12,8 @@
 
 | Measure | Before | After |
 |---|---|---|
-| detailed rendered / folds-open words | 5,247 / 6,958 | _tbd_ |
-| first 800 rendered words contain the five tokens | no (`Knowledge Publications`, `2026-09-19` absent) | _tbd_ |
+| detailed rendered / folds-open words | 5,247 / 6,958 | 5,643 / 7,354 (ceiling 7,500) |
+| first 800 rendered words contain the five tokens | no (`Knowledge Publications`, `2026-09-19` absent) | yes |
 | landing rendered / folds-open | 943 / 1,706 | unchanged |
+
+Checks at delivery: `check_rfc_routes.mjs` all routes behave; `site_nav.mjs --check` 13 pages in sync; `check_site_nav.mjs` all pages pass; link + fact-select + ceiling + exec-skim + detailed-align tests 37 passed; full spike suite 1,017 passed. `check_cli_viewer.py` shows the three known baseline Prototype-callout FAILs; `check_full_demo.py` shows five audit-register FAILs (INV-1, SCAN_FILES, INV-6, INV-5) that are byte-identical on main at 3855b91 and name no detailed-page text, so they are pre-existing and out of this slice.
