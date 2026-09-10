@@ -12,9 +12,11 @@
 
 | Measure | Before | After |
 |---|---|---|
-| rendered words | 1,117 | 945 |
-| folds-open words | 1,670 | 1,708 |
+| rendered words | 1,117 | 943 (after Astra fix-1) |
+| folds-open words | 1,670 | 1,706 (after Astra fix-1) |
 | first 450 words contain the five tokens | no (`2026-09-19` and `pilot` absent above the fold) | yes |
 | read time at 230 wpm | 4.9 min | 4.1 min |
 
 Checks at delivery: `site_nav.mjs --check` 13 pages in sync; `check_rfc_routes.mjs` all routes behave; `check_site_nav.mjs` all pages pass; link + fact-select + ceiling + skim tests 34 passed; full spike suite 1,014 passed; detailed RFC unchanged at 6,958 folds-open words (backlink label only).
+
+Astra first review (two P2s, wording): the replayable-context cell now states fixed inputs and equivalent current access with revoked access denying the replay; the Catalog-access cell names custom-entry metadata, discovery not explaining the retrieval path, and other Catalog and source permissions applying. Paid for by trimming the decision grid's duplicated SQL-vs-graph clause (kept in the risks strip), the asks and small phrasings; no scope clause removed.
