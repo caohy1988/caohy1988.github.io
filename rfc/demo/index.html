@@ -15,20 +15,42 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../assets/site-nav.css" data-site-nav>
+<script defer src="../../assets/site-nav.js" data-site-nav></script>
 </head>
 <body>
 
-<div class="site-topbar">
-  <div class="site-shell">
-    <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
-    <nav class="nav-links" aria-label="Primary">
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav data-sticky="">
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
       <a href="/research/">Research</a>
-      <a href="/rfc/" aria-current="page">RFC</a>
-      <a href="/rfc/detailed-rfc/">Detailed RFC</a>
-      <a href="/evalbench/">EvalBench</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <div class="site-nav-folder" data-active="true">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/" aria-current="page">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+        </div>
+      </div>
     </nav>
   </div>
 </div>
+<!-- site-nav:end -->
 
 <header class="masthead">
   <div class="shell">
