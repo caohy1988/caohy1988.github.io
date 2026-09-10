@@ -1,6 +1,7 @@
 // Offline browser check for the five BigQuery product boards (research/board-select-copy-spec.md G2).
 // Serves the repository root on a loopback port and drives headless Chromium over every board at 1280px and 375px.
 // External links are stubbed so "the source opened" can be observed without the network.
+// Also covers Astra's PR 68 P2s: focused controls stay above the fixed tray (1280x740, 375x740) and the manual-copy panel stays accurate after edits.
 // --shots writes screenshots to /tmp/board-shots/. Exit 0 = pass; 1 = a check failed; 3 = Playwright unavailable.
 import http from "node:http";
 import fs from "node:fs";
@@ -155,6 +156,65 @@ for (const slug of BOARDS) {
   const plain = await page.evaluate(() => navigator.clipboard.readText());
   check(plain === blocked.text && plain.includes(`\n   ${sorted[0].href}\n`), `${slug}: Copy plain text writes the review text`);
   if (SHOTS && slug === BOARDS[0]) await page.screenshot({ path: path.join(SHOTS, "desktop-blocked.png") });
+  await context.close();
+
+  // ---- keyboard focus stays above the fixed tray (Astra P2 #1): 1280x740 Space + Tab x3, and 375x740 first Tab after selecting
+  const focusBox = () => { const el = document.activeElement, r = el.getBoundingClientRect(), t = document.getElementById("board-tray").getBoundingClientRect();
+    return { tag: el.tagName, text: (el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 40), top: Math.round(r.top), bottom: Math.round(r.bottom), trayTop: Math.round(t.top), trayH: Math.round(t.height), inner: innerHeight }; };
+  for (const [w, h, mob] of [[1280, 740, false], [375, 740, true]]) {
+    context = await browser.newContext({ viewport: { width: w, height: h }, isMobile: mob, hasTouch: mob });
+    await stubExternal(context);
+    page = await context.newPage();
+    await page.goto(url, { waitUntil: "load" }); await page.waitForSelector(".card");
+    await page.focus(".card:first-child input"); await page.keyboard.press("Space");
+    const presses = mob ? 1 : 3;
+    for (let i = 0; i < presses; i++) await page.keyboard.press("Tab");
+    await page.waitForTimeout(150);
+    const f = await page.evaluate(focusBox);
+    check(f.top >= 0 && f.bottom <= f.trayTop && f.trayH > 0, `${slug} ${w}x${h}: after Space + Tab x${presses} the focused ${f.tag} sits above the tray ${JSON.stringify(f)}`);
+    // keep tabbing through a few more cards: every focused control stays visible
+    let allVisible = true, last = null;
+    for (let i = 0; i < 8; i++) { await page.keyboard.press("Tab"); await page.waitForTimeout(60); last = await page.evaluate(focusBox); if (!(last.top >= 0 && last.bottom <= last.trayTop)) { allVisible = false; break; } }
+    check(allVisible, `${slug} ${w}x${h}: eight more Tabs keep focus above the tray ${JSON.stringify(last)}`);
+    const pad = await page.evaluate(() => ({ sp: document.documentElement.style.scrollPaddingBottom, mp: parseInt(getComputedStyle(document.querySelector("main")).paddingBottom, 10), trayH: Math.round(document.getElementById("board-tray").getBoundingClientRect().height) }));
+    check(parseInt(pad.sp, 10) >= pad.trayH && pad.mp >= pad.trayH, `${slug} ${w}x${h}: scroll-padding and reserved space match the measured tray height ${JSON.stringify(pad)}`);
+    if (SHOTS && slug === BOARDS[0]) await page.screenshot({ path: path.join(SHOTS, `focus-${w}.png`) });
+    await context.close();
+  }
+
+  // ---- both clipboard writes denied, then the selection is edited (Astra P2 #2)
+  context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await stubExternal(context);
+  await context.addInitScript(() => { navigator.clipboard.write = () => Promise.reject(new Error("blocked")); navigator.clipboard.writeText = () => Promise.reject(new Error("blocked")); });
+  page = await context.newPage();
+  await page.goto(url, { waitUntil: "load" }); await page.waitForSelector(".card");
+  const manualState = () => { const t = document.getElementById("board-review-text");
+    return { focused: document.activeElement === t, full: t.selectionStart === 0 && t.selectionEnd === t.value.length && t.value.length > 0, items: t.value.split("\n").filter((l) => /^\d+\. /.test(l)).length,
+      hint: document.getElementById("board-review-hint").textContent, selectBtn: !document.getElementById("board-review-select").hidden, active: document.activeElement.tagName + (document.activeElement.id ? "#" + document.activeElement.id : "") }; };
+  await page.click(".card:first-child .card-select");
+  await page.click("#board-copy-plain");
+  await page.waitForFunction(() => /blocked/.test(document.getElementById("board-status").textContent));
+  let ms = await page.evaluate(manualState);
+  check(ms.focused && ms.full && ms.items === 1 && /is selected/.test(ms.hint) && ms.selectBtn, `${slug}: both writes denied -> textarea focused and fully selected ${JSON.stringify(ms)}`);
+  await page.click(".card:nth-child(2) .card-select");
+  ms = await page.evaluate(manualState);
+  check(!ms.focused && ms.items === 2 && /no longer selected/.test(ms.hint) && ms.selectBtn && ms.active === "INPUT", `${slug}: selecting another card updates the output, says it is no longer selected, leaves focus on the checkbox ${JSON.stringify(ms)}`);
+  await page.click("#board-review-select");
+  ms = await page.evaluate(manualState);
+  check(ms.focused && ms.full && ms.items === 2 && /is selected/.test(ms.hint), `${slug}: Select all text re-selects the refreshed output ${JSON.stringify(ms)}`);
+  await page.click("#board-review-list li:first-child button");
+  ms = await page.evaluate(manualState);
+  check(ms.focused && ms.full && ms.items === 1 && /is selected/.test(ms.hint), `${slug}: Remove inside Review re-selects the refreshed output and keeps focus in the panel ${JSON.stringify(ms)}`);
+  await page.click("#board-review-list li:first-child button");
+  const closed = await page.evaluate(() => ({ hidden: document.getElementById("board-review").hidden, tray: document.getElementById("board-tray").hidden, sel: sessionStorage.getItem("board-select:" + document.querySelector("main").dataset.board) }));
+  check(closed.hidden && closed.tray && closed.sel === "[]", `${slug}: removing the last card closes the panel and the tray ${JSON.stringify(closed)}`);
+  // a later successful plain copy clears manual mode
+  await page.evaluate(() => { navigator.clipboard.writeText = (t) => Promise.resolve(); });
+  await page.click(".card:first-child .card-select"); await page.click("#board-copy-plain");
+  await page.waitForFunction(() => /as plain text/.test(document.getElementById("board-status").textContent));
+  await page.click("#board-review-toggle");
+  ms = await page.evaluate(manualState);
+  check(!ms.selectBtn && /plain-text version/.test(ms.hint), `${slug}: after a successful copy the panel drops the manual-copy state ${JSON.stringify(ms)}`);
   await context.close();
 
   // ---- mobile

@@ -29,6 +29,7 @@
   var allEntries = [], byId = {}, activeFilter = "all", boardTitle = "";
   var selected = new Set();
   var storageOk = true;
+  var manualMode = false; // both clipboard writes failed: the review textarea is the copy surface
   var els = {};
 
   function loadSelection() {
@@ -100,10 +101,22 @@
     var n = selected.size, hidden = selectedEntries().filter(function (e) { return activeFilter !== "all" && channelOf(e) !== activeFilter; }).length;
     return n + " selected" + (hidden ? " · " + hidden + " hidden by filter" : "");
   }
+  function reserveTraySpace() {
+    var h = els.tray.hidden ? 0 : Math.ceil(els.tray.getBoundingClientRect().height);
+    document.documentElement.style.scrollPaddingBottom = h ? h + 8 + "px" : "";
+    main.style.paddingBottom = h ? h + 24 + "px" : "";
+  }
+  function keepAboveTray(el) {
+    if (els.tray.hidden || !el || !els.list.contains(el)) return;
+    var r = el.getBoundingClientRect(), top = els.tray.getBoundingClientRect().top;
+    if (r.bottom > top - 8) window.scrollBy(0, r.bottom - top + 8);
+    else if (r.top < 0) window.scrollBy(0, r.top - 8);
+  }
   function updateTray() {
     var n = selected.size;
     els.tray.hidden = n === 0;
     document.body.classList.toggle("board-tray-open", n > 0);
+    reserveTraySpace();
     var hidden = selectedEntries().filter(function (e) { return activeFilter !== "all" && channelOf(e) !== activeFilter; }).length;
     els.count.innerHTML = n + " selected" + (hidden ? ' <span class="hidden-note">· ' + hidden + " hidden by filter</span>" : "");
     els.copyRich.disabled = n === 0; els.copyPlain.disabled = n === 0;
@@ -132,7 +145,7 @@
         "text/plain": new Blob([p.text], { type: "text/plain" })
       })]);
     } catch (e) { richFailed(p); return; }
-    promise.then(function () { setStatus("Copied " + n + " card" + (n === 1 ? "" : "s") + " for Google Docs."); }, function () { richFailed(p); });
+    promise.then(function () { manualMode = false; els.reviewSelect.hidden = true; setStatus("Copied " + n + " card" + (n === 1 ? "" : "s") + " for Google Docs."); }, function () { richFailed(p); });
   }
   function richFailed(p) {
     setStatus("Rich copy was blocked here. Use Copy plain text, or copy from the review panel.");
@@ -144,16 +157,22 @@
     if (window.isSecureContext && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
       var promise;
       try { promise = navigator.clipboard.writeText(p.text); } catch (e) { manualCopy(p); return; }
-      promise.then(function () { setStatus("Copied " + n + " card" + (n === 1 ? "" : "s") + " as plain text."); }, function () { manualCopy(p); });
+      promise.then(function () { manualMode = false; els.reviewSelect.hidden = true; setStatus("Copied " + n + " card" + (n === 1 ? "" : "s") + " as plain text."); }, function () { manualCopy(p); });
     } else manualCopy(p);
   }
-  function manualCopy(p) {
-    openReview(p);
-    els.reviewHint.textContent = "Clipboard access is blocked here. The text below is selected: press ⌘C or Ctrl+C to copy it.";
+  function selectOutput() {
     els.reviewText.focus(); els.reviewText.select();
+    els.reviewHint.textContent = "Clipboard access is blocked here. The text below is selected: press ⌘C or Ctrl+C to copy it.";
+  }
+  function manualCopy(p) {
+    manualMode = true;
+    openReview(p);
+    els.reviewSelect.hidden = false;
+    selectOutput();
     setStatus("Clipboard blocked. Copy the selected text from the review panel.");
   }
-  function renderReview(p) {
+  function renderReview(p, opts) {
+    opts = opts || {};
     p = p || payload();
     var entries = selectedEntries();
     els.reviewList.innerHTML = entries.map(function (e) {
@@ -164,19 +183,28 @@
         var id = b.getAttribute("data-remove"); selected.delete(id); saveSelection();
         var box = els.list.querySelector('.card[data-id="' + CSS.escape(id) + '"] input');
         if (box) { box.checked = false; box.closest(".card").setAttribute("data-selected", "false"); }
-        setStatus("Removed. " + countLine()); updateTray();
-        if (!selected.size) closeReview();
+        setStatus("Removed. " + countLine());
+        if (!selected.size) { updateTray(); closeReview(); els.reviewToggle.focus(); return; }
+        renderReview(null, { fromReview: true }); updateTray();
       });
     });
     els.reviewText.value = p ? p.text : "";
-    if (!els.reviewHint.textContent) els.reviewHint.textContent = "This is the plain-text version of what Copy for Google Docs puts on the clipboard.";
+    if (manualMode) {
+      // The output was replaced, so any earlier text selection is gone. Re-select it when the edit came from inside the
+      // panel (the Remove button is gone, focus would fall to <body>); otherwise say so and offer Select all text.
+      if (opts.fromReview || document.activeElement === els.reviewText) selectOutput();
+      else els.reviewHint.textContent = "The list changed and is no longer selected. Press Select all text, then ⌘C or Ctrl+C.";
+    } else {
+      els.reviewHint.textContent = "This is the plain-text version of what Copy for Google Docs puts on the clipboard.";
+      if (opts.fromReview) (els.reviewList.querySelector("button[data-remove]") || els.reviewClose).focus();
+    }
   }
   function openReview(p) {
     els.review.hidden = false; els.reviewToggle.setAttribute("aria-expanded", "true");
     renderReview(p);
     els.review.scrollIntoView({ block: "nearest" });
   }
-  function closeReview() { els.review.hidden = true; els.reviewToggle.setAttribute("aria-expanded", "false"); els.reviewHint.textContent = ""; }
+  function closeReview() { els.review.hidden = true; els.reviewToggle.setAttribute("aria-expanded", "false"); els.reviewHint.textContent = ""; manualMode = false; els.reviewSelect.hidden = true; }
 
   function buildChrome() {
     els.lede = document.getElementById("lede"); els.meta = document.getElementById("meta");
@@ -196,13 +224,20 @@
     document.body.appendChild(tray);
     var review = document.createElement("section"); review.className = "board-review"; review.id = "board-review"; review.hidden = true; review.setAttribute("aria-labelledby", "board-review-title");
     review.innerHTML = '<h2 id="board-review-title">Review selection</h2><p class="board-review-hint" id="board-review-hint"></p><ul id="board-review-list"></ul>' +
-      '<textarea id="board-review-text" readonly aria-label="Plain-text copy"></textarea><button type="button" id="board-review-close">Close</button>';
+      '<textarea id="board-review-text" readonly aria-label="Plain-text copy"></textarea>' +
+      '<button type="button" id="board-review-select" hidden>Select all text</button><button type="button" id="board-review-close">Close</button>';
     els.list.insertAdjacentElement("afterend", review);
     els.tray = tray; els.count = tray.querySelector("#board-tray-count"); els.selectVisible = tray.querySelector("#board-select-visible");
     els.reviewToggle = tray.querySelector("#board-review-toggle"); els.copyRich = tray.querySelector("#board-copy-rich");
     els.copyPlain = tray.querySelector("#board-copy-plain"); els.clear = tray.querySelector("#board-clear");
     els.review = review; els.reviewList = review.querySelector("#board-review-list"); els.reviewText = review.querySelector("#board-review-text");
     els.reviewHint = review.querySelector("#board-review-hint"); els.reviewClose = review.querySelector("#board-review-close");
+    els.reviewSelect = review.querySelector("#board-review-select");
+    els.reviewSelect.addEventListener("click", selectOutput);
+    // Native focus scrolling honours scroll-padding-bottom; this covers browsers that do not, and wrapped tray heights.
+    els.list.addEventListener("focusin", function (e) { keepAboveTray(e.target); });
+    if (window.ResizeObserver) new ResizeObserver(function () { reserveTraySpace(); }).observe(tray);
+    window.addEventListener("resize", reserveTraySpace);
 
     els.selectVisible.addEventListener("change", function () {
       var vis = visibleEntries(), on = els.selectVisible.checked;
