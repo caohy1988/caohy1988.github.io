@@ -1,0 +1,11 @@
+# Intent — `/rfc/` as a five-minute leadership decision brief
+
+**Ask (Haiyuan, 2026-09-09 ~23:08 PT, GO on slice `rfc-exec-skim`).** Restructure the landing page `/rfc/` so a BigQuery leader can, in about five minutes and without opening anything, state the problem, why BigQuery, what works today, the decision requested and what would make us stop or narrow. Joint EM recommendation (Fable + Astra consults, 2026-09-09 23:01 PT) is authoritative.
+
+**Why now.** The page is honest and near the right length (1,117 words rendered / 1,670 with folds open) but decision-last: the two asks and the 2026-09-19 checkpoint sit at the bottom, the product is named once inside a dense paragraph, the three checks read as engineering contracts, the eight proposed thresholds read as caveats, the evidence is spread over four places, there are no risks on the page, and BigQuery Agent Analytics is not named in the body.
+
+**What changes.** Order and vocabulary on one page: decision, status, asks and checkpoint first; the 118% → 96% figure second; four service roles including Knowledge Publications (proposed) and BigQuery Agent Analytics (observes use; grants nothing, certifies nothing); three Finance-question cards with today-vs-proposed lines; evidence as three scoped rows; a three-line decision summary over a fold holding the eight proposed thresholds; a four-row risks strip; closing asks with four requested roles and no names.
+
+**What does not change.** Every honesty beat stays verbatim in meaning: invented data only; feasibility, not the feature; each run reached a different part; graph access unproven; fact rows pinned by digest with no live readback; ordinary SQL under five seconds single-request and over at five concurrent; full-path cost unmeasured; the checkpoint means continue, narrow or stop; Knowledge Publications first, receipts as the follow-on, SQL as the first engine. Every `id`, every tested `href`, the legacy-bookmark forwarder, the two diagrams and the detailed RFC body are untouched (the detailed page's backlink label may say "5-minute decision brief").
+
+**Non-goals.** No `/rfc/exec/` route or third page; no receipt-first reopen; no new live cloud run; no detailed-RFC rewrite; no cut of a scope clause to reach Astra's 700–850-word stretch target (that waits for the outside-reader test).
