@@ -159,23 +159,36 @@ for (const slug of BOARDS) {
   await context.close();
 
   // ---- keyboard focus stays above the fixed tray (Astra P2 #1): 1280x740 Space + Tab x3, and 375x740 first Tab after selecting
-  const focusBox = () => { const el = document.activeElement, r = el.getBoundingClientRect(), t = document.getElementById("board-tray").getBoundingClientRect();
-    return { tag: el.tagName, text: (el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 40), top: Math.round(r.top), bottom: Math.round(r.bottom), trayTop: Math.round(t.top), trayH: Math.round(t.height), inner: innerHeight }; };
+  // Measures the VISIBLE focus indicator: the 22px .box for a card checkbox (the input itself is clipped to 1px), else the element, plus its outline.
+  const focusBox = () => { const el = document.activeElement, isBox = el.matches(".card-select input"), target = isBox ? el.nextElementSibling : el;
+    const r = target.getBoundingClientRect(), t = document.getElementById("board-tray").getBoundingClientRect(), pad = isBox ? 5 : 3;
+    return { tag: el.tagName + (isBox ? ".box" : ""), text: (el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 40), top: Math.round(r.top - pad), bottom: Math.round(r.bottom + pad), trayTop: Math.round(t.top), trayH: Math.round(t.height), inner: innerHeight }; };
   for (const [w, h, mob] of [[1280, 740, false], [375, 740, true]]) {
     context = await browser.newContext({ viewport: { width: w, height: h }, isMobile: mob, hasTouch: mob });
     await stubExternal(context);
     page = await context.newPage();
     await page.goto(url, { waitUntil: "load" }); await page.waitForSelector(".card");
+    // scroll so the first card sits low in the viewport, where a tray appearing would cover it (Astra's residual repro)
+    await page.evaluate(() => { const c = document.querySelector(".card:first-child .card-select"); window.scrollTo(0, Math.max(0, c.getBoundingClientRect().top + window.scrollY - innerHeight + 120)); });
     await page.focus(".card:first-child input"); await page.keyboard.press("Space");
+    await page.waitForTimeout(150);
+    const f0 = await page.evaluate(focusBox);
+    check(f0.tag === "INPUT.box" && f0.top >= 0 && f0.bottom <= f0.trayTop && f0.trayH > 0, `${slug} ${w}x${h}: immediately after Space the focused checkbox box sits above the new tray ${JSON.stringify(f0)}`);
     const presses = mob ? 1 : 3;
     for (let i = 0; i < presses; i++) await page.keyboard.press("Tab");
     await page.waitForTimeout(150);
     const f = await page.evaluate(focusBox);
-    check(f.top >= 0 && f.bottom <= f.trayTop && f.trayH > 0, `${slug} ${w}x${h}: after Space + Tab x${presses} the focused ${f.tag} sits above the tray ${JSON.stringify(f)}`);
-    // keep tabbing through a few more cards: every focused control stays visible
-    let allVisible = true, last = null;
-    for (let i = 0; i < 8; i++) { await page.keyboard.press("Tab"); await page.waitForTimeout(60); last = await page.evaluate(focusBox); if (!(last.top >= 0 && last.bottom <= last.trayTop)) { allVisible = false; break; } }
-    check(allVisible, `${slug} ${w}x${h}: eight more Tabs keep focus above the tray ${JSON.stringify(last)}`);
+    check(f.top >= 0 && f.bottom <= f.trayTop, `${slug} ${w}x${h}: after Space + Tab x${presses} the focused ${f.tag} sits above the tray ${JSON.stringify(f)}`);
+    // keep tabbing through more cards: every focused control (checkbox boxes and title links) stays visible
+    let allVisible = true, last = null, boxes = 0;
+    for (let i = 0; i < 12; i++) { await page.keyboard.press("Tab"); await page.waitForTimeout(60); last = await page.evaluate(focusBox); if (last.tag === "INPUT.box") boxes += 1; if (!(last.top >= 0 && last.bottom <= last.trayTop)) { allVisible = false; break; } }
+    check(allVisible && boxes >= 4, `${slug} ${w}x${h}: twelve more Tabs keep every focused box and link above the tray (${boxes} boxes checked) ${JSON.stringify(last)}`);
+    // the tray growing under a focused control (wrap at a narrower width) also re-scrolls it into the clear
+    if (!mob) {
+      await page.setViewportSize({ width: 640, height: 740 }); await page.waitForTimeout(250);
+      const g = await page.evaluate(focusBox);
+      check(g.top >= 0 && g.bottom <= g.trayTop, `${slug} 640x740 after resize: focused ${g.tag} still above the wrapped tray ${JSON.stringify(g)}`);
+    }
     const pad = await page.evaluate(() => ({ sp: document.documentElement.style.scrollPaddingBottom, mp: parseInt(getComputedStyle(document.querySelector("main")).paddingBottom, 10), trayH: Math.round(document.getElementById("board-tray").getBoundingClientRect().height) }));
     check(parseInt(pad.sp, 10) >= pad.trayH && pad.mp >= pad.trayH, `${slug} ${w}x${h}: scroll-padding and reserved space match the measured tray height ${JSON.stringify(pad)}`);
     if (SHOTS && slug === BOARDS[0]) await page.screenshot({ path: path.join(SHOTS, `focus-${w}.png`) });

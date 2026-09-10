@@ -106,17 +106,26 @@
     document.documentElement.style.scrollPaddingBottom = h ? h + 8 + "px" : "";
     main.style.paddingBottom = h ? h + 24 + "px" : "";
   }
+  /** The rendered focus indicator: the 22px .box for a card checkbox (its input is clipped to 1px), else the element itself,
+      plus the focus outline (3px + offset) so the ring stays visible too. */
+  function visibleRect(el) {
+    var target = el.matches(".card-select input") && el.nextElementSibling ? el.nextElementSibling : el;
+    var r = target.getBoundingClientRect(), pad = 6;
+    return { top: r.top - pad, bottom: r.bottom + pad };
+  }
   function keepAboveTray(el) {
+    el = el || document.activeElement;
     if (els.tray.hidden || !el || !els.list.contains(el)) return;
-    var r = el.getBoundingClientRect(), top = els.tray.getBoundingClientRect().top;
-    if (r.bottom > top - 8) window.scrollBy(0, r.bottom - top + 8);
-    else if (r.top < 0) window.scrollBy(0, r.top - 8);
+    var r = visibleRect(el), top = els.tray.getBoundingClientRect().top;
+    if (r.bottom > top) window.scrollBy(0, r.bottom - top + 4);
+    else if (r.top < 0) window.scrollBy(0, r.top - 4);
   }
   function updateTray() {
     var n = selected.size;
     els.tray.hidden = n === 0;
     document.body.classList.toggle("board-tray-open", n > 0);
     reserveTraySpace();
+    keepAboveTray(); // the tray may have just appeared or grown under the focused control (Space on a checkbox)
     var hidden = selectedEntries().filter(function (e) { return activeFilter !== "all" && channelOf(e) !== activeFilter; }).length;
     els.count.innerHTML = n + " selected" + (hidden ? ' <span class="hidden-note">· ' + hidden + " hidden by filter</span>" : "");
     els.copyRich.disabled = n === 0; els.copyPlain.disabled = n === 0;
@@ -236,8 +245,8 @@
     els.reviewSelect.addEventListener("click", selectOutput);
     // Native focus scrolling honours scroll-padding-bottom; this covers browsers that do not, and wrapped tray heights.
     els.list.addEventListener("focusin", function (e) { keepAboveTray(e.target); });
-    if (window.ResizeObserver) new ResizeObserver(function () { reserveTraySpace(); }).observe(tray);
-    window.addEventListener("resize", reserveTraySpace);
+    if (window.ResizeObserver) new ResizeObserver(function () { reserveTraySpace(); keepAboveTray(); }).observe(tray);
+    window.addEventListener("resize", function () { reserveTraySpace(); keepAboveTray(); });
 
     els.selectVisible.addEventListener("change", function () {
       var vis = visibleEntries(), on = els.selectVisible.checked;
