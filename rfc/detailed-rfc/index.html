@@ -220,6 +220,20 @@
     .callout,.status-note,blockquote,.fixture-note{background:#fff}
   }
 
+  .decision-brief{border:1px solid #EBD3AC;background:var(--runtime-bg);border-radius:14px;padding:16px 20px 14px;margin:18px 0 14px;max-width:820px;font-family:var(--display)}
+  .decision-brief dl{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:6px 0 0}
+  .decision-brief dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--runtime)}
+  .decision-brief dd{margin:4px 0 0;font-size:14px;line-height:1.5;color:var(--ink)}
+  .decision-brief p{margin:12px 0 0;font-size:14px;line-height:1.5;color:var(--ink-soft);max-width:none}
+  .evidence-status{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:14px 18px 6px;margin:16px 0 22px;font-family:var(--display)}
+  .evidence-status dl{margin:0}
+  .evidence-status dl>div{display:grid;grid-template-columns:170px 1fr;gap:14px;padding:10px 0;border-top:1px solid var(--line-soft)}
+  .evidence-status dl>div:first-child{border-top:none}
+  .evidence-status dt{font-weight:600;font-size:14px;line-height:1.5;color:var(--ink)}
+  .evidence-status dd{margin:0;font-size:14px;line-height:1.55;color:var(--ink-soft);max-width:none}
+  .evidence-status .scope{display:block;margin-top:4px;font-size:13px}
+  @media(max-width:760px){.decision-brief dl{grid-template-columns:1fr}.evidence-status dl>div{grid-template-columns:1fr;gap:4px}}
+  @media print{.decision-brief,.evidence-status{background:#fff;border-color:#aaa;break-inside:avoid}}
 </style>
 <link rel="stylesheet" href="../../assets/site-nav.css" data-site-nav>
 <script defer src="../../assets/site-nav.js" data-site-nav></script>
@@ -264,10 +278,19 @@
   <div class="wrap masthead">
     <div class="eyebrow"><span class="dot"></span>Request for comments · GoogleCloudPlatform / knowledge-catalog</div>
     <h1>OKF runtime context projection<br><span class="thin">a proposed Knowledge Catalog + BigQuery runtime profile for OKF v0.2</span></h1>
-    <p class="thesis">The proposed BigQuery runtime would turn the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.</p>
+    <p class="thesis">Proposed BigQuery Knowledge Publications would turn the OKF graph into replayable context for agents—with explainable access—and a later verified receipt would add evidence that the declared computation ran.</p>
     <p class="subtitle">A proposal, with a reference implementation, for an optional runtime layer. Teams keep authoring in the Open Knowledge Format (OKF); each bundle would be published to Knowledge Catalog for discovery and governance, and to BigQuery so an agent’s context can be replayed, its access checked against current policy, and its calculations backed by evidence. OKF itself does not change.</p>
     <div class="status-note"><b>Status: a proposal, with recorded examples on invented data.</b> One example <a href="https://github.com/caohy1988/caohy1988.github.io/blob/b05e278b0c459f3dc035d7cae48841c75d6fa89f/rfc/spikes/bq-graph/evidence/report.md">finds linked rules with a graph walk</a>; another <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/6719eb535667963fa640dd4535e508b550eb6cb1/examples/okf_attested_computation/evidence/receipt/report.md">checks a query the caller owns</a> before release; recorded chains joined them, and one run retrieved through graph queries. Still to prove: all of it in one path on real cohort data. The <a href="#current-evidence">recorded examples</a> carry each run’s limits.</div>
-    <p><a href="../"><strong>Board-pack near-miss →</strong></a> <span>The pack says 118%. Retention is 96%. Illustrative · 5-minute decision brief.</span></p>
+    <div class="decision-brief" data-rfc-skim>
+      <div class="tag">Decision brief · proposed BigQuery Knowledge Publications · nothing committed</div>
+      <dl>
+        <div><dt>Decision requested</dt><dd>A BigQuery owner and a Knowledge Catalog counterpart to scope Knowledge Publications as a managed Preview, SQL first, the verified receipt as the follow-on; one Finance retention pilot with agreed data and budget.</dd></div>
+        <div><dt>Status</dt><dd>Feasibility on invented data only, each recorded run reaching a different part of the path; access inside graph queries unproven; nothing committed.</dd></div>
+        <div><dt>Checkpoint 2026-09-19</dt><dd>Continue, narrow or stop against thresholds the owner has accepted; every threshold is proposed, none accepted.</dd></div>
+      </dl>
+      <p>This page is the engineering companion of the 5-minute decision brief: architecture, contracts, protocol, phases and evidence artifacts, with the same decision and the same limits.</p>
+    </div>
+    <p><a href="../"><strong>5-minute decision brief →</strong></a> <span>The pack says 118%. Retention is 96%. Illustrative scenario, invented company and numbers.</span></p>
     <div class="badges">
       <span class="badge"><b>Status</b>&nbsp;· RFC proposal</span>
       <span class="badge"><b>Scope</b>&nbsp;· optional profile + reference implementation</span>
@@ -277,8 +300,8 @@
     <div class="credo" aria-label="Service roles">
       <div><span class="k"><span class="swatch" style="background:var(--source)"></span>OKF</span><p>authors portable knowledge and its relations</p></div>
       <div><span class="k"><span class="swatch" style="background:var(--catalog)"></span>Knowledge Catalog</span><p>discovers and governs it</p></div>
-      <div><span class="k"><span class="swatch" style="background:var(--runtime)"></span>BigQuery runtime · proposed</span><p>selects, authorizes and accounts for its use</p></div>
-      <div><span class="k"><span class="swatch" style="background:var(--telemetry)"></span>Agent Analytics</span><p>observes that use</p></div>
+      <div><span class="k"><span class="swatch" style="background:var(--runtime)"></span>BigQuery Knowledge Publications · proposed</span><p>would serve the approved version and linked rules under current access; later, check calculation evidence</p></div>
+      <div><span class="k"><span class="swatch" style="background:var(--telemetry)"></span>BigQuery Agent Analytics</span><p>observes use; does not grant access or certify results</p></div>
     </div>
   </div>
 </header>
@@ -289,6 +312,15 @@
   <h2>Three things a definition lookup cannot establish</h2>
   <p class="lede">An agent can cite the right definition and still give the wrong number. This proposal connects the knowledge the agent was given, the access that allowed it, and the calculation that produced the answer. The authored OKF bundle stays the source of truth; Knowledge Catalog (KC) and BigQuery each hold a derived copy with a different job.</p>
   <p><strong>Especially strong when</strong> the facts an analytical agent needs already live in BigQuery, within budgets the customer has agreed to; none has yet. <strong>What the examples show</strong> is set out once, with each run’s limits, under <a href="#current-evidence">recorded examples</a>.</p>
+  <p><strong>Names.</strong> This page calls the proposed feature the BigQuery runtime; the decision brief calls it <strong>BigQuery Knowledge Publications (proposed)</strong>: managed, versioned retrieval, SQL first, with the verified receipt as the follow-on. Neither is committed.</p>
+  <div class="evidence-status" data-rfc-skim>
+    <div class="tag">Evidence status · feasibility, not the feature · invented data throughout</div>
+    <dl>
+      <div><dt>Recorded feasibility</dt><dd>Retrieval selected a definition with its linked rules; a receipt withheld a number whose query and result disagreed; connected runs reached an enforcing consumer, once via graph queries. <span class="scope">Scope: single identity, hand-pinned seeds, each run a different part; the graph run tried only the expected-success case. Each run’s limits: <a href="#current-evidence">recorded examples</a>.</span></dd></div>
+      <div><dt>Measured retrieval</dt><dd>Ordinary SQL under five seconds one request at a time, over five seconds at five at once (<a href="../spikes/bq-graph/evidence/sql-baseline/baseline.md">the comparison</a>). <span class="scope">Scope: four retrieval cells on on-demand capacity; the full time from question to released number, and its cost, are not measured; the graph benchmark is unfinished.</span></dd></div>
+      <div><dt>Still to validate</dt><dd>One run combining catalog discovery, a restricted identity and graph queries, access holding inside them; a live read-back of the synthetic fact rows against their digest; a customer cohort. <span class="scope">Scope: the restricted identity was denied on plain SQL only; the Alder cohort stays unselected.</span></dd></div>
+    </dl>
+  </div>
 
   <table class="compare" id="runtime-guarantees">
     <caption>KC + OKF, compared with the proposed BigQuery runtime · proposed guarantees</caption>
@@ -939,8 +971,9 @@ envelope_equality_digest  = HMAC-SHA256(tenant_scoped_key,
   <div class="sec-label">10 · Closing</div>
   <h2>Give the agent context it can replay—and a number it can account for</h2>
   <p>OKF supplies the authored definition, relations and computation declaration; Catalog makes them discoverable and governed; the proposed BigQuery runtime would select a pinned context, explain current access and check execution evidence; BQAA observes.</p>
-  <blockquote class="punch">The proposed BigQuery runtime would turn the OKF graph into replayable context for agents—with explainable access and evidence that the declared computation ran.</blockquote>
-  <p><strong>One pilot.</strong> Sponsor a Finance-owned retention pilot on real cohort data with an agreed operating budget, connecting catalog discovery, pinned retrieval, current access checks, caller-delegated computation and result-bound consumption in one path. Reassess at the 2026-09-19 evidence checkpoint: the opportunity narrows if budgets or Enterprise cost cannot be met, if simpler retrieval serves the need, or if result evidence cannot be trusted and enforced.</p>
+  <blockquote class="punch">Proposed BigQuery Knowledge Publications would turn the OKF graph into replayable context for agents—with explainable access—and a later verified receipt would add evidence that the declared computation ran.</blockquote>
+  <p><strong>Two asks.</strong> To BigQuery: an owner and a Knowledge Catalog counterpart to scope Knowledge Publications as a managed Preview, SQL first, receipt as the follow-on; neither committed. To a Finance owner: sponsor a retention pilot on real cohort data with an agreed operating budget, connecting catalog discovery, pinned retrieval, current access checks, caller-delegated computation and result-bound consumption in one path. Reassess at the 2026-09-19 evidence checkpoint: continue, narrow or stop against thresholds the owner has accepted; the opportunity narrows if budgets or Enterprise cost cannot be met, if simpler retrieval serves the need, or if result evidence cannot be trusted and enforced.</p>
+  <p><strong>Requested roles, nobody named:</strong> BigQuery owner · Knowledge Catalog counterpart · Finance pilot owner · BigQuery Agent Analytics integration counterpart. Staffing, budget and real data: pending.</p>
 </section>
 
 <footer data-rfc-skim>

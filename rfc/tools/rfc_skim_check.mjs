@@ -4,9 +4,13 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-const PAGE = process.argv[2] || "rfc/index.html";
-const RENDERED_MAX = 950, WINDOW = 450, WPM = 230, MINUTES_MAX = 5;
-const TOKENS = ["proposed", "invented", "Knowledge Publications", "pilot", "2026-09-19"];
+// Flags (rfc/rfc-detailed-align-spec.md G2): --window N --tokens a,b,c --max-rendered N --max-minutes N; defaults are the landing gate.
+const args = process.argv.slice(2);
+const flag = (name, fallback) => { const i = args.indexOf(name); return i >= 0 && args[i + 1] !== undefined ? args[i + 1] : fallback; };
+const positional = args.filter((a, i) => !a.startsWith("--") && !(i > 0 && args[i - 1].startsWith("--")));
+const PAGE = positional[0] || "rfc/index.html";
+const RENDERED_MAX = Number(flag("--max-rendered", 950)), WINDOW = Number(flag("--window", 450)), WPM = 230, MINUTES_MAX = Number(flag("--max-minutes", 5));
+const TOKENS = flag("--tokens", "proposed,invented,Knowledge Publications,pilot,2026-09-19").split(",");
 
 async function loadPlaywright() {
   const candidates = ["playwright", process.env.PLAYWRIGHT_MODULE,
