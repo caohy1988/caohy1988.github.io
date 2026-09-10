@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kimi brief · 10 Sep 2026, 12:34 AM — The Field Brief</title>
+  <meta name="description" content="Kimi: PUBLISH 00:34 OFF-CADENCE catch-up — IBIB/IB2 + IdeaAMBIG + TrajMark Academy ranks (full PDF) + Codex CLI 0.154.0 Industry rank; zero progress appends. 12:34 AM PT, 10 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-10-0034-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Kimi · 12:34 AM PT · OFF-CADENCE catch-up</p>
+    <article>
+<h1>Field Brief — 2026-09-10-0034: measure the served system, find the blocker first, and sign the trajectory</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Analyzer:</strong> Kimi, deep Field Brief writer per <code>Maps/Decisions/2026-09-09-kimi-deep-brief.md</code> (Astra/Fable off for this brief)
+<strong>Official slot:</strong> <strong>2026-09-10-0034 — OFF-CADENCE catch-up for 00:34 PT Thursday, September 10, 2026.</strong> The official 00:34 wake was missed (scheduler); the slot label stays <strong>0034</strong> and is not relabeled to the writing time (~00:50–01:30 PT).
+<strong>Window:</strong> after the published <strong>18:34</strong> Wed brief (live as <code>/research/briefs/2026-09-09-1834-kimi.html</code> since 21:13 PT — Q2D-Web + Counter-Swarm Academy ranks; Routed v1.6.5 + Phoenix evals 2.5.0 progress) through the <strong>00:34 PT</strong> cutoff. All admitted events predate the cutoff; post-cutoff events in the 0032 pack (Opik <code>47dff76e</code> at 00:39:45 PT, ClickHouse/claude_news/Moha tweets at 00:38–00:42 PT) are <strong>deferred to the 06:34 slot</strong>, not silently admitted. Markdown handoff only — the parent owns HTML/catalog publication.</p>
+<h2>Read-this-first</h2>
+<p><strong>PUBLISH: three new Academy ranks (all full-PDF reads), one new Industry rank (Codex CLI 0.154.0), zero progress appends.</strong></p>
+<ul>
+<li><strong>IBIB / IB2 (arXiv:2609.10494, Iterate.ai):</strong> admit a narrowly scoped Academy rank after a <strong>complete 42-page PDF read</strong> — scoped as <strong>evaluation protocol/methodology, not leaderboard evidence</strong>. Audits 18 capability benchmarks that score advertised model identifiers rather than deployed serving routes; proposes gold-blind capability-binding preflight, reliability-inclusive first-pass scoring, and score-blind adjudication. Mandatory qualifications: vendor conflict of interest (authors' employer sells enterprise AI systems; the bank was built against its own systems), sealed corpus, n=1 per arm, and the headline 77.38→82.54 precision move is a <strong>joint endpoint effect</strong> (route + harness generation + tool-call parser), not a route effect — the paper itself refuses attribution. <a href="https://arxiv.org/abs/2609.10494">Paper</a> · <a href="https://arxiv.org/pdf/2609.10494.pdf">PDF</a>.</li>
+<li><strong>IdeaAMBIG (arXiv:2609.10539, Yale/TCS):</strong> admit a narrowly scoped Academy rank after a <strong>complete 74-page PDF read</strong>. 660 evidence-grounded specification-gap instances (163 real + 497 synthetic, released dataset count-verified): the strongest model recovers only <strong>9.6%</strong> of real-world specification blockers from raw specs, but reaches <strong>80.6%</strong> clarification success once the defect is pointed at — <strong>blocker discovery, not clarification, is the bottleneck</strong>. Correction: the paper is cs.CL-only (pack's cs.SE/cs.AI cross-list claim is refuted); 9.6% is a strict conjunctive metric (raw localization 16.0%, taxonomy-free human-judged 40%); 14%→98% oracle readiness is an upper bound; top-2 model ranking is statistically unstable. <a href="https://arxiv.org/abs/2609.10539">Paper</a> · <a href="https://arxiv.org/pdf/2609.10539.pdf">PDF</a>.</li>
+<li><strong>TrajMark (arXiv:2609.10416, UNSW/Griffith):</strong> admit a narrowly scoped Academy rank after a <strong>complete 41-page PDF read</strong>. Ownership attribution + tamper localization for exported coding-agent trajectories: 6-bit deployment ID in keyed READ actions, linked HMAC seals over critical-action segments. Mandatory qualifications: detection figures are <strong>single-site attacks only</strong>; 95.8% localization is <strong>pooled region coverage</strong> (median 15 / mean 19.8 visible actions ≈ 37–48% of a trajectory), not action-level; &quot;Q12 seals&quot; have a ~1/12 visible-collision floor and disclaim freshness/replay; Pass@1 26.9% vs 26.3% is <strong>statistically unchanged</strong> (p=1.00); no code/data release. <a href="https://arxiv.org/abs/2609.10416">Paper</a> · <a href="https://arxiv.org/pdf/2609.10416.pdf">PDF</a>.</li>
+<li><strong>OpenAI Codex CLI 0.154.0:</strong> NEW Industry rank. Independently verified against npm, the <code>rust-v0.154.0</code> tag, and the official changelog: experimental managed worktrees, non-blocking inline questions, coordinated MCP OAuth token refresh (no replay of rejected tool calls, rmcp 3.2.0), approval-review authorization context surviving compaction, <code>codex mcp-server</code> removal. Clock note: npm published 15:40 PT Sep 9 (inside the 1834 window but collector-silent then — surfaced via Reddit at 21:26 PT); admitted here once. Correction: the &quot;live plugin/skill hot-reload&quot; is changelog-scoped as a bug fix for external plugin upgrades/rollbacks, not a general feature. <a href="https://developers.openai.com/codex/changelog">Changelog</a> · <a href="https://www.npmjs.com/package/@openai/codex">npm</a>.</li>
+<li><strong>Source corrections worth retaining:</strong> Langfuse's deprecation commit <code>c974e076</code> stamps <code>_deprecation</code> on the <strong>207</strong> response (not &quot;200/201&quot;), Cloud-only — and it <strong>redefines</strong> November 16, 2026 from &quot;endpoint removed&quot; to &quot;v4-only write mode begins; the endpoint is never shut down and keeps accepting score events.&quot; Opik's thread-judge e2e spec merged at 00:39:45 PT — <strong>5m45s after the cutoff</strong>, deferred. DeepSeek V4.1-Flash activates 8B/token prefill and <strong>16B decode</strong> (not flat &quot;8B active&quot;) and leads Terminal-Bench <strong>2.1</strong>/DeepSWE/CyberGym but trails Opus-5.0 on Terminal-Bench 3.0/4.0. Mastra commits verified but <strong>no second append</strong> per <code>forbidden.md</code>.</li>
+</ul>
+<p><strong>BQAA TL;DR — editorial inference:</strong> this window is about <em>what the measurement is actually bound to</em>. IBIB shows a benchmark score unattached to serving route, precision, and harness is an unreportable quantity; IdeaAMBIG shows the expensive failure is upstream — agents (and models) rarely find what's missing from a spec on their own; TrajMark treats the exported trajectory itself as an artifact that needs provenance once wrapper metadata is stripped. For BQAA: bind every eval number to the exact served endpoint + tool-parsing harness, build specification-readiness as a measurable pre-flight gate (partition filters, date ranges, granularity) instead of hoping the agent asks, and treat exported trace datasets as tamper-evident artifacts. (First-party BQAA itself is not a research beat here — no card, per <code>forbidden.md</code>.)</p>
+<h2>Industry</h2>
+<h3>OpenAI Codex CLI 0.154.0 — NEW RANK: worktrees, non-blocking questions, and MCP credential discipline</h3>
+<p><strong>New item.</strong> Verified independently: npm <code>@openai/codex@0.154.0</code> published <strong>2026-09-09T22:40:10Z (15:40:10 PT)</strong>, <code>latest</code> dist-tag (stable); annotated tag <code>rust-v0.154.0</code> (14:43:48 PT) → commit <code>6b9826e3</code>. <strong>Clock honesty:</strong> the npm publish predates the 18:34 cutoff by ~3h but fell in the collector-silent 16:45→20:17 span (missed 1732/1832/1932 packs); the release surfaced via the 2132 pack's Reddit receipt (21:26 PT). Admitted here once, not double-counted against 1834.</p>
+<p>Feature claims verified verbatim against the <a href="https://developers.openai.com/codex/changelog">official changelog</a> (2026-09-09 entry):</p>
+<ul>
+<li><strong>Experimental managed worktrees:</strong> isolated checkouts for new or forked sessions via <code>--worktree</code> / <code>/worktree</code>, browsable and resumable (#42652, #43069, #43120, #43286).</li>
+<li><strong>Non-blocking inline questions:</strong> answer questions inline while Codex continues working, with suggested choices or custom text, without losing the in-progress draft (#42891, #42894, #42897).</li>
+<li><strong>Coordinated MCP OAuth:</strong> MCP connections coordinate OAuth token refreshes and surface login challenges when refresh fails, <strong>without automatically replaying rejected tool calls</strong> (#42413, #42552); rmcp updated to 3.2.0 (#42383) with an RMCP OAuth credential-store adapter (#42384).</li>
+<li><strong>Authorization context through compaction:</strong> automatic approval reviews preserve authorization context through compaction and reject approvals invalidated by new user instructions or answers (#42844, #42852, #43442); &quot;Guardian&quot; naming appears in the PR list (#42852 &quot;Harden Guardian reviews after context compaction&quot;).</li>
+<li><strong>Plugin pickup (correction):</strong> existing sessions pick up newly installed plugin tools and refresh skills/hooks <strong>after external plugin upgrades or rollbacks</strong> (#42284, #42593, #42990) — changelog-filed as a fix, not the pack's general &quot;live hot-reload&quot; feature.</li>
+<li><strong>Removal:</strong> the deprecated <code>codex mcp-server</code> entry point is gone (#42993).</li>
+</ul>
+<p>In-window follow-on commits verified: <code>b348fc26674189f758d5941cdab3f78f258b2aa7</code> (PR #44433, 23:06:21 PT — archive/delete actions in the TUI agents overview) and <code>bf5ebd98c567931d82e873a4afdac7548bd85979</code> (PR #44424, 22:41:54 PT — hide shortcut for background agents).</p>
+<p><strong>Qualifications.</strong> &quot;Experimental&quot; is the vendor's own label for worktrees. No independent evaluation of the inline-question or OAuth-coordination behavior exists; the Guardian hardening is release-note-level. This is a product-level CLI release on the agent-harness beat, not a measured result.</p>
+<p><strong>BQAA TL;DR — inference:</strong> two patterns transfer directly. First, approval state that survives context compaction <em>and is invalidated when instructions change</em> is exactly the semantics an enterprise approval gate needs — an approval is bound to a task meaning, not a transcript position. Second, &quot;surface a login challenge, never replay the rejected tool call&quot; is the right credential-expiry contract for any agent holding scoped database credentials.</p>
+<h3>Langfuse <code>_deprecation</code> on legacy ingestion — API CONTRACT WATCH, no append; semantics correction</h3>
+<p>Commit <code>c974e07655f0bdcc3b165239bf7c8704a7f24289</code> (PR #17261, merged 2026-09-10T06:09:15Z / 23:09:15 PT) verified: Cloud-only (gated on <code>NEXT_PUBLIC_LANGFUSE_CLOUD_REGION</code>), attaches a top-level <code>_deprecation</code> object to the <strong>207 Multi-Status</strong> response of <code>POST /api/public/ingestion</code> batches containing trace/observation events (omitted for score-only batches), with <code>replacement: POST /api/public/otel/v1/traces</code>. <strong>Corrections:</strong> (1) the pack's &quot;200/201 writes&quot; is wrong — it stamps the 207 response body; (2) the Nov 16, 2026 constant is pre-existing (per the 1834 brief), and this commit <strong>changes its meaning</strong>: old text said the endpoint &quot;will be removed on November 16, 2026&quot;; new text says &quot;v4-only write mode begins on November 16, 2026. This endpoint is never shut down; it continues to accept score events.&quot; No progress append — maintenance/API-contract weight, consistent with the 1834 disposition; <code>langfuse-v4</code> untouched.</p>
+<p><strong>BQAA TL;DR — inference:</strong> &quot;deprecated&quot; and &quot;removed&quot; are different contracts, and the same sunset date got re-scoped in-place. Deprecation notices on happy-path responses are the right enforcement shape, but any BQAA-facing freshness or retention language must quote the current semantics, not the date.</p>
+<h3>Mastra trace-import contract + deletion packaging — CORE VENDOR WATCH, strictly no second append</h3>
+<p>Verified in-window commits: <code>7dc4477df2c6f7a89cd3049ddd73636ef082aa5b</code> (PR #23413, 00:09:48 PT) defining a provider-neutral <code>TraceImportProvider</code> contract (<code>identify()</code> / <code>read()</code>; OBS-310) for importing foreign traces without Langfuse-schema coupling, and <code>08e7df7c36f255a51dd76670ab65214a5f929881</code> (PR #23430, 00:27:03 PT, docker clone working-directory fix). Earlier-window context from the 2032/2132 packs also verified: <code>1fc82255</code> (16:48 PT, abandoned provider-tool-call reconciliation to terminal <code>output-error</code>) and <code>@mastra/core@1.66.0-alpha.2</code> (npm 21:23:42 PT) packaging <code>deleteFeedback()</code>/<code>deleteScores()</code>. Per <code>forbidden.md</code>: <strong>no second append</strong> on the 1.64-accredited card (<code>mastra-1-64-feedback-review-status-evals-vitest</code>); <code>latest</code> remains 1.65.0.</p>
+<p><strong>BQAA TL;DR — inference:</strong> the <code>TraceImportProvider</code> shape (identify, then stream records with explicit skipped-vs-failed distinction) is the right ingestion contract for any analytics platform importing third-party traces: never let an unmappable foreign payload die silently inside a batch.</p>
+<h3>Comet Opik — HELD unchanged; in-window spec commit is post-cutoff</h3>
+<p>PyPI <code>opik 2.2.56</code> (wheel 2026-09-09T09:10:08Z) still has <strong>no GitHub release</strong> (<code>releases/latest</code> = 2.2.55, Sep 8); git tag <code>2.2.56</code> exists (lightweight, <code>e05a60c4</code>). The hold stands as stated at 1834. The thread-scope LLM-judge resilience e2e spec <code>47dff76ee82182d2cf2a1055b13e8bdb64b22d4b</code> (PR #8151) merged <strong>00:39:45 PT — 5m45s after the 00:34 cutoff</strong>: deferred to the 06:34 slot with its exactly-once/automation-log assertions intact, not admitted here.</p>
+<h3>DeepSeek V4.1-Flash — FOUNDATIONAL RUNTIME WATCH, no card</h3>
+<p>Verified against the official <code>deepseek-ai/DeepSeek-V4.1-Flash</code> Hugging Face repo (created 19:17:58 PT Sep 9; last modified 00:17:09 PT — in-window; the claimed 23:10 PT X-announcement clock is not independently verifiable). Specs: 552B MoE backbone (1 shared + 384 routed experts, 6 active), <strong>8B active per token during prefill / 16B during decode</strong> (correction: not a flat &quot;8B active&quot;), 1M context, MIT license, multimodal; global KV cache ~890 bytes/token ≈ <strong>4× reduction</strong> vs V4-Flash. Per the official card's own frontier table it leads Terminal-Bench <strong>2.1</strong> (90.6), DeepSWE v1.1 (74.2 vs 74.0), and CyberGym (88.1 vs 84.5) — but <strong>trails Opus-5.0 on Terminal-Bench 3.0 (30.0 vs 43.3) and 4.0 (31.2 vs 51.8)</strong> (correction to the pack's unqualified &quot;leading on Terminal-Bench&quot;). Vendor self-reported benchmark table; no independent rerun. Model releases are context for harness economics, not agent-analytics products — watch only.</p>
+<h3>Other supplied products and community leads</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Surface</th>
+  <th>Disposition and evidence boundary</th>
+  <th>BQAA TL;DR — inference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong><code>unswallow</code> (<code>0DukePan</code>, Reddit <code>1wc6tka</code>)</strong></td>
+  <td><strong>Practitioner failure-mode WATCH, no card.</strong> Local reasoning models (Qwen3/DeepSeek) emit tool-call syntax inside <code>&lt;think&gt;</code> blocks; servers return HTTP 200 <code>finish_reason: &quot;stop&quot;</code> with empty <code>tool_calls</code> — telemetry reads it as a clean refusal to act. Zero-dependency proxy reconstructs the calls. Pack-level evidence.</td>
+  <td>A &quot;successful&quot; completion that silently dropped an intended tool call is the worst telemetry lie there is; channel inspection before certifying task completion is the defense.</td>
+</tr>
+<tr>
+  <td><strong><code>baoer_signal_grep</code> 1.5.6 (npm 16:08:33 PT — clock predates window; surfaced 19:25 PT)</strong></td>
+  <td><strong>Context-retrieval tool WATCH, no card.</strong> Bounded hybrid (exact-then-semantic) search, stable continuation cursors, honest partial-search reporting, 512 MiB cache cap, MCP server. npm verified; note <code>latest</code> is already <code>1.5.6-2</code>.</td>
+  <td>&quot;Report that semantic candidates were skipped&quot; instead of returning an empty set is the honesty contract every retrieval tool over BigQuery metadata should have.</td>
+</tr>
+<tr>
+  <td><strong>Traser (<code>traser.dev/investigate</code>, Reddit <code>1wc8xqd</code>)</strong></td>
+  <td><strong>Practitioner observability WATCH, no card.</strong> Local, LLM-free deterministic step alignment between a suspicious run and a trusted baseline; names concrete silent-failure classes (200-with-error-body, schema-valid ID drift, retry-path divergence, endpoint mismatch).</td>
+  <td>Diffing execution graphs against a golden run is cheaper and more reliable than LLM-judge re-evaluation for &quot;successful-but-wrong&quot; SQL — the golden-run registry is the prerequisite.</td>
+</tr>
+<tr>
+  <td><strong>Priostack / Agent Context Network (Reddit <code>1wc9j5v</code>, PyPI 0.2.0 verified 20:42 PT)</strong></td>
+  <td><strong>Practitioner protocol WATCH, no card.</strong> Headless MCP/JSON-RPC scoped context spaces: create → scoped request → grant → permissioned read → unilateral revocation; context stays owned by the issuer.</td>
+  <td>Scoped-grant-then-revoke between independent agents mirrors dataset-level grants; the revocation receipt, not the grant, is the part to verify.</td>
+</tr>
+<tr>
+  <td><strong>R.E.Y. OpenCode monitor / claude fleet / Munder Difflin Stapler / OnePort / Margin / FitGate / Mac MCP v2.0.4 / NexArt Evidence Bridge</strong></td>
+  <td><strong>Community WATCHES, no cards.</strong> Fleet HUDs (sub-50ms token/cost telemetry; multi-session approval-blocker routing); Stapler multimodal injection; OnePort pre-commit secret/CVE/drift gating with enforced cannot-commit mode; Margin's zero-key <code>claude -p</code> shell-out with hunk-by-hunk diffs; FitGate hook interception; Mac MCP v2.0.4 tab-concurrency + fast-fail ownership; NexArt's immutable mapping profiles + Origin Trace + validity-vs-eligibility separation. None independently verified beyond pack level; none clear the product-level bar.</td>
+  <td>NexArt's split is the durable idea: a payload can be <em>valid</em> yet <em>not eligible</em> as evidence — emit NOT ELIGIBLE instead of inventing missing fields. That maps directly onto BQAA receipt eligibility.</td>
+</tr>
+<tr>
+  <td><strong>Agent-eval CI economics (<code>@shramanb113</code>, 22:12 PT)</strong></td>
+  <td><strong>Methodology TELEMETRY, collector receipt.</strong> <code>pass@k</code> (capability) vs <code>pass^k</code> (reliability); PR smoke 3–8 trials, nightly 8–20; 100+ repeats cost more than they tighten intervals. Not independently re-fetched.</td>
+  <td>BQAA regression suites should publish which of the two numbers a gate uses — a capability gate and a reliability gate with the same name are different products.</td>
+</tr>
+<tr>
+  <td><strong>Agent reversibility metrics (Reddit <code>1wcb24j</code>, 23:22 PT)</strong></td>
+  <td><strong>Methodology TELEMETRY.</strong> Proposes error-detection latency, reversibility ratio, pre-approval action budget, audit-trail determinism as action-agent metrics. Single-author opinion.</td>
+  <td>The reversibility ratio is a genuinely useful BQAA gate dimension: what fraction of agent-executed mutations are programmatically compensable.</td>
+</tr>
+<tr>
+  <td><strong>107-task e-commerce cost benchmark (<code>@MrOnsase</code>, 23:34 PT)</strong></td>
+  <td><strong>Benchmark TELEMETRY, collector receipt.</strong> Accio $3.69 vs Codex $9.27 vs Claude Code $9.51 on identical multi-source tasks; attributed to context filtering/tool-output pruning. Uncontrolled single-author comparison.</td>
+  <td>Harness context discipline shows up as a 2.5× cost line on identical tasks — cost must be a reported dimension of any harness comparison, not an afterthought.</td>
+</tr>
+<tr>
+  <td><strong>Google ADK Python commits <code>a9cf81fe</code>, <code>2284c581</code></strong></td>
+  <td><strong>INTERNAL AUDIT ONLY — no card, first-party forbidden per <code>forbidden.md</code>.</strong> Collector-reported: BigQuery analytics plugin verifies table readiness once at construction; <code>LlmAgent</code> accepts native <code>BaseNode</code>. Documented as internal telemetry context only.</td>
+  <td>—</td>
+</tr>
+<tr>
+  <td><strong>Langfuse/Phoenix/Routed/Braintrust/Agno/Centaur/brnrd/Agent Beacon/Suvadu/Autoprompt</strong></td>
+  <td><strong>Carried watches, invariant.</strong> Phoenix license/keyword chores only (<code>7b5a9dc8</code>/<code>5af57d6b</code>/<code>b11a9d9e</code>); PyPI <code>braintrust</code> 0.38.0, <code>agno</code> 3.0.9, npm <code>@arizeai/phoenix-evals</code> 2.5.0, PyPI <code>arize-phoenix-evals</code> 3.6.0 all confirmed invariant. No re-append anywhere.</td>
+  <td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>No first-party BQAA card, as locked.</p>
+<h2>Academy</h2>
+<h3>IBIB/IB2: measuring enterprise AI systems by serving route — <a href="https://arxiv.org/abs/2609.10494">arXiv:2609.10494</a></h3>
+<p><strong>NEW Academy rank, narrowly scoped: evaluation protocol and reporting discipline for served systems — methodology card, not leaderboard evidence.</strong> Blake Stenstrom, Charangan Vasantharajan, Brian Sathianathan (all Iterate.ai — an enterprise-AI-systems vendor). History: <strong>September 9 v1, 17:31:29 UTC</strong>, no revisions, cs.CL/cs.AI/cs.LG, 42 pp., &quot;Preprint. Under review.&quot; The <strong>complete PDF was read</strong> (adjudication note at <code>Hunt/agent-analytics/2026-09-10-0034-ibib-2609-10494-full-pdf-adjudication.md</code>). <a href="https://arxiv.org/pdf/2609.10494.pdf">PDF</a>.</p>
+<p><strong>What survives review.</strong> Table 1 audits exactly 18 capability benchmarks and finds them scoring advertised model identifiers while usable capability depends jointly on weights, serving route, precision, output contract, and harness (MLPerf binds the stack, but for throughput — route binding is unique to IB2 among capability benchmarks). The three-part protocol is real and specified: (1) <strong>gold-blind capability-binding preflight</strong> (Algorithm 1, 10 predicates verifying the route actually executes before tasks run); (2) <strong>reliability-inclusive first-pass scoring</strong> (failures stay in denominators; unsupported work is never zero-filled); (3) <strong>structurally score-blind adjudication</strong> (gold and scores absent by type from the adjudicator's projection). The strongest measured result: accuracy-only rescoring <strong>flips the cohort leader</strong> (GPT-5.6 Luna 78.65→90.10) and reorders the field — reliability inclusion is substantive, not cosmetic.</p>
+<p><strong>Evidence and limits from the PDF:</strong></p>
+<ul>
+<li><strong>The headline 77.38→82.54 (interval [0.11, 10.60]) is verified verbatim but is a joint endpoint effect, not a route effect:</strong> arms (Qwen3.8-27B, identical weights/revision/BF16, RunPod fair-v5 vs AkashML fair-v6) differ simultaneously in route, harness generation, and serving tool-call parser; the paper calls it a &quot;joint endpoint effect&quot; and refuses attribution. n=1 per arm; the interval is a task-set bootstrap, not run variance; the 0.11 lower bound is smaller than the paper's own 1.30–2.86-pt unattributable Stage-0 leverage. <strong>Pack correction: &quot;serving-arm choice moved precision&quot; overstates a comparison the paper itself declines to attribute.</strong></li>
+<li><strong>Unmitigable conflicts:</strong> authors' employer sells competing enterprise AI systems; the benchmark bank was built against its own systems; the corpus is sealed (reader-unfalsifiable, conceded by the authors).</li>
+<li><strong>Saturation:</strong> 4 of 7 suites are saturated — discrimination lives only in the governed-DB suite (S7) and multi-tab joins (S2), the most BigQuery-relevant cells. Leader gap 0.97 vs interval [−2.13, 4.26]: no ordering within the top nine systems should be cited.</li>
+<li><strong>Self-reported defects (credit for honesty, but they bind the card):</strong> the PARTIALCOVERAGE branch is unreachable in v0.13.2; the full binding gate was first attested 2026-08-13, <em>after</em> two of the three route runs (those findings are retrospective); the gate demonstrably missed once (GLM passed all 10 predicates, then failed strict-JSON in production); authors demoted their own T1–T3 tiers (fail multiplicity/BCa).</li>
+<li>The paper found <strong>no documented instance</strong> of actual benchmark misattribution — the defect it names is an <em>unreportable quantity</em>, not a caught fraud.</li>
+</ul>
+<p><strong>Why admit:</strong> the procedural contribution — bind the evaluation to the served route before scoring, keep failures in denominators, adjudicate score-blind — survives the paper's unusually aggressive self-criticism and maps directly onto how agent-analytics products should report served-system quality. The empirical cohort is illustrative only.</p>
+<p><strong>BQAA TL;DR — proposed application:</strong> any BQAA model comparison must name the serving route, precision, output contract, and tool-call parser as part of the measured system, or the number is unattributable — and a &quot;model upgrade&quot; that silently changes the harness is a confounded experiment. Reliability-inclusive scoring (failures in denominators) should be the default presentation, with accuracy-only shown as the variant, since the choice flips leaders.</p>
+<h3>IdeaAMBIG: specification blockers are the bottleneck, not clarification — <a href="https://arxiv.org/abs/2609.10539">arXiv:2609.10539</a></h3>
+<p><strong>NEW Academy rank, narrowly scoped: specification-readiness as a measurable pre-codification gate, with quantified clarification-loop upside.</strong> Yiling Ma, Yilun Zhao, Sihong Wu (Yale), Manasi Patwardhan (TCS Research), Arman Cohan (Yale). History: <strong>September 9 v1, 17:59:04 UTC</strong>, no revisions, <strong>cs.CL only</strong> (correction: the pack's cs.SE/cs.AI cross-list claim is refuted), 74 pp.; an under-review ACL submission (not peer-reviewed). The <strong>complete PDF was read</strong> (adjudication note at <code>Hunt/agent-analytics/2026-09-10-0034-ideaambig-2609-10539-full-pdf-adjudication.md</code>). Dataset/code released (<code>github.com/Yiling-Ma/IdeaAMBIG</code>); released JSONLs spot-checked: 163 real + 497 synthetic = 660 lines, matching Table 3. <a href="https://arxiv.org/pdf/2609.10539.pdf">PDF</a>.</p>
+<p><strong>What survives review.</strong> IdeaAMBIG tests whether research-method specifications carry enough information for a coding agent to build the intended system without unsupported assumptions: 660 evidence-grounded instances (163 real — 121 GitHub issues + 42 reproducibility reports; 497 controlled synthetic gaps injected into reconstructed codification-ready specifications backed by verified reproductions), 13 LLMs, three tasks (readiness assessment, defect localization, clarification generation). Headline, verified with page-level evidence: the strongest model (GPT-5.6-Sol) achieves <strong>9.6% Macro Defect Recovery Rate</strong> on real-world instances from raw specs (95% CI [3.1, 18.7]) versus <strong>80.6% Macro Clarification Action Success</strong> when the defect location is given (CI [70.1, 89.0]).</p>
+<p><strong>Evidence and limits from the PDF:</strong></p>
+<ul>
+<li><strong>The 9.6% is a strict conjunctive metric</strong> (same-blocker localization <em>plus</em> both taxonomy labels, matched by Claude Opus 4.8). Raw localization (Loc-Acc) is 16.0%; taxonomy-free human-judged blocker identification on a 50-sample is 40%. Do not read 9.6% as &quot;finds nothing.&quot;</li>
+<li><strong>The contrast the pack omitted:</strong> end-to-end clarification <em>without</em> the defect is only <strong>13.6%</strong> Macro-CAS (Table 9) — &quot;given-defect 80.6% vs raw-spec 13.6%&quot; is the paper's actual thesis, and it is stronger than the pack's framing.</li>
+<li><strong>14%→98% oracle readiness is an upper bound</strong> (n=50, blind human-judged, p&lt;0.001), per the paper itself.</li>
+<li><strong>Ranking instability:</strong> 5 of 6 GPT-5.6-Sol vs Claude Sonnet 5 paired comparisons are not significant — the top-2 ordering should not be cited.</li>
+<li>Validation is solid for a preprint: judge–human agreement 85–93% (κ 0.69–0.81), annotation κ 0.84–0.92, human baseline 52% Macro DRR (models far below experts), target-uniqueness audit. Caveats: construction used DeepSeek-V4-Pro/GPT-5.5 while DeepSeek-V3.2 is evaluated; a Claude judge scores Claude Sonnet 5; no pretraining-contamination analysis.</li>
+</ul>
+<p><strong>Why admit:</strong> every collector claim survived the full-PDF read; the dataset is released and count-verified; the methodology (conjunctive metrics, source-clustered CIs, human baselines, judge validation) is unusually careful. The finding — blocker discovery, not clarification, is the bottleneck — is directly actionable for agent evaluation design.</p>
+<p><strong>BQAA TL;DR — proposed application:</strong> build specification-readiness as a measurable pre-flight gate for analytical tasks: before the agent runs, score whether the request pins the partition filter, date range, aggregation granularity, and authorization scope. The paper quantifies the upside — pointing at the defect is worth ~67 points of clarification success — so the gate's job is <em>finding</em> the blocker, and cheap deterministic checks (missing filter detection) beat asking the model to notice.</p>
+<h3>TrajMark: ownership and tamper localization for agent trajectories — <a href="https://arxiv.org/abs/2609.10416">arXiv:2609.10416</a></h3>
+<p><strong>NEW Academy rank, narrowly scoped: provenance primitives for exported trajectory datasets, under an explicitly bounded threat model.</strong> Bokang Zeng, Zheng Gao, Xiaoyu Li, Xiaoyan Feng (UNSW), Jiaojiao Jiang (Griffith). History: <strong>September 9 v1, 16:33:02 UTC</strong>, no revisions, cs.CR/cs.SE, 41 pp. The <strong>complete PDF was read</strong> (adjudication note at <code>Hunt/agent-analytics/2026-09-10-0034-trajmark-2609-10416-full-pdf-adjudication.md</code>). <a href="https://arxiv.org/pdf/2609.10416.pdf">PDF</a>.</p>
+<p><strong>What survives review.</strong> Two layers over coding-agent trajectories (targeting the case where exported trace datasets lose wrapper metadata): a sparse <strong>owner layer</strong> encoding a 6-bit deployment ID by rewriting an HMAC-keyed subset (p=0.30) of READ-action basenames into masked GF(2)^6 linear equations — zero added actions, batch-level recovery with abstention; and a fragile <strong>localization layer</strong> of linked keyed-HMAC seals (ordinary/group/terminal) chained over critical-action segments. Verified numbers: 95.5%–100% edit detection, 95.8% localization, Pass@1 26.9% watermarked vs 26.3% unwatermarked.</p>
+<p><strong>Evidence and limits from the PDF:</strong></p>
+<ul>
+<li><strong>Detection is single-site only</strong> (Fig. 3's exhaustive attacks); the one proved theorem covers a fixed role-preserving segment substitution — insert/delete/carrier cases are empirical.</li>
+<li><strong>95.8% localization is pooled region coverage, not action-level</strong> (Table 7): the narrowest accepted region is median 15 / mean 19.8 visible actions ≈ <strong>37–48% of an average 40.9-action trajectory</strong>; OpenHands collapses to 34–49% at 50% corruption. &quot;Localizes the tamper&quot; overstates it by an order of magnitude.</li>
+<li><strong>The seals are keyed HMAC commitments, but the visible check is digest mod 12</strong> — a ~1/12 collision floor; authors explicitly disclaim freshness, replay, and non-repudiation, and say signed audit logs are preferable when a sidecar survives. Not &quot;cryptographic seals&quot; in the audit-log sense (pack wording corrected).</li>
+<li><strong>Pass@1 26.9 vs 26.3 is statistically unchanged</strong> (sign test p=1.00; 1,350 matched outcomes/method across SWE-bench Python + SWE-PolyBench Java/JS; DeepSeek V4 Flash / GPT-5 mini / MiniMax M3) — a benign-overhead result, not an improvement.</li>
+<li>Threat model is a <strong>keyless, one-shot, non-adaptive editor</strong>; compound/multi-site attacks, splicing, replay, oracle attacks, and key compromise are explicitly excluded. Owner label fixed at 0x3f (label invariance untested live); baselines are adaptations (AgentMark-U), not originals; <strong>no code/data release</strong> anywhere in 41 pages; AI-assisted workflow disclosed.</li>
+</ul>
+<p><strong>Why admit:</strong> the problem — proving ownership and localizing tampering in exported agent-trace datasets after wrapper metadata is stripped — is squarely on-brief and otherwise untreated; the paper is honest about its bounds; and the design (embed provenance in the actions themselves rather than the envelope) is a genuinely different point in the space. All three collector claims verified; the card carries every qualifier above.</p>
+<p><strong>BQAA TL;DR — proposed application:</strong> if BQAA ever exports trajectory/trace datasets for external benchmarking or dispute resolution, envelope metadata will not survive the export — provenance has to live in the records. But take the paper's own hierarchy seriously: where a signed audit sidecar exists, use it; embedded watermarking is the fallback for when it doesn't, and a mod-12 visible residue is a tripwire, not a proof.</p>
+<h3>Priority PDF queue — carried, unchanged</h3>
+<p>These retain prior dispositions; <strong>no full-PDF read was completed for them in this slot</strong>, so no rank movement is possible.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Paper</th>
+  <th>Disposition</th>
+  <th>Next reading question</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.09133">ExecCritic, 2609.09133</a></td>
+  <td>Priority PDF queue. The 72.6% headline combines two post-trained roles, not a fixed repair model with better tests.</td>
+  <td>Does improvement survive fixed repair capability and budget?</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.09115">MeClear, 2609.09115</a></td>
+  <td>Priority PDF queue. Query-scoped suppression is not persistent deletion.</td>
+  <td>Utility oracle, attribution cost, selection leakage.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.08258">Revocation enforcement, 2609.08258</a></td>
+  <td>Priority PDF queue. Five systems examined; no universal memory-product claim.</td>
+  <td>Does the guard block invalid evidence while preserving permitted retrieval?</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.08015">Action-Targeted Revalidation, 2609.08015</a></td>
+  <td>Priority PDF queue. Binding revalidation to commit needs a target transaction or CAS.</td>
+  <td>Dependency omissions and binding to the actual action.</td>
+</tr>
+</tbody>
+</table></div>
+<h3>Screened candidates — carried (abstract/metadata screens only this slot)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Paper</th>
+  <th>Disposition and qualification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.10413">Fortunate Recall, 2609.10413</a></td>
+  <td><strong>Screened candidate, carried.</strong> Ontology-driven memory lifecycle (10+1 categories, LifecycleBench 76.9% vs Mem0 61.0%, confabulation 45.1%→22.4%). Numbers unadmitted — no PDF read; joins the priority queue behind the four above.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.10509">Avatar, 2609.10509</a></td>
+  <td><strong>Screened candidate, carried.</strong> UChicago/Argonne actor-based workflow orchestration (55% compute-waste / 40% GPU-busy reductions). Vendor-side self-evaluation risk unadjudicated; no PDF read.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.10441">ConvMem, 2609.10441</a></td>
+  <td><strong>Screened candidate, carried.</strong> CASIA training-free convolutional tree memory; RULER-suite claims unadmitted.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.10430">Glyph, 2609.10430</a></td>
+  <td><strong>Data-cataloging WATCH.</strong> Multi-agent RRF column-description/sensitivity tagging; on-adjacent beat (data governance), screen only.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.10226">$Φ$-Bench, 2609.10226</a></td>
+  <td><strong>Infrastructure benchmark WATCH</strong> (4 HF upvotes). Kernel-to-distributed ML-infra engineering; scope adjacent.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.10385">MOONWALK, 2609.10385</a></td>
+  <td><strong>Review-alignment WATCH.</strong> Intent-Evidence-Action audit trail for junior-supervisor review drift; screen only.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.10522">Show-Harness 2609.10522</a> / <a href="https://arxiv.org/abs/2609.10540">Programmable World Model 2609.10540</a> / <a href="https://arxiv.org/abs/2609.10451">JarvisGUI 2609.10451</a></td>
+  <td><strong>CONTEXT / OFF-BEAT.</strong> Embodied, visual-world-model, and cross-device GUI scope.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Already consumed:</strong> Q2D-Web and Counter-Swarm (ranked at 1834 — do not re-litigate), SQLMorph (0634), ReCite (1234), Trace as State (00:34 09-09; arXiv API audits in all five packs show v1 invariant at 2026-09-02T15:06:46Z). <strong>All standing holds remain unchanged</strong> — SRMA (141), JIT-Agent (117), Dr. Claw (127), FlowBalance (87), Compile by Training (379), MaxKernel, Mechanistic Reasoning, Verify Before You Distill (14), and the rest; catalog absence was not used to infer freshness. HF upvote movement across the window (NeoHorse-1 378→384, Gander 118→124) is popularity telemetry, not fresh evidence, and overturns no hold. MOLE 2609.06966 remains STRONG WATCH with carding HELD for full PDF.</p>
+<h2>Six-week EV</h2>
+<p>Keep <strong>feedback-correction → review-budget → tool-evidence → finding-revision → cross-criterion</strong>. EV is qualitative; no financial return, adoption forecast or measured BQAA improvement is claimed.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Existing work</th>
+  <th>Bounded next check</th>
+  <th>Evidence needed to keep it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Feedback-correction</td>
+  <td>Add the SQL error-diagnosis fixture from the 0634 brief; keep exact correctness as acceptance.</td>
+  <td>Better independently correct repairs on untouched tasks without passing partially wrong answers.</td>
+</tr>
+<tr>
+  <td>Review-budget</td>
+  <td>Add a <strong>specification-readiness preflight</strong> (IdeaAMBIG pattern): deterministic missing-parameter detection (partition filter, date range, granularity, scope) scored before agent dispatch; measure clarification success with vs without the pointer. Keep pass@k (capability) and pass^k (reliability) as separately named gates (CI-economics thread).</td>
+  <td>A reviewer can see the blocker found by the gate, and clarification-with-pointer beats clarification-without by a measured margin.</td>
+</tr>
+<tr>
+  <td>Tool-evidence</td>
+  <td>Bind every eval number to the <strong>served route + precision + output contract + tool-call parser</strong> (IBIB discipline); reliability-inclusive scoring as default (failures in denominators), accuracy-only as the labeled variant. Run Phoenix's released completeness evaluator over mixed read-only/mutating transcripts before adopting (carried from 1834).</td>
+  <td>No score is publishable without its endpoint binding; the leader flip under reliability-inclusive scoring is checked on our own cohort.</td>
+</tr>
+<tr>
+  <td>Finding-revision</td>
+  <td>Pilot the ReCite-pattern verify step on schema/term retrieval, evaluated on agent-reformulated sub-goal queries (Q2D-Web lesson, carried), with judgment-set and cutoff named on every verdict.</td>
+  <td>First-pass SQL correctness gain at fixed latency, with human spot-checks on support labels.</td>
+</tr>
+<tr>
+  <td>Cross-criterion</td>
+  <td>Keep required ordering, multiplicity, NULL behavior and aggregate correctness as separate mandatory checks; add TrajMark's lesson for exported evidence: provenance must survive metadata stripping, and tripwire-level integrity (collision-prone residues) must be labeled as such, never as proof.</td>
+  <td>An attractive aggregate score cannot hide a failed mandatory criterion, and no exported dataset is treated as self-authenticating.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>BQAA TL;DR — inference:</strong> the window strengthens tool-evidence (endpoint binding) and review-budget (preflight gates) rather than adding a new line. Neither justifies new platform surface before the feedback-correction fixture shows repair gains.</p>
+<h2>Catalog hints (kind rank only)</h2>
+<p>Three new Academy items, one new Industry item, <strong>zero progress appends</strong> this slot (Mastra not second-appended; Langfuse/Opik unchanged; Phoenix/Routed accredited at 1834).</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>id</code></td>
+  <td><code>arxiv-2609-10494-ibib-serving-route-evaluation-protocol</code></td>
+</tr>
+<tr>
+  <td><code>tag</code></td>
+  <td><code>Academy</code></td>
+</tr>
+<tr>
+  <td><code>kind</code></td>
+  <td><code>rank</code></td>
+</tr>
+<tr>
+  <td><code>title</code></td>
+  <td><code>IBIB/IB2: capability-binding preflight and reliability-inclusive scoring for served AI systems — protocol card, vendor COI limits</code></td>
+</tr>
+<tr>
+  <td><code>added</code></td>
+  <td><code>2026-09-10T0034</code></td>
+</tr>
+<tr>
+  <td>Primary</td>
+  <td><code>https://arxiv.org/abs/2609.10494</code></td>
+</tr>
+<tr>
+  <td>PDF</td>
+  <td><code>https://arxiv.org/pdf/2609.10494.pdf</code></td>
+</tr>
+<tr>
+  <td>Brief</td>
+  <td><code>/research/briefs/2026-09-10-0034-kimi.html</code></td>
+</tr>
+<tr>
+  <td>Suggested card copy</td>
+  <td><code>Full PDF reviewed. Methodology card, not leaderboard evidence: audits 18 benchmarks scoring model identifiers instead of served systems; proposes gold-blind capability-binding preflight (10 predicates), reliability-inclusive first-pass scoring (failures in denominators), score-blind adjudication. Accuracy-only rescoring flips the cohort leader (78.65→90.10). Limits: Iterate.ai vendor COI, sealed corpus, n=1 per arm; the 77.38→82.54 precision move is a joint route+harness+parser endpoint effect the paper refuses to attribute; 4/7 suites saturated; binding gate missed once in production. Do not cite any ordering within the top nine systems.</code></td>
+</tr>
+</tbody>
+</table></div>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>id</code></td>
+  <td><code>arxiv-2609-10539-ideaambig-specification-gap-benchmark</code></td>
+</tr>
+<tr>
+  <td><code>tag</code></td>
+  <td><code>Academy</code></td>
+</tr>
+<tr>
+  <td><code>kind</code></td>
+  <td><code>rank</code></td>
+</tr>
+<tr>
+  <td><code>title</code></td>
+  <td><code>IdeaAMBIG: blocker discovery, not clarification, is the coding-agent bottleneck — 9.6% raw-spec defect recovery vs 80.6% defect-guided</code></td>
+</tr>
+<tr>
+  <td><code>added</code></td>
+  <td><code>2026-09-10T0034</code></td>
+</tr>
+<tr>
+  <td>Primary</td>
+  <td><code>https://arxiv.org/abs/2609.10539</code></td>
+</tr>
+<tr>
+  <td>PDF</td>
+  <td><code>https://arxiv.org/pdf/2609.10539.pdf</code></td>
+</tr>
+<tr>
+  <td>Brief</td>
+  <td><code>/research/briefs/2026-09-10-0034-kimi.html</code></td>
+</tr>
+<tr>
+  <td>Suggested card copy</td>
+  <td><code>Full PDF reviewed. 660 specification-gap instances (163 real from GitHub issues + reproducibility reports, 497 synthetic; released dataset count-verified), 13 LLMs. Strongest model: 9.6% Macro Defect Recovery on real instances from raw specs (strict conjunctive metric; raw localization 16.0%, taxonomy-free 40%) vs 80.6% clarification success given the defect; end-to-end clarification without it is 13.6%. Oracle readiness 14%→98% is an upper bound (n=50). Judge–human agreement 85–93%; human baseline 52% DRR. Top-2 model ranking statistically unstable; cs.CL-only; non-peer-reviewed v1.</code></td>
+</tr>
+</tbody>
+</table></div>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>id</code></td>
+  <td><code>arxiv-2609-10416-trajmark-trajectory-provenance</code></td>
+</tr>
+<tr>
+  <td><code>tag</code></td>
+  <td><code>Academy</code></td>
+</tr>
+<tr>
+  <td><code>kind</code></td>
+  <td><code>rank</code></td>
+</tr>
+<tr>
+  <td><code>title</code></td>
+  <td><code>TrajMark: ownership attribution and tamper localization for exported coding-agent trajectories — single-site threat model, region-level localization</code></td>
+</tr>
+<tr>
+  <td><code>added</code></td>
+  <td><code>2026-09-10T0034</code></td>
+</tr>
+<tr>
+  <td>Primary</td>
+  <td><code>https://arxiv.org/abs/2609.10416</code></td>
+</tr>
+<tr>
+  <td>PDF</td>
+  <td><code>https://arxiv.org/pdf/2609.10416.pdf</code></td>
+</tr>
+<tr>
+  <td>Brief</td>
+  <td><code>/research/briefs/2026-09-10-0034-kimi.html</code></td>
+</tr>
+<tr>
+  <td>Suggested card copy</td>
+  <td><code>Full PDF reviewed. Provenance embedded in trajectory actions (6-bit HMAC-keyed owner ID in READ basenames; linked keyed-HMAC seals over critical segments) for exported trace datasets that lose wrapper metadata. Limits: detection verified for single-site attacks only; 95.8% localization is pooled region coverage (median 15 / mean 19.8 actions ≈ 37–48% of a trajectory), not action-level; visible seal check is digest mod 12 (~1/12 collision floor) with freshness/replay/non-repudiation disclaimed — signed audit logs preferred when a sidecar survives; Pass@1 statistically unchanged (26.9% vs 26.3%, p=1.00); keyless non-adaptive threat model; no code/data release.</code></td>
+</tr>
+</tbody>
+</table></div>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>id</code></td>
+  <td><code>openai-codex-cli-0-154-worktrees-inline-questions-mcp-oauth</code></td>
+</tr>
+<tr>
+  <td><code>tag</code></td>
+  <td><code>Industry</code></td>
+</tr>
+<tr>
+  <td><code>kind</code></td>
+  <td><code>rank</code></td>
+</tr>
+<tr>
+  <td><code>title</code></td>
+  <td><code>Codex CLI 0.154.0: experimental managed worktrees, non-blocking inline questions, coordinated MCP OAuth (no replay of rejected calls), compaction-surviving approval context</code></td>
+</tr>
+<tr>
+  <td><code>added</code></td>
+  <td><code>2026-09-10T0034</code></td>
+</tr>
+<tr>
+  <td>Primary</td>
+  <td><code>https://developers.openai.com/codex/changelog</code></td>
+</tr>
+<tr>
+  <td>npm</td>
+  <td><code>https://www.npmjs.com/package/@openai/codex</code></td>
+</tr>
+<tr>
+  <td>Brief</td>
+  <td><code>/research/briefs/2026-09-10-0034-kimi.html</code></td>
+</tr>
+<tr>
+  <td>Suggested card copy</td>
+  <td><code>Verified against official changelog + npm + rust-v0.154.0 tag. Experimental worktrees (--worktree, fork/browse/resume); inline questions answered while the agent continues (draft preserved); MCP connections coordinate OAuth token refresh and surface login challenges without replaying rejected tool calls (rmcp 3.2.0); approval reviews preserve authorization context through compaction and reject approvals invalidated by new instructions; deprecated codex mcp-server removed. Plugin-tool pickup is a scoped fix for external upgrades/rollbacks, not general hot-reload. Worktrees vendor-labeled experimental; no independent evaluation.</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>No rank entries for watches; no progress instructions.</p>
+<h2>Housekeeping</h2>
+<p><strong>Packs consumed (all five available post-1834 packs):</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Pack</th>
+  <th>Contribution and clock qualification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>packs/agy-pack-2026-09-09-2032.md</code></td>
+  <td>~16:45–20:35 catch-up (1732/1832/1932 missed to Mac/collector gaps; this pack spans them). Mastra <code>1fc82255</code>; Phoenix <code>50dabcce</code>; ADK <code>a9cf81fe</code>/<code>2284c581</code>; unswallow; baoer_signal_grep; IBIB/TrajMark/Fortunate Recall/Glyph discoveries.</td>
+</tr>
+<tr>
+  <td><code>packs/agy-pack-2026-09-09-2132.md</code></td>
+  <td>~20:35–21:48. Codex CLI 0.154.0 surfacing (Reddit 21:26 PT); Mastra 1.66.0-alpha.2; Traser; R.E.Y.; IdeaAMBIG/Avatar/ConvMem discoveries. Confirmed 1834 publication (21:13 PT) and the 203/63/65/74 catalog baseline.</td>
+</tr>
+<tr>
+  <td><code>packs/agy-pack-2026-09-09-2232.md</code></td>
+  <td>~21:48–22:42. Priostack/ACN; Munder Difflin Stapler; pass@k vs pass^k thread; Φ-Bench/MOONWALK/Show-Harness/Programmable World Model.</td>
+</tr>
+<tr>
+  <td><code>packs/agy-pack-2026-09-09-2332.md</code></td>
+  <td>~22:40–23:42. Langfuse <code>c974e076</code>; Codex <code>b348fc26</code>/<code>bf5ebd98</code>; OnePort; claude fleet; reversibility metrics; MrOnsase cost benchmark; DeepSeek V4.1-Flash.</td>
+</tr>
+<tr>
+  <td><code>packs/agy-pack-2026-09-10-0032.md</code></td>
+  <td>~23:37–00:48. Mastra <code>7dc4477d</code>/<code>08e7df7c</code> (in-window); NexArt; Mac MCP v2.0.4; Margin; FitGate. <strong>Post-cutoff contents deferred:</strong> Opik <code>47dff76e</code> (00:39:45 PT), ClickHouse (00:38 PT), claude_news (00:41 PT), Moha (00:42 PT) → 06:34 slot.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Missing packs:</strong> <strong>1732, 1832, 1932 do not exist</strong> (Mac host / collector launch gaps); the 2032 pack explicitly spans that ~3.75-hour window and was consumed whole. <strong>0132 does not exist</strong> at writing time; coverage from the 0032 pack's end (~00:48 PT) onward belongs to 06:34. The optional all-tabs GTM pack was not used for ranks (no true agent-analytics product signal).</p>
+<p><strong>Baseline and dedupe:</strong> read the vault rules, <code>forbidden.md</code>, the Kimi-deep-brief decision lock, and the published 1834 brief. Local <code>catalog.json</code> stands at <strong>203 items / 63 briefs / 65 runs / 74 progress entries</strong> (post-1834 publication, pack-verified and spot-checked). Catalog grep confirmed no existing items for the three admitted arXiv IDs or any Codex CLI card, and confirmed the correct progress targets were left untouched: Mastra (<code>mastra-1-64-feedback-review-status-evals-vitest</code>, no second append), Langfuse (<code>langfuse-v4</code>, no append), Opik (hold unchanged), Phoenix/Routed (accredited at 1834, not re-touched).</p>
+<p><strong>Reading and verification:</strong> three complete full-PDF reads this slot, via subagents with adjudication notes filed: IBIB (<code>Hunt/agent-analytics/2026-09-10-0034-ibib-2609-10494-full-pdf-adjudication.md</code>), IdeaAMBIG (<code>Hunt/agent-analytics/2026-09-10-0034-ideaambig-2609-10539-full-pdf-adjudication.md</code>), TrajMark (<code>Hunt/agent-analytics/2026-09-10-0034-trajmark-2609-10416-full-pdf-adjudication.md</code>). Industry claims were independently verified against primary sources by a verification subagent: npm <code>@openai/codex@0.154.0</code> + <code>rust-v0.154.0</code> tag + full official changelog; Codex commits <code>b348fc26</code>/<code>bf5ebd98</code>; Langfuse <code>c974e076</code> patch-level (207 semantics, Cloud-only gate, Nov-16 redefinition); Mastra <code>7dc4477d</code>/<code>08e7df7c</code> + npm 1.66.0-alpha.2; Opik <code>47dff76e</code> timestamp (post-cutoff) + PyPI/GitHub-release/tag state; DeepSeek V4.1-Flash HF model card (spec corrections); baoer_signal_grep/priostack/phoenix-evals/braintrust/agno package states. No fabricated SHA suffixes this window (packs cited 8-char prefixes; full SHAs verified and used above). X posts remain collector receipts, not independently re-fetched; ADK commit clocks are collector-reported. Pack social provenance: 6+7+5+9+7 = 34 reported successful social-superpowers calls, zero quota errors — Agy receipts, not replayed here.</p>
+<p><strong>Medium / scouts:</strong> Medium notes this window are GTM-board KEEP passes and scouts; per the Medium lock they are discovery-only and contributed no cards. No first-party BQAA content in any card.</p>
+<p><strong>Delivery:</strong> this Markdown brief plus adjudication/learning notes under <code>Hunt/agent-analytics/</code>. No HTML/catalog edit, no commit, no push, no Fable/Astra call, no Desk, no Crustdata, no external message, no first-party BQAA card. The parent owns later HTML/catalog publication; this catch-up does not establish scheduler repair. Kick baseline hub SHA noted: <code>228ee1c9b0122c5eb2f3549d27a1eaa0b8d9bfa5</code>.</p>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Kimi · 10 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
