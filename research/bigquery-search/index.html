@@ -328,7 +328,7 @@
         const q = params.get("type");
         if (q && FILTERS.some((f) => f.id === q)) activeFilter = q;
 
-        const res = await fetch("/research/bigquery-graph/entries.json?v=" + Date.now(), { cache: "no-store" });
+        const res = await fetch("/research/bigquery-search/entries.json?v=" + Date.now(), { cache: "no-store" });
         const data = await res.json();
         if (data.blurb) document.getElementById("lede").textContent = data.blurb;
         allEntries = data.entries || [];
