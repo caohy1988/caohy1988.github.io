@@ -25,8 +25,10 @@ Brand `HC / FIELD BRIEF` links to `/research/`. "CA in BigQuery" is relabelled "
 ## Behaviour (`assets/site-nav.js`, progressive)
 
 - Folder button click toggles its menu; opening one closes the others. `ArrowDown`/`ArrowUp` on the button opens and focuses the first/last item. Inside a menu `ArrowDown`/`ArrowUp`/`Home`/`End` move focus. `Escape` closes the open folder and returns focus to its button; tabbing out or clicking outside closes it.
-- Below 860px the nav collapses behind a `Menu` toggle (`aria-expanded`); folders expand inline; `Escape` with no folder open closes the menu and refocuses the toggle. Viewport changes reset state.
-- Without the script the CSS shows folders on hover and `:focus-within` on desktop, and lists everything on mobile (toggle hidden).
+- Handled keys (arrows, Home, End, Escape) are consumed with `stopPropagation` so page shortcuts (the demos' Home/End beat keys) do not fire. A panel that would run past the right edge of the viewport hangs from the button's right edge (`data-align="right"`; the last folder always does).
+- Below 860px the nav collapses behind a `Menu` toggle (`aria-expanded`); folders expand inline; `Escape` with no folder open closes the menu and refocuses the toggle. Viewport changes reset state. On the sticky pages an expanded bar is capped at the viewport height and scrolls inside itself.
+- Without the script the CSS shows folders on hover and `:focus-within` on desktop (an invisible 8px bridge above the panel keeps the pointer inside the folder while crossing the gap), lists everything on mobile (toggle hidden), and releases the sticky position on mobile so the list is ordinary page flow.
+- The board pack's skip link (`rfc/styles.css`) sits above the bar (`z-index: 60` over the bar's 40) so the first Tab stop is visible.
 - If a page ships without any `aria-current` (a generator drifted), the script marks the link whose href equals `location.pathname`.
 
 ## Visual
@@ -36,6 +38,6 @@ Dark navy bar (`#101828`), 58px tall, mono brand with orange `HC`, items muted `
 ## Acceptance
 
 1. `node tools/site_nav.mjs --check` → all 13 pages in sync.
-2. `node tools/check_site_nav.mjs` → every page passes the desktop and mobile checks (IA links, single aria-current, folder open/close, Escape focus return, ArrowDown, toggle, no horizontal overflow).
+2. `node tools/check_site_nav.mjs` → every page passes the desktop and mobile checks (IA links, single aria-current, each folder open inside the viewport, Escape focus return, ArrowDown/Home/End, tab-out and outside click close an open folder, toggle, no horizontal overflow), the no-JS hover path across the gap, the board pack's first-Tab skip link, Home/End on both demos keeping `#beat=3` at 1280 and 375px, and the sticky pages at 667×375 with and without the script.
 3. `node rfc/tools/check_rfc_routes.mjs` → all routes behave; `rfc/spikes/bq-graph/tests` green (the demo nav test now reads the generated block).
 4. `rfc/tools/rfc_word_count.mjs` stays under the ceilings (1,800 / 7,500 with folds open).

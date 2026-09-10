@@ -28,6 +28,11 @@
   function setOpen(f, open) {
     f.setAttribute("data-open", open ? "true" : "false");
     button(f).setAttribute("aria-expanded", open ? "true" : "false");
+    if (!open || mobile.matches) return;
+    // A panel that would run past the right edge of the viewport hangs from the button's right edge instead.
+    var menu = f.querySelector(".site-nav-menu");
+    f.removeAttribute("data-align");
+    if (menu.getBoundingClientRect().right > document.documentElement.clientWidth) f.setAttribute("data-align", "right");
   }
   function closeAll(except) { folders.forEach(function (f) { if (f !== except && isOpen(f)) setOpen(f, false); }); }
   function setMenu(open) {
@@ -70,7 +75,7 @@
       else if (e.key === "ArrowUp") next = items[(i - 1 + items.length) % items.length];
       else if (e.key === "Home") next = items[0];
       else if (e.key === "End") next = items[items.length - 1];
-      if (next) { e.preventDefault(); next.focus(); }
+      if (next) { e.preventDefault(); e.stopPropagation(); next.focus(); } // consumed: page shortcuts (demo Home/End) must not fire
     });
     // Tabbing out of a folder closes it; a click that lands outside is handled below.
     f.addEventListener("focusout", function (e) {

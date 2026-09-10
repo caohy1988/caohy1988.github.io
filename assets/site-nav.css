@@ -93,6 +93,11 @@
   border-radius: 10px;
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
 }
+/* The last folder (and any panel the script finds running past the viewport) hangs from the button's right edge. */
+.site-nav-folder:last-child > .site-nav-menu,
+.site-nav-folder[data-align="right"] > .site-nav-menu { left: auto; right: 0; }
+/* Invisible bridge over the 6px gap so a pointer moving from the button into the panel never leaves the folder's hover area. */
+.site-nav-menu::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 8px; }
 .site-nav-folder[data-open="true"] > .site-nav-menu { display: flex; }
 .site-nav-menu a {
   display: block;
@@ -180,7 +185,12 @@
     background: none;
     box-shadow: none;
   }
+  .site-nav-menu::before { display: none; }
   .site-nav-menu a { font-size: 0.92rem; padding: 11px 12px; }
+  /* A pinned bar taller than a short viewport scrolls inside itself while the menu is open; without the script the
+     full list is ordinary page flow instead of a pinned wall. */
+  .site-topbar[data-sticky][data-open="true"] { max-height: 100vh; max-height: 100dvh; overflow-y: auto; }
+  .site-topbar[data-sticky]:not(.site-nav-js) { position: relative; }
   /* Without the script: no toggle, everything listed. */
   .site-topbar:not(.site-nav-js) .site-nav-toggle { display: none; }
   .site-topbar:not(.site-nav-js) .site-nav,
