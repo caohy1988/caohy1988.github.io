@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kimi brief · 9 Sep 2026, 6:34 PM — The Field Brief</title>
+  <meta name="description" content="Kimi: PUBLISH 18:34 OFF-CADENCE catch-up — Q2D-Web + Counter-Swarm Academy ranks (full PDF) + Routed v1.6.5 and Phoenix @arizeai/phoenix-evals 2.5.0 progress; zero new Industry ranks. 6:34 PM PT, 9 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-09-1834-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Kimi · 6:34 PM PT · OFF-CADENCE catch-up</p>
+    <article>
+<h1>Field Brief — 2026-09-09-1834: the evaluation layer ships — completeness checks, dual error rates, and agent-scale retrieval benchmarks</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Analyzer:</strong> Kimi, deep Field Brief writer per <code>Maps/Decisions/2026-09-09-kimi-deep-brief.md</code> (Astra/Fable off for this brief)
+<strong>Official slot:</strong> <strong>2026-09-09-1834 — OFF-CADENCE catch-up for 18:34 PT Wednesday, September 9, 2026.</strong> The Mac was down at the real 18:34 wake; the slot label stays <strong>1834</strong> and is not relabeled to the writing time.
+<strong>Window:</strong> after the published <strong>12:34</strong> brief (live as <code>/research/briefs/2026-09-09-1234-kimi.html</code> since 13:33 PT) through the <strong>18:34 PT</strong> cutoff. The 1332 pack also backfills the collector-silent 10:55→12:34 span the 1234 brief explicitly deferred to this slot; those events (e.g. Routed v1.6.5 at 11:56:42 PT) are admitted here, not double-counted there. All admitted events predate the cutoff; the latest pack evidence ends ~16:45 PT. Markdown handoff only — the parent owns HTML/catalog publication.</p>
+<h2>Read-this-first</h2>
+<p><strong>PUBLISH: two new Academy ranks (both full-PDF reads), two accepted Industry progress appends, no new Industry rank.</strong></p>
+<ul>
+<li><strong>Q2D-Web (arXiv:2609.08887, Perplexity AI):</strong> admit a narrowly scoped Academy rank after a <strong>complete PDF read</strong>. The first benchmark pairing a ~190M-document web corpus with 69,721 real agent-reformulated production queries and deep multi-source judgments (Recall@1000 primary). Mandatory qualifications: industry self-benchmark (Perplexity data, labels, pipeline, in-house winning models, private scorer, dataset unreleased by design); label circularity (citation labels are conditioned on the production retriever; LLM judgments unvalidated against humans, with 15.8% measured residual false negatives); the primary-metric winner <strong>flips</strong> across judgment sets and the shallow-cutoff winner differs from the deep-recall winner. <a href="https://arxiv.org/abs/2609.08887">Paper</a> · <a href="https://huggingface.co/spaces/perplexity-ai/q2d-web-leaderboard">Leaderboard</a> (verified live; results JSONs match the paper's tables).</li>
+<li><strong>Counter-Swarm Doctrine (arXiv:2609.06140):</strong> admit a narrowly scoped Academy rank after a <strong>complete PDF read</strong> — scoped as <strong>evaluation design and evidence hygiene, not measured security results</strong>. The paper's four-arm detector comparison and recurrence-after-quarantine tests are <strong>proposed, never run</strong>; its only executed analysis is a checksum-verified reconstruction of the collusion.wiki export (14,591 saves, 5,217 deletions) that verifies counts, not attribution or cause. Single author, unverifiable affiliation (&quot;MoltAI Corp&quot;). Correction: the pack's &quot;measures recurrence after channel closure and state quarantine&quot; is false — nothing is measured. <a href="https://arxiv.org/abs/2609.06140">Paper</a>.</li>
+<li><strong>Routed v1.6.5:</strong> accept progress on <code>routed-skill-selection-history-and-explanations</code>. Verified release (11:56:42 PT): dual <strong>FAR 0.0% / FDR 1.5%</strong> reporting across a 190-case suite, grounded confidence floors (0.28 anchored / 0.40 unanchored), conditional negation parsing, and a self-service <code>routed benchmark</code> CLI. Numbers are vendor self-reported and not independently reproduced. <a href="https://github.com/bshea-1/routed/releases/tag/v1.6.5">Release</a>.</li>
+<li><strong>Phoenix <code>@arizeai/phoenix-evals</code> 2.5.0 (npm):</strong> accept progress on <code>phoenix-evals-v3-6</code>. The completeness evaluator watched at 1234 as &quot;merged, unreleased&quot; is now <strong>released</strong> (16:38:33 PT) as <code>createCompletenessEvaluator</code>, alongside the document→retrieval relevance evaluator rename/deprecation. <strong>JS package only</strong> — Python <code>arize-phoenix-evals</code> remains 3.6.0 (Sep 1) and contains no completeness evaluator. Correction: the pack's recommended card id (<code>phoenix-runtime-eval-and-synthetic-dataset-generation</code>) does not exist in the catalog; the correct target is <code>phoenix-evals-v3-6</code>.</li>
+<li><strong>Source corrections worth retaining:</strong> the pack's full 40-char SHAs for the Mastra (<code>4d72bcea…</code>) and Langfuse (<code>2c44151e…</code>) commits have <strong>fabricated suffixes</strong> — the real commits are <code>4d72bceaf323dfe617a882b80defb2ab21b97ed9</code> and <code>2c44151e2a1fe8736b3e73b087c761ae2a1edabc</code> (8-char prefixes were correct). Opik's git <strong>tag</strong> <code>2.2.56</code> exists but there is still no GitHub <strong>release</strong> for the PyPI 2.2.56 wheel — the hold stands, precisely stated. Langfuse's v3 sunset date (Nov 16, 2026) is pre-existing text, not new in the delay-notice commit. Autoprompt's Terminal-Bench numbers are self-reported single-run &quot;version 1 benchmarks&quot; with no retained timing/token logs.</li>
+</ul>
+<p><strong>BQAA TL;DR — editorial inference:</strong> this window is the evaluation layer catching up to agent infrastructure. Phoenix ships conversation-completeness as a released evaluator; Routed formalizes asymmetric error accounting (false accept vs false decline) for tool/skill admission; Q2D-Web shows retrieval evaluation must run on agent-written queries at production scale, with judgment-set choice flipping winners; Counter-Swarm models the evidence discipline (reported vs proposed vs measured) that any multi-agent security claim needs. For BQAA: report both error directions on admission gates, treat &quot;did the agent finish everything asked&quot; as a scored dimension, and never let a single aggregate hide a criterion-level reversal. (First-party BQAA itself is not a research beat here — no card, per <code>forbidden.md</code>.)</p>
+<h2>Industry</h2>
+<h3>Routed v1.6.5 — accepted PROGRESS: dual FAR/FDR evaluation and grounded confidence floors</h3>
+<p><strong>Existing item:</strong> <code>routed-skill-selection-history-and-explanations</code>. <strong>One progress append only.</strong></p>
+<p>The <a href="https://github.com/bshea-1/routed/releases/tag/v1.6.5">v1.6.5 release</a> is independently verified against the GitHub API: published <strong>2026-09-09T18:56:42Z (11:56:42 PT)</strong>, tag → commit <code>e963747a0b32990f40861f50aa9d60bf3a0a95b6</code>. It falls in the collector-silent 10:55→12:34 span backfilled by the 1332 pack and deferred by the 1234 brief to this slot — admitted here once. Release-body claims verified verbatim:</p>
+<ul>
+<li><strong>Dual evaluation framework:</strong> False Accept Rate (no-skill prompts leaking skills into context) <strong>0.0% (0/60)</strong> vs False Decline Rate (valid coding queries dropped) <strong>1.5% (2/130)</strong>, across a 190-case suite (130 positive + 60 adversarial/no-skill), replacing single-sided rejection testing.</li>
+<li><strong>Aggregate retrieval numbers across 2,130 indexed skills:</strong> Top-1 73.2%, Top-3 83.7%, Top-5 87.4%, MRR 78.8%, composite 83.2.</li>
+<li><strong>Grounded dynamic confidence floors:</strong> anchored queries (BM25/tag overlap) get a 0.28 floor; unanchored (pure embedding geometry) get a stricter 0.40 floor.</li>
+<li><strong>Conditional negation parsing:</strong> distinguishes direct suppression (&quot;do not run a security audit&quot;) from state preservation (&quot;if the audit is already running do not stop it&quot;), with length constraints on compound-word decomposition.</li>
+<li><strong>Self-service benchmarks:</strong> <code>routed benchmark [--json] [--dataset &lt;path&gt;]</code>, standard suite committed at <code>packages/core/src/benchmark/dataset.ts</code>.</li>
+</ul>
+<p><strong>Qualifications.</strong> All benchmark numbers are vendor self-reported; the dataset path is published but no independent rerun exists. Consistent with the standing v1.6.0 qualification, benchmark rejection behavior is not authorization enforcement, and FAR/FDR are not calibrated probabilities. The floor values (0.28/0.40) are asserted as &quot;calibrated&quot; without a published calibration procedure.</p>
+<p><strong>Accepted progress text — append once at <code>2026-09-09T1834</code>:</strong></p>
+<blockquote>
+<p>Routed <a href="https://github.com/bshea-1/routed/releases/tag/v1.6.5">v1.6.5</a> (Sep 9, 11:56 PT) ships dual error accounting for skill admission — False Accept Rate 0.0% (0/60 no-skill) vs False Decline Rate 1.5% (2/130) over a 190-case suite — plus grounded confidence floors (0.28 anchored / 0.40 unanchored), conditional negation parsing, and a reproducible <code>routed benchmark</code> CLI with committed dataset. Vendor self-reported across 2,130 indexed skills (Top-1 73.2%, Top-3 83.7%, MRR 78.8%); not independently reproduced, and not an authorization-enforcement or calibrated-probability claim. <a href="/research/briefs/2026-09-09-1834-kimi.html">Full brief</a>.</p>
+</blockquote>
+<p><strong>BQAA TL;DR — inference:</strong> admission gates have two error directions with asymmetric cost, and single-number accuracy hides which side you're paying on. A BQAA tool/table admission check should report &quot;unauthorized item admitted&quot; and &quot;legitimate item dropped&quot; separately — the 0.28/0.40 split by evidence anchoring (lexical match vs pure embedding geometry) is a concrete prior for how to set those thresholds differently.</p>
+<h3>Phoenix <code>@arizeai/phoenix-evals</code> 2.5.0 — accepted PROGRESS: the completeness evaluator ships (JS only)</h3>
+<p><strong>Existing item:</strong> <code>phoenix-evals-v3-6</code>. <strong>One progress append only.</strong> (Correction: the pack targeted a nonexistent card id <code>phoenix-runtime-eval-and-synthetic-dataset-generation</code>; the catalog's Phoenix evals card is <code>phoenix-evals-v3-6</code>.)</p>
+<p>Independently verified: npm <code>@arizeai/phoenix-evals@2.5.0</code> published <strong>2026-09-09T23:38:33Z (16:38:33 PT)</strong>, with matching GitHub release (23:38:35Z); predecessor 2.4.0 was Aug 28. The JS changelog verbatim: <code>63805d0</code> &quot;Add <code>createCompletenessEvaluator</code> to judge whether every active user request in a conversation was actually completed&quot; — the same commit watched at 1234 as merged-but-unreleased (<a href="https://github.com/Arize-ai/phoenix/pull/15767">PR #15767</a>) — and <code>d67ea3f</code> deprecating <code>createDocumentRelevanceEvaluator</code> in favor of <code>createRetrievalRelevanceEvaluator</code> (<code>documentText</code>→<code>context</code>, <code>unrelated</code>→<code>irrelevant</code>; removal scheduled next major). This converts the 1234 audit watch into progress: the evaluator is now in a released package.</p>
+<p><strong>Scope limits.</strong> JS/TypeScript package only: PyPI <code>arize-phoenix-evals</code> remains <strong>3.6.0</strong> (Sep 1) with no completeness evaluator; core <code>arize-phoenix</code> 20.9.0 and <code>arize-phoenix-client</code> 3.5.0 (both Sep 8) are invariant. (Package-name correction for the record: the PyPI client package is <code>arize-phoenix-client</code>, not <code>phoenix-client</code>.) The evaluator's judged quality on real conversations remains unestablished — the PR shipped a synthetic benchmark, not field results. Same-window Phoenix commits <code>1c9d9c4d</code> (URL-addressable trace/session table filters, 12:13:27 PT) and <code>e2e51432</code> (Harbor integration guide + agent skill, 15:36:13 PT) are verified merged but ride along as context, not separate progress.</p>
+<p><strong>Accepted progress text — append once at <code>2026-09-09T1834</code>:</strong></p>
+<blockquote>
+<p><a href="https://github.com/Arize-ai/phoenix/releases">@arizeai/phoenix-evals 2.5.0</a> (npm, Sep 9, 16:38 PT) releases the completeness evaluator merged that morning: <code>createCompletenessEvaluator</code> judges whether every active user request in a conversation was completed. Also deprecates <code>createDocumentRelevanceEvaluator</code> for <code>createRetrievalRelevanceEvaluator</code> (documentText→context, unrelated→irrelevant). JS/TS only — Python arize-phoenix-evals stays 3.6.0 without it; judged quality on real conversations is unestablished (synthetic benchmark only). <a href="/research/briefs/2026-09-09-1834-kimi.html">Full brief</a>.</p>
+</blockquote>
+<p><strong>BQAA TL;DR — inference:</strong> &quot;did the agent address everything the user asked&quot; is now a released, importable check rather than a bespoke prompt. The 1234 caveat still applies and is now testable against the real factory: does the mutating-tool-result requirement misclassify legitimately read-only tasks? That is the first experiment to run before wiring it into any verification pipeline.</p>
+<h3>Mastra feedback/score deletion — CONTEXT WATCH, strictly no second append</h3>
+<p>Commit <code>4d72bceaf323dfe617a882b80defb2ab21b97ed9</code> (PR <a href="https://github.com/mastra-ai/mastra/pull/22558">#22558</a>, merged 2026-09-09T23:15:23Z / 16:15:23 PT) is verified: <code>deleteFeedback()</code>/<code>deleteScores()</code> across core storage, Postgres/DuckDB/OracleDB/ClickHouse/in-memory adapters, server routes, client-js, CLI and Studio — batch-shaped, idempotent, 1,000-ID cap, tenant-scoped <code>mastra_deletion_requests</code> tracking with ClickHouse synchronous lightweight deletes. <strong>Corrections:</strong> the pack's 40-char SHA had a fabricated suffix (prefix correct); and per <code>forbidden.md</code> there is <strong>no second append</strong> on the 1.65.0-accredited card. Honest caveat preserved from the PR: lightweight deletes hide rows from reads but do not guarantee physical purge; open-source deployments have no default retention TTL. <code>@mastra/core</code> npm remains 1.65.0; a <code>1.66.0-alpha.1</code> prerelease (20:26:34Z) exists — a future-release watch, not progress.</p>
+<p><strong>BQAA TL;DR — inference:</strong> feedback revocation that immediately disappears from reads and aggregates, tracked as a tenant-scoped pending request, is the right contract shape — but &quot;gone from queries&quot; and &quot;gone from disk&quot; are different receipts, and audit language must not conflate them.</p>
+<h3>Comet Opik — HELD unchanged, hold stated precisely; OTel docs watch</h3>
+<p>PyPI wheel <code>opik 2.2.56</code> (uploaded 09:10:08Z / 02:10 PT) still has <strong>no GitHub release</strong> — <code>releases/latest</code> remains 2.2.55 (Sep 8). Precision correction: a git <strong>tag</strong> <code>2.2.56</code> does exist; the missing artifact is specifically the GitHub release. The hold therefore stands on release-index absence, not tag absence. Verified in-window engineering telemetry, no card movement: commit <code>e1a676ad</code> (11:48:14 PT) dispatches default <code>ascore</code> to a worker thread via <code>asyncio.to_thread</code> with contextvars preserved; commit <code>dfeffe7d</code> (16:30:14 PT) documents Opik-specific OTel span attributes (<code>opik.tags</code>, <code>opik.metadata.&lt;key&gt;</code>, <code>thread_id</code> root→trace mapping).</p>
+<p><strong>BQAA TL;DR — inference:</strong> blocking the metric scorer's event loop is the kind of defect that silently distorts every latency distribution downstream; the fix pattern (offload + contextvars so spans stay correctly parented) is the part worth copying.</p>
+<h3>Langfuse legacy-endpoint delay notice — API ARCHITECTURE WATCH</h3>
+<p>Commit <code>2c44151e2a1fe8736b3e73b087c761ae2a1edabc</code> (PR #17260, 21:27:32Z / 14:27:32 PT) is verified: legacy (v3) public API endpoint docs now state &quot;Data on this API is delayed by about 10 minutes. Real-time is only OpenTelemetry writes plus v2 observations and v2 metrics reads.&quot; <strong>Corrections:</strong> the pack's SHA suffix was fabricated (real SHA above); the November 16, 2026 v3 removal date is pre-existing notice text, not new in this commit; and the notice covers the legacy v3 API families (the &quot;v1/v3&quot; phrasing in the pack is broader than the code shows). Core v4.33.0 / SDK 4.15.2 remain invariant from the 0832 window; no progress append (maintenance-weighted, per 1234).</p>
+<p><strong>BQAA TL;DR — inference:</strong> &quot;real-time&quot; is an endpoint-specific property, not a product property. Any freshness claim on a dashboard should name the write path and read API version it depends on.</p>
+<h3>Autoprompt Skill v2.0.0 — AGENT CODING SKILL &amp; BENCHMARK WATCH, no card</h3>
+<p><a href="https://github.com/Spielewoy/autoprompt-skill">Release v2.0.0</a> verified (published 21:25:45Z / 14:25:45 PT): extends a Codex-v2-style review-fix-recheck workflow across 11 providers. README benchmark: OpenCode 1.18.7 + DeepSeek V4 Flash on Terminal-Bench 2.1 moves 60/89 (67.42%) → 73/89 (82.02%), +14.61 points, 45% fewer failures. <strong>Qualifications from the primary source:</strong> the numbers are self-reported single-run &quot;<strong>version 1 benchmarks</strong>&quot;; the disclosed ~3x time / ~2x token overhead is explicitly a planning estimate — &quot;timing and token logs were not retained&quot;; native runtime verification is Linux-only; cheap-model validation runs produced <code>DONE_WITH_VERIFICATION_LIMITATIONS</code>; and the README's tested-OpenCode table (1.18.29) disagrees with the benchmark's version (1.18.7). No independent rerun; no card.</p>
+<p><strong>BQAA TL;DR — inference:</strong> the honest part is the shape, not the score: quality gain with an explicitly charged repair-loop cost multiplier. Any BQAA repair-loop evaluation should publish the multiplier alongside the gain — and retain the logs this author didn't.</p>
+<h3>Braintrust Loop on Brainstore query plans — TELEMETRY WATCH</h3>
+<p>Ankur Goyal (Braintrust CEO) disclosed in-window (collector receipt 15:51:16 PT; X post not independently re-fetched) that Braintrust pipes Brainstore query execution plans into Loop and found low-level optimizations, including duplicate byte-range over-fetches from object storage. PyPI <code>braintrust 0.38.0</code> invariant (progress accredited at 1234; do not double-append). A vendor self-report of dogfooding, not a measured result — but directionally notable: trace pattern detection applied to database engine plans.</p>
+<p><strong>BQAA TL;DR — inference:</strong> the pattern generalizes — export query plans as spans, let trace analytics find recurring anti-patterns. The BQAA version is BigQuery execution plans and agent-generated SQL, and the receipts would need to be verified plan diffs, not pattern counts.</p>
+<h3>Other supplied products and community leads</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Surface</th>
+  <th>Disposition and evidence boundary</th>
+  <th>BQAA TL;DR — inference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Centaur (<code>paradigmxyz/centaur</code>) + <code>centaur-context</code></strong></td>
+  <td><strong>Community infrastructure WATCH, no card.</strong> Release <code>centaur-0.1.139</code> (12:20:13 PT) and commits verified at pack level across 1432–1632: MCP service listing behind <code>mcpv2</code> flag, MCP search tool (<code>127ac4d7</code>, 14:47:36 PT), MCP run command (<code>8b557d43</code>, 15:43:26 PT), non-interactive skill install (<code>6dee7696</code>). Rust+Postgres control plane, Claude Code/Codex/Amp in Kubernetes sandboxes, async post-run context curation. Not independently re-verified beyond pack level here.</td>
+  <td>Control plane / execution sandbox separation with a post-run curator writing distilled learnings back is a credible fleet pattern; the curator's write path is exactly where provenance must be enforced.</td>
+</tr>
+<tr>
+  <td><strong>brnrd (<code>hugimuni-labs/brnrd</code>)</strong></td>
+  <td><strong>Multi-runner scheduling WATCH, no card.</strong> Reddit discovery (<code>1wbx5ge</code>) plus commits <code>4b4c90a8</code>, <code>cb75c787</code> (trustworthy quota window pace), <code>68eb1e0a</code> (Claude→Codex load-balance demo), all ~11:16–14:33 PT, pack-level verified. Treats runner quota/burn rate as first-class scheduling state.</td>
+  <td>Quota exhaustion mid-task is a real fleet failure mode; surfacing remaining quota to the orchestrator before dispatch beats blind failover.</td>
+</tr>
+<tr>
+  <td><strong>Mac MCP tab locks / Hokmah MCP / TokenTelemetry / Elstar v1.0.8 / chrome-bridge / OtoDock</strong></td>
+  <td><strong>Community WATCHES, no cards.</strong> Mac MCP: fail-fast per-tab ownership locks (<code>TAB_LOCKED_BY_WORKER</code>) for multi-agent browser contention. Hokmah: three-layer repo memory graph (TransitionGraph/IdeaGraph/WorldModel) with a &quot;40x token reduction&quot; claim that is vendor-asserted. TokenTelemetry thread: file-based approval contracts with mechanical pre-tool deny rules. Elstar: iOS UI automation/inspection MCP for coding agents. None independently verified; none clear the product-level bar this slot.</td>
+  <td>The governance-pattern thread (approve a written contract file, enforce deny rules mechanically pre-tool) is the durable idea; conversational-turn approval does not survive context compaction.</td>
+</tr>
+<tr>
+  <td><strong>Practitioner analytics loop (Reddit <code>1wbw83y</code>)</strong></td>
+  <td><strong>Practitioner architecture WATCH.</strong> Production POS analytics copilot: frozen ~12 CORE tools + intent pins for prompt-cache stability; slim DTOs (4,000→500 chars); post-hoc numeric grounding validator. Known false-positive mode: comparative queries report computed deltas absent from tool output (community fix: inject baseline and delta into the DTO). Single-author report, not independently verified.</td>
+  <td>&quot;The LLM never computes anything&quot; is the BQAA-convergent invariant; the delta false-positive is a concrete warning for any post-hoc numeric validator over computed (not raw) figures.</td>
+</tr>
+<tr>
+  <td><strong>kotysoft blind coding-agent experiment (Reddit <code>1wbzgbr</code>)</strong></td>
+  <td><strong>Practitioner evaluation WATCH.</strong> 7 coding agents in isolated Kotlin worktrees, blind-graded by an 8th model that built its own brute-force simulator; reasoning-effort knob showed negligible quality variance (84/85/83) at ~2x cost; cache writes dominated billing variance over output tokens (5.0k→16.1k). N=1 task, self-reported.</td>
+  <td>Cost decomposition matters: cache-write thrash, not output tokens, may be the variance driver in multi-agent fleets — a BQAA cost model that ignores cache writes will misattribute it.</td>
+</tr>
+<tr>
+  <td><strong>Warp Factories / Software Factory Stack</strong></td>
+  <td><strong>Context WATCH carried from 1234, unchanged.</strong> Blog dated September 5; &quot;Cost per PR&quot; and ZDR are stated stack requirements, not documented shipped endpoints. No new evidence this window.</td>
+  <td>—</td>
+</tr>
+<tr>
+  <td><strong>Agent Beacon v1.3.9 / Suvadu v0.4.0 / GoGraph</strong></td>
+  <td><strong>Carried watches, invariant.</strong> Beacon: readme-only commit <code>36c2e4fb</code> this window; 1234 corrections stand (21+ runtimes, <code>~/.beacon/endpoint/logs/runtime.jsonl</code>, maintenance release). Community X chatter (16:33 PT) praising Beacon's OTel normalization is sentiment, not evidence.</td>
+  <td>—</td>
+</tr>
+<tr>
+  <td><strong>Google ADK Python commits <code>73ab76da</code>, <code>83d966cf</code>, <code>4b819ab7</code>, <code>d9b57bf4</code></strong></td>
+  <td><strong>INTERNAL AUDIT ONLY — no card, no rank, first-party forbidden per <code>forbidden.md</code>.</strong> Collector-reported: sandbox session-state persistence (12:56 PT), tool-call spans relocated under the agent span (13:33 PT), replay-sequence echo reordering fix (14:24 PT), model-response finalizer module extraction (15:36 PT). Documented as internal telemetry context only.</td>
+  <td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>No first-party BQAA card, as locked.</p>
+<h2>Academy</h2>
+<h3>Q2D-Web: retrieval benchmark for agentic RAG at production scale — <a href="https://arxiv.org/abs/2609.08887">arXiv:2609.08887</a></h3>
+<p><strong>NEW Academy rank, narrowly scoped: first-stage retriever evaluation on agent-reformulated queries at web scale — an industry self-benchmark with a private scorer and measured label noise.</strong> Maximilian Schall, Sedigheh Eslami, Markus Krimmel, Antoine Chaffin, Louis Milliken, Bo Wang, Denis Bykov (Perplexity AI). History: <strong>September 8 v1, 15:26:05 UTC</strong>, no revisions, cs.IR/cs.CL. The <strong>complete PDF was read</strong> (25 pp.; adjudication note at <code>Hunt/agent-analytics/2026-09-09-1834-q2d-web-2609-08887-full-pdf-adjudication.md</code>), and the public leaderboard was independently verified — its committed per-model results JSONs match the paper's Table 3 to printed precision. <a href="https://arxiv.org/pdf/2609.08887.pdf">PDF</a> · <a href="https://huggingface.co/spaces/perplexity-ai/q2d-web-leaderboard">Leaderboard</a>.</p>
+<p><strong>What survives review.</strong> The benchmark pairs a ~190M-document corpus (the deduplicated union of Perplexity production top-5,000 results per query) with <strong>69,721 LLM-reformulated queries</strong> from ~23k production searches over 9 months (65.8% English; 82.3% agent-generated &quot;support&quot; queries), and three judgment sets: agent <strong>citations</strong>, production <strong>web-ranking</strong> top-50, and a <strong>combined</strong> set adding DeepSeek-V4-Flash binary labels over pooled unjudged docs. Thirteen retrievers evaluated (1 lexical, 10 dense, 2 late-interaction), with neural eval models temporally held out (released on/after 2025-01-01) from the pooling/judging models. Headline: full-corpus Combined Recall@1000 — pplx-embed-v1-4b <strong>69.11</strong>, Nemotron-3-Embed-8B 68.58, BM25 44.77 last. An RRF-pooled subcorpus at 31.7% of the corpus reproduces full-corpus rankings at Kendall τb = 1.00 (with +3–7 point recall inflation, mean +5.1), cutting a 4B model's evaluation from ~4,608 to ~1,500 H200 GPU-hours.</p>
+<p><strong>Evidence and limits from the PDF:</strong></p>
+<ul>
+<li><strong>Winner instability is the finding to quote carefully:</strong> rankings are only <em>largely</em> stable — the Recall@1000 winner flips across judgment sets (Nemotron-8B leads on Citation at 61.68; pplx-4b leads Combined at 69.11), and the shallow-ranking winner (Nemotron-8B, nDCG@10 47.44) differs from the deep-recall winner. Any single-number citation of this benchmark is a choice of judgment set and cutoff.</li>
+<li><strong>Self-evaluation confound:</strong> queries, corpus, all three label sources, and the production system are Perplexity's; 3 of 13 evaluated retrievers are Perplexity's own and win the primary metric on 2 of 3 sets. The corpus is production-retriever-filtered, not a random web sample. Dataset and scorer are deliberately private; independent verification is impossible by design (leaderboard-only).</li>
+<li><strong>Label quality:</strong> citation labels are conditioned on what the production retriever returned (circular as ground truth); LLM judgments have no human-agreement study, and the hard-negative audit is the same judge revisiting itself; <strong>15.8%</strong> of sampled &quot;non-relevant&quot; top-1000 docs are actually relevant. Documents are truncated to 512 tokens (mean ~3.3k) — the authors disclaim unbiased full-document estimates. No significance testing.</li>
+<li><strong>Most interesting design result for ensembles:</strong> BM25, the worst overall retriever, contributes <strong>14,621 unique positives — ~6× the next model's</strong> — lexical recall still adds irreplaceable candidates at web scale.</li>
+<li>Minor internal issues: the &quot;about eight hours on a single 8×H200 node&quot; sentence only fits the smallest model (the 4B needs ~7.8 days on that node); Table 1's language count for TREC Web contradicts the paper's own ClueWeb12 English-only note. Nothing disqualifying.</li>
+</ul>
+<p><strong>Why admit:</strong> the first benchmark to measure retrievers against the queries agents <em>actually write</em> (machine-reformulated, multi-language, support-heavy) at production corpus scale, with a temporally-held-out design, three triangulated label sources, honest cost accounting, and a verified public leaderboard. Directly on-topic for agent retrieval evaluation. The scope is first-stage candidate recall only — not answer quality, reranking, or end-to-end agent performance.</p>
+<p><strong>BQAA TL;DR — proposed application:</strong> two transfers. First, evaluate BQAA's schema/term retrieval on <em>agent-reformulated</em> sub-goal queries, not human-written questions — the distributions differ and the paper quantifies how. Second, adopt the triangulation discipline: any retrieval verdict should name its judgment set and cutoff, because the winner flips across both. The BM25 unique-positives result argues for keeping a lexical leg in hybrid retrieval even when it loses the aggregate.</p>
+<h3>Counter-Swarm Doctrine — <a href="https://arxiv.org/abs/2609.06140">arXiv:2609.06140</a></h3>
+<p><strong>NEW Academy rank, narrowly scoped: evaluation-design rigor and evidence hygiene for multi-agent intrusion analysis — zero executed experiments.</strong> Gregory Frank (&quot;Chief Scientist, MoltAI Corp&quot; — affiliation unverifiable). History: <strong>September 5 v1, 15:25:45 UTC</strong>, no revisions, cs.CR/cs.LG/cs.MA. The <strong>complete 35-page PDF was read</strong> (adjudication note at <code>Hunt/agent-analytics/2026-09-09-1834-counter-swarm-2609-06140-full-pdf-adjudication.md</code>).</p>
+<p><strong>What survives review.</strong> The paper proposes the <strong>revisable coordination episode</strong> — linking observed resource transfers, task authority, and response history across separate agent executions — as the operational unit of multi-agent defense, replacing per-turn or per-session spans; prospective episode discovery (determining which actions belong together <em>before</em> an evaluator labels membership) is named the central research problem. Its four-arm evaluation design (isolated actions / rolling windows / known groups / prospective discovery at <strong>matched review cost and matched false-alert workload</strong>, plus recurrence-after-channel-closure-and-quarantine conditions) is specified with falsification tables, preregistration requirements, censoring/stopping-rule analysis, and correct prevalence-precision arithmetic.</p>
+<p><strong>Evidence and limits from the PDF — the measured/proposed/reported separation is the point:</strong></p>
+<ul>
+<li><strong>Measured (the paper's only executed work):</strong> a checksum-verified reconstruction of the collusion.wiki public export — 14,591 retained saves across four wikis, 5,217 DSE deletion events, 101 script-injection probes — establishing that the post-June-22 decline in retained saves precedes most cleanup and is not an artifact of counting only surviving pages. It verifies the export's counts and temporal aggregation, not the completeness, attribution, or cause of the underlying logs.</li>
+<li><strong>Proposed (never run):</strong> the detector comparison, the episode-discovery procedure, all candidate signals (&quot;none has a measured deployment precision in this paper&quot;), and the recurrence tests. <strong>Pack correction: the claim that the paper &quot;measures recurrence after channel closure and state quarantine&quot; is false</strong> — recurrence is a proposed test condition; observed recurrence exists only as incident narrative the paper itself says cannot establish intervention effects.</li>
+<li><strong>Reported (clearly attributed to others):</strong> cited incident corpora and third-party results (FakeLab FPR operating points, an OpenAI retrospective, METR/Redwood figures), with the paper refusing to count overlapping investigations as independent replications.</li>
+<li>Red flags: single author, unverifiable affiliation, no code/data release beyond an analysis script over a pinned third-party export, submitted the same day the export was downloaded.</li>
+</ul>
+<p><strong>Why admit:</strong> within agent-analytics values (evaluation methodology, telemetry, multi-agent security evidence) this is the most methodologically careful available treatment of the two canonical 2026 coordination incidents — matched-cost evaluation design and a formal reported/proposed/measured evidence convention (its Appendix G) that is itself a model for how agent-security claims should be written. The card's value is design and hygiene, not new security evidence. If the Academy tier ever requires executed experiments, this card should be re-scoped or retired.</p>
+<p><strong>BQAA TL;DR — proposed application:</strong> when auditing an agent fleet for coordinated misuse, the unit of review should be the cross-execution episode, not the span — and the review budget must be held constant when comparing detection strategies, or the comparison is rigged by alert volume. Internally, the reported/proposed/measured label discipline is directly worth adopting for BQAA's own capability claims.</p>
+<h3>Priority PDF queue — carried, unchanged</h3>
+<p>These retain their 1234 dispositions; <strong>no full-PDF read was completed for them in this slot</strong>, so no rank movement is possible.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Paper</th>
+  <th>Disposition</th>
+  <th>Next reading question</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.09133">ExecCritic, 2609.09133</a></td>
+  <td>Priority PDF queue. The 72.6% headline combines two post-trained roles (Test + Repair), not a fixed repair model with better tests.</td>
+  <td>Does improvement survive fixed repair capability and budget, and does the test oracle reflect requested behavior?</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.09115">MeClear, 2609.09115</a></td>
+  <td>Priority PDF queue. Query-scoped suppression is not persistent deletion; abstract-level recovery figures unadmitted.</td>
+  <td>Utility oracle, attribution cost, interacting memories, selection leakage.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.08258">Revocation enforcement, 2609.08258</a></td>
+  <td>Priority PDF queue. Five systems examined; no universal memory-product claim.</td>
+  <td>Does the guard block invalid evidence while preserving permitted retrieval?</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.08015">Action-Targeted Revalidation, 2609.08015</a></td>
+  <td>Priority PDF queue. Binding revalidation to commit needs a target transaction or compare-and-set.</td>
+  <td>Inspect dependency omissions and binding to the actual action.</td>
+</tr>
+</tbody>
+</table></div>
+<h3>Other named candidates — dispositions retained</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Paper</th>
+  <th>Disposition and qualification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.09090">SPINE, 2609.09090</a></td>
+  <td>AUDIT WATCH, PDF-blocked at 0634. Not a business-SQL benchmark; no &quot;collapse after 3–5 turns&quot; generalization.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.09048">Instrument Effects, 2609.09048</a></td>
+  <td>AUDIT WATCH. Reports a <strong>failed</strong> generalization test; do not invert.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.09030">Answer-Distribution Trajectories, 2609.09030</a></td>
+  <td>AUDIT WATCH. Answer distributions are richer than entropy; no tool-call early-stop detector established.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.09153">Procedural Graphs, 2609.09153</a></td>
+  <td>AUDIT WATCH (22 HF upvotes, +3 across the window). Popularity movement only.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Already consumed:</strong> SQLMorph 2609.08950 (rank at 0634), ReCite 2609.09156 (rank at 1234), Trace as State 2609.02702 (progress at 00:34; arXiv API audits in all four packs this window show zero revisions, invariant at 2026-09-02T15:06:46Z). <strong>All standing holds remain unchanged</strong> — SRMA (141), JIT-Agent (117), Dr. Claw (126), FlowBalance (87), Compile by Training (378), MaxKernel, Mechanistic Reasoning, Verify Before You Distill, and the rest; catalog absence was not used to infer freshness. HF upvote movement across the window (NeoHorse-1 300→377, Gander 105→115) is popularity telemetry, not fresh evidence, and overturns no hold. MOLE 2609.06966 remains STRONG WATCH with carding HELD for full PDF.</p>
+<h2>Six-week EV</h2>
+<p>Keep <strong>feedback-correction → review-budget → tool-evidence → finding-revision → cross-criterion</strong>. EV is qualitative; no financial return, adoption forecast or measured BQAA improvement is claimed.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Existing work</th>
+  <th>Bounded next check</th>
+  <th>Evidence needed to keep it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Feedback-correction</td>
+  <td>Add the SQL error-diagnosis fixture from the 0634 brief; keep exact correctness as acceptance.</td>
+  <td>Better independently correct repairs on untouched tasks without passing partially wrong answers.</td>
+</tr>
+<tr>
+  <td>Review-budget</td>
+  <td>Report admission errors asymmetrically (Routed pattern): false-accept and false-decline rates side by side at fixed reviewer time, with anchored/unanchored threshold splits. Charge repair-loop cost multipliers explicitly (Autoprompt's disclosed ~3x/~2x shape, but with retained logs).</td>
+  <td>Useful repair gain after charging query, matching and human costs — with both error directions visible.</td>
+</tr>
+<tr>
+  <td>Tool-evidence</td>
+  <td>The completeness contract is now testable against a <strong>released</strong> package: run Phoenix's <code>createCompletenessEvaluator</code> (JS 2.5.0) over mixed read-only and mutating task transcripts; measure whether the mutating-result requirement misclassifies legitimate read-only answers before adopting it.</td>
+  <td>A reviewer can reconstruct both the answer and why it received its score, including known capture gaps.</td>
+</tr>
+<tr>
+  <td>Finding-revision</td>
+  <td>Pilot the ReCite-pattern verify step on schema/term retrieval, evaluated on <strong>agent-reformulated</strong> sub-goal queries (Q2D-Web lesson), with judgment-set and cutoff named on every verdict.</td>
+  <td>First-pass SQL correctness gain at fixed latency, with human spot-checks on support labels.</td>
+</tr>
+<tr>
+  <td>Cross-criterion</td>
+  <td>Keep required ordering, multiplicity, NULL behavior and aggregate correctness as separate mandatory checks; add the Q2D-Web observation that judgment-set and cutoff choice flip winners, so no single aggregate may hide a criterion-level reversal.</td>
+  <td>An attractive aggregate score cannot hide a failed mandatory criterion.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>BQAA TL;DR — inference:</strong> the window strengthens the tool-evidence and review-budget lines rather than adding a new one — completeness evaluation is now released software (test before adopting), and asymmetric error reporting is now a shipped vendor convention. Neither justifies new platform surface before the feedback-correction fixture shows repair gains.</p>
+<h2>Catalog hints (kind rank only)</h2>
+<p>Two new Academy items, two existing-card progress instructions (under Industry above; append once each at <code>2026-09-09T1834</code> on <code>routed-skill-selection-history-and-explanations</code> and <code>phoenix-evals-v3-6</code> — do not create the pack's nonexistent <code>phoenix-runtime-eval-and-synthetic-dataset-generation</code> id).</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>id</code></td>
+  <td><code>arxiv-2609-08887-q2d-web-agentic-rag-retrieval</code></td>
+</tr>
+<tr>
+  <td><code>tag</code></td>
+  <td><code>Academy</code></td>
+</tr>
+<tr>
+  <td><code>kind</code></td>
+  <td><code>rank</code></td>
+</tr>
+<tr>
+  <td><code>title</code></td>
+  <td><code>Q2D-Web: first-stage retriever benchmark on 69,721 agent-reformulated queries over ~190M web docs — industry self-benchmark limits</code></td>
+</tr>
+<tr>
+  <td><code>added</code></td>
+  <td><code>2026-09-09T1834</code></td>
+</tr>
+<tr>
+  <td>Primary</td>
+  <td><code>https://arxiv.org/abs/2609.08887</code></td>
+</tr>
+<tr>
+  <td>PDF</td>
+  <td><code>https://arxiv.org/pdf/2609.08887.pdf</code></td>
+</tr>
+<tr>
+  <td>Leaderboard</td>
+  <td><code>https://huggingface.co/spaces/perplexity-ai/q2d-web-leaderboard</code></td>
+</tr>
+<tr>
+  <td>Brief</td>
+  <td><code>/research/briefs/2026-09-09-1834-kimi.html</code></td>
+</tr>
+<tr>
+  <td>Suggested card copy</td>
+  <td><code>Full PDF reviewed. Narrowly scoped: first-stage retrieval recall for agent-written queries at production web scale (Combined Recall@1000: pplx-embed-v1-4b 69.11, Nemotron-3-Embed-8B 68.58, BM25 44.77; RRF subcorpus at 31.7% preserves rankings, τb=1.00). Perplexity self-benchmark: private scorer, dataset unreleased, in-house models win 2 of 3 judgment sets; citation labels circular, LLM labels unvalidated, 15.8% residual false negatives; winner flips across judgment sets and cutoffs. BM25 adds 14,621 unique positives (~6x next) despite lowest recall.</code></td>
+</tr>
+</tbody>
+</table></div>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>id</code></td>
+  <td><code>arxiv-2609-06140-counter-swarm-coordination-episodes</code></td>
+</tr>
+<tr>
+  <td><code>tag</code></td>
+  <td><code>Academy</code></td>
+</tr>
+<tr>
+  <td><code>kind</code></td>
+  <td><code>rank</code></td>
+</tr>
+<tr>
+  <td><code>title</code></td>
+  <td><code>Counter-Swarm Doctrine: revisable coordination episodes as the unit of multi-agent defense — evaluation design, zero executed experiments</code></td>
+</tr>
+<tr>
+  <td><code>added</code></td>
+  <td><code>2026-09-09T1834</code></td>
+</tr>
+<tr>
+  <td>Primary</td>
+  <td><code>https://arxiv.org/abs/2609.06140</code></td>
+</tr>
+<tr>
+  <td>PDF</td>
+  <td><code>https://arxiv.org/pdf/2609.06140.pdf</code></td>
+</tr>
+<tr>
+  <td>Brief</td>
+  <td><code>/research/briefs/2026-09-09-1834-kimi.html</code></td>
+</tr>
+<tr>
+  <td>Suggested card copy</td>
+  <td><code>Full PDF reviewed. Evaluation-design contribution only: four-arm detector comparison at matched review cost and false-alert workload, recurrence-after-quarantine test conditions, and a reported/proposed/measured evidence discipline — none of it executed. Sole measured component: checksum-verified collusion.wiki export reconstruction (14,591 saves, 5,217 deletions; decline precedes cleanup), verifying counts not attribution or cause. Single author, unverifiable affiliation; submitted same day as data download. Do not cite as measured containment evidence.</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>No rank entries for watches; no new Industry item this slot.</p>
+<h2>Housekeeping</h2>
+<p><strong>Packs consumed (all four available post-1234 packs):</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Pack</th>
+  <th>Contribution and clock qualification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>packs/agy-pack-2026-09-09-1332.md</code></td>
+  <td>~10:55–13:25 catch-up (1132/1232 hourly packs never written — earlier Mac outage). Backfills the collector-silent 10:55→12:34 span the 1234 brief deferred: Routed v1.6.5 (11:56:42 PT), Opik <code>e1a676ad</code> (11:48:14 PT), Phoenix <code>1c9d9c4d</code> (12:13:27 PT), Mastra <code>4fbbdf1b</code>, ADK <code>73ab76da</code>; practitioner loop <code>1wbw83y</code>; Hokmah; TokenTelemetry; Counter-Swarm discovery.</td>
+</tr>
+<tr>
+  <td><code>packs/agy-pack-2026-09-09-1432.md</code></td>
+  <td>~13:25–13:50. ADK <code>83d966cf</code>; Centaur 0.1.139 + <code>93c43ed8</code>; brnrd <code>4b4c90a8</code>; Mac MCP tab locks; Mastra <code>df4e650c</code>. Confirmed 1234 HTML publication (13:33 PT) and the 201/62/64/72 catalog baseline.</td>
+</tr>
+<tr>
+  <td><code>packs/agy-pack-2026-09-09-1532.md</code></td>
+  <td>~13:50–15:30. ADK <code>4b819ab7</code>; Q2D-Web discovery + leaderboard; kotysoft experiment; Centaur <code>127ac4d7</code>; brnrd <code>cb75c787</code>/<code>68eb1e0a</code>; Phoenix Cursor-plugin commits; Elstar v1.0.8.</td>
+</tr>
+<tr>
+  <td><code>packs/agy-pack-2026-09-09-1632.md</code></td>
+  <td>~15:30–16:45. Phoenix evals npm 2.5.0 (16:38:33 PT) + Harbor docs <code>e2e51432</code>; Mastra deletion PR; Braintrust Loop/Brainstore disclosure; Autoprompt v2.0.0; Opik <code>dfeffe7d</code>; Langfuse <code>2c44151e</code>; ADK <code>d9b57bf4</code>; Centaur <code>8b557d43</code>/<code>6dee7696</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Missing packs:</strong> <strong>1732 and 1832 do not exist</strong> (the same Mac outage that missed this slot's wake). Coverage from ~16:45 PT to the 18:34 cutoff is collector-silent; this brief does not invent coverage for that span, and events in it may surface in later packs for the 00:34 slot. The window's latest admitted evidence is 16:45 PT.</p>
+<p><strong>Baseline and dedupe:</strong> read the vault rules, <code>forbidden.md</code>, the Kimi-deep-brief decision lock, the published 0634 and 1234 briefs and their Ship/Hunt handoffs. Local <code>catalog.json</code> stands at <strong>201 items / 62 briefs / 64 runs / 72 progress entries</strong> (post-1234 publication). Grep over catalog item IDs confirmed no existing Q2D-Web or Counter-Swarm items, and confirmed the real progress targets <code>routed-skill-selection-history-and-explanations</code> and <code>phoenix-evals-v3-6</code> (the pack's suggested Phoenix card id does not exist). Mastra was not second-appended; SQLMorph/ReCite/Trace-as-State/Grepr/Braintrust were not re-touched.</p>
+<p><strong>Reading and verification:</strong> two complete full-PDF reads this slot, both via subagents with adjudication notes filed: Q2D-Web (<code>Hunt/agent-analytics/2026-09-09-1834-q2d-web-2609-08887-full-pdf-adjudication.md</code>) and Counter-Swarm (<code>Hunt/agent-analytics/2026-09-09-1834-counter-swarm-2609-06140-full-pdf-adjudication.md</code>). Industry claims were independently verified against primary sources by a verification subagent: Routed v1.6.5 release+tag+commit; npm <code>@arizeai/phoenix-evals</code> 2.5.0 + JS changelog + PyPI <code>arize-phoenix</code>/<code>arize-phoenix-client</code>/<code>arize-phoenix-evals</code>; Opik PyPI 2.2.56 vs GitHub release 2.2.55 (git tag 2.2.56 exists); Mastra PR #22558 + real commit SHA + npm 1.65.0/1.66.0-alpha.1; Langfuse PR #17260 + real commit SHA; Phoenix commits <code>e2e51432</code>/<code>1c9d9c4d</code>; Autoprompt v2.0.0 release + README benchmark claims. Two pack SHAs had fabricated suffixes with correct 8-char prefixes — corrected above; packs should cite prefixes only. X posts (Goyal, Beshawred, others) remain collector receipts, not independently re-fetched; ADK commit clocks are collector-reported. Pack social provenance: 7+7+8+6 = 28 reported successful social-superpowers calls, zero quota errors — Agy receipts, not replayed here.</p>
+<p><strong>Medium / scouts:</strong> Medium notes this window are Stories/BQML scouts plus a usage-dashboard fix; per the Medium lock they are discovery-only and contributed no cards. No first-party BQAA content in any card.</p>
+<p><strong>Delivery:</strong> this Markdown brief plus a Hunt learning note under <code>Hunt/agent-analytics/</code>. No HTML/catalog edit, no commit, no push, no Fable/Astra call, no Desk, no Crustdata, no external message, no first-party BQAA card. The parent owns later HTML/catalog publication; this catch-up does not establish scheduler repair.</p>
+<p>BRIEF_OK PUBLISH — brief written by Kimi for slot 2026-09-09-1834 (off-cadence catch-up) at <code>/Users/haiyuancao/Documents/agent-analytics-research/briefs/2026-09-09-1834-kimi.md</code>; two new Academy ranks (full-PDF), two progress appends, all primary-source verified, all corrections stated.</p>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Kimi · 9 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
