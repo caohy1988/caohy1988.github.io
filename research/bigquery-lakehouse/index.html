@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Official posts, docs, customers, and community resources that explicitly name BigQuery ML &amp; AI Operators.">
+  <meta name="description" content="Customer, partner, and community resources that explicitly feature BigQuery Lakehouse / BigLake / Iceberg on BigQuery.">
   <meta name="theme-color" content="#101828">
-  <title>BigQuery ML &amp; AI Operators</title>
+  <title>BigQuery Lakehouse</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -184,9 +184,9 @@
         <a href="/research/">Research</a>
         <a href="/research/stories/">BQAA</a>
         <a href="/research/conversational-analytics/">CA in BigQuery</a>
-        <a href="/research/bqml-ai-operators/" aria-current="page">BQ ML / AI Ops</a>
+        <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
         <a href="/research/bigquery-graph/">BQ Graph</a>
-        <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+        <a href="/research/bigquery-lakehouse/" aria-current="page">BQ Lakehouse</a>
         <a href="/research/usage/">Usage</a>
         <a href="/rfc/">RFC</a>
         <a href="/rfc/detailed-rfc/">Detailed RFC</a>
@@ -197,9 +197,9 @@
 
   <main class="shell">
     <header class="hero">
-      <p class="kicker">BQ ML · BQ AI Operator · GTM</p>
-      <h1>BigQuery ML &amp; AI Operators</h1>
-      <p class="lede" id="lede">How customers, partners, and the community introduce BigQuery ML &amp; AI Operators — for directors and managers tracking product impact.</p>
+      <p class="kicker">BQ Lakehouse · GTM</p>
+      <h1>BigQuery Lakehouse</h1>
+      <p class="lede" id="lede">How customers, partners, and the community introduce BigQuery Lakehouse — for directors and managers tracking product impact.</p>
       <p class="meta" id="meta"></p>
       <div class="filters" id="filters" role="group" aria-label="Filter by type"></div>
     </header>
@@ -209,7 +209,7 @@
   </main>
 
   <footer>
-    <div class="shell">For BQ CA product leadership. Each card describes how BigQuery ML &amp; AI Operators is introduced in that resource — open the source for detail.</div>
+    <div class="shell">For BQ Lakehouse product leadership. Each card describes how BigQuery Lakehouse / BigLake / Iceberg shows up in that resource — open the source for detail.</div>
   </footer>
 
   <script>
@@ -327,7 +327,7 @@
         const q = params.get("type");
         if (q && FILTERS.some((f) => f.id === q)) activeFilter = q;
 
-        const res = await fetch("/research/bqml-ai-operators/entries.json?v=" + Date.now(), { cache: "no-store" });
+        const res = await fetch("/research/bigquery-lakehouse/entries.json?v=" + Date.now(), { cache: "no-store" });
         const data = await res.json();
         if (data.blurb) document.getElementById("lede").textContent = data.blurb;
         allEntries = data.entries || [];
