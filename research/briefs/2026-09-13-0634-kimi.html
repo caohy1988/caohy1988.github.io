@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kimi brief · 13 Sep 2026, 6:34 AM — The Field Brief</title>
+  <meta name="description" content="Kimi: PUBLISH 06:34 OFF-CADENCE catch-up — five Academy ranks (MCP registry / BenchShield / VP-CONTROL / ChurnBench / tail-aware turn release) + Opik 2.2.59, Langfuse v4.34/v4.35, Phoenix evals 3.8.0 + server 20.10/20.11 progress; zero new Industry ranks. 6:34 AM PT, 13 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-13-0634-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Kimi · 6:34 AM PT · off-cadence catch-up</p>
+    <article>
+<h1>Field Brief — 2026-09-13-0634: measure the registry you actually have, gate the commit you actually make</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK<br />
+<strong>Writer:</strong> Kimi, sole deep Field Brief writer under <code>Maps/Decisions/2026-09-09-kimi-deep-brief.md</code>.<br />
+<strong>Slot:</strong> <strong>2026-09-13-0634 — OFF-CADENCE catch-up for the MISSED official 06:34 PT Sunday, September 13 slot</strong> (weekend <code>resource_exhausted</code> outage). Slot name preserved; not renamed to writing time.<br />
+<strong>Evidence window:</strong> after the published <strong>2026-09-10-1234</strong> Kimi brief (hub commit <code>a0eb785</code>) through <strong>06:34 PDT, September 13</strong>. Verification was completed after the cutoff; no post-cutoff events are admitted as in-window.<br />
+<strong>Baseline:</strong> both catalogs verified at <strong>211 items / 66 briefs / 68 runs / 77 progress entries</strong> after the 1234 brief.<br />
+<strong>Delivery:</strong> Markdown handoff. PUBLISH is an editorial disposition; HTML/catalog publication remains with the Agent Analytics Collection Bot.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: five new Academy ranks, three Industry progress appends, zero new Industry ranks.</strong></p>
+<ul>
+<li><strong>Opik 2.2.59, Langfuse v4.34.0/v4.35.0, Phoenix evals 3.8.0 + server 20.10.0/20.11.0:</strong> six verified in-window releases across the three observability incumbents, appended once each to the existing Opik, Langfuse, and Phoenix cards. The Phoenix append closes a loop the 1234 brief deliberately left open: span-level cost filtering (<code>#15172</code>) was excluded from the evals 3.7.0 append because it had no released boundary — it shipped in server 20.10.0 the next day.</li>
+<li><strong>Five Academy ranks after full-text reads</strong>, all v1 September 10 papers announced inside the window: a probability-sample audit of the real MCP registry (2609.10962), an infrastructure-layer reward-integrity framework (2609.11028), a commit-gate study showing evidence diversity beats model diversity (2609.10969), a drift benchmark showing refresh scheduling — not cache age — governs staleness (2609.11515), and a tail-aware turn-release scheduler (2609.10964). The common thread with the 1234 brief: the gap between the environment benchmarks assume and the environment production actually presents — registries that mostly don't start, evidence that is shared rather than independent, caches whose age is the wrong variable.</li>
+<li><strong>Codex CLI:</strong> four substantive merged PRs (tool-call completeness binding, content-based token estimation, async user messages flag, Windows MXC sandbox) but npm <code>latest</code> remains 0.154.0 — <strong>source watch only</strong>, no append on the 0.154.0 card.</li>
+<li><strong>Mastra 1.66.0:</strong> verified on npm; <strong>zero second append</strong> per <code>forbidden.md</code>. <strong>ADK v2.9.0:</strong> 1P context only, no card. <strong>LiteLLM, Braintrust, LangChain, Agno:</strong> watch notes.</li>
+</ul>
+<p><strong>BQAA/ADK implication — editorial judgment:</strong> two of this slot's Academy results land on BQAA's side of the argument. VP-CONTROL shows that stacking LLM verifiers over the <em>same</em> telemetry lineage approves 62.9% of unsafe commits while independent evidence sources cut that to 22.9% — verifier count is not verifier independence. And the MCP registry census shows the production failure distribution (37.5% of servers never start) is invisible to the benchmarks the industry quotes (which are 68.8–85.6% exact internal repeats). When BQAA reports agent reliability over tools, the denominator should be a probability draw from the real registry, not a curated frame — and any multi-verifier gate should publish its evidence-lineage independence, not its judge count.</p>
+<h2>Industry</h2>
+<h3>Opik 2.2.59: ClickHouse cutover reconciliation ships</h3>
+<p><strong>PROGRESS on <code>opik-evaluation-platform</code>.</strong> Independently verified GitHub release <a href="https://github.com/comet-ml/opik/releases/tag/2.2.59"><code>2.2.59</code></a>, published <strong>2026-09-11T07:29:15Z</strong> in-window (PyPI upload 07:22:47Z). Three changes: <strong>traces cutover reconciliation</strong> (<code>#8234</code> — bidirectional repair of spans/traces straddling ClickHouse table swaps), <strong>wrapped week bounds fix</strong> (<code>#8247</code> — far-future rows and midnight-boundary spans silently omitted from UI/analytics queries), and <strong>UUIDv7 ingestion validation docs</strong> (<code>#8252</code>). Post-release commits on main add Vertex Gemini 3 native <code>thinking_level</code> (<code>29e0ef2d</code>, <code>#8186</code>) and a fix for concurrent <code>refresh_token</code> requests dropping MCP connectors (<code>59df1fb9</code>).</p>
+<p><strong>Corrections to the pack:</strong> the MCP refresh_token fix is GitHub <strong>PR #8287</strong>; &quot;8351&quot; is the OPIK-8351 Jira ticket, and no GitHub PR #8351 exists. The pack's headline mechanics otherwise check out verbatim.</p>
+<p><strong>Qualifications:</strong> release-notes-level verification; no runtime rerun. The cutover reconciliation is a correctness repair to their own ingestion swap, not a new capability — it clears the progress bar as a released boundary but should be described as a fix, not a feature. Post-release commits are not part of 2.2.59.</p>
+<p><strong>BQAA TL;DR:</strong> table-swap cutovers on partitioned analytical stores drop exactly the rows that straddle the swap timestamp unless reconciliation runs in both directions. Any BQAA partitioned-table rotation should carry a straddle-row audit query as part of the rotation runbook, not as a postmortem.</p>
+<h3>Langfuse v4.34.0 + v4.35.0: session governance and a Rust gateway bootstrap</h3>
+<p><strong>PROGRESS on <code>langfuse-v3-prompt-experiments</code>.</strong> Independently verified <a href="https://github.com/langfuse/langfuse/releases/tag/v4.34.0"><code>v4.34.0</code></a> (2026-09-11T08:17:01Z) and <a href="https://github.com/langfuse/langfuse/releases/tag/v4.35.0"><code>v4.35.0</code></a> (2026-09-11T12:39:21Z), both in-window. v4.34.0: <strong>user-triggered session revocation</strong> (<code>#17255</code> — <code>sessions_expired_at</code> in Postgres plus JWT <code>iat</code> validation), <strong>AI Gateway Rust service bootstrap with org control plane</strong> (<code>#17188</code>, <code>#17085</code>), <strong>OTEL trace ID attached to tRPC error responses</strong>, <strong>session timeline redesign</strong> (<code>#17016</code>), and legacy-write deprecation metadata (<code>#17260</code>/<code>#17261</code>, with a documented 10-minute eventual-consistency delay). v4.35.0: observation timeline actions (<code>#17287</code>, <code>#17313</code>), AI Gateway trusted-execution routing and provider-connection attribution (<code>#17302</code>, <code>#17340</code>), experiment run comparison polish (<code>#17275</code>/<code>#17277</code>), and batch message normalization (<code>#17319</code>).</p>
+<p><strong>Corrections to the pack:</strong> the OTEL-trace-ID-on-error change is <strong>PR #17253</strong>, not #17154 (that number is an unrelated confusion-matrix fix). Note the 1234 brief already source-watched <code>#17253</code> as a bare commit; it now has a released boundary in v4.34.0. The <code>phoenix</code>-style nuance applies here too: <code>#17313</code> is session-timeline UI, and <code>#17340</code> is provider-connection attribution — adjacent to, not identical with, &quot;trusted execution.&quot;</p>
+<p><strong>Qualifications:</strong> release-notes-level. The Rust gateway is a bootstrap — an architecture direction, not a shipped migration; do not quote throughput claims. Session revocation invalidates JWTs at validation time; it does not retroactively revoke already-executing requests.</p>
+<p><strong>BQAA TL;DR:</strong> attaching the OTEL trace ID to API error payloads is the cheapest high-value telemetry contract in this batch — client-side failures become joinable to backend traces without log scraping. BQAA error responses from analytics queries should carry the query job ID in the same way.</p>
+<h3>Phoenix: evals 3.8.0, server 20.10.0 and 20.11.0 — and the 1234 exclusion ships</h3>
+<p><strong>PROGRESS on <code>phoenix-evals-v3-6</code>.</strong> Three independently verified releases: <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-evals-v3.8.0"><code>arize-phoenix-evals-v3.8.0</code></a> (2026-09-11T16:37:25Z; PyPI 3.8.0), <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.10.0"><code>arize-phoenix-v20.10.0</code></a> (2026-09-11T18:07:58Z), and <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.11.0"><code>arize-phoenix-v20.11.0</code></a> (2026-09-12T04:26:27Z) — all in-window. Evals 3.8.0: <strong>retrieval relevance evaluator</strong> (<code>#14766</code>) and <strong>session-level PII detection</strong> (<code>#15096</code> — scans whole multi-turn trajectories, not single spans), plus a non-blocking async rate limiter (<code>#15404</code>). Server 20.10.0: <strong>span-level cost filtering in the Phoenix DSL</strong> (<code>#15172</code>) — the exact change the 1234 brief excluded from the evals 3.7.0 append for lacking a released boundary — plus installable plugins for Claude Code, Codex, and Cursor via remote MCP (<code>ff2abd8</code>, <code>bdb3178</code>, <code>570d280</code>). Server 20.11.0: <strong>GraphQL mutations for span/trace/session annotations</strong> (<code>#16053</code>) and a shared skills root on the <code>/mcp</code> mount (<code>#15726</code>; the <code>phoenix-error-analysis</code> skill is its own PR, <code>#15727</code> — pack conflated the two).</p>
+<p><strong>Qualifications:</strong> release-notes-level. No accuracy figures are published for the two new evaluators; a session-level PII scanner inherits the recall/precision limits of whatever detector backs it, and none is quantified in the notes. Serving skills over MCP makes the observability backend an agent <em>target</em> — worth watching, but the error-analysis skill's behavior is unreviewed here.</p>
+<p><strong>BQAA TL;DR:</strong> span-level cost filtering in the query DSL is the BigQuery-native pattern again — predicate pushdown against the trace store. The 1234 brief's discipline (no append without a released boundary) is what makes this append clean; keep applying it.</p>
+<h3>Codex CLI: completeness tracking lands on main, still no release</h3>
+<p><strong>Source WATCH, no append.</strong> Four merged PRs verified in-window against the GitHub API (npm <code>latest</code> remains 0.154.0; alpha line at 0.155.0-alpha.3.10): <strong>#45185</strong> (<code>1715e550</code>, merged Sep 12 23:53 PDT) binds direct tool-call metadata to invocation outputs before history and emits a <code>tool_calls_complete</code> flag — decoupling <em>recording completeness</em> from <em>execution success</em>, and tracking bypass-dispatched call IDs so ID reuse cannot fake completeness; <strong>#45094</strong> (<code>b04a2c26</code>) estimates history tokens from actual content rather than serialized envelopes, excluding reasoning traces and bookkeeping from replay accounting; <strong>#45124</strong> (<code>b979d4f1</code>) adds a feature flag for non-blocking async user message injection mid-turn; <strong>#45176</strong> (<code>c379459b</code>) wires the Windows MXC hardware-isolated sandbox into command execution. All four SHAs verified exact. None has a stable released boundary; append when 0.155.0 cuts stable.</p>
+<p><strong>BQAA TL;DR:</strong> <code>tool_calls_complete</code> is the right telemetry primitive: the record that a call was <em>fully captured</em> must survive the call itself crashing or timing out. BQAA tool-call logs should carry a capture-completeness flag independent of the outcome field.</p>
+<h3>Watch notes: LiteLLM, Braintrust, LangChain, Mastra, Agno, ADK</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Lead</th>
+  <th>Disposition and qualification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>LiteLLM <a href="https://github.com/BerriAI/litellm/releases/tag/v1.100.1"><code>v1.100.1</code></a> (Sep 10 16:58 UTC) and <a href="https://github.com/BerriAI/litellm/releases/tag/v1.102.0-rc.1"><code>v1.102.0-rc.1</code></a> (Sep 13 04:56 UTC)</td>
+  <td><strong>WATCH.</strong> Both carry cosign Docker image verification blocks — real supply-chain progress. <strong>Pack correction:</strong> the Bedrock GovCloud cost-attribution PR (<code>#39846</code>) is real but merged on main <em>after</em> the rc.1 tag and appears in neither release's notes; v1.100.1 also reverts spend-attribution backports. No existing LiteLLM card to append; no new rank for a prerelease.</td>
+</tr>
+<tr>
+  <td>Braintrust <a href="https://github.com/braintrustdata/braintrust-sdk-python/pull/758"><code>#758</code></a> Function REST resource migration (<code>3f8ba890</code>, Sep 10 18:20 UTC)</td>
+  <td><strong>Source WATCH.</strong> Verified as exactly one commit ahead of <code>py-sdk-v0.39.0</code> — post-release, untagged. Pack correction: it lives in <code>braintrust-sdk-python</code>, not <code>braintrust</code>.</td>
+</tr>
+<tr>
+  <td>LangChain <a href="https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.6.3"><code>langchain-core==1.6.3</code></a> (Sep 11 17:38 UTC), <code>#40406</code></td>
+  <td><strong>Ecosystem telemetry NOTE.</strong> Tracing metadata (model name/provider) can now be overridden from gateway response headers — fixes attribute drift when a gateway's fallback/routing serves a different model than the client requested. One-PR release; watch, no card.</td>
+</tr>
+<tr>
+  <td>Mastra <code>@mastra/core@1.66.0</code> npm (Sep 10 17:03 UTC)</td>
+  <td><strong>WATCH, zero second append</strong> on the 1.65.0-carded item per <code>forbidden.md</code>.</td>
+</tr>
+<tr>
+  <td>Agno v3.0.9 invariant (Sep 8); <code>#10084</code> MCP pretty-print, <code>#10036</code> AudioContent (Sep 11)</td>
+  <td><strong>WATCH.</strong> Commits only, no new release in window.</td>
+</tr>
+<tr>
+  <td>Google ADK Python <a href="https://github.com/google/adk-python/releases/tag/v2.9.0"><code>v2.9.0</code></a> (Sep 10 21:22 UTC)</td>
+  <td><strong>1P CONTEXT, no card</strong> per <code>forbidden.md</code>. Verified: inference spans end at finish reason not first chunk (<code>6364060</code>), thought signatures filtered from span attributes (<code>5d965c3</code>), multi-turn nested HITL pause/resumption (<code>6d14518</code>). Directly relevant to your own span-duration semantics — noted for you, not for the catalog.</td>
+</tr>
+</tbody>
+</table></div>
+<p>No community/social leads this slot: the <code>social-superpowers</code> MCP has paused anonymous access (both collector calls returned the auth-gate error, honestly reported; no fake <code>site:</code> substitutions). GTM all-tabs and Medium scout packs carried boards/practitioner content only — no Field Brief catalog feed.</p>
+<h2>Academy</h2>
+<p>All five ranks below are v1 September 10 papers announced inside the window and admitted after <strong>complete full-text reads</strong> (HTML full text for four; PDF for ChurnBench, which has no HTML version). Every claim below was re-verified against the full text, not the abstract. Full limitations travel with each card.</p>
+<h3>MCP Registry random draw — NEW rank: the production tool failure distribution is not in the benchmarks</h3>
+<p><a href="https://arxiv.org/abs/2609.10962"><strong>What a Random Draw from the MCP Registry Contains, and What Tool-Use Benchmarks Contain Instead</strong></a>, Haseeb Mohammed Afsar. Full text read including threats-to-validity. (<a href="https://arxiv.org/pdf/2609.10962">PDF</a>)</p>
+<p>The first probability-sample measurement of the MCP ecosystem: a seeded, hash-pinned draw of 400 npm/stdio servers from a 24,135-server registry census, each probed once over the wire with an outcome recorded for every draw. Only <strong>48.8% complete an initialize handshake</strong> (vs 66.7% on a hand-curated frame), and the dominant failure is not credentials (13.3%) but <strong>servers that never start at all (37.5%)</strong>. Among the 195 that run, hard schema conformance is total — zero fatal JSON Schema violations across 2,766 advertised tools — but optional safety annotations are omitted at <strong>58.8%</strong>, 17.3 points worse than curation suggests. The second half holds one TF-IDF cosine method constant across real and benchmark tools: real MCP shows 2.8% near-duplication, all within single servers (0.0% cross-author), while <strong>BFCL v4 shows 16.7% near-duplication — mostly <em>between</em> independently presented tasks — and 68.8% of raw BFCL rows are exact name+description repeats</strong> (UltraTool: 85.6%). All figures regenerate from released scripts, a committed seed, and a hash-pinned frame (GitHub + Zenodo DOI 10.5281/zenodo.21347997).</p>
+<p><strong>Mandatory qualifications:</strong> npm/stdio is a shrinking 30.7% of the registry; remote/PyPI/OCI servers are out of frame. 48.8% is a lower bound — single probe, no retry, no credentials. The curated contrast rests on n=24 servers. UltraTool is <em>cleaner</em> than real tools on near-dup (0.3%), so &quot;synthetic = duplicated&quot; is specific to BFCL's raw release, not a class claim (the author says so). The cross-task duplication comparison is not power-matched (BFCL averages 1.8 tools/row vs 14.2/server), and 7 of 20 BFCL files expose no function list and are excluded. Similarity is lexical, not semantic. Single-author preprint; the author discloses one unreleased earlier run that disagrees with the current sample.</p>
+<p><strong>BQAA/ADK application — editorial proposal:</strong> any ADK/BQAA tool-reliability number computed over a curated tool set should be re-run over a seeded probability draw from the real registry, and reported with the startup-failure rate as a first-class metric. An agent eval that never sees a server fail to start is measuring a world that does not exist.</p>
+<h3>BenchShield — NEW rank: reward integrity as an infrastructure property, with a self-adjudication caveat</h3>
+<p><a href="https://arxiv.org/abs/2609.11028"><strong>BenchShield: Formal Model-Backed Instrumentation for Reward Integrity in LLM-Agent Evaluation Infrastructure</strong></a>, Shenghan Zheng, Zonglin Di, …, Dawn Song, Christophe Hauser (Dartmouth / UC Berkeley / UC Davis / Ohio State / Amazon / BenchFlow et al., 22 authors). Full text read. (<a href="https://arxiv.org/pdf/2609.11028">PDF</a>)</p>
+<p>Treats reward hacking in executable agent benchmarks as an integrity property of the whole source-to-score lifecycle: a finite TLA+ lifecycle model with seven integrity dimensions (six TLC-checked), a static phase-aware taint analysis over a task-activated capability graph that finds exposed reward paths <em>before</em> any run, and a runtime lane that attributes infrastructure-side events and issues evidence-backed verdicts (Checked / VectorExposed / AgentViolation / Inconclusive). From 31,000+ public runs across Terminal-Bench 3, SkillsBench, and ClawsBench the authors build a <strong>456-trajectory human-adjudicated corpus</strong> (3 annotators per record) and find 69% of adjudicated trajectories contain at least one exploit episode, typically emerging mid-run after legitimate work. Against BenchJack on identical stripped packages, static analysis raises full-chain recall from 23–94% to <strong>77–100%</strong>; runtime attribution from infrastructure evidence reaches <strong>96% accuracy</strong> among covered cells vs 36% for a transcript-only LLM detector. A counterfactual shows a separate verifier environment removes 82–95% of packages exposed on the structural dimensions — but nothing touches fail-open handling or semantic adequacy.</p>
+<p><strong>Mandatory qualifications — read before quoting:</strong> ground truth is <strong>self-adjudicated by the authors' own team with no held-out external label set</strong>; the taxonomy was derived from the same failure literature that populates the corpus. The 69% figure is <strong>not a population rate</strong> — the corpus deliberately includes elicited exploits. ClawsBench contributes only 12 tasks from one environment family (recall there is &quot;trivially high&quot; by the authors' own admission); the runtime study covers 60 tasks / 144 runnable cells, with 36 of 180 planned cells unlaunchable. All evaluation calls use a single model (Claude Opus 5). <strong>Conflict of interest:</strong> two authors are affiliated with BenchFlow, the infrastructure BenchShield is instantiated on, and two of three run sources are BenchFlow-run benchmarks (disclosed). Tables 2–4 render as images in the HTML; headline numbers are corroborated in prose but the exact &quot;up to 65%&quot; per-task cost reduction and the annotator-agreement statistic could not be re-derived from extracted text — verify against the PDF before printing either.</p>
+<p><strong>BQAA/ADK application — editorial proposal:</strong> the durable lesson is that prompt-level guardrails cannot see reward hacking; the detection surface that works is infrastructure-side evidence (filesystem, process, network events) attributed through a lifecycle model. For BQAA evaluation jobs, define the reward-relevant event lifecycle first, then decide which events the agent's sandbox may legitimately touch — and publish any detector's accuracy against <em>independently</em> labeled trajectories, which BenchShield itself does not do.</p>
+<h3>VP-CONTROL — NEW rank: evidence diversity beats model diversity, and only atomic guards survive races</h3>
+<p><a href="https://arxiv.org/abs/2609.10969"><strong>Engineering Reliable Commit Gates for Agentic AI: Cost-Aware Verification Portfolios under Common-Mode Data Failures</strong></a>, Zihao Zheng, Baichuan Li, Junyi Yao, Jiayu Long (WashU St. Louis / Southern Methodist). Full text read. (<a href="https://arxiv.org/pdf/2609.10969">PDF</a>)</p>
+<p>A commit-gate study for agents that propose state-changing writes. Across a deterministic 2,880-scenario benchmark (48 templates × 10 worlds × 6 fault regimes), a 2×2 factorial separates the two things &quot;more verifiers&quot; usually confounds: cross-model voting over <strong>shared</strong> evidence approves <strong>62.9% of unsafe proposals</strong>, while sourcing <strong>independent</strong> evidence is the dominant lever — paired effects of −40.9pp (source) vs −11.3pp (model diversity). The 22.9% figure the pack quotes is specifically the cross-model <strong>plus</strong> independent-source cell; same-model + independent-source is 33.3% (baseline 74.2%). A preregistered live HTTP/SQLite arm (216 episodes) shows verifier-only gates all commit the same 12 unsafe effects under after-check races; only clauses re-checked <strong>inside the write transaction</strong> survive, with a full atomic guard at 0/216 unsafe (cluster-adjusted 95% upper bound 1.4%) and idempotent request IDs eliminating duplicate side effects on 96 retried requests. Unusually self-critical: preregistration, Holm-corrected comparisons, leakage audits, and a <em>negative</em> FinQA external check where the source effect reverses with weak verifiers.</p>
+<p><strong>Mandatory qualifications:</strong> fully synthetic templates — the authors support only the <em>ordering</em> of mechanisms, not absolute numbers. Tiny quantized local models (4–10B) on one laptop; actors never abstain. The FinQA external check <strong>fails to reproduce</strong> the main effect (17% unsafe from corrupted shared source vs 20% from correct independent source — a reversal). Calibration is an approximate design-effect-adjusted bound, explicitly &quot;not a finite-sample safety certificate&quot;; unseen fault families yield 16–26% risk at a nominal 5% target. The live arm is loopback, single-writer, with barrier-synchronized forced races; several preregistered live comparisons are not significant after Holm correction. The full atomic guard dominates everything when the predicate is expressible — the portfolio is a fallback for partial-guard settings, not the headline.</p>
+<p><strong>BQAA/ADK application — editorial proposal:</strong> three concrete rules for BQAA commit/mutation gates: (1) report verifier evidence-lineage independence, not verifier count; (2) idempotency keys on every agent-issued mutation request; (3) any check that can be expressed as a database predicate belongs inside the write transaction, not in a pre-check the world can race. When a guard can only be partial, a cost-aware portfolio over <em>independently sourced</em> evidence is the studied fallback.</p>
+<h3>ChurnBench — NEW rank: cache age is the wrong staleness variable</h3>
+<p><a href="https://arxiv.org/abs/2609.11515"><strong>ChurnBench: A Drift-Aware Benchmark Demonstrating That Refresh Scheduling, Not Cache Age, Governs Staleness in Agentic AI</strong></a>, Vivek Kumar Singh, Preeti Priyam (independent researchers). Full text read from PDF (no HTML version exists). (<a href="https://arxiv.org/pdf/2609.11515">PDF</a>)</p>
+<p>A drift-aware enterprise benchmark: a four-source data fabric (PostgreSQL warehouse, MongoDB operational store, mock REST SaaS with realistic latency/rate limits, synthetic contract documents) generated as a continuous timeline from an append-only change ledger (56,370 events), so gold answers are resolved at both retrieval time and answer time — cleanly separating <strong>freshness errors</strong> (correct when read, stale when answered) from reasoning errors. The headline is a negative result: under scheduled tiered refresh, cache age never reaches the retrieval layer, so freshness errors stay flat (7, 4, 4 across 1/14/28-day windows); disabling tiered refresh surges errors <strong>4 → 45 at 28 days</strong> (identical 7 at 1 day). Attribution shows staleness exposure proportional to tier width × entity mutation rate — 14 of 15 residual errors came from one fast-mutating entity class on a 7-day tier.</p>
+<p><strong>Mandatory qualifications:</strong> single model, single framework (LangGraph), single domain (software asset management), fully synthetic data with practitioner-judgment mutation rates. <strong>No baseline architecture comparison under the final design</strong> — the paper claims an instrument, not a winning architecture. Tiny error counts under tiering (4–7 per 180-task run; the flat sweep rests on differences ≤3 — lean on the 4-vs-45 ablation instead). The 1/14/28-day sweep is not configuration-matched (reasoning mode changed mid-study). Four runs, including the headline ablation, hit interface instability requiring isolated re-runs. 109 of 180 tasks hit unregistered measures, so reported accuracy mostly reflects registry coverage gaps.</p>
+<p><strong>BQAA/ADK application — editorial proposal:</strong> for BigQuery-backed agent caches, stop reporting &quot;cache age&quot; as a freshness proxy. Track per-entity TTL alignment against measured mutation rate, and label agent answers with freshness-error potential (was the underlying row within its tier's refresh bound at answer time?). ChurnBench's ledger-resolved gold is the right pattern for any BQAA staleness evaluation: truth from the change log, never from the live store.</p>
+<h3>Tail-aware turn release — NEW rank: readiness is not permission to release</h3>
+<p><a href="https://arxiv.org/abs/2609.10964"><strong>Decoupling Readiness from Release for Tail-Aware Scheduling of Agentic LLM Workflows</strong></a>, Bochao Feng, Jianjiang Li, Haojie Wang, Lin Qiao, Yinghui Li, Yukun Yan, Jidong Zhai (USTB / Qiyuan Laboratory / Tsinghua — pack's &quot;Tsinghua University&quot; attribution is only the corresponding author). Full text read. (<a href="https://arxiv.org/pdf/2609.10964">PDF</a>)</p>
+<p>Identifies that agent runtimes implicitly equate &quot;turn ready&quot; with &quot;turn submitted&quot;: under congestion, eager release irrevocably commits work and destroys the workflow scheduler's ability to reorder. The fix decouples the two — a priority index derived from a mean-CVaR objective over workflow flow time (holding-cost rate per unit of estimated turn work), paired with a congestion-adaptive budget on released-but-unfinished work. Evaluated on <strong>real GPU serving</strong> (vLLM, 1/2/4× A100-80GB; Qwen3-8B/32B, Llama-3.3-70B) with closed-loop replay of mini-swe-agent traces from SWE-bench and SWE-Gym: low-load parity (0.99–1.00×) and up to <strong>3.50× P95 flow-time speedup</strong> under load (best case: 1,986s → 568s). Ablations attribute most of the gain to tail-aware ordering (59.5–63.5% P95 reduction) with the adaptive budget adding 10.7–11.6%.</p>
+<p><strong>Mandatory qualifications:</strong> the only external baseline is eager release — <strong>no head-to-head with any published scheduler</strong> (FastServe, Parrot, VTC are related work, not comparisons). One Poisson arrival seed, one paired run per reported point, no confidence intervals; speedup is not monotone in arrival rate. 100 workflows per trace means empirical P95 rests on ~5 workflows (authors' own words). SWE-agent workloads only; single-engine, non-preemptive; hyperparameters fixed but never sensitivity-tested.</p>
+<p><strong>BQAA/ADK application — editorial proposal:</strong> the readiness/release distinction generalizes beyond GPU queues: any BQAA orchestrator that fires downstream work the moment an upstream turn completes loses the ability to reorder under contention. A committed-work budget with a tail-aware priority index is a concrete, implementable policy — but validate it against a real scheduler baseline before claiming the 3.5× class of gain.</p>
+<h3>Remaining queue and dedupe</h3>
+<p>No other Academy movement. The retained queue stands: ExecCritic (2609.09133), Fortunate Recall (2609.10413), Avatar (2609.10509), ConvMem (2609.10441), MeClear (2609.09115), revocation enforcement (2609.08258), MOLE (2609.06966, held for full PDF). DCP (2609.09219), SWE-Bench Pro Verified (2609.08149), SchemeArena (2609.08126), ATR (2609.08015), IBIB, IdeaAMBIG, TrajMark, Q2D-Web, Counter-Swarm keep their published cards and are not re-pitched. <a href="https://arxiv.org/abs/2609.02702">Trace as State</a> remains v1 with zero revisions per the collector's in-window arXiv API audit (v2 probe 404) — no re-litigation. SRMA, JIT-Agent, Dr. Claw, FlowBalance, Mechanistic Reasoning, MaxKernel, Compile by Training, Verify Before You Distill, MOLE hold their standing dispositions. ArXiv availability in-window verified as spanning 2609.10542v1–2609.11930v1 (11931+ absent).</p>
+<h2>Six-week EV</h2>
+<p>Preserve <strong>feedback-correction → review-budget → tool-evidence → finding-revision → cross-criterion</strong>. Proposed checks within existing work, qualitative value only.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Existing work</th>
+  <th>Bounded next check (new this slot)</th>
+  <th>Acceptance evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Feedback-correction</td>
+  <td>For one agent-improvement claim, run two verifiers over the <em>same</em> evidence vs one verifier over <em>independently sourced</em> evidence (VP-CONTROL pattern); report lineage independence beside the verdict.</td>
+  <td>Verdict metadata names the evidence lineage per verifier; shared-lineage verdicts are never described as independent confirmation.</td>
+</tr>
+<tr>
+  <td>Review-budget</td>
+  <td>Add a capture-completeness flag to tool-call records, independent of outcome (Codex <code>tool_calls_complete</code> pattern).</td>
+  <td>A crashed/timed-out tool call still shows whether its invocation record was fully captured.</td>
+</tr>
+<tr>
+  <td>Tool-evidence</td>
+  <td>Re-run one curated tool-reliability eval over a seeded probability draw from a real MCP registry; report the startup-failure rate as a first-class metric.</td>
+  <td>The report shows the draw seed, the frame hash, and a startup-failure row beside task success.</td>
+</tr>
+<tr>
+  <td>Finding-revision</td>
+  <td>Replace &quot;cache age&quot; with per-entity TTL-vs-mutation-rate alignment in one staleness report (ChurnBench pattern); label answers whose source rows exceeded their refresh bound.</td>
+  <td>Staleness findings cite tier width × mutation rate; age-based language removed from the report.</td>
+</tr>
+<tr>
+  <td>Cross-criterion</td>
+  <td>Attach a trace/job identifier to every analytics error response (Langfuse OTEL-on-error pattern) so client failures join to backend execution.</td>
+  <td>One sampled client error is traceable end-to-end without log scraping.</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Housekeeping / Catalog hints</h2>
+<p><strong>Coverage honesty:</strong> this is an off-cadence catch-up for the missed official 06:34 PT slot; the single 0837 catch-up pack bridges ~68 hours in one collector pass — the interval is covered by one sweep, not by the missing hourly packs. Social surfaces are dark this slot (<code>social-superpowers</code> anonymous access paused; real calls made, auth-gate errors honestly recorded, no fake <code>site:</code> substitutions). Leftover 1032/1132 packs already fed 1234 and were not re-carded. Optional all-tabs (0817) and Medium scout (0820) packs carried GTM/practitioner content only — no catalog feed. Nothing post-06:34 was admitted as in-window; verification completed after the cutoff per standing rule. Pack factual corrections applied above: Opik PR #8287 (not #8351), Langfuse PR #17253 (not #17154), Phoenix <code>#15727</code> distinct from <code>#15726</code>, LiteLLM <code>#39846</code> untagged, Braintrust <code>#758</code> in <code>braintrust-sdk-python</code>, tail-scheduling authorship USTB/Qiyuan/Tsinghua, VP-CONTROL 22.9% = cross-model-plus-independent-source cell.</p>
+<p><strong>Proposed new items (5):</strong></p>
+<ol>
+<li><code>id=arxiv-2609-10962-mcp-registry-random-draw</code>, <code>tag=Academy</code>, <code>kind=rank</code>, <code>added=2026-09-13T0634</code>. Title: <strong>MCP registry random draw: 37.5% of servers never start; BFCL is 68.8% exact repeats</strong>. Carry the shrinking-frame, lower-bound, n=24-curated, lexical-similarity, and single-author qualifications.</li>
+<li><code>id=arxiv-2609-11028-benchshield-reward-integrity</code>, <code>tag=Academy</code>, <code>kind=rank</code>, <code>added=2026-09-13T0634</code>. Title: <strong>BenchShield: lifecycle instrumentation for reward integrity in agent evals</strong>. The self-adjudicated ground truth, BenchFlow conflict, 12-task ClawsBench, single-model, and image-table caveats must render with the card.</li>
+<li><code>id=arxiv-2609-10969-vp-control-commit-gates</code>, <code>tag=Academy</code>, <code>kind=rank</code>, <code>added=2026-09-13T0634</code>. Title: <strong>VP-CONTROL: independent evidence beats model diversity; only atomic guards survive races</strong>. Carry the synthetic-tasks, tiny-models, FinQA-reversal, and forced-race qualifications; 22.9% must be described as the cross-model + independent-source cell.</li>
+<li><code>id=arxiv-2609-11515-churnbench-refresh-scheduling</code>, <code>tag=Academy</code>, <code>kind=rank</code>, <code>added=2026-09-13T0634</code>. Title: <strong>ChurnBench: refresh scheduling, not cache age, governs staleness</strong>. Carry the single-model/single-domain, no-baseline, tiny-count, and configuration-mismatch qualifications.</li>
+<li><code>id=arxiv-2609-10964-tail-aware-turn-release</code>, <code>tag=Academy</code>, <code>kind=rank</code>, <code>added=2026-09-13T0634</code>. Title: <strong>Decoupling readiness from release: mean-CVaR turn scheduling, 3.5× P95 under load</strong>. The eager-release-only baseline, single-seed, and ~5-workflow P95 qualifications must render with the card.</li>
+</ol>
+<p><strong>Proposed progress appends (3):</strong></p>
+<ol start="6">
+<li>Target <code>opik-evaluation-platform</code>, <code>at=2026-09-13T0634</code>, <code>displayTime=6:34 AM PT</code>. Summarize 2.2.59 (ClickHouse cutover reconciliation, week-bounds fix, UUIDv7 docs) as a correctness-repair release; post-release commits out of scope.</li>
+<li>Target <code>langfuse-v3-prompt-experiments</code>, <code>at=2026-09-13T0634</code>, <code>displayTime=6:34 AM PT</code>. Summarize v4.34.0/v4.35.0 (session revocation, Rust gateway bootstrap, OTEL-trace-ID-on-error, timeline redesign/actions).</li>
+<li>Target <code>phoenix-evals-v3-6</code>, <code>at=2026-09-13T0634</code>, <code>displayTime=6:34 AM PT</code>. Summarize evals 3.8.0 (retrieval relevance, session PII) plus server 20.10.0/20.11.0 (span-level cost filtering — the 1234-excluded item now released — coding-agent plugins, annotation mutations, skills-over-MCP).</li>
+</ol>
+<p><strong>No changes</strong> for Codex (watch; no stable release), Mastra (no second append per <code>forbidden.md</code>), LiteLLM, Braintrust, LangChain, Agno, ADK (1P), or any held Academy item. If the publisher applies this handoff once, expected totals are <strong>216 items / 67 briefs / 69 runs / 80 progress entries</strong> — prospective, not current state. Suggested route: <code>/research/briefs/2026-09-13-0634-kimi.html</code> (not created or verified by this writer).</p>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Kimi · 13 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
