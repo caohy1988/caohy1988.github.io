@@ -750,6 +750,19 @@
       return ((item.title || "") + " " + strip(item.html) + " " + extra).toLowerCase();
     }
     function dayKey(s) { return String(s || "").slice(0, 10); }
+    /** Brief/run stamp: "Sep 13, 2026 · 12:34 PM PT" (date was missing on Latest card). */
+    function formatBriefWhen(b) {
+      if (!b) return "";
+      const iso = String(b.date || dayKey(b.id) || "").slice(0, 10);
+      let datePart = "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+        const [y, m, d] = iso.split("-").map(Number);
+        datePart = `${MONTHS[m - 1].slice(0, 3)} ${d}, ${y}`;
+      }
+      const timePart = b.displayTime || "";
+      if (datePart && timePart) return `${datePart} · ${timePart}`;
+      return datePart || timePart;
+    }
     function lastAt(item) {
       const p = item.progress || [];
       return p.length ? p[p.length - 1].at : item.added;
@@ -847,7 +860,7 @@
 
     function briefRailHtml(latestBrief, addedN) {
       if (!latestBrief || !latestBrief.href) return "";
-      const when = latestBrief.displayTime || "";
+      const when = formatBriefWhen(latestBrief);
       const who = latestBrief.analyzer || "Field Brief";
       const status = addedN === 0 ? "Verified flat — open the write-up" : "Open the deep brief";
       const lb = `<a class="latest-brief" href="${escapeHtml(latestBrief.href)}">
@@ -951,7 +964,7 @@
       if (!list.length) return "";
       const items = list.map(b => `
         <a class="brief-link" href="${escapeHtml(b.href)}">
-          <span class="when">${escapeHtml(b.displayTime || "")} · ${escapeHtml(b.analyzer || "Field Brief")}</span>
+          <span class="when">${escapeHtml(formatBriefWhen(b))} · ${escapeHtml(b.analyzer || "Field Brief")}</span>
           <b>${escapeHtml(b.title)}</b>
           <p>Open the deep brief</p>
         </a>`).join("");
@@ -985,7 +998,7 @@
       const addedN = latestRun && Array.isArray(latestRun.added) ? latestRun.added.length : null;
       const flatNote = latestRun && addedN === 0 ? " · verified flat" : (latestRun && addedN != null ? ` · ${addedN} new card${addedN === 1 ? "" : "s"}` : "");
       $("edition-meta").textContent = latestRun
-        ? `Last pass ${latestRun.displayTime} · ${STATE.items.length} items kept · append only` + flatNote + (latestBrief ? ` · ${(latestBrief.analyzer || "Field Brief")}` : "")
+        ? `Last pass ${formatBriefWhen(latestRun)} · ${STATE.items.length} items kept · append only` + flatNote + (latestBrief ? ` · ${(latestBrief.analyzer || "Field Brief")}` : "")
         : `${STATE.items.length} items`;
       const rail = $("brief-rail-slot");
       if (rail) rail.innerHTML = briefRailHtml(latestBrief, addedN);
@@ -1010,7 +1023,7 @@
         </aside>`;
       bind();
       const briefStamp = latestBrief
-        ? ` · ${(latestBrief.analyzer || "Field Brief")} ${latestBrief.displayTime}`
+        ? ` · ${(latestBrief.analyzer || "Field Brief")} ${formatBriefWhen(latestBrief)}`
         : "";
       document.title = "The Field Brief · catalog" + briefStamp;
     }
