@@ -833,14 +833,33 @@
         </div>`;
     }
 
+
+    function formatDayTime(isoLike, timePart) {
+      const iso = dayKey(isoLike);
+      let datePart = "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+        const [y, m, d] = iso.split("-").map(Number);
+        datePart = `${MONTHS[m - 1].slice(0, 3)} ${d}, ${y}`;
+      }
+      const t = timePart || "";
+      if (datePart && t) return `${datePart} · ${t}`;
+      return datePart || t;
+    }
+    function formatAddedStamp(item) {
+      return formatDayTime(item && item.added, item && item.addedDisplay);
+    }
+    function formatProgressStamp(p) {
+      return formatDayTime(p && p.at, (p && (p.displayTime || p.at)) || "");
+    }
+
     function storyHtml(item) {
       const updated = (item.progress || []).length > 0;
       const badge = updated
-        ? `<span class="badge upd">Updated ${escapeHtml((item.progress.slice(-1)[0] || {}).displayTime || "")}</span>`
-        : `<span class="badge">Added ${escapeHtml(item.addedDisplay || "")}</span>`;
+        ? `<span class="badge upd">Updated ${escapeHtml(formatProgressStamp(item.progress.slice(-1)[0] || {}))}</span>`
+        : `<span class="badge">Added ${escapeHtml(formatAddedStamp(item))}</span>`;
       const prog = (item.progress || []).map(p => `
         <div class="prog-item">
-          <div class="when">Progress · ${escapeHtml(p.displayTime || p.at)}</div>
+          <div class="when">Progress · ${escapeHtml(formatProgressStamp(p))}</div>
           <p>${p.html}</p>
         </div>`).join("");
       return `
