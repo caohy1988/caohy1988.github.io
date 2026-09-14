@@ -175,7 +175,7 @@ ${renderNav(PAGE_PATH)}
   <main class="shell" id="main">
     <p class="kicker">Builds · MCP Apps · ${version}</p>
     <h1>${inline(heading)}</h1>
-    <p class="meta"><span class="mono">${version} · ${date}</span> · MCP Apps (SEP-1865) support across nine host surfaces, read from vendor documentation, dated historical reports, one pinned source snapshot and footnoted local inspection. Each cell links to what it rests on. No cell is an observed UI or fallback run.</p>
+    <p class="meta"><span class="mono">${version} · ${date}</span> · MCP Apps (SEP-1865) support across nine host surfaces, read from vendor documentation, dated historical reports, one pinned source snapshot and footnoted local inspection. Public references are linked; prior local inspection is summarized in the footnotes. No cell is an observed UI or fallback run.</p>
 
     <section class="intro prose" aria-label="Summary">
 ${intro.map((p) => `      <p>${inline(p)}</p>`).join("\n")}
