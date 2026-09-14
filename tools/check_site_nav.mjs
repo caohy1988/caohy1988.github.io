@@ -52,6 +52,8 @@ if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 const failures = [];
 const expected = NAV.flatMap((e) => e.items ? e.items : [e]).map((i) => [i.label, i.href]);
 const folderCount = NAV.filter((e) => e.items).length;
+const lastFolder = NAV.filter((e) => e.items).pop();
+const firstItem = lastFolder.items[0].label, lastItem = lastFolder.items[lastFolder.items.length - 1].label;
 const check = (ok, what) => { console.log(`${ok ? "OK  " : "FAIL"} ${what}`); if (!ok) failures.push(what); };
 const shot = (page, name) => SHOTS ? page.screenshot({ path: path.join(SHOTS, name) }) : Promise.resolve();
 const pageOverflow = () => document.documentElement.scrollWidth - window.innerWidth;
@@ -102,12 +104,12 @@ for (const [pagePath, file] of Object.entries(PAGES)) {
   check(afterEsc[0] === "false" && afterEsc[1] === NAV.filter((e) => e.items).pop().label, `${file} desktop: Escape closes and refocuses ${JSON.stringify(afterEsc)}`);
   await page.keyboard.press("ArrowDown");
   const afterArrow = await page.evaluate((i) => [document.querySelectorAll(".site-nav-folder-button")[i].getAttribute("aria-expanded"), document.activeElement && document.activeElement.textContent.trim()], folderCount - 1);
-  check(afterArrow[0] === "true" && afterArrow[1] === "RFC", `${file} desktop: ArrowDown opens and focuses first item ${JSON.stringify(afterArrow)}`);
+  check(afterArrow[0] === "true" && afterArrow[1] === firstItem, `${file} desktop: ArrowDown opens and focuses first item ${JSON.stringify(afterArrow)}`);
   await page.keyboard.press("End");
-  check(await page.evaluate(focusedText) === "EvalBench", `${file} desktop: End focuses the last item`);
+  check(await page.evaluate(focusedText) === lastItem, `${file} desktop: End focuses the last item`);
   await page.keyboard.press("Home");
-  check(await page.evaluate(focusedText) === "RFC", `${file} desktop: Home focuses the first item`);
-  await page.keyboard.press("Tab"); await page.keyboard.press("Tab"); await page.keyboard.press("Tab");
+  check(await page.evaluate(focusedText) === firstItem, `${file} desktop: Home focuses the first item`);
+  for (let k = 0; k < lastFolder.items.length; k++) await page.keyboard.press("Tab"); // from the first item past the last one
   check(await page.evaluate(expandedOf, folderCount - 1) === "false", `${file} desktop: tabbing out closes the folder`);
   await page.locator(".site-nav-folder-button").nth(0).click();
   check(await page.evaluate(expandedOf, 0) === "true", `${file} desktop: folder reopened for the outside-click case`);
@@ -172,13 +174,13 @@ for (const [pagePath, file] of Object.entries(PAGES)) {
       if (mob) await page.locator(".site-nav-toggle").click();
       const builds = page.locator(".site-nav-folder-button").nth(folderCount - 1);
       await builds.focus();
-      await page.keyboard.press("ArrowUp"); // opens Builds and focuses EvalBench
+      await page.keyboard.press("ArrowUp"); // opens Builds and focuses its last item
       const before = await page.evaluate(focusedText);
       await page.keyboard.press("Home");
       const afterHome = await page.evaluate(() => [document.activeElement.textContent.trim(), location.hash]);
       await page.keyboard.press("End");
       const afterEnd = await page.evaluate(() => [document.activeElement.textContent.trim(), location.hash]);
-      check(before === "EvalBench" && afterHome[0] === "RFC" && afterHome[1] === "#beat=3" && afterEnd[0] === "EvalBench" && afterEnd[1] === "#beat=3",
+      check(before === lastItem && afterHome[0] === firstItem && afterHome[1] === "#beat=3" && afterEnd[0] === lastItem && afterEnd[1] === "#beat=3",
         `${file} ${w}px: menu Home/End keep #beat=3 ${JSON.stringify([before, afterHome, afterEnd])}`);
       await page.close();
     }
