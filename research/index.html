@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-badge-stamp="date-time-v2">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -846,10 +846,14 @@
       return datePart || t;
     }
     function formatAddedStamp(item) {
-      return formatDayTime(item && item.added, item && item.addedDisplay);
+      const raw = (item && item.addedDisplay) || "";
+      if (/\b20\d{2}\b/.test(raw) && /·/.test(raw)) return raw;
+      return formatDayTime(item && item.added, raw);
     }
     function formatProgressStamp(p) {
-      return formatDayTime(p && p.at, (p && p.displayTime) || "");
+      const raw = (p && p.displayTime) || "";
+      if (/\b20\d{2}\b/.test(raw) && /·/.test(raw)) return raw;
+      return formatDayTime(p && p.at, raw);
     }
 
     function storyHtml(item) {
