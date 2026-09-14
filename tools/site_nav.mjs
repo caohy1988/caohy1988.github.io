@@ -31,6 +31,7 @@ export const NAV = [
     { label: "RFC", href: "/rfc/" },
     { label: "Detailed RFC", href: "/rfc/detailed-rfc/" },
     { label: "EvalBench", href: "/evalbench/" },
+    { label: "MCP Apps matrix", href: "/research/builds/mcp-apps-feature-matrix/" },
   ] },
 ];
 
@@ -49,6 +50,7 @@ export const PAGES = {
   "/rfc/demo/": "rfc/demo/index.html",
   "/rfc/full-demo/": "rfc/full-demo/index.html",
   "/evalbench/": "evalbench/index.html",
+  "/research/builds/mcp-apps-feature-matrix/": "research/builds/mcp-apps-feature-matrix/index.html",
 };
 
 // Which nav entry is "current" for a page. Demos live under the RFC (that is what their old nav said).
