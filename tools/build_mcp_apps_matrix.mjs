@@ -8,7 +8,7 @@
 // Layer D (matrix, legend, columns, footnotes, takeaways, version history, rendered-from)
 // is preserved from source.md. brief.md owns banner/judgment/action/next-steps/headings.
 // host-tldr.md owns the above-fold Host | Status | Why table (Full/Partial/Unknown feature parity)
-// and the official-vs-ours comparison table.
+// the official-vs-ours comparison table, and the per-product Agreement table (official CHECK vs our chip).
 // judgments.json owns product sentences and compact rows (PR3 grid).
 import fs from "node:fs";
 import path from "node:path";
@@ -96,7 +96,7 @@ export const HOST_TLDR_STATUSES = ["Full", "Partial", "Unknown"];
 
 // host-tldr.md owns the above-fold Host | Status | Why table (TLDR_HUMAN contract).
 export function parseHostTldr(md) {
-  const { sections } = parseSections(md, ["Heading", "Summary", "Official matrix", "Table"], "host-tldr.md");
+  const { sections } = parseSections(md, ["Heading", "Summary", "Official matrix", "Agreement", "Table"], "host-tldr.md");
   const rows = sections["Table"].split("\n").filter((l) => l.startsWith("|")).map(splitRow);
   const [head, sep, ...body] = rows;
   if (head === SEPARATOR || head.join("|") !== "Host|Status|Why") throw new Error("host-tldr.md table header must be Host | Status | Why");
@@ -108,11 +108,65 @@ export function parseHostTldr(md) {
     if (!HOST_TLDR_STATUSES.includes(status)) throw new Error(`host-tldr.md ${host}: status must be ${HOST_TLDR_STATUSES.join("/")}, got ${status}`);
     if (!/\]\(https:\/\/[^)\s]+\)/.test(why)) throw new Error(`host-tldr.md ${host}: Why needs at least one https evidence link`);
   }
-  return { heading: sections["Heading"], summary: sections["Summary"], official: parseOfficial(sections["Official matrix"]), rows: body };
+  return {
+    heading: sections["Heading"],
+    summary: sections["Summary"],
+    official: parseOfficial(sections["Official matrix"]),
+    agreement: parseAgreement(sections["Agreement"], body),
+    rows: body,
+  };
+}
+
+// Per product: does the official Apps CHECK match our feature-parity chip? (Haiyuan, 2026-09-14)
+// Only the 1:1 name-aligned overlaps get a row; CHECK + Full = Agree, CHECK + Partial/Unknown = Disagree.
+export const AGREEMENT_OVERLAPS = ["Claude Desktop", "GitHub Copilot", "Cursor"];
+
+function parseAgreement(text, hostRows) {
+  const lines = text.split("\n");
+  const first = lines.findIndex((l) => l.startsWith("|"));
+  if (first < 0) throw new Error("host-tldr.md Agreement needs a table");
+  let end = first;
+  while (end < lines.length && lines[end].startsWith("|")) end++;
+  const after = lines.slice(end).join(" ").trim();
+  const [head, sep, ...body] = lines.slice(first, end).map(splitRow);
+  if (head === SEPARATOR || head.join("|") !== "Product|Official claim|Our chip|Agreement") {
+    throw new Error("host-tldr.md Agreement header must be Product | Official claim | Our chip | Agreement");
+  }
+  if (sep !== SEPARATOR) throw new Error("host-tldr.md Agreement separator row missing");
+  const products = body.map((r) => r[0]);
+  if (products.join("|") !== AGREEMENT_OVERLAPS.join("|")) throw new Error(`host-tldr.md Agreement rows must be ${AGREEMENT_OVERLAPS.join(", ")}`);
+  const chipOf = Object.fromEntries(hostRows.map(([host, status]) => [host, status]));
+  for (const r of body) {
+    if (r.length !== 4) throw new Error(`host-tldr.md Agreement row has ${r.length} cells: ${r[0]}`);
+    const [product, official, ours, agreement] = r;
+    if (official !== "CHECK") throw new Error(`host-tldr.md Agreement ${product}: official claim must be CHECK`);
+    if (ours !== chipOf[product]) throw new Error(`host-tldr.md Agreement ${product}: chip ${ours} does not match Table status ${chipOf[product]}`);
+    const want = ours === "Full" ? "Agree" : "Disagree";
+    if (agreement !== want) throw new Error(`host-tldr.md Agreement ${product}: CHECK + ${ours} must be ${want}, got ${agreement}`);
+  }
+  if (!/\bno overlap\b/.test(after)) throw new Error("host-tldr.md Agreement must note the no-overlap products");
+  return { head, body, after };
+}
+
+function renderAgreement(a) {
+  const th = a.head.map((h) => `<th scope="col">${esc(h)}</th>`).join("");
+  const trs = a.body.map(([product, official, ours, agreement]) =>
+    `              <tr><th scope="row">${esc(product)}</th><td>${esc(official)}</td><td>${esc(ours)}</td><td class="agree-${agreement.toLowerCase()}"><strong>${esc(agreement)}</strong></td></tr>`,
+  ).join("\n");
+  return `      <div class="tldr-agreement prose" id="official-agreement">
+        <table class="tldr-agree">
+          <thead><tr>${th}</tr></thead>
+          <tbody>
+${trs}
+          </tbody>
+        </table>
+        <p class="tldr-no-overlap">${inline(a.after)}</p>
+      </div>`;
 }
 
 export const OFFICIAL_LINKS = ["https://modelcontextprotocol.io/extensions/apps/overview", "https://modelcontextprotocol.io/extensions/client-matrix"];
-export const OFFICIAL_COMPARE_ROWS = ["Question", "Grain", "Observed UI runs"];
+// "No observed UI runs" lives in Summary (and the banner), not a compare row, to keep S1 room for Agreement.
+export const OFFICIAL_COMPARE_ROWS = ["Question", "Grain"];
 
 // "Official matrix" = a lead saying this differs, a | | Official | This page | table, and a closing line.
 function parseOfficial(text) {
@@ -160,6 +214,7 @@ function renderHostTldr(tldr) {
       <h2 id="host-tldr-heading">${esc(tldr.heading)}</h2>
       <p class="tldr-summary prose">${inline(tldr.summary)}</p>
 ${renderOfficial(tldr.official)}
+${renderAgreement(tldr.agreement)}
       <div class="tldr-table-wrap">
         <table class="host-tldr-table">
           <thead><tr><th scope="col">Host</th><th scope="col">Status</th><th scope="col">Why</th></tr></thead>
@@ -361,6 +416,15 @@ export function build(sourceMd, briefMd, judgments, hostTldrMd) {
       table.tldr-compare td.compare-official::before { content: "Official: "; font-weight: 600; color: var(--ink); }
       table.tldr-compare td.compare-ours::before { content: "This page: "; font-weight: 600; color: var(--ink); }
     }
+    .tldr-agreement { margin: 0 0 12px; font-size: 0.92rem; color: var(--ink-soft); }
+    .tldr-agreement p { margin: 0; }
+    table.tldr-agree { border-collapse: collapse; width: 100%; table-layout: fixed; margin: 0 0 8px; line-height: 1.4; }
+    table.tldr-agree th, table.tldr-agree td { padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+    table.tldr-agree thead th { font-weight: 600; color: var(--ink); background: var(--paper-2); }
+    table.tldr-agree tbody th { font-weight: 600; color: var(--ink); }
+    table.tldr-agree td.agree-agree { color: var(--mint); }
+    table.tldr-agree td.agree-disagree { color: var(--accent-dark); }
+    @media (max-width: 420px) { table.tldr-agree th, table.tldr-agree td { padding: 5px 4px; } }
     details.fold > summary { cursor: pointer; list-style: none; }
     details.fold > summary::-webkit-details-marker { display: none; }
     details.fold > summary h2 { display: inline; margin: 0; }

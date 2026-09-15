@@ -66,15 +66,42 @@ test("host TLDR carries summary + a “Yes, this differs” official-vs-ours com
   assert.match(cmp, /<a href="https:\/\/modelcontextprotocol\.io\/extensions\/apps\/overview" rel="noopener">MCP Apps overview<\/a>/);
   assert.match(cmp, /<a href="https:\/\/modelcontextprotocol\.io\/extensions\/client-matrix" rel="noopener">client extension matrix<\/a>/);
   const rows = Object.fromEntries([...cmp.matchAll(/<tr><th scope="row">([^<]+)<\/th><td class="compare-official">([\s\S]*?)<\/td><td class="compare-ours">([\s\S]*?)<\/td><\/tr>/g)].map((m) => [m[1], [m[2], m[3]]]));
-  assert.deepEqual(Object.keys(rows), ["Question", "Grain", "Observed UI runs"]);
+  assert.deepEqual(Object.keys(rows), ["Question", "Grain"]);
   assert.match(rows.Question[0], /Does the client implement <code>io\.modelcontextprotocol\/ui<\/code>/);
   assert.match(rows.Question[1], /capability \/ registration-path \/ fallback gap for shipping Glance-style UI on these nine hosts/);
   assert.match(rows.Grain[0], /CHECK/);
   assert.match(rows.Grain[1], /Full \/ Partial \/ Unknown feature parity per host, with evidence links/);
-  assert.match(rows["Observed UI runs"][1], /^None; we do not invent them$/);
-  assert.match(cmp, /not a verified Glance UI journey/);
-  // the comparison table plus the Host | Status | Why table, and no official-overlap host table
-  assert.equal([...s.matchAll(/<table/g)].length, 2);
+  // the comparison table, the Agreement table, and the Host | Status | Why table
+  assert.equal([...s.matchAll(/<table/g)].length, 3);
+});
+
+test("host TLDR answers per-product agreement: 3 overlaps (2 Agree, 1 Disagree), 16 no overlap, naming traps", () => {
+  const s = section(html());
+  const at = (x) => { const i = s.indexOf(x); assert.ok(i > 0, x); return i; };
+  assert.ok(at('id="official-vs-ours"') < at('id="official-agreement"'));
+  assert.ok(at('id="official-agreement"') < at('class="host-tldr-table"'));
+  const agree = s.match(/<div class="tldr-agreement prose" id="official-agreement">[\s\S]*?<\/div>/)[0];
+  const rows = [...agree.matchAll(/<tr><th scope="row">([^<]+)<\/th><td>([^<]+)<\/td><td>([^<]+)<\/td><td class="agree-([a-z]+)"><strong>([^<]+)<\/strong><\/td><\/tr>/g)].map((m) => m.slice(1));
+  assert.deepEqual(rows, [
+    ["Claude Desktop", "CHECK", "Partial", "disagree", "Disagree"],
+    ["GitHub Copilot", "CHECK", "Full", "agree", "Agree"],
+    ["Cursor", "CHECK", "Full", "agree", "Agree"],
+  ]);
+  assert.ok(!/class="chip/.test(agree), "agreement words are not feature-parity chips");
+  assert.match(agree, /Other 16 products: <strong>no overlap<\/strong>/);
+  assert.match(agree, /ChatGPT ≠ Codex Desktop/);
+  assert.match(agree, /Claude web ≠ Desktop\/Cowork\/Code/);
+  assert.match(agree, /CHECK is a claim, not a verified Glance UI journey/);
+});
+
+test("parser ties Agreement to the Table chips and the CHECK mapping rule", () => {
+  const md = tldrMd();
+  assert.throws(() => parseHostTldr(md.replace("| Cursor | CHECK | Full | Agree |", "| Cursor | CHECK | Full | Disagree |")), /must be Agree/);
+  assert.throws(() => parseHostTldr(md.replace("| Claude Desktop | CHECK | Partial | Disagree |", "| Claude Desktop | CHECK | Partial | Agree |")), /must be Disagree/);
+  assert.throws(() => parseHostTldr(md.replace("| GitHub Copilot | CHECK | Full | Agree |", "| GitHub Copilot | CHECK | Partial | Disagree |")), /does not match Table status/);
+  assert.throws(() => parseHostTldr(md.replace("| Cursor | CHECK | Full | Agree |\n", "")), /Agreement rows must be/);
+  assert.throws(() => parseHostTldr(md.replace("**no overlap**", "**elsewhere**")), /no-overlap/);
+  assert.throws(() => parseHostTldr(md.replace("## Agreement\n", "## Agreements\n")), /missing section: Agreement/);
 });
 
 test("parser rejects an Official matrix block without the differs lead, a required row, or an official link", () => {
@@ -99,7 +126,7 @@ test("parser rejects Unsupported status, a link-free Why, and a missing row", ()
   assert.throws(() => parseHostTldr(md.replace("| Claude Code | Unknown |", "| Claude Code | Unsupported |")), /status must be/);
   const noLink = md.replace(/\| Antigravity CLI \| Unknown \| .*\|\n/, "| Antigravity CLI | Unknown | Silent on Apps. |\n");
   assert.throws(() => parseHostTldr(noLink), /https evidence link/);
-  const short = md.replace(/\| Cursor \| .*\|\n/, "");
+  const short = md.replace(/\| Cursor \| Full \| .*\|\n/, "");
   assert.throws(() => parseHostTldr(short), /expected 9/);
 });
 
