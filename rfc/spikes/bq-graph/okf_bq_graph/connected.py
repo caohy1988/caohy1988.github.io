@@ -267,12 +267,18 @@ class HermeticEnv(_Surfaces):
         return getattr(self, "_t", 0.0)
 
     def __init__(self, projection: dict, sdk_root: str, cfg: CatalogConfig, runner: Callable = subprocess.run,
-                 broker: Any = None, catalog: Any = None, facts: Optional[Callable[[], dict]] = None):
+                 broker: Any = None, catalog: Any = None, facts: Optional[Callable[[], dict]] = None,
+                 catalog_pages: Optional[list] = None, catalog_entries: Optional[dict] = None, head: Any = ...):
+        """`catalog_pages` / `catalog_entries` replace the injected fixture responses (publish_connected hands over the
+        entries its hermetic publish wrote); `head` is the retained head (default: the projection itself)."""
         self.projection, self.sdk_root, self.cfg, self.runner = projection, sdk_root, cfg, runner
         self.broker = broker or HermeticBroker(projection)
         self.access = catalog or HermeticCatalogAccess()
-        body = json.loads((ROOT / "fixtures" / "catalog_responses.json").read_text(encoding="utf-8"))
-        self.reader = PolicyCatalogReader(body["pages"], body["entries"], allowed=lambda: self.access.granted)
+        if catalog_pages is None or catalog_entries is None:
+            body = json.loads((ROOT / "fixtures" / "catalog_responses.json").read_text(encoding="utf-8"))
+            catalog_pages, catalog_entries = body["pages"], body["entries"]
+        self.head = projection["publication_id"] if head is ... else head
+        self.reader = PolicyCatalogReader(catalog_pages, catalog_entries, allowed=lambda: self.access.granted)
         self._facts = facts or vendored_manifest
         self.receipt_launches = 0
 
@@ -308,7 +314,7 @@ class HermeticEnv(_Surfaces):
     def store(self, journal: Journal) -> Any:
         s = PolicyStore(journal, self.broker, dataset=f"hermetic-store ({self.cfg.runtime_dataset} policy-gated)")
         s.add(self.projection)
-        s.set_head(self.projection["bundle_id"], self.projection["publication_id"])
+        s.set_head(self.projection["bundle_id"], self.head)
         return s
 
     def graph_clients(self, journal: Journal) -> dict:
@@ -356,7 +362,10 @@ class LiveEnv(_Surfaces):
         from .catalog import HttpReader
         from .principal import RestrictedBroker
         self.sdk_root, self.cfg, self.wait_s, self.sdk_python, self.runner = sdk_root, cfg, wait_s, sdk_python, runner
-        self.broker = RestrictedBroker("fallback", sdk_pub["dataset"], dependencies=sdk_pub["dependencies"], wait_s=wait_s)
+        # the graph dataset is the one the Catalog pin is allowed to name: the long-lived spike dataset by default, the
+        # run-owned published dataset under publish_connected
+        self.broker = RestrictedBroker("fallback", sdk_pub["dataset"], dependencies=sdk_pub["dependencies"], wait_s=wait_s,
+                                       graph_dataset=cfg.runtime_dataset)
         source, _ = google.auth.default(scopes=[self.CLOUD])
         self._req_creds = impersonated_credentials.Credentials(source_credentials=source, target_principal=self.broker.email,
                                                                target_scopes=[self.CLOUD, self.USERINFO], lifetime=3600)
@@ -412,12 +421,13 @@ class LiveEnv(_Surfaces):
         `_rls` row-policy grantee; then wait until the requester observes the graph probe and authorization DENIED."""
         b = self.broker
         b.state.update(REVOKED)
-        for ds in (DATASET, RLS_DS, b.sdk_dataset):
+        datasets = list(dict.fromkeys((b.graph_dataset, RLS_DS, b.sdk_dataset)))
+        for ds in datasets:
             b._reader(ds, False)
         b._rls_grantee(False)
-        g_ok, g_obs, g_s = b._wait(lambda: b._probe_table(f"{PROJECT}.{DATASET}.nodes"), DENIED)
+        g_ok, g_obs, g_s = b._wait(lambda: b._probe_table(f"{PROJECT}.{b.graph_dataset}.nodes"), DENIED)
         s_ok, s_obs, s_s = b._wait(lambda: b.authorize(b.dependencies), DENIED)
-        return b._log("revoke_all", datasets=[DATASET, RLS_DS, b.sdk_dataset], observed=g_ok and s_ok,
+        return b._log("revoke_all", datasets=datasets, observed=g_ok and s_ok,
                       graph={"waited_s": g_s, "status": g_obs.get("status")}, sdk={"waited_s": s_s, "status": s_obs.get("status")})
 
     def store(self, journal: Journal) -> Any:
@@ -429,7 +439,7 @@ class LiveEnv(_Surfaces):
         return dict(self.broker.graph_clients(), cache=None, journal=journal)
 
     def graph_probe(self) -> dict:
-        return dict(self.broker._probe_table(f"{PROJECT}.{DATASET}.nodes"), checked_by="dry-run SELECT under the requester")
+        return dict(self.broker._probe_table(f"{PROJECT}.{self.broker.graph_dataset}.nodes"), checked_by="dry-run SELECT under the requester")
 
     def authorize(self, deps: list[str]) -> dict:
         return self.broker.authorize(deps)

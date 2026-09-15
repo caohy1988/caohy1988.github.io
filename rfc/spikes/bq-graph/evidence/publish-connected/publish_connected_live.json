@@ -1,0 +1,619 @@
+{
+ "author": {
+  "bundle_clean": true,
+  "checkout_head_matches_pin": true,
+  "compiler_version": "okf_bq_graph.compile/0.1.0",
+  "edges": 109,
+  "edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+  "nodes": 44,
+  "nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b",
+  "ok": true,
+  "projection_valid": true,
+  "publication_id": "pub_190192147fd7fd78",
+  "source_manifest_sha256": "190192147fd7fd780b0da94c596045e363b29b4c23963959503cc677f1a3b5d5",
+  "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec"
+ },
+ "broken_at": null,
+ "checks": {
+  "author": true,
+  "author_identity": true,
+  "catalog_pin": true,
+  "cleanup": true,
+  "connected": true,
+  "consumed": true,
+  "head_switched": true,
+  "originals": true,
+  "publish_journal_resolved": true,
+  "ready": true
+ },
+ "connected": {
+  "broken_at": null,
+  "run_dir": "evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72",
+  "run_id": "e2e-20260915t082049z-34e6ed72",
+  "summary": {
+   "access": {
+    "authorization_after_revocation": "DENIED",
+    "bypass_publication": "ERROR",
+    "bypass_retrieval": "DENIED",
+    "caller_is_requester": true,
+    "catalog_before_grant": "DENIED",
+    "catalog_grant_observed": "ALLOWED",
+    "catalog_grant_waited_s": 71,
+    "catalog_revocation_waited_s": 0,
+    "fresh_request_after_revocation": "CATALOG_ERROR",
+    "receipt_launches_after_revocation": 0,
+    "revocation_observed": true
+   },
+   "answer": "[LIVE] Gross margin: $400.00 USD \u00b7 VERIFIED",
+   "broken_at": null,
+   "cases": {
+    "connected-approved": {
+     "acceptance": "MET",
+     "decision": "RELEASED"
+    },
+    "connected-denied-intermediate": {
+     "acceptance": "MET",
+     "decision": "REFUSED"
+    },
+    "connected-revocation": {
+     "acceptance": "MET",
+     "decision": "REFUSED"
+    },
+    "connected-sql-substitution": {
+     "acceptance": "MET",
+     "decision": "REFUSED"
+    },
+    "connected-unauthorized-output": {
+     "acceptance": "MET",
+     "decision": "REFUSED"
+    }
+   },
+   "engine": "fallback",
+   "facts": "OK",
+   "identity": {
+    "roles": {
+     "graph": {
+      "jobs": 46,
+      "status": "BOUND"
+     },
+     "policy_admin": {
+      "jobs": 9,
+      "status": "BOUND"
+     },
+     "receipt": {
+      "jobs": 2,
+      "status": "BOUND"
+     },
+     "requester_probe": {
+      "jobs": 1,
+      "status": "BOUND"
+     }
+    },
+    "status": "BOUND"
+   },
+   "labels": {
+    "apis": "live GCP (Dataplex Catalog, BigQuery, IAM) in --live; emulated in --hermetic",
+    "cache": "Catalog concept seeds disable the retrieval cache: revocation is shown on a fresh request, a retained-pin bypass and the stored receipt, not on a cached replay",
+    "catalog_access": "the harness grants the requester catalogViewer on the demo entry group for the run and removes it for revocation",
+    "data": "synthetic (invented Acme fixture; no customer data)",
+    "denied_intermediate_seed": "injected legacy fixture seed on the `_rls` governance copy of the pinned publication, not a Catalog discovery",
+    "engine": "relational fallback on the published tables (not BigQuery Graph / GQL)",
+    "receipt": "the SDK example's own verifier with a requester-held key; no independent attester",
+    "requester": "restricted service account through IAM impersonation, on every execution leg including the Catalog read",
+    "sample": "n = 1 run; no latency or cost benchmark"
+   },
+   "mode": "live",
+   "receipt_ref": "<id:75c45c01>",
+   "receipt_verdict": "VERIFIED",
+   "run_dir": "evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72",
+   "run_id": "e2e-20260915t082049z-34e6ed72",
+   "teardown": {
+    "broker": "VERIFIED",
+    "catalog": "VERIFIED"
+   },
+   "unresolved_jobs": 0,
+   "verdict": "E2E_CONNECTED"
+  },
+  "verdict": "E2E_CONNECTED"
+ },
+ "consumed": {
+  "checks": {
+   "catalog_ok": true,
+   "entry_is_owned": true,
+   "head_is_published": true,
+   "pin_dataset": true,
+   "pin_publication": true,
+   "publication_ok": true,
+   "store_dataset": true
+  },
+  "dataset": "okf_kp_publish_kp_20260915t082018z_0387",
+  "entry": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin",
+  "observed": {
+   "catalog": "OK",
+   "head": "pub_190192147fd7fd78",
+   "pin_publication_id": "pub_190192147fd7fd78",
+   "pin_runtime_dataset": "okf_kp_publish_kp_20260915t082018z_0387",
+   "publication": "OK"
+  },
+  "publication_id": "pub_190192147fd7fd78",
+  "status": "MATCH"
+ },
+ "finished_at": "2026-09-15T08:32:49.589717+00:00",
+ "labels": {
+  "apis": "live GCP (Dataplex Catalog, BigQuery, IAM) in --live; emulated in --hermetic",
+  "cache": "Catalog concept seeds disable the retrieval cache: revocation is shown on a fresh request, a retained-pin bypass and the stored receipt, not on a cached replay",
+  "catalog_access": "the harness grants the requester catalogViewer on the demo entry group for the run and removes it for revocation",
+  "catalog_role": "discovery projection: the run-owned entry's pin is generated from the READY rows after the head advanced",
+  "data": "synthetic (invented Acme fixture; no customer data)",
+  "denied_intermediate_seed": "injected legacy fixture seed on the `_rls` governance copy of the pinned publication, not a Catalog discovery",
+  "engine": "relational fallback on the published tables (not BigQuery Graph / GQL)",
+  "publication_id": "content-addressed from the pinned source: the same id the long-lived spike dataset holds, deployed fresh (new dataset, rows and jobs); not a new knowledge revision",
+  "publish": "BigQuery is the publish authority: run-owned relational dataset, full-row readback, READY row, atomic head MERGE",
+  "receipt": "the SDK example's own verifier with a requester-held key; no independent attester",
+  "requester": "restricted service account through IAM impersonation, on every execution leg including the Catalog read",
+  "sample": "n = 1 run; no latency or cost benchmark",
+  "sec05": "RFC \u00a705 states recorded on a simplified protocol: one owned dataset with active_publication, no sync_id, deployment_heads or *_current views",
+  "teardown": "the owned dataset and entry are deleted at the end (absence read back); job metadata stays readable"
+ },
+ "mode": "live",
+ "owned": {
+  "dataset": "okf_kp_publish_kp_20260915t082018z_0387",
+  "deployment": "acme-retail-kp-publish-kp-20260915t082018z-0387",
+  "entry_prefix": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/",
+  "profile": "okf-kp-publish/1",
+  "protected": {
+   "dataset": "okf_graph_spike_20260905",
+   "entry": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kc-unblock/metrics/gross-margin"
+  }
+ },
+ "publish": {
+  "author_identity": {
+   "checked_by": "operator jobs.get",
+   "jobs": {
+    "okf_cc_kp_20260915t082018z_0387_create_table_04cf3f134493": "operator",
+    "okf_cc_kp_20260915t082018z_0387_create_table_892b982f75f1": "operator",
+    "okf_cc_kp_20260915t082018z_0387_create_table_9c2317a5ff39": "operator",
+    "okf_cc_kp_20260915t082018z_0387_create_table_d3d7d4872ab8": "operator",
+    "okf_cc_kp_20260915t082018z_0387_insert_publication_4ffc4d91d100": "operator",
+    "okf_cc_kp_20260915t082018z_0387_load_edges_21df42ad11ac": "operator",
+    "okf_cc_kp_20260915t082018z_0387_load_nodes_7f0d27d40667": "operator",
+    "okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67": "operator",
+    "okf_cc_kp_20260915t082018z_0387_pin_source_publication_f4f9fcaf50e0": "operator",
+    "okf_cc_kp_20260915t082018z_0387_pin_source_seed_09bfac7145be": "operator",
+    "okf_cc_kp_20260915t082018z_0387_publication_exists_04de1f209885": "operator",
+    "okf_cc_kp_20260915t082018z_0387_publication_status_fc1b6390442f": "operator",
+    "okf_cc_kp_20260915t082018z_0387_read_head_85a953aabf4a": "operator",
+    "okf_cc_kp_20260915t082018z_0387_read_head_9945996bc0ff": "operator",
+    "okf_cc_kp_20260915t082018z_0387_read_head_c65816785e7e": "operator",
+    "okf_cc_kp_20260915t082018z_0387_readback_edges_d21456ca6d2c": "operator",
+    "okf_cc_kp_20260915t082018z_0387_readback_nodes_1dad6332bfb8": "operator",
+    "okf_cc_kp_20260915t082018z_0387_reread_original_head_3196e0d747a7": "operator",
+    "okf_cc_kp_20260915t082018z_0387_snapshot_original_head_a149bea8e896": "operator"
+   },
+   "jobs_compared": 19,
+   "roles": {
+    "author": {
+     "expected": "operator",
+     "jobs": 19,
+     "required": true,
+     "status": "BOUND"
+    }
+   },
+   "status": "BOUND"
+  },
+  "authority": "BigQuery",
+  "catalog_pin": {
+   "adversarial_override": [],
+   "authored_aspects_present": true,
+   "entry": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin",
+   "publication_id": "pub_190192147fd7fd78",
+   "readback_status": "OK"
+  },
+  "cleanup": {
+   "foreign_preserved": 0,
+   "pending": 0,
+   "status": "COMPLETE",
+   "steps": [
+    {
+     "absent_verified": true,
+     "deleted": true,
+     "kind": "entry",
+     "resource": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin"
+    },
+    {
+     "absent_verified": true,
+     "deleted": true,
+     "kind": "dataset",
+     "resource": "okf_kp_publish_kp_20260915t082018z_0387"
+    }
+   ],
+   "unresolved_jobs": 0
+  },
+  "dataset": "okf_kp_publish_kp_20260915t082018z_0387",
+  "head": {
+   "from": null,
+   "merge_job_id": "okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67",
+   "merge_state": "DONE",
+   "observed": "pub_190192147fd7fd78",
+   "state": "SWITCHED",
+   "to": "pub_190192147fd7fd78"
+  },
+  "head_after_catalog": "pub_190192147fd7fd78",
+  "jobs": [
+   {
+    "at": "2026-09-15T08:20:20.458815+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_snapshot_original_head_a149bea8e896",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "snapshot_original_head",
+    "rows": 1,
+    "seq": 2,
+    "state": "DONE",
+    "target": "okf_graph_spike_20260905.active_publication"
+   },
+   {
+    "at": "2026-09-15T08:20:22.258850+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_create_table_04cf3f134493",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "create_table",
+    "rows": null,
+    "seq": 5,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.nodes"
+   },
+   {
+    "at": "2026-09-15T08:20:23.105560+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_create_table_d3d7d4872ab8",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "create_table",
+    "rows": null,
+    "seq": 6,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.edges"
+   },
+   {
+    "at": "2026-09-15T08:20:23.720837+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_create_table_9c2317a5ff39",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "create_table",
+    "rows": null,
+    "seq": 7,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.publications"
+   },
+   {
+    "at": "2026-09-15T08:20:24.696160+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_create_table_892b982f75f1",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "create_table",
+    "rows": null,
+    "seq": 8,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.active_publication"
+   },
+   {
+    "at": "2026-09-15T08:20:25.657369+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_publication_exists_04de1f209885",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "publication_exists",
+    "rows": 0,
+    "seq": 9,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.publications"
+   },
+   {
+    "at": "2026-09-15T08:20:29.352714+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_load_nodes_7f0d27d40667",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "load_nodes",
+    "rows": null,
+    "seq": 10,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.nodes"
+   },
+   {
+    "at": "2026-09-15T08:20:33.684584+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_load_edges_21df42ad11ac",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "load_edges",
+    "rows": null,
+    "seq": 11,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.edges"
+   },
+   {
+    "at": "2026-09-15T08:20:34.719896+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_readback_nodes_1dad6332bfb8",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "readback_nodes",
+    "rows": 44,
+    "seq": 12,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.nodes"
+   },
+   {
+    "at": "2026-09-15T08:20:35.754023+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_readback_edges_d21456ca6d2c",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "readback_edges",
+    "rows": 109,
+    "seq": 13,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.edges"
+   },
+   {
+    "at": "2026-09-15T08:20:37.811328+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_insert_publication_4ffc4d91d100",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "insert_publication",
+    "rows": null,
+    "seq": 14,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.publications"
+   },
+   {
+    "at": "2026-09-15T08:20:39.176261+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_publication_status_fc1b6390442f",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "publication_status",
+    "rows": 1,
+    "seq": 15,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.publications"
+   },
+   {
+    "at": "2026-09-15T08:20:40.154920+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_read_head_c65816785e7e",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "read_head",
+    "rows": 0,
+    "seq": 16,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.active_publication"
+   },
+   {
+    "at": "2026-09-15T08:20:42.224661+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "merge_head",
+    "rows": null,
+    "seq": 17,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.active_publication"
+   },
+   {
+    "at": "2026-09-15T08:20:43.291214+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_read_head_9945996bc0ff",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "read_head",
+    "rows": 1,
+    "seq": 18,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.active_publication"
+   },
+   {
+    "at": "2026-09-15T08:20:44.640124+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_pin_source_publication_f4f9fcaf50e0",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "pin_source_publication",
+    "rows": 1,
+    "seq": 19,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.publications"
+   },
+   {
+    "at": "2026-09-15T08:20:45.643962+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_pin_source_seed_09bfac7145be",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "pin_source_seed",
+    "rows": 1,
+    "seq": 20,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.nodes"
+   },
+   {
+    "at": "2026-09-15T08:20:47.119245+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_read_head_85a953aabf4a",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "read_head",
+    "rows": 1,
+    "seq": 24,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387.active_publication"
+   },
+   {
+    "at": "2026-09-15T08:32:46.185461+00:00",
+    "job_id": "okf_cc_kp_20260915t082018z_0387_reread_original_head_3196e0d747a7",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "role": "reread_original_head",
+    "rows": 1,
+    "seq": 26,
+    "state": "DONE",
+    "target": "okf_graph_spike_20260905.active_publication"
+   }
+  ],
+  "originals": {
+   "at": "2026-09-15T08:20:20.459900+00:00",
+   "entry_present": true,
+   "entry_sha256": "dc5ff299aaf6d1030083426498e381c6494bf2f2bea6981d6db45b5254a3d680",
+   "head": "pub_190192147fd7fd78",
+   "head_rows": 1,
+   "runtime_aspect_present": true
+  },
+  "originals_recheck": {
+   "after": {
+    "entry_sha256": "dc5ff299aaf6d1030083426498e381c6494bf2f2bea6981d6db45b5254a3d680",
+    "head": "pub_190192147fd7fd78"
+   },
+   "before": {
+    "entry_sha256": "dc5ff299aaf6d1030083426498e381c6494bf2f2bea6981d6db45b5254a3d680",
+    "head": "pub_190192147fd7fd78"
+   },
+   "note": "an unexpected external change is reported and preserved, never rolled back by this driver",
+   "status": "UNCHANGED"
+  },
+  "provision": {
+   "dataset": "okf_kp_publish_kp_20260915t082018z_0387",
+   "tables": [
+    "nodes",
+    "edges",
+    "publications",
+    "active_publication"
+   ]
+  },
+  "ready": {
+   "publication_id": "pub_190192147fd7fd78",
+   "readback": {
+    "dangling": true,
+    "distinct": true,
+    "edge_rows": true,
+    "edges_sha256": true,
+    "node_rows": true,
+    "nodes_sha256": true,
+    "section_hashes": true
+   },
+   "row": {
+    "bundle_id": "acme_retail",
+    "compiler_version": "okf_bq_graph.compile/0.1.0",
+    "created_at": "2026-09-15T08:20:35.758979+00:00",
+    "edge_count": 109,
+    "edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+    "node_count": 44,
+    "nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b",
+    "publication_id": "pub_190192147fd7fd78",
+    "ready_at": "2026-09-15T08:20:35.758988+00:00",
+    "section_count": 22,
+    "source_manifest_sha256": "190192147fd7fd780b0da94c596045e363b29b4c23963959503cc677f1a3b5d5",
+    "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec",
+    "validation_reasons": [],
+    "validation_status": "READY"
+   },
+   "state": "READY"
+  },
+  "unresolved_jobs": 0,
+  "writes": [
+   {
+    "role": "create_dataset",
+    "seq": 4,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387"
+   },
+   {
+    "role": "create_entry",
+    "seq": 22,
+    "state": "DONE",
+    "target": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin"
+   },
+   {
+    "role": "delete_entry",
+    "seq": 27,
+    "state": "DONE",
+    "target": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin"
+   },
+   {
+    "role": "delete_dataset",
+    "seq": 29,
+    "state": "DONE",
+    "target": "okf_kp_publish_kp_20260915t082018z_0387"
+   }
+  ]
+ },
+ "rfc_path": [
+  "author/publish (BigQuery)",
+  "discover (Catalog)",
+  "pin + retrieve fixed context",
+  "evaluate current access (incl. revocation)",
+  "validate the calculation (receipt)",
+  "enforcing consumer"
+ ],
+ "run_dir": "evidence/publish-connected/kp-20260915t082018z-0387",
+ "run_id": "kp-20260915t082018z-0387",
+ "runner": "okf_bq_graph.publish_connected/0.1.0",
+ "started_at": "2026-09-15T08:20:18.079470+00:00",
+ "state_trace": [
+  {
+   "at": "2026-09-15T08:20:18.144204+00:00",
+   "edges": 109,
+   "jobs": [],
+   "nodes": 44,
+   "publication_id": "pub_190192147fd7fd78",
+   "state": "PLANNED"
+  },
+  {
+   "at": "2026-09-15T08:20:24.697841+00:00",
+   "dataset": "okf_kp_publish_kp_20260915t082018z_0387",
+   "jobs": [
+    "okf_cc_kp_20260915t082018z_0387_snapshot_original_head_a149bea8e896",
+    "okf_cc_kp_20260915t082018z_0387_create_table_04cf3f134493",
+    "okf_cc_kp_20260915t082018z_0387_create_table_d3d7d4872ab8",
+    "okf_cc_kp_20260915t082018z_0387_create_table_9c2317a5ff39",
+    "okf_cc_kp_20260915t082018z_0387_create_table_892b982f75f1"
+   ],
+   "state": "PREPARING"
+  },
+  {
+   "at": "2026-09-15T08:20:37.813700+00:00",
+   "jobs": [
+    "okf_cc_kp_20260915t082018z_0387_publication_exists_04de1f209885",
+    "okf_cc_kp_20260915t082018z_0387_load_nodes_7f0d27d40667",
+    "okf_cc_kp_20260915t082018z_0387_load_edges_21df42ad11ac",
+    "okf_cc_kp_20260915t082018z_0387_readback_nodes_1dad6332bfb8",
+    "okf_cc_kp_20260915t082018z_0387_readback_edges_d21456ca6d2c",
+    "okf_cc_kp_20260915t082018z_0387_insert_publication_4ffc4d91d100"
+   ],
+   "publication_id": "pub_190192147fd7fd78",
+   "state": "BQ_STAGED",
+   "validation_status": "READY"
+  },
+  {
+   "at": "2026-09-15T08:20:43.292573+00:00",
+   "head_from": null,
+   "head_to": "pub_190192147fd7fd78",
+   "jobs": [
+    "okf_cc_kp_20260915t082018z_0387_publication_status_fc1b6390442f",
+    "okf_cc_kp_20260915t082018z_0387_read_head_c65816785e7e",
+    "okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67",
+    "okf_cc_kp_20260915t082018z_0387_read_head_9945996bc0ff"
+   ],
+   "merge_job_id": "okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67",
+   "state": "BQ_COMMITTED"
+  },
+  {
+   "at": "2026-09-15T08:20:46.207848+00:00",
+   "entry": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin",
+   "jobs": [
+    "okf_cc_kp_20260915t082018z_0387_pin_source_publication_f4f9fcaf50e0",
+    "okf_cc_kp_20260915t082018z_0387_pin_source_seed_09bfac7145be"
+   ],
+   "state": "KC_APPLIED"
+  },
+  {
+   "at": "2026-09-15T08:20:47.120170+00:00",
+   "head": "pub_190192147fd7fd78",
+   "jobs": [
+    "okf_cc_kp_20260915t082018z_0387_read_head_85a953aabf4a"
+   ],
+   "state": "COMPLETE"
+  }
+ ],
+ "verdict": "E2E_PUBLISH_CONNECTED",
+ "verdict_rule": "E2E_PUBLISH_CONNECTED only when the author provenance holds, the BigQuery publication is READY on full-row readback, the head was observed switched to it, the Catalog pin generated from those rows parses OK, the publish journal has no unresolved job, the consumer resolved exactly that publication in that dataset, the connected run is E2E_CONNECTED, every author job ran as the author, the originals are unchanged and cleanup is COMPLETE; E2E_BROKEN when the connected run is broken, the consumer served another publication or dataset, or an author job ran as someone else; E2E_INCOMPLETE otherwise"
+}
