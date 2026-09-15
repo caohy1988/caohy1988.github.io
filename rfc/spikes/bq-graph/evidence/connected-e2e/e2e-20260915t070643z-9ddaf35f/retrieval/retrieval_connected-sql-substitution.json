@@ -1,0 +1,180 @@
+{
+ "computations": [
+  {
+   "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+   "concept": "<id:b6c2a45a>",
+   "concept_hops": 1,
+   "freshness": {
+    "stale_after": "2026-12-31T00:00:00Z",
+    "verdict": "FRESH"
+   },
+   "path": "<id:b6c2a45a>.md",
+   "runtime": "bigquery",
+   "runtime_verdict": "NOT_EXECUTED",
+   "section_id": "acme_retail|pub_190192147fd7fd78|Section|<id:b6c2a45a>#s0",
+   "seed": "<id:567bd799>",
+   "sql": "WITH recognized_orders AS (\n  SELECT\n    o.order_id,\n    CASE\n      WHEN o.currency = 'USD' THEN o.net_amount\n      ELSE o.net_amount * fx.rate_to_usd\n    END AS revenue_usd\n  FROM `acme.sales.orders` AS o\n  LEFT JOIN `acme.finance.fx_daily_rates` AS fx\n    ON fx.currency = o.currency\n    AND fx.rate_date = DATE(o.order_ts)\n  WHERE o.order_status = 'delivered'\n    AND DATE_DIFF(CURRENT_DATE(), DATE(o.order_ts), DAY) >= 30\n    AND DATE(o.order_ts) BETWEEN @period_start AND @period_end\n),\ncogs_full AS (\n  SELECT\n    ol.order_id,\n    SUM(ol.quantity * p.cost) AS product_cost,\n    SUM(fc.allocated_cost) AS fulfillment_cost,\n    SUM(sc.shipping_cost) AS shipping_cost,\n    SUM(pf.fee_amount) AS payment_fee\n  FROM `acme.sales.order_lines` AS ol\n  JOIN `acme.catalog.products` AS p ON p.product_id = ol.product_id\n  LEFT JOIN `acme.logistics.fulfillment_cost` AS fc ON fc.order_id = ol.order_id\n  LEFT JOIN `acme.logistics.shipment_cost` AS sc ON sc.order_id = ol.order_id\n  LEFT JOIN `acme.finance.payment_fees` AS pf ON pf.order_id = ol.order_id\n  GROUP BY ol.order_id\n)\nSELECT\n  SUM(r.revenue_usd) - SUM(\n    COALESCE(c.product_cost, 0)\n    + COALESCE(c.fulfillment_cost, 0)\n    + COALESCE(c.shipping_cost, 0)\n    + COALESCE(c.payment_fee, 0)\n  ) AS gross_margin_usd\nFROM recognized_orders AS r\nLEFT JOIN cogs_full AS c USING (order_id)",
+   "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+   "status": "stable",
+   "trust_tier": "human-reviewed",
+   "via": [
+    "<id:567bd799>",
+    "<id:b6c2a45a>"
+   ]
+  }
+ ],
+ "concepts": [
+  {
+   "concept": "<id:567bd799>",
+   "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+   "forced": false,
+   "freshness": {
+    "stale_after": "2026-12-31T00:00:00Z",
+    "verdict": "FRESH"
+   },
+   "lifecycle_status": "stable",
+   "matched_sections": [],
+   "path": "<id:567bd799>.md",
+   "provenance": [
+    {
+     "declaration": "frontmatter.sources[0]",
+     "note": "declaration-scoped signals (usage_count/window) and resolves_to are not exposed as graph properties; fetch from edges/nodes tables if needed",
+     "resolution": null,
+     "resource": "policies/margin-standard.md",
+     "source_id": "acme_retail|pub_190192147fd7fd78|Source|src:policies/margin-standard.md",
+     "title": "Cost Allocation & Margin Standard (FY2026)"
+    },
+    {
+     "declaration": "frontmatter.sources[1]",
+     "note": "declaration-scoped signals (usage_count/window) and resolves_to are not exposed as graph properties; fetch from edges/nodes tables if needed",
+     "resolution": null,
+     "resource": "policies/revenue-recognition.md",
+     "source_id": "acme_retail|pub_190192147fd7fd78|Source|src:policies/revenue-recognition.md",
+     "title": "Revenue Recognition Policy (FY2026)"
+    }
+   ],
+   "replacement": null,
+   "seed_origin": "catalog",
+   "title": "Gross Margin",
+   "trust_tier": "human-reviewed",
+   "type": "Metric",
+   "verifications": [
+    {
+     "at": "2026-07-01T09:00:00Z",
+     "by": "human:jsmith@acme",
+     "kind": "human"
+    }
+   ]
+  }
+ ],
+ "paths": [
+  {
+   "concept_hops": 1,
+   "seed": "<id:567bd799>",
+   "via": [
+    "<id:567bd799>",
+    "<id:b6c2a45a>"
+   ]
+  }
+ ],
+ "scope": {
+  "as_of": "2026-09-15T07:06:43Z",
+  "bundle_id": "acme_retail",
+  "engine": "fallback",
+  "publication_id": "pub_190192147fd7fd78",
+  "requester": "sa:okf-receipt-restricted",
+  "seed": {
+   "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+   "origin": "catalog"
+  },
+  "templates": {
+   "context": {
+    "chars": 990,
+    "graph_table": false,
+    "name": "context.fallback",
+    "sha256": "ad8b85a3df93c69c43c8996bfdf49e2032204933a2064e7a002b62241ed87910"
+   },
+   "walk": {
+    "chars": 1698,
+    "graph_table": false,
+    "name": "fallback.sql",
+    "sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047"
+   }
+  },
+  "top_k": 5
+ },
+ "status": "OK",
+ "timing": {
+  "jobs": [
+   {
+    "bytes_billed": 20971520,
+    "bytes_processed": 58680,
+    "cache_hit": false,
+    "created": "2026-09-15T07:10:15.792000+00:00",
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-15T07:10:16.388000+00:00",
+    "error": null,
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_2d838e853803",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+    "server_state": "DONE",
+    "slot_ms": 736,
+    "stage": "walk",
+    "started": "2026-09-15T07:10:15.892000+00:00",
+    "state": "DONE",
+    "stats_present": true
+   },
+   {
+    "bytes_billed": 10485760,
+    "bytes_processed": 16752,
+    "cache_hit": false,
+    "created": "2026-09-15T07:10:16.849000+00:00",
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-15T07:10:17.110000+00:00",
+    "error": null,
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_114a2ab8c6e6",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+    "server_state": "DONE",
+    "slot_ms": 72,
+    "stage": "nodes",
+    "started": "2026-09-15T07:10:16.906000+00:00",
+    "state": "DONE",
+    "stats_present": true
+   },
+   {
+    "bytes_billed": 20971520,
+    "bytes_processed": 157239,
+    "cache_hit": false,
+    "created": "2026-09-15T07:10:16.878000+00:00",
+    "edition": "ENTERPRISE",
+    "ended": "2026-09-15T07:10:17.187000+00:00",
+    "error": null,
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_27245eb2bfdd",
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+    "server_state": "DONE",
+    "slot_ms": 95,
+    "stage": "context",
+    "started": "2026-09-15T07:10:16.950000+00:00",
+    "state": "DONE",
+    "stats_present": true
+   }
+  ],
+  "stages_ms": {
+   "assembly": 0.3,
+   "context": 830.2,
+   "nodes": 747.7,
+   "seed": 0.0,
+   "walk": 1058.3
+  },
+  "total_ms": 1890.9
+ },
+ "warnings": [
+  "catalog seed: exact Concept id supplied by the runtime pin, not a semantic ranking",
+  "FALLBACK engine: relational joins, not BigQuery Graph"
+ ]
+}

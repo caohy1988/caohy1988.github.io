@@ -1,0 +1,109 @@
+┌─ OKF connected end-to-end · Catalog → publication → retrieval → receipt → consumer, with access + revocation
+│ model      gemini-3.8-flash (Vertex AI, global)
+│ project    test-project-0728-467323 · live GCP APIs: Dataplex Catalog, BigQuery, IAM
+│ data       synthetic Acme fixture · no customer data
+│ requester  restricted service account via IAM impersonation
+│ engine     relational fallback on the published tables (not BigQuery Graph)
+│ runner     okf_bq_graph.connected @ 9ace988 · okf-connected-e2e 0.1.0
+└──────────────────────────────────────────────────────────────────────────────
+you ▸ What was Acme's gross margin for January 2026, and can I trust the number?
+agent ▸ tool call governed_gross_margin({"period": "2026-01"})
+  [00:06:43] provenance   detail=SDK pin, clean checkout
+  [00:06:43] grant        detail=Catalog viewer + dataset reads for the requester; waiting until the requester observes them
+  [00:08:14] grant        detail=waiting for a stable observation of Catalog, graph and fact access
+  [00:09:44] grant_done   catalog=ALLOWED waited_s=83
+  [00:09:45] case         case=connected-approved stage=catalog -> publication -> retrieval -> payload -> bind
+  [00:09:58] case         case=connected-approved stage=facts read-back under the requester
+  [00:10:06] case         case=connected-approved stage=receipt CLI (approved) under the requester
+  [00:10:12] decision     case=connected-approved decision=RELEASED acceptance=MET display=[LIVE] Gross margin: $400.00 USD · VERIFIED
+  [00:10:12] case         case=connected-sql-substitution stage=catalog -> publication -> retrieval -> payload -> bind
+  [00:10:22] case         case=connected-sql-substitution stage=facts read-back under the requester
+  [00:10:29] case         case=connected-sql-substitution stage=receipt CLI (sql-substitution) under the requester
+  [00:10:33] decision     case=connected-sql-substitution decision=REFUSED acceptance=MET
+  [00:10:33] case         case=connected-denied-intermediate stage=row policy hides the intermediate; retrieval under the requester
+  [00:10:44] decision     case=connected-denied-intermediate decision=REFUSED acceptance=MET
+  [00:12:11] case         case=connected-unauthorized-output stage=waiting for a stable observation of {'graph': 'ALLOWED', 'authorization': 'DENIED'}
+  [00:13:41] case         case=connected-unauthorized-output stage=catalog -> publication -> retrieval -> payload -> bind
+  [00:13:51] decision     case=connected-unauthorized-output decision=REFUSED acceptance=MET
+  [00:13:51] case         case=connected-revocation stage=control: access present
+  [00:15:25] case         case=connected-revocation stage=revoke Catalog, graph and fact access; wait for the requester to observe it
+  [00:18:24] case         case=connected-revocation stage=fresh request from Catalog discovery
+  [00:18:24] case         case=connected-revocation stage=retained-pin bypass: publication, retrieval, authorization
+  [00:18:27] decision     case=connected-revocation decision=REFUSED acceptance=MET
+  [00:18:27] teardown     detail=restore Catalog IAM, dataset ACLs, row-policy grantees; read back
+tool result → model (validated: no identifiers, SQL, principals or paths)
+{
+ "decision": "RELEASED",
+ "answer": "[LIVE] Gross margin: $400.00 USD · VERIFIED",
+ "run_verdict": "E2E_CONNECTED",
+ "receipt": {
+  "ref": "<id:7bb35d23>",
+  "verdict": "VERIFIED"
+ },
+ "facts_readback": "OK",
+ "cases": {
+  "approved": {
+   "decision": "RELEASED",
+   "acceptance": "MET"
+  },
+  "sql-substitution": {
+   "decision": "REFUSED",
+   "acceptance": "MET"
+  },
+  "denied-intermediate": {
+   "decision": "REFUSED",
+   "acceptance": "MET"
+  },
+  "unauthorized-output": {
+   "decision": "REFUSED",
+   "acceptance": "MET"
+  },
+  "revocation": {
+   "decision": "REFUSED",
+   "acceptance": "MET"
+  }
+ },
+ "access_checks": {
+  "catalog_before_grant": "DENIED",
+  "catalog_grant_observed": "ALLOWED",
+  "catalog_grant_waited_s": 83,
+  "caller_is_requester": true,
+  "revocation_observed": true,
+  "catalog_revocation_waited_s": 0,
+  "fresh_request_after_revocation": "CATALOG_ERROR",
+  "bypass_publication": "ERROR",
+  "bypass_retrieval": "DENIED",
+  "authorization_after_revocation": "DENIED",
+  "receipt_launches_after_revocation": 0
+ },
+ "identity": {
+  "status": "BOUND",
+  "jobs_by_role": {
+   "graph": 46,
+   "receipt": 2,
+   "requester_probe": 1,
+   "policy_admin": 9
+  }
+ },
+ "teardown": {
+  "catalog": "VERIFIED",
+  "broker": "VERIFIED"
+ }
+}
+agent ◂ tool result governed_gross_margin
+gemini-3.8-flash ▸ "[LIVE] Gross margin: $400.00 USD · VERIFIED"
+The receipt verdict is **VERIFIED** and the run verdict is **E2E_CONNECTED**.
+The run validated Catalog read access, the pinned publication, governed retrieval, fact read-back, and receipt verification. Additionally, it confirmed that after access was revoked, a fresh request, a publication or retrieval bypass, and authorization via the stored receipt were all refused. 
+Please note that this data is a synthetic fixture, the APIs are live GCP, and this reflects a single run rather than operational readiness.
+consumer decisions
+  connected-approved               RELEASED  acceptance=MET
+  connected-sql-substitution       REFUSED   acceptance=MET
+  connected-denied-intermediate    REFUSED   acceptance=MET
+  connected-unauthorized-output    REFUSED   acceptance=MET
+  connected-revocation             REFUSED   acceptance=MET
+access and revocation
+  catalog before grant=DENIED · after grant=ALLOWED (83s) · caller is requester=True
+  after revocation: fresh request=CATALOG_ERROR · bypass publication=ERROR · bypass retrieval=DENIED · authorization=DENIED · receipt launches=0
+  identity=BOUND (graph 46, receipt 2, requester_probe 1, policy_admin 9) · unresolved jobs=0 · teardown={'catalog': 'VERIFIED', 'broker': 'VERIFIED'}
+verdict E2E_CONNECTED · run e2e-20260915t070643z-9ddaf35f
+transcript: evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/agent_transcript.json
