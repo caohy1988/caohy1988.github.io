@@ -1,5 +1,18 @@
 # Plan — `/rfc/e2e/`
 
+> **Superseded in part (2026-09-15, branch `rfc/e2e-viz`).** This is the PR #79 execution plan. The walkthrough rewrite follows [`VISUAL_PLAN.md`](VISUAL_PLAN.md) units U1–U3.
+>
+> **What stays:** the step 2 tape offsets remain the source for the Evidence chapter links and each step's "▶" link. These are compressed recording positions, not live-run elapsed times. The VTT `result` cue now describes the agent's *final answer*: its tool payload still carries run IDs and a masked receipt reference.
+>
+> **Checks for the rewrite:**
+> - `node rfc/tools/build_e2e_visual_evidence.mjs --check`
+> - `node --test rfc/tools/build_e2e_visual_evidence.test.mjs`
+> - `node rfc/tools/check_e2e_visual.mjs [--shots DIR]`
+> - `node tools/site_nav.mjs --check`
+> - `node tools/check_site_nav.mjs`
+> - `node rfc/tools/check_rfc_routes.mjs`
+> - `node rfc/tools/rfc_skim_check.mjs rfc/e2e/index.html --max-rendered 950 --window 350 --tokens "Open Knowledge Format,Knowledge Catalog,BigQuery Knowledge Publish,synthetic,still open"`
+
 Execute in order. Everything is site-only on branch `rfc/e2e-page`. No live GCP calls.
 
 1. **Docs.** Write `intent.md`, `spec.md` and this plan.

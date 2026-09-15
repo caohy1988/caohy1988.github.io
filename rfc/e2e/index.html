@@ -4,19 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="canonical" href="https://caohy1988.github.io/rfc/e2e/">
-<meta name="description" content="The RFC's end-to-end demo, one live run on synthetic data: definitions authored in Open Knowledge Format, published in BigQuery as the version agents are served, discovered in Knowledge Catalog, then used by an agent under its own access, checked by a receipt and refused after revocation. What it proved, and what is still open.">
-<meta property="og:title" content="Write it down. Publish it in BigQuery. Prove the agent’s number.">
-<meta property="og:description" content="Open Knowledge Format + Knowledge Catalog for authoring and discovery, BigQuery Knowledge Publish as the serving authority, and an agent whose number is released only with a verified receipt. One live run, synthetic data, nothing ready.">
+<meta name="description" content="The RFC's end-to-end demo as a six-step walkthrough of one recorded live run on synthetic data: Open Knowledge Format authors, BigQuery Knowledge Publish publishes and serves a fixed version, Knowledge Catalog points to it, and the agent's number is released only with a verified receipt, then refused after revocation. What it showed once, and what is still open.">
+<meta property="og:title" content="Can you defend the agent’s number? Six recorded steps.">
+<meta property="og:description" content="Open Knowledge Format + Knowledge Catalog for authoring and discovery, BigQuery Knowledge Publish as the serving authority, and a receipt checked before release. One recorded live run, synthetic data, spike code, not a readiness claim.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://caohy1988.github.io/rfc/e2e/">
 <meta name="theme-color" content="#16233B">
-<title>End-to-end demo · Publish in BigQuery, discover in Knowledge Catalog, prove the agent’s number</title>
+<title>End-to-end demo · Six recorded steps from a written definition to a released number</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="../../assets/site-nav.css" data-site-nav>
 <script defer src="../../assets/site-nav.js" data-site-nav></script>
+<script defer src="visual-walkthrough.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to the demo</a>
@@ -55,262 +56,287 @@
 
 <header class="masthead">
   <div class="shell">
-    <p class="kicker"><span>RFC · end-to-end demo · one live run</span><span><a href="../">RFC</a> · <a href="../detailed-rfc/">Detailed RFC</a></span></p>
-    <h1>Write it down. Publish it in BigQuery. <em>Prove the agent’s number.</em></h1>
-    <p class="problem"><strong>The problem:</strong> an AI agent can find the right metric definition and still report a number nobody can defend: an old formula, unapproved data access, no proof its query was the approved one.</p>
+    <p class="kicker"><span>RFC · end-to-end demo</span><span><a href="../">RFC</a> · <a href="../detailed-rfc/">Detailed RFC</a></span></p>
+    <h1>Can you defend the agent’s number?</h1>
+    <p class="bridge">The RFC’s Alder slide shows an <em>illustrative</em> 118% versus 96% retention disagreement. Here the same checks (definition, access, calculation) ran live on Acme’s January 2026 gross margin, using synthetic data.</p>
+    <p class="roles"><b>Open Knowledge Format (OKF)</b> writes the knowledge · <b>Knowledge Catalog</b> helps find it · <b>BigQuery Knowledge Publish</b>, a proposed feature, publishes and serves the fixed version.</p>
     <ul class="badges" aria-label="What this demo is">
-      <li class="badge warn">Proposed feature · spike code, not a product</li>
+      <li class="badge ok">Recorded live run</li>
       <li class="badge">Synthetic data · one run</li>
-      <li class="badge ok">Real BigQuery, Knowledge Catalog and IAM calls</li>
+      <li class="badge warn">Spike code, not a product</li>
     </ul>
+    <p class="cta"><a class="go" href="#path">Follow the six steps ↓</a><a href="#evidence">Inspect the evidence</a></p>
+    <p class="teaser"><strong>Still open:</strong> access checks in BigQuery Graph queries, an independent attester, repeated runs, real data.</p>
   </div>
 </header>
 
 <main id="main" tabindex="-1">
-  <section class="band shell" aria-labelledby="glance-title">
-    <h2 class="eyebrow" id="glance-title">In 30 seconds</h2>
-    <div class="cards">
-      <article class="card c-problem">
-        <p class="card-k">What breaks today</p>
-        <h3>Found is not trusted.</h3>
-        <p>Search finds a likely definition, not the exact version with its rules. Nothing records who let the agent in or whether its query was approved.</p>
-      </article>
-      <article class="card c-a">
-        <p class="card-k">Authoring + discovery</p>
-        <h3>Open Knowledge Format + Knowledge Catalog</h3>
-        <p>Finance writes definitions, rules and the approved calculation as Open Knowledge Format files. Knowledge Catalog lets agents find them; each entry names the published version to use. A directory, not the authority.</p>
-      </article>
-      <article class="card c-b">
-        <p class="card-k">Serving authority</p>
-        <h3>BigQuery Knowledge Publish</h3>
-        <p>BigQuery stores a fixed, read-only version, reads every row back to check it, marks it ready and switches the “current version” in one step. Agents are served from BigQuery.</p>
-      </article>
-      <article class="card c-proved">
-        <p class="card-k">What the live run proved</p>
-        <h3>One live run published in BigQuery, then the agent discovered, used, verified, and was revoked — successfully.</h3>
-        <p class="result"><span>Acme gross margin, January 2026</span><b>$400.00</b><span>released with a verified receipt</span></p>
-      </article>
+  <section class="band shell" id="path" aria-labelledby="path-title">
+    <p class="eyebrow">The path · six steps</p>
+    <h2 class="title" id="path-title">From a written definition to a released number</h2>
+    <p class="lede">Choose a step to see what the recorded run did. Choosing replays nothing.</p>
+<!-- e2e-visual:walkthrough:start -->
+<div class="vw" id="walkthrough" data-evidence="visual-evidence.json" data-markup-sha256="7b00e99c3627bb10870bb95068dc634406e9c33f7cade27a912e0bd0199b7331">
+    <p class="vw-unavailable" role="status" hidden>Interactive details unavailable. The six recorded steps below still come from the committed files of the 2026-09-15 run; <a href="#evidence">open the raw records</a>.</p>
+    <div class="vw-grid">
+      <nav class="vw-rail" aria-label="Six steps">
+        <ol>
+          <li><a href="#stage-publish" data-stage="publish" class="p-b"><span class="vw-n" aria-hidden="true">1</span><span><b>Publish</b> BigQuery fixes one version</span></a></li>
+          <li><a href="#stage-catalog" data-stage="catalog" class="p-a"><span class="vw-n" aria-hidden="true">2</span><span><b>Catalog</b> a pointer, not the authority</span></a></li>
+          <li><a href="#stage-discover" data-stage="discover" class="p-a"><span class="vw-n" aria-hidden="true">3</span><span><b>Discover</b> the requester finds that version</span></a></li>
+          <li><a href="#stage-retrieve" data-stage="retrieve" class="p-b"><span class="vw-n" aria-hidden="true">4</span><span><b>Retrieve</b> fixed context, requester’s access</span></a></li>
+          <li><a href="#stage-receipt" data-stage="receipt" class="p-c"><span class="vw-n" aria-hidden="true">5</span><span><b>Receipt</b> checked before release</span></a></li>
+          <li><a href="#stage-revoke" data-stage="revoke" class="p-c"><span class="vw-n" aria-hidden="true">6</span><span><b>Revoke</b> later requests refused</span></a></li>
+        </ol>
+      </nav>
+      <div class="vw-work">
+        <figure class="vw-diagram">
+          <ol class="vw-flow" aria-label="Objects in the recorded path"><li class="vw-obj p-a" data-obj="okf"><b>Open Knowledge Format files</b><span>definition, rules, calculation</span></li><li class="vw-link" data-link="okf-publication" aria-hidden="true"></li><li class="vw-obj p-b" data-obj="publication"><b>BigQuery publication</b><span>fixed, READY, current</span></li><li class="vw-link" data-link="publication-catalog" aria-hidden="true"></li><li class="vw-obj p-a" data-obj="catalog"><b>Catalog entry</b><span>points to that version</span></li><li class="vw-link" data-link="catalog-requester" aria-hidden="true"></li><li class="vw-obj p-c" data-obj="requester"><b>Requester</b><span>restricted account</span></li><li class="vw-link" data-link="requester-receipt" aria-hidden="true"></li><li class="vw-obj p-c" data-obj="receipt"><b>Receipt check</b><span>before any release</span></li></ol>
+          <figcaption class="vw-legend"><span class="lg p-a">OKF + Knowledge Catalog: authoring, discovery</span><span class="lg p-b">BigQuery Knowledge Publish: serving authority</span><span class="lg p-c">Requester and receipt</span></figcaption>
+        </figure>
+        <p class="vw-live" aria-live="polite"></p>
+        <article class="vw-stage p-b" id="stage-publish" data-stage="publish" tabindex="-1" aria-labelledby="stage-publish-h">
+          <p class="vw-kicker"><span class="tag t-b">BigQuery Knowledge Publish</span></p>
+          <h3 id="stage-publish-h">Publish one fixed version in BigQuery</h3>
+          <div class="vw-cols">
+            <div class="vw-mean"><h4>What this means</h4><p>Finance’s Open Knowledge Format files define Gross Margin, its rules and the approved calculation. BigQuery stores them as a fixed version, checks it, then makes it current.</p></div>
+            <div class="vw-obs"><h4>Recorded</h4>
+          <ol class="vw-checks">
+            <li><b>Written</b> <span class="obs" data-fact="nodes">44</span> nodes, <span class="obs" data-fact="edges">109</span> edges, <span class="obs" data-fact="sections">22</span> sections</li>
+            <li><b>Read back</b> <span class="obs" data-fact="readback_checks">7 of 7</span> checks true</li>
+            <li><b><span class="obs" data-fact="ready_state">READY</span></b> at <span class="obs" data-fact="ready_at">08:20:35 UTC</span></li>
+            <li><b>Current version</b> <span class="obs" data-fact="head_from">none</span> → <span class="obs" data-fact="publication_id">pub_190192147fd7fd78</span>, <span class="obs" data-fact="head_state">SWITCHED</span> <span class="obs" data-fact="head_at">08:20:43 UTC</span></li>
+          </ol>
+            </div>
+          </div>
+          <div class="vw-more"><details class="vw-src"><summary>Source details</summary><ul><li><b>nodes</b> = <code>44</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/author/nodes</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/ready/row/node_count</code></li><li><b>edges</b> = <code>109</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/author/edges</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/ready/row/edge_count</code></li><li><b>sections</b> = <code>22</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/ready/row/section_count</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 53 <code>publish</code></li><li><b>readback_checks</b> = <code>7</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/ready/readback</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 53 <code>publish</code></li><li><b>ready_state</b> = <code>&quot;READY&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/ready/state</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/ready/row/validation_status</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 53 <code>publish</code></li><li><b>ready_at</b> = <code>&quot;2026-09-15T08:20:35.758988+00:00&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/ready/row/ready_at</code></li><li><b>head_from</b> = <code>null</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/head/from</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/state_trace/3/head_from</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 67 <code>head_switch</code></li><li><b>publication_id</b> = <code>&quot;pub_190192147fd7fd78&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/author/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/ready/row/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/ready/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/head/to</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/head/observed</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/catalog_pin/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/consumed/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/catalog/pin/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/publication/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/retrieval/scope/publication_id</code></li><li><b>head_state</b> = <code>&quot;SWITCHED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/head/state</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 67 <code>head_switch</code></li><li><b>head_at</b> = <code>&quot;2026-09-15T08:20:43.292573+00:00&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/state_trace/3/at</code></li><li><b>jobs</b> (full references):<ul><li>load_nodes · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_load_nodes_7f0d27d40667</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 38 <code>terminal</code> seq 10</li><li>load_edges · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_load_edges_21df42ad11ac</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 41 <code>terminal</code> seq 11</li><li>readback_nodes · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_readback_nodes_1dad6332bfb8</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 45 <code>terminal</code> seq 12</li><li>readback_edges · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_readback_edges_d21456ca6d2c</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 48 <code>terminal</code> seq 13</li><li>insert_publication · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_insert_publication_4ffc4d91d100</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 51 <code>terminal</code> seq 14</li><li>publication_status · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_publication_status_fc1b6390442f</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 56 <code>terminal</code> seq 15</li><li>merge_head · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 62 <code>terminal</code> seq 17</li><li>read_head after merge · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_read_head_9945996bc0ff</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 66 <code>terminal</code> seq 18</li></ul></li><li><b>author identity</b> <span class="obs" data-fact="author_jobs">19</span> jobs <span class="obs" data-fact="author_identity">BOUND</span>; source pin <span class="obs" data-fact="source_pin">31da799</span></li></ul></details> <a class="seek" href="#tape" data-t="11.7" aria-label="Watch this step in the original CLI recording at 0:12">▶ 0:12</a></div>
+        </article>
+        <article class="vw-stage p-a" id="stage-catalog" data-stage="catalog" tabindex="-1" aria-labelledby="stage-catalog-h">
+          <p class="vw-kicker"><span class="tag t-a">Knowledge Catalog</span></p>
+          <h3 id="stage-catalog-h">Write the Knowledge Catalog pointer</h3>
+          <div class="vw-cols">
+            <div class="vw-mean"><h4>What this means</h4><p>After the switch, Knowledge Catalog gets an entry naming the version BigQuery published. Catalog is the directory; BigQuery stays the serving authority.</p></div>
+            <div class="vw-obs"><h4>Recorded</h4>
+          <ul class="vw-rec">
+            <li>Entry written <span class="obs" data-fact="pin_at">08:20:46 UTC</span>, pointing to <span class="obs" data-fact="publication_id">pub_190192147fd7fd78</span>; readback <span class="obs" data-fact="pin_readback">OK</span>.</li>
+            <li>Catalog API operations, not BigQuery jobs: no job ID.</li>
+          </ul>
+            </div>
+          </div>
+          <div class="vw-more"><details class="vw-src"><summary>Source details</summary><ul><li><b>pin_at</b> = <code>&quot;2026-09-15T08:20:46.207848+00:00&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/state_trace/4/at</code></li><li><b>publication_id</b> = <code>&quot;pub_190192147fd7fd78&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/author/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/ready/row/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/ready/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/head/to</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/head/observed</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/catalog_pin/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/consumed/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/catalog/pin/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/publication/publication_id</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/retrieval/scope/publication_id</code></li><li><b>pin_readback</b> = <code>&quot;OK&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/publish/catalog_pin/readback_status</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 85 <code>write_pin</code></li><li><b>operations</b> (no BigQuery job):<ul><li>create_entry · <code>job_backed=false</code>, <code>job_id=null</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 80 <code>terminal</code> seq 22</li><li>readback_entry · <code>job_backed=false</code>, <code>job_id=null</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 84 <code>terminal</code> seq 23</li></ul></li><li><b>entry</b> <code>projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin</code></li></ul></details> <a class="seek" href="#tape" data-t="27.4" aria-label="Watch this step in the original CLI recording at 0:27">▶ 0:27</a></div>
+        </article>
+        <article class="vw-stage p-a" id="stage-discover" data-stage="discover" tabindex="-1" aria-labelledby="stage-discover-h">
+          <p class="vw-kicker"><span class="tag t-a">Knowledge Catalog</span><span class="tag t-c">Requester</span></p>
+          <h3 id="stage-discover-h">Discover it as the requester</h3>
+          <div class="vw-cols">
+            <div class="vw-mean"><h4>What this means</h4><p>The agent’s tool reads Knowledge Catalog as the restricted requester and pins the version named there. Finding an entry grants no access to its contents.</p></div>
+            <div class="vw-obs"><h4>Recorded</h4>
+          <ul class="vw-rec">
+            <li>Before access: <span class="obs" data-fact="catalog_before">DENIED</span> (<span class="obs" data-fact="catalog_before_http">HTTP 403</span>); after grant: <span class="obs" data-fact="catalog_after">ALLOWED</span>.</li>
+            <li>Pin versus BigQuery’s publication and dataset: <span class="obs" data-fact="consumed_status">MATCH</span>, <span class="obs" data-fact="consumed_checks">7 of 7</span> checks.</li>
+          </ul>
+            </div>
+          </div>
+          <div class="vw-more"><details class="vw-src"><summary>Source details</summary><ul><li><b>catalog_before</b> = <code>&quot;DENIED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/grant/catalog_before/status</code></li><li><b>catalog_before_http</b> = <code>403</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/grant/catalog_before/http_status</code></li><li><b>catalog_after</b> = <code>&quot;ALLOWED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/grant/catalog_wait/status</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/grant/catalog_wait/observed</code></li><li><b>consumed_status</b> = <code>&quot;MATCH&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/consumed/status</code></li><li><b>consumed_checks</b> = <code>7</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/consumed/checks</code></li><li><b>requester Catalog reads</b>:<ul><li>connected-approved__catalog_list_0 at 08:23:39 UTC · response hash <code>3d329c2fad1929d2c5012e8e99a7d55d74725122867663330c506609ee75100f</code>; redacted retained copy <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/catalog/connected-approved__catalog_list_0.json">hash</a> <code>6369b42956e15bda7fd29e1c902f1255e47a495ebdf55c1c0afc08ecce028809</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> line 3 <code>catalog_raw</code></li><li>connected-approved__catalog_entry at 08:23:39 UTC · response hash <code>41aa89433a853229da25726656cc73d1f7bb0e890ea1c275d211aec7c9fc88c6</code>; redacted retained copy <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/catalog/connected-approved__catalog_entry.json">hash</a> <code>404623d5f145a489ea9ad89b2ccd1b26cad0a2aa1075c4e6c1953f9da0e7e18e</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> line 5 <code>catalog_raw</code></li></ul></li><li>Access observed after <span class="obs" data-fact="catalog_wait_s">71 s</span> of polling (a diagnostic interval, not a propagation bound); caller is requester <span class="obs" data-fact="caller_is_requester">true</span>. Consumer records mask part of the entry name; ownership is corroborated by <code>entry_is_owned</code>.</li></ul></details> <a class="seek" href="#tape" data-t="39.8" aria-label="Watch this step in the original CLI recording at 0:40">▶ 0:40</a></div>
+        </article>
+        <article class="vw-stage p-b" id="stage-retrieve" data-stage="retrieve" tabindex="-1" aria-labelledby="stage-retrieve-h">
+          <p class="vw-kicker"><span class="tag t-b">BigQuery Knowledge Publish</span><span class="tag t-c">Requester</span></p>
+          <h3 id="stage-retrieve-h">Retrieve the pinned context</h3>
+          <div class="vw-cols">
+            <div class="vw-mean"><h4>What this means</h4><p>BigQuery returns the pinned definition, rule and approved calculation under the requester’s access. The current pointer is observed, not silently followed.</p></div>
+            <div class="vw-obs"><h4>Recorded</h4>
+          <ul class="vw-rec">
+            <li>Publication <span class="obs" data-fact="publication_status">OK</span>, binding <span class="obs" data-fact="bind_status">BOUND</span>, payload <span class="obs" data-fact="payload_status">CONSISTENT</span>.</li>
+            <li>Access <span class="obs" data-fact="authorization_status">ALLOWED</span>: <span class="obs" data-fact="authorization_denied">0 of 7</span> tables denied.</li>
+            <li>Plain SQL (<span class="obs" data-fact="retrieval_engine">fallback</span>), not a graph query.</li>
+          </ul>
+            </div>
+          </div>
+          <div class="vw-more"><details class="vw-src"><summary>Source details</summary><ul><li><b>publication_status</b> = <code>&quot;OK&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/publication/status</code></li><li><b>bind_status</b> = <code>&quot;BOUND&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/bind/status</code></li><li><b>payload_status</b> = <code>&quot;CONSISTENT&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/payload/status</code></li><li><b>authorization_status</b> = <code>&quot;ALLOWED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/authorization/status</code></li><li><b>authorization_denied</b> = <code>0</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/authorization/denied</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/authorization/tables</code></li><li><b>retrieval_engine</b> = <code>&quot;fallback&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/retrieval/scope/engine</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/engine</code></li><li><b>approved-case jobs</b>:<ul><li>retrieval walk · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_e2e-20260915t082049z-34e6ed72_retrieval_walk_7f2f49791577</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> line 17 <code>terminal</code> seq 4</li><li>retrieval context · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_e2e-20260915t082049z-34e6ed72_retrieval_context_c5c4eed2d77b</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> line 22 <code>terminal</code> seq 5</li><li>retrieval nodes · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_e2e-20260915t082049z-34e6ed72_retrieval_nodes_85267bc7e55f</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> line 23 <code>terminal</code> seq 6</li></ul></li><li>Other store, declaration and payload jobs stay in the run inventory under Evidence; role names alone do not assign them to this case.</li></ul></details> <a class="seek" href="#tape" data-t="39.8" aria-label="Watch this step in the original CLI recording at 0:40">▶ 0:40</a></div>
+        </article>
+        <article class="vw-stage p-c" id="stage-receipt" data-stage="receipt" tabindex="-1" aria-labelledby="stage-receipt-h">
+          <p class="vw-kicker"><span class="tag t-c">Receipt</span></p>
+          <h3 id="stage-receipt-h">Check the receipt, then release</h3>
+          <div class="vw-cols">
+            <div class="vw-mean"><h4>What this means</h4><p>A receipt ties the BigQuery job, the calculation and the result. The consumer checks it before releasing any number.</p></div>
+            <div class="vw-obs"><h4>Recorded</h4>
+          <p class="vw-result"><span class="k">Recorded live result</span><b><span class="obs" data-fact="amount">$400.00 USD</span></b><span>receipt <span class="obs" data-fact="receipt_verdict">VERIFIED</span> · <span class="obs" data-fact="approved_decision">RELEASED</span></span></p>
+          <ul class="vw-neg" aria-label="Recorded negative checks">
+            <li><b>Swapped query</b> <span class="stop"><span class="obs" data-fact="sub_decision">Refused</span></span> receipt <span class="obs" data-fact="sub_verdict">REJECTED</span> (<span class="obs" data-fact="sub_reason">sql_mismatch</span>); a receipt job ran.</li>
+            <li><b>Hidden rule</b> <span class="stop"><span class="obs" data-fact="hidden_decision">Refused</span></span> separate injected legacy-seed test on the governance copy; receipt <span class="obs" data-fact="hidden_receipt_invoked">not invoked</span>.</li>
+            <li><b>Unreadable dependencies</b> <span class="stop"><span class="obs" data-fact="unread_decision">Refused</span></span> <span class="obs" data-fact="unread_denied">7 tables DENIED</span>; receipt <span class="obs" data-fact="unread_receipt_invoked">not invoked</span>.</li>
+          </ul>
+            </div>
+          </div>
+          <div class="vw-more"><details class="vw-src"><summary>Source details</summary><ul><li><b>amount</b> = <code>&quot;$400.00 USD&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/consume/display</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/connected/summary/answer</code></li><li><b>receipt_verdict</b> = <code>&quot;VERIFIED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/receipt/receipt/verdict</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/receipt/output/verdict</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> <code>/connected/summary/receipt_verdict</code></li><li><b>approved_decision</b> = <code>&quot;RELEASED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/consume/decision</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/decisions/connected-approved</code></li><li><b>sub_decision</b> = <code>&quot;REFUSED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/1/consume/decision</code></li><li><b>sub_verdict</b> = <code>&quot;REJECTED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/1/receipt/output/verdict</code></li><li><b>sub_reason</b> = <code>&quot;sql_mismatch&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/1/receipt/output/reason_codes</code></li><li><b>hidden_decision</b> = <code>&quot;REFUSED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/2/consume/decision</code></li><li><b>hidden_receipt_invoked</b> = <code>false</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/2/receipt/invoked</code></li><li><b>unread_decision</b> = <code>&quot;REFUSED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/3/consume/decision</code></li><li><b>unread_denied</b> = <code>7</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/3/authorization/denied</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/3/authorization/status</code></li><li><b>unread_receipt_invoked</b> = <code>false</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/3/receipt/invoked</code></li><li><b>receipt jobs</b>:<ul><li>approved receipt · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_rcpt_a783c736b3ac936351bef069_22e00a1dd6cb4fc8</code> · VERIFIED — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/receipt/receipt/job</code></li><li>substitution receipt · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_rcpt_d2472cd6fef3b214eb39c20d_2a2706019e808fcb</code> · REJECTED · <code>output.job</code> null — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/1/receipt/receipt/job</code></li></ul></li><li>Recorded line <code>[LIVE] Gross margin: $400.00 USD · VERIFIED</code>; receipt issued <span class="obs" data-fact="receipt_issued">08:24:02 UTC</span>, execution <span class="obs" data-fact="execution_match">MATCH</span>. The receipt’s publication ID <code>okf-receipt-spike/acme-retail-derived/gross-margin-period</code> is the SDK’s label, not the BigQuery publication ID. Hidden-rule seed: <span class="obs" data-fact="hidden_seed">injected-fixture-seed</span>.</li></ul></details> <a class="seek" href="#tape" data-t="48.8" aria-label="Watch this step in the original CLI recording at 0:49">▶ 0:49</a></div>
+        </article>
+        <article class="vw-stage p-c is-stop" id="stage-revoke" data-stage="revoke" tabindex="-1" aria-labelledby="stage-revoke-h">
+          <p class="vw-kicker"><span class="tag t-c">Requester</span></p>
+          <h3 id="stage-revoke-h">Remove access, then recheck</h3>
+          <div class="vw-cols">
+            <div class="vw-mean"><h4>What this means</h4><p>Access was removed and denial observed repeatedly. Three routes were then retried; the earlier release authorizes nothing new.</p></div>
+            <div class="vw-obs"><h4>Recorded</h4>
+          <ul class="vw-neg" aria-label="Recorded checks after revocation">
+            <li><b>Fresh request</b> <span class="stop"><span class="obs" data-fact="fresh_refused">Refused</span></span> at Catalog (<span class="obs" data-fact="fresh_http">HTTP 403</span>); <span class="obs" data-fact="fresh_downstream">nothing downstream ran</span>.</li>
+            <li><b>Retained pin</b> <span class="stop"><span class="obs" data-fact="bypass_refused">Refused</span></span> publication <span class="obs" data-fact="bypass_publication">ERROR</span>, retrieval <span class="obs" data-fact="bypass_retrieval">DENIED</span>, <span class="obs" data-fact="bypass_disclosed">nothing disclosed</span>.</li>
+            <li><b>Stored receipt</b> <span class="stop"><span class="obs" data-fact="revoked_decision">Refused</span></span> access <span class="obs" data-fact="revoked_authorization">DENIED</span>; <span class="obs" data-fact="revoked_receipts">0</span> new receipt runs.</li>
+          </ul>
+          <p class="vw-foot">Denial held <span class="obs" data-fact="revoked_stable">6 consecutive checks</span>; cache replay <span class="obs" data-fact="cache_replay">not exercised</span>.</p>
+            </div>
+          </div>
+          <div class="vw-more"><details class="vw-src"><summary>Source details</summary><ul><li><b>fresh_refused</b> = <code>&quot;CATALOG_ERROR&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/fresh_request/catalog/status</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/fresh_request/downstream_ran</code></li><li><b>fresh_http</b> = <code>403</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/fresh_request/catalog/http_status</code></li><li><b>fresh_downstream</b> = <code>false</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/fresh_request/downstream_ran</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/fresh_request/stopped_at</code></li><li><b>bypass_refused</b> = <code>&quot;ERROR/DENIED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/bypass/publication/status</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/bypass/retrieval/status</code></li><li><b>bypass_publication</b> = <code>&quot;ERROR&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/bypass/publication/status</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> line 154 <code>reconciled</code> seq 45; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> line 158 <code>reconciled</code> seq 46</li><li><b>bypass_retrieval</b> = <code>&quot;DENIED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/bypass/retrieval/status</code></li><li><b>bypass_disclosed</b> = <code>false</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/bypass/retrieval/disclosed_anything</code></li><li><b>revoked_decision</b> = <code>&quot;REFUSED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/consume/decision</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/decisions/connected-revocation</code></li><li><b>revoked_authorization</b> = <code>&quot;DENIED&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/authorization/status</code></li><li><b>revoked_receipts</b> = <code>0</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/receipt_invocations_after_revocation</code></li><li><b>revoked_stable</b> = <code>true</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/revocation/stable/stable</code>; <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/revocation/stable/consecutive</code></li><li><b>cache_replay</b> = <code>&quot;not exercised: Catalog concept seeds disable the retrieval cache&quot;</code> — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/4/cache</code></li><li><b>post-revocation BigQuery calls</b> (UNKNOWN, then reconciled to ERROR: refusal evidence, not successful queries):<ul><li>after revocation: pin_resolution · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_e2e-20260915t082049z-34e6ed72_pin_resolution_d097cdbe6c0b</code> · ERROR (server observed DONE) — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> line 154 <code>reconciled</code> seq 45</li><li>after revocation: retrieval_walk · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_e2e-20260915t082049z-34e6ed72_retrieval_walk_af984d936060</code> · ERROR (server observed DONE) — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> line 158 <code>reconciled</code> seq 46</li></ul></li></ul></details> <a class="seek" href="#tape" data-t="69.8" aria-label="Watch this step in the original CLI recording at 1:10">▶ 1:10</a></div>
+        </article>
+        <p class="vw-pager" hidden><button type="button" data-dir="-1">← Previous</button><button type="button" data-dir="1">Next →</button></p>
+      </div>
     </div>
-    <p class="teaser"><strong>Still open:</strong> the same checks inside BigQuery Graph queries, an independent checker, repeated runs, real data. <a href="#tape">Watch the 93-second tape ↓</a></p>
+    <ul class="vw-outcomes" aria-label="Recorded outcomes">
+      <li class="oc-rel"><span class="k">Recorded approved case</span><b><span class="obs" data-fact="amount">$400.00 USD</span></b><span>released, receipt verified</span></li>
+      <li class="oc-ref"><span class="k">Swapped query</span><b class="stop"><span class="obs" data-fact="sub_decision">Refused</span></b></li>
+      <li class="oc-ref"><span class="k">Hidden rule, injected test</span><b class="stop"><span class="obs" data-fact="hidden_decision">Refused</span></b></li>
+      <li class="oc-ref"><span class="k">Unreadable dependencies</span><b class="stop"><span class="obs" data-fact="unread_decision">Refused</span></b></li>
+      <li class="oc-rev"><span class="k">Access removed</span><b class="stop"><span class="obs" data-fact="revoked_outcome">Later release refused</span></b></li>
+    </ul>
+  </div>
+<!-- e2e-visual:walkthrough:end -->
   </section>
 
   <section class="band shell" id="why" aria-labelledby="why-title">
-    <p class="eyebrow">Why all three, not one</p>
-    <h2 class="title" id="why-title">Each part alone leaves a question unanswered.</h2>
-    <p class="lede">The RFC asks three questions of any number an agent reports; only all three parts together answered them.</p>
-    <div class="table-wrap" role="region" aria-label="Comparison of agent paths" tabindex="0">
-      <table class="compare">
-        <thead>
-          <tr>
-            <th scope="col">Path</th>
-            <th scope="col"><span>Replayable context</span>Which version did the agent get?</th>
-            <th scope="col"><span>Explainable access</span>Who allowed it?</th>
-            <th scope="col"><span>Verifiable execution</span>Did the query match?</th>
-            <th scope="col"><span>Authority</span>Who says what is current?</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><th scope="row">Ungoverned agent</th><td class="no">Whatever it finds or writes</td><td class="no">Whatever credential it holds</td><td class="no">Nothing checks</td><td class="no">Nobody</td></tr>
-          <tr><th scope="row">Open Knowledge Format only</th><td class="part">Written down; nothing serves one fixed version</td><td class="no">No access path of its own</td><td class="part">Calculation declared, never checked</td><td class="no">Whichever copy of the files</td></tr>
-          <tr><th scope="row">Knowledge Catalog only</th><td class="part">Search ranks candidates; it does not pin the linked rule</td><td class="part">Discovery alone does not explain the agent’s retrieval</td><td class="no">Finding the calculation does not prove it ran</td><td class="part">A Catalog entry, which can drift from what is served</td></tr>
-          <tr class="ours"><th scope="row">All three together<em>shown once · synthetic data</em></th><td class="yes">A pinned, ready BigQuery version, with its rules</td><td class="yes">The agent’s own restricted account, checked at each step; revocation held</td><td class="yes">A receipt ties BigQuery job, context and result before release</td><td class="yes">BigQuery; the Catalog points to it</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="roles"><b>In one line:</b> Open Knowledge Format authors · Knowledge Catalog discovers · BigQuery publishes, serves and runs the checked calculation.</p>
-  </section>
-
-  <section class="band shell" id="path" aria-labelledby="path-title">
-    <p class="eyebrow">The path, step by step</p>
-    <h2 class="title" id="path-title">Seven steps, one live run.</h2>
-    <p class="lede">The <a href="../">RFC’s</a> 118%-versus-96% retention slide is illustrative. This run puts the same checks (definition with its rule, access, receipt) live on Acme, an invented retailer. The agent is asked: <q>What was Acme’s gross margin for January 2026, and can I trust the number?</q></p>
-    <ol class="steps">
-      <li class="step s-a">
-        <span class="n" aria-hidden="true">1</span>
-        <div>
-          <p class="tags"><span class="tag t-a">Open Knowledge Format</span><span class="tag">Replayable context</span></p>
-          <h3>Author the knowledge</h3>
-          <p>Finance writes down <b>Gross Margin</b> (full cost, explicitly <em>not</em> the old product-cost-only formula), the policies it cites and the one approved SQL calculation.</p>
-          <p class="run"><b>In the run:</b> the pinned files compiled into 44 linked items. <a class="seek" href="#tape" data-t="4.2">▶ 0:04</a></p>
-        </div>
+    <p class="eyebrow">Why the three parts work together</p>
+    <h2 class="title" id="why-title">Three questions every agent number must answer</h2>
+    <ol class="why">
+      <li>
+        <h3>Which version and rules? <span>Replayable context</span></h3>
+        <p>Search ranks candidates; files describe knowledge. Together they add a validated publication and a Catalog pin to the version BigQuery serves.</p>
       </li>
-      <li class="step s-b">
-        <span class="n" aria-hidden="true">2</span>
-        <div>
-          <p class="tags"><span class="tag t-b">BigQuery Knowledge Publish</span><span class="tag">Replayable context</span></p>
-          <h3>Publish it in BigQuery</h3>
-          <p>BigQuery writes a fixed version, reads every row back, marks it <b>ready</b>, then switches the “current version” pointer in one step; only a ready version can become current.</p>
-          <p class="run"><b>In the run:</b> 19 BigQuery jobs; ready after 19 seconds, switched 6 seconds later. <a class="seek" href="#tape" data-t="11.7">▶ 0:11</a> <a class="seek" href="#tape" data-t="27.4">▶ 0:27</a></p>
-        </div>
+      <li>
+        <h3>Whose access, right now? <span>Explainable access</span></h3>
+        <p>Permission to discover does not explain permission to retrieve. Here the restricted requester’s own account was checked at every step, and again after revocation.</p>
       </li>
-      <li class="step s-a">
-        <span class="n" aria-hidden="true">3</span>
-        <div>
-          <p class="tags"><span class="tag t-a">Knowledge Catalog</span><span class="tag">Replayable context</span></p>
-          <h3>Discover it in Knowledge Catalog</h3>
-          <p>Only after the switch is a Catalog entry written, pointing at that exact version. The agent’s tool reads the entry itself, as the agent’s restricted account.</p>
-          <p class="run"><b>In the run:</b> denied before access was granted, allowed after. <a class="seek" href="#tape" data-t="27.4">▶ 0:27</a></p>
-        </div>
-      </li>
-      <li class="step s-c">
-        <span class="n" aria-hidden="true">4</span>
-        <div>
-          <p class="tags"><span class="tag t-c">Agent</span><span class="tag">Explainable access</span></p>
-          <h3>Retrieve under the agent’s own access</h3>
-          <p>The agent pins the named version and retrieves the definition, linked rules and approved calculation from BigQuery, never with the owner’s credentials.</p>
-          <p class="run"><b>In the run:</b> all under one restricted account. <a class="seek" href="#tape" data-t="39.8">▶ 0:40</a></p>
-        </div>
-      </li>
-      <li class="step s-c">
-        <span class="n" aria-hidden="true">5</span>
-        <div>
-          <p class="tags"><span class="tag t-c">Receipt</span><span class="tag">Verifiable execution</span></p>
-          <h3>A receipt checks the number before release</h3>
-          <p>The approved calculation runs as a BigQuery job; a receipt ties job, query, context and result, and the number is released only if it checks out.</p>
-          <p class="run"><b>In the run:</b> <b>$400.00, verified, released.</b> A swapped query, a hidden rule and unreadable output were each refused. <a class="seek" href="#tape" data-t="48.8">▶ 0:49</a> <a class="seek" href="#tape" data-t="51.8">▶ 0:52</a></p>
-        </div>
-      </li>
-      <li class="step s-c">
-        <span class="n" aria-hidden="true">6</span>
-        <div>
-          <p class="tags"><span class="tag t-c">Revoke</span><span class="tag">Explainable access</span></p>
-          <h3>Revoke, and the door closes</h3>
-          <p>Access is removed. A fresh request, a shortcut through the version already pinned, and the receipt already stored must all fail.</p>
-          <p class="run"><b>In the run:</b> all three refused; no new calculation launched. <a class="seek" href="#tape" data-t="69.8">▶ 1:10</a> <a class="seek" href="#tape" data-t="78.5">▶ 1:19</a></p>
-        </div>
-      </li>
-      <li class="step s-c">
-        <span class="n" aria-hidden="true">7</span>
-        <div>
-          <p class="tags"><span class="tag t-c">Answer</span><span class="tag">All three outcomes</span></p>
-          <h3>The agent gets the answer, not the plumbing</h3>
-          <p>The agent receives the number and verdicts, no IDs, SQL or account names; test tables and entry are deleted.</p>
-          <p class="run"><b>In the run:</b> what was served matched what BigQuery published. <a class="seek" href="#tape" data-t="84.1">▶ 1:24</a></p>
-        </div>
+      <li>
+        <h3>Did the approved calculation run? <span>Verifiable execution</span></h3>
+        <p>A declared calculation does not show it ran. The consumer checked the SDK receipt linking job, calculation and result before release.</p>
       </li>
     </ol>
-  </section>
-
-  <section class="tape-band" id="tape" aria-labelledby="tape-title">
-    <div class="shell">
-      <p class="eyebrow">The tape · 93 seconds</p>
-      <h2 class="title" id="tape-title">Watch the same run.</h2>
-      <p class="lede">A finance agent on Gemini asks for Acme’s gross margin and whether to trust it. Captions narrate each step; chapters jump to it.</p>
-      <div class="tape">
-        <video id="tape-video" controls preload="metadata" playsinline poster="okf-publish-connected-poster.png" width="1364" height="1000" aria-describedby="tape-note">
-          <source src="../demo/okf-publish-connected.mp4" type="video/mp4">
-          <track kind="captions" src="okf-publish-connected.en.vtt" srclang="en" label="English (narration)" default>
-          Terminal recording of the live run: <a href="../demo/okf-publish-connected.mp4">download the mp4</a>.
-        </video>
-        <ol class="chapters" aria-label="Chapters">
-          <li><a class="chap" href="#tape" data-t="0"><time>0:00</time><span>The question</span></a></li>
-          <li><a class="chap" href="#tape" data-t="4.2"><time>0:04</time><span>1 · Author in Open Knowledge Format</span></a></li>
-          <li><a class="chap" href="#tape" data-t="11.7"><time>0:11</time><span>2 · Write and check in BigQuery</span></a></li>
-          <li><a class="chap" href="#tape" data-t="21.9"><time>0:22</time><span>2 · Ready; current version switched</span></a></li>
-          <li><a class="chap" href="#tape" data-t="27.4"><time>0:27</time><span>3 · Knowledge Catalog entry written</span></a></li>
-          <li><a class="chap" href="#tape" data-t="39.8"><time>0:40</time><span>4 · Discover, pin, retrieve</span></a></li>
-          <li><a class="chap" href="#tape" data-t="48.8"><time>0:49</time><span>5 · Receipt checks out: $400.00 released</span></a></li>
-          <li><a class="chap" href="#tape" data-t="51.8"><time>0:52</time><span>5 · Traps refused</span></a></li>
-          <li><a class="chap" href="#tape" data-t="69.8"><time>1:10</time><span>6 · Access revoked, requests refused</span></a></li>
-          <li><a class="chap" href="#tape" data-t="84.1"><time>1:24</time><span>7 · The agent’s answer and verdict</span></a></li>
-        </ol>
-      </div>
-      <p class="verdict"><b>In plain words:</b> one live run published in BigQuery, then the agent discovered, used, verified, and was revoked — successfully.</p>
-      <p class="note" id="tape-note">Real recording of the live run; waits over 3 s compressed (the run took 12½ minutes). Machine verdict on screen: <code>E2E_PUBLISH_CONNECTED</code>.</p>
-    </div>
+    <p class="thesis">OKF alone supplies the declaration; Knowledge Catalog alone, discovery; an ungoverned agent, neither this publication contract nor this receipt check. With BigQuery publishing and the enforcing consumer, the recorded path answered all three questions once. <span class="qual">An architectural comparison from the RFC, not a benchmark.</span></p>
   </section>
 
   <section class="band shell" id="proved" aria-labelledby="proved-title">
-    <p class="eyebrow">What we proved · what is still open</p>
-    <h2 class="title" id="proved-title">Shown once. Not ready.</h2>
+    <p class="eyebrow">Shown once · still open</p>
+    <h2 class="title" id="proved-title">Shown once. Not a readiness claim.</h2>
     <div class="two">
       <div class="col col-yes">
         <h3>Shown once, on synthetic data</h3>
         <ul>
-          <li>BigQuery acted as the publish authority: a checked, ready version became current in one step.</li>
-          <li>Knowledge Catalog pointed the agent at exactly that version, read under the agent’s own access.</li>
-          <li>The number was released only with a verified receipt.</li>
-          <li>Revocation held against a fresh request, an old pin and a stored receipt.</li>
+          <li>A checked, READY BigQuery version became current in one step.</li>
+          <li>Knowledge Catalog pointed the requester to exactly that version.</li>
+          <li>Release happened only with a verified receipt.</li>
+          <li>Revocation held against three later routes.</li>
         </ul>
       </div>
       <div class="col col-open">
         <h3>Still open</h3>
         <ul>
-          <li>The same access checks inside BigQuery Graph queries; this run used plain SQL.</li>
-          <li>An independent attester; this run used the SDK’s own checker.</li>
-          <li>Repeated runs, cost, latency and real customer data.</li>
-          <li>Publishing a new revision, and the full sync protocol between BigQuery and Knowledge Catalog.</li>
+          <li>Access checks inside BigQuery Graph queries; this run used plain SQL.</li>
+          <li>An independent attester; the SDK verified its own receipt.</li>
+          <li>New knowledge revisions; the full BigQuery–Catalog sync protocol.</li>
+          <li>Repeated runs, cost, latency, real data, cache replay.</li>
         </ul>
       </div>
     </div>
-    <p class="more">The decision this supports is on the <a href="../">RFC</a>; the design is in the <a href="../detailed-rfc/#architecture">Detailed RFC</a>.</p>
+    <p class="more">Decision: <a href="../">RFC</a> · design: <a href="../detailed-rfc/#architecture">Detailed RFC</a>.</p>
 
     <details class="evidence" id="evidence">
-      <summary><span class="ev-title">Evidence</span><span class="ev-note">Run IDs, BigQuery jobs, Catalog entry, cases and technical limits</span></summary>
+      <summary><span class="ev-title">Evidence</span><span class="ev-note">Run record, jobs, Catalog operations, cases, limits, CLI tape</span></summary>
       <div class="ev-body">
-        <p>Copied from the retained record of the live run; nothing was re-run for this page. Full detail: <a href="../spikes/bq-graph/evidence/report-publish-connected.md">report-publish-connected.md</a>.</p>
-
+        <p>Generated from the committed run files by <code>rfc/tools/build_e2e_visual_evidence.mjs</code> (<a href="visual-evidence.json">visual-evidence.json</a>); nothing was re-run for this page. Full detail: <a href="../spikes/bq-graph/evidence/report-publish-connected.md">report-publish-connected.md</a>.</p>
+<!-- e2e-visual:record:start -->
+<div class="ev-record" data-generated="rfc/tools/build_e2e_visual_evidence.mjs">
         <h3>Run</h3>
         <dl class="kv">
-          <dt>verdict</dt><dd><code>E2E_PUBLISH_CONNECTED</code> · run <code>kp-20260915t082018z-0387</code></dd>
-          <dt>window</dt><dd>2026-09-15 08:20:18 → 08:32:49 UTC</dd>
-          <dt>project</dt><dd><code>test-project-0728-467323</code> · live BigQuery, Dataplex Catalog (Knowledge Catalog) and IAM APIs</dd>
-          <dt>agent</dt><dd>ADK agent on <code>gemini-3.8-flash</code> (Vertex AI, global) with one tool, <code>governed_gross_margin</code></dd>
-          <dt>code</dt><dd>runner <code>okf_bq_graph.publish_connected/0.1.0</code> at spike <code>c075801</code> · CLI <a href="https://github.com/caohy1988/okf-connected-e2e">caohy1988/okf-connected-e2e</a> <code>7773909</code> (0.2.0)</dd>
-          <dt>data</dt><dd>synthetic Acme bundle, source pin <code>31da799a9aef176df12e91abbd119ea9385b75ec</code>; no customer data</dd>
+          <dt>verdict</dt><dd><code data-fact="run_verdict">E2E_PUBLISH_CONNECTED</code> · publish run <code data-fact="run_publish_id">kp-20260915t082018z-0387</code> · consume run <code data-fact="run_consume_id">e2e-20260915t082049z-34e6ed72</code></dd>
+          <dt>window</dt><dd><code data-fact="run_started">2026-09-15 08:20:18 UTC</code> → <code data-fact="run_finished">08:32:49 UTC</code></dd>
+          <dt>project</dt><dd><code data-fact="run_project">test-project-0728-467323</code> · mode <code data-fact="run_mode">live (the recorded invocation, not this page)</code></dd>
+          <dt>data</dt><dd>synthetic Acme bundle, source pin <code data-fact="source_pin">31da799</code>; no customer data</dd>
         </dl>
-
-        <h3>Open Knowledge Format + Knowledge Catalog (authoring + discovery)</h3>
-        <dl class="kv">
-          <dt>authored concepts</dt><dd><code>metrics/gross-margin</code>, <code>metrics/gross-margin-legacy</code> (deprecated), <code>metrics/revenue</code>, <code>policies/margin-standard</code>, <code>policies/revenue-recognition</code>, <code>computations/gross-margin-period</code> (Attested Computation), <code>computations/revenue-ytd</code></dd>
-          <dt>catalog entry</dt><dd><code>projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin</code>: written after the head switch, pin generated from the <code>READY</code> rows, readback <code>OK</code>; deleted at the end</dd>
-          <dt>consumed = published</dt><dd><code>MATCH</code>: the pin names this publication and dataset, the entry is run-owned, the head was observed on this publication</dd>
-        </dl>
-
+        <h3>Source files</h3>
+        <ul class="files"><li><a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> · 22713 bytes · sha256 <code>9ebff63c92bcbd57343f6fe1cd9162ed31286841b31eafe47b5f79c5c99f0395</code></li><li><a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> · 63499 bytes · sha256 <code>17d13c7c006ed43786a2824dcef9ee3a5ceaef88d209d8fe7cca434ce7d27d5c</code></li><li><a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> · 154839 bytes · sha256 <code>bb19e268895805c83e015c7c96ba343ab7ed532b95101fb732a22e62da7d36bf</code></li><li><a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> · 107473 bytes · sha256 <code>c1e0bcd8215d53ab2a1670a5f132a00633107956f8fe35827c3483019b183fbe</code></li><li><a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/catalog/connected-approved__catalog_list_0.json">retained Catalog list</a> · 9280 bytes · sha256 <code>6369b42956e15bda7fd29e1c902f1255e47a495ebdf55c1c0afc08ecce028809</code></li><li><a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/catalog/connected-approved__catalog_entry.json">retained Catalog entry</a> · 1987 bytes · sha256 <code>404623d5f145a489ea9ad89b2ccd1b26cad0a2aa1075c4e6c1953f9da0e7e18e</code></li><li><a href="../spikes/bq-graph/evidence/report-publish-connected.md">report-publish-connected.md</a> · 11513 bytes · sha256 <code>acffa1411dcde0c37b255dc6c2ece8e84249d778bb37ebb47961a48a61755a39</code></li></ul>
         <h3>BigQuery Knowledge Publish (serving authority)</h3>
         <dl class="kv">
-          <dt>publication</dt><dd><code>pub_190192147fd7fd78</code> <code>READY</code> on full-row readback: 44 nodes, 109 edges, 22 sections; nodes_sha256 <code>47a1278ef2bc4e2c…</code>, edges_sha256 <code>95a193a0c41354a1…</code></dd>
-          <dt>head switch</dt><dd><code>active_publication</code> <code>None → pub_190192147fd7fd78</code> (SWITCHED) by merge job <code>okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67</code></dd>
-          <dt>author jobs</dt><dd>19 BigQuery jobs under driver-chosen ids, identity <code>BOUND</code> on <code>jobs.get</code> readback, unresolved 0; e.g. <code>…_load_nodes_7f0d27d40667</code>, <code>…_readback_nodes_1dad6332bfb8</code> (44 rows), <code>…_insert_publication_4ffc4d91d100</code>, <code>…_pin_source_publication_f4f9fcaf50e0</code> (prefix <code>okf_cc_kp_20260915t082018z_0387</code>; all 19 in the report)</dd>
-          <dt>state trace</dt><dd><code>PLANNED → PREPARING → BQ_STAGED → BQ_COMMITTED → KC_APPLIED → COMPLETE</code>, 08:20:18 → 08:20:47 UTC</dd>
-          <dt>dataset</dt><dd><code>okf_kp_publish_kp_20260915t082018z_0387</code>, run-owned; deleted at the end with absence read back (job metadata stays readable); originals re-read <code>UNCHANGED</code></dd>
+          <dt>publication</dt><dd><code data-fact="publication_id">pub_190192147fd7fd78</code> <code data-fact="ready_state">READY</code> at <code data-fact="ready_at">08:20:35 UTC</code> on full-row readback (<code data-fact="readback_checks">7 of 7</code>): <code data-fact="nodes">44</code> nodes, <code data-fact="edges">109</code> edges, <code data-fact="sections">22</code> sections</dd>
+          <dt>head switch</dt><dd><code>active_publication</code> <code data-fact="head_from">none</code> → <code data-fact="publication_id">pub_190192147fd7fd78</code> <code data-fact="head_state">SWITCHED</code> at <code data-fact="head_at">08:20:43 UTC</code></dd>
+          <dt>dataset</dt><dd><code data-fact="dataset">okf_kp_publish_kp_20260915t082018z_0387</code>, run-owned</dd>
+          <dt>jobs</dt><dd><ul><li>load_nodes · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_load_nodes_7f0d27d40667</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 38 <code>terminal</code> seq 10</li><li>load_edges · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_load_edges_21df42ad11ac</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 41 <code>terminal</code> seq 11</li><li>readback_nodes · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_readback_nodes_1dad6332bfb8</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 45 <code>terminal</code> seq 12</li><li>readback_edges · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_readback_edges_d21456ca6d2c</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 48 <code>terminal</code> seq 13</li><li>insert_publication · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_insert_publication_4ffc4d91d100</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 51 <code>terminal</code> seq 14</li><li>publication_status · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_publication_status_fc1b6390442f</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 56 <code>terminal</code> seq 15</li><li>merge_head · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 62 <code>terminal</code> seq 17</li><li>read_head after merge · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_kp_20260915t082018z_0387_read_head_9945996bc0ff</code> · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 66 <code>terminal</code> seq 18</li></ul><code data-fact="author_jobs">19</code> author jobs, identity <code data-fact="author_identity">BOUND</code>; all 19 in the report.</dd>
         </dl>
-
-        <h3>Consume</h3>
+        <h3>Knowledge Catalog (discovery)</h3>
         <dl class="kv">
-          <dt>consume run</dt><dd><code>e2e-20260915t082049z-34e6ed72</code> · requester identity <code>BOUND</code> (graph 46, policy_admin 9, receipt 2, requester_probe 1 jobs), unresolved 0</dd>
-          <dt>access</dt><dd>Catalog before grant <code>DENIED</code>, after grant <code>ALLOWED</code> (observed after 71 s), caller is requester <code>true</code></dd>
-          <dt>after revocation</dt><dd>fresh request <code>CATALOG_ERROR</code> · bypass publication <code>ERROR</code> · bypass retrieval <code>DENIED</code> · authorization <code>DENIED</code> · receipt launches 0</dd>
-          <dt>receipt jobs</dt><dd><code>okf_rcpt_a783c736b3ac936351bef069_22e00a1dd6cb4fc8</code>, <code>okf_rcpt_d2472cd6fef3b214eb39c20d_2a2706019e808fcb</code> · approved receipt <code>VERIFIED</code></dd>
+          <dt>entry</dt><dd><code data-fact="pin_entry">projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin</code>: written at <code data-fact="pin_at">08:20:46 UTC</code>, after the head switch; readback <code data-fact="pin_readback">OK</code></dd>
+          <dt>operations</dt><dd><ul><li>create_entry · no BigQuery job (<code>job_id=null</code>) · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 80 <code>terminal</code> seq 22</li><li>readback_entry · no BigQuery job (<code>job_id=null</code>) · DONE — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">publish/journal.jsonl</a> line 84 <code>terminal</code> seq 23</li></ul></dd>
+          <dt>consumed</dt><dd><code data-fact="consumed_status">MATCH</code> (<code data-fact="consumed_checks">7 of 7</code> checks)</dd>
         </dl>
+        <h3>Consumer cases</h3>
         <div class="table-wrap ev-table" role="region" aria-label="Consumer cases" tabindex="0">
           <table class="cases">
-            <thead><tr><th scope="col">Case</th><th scope="col">Decision</th><th scope="col">Acceptance</th><th scope="col">In plain words</th></tr></thead>
+            <thead><tr><th scope="col">Case</th><th scope="col">Decision</th><th scope="col">Acceptance</th></tr></thead>
             <tbody>
-              <tr><td><code>connected-approved</code></td><td>RELEASED</td><td>MET</td><td><code>[LIVE] Gross margin: $400.00 USD · VERIFIED</code></td></tr>
-              <tr><td><code>connected-sql-substitution</code></td><td>REFUSED</td><td>MET</td><td>swapped query</td></tr>
-              <tr><td><code>connected-denied-intermediate</code></td><td>REFUSED</td><td>MET</td><td>a rule the agent may not see</td></tr>
-              <tr><td><code>connected-unauthorized-output</code></td><td>REFUSED</td><td>MET</td><td>output it may not read</td></tr>
-              <tr><td><code>connected-revocation</code></td><td>REFUSED</td><td>MET</td><td>after access was removed</td></tr>
+              <tr><td><code>connected-approved</code></td><td>RELEASED</td><td>MET</td></tr>
+              <tr><td><code>connected-sql-substitution</code></td><td>REFUSED</td><td>MET</td></tr>
+              <tr><td><code>connected-denied-intermediate</code></td><td>REFUSED</td><td>MET</td></tr>
+              <tr><td><code>connected-unauthorized-output</code></td><td>REFUSED</td><td>MET</td></tr>
+              <tr><td><code>connected-revocation</code></td><td>REFUSED</td><td>MET</td></tr>
             </tbody>
           </table>
         </div>
+        <dl class="kv">
+          <dt>receipt jobs</dt><dd><ul><li>approved receipt · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_rcpt_a783c736b3ac936351bef069_22e00a1dd6cb4fc8</code> · VERIFIED — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/0/receipt/receipt/job</code></li><li>substitution receipt · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_rcpt_d2472cd6fef3b214eb39c20d_2a2706019e808fcb</code> · REJECTED · <code>output.job</code> null — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> <code>/cases/1/receipt/receipt/job</code></li></ul></dd>
+          <dt>after revocation</dt><dd><ul><li>after revocation: pin_resolution · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_e2e-20260915t082049z-34e6ed72_pin_resolution_d097cdbe6c0b</code> · ERROR (server observed DONE) — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> line 154 <code>reconciled</code> seq 45</li><li>after revocation: retrieval_walk · <code>test-project-0728-467323</code> / <code>US</code> / <code>okf_cc_e2e-20260915t082049z-34e6ed72_retrieval_walk_af984d936060</code> · ERROR (server observed DONE) — <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">connected journal.jsonl</a> line 158 <code>reconciled</code> seq 46</li></ul></dd>
+          <dt>job inventory</dt><dd>author 19 (BOUND); consumer roles graph 46, policy_admin 9, receipt 2, requester_probe 1; consumer journal final states DONE 41, EMPTY 3, ERROR 2; unresolved 0. Policy-admin jobs ran as the operator; not every consumer-side job ran as the requester, and ERROR/EMPTY states are recorded as such.</dd>
+          <dt>cleanup</dt><dd>run-owned entry and dataset deleted with absence read back: <code data-fact="cleanup_status">COMPLETE</code>; originals <code data-fact="originals">UNCHANGED</code>; consumer teardown <code data-fact="teardown">VERIFIED</code>. The deleted resources no longer serve queries. The trace’s <code>COMPLETE</code> at <code data-fact="publish_phase_complete_at">08:20:47 UTC</code> ends the publish phase, not the end-to-end run.</dd>
+        </dl>
+      </div>
+<!-- e2e-visual:record:end -->
 
         <h3>Technical limits (named, not waived)</h3>
         <ul>
           <li><b>Graph:</b> retrieval and access ran on relational SQL over the published tables, not BigQuery Graph / GQL; access inside graph queries is still open.</li>
-          <li><b>Attestation:</b> the SDK example’s own verifier with a requester-held key; no independent attester.</li>
-          <li><b>Revision:</b> the publication id is content-addressed from the pinned source, so this run deployed the same id the long-lived spike dataset holds into a fresh run-owned dataset: a new deployment, not a new revision of the knowledge.</li>
+          <li><b>Attestation:</b> the SDK example’s own verifier with a requester-held key; no independent attester. The receipt’s publication ID is the SDK’s label, not the BigQuery publication ID.</li>
+          <li><b>Revision:</b> the publication ID is content-addressed from the pinned source, so this run deployed the same ID the long-lived spike dataset holds into a fresh run-owned dataset: a new deployment, not a new revision of the knowledge.</li>
           <li><b>Cross-service protocol (Detailed RFC §05):</b> simplified to one owned dataset with <code>active_publication</code>; no <code>sync_id</code> staging, <code>deployment_heads</code>, <code>*_current</code> views or Catalog lag SLO.</li>
-          <li><b>Access setup:</b> the harness grants the requester Catalog viewer and dataset reads for the run and removes them to revoke; the denied-intermediate case uses an injected legacy seed on the long-lived <code>_rls</code> copy, not a Catalog discovery.</li>
+          <li><b>Access setup:</b> the harness grants the requester Catalog viewer and dataset reads for the run and removes them to revoke; the hidden-rule case uses an injected legacy seed on the long-lived <code>_rls</code> copy, not a Catalog discovery.</li>
+          <li><b>Cache:</b> Catalog concept seeds disable the retrieval cache, so cached replay after revocation was not exercised.</li>
           <li><b>Sample:</b> n = 1, synthetic data, no cost or latency benchmark. Earlier runs stay as recorded: <code>e2e-20260915t070643z-9ddaf35f</code> (consume-only, <a href="../spikes/bq-graph/evidence/report-connected-e2e.md">report</a>) and <code>e2e-20260915t065449z-98e21004</code> (<code>E2E_BROKEN</code>).</li>
         </ul>
 
+        <section class="tape-band" id="tape" aria-labelledby="tape-title">
+          <p class="eyebrow">The original CLI tape · 93 seconds</p>
+          <h3 class="tape-title" id="tape-title">Watch the same run in the terminal</h3>
+          <p class="lede">A finance agent on Gemini asks for Acme’s gross margin and whether to trust it. Captions narrate each step; chapters jump to it. Chapter times are positions in the compressed recording, not live-run elapsed times.</p>
+          <div class="tape">
+            <video id="tape-video" controls preload="metadata" playsinline poster="okf-publish-connected-poster.png" width="1364" height="1000" aria-describedby="tape-note">
+              <source src="../demo/okf-publish-connected.mp4" type="video/mp4">
+              <track kind="captions" src="okf-publish-connected.en.vtt" srclang="en" label="English (narration)" default>
+              Terminal recording of the live run: <a href="../demo/okf-publish-connected.mp4">download the mp4</a>.
+            </video>
+            <ol class="chapters" aria-label="Chapters">
+              <li><a class="chap" href="#tape" data-t="0"><time>0:00</time><span>The question</span></a></li>
+              <li><a class="chap" href="#tape" data-t="4.2"><time>0:04</time><span>Author in Open Knowledge Format</span></a></li>
+              <li><a class="chap" href="#tape" data-t="11.7"><time>0:12</time><span>1 · Write and check in BigQuery</span></a></li>
+              <li><a class="chap" href="#tape" data-t="21.9"><time>0:22</time><span>1 · Ready; current version switched</span></a></li>
+              <li><a class="chap" href="#tape" data-t="27.4"><time>0:27</time><span>2 · Knowledge Catalog entry written</span></a></li>
+              <li><a class="chap" href="#tape" data-t="39.8"><time>0:40</time><span>3–4 · Discover, pin, retrieve</span></a></li>
+              <li><a class="chap" href="#tape" data-t="48.8"><time>0:49</time><span>5 · Receipt checks out: $400.00 released</span></a></li>
+              <li><a class="chap" href="#tape" data-t="51.8"><time>0:52</time><span>5 · Negative checks refused</span></a></li>
+              <li><a class="chap" href="#tape" data-t="69.8"><time>1:10</time><span>6 · Access revoked, requests refused</span></a></li>
+              <li><a class="chap" href="#tape" data-t="84.1"><time>1:24</time><span>The agent’s answer and verdict</span></a></li>
+            </ol>
+          </div>
+          <p class="note" id="tape-note">Real recording of the live run; waits over 3 s compressed (the run took 12½ minutes). Machine verdict on screen: <code>E2E_PUBLISH_CONNECTED</code>.</p>
+        </section>
+
         <h3>Files</h3>
         <ul class="files">
-          <li>Run record: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> · publish journal: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">journal.jsonl</a> · consume record: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/connected_live.json">connected_live.json</a> · agent transcript: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/agent_transcript.json">agent_transcript.json</a></li>
+          <li>Run record: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> · publish journal: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">journal.jsonl</a> · consume record: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/connected_live.json">connected_live.json</a> · consume journal: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/e2e-20260915t082049z-34e6ed72/journal.jsonl">journal.jsonl</a> · agent transcript: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/agent_transcript.json">agent_transcript.json</a></li>
           <li>Tape: <a href="../demo/okf-publish-connected.mp4">mp4</a> · <a href="../demo/publish-connected/okf-publish-connected-transcript.txt">plaintext transcript</a> · <a href="../demo/publish-connected/okf-publish-connected.cast">asciinema cast</a> · <a href="okf-publish-connected.en.vtt">captions</a></li>
-          <li>How this page was built: <a href="intent.md">intent</a> · <a href="spec.md">spec</a> · <a href="plan.md">plan</a></li>
+          <li>How this page was built: <a href="VISUAL_PLAN.md">visual plan</a> · <a href="intent.md">intent</a> · <a href="spec.md">spec</a> · <a href="plan.md">plan</a></li>
         </ul>
       </div>
     </details>
@@ -319,32 +345,9 @@
 
 <footer>
   <div class="shell">
-    <span>rfc/e2e · one live run · synthetic data</span>
-    <span>proposed feature · spike code · not a readiness claim</span>
+    <span>rfc/e2e · recorded live run · synthetic data</span>
+    <span>spike code · not a readiness claim</span>
   </div>
 </footer>
-
-<script>
-  // Chapter and step links seek the tape; without JavaScript they still jump to it.
-  (function () {
-    var video = document.getElementById("tape-video");
-    if (!video) return;
-    var chapters = [].slice.call(document.querySelectorAll(".chapters a[data-t]"));
-    [].slice.call(document.querySelectorAll("a[data-t]")).forEach(function (a) {
-      a.addEventListener("click", function (e) {
-        var t = parseFloat(a.getAttribute("data-t")) || 0;
-        if (a.classList.contains("chap")) e.preventDefault();
-        try { video.currentTime = t; } catch (err) { /* metadata not loaded yet */ }
-        var p = video.play();
-        if (p && p.catch) p.catch(function () {});
-      });
-    });
-    video.addEventListener("timeupdate", function () {
-      var now = video.currentTime, current = null;
-      chapters.forEach(function (a) { if (parseFloat(a.getAttribute("data-t")) <= now + 0.05) current = a; });
-      chapters.forEach(function (a) { if (a === current) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
-    });
-  })();
-</script>
 </body>
 </html>

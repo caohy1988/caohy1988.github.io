@@ -1,5 +1,19 @@
 # Spec — `/rfc/e2e/`
 
+> **Superseded in part (2026-09-15, branch `rfc/e2e-viz`).** §1, §3 and §6 below describe the PR #79 layout. The current layout and acceptance are in [`VISUAL_PLAN.md`](VISUAL_PLAN.md).
+>
+> **Files added:**
+> - `visual-walkthrough.js`: progressive enhancement only.
+> - `visual-evidence.json`: generated.
+> - `../tools/build_e2e_visual_evidence.mjs`, with `.test.mjs` and `--check`: projects the pinned run files. It validates the joins, and generates the JSON plus the `e2e-visual:walkthrough` / `e2e-visual:record` regions of `index.html`. Never hand-edit those regions.
+> - `../tools/check_e2e_visual.mjs`: browser acceptance and dynamic reading load.
+>
+> **§4 relaxed.** The walkthrough's "Recorded" lines may show exact generated statuses (`READY`, `SWITCHED`, `CATALOG_ERROR`, …) and the publication ID. Job IDs, hashes and journal pointers stay in the closed "Source details" and Evidence folds.
+>
+> **§6 gates added:** builder `--check`, `node --test`, `check_e2e_visual.mjs`. The skim gate is now `--max-rendered 950` (was 1150).
+>
+> **Unchanged:** §2 asset strategy and §5 navigation.
+
 Companion to `intent.md`. Source of truth for every claim: `../spikes/bq-graph/evidence/report-publish-connected.md` and its run directory `evidence/publish-connected/kp-20260915t082018z-0387/`.
 
 ## 1. Files
