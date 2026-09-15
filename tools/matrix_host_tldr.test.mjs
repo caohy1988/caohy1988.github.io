@@ -46,7 +46,10 @@ test("host TLDR table has 9 hosts, allowed chips only, and a linked Why per row"
     assert.ok(HOST_TLDR_STATUSES.includes(word), word);
     assert.equal(cls, word.toLowerCase());
   }
-  assert.deepEqual(chips.map((c) => c[2]), ["Documented", "Partial", "Unknown", "Unknown", "Partial", "Documented", "Documented", "Unknown", "Unknown"]);
+  assert.deepEqual(chips.map((c) => c[2]), ["Partial", "Partial", "Unknown", "Unknown", "Partial", "Full", "Full", "Unknown", "Unknown"]);
+  assert.ok(!/chip-documented|>Documented</.test(s), "host TLDR chips rate feature parity, never Documented");
+  assert.match(s, /Chips rate <strong>feature parity<\/strong> \([^)]*mount, fallback[^)]*\), not documentation/);
+  assert.match(s, /<strong>Full<\/strong>: GitHub Copilot in VS Code and Cursor\. <strong>Partial<\/strong>: Claude Desktop, Claude Cowork, OpenAI Codex Desktop\. The other four are <strong>Unknown<\/strong>/);
   for (const [, host, , why] of rows) {
     const links = [...why.matchAll(/<a href="(https:\/\/[^"]+)" rel="noopener">([^<]+)<\/a>/g)];
     assert.ok(links.length >= 1, `${host} Why has no https link`);
@@ -54,15 +57,32 @@ test("host TLDR table has 9 hosts, allowed chips only, and a linked Why per row"
   }
 });
 
-test("host TLDR carries summary + official-matrix paragraph with both official links", () => {
+test("host TLDR carries summary + a “Yes, this differs” official-vs-ours comparison with both official links", () => {
   const s = section(html());
   assert.match(s, /No row below is an observed UI or fallback run/);
   assert.match(s, /not<\/strong> the same as unsupported/);
-  assert.match(s, /<a href="https:\/\/modelcontextprotocol\.io\/extensions\/apps\/overview" rel="noopener">MCP Apps overview<\/a>/);
-  assert.match(s, /<a href="https:\/\/modelcontextprotocol\.io\/extensions\/client-matrix" rel="noopener">client extension matrix<\/a>/);
-  assert.match(s, /<code>io\.modelcontextprotocol\/ui<\/code>/);
-  // one paragraph, not a second table
-  assert.equal([...s.matchAll(/<table/g)].length, 1);
+  const cmp = s.match(/<div class="tldr-official prose" id="official-vs-ours">[\s\S]*?<\/div>/)[0];
+  assert.match(cmp, /<p class="tldr-differs"><strong>Yes — this differs from the official MCP Apps matrix, intentionally\.<\/strong>/);
+  assert.match(cmp, /<a href="https:\/\/modelcontextprotocol\.io\/extensions\/apps\/overview" rel="noopener">MCP Apps overview<\/a>/);
+  assert.match(cmp, /<a href="https:\/\/modelcontextprotocol\.io\/extensions\/client-matrix" rel="noopener">client extension matrix<\/a>/);
+  const rows = Object.fromEntries([...cmp.matchAll(/<tr><th scope="row">([^<]+)<\/th><td class="compare-official">([\s\S]*?)<\/td><td class="compare-ours">([\s\S]*?)<\/td><\/tr>/g)].map((m) => [m[1], [m[2], m[3]]]));
+  assert.deepEqual(Object.keys(rows), ["Question", "Grain", "Observed UI runs"]);
+  assert.match(rows.Question[0], /Does the client implement <code>io\.modelcontextprotocol\/ui<\/code>/);
+  assert.match(rows.Question[1], /capability \/ registration-path \/ fallback gap for shipping Glance-style UI on these nine hosts/);
+  assert.match(rows.Grain[0], /CHECK/);
+  assert.match(rows.Grain[1], /Full \/ Partial \/ Unknown feature parity per host, with evidence links/);
+  assert.match(rows["Observed UI runs"][1], /^None; we do not invent them$/);
+  assert.match(cmp, /not a verified Glance UI journey/);
+  // the comparison table plus the Host | Status | Why table, and no official-overlap host table
+  assert.equal([...s.matchAll(/<table/g)].length, 2);
+});
+
+test("parser rejects an Official matrix block without the differs lead, a required row, or an official link", () => {
+  const md = tldrMd();
+  assert.throws(() => parseHostTldr(md.replace("this differs", "this compares")), /must say this differs/);
+  assert.throws(() => parseHostTldr(md.replace(/^\| Grain \|.*\n/m, "")), /missing row: Grain/);
+  assert.throws(() => parseHostTldr(md.replace("(https://modelcontextprotocol.io/extensions/apps/overview)", "(https://example.com/)")), /must link/);
+  assert.throws(() => parseHostTldr(md.replace(/^\| \| Official.*\n\|---\|---\|---\|\n/m, "")), /header must be|comparison table/);
 });
 
 test("reader front never shows an Unsupported chip, unqualified unsupported, or private paths", () => {

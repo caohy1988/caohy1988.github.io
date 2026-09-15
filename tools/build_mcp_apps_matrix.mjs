@@ -7,7 +7,8 @@
 //
 // Layer D (matrix, legend, columns, footnotes, takeaways, version history, rendered-from)
 // is preserved from source.md. brief.md owns banner/judgment/action/next-steps/headings.
-// host-tldr.md owns the above-fold Host | Status | Why table (Documented/Partial/Unknown).
+// host-tldr.md owns the above-fold Host | Status | Why table (Full/Partial/Unknown feature parity)
+// and the official-vs-ours comparison table.
 // judgments.json owns product sentences and compact rows (PR3 grid).
 import fs from "node:fs";
 import path from "node:path";
@@ -90,7 +91,8 @@ function parseSource(md) {
   return { title, heading, version, date, intro, table, legend, columns, notes, bullets };
 }
 
-export const HOST_TLDR_STATUSES = ["Documented", "Partial", "Unknown"];
+// Feature parity across the dense-matrix capability rows, not documentation parity (Haiyuan, 2026-09-14).
+export const HOST_TLDR_STATUSES = ["Full", "Partial", "Unknown"];
 
 // host-tldr.md owns the above-fold Host | Status | Why table (TLDR_HUMAN contract).
 export function parseHostTldr(md) {
@@ -106,7 +108,47 @@ export function parseHostTldr(md) {
     if (!HOST_TLDR_STATUSES.includes(status)) throw new Error(`host-tldr.md ${host}: status must be ${HOST_TLDR_STATUSES.join("/")}, got ${status}`);
     if (!/\]\(https:\/\/[^)\s]+\)/.test(why)) throw new Error(`host-tldr.md ${host}: Why needs at least one https evidence link`);
   }
-  return { heading: sections["Heading"], summary: sections["Summary"], official: sections["Official matrix"], rows: body };
+  return { heading: sections["Heading"], summary: sections["Summary"], official: parseOfficial(sections["Official matrix"]), rows: body };
+}
+
+export const OFFICIAL_LINKS = ["https://modelcontextprotocol.io/extensions/apps/overview", "https://modelcontextprotocol.io/extensions/client-matrix"];
+export const OFFICIAL_COMPARE_ROWS = ["Question", "Grain", "Observed UI runs"];
+
+// "Official matrix" = a lead saying this differs, a | | Official | This page | table, and a closing line.
+function parseOfficial(text) {
+  const lines = text.split("\n");
+  const first = lines.findIndex((l) => l.startsWith("|"));
+  if (first < 0) throw new Error("host-tldr.md Official matrix needs a comparison table");
+  let end = first;
+  while (end < lines.length && lines[end].startsWith("|")) end++;
+  const lead = lines.slice(0, first).join(" ").trim();
+  const after = lines.slice(end).join(" ").trim();
+  const [head, sep, ...body] = lines.slice(first, end).map(splitRow);
+  if (head === SEPARATOR || head.length !== 3 || head[0] !== "" || !/^Official\b/.test(head[1]) || head[2] !== "This page") {
+    throw new Error("host-tldr.md Official matrix table header must be | | Official … | This page |");
+  }
+  if (sep !== SEPARATOR) throw new Error("host-tldr.md Official matrix separator row missing");
+  for (const r of body) if (r.length !== 3) throw new Error(`host-tldr.md Official matrix row has ${r.length} cells: ${r[0]}`);
+  const labels = body.map((r) => r[0]);
+  for (const need of OFFICIAL_COMPARE_ROWS) if (!labels.includes(need)) throw new Error(`host-tldr.md Official matrix missing row: ${need}`);
+  if (!/\bdiffers\b/.test(lead)) throw new Error("host-tldr.md Official matrix lead must say this differs");
+  if (!/`io\.modelcontextprotocol\/ui`/.test(body.find((r) => r[0] === "Question")[1])) throw new Error("host-tldr.md Official question must name io.modelcontextprotocol/ui");
+  for (const href of OFFICIAL_LINKS) if (!text.includes(`](${href})`)) throw new Error(`host-tldr.md Official matrix must link ${href}`);
+  return { lead, head, body, after };
+}
+
+function renderOfficial(o) {
+  const [, official, ours] = o.head;
+  const trs = o.body.map(([label, a, b]) => `              <tr><th scope="row">${esc(label)}</th><td class="compare-official">${inline(a)}</td><td class="compare-ours">${inline(b)}</td></tr>`).join("\n");
+  return `      <div class="tldr-official prose" id="official-vs-ours">
+        <p class="tldr-differs">${inline(o.lead)}</p>
+        <table class="tldr-compare">
+          <thead><tr><td></td><th scope="col">${inline(official)}</th><th scope="col">${inline(ours)}</th></tr></thead>
+          <tbody>
+${trs}
+          </tbody>
+        </table>${o.after ? `\n        <p class="tldr-overlap">${inline(o.after)}</p>` : ""}
+      </div>`;
 }
 
 function renderHostTldr(tldr) {
@@ -117,7 +159,7 @@ function renderHostTldr(tldr) {
   return `    <section class="host-tldr" id="host-tldr" aria-labelledby="host-tldr-heading">
       <h2 id="host-tldr-heading">${esc(tldr.heading)}</h2>
       <p class="tldr-summary prose">${inline(tldr.summary)}</p>
-      <p class="tldr-official prose">${inline(tldr.official)}</p>
+${renderOfficial(tldr.official)}
       <div class="tldr-table-wrap">
         <table class="host-tldr-table">
           <thead><tr><th scope="col">Host</th><th scope="col">Status</th><th scope="col">Why</th></tr></thead>
@@ -304,6 +346,28 @@ export function build(sourceMd, briefMd, judgments, hostTldrMd) {
     .host-tldr h2 { margin: 0 0 8px; }
     .tldr-summary { margin: 0 0 10px; }
     .tldr-official { margin: 0 0 12px; font-size: 0.92rem; color: var(--ink-soft); }
+    .tldr-official p { margin: 0 0 8px; }
+    .tldr-differs { color: var(--ink); }
+    table.tldr-compare { border-collapse: collapse; width: 100%; table-layout: fixed; margin: 0 0 8px; line-height: 1.4; }
+    table.tldr-compare th, table.tldr-compare td { padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+    table.tldr-compare thead th { font-weight: 600; color: var(--ink); background: var(--paper-2); }
+    table.tldr-compare thead td { width: 9.5em; background: var(--paper-2); }
+    table.tldr-compare tbody th { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+    @media (max-width: 700px) {
+      table.tldr-compare thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+      table.tldr-compare, table.tldr-compare tbody, table.tldr-compare tr, table.tldr-compare th, table.tldr-compare td { display: block; width: auto; }
+      table.tldr-compare tr { padding: 6px 0; border-bottom: 1px solid var(--line); }
+      table.tldr-compare th, table.tldr-compare td { padding: 2px 0; border: 0; }
+      table.tldr-compare td.compare-official::before { content: "Official: "; font-weight: 600; color: var(--ink); }
+      table.tldr-compare td.compare-ours::before { content: "This page: "; font-weight: 600; color: var(--ink); }
+    }
+    details.fold > summary { cursor: pointer; list-style: none; }
+    details.fold > summary::-webkit-details-marker { display: none; }
+    details.fold > summary h2 { display: inline; margin: 0; }
+    details.fold > summary::before { content: "▸ "; color: var(--mint); font-weight: 600; }
+    details.fold[open] > summary::before { content: "▾ "; }
+    details.fold > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .fold-hint { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin-left: 6px; }
     .tldr-table-wrap { border: 1px solid var(--line); border-radius: 10px; background: var(--cream); overflow: hidden; }
     table.host-tldr-table { border-collapse: collapse; width: 100%; font-size: 0.9rem; line-height: 1.45; }
     table.host-tldr-table th, table.host-tldr-table td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
@@ -312,7 +376,7 @@ export function build(sourceMd, briefMd, judgments, hostTldrMd) {
     table.host-tldr-table tbody th { white-space: nowrap; font-weight: 600; }
     table.host-tldr-table td.tldr-why { color: var(--ink-soft); }
     .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; border: 1px solid; white-space: nowrap; }
-    .chip-documented { color: var(--mint); border-color: rgba(15,118,110,.45); background: rgba(15,118,110,.08); }
+    .chip-full { color: var(--mint); border-color: rgba(15,118,110,.45); background: rgba(15,118,110,.08); }
     .chip-partial { color: var(--accent-dark); border-color: rgba(183,72,13,.4); background: rgba(232,115,36,.1); }
     .chip-unknown { color: var(--ink-soft); border-color: var(--line); background: var(--paper-2); }
     @media (max-width: 700px) {
@@ -452,7 +516,7 @@ ${renderNextSteps(brief)}
       <p class="owner">${esc(owner)}</p>
     </section>
 
-    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>host-tldr.md</code> (host status table), <code>judgments.json</code> (product sentences and compact rows), and <code>source.md</code> (full evidence below).</p>
+    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code>, <code>host-tldr.md</code>, <code>judgments.json</code> and <code>source.md</code>.</p>
 
     <details class="evidence" id="full-evidence">
       <summary>${esc(foldSummary)}</summary>
@@ -472,7 +536,7 @@ ${layerD}
         if (!el) return;
         var fold = document.getElementById("full-evidence");
         if (fold && fold.contains(el)) fold.open = true;
-        // print: ensure open
+        for (var d = el.parentElement; d; d = d.parentElement) if (d.tagName === "DETAILS") d.open = true;
         el.scrollIntoView({ block: "start" });
       }
       window.addEventListener("DOMContentLoaded", openEvidenceForHash);
@@ -481,6 +545,7 @@ ${layerD}
         window.matchMedia("print").addEventListener("change", function (e) {
           var fold = document.getElementById("full-evidence");
           if (fold && e.matches) fold.open = true;
+          if (e.matches) document.querySelectorAll("main details").forEach(function (d) { d.open = true; });
         });
       }
     })();

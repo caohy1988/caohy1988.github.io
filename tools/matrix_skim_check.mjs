@@ -34,6 +34,7 @@ export const WPM = 230;
 export const FIRST_SCREEN_VIEWPORTS = ["1280x720", "375x667"];
 export const OVERFLOW_VIEWPORTS = ["320x568", "375x667"];
 export const S2_TARGETS = ["#banner", "#aggregate-judgment", "#shipping-action"];
+export const STATUS_FOLD = "status-by-product-fold";
 export const S3_TOKENS = JSON.parse(fs.readFileSync(path.join(REPO, PAGE_DIR, "copy-map.json"), "utf8")).brief_tokens_S3;
 const FORBIDDEN_STATUS_WORD = /^(yes|no|supported|unsupported)$/i;
 
@@ -61,16 +62,64 @@ function serve() {
   });
 }
 
+export const countWords = (t) => (t.match(/\S+/g) || []).filter((x) => /[\p{L}\p{N}]/u.test(x)).length;
+
+// Runs inside the page. Returns the rendered text of `rootSelector` twice: `raw` is innerText; `readable` is innerText
+// with fully clipped accessibility-only boxes (.visually-hidden trigger names, a clipped heading or thead) removed,
+// because a sighted skim never reads them. Those nodes are hidden only for the read and restored at once, so the
+// accessible DOM is unchanged. Closed <details> and [hidden] panels are already absent from innerText.
+export function readableTextInPage(rootSelector) {
+  const root = document.querySelector(rootSelector);
+  const zeroClip = /^rect\(\s*0(px)?[\s,]+0(px)?[\s,]+0(px)?[\s,]+0(px)?\s*\)$/;
+  const fullyClipped = (e) => {
+    const cs = getComputedStyle(e);
+    if (cs.position !== "absolute" && cs.position !== "fixed") return false;
+    if (e.checkVisibility && !e.checkVisibility()) return false; // inside a closed fold: not rendered, not in innerText
+    const r = e.getBoundingClientRect();
+    return zeroClip.test(cs.clip) || (cs.overflow === "hidden" && r.width <= 1 && r.height <= 1);
+  };
+  const clipped = [...root.querySelectorAll("*")].filter(fullyClipped).filter((e, _, all) => !all.some((o) => o !== e && o.contains(e)));
+  const key = (el) => el.id || String(el.className) || el.tagName.toLowerCase();
+  const raw = root.innerText;
+  const rawSections = Object.fromEntries([...root.children].map((el) => [key(el), el.innerText]));
+  const clippedText = clipped.map((e) => e.innerText || e.textContent);
+  const saved = clipped.map((e) => e.getAttribute("style"));
+  clipped.forEach((e) => e.style.setProperty("display", "none", "important"));
+  const readable = root.innerText;
+  const sections = Object.fromEntries([...root.children].map((el) => [key(el), el.innerText]));
+  clipped.forEach((e, i) => (saved[i] === null ? e.removeAttribute("style") : e.setAttribute("style", saved[i])));
+  return { raw, readable, sections, rawSections, clippedText, openFolds: root.querySelectorAll("details[open]").length };
+}
+
+export function wordLoad(t) {
+  const map = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, countWords(v)]));
+  return {
+    words: countWords(t.readable), rawWords: countWords(t.raw), clippedWords: countWords(t.clippedText.join(" ")),
+    sections: map(t.sections), rawSections: map(t.rawSections), openFolds: t.openFolds,
+    a11yLabelsInReadable: /: show evidence\b/.test(t.readable),
+  };
+}
+
+// Counts a standalone HTML fixture at one viewport (used by the counter regression test).
+export async function measureReadableHtml(html, { engine = "chromium", width = 375, height = 667 } = {}) {
+  const pw = await loadPlaywright();
+  if (!pw) throw new PlaywrightMissing("Playwright not found");
+  const browser = await pw[engine].launch();
+  try {
+    const page = await (await browser.newContext({ viewport: { width, height } })).newPage();
+    await page.setContent(html);
+    return wordLoad(await page.evaluate(readableTextInPage, "main"));
+  } finally {
+    await browser.close();
+  }
+}
+
 // Runs inside the page. Folds must be closed when called.
 function measureInPage({ targets, tokens, privatePathSource }) {
-  const countWords = (t) => (t.match(/\S+/g) || []).filter((x) => /[\p{L}\p{N}]/u.test(x)).length;
   const vw = window.innerWidth, vh = window.innerHeight;
   const main = document.querySelector("main");
   const fold = document.getElementById("full-evidence");
   const round = (x) => Math.round(x * 10) / 10;
-
-  const sections = {};
-  for (const el of main.children) sections[el.id || String(el.className) || el.tagName.toLowerCase()] = countWords(el.innerText);
 
   const boxes = {};
   for (const sel of targets) {
@@ -120,9 +169,6 @@ function measureInPage({ targets, tokens, privatePathSource }) {
     innerWidth: vw, innerHeight: vh, scrollY: window.scrollY,
     foldOpen: fold ? fold.open : null,
     panelsOpen: [...document.querySelectorAll(".compact-panel")].filter((p) => !p.hidden).length,
-    words: countWords(main.innerText),
-    bodyWords: countWords(document.body.innerText),
-    sections,
     overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     boxes,
     firstScreenWords: seen.length,
@@ -153,7 +199,20 @@ function measureInPage({ targets, tokens, privatePathSource }) {
 
 const PRIVATE_PATH = String.raw`/Users/|/private/tmp/|(^|[\s"'\x60(>])/tmp/[A-Za-z0-9._/-]+|links to a receipt`;
 
+// Layer B sits in a closed <details>: its summary must open on Enter (and on tap at phone widths) before the
+// compact triggers are reachable. The fold is left open for the trigger checks and closed again at the end.
 async function disclosureCheck(page, touch) {
+  const summary = page.locator(`#${STATUS_FOLD} > summary`);
+  const foldOpen = () => page.evaluate((id) => document.getElementById(id).open, STATUS_FOLD);
+  const fold = { closedAtLoad: !(await foldOpen()) };
+  await summary.scrollIntoViewIfNeeded();
+  await summary.focus();
+  await page.keyboard.press("Enter"); fold.enterOpens = await foldOpen();
+  await page.keyboard.press("Enter"); fold.enterCloses = !(await foldOpen());
+  if (touch) { await summary.tap(); fold.tapOpens = await foldOpen(); }
+  else await page.keyboard.press("Enter");
+  fold.keyboardPass = fold.closedAtLoad && fold.enterOpens && fold.enterCloses;
+  fold.touchPass = touch ? fold.tapOpens : null;
   const btn = page.locator(".compact-trigger:visible").first();
   await btn.scrollIntoViewIfNeeded();
   const panel = page.locator(`#${await btn.getAttribute("aria-controls")}`);
@@ -165,31 +224,36 @@ async function disclosureCheck(page, touch) {
   await page.keyboard.press("Enter"); out.enter = await state();
   await page.keyboard.press("Space"); out.space = await state();
   await page.keyboard.press("Enter"); await page.keyboard.press("Escape"); out.escape = await state();
-  out.keyboardPass = opened(out.enter) && closed(out.space) && closed(out.escape);
+  out.fold = fold;
+  out.keyboardPass = fold.keyboardPass && opened(out.enter) && closed(out.space) && closed(out.escape);
   if (touch) {
     await btn.tap(); out.tapOpen = await state();
     await btn.tap(); out.tapClose = await state();
-    out.touchPass = opened(out.tapOpen) && closed(out.tapClose);
+    out.touchPass = fold.touchPass && opened(out.tapOpen) && closed(out.tapClose);
   }
+  await page.evaluate((id) => { document.getElementById(id).open = false; }, STATUS_FOLD);
   return out;
 }
 
 async function printCheck(page) {
+  const statusClosedBefore = await page.evaluate((id) => !document.getElementById(id).open, STATUS_FOLD);
   await page.emulateMedia({ media: "print" });
   await page.waitForTimeout(150);
-  const r = await page.evaluate(() => {
+  const r = await page.evaluate((id) => {
     const fold = document.getElementById("full-evidence");
     const hiddenPanel = document.querySelector(".compact-panel[hidden]");
     return {
       foldOpen: fold.open,
+      statusFoldOpen: document.getElementById(id).open,
       summaryDisplay: getComputedStyle(fold.querySelector("summary")).display,
       hiddenPanelDisplay: hiddenPanel ? getComputedStyle(hiddenPanel).display : null,
       printCss: [...document.querySelectorAll("style")].some((s) => /@media print[\s\S]*details\.evidence > summary \{ display: none; \}/.test(s.textContent)),
       openOnPrintScript: [...document.scripts].some((s) => /matchMedia\("print"\)/.test(s.textContent) && /fold\.open = true/.test(s.textContent)),
     };
-  });
+  }, STATUS_FOLD);
   await page.emulateMedia({ media: "screen" });
-  r.pass = r.foldOpen && r.hiddenPanelDisplay !== "none" && r.printCss && r.openOnPrintScript;
+  r.statusClosedBefore = statusClosedBefore;
+  r.pass = r.foldOpen && statusClosedBefore && r.statusFoldOpen && r.hiddenPanelDisplay !== "none" && r.printCss && r.openOnPrintScript;
   return r;
 }
 
@@ -211,6 +275,11 @@ async function runEngine(pw, engine, { url, offline, shots }) {
       const page = await context.newPage();
       await settle(page, url);
       const m = await page.evaluate(measureInPage, { targets: S2_TARGETS, tokens: S3_TOKENS, privatePathSource: PRIVATE_PATH });
+      Object.assign(m, wordLoad(await page.evaluate(readableTextInPage, "main")));
+      // S7 rendered labels live in layer B, which is folded: read them with the status fold open, then close it.
+      await page.evaluate((id) => { document.getElementById(id).open = true; }, STATUS_FOLD);
+      m.rendered = (await page.evaluate(measureInPage, { targets: S2_TARGETS, tokens: S3_TOKENS, privatePathSource: PRIVATE_PATH })).rendered;
+      await page.evaluate((id) => { document.getElementById(id).open = false; }, STATUS_FOLD);
       if (shots) {
         fs.mkdirSync(shots, { recursive: true });
         await page.screenshot({ path: path.join(shots, `${engine}-${vp.name}-first-screen.png`) });
@@ -237,9 +306,10 @@ export function evaluateGates(viewports) {
   const by = Object.fromEntries(viewports.map((v) => [v.viewport, v]));
   const S1 = {
     threshold: `≤ ${S1_MAX_WORDS} words and ≤ ${S1_MAX_MINUTES} min at ${WPM} wpm, folds closed`,
-    values: viewports.map((v) => ({ viewport: v.viewport, words: v.words, minutes: v.minutes, foldOpen: v.foldOpen, panelsOpen: v.panelsOpen })),
+    counter: "readable <main> innerText: fully clipped accessibility-only text excluded (rawWords keeps it)",
+    values: viewports.map((v) => ({ viewport: v.viewport, words: v.words, rawWords: v.rawWords, clippedWords: v.clippedWords, minutes: v.minutes, foldOpen: v.foldOpen, openFolds: v.openFolds, panelsOpen: v.panelsOpen })),
   };
-  S1.pass = viewports.every((v) => v.foldOpen === false && v.panelsOpen === 0 && v.words <= S1_MAX_WORDS && v.minutes <= S1_MAX_MINUTES);
+  S1.pass = viewports.every((v) => v.foldOpen === false && (v.openFolds ?? 0) === 0 && v.panelsOpen === 0 && v.words <= S1_MAX_WORDS && v.minutes <= S1_MAX_MINUTES);
 
   const S2 = {
     threshold: `${S2_TARGETS.join(", ")} fully visible without scrolling at ${FIRST_SCREEN_VIEWPORTS.join(" and ")}`,
@@ -309,7 +379,7 @@ function summarize(report) {
     for (const [name, g] of Object.entries(r.gates)) lines.push(`${g.pass ? "PASS" : "FAIL"} ${r.engine} ${name}: ${g.threshold}`);
     for (const v of r.viewports) {
       const b = (s) => v.boxes[s] ? `${v.boxes[s].bottom}${v.boxes[s].fullyVisible ? "" : "!"}` : "missing";
-      lines.push(`     ${r.engine} ${v.viewport}: words=${v.words} min=${v.minutes} overflowX=${v.overflowX} bottoms banner=${b("#banner")} judgment=${b("#aggregate-judgment")} action=${b("#shipping-action")} tokens=${Object.values(v.tokenHits).filter(Boolean).length}/${S3_TOKENS.length} kbd=${v.disclosure.keyboardPass} tap=${v.disclosure.touchPass ?? "-"} print=${v.print.pass} frag=${v.fragment.pass} webFonts=${v.webFontsLoaded.length}`);
+      lines.push(`     ${r.engine} ${v.viewport}: words=${v.words} (raw ${v.rawWords}, clipped ${v.clippedWords}) min=${v.minutes} overflowX=${v.overflowX} bottoms banner=${b("#banner")} judgment=${b("#aggregate-judgment")} action=${b("#shipping-action")} tokens=${Object.values(v.tokenHits).filter(Boolean).length}/${S3_TOKENS.length} kbd=${v.disclosure.keyboardPass} tap=${v.disclosure.touchPass ?? "-"} print=${v.print.pass} frag=${v.fragment.pass} webFonts=${v.webFontsLoaded.length}`);
     }
   }
   return lines.join("\n");

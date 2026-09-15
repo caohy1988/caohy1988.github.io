@@ -41,6 +41,28 @@
     .host-tldr h2 { margin: 0 0 8px; }
     .tldr-summary { margin: 0 0 10px; }
     .tldr-official { margin: 0 0 12px; font-size: 0.92rem; color: var(--ink-soft); }
+    .tldr-official p { margin: 0 0 8px; }
+    .tldr-differs { color: var(--ink); }
+    table.tldr-compare { border-collapse: collapse; width: 100%; table-layout: fixed; margin: 0 0 8px; line-height: 1.4; }
+    table.tldr-compare th, table.tldr-compare td { padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+    table.tldr-compare thead th { font-weight: 600; color: var(--ink); background: var(--paper-2); }
+    table.tldr-compare thead td { width: 9.5em; background: var(--paper-2); }
+    table.tldr-compare tbody th { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+    @media (max-width: 700px) {
+      table.tldr-compare thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+      table.tldr-compare, table.tldr-compare tbody, table.tldr-compare tr, table.tldr-compare th, table.tldr-compare td { display: block; width: auto; }
+      table.tldr-compare tr { padding: 6px 0; border-bottom: 1px solid var(--line); }
+      table.tldr-compare th, table.tldr-compare td { padding: 2px 0; border: 0; }
+      table.tldr-compare td.compare-official::before { content: "Official: "; font-weight: 600; color: var(--ink); }
+      table.tldr-compare td.compare-ours::before { content: "This page: "; font-weight: 600; color: var(--ink); }
+    }
+    details.fold > summary { cursor: pointer; list-style: none; }
+    details.fold > summary::-webkit-details-marker { display: none; }
+    details.fold > summary h2 { display: inline; margin: 0; }
+    details.fold > summary::before { content: "▸ "; color: var(--mint); font-weight: 600; }
+    details.fold[open] > summary::before { content: "▾ "; }
+    details.fold > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .fold-hint { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin-left: 6px; }
     .tldr-table-wrap { border: 1px solid var(--line); border-radius: 10px; background: var(--cream); overflow: hidden; }
     table.host-tldr-table { border-collapse: collapse; width: 100%; font-size: 0.9rem; line-height: 1.45; }
     table.host-tldr-table th, table.host-tldr-table td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
@@ -49,7 +71,7 @@
     table.host-tldr-table tbody th { white-space: nowrap; font-weight: 600; }
     table.host-tldr-table td.tldr-why { color: var(--ink-soft); }
     .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; border: 1px solid; white-space: nowrap; }
-    .chip-documented { color: var(--mint); border-color: rgba(15,118,110,.45); background: rgba(15,118,110,.08); }
+    .chip-full { color: var(--mint); border-color: rgba(15,118,110,.45); background: rgba(15,118,110,.08); }
     .chip-partial { color: var(--accent-dark); border-color: rgba(183,72,13,.4); background: rgba(232,115,36,.1); }
     .chip-unknown { color: var(--ink-soft); border-color: var(--line); background: var(--paper-2); }
     @media (max-width: 700px) {
@@ -191,7 +213,7 @@
   <main class="shell" id="main">
     <p class="kicker">Builds · MCP Apps · v7 evidence, readable edition</p>
     <h1>Which AI hosts document MCP Apps rendering, and what to ship anyway</h1>
-    <p class="meta"><span class="mono">v7 · 2026-09-14</span><span class="desk-only"> · Readable edition of the MCP Apps (SEP-1865) evidence matrix across nine host surfaces. Judgments first; full evidence on demand. No cell is an observed UI or fallback run.</span></p>
+    <p class="meta"><span class="mono">v7 · 2026-09-14</span><span class="desk-only"> · Readable edition across nine host surfaces.</span></p>
 
     <section class="short prose" id="short-version" aria-label="The short version">
       <h2>The short version</h2>
@@ -205,21 +227,32 @@
 
     <section class="host-tldr" id="host-tldr" aria-labelledby="host-tldr-heading">
       <h2 id="host-tldr-heading">Host status at a glance</h2>
-      <p class="tldr-summary prose">Three hosts <strong>document</strong> MCP Apps rendering today: Claude Desktop, GitHub Copilot in VS Code, and Cursor. Two look <strong>partial</strong> (Claude Cowork has mixed dated reports by path; OpenAI Codex Desktop has Apps-related code in the inspected bundle but no captured UI). The rest stay <strong>Unknown</strong> — we checked their guides and found nothing adequate, which is <strong>not</strong> the same as unsupported. <strong>No row below is an observed UI or fallback run.</strong></p>
-      <p class="tldr-official prose">This page answers a different question from the official <a href="https://modelcontextprotocol.io/extensions/apps/overview" rel="noopener">MCP Apps overview</a> / <a href="https://modelcontextprotocol.io/extensions/client-matrix" rel="noopener">client extension matrix</a>. Official CHECK marks mean a client advertises the <code>io.modelcontextprotocol/ui</code> extension. Our table tracks capability / path / fallback evidence for the nine Glance-relevant hosts. Overlap: Claude Desktop, GitHub Copilot, Cursor. Official CHECK ≠ verified Glance UI journey.</p>
+      <p class="tldr-summary prose">Chips rate <strong>feature parity</strong> (advertisement, mount, fallback, switch evidence), not documentation. <strong>Full</strong>: GitHub Copilot in VS Code and Cursor. <strong>Partial</strong>: Claude Desktop, Claude Cowork, OpenAI Codex Desktop. The other four are <strong>Unknown</strong> — too little evidence to judge, which is <strong>not</strong> the same as unsupported. <strong>No row below is an observed UI or fallback run.</strong></p>
+      <div class="tldr-official prose" id="official-vs-ours">
+        <p class="tldr-differs"><strong>Yes — this differs from the official MCP Apps matrix, intentionally.</strong></p>
+        <table class="tldr-compare">
+          <thead><tr><td></td><th scope="col">Official <a href="https://modelcontextprotocol.io/extensions/client-matrix" rel="noopener">client extension matrix</a></th><th scope="col">This page</th></tr></thead>
+          <tbody>
+              <tr><th scope="row">Question</th><td class="compare-official">Does the client implement <code>io.modelcontextprotocol/ui</code> (<a href="https://modelcontextprotocol.io/extensions/apps/overview" rel="noopener">MCP Apps overview</a>)?</td><td class="compare-ours">What is the capability / registration-path / fallback gap for shipping Glance-style UI on these nine hosts?</td></tr>
+              <tr><th scope="row">Grain</th><td class="compare-official">Community-maintained CHECK per client</td><td class="compare-ours">Full / Partial / Unknown feature parity per host, with evidence links</td></tr>
+              <tr><th scope="row">Observed UI runs</th><td class="compare-official">N/A</td><td class="compare-ours">None; we do not invent them</td></tr>
+          </tbody>
+        </table>
+        <p class="tldr-overlap">Overlap: Claude Desktop, GitHub Copilot, Cursor. An official CHECK means the client claims the extension, not a verified Glance UI journey.</p>
+      </div>
       <div class="tldr-table-wrap">
         <table class="host-tldr-table">
           <thead><tr><th scope="col">Host</th><th scope="col">Status</th><th scope="col">Why</th></tr></thead>
           <tbody>
-          <tr><th scope="row">Claude Desktop</th><td class="tldr-status"><span class="chip chip-documented">Documented</span></td><td class="tldr-why">Vendor docs claim Apps support (<a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">Claude Apps getting started</a>); mixed historical failures exist (<a href="https://github.com/anthropics/claude-ai-mcp/issues/165" rel="noopener">issue #165</a>). Not an observed run here.</td></tr>
-          <tr><th scope="row">Claude Cowork</th><td class="tldr-status"><span class="chip chip-partial">Partial</span></td><td class="tldr-why">Dated reports: first-party path yes / gateway &amp; plugin no (<a href="https://github.com/anthropics/claude-ai-mcp/issues/236" rel="noopener">issue #236</a>, <a href="https://github.com/anthropics/claude-ai-mcp/issues/274" rel="noopener">issue #274</a>). Not current observed.</td></tr>
-          <tr><th scope="row">Claude Code</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Reviewed <a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">Claude Code MCP guide</a> is silent on Apps; handshake uncaptured. Unknown ≠ unsupported.</td></tr>
-          <tr><th scope="row">OpenAI Codex CLI</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Reviewed <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">Codex CLI MCP docs</a> silent on Apps. Unknown ≠ unsupported.</td></tr>
-          <tr><th scope="row">OpenAI Codex Desktop</th><td class="tldr-status"><span class="chip chip-partial">Partial</span></td><td class="tldr-why">Local inspection finds Apps-related sandbox/schema/gate code in <code>ChatGPT.app</code> (receipts private, not linked); vendor <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=desktop" rel="noopener">Desktop MCP docs</a> silent; one historical <a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-5127235678" rel="noopener">“Codex” iframe report</a> leaves surface unstated. UI not captured.</td></tr>
-          <tr><th scope="row">GitHub Copilot</th><td class="tldr-status"><span class="chip chip-documented">Documented</span></td><td class="tldr-why"><a href="https://code.visualstudio.com/blogs/2026/01/26/mcp-apps-support" rel="noopener">VS Code MCP Apps blog</a> + <a href="https://code.visualstudio.com/updates/v1_109" rel="noopener">v1.109 notes</a>; Apps version pinned in <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/platform/mcp/common/modelContextProtocolApps.ts#L86" rel="noopener">VS Code source</a>. Not an observed run.</td></tr>
-          <tr><th scope="row">Cursor</th><td class="tldr-status"><span class="chip chip-documented">Documented</span></td><td class="tldr-why"><a href="https://cursor.com/docs/context/mcp" rel="noopener">Cursor MCP docs</a> claim support; a mount regression was reported fixed in 3.12 (<a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/19" rel="noopener">forum thread</a>, unreproduced here). Not observed.</td></tr>
-          <tr><th scope="row">Antigravity CLI</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Reviewed <a href="https://antigravity.google/docs/mcp" rel="noopener">Antigravity MCP docs</a> silent on Apps. Unknown ≠ unsupported.</td></tr>
-          <tr><th scope="row">Antigravity Desktop</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Reviewed <a href="https://antigravity.google/docs/mcp" rel="noopener">Antigravity MCP docs</a> and <a href="https://antigravity.google/changelog" rel="noopener">changelog</a> (through 2.13.0) do not establish Apps; inspected 2.2.1 slice had no named Apps literals. Unknown ≠ unsupported.</td></tr>
+          <tr><th scope="row">Claude Desktop</th><td class="tldr-status"><span class="chip chip-partial">Partial</span></td><td class="tldr-why">Inline mount documented (<a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">guide</a>) but reports mixed (<a href="https://github.com/anthropics/claude-ai-mcp/issues/165" rel="noopener">issue #165</a>); fallbacks reported as a <a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-4747962829" rel="noopener">blank gap</a> and an <a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-5301835548" rel="noopener">error card</a>; version, checklist, switch unknown.</td></tr>
+          <tr><th scope="row">Claude Cowork</th><td class="tldr-status"><span class="chip chip-partial">Partial</span></td><td class="tldr-why">Reports split by path: first-party mounts, gateway text fallback (<a href="https://github.com/anthropics/claude-ai-mcp/issues/236" rel="noopener">issue #236</a>), plugin raw JSON (<a href="https://github.com/anthropics/claude-ai-mcp/issues/274" rel="noopener">issue #274</a>); version, checklist unknown.</td></tr>
+          <tr><th scope="row">Claude Code</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Advertisement, mount, fallback unknown; <a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">guide</a> covers standard MCP only. Unknown ≠ unsupported.</td></tr>
+          <tr><th scope="row">OpenAI Codex CLI</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Advertisement, mount, fallback unknown; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">docs</a> silent on Apps. Unknown ≠ unsupported.</td></tr>
+          <tr><th scope="row">OpenAI Codex Desktop</th><td class="tldr-status"><span class="chip chip-partial">Partial</span></td><td class="tldr-why">Inspected bundle has code for a UI-extension handshake, sandboxed mount, fallback branch and a gate defaulting to <code>false</code> (receipts private, not linked); advertisement and UI not captured; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=desktop" rel="noopener">docs</a> silent.</td></tr>
+          <tr><th scope="row">GitHub Copilot</th><td class="tldr-status"><span class="chip chip-full">Full</span></td><td class="tldr-why"><a href="https://code.visualstudio.com/blogs/2026/01/26/mcp-apps-support" rel="noopener">Docs</a> plus pinned source for <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/platform/mcp/common/modelContextProtocolApps.ts#L86" rel="noopener">Apps version</a>, <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatMcpAppModel.ts#L568" rel="noopener">inline mount</a>, <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/mcp/common/mcpLanguageModelToolContribution.ts#L245" rel="noopener">off</a> and <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatMcpAppSubPart.ts#L182" rel="noopener">error</a> fallbacks, and a <a href="https://code.visualstudio.com/docs/agents/reference/ai-settings" rel="noopener">toggle</a>. App-only visibility unknown. Not a released build or observed run.</td></tr>
+          <tr><th scope="row">Cursor</th><td class="tldr-status"><span class="chip chip-full">Full</span></td><td class="tldr-why"><a href="https://cursor.com/docs/context/mcp" rel="noopener">Docs</a> claim Apps; dated reports show mounts <a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/19" rel="noopener">restored in 3.12</a>, a <a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/10" rel="noopener">plain-text fallback</a> and <a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/22" rel="noopener">no toggle or enablement</a> (staff). Version, checklist unpublished; unreproduced, not an observed run.</td></tr>
+          <tr><th scope="row">Antigravity CLI</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Advertisement, mount, fallback unknown; <a href="https://antigravity.google/docs/mcp" rel="noopener">docs</a> silent on Apps. Unknown ≠ unsupported.</td></tr>
+          <tr><th scope="row">Antigravity Desktop</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Inspected 2.2.1 slice has no named Apps literals; <a href="https://antigravity.google/docs/mcp" rel="noopener">docs</a> and <a href="https://antigravity.google/changelog" rel="noopener">changelog</a> through 2.13.0 silent. Unknown ≠ unsupported.</td></tr>
           </tbody>
         </table>
       </div>
@@ -252,7 +285,8 @@
 
 
     <section class="compact prose" id="status-by-product" aria-label="Status by product">
-      <h2>Status by product</h2>
+      <details class="fold" id="status-by-product-fold">
+      <summary><h2>Status by product</h2> <span class="fold-hint">four questions per host</span></summary>
       <p class="compact-hint">Evidence word plus phrase. Activate a cell for the full v7 source cell, legend, and any footnote. Glyphs are not used as a support scale.</p>
       <div class="compact-table-wrap" data-compact-table>
         <table class="compact-matrix">
@@ -1209,22 +1243,23 @@
       </div>
       <p class="compact-key">Documented = the vendor's own page · Source pinned = a code snapshot, not a shipped build · Reported = a dated user or staff report, not reproduced · Code found = strings or functions in a local install, nothing run · Unknown = this evidence does not establish the answer · User setting = a documented user control · Internal gate found = code gate, not a user control; runtime value may be unknown</p>
       <p class="compact-portable">Every row: recommended portable content path (readable text, optional image).</p>
+      </details>
     </section>
 
     <section class="next prose" id="what-would-change" aria-label="What would change this page">
       <h2>What would change this page</h2>
       <ul class="next-steps">
-      <li>Host advertisement — capture the host/client's Apps advertisement in its initialize handshake at the relevant protocol revision. Would update &quot;Vendor documents&quot; for no one and &quot;Rendering evidence&quot; for nobody; it updates the advertisement row in the full matrix.</li>
-      <li>Mount and fallback — for one named build and one registration path, capture the Apps UI handshake, a mount, then the same tool with Apps off or failing. Record any stage not reached. Would update &quot;Rendering evidence&quot; and &quot;Without Apps&quot; for that build and path only.</li>
-      <li>App-only visibility — a separate tool-exposure check (is an <code>app</code>-visibility tool offered to the model?). Would update the visibility row only.</li>
-      <li>Antigravity Desktop — the same on a current build (2.13.0); the searched build is eleven minor versions old.</li>
-      <li>Codex Desktop — capture the gate's runtime value and the server-facing handshake; code presence proves neither.</li>
-      <li>Documentation gaps close only when the vendor publishes; nothing we run changes those.</li>
+      <li>Host advertisement — capture the Apps advertisement in the host's initialize handshake at the relevant protocol revision. Updates only the advertisement row.</li>
+      <li>Mount and fallback — for one named build and registration path, capture the Apps UI handshake, a mount, then the same tool with Apps off or failing; record any stage not reached. Updates &quot;Rendering evidence&quot; and &quot;Without Apps&quot; for that build and path only.</li>
+      <li>App-only visibility — check whether an <code>app</code>-visibility tool reaches the model; updates that row only.</li>
+      <li>Antigravity Desktop — repeat on current build 2.13.0, eleven minor versions past the searched 2.2.1.</li>
+      <li>Codex Desktop — capture the gate's runtime value and server-facing handshake; code presence proves neither.</li>
+      <li>Documentation gaps close only when the vendor publishes.</li>
       </ul>
-      <p class="owner">Proposed owner role: whoever has the named build installed plus a test Apps server (the seat that produced each inspection pack is the natural candidate). Effort unestimated.</p>
+      <p class="owner">Proposed owner: whoever has the named build and a test Apps server; effort unestimated.</p>
     </section>
 
-    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>host-tldr.md</code> (host status table), <code>judgments.json</code> (product sentences and compact rows), and <code>source.md</code> (full evidence below).</p>
+    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code>, <code>host-tldr.md</code>, <code>judgments.json</code> and <code>source.md</code>.</p>
 
     <details class="evidence" id="full-evidence">
       <summary>Full evidence (v7, 2026-09-14): matrix, legend, columns, footnotes, takeaways, history</summary>
@@ -1288,7 +1323,7 @@
         if (!el) return;
         var fold = document.getElementById("full-evidence");
         if (fold && fold.contains(el)) fold.open = true;
-        // print: ensure open
+        for (var d = el.parentElement; d; d = d.parentElement) if (d.tagName === "DETAILS") d.open = true;
         el.scrollIntoView({ block: "start" });
       }
       window.addEventListener("DOMContentLoaded", openEvidenceForHash);
@@ -1297,6 +1332,7 @@
         window.matchMedia("print").addEventListener("change", function (e) {
           var fold = document.getElementById("full-evidence");
           if (fold && e.matches) fold.open = true;
+          if (e.matches) document.querySelectorAll("main details").forEach(function (d) { d.open = true; });
         });
       }
     })();

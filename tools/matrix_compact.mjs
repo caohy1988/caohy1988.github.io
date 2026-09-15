@@ -157,7 +157,8 @@ export function renderCompact(judgments, sourceMd, notes, inline, esc) {
 
   return `
     <section class="compact prose" id="status-by-product" aria-label="Status by product">
-      <h2>Status by product</h2>
+      <details class="fold" id="status-by-product-fold">
+      <summary><h2>Status by product</h2> <span class="fold-hint">four questions per host</span></summary>
       <p class="compact-hint">Evidence word plus phrase. Activate a cell for the full v7 source cell, legend, and any footnote. Glyphs are not used as a support scale.</p>
       <div class="compact-table-wrap" data-compact-table>
         <table class="compact-matrix">
@@ -172,6 +173,7 @@ ${cards}
       </div>
       <p class="compact-key">${esc(wordLegend)}</p>
       <p class="compact-portable">Every row: recommended portable content path (readable text, optional image).</p>
+      </details>
     </section>`;
 }
 
