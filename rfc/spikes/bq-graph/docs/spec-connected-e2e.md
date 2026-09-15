@@ -79,7 +79,8 @@ Order is fixed. `S*` are run-level stages; cases are graded MET / WRONG / NOT_RE
 5. **Payload guard.** `verify_payload(store, pin, trusted, result, comp, decl, engine="fallback")` must be
    `CONSISTENT`.
 6. **Bind.** `chain.bind(comp, decl, sdk_pub, as_of, source_pin=pin.source_pin)` must be `BOUND`.
-7. **Fact read-back (secondary bar).** Under the requester, every table of the vendored `content.json` is read in full
+7. **Authorization, then fact read-back (secondary bar).** Authorization (step 8) is evaluated first, so a denied
+   requester is refused naming authorization and no read-back is attempted. Under the requester, every table of the vendored `content.json` is read in full
    (schema from `get_table`, rows by `SELECT *`) and canonicalised as `okf-fact-content/1`. The result is judged with
    `consumer_run.admit_live`, which must return `OK` with the bound content digest. `FACTS_DRIFTED` or `MATERIALIZATION_EXPIRED`
    refuses before execution.
