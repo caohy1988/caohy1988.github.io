@@ -23,7 +23,7 @@ Steps, on the live URL https://caohy1988.github.io/research/builds/mcp-apps-feat
    - a. The aggregate judgment ("Three of nine host surfaces document MCP Apps rendering …") is present.
    - b. The shipping action ("Ship the portable path regardless …") is present.
    - c. The Unknown definition ("'Unknown' means this evidence does not establish the answer; it is not 'unsupported'") is present, and nothing says Unknown means unsupported.
-   - d. The host TLDR ("Host status at a glance", nine hosts, Documented / Partial / Unknown) is present and readable.
+   - d. The host TLDR ("Host status at a glance", nine hosts, Full / Partial / Unknown feature-parity chips, and the "Yes — this differs" official-vs-ours comparison) is present and readable.
    - e. The full evidence is still reachable: either Reader shows the v7 matrix, footnotes and takeaways, or leaving Reader and opening "Full evidence (v7, 2026-09-14)" shows them.
    - f. No Reader text implies an observed UI or fallback run.
 4. Leave Reader. Load `#takeaways` on the URL and confirm the evidence fold opens at the takeaways.

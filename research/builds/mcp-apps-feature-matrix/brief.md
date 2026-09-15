@@ -13,15 +13,15 @@ Ship the portable path regardless: readable text plus an optional image as ordin
 What would change this page
 
 ## Next steps
-- Host advertisement — capture the host/client's Apps advertisement in its initialize handshake at the relevant protocol revision. Would update "Vendor documents" for no one and "Rendering evidence" for nobody; it updates the advertisement row in the full matrix.
-- Mount and fallback — for one named build and one registration path, capture the Apps UI handshake, a mount, then the same tool with Apps off or failing. Record any stage not reached. Would update "Rendering evidence" and "Without Apps" for that build and path only.
-- App-only visibility — a separate tool-exposure check (is an `app`-visibility tool offered to the model?). Would update the visibility row only.
-- Antigravity Desktop — the same on a current build (2.13.0); the searched build is eleven minor versions old.
-- Codex Desktop — capture the gate's runtime value and the server-facing handshake; code presence proves neither.
-- Documentation gaps close only when the vendor publishes; nothing we run changes those.
+- Host advertisement — capture the Apps advertisement in the host's initialize handshake at the relevant protocol revision. Updates only the advertisement row.
+- Mount and fallback — for one named build and registration path, capture the Apps UI handshake, a mount, then the same tool with Apps off or failing; record any stage not reached. Updates "Rendering evidence" and "Without Apps" for that build and path only.
+- App-only visibility — check whether an `app`-visibility tool reaches the model; updates that row only.
+- Antigravity Desktop — repeat on current build 2.13.0, eleven minor versions past the searched 2.2.1.
+- Codex Desktop — capture the gate's runtime value and server-facing handshake; code presence proves neither.
+- Documentation gaps close only when the vendor publishes.
 
 ## Next steps owner
-Proposed owner role: whoever has the named build installed plus a test Apps server (the seat that produced each inspection pack is the natural candidate). Effort unestimated.
+Proposed owner: whoever has the named build and a test Apps server; effort unestimated.
 
 ## Evidence fold summary
 Full evidence (v7, 2026-09-14): matrix, legend, columns, footnotes, takeaways, history
@@ -30,4 +30,4 @@ Full evidence (v7, 2026-09-14): matrix, legend, columns, footnotes, takeaways, h
 Builds · MCP Apps · v7 evidence, readable edition
 
 ## Meta
-v7 · 2026-09-14 · Readable edition of the MCP Apps (SEP-1865) evidence matrix across nine host surfaces. Judgments first; full evidence on demand. No cell is an observed UI or fallback run.
+v7 · 2026-09-14 · Readable edition across nine host surfaces.
