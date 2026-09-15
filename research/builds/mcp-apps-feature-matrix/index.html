@@ -37,6 +37,30 @@
     .banner p { margin: 0; }
     .judgment, .action { margin: 0 0 14px; }
     .action { font-weight: 550; }
+    .host-tldr { margin: 22px 0 8px; }
+    .host-tldr h2 { margin: 0 0 8px; }
+    .tldr-summary { margin: 0 0 10px; }
+    .tldr-official { margin: 0 0 12px; font-size: 0.92rem; color: var(--ink-soft); }
+    .tldr-table-wrap { border: 1px solid var(--line); border-radius: 10px; background: var(--cream); overflow: hidden; }
+    table.host-tldr-table { border-collapse: collapse; width: 100%; font-size: 0.9rem; line-height: 1.45; }
+    table.host-tldr-table th, table.host-tldr-table td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+    table.host-tldr-table thead th { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; background: var(--paper-2); }
+    table.host-tldr-table tbody tr:last-child th, table.host-tldr-table tbody tr:last-child td { border-bottom: 0; }
+    table.host-tldr-table tbody th { white-space: nowrap; font-weight: 600; }
+    table.host-tldr-table td.tldr-why { color: var(--ink-soft); }
+    .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; border: 1px solid; white-space: nowrap; }
+    .chip-documented { color: var(--mint); border-color: rgba(15,118,110,.45); background: rgba(15,118,110,.08); }
+    .chip-partial { color: var(--accent-dark); border-color: rgba(183,72,13,.4); background: rgba(232,115,36,.1); }
+    .chip-unknown { color: var(--ink-soft); border-color: var(--line); background: var(--paper-2); }
+    @media (max-width: 700px) {
+      table.host-tldr-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+      table.host-tldr-table, table.host-tldr-table tbody, table.host-tldr-table tr { display: block; }
+      table.host-tldr-table tr { padding: 9px 12px; border-bottom: 1px solid var(--line); }
+      table.host-tldr-table tbody tr:last-child { border-bottom: 0; }
+      table.host-tldr-table th, table.host-tldr-table td { display: inline; padding: 0; border: 0; }
+      table.host-tldr-table td.tldr-status { margin-left: 6px; }
+      table.host-tldr-table td.tldr-why { display: block; margin-top: 4px; }
+    }
     .products, .next-steps { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
     .products li, .next-steps li { margin: 0 0 10px; }
     .compact { margin: 28px 0 24px; }
@@ -178,6 +202,28 @@
     <div class="banner prose" role="note" id="banner">
       <p>Evidence, not test results. Everything here comes from vendor documentation, dated user or staff reports, one pinned VS Code source snapshot, or local file inspection whose receipts are private and not linked. No cell is an observed UI or fallback run. &quot;Unknown&quot; means this evidence does not establish the answer; it is not &quot;unsupported&quot;.</p>
     </div>
+
+    <section class="host-tldr" id="host-tldr" aria-labelledby="host-tldr-heading">
+      <h2 id="host-tldr-heading">Host status at a glance</h2>
+      <p class="tldr-summary prose">Three hosts <strong>document</strong> MCP Apps rendering today: Claude Desktop, GitHub Copilot in VS Code, and Cursor. Two look <strong>partial</strong> (Claude Cowork has mixed dated reports by path; OpenAI Codex Desktop has Apps-related code in the inspected bundle but no captured UI). The rest stay <strong>Unknown</strong> — we checked their guides and found nothing adequate, which is <strong>not</strong> the same as unsupported. <strong>No row below is an observed UI or fallback run.</strong></p>
+      <p class="tldr-official prose">This page answers a different question from the official <a href="https://modelcontextprotocol.io/extensions/apps/overview" rel="noopener">MCP Apps overview</a> / <a href="https://modelcontextprotocol.io/extensions/client-matrix" rel="noopener">client extension matrix</a>. Official CHECK marks mean a client advertises the <code>io.modelcontextprotocol/ui</code> extension. Our table tracks capability / path / fallback evidence for the nine Glance-relevant hosts. Overlap: Claude Desktop, GitHub Copilot, Cursor. Official CHECK ≠ verified Glance UI journey.</p>
+      <div class="tldr-table-wrap">
+        <table class="host-tldr-table">
+          <thead><tr><th scope="col">Host</th><th scope="col">Status</th><th scope="col">Why</th></tr></thead>
+          <tbody>
+          <tr><th scope="row">Claude Desktop</th><td class="tldr-status"><span class="chip chip-documented">Documented</span></td><td class="tldr-why">Vendor docs claim Apps support (<a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">Claude Apps getting started</a>); mixed historical failures exist (<a href="https://github.com/anthropics/claude-ai-mcp/issues/165" rel="noopener">issue #165</a>). Not an observed run here.</td></tr>
+          <tr><th scope="row">Claude Cowork</th><td class="tldr-status"><span class="chip chip-partial">Partial</span></td><td class="tldr-why">Dated reports: first-party path yes / gateway &amp; plugin no (<a href="https://github.com/anthropics/claude-ai-mcp/issues/236" rel="noopener">issue #236</a>, <a href="https://github.com/anthropics/claude-ai-mcp/issues/274" rel="noopener">issue #274</a>). Not current observed.</td></tr>
+          <tr><th scope="row">Claude Code</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Reviewed <a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">Claude Code MCP guide</a> is silent on Apps; handshake uncaptured. Unknown ≠ unsupported.</td></tr>
+          <tr><th scope="row">OpenAI Codex CLI</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Reviewed <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">Codex CLI MCP docs</a> silent on Apps. Unknown ≠ unsupported.</td></tr>
+          <tr><th scope="row">OpenAI Codex Desktop</th><td class="tldr-status"><span class="chip chip-partial">Partial</span></td><td class="tldr-why">Local inspection finds Apps-related sandbox/schema/gate code in <code>ChatGPT.app</code> (receipts private, not linked); vendor <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=desktop" rel="noopener">Desktop MCP docs</a> silent; one historical <a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-5127235678" rel="noopener">“Codex” iframe report</a> leaves surface unstated. UI not captured.</td></tr>
+          <tr><th scope="row">GitHub Copilot</th><td class="tldr-status"><span class="chip chip-documented">Documented</span></td><td class="tldr-why"><a href="https://code.visualstudio.com/blogs/2026/01/26/mcp-apps-support" rel="noopener">VS Code MCP Apps blog</a> + <a href="https://code.visualstudio.com/updates/v1_109" rel="noopener">v1.109 notes</a>; Apps version pinned in <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/platform/mcp/common/modelContextProtocolApps.ts#L86" rel="noopener">VS Code source</a>. Not an observed run.</td></tr>
+          <tr><th scope="row">Cursor</th><td class="tldr-status"><span class="chip chip-documented">Documented</span></td><td class="tldr-why"><a href="https://cursor.com/docs/context/mcp" rel="noopener">Cursor MCP docs</a> claim support; a mount regression was reported fixed in 3.12 (<a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/19" rel="noopener">forum thread</a>, unreproduced here). Not observed.</td></tr>
+          <tr><th scope="row">Antigravity CLI</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Reviewed <a href="https://antigravity.google/docs/mcp" rel="noopener">Antigravity MCP docs</a> silent on Apps. Unknown ≠ unsupported.</td></tr>
+          <tr><th scope="row">Antigravity Desktop</th><td class="tldr-status"><span class="chip chip-unknown">Unknown</span></td><td class="tldr-why">Reviewed <a href="https://antigravity.google/docs/mcp" rel="noopener">Antigravity MCP docs</a> and <a href="https://antigravity.google/changelog" rel="noopener">changelog</a> (through 2.13.0) do not establish Apps; inspected 2.2.1 slice had no named Apps literals. Unknown ≠ unsupported.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
     <section class="by-product prose" id="by-product" aria-label="By product">
       <h2>By product</h2>
@@ -1178,7 +1224,7 @@
       <p class="owner">Proposed owner role: whoever has the named build installed plus a test Apps server (the seat that produced each inspection pack is the natural candidate). Effort unestimated.</p>
     </section>
 
-    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>judgments.json</code> (product sentences and compact rows), and <code>source.md</code> (full evidence below).</p>
+    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>host-tldr.md</code> (host status table), <code>judgments.json</code> (product sentences and compact rows), and <code>source.md</code> (full evidence below).</p>
 
     <details class="evidence" id="full-evidence">
       <summary>Full evidence (v7, 2026-09-14): matrix, legend, columns, footnotes, takeaways, history</summary>
