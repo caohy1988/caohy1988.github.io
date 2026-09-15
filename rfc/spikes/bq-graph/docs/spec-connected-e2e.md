@@ -139,6 +139,17 @@ MET needs all seven.
   `BOUND`. Authorization must be `DENIED` with at least one denied table. The CLI is never invoked, and REFUSED names
   the authorization.
 
+### 4.4 Stable observation (added after the first live run)
+
+The first live run (`e2e-20260915t065449z-98e21004`) is retained as `E2E_BROKEN`: the SDK dataset read, removed for
+`connected-unauthorized-output`, was observed DENIED 1 s after removal and ALLOWED 9 s later at decision time (the
+consumer still refused; acceptance graded WRONG). One observation is not propagation. Every policy transition now
+waits for `stable()`: six consecutive agreeing observations 15 s apart on every named surface (catalog, graph,
+authorization), within `--wait-s`. Gates: after the grant (all ALLOWED), after removing the fact read (graph ALLOWED,
+authorization DENIED), before revocation (all ALLOWED) and after revocation (all DENIED). A gate that never settles
+leaves its case `NOT_REACHED` and runs nothing; a read that is stably DENIED and then ALLOWED at decision time is still
+`WRONG`. The agent's tool withholds the released answer unless the whole run is `E2E_CONNECTED`.
+
 ## 5. Verdict
 
 - `E2E_CONNECTED`: every case MET, identity `BOUND`, zero unresolved journal entries, Catalog restore `VERIFIED`, broker

@@ -94,6 +94,33 @@ def vendored_manifest() -> dict:
     return json.loads((FACTS_DIR / "content.json").read_text(encoding="utf-8"))
 
 
+# ----------------------------------------------------------------------------- stable observation
+STABLE_POLLS = 6        # consecutive observations every surface must agree on
+STABLE_EVERY_S = 15.0   # seconds between observations: a stable window of at least 75 s
+
+
+def stable(env: Any, want: dict[str, str], polls: int = STABLE_POLLS, every_s: float = STABLE_EVERY_S,
+           wait_s: Optional[float] = None) -> dict:
+    """A policy transition counts only when the requester observes the wanted state on every surface for `polls`
+    consecutive observations. One observation is not propagation: the first live run (e2e-20260915t065449z-98e21004)
+    saw the SDK dataset read DENIED 1 s after its removal and ALLOWED again 9 s later. A surface that never settles within
+    `wait_s` is reported `stable: false` with its full history and flap count; elapsed time is never an outcome."""
+    wait_s = float(wait_s if wait_s is not None else getattr(env, "wait_s", 600))
+    t0 = env.clock()
+    streak, history = 0, []
+    while True:
+        obs = {s: env.observe(s) for s in want}
+        streak = streak + 1 if all(obs[s] == w for s, w in want.items()) else 0
+        history.append(dict(obs, t=round(env.clock() - t0, 1)))
+        waited = env.clock() - t0
+        if streak >= polls or waited >= wait_s:
+            flaps = {s: sum(1 for a, b in zip(history, history[1:]) if a[s] != b[s]) for s in want}
+            return {"want": want, "stable": streak >= polls, "consecutive": streak, "polls": len(history), "every_s": every_s,
+                    "waited_s": int(waited), "flaps": flaps, "history": history,
+                    "note": f"{polls} consecutive agreeing observations required; a poll interval, not a propagation bound"}
+        env.sleep(every_s)
+
+
 # ----------------------------------------------------------------------------- fact read-back (secondary bar)
 _BQ_TYPES = {"INTEGER": "INT64", "INT64": "INT64", "NUMERIC": "NUMERIC", "STRING": "STRING", "TIMESTAMP": "TIMESTAMP", "DATE": "DATE"}
 
@@ -215,8 +242,29 @@ class PolicyStore(ProjectionStore):
         self._gate(); return super().rows(bundle, pub)
 
 
-class HermeticEnv:
+class _Surfaces:
+    """What `stable` observes, under the requester: the Catalog entry, the graph dataset and the computation's tables."""
+    deps: list[str] = []
+
+    def observe(self, surface: str) -> Optional[str]:
+        if surface == "catalog":
+            return self.catalog_observe().get("status")
+        if surface == "graph":
+            return self.graph_probe().get("status")
+        if surface == "authorization":
+            return self.authorize(self.deps).get("status")
+        raise ValueError(f"unknown surface {surface}")
+
+
+class HermeticEnv(_Surfaces):
     live, engine, mode = False, "oracle", "hermetic"
+    wait_s = 600
+
+    def sleep(self, s: float) -> None:           # virtual clock: the hermetic run never sleeps
+        self._t = getattr(self, "_t", 0.0) + s
+
+    def clock(self) -> float:
+        return getattr(self, "_t", 0.0)
 
     def __init__(self, projection: dict, sdk_root: str, cfg: CatalogConfig, runner: Callable = subprocess.run,
                  broker: Any = None, catalog: Any = None, facts: Optional[Callable[[], dict]] = None):
@@ -289,8 +337,14 @@ class HermeticEnv:
         return {"catalog": self.access.restore(), "broker": self.broker.teardown()}
 
 
-class LiveEnv:
+class LiveEnv(_Surfaces):
     live, engine, mode = True, "fallback", "live"
+
+    def sleep(self, s: float) -> None:
+        time.sleep(s)
+
+    def clock(self) -> float:
+        return time.monotonic()
     CLOUD = "https://www.googleapis.com/auth/cloud-platform"
     USERINFO = "https://www.googleapis.com/auth/userinfo.email"
 
@@ -504,6 +558,12 @@ def accept(c: dict) -> dict:
         return dict(v, expected=EXPECTED[case])
     if case == REVOKE:
         return _accept_revocation(c)
+    ps = c.get("policy_stable")
+    if ps is not None and not ps.get("stable"):
+        invoked = (c.get("receipt") or {}).get("invoked")
+        return _verdict(case, ["receipt invoked although the policy was never stably observed"] if invoked else [],
+                        [f"policy not stably observed by the requester (flaps {ps.get('flaps')} in {ps.get('waited_s')}s): "
+                         "enforcement cannot be told from propagation"])
     failed, nr = _seeded_path(c)
     rec = c.get("receipt") or {}
     if case in (APPROVED, SUBST):
@@ -560,6 +620,9 @@ def _accept_revocation(c: dict) -> dict:
     nr: list[str] = []
     if (c.get("first_release") or {}).get("decision") != "RELEASED":
         nr.append("the approved case never released: nothing to revoke from")
+    cs = c.get("control_stable")
+    if cs is not None and not cs.get("stable"):
+        nr.append(f"control access not stably observed before revocation (flaps {cs.get('flaps')})")
     ctl = c.get("control") or {}
     for surface in ("catalog", "graph", "authorization"):
         if (ctl.get(surface) or {}).get("status") != ALLOWED:
@@ -666,6 +729,7 @@ def run_connected(env: Any, sdk_root: str, acme_root: str, out_dir: Path | str =
     if not prov["ok"]:
         return _finish(out, env, journal, run_dir, out_dir, "provenance", None)
     deps = sdk_pub["dependencies"]
+    env.deps = deps
     trusted_cache: dict[str, dict] = {}
     state: dict[str, Any] = {"pin": None, "approved": None}
 
@@ -727,7 +791,7 @@ def run_connected(env: Any, sdk_root: str, acme_root: str, out_dir: Path | str =
         rec["bind"] = CH.bind(comp, decl, sdk_pub, as_of, source_pin=pin.source_pin)
         return rec, ctx
 
-    def seeded_case(label: str, sdk_case: Optional[str], pol: Optional[dict] = None) -> dict:
+    def seeded_case(label: str, sdk_case: Optional[str], pol: Optional[dict] = None, stable_want: Optional[dict] = None) -> dict:
         c: dict[str, Any] = {"case": label, "expected": EXPECTED[label], "seed_origin": "Catalog discovery under the requester", "receipt_invocations": 0}
         if pol is not None:
             try:
@@ -738,6 +802,17 @@ def run_connected(env: Any, sdk_root: str, acme_root: str, out_dir: Path | str =
                          authorization={"status": "NOT_RUN"}, receipt={"invoked": False, "reason": "policy not applied"})
                 c["consume"] = consume_connected(c["bind"], c["receipt"], None, None)
                 c["acceptance"] = accept(c)
+                return c
+        if stable_want is not None:
+            progress("case", case=label, stage=f"waiting for a stable observation of {stable_want}")
+            c["policy_stable"] = stable(env, stable_want)
+            if not c["policy_stable"]["stable"]:
+                c.update(catalog={"status": "NOT_RUN", "reason": "policy not stably observed"},
+                         bind={"status": "NOT_REACHED", "reason": "policy not stably observed"}, authorization={"status": "NOT_RUN"},
+                         receipt={"invoked": False, "reason": "policy not stably observed: nothing was run"})
+                c["consume"] = consume_connected(c["bind"], c["receipt"], None, None)
+                c["acceptance"] = accept(c)
+                progress("decision", case=label, decision=c["consume"]["decision"], acceptance=c["acceptance"]["status"])
                 return c
         progress("case", case=label, stage="catalog -> publication -> retrieval -> payload -> bind")
         rec, _ctx = seeded(label)
@@ -815,6 +890,7 @@ def run_connected(env: Any, sdk_root: str, acme_root: str, out_dir: Path | str =
             c["control_policy"] = env.requester_apply(_policy())
         except Exception as e:  # noqa: BLE001
             c["control_policy"] = _err(e)
+        c["control_stable"] = stable(env, {"catalog": ALLOWED, "graph": ALLOWED, "authorization": ALLOWED})
         c["control"] = {"catalog": env.catalog_observe(), "graph": env.graph_probe(), "authorization": env.authorize(deps)}
         launches_before = env.receipt_launches
         progress("case", case=label, stage="revoke Catalog, graph and fact access; wait for the requester to observe it")
@@ -828,7 +904,9 @@ def run_connected(env: Any, sdk_root: str, acme_root: str, out_dir: Path | str =
         except Exception as e:  # noqa: BLE001
             rev["requester"] = dict(_err(e), observed=False)
         rev["catalog_wait"] = env.catalog_wait(DENIED)
-        rev["observed"] = bool(rev["catalog_wait"].get("observed")) and bool((rev["requester"] or {}).get("observed"))
+        rev["stable"] = stable(env, {"catalog": DENIED, "graph": DENIED, "authorization": DENIED})
+        rev["observed"] = (bool(rev["catalog_wait"].get("observed")) and bool((rev["requester"] or {}).get("observed"))
+                           and bool(rev["stable"]["stable"]))
         c["revocation"] = rev
         progress("case", case=label, stage="fresh request from Catalog discovery")
         fresh, _ = seeded(f"{label}-fresh")
@@ -878,6 +956,11 @@ def run_connected(env: Any, sdk_root: str, acme_root: str, out_dir: Path | str =
             except Exception as e:  # noqa: BLE001
                 g["requester"] = _err(e)
                 blocked = f"requester grants not observed: {g['requester']['error'][:160]}"
+        if blocked is None:
+            progress("grant", detail="waiting for a stable observation of Catalog, graph and fact access")
+            g["stable"] = stable(env, {"catalog": ALLOWED, "graph": ALLOWED, "authorization": ALLOWED})
+            if not g["stable"]["stable"]:
+                blocked = f"grants not stably observed by the requester within {g['stable']['waited_s']}s (flaps {g['stable']['flaps']})"
         out["grant"] = g
         progress("grant_done", catalog=g["catalog_wait"].get("status"), waited_s=g["catalog_wait"].get("waited_s"), blocked=blocked)
         if blocked is None:
@@ -886,7 +969,8 @@ def run_connected(env: Any, sdk_root: str, acme_root: str, out_dir: Path | str =
             out["cases"].append(approved)
             out["cases"].append(seeded_case(SUBST, "sql-substitution"))
             out["cases"].append(denied_intermediate_case())
-            out["cases"].append(seeded_case(UNAUTH, None, pol=_policy(sdk_tables=False)))
+            out["cases"].append(seeded_case(UNAUTH, None, pol=_policy(sdk_tables=False),
+                                            stable_want={"graph": ALLOWED, "authorization": DENIED}))
             out["cases"].append(revocation_case(approved))
     except Exception as e:  # noqa: BLE001 - an unexpected failure still tears down and writes its record
         out["run_error"] = _err(e)

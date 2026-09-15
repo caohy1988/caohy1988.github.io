@@ -336,11 +336,17 @@ def _run(projection, sdk_root, sample_root, tmp_path, launches, env_cls=E2E.Herm
 
 def test_a_revocation_that_is_claimed_but_not_enforced_is_broken(projection, sdk_root, sample_root, tmp_path, recorded):
     class Lying(E2E.HermeticEnv):
+        revoked = False
+
         def catalog_revoke(self):
+            self.revoked = True
             return {"status": "REVOKED"}                     # the Catalog keeps serving the requester
 
         def catalog_wait(self, want):
             return {"want": want, "observed": True, "status": want, "waited_s": 0}
+
+        def observe(self, surface):                          # and every observation claims the revocation held
+            return "DENIED" if surface == "catalog" and self.revoked else super().observe(surface)
 
     _, out = _run(projection, sdk_root, sample_root, tmp_path, recorded[2], env_cls=Lying)
     rv = {c["case"]: c for c in out["cases"]}[E2E.REVOKE]
@@ -401,6 +407,66 @@ def test_an_unverified_restore_blocks_the_verdict(projection, sdk_root, sample_r
     _, out = _run(projection, sdk_root, sample_root, tmp_path, recorded[2], catalog=BadRestore())
     assert out["acceptance"] == {c: "MET" for c in E2E.CASES}
     assert out["verdict"] == "E2E_INCOMPLETE" and out["broken_at"] == "teardown"
+
+
+def test_a_flapping_removed_read_is_not_reached_and_nothing_runs(projection, sdk_root, sample_root, tmp_path, recorded):
+    """The first live run's failure shape: the removed read is observed DENIED once, then ALLOWED again. One observation
+    is not propagation, so the case must not be graded against the platform at all."""
+    class Flapping(E2E.HermeticEnv):
+        def authorize(self, deps):
+            r = super().authorize(deps)
+            if not self.broker.state["sdk_tables"] and self.broker.state["dataset_reader"]:
+                self._n = getattr(self, "_n", 0) + 1
+                if self._n % 2 == 0:
+                    return dict(r, status="ALLOWED", denied=0)
+            return r
+
+    env, out = _run(projection, sdk_root, sample_root, tmp_path, recorded[2], env_cls=Flapping)
+    uo = {c["case"]: c for c in out["cases"]}[E2E.UNAUTH]
+    assert uo["policy_stable"]["stable"] is False and uo["policy_stable"]["flaps"]["authorization"] > 0
+    assert uo["catalog"]["status"] == "NOT_RUN" and uo["receipt"]["invoked"] is False and uo["acceptance"]["status"] == "NOT_REACHED"
+    assert out["verdict"] == "E2E_INCOMPLETE" and out["broken_at"] == E2E.UNAUTH
+    assert out["acceptance"][E2E.REVOKE] == "MET"                        # later cases still run on stable observations
+
+
+def test_a_stably_removed_read_allowed_at_decision_time_is_broken(projection, sdk_root, sample_root, tmp_path, recorded):
+    class Reopens(E2E.HermeticEnv):
+        def authorize(self, deps):
+            r = super().authorize(deps)
+            if not self.broker.state["sdk_tables"] and self.broker.state["dataset_reader"]:
+                self._n = getattr(self, "_n", 0) + 1
+                if self._n > E2E.STABLE_POLLS:                          # stable for the gate, open again when the case decides
+                    return dict(r, status="ALLOWED", denied=0)
+            return r
+
+    _, out = _run(projection, sdk_root, sample_root, tmp_path, recorded[2], env_cls=Reopens)
+    uo = {c["case"]: c for c in out["cases"]}[E2E.UNAUTH]
+    assert uo["policy_stable"]["stable"] is True and uo["authorization"]["status"] == "ALLOWED"
+    assert uo["acceptance"]["status"] == "WRONG" and uo["receipt"]["invoked"] is False and out["verdict"] == "E2E_BROKEN"
+
+
+def test_stable_needs_consecutive_agreement_on_every_surface():
+    class Env:
+        wait_s = 1000
+        _t = 0.0
+        seq = iter(["DENIED", "ALLOWED"] + ["DENIED"] * 20)
+
+        def observe(self, s):
+            return next(self.seq) if s == "authorization" else "ALLOWED"
+
+        def sleep(self, s):
+            self._t += s
+
+        def clock(self):
+            return self._t
+
+    r = E2E.stable(Env(), {"graph": "ALLOWED", "authorization": "DENIED"})
+    assert r["stable"] and r["consecutive"] == E2E.STABLE_POLLS and r["flaps"]["authorization"] == 2 and r["polls"] == 2 + E2E.STABLE_POLLS
+    class Never(Env):
+        def observe(self, s):
+            return "ALLOWED"
+    r = E2E.stable(Never(), {"authorization": "DENIED"}, wait_s=60)
+    assert r["stable"] is False and r["waited_s"] >= 60
 
 
 def test_a_dirty_sdk_checkout_is_refused_before_any_grant(projection, sdk_root, sample_root, tmp_path, recorded, monkeypatch):
