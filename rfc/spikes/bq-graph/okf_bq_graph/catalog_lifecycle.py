@@ -65,10 +65,14 @@ class LifecycleConfig:
     compiler_version: str = "okf_bq_graph.compile/0.1.0"
     timeout_s: float = DEFAULT_TIMEOUT
     settle_s: Optional[float] = None    # recheck cadence for a pending (timed-out) create; NEVER closes the attempt by itself (default 2 x timeout_s)
+    dataset_stem: str = "okf_catalog_chain"          # owned dataset = <dataset_stem>_<run_suffix>
+    entry_stem: str = "acme-retail-catalog-chain"    # owned entries under <group>/entries/<entry_stem>/<run_id>/; deployment <entry_stem>-<run_id>
 
     def __post_init__(self) -> None:
         if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{3,63}", self.run_id):
             raise ValueError("run_id must be 4-64 chars of [A-Za-z0-9._-]")
+        if not re.fullmatch(r"[a-z][a-z0-9_]{2,40}", self.dataset_stem) or not re.fullmatch(r"[a-z][a-z0-9-]{2,40}", self.entry_stem):
+            raise ValueError("dataset_stem / entry_stem must be short lowercase identifiers")
 
     @property
     def settle(self) -> float:
@@ -80,15 +84,15 @@ class LifecycleConfig:
 
     @property
     def dataset(self) -> str:
-        return f"okf_catalog_chain_{self.run_suffix}"
+        return f"{self.dataset_stem}_{self.run_suffix}"
 
     @property
     def entry_prefix(self) -> str:
-        return f"{self.catalog_group}/entries/acme-retail-catalog-chain/{self.run_id}/"
+        return f"{self.catalog_group}/entries/{self.entry_stem}/{self.run_id}/"
 
     @property
     def deployment(self) -> str:
-        return f"acme-retail-catalog-chain-{self.run_id}"
+        return f"{self.entry_stem}-{self.run_id}"
 
     def allowlist(self) -> dict:
         """Derived locally before any Catalog read; the trusted destination/entry/deployment scope for B2 pins."""

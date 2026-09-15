@@ -373,9 +373,10 @@ class RestrictedBroker:
     def __init__(self, engine: str, sdk_dataset: str, dependencies: Optional[list[str]] = None, sa_email: Optional[str] = None,
                  factory: Optional[Callable[[str], Any]] = None, owner: Any = None, wait_s: int = 240,
                  credential_file: Callable[..., str] = impersonated_credential_file,
-                 scope_shim: Optional[Callable[[str], str]] = scope_shim_file):
+                 scope_shim: Optional[Callable[[str], str]] = scope_shim_file, graph_dataset: str = DATASET):
         from .authz import impersonated_client
         self.engine, self.sdk_dataset = engine, sdk_dataset
+        self.graph_dataset = graph_dataset                          # the base (non-`_rls`) dataset retrieval reads: the pin's runtime dataset
         self.dependencies: list[str] = list(dependencies or [])   # the bound SDK publication's tables: known BEFORE the first grant probe
         self.original: dict[str, list] = {}                         # per touched dataset: the principal's ACL entries before this broker's first mutation
         self.email = sa_email or restricted_sa()
@@ -610,7 +611,7 @@ class RestrictedBroker:
         self.owner.update_dataset(d, ["access_entries"])
 
     def _graph_ds(self) -> str:
-        return RLS_DS if self.state["dataset"] == "rls" else DATASET
+        return RLS_DS if self.state["dataset"] == "rls" else self.graph_dataset
 
     def _wait(self, fn: Callable[[], dict], want: str) -> tuple[bool, dict, int]:
         t0 = time.monotonic()
