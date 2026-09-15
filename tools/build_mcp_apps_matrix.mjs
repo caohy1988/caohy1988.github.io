@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Renders research/builds/mcp-apps-feature-matrix/ from source.md + brief.md + judgments.json
+// Renders research/builds/mcp-apps-feature-matrix/ from source.md + brief.md + host-tldr.md + judgments.json
 // into index.html (PM/UTL-readable front; full v7 evidence in a details fold).
 //
 //   node tools/build_mcp_apps_matrix.mjs          rewrite index.html
@@ -7,6 +7,7 @@
 //
 // Layer D (matrix, legend, columns, footnotes, takeaways, version history, rendered-from)
 // is preserved from source.md. brief.md owns banner/judgment/action/next-steps/headings.
+// host-tldr.md owns the above-fold Host | Status | Why table (Documented/Partial/Unknown).
 // judgments.json owns product sentences and compact rows (PR3 grid).
 import fs from "node:fs";
 import path from "node:path";
@@ -20,6 +21,7 @@ const PAGE_PATH = `/${DIR}/`;
 const SRC = path.join(REPO, DIR, "source.md");
 const BRIEF = path.join(REPO, DIR, "brief.md");
 const JUDGMENTS = path.join(REPO, DIR, "judgments.json");
+const HOST_TLDR = path.join(REPO, DIR, "host-tldr.md");
 const OUT = path.join(REPO, DIR, "index.html");
 const CANONICAL = `https://caohy1988.github.io${PAGE_PATH}`;
 
@@ -88,7 +90,56 @@ function parseSource(md) {
   return { title, heading, version, date, intro, table, legend, columns, notes, bullets };
 }
 
+export const HOST_TLDR_STATUSES = ["Documented", "Partial", "Unknown"];
+
+// host-tldr.md owns the above-fold Host | Status | Why table (TLDR_HUMAN contract).
+export function parseHostTldr(md) {
+  const { sections } = parseSections(md, ["Heading", "Summary", "Official matrix", "Table"], "host-tldr.md");
+  const rows = sections["Table"].split("\n").filter((l) => l.startsWith("|")).map(splitRow);
+  const [head, sep, ...body] = rows;
+  if (head === SEPARATOR || head.join("|") !== "Host|Status|Why") throw new Error("host-tldr.md table header must be Host | Status | Why");
+  if (sep !== SEPARATOR) throw new Error("host-tldr.md table separator row missing");
+  if (body.length !== 9) throw new Error(`host-tldr.md table has ${body.length} rows, expected 9`);
+  for (const r of body) {
+    if (r.length !== 3) throw new Error(`host-tldr.md row has ${r.length} cells: ${r[0]}`);
+    const [host, status, why] = r;
+    if (!HOST_TLDR_STATUSES.includes(status)) throw new Error(`host-tldr.md ${host}: status must be ${HOST_TLDR_STATUSES.join("/")}, got ${status}`);
+    if (!/\]\(https:\/\/[^)\s]+\)/.test(why)) throw new Error(`host-tldr.md ${host}: Why needs at least one https evidence link`);
+  }
+  return { heading: sections["Heading"], summary: sections["Summary"], official: sections["Official matrix"], rows: body };
+}
+
+function renderHostTldr(tldr) {
+  const trs = tldr.rows.map(([host, status, why]) => {
+    const chip = `<span class="chip chip-${status.toLowerCase()}">${esc(status)}</span>`;
+    return `          <tr><th scope="row">${esc(host)}</th><td class="tldr-status">${chip}</td><td class="tldr-why">${inline(why)}</td></tr>`;
+  }).join("\n");
+  return `    <section class="host-tldr" id="host-tldr" aria-labelledby="host-tldr-heading">
+      <h2 id="host-tldr-heading">${esc(tldr.heading)}</h2>
+      <p class="tldr-summary prose">${inline(tldr.summary)}</p>
+      <p class="tldr-official prose">${inline(tldr.official)}</p>
+      <div class="tldr-table-wrap">
+        <table class="host-tldr-table">
+          <thead><tr><th scope="col">Host</th><th scope="col">Status</th><th scope="col">Why</th></tr></thead>
+          <tbody>
+${trs}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
 function parseBrief(md) {
+  const { title, sections } = parseSections(
+    md,
+    ["Banner", "Aggregate judgment", "Shipping action", "Next steps heading", "Next steps", "Next steps owner", "Evidence fold summary", "Kicker", "Meta"],
+    "brief.md",
+  );
+  if (!title) throw new Error("brief.md missing H1");
+  return { title, sections };
+}
+
+function parseSections(md, need, name) {
   const lines = md.replace(/\r\n/g, "\n").split("\n");
   const out = { title: "", sections: {} };
   let cur = null, buf = [];
@@ -104,10 +155,9 @@ function parseBrief(md) {
     if (cur) buf.push(l);
   }
   flush();
-  for (const need of ["Banner", "Aggregate judgment", "Shipping action", "Next steps heading", "Next steps", "Next steps owner", "Evidence fold summary", "Kicker", "Meta"]) {
-    if (!out.sections[need]) throw new Error(`brief.md missing section: ${need}`);
+  for (const n of need) {
+    if (!out.sections[n]) throw new Error(`${name} missing section: ${n}`);
   }
-  if (!out.title) throw new Error("brief.md missing H1");
   return out;
 }
 
@@ -192,9 +242,10 @@ function renderNextSteps(brief) {
   return items.map((it) => `      <li>${inline(it)}</li>`).join("\n");
 }
 
-export function build(sourceMd, briefMd, judgments) {
+export function build(sourceMd, briefMd, judgments, hostTldrMd) {
   const parsed = parseSource(sourceMd);
   const brief = parseBrief(briefMd);
+  const hostTldr = renderHostTldr(parseHostTldr(hostTldrMd));
   const { version, date } = parsed;
   assertCompactFresh(judgments, sourceMd);
   const layerD = renderLayerD(parsed);
@@ -249,6 +300,30 @@ export function build(sourceMd, briefMd, judgments) {
     .banner p { margin: 0; }
     .judgment, .action { margin: 0 0 14px; }
     .action { font-weight: 550; }
+    .host-tldr { margin: 22px 0 8px; }
+    .host-tldr h2 { margin: 0 0 8px; }
+    .tldr-summary { margin: 0 0 10px; }
+    .tldr-official { margin: 0 0 12px; font-size: 0.92rem; color: var(--ink-soft); }
+    .tldr-table-wrap { border: 1px solid var(--line); border-radius: 10px; background: var(--cream); overflow: hidden; }
+    table.host-tldr-table { border-collapse: collapse; width: 100%; font-size: 0.9rem; line-height: 1.45; }
+    table.host-tldr-table th, table.host-tldr-table td { padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+    table.host-tldr-table thead th { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; background: var(--paper-2); }
+    table.host-tldr-table tbody tr:last-child th, table.host-tldr-table tbody tr:last-child td { border-bottom: 0; }
+    table.host-tldr-table tbody th { white-space: nowrap; font-weight: 600; }
+    table.host-tldr-table td.tldr-why { color: var(--ink-soft); }
+    .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; border: 1px solid; white-space: nowrap; }
+    .chip-documented { color: var(--mint); border-color: rgba(15,118,110,.45); background: rgba(15,118,110,.08); }
+    .chip-partial { color: var(--accent-dark); border-color: rgba(183,72,13,.4); background: rgba(232,115,36,.1); }
+    .chip-unknown { color: var(--ink-soft); border-color: var(--line); background: var(--paper-2); }
+    @media (max-width: 700px) {
+      table.host-tldr-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+      table.host-tldr-table, table.host-tldr-table tbody, table.host-tldr-table tr { display: block; }
+      table.host-tldr-table tr { padding: 9px 12px; border-bottom: 1px solid var(--line); }
+      table.host-tldr-table tbody tr:last-child { border-bottom: 0; }
+      table.host-tldr-table th, table.host-tldr-table td { display: inline; padding: 0; border: 0; }
+      table.host-tldr-table td.tldr-status { margin-left: 6px; }
+      table.host-tldr-table td.tldr-why { display: block; margin-top: 4px; }
+    }
     .products, .next-steps { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
     .products li, .next-steps li { margin: 0 0 10px; }
     .compact { margin: 28px 0 24px; }
@@ -360,6 +435,8 @@ ${renderNav(PAGE_PATH)}
       <p>${esc(banner)}</p>
     </div>
 
+${hostTldr}
+
     <section class="by-product prose" id="by-product" aria-label="By product">
       <h2>By product</h2>
 ${renderSentences(judgments)}
@@ -375,7 +452,7 @@ ${renderNextSteps(brief)}
       <p class="owner">${esc(owner)}</p>
     </section>
 
-    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>judgments.json</code> (product sentences and compact rows), and <code>source.md</code> (full evidence below).</p>
+    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>host-tldr.md</code> (host status table), <code>judgments.json</code> (product sentences and compact rows), and <code>source.md</code> (full evidence below).</p>
 
     <details class="evidence" id="full-evidence">
       <summary>${esc(foldSummary)}</summary>
@@ -418,12 +495,13 @@ function loadInputs() {
   const sourceMd = fs.readFileSync(SRC, "utf8");
   const briefMd = fs.readFileSync(BRIEF, "utf8");
   const judgments = JSON.parse(fs.readFileSync(JUDGMENTS, "utf8"));
-  return { sourceMd, briefMd, judgments };
+  const hostTldrMd = fs.readFileSync(HOST_TLDR, "utf8");
+  return { sourceMd, briefMd, judgments, hostTldrMd };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { sourceMd, briefMd, judgments } = loadInputs();
-  const next = build(sourceMd, briefMd, judgments);
+  const { sourceMd, briefMd, judgments, hostTldrMd } = loadInputs();
+  const next = build(sourceMd, briefMd, judgments, hostTldrMd);
   const check = process.argv.includes("--check");
   const cur = fs.existsSync(OUT) ? fs.readFileSync(OUT, "utf8") : null;
   if (check) {

@@ -167,6 +167,7 @@ test("negative: deleting a takeaway fails block parity", () => {
       "assets/site-nav.js",
       "research/builds/mcp-apps-feature-matrix/source.md",
       "research/builds/mcp-apps-feature-matrix/brief.md",
+      "research/builds/mcp-apps-feature-matrix/host-tldr.md",
       "research/builds/mcp-apps-feature-matrix/judgments.json",
       "research/builds/mcp-apps-feature-matrix/v7-preservation-baseline.json",
       "research/builds/mcp-apps-feature-matrix/index.html",
