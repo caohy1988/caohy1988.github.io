@@ -281,8 +281,21 @@ export function build(sourceMd, briefMd, judgments) {
     .source { font-size: 0.88rem; color: var(--ink-faint); margin: 0 0 8px; }
     footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); margin-top: 48px; }
     footer .shell { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .kicker { padding: 28px 0 6px; }
+    h1 { font-size: clamp(1.55rem, 3.6vw, 2.35rem); margin: 0 0 8px; }
+    .meta { margin: 0 0 16px; padding-bottom: 14px; font-size: 0.9rem; }
+    .banner { padding: 12px 14px; margin: 0 0 14px; font-size: 0.88rem; line-height: 1.45; }
+    #short-version h2 { margin: 18px 0 8px; font-size: 1.25rem; }
+    .judgment, .action { margin: 0 0 10px; font-size: 0.98rem; line-height: 1.45; }
     @media (max-width: 860px) {
-      body { font-size: 16px; }
+      body { font-size: 15px; }
+      .kicker { padding: 14px 0 4px; font-size: 0.62rem; letter-spacing: 0.08em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      h1 { font-size: 1.35rem; line-height: 1.2; max-width: none; margin: 0 0 6px; }
+      .meta { margin: 0 0 10px; padding-bottom: 10px; font-size: 0.78rem; line-height: 1.35; }
+      .meta .desk-only { display: none; }
+      .banner { padding: 8px 10px; margin: 0 0 8px; font-size: 0.78rem; line-height: 1.35; }
+      #short-version h2 { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+      .judgment, .action { margin: 0 0 8px; font-size: 0.9rem; line-height: 1.35; }
       table.matrix th, table.matrix td { width: 220px; min-width: 220px; max-width: 220px; }
       table.matrix th.feature { width: 140px; min-width: 140px; max-width: 140px; }
       table.matrix { min-width: 2120px; }
@@ -304,17 +317,17 @@ ${renderNav(PAGE_PATH)}
   <main class="shell" id="main">
     <p class="kicker">${esc(kicker)}</p>
     <h1>${esc(brief.title)}</h1>
-    <p class="meta"><span class="mono">${esc(meta.split(" · ").slice(0, 2).join(" · "))}</span> · ${esc(meta.split(" · ").slice(2).join(" · "))}</p>
-
-    <div class="banner prose" role="note" id="banner">
-      <p>${esc(banner)}</p>
-    </div>
+    <p class="meta"><span class="mono">${esc(meta.split(" · ").slice(0, 2).join(" · "))}</span><span class="desk-only"> · ${esc(meta.split(" · ").slice(2).join(" · "))}</span></p>
 
     <section class="short prose" id="short-version" aria-label="The short version">
       <h2>The short version</h2>
       <p class="judgment" id="aggregate-judgment">${esc(judgment)}</p>
       <p class="action" id="shipping-action">${esc(action)}</p>
     </section>
+
+    <div class="banner prose" role="note" id="banner">
+      <p>${esc(banner)}</p>
+    </div>
 
     <section class="by-product prose" id="by-product" aria-label="By product">
       <h2>By product</h2>
