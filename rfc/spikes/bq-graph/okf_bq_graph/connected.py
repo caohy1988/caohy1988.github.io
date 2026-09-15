@@ -315,7 +315,7 @@ class LiveEnv:
         return {"kind": "live", "broker": self.broker.describe(), "catalog": "dataplex v1 entries.list + entries.get(view=ALL) under the "
                 "requester's impersonated credential (cloud-platform + userinfo.email scopes)",
                 "catalog_access": {"role": self.access.role, "resources": self.access.resources},
-                "store": f"BigQueryStore on {self.cfg.runtime_dataset} under the requester", "engine": "fallback (relational, on-demand)",
+                "store": f"BigQueryStore on {self.cfg.runtime_dataset} under the requester", "engine": "fallback (relational SQL on the published tables; job routing follows the project's assignments and is not asserted)",
                 "sdk": "examples/okf_attested_computation/run.py --live under the requester's impersonated ADC file",
                 "sdk_python": "OKF_SDK_PYTHON / --sdk-python" if self.sdk_python or os.environ.get("OKF_SDK_PYTHON") else "this interpreter"}
 
@@ -388,7 +388,7 @@ class LiveEnv:
         for name in vendored_manifest()["tables"]:
             ref = f"{m['project']}.{m['dataset']}.{name}"
             schema = [{"name": f.name, "type": f.field_type, "mode": f.mode} for f in self.broker.sa.get_table(ref).schema]
-            cfg = bigquery.QueryJobConfig(use_query_cache=False, maximum_bytes_billed=10 * 1024 * 1024,
+            cfg = bigquery.QueryJobConfig(use_query_cache=False, maximum_bytes_billed=100 * 1024 * 1024,   # on-demand bills a 10 MB minimum
                                           labels={"okf_spike": "connected_e2e", "stage": "facts-readback"})
             rows, _job, _e = run_journaled(self.broker.sa, journal, "facts_readback", f"full read of synthetic fact table {name}",
                                            f"SELECT * FROM `{ref}`", cfg, m.get("location", LOCATION), project=m["project"],
