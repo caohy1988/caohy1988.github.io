@@ -39,6 +39,34 @@
     .action { font-weight: 550; }
     .products, .next-steps { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
     .products li, .next-steps li { margin: 0 0 10px; }
+    .compact { margin: 28px 0 24px; }
+    .compact-hint, .compact-key, .compact-portable { color: var(--ink-soft); font-size: 0.92rem; }
+    .compact-table-wrap { overflow-x: auto; margin: 12px 0 16px; border: 1px solid var(--line); border-radius: 10px; }
+    table.compact-matrix { border-collapse: collapse; width: 100%; min-width: 920px; font-size: 0.9rem; }
+    table.compact-matrix th, table.compact-matrix td { border-bottom: 1px solid var(--line); padding: 10px 12px; vertical-align: top; text-align: left; }
+    table.compact-matrix th.product { min-width: 160px; }
+    table.compact-matrix thead th { background: var(--cream); font-size: 0.8rem; letter-spacing: 0.01em; }
+    .compact-cards { display: none; gap: 12px; }
+    .compact-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: #fff; }
+    .compact-card h3 { margin: 0 0 10px; font-size: 1.05rem; }
+    .compact-card-row { margin: 0 0 10px; }
+    .compact-card-q { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); margin-bottom: 4px; }
+    .compact-trigger { display: block; width: 100%; text-align: left; border: 1px solid var(--line); border-radius: 8px; background: var(--cream); padding: 8px 10px; cursor: pointer; font: inherit; color: inherit; }
+    .compact-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .compact-trigger[aria-expanded="true"] { border-color: var(--accent); background: #fff; }
+    .compact-word { font-weight: 650; }
+    .compact-phrase { color: var(--ink-soft); }
+    .compact-panel { margin-top: 8px; padding: 10px 12px; border-left: 3px solid var(--accent); background: #fff; font-size: 0.88rem; color: var(--ink-soft); }
+    .compact-panel[hidden] { display: none !important; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 700px) {
+      .compact-table-wrap { display: none; }
+      .compact-cards { display: grid; }
+    }
+    @media print {
+      .compact-panel[hidden] { display: block !important; }
+      .compact-trigger { border: 0; background: transparent; padding: 0; }
+    }
     .owner { font-size: 0.9rem; color: var(--ink-faint); margin: 0 0 28px; }
     .rule { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
     details.evidence { border: 1px solid var(--line); border-radius: 10px; background: var(--cream); padding: 0 18px 18px; margin: 28px 0 8px; }
@@ -176,6 +204,967 @@
       </ul>
     </section>
 
+
+    <section class="compact prose" id="status-by-product" aria-label="Status by product">
+      <h2>Status by product</h2>
+      <p class="compact-hint">Evidence word plus phrase. Activate a cell for the full v7 source cell, legend, and any footnote. Glyphs are not used as a support scale.</p>
+      <div class="compact-table-wrap" data-compact-table>
+        <table class="compact-matrix">
+          <thead><tr><th scope="col" class="product">Product</th><th scope="col">Vendor documents Apps rendering?</th><th scope="col">Rendering evidence</th><th scope="col">Apps control</th><th scope="col">Without Apps, what shows?</th></tr></thead>
+          <tbody>
+          <tr><th scope="row" class="product">Claude Desktop</th><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-desktop-vendor_docs-panel" id="compact-claude-desktop-vendor_docs-btn">
+                <span class="compact-word">Documented</span> <span class="compact-phrase">inline</span>
+                <span class="visually-hidden">Claude Desktop, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-desktop-vendor_docs-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Desktop</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell"><a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">VD inline</a>; <a href="https://github.com/anthropics/claude-ai-mcp/issues/165" rel="noopener">HR mixed</a></p>
+                <p class="compact-legend">Documented = the vendor's own page · VD = vendor documentation · HR = human report (dated)</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-desktop-rendering_evidence-panel" id="compact-claude-desktop-rendering_evidence-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">mixed issue reports</span>
+                <span class="visually-hidden">Claude Desktop, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-desktop-rendering_evidence-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Desktop</strong> · Rendering evidence</p>
+                <p class="compact-source-cell"><a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">VD inline</a>; <a href="https://github.com/anthropics/claude-ai-mcp/issues/165" rel="noopener">HR mixed</a></p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · VD = vendor documentation · HR = human report (dated)</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-desktop-apps_control-panel" id="compact-claude-desktop-apps_control-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs show a permission prompt only</span>
+                <span class="visually-hidden">Claude Desktop, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-desktop-apps_control-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Desktop</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; <a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">VD</a> (permission prompt only, background)</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-desktop-without_apps-panel" id="compact-claude-desktop-without_apps-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">blank gap; error card (issue reports)</span>
+                <span class="visually-hidden">Claude Desktop, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-desktop-without_apps-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Desktop</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell"><a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-4747962829" rel="noopener">HR gap</a>; <a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-5301835548" rel="noopener">HR error card</a></p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · HR = human report (dated)</p>
+                
+              </div>
+            </div></td></tr>
+          <tr><th scope="row" class="product">Claude Cowork</th><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-cowork-vendor_docs-panel" id="compact-claude-cowork-vendor_docs-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">guide names Cowork in navigation only</span>
+                <span class="visually-hidden">Claude Cowork, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-cowork-vendor_docs-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Cowork</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">unk (no Cowork-specific prose guide reviewed; the <a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">Claude guide</a> names Cowork only in navigation)</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-cowork-rendering_evidence-panel" id="compact-claude-cowork-rendering_evidence-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">first-party yes; gateway third-party no (Apr 2026); plugin no (May 2026)</span>
+                <span class="visually-hidden">Claude Cowork, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-cowork-rendering_evidence-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Cowork</strong> · Rendering evidence</p>
+                <p class="compact-source-cell"><a href="https://github.com/anthropics/claude-ai-mcp/issues/236" rel="noopener">HR 1P yes / gateway 3P no (Apr 2026)</a>; <a href="https://github.com/anthropics/claude-ai-mcp/issues/274" rel="noopener">HR plugin no (engine 2.1.128, May 2026)</a></p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · HR = human report (dated)</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-cowork-apps_control-panel" id="compact-claude-cowork-apps_control-btn">
+                <span class="compact-word">Unknown</span>
+                <span class="visually-hidden">Claude Cowork, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-cowork-apps_control-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Cowork</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; <a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">VD</a> (background)</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-cowork-without_apps-panel" id="compact-claude-cowork-without_apps-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">plain text, gateway third-party (Apr 2026); raw JSON, plugin (May 2026)</span>
+                <span class="visually-hidden">Claude Cowork, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-cowork-without_apps-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Cowork</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell"><a href="https://github.com/anthropics/claude-ai-mcp/issues/236" rel="noopener">HR text, gateway 3P (Apr 2026)</a>; <a href="https://github.com/anthropics/claude-ai-mcp/issues/274" rel="noopener">HR raw JSON, plugin (May 2026)</a></p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · HR = human report (dated)</p>
+                
+              </div>
+            </div></td></tr>
+          <tr><th scope="row" class="product">Claude Code</th><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-code-vendor_docs-panel" id="compact-claude-code-vendor_docs-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs silent</span>
+                <span class="visually-hidden">Claude Code, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-code-vendor_docs-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Code</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">unk; <a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-code-rendering_evidence-panel" id="compact-claude-code-rendering_evidence-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">no retained inspection evidence</span>
+                <span class="visually-hidden">Claude Code, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-code-rendering_evidence-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Code</strong> · Rendering evidence</p>
+                <p class="compact-source-cell">unk; <a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-code-apps_control-panel" id="compact-claude-code-apps_control-btn">
+                <span class="compact-word">Unknown</span>
+                <span class="visually-hidden">Claude Code, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-code-apps_control-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Code</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; <a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">VD</a> (background)</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-code-without_apps-panel" id="compact-claude-code-without_apps-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">Apps fallback not documented; not run</span>
+                <span class="visually-hidden">Claude Code, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-code-without_apps-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Code</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell">unk; <a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">VD standard MCP only</a>; Apps fallback not documented; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td></tr>
+          <tr><th scope="row" class="product">OpenAI Codex CLI</th><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-cli-vendor_docs-panel" id="compact-openai-codex-cli-vendor_docs-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs silent</span>
+                <span class="visually-hidden">OpenAI Codex CLI, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-cli-vendor_docs-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex CLI</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">unk; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-cli-rendering_evidence-panel" id="compact-openai-codex-cli-rendering_evidence-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">no retained inspection evidence</span>
+                <span class="visually-hidden">OpenAI Codex CLI, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-cli-rendering_evidence-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex CLI</strong> · Rendering evidence</p>
+                <p class="compact-source-cell">unk; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-cli-apps_control-panel" id="compact-openai-codex-cli-apps_control-btn">
+                <span class="compact-word">Unknown</span>
+                <span class="visually-hidden">OpenAI Codex CLI, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-cli-apps_control-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex CLI</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">VD silent</a>; local flag state has no linked receipt in this evidence set</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-cli-without_apps-panel" id="compact-openai-codex-cli-without_apps-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">Apps fallback not documented; not run</span>
+                <span class="visually-hidden">OpenAI Codex CLI, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-cli-without_apps-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex CLI</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell">unk; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">VD standard MCP</a>; Apps fallback not documented; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td></tr>
+          <tr><th scope="row" class="product">OpenAI Codex Desktop</th><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-desktop-vendor_docs-panel" id="compact-openai-codex-desktop-vendor_docs-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs silent</span>
+                <span class="visually-hidden">OpenAI Codex Desktop, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-desktop-vendor_docs-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex Desktop</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">LI sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and <code>/mcp-app.html</code> strings present in bundle⁵ (code presence, not an observed mount); <a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-5127235678" rel="noopener">HR &quot;Codex&quot; iframe, surface unstated</a> (Jul 2026); <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=desktop" rel="noopener">VD silent</a>; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · HR = human report (dated) · LI = local inspection (receipts private)</p>
+                <p class="compact-footnote">⁵ ChatGPT.app 26.908.40834 (build 8881, bundle <code>com.openai.codex</code>), string and offset inspection of <code>Contents/Resources/app.asar</code> (322,016,862 bytes, sha256 <code>bb40cd88…</code>; offsets below are absolute asar bytes): <code>hq</code> (from offset 8,111,053) is a Desktop→Codex-app-server <code>initialize</code> constructor (ID <code>__codex_initialize__</code>; app-server fields <code>experimentalApi</code>, <code>optOutNotificationMethods</code>; no base-MCP <code>protocolVersion</code>) whose <code>extensions</code> includes <code>io.modelcontextprotocol/ui</code> with mime types <code>text/html;profile=mcp-app</code> and <code>text/html+skybridge</code>; its caller at 8,201,387 sends it over the app-server transport (<code>Starting app-server transport</code>). Forwarding into any MCP-server client's <code>initialize</code> capabilities was not traced, so this is not an observed or fully traced server-facing advertisement (receipt). Sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and mime constants at 7,548,947–7,549,300; webview host constant and <code>/mcp-app.html</code> at 6,146,638 (receipt). Gate <code>enable_mcp_apps</code>: feature-registry entry with <code>layerName: &quot;2138468235&quot;</code> at 31,622,158 and read site <code>.get(&quot;enable_mcp_apps&quot;, false)</code> at 166,090,887 (receipt); the literal also occurs 8 times in the bundled <code>Resources/codex</code> binary (count only, not excerpted). Fallback decision <code>_9n</code> at 27,560,050 (receipt; branch table there comes from source-only evaluation of the extracted function, not a Desktop run). Validator <code>G8e</code> at 34,155,000 with nine named nonexperimental top-level feature fields (<code>openLinks</code>, <code>downloadFile</code>, <code>serverTools</code>, <code>serverResources</code>, <code>logging</code>, <code>sandbox</code> carrying both <code>permissions</code> and <code>csp</code>, <code>updateModelContext</code>, <code>message</code>, <code>sampling</code>) plus optional <code>experimental</code> (receipt); the earlier &quot;10 capabilities&quot; count split <code>sandbox</code> into two checklist rows. A <code>protocolVersion</code> description string carries the example <code>&quot;2025-11-21&quot;</code> at 34,162,872 (receipt); the literal <code>McpUiInitializeResult</code> does not occur in the asar. One lookup path parses <code>_meta.ui.visibility</code> as <code>app</code>/<code>model</code> for a single named tool at 296,608,173 (receipt). Offsets come from one machine's bundle; the gate's remote value, the wire handshake, and the rendered UI were not captured.</p>
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-desktop-rendering_evidence-panel" id="compact-openai-codex-desktop-rendering_evidence-btn">
+                <span class="compact-word">Code found</span> <span class="compact-phrase">sandbox and mount strings in bundle; not run; a Jul 2026 report says &quot;Codex&quot; without naming the surface</span>
+                <span class="visually-hidden">OpenAI Codex Desktop, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-desktop-rendering_evidence-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex Desktop</strong> · Rendering evidence</p>
+                <p class="compact-source-cell">LI sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and <code>/mcp-app.html</code> strings present in bundle⁵ (code presence, not an observed mount); <a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-5127235678" rel="noopener">HR &quot;Codex&quot; iframe, surface unstated</a> (Jul 2026); <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=desktop" rel="noopener">VD silent</a>; not run</p>
+                <p class="compact-legend">Code found = strings or functions in a local install, nothing run · VD = vendor documentation · HR = human report (dated) · LI = local inspection (receipts private)</p>
+                <p class="compact-footnote">⁵ ChatGPT.app 26.908.40834 (build 8881, bundle <code>com.openai.codex</code>), string and offset inspection of <code>Contents/Resources/app.asar</code> (322,016,862 bytes, sha256 <code>bb40cd88…</code>; offsets below are absolute asar bytes): <code>hq</code> (from offset 8,111,053) is a Desktop→Codex-app-server <code>initialize</code> constructor (ID <code>__codex_initialize__</code>; app-server fields <code>experimentalApi</code>, <code>optOutNotificationMethods</code>; no base-MCP <code>protocolVersion</code>) whose <code>extensions</code> includes <code>io.modelcontextprotocol/ui</code> with mime types <code>text/html;profile=mcp-app</code> and <code>text/html+skybridge</code>; its caller at 8,201,387 sends it over the app-server transport (<code>Starting app-server transport</code>). Forwarding into any MCP-server client's <code>initialize</code> capabilities was not traced, so this is not an observed or fully traced server-facing advertisement (receipt). Sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and mime constants at 7,548,947–7,549,300; webview host constant and <code>/mcp-app.html</code> at 6,146,638 (receipt). Gate <code>enable_mcp_apps</code>: feature-registry entry with <code>layerName: &quot;2138468235&quot;</code> at 31,622,158 and read site <code>.get(&quot;enable_mcp_apps&quot;, false)</code> at 166,090,887 (receipt); the literal also occurs 8 times in the bundled <code>Resources/codex</code> binary (count only, not excerpted). Fallback decision <code>_9n</code> at 27,560,050 (receipt; branch table there comes from source-only evaluation of the extracted function, not a Desktop run). Validator <code>G8e</code> at 34,155,000 with nine named nonexperimental top-level feature fields (<code>openLinks</code>, <code>downloadFile</code>, <code>serverTools</code>, <code>serverResources</code>, <code>logging</code>, <code>sandbox</code> carrying both <code>permissions</code> and <code>csp</code>, <code>updateModelContext</code>, <code>message</code>, <code>sampling</code>) plus optional <code>experimental</code> (receipt); the earlier &quot;10 capabilities&quot; count split <code>sandbox</code> into two checklist rows. A <code>protocolVersion</code> description string carries the example <code>&quot;2025-11-21&quot;</code> at 34,162,872 (receipt); the literal <code>McpUiInitializeResult</code> does not occur in the asar. One lookup path parses <code>_meta.ui.visibility</code> as <code>app</code>/<code>model</code> for a single named tool at 296,608,173 (receipt). Offsets come from one machine's bundle; the gate's remote value, the wire handshake, and the rendered UI were not captured.</p>
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-desktop-apps_control-panel" id="compact-openai-codex-desktop-apps_control-btn">
+                <span class="compact-word">Internal gate found</span> <span class="compact-phrase">in-code default false; runtime value unknown; no user switch identified</span>
+                <span class="visually-hidden">OpenAI Codex Desktop, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-desktop-apps_control-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex Desktop</strong> · Apps control</p>
+                <p class="compact-source-cell">LI internal gate <code>enable_mcp_apps</code>, layer <code>2138468235</code>, read with in-code default <code>false</code>; remote value uncaptured⁵; no Apps-specific user switch identified in reviewed sources; exhaustive switch coverage unverified; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=desktop" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Internal gate found = code gate, not a user control; runtime value may be unknown · VD = vendor documentation · LI = local inspection (receipts private)</p>
+                <p class="compact-footnote">⁵ ChatGPT.app 26.908.40834 (build 8881, bundle <code>com.openai.codex</code>), string and offset inspection of <code>Contents/Resources/app.asar</code> (322,016,862 bytes, sha256 <code>bb40cd88…</code>; offsets below are absolute asar bytes): <code>hq</code> (from offset 8,111,053) is a Desktop→Codex-app-server <code>initialize</code> constructor (ID <code>__codex_initialize__</code>; app-server fields <code>experimentalApi</code>, <code>optOutNotificationMethods</code>; no base-MCP <code>protocolVersion</code>) whose <code>extensions</code> includes <code>io.modelcontextprotocol/ui</code> with mime types <code>text/html;profile=mcp-app</code> and <code>text/html+skybridge</code>; its caller at 8,201,387 sends it over the app-server transport (<code>Starting app-server transport</code>). Forwarding into any MCP-server client's <code>initialize</code> capabilities was not traced, so this is not an observed or fully traced server-facing advertisement (receipt). Sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and mime constants at 7,548,947–7,549,300; webview host constant and <code>/mcp-app.html</code> at 6,146,638 (receipt). Gate <code>enable_mcp_apps</code>: feature-registry entry with <code>layerName: &quot;2138468235&quot;</code> at 31,622,158 and read site <code>.get(&quot;enable_mcp_apps&quot;, false)</code> at 166,090,887 (receipt); the literal also occurs 8 times in the bundled <code>Resources/codex</code> binary (count only, not excerpted). Fallback decision <code>_9n</code> at 27,560,050 (receipt; branch table there comes from source-only evaluation of the extracted function, not a Desktop run). Validator <code>G8e</code> at 34,155,000 with nine named nonexperimental top-level feature fields (<code>openLinks</code>, <code>downloadFile</code>, <code>serverTools</code>, <code>serverResources</code>, <code>logging</code>, <code>sandbox</code> carrying both <code>permissions</code> and <code>csp</code>, <code>updateModelContext</code>, <code>message</code>, <code>sampling</code>) plus optional <code>experimental</code> (receipt); the earlier &quot;10 capabilities&quot; count split <code>sandbox</code> into two checklist rows. A <code>protocolVersion</code> description string carries the example <code>&quot;2025-11-21&quot;</code> at 34,162,872 (receipt); the literal <code>McpUiInitializeResult</code> does not occur in the asar. One lookup path parses <code>_meta.ui.visibility</code> as <code>app</code>/<code>model</code> for a single named tool at 296,608,173 (receipt). Offsets come from one machine's bundle; the gate's remote value, the wire handshake, and the rendered UI were not captured.</p>
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-desktop-without_apps-panel" id="compact-openai-codex-desktop-without_apps-btn">
+                <span class="compact-word">Code found</span> <span class="compact-phrase">a fallback branch exists in code; what it shows is unverified; not run</span>
+                <span class="visually-hidden">OpenAI Codex Desktop, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-desktop-without_apps-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex Desktop</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell">LI decision function <code>_9n</code>⁵: rendering disabled, or missing render data without loading/error, selects <code>fallback</code>; resource-error or loading with missing data selects <code>html</code> with null render data; downstream presentation of either branch unverified; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=desktop" rel="noopener">VD standard MCP</a>; Apps fallback not documented; not run</p>
+                <p class="compact-legend">Code found = strings or functions in a local install, nothing run · VD = vendor documentation · LI = local inspection (receipts private)</p>
+                <p class="compact-footnote">⁵ ChatGPT.app 26.908.40834 (build 8881, bundle <code>com.openai.codex</code>), string and offset inspection of <code>Contents/Resources/app.asar</code> (322,016,862 bytes, sha256 <code>bb40cd88…</code>; offsets below are absolute asar bytes): <code>hq</code> (from offset 8,111,053) is a Desktop→Codex-app-server <code>initialize</code> constructor (ID <code>__codex_initialize__</code>; app-server fields <code>experimentalApi</code>, <code>optOutNotificationMethods</code>; no base-MCP <code>protocolVersion</code>) whose <code>extensions</code> includes <code>io.modelcontextprotocol/ui</code> with mime types <code>text/html;profile=mcp-app</code> and <code>text/html+skybridge</code>; its caller at 8,201,387 sends it over the app-server transport (<code>Starting app-server transport</code>). Forwarding into any MCP-server client's <code>initialize</code> capabilities was not traced, so this is not an observed or fully traced server-facing advertisement (receipt). Sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and mime constants at 7,548,947–7,549,300; webview host constant and <code>/mcp-app.html</code> at 6,146,638 (receipt). Gate <code>enable_mcp_apps</code>: feature-registry entry with <code>layerName: &quot;2138468235&quot;</code> at 31,622,158 and read site <code>.get(&quot;enable_mcp_apps&quot;, false)</code> at 166,090,887 (receipt); the literal also occurs 8 times in the bundled <code>Resources/codex</code> binary (count only, not excerpted). Fallback decision <code>_9n</code> at 27,560,050 (receipt; branch table there comes from source-only evaluation of the extracted function, not a Desktop run). Validator <code>G8e</code> at 34,155,000 with nine named nonexperimental top-level feature fields (<code>openLinks</code>, <code>downloadFile</code>, <code>serverTools</code>, <code>serverResources</code>, <code>logging</code>, <code>sandbox</code> carrying both <code>permissions</code> and <code>csp</code>, <code>updateModelContext</code>, <code>message</code>, <code>sampling</code>) plus optional <code>experimental</code> (receipt); the earlier &quot;10 capabilities&quot; count split <code>sandbox</code> into two checklist rows. A <code>protocolVersion</code> description string carries the example <code>&quot;2025-11-21&quot;</code> at 34,162,872 (receipt); the literal <code>McpUiInitializeResult</code> does not occur in the asar. One lookup path parses <code>_meta.ui.visibility</code> as <code>app</code>/<code>model</code> for a single named tool at 296,608,173 (receipt). Offsets come from one machine's bundle; the gate's remote value, the wire handshake, and the rendered UI were not captured.</p>
+              </div>
+            </div></td></tr>
+          <tr><th scope="row" class="product">GitHub Copilot in VS Code</th><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-github-copilot-in-vs-code-vendor_docs-panel" id="compact-github-copilot-in-vs-code-vendor_docs-btn">
+                <span class="compact-word">Documented</span> <span class="compact-phrase">inline</span>
+                <span class="visually-hidden">GitHub Copilot in VS Code, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-github-copilot-in-vs-code-vendor_docs-panel" hidden>
+                <p class="compact-panel-label"><strong>GitHub Copilot in VS Code</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell"><a href="https://code.visualstudio.com/blogs/2026/01/26/mcp-apps-support" rel="noopener">VD inline</a>; <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatMcpAppModel.ts#L568" rel="noopener">SS inline-only</a></p>
+                <p class="compact-legend">Documented = the vendor's own page · VD = vendor documentation · SS = source snapshot</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-github-copilot-in-vs-code-rendering_evidence-panel" id="compact-github-copilot-in-vs-code-rendering_evidence-btn">
+                <span class="compact-word">Source pinned</span> <span class="compact-phrase">inline-only in source; not a release run</span>
+                <span class="visually-hidden">GitHub Copilot in VS Code, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-github-copilot-in-vs-code-rendering_evidence-panel" hidden>
+                <p class="compact-panel-label"><strong>GitHub Copilot in VS Code</strong> · Rendering evidence</p>
+                <p class="compact-source-cell"><a href="https://code.visualstudio.com/blogs/2026/01/26/mcp-apps-support" rel="noopener">VD inline</a>; <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatMcpAppModel.ts#L568" rel="noopener">SS inline-only</a></p>
+                <p class="compact-legend">Source pinned = a code snapshot, not a shipped build · VD = vendor documentation · SS = source snapshot</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-github-copilot-in-vs-code-apps_control-panel" id="compact-github-copilot-in-vs-code-apps_control-btn">
+                <span class="compact-word">User setting</span> <span class="compact-phrase">documented (`chat.mcp.apps.enabled`)</span>
+                <span class="visually-hidden">GitHub Copilot in VS Code, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-github-copilot-in-vs-code-apps_control-panel" hidden>
+                <p class="compact-panel-label"><strong>GitHub Copilot in VS Code</strong> · Apps control</p>
+                <p class="compact-source-cell"><a href="https://code.visualstudio.com/docs/agents/reference/ai-settings" rel="noopener">VD toggle</a> <code>chat.mcp.apps.enabled</code>; <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/mcp/common/mcpLanguageModelToolContribution.ts#L245" rel="noopener">SS</a></p>
+                <p class="compact-legend">User setting = a documented user control · VD = vendor documentation · SS = source snapshot</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-github-copilot-in-vs-code-without_apps-panel" id="compact-github-copilot-in-vs-code-without_apps-btn">
+                <span class="compact-word">Source pinned</span> <span class="compact-phrase">off: no app data; load error: error card; not run</span>
+                <span class="visually-hidden">GitHub Copilot in VS Code, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-github-copilot-in-vs-code-without_apps-panel" hidden>
+                <p class="compact-panel-label"><strong>GitHub Copilot in VS Code</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell"><a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/mcp/common/mcpLanguageModelToolContribution.ts#L245" rel="noopener">SS off→no app data</a>; <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatMcpAppSubPart.ts#L182" rel="noopener">SS load error→error card</a>; not run</p>
+                <p class="compact-legend">Source pinned = a code snapshot, not a shipped build · SS = source snapshot</p>
+                
+              </div>
+            </div></td></tr>
+          <tr><th scope="row" class="product">Cursor</th><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-cursor-vendor_docs-panel" id="compact-cursor-vendor_docs-btn">
+                <span class="compact-word">Documented</span>
+                <span class="visually-hidden">Cursor, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-cursor-vendor_docs-panel" hidden>
+                <p class="compact-panel-label"><strong>Cursor</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell"><a href="https://cursor.com/docs/context/mcp" rel="noopener">VD</a>; <a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/19" rel="noopener">HR fix 3.12</a></p>
+                <p class="compact-legend">Documented = the vendor's own page · VD = vendor documentation · HR = human report (dated)</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-cursor-rendering_evidence-panel" id="compact-cursor-rendering_evidence-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">rendering regression 3.10.20, fixed 3.12 (forum, Jul 2026)</span>
+                <span class="visually-hidden">Cursor, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-cursor-rendering_evidence-panel" hidden>
+                <p class="compact-panel-label"><strong>Cursor</strong> · Rendering evidence</p>
+                <p class="compact-source-cell"><a href="https://cursor.com/docs/context/mcp" rel="noopener">VD</a>; <a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/19" rel="noopener">HR fix 3.12</a></p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · VD = vendor documentation · HR = human report (dated)</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-cursor-apps_control-panel" id="compact-cursor-apps_control-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">staff: no toggle, no account enablement (Jul–Aug 2026)</span>
+                <span class="visually-hidden">Cursor, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-cursor-apps_control-panel" hidden>
+                <p class="compact-panel-label"><strong>Cursor</strong> · Apps control</p>
+                <p class="compact-source-cell"><a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/22" rel="noopener">HR no toggle / no account enablement</a> (staff, Aug 2026); <a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/10" rel="noopener">HR</a> (staff, Jul 2026)</p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · HR = human report (dated)</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-cursor-without_apps-panel" id="compact-cursor-without_apps-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">plain text (3.10.20, Jul 2026); docs generic</span>
+                <span class="visually-hidden">Cursor, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-cursor-without_apps-panel" hidden>
+                <p class="compact-panel-label"><strong>Cursor</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell"><a href="https://cursor.com/docs/context/mcp" rel="noopener">VD generic</a>; <a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/10" rel="noopener">HR text</a> (3.10.20, Jul 2026)</p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · VD = vendor documentation · HR = human report (dated)</p>
+                
+              </div>
+            </div></td></tr>
+          <tr><th scope="row" class="product">Antigravity CLI</th><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-cli-vendor_docs-panel" id="compact-antigravity-cli-vendor_docs-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs silent</span>
+                <span class="visually-hidden">Antigravity CLI, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-cli-vendor_docs-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity CLI</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">unk; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-cli-rendering_evidence-panel" id="compact-antigravity-cli-rendering_evidence-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">no retained inspection evidence</span>
+                <span class="visually-hidden">Antigravity CLI, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-cli-rendering_evidence-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity CLI</strong> · Rendering evidence</p>
+                <p class="compact-source-cell">unk; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-cli-apps_control-panel" id="compact-antigravity-cli-apps_control-btn">
+                <span class="compact-word">Unknown</span>
+                <span class="visually-hidden">Antigravity CLI, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-cli-apps_control-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity CLI</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD</a> (background)</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-cli-without_apps-panel" id="compact-antigravity-cli-without_apps-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">Apps fallback not documented; not run</span>
+                <span class="visually-hidden">Antigravity CLI, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-cli-without_apps-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity CLI</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell">unk; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD standard MCP</a>; Apps fallback not documented; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></td></tr>
+          <tr><th scope="row" class="product">Antigravity Desktop</th><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-desktop-vendor_docs-panel" id="compact-antigravity-desktop-vendor_docs-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs and changelog silent through 2.13.0</span>
+                <span class="visually-hidden">Antigravity Desktop, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-desktop-vendor_docs-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity Desktop</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">unk; LI no named Apps mount literals (<code>text/html;profile=mcp-app</code>, <code>McpUi</code>) in inspected 2.2.1 artifacts; mounting unverified⁶; LI Desktop <code>plugin://</code> sidecar scheme⁷ and <a href="https://antigravity.google/changelog" rel="noopener">VD auxiliary-pane sidecar links, 2.5.0, Jul 31 2026</a> do not establish SEP-1865 mounting; <code>generative_ui</code> Desktop applicability unverified⁷; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD silent</a>; <a href="https://antigravity.google/docs/sidecars" rel="noopener">VD sidecars</a>; <a href="https://antigravity.google/changelog" rel="noopener">VD changelog 2.10.0 structured MCP result previews (Aug 24 2026)</a>; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · LI = local inspection (receipts private) · unk = unknown in the full matrix cell</p>
+                <p class="compact-footnote">⁶ Antigravity.app 2.2.1 (bundle <code>com.google.antigravity</code>; vendor changelog entry <code>2.2.1</code> dated June 25, 2026; <code>language_server --stamp</code>: built 2026-06-24 15:07:41 PDT at CL 937580474, baseline 935994098, branch <code>//depot/branches/agy_ls_release_branch/2.2/google3</code>; <code>app.asar</code> 2,113,928 bytes, whole-file sha256 <code>d051fe06…</code>, plist <code>ElectronAsarIntegrity</code> header hash <code>98e41655…</code>; <code>MacOS/Antigravity</code> 52,560 bytes, sha256 <code>c59f2e52…</code>; <code>language_server</code> 119,793,728 bytes, sha256 <code>9c69f1a5…</code>, Go MCP client with 1,818 <code>go_sdk/v/v0/mcp</code> package-path strings): a selected-artifact literal search of <code>app.asar</code> unpacked with <code>@electron/asar</code> (<code>dist/*.js</code> plus <code>node_modules</code>), <code>Contents/MacOS/Antigravity</code>, and <code>Contents/Resources/bin/language_server</code> found 0 matches for <code>io.modelcontextprotocol/ui</code>, <code>ui/initialize</code>, <code>2026-01-26</code>, <code>text/html;profile=mcp-app</code>, <code>mcp-app</code>, <code>McpUi</code>, <code>McpUiHostCapabilities</code>, <code>_meta.ui</code>, and <code>agent-embed</code> (receipt, machine-readable counts). This is not an exhaustive schema, renderer, negotiation, or switch audit; minified, generated, or dynamically loaded code served from the <code>language_server</code> origin was not inspected. The sole <code>io.modelcontextprotocol</code> hit is <code>RELATED_TASK_META_KEY = 'io.modelcontextprotocol/related-task'</code> in bundled <code>chrome-devtools-mcp</code> <code>^0.23.0</code> (<code>node_modules/chrome-devtools-mcp/build/src/third_party/index.js:22687</code>), a task-metadata key unrelated to Apps. Base-protocol date strings <code>2025-11-25</code>, <code>2025-06-18</code>, <code>2025-03-26</code>, <code>2024-11-05</code> sit adjacent, without separators, at <code>language_server</code> offset 37237601 (bytes <code>post_tool_2025-11-252025-06-182025-03-262024-11-05roots/listtools/listtools/call</code>); adjacency in a Go string pool does not establish a negotiation array, a supported range, or a negotiated maximum. Bundle lag: the inspected build is 2.2.1 while the vendor changelog's current release is 2.13.0 (Sep 9, 2026); later builds were not inspected. Wire handshake and rendered UI not captured; no run.</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-desktop-rendering_evidence-panel" id="compact-antigravity-desktop-rendering_evidence-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">2.2.1 searched, no named Apps strings; 2.13.0 not inspected</span>
+                <span class="visually-hidden">Antigravity Desktop, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-desktop-rendering_evidence-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity Desktop</strong> · Rendering evidence</p>
+                <p class="compact-source-cell">unk; LI no named Apps mount literals (<code>text/html;profile=mcp-app</code>, <code>McpUi</code>) in inspected 2.2.1 artifacts; mounting unverified⁶; LI Desktop <code>plugin://</code> sidecar scheme⁷ and <a href="https://antigravity.google/changelog" rel="noopener">VD auxiliary-pane sidecar links, 2.5.0, Jul 31 2026</a> do not establish SEP-1865 mounting; <code>generative_ui</code> Desktop applicability unverified⁷; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD silent</a>; <a href="https://antigravity.google/docs/sidecars" rel="noopener">VD sidecars</a>; <a href="https://antigravity.google/changelog" rel="noopener">VD changelog 2.10.0 structured MCP result previews (Aug 24 2026)</a>; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · LI = local inspection (receipts private) · unk = unknown in the full matrix cell</p>
+                <p class="compact-footnote">⁶ Antigravity.app 2.2.1 (bundle <code>com.google.antigravity</code>; vendor changelog entry <code>2.2.1</code> dated June 25, 2026; <code>language_server --stamp</code>: built 2026-06-24 15:07:41 PDT at CL 937580474, baseline 935994098, branch <code>//depot/branches/agy_ls_release_branch/2.2/google3</code>; <code>app.asar</code> 2,113,928 bytes, whole-file sha256 <code>d051fe06…</code>, plist <code>ElectronAsarIntegrity</code> header hash <code>98e41655…</code>; <code>MacOS/Antigravity</code> 52,560 bytes, sha256 <code>c59f2e52…</code>; <code>language_server</code> 119,793,728 bytes, sha256 <code>9c69f1a5…</code>, Go MCP client with 1,818 <code>go_sdk/v/v0/mcp</code> package-path strings): a selected-artifact literal search of <code>app.asar</code> unpacked with <code>@electron/asar</code> (<code>dist/*.js</code> plus <code>node_modules</code>), <code>Contents/MacOS/Antigravity</code>, and <code>Contents/Resources/bin/language_server</code> found 0 matches for <code>io.modelcontextprotocol/ui</code>, <code>ui/initialize</code>, <code>2026-01-26</code>, <code>text/html;profile=mcp-app</code>, <code>mcp-app</code>, <code>McpUi</code>, <code>McpUiHostCapabilities</code>, <code>_meta.ui</code>, and <code>agent-embed</code> (receipt, machine-readable counts). This is not an exhaustive schema, renderer, negotiation, or switch audit; minified, generated, or dynamically loaded code served from the <code>language_server</code> origin was not inspected. The sole <code>io.modelcontextprotocol</code> hit is <code>RELATED_TASK_META_KEY = 'io.modelcontextprotocol/related-task'</code> in bundled <code>chrome-devtools-mcp</code> <code>^0.23.0</code> (<code>node_modules/chrome-devtools-mcp/build/src/third_party/index.js:22687</code>), a task-metadata key unrelated to Apps. Base-protocol date strings <code>2025-11-25</code>, <code>2025-06-18</code>, <code>2025-03-26</code>, <code>2024-11-05</code> sit adjacent, without separators, at <code>language_server</code> offset 37237601 (bytes <code>post_tool_2025-11-252025-06-182025-03-262024-11-05roots/listtools/listtools/call</code>); adjacency in a Go string pool does not establish a negotiation array, a supported range, or a negotiated maximum. Bundle lag: the inspected build is 2.2.1 while the vendor changelog's current release is 2.13.0 (Sep 9, 2026); later builds were not inspected. Wire handshake and rendered UI not captured; no run.</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-desktop-apps_control-panel" id="compact-antigravity-desktop-apps_control-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs show a per-server enable toggle only</span>
+                <span class="visually-hidden">Antigravity Desktop, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-desktop-apps_control-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity Desktop</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; LI no Apps-specific user switch identified in reviewed sources (shell <code>settingsService</code> DEFAULTS, global and workspace <code>mcp_config.json</code>, <code>language_server --help</code>, 53 lines); exhaustive switch coverage unverified⁷; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD per-server enable toggle only, background</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · LI = local inspection (receipts private) · unk = unknown in the full matrix cell</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+              </div>
+            </div></td><td>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-desktop-without_apps-panel" id="compact-antigravity-desktop-without_apps-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs describe standard result previews (2.10.0); Apps fallback not documented; not run</span>
+                <span class="visually-hidden">Antigravity Desktop, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-desktop-without_apps-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity Desktop</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell">unk; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD standard MCP</a>; <a href="https://antigravity.google/changelog" rel="noopener">VD result previews, 2.10.0, Aug 24 2026; large binary results saved to file, 2.9.1, Aug 20 2026</a>; LI no literal <code>_meta.ui</code> match in selected artifacts; renderer/fallback behavior unverified⁷; Apps fallback not documented; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · LI = local inspection (receipts private) · unk = unknown in the full matrix cell</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+              </div>
+            </div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="compact-cards" data-compact-cards>
+      <article class="compact-card" aria-label="Claude Desktop">
+        <h3>Claude Desktop</h3>
+        <div class="compact-card-row"><span class="compact-card-q">Vendor documents Apps rendering?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-desktop-vendor_docs-card-panel" id="compact-claude-desktop-vendor_docs-card-btn">
+                <span class="compact-word">Documented</span> <span class="compact-phrase">inline</span>
+                <span class="visually-hidden">Claude Desktop, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-desktop-vendor_docs-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Desktop</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell"><a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">VD inline</a>; <a href="https://github.com/anthropics/claude-ai-mcp/issues/165" rel="noopener">HR mixed</a></p>
+                <p class="compact-legend">Documented = the vendor's own page · VD = vendor documentation · HR = human report (dated)</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Rendering evidence</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-desktop-rendering_evidence-card-panel" id="compact-claude-desktop-rendering_evidence-card-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">mixed issue reports</span>
+                <span class="visually-hidden">Claude Desktop, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-desktop-rendering_evidence-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Desktop</strong> · Rendering evidence</p>
+                <p class="compact-source-cell"><a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">VD inline</a>; <a href="https://github.com/anthropics/claude-ai-mcp/issues/165" rel="noopener">HR mixed</a></p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · VD = vendor documentation · HR = human report (dated)</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Apps control</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-desktop-apps_control-card-panel" id="compact-claude-desktop-apps_control-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs show a permission prompt only</span>
+                <span class="visually-hidden">Claude Desktop, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-desktop-apps_control-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Desktop</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; <a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">VD</a> (permission prompt only, background)</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Without Apps, what shows?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-desktop-without_apps-card-panel" id="compact-claude-desktop-without_apps-card-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">blank gap; error card (issue reports)</span>
+                <span class="visually-hidden">Claude Desktop, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-desktop-without_apps-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Desktop</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell"><a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-4747962829" rel="noopener">HR gap</a>; <a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-5301835548" rel="noopener">HR error card</a></p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · HR = human report (dated)</p>
+                
+              </div>
+            </div></div>
+      </article>
+      <article class="compact-card" aria-label="Claude Cowork">
+        <h3>Claude Cowork</h3>
+        <div class="compact-card-row"><span class="compact-card-q">Vendor documents Apps rendering?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-cowork-vendor_docs-card-panel" id="compact-claude-cowork-vendor_docs-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">guide names Cowork in navigation only</span>
+                <span class="visually-hidden">Claude Cowork, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-cowork-vendor_docs-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Cowork</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">unk (no Cowork-specific prose guide reviewed; the <a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">Claude guide</a> names Cowork only in navigation)</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Rendering evidence</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-cowork-rendering_evidence-card-panel" id="compact-claude-cowork-rendering_evidence-card-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">first-party yes; gateway third-party no (Apr 2026); plugin no (May 2026)</span>
+                <span class="visually-hidden">Claude Cowork, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-cowork-rendering_evidence-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Cowork</strong> · Rendering evidence</p>
+                <p class="compact-source-cell"><a href="https://github.com/anthropics/claude-ai-mcp/issues/236" rel="noopener">HR 1P yes / gateway 3P no (Apr 2026)</a>; <a href="https://github.com/anthropics/claude-ai-mcp/issues/274" rel="noopener">HR plugin no (engine 2.1.128, May 2026)</a></p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · HR = human report (dated)</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Apps control</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-cowork-apps_control-card-panel" id="compact-claude-cowork-apps_control-card-btn">
+                <span class="compact-word">Unknown</span>
+                <span class="visually-hidden">Claude Cowork, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-cowork-apps_control-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Cowork</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; <a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">VD</a> (background)</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Without Apps, what shows?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-cowork-without_apps-card-panel" id="compact-claude-cowork-without_apps-card-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">plain text, gateway third-party (Apr 2026); raw JSON, plugin (May 2026)</span>
+                <span class="visually-hidden">Claude Cowork, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-cowork-without_apps-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Cowork</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell"><a href="https://github.com/anthropics/claude-ai-mcp/issues/236" rel="noopener">HR text, gateway 3P (Apr 2026)</a>; <a href="https://github.com/anthropics/claude-ai-mcp/issues/274" rel="noopener">HR raw JSON, plugin (May 2026)</a></p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · HR = human report (dated)</p>
+                
+              </div>
+            </div></div>
+      </article>
+      <article class="compact-card" aria-label="Claude Code">
+        <h3>Claude Code</h3>
+        <div class="compact-card-row"><span class="compact-card-q">Vendor documents Apps rendering?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-code-vendor_docs-card-panel" id="compact-claude-code-vendor_docs-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs silent</span>
+                <span class="visually-hidden">Claude Code, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-code-vendor_docs-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Code</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">unk; <a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Rendering evidence</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-code-rendering_evidence-card-panel" id="compact-claude-code-rendering_evidence-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">no retained inspection evidence</span>
+                <span class="visually-hidden">Claude Code, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-code-rendering_evidence-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Code</strong> · Rendering evidence</p>
+                <p class="compact-source-cell">unk; <a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Apps control</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-code-apps_control-card-panel" id="compact-claude-code-apps_control-card-btn">
+                <span class="compact-word">Unknown</span>
+                <span class="visually-hidden">Claude Code, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-code-apps_control-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Code</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; <a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">VD</a> (background)</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Without Apps, what shows?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-claude-code-without_apps-card-panel" id="compact-claude-code-without_apps-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">Apps fallback not documented; not run</span>
+                <span class="visually-hidden">Claude Code, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-claude-code-without_apps-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Claude Code</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell">unk; <a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">VD standard MCP only</a>; Apps fallback not documented; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+      </article>
+      <article class="compact-card" aria-label="OpenAI Codex CLI">
+        <h3>OpenAI Codex CLI</h3>
+        <div class="compact-card-row"><span class="compact-card-q">Vendor documents Apps rendering?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-cli-vendor_docs-card-panel" id="compact-openai-codex-cli-vendor_docs-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs silent</span>
+                <span class="visually-hidden">OpenAI Codex CLI, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-cli-vendor_docs-card-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex CLI</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">unk; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Rendering evidence</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-cli-rendering_evidence-card-panel" id="compact-openai-codex-cli-rendering_evidence-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">no retained inspection evidence</span>
+                <span class="visually-hidden">OpenAI Codex CLI, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-cli-rendering_evidence-card-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex CLI</strong> · Rendering evidence</p>
+                <p class="compact-source-cell">unk; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Apps control</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-cli-apps_control-card-panel" id="compact-openai-codex-cli-apps_control-card-btn">
+                <span class="compact-word">Unknown</span>
+                <span class="visually-hidden">OpenAI Codex CLI, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-cli-apps_control-card-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex CLI</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">VD silent</a>; local flag state has no linked receipt in this evidence set</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Without Apps, what shows?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-cli-without_apps-card-panel" id="compact-openai-codex-cli-without_apps-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">Apps fallback not documented; not run</span>
+                <span class="visually-hidden">OpenAI Codex CLI, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-cli-without_apps-card-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex CLI</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell">unk; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">VD standard MCP</a>; Apps fallback not documented; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+      </article>
+      <article class="compact-card" aria-label="OpenAI Codex Desktop">
+        <h3>OpenAI Codex Desktop</h3>
+        <div class="compact-card-row"><span class="compact-card-q">Vendor documents Apps rendering?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-desktop-vendor_docs-card-panel" id="compact-openai-codex-desktop-vendor_docs-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs silent</span>
+                <span class="visually-hidden">OpenAI Codex Desktop, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-desktop-vendor_docs-card-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex Desktop</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">LI sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and <code>/mcp-app.html</code> strings present in bundle⁵ (code presence, not an observed mount); <a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-5127235678" rel="noopener">HR &quot;Codex&quot; iframe, surface unstated</a> (Jul 2026); <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=desktop" rel="noopener">VD silent</a>; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · HR = human report (dated) · LI = local inspection (receipts private)</p>
+                <p class="compact-footnote">⁵ ChatGPT.app 26.908.40834 (build 8881, bundle <code>com.openai.codex</code>), string and offset inspection of <code>Contents/Resources/app.asar</code> (322,016,862 bytes, sha256 <code>bb40cd88…</code>; offsets below are absolute asar bytes): <code>hq</code> (from offset 8,111,053) is a Desktop→Codex-app-server <code>initialize</code> constructor (ID <code>__codex_initialize__</code>; app-server fields <code>experimentalApi</code>, <code>optOutNotificationMethods</code>; no base-MCP <code>protocolVersion</code>) whose <code>extensions</code> includes <code>io.modelcontextprotocol/ui</code> with mime types <code>text/html;profile=mcp-app</code> and <code>text/html+skybridge</code>; its caller at 8,201,387 sends it over the app-server transport (<code>Starting app-server transport</code>). Forwarding into any MCP-server client's <code>initialize</code> capabilities was not traced, so this is not an observed or fully traced server-facing advertisement (receipt). Sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and mime constants at 7,548,947–7,549,300; webview host constant and <code>/mcp-app.html</code> at 6,146,638 (receipt). Gate <code>enable_mcp_apps</code>: feature-registry entry with <code>layerName: &quot;2138468235&quot;</code> at 31,622,158 and read site <code>.get(&quot;enable_mcp_apps&quot;, false)</code> at 166,090,887 (receipt); the literal also occurs 8 times in the bundled <code>Resources/codex</code> binary (count only, not excerpted). Fallback decision <code>_9n</code> at 27,560,050 (receipt; branch table there comes from source-only evaluation of the extracted function, not a Desktop run). Validator <code>G8e</code> at 34,155,000 with nine named nonexperimental top-level feature fields (<code>openLinks</code>, <code>downloadFile</code>, <code>serverTools</code>, <code>serverResources</code>, <code>logging</code>, <code>sandbox</code> carrying both <code>permissions</code> and <code>csp</code>, <code>updateModelContext</code>, <code>message</code>, <code>sampling</code>) plus optional <code>experimental</code> (receipt); the earlier &quot;10 capabilities&quot; count split <code>sandbox</code> into two checklist rows. A <code>protocolVersion</code> description string carries the example <code>&quot;2025-11-21&quot;</code> at 34,162,872 (receipt); the literal <code>McpUiInitializeResult</code> does not occur in the asar. One lookup path parses <code>_meta.ui.visibility</code> as <code>app</code>/<code>model</code> for a single named tool at 296,608,173 (receipt). Offsets come from one machine's bundle; the gate's remote value, the wire handshake, and the rendered UI were not captured.</p>
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Rendering evidence</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-desktop-rendering_evidence-card-panel" id="compact-openai-codex-desktop-rendering_evidence-card-btn">
+                <span class="compact-word">Code found</span> <span class="compact-phrase">sandbox and mount strings in bundle; not run; a Jul 2026 report says &quot;Codex&quot; without naming the surface</span>
+                <span class="visually-hidden">OpenAI Codex Desktop, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-desktop-rendering_evidence-card-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex Desktop</strong> · Rendering evidence</p>
+                <p class="compact-source-cell">LI sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and <code>/mcp-app.html</code> strings present in bundle⁵ (code presence, not an observed mount); <a href="https://github.com/anthropics/claude-ai-mcp/issues/165#issuecomment-5127235678" rel="noopener">HR &quot;Codex&quot; iframe, surface unstated</a> (Jul 2026); <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=desktop" rel="noopener">VD silent</a>; not run</p>
+                <p class="compact-legend">Code found = strings or functions in a local install, nothing run · VD = vendor documentation · HR = human report (dated) · LI = local inspection (receipts private)</p>
+                <p class="compact-footnote">⁵ ChatGPT.app 26.908.40834 (build 8881, bundle <code>com.openai.codex</code>), string and offset inspection of <code>Contents/Resources/app.asar</code> (322,016,862 bytes, sha256 <code>bb40cd88…</code>; offsets below are absolute asar bytes): <code>hq</code> (from offset 8,111,053) is a Desktop→Codex-app-server <code>initialize</code> constructor (ID <code>__codex_initialize__</code>; app-server fields <code>experimentalApi</code>, <code>optOutNotificationMethods</code>; no base-MCP <code>protocolVersion</code>) whose <code>extensions</code> includes <code>io.modelcontextprotocol/ui</code> with mime types <code>text/html;profile=mcp-app</code> and <code>text/html+skybridge</code>; its caller at 8,201,387 sends it over the app-server transport (<code>Starting app-server transport</code>). Forwarding into any MCP-server client's <code>initialize</code> capabilities was not traced, so this is not an observed or fully traced server-facing advertisement (receipt). Sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and mime constants at 7,548,947–7,549,300; webview host constant and <code>/mcp-app.html</code> at 6,146,638 (receipt). Gate <code>enable_mcp_apps</code>: feature-registry entry with <code>layerName: &quot;2138468235&quot;</code> at 31,622,158 and read site <code>.get(&quot;enable_mcp_apps&quot;, false)</code> at 166,090,887 (receipt); the literal also occurs 8 times in the bundled <code>Resources/codex</code> binary (count only, not excerpted). Fallback decision <code>_9n</code> at 27,560,050 (receipt; branch table there comes from source-only evaluation of the extracted function, not a Desktop run). Validator <code>G8e</code> at 34,155,000 with nine named nonexperimental top-level feature fields (<code>openLinks</code>, <code>downloadFile</code>, <code>serverTools</code>, <code>serverResources</code>, <code>logging</code>, <code>sandbox</code> carrying both <code>permissions</code> and <code>csp</code>, <code>updateModelContext</code>, <code>message</code>, <code>sampling</code>) plus optional <code>experimental</code> (receipt); the earlier &quot;10 capabilities&quot; count split <code>sandbox</code> into two checklist rows. A <code>protocolVersion</code> description string carries the example <code>&quot;2025-11-21&quot;</code> at 34,162,872 (receipt); the literal <code>McpUiInitializeResult</code> does not occur in the asar. One lookup path parses <code>_meta.ui.visibility</code> as <code>app</code>/<code>model</code> for a single named tool at 296,608,173 (receipt). Offsets come from one machine's bundle; the gate's remote value, the wire handshake, and the rendered UI were not captured.</p>
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Apps control</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-desktop-apps_control-card-panel" id="compact-openai-codex-desktop-apps_control-card-btn">
+                <span class="compact-word">Internal gate found</span> <span class="compact-phrase">in-code default false; runtime value unknown; no user switch identified</span>
+                <span class="visually-hidden">OpenAI Codex Desktop, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-desktop-apps_control-card-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex Desktop</strong> · Apps control</p>
+                <p class="compact-source-cell">LI internal gate <code>enable_mcp_apps</code>, layer <code>2138468235</code>, read with in-code default <code>false</code>; remote value uncaptured⁵; no Apps-specific user switch identified in reviewed sources; exhaustive switch coverage unverified; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=desktop" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Internal gate found = code gate, not a user control; runtime value may be unknown · VD = vendor documentation · LI = local inspection (receipts private)</p>
+                <p class="compact-footnote">⁵ ChatGPT.app 26.908.40834 (build 8881, bundle <code>com.openai.codex</code>), string and offset inspection of <code>Contents/Resources/app.asar</code> (322,016,862 bytes, sha256 <code>bb40cd88…</code>; offsets below are absolute asar bytes): <code>hq</code> (from offset 8,111,053) is a Desktop→Codex-app-server <code>initialize</code> constructor (ID <code>__codex_initialize__</code>; app-server fields <code>experimentalApi</code>, <code>optOutNotificationMethods</code>; no base-MCP <code>protocolVersion</code>) whose <code>extensions</code> includes <code>io.modelcontextprotocol/ui</code> with mime types <code>text/html;profile=mcp-app</code> and <code>text/html+skybridge</code>; its caller at 8,201,387 sends it over the app-server transport (<code>Starting app-server transport</code>). Forwarding into any MCP-server client's <code>initialize</code> capabilities was not traced, so this is not an observed or fully traced server-facing advertisement (receipt). Sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and mime constants at 7,548,947–7,549,300; webview host constant and <code>/mcp-app.html</code> at 6,146,638 (receipt). Gate <code>enable_mcp_apps</code>: feature-registry entry with <code>layerName: &quot;2138468235&quot;</code> at 31,622,158 and read site <code>.get(&quot;enable_mcp_apps&quot;, false)</code> at 166,090,887 (receipt); the literal also occurs 8 times in the bundled <code>Resources/codex</code> binary (count only, not excerpted). Fallback decision <code>_9n</code> at 27,560,050 (receipt; branch table there comes from source-only evaluation of the extracted function, not a Desktop run). Validator <code>G8e</code> at 34,155,000 with nine named nonexperimental top-level feature fields (<code>openLinks</code>, <code>downloadFile</code>, <code>serverTools</code>, <code>serverResources</code>, <code>logging</code>, <code>sandbox</code> carrying both <code>permissions</code> and <code>csp</code>, <code>updateModelContext</code>, <code>message</code>, <code>sampling</code>) plus optional <code>experimental</code> (receipt); the earlier &quot;10 capabilities&quot; count split <code>sandbox</code> into two checklist rows. A <code>protocolVersion</code> description string carries the example <code>&quot;2025-11-21&quot;</code> at 34,162,872 (receipt); the literal <code>McpUiInitializeResult</code> does not occur in the asar. One lookup path parses <code>_meta.ui.visibility</code> as <code>app</code>/<code>model</code> for a single named tool at 296,608,173 (receipt). Offsets come from one machine's bundle; the gate's remote value, the wire handshake, and the rendered UI were not captured.</p>
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Without Apps, what shows?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-openai-codex-desktop-without_apps-card-panel" id="compact-openai-codex-desktop-without_apps-card-btn">
+                <span class="compact-word">Code found</span> <span class="compact-phrase">a fallback branch exists in code; what it shows is unverified; not run</span>
+                <span class="visually-hidden">OpenAI Codex Desktop, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-openai-codex-desktop-without_apps-card-panel" hidden>
+                <p class="compact-panel-label"><strong>OpenAI Codex Desktop</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell">LI decision function <code>_9n</code>⁵: rendering disabled, or missing render data without loading/error, selects <code>fallback</code>; resource-error or loading with missing data selects <code>html</code> with null render data; downstream presentation of either branch unverified; <a href="https://learn.chatgpt.com/docs/extend/mcp?surface=desktop" rel="noopener">VD standard MCP</a>; Apps fallback not documented; not run</p>
+                <p class="compact-legend">Code found = strings or functions in a local install, nothing run · VD = vendor documentation · LI = local inspection (receipts private)</p>
+                <p class="compact-footnote">⁵ ChatGPT.app 26.908.40834 (build 8881, bundle <code>com.openai.codex</code>), string and offset inspection of <code>Contents/Resources/app.asar</code> (322,016,862 bytes, sha256 <code>bb40cd88…</code>; offsets below are absolute asar bytes): <code>hq</code> (from offset 8,111,053) is a Desktop→Codex-app-server <code>initialize</code> constructor (ID <code>__codex_initialize__</code>; app-server fields <code>experimentalApi</code>, <code>optOutNotificationMethods</code>; no base-MCP <code>protocolVersion</code>) whose <code>extensions</code> includes <code>io.modelcontextprotocol/ui</code> with mime types <code>text/html;profile=mcp-app</code> and <code>text/html+skybridge</code>; its caller at 8,201,387 sends it over the app-server transport (<code>Starting app-server transport</code>). Forwarding into any MCP-server client's <code>initialize</code> capabilities was not traced, so this is not an observed or fully traced server-facing advertisement (receipt). Sandbox scheme <code>codex-mcp-app-sandbox</code>, host <code>web-sandbox.oaiusercontent.com</code>, and mime constants at 7,548,947–7,549,300; webview host constant and <code>/mcp-app.html</code> at 6,146,638 (receipt). Gate <code>enable_mcp_apps</code>: feature-registry entry with <code>layerName: &quot;2138468235&quot;</code> at 31,622,158 and read site <code>.get(&quot;enable_mcp_apps&quot;, false)</code> at 166,090,887 (receipt); the literal also occurs 8 times in the bundled <code>Resources/codex</code> binary (count only, not excerpted). Fallback decision <code>_9n</code> at 27,560,050 (receipt; branch table there comes from source-only evaluation of the extracted function, not a Desktop run). Validator <code>G8e</code> at 34,155,000 with nine named nonexperimental top-level feature fields (<code>openLinks</code>, <code>downloadFile</code>, <code>serverTools</code>, <code>serverResources</code>, <code>logging</code>, <code>sandbox</code> carrying both <code>permissions</code> and <code>csp</code>, <code>updateModelContext</code>, <code>message</code>, <code>sampling</code>) plus optional <code>experimental</code> (receipt); the earlier &quot;10 capabilities&quot; count split <code>sandbox</code> into two checklist rows. A <code>protocolVersion</code> description string carries the example <code>&quot;2025-11-21&quot;</code> at 34,162,872 (receipt); the literal <code>McpUiInitializeResult</code> does not occur in the asar. One lookup path parses <code>_meta.ui.visibility</code> as <code>app</code>/<code>model</code> for a single named tool at 296,608,173 (receipt). Offsets come from one machine's bundle; the gate's remote value, the wire handshake, and the rendered UI were not captured.</p>
+              </div>
+            </div></div>
+      </article>
+      <article class="compact-card" aria-label="GitHub Copilot in VS Code">
+        <h3>GitHub Copilot in VS Code</h3>
+        <div class="compact-card-row"><span class="compact-card-q">Vendor documents Apps rendering?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-github-copilot-in-vs-code-vendor_docs-card-panel" id="compact-github-copilot-in-vs-code-vendor_docs-card-btn">
+                <span class="compact-word">Documented</span> <span class="compact-phrase">inline</span>
+                <span class="visually-hidden">GitHub Copilot in VS Code, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-github-copilot-in-vs-code-vendor_docs-card-panel" hidden>
+                <p class="compact-panel-label"><strong>GitHub Copilot in VS Code</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell"><a href="https://code.visualstudio.com/blogs/2026/01/26/mcp-apps-support" rel="noopener">VD inline</a>; <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatMcpAppModel.ts#L568" rel="noopener">SS inline-only</a></p>
+                <p class="compact-legend">Documented = the vendor's own page · VD = vendor documentation · SS = source snapshot</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Rendering evidence</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-github-copilot-in-vs-code-rendering_evidence-card-panel" id="compact-github-copilot-in-vs-code-rendering_evidence-card-btn">
+                <span class="compact-word">Source pinned</span> <span class="compact-phrase">inline-only in source; not a release run</span>
+                <span class="visually-hidden">GitHub Copilot in VS Code, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-github-copilot-in-vs-code-rendering_evidence-card-panel" hidden>
+                <p class="compact-panel-label"><strong>GitHub Copilot in VS Code</strong> · Rendering evidence</p>
+                <p class="compact-source-cell"><a href="https://code.visualstudio.com/blogs/2026/01/26/mcp-apps-support" rel="noopener">VD inline</a>; <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatMcpAppModel.ts#L568" rel="noopener">SS inline-only</a></p>
+                <p class="compact-legend">Source pinned = a code snapshot, not a shipped build · VD = vendor documentation · SS = source snapshot</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Apps control</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-github-copilot-in-vs-code-apps_control-card-panel" id="compact-github-copilot-in-vs-code-apps_control-card-btn">
+                <span class="compact-word">User setting</span> <span class="compact-phrase">documented (`chat.mcp.apps.enabled`)</span>
+                <span class="visually-hidden">GitHub Copilot in VS Code, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-github-copilot-in-vs-code-apps_control-card-panel" hidden>
+                <p class="compact-panel-label"><strong>GitHub Copilot in VS Code</strong> · Apps control</p>
+                <p class="compact-source-cell"><a href="https://code.visualstudio.com/docs/agents/reference/ai-settings" rel="noopener">VD toggle</a> <code>chat.mcp.apps.enabled</code>; <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/mcp/common/mcpLanguageModelToolContribution.ts#L245" rel="noopener">SS</a></p>
+                <p class="compact-legend">User setting = a documented user control · VD = vendor documentation · SS = source snapshot</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Without Apps, what shows?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-github-copilot-in-vs-code-without_apps-card-panel" id="compact-github-copilot-in-vs-code-without_apps-card-btn">
+                <span class="compact-word">Source pinned</span> <span class="compact-phrase">off: no app data; load error: error card; not run</span>
+                <span class="visually-hidden">GitHub Copilot in VS Code, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-github-copilot-in-vs-code-without_apps-card-panel" hidden>
+                <p class="compact-panel-label"><strong>GitHub Copilot in VS Code</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell"><a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/mcp/common/mcpLanguageModelToolContribution.ts#L245" rel="noopener">SS off→no app data</a>; <a href="https://github.com/microsoft/vscode/blob/c48e5e4a36448a6788d234ac510cf0985a08e10b/src/vs/workbench/contrib/chat/browser/widget/chatContentParts/toolInvocationParts/chatMcpAppSubPart.ts#L182" rel="noopener">SS load error→error card</a>; not run</p>
+                <p class="compact-legend">Source pinned = a code snapshot, not a shipped build · SS = source snapshot</p>
+                
+              </div>
+            </div></div>
+      </article>
+      <article class="compact-card" aria-label="Cursor">
+        <h3>Cursor</h3>
+        <div class="compact-card-row"><span class="compact-card-q">Vendor documents Apps rendering?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-cursor-vendor_docs-card-panel" id="compact-cursor-vendor_docs-card-btn">
+                <span class="compact-word">Documented</span>
+                <span class="visually-hidden">Cursor, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-cursor-vendor_docs-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Cursor</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell"><a href="https://cursor.com/docs/context/mcp" rel="noopener">VD</a>; <a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/19" rel="noopener">HR fix 3.12</a></p>
+                <p class="compact-legend">Documented = the vendor's own page · VD = vendor documentation · HR = human report (dated)</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Rendering evidence</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-cursor-rendering_evidence-card-panel" id="compact-cursor-rendering_evidence-card-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">rendering regression 3.10.20, fixed 3.12 (forum, Jul 2026)</span>
+                <span class="visually-hidden">Cursor, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-cursor-rendering_evidence-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Cursor</strong> · Rendering evidence</p>
+                <p class="compact-source-cell"><a href="https://cursor.com/docs/context/mcp" rel="noopener">VD</a>; <a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/19" rel="noopener">HR fix 3.12</a></p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · VD = vendor documentation · HR = human report (dated)</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Apps control</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-cursor-apps_control-card-panel" id="compact-cursor-apps_control-card-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">staff: no toggle, no account enablement (Jul–Aug 2026)</span>
+                <span class="visually-hidden">Cursor, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-cursor-apps_control-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Cursor</strong> · Apps control</p>
+                <p class="compact-source-cell"><a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/22" rel="noopener">HR no toggle / no account enablement</a> (staff, Aug 2026); <a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/10" rel="noopener">HR</a> (staff, Jul 2026)</p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · HR = human report (dated)</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Without Apps, what shows?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-cursor-without_apps-card-panel" id="compact-cursor-without_apps-card-btn">
+                <span class="compact-word">Reported</span> <span class="compact-phrase">plain text (3.10.20, Jul 2026); docs generic</span>
+                <span class="visually-hidden">Cursor, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-cursor-without_apps-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Cursor</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell"><a href="https://cursor.com/docs/context/mcp" rel="noopener">VD generic</a>; <a href="https://forum.cursor.com/t/mcp-apps-stopped-rendering-in-3-10-20-worked-in-3-9-16/165167/10" rel="noopener">HR text</a> (3.10.20, Jul 2026)</p>
+                <p class="compact-legend">Reported = a dated user or staff report, not reproduced · VD = vendor documentation · HR = human report (dated)</p>
+                
+              </div>
+            </div></div>
+      </article>
+      <article class="compact-card" aria-label="Antigravity CLI">
+        <h3>Antigravity CLI</h3>
+        <div class="compact-card-row"><span class="compact-card-q">Vendor documents Apps rendering?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-cli-vendor_docs-card-panel" id="compact-antigravity-cli-vendor_docs-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs silent</span>
+                <span class="visually-hidden">Antigravity CLI, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-cli-vendor_docs-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity CLI</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">unk; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Rendering evidence</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-cli-rendering_evidence-card-panel" id="compact-antigravity-cli-rendering_evidence-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">no retained inspection evidence</span>
+                <span class="visually-hidden">Antigravity CLI, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-cli-rendering_evidence-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity CLI</strong> · Rendering evidence</p>
+                <p class="compact-source-cell">unk; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD silent</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Apps control</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-cli-apps_control-card-panel" id="compact-antigravity-cli-apps_control-card-btn">
+                <span class="compact-word">Unknown</span>
+                <span class="visually-hidden">Antigravity CLI, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-cli-apps_control-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity CLI</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD</a> (background)</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Without Apps, what shows?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-cli-without_apps-card-panel" id="compact-antigravity-cli-without_apps-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">Apps fallback not documented; not run</span>
+                <span class="visually-hidden">Antigravity CLI, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-cli-without_apps-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity CLI</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell">unk; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD standard MCP</a>; Apps fallback not documented; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · unk = unknown in the full matrix cell</p>
+                
+              </div>
+            </div></div>
+      </article>
+      <article class="compact-card" aria-label="Antigravity Desktop">
+        <h3>Antigravity Desktop</h3>
+        <div class="compact-card-row"><span class="compact-card-q">Vendor documents Apps rendering?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-desktop-vendor_docs-card-panel" id="compact-antigravity-desktop-vendor_docs-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs and changelog silent through 2.13.0</span>
+                <span class="visually-hidden">Antigravity Desktop, Vendor documents Apps rendering?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-desktop-vendor_docs-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity Desktop</strong> · Vendor documents Apps rendering?</p>
+                <p class="compact-source-cell">unk; LI no named Apps mount literals (<code>text/html;profile=mcp-app</code>, <code>McpUi</code>) in inspected 2.2.1 artifacts; mounting unverified⁶; LI Desktop <code>plugin://</code> sidecar scheme⁷ and <a href="https://antigravity.google/changelog" rel="noopener">VD auxiliary-pane sidecar links, 2.5.0, Jul 31 2026</a> do not establish SEP-1865 mounting; <code>generative_ui</code> Desktop applicability unverified⁷; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD silent</a>; <a href="https://antigravity.google/docs/sidecars" rel="noopener">VD sidecars</a>; <a href="https://antigravity.google/changelog" rel="noopener">VD changelog 2.10.0 structured MCP result previews (Aug 24 2026)</a>; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · LI = local inspection (receipts private) · unk = unknown in the full matrix cell</p>
+                <p class="compact-footnote">⁶ Antigravity.app 2.2.1 (bundle <code>com.google.antigravity</code>; vendor changelog entry <code>2.2.1</code> dated June 25, 2026; <code>language_server --stamp</code>: built 2026-06-24 15:07:41 PDT at CL 937580474, baseline 935994098, branch <code>//depot/branches/agy_ls_release_branch/2.2/google3</code>; <code>app.asar</code> 2,113,928 bytes, whole-file sha256 <code>d051fe06…</code>, plist <code>ElectronAsarIntegrity</code> header hash <code>98e41655…</code>; <code>MacOS/Antigravity</code> 52,560 bytes, sha256 <code>c59f2e52…</code>; <code>language_server</code> 119,793,728 bytes, sha256 <code>9c69f1a5…</code>, Go MCP client with 1,818 <code>go_sdk/v/v0/mcp</code> package-path strings): a selected-artifact literal search of <code>app.asar</code> unpacked with <code>@electron/asar</code> (<code>dist/*.js</code> plus <code>node_modules</code>), <code>Contents/MacOS/Antigravity</code>, and <code>Contents/Resources/bin/language_server</code> found 0 matches for <code>io.modelcontextprotocol/ui</code>, <code>ui/initialize</code>, <code>2026-01-26</code>, <code>text/html;profile=mcp-app</code>, <code>mcp-app</code>, <code>McpUi</code>, <code>McpUiHostCapabilities</code>, <code>_meta.ui</code>, and <code>agent-embed</code> (receipt, machine-readable counts). This is not an exhaustive schema, renderer, negotiation, or switch audit; minified, generated, or dynamically loaded code served from the <code>language_server</code> origin was not inspected. The sole <code>io.modelcontextprotocol</code> hit is <code>RELATED_TASK_META_KEY = 'io.modelcontextprotocol/related-task'</code> in bundled <code>chrome-devtools-mcp</code> <code>^0.23.0</code> (<code>node_modules/chrome-devtools-mcp/build/src/third_party/index.js:22687</code>), a task-metadata key unrelated to Apps. Base-protocol date strings <code>2025-11-25</code>, <code>2025-06-18</code>, <code>2025-03-26</code>, <code>2024-11-05</code> sit adjacent, without separators, at <code>language_server</code> offset 37237601 (bytes <code>post_tool_2025-11-252025-06-182025-03-262024-11-05roots/listtools/listtools/call</code>); adjacency in a Go string pool does not establish a negotiation array, a supported range, or a negotiated maximum. Bundle lag: the inspected build is 2.2.1 while the vendor changelog's current release is 2.13.0 (Sep 9, 2026); later builds were not inspected. Wire handshake and rendered UI not captured; no run.</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Rendering evidence</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-desktop-rendering_evidence-card-panel" id="compact-antigravity-desktop-rendering_evidence-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">2.2.1 searched, no named Apps strings; 2.13.0 not inspected</span>
+                <span class="visually-hidden">Antigravity Desktop, Rendering evidence: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-desktop-rendering_evidence-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity Desktop</strong> · Rendering evidence</p>
+                <p class="compact-source-cell">unk; LI no named Apps mount literals (<code>text/html;profile=mcp-app</code>, <code>McpUi</code>) in inspected 2.2.1 artifacts; mounting unverified⁶; LI Desktop <code>plugin://</code> sidecar scheme⁷ and <a href="https://antigravity.google/changelog" rel="noopener">VD auxiliary-pane sidecar links, 2.5.0, Jul 31 2026</a> do not establish SEP-1865 mounting; <code>generative_ui</code> Desktop applicability unverified⁷; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD silent</a>; <a href="https://antigravity.google/docs/sidecars" rel="noopener">VD sidecars</a>; <a href="https://antigravity.google/changelog" rel="noopener">VD changelog 2.10.0 structured MCP result previews (Aug 24 2026)</a>; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · LI = local inspection (receipts private) · unk = unknown in the full matrix cell</p>
+                <p class="compact-footnote">⁶ Antigravity.app 2.2.1 (bundle <code>com.google.antigravity</code>; vendor changelog entry <code>2.2.1</code> dated June 25, 2026; <code>language_server --stamp</code>: built 2026-06-24 15:07:41 PDT at CL 937580474, baseline 935994098, branch <code>//depot/branches/agy_ls_release_branch/2.2/google3</code>; <code>app.asar</code> 2,113,928 bytes, whole-file sha256 <code>d051fe06…</code>, plist <code>ElectronAsarIntegrity</code> header hash <code>98e41655…</code>; <code>MacOS/Antigravity</code> 52,560 bytes, sha256 <code>c59f2e52…</code>; <code>language_server</code> 119,793,728 bytes, sha256 <code>9c69f1a5…</code>, Go MCP client with 1,818 <code>go_sdk/v/v0/mcp</code> package-path strings): a selected-artifact literal search of <code>app.asar</code> unpacked with <code>@electron/asar</code> (<code>dist/*.js</code> plus <code>node_modules</code>), <code>Contents/MacOS/Antigravity</code>, and <code>Contents/Resources/bin/language_server</code> found 0 matches for <code>io.modelcontextprotocol/ui</code>, <code>ui/initialize</code>, <code>2026-01-26</code>, <code>text/html;profile=mcp-app</code>, <code>mcp-app</code>, <code>McpUi</code>, <code>McpUiHostCapabilities</code>, <code>_meta.ui</code>, and <code>agent-embed</code> (receipt, machine-readable counts). This is not an exhaustive schema, renderer, negotiation, or switch audit; minified, generated, or dynamically loaded code served from the <code>language_server</code> origin was not inspected. The sole <code>io.modelcontextprotocol</code> hit is <code>RELATED_TASK_META_KEY = 'io.modelcontextprotocol/related-task'</code> in bundled <code>chrome-devtools-mcp</code> <code>^0.23.0</code> (<code>node_modules/chrome-devtools-mcp/build/src/third_party/index.js:22687</code>), a task-metadata key unrelated to Apps. Base-protocol date strings <code>2025-11-25</code>, <code>2025-06-18</code>, <code>2025-03-26</code>, <code>2024-11-05</code> sit adjacent, without separators, at <code>language_server</code> offset 37237601 (bytes <code>post_tool_2025-11-252025-06-182025-03-262024-11-05roots/listtools/listtools/call</code>); adjacency in a Go string pool does not establish a negotiation array, a supported range, or a negotiated maximum. Bundle lag: the inspected build is 2.2.1 while the vendor changelog's current release is 2.13.0 (Sep 9, 2026); later builds were not inspected. Wire handshake and rendered UI not captured; no run.</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Apps control</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-desktop-apps_control-card-panel" id="compact-antigravity-desktop-apps_control-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs show a per-server enable toggle only</span>
+                <span class="visually-hidden">Antigravity Desktop, Apps control: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-desktop-apps_control-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity Desktop</strong> · Apps control</p>
+                <p class="compact-source-cell">unk; LI no Apps-specific user switch identified in reviewed sources (shell <code>settingsService</code> DEFAULTS, global and workspace <code>mcp_config.json</code>, <code>language_server --help</code>, 53 lines); exhaustive switch coverage unverified⁷; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD per-server enable toggle only, background</a></p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · LI = local inspection (receipts private) · unk = unknown in the full matrix cell</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+              </div>
+            </div></div>
+        <div class="compact-card-row"><span class="compact-card-q">Without Apps, what shows?</span>
+            <div class="compact-cell" data-compact-cell>
+              <button type="button" class="compact-trigger" aria-expanded="false" aria-controls="compact-antigravity-desktop-without_apps-card-panel" id="compact-antigravity-desktop-without_apps-card-btn">
+                <span class="compact-word">Unknown</span> <span class="compact-phrase">docs describe standard result previews (2.10.0); Apps fallback not documented; not run</span>
+                <span class="visually-hidden">Antigravity Desktop, Without Apps, what shows?: show evidence</span>
+              </button>
+              <div class="compact-panel" id="compact-antigravity-desktop-without_apps-card-panel" hidden>
+                <p class="compact-panel-label"><strong>Antigravity Desktop</strong> · Without Apps, what shows?</p>
+                <p class="compact-source-cell">unk; <a href="https://antigravity.google/docs/mcp" rel="noopener">VD standard MCP</a>; <a href="https://antigravity.google/changelog" rel="noopener">VD result previews, 2.10.0, Aug 24 2026; large binary results saved to file, 2.9.1, Aug 20 2026</a>; LI no literal <code>_meta.ui</code> match in selected artifacts; renderer/fallback behavior unverified⁷; Apps fallback not documented; not run</p>
+                <p class="compact-legend">Unknown = this evidence does not establish the answer · VD = vendor documentation · LI = local inspection (receipts private) · unk = unknown in the full matrix cell</p>
+                <p class="compact-footnote">⁷ Antigravity.app 2.2.1 shell, extensibility, and settings surfaces (same bundle as</p>
+              </div>
+            </div></div>
+      </article>
+      </div>
+      <p class="compact-key">Documented = the vendor's own page · Source pinned = a code snapshot, not a shipped build · Reported = a dated user or staff report, not reproduced · Code found = strings or functions in a local install, nothing run · Unknown = this evidence does not establish the answer · User setting = a documented user control · Internal gate found = code gate, not a user control; runtime value may be unknown</p>
+      <p class="compact-portable">Every row: recommended portable content path (readable text, optional image).</p>
+    </section>
+
     <section class="next prose" id="what-would-change" aria-label="What would change this page">
       <h2>What would change this page</h2>
       <ul class="next-steps">
@@ -189,7 +1178,7 @@
       <p class="owner">Proposed owner role: whoever has the named build installed plus a test Apps server (the seat that produced each inspection pack is the natural candidate). Effort unestimated.</p>
     </section>
 
-    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>judgments.json</code> (product sentences), and <code>source.md</code> (full evidence below).</p>
+    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>judgments.json</code> (product sentences and compact rows), and <code>source.md</code> (full evidence below).</p>
 
     <details class="evidence" id="full-evidence">
       <summary>Full evidence (v7, 2026-09-14): matrix, legend, columns, footnotes, takeaways, history</summary>
@@ -265,6 +1254,34 @@
         });
       }
     })();
+
+    (function () {
+      function closeAll(except) {
+        document.querySelectorAll("[data-compact-cell]").forEach(function (cell) {
+          if (except && cell === except) return;
+          var btn = cell.querySelector(".compact-trigger");
+          var panel = cell.querySelector(".compact-panel");
+          if (!btn || !panel) return;
+          btn.setAttribute("aria-expanded", "false");
+          panel.hidden = true;
+        });
+      }
+      document.addEventListener("click", function (e) {
+        var btn = e.target.closest && e.target.closest(".compact-trigger");
+        if (!btn) return;
+        var cell = btn.closest("[data-compact-cell]");
+        var panel = cell.querySelector(".compact-panel");
+        var open = btn.getAttribute("aria-expanded") === "true";
+        closeAll(open ? null : cell);
+        btn.setAttribute("aria-expanded", open ? "false" : "true");
+        panel.hidden = open;
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key !== "Escape") return;
+        closeAll(null);
+      });
+    })();
+
   </script>
 </body>
 </html>

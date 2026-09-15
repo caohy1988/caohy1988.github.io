@@ -65,8 +65,9 @@ function privatePathLeak(text) {
   return (
     /\/Users\//.test(text) ||
     /links to a receipt/i.test(text) ||
-    /\/private\/tmp\/\S+/i.test(text) ||
-    /(?:^|[\s"'`(])\/tmp\/[A-Za-z0-9._/-]+/m.test(text)
+    /\/private\/tmp\/[A-Za-z0-9._/-]+/i.test(text) ||
+    /(?:^|[\s"'`(>]|<\/?code>)\/tmp\/[A-Za-z0-9._/-]+/m.test(text) ||
+    /(?:^|[\s"'`(>]|<\/?p>)\/tmp\/[A-Za-z0-9._/-]+/m.test(text)
   );
 }
 
@@ -159,6 +160,8 @@ test("negative: deleting a takeaway fails block parity", () => {
   try {
     for (const rel of [
       "tools/build_mcp_apps_matrix.mjs",
+      "tools/matrix_compact.mjs",
+      "tools/matrix_judgments_schema.mjs",
       "tools/site_nav.mjs",
       "assets/site-nav.css",
       "assets/site-nav.js",

@@ -7,11 +7,12 @@
 //
 // Layer D (matrix, legend, columns, footnotes, takeaways, version history, rendered-from)
 // is preserved from source.md. brief.md owns banner/judgment/action/next-steps/headings.
-// judgments.json owns product sentences (and compact rows for later PR3).
+// judgments.json owns product sentences and compact rows (PR3 grid).
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { render as renderNav, headTags } from "./site_nav.mjs";
+import { renderCompact, COMPACT_DISCLOSURE_SCRIPT, assertCompactFresh } from "./matrix_compact.mjs";
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIR = "research/builds/mcp-apps-feature-matrix";
@@ -195,7 +196,9 @@ export function build(sourceMd, briefMd, judgments) {
   const parsed = parseSource(sourceMd);
   const brief = parseBrief(briefMd);
   const { version, date } = parsed;
+  assertCompactFresh(judgments, sourceMd);
   const layerD = renderLayerD(parsed);
+  const compact = renderCompact(judgments, sourceMd, parsed.notes, inline, esc);
   const [linkTag, scriptTag] = headTags(`${DIR}/index.html`);
 
   const banner = brief.sections["Banner"];
@@ -248,6 +251,34 @@ export function build(sourceMd, briefMd, judgments) {
     .action { font-weight: 550; }
     .products, .next-steps { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
     .products li, .next-steps li { margin: 0 0 10px; }
+    .compact { margin: 28px 0 24px; }
+    .compact-hint, .compact-key, .compact-portable { color: var(--ink-soft); font-size: 0.92rem; }
+    .compact-table-wrap { overflow-x: auto; margin: 12px 0 16px; border: 1px solid var(--line); border-radius: 10px; }
+    table.compact-matrix { border-collapse: collapse; width: 100%; min-width: 920px; font-size: 0.9rem; }
+    table.compact-matrix th, table.compact-matrix td { border-bottom: 1px solid var(--line); padding: 10px 12px; vertical-align: top; text-align: left; }
+    table.compact-matrix th.product { min-width: 160px; }
+    table.compact-matrix thead th { background: var(--cream); font-size: 0.8rem; letter-spacing: 0.01em; }
+    .compact-cards { display: none; gap: 12px; }
+    .compact-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: #fff; }
+    .compact-card h3 { margin: 0 0 10px; font-size: 1.05rem; }
+    .compact-card-row { margin: 0 0 10px; }
+    .compact-card-q { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); margin-bottom: 4px; }
+    .compact-trigger { display: block; width: 100%; text-align: left; border: 1px solid var(--line); border-radius: 8px; background: var(--cream); padding: 8px 10px; cursor: pointer; font: inherit; color: inherit; }
+    .compact-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .compact-trigger[aria-expanded="true"] { border-color: var(--accent); background: #fff; }
+    .compact-word { font-weight: 650; }
+    .compact-phrase { color: var(--ink-soft); }
+    .compact-panel { margin-top: 8px; padding: 10px 12px; border-left: 3px solid var(--accent); background: #fff; font-size: 0.88rem; color: var(--ink-soft); }
+    .compact-panel[hidden] { display: none !important; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 700px) {
+      .compact-table-wrap { display: none; }
+      .compact-cards { display: grid; }
+    }
+    @media print {
+      .compact-panel[hidden] { display: block !important; }
+      .compact-trigger { border: 0; background: transparent; padding: 0; }
+    }
     .owner { font-size: 0.9rem; color: var(--ink-faint); margin: 0 0 28px; }
     .rule { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
     details.evidence { border: 1px solid var(--line); border-radius: 10px; background: var(--cream); padding: 0 18px 18px; margin: 28px 0 8px; }
@@ -334,6 +365,8 @@ ${renderNav(PAGE_PATH)}
 ${renderSentences(judgments)}
     </section>
 
+${compact}
+
     <section class="next prose" id="what-would-change" aria-label="${esc(nextHeading)}">
       <h2>${esc(nextHeading)}</h2>
       <ul class="next-steps">
@@ -342,7 +375,7 @@ ${renderNextSteps(brief)}
       <p class="owner">${esc(owner)}</p>
     </section>
 
-    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>judgments.json</code> (product sentences), and <code>source.md</code> (full evidence below).</p>
+    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>judgments.json</code> (product sentences and compact rows), and <code>source.md</code> (full evidence below).</p>
 
     <details class="evidence" id="full-evidence">
       <summary>${esc(foldSummary)}</summary>
@@ -374,6 +407,7 @@ ${layerD}
         });
       }
     })();
+${COMPACT_DISCLOSURE_SCRIPT}
   </script>
 </body>
 </html>
