@@ -4,7 +4,7 @@
 Host status at a glance
 
 ## Summary
-Chips rate **feature parity** (advertisement, mount, fallback, switch evidence), not documentation. **Full**: GitHub Copilot in VS Code and Cursor. **Partial**: Claude Desktop, Claude Cowork, OpenAI Codex Desktop. The other four are **Unknown** — too little evidence to judge, which is **not** the same as unsupported. **No row below is an observed UI or fallback run.**
+Chips rate **feature parity** (advertisement, mount, fallback, switch evidence), not documentation. **Full**: GitHub Copilot in VS Code and Cursor. **Partial**: Claude Desktop, Claude Cowork, OpenAI Codex Desktop. The other four are **Unknown** (**not** the same as unsupported). **No row below is an observed UI or fallback run.**
 
 ## Official matrix
 **Yes — this differs from the official MCP Apps matrix, intentionally.**
@@ -13,9 +13,15 @@ Chips rate **feature parity** (advertisement, mount, fallback, switch evidence),
 |---|---|---|
 | Question | Does the client implement `io.modelcontextprotocol/ui` ([MCP Apps overview](https://modelcontextprotocol.io/extensions/apps/overview))? | What is the capability / registration-path / fallback gap for shipping Glance-style UI on these nine hosts? |
 | Grain | Community-maintained CHECK per client | Full / Partial / Unknown feature parity per host, with evidence links |
-| Observed UI runs | N/A | None; we do not invent them |
 
-Overlap: Claude Desktop, GitHub Copilot, Cursor. An official CHECK means the client claims the extension, not a verified Glance UI journey.
+## Agreement
+| Product | Official claim | Our chip | Agreement |
+|---|---|---|---|
+| Claude Desktop | CHECK | Partial | Disagree |
+| GitHub Copilot | CHECK | Full | Agree |
+| Cursor | CHECK | Full | Agree |
+
+Other 16 products: **no overlap** (one side only; ChatGPT ≠ Codex Desktop, Claude web ≠ Desktop/Cowork/Code). CHECK is a claim, not a verified Glance UI journey.
 
 ## Table
 | Host | Status | Why |

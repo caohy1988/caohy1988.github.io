@@ -56,6 +56,15 @@
       table.tldr-compare td.compare-official::before { content: "Official: "; font-weight: 600; color: var(--ink); }
       table.tldr-compare td.compare-ours::before { content: "This page: "; font-weight: 600; color: var(--ink); }
     }
+    .tldr-agreement { margin: 0 0 12px; font-size: 0.92rem; color: var(--ink-soft); }
+    .tldr-agreement p { margin: 0; }
+    table.tldr-agree { border-collapse: collapse; width: 100%; table-layout: fixed; margin: 0 0 8px; line-height: 1.4; }
+    table.tldr-agree th, table.tldr-agree td { padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+    table.tldr-agree thead th { font-weight: 600; color: var(--ink); background: var(--paper-2); }
+    table.tldr-agree tbody th { font-weight: 600; color: var(--ink); }
+    table.tldr-agree td.agree-agree { color: var(--mint); }
+    table.tldr-agree td.agree-disagree { color: var(--accent-dark); }
+    @media (max-width: 420px) { table.tldr-agree th, table.tldr-agree td { padding: 5px 4px; } }
     details.fold > summary { cursor: pointer; list-style: none; }
     details.fold > summary::-webkit-details-marker { display: none; }
     details.fold > summary h2 { display: inline; margin: 0; }
@@ -227,7 +236,7 @@
 
     <section class="host-tldr" id="host-tldr" aria-labelledby="host-tldr-heading">
       <h2 id="host-tldr-heading">Host status at a glance</h2>
-      <p class="tldr-summary prose">Chips rate <strong>feature parity</strong> (advertisement, mount, fallback, switch evidence), not documentation. <strong>Full</strong>: GitHub Copilot in VS Code and Cursor. <strong>Partial</strong>: Claude Desktop, Claude Cowork, OpenAI Codex Desktop. The other four are <strong>Unknown</strong> — too little evidence to judge, which is <strong>not</strong> the same as unsupported. <strong>No row below is an observed UI or fallback run.</strong></p>
+      <p class="tldr-summary prose">Chips rate <strong>feature parity</strong> (advertisement, mount, fallback, switch evidence), not documentation. <strong>Full</strong>: GitHub Copilot in VS Code and Cursor. <strong>Partial</strong>: Claude Desktop, Claude Cowork, OpenAI Codex Desktop. The other four are <strong>Unknown</strong> (<strong>not</strong> the same as unsupported). <strong>No row below is an observed UI or fallback run.</strong></p>
       <div class="tldr-official prose" id="official-vs-ours">
         <p class="tldr-differs"><strong>Yes — this differs from the official MCP Apps matrix, intentionally.</strong></p>
         <table class="tldr-compare">
@@ -235,10 +244,19 @@
           <tbody>
               <tr><th scope="row">Question</th><td class="compare-official">Does the client implement <code>io.modelcontextprotocol/ui</code> (<a href="https://modelcontextprotocol.io/extensions/apps/overview" rel="noopener">MCP Apps overview</a>)?</td><td class="compare-ours">What is the capability / registration-path / fallback gap for shipping Glance-style UI on these nine hosts?</td></tr>
               <tr><th scope="row">Grain</th><td class="compare-official">Community-maintained CHECK per client</td><td class="compare-ours">Full / Partial / Unknown feature parity per host, with evidence links</td></tr>
-              <tr><th scope="row">Observed UI runs</th><td class="compare-official">N/A</td><td class="compare-ours">None; we do not invent them</td></tr>
           </tbody>
         </table>
-        <p class="tldr-overlap">Overlap: Claude Desktop, GitHub Copilot, Cursor. An official CHECK means the client claims the extension, not a verified Glance UI journey.</p>
+      </div>
+      <div class="tldr-agreement prose" id="official-agreement">
+        <table class="tldr-agree">
+          <thead><tr><th scope="col">Product</th><th scope="col">Official claim</th><th scope="col">Our chip</th><th scope="col">Agreement</th></tr></thead>
+          <tbody>
+              <tr><th scope="row">Claude Desktop</th><td>CHECK</td><td>Partial</td><td class="agree-disagree"><strong>Disagree</strong></td></tr>
+              <tr><th scope="row">GitHub Copilot</th><td>CHECK</td><td>Full</td><td class="agree-agree"><strong>Agree</strong></td></tr>
+              <tr><th scope="row">Cursor</th><td>CHECK</td><td>Full</td><td class="agree-agree"><strong>Agree</strong></td></tr>
+          </tbody>
+        </table>
+        <p class="tldr-no-overlap">Other 16 products: <strong>no overlap</strong> (one side only; ChatGPT ≠ Codex Desktop, Claude web ≠ Desktop/Cowork/Code). CHECK is a claim, not a verified Glance UI journey.</p>
       </div>
       <div class="tldr-table-wrap">
         <table class="host-tldr-table">
