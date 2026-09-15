@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="https://caohy1988.github.io/rfc/e2e/">
+<meta name="description" content="The RFC's end-to-end demo, one live run on synthetic data: definitions authored in Open Knowledge Format, published in BigQuery as the version agents are served, discovered in Knowledge Catalog, then used by an agent under its own access, checked by a receipt and refused after revocation. What it proved, and what is still open.">
+<meta property="og:title" content="Write it down. Publish it in BigQuery. Prove the agent’s number.">
+<meta property="og:description" content="Open Knowledge Format + Knowledge Catalog for authoring and discovery, BigQuery Knowledge Publish as the serving authority, and an agent whose number is released only with a verified receipt. One live run, synthetic data, nothing ready.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://caohy1988.github.io/rfc/e2e/">
+<meta name="theme-color" content="#16233B">
+<title>End-to-end demo · Publish in BigQuery, discover in Knowledge Catalog, prove the agent’s number</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../assets/site-nav.css" data-site-nav>
+<script defer src="../../assets/site-nav.js" data-site-nav></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the demo</a>
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav data-sticky="">
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <div class="site-nav-folder" data-active="true">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/" aria-current="page">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+          <a href="/research/builds/mcp-apps-feature-matrix/">MCP Apps matrix</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+<!-- site-nav:end -->
+
+<header class="masthead">
+  <div class="shell">
+    <p class="kicker"><span>RFC · end-to-end demo · one live run</span><span><a href="../">RFC</a> · <a href="../detailed-rfc/">Detailed RFC</a></span></p>
+    <h1>Write it down. Publish it in BigQuery. <em>Prove the agent’s number.</em></h1>
+    <p class="problem"><strong>The problem:</strong> an AI agent can find the right metric definition and still report a number nobody can defend: an old formula, unapproved data access, no proof its query was the approved one.</p>
+    <ul class="badges" aria-label="What this demo is">
+      <li class="badge warn">Proposed feature · spike code, not a product</li>
+      <li class="badge">Synthetic data · one run</li>
+      <li class="badge ok">Real BigQuery, Knowledge Catalog and IAM calls</li>
+    </ul>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <section class="band shell" aria-labelledby="glance-title">
+    <h2 class="eyebrow" id="glance-title">In 30 seconds</h2>
+    <div class="cards">
+      <article class="card c-problem">
+        <p class="card-k">What breaks today</p>
+        <h3>Found is not trusted.</h3>
+        <p>Search finds a likely definition, not the exact version with its rules. Nothing records who let the agent in or whether its query was approved.</p>
+      </article>
+      <article class="card c-a">
+        <p class="card-k">Authoring + discovery</p>
+        <h3>Open Knowledge Format + Knowledge Catalog</h3>
+        <p>Finance writes definitions, rules and the approved calculation as Open Knowledge Format files. Knowledge Catalog lets agents find them; each entry names the published version to use. A directory, not the authority.</p>
+      </article>
+      <article class="card c-b">
+        <p class="card-k">Serving authority</p>
+        <h3>BigQuery Knowledge Publish</h3>
+        <p>BigQuery stores a fixed, read-only version, reads every row back to check it, marks it ready and switches the “current version” in one step. Agents are served from BigQuery.</p>
+      </article>
+      <article class="card c-proved">
+        <p class="card-k">What the live run proved</p>
+        <h3>One live run published in BigQuery, then the agent discovered, used, verified, and was revoked — successfully.</h3>
+        <p class="result"><span>Acme gross margin, January 2026</span><b>$400.00</b><span>released with a verified receipt</span></p>
+      </article>
+    </div>
+    <p class="teaser"><strong>Still open:</strong> the same checks inside BigQuery Graph queries, an independent checker, repeated runs, real data. <a href="#tape">Watch the 93-second tape ↓</a></p>
+  </section>
+
+  <section class="band shell" id="why" aria-labelledby="why-title">
+    <p class="eyebrow">Why all three, not one</p>
+    <h2 class="title" id="why-title">Each part alone leaves a question unanswered.</h2>
+    <p class="lede">The RFC asks three questions of any number an agent reports; only all three parts together answered them.</p>
+    <div class="table-wrap" role="region" aria-label="Comparison of agent paths" tabindex="0">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th scope="col">Path</th>
+            <th scope="col"><span>Replayable context</span>Which version did the agent get?</th>
+            <th scope="col"><span>Explainable access</span>Who allowed it?</th>
+            <th scope="col"><span>Verifiable execution</span>Did the query match?</th>
+            <th scope="col"><span>Authority</span>Who says what is current?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Ungoverned agent</th><td class="no">Whatever it finds or writes</td><td class="no">Whatever credential it holds</td><td class="no">Nothing checks</td><td class="no">Nobody</td></tr>
+          <tr><th scope="row">Open Knowledge Format only</th><td class="part">Written down; nothing serves one fixed version</td><td class="no">No access path of its own</td><td class="part">Calculation declared, never checked</td><td class="no">Whichever copy of the files</td></tr>
+          <tr><th scope="row">Knowledge Catalog only</th><td class="part">Search ranks candidates; it does not pin the linked rule</td><td class="part">Discovery alone does not explain the agent’s retrieval</td><td class="no">Finding the calculation does not prove it ran</td><td class="part">A Catalog entry, which can drift from what is served</td></tr>
+          <tr class="ours"><th scope="row">All three together<em>shown once · synthetic data</em></th><td class="yes">A pinned, ready BigQuery version, with its rules</td><td class="yes">The agent’s own restricted account, checked at each step; revocation held</td><td class="yes">A receipt ties BigQuery job, context and result before release</td><td class="yes">BigQuery; the Catalog points to it</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="roles"><b>In one line:</b> Open Knowledge Format authors · Knowledge Catalog discovers · BigQuery publishes, serves and runs the checked calculation.</p>
+  </section>
+
+  <section class="band shell" id="path" aria-labelledby="path-title">
+    <p class="eyebrow">The path, step by step</p>
+    <h2 class="title" id="path-title">Seven steps, one live run.</h2>
+    <p class="lede">The <a href="../">RFC’s</a> 118%-versus-96% retention slide is illustrative. This run puts the same checks (definition with its rule, access, receipt) live on Acme, an invented retailer. The agent is asked: <q>What was Acme’s gross margin for January 2026, and can I trust the number?</q></p>
+    <ol class="steps">
+      <li class="step s-a">
+        <span class="n" aria-hidden="true">1</span>
+        <div>
+          <p class="tags"><span class="tag t-a">Open Knowledge Format</span><span class="tag">Replayable context</span></p>
+          <h3>Author the knowledge</h3>
+          <p>Finance writes down <b>Gross Margin</b> (full cost, explicitly <em>not</em> the old product-cost-only formula), the policies it cites and the one approved SQL calculation.</p>
+          <p class="run"><b>In the run:</b> the pinned files compiled into 44 linked items. <a class="seek" href="#tape" data-t="4.2">▶ 0:04</a></p>
+        </div>
+      </li>
+      <li class="step s-b">
+        <span class="n" aria-hidden="true">2</span>
+        <div>
+          <p class="tags"><span class="tag t-b">BigQuery Knowledge Publish</span><span class="tag">Replayable context</span></p>
+          <h3>Publish it in BigQuery</h3>
+          <p>BigQuery writes a fixed version, reads every row back, marks it <b>ready</b>, then switches the “current version” pointer in one step; only a ready version can become current.</p>
+          <p class="run"><b>In the run:</b> 19 BigQuery jobs; ready after 19 seconds, switched 6 seconds later. <a class="seek" href="#tape" data-t="11.7">▶ 0:11</a> <a class="seek" href="#tape" data-t="27.4">▶ 0:27</a></p>
+        </div>
+      </li>
+      <li class="step s-a">
+        <span class="n" aria-hidden="true">3</span>
+        <div>
+          <p class="tags"><span class="tag t-a">Knowledge Catalog</span><span class="tag">Replayable context</span></p>
+          <h3>Discover it in Knowledge Catalog</h3>
+          <p>Only after the switch is a Catalog entry written, pointing at that exact version. The agent’s tool reads the entry itself, as the agent’s restricted account.</p>
+          <p class="run"><b>In the run:</b> denied before access was granted, allowed after. <a class="seek" href="#tape" data-t="27.4">▶ 0:27</a></p>
+        </div>
+      </li>
+      <li class="step s-c">
+        <span class="n" aria-hidden="true">4</span>
+        <div>
+          <p class="tags"><span class="tag t-c">Agent</span><span class="tag">Explainable access</span></p>
+          <h3>Retrieve under the agent’s own access</h3>
+          <p>The agent pins the named version and retrieves the definition, linked rules and approved calculation from BigQuery, never with the owner’s credentials.</p>
+          <p class="run"><b>In the run:</b> all under one restricted account. <a class="seek" href="#tape" data-t="39.8">▶ 0:40</a></p>
+        </div>
+      </li>
+      <li class="step s-c">
+        <span class="n" aria-hidden="true">5</span>
+        <div>
+          <p class="tags"><span class="tag t-c">Receipt</span><span class="tag">Verifiable execution</span></p>
+          <h3>A receipt checks the number before release</h3>
+          <p>The approved calculation runs as a BigQuery job; a receipt ties job, query, context and result, and the number is released only if it checks out.</p>
+          <p class="run"><b>In the run:</b> <b>$400.00, verified, released.</b> A swapped query, a hidden rule and unreadable output were each refused. <a class="seek" href="#tape" data-t="48.8">▶ 0:49</a> <a class="seek" href="#tape" data-t="51.8">▶ 0:52</a></p>
+        </div>
+      </li>
+      <li class="step s-c">
+        <span class="n" aria-hidden="true">6</span>
+        <div>
+          <p class="tags"><span class="tag t-c">Revoke</span><span class="tag">Explainable access</span></p>
+          <h3>Revoke, and the door closes</h3>
+          <p>Access is removed. A fresh request, a shortcut through the version already pinned, and the receipt already stored must all fail.</p>
+          <p class="run"><b>In the run:</b> all three refused; no new calculation launched. <a class="seek" href="#tape" data-t="69.8">▶ 1:10</a> <a class="seek" href="#tape" data-t="78.5">▶ 1:19</a></p>
+        </div>
+      </li>
+      <li class="step s-c">
+        <span class="n" aria-hidden="true">7</span>
+        <div>
+          <p class="tags"><span class="tag t-c">Answer</span><span class="tag">All three outcomes</span></p>
+          <h3>The agent gets the answer, not the plumbing</h3>
+          <p>The agent receives the number and verdicts, no IDs, SQL or account names; test tables and entry are deleted.</p>
+          <p class="run"><b>In the run:</b> what was served matched what BigQuery published. <a class="seek" href="#tape" data-t="84.1">▶ 1:24</a></p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="tape-band" id="tape" aria-labelledby="tape-title">
+    <div class="shell">
+      <p class="eyebrow">The tape · 93 seconds</p>
+      <h2 class="title" id="tape-title">Watch the same run.</h2>
+      <p class="lede">A finance agent on Gemini asks for Acme’s gross margin and whether to trust it. Captions narrate each step; chapters jump to it.</p>
+      <div class="tape">
+        <video id="tape-video" controls preload="metadata" playsinline poster="okf-publish-connected-poster.png" width="1364" height="1000" aria-describedby="tape-note">
+          <source src="../demo/okf-publish-connected.mp4" type="video/mp4">
+          <track kind="captions" src="okf-publish-connected.en.vtt" srclang="en" label="English (narration)" default>
+          Terminal recording of the live run: <a href="../demo/okf-publish-connected.mp4">download the mp4</a>.
+        </video>
+        <ol class="chapters" aria-label="Chapters">
+          <li><a class="chap" href="#tape" data-t="0"><time>0:00</time><span>The question</span></a></li>
+          <li><a class="chap" href="#tape" data-t="4.2"><time>0:04</time><span>1 · Author in Open Knowledge Format</span></a></li>
+          <li><a class="chap" href="#tape" data-t="11.7"><time>0:11</time><span>2 · Write and check in BigQuery</span></a></li>
+          <li><a class="chap" href="#tape" data-t="21.9"><time>0:22</time><span>2 · Ready; current version switched</span></a></li>
+          <li><a class="chap" href="#tape" data-t="27.4"><time>0:27</time><span>3 · Knowledge Catalog entry written</span></a></li>
+          <li><a class="chap" href="#tape" data-t="39.8"><time>0:40</time><span>4 · Discover, pin, retrieve</span></a></li>
+          <li><a class="chap" href="#tape" data-t="48.8"><time>0:49</time><span>5 · Receipt checks out: $400.00 released</span></a></li>
+          <li><a class="chap" href="#tape" data-t="51.8"><time>0:52</time><span>5 · Traps refused</span></a></li>
+          <li><a class="chap" href="#tape" data-t="69.8"><time>1:10</time><span>6 · Access revoked, requests refused</span></a></li>
+          <li><a class="chap" href="#tape" data-t="84.1"><time>1:24</time><span>7 · The agent’s answer and verdict</span></a></li>
+        </ol>
+      </div>
+      <p class="verdict"><b>In plain words:</b> one live run published in BigQuery, then the agent discovered, used, verified, and was revoked — successfully.</p>
+      <p class="note" id="tape-note">Real recording of the live run; waits over 3 s compressed (the run took 12½ minutes). Machine verdict on screen: <code>E2E_PUBLISH_CONNECTED</code>.</p>
+    </div>
+  </section>
+
+  <section class="band shell" id="proved" aria-labelledby="proved-title">
+    <p class="eyebrow">What we proved · what is still open</p>
+    <h2 class="title" id="proved-title">Shown once. Not ready.</h2>
+    <div class="two">
+      <div class="col col-yes">
+        <h3>Shown once, on synthetic data</h3>
+        <ul>
+          <li>BigQuery acted as the publish authority: a checked, ready version became current in one step.</li>
+          <li>Knowledge Catalog pointed the agent at exactly that version, read under the agent’s own access.</li>
+          <li>The number was released only with a verified receipt.</li>
+          <li>Revocation held against a fresh request, an old pin and a stored receipt.</li>
+        </ul>
+      </div>
+      <div class="col col-open">
+        <h3>Still open</h3>
+        <ul>
+          <li>The same access checks inside BigQuery Graph queries; this run used plain SQL.</li>
+          <li>An independent attester; this run used the SDK’s own checker.</li>
+          <li>Repeated runs, cost, latency and real customer data.</li>
+          <li>Publishing a new revision, and the full sync protocol between BigQuery and Knowledge Catalog.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="more">The decision this supports is on the <a href="../">RFC</a>; the design is in the <a href="../detailed-rfc/#architecture">Detailed RFC</a>.</p>
+
+    <details class="evidence" id="evidence">
+      <summary><span class="ev-title">Evidence</span><span class="ev-note">Run IDs, BigQuery jobs, Catalog entry, cases and technical limits</span></summary>
+      <div class="ev-body">
+        <p>Copied from the retained record of the live run; nothing was re-run for this page. Full detail: <a href="../spikes/bq-graph/evidence/report-publish-connected.md">report-publish-connected.md</a>.</p>
+
+        <h3>Run</h3>
+        <dl class="kv">
+          <dt>verdict</dt><dd><code>E2E_PUBLISH_CONNECTED</code> · run <code>kp-20260915t082018z-0387</code></dd>
+          <dt>window</dt><dd>2026-09-15 08:20:18 → 08:32:49 UTC</dd>
+          <dt>project</dt><dd><code>test-project-0728-467323</code> · live BigQuery, Dataplex Catalog (Knowledge Catalog) and IAM APIs</dd>
+          <dt>agent</dt><dd>ADK agent on <code>gemini-3.8-flash</code> (Vertex AI, global) with one tool, <code>governed_gross_margin</code></dd>
+          <dt>code</dt><dd>runner <code>okf_bq_graph.publish_connected/0.1.0</code> at spike <code>c075801</code> · CLI <a href="https://github.com/caohy1988/okf-connected-e2e">caohy1988/okf-connected-e2e</a> <code>7773909</code> (0.2.0)</dd>
+          <dt>data</dt><dd>synthetic Acme bundle, source pin <code>31da799a9aef176df12e91abbd119ea9385b75ec</code>; no customer data</dd>
+        </dl>
+
+        <h3>Open Knowledge Format + Knowledge Catalog (authoring + discovery)</h3>
+        <dl class="kv">
+          <dt>authored concepts</dt><dd><code>metrics/gross-margin</code>, <code>metrics/gross-margin-legacy</code> (deprecated), <code>metrics/revenue</code>, <code>policies/margin-standard</code>, <code>policies/revenue-recognition</code>, <code>computations/gross-margin-period</code> (Attested Computation), <code>computations/revenue-ytd</code></dd>
+          <dt>catalog entry</dt><dd><code>projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin</code>: written after the head switch, pin generated from the <code>READY</code> rows, readback <code>OK</code>; deleted at the end</dd>
+          <dt>consumed = published</dt><dd><code>MATCH</code>: the pin names this publication and dataset, the entry is run-owned, the head was observed on this publication</dd>
+        </dl>
+
+        <h3>BigQuery Knowledge Publish (serving authority)</h3>
+        <dl class="kv">
+          <dt>publication</dt><dd><code>pub_190192147fd7fd78</code> <code>READY</code> on full-row readback: 44 nodes, 109 edges, 22 sections; nodes_sha256 <code>47a1278ef2bc4e2c…</code>, edges_sha256 <code>95a193a0c41354a1…</code></dd>
+          <dt>head switch</dt><dd><code>active_publication</code> <code>None → pub_190192147fd7fd78</code> (SWITCHED) by merge job <code>okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67</code></dd>
+          <dt>author jobs</dt><dd>19 BigQuery jobs under driver-chosen ids, identity <code>BOUND</code> on <code>jobs.get</code> readback, unresolved 0; e.g. <code>…_load_nodes_7f0d27d40667</code>, <code>…_readback_nodes_1dad6332bfb8</code> (44 rows), <code>…_insert_publication_4ffc4d91d100</code>, <code>…_pin_source_publication_f4f9fcaf50e0</code> (prefix <code>okf_cc_kp_20260915t082018z_0387</code>; all 19 in the report)</dd>
+          <dt>state trace</dt><dd><code>PLANNED → PREPARING → BQ_STAGED → BQ_COMMITTED → KC_APPLIED → COMPLETE</code>, 08:20:18 → 08:20:47 UTC</dd>
+          <dt>dataset</dt><dd><code>okf_kp_publish_kp_20260915t082018z_0387</code>, run-owned; deleted at the end with absence read back (job metadata stays readable); originals re-read <code>UNCHANGED</code></dd>
+        </dl>
+
+        <h3>Consume</h3>
+        <dl class="kv">
+          <dt>consume run</dt><dd><code>e2e-20260915t082049z-34e6ed72</code> · requester identity <code>BOUND</code> (graph 46, policy_admin 9, receipt 2, requester_probe 1 jobs), unresolved 0</dd>
+          <dt>access</dt><dd>Catalog before grant <code>DENIED</code>, after grant <code>ALLOWED</code> (observed after 71 s), caller is requester <code>true</code></dd>
+          <dt>after revocation</dt><dd>fresh request <code>CATALOG_ERROR</code> · bypass publication <code>ERROR</code> · bypass retrieval <code>DENIED</code> · authorization <code>DENIED</code> · receipt launches 0</dd>
+          <dt>receipt jobs</dt><dd><code>okf_rcpt_a783c736b3ac936351bef069_22e00a1dd6cb4fc8</code>, <code>okf_rcpt_d2472cd6fef3b214eb39c20d_2a2706019e808fcb</code> · approved receipt <code>VERIFIED</code></dd>
+        </dl>
+        <div class="table-wrap ev-table" role="region" aria-label="Consumer cases" tabindex="0">
+          <table class="cases">
+            <thead><tr><th scope="col">Case</th><th scope="col">Decision</th><th scope="col">Acceptance</th><th scope="col">In plain words</th></tr></thead>
+            <tbody>
+              <tr><td><code>connected-approved</code></td><td>RELEASED</td><td>MET</td><td><code>[LIVE] Gross margin: $400.00 USD · VERIFIED</code></td></tr>
+              <tr><td><code>connected-sql-substitution</code></td><td>REFUSED</td><td>MET</td><td>swapped query</td></tr>
+              <tr><td><code>connected-denied-intermediate</code></td><td>REFUSED</td><td>MET</td><td>a rule the agent may not see</td></tr>
+              <tr><td><code>connected-unauthorized-output</code></td><td>REFUSED</td><td>MET</td><td>output it may not read</td></tr>
+              <tr><td><code>connected-revocation</code></td><td>REFUSED</td><td>MET</td><td>after access was removed</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Technical limits (named, not waived)</h3>
+        <ul>
+          <li><b>Graph:</b> retrieval and access ran on relational SQL over the published tables, not BigQuery Graph / GQL; access inside graph queries is still open.</li>
+          <li><b>Attestation:</b> the SDK example’s own verifier with a requester-held key; no independent attester.</li>
+          <li><b>Revision:</b> the publication id is content-addressed from the pinned source, so this run deployed the same id the long-lived spike dataset holds into a fresh run-owned dataset: a new deployment, not a new revision of the knowledge.</li>
+          <li><b>Cross-service protocol (Detailed RFC §05):</b> simplified to one owned dataset with <code>active_publication</code>; no <code>sync_id</code> staging, <code>deployment_heads</code>, <code>*_current</code> views or Catalog lag SLO.</li>
+          <li><b>Access setup:</b> the harness grants the requester Catalog viewer and dataset reads for the run and removes them to revoke; the denied-intermediate case uses an injected legacy seed on the long-lived <code>_rls</code> copy, not a Catalog discovery.</li>
+          <li><b>Sample:</b> n = 1, synthetic data, no cost or latency benchmark. Earlier runs stay as recorded: <code>e2e-20260915t070643z-9ddaf35f</code> (consume-only, <a href="../spikes/bq-graph/evidence/report-connected-e2e.md">report</a>) and <code>e2e-20260915t065449z-98e21004</code> (<code>E2E_BROKEN</code>).</li>
+        </ul>
+
+        <h3>Files</h3>
+        <ul class="files">
+          <li>Run record: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish_connected_live.json">publish_connected_live.json</a> · publish journal: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/publish/journal.jsonl">journal.jsonl</a> · consume record: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/connected/connected_live.json">connected_live.json</a> · agent transcript: <a href="../spikes/bq-graph/evidence/publish-connected/kp-20260915t082018z-0387/agent_transcript.json">agent_transcript.json</a></li>
+          <li>Tape: <a href="../demo/okf-publish-connected.mp4">mp4</a> · <a href="../demo/publish-connected/okf-publish-connected-transcript.txt">plaintext transcript</a> · <a href="../demo/publish-connected/okf-publish-connected.cast">asciinema cast</a> · <a href="okf-publish-connected.en.vtt">captions</a></li>
+          <li>How this page was built: <a href="intent.md">intent</a> · <a href="spec.md">spec</a> · <a href="plan.md">plan</a></li>
+        </ul>
+      </div>
+    </details>
+  </section>
+</main>
+
+<footer>
+  <div class="shell">
+    <span>rfc/e2e · one live run · synthetic data</span>
+    <span>proposed feature · spike code · not a readiness claim</span>
+  </div>
+</footer>
+
+<script>
+  // Chapter and step links seek the tape; without JavaScript they still jump to it.
+  (function () {
+    var video = document.getElementById("tape-video");
+    if (!video) return;
+    var chapters = [].slice.call(document.querySelectorAll(".chapters a[data-t]"));
+    [].slice.call(document.querySelectorAll("a[data-t]")).forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        var t = parseFloat(a.getAttribute("data-t")) || 0;
+        if (a.classList.contains("chap")) e.preventDefault();
+        try { video.currentTime = t; } catch (err) { /* metadata not loaded yet */ }
+        var p = video.play();
+        if (p && p.catch) p.catch(function () {});
+      });
+    });
+    video.addEventListener("timeupdate", function () {
+      var now = video.currentTime, current = null;
+      chapters.forEach(function (a) { if (parseFloat(a.getAttribute("data-t")) <= now + 0.05) current = a; });
+      chapters.forEach(function (a) { if (a === current) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
+    });
+  })();
+</script>
+</body>
+</html>
