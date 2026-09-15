@@ -309,22 +309,22 @@
             </section>
             <section class="design-part" aria-labelledby="design-chain">
               <h3 id="design-chain">The three as one path</h3>
-              <p>A live catalog read pins the publication, governed retrieval supplies the declared calculation, and the receipt check verifies the job before release.</p>
+              <p>A BigQuery publish commits the publication, a live catalog read pins it, governed retrieval supplies the declared calculation, and the receipt check verifies the job before release.</p>
               <p class="design-cue">Shown</p>
               <ul class="design-points">
                 <li>Catalog-seeded runs went from live read to enforcing consumer, held their pin while the head moved, and withheld the number when publication or content failed validation (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/50ecaa8976cb5fb633fb1c2b11b70eba3bbcd939/rfc/spikes/bq-graph/evidence/catalog-chain/b2-20260907t162636z-cd45/b2_summary.md">what those cases showed</a>).</li>
                 <li>A restricted identity held inside the chain; nothing unauthorized was released (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/ad18b075524d7b752c5782da17c29e70cee05fb7/rfc/spikes/bq-graph/README.md#live-restricted-pass-slice-b-2026-09-07">how that run worked and where it stops</a>).</li>
                 <li>One run retrieved through graph queries on Enterprise capacity and released only after the declaration and receipt checks passed (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/0ab27d679a1e640cc7dcfdbeea465e44788ab133/rfc/spikes/bq-graph/evidence/chain/SLICE_B_RUN_E_20260908.md">what that run did and did not show</a>).</li>
-                <li>One live run did all three under a restricted identity, starting from its own catalog read and checking the fact rows against their digest; after revocation a fresh request, a cached-pin bypass and the stored receipt were refused (<a href="spikes/bq-graph/evidence/report-connected-e2e.md">the connected run</a>, <a href="demo/#connected-e2e">tape</a>, <a href="https://github.com/caohy1988/okf-connected-e2e">code</a>).</li>
+                <li>One live run published to BigQuery (READY, head switched), then did all three under a restricted identity from its own catalog read of that publication; after revocation a fresh request, a cached-pin bypass and the stored receipt were refused (<a href="spikes/bq-graph/evidence/report-publish-connected.md">the run</a>, <a href="demo/#connected-e2e">tape</a>, <a href="https://github.com/caohy1988/okf-connected-e2e">code</a>).</li>
               </ul>
               <p class="design-cue">Limits</p>
               <ul class="design-points">
-                <li>Earlier runs each reached a different part; the graph-query run tried only the case expected to succeed and began from a hand-pinned seed. The connected run used plain SQL, the SDK’s own verifier and one injected seed, once.</li>
+                <li>Earlier runs each reached a different part; the graph-query run tried only the case expected to succeed and began from a hand-pinned seed. The connected run used plain SQL, the SDK’s own verifier, one injected seed and an unchanged revision, once.</li>
               </ul>
             </section>
             <section class="design-part" aria-labelledby="design-evidence">
               <h3 id="design-evidence">What is still open</h3>
-              <p><strong>The bar, shown once.</strong> One live run did all of it: catalog discovery, pinned publication, governed retrieval, caller-delegated computation, result-bound receipt and enforcing consumer, with access and revocation checks holding throughout, on synthetic data and plain SQL (<a href="spikes/bq-graph/evidence/report-connected-e2e.md">the report</a>). Still open: the same inside graph queries, an independent attester, and repeated runs.</p>
+              <p><strong>The bar, shown once.</strong> One live run did all of it: BigQuery publish, catalog discovery, pinned publication, governed retrieval, caller-delegated computation, result-bound receipt and enforcing consumer, with access and revocation checks holding throughout, on synthetic data and plain SQL (<a href="spikes/bq-graph/evidence/report-publish-connected.md">the report</a>). Still open: the same inside graph queries, an independent attester, and repeated runs.</p>
               <p class="design-cue">Also unfinished</p>
               <ul class="design-points">
                 <li>Benchmarks: the graph cells are incomplete and the <a href="spikes/bq-graph/evidence/sql-baseline/baseline.md">ordinary-SQL comparison</a> has measured retrieval only, not cost or the full path.</li>

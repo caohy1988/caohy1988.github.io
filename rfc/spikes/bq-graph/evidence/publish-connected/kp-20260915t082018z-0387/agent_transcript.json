@@ -1,0 +1,114 @@
+{
+ "question": "What was Acme's gross margin for January 2026, and can I trust the number?",
+ "model": "gemini-3.8-flash",
+ "vertex_location": "global",
+ "tool_payloads": [
+  {
+   "decision": "RELEASED",
+   "answer": "[LIVE] Gross margin: $400.00 USD · VERIFIED",
+   "withheld": null,
+   "path": "author/publish in BigQuery -> Catalog discovery -> pin -> governed retrieval -> access + revocation -> receipt -> enforcing consumer",
+   "run_verdict": "E2E_PUBLISH_CONNECTED",
+   "broken_at": null,
+   "run_id": "kp-20260915t082018z-0387",
+   "receipt": {
+    "ref": "<id:75c45c01>",
+    "verdict": "VERIFIED"
+   },
+   "facts_readback": "OK",
+   "cases": {
+    "approved": {
+     "decision": "RELEASED",
+     "acceptance": "MET"
+    },
+    "sql-substitution": {
+     "decision": "REFUSED",
+     "acceptance": "MET"
+    },
+    "denied-intermediate": {
+     "decision": "REFUSED",
+     "acceptance": "MET"
+    },
+    "unauthorized-output": {
+     "decision": "REFUSED",
+     "acceptance": "MET"
+    },
+    "revocation": {
+     "decision": "REFUSED",
+     "acceptance": "MET"
+    }
+   },
+   "access_checks": {
+    "catalog_before_grant": "DENIED",
+    "catalog_grant_observed": "ALLOWED",
+    "catalog_grant_waited_s": 71,
+    "caller_is_requester": true,
+    "revocation_observed": true,
+    "catalog_revocation_waited_s": 0,
+    "fresh_request_after_revocation": "CATALOG_ERROR",
+    "bypass_publication": "ERROR",
+    "bypass_retrieval": "DENIED",
+    "authorization_after_revocation": "DENIED",
+    "receipt_launches_after_revocation": 0
+   },
+   "identity": {
+    "status": "BOUND",
+    "jobs_by_role": {
+     "graph": 46,
+     "receipt": 2,
+     "requester_probe": 1,
+     "policy_admin": 9
+    }
+   },
+   "unresolved_jobs": 0,
+   "teardown": {
+    "catalog": "VERIFIED",
+    "broker": "VERIFIED"
+   },
+   "labels": {
+    "data": "synthetic invented Acme fixture; no customer data",
+    "apis": "live GCP (BigQuery, Dataplex Catalog, IAM)",
+    "engine": "relational fallback, not BigQuery Graph",
+    "requester": "restricted service account through IAM impersonation",
+    "receipt": "the SDK verifier with a requester-held key; no independent attester",
+    "sample": "one run",
+    "publish": "BigQuery is the publish authority; the Catalog entry is the discovery projection, written only after the head advanced",
+    "publication": "content-addressed from the pinned source, deployed fresh into a run-owned dataset that is deleted after the run"
+   },
+   "evidence": "evidence/publish-connected/kp-20260915t082018z-0387",
+   "connected_verdict": "E2E_CONNECTED",
+   "consume_run_id": "e2e-20260915t082049z-34e6ed72",
+   "publication": {
+    "authority": "BigQuery",
+    "states": [
+     "PLANNED",
+     "PREPARING",
+     "BQ_STAGED",
+     "BQ_COMMITTED",
+     "KC_APPLIED",
+     "COMPLETE"
+    ],
+    "ready": "READY",
+    "rows": {
+     "nodes": 44,
+     "edges": 109,
+     "sections": 22
+    },
+    "head_switched": true,
+    "author_jobs": 19,
+    "author_identity": "BOUND",
+    "catalog_pin": "OK",
+    "consumer_served_this_publication": true,
+    "originals": "UNCHANGED",
+    "cleanup": "COMPLETE"
+   }
+  }
+ ],
+ "answer": "\"[LIVE] Gross margin: $400.00 USD · VERIFIED\"\n\nThe receipt verdict is **VERIFIED** and the run verdict is **E2E_PUBLISH_CONNECTED**.\n\nRegarding whether the number can be trusted, the run verified the complete end-to-end governance path:\n1. The publication was first published in BigQuery (READY, head switched) and the Catalog entry was written from it.\n2. The requester's own Catalog read, the pinned publication, governed retrieval, fact read-back, and receipt were then verified.\n3. After access was revoked, a fresh request, a bypass, and the stored receipt were all refused.\n\nPlease note that the underlying data is a synthetic invented Acme fixture, the APIs are live GCP (BigQuery, Dataplex Catalog, IAM), and this reflects a single test run rather than operational readiness.",
+ "answer_leak_check": [],
+ "run_id": "kp-20260915t082018z-0387",
+ "mode": "live",
+ "cli": "okf-connected-e2e 0.2.0",
+ "runner": "okf_bq_graph.publish_connected/0.1.0",
+ "path": "publish-then-consume"
+}

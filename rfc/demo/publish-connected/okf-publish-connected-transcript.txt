@@ -1,0 +1,184 @@
+$ DEMO_MODEL_ID=gemini-3.8-flash okf-e2e agent --live "What was Acme's gross margin for January 2026, and can I trust the number?"
+┌─ OKF RFC full path · Author/Publish (BigQuery) → Catalog discovery → pin → retrieval → access + revocation → receipt → consumer
+│ model      gemini-3.8-flash (Vertex AI, global)
+│ project    test-project-0728-467323 · live GCP APIs: BigQuery, Dataplex Catalog, IAM
+│ data       synthetic Acme fixture · no customer data
+│ publish    in BigQuery (authority): run-owned dataset, READY on full-row readback, atomic head MERGE; Catalog pin written after
+│ requester  restricted service account via IAM impersonation
+│ engine     relational fallback on the published tables (not BigQuery Graph)
+│ runner     okf_bq_graph.publish_connected @ c075801 · okf-connected-e2e 0.2.0
+└──────────────────────────────────────────────────────────────────────────────
+you ▸ What was Acme's gross margin for January 2026, and can I trust the number?
+agent ▸ tool call governed_gross_margin({"period": "2026-01"})
+  [01:20:18] author       detail=compile the synthetic Acme bundle at 31da799 into an immutable projection
+  [01:20:18] state        state=PLANNED jobs=0 publication_id=pub_190192147fd7fd78 nodes=44 edges=109
+  [01:20:18] publish      detail=BigQuery: owned dataset okf_kp_publish_kp_20260915t082018z_0387 (relational tables only)
+  [01:20:20] bq_job       role=snapshot_original_head job=okf_cc_kp_20260915t082018z_0387_snapshot_original_head_a149bea8e896 state=DONE rows=1
+  [01:20:21] write        role=create_dataset target=okf_kp_publish_kp_20260915t082018z_0387 state=DONE
+  [01:20:22] bq_job       role=create_table job=okf_cc_kp_20260915t082018z_0387_create_table_04cf3f134493 state=DONE
+  [01:20:23] bq_job       role=create_table job=okf_cc_kp_20260915t082018z_0387_create_table_d3d7d4872ab8 state=DONE
+  [01:20:23] bq_job       role=create_table job=okf_cc_kp_20260915t082018z_0387_create_table_9c2317a5ff39 state=DONE
+  [01:20:24] bq_job       role=create_table job=okf_cc_kp_20260915t082018z_0387_create_table_892b982f75f1 state=DONE
+  [01:20:24] state        state=PREPARING jobs=5 dataset=okf_kp_publish_kp_20260915t082018z_0387
+  [01:20:24] publish      detail=append immutable node/edge rows, read every row back, validate, mark READY
+  [01:20:25] bq_job       role=publication_exists job=okf_cc_kp_20260915t082018z_0387_publication_exists_04de1f209885 state=DONE rows=0
+  [01:20:29] bq_job       role=load_nodes job=okf_cc_kp_20260915t082018z_0387_load_nodes_7f0d27d40667 state=DONE
+  [01:20:33] bq_job       role=load_edges job=okf_cc_kp_20260915t082018z_0387_load_edges_21df42ad11ac state=DONE
+  [01:20:34] bq_job       role=readback_nodes job=okf_cc_kp_20260915t082018z_0387_readback_nodes_1dad6332bfb8 state=DONE rows=44
+  [01:20:35] bq_job       role=readback_edges job=okf_cc_kp_20260915t082018z_0387_readback_edges_d21456ca6d2c state=DONE rows=109
+  [01:20:37] bq_job       role=insert_publication job=okf_cc_kp_20260915t082018z_0387_insert_publication_4ffc4d91d100 state=DONE
+  [01:20:37] ready        validation_status=READY publication=pub_190192147fd7fd78 nodes=44 edges=109 sections=22
+  [01:20:37] state        state=BQ_STAGED jobs=6 publication_id=pub_190192147fd7fd78 validation_status=READY
+  [01:20:37] publish      detail=atomic head switch: MERGE active_publication, only for a READY publication
+  [01:20:39] bq_job       role=publication_status job=okf_cc_kp_20260915t082018z_0387_publication_status_fc1b6390442f state=DONE rows=1
+  [01:20:40] bq_job       role=read_head job=okf_cc_kp_20260915t082018z_0387_read_head_c65816785e7e state=DONE rows=0
+  [01:20:42] bq_job       role=merge_head job=okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67 state=DONE
+  [01:20:43] bq_job       role=read_head job=okf_cc_kp_20260915t082018z_0387_read_head_9945996bc0ff state=DONE rows=1
+  [01:20:43] head         state=SWITCHED from_=None to=pub_190192147fd7fd78 merge_job=okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67
+  [01:20:43] state        state=BQ_COMMITTED jobs=4 head_to=pub_190192147fd7fd78 merge_job_id=okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67
+  [01:20:43] publish      detail=Catalog discovery projection: owned entry pinned to the READY rows (written after commit)
+  [01:20:44] bq_job       role=pin_source_publication job=okf_cc_kp_20260915t082018z_0387_pin_source_publication_f4f9fcaf50e0 state=DONE rows=1
+  [01:20:45] bq_job       role=pin_source_seed job=okf_cc_kp_20260915t082018z_0387_pin_source_seed_09bfac7145be state=DONE rows=1
+  [01:20:46] write        role=create_entry target=projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin state=DONE
+  [01:20:46] catalog_pin  entry=projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin readback=OK
+  [01:20:46] state        state=KC_APPLIED jobs=2 entry=projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin
+  [01:20:47] bq_job       role=read_head job=okf_cc_kp_20260915t082018z_0387_read_head_85a953aabf4a state=DONE rows=1
+  [01:20:47] state        state=COMPLETE jobs=1 head=pub_190192147fd7fd78
+  [01:20:47] consume      detail=the restricted requester now discovers, pins, retrieves, is authorized, runs the receipt, and is revoked
+  [01:20:49] provenance   detail=SDK pin, clean checkout
+  [01:20:49] grant        detail=Catalog viewer + dataset reads for the requester; waiting until the requester observes them
+  [01:22:08] grant        detail=waiting for a stable observation of Catalog, graph and fact access
+  [01:23:39] grant_done   catalog=ALLOWED waited_s=71
+  [01:23:39] case         case=connected-approved stage=catalog -> publication -> retrieval -> payload -> bind
+  [01:23:49] case         case=connected-approved stage=facts read-back under the requester
+  [01:23:58] case         case=connected-approved stage=receipt CLI (approved) under the requester
+  [01:24:04] decision     case=connected-approved decision=RELEASED acceptance=MET display=[LIVE] Gross margin: $400.00 USD · VERIFIED
+  [01:24:04] case         case=connected-sql-substitution stage=catalog -> publication -> retrieval -> payload -> bind
+  [01:24:13] case         case=connected-sql-substitution stage=facts read-back under the requester
+  [01:24:21] case         case=connected-sql-substitution stage=receipt CLI (sql-substitution) under the requester
+  [01:24:24] decision     case=connected-sql-substitution decision=REFUSED acceptance=MET
+  [01:24:24] case         case=connected-denied-intermediate stage=row policy hides the intermediate; retrieval under the requester
+  [01:24:35] decision     case=connected-denied-intermediate decision=REFUSED acceptance=MET
+  [01:26:03] case         case=connected-unauthorized-output stage=waiting for a stable observation of {'graph': 'ALLOWED', 'authorization': 'DENIED'}
+  [01:27:31] case         case=connected-unauthorized-output stage=catalog -> publication -> retrieval -> payload -> bind
+  [01:27:42] decision     case=connected-unauthorized-output decision=REFUSED acceptance=MET
+  [01:27:42] case         case=connected-revocation stage=control: access present
+  [01:29:15] case         case=connected-revocation stage=revoke Catalog, graph and fact access; wait for the requester to observe it
+  [01:32:25] case         case=connected-revocation stage=fresh request from Catalog discovery
+  [01:32:25] case         case=connected-revocation stage=retained-pin bypass: publication, retrieval, authorization
+  [01:32:27] decision     case=connected-revocation decision=REFUSED acceptance=MET
+  [01:32:27] teardown     detail=restore Catalog IAM, dataset ACLs, row-policy grantees; read back
+  [01:32:44] consumed     status=MATCH connected=E2E_CONNECTED
+  [01:32:44] teardown     detail=originals re-read; owned entry + dataset deleted; absence read back
+  [01:32:46] bq_job       role=reread_original_head job=okf_cc_kp_20260915t082018z_0387_reread_original_head_3196e0d747a7 state=DONE rows=1
+  [01:32:46] write        role=delete_entry target=projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kp-publish/kp-20260915t082018z-0387/metrics/gross-margin state=DONE
+  [01:32:46] write        role=delete_dataset target=okf_kp_publish_kp_20260915t082018z_0387 state=DONE
+  [01:32:47] cleanup      status=COMPLETE
+tool result → model (validated: no identifiers, SQL, principals or paths)
+{
+ "decision": "RELEASED",
+ "answer": "[LIVE] Gross margin: $400.00 USD · VERIFIED",
+ "run_verdict": "E2E_PUBLISH_CONNECTED",
+ "publication": {
+  "authority": "BigQuery",
+  "states": [
+   "PLANNED",
+   "PREPARING",
+   "BQ_STAGED",
+   "BQ_COMMITTED",
+   "KC_APPLIED",
+   "COMPLETE"
+  ],
+  "ready": "READY",
+  "rows": {
+   "nodes": 44,
+   "edges": 109,
+   "sections": 22
+  },
+  "head_switched": true,
+  "author_jobs": 19,
+  "author_identity": "BOUND",
+  "catalog_pin": "OK",
+  "consumer_served_this_publication": true,
+  "originals": "UNCHANGED",
+  "cleanup": "COMPLETE"
+ },
+ "receipt": {
+  "ref": "<id:75c45c01>",
+  "verdict": "VERIFIED"
+ },
+ "facts_readback": "OK",
+ "cases": {
+  "approved": {
+   "decision": "RELEASED",
+   "acceptance": "MET"
+  },
+  "sql-substitution": {
+   "decision": "REFUSED",
+   "acceptance": "MET"
+  },
+  "denied-intermediate": {
+   "decision": "REFUSED",
+   "acceptance": "MET"
+  },
+  "unauthorized-output": {
+   "decision": "REFUSED",
+   "acceptance": "MET"
+  },
+  "revocation": {
+   "decision": "REFUSED",
+   "acceptance": "MET"
+  }
+ },
+ "access_checks": {
+  "catalog_before_grant": "DENIED",
+  "catalog_grant_observed": "ALLOWED",
+  "catalog_grant_waited_s": 71,
+  "caller_is_requester": true,
+  "revocation_observed": true,
+  "catalog_revocation_waited_s": 0,
+  "fresh_request_after_revocation": "CATALOG_ERROR",
+  "bypass_publication": "ERROR",
+  "bypass_retrieval": "DENIED",
+  "authorization_after_revocation": "DENIED",
+  "receipt_launches_after_revocation": 0
+ },
+ "identity": {
+  "status": "BOUND",
+  "jobs_by_role": {
+   "graph": 46,
+   "receipt": 2,
+   "requester_probe": 1,
+   "policy_admin": 9
+  }
+ },
+ "teardown": {
+  "catalog": "VERIFIED",
+  "broker": "VERIFIED"
+ }
+}
+agent ◂ tool result governed_gross_margin
+gemini-3.8-flash ▸ "[LIVE] Gross margin: $400.00 USD · VERIFIED"
+The receipt verdict is **VERIFIED** and the run verdict is **E2E_PUBLISH_CONNECTED**.
+Regarding whether the number can be trusted, the run verified the complete end-to-end governance path:
+1. The publication was first published in BigQuery (READY, head switched) and the Catalog entry was written from it.
+2. The requester's own Catalog read, the pinned publication, governed retrieval, fact read-back, and receipt were then verified.
+3. After access was revoked, a fresh request, a bypass, and the stored receipt were all refused.
+Please note that the underlying data is a synthetic invented Acme fixture, the APIs are live GCP (BigQuery, Dataplex Catalog, IAM), and this reflects a single test run rather than operational readiness.
+publish (BigQuery is the authority)
+  states PLANNED → PREPARING → BQ_STAGED → BQ_COMMITTED → KC_APPLIED → COMPLETE · READY rows={'nodes': 44, 'edges': 109, 'sections': 22} · dataset okf_kp_publish_kp_20260915t082018z_0387
+  head None → pub_190192147fd7fd78 (SWITCHED) · merge job okf_cc_kp_20260915t082018z_0387_merge_head_b402d3731b67
+  author jobs 19 (identity BOUND) · catalog pin OK · consumer served this publication: MATCH · originals UNCHANGED · cleanup COMPLETE
+consumer decisions
+  connected-approved               RELEASED  acceptance=MET
+  connected-sql-substitution       REFUSED   acceptance=MET
+  connected-denied-intermediate    REFUSED   acceptance=MET
+  connected-unauthorized-output    REFUSED   acceptance=MET
+  connected-revocation             REFUSED   acceptance=MET
+access and revocation
+  catalog before grant=DENIED · after grant=ALLOWED (71s) · caller is requester=True
+  after revocation: fresh request=CATALOG_ERROR · bypass publication=ERROR · bypass retrieval=DENIED · authorization=DENIED · receipt launches=0
+  identity=BOUND (graph 46, receipt 2, requester_probe 1, policy_admin 9) · unresolved jobs=0 · teardown={'catalog': 'VERIFIED', 'broker': 'VERIFIED'}
+  connected verdict E2E_CONNECTED · consume run e2e-20260915t082049z-34e6ed72
+verdict E2E_PUBLISH_CONNECTED · run kp-20260915t082018z-0387
+transcript: evidence/publish-connected/kp-20260915t082018z-0387/agent_transcript.json
