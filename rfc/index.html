@@ -171,9 +171,9 @@
         <section class="runtime-rule evidence" id="evidence-status" aria-labelledby="evidence-status-title">
           <p id="evidence-status-title"><strong>What works today.</strong> Feasibility, not the feature; invented data throughout.</p>
           <dl class="evidence-rows">
-            <div><dt>Recorded feasibility</dt><dd>Retrieval selected a definition with its linked rules; a receipt withheld a number whose query and result disagreed; connected runs reached an enforcing consumer, once via graph queries. <span class="scope">Scope: single identity, hand-pinned seeds, each run a different part; the graph run tried only the expected-success case.</span></dd></div>
+            <div><dt>Recorded feasibility</dt><dd>Retrieval selected a definition with its linked rules; a receipt withheld a number whose query and result disagreed; one live run went from catalog read to released number under a restricted identity, refusing after revocation (<a href="spikes/bq-graph/evidence/report-connected-e2e.md">the run</a>). <span class="scope">Scope: plain SQL, synthetic data, one run; graph queries ran once, success case only.</span></dd></div>
             <div><dt>Measured retrieval</dt><dd>Ordinary SQL under five seconds one request at a time, over five seconds at five at once (<a href="spikes/bq-graph/evidence/sql-baseline/baseline.md">the comparison</a>). <span class="scope">Scope: retrieval only; full question-to-number time and cost are not measured.</span></dd></div>
-            <div><dt>Still to validate</dt><dd>One run combining catalog discovery, a restricted identity and graph queries, access holding inside them; a live read-back of the synthetic fact rows against their digest; a customer cohort. <span class="scope">Scope: the restricted identity was denied on plain SQL only; Alder’s cohort has never been selected.</span></dd></div>
+            <div><dt>Still to validate</dt><dd>The same connected run inside graph queries, access holding there too; an independent attester; a customer cohort. <span class="scope">Scope: access held on plain SQL only; Alder’s cohort has never been selected.</span></dd></div>
           </dl>
         </section>
         <section class="runtime-rule" id="sep19-envelope" aria-labelledby="sep19-envelope-title">
@@ -315,15 +315,16 @@
                 <li>Catalog-seeded runs went from live read to enforcing consumer, held their pin while the head moved, and withheld the number when publication or content failed validation (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/50ecaa8976cb5fb633fb1c2b11b70eba3bbcd939/rfc/spikes/bq-graph/evidence/catalog-chain/b2-20260907t162636z-cd45/b2_summary.md">what those cases showed</a>).</li>
                 <li>A restricted identity held inside the chain; nothing unauthorized was released (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/ad18b075524d7b752c5782da17c29e70cee05fb7/rfc/spikes/bq-graph/README.md#live-restricted-pass-slice-b-2026-09-07">how that run worked and where it stops</a>).</li>
                 <li>One run retrieved through graph queries on Enterprise capacity and released only after the declaration and receipt checks passed (<a href="https://github.com/caohy1988/caohy1988.github.io/blob/0ab27d679a1e640cc7dcfdbeea465e44788ab133/rfc/spikes/bq-graph/evidence/chain/SLICE_B_RUN_E_20260908.md">what that run did and did not show</a>).</li>
+                <li>One live run did all three under a restricted identity, starting from its own catalog read and checking the fact rows against their digest; after revocation a fresh request, a cached-pin bypass and the stored receipt were refused (<a href="spikes/bq-graph/evidence/report-connected-e2e.md">the connected run</a>, <a href="demo/#connected-e2e">tape</a>, <a href="https://github.com/caohy1988/okf-connected-e2e">code</a>).</li>
               </ul>
               <p class="design-cue">Limits</p>
               <ul class="design-points">
-                <li>All runs carried a single identity, each reached a different part, and the graph-query run tried only the case expected to succeed. The restricted-identity and graph-query runs began from hand-pinned seeds; the restricted run used plain SQL.</li>
+                <li>Earlier runs each reached a different part; the graph-query run tried only the case expected to succeed and began from a hand-pinned seed. The connected run used plain SQL, the SDK’s own verifier and one injected seed, once.</li>
               </ul>
             </section>
             <section class="design-part" aria-labelledby="design-evidence">
               <h3 id="design-evidence">What is still open</h3>
-              <p><strong>The bar.</strong> One run doing all of it at once: catalog discovery, pinned publication, governed retrieval, caller-delegated computation, result-bound receipt and enforcing consumer, with access and revocation checks holding throughout.</p>
+              <p><strong>The bar, shown once.</strong> One live run did all of it: catalog discovery, pinned publication, governed retrieval, caller-delegated computation, result-bound receipt and enforcing consumer, with access and revocation checks holding throughout, on synthetic data and plain SQL (<a href="spikes/bq-graph/evidence/report-connected-e2e.md">the report</a>). Still open: the same inside graph queries, an independent attester, and repeated runs.</p>
               <p class="design-cue">Also unfinished</p>
               <ul class="design-points">
                 <li>Benchmarks: the graph cells are incomplete and the <a href="spikes/bq-graph/evidence/sql-baseline/baseline.md">ordinary-SQL comparison</a> has measured retrieval only, not cost or the full path.</li>
@@ -343,7 +344,7 @@
           <div><dt>Catalog lag or a stale pin</dt><dd>One publication shown, another served. Gate: pin-or-fail-stale and an owned lag target.</dd></div>
           <div><dt>Ordinary SQL is enough</dt><dd>SQL is the first engine; graph must justify its extra cost.</dd></div>
           <div><dt>Access inside graph queries</dt><dd>Unproven. Gate: a restricted identity denied inside graph retrieval before promotion.</dd></div>
-          <div><dt>A demonstration read as readiness</dt><dd>Gate: promotion only after one connected end-to-end run; each example credited for its part.</dd></div>
+          <div><dt>A demonstration read as readiness</dt><dd>Gate: one connected run is shown; promotion needs repeats on graph queries and real data.</dd></div>
         </dl>
         <p class="risk-more"><a href="detailed-rfc/#phases">All twelve risks and gates.</a></p>
       </div>

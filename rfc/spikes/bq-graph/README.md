@@ -693,6 +693,33 @@ cell (G8 remains 0/9) and no accepted 2026-09-19 threshold. The hermetic suite r
 `google-cloud-bigquery 3.40.1`, while `pyproject.toml` pins `3.45.0`: the transport regressions here are real-object
 tests at 3.40.1 and should be re-run at the pinned version before any live claim rests on them.
 
+## Connected end-to-end run (2026-09-15, live): the still-open bar in one run
+
+`okf_bq_graph/connected.py` (docs: `docs/{intent,spec,plan}-connected-e2e.md`; report:
+[`evidence/report-connected-e2e.md`](./evidence/report-connected-e2e.md)) runs the whole path in **one invocation under
+one requester** (`sa:okf-receipt-restricted`, IAM impersonation) on every execution leg, **including the Catalog read**,
+which no earlier run did (`okf_bq_graph/catalog_access.py` grants the requester `roles/dataplex.catalogViewer` on the
+demo entry group, removes it for revocation and restores the snapshot with read-back). Five cases in order:
+`connected-approved` (Catalog → pinned publication → trusted source → governed retrieval → payload guard → bind →
+authorization → synthetic fact read-back against the selected digest → receipt under the requester → enforcing
+consumer), `connected-sql-substitution`, `connected-denied-intermediate` (injected legacy seed on `_rls`),
+`connected-unauthorized-output`, and `connected-revocation` (a fresh request refused at Catalog, a retained-pin bypass
+refused at publication / retrieval / authorization, the stored receipt re-decided REFUSED, no execution after).
+Every policy transition counts only on six consecutive agreeing observations (`stable`). Verdict `E2E_CONNECTED` needs
+all five MET, identity BOUND over every job, no unresolved job and both restores VERIFIED.
+
+Live result: **`E2E_CONNECTED`**, run `evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/` (58 jobs BOUND, receipt
+`rcpt-5b554572…` VERIFIED, `[LIVE] Gross margin: $400.00 USD · VERIFIED`, 0 launches after revocation). The first live
+attempt `e2e-20260915t065449z-98e21004` is retained as **`E2E_BROKEN`** (an ACL flap graded WRONG; fixed by the
+stability gate, not relabelled). The runnable CLI and the Gemini 3.8 Flash ADK agent that drove the recorded run live
+in [`caohy1988/okf-connected-e2e`](https://github.com/caohy1988/okf-connected-e2e). What it does not establish: GQL
+traversal, an independent attester, customer data, benchmarks, n > 1 (full list in the report).
+
+```bash
+python3 -m okf_bq_graph.connected --hermetic
+OKF_SDK_PYTHON=/usr/local/opt/python@3.13/bin/python3.13 python3 -m okf_bq_graph.connected --live [--wait-s 600]
+```
+
 ## Ordinary-SQL baseline for the 2026-09-19 checkpoint (2026-09-07, predeclared and empty)
 
 `evidence/sql-baseline/baseline.md` is a plan, not a measurement. It exists because the checkpoint has to compare an

@@ -1,0 +1,4430 @@
+{
+ "acceptance": {
+  "connected-approved": "MET",
+  "connected-denied-intermediate": "MET",
+  "connected-revocation": "MET",
+  "connected-sql-substitution": "MET",
+  "connected-unauthorized-output": "MET"
+ },
+ "as_of": "2026-09-15T07:06:43Z",
+ "broker_journal": [
+  {
+   "at": "2026-09-15T07:08:14.980037+00:00",
+   "event": "apply",
+   "graph": {
+    "status": "ALLOWED",
+    "waited_s": 0
+   },
+   "observed": true,
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": true,
+    "hidden": [],
+    "sdk_tables": true
+   },
+   "rls": {
+    "reason": "case does not use the `_rls` fixture",
+    "status": "NOT_APPLICABLE"
+   },
+   "sdk": {
+    "status": "ALLOWED",
+    "waited_s": 2
+   }
+  },
+  {
+   "at": "2026-09-15T07:10:34.788535+00:00",
+   "ds": "okf_receipt_spike_20260905",
+   "event": "grant_preexisting",
+   "note": "left untouched; not this broker's to change",
+   "roles": [
+    "READER"
+   ]
+  },
+  {
+   "at": "2026-09-15T07:10:39.355273+00:00",
+   "ds": "okf_graph_spike_20260905_rls",
+   "event": "rls_policies",
+   "jobs": {
+    "edges": "72d0a2e6-157c-44b7-b4f4-787b26d3d3a6",
+    "nodes": "e84a136c-702b-45de-87ac-11b8adc44afb",
+    "section_vectors": "01818e1b-735d-42fd-80af-65ad796b669e"
+   },
+   "note": "hidden-intermediate policies re-issued with the SA added to / removed from the fixture's grantee list",
+   "sa_grantee": true
+  },
+  {
+   "at": "2026-09-15T07:10:42.455147+00:00",
+   "event": "apply",
+   "graph": {
+    "status": "ALLOWED",
+    "waited_s": 0
+   },
+   "observed": true,
+   "policy": {
+    "dataset": "rls",
+    "dataset_reader": true,
+    "hidden": [
+     "<id:567bd799>"
+    ],
+    "sdk_tables": true
+   },
+   "rls": {
+    "hidden": 0,
+    "job_id": "23cc5204-2c48-41e0-a431-027c1c7f5d93",
+    "status": "ALLOWED",
+    "visible": 40,
+    "waited_s": 0
+   },
+   "sdk": {
+    "status": "ALLOWED",
+    "waited_s": 1
+   }
+  },
+  {
+   "at": "2026-09-15T07:10:44.989951+00:00",
+   "ds": "okf_graph_spike_20260905",
+   "event": "grant_preexisting",
+   "note": "left untouched; not this broker's to change",
+   "roles": [
+    "READER"
+   ]
+  },
+  {
+   "at": "2026-09-15T07:10:49.065452+00:00",
+   "ds": "okf_graph_spike_20260905_rls",
+   "event": "rls_policies",
+   "jobs": {
+    "edges": "7ee65c08-4092-4c19-b8f2-5f120da6bac3",
+    "nodes": "331ed54b-0c69-4b84-90ff-8cd0b6c9943c",
+    "section_vectors": "82c842f6-46a0-47be-bea7-4832244cb3a3"
+   },
+   "note": "hidden-intermediate policies re-issued with the SA added to / removed from the fixture's grantee list",
+   "sa_grantee": false
+  },
+  {
+   "at": "2026-09-15T07:12:11.715831+00:00",
+   "event": "apply",
+   "graph": {
+    "status": "ALLOWED",
+    "waited_s": 0
+   },
+   "observed": true,
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": true,
+    "hidden": [],
+    "sdk_tables": false
+   },
+   "rls": {
+    "reason": "case does not use the `_rls` fixture",
+    "status": "NOT_APPLICABLE"
+   },
+   "sdk": {
+    "status": "DENIED",
+    "waited_s": 82
+   }
+  },
+  {
+   "at": "2026-09-15T07:13:51.596954+00:00",
+   "ds": "okf_graph_spike_20260905",
+   "event": "grant_preexisting",
+   "note": "left untouched; not this broker's to change",
+   "roles": [
+    "READER"
+   ]
+  },
+  {
+   "at": "2026-09-15T07:13:55.129732+00:00",
+   "event": "apply",
+   "graph": {
+    "status": "ALLOWED",
+    "waited_s": 0
+   },
+   "observed": true,
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": true,
+    "hidden": [],
+    "sdk_tables": true
+   },
+   "rls": {
+    "reason": "case does not use the `_rls` fixture",
+    "status": "NOT_APPLICABLE"
+   },
+   "sdk": {
+    "status": "ALLOWED",
+    "waited_s": 2
+   }
+  },
+  {
+   "at": "2026-09-15T07:16:54.316688+00:00",
+   "datasets": [
+    "okf_graph_spike_20260905",
+    "okf_graph_spike_20260905_rls",
+    "okf_receipt_spike_20260905"
+   ],
+   "event": "revoke_all",
+   "graph": {
+    "status": "DENIED",
+    "waited_s": 82
+   },
+   "observed": true,
+   "sdk": {
+    "status": "DENIED",
+    "waited_s": 2
+   }
+  }
+ ],
+ "caller": {
+  "caller_is_requester": true,
+  "checked_by": "oauth2 tokeninfo of the Catalog session's own access token",
+  "http_status": 200,
+  "principal": "sa:okf-receipt-restricted",
+  "status": "REQUESTER"
+ },
+ "cases": [
+  {
+   "acceptance": {
+    "expected": "RELEASED",
+    "failed": [],
+    "status": "MET"
+   },
+   "authorization": {
+    "at": "2026-09-15T07:09:58.958879+00:00",
+    "checked_by": "dry-run SELECT per dependency table under the impersonated client",
+    "denied": 0,
+    "status": "ALLOWED",
+    "tables": [
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fulfillment_cost"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fx_daily_rates"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.order_lines"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.orders"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.payment_fees"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.products"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.shipment_cost"
+     }
+    ]
+   },
+   "bind": {
+    "checks": {
+     "declared_type": {
+      "graph": "Attested Computation",
+      "ok": true
+     },
+     "file_sha256": {
+      "graph": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "ok": true,
+      "sdk_bytes": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "freshness": {
+      "as_of": "2026-09-15T07:06:43Z",
+      "ok": true,
+      "stale_after": "2026-12-31T00:00:00Z",
+      "verdict": "FRESH"
+     },
+     "lifecycle": {
+      "graph": "stable",
+      "ok": true
+     },
+     "not_executed_by_graph": {
+      "graph": "NOT_EXECUTED",
+      "ok": true
+     },
+     "parameters": {
+      "graph": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ],
+      "ok": true,
+      "sdk": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ]
+     },
+     "path": {
+      "graph": "<id:b6c2a45a>.md",
+      "ok": true,
+      "sdk": "acme_retail/gross-margin-period.md"
+     },
+     "runtime": {
+      "graph": "bigquery",
+      "ok": true,
+      "sdk": "bigquery"
+     },
+     "source_pin": {
+      "graph": "31da799a9aef176df12e91abbd119ea9385b75ec",
+      "note": "the SDK fixture manifest's derived_from is a free-text lineage label at the pinned SDK commit, compared against the full verified graph revision; it is not a Git attestation of that revision",
+      "ok": true,
+      "sdk": "knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec"
+     },
+     "sql_text": {
+      "graph_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+      "note": "compared after trailing-whitespace normalisation: the graph fence regex drops the final newline the SDK keeps",
+      "ok": true,
+      "sdk_fence_sha256": "d1f76cb93bcf69dc87ee721b91ef8d1478df7a4b0aa9ec86ef1abda9e56934bd"
+     }
+    },
+    "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+    "concept_hops": 1,
+    "sdk_context_ref": "okf:acme-retail-derived#gross-margin-period",
+    "sdk_publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+    "status": "BOUND",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "<id:567bd799>",
+     "<id:b6c2a45a>"
+    ]
+   },
+   "case": "connected-approved",
+   "catalog": {
+    "aspect_key": "201486563047.us-central1.okf-context-runtime",
+    "authored_aspects": [
+     "201486563047.us-central1.okf",
+     "655216118709.global.overview"
+    ],
+    "discovery": {
+     "entries_listed": 11,
+     "entry_sha256": "ad1115df694304a0c12e011387635f59bedacd6606f62c7abc83340df3f610ed",
+     "list_sha256": [
+      "723712c4cd9f1914192636b8de38f9ae2c2d1361d4343eb585877e59df2f179e"
+     ],
+     "matches": 1,
+     "page_size": 100,
+     "pages": 1
+    },
+    "entry": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kc-unblock/<id:567bd799>",
+    "mode": "catalog",
+    "note": "fresh Dataplex list + get(view=ALL) under the requester's impersonated credential",
+    "pin": {
+     "binding_verified_at": "2026-09-07T05:14:10.847600+00:00",
+     "bundle_id": "acme_retail",
+     "compiler_version": "okf_bq_graph.compile/0.1.0",
+     "concept_file_sha256": "912be604fe7f681322b2ba6414b5791e9eb91b73aad1cae7afa666cedfe7d3c9",
+     "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+     "concept_path": "<id:567bd799>.md",
+     "managed_by_deployment": "acme-retail-kc-unblock-20260906",
+     "managed_by_principal": "operator",
+     "managed_by_profile": "okf-kc-self-unblock/1",
+     "publication_id": "pub_190192147fd7fd78",
+     "published_snapshot_id": null,
+     "runtime_contract": "graph-spike-v1",
+     "runtime_dataset": "okf_graph_spike_20260905",
+     "runtime_location": "US",
+     "runtime_project": "test-project-0728-467323",
+     "source_manifest_sha256": "190192147fd7fd780b0da94c596045e363b29b4c23963959503cc677f1a3b5d5",
+     "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec",
+     "source_repository": "https://github.com/GoogleCloudPlatform/knowledge-catalog",
+     "source_root": "okf/bundles/acme_retail"
+    },
+    "raw_entry_sha256": "ad1115df694304a0c12e011387635f59bedacd6606f62c7abc83340df3f610ed",
+    "same_pin_as_first_discovery": true,
+    "status": "OK"
+   },
+   "computation": {
+    "concept": "<id:b6c2a45a>",
+    "concept_hops": 1,
+    "path": "<id:b6c2a45a>.md",
+    "runtime": "bigquery",
+    "runtime_verdict": "NOT_EXECUTED",
+    "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+    "status": "stable",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "<id:567bd799>",
+     "<id:b6c2a45a>"
+    ]
+   },
+   "consume": {
+    "decision": "RELEASED",
+    "display": "[LIVE] Gross margin: $400.00 USD \u00b7 VERIFIED",
+    "reasons": []
+   },
+   "declaration": {
+    "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_b71f31ab33c2",
+    "lifecycle_status": "stable",
+    "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+    "parameters": [
+     {
+      "name": "period_start",
+      "required": true,
+      "type": "date"
+     },
+     {
+      "name": "period_end",
+      "required": true,
+      "type": "date"
+     }
+    ],
+    "path": "<id:b6c2a45a>.md",
+    "receipt_fields": [
+     "job_id",
+     "executed_sql",
+     "result"
+    ],
+    "runtime": "bigquery",
+    "stale_after": "2026-12-31T00:00:00Z",
+    "status": "OK",
+    "type": "Attested Computation"
+   },
+   "expected": "RELEASED",
+   "facts": {
+    "bound_content_digest": "7264e7df6276463dc4ec7a6b179b87bff08aaa105660ea37611398fc197454f0",
+    "expires_about": "2026-10-05",
+    "note": "a passing readback is necessary, not proof the rows stayed equal during the campaign; bind the digest to every attempt",
+    "selected_content_digest": "7264e7df6276463dc4ec7a6b179b87bff08aaa105660ea37611398fc197454f0",
+    "smoke": {
+     "january_matches": true,
+     "note": "smoke checks only: a changed non-January amount leaves both true while the content digest changes; they never decide admission and a failure to evaluate them is a diagnostic, not a crash",
+     "row_counts_match": true
+    },
+    "status": "OK",
+    "tables": {
+     "fulfillment_cost": 2,
+     "fx_daily_rates": 0,
+     "order_lines": 3,
+     "orders": 3,
+     "payment_fees": 2,
+     "products": 2,
+     "shipment_cost": 2
+    }
+   },
+   "payload": {
+    "checks": {
+     "computations": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+        "fields": true,
+        "section_membership": true,
+        "sql_bytes": true,
+        "trusted_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c"
+       }
+      ],
+      "ok": true
+     },
+     "declaration": {
+      "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+      "ok": true,
+      "source_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "trusted_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "engine": {
+      "basis": "configured engine supplied by the caller",
+      "ok": true,
+      "returned": "fallback",
+      "trusted": "fallback"
+     },
+     "governance": {
+      "engine": "fallback",
+      "engine_source": "trusted (caller-configured)",
+      "items": [
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+        "ok": true,
+        "provenance": true,
+        "replacement": true,
+        "trust_tier": true,
+        "verifications": true
+       },
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+        "ok": true,
+        "trust_tier": true
+       }
+      ],
+      "note": "trust tier, verifications, the engine's complete provenance item shape (every required key present, no extra key, every value equal: oracle declared/intrinsic/resolves_to, relational source_id/resolution/note), freshness as the whole {verdict, stale_after} record, and replacement, all recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
+      "ok": true,
+      "provenance_shape": [
+       "declaration",
+       "note",
+       "resolution",
+       "resource",
+       "source_id",
+       "title"
+      ]
+     },
+     "paths": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>"
+        ]
+       }
+      ],
+      "ok": true
+     },
+     "recomputed_manifests": {
+      "edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b",
+      "ok": true,
+      "trusted_edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "trusted_nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b"
+     },
+     "result_paths": {
+      "items": [
+       {
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>"
+        ]
+       }
+      ],
+      "matches_computations": true,
+      "ok": true
+     },
+     "result_scope": {
+      "ok": true,
+      "scope": {
+       "bundle_id": "acme_retail",
+       "publication_id": "pub_190192147fd7fd78"
+      }
+     },
+     "retained_edge_rows": {
+      "ok": true,
+      "retained": 109,
+      "trusted": 109
+     },
+     "retained_node_rows": {
+      "first_diff": null,
+      "ok": true,
+      "retained": 44,
+      "trusted": 44
+     },
+     "section_text_hashes": {
+      "mismatched": [],
+      "ok": true,
+      "sections": 22
+     },
+     "seed_concept": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+      "expected": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+      "ok": true
+     },
+     "selected_computation": {
+      "bytes_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+       "fields": true,
+       "section_membership": true,
+       "sql_bytes": true,
+       "trusted_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c"
+      },
+      "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+      "ok": true,
+      "path": "<id:b6c2a45a>.md",
+      "path_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+       "edges_continuous": true,
+       "endpoints": true,
+       "nodes_in_trusted": true,
+       "via": [
+        "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+        "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>"
+       ]
+      }
+     }
+    },
+    "failed": [],
+    "jobs": [
+     {
+      "edges_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 61408,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained edge rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-15T07:09:56.450758+00:00",
+       "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_0e7730c05b99",
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_0e7730c05b99",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+       "role": "payload_rows",
+       "rows": 109,
+       "seq": 9,
+       "state": "DONE",
+       "submitted_at": "2026-09-15T07:09:56.451028+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-15T07:09:57.256677+00:00"
+      },
+      "nodes_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 117477,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained node rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-15T07:09:55.412657+00:00",
+       "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_b62b92a94abc",
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_b62b92a94abc",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+       "role": "payload_rows",
+       "rows": 44,
+       "seq": 8,
+       "state": "DONE",
+       "submitted_at": "2026-09-15T07:09:55.412965+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-15T07:09:56.449644+00:00"
+      }
+     }
+    ],
+    "note": "full retained rows, recomputed manifests/section hashes, scoped path endpoints/edges, SQL and declaration bytes compared to the trusted compilation of the pinned source; labels and digests alone are not accepted",
+    "status": "CONSISTENT"
+   },
+   "publication": {
+    "checks": {
+     "compiler_version": true,
+     "seed_file_sha256": true,
+     "seed_kind": true,
+     "seed_path": true,
+     "seed_scope": true,
+     "source_manifest_sha256": true,
+     "source_pin": true
+    },
+    "error": null,
+    "head": {
+     "matches_pin": true,
+     "note": "observed only; the requested pin is served or refused, the head is never followed",
+     "publication_id": "pub_190192147fd7fd78",
+     "rows": 1
+    },
+    "publication_id": "pub_190192147fd7fd78",
+    "reasons": [],
+    "status": "OK"
+   },
+   "receipt": {
+    "argv": [
+     "/usr/local/opt/python@3.13/bin/python3.13",
+     "~/BigQuery-Agent-Analytics-SDK-receipt-spike/examples/okf_attested_computation/run.py",
+     "--case",
+     "approved",
+     "--evidence-dir",
+     "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/receipt/.inv_approved_live_p1vddmge",
+     "--live"
+    ],
+    "case": "approved",
+    "cwd": "~/BigQuery-Agent-Analytics-SDK-receipt-spike",
+    "diag": "retained",
+    "diag_path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/receipt/case_connected-approved_live.json",
+    "diag_present": true,
+    "diag_sha256": "598c34bc50ee6fdd1bda6675db69a6562821a08bc2eeb36ee320a446f2a16053",
+    "elapsed_ms": 6096.0,
+    "env_injected": [
+     "GOOGLE_APPLICATION_CREDENTIALS",
+     "PYTHONPATH"
+    ],
+    "exit_code": 0,
+    "invocation_dir": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/receipt/.inv_approved_live_p1vddmge",
+    "invoked": true,
+    "live": true,
+    "output": {
+     "access_probe": {
+      "outcome": "ALLOWED",
+      "output": "ALLOWED",
+      "probed_at": 1789456212,
+      "sources": "ALLOWED"
+     },
+     "execution_match": "MATCH",
+     "job": {
+      "job_id": "okf_rcpt_e6fab1ac8adb4af45708cd7c_ba1740808c842003",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "reason_codes": [],
+     "receipt_id": "rcpt-5b554572488b86d4c55f7577",
+     "request_id": "req-e6fab1ac8adb4af45708cd7c",
+     "verdict": "VERIFIED"
+    },
+    "receipt": {
+     "attester_artifact_hash": "e9bb803540f56ceab8faaac915b9f6e72dd8d64fed7d1c6126b9c75ea1e9365e",
+     "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+     "context_ref": "okf:acme-retail-derived#gross-margin-period",
+     "execution_match": "MATCH",
+     "expires_at": 1789456509,
+     "issued_at": 1789456211,
+     "job": {
+      "job_id": "okf_rcpt_e6fab1ac8adb4af45708cd7c_ba1740808c842003",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "policy_version": "okf-receipt-spike-policy/2026-09-05",
+     "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+     "reason_codes": [],
+     "receipt_id": "rcpt-5b554572488b86d4c55f7577",
+     "request_id": "req-e6fab1ac8adb4af45708cd7c",
+     "verdict": "VERIFIED"
+    },
+    "released": true,
+    "request_id": "req-e6fab1ac8adb4af45708cd7c",
+    "retained_as": "connected-approved",
+    "stderr_tail": "",
+    "stdout": "[LIVE] Gross margin: $400.00 USD \u00b7 VERIFIED\n"
+   },
+   "receipt_invocations": 1,
+   "retrieval": {
+    "computations": [
+     "<id:b6c2a45a>.md"
+    ],
+    "concepts": [
+     "<id:567bd799>"
+    ],
+    "hidden_id_in_full_result": [],
+    "paths": [
+     {
+      "concept_hops": 1,
+      "seed": "<id:567bd799>",
+      "via": [
+       "<id:567bd799>",
+       "<id:b6c2a45a>"
+      ]
+     }
+    ],
+    "reached": true,
+    "retained": {
+     "masked": true,
+     "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/retrieval/retrieval_connected-approved.json",
+     "sha256": "acdc44ef1c9a1e69247166740d29f7a14240004744fe26d9ee338b0d469b1882"
+    },
+    "scope": {
+     "as_of": "2026-09-15T07:06:43Z",
+     "bundle_id": "acme_retail",
+     "engine": "fallback",
+     "publication_id": "pub_190192147fd7fd78",
+     "requester": "sa:okf-receipt-restricted",
+     "seed": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+      "origin": "catalog"
+     },
+     "templates": {
+      "context": {
+       "chars": 990,
+       "graph_table": false,
+       "name": "context.fallback",
+       "sha256": "ad8b85a3df93c69c43c8996bfdf49e2032204933a2064e7a002b62241ed87910"
+      },
+      "walk": {
+       "chars": 1698,
+       "graph_table": false,
+       "name": "fallback.sql",
+       "sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047"
+      }
+     },
+     "top_k": 5
+    },
+    "status": "OK",
+    "timing": {
+     "jobs": [
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 58680,
+       "cache_hit": false,
+       "created": "2026-09-15T07:09:51.908000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:09:52.695000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_49aabe526ce2",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 537,
+       "stage": "walk",
+       "started": "2026-09-15T07:09:52.263000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      },
+      {
+       "bytes_billed": 10485760,
+       "bytes_processed": 16752,
+       "cache_hit": false,
+       "created": "2026-09-15T07:09:53.606000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:09:53.924000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_d43e37f16c52",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 93,
+       "stage": "nodes",
+       "started": "2026-09-15T07:09:53.686000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      },
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 157239,
+       "cache_hit": false,
+       "created": "2026-09-15T07:09:53.513000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:09:53.834000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_659675881d0c",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 102,
+       "stage": "context",
+       "started": "2026-09-15T07:09:53.595000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      }
+     ],
+     "stages_ms": {
+      "assembly": 0.3,
+      "context": 1199.8,
+      "nodes": 962.8,
+      "seed": 0.0,
+      "walk": 1600.1
+     },
+     "total_ms": 2802.6
+    },
+    "warnings": [
+     "catalog seed: exact Concept id supplied by the runtime pin, not a semantic ranking",
+     "FALLBACK engine: relational joins, not BigQuery Graph"
+    ]
+   },
+   "seed_origin": "Catalog discovery under the requester",
+   "source": {
+    "checks": {
+     "bundle_git_prefix": "okf/bundles/acme_retail",
+     "bundle_prefix_matches_source_root": true,
+     "bundle_tree_clean": true,
+     "compiler_version_matches_pin": true,
+     "derived": false,
+     "git_head": "31da799a9aef176df12e91abbd119ea9385b75ec",
+     "git_head_matches_pin": true,
+     "publication_id_matches_pin": true,
+     "seed_file_sha256_matches_pin": true,
+     "seed_present": true,
+     "source_manifest_matches_pin": true
+    },
+    "note": "compiled from the clean pinned checkout (git HEAD == pin, bundle tree clean)",
+    "status": "OK"
+   }
+  },
+  {
+   "acceptance": {
+    "expected": "REFUSED",
+    "failed": [],
+    "status": "MET"
+   },
+   "authorization": {
+    "at": "2026-09-15T07:10:22.096420+00:00",
+    "checked_by": "dry-run SELECT per dependency table under the impersonated client",
+    "denied": 0,
+    "status": "ALLOWED",
+    "tables": [
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fulfillment_cost"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fx_daily_rates"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.order_lines"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.orders"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.payment_fees"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.products"
+     },
+     {
+      "status": "ALLOWED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.shipment_cost"
+     }
+    ]
+   },
+   "bind": {
+    "checks": {
+     "declared_type": {
+      "graph": "Attested Computation",
+      "ok": true
+     },
+     "file_sha256": {
+      "graph": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "ok": true,
+      "sdk_bytes": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "freshness": {
+      "as_of": "2026-09-15T07:06:43Z",
+      "ok": true,
+      "stale_after": "2026-12-31T00:00:00Z",
+      "verdict": "FRESH"
+     },
+     "lifecycle": {
+      "graph": "stable",
+      "ok": true
+     },
+     "not_executed_by_graph": {
+      "graph": "NOT_EXECUTED",
+      "ok": true
+     },
+     "parameters": {
+      "graph": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ],
+      "ok": true,
+      "sdk": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ]
+     },
+     "path": {
+      "graph": "<id:b6c2a45a>.md",
+      "ok": true,
+      "sdk": "acme_retail/gross-margin-period.md"
+     },
+     "runtime": {
+      "graph": "bigquery",
+      "ok": true,
+      "sdk": "bigquery"
+     },
+     "source_pin": {
+      "graph": "31da799a9aef176df12e91abbd119ea9385b75ec",
+      "note": "the SDK fixture manifest's derived_from is a free-text lineage label at the pinned SDK commit, compared against the full verified graph revision; it is not a Git attestation of that revision",
+      "ok": true,
+      "sdk": "knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec"
+     },
+     "sql_text": {
+      "graph_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+      "note": "compared after trailing-whitespace normalisation: the graph fence regex drops the final newline the SDK keeps",
+      "ok": true,
+      "sdk_fence_sha256": "d1f76cb93bcf69dc87ee721b91ef8d1478df7a4b0aa9ec86ef1abda9e56934bd"
+     }
+    },
+    "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+    "concept_hops": 1,
+    "sdk_context_ref": "okf:acme-retail-derived#gross-margin-period",
+    "sdk_publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+    "status": "BOUND",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "<id:567bd799>",
+     "<id:b6c2a45a>"
+    ]
+   },
+   "case": "connected-sql-substitution",
+   "catalog": {
+    "aspect_key": "201486563047.us-central1.okf-context-runtime",
+    "authored_aspects": [
+     "201486563047.us-central1.okf",
+     "655216118709.global.overview"
+    ],
+    "discovery": {
+     "entries_listed": 11,
+     "entry_sha256": "ad1115df694304a0c12e011387635f59bedacd6606f62c7abc83340df3f610ed",
+     "list_sha256": [
+      "723712c4cd9f1914192636b8de38f9ae2c2d1361d4343eb585877e59df2f179e"
+     ],
+     "matches": 1,
+     "page_size": 100,
+     "pages": 1
+    },
+    "entry": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kc-unblock/<id:567bd799>",
+    "mode": "catalog",
+    "note": "fresh Dataplex list + get(view=ALL) under the requester's impersonated credential",
+    "pin": {
+     "binding_verified_at": "2026-09-07T05:14:10.847600+00:00",
+     "bundle_id": "acme_retail",
+     "compiler_version": "okf_bq_graph.compile/0.1.0",
+     "concept_file_sha256": "912be604fe7f681322b2ba6414b5791e9eb91b73aad1cae7afa666cedfe7d3c9",
+     "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+     "concept_path": "<id:567bd799>.md",
+     "managed_by_deployment": "acme-retail-kc-unblock-20260906",
+     "managed_by_principal": "operator",
+     "managed_by_profile": "okf-kc-self-unblock/1",
+     "publication_id": "pub_190192147fd7fd78",
+     "published_snapshot_id": null,
+     "runtime_contract": "graph-spike-v1",
+     "runtime_dataset": "okf_graph_spike_20260905",
+     "runtime_location": "US",
+     "runtime_project": "test-project-0728-467323",
+     "source_manifest_sha256": "190192147fd7fd780b0da94c596045e363b29b4c23963959503cc677f1a3b5d5",
+     "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec",
+     "source_repository": "https://github.com/GoogleCloudPlatform/knowledge-catalog",
+     "source_root": "okf/bundles/acme_retail"
+    },
+    "raw_entry_sha256": "ad1115df694304a0c12e011387635f59bedacd6606f62c7abc83340df3f610ed",
+    "same_pin_as_first_discovery": true,
+    "status": "OK"
+   },
+   "computation": {
+    "concept": "<id:b6c2a45a>",
+    "concept_hops": 1,
+    "path": "<id:b6c2a45a>.md",
+    "runtime": "bigquery",
+    "runtime_verdict": "NOT_EXECUTED",
+    "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+    "status": "stable",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "<id:567bd799>",
+     "<id:b6c2a45a>"
+    ]
+   },
+   "consume": {
+    "decision": "REFUSED",
+    "reasons": [
+     "exit_code 2 != 0",
+     "receipt.verdict REJECTED: consumer refuses on UNVERIFIABLE/REJECTED",
+     "output.verdict REJECTED: consumer refuses on UNVERIFIABLE/REJECTED",
+     "execution_match MISMATCH/MISMATCH != MATCH",
+     "reason_codes sql_mismatch",
+     "CLI consumer did not report released=true",
+     "stdout is not exactly one VERIFIED release line"
+    ]
+   },
+   "declaration": {
+    "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_42fa5330eed6",
+    "lifecycle_status": "stable",
+    "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+    "parameters": [
+     {
+      "name": "period_start",
+      "required": true,
+      "type": "date"
+     },
+     {
+      "name": "period_end",
+      "required": true,
+      "type": "date"
+     }
+    ],
+    "path": "<id:b6c2a45a>.md",
+    "receipt_fields": [
+     "job_id",
+     "executed_sql",
+     "result"
+    ],
+    "runtime": "bigquery",
+    "stale_after": "2026-12-31T00:00:00Z",
+    "status": "OK",
+    "type": "Attested Computation"
+   },
+   "expected": "REFUSED",
+   "facts": {
+    "bound_content_digest": "7264e7df6276463dc4ec7a6b179b87bff08aaa105660ea37611398fc197454f0",
+    "expires_about": "2026-10-05",
+    "note": "a passing readback is necessary, not proof the rows stayed equal during the campaign; bind the digest to every attempt",
+    "selected_content_digest": "7264e7df6276463dc4ec7a6b179b87bff08aaa105660ea37611398fc197454f0",
+    "smoke": {
+     "january_matches": true,
+     "note": "smoke checks only: a changed non-January amount leaves both true while the content digest changes; they never decide admission and a failure to evaluate them is a diagnostic, not a crash",
+     "row_counts_match": true
+    },
+    "status": "OK",
+    "tables": {
+     "fulfillment_cost": 2,
+     "fx_daily_rates": 0,
+     "order_lines": 3,
+     "orders": 3,
+     "payment_fees": 2,
+     "products": 2,
+     "shipment_cost": 2
+    }
+   },
+   "payload": {
+    "checks": {
+     "computations": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+        "fields": true,
+        "section_membership": true,
+        "sql_bytes": true,
+        "trusted_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c"
+       }
+      ],
+      "ok": true
+     },
+     "declaration": {
+      "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+      "ok": true,
+      "source_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "trusted_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "engine": {
+      "basis": "configured engine supplied by the caller",
+      "ok": true,
+      "returned": "fallback",
+      "trusted": "fallback"
+     },
+     "governance": {
+      "engine": "fallback",
+      "engine_source": "trusted (caller-configured)",
+      "items": [
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+        "ok": true,
+        "provenance": true,
+        "replacement": true,
+        "trust_tier": true,
+        "verifications": true
+       },
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+        "ok": true,
+        "trust_tier": true
+       }
+      ],
+      "note": "trust tier, verifications, the engine's complete provenance item shape (every required key present, no extra key, every value equal: oracle declared/intrinsic/resolves_to, relational source_id/resolution/note), freshness as the whole {verdict, stale_after} record, and replacement, all recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
+      "ok": true,
+      "provenance_shape": [
+       "declaration",
+       "note",
+       "resolution",
+       "resource",
+       "source_id",
+       "title"
+      ]
+     },
+     "paths": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>"
+        ]
+       }
+      ],
+      "ok": true
+     },
+     "recomputed_manifests": {
+      "edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b",
+      "ok": true,
+      "trusted_edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "trusted_nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b"
+     },
+     "result_paths": {
+      "items": [
+       {
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>"
+        ]
+       }
+      ],
+      "matches_computations": true,
+      "ok": true
+     },
+     "result_scope": {
+      "ok": true,
+      "scope": {
+       "bundle_id": "acme_retail",
+       "publication_id": "pub_190192147fd7fd78"
+      }
+     },
+     "retained_edge_rows": {
+      "ok": true,
+      "retained": 109,
+      "trusted": 109
+     },
+     "retained_node_rows": {
+      "first_diff": null,
+      "ok": true,
+      "retained": 44,
+      "trusted": 44
+     },
+     "section_text_hashes": {
+      "mismatched": [],
+      "ok": true,
+      "sections": 22
+     },
+     "seed_concept": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+      "expected": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+      "ok": true
+     },
+     "selected_computation": {
+      "bytes_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+       "fields": true,
+       "section_membership": true,
+       "sql_bytes": true,
+       "trusted_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c"
+      },
+      "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+      "ok": true,
+      "path": "<id:b6c2a45a>.md",
+      "path_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+       "edges_continuous": true,
+       "endpoints": true,
+       "nodes_in_trusted": true,
+       "via": [
+        "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+        "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>"
+       ]
+      }
+     }
+    },
+    "failed": [],
+    "jobs": [
+     {
+      "edges_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 61408,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained edge rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-15T07:10:19.770091+00:00",
+       "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_ec18041a2ec1",
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_ec18041a2ec1",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+       "role": "payload_rows",
+       "rows": 109,
+       "seq": 25,
+       "state": "DONE",
+       "submitted_at": "2026-09-15T07:10:19.770495+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-15T07:10:20.523432+00:00"
+      },
+      "nodes_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 117477,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained node rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-15T07:10:18.585467+00:00",
+       "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_6013b73ce0bd",
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_6013b73ce0bd",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+       "role": "payload_rows",
+       "rows": 44,
+       "seq": 24,
+       "state": "DONE",
+       "submitted_at": "2026-09-15T07:10:18.585791+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-15T07:10:19.769261+00:00"
+      }
+     }
+    ],
+    "note": "full retained rows, recomputed manifests/section hashes, scoped path endpoints/edges, SQL and declaration bytes compared to the trusted compilation of the pinned source; labels and digests alone are not accepted",
+    "status": "CONSISTENT"
+   },
+   "publication": {
+    "checks": {
+     "compiler_version": true,
+     "seed_file_sha256": true,
+     "seed_kind": true,
+     "seed_path": true,
+     "seed_scope": true,
+     "source_manifest_sha256": true,
+     "source_pin": true
+    },
+    "error": null,
+    "head": {
+     "matches_pin": true,
+     "note": "observed only; the requested pin is served or refused, the head is never followed",
+     "publication_id": "pub_190192147fd7fd78",
+     "rows": 1
+    },
+    "publication_id": "pub_190192147fd7fd78",
+    "reasons": [],
+    "status": "OK"
+   },
+   "receipt": {
+    "argv": [
+     "/usr/local/opt/python@3.13/bin/python3.13",
+     "~/BigQuery-Agent-Analytics-SDK-receipt-spike/examples/okf_attested_computation/run.py",
+     "--case",
+     "sql-substitution",
+     "--evidence-dir",
+     "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/receipt/.inv_sql-substitution_live_be1thq_i",
+     "--live"
+    ],
+    "case": "sql-substitution",
+    "cwd": "~/BigQuery-Agent-Analytics-SDK-receipt-spike",
+    "diag": "retained",
+    "diag_path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/receipt/case_connected-sql-substitution_live.json",
+    "diag_present": true,
+    "diag_sha256": "97761cdaaec6e2aef575679e481102658d9db8ace4770977663a17996187ba96",
+    "elapsed_ms": 3341.9,
+    "env_injected": [
+     "GOOGLE_APPLICATION_CREDENTIALS",
+     "PYTHONPATH"
+    ],
+    "exit_code": 2,
+    "invocation_dir": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/receipt/.inv_sql-substitution_live_be1thq_i",
+    "invoked": true,
+    "live": true,
+    "output": {
+     "access_probe": null,
+     "execution_match": "MISMATCH",
+     "job": null,
+     "reason_codes": [
+      "sql_mismatch"
+     ],
+     "receipt_id": "rcpt-5bc0fa6198c69e6965173bd5",
+     "request_id": "req-db42283992bdfe00a42de21d",
+     "verdict": "REJECTED"
+    },
+    "receipt": {
+     "attester_artifact_hash": "e9bb803540f56ceab8faaac915b9f6e72dd8d64fed7d1c6126b9c75ea1e9365e",
+     "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+     "context_ref": "okf:acme-retail-derived#gross-margin-period",
+     "execution_match": "MISMATCH",
+     "expires_at": 1789456531,
+     "issued_at": 1789456232,
+     "job": {
+      "job_id": "okf_rcpt_db42283992bdfe00a42de21d_ee05a2c8a8152a24",
+      "location": "US",
+      "project": "test-project-0728-467323"
+     },
+     "policy_version": "okf-receipt-spike-policy/2026-09-05",
+     "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+     "reason_codes": [
+      "sql_mismatch"
+     ],
+     "receipt_id": "rcpt-5bc0fa6198c69e6965173bd5",
+     "request_id": "req-db42283992bdfe00a42de21d",
+     "verdict": "REJECTED"
+    },
+    "released": false,
+    "request_id": "req-db42283992bdfe00a42de21d",
+    "retained_as": "connected-sql-substitution",
+    "stderr_tail": "",
+    "stdout": "[LIVE] BLOCKED verdict=REJECTED execution_match=MISMATCH reasons=sql_mismatch\n"
+   },
+   "receipt_invocations": 1,
+   "retrieval": {
+    "computations": [
+     "<id:b6c2a45a>.md"
+    ],
+    "concepts": [
+     "<id:567bd799>"
+    ],
+    "hidden_id_in_full_result": [],
+    "paths": [
+     {
+      "concept_hops": 1,
+      "seed": "<id:567bd799>",
+      "via": [
+       "<id:567bd799>",
+       "<id:b6c2a45a>"
+      ]
+     }
+    ],
+    "reached": true,
+    "retained": {
+     "masked": true,
+     "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/retrieval/retrieval_connected-sql-substitution.json",
+     "sha256": "309c1639de6b1f81b8660bfe2c99cce9d1288fb0f6ae6739b1fb46c9671730e5"
+    },
+    "scope": {
+     "as_of": "2026-09-15T07:06:43Z",
+     "bundle_id": "acme_retail",
+     "engine": "fallback",
+     "publication_id": "pub_190192147fd7fd78",
+     "requester": "sa:okf-receipt-restricted",
+     "seed": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+      "origin": "catalog"
+     },
+     "templates": {
+      "context": {
+       "chars": 990,
+       "graph_table": false,
+       "name": "context.fallback",
+       "sha256": "ad8b85a3df93c69c43c8996bfdf49e2032204933a2064e7a002b62241ed87910"
+      },
+      "walk": {
+       "chars": 1698,
+       "graph_table": false,
+       "name": "fallback.sql",
+       "sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047"
+      }
+     },
+     "top_k": 5
+    },
+    "status": "OK",
+    "timing": {
+     "jobs": [
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 58680,
+       "cache_hit": false,
+       "created": "2026-09-15T07:10:15.792000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:10:16.388000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_2d838e853803",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 736,
+       "stage": "walk",
+       "started": "2026-09-15T07:10:15.892000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      },
+      {
+       "bytes_billed": 10485760,
+       "bytes_processed": 16752,
+       "cache_hit": false,
+       "created": "2026-09-15T07:10:16.849000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:10:17.110000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_114a2ab8c6e6",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 72,
+       "stage": "nodes",
+       "started": "2026-09-15T07:10:16.906000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      },
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 157239,
+       "cache_hit": false,
+       "created": "2026-09-15T07:10:16.878000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:10:17.187000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_27245eb2bfdd",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 95,
+       "stage": "context",
+       "started": "2026-09-15T07:10:16.950000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      }
+     ],
+     "stages_ms": {
+      "assembly": 0.3,
+      "context": 830.2,
+      "nodes": 747.7,
+      "seed": 0.0,
+      "walk": 1058.3
+     },
+     "total_ms": 1890.9
+    },
+    "warnings": [
+     "catalog seed: exact Concept id supplied by the runtime pin, not a semantic ranking",
+     "FALLBACK engine: relational joins, not BigQuery Graph"
+    ]
+   },
+   "seed_origin": "Catalog discovery under the requester",
+   "source": {
+    "checks": {
+     "bundle_git_prefix": "okf/bundles/acme_retail",
+     "bundle_prefix_matches_source_root": true,
+     "bundle_tree_clean": true,
+     "compiler_version_matches_pin": true,
+     "derived": false,
+     "git_head": "31da799a9aef176df12e91abbd119ea9385b75ec",
+     "git_head_matches_pin": true,
+     "publication_id_matches_pin": true,
+     "seed_file_sha256_matches_pin": true,
+     "seed_present": true,
+     "source_manifest_matches_pin": true
+    },
+    "note": "compiled from the clean pinned checkout (git HEAD == pin, bundle tree clean)",
+    "status": "OK"
+   }
+  },
+  {
+   "acceptance": {
+    "expected": "REFUSED",
+    "failed": [],
+    "status": "MET"
+   },
+   "authorization": {
+    "reason": "nothing bound",
+    "status": "NOT_RUN"
+   },
+   "bind": {
+    "reason": "retrieval_denied",
+    "status": "NOT_REACHED"
+   },
+   "case": "connected-denied-intermediate",
+   "consume": {
+    "decision": "REFUSED",
+    "reasons": [
+     "bind status NOT_REACHED: declaration not bound to the executed publication",
+     "receipt not invoked: nothing executed, nothing verifiable"
+    ]
+   },
+   "expected": "REFUSED",
+   "grant": {
+    "at": "2026-09-15T07:10:42.455147+00:00",
+    "event": "apply",
+    "graph": {
+     "status": "ALLOWED",
+     "waited_s": 0
+    },
+    "observed": true,
+    "policy": {
+     "dataset": "rls",
+     "dataset_reader": true,
+     "hidden": [
+      "<id:567bd799>"
+     ],
+     "sdk_tables": true
+    },
+    "rls": {
+     "hidden": 0,
+     "job_id": "23cc5204-2c48-41e0-a431-027c1c7f5d93",
+     "status": "ALLOWED",
+     "visible": 40,
+     "waited_s": 0
+    },
+    "sdk": {
+     "status": "ALLOWED",
+     "waited_s": 1
+    }
+   },
+   "hidden": [
+    "<id:567bd799>"
+   ],
+   "note": "the `_rls` governance copy of the pinned publication; the Catalog pin names the base runtime dataset, so this seed is a labelled injection, not a discovery",
+   "policy": {
+    "dataset": "rls",
+    "dataset_reader": true,
+    "hidden": [
+     "<id:567bd799>"
+    ],
+    "sdk_tables": true
+   },
+   "publication_source": "first Catalog discovery",
+   "receipt": {
+    "invoked": false,
+    "reason": "bind NOT_REACHED: nothing was executed"
+   },
+   "receipt_invocations": 0,
+   "retrieval": {
+    "computations": [],
+    "concepts": [
+     "<id:97dc35b4>"
+    ],
+    "hidden_id_in_full_result": [],
+    "paths": [],
+    "reached": false,
+    "scope": {
+     "as_of": "2026-09-15T07:06:43Z",
+     "bundle_id": "acme_retail",
+     "engine": "fallback",
+     "publication_id": "pub_190192147fd7fd78",
+     "requester": "sa:okf-receipt-restricted",
+     "templates": {
+      "context": {
+       "chars": 1002,
+       "graph_table": false,
+       "name": "context.fallback",
+       "sha256": "2ea9d48216ada35208d1a6c451354a96ea30a4ae095aeab8e337f1b3d02da34e"
+      },
+      "walk": {
+       "chars": 1706,
+       "graph_table": false,
+       "name": "fallback.sql",
+       "sha256": "4286a2432991779fd6c8ae2c308eee6d2d903b44d6b989198cd8608193c6937a"
+      }
+     },
+     "top_k": 5
+    },
+    "status": "OK",
+    "timing": {
+     "jobs": [
+      {
+       "bytes_billed": null,
+       "bytes_processed": null,
+       "cache_hit": false,
+       "created": "2026-09-15T07:10:42.587000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:10:43.262000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_cad96c543122",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 631,
+       "stage": "walk",
+       "started": "2026-09-15T07:10:42.840000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      },
+      {
+       "bytes_billed": null,
+       "bytes_processed": null,
+       "cache_hit": false,
+       "created": "2026-09-15T07:10:43.742000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:10:44.112000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_3cb730e35249",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 106,
+       "stage": "nodes",
+       "started": "2026-09-15T07:10:43.856000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      },
+      {
+       "bytes_billed": null,
+       "bytes_processed": null,
+       "cache_hit": false,
+       "created": "2026-09-15T07:10:43.778000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:10:44.266000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_4f6878b83293",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 299,
+       "stage": "context",
+       "started": "2026-09-15T07:10:43.896000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      }
+     ],
+     "stages_ms": {
+      "assembly": 0.1,
+      "context": 1137.3,
+      "nodes": 787.5,
+      "seed": 0.0,
+      "walk": 1172.3
+     },
+     "total_ms": 2312.5
+    },
+    "warnings": [
+     "forced seed: harness-only deterministic override, not a semantic ranking",
+     "FALLBACK engine: relational joins, not BigQuery Graph"
+    ]
+   },
+   "seed_origin": "injected-fixture-seed"
+  },
+  {
+   "acceptance": {
+    "expected": "REFUSED",
+    "failed": [],
+    "status": "MET"
+   },
+   "authorization": {
+    "at": "2026-09-15T07:13:51.319097+00:00",
+    "checked_by": "dry-run SELECT per dependency table under the impersonated client",
+    "denied": 7,
+    "status": "DENIED",
+    "tables": [
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fulfillment_cost"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fx_daily_rates"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.order_lines"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.orders"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.payment_fees"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.products"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.shipment_cost"
+     }
+    ]
+   },
+   "bind": {
+    "checks": {
+     "declared_type": {
+      "graph": "Attested Computation",
+      "ok": true
+     },
+     "file_sha256": {
+      "graph": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "ok": true,
+      "sdk_bytes": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "sdk_manifest": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "freshness": {
+      "as_of": "2026-09-15T07:06:43Z",
+      "ok": true,
+      "stale_after": "2026-12-31T00:00:00Z",
+      "verdict": "FRESH"
+     },
+     "lifecycle": {
+      "graph": "stable",
+      "ok": true
+     },
+     "not_executed_by_graph": {
+      "graph": "NOT_EXECUTED",
+      "ok": true
+     },
+     "parameters": {
+      "graph": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ],
+      "ok": true,
+      "sdk": [
+       [
+        "period_start",
+        "DATE"
+       ],
+       [
+        "period_end",
+        "DATE"
+       ]
+      ]
+     },
+     "path": {
+      "graph": "<id:b6c2a45a>.md",
+      "ok": true,
+      "sdk": "acme_retail/gross-margin-period.md"
+     },
+     "runtime": {
+      "graph": "bigquery",
+      "ok": true,
+      "sdk": "bigquery"
+     },
+     "source_pin": {
+      "graph": "31da799a9aef176df12e91abbd119ea9385b75ec",
+      "note": "the SDK fixture manifest's derived_from is a free-text lineage label at the pinned SDK commit, compared against the full verified graph revision; it is not a Git attestation of that revision",
+      "ok": true,
+      "sdk": "knowledge-catalog okf/bundles/acme_retail @ 31da799a9aef176df12e91abbd119ea9385b75ec"
+     },
+     "sql_text": {
+      "graph_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+      "note": "compared after trailing-whitespace normalisation: the graph fence regex drops the final newline the SDK keeps",
+      "ok": true,
+      "sdk_fence_sha256": "d1f76cb93bcf69dc87ee721b91ef8d1478df7a4b0aa9ec86ef1abda9e56934bd"
+     }
+    },
+    "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+    "concept_hops": 1,
+    "sdk_context_ref": "okf:acme-retail-derived#gross-margin-period",
+    "sdk_publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+    "status": "BOUND",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "<id:567bd799>",
+     "<id:b6c2a45a>"
+    ]
+   },
+   "case": "connected-unauthorized-output",
+   "catalog": {
+    "aspect_key": "201486563047.us-central1.okf-context-runtime",
+    "authored_aspects": [
+     "201486563047.us-central1.okf",
+     "655216118709.global.overview"
+    ],
+    "discovery": {
+     "entries_listed": 11,
+     "entry_sha256": "ad1115df694304a0c12e011387635f59bedacd6606f62c7abc83340df3f610ed",
+     "list_sha256": [
+      "723712c4cd9f1914192636b8de38f9ae2c2d1361d4343eb585877e59df2f179e"
+     ],
+     "matches": 1,
+     "page_size": 100,
+     "pages": 1
+    },
+    "entry": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries/acme-retail-kc-unblock/<id:567bd799>",
+    "mode": "catalog",
+    "note": "fresh Dataplex list + get(view=ALL) under the requester's impersonated credential",
+    "pin": {
+     "binding_verified_at": "2026-09-07T05:14:10.847600+00:00",
+     "bundle_id": "acme_retail",
+     "compiler_version": "okf_bq_graph.compile/0.1.0",
+     "concept_file_sha256": "912be604fe7f681322b2ba6414b5791e9eb91b73aad1cae7afa666cedfe7d3c9",
+     "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+     "concept_path": "<id:567bd799>.md",
+     "managed_by_deployment": "acme-retail-kc-unblock-20260906",
+     "managed_by_principal": "operator",
+     "managed_by_profile": "okf-kc-self-unblock/1",
+     "publication_id": "pub_190192147fd7fd78",
+     "published_snapshot_id": null,
+     "runtime_contract": "graph-spike-v1",
+     "runtime_dataset": "okf_graph_spike_20260905",
+     "runtime_location": "US",
+     "runtime_project": "test-project-0728-467323",
+     "source_manifest_sha256": "190192147fd7fd780b0da94c596045e363b29b4c23963959503cc677f1a3b5d5",
+     "source_pin": "31da799a9aef176df12e91abbd119ea9385b75ec",
+     "source_repository": "https://github.com/GoogleCloudPlatform/knowledge-catalog",
+     "source_root": "okf/bundles/acme_retail"
+    },
+    "raw_entry_sha256": "ad1115df694304a0c12e011387635f59bedacd6606f62c7abc83340df3f610ed",
+    "same_pin_as_first_discovery": true,
+    "status": "OK"
+   },
+   "computation": {
+    "concept": "<id:b6c2a45a>",
+    "concept_hops": 1,
+    "path": "<id:b6c2a45a>.md",
+    "runtime": "bigquery",
+    "runtime_verdict": "NOT_EXECUTED",
+    "sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c",
+    "status": "stable",
+    "trust_tier": "human-reviewed",
+    "via": [
+     "<id:567bd799>",
+     "<id:b6c2a45a>"
+    ]
+   },
+   "consume": {
+    "decision": "REFUSED",
+    "reasons": [
+     "authorization DENIED at decision time: the requester's credential cannot read every dependency of the bound computation (7 denied)",
+     "receipt not invoked: nothing executed, nothing verifiable"
+    ]
+   },
+   "declaration": {
+    "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_d48e61c3f223",
+    "lifecycle_status": "stable",
+    "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+    "parameters": [
+     {
+      "name": "period_start",
+      "required": true,
+      "type": "date"
+     },
+     {
+      "name": "period_end",
+      "required": true,
+      "type": "date"
+     }
+    ],
+    "path": "<id:b6c2a45a>.md",
+    "receipt_fields": [
+     "job_id",
+     "executed_sql",
+     "result"
+    ],
+    "runtime": "bigquery",
+    "stale_after": "2026-12-31T00:00:00Z",
+    "status": "OK",
+    "type": "Attested Computation"
+   },
+   "expected": "REFUSED",
+   "payload": {
+    "checks": {
+     "computations": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+        "fields": true,
+        "section_membership": true,
+        "sql_bytes": true,
+        "trusted_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c"
+       }
+      ],
+      "ok": true
+     },
+     "declaration": {
+      "file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+      "ok": true,
+      "source_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+      "trusted_file_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7"
+     },
+     "engine": {
+      "basis": "configured engine supplied by the caller",
+      "ok": true,
+      "returned": "fallback",
+      "trusted": "fallback"
+     },
+     "governance": {
+      "engine": "fallback",
+      "engine_source": "trusted (caller-configured)",
+      "items": [
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+        "ok": true,
+        "provenance": true,
+        "replacement": true,
+        "trust_tier": true,
+        "verifications": true
+       },
+       {
+        "freshness": true,
+        "node_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+        "ok": true,
+        "trust_tier": true
+       }
+      ],
+      "note": "trust tier, verifications, the engine's complete provenance item shape (every required key present, no extra key, every value equal: oracle declared/intrinsic/resolves_to, relational source_id/resolution/note), freshness as the whole {verdict, stale_after} record, and replacement, all recomputed from trusted VERIFIED_BY/DERIVES_FROM/RESOLVES_TO/LINKS_TO edges at scope.as_of",
+      "ok": true,
+      "provenance_shape": [
+       "declaration",
+       "note",
+       "resolution",
+       "resource",
+       "source_id",
+       "title"
+      ]
+     },
+     "paths": {
+      "items": [
+       {
+        "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>"
+        ]
+       }
+      ],
+      "ok": true
+     },
+     "recomputed_manifests": {
+      "edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b",
+      "ok": true,
+      "trusted_edges_sha256": "95a193a0c41354a191098184a286e257aa46dbba90d4b8f8b15b5419ff7490d7",
+      "trusted_nodes_sha256": "47a1278ef2bc4e2c8c6b9d7e8dc72ccf6e46ee0fd3c08e4aa019c2f5e4ca0b7b"
+     },
+     "result_paths": {
+      "items": [
+       {
+        "edges_continuous": true,
+        "endpoints": true,
+        "nodes_in_trusted": true,
+        "via": [
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+         "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>"
+        ]
+       }
+      ],
+      "matches_computations": true,
+      "ok": true
+     },
+     "result_scope": {
+      "ok": true,
+      "scope": {
+       "bundle_id": "acme_retail",
+       "publication_id": "pub_190192147fd7fd78"
+      }
+     },
+     "retained_edge_rows": {
+      "ok": true,
+      "retained": 109,
+      "trusted": 109
+     },
+     "retained_node_rows": {
+      "first_diff": null,
+      "ok": true,
+      "retained": 44,
+      "trusted": 44
+     },
+     "section_text_hashes": {
+      "mismatched": [],
+      "ok": true,
+      "sections": 22
+     },
+     "seed_concept": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+      "expected": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+      "ok": true
+     },
+     "selected_computation": {
+      "bytes_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+       "fields": true,
+       "section_membership": true,
+       "sql_bytes": true,
+       "trusted_sql_sha256": "907f8a56960c384acebfa050ef7f34c11ced0da5677e734fbd3646d3d93bc81c"
+      },
+      "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+      "ok": true,
+      "path": "<id:b6c2a45a>.md",
+      "path_check": {
+       "computation_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>",
+       "edges_continuous": true,
+       "endpoints": true,
+       "nodes_in_trusted": true,
+       "via": [
+        "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+        "acme_retail|pub_190192147fd7fd78|Concept|<id:b6c2a45a>"
+       ]
+      }
+     }
+    },
+    "failed": [],
+    "jobs": [
+     {
+      "edges_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 61408,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained edge rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-15T07:13:47.986050+00:00",
+       "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_03d0beaadca2",
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_03d0beaadca2",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+       "role": "payload_rows",
+       "rows": 109,
+       "seq": 44,
+       "state": "DONE",
+       "submitted_at": "2026-09-15T07:13:47.986614+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-15T07:13:48.885597+00:00"
+      },
+      "nodes_job": {
+       "actual": true,
+       "bytes_billed": 10485760,
+       "bytes_processed": 117477,
+       "dataset": "okf_graph_spike_20260905",
+       "dataset_project": "test-project-0728-467323",
+       "description": "full retained node rows",
+       "engine": "bigquery",
+       "error": null,
+       "intended_at": "2026-09-15T07:13:46.997183+00:00",
+       "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_17df618940e5",
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_17df618940e5",
+       "job_ref_complete": true,
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+       "role": "payload_rows",
+       "rows": 44,
+       "seq": 43,
+       "state": "DONE",
+       "submitted_at": "2026-09-15T07:13:46.997609+00:00",
+       "terminal": true,
+       "terminal_at": "2026-09-15T07:13:47.985081+00:00"
+      }
+     }
+    ],
+    "note": "full retained rows, recomputed manifests/section hashes, scoped path endpoints/edges, SQL and declaration bytes compared to the trusted compilation of the pinned source; labels and digests alone are not accepted",
+    "status": "CONSISTENT"
+   },
+   "policy_apply": {
+    "at": "2026-09-15T07:12:11.715831+00:00",
+    "event": "apply",
+    "graph": {
+     "status": "ALLOWED",
+     "waited_s": 0
+    },
+    "observed": true,
+    "policy": {
+     "dataset": "base",
+     "dataset_reader": true,
+     "hidden": [],
+     "sdk_tables": false
+    },
+    "rls": {
+     "reason": "case does not use the `_rls` fixture",
+     "status": "NOT_APPLICABLE"
+    },
+    "sdk": {
+     "status": "DENIED",
+     "waited_s": 82
+    }
+   },
+   "policy_stable": {
+    "consecutive": 6,
+    "every_s": 15.0,
+    "flaps": {
+     "authorization": 0,
+     "graph": 0
+    },
+    "history": [
+     {
+      "authorization": "DENIED",
+      "graph": "ALLOWED",
+      "t": 1.9
+     },
+     {
+      "authorization": "DENIED",
+      "graph": "ALLOWED",
+      "t": 19.1
+     },
+     {
+      "authorization": "DENIED",
+      "graph": "ALLOWED",
+      "t": 36.7
+     },
+     {
+      "authorization": "DENIED",
+      "graph": "ALLOWED",
+      "t": 54.5
+     },
+     {
+      "authorization": "DENIED",
+      "graph": "ALLOWED",
+      "t": 72.2
+     },
+     {
+      "authorization": "DENIED",
+      "graph": "ALLOWED",
+      "t": 89.5
+     }
+    ],
+    "note": "6 consecutive agreeing observations required; a poll interval, not a propagation bound",
+    "polls": 6,
+    "stable": true,
+    "waited_s": 89,
+    "want": {
+     "authorization": "DENIED",
+     "graph": "ALLOWED"
+    }
+   },
+   "publication": {
+    "checks": {
+     "compiler_version": true,
+     "seed_file_sha256": true,
+     "seed_kind": true,
+     "seed_path": true,
+     "seed_scope": true,
+     "source_manifest_sha256": true,
+     "source_pin": true
+    },
+    "error": null,
+    "head": {
+     "matches_pin": true,
+     "note": "observed only; the requested pin is served or refused, the head is never followed",
+     "publication_id": "pub_190192147fd7fd78",
+     "rows": 1
+    },
+    "publication_id": "pub_190192147fd7fd78",
+    "reasons": [],
+    "status": "OK"
+   },
+   "receipt": {
+    "invoked": false,
+    "reason": "authorization DENIED under the requester: nothing was executed"
+   },
+   "receipt_invocations": 0,
+   "retrieval": {
+    "computations": [
+     "<id:b6c2a45a>.md"
+    ],
+    "concepts": [
+     "<id:567bd799>"
+    ],
+    "hidden_id_in_full_result": [],
+    "paths": [
+     {
+      "concept_hops": 1,
+      "seed": "<id:567bd799>",
+      "via": [
+       "<id:567bd799>",
+       "<id:b6c2a45a>"
+      ]
+     }
+    ],
+    "reached": true,
+    "retained": {
+     "masked": true,
+     "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/retrieval/retrieval_connected-unauthorized-output.json",
+     "sha256": "6610b4c6eda8439eb0ca9be7f496d2497aea10da3d955df6731e74a7f4010b8a"
+    },
+    "scope": {
+     "as_of": "2026-09-15T07:06:43Z",
+     "bundle_id": "acme_retail",
+     "engine": "fallback",
+     "publication_id": "pub_190192147fd7fd78",
+     "requester": "sa:okf-receipt-restricted",
+     "seed": {
+      "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+      "origin": "catalog"
+     },
+     "templates": {
+      "context": {
+       "chars": 990,
+       "graph_table": false,
+       "name": "context.fallback",
+       "sha256": "ad8b85a3df93c69c43c8996bfdf49e2032204933a2064e7a002b62241ed87910"
+      },
+      "walk": {
+       "chars": 1698,
+       "graph_table": false,
+       "name": "fallback.sql",
+       "sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047"
+      }
+     },
+     "top_k": 5
+    },
+    "status": "OK",
+    "timing": {
+     "jobs": [
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 58680,
+       "cache_hit": false,
+       "created": "2026-09-15T07:13:44.422000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:13:44.884000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_a03654e31135",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 609,
+       "stage": "walk",
+       "started": "2026-09-15T07:13:44.491000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      },
+      {
+       "bytes_billed": 20971520,
+       "bytes_processed": 157239,
+       "cache_hit": false,
+       "created": "2026-09-15T07:13:45.416000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:13:45.722000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_56083848dbf8",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 98,
+       "stage": "context",
+       "started": "2026-09-15T07:13:45.492000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      },
+      {
+       "bytes_billed": 10485760,
+       "bytes_processed": 16752,
+       "cache_hit": false,
+       "created": "2026-09-15T07:13:45.436000+00:00",
+       "edition": "ENTERPRISE",
+       "ended": "2026-09-15T07:13:45.746000+00:00",
+       "error": null,
+       "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_71293ff4fb38",
+       "location": "US",
+       "project": "test-project-0728-467323",
+       "reservation_id": "test-project-0728-467323:US.okf-demo-enterprise",
+       "server_state": "DONE",
+       "slot_ms": 60,
+       "stage": "nodes",
+       "started": "2026-09-15T07:13:45.502000+00:00",
+       "state": "DONE",
+       "stats_present": true
+      }
+     ],
+     "stages_ms": {
+      "assembly": 0.4,
+      "context": 857.8,
+      "nodes": 889.1,
+      "seed": 0.0,
+      "walk": 1002.5
+     },
+     "total_ms": 1894.0
+    },
+    "warnings": [
+     "catalog seed: exact Concept id supplied by the runtime pin, not a semantic ranking",
+     "FALLBACK engine: relational joins, not BigQuery Graph"
+    ]
+   },
+   "seed_origin": "Catalog discovery under the requester",
+   "source": {
+    "checks": {
+     "bundle_git_prefix": "okf/bundles/acme_retail",
+     "bundle_prefix_matches_source_root": true,
+     "bundle_tree_clean": true,
+     "compiler_version_matches_pin": true,
+     "derived": false,
+     "git_head": "31da799a9aef176df12e91abbd119ea9385b75ec",
+     "git_head_matches_pin": true,
+     "publication_id_matches_pin": true,
+     "seed_file_sha256_matches_pin": true,
+     "seed_present": true,
+     "source_manifest_matches_pin": true
+    },
+    "note": "compiled from the clean pinned checkout (git HEAD == pin, bundle tree clean)",
+    "status": "OK"
+   }
+  },
+  {
+   "acceptance": {
+    "expected": "REFUSED",
+    "failed": [],
+    "status": "MET"
+   },
+   "authorization": {
+    "at": "2026-09-15T07:18:27.518872+00:00",
+    "checked_by": "dry-run SELECT per dependency table under the impersonated client",
+    "denied": 7,
+    "status": "DENIED",
+    "tables": [
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fulfillment_cost"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.fx_daily_rates"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.order_lines"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.orders"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.payment_fees"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.products"
+     },
+     {
+      "error_class": "Forbidden",
+      "status": "DENIED",
+      "table": "test-project-0728-467323.okf_receipt_spike_20260905.shipment_cost"
+     }
+    ]
+   },
+   "bypass": {
+    "note": "an agent that cached the pin skips Catalog and goes straight to the store and retrieval",
+    "publication": {
+     "error": "Forbidden: 403 Access Denied: Table test-project-0728-467323:okf_graph_spike_20260905.publications: User does not have permission to query table test-project-0728-467323:okf_graph_spike_20260905.publications, or perhaps it does not exist.; reason: accessDenied, message: Access Denied: Table test-project-0728-4",
+     "reasons": [
+      "store read failed"
+     ],
+     "status": "ERROR"
+    },
+    "retrieval": {
+     "computations": [],
+     "concepts": [],
+     "disclosed_anything": false,
+     "hidden_id_in_full_result": [],
+     "paths": [],
+     "scope": {
+      "as_of": "2026-09-15T07:06:43Z",
+      "bundle_id": "acme_retail",
+      "engine": "fallback",
+      "publication_id": "pub_190192147fd7fd78",
+      "requester": "sa:okf-receipt-restricted",
+      "seed": {
+       "concept_id": "acme_retail|pub_190192147fd7fd78|Concept|<id:567bd799>",
+       "origin": "retained-pin-bypass"
+      },
+      "templates": {
+       "walk": {
+        "chars": 1698,
+        "graph_table": false,
+        "name": "fallback.sql",
+        "sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047"
+       }
+      },
+      "top_k": 5
+     },
+     "status": "DENIED",
+     "timing": {
+      "jobs": [],
+      "stages_ms": {
+       "seed": 0.0
+      },
+      "total_ms": 495.6
+     },
+     "warnings": [
+      "authorization error: Forbidden"
+     ]
+    }
+   },
+   "cache": "not exercised: Catalog concept seeds disable the retrieval cache",
+   "case": "connected-revocation",
+   "consume": {
+    "decision": "REFUSED",
+    "reasons": [
+     "authorization DENIED at decision time: the requester's credential cannot read every dependency of the bound computation (7 denied)"
+    ]
+   },
+   "control": {
+    "authorization": {
+     "at": "2026-09-15T07:15:25.121781+00:00",
+     "checked_by": "dry-run SELECT per dependency table under the impersonated client",
+     "denied": 0,
+     "status": "ALLOWED",
+     "tables": [
+      {
+       "status": "ALLOWED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.fulfillment_cost"
+      },
+      {
+       "status": "ALLOWED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.fx_daily_rates"
+      },
+      {
+       "status": "ALLOWED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.order_lines"
+      },
+      {
+       "status": "ALLOWED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.orders"
+      },
+      {
+       "status": "ALLOWED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.payment_fees"
+      },
+      {
+       "status": "ALLOWED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.products"
+      },
+      {
+       "status": "ALLOWED",
+       "table": "test-project-0728-467323.okf_receipt_spike_20260905.shipment_cost"
+      }
+     ]
+    },
+    "catalog": {
+     "at": "2026-09-15T07:15:23.263762+00:00",
+     "http_status": 200,
+     "status": "ALLOWED"
+    },
+    "graph": {
+     "checked_by": "dry-run SELECT under the requester",
+     "status": "ALLOWED",
+     "table": "test-project-0728-467323.okf_graph_spike_20260905.nodes"
+    }
+   },
+   "control_policy": {
+    "at": "2026-09-15T07:13:55.129732+00:00",
+    "event": "apply",
+    "graph": {
+     "status": "ALLOWED",
+     "waited_s": 0
+    },
+    "observed": true,
+    "policy": {
+     "dataset": "base",
+     "dataset_reader": true,
+     "hidden": [],
+     "sdk_tables": true
+    },
+    "rls": {
+     "reason": "case does not use the `_rls` fixture",
+     "status": "NOT_APPLICABLE"
+    },
+    "sdk": {
+     "status": "ALLOWED",
+     "waited_s": 2
+    }
+   },
+   "control_stable": {
+    "consecutive": 6,
+    "every_s": 15.0,
+    "flaps": {
+     "authorization": 0,
+     "catalog": 0,
+     "graph": 0
+    },
+    "history": [
+     {
+      "authorization": "ALLOWED",
+      "catalog": "ALLOWED",
+      "graph": "ALLOWED",
+      "t": 2.4
+     },
+     {
+      "authorization": "ALLOWED",
+      "catalog": "ALLOWED",
+      "graph": "ALLOWED",
+      "t": 19.4
+     },
+     {
+      "authorization": "ALLOWED",
+      "catalog": "ALLOWED",
+      "graph": "ALLOWED",
+      "t": 36.8
+     },
+     {
+      "authorization": "ALLOWED",
+      "catalog": "ALLOWED",
+      "graph": "ALLOWED",
+      "t": 53.8
+     },
+     {
+      "authorization": "ALLOWED",
+      "catalog": "ALLOWED",
+      "graph": "ALLOWED",
+      "t": 71.0
+     },
+     {
+      "authorization": "ALLOWED",
+      "catalog": "ALLOWED",
+      "graph": "ALLOWED",
+      "t": 88.0
+     }
+    ],
+    "note": "6 consecutive agreeing observations required; a poll interval, not a propagation bound",
+    "polls": 6,
+    "stable": true,
+    "waited_s": 87,
+    "want": {
+     "authorization": "ALLOWED",
+     "catalog": "ALLOWED",
+     "graph": "ALLOWED"
+    }
+   },
+   "expected": "REFUSED",
+   "first_release": {
+    "case": "connected-approved",
+    "decision": "RELEASED"
+   },
+   "fresh_request": {
+    "catalog": {
+     "details": {},
+     "http_status": 403,
+     "reason": "entries.list page 0: HTTP 403 Permission 'dataplex.entries.list' denied on 'projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo/entries'",
+     "stage": "list",
+     "status": "CATALOG_ERROR"
+    },
+    "downstream_ran": false,
+    "stopped_at": "seed"
+   },
+   "receipt_invocations_after_revocation": 0,
+   "revocation": {
+    "catalog": {
+     "at": "2026-09-15T07:15:25.983362+00:00",
+     "resources": {
+      "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo": "REVOKED"
+     },
+     "role": "roles/dataplex.catalogViewer",
+     "status": "REVOKED"
+    },
+    "catalog_wait": {
+     "http_status": 403,
+     "note": "a poll interval, not a propagation bound",
+     "observed": true,
+     "polls": 1,
+     "status": "DENIED",
+     "waited_s": 0,
+     "want": "DENIED"
+    },
+    "observed": true,
+    "requester": {
+     "at": "2026-09-15T07:16:54.316688+00:00",
+     "datasets": [
+      "okf_graph_spike_20260905",
+      "okf_graph_spike_20260905_rls",
+      "okf_receipt_spike_20260905"
+     ],
+     "event": "revoke_all",
+     "graph": {
+      "status": "DENIED",
+      "waited_s": 82
+     },
+     "observed": true,
+     "sdk": {
+      "status": "DENIED",
+      "waited_s": 2
+     }
+    },
+    "stable": {
+     "consecutive": 6,
+     "every_s": 15.0,
+     "flaps": {
+      "authorization": 0,
+      "catalog": 0,
+      "graph": 0
+     },
+     "history": [
+      {
+       "authorization": "DENIED",
+       "catalog": "DENIED",
+       "graph": "DENIED",
+       "t": 2.3
+      },
+      {
+       "authorization": "DENIED",
+       "catalog": "DENIED",
+       "graph": "DENIED",
+       "t": 19.8
+      },
+      {
+       "authorization": "DENIED",
+       "catalog": "DENIED",
+       "graph": "DENIED",
+       "t": 37.1
+      },
+      {
+       "authorization": "DENIED",
+       "catalog": "DENIED",
+       "graph": "DENIED",
+       "t": 54.9
+      },
+      {
+       "authorization": "DENIED",
+       "catalog": "DENIED",
+       "graph": "DENIED",
+       "t": 72.4
+      },
+      {
+       "authorization": "DENIED",
+       "catalog": "DENIED",
+       "graph": "DENIED",
+       "t": 89.8
+      }
+     ],
+     "note": "6 consecutive agreeing observations required; a poll interval, not a propagation bound",
+     "polls": 6,
+     "stable": true,
+     "waited_s": 89,
+     "want": {
+      "authorization": "DENIED",
+      "catalog": "DENIED",
+      "graph": "DENIED"
+     }
+    }
+   },
+   "stored_receipt_note": "the approved case's sealed receipt re-decided under the post-revocation authorization; never re-executed"
+  }
+ ],
+ "catalog_access": {
+  "calls": [
+   {
+    "at": "2026-09-15T07:06:44.779804+00:00",
+    "error": null,
+    "http_status": 200,
+    "resource": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo",
+    "response_sha256": "441f2b14a045e4e9a9d473f09da7b50b6710544994c63eb7efa6507f6b767e5f",
+    "verb": "getIamPolicy"
+   },
+   {
+    "at": "2026-09-15T07:06:44.976823+00:00",
+    "error": null,
+    "http_status": 200,
+    "resource": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo",
+    "response_sha256": "441f2b14a045e4e9a9d473f09da7b50b6710544994c63eb7efa6507f6b767e5f",
+    "verb": "getIamPolicy"
+   },
+   {
+    "at": "2026-09-15T07:06:45.408846+00:00",
+    "error": null,
+    "http_status": 200,
+    "resource": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo",
+    "response_sha256": "f362fa12299e6de24d610677f2c40333f8064a9e0aaa31c3b3a1e38a2daf4c4c",
+    "verb": "setIamPolicy"
+   },
+   {
+    "at": "2026-09-15T07:15:25.581288+00:00",
+    "error": null,
+    "http_status": 200,
+    "resource": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo",
+    "response_sha256": "f362fa12299e6de24d610677f2c40333f8064a9e0aaa31c3b3a1e38a2daf4c4c",
+    "verb": "getIamPolicy"
+   },
+   {
+    "at": "2026-09-15T07:15:25.983212+00:00",
+    "error": null,
+    "http_status": 200,
+    "resource": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo",
+    "response_sha256": "a2f52e991c405ba722d3adba6f9812803aef0326b6d809e0943898320b0808fc",
+    "verb": "setIamPolicy"
+   },
+   {
+    "at": "2026-09-15T07:18:27.676771+00:00",
+    "error": null,
+    "http_status": 200,
+    "resource": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo",
+    "response_sha256": "a2f52e991c405ba722d3adba6f9812803aef0326b6d809e0943898320b0808fc",
+    "verb": "getIamPolicy"
+   },
+   {
+    "at": "2026-09-15T07:18:28.075344+00:00",
+    "error": null,
+    "http_status": 200,
+    "resource": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo",
+    "response_sha256": "2e872734a2e39a98784f32d6e5de685dafb689508bddeeb354d856f3a6dc92bf",
+    "verb": "setIamPolicy"
+   },
+   {
+    "at": "2026-09-15T07:18:28.274132+00:00",
+    "error": null,
+    "http_status": 200,
+    "resource": "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo",
+    "response_sha256": "2e872734a2e39a98784f32d6e5de685dafb689508bddeeb354d856f3a6dc92bf",
+    "verb": "getIamPolicy"
+   }
+  ],
+  "member": "serviceAccount:sa:okf-receipt-restricted",
+  "mutated": [
+   "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo"
+  ],
+  "preexisting": {},
+  "resources": [
+   "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo"
+  ],
+  "role": "roles/dataplex.catalogViewer",
+  "snapshots": {
+   "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo": {
+    "at": "2026-09-15T07:06:44.780054+00:00",
+    "bindings": [],
+    "etag": "BwZbgBeqo14=",
+    "member_held_role": false
+   }
+  }
+ },
+ "checks": {
+  "cases": 5,
+  "cases_met": 5,
+  "identity": "BOUND",
+  "provenance": true,
+  "teardown_ok": true,
+  "unresolved_jobs": 0
+ },
+ "decisions": {
+  "connected-approved": "RELEASED",
+  "connected-denied-intermediate": "REFUSED",
+  "connected-revocation": "REFUSED",
+  "connected-sql-substitution": "REFUSED",
+  "connected-unauthorized-output": "REFUSED"
+ },
+ "engine": "fallback",
+ "finished_at": "2026-09-15T07:18:43.121460+00:00",
+ "grant": {
+  "catalog": {
+   "at": "2026-09-15T07:06:45.409053+00:00",
+   "resources": {
+    "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo": "GRANTED"
+   },
+   "role": "roles/dataplex.catalogViewer",
+   "status": "GRANTED"
+  },
+  "catalog_before": {
+   "at": "2026-09-15T07:06:44.371613+00:00",
+   "http_status": 403,
+   "status": "DENIED"
+  },
+  "catalog_wait": {
+   "http_status": 200,
+   "note": "a poll interval, not a propagation bound",
+   "observed": true,
+   "polls": 9,
+   "status": "ALLOWED",
+   "waited_s": 83,
+   "want": "ALLOWED"
+  },
+  "requester": {
+   "at": "2026-09-15T07:08:14.980037+00:00",
+   "event": "apply",
+   "graph": {
+    "status": "ALLOWED",
+    "waited_s": 0
+   },
+   "observed": true,
+   "policy": {
+    "dataset": "base",
+    "dataset_reader": true,
+    "hidden": [],
+    "sdk_tables": true
+   },
+   "rls": {
+    "reason": "case does not use the `_rls` fixture",
+    "status": "NOT_APPLICABLE"
+   },
+   "sdk": {
+    "status": "ALLOWED",
+    "waited_s": 2
+   }
+  },
+  "stable": {
+   "consecutive": 6,
+   "every_s": 15.0,
+   "flaps": {
+    "authorization": 0,
+    "catalog": 0,
+    "graph": 0
+   },
+   "history": [
+    {
+     "authorization": "ALLOWED",
+     "catalog": "ALLOWED",
+     "graph": "ALLOWED",
+     "t": 2.3
+    },
+    {
+     "authorization": "ALLOWED",
+     "catalog": "ALLOWED",
+     "graph": "ALLOWED",
+     "t": 19.8
+    },
+    {
+     "authorization": "ALLOWED",
+     "catalog": "ALLOWED",
+     "graph": "ALLOWED",
+     "t": 37.3
+    },
+    {
+     "authorization": "ALLOWED",
+     "catalog": "ALLOWED",
+     "graph": "ALLOWED",
+     "t": 55.2
+    },
+    {
+     "authorization": "ALLOWED",
+     "catalog": "ALLOWED",
+     "graph": "ALLOWED",
+     "t": 72.6
+    },
+    {
+     "authorization": "ALLOWED",
+     "catalog": "ALLOWED",
+     "graph": "ALLOWED",
+     "t": 89.9
+    }
+   ],
+   "note": "6 consecutive agreeing observations required; a poll interval, not a propagation bound",
+   "polls": 6,
+   "stable": true,
+   "waited_s": 89,
+   "want": {
+    "authorization": "ALLOWED",
+    "catalog": "ALLOWED",
+    "graph": "ALLOWED"
+   }
+  }
+ },
+ "identity": {
+  "admin_jobs": 9,
+  "admin_ops": {
+   "attempted": 9,
+   "by_state": {
+    "DONE": 9
+   }
+  },
+  "checked_by": "operator jobs.get",
+  "expected": "sa:okf-receipt-restricted",
+  "graph_jobs": 46,
+  "jobs": {
+   "01818e1b-735d-42fd-80af-65ad796b669e": "operator",
+   "23cc5204-2c48-41e0-a431-027c1c7f5d93": "sa:okf-receipt-restricted",
+   "331ed54b-0c69-4b84-90ff-8cd0b6c9943c": "operator",
+   "62a2ceb9-2ea2-4201-8417-07e48ee91c3b": "operator",
+   "72d0a2e6-157c-44b7-b4f4-787b26d3d3a6": "operator",
+   "7ee65c08-4092-4c19-b8f2-5f120da6bac3": "operator",
+   "82c842f6-46a0-47be-bea7-4832244cb3a3": "operator",
+   "cf932be2-e8ef-4dcf-a900-40f19842e126": "operator",
+   "e382b1e5-62ec-447e-ba96-6c28771a797b": "operator",
+   "e84a136c-702b-45de-87ac-11b8adc44afb": "operator",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_42fa5330eed6": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_b71f31ab33c2": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_d48e61c3f223": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_04f73ab36c74": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_075de47260be": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_09bd2182fafb": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_188018bea07f": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_294b9b687c0b": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_527cc01b02c2": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_5777d789c230": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_6649bdb5013c": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_68291f2a275b": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_6e547d67aa27": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_8c8b65e4ac0b": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_bb97b6dad648": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_e23994ac5440": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_f49873a0a7ef": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_6a8268acdbe3": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_cc543e6da618": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_efbdea5dadf5": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_03d0beaadca2": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_0e7730c05b99": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_17df618940e5": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_6013b73ce0bd": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_b62b92a94abc": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_ec18041a2ec1": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_1835549aadea": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_3ae68daa9635": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_3f06bc925694": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_f8a8148824c0": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_27245eb2bfdd": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_4f6878b83293": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_56083848dbf8": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_659675881d0c": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_114a2ab8c6e6": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_3cb730e35249": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_71293ff4fb38": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_d43e37f16c52": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_2d838e853803": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_41c26a871218": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_49aabe526ce2": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_a03654e31135": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_cad96c543122": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_8646c3a04696": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_a3110a8ec0f4": "sa:okf-receipt-restricted",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_afe3ad833091": "sa:okf-receipt-restricted",
+   "okf_rcpt_db42283992bdfe00a42de21d_ee05a2c8a8152a24": "sa:okf-receipt-restricted",
+   "okf_rcpt_e6fab1ac8adb4af45708cd7c_ba1740808c842003": "sa:okf-receipt-restricted"
+  },
+  "jobs_compared": 58,
+  "other_identities": [],
+  "probe_jobs": 1,
+  "receipt_jobs": 2,
+  "roles": {
+   "graph": {
+    "expected": "sa:okf-receipt-restricted",
+    "jobs": 46,
+    "required": true,
+    "status": "BOUND"
+   },
+   "policy_admin": {
+    "expected": "operator",
+    "jobs": 9,
+    "required": false,
+    "status": "BOUND"
+   },
+   "receipt": {
+    "expected": "sa:okf-receipt-restricted",
+    "jobs": 2,
+    "required": true,
+    "status": "BOUND"
+   },
+   "requester_probe": {
+    "expected": "sa:okf-receipt-restricted",
+    "jobs": 1,
+    "required": false,
+    "status": "BOUND"
+   }
+  },
+  "status": "BOUND"
+ },
+ "job_inventory": {
+  "graph_and_store": [
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_3ae68daa9635",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_8646c3a04696",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_cc543e6da618",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_49aabe526ce2",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_659675881d0c",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_d43e37f16c52",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_b71f31ab33c2",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_b62b92a94abc",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_0e7730c05b99",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_188018bea07f",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_6649bdb5013c",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_5777d789c230",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_bb97b6dad648",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_6e547d67aa27",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_075de47260be",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_68291f2a275b",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_f8a8148824c0",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_afe3ad833091",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_efbdea5dadf5",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_2d838e853803",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_114a2ab8c6e6",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_27245eb2bfdd",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_42fa5330eed6",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_6013b73ce0bd",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_ec18041a2ec1",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_294b9b687c0b",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_e23994ac5440",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_8c8b65e4ac0b",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_09bd2182fafb",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_f49873a0a7ef",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_527cc01b02c2",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_04f73ab36c74",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_cad96c543122",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_3cb730e35249",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_4f6878b83293",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_3f06bc925694",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_a3110a8ec0f4",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_6a8268acdbe3",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_a03654e31135",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_71293ff4fb38",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_56083848dbf8",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_d48e61c3f223",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_17df618940e5",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_03d0beaadca2",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_1835549aadea",
+   "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_41c26a871218"
+  ],
+  "journal_by_role": {
+   "chain_declaration": 3,
+   "facts_readback": 14,
+   "observed_head": 3,
+   "payload_rows": 6,
+   "pin_resolution": 4,
+   "retrieval_context": 4,
+   "retrieval_nodes": 4,
+   "retrieval_walk": 5,
+   "seed_visibility": 3
+  },
+  "note": "every journaled job (Catalog-seeded store reads, retrieval, declaration, payload rows, facts read-back, the bypass attempts) and every receipt job; broker probes and row-policy DDL are in identity.roles",
+  "receipt": [
+   "okf_rcpt_e6fab1ac8adb4af45708cd7c_ba1740808c842003",
+   "okf_rcpt_db42283992bdfe00a42de21d_ee05a2c8a8152a24"
+  ],
+  "unresolved": []
+ },
+ "journal": {
+  "jobs": [
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 1243,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "retained publication row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:09:46.139387+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_3ae68daa9635",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_3ae68daa9635",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "a0c216227f4f4627d7b0eaf921db1900f42506245ca4f409f269208f616f5ead",
+    "role": "pin_resolution",
+    "rows": 1,
+    "seq": 1,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:09:46.139712+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:09:49.824709+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 14665,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "exact seed node row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:09:49.826264+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_8646c3a04696",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_8646c3a04696",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "5a17f13fc3a380194d1438d8f0ddf8bb43850126c8812fe9fdf2b7d4fff0410e",
+    "role": "seed_visibility",
+    "rows": 1,
+    "seq": 2,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:09:49.830856+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:09:50.657553+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 67,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "active_publication (observation only; never followed)",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:09:50.658779+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_cc543e6da618",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_cc543e6da618",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "468285771bb69398b2780f3e9518a4bbc1857825a480feca71c68efcae1344f4",
+    "role": "observed_head",
+    "rows": 1,
+    "seq": 3,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:09:50.659060+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:09:51.667408+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 58680,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage walk",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:09:51.769931+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_49aabe526ce2",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_49aabe526ce2",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047",
+    "role": "retrieval_walk",
+    "rows": 1,
+    "seq": 4,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:09:51.770085+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:09:53.369458+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 157239,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage context",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:09:53.371416+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_659675881d0c",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_659675881d0c",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "29aff0d7ac7f67ee0655c2f6c483c16d39888d1f67a5517f4bbcb275b35fae6a",
+    "role": "retrieval_context",
+    "rows": 19,
+    "seq": 5,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:09:53.372236+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:09:54.570043+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 16752,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage nodes",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:09:53.373095+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_d43e37f16c52",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_d43e37f16c52",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "55f972cfdbd7a208f20dc7d231b0992b9ccde4c00c7517f23eccbd4d1908c8ac",
+    "role": "retrieval_nodes",
+    "rows": 2,
+    "seq": 6,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:09:53.374091+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:09:54.333438+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 21351,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "Attested Computation declaration row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:09:54.574583+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_b71f31ab33c2",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_b71f31ab33c2",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b790feadc52b45041beb10f8645503250de42269219cf4e97d579f7bdad6f2d3",
+    "role": "chain_declaration",
+    "rows": 1,
+    "seq": 7,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:09:54.574775+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:09:55.411260+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 117477,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained node rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:09:55.412657+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_b62b92a94abc",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_b62b92a94abc",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+    "role": "payload_rows",
+    "rows": 44,
+    "seq": 8,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:09:55.412965+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:09:56.449644+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 61408,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained edge rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:09:56.450758+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_0e7730c05b99",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_0e7730c05b99",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+    "role": "payload_rows",
+    "rows": 109,
+    "seq": 9,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:09:56.451028+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:09:57.256677+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 78,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table fulfillment_cost",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:09:59.294864+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_188018bea07f",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_188018bea07f",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "c9df96e43c41051753953c5eb20bf6696aaf3f8cbb1de9a065db36ce604904cb",
+    "role": "facts_readback",
+    "rows": 2,
+    "seq": 10,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:09:59.295582+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:00.121401+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 0,
+    "bytes_processed": 0,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table fx_daily_rates",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:00.373989+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_6649bdb5013c",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_6649bdb5013c",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b1500f8fd659379c08a6183519829ca078f82cbdc789fa2f61271e6906126f42",
+    "role": "facts_readback",
+    "rows": 0,
+    "seq": 11,
+    "state": "EMPTY",
+    "submitted_at": "2026-09-15T07:10:00.374952+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:01.171495+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 119,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table order_lines",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:01.446677+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_5777d789c230",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_5777d789c230",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "1ebfc0c1a0c1255acd2ed7c8874a3e29ef46ec57a1e260535a9bb7c2ecb64080",
+    "role": "facts_readback",
+    "rows": 3,
+    "seq": 12,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:01.447720+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:02.374033+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 423,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table orders",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:02.574578+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_bb97b6dad648",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_bb97b6dad648",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "6a3f4867e508c3e8c10c64534e5401bcd80780d61f318441e25dd792eddd837a",
+    "role": "facts_readback",
+    "rows": 3,
+    "seq": 13,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:02.575530+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:03.391031+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 78,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table payment_fees",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:03.598349+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_6e547d67aa27",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_6e547d67aa27",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "6db6c2b878f7526de449c82782b71b5b50db389a70f4d962088b2e4b2e102197",
+    "role": "facts_readback",
+    "rows": 2,
+    "seq": 14,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:03.599350+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:04.474392+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 49,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table products",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:04.683479+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_075de47260be",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_075de47260be",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "549ff769a05f3fe793b5f9c85bfd1e336c26bb85286f6a13b554546e12a1c13a",
+    "role": "facts_readback",
+    "rows": 2,
+    "seq": 15,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:04.684056+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:05.457053+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 78,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table shipment_cost",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:05.670157+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_68291f2a275b",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_68291f2a275b",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "ee5e20bb18ca1d93662f6393fc4510e531abbdd9e3463c9ae70b62ae0eecd2e1",
+    "role": "facts_readback",
+    "rows": 2,
+    "seq": 16,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:05.670750+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:06.469881+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 1243,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "retained publication row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:12.989089+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_f8a8148824c0",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_f8a8148824c0",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "a0c216227f4f4627d7b0eaf921db1900f42506245ca4f409f269208f616f5ead",
+    "role": "pin_resolution",
+    "rows": 1,
+    "seq": 17,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:12.989386+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:13.691184+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 14665,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "exact seed node row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:13.692203+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_afe3ad833091",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_afe3ad833091",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "5a17f13fc3a380194d1438d8f0ddf8bb43850126c8812fe9fdf2b7d4fff0410e",
+    "role": "seed_visibility",
+    "rows": 1,
+    "seq": 18,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:13.692439+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:14.780862+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 67,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "active_publication (observation only; never followed)",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:14.782085+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_efbdea5dadf5",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_efbdea5dadf5",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "468285771bb69398b2780f3e9518a4bbc1857825a480feca71c68efcae1344f4",
+    "role": "observed_head",
+    "rows": 1,
+    "seq": 19,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:14.782474+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:15.653155+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 58680,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage walk",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:15.654848+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_2d838e853803",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_2d838e853803",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047",
+    "role": "retrieval_walk",
+    "rows": 1,
+    "seq": 20,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:15.655104+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:16.712194+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 16752,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage nodes",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:16.714299+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_114a2ab8c6e6",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_114a2ab8c6e6",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "55f972cfdbd7a208f20dc7d231b0992b9ccde4c00c7517f23eccbd4d1908c8ac",
+    "role": "retrieval_nodes",
+    "rows": 2,
+    "seq": 21,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:16.714626+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:17.461230+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 157239,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage context",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:16.715486+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_27245eb2bfdd",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_27245eb2bfdd",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "29aff0d7ac7f67ee0655c2f6c483c16d39888d1f67a5517f4bbcb275b35fae6a",
+    "role": "retrieval_context",
+    "rows": 19,
+    "seq": 22,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:16.716221+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:17.543433+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 21351,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "Attested Computation declaration row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:17.547089+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_42fa5330eed6",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_42fa5330eed6",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b790feadc52b45041beb10f8645503250de42269219cf4e97d579f7bdad6f2d3",
+    "role": "chain_declaration",
+    "rows": 1,
+    "seq": 23,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:17.547278+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:18.584231+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 117477,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained node rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:18.585467+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_6013b73ce0bd",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_6013b73ce0bd",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+    "role": "payload_rows",
+    "rows": 44,
+    "seq": 24,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:18.585791+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:19.769261+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 61408,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained edge rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:19.770091+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_ec18041a2ec1",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_ec18041a2ec1",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+    "role": "payload_rows",
+    "rows": 109,
+    "seq": 25,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:19.770495+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:20.523432+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 78,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table fulfillment_cost",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:22.502737+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_294b9b687c0b",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_294b9b687c0b",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "c9df96e43c41051753953c5eb20bf6696aaf3f8cbb1de9a065db36ce604904cb",
+    "role": "facts_readback",
+    "rows": 2,
+    "seq": 26,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:22.503339+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:23.493589+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 0,
+    "bytes_processed": 0,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table fx_daily_rates",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:23.691031+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_e23994ac5440",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_e23994ac5440",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b1500f8fd659379c08a6183519829ca078f82cbdc789fa2f61271e6906126f42",
+    "role": "facts_readback",
+    "rows": 0,
+    "seq": 27,
+    "state": "EMPTY",
+    "submitted_at": "2026-09-15T07:10:23.691586+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:24.471765+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 119,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table order_lines",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:24.682610+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_8c8b65e4ac0b",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_8c8b65e4ac0b",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "1ebfc0c1a0c1255acd2ed7c8874a3e29ef46ec57a1e260535a9bb7c2ecb64080",
+    "role": "facts_readback",
+    "rows": 3,
+    "seq": 28,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:24.683304+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:25.498464+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 423,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table orders",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:25.724577+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_09bd2182fafb",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_09bd2182fafb",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "6a3f4867e508c3e8c10c64534e5401bcd80780d61f318441e25dd792eddd837a",
+    "role": "facts_readback",
+    "rows": 3,
+    "seq": 29,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:25.725205+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:26.473461+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 78,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table payment_fees",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:26.695362+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_f49873a0a7ef",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_f49873a0a7ef",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "6db6c2b878f7526de449c82782b71b5b50db389a70f4d962088b2e4b2e102197",
+    "role": "facts_readback",
+    "rows": 2,
+    "seq": 30,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:26.696010+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:27.537372+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 49,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table products",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:27.731826+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_527cc01b02c2",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_527cc01b02c2",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "549ff769a05f3fe793b5f9c85bfd1e336c26bb85286f6a13b554546e12a1c13a",
+    "role": "facts_readback",
+    "rows": 2,
+    "seq": 31,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:27.732358+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:28.603569+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 78,
+    "dataset_project": "test-project-0728-467323",
+    "description": "full read of synthetic fact table shipment_cost",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:28.795803+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_04f73ab36c74",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_facts_readback_04f73ab36c74",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "ee5e20bb18ca1d93662f6393fc4510e531abbdd9e3463c9ae70b62ae0eecd2e1",
+    "role": "facts_readback",
+    "rows": 2,
+    "seq": 32,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:28.796378+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:29.858384+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": null,
+    "bytes_processed": null,
+    "dataset": "okf_graph_spike_20260905_rls",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage walk",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:42.456833+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_cad96c543122",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_cad96c543122",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "4286a2432991779fd6c8ae2c308eee6d2d903b44d6b989198cd8608193c6937a",
+    "role": "retrieval_walk",
+    "rows": 0,
+    "seq": 33,
+    "state": "EMPTY",
+    "submitted_at": "2026-09-15T07:10:42.457643+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:43.627861+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": null,
+    "bytes_processed": null,
+    "dataset": "okf_graph_spike_20260905_rls",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage nodes",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:43.630206+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_3cb730e35249",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_3cb730e35249",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "defed7c339bac3a5fa57ff3c92363d3ceb5fc6d6923ef1c85a4e215311f122a2",
+    "role": "retrieval_nodes",
+    "rows": 1,
+    "seq": 34,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:43.630574+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:44.416808+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": null,
+    "bytes_processed": null,
+    "dataset": "okf_graph_spike_20260905_rls",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage context",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:10:43.631352+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_4f6878b83293",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_4f6878b83293",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "f25678aa0b29dee43b5dc1ba8f0052f20f02891c7b1ef96a79eaeabbbb3af0e5",
+    "role": "retrieval_context",
+    "rows": 5,
+    "seq": 35,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:10:43.632160+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:10:44.766530+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 1243,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "retained publication row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:13:41.554139+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_3f06bc925694",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_3f06bc925694",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "a0c216227f4f4627d7b0eaf921db1900f42506245ca4f409f269208f616f5ead",
+    "role": "pin_resolution",
+    "rows": 1,
+    "seq": 36,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:13:41.554327+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:13:42.535679+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 14665,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "exact seed node row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:13:42.536577+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_a3110a8ec0f4",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_seed_visibility_a3110a8ec0f4",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "5a17f13fc3a380194d1438d8f0ddf8bb43850126c8812fe9fdf2b7d4fff0410e",
+    "role": "seed_visibility",
+    "rows": 1,
+    "seq": 37,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:13:42.536814+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:13:43.486242+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 67,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "active_publication (observation only; never followed)",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:13:43.487496+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_6a8268acdbe3",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_observed_head_6a8268acdbe3",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "468285771bb69398b2780f3e9518a4bbc1857825a480feca71c68efcae1344f4",
+    "role": "observed_head",
+    "rows": 1,
+    "seq": 38,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:13:43.487868+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:13:44.283140+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 58680,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage walk",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:13:44.284844+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_a03654e31135",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_a03654e31135",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047",
+    "role": "retrieval_walk",
+    "rows": 1,
+    "seq": 39,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:13:44.285098+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:13:45.286676+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 16752,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage nodes",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:13:45.288284+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_71293ff4fb38",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_nodes_71293ff4fb38",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "55f972cfdbd7a208f20dc7d231b0992b9ccde4c00c7517f23eccbd4d1908c8ac",
+    "role": "retrieval_nodes",
+    "rows": 2,
+    "seq": 40,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:13:45.288602+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:13:46.176758+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 20971520,
+    "bytes_processed": 157239,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage context",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:13:45.289486+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_56083848dbf8",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_context_56083848dbf8",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "29aff0d7ac7f67ee0655c2f6c483c16d39888d1f67a5517f4bbcb275b35fae6a",
+    "role": "retrieval_context",
+    "rows": 19,
+    "seq": 41,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:13:45.290372+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:13:46.145061+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 21351,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "Attested Computation declaration row",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:13:46.182230+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_d48e61c3f223",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_chain_declaration_d48e61c3f223",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b790feadc52b45041beb10f8645503250de42269219cf4e97d579f7bdad6f2d3",
+    "role": "chain_declaration",
+    "rows": 1,
+    "seq": 42,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:13:46.182693+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:13:46.995820+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 117477,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained node rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:13:46.997183+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_17df618940e5",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_17df618940e5",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "bc3ecfa9a36b0490636bed191ce38f770c93746f04b2eab11826b8d5b28b0fd9",
+    "role": "payload_rows",
+    "rows": 44,
+    "seq": 43,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:13:46.997609+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:13:47.985081+00:00"
+   },
+   {
+    "actual": true,
+    "bytes_billed": 10485760,
+    "bytes_processed": 61408,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "full retained edge rows",
+    "engine": "bigquery",
+    "error": null,
+    "intended_at": "2026-09-15T07:13:47.986050+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_03d0beaadca2",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_payload_rows_03d0beaadca2",
+    "job_ref_complete": true,
+    "location": "US",
+    "project": "test-project-0728-467323",
+    "query_sha256": "b97674c40796e109c7b13c1edf1535975c9803b417957a8a501b38aa115edf22",
+    "role": "payload_rows",
+    "rows": 109,
+    "seq": 44,
+    "state": "DONE",
+    "submitted_at": "2026-09-15T07:13:47.986614+00:00",
+    "terminal": true,
+    "terminal_at": "2026-09-15T07:13:48.885597+00:00"
+   },
+   {
+    "actual": true,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "retained publication row",
+    "engine": "bigquery",
+    "error": "{'reason': 'accessDenied', 'message': 'Access Denied: Table test-project-0728-467323:okf_graph_spike_20260905.publications: User does not have permission to query table test-project-0728-467323:okf_graph_spike_20260905.publications, or perhaps it does not exist.'}",
+    "intended_at": "2026-09-15T07:18:24.598912+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_1835549aadea",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_pin_resolution_1835549aadea",
+    "job_ref_complete": true,
+    "location": "US",
+    "observed": "DONE",
+    "project": "test-project-0728-467323",
+    "query_sha256": "a0c216227f4f4627d7b0eaf921db1900f42506245ca4f409f269208f616f5ead",
+    "reconciled": true,
+    "reconciled_at": "2026-09-15T07:18:24.990859+00:00",
+    "role": "pin_resolution",
+    "seq": 45,
+    "state": "ERROR",
+    "submitted_at": "2026-09-15T07:18:24.599240+00:00",
+    "terminal": true,
+    "unknown_at": "2026-09-15T07:18:24.841718+00:00"
+   },
+   {
+    "actual": true,
+    "dataset": "okf_graph_spike_20260905",
+    "dataset_project": "test-project-0728-467323",
+    "description": "governed retrieval stage walk",
+    "engine": "bigquery",
+    "error": "{'reason': 'accessDenied', 'message': 'Access Denied: Table test-project-0728-467323:okf_graph_spike_20260905.edges: User does not have permission to query table test-project-0728-467323:okf_graph_spike_20260905.edges, or perhaps it does not exist.'}",
+    "intended_at": "2026-09-15T07:18:24.992165+00:00",
+    "intended_job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_41c26a871218",
+    "job_id": "okf_cc_e2e-20260915t070643z-9ddaf35f_retrieval_walk_41c26a871218",
+    "job_ref_complete": true,
+    "location": "US",
+    "observed": "DONE",
+    "project": "test-project-0728-467323",
+    "query_sha256": "88fe3d352a96cf4683c42be704d35c30bfa505e1f021d58ff92996b611fee047",
+    "reconciled": true,
+    "reconciled_at": "2026-09-15T07:18:25.486428+00:00",
+    "role": "retrieval_walk",
+    "seq": 46,
+    "state": "ERROR",
+    "submitted_at": "2026-09-15T07:18:24.992543+00:00",
+    "terminal": true,
+    "unknown_at": "2026-09-15T07:18:25.372506+00:00"
+   }
+  ],
+  "retained": [
+   {
+    "bytes": 8576,
+    "name": "connected-approved__catalog_list_0",
+    "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/catalog/connected-approved__catalog_list_0.json",
+    "retained_at": "2026-09-15T07:09:45.942647+00:00",
+    "sha256": "f808e940e72ba9298569b120a0f0a738851fe824043ec3499606dc0ac3d105ef"
+   },
+   {
+    "bytes": 5444,
+    "name": "connected-approved__catalog_entry",
+    "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/catalog/connected-approved__catalog_entry.json",
+    "retained_at": "2026-09-15T07:09:46.137723+00:00",
+    "sha256": "748a877ccb43b9d91c1dcaef98eca8b9ed9bc0e3c3fe651719e8762261aca973"
+   },
+   {
+    "bytes": 6632,
+    "name": "retrieval_connected-approved",
+    "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/retrieval/retrieval_connected-approved.json",
+    "retained_at": "2026-09-15T07:09:54.574072+00:00",
+    "sha256": "acdc44ef1c9a1e69247166740d29f7a14240004744fe26d9ee338b0d469b1882"
+   },
+   {
+    "bytes": 8576,
+    "name": "connected-sql-substitution__catalog_list_0",
+    "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/catalog/connected-sql-substitution__catalog_list_0.json",
+    "retained_at": "2026-09-15T07:10:12.839728+00:00",
+    "sha256": "f808e940e72ba9298569b120a0f0a738851fe824043ec3499606dc0ac3d105ef"
+   },
+   {
+    "bytes": 5444,
+    "name": "connected-sql-substitution__catalog_entry",
+    "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/catalog/connected-sql-substitution__catalog_entry.json",
+    "retained_at": "2026-09-15T07:10:12.987529+00:00",
+    "sha256": "748a877ccb43b9d91c1dcaef98eca8b9ed9bc0e3c3fe651719e8762261aca973"
+   },
+   {
+    "bytes": 6630,
+    "name": "retrieval_connected-sql-substitution",
+    "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/retrieval/retrieval_connected-sql-substitution.json",
+    "retained_at": "2026-09-15T07:10:17.546625+00:00",
+    "sha256": "309c1639de6b1f81b8660bfe2c99cce9d1288fb0f6ae6739b1fb46c9671730e5"
+   },
+   {
+    "bytes": 8576,
+    "name": "connected-unauthorized-output__catalog_list_0",
+    "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/catalog/connected-unauthorized-output__catalog_list_0.json",
+    "retained_at": "2026-09-15T07:13:41.418152+00:00",
+    "sha256": "f808e940e72ba9298569b120a0f0a738851fe824043ec3499606dc0ac3d105ef"
+   },
+   {
+    "bytes": 5444,
+    "name": "connected-unauthorized-output__catalog_entry",
+    "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/catalog/connected-unauthorized-output__catalog_entry.json",
+    "retained_at": "2026-09-15T07:13:41.553005+00:00",
+    "sha256": "748a877ccb43b9d91c1dcaef98eca8b9ed9bc0e3c3fe651719e8762261aca973"
+   },
+   {
+    "bytes": 6630,
+    "name": "retrieval_connected-unauthorized-output",
+    "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/retrieval/retrieval_connected-unauthorized-output.json",
+    "retained_at": "2026-09-15T07:13:46.181690+00:00",
+    "sha256": "6610b4c6eda8439eb0ca9be7f496d2497aea10da3d955df6731e74a7f4010b8a"
+   },
+   {
+    "bytes": 218,
+    "name": "connected-revocation-fresh__catalog_list_0",
+    "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/catalog/connected-revocation-fresh__catalog_list_0.json",
+    "retained_at": "2026-09-15T07:18:24.597451+00:00",
+    "sha256": "0d8c57ca296971541eef9d82d495916b92b7d359dacadf5cc2619400773d1c88"
+   }
+  ],
+  "summary": {
+   "actual_jobs": 46,
+   "by_state": {
+    "DONE": 41,
+    "EMPTY": 3,
+    "ERROR": 2
+   },
+   "entries": 46,
+   "path": "~/caohy1988.github.io-connected-e2e/rfc/spikes/bq-graph/evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f/journal.jsonl",
+   "retained_files": 10,
+   "unresolved": 0,
+   "with_job_id": 46
+  }
+ },
+ "labels": {
+  "apis": "live GCP (Dataplex Catalog, BigQuery, IAM) in --live; emulated in --hermetic",
+  "cache": "Catalog concept seeds disable the retrieval cache: revocation is shown on a fresh request, a retained-pin bypass and the stored receipt, not on a cached replay",
+  "catalog_access": "the harness grants the requester catalogViewer on the demo entry group for the run and removes it for revocation",
+  "data": "synthetic (invented Acme fixture; no customer data)",
+  "denied_intermediate_seed": "injected legacy fixture seed on the `_rls` governance copy of the pinned publication, not a Catalog discovery",
+  "engine": "relational fallback on the published tables (not BigQuery Graph / GQL)",
+  "receipt": "the SDK example's own verifier with a requester-held key; no independent attester",
+  "requester": "restricted service account through IAM impersonation, on every execution leg including the Catalog read",
+  "sample": "n = 1 run; no latency or cost benchmark"
+ },
+ "mode": "live",
+ "provenance": {
+  "ok": true,
+  "sdk_clean": true,
+  "sdk_head_pin": true
+ },
+ "requester": {
+  "environment": {
+   "broker": {
+    "authorization_probe": "dry-run SELECT per dependency table under the impersonated client",
+    "engine": "fallback",
+    "graph_leg": "authz.impersonated_client (IAM generateAccessToken; jobs carry the SA user_email)",
+    "iam": true,
+    "kind": "iam-impersonation-broker",
+    "principal": "sa:okf-receipt-restricted",
+    "receipt_leg": "SDK subprocess under an impersonated_service_account ADC file (GOOGLE_APPLICATION_CREDENTIALS), plus a PYTHONPATH `usercustomize.py` that adds the userinfo.email scope to google.auth.default (NOT `sitecustomize.py`: this interpreter ships one that completes sys.path, and a copy on PYTHONPATH shadows it). The SDK reads the requester from oauth2 tokeninfo, which returns no e-mail for a cloud-platform-only impersonated token, and google-auth ignores the ADC file's own `scopes` when the caller passes them, as the SDK does. The shim changes the credential's scope, never its identity, and edits no SDK source",
+    "rls_grantee": "a case on the `_rls` fixture adds the SA to the three hidden-intermediate row access policies (authz.set_rls) and observes the rows it can actually read; teardown restores the snapshot"
+   },
+   "catalog": "dataplex v1 entries.list + entries.get(view=ALL) under the requester's impersonated credential (cloud-platform + userinfo.email scopes)",
+   "catalog_access": {
+    "resources": [
+     "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo"
+    ],
+    "role": "roles/dataplex.catalogViewer"
+   },
+   "engine": "fallback (relational SQL on the published tables; job routing follows the project's assignments and is not asserted)",
+   "kind": "live",
+   "sdk": "examples/okf_attested_computation/run.py --live under the requester's impersonated ADC file",
+   "sdk_python": "OKF_SDK_PYTHON / --sdk-python",
+   "store": "BigQueryStore on okf_graph_spike_20260905 under the requester"
+  },
+  "principal": "sa:okf-receipt-restricted"
+ },
+ "run_dir": "evidence/connected-e2e/e2e-20260915t070643z-9ddaf35f",
+ "run_id": "e2e-20260915t070643z-9ddaf35f",
+ "runner": "okf_bq_graph.connected/0.1.0",
+ "sdk": {
+  "computation_digest": "afe2afbd4ab7ffe3144ca317c509b47bb5a03c5d035bf13b0849911eb3823312",
+  "computation_sha256": "5e96ae11835ad328ccc94d29ae4bc7cc40176758cbcbad63231d0461c1f8f0e7",
+  "context_ref": "okf:acme-retail-derived#gross-margin-period",
+  "dependencies": 7,
+  "head": "6719eb535667963fa640dd4535e508b550eb6cb1",
+  "head_matches_pin": true,
+  "pin": "6719eb535667963fa640dd4535e508b550eb6cb1",
+  "publication_id": "okf-receipt-spike/acme-retail-derived/gross-margin-period",
+  "repo_dirty": false,
+  "synthetic_fixture": true
+ },
+ "selected_cases": [
+  "connected-approved",
+  "connected-sql-substitution",
+  "connected-denied-intermediate",
+  "connected-unauthorized-output",
+  "connected-revocation"
+ ],
+ "started_at": "2026-09-15T07:06:43.550116+00:00",
+ "teardown": {
+  "broker": {
+   "datasets": {
+    "okf_graph_spike_20260905": {
+     "added_by_broker": false,
+     "original_roles": [],
+     "roles_after": []
+    },
+    "okf_graph_spike_20260905_rls": {
+     "added_by_broker": false,
+     "original_roles": [],
+     "roles_after": []
+    },
+    "okf_receipt_spike_20260905": {
+     "added_by_broker": false,
+     "original_roles": [],
+     "roles_after": []
+    }
+   },
+   "rls": {
+    "grantees_after": {
+     "edges": 1,
+     "nodes": 1,
+     "section_vectors": 1
+    },
+    "restored_to_snapshot": true,
+    "sa_in_grantees_after": false,
+    "tables": 3
+   },
+   "status": "VERIFIED",
+   "steps": {
+    "readback_okf_graph_spike_20260905": {
+     "ok": true
+    },
+    "readback_okf_graph_spike_20260905_rls": {
+     "ok": true
+    },
+    "readback_okf_receipt_spike_20260905": {
+     "ok": true
+    },
+    "readback_rls_policies": {
+     "ok": true
+    },
+    "remove_credential_file": {
+     "held": [
+      "adc.json",
+      "usercustomize.py"
+     ],
+     "ok": true
+    },
+    "restore_okf_graph_spike_20260905": {
+     "ok": true
+    },
+    "restore_okf_graph_spike_20260905_rls": {
+     "ok": true
+    },
+    "restore_okf_receipt_spike_20260905": {
+     "ok": true
+    },
+    "restore_rls_policies": {
+     "ok": true
+    }
+   }
+  },
+  "catalog": {
+   "at": "2026-09-15T07:18:28.274411+00:00",
+   "status": "VERIFIED",
+   "steps": {
+    "projects/test-project-0728-467323/locations/us-central1/entryGroups/okf-rfc-demo": {
+     "member_holds_role_after": false,
+     "ok": true,
+     "readback_equal": true,
+     "restore": true
+    }
+   }
+  }
+ },
+ "verdict": "E2E_CONNECTED",
+ "verdict_rule": "E2E_CONNECTED only when provenance holds before any case, every case is MET (reached its stage with its specific evidence), live identity is BOUND over every job the run submitted, no journaled job is unresolved, and both the Catalog IAM restore and the requester broker teardown are VERIFIED; E2E_BROKEN when a reached stage contradicts its expectation or a job ran as an unexpected identity; E2E_INCOMPLETE otherwise"
+}

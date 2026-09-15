@@ -216,7 +216,8 @@ def bind(comp: dict, decl: dict, sdk_pub: dict, as_of: str, source_pin: str = SO
 
 # ----------------------------------------------------------------------------- receipt leg (subprocess)
 def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner = subprocess.run,
-                timeout: int = 900, env_extra: Optional[dict] = None, label: Optional[str] = None) -> dict:
+                timeout: int = 900, env_extra: Optional[dict] = None, label: Optional[str] = None,
+                python: Optional[str] = None) -> dict:
     """Invoke the SDK example CLI for one case. The verdict is read from the CLI's own per-case diagnostic JSON, not
     from stdout. The CLI writes into an invocation-private directory that no other launch can see (overlapping runs
     cannot exchange evidence: Astra P2), the file must be newer than the launch, and the retained file is moved from
@@ -224,12 +225,15 @@ def run_receipt(case: str, root: str, out_dir: str, live: bool, runner: Runner =
     directory, so two successful overlapping runs never share a retained path). The record carries the diagnostic's
     request id and SHA-256 so every reference reconciles. A missing, stale or unparsable diagnostic is UNVERIFIABLE and
     `diag_present = False`. `label` names the retained file after the CHAIN case when several chain cases run the same
-    SDK case (the restricted chain runs `approved` twice): two retained diagnostics never share a name inside one run."""
+    SDK case (the restricted chain runs `approved` twice): two retained diagnostics never share a name inside one run.
+    `python` is the child's interpreter (default `OKF_SDK_PYTHON`, else this interpreter): a virtualenv disables user
+    site-packages, so the requester broker's `usercustomize` scope shim only loads under an interpreter that enables them."""
     out_dir = str(Path(out_dir).resolve())   # the CLI runs with the SDK root as cwd: never let a relative path land there
     Path(out_dir).mkdir(parents=True, exist_ok=True)
     mode = "live" if live else "hermetic"
     inv_dir = tempfile.mkdtemp(prefix=f".inv_{case}_{mode}_", dir=out_dir)
-    argv = [sys.executable, str(Path(root) / EXAMPLE_REL / "run.py"), "--case", case, "--evidence-dir", inv_dir]
+    interpreter = python or os.environ.get("OKF_SDK_PYTHON") or sys.executable
+    argv = [interpreter, str(Path(root) / EXAMPLE_REL / "run.py"), "--case", case, "--evidence-dir", inv_dir]
     env = dict(os.environ)
     if live:
         argv.append("--live")
