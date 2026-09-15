@@ -338,7 +338,7 @@ export function build(sourceMd, briefMd, judgments, hostTldrMd) {
     .compact-card h3 { margin: 0 0 10px; font-size: 1.05rem; }
     .compact-card-row { margin: 0 0 10px; }
     .compact-card-q { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); margin-bottom: 4px; }
-    .compact-trigger { display: block; width: 100%; text-align: left; border: 1px solid var(--line); border-radius: 8px; background: var(--cream); padding: 8px 10px; cursor: pointer; font: inherit; color: inherit; }
+    .compact-trigger { position: relative; display: block; width: 100%; text-align: left; border: 1px solid var(--line); border-radius: 8px; background: var(--cream); padding: 8px 10px; cursor: pointer; font: inherit; color: inherit; }
     .compact-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .compact-trigger[aria-expanded="true"] { border-color: var(--accent); background: #fff; }
     .compact-word { font-weight: 650; }

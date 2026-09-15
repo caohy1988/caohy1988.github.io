@@ -11,6 +11,8 @@ Full dual-aligned plan: `/tmp/mcp-apps-matrix-pm/impl/PLAN_v2.md` (Haiyuan-appro
 | **3b. Host TLDR (additive)** | above-fold `#host-tldr` from `host-tldr.md`: plain summary, official-matrix paragraph, Host \| Status \| Why (Documented/Partial/Unknown chips, linked evidence) | 9 rows; allowed chips only; https link per Why; private-path guard; `--check` drift | no |
 | **4. Acceptance / handoff** | Chromium viewports as PR70; Safari Reader; PM+UTL reader session; Astra at exact HEAD; vault | §8 gates recorded | no |
 
+PR4 records: measured §8 values (Chromium + WebKit) in `acceptance-results.md`, reproducible with `tools/matrix_skim_check.mjs`; the deferred human steps (Safari Reader View pass, PM + UTL five-question test) and their templates in `acceptance-checklist.md`. S1 fails at HEAD and is recorded as a residual, threshold unchanged.
+
 ## Order rule
 No fold-only intermediate publish. Judgment + shipping action land in PR2 with preservation checks.
 
