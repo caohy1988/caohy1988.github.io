@@ -1,5 +1,9 @@
 # Intent — dedicated end-to-end demo page `/rfc/e2e/`
 
+> **Superseded in part (2026-09-15, branch `rfc/e2e-viz`).** Haiyuan (~07:31 PT): the CLI-first demo was still too hard to understand. The page now follows [`VISUAL_PLAN.md`](VISUAL_PLAN.md): six reader-controlled steps (Publish → Catalog → Discover → Retrieve → Receipt → Revoke) with a synchronized panel, generated from the retained run files. The tape sits under Evidence.
+>
+> Still in force from this document: the problem, both planes, the Alder → Acme scenario, the honesty rules and the non-goals, including no new live run. The "page plus tape" five-minute outcome and acceptance (a)–(c) are replaced by VISUAL_PLAN's Verification Contract.
+
 Owner ask (Haiyuan, 2026-09-15 ~06:51 PT, with 06:53 and 06:57 additions). Implementer: Claude Opus. Reviewer and overnight merge representative: Astra; second LGTM: Kimi.
 
 ## Problem
