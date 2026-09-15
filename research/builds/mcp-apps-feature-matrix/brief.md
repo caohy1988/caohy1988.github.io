@@ -7,7 +7,7 @@ Evidence, not test results. Everything here comes from vendor documentation, dat
 Three of nine host surfaces document MCP Apps rendering: Claude Desktop, GitHub Copilot in VS Code, and Cursor. That is a documentation-based starting set; build and registration path still need verifying, and no fallback has been verified by a run anywhere.
 
 ## Shipping action
-Ship the portable path regardless: readable text plus an optional image as ordinary tool content. Do not rely on app-only tool visibility to hide a tool from the model; it is unverified on every host.
+Ship the portable path regardless: readable text plus an optional image as ordinary tool content. Do not rely on [app-only tool visibility](https://github.com/modelcontextprotocol/ext-apps/blob/6d9bdc7babf275b759225aa722cbf5510c4c6021/specification/2026-01-26/apps.mdx) to hide a tool from the model; it is unverified on every host.
 
 ## Next steps heading
 What would change this page

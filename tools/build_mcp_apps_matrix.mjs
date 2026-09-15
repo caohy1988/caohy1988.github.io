@@ -118,7 +118,7 @@ function renderLayerD(parsed) {
     return `        <tr>${cells.join("")}</tr>`;
   }).join("\n");
   return `
-    <section class="intro prose" aria-label="Version history">
+    <section class="intro prose" aria-label="Summary">
 ${intro.map((p) => `      <p>${inline(p)}</p>`).join("\n")}
     </section>
 
@@ -149,7 +149,7 @@ ${bullets.map((b) => `      <li>${inline(b)}</li>`).join("\n")}
     </ul>
 
     <hr class="rule">
-    <p class="source prose">Rendered from <code>source.md</code>, <code>brief.md</code>, and <code>judgments.json</code> in this folder by <code>tools/build_mcp_apps_matrix.mjs</code>. The Markdown <code>source.md</code> is the publish copy of MATRIX_TLDR ${version}; local inspection receipts referenced in the footnotes are not hosted here.</p>
+    <p class="source prose">Rendered from <code>source.md</code> in this folder by <code>tools/build_mcp_apps_matrix.mjs</code>. The Markdown is the publish copy of MATRIX_TLDR v7; local inspection receipts referenced in the footnotes are not hosted here.</p>
 `.replace(/^\n/, "");
 }
 
@@ -322,7 +322,7 @@ ${renderNav(PAGE_PATH)}
     <section class="short prose" id="short-version" aria-label="The short version">
       <h2>The short version</h2>
       <p class="judgment" id="aggregate-judgment">${esc(judgment)}</p>
-      <p class="action" id="shipping-action">${esc(action)}</p>
+      <p class="action" id="shipping-action">${inline(action)}</p>
     </section>
 
     <div class="banner prose" role="note" id="banner">
@@ -341,6 +341,8 @@ ${renderNextSteps(brief)}
       </ul>
       <p class="owner">${esc(owner)}</p>
     </section>
+
+    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>judgments.json</code> (product sentences), and <code>source.md</code> (full evidence below).</p>
 
     <details class="evidence" id="full-evidence">
       <summary>${esc(foldSummary)}</summary>
