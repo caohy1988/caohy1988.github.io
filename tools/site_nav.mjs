@@ -49,15 +49,16 @@ export const PAGES = {
   "/rfc/detailed-rfc/": "rfc/detailed-rfc/index.html",
   "/rfc/demo/": "rfc/demo/index.html",
   "/rfc/full-demo/": "rfc/full-demo/index.html",
+  "/rfc/e2e/": "rfc/e2e/index.html",
   "/evalbench/": "evalbench/index.html",
   "/research/builds/mcp-apps-feature-matrix/": "research/builds/mcp-apps-feature-matrix/index.html",
 };
 
 // Which nav entry is "current" for a page. Demos live under the RFC (that is what their old nav said).
-export const CURRENT = { "/rfc/demo/": "/rfc/", "/rfc/full-demo/": "/rfc/" };
+export const CURRENT = { "/rfc/demo/": "/rfc/", "/rfc/full-demo/": "/rfc/", "/rfc/e2e/": "/rfc/" };
 
 // Long single-page documents keep the bar pinned (they did before the shared chrome).
-export const STICKY = new Set(["/rfc/detailed-rfc/", "/rfc/demo/", "/rfc/full-demo/"]);
+export const STICKY = new Set(["/rfc/detailed-rfc/", "/rfc/demo/", "/rfc/full-demo/", "/rfc/e2e/"]);
 
 const START = "<!-- site-nav:start -->";
 const END = "<!-- site-nav:end -->";

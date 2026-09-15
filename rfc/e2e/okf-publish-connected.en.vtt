@@ -1,0 +1,72 @@
+WEBVTT
+Kind: captions
+Language: en
+
+NOTE
+Narration for ../demo/okf-publish-connected.mp4, the real terminal recording of live run kp-20260915t082018z-0387
+(synthetic data, one run). Cue times come from the asciinema cast with idle waits capped at 3 s, the same
+compression the mp4 was rendered with (92.72 s cast vs 92.75 s mp4), spot-checked on frames at 1, 27.8, 49.3 and 79 s.
+
+setup
+00:00:00.000 --> 00:00:04.200
+Can an AI agent answer “What was Acme’s gross margin?”
+with the approved definition — and prove the number?
+
+author
+00:00:04.200 --> 00:00:11.700
+Step 1 · Author: Finance’s Open Knowledge Format files
+are compiled into one fixed version.
+
+publish-write
+00:00:11.700 --> 00:00:21.900
+Step 2 · Publish in BigQuery: rows are written,
+then every row is read back and checked.
+
+publish-switch
+00:00:21.900 --> 00:00:27.400
+Ready. BigQuery now switches its
+“current version” pointer in one step.
+
+catalog
+00:00:27.400 --> 00:00:31.200
+Switched — BigQuery serves this version.
+Step 3 · A Knowledge Catalog entry is written that points to it.
+
+grant
+00:00:31.200 --> 00:00:39.800
+The agent’s restricted account is given read access.
+(Waiting until it takes effect: 71 s, compressed.)
+
+discover
+00:00:39.800 --> 00:00:48.800
+Step 4 · The agent finds the entry in Knowledge Catalog, pins that version,
+and retrieves the definition and the approved calculation.
+
+release
+00:00:48.800 --> 00:00:51.800
+Step 5 · The receipt checks out, so the number is released:
+gross margin $400.00.
+
+traps
+00:00:51.800 --> 00:01:09.800
+Traps: a swapped query, a rule the agent may not see,
+and output it may not read — each one refused.
+
+revoke
+00:01:09.800 --> 00:01:18.500
+Step 6 · Revoke: the agent’s access is removed…
+
+refused
+00:01:18.500 --> 00:01:24.100
+…a fresh request, a shortcut through the old pin and the stored receipt
+are all refused. The test tables and Catalog entry are deleted.
+
+result
+00:01:24.100 --> 00:01:26.700
+The agent receives only the answer and the verdicts:
+no IDs, SQL or account names.
+
+verdict
+00:01:26.700 --> 00:01:32.750
+One live run published in BigQuery, then the agent discovered,
+used, verified, and was revoked — successfully.
