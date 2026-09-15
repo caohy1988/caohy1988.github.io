@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MCP Apps feature matrix (v7) — The Field Brief</title>
-  <meta name="description" content="MCP Apps (SEP-1865) feature support by product, v7 2026-09-14: what vendor documentation, historical reports, pinned source and local inspection show for nine host surfaces. No cell is an observed UI run.">
+  <title>MCP Apps feature matrix (v7, readable) — The Field Brief</title>
+  <meta name="description" content="MCP Apps (SEP-1865) feature support by product, v7 2026-09-14: which hosts document Apps rendering, what to ship anyway, and the full v7 evidence on demand. No cell is an observed UI run.">
   <meta name="theme-color" content="#101828">
   <link rel="canonical" href="https://caohy1988.github.io/research/builds/mcp-apps-feature-matrix/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,15 +28,24 @@
     .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
     .prose { max-width: 76ch; }
     .kicker { padding: 36px 0 8px; margin: 0; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mint); }
-    h1 { font-family: var(--serif); font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; max-width: 24ch; }
+    h1 { font-family: var(--serif); font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; max-width: 28ch; }
     .meta { color: var(--ink-soft); margin: 0 0 28px; padding-bottom: 22px; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
     .meta .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
     h2 { font-family: var(--serif); font-size: 1.55rem; font-weight: 600; letter-spacing: -0.02em; margin: 40px 0 12px; }
-    .intro p { margin: 0 0 14px; color: var(--ink-soft); }
-    .intro strong, .notes strong, .takeaways strong { color: var(--ink); }
+    h3.group { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin: 22px 0 8px; font-weight: 600; }
+    .banner { background: var(--cream); border: 1px solid var(--line); border-left: 4px solid var(--mint); border-radius: 8px; padding: 14px 18px; margin: 0 0 22px; font-size: 0.92rem; color: var(--ink-soft); }
+    .banner p { margin: 0; }
+    .judgment, .action { margin: 0 0 14px; }
+    .action { font-weight: 550; }
+    .products, .next-steps { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    .products li, .next-steps li { margin: 0 0 10px; }
+    .owner { font-size: 0.9rem; color: var(--ink-faint); margin: 0 0 28px; }
     .rule { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
-
-    /* The nine-column matrix: the wrapper scrolls sideways; the feature column stays put while it does. */
+    details.evidence { border: 1px solid var(--line); border-radius: 10px; background: var(--cream); padding: 0 18px 18px; margin: 28px 0 8px; }
+    details.evidence > summary { cursor: pointer; list-style: none; font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mint); padding: 16px 0; font-weight: 600; }
+    details.evidence > summary::-webkit-details-marker { display: none; }
+    details.evidence > summary::before { content: "▸ "; }
+    details.evidence[open] > summary::before { content: "▾ "; }
     .matrix-hint { display: flex; justify-content: space-between; gap: 16px; margin: 0 0 8px; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
     .matrix-scroll { overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; margin: 0 0 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--cream); }
     .matrix-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -54,8 +63,7 @@
     table.matrix td.st-unk::before { background: var(--ink-faint); }
     table.matrix td.st-unpub::before { background: var(--accent); }
     table.matrix td.st-rec::before { background: var(--mint); }
-
-    .callout { background: var(--cream); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 14px 18px; margin: 18px 0; font-size: 0.92rem; color: var(--ink-soft); }
+    .callout { background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 14px 18px; margin: 18px 0; font-size: 0.92rem; color: var(--ink-soft); }
     .callout p { margin: 0 0 10px; }
     .callout p:last-child { margin-bottom: 0; }
     .notes p { margin: 0 0 14px; font-size: 0.88rem; color: var(--ink-soft); }
@@ -64,13 +72,33 @@
     .source { font-size: 0.88rem; color: var(--ink-faint); margin: 0 0 8px; }
     footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); margin-top: 48px; }
     footer .shell { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .kicker { padding: 28px 0 6px; }
+    h1 { font-size: clamp(1.55rem, 3.6vw, 2.35rem); margin: 0 0 8px; }
+    .meta { margin: 0 0 16px; padding-bottom: 14px; font-size: 0.9rem; }
+    .banner { padding: 12px 14px; margin: 0 0 14px; font-size: 0.88rem; line-height: 1.45; }
+    #short-version h2 { margin: 18px 0 8px; font-size: 1.25rem; }
+    .judgment, .action { margin: 0 0 10px; font-size: 0.98rem; line-height: 1.45; }
     @media (max-width: 860px) {
-      body { font-size: 16px; }
+      body { font-size: 15px; }
+      .kicker { padding: 14px 0 4px; font-size: 0.62rem; letter-spacing: 0.08em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      h1 { font-size: 1.35rem; line-height: 1.2; max-width: none; margin: 0 0 6px; }
+      .meta { margin: 0 0 10px; padding-bottom: 10px; font-size: 0.78rem; line-height: 1.35; }
+      .meta .desk-only { display: none; }
+      .banner { padding: 8px 10px; margin: 0 0 8px; font-size: 0.78rem; line-height: 1.35; }
+      #short-version h2 { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+      .judgment, .action { margin: 0 0 8px; font-size: 0.9rem; line-height: 1.35; }
       table.matrix th, table.matrix td { width: 220px; min-width: 220px; max-width: 220px; }
       table.matrix th.feature { width: 140px; min-width: 140px; max-width: 140px; }
       table.matrix { min-width: 2120px; }
     }
-    @media print { .matrix-scroll { overflow: visible; border: 0; } table.matrix { min-width: 0; width: 100%; font-size: 7pt; } table.matrix th, table.matrix td { width: auto; min-width: 0; max-width: none; } }
+    @media print {
+      .matrix-scroll { overflow: visible; border: 0; }
+      table.matrix { min-width: 0; width: 100%; font-size: 7pt; }
+      table.matrix th, table.matrix td { width: auto; min-width: 0; max-width: none; }
+      details.evidence { border: 0; padding: 0; }
+      details.evidence > summary { display: none; }
+      details.evidence[open], details.evidence { display: block; }
+    }
   </style>
   <link rel="stylesheet" href="../../../assets/site-nav.css" data-site-nav>
   <script defer src="../../../assets/site-nav.js" data-site-nav></script>
@@ -109,10 +137,62 @@
 </div>
 <!-- site-nav:end -->
   <main class="shell" id="main">
-    <p class="kicker">Builds · MCP Apps · v7</p>
-    <h1>MCP Apps feature support by product</h1>
-    <p class="meta"><span class="mono">v7 · 2026-09-14</span> · MCP Apps (SEP-1865) support across nine host surfaces, read from vendor documentation, dated historical reports, one pinned source snapshot and footnoted local inspection. Public references are linked; prior local inspection is summarized in the footnotes. No cell is an observed UI or fallback run.</p>
+    <p class="kicker">Builds · MCP Apps · v7 evidence, readable edition</p>
+    <h1>Which AI hosts document MCP Apps rendering, and what to ship anyway</h1>
+    <p class="meta"><span class="mono">v7 · 2026-09-14</span><span class="desk-only"> · Readable edition of the MCP Apps (SEP-1865) evidence matrix across nine host surfaces. Judgments first; full evidence on demand. No cell is an observed UI or fallback run.</span></p>
 
+    <section class="short prose" id="short-version" aria-label="The short version">
+      <h2>The short version</h2>
+      <p class="judgment" id="aggregate-judgment">Three of nine host surfaces document MCP Apps rendering: Claude Desktop, GitHub Copilot in VS Code, and Cursor. That is a documentation-based starting set; build and registration path still need verifying, and no fallback has been verified by a run anywhere.</p>
+      <p class="action" id="shipping-action">Ship the portable path regardless: readable text plus an optional image as ordinary tool content. Do not rely on <a href="https://github.com/modelcontextprotocol/ext-apps/blob/6d9bdc7babf275b759225aa722cbf5510c4c6021/specification/2026-01-26/apps.mdx" rel="noopener">app-only tool visibility</a> to hide a tool from the model; it is unverified on every host.</p>
+    </section>
+
+    <div class="banner prose" role="note" id="banner">
+      <p>Evidence, not test results. Everything here comes from vendor documentation, dated user or staff reports, one pinned VS Code source snapshot, or local file inspection whose receipts are private and not linked. No cell is an observed UI or fallback run. &quot;Unknown&quot; means this evidence does not establish the answer; it is not &quot;unsupported&quot;.</p>
+    </div>
+
+    <section class="by-product prose" id="by-product" aria-label="By product">
+      <h2>By product</h2>
+      <h3 class="group">Documented by the vendor</h3>
+      <ul class="products">
+        <li><a href="https://claude.com/docs/connectors/building/mcp-apps/getting-started" rel="noopener">Claude Desktop</a> — the vendor guide documents inline Apps; issue reports are mixed; reported fallbacks are a blank gap and an error card. Not run here.</li>
+        <li><a href="https://code.visualstudio.com/blogs/2026/01/26/mcp-apps-support" rel="noopener">GitHub Copilot in VS Code</a> — vendor blog and release notes; pinned source (not a shipped build) carries Apps version 2026-01-26 and a user setting. Not run here.</li>
+        <li><a href="https://cursor.com/docs/context/mcp" rel="noopener">Cursor</a> — vendor docs; a rendering regression in 3.10 reported fixed in 3.12 (forum, Jul 2026); staff say no toggle or account enablement exists (Jul–Aug 2026). Not run here.</li>
+      </ul>
+      <h3 class="group">Reported only</h3>
+      <ul class="products">
+        <li><a href="https://github.com/anthropics/claude-ai-mcp/issues/236" rel="noopener">Claude Cowork</a> — dated reports: first-party apps rendered and a gateway third-party server showed plain text (Apr 2026); a plugin showed raw JSON (May 2026). No Cowork-specific vendor guide; the Claude guide names Cowork only in navigation.</li>
+      </ul>
+      <h3 class="group">Code found, undocumented</h3>
+      <ul class="products">
+        <li><a href="#notes">OpenAI Codex Desktop</a> — the app bundle contains Apps sandbox and schema code and an internal gate whose in-code default is false; its runtime value is unknown. Vendor docs are silent. Nothing observed rendering.</li>
+      </ul>
+      <h3 class="group">Unknown</h3>
+      <ul class="products">
+        <li><a href="https://code.claude.com/docs/en/mcp#mcp-client-runtimes" rel="noopener">Claude Code</a> — docs cover standard MCP only; no retained inspection evidence here; Apps behavior unverified.</li>
+        <li><a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli" rel="noopener">OpenAI Codex CLI</a> — docs silent; no retained inspection evidence here; Apps behavior unverified.</li>
+        <li><a href="https://antigravity.google/docs/mcp" rel="noopener">Antigravity CLI</a> — docs silent; no retained inspection evidence here; Apps behavior unverified.</li>
+        <li><a href="#notes">Antigravity Desktop</a> — build 2.2.1 searched for named Apps strings, none found; the current 2.13.0 (Sep 9 2026) was not inspected; docs and changelog are silent.</li>
+      </ul>
+    </section>
+
+    <section class="next prose" id="what-would-change" aria-label="What would change this page">
+      <h2>What would change this page</h2>
+      <ul class="next-steps">
+      <li>Host advertisement — capture the host/client's Apps advertisement in its initialize handshake at the relevant protocol revision. Would update &quot;Vendor documents&quot; for no one and &quot;Rendering evidence&quot; for nobody; it updates the advertisement row in the full matrix.</li>
+      <li>Mount and fallback — for one named build and one registration path, capture the Apps UI handshake, a mount, then the same tool with Apps off or failing. Record any stage not reached. Would update &quot;Rendering evidence&quot; and &quot;Without Apps&quot; for that build and path only.</li>
+      <li>App-only visibility — a separate tool-exposure check (is an <code>app</code>-visibility tool offered to the model?). Would update the visibility row only.</li>
+      <li>Antigravity Desktop — the same on a current build (2.13.0); the searched build is eleven minor versions old.</li>
+      <li>Codex Desktop — capture the gate's runtime value and the server-facing handshake; code presence proves neither.</li>
+      <li>Documentation gaps close only when the vendor publishes; nothing we run changes those.</li>
+      </ul>
+      <p class="owner">Proposed owner role: whoever has the named build installed plus a test Apps server (the seat that produced each inspection pack is the natural candidate). Effort unestimated.</p>
+    </section>
+
+    <p class="generator-inputs prose" id="generator-inputs">Page inputs: <code>brief.md</code> (banner, judgment, action, next steps), <code>judgments.json</code> (product sentences), and <code>source.md</code> (full evidence below).</p>
+
+    <details class="evidence" id="full-evidence">
+      <summary>Full evidence (v7, 2026-09-14): matrix, legend, columns, footnotes, takeaways, history</summary>
     <section class="intro prose" aria-label="Summary">
       <p>Claude Desktop, GitHub Copilot in VS Code, and Cursor document MCP Apps (SEP-1865) support. The OpenAI Codex Desktop bundle (<code>ChatGPT.app</code>) contains Apps-related sandbox, schema, internal initialization, and gate code, found by local inspection only and undocumented by the vendor; its server-facing advertisement and UI behavior were not captured. <strong>No cell is an observed UI or fallback run.</strong> Support depends on surface, build, and registration path. v4 split OpenAI Codex and Antigravity into CLI and Desktop columns. v5 rebuilt the Antigravity Desktop column from the deep pack (PACK_ANTIGRAVITY_DESKTOP + DELTA, Agy, 2026-09-14). v6 applies the Astra v5 review (ASTRA_REVIEW.md, 0 P0 / 4 P1 / 2 P2): LI claims are summarized from retained private inspection receipts, which this public edition omits, bare <code>unpub</code> cells link the reviewed guide, the Codex advertisement cell is scoped to the Desktop→app-server hop, <code>generative_ui</code> is no longer attributed to Desktop, and absence / date-list / switch wording is narrowed to what the selected-artifact searches show. Antigravity Desktop still yields no SEP-1865 evidence and stays unk. v7 applies the Astra re-review (ASTRA_RR.md, 0 P0 / 1 P1 / 0 P2, finding P1-R1) as a document-only repair with no new inspection: inherited local-inspection (LI) annotations in the Claude Desktop, Claude Cowork, Claude Code, OpenAI Codex CLI, and Antigravity CLI columns had no linked receipt in this evidence set and were removed from cells, footnotes, and takeaways rather than re-inspected; the affected cells keep their <code>unk</code> status and vendor-guide links, and the Codex CLI switch cell becomes <code>unk</code>. Relative to v4, columns 1–4 and 6–8 now differ only in the capability-checklist cells and in those removals; the OpenAI Codex Desktop and Antigravity Desktop columns were rewritten in v6 and are unchanged in v7.</p>
     </section>
@@ -157,10 +237,34 @@
 
     <hr class="rule">
     <p class="source prose">Rendered from <code>source.md</code> in this folder by <code>tools/build_mcp_apps_matrix.mjs</code>. The Markdown is the publish copy of MATRIX_TLDR v7; local inspection receipts referenced in the footnotes are not hosted here.</p>
+
+    </details>
   </main>
 
   <footer>
-    <div class="shell"><span>The Field Brief · Builds · MCP Apps feature matrix v7</span><span>Haiyuan Cao</span></div>
+    <div class="shell"><span>The Field Brief · Builds · MCP Apps feature matrix v7 (readable)</span><span>Haiyuan Cao</span></div>
   </footer>
+  <script>
+    (function () {
+      function openEvidenceForHash() {
+        var id = (location.hash || "").replace(/^#/, "");
+        if (!id) return;
+        var el = document.getElementById(id);
+        if (!el) return;
+        var fold = document.getElementById("full-evidence");
+        if (fold && fold.contains(el)) fold.open = true;
+        // print: ensure open
+        el.scrollIntoView({ block: "start" });
+      }
+      window.addEventListener("DOMContentLoaded", openEvidenceForHash);
+      window.addEventListener("hashchange", openEvidenceForHash);
+      if (window.matchMedia) {
+        window.matchMedia("print").addEventListener("change", function (e) {
+          var fold = document.getElementById("full-evidence");
+          if (fold && e.matches) fold.open = true;
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
