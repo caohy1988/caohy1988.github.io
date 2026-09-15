@@ -29,6 +29,18 @@ export const EXPECTED_QUESTIONS = [
   "without_apps",
 ];
 
+export const PRODUCT_SOURCE_COLUMN = {
+  "Claude Desktop": "Claude Desktop",
+  "Claude Cowork": "Claude Cowork",
+  "Claude Code": "Claude Code",
+  "OpenAI Codex CLI": "OpenAI Codex CLI",
+  "OpenAI Codex Desktop": "OpenAI Codex Desktop",
+  "GitHub Copilot in VS Code": "GitHub Copilot",
+  "Cursor": "Cursor",
+  "Antigravity CLI": "Antigravity CLI",
+  "Antigravity Desktop": "Antigravity Desktop",
+};
+
 export function loadJudgments() {
   return JSON.parse(fs.readFileSync(JUDGMENTS, "utf8"));
 }
@@ -50,6 +62,33 @@ export function sha256(text) {
   return crypto.createHash("sha256").update(text, "utf8").digest("hex");
 }
 
+export function sourceBlocks(sourceText, baseline) {
+  const paras = sourceText.split(/\n\n/).filter((p) => p.trim());
+  const tldr = paras[0];
+  const notes = paras.find((p) => p.includes("LI footnotes"));
+  return {
+    source_tldr_intro_v7_LI_removal: {
+      block_sha256: sha256(tldr),
+      html_intro_sha256: baseline?.blocks?.html_intro?.sha256,
+    },
+    footnote_1_4_withdrawn_LI_in_LI_footnotes_paragraph: {
+      block_sha256: sha256(notes || ""),
+      html_notes_sha256: baseline?.blocks?.html_notes?.sha256,
+    },
+    footnote_5_in_LI_footnotes_paragraph: {
+      block_sha256: sha256(notes || ""),
+      html_notes_sha256: baseline?.blocks?.html_notes?.sha256,
+    },
+    footnote_6_in_LI_footnotes_paragraph: {
+      block_sha256: sha256(notes || ""),
+      html_notes_sha256: baseline?.blocks?.html_notes?.sha256,
+    },
+    html_takeaways_block: {
+      block_sha256: baseline?.blocks?.html_takeaways?.sha256,
+    },
+  };
+}
+
 export function validateJudgments(j, sourceText, baseline) {
   const errors = [];
   if (j.schema_version !== 1) errors.push("schema_version must be 1");
@@ -66,9 +105,9 @@ export function validateJudgments(j, sourceText, baseline) {
   }
 
   const { cells } = parseSourceCells(sourceText);
+  const blocks = sourceBlocks(sourceText, baseline);
   const forbidden = new Set(j.honesty?.forbidden_status_words || []);
   const seen = new Set();
-  const productSourceCols = new Map();
 
   for (const row of j.compact_rows || []) {
     const key = `${row.product}::${row.question}`;
@@ -85,24 +124,25 @@ export function validateJudgments(j, sourceText, baseline) {
     }
     const firstWord = String(row.phrase || "").split(/[\s·]/)[0];
     if (forbidden.has(firstWord)) errors.push(`${key}: forbidden status word ${firstWord}`);
-    if (row.product === "GitHub Copilot") errors.push("must spell GitHub Copilot in VS Code");
-    if (productSourceCols.has(row.product) && productSourceCols.get(row.product) !== row.product_source_column) {
-      errors.push(`${key}: inconsistent product_source_column`);
+    if (/\bYes\b|\bNo\b/.test(row.phrase || "") && /supported/i.test(row.phrase || "")) {
+      errors.push(`${key}: looks like Yes/No supported chip`);
     }
-    productSourceCols.set(row.product, row.product_source_column);
+    if (row.product === "GitHub Copilot") errors.push("must spell GitHub Copilot in VS Code");
+    const expectedCol = PRODUCT_SOURCE_COLUMN[row.product];
+    if (expectedCol && row.product_source_column !== expectedCol) {
+      errors.push(`${key}: product_source_column must be ${expectedCol}`);
+    }
     const cellText = cells[row.source_row]?.[row.product_source_column];
     if (cellText == null) errors.push(`${key}: missing source cell ${row.source_row} / ${row.product_source_column}`);
     else if (sha256(cellText) !== row.cell_sha256) errors.push(`${key}: cell_sha256 stale for ${row.source_row}`);
   }
 
-  // exact 9×4 coverage
   for (const p of EXPECTED_PRODUCTS) {
     for (const q of EXPECTED_QUESTIONS) {
       if (!seen.has(`${p}::${q}`)) errors.push(`missing compact row ${p}::${q}`);
     }
   }
 
-  // sentence coverage + derivations
   const sentenceProducts = new Set();
   for (const s of j.product_sentences || []) {
     if (!s.product || !s.group || !s.sentence || !String(s.sentence).trim()) {
@@ -135,13 +175,37 @@ export function validateJudgments(j, sourceText, baseline) {
       if (text == null) errors.push(`${s.product}: cited cell missing ${c.source_row}/${c.product_source_column}`);
       else if (sha256(text) !== c.cell_sha256) errors.push(`${s.product}: cited cell_sha256 stale ${c.source_row}`);
     }
-    // inspection routing rule for Antigravity Desktop / Codex Desktop style claims
+
+    const withdrawalClause = (d?.supporting_clauses || []).some((c) => /no retained inspection evidence|removed inherited LI/i.test(c));
+    if (withdrawalClause && (!Array.isArray(d.cited_blocks) || d.cited_blocks.length < 1)) {
+      errors.push(`${s.product}: withdrawal/LI-removal clause requires cited_blocks`);
+    }
+
+    for (const b of d?.cited_blocks || []) {
+      const known = blocks[b.id];
+      if (!known) errors.push(`${s.product}: unknown cited_blocks.id ${b.id}`);
+      else {
+        if (b.block_sha256 && known.block_sha256 && b.block_sha256 !== known.block_sha256) {
+          errors.push(`${s.product}: cited_blocks.block_sha256 stale for ${b.id}`);
+        }
+        if (b.html_notes_sha256 && known.html_notes_sha256 && b.html_notes_sha256 !== known.html_notes_sha256) {
+          errors.push(`${s.product}: cited_blocks.html_notes_sha256 stale for ${b.id}`);
+        }
+        if (b.html_intro_sha256 && known.html_intro_sha256 && b.html_intro_sha256 !== known.html_intro_sha256) {
+          errors.push(`${s.product}: cited_blocks.html_intro_sha256 stale for ${b.id}`);
+        }
+        if (!b.block_sha256 && !b.html_notes_sha256 && !b.html_intro_sha256) {
+          errors.push(`${s.product}: cited_blocks ${b.id} missing hash fields`);
+        }
+      }
+    }
+
     if (s.links_footnote) {
       if (s.first_claim_link) {
         errors.push(`${s.product}: inspection-footnote sentence must not use a silent vendor URL as first_claim_link`);
       }
-      const blocks = d?.cited_blocks || [];
-      if (!blocks.length || !blocks.some((b) => String(b.marker) === String(s.links_footnote))) {
+      const bl = d?.cited_blocks || [];
+      if (!bl.length || !bl.some((b) => String(b.marker) === String(s.links_footnote))) {
         errors.push(`${s.product}: links_footnote ${s.links_footnote} needs matching cited_blocks.marker`);
       }
     }
@@ -150,7 +214,6 @@ export function validateJudgments(j, sourceText, baseline) {
     if (!sentenceProducts.has(p)) errors.push(`missing product sentence for ${p}`);
   }
 
-  // fixtures
   const by = Object.fromEntries((j.compact_rows || []).map((r) => [`${r.product}::${r.question}`, r]));
   const fx = j.counterexample_fixtures || {};
   const c1 = by["Cursor::without_apps"];
@@ -177,7 +240,9 @@ export function validateJudgments(j, sourceText, baseline) {
   if (j.v7_source_sha256 && j.v7_source_sha256 !== srcSha) errors.push("judgments v7_source_sha256 mismatch");
   if (baseline?.source_md_sha256 && baseline.source_md_sha256 !== srcSha) errors.push("baseline source_md_sha256 mismatch");
   const blob = JSON.stringify(j);
-  if (/\/Users\/|links to a receipt/i.test(blob)) errors.push("private receipt path or forbidden receipt phrasing in judgments");
+  if (/\/Users\/|\/private\/tmp\/.*receipt|links to a receipt/i.test(blob)) {
+    errors.push("private receipt path or forbidden receipt phrasing in judgments");
+  }
   return errors;
 }
 

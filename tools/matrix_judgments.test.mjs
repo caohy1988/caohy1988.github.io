@@ -89,3 +89,33 @@ test("exact 9x4 compact coverage constants match artifact", () => {
   const keys = new Set(j.compact_rows.map((r) => `${r.product}::${r.question}`));
   for (const p of EXPECTED_PRODUCTS) for (const q of EXPECTED_QUESTIONS) assert.ok(keys.has(`${p}::${q}`));
 });
+
+test("schema rejects stale cited_blocks hashes and wrong product_source_column", () => {
+  const j = loadJudgments();
+  const src = fs.readFileSync(path.join(DIR, "source.md"), "utf8");
+  const baseline = JSON.parse(fs.readFileSync(path.join(DIR, "v7-preservation-baseline.json"), "utf8"));
+  const badHash = structuredClone(j);
+  const agy = badHash.product_sentences.find((s) => s.product === "Antigravity Desktop");
+  agy.derivation.cited_blocks[0].block_sha256 = "0".repeat(64);
+  assert.ok(validateJudgments(badHash, src, baseline).some((e) => /block_sha256 stale/.test(e)));
+  const badCol = structuredClone(j);
+  for (const row of badCol.compact_rows.filter((r) => r.product === "Claude Desktop")) {
+    row.product_source_column = "Claude Cowork";
+    // keep hash pointing at Cowork cell so only mapping fails
+    const { cells } = parseSourceCells(src);
+    row.cell_sha256 = sha256(cells[row.source_row]["Claude Cowork"]);
+  }
+  assert.ok(validateJudgments(badCol, src, baseline).some((e) => /product_source_column must be/.test(e)));
+});
+
+test("schema rejects Yes/No supported chip and private tmp receipt path", () => {
+  const j = loadJudgments();
+  const src = fs.readFileSync(path.join(DIR, "source.md"), "utf8");
+  const baseline = JSON.parse(fs.readFileSync(path.join(DIR, "v7-preservation-baseline.json"), "utf8"));
+  const bad = structuredClone(j);
+  bad.compact_rows[0].phrase = "Documented · Yes supported";
+  assert.ok(validateJudgments(bad, src, baseline).some((e) => /Yes\/No supported/.test(e)));
+  const bad2 = structuredClone(j);
+  bad2.compact_rows[0].phrase += " /private/tmp/matrix-receipt/inspection.json";
+  assert.ok(validateJudgments(bad2, src, baseline).some((e) => /private receipt/.test(e)));
+});
