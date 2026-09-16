@@ -103,7 +103,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-15 · EM + vault detail</strong></span>
+      <span>Updated <strong>2026-09-15 · Grok Bot patterns</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -126,6 +126,7 @@
       <li><a href="#skills">Skills &amp; hooks</a></li>
       <li><a href="#providers">Model providers</a></li>
       <li><a href="#usage">Usage visibility</a></li>
+      <li><a href="#grok-patterns">Grok Bot team patterns</a></li>
       <li><a href="#extend">How to extend the team</a></li>
       <li><a href="#checklist">Operator checklist</a></li>
     </ol>
@@ -440,8 +441,40 @@ grok-tmux-run dsh-collect-HH32 -- \
     </ul>
   </section>
 
+
+  <section id="grok-patterns">
+    <h2>12. Grok Bot team patterns</h2>
+    <p>Product guidance for Grok Bot (chief of staff, group rooms, routines, teach-once) applied to this fleet. Lock: <code>Maps/Decisions/2026-09-15-route-via-manage-bot.md</code>.</p>
+
+    <h3>Chief of staff</h3>
+    <p><strong>Agent Manage Bot</strong> is default intake. Haiyuan asks Manage first; Manage routes to Collection / Github / Medium (or a group room) and only pulls Haiyuan in for judgment calls. Exceptions: already mid-thread with a specialist, explicit @, or an emergency live fire.</p>
+
+    <h3>Group rooms (visible handoffs)</h3>
+    <table>
+      <thead><tr><th>Room</th><th>Members</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td>Field Brief</td><td>Collection, Medium, Manage</td><td>Pack / brief / Stories / GTM handoffs that should be visible</td></tr>
+        <tr><td>Coding EM</td><td>Github Bot, Manage</td><td>PR / slice / dual-LGTM coordination</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Prefer the room when the handoff itself matters; keep secrets and credentials out of group posts.</p>
+
+    <h3>Routines on Manage Bot</h3>
+    <ul>
+      <li><strong>Weekday usage dashboard refresh</strong> — 9:05 PT weekdays (quiet if unchanged).</li>
+      <li><strong>Field Brief missed-slot watch</strong> — :50 after 00/06/12/18 PT; pings Field Brief room if a :34 looks &gt;20m late (Collection still owns publish).</li>
+    </ul>
+    <p>Collection Bot still owns collect/brief/Stories/GTM crons. Teach-from-demonstration can refine these later when Haiyuan records a workflow once.</p>
+
+    <h3>Profile = contract</h3>
+    <p>Each Grok Bot’s description mirrors its vault <code>Agents/*.md</code> card: ownership, never-do, and human gate. Update both when a lasting boundary changes.</p>
+
+    <h3>Outer loop → inner loop</h3>
+    <p>Grok bots orchestrate (prompts, routines, EM babysitting). Mac CLIs / Cursor Cloud Agents execute. Obsidian is the shared memory across both layers.</p>
+  </section>
+
   <section id="extend">
-    <h2>12. How to extend the team</h2>
+    <h2>13. How to extend the team</h2>
     <ol>
       <li><strong>Decide the layer</strong> — Grok bot (orchestrator) vs Mac CLI (worker).</li>
       <li><strong>Agent Manage Bot</strong> creates/organizes Grok bots; onboards Mac CLIs (binary, auth, usage card, vault card).</li>
@@ -454,10 +487,11 @@ grok-tmux-run dsh-collect-HH32 -- \
   </section>
 
   <section id="checklist">
-    <h2>13. Operator checklist</h2>
+    <h2>14. Operator checklist</h2>
     <ul>
       <li>☐ Mac online; Grok Bot desktop connected for local-exec</li>
       <li>☐ Vault hooks installed (<code>install-agent-hooks.sh</code>); agents reading vault before tasks</li>
+      <li>☐ Default asks go to Manage Bot; Field Brief / Coding EM rooms used for visible handoffs</li>
       <li>☐ Coding slices have committed <code>intent.md</code> / <code>spec.md</code> / <code>plan.md</code> before implement</li>
       <li>☐ Reviewers only after PR URL; dual LGTM ≠ merge</li>
       <li>☐ Collect crons: Agy ≡0 / Muse ≡1 / DSH ≡2 at <code>:32</code></li>
