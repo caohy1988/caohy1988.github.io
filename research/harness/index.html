@@ -104,7 +104,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-16 · Harness Lab tab</strong></span>
+      <span>Updated <strong>2026-09-16 · Lab scout #1 applied</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -271,7 +271,7 @@
         <tr><td>Product owner</td><td>Haiyuan</td><td>Accepts <code>intent.md</code> / <code>spec.md</code>; only merge &amp; production gate</td></tr>
         <tr><td>EM</td><td>Github Bot</td><td>Commits artifacts, fires the next play, triages review, starts the next independent slice; 5‑min heartbeat babysitter</td></tr>
         <tr><td>Implementer</td><td>Claude / Fable (default)</td><td>Implements from accepted <code>plan.md</code>; opens PR; cannot LGTM itself</td></tr>
-        <tr><td>Reviewers</td><td>Codex / Astra + Kimi</td><td>Review the GitHub PR after it exists; dual LGTM = agent-complete, not shipped</td></tr>
+        <tr><td>Reviewers</td><td>Codex / Astra + Kimi</td><td>Review the GitHub PR after it exists; <strong>blind dual LGTM</strong> (second reviewer never sees the first reviewer’s text — PR + intent/spec/plan only); dual LGTM = agent-complete, not shipped</td></tr>
         <tr><td>Research originator</td><td>human or scout bot</td><td>Writes Stage‑1 <code>intent.md</code> (problem, why, constraints) — not a coding task</td></tr>
       </tbody>
     </table>
@@ -333,6 +333,7 @@
       <li>Stall the next independent slice on org APPROVE.</li>
       <li>Cold-start Claude/Codex/Kimi when a session id for that PR/slice already exists.</li>
       <li>Put Haiyuan back on the critical path of mid-build approval prompts.</li>
+      <li>Forward one reviewer’s findings into the other reviewer’s kickoff (breaks blind dual LGTM).</li>
     </ul>
     <p class="note">EM also runs a <strong>5‑minute heartbeat</strong> across live agent tasks (babysitter layer). It does not replace Mac <code>grok-tmux-watchdog</code> (~540s) — both apply.</p>
   </section>
@@ -352,6 +353,7 @@
     </table>
     <p>Surfaces: X/Twitter, Reddit, LinkedIn (proxy), Google/vendor, arXiv, Papers with Code. Agy owns social-superpowers for X/Reddit; Muse/DSH label proxies honestly. <strong>Collection only</strong> — no catalog HTML from pack agents. Crustdata is forbidden.</p>
     <h3>Every 6h deep brief (<code>00:34 / 06:34 / 12:34 / 18:34</code> PT)</h3>
+    <p class="note"><strong>Research-system shape (Lab #1):</strong> lead orchestrates → parallel collectors persist packs → Kimi synthesizes → Collection citation-checks and publishes. Label thin packs before brief. Manage :50 + Collection :44 are the safety net when primary :34 never wakes.</p>
     <ol>
       <li>Kimi writes deep Field Brief Markdown from <strong>agy + muse + dsh</strong> packs since the last slot (dedupe across collectors).</li>
       <li>Collection Bot publishes HTML + catalog + push to the hub.</li>
@@ -437,6 +439,7 @@ grok-tmux-run dsh-collect-HH32 -- \
     <p>Public dashboard: <a href="/research/usage/">/research/usage/</a></p>
     <p class="note">Daily curated harness tips live at <a href="/research/harness-lab/">/research/harness-lab/</a> (Agent Manage Bot · collect ~09:00 PT · curate/publish ~16:30 PT).</p>
     <p>Includes a <strong>routine fire proxy</strong> (<a href="/research/usage/#routine-proxy">#routine-proxy</a>): coarse cron fires/week from Collection Active dumps + Manage routines — labeled PROXY, not dollars or tokens.</p>
+    <p class="note"><strong>Lab #1 follow-ups (not installed):</strong> optional <a href="https://github.com/noah-thing/receipt">receipt</a> $/PR spike on one EM repo; optional <a href="https://github.com/awesamarth/watchdog">Watchdog</a> Codex-scoped control-plane pilot — do not replace fleet <code>grok-tmux-watchdog</code> without Haiyuan ask.</p>
     <ul>
       <li>Mac CLI quota / health cards: Claude, Codex, Kimi, Agy, Muse, DSH</li>
       <li>Overall Grok Bots activity share from local transcripts (not plan dollars)</li>
@@ -448,7 +451,7 @@ grok-tmux-run dsh-collect-HH32 -- \
   <section id="grok-patterns">
     <h2>12. Grok Bot team patterns</h2>
     <p>Product guidance for Grok Bot (chief of staff, group rooms, routines, teach-once) applied to this fleet — plus the 2026-09-15 CoS upgrades.</p>
-    <p>Locks: <code>Maps/Decisions/2026-09-15-route-via-manage-bot.md</code> · <code>Maps/Contracts/manage-handoffs.md</code> · <code>Maps/Decisions/2026-09-15-collection-scout-actions-done.md</code>.</p>
+    <p>Locks: <code>Maps/Decisions/2026-09-16-lab-scout1-applied.md</code> · <code>Maps/Decisions/2026-09-15-route-via-manage-bot.md</code> · <code>Maps/Contracts/manage-handoffs.md</code> · <code>Maps/Decisions/2026-09-15-collection-scout-actions-done.md</code>.</p>
 
     <h3>Chief of staff</h3>
     <p><strong>Agent Manage Bot</strong> is default intake. Haiyuan asks Manage first; Manage routes to Collection / Github / Medium (or a group room) and only pulls Haiyuan in for judgment calls. Exceptions: already mid-thread with a specialist, explicit @, or an emergency live fire. Ambiguous or unrouted asks ask Haiyuan back — never silent SendToAgent (Lab scout 2026-09-16 / Anthropic coordination patterns).</p>
@@ -518,7 +521,9 @@ grok-tmux-run dsh-collect-HH32 -- \
       <li>☐ Handoffs carry artifact path per <code>Maps/Contracts/manage-handoffs.md</code></li>
       <li>☐ Auto-review intent list checked after Duplicate (<code>Maps/Hooks/auto-review-personal-rules.md</code>)</li>
       <li>☐ Coding slices have committed <code>intent.md</code> / <code>spec.md</code> / <code>plan.md</code> before implement</li>
-      <li>☐ Reviewers only after PR URL; dual LGTM ≠ merge</li>
+      <li>☐ Reviewers only after PR URL; <strong>blind</strong> dual LGTM ≠ merge</li>
+      <li>☐ Ambiguous asks clarified with Haiyuan (no silent misroute)</li>
+      <li>☐ <a href="/research/harness-lab/">Lab</a> KEEPs applied or filed as follow-up</li>
       <li>☐ Collect crons: Agy ≡0 / Muse ≡1 / DSH ≡2 at <code>:32</code></li>
       <li>☐ Kimi <code>:34</code> deep brief + Collection Bot publish path healthy</li>
       <li>☐ Long jobs: tmux + stream + watchdog + EM 5‑min heartbeat</li>
