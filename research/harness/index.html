@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="How Haiyuan Cao builds and runs a dual-layer agent team: Grok bots + Mac CLIs, shared Obsidian vault, Field Brief pipeline, coding loop, and launch standards.">
+  <meta name="description" content="How Haiyuan Cao builds and runs a dual-layer agent team: Grok bots + Mac CLIs, EM loop from intent/spec/plan.md, Obsidian context vault, Field Brief pipeline, and launch standards.">
   <meta name="theme-color" content="#101828">
   <title>Agent Harness Playbook — Field Brief</title>
   <link rel="canonical" href="https://caohy1988.github.io/research/harness/">
@@ -99,11 +99,11 @@
   <header class="hero">
     <p class="kicker">Playbook · agent team</p>
     <h1>Agent harness playbook</h1>
-    <p class="lede">How this Field Brief / research fleet is built: a dual-layer harness (Grok bots + Mac CLIs), one shared Obsidian vault, standing pipelines for collect → brief → publish, and hard launch rules so long runs don’t die silently.</p>
+    <p class="lede">How this Field Brief / research fleet is built: a dual-layer harness (Grok bots + Mac CLIs), an EM loop driven by intent/spec/plan markdown, a shared Obsidian context vault, standing collect → brief → publish pipelines, and hard launch rules so long runs don’t die silently.</p>
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-15</strong></span>
+      <span>Updated <strong>2026-09-15 · EM + vault detail</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -118,7 +118,8 @@
       <li><a href="#thesis">Thesis</a></li>
       <li><a href="#layers">Two layers</a></li>
       <li><a href="#roster">Roster</a></li>
-      <li><a href="#vault">Shared vault</a></li>
+      <li><a href="#vault">Obsidian context vault</a></li>
+      <li><a href="#em-loop">EM task loop (intent → plan → PR)</a></li>
       <li><a href="#pipeline">Field Brief pipeline</a></li>
       <li><a href="#coding">Coding loop (SDLC)</a></li>
       <li><a href="#launch">Mac launch standards</a></li>
@@ -194,24 +195,148 @@
   </section>
 
   <section id="vault">
-    <h2>4. Shared vault</h2>
-    <p>Canonical path on the Mac: <code>~/Documents/agent-context</code> (Obsidian). Applies to every Grok bot and every Mac CLI.</p>
-    <div class="card">
-      <strong>Before any new task</strong>
-      Read <code>AGENTS.md</code> + <code>forbidden.md</code>, your <code>Agents/&lt;slug&gt;.md</code> card, recent Hunt/Ship notes, and relevant <code>Maps/Decisions/</code>. Prefer vault truth over chat memory when they conflict.
+    <h2>4. Obsidian context vault</h2>
+    <p>The team’s long-term memory is a shared Obsidian vault on the Mac — treated as a <strong>context repo</strong>, not a chat log.</p>
+    <p><span class="mono">~/Documents/agent-context</span></p>
+    <p>Applies to every Grok bot and every Mac CLI. Chat is a digest only; <strong>proof of done = a vault note path</strong> (and/or a live URL).</p>
+
+    <h3>Layout</h3>
+    <table>
+      <thead><tr><th>Folder</th><th>What lives there</th></tr></thead>
+      <tbody>
+        <tr><td><code>Hunt/</code></td><td>Scout packs &amp; research notes (<code>agent-analytics/</code>, <code>medium/</code>, <code>misc/</code>)</td></tr>
+        <tr><td><code>Ship/</code></td><td>Deliverables: <code>briefs/</code>, <code>rfc/</code>, <code>builds/</code></td></tr>
+        <tr><td><code>Wiki/</code></td><td>Learning notes, <code>Daily/</code> digests, how-it-works</td></tr>
+        <tr><td><code>Maps/</code></td><td><code>Roster.md</code>, <code>Decisions/</code> locks, TELOS / hooks</td></tr>
+        <tr><td><code>Agents/</code></td><td>Per-agent cards (role, paths, locks)</td></tr>
+        <tr><td><code>AGENTS.md</code></td><td>Fleet-wide contract (read first)</td></tr>
+        <tr><td><code>forbidden.md</code></td><td>Never-again list</td></tr>
+        <tr><td><code>bin/</code></td><td><code>vault-note</code>, <code>install-agent-hooks.sh</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Who files where</h3>
+    <table>
+      <thead><tr><th>Agent</th><th>Default folder</th></tr></thead>
+      <tbody>
+        <tr><td>Collection Bot</td><td><code>Hunt/agent-analytics/</code> + <code>Ship/briefs/</code> after each Field Brief</td></tr>
+        <tr><td>Github Bot (EM)</td><td><code>Ship/rfc/</code> + <code>Ship/builds/</code></td></tr>
+        <tr><td>Medium Bot</td><td><code>Hunt/medium/</code></td></tr>
+        <tr><td>Claude / Fable / Muse / DSH (implement)</td><td><code>Ship/builds/</code> (+ <code>Ship/rfc/</code> when on RFC work)</td></tr>
+        <tr><td>Codex / Astra</td><td><code>Ship/briefs/</code> + <code>Hunt/agent-analytics/</code> (+ <code>Ship/rfc/</code> when reviewing)</td></tr>
+        <tr><td>Kimi / Agy (collect)</td><td><code>Hunt/agent-analytics/</code> (packs); Kimi never writes hub HTML</td></tr>
+        <tr><td>Agent Manage Bot</td><td><code>Hunt/agent-manage/</code> + <code>Maps/Decisions/</code> for locks</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Lifecycle every agent follows</h3>
+    <div class="grid2">
+      <div class="card">
+        <strong>Before starting</strong>
+        1. <code>AGENTS.md</code> + <code>forbidden.md</code><br>
+        2. Your recent Hunt/Ship notes<br>
+        3. <code>Maps/Decisions/</code> that touch the work<br>
+        4. <code>Maps/Roster.md</code> if ownership is unclear<br>
+        Prefer vault truth over chat memory when they conflict.
+      </div>
+      <div class="card">
+        <strong>After finishing</strong>
+        File a short learning note: what/done, learned, pointers (no secrets), follow-ups.
+        Prefer <code>bin/vault-note &lt;folder&gt; "title"</code>.
+        Standing rule changes → <code>Maps/Decisions/YYYY-MM-DD-slug.md</code>.
+        Corrections → append <code>forbidden.md</code>.
+      </div>
+    </div>
+
+    <h3>Daily consolidation (~20:57 PT)</h3>
+    <ol>
+      <li>Skim today’s notes in your folders.</li>
+      <li>Write <code>Wiki/Daily/YYYY-MM-DD-&lt;agent-slug&gt;.md</code> (or append <code>Wiki/Today.md</code>).</li>
+      <li>Update your <code>Agents/&lt;slug&gt;.md</code> card if role/paths/locks changed.</li>
+      <li>Touch root <code>AGENTS.md</code> <em>only</em> for fleet-wide standing rules (prefer a Decisions lock + one-line pointer).</li>
+    </ol>
+    <p class="note">The vault never posts, pays, deploys, merges, or sends Slack/email. Haiyuan (or an owning Grok bot’s explicit session gate) is the human gate. Re-wire CLI homes anytime with <code>bin/install-agent-hooks.sh</code>.</p>
+  </section>
+
+  <section id="em-loop">
+    <h2>5. EM task loop (intent → plan → PR)</h2>
+    <p>Github Bot CHY1988 acts as <strong>engineering manager</strong> for the coding team. Code is not the bottleneck — plan, review, and merge still need a loop. Each stage commits an artifact the next stage can read. Humans sit at the gates. The agent that wrote the code cannot approve it.</p>
+
+    <h3>Roles</h3>
+    <table>
+      <thead><tr><th>Role</th><th>Who</th><th>Job</th></tr></thead>
+      <tbody>
+        <tr><td>Product owner</td><td>Haiyuan</td><td>Accepts <code>intent.md</code> / <code>spec.md</code>; only merge &amp; production gate</td></tr>
+        <tr><td>EM</td><td>Github Bot</td><td>Commits artifacts, fires the next play, triages review, starts the next independent slice; 5‑min heartbeat babysitter</td></tr>
+        <tr><td>Implementer</td><td>Claude / Fable (default)</td><td>Implements from accepted <code>plan.md</code>; opens PR; cannot LGTM itself</td></tr>
+        <tr><td>Reviewers</td><td>Codex / Astra + Kimi</td><td>Review the GitHub PR after it exists; dual LGTM = agent-complete, not shipped</td></tr>
+        <tr><td>Research originator</td><td>human or scout bot</td><td>Writes Stage‑1 <code>intent.md</code> (problem, why, constraints) — not a coding task</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Artifact chain</h3>
+    <div class="flow">intent.md  →  spec.md  →  plan.md  →  PR + tests  →  dual review  →  human merge  →  pipeline
+         ↑                                                                    │
+         └──────── incident / broken demo / failed control band ──────────────┘</div>
+    <ul>
+      <li>An accepted <code>intent.md</code> triggers design.</li>
+      <li>An accepted <code>spec.md</code> triggers plan mode.</li>
+      <li>An accepted <code>plan.md</code> triggers Claude implementation.</li>
+      <li>A PR URL existing triggers Codex + Kimi (never before).</li>
+      <li>Dual LGTM + product-owner merge triggers ship. Dual LGTM alone is <strong>not</strong> merged.</li>
+    </ul>
+    <p>Artifacts live next to the code (<code>intent/</code>, repo-root <code>spec.md</code> / <code>plan.md</code>, or the repo’s existing docs path — e.g. board-pack <code>intent.md</code> + <code>plan.md</code>). Git history is the audit trail.</p>
+
+    <h3>What each markdown is for</h3>
+    <div class="grid2">
+      <div class="card">
+        <strong>intent.md</strong>
+        Problem, why now, constraints, non-goals, success signal. Written by research/product — not by the implementer inventing scope mid-build.
+      </div>
+      <div class="card">
+        <strong>spec.md</strong>
+        Observable behavior / acceptance criteria the reviewers will check against. Product owner accepts before plan mode.
+      </div>
     </div>
     <div class="card">
-      <strong>After every meaningful task</strong>
-      File what / learned / pointers / follow-ups. Chat stays a one-line digest. Prefer <code>bin/vault-note</code>. Never put secrets in notes. The vault never posts, pays, deploys, merges, or sends mail.
+      <strong>plan.md</strong>
+      Ordered slices, claim map, files to touch, test plan, and “done” definition. Implementer works <em>from</em> this file; reviewers check the PR against it. Review fix passes append a short record (what changed, which finding) instead of rewriting history silently.
     </div>
-    <p>Daily consolidation target: <strong>20:57 PT</strong> (Grok bots); Mac CLIs ~20:57–21:10 PT via Github Bot kick.</p>
-    <p>Re-install CLI hooks anytime:</p>
-    <pre>bin/install-agent-hooks.sh</pre>
-    <p>That wires vault <code>AGENTS.md</code> into Agy / Codex / Kimi / DSH homes, Claude’s global CLAUDE.md, and shared skills into Muse + DSH skill roots (see <a href="#skills">Skills &amp; hooks</a>).</p>
+
+    <h3>Play-by-play (one slice)</h3>
+    <ol>
+      <li><strong>Read vault</strong> — EM + implementer pull <code>AGENTS.md</code>, Decisions, prior Ship notes for this area.</li>
+      <li><strong>Commit intent → spec → plan</strong> if missing (any slice bigger than a one-line fix).</li>
+      <li><strong>Haiyuan accepts</strong> intent/spec when the change is consequential.</li>
+      <li><strong>EM launches implementer</strong> via <code>grok-tmux-run</code> + stream-json + watchdog; prompt points at the committed <code>plan.md</code>.</li>
+      <li><strong>Implementer</strong> builds, runs the repo’s one-command tests, commits, pushes, opens the PR — does not wait for reviewers.</li>
+      <li><strong>EM requests Codex + Kimi</strong> on the PR URL. Local CLI review is optional extra, never a gate.</li>
+      <li><strong>EM triages</strong> — P0/P1 block dual LGTM; P2s get a fix pass on the same branch/session id. Recurring findings go into <code>CLAUDE.md</code> / a skill, not another one-off FIX prompt.</li>
+      <li><strong>Dual LGTM</strong> → ping product owner. Merge only if Haiyuan asked (or a standing order for that repo).</li>
+      <li><strong>File vault</strong> — Ship/builds or Ship/rfc note with PR URL, session ids, follow-ups.</li>
+      <li><strong>Next independent slice</strong> starts without waiting on org APPROVE of the previous one.</li>
+    </ol>
+
+    <h3>Clay plays (always on)</h3>
+    <ul>
+      <li><code>CLAUDE.md</code> at repo root — build/test/lint, conventions, “things Claude gets wrong” (&lt; 1 page).</li>
+      <li><code>REVIEW.md</code> — identical reviewer passes every PR; check against <code>spec.md</code> + <code>plan.md</code>.</li>
+      <li><strong>Skills</strong> for advisory policy; <strong>hooks</strong> for must-hold rules (no secrets in diff, no push to main, no weakening tests during a fix).</li>
+    </ul>
+
+    <h3>What the EM does not do</h3>
+    <ul>
+      <li>Start Codex/Kimi before there is a PR URL.</li>
+      <li>Treat dual LGTM as merged.</li>
+      <li>Stall the next independent slice on org APPROVE.</li>
+      <li>Cold-start Claude/Codex/Kimi when a session id for that PR/slice already exists.</li>
+      <li>Put Haiyuan back on the critical path of mid-build approval prompts.</li>
+    </ul>
+    <p class="note">EM also runs a <strong>5‑minute heartbeat</strong> across live agent tasks (babysitter layer). It does not replace Mac <code>grok-tmux-watchdog</code> (~540s) — both apply.</p>
   </section>
 
   <section id="pipeline">
-    <h2>5. Field Brief pipeline</h2>
+    <h2>6. Field Brief pipeline</h2>
     <p>Locked standing cadence for <a href="/research/">caohy1988.github.io/research</a>:</p>
     <h3>Hourly source collect (<code>:32</code> PT)</h3>
     <p>Three-way capacity balance (<code>hour % 3</code>):</p>
@@ -239,19 +364,20 @@
   </section>
 
   <section id="coding">
-    <h2>6. Coding loop (SDLC)</h2>
-    <p>Github Bot runs an AI-native Plan → Design → Build → Test → Deploy → Maintain loop:</p>
+    <h2>7. Coding loop (SDLC)</h2>
+    <p>Github Bot runs an AI-native Plan → Design → Build → Test → Deploy → Maintain loop. The detailed EM playbook is in <a href="#em-loop">§5</a> (<code>intent.md</code> → <code>spec.md</code> → <code>plan.md</code> → PR → dual review → human merge).</p>
     <ul>
       <li><strong>Implementer (default):</strong> Claude Code / Fable</li>
       <li><strong>Reviewers:</strong> Codex/Astra + Kimi (dual LGTM on the critical path)</li>
       <li><strong>Optional parallel:</strong> Muse Spark or DSH when Haiyuan asks — not required for dual-LGTM</li>
       <li><strong>Merge:</strong> Haiyuan only</li>
+      <li><strong>Context:</strong> every stage also files Obsidian notes so the next agent inherits state (§4)</li>
     </ul>
     <p class="note">No-exit-while-waiting: Mac agents must not end a turn waiting on background CI/live jobs with a dirty tree. Foreground to a durable exit, or hermetic-first push then a second pass.</p>
   </section>
 
   <section id="launch">
-    <h2>7. Mac launch standards</h2>
+    <h2>8. Mac launch standards</h2>
     <p>Standing order for <strong>every</strong> long Mac CLI run (Claude, Codex, Kimi, Agy, Muse, DSH):</p>
     <ol>
       <li>Launch via <code>~/bin/grok-tmux-run &lt;session&gt; -- &lt;cmd&gt;</code> (logs under <code>~/Library/Logs/grok-tmux/</code>). Never bare <code>nohup</code> from Grok Shell.</li>
@@ -271,7 +397,7 @@ grok-tmux-run dsh-collect-HH32 -- \
   </section>
 
   <section id="skills">
-    <h2>8. Skills &amp; hooks</h2>
+    <h2>9. Skills &amp; hooks</h2>
     <p>Fleet-wide installer: <code>agent-context/bin/install-agent-hooks.sh</code>.</p>
     <table>
       <thead><tr><th>Surface</th><th>What gets wired</th></tr></thead>
@@ -292,7 +418,7 @@ grok-tmux-run dsh-collect-HH32 -- \
   </section>
 
   <section id="providers">
-    <h2>9. Model providers (Mac)</h2>
+    <h2>10. Model providers (Mac)</h2>
     <table>
       <thead><tr><th>CLI</th><th>Provider shape</th><th>Notes</th></tr></thead>
       <tbody>
@@ -305,7 +431,7 @@ grok-tmux-run dsh-collect-HH32 -- \
   </section>
 
   <section id="usage">
-    <h2>10. Usage visibility</h2>
+    <h2>11. Usage visibility</h2>
     <p>Public dashboard: <a href="/research/usage/">/research/usage/</a></p>
     <ul>
       <li>Mac CLI quota / health cards: Claude, Codex, Kimi, Agy, Muse, DSH</li>
@@ -315,7 +441,7 @@ grok-tmux-run dsh-collect-HH32 -- \
   </section>
 
   <section id="extend">
-    <h2>11. How to extend the team</h2>
+    <h2>12. How to extend the team</h2>
     <ol>
       <li><strong>Decide the layer</strong> — Grok bot (orchestrator) vs Mac CLI (worker).</li>
       <li><strong>Agent Manage Bot</strong> creates/organizes Grok bots; onboards Mac CLIs (binary, auth, usage card, vault card).</li>
@@ -328,13 +454,16 @@ grok-tmux-run dsh-collect-HH32 -- \
   </section>
 
   <section id="checklist">
-    <h2>12. Operator checklist</h2>
+    <h2>13. Operator checklist</h2>
     <ul>
       <li>☐ Mac online; Grok Bot desktop connected for local-exec</li>
-      <li>☐ Vault hooks installed (<code>install-agent-hooks.sh</code>)</li>
+      <li>☐ Vault hooks installed (<code>install-agent-hooks.sh</code>); agents reading vault before tasks</li>
+      <li>☐ Coding slices have committed <code>intent.md</code> / <code>spec.md</code> / <code>plan.md</code> before implement</li>
+      <li>☐ Reviewers only after PR URL; dual LGTM ≠ merge</li>
       <li>☐ Collect crons: Agy ≡0 / Muse ≡1 / DSH ≡2 at <code>:32</code></li>
       <li>☐ Kimi <code>:34</code> deep brief + Collection Bot publish path healthy</li>
-      <li>☐ Long jobs: tmux + stream + watchdog</li>
+      <li>☐ Long jobs: tmux + stream + watchdog + EM 5‑min heartbeat</li>
+      <li>☐ Post-task Obsidian notes filed; daily digest ~20:57 PT</li>
       <li>☐ <a href="/research/usage/">Usage</a> cards green / explained</li>
       <li>☐ No secrets in vault notes or hub commits</li>
     </ul>
