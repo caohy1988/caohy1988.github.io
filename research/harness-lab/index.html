@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Curated harness tips for Haiyuan Cao's Grok bots + Mac CLIs + Obsidian vault + Field Brief/EM fleet — actionable methods only.">
+  <meta name="theme-color" content="#101828">
+  <title>Harness Lab — Field Brief</title>
+  <link rel="canonical" href="https://caohy1988.github.io/research/harness-lab/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/site-nav.css" data-site-nav>
+  <script defer src="../../assets/site-nav.js" data-site-nav></script>
+  <style>
+    :root {
+      --navy: #101828; --navy-2: #17233a; --paper: #f4efe6; --paper-2: #ebe4d8;
+      --cream: #fbf7f0; --ink: #161410; --ink-soft: #5c564c; --ink-faint: #8a8378;
+      --line: #d9d0c3; --accent: #e87324; --accent-dark: #b7480d; --mint: #0f766e;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); text-underline-offset: 2px; }
+    a:hover { color: var(--ink); }
+    .shell { width: min(860px, calc(100% - 40px)); margin: 0 auto; }
+    header.hero { padding: 36px 0 8px; }
+    .kicker { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-dark); margin: 0 0 8px; }
+    h1 { font-family: var(--serif); font-size: clamp(1.9rem, 3.2vw, 2.6rem); font-weight: 600; margin: 0 0 12px; letter-spacing: -0.02em; }
+    .lede { color: var(--ink-soft); max-width: 62ch; margin: 0 0 12px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 22px; }
+    .meta strong { color: var(--ink); }
+    .callout { background: #fff7ed; border: 1px solid #f0d2b0; border-radius: 12px; padding: 14px 16px; margin: 0 0 24px; color: var(--ink-soft); font-size: 0.95rem; }
+    .callout strong { color: var(--ink); }
+    .list { display: flex; flex-direction: column; gap: 14px; padding-bottom: 36px; }
+    .card { background: var(--cream); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: 0 1px 0 rgba(16,24,40,0.03); }
+    .card .src { display: flex; flex-wrap: wrap; gap: 8px 14px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 8px; }
+    .card h2 { font-family: var(--serif); font-size: 1.2rem; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; line-height: 1.25; }
+    .card h2 a { color: var(--ink); text-decoration: none; }
+    .card h2 a:hover { color: var(--accent-dark); text-decoration: underline; }
+    .card p.why { margin: 0 0 10px; color: var(--ink-soft); }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { display: inline-block; font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; background: var(--paper-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; color: var(--ink-soft); }
+    .tag.applied { background: #d1fae5; border-color: #a7f3d0; color: #065f46; }
+    .empty { color: var(--ink-faint); padding: 24px 0; }
+    footer { border-top: 1px solid var(--line); padding: 22px 0 48px; color: var(--ink-faint); font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav>
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <a href="/research/harness/">Harness</a>
+      <a href="/research/harness-lab/" aria-current="page">Lab</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+          <a href="/research/builds/mcp-apps-feature-matrix/">MCP Apps matrix</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+<!-- site-nav:end -->
+
+<main class="shell">
+  <header class="hero">
+    <p class="kicker">Agent Manage · daily scout</p>
+    <h1 id="title">Harness Lab</h1>
+    <p class="lede" id="blurb">Loading…</p>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <div class="callout">
+    <strong>Scope.</strong> Tips that strengthen <em>this</em> fleet — CoS rooms, routines, tmux/watchdog, EM loop, vault, usage, Mac CLI seats.
+    Companion to the <a href="/research/harness/">harness playbook</a>. Owned by Agent Manage Bot; pack agents never write this HTML.
+  </div>
+
+  <section class="list" id="list" aria-live="polite">
+    <p class="empty">Loading entries…</p>
+  </section>
+</main>
+
+<footer>
+  <div class="shell">
+    Public research hub · harness lab · Haiyuan Cao ·
+    <a href="/research/harness/">Playbook</a> ·
+    <a href="/research/usage/">Usage</a> ·
+    <a href="/research/">Field Brief</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function sortNewest(entries) {
+    return (entries || []).slice().sort(function (a, b) {
+      return String(b.date || "").localeCompare(String(a.date || "")) || String(b.id || "").localeCompare(String(a.id || ""));
+    });
+  }
+  fetch("entries.json", { cache: "no-store" })
+    .then(function (r) { if (!r.ok) throw new Error("entries.json " + r.status); return r.json(); })
+    .then(function (data) {
+      document.getElementById("title").textContent = data.title || "Harness Lab";
+      document.getElementById("blurb").textContent = data.blurb || "";
+      var entries = sortNewest(data.entries);
+      var meta = document.getElementById("meta");
+      meta.innerHTML = "<span>" + entries.length + " <strong>entries</strong></span>" +
+        (data.updatedAt ? "<span>Updated <strong>" + esc(data.updatedAt) + "</strong></span>" : "") +
+        "<span>Newest first</span>";
+      var list = document.getElementById("list");
+      if (!entries.length) {
+        list.innerHTML = '<p class="empty">No lab entries yet.</p>';
+        return;
+      }
+      list.innerHTML = entries.map(function (e) {
+        var href = e.href || "";
+        var title = href
+          ? '<a href="' + esc(href) + '" rel="noopener noreferrer">' + esc(e.title) + "</a>"
+          : esc(e.title);
+        var tags = (e.tags || []).map(function (t) {
+          return '<span class="tag">' + esc(t) + "</span>";
+        }).join("");
+        if (e.appliedToPlaybook) tags += '<span class="tag applied">in playbook</span>';
+        return '<article class="card" id="' + esc(e.id) + '">' +
+          '<div class="src"><span>' + esc(e.source || "") + "</span><span>" + esc(e.displayDate || e.date || "") + "</span></div>" +
+          "<h2>" + title + "</h2>" +
+          '<p class="why">' + esc(e.why || "") + "</p>" +
+          (tags ? '<div class="tags">' + tags + "</div>" : "") +
+          "</article>";
+      }).join("");
+    })
+    .catch(function (err) {
+      document.getElementById("list").innerHTML = '<p class="empty">Failed to load entries.json (' + esc(err.message) + ").</p>";
+    });
+})();
+</script>
+</body>
+</html>
