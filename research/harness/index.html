@@ -104,7 +104,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-16 · Lab scout #1 applied</strong></span>
+      <span>Updated <strong>2026-09-16 · blind LGTM = Astra+Fable</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -270,8 +270,8 @@
       <tbody>
         <tr><td>Product owner</td><td>Haiyuan</td><td>Accepts <code>intent.md</code> / <code>spec.md</code>; only merge &amp; production gate</td></tr>
         <tr><td>EM</td><td>Github Bot</td><td>Commits artifacts, fires the next play, triages review, starts the next independent slice; 5‑min heartbeat babysitter</td></tr>
-        <tr><td>Implementer</td><td>Claude / Fable (default)</td><td>Implements from accepted <code>plan.md</code>; opens PR; cannot LGTM itself</td></tr>
-        <tr><td>Reviewers</td><td>Codex / Astra + Kimi</td><td>Review the GitHub PR after it exists; <strong>blind dual LGTM</strong> (second reviewer never sees the first reviewer’s text — PR + intent/spec/plan only); dual LGTM = agent-complete, not shipped</td></tr>
+        <tr><td>Implementer</td><td>Claude / Fable (default) or Muse/DSH</td><td>Implements from accepted <code>plan.md</code>; opens PR; cannot be a dual-LGTM reviewer on the same PR</td></tr>
+        <tr><td>Reviewers</td><td>Astra + Fable</td><td>Blind dual LGTM on the PR (each sees PR + intent/spec/plan only — never each other’s reviews); dual LGTM = agent-complete, not shipped. Implementer ≠ reviewer on same PR</td></tr>
         <tr><td>Research originator</td><td>human or scout bot</td><td>Writes Stage‑1 <code>intent.md</code> (problem, why, constraints) — not a coding task</td></tr>
       </tbody>
     </table>
@@ -284,7 +284,7 @@
       <li>An accepted <code>intent.md</code> triggers design.</li>
       <li>An accepted <code>spec.md</code> triggers plan mode.</li>
       <li>An accepted <code>plan.md</code> triggers Claude implementation.</li>
-      <li>A PR URL existing triggers Codex + Kimi (never before).</li>
+      <li>A PR URL existing triggers Astra + Fable blind dual-LGTM (never before; implementer ≠ reviewer).</li>
       <li>Dual LGTM + product-owner merge triggers ship. Dual LGTM alone is <strong>not</strong> merged.</li>
     </ul>
     <p>Artifacts live next to the code (<code>intent/</code>, repo-root <code>spec.md</code> / <code>plan.md</code>, or the repo’s existing docs path — e.g. board-pack <code>intent.md</code> + <code>plan.md</code>). Git history is the audit trail.</p>
@@ -312,7 +312,7 @@
       <li><strong>Haiyuan accepts</strong> intent/spec when the change is consequential.</li>
       <li><strong>EM launches implementer</strong> via <code>grok-tmux-run</code> + stream-json + watchdog; prompt points at the committed <code>plan.md</code>.</li>
       <li><strong>Implementer</strong> builds, runs the repo’s one-command tests, commits, pushes, opens the PR — does not wait for reviewers.</li>
-      <li><strong>EM requests Codex + Kimi</strong> on the PR URL. Local CLI review is optional extra, never a gate.</li>
+      <li><strong>EM requests Astra + Fable</strong> on the PR URL independently (blind dual-LGTM). Local CLI review is optional extra, never a gate.</li>
       <li><strong>EM triages</strong> — P0/P1 block dual LGTM; P2s get a fix pass on the same branch/session id. Recurring findings go into <code>CLAUDE.md</code> / a skill, not another one-off FIX prompt.</li>
       <li><strong>Dual LGTM</strong> → ping product owner. Merge only if Haiyuan asked (or a standing order for that repo).</li>
       <li><strong>File vault</strong> — Ship/builds or Ship/rfc note with PR URL, session ids, follow-ups.</li>
@@ -371,8 +371,8 @@
     <h2>7. Coding loop (SDLC)</h2>
     <p>Github Bot runs an AI-native Plan → Design → Build → Test → Deploy → Maintain loop. The detailed EM playbook is in <a href="#em-loop">§5</a> (<code>intent.md</code> → <code>spec.md</code> → <code>plan.md</code> → PR → dual review → human merge).</p>
     <ul>
-      <li><strong>Implementer (default):</strong> Claude Code / Fable</li>
-      <li><strong>Reviewers:</strong> Codex/Astra + Kimi (dual LGTM on the critical path)</li>
+      <li><strong>Implementer (default):</strong> Claude Code / Fable (or Muse/DSH when Fable is needed on review)</li>
+      <li><strong>Reviewers:</strong> Astra + Fable (blind dual LGTM on the critical path; implementer ≠ reviewer)</li>
       <li><strong>Optional parallel:</strong> Muse Spark or DSH when Haiyuan asks — not required for dual-LGTM</li>
       <li><strong>Merge:</strong> Haiyuan only</li>
       <li><strong>Context:</strong> every stage also files Obsidian notes so the next agent inherits state (§4)</li>
@@ -451,7 +451,7 @@ grok-tmux-run dsh-collect-HH32 -- \
   <section id="grok-patterns">
     <h2>12. Grok Bot team patterns</h2>
     <p>Product guidance for Grok Bot (chief of staff, group rooms, routines, teach-once) applied to this fleet — plus the 2026-09-15 CoS upgrades.</p>
-    <p>Locks: <code>Maps/Decisions/2026-09-16-lab-scout1-applied.md</code> · <code>Maps/Decisions/2026-09-15-route-via-manage-bot.md</code> · <code>Maps/Contracts/manage-handoffs.md</code> · <code>Maps/Decisions/2026-09-15-collection-scout-actions-done.md</code>.</p>
+    <p>Locks: <code>Maps/Decisions/2026-09-16-blind-dual-lgtm-astra-fable.md</code> · <code>Maps/Decisions/2026-09-16-lab-scout1-applied.md</code> · <code>Maps/Decisions/2026-09-15-route-via-manage-bot.md</code> · <code>Maps/Contracts/manage-handoffs.md</code> · <code>Maps/Decisions/2026-09-15-collection-scout-actions-done.md</code>.</p>
 
     <h3>Chief of staff</h3>
     <p><strong>Agent Manage Bot</strong> is default intake. Haiyuan asks Manage first; Manage routes to Collection / Github / Medium (or a group room) and only pulls Haiyuan in for judgment calls. Exceptions: already mid-thread with a specialist, explicit @, or an emergency live fire. Ambiguous or unrouted asks ask Haiyuan back — never silent SendToAgent (Lab scout 2026-09-16 / Anthropic coordination patterns).</p>
