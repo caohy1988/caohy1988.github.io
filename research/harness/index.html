@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How Haiyuan Cao builds and runs a dual-layer agent team: Grok bots + Mac CLIs, shared Obsidian vault, Field Brief pipeline, coding loop, and launch standards.">
+  <meta name="theme-color" content="#101828">
+  <title>Agent Harness Playbook — Field Brief</title>
+  <link rel="canonical" href="https://caohy1988.github.io/research/harness/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/site-nav.css" data-site-nav>
+  <script defer src="../../assets/site-nav.js" data-site-nav></script>
+  <style>
+    :root {
+      --navy: #101828; --navy-2: #17233a; --paper: #f4efe6; --paper-2: #ebe4d8;
+      --cream: #fbf7f0; --ink: #161410; --ink-soft: #5c564c; --ink-faint: #8a8378;
+      --line: #d9d0c3; --accent: #e87324; --accent-dark: #b7480d; --mint: #0f766e;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); text-underline-offset: 2px; }
+    a:hover { color: var(--ink); }
+    .shell { width: min(860px, calc(100% - 40px)); margin: 0 auto; }
+    header.hero { padding: 36px 0 8px; }
+    .kicker { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-dark); margin: 0 0 8px; }
+    h1 { font-family: var(--serif); font-size: clamp(1.9rem, 3.2vw, 2.6rem); font-weight: 600; margin: 0 0 12px; letter-spacing: -0.02em; }
+    .lede { color: var(--ink-soft); max-width: 62ch; margin: 0 0 16px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 28px; }
+    .meta strong { color: var(--ink); }
+    .toc { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 0 0 36px; }
+    .toc h2 { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; margin: 0 0 10px; color: var(--ink-faint); font-weight: 600; }
+    .toc ol { margin: 0; padding-left: 1.2rem; }
+    .toc li { margin: 4px 0; }
+    .toc a { color: var(--ink); text-decoration: none; }
+    .toc a:hover { color: var(--accent-dark); text-decoration: underline; }
+    section { margin: 0 0 42px; }
+    h2 { font-family: var(--serif); font-size: 1.55rem; font-weight: 600; margin: 0 0 12px; letter-spacing: -0.01em; padding-top: 8px; border-top: 1px solid var(--line); }
+    h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 600; margin: 22px 0 8px; }
+    p { margin: 0 0 12px; }
+    ul, ol { margin: 0 0 14px; padding-left: 1.25rem; }
+    li { margin: 4px 0; }
+    code, .mono { font-family: var(--mono); font-size: 0.88em; }
+    pre { background: var(--navy); color: #e8eef6; border-radius: 10px; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 0.82rem; line-height: 1.45; margin: 0 0 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 0 0 16px; }
+    th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+    .card { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 0 0 14px; }
+    .card strong { display: block; margin-bottom: 4px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 16px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .pill { display: inline-block; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; background: var(--paper-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; margin: 0 6px 6px 0; color: var(--ink-soft); }
+    .flow { font-family: var(--mono); font-size: 0.82rem; background: var(--navy-2); color: #d7e0ec; border-radius: 10px; padding: 14px 16px; margin: 0 0 16px; white-space: pre-wrap; }
+    .note { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; color: var(--ink-soft); margin: 0 0 16px; }
+    footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--ink-faint); font-size: 0.88rem; }
+    .callout { background: #fff7ed; border: 1px solid #f0d2b0; border-radius: 12px; padding: 14px 16px; margin: 0 0 20px; }
+  </style>
+</head>
+<body>
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav data-sticky="">
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <a href="/research/harness/" aria-current="page">Harness</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+          <a href="/research/builds/mcp-apps-feature-matrix/">MCP Apps matrix</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+<!-- site-nav:end -->
+
+<main class="shell">
+  <header class="hero">
+    <p class="kicker">Playbook · agent team</p>
+    <h1>Agent harness playbook</h1>
+    <p class="lede">How this Field Brief / research fleet is built: a dual-layer harness (Grok bots + Mac CLIs), one shared Obsidian vault, standing pipelines for collect → brief → publish, and hard launch rules so long runs don’t die silently.</p>
+    <div class="meta">
+      <span>Owner <strong>Haiyuan Cao</strong></span>
+      <span>Timezone <strong>America/Los_Angeles</strong></span>
+      <span>Updated <strong>2026-09-15</strong></span>
+      <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
+    </div>
+  </header>
+
+  <div class="callout">
+    <strong>Public contract.</strong> This page describes architecture and operating rules. It deliberately omits secrets, API keys, tokens, and private chat. Quota numbers live on the <a href="/research/usage/">usage dashboard</a>; durable private notes live in the Obsidian vault (not published here).
+  </div>
+
+  <nav class="toc" aria-label="Contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#thesis">Thesis</a></li>
+      <li><a href="#layers">Two layers</a></li>
+      <li><a href="#roster">Roster</a></li>
+      <li><a href="#vault">Shared vault</a></li>
+      <li><a href="#pipeline">Field Brief pipeline</a></li>
+      <li><a href="#coding">Coding loop (SDLC)</a></li>
+      <li><a href="#launch">Mac launch standards</a></li>
+      <li><a href="#skills">Skills &amp; hooks</a></li>
+      <li><a href="#providers">Model providers</a></li>
+      <li><a href="#usage">Usage visibility</a></li>
+      <li><a href="#extend">How to extend the team</a></li>
+      <li><a href="#checklist">Operator checklist</a></li>
+    </ol>
+  </nav>
+
+  <section id="thesis">
+    <h2>1. Thesis</h2>
+    <p>The harness is not “one mega-agent.” It is a <strong>small company of specialists</strong> with clear ownership, a shared memory (the vault), and a few locked pipelines. Chat is a digest; the vault is proof of done.</p>
+    <ul>
+      <li><strong>Specialize</strong> — Collection Bot owns briefs; Github Bot owns the coding EM loop; Agent Manage Bot owns roster/onboarding; Mac CLIs are the workers.</li>
+      <li><strong>Share context</strong> — every agent reads/writes the same Obsidian vault before and after work.</li>
+      <li><strong>Balance capacity</strong> — hourly collect rotates Agy / Muse / DSH so no single quota carries the load.</li>
+      <li><strong>Survive reconnects</strong> — long Mac jobs always go through tmux + streaming heartbeats + a stale-log watchdog.</li>
+      <li><strong>Human gates stay human</strong> — merges, payments, unsolicited publishes, and agent deletion require Haiyuan.</li>
+    </ul>
+  </section>
+
+  <section id="layers">
+    <h2>2. Two layers</h2>
+    <div class="grid2">
+      <div class="card">
+        <strong>Layer A — Grok bots</strong>
+        Always-on assistants in the Grok Bot sidebar. They schedule routines, babysit Mac workers, publish hub HTML, manage the roster, and talk to each other. Examples: Agent Analytics Collection Bot, Github Bot CHY1988, Medium Bot, Agent Manage Bot.
+      </div>
+      <div class="card">
+        <strong>Layer B — Mac CLIs</strong>
+        Local coding/scout agents on Haiyuan’s Mac, kicked by Grok bots via <code>grok-tmux-run</code>. Examples: Claude/Fable, Codex/Astra, Kimi, Agy, Muse Code (Muse Spark), DSH (DeepSeek Harness).
+      </div>
+    </div>
+    <div class="flow">Haiyuan
+  ├─ Grok bots (orchestrate, publish, EM, roster)
+  │    ├─ Collection Bot  → Field Brief + Stories + GTM boards
+  │    ├─ Github Bot      → Plan–Design–Build–Test–Review loop
+  │    ├─ Medium Bot      → industry scout (Medium-proxied)
+  │    └─ Agent Manage Bot→ create / organize / keep useful
+  └─ Mac CLIs (execute)
+       ├─ Agy / Muse / DSH  → hourly source packs (hour % 3)
+       ├─ Kimi (+ Astra fallback) → deep Field Brief Markdown
+       └─ Fable (+ Muse/DSH optional) → implement; Codex/Kimi review</div>
+  </section>
+
+  <section id="roster">
+    <h2>3. Roster</h2>
+    <h3>Grok bots</h3>
+    <table>
+      <thead><tr><th>Agent</th><th>Owns</th><th>Does not</th></tr></thead>
+      <tbody>
+        <tr><td>Agent Analytics Collection Bot</td><td>Industry/academy Field Briefs; Hunt packs → hub publish; Stories; GTM twin boards</td><td>Desk/SDK PRs; own-stack engineering</td></tr>
+        <tr><td>Github Bot CHY1988</td><td>EM for GitHub agent coding; Fable implement + Codex/Kimi review</td><td>Merge without Haiyuan</td></tr>
+        <tr><td>Medium Bot</td><td>Medium-proxied industry scout for briefs / boards</td><td>Unsolicited Medium publish</td></tr>
+        <tr><td>Agent Manage Bot</td><td>Create/organize teammates; onboard Mac CLIs; usage cards; hooks/skills</td><td>Destroy agents without Haiyuan</td></tr>
+      </tbody>
+    </table>
+    <h3>Mac CLIs</h3>
+    <table>
+      <thead><tr><th>Agent</th><th>Default model lane</th><th>Primary job</th></tr></thead>
+      <tbody>
+        <tr><td>Claude Code / Fable</td><td>Claude (Opus on Mac seat when capped)</td><td>Implementer under Github Bot</td></tr>
+        <tr><td>Codex / Astra</td><td>GPT-6 Astra</td><td>RFC / evidence review; Kimi fallback for deep briefs</td></tr>
+        <tr><td>Kimi</td><td>Kimi Code</td><td>Deep Field Brief Markdown every 6h</td></tr>
+        <tr><td>Agy</td><td>Gemini 3.8 Flash High</td><td>Collect packs on <code>hour % 3 == 0</code>; social-superpowers for X/Reddit</td></tr>
+        <tr><td>Muse Code / Muse Spark</td><td>muse-spark-1.3-contributor</td><td>Collect on <code>hour % 3 == 1</code>; optional implementer (off dual-LGTM unless asked)</td></tr>
+        <tr><td>DSH</td><td>OpenRouter GLM-5.3 (coding) / DeepSeek V4.1 Flash (collect)</td><td>Collect on <code>hour % 3 == 2</code>; optional implementer</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Muse and DSH are <strong>optional</strong> on the Claude→Codex+Kimi dual-LGTM critical path unless Haiyuan explicitly puts them on a slice.</p>
+  </section>
+
+  <section id="vault">
+    <h2>4. Shared vault</h2>
+    <p>Canonical path on the Mac: <code>~/Documents/agent-context</code> (Obsidian). Applies to every Grok bot and every Mac CLI.</p>
+    <div class="card">
+      <strong>Before any new task</strong>
+      Read <code>AGENTS.md</code> + <code>forbidden.md</code>, your <code>Agents/&lt;slug&gt;.md</code> card, recent Hunt/Ship notes, and relevant <code>Maps/Decisions/</code>. Prefer vault truth over chat memory when they conflict.
+    </div>
+    <div class="card">
+      <strong>After every meaningful task</strong>
+      File what / learned / pointers / follow-ups. Chat stays a one-line digest. Prefer <code>bin/vault-note</code>. Never put secrets in notes. The vault never posts, pays, deploys, merges, or sends mail.
+    </div>
+    <p>Daily consolidation target: <strong>20:57 PT</strong> (Grok bots); Mac CLIs ~20:57–21:10 PT via Github Bot kick.</p>
+    <p>Re-install CLI hooks anytime:</p>
+    <pre>bin/install-agent-hooks.sh</pre>
+    <p>That wires vault <code>AGENTS.md</code> into Agy / Codex / Kimi / DSH homes, Claude’s global CLAUDE.md, and shared skills into Muse + DSH skill roots (see <a href="#skills">Skills &amp; hooks</a>).</p>
+  </section>
+
+  <section id="pipeline">
+    <h2>5. Field Brief pipeline</h2>
+    <p>Locked standing cadence for <a href="/research/">caohy1988.github.io/research</a>:</p>
+    <h3>Hourly source collect (<code>:32</code> PT)</h3>
+    <p>Three-way capacity balance (<code>hour % 3</code>):</p>
+    <table>
+      <thead><tr><th>Hours</th><th>Collector</th><th>Pack file</th></tr></thead>
+      <tbody>
+        <tr><td>0,3,6,9,12,15,18,21</td><td>Agy · gemini-3.8-flash-high</td><td><code>packs/agy-pack-YYYY-MM-DD-HH32.md</code></td></tr>
+        <tr><td>1,4,7,10,13,16,19,22</td><td>Muse · <code>muse exec</code></td><td><code>packs/muse-pack-…</code></td></tr>
+        <tr><td>2,5,8,11,14,17,20,23</td><td>DSH · <code>dsh-collect-pack</code></td><td><code>packs/dsh-pack-…</code></td></tr>
+      </tbody>
+    </table>
+    <p>Surfaces: X/Twitter, Reddit, LinkedIn (proxy), Google/vendor, arXiv, Papers with Code. Agy owns social-superpowers for X/Reddit; Muse/DSH label proxies honestly. <strong>Collection only</strong> — no catalog HTML from pack agents. Crustdata is forbidden.</p>
+    <h3>Every 6h deep brief (<code>00:34 / 06:34 / 12:34 / 18:34</code> PT)</h3>
+    <ol>
+      <li>Kimi writes deep Field Brief Markdown from <strong>agy + muse + dsh</strong> packs since the last slot (dedupe across collectors).</li>
+      <li>Collection Bot publishes HTML + catalog + push to the hub.</li>
+      <li>Astra <code>gpt-6-astra</code> xhigh is fallback only if Kimi is quota-capped. Fable is off for briefs.</li>
+    </ol>
+    <h3>Stories &amp; GTM boards</h3>
+    <ul>
+      <li><a href="/research/stories/">BQAA Stories</a> — full-web scout, additive, newest-first; every story must name BigQuery Agent Analytics positively.</li>
+      <li>GTM twin boards (CA, BQ ML/AI Ops, Graph, Lakehouse, Search) — 6h additive scouts; prefer 3P/customer; no 1P docs/codelabs; GC Blog only for named customer stories.</li>
+      <li>Medium Bot = industry scout input only (Medium-proxied titles/URLs).</li>
+    </ul>
+  </section>
+
+  <section id="coding">
+    <h2>6. Coding loop (SDLC)</h2>
+    <p>Github Bot runs an AI-native Plan → Design → Build → Test → Deploy → Maintain loop:</p>
+    <ul>
+      <li><strong>Implementer (default):</strong> Claude Code / Fable</li>
+      <li><strong>Reviewers:</strong> Codex/Astra + Kimi (dual LGTM on the critical path)</li>
+      <li><strong>Optional parallel:</strong> Muse Spark or DSH when Haiyuan asks — not required for dual-LGTM</li>
+      <li><strong>Merge:</strong> Haiyuan only</li>
+    </ul>
+    <p class="note">No-exit-while-waiting: Mac agents must not end a turn waiting on background CI/live jobs with a dirty tree. Foreground to a durable exit, or hermetic-first push then a second pass.</p>
+  </section>
+
+  <section id="launch">
+    <h2>7. Mac launch standards</h2>
+    <p>Standing order for <strong>every</strong> long Mac CLI run (Claude, Codex, Kimi, Agy, Muse, DSH):</p>
+    <ol>
+      <li>Launch via <code>~/bin/grok-tmux-run &lt;session&gt; -- &lt;cmd&gt;</code> (logs under <code>~/Library/Logs/grok-tmux/</code>). Never bare <code>nohup</code> from Grok Shell.</li>
+      <li><strong>Streaming required</strong> — Claude <code>stream-json</code>, Muse <code>--json</code>, DSH collect tee stdout/stderr; no long buffered text-only launches.</li>
+      <li>Attach <code>grok-tmux-watchdog</code> (~540s stale) with <code>--on-stale</code> resume of the same session.</li>
+      <li>Reuse each tool’s session id per PR/slice; don’t cold-start follow-ups.</li>
+    </ol>
+    <h3>Collect launch snippets</h3>
+    <pre># Muse (odd hours in the old even/odd split; now hour%3==1)
+cd ~/Documents/agent-analytics-research
+grok-tmux-run muse-collect-HH32 -- \
+  muse exec --json --trust-workspace --disable-approval --prompt-file prompt.md
+
+# DSH (hour%3==2) — Flash for the run, then restore coding default
+grok-tmux-run dsh-collect-HH32 -- \
+  dsh-collect-pack prompt.md</pre>
+  </section>
+
+  <section id="skills">
+    <h2>8. Skills &amp; hooks</h2>
+    <p>Fleet-wide installer: <code>agent-context/bin/install-agent-hooks.sh</code>.</p>
+    <table>
+      <thead><tr><th>Surface</th><th>What gets wired</th></tr></thead>
+      <tbody>
+        <tr><td>Agy / Codex / Kimi</td><td><code>AGENTS.md</code> symlink into each home</td></tr>
+        <tr><td>Claude</td><td>Global <code>CLAUDE.md</code> from vault</td></tr>
+        <tr><td>DSH</td><td><code>~/.dsh/AGENTS.md</code> + <code>~/.dsh/skills/*</code></td></tr>
+        <tr><td>Muse</td><td>Personal skills under <code>~/.config/muse/skills/</code>; project skills via <code>--trust-workspace</code></td></tr>
+        <tr><td>Projects</td><td>Research hub + github.io get vault <code>AGENTS.md</code> + skill mirrors</td></tr>
+      </tbody>
+    </table>
+    <p>Shared skill bundles (canonical under vault <code>Agents/skills/</code>):</p>
+    <ul>
+      <li><span class="pill">obsidian-agent-context</span> vault read/file rules</li>
+      <li><span class="pill">field-brief-source-collect</span> hourly pack contract</li>
+    </ul>
+    <p>Grok bots that kick Mac jobs also keep launch skills: tmux-backed launches + stream-json/watchdog heartbeats.</p>
+  </section>
+
+  <section id="providers">
+    <h2>9. Model providers (Mac)</h2>
+    <table>
+      <thead><tr><th>CLI</th><th>Provider shape</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Agy</td><td>Gemini (Flash High for collect)</td><td>social-superpowers MCP for X/Reddit</td></tr>
+        <tr><td>Muse</td><td>Meta Muse Spark</td><td>OAuth / Accounts Center for plan; no CLI quota bars yet</td></tr>
+        <tr><td>DSH</td><td>OpenRouter (GLM-5.3 / DeepSeek V4.1)</td><td>Credits PAYG; optional CN Ark Coding Plan Pro plugin when 实名</td></tr>
+        <tr><td>Claude / Codex / Kimi</td><td>Vendor CLIs</td><td>Usage cards on the dashboard</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="usage">
+    <h2>10. Usage visibility</h2>
+    <p>Public dashboard: <a href="/research/usage/">/research/usage/</a></p>
+    <ul>
+      <li>Mac CLI quota / health cards: Claude, Codex, Kimi, Agy, Muse, DSH</li>
+      <li>Overall Grok Bots activity share from local transcripts (not plan dollars)</li>
+      <li>Refresh on the Mac via <code>usage-dashboard/refresh.sh</code>, then commit/push the hub</li>
+    </ul>
+  </section>
+
+  <section id="extend">
+    <h2>11. How to extend the team</h2>
+    <ol>
+      <li><strong>Decide the layer</strong> — Grok bot (orchestrator) vs Mac CLI (worker).</li>
+      <li><strong>Agent Manage Bot</strong> creates/organizes Grok bots; onboards Mac CLIs (binary, auth, usage card, vault card).</li>
+      <li><strong>Vault</strong> — add <code>Agents/&lt;slug&gt;.md</code>, update <code>Maps/Roster.md</code> + <code>AGENTS.md</code>, file a <code>Maps/Decisions/</code> lock.</li>
+      <li><strong>Hooks</strong> — extend <code>install-agent-hooks.sh</code> if the CLI has an AGENTS/skills home.</li>
+      <li><strong>Routines</strong> — owning Grok bot schedules the cron/event listeners (Collection Bot for packs; Github Bot for coding EM).</li>
+      <li><strong>Usage</strong> — add a collector + card in <code>usage-dashboard/collect_and_build.py</code>, refresh, push.</li>
+      <li><strong>Never</strong> put keys in the vault or hub HTML. Rotate anything pasted into chat.</li>
+    </ol>
+  </section>
+
+  <section id="checklist">
+    <h2>12. Operator checklist</h2>
+    <ul>
+      <li>☐ Mac online; Grok Bot desktop connected for local-exec</li>
+      <li>☐ Vault hooks installed (<code>install-agent-hooks.sh</code>)</li>
+      <li>☐ Collect crons: Agy ≡0 / Muse ≡1 / DSH ≡2 at <code>:32</code></li>
+      <li>☐ Kimi <code>:34</code> deep brief + Collection Bot publish path healthy</li>
+      <li>☐ Long jobs: tmux + stream + watchdog</li>
+      <li>☐ <a href="/research/usage/">Usage</a> cards green / explained</li>
+      <li>☐ No secrets in vault notes or hub commits</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <div class="shell">
+    Public research hub · agent harness playbook · Haiyuan Cao ·
+    <a href="/research/">Field Brief</a> ·
+    <a href="/research/usage/">Usage</a> ·
+    <a href="https://github.com/caohy1988/caohy1988.github.io">source</a>
+  </div>
+</footer>
+</body>
+</html>

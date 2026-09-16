@@ -27,6 +27,7 @@ export const NAV = [
     { label: "BQ Search", href: "/research/bigquery-search/" },
   ] },
   { label: "Usage", href: "/research/usage/" },
+  { label: "Harness", href: "/research/harness/" },
   { label: "Builds", id: "builds", items: [
     { label: "RFC", href: "/rfc/" },
     { label: "Detailed RFC", href: "/rfc/detailed-rfc/" },
@@ -45,6 +46,7 @@ export const PAGES = {
   "/research/bigquery-lakehouse/": "research/bigquery-lakehouse/index.html",
   "/research/bigquery-search/": "research/bigquery-search/index.html",
   "/research/usage/": "research/usage/index.html",
+  "/research/harness/": "research/harness/index.html",
   "/rfc/": "rfc/index.html",
   "/rfc/detailed-rfc/": "rfc/detailed-rfc/index.html",
   "/rfc/demo/": "rfc/demo/index.html",
@@ -58,7 +60,7 @@ export const PAGES = {
 export const CURRENT = { "/rfc/demo/": "/rfc/", "/rfc/full-demo/": "/rfc/", "/rfc/e2e/": "/rfc/" };
 
 // Long single-page documents keep the bar pinned (they did before the shared chrome).
-export const STICKY = new Set(["/rfc/detailed-rfc/", "/rfc/demo/", "/rfc/full-demo/", "/rfc/e2e/"]);
+export const STICKY = new Set(["/rfc/detailed-rfc/", "/rfc/demo/", "/rfc/full-demo/", "/rfc/e2e/", "/research/harness/"]);
 
 const START = "<!-- site-nav:start -->";
 const END = "<!-- site-nav:end -->";
