@@ -7,6 +7,12 @@
   var SLUG = main.getAttribute("data-board");
   var ENTRIES_URL = main.getAttribute("data-entries");
   var BOARD_URL = main.getAttribute("data-board-url") || (location.origin + location.pathname);
+  // data-entry-noun: "resource" (default) or "stor" → story/stories
+  var NOUN_STEM = main.getAttribute("data-entry-noun") || "resource";
+  function entryNoun(n) {
+    if (NOUN_STEM === "stor") return n === 1 ? "story" : "stories";
+    return n === 1 ? NOUN_STEM : NOUN_STEM + "s";
+  }
   var STORAGE_KEY = "board-select:" + SLUG;
   var FILTERS = [
     { id: "all", label: "All" }, { id: "video", label: "Video" }, { id: "medium", label: "Medium" },
@@ -72,8 +78,8 @@
   function renderList() {
     var filtered = visibleEntries(), n = filtered.length, total = allEntries.length;
     var label = (FILTERS.filter(function (f) { return f.id === activeFilter; })[0] || {}).label || "All";
-    els.meta.textContent = (activeFilter === "all" ? total + " resource" + (total === 1 ? "" : "s") : n + " of " + total + " · " + label) + " · newest first";
-    if (!n) { els.list.innerHTML = '<p class="empty">No resources in this filter.</p>'; updateTray(); return; }
+    els.meta.textContent = (activeFilter === "all" ? total + " " + entryNoun(total) : n + " of " + total + " · " + label) + " · newest first";
+    if (!n) { els.list.innerHTML = '<p class="empty">No ' + entryNoun(2) + ' in this filter.</p>'; updateTray(); return; }
     els.list.innerHTML = filtered.map(function (e) {
       var tags = (e.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
       var ch = channelOf(e), typeLabel = TYPE_LABEL[ch] || kindLabel(e.kind);

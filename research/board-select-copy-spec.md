@@ -1,6 +1,6 @@
 # Spec — `board-select-copy`
 
-Boards: `research/{conversational-analytics,bigquery-search,bigquery-graph,bigquery-lakehouse,bqml-ai-operators}/index.html`, each rendering `entries.json` (`updatedAt`, `title`, `blurb`, `entries[]` of `id, kind, source, date, displayDate, title, href, why, tags`). No test in the repository reads these pages today; `tools/site_nav.mjs` owns their nav block and must stay in sync.
+Boards: `research/{conversational-analytics,bigquery-search,bigquery-graph,bigquery-lakehouse,bqml-ai-operators,stories}/index.html` (BQAA Stories uses `stories.json` via `data-entries`), each rendering `entries.json` (`updatedAt`, `title`, `blurb`, `entries[]` of `id, kind, source, date, displayDate, title, href, why, tags`). No test in the repository reads these pages today; `tools/site_nav.mjs` owns their nav block and must stay in sync.
 
 ## 1. Shared renderer
 
