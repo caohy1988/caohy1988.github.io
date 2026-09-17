@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-16T14:24:06-07:00",
+  "updatedAt": "2026-09-16T19:37:46-07:00",
   "title": "BigQuery Lakehouse",
   "blurb": "Product impact board for BigQuery Lakehouse / BigLake / Iceberg on BigQuery — how customers, partners, analysts, and the community introduce open lakehouse patterns. Built for BQ Lakehouse directors and managers tracking GTM. Prefer customer/3P; no 1P docs; GC Blog only for successful named customer stories.",
   "entries": [
@@ -17,6 +17,22 @@
         "BigLake",
         "Metastore",
         "Qiita"
+      ]
+    },
+    {
+      "id": "github-teamschools-teamster-issue-5316-stale-biglake-cache",
+      "kind": "community",
+      "source": "GitHub (TEAMSchools/teamster)",
+      "date": "2026-09-15",
+      "displayDate": "Sep 15, 2026",
+      "title": "i-Ready staging NULLs: BigLake metadata cache stale after Inform rename",
+      "href": "https://github.com/TEAMSchools/teamster/issues/5316",
+      "why": "Live Sep 15 production incident: stale BigLake metadata cache made renamed Avro columns read as NULL after an Inform cutover — concrete day-2 signal that BigLake cache freshness is a pipeline reliability risk for school analytics teams.",
+      "tags": [
+        "biglake",
+        "metadata-cache",
+        "customer-incident",
+        "community"
       ]
     },
     {
@@ -174,6 +190,22 @@
       ]
     },
     {
+      "id": "github-dataengy-ogip-issue-60-biglake-iceberg-composer",
+      "kind": "community",
+      "source": "GitHub (dataengy/ogip)",
+      "date": "2026-09-04",
+      "displayDate": "Sep 4, 2026",
+      "title": "GCP alt-deployment: BigLake Iceberg + dbt on Composer 3",
+      "href": "https://github.com/dataengy/ogip/issues/60",
+      "why": "Fresh Sep 2026 OSS task scoping BigLake Metastore Iceberg + dbt-bigquery table_format:iceberg on Composer 3 — reference architecture demand for BigLake-backed medallion stacks.",
+      "tags": [
+        "biglake",
+        "dbt",
+        "composer",
+        "community"
+      ]
+    },
+    {
       "id": "docs-redpanda-com-iceberg-topics-gcp-biglake-202609",
       "kind": "partner",
       "source": "Redpanda Docs",
@@ -252,6 +284,22 @@
         "Iceberg",
         "BigQuery",
         "video"
+      ]
+    },
+    {
+      "id": "terraform-registry-google-biglake-iceberg-catalog-2026",
+      "kind": "partner",
+      "source": "Terraform Registry (hashicorp/google)",
+      "date": "2026-09-01",
+      "displayDate": "Sep 2026",
+      "title": "google_biglake_iceberg_catalog — BigLake / federated Iceberg REST catalogs",
+      "href": "https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/biglake_iceberg_catalog",
+      "why": "Canonical HashiCorp registry docs for google_biglake_iceberg_catalog covering CATALOG_TYPE_BIGLAKE and CATALOG_TYPE_FEDERATED — durable partner IaC surface for borderless BigLake catalogs.",
+      "tags": [
+        "terraform",
+        "biglake",
+        "partner",
+        "iac"
       ]
     },
     {
@@ -351,6 +399,38 @@
         "Lakehouse",
         "Iceberg",
         "BigLake"
+      ]
+    },
+    {
+      "id": "github-hashicorp-tf-google-issue-29136-biglake-partition-field-id",
+      "kind": "community",
+      "source": "GitHub (hashicorp/terraform-provider-google)",
+      "date": "2026-08-31",
+      "displayDate": "Aug 31, 2026",
+      "title": "google_biglake_iceberg_table: partitioned create needs field-id",
+      "href": "https://github.com/hashicorp/terraform-provider-google/issues/29136",
+      "why": "Community bug: BigLake Iceberg table create fails when API requires partition field-id but TF exposes it as computed — pairs with the boarded partition field-ids PR as the customer-visible IaC gap.",
+      "tags": [
+        "terraform",
+        "biglake",
+        "partition",
+        "community"
+      ]
+    },
+    {
+      "id": "github-clickhouse-pr-117329-biglake-flat-namespaces",
+      "kind": "community",
+      "source": "GitHub (ClickHouse/ClickHouse)",
+      "date": "2026-08-31",
+      "displayDate": "Aug 31, 2026",
+      "title": "DataLakeCatalog flat_namespaces setting (BigLake-style top-level listing)",
+      "href": "https://github.com/ClickHouse/ClickHouse/pull/117329",
+      "why": "Merged ClickHouse PR that generalizes BigLake’s always-flat namespace listing into a DataLakeCatalog setting — partner-engine proof that BigLake’s REST namespace model is shaping OSS catalog UX.",
+      "tags": [
+        "clickhouse",
+        "biglake",
+        "iceberg-rest",
+        "community"
       ]
     },
     {
@@ -747,6 +827,38 @@
       ]
     },
     {
+      "id": "github-dbt-labs-dbt-issue-15742-snowflake-biglake-casing",
+      "kind": "community",
+      "source": "GitHub (dbt-labs/dbt)",
+      "date": "2026-07-30",
+      "displayDate": "Jul 30, 2026",
+      "title": "Snowflake persist_docs fails on case-sensitive IRC / BigLake Catalog-Linked tables",
+      "href": "https://github.com/dbt-labs/dbt/issues/15742",
+      "why": "dbt bug on Snowflake-managed Iceberg tables backed by external Iceberg REST / BigLake catalog-linked DBs — column-comment casing friction that directors should track for borderless Snowflake↔BigLake workflows.",
+      "tags": [
+        "dbt",
+        "snowflake",
+        "biglake",
+        "community"
+      ]
+    },
+    {
+      "id": "github-apache-polaris-pr-5196-biglake-validation",
+      "kind": "community",
+      "source": "GitHub (apache/polaris)",
+      "date": "2026-07-30",
+      "displayDate": "Jul 30, 2026",
+      "title": "Add BigLake configuration validation for catalog creation and updates",
+      "href": "https://github.com/apache/polaris/pull/5196",
+      "why": "Apache Polaris fail-fast validation for Iceberg REST catalogs targeting https://biglake.googleapis.com/iceberg/v1/restcatalog and bl:// warehouses — treats BigLake as a first-class external catalog peer.",
+      "tags": [
+        "polaris",
+        "biglake",
+        "iceberg-rest",
+        "community"
+      ]
+    },
+    {
       "id": "github-apache-polaris-issue-5195-biglake-external",
       "kind": "community",
       "source": "GitHub (apache/polaris)",
@@ -811,6 +923,22 @@
         "Delta",
         "Medium",
         "3P"
+      ]
+    },
+    {
+      "id": "github-redpanda-terraform-pr-18-biglake-iam",
+      "kind": "community",
+      "source": "GitHub (redpanda-data/terraform-gcp-redpanda-byovpc)",
+      "date": "2026-07-28",
+      "displayDate": "Jul 28, 2026",
+      "title": "Add BigLake IAM grants for GCP BYOVPC",
+      "href": "https://github.com/redpanda-data/terraform-gcp-redpanda-byovpc/pull/18",
+      "why": "Redpanda BYOVPC Terraform enables biglake.googleapis.com and grants roles/biglake.editor for broker-native Iceberg — streaming partner IaC that wires BigLake into production GCP VPC footprints.",
+      "tags": [
+        "redpanda",
+        "biglake",
+        "terraform",
+        "community"
       ]
     },
     {
@@ -928,6 +1056,55 @@
       ]
     },
     {
+      "id": "github-trinodb-trino-pr-30438-biglake-server-location",
+      "kind": "community",
+      "source": "GitHub (trinodb/trino)",
+      "date": "2026-07-23",
+      "displayDate": "Jul 23, 2026",
+      "title": "Let BigLake metastore assign Iceberg table locations",
+      "href": "https://github.com/trinodb/trino/pull/30438",
+      "why": "Merged Trino fix for BigLake’s server-assigned immutable table locations (namespace/table/random_suffix) — required for CREATE TABLE against BigLake Metastore GOOGLE security without location mismatch failures.",
+      "tags": [
+        "trino",
+        "biglake",
+        "iceberg",
+        "community"
+      ]
+    },
+    {
+      "id": "github-trinodb-trino-issue-30440-biglake-register-table",
+      "kind": "community",
+      "source": "GitHub (trinodb/trino)",
+      "date": "2026-07-23",
+      "displayDate": "Jul 23, 2026",
+      "title": "Iceberg BigLake metastore rejects registering tables under the locations it assigns",
+      "href": "https://github.com/trinodb/trino/issues/30440",
+      "why": "Open Trino issue: BigLake assigns suffixed table locations then rejects register_table under those paths — day-2 interoperability gap for unregister/register workflows on BigLake Metastore.",
+      "tags": [
+        "trino",
+        "biglake",
+        "register-table",
+        "community"
+      ]
+    },
+    {
+      "id": "github-dbt-labs-dbt-issue-15659-biglake-iceberg-epic",
+      "kind": "community",
+      "source": "GitHub (dbt-labs/dbt)",
+      "date": "2026-07-23",
+      "displayDate": "Jul 23, 2026",
+      "title": "[EPIC] per-model table_format: iceberg for managed catalogs (BigQuery/BigLake)",
+      "href": "https://github.com/dbt-labs/dbt/issues/15659",
+      "why": "dbt epic to standardize table_format: iceberg across managed catalogs including BigQuery (BigLake) — transforms partner roadmap that makes managed Iceberg-on-BQ a first-class dbt model config.",
+      "tags": [
+        "dbt",
+        "bigquery",
+        "biglake",
+        "iceberg",
+        "community"
+      ]
+    },
+    {
       "id": "medium-snowflake-iceberg-catalogs-below-surface",
       "kind": "essay",
       "source": "Medium (Snowflake) · Daniel Hunt",
@@ -975,6 +1152,22 @@
         "Spark",
         "BigQuery",
         "Medium"
+      ]
+    },
+    {
+      "id": "github-trinodb-trino-issue-30261-biglake-replace-properties",
+      "kind": "community",
+      "source": "GitHub (trinodb/trino)",
+      "date": "2026-07-09",
+      "displayDate": "Jul 9, 2026",
+      "title": "CREATE OR REPLACE fails on BigLake metastore remove-properties",
+      "href": "https://github.com/trinodb/trino/issues/30261",
+      "why": "Open Trino bug: CREATE OR REPLACE TABLE against BigLake Metastore fails on remove-properties for write.parquet.compression-codec — write-path friction directors should expect in multi-engine Trino+BigLake labs.",
+      "tags": [
+        "trino",
+        "biglake",
+        "bug",
+        "community"
       ]
     },
     {
@@ -1157,6 +1350,38 @@
       "displayDate": "Jun 20, 2026"
     },
     {
+      "id": "github-trinodb-trino-pr-29963-biglake-quota",
+      "kind": "community",
+      "source": "GitHub (trinodb/trino)",
+      "date": "2026-06-19",
+      "displayDate": "Jun 19, 2026",
+      "title": "Make TestIcebergBigLakeMetastoreConnectorSmokeTest non-parallel",
+      "href": "https://github.com/trinodb/trino/pull/29963",
+      "why": "Trino CI serialization after BigLake REST 429s at 1,200 read req/min — surfaces a real BigLake Metastore rate-limit threshold for high-concurrency Trino fleets.",
+      "tags": [
+        "trino",
+        "biglake",
+        "quota",
+        "community"
+      ]
+    },
+    {
+      "id": "github-hashicorp-tf-google-pr-27903-biglake-iceberg-header",
+      "kind": "community",
+      "source": "GitHub (hashicorp/terraform-provider-google)",
+      "date": "2026-06-17",
+      "displayDate": "Jun 17, 2026",
+      "title": "Add Iceberg Access-Delegation header on BigLake table calls",
+      "href": "https://github.com/hashicorp/terraform-provider-google/pull/27903",
+      "why": "Merged TF fix shipping X-Iceberg-Access-Delegation for google_biglake_iceberg_table when catalogs use CREDENTIAL_MODE_VENDED_CREDENTIALS — unblocks IaC create of vended-credential BigLake tables.",
+      "tags": [
+        "terraform",
+        "biglake",
+        "vended-credentials",
+        "community"
+      ]
+    },
+    {
       "id": "medium-hyunuk-cross-cloud-lakehouse-no-copy-2026-06",
       "kind": "essay",
       "source": "Medium (Google Cloud Community) · Hyunuk Lim",
@@ -1223,6 +1448,22 @@
         "BigLake",
         "Iceberg",
         "Qiita",
+        "community"
+      ]
+    },
+    {
+      "id": "github-hashicorp-tf-google-pr-27865-biglake-sort-order",
+      "kind": "community",
+      "source": "GitHub (hashicorp/terraform-provider-google)",
+      "date": "2026-06-15",
+      "displayDate": "Jun 15, 2026",
+      "title": "feat: Add sort_order support to BigLake Iceberg Table",
+      "href": "https://github.com/hashicorp/terraform-provider-google/pull/27865",
+      "why": "Merged HashiCorp enhancement adding sort_order to google_biglake_iceberg_table — IaC coverage for Iceberg write-order on BigLake-managed tables.",
+      "tags": [
+        "terraform",
+        "biglake",
+        "iceberg",
         "community"
       ]
     },
@@ -1625,6 +1866,22 @@
       "displayDate": "May 21, 2026"
     },
     {
+      "id": "github-airbyte-pr-78301-biglake-rest-iam",
+      "kind": "community",
+      "source": "GitHub (airbytehq/airbyte)",
+      "date": "2026-05-20",
+      "displayDate": "May 20, 2026",
+      "title": "docs(destination-gcs-data-lake): fix IAM roles and BigLake REST setup",
+      "href": "https://github.com/airbytehq/airbyte/pull/78301",
+      "why": "Airbyte destination docs for writing Iceberg via https://biglake.googleapis.com/iceberg/v1/restcatalog with least-privilege BigLake Editor/Admin roles — ingestion-partner how-to for BigLake REST writers.",
+      "tags": [
+        "airbyte",
+        "biglake",
+        "iam",
+        "community"
+      ]
+    },
+    {
       "id": "dremio-lakehouse-catalogs-biglake-2026-05",
       "kind": "partner",
       "source": "Dremio",
@@ -1687,6 +1944,22 @@
         "BigLake",
         "Hadoop catalog",
         "Medium"
+      ]
+    },
+    {
+      "id": "github-risingwave-pr-25671-lakehouse-rest-notes",
+      "kind": "community",
+      "source": "GitHub (risingwavelabs/risingwave)",
+      "date": "2026-05-15",
+      "displayDate": "May 15, 2026",
+      "title": "doc(connector): update Lakehouse Iceberg REST notes",
+      "href": "https://github.com/risingwavelabs/risingwave/pull/25671",
+      "why": "RisingWave connector docs updated for Google Cloud Lakehouse Iceberg REST (x-goog-user-project + vended-credentials) — streaming OLAP engine aligning with the BigLake rename and REST auth model.",
+      "tags": [
+        "risingwave",
+        "biglake",
+        "lakehouse",
+        "community"
       ]
     },
     {
@@ -1835,6 +2108,22 @@
         "BigLake",
         "REST catalog",
         "Medium"
+      ]
+    },
+    {
+      "id": "github-apache-doris-pr-62988-googleauthmanager",
+      "kind": "community",
+      "source": "GitHub (apache/doris)",
+      "date": "2026-05-01",
+      "displayDate": "May 1, 2026",
+      "title": "[feat](iceberg) Support Google Authentication for Iceberg REST catalog",
+      "href": "https://github.com/apache/doris/pull/62988",
+      "why": "Open Doris PR adding GoogleAuthManager / ADC for Iceberg REST catalogs pointed at biglake.googleapis.com — next engine after StarRocks/Trino wiring native Google auth for BigLake.",
+      "tags": [
+        "doris",
+        "biglake",
+        "google-auth",
+        "community"
       ]
     },
     {
@@ -2248,6 +2537,22 @@
       ]
     },
     {
+      "id": "github-trinodb-trino-issue-29084-biglake-workload-identity",
+      "kind": "community",
+      "source": "GitHub (trinodb/trino)",
+      "date": "2026-04-13",
+      "displayDate": "Apr 13, 2026",
+      "title": "Iceberg REST Catalog requires gcs.json-key-file-path even with Workload Identity",
+      "href": "https://github.com/trinodb/trino/issues/29084",
+      "why": "Closed Trino issue: BigLake REST (GOOGLE security) forced JSON key files on GKE Workload Identity — security-posture friction that GKE shops hit when pointing Trino at biglake.googleapis.com.",
+      "tags": [
+        "trino",
+        "biglake",
+        "workload-identity",
+        "community"
+      ]
+    },
+    {
       "id": "dbt-labs-blog-google-cloud-next-2026",
       "kind": "partner",
       "source": "dbt Labs Blog",
@@ -2534,6 +2839,22 @@
         "BigLake",
         "Iceberg",
         "partner"
+      ]
+    },
+    {
+      "id": "github-clickhouse-pr-98670-biglake-create-drop",
+      "kind": "community",
+      "source": "GitHub (ClickHouse/ClickHouse)",
+      "date": "2026-03-03",
+      "displayDate": "Mar 3, 2026",
+      "title": "Native CREATE/DROP TABLE for DataLakeCatalog (BigLake REST path)",
+      "href": "https://github.com/ClickHouse/ClickHouse/pull/98670",
+      "why": "Merged ClickHouse DataLakeCatalog CREATE/DROP (with optional purge) including BigLake REST catalog codepaths — write-side lifecycle for ClickHouse over BigLake Iceberg tables.",
+      "tags": [
+        "clickhouse",
+        "biglake",
+        "datalakecatalog",
+        "community"
       ]
     },
     {
@@ -3454,6 +3775,21 @@
         "Iceberg",
         "BigQuery",
         "Redpanda"
+      ]
+    },
+    {
+      "id": "github-apache-iceberg-pr-12808-bigquery-metastore-catalog",
+      "kind": "community",
+      "source": "GitHub (apache/iceberg)",
+      "date": "2025-05-13",
+      "displayDate": "May 13, 2025",
+      "title": "Catalog: Add BigQuery Metastore Catalog Support",
+      "href": "https://github.com/apache/iceberg/pull/12808",
+      "why": "Merged upstream Iceberg BigQueryMetastoreCatalog — the OSS catalog path for Iceberg tables whose metadata lives in BigQuery Metastore, complementary to BigLake REST.",
+      "tags": [
+        "apache-iceberg",
+        "bigquery-metastore",
+        "community"
       ]
     },
     {
