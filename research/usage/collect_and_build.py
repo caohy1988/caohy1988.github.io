@@ -26,24 +26,25 @@ MUSE_BIN = Path.home() / ".local/bin/muse"
 MUSE_AUTH = Path.home() / ".config/muse/auth.json"
 DSH_BIN = Path.home() / ".local/bin/dsh"
 DSH_DIR = Path.home() / ".dsh"
-BOX_AGENTS = Path("/home/box/agent-data/agents")
-BOX_TRANS = Path("/home/box/agent-data/agent-transcripts")
 GROK_CACHE = HERE / "grok_box_activity.json"
 
-GROK_ORDER = [
-    "Agent Analytics Collection Bot",
-    "Github Bot CHY1988",
-    "Medium Bot",
-    "Agent Manage Bot",
-]
-GROK_ROLES = {
-    "Agent Analytics Collection Bot": "Collection / vault ops",
-    "Github Bot CHY1988": "GitHub / hub publish",
-    "Medium Bot": "Medium (id was Linkedin)",
-    "Agent Manage Bot": "Chief of staff — dual-layer harness (rooms, Lab, Field Brief watch)",
-}
-# Dead / placeholder agents still on disk — never show in usage roster
-GROK_SKIP_NAMES = {"New Bot", "Field Brief", "Coding EM"}
+# Box collection + freshness logic is shared with the box-side collector script.
+from collect_grok_box_activity import (  # noqa: E402
+    BOX_TRANS,
+    GROK_LINKS,
+    GROK_NOTE,
+    GROK_ORDER,
+    GROK_ROLES,
+    GROK_SKIP_NAMES,
+    STALE_AFTER_HOURS,
+    build_payload,
+    collect_box_bots,
+    empty_bot as _empty_bot,
+    ms_to_pt,
+    normalize_bots,
+    staleness,
+)
+
 GROK_COLORS = ["#0f766e", "#e87324", "#2563eb", "#7c3aed"]
 
 
@@ -90,17 +91,6 @@ def ts_to_pt(ts: int | float | None) -> str | None:
         return None
     try:
         return datetime.fromtimestamp(float(ts), tz=timezone.utc).astimezone(PT).strftime(
-            "%Y-%m-%d %H:%M %Z"
-        )
-    except Exception:
-        return None
-
-
-def ms_to_pt(ms: int | float | None) -> str | None:
-    if ms is None:
-        return None
-    try:
-        return datetime.fromtimestamp(float(ms) / 1000.0, tz=timezone.utc).astimezone(PT).strftime(
             "%Y-%m-%d %H:%M %Z"
         )
     except Exception:
@@ -884,23 +874,6 @@ def collect_agy() -> dict:
     return out
 
 
-def _empty_bot(name: str) -> dict:
-    return {
-        "id": None,
-        "name": name,
-        "title": "",
-        "role": GROK_ROLES.get(name, ""),
-        "messages": {"user": 0, "assistant": 0, "tool": 0, "total": 0, "assistant_tool": 0},
-        "transcript_bytes": 0,
-        "transcript_mb": 0.0,
-        "last_transcript_activity_pt": None,
-        "automation_runs": 0,
-        "last_automation_started_pt": None,
-        "share_assistant_tool_pct": 0.0,
-    }
-
-
-
 def sync_manage_bot_transcript_from_client() -> Path | None:
     """Mirror Agent Manage Bot UI transcript replica into a countable jsonl.
 
@@ -1061,135 +1034,11 @@ def _apply_manage_bot_client_counts(bots: list[dict]) -> list[dict]:
 
 
 def _collect_grok_from_box() -> dict | None:
-    if not BOX_AGENTS.exists():
+    bots = collect_box_bots()
+    if bots is None:
         return None
-    bots = []
-    for d in sorted(BOX_AGENTS.iterdir()):
-        if not d.is_dir() or not (d / "profile.json").exists():
-            continue
-        prof = json.loads((d / "profile.json").read_text())
-        aid = d.name
-        name = prof.get("name") or aid
-        tp = BOX_TRANS / aid / f"{aid}.jsonl"
-        counts: Counter = Counter()
-        size = 0
-        mtime = None
-        if tp.exists():
-            st = tp.stat()
-            size = st.st_size
-            mtime = datetime.fromtimestamp(st.st_mtime, tz=timezone.utc).astimezone(PT).strftime(
-                "%Y-%m-%d %H:%M %Z"
-            )
-            with tp.open() as f:
-                for line in f:
-                    try:
-                        o = json.loads(line)
-                    except Exception:
-                        continue
-                    r = o.get("role")
-                    if r in ("user", "assistant", "tool"):
-                        counts[r] += 1
-        # Fallback: local store.db when jsonl not mirrored yet (e.g. new / temporal agents)
-        store = d / "store.db"
-        if sum(counts.values()) == 0 and store.exists():
-            try:
-                import sqlite3
-                con = sqlite3.connect(f"file:{store}?mode=ro", uri=True)
-                rows = con.execute("SELECT entry FROM transcript_entries").fetchall()
-                con.close()
-                for (entry,) in rows:
-                    try:
-                        o = json.loads(entry) if isinstance(entry, str) else {}
-                    except Exception:
-                        continue
-                    kind = (o.get("kind") or "").lower()
-                    if kind in ("user-message", "user", "receive-message"):
-                        counts["user"] += 1
-                    elif kind in ("send-message", "assistant"):
-                        counts["assistant"] += 1
-                    elif "tool" in kind:
-                        counts["tool"] += 1
-                    else:
-                        # unknown store kinds still count as assistant activity
-                        if kind:
-                            counts["assistant"] += 1
-                if rows:
-                    st = store.stat()
-                    size = max(size, st.st_size)
-                    mtime = datetime.fromtimestamp(st.st_mtime, tz=timezone.utc).astimezone(PT).strftime(
-                        "%Y-%m-%d %H:%M %Z"
-                    )
-            except Exception:
-                pass
-        auto_runs = 0
-        last_started = None
-        autod = d / "automations"
-        if autod.exists():
-            for runs_path in autod.glob("*/runs.json"):
-                try:
-                    raw = json.loads(runs_path.read_text())
-                except Exception:
-                    continue
-                entries = raw if isinstance(raw, list) else (raw.get("runs") or raw.get("entries") or [])
-                if not isinstance(entries, list):
-                    continue
-                auto_runs += len(entries)
-                for e in entries:
-                    sa = e.get("startedAt") or e.get("started_at")
-                    if sa is None:
-                        continue
-                    if last_started is None or float(sa) > float(last_started):
-                        last_started = sa
-        at = counts["assistant"] + counts["tool"]
-        bots.append(
-            {
-                "id": aid,
-                "name": name,
-                "title": prof.get("title") or "",
-                "role": GROK_ROLES.get(name, prof.get("title") or ""),
-                "messages": {
-                    "user": counts["user"],
-                    "assistant": counts["assistant"],
-                    "tool": counts["tool"],
-                    "total": counts["user"] + counts["assistant"] + counts["tool"],
-                    "assistant_tool": at,
-                },
-                "transcript_bytes": size,
-                "transcript_mb": round(size / (1024 * 1024), 2),
-                "last_transcript_activity_pt": mtime,
-                "automation_runs": auto_runs,
-                "last_automation_started_pt": ms_to_pt(last_started),
-            }
-        )
-    have = {b["name"] for b in bots}
-    for name in GROK_ORDER:
-        if name not in have:
-            bots.append(_empty_bot(name))
-    bots = [b for b in bots if b.get("name") not in GROK_SKIP_NAMES]
-    rank = {n: i for i, n in enumerate(GROK_ORDER)}
-    bots.sort(key=lambda b: (rank.get(b["name"], 99), b["name"]))
-    fleet_at = sum(b["messages"]["assistant_tool"] for b in bots) or 0
-    fleet_total = sum(b["messages"]["total"] for b in bots)
-    denom = fleet_at or 1
-    for b in bots:
-        b["share_assistant_tool_pct"] = round(100.0 * b["messages"]["assistant_tool"] / denom, 1) if fleet_at else 0.0
     bots = _apply_manage_bot_client_counts(bots)
-    fleet_at = sum(b["messages"]["assistant_tool"] for b in bots) or 0
-    fleet_total = sum(b["messages"]["total"] for b in bots)
-    return {
-        "ok": True,
-        "source": "box /home/box/agent-data (live)",
-        "collected_at_pt": iso_pt(),
-        "collected_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "bots": bots,
-        "fleet_messages_total": fleet_total,
-        "fleet_assistant_tool_total": fleet_at,
-        "note": "Activity share from local Grok Bot transcripts — not Cursor plan dollars.",
-        "links": {
-            "usage_billing": "grokbot://app/v1/settings?id=plan",
-            "on_demand": "grokbot://app/v1/settings?id=on-demand",
-        },
-    }
+    return build_payload(bots, "box /home/box/agent-data (live)")
 
 
 
@@ -1539,64 +1388,56 @@ def collect_routine_proxy() -> dict:
 
 
 
+def _mark_stale(data: dict, cache: dict | None) -> dict:
+    """Set stale / stale_reason from collected_at_*; never let an old cache pass as current."""
+    stale, reason = staleness(cache)
+    data["stale"] = stale
+    data["stale_reason"] = reason
+    return data
+
+
 def collect_grok() -> dict:
     live = _collect_grok_from_box()
     if live:
-        return live
+        return _mark_stale(live, live)
     if GROK_CACHE.exists():
         try:
             data = json.loads(GROK_CACHE.read_text())
             data["ok"] = True
             data.setdefault("source", "grok_box_activity.json (cached from box)")
-            data.setdefault(
-                "note",
-                "Activity share from local Grok Bot transcripts — not Cursor plan dollars.",
-            )
-            data["links"] = {
-                "usage_billing": "grokbot://app/v1/settings?id=plan",
-                "on_demand": "grokbot://app/v1/settings?id=on-demand",
-            }
-            # ensure named bots
-            have = {b["name"] for b in data.get("bots") or []}
-            bots = list(data.get("bots") or [])
-            for name in GROK_ORDER:
-                if name not in have:
-                    bots.append(_empty_bot(name))
-            bots = [b for b in bots if b.get("name") not in GROK_SKIP_NAMES]
-            rank = {n: i for i, n in enumerate(GROK_ORDER)}
-            bots.sort(key=lambda b: (rank.get(b["name"], 99), b["name"]))
-            bots = _apply_manage_bot_client_counts(bots)
+            data.setdefault("note", GROK_NOTE)
+            data["links"] = dict(GROK_LINKS)
+            bots = _apply_manage_bot_client_counts(normalize_bots(data.get("bots") or []))
             data["bots"] = bots
             data["fleet_assistant_tool_total"] = sum(b["messages"]["assistant_tool"] for b in bots)
             data["fleet_messages_total"] = sum(b["messages"]["total"] for b in bots)
-            return data
+            return _mark_stale(data, data)
         except Exception as e:
             return {
                 "ok": False,
                 "source": "grok_box_activity.json",
                 "error": str(e),
+                "stale": True,
+                "stale_reason": f"grok_box_activity.json unreadable ({e})",
                 "bots": [_empty_bot(n) for n in GROK_ORDER],
                 "fleet_messages_total": 0,
                 "fleet_assistant_tool_total": 0,
-                "note": "Activity share from local Grok Bot transcripts — not Cursor plan dollars.",
-                "links": {
-                    "usage_billing": "grokbot://app/v1/settings?id=plan",
-                    "on_demand": "grokbot://app/v1/settings?id=on-demand",
-                },
+                "note": GROK_NOTE,
+                "links": dict(GROK_LINKS),
             }
     bots = _apply_manage_bot_client_counts([_empty_bot(n) for n in GROK_ORDER])
-    return {
-        "ok": True,
-        "source": "static roster + client replica (no box activity cache)",
-        "note": "Activity share from local Grok Bot transcripts — not Cursor plan dollars. Open Usage & Billing for included/on-demand spend.",
-        "bots": bots,
-        "fleet_messages_total": sum(b["messages"]["total"] for b in bots),
-        "fleet_assistant_tool_total": sum(b["messages"]["assistant_tool"] for b in bots),
-        "links": {
-            "usage_billing": "grokbot://app/v1/settings?id=plan",
-            "on_demand": "grokbot://app/v1/settings?id=on-demand",
+    return _mark_stale(
+        {
+            "ok": True,
+            "source": "static roster + client replica (no box activity cache)",
+            "note": GROK_NOTE + " Open Usage & Billing for included/on-demand spend.",
+            "bots": bots,
+            "fleet_messages_total": sum(b["messages"]["total"] for b in bots),
+            "fleet_assistant_tool_total": sum(b["messages"]["assistant_tool"] for b in bots),
+            "links": dict(GROK_LINKS),
         },
-    }
+        None,
+    )
 
 
 # ── HTML ────────────────────────────────────────────────────────────────────
@@ -1623,6 +1464,86 @@ def progress_bar(pct: float | None, tone: str, label: str | None = None) -> str:
       <div class="bar-track"><div class="bar-fill {tone}" style="width:{width}%"></div></div>
       <div class="bar-pct {tone}">{esc(shown)}</div>
     </div>"""
+
+
+def render_grok_body(grok: dict) -> str:
+    """Grok section body — STALE banner first when the box activity cache is old/unknown."""
+    bots = grok.get("bots") or []
+    fleet = grok.get("fleet_messages_total") or 0
+    # stacked share bar
+    segments = []
+    legend = []
+    for i, b in enumerate(bots):
+        pct = float(b.get("share_assistant_tool_pct") or 0)
+        color = GROK_COLORS[i % len(GROK_COLORS)]
+        if pct > 0:
+            segments.append(
+                f'<div class="stack-seg" style="width:{pct}%;background:{color}" title="{esc(b.get("name"))}: {pct}%"></div>'
+            )
+        legend.append(
+            f'<span class="stack-leg"><i style="background:{color}"></i>{esc(b.get("name"))} {pct:g}%</span>'
+        )
+    stack = "".join(segments) or '<div class="stack-seg empty" style="width:100%"></div>'
+    rows = []
+    for b in bots:
+        msg = b.get("messages") or {}
+        rows.append(
+            f"""
+        <tr>
+          <td><strong>{esc(b.get('name'))}</strong><div class="muted">{esc(b.get('role') or '')}</div></td>
+          <td class="num">{esc(msg.get('user', 0))} / {esc(msg.get('assistant', 0))} / {esc(msg.get('tool', 0))}</td>
+          <td class="num">{esc(b.get('transcript_mb', 0))} MB</td>
+          <td class="num">{esc(b.get('automation_runs', 0))}</td>
+          <td>{esc(b.get('last_transcript_activity_pt') or '—')}</td>
+          <td class="num">{esc(b.get('share_assistant_tool_pct', 0))}%</td>
+        </tr>"""
+        )
+    links = grok.get("links") or {}
+    ub = links.get("usage_billing") or "grokbot://app/v1/settings?id=plan"
+    od = links.get("on_demand") or "grokbot://app/v1/settings?id=on-demand"
+    collected = grok.get("collected_at_pt") or grok.get("collected_at_utc")
+    collected_pill = f" · box activity collected <strong>{esc(collected)}</strong>" if collected else ""
+    stale_banner = ""
+    if grok.get("stale"):
+        when = f"collected {collected}" if collected else "no collected_at timestamp"
+        stale_banner = (
+            '<p class="stale-banner" role="status"><span class="status-chip warn">STALE</span> '
+            f"Grok box activity cache is older than {STALE_AFTER_HOURS}h or of unknown age ({esc(when)}). "
+            "Last-activity dates below are <strong>not current</strong>; CLI bars may still be fresh."
+            f'<span class="muted"> Reason: {esc(grok.get("stale_reason") or "unknown")}.</span></p>'
+        )
+    grok_body = f"""
+      {stale_banner}
+      <p class="pill">Fleet messages <strong>{esc(fleet)}</strong> · share = assistant+tool{collected_pill}</p>
+      <div class="metric">
+        <div class="metric-label">Share of assistant+tool messages</div>
+        <div class="stack-track">{stack}</div>
+        <div class="stack-legend">{''.join(legend)}</div>
+      </div>
+      <div class="table-wrap">
+        <table class="bots">
+          <thead>
+            <tr>
+              <th>Bot</th>
+              <th>Messages (u/a/t)</th>
+              <th>Transcript</th>
+              <th>Auto runs</th>
+              <th>Last activity (PT)</th>
+              <th>Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            {''.join(rows)}
+          </tbody>
+        </table>
+      </div>
+      <p class="link-pills">
+        <a class="link-pill" href="{esc(ub)}">Usage &amp; Billing</a>
+        <a class="link-pill" href="{esc(od)}">On-demand</a>
+      </p>
+      <p class="muted">Activity share from local Grok Bot transcripts — not Cursor plan dollars. Open Usage &amp; Billing for included/on-demand spend.</p>
+    """
+    return grok_body
 
 
 def render_html(snap: dict) -> str:
@@ -1757,70 +1678,7 @@ def render_html(snap: dict) -> str:
       <p class="muted">{esc(dsh.get('detail') or 'DeepSeek Harness via OpenRouter.')}</p>
     """
 
-    # Grok overall activity
-    bots = grok.get("bots") or []
-    fleet = grok.get("fleet_messages_total") or 0
-    # stacked share bar
-    segments = []
-    legend = []
-    for i, b in enumerate(bots):
-        pct = float(b.get("share_assistant_tool_pct") or 0)
-        color = GROK_COLORS[i % len(GROK_COLORS)]
-        if pct > 0:
-            segments.append(
-                f'<div class="stack-seg" style="width:{pct}%;background:{color}" title="{esc(b.get("name"))}: {pct}%"></div>'
-            )
-        legend.append(
-            f'<span class="stack-leg"><i style="background:{color}"></i>{esc(b.get("name"))} {pct:g}%</span>'
-        )
-    stack = "".join(segments) or '<div class="stack-seg empty" style="width:100%"></div>'
-    rows = []
-    for b in bots:
-        msg = b.get("messages") or {}
-        rows.append(
-            f"""
-        <tr>
-          <td><strong>{esc(b.get('name'))}</strong><div class="muted">{esc(b.get('role') or '')}</div></td>
-          <td class="num">{esc(msg.get('user', 0))} / {esc(msg.get('assistant', 0))} / {esc(msg.get('tool', 0))}</td>
-          <td class="num">{esc(b.get('transcript_mb', 0))} MB</td>
-          <td class="num">{esc(b.get('automation_runs', 0))}</td>
-          <td>{esc(b.get('last_transcript_activity_pt') or '—')}</td>
-          <td class="num">{esc(b.get('share_assistant_tool_pct', 0))}%</td>
-        </tr>"""
-        )
-    links = grok.get("links") or {}
-    ub = links.get("usage_billing") or "grokbot://app/v1/settings?id=plan"
-    od = links.get("on_demand") or "grokbot://app/v1/settings?id=on-demand"
-    grok_body = f"""
-      <p class="pill">Fleet messages <strong>{esc(fleet)}</strong> · share = assistant+tool</p>
-      <div class="metric">
-        <div class="metric-label">Share of assistant+tool messages</div>
-        <div class="stack-track">{stack}</div>
-        <div class="stack-legend">{''.join(legend)}</div>
-      </div>
-      <div class="table-wrap">
-        <table class="bots">
-          <thead>
-            <tr>
-              <th>Bot</th>
-              <th>Messages (u/a/t)</th>
-              <th>Transcript</th>
-              <th>Auto runs</th>
-              <th>Last activity (PT)</th>
-              <th>Share</th>
-            </tr>
-          </thead>
-          <tbody>
-            {''.join(rows)}
-          </tbody>
-        </table>
-      </div>
-      <p class="link-pills">
-        <a class="link-pill" href="{esc(ub)}">Usage &amp; Billing</a>
-        <a class="link-pill" href="{esc(od)}">On-demand</a>
-      </p>
-      <p class="muted">Activity share from local Grok Bot transcripts — not Cursor plan dollars. Open Usage &amp; Billing for included/on-demand spend.</p>
-    """
+    grok_body = render_grok_body(grok)
 
     # Routine fire proxy (NOT $)
     rp_rows = []
@@ -2019,6 +1877,17 @@ def render_html(snap: dict) -> str:
     .status-chip.ok {{ background: #d1fae5; color: #065f46; border-color: #a7f3d0; }}
     .status-chip.warn {{ background: #ffedd5; color: #9a3412; border-color: #fed7aa; }}
     .status-chip.bad {{ background: #fee2e2; color: #991b1b; border-color: #fecaca; }}
+    .stale-banner {{
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      border: 1px solid #fed7aa;
+      border-left: 4px solid var(--warn);
+      border-radius: 8px;
+      background: #fff7ed;
+      color: #9a3412;
+      font-size: 0.9rem;
+    }}
+    .stale-banner .status-chip {{ margin-right: 6px; }}
     .status-chip.unk {{ background: var(--paper-2); color: var(--ink-soft); }}
     .pill {{
       display: inline-block;
@@ -2293,7 +2162,7 @@ def main() -> None:
     d = snap.get("dsh") or {}
     print(f"DSH: ok={d.get('ok')} ver={d.get('cli_version')} model={d.get('model')} provider={d.get('provider')}")
     g = snap["grok"]
-    print(f"Grok: bots={len(g.get('bots') or [])} fleet={g.get('fleet_messages_total')} source={g.get('source')}")
+    print(f"Grok: bots={len(g.get('bots') or [])} fleet={g.get('fleet_messages_total')} source={g.get('source')} stale={g.get('stale')}")
     rp = snap.get("routine_proxy") or {}
     print(
         "RoutineProxy: rows=%s fires_per_week≈%s source=%s"
