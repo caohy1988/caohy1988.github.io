@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="How Haiyuan Cao builds and runs a dual-layer agent team: Grok bots + Mac CLIs, EM loop from intent/spec/plan.md, Obsidian context vault, Field Brief pipeline, and launch standards.">
+  <meta name="description" content="How Haiyuan Cao builds and runs a dual-layer agent team: Grok bots + Mac CLIs, Jev typed routing, EM loop from intent/spec/plan.md, Obsidian context vault, Field Brief pipeline, and launch standards.">
   <meta name="theme-color" content="#101828">
   <title>Agent Harness Playbook — Field Brief</title>
   <link rel="canonical" href="https://caohy1988.github.io/research/harness/">
@@ -129,6 +129,7 @@
       <li><a href="#providers">Model providers</a></li>
       <li><a href="#usage">Usage visibility</a></li>
       <li><a href="#grok-patterns">Grok Bot team patterns</a></li>
+      <li><a href="#jev">Jev decision layer</a></li>
       <li><a href="#extend">How to extend the team</a></li>
       <li><a href="#checklist">Operator checklist</a></li>
     </ol>
@@ -143,6 +144,7 @@
       <li><strong>Balance capacity</strong> — hourly collect rotates Agy / Muse / DSH so no single quota carries the load.</li>
       <li><strong>Survive reconnects</strong> — long Mac jobs always go through tmux + streaming heartbeats + a stale-log watchdog.</li>
       <li><strong>Human gates stay human</strong> — merges, payments, unsolicited publishes, and agent deletion require Haiyuan.</li>
+      <li><strong>Decide cheap, execute expensive</strong> — TypeSafe <strong>Jev</strong> (via OpenRouter) picks the route; Grok bots and Mac CLIs still do the work.</li>
     </ul>
   </section>
 
@@ -163,7 +165,8 @@
   │    ├─ Collection Bot  → Field Brief + Stories + GTM boards
   │    ├─ Github Bot      → Plan–Design–Build–Test–Review loop
   │    ├─ Medium Bot      → industry scout (Medium-proxied)
-  │    └─ Agent Manage Bot→ create / organize / keep useful
+  │    ├─ Agent Manage Bot→ create / organize / keep useful
+  │    └─ Jev (OpenRouter) → typed route Choice before fan-out
   └─ Mac CLIs (execute)
        ├─ Agy / Muse / DSH  → hourly source packs (hour % 3)
        ├─ Kimi (+ Astra fallback) → deep Field Brief Markdown
@@ -179,7 +182,8 @@
         <tr><td>Agent Analytics Collection Bot</td><td>Industry/academy Field Briefs; Hunt packs → hub publish; Stories; GTM twin boards</td><td>Desk/SDK PRs; own-stack engineering</td></tr>
         <tr><td>Github Bot CHY1988</td><td>EM for GitHub agent coding; Fable implement + Codex/Kimi review</td><td>Merge without Haiyuan</td></tr>
         <tr><td>Medium Bot</td><td>Medium-proxied industry scout for briefs / boards</td><td>Unsolicited Medium publish</td></tr>
-        <tr><td>Agent Manage Bot</td><td>Create/organize teammates; onboard Mac CLIs; usage cards; hooks/skills</td><td>Destroy agents without Haiyuan</td></tr>
+        <tr><td>Agent Manage Bot</td><td>Create/organize teammates; onboard Mac CLIs; usage cards; hooks/skills; owns Jev router</td><td>Destroy agents without Haiyuan</td></tr>
+        <tr><td>Jev</td><td>TypeSafe System One decision layer (OpenRouter <code>typesafe/jev-1.13</code>) — Choice/Score/Noul routing</td><td>Chat authorship; coding implement; merge/pay/send</td></tr>
       </tbody>
     </table>
     <h3>Mac CLIs</h3>
@@ -452,10 +456,10 @@ grok-tmux-run dsh-collect-HH32 -- \
   <section id="grok-patterns">
     <h2>12. Grok Bot team patterns</h2>
     <p>Product guidance for Grok Bot (chief of staff, group rooms, routines, teach-once) applied to this fleet — plus the 2026-09-15 CoS upgrades.</p>
-    <p>Locks: <code>Maps/Decisions/2026-09-16-blind-dual-lgtm-astra-fable.md</code> · <code>Maps/Decisions/2026-09-16-lab-scout1-applied.md</code> · <code>Maps/Decisions/2026-09-15-route-via-manage-bot.md</code> · <code>Maps/Contracts/manage-handoffs.md</code> · <code>Maps/Decisions/2026-09-15-collection-scout-actions-done.md</code>.</p>
+    <p>Locks: <code>Maps/Decisions/2026-09-16-blind-dual-lgtm-astra-fable.md</code> · <code>Maps/Decisions/2026-09-16-lab-scout1-applied.md</code> · <code>Maps/Decisions/2026-09-15-route-via-manage-bot.md</code> · <code>Maps/Contracts/manage-handoffs.md</code> · <code>Maps/Decisions/2026-09-15-collection-scout-actions-done.md</code> · <code>Maps/Decisions/2026-09-20-jev-decision-layer.md</code>.</p>
 
     <h3>Chief of staff</h3>
-    <p><strong>Agent Manage Bot</strong> is default intake. Haiyuan asks Manage first; Manage routes to Collection / Github / Medium (or a group room) and only pulls Haiyuan in for judgment calls. Exceptions: already mid-thread with a specialist, explicit @, or an emergency live fire. Ambiguous or unrouted asks ask Haiyuan back — never silent SendToAgent (Lab scout 2026-09-16 / Anthropic coordination patterns).</p>
+    <p><strong>Agent Manage Bot</strong> is default intake. Haiyuan asks Manage first; Manage asks <strong>Jev</strong> for a typed route (when active), then routes to Collection / Github / Medium (or a group room) and only pulls Haiyuan in for judgment calls. Exceptions: already mid-thread with a specialist, explicit @, or an emergency live fire. Ambiguous or unrouted asks ask Haiyuan back — never silent SendToAgent (Lab scout 2026-09-16 / Anthropic coordination patterns).</p>
 
     <h3>Group rooms (visible handoffs)</h3>
     <table>
@@ -499,8 +503,30 @@ grok-tmux-run dsh-collect-HH32 -- \
     <p><code>namespace</code> + <code>toolName</code> must be top-level beside <code>arguments</code>. Poisoned history → Duplicate bot before Reset Computer. Pointer in vault <code>AGENTS.md</code>.</p>
   </section>
 
+
+  <section id="jev">
+    <h2>13. Jev decision layer</h2>
+    <p>TypeSafe <strong>Jev</strong> is a System One model: you send <code>state</code> + typed questions; it returns a Choice / Score / Noul with calibrated confidence — not prose. On this fleet it sits <em>in front of</em> Manage’s CoS routing so expensive fan-outs (browser, Mac CLI, room kicks) only run when the route is clear.</p>
+    <p class="note">Provider: <strong>OpenRouter</strong> <code>typesafe/jev-1.13</code> via <code>POST /api/v1/systemone</code> (reuses DSH <code>OPENROUTER_API_KEY</code>). Not a new coding CLI seat. Lock: <code>Maps/Decisions/2026-09-20-jev-decision-layer.md</code>.</p>
+    <div class="flow">ask → Manage Bot
+  → jev-route (state JSON)
+  → Choice: inline | field_brief | coding_em | escalate
+  → if confidence ≥ 0.55 and mode=active → honor route
+  → else fall back to normal CoS / ask Haiyuan
+  → Grok room or Mac CLI executes</div>
+    <h3>Operator bits</h3>
+    <ul>
+      <li>Skill: <code>jev-usage-router</code> · helper: <code>/home/box/bin/jev-route '&lt;state-json&gt;'</code></li>
+      <li>Config: <code>/home/box/agent-data/jev/router.json</code> (<code>mode: active|shadow</code>, <code>confidence_floor</code>, kill switch <code>enabled: false</code>)</li>
+      <li>Logs: <code>/home/box/agent-data/jev/logs/</code> (shadow and active both log)</li>
+      <li>Vault card: <code>Agents/jev.md</code> · sidebar bot <strong>Jev</strong> for roster visibility</li>
+      <li>Never put secrets in <code>state</code>; Jev never authorizes merge/pay/send</li>
+    </ul>
+    <p>Distinct from Lab KEEP <strong>jev-guard</strong> (per-tool security hook) — that remains an optional Coding EM smoke, not this router.</p>
+  </section>
+
   <section id="extend">
-    <h2>13. How to extend the team</h2>
+    <h2>14. How to extend the team</h2>
     <p class="note">Architecture tips that survive a day get filed in <a href="/research/harness-lab/">Harness Lab</a>; if a KEEP changes how we run, patch this playbook the same day.</p>
     <ol>
       <li><strong>Decide the layer</strong> — Grok bot (orchestrator) vs Mac CLI (worker).</li>
@@ -514,11 +540,12 @@ grok-tmux-run dsh-collect-HH32 -- \
   </section>
 
   <section id="checklist">
-    <h2>14. Operator checklist</h2>
+    <h2>15. Operator checklist</h2>
     <ul>
       <li>☐ Mac online; Grok Bot desktop connected for local-exec</li>
       <li>☐ Vault hooks installed (<code>install-agent-hooks.sh</code>); agents reading vault before tasks</li>
       <li>☐ Default asks go to Manage Bot; Field Brief / Coding EM rooms used for visible handoffs</li>
+      <li>☐ Jev router <code>mode: active</code>; honor Choice when confidence ≥ floor; logs under <code>jev/logs/</code></li>
       <li>☐ Handoffs carry artifact path per <code>Maps/Contracts/manage-handoffs.md</code></li>
       <li>☐ Auto-review intent list checked after Duplicate (<code>Maps/Hooks/auto-review-personal-rules.md</code>)</li>
       <li>☐ Coding slices have committed <code>intent.md</code> / <code>spec.md</code> / <code>plan.md</code> before implement</li>
