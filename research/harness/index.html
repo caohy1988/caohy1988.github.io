@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-20 · Manage card sync weekly</strong></span>
+      <span>Updated <strong>2026-09-20 · SpaceX guide KEEPs (proof / ops / PR 12h / nightly)</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -131,6 +131,7 @@
       <li><a href="#usage">Usage visibility</a></li>
       <li><a href="#grok-patterns">Grok Bot team patterns</a></li>
       <li><a href="#jev">Jev decision layer</a> · <a href="#jev-gates">gates</a> · <a href="#jev-session">live session</a></li>
+      <li><a href="#spacex-keeps">SpaceX engineer-guide KEEPs</a></li>
       <li><a href="#extend">How to extend the team</a></li>
       <li><a href="#checklist">Operator checklist</a></li>
     </ol>
@@ -493,6 +494,9 @@ grok-tmux-run dsh-collect-HH32 -- \
       <li>Harness Lab collect — 09:00 PT daily (Agy/Muse/DSH rotation)</li>
       <li>Harness Lab KEEP curate/publish — 16:30 PT daily</li>
       <li>Weekly playbook ↔ vault card ↔ Grok profile sync — Mondays 11:00 PT</li>
+      <li>Weekday specialist ops nudge — 08:00 PT Mon–Fri (Jenny-style playbook + blockers)</li>
+      <li>PR board sweep — 09:00 + 21:00 PT daily (12h; CI/conflict/stall → Coding EM)</li>
+      <li>Nightly Mac harness audit — 03:00 PT (rotate one Mac CLI; dual-LGTM; no merge)</li>
     </ul>
     <p><strong>Policy:</strong> task → corrected → skill → Test run → Active. Prefer event triggers over tight crons. Audit PR babysits after merge; dump Active lists for Stories/GTM overlap. See <code>Maps/Decisions/2026-09-15-grok-routine-audit.md</code>.</p>
 
@@ -577,8 +581,26 @@ ask → Manage Bot
     <p>Distinct from Lab KEEP <strong>jev-guard</strong> (per-tool security hook) — that remains an optional Coding EM smoke, not this router.</p>
   </section>
 
+  
+  <section id="spacex-keeps">
+    <h2>16. SpaceX engineer-guide KEEPs (2026-09-20)</h2>
+    <p>From Lingxi’s <a href="https://x.ai/bot/guides/grok-bot-for-engineering">Grok Bot for Engineering</a> and Simon’s <code>grok-bot-guide-cn.pdf</code> (Xiaohongshu). Lab: <a href="/research/harness-lab/">harness-lab</a>. Lock: <code>Maps/Decisions/2026-09-20-spacex-guide-harness-keeps.md</code>.</p>
+    <h3>Closed proof loop</h3>
+    <p>Checkable proof before “done”: green CI / exit code, live URL, or before/after screenshot. Summaries are intent. Soft done without proof gets pushed back (Coding EM + Manage handoffs).</p>
+    <h3>Standing automations</h3>
+    <table>
+      <thead><tr><th>Routine</th><th>When (PT)</th><th>What</th></tr></thead>
+      <tbody>
+        <tr><td>Weekday specialist ops nudge</td><td>08:00 Mon–Fri</td><td>Playbook bullets + blocker ask in Field Brief / Coding EM</td></tr>
+        <tr><td>PR board sweep 12h</td><td>09:00 + 21:00 daily</td><td>Open PRs → CI/conflict/stall → Mac CLI unblock + proof; never merge</td></tr>
+        <tr><td>Nightly Mac harness audit</td><td>03:00 daily</td><td>One rotating Mac seat; scoped audit PR; dual-LGTM; morning ping if ready</td></tr>
+      </tbody>
+    </table>
+    <p class="note"><strong>P0 urgency</strong> stays keyword-only (no standing 5‑minute poller) until Haiyuan asks. <strong>Shared box ≠ isolation</strong> — all Grok bots share one cloud computer (files + logins).</p>
+  </section>
+
   <section id="extend">
-    <h2>14. How to extend the team</h2>
+    <h2>17. How to extend the team</h2>
     <p class="note">Architecture tips that survive a day get filed in <a href="/research/harness-lab/">Harness Lab</a>; if a KEEP changes how we run, patch this playbook the same day.</p>
     <ol>
       <li><strong>Decide the layer</strong> — Grok bot (orchestrator) vs Mac CLI (worker).</li>
@@ -592,7 +614,7 @@ ask → Manage Bot
   </section>
 
   <section id="checklist">
-    <h2>15. Operator checklist</h2>
+    <h2>18. Operator checklist</h2>
     <ul>
       <li>☐ Mac online; Grok Bot desktop connected for local-exec</li>
       <li>☐ Vault hooks installed (<code>install-agent-hooks.sh</code>); agents reading vault before tasks</li>
