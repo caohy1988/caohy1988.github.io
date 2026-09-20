@@ -29,6 +29,7 @@ export const NAV = [
   { label: "Usage", href: "/research/usage/" },
   { label: "Harness", href: "/research/harness/" },
   { label: "Lab", href: "/research/harness-lab/" },
+  { label: "Templates", href: "/research/templates/" },
   { label: "Builds", id: "builds", items: [
     { label: "RFC", href: "/rfc/" },
     { label: "Detailed RFC", href: "/rfc/detailed-rfc/" },
@@ -49,6 +50,7 @@ export const PAGES = {
   "/research/usage/": "research/usage/index.html",
   "/research/harness/": "research/harness/index.html",
   "/research/harness-lab/": "research/harness-lab/index.html",
+  "/research/templates/": "research/templates/index.html",
   "/rfc/": "rfc/index.html",
   "/rfc/detailed-rfc/": "rfc/detailed-rfc/index.html",
   "/rfc/demo/": "rfc/demo/index.html",
