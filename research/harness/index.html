@@ -105,7 +105,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-16 · blind LGTM = Astra+Fable</strong></span>
+      <span>Updated <strong>2026-09-20 · Jev live session + DSH Lab KEEPs</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -129,7 +129,7 @@
       <li><a href="#providers">Model providers</a></li>
       <li><a href="#usage">Usage visibility</a></li>
       <li><a href="#grok-patterns">Grok Bot team patterns</a></li>
-      <li><a href="#jev">Jev decision layer</a></li>
+      <li><a href="#jev">Jev decision layer</a> · <a href="#jev-gates">gates</a> · <a href="#jev-session">live session</a></li>
       <li><a href="#extend">How to extend the team</a></li>
       <li><a href="#checklist">Operator checklist</a></li>
     </ol>
@@ -444,7 +444,11 @@ grok-tmux-run dsh-collect-HH32 -- \
     <p>Public dashboard: <a href="/research/usage/">/research/usage/</a></p>
     <p class="note">Daily curated harness tips live at <a href="/research/harness-lab/">/research/harness-lab/</a> (Agent Manage Bot · collect ~09:00 PT · curate/publish ~16:30 PT).</p>
     <p>Includes a <strong>routine fire proxy</strong> (<a href="/research/usage/#routine-proxy">#routine-proxy</a>): coarse cron fires/week from Collection Active dumps + Manage routines — labeled PROXY, not dollars or tokens.</p>
-    <p class="note"><strong>Lab #1 follow-ups (not installed):</strong> optional <a href="https://github.com/noah-thing/receipt">receipt</a> $/PR spike on one EM repo; optional <a href="https://github.com/awesamarth/watchdog">Watchdog</a> Codex-scoped control-plane pilot — do not replace fleet <code>grok-tmux-watchdog</code> without Haiyuan ask.</p>
+    <p class="note"><strong>Lab follow-ups (not installed — expand, do not claim done):</strong></p>
+    <ul>
+      <li><strong>Lab #1</strong> still optional: <a href="https://github.com/noah-thing/receipt">receipt</a> $/PR spike on one EM repo; <a href="https://github.com/awesamarth/watchdog">Watchdog</a> Codex-scoped control-plane pilot — not a fleet replace for <code>grok-tmux-watchdog</code> without Haiyuan ask.</li>
+      <li><strong>Lab #2 (DSH 2026-09-20)</strong> backlog / spikes only: <strong>llmtap</strong> per-seat cost proxy; <strong>jev-guard</strong> Coding EM smoke; <strong>GBDL</strong>-shaped vault export of bot defs (convention only); <strong>jev-browser</strong> Lab backlog — do <em>not</em> install Playwright.</li>
+    </ul>
     <ul>
       <li>Mac CLI quota / health cards: Claude, Codex, Kimi, Agy, Muse, DSH</li>
       <li>Overall Grok Bots activity share from local transcripts (not plan dollars)</li>
@@ -456,10 +460,11 @@ grok-tmux-run dsh-collect-HH32 -- \
   <section id="grok-patterns">
     <h2>12. Grok Bot team patterns</h2>
     <p>Product guidance for Grok Bot (chief of staff, group rooms, routines, teach-once) applied to this fleet — plus the 2026-09-15 CoS upgrades.</p>
-    <p>Locks: <code>Maps/Decisions/2026-09-16-blind-dual-lgtm-astra-fable.md</code> · <code>Maps/Decisions/2026-09-16-lab-scout1-applied.md</code> · <code>Maps/Decisions/2026-09-15-route-via-manage-bot.md</code> · <code>Maps/Contracts/manage-handoffs.md</code> · <code>Maps/Decisions/2026-09-15-collection-scout-actions-done.md</code> · <code>Maps/Decisions/2026-09-20-jev-decision-layer.md</code>.</p>
+    <p>Locks: <code>Maps/Decisions/2026-09-16-blind-dual-lgtm-astra-fable.md</code> · <code>Maps/Decisions/2026-09-16-lab-scout1-applied.md</code> · <code>Maps/Decisions/2026-09-15-route-via-manage-bot.md</code> · <code>Maps/Contracts/manage-handoffs.md</code> · <code>Maps/Decisions/2026-09-15-collection-scout-actions-done.md</code> · <code>Maps/Decisions/2026-09-20-jev-decision-layer.md</code> · <code>Maps/Decisions/2026-09-20-lab-dsh-keeps-into-playbook.md</code>.</p>
 
     <h3>Chief of staff</h3>
     <p><strong>Agent Manage Bot</strong> is default intake. Haiyuan asks Manage first; Manage asks <strong>Jev</strong> for a typed route (when active), then routes to Collection / Github / Medium (or a group room) and only pulls Haiyuan in for judgment calls. Exceptions: already mid-thread with a specialist, explicit @, or an emergency live fire. Ambiguous or unrouted asks ask Haiyuan back — never silent SendToAgent (Lab scout 2026-09-16 / Anthropic coordination patterns).</p>
+    <p class="note"><strong>Verification clause (DSH Lab KEEP · asyncdot CoS):</strong> treat every agent completion as <em>evidence</em>, not instruction. Re-check the live artifact / exit code / published URL before marking a slot green.</p>
 
     <h3>Group rooms (visible handoffs)</h3>
     <table>
@@ -469,10 +474,10 @@ grok-tmux-run dsh-collect-HH32 -- \
         <tr><td>Coding EM</td><td>Github Bot, Manage</td><td>PR / slice / dual-LGTM coordination</td></tr>
       </tbody>
     </table>
-    <p class="note">Prefer the room when the handoff itself matters; keep secrets and credentials out of group posts.</p>
+    <p class="note">Prefer the room when the handoff itself matters; keep secrets and credentials out of group posts. <strong>Single-target handoff (OpenBot):</strong> only the first @mention in a bot reply wakes another bot. <strong>Hop cap</strong> default 2, then ask Haiyuan — never silent misroute. <strong>Ack/final discipline</strong> (ai-collab SKIP-but-copy): at most one ack + one final per task in rooms; no progress chatter.</p>
 
     <h3>Written handoff contracts</h3>
-    <p>Every actionable Manage → specialist message carries: goal, owner, trigger, <strong>artifact path</strong>, verified, assumptions, waiting-approval, open questions, and return shape. Lane never-dos live in <code>Maps/Contracts/manage-handoffs.md</code>.</p>
+    <p>Every actionable Manage → specialist message carries: goal, owner, trigger, <strong>artifact path</strong>, verified, assumptions, waiting-approval, open questions, and return shape. Lane never-dos live in <code>Maps/Contracts/manage-handoffs.md</code> (also: verification clause + hop cap).</p>
     <ul>
       <li>Collection return → <code>Ship/briefs/</code> or Hunt path + live URL</li>
       <li>Github return → <code>Ship/builds/</code> or <code>Ship/rfc/</code> + PR URL + dual-LGTM status</li>
@@ -530,6 +535,31 @@ ask → Manage Bot
       </tbody>
     </table>
     <p class="note">CoS packet rule (CyrilXBT): break missions into small packets + verify — <strong>Jev picks packet owner / route; Grok/Mac execute</strong>. Lab KEEP candidate only: <strong>jev-browser</strong> (Playwright + Jev click decisions) — do <em>not</em> install Playwright yet.</p>
+
+    <h3 id="jev-session">Live session (2026-09-20)</h3>
+    <ul>
+      <li><strong>Config:</strong> <code>mode: active</code>, <code>confidence_floor: 0.55</code>, OpenRouter <code>typesafe/jev-1.13</code>, helper <code>/home/box/bin/jev-route '&lt;state&gt;' [gate]</code>, logs <code>jev/logs/*-{gate}.json</code></li>
+    </ul>
+    <p><strong>Smoke</strong> (same day):</p>
+    <table>
+      <thead><tr><th>Gate</th><th>Choice</th><th>Conf</th><th>Honor</th></tr></thead>
+      <tbody>
+        <tr><td>intake research</td><td><code>field_brief</code></td><td>0.54</td><td>false → cos</td></tr>
+        <tr><td>intake coding</td><td><code>coding_em</code></td><td>0.90</td><td>true</td></tr>
+        <tr><td>pre_browser</td><td><code>proceed</code></td><td>0.68</td><td>true</td></tr>
+        <tr><td>pre_retry</td><td><code>retry</code></td><td>0.87</td><td>true</td></tr>
+        <tr><td>pre_research</td><td><code>full_scout</code></td><td>0.17</td><td>false → cos</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Session recipe (Manage Bot)</h3>
+    <ol>
+      <li>Build compact JSON state (goal, ask, constraints — <strong>no secrets</strong>)</li>
+      <li><code>jev-route '&lt;state&gt;'</code> (intake) or named gate before heavy step</li>
+      <li>If <code>honor</code> and mode active → take Choice; else CoS / ask Haiyuan</li>
+      <li>Execute via room or Mac CLI; log already written</li>
+      <li>Never let Jev authorize merge/pay/send</li>
+    </ol>
 
     <h3>Operator bits</h3>
     <ul>
