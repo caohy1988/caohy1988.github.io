@@ -506,18 +506,35 @@ grok-tmux-run dsh-collect-HH32 -- \
 
   <section id="jev">
     <h2>13. Jev decision layer</h2>
-    <p>TypeSafe <strong>Jev</strong> is a System One model: you send <code>state</code> + typed questions; it returns a Choice / Score / Noul with calibrated confidence — not prose. On this fleet it sits <em>in front of</em> Manage’s CoS routing so expensive fan-outs (browser, Mac CLI, room kicks) only run when the route is clear.</p>
-    <p class="note">Provider: <strong>OpenRouter</strong> <code>typesafe/jev-1.13</code> via <code>POST /api/v1/systemone</code> (reuses DSH <code>OPENROUTER_API_KEY</code>). Not a new coding CLI seat. Lock: <code>Maps/Decisions/2026-09-20-jev-decision-layer.md</code>.</p>
-    <div class="flow">ask → Manage Bot
-  → jev-route (state JSON)
-  → Choice: inline | field_brief | coding_em | escalate
-  → if confidence ≥ 0.55 and mode=active → honor route
-  → else fall back to normal CoS / ask Haiyuan
+    <p>TypeSafe <strong>Jev</strong> is a System One model: you send <code>state</code> + typed questions; it returns a Choice / Score / Noul with calibrated confidence — <strong>not prose / no text gen</strong>. On this fleet it sits <em>in front of</em> Manage’s CoS routing so expensive fan-outs (browser, Mac CLI, room kicks) only run when the route is clear.</p>
+    <p class="note">Provider: <strong>OpenRouter</strong> <code>typesafe/jev-1.13</code> via <code>POST /api/v1/systemone</code> (reuses DSH <code>OPENROUTER_API_KEY</code>). Not a new coding CLI seat. Lock: <code>Maps/Decisions/2026-09-20-jev-decision-layer.md</code>. Hunt: <code>Hunt/agent-manage/2026-09-20-jev-x-optimize.md</code>.</p>
+    <div class="flow">Codila loop: prompt → GrokBot → Jev decision → GrokBot execution
+Gideon layers: Jev decides typed next move · Grok executes · Mac CLIs for long/coding
+
+ask → Manage Bot
+  → jev-route '&lt;state&gt;' [gate]
+  → multi-q System One (Choice + Score + Noul in ONE call)
+  → if primary confidence ≥ confidence_floor and mode=active → honor
+  → else honor=false, fallback=cos → normal CoS / ask Haiyuan
   → Grok room or Mac CLI executes</div>
+
+    <h3 id="jev-gates">Jev gates</h3>
+    <p>Optional 2nd arg to <code>jev-route</code>. Always multi-question in one OpenRouter call. Still <strong>no text generation from Jev</strong>.</p>
+    <table>
+      <thead><tr><th>Gate</th><th>When</th><th>Primary Choice</th><th>Also asks</th></tr></thead>
+      <tbody>
+        <tr><td><code>intake</code> (default)</td><td>Ambiguous route / fan-out</td><td><code>route</code>: inline | field_brief | coding_em | escalate</td><td>Score <code>cost_risk</code>; Noul <code>needs_owner</code></td></tr>
+        <tr><td><code>pre_browser</code></td><td><strong>Before</strong> computerUse / browser</td><td><code>browser_action</code>: proceed | skip | escalate</td><td>Noul <code>page_looks_safe</code>; Score <code>waste_risk</code>; Score <code>cost_risk</code></td></tr>
+        <tr><td><code>pre_retry</code></td><td><strong>Before</strong> expensive Mac CLI retry</td><td><code>retry_decision</code>: retry | abort | escalate</td><td>Score <code>likely_succeed</code>; Score <code>cost_risk</code></td></tr>
+        <tr><td><code>pre_research</code></td><td><strong>Before</strong> Field Brief / full scout</td><td><code>research_depth</code>: skip | light_web | full_scout | escalate</td><td>Score <code>cost_risk</code></td></tr>
+      </tbody>
+    </table>
+    <p class="note">CoS packet rule (CyrilXBT): break missions into small packets + verify — <strong>Jev picks packet owner / route; Grok/Mac execute</strong>. Lab KEEP candidate only: <strong>jev-browser</strong> (Playwright + Jev click decisions) — do <em>not</em> install Playwright yet.</p>
+
     <h3>Operator bits</h3>
     <ul>
-      <li>Skill: <code>jev-usage-router</code> · helper: <code>/home/box/bin/jev-route '&lt;state-json&gt;'</code></li>
-      <li>Config: <code>/home/box/agent-data/jev/router.json</code> (<code>mode: active|shadow</code>, <code>confidence_floor</code>, kill switch <code>enabled: false</code>)</li>
+      <li>Skill: <code>jev-usage-router</code> · helper: <code>/home/box/bin/jev-route '&lt;state-json&gt;' [gate]</code></li>
+      <li>Config: <code>/home/box/agent-data/jev/router.json</code> (<code>mode: active</code> keep unless broken; <code>confidence_floor</code>; kill switch <code>enabled: false</code>)</li>
       <li>Logs: <code>/home/box/agent-data/jev/logs/</code> (shadow and active both log)</li>
       <li>Vault card: <code>Agents/jev.md</code> · sidebar bot <strong>Jev</strong> for roster visibility</li>
       <li>Never put secrets in <code>state</code>; Jev never authorizes merge/pay/send</li>
