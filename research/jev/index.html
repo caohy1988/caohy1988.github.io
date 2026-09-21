@@ -170,51 +170,70 @@
 </section>
 
 <section id="real-demo" class="chapter">
-<!-- MAC_OS_TIMED_CHROME_TIGHT_2026_09_20 -->
-<section id="mac-os-timed-chrome-tight">
-  <h3>Timed OS Chrome recording (tight crop)</h3>
-  <p>Fresh branch superseding #87. Center-right crop (~48%×82%) + ~28s trim to exclude Grok Bot sidebar/account/composer. Reject if any bot UI remains in kf01–03.</p>
-  <p><a href="demo/2026-09-20-mac-os-timed-chrome-tight.mp4">mp4</a> ·
+<div class="chapter-number">09 / REAL DEMO</div>
+<h2>How CUA, WebMCP, and Jev fit together.</h2>
+<p class="lead">One loop: <strong>Jev judges</strong> → prefer a <strong>WebMCP tool</strong> when the page declares one → otherwise fall back to <strong>CUA</strong> driving Chrome pixels/DOM. Jev never authorizes pay, send, or merge.</p>
+
+<div class="roles" style="margin:1.25rem 0">
+  <div><span>EXECUTOR</span><h3>CUA</h3><p>Drives Chrome (pixels / DOM). Slow when hunting UI; needed when no tool exists.</p></div>
+  <div><span>PAGE TOOLS</span><h3>WebMCP</h3><p>The page declares callable tools. The agent invokes them directly — usually faster than poking the DOM.</p></div>
+  <div><span>SYSTEM ONE</span><h3>Jev</h3><p>Fast Choice over closed options (~ms). Picks the route/tool. Does <strong>not</strong> drive Chrome or write prose.</p></div>
+</div>
+
+<p style="text-align:center;margin:0.5rem 0 1.25rem;font-family:ui-monospace,monospace;font-size:0.95rem">
+  User goal → <strong>Jev Choice</strong> → if WebMCP tool available use it · else CUA DOM
+</p>
+
+<h3>Beat-labeled Chrome clip (from #88)</h3>
+<p>Cropped OS recording of headed Chrome (~28s). Read the beats with the video:</p>
+<ol>
+  <li><strong>Beat 1 — Goal:</strong> open a public WebMCP site (webmcp.com / nekuda / computer.webmcp.com).</li>
+  <li><strong>Beat 2 — Jev would choose:</strong> parallel System One call (not painted into the video):
+    <code>pre_tool</code> → <strong>allow</strong> · conf <strong>0.99</strong> · wall <strong>383&nbsp;ms</strong> · model <code>typesafe/jev-1.13</code>.
+    Path-preference evidence (decision-only, earlier pass): on store.nekuda.ai Jev scored WebMCP <code>list_products</code> <strong>0.90</strong> vs DOM <code>btn_browse_all</code> <strong>0.60</strong>.</li>
+  <li><strong>Beat 3 — Chrome executes:</strong> the recording shows headed Chrome navigating those sites (CUA-style / CDP-driven session under OS capture).</li>
+</ol>
+
+<video controls width="100%" style="max-width:720px;margin:0.75rem 0" src="demo/2026-09-20-mac-os-timed-chrome-tight.mp4"
+  poster="demo/2026-09-20-mac-os-timed-chrome-tight-kf01.png"></video>
+<p class="caption">
+  <a href="demo/2026-09-20-mac-os-timed-chrome-tight.mp4">mp4</a> ·
   <a href="demo/2026-09-20-mac-os-timed-chrome-tight-kf01.png">kf01</a> ·
   <a href="demo/2026-09-20-mac-os-timed-chrome-tight-kf02.png">kf02</a> ·
-  <a href="demo/2026-09-20-mac-os-timed-chrome-tight-kf03.png">kf03</a></p>
-  <video controls width="100%" style="max-width:720px" src="demo/2026-09-20-mac-os-timed-chrome-tight.mp4"></video>
-</section>
-<div class="chapter-number">09 / REAL DEMO</div><h2>CUA Driver + Jev + WebMCP — recorded 20 Sep 2026.</h2>
-<p class="lead">Coding EM recording from scout recipe. Honest about <strong>mock vs live</strong>. Jev never authorizes pay/send/merge.</p>
+  <a href="demo/2026-09-20-mac-os-timed-chrome-tight-kf03.png">kf03</a> ·
+  <a href="demo/2026-09-20-jev-s09-choice.json">Jev Choice JSON</a>
+</p>
 
-<div class="fleet-card">
-  <h3>Recipe (keep layers separate)</h3>
-  <table class="fleet-table"><thead><tr><th>Layer</th><th>Job</th><th>Ours</th></tr></thead><tbody>
-  <tr><td><strong>WebMCP</strong></td><td>Page declares tools</td><td>Public sites; Chrome flag = Haiyuan step</td></tr>
-  <tr><td><strong>Jev</strong></td><td>Choice over closed IDs</td><td>OpenRouter <code>typesafe/jev-1.13</code></td></tr>
-  <tr><td><strong>Arg model</strong></td><td>Fill free-text args</td><td>Not run this pass</td></tr>
-  <tr><td><strong>Executor</strong></td><td>Run tool / click</td><td>CUA Driver <code>jev-use</code> (mock proven)</td></tr>
+<div class="fleet-card" style="margin:1.25rem 0">
+  <h3>What this clip proves / does not prove</h3>
+  <table class="fleet-table"><thead><tr><th>Proves</th><th>Does not prove</th></tr></thead><tbody>
+  <tr>
+    <td>Real headed Mac Chrome under OS <code>ffmpeg avfoundation</code> (cropped Chrome-only; #88).</td>
+    <td>A live closed loop where Jev’s Choice is injected into Chrome mid-frame (parallel call only).</td>
+  </tr>
+  <tr>
+    <td>System One latency sample: <strong>383&nbsp;ms</strong> wall for <code>pre_tool</code> allow @ conf 0.99.</td>
+    <td>Native WebMCP tool <em>execute</em> inside the recorded pixels (flag/tool list may be unused in-frame).</td>
+  </tr>
+  <tr>
+    <td>Decision-only preference for WebMCP tools on nekuda (0.90 vs 0.60 DOM) from the scout table.</td>
+    <td>Pay / send / merge — Jev still never authorizes those.</td>
+  </tr>
   </tbody></table>
 </div>
 
-<h3>Mock proof (credential-free)</h3>
-<p>Official example <code>libs/cua-driver/examples/jev-use/</code> · <code>uv run --frozen python verify_setup.py --output-dir proof-mock</code></p>
-<table class="fleet-table"><thead><tr><th>Check</th><th>Result</th></tr></thead><tbody>
-<tr><td><code>summary.json</code> <code>complete</code></td><td><strong>true</strong></td></tr>
-<tr><td>python / mock</td><td>verified · token <code>jev-guide-mock</code></td></tr>
-<tr><td>Driver on box</td><td><code>cua-driver 0.28.2</code> (Linux); Mac install staged for <code>e327005d-…</code></td></tr>
-<tr><td>TypeSafe live key</td><td>Absent — live decisions via OpenRouter shim, not <code>verify_setup --live</code></td></tr>
-</tbody></table>
-
-<h3>A1 vs A2 — decision-only (3 safe sites)</h3>
-<p>Same goals; Jev picks one candidate. <strong>No WebMCP execute</strong> this pass (Chrome <code>#enable-webmcp-testing</code> not enabled). Stop-before-pay honored (checkout mass ≈ 0).</p>
-<table class="fleet-table"><thead><tr><th>Task</th><th>Site</th><th>A1 DOM</th><th>A2 WebMCP</th></tr></thead><tbody>
-<tr><td>Directory discovery</td><td>webmcp.com</td><td><code>btn_surprise</code> · 0.59</td><td><code>surprise_me</code> · 0.52</td></tr>
-<tr><td>Demo cart (no pay)</td><td>store.nekuda.ai</td><td><code>btn_browse_all</code> · 0.60</td><td><code>list_products</code> · <strong>0.90</strong></td></tr>
-<tr><td>Docs answer</td><td>render.com</td><td><code>search_docs</code> · 0.53</td><td><code>render.docs.search</code> · 0.67</td></tr>
-</tbody></table>
-<p class="caption">Latencies ~0.2–0.3s per Choice. Full table in vault <code>Ship/builds/2026-09-20-jev-cua-webmcp-demo.md</code>.</p>
-
-<h3>WindTunnel v1.2 (external board — not our re-run)</h3>
-<p>Idan Levin / nekuda board: Jev+Mercury+WebMCP <strong>49/49</strong> · final score <strong>96.5</strong> · median <strong>$0.0011</strong> / <strong>3.2s</strong>. Same stack on DOM-ultrafast without WebMCP: <strong>25/49</strong> · score <strong>67.3</strong>. Source: <a href="https://webmcp.com/benchmark" rel="noopener">webmcp.com/benchmark</a>.</p>
-
-<div class="fleet-warn"><strong>Blockers.</strong> Chrome WebMCP testing flag = Haiyuan. Live native WebMCP execute + side-by-side clip pending flag. Mac Driver apply script staged (box seat had no Mac Shell). Dual LGTM ≠ merge.</div>
+<details style="margin:1rem 0">
+  <summary>Recipe table + mock / WindTunnel notes (secondary)</summary>
+  <div class="fleet-card">
+    <h3>Recipe (keep layers separate)</h3>
+    <table class="fleet-table"><thead><tr><th>Layer</th><th>Job</th><th>Ours</th></tr></thead><tbody>
+    <tr><td><strong>WebMCP</strong></td><td>Page declares tools</td><td>Public sites; Chrome testing flag when enabled</td></tr>
+    <tr><td><strong>Jev</strong></td><td>Choice over closed IDs</td><td>OpenRouter <code>typesafe/jev-1.13</code></td></tr>
+    <tr><td><strong>Executor</strong></td><td>Run tool / click</td><td>CUA / CDP / OS-recorded Chrome</td></tr>
+    </tbody></table>
+  </div>
+  <p class="caption">Mock <code>complete:true</code> and WindTunnel board numbers remain secondary citations. WindTunnel: WebMCP path 49/49 · 96.5 vs DOM 25/49 · 67.3 on <a href="https://webmcp.com/benchmark" rel="noopener">webmcp.com/benchmark</a> (external, not our re-run).</p>
+</details>
 </section>
 
 <section id="sources" class="chapter sources"><div class="chapter-number">SOURCEBOOK</div><h2>Follow the evidence.</h2><p>Every source below was inspected for this study or its preceding research. Code and repository reports are linked to a fixed revision; vendor documentation and the article can change. Study access date: 19 September 2026. Fleet appendix: 20 September 2026.</p><p class="method-note">This is an independent synthesis, not a TypeSafe publication. We inspected documentation, code, and published results; we did not rerun model evaluations. Illustrations are explicitly labeled. No private conversations or internal company data are included.</p><ol id="source-list"><li id="s1"><a href="https://archerhume.com/posts/jevs-architecture-unmasked/" target="_blank" rel="noopener noreferrer">Jev’s Architecture Unmasked ↗</a><p>Black-box experiments and a proposed architecture. Distinguishes observations from inference; does not disclose Jev’s internals.</p><span class="source-meta">Archer Hume · 17 September 2026 · independent investigation</span></li>
