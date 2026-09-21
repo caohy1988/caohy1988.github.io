@@ -175,7 +175,7 @@
 <p class="lead">One loop: <strong>Jev judges</strong> → prefer a <strong>WebMCP tool</strong> when the page declares one → otherwise fall back to <strong>CUA</strong> driving Chrome pixels/DOM. Jev never authorizes pay, send, or merge.</p>
 
 <div class="roles" style="margin:1.25rem 0">
-  <div><span>EXECUTOR</span><h3>CUA</h3><p>Drives Chrome (pixels / DOM). Slow when hunting UI; needed when no tool exists.</p></div>
+  <div><span>EXECUTOR</span><h3>CUA</h3><p>Drives Chrome (pixels / DOM) when used as executor. Slow when hunting UI; needed when no tool exists.</p></div>
   <div><span>PAGE TOOLS</span><h3>WebMCP</h3><p>The page declares callable tools. The agent invokes them directly — usually faster than poking the DOM.</p></div>
   <div><span>SYSTEM ONE</span><h3>Jev</h3><p>Fast Choice over closed options (~ms). Picks the route/tool. Does <strong>not</strong> drive Chrome or write prose.</p></div>
 </div>
@@ -185,16 +185,13 @@
 </p>
 
 <h3>Beat-labeled Chrome clip (from #88)</h3>
-<p>Cropped OS recording of headed Chrome (~28s). Read the beats with the video:</p>
+<p>Cropped OS recording of headed Chrome (~28s). Beats below are a <strong>reading guide</strong> for the teaching loop — they are not a shot-by-shot transcript of every frame (much of the clip is Chrome UI / flags surfaces).</p>
 <ol>
-  <li><strong>Beat 1 — Goal:</strong> open a public WebMCP site (webmcp.com / nekuda / computer.webmcp.com).</li>
-  <li><strong>Beat 2 — Jev would choose:</strong> parallel System One call (not painted into the video):
-    <code>pre_tool</code> → <strong>allow</strong> · conf <strong>0.99</strong> · wall <strong>383&nbsp;ms</strong> · model <code>typesafe/jev-1.13</code>.
-    Path-preference evidence (decision-only, earlier pass): on store.nekuda.ai Jev scored WebMCP <code>list_products</code> <strong>0.90</strong> vs DOM <code>btn_browse_all</code> <strong>0.60</strong>.</li>
-  <li><strong>Beat 3 — Chrome executes:</strong> the recording shows headed Chrome navigating those sites (CUA-style / CDP-driven session under OS capture).</li>
+  <li><strong>Beat 1 — Goal:</strong> use a public WebMCP-capable site as the example surface (clip shows headed Chrome; sites visited in the broader session included webmcp.com / nekuda — <code>computer.webmcp.com</code> is cited in scout notes, not guaranteed in every frame of this crop).</li>
+  <li><strong>Beat 2 — Jev Decision (parallel, not on-video):</strong> a separate System One <code>pre_tool</code> call returned <strong>allow</strong> · conf <strong>0.99</strong> · wall <strong>383&nbsp;ms</strong> (<code>typesafe/jev-1.13</code>). That is a <em>tool-risk gate</em> sample, not a “pick WebMCP vs DOM” router Choice burned into the pixels.</li>
+  <li><strong>Beat 3 — Chrome executes:</strong> the recording is headed Chrome under OS capture (cropped). Treat navigation as CUA/<strong>Chrome-driving</strong> evidence — not a claim that the CUA Driver binary is visible in-frame.</li>
 </ol>
-
-<video controls width="100%" style="max-width:720px;margin:0.75rem 0" src="demo/2026-09-20-mac-os-timed-chrome-tight.mp4"
+<p class="caption"><strong>Separate decision-only samples</strong> (not the same run as the clip): earlier scout table scored nekuda WebMCP <code>list_products</code> conf <strong>0.90</strong> vs DOM <code>btn_browse_all</code> <strong>0.60</strong>. Those confidences are independent snapshots — do not read them as the clip’s live route preference.</p><video controls width="100%" style="max-width:720px;margin:0.75rem 0" src="demo/2026-09-20-mac-os-timed-chrome-tight.mp4"
   poster="demo/2026-09-20-mac-os-timed-chrome-tight-kf01.png"></video>
 <p class="caption">
   <a href="demo/2026-09-20-mac-os-timed-chrome-tight.mp4">mp4</a> ·
@@ -212,11 +209,11 @@
     <td>A live closed loop where Jev’s Choice is injected into Chrome mid-frame (parallel call only).</td>
   </tr>
   <tr>
-    <td>System One latency sample: <strong>383&nbsp;ms</strong> wall for <code>pre_tool</code> allow @ conf 0.99.</td>
+    <td>System One latency sample: <strong>383&nbsp;ms</strong> wall for <code>pre_tool</code> <em>allow/deny/ask gate</em> @ conf 0.99 (not a WebMCP-vs-DOM route Choice).</td>
     <td>Native WebMCP tool <em>execute</em> inside the recorded pixels (flag/tool list may be unused in-frame).</td>
   </tr>
   <tr>
-    <td>Decision-only preference for WebMCP tools on nekuda (0.90 vs 0.60 DOM) from the scout table.</td>
+    <td>Separate decision-only scout samples on nekuda (0.90 vs 0.60) — not measured from this clip.</td>
     <td>Pay / send / merge — Jev still never authorizes those.</td>
   </tr>
   </tbody></table>
@@ -229,7 +226,7 @@
     <table class="fleet-table"><thead><tr><th>Layer</th><th>Job</th><th>Ours</th></tr></thead><tbody>
     <tr><td><strong>WebMCP</strong></td><td>Page declares tools</td><td>Public sites; Chrome testing flag when enabled</td></tr>
     <tr><td><strong>Jev</strong></td><td>Choice over closed IDs</td><td>OpenRouter <code>typesafe/jev-1.13</code></td></tr>
-    <tr><td><strong>Executor</strong></td><td>Run tool / click</td><td>CUA / CDP / OS-recorded Chrome</td></tr>
+    <tr><td><strong>Executor</strong></td><td>Run tool / click</td><td>OS-recorded headed Chrome (CDP/CUA may drive off-camera)</td></tr>
     </tbody></table>
   </div>
   <p class="caption">Mock <code>complete:true</code> and WindTunnel board numbers remain secondary citations. WindTunnel: WebMCP path 49/49 · 96.5 vs DOM 25/49 · 67.3 on <a href="https://webmcp.com/benchmark" rel="noopener">webmcp.com/benchmark</a> (external, not our re-run).</p>
