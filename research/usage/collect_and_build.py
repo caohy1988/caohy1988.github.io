@@ -86,6 +86,50 @@ def redact(obj):
     return obj
 
 
+# Error strings end up in the public snapshot.json / index.html. subprocess.TimeoutExpired and
+# CalledProcessError stringify their full argv, and the curl calls carry "Authorization: Bearer …"
+# there — so exceptions go through safe_error(), and main() scrubs the whole tree once more.
+_SECRET_PATTERNS = (
+    (re.compile(r"(?i)(authorization['\"]?\s*[:=]\s*['\"]?)(?!(?:(?:bearer|basic|token)\s+)?\[REDACTED\])(?:(bearer|basic|token)\s+)?[^\s'\",\]\)}]+"), r"\1\2 [REDACTED]"),
+    (re.compile(r"(?i)\b(bearer)\s+(?!\[REDACTED\])[^\s'\",\]\)}]+"), r"\1 [REDACTED]"),
+    (re.compile(r"\beyJ[\w-]{5,}\.[\w-]{5,}\.[\w-]{5,}"), "[REDACTED]"),  # JWT
+    (re.compile(r"\bsk-[\w-]{12,}"), "[REDACTED]"),
+    (re.compile(r"(?i)\b((?:api[_-]?key|access[_-]?token|refresh[_-]?token|id[_-]?token)['\"]?\s*[:=]\s*['\"]?)(?!\[REDACTED\])[^\s'\",\]\)}]+"), r"\1[REDACTED]"),
+)
+
+
+def scrub_secrets(text, secrets=()) -> str:
+    """Strip credentials from free text (known literal values first, then Bearer/JWT/key patterns)."""
+    text = str(text)
+    for sec in secrets:
+        if sec and len(str(sec)) >= 6:
+            text = text.replace(str(sec), "[REDACTED]")
+    for pat, repl in _SECRET_PATTERNS:
+        text = pat.sub(repl, text)
+    return text.replace("  [REDACTED]", " [REDACTED]")
+
+
+def safe_error(e: BaseException, secrets=(), limit: int = 300) -> str:
+    """Publishable description of an exception — never the command line."""
+    if isinstance(e, (subprocess.TimeoutExpired, subprocess.CalledProcessError)):
+        cmd = e.cmd[0] if isinstance(e.cmd, (list, tuple)) and e.cmd else "command"
+        name = Path(str(cmd).split()[0]).name if str(cmd).strip() else "command"
+        if isinstance(e, subprocess.TimeoutExpired):
+            return f"{name} timeout after {e.timeout:g}s"
+        return f"{name} failed (exit {e.returncode})"
+    return scrub_secrets(e, secrets)[:limit]
+
+
+def scrub_tree(obj, secrets=()):
+    if isinstance(obj, dict):
+        return {k: scrub_tree(v, secrets) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [scrub_tree(x, secrets) for x in obj]
+    if isinstance(obj, str):
+        return scrub_secrets(obj, secrets)
+    return obj
+
+
 def ts_to_pt(ts: int | float | None) -> str | None:
     if ts is None:
         return None
@@ -172,7 +216,7 @@ def collect_claude() -> dict:
             for b in out["bars"]
         )
     except Exception as e:
-        out["error"] = str(e)
+        out["error"] = safe_error(e)
     return out
 
 
@@ -207,9 +251,9 @@ def collect_codex() -> dict:
             if proc.returncode == 0 and (proc.stdout or "").strip().startswith("{"):
                 raw = json.loads(proc.stdout)
             else:
-                curl_err = (proc.stderr or proc.stdout or f"curl exit {proc.returncode}")[:400]
+                curl_err = scrub_secrets(proc.stderr or proc.stdout or f"curl exit {proc.returncode}", (token,))[:400]
         except Exception as e:
-            curl_err = str(e)
+            curl_err = safe_error(e, (token,))
         if raw is None:
             req = urllib.request.Request(
                 "https://chatgpt.com/backend-api/wham/usage",
@@ -222,7 +266,7 @@ def collect_codex() -> dict:
                 with urllib.request.urlopen(req, timeout=30) as resp:
                     raw = json.loads(resp.read().decode())
             except Exception as e:
-                out["error"] = f"curl: {curl_err}; urllib: {e}"
+                out["error"] = f"curl: {curl_err}; urllib: {safe_error(e, (token,))}"
                 # fall back to last good cache if present
                 cache = HERE / "codex-usage.json"
                 if cache.exists():
@@ -298,7 +342,7 @@ def collect_codex() -> dict:
             out["ok"] = True
             out.pop("error", None)
     except Exception as e:
-        out["error"] = str(e)
+        out["error"] = safe_error(e)
     return out
 
 
@@ -356,7 +400,7 @@ def collect_kimi() -> dict:
                 )
             if proc.returncode == 0 and 200 <= http_code < 300 and body.strip():
                 return json.loads(body)
-            err = (proc.stderr or body or f"curl exit {proc.returncode} http={http_code}")[:300]
+            err = scrub_secrets(proc.stderr or body or f"curl exit {proc.returncode} http={http_code}", (token,))[:300]
             # Fall through to urllib if curl missing/failed oddly
             if "curl:" in err or proc.returncode == 127:
                 pass
@@ -521,7 +565,7 @@ def collect_kimi() -> dict:
                 )
                 return out
     except Exception as e:
-        out["api_error"] = str(e)[:300]
+        out["api_error"] = safe_error(e)
         # fall through to vault markers
 
     # --- Fallback: vault markers ---
@@ -768,7 +812,7 @@ def collect_agy() -> dict:
             else None
         )
     except Exception as e:
-        out["cli_version_error"] = str(e)
+        out["cli_version_error"] = safe_error(e)
 
     try:
         proc = subprocess.run(
@@ -793,7 +837,7 @@ def collect_agy() -> dict:
         elif proc.returncode != 0:
             out["usage_error"] = (proc.stderr or proc.stdout or f"exit {proc.returncode}")[:500]
     except Exception as e:
-        out["usage_error"] = str(e)
+        out["usage_error"] = safe_error(e)
 
     packs = sorted(PACKS.glob("agy-pack-*.md"), key=lambda p: p.stat().st_mtime, reverse=True)
     if packs:
@@ -1086,7 +1130,7 @@ def collect_muse() -> dict:
         if not auth_ok:
             out["error"] = "muse auth missing — run muse login"
     except Exception as e:
-        out["error"] = str(e)
+        out["error"] = safe_error(e)
     return out
 
 
@@ -1167,7 +1211,7 @@ def collect_dsh() -> dict:
         if not auth_ok:
             out["error"] = "OpenRouter key missing — set OPENROUTER_API_KEY in ~/.dsh/.env"
     except Exception as e:
-        out["error"] = str(e)
+        out["error"] = safe_error(e)
     return out
 
 
@@ -1416,9 +1460,9 @@ def collect_grok() -> dict:
             return {
                 "ok": False,
                 "source": "grok_box_activity.json",
-                "error": str(e),
+                "error": safe_error(e),
                 "stale": True,
-                "stale_reason": f"grok_box_activity.json unreadable ({e})",
+                "stale_reason": f"grok_box_activity.json unreadable ({safe_error(e)})",
                 "bots": [_empty_bot(n) for n in GROK_ORDER],
                 "fleet_messages_total": 0,
                 "fleet_assistant_tool_total": 0,
@@ -2132,6 +2176,7 @@ def main() -> None:
         "routine_proxy": collect_routine_proxy(),
         "grok": collect_grok(),
     }
+    snap = scrub_tree(snap)  # last line of defense; collectors already use safe_error()
 
     publish = json.loads(json.dumps(snap))
     if "evidence" in publish.get("kimi", {}):

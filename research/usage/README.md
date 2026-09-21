@@ -10,6 +10,7 @@ versioned copies; the Mac source of truth is:
   collect_and_build.py            # collects Mac CLI usage + renders index.html / snapshot.json
   collect_grok_box_activity.py    # box-side Grok activity collector (also imported by the above)
   test_grok_stale.py              # python3 test_grok_stale.py  → ALL CHECKS PASSED
+  test_error_redaction.py         # python3 test_error_redaction.py → no Bearer/argv in error fields, snapshot.json, index.html
   refresh.sh                      # build + copy index.html / snapshot.json into this folder
 ```
 
