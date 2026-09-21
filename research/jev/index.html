@@ -184,41 +184,57 @@
  User goal → <strong>Jev Choice</strong> → if WebMCP tool available use it · else CUA DOM
 </p>
 
-<h3>Beat-labeled Chrome clip (from #88)</h3>
-<p>Cropped OS recording of headed Chrome (~28s). Beats below are a <strong>reading guide</strong> for the teaching loop — they are not a shot-by-shot transcript of the recording (much of the clip is Chrome UI / flags surfaces).</p>
+<h3>HUD-annotated Chrome clip (Step 2)</h3>
+<p>~37s headed Mac Chrome on <code>webmcp.com</code> / <code>store.nekuda.ai</code> with an <strong>on-page HUD</strong> showing beat · path (WebMCP|DOM) · Jev Choice · conf · ms. No desktop/chat leak (page frames only).</p>
 <ol>
- <li><strong>Beat 1 — Goal:</strong> use a public WebMCP-capable site as the example surface (clip shows headed Chrome; the crop shows headed Chrome on a public WebMCP demo site).</li>
- <li><strong>Beat 2 — Jev Decision (parallel, not on-video):</strong> a separate System One <code>pre_tool</code> call returned <strong>allow</strong> · conf <strong>0.99</strong> · wall <strong>383&nbsp;ms</strong> (<code>typesafe/jev-1.13</code>). That is a <em>tool-risk gate</em> sample, not a “pick WebMCP vs DOM” router Choice burned into the pixels.</li>
- <li><strong>Beat 3 — Chrome executes:</strong> the recording is headed Chrome under OS capture (cropped). Chrome navigates in the recording under OS capture.</li>
+ <li><strong>Beat 1 — Goal:</strong> open a public WebMCP site.</li>
+ <li><strong>Beat 2 — Jev Choice (on HUD):</strong> parallel System One <code>pre_tool</code> sample burned into the overlay — <strong>allow</strong> · conf <strong>0.87</strong> · wall <strong>575&nbsp;ms</strong> · path labeled <strong>DOM</strong> (gate sample, not a live WebMCP-vs-DOM router wire).</li>
+ <li><strong>Beat 3 — Chrome executes:</strong> scripted CDP navigates / clicks while the HUD stays visible.</li>
 </ol>
-<p class="caption"><strong>Separate decision-only samples</strong> (not the same run as the clip): earlier scout table scored nekuda WebMCP <code>list_products</code> conf <strong>0.90</strong> vs DOM <code>btn_browse_all</code> <strong>0.60</strong>. Those confidences are independent snapshots — do not read them as the clip’s live route preference.</p><p><strong>Clip provenance:</strong> Scripted CDP drove this Chrome session. CUA was not run. No WebMCP tool executed in the recording. Hostnames need not be readable in the crop.</p>
-<video controls width="100%" style="max-width:720px;margin:0.75rem 0" src="demo/2026-09-20-mac-os-timed-chrome-tight.mp4"
- poster="demo/2026-09-20-mac-os-timed-chrome-tight-kf01.png"></video>
+<p><strong>Clip provenance:</strong> Headed Mac Chrome; HUD injected via CDP <code>Runtime.evaluate</code>; frames from CDP <code>Page.captureScreenshot</code> assembled to mp4. CUA was not run. No WebMCP tool executed. OS <code>screencapture</code>/<code>ffmpeg avfoundation</code> Capture screen returned black (~144&nbsp;KB identical frames) at record time — TCC/Screen Recording — so this Step 2 ship uses CDP page frames, not OS desktop pixels.</p>
+<video controls width="100%" style="max-width:720px;margin:0.75rem 0" src="demo/2026-09-20-mac-os-hud-chrome.mp4"
+ poster="demo/2026-09-20-mac-os-hud-kf02.png"></video>
 <p class="caption">
- <a href="demo/2026-09-20-mac-os-timed-chrome-tight.mp4">mp4</a> ·
- <a href="demo/2026-09-20-mac-os-timed-chrome-tight-kf01.png">kf01</a> ·
- <a href="demo/2026-09-20-mac-os-timed-chrome-tight-kf02.png">kf02</a> ·
- <a href="demo/2026-09-20-mac-os-timed-chrome-tight-kf03.png">kf03</a> ·
- <a href="demo/2026-09-20-jev-s09-choice.json">Jev Choice JSON</a>
+ <a href="demo/2026-09-20-mac-os-hud-chrome.mp4">mp4</a> ·
+ <a href="demo/2026-09-20-mac-os-hud-kf01.png">kf01</a> ·
+ <a href="demo/2026-09-20-mac-os-hud-kf02.png">kf02</a> ·
+ <a href="demo/2026-09-20-mac-os-hud-kf03.png">kf03</a> ·
+ <a href="demo/2026-09-20-mac-os-hud-jev.json">Jev Choice JSON</a>
 </p>
+<figure style="margin:1rem 0;max-width:720px">
+ <img src="demo/2026-09-20-mac-os-hud-kf02.png" alt="HUD Beat 2 on webmcp.com" width="100%" style="border:1px solid #ccc;border-radius:6px"/>
+ <figcaption class="caption">Keyframe: Beat 2 HUD — path DOM · pre_tool:allow · conf 0.87 · 575&nbsp;ms</figcaption>
+</figure>
 
 <div class="fleet-card" style="margin:1.25rem 0">
- <h3>What this clip proves / does not prove</h3>
+ <h3>What this HUD clip proves / does not prove</h3>
  <table class="fleet-table"><thead><tr><th>Proves</th><th>Does not prove</th></tr></thead><tbody>
  <tr>
- <td>Real headed Mac Chrome under OS <code>ffmpeg avfoundation</code> (cropped Chrome-only; #88).</td>
- <td>A live closed loop where Jev’s Choice is injected into Chrome mid-frame (parallel call only).</td>
+ <td>On-screen Choice / latency / path HUD over real headed Mac Chrome page content (no desktop/chat leak).</td>
+ <td>OS desktop screencapture of the Chrome window (that path was black/TCC at record time).</td>
  </tr>
  <tr>
- <td>System One latency sample: <strong>383&nbsp;ms</strong> wall for <code>pre_tool</code> <em>allow/deny/ask gate</em> @ conf 0.99 (not a WebMCP-vs-DOM route Choice).</td>
- <td>Native WebMCP tool <em>execute</em> inside the recorded pixels.</td>
+ <td>Parallel System One gate sample visible in-frame: <strong>575&nbsp;ms</strong> · conf <strong>0.87</strong> · <code>pre_tool:allow</code>.</td>
+ <td>A live closed loop where Jev’s Choice drives Chrome mid-frame (HUD is labeled parallel / not live wire).</td>
  </tr>
  <tr>
- <td>Separate decision-only scout samples on nekuda (0.90 vs 0.60) — not measured from this clip.</td>
- <td>Pay / send / merge — Jev still never authorizes those.</td>
+ <td>Teaching beats for goal → Choice → execute on a public WebMCP site.</td>
+ <td>Native WebMCP tool <em>execute</em>; pay / send / merge (never authorized).</td>
  </tr>
  </tbody></table>
 </div>
+
+<details style="margin:1rem 0">
+ <summary>Prior #88 OS-cropped clip (no HUD)</summary>
+ <p>Cropped OS recording of headed Chrome (~28s) from #88 — reading-guide beats only; no on-screen Choice HUD.</p>
+ <video controls width="100%" style="max-width:720px;margin:0.75rem 0" src="demo/2026-09-20-mac-os-timed-chrome-tight.mp4"
+  poster="demo/2026-09-20-mac-os-timed-chrome-tight-kf01.png"></video>
+ <p class="caption">
+  <a href="demo/2026-09-20-mac-os-timed-chrome-tight.mp4">mp4</a> ·
+  <a href="demo/2026-09-20-mac-os-timed-chrome-tight-kf01.png">kf01</a> ·
+  <a href="demo/2026-09-20-jev-s09-choice.json">prior Jev JSON (383&nbsp;ms)</a>
+ </p>
+</details>
 
 <details style="margin:1rem 0">
  <summary>Recipe table + mock / WindTunnel notes (secondary)</summary>
