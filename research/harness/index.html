@@ -541,6 +541,7 @@ ask → Manage Bot
         <tr><td><code>pre_browser</code></td><td><strong>Before</strong> computerUse / browser</td><td><code>browser_action</code>: proceed | skip | escalate</td><td>Noul <code>page_looks_safe</code>; Score <code>waste_risk</code>; Score <code>cost_risk</code></td></tr>
         <tr><td><code>pre_retry</code></td><td><strong>Before</strong> expensive Mac CLI retry</td><td><code>retry_decision</code>: retry | abort | escalate</td><td>Score <code>likely_succeed</code>; Score <code>cost_risk</code></td></tr>
         <tr><td><code>pre_research</code></td><td><strong>Before</strong> Field Brief / full scout</td><td><code>research_depth</code>: skip | light_web | full_scout | escalate</td><td>Score <code>cost_risk</code></td></tr>
+        <tr><td><code>pre_tool</code></td><td><strong>Before</strong> high-risk MCP / Shell mutations</td><td><code>verdict</code>: allow | ask | deny</td><td>Score <code>destructive</code>/<code>exfil_risk</code>/<code>cost_risk</code>; Noul <code>in_grant</code>/<code>args_plausible</code>/<code>on_task</code></td></tr>
       </tbody>
     </table>
     <p class="note"><strong>pre_tool local policy:</strong> deny→stop; ask→CoS/Haiyuan; allow→proceed. Honor if <code>verdict</code> confidence ≥ floor (0.55); else CoS. <strong>Never authorizes send/pay/merge.</strong></p>
