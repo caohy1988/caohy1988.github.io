@@ -1,8 +1,65 @@
 {
-  "updatedAt": "2026-09-20T08:52:49-07:00",
+  "updatedAt": "2026-09-21T10:56:47-07:00",
   "title": "BigQuery Lakehouse",
   "blurb": "Product impact board for BigQuery Lakehouse / BigLake / Iceberg on BigQuery — how customers, partners, analysts, and the community introduce open lakehouse patterns. Built for BQ Lakehouse directors and managers tracking GTM. Prefer customer/3P; no 1P docs; GC Blog only for successful named customer stories.",
   "entries": [
+    {
+      "id": "github-traceforce-lakehouse-pr-14-gcp-biglake-managed-iceberg",
+      "kind": "community",
+      "source": "GitHub · traceforce/traceforce-lakehouse (vawadhwa88)",
+      "date": "2026-09-21",
+      "displayDate": "Sep 21, 2026",
+      "title": "GCP lakehouse: Terraform module + skill (BigQuery + BigLake managed Iceberg)",
+      "href": "https://github.com/traceforce/traceforce-lakehouse/pull/14",
+      "why": "First-class open-source Terraform infrastructure module and operational skill implementing an autonomous AI agent telemetry lakehouse natively on GCP using BigQuery and BigLake managed Iceberg tables (agent_events partitioned by DATE(ts) and clustered by source_object) alongside 17 mirror tables. Fully validated live against real GCP project test-env-508907, exercising atomic mirror MERGE and OTLP attribute parsing over managed Iceberg.",
+      "tags": [
+        "BigQuery Lakehouse",
+        "BigLake",
+        "managed Iceberg",
+        "Terraform",
+        "agent telemetry",
+        "community",
+        "GitHub"
+      ]
+    },
+    {
+      "id": "github-trinodb-trino-pr-31240-separate-iceberg-rest-google-auth-biglake",
+      "kind": "community",
+      "source": "GitHub · trinodb/trino (findinpath)",
+      "date": "2026-09-18",
+      "displayDate": "Sep 18, 2026",
+      "title": "Separate Iceberg REST catalog Google auth from GCS file system auth",
+      "href": "https://github.com/trinodb/trino/pull/31240",
+      "why": "Core Trino engine pull request decoupling Google Cloud authentication for Iceberg REST catalogs from underlying GCS filesystem credentials. Resolves credential collision when Trino communicates with the BigLake Metastore REST catalog endpoint while relying on vended storage credentials for object-level GCS operations, enabling granular, enterprise-grade access separation across lakehouse query tiers.",
+      "tags": [
+        "Trino",
+        "BigLake Metastore",
+        "Iceberg REST catalog",
+        "Google Cloud Lakehouse",
+        "vended credentials",
+        "community",
+        "GitHub"
+      ]
+    },
+    {
+      "id": "github-trinodb-trino-pr-31217-biglake-vended-credential-root-location",
+      "kind": "community",
+      "source": "GitHub · trinodb/trino (findinpath)",
+      "date": "2026-09-17",
+      "displayDate": "Sep 17, 2026",
+      "title": "Fix vended credential lookup for table root location",
+      "href": "https://github.com/trinodb/trino/pull/31217",
+      "why": "Resolves a critical write-path and DDL defect in Trino's Iceberg connector where tables managed by Google Lakehouse Iceberg REST Catalog (BigLake Metastore) with vended credentials failed on direct table root operations like DROP TABLE due to trailing-slash prefix mismatch in findVendedCredentialsForLocation. Configures a dedicated Trino CI integration bucket (GCP_CREDENTIALS_VENDING_STORAGE_BUCKET) to permanently isolate vended-credentials BigLake smoke testing.",
+      "tags": [
+        "Trino",
+        "Google Lakehouse",
+        "BigLake Metastore",
+        "Iceberg REST catalog",
+        "vended credentials",
+        "community",
+        "GitHub"
+      ]
+    },
     {
       "id": "qiita-hitachi-masahiro-ito-iceberg-biglake-metastore-2026",
       "kind": "essay",
