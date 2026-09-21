@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-20 · SpaceX guide KEEPs (proof / ops / PR 12h / nightly)</strong></span>
+      <span>Updated <strong>2026-09-20 · Jev pre_tool gate + prior Lab KEEPs</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -543,6 +543,7 @@ ask → Manage Bot
         <tr><td><code>pre_research</code></td><td><strong>Before</strong> Field Brief / full scout</td><td><code>research_depth</code>: skip | light_web | full_scout | escalate</td><td>Score <code>cost_risk</code></td></tr>
       </tbody>
     </table>
+    <p class="note"><strong>pre_tool local policy:</strong> deny→stop; ask→CoS/Haiyuan; allow→proceed. Honor if <code>verdict</code> confidence ≥ floor (0.55); else CoS. <strong>Never authorizes send/pay/merge.</strong></p>
     <p class="note">CoS packet rule (CyrilXBT): break missions into small packets + verify — <strong>Jev picks packet owner / route; Grok/Mac execute</strong>. Lab KEEP candidate only: <strong>jev-browser</strong> (Playwright + Jev click decisions) — do <em>not</em> install Playwright yet.</p>
 
     <h3 id="jev-session">Live session (2026-09-20)</h3>
@@ -558,7 +559,10 @@ ask → Manage Bot
         <tr><td>pre_browser</td><td><code>proceed</code></td><td>0.68</td><td>true</td></tr>
         <tr><td>pre_retry</td><td><code>retry</code></td><td>0.87</td><td>true</td></tr>
         <tr><td>pre_research</td><td><code>full_scout</code></td><td>0.17</td><td>false → cos</td></tr>
-      </tbody>
+              <tr><td>pre_tool read-only ls</td><td><code>allow</code></td><td>0.93</td><td>true</td></tr>
+        <tr><td>pre_tool gh pr merge</td><td><code>deny</code></td><td>1.00</td><td>true</td></tr>
+        <tr><td>pre_tool ambiguous rm</td><td><code>ask</code></td><td>0.40</td><td>false → cos</td></tr>
+</tbody>
     </table>
 
     <h3>Session recipe (Manage Bot)</h3>
