@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-22 · 12:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="Codex 0.156.0 stable; DeepEval 4.2.4–4.2.5 Jev; LiteLLM v1.102.0 stream guardrails; Academy PP-S + EDGEGEN.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-22-1234-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 PM PT · Official 6h slot (late primary wake ~12:57 PT; label kept 1234)</p>
+    <article>
+<h1>Field Brief — 2026-09-22-1234: Codex CLI graduates 0.156.0 to stable — a 526-commit cut whose release notes lead with UI and voice, but whose changelog is an agent-telemetry release (turn-metric model attribution, tool-call receipt/readiness trace events, analytics-state turn metadata, tool analytics by call origin); DeepEval becomes the fourth eval vendor to ship Jev-as-judge, with typed classifiers and a Jev-only custom metric; LiteLLM v1.102.0 lets post_call guardrail pipelines run on streaming responses; Academy adds a survey-statistics method for turning LLM-judge labels plus a small human sample into per-segment quality intervals (PP-S), and a policy-driven edge-case generator for tool-calling agents (EDGEGEN)</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer:</strong> Opus 5.5 (<code>claude-opus-5-5[1m]</code>), primary deep Field Brief writer under <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-22-1234</strong> (official 6h slot, 12:34 PT Tue Sep 22, 2026). The primary automation woke late (~12:57 PT) and this was written ~12:58–13:10 PT. Per <code>Maps/Decisions/2026-09-06-field-brief-routine-missed-slots.md</code>, the label stays <strong>1234</strong> rather than being renamed to clock time.
+<strong>Evidence window:</strong> starts after the published <strong>2026-09-22-0634</strong> Kimi brief (live https://caohy1988.github.io/research/briefs/2026-09-22-0634-kimi.html; its write-time as-of was ~17:15 UTC) and runs to ~20:04 UTC (13:04 PT).</p>
+<ul>
+<li><strong>Source packs used:</strong> Agy 0932 (its items that 0634 did not cover), Muse 1032, DSH 1132 and Agy 1232.</li>
+<li><strong>Missing packs (honest label, nothing invented):</strong> DSH 0532 and 0832, Agy 1032, Muse 0732.</li>
+<li><strong>Catalog baseline:</strong> <strong>337 items / 91 briefs / 93 runs</strong>, re-verified read-only at write time.
+<strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call; Collection owns the HTML, the catalog and the push.</li>
+</ul>
+<h2>Read this first</h2>
+<p><strong>PUBLISH with five new ranks: three Industry, two Academy.</strong> At write time I re-verified every Industry item against primary sources (GitHub release objects and compare diffs, PR bodies, npm dist-tags and publish times, PyPI JSON), rather than trusting the packs. I read both Academy ranks, and the one Academy rejection, as full PDFs; that includes their tables and appendices.</p>
+<p>The window's headline is <strong>Codex <code>rust-v0.156.0</code> going stable</strong> (GitHub 19:51:01Z; npm <code>latest</code> → 0.156.0 at 19:55:37Z). Every Codex card so far has been a prerelease that <code>latest</code> users never saw. This one is the stable line.</p>
+<p>The release notes sell fullscreen UI and voice. The 526-entry changelog is really a <strong>telemetry and attribution release</strong>:</p>
+<ul>
+<li>turn metrics attributed to the models actually used (#44656);</li>
+<li><code>codex.tool_call_received</code> / <code>codex.tool_result_ready</code> trace events (#44661);</li>
+<li><code>analytics_enabled</code> in turn metadata (#44628);</li>
+<li>root turn attribution preserved in turn-start events (#44611);</li>
+<li>tool analytics classified by call origin (#45535);</li>
+<li>MCP auth/approval outcomes classified in analytics (#45716).</li>
+</ul>
+<p>The second thread is the <strong>Jev-as-judge wave gaining a fourth vendor</strong>. Earlier cards: LangSmith and Phoenix JS at 0034, pydantic-ai at 0034, Opik at 0634. DeepEval 4.2.4 adds Jev-decided QAG/GEval/DAG verdicts plus categorical classifiers. 4.2.5, published ~5 h later on PyPI only, adds a Jev-only custom metric (<code>JevEval</code> / <code>ConversationalJevEval</code>).</p>
+<p><strong>Industry: three ranks.</strong></p>
+<ol>
+<li><strong>Codex <code>rust-v0.156.0</code> stable.</strong> The alpha.9 prerelease from the same window is folded in as progress.</li>
+<li><strong>DeepEval <code>4.2.4</code> → <code>4.2.5</code>:</strong> Jev System One plus classifiers.</li>
+<li><strong>LiteLLM <code>v1.102.0</code>:</strong> post_call guardrail pipelines on streams, provider-key redaction in tracebacks, and emulated <code>file_search</code> scoped to the request's vector stores. This is a boundary absorb, explained in the rank.</li>
+</ol>
+<p><strong>Academy: two ranks.</strong></p>
+<ol>
+<li><strong>PP-S / PP-TS <code>2609.20758</code>:</strong> prediction-powered smoothing for disaggregated evaluation.</li>
+<li><strong>EDGEGEN <code>2609.24115</code>:</strong> policy-driven edge-case task generation for tool-calling agents, carded with heavy evidence caveats.</li>
+</ol>
+<p>ACLArena <code>2609.23989</code>, the new Hugging Face listing, was read in full and <strong>rejected</strong>: it is about post-training forgetting, not agent analytics.</p>
+<p><strong>Not carded:</strong></p>
+<ul>
+<li><strong>Opik <code>2.2.76</code>:</strong> a patch bump with one user-facing feature → NOTE.</li>
+<li><strong>OpenHands <code>v1.22.0</code>:</strong> a thin cloud-backend admin release → NOTE.</li>
+<li><strong>Codex <code>rust-v0.157.0-alpha.9</code>:</strong> folded into Industry rank 1.</li>
+<li>LiteLLM, Mastra and Langfuse unreleased commits → NOTE/WATCH.</li>
+</ul>
+<p><strong>Pack-claim corrections:</strong></p>
+<ol>
+<li><strong>DeepEval 4.2.4's own release notes say &quot;<code>deepeval</code> 4.2.2 introduces support for Jev&quot;.</strong> That is wrong. The integration PR #3332 (&quot;Features/system one&quot;, which <em>adds</em> <code>deepeval/classifiers/*</code> and the <code>_experimental_system_one_*</code> templates) merged at <strong>14:54:39Z Sep 22</strong>. PyPI 4.2.4 was uploaded at 14:55:33Z; PyPI 4.2.2 dates from Sep 6. Treat &quot;4.2.2&quot; as a vendor typo; Jev first ships in <strong>4.2.4</strong>.</li>
+<li><strong>No pack caught DeepEval 4.2.5</strong> (PyPI 19:26:34Z, no GitHub release). It carries #3337, which adds <code>JevEval</code> / <code>ConversationalJevEval</code>, and was found by primary re-verification.</li>
+<li><strong>&quot;LiteLLM v1.102.0 boundary-adjacent, ~96s pre-window&quot; (DSH 1132)</strong> is true only of the GitHub <em>release object</em> (17:56:26Z). The <strong>PyPI 1.102.0 artifact has existed since 2026-09-20T04:41:12Z</strong>; the 0634 brief itself recorded &quot;PyPI flat 1.102.0&quot;. So this is a two-day-old artifact whose release notes appeared today. It is absorbed as a rank because it has never been carded (catalog grep: zero <code>1.102.0</code> hits) and its content is product-level, not because it is new.</li>
+<li><strong>Agy 1232 described 0.156.0 as a &quot;MAJOR STABLE VERSION&quot;.</strong> It is a stable minor on the 0.x line. It matters because it reaches <code>latest</code>, not because of semver.</li>
+<li><strong>npm per-platform dist-tag lag:</strong> at write time <code>darwin-arm64</code> still points to <code>0.155.1-darwin-arm64</code> while <code>latest</code> and the other platform tags are on 0.156.0. Apple-silicon installs may lag for a while; this is a collector detail, not a card fact.</li>
+</ol>
+<h2>Industry</h2>
+<p><strong>Three new ranks.</strong> All of the following verification is my own, done at write time:</p>
+<ul>
+<li><strong>GitHub releases list:</strong> <code>openai/codex</code> (<code>rust-v0.156.0</code> prerelease=false at 19:51:01Z; <code>rust-v0.157.0-alpha.9</code> at 18:00:16Z), <code>confident-ai/deepeval</code> (<code>python-v4.2.4</code> at 16:36:00Z), <code>BerriAI/litellm</code> (<code>v1.102.0</code> at 17:56:26Z), <code>comet-ml/opik</code> (<code>2.2.76</code> at 18:55:45Z), <code>OpenHands</code> (<code>v1.22.0</code> at 16:28:11Z).</li>
+<li><strong>Compare diffs:</strong> Codex <code>rust-v0.155.0...rust-v0.156.0</code> = <strong>526 commits</strong>; <code>rust-v0.157.0-alpha.8...alpha.9</code> = <strong>17 commits</strong>, full list read; LiteLLM <code>v1.101.0...v1.102.0</code> = 1,488 commits.</li>
+<li><strong>PR bodies read:</strong> Codex #44661 and #44628, DeepEval #3332 and #3337 file lists plus the JevEval docs patch, LiteLLM #38788, Opik #8473.</li>
+<li><strong>npm <code>@openai/codex</code>:</strong> <code>latest</code> = 0.156.0 (19:55:37Z); <code>alpha</code> = 0.157.0-alpha.9 (18:15:54Z).</li>
+<li><strong>PyPI:</strong> <code>deepeval</code> 4.2.4 (14:55:33Z) and 4.2.5 (19:26:34Z); <code>opik</code> 2.2.76 (18:49:48Z); <code>litellm</code> 1.102.0 (2026-09-20T04:41:12Z).</li>
+<li><strong>Catalog grep before ranking:</strong> zero collisions for <code>0.156.0</code> stable, <code>deepeval</code>, <code>1.102.0</code> and <code>2.2.76</code>. Existing <code>0.156.0</code> hits are alpha-era cards: alpha.10–12 (the <code>/usage</code> dashboard, transcript, command center) and alpha.16→0.157.0-alpha.1.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://github.com/openai/codex/releases/tag/rust-v0.156.0">OpenAI Codex CLI <code>rust-v0.156.0</code> (stable)</a> — the 0.156 prerelease train reaches <code>latest</code>, a 526-commit stable cut that is mostly agent-telemetry and attribution plumbing under a UI/voice headline, with 0.157.0-alpha.9 already moving Guardian review context to on-by-default</h3>
+<p><strong>What shipped (release-notes level):</strong></p>
+<ul>
+<li><strong>Optional fullscreen <code>/tui</code></strong>: transcript search, mouse selection, right-click copy (#46732/#46734/#46883/#46895).</li>
+<li><strong>Voice on by default</strong>: F8 toggle, <code>/voice settings</code>, bundled Linux/Windows audio runtimes.</li>
+<li><strong><code>/usage</code> analytics dashboard</strong>: account usage, token totals, plugin and skill activity (#45764/#45769).</li>
+<li><strong>Agent command center</strong>: status filters; worktree sessions on by default (#46839/#45276/#44870).</li>
+<li><strong>Other:</strong> six themes plus inline Mermaid and display equations (#46504); <code>/daemon</code> / <code>--no-daemon</code> (#45854/#46088); sandbox isolation fixes on Windows inbound, privileged Linux/macOS sockets and macOS read-only handles (#44639/#45984/#46500).</li>
+</ul>
+<p><strong>What matters for an analytics consumer (changelog level, titles read in full; PR bodies read for #44661 and #44628):</strong></p>
+<ul>
+<li><strong>#44661 <code>Trace tool call receipt, result readiness, and code-mode dispatch</code></strong> emits <code>codex.tool_call_received</code> and <code>codex.tool_result_ready</code> events for direct and code-mode calls, carrying ids and tool names but <em>no arguments or output</em>. Readiness is recorded before result encoding, including ordinary errors and aborted responses. Nested call ids are assigned at broker receipt and linked to the dispatching turn. The PR's rationale: tool results can be ready before the sampling loop collects them, and code-mode cells can outlive a turn.</li>
+<li><strong>#44628 <code>Expose session analytics state in Responses turn metadata</code></strong> adds an optional <code>analytics_enabled</code> boolean to <code>x-codex-turn-metadata</code>. It reports <em>collection state</em> independently of event eligibility or delivery, and is a reserved key that config and clients cannot override. <strong>#44646</strong> honors thread analytics opt-outs on shared clients.</li>
+<li><strong>Attribution:</strong></li>
+<li>#44656 attributes turn metrics to the models used during the turn;</li>
+<li>#45445 attributes command and plugin analytics to the invoking model;</li>
+<li>#44611 preserves root turn attribution in turn-start events;</li>
+<li>#44659 preserves turn triggers across delegated agent work;</li>
+<li>#45535 classifies tool analytics events by call origin;</li>
+<li>#45649 and #45716 add elicitation, MCP-auth and approval-outcome classification to analytics.</li>
+<li><strong>Tracing breadth:</strong> #45505 adds lifecycle tracing for unified exec; #45496 traces global user-instruction loading.</li>
+<li><strong>Guardian (Codex's review/approval layer):</strong> extracted into its own reviewer extension across roughly 15 PRs (#45417–#45736), routed through <code>/responses</code> with identifying headers (#45736), and cached approvals are invalidated on unscored permission widening (#44617).</li>
+</ul>
+<p><strong>Progress, not a separate rank: <code>rust-v0.157.0-alpha.9</code></strong> (18:00:16Z; npm <code>alpha</code> at 18:15:54Z; 17 commits read):</p>
+<ul>
+<li><strong>#47275 Enable Guardian thread context by default</strong> and #47272 allow Guardian sync review across compaction-hash differences;</li>
+<li>#47271/#47292/#47301 consolidate <code>AgentControl</code> and separate runtime state from controller handles;</li>
+<li>#47267 streams agent snapshots from local status subscriptions;</li>
+<li>#47317 enables <code>/import</code> in remote and local daemon sessions; #47318 offers explicit recovery for incompatible background servers.</li>
+</ul>
+<p>The release body is bare (&quot;Release 0.157.0-alpha.9&quot;), so intent is taken from commit titles.</p>
+<p><strong>Honest caveats:</strong></p>
+<ul>
+<li>The 526-entry changelog was read at title level. Only #44661 and #44628 PR bodies were read, so the other attribution items are characterized by title only.</li>
+<li>Much of 0.156.0's user-visible surface was already carded in alpha-era cards: <code>/usage</code>, command center and transcript at alpha.10–12. This card is about the <strong>stable graduation</strong> plus the telemetry layer those cards did not cover.</li>
+<li>No install or smoke test.</li>
+<li>The npm <code>darwin-arm64</code> dist-tag still pointed to 0.155.1 at write time.</li>
+<li>The <code>/usage</code> dashboard is account-scoped and OpenAI-hosted; there is no evidence of an export API.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> Codex's stable line now separates three things analytics usually conflates:</p>
+<ol>
+<li><strong>Whether collection is on</strong> (<code>analytics_enabled</code> in turn metadata, independent of delivery). A missing event is no longer ambiguous between &quot;opted out&quot; and &quot;dropped&quot;.</li>
+<li><strong>Which model earned the turn</strong> (#44656 and #45445 attribute metrics to the models actually used). Multi-model turns stop being charged to the session default.</li>
+<li><strong>When a tool result was ready versus when it was consumed</strong> (#44661). The receipt→readiness→collection gap becomes measurable.</li>
+</ol>
+<p>The #44661 events carry no arguments or output by design. That is the privacy-safe shape BQAA should mirror: ids plus tool names plus timestamps, with payloads left out of the event stream.</p>
+<h3>2. NEW rank: <a href="https://github.com/confident-ai/deepeval/releases/tag/python-v4.2.4">Confident AI <code>deepeval</code> <code>4.2.4</code> → <code>4.2.5</code></a> — fourth eval vendor to ship Jev-as-judge: QAG/GEval/DAG verdicts decided by TypeSafe's System One with fixed-threshold probabilities, a new categorical-classifier family, and (4.2.5, PyPI-only) a Jev-only <code>JevEval</code> / <code>ConversationalJevEval</code> custom metric</h3>
+<p><strong>4.2.4</strong> (GitHub 16:36:00Z; PyPI 14:55:33Z) is the release titled &quot;🧠 Introducing Jev: System One for LLM Evals&quot;. Its stated principle: &quot;language tasks stay with your evaluation LLM; decision points go to Jev&quot;.</p>
+<p>What changes when Jev is on:</p>
+<ul>
+<li><strong><code>FaithfulnessMetric</code> and other QAG metrics:</strong> the LLM still extracts claims; Jev decides one Noul (<code>P(yes)</code>) per claim.</li>
+<li><strong><code>GEval</code>:</strong> Noul in strict mode, Score when a rubric is provided.</li>
+<li><strong><code>DAGMetric</code>:</strong> Noul for binary nodes, Choice for non-binary nodes.</li>
+<li><strong>Classifiers:</strong> Choice over a closed label set.</li>
+<li><strong>Score math is unchanged</strong>; faithfulness is still truthful claims / total claims.</li>
+<li><strong>Vendor-stated economics (not verified):</strong> $0.042 per million input tokens with no output charge; ~100 ms per query; a metric's independent questions batched into one request.</li>
+<li><strong>Opt-in and experimental:</strong> <code>deepeval set-mode experimental</code> plus <code>typesafe-sdk</code> plus <code>TYPESAFE_API_KEY</code>. In experimental mode a missing SDK or key <strong>fails loudly instead of falling back</strong> to the LLM.</li>
+</ul>
+<p>The same cut, via #3332, adds <strong>categorical LLM-as-a-judge classifiers</strong> that return one label from a closed set. Shipped files include <code>abstention</code>, <code>clarification</code>, <code>data_leakage</code>, <code>escalation</code>, <code>forbidden_commitments</code> and the release-note example <code>RefusalClassifier</code> → <code>refused</code>.</p>
+<p><strong>4.2.5</strong> (PyPI 19:26:34Z; no GitHub release) carries <strong>#3337</strong>, which adds <code>deepeval/metrics/jev_eval/*</code> and <code>conversational_jev_eval/*</code> with docs and tests. According to the shipped docs, you define bounded <strong>questions</strong> (typed <code>Noul</code> / <code>Score</code> / <code>Choice</code>), Jev answers each with calibrated probabilities, and a fixed equation produces the score: &quot;No LLM judges the conversation&quot;; an LLM only optionally writes the reason.</p>
+<p><strong>Honest caveats:</strong></p>
+<ul>
+<li>The release notes misstate the version as 4.2.2; see correction 1 in Read this first.</li>
+<li>All economics and latency figures are vendor claims.</li>
+<li>The feature is explicitly experimental and opt-in.</li>
+<li>4.2.5 has no release notes; its content comes from the #3337 file list and the docs patch.</li>
+<li>No install or smoke test.</li>
+<li>I found no independent head-to-head of Jev versus LLM-judge variance on DeepEval's metrics. The only independent academic evaluation of Jev remains <code>2609.24965</code>, carded at 0034.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> four independent eval platforms now share the same separation: <strong>generate with an LLM, decide with a typed model</strong>. LangSmith and Phoenix JS at 0034, Opik at 0634, and now DeepEval. DeepEval's version is the most explicit about <em>where</em> the boundary falls: claim extraction stays with the LLM, the per-claim verdict goes to Jev.</p>
+<p>For a trace warehouse this means eval results increasingly arrive as <strong>typed decisions with probabilities</strong> (<code>Noul</code> P(yes), <code>Choice</code> distributions, <code>Score</code>) rather than free-text judge output plus a parsed number. The eval-result schema should keep the probability vector and the question text, not just the thresholded label.</p>
+<p>&quot;Fails loudly, never falls back&quot; is also the right provenance rule: a result row should record <em>which</em> decider produced it.</p>
+<h3>3. NEW rank (boundary absorb): <a href="https://github.com/BerriAI/litellm/releases/tag/v1.102.0">BerriAI LiteLLM <code>v1.102.0</code></a> — post_call guardrail pipelines now run on streaming responses (streaming requests to policy-governed models previously got a 400), post_call text rewrites apply on streams, provider keys are redacted from pass-through failure tracebacks, and emulated <code>file_search</code> is scoped to the request's vector stores</h3>
+<p>The GitHub release object is from 17:56:26Z today. The <strong>PyPI artifact has existed since 2026-09-20T04:41:12Z</strong>; see correction 3. It was never carded, and its content is gateway-level policy and telemetry behavior, so it is absorbed here with that label.</p>
+<ul>
+<li><strong>#38788 <code>feat(policy_engine): execute post_call guardrail pipelines on streaming responses</code>.</strong> The PR body states the problem directly: policies with post_call steps <strong>rejected every streaming request with 400</strong>, locking streaming clients out of every policy-governed model. The fix buffers the stream, runs the pipeline verdict, then releases the chunks on allow or ends the stream on block.</li>
+<li><strong>#39233</strong> applies post_call pipeline text rewrites on streams.</li>
+<li><strong>#39964</strong> redacts provider keys from pass-through failure tracebacks.</li>
+<li><strong>#39972</strong> scopes emulated <code>file_search</code> to the request's vector stores.</li>
+<li><strong>Also in the cut:</strong> #36841 <code>lite pi</code> CLI (runs the pi coding agent through the proxy); #39936 opt-in per-server MCP OAuth relay discovery; #39980 counts a batch's cost once, from the first retrieve that sees it final; #39880 splits Azure Sentinel batches under the 1 MB ingestion cap; #39918 <code>inspect_embeddings</code> toggle for the AIM and Cato guardrails.</li>
+<li><strong>Post-release in-window commits (unreleased → WATCH):</strong> #42327 opt-in <code>include_guardrail_response</code> in API responses; #42491 span-type filter on request logs; #41711 propagates parent session and trace ids into intercepted web searches.</li>
+</ul>
+<p><strong>Honest caveats:</strong></p>
+<ul>
+<li>1,488 commits separate v1.101.0 and v1.102.0 (release-branch arithmetic). The notes above are the curated release list, not an audit.</li>
+<li>The PR body itself discloses that #38788 merged into its stack branch &quot;ahead of a reviewer approval through an auto-merge arming slip&quot;, with review deferred to the parent #38721.</li>
+<li>Buffering the whole stream for a post_call verdict removes streaming's time-to-first-token benefit on those routes. That trade-off is inherent to the design.</li>
+<li>The carried WATCH, #42074 native compact-to-fit, is <strong>still unreleased</strong> (v1.103.0-rc.1 remains the latest prerelease).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>Streaming plus guardrails used to be impossible in LiteLLM's policy engine; now it is buffered.</strong> Gateway-side traces for policy-governed streams will show a new latency shape: TTFT ≈ full generation time plus pipeline time. Latency analytics should branch on &quot;policy-buffered stream&quot;, not flag these as slow.</li>
+<li><strong>#39964 traceback key redaction</strong> is another instance of the leak class noted in <code>forbidden.md</code>: error paths are where secrets escape. Any BQAA ingestion of gateway error payloads should assume pre-v1.102.0 LiteLLM tracebacks may contain provider keys.</li>
+<li><strong>#39980 &quot;cost once, from the first final retrieve&quot;</strong> is the batch-cost double-count fix every cost warehouse eventually needs; the same rule applies to BQAA batch cost rows.</li>
+</ol>
+<h3>Watch notes (thin / carried — not ranks)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Lead</th>
+  <th>Disposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Opik <code>2.2.76</code></strong> (PyPI 18:49:48Z; GitHub 18:55:45Z). #8473: <code>opik mcp configure</code> now runs <code>claude mcp login opik-mcp</code> after adding the hosted server (tty only; the Codex path already logs in during <code>codex mcp add</code>). #8472 routes experiment-item aggregates through <code>JsonEachRowBulkInsert</code>. #8478 fixes placeholder-project aggregates.</td>
+  <td><strong>NOTE.</strong> A patch bump with one user-facing feature, below the product-level bar. The #8473 PR body has a finding worth one line: <strong>an unauthorized MCP server contributes no tools rather than an error</strong>, a silent-failure mode worth an explicit &quot;MCP server registered but zero tools&quot; signal on the agent side. Post-2.2.76, #8477 (ClickHouse v2 bulk insert for dataset item versions) merged 19:47Z → WATCH.</td>
+</tr>
+<tr>
+  <td><strong>OpenHands <code>v1.22.0</code></strong> (16:28:11Z). #17276 tests remote MCP servers on cloud backends; #17216 opens Git Sync to org admins; #17467 preserves sibling MCP servers when saving; consumes SDK 1.49.4 and Automation 1.14.0.</td>
+  <td><strong>NOTE.</strong> A thin cloud-backend admin release; the prior OpenHands cards (v1.18–v1.21) cover the substantive profile and secret-scoping line.</td>
+</tr>
+<tr>
+  <td><strong>LiteLLM #42074</strong> native compact-to-fit</td>
+  <td><strong>WATCH carried</strong> (fourth slot). Still unreleased; latest prerelease <code>v1.103.0-rc.1</code> (Sep 20).</td>
+</tr>
+<tr>
+  <td><strong>LiteLLM #42327 / #42491 / #41711</strong>: guardrail-response passthrough, log span-type filter, trace-id propagation into intercepted web searches</td>
+  <td><strong>WATCH.</strong> Unreleased; card with v1.103.0 if they ride it.</td>
+</tr>
+<tr>
+  <td><strong>Langfuse #17797</strong> <code>remove decisionModelEvaluators feature flag</code> (Muse 1032), following #17795 in Agy 0932</td>
+  <td><strong>WATCH.</strong> Langfuse's decision-model evaluator is leaving its flag, which would make it a likely <strong>fifth</strong> Jev/decision-model eval surface once released. Unreleased at write time.</td>
+</tr>
+<tr>
+  <td><strong>Mastra <code>1.69.0-alpha.0</code></strong> plus factory-session merges (#24572/#24574)</td>
+  <td><strong>NOTE.</strong> <code>latest</code> is still 1.68.0 (carded at 0634).</td>
+</tr>
+<tr>
+  <td><strong>Codex post-0.156.0</strong></td>
+  <td><strong>WATCH.</strong> 0.157.0 is at alpha.9; Guardian-context-by-default is the item to confirm when 0.157.0 goes stable.</td>
+</tr>
+<tr>
+  <td><strong>LangChain × TypeSafe livestream (Tue Sep 22)</strong></td>
+  <td><strong>WATCH (unresolved).</strong> No outcome signal in any pack; not invented.</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Academy</h2>
+<p><strong>Two new ranks</strong>, both read as full PDFs by independent readers at write time: all sections, tables and appendices. One full-PDF rejection.</p>
+<p>State checks:</p>
+<ul>
+<li><strong>Ceiling:</strong> holds at <strong>2609.25004</strong> (my probes: 25004 = 200; 25005 / 25006 / 25010 = 404).</li>
+<li><strong>Priority pin <code>2609.02702</code>:</strong> <strong>v1 intact</strong> (exactly one <code>[v1]</code>).</li>
+<li><strong>Sources:</strong> both ranks were submitted <em>below</em> the ceiling (Sep 17 and Sep 21) and surfaced through Hugging Face Daily Papers 09-22, which grew 20 → 31 in Agy 0932 and 31 → 32 in Agy 1232. The 0634 brief did not have Agy 0932 on disk, so these are first dispositions. Catalog grep for both ids: zero hits.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.20758">arXiv:2609.20758 — Prediction-Powered Smoothing and Validation for Disaggregated AI Evaluation</a> (Kawano, Li, Parker — UC Santa Cruz Statistics; v1, Sep 17 2026; 30 pp)</h3>
+<p><strong>What it is:</strong> evaluation treated as <strong>finite-population survey sampling</strong>. It estimates quality <em>per segment</em> (conversation type × model, or task type) from LLM-judge scores on everything plus a small human-graded probability sample, with calibrated intervals.</p>
+<ul>
+<li>It reframes PPI as the survey difference estimator and PPI++ as GREG.</li>
+<li><strong>PP-S</strong> adds a Bayesian Fay–Herriot small-area model over per-segment GREG estimates, borrowing strength via segment-level auxiliary means such as the mean judge score.</li>
+<li><strong>PP-TS</strong> also borrows along a nested taxonomy.</li>
+<li><strong>DB-CV</strong> is a debiased design-based cross-validation score for choosing between direct and smoothed estimators.</li>
+</ul>
+<p><strong>Evidence:</strong></p>
+<ul>
+<li><strong>Open LLM Leaderboard slice</strong> (9,324 questions, 34 task types, grading phi-4; Table 2, 10% sample): PP-TS is best under all three auxiliaries, with RMSE 0.082 → 0.059 against the Horvitz–Thompson (HT) estimator using historical difficulty. Figure 3 shows most of the gain comes from the segment-level covariate; shrinkage alone gives only 0.082 → 0.080.</li>
+<li><strong>PRISM</strong> (68,371 responses rated by 1,500 participants, 63 segments = 21 LLMs × 3 conversation types; judge gpt-5-nano, costing about $6 to score everything; Table 3): PP-S with judge plus content covariates gets RMSE 1.527 versus HT 2.505. Interval width in the sparsest quartile falls from ~15 to ~7 points (Figure 4).</li>
+<li><strong>Coverage:</strong> 0.93–0.96 throughout.</li>
+<li><strong>DB-CV</strong> (Table 4) estimates true error at 1.07× versus 2.59–4.00× for alternatives.</li>
+<li><strong>Code:</strong> https://github.com/sho-kawano/disagg-ai-eval</li>
+</ul>
+<p><strong>Honest caveats (from the full read):</strong></p>
+<ul>
+<li>The abstract's <strong>&quot;deployed agent traffic&quot;</strong> is the public <strong>PRISM</strong> dataset treated as traffic: user-rated chat, <strong>no tools, no multi-step agents</strong>. It is untested on real agent traces.</li>
+<li>With the judge alone as auxiliary, gains are modest (RMSE 2.418–2.253 vs 2.505). The large win needs content covariates.</li>
+<li>The &quot;perfect oracle ordering&quot; is one replicate; over 100 repeats τ = 0.89.</li>
+<li>No effective-sample-size figure is reported. My rough conversion from the RMSE ratios is about 1.9× (benchmark) to 2.7× (PRISM).</li>
+<li>The method <strong>requires a probability sample</strong>. Sec 2 shows that flagged or complaint-driven samples bias the estimates, and PPI does not fix that.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> this is close to the statistical backbone BQAA's LLM-as-judge-over-traces story is missing: <strong>judge every trace, have humans grade a known-design stratified sample, and report per-segment (agent × tool × intent) quality with defensible intervals</strong>. Three design rules follow directly:</p>
+<ol>
+<li><strong>Sample for human review by design, never from flagged traces</strong>, and record inclusion probabilities in the table.</li>
+<li><strong>Use segment-level judge means as covariates</strong>, not only per-row judge scores.</li>
+<li><strong>Use the agent/tool/intent hierarchy as the smoothing taxonomy.</strong></li>
+</ol>
+<p>Pairs naturally with the Jev wave (Industry rank 2): typed judge probabilities make better auxiliaries than parsed free-text scores.</p>
+<h3>2. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.24115">arXiv:2609.24115 — EDGEGEN: Improving Tool-Calling Agents Beyond Happy Paths with Synthetic Edge Case Generation</a> (Abichandani et al. — SAP; v1, Sep 21 2026; 23 pp)</h3>
+<p><strong>What it is:</strong> a five-stage pipeline that generates <strong>rule-violating, database-grounded tasks</strong> for tool-calling agents:</p>
+<ol>
+<li>an LLM extracts atomic compliance rules from the policy document (top 5, so ≤32 rule subsets);</li>
+<li>tool-graph workflows are sampled (single / chain / DAG);</li>
+<li>rule subsets to violate are enumerated, with contradictions filtered out;</li>
+<li>a SQL agent finds the database rows that make each scenario real;</li>
+<li>the task is written with natural-language assertions and checked for existence and feasibility.</li>
+</ol>
+<p>The outputs drive LoRA fine-tuning (successful gpt-5.4 demonstrations) and Meta-Harness-style harness optimization. Evaluation uses τ²-bench airline and retail (10 test tasks each) and ToolSandbox (15), with gpt-4.1 as user simulator and judge.</p>
+<p><strong>Evidence (full read):</strong></p>
+<ul>
+<li><strong>Headline fine-tuning gain:</strong> &quot;+2% to +42%&quot; is <strong>relative mean-progress gain over the untuned base model on airline</strong> (Table 1): Qwen2.5-3b 0.258 → 0.366; ~flat for Qwen3.5-35b. ToolSandbox: +10.9% to +23.4%.</li>
+<li><strong>Headline harness gain:</strong> &quot;+10% / +30%&quot; comes from <strong>one model</strong> (Gemma-4-e4b, airline; Table 2): 0.561 versus a human-curated harness at 0.508 and a base harness at 0.430, using fewer tokens (85k vs 121k).</li>
+<li><strong>The optimized harness converges on a discover → verify → confirm → write protocol</strong> rather than a hard-coded checklist (App A.5).</li>
+</ul>
+<p><strong>Honest caveats: why this is qualified.</strong></p>
+<ul>
+<li><strong>Test sets are n = 10–15.</strong> There are no significance tests.</li>
+<li><strong>With gpt-5.4 the EdgeGen harness loses to the human-curated one</strong> (0.798 vs 0.831). On ToolSandbox with gpt-4o-mini it also trails (0.923 vs 0.931).</li>
+<li><strong>In the scaling study (Table 14) harness gains mostly vanish</strong> (n = 30/60 falls below base).</li>
+<li>More violations do not mean more gain (Table 3).</li>
+<li>&quot;Fully automated&quot; still depends on gpt-5.4 demonstrations and a non-public database generator. Code and data are claimed (Apache 2.0) but <strong>no URL is given</strong>.</li>
+<li><strong>The paper's own human audit (Table 5) found only 6/10 airline and 4/10 ToolSandbox judge-&quot;successful&quot; runs actually correct.</strong></li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> carded for the <strong>method pattern and the audit number, not the headline gains.</strong></p>
+<ol>
+<li><strong>Policy document plus live database → rule-violation test cases</strong> is a reusable recipe for generating eval sets from an agent's own spec. It is the edge-case complement to judging happy-path traces.</li>
+<li>The <strong>40–60% false-success rate of the LLM judge in the paper's own audit</strong> is the strongest datum in the paper. It is independent evidence for pairing judge labels with a designed human sample, which is exactly Academy rank 1's method.</li>
+</ol>
+<h3>Rejected after full-PDF read</h3>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.23989">arXiv:2609.23989 — ACLArena: Agent Continual Learning in Multi-stage Post-training</a></strong> (UCLA / UC Santa Cruz; v1, Sep 21; 25 pp). This is the new Hugging Face listing in Agy 1232.</li>
+<li><strong>What it is:</strong> sequential RL post-training (Math → Search → E-commerce → IF) on Qwen3-8B-Base measures forgetting: AIME 23.33 → 6.04 and NQ 45.2 → 14.6 after the E-commerce stage. It compares multi-teacher on-policy distillation, self-distilled fine-tuning and merging, and proposes MLE, a frozen backbone plus per-stage LoRA routed by environment.</li>
+<li><strong>Why REJECT:</strong> it is a <em>training</em> paper with no traces or telemetry. The abstract's &quot;substantially improving&quot; is overstated; MLE ties or trails on AIME, τ³-Telecom, IF-Bench and MMLU. Its environment-keyed routing is effectively a task label.</li>
+<li><strong>One idea worth a pointer only:</strong> token-entropy consistency (92–95% of tokens are low-entropy and ~0.997-stable across stages; drift concentrates in high-entropy tokens) as a candidate <em>version-drift</em> signal between agent releases.</li>
+</ul>
+<p><strong>Carried dispositions stand:</strong></p>
+<ul>
+<li>0034's Academy ranks (24972 / 24974 / 24890 / 24831 / 23986 / 23377 / 24965) are not re-carded.</li>
+<li>D-RAC <code>2609.24220</code> stays HOLD; Deep Persona <code>2609.22255</code> stays REJECT.</li>
+<li>Agy 0932 WATCH/NOTE items not advanced to rank: SkillSpec <code>2609.06052</code> (agent-skill spec checking; Aug-range id, no full read this slot → WATCH for a later full read), plus Lie Detector <code>2609.21996</code>, Realtime-Venus <code>2609.13814</code> and Complex KDA <code>2609.24797</code> (off-mission or NOTE).</li>
+</ul>
+<h2>Six-week EV (what to expect by early November)</h2>
+<ol>
+<li><strong>Codex 0.157.0 goes stable</strong> with Guardian thread context on by default and <code>AgentControl</code> consolidation. <strong>~80%.</strong> It is at alpha.9, and the 0.156 line took ~16 alphas. Watch whether <code>codex.tool_call_received</code> / <code>tool_result_ready</code> get OTel export mappings.</li>
+<li><strong>A fifth eval vendor ships decision-model / Jev judging.</strong> <strong>~65%.</strong> The Langfuse decision-model evaluator flag was removed in #17797.</li>
+<li><strong>DeepEval's Jev mode leaves &quot;experimental&quot;.</strong> <strong>~35%.</strong> It is tagged experimental and opt-in, and 4.2.5 is adding surface quickly.</li>
+<li><strong>Someone publishes PPI / small-area estimation applied to <em>real multi-step agent traces</em> with tool segments.</strong> <strong>~25%.</strong> PP-S's code is public, and the agent-trace gap is explicit in its limitations.</li>
+<li><strong>LiteLLM v1.103.0 ships with #42074 compact-to-fit.</strong> <strong>~60%.</strong> The rc.1 has been out since Sep 20.</li>
+</ol>
+<h2>Verification &amp; tool honesty</h2>
+<ul>
+<li><strong>This brief's own probes (~19:55–20:04 UTC):</strong></li>
+<li>GitHub releases lists for Codex, DeepEval, OpenHands, Opik and LiteLLM. The per-tag <code>releases/tags/&lt;tag&gt;</code> endpoint returned 404 for all six tags on this host, so I used the list endpoint; every object was found there.</li>
+<li>Compare diffs: Codex 0.155.0→0.156.0 (526) and alpha.8→alpha.9 (17, full list); LiteLLM 1.101.0→1.102.0 (1,488).</li>
+<li>PR bodies: Codex #44661 and #44628, LiteLLM #38788, Opik #8473, DeepEval #3332 and #3337 file lists plus the docs patch.</li>
+<li>npm <code>@openai/codex</code> dist-tags and publish times; PyPI JSON for deepeval, opik and litellm.</li>
+<li>arXiv abs probes for the ceiling and the pin.</li>
+<li><strong>Full-PDF reads:</strong> 2609.20758 (30 pp), 2609.24115 (23 pp) and 2609.23989 (25 pp), each read end-to-end including appendices, with abstract-vs-body discrepancies recorded above.</li>
+<li><strong>Pack trust posture:</strong></li>
+<li><strong>DSH 1132:</strong> Codex alpha.9 and Opik 2.2.76 verified exactly. Its LiteLLM boundary claim is true for the GitHub object but misses the Sep 20 PyPI artifact.</li>
+<li><strong>Agy 1232:</strong> Codex 0.156.0 stable verified, including the 19:51:01Z timestamp. &quot;MAJOR&quot; is corrected to stable-minor.</li>
+<li><strong>Agy 0932:</strong> DeepEval 4.2.4 and OpenHands 1.22.0 verified. The &quot;introduces Jev in 4.2.2&quot; text is the vendor's typo, not the collector's.</li>
+<li><strong>Muse 1032:</strong> its flat-window claim holds for its window.</li>
+<li><strong>Social surfaces:</strong> X, Reddit and LinkedIn contributed zero signal this slot. Collectors recorded genuine 401/403 failures; no <code>site:</code> substitution.</li>
+<li><strong>Rules and read-only state:</strong></li>
+<li>Crustdata not called (forbidden). Fable not used. No first-party BQAA material carded. No Desk section.</li>
+<li>The hub repo <code>caohy1988.github.io</code> was not edited or pushed.</li>
+<li>Catalog baseline read-only: <strong>337 / 91 / 93</strong>, max brief <code>2026-09-22T0634</code>.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 22 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
