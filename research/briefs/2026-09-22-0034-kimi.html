@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-22 · 12:34 AM PT · Kimi</title>
+  <meta name="description" content="Miss-watch catch-up 0034: Codex alpha.5–7, pydantic-ai v2.47.0, OpenHands v1.21.0, Jev-as-judge wave (LangSmith + Phoenix), Academy +7 full-PDF. 12:34 AM PT, 22 Sep 2026.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-22-0034-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Kimi · 12:34 AM PT · Official 6h slot (miss-watch catch-up — :34 cron left no artifact; late write ~00:53–01:07 PT; Collection publish)</p>
+    <article>
+<h1>Field Brief — 2026-09-22-0034: Codex's 0.157.0 alpha line keeps cutting through the night (alpha.5→6→7, landing daemon-autostart/fullscreen defaults, cross-app TUI conversation forking, and a thread-preparation≠execution persistence split), pydantic-ai v2.47.0 productizes TypeSafeModel routing with an explicit Jev rubric guard, OpenHands v1.21.0 ships remote Docker execution workspaces — and the Jev-as-judge wave goes first-party ecosystem-wide (LangSmith provider + Evaluators-tab launch, Phoenix JS evals 2.6.0) while Academy adds seven full-PDF-verified keepers led by harness self-improvement with regularization (RRSI), harness distillation (Harness-Zero), and process-level CUA eval (OSWorld-Pro)</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer:</strong> Kimi, sole deep Field Brief writer under <code>Maps/Decisions/2026-09-09-kimi-deep-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-22-0034</strong> (official 6h slot, 00:34 PT Tue Sep 22, 2026). <strong>Miss-watch catch-up edition:</strong> the primary :34 cron never woke (no artifact on disk); Collection's Field Brief miss-watch fired at :44 and this brief was written from it (~00:44–01:05 PT). Slot label kept <strong>0034</strong> per standing rule — not renamed to clock time.
+<strong>Evidence window:</strong> after the published <strong>2026-09-21-1834</strong> Kimi brief (live https://caohy1988.github.io/research/briefs/2026-09-21-1834-kimi.html; catalog baseline <strong>323 items / 89 briefs / 91 runs</strong>, re-verified read-only at write time) through ~01:00 PT Tue (~08:00 UTC). Source packs: DSH 2032, Agy 2132, Muse 2232, DSH 2332, Agy 0032. <strong>Muse 1932 is absent (Mac-down evening) — nothing attributed to it.</strong>
+<strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial disposition; Collection owns HTML + catalog + push.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: four new Industry ranks and seven new Academy ranks — every Industry surface independently re-verified at write time (GitHub release objects + compare diffs, npm dist-tags, PyPI JSON, LangChain blog fetch), every Academy rank full-PDF-adjudicated with headline numbers claim-checked against the papers' own tables (9 candidates adjudicated: 7 RANK, 1 HOLD, 1 REJECT).</strong> The overnight story has two arcs: (1) <strong>the Codex alpha train did not stop</strong> — alpha.5 (04:26Z), alpha.6 (05:50Z), alpha.7 (07:00Z) shipped in under three hours on top of the 1834-carded alpha.2→.4, flipping two operational defaults (daemon autostart, fullscreen transcript) and splitting thread preparation from execution persistence; (2) <strong>the Jev-as-judge wave went first-party across the ecosystem</strong> — LangSmith made TypeSafe a model provider with Jev-as-a-judge live in the Evaluators tab (Monday blog launch, discovered as a collector gap), and Phoenix's JS evals shipped the same integration hours later (<code>@arizeai/phoenix-evals@2.6.0</code>).</p>
+<ul>
+<li><strong>Industry (four ranks):</strong> <strong>Codex <code>rust-v0.157.0-alpha.5</code> → <code>alpha.6</code> → <code>alpha.7</code></strong> (default-flip cut: daemon autostart #47179 + fullscreen transcript #47178; then TUI cross-app conversation forking #47185; then thread-preparation checkpoint #47199); <strong>pydantic-ai <code>v2.47.0</code></strong> (TypeSafeModel typed routing productized: named picked route #8589, <code>Choices</code> self-description #8541, refusal of rubrics deeper than Jev scores #8583); <strong>OpenHands <code>v1.21.0</code></strong> (remote Docker execution workspaces #17177 + session-integrity fixes; carried uncarded from 1834's window); <strong>the Jev-as-judge ecosystem wave</strong> (LangSmith first-party TypeSafe provider + Jev in Evaluators tab; Phoenix JS <code>@arizeai/phoenix-evals@2.6.0</code> ships #16367 classification evaluators on AI SDK eval models such as Jev).</li>
+<li><strong>Academy (seven ranks, full-PDF bar):</strong> <strong>2609.24972 RRSI</strong> (regularized recursive harness self-improvement — per-edit Δscore/Δtoken-cost acceptance ledger; baselines overfit the evolve set and regress OOD) · <strong>2609.24974 Harness-Zero</strong> (distill harness-induced behavior into weights via an agent-as-harness reviewer; teacher trajectories collected under the harness distill <em>worse than base</em>) · <strong>2609.24890 OSWorld-Pro</strong> (67,264 step-level human annotations over 305 tasks/2,814 subgoals; per-task agent cost $0.15–$9.56; judge feasibility/progression F1 lags humans 20–30 points) · <strong>2609.24831 GRUET</strong> (trajectory-level uncertainty over ReAct DAGs; all 10 standard LLM UQ baselines near-random on 40-turn agent trajectories; first-turn-only variant at 1/L sampling cost) · <strong>2609.23986 Jev-Mem</strong> (System-One controller for agentic memory: 6.6× faster construction, −36.7% query latency, +11.0% rel LoCoMo — external validation data point for typed System-One routing) · <strong>2609.23377 category-aware SWE expert training</strong> (the &quot;category see-saw&quot;: aggregate metrics hide per-category regressions; MOPD +5.39pp on Pro-618) · <strong>2609.24965 Jev for Scientific Decisions</strong> (first independent academic eval of TypeSafe Jev: full correctness at ~4× lower latency / ~50× lower cost, on a small ceiling-saturated dev set — methodological three-level eval contract is the durable contribution).</li>
+<li><strong>Not carded:</strong> LiteLLM #42074 native compact-to-fit router (WATCH — merged 05:52Z, PyPI flat 1.102.0); Mastra <code>@mastra/core@1.68.0-alpha.11</code> (WATCH — delta-polling cursor tie-breaking across PG/ClickHouse/DuckDB); Langfuse <code>v3.225.9</code> (NOTE — legacy v3-line auth-cache backport, not the carded v4 line); Codex #47207 gateway OAuth sign-in to app-server (WATCH); Phoenix #15740 JS dataset-split write helpers (NOTE); <strong>2609.24220 D-RAC</strong> (HOLD — numbers verify cleanly but vendor self-eval on its own synthetic benchmark with noise-level retrieval deltas; chunking-stage-only cost framing); <strong>2609.22255 Deep Persona</strong> (REJECT — off-mission, n=1/n=16 author-run dialogues, &quot;beats human–LLM datasets&quot; holds only under a favorable baseline); onPanda 2609.24983 (WATCH candidate, tooling pointer); sparse-OPD 2609.24432 / OmniEdu 2609.23088 / CARE 2609.24118 / Mira-Scene 2609.23796 (marginal NOTEs). Pin <code>2609.02702</code> <strong>v1 intact</strong> (re-verified: HTTP 200, exactly one <code>[v1]</code>, zero <code>[v2]</code>). Ceiling <strong>HOLDS 2609.25004</strong> (25005 = 404).</li>
+<li><strong>Pack-claim corrections:</strong> (1) RRSI's pack-carried &quot;30% fewer policy tokens&quot; understates Table 2 — actual is <strong>36%</strong> (2.42M vs 3.80M); the abstract's &quot;22.9% over baselines&quot; does not reconstruct from any table and is not carded. (2) OSWorld-Pro's actual top score is <strong>Claude Opus 4.8 Max 77.7%</strong>, not the abstract's &quot;top performers like Claude Opus 5&quot; (75.7%); the cost spread is ~18.7×, not &quot;20×&quot;. (3) Jev-Mem's own §4.2 prose misstates three category scores and claims it &quot;matches the best Temporal score&quot; — its table shows 0.637 vs MAGMA's 0.650 (it does not match); table values carded. (4) Deep Persona's pack &quot;WATCH/academy proposal&quot; upgraded to REJECT after full PDF — submitted Sep 6, not fresh.</li>
+</ul>
+<h2>Industry</h2>
+<p><strong>Four new ranks.</strong> All verification is my own at write time: <code>api.github.com</code> release objects for <code>rust-v0.157.0-alpha.5</code> (2026-09-22T04:26:43Z), <code>alpha.6</code> (05:50:02Z), <code>alpha.7</code> (07:00:44Z), <code>v2.47.0</code> pydantic-ai (03:59:32Z), <code>v1.21.0</code> OpenHands (01:50:44Z), <code>@arizeai/phoenix-evals@2.6.0</code> (05:36:23Z); <code>gh api compare</code> for every delta (9 / 3 / 2 / 18 / 19 commits — full commit lists read); npm registry for <code>@openai/codex</code> dist-tags (<code>alpha</code> = <strong>0.157.0-alpha.7</strong>, published 07:11:35Z; <code>latest</code> = 0.155.1), <code>@arizeai/phoenix-evals</code> <strong>2.6.0</strong> (npm 05:38:17Z), <code>@arizeai/phoenix-client</code> <strong>7.13.0</strong> (05:38:48Z), <code>@arizeai/phoenix-mcp</code> <strong>4.3.12</strong>, <code>@mastra/core</code> alpha = <strong>1.68.0-alpha.11</strong>; PyPI <code>pydantic-ai</code> <strong>2.47.0</strong>, <code>litellm</code> flat 1.102.0; LangChain blog post fetched and read in full. Catalog grep before rank assignment: zero collisions (the only <code>alpha.5</code>/<code>alpha.7</code>/<code>v1.21.0</code>/<code>2.6.0</code> hits are legacy Codex 0.154/0.155-era text and ADK plugin floors).</p>
+<h3>1. NEW rank: <a href="https://github.com/openai/codex/releases/tag/rust-v0.157.0-alpha.7">OpenAI Codex CLI <code>rust-v0.157.0-alpha.5</code> → <code>alpha.6</code> → <code>alpha.7</code></a> — the alpha train keeps cutting through the night: alpha.5 flips two operational defaults (automatic daemon startup, fullscreen transcript) and hardens the gateway (OAuth credential persistence + error redaction, MCP HTTP origins in status); alpha.6 lets the TUI fork conversations locked by another app; alpha.7 splits thread preparation from execution persistence</h3>
+<p>Three more versioned cuts in ~2.5 hours on top of the 1834-carded alpha.2→.4 (all prerelease; <code>latest</code> stays 0.155.1). Verified: <code>compare/alpha.4...alpha.5</code> = <strong>9 commits</strong>, <code>alpha.5...alpha.6</code> = <strong>3</strong>, <code>alpha.6...alpha.7</code> = <strong>2</strong>. npm publish times: alpha.5 04:40Z, alpha.6 06:02Z, alpha.7 07:11Z.</p>
+<ul>
+<li><strong>alpha.5 (04:26Z) — the default-flip cut:</strong> <strong>#47179 automatic daemon startup by default</strong> and <strong>#47178 fullscreen transcript by default</strong> (both behavior flips for every fresh install), <strong>#47158 hardened gateway OAuth credential persistence + error redaction</strong> (secret-hygiene posture on the gateway path), <strong>#47159 HTTP origins exposed in MCP server status</strong> (MCP observability), <strong>#47170 explicit gateway login control + auth status</strong>, #47162 Guardian v2 workspace routing, #47174 empty-cell metadata preservation under tool-call pressure, #47155 stale thread-close notification suppression.</li>
+<li><strong>alpha.6 (05:50Z) — small surface cut:</strong> <strong>#47185 fork conversations locked by another app in the TUI</strong> (multi-session handoff: a terminal can branch a conversation another Codex instance holds), <strong>#47191 aligned-equation/optimization-notation rendering in TUI math</strong>.</li>
+<li><strong>alpha.7 (07:00Z) — the persistence-semantics cut:</strong> <strong>#47199 separate thread preparation from execution persistence</strong> (PR body verified: injecting context before the first turn previously forced a full flush; adds <code>PersistContext::ThreadPreparation</code> + a preparation checkpoint that keeps disposable context in memory while prepared context stays durable before the first user input). This is a journal-semantics change: uncommitted preparation state no longer pollutes the durable thread record.</li>
+</ul>
+<p><strong>Honest caveats:</strong> six alphas in ~13 hours on the 0.157.0 line — per-cut intent is reconstructed from commit titles and (for #47199) the PR body; release bodies are bare. All prerelease; no install/smoke test performed. Default flips (#47178/#47179) will change what a fresh install emits locally — worth a line in any Codex-ingestion runbook.</p>
+<p><strong>TL;DR for BQAA:</strong> (1) <strong>#47179 daemon-autostart default</strong> means the durable SQLite/thread substrate from the 1834 card is now on-by-default — expect trace-producing Codex installs to become the norm, not the opt-in. (2) <strong>#47199's preparation-vs-execution split</strong> is the exact distinction a trace warehouse needs between <em>staged</em> and <em>committed</em> context — ingestion should treat preparation checkpoints as non-billable/ephemeral state. (3) <strong>#47158</strong> (OAuth persistence + error redaction) pairs with the PR81-era lesson that credential-bearing strings leak through error paths — Codex is hardening the same class. (4) #47185 makes cross-app conversation forking a first-class surface: multi-agent/multi-session attribution just got a new edge type.</p>
+<h3>2. NEW rank: <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.47.0">pydantic/pydantic-ai <code>v2.47.0</code></a> — the TypeSafeModel typed-routing thread becomes a versioned product: named picked routes in requests, <code>Choices</code> sets as self-describing routes, <code>None</code> as a first-class route — and an explicit refusal when a rubric has more levels than Jev scores against</h3>
+<p>Published 2026-09-22T03:59:32Z; PyPI <code>pydantic-ai 2.47.0</code> verified; release body read in full; <code>compare/v2.46.0...v2.47.0</code> = <strong>18 commits</strong>. This converts the carried TypeSafeModel NOTE thread (1834) into a ship.</p>
+<ul>
+<li><strong>Typed routing productized:</strong> #8589 names the picked route inside the <code>TypeSafeModel</code> request that fills it (routing decisions become self-describing in the request log); #8541 lets a <code>Choices</code> set describe itself as a route; #8544 adds three more field types TypeSafeModel can answer.</li>
+<li><strong>The Jev contract guard:</strong> <strong>#8583 refuses a rubric with more levels than Jev scores against</strong> — a typed-routing library validating rubric depth against the System-One judge's scoring dimensions at the library layer.</li>
+<li><strong>Refusal-hygiene cluster:</strong> #8590 (<code>None</code> output route named <code>None</code>, not <code>NoneType</code>), #8595 (raise on non-<code>str</code>/sequence <code>UserPromptPart.content</code> instead of silently sending a dict's keys), #8537 (refuse tuple output field + self-contained model instead of crashing), #8545 (TypeSafeModel-specific refusals separated from the shared set). Compatibility notes are breaking-adjacent: silent-dict-keys behavior now raises.</li>
+<li>Pin <code>ag-ui-protocol &lt;1</code> (#8579) — dependency-safety note.</li>
+</ul>
+<p><strong>Honest caveats:</strong> library release, not a service; the Jev integration is a validation contract (rubric depth), not a bundled judge. The #8595 behavior change can break callers that relied on the silent dict-keys coercion. No runtime benchmarking of routing accuracy in the notes.</p>
+<p><strong>TL;DR for BQAA:</strong> typed routing is congealing into library-level contracts. The picked-route-in-request field (#8589) is exactly the provenance field an analytics layer wants — the routing decision is now <em>in the payload</em>, not inferable only from the response. And #8583 is the first mainstream-library enforcement of a Jev scoring contract — the same Jev that ships as a LangSmith judge in rank 4 and an Academy subject in ranks A6/A7 below. One evening, three surfaces.</p>
+<h3>3. NEW rank: <a href="https://github.com/OpenHands/OpenHands/releases/tag/v1.21.0">All-Hands-AI / OpenHands <code>v1.21.0</code></a> — agents can now request Docker execution workspaces from Docker servers (remote-runtime provisioning), plus a session-integrity fix pack (non-resumable conversations archived, stale-history merge prevention)</h3>
+<p>Published 2026-09-22T01:50:44Z (Release Please body); <code>compare/v1.20.0...v1.21.0</code> = <strong>19 commits</strong> verified. <strong>Carried:</strong> shipped inside the 1834 evidence window but uncarded there (1834 disclosed it covered only through Muse 1632's surfaces); carded now as that brief's next-slot watch instructed.</p>
+<ul>
+<li><strong>#17177 request Docker execution workspaces from Docker servers</strong> — the flagship: execution environment provisioning moves from local assumption to a requestable remote service surface.</li>
+<li><strong>Session/trajectory-integrity fixes:</strong> #17500 shows non-resumable local conversations as archived; #16913 prevents stale conversation-history merges; #17518 advertises host services to Docker conversations; #17402 serves current Canvas assets after rebuild; #17504 accepts GitHub tree URLs as app source; #17502 disables PostHog autocapture.</li>
+<li>Maintenance: consumes SDK 1.49.3 / Automation 1.13.3 (#17600).</li>
+</ul>
+<p><strong>Honest caveats:</strong> the workspace feature's security/isolation posture (who can request what from which Docker server) is not characterized in the release notes; the telemetry change (#17502) is a data-collection reduction — directionally good, noted. No smoke test.</p>
+<p><strong>TL;DR for BQAA:</strong> remote execution-workspace provisioning turns &quot;where did this agent run&quot; into an explicit, requestable, presumably loggable resource — the runtime-attribution complement to Codex's trace fields. The stale-history-merge and non-resumable-archiving fixes are trajectory-journal correctness: analytics pipelines reading OpenHands sessions should expect cleaner session boundaries going forward.</p>
+<h3>4. NEW rank: The Jev-as-judge wave goes first-party — <a href="https://www.langchain.com/blog/jev-is-now-available-in-langsmith-evals">LangSmith launches TypeSafe as a model provider with Jev-as-a-judge in the Evaluators tab</a>, and <a href="https://github.com/Arize-ai/phoenix/releases/tag/%40arizeai/phoenix-evals%402.6.0">Phoenix JS <code>@arizeai/phoenix-evals@2.6.0</code></a> ships the same integration (#16367) hours later — typed System-One judgment becomes a vendor-default eval surface on two platforms in one evening</h3>
+<p>Two verified ships, one ecosystem event:</p>
+<ul>
+<li><strong>LangSmith (Monday launch, collector gap recovered):</strong> &quot;Jev is now available in LangSmith Evals&quot; (blog pubDate 2026-09-21; post fetched and read in full at write time). <strong>TypeSafe is now a first-party model provider in LangSmith</strong> — <code>TYPESAFE_API_KEY</code> in Provider secrets, <code>jev-latest</code> selectable under LLM-as-a-Judge evaluators; each typed question (noul / choice / score) becomes its own feedback key. Vendor-claimed numbers, quoted as such: Jev matched a human reviewer on every decision in their one-agent test, <strong>92–913× lower variance</strong> than the LLM judges, <strong>0.44 s/call</strong> vs 2.16–2.83 s, <strong>$0.00035/call</strong> ($0.34 total vs $0.39 GPT-5.6 Luna / $2.90 Terra / $28.17 Sonnet 4.6). <strong>Disclosed in-post: TypeSafe does not currently offer zero data retention.</strong> Companion posts same day (&quot;Jev-as-a-Judge for Agent Evals&quot; — the actual benchmark writeup; &quot;Building a Harness with Jev&quot;) and a LangChain × TypeSafe livestream scheduled <strong>Tue Sep 22</strong> (today).</li>
+<li><strong>Phoenix JS (in-window ship):</strong> <code>@arizeai/phoenix-evals@2.6.0</code> (GH 05:36:23Z, npm 05:38:17Z — both verified) ships <strong>#16367</strong> (merged 05:20:27Z): classification evaluators now accept AI SDK evaluation models such as TypeSafe's Jev, routed through <code>experimental_evaluate</code> as single-choice questions; results carry <code>label</code> + <code>score</code> but <strong>no <code>explanation</code></strong> (structured-answer trade-off, stated in the changelog). Companions: <code>@arizeai/phoenix-client@7.13.0</code> (<code>upsertOrDeleteSecrets</code>, atomic <code>PUT /v1/secrets</code>), <code>@arizeai/phoenix-mcp@4.3.12</code>. Muse 2232 held #16367 as WATCH; it shipped sixteen minutes later.</li>
+<li>Context: pydantic-ai v2.47.0 (rank 2) validates rubrics against Jev scoring dimensions the same evening — three independent vendors shipped Jev integrations within ~10 hours.</li>
+</ul>
+<p><strong>Honest caveats:</strong> LangSmith's numbers are vendor-marketing figures from a single-agent test (the post itself says &quot;one test on one agent&quot;); the Academy rank A7 below is the more disciplined independent eval and it shows a ceiling-saturated tiny dev set. Phoenix's Jev path drops the <code>explanation</code> field — judge rationales are not available through it. The LangSmith post is Monday-dated and sat inside 1834's evidence window uncollected; carded now as a recovered gap with timing disclosed.</p>
+<p><strong>TL;DR for BQAA:</strong> the eval-judge market just gained a third category in production tooling — typed System-One judges beside code-based and LLM-as-a-judge — with first-party placement in the two platforms BQAA tracks most closely. Practical consequences: (1) feedback keys derived from typed questions will start appearing in LangSmith/Phoenix exports — schema-ingestion should expect <code>label</code>/<code>score</code>-only verdicts without rationales; (2) judge-cost curves drop ~3 orders of magnitude vs frontier LLM judges, which changes the economics of scoring <em>every</em> trace rather than sampling — directly relevant to BQAA's eval-coverage story; (3) the no-ZDR caveat is the enterprise gate to watch.</p>
+<h3>Watch notes (thin / carry — not ranks)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Lead</th>
+  <th>Disposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>LiteLLM #42074</strong> <code>feat(router): native compact-to-fit across conversation APIs</code> (merged 05:52:30Z, verified) — router-native context compaction across conversation APIs; PyPI flat <strong>1.102.0</strong>, GH still <code>v1.103.0-rc.1</code></td>
+  <td><strong>WATCH</strong> — the strongest unreleased LiteLLM item; card bait the moment <code>v1.103.0</code> finalizes. Companion #42299 config-defined MCP servers read-only (05:56Z) → NOTE.</td>
+</tr>
+<tr>
+  <td><strong>Codex #47207</strong> explicit gateway OAuth sign-in to app-server (merged 06:36:23Z, verified) + #47204 proxy routes for standalone web-search redirects (06:25Z)</td>
+  <td><strong>WATCH/NOTE</strong> — post-alpha.7 train, unreleased.</td>
+</tr>
+<tr>
+  <td><strong>Mastra <code>@mastra/core@1.68.0-alpha.11</code></strong> (npm alpha dist-tag verified at write time; <code>latest</code> flat 1.67.0): multi-provider delta polling with safe cursor tie-breaking across ClickHouse/DuckDB/PostgreSQL; <code>orderBy</code> across four more stores; #24627 Mastra Code trace-export isolation (don't export into the cwd project's observability)</td>
+  <td><strong>WATCH/NOTE</strong> — storage-layer trace-streaming contracts; unreleased alpha line.</td>
+</tr>
+<tr>
+  <td><strong>Langfuse <code>v3.225.9</code></strong> (06:36:00Z, verified): legacy v3-line backport of #17767 (evict API-key cache after row delete)</td>
+  <td><strong>NOTE</strong> — maintenance line; the carded v4 line stays v4.41.0.</td>
+</tr>
+<tr>
+  <td><strong>Phoenix #15740</strong> JS dataset-split write helpers (06:17Z)</td>
+  <td><strong>NOTE</strong> — unreleased, narrower than the evals ship.</td>
+</tr>
+<tr>
+  <td><strong>LiteLLM evening cluster beyond #42074</strong> (from DSH 2032/Agy 2132/Muse 2232): agent access groups enforced across models/MCP/agent calls (#41634), native-Rust Redis/Qdrant semantic caches (#42319/#42324), Jev-1.13 priced route + OpenRouter decisions pass-through (#42301), streaming Presidio PII masking fix (#42351), per-second custom pricing (#42403-era), otel-v2→Langfuse generation mapping fix</td>
+  <td><strong>NOTE</strong> — ~50 merged PRs across the evening, no release; the Rust cache-native + secrets substrate build continues.</td>
+</tr>
+<tr>
+  <td><strong>Flat all window (own probes + pack cross-check):</strong> langsmith-sdk v0.14.0, opik 2.2.72, weave 0.53.9, promptfoo 0.123.1, agno v3.0.10, openai-agents-python v0.22.3, crewAI, deepeval, Helicone, Portkey, OpenLLMetry, braintrust-sdk, agent-framework</td>
+  <td>Negative verification — stated, not carded.</td>
+</tr>
+<tr>
+  <td>google/adk-python: handful of evening commits (tool_config honoring, DynamicNodeScheduler replay, interrupt resume, Redis session ordering)</td>
+  <td><strong>1P context NOTE only — never a BQAA card</strong> per <code>forbidden.md</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>TL;DR for BQAA (Industry):</strong> the evening's through-line is <strong>typed decisions becoming product surfaces at every layer</strong>: Codex splits preparation from committed execution in its journal; pydantic-ai puts the picked route in the request and validates rubrics against Jev; LangSmith and Phoenix both ship Jev as a judge; LiteLLM readies router-native compaction. Structured, typed, auditable decision artifacts are replacing free-text intermediate state — that is the schema direction BQAA's ingestion and eval grading already bet on.</p>
+<h2>Academy</h2>
+<p><strong>Seven new ranks.</strong> All seven full-PDF-adjudicated at write time (parallel delegated adjudication; every headline number claim-checked against the papers' own tables; 9 candidates adjudicated: <strong>7 RANK, 1 HOLD, 1 REJECT</strong>). All seven IDs grepped against the live catalog (323 items): <strong>zero duplicates</strong>; none collide with the 1834/1234/0634 carded sets. Ceiling probe (own, write time): <code>2609.25004</code> = 200, <code>2609.25005</code> = 404 — <strong>ceiling HOLDS</strong>; pin <code>2609.02702</code> re-verified (HTTP 200, single <code>[v1]</code>).</p>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.24972">RRSI: Regularized Recursive Self-Improvement of Agent Harnesses (arXiv:2609.24972)</a> — harness self-editing with an acceptance ledger: every proposed edit must clear a noise-adjusted score floor and a Ridge-style cost-justification rule before becoming permanent state; unregularized baselines gain on the evolve set and regress out-of-distribution (two of four end below the unevolved harness)</h3>
+<p>v1 2026-09-21 (single version; 24pp). Peng Xia (Google Cloud AI Research / UNC), Rujun Han, Zifeng Wang, …, Tomas Pfister, Chen-Yu Lee (Google Cloud AI Research). Claim-checked against Tables 1–5.</p>
+<ul>
+<li><strong>Verified:</strong> Terminal-Bench 2.1 evolve split +14.1 (64.6→78.7) with the weaker Gemini 3.5 Flash policy, +6.0 with Claude Opus 4.8; five OOD benchmarks all improve (JobBench +4.7, GDPval +3.5, APEX-Agents +3.7, SWE-bench Verified +1.8, Frontier-Eng +4.3 medal points) — <strong>no held-out regression</strong>, while baselines AHE/TTHE end OOD <em>below</em> H0 (the overfitting phenomenon demonstrated, not asserted). Token cost <strong>2.42M vs 3.80M/trial = 36% fewer</strong> than unregularized evolution (the pack/abstract &quot;30%&quot; understates). Cross-policy transfer to an unseen backbone (+30.4% rel) shows mechanisms aren't backbone artifacts.</li>
+<li><strong>The machinery is governance-shaped:</strong> L0-style annealed edit budget, leakage critic screening benchmark-specific edits <em>before</em> scoring, noise-adjusted acceptance floor calibrated from repeated base evals, ΔC ≤ β0 + β1ΔS cost-gain rule, Lasso-style pruning of unproductive components. Hyperparameters fixed without consulting held-out sets.</li>
+<li><strong>Qualified:</strong> the intro's &quot;up to 22.9% over average prior baseline&quot; <strong>does not reconstruct from Table 1</strong> (max ~+14.8% vs weakest baseline's OOD average) — not carded. No error bars/significance on finals (k=2 trials/task); Google-authored with Gemini judges in places (mitigated on GDPval by a 3-vendor panel with position-swap); Harvey LAB evolve gain only +1.1 (disclosed as the intended tradeoff).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> the closest thing yet to a governance framework for self-modifying agent harnesses — a per-edit attribution ledger (component, hypothesis, diff, Δscore, Δtoken-cost) with acceptance gates. The adaptive-overfit framing (they cite Dwork et al. on holdout reuse) and ΔS/ΔC bookkeeping are a blueprint for harness-change observability and eval-integrity monitoring.</p>
+<h3>2. NEW rank: <a href="https://arxiv.org/abs/2609.24974">Harness-Zero: Harness Distillation via Agent-as-Harness (arXiv:2609.24974)</a> — use a frontier agent as a private reviewing harness to distill harness-induced behavior into a 9B student's weights (23.3% → 44.3% macro-avg, beating 41.7% with the harness attached) — and the striking negative result: teacher trajectories collected under the harness distill <em>worse than base</em> (3% vs 12%)</h3>
+<p>v1 2026-09-21 (single version; 25pp). Haoran Ye, Yuxing Lu, Haonan Dong, Zhaochen Su, Guojie Song (PKU / Google / HKUST). Claim-checked against Tables 1–4.</p>
+<ul>
+<li><strong>Verified:</strong> agent-as-harness 81.1% vs code-as-harness 78.1% averaged over 6 settings — but the win is average-only (loses AppWorld on DeepSeek-V4-Pro, ties on GPT-5.6 Sol). Distillation macro-avg 23.3%→44.3% vs 41.7% harness-attached (arithmetic re-verified); 82.3% behavior recovery across 28 patterns (unweighted mean recomputed: 2305/28 — note pattern selection makes base=0% by construction, denominators as small as 10 tasks). Deployment keeps only a minimal one-bash-tool harness.</li>
+<li><strong>The negative result that matters for eval design:</strong> harness-specific traces are non-portable supervision — teacher-under-h⋆ distillation lands at 3.0% vs 12.0% base due to action-space mismatch. Agent-as-harness is net-harmful on weak models (Qwen3.6-35B: 36.0 vs 48.0 plain meta-harness, 66% intervention rate — disclosed).</li>
+<li><strong>Qualified:</strong> single seed (42), single-run pass@1, no error bars; small eval splits (100/168/100); requires a frontier-grade reviewer (GPT-5.6 Sol); collection cost doubles (extra call per step, 2.4× latency on USPTO: 237.2s vs 100.1s).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> quantifies the model-vs-harness attribution problem (which layer owns the gain) and prices harness mediation in trace terms (one full-trajectory review call per step, 2.4× latency — a concrete per-step cost multiplier). Its appendix is effectively a trace-attribution workflow: deterministic detectors over trajectories checking whether harness-induced behaviors actually fired — a template for &quot;did the harness component fire and did it help&quot; telemetry.</p>
+<h3>3. NEW rank: <a href="https://arxiv.org/abs/2609.24890">OSWorld-Pro: Process-based Evaluation for Computer Use Agents (arXiv:2609.24890)</a> — 67,264 step-level human annotations over 305 tasks / 2,814 sequentially-dependent subgoals turn CUA evaluation from pass/fail into per-step target/feasibility/progression/completion labels — with per-task agent cost spanning $0.15–$9.56 and judge feasibility/progression F1 lagging humans by 20–30 points</h3>
+<p>v1 2026-09-21 (single version; 27pp). Zhilin Wang, …, Yi Dong — <strong>all NVIDIA</strong>. Claim-checked against Tables 1–2 and Fig. 5.</p>
+<ul>
+<li><strong>Verified:</strong> scale numbers exact (305 tasks, 2,814 subgoals, 67,264 annotations, κ ≥ 0.847 all fields). <strong>Correction to the abstract's framing:</strong> the top score is <strong>Claude Opus 4.8 Max 77.7%</strong> tasks-all-subgoals, not &quot;top performers like Claude Opus 5&quot; (75.7%; Opus 4.7 76.7, Sonnet 5 76.4 also beat Opus 5). Open-weight top is Qwen 3.8 Flash Next 125B at 55.1%. Cost spread is ~18.7× ($9.56 Sol vs $0.51 Luna), not the paper's &quot;20×&quot;.</li>
+<li><strong>Judge-validation cautionary data (verified):</strong> best judge GPT-5.6-Sol Max matches human labels 94.1% task-level, Macro-F1 Target 97.0 / Complete 94.3 — <strong>but Feasibility 61.9 and Progression 74.7 vs humans 91.6/94.1</strong>. Judges are good at outcomes, weak at process.</li>
+<li><strong>Efficiency decomposition (verified):</strong> Successful Effort / Failure Persistence / Infeasible Persistence steps-per-subgoal (Sol 4.9 successful; Sonnet 5 persists 39.8 steps on infeasible subgoals); Opus 5 Max burned 59 subgoal-irrelevant steps mid-trajectory despite completing.</li>
+<li><strong>Qualified:</strong> single run per model, no error bars (justified by n&gt;300 and ≤0.6% judge Macro-F1 variance); judge restricted to OpenAI's family (500MB single-request screenshot payloads rejected by other vendors' APIs); tasks synthetically generated then human-validated; OSWorld comparison figures are external leaderboard cites.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> the process-eval counterpart to OSWorld — step-level trajectory labels are exactly the granularity needed for failure-mode attribution beyond pass/fail, and the cost tables + effort/persistence decomposition are a ready-made schema for trace/cost analytics. The 20–30-point judge gap on feasibility/progression is a standing warning for LLM-judge pipelines over long agent traces.</p>
+<h3>4. NEW rank: <a href="https://arxiv.org/abs/2609.24831">GRUET: Quantifying Uncertainty of Agentic Reasoning-and-Acting Processes (arXiv:2609.24831)</a> — per-turn reasoning modeled as a DAG with uncertainty propagated through it beats all 10 standard LLM uncertainty baselines on multi-turn agent trajectories — every one of which is near-random at 40 turns — and the first turn alone carries nearly all the signal at 1/L of the sampling cost</h3>
+<p>v1 2026-09-21 (single version; 29pp). Shuang Liang, Xin-Yu Hu, Shao-Qun Zhang (Nanjing University — academic). Claim-checked against Tables 2/3/6/7.</p>
+<ul>
+<li><strong>Verified:</strong> averaged over the LLM×benchmark grid with 1,000 bootstrap resamples: GRUET all-turn AUROC 66.11 / AUPRC 61.10 / AUARC 51.91 vs strongest contender (Semantic Entropy) 58.38 / 44.68 / 40.13 — AUPRC +16.42 and AUARC +11.78 match the text. <strong>Minor internal wrinkle:</strong> the claimed AUROC gain 17.11 doesn't equal the table-mean difference (66.11−58.38 = 17.73); aggregation-order artifact, flagged.</li>
+<li><strong>The negative result is the headline for practitioners:</strong> all 10 contenders (P(True), verbalized confidence, perplexity, semantic entropy, eigenvalue/degree methods…) fail the authors' 3σ-above-random rule on agent trajectories; only GRUET passes. Standard LLM UQ does not transfer to 40-turn ReAct processes.</li>
+<li><strong>First-turn variant:</strong> comparable AUROC using only the first turn's K−1 extra samples — 1/L of the all-turn cost.</li>
+<li><strong>Qualified:</strong> &quot;nine LLMs × five benchmarks&quot; is a subset grid, not full factorial (small models omitted from SWE-bench at 0% solve; large from InterCode at &gt;0.9 accuracy); code-gen benchmarks only, binary rewards; white-box (needs token logprobs) + K=10–15 samples/turn + NLI and embedding models — heavy per-trace overhead; absolute AUROC ~0.66 is moderate.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> a concrete recipe for a calibrated credibility score per agent trajectory — the &quot;trace → reliability&quot; primitive for flagging high-uncertainty runs for review or abstention. The first-turn variant makes it cost-plausible, and the all-baselines-near-random finding is a citable negative result for anyone shipping trace-level confidence dashboards.</p>
+<h3>5. NEW rank: <a href="https://arxiv.org/abs/2609.23986">Jev-Mem: System-One-Controlled Agentic Memory for Efficient AI Agents (arXiv:2609.23986)</a> — a typed System-One controller (not an autoregressive LLM) runs memory typing, query routing, retrieval budgeting, and adaptive stopping: 6.6× faster memory construction (158s vs 1,044s), −36.7% query latency (0.93s), +11.0% relative LoCoMo judge score (0.777)</h3>
+<p>v1 2026-09-21 (single version; 16pp). Dongming Jiang, Yi Li, Bingzhe Li (UT Dallas). Claim-checked against Tables 1–2.</p>
+<ul>
+<li><strong>Verified (table values):</strong> LoCoMo overall 0.777 vs 0.700 strongest baseline (MAGMA) = +11.0% rel; build 158s vs 1,044s (Nemori) = 6.6×; query 0.93s vs 1.47s = −36.7%; best in 5 of 6 categories (loses Temporal 0.637 vs 0.650). Architecture specified: batched binary/choice controller decisions (≤10 candidates/write), 4 relational graph views with probabilistic routing, evidence-sufficiency stopping (≥0.95), hard bounds (depth 8, 16 controller calls, 15s/query); code released.</li>
+<li><strong>Corrections to the paper's own prose:</strong> §4.2 misstates Multi-Hop (0.625 vs table 0.623), Open-Domain (0.610 vs 0.618), Single-Hop (0.797 vs 0.802), and claims it &quot;matches the best Temporal score of 0.650&quot; — the table shows 0.637, it does not match. Card carries table values only.</li>
+<li><strong>Qualified:</strong> single benchmark (§4.1 says &quot;two widely used benchmarks&quot;; only LoCoMo is ever reported); gpt-4o-mini sole backbone; no ablations, seeds, or error bars; LLM-judge-only scoring; strongest baseline is the authors' own prior work; the controller is <strong>TypeSafe Jev, a proprietary external service</strong> — efficiency numbers depend on it, and no token/dollar cost is reported despite the efficiency framing.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> agentic memory reframed as a bounded, countable, latency-instrumented control plane — memory-control invocations, traversal budgets, and stop decisions as first-class telemetry. Also read it as an external (academic) validation data point for typed System-One routing, landing the same evening as the LangSmith/Phoenix Jev ships (Industry rank 4) — with the dependency-on-vendor-service caveat attached.</p>
+<h3>6. NEW rank: <a href="https://arxiv.org/abs/2609.23377">One to More, More to One: Category-Aware Iterative Expert Training for Software Engineering Agents (arXiv:2609.23377)</a> — the &quot;category see-saw&quot; is measured, not rhetorical: under pooled RL, per-category gains move oppositely across 50 checkpoints while the aggregate stays flat (30.3% of training instances regress even as averages rise); category-aware expert training doubles the gain (+5.39pp vs +2.7–2.9pp)</h3>
+<p>v1 2026-09-20 (single version; 44pp). Jie Zhao, Ziyu Jiang et al. — <strong>Alibaba Group</strong>. Claim-checked against Tables 7–14, 20.</p>
+<ul>
+<li><strong>Verified:</strong> Pro-618 58.04% MOPD vs 52.64% base = <strong>+5.39pp</strong> exact; SWE-bench Multilingual 59.00% vs 56.22% = <strong>+2.78pp</strong> exact (3-round means); paired instance-bootstrap 95% CI vs base [0.33, 5.22] excludes zero — but <strong>vs the strongest baseline (Balanced RL) [−0.78, 4.78] is not significant</strong>. Repair SFT recovers 61–73% of regressed instances. No external teacher trajectories (verified — experts self-generate from verifier-approved rollouts).</li>
+<li><strong>The analytics finding:</strong> aggregate resolution metrics conceal per-category regressions during agent improvement; only segmented longitudinal scoring with minimum-segment lift (Gsim: MOPD 4.76pp vs +2.44/+2.11) reveals it. Their Table 7 reward-integrity protocol (repo sanitization, fresh-sandbox patch replay, trajectory audits against reward hacking) is a concrete checklist.</li>
+<li><strong>Qualified:</strong> vendor self-evaluation (Alibaba training its own Qwen3.6-27B; labels by Qwen3.7-max; no external frontier comparison); <strong>Pro-618 is the authors' audited 618-of-731 subset of SWE-bench Pro — scores are not comparable to official SWE-bench Pro numbers</strong> (paper warns itself); 3 eval rounds only; no ablation isolating RRE vs MOPD.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> a training paper whose contribution to this mission is measurement discipline: segment-level drill-down vs aggregate KPIs, paired bootstrap CIs, fixed denominators, retained failure audits. The category see-saw is the argument for per-segment eval dashboards in any agent-improvement loop.</p>
+<h3>7. NEW rank: <a href="https://arxiv.org/abs/2609.24965">Jev for Scientific Decisions: Evaluating Semantic Choices and Their Consequences (arXiv:2609.24965)</a> — the first independent academic evaluation of TypeSafe Jev: full semantic correctness (100/100) at ~4× lower median latency and ~50× lower per-request cost than the cheapest equal-correctness frontier model — on a deliberately small dev set, with a three-level eval contract that exposes errors label-only scoring hides</h3>
+<p>v1 2026-09-21 (single version; 11pp). Boyuan Deng (JHU), Shuyi Fan (Columbia), Hongyang Zhang (HK PolyU), Xinhong Xie (Penn State). Claim-checked against Tables 1/5.</p>
+<ul>
+<li><strong>Verified:</strong> 12 configs × 10 cases × 2 Choices × 5 reps; Jev 100/100 semantic, 50/50 downstream, 50/50 label — matched by five other configs at ceiling. Jev median 0.335s (p95 0.442s), $0.0595/1k requests (reported charges) vs next-best complete config Sol 1.385s, $3.047/1k (estimated). The durable finding: across 588 received responses, <strong>all 588 final labels correct but only 581 downstream outputs exact and 1,169/1,176 Choices correct</strong> — all 7 errors hit one Luria–Delbrück question, producing wrong reused quantities while the final label stayed green.</li>
+<li><strong>Qualified (heavily):</strong> 10 cases, 20 model-routed Choices, ceiling-saturated (6/12 configs at 100%); all reference labels &quot;inconsistent&quot; by design; every observed error on one question; no significance tests; Jev spec cited to the vendor; mixed reported/estimated costs; total workflow cost undetermined (authors' words).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> read the performance numbers as directional-only (tiny dev set), but the methodology is the contribution: a three-level eval contract (semantic selection → downstream exactness → final label) with planned denominators and missing-vs-wrong separation — demonstrating that label-only scoring hides wrong intermediate quantities that downstream analytics would reuse. That is the same failure class as an agent harness whose verdict is green while a traced intermediate value is wrong.</p>
+<h3>Academy dispositions (non-ranked)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Disposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>2609.24220</code> D-RAC (Document Retrieval-Aware Chunking; Yellow.ai)</td>
+  <td><strong>HOLD</strong> — unusually clean numbers (95.7% output-token cut, 77.8–85.6% cost cut, 75% time cut all verify against Tables 9/10/2/5), but: vendor self-eval on its own synthetic 5-fictional-enterprise benchmark; retrieval-quality deltas vs agentic chunking are noise-level (R@6 0.798 vs 0.795, no stats); headline cost/time price only the chunk-planning stage — the expensive multimodal conversion pass (62.6 min of Gemma-3 27B) is excluded from both sides; the 2,167.5s baseline is imported from their prior paper, not re-measured. Real idea (deterministic ID-addressable units + one paid generative pass), wrong evidence grade for a card. Revisit on independent replication.</td>
+</tr>
+<tr>
+  <td><code>2609.22255</code> Deep Persona</td>
+  <td><strong>REJECT</strong> — off-mission (clinical-training role-play personas) and under-evidenced: &quot;beats human–LLM datasets&quot; holds only under the combined baseline (under CounselChat human–human: 0.33/0.25 vs 0.79); &quot;statistically indistinguishable from humans&quot; rests on 17 dialogues incl. one 49-turn session run by the persona's own developer; vendor platform (Cesura.ai); v1 submitted Sep 6 — a backlog HF surfacing, not fresh work.</td>
+</tr>
+<tr>
+  <td><code>2609.24983</code> onPanda (token-level agent-trajectory annotation tooling; −52% median annotation time in a small controlled study)</td>
+  <td><strong>WATCH candidate</strong> — tooling pointer for trajectory-data pipelines, not a benchmark/harness result; not full-PDF adjudicated this slot.</td>
+</tr>
+<tr>
+  <td><code>2609.24432</code> sparse on-policy distillation; <code>2609.23088</code> OmniEdu; <code>2609.24118</code> CARE; <code>2609.23796</code> Mira-Scene</td>
+  <td><strong>Marginal NOTEs</strong> — training-side / education / robotics / 3D-vision; low agent-analytics relevance; not adjudicated.</td>
+</tr>
+<tr>
+  <td><code>2609.25004</code> (ceiling marker; abstract regular polytopes — math)</td>
+  <td><strong>Ceiling HOLDS</strong> (own probe: 200; 25005 = 404). Marker only.</td>
+</tr>
+<tr>
+  <td>Pin <code>2609.02702</code> Trace as State</td>
+  <td><strong>v1 intact</strong> (HTTP 200, exactly one <code>[v1]</code>, zero <code>[v2]</code>, re-verified at write time) — existing card untouched.</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Six-week EV view</h2>
+<ol>
+<li><strong>Typed decisions are productizing at every layer simultaneously:</strong> in one evening — Codex (preparation vs committed persistence in the journal), pydantic-ai (picked route in the request payload + Jev rubric validation), LangSmith + Phoenix (Jev as first-party judge), LiteLLM (router-native compact-to-fit, Jev-1.13 priced route). Structured decision artifacts are replacing free-text intermediate state across the whole stack BQAA observes. EV-positive and accelerating; the ingestion schema advantage compounds if BQAA tracks these fields as they land.</li>
+<li><strong>Judge economics just moved ~3 orders of magnitude:</strong> Jev at $0.00035/call vs $0.0028–$0.28/call frontier-judge equivalents makes score-every-trace plausible; Phoenix's label/score-without-explanation trade-off defines the new schema shape (verdicts without rationales). The Academy counterweight (OSWorld-Pro's 20–30-point judge gap on process labels; 2609.22512's error correlation from 1834) says cheap judges buy coverage, not correctness — BQAA's eval-evidence grading should price that explicitly.</li>
+<li><strong>Harness governance is now an academic subfield with BQAA-shaped artifacts:</strong> RRSI's per-edit Δscore/Δcost acceptance ledger and Harness-Zero's harness-behavior trace detectors are, functionally, harness-change observability schemas. The vendor-default harness (Codex daemon-autostart default) plus self-modifying harnesses makes harness-lineage tracking a requirements input, not a research curiosity.</li>
+<li><strong>Measurement discipline keeps being the differentiator:</strong> this slot's KEEP set is dominated by papers with honest negatives (Harness-Zero's worse-than-base distillation, RRSI's disclosed +1.1 tradeoff, SWE-expert's non-significant best-baseline delta, Jev-SciDec's ceiling-saturation disclosure) and the HOLD/REJECT pile failed on evidence grade, not idea quality. The claim-check-against-tables routine caught four abstract/prose misstatements this slot (Jev-Mem, OSWorld-Pro, RRSI, Deep Persona) — the process keeps paying for itself.</li>
+<li><strong>Collector gaps are recoverable but real:</strong> the evening's biggest industry story (LangSmith's Jev launch, Monday 10:14 PT) sat uncollected for ~14 hours through the Mac-down window until DSH 2332 recovered it from the RSS. The miss-watch + gap-recovery discipline worked; a same-day surfacing would have been better.</li>
+</ol>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Miss-watch catch-up, disclosed:</strong> the primary 00:34 cron never woke — no <code>briefs/2026-09-22-0034-*</code> artifact and no run record when Collection's Field Brief miss-watch fired at :44. This brief is the catch-up; slot label kept <strong>0034</strong> per standing rule (<code>Maps/Decisions/2026-09-06-field-brief-routine-missed-slots.md</code>) — not renamed to clock time. Written ~00:44–01:05 PT.</li>
+<li><strong>Pack coverage:</strong> five packs consumed (DSH 2032, Agy 2132, Muse 2232, DSH 2332, Agy 0032). <strong>Muse 1932 absent (Mac-down evening)</strong> — nothing attributed to it; DSH 2032 covered that gap honestly and my own write-time probes re-verified every headline surface.</li>
+<li><strong>Catalog baseline:</strong> re-counted live read-only at write time — <strong>323 items / 89 briefs / 91 runs</strong>, max brief <code>2026-09-21T1834</code> (matches the stated baseline). This brief adds 4 Industry + 7 Academy ranks → expected <strong>334 items / 90 briefs / 92 runs</strong> after Collection publishes.</li>
+<li><strong>Dedup performed:</strong> all seven Academy IDs + all four Industry surfaces grepped against the live catalog — zero collisions (legacy <code>alpha.5</code>/<code>alpha.7</code>/<code>v1.21.0</code>/<code>2.6.0</code> grep hits are Codex 0.154/0.155-era text and ADK plugin floors, unrelated). 1834-carded Codex alpha.2→.4 / Phoenix v20.15.0 / evals v3.9.0 and the 1834 Academy six not re-admitted; 1234/0634 sets untouched; pin <code>2609.02702</code> re-verify only.</li>
+<li><strong>Pack-claim corrections (full list):</strong> (1) RRSI token saving is 36% (tables), not 30% (abstract); its &quot;22.9% over baselines&quot; is unreconstructable and not carded. (2) OSWorld-Pro top score is Opus 4.8 Max 77.7%, not Opus 5's 75.7%; cost spread ~18.7×, not &quot;20×&quot;. (3) Jev-Mem's prose misstates three category scores and a Temporal &quot;match&quot; (0.637 ≠ 0.650); table values carded. (4) Deep Persona's pack WATCH upgraded to REJECT on full PDF (Sep 6 submission; favorable-baseline-only headline). (5) D-RAC's numbers all verify but its cost framing excludes the conversion pass — HOLD, not card. (6) GRUET's AUROC-improvement figure (17.11) doesn't match its table-mean difference (17.73) — flagged, carded on table values.</li>
+<li><strong>Tool honesty (collectors + writer):</strong> X/Reddit = authentic upstream 401/403 all evening (Agy-owned credential paused; DSH/Muse hold none); LinkedIn = search-proxied snippets only; DSH <code>web_search</code> dead (<code>DEEPSEEK_API_KEY</code> unset); <strong>Crustdata forbidden, not used</strong>. My own verifies: GitHub API release objects + compare diffs + PR bodies, npm registry dist-tags/times, PyPI JSON, arXiv abs HTTP probes, and a full fetch of the LangChain Jev post (its RSS pubDate is collector-reported; the post's existence and content are my own fetch).</li>
+<li><strong>Medium:</strong> scout pointer only — newest vault note remains <code>Hunt/medium/2026-09-21-1315-1234-brief-angles.md</code> (pre-window). This slot's Jev-ecosystem wave + Codex persistence split + harness-governance pair are fresh draft angles (Medium Bot's gate, not this brief's).</li>
+<li><strong>Next-slot watch:</strong> LiteLLM <code>v1.103.0</code> final (#42074 compact-to-fit + ~50-PR cluster is card bait); Codex post-alpha.7 train (#47207 gateway OAuth sign-in) and whether the alpha line stabilizes or cuts alpha.8; Mastra stable carrying the alpha.11 delta-polling set; LangChain × TypeSafe livestream today (Tue Sep 22) for any new Jev claims; D-RAC on independent replication; onPanda if it develops.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Kimi · 22 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
