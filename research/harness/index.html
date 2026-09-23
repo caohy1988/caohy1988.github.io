@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-23 · Run limits / autonomy ladder / retry</strong></span>
+      <span>Updated <strong>2026-09-23 · Token-save locks + Opus 5.5 defaults</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -183,7 +183,7 @@
       <tbody>
         <tr><td>Agent Analytics Collection Bot</td><td>Industry/academy Field Briefs; Hunt packs → hub publish; Stories; GTM twin boards</td><td>Desk/SDK PRs; own-stack engineering</td></tr>
         <tr><td>Github Bot CHY1988</td><td>EM for GitHub agent coding; Fable implement + Codex/Kimi review</td><td>Merge without Haiyuan</td></tr>
-        <tr><td>Medium Bot</td><td>Medium-proxied industry scout for briefs / boards</td><td>Unsolicited Medium publish</td></tr>
+        <tr><td>Medium Bot</td><td>Medium-proxied industry scout for briefs / boards — standing scouts <strong>paused</strong> 2026-09-21 (token save) until Haiyuan resumes</td><td>Unsolicited Medium publish</td></tr>
         <tr><td>Agent Manage Bot</td><td>Create/organize teammates; onboard Mac CLIs; usage cards; hooks/skills; owns Jev router</td><td>Destroy agents without Haiyuan</td></tr>
         <tr><td>Jev</td><td>TypeSafe System One decision layer (OpenRouter <code>typesafe/jev-1.13</code>) — Choice/Score/Noul routing</td><td>Chat authorship; coding implement; merge/pay/send</td></tr>
       </tbody>
@@ -192,9 +192,9 @@
     <table>
       <thead><tr><th>Agent</th><th>Default model lane</th><th>Primary job</th></tr></thead>
       <tbody>
-        <tr><td>Claude Code / Fable</td><td>Claude (Opus on Mac seat when capped)</td><td>Implementer under Github Bot</td></tr>
+        <tr><td>Claude Code / Fable</td><td>Opus 5.5 (<code>claude-opus-5-5[1m]</code>)</td><td>Default implementer under Github Bot; also Field Brief deep writer</td></tr>
         <tr><td>Codex / Astra</td><td>GPT-6 Astra</td><td>RFC / evidence review; Kimi fallback for deep briefs</td></tr>
-        <tr><td>Kimi</td><td>Kimi Code</td><td>Deep Field Brief Markdown every 6h</td></tr>
+        <tr><td>Kimi</td><td>Kimi Code</td><td>Field Brief deep-writer <strong>fallback</strong> if Opus capped (Astra last-resort)</td></tr>
         <tr><td>Agy</td><td>Gemini 3.8 Flash High</td><td>Collect packs on <code>hour % 3 == 0</code>; social-superpowers for X/Reddit</td></tr>
         <tr><td>Muse Code / Muse Spark</td><td>muse-spark-1.3-contributor</td><td>Collect on <code>hour % 3 == 1</code>; optional implementer (off dual-LGTM unless asked)</td></tr>
         <tr><td>DSH</td><td>OpenRouter GLM-5.3 (coding) / DeepSeek V4.1 Flash (collect)</td><td>Collect on <code>hour % 3 == 2</code>; optional implementer</td></tr>
@@ -276,7 +276,7 @@
       <thead><tr><th>Role</th><th>Who</th><th>Job</th></tr></thead>
       <tbody>
         <tr><td>Product owner</td><td>Haiyuan</td><td>Accepts <code>intent.md</code> / <code>spec.md</code>; only merge &amp; production gate</td></tr>
-        <tr><td>EM</td><td>Github Bot</td><td>Commits artifacts, fires the next play, triages review, starts the next independent slice; 5‑min heartbeat babysitter</td></tr>
+        <tr><td>EM</td><td>Github Bot</td><td>Commits artifacts, fires the next play, triages review, starts the next independent slice; <code>*/15</code> heartbeat babysitter</td></tr>
         <tr><td>Implementer</td><td>Claude / Fable (default) or Muse/DSH</td><td>Implements from accepted <code>plan.md</code>; opens PR; cannot be a dual-LGTM reviewer on the same PR</td></tr>
         <tr><td>Reviewers</td><td>Astra + Fable</td><td>Blind dual LGTM on the PR (each sees PR + intent/spec/plan only — never each other’s reviews); dual LGTM = agent-complete, not shipped. Implementer ≠ reviewer on same PR</td></tr>
         <tr><td>Research originator</td><td>human or scout bot</td><td>Writes Stage‑1 <code>intent.md</code> (problem, why, constraints) — not a coding task</td></tr>
@@ -342,7 +342,7 @@
       <li>Put Haiyuan back on the critical path of mid-build approval prompts.</li>
       <li>Forward one reviewer’s findings into the other reviewer’s kickoff (breaks blind dual LGTM).</li>
     </ul>
-    <p class="note">EM also runs a <strong>5‑minute heartbeat</strong> across live agent tasks (babysitter layer). It does not replace Mac <code>grok-tmux-watchdog</code> (~540s) — both apply.</p>
+    <p class="note">EM also runs a <strong>15‑minute heartbeat</strong> (<code>*/15</code> PT; stretched 2026-09-21 token save from <code>*/5</code>) across live agent tasks (babysitter layer). It does not replace Mac <code>grok-tmux-watchdog</code> (~540s) — both apply.</p>
   </section>
 
   <section id="pipeline">
@@ -360,17 +360,16 @@
     </table>
     <p>Surfaces: X/Twitter, Reddit, LinkedIn (proxy), Google/vendor, arXiv, Papers with Code. Agy owns social-superpowers for X/Reddit; Muse/DSH label proxies honestly. <strong>Collection only</strong> — no catalog HTML from pack agents. Crustdata is forbidden.</p>
     <h3>Every 6h deep brief (<code>00:34 / 06:34 / 12:34 / 18:34</code> PT)</h3>
-    <p class="note"><strong>Research-system shape (Lab #1):</strong> lead orchestrates → parallel collectors persist packs → Kimi synthesizes → Collection citation-checks and publishes. Label thin packs before brief. Manage :50 + Collection :44 are the safety net when primary :34 never wakes.</p>
+    <p class="note"><strong>Research-system shape (Lab #1):</strong> lead orchestrates → parallel collectors persist packs → Opus 5.5 synthesizes (Kimi fallback) → Collection citation-checks and publishes. Label thin packs before brief. Collection <code>:44</code> miss-watch is the <strong>sole</strong> Field Brief detector when primary <code>:34</code> never wakes (Manage <code>:50</code> miss-watch paused 2026-09-21 token save).</p>
     <ol>
-      <li>Kimi writes deep Field Brief Markdown from <strong>agy + muse + dsh</strong> packs since the last slot (dedupe across collectors).</li>
+      <li>Opus 5.5 writes deep Field Brief Markdown from <strong>agy + muse + dsh</strong> packs since the last slot (dedupe across collectors). Kimi is fallback if Opus capped; Astra last-resort. Fable is off for briefs.</li>
       <li>Collection Bot publishes HTML + catalog + push to the hub.</li>
-      <li>Astra <code>gpt-6-astra</code> xhigh is fallback only if Kimi is quota-capped. Fable is off for briefs.</li>
     </ol>
     <h3>Stories &amp; GTM boards</h3>
     <ul>
       <li><a href="/research/stories/">BQAA Stories</a> — full-web scout, additive, newest-first; every story must name BigQuery Agent Analytics positively.</li>
       <li>GTM twin boards (CA, BQ ML/AI Ops, Graph, Lakehouse, Search) — <strong>weekly</strong> pack+page (Mon ~10:00 PT); prior 6h scouts retired. <strong>Paused</strong> 2026-09-21 (token save) until Haiyuan lifts — Field Briefs + Research/Stories unchanged. Prefer 3P/customer; no 1P docs/codelabs; GC Blog only for named customer stories. Locks: <code>Maps/Decisions/2026-09-20-research-stories-daily-gtm-weekly.md</code> · <code>Maps/Decisions/2026-09-21-pause-gtm-updates-tokens.md</code>.</li>
-      <li>Medium Bot = industry scout input only (Medium-proxied titles/URLs).</li>
+      <li>Medium Bot = industry scout input only (Medium-proxied titles/URLs). Standing scouts <strong>paused</strong> 2026-09-21 (token save) until Haiyuan resumes.</li>
     </ul>
   </section>
 
@@ -476,7 +475,7 @@ grok-tmux-run dsh-collect-HH32 -- \
         <tr><td>Coding EM</td><td>Github Bot, Manage</td><td>PR / slice / dual-LGTM coordination</td></tr>
       </tbody>
     </table>
-    <p class="note">Prefer the room when the handoff itself matters; keep secrets and credentials out of group posts. <strong>Single-target handoff (OpenBot):</strong> only the first @mention in a bot reply wakes another bot. <strong>Hop cap</strong> default 2, then ask Haiyuan — never silent misroute. <strong>Ack/final discipline</strong> (ai-collab SKIP-but-copy): at most one ack + one final per task in rooms; no progress chatter.</p>
+    <p class="note">Prefer the room when the handoff itself matters; keep secrets and credentials out of group posts. <strong>Single-target handoff (OpenBot):</strong> only the first @mention in a bot reply wakes another bot. <strong>Hop cap</strong> default 2 (Field Brief room <strong>1</strong> after a miss ticket), then ask Haiyuan — never silent misroute. <strong>Ack/final discipline</strong> (ai-collab SKIP-but-copy): at most one ack + one final per task in rooms; no progress chatter.</p>
 
     <h3>Written handoff contracts</h3>
     <p>Every actionable Manage → specialist message carries: goal, owner, trigger, <strong>artifact path</strong>, verified, assumptions, waiting-approval, open questions, and return shape. Lane never-dos live in <code>Maps/Contracts/manage-handoffs.md</code> (also: verification clause + hop cap).</p>
@@ -490,10 +489,10 @@ grok-tmux-run dsh-collect-HH32 -- \
         <p><strong>Manage Bot</strong></p>
     <ul>
       <li>Weekday usage integrity — 09:05 PT Mon–Fri</li>
-      <li>Field Brief missed-slot watch — :50 after 00/06/12/18 PT (second line; Collection’s :44 miss-watch still auto-kicks catch-up; Collection owns publish)</li>
+      <li>Field Brief missed-slot watch — Manage <code>:50</code> <strong>paused</strong> (token save); Collection <code>:44</code> is sole detector + auto-kick; Collection owns publish</li>
       <li>Harness Lab collect — 09:00 PT daily (Agy/Muse/DSH rotation)</li>
       <li>Harness Lab KEEP curate/publish — 16:30 PT daily</li>
-      <li>Weekly playbook ↔ vault card ↔ Grok profile sync — Mondays 11:00 PT</li>
+      <li>Weekly playbook ↔ vault card ↔ Grok profile sync — Mondays 10:47 PT</li>
       <li>Weekday specialist ops nudge — 08:00 PT Mon–Fri (Jenny-style playbook + blockers)</li>
       <li>PR board sweep — 09:00 + 21:00 PT daily (12h; CI/conflict/stall → Coding EM)</li>
       <li>Nightly Mac harness audit — 03:00 PT (rotate one Mac CLI; dual-LGTM; no merge)</li>
@@ -667,8 +666,8 @@ ask → Manage Bot
       <li>☐ Ambiguous asks clarified with Haiyuan (no silent misroute)</li>
       <li>☐ <a href="/research/harness-lab/">Lab</a> KEEPs applied or filed as follow-up</li>
       <li>☐ Collect crons: Agy ≡0 / Muse ≡1 / DSH ≡2 at <code>:32</code></li>
-      <li>☐ Kimi <code>:34</code> deep brief + Collection Bot publish path healthy</li>
-      <li>☐ Long jobs: tmux + stream + watchdog + EM 5‑min heartbeat</li>
+      <li>☐ Opus 5.5 (Kimi fallback) <code>:34</code> deep brief + Collection Bot publish path healthy</li>
+      <li>☐ Long jobs: tmux + stream + watchdog + EM <code>*/15</code> heartbeat</li>
       <li>☐ Post-task Obsidian notes filed; daily digest ~20:57 PT</li>
       <li>☐ <a href="/research/usage/">Usage</a> cards green / explained</li>
       <li>☐ No secrets in vault notes or hub commits</li>
