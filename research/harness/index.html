@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-23 · Exception-first skills</strong></span>
+      <span>Updated <strong>2026-09-23 · Run limits / autonomy ladder / retry</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -498,7 +498,7 @@ grok-tmux-run dsh-collect-HH32 -- \
       <li>PR board sweep — 09:00 + 21:00 PT daily (12h; CI/conflict/stall → Coding EM)</li>
       <li>Nightly Mac harness audit — 03:00 PT (rotate one Mac CLI; dual-LGTM; no merge)</li>
     </ul>
-    <p><strong>Policy:</strong> <strong>Three-Run Proof</strong> (Observe → Correct → Release) before Active — never automate the first success. Prefer event triggers over tight crons. Mondays: playbook↔card sync <strong>plus weekly kill review</strong>. Mac/Field Brief skills are <strong>exception-first</strong> (ran? right? miss if killed?). Audit PR babysits after merge. See <code>Maps/Decisions/2026-09-15-grok-routine-audit.md</code> · <code>Maps/Decisions/2026-09-23-0xgenai-three-run-kill-review-gyr.md</code>.</p>
+    <p><strong>Policy:</strong> <strong>Three-Run Proof</strong> (Observe → Correct → Release) before Active — never automate the first success. Prefer event triggers over tight crons. Mondays: playbook↔card sync <strong>plus weekly kill review</strong>. Mac/Field Brief skills are <strong>exception-first</strong> (ran? right? miss if killed?). Long fires use <strong>run limits</strong>, autonomy ladder + demotion, and a <strong>retry/cost ceiling</strong>. Audit PR babysits after merge. See <code>Maps/Decisions/2026-09-15-grok-routine-audit.md</code> · <code>Maps/Decisions/2026-09-23-0xgenai-three-run-kill-review-gyr.md</code>.</p>
 
     <h3>Profile = contract</h3>
     <p>Each Grok Bot’s description mirrors its vault <code>Agents/*.md</code> card: ownership, never-do, and human gate. Update both when a lasting boundary changes.</p>
@@ -620,6 +620,19 @@ ask → Manage Bot
     <h3 id="exception-first">Exception-first skills (2026-09-23)</h3>
     <p>Mac launch and Field Brief skills document <strong>symptom → action</strong> failure branches (stall ~540s, dirty exit-0, quota failover, Mac-down gaps, miss-watch sole detector, orphan BRIEF_OK) <em>before</em> rediscovering them in chat. Authoring rule: when you edit those skills, update Exception paths in the same pass.</p>
     <p class="note">Skill: exception-first-mac-and-field-brief · Lock: <code>Maps/Decisions/2026-09-23-exception-first-skills.md</code>.</p>
+
+    <h3 id="run-limits">Run limits + abnormal-volume stop (2026-09-23)</h3>
+    <p>Long fires inherit defaults: <strong>50 items · 2 retries · $0 spend · 0 external actions</strong> without Haiyuan approval. If input volume changes abnormally vs the last clean run → <strong>stop and escalate</strong> (a permitted action repeated at scale is still damage).</p>
+
+    <h3 id="autonomy-ladder">Autonomy ladder 0–4 + demotion</h3>
+    <p>GYR is touch policy; the ladder is earned autonomy: Observe → Prepare → Execute-with-approval → Auto → Coordinate. <strong>Demote</strong> when quality drops, an integration changes, or human repairs pile up.</p>
+
+    <h3 id="retry-ceiling">Retry / cost ceiling</h3>
+    <p>Transient ≤2 · schema repair once · conflicting evidence → ask · verification fail → return exact gap · three failed correction rounds → escalate · cost ceiling → stop. Pairs with exception-first skills.</p>
+
+    <h3 id="mission-dod">Light Mission DoD</h3>
+    <p>For non-trivial Field Brief / research / one-shots (not every ops nudge): <strong>Outcome · Done-when · Constraints · Approval</strong> before execute. Full 7-field Mission Contract optional.</p>
+    <p class="note">Lock: <code>Maps/Decisions/2026-09-23-0xjmori-run-limits-ladder-retry.md</code> · Hunt: <code>Hunt/agent-manage/2026-09-23-0xjmori-trust-guide-keeps.md</code>.</p>
   </section>
 
   <section id="extend">
@@ -647,6 +660,7 @@ ask → Manage Bot
       <li>☐ New routines pass <strong>Three-Run Proof</strong> before Active; Monday sync includes kill review</li>
       <li>☐ Bot charters end with <strong>GREEN / YELLOW / RED</strong> reversibility (RED = Haiyuan)</li>
       <li>☐ Mac launch + Field Brief skills carry <strong>Exception paths</strong> (symptom → action)</li>
+      <li>☐ Long fires declare <strong>run limits</strong>; demote autonomy when quality drops</li>
       <li>☐ Auto-review intent list checked after Duplicate (<code>Maps/Hooks/auto-review-personal-rules.md</code>)</li>
       <li>☐ Coding slices have committed <code>intent.md</code> / <code>spec.md</code> / <code>plan.md</code> before implement</li>
       <li>☐ Reviewers only after PR URL; <strong>blind</strong> dual LGTM ≠ merge</li>
