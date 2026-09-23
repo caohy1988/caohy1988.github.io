@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-23 · 6:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="Mastra 1.69.0 typed Classifier fail-closed; Langfuse v4.43.0 / Agno v3.0.11 / Codex alpha.2 progress; Academy +9 incl. 2609.26758 / 26529 / 26781.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-23-0634-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 6:34 AM PT · Official 6h slot (primary :34 left no artifact; Collection miss-watch catch-up ~07:23–07:40 PT; label kept 0634)</p>
+    <article>
+<h1>Field Brief — 2026-09-23-0634: Mastra 1.69.0 puts a typed classifier on <code>latest</code> as judge, router and gate, and it fails closed. Langfuse now lets the same Jev judge arrive through three upstreams. The Academy side answers the obvious question: a type-safe decision head has a 0% type-error rate, yet swapping option names flips 77% of its answers. Also nine full-PDF papers on approval-vs-execution logging, eval leakage, 1,024-agent swarms and skippable verifier calls</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer:</strong> Opus 5.5 (<code>claude-opus-5-5[1m]</code>), primary deep Field Brief writer under <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-23-0634</strong> (official 6h slot, 06:34 PT Wed Sep 23, 2026). The primary :34 cron left <strong>no artifact</strong>, so this is the <strong>Collection <code>:44</code> miss-watch catch-up</strong>, written ~07:25–08:05 PT (~14:25–15:05Z). Per <code>Maps/Decisions/2026-09-06-field-brief-routine-missed-slots.md</code> the label stays <strong>0634</strong>.
+<strong>Evidence window:</strong> from the 0034 brief's as-of (~08:15Z Sep 23) to the 06:34 PT slot (13:34Z), confirmed by my own probes at ~14:27–14:45Z.</p>
+<ul>
+<li><strong>Source packs used:</strong> Muse 0132, DSH 0232, Agy 0332, Muse 0432, DSH 0532, Agy 0632. All six are on disk; nothing is missing. Later packs were ignored.</li>
+<li><strong>Catalog baseline:</strong> <strong>362 items / 94 briefs / 96 runs</strong>, re-verified read-only at write time.
+<strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call; Collection owns the HTML, the catalog and the push.</li>
+</ul>
+<h2>Read this first</h2>
+<p><strong>PUBLISH with 10 new ranks (1 Industry, 9 Academy), two progress lines on existing Industry cards and one Codex alpha progress line.</strong></p>
+<p><strong>Industry: the typed decision call now shows up in three roles, each with its own failure policy.</strong></p>
+<ul>
+<li><strong>Mastra <code>@mastra/core@1.69.0</code> reached npm <code>latest</code> at 09:36Z</strong> (the 0034 brief put this at ~85%). It ships a typed <strong><code>Classifier</code></strong> primitive that can be used in three ways:</li>
+<li>registered on <code>Mastra</code>;</li>
+<li>as a <strong>workflow step</strong>, returning typed answers plus token usage for branching;</li>
+<li>as a <strong><code>ClassifierProcessor</code></strong> guarding input, output and stream. This one <strong>fails closed by default</strong>: if the classifier call errors, the request is aborted.</li>
+</ul>
+<p>It also adds <strong><code>tracingOptions.rootSpanName</code></strong>, so root span names stop being a stable workflow key.</p>
+<ul>
+<li><strong>Langfuse v4.43.0 (13:06Z)</strong> lets a decision-model evaluator reach Jev through <strong>TypeSafe, OpenRouter or the Vercel AI Gateway</strong>. As a result one judge can appear under <code>jev-1.13.0</code>, <code>typesafe/jev-1.13-20260917</code> or <code>~typesafe/…</code>.</li>
+<li><strong>Agno v3.0.11 (13:14Z)</strong> makes cancellation a typed field (<code>cancellation_stage</code>).</li>
+<li><strong>Codex <code>0.158.0-alpha.2</code></strong> starts emitting lifecycle events for exec launch failures, which previously emitted nothing.</li>
+</ul>
+<p><strong>What this means for BQAA:</strong> the shape of an agent run is getting more typed at the framework layer: decisions, aborts, cancellations and launch failures. A trace store that only has &quot;LLM span&quot; and &quot;tool span&quot; will flatten all of it.</p>
+<p><strong>Academy: yesterday's mailing, a second pass.</strong> The 1834 and 0034 briefs read 20 papers from the 22 Sep mailing. A clean re-scrape of that day's cs.AI / cs.MA / cs.SE / cs.CL / cs.LG / cs.DB / cs.IR / cs.CR <code>new</code> listings turned up <strong>16 uncarded, on-axis titles no brief had mentioned</strong>. Four independent readers read all 16 as full PDFs; <strong>9 are ranked</strong> here (1 plain, 8 qualified). The three strongest:</p>
+<ol>
+<li><strong>2609.26758, &quot;Type-Safe Is Not Error-Free.&quot;</strong> This is the counterweight to this week's Jev-as-judge wave.</li>
+</ol>
+<ul>
+<li>The rubric text is kept byte-identical; only which option <strong>name</strong> it sits behind is swapped. Swapping <em>no/yes</em> flips <strong>76.92%</strong> of an open Jev-like head's answers, against 6.50% for <em>0/1</em>.</li>
+<li>AUROC <strong>inverts, .9376 → .2315</strong>. The vendor's hosted model flips <strong>32.50%</strong>, against a 1.33% test-retest floor.</li>
+<li>The type-error rate is <strong>0% throughout</strong>.</li>
+</ul>
+<ol start="2">
+<li><strong>2609.26529, &quot;From Approval to Execution.&quot;</strong> The action a human approved can be <em>rebuilt</em> before it runs (on workflow reload, transcript projection, argument rebinding) while the approval ID stays the same. Five released-package fixes block 60/60 out-of-scope effects, but signed replay still passes on one path. This is directly an ADK tool-confirmation logging problem.</li>
+<li><strong>2609.25502, &quot;Spend Classification Without Leakage.&quot;</strong> <strong>~61%</strong> of test rows repeat training text under a random split. On one dataset that repetition makes a 1-NN baseline and DistilBERT look equal (87.5 vs 87.1). Leak-free splits put DistilBERT <strong>2.3–3.6 pts ahead</strong>.</li>
+</ol>
+<p><strong>Housekeeping flags:</strong></p>
+<ul>
+<li>The arXiv ceiling is flat at <strong>2609.26796</strong>; pin <code>2609.02702</code> is still v1 only.</li>
+<li><strong>Scrape correction (mine, caught before any reading counted):</strong> my first listing scrape zipped IDs and titles from misaligned arrays. Abs-page title checks caught it. I stopped the first four readers and re-ran with per-entry parsing. Every paper below had its title confirmed on its abs page by its reader.</li>
+</ul>
+<h2>Industry</h2>
+<p><strong>One new rank, two progress lines on existing cards, one alpha progress line, and watch notes.</strong> All of it is verified by me at write time (~14:27–14:45Z Sep 23), not taken from the packs:</p>
+<ul>
+<li><strong>GitHub release lists (published after 08:00Z Sep 23), 30 repos.</strong> Objects exist in the window only for:</li>
+<li>Langfuse (<code>v4.43.0</code> 13:06:20Z; <code>v3.225.10</code> 13:15:08Z, a v3 maintenance backport);</li>
+<li>Agno (<code>v3.0.11</code> 13:14:46Z);</li>
+<li>Codex (<code>rust-v0.158.0-alpha.2</code> 13:07:10Z, prerelease);</li>
+<li>Mastra (the GitHub page for the already-carded <code>@mastra/core@1.68.0</code>, 08:40:08Z);</li>
+<li>Opik (<code>2.2.77</code> 08:33Z);</li>
+<li>Vercel AI (<code>ai@7.0.112</code> 08:37Z, <code>ai@6.0.289</code> 11:22Z, <code>ai@5.0.264</code> 08:33Z, plus provider packages).</li>
+</ul>
+<p>There are <strong>zero</strong> new objects for LiteLLM, pydantic-ai, Phoenix, DeepEval, LangGraph, the LangSmith SDK, ADK Python/JS, Microsoft Agent Framework, OpenAI Agents, CrewAI, OpenLLMetry, OTel semconv, Claude Code, Weave, Promptfoo, Letta, OpenHands, Strands, OpenInference, LlamaIndex, smolagents and MLflow.</p>
+<ul>
+<li><strong>npm:</strong></li>
+<li><code>@mastra/core</code>: <code>latest</code> = <strong>1.69.0</strong>, published <strong>09:36:31.944Z</strong>. <code>alpha</code> still reads 1.69.0-alpha.4. There is still <strong>no GitHub release object</strong> for <code>@mastra/core@1.69.0</code> (REST returns 404).</li>
+<li><code>@openai/codex</code>: <code>latest</code> = 0.156.1 on every platform tag; <code>alpha</code> = <strong>0.158.0-alpha.2</strong> on every platform tag.</li>
+<li><code>ai</code>: <code>latest</code> = 7.0.112.</li>
+<li><strong>PyPI:</strong> agno <strong>3.0.11</strong> (13:15:37Z) and opik <strong>2.2.77</strong> (08:26:52Z) are new. Unchanged: litellm 1.102.1, pydantic-ai 2.48.0, deepeval 4.2.5, arize-phoenix 20.15.0, langsmith 0.14.0, google-adk 2.9.2, mlflow 3.16.1, and langfuse (Python SDK) 4.15.4.</li>
+<li><strong>Catalog grep before ranking</strong> (live <code>catalog.json</code>, <strong>362 / 94 / 96</strong>):</li>
+<li>Zero hits for <code>4.43.0</code>, <code>3.0.11</code>, <code>0.158.0</code>, <code>rootSpanName</code>, <code>cancellation_stage</code>.</li>
+<li><code>1.69.0</code> appears once, as an alpha note folded into the 1834 Vercel card (&quot;Mastra Classifier on @mastra/core@1.69.0-alpha.2 folded as alpha note&quot;). <strong>1.69.0 has no card of its own.</strong></li>
+</ul>
+<h3>1. NEW rank: <a href="https://www.npmjs.com/package/@mastra/core/v/1.69.0">Mastra <code>@mastra/core@1.69.0</code></a> reaches npm <code>latest</code>: typed <strong>Classifier</strong> primitive, <code>ClassifierProcessor</code> (fails closed by default) and classifier workflow steps are now stable; <code>tracingOptions.rootSpanName</code> gives each run its own root span name</h3>
+<p><strong>What shipped.</strong> I read the <code>## 1.69.0</code> section of <code>packages/core/CHANGELOG.md</code> on <code>main</code>; the npm tarball ships no CHANGELOG. The release was published to npm at 09:36:31Z (02:36 PT), the promotion predicted by the 0034 six-week EV at ~85%.</p>
+<ul>
+<li><strong>Classifier stack (minor changes):</strong></li>
+<li>a typed <strong><code>Classifier</code> primitive</strong> for fixed-option evaluation with AI SDK evaluation models (#24458);</li>
+<li><strong>registration on the <code>Mastra</code> instance</strong> (#24738);</li>
+<li><strong>classifiers as typed workflow steps</strong> (#24747). These expose &quot;complete typed answers <strong>and token usage</strong>&quot; to branch and conditional control flow, in both fluent and dynamic graphs;</li>
+<li><strong><code>ClassifierProcessor</code></strong> (#24768), which applies typed classifier policies to agent <strong>input, output and streaming</strong> content.</li>
+<li><strong><code>ClassifierProcessor</code> fails closed by default (#24793).</strong> If the classifier call fails, the request is <strong>aborted</strong>. Setting <code>errorStrategy: 'warn'</code> restores fail-open. Contrast LiteLLM's Jev compaction guardrail (0034 card), which <strong>fails open</strong>.</li>
+<li><strong>Observability contract changes:</strong></li>
+<li><strong><code>tracingOptions.rootSpanName</code></strong> (#24564) replaces the default <code>agent run: '&lt;id&gt;'</code> / <code>workflow run: '&lt;id&gt;'</code> name on the <strong>root span only</strong>. It is accepted on the agent and workflow HTTP routes and in client types. It works for the Inngest engine too, because the name is applied before any durable snapshot is taken.</li>
+<li>The trace-query <strong><code>group</code> option is deprecated</strong> in favour of the <code>queryThreads</code> thread-query contract (#23790).</li>
+<li>Internal spans now <strong>keep their internal status through <code>rebuildSpan()</code>/<code>exportSpan()</code></strong> (#24742), so they stay out of exporters by default.</li>
+<li><code>runEvals</code> <strong>no longer saves <code>mastra__authToken</code></strong> or unstorable values into score rows. Nested request-context objects become dotted keys (#24753).</li>
+<li><strong>Also in this release:</strong></li>
+<li><code>context.background.adopt()</code> for background tasks (#24418);</li>
+<li><code>validateSkillContent()</code> / <code>validateSkillMetadata()</code> for <code>SKILL.md</code> (#24766);</li>
+<li>tool calls with a function-valued approval policy now run <strong>in parallel</strong> when the policy returns <code>false</code>;</li>
+<li>a fix for an event-loop hang after a persisted idle signal.</li>
+</ul>
+<p><strong>Why it's a rank.</strong> The 1834 and 0034 briefs tracked this as an alpha. This is the stable release, and it makes Mastra the <strong>first agent framework on a <code>latest</code> tag that has a typed, probability-bearing classifier as a first-class primitive</strong>, used as a workflow step (routing) and as a processor (guardrail). Tonight's product pattern: <strong>the same decision call is showing up as judge, router and gate</strong>, and each role has a different failure policy.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li><strong>Log a classifier decision as its own event type</strong>, separate from LLM calls and eval scores. It needs <code>role ∈ {route, gate, judge}</code>, <code>options</code>, <code>chosen</code>, <code>probabilities</code>, <code>error_strategy</code> (fail_closed/fail_open), <code>aborted</code> (bool) and token usage. The same model call means different things in each role.</li>
+<li><strong><code>rootSpanName</code> breaks &quot;group by span name = group by workflow&quot;.</strong> Customers who set it will emit arbitrary root names. BQAA should key workflow identity on a stable <code>workflow_id</code>/<code>agent_id</code> attribute, never on the root span name.</li>
+<li><strong>Fail-closed aborts are a new outcome class.</strong> A request aborted by a classifier outage looks like a user-facing failure with no model error. Dashboards should separate &quot;blocked by policy,&quot; &quot;blocked because the classifier failed,&quot; and &quot;model error.&quot;</li>
+</ul>
+<p><strong>Boundaries.</strong> The GitHub release page still returns 404, so npm is the authoritative artifact. Mastra #24566 (trusted tenant scope across trace queries, merged 09:44Z) and #24813 (Inngest resumed agents no longer replay suspended runs) merged after 1.69.0 was published and are <strong>not in it</strong>. They are WATCH items below.</p>
+<h3>Progress on the 0034 card: <a href="https://github.com/langfuse/langfuse/releases/tag/v4.43.0">Langfuse v4.43.0</a> (GitHub 13:06:20Z): decision-model connections can now be served through <strong>OpenRouter or the Vercel AI Gateway</strong> as well as TypeSafe directly; scores can be created from the annotation sidebar; SCIM org-scoping security fix</h3>
+<p>I read the release body and the full body of #17798 (merged 12:53:56Z).</p>
+<ul>
+<li><strong>Jev upstream choice (#17798).</strong> A TypeSafe decision-model connection now offers three upstream cards:</li>
+<li><strong>TypeSafe</strong> (no base URL stored; defaults to <code>api.typesafe.ai/v1</code>);</li>
+<li><strong>Vercel AI Gateway</strong> (<code>ai-gateway.vercel.sh/typesafe/v1</code>);</li>
+<li><strong>OpenRouter</strong> (<code>openrouter.ai/api/v1</code>).</li>
+</ul>
+<p>Both gateways expose a TypeSafe-compatible <code>POST …/v1/systemone</code>, so only the adapter's <code>baseURL</code> changes. The server accepts only those two preset gateway URLs.</p>
+<p>Default models are <code>jev-1.13.0</code> and <code>jev-latest</code>. The Jev pricing <code>matchPattern</code> now also accepts <strong>OpenRouter's dated slugs</strong> (<code>typesafe/jev-1.13-20260917</code>) and the <code>~typesafe/</code> alias. The same PR masks secrets in the LLM-connection form.</p>
+<ul>
+<li><strong>Also in this release:</strong></li>
+<li>scores created from the annotation sidebar (#17815);</li>
+<li>project and org members filtered by role (#17810);</li>
+<li><strong>SCIM <code>Users/{id}</code> reads and mutations scoped to the caller's org (#17828)</strong>, a security fix. <code>v3.225.10</code> backports the SCIM fix (#17830) to the v3 line;</li>
+<li>a Formatted/Raw toggle on observation attributes;</li>
+<li>a full-text-search prefilter perf fix;</li>
+<li>the in-app assistant switched to Opus 5.5.</li>
+<li><strong>Why it's progress, not a new rank:</strong> it extends the v4.42.0 decision-model card rather than adding a new surface. It matters because <strong>one logical judge (Jev 1.13) can now arrive under three model strings</strong> from three upstreams with different prices.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Store <code>decision_model_upstream</code> (typesafe / openrouter / vercel-gateway) <strong>separately from</strong> a normalized <code>decision_model_version</code>. Otherwise <code>jev-1.13.0</code>, <code>typesafe/jev-1.13-20260917</code> and <code>~typesafe/…</code> split one judge's scores into three cohorts.</li>
+<li>Scores from the annotation sidebar are human labels. Keep <code>score_source = human_annotation</code> distinct from evaluator scores so judge-vs-human calibration joins stay clean.</li>
+</ul>
+<h3>Progress on the Agno 3.0 card: <a href="https://github.com/agno-agi/agno/releases/tag/v3.0.11">Agno v3.0.11</a> (GitHub 13:14:46Z; PyPI 13:15:37Z): machine-readable <code>cancellation_stage</code> on run outputs; a knowledge-level retrieval pipeline with MMR and recency rerankers; MCP tool-discovery pagination and described MCP input schemas; AG-UI 1.0</h3>
+<p>I read the full release body (28 PRs).</p>
+<ul>
+<li><strong><code>cancellation_stage</code></strong> (#10411): <code>PENDING</code>, <code>EXECUTING</code>, <code>INTERRUPTED</code> or unknown, on <code>RunOutput</code>, <code>TeamRunOutput</code>, <code>WorkflowRunOutput</code> and the run API schemas, &quot;so clients no longer match on the cancellation message text.&quot;</li>
+<li><strong>Retrieval:</strong></li>
+<li><code>Knowledge.search()</code> now runs a <strong>knowledge-level retrieval pipeline</strong> that widens the candidate pool before a reranker (#10115);</li>
+<li><strong><code>MMRReranker</code></strong> and <strong><code>RecencyReranker</code></strong> (exponential time decay; pgvector-focused);</li>
+<li>the vector-DB-level <code>reranker</code> is <strong>deprecated</strong> in favour of <code>Knowledge</code>'s;</li>
+<li>typed <code>PageCommandResult</code> with explicit error, completeness and truncation metadata.</li>
+<li><strong>MCP and protocols:</strong></li>
+<li>AgentOS MCP tools carry argument descriptions in <code>inputSchema</code> and bound <code>get_sessions</code> pagination;</li>
+<li>raw <code>ClientSession</code> discovery <strong>collects every <code>tools/list</code> page</strong> (previously only the first);</li>
+<li>bare <code>mcp=True</code> gets the same routing and Host check as <code>MCPConfig</code>;</li>
+<li><strong><code>ag-ui-protocol</code> 1.0</strong>;</li>
+<li>WebSocket workflow submissions now enforce version pins and session ownership.</li>
+<li><strong>Correctness:</strong> sync tool hooks returning <code>function_call(**arguments)</code> now work in the async path. Before, &quot;the tool body never ran&quot; and the unawaited coroutine was recorded as the tool result.</li>
+<li><strong>Why progress:</strong> it lands on the existing <code>agno-3-0-agentos-…</code> card (4 prior progress lines, last v3.0.10 on Sep 16). It's material because of the typed cancellation field and the retrieval-pipeline change.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Cancellation is becoming a typed field in frameworks. Map Agno's <code>cancellation_stage</code> into a common <code>run_status_detail</code> enum (pending / executing / interrupted) instead of parsing error text. Mastra's fail-closed aborts and Codex's launch-failure events below point the same way.</li>
+<li>The async-hook bug means <strong>older Agno traces can show a tool &quot;result&quot; for a tool that never executed.</strong> Flag Agno &lt; 3.0.11 async-path tool spans with sync hooks as suspect in any tool-success analysis.</li>
+</ul>
+<h3>Alpha progress on the Codex card: <a href="https://github.com/openai/codex/compare/rust-v0.157.0-alpha.11...rust-v0.158.0-alpha.2">OpenAI Codex CLI <code>rust-v0.158.0-alpha.2</code></a> (13:07:10Z, prerelease; npm <code>alpha</code> on every platform)</h3>
+<p>The release body is empty. I read the compare against <code>0.157.0-alpha.11</code>: <strong>10 commits, listed in full</strong>. There is <strong>no <code>0.157.0</code> stable</strong>; the train jumped straight to 0.158 alphas, while <code>latest</code> stays 0.156.1.</p>
+<ul>
+<li><strong>Product-visible changes:</strong></li>
+<li><strong><code>features.multi_agent_v2.disable_direct_message</code></strong> (#47540, default false). It drops <code>send_message</code>/<code>followup_task</code> and <strong>requires a message-board <code>post</code> tool</strong>, so sub-agents coordinate through a shared board instead of direct messages;</li>
+<li><strong>command lifecycle events for exec launch failures</strong> (#47529): start and failure events with no PID, <code>exit_code = -1</code>, zero duration, the launch diagnostic and plugin attribution. Before this, launch failures emitted no events;</li>
+<li><code>transparent_background</code> on <code>image_gen</code> (#47484).</li>
+<li><strong>Internal:</strong> session agent operations, lookups and V2 context routed through <code>AgentControl</code> (#47520, #47536); parallel instruction refresh (#47458); WebSocket auth extracted into a crate (#47447).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> tool-failure rate computed from Codex telemetry <strong>before</strong> this change undercounts launch failures, which emitted no events. When comparing across versions, treat <code>exit_code = -1 AND pid IS NULL</code> as a new &quot;launch failure&quot; class. Alpha only; no rank.</p>
+<h3>Watch notes (not ranks)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>Disposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Mastra #24566</strong> <code>enforce a trusted tenant scope across trace queries</code> (merged 09:44:42Z)</td>
+  <td><strong>WATCH.</strong> Merged after 1.69.0, unreleased. Multi-tenant trace isolation on the observability read path; a card candidate when it ships in 1.70.0 or a 1.69.x patch.</td>
+</tr>
+<tr>
+  <td><strong>Mastra #24813</strong> (Inngest resumed agents no longer replay suspended runs), #24782/#24770 (Inngest durable-agent fixes), #24803 (one trace summary), #24672 (readable processor span previews)</td>
+  <td><strong>WATCH/NOTE.</strong> Unreleased merges.</td>
+</tr>
+<tr>
+  <td><strong>Opik 2.2.77</strong> (GitHub 08:33Z; PyPI 08:26Z)</td>
+  <td><strong>NOTE.</strong> ClickHouse-v2 streaming inserts, permission gating on eval-rule delete, QA/CI. Maintenance.</td>
+</tr>
+<tr>
+  <td><strong>Vercel <code>ai@7.0.112</code></strong> (08:37Z; npm <code>latest</code>), <code>ai@6.0.289</code>, <code>ai@5.0.264</code></td>
+  <td><strong>NOTE.</strong> On the 1834-carded line. 7.0.112 adds &quot;report consumer cancellation in UI message stream end callbacks&quot; (another cancellation-as-a-typed-signal move) plus fixes.</td>
+</tr>
+<tr>
+  <td><strong>Langfuse <code>v3.225.10</code></strong></td>
+  <td><strong>NOTE.</strong> v3 backport of the SCIM org-scoping fix (#17830).</td>
+</tr>
+<tr>
+  <td><strong>Phoenix #16376</strong> (retry <code>RateLimitError</code> in SyncExecutor), <strong>Promptfoo #11037/#11040</strong> (Opus 5.5 and GPT-6 Sol/Luna providers), <strong>Opik #8452/#8490</strong></td>
+  <td><strong>NOTE.</strong> Unreleased merges.</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Academy</h2>
+<p><strong>Ceiling flat at 2609.26796.</strong> On my probes at ~14:30Z, <code>26796</code> returns 200 and <code>26797</code>, <code>26798</code> and <code>26800</code> return 404. Pin <code>2609.02702</code> returns 200 for <code>v1</code> and 404 for <code>v2</code>. The next mailing is ~00:00Z Sep 24.</p>
+<p><strong>How these were chosen:</strong></p>
+<ul>
+<li>Every paper below comes from the 22 Sep 2026 listing (announced ~00:00Z Sep 23), the same mailing as the 1834/0034 Academy sets.</li>
+<li>They were missed because the packs' keyword shortlists never surfaced them. A grep of every <code>briefs/2026-09-2*.md</code> finds <strong>zero mentions</strong> of any of the nine ranked IDs except Agensh (26781), which 0034 listed as title-only WATCH.</li>
+<li>Catalog grep: <strong>zero hits</strong> for all nine.</li>
+<li>Some carry an earlier v1 date on the abs page (CoVeR, 3 Sep; WatchPoint, 10 Aug) but first appeared in this listing. I note this and do not treat it as disqualifying.</li>
+<li><strong>Each paper was read end to end as a full PDF by an independent reader, with the last page confirmed.</strong> I spot-checked the headline numbers of 26758 against the extracted text (76.92%, 70.42 pts, AUROC .9376 → .2315 all present).</li>
+</ul>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.26758">arXiv:2609.26758 — Type-Safe Is Not Error-Free: A Constrained Decision Head Follows the Option Name, Not the Rubric Bound to It</a> (Sun — NUS; Xu — Fudan; equal contribution; v1, Sep 22 2026; 9 pp, read to App. E)</h3>
+<p><strong>What it is:</strong></p>
+<ul>
+<li>A controlled test of Jev-style constrained decision heads, the &quot;one state + typed options → probabilities&quot; call that Langfuse, LiteLLM, Mastra and the AI SDK adopted this week.</li>
+<li>The question, state and rubric text stay <strong>byte-identical</strong>. Only <strong>which option name each rubric is bound to</strong> is swapped.</li>
+<li>Models tested: two open encoder heads (ModernBERT with a marker read-out, DeBERTa with a span-mean read-out) and the vendor's hosted model.</li>
+</ul>
+<p><strong>Results</strong> (n = 1,200 over 4 predicates; one predicate is <strong>agent-trace triage</strong>):</p>
+<ul>
+<li>Swapping rubrics behind <strong>no/yes flips 76.92%</strong> of answers, against <strong>6.50%</strong> for neutral <strong>0/1</strong> names. That is a difference-in-differences of <strong>+70.42 pts [67.58, 73.08]</strong>.</li>
+<li>The failure is confident <strong>inversion</strong>, not noise: <strong>AUROC .9376 → .2315</strong>.</li>
+<li><strong>Hosted model:</strong> <strong>32.50%</strong> flips against a <strong>1.33%</strong> test-retest floor; AUROC .8146 → .5806.</li>
+<li>The span-mean read-out flips <strong>4.1× less</strong> than the marker read-out. Random-string option names bring flips back to the neutral level.</li>
+<li><strong>Type-error rate: 0% in every condition.</strong></li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>Two authors; one checkpoint per architecture; English only.</li>
+<li>The proposed mitigations are <strong>not evaluated</strong>.</li>
+<li>A code release is claimed, but no URL is given.</li>
+<li>The abstract is partly garbled, and it names &quot;Jev&quot; while the body says &quot;vendor&quot;.</li>
+<li>The claim that the effect grows with more options rests on a multi-way arm the paper itself calls directional.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li><strong>Schema validity is not correctness.</strong> Every decision-model score row should carry the <strong>option names and the rubric binding</strong> (or a hash of them). Without that, a template edit that renames options silently changes what the scores mean.</li>
+<li><strong>Offer a label-free &quot;name-invariance flip rate&quot;</strong>: re-run a sample with neutral or permuted option names, and track it next to accuracy and calibration. It costs two extra passes per sampled item and needs no human labels.</li>
+<li>Langfuse's &quot;Flag Out-of-Scope Request&quot; (yes/no) template is exactly the shape that flipped worst here.</li>
+</ul>
+<h3>2. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.26529">arXiv:2609.26529 — From Approval to Execution: Reconstruction-Aware Repair Analysis for LLM-Agent Software</a> (Zhu, Liu, Fan, Chen, He; no affiliation given; v1, Sep 22 2026; 18 pp, read to the Data Availability statement and references)</h3>
+<p><strong>What it is:</strong></p>
+<ul>
+<li>In agent frameworks, the action a human <strong>approves</strong> can be <strong>reconstructed before it executes</strong>: on workflow reload, transcript projection, argument rebinding or a durable-state lookup.</li>
+<li>The executed action can then <strong>differ while the approval ID stays the same</strong>.</li>
+<li>The paper formalizes &quot;reconstruction-stable authorization&quot;. Its analyzer, APAS-Finder, decides whether a proposed fix is sufficient and where a bypass remains.</li>
+</ul>
+<p><strong>Results:</strong></p>
+<ul>
+<li>Frozen predictions match <strong>28/28</strong> controlled outcomes; baselines get 20/28 and 16/28.</li>
+<li>A checked-fields-only rule separates <strong>0/4</strong> matched pairs; the method separates <strong>4/4</strong>.</li>
+<li>Two analysts agree on 19/20 sink dependencies.</li>
+<li>In released packages, five fixes block <strong>60/60</strong> out-of-scope effects. On the AI SDK path, <strong>signed replay still passes (5/5) even with HMAC</strong>.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>Small, purposive sample: the 28 cases are a 4-graph × 7-fix factorial.</li>
+<li>Graphs are built by hand, at a median of 63 minutes each. Automated extraction recovers only 45/233 (AST) or 104/233 (CodeQL) facts.</li>
+<li>The artifact is anonymous; the fixes are not confirmed by maintainers; ChatGPT/Codex use is disclosed.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>For ADK tool-confirmation (HITL) events, log <strong><code>approved_action_hash</code></strong> over the security-relevant fields at approval time, <strong><code>executed_action_hash</code></strong> at dispatch, plus <code>grant_id</code>, nonce/epoch and sink.</li>
+<li>&quot;Approved ≠ executed&quot; then becomes a one-line BigQuery anomaly query. Replay shows up as a reused nonce.</li>
+<li>This pairs with ZeroGate (0034 #10): both argue approval and execution are <strong>two events</strong>, not one.</li>
+</ul>
+<h3>3. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.25502">arXiv:2609.25502 — Spend Classification Without Leakage: An Evaluation Harness and What It Changed in a Deployed System</a> (Gupta — SpendSide / Cognistone; single author; v1, Sep 21 2026; 16 pp, read to App. D Table 17)</h3>
+<p><strong>What it is:</strong> an evaluation harness for spend classification with four split protocols, run over <strong>1.26M public procurement lines</strong> (California and Washington). It measures how much item text repeats between train and test. It also derives a text-only <strong>ceiling</strong> from identical texts that carry conflicting labels.</p>
+<p><strong>Results:</strong></p>
+<ul>
+<li>Under a random split, <strong>60.7% / 61.2%</strong> of test rows repeat training text. Naive Bayes scores <strong>56.0% on repeats vs 31.9% on new text</strong>.</li>
+<li>The text-only ceiling is <strong>79.4% (CA) vs 98.4% (WA)</strong>.</li>
+<li>On WA, the leaky split makes <strong>1-NN and DistilBERT look equal (87.5 vs 87.1)</strong>. Leak-free splits put DistilBERT <strong>+2.3–3.6 pts</strong> ahead.</li>
+<li>Deployment: reviewers accepted <strong>351/1,084 = 32.4%</strong> of suggestions (CI 29.7–35.2). This is self-reported and labelled &quot;corroboration, not validation.&quot;</li>
+</ul>
+<p><strong>Caveats:</strong> single author with a disclosed conflict of interest; one run per cell; the pilot data is proprietary; LLM-assisted prose. Code is released.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>When customers build eval sets from their own traces, <strong>dedupe or split by normalized input</strong> (hash the normalized user turn). Around 60% repeated inputs silently inflate scores and can flip model rankings.</li>
+<li>Keep the <strong>original suggestion and the human accept/reject as separate immutable rows</strong>; the paper's external check depended on having both.</li>
+<li>Compute a per-dataset &quot;conflicting-label ceiling&quot; before comparing accuracies across datasets.</li>
+</ul>
+<h3>4. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.26781">arXiv:2609.26781 — Agensh: Scaling Organizational Intelligence to 1,024 Agents</a> (Zhan, Song, Dong, Huang, Lian, Xia, Wei — Microsoft Research; v1, Sep 22 2026; 13 pp, read to App. C)</h3>
+<p><strong>What it is:</strong></p>
+<ul>
+<li>A multi-agent harness with <strong>no central orchestrator</strong>. Workers loop: gather context → claim → act → verify → merge.</li>
+<li>They coordinate through three channels:</li>
+<li>a Gitea workspace;</li>
+<li>Mattermost messages;</li>
+<li>an <strong>append-only shared-context board</strong> with typed entries (<code>OBSERVED</code>, <code>FACT</code>, <code>FAIL</code>, <code>CLAIM</code>, <code>PATCH_SUMMARY</code>) inside an event envelope (<code>event_id</code>, <code>source</code>, <code>kind</code>, <code>observed_at</code>).</li>
+<li>Model: GPT-5.6-sol (high), 6h budget.</li>
+</ul>
+<p><strong>Results:</strong></p>
+<ul>
+<li>On the 5 hardest ProgramBench tasks, the mean final pass rate goes <strong>19.31% → 20.68 / 26.52 / 28.78%</strong> at 1 / 8 / 32 / 128 agents.</li>
+<li>On pandoc: <strong>33.89% (1) → 50.94% (128) → 55.06% (1,024)</strong>.</li>
+<li>On pandoc, 128 agents pass 30% by minute 30, versus minute 90 for 8 agents.</li>
+<li>Code: the paper links github.com/microsoft/Agensh, but it <strong>still returns 404</strong> on my probe at ~15:00Z (STALE-bench, by contrast, returns 200).</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li><strong>One run per configuration</strong>; no variance.</li>
+<li><strong>No token or dollar cost</strong> reported, which is striking at 1,024 agents.</li>
+<li>The 1,024-agent point is pandoc only.</li>
+<li>The &quot;emergent roles&quot; are anecdotal. Vendor-authored.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>At swarm scale, the unit of analysis is the <strong>organization, not the span</strong>. Claims, conflicts, merges and handoffs need to be first-class event rows keyed by worker.</li>
+<li>The paper's own omission (cost per agent-hour, contribution per worker) is exactly the join BQAA can compute when those events land beside LLM usage.</li>
+<li>Codex's new &quot;message board instead of direct messages&quot; option (Industry, alpha) is the same pattern arriving in a product.</li>
+</ul>
+<h3>5. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.25173">arXiv:2609.25173 — Attack Success Rate Is Not a Number: On Measurement Validity in Agentic AI Security Evaluation</a> (Pathade, Pawar, Patil — independent; v1, Sep 21 2026; 7 pp, read to the Reproducibility statement)</h3>
+<p><strong>What it is:</strong> it defines <strong>six axes</strong> of how attack success rate (ASR) is measured: unit, oracle, trials, attacker adaptivity, defense knowledge, and the partial-success rule. It meta-analyzes <strong>259</strong> arXiv papers with regex detectors checked against hand coding, then adds an analytical power study.</p>
+<p><strong>Results:</strong></p>
+<ul>
+<li><strong>58.0%</strong> (Wilson CI 44.2–70.6, hand-coded n=50) report neither variance nor repeated runs; the automated rate is 65.3%.</li>
+<li><strong>29.7%</strong> of judge-using papers validate the judge against human labels.</li>
+<li><strong>10.8%</strong> state an attack budget; <strong>2.3%</strong> state a partial-success rule.</li>
+<li>On a 100-instance benchmark the minimum detectable difference is <strong>18.2 pts</strong>. A true 5-pt gap is <strong>ranked backwards about 21%</strong> of the time (Monte Carlo .237).</li>
+</ul>
+<p><strong>Caveats:</strong> one human coder; detectors tuned on the sample used to validate them; the inversion results are analytical, not empirical; the checklist is unvalidated; no artifact.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>An eval or red-team row needs <strong><code>unit_of_analysis</code>, <code>oracle_type</code>, judge model and prompt version, judge-human agreement, <code>run_index</code>, seed and temperature, and a benign-utility pairing</strong>. Otherwise two ASRs or pass rates are not comparable.</li>
+<li>On benchmarks of ~100 items, show the minimum detectable difference next to any A/B delta.</li>
+</ul>
+<h3>6. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.26086">arXiv:2609.26086 — CoVeR: Coverage-Based Routing of Verifier Calls in Agentic Retrieval</a> (Roh — independent; Han — KAIST; v1 dated Sep 3 2026, first listed Sep 22; 32 pp, read to App. J)</h3>
+<p><strong>What it is:</strong></p>
+<ul>
+<li>Before each <strong>stop-verifier</strong> call in an agentic retrieval loop, CoVeR computes a cheap coverage margin from frozen E5 embeddings.</li>
+<li>If the margin exceeds τ = 0.16, the verifier call is <strong>skipped</strong>. The gate can never stop the loop on its own.</li>
+<li>Setup: Self-Ask with Qwen2.5-3B/7B on HotpotQA, 2Wiki and MuSiQue.</li>
+</ul>
+<p><strong>Results:</strong></p>
+<ul>
+<li>Verifier calls cut by <strong>62.2% / 67.8% / 93.0%</strong> (MuSiQue is saturated), with EM within <strong>±0.3 pp</strong>. Verifier input tokens drop 72 / 73 / 97%.</li>
+<li>The margin <strong>cannot replace</strong> the verifier: AUROC with generated claims is 0.686 / 0.680 / 0.760, versus 0.89 / 0.90 / 0.83 with oracle claims.</li>
+<li>It also <strong>cannot veto</strong> verifier errors (AUROC 0.39).</li>
+<li>The analysis is unusually careful: pre-registered bars, paired bootstrap, TOST.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>The verifier is the authors' own HALT, whose weights are not released; code is promised &quot;on publication&quot;.</li>
+<li>Single seed and scaffold; low absolute EM (0.08–0.31).</li>
+<li>The HotpotQA CI does not exclude a 1 pp loss.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li><strong>Most judge calls inside agent loops are predictable &quot;keep going&quot; calls.</strong> Log <code>verifier_called</code>, <code>skipped_by_gate</code>, gate margin, verdict and verifier tokens per step. Customers can then see how much judge spend was skippable.</li>
+<li>This is the in-loop counterpart to Mastra's classifier-as-workflow-step.</li>
+</ul>
+<h3>7. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.26204">arXiv:2609.26204 — WatchPoint: Executable User Feedback for Real-World Agentic Web Development</a> (Yang, Liu — Stevens; Yang — UT Dallas; v1 dated Aug 10 2026, first listed Sep 22; 24 pp, read to App. K.2)</h3>
+<p><strong>What it is:</strong></p>
+<ul>
+<li>After a failed attempt, two single-shot agents write <strong>Playwright and bash diagnostic scripts</strong>. These emit raw <code>{n, v}</code> &quot;CHECK&quot; facts, which are fed into the warm-start retry.</li>
+<li><strong>By design, no LLM ever interprets the output.</strong> An earlier version that let an LLM interpret it hallucinated, and Pass@1 fell from 11/20 to 4/20.</li>
+<li>Tested on Web-Bench (50 projects, 1,000 tasks) with OpenHands.</li>
+</ul>
+<p><strong>Results:</strong></p>
+<ul>
+<li>Recovery <strong>38/66 = 57.6%</strong>, against 45.1% for the baseline on the same categories.</li>
+<li>Overall P@2 <strong>26.6% → 28.1%</strong> (GLM-5 diagnoser) / 27.9% (GPT-5.4).</li>
+<li><strong>For the stronger coder GLM-5, adding diagnostics lowered P@2 from 44.5% to 37.7%.</strong></li>
+<li>Diagnostics add under 2% to cost.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>Single run per configuration. The authors' own variance analysis shows <strong>11.5% of tasks flip between runs</strong> (about ±6 pp on P@2), which is on the order of the headline gain.</li>
+<li>The &quot;comparable to humans&quot; claim compares 28 projects against 5 easy projects done by 2 students.</li>
+<li>Log release is claimed, but no URL is given.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Store <strong>raw executable observations</strong> (key/value checks with <code>feedback_source</code> = test / browser / terminal / human and <code>attempt_idx</code>) <strong>separately from LLM-written summaries</strong>. Only the former are evidence.</li>
+<li><strong>Report run-to-run flip rate</strong> as the noise floor for any retry or feedback A/B.</li>
+<li>Feedback helps weak agents and can hurt strong ones, so slice by model.</li>
+</ul>
+<h3>8. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.25396">arXiv:2609.25396 — Passes Alone, Fails Together: Benchmarking Semantic Coordination in Parallel LLM-Agent Development</a> (Xia, Park — UIUC; Wu — Columbia; v1, Sep 21 2026; 6 pp, EXPRESS '26 workshop; read to App. C)</h3>
+<p><strong>What it is:</strong> <strong>STALE</strong>, a benchmark that runs the same tests on each parallel agent's patch alone and on the merged result. It counts only failures that appear <strong>after the merge</strong>. There are three tiers: synthetic, mined real PR pairs, and constructed Django tasks.</p>
+<p><strong>Results:</strong></p>
+<ul>
+<li><strong>Mined:</strong> only <strong>1 of 834</strong> runs over 417 Django pairs interfered, once a grading bug the authors disclose was fixed.</li>
+<li><strong>Constructed:</strong> GPT-5.5 interfered in <strong>105/108 (97%)</strong>. A message describing the other agent's finished change recovered <strong>89/108</strong>.</li>
+<li><strong>Synthetic:</strong> a ~130-token message cut interference from <strong>2.50 to 0.04</strong>.</li>
+</ul>
+<p><strong>Caveats:</strong> short workshop paper; nearly all Django; the &quot;message&quot; condition is an ideal, complete description; only GPT-5-class models. Code is public (github.com/illinoisdata/STALE-bench).</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>The authors explicitly ask for <strong>execution records of parallel agents</strong>. The fields are a shared base commit, each agent's patch, and per-patch plus post-merge test outcomes against one suite.</li>
+<li>With those, &quot;fails only after merge&quot; is a BigQuery query. It is the correctness companion to Agensh's scaling curve.</li>
+</ul>
+<h3>9. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.25645">arXiv:2609.25645 — Efficient Cost-Aware LLM Evaluation via Bayesian Bandit Gittins Indices</a> (Xie — Cornell/Columbia; He — NYU; Cao — NYU/SUFE; v1, Sep 22 2026; 42 pp, read to App. E.3; ICML 2026 DEMO workshop spotlight)</h3>
+<p><strong>What it is:</strong> it treats choosing an LLM configuration as a <strong>cost-aware Bayesian bandit</strong>. Gittins indices, precomputed offline with an FFT, decide which configuration to evaluate on which example next, and when to stop. An &quot;LCB-style&quot; rule (posterior mean minus one SD) makes the final recommendation.</p>
+<p><strong>Results:</strong></p>
+<ul>
+<li>Offline replay over existing score tables: GSM8K 122×1000, PIQA 103×1000, AlpacaEval 152×805, MMLU 1,500 configurations × 57 subjects.</li>
+<li>Stopping triggers at <strong>1–10%</strong> of full-evaluation cost.</li>
+<li>At 2% of cost, the <strong>LCB rule cuts regret from 0.0780 to 0.0080 on GSM8K</strong> and from 0.0828 to 0.0018 on MMLU Hard-Large.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>The &quot;1–2% cost&quot; headline is read off plots only.</li>
+<li>The LCB rule that drives the gains sits <strong>outside the optimality proof</strong>.</li>
+<li>The cost weight and batch sizes were tuned on the same data.</li>
+<li>Costs are API-price proxies; the models are old; AI helped draft the proofs. Code is released.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Adaptive eval needs <strong>per-(config, example) score rows with cost, tokens, batch ID and timestamp</strong>, which a trace store already has.</li>
+<li>Also store the <strong>recommendation rule</strong> used; switching it moved regret about 10×.</li>
+<li>A natural &quot;stop evaluating early&quot; feature on top of BQAA eval tables.</li>
+</ul>
+<h3>Held after full read (not ranked)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Paper</th>
+  <th>Why HOLD / REJECT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.25959">2609.25959</a> Calibration Is Not Verification (conformal routing for mixture-of-agents; LUT / Dell)</td>
+  <td><strong>HOLD.</strong> Precision 0.41 → 0.83 comes with <strong>89–91% of claims removed</strong>. The theorem bounds an &quot;all claims true&quot; rate, but the &quot;guarantee holds&quot; column checks precision (0.66 vs a 0.75 target at α=0.25). Internal counts are inconsistent; the medical set is internal; no code. One keeper: <strong>store a missing check as NULL, never 0</strong>. A default 0 put an artificial floor under every alarm score.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.26121">2609.26121</a> DTOC: Dynamic Tool Output Compression (Pegasystems)</td>
+  <td><strong>HOLD.</strong> <code>manage_context(enable, disable)</code> swaps tool outputs for 30–50-token placeholders. The evidence is <strong>n = 6 tasks, one run each</strong>: it helps Sonnet 4.6 and GPT-5.4 but raises input tokens <strong>+18.4% (Opus 4.8)</strong> and <strong>+48.7% (Gemini 3.5 Flash)</strong>. Vendor; private ablation. The logging idea (context-visibility change as an event with a token delta) is sound.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.25052">2609.25052</a> Self-Cleaning and Captured Anyway (agent self-written memory; Macau / SCUT)</td>
+  <td><strong>HOLD.</strong> 72 pp; main text and App. A–D read in full, App. E–W keyword-searched (disclosed). Contamination runs split into two groups, predicted by one measured curve. But headline numbers conflict (frontier capture 0.850 vs 0.786; 87 vs 72 claims), and the repo is private until acceptance.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.25286">2609.25286</a> Learned Enterprise Data Comprehension (data agents; permute.ai)</td>
+  <td><strong>HOLD.</strong> 94.67% Pass@1 on the Data Agent Benchmark (54 queries × 5 trials), versus 84.13% for the same harness without the method. But the &quot;39-pt&quot; headline compares Opus 5 against an Opus 4.6 reference, there is no leaderboard table for &quot;first of 40&quot;, the header claims &quot;Published at ICLR 2027&quot;, and no code is released. <strong>Competitive pointer for BigQuery conversational analytics only.</strong></td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.25845">2609.25845</a> Visual Jev (independent authors; no apparent vendor link)</td>
+  <td><strong>HOLD.</strong> Shared-prefix batching of forced-choice VQA questions: 8.9× faster at N = 32 questions per image. A typed head adds no accuracy over the LM head. Honest engineering, but off the agent-analytics axis.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.26468">2609.26468</a> Measuring Calibration in Multi-Label Text Classification (TUM / Bosch)</td>
+  <td><strong>HOLD.</strong> Sound per-label ECE method. Relevant only if judges emit multi-label failure tags; then store per-label confidences.</td>
+</tr>
+<tr>
+  <td><a href="https://arxiv.org/abs/2609.26146">2609.26146</a> From Risk Scoring to Risk Allocation (single author, USC)</td>
+  <td><strong>REJECT.</strong> Finance/QUBO monitoring; AUROC rests on 4, 9 and 24 positive days; the paper's own table contradicts its text.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Carried dispositions stand:</strong></p>
+<ul>
+<li>2609.24967 and the Academy sets from 0034 (ten papers), 1834 (seven) and 1234 (two) are <strong>not re-carded</strong>.</li>
+<li>2609.25647 and 2609.26642 stay <strong>HOLD</strong> (from 1834).</li>
+<li>ACLArena <code>2609.23989</code> REJECT; D-RAC <code>2609.24220</code> HOLD; SkillSpec <code>2609.06052</code> WATCH.</li>
+</ul>
+<h2>Six-week EV (what to expect by early November)</h2>
+<ol>
+<li><strong>A second agent framework ships a typed classifier or decision step on a stable tag, with an explicit fail-open or fail-closed policy</strong> (candidates: ADK, OpenAI Agents, pydantic-ai, LangGraph). <strong>~55%.</strong> Mastra set the template today; LiteLLM went fail-open.</li>
+<li><strong>A Jev-as-judge vendor or OSS store adds an option-name or permutation robustness check, or documents the name-binding effect</strong>, in response to 2609.26758 or independently. <strong>~25%.</strong> The paper is two days old and its mitigations are untested.</li>
+<li><strong>Langfuse (or another store) normalizes decision-model versions across upstreams in its UI or metrics</strong> (one model identity for TypeSafe, OpenRouter and Vercel slugs). <strong>~50%.</strong> The pricing <code>matchPattern</code> already does it for cost, but not yet for score grouping.</li>
+<li><strong>Mastra ships trusted tenant scoping for trace queries (#24566) in 1.70.0 or a 1.69.x patch.</strong> <strong>~80%.</strong> It is already merged on main.</li>
+<li><strong>Codex <code>0.158.0</code> goes stable with the message-board multi-agent option and exec launch-failure events.</strong> <strong>~70%.</strong> There was no 0.157.0 stable; the 0.157.0-stable prediction carried from earlier briefs is <strong>retired</strong> as superseded.</li>
+<li><strong>LiteLLM <code>v1.103.0</code> goes stable with the Jev classifier and compaction guardrail.</strong> <strong>~75%</strong> (carried, trimmed from 80%, since no new object appeared in this window).</li>
+</ol>
+<h2>Verification &amp; tool honesty</h2>
+<ul>
+<li><strong>This brief's own probes (~14:27–15:00Z Sep 23):</strong></li>
+<li><strong>GitHub release lists</strong> for 30 repos (listed under Industry).</li>
+<li><strong>Release bodies:</strong> Langfuse v4.43.0 and v3.225.10; Agno v3.0.11; Codex <code>rust-v0.158.0-alpha.2</code> (empty body); Vercel <code>ai@7.0.112</code>.</li>
+<li><strong>PR bodies:</strong> Langfuse #17798; Codex #47540, #47529, #47484.</li>
+<li><strong>Codex compare:</strong> <code>alpha.11...0.158.0-alpha.2</code>, 10 commits, full list.</li>
+<li><strong>Mastra:</strong> <code>## 1.69.0</code> section of <code>packages/core/CHANGELOG.md</code> on <code>main</code>. The npm tarball has no CHANGELOG; the GitHub release tag returns 404.</li>
+<li><strong>npm:</strong> dist-tags and times for <code>@mastra/core</code> (1.69.0 at 09:36:31.944Z) and <code>@openai/codex</code>; <code>ai</code> latest.</li>
+<li><strong>PyPI JSON:</strong> agno, opik, litellm, pydantic-ai, deepeval, arize-phoenix, langsmith, google-adk, mlflow, langfuse.</li>
+<li><strong>arXiv:</strong> ceiling probe (26796 = 200; 26797, 26798, 26800 = 404); pin <code>2609.02702</code> v1 = 200, v2 = 404. Listing scrape across 8 categories, with abs-page title checks.</li>
+<li><strong>Full-PDF reads (16 papers, four independent readers, each title confirmed on the abs page and each read to the last page):</strong></li>
+<li><strong>Ranked:</strong><ul>
+<li>2609.26758 (9 pp, App. E);</li>
+<li>2609.26529 (18 pp, Data Availability and refs);</li>
+<li>2609.25502 (16 pp, App. D Table 17);</li>
+<li>2609.26781 (13 pp, App. C);</li>
+<li>2609.25173 (7 pp, full);</li>
+<li>2609.26086 (32 pp, App. J);</li>
+<li>2609.26204 (24 pp, App. K.2);</li>
+<li>2609.25396 (6 pp, App. C);</li>
+<li>2609.25645 (42 pp, App. E.3; figures not inspectable from text).</li>
+</ul>
+</li>
+<li><strong>Held:</strong><ul>
+<li>2609.25959 (14 pp);</li>
+<li>2609.26121 (15 pp);</li>
+<li>2609.25052 (72 pp; <strong>App. E–W keyword-searched only</strong>, disclosed);</li>
+<li>2609.25286 (20 pp);</li>
+<li>2609.25845 (13 pp);</li>
+<li>2609.26468 (29 pp);</li>
+<li>2609.26146 (13 pp).</li>
+</ul>
+</li>
+</ul>
+<p>Abstract-vs-body discrepancies are recorded in each card.</p>
+<ul>
+<li><strong>Process correction (disclosed):</strong> my first arXiv listing scrape misaligned ID and title arrays. I caught it through abs-page title checks, stopped the first four readers before any of their output was used, and re-ran with per-entry parsing. No result from the aborted readers is used here.</li>
+<li><strong>Pack trust posture:</strong></li>
+<li><strong>DSH 0232:</strong> Mastra 1.69.0 timestamp, feature list and GitHub-404 boundary verified exactly.</li>
+<li><strong>DSH 0532:</strong> Langfuse v4.43.0 verified. Its Agensh read matches the independent full read. It said code links were not verified; the repo is still 404.</li>
+<li><strong>Agy 0632:</strong> Agno v3.0.11 and Codex alpha.2 verified. Its &quot;packages the entire 5-PR AgentControl arc&quot; framing is accurate as a commit list, but most of those PRs are internal refactors. I carried only the product-visible ones.</li>
+<li><strong>Muse 0132 / Muse 0432 / Agy 0332:</strong> NOTE-level items (Opik 2.2.77, <code>ai@7.0.112</code>, <code>ai@6.0.289</code>, Mastra 1.68.0 GitHub page) verified; dispositions agree.</li>
+<li><strong>All six packs missed the 16 uncarded on-axis Academy titles</strong> from the 22 Sep listing. Their shortlists came from HF Daily plus ceiling probes, not full category listings.</li>
+<li><strong>Social surfaces:</strong> the packs report X MCP 401, Reddit 403 and LinkedIn search-proxied only, with no in-window product signal. No <code>site:</code> substitution; nothing invented. Medium not used (newest scout note is still Sep 21).</li>
+<li><strong>Rules and read-only state:</strong></li>
+<li>Crustdata not called (forbidden). Fable not used. No first-party BQAA material carded. No Desk section.</li>
+<li>The hub repo <code>caohy1988.github.io</code> was not edited or pushed.</li>
+<li>Catalog baseline read-only: <strong>362 / 94 / 96</strong>.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 23 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
