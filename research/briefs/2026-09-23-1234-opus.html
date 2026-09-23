@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-23 · 12:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="LangChain mid-conversation tool changes; Opik 2.2.78 jury votes + 33× reads; Phoenix 20.16.0; Goose decisions; Braintrust span hooks; Mem0 User Profiles. Academy quiet.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-23-1234-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 PM PT · Official 6h slot (primary :34 left no artifact; Collection late-wake catch-up ~12:58–13:20 PT; label kept 1234)</p>
+    <article>
+<h1>Field Brief — 2026-09-23-1234: LangChain now lets an agent change its tool list mid-conversation on both OpenAI and Anthropic. Opik stops losing jury votes and reads experiments 33× faster. Phoenix closes the trace when a tool throws. Goose adds a decision-model provider next to its chat providers. Braintrust lets you rewrite spans before export, and Mem0 generates user profiles as async, idempotent jobs. No new Academy papers this window.</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer:</strong> Opus 5.5 (<code>claude-opus-5-5[1m]</code>), primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-23-1234</strong> (official 6h slot, 12:34 PT Wed Sep 23, 2026). The primary :34 cron left <strong>no artifact</strong>. This is the <strong>Collection late-wake catch-up (~12:58 PT)</strong>, written ~13:00–13:20 PT (~20:00–20:20Z). The label stays <strong>1234</strong> per <code>Maps/Decisions/2026-09-06-field-brief-routine-missed-slots.md</code>.
+<strong>Evidence window:</strong> from the 0634 brief's as-of (~14:45Z Sep 23) to the slot close. I re-probed everything myself at ~20:00–20:10Z.</p>
+<ul>
+<li><strong>Source packs used (5):</strong> Muse 0732, DSH 0832, Muse 1032, DSH 1132, Agy 1232. <strong>Agy 0932 is missing</strong> (see Housekeeping).</li>
+<li><strong>Catalog baseline:</strong> <strong>372 items / 95 briefs / 97 runs</strong>, re-verified read-only at write time. The newest brief is <code>2026-09-23T0634</code>.
+<strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call; Collection owns the HTML, the catalog and the push.</li>
+</ul>
+<h2>Read this first</h2>
+<p><strong>PUBLISH with 6 new Industry ranks (one of them a paired LangChain release), 0 Academy ranks, and 5 progress or watch notes.</strong></p>
+<p><strong>The theme: the rest of the agent run is becoming structured data too.</strong> Mid-run tool changes, individual jury votes, the failed tool call inside a trace, a typed decision call, and the span record itself are all getting explicit fields.</p>
+<ol>
+<li><strong>LangChain <code>langchain-openai 1.6.5</code> + <code>langchain-anthropic 1.7.4</code> (one rank).</strong> An agent's tool list can now <strong>change partway through a conversation</strong>, carried on a <code>SystemMessage</code>. Previously the payload was silently dropped or failed with an opaque 400. Both packages also add Opus 5.5 and GPT-6-sol/luna model profiles.</li>
+<li><strong>Opik <code>2.2.78</code>.</strong> <code>LLMJuriesJudge</code> was <strong>silently dropping votes</strong>: two judges that emit the same score name collapsed into one entry, while the reason text still said &quot;averaged 2 judge scores&quot;. It now reports every vote. Separately, experiment reads are <strong>33× faster</strong>: 100k items went from 221 s to ~16 s.</li>
+<li><strong>Arize Phoenix <code>20.16.0</code>.</strong> When a server tool raises during a PXI agent turn, the root span now ends in ERROR and the failed tool span appears in the trace list. Before this fix, a turn that failed on a tool left no complete trace. The release also adds cost-table and playground entries for gpt-6-sol/luna and claude-opus-5-5.</li>
+<li><strong>Goose <code>v1.52.0</code> (repo is now <code>aaif-goose/goose</code>).</strong> Adds a <strong>decisions provider crate</strong> with OpenRouter and Jev implementations, separate from the chat providers. It exists because Jev's typed evaluation API does not fit a chat-completion interface. This is the fourth runtime this week to treat the typed decision call as its own kind of call.</li>
+<li><strong>Braintrust JS <code>3.35.0</code>.</strong> Adds <strong>span export hooks</strong> (<code>onSpanExport</code>) that can add, modify, delete or replace fields on a span record before export, <strong>once per record rather than once per transport retry</strong>. Also adds multimodal instrumentation for OpenAI and Google GenAI, and fixes dataset snapshots that silently included deleted rows.</li>
+<li><strong>Mem0 <code>v2.2.0</code> / <code>ts-v3.3.0</code>.</strong> Adds <strong>User Profiles</strong>: a JSON-Schema-shaped summary of one user, synthesized by an LLM from that user's memories in <strong>asynchronous jobs that carry an <code>Idempotency-Key</code></strong>.</li>
+</ol>
+<p><strong>What this means for BQAA:</strong> three of these ranks (LangChain, Phoenix, Opik) are about what a flat span log <em>loses</em>: the tool list changing mid-run, a tool failure that orphans the turn, and repeated votes collapsing into one. Each is a column or event type that <code>agent_events</code> should be able to hold.</p>
+<p><strong>Academy:</strong> the arXiv ceiling is <strong>flat at <code>2609.26796</code></strong> (re-probed <code>…26797</code> through <code>…26900</code>, all 404). The only new HF daily entry, <strong><code>2609.22323</code> ALPINE</strong>, is off-axis (a 22–35k-parameter few-shot image classifier); I read the abstract and did not rank it. <strong>No new Academy rank, so no full PDF was required.</strong></p>
+<h2>Industry</h2>
+<p><strong>How I verified it (~20:00–20:10Z):</strong></p>
+<ul>
+<li><strong>GitHub releases:</strong> read directly for every candidate. I also checked 26 more repos for releases after 19:02Z. The only new objects were Mem0 (<code>v2.2.0</code>, <code>ts-v3.3.0</code>, <code>pi-agent-v0.3.2</code>) and <code>openai-python v3.19.1</code>.</li>
+<li><strong>PyPI (latest version and upload time):</strong></li>
+<li>opik <strong>2.2.78</strong> (15:04:18Z)</li>
+<li>arize-phoenix <strong>20.16.0</strong> (15:47:37Z)</li>
+<li>langchain-openai <strong>1.6.5</strong> (15:31:38Z)</li>
+<li>langchain-anthropic <strong>1.7.4</strong> (17:55:48Z)</li>
+<li>mem0ai <strong>2.2.0</strong> (19:04:35Z)</li>
+<li><strong>npm:</strong></li>
+<li>braintrust <strong>3.35.0</strong> (18:52:49Z)</li>
+<li>mem0ai <strong>3.3.0</strong> (19:10:48Z)</li>
+<li><code>@mastra/core</code>: <code>latest</code> = 1.69.0 (already carded at 0634), <code>alpha</code> = 1.70.0-alpha.0</li>
+<li><strong>Live catalog grep:</strong></li>
+<li><code>langchain-openai</code>, <code>langchain-anthropic</code>, <code>goose</code>: <strong>0 hits</strong>.</li>
+<li>Opik: last ranked card covers 2.2.73–2.2.75.</li>
+<li>Phoenix: last version card is 20.4.0.</li>
+<li>Braintrust JS: last card is 3.29.0.</li>
+<li>Mem0: no product card (1 unrelated Academy hit).</li>
+<li><code>22323</code>: 0 hits.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://github.com/langchain-ai/langchain/releases/tag/langchain-openai%3D%3D1.6.5">LangChain <code>langchain-openai 1.6.5</code></a> + <a href="https://github.com/langchain-ai/langchain/releases/tag/langchain-anthropic%3D%3D1.7.4"><code>langchain-anthropic 1.7.4</code></a>: mid-conversation tool changes on <code>SystemMessage</code>, plus Opus 5.5 / GPT-6 model profiles</h3>
+<p>This is <strong>one rank</strong>: both packages ship the same two PRs, 2 h 24 m apart (OpenAI 15:31:52Z, Anthropic 17:56:03Z).</p>
+<p><strong>What shipped.</strong></p>
+<ul>
+<li><strong>#40758, mid-conversation tool changes.</strong> Both providers let the tool set change partway through a conversation, but until now LangChain could not put that on the wire: users got a silent drop or an opaque 400. It is now carried on <code>SystemMessage</code> via <code>non_standard</code> content blocks.</li>
+<li><strong>Anthropic:</strong><ul>
+<li><code>tool_addition</code> / <code>tool_removal</code> blocks survive on a <em>mid-conversation</em> system turn.</li>
+<li>The <code>mid-conversation-tool-changes-2026-07-01</code> beta header is appended automatically when such a block is actually sent.</li>
+<li>A tool-change block on the <em>leading</em> <code>SystemMessage</code> raises an error.</li>
+<li>On unsupported models the block is stripped with a warning and the text is kept.</li>
+<li><strong>Behavior change:</strong> unrecognized blocks on a <code>SystemMessage</code> are now <strong>dropped with a warning</strong> instead of forwarded verbatim.</li>
+</ul>
+</li>
+<li><strong>OpenAI:</strong><ul>
+<li><code>additional_tools</code> is hoisted to a top-level Responses input item.</li>
+<li>On Chat Completions it <strong>raises</strong>, naming <code>use_responses_api=True</code>.</li>
+</ul>
+</li>
+<li><strong>#40785:</strong> Opus 5.5 and GPT-6 model-profile augmentations.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> the tool list is no longer fixed for a whole run. Any analysis that treats &quot;tools available&quot; as a session-level attribute will be wrong for LangChain agents on both providers. BQAA should record tool-set changes as <strong>events with a position in the conversation</strong>, and ADK should decide whether it wants the same primitive.</p>
+<h3>2. NEW rank: <a href="https://github.com/comet-ml/opik/releases/tag/2.2.78">Opik <code>2.2.78</code></a>: the jury judge reports every vote; experiment reads are 33× faster; ClickHouse cold tier ships</h3>
+<p><strong>What shipped</strong> (compare 2.2.77…2.2.78; 2.2.76 and 2.2.77 were notes only):</p>
+<ul>
+<li><strong>#8394, every jury vote in <code>judge_scores</code>.</strong></li>
+<li><strong>The bug:</strong> <code>metadata[&quot;judge_scores&quot;]</code> was a dict keyed by score name. Judges share a score name whenever one class is used twice (GEval defaults to <code>&quot;g_eval_metric&quot;</code>), so a multi-criteria or two-model jury, the setup a jury exists for, <strong>silently lost votes</strong>. Meanwhile <code>reason</code> still said &quot;Averaged 2 judge scores&quot;.</li>
+<li><strong>The fix:</strong> repeated names get <code>#2</code>, <code>#3</code>. Keys are byte-identical wherever names were already unique.</li>
+<li><strong>#8491, experiment-read performance.</strong></li>
+<li>Page size goes from 100 to <strong>2,000</strong>, pages are fetched concurrently, and pages are no longer parsed into pydantic models.</li>
+<li>Measured on 100k items: <strong>221.1 s → 28.3 s at page size 1,000</strong>, ~16 s projected at 2,000.</li>
+<li>The PR finds that round trips, not payload size, were the cost.</li>
+<li><strong>#8501:</strong> Contains / LevenshteinRatio / RegexMatch now validate string output.</li>
+<li><strong>#8427:</strong> explicit empty rule sets are honored in PromptInjection / Tone.</li>
+<li><strong>#8363:</strong> streamed Mistral tool calls no longer merge when the stream omits <code>index</code>.</li>
+<li><strong>Infrastructure:</strong></li>
+<li>ClickHouse cold-tier migration job (#7767);</li>
+<li>minmax skip index on <code>trace_threads.created_at</code> (#8452);</li>
+<li>cluster-wide merge/reclaim settings (#8487);</li>
+<li>Helm PDB fix (#8490);</li>
+<li>alerts UI rework (#8099).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> the jury bug is the useful lesson. An LLM-as-judge output keyed by <em>metric name</em> instead of <em>vote identity</em> loses data silently. BQAA's judge/eval rows should key on <strong>(judge instance, vote index)</strong>, not on the score name. The 33× read result is a reminder that experiment reads are limited by round trips.</p>
+<h3>3. NEW rank: <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.16.0">Arize Phoenix <code>arize-phoenix-v20.16.0</code></a>: PXI turn traces close out when a server tool raises; spans sort by <code>start_time</code>; frontier-model cost tables</h3>
+<p><strong>What shipped:</strong></p>
+<ul>
+<li><strong>#16338:</strong></li>
+<li><strong>Before:</strong> a PXI agent turn whose server tool raised left an incomplete trace.</li>
+<li><strong>After:</strong> the <code>pxi.turn</code> root span ends in <strong>ERROR status</strong>, the failed TOOL span and its exception event sit beneath it, and the trace appears in the traces list.</li>
+<li><strong>#16380:</strong> the span-list endpoint is sorted by <code>start_time</code>.</li>
+<li><strong>#16391, plus a price update:</strong> gpt-6-sol, gpt-6-luna and claude-opus-5-5 are in the cost tables and the playground.</li>
+<li><strong>JS:</strong></li>
+<li>dataset-split write helpers (#15740);</li>
+<li>a secrets-management helper (#15747).</li>
+<li><strong>Docs:</strong> Cloudflare AI Gateway tracing integration.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> &quot;a tool raised, so the turn never closed&quot; is a failure mode the BQAA plugin needs to cover. Check that an exception inside an ADK tool callback still produces a closed root/invocation event with error status, not an orphaned span. It is cheap to add as a plugin regression test.</p>
+<h3>4. NEW rank: <a href="https://github.com/aaif-goose/goose/releases/tag/v1.52.0">Goose <code>v1.52.0</code></a>: a decisions provider crate (OpenRouter + Jev) alongside chat providers; live voice in desktop; recipe limits</h3>
+<p><strong>What shipped:</strong></p>
+<ul>
+<li><strong>#12418 (closes #12215):</strong> a <strong>decisions provider crate</strong> with OpenRouter and Jev implementations.</li>
+<li>The issue's framing: Jev &quot;exposes a typed evaluation API rather than a chat-completion API, so it doesn't fit the existing conversational provider interface&quot;.</li>
+<li>The requested contract: yes/no, choice and score questions, returning <strong>probabilities, confidence, model identity and token usage</strong>.</li>
+<li><strong>Also in the release:</strong></li>
+<li>live voice conversations in the desktop app (#12093);</li>
+<li>a Z.AI Coding Plan provider (#12205);</li>
+<li><strong>recipe parameter limits</strong> of max 32 params / 200 select options / 128 KiB (#12259);</li>
+<li>Opus 5.5 / GPT-6-sol / GPT-6-luna support (#12447);</li>
+<li><code>strict:false</code> on chat-completions tools (#12272).</li>
+<li><strong>Repo move:</strong> the canonical repo is now <code>aaif-goose/goose</code>. This is the first Goose card in the catalog.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> this is the fourth runtime this week to treat the typed decision call as a <strong>separate kind of call</strong>. The other three: Mastra's Classifier (0634), Langfuse's Jev evaluator routing (0634) and LiteLLM's Jev guardrail (0034). The decision-event schema BQAA has been circling can now be checked against Goose's fields: probabilities, confidence, model id, tokens.</p>
+<h3>5. NEW rank: <a href="https://github.com/braintrustdata/braintrust-sdk-javascript/releases/tag/braintrust%403.35.0">Braintrust JS SDK <code>braintrust@3.35.0</code></a>: span export hooks; multimodal instrumentation; deleted rows no longer leak into dataset snapshots</h3>
+<p><strong>What shipped</strong> (last card: 3.29.0):</p>
+<ul>
+<li><strong>#2489, span export hooks.</strong> Synchronous <strong><code>onSpanExport</code> customizers</strong> can add, modify, delete or replace fields on instrumentation span records before export. They are applied <strong>once per record, not once per transport retry</strong>.</li>
+<li><strong>Instrumentation:</strong></li>
+<li>OpenAI multimodal APIs (#2434);</li>
+<li>Google GenAI multimodal APIs (#2484);</li>
+<li>Groq audio APIs (#2473).</li>
+<li><strong>#2497:</strong> token metrics are now correct with AI SDK middleware.</li>
+<li><strong>#2507:</strong> provider-managed tool calls are captured, and the right provider is attributed when going through the Vercel AI Gateway.</li>
+<li><strong>#2499:</strong> Pi Coding Agent tool spans stay current, so nested spans attach under them.</li>
+<li><strong>#2512:</strong> dataset snapshots no longer <strong>silently include deleted rows</strong>.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> an export-time redaction/enrichment hook that runs once per record is the right shape for PII masking before rows reach BigQuery. Worth comparing with the BQAA plugin's own content-masking path. Also note #2507: when a request goes through a gateway, the provider actually used has to be recorded separately from the one requested.</p>
+<h3>6. NEW rank: <a href="https://github.com/mem0ai/mem0/releases/tag/v2.2.0">Mem0 <code>v2.2.0</code></a> + <a href="https://github.com/mem0ai/mem0/releases/tag/ts-v3.3.0"><code>ts-v3.3.0</code></a>: User Profiles are schema-shaped, generated from memories by LLM, as async idempotent jobs</h3>
+<p><strong>What shipped (#7340):</strong></p>
+<ul>
+<li><strong>User Profiles</strong> on the hosted <code>MemoryClient</code> / <code>AsyncMemoryClient</code> (Python) and <code>MemoryClient</code> (TS). A profile is a structured JSON summary of one user, shaped by a <strong>per-project JSON Schema</strong> and filled by an LLM from that user's memories.</li>
+<li><strong>Methods:</strong> <code>get_profile</code>, <code>generate_profile</code>, <code>sample_profiles</code>, <code>get_profile_job</code>, <code>get_profile_settings</code>, <code>update_profile_settings</code>.</li>
+<li><strong>Jobs:</strong></li>
+<li>Generation is <strong>asynchronous</strong>.</li>
+<li>Every job POST carries an <strong><code>Idempotency-Key</code></strong>; callers can supply their own so a retry reuses the running job instead of paying for a second LLM run.</li>
+<li><strong>#6993:</strong> the Valkey vector store no longer crashes on <code>None</code> timestamps.</li>
+<li><strong>Companion releases:</strong> <code>opencode-v0.4.1</code>, <code>openclaw-v1.2.1</code>, <code>pi-agent-v0.3.2</code>.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> this is memory-derived state produced by an LLM job, outside any agent turn. To answer &quot;why did the agent believe X about this user&quot;, the lineage has to cover <strong>memory → profile job → profile version → the turn that read it</strong>. The idempotency key is a natural join key for that lineage.</p>
+<h3>Progress and watch notes (not ranked)</h3>
+<ul>
+<li><strong>Codex <code>rust-v0.158.0-alpha.3</code> (17:07Z) and <code>alpha.4</code> (18:36:50Z).</strong> Progress on the 0634 alpha.2 line only.</li>
+<li>alpha.3 bundles TUI/docs/analytics fixes.</li>
+<li>alpha.4 adds realtime context refresh (#47596) and prerelease/canary update guards (#47597).</li>
+<li>Unreleased on main after 19:02Z: <code>Retry-After</code> handling (#47641) and Guardian reviews bound to the target environment (#47630).</li>
+<li>Nothing here is a new product surface.</li>
+<li><strong>OpenHands <code>v1.23.0</code> (17:24:03Z, verified).</strong></li>
+<li>Contents: universal macOS DMG, light themes, Agent Canvas telemetry tagged by deployment kind (#17529), and UI fixes.</li>
+<li><strong>Not ranked:</strong> no new product surface compared with the v1.19/v1.20 agent-profile cards.</li>
+<li>Collector gap: Muse 1032 missed it; DSH 1132 caught it.</li>
+<li><strong>Mastra.</strong></li>
+<li><code>1.70.0-alpha.0</code> is on the npm <code>alpha</code> tag.</li>
+<li><code>#24792</code> adds <code>createClassifierScorer()</code>, which brings classifiers into scorers (WATCH; this extends the 0634 Classifier card).</li>
+<li><code>#24554</code> adds tag predicates to trace queries.</li>
+<li><code>#24580</code> fixes Redis-streams pubsub memory leaks.</li>
+<li><strong><code>openai-python v3.19.1</code> (19:15:40Z).</strong> Patch release: single-pass tool iterables are no longer dropped (#3770), and HTTP headers merge case-insensitively (#3486). NOTE only.</li>
+<li><strong>Langfuse:</strong> <code>#17845</code> and design-system work since v4.43.0. No new release object, so NOTE only.</li>
+</ul>
+<h2>Academy</h2>
+<p><strong>No new ranks.</strong></p>
+<ul>
+<li><strong>Ceiling:</strong> flat at <strong><code>2609.26796</code></strong>. I re-probed <code>2609.26797 / 26800 / 26810 / 26850 / 26900</code>; all return 404.</li>
+<li><strong>Pin:</strong> <code>2609.02702</code> is still v1 only (per packs; not re-probed by me).</li>
+<li><strong><a href="https://arxiv.org/abs/2609.22323">arXiv:2609.22323</a>, ALPINE (submitted 2026-09-16).</strong> It is the only new HF 09-23 entry. It is a 22–35k-parameter few-shot <strong>image</strong> classifier (Gabor guidance plus a content-adaptive patch locator) evaluated on CIFAR-FS / MiniImageNet.</li>
+<li><strong>Scout/hold:</strong> it is off-axis for agent analytics. I read the abstract only; it is not ranked, so the full-PDF rule does not apply.</li>
+<li>One method note worth keeping: its &quot;falsification ablations&quot; report honestly that the headline component (relational tokens) is <em>not</em> what drives performance.</li>
+<li><strong>Not re-admitted:</strong></li>
+<li>0634's nine (<code>26758</code>, <code>26529</code>, <code>25502</code>, <code>26781</code>, <code>25173</code>, <code>26086</code>, <code>26204</code>, <code>25396</code>, <code>25645</code>);</li>
+<li>0034's ten;</li>
+<li>the Tuesday set.</li>
+</ul>
+<h2>Six-week EV (through ~Nov 4)</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Call</th>
+  <th>Probability</th>
+  <th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>A second agent framework (ADK, Mastra, Vercel AI SDK or pydantic-ai) exposes mid-run tool-set changes as a first-class message or event</td>
+  <td>~55%</td>
+  <td>Both big providers have shipped the API (the Anthropic beta is dated 2026-07-01); LangChain has now done the plumbing</td>
+</tr>
+<tr>
+  <td>Goose's decisions crate is followed by a decision/classifier span type in an OTel GenAI semconv PR or an OpenInference spec change</td>
+  <td>~35%</td>
+  <td>Goose is the fourth runtime to separate decision calls this week, but semconv moves slowly</td>
+</tr>
+<tr>
+  <td>Another eval vendor ships a fix for collapsed or deduplicated multi-judge scores (the Opik #8394 class of bug)</td>
+  <td>~30%</td>
+  <td>The pattern &quot;dict keyed by metric name&quot; is common. Detection needs someone to notice the reason/value mismatch</td>
+</tr>
+<tr>
+  <td>Mastra <code>1.70.0</code> reaches <code>latest</code> with classifier-based scorers (#24792)</td>
+  <td>~70%</td>
+  <td>alpha.0 is already cut; the 1.69 cadence was about one week</td>
+</tr>
+<tr>
+  <td>Phoenix and/or Langfuse add export-time span customizers matching Braintrust's <code>onSpanExport</code></td>
+  <td>~25%</td>
+  <td>Masking hooks exist in several SDKs; running once per record is the new detail</td>
+</tr>
+</tbody>
+</table></div>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>LangChain 1.6.5 / 1.7.4:</strong> tool availability changes mid-run, so log tool-set changes as positioned events, not a session attribute.</li>
+<li><strong>Opik 2.2.78:</strong> key judge output on vote identity, not score name. Experiment reads are limited by round trips.</li>
+<li><strong>Phoenix 20.16.0:</strong> add a plugin regression test that a tool exception still closes the invocation with error status.</li>
+<li><strong>Goose v1.52.0:</strong> check the decision-event schema against Goose's field set (probabilities / confidence / model id / tokens).</li>
+<li><strong>Braintrust 3.35.0:</strong> per-record export hooks are the right place for masking. Record the provider actually used behind a gateway, not just the one requested.</li>
+<li><strong>Mem0 2.2.0:</strong> LLM-derived user state needs lineage back to memory and job, with the idempotency key as the join key.</li>
+<li><strong>Codex / OpenHands / Mastra / openai-python / Langfuse:</strong> notes only; nothing to act on.</li>
+<li><strong>ALPINE 2609.22323:</strong> off-axis; no action.</li>
+</ul>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Pack gap:</strong> <code>packs/agy-pack-2026-09-23-0932.md</code> is <strong>ABSENT</strong>. Nothing was invented to fill it.</li>
+<li>I re-probed GitHub releases for 27 watch repos across 15:58–18:05Z, which covers the missing slot plus Muse 1032.</li>
+<li>Found: langchain-anthropic 1.7.4, Codex alpha.3, OpenHands v1.23.0 (all covered above), and <strong><code>langgraph cli==0.4.32</code> (18:02:46Z)</strong>.</li>
+<li><code>langgraph cli==0.4.32</code> is a CLI patch release: NOTE only, not ranked. No pack had reported it.</li>
+<li><strong>Mac downtime:</strong> ~08:28–08:53 PT delayed the Muse 0732 and DSH 0832 fires. Both kept their official labels.</li>
+<li><strong>Collector miss:</strong> Muse 1032 missed OpenHands v1.23.0 in its window; DSH 1132 flagged it. Goose v1.52.0 and langchain-openai 1.6.5 were outside Muse 0732's watchlist; DSH 0832 caught them with honest boundary labels.</li>
+<li><strong>Surfaces:</strong></li>
+<li>X: 401 without credentials.</li>
+<li>Reddit: 403.</li>
+<li>LinkedIn: no search proxy in DSH runs.</li>
+<li>Papers with Code: 302.</li>
+<li>These are the same standing gaps as before; nothing was substituted for them.</li>
+<li><strong>Rule checks:</strong></li>
+<li>No first-party BQAA cards.</li>
+<li>No Desk section.</li>
+<li>No GTM content (GTM boards are paused).</li>
+<li>Crustdata was not used.</li>
+<li>Fable was not used.</li>
+<li><strong>Catalog:</strong> 372 / 95 / 97 read-only, and untouched by me. Expected after publish: <strong>378 items / 96 briefs / 98 runs</strong> (+6 ranks), if Collection cards each rank once.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 23 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
