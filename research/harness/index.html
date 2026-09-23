@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-21 · GTM weekly+paused · SpaceX routines on card</strong></span>
+      <span>Updated <strong>2026-09-23 · Three-Run / kill review / GYR authority</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -498,7 +498,7 @@ grok-tmux-run dsh-collect-HH32 -- \
       <li>PR board sweep — 09:00 + 21:00 PT daily (12h; CI/conflict/stall → Coding EM)</li>
       <li>Nightly Mac harness audit — 03:00 PT (rotate one Mac CLI; dual-LGTM; no merge)</li>
     </ul>
-    <p><strong>Policy:</strong> task → corrected → skill → Test run → Active. Prefer event triggers over tight crons. Audit PR babysits after merge; dump Active lists for Stories/GTM overlap. See <code>Maps/Decisions/2026-09-15-grok-routine-audit.md</code>.</p>
+    <p><strong>Policy:</strong> <strong>Three-Run Proof</strong> (Observe → Correct → Release) before Active — never automate the first success. Prefer event triggers over tight crons. Mondays: playbook↔card sync <strong>plus weekly kill review</strong> (ran? right? miss if killed?). Audit PR babysits after merge. See <code>Maps/Decisions/2026-09-15-grok-routine-audit.md</code> · <code>Maps/Decisions/2026-09-23-0xgenai-three-run-kill-review-gyr.md</code>.</p>
 
     <h3>Profile = contract</h3>
     <p>Each Grok Bot’s description mirrors its vault <code>Agents/*.md</code> card: ownership, never-do, and human gate. Update both when a lasting boundary changes.</p>
@@ -602,6 +602,20 @@ ask → Manage Bot
       </tbody>
     </table>
     <p class="note"><strong>P0 urgency</strong> stays keyword-only (no standing 5‑minute poller) until Haiyuan asks. <strong>Shared box ≠ isolation</strong> — all Grok bots share one cloud computer (files + logins).</p>
+    <h3 id="three-run-proof">Three-Run Proof (2026-09-23)</h3>
+    <p>From <a href="https://x.com/0xGenAi/status/2091199153942495683">0xGenAi’s complete Grok Bot guide</a>. Before enabling a new routine: <strong>Observe</strong> (fix charter/handoff/skill, not the artifact by hand) → <strong>Correct</strong> on a second input → <strong>Release</strong> after a third consecutive clean run (or three checkable proofs). Do not automate the first successful run.</p>
+    <h3 id="kill-review">Weekly kill review</h3>
+    <p>Paired with Monday playbook↔card sync. For each Manage routine: did it run? was the output right? would we miss it if killed? Pause or delete zombies. Spot-check one output by hand.</p>
+    <h3 id="gyr-authority">GREEN / YELLOW / RED (reversibility)</h3>
+    <table>
+      <thead><tr><th>Tier</th><th>Rule</th><th>Examples</th></tr></thead>
+      <tbody>
+        <tr><td><strong>GREEN</strong></td><td>Do it; log it</td><td>search, read, summarize, draft, vault note, research</td></tr>
+        <tr><td><strong>YELLOW</strong></td><td>Allowed inside approved tools / lanes</td><td>vault/hub edits under lane, saved routines, Mac CLI on named repos</td></tr>
+        <tr><td><strong>RED</strong></td><td>Always ask Haiyuan</td><td>send/publish, spend/pay, merge, delete non-junk, permissions, production, accept terms</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Uncertainty: if you cannot undo it in under a minute, park and ask. Lock: <code>Maps/Decisions/2026-09-23-0xgenai-three-run-kill-review-gyr.md</code>.</p>
   </section>
 
   <section id="extend">
@@ -626,6 +640,8 @@ ask → Manage Bot
       <li>☐ Default asks go to Manage Bot; Field Brief / Coding EM rooms used for visible handoffs</li>
       <li>☐ Jev router <code>mode: active</code>; honor Choice when confidence ≥ floor; logs under <code>jev/logs/</code></li>
       <li>☐ Handoffs carry artifact path per <code>Maps/Contracts/manage-handoffs.md</code></li>
+      <li>☐ New routines pass <strong>Three-Run Proof</strong> before Active; Monday sync includes kill review</li>
+      <li>☐ Bot charters end with <strong>GREEN / YELLOW / RED</strong> reversibility (RED = Haiyuan)</li>
       <li>☐ Auto-review intent list checked after Duplicate (<code>Maps/Hooks/auto-review-personal-rules.md</code>)</li>
       <li>☐ Coding slices have committed <code>intent.md</code> / <code>spec.md</code> / <code>plan.md</code> before implement</li>
       <li>☐ Reviewers only after PR URL; <strong>blind</strong> dual LGTM ≠ merge</li>
