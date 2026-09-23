@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-23 · 12:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="Langfuse v4.42.0 decision-model evaluators + LiteLLM v1.102.1 Jev gateway; Academy +10 incl. 2609.25938 / 26707 / 26779 / 26777.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-23-0034-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 AM PT · Official 6h slot (primary :34 left no artifact; Collection miss-watch catch-up ~00:58–01:07 PT; label kept 0034)</p>
+    <article>
+<h1>Field Brief — 2026-09-23-0034: Jev-as-judge moves into the tools people self-host. Langfuse v4.42.0 makes decision-model evaluators available to every project, and LiteLLM backports Jev routing, passthrough and compaction to four stable lines. The Academy side is from yesterday's mailing, now read in full: text-to-SQL &quot;certified&quot; abstention understates risk by up to 10 points depending on the oracle; how to spend a small expert-label budget to debias cheap judges; rule-based compaction at half the cost; and four trace-schema papers</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer:</strong> Opus 5.5 (<code>claude-opus-5-5[1m]</code>), primary deep Field Brief writer under <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-23-0034</strong> (official 6h slot, 00:34 PT Wed Sep 23, 2026). The primary :34 cron left no artifact, so this is the <strong>Collection <code>:44</code> miss-watch catch-up</strong>, written ~00:58–01:20 PT (~07:58–08:20Z). Per <code>Maps/Decisions/2026-09-06-field-brief-routine-missed-slots.md</code> the label stays <strong>0034</strong>.
+<strong>Evidence window:</strong> from the 1834 brief's as-of (~02:45Z Sep 23) to my own probes at ~08:00–08:15Z Sep 23.</p>
+<ul>
+<li><strong>Source packs used:</strong> Muse 1932, DSH 2032, Agy 2132, Muse 2232, DSH 2332, Agy 0032.</li>
+<li><strong>Missing pack (honest label, nothing invented):</strong> <code>agy-pack-2026-09-22-1832.md</code> (Mac offline). It falls before this window anyway, and my own primary sweep covers it. Muse 0132 is after this slot and was ignored.</li>
+<li><strong>Catalog baseline:</strong> <strong>350 items / 93 briefs / 95 runs</strong>, re-verified read-only at write time.
+<strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call; Collection owns the HTML, the catalog and the push.</li>
+</ul>
+<h2>Read this first</h2>
+<p><strong>PUBLISH with 12 new ranks (2 Industry, 10 Academy) and two progress lines on existing cards.</strong></p>
+<p><strong>Industry: Jev-as-judge is now in the self-hosted tools.</strong> The 0034/0634/1234/1834 briefs tracked TypeSafe Jev arriving in hosted eval vendors (LangSmith, Phoenix, Opik, DeepEval) and in the Vercel AI SDK. Tonight it reached the two open-source tools teams most often run themselves:</p>
+<ul>
+<li><strong>Langfuse v4.42.0</strong> (GitHub 07:19:33Z) adds a third evaluator type next to LLM-as-judge and code: the <strong>decision-model evaluator</strong>. One Jev call takes one JSON state and N typed questions and writes N scores. The probabilities, confidence and resolved model version go into <code>metadata.typesafe</code>. The feature flag has been removed, so it is available to every project, though the UI still says &quot;experimental&quot;. This is the ~75% call from the 1834 six-week EV, landing 6 hours later.</li>
+<li><strong>LiteLLM v1.102.1</strong> (GitHub 06:12Z, PyPI 03:58Z) backports the full Jev set to the stable 1.102 line:</li>
+<li>a Jev <strong>complexity-router classifier</strong>, which records probabilities, confidence, classifier model and cost per routing decision;</li>
+<li>a Jev <strong>compaction guardrail</strong> that blanks tool results Jev judges irrelevant;</li>
+<li><code>/typesafe/v1/systemone</code> and OpenRouter-decisions passthroughs with cost tracking.</li>
+</ul>
+<p>The passthrough also went to v1.101.1, v1.100.2 and v1.99.3 in the same hour. The stated reason is that &quot;a customer runs the 1.103 rc in prod to get it.&quot;</p>
+<p><strong>What this means for BQAA:</strong> a probability-bearing decision call now shows up in three layers of a customer's stack at once:</p>
+<ul>
+<li>the gateway (LiteLLM routing),</li>
+<li>the framework (Mastra Classifier, alpha),</li>
+<li>the eval store (Langfuse scores).</li>
+</ul>
+<p>Each layer uses its own field names. The Academy ranks below explain why the probability, the label source and the sampling probability need to be typed columns.</p>
+<p><strong>Academy: yesterday's mailing, now read in full.</strong> The ceiling is flat at <strong>2609.26796</strong> (the next mailing is ~00:00Z Sep 24). The 1834 brief read ten papers from the Tuesday mailing and listed eight more as title-only WATCH. Tonight independent readers read <strong>10 full PDFs</strong> from that list, end to end. All ten are ranked here (four plain, six qualified). The three strongest:</p>
+<ol>
+<li><strong>2609.25938.</strong> In a preregistered test, a conformal &quot;certified at 10% risk&quot; text-to-SQL abstainer carries <strong>17–20 points</strong> of risk under expert labels. The certificate is only as good as its label oracle. This is directly relevant to BigQuery conversational analytics.</li>
+<li><strong>2609.26707.</strong> A doubly-robust off-policy estimator for traces where a cheap judge labels every step and experts label only a sample. Sampling in proportion to judge uncertainty cuts RMSE by <strong>55–62%</strong> on LMArena (equal-exposure policy only) while keeping valid CIs.</li>
+<li><strong>2609.26779, CliffCompaction (CMU).</strong> Rule-based compaction with no LLM call that never compacts an earlier compaction. It halves per-task cost at equal or better Terminal-Bench scores. Its cost model is computed entirely from per-call token and cache telemetry.</li>
+</ol>
+<p><strong>Pack correction:</strong> DSH 2332 and Agy 0032 both pitched <strong>2609.24967 (Emergent Collusion)</strong> as the top Academy candidate. <strong>It is already carded</strong> (catalog id <code>arxiv-2609-24967-emergent-collusion-long-horizon-agents</code>, added 2026-09-21-1834 Kimi). Not re-admitted.</p>
+<h2>Industry</h2>
+<p><strong>Two new ranks and two progress lines.</strong> All verification is my own, done at write time (~08:00–08:15Z Sep 23):</p>
+<ul>
+<li><strong>GitHub release lists (published after 01:30Z Sep 23), ~30 repos:</strong> in-window objects exist only for Langfuse (v4.42.0), Codex (<code>rust-v0.156.1</code>, <code>rust-v0.157.0-alpha.11</code>, <code>rust-v0.155.0-alpha.16.3</code>), pydantic-ai (v2.48.0), LiteLLM (v1.104.0-dev.1, v1.102.1, v1.101.1, v1.100.2, v1.99.3) and MLflow (v2.11.5, legacy line).</li>
+<li>Zero new objects for Opik, DeepEval, Phoenix, LangSmith, LangGraph, ADK Python/JS, Microsoft Agent Framework, OpenAI Agents, CrewAI, OpenLLMetry, OTel semconv, Claude Code, Weave, Promptfoo, Agno, Letta, OpenHands, Vercel AI, Strands, OpenInference, LlamaIndex and smolagents.</li>
+<li><strong>npm:</strong></li>
+<li><code>@openai/codex</code>: <code>latest</code> = 0.156.1 on every platform tag; <code>alpha</code> = 0.157.0-alpha.11.</li>
+<li><code>@mastra/core</code>: <code>latest</code> = 1.68.0; <code>alpha</code> = <strong>1.69.0-alpha.4, published 08:01:31Z</strong>, 27 minutes after the slot. It is a boundary item and gets no rank.</li>
+<li><strong>PyPI:</strong> litellm <strong>1.102.1</strong> (03:58Z), pydantic-ai <strong>2.48.0</strong> (02:54Z). Unchanged: opik 2.2.76, deepeval 4.2.5, arize-phoenix 20.15.0, langsmith 0.14.0, google-adk 2.9.2, mlflow 3.16.1, and langfuse (Python SDK) 4.15.4.</li>
+<li><strong>Catalog grep before ranking:</strong> zero hits for <code>v4.42.0</code>, <code>0.156.1</code>, <code>2.48.0</code>. For LiteLLM, the only Jev/TypeSafe items in the catalog are vendor cards for other products (none for LiteLLM). The v1.102.0 card from 1234 does not mention Jev.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://github.com/langfuse/langfuse/releases/tag/v4.42.0">Langfuse v4.42.0</a>: decision-model evaluators (TypeSafe Jev) are released and available to every project, with three gallery templates; trace review and annotation are embedded beside traces; default pricing for Opus 5.5 and GPT-6 Sol/Luna</h3>
+<p><strong>What shipped</strong> (I read the release list and the full bodies of #17733, #17778 and #17797):</p>
+<ul>
+<li><strong>A new evaluator type, <code>DECISION_MODEL</code> (#17733).</strong> One evaluator is <strong>one JSON state + N typed questions = N named scores from one Jev call</strong>.</li>
+<li><strong>Question types:</strong><ul>
+<li><code>choice</code> (2–255 options) becomes a CATEGORICAL score;</li>
+<li><code>score</code> (2–10 ordered levels) becomes a NUMERIC expected level;</li>
+<li><code>noul</code> (yes/no) becomes a NUMERIC <strong>P(true)</strong>.</li>
+</ul>
+</li>
+<li><strong>Certainty never changes the score value.</strong> <code>probabilities</code>, <code>confidence</code>, <code>legend</code>, <code>questionId</code>, <code>type</code> and the <strong>resolved model</strong> go into <code>metadata.typesafe</code> on every score. The comment holds a one-line summary (e.g. <code>ready (p=0.91); confidence 0.82; runner-up needs_revision (0.09)</code>), since Jev returns no rationale.</li>
+<li><strong>Execution:</strong> runs on the LLM-as-judge queue through <code>@ai-sdk/typesafe-ai</code> + <code>experimental_evaluate</code> (so the AI SDK decision-call shape carded at 1834 is now inside Langfuse's worker). It writes <strong>one execution trace (GENERATION span) that every score links to</strong>.</li>
+<li><strong>Cost and errors:</strong> a default Jev price row ($0.042 per M input tokens, output free) costs these generations at ingestion. Provider 429s are retried, and auth failures pause the evaluator.</li>
+<li><strong>The feature flag is removed (#17797).</strong> Decision-model evaluators are now offered in every project, not only to admins or flagged orgs. Labels still read &quot;(experimental)&quot;. TypeSafe connections are kept out of playground and judge model pickers on purpose.</li>
+<li><strong>Gallery templates (#17778):</strong></li>
+<li><em>Assign Input Topic</em> (Choice). It <strong>takes the &quot;Recommended&quot; slot from the LLM-judge version</strong>.</li>
+<li><em>Flag Out-of-Scope Request</em> (Yes/no).</li>
+<li><em>Rate Customer Frustration</em> (Score, 4 levels).</li>
+<li><strong>In the same release:</strong></li>
+<li><strong>Review and annotation:</strong><ul>
+<li>comments and annotation embedded beside traces and sessions (#17745);</li>
+<li>unified score editing and review state (#17740);</li>
+<li>batch-mapping validation for decision models (#17785).</li>
+</ul>
+</li>
+<li><strong>Ingestion and IO:</strong><ul>
+<li>OTel event processing extracted in the worker (#17736);</li>
+<li>the normalized IO parser is GA in the single-trace UI (#17729);</li>
+<li>the experiment attribute is read from the experiment root span (#17473).</li>
+</ul>
+</li>
+<li><strong>Pricing:</strong> <strong>default pricing for Claude Opus 5.5 and GPT-6 Sol/Luna</strong> (#17802).</li>
+</ul>
+<p><strong>Why it's a rank:</strong></p>
+<ul>
+<li>Langfuse is the most widely self-hosted OSS trace and eval store. This release makes Jev-as-judge a <strong>default gallery option in self-hosted deployments</strong>, not a hosted-vendor feature.</li>
+<li>It is also the first vendor to state a <strong>score storage contract</strong> for decision models: the value is fixed by type, and certainty sits in namespaced metadata.</li>
+<li>Honest caveats:</li>
+<li>The PR's own verification skipped a live TypeSafe call (no key in CI), so result-panel mapping was tested against fixtures.</li>
+<li>Decision-model evaluators are <strong>hidden from the public API and MCP</strong> (they cannot be listed or fetched there). Programmatic export of the evaluator definitions is limited for now, although the scores they produce are ordinary scores.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>Langfuse puts probabilities in score metadata, not in the value.</strong> That is the pattern BQAA should expect when it ingests or federates third-party eval results. Plan a typed <code>judge_probabilities</code> / <code>judge_confidence</code> / <code>judge_model_resolved</code> projection, not a JSON blob. Academy ranks 2 and 8 explain why those columns matter.</li>
+<li><strong>&quot;One call, N scores, one linked execution trace&quot;</strong> is a clean join shape. BQAA's evaluation events should carry a <code>judge_call_id</code> shared by all scores from one decision call, so cost and latency are not counted N times.</li>
+<li><strong>Langfuse's LLM-as-judge queue now runs a non-generative model.</strong> If BQAA or ADK adds a hosted judge step, reserve a distinct evaluator type for decision models rather than overloading the LLM-judge path. That is the same conclusion as the 1834 AI SDK card, now confirmed by a second vendor.</li>
+</ol>
+<h3>2. NEW rank: <a href="https://github.com/BerriAI/litellm/releases/tag/v1.102.1">LiteLLM v1.102.1</a> (+ <a href="https://github.com/BerriAI/litellm/releases/tag/v1.101.1">v1.101.1</a> / <a href="https://github.com/BerriAI/litellm/releases/tag/v1.100.2">v1.100.2</a> / <a href="https://github.com/BerriAI/litellm/releases/tag/v1.99.3">v1.99.3</a>): TypeSafe Jev routing, compaction and passthroughs backported to stable lines; the gateway now makes probability-scored routing decisions and logs them</h3>
+<p><strong>What shipped</strong> (I read the release bodies and the full bodies of #42595, #41615 and #41757):</p>
+<ul>
+<li><strong>v1.102.1 (#42595)</strong> cherry-picks <strong>seven Jev PRs</strong> from main onto <code>stable/1.102.x</code>:</li>
+<li><strong>#41615, Jev as a complexity-router classifier.</strong> The configured tier labels become one Jev <code>choice</code> question. <strong>&quot;Routing decision records the probabilities, confidence, classifier model, and cost.&quot;</strong> It also returns response headers <code>x-litellm-complexity-router-tier</code> and <code>x-litellm-complexity-router-cause: jev_classifier</code>. Failures fall back through the existing classifier circuit breaker.</li>
+<li><strong>#41757, the <code>typesafe</code> compaction guardrail.</strong> Each completed tool exchange gets one yes/no Jev question. Results judged irrelevant are blanked; system, last user and last exchange are never touched. It fails open by default. The backport's own demo shows 962 vs 1,119 prompt tokens for the same chat.</li>
+<li><strong>#41607 / #41723, <code>/typesafe/v1/systemone</code> passthrough</strong> with logging and cost tracking. <strong>#42301</strong> adds OpenRouter <code>alpha/decisions</code> pricing for <code>typesafe/jev-1.13</code>. <strong>#41879</strong> enforces virtual-key budgets on Jev test routing. <strong>#41886</strong> adds a JEV classifier to the Auto-Router UI.</li>
+<li><strong>v1.101.1, v1.100.2 and v1.99.3</strong> each backport <strong>#41607</strong> (the passthrough with logging and cost tracking), published 06:12–07:10Z.</li>
+<li><strong>Why it happened:</strong> the stated motive is &quot;A customer runs the 1.103 rc in prod to get it and wants a stable line instead.&quot;</li>
+</ul>
+<p><strong>Why it's a rank (and not just progress on the 1234 v1.102.0 card):</strong></p>
+<ul>
+<li>None of the Jev gateway surface has been carded. It lived only in <code>v1.103.0-rc.1</code>, a WATCH item for five slots.</li>
+<li>A gateway making the <strong>routing decision</strong> with a calibrated classifier is a different analytics object from a judge scoring output afterwards. The decision happens before the model call and determines which model (and how much cost) the request gets.</li>
+<li>Backporting to four stable lines within one hour points to customer demand, not a demo.</li>
+</ul>
+<p><strong>Honest caveats:</strong></p>
+<ul>
+<li>These are patch versions carrying a feature via backport. The <code>stable/1.102.x</code> line lacks some main-branch features (LLM-v2 classifier, forecast classifier), so the UI was adapted (#42595 notes).</li>
+<li>14 <code>semantic_router</code> tests fail on the line before and after the picks, because the dependency is not installed.</li>
+<li>The compaction guardrail <strong>fails open</strong> by default. Contrast Mastra, which tonight switched its ClassifierProcessor to fail <strong>closed</strong> by default (#24793, WATCH below).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>Routing decisions are now probability-scored events at the gateway.</strong> A BQAA row for a LiteLLM-fronted agent should be able to record <code>router_cause</code>, <code>router_tier</code>, the classifier's probability vector and confidence, and the classifier's own cost. Otherwise &quot;why did this request go to the expensive model?&quot; has no answer in SQL.</li>
+<li><strong>Compaction by relevance-blanking changes what the model saw.</strong> If the guardrail blanked a tool result, the logged request no longer matches the agent's intent. BQAA needs a <code>compaction_applied</code> / <code>items_blanked</code> marker per call (CliffCompaction, Academy rank 3, makes the same argument from the cost side).</li>
+<li><strong>Fail-open vs fail-closed defaults now differ across vendors</strong> for the same kind of Jev gate. A classifier timeout should be logged as its own outcome, not silently treated as a pass.</li>
+</ol>
+<h3>Progress on the 1234 card: <a href="https://github.com/openai/codex/releases/tag/rust-v0.156.1">OpenAI Codex CLI <code>rust-v0.156.1</code></a> (npm <code>latest</code>, all platforms) + <a href="https://github.com/openai/codex/compare/rust-v0.157.0-alpha.10...rust-v0.157.0-alpha.11"><code>0.157.0-alpha.11</code></a></h3>
+<ul>
+<li><strong>0.156.1 (02:41:36Z) is a one-PR hotfix.</strong> GPT-6 Sol and Luna appear in the model picker, and <strong>the rate-limit switch prompt now recommends GPT-6 Luna</strong> (#47405, the stable backport of #47332). This is a product-visible default nudge, but not a new analytics surface, so it gets a progress line, not a rank.</li>
+<li><strong>alpha.11 (04:50:17Z; GitHub prerelease object present this time) has 27 commits.</strong> I read the full list. The analytics-relevant ones:</li>
+<li><strong>resume model context from the latest compaction boundary</strong> (#47365), which follows alpha.10's #47323 checkpoint metadata;</li>
+<li><strong>network policy enforced throughout HTTP/WebSocket, app-server, AWS auth + telemetry, remote control and embedded startup</strong> (#47389/#47407/#47408/#47410/#47411);</li>
+<li>opt-in reasoning status for realtime V3 delegations (#47377);</li>
+<li>inherited environment settings applied at turn boundaries (#47428).</li>
+<li><strong><code>rust-v0.155.0-alpha.16.3</code></strong> is an old-line backport and is not tracked.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> Codex now has two turn-state boundaries to track: compaction checkpoints and policy-enforced egress. A session that resumes &quot;from the latest compaction boundary&quot; needs the boundary ID in the event log, or replay and cost attribution break across resumes.</p>
+<h3>Progress on the 0034-Tue card: <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.48.0">pydantic-ai v2.48.0</a> (GitHub 02:41:40Z; PyPI 02:54:52Z)</h3>
+<ul>
+<li><strong>Model support:</strong> OpenAI <code>gpt-6-sol</code> / <code>gpt-6-luna</code> (#8635) and Claude Opus 5.5 (#8637) are supported, and <code>genai-prices</code> is bumped to 0.1.8 (#8648).</li>
+<li><strong>ID preservation:</strong> <strong><code>UIMessage.id</code> is preserved across Vercel AI <code>load_messages</code>/<code>dump_messages</code> (#8623), and AG-UI <code>Message.id</code> is preserved likewise (#8632).</strong></li>
+<li><strong>Why only a progress line:</strong> model enablement plus ID fidelity is below rank bar. The ID-preservation fixes matter for analytics, though: message IDs that survive round-trips through UI adapters are what let a UI event be joined to a model-call span.</li>
+<li><strong>Post-release (unreleased):</strong> #8653 keeps all streamed OpenAI logprobs in <code>provider_details['logprobs']</code>. NOTE.</li>
+</ul>
+<h3>Watch notes (not ranks)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>Disposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Mastra <code>@mastra/core@1.69.0-alpha.3</code> (04:21Z) → <code>alpha.4</code> (08:01Z, post-slot).</strong> In alpha.4: <strong><code>ClassifierProcessor</code></strong> (#24768), a typed classifier gate on agent input, output and stream chunks with <code>onResult</code> abort or filter; <strong><code>Workflow.classifier()</code></strong> routing step (#24747); <strong><code>tracingOptions.name</code></strong> per-run root span names (#24564); <strong>ClassifierProcessor fails closed by default</strong> (#24793). In alpha.3: <code>validateSkillContent</code> (#24766) and plugin background-operation tracking (#24418).</td>
+  <td><strong>WATCH.</strong> <code>latest</code> is still 1.68.0. Promote to a progress line on the 1834 AI SDK/Mastra card when 1.69.0 reaches <code>latest</code>. #24564 matters for trace-list grouping, and the fail-closed default is the safety-relevant contrast with LiteLLM's fail-open guardrail.</td>
+</tr>
+<tr>
+  <td><strong>LiteLLM <code>v1.104.0-dev.1</code></strong> (03:24Z, prerelease; ~570-line changelog: breached-password policy, orjson <code>/model/info</code>, Rust callback isolation, price syncs)</td>
+  <td><strong>WATCH.</strong> Dev tag. The Rust cost/catalog/diagnostics crates (1834 WATCH, #42616) are still not in a versioned runtime path.</td>
+</tr>
+<tr>
+  <td><strong>MLflow v2.11.5</strong> (06:17Z, legacy 2.x line; opt-in Databricks SDK Files API for UC registry artifacts)</td>
+  <td><strong>NOTE.</strong> Legacy maintenance. PyPI <code>latest</code> is still 3.16.1.</td>
+</tr>
+<tr>
+  <td><strong>Strands <code>harness-*</code></strong></td>
+  <td>Carried WATCH; no in-window release.</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Academy</h2>
+<p><strong>Ceiling is flat at 2609.26796.</strong> <code>26796</code>=200; <code>26797</code> and <code>26800</code>=404 on my probes at ~08:05Z. Pin <code>2609.02702</code> still shows only <code>[v1]</code>. Every rank below comes from the Tuesday mailing already announced at 1834, drawn from its WATCH list and the pack shortlists. Each was <strong>read end to end as a full PDF by an independent reader</strong>, with the last page confirmed. Catalog grep for all ten ids gives zero hits.</p>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.25938">arXiv:2609.25938 — Certified Against Which Oracle? Execution Labels Set the Reported Risk of Conformal Abstention for Text-to-SQL</a> (Liu, Qiao, Zhang, Chen — Xinqiao Hospital, Army Medical University; v1, Sep 22 2026; 34 pp)</h3>
+<p><strong>What it does:</strong></p>
+<ul>
+<li><strong>Setup:</strong> a preregistered 2×2 intervention on Spider-Realistic (508 questions). Four SQL-specialist checkpoints (Kwai-AutoSQL-32B/14B, OmniSQL-32B, XiYanSQL-32B), 50 samples per question (304,800 generations), 3 seeds, 200 splits.</li>
+<li><strong>The abstainer:</strong> consistency across execution-equivalence classes, thresholded by split conformal risk control at α=0.10.</li>
+<li><strong>What is swapped:</strong> where the grouping <em>and</em> the correctness labels come from, either the single shipped DB or the distilled multi-instance test suite.</li>
+</ul>
+<p><strong>Findings:</strong></p>
+<ul>
+<li><strong>Switching the label oracle alone moves the certificate's real risk up by 2.73–10.23 points</strong> above what it reports. For example, Kwai-32B reports 0.098 and carries 0.200 under the suite (Table 2).</li>
+<li><strong>Neither oracle matches experts.</strong> On 1,028 blind expert-labelled answers, a certificate nominally at 0.10 carries <strong>20.0 (XiYan) and 17.2 (Kwai) points of risk</strong> (Table A11). The strict oracle errs both ways: only 26–35% of its rejections are real semantic errors.</li>
+<li><strong>About 17.5% [12.2, 22.8] of reference SQL queries are defective</strong> (blind expert audit of flagged vs control questions).</li>
+<li><strong>Scores always look better under their own oracle.</strong> Each consistency score looks better under the oracle that built its clusters in <strong>16/16</strong> cases. Under expert labels, the claimed AUROC gain holds for Kwai (+6.96, p=0.004) and not for XiYan (+1.53, p=0.275; suite labels had said +8.3).</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>One benchmark family (SQLite/Spider), Qwen-lineage models only.</li>
+<li>Expert labels cover 2 models at 1 seed.</li>
+<li>AI-reviewer census from a single model family.</li>
+<li>The endpoint was chosen after an earlier registration missed its criterion (disclosed).</li>
+<li>Code is public (github.com/yahiko-l/text-to-sql-oracle-certificates); the data is not.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>This bears directly on BigQuery conversational analytics.</strong> Any &quot;the agent abstains when unsure, risk ≤ X%&quot; claim is a claim <em>about a label oracle</em>. Every correctness label BQAA stores for a text-to-SQL eval should carry <code>label_oracle</code> (single DB / multi-instance / expert / LLM judge / user feedback). Without it, a risk number cannot be read.</li>
+<li><strong>Don't grade a confidence score with labels from the executions that built it.</strong> Keep one independent label source (expert or held-out instances) for calibration checks.</li>
+<li><strong>Cheap reference-SQL lint catches a lot:</strong> empty result on its own DB, ordering or comparison on a text column, joins with no ON clause, case-sensitive literals. Run it before trusting any golden set.</li>
+</ol>
+<h3>2. NEW rank: <a href="https://arxiv.org/abs/2609.26707">arXiv:2609.26707 — Optimal Sequential Annotations for Off-Policy Evaluation</a> (Chae, Nwankwo, Qin, Zhou — USC, UC Berkeley, UW; v1, Sep 22 2026; 52 pp, stat.ME)</h3>
+<p><strong>What it does:</strong></p>
+<ul>
+<li><strong>The problem:</strong> a cheap judge labels every step of a multi-step trace, and expert gold labels are bought for a sample. The paper treats this as off-policy evaluation with missing rewards and builds a doubly-robust estimator with stage-wise inverse-probability-weighted corrections.</li>
+<li><strong>Theory:</strong> it is unbiased, with a variance decomposition and asymptotic normality both non-adaptive and batch-adaptive.</li>
+<li><strong>The key result (Thm 1):</strong> the <strong>optimal probability of expert-labelling a step is proportional to the conditional standard deviation</strong> of that step's contribution. Labelling is forward-monotone: you can only label step 2 if step 1 was labelled.</li>
+<li><strong>Uncertainty signal:</strong> it can be <strong>disagreement among several cheap (silver) judges</strong>, which costs no gold labels.</li>
+</ul>
+<p><strong>Results:</strong></p>
+<ul>
+<li><strong>Simulation:</strong> RMSE falls 37–40% at a 20% budget, and CI coverage is 0.92 vs 0.83 for random sampling.</li>
+<li><strong>Homelessness-services casenotes</strong> (777 clients, 180k notes): RMSE falls 17–68% depending on task and budget.</li>
+<li><strong>LMArena</strong> (21,685 sessions, T=2): <strong>55–62% lower RMSE, but only under the equal-exposure target policy.</strong> Under the tilt ×1.5 policy it is <strong>only ~11–21%</strong> (Table 1). The abstract doesn't make this distinction.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>The casenote &quot;ground truth&quot; is itself silver labels from a fine-tuned LLM.</li>
+<li>The simulator figures disagree between sections (33–51% vs 37–60%).</li>
+<li>The implementation differs from the theory (cross-fitted variances).</li>
+<li>The LMArena intervals come with no coverage guarantee. Only T=2 is tested.</li>
+<li><strong>No code released.</strong></li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>This is the statistics behind &quot;Jev on everything, humans on a sample.&quot;</strong> It only works if each judged row stores <strong><code>annotation_prob</code></strong>, the probability it was selected for human review, next to <code>judge_label</code>, <code>judge_prob</code> and nullable <code>gold_label</code>. Without the selection probability, no debiased estimate is possible afterwards.</li>
+<li><strong>Sample human review in proportion to judge uncertainty</strong>, using disagreement among cheap judges or Jev's own probability spread, not uniformly. That is a concrete default for a BQAA review-queue feature.</li>
+<li><strong>Log the route and its propensity on each span</strong>, i.e. which model or route was taken and with what probability. LiteLLM's Jev router (Industry rank 2) now produces exactly those, which makes &quot;what if we routed differently&quot; estimable from logs.</li>
+</ol>
+<h3>3. NEW rank: <a href="https://arxiv.org/abs/2609.26779">arXiv:2609.26779 — CliffCompaction: Cost-Efficient Compaction for Long-Horizon Coding Agents</a> (Nguyen, Cho, Dettmers — Carnegie Mellon; Chen — Bosch Center for AI; v1, Sep 22 2026; 25 pp)</h3>
+<p><strong>How it works:</strong> rule-based compaction with <strong>no extra LLM call</strong>. When context crosses budget B, it:</p>
+<ul>
+<li>drops tool results over 500 characters,</li>
+<li>shrinks tool calls to a 150-character signature,</li>
+<li>trims thoughts to 300 characters,</li>
+<li>keeps the system prompt, the task and the last K turns verbatim.</li>
+</ul>
+<p>The key rule is <strong>&quot;never compact a compaction&quot;</strong>: the previous compacted block is discarded, not nested. The prompt cache therefore stays valid between compaction events, which gives the context curve its &quot;cliff&quot; shape.</p>
+<p><strong>Results:</strong></p>
+<ul>
+<li><strong>Terminal-Bench 2.0 (Table 2):</strong></li>
+<li>Kimi K2.6 at 16K scores <strong>61.42% vs 59.16% with full context and 55.45% with native summarization, at $0.19 vs $0.40 per task</strong>.</li>
+<li>GLM 5.1 at 16K: 54.33% vs 49.83%.</li>
+<li><strong>Inside Claude Code</strong> (TB 2.1, GLM 5.3 Flash at about 45K): <strong>76.69% vs 70.97%</strong> for Claude Code's own auto-compaction.</li>
+<li><strong>Test-time scaling:</strong> three compacted rollouts plus the authors' SGV selector reach 69.7% for $58, i.e. +10.5 points at 1.9× cost. Uncompacted is +4.8 at 3.0×.</li>
+<li><strong>KernelBench L3:</strong> 3.58× speedup vs 1.30× without compaction. Without it, 98% of runs hit the 256K window at a median of 99 steps.</li>
+<li><strong>Where the context goes (Table 7):</strong> tool results 56.0%, tool calls 28.0%, thoughts 13.6%, system/task 2.4%. <strong>Cache reads are 78% of the uncompacted bill</strong> and fall 80%.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>Headline costs assume &quot;perfect caching.&quot; Metered costs differ (Table 8): GLM cache-hit rates run 47–91%, and Kimi at 8K on SWE-bench is +1%.</li>
+<li>The number of seeds is never stated.</li>
+<li>On SWE-bench it is slightly worse than full context (73.87 → 71.87).</li>
+<li>The SGV selector is trained on the same 89 Terminal-Bench tasks (the authors argue there is no leakage).</li>
+<li>Comparisons to frontier models mix sources.</li>
+<li>Code: github.com/nguyenvuthientrang/cliffcompaction.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>Compaction should be a first-class event:</strong> tokens before and after, method, and whether it invalidated the cache. The paper itself <em>infers</em> compaction from a drop in prompt length between calls. BQAA can do the same in SQL from per-call <code>prompt_tokens</code>/<code>cached_tokens</code>, today, for any agent.</li>
+<li><strong>Split cost into cache-read, uncached prefill and output, and attribute context by component</strong> (tool_result / tool_call / thought). Cache reads, at 78% of spend, are the lever that matters, and they are invisible in a single <code>total_tokens</code> column.</li>
+<li><strong>Best-of-k selection is possible from event-row features alone:</strong> step count, tool-call count, &quot;marked complete&quot;, and agreement between rollouts. This is a concrete demo of analytics feeding back into agent quality.</li>
+</ol>
+<h3>4. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.25804">arXiv:2609.25804 — The Tasteful Agent: Measuring and Improving Taste in Long-Horizon Tasks</a> (Pan et al. — City University of Hong Kong + Microsoft; v1, Sep 22 2026; 33 pp)</h3>
+<p><strong>What it does:</strong> Taste-Bench is <strong>502 &quot;decision forks&quot; mined automatically from existing agent traces</strong>.</p>
+<ul>
+<li><strong>Fork types:</strong></li>
+<li>&quot;Parallel&quot; forks: a passing and a failing attempt at the same task, aligned at the step where they diverge.</li>
+<li>&quot;Detour&quot; forks: a single run that commits to a direction, hits an observed failure, then recovers.</li>
+<li><strong>Sources:</strong> 2,677 SWE-bench Pro rollouts and 1,132 runs from METR's MALT transcripts. 10.8% of 4,657 candidate forks survive filtering.</li>
+<li><strong>Human check:</strong> 98.8% agreement with the mined label (κ=0.973).</li>
+</ul>
+<p><strong>Results:</strong></p>
+<ul>
+<li>The best model scores <strong>59.7%</strong> (GPT-5.6 Sol), where chance is 25% (a question counts only if answered correctly in both orders).</li>
+<li>Accuracy falls from <strong>62.3% to 21.0%</strong> when the deciding evidence arrives later in the run. More reasoning effort doesn't help.</li>
+<li>A distilled Qwen3.6-27B advisor lifts held-out SWE-bench Pro from <strong>14.6% to 33.7%</strong> (oracle advice gives 39.0%).</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>The end-to-end test is n=41, and the averaging behind 33.7% is not stated.</li>
+<li>The advice is mined from earlier runs on the same tasks.</li>
+<li>The candidate wording was written by the top-ranked model.</li>
+<li>Time-horizon labels come from a single judge.</li>
+<li>Code and data are released (github.com/wbopan/tastebench; HF <code>wenbopan/taste-bench</code>).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>Multiple attempts at the same task with pass/fail outcomes can be mined into labelled decision points with no annotation.</strong> Keep <code>task_id</code> joinable across <code>run_id</code>s and keep outcomes on runs.</li>
+<li><strong>Store the exit code or error on every tool result.</strong> Then &quot;commit → wall → recovery&quot; detours can be found with SQL.</li>
+<li><strong>Consider a &quot;time-to-evidence&quot; metric:</strong> steps between a decision and the observation that confirms or refutes it. Late-evidence decisions are where models are near chance.</li>
+</ol>
+<h3>5. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.26760">arXiv:2609.26760 — Grow the Harness, Not the Context: From Strategy-Free Scaffolds to Reusable Specialist Agents</a> (Li, Li, Zhao, Ye, Li, Gao — SIAT-CAS; Xu — Univ. of Macau; v1, Sep 22 2026; 16 pp)</h3>
+<p><strong>What it does:</strong></p>
+<ul>
+<li><strong>Starting point:</strong> an empty harness (<code>h0</code> returns nothing), with the model and tools held fixed. Only the harness code is learned.</li>
+<li><strong>Tracing:</strong> each run records a <strong>function-level execution DAG</strong> with harness-function, LLM and tool calls, each carrying inputs, outputs, errors, parent and duration.</li>
+<li><strong>Repair loop:</strong> an optimizer fixes a window of K failures together, and may only edit functions that appear in the failure traces. A 50-task held-out gate rolls back any regression.</li>
+</ul>
+<p><strong>Results:</strong></p>
+<ul>
+<li>Best success in 5 of 6 settings on BrowseComp-Plus and WebArena-Verified, with <strong>76–92% fewer LLM calls and 74–99% lower cost</strong> than tool-calling. For example, BrowseComp-Plus with gpt-oss-120b: 49.3 vs 40.0, at $0.87 vs $6.70.</li>
+<li>WebArena success holds at ~45% down to a 4B model, where tool-calling falls to 6.7%.</li>
+<li><strong>Ablation:</strong> removing function-level trace guidance halves success (36.0 → 18.0).</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>50-task test sets with ±11–13 pp CIs that overlap baselines in several cells.</li>
+<li>Single-run ablations.</li>
+<li>Optimizer cost is excluded from the cost figures.</li>
+<li>Site-specific resolvers raise overfitting risk.</li>
+<li>No code.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>Span trees should include harness-function spans, not only LLM and tool spans.</strong> The set of functions touched in a failed trace is what the optimizer edits.</li>
+<li><strong>Record <code>harness_version</code> and gate outcomes (accepted or rolled back)</strong> per run, for regression detection across versions.</li>
+<li><strong>Report cost per successful task, split into online and offline-optimizer cost.</strong></li>
+</ol>
+<h3>6. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.25913">arXiv:2609.25913 — When Does Execution Provenance Help Agent Memory Retrieval?</a> (Wang, Ju, Zhang, Sun et al. — USQ, SUSTech, Nanjing Univ., Norve Labs; v1, Sep 22 2026; 14 pp; header claims WSDM 2027)</h3>
+<p><strong>What it does:</strong></p>
+<ul>
+<li><strong>Reframes agent-memory retrieval as &quot;budgeted evidence completion&quot;:</strong> does <em>all</em> the gold evidence fit under a B-token budget?</li>
+<li><strong>Provenance units:</strong> chunks aligned to tool-argument and tool-output fields.</li>
+<li><strong>Graph layer:</strong> a zero-initialised residual R-GCN over typed provenance edges on top of a frozen dense retriever.</li>
+</ul>
+<p><strong>Results:</strong></p>
+<ul>
+<li><strong>Aligning chunks to tool-call fields beats 512-token windows by +19.07 Full-Support@2048</strong> (53.71 → 72.78). It is still +11.96 over an oracle that picks the best flat chunk size.</li>
+<li>The graph layer adds <strong>+4.55</strong> (CI [2.98, 6.18]), almost all on multi-event questions (+11.83), at +20 ms latency.</li>
+<li><strong>Where the graph signal comes from:</strong> most of it is the lexical <code>feeds</code> edge, i.e. a path, ID or hash from an earlier output reappearing in a later argument. Artifact I/O edges add nothing detectable.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>Synthetic OS-agent traces (ISETrace, 23k trajectories) with LLM-written queries.</li>
+<li>The audit checked model judgments rather than re-annotating blind.</li>
+<li>The end-to-end QA gain is borderline (CI [0.00, 12.10]).</li>
+<li>Code and data are released.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>Store span addresses</strong> (event_id + JSON path + offsets) and tool_call → tool_output links as columns.</li>
+<li><strong>An exact-match value-reuse edge</strong> (IDs, paths or hashes flowing from one output into a later argument) is cheap to compute in SQL and carries most of the graph benefit.</li>
+<li><strong>Measure agent-memory quality as &quot;complete evidence within budget,&quot;</strong> not recall@k.</li>
+</ol>
+<h3>7. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.26457">arXiv:2609.26457 — Recursive self-improvement of AI research agents (AIDE²)</a> (Srikanth, Zhao, Xu, Wu, Jiang — Weco AI; v1, Sep 22 2026; 28 pp)</h3>
+<p><strong>What it does:</strong></p>
+<ul>
+<li><strong>Two loops:</strong> an outer agent (Opus 4.7) rewrites the code of an inner AI-research agent (Gemini 3 Flash). A rewrite is accepted only if the <strong>private held-out grade</strong> improves.</li>
+</ul>
+<p><strong>Results:</strong></p>
+<ul>
+<li><strong>The featured run</strong> lasted 8 days, generated 100 candidates and accepted 7. The grade rose from 0.703 to 0.778, vs 0.749 for Weco's human-built agent.</li>
+<li><strong>Held-out benchmarks:</strong> ALE-Bench 1790 vs 1511; WeatherBench 2 0.793 vs 0.404.</li>
+<li><strong>Reward-hacking rate on KernelBench</strong> fell from 55% to 32%.</li>
+<li><strong>About a quarter of rejected rewrites beat the incumbent on the public score but lost on the private one.</strong></li>
+<li>The main discovered changes: a bandit over drafting strategies, a bounded history summary (prompts ~50× smaller), and failure memory.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>One featured run; the two repeat runs accepted only 2 and 4 rewrites.</li>
+<li>Small held-out sets (WeatherBench 2 is one task).</li>
+<li>Gains are not monotone (AIDE₄₇ beats AIDE₈₅ on two benchmarks).</li>
+<li>The baseline is the authors' own agent. No code; total run cost not stated.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>Self-improving harnesses need a lineage table:</strong> candidate, parent, diff, public score, private score, Δ, accepted.</li>
+<li><strong>Keep public and held-out scores as separate fields.</strong> The gap is a direct reward-hacking signal.</li>
+<li><strong>Prompt size per call over a run, bug rate and repeated error signatures</strong> predict context-overflow deaths. They are cheap standard metrics.</li>
+</ol>
+<h3>8. NEW rank (qualified; position paper): <a href="https://arxiv.org/abs/2609.26489">arXiv:2609.26489 — Calibration as a First-Class Criterion in LLM Evaluation</a> (Sanz-Guerrero, von der Wense — JGU Mainz, CU Boulder; v1, Sep 22 2026; 8 pp)</h3>
+<p><strong>What it argues:</strong> a short position paper with <strong>no experiments</strong>.</p>
+<ul>
+<li><strong>Nobody reports calibration.</strong> An informal check of recent model reports (GPT-5.5, Claude Sonnet 4.6, Gemini 3.5 Flash, and open models) finds none reporting it.</li>
+<li><strong>Miscalibrated judges bias the pipeline:</strong> &quot;If the judge is miscalibrated, the resulting rankings, win rates, and reported improvements are biased.&quot;</li>
+<li><strong>Metric choice matters.</strong> ECE depends on binning; Brier is a proper scoring rule; AUROC is not a calibration measure (shifting every confidence by the same amount leaves AUROC unchanged).</li>
+<li><strong>The recipe needs two fields per example:</strong> confidence and correctness.</li>
+</ul>
+<p><strong>Why rank it at all:</strong> it is thin as evidence. It is ranked, qualified, because this week five-plus vendors started shipping <strong>probability-emitting judges</strong> (tonight: Langfuse <code>metadata.typesafe</code>, LiteLLM routing probabilities), and none of them reports calibration against ground truth. The 1834 JEV-as-a-Judge paper measured judges at 0.90–0.96 confidence while near chance on reference-free prose. This paper names that gap and gives the minimal fix.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>Store <code>judge_confidence</code> next to <code>judge_label</code> and any eventual ground-truth label.</strong> Then ECE, Brier and a reliability diagram are one SQL aggregate, a natural BQAA feature.</li>
+<li><strong>Tag the confidence type</strong> (logprob / verbalized / decision-model probability). They are not interchangeable.</li>
+<li><strong>Keep per-step confidence on agent spans</strong>, so calibration can be computed over whole traces.</li>
+</ol>
+<h3>9. NEW rank: <a href="https://arxiv.org/abs/2609.26777">arXiv:2609.26777 — SWE-Serve: Benchmarking Agentic Engineering For Production Inference Serving</a> (Williams, Farris, Farris — NVIDIA; Jiao — NVIDIA + UC Berkeley; v1, Sep 22 2026; 43 pp)</h3>
+<p><strong>What it does:</strong></p>
+<ul>
+<li><strong>Tasks:</strong> 53 repository-grounded tasks from merged SGLang changes (12 CPU, 41 single-H100). Qualification: 53/53 reject the unchanged repo and accept the reference.</li>
+<li><strong>Scoring:</strong> hidden fail-to-pass and pass-to-pass tests. 19 tasks also carry 276 model-serving end-to-end tests.</li>
+<li><strong>Runs:</strong> 11 models, 31 model–effort configurations, 3 runs each.</li>
+</ul>
+<p><strong>Results:</strong></p>
+<ul>
+<li>The best configurations reach <strong>75% pass@1</strong> (Opus 5 max at $17.40 per task; GPT-5.6 Sol max at $12.26).</li>
+<li><strong>Four configurations tie at 64% with a 7.6× cost spread</strong> ($0.95–$7.24).</li>
+<li><strong>The E2E gap is the headline:</strong> on 19 tasks / 627 patches, removing E2E tests from scoring lifts the pass rate <strong>from 45.9% to 69.4% (+23.4 pp, CI 13.4–34.4)</strong>. A matched control removing the same number of non-E2E tests adds only half as much.</li>
+<li><strong>Harness comparison:</strong> Codex scored 73.6% and Claude Code 69.8%, vs 75.5% for a bash-only scaffold.</li>
+<li><strong>Open-book pilot:</strong> agents retrieved the upstream solution on up to 32.1% of tasks.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>One serving system.</li>
+<li>3 runs with normal-approximation CIs.</li>
+<li>The E2E finding rests on 19 tasks.</li>
+<li>Contamination is only mitigated by a canary string and closed-book runs.</li>
+<li><strong>Release promised, but no URL in the paper.</strong></li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>Split agent outcomes into fail-to-pass, pass-to-pass (regression) and E2E tiers.</strong> One success bit hides about a third of production failures here.</li>
+<li><strong>Cost per solved task separates configurations with equal pass rates</strong>, a BQAA view that needs only cost + outcome per run.</li>
+<li><strong>Auditing trajectories for external fetches</strong> (solution retrieval) is a concrete trace-analytics use case.</li>
+</ol>
+<h3>10. NEW rank (qualified): <a href="https://arxiv.org/abs/2609.25443">arXiv:2609.25443 — ZeroGate: Trust-Preserving Fast Paths for Governed AI Agent Runtimes</a> (Wang — Ond Holdings; single author, vendor; v1, Sep 21 2026; 47 pp)</h3>
+<p><strong>What it does:</strong></p>
+<ul>
+<li><strong>ActionPass:</strong> an issuer signs a short-lived, single-use approval for one exact action. At dispatch, a trusted adapter rebuilds the final action from the bytes actually sent.</li>
+<li><strong>One transaction:</strong> a local gate verifies the binding, then consumes the nonce, updates quota and writes an <strong>admission receipt</strong> in one SQLite transaction.</li>
+<li><strong>Four separate records:</strong> the paper insists on keeping request, grant, admission receipt and effect evidence distinct. Operator states are prepared / admitted / outcome-pending / effect-verified.</li>
+</ul>
+<p><strong>Results:</strong></p>
+<ul>
+<li><strong>Semantic fixtures:</strong> 0/1,360 false allows. Ablations produce 80–1,300 false allows, e.g. 140 without action binding and 240 without freshness checks.</li>
+<li><strong>Azure cloud study:</strong> 4,800/4,800 attempts succeeded. p95 time to permission is ~10 ms vs 25–334 ms synchronous. <strong>But the full lifecycle is slower at every concurrency level</strong> (e.g. 4.26 s vs 53 ms at C=1). The author says it is &quot;not a net speedup.&quot;</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>Single author, vendor-affiliated, not peer-reviewed.</li>
+<li>All fixture labels written by the author.</li>
+<li>One deployment; freshness and revocation distribution not implemented; nonce enforcement on a single host.</li>
+<li>Artifact released (github.com/OndCo/Agent-Action-Boundary-Benchmark plus arXiv ancillary).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ol>
+<li><strong>Log approval, admission and effect as separate event types</strong>, joined by pass hash / action fingerprint. An &quot;approved&quot; or &quot;admitted&quot; row must never read as &quot;completed.&quot;</li>
+<li><strong>Useful anomaly checks:</strong> executed payload hash ≠ approved hash, reused nonce, admission against a stale policy epoch.</li>
+<li><strong>Show lifecycle latency next to gate latency.</strong> A p95-to-dispatch dashboard alone would hide the 1.5–4.2 s cost measured here.</li>
+</ol>
+<h3>Rejected as duplicate (not read)</h3>
+<ul>
+<li><strong>Emergent Collusion <code>2609.24967</code>:</strong> <strong>already carded</strong> (2026-09-21-1834). Pack pitches rejected as duplicates.</li>
+</ul>
+<h3>Not read this slot (title or abstract only)</h3>
+<ul>
+<li><strong>Agensh <code>2609.26781</code></strong> (1,024-agent self-organizing harness) and <strong>SARA <code>2609.26763</code></strong> (SLO-aware disaggregated serving) are infrastructure-side. Title/abstract only; WATCH.</li>
+<li><strong>Lean Pool <code>2609.25199</code>:</strong> scout NOTE (formalized-math archive), not agent analytics.</li>
+<li>Carried holds unchanged: ACLArena <code>2609.23989</code> REJECT; D-RAC <code>2609.24220</code> HOLD; SkillSpec <code>2609.06052</code> WATCH.</li>
+</ul>
+<h2>Six-week EV (what to expect by early November)</h2>
+<ol>
+<li><strong>A third OSS trace/eval store ships decision-model evaluators with probabilities stored as typed fields</strong> (e.g. Phoenix OSS, MLflow, Opik self-host UI parity). <strong>~60%.</strong> Langfuse set the template tonight; the others already have Jev as a hosted judge.</li>
+<li><strong>LiteLLM <code>v1.103.0</code> goes stable with the Jev classifier and compaction guardrail on main.</strong> <strong>~80%.</strong> Backporting to four lines suggests the rc is close.</li>
+<li><strong>Mastra <code>1.69.0</code> reaches <code>latest</code> with Classifier, ClassifierProcessor (fail closed) and <code>Workflow.classifier()</code>.</strong> <strong>~85%</strong> (carried). alpha.4 landed tonight.</li>
+<li><strong>Someone publishes a calibration audit of Jev-as-judge or routing probabilities on production traces</strong> (ECE/Brier vs human labels). <strong>~35%.</strong> Four papers this week point at the gap; nobody has the joined data yet.</li>
+<li><strong>Codex 0.157.0 goes stable with compaction-boundary resume.</strong> <strong>~80%</strong> (carried).</li>
+<li><strong>An OTel GenAI semconv issue proposes a routing-decision or classifier operation</strong> (not only <code>evaluate</code>), citing LiteLLM router headers or the AI SDK. <strong>~30%.</strong></li>
+</ol>
+<h2>Verification &amp; tool honesty</h2>
+<ul>
+<li><strong>This brief's own probes (~08:00–08:15Z Sep 23):</strong></li>
+<li><strong>GitHub release lists</strong> for about 30 repos (listed under Industry).</li>
+<li><strong>Release bodies:</strong> Langfuse v4.42.0; Codex 0.156.1; pydantic-ai v2.48.0; LiteLLM v1.102.1 / v1.101.1 / v1.100.2 / v1.99.3 / v1.104.0-dev.1; MLflow v2.11.5.</li>
+<li><strong>PR bodies:</strong> Langfuse #17733, #17778, #17797; LiteLLM #42595, #41615, #41757; Mastra #24768, #24747, #24564, #24793.</li>
+<li><strong>Codex compare:</strong> <code>alpha.10...alpha.11</code> (27 commits, full list).</li>
+<li><strong>npm:</strong> dist-tags and times for <code>@openai/codex</code> and <code>@mastra/core</code> (alpha.3 04:21:41Z, alpha.4 08:01:31Z).</li>
+<li><strong>PyPI JSON:</strong> litellm, pydantic-ai, langfuse, opik, deepeval, arize-phoenix, google-adk, langsmith, mlflow.</li>
+<li><strong>arXiv:</strong> abs pages for 12 candidates; ceiling probe (26796=200; 26797 and 26800=404); pin <code>2609.02702</code> <code>[v1]</code> only.</li>
+<li><strong>Full-PDF reads (five independent readers, each end to end with the last page confirmed):</strong></li>
+<li>2609.25804 (33 pp, to App. H Table 12);</li>
+<li>2609.26760 (16 pp, to App. B.1);</li>
+<li>2609.25913 (14 pp, to App. G Table 8);</li>
+<li>2609.25938 (34 pp, to App. H);</li>
+<li>2609.26489 (8 pp, full);</li>
+<li>2609.26707 (52 pp; main text, App. A and App. C in full; <strong>App. B proofs pp. 29–47 skimmed</strong>, disclosed);</li>
+<li>2609.26779 (25 pp, full);</li>
+<li>2609.26457 (28 pp, full).</li>
+<li>2609.26777 (43 pp, full);</li>
+<li>2609.25443 (47 pp, full, including references).</li>
+</ul>
+<p>Abstract-vs-body discrepancies are recorded in each card (e.g. the LMArena policy qualifier in 26707).</p>
+<ul>
+<li><strong>Pack trust posture:</strong></li>
+<li><strong>Muse 1932:</strong> Codex 0.156.1 and the arXiv shortlist verified.</li>
+<li><strong>DSH 2032:</strong> pydantic-ai v2.48.0 timestamps verified exactly.</li>
+<li><strong>Agy 2132:</strong> Mastra alpha.3 verified. It filed LiteLLM 1.102.1 as WATCH without reading the release body, which <strong>contains the Jev backport</strong>.</li>
+<li><strong>Muse 2232:</strong> alpha.11 verified.</li>
+<li><strong>DSH 2332 / Agy 0032:</strong> <strong>both mis-pitched already-carded 2609.24967 as a new candidate</strong>, which the catalog grep caught. Agy 0032's Langfuse v4.42.0 description is accurate.</li>
+<li><strong>Social surfaces:</strong> the packs report no X, Reddit or LinkedIn product signal beyond the release objects above. No <code>site:</code> substitution; nothing invented. Medium not used.</li>
+<li><strong>Rules and read-only state:</strong></li>
+<li>Crustdata not called (forbidden). Fable not used. No first-party BQAA material carded. No Desk section.</li>
+<li>The hub repo <code>caohy1988.github.io</code> was not edited or pushed.</li>
+<li>Catalog baseline read-only: <strong>350 / 93 / 95</strong>.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 23 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
