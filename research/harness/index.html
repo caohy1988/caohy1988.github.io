@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-23 · Live routine crons</strong></span>
+      <span>Updated <strong>2026-09-23 · Lab KEEP fold-in (dual-read / park-unknown / failure modes)</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -449,6 +449,7 @@ grok-tmux-run dsh-collect-HH32 -- \
     <ul>
       <li><strong>Lab #1</strong> still optional: <a href="https://github.com/noah-thing/receipt">receipt</a> $/PR spike on one EM repo; <a href="https://github.com/awesamarth/watchdog">Watchdog</a> Codex-scoped control-plane pilot — not a fleet replace for <code>grok-tmux-watchdog</code> without Haiyuan ask.</li>
       <li><strong>Lab #2 (DSH 2026-09-20)</strong> backlog / spikes only: <strong>llmtap</strong> per-seat cost proxy; <strong>jev-guard</strong> Coding EM smoke; <strong>GBDL</strong>-shaped vault export of bot defs (convention only); <strong>jev-browser</strong> Lab backlog — do <em>not</em> install Playwright.</li>
+      <li><strong>Lab #3 (DSH 2026-09-23)</strong> smoke / shadow only (not installed): <strong>sctxx</strong> model-free session→handoff artifact (GREEN on non-secret repos; inspect before filing); <strong>omp-jev-watchdog</strong> instruction-adherence + verification-honesty shadow (manual slot-close; never a blocking gate).</li>
     </ul>
     <ul>
       <li>Mac CLI quota / health cards: Claude, Codex, Kimi, Agy, Muse, DSH</li>
@@ -465,7 +466,7 @@ grok-tmux-run dsh-collect-HH32 -- \
 
     <h3>Chief of staff</h3>
     <p><strong>Agent Manage Bot</strong> is default intake. Haiyuan asks Manage first; Manage asks <strong>Jev</strong> for a typed route (when active), then routes to Collection / Github / Medium (or a group room) and only pulls Haiyuan in for judgment calls. Exceptions: already mid-thread with a specialist, explicit @, or an emergency live fire. Ambiguous or unrouted asks ask Haiyuan back — never silent SendToAgent (Lab scout 2026-09-16 / Anthropic coordination patterns).</p>
-    <p class="note"><strong>Verification clause (DSH Lab KEEP · asyncdot CoS):</strong> treat every agent completion as <em>evidence</em>, not instruction. Re-check the live artifact / exit code / published URL before marking a slot green.</p>
+    <p class="note"><strong>Verification clause (DSH Lab KEEP · asyncdot CoS):</strong> treat every agent completion as <em>evidence</em>, not instruction. Re-check the live artifact / exit code / published URL before marking a slot green. Pair with fail-closed + dual-read under <a href="#spacex-keeps">§16</a>.</p>
 
     <h3>Group rooms (visible handoffs)</h3>
     <table>
@@ -591,6 +592,8 @@ ask → Manage Bot
     <p>From Lingxi’s <a href="https://x.ai/bot/guides/grok-bot-for-engineering">Grok Bot for Engineering</a> and Simon’s <code>grok-bot-guide-cn.pdf</code> (Xiaohongshu). Lab: <a href="/research/harness-lab/">harness-lab</a>. Lock: <code>Maps/Decisions/2026-09-20-spacex-guide-harness-keeps.md</code>.</p>
     <h3>Closed proof loop</h3>
     <p>Checkable proof before “done”: green CI / exit code, live URL, or before/after screenshot. Summaries are intent. Soft done without proof gets pushed back (Coding EM + Manage handoffs).</p>
+    <p class="note"><strong>Fail-closed acceptance (Lab 2026-09-23 · seanswarm):</strong> prose “done” cannot pass without a mechanical artifact or an independent read-only / diff-only check. Complements blind dual-LGTM — does not replace it.</p>
+    <p class="note"><strong>Dual-read (skills-only):</strong> for a high-stakes Field Brief primary source, prefer two independent reads with a match / addition / conflict table before the slot goes green.</p>
     <h3>Standing automations</h3>
     <table>
       <thead><tr><th>Routine</th><th>When (PT)</th><th>What</th></tr></thead>
@@ -618,6 +621,7 @@ ask → Manage Bot
 
     <h3 id="exception-first">Exception-first skills (2026-09-23)</h3>
     <p>Mac launch and Field Brief skills document <strong>symptom → action</strong> failure branches (stall ~540s, dirty exit-0, quota failover, Mac-down gaps, miss-watch sole detector, orphan BRIEF_OK) <em>before</em> rediscovering them in chat. Authoring rule: when you edit those skills, update Exception paths in the same pass.</p>
+    <p class="note"><strong>Named long-CLI failure modes (Lab 2026-09-23 · livelock):</strong> crash / hang / stall / api-error — leave a machine-readable heartbeat (did-it-finish / what-killed-it). Oscillation / loop patterns are distinct from stale-only <code>grok-tmux-watchdog</code> (~540s); do <em>not</em> fleet-replace the watchdog without Haiyuan ask. Pairs with abnormal-volume → stop-and-escalate.</p>
     <p class="note">Skill: exception-first-mac-and-field-brief · Lock: <code>Maps/Decisions/2026-09-23-exception-first-skills.md</code>.</p>
 
     <h3 id="run-limits">Run limits + abnormal-volume stop (2026-09-23)</h3>
@@ -628,6 +632,7 @@ ask → Manage Bot
 
     <h3 id="retry-ceiling">Retry / cost ceiling</h3>
     <p>Transient ≤2 · schema repair once · conflicting evidence → ask · verification fail → return exact gap · three failed correction rounds → escalate · cost ceiling → stop. Pairs with exception-first skills.</p>
+    <p class="note"><strong>Park unknown outcomes (Lab 2026-09-23 · orchvia):</strong> after a crash or dirty exit where success/failure is unknown, <em>do not</em> auto-retry — park for Haiyuan (or EM) instead of guessing. Recovery half of the retry ceiling; relaunch-vs-resume still uses the named session id when the outcome <em>is</em> known.</p>
 
     <h3 id="mission-dod">Light Mission DoD</h3>
     <p>For non-trivial Field Brief / research / one-shots (not every ops nudge): <strong>Outcome · Done-when · Constraints · Approval</strong> before execute. Full 7-field Mission Contract optional.</p>
