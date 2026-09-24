@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-23 · Lab KEEP fold-in (dual-read / park-unknown / failure modes)</strong></span>
+      <span>Updated <strong>2026-09-23 · Jev research + completion gates (shadow)</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -537,14 +537,17 @@ ask → Manage Bot
     <table>
       <thead><tr><th>Gate</th><th>When</th><th>Primary Choice</th><th>Also asks</th></tr></thead>
       <tbody>
-        <tr><td><code>intake</code> (default)</td><td>Ambiguous route / fan-out</td><td><code>route</code>: inline | field_brief | coding_em | escalate</td><td>Score <code>cost_risk</code>; Noul <code>needs_owner</code></td></tr>
+        <tr><td><code>intake</code> (default)</td><td>Ambiguous route / fan-out (live worker menu via <code>available_workers</code>/<code>unavailable</code>)</td><td><code>route</code>: inline | field_brief | coding_em | escalate</td><td>Score <code>cost_risk</code>; Noul <code>needs_owner</code></td></tr>
         <tr><td><code>pre_browser</code></td><td><strong>Before</strong> computerUse / browser</td><td><code>browser_action</code>: proceed | skip | escalate</td><td>Noul <code>page_looks_safe</code>; Score <code>waste_risk</code>; Score <code>cost_risk</code></td></tr>
         <tr><td><code>pre_retry</code></td><td><strong>Before</strong> expensive Mac CLI retry</td><td><code>retry_decision</code>: retry | abort | escalate</td><td>Score <code>likely_succeed</code>; Score <code>cost_risk</code></td></tr>
         <tr><td><code>pre_research</code></td><td><strong>Before</strong> Field Brief / full scout</td><td><code>research_depth</code>: skip | light_web | full_scout | escalate</td><td>Score <code>cost_risk</code></td></tr>
         <tr><td><code>pre_tool</code></td><td><strong>Before</strong> high-risk MCP / Shell mutations</td><td><code>verdict</code>: allow | ask | deny</td><td>Score <code>destructive</code>/<code>exfil_risk</code>/<code>cost_risk</code>; Noul <code>in_grant</code>/<code>args_plausible</code>/<code>on_task</code></td></tr>
+        <tr><td><code>research_check</code> <em>(shadow)</em></td><td>Field Brief citation step</td><td><code>research_verdict</code>: accept | verify_more | reject</td><td>Score <code>source_strength</code>; Noul <code>primary_source_present</code>; Score <code>cost_risk</code></td></tr>
+        <tr><td><code>completion_check</code> <em>(shadow)</em></td><td><strong>Before</strong> reporting non-trivial task done</td><td><code>completion_verdict</code>: complete | verify_more | incomplete</td><td>Noul <code>all_outputs_evidenced</code>; Score <code>gap_severity</code>; Score <code>cost_risk</code></td></tr>
       </tbody>
     </table>
     <p class="note"><strong>pre_tool local policy:</strong> deny→stop; ask→CoS/Haiyuan; allow→proceed. Honor if <code>verdict</code> confidence ≥ floor (0.55); else CoS. <strong>Never authorizes send/pay/merge.</strong></p>
+    <p class="note"><strong>Company-in-a-Box shadow gates (2026-09-23):</strong> <code>research_check</code> + <code>completion_check</code> always return <code>honor: false</code> / <code>shadow: true</code> (per-gate <code>gate_modes</code> in <code>router.json</code>) — log the verdict, never block. Promote to active after Three-Run Proof. <strong>Live worker menu</strong> on <code>intake</code>: optional state <code>available_workers</code> / <code>unavailable</code> so callers only offer workers that exist right now (e.g. Mac offline → drop <code>coding_em</code> or escalate). Metrics to track later: routing accuracy, research escapes, false completion, unnecessary human interruptions, recovery. Source: <a href="https://x.com/unicodef1wn/status/2102375891875581966">unicodef1wn · AI Company-in-a-Box</a>.</p>
     <p class="note">CoS packet rule (CyrilXBT): break missions into small packets + verify — <strong>Jev picks packet owner / route; Grok/Mac execute</strong>. Lab KEEP candidate only: <strong>jev-browser</strong> (Playwright + Jev click decisions) — do <em>not</em> install Playwright yet.</p>
 
     <h3 id="jev-session">Live session (2026-09-20)</h3>
