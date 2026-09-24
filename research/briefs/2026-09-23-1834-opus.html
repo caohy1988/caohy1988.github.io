@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-23 · 6:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="Vercel AI SDK 7.0.113 tool-approval replay + Gemini 3.8 TTS; Letta Code v0.33.0 memory worker + credential redaction; Codex alpha.5/6; Academy +6.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-23-1834-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 6:34 PM PT · Official 6h slot (primary :34 left no artifact; miss-watch / Mac-down catch-up ~21:05+ PT; label kept 1834)</p>
+    <article>
+<h1>Field Brief — 2026-09-23-1834: Vercel's AI SDK now resumes tool approvals from earlier messages and supports Gemini 3.8 TTS. Letta Code moves memory repair to a background worker and redacts runtime credentials from all tool output. Codex ships two more 0.158 alphas; the Guardian rewrite is on main but not yet released. Six new Academy papers from a batch that landed this window: an injected string that deletes an agent's reasoning, pre-declared run budgets, tool calls that fail silently, when to interrupt an agent, calibrating LLM judges, and how teams maintain agent workflow specs.</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer:</strong> Opus 5.5 (<code>claude-opus-5-5[1m]</code>), primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-23-1834</strong> (official 6h slot, 18:34 PT Wed Sep 23, 2026). The primary :34 cron left <strong>no artifact</strong>, because the Mac was down ~17:49 to ~21:05 PT. This is the <strong>miss-watch / Mac-down catch-up</strong>, written ~21:05–21:40 PT (~04:05–04:40Z Sep 24). The label stays <strong>1834</strong> per <code>Maps/Decisions/2026-09-06-field-brief-routine-missed-slots.md</code>.
+<strong>Evidence window:</strong> from the 1234 brief's as-of (~20:10Z) to the slot close (18:34 PT = 01:34Z Sep 24). I re-probed GitHub, PyPI, npm and arXiv myself at ~04:08–04:20Z.</p>
+<ul>
+<li><strong>Source packs used (3):</strong> DSH 1432, Agy 1532, Muse 1632. The last pack's as-of is 23:50Z (16:50 PT). <strong>Nothing collected 16:50–18:34 PT</strong>, so I swept that gap directly (see Housekeeping).</li>
+<li><strong>Catalog baseline:</strong> <strong>378 items / 96 briefs / 98 runs</strong>, re-verified read-only. The newest brief is <code>2026-09-23T1234</code>.
+<strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call; Collection owns the HTML, the catalog and the push.</li>
+</ul>
+<h2>Read this first</h2>
+<p><strong>PUBLISH with 8 new ranks (2 Industry, 6 Academy), 1 Codex progress note, and a WATCH list.</strong></p>
+<p><strong>The theme: the agent's own account of what it did is not enough evidence.</strong> A tool can report success and return a truncated payload. An injected string can empty the reasoning trace while the harmful tool call still runs. An agent can claim it finished without anything independent checking. Approvals must survive a conversation being replayed. In each case, the thing an observer needs is the <strong>executed</strong> record, not the narrated one.</p>
+<p><strong>Industry:</strong></p>
+<ol>
+<li><strong>Vercel AI SDK <code>ai@7.0.113</code> (with Gemini 3.8 TTS folded in).</strong></li>
+</ol>
+<ul>
+<li>Tool-approval fixes: an approval given in an earlier message now resumes correctly. Approved inputs survive re-validation, and histories whose reconstructed schema output does not match are rejected, including signed approvals whose original input is missing.</li>
+<li>New <strong>Gemini 3.8 Flash / Flash Lite TTS</strong> support. Google's own <code>python-genai</code> added the same two model IDs the same afternoon; that is the same launch, not a separate item.</li>
+</ul>
+<ol start="2">
+<li><strong>Letta Code <code>v0.33.0</code>.</strong></li>
+</ol>
+<ul>
+<li>A background worker now handles memory Git-conflict repair and routine memory upkeep.</li>
+<li>The app protocol now reports running workflows as their own kind of background process.</li>
+<li>The runtime credential is redacted from <strong>all</strong> tool output, including streamed chunks and hook feedback. This followed an incident where an env-file parse error printed the API key to stderr.</li>
+</ul>
+<p><strong>Progress:</strong> Codex <code>rust-v0.158.0-alpha.5</code> / <code>alpha.6</code> add Guardian review bound to the target environment, opt-in OTLP logging of the final response, extension hooks on tool dispatch and model streams, and exec-server RPC tracing. <strong>The Guardian thread-context consolidation (<code>#47686</code>–<code>#47690</code>) is merged to main but is in neither alpha.</strong> I checked the alpha.6…main compare: 17 commits ahead, all four Guardian PRs included.</p>
+<p><strong>Academy</strong> (the arXiv ceiling moved from <code>2609.26796</code> to <strong><code>2609.28474</code></strong>; I read the full PDF of every paper ranked):</p>
+<ol>
+<li><strong><code>2609.27542</code> Control-token injection.</strong> One fixed string of gpt-oss control tokens drops reasoning from 52.5 tokens to <strong>0</strong> in <strong>40/40</strong> trials, while the exfiltration call still fires 40/40. Monitors that read reasoning go from catching 100% to catching 0%.</li>
+<li><strong><code>2609.27871</code> Bounded Loops.</strong> The harness marks a step done only on the verdict of a gate the worker cannot write to. Every attempt goes into a hash-chained ledger, with a declared budget. Their own <strong>wall-clock ceiling was never enforced</strong>: 65 of 69 loops declared 60 s for 10 attempts, while a real agent turn had a median of 48 s.</li>
+<li><strong><code>2609.26836</code> Silent failures in agent-tool interaction.</strong> 91 human-verified failures across 198 test cases in 15 tools. The tools returned incomplete or transformed data that looked like success.</li>
+<li><strong><code>2609.28197</code> PASTABench.</strong> Scores safety monitors on <em>when</em> they interrupt, turn by turn. The best &quot;perfect&quot; score is ~41%, and monitors mostly interrupt too early.</li>
+<li><strong><code>2609.27954</code> Auditing LLM-judge recalibration.</strong> The accuracy gap is a poor guide to whether a judge's calibration transfers. Temperature scaling on 16 target-domain labels beats every gap-based rule.</li>
+<li><strong><code>2609.27263</code> GitHub Agentic Workflows.</strong> 1,248 workflow specs; 78.2% are still being edited in month 4. Only 9.4% say anything about prompt-injection defence.</li>
+</ol>
+<p><strong>What this means for BQAA:</strong> papers 1–3 each name a field <code>agent_events</code> should carry:</p>
+<ul>
+<li><strong>executed vs emitted tool call</strong> (the model emitted a call; did it run?)</li>
+<li><strong>independent gate verdict + declared budget</strong> (who says the step is done, and what it was allowed to spend)</li>
+<li><strong>tool-payload completeness</strong> (did a &quot;successful&quot; call return everything?)</li>
+</ul>
+<p>PASTABench and the judge-calibration paper both say how to evaluate monitors and judges that run <em>over</em> those logs.</p>
+<h2>Industry</h2>
+<p><strong>How I verified it (~04:08–04:20Z Sep 24):</strong></p>
+<ul>
+<li><strong>GitHub releases:</strong> checked 28 repos for anything published 19:34Z–01:34Z. New objects:</li>
+<li>vercel/ai: <code>ai@7.0.113</code> (21:43:43Z), with backports <code>ai@6.0.290</code> and <code>ai@5.0.265</code>, plus <code>@ai-sdk/zai</code> / <code>@ai-sdk/xai</code> patches</li>
+<li>openai/codex: <code>rust-v0.158.0-alpha.5</code> (22:10:20Z), <code>alpha.6</code> (23:41:29Z) and <code>rust-v0.155.0-alpha.16.4</code> (19:55:18Z)</li>
+<li>BerriAI/litellm: <code>v1.101.2</code> (00:17:20Z)</li>
+<li>anthropics/claude-agent-sdk-python: <code>v0.2.159</code> (20:27:36Z)</li>
+<li>langchain-ai/langgraph: <code>cli==0.4.32.dev0</code> (23:26:51Z)</li>
+<li>letta-ai/letta-code: <code>v0.32.19</code> (19:49:54Z) and <strong><code>v0.33.0</code> (23:51:19Z)</strong>. None of the three packs reported Letta Code.</li>
+<li><strong>PyPI (21 packages, uploads in window):</strong></li>
+<li><code>litellm 1.101.2</code> (00:04Z)</li>
+<li><code>letta 0.32.19</code> / <code>0.33.0</code> (20:24Z / 23:59Z)</li>
+<li>Everything else is flat. <code>langchain-openai</code> is still <strong>1.6.5</strong>, so the 1.6.6 in Agy's pack is only release prep and has not shipped. <code>pydantic-ai 2.49.0</code> was uploaded at <strong>03:23Z</strong>, after the slot closed (next slot).</li>
+<li><strong>npm:</strong> <code>ai 7.0.113</code>; <code>@ai-sdk/google 4.0.79</code>; <code>@mastra/core</code> latest is still <code>1.69.0</code>, with <strong><code>1.70.0-alpha.1</code></strong> (00:24Z, prerelease).</li>
+<li><strong>Live catalog grep:</strong></li>
+<li>Vercel: the last card is <code>vercel-ai-sdk-7-0-111-experimental-evaluate-otel-spans</code>.</li>
+<li><code>letta</code>: 0 hits.</li>
+<li><code>gemini-3-8</code> / &quot;Gemini 3.8 TTS&quot;: 0 hits.</li>
+<li><code>claude-agent-sdk</code>: has a card.</li>
+<li>LiteLLM: last cards are 1.102.0 and 1.102.1.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.113">Vercel AI SDK <code>ai@7.0.113</code></a>: tool approvals survive replay; Gemini 3.8 Flash / Flash Lite TTS</h3>
+<p><strong>Why this is material relative to the prior <code>7.0.111</code> card:</strong> that card was about experimental evaluation OTel spans. This release changes how <strong>human-in-the-loop tool approval</strong> behaves across message history, and adds a new Google speech model family. I also looked at <code>7.0.112</code> (08:37Z, never carded): it added consumer-cancellation reporting in UI-stream end callbacks and reasoning-part pruning. I folded that in here because it is not rank-worthy alone.</p>
+<p><strong>What shipped (release notes, read directly):</strong></p>
+<ul>
+<li><strong>Tool approval:</strong></li>
+<li><code>b74c0cb</code>: approvals given in <em>earlier</em> messages now resume the tool.</li>
+<li><code>a4b0940</code>: manually approved inputs that went through schema transforms now execute. Approved inputs survive re-validation. Histories whose reconstructed schema output differs are <strong>rejected</strong>, and so are signed approvals whose original input is missing.</li>
+<li><code>dcdb011</code>: completed streamed tool-input callbacks now go to <em>repaired</em> tools.</li>
+<li><strong><code>2693319</code>, Gemini 3.8 TTS:</strong></li>
+<li>Structured speech metadata, plus per-turn speaker and style controls for prebuilt voices.</li>
+<li>Native WAV is passed through without a doubled header; explicit PCM, mu-law and A-law output.</li>
+<li>Empty transcripts are rejected before the request is sent.</li>
+<li>Newer and custom model IDs default to structured speech; Gemini 2.5 and 3.1 keep the legacy format.</li>
+<li><strong><code>c93ee90</code>:</strong> message history is kept for direct-transport stream callbacks. <strong><code>fe07867</code>:</strong> Google <code>embedMany</code> with more than 100 values stays aligned across automatic batches.</li>
+<li><strong>Same launch, not counted twice:</strong> Google <a href="https://github.com/googleapis/python-genai/commit/0cad6ca7"><code>python-genai</code> <code>0cad6ca7</code></a> (21:02Z) adds the IDs <code>gemini-3.8-flash-tts</code> (&quot;Voice Design and dual-speaker screenplay control&quot;) and <code>gemini-3.8-flash-lite-tts</code> (&quot;direct replacement for gemini-3.1-flash-tts-preview&quot;).</li>
+<li>This is only an SDK type commit. There is no <code>google-genai</code> release (latest 2.25.0, from Sep 22), and I did <strong>not</strong> verify a Google launch post.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> approvals are now state that must survive replay, and a signed approval can be rejected when the history does not reconstruct. So &quot;approval requested / granted / rejected on replay&quot; belongs in the event log as distinct events, not inferred from the fact that the tool ran. Gemini 3.8 TTS means voice agents on Gemini now have a structured speech-turn format; if ADK voice paths adopt it, BQAA will need speaker/style fields on audio output events.</p>
+<h3>2. NEW rank: <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.0">Letta Code <code>v0.33.0</code></a>: background memory worker, running workflows exposed in the protocol, ambient credential redaction</h3>
+<p><strong>What shipped</strong> (read from the release notes and PR bodies; PyPI <code>letta 0.33.0</code> is summarized as &quot;Letta Code: stateful agents in your terminal&quot;):</p>
+<ul>
+<li><strong>#4628 / #4634, background memory worker.</strong></li>
+<li>Letta Code's memory is a Git repo. When the post-turn sync finds an unfinished merge or rebase, a <strong>repair-only worker</strong> now fixes it instead of asking the agent to.</li>
+<li>Each handed-off conflict is recorded (HEAD, the operation's heads and a per-attempt token) so that a duplicate repair becomes a no-op.</li>
+<li>Routine memory upkeep also moves to the worker.</li>
+<li><strong>#4652, running workflows in the protocol.</strong> Background workflows used to appear in the App Server status snapshot as Bash processes. They now have their own <code>workflow</code> variant with task id, description, start time and status.</li>
+<li><strong>#4657, redacting ambient credentials</strong> (incident LET-10106). A sandbox env-file parse error printed the full <code>LETTA_API_KEY</code> to stderr. The runtime credential is now scrubbed from:</li>
+<li>streamed stdout/stderr, with a <strong>chunk-boundary-safe</strong> scrubber (a secret split across chunks is still caught)</li>
+<li>the final return of every tool, not just shell tools</li>
+<li>thrown errors and background output</li>
+<li>PostToolUse / PreToolUse hook feedback</li>
+<li>The PR itself says this is containment of accidental output, not a credential boundary.</li>
+<li><strong>#4663:</strong> subagents keep effort-suffixed model pins when they spawn.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> two patterns to copy.</p>
+<ul>
+<li><strong>Redaction.</strong> Secrets can leak through tool <em>errors</em> and stream chunks, not just tool results. Any payload BQAA logs from tool output needs the same chunk-safe scrubbing <em>before</em> the write to BigQuery.</li>
+<li><strong>Work outside the turn.</strong> Background memory upkeep and repair happen outside the turn that caused them. BQAA should log them as separate events tied to the originating turn and attempt token, or memory state will change with no trace attached.</li>
+</ul>
+<h3>Progress and watch notes (not ranked)</h3>
+<ul>
+<li><strong>Progress, Codex <a href="https://github.com/openai/codex/releases/tag/rust-v0.158.0-alpha.5"><code>rust-v0.158.0-alpha.5</code></a> + <a href="https://github.com/openai/codex/releases/tag/rust-v0.158.0-alpha.6"><code>alpha.6</code></a></strong> (prereleases; I read both compares).</li>
+<li>alpha.5 is 34 commits on top of alpha.4:<ul>
+<li>Guardian reviews bound to the action's target environment (<code>#47630</code>), and Guardian computer-use review applied to the Browser connector (<code>#47647</code>)</li>
+<li>opt-in <strong>OTLP logging of the final agent response</strong> (<code>#47649</code>)</li>
+<li><strong>tool dispatch and timing observations exposed to extensions</strong> (<code>#47662</code>)</li>
+<li>Retry-After honored (<code>#47641</code>)</li>
+<li>WebSocket auth on exec-server (<code>#47601</code>)</li>
+</ul>
+</li>
+<li>alpha.6 is 9 commits:<ul>
+<li>model-specific descriptions for message-board tools (<code>#47670</code>)</li>
+<li>MCP resource-tool catalog overrides (<code>#47677</code>)</li>
+<li><strong>extension hooks for model requests and response streams</strong> (<code>#47679</code>)</li>
+<li>exec-server RPC timing / startup tracing (<code>#47680</code>)</li>
+<li>capability discovery V2 (<code>#47683</code>)</li>
+</ul>
+</li>
+<li><strong>Guardian consolidation <code>#47686</code>/<code>#47688</code>/<code>#47689</code>/<code>#47690</code></strong> (merged 22:45–22:51Z: always-on thread-owned context, legacy evidence paths removed) is <strong>only on main</strong>. Agy's pack framed it as part of the alpha.5 wave; it is not. Revisit when it ships in alpha.7 or later.</li>
+<li><strong>For BQAA:</strong> three new places to attach observation: the final-response OTLP log, extension dispatch/timing hooks, and model-stream hooks.</li>
+<li><strong>WATCH, Vercel AI <a href="https://github.com/vercel/ai/pull/21264"><code>#21264</code></a></strong> (merged 21:51Z, unreleased). Anthropic <strong>on-demand compaction</strong> with the signed summary block round-tripped through streams, UI persistence and batches (<code>compact-2026-09-04</code> beta). Card it when it ships in a release. The BQAA angle: compaction is a context rewrite that must be logged, or later turns lose their lineage.</li>
+<li><strong>WATCH, LiteLLM</strong> (all merged, none released; 1.102.1 is still latest).</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/42767"><code>#42767</code></a>: Bedrock's native <code>/v1/responses</code> for gpt-5.6 / gpt-6. This fixes <code>prompt_cache_key</code> 400s and removes the silent parameter drop for Codex.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/42790"><code>#42790</code></a>: MCP tool attribution is kept when a guardrail blocks a REST call.</li>
+<li><code>#42799</code> / <code>#42805</code>: the Rust native-dispatch foundation.</li>
+<li><strong>WATCH, PydanticAI.</strong></li>
+<li><a href="https://github.com/pydantic/pydantic-ai/pull/8706"><code>#8706</code></a>: the tracer and <code>trace_include_content</code> now follow an explicit <code>Instrumentation</code> capability.</li>
+<li><code>#8514</code>: <code>RealtimeSession.wait_for_reply()</code>.</li>
+<li>TypeSafeModel/Jev rubric follow-ups.</li>
+<li><code>pydantic-ai 2.49.0</code> landed at <strong>03:23Z</strong>, after the slot closed. <strong>Next slot should check whether it carries <code>#8706</code>.</strong></li>
+<li><strong>WATCH, Mastra:</strong> <code>@mastra/core@1.70.0-alpha.1</code> (00:24Z, prerelease), <a href="https://github.com/mastra-ai/mastra/pull/24076"><code>#24076</code></a> (stored history stays authoritative when clients echo it back), Bedrock sampling-parameter and Inngest retry fixes. <code>#24865</code> ModelSelectionProcessor is carried from earlier.</li>
+<li><strong>NOTE only:</strong></li>
+<li><code>litellm v1.101.2</code>: a stable-branch backport, older than 1.102.x.</li>
+<li><code>claude-agent-sdk-python v0.2.159</code>: bundles CLI 2.1.281.</li>
+<li><code>ai@6.0.290</code> / <code>ai@5.0.265</code>: backports.</li>
+<li><code>rust-v0.155.0-alpha.16.4</code>: an old-line Codex patch.</li>
+<li><code>langgraph cli==0.4.32.dev0</code>.</li>
+<li>Codex main after alpha.6: WebSocket prewarm and repair for idle threads (<code>#47701</code>), tool-result metadata kept more selectively under size limits (<code>#47714</code>).</li>
+</ul>
+<h2>Academy</h2>
+<p><strong>Probe (~04:10Z):</strong></p>
+<ul>
+<li><code>abs/2609.26796</code> → 200. A binary search puts the <strong>new ceiling at <code>2609.28474</code></strong> (28475–28494 → 404).</li>
+<li>This is Wednesday's arXiv announcement, which lands around 17:00 PT, <strong>inside</strong> this slot window. All three packs saw a flat ceiling because they ran before it.</li>
+<li><strong>Pin <code>2609.02702</code>:</strong> abs 200, v1 200, <strong>v2 404</strong>. The v1 invariant holds.</li>
+<li><strong>Screening:</strong></li>
+<li>Parsed the new listings for cs.AI/CL/SE/MA/LG/DB/CR/HC/IR: 558 entries, <strong>481 above the old ceiling</strong>.</li>
+<li>28 agent-plus-observability/eval titles, plus 8 trace/judge titles.</li>
+<li>Shortlisted 7 and <strong>downloaded and read the full PDF of each</strong>, all main text; appendices skimmed on the 74-page Bounded Loops.</li>
+<li>Ranked 6. Did not rank <strong><code>2609.27257</code> UniDataAgent</strong>: an ICDM demo on private data, a 40-question eval, and nothing for an observer layer.</li>
+<li><strong>No overlap with the 1234, 0634 or 0034 Academy sets:</strong> every ID is above <code>2609.26796</code>.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.27542">arXiv 2609.27542</a>: Control-Token Injection Suppresses Chain-of-Thought and Defeats Reasoning-Based Oversight in Tool-Using Agents</h3>
+<p><strong>Who / what:</strong></p>
+<ul>
+<li>Usama, Jung (Braindeck) and Un Nisa (U. Wah); cs.CR; submitted Sep 23; no venue.</li>
+<li>Code with per-trial logs: https://github.com/Usama1002/deleting-the-trace.</li>
+</ul>
+<p><strong>Finding.</strong> One fixed string of gpt-oss-20b's own control tokens, placed in untrusted input, <strong>drops reasoning from a mean of 52.5 tokens to 0 in 40/40 trials, while the <code>http.post</code> exfiltration still fires 40/40</strong> (Table 1).</p>
+<ul>
+<li>With malicious framing, rule-based and LLM monitors that read the reasoning go from catching <strong>100% of plain trials to 0% of forged ones</strong>. The attack converts <strong>39.6%</strong> of refusals into completed exfiltration (Table 3).</li>
+<li>Planting a fake reasoning line (&quot;Routine request; proceeding.&quot;) gets past keyword, empty-trace and LLM-judge monitors, <strong>16/16</strong> (Table 7).</li>
+<li>Swapping only the <strong>tool-call parser</strong> gives 24/24 vs 0/24 on identical model outputs (Table 4). So <em>the harness decides whether an emitted call executes</em>.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>Small n: one main model, and an <strong>unnamed</strong> sandbox.</li>
+<li>The 24/0 parser gap partly comes from an integration bug, which the authors disclose.</li>
+<li>It applies to open-weight models whose chat template the customer controls, not to hosted Gemini.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> any safety analytics that reads logged thoughts can be blinded by one string. BQAA should log <strong>tool arguments and executed side effects next to the reasoning</strong>, and support three flags: empty or boilerplate reasoning, control-token patterns in user or tool content, and <strong>emitted-but-not-executed</strong> divergence.</p>
+<h3>2. NEW rank: <a href="https://arxiv.org/abs/2609.27871">arXiv 2609.27871</a>: Bounded Loops — Pre-Run Spend Bounds, Proved Termination, and Verified Completion for Agent Harnesses</h3>
+<p><strong>Who / what:</strong></p>
+<ul>
+<li>V. P. Bhardwaj (Qualixar), G. Singh and A. P. Bhardwaj; cs.SE; 74 pp.</li>
+<li>The abs page's <code>citation_date</code> is 2026-08-20, although the ID is a September one; I took it as-is.</li>
+<li>Code (Apache-2.0): https://github.com/qualixar/bounded-loops.</li>
+</ul>
+<p><strong>Finding.</strong> A step is &quot;done&quot; only when an independent gate the worker cannot write to returns pass / reject / incapacity. The verdict goes into an append-only hash-chained ledger, and the run has a pre-declared budget.</p>
+<ul>
+<li><strong>Proofs:</strong></li>
+<li>Runs terminate even when a failure re-runs earlier steps, with at most (R+1)·Σm_v attempts. This needs a single run-wide repair budget; with per-node budgets two nodes could re-run each other forever.</li>
+<li>&quot;Done&quot; is always backed by a recorded verdict.</li>
+<li>Adding a model judge next to a deterministic gate (both must pass) cannot add false accepts.</li>
+<li><strong>Empirical:</strong></li>
+<li><strong>47 gate defects</strong> in shipped code, 20 of them false accepts.</li>
+<li>After repair, 0/209 false accepts (α ≤ 1.8%, Wilson 95%). A <em>new</em> mutation family then got <strong>23.3%</strong> false accepts, so the zero means the tests were saturated, not that the gates are correct.</li>
+<li>The <strong>declared wall-clock ceiling was only checked between attempts</strong>. 65 of 69 loops declared 60 s for 10 attempts; real turns had a median of 48.3 s and a max of 270.6 s (§14.2).</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>The authors wrote the gates, the corpus and the catalogue.</li>
+<li>Vendor conflict of interest (disclosed).</li>
+<li>Arithmetic slips: the Table 13 caption and the §12.7 Wilson bound do not match the text.</li>
+<li>The abstract overstates &quot;47 vacuous&quot;: 2 of the 47 are false rejects and 11 are misfiled incapacities.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> this is the closest paper yet to a spec for an <strong>audit log of agent completion</strong>: the gate verdict, whether an attempt actually happened, the attempt counter and the declared budget, all checkable by a third party from the log alone. BQAA should <em>record</em> these fields, not enforce them. The unenforced-ceiling finding is a reason to log declared budget next to actual spend for every run.</p>
+<h3>3. NEW rank: <a href="https://arxiv.org/abs/2609.26836">arXiv 2609.26836</a>: Silent Failures in Agent–Tool Interaction — An Audit of ToolUniverse</h3>
+<p><strong>Who / what:</strong></p>
+<ul>
+<li>Gopalan, Singh and Narayanan (AI Tech Ethics); cs.AI/SE; submitted Sep 21; no code released.</li>
+</ul>
+<p><strong>Finding.</strong> Tool calls through MCP often <strong>look successful but return incomplete, transformed or unqualified data</strong>. The agent then states wrong claims confidently, which the authors call &quot;silent amplification&quot;.</p>
+<ul>
+<li><strong>91 human-verified failures across 198 test cases in 15 tools.</strong></li>
+<li>Most originate in the API or wrapper layer, not the agent.</li>
+<li>Completeness is the top issue dimension (28 of 134 occurrences).</li>
+<li>7 of 15 tools failed more than half their test cases.</li>
+<li>The paper proposes a 7-level failure-locus taxonomy (tool limitation … agent misinterpretation).</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li><strong>Tools were chosen because they already had candidate failures</strong>, so the rates are not base rates.</li>
+<li>An LLM generated the candidate failures and adjudicated them; validation of the rest was partial.</li>
+<li>The 51/25 API-vs-wrapper split is in the abstract but cannot be traced in the body.</li>
+<li>The agent's model is not named.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> &quot;tool returned OK&quot; is the wrong success signal. The TOOL_COMPLETED payload needs <strong>truncation, row-cap, empty-but-success and missing-field</strong> indicators so silent failures can be queried. The L1–L7 taxonomy is a usable starting label set for a detector.</p>
+<h3>4. NEW rank: <a href="https://arxiv.org/abs/2609.28197">arXiv 2609.28197</a>: PASTABench — Proactive Assessment of Sequential Trajectories for Agent Safety</h3>
+<p><strong>Who / what:</strong></p>
+<ul>
+<li>Sun, Zhou, Zhu, … Han and Guo (HKUST), with J. Zhou (PKU).</li>
+<li>EMNLP 2026 per the arXiv comments. The paper says the benchmark is released, but gives no link.</li>
+</ul>
+<p><strong>Finding.</strong></p>
+<ul>
+<li><strong>Setup:</strong></li>
+<li>1,139 synthetic trajectories across 13 risk sub-categories and 496 tools.</li>
+<li>Each trajectory has two labelled turns: the <strong>Earliest-Signal</strong> turn and the <strong>Trigger</strong> turn.</li>
+<li>The monitor reads the history turn by turn and must continue or interrupt, and name the risk.</li>
+<li><strong>Across 16 LLMs:</strong></li>
+<li>The best &quot;Perfect&quot; score (interrupts inside the window with the correct category) is <strong>40.74%</strong> (GPT-4o); the mean is 28.22%.</li>
+<li>Failures are dominated by <strong>interrupting too early</strong>: up to 64.27% of trajectories for Gemini-2.5-Pro, while late interruption is ≤1.32% for every model.</li>
+<li>With hazard keywords neutralized, many models appear to react to words like &quot;transfer&quot; or &quot;payment&quot; rather than to the risk itself.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>All data is synthetic (DeepSeek-R1).</li>
+<li>GPT-4o both annotated the ground truth and ranks first.</li>
+<li><strong>There are no fully benign control trajectories</strong>, so false alarms on safe runs are never measured.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> PASTABench gives a ready scoring scheme for <strong>any LLM monitor replayed turn by turn over logged event sequences</strong>: early / in-window / late, plus the right category. Before BQAA ships proactive alerting, false-alarm rates must be measured on benign traces. The paper itself shows this is exactly where judges fail.</p>
+<h3>5. NEW rank: <a href="https://arxiv.org/abs/2609.27954">arXiv 2609.27954</a>: When Accuracy Gaps Fail to Certify — Auditing Cross-Domain Recalibration of LLM Judges</h3>
+<p><strong>Who / what:</strong></p>
+<ul>
+<li>Afrin (KIIT) and Shihab (Iowa State); cs.LG; no venue; code &quot;will be&quot; released.</li>
+</ul>
+<p><strong>Finding.</strong></p>
+<ul>
+<li><strong>Setup:</strong> 13 judges (1–9B open models plus Claude Sonnet 4.5), 8 domains, 1,176 predeclared transfers.</li>
+<li><strong>The gap is a weak signal.</strong> The source-to-target accuracy gap barely predicts calibration harm: leak-free r = 0.25, CI [−0.09, 0.55]. On the second answer generator it falls to r = 0.09.</li>
+<li><strong>Target labels beat source fitting.</strong> Spending <strong>16 target-domain labels on temperature scaling</strong> gives ΔBrier −0.171 with a 9% harm rate. Source-fitted Platt gives −0.052 with 34% harm. EM label-shift makes things worse on average.</li>
+<li><strong>What does predict harm</strong> is only the raw error measured on the target probe, and that replicates on the second generator.</li>
+<li><strong>The certificate is valid but powerless:</strong> it has 0.128 power even at 1,024 labels.</li>
+</ul>
+<p><strong>Caveats:</strong> small generators, 40 items per domain, verbal-confidence parse failures of up to 20.6%, and one frontier judge.</p>
+<p><strong>TL;DR for BQAA:</strong> if BQAA stores judge scores for agent evals, an accuracy-parity dashboard <strong>does not show that a judge transfers to a new agent or domain</strong>. The paper's recommendations:</p>
+<ul>
+<li>log raw judge scores and <strong>parse failures</strong></li>
+<li>key calibration by domain</li>
+<li>budget a ~16-item labeled probe for each new agent/task</li>
+</ul>
+<h3>6. NEW rank: <a href="https://arxiv.org/abs/2609.27263">arXiv 2609.27263</a>: Specifying and Maintaining Agentic Workflows — An Empirical Study of GitHub Agentic Workflows</h3>
+<p><strong>Who / what:</strong></p>
+<ul>
+<li>Khelifi, Oukhay, Ouni and Sayagh (ÉTS), with Saied (Laval); cs.SE.</li>
+<li>Data: https://github.com/stilab-ets/ghaw.</li>
+</ul>
+<p><strong>Finding.</strong></p>
+<ul>
+<li><strong>Corpus:</strong> 1,248 gh-aw Markdown specs from 276 repos, with 7,446 commits.</li>
+<li><strong>Specs are substantial:</strong> the median body is 556.5 words.</li>
+<li><strong>Specs keep changing:</strong> <strong>78.2% are still edited in month 4</strong>. Changes split into 44.8% frontmatter only, 37.8% body only and 17.3% both.</li>
+<li><strong>Specs are copied:</strong> 29.6% of projects reference another repo's spec.</li>
+<li><strong>What specs declare</strong> (from the 42-label taxonomy):</li>
+<li>Task, Output, Constraint and Process appear in over 93% of specs.</li>
+<li>Resource Budget: 38.2%. Cross-Run Memory: 18.1%.</li>
+<li><strong>Prompt-injection defence: 9.4%.</strong></li>
+<li>An LLM (one-shot Gemini 3.1 Pro) applies the taxonomy at F1 0.818 and κ 0.715.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>Single-run model rankings.</li>
+<li>The study does not measure whether instructions change execution outcomes.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> recurring agents drift because their specs are edited constantly and copied across repos. Stamp an <strong>instruction/spec version hash</strong> on every run so behaviour can be compared before and after an edit. The taxonomy gives fleet-level tags (declares a budget? declares injection defence?) that can be joined to observed behaviour.</p>
+<h2>Six-week EV (through ~Nov 4)</h2>
+<ul>
+<li><strong>Highest EV: the &quot;emitted vs executed&quot; schema field</strong> (Academy #1, #3; Vercel approvals; Codex dispatch hooks).</li>
+<li>It is cheap to add to the <code>agent_events</code> design, and it is the one field that survives both reasoning-trace tampering and silent tool failure.</li>
+<li>Expect a public ADK/OTel discussion of whether &quot;the tool call ran&quot; is a separate span attribute.</li>
+<li><strong>Medium EV: a gate verdict and declared-budget record</strong> (Academy #2).</li>
+<li>If run-limit receipts (like the vault's own 50/2/$0/0 limits) become common, BQAA is the natural store for them.</li>
+<li>Watch whether Codex's Guardian consolidation ships with a structured verdict record in alpha.7+.</li>
+<li><strong>Medium EV: evaluating judges and monitors over logs</strong> (Academy #4, #5). The labeled probe per domain, the early/in-window/late metric and benign-trace false-alarm rates are an eval-methodology package BQAA can document without building new infrastructure.</li>
+<li><strong>Watch for the next slot:</strong></li>
+<li><code>pydantic-ai 2.49.0</code> (<code>Instrumentation</code> capability?)</li>
+<li>a Vercel release carrying Anthropic compaction</li>
+<li>a LiteLLM release with Bedrock native Responses and MCP attribution</li>
+<li>Mastra 1.70.0 stable</li>
+<li>Codex alpha.7 with Guardian</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>Vercel <code>ai@7.0.113</code> + Gemini 3.8 TTS:</strong> log approval requested / granted / rejected-on-replay as separate events. If ADK voice adopts structured TTS, add speaker/style fields.</li>
+<li><strong>Letta Code <code>v0.33.0</code>:</strong> scrub secrets chunk-safely from tool output <em>and errors</em> before the write to BigQuery. Log background memory work as separate events tied to the originating turn.</li>
+<li><strong>Codex alpha.5/6 (progress):</strong> final-response OTLP logging and extension dispatch/stream hooks are new places to attach observation. Guardian consolidation is still unreleased.</li>
+<li><strong>2609.27542 control-token injection:</strong> do not rely on reasoning-trace content for safety analytics. Log executed tool args and side effects, and flag empty reasoning and emitted-but-not-executed calls.</li>
+<li><strong>2609.27871 Bounded Loops:</strong> record the gate verdict, whether an attempt happened, the attempt count and declared-vs-actual budget. Record, do not enforce.</li>
+<li><strong>2609.26836 silent tool failures:</strong> add completeness and truncation indicators to tool-completion events, because OK is not success.</li>
+<li><strong>2609.28197 PASTABench:</strong> score turn-by-turn monitors as early / in-window / late, and measure false alarms on benign traces first.</li>
+<li><strong>2609.27954 judge calibration:</strong> use a ~16-label probe per domain with per-domain temperature scaling, and log parse failures and raw scores.</li>
+<li><strong>2609.27263 gh-aw specs:</strong> stamp a spec/instruction version hash on every run.</li>
+</ul>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Mac downtime ~17:49 to ~21:05 PT.</strong> Three hourly collector fires were missed: <strong>DSH 1732, Agy 1832 and Muse 1932</strong>. No packs exist for them, and none were invented.</li>
+<li><code>dsh-pack-2026-09-23-2032.md</code> falls after the slot and was <strong>ignored</strong>.</li>
+<li>The Agy 0932 gap from earlier today is still carried.</li>
+<li><strong>Gap sweep 16:50–18:34 PT (23:50Z–01:34Z), done by me:</strong> GitHub releases (28 repos), PyPI (21), npm (8), Codex main commits and the arXiv ceiling.</li>
+<li>Found <strong><code>litellm v1.101.2</code></strong> (NOTE) and <strong><code>@mastra/core@1.70.0-alpha.1</code></strong> (WATCH).</li>
+<li>Found the <strong>arXiv batch</strong> (ceiling 26796 → 28474), which produced all 6 Academy ranks.</li>
+<li><strong>Letta Code v0.33.0 (23:51Z)</strong> sits right at the Muse 1632 as-of edge, and v0.32.19 is in the DSH 1432 window; no pack reported either. Collector watchlists should add <code>letta-ai/letta-code</code>.</li>
+<li><strong>Corrections to the packs:</strong></li>
+<li>Agy 1532 presented the Guardian consolidation alongside alpha.5. It is <strong>unreleased on main</strong>: I confirmed the merge times and that the alpha.6…main compare contains all four PRs. Muse 1632 had this right.</li>
+<li><code>langchain-openai 1.6.6</code> is <strong>not on PyPI</strong> (latest 1.6.5), so it was not ranked.</li>
+<li><strong>Surfaces:</strong> X 401 and Reddit 403 (per the packs; not re-probed). LinkedIn proxy yielded nothing attributable. Papers with Code is unprobed (standing 302). No web search was used; all verification was through public GitHub, PyPI, npm and arXiv.</li>
+<li><strong>Run limits:</strong> 8 ranks + 1 progress + ~6 WATCH/NOTE, all within 50 items. 0 retries. $0 spent. 0 external messages.</li>
+<li><strong>Full PDFs</strong> were extracted with <code>pdftotext</code> and read for all 7 shortlisted papers. The full-text extracts are under <code>/tmp/fb1834/</code>.</li>
+<li><strong>Rule checks:</strong></li>
+<li>No first-party BQAA cards.</li>
+<li>No Desk section.</li>
+<li>No GTM content.</li>
+<li>Crustdata was not used.</li>
+<li>Fable was not used.</li>
+<li>Medium was not used.</li>
+<li><strong>Catalog:</strong> 378 / 96 / 98 read-only, and untouched by me. Expected after publish: <strong>386 items / 97 briefs / 99 runs</strong> (+8 ranks), if Collection cards each rank once. The Codex progress note should update the existing Codex card, not add a new item.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 23 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
