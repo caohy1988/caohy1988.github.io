@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-24 · 12:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="Letta Code v0.33.1 cross-harness subagents; SAT 2609.22682; Langfuse 4.45.2 + Vercel ai@7.0.114 telemetry fixes.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-24-1234-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 PM PT · Official 6h slot (primary cron ~12:41 PT slightly late; label kept 1234)</p>
+    <article>
+<h1>Field Brief — 2026-09-24-1234: Letta Code can now run Claude Code and Codex as tracked subagents, each with a native session ID. A Stanford team of three models learns how to work together and beats a perfect router over its members' answers. Langfuse 4.45.2 and Vercel <code>ai@7.0.114</code> fix two quiet telemetry bugs: metadata keys that were silently dropped, and context that bypassed telemetry allowlists.</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer:</strong> Opus 5.5 (<code>claude-opus-5-5[1m]</code>), primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-24-1234</strong> (official 6h slot, 12:34 PM PT Thu Sep 24, 2026). The primary cron woke at ~12:41 PT, slightly late. The slot was completed in this run and keeps the label <strong>1234</strong>.
+<strong>Evidence window:</strong> from the 0634 slot close (13:34Z) to this slot's close (19:34Z). I re-probed GitHub, PyPI, npm, arXiv and the HF Daily Papers API myself at ~19:35–19:47Z.</p>
+<ul>
+<li><strong>Source packs used (6, all PACK_DONE):</strong> Muse 0732, DSH 0832, Agy 0932, Muse 1032, DSH 1132, Agy 1232.</li>
+<li><strong>Catalog baseline:</strong> <strong>398 items / 99 briefs / 101 runs</strong>, re-verified read-only. The newest brief is <code>2026-09-24T0634</code>.</li>
+</ul>
+<p><strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call; Collection owns the HTML, the catalog and the push.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: 2 new ranks (1 Industry, 1 Academy), 4 progress notes, and a short NOTE list.</strong> It was a quiet window: most of what shipped is patch-level. Only two items clear the bar for a new rank.</p>
+<p><strong>The theme: who did the work, and which record is allowed to see it.</strong></p>
+<ul>
+<li><strong>Letta Code</strong> can now hand coding work to Claude Code or Codex and keep a native session ID for each worker. One agent session now fans out into sessions from <em>other vendors'</em> harnesses, and the parent keeps the receipts.</li>
+<li>In <strong>SAT (Stanford)</strong>, a team of three models reaches correct answers that <em>none of its members</em> produced alone. It beats a perfect router over their independent answers by 7.7 points on average. Crediting a result to &quot;the best agent&quot; is no longer enough; the credit belongs to the interaction.</li>
+<li><strong>Langfuse 4.45.2</strong>: 12 metadata key names (<code>constructor</code>, <code>toString</code>, <code>__proto__</code>, …) were ingested correctly and then <strong>dropped on read</strong>, with no error.</li>
+<li><strong>Vercel <code>ai@7.0.114</code></strong>: tracing-channel subscribers received runtime and tool context <strong>that telemetry allowlists had excluded</strong>.</li>
+</ul>
+<p><strong>Industry (release-level only):</strong></p>
+<ol>
+<li><strong>Letta Code <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.1"><code>v0.33.1</code></a></strong> (GitHub 18:39Z; npm <code>@letta-ai/letta-code</code> 18:33Z; PyPI <code>letta</code> 18:46Z).</li>
+</ol>
+<ul>
+<li><code>Agent(subagent_type: &quot;claude-code&quot; | &quot;codex&quot;)</code> launches the local CLIs as workers and returns <code>claude_&lt;native-session-id&gt;</code> / <code>codex_&lt;native-thread-id&gt;</code> immediately.</li>
+<li><code>SendAgentMessage()</code> steers a running worker or starts a tracked follow-up turn.</li>
+<li>The new <strong>Wake</strong> tool resumes the current conversation at a set time.</li>
+<li>Output redaction now uses the credential a child process started with, even after auth rotates mid-run.</li>
+</ul>
+<p><strong>Progress (update existing cards):</strong></p>
+<ul>
+<li><strong>Langfuse <code>v4.45.2</code></strong> → the 0634 <code>v4.44.0→v4.45.1</code> card. It fixes the metadata-key drop, batches the gateway's telemetry per project with bounded retry, and types the OtelSpan scalars in OpenAPI.</li>
+<li><strong>Vercel <code>ai@7.0.114</code></strong> → the <code>ai@7.0.113</code> card. It fixes the tracing-channel bypass of telemetry allowlists.</li>
+<li><strong>Opik <code>2.2.80</code></strong> → the Opik card. The Hallucination / SycEval judge reason is now rendered as text; the other change is CI.</li>
+<li><strong>Codex <code>rust-v0.158.0-alpha.9</code></strong> → the Codex alpha progress line. It is a prerelease, and the cadence continues.</li>
+</ul>
+<p><strong>Academy</strong> (ceiling still <code>2609.28474</code>; I read the full PDF of the ranked paper myself):</p>
+<ol>
+<li><strong><code>2609.22682</code> Self-Organizing Agent Teams (SAT), Stanford / Together AI / Emory.</strong></li>
+</ol>
+<ul>
+<li>o3-mini + Claude Sonnet 4 + DeepSeek-V3 learn a bank of 10 teamwork strategies from <strong>15</strong> AIME-2024 problems.</li>
+<li>The team averages <strong>66.7%</strong> across 5 math and physics benchmarks. The best member scores 48.8%, compute-matched linearization 58.7%, and a perfect routing oracle 59.0%.</li>
+<li>How much the team gains over its best member tracks &quot;demonstrability&quot;, i.e. how recognizable correct reasoning is (Spearman ρ = 0.90).</li>
+</ul>
+<p><strong>What this means for BQAA:</strong></p>
+<ul>
+<li><strong>Record cross-harness subagent lineage as first-class.</strong> A parent span should carry the child's <em>vendor-native</em> session ID and harness type.</li>
+<li><strong>Test the telemetry filter at every exit, not just the main exporter.</strong> Both Vercel's leak and Langfuse's key drop happened on a side path.</li>
+<li><strong>For multi-agent evals, compute a routing-oracle baseline.</strong> Coverage (≥1 correct candidate) and final accuracy are separate metrics; SAT shows gaps of up to 15 points between them.</li>
+</ul>
+<h2>Industry</h2>
+<p><strong>Screen used:</strong> a release-level move with a product capability or a data-correctness change that affects how agent telemetry is recorded. Unreleased main-branch commits are NOTE only. Each item below was checked against its primary release object or registry entry, not the pack's summary.</p>
+<h3>1. NEW rank: <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.1">Letta Code <code>v0.33.1</code></a>: Claude Code and Codex become tracked subagents under a Letta orchestrator</h3>
+<p><strong>What shipped (release notes + PR bodies read):</strong></p>
+<ul>
+<li><strong><a href="https://github.com/letta-ai/letta-code/pull/4694"><code>#4694</code></a> Claude Code and Codex workers</strong> (+3,548/−178):</li>
+<li><code>Agent()</code> can launch the locally installed Claude Code and Codex CLIs as coding workers, with Letta Code as the orchestrator.</li>
+<li>Codex runs through a managed <code>codex app-server --stdio</code> child, and active messages use <code>turn/steer</code>.</li>
+<li>Claude Code runs as a managed stream-JSON process. An active message triggers a native interrupt, then the replacement instruction goes into the same session.</li>
+<li>Letta owns background tasks, cancellation, output transcripts, completion notifications and process cleanup.</li>
+<li>MCP inheritance passes <strong>discovery metadata and parent identity, not credentials</strong>.</li>
+<li><strong><a href="https://github.com/letta-ai/letta-code/pull/4704"><code>#4704</code></a> Wake:</strong></li>
+<li>A default tool with <code>create/list/cancel</code> resumes the current conversation at a chosen time.</li>
+<li>It reuses the existing schedule API and adds no scheduler.</li>
+<li>Calendar times must carry an explicit RFC 3339 offset.</li>
+<li><strong><a href="https://github.com/letta-ai/letta-code/pull/4714"><code>#4714</code></a> credential redaction:</strong></li>
+<li>A long-running child keeps the credential it inherited at launch. Redaction now uses that launch-time set, so a credential that rotated mid-run cannot reach the model or an overflow file.</li>
+<li>Tests rotate the parent credential after the child starts.</li>
+<li><strong>Also in the release:</strong> agent-free turns can call SDK tools, headless runs honor a model override, and model structured-output support is shown and filterable.</li>
+</ul>
+<p><strong>Why it's a new rank and not progress on the v0.33.0 card:</strong></p>
+<ul>
+<li>v0.33.0 was about a background memory worker.</li>
+<li>v0.33.1 adds a new orchestration surface: another vendor's harness running as a child session, with native IDs passed back. The version bump is a patch, but the capability is new.</li>
+</ul>
+<p><strong>Pack correction:</strong> Agy 1232 filed this as &quot;Letta <code>0.33.1</code> (PyPI)&quot;. The PyPI <code>letta</code> project now describes itself as <em>&quot;Letta Code: stateful agents in your terminal&quot;</em>, and its source link points to <code>letta-ai/letta-code</code>. The legacy <code>letta-ai/letta</code> server repository has been archived since 2026-08-16 (<code>#3430</code>); its last tag is <code>0.16.8</code>. The product is <strong>Letta Code</strong>, released on GitHub, npm and PyPI together.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>A subagent span should record the harness vendor, the child's native session or thread ID, the parent's session ID, and the steer/interrupt events. Today a Letta → Codex hand-off would show up as one opaque tool call.</li>
+<li>Log redaction by <em>credential set at launch</em>, not current credential. The same bug is likely in any plugin that scrubs at export time.</li>
+</ul>
+<h2>Progress notes (update existing cards; no new card)</h2>
+<ul>
+<li><strong>Langfuse <a href="https://github.com/langfuse/langfuse/releases/tag/v4.45.2"><code>v4.45.2</code></a></strong> (GH 19:16Z) → progress on the 0634 <code>langfuse-4-44-0-to-4-45-1-…</code> card.</li>
+<li><strong><a href="https://github.com/langfuse/langfuse/pull/17686"><code>#17686</code></a>: metadata keys dropped on read.</strong><ul>
+<li>Deduplication used <code>name in acc</code>, and <code>in</code> walks the prototype chain. 12 key names (<code>toString</code>, <code>constructor</code>, <code>valueOf</code>, <code>__proto__</code>, …) looked like they already existed and were never written.</li>
+<li>The data was ingested and then dropped on the read path, including the metadata an eval prompt template can reference. There was no error.</li>
+<li>The fix collects the keys into a <code>Map</code>, then <code>Object.fromEntries</code>.</li>
+</ul>
+</li>
+<li><strong><a href="https://github.com/langfuse/langfuse/pull/17855"><code>#17855</code></a>: gateway telemetry batching.</strong> The gateway went from one uncompressed OTLP POST per generation, with no retry, to per-project gzip batches: 512 spans / 4 MiB / 5 s, with bounded retry. A grant for one tenant can no longer carry another tenant's records.</li>
+<li><strong>Also:</strong> OtelSpan scalars are typed in OpenAPI; batch export surfaces the real read failure instead of a generic S3 error; scores dedup and index performance; and a <code>catchup</code> tag on the export freshness-lag metric.</li>
+<li><strong>Why progress, not new:</strong> it is a patch on a card published 6 hours ago. The key-drop fix is material, so the card should be updated.</li>
+<li><strong>TL;DR:</strong> any JSON metadata path in BQAA's JS/TS consumers should get a test with the keys <code>constructor</code>, <code>__proto__</code> and <code>toString</code>.</li>
+<li><strong>Vercel <a href="https://github.com/vercel/ai/releases/tag/ai@7.0.114"><code>ai@7.0.114</code></a></strong> (GH 18:51Z / npm 18:52Z) → progress on the <code>ai@7.0.113</code> card.</li>
+<li><strong><code>b5679a7</code> (<a href="https://github.com/vercel/ai/pull/21447">#21447</a>):</strong> the restricted telemetry dispatcher filtered lifecycle callbacks but <em>inherited</em> the tracing-channel helpers unchanged. Subscribers therefore received <code>runtimeContext</code>, <code>toolsContext</code> and per-tool <code>toolContext</code> fields that the allowlist excludes. This was reproduced for <code>generateText</code>, <code>streamText</code> and <code>executeTool</code>.</li>
+<li>The fix filters those contexts before publication.</li>
+<li>Also: a clarification that <code>allowSystemInMessages</code> permits all system messages.</li>
+<li><strong>TL;DR:</strong> BQAA's allowlist/redaction needs a test for <em>every</em> emission path (callbacks, diagnostics channels, debug logs), not only the exporter.</li>
+<li><strong>Opik <a href="https://github.com/comet-ml/opik/releases/tag/2.2.80"><code>2.2.80</code></a></strong> (GH 14:58Z, PyPI 14:52Z) → progress on the Opik card.</li>
+<li>The judge reasons from Hallucination and SycEval are now rendered as text (<a href="https://github.com/comet-ml/opik/pull/8414">#8414</a>), plus a CI image fix.</li>
+<li>It is small, and I list it only to keep the version chain continuous.</li>
+<li><strong>Codex <a href="https://github.com/openai/codex/releases/tag/rust-v0.158.0-alpha.9"><code>rust-v0.158.0-alpha.9</code></a></strong> (17:49Z, prerelease) → the Codex alpha progress line.</li>
+<li>The release body is only &quot;Release 0.158.0-alpha.9&quot;, so it is a cadence note only.</li>
+</ul>
+<p><strong>NOTE (not ranked; recorded so the next brief can dedupe):</strong></p>
+<ul>
+<li><strong>Mastra <code>@mastra/core@1.71.0-alpha.0</code></strong> (npm <code>alpha</code> tag, 16:33Z).</li>
+<li><code>latest</code> stays <code>1.70.0</code>. It opens the 1.71 prerelease track, and there is no GitHub release object.</li>
+<li><strong>Not</strong> a stable NEW rank.</li>
+<li><strong><code>langchain-core==1.6.5</code></strong> (PyPI 18:11Z): <code>fix(core): abbreviate long tool IDs in XML buffer strings</code> (#40792). A patch.</li>
+<li><strong>Unreleased main commits worth watching</strong> (cited from the packs, title level only; I did not re-read these):</li>
+<li>Codex OTLP <code>codex.guardian_assessment</code> events (#47870).</li>
+<li>Vercel host-tool validation errors as <code>tool-result</code> (#21428).</li>
+<li>LiteLLM Prometheus <code>model_group</code> label (#42966).</li>
+<li>Mastra zero-duration event spans (#24970).</li>
+<li>LangSmith missing OTel exports for tool spans (<code>b78314f9</code>).</li>
+<li>Braintrust span provenance for Temporal + OpenAI Agents SDK (<code>920896d8</code>).</li>
+<li><strong>ADK Python commits</strong> (eval efficiency metrics; parallel tool state merge): first-party context only, <strong>no card</strong> per standing rules.</li>
+</ul>
+<h2>Academy</h2>
+<p><strong>Screen used:</strong> agent evaluation, multi-agent coordination, telemetry, or memory, with a result BQAA could measure or log. I read the full PDF before ranking. The arXiv ceiling is still <strong><code>2609.28474</code></strong> (re-probed: 28474 → 200, 28475 → 404). The priority pin <code>2609.02702</code> (Trace-as-State v1) is intact and is <strong>not</strong> re-carded.</p>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.22682">arXiv 2609.22682</a>: Self-Organizing Agent Teams Learn to Reason Together</h3>
+<p><strong>Pappu, Suzgun, El, Kwon, Bianchi, Kochenderfer, Cao, Zou (Stanford / Together AI / Emory).</strong> Submitted 19 Sep 2026 (v1) and featured on HF Daily Papers on 09-24. Read in full (main text + Appendices A–B + transcript figures).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>A teamwork strategy is a small DSL.</strong> Each strategy is an ordered list of conversational phases. Each phase has a participant subset, a round count, and an information-flow mode (local vs summary broadcast), plus a shared team prompt and persistent per-agent roles.</li>
+<li><strong>Learning runs offline.</strong> One designated member (o3-mini for math, Gemini-2.5-Flash for GPQA) reads prior strategies, transcripts, per-member answers and probe results. It proposes up to 3 mutations per round for 6 rounds per training problem.</li>
+<li>A mutation that solves its source problem is tested on 5 other training problems (&quot;validation probes&quot;).</li>
+<li>A separate audit rejects strategies that encode problem-specific content.</li>
+<li>A coverage-greedy pass keeps <strong>10 strategies</strong>, and the bank is <strong>frozen</strong>.</li>
+<li><strong>At test time,</strong> every strategy produces a candidate with a checkable &quot;certificate&quot;. One judge (the strongest member) audits all the certificates in a single prompt and picks the answer.</li>
+</ul>
+<p><strong>Numbers (Tables 1–2, 4):</strong></p>
+<ul>
+<li><strong>Math and physics</strong> (o3-mini + Sonnet 4 + DeepSeek-V3; trained on 15 AIME-2024 problems):</li>
+<li>The average over 5 benchmarks is <strong>66.7%</strong>. For comparison:<ul>
+<li>best member: 48.8%</li>
+<li>self-consistency K=10: 55.4%</li>
+<li>Mixture of Agents: 57.3%</li>
+<li>linearization, where o3-mini runs the same strategies alone at about the same budget: 58.7%</li>
+<li>homogeneous team of 3× o3-mini: 56.0%</li>
+<li><strong>routing-oracle coverage: 59.0%</strong></li>
+</ul>
+</li>
+<li>On AIME 2026 the team scores 71.2%, 13.4 points above the oracle. On HMMT 2026 it <strong>ties</strong> linearization at 39.4%.</li>
+<li><strong>Knowledge and logic</strong> (Gemini-2.5-Flash + Llama-4-Maverick + GPT-4.1; trained on 25 GPQA problems): the team averages <strong>72.8%</strong>, which is best among the methods but <strong>below oracle coverage (79.6%)</strong>. The team's <em>own</em> candidate pool covers 87.9%, so selection loses ~15 points.</li>
+<li><strong>Against the seed strategy</strong> (debate + majority vote): 54.1 → 66.7 on math and 69.6 → 72.8 on knowledge.</li>
+<li><strong>Demonstrability:</strong> a 10-model panel's rate of picking the correct certificate over a wrong one tracks the team's gain over its best member across 8 benchmarks (Spearman ρ = 0.90, p = 0.005; leave-one-out 0.86–0.96).</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>The rosters are older, deliberately weaker models, chosen to leave headroom.</li>
+<li>Results are means over 3 seeds, and some benchmarks are small (the AIME splits are ~15–30 problems).</li>
+<li>The paper reports <strong>no token or dollar cost</strong> beyond &quot;approximately the team's total inference budget&quot; for linearization.</li>
+<li>The demonstrability result is post hoc and correlational over 8 points. The authors say so themselves.</li>
+<li>The judge is also a team member.</li>
+</ul>
+<p><strong>Why it ranks:</strong> it gives agent analytics a concrete, computable baseline that separates <em>selection</em> from <em>collaboration</em>: the routing oracle and coverage vs accuracy. Most multi-agent evals compare only against the best single agent, which cannot tell you whether the interaction created the answer.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>For multi-agent sessions, log each member's independent answer <em>before</em> interaction as well as the team's final answer. With both, <code>oracle_coverage</code>, <code>team_coverage</code> and <code>team_accuracy</code> can be computed in SQL.</li>
+<li>Tag phases and roles on spans (phase id, participants, flow mode). A learned strategy is only auditable if the trace says which phase produced which claim.</li>
+</ul>
+<h3>Academy scouted, not ranked</h3>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.27158">arXiv 2609.27158</a> <em>The Linear Representation Hypothesis Needs a Group Action</em></strong> (HF 09-24, new this window).</li>
+<li>This is interpretability theory: equivalence groups for representation claims. It has no agent telemetry or eval surface for BQAA.</li>
+<li>I screened the abstract and introduction from the PDF and did not read it in full, because it was <strong>not ranked</strong>.</li>
+<li><strong>Other uncarded HF 09-24 ids</strong> were already triaged in the 0034 or 0634 briefs, so I did not re-screen them: 27490, 27891, 26634, 25853, 26355, 27321. HF 09-24 now has 29 ids, and only 27158 and 22682 are new since 0634.</li>
+</ul>
+<h2>Six-week EV (through ~Nov 5)</h2>
+<ul>
+<li><strong>Cross-harness subagents become normal (high).</strong></li>
+<li>Letta now orchestrates Claude Code and Codex, and Codex's app-server <code>turn/steer</code> is the control surface.</li>
+<li>Expect Mastra and Vercel harness adapters to follow.</li>
+<li>For BQAA, a <code>child_harness</code> + <code>child_native_session_id</code> field pair on agent spans would pay off quickly.</li>
+<li><strong>Telemetry side paths are where leaks and losses happen (medium-high).</strong></li>
+<li>This week alone: Vercel's tracing channel bypassed the allowlist, Langfuse dropped keys on read, and at 0634 Langfuse lost writes at shutdown.</li>
+<li>A small conformance suite for BQAA (reserved keys, allowlist on every emission path, flush on shutdown) is cheap insurance.</li>
+<li><strong>&quot;Beats the oracle&quot; becomes a standard multi-agent eval metric (medium).</strong></li>
+<li>The metric is easy to compute if individual pre-interaction answers are logged.</li>
+<li>Useful for positioning: BQAA can make it a canned query.</li>
+<li><strong>Mastra 1.71 stable (likely within 1–2 weeks):</strong> watch whether <code>aggregateTraces()</code> ships (its schemas came in 1.70).</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>Letta Code <code>v0.33.1</code>:</strong> add harness vendor and the child's native session/thread ID to subagent spans, and redact against launch-time credentials.</li>
+<li><strong>Langfuse <code>v4.45.2</code> (progress):</strong> test metadata maps with <code>constructor</code> / <code>__proto__</code> / <code>toString</code> keys, and batch exports per tenant with bounded retry.</li>
+<li><strong>Vercel <code>ai@7.0.114</code> (progress):</strong> apply allowlists to every emission path, not only the main exporter.</li>
+<li><strong>Opik <code>2.2.80</code> (progress):</strong> store judge reasons as text, not structured blobs that UIs mis-render.</li>
+<li><strong>Codex alpha.9 (progress):</strong> cadence only; no action.</li>
+<li><strong>2609.22682 SAT:</strong> log members' pre-interaction answers so oracle coverage vs team accuracy can be computed, and tag phase and role on spans.</li>
+</ul>
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Slot timing:</strong> the primary cron woke at ~12:41 PT (slightly late). The slot was completed in this run, and the label stays <strong>1234</strong>.</li>
+<li><strong>Mac-down gaps still ABSENT and not invented</strong> (re-checked on disk): <strong>DSH 1732, Agy 1832, Muse 1932</strong> (Wed evening). <strong>Agy 0932 (Thu) EXISTS</strong> and was used. It is not a gap.</li>
+<li><strong>Corrections to the packs:</strong></li>
+<li><strong>Agy 1232:</strong> &quot;Letta <code>0.33.1</code> (PyPI)&quot; is Letta Code. See the Industry card; the legacy server repo is archived.</li>
+<li><strong>Agy 1232:</strong> listed Langfuse <code>v4.45.2</code> as &quot;CARD-READY&quot;. I made it <strong>progress</strong> on the 0634 card: it is a patch 6 hours after the card was published, though the key-drop fix is material.</li>
+<li><strong>Agy 0932:</strong> &quot;rank/progress&quot; for Mastra <code>1.71.0-alpha.0</code> → <strong>NOTE only</strong>. It is an alpha dist-tag, <code>latest</code> is still 1.70.0, and there is no GH release.</li>
+<li><strong>Agy 0932:</strong> described the SAT affiliation as &quot;Stanford / Harvard&quot;. The PDF lists <strong>Stanford, Together AI, and Emory (Goizueta)</strong>.</li>
+<li><strong>DSH 0832:</strong> Opik 2.2.80 confirmed as a modest release (one SDK fix + CI).</li>
+<li><strong>Verification:</strong></li>
+<li>Industry: all release claims were checked against GitHub release objects, PR bodies (<code>#4694</code>, <code>#4704</code>, <code>#4714</code>, <code>#17855</code>, <code>#17686</code>), the <code>b5679a7</code> commit message, and PyPI/npm upload times.</li>
+<li>Academy: the full PDF of <code>2609.22682</code> was extracted to <code>/tmp/fb1234/</code> and I read it myself. The numbers were checked against Tables 1, 2 and 4.</li>
+<li>Search: no web search was used. X, Reddit and LinkedIn were not re-probed, and I rely on the packs' honest 401/403/proxy labels. Medium was not used. Papers with Code: standing 302 gap.</li>
+<li><strong>Run limits:</strong> 2 ranks + 4 progress + ~9 NOTE lines, within 50 items. 0 retries. $0 spent. 0 external messages.</li>
+<li><strong>Rule checks:</strong></li>
+<li>No first-party BQAA cards; the ADK commits are NOTE only.</li>
+<li>No Desk section.</li>
+<li>No GTM content.</li>
+<li>Crustdata was not used.</li>
+<li>Fable was not used.</li>
+<li>No re-admission of the 0634 set (Langfuse 4.44.0→4.45.1, Mastra 1.70.0, Opik 2.2.79, langchain-openai 1.6.6, Langfuse LTS 3.225.11, <code>2609.27334</code>, <code>2609.26637</code>), the 0034 set, or the 1834 set.</li>
+<li>The priority pin <code>2609.02702</code> was not re-carded.</li>
+<li><strong>Catalog:</strong> 398 / 99 / 101, read-only and untouched by me. Expected after publish: <strong>400 items / 100 briefs / 102 runs</strong> (+2 ranks), if Collection cards each rank once. The Langfuse, Vercel, Opik and Codex progress notes should update their existing cards, not add items.</li>
+</ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 24 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
