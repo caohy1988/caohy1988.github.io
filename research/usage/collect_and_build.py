@@ -36,16 +36,19 @@ from collect_grok_box_activity import (  # noqa: E402
     GROK_ORDER,
     GROK_ROLES,
     GROK_SKIP_NAMES,
+    SOURCE_STALE_AFTER_HOURS,
     STALE_AFTER_HOURS,
+    apply_source_freshness,
     build_payload,
     collect_box_bots,
     empty_bot as _empty_bot,
     ms_to_pt,
     normalize_bots,
+    overlay_client_replicas,
     staleness,
 )
 
-GROK_COLORS = ["#0f766e", "#e87324", "#2563eb", "#7c3aed"]
+GROK_COLORS = ["#0f766e", "#e87324", "#2563eb", "#7c3aed", "#db2777"]
 
 
 def now_pt() -> datetime:
@@ -1029,8 +1032,18 @@ def _apply_manage_bot_client_counts(bots: list[dict]) -> list[dict]:
         if b.get("name") != "Agent Manage Bot":
             continue
         cur = (b.get("messages") or {}).get("assistant_tool") or 0
+        # Always refresh last-activity from the client replica mtime when present.
+        if mtime:
+            b["last_transcript_activity_pt"] = mtime
+            b["activity_source"] = "mac-client-replica:6a85c81a-8c66-4169-ae76-60d743932802"
+            try:
+                # mtime string is PT display; keep epoch from file
+                b["source_mtime_epoch"] = local.stat().st_mtime
+            except Exception:
+                pass
         if cur > 0:
-            return bots
+            patched = True
+            break
         b["id"] = b.get("id") or "6a85c81a-8c66-4169-ae76-60d743932802"
         b["role"] = GROK_ROLES.get("Agent Manage Bot", b.get("role") or "")
         b["messages"] = {
@@ -1082,7 +1095,22 @@ def _collect_grok_from_box() -> dict | None:
     if bots is None:
         return None
     bots = _apply_manage_bot_client_counts(bots)
-    return build_payload(bots, "box /home/box/agent-data (live)")
+    bots = overlay_client_replicas(bots)
+    problems = []
+    for b in bots:
+        if not b.get("stale"):
+            continue
+        if b.get("missing_agent_dir"):
+            problems.append(f"{b.get('name')}(missing_dir)")
+        elif b.get("source_mtime_epoch") is None:
+            problems.append(f"{b.get('name')}(no_source)")
+        else:
+            problems.append(f"{b.get('name')}({b.get('source_age_hours')}h)")
+    return build_payload(
+        bots,
+        "box agents/<id>/ live + Mac client replicas",
+        problems=problems,
+    )
 
 
 
@@ -1452,6 +1480,19 @@ def collect_grok() -> dict:
             data.setdefault("note", GROK_NOTE)
             data["links"] = dict(GROK_LINKS)
             bots = _apply_manage_bot_client_counts(normalize_bots(data.get("bots") or []))
+            bots = overlay_client_replicas(bots)
+            data["bots"] = bots
+            data["freshness"] = {
+                "stale_after_hours": SOURCE_STALE_AFTER_HOURS,
+                "stale_or_missing": [
+                    (
+                        f"{b.get('name')}(missing_dir)" if b.get("missing_agent_dir")
+                        else f"{b.get('name')}(no_source)" if b.get("source_mtime_epoch") is None
+                        else f"{b.get('name')}({b.get('source_age_hours')}h)"
+                    )
+                    for b in bots if b.get("stale")
+                ],
+            }
             data["bots"] = bots
             data["fleet_assistant_tool_total"] = sum(b["messages"]["assistant_tool"] for b in bots)
             data["fleet_messages_total"] = sum(b["messages"]["total"] for b in bots)
@@ -1510,6 +1551,19 @@ def progress_bar(pct: float | None, tone: str, label: str | None = None) -> str:
     </div>"""
 
 
+
+def _fmt_last_activity(b: dict) -> str:
+    """Render last-activity cell; show visible stale-source badge when flagged."""
+    when = esc(b.get("last_transcript_activity_pt") or "—")
+    if b.get("stale"):
+        reason = esc(b.get("stale_reason") or "source older than 24h while peers are fresh")
+        return (
+            f'<span class="status-chip warn" title="{reason}">stale source</span> '
+            f'<span class="muted">{when}</span>'
+        )
+    return when
+
+
 def render_grok_body(grok: dict) -> str:
     """Grok section body — STALE banner first when the box activity cache is old/unknown."""
     bots = grok.get("bots") or []
@@ -1538,7 +1592,7 @@ def render_grok_body(grok: dict) -> str:
           <td class="num">{esc(msg.get('user', 0))} / {esc(msg.get('assistant', 0))} / {esc(msg.get('tool', 0))}</td>
           <td class="num">{esc(b.get('transcript_mb', 0))} MB</td>
           <td class="num">{esc(b.get('automation_runs', 0))}</td>
-          <td>{esc(b.get('last_transcript_activity_pt') or '—')}</td>
+          <td>{_fmt_last_activity(b)}</td>
           <td class="num">{esc(b.get('share_assistant_tool_pct', 0))}%</td>
         </tr>"""
         )
