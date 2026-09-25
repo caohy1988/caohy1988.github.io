@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-23 · Jev research + completion gates (shadow)</strong></span>
+      <span>Updated <strong>2026-09-24 · Coding EM kick ledger + usage freshness guard + Lab KEEP pointers</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -343,6 +343,7 @@
       <li>Forward one reviewer’s findings into the other reviewer’s kickoff (breaks blind dual LGTM).</li>
     </ul>
     <p class="note">EM also runs a <strong>15‑minute heartbeat</strong> (<code>*/15</code> PT; stretched 2026-09-21 token save from <code>*/5</code>) across live agent tasks (babysitter layer). It does not replace Mac <code>grok-tmux-watchdog</code> (~540s) — both apply.</p>
+    <p class="note"><strong>Heartbeat reads the kick ledger first (2026-09-24):</strong> each <code>*/15</code> pass opens <code>/home/box/agent-data/handoffs/coding-em-kicks.json</code> before inventorying tmux + PRs. A kick still <code>posted</code> with no seat is <strong>not idle</strong> — launch it or mark it <code>blocked</code> with a note. See <a href="#coding-em-kicks">§12 Coding EM kick ledger</a>.</p>
   </section>
 
   <section id="pipeline">
@@ -450,12 +451,16 @@ grok-tmux-run dsh-collect-HH32 -- \
       <li><strong>Lab #1</strong> still optional: <a href="https://github.com/noah-thing/receipt">receipt</a> $/PR spike on one EM repo; <a href="https://github.com/awesamarth/watchdog">Watchdog</a> Codex-scoped control-plane pilot — not a fleet replace for <code>grok-tmux-watchdog</code> without Haiyuan ask.</li>
       <li><strong>Lab #2 (DSH 2026-09-20)</strong> backlog / spikes only: <strong>llmtap</strong> per-seat cost proxy; <strong>jev-guard</strong> Coding EM smoke; <strong>GBDL</strong>-shaped vault export of bot defs (convention only); <strong>jev-browser</strong> Lab backlog — do <em>not</em> install Playwright.</li>
       <li><strong>Lab #3 (DSH 2026-09-23)</strong> smoke / shadow only (not installed): <strong>sctxx</strong> model-free session→handoff artifact (GREEN on non-secret repos; inspect before filing); <strong>omp-jev-watchdog</strong> instruction-adherence + verification-honesty shadow (manual slot-close; never a blocking gate).</li>
+      <li><strong>Lab #4 (Agy 2026-09-24)</strong> new practice, not installed: <a href="https://github.com/jberdah/agent-runway">agent-runway</a> pre-flight quota check before an Opus launch; <a href="https://github.com/dommar04/ai-coding-gateway">ai-coding-gateway</a>-style PostToolUse trim of noisy tool output. Also not built: runtime-enforced run limits in the wrapper (bounded-agent-runtime) and automatic worktree checkpoint + relaunch (CAPO). Those two are listed below only as sources for existing policy.</li>
     </ul>
     <ul>
       <li>Mac CLI quota / health cards: Claude, Codex, Kimi, Agy, Muse, DSH</li>
       <li>Overall Grok Bots activity share from local transcripts (not plan dollars)</li>
       <li>Refresh on the Mac via <code>usage-dashboard/refresh.sh</code>, then commit/push the hub</li>
     </ul>
+    <h3 id="usage-freshness">Per-bot last activity + freshness guard (2026-09-24)</h3>
+    <p>Per-bot <strong>last activity</strong> comes from live box files under <code>agents/&lt;id&gt;/</code> (store.db clocks, automations state, memory/assets). On the Mac it is overlaid with <strong>Grok Bot client transcript replicas</strong> when those are newer. It never comes from the frozen <code>agent-transcripts</code> mirror. A bot gets a visible <strong><code>stale source</code></strong> badge when its source is <strong>&gt;24h</strong> old while other roster bots are current, or when its agent dir is missing. The box collector prints <code>STALE_SOURCES:</code> and exits non-zero, so the weekday refresh surfaces it instead of publishing a silently old date.</p>
+    <p class="note"><strong>Jev (on-demand):</strong> last activity = newer of the newest <code>jev-route</code> log (<code>/home/box/agent-data/jev/logs/</code>) or the Jev chat folder; source label <code>jev-route logs</code>. The page shows Jev router call counts (total / 24h / 7d / per gate). Jev is flagged stale only when <strong>both</strong> sources are older than <strong>7 days</strong>. Hunt: <code>Hunt/agent-manage/2026-09-24-usage-last-activity-fix.md</code>.</p>
   </section>
 
 
@@ -486,6 +491,15 @@ grok-tmux-run dsh-collect-HH32 -- \
       <li>Medium return → <code>Hunt/medium/</code> path list (no hub PRs)</li>
     </ul>
 
+    <h3 id="coding-em-kicks">Coding EM kick ledger + pickup check (2026-09-24)</h3>
+    <p>Every Manage handoff to Coding EM goes as a <strong>direct priority wake to Github Bot</strong>. A Coding EM room post is optional and never enough on its own. Each kick also gets a row in the box ledger <code>/home/box/agent-data/handoffs/coding-em-kicks.json</code>: <code>posted</code> → <code>launched</code> → <code>pr_open</code> / <code>done</code>, or <code>blocked</code> + note.</p>
+    <ul>
+      <li>Github Bot’s <code>*/15</code> heartbeat reads the ledger <strong>first</strong>; <code>posted</code> with no seat = launch or mark blocked, never “idle”.</li>
+      <li>Manage routine <strong>Coding EM kick pickup check</strong> — 04:06 + 08:06 PT: cross-check ledger vs tmux / PRs, send <strong>one</strong> priority re-wake for a stuck kick, and tell Haiyuan at 08:06 if it is still stuck. Silent otherwise.</li>
+      <li>New named failure mode for exception-first skills: <strong>unacked handoff</strong> (a room-only kick the heartbeat never read, 2026-09-24 03:15–06:50 PT).</li>
+    </ul>
+    <p class="note">Lock: <code>Maps/Decisions/2026-09-24-coding-em-kick-ledger.md</code>. Pairs with no-exit-while-waiting and <a href="#exception-first">exception-first skills</a>.</p>
+
     <h3>Routines</h3>
         <p><strong>Manage Bot</strong></p>
     <ul>
@@ -494,9 +508,10 @@ grok-tmux-run dsh-collect-HH32 -- \
       <li>Harness Lab collect — 08:55 PT daily (Agy/Muse/DSH rotation)</li>
       <li>Harness Lab KEEP curate/publish — 16:45 PT daily</li>
       <li>Weekly playbook ↔ vault card ↔ Grok profile sync — Mondays 10:47 PT</li>
-      <li>Weekday specialist ops nudge — 08:00 PT Mon–Fri (Jenny-style playbook + blockers)</li>
+      <li>Weekday specialist ops nudge — 08:11 PT Mon–Fri (Jenny-style playbook + blockers)</li>
       <li>PR board sweep — 09:09 + 21:09 PT daily (12h; CI/conflict/stall → Coding EM)</li>
       <li>Nightly Mac harness audit — 02:59 PT (rotate one Mac CLI; dual-LGTM; no merge)</li>
+      <li>Coding EM kick pickup check — 04:06 + 08:06 PT (ledger vs tmux/PRs; one re-wake; Haiyuan at 08:06 if still stuck — <a href="#coding-em-kicks">details</a>)</li>
     </ul>
     <p><strong>Policy:</strong> <strong>Three-Run Proof</strong> (Observe → Correct → Release) before Active — never automate the first success. Prefer event triggers over tight crons. Mondays: playbook↔card sync <strong>plus weekly kill review</strong>. Mac/Field Brief skills are <strong>exception-first</strong> (ran? right? miss if killed?). Long fires use <strong>run limits</strong>, autonomy ladder + demotion, and a <strong>retry/cost ceiling</strong>. Audit PR babysits after merge. See <code>Maps/Decisions/2026-09-15-grok-routine-audit.md</code> · <code>Maps/Decisions/2026-09-23-0xgenai-three-run-kill-review-gyr.md</code>.</p>
 
@@ -601,7 +616,7 @@ ask → Manage Bot
     <table>
       <thead><tr><th>Routine</th><th>When (PT)</th><th>What</th></tr></thead>
       <tbody>
-        <tr><td>Weekday specialist ops nudge</td><td>08:00 Mon–Fri</td><td>Playbook bullets + blocker ask in Field Brief / Coding EM</td></tr>
+        <tr><td>Weekday specialist ops nudge</td><td>08:11 Mon–Fri</td><td>Playbook bullets + blocker ask in Field Brief / Coding EM</td></tr>
         <tr><td>PR board sweep 12h</td><td>09:09 + 21:09 daily</td><td>Open PRs → CI/conflict/stall → Mac CLI unblock + proof; never merge</td></tr>
         <tr><td>Nightly Mac harness audit</td><td>02:59 daily</td><td>One rotating Mac seat; scoped audit PR; dual-LGTM; morning ping if ready</td></tr>
       </tbody>
@@ -624,11 +639,13 @@ ask → Manage Bot
 
     <h3 id="exception-first">Exception-first skills (2026-09-23)</h3>
     <p>Mac launch and Field Brief skills document <strong>symptom → action</strong> failure branches (stall ~540s, dirty exit-0, quota failover, Mac-down gaps, miss-watch sole detector, orphan BRIEF_OK) <em>before</em> rediscovering them in chat. Authoring rule: when you edit those skills, update Exception paths in the same pass.</p>
+    <p class="note"><strong>Quota failover source (Lab 2026-09-24 · <a href="https://github.com/whitewolfx7/capo">CAPO</a>):</strong> matches our live rule — Opus 5.5 capped → Kimi fallback (Astra last-resort), with no-exit-while-waiting and the retry ceiling. CAPO’s automatic Markdown checkpoint of <code>git status</code> + uncommitted diff, then relaunch on the other CLI, is <em>not live</em> here. The handoff is still the named session id + vault note.</p>
     <p class="note"><strong>Named long-CLI failure modes (Lab 2026-09-23 · livelock):</strong> crash / hang / stall / api-error — leave a machine-readable heartbeat (did-it-finish / what-killed-it). Oscillation / loop patterns are distinct from stale-only <code>grok-tmux-watchdog</code> (~540s); do <em>not</em> fleet-replace the watchdog without Haiyuan ask. Pairs with abnormal-volume → stop-and-escalate.</p>
     <p class="note">Skill: exception-first-mac-and-field-brief · Lock: <code>Maps/Decisions/2026-09-23-exception-first-skills.md</code>.</p>
 
     <h3 id="run-limits">Run limits + abnormal-volume stop (2026-09-23)</h3>
     <p>Long fires inherit defaults: <strong>50 items · 2 retries · $0 spend · 0 external actions</strong> without Haiyuan approval. If input volume changes abnormally vs the last clean run → <strong>stop and escalate</strong> (a permitted action repeated at scale is still damage).</p>
+    <p class="note"><strong>Source (Lab 2026-09-24 · <a href="https://github.com/hammasbuilds/bounded-agent-runtime">bounded-agent-runtime</a>):</strong> the same idea — step / time / spend / tool-call / repeat ceilings plus tool risk tiers (READ / WRITE / EXTERNAL / IRREVERSIBLE ≈ our <a href="#gyr-authority">GYR</a>). Today our limits are policy in charters and skills; a wrapper that enforces them outside the agent loop is a <em>Lab follow-up, not live</em>.</p>
 
     <h3 id="autonomy-ladder">Autonomy ladder 0–4 + demotion</h3>
     <p>GYR is touch policy; the ladder is earned autonomy: Observe → Prepare → Execute-with-approval → Auto → Coordinate. <strong>Demote</strong> when quality drops, an integration changes, or human repairs pile up.</p>
