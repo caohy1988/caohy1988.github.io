@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-25 · 12:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="PydanticAI decide spans, DSPy 3.4 Jev types, Codex 0.157 stable OTLP policy gate; Denial-of-Wallet, ACE, Approval Laundering, JevOut, harness cost.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-25-0034-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 AM PT · Miss-watch catch-up (primary :34 left no artifact)</p>
+    <article>
+<h1>Field Brief — 2026-09-25-0034: Decision layers became telemetry. PydanticAI 2.50 records every route probability in a <code>decide</code> span, and DSPy 3.4 returns Jev probabilities as ordinary outputs. Those probabilities can be steered: short, answer-preserving context flipped 61% of Jev's correct picks. Four papers measure what an agent's own record misses: re-billed tool output (up to 14,293× the first call's input), exfiltration visible only in syscalls, approvals that omit side effects, and cache-driven cost. Codex 0.157 went stable and now withholds OTLP telemetry under destination-restricted network policies.</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer:</strong> Opus 5.5 (<code>claude-opus-5-5[1m]</code>), primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-25-0034</strong> (official 6h slot, 12:34 AM PT Fri Sep 25, 2026). <strong>Miss-watch catch-up:</strong> the primary :34 run left no artifact (no HTML, no Markdown). This run started ~00:55 PT (first clock read 00:57 PT). The label stays <strong>0034</strong>, per <code>Maps/Decisions/2026-09-06-field-brief-routine-missed-slots.md</code>.
+<strong>Evidence window:</strong> from the 1834 brief's last probes (~02:05Z) to this run's last probes (~08:10Z). It also includes two Codex prereleases published before 02:05Z that the 1834 brief did not report. I re-probed GitHub, npm, PyPI, arXiv abs pages and HN Algolia myself between 07:57Z and 08:10Z, and read 7 PDFs in full.</p>
+<ul>
+<li><strong>Source packs used (6, all PACK_DONE):</strong> Muse 1932 (late catch-up), DSH 2032 (late catch-up), Agy 2132, Muse 2232, DSH 2332 and Agy 0032.</li>
+<li><strong>Catalog baseline:</strong> <strong>405 items / 101 briefs / 103 runs</strong>, SHA-256 <code>47660f4a…99696256</code>, read-only. The newest brief is <code>2026-09-24T1834</code>.</li>
+</ul>
+<p><strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call; Collection owns the HTML, the catalog and the push.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: 3 new Industry ranks, 5 new Academy ranks, 3 Industry progress notes, and a short NOTE list.</strong></p>
+<p><strong>Theme 1: the typed decision layer went from a model call to a first-class telemetry object in one night, and a paper measured how easily it can be steered.</strong></p>
+<ul>
+<li><strong><a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.50.0">PydanticAI v2.50.0</a></strong> adds a <code>DecisionModel</code> base class. Every request it sends gets a <code>decide</code> span that records the questions asked, the routes offered, the route taken, per-question confidence and per-option probabilities. It also quietly <strong>ignores</strong> the old <code>typesafe_tool_call_threshold</code> setting.</li>
+<li><strong><a href="https://github.com/stanfordnlp/dspy/releases/tag/3.4.0">DSPy 3.4.0</a></strong> (missed by every pack) makes Jev a normal <code>lm=</code> backend. Its <code>Noul</code>, <code>Choice</code> and <code>Score</code> outputs carry probabilities and confidence, and a new optimizer (ReAnchor) fits decision thresholds against the program's own metric. DSPy also moves its default LM path off LiteLLM onto a native engine.</li>
+<li><strong>The same probabilities can be pushed around</strong> (<a href="https://arxiv.org/abs/2609.30243">2609.30243</a>, JevOut). Short, fluent context that leaves the correct answer unchanged redirected Jev on <strong>312 of 508</strong> initially correct decisions (61.4%), 229 of them at ≥0.7 probability on the wrong option.</li>
+<li><strong>A companion paper found the opposite for injection</strong> (<a href="https://arxiv.org/abs/2609.28613">2609.28613</a>, read in full, folded into the JevOut card). Classic injection text flipped Jev in only 1.8–3.5% of 510 cases. What decides risk is the decision's <strong>margin</strong>, not the wording.</li>
+</ul>
+<p><strong>Theme 2: what the agent's own record does not show.</strong></p>
+<ul>
+<li><strong>Cost</strong> (<a href="https://arxiv.org/abs/2609.28585">2609.28585</a>, Denial-of-Wallet). A tool return that the host keeps in history is billed again on every later call. Cumulative input reached <strong>14,293×</strong> the first call's input, and only 71 of 3,830 public MCP repos show any code-visible safeguard against it (token, growth, loop or spend limits).</li>
+<li><strong>Syscalls</strong> (<a href="https://arxiv.org/abs/2609.28915">2609.28915</a>, ACE, AWS). App-layer evidence, which is what BQAA sees, scores AUROC <strong>0.586</strong> on &quot;silent exfiltration via logging&quot;. The kernel trace scores <strong>0.976</strong> on the same sessions.</li>
+<li><strong>Approvals</strong> (<a href="https://arxiv.org/abs/2609.28586">2609.28586</a>, Approval Laundering). <strong>40 of 111</strong> approval records omit an effect class the approved command then exercised, such as a <code>postinstall</code> hook writing a file or an MCP call reaching the network.</li>
+<li><strong>Cache</strong> (<a href="https://arxiv.org/abs/2609.28919">2609.28919</a>, Control the Harness). In a harness, the unit to price is the turn, not the request. Corrections are over a third of the bill, and 17–27% of user turns arrive after the 5-minute prompt cache has expired.</li>
+<li><strong>Telemetry egress</strong> (<a href="https://github.com/openai/codex/releases/tag/rust-v0.157.0">Codex rust-v0.157.0</a>, now npm <code>latest</code>). Under a managed network policy that restricts destinations, Codex <strong>refuses every OTLP log, trace and metric export</strong>, even to an allowlisted collector. I verified this in the source at the release tag.</li>
+</ul>
+<p><strong>What this means for BQAA (as the observer, not the source of truth):</strong></p>
+<ul>
+<li><strong>Add a decision event to the schema now:</strong> question keys, option labels, per-option probabilities, threshold, route taken, hand-off. Store the top-1 minus top-2 margin, because low-margin decisions are the ones that flip.</li>
+<li><strong>Price turns cache-aware and watch re-billed state:</strong> uncached input, cache reads and cache writes per request; the cumulative input amplification (CAF, total session input ÷ first-call input) and per-turn prompt growth; correction turns; cold returns after the cache has expired.</li>
+<li><strong>Say plainly which failures app-layer telemetry cannot see,</strong> and give host evidence (EDR, eBPF) a session join key. Treat &quot;a client went silent&quot; as its own signal, since Codex now goes silent by policy.</li>
+</ul>
+<h2>Industry</h2>
+<p><strong>Screen used:</strong> a release-level move that ships a product capability, or a change to how agent telemetry, cost or decisions are recorded. Unreleased main-branch commits are NOTE only. I checked every item against its primary release object, tag, registry entry, changelog or PR body, not against the pack summary.</p>
+<p><strong>Sweep results (my own, 07:57Z–08:10Z):</strong></p>
+<ul>
+<li><strong>GitHub release objects since 01:44Z (37 repos):</strong> Codex <code>rust-v0.157.0</code>, <code>rust-v0.158.0-alpha.13</code>; the <code>langchain-ai/langgraphjs</code> train (six packages); pydantic-ai <code>v2.50.0</code>; LiteLLM <code>v1.98.1</code>, <code>v1.99.4</code>, <code>v1.100.3</code>, <code>v1.104.0-dev.2</code>; DSPy <code>3.4.0</code>. Nothing new after 06:46Z.</li>
+<li><strong>PyPI in the window (50 packages):</strong> pydantic-ai(-slim) 2.50.0, the LiteLLM four, <strong>dspy 3.4.0</strong>, and a crewai nightly.</li>
+<li><strong>npm in the window (53 packages):</strong> <code>@openai/codex</code> 0.157.0 (<code>latest</code>) and 0.158.0-alpha.13; <code>@langchain/langgraph</code> 1.4.18, <code>-sdk</code> 1.12.0, <code>@langchain/react</code> 1.2.0; and a <strong>Mastra <code>alpha</code> train</strong> (<code>@mastra/core@1.72.0-alpha.0</code> plus server, client-js, memory and pg), which no pack reported.</li>
+</ul>
+<h3>NEW 1: <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.50.0">PydanticAI v2.50.0</a>: <code>DecisionModel</code> base, <code>decide</code> spans, route-by-name, and the tool-call &quot;lean&quot; removed</h3>
+<p>GH release at 04:47:15Z; PyPI <code>pydantic-ai</code> at 05:03:21Z and <code>pydantic-ai-slim</code> at 05:03:24Z. I read the release notes and the PR bodies of #8696, #8698, #8733 and #8739.</p>
+<ul>
+<li><strong><code>DecisionModel</code>, a base for any Decisions-protocol backend (<a href="https://github.com/pydantic/pydantic-ai/pull/8696">#8696</a>).</strong></li>
+<li>It turns an agent's output type and tools into typed questions (<code>noul</code>, <code>choice</code>, <code>score</code>) and maps the answers back. <code>TypeSafeModel</code> becomes a thin adapter on top of it.</li>
+<li>The PR notes that OpenRouter already serves the same protocol (#8552).</li>
+<li>Settings are renamed to <code>decision_*</code>; the old <code>typesafe_*</code> names still work but warn.</li>
+<li><strong>A <code>decide {model}</code> span for every Decisions request (<a href="https://github.com/pydantic/pydantic-ai/pull/8698">#8698</a>), nested under the <code>chat</code> span.</strong></li>
+<li><code>gen_ai.operation.name = &quot;decide&quot;</code>. This is a custom value, which semconv allows; it is not a standard operation name.</li>
+<li>The route and decision attributes are <code>pydantic_ai.decision.{thresholds, questions, state, answers, confidence, route_question, route_options, route_questions, route}</code>. Token counts go in <code>pydantic_ai.decision.usage.*</code>.</li>
+<li><strong>Hand-offs are errors on the <code>decide</code> span.</strong> A pick below <code>decision_route_threshold</code> raises <code>UnsureRoute</code>, and a route the model cannot fill raises <code>UnfillableRoute</code>. With a <code>FallbackModel</code>, the parent <code>chat</code> span ends <strong>without</strong> an error, so the <code>decide</code> span is the only place the hand-off appears.</li>
+<li><strong>No <code>gen_ai.usage.*</code> and no cost on <code>decide</code> spans.</strong> The <code>chat</code> span already carries the sum, and adding both would double-count.</li>
+<li><strong>With content capture off,</strong> the span keeps numbers and identifiers (question keys, route labels, confidence, probabilities) but drops state text and question text.</li>
+<li>A fill past the size cutoff produces a sibling <code>decide</code> span. A telemetry failure never fails the request.</li>
+<li>Nesting is documented for DBOS, Prefect and Temporal, the last as <code>invoke_agent → chat → StartActivity → RunActivity → decide</code>.</li>
+<li><strong>Compatibility notes:</strong></li>
+<li><strong>Route by name (<a href="https://github.com/pydantic/pydantic-ai/pull/8733">#8733</a>).</strong> The route question is keyed <code>route</code>, and each route has one label, such as <code>Refund</code>, <code>None</code> or a tool name.</li>
+<li><strong><code>ModelSelectionContext</code> (#8737).</strong> <code>.messages</code> now ends with the request being routed, and a new <code>.prompt</code> field is added.</li>
+<li><strong>The tool-call &quot;lean&quot; is removed (<a href="https://github.com/pydantic/pydantic-ai/pull/8739">#8739</a>).</strong> The likeliest route is always taken. The opt-in <code>decision_route_threshold</code> hands unsure picks to a <code>FallbackModel</code>.</li>
+<li><strong><code>typesafe_tool_call_threshold</code> (shipped in v2.45–v2.49, default 0.6) is deprecated and ignored.</strong> Code that relied on the default now calls the tool Jev picked. The PR's evidence: on 156 labelled support-desk runs, taking the likeliest route scored 156/156 against 154/156 for the lean.</li>
+<li><strong>Cost and realtime fixes:</strong></li>
+<li>Anthropic one-hour cache writes are now priced at the one-hour rate instead of the five-minute rate (#8666).</li>
+<li>Realtime image input is priced at the image rate (#8741), and <code>RequestUsage.audio_seconds</code> is added (#8427).</li>
+<li>A failed OpenAI realtime response becomes a <code>RealtimeSessionErrorEvent</code> with <code>finish_reason='error'</code> (#8752); before, the error was dropped.</li>
+<li><code>wait_for_reply()</code> no longer hangs on a refused send (#8747).</li>
+<li><code>RunContext.in_durable_context</code> is added (#8723).</li>
+<li><strong>Why it ranks as NEW, not progress:</strong> it adds a new public API and a new span type compared with the <code>pydantic-ai-v2-49-0-nested-usage-attribution-boolcriteria-typesafe-none</code> card. The catalog followed the same rule for v2.49 vs v2.47.</li>
+<li><strong>Caveat:</strong> <code>decide</code> is not an OTel GenAI semconv operation yet, and the attribute names are PydanticAI's own.</li>
+<li><strong>TL;DR:</strong> count hand-offs from <code>decide</code>-span exceptions, not <code>chat</code>-span errors. Never sum <code>decide</code> usage into session totals. Flag agents whose config still sets <code>typesafe_tool_call_threshold</code>, because their routing changed silently.</li>
+</ul>
+<h3>NEW 2: <a href="https://github.com/stanfordnlp/dspy/releases/tag/3.4.0">DSPy 3.4.0</a>: Jev decision types with probability evidence, ReAnchor calibration, and a native LM engine that bypasses LiteLLM by default</h3>
+<p>PyPI at 04:04:23Z and GH release at 04:06:22Z. <strong>No pack reported it</strong>, because DSPy is not on the collectors' watchlist. I read the full release notes and the 3.4.0 migration guide (<code>docs/docs/community/normalized-lm-api-migration.md</code>).</p>
+<ul>
+<li><strong>Jev through TypeSafe as an ordinary backend (<a href="https://github.com/stanfordnlp/dspy/pull/10463">#10463</a>).</strong></li>
+<li>Configure it with <code>dspy.configure(lm=dspy.experimental.TypeSafe(&quot;jev-latest&quot;))</code>. <code>Predict</code> translates the signature into Jev decision requests.</li>
+<li>There are three experimental output types:<ul>
+<li><code>Noul</code>: <code>.value</code>, <code>.probability</code>, <code>.confidence</code></li>
+<li><code>Choice[...]</code>: <code>.value</code>, per-option <code>.probabilities</code>, <code>.confidence</code></li>
+<li><code>Score[...]</code>: continuous <code>.value</code>, ordinal <code>.level</code>, rubric <code>.probabilities</code>, <code>.confidence</code></li>
+</ul>
+</li>
+<li>Thresholds, score cuts and choice weights are applied locally, not sent to the backend, so identical requests can reuse cached evidence.</li>
+<li>The notes caveat the confidence values themselves: <code>Noul</code> confidence measures distance from its threshold, not calibration, and a generative LM's confidence is self-reported.</li>
+<li><strong>ReAnchor (<a href="https://github.com/stanfordnlp/dspy/pull/10475">#10475</a>).</strong></li>
+<li>This experimental optimizer fits Boolean thresholds, score cuts and choice weights against the whole program's metric, without rewriting instructions.</li>
+<li>A setting must improve the training score <strong>and</strong> pass a held-out fold check.</li>
+<li>The notes state there is &quot;no fixed inference budget&quot; guarantee.</li>
+<li><strong>The native LM engine (lm15) is the new default path.</strong></li>
+<li><code>engine=&quot;auto&quot;</code> prefers native execution. LiteLLM is chosen only before inference, for requests the native route cannot carry. Auth failures, timeouts and provider errors never switch the backend.</li>
+<li><code>engine=&quot;litellm&quot;</code> forces the old path, and LiteLLM remains installed.</li>
+<li>The migration guide says &quot;DSPy owns response caching, retries, candidate fan-out, callbacks and history&quot; on both engines.</li>
+<li><strong>Accounting semantics that matter for analytics</strong> (release notes and migration guide):</li>
+<li><strong>&quot;Unknown cost remains unknown rather than zero.&quot;</strong></li>
+<li>A setting the native route cannot carry exactly is <strong>adapted and recorded</strong> in LM history under <code>adaptations</code> (<code>field</code>, <code>action</code>, <code>asked</code>, <code>applied</code>, <code>reason</code>). For example, <code>temperature=1.5</code> on Anthropic becomes <code>1.0</code>.</li>
+<li>Native <code>n</code> answers are <code>n</code> sequential requests, so input tokens are billed more than once.</li>
+<li>Closing a native Responses stream early can lose final usage.</li>
+<li>&quot;A network retry can still repeat a request the provider already processed or billed: this is <strong>not an exactly-once guarantee</strong>.&quot;</li>
+<li>Nested usage trackers now roll into their parent (#10065).</li>
+<li>GEPA's trace capture no longer misaligns failed examples with their scores (#10305). This fixes an eval-data bug in 3.3.1.</li>
+<li><strong>Breaking changes:</strong> the RLM <code>interpreter_factory=</code> argument is now keyword-only; the experimental 3.3 LM types are removed; legacy <code>lm(messages=[...])</code> calls and custom <code>BaseLM.forward()</code> are deprecated until the 3.5 cutoff; Pydantic 2.11 or later is required.</li>
+<li><strong>Why it ranks:</strong> it is a major release of a widely used agent/LM-program framework that ships a product capability (typed decisions with probability evidence plus metric-driven calibration). It also changes where LM calls are executed and how cost is recorded.</li>
+<li><strong>Catalog context:</strong></li>
+<li><code>langfuse-4-42-0-decision-model-evaluators-typesafe-jev</code></li>
+<li><code>goose-v1-52-0-decisions-provider-crate-openrouter-jev</code></li>
+<li><code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code></li>
+<li><strong>TL;DR:</strong> tracing that depends on LiteLLM being in the call path (LiteLLM callbacks, a LiteLLM-level instrumentor) no longer sees calls DSPy runs natively, so verify DSPy coverage after upgrading. Keep unknown cost as NULL, not 0. Store requested-versus-applied parameters.</li>
+</ul>
+<h3>NEW 3: <a href="https://github.com/openai/codex/releases/tag/rust-v0.157.0">OpenAI Codex CLI rust-v0.157.0 STABLE</a>: the 0.157 train reaches npm <code>latest</code>, with network policy now governing telemetry</h3>
+<p>GH release at 02:31:06Z and npm <code>@openai/codex@0.157.0</code> at 02:35:19Z, now <code>latest</code> on all six platforms (02:36–02:45Z). The changelog lists 126 PRs since 0.156.0. I read the release notes and the PR bodies of #47408, #47389, #47113, #47353, #47327, #47106, #47179 and #47081. I also checked the network-policy code at the <code>rust-v0.157.0</code> tag.</p>
+<ul>
+<li><strong>Product changes:</strong></li>
+<li>GPT-6 Sol and Luna, including on Amazon Bedrock (#47332, #47347).</li>
+<li><strong>The background server (daemon) now starts automatically by default</strong> for eligible interactive sessions (<a href="https://github.com/openai/codex/pull/47179">#47179</a>: <code>daemon_auto_start</code> promoted to stable and on by default).</li>
+<li>Fullscreen transcripts are on by default, and <code>/import</code> works in remote and daemon sessions.</li>
+<li><strong>Network policy now covers the whole request lifecycle (<a href="https://github.com/openai/codex/pull/47389">#47389</a>, <a href="https://github.com/openai/codex/pull/47407">#47407</a>).</strong></li>
+<li>Every redirect destination is checked.</li>
+<li>A permit is held while the response body is read.</li>
+<li>WebSocket reads and writes are guarded by revocable permits.</li>
+<li>Policy denials survive error handling and are <strong>not retried</strong>.</li>
+<li><strong>Telemetry obeys the same policy (<a href="https://github.com/openai/codex/pull/47408">#47408</a>).</strong></li>
+<li>The PR body says it will &quot;Guard OTLP log, trace, and metric exports with revocable permits, <strong>disable them under destination restrictions</strong>, and make managed HTTP exports cancellable. Suppress global Statsig settings while managed policy is active.&quot;</li>
+<li><strong>Verified at the tag:</strong><ul>
+<li><code>otel/src/network_policy.rs</code> wraps every span, log and metric exporter in a <code>PolicyExporter</code>; its header reads &quot;OTLP SDK transports remain disabled under application destination restrictions&quot;.</li>
+<li>In <code>http-client/src/network_policy.rs</code>, <code>acquire_for_unsupported_sdk()</code> returns <code>UnsupportedTransport</code> whenever an endpoint allowlist is set, or when the managed destination policy is anything other than <code>Unrestricted</code>.</li>
+</ul>
+</li>
+<li><strong>Net effect:</strong> under a destination-restricted managed policy, every OTLP export batch fails, <strong>including exports to an allowlisted collector</strong>. Without a managed policy, nothing changes.</li>
+<li><strong>Analytics fields new to the catalog:</strong></li>
+<li><a href="https://github.com/openai/codex/pull/47113">#47113</a>: <code>creator_user_id</code> and <code>creator_account_id</code> are persisted in rollouts and SQLite, including on forks. Resume and revert keep the original creator.</li>
+<li><a href="https://github.com/openai/codex/pull/47353">#47353</a>: <code>invalid_prompt</code> is now its own non-retryable error class. Before, it was a generic invalid request.</li>
+<li><a href="https://github.com/openai/codex/pull/47327">#47327</a>: failed image generations keep their request ID. Before, failure analytics had none.</li>
+<li><a href="https://github.com/openai/codex/pull/47106">#47106</a>: skill telemetry keeps the originating <code>turn_id</code> for Code Mode skill calls that complete after another turn has started.</li>
+<li><strong>Already carded through the 0.157 alpha ranks, now reaching stable users:</strong></li>
+<li>#47081, cumulative MCP attribution in Responses <code>client_metadata</code> (16 KiB cap, <code>attribution_error</code>)</li>
+<li>#47114, thread-item lifecycle timestamps</li>
+<li>#47212, MCP trace context across transport workers</li>
+<li>#47235, <code>SpawnRequest</code></li>
+<li><strong>Why it ranks as NEW:</strong> it is a stable graduation to npm <code>latest</code>, like the <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code> card, and it adds a telemetry-affecting behavior change the catalog has not recorded.</li>
+<li><strong>TL;DR:</strong></li>
+<li>For enterprise Codex fleets on managed network policies, expect OTLP data to <strong>stop</strong> rather than error. Alert on per-client silence and document the cause.</li>
+<li>Key sessions by creator identity.</li>
+<li>Break out <code>invalid_prompt</code> separately from generic 400s.</li>
+</ul>
+<h3>Progress notes (update existing cards; no new card)</h3>
+<p><strong>1. LiteLLM three-branch stable backport wave, <a href="https://github.com/BerriAI/litellm/releases/tag/v1.98.1">v1.98.1</a> / <a href="https://github.com/BerriAI/litellm/releases/tag/v1.99.4">v1.99.4</a> / <a href="https://github.com/BerriAI/litellm/releases/tag/v1.100.3">v1.100.3</a></strong> → progress on <code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code>.</p>
+<ul>
+<li><strong>Clocks:</strong> GH releases at 06:20:07Z, 06:20:07Z and 06:21:39Z; PyPI uploads at 06:05:19Z, 06:06:03Z and 06:08:44Z. PyPI <code>latest</code> is still 1.102.1.</li>
+<li><strong>Content:</strong> each release body is one backport PR (#43130, #43131, #43132) carrying the same three fixes. v1.98.1 also carries the Bedrock/GPT-6 reasoning-gate fix and a Python 3.13 image pin (#42002). PR bodies read:</li>
+<li><strong><a href="https://github.com/BerriAI/litellm/pull/39729">#39729</a>:</strong> an end-user budget reset zeroed the DB spend but not the cached <code>spend:end_user:&lt;id&gt;</code> counter. Other workers and replicas kept returning <strong>429</strong> after the budget window rolled over, until their caches expired. The fix zeroes the counter in memory and Redis, evicts the cached object, and floors the cached spend at the DB value.</li>
+<li><strong><a href="https://github.com/BerriAI/litellm/pull/40639">#40639</a>:</strong> a shared budget with more than <strong>32,767 end users never reset</strong> (Postgres bind-variable limit). Every reset tick rolled back, and customers stayed blocked with no signal. The fix resets by budget link.</li>
+<li><strong>#39631:</strong> <code>gpt-6*</code> names are handled as the gpt-5 request family.</li>
+<li><strong>Why progress, not NEW:</strong> these are backports of fixes that first shipped in v1.101.0 (#39729) and v1.102.0 (#40639). The 1.101.x line had already picked up #40639 in the earlier Jev backport wave. After this wave, every maintained line from 1.98.x to 1.102.x carries both fixes. I checked with the compare API and the 1.101.x commit log.</li>
+<li><strong>Also: <a href="https://github.com/BerriAI/litellm/releases/tag/v1.104.0-dev.2">v1.104.0-dev.2</a></strong> (prerelease; GH at 06:38:48Z, PyPI at 06:09:07Z) is the first artifact with <a href="https://github.com/BerriAI/litellm/pull/42486">#42486</a>.</li>
+<li>It sets <code>gen_ai.conversation.id</code> on OTel v2 LLM spans from the caller's session id: the <code>litellm_session_id</code> body field, the <code>x-litellm-session-id</code> header, or the <code>langfuse_session_id</code> header.</li>
+<li>IDs that LiteLLM minted itself are ignored. The PR merged Sep 23.</li>
+</ul>
+<p><strong>2. OpenAI Codex <a href="https://github.com/openai/codex/compare/rust-v0.158.0-alpha.10...rust-v0.158.0-alpha.13"><code>rust-v0.158.0-alpha.11</code> → <code>alpha.13</code></a></strong> → progress on <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code> (the alpha line).</p>
+<ul>
+<li><strong>Clocks:</strong></li>
+<li>alpha.11: GH at 23:23:08Z, npm at 23:35Z</li>
+<li>alpha.12: GH at 00:54:29Z, npm at 01:12Z</li>
+<li>alpha.13: GH at 04:29:26Z, npm <code>alpha</code> at 04:40Z</li>
+<li><strong>Contents:</strong> 28 commits since alpha.10. PR bodies read:</li>
+<li><strong><a href="https://github.com/openai/codex/pull/47984">#47984</a>: multi-agent spawn metrics.</strong><ul>
+<li><code>codex.multi_agent.spawn.phase.duration_ms</code> times each phase: residency reservation, fork context, child creation, durability waits, input admission, and total.</li>
+<li><code>codex.multi_agent.spawn.failure</code> counts failures by bounded error category.</li>
+<li>Labels are bounded: fork mode, version, SKU and history mode.</li>
+</ul>
+</li>
+<li><strong><a href="https://github.com/openai/codex/pull/47967">#47967</a>: <code>flex_unavailable</code> is a distinct terminal error.</strong> It comes from a 429 or from streamed <code>error</code> / <code>response.failed</code> events, is not retried, and gets its own telemetry class. Unexpected HTTP responses now map to <code>HttpConnectionFailed</code> with the status code kept.</li>
+<li><strong>#47957:</strong> tool-call observations are bounded to the 15 MiB outgoing budget, and a call inventory is marked incomplete when trimming drops calls. This was a NOTE at 1834; it now ships in a prerelease.</li>
+<li><strong>#47947:</strong> root authorization context goes to 16 messages.</li>
+<li><strong>#47974:</strong> Git-directory protections hold across writable roots.</li>
+<li><strong>#47970:</strong> current environment selections are exposed for a running turn.</li>
+<li><strong>Housekeeping:</strong> alpha.11 and alpha.12 were published before the 1834 run's probes but were not in that brief. Both sort below older alphas in GitHub's release listing.</li>
+</ul>
+<p><strong>3. Mastra <a href="https://www.npmjs.com/package/@mastra/core/v/1.72.0-alpha.0"><code>@mastra/core@1.72.0-alpha.0</code></a></strong> (npm <code>alpha</code> tag at 04:23:57Z; <code>latest</code> is still 1.71.0; server, client-js, memory and pg alphas at 04:19–04:35Z) → progress on <code>mastra-core-1-70-0-model-selection-processor-tenant-scoped-traces-memory-1-32</code>.</p>
+<ul>
+<li><strong>No pack reported this publish.</strong> Muse 1932 and DSH 2032 said &quot;no publish yet&quot; at 04:09Z. The later packs checked only <code>latest</code>.</li>
+<li><strong>Silent gaps on the durable engine, now fixed.</strong> From <code>packages/core/CHANGELOG.md</code> (1.72.0-alpha.0 section):</li>
+<li>Output processors' <code>processToolResult</code> hooks were skipped on the durable engine, so &quot;a redaction processor had no effect on durable streams or transcripts&quot;.</li>
+<li>Background tool results skipped transcript transforms, so &quot;payloads a user asked to redact&quot; were persisted raw.</li>
+<li>Tool payload transforms redacted streamed chunks but persisted raw values.</li>
+<li>Call-time <code>modelSettings.maxRetries</code> was silently ignored.</li>
+<li>The run-level <code>totalMs</code> budget was not enforced, so &quot;a hanging provider or a long tool chain could run forever&quot;.</li>
+<li>The evented engine dropped the caller's <code>actor</code> identity, so actor-based authorization inside tools &quot;silently saw no actor&quot;.</li>
+<li>Evented streams lost events when the agent used a custom pubsub.</li>
+<li><strong>New in this alpha:</strong></li>
+<li><code>DurableAgent.observe()</code> gains <code>detach()</code>.</li>
+<li><code>subscribeToThread({ withInitialHistory })</code> sends one <code>thread-history</code> chunk and no longer replays completed runs.</li>
+<li><code>PubSub.trimTopic</code> deletes a finished run's entries. Failed or cancelled runs are deleted 30 s after they end.</li>
+<li><strong>TL;DR:</strong> thread histories and traces written by durable Mastra agents before this fix may hold payloads their owners configured to redact. That is worth an audit query.</li>
+</ul>
+<h3>NOTE (not ranked; commit-level, unreleased; recorded so the next brief can dedupe)</h3>
+<p>I verified the PR titles and merge clocks below on GitHub. Bodies come from the packs unless marked &quot;body read&quot;.</p>
+<ul>
+<li><strong>LiteLLM</strong> (all on main, unreleased; none are in dev.2, whose tag was cut at 05:10Z):</li>
+<li><code>e319bf27</code> (<a href="https://github.com/BerriAI/litellm/pull/36741">#36741</a>, 06:22:56Z; commit body read). The Langfuse callback moves to SDK v4 observations <strong>exported over OpenTelemetry</strong>, with one isolated tracer provider per Langfuse credential set.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43108">#43108</a> (04:34:57Z). <code>[&quot;*&quot;]</code> in <code>mcp_tool_permissions</code> grants <strong>all current and future</strong> tools on an MCP server.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/41231">#41231</a> (06:34:16Z). Key-level MCP grant validation now counts servers inherited through team unified access groups.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/42555">#42555</a> (01:54:53Z). Team admins can update member key budgets.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43075">#43075</a> (02:00:15Z; body read). A Vertex Gemma container's own error inside an HTTP 200 now surfaces with the container's status and message. Before, it became an opaque <strong>500</strong> that Claude Code retried ten times over about 4 minutes.</li>
+<li><strong>Mastra</strong> (main, unreleased; <code>@mastra/livekit</code> has published nothing since):</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25068">#25068</a> (04:22:57Z). Failed LiveKit workflow turns were reported as successful, and <code>onTurnComplete</code> then saved them to memory.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25078">#25078</a> (06:53:29Z). Durable-agent finish chunks are now attributed to the agent.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25079">#25079</a> (06:54:31Z). Invalid durable timeout settings are rejected before a run starts.</li>
+<li><strong>LangGraph JS.</strong> <a href="https://github.com/langchain-ai/langgraphjs/releases"><code>@langchain/langgraph@1.4.18</code></a> (GH at 03:17:30Z in <code>langchain-ai/langgraphjs</code>; npm at 03:18:14Z) is only a dependency bump to <code>@langchain/langgraph-sdk@1.12.0</code>.</li>
+<li>The change itself (<a href="https://github.com/langchain-ai/langgraphjs/pull/2848">#2848</a>) is in <code>@langchain/react</code>, <code>vue</code> and <code>svelte</code> 1.2.0. With the opt-in <code>useStream(..., { queue: &quot;server&quot; })</code>, queued submissions become durable server-side runs that are visible to other sessions.</li>
+<li>Not ranked: it is a client-SDK queueing feature with no telemetry change.</li>
+<li><strong>Google ADK main (first-party context only; no card):</strong></li>
+<li><code>d7a7c3c6</code> (04:03Z): the <code>load_web_page</code> SSRF checks now also apply on the proxy path. According to the pack, <code>metadata.google.internal</code> was reachable when <code>HTTP(S)_PROXY</code> was set.</li>
+<li><code>6b96ba19</code> (04:33Z): single-turn structured output is kept in <code>event.output</code>.</li>
+<li><code>9625b06c</code> (04:58Z): SQLite memory service.</li>
+</ul>
+<h2>Academy</h2>
+<p><strong>Screen used:</strong> agent evaluation, cost, security or oversight evidence that produces a result BQAA could measure or log. Every rank below was read in full before ranking.</p>
+<p><strong>Coverage:</strong></p>
+<ul>
+<li><strong>No new arXiv mailing in this window.</strong> The Thursday 20:00 ET mailing (ceiling 2609.30268) was covered at 1834, and arXiv does not announce on Friday or Saturday evenings. The next mailing is Sunday 20:00 ET (Mon 00:00Z).</li>
+<li>The candidates therefore come from the same Sep 23–24 batch. The 1834 brief keyword-screened all 1,779 of its titles, and its &quot;scouted, not ranked&quot; list set tonight's reading list.</li>
+<li><strong>Full PDFs read (7):</strong> 28585, 28915, 28586, 28919, 28559, 30243 and 28613.</li>
+<li><strong>v1 dates checked on every candidate.</strong> 2609.29647 (AgentKernel) is backfill (v1 on Aug 29), so it is not treated as new work.</li>
+<li>The priority pin <code>2609.02702</code> (Trace-as-State v1) is intact and is <strong>not</strong> re-carded.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.28585">arXiv 2609.28585</a>: Persistent Billable State: Denial-of-Wallet Attacks and Defenses in Tool-Calling LLM Agents</h3>
+<p><strong>Zhang, Xia, Wu, Yue, Zhang, Cheng, Tu</strong> (Chinese Academy of Sciences IIE / UCAS, Beihang, BUPT). Submitted 23 Sep 2026.</p>
+<p><strong>Full PDF read (22 pp):</strong> §1–10 and App. C (Tables 4–13, Figs. 9–14).</p>
+<p><strong>The idea:</strong> once a host keeps a tool's return in history, the provider bills it again on <strong>every later call</strong>. An admitted malicious or compromised tool can therefore buy recurring, victim-billed processing with a schema-valid, task-plausible return. It needs no credentials, and cumulative input grows as O(N²).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>DOW-BENCH:</strong> six attack vectors (Table 1): direct recursion, polymorphic mutation, cross-tool chaining, stealth escalation, weaponized output and adaptive threshold-hugging.</li>
+<li><strong>243 core executions</strong> across six model families: GPT-4o, GPT-4o-mini, Mistral-Large, Llama-3.3-70B, Nemotron-120B and Qwen-3-235B.</li>
+<li><strong>Metric: CAF</strong>, the cumulative input tokens of a session divided by its first call's input tokens, computed from provider-reported usage.</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Exposure (Tables 3–4).</strong> Maximum CAF was <strong>14,293×</strong> (Mistral-Large, direct vector). <strong>51 of 69</strong> priced attack sessions crossed $0.10, and the largest reached $3.404, against $0.025 for the largest benign session.</li>
+<li><strong>Run length is not a safeguard (§6.1).</strong> CAF's coefficient of variation reached 3.08 (V1 on Llama-3.3-70B), so &quot;the agent will stop on its own&quot; cannot serve as a budget.</li>
+<li><strong>Turn survival drives exposure (§6.2).</strong> CAF tracks mean turns (ρ = 0.79) and tool calls (ρ = 0.81).</li>
+<li><strong>Retention policy (§6.3, Table 13).</strong> Keeping raw tool history raised mean effective cost by <strong>21.2–35.9%</strong>. Deterministic compression kept <strong>10/12 and 11/12</strong> history-dependent tasks successful; deletion kept 2/12.</li>
+<li><strong>Their fix: four host-side checks before each later call (§7–8).</strong> D1 caps prompt tokens, D2 flags prompt growth, D3 caps recursion, and D4 is a cost circuit breaker.</li>
+<li>They contained all <strong>123</strong> replay evaluations (41 recurring attacks × 3 presets).</li>
+<li>The moderate growth check (D2) fired on <strong>2 of 1,050</strong> benign runs (0.19%).</li>
+<li>Median decision time was 3.3–4.4 µs.</li>
+<li>A progress-authorized budget completed <strong>22/24</strong> workflows, against <strong>13/24</strong> under a fixed $0.10 cap (McNemar p = 0.0039).</li>
+<li><strong>Ecosystem (Fig. 14).</strong> Only <strong>71 of 3,830</strong> public MCP server and transport repos have any code-visible safeguard (1.9%), and none cover all four check families.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>It is a paper-only release: no code, data or attack material.</li>
+<li>The models are mostly 2025-era, and the priced cohort is small (78 sessions; V2 and V4 have 3 priced sessions each).</li>
+<li>The archived manifests omit temperature, max-turn and cache-policy fields.</li>
+<li>Prices are nominal list rates.</li>
+<li>The ecosystem scan is lexical.</li>
+<li>Disclosure to providers is still under review.</li>
+<li>It comes from the same team as 2609.28586 below, so the two are not independent confirmations.</li>
+</ul>
+<p><strong>Why it ranks:</strong> it turns &quot;retained tool output&quot; into a measurable cost-security object, and every metric it uses (CAF, per-turn Δp, priced exposure) can be computed from per-call usage telemetry that BQAA already stores. It complements the catalog's bounded-loops card (<code>arxiv-2609-27871-bounded-loops-pre-run-spend-bounds-verified-completion</code>) by locating the attack at the moment tool output is fed back in, not at the loop bound.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Ship per-session CAF and per-turn prompt-growth (Δp) views. The paper's moderate rule is Δp &gt; 10k, or Δp/p₁ &gt; 3 with Δp &gt; 2k.</li>
+<li>Attribute each retained-token block to the tool return that introduced it, so &quot;which tool is being re-billed&quot; becomes a query.</li>
+</ul>
+<h3>2. NEW rank: <a href="https://arxiv.org/abs/2609.28915">arXiv 2609.28915</a>: On the Effectiveness of Kernel-Level Evidence for Agent Security (ACE)</h3>
+<p><strong>King (U. Georgia); Zhang, Kuznetsov, Liu, Coskun, Ding (AWS).</strong> Submitted 24 Sep 2026.</p>
+<p><strong>Full PDF read (53 pp):</strong> §1–4, App. A–E (threat model, labels, OWASP coverage, capture, attribution), H, L (Falco, Cisco scanner) and M (cross-runtime). I skimmed App. I–K.</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>ACE corpus:</strong> <strong>4,047 paired sessions</strong>, 17 threat models, six delivery vectors (31 real third-party MCP servers with hand-authored patches; file, web, memory, retrieval and user-direct injection), 12 attack mechanics, and 14 of 25 OWASP LLM/agentic categories.</li>
+<li><strong>Capture:</strong> each session ran Claude Code with Haiku 4.5 in a fresh container. Three artifacts per session: an in-container <code>strace</code> over 15 tracepoints (~3,500 events per session), a <code>tools/list</code> snapshot, and the transcript.</li>
+<li><strong>Labels:</strong> 1,358 malicious positives and 2,293 negatives.</li>
+<li><strong>Detectors:</strong> 10 detectors (boosted trees, tabular foundation models, three Qwen judges, three LoRA SLMs) across <strong>App-View</strong> (the transcript plus the served tool manifest; what an agent-telemetry product sees), <strong>Kernel-View</strong> (the syscall trace) and <strong>Cross-View</strong> (both). They evaluated in-distribution and with held-out OWASP attack families.</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Kernel evidence works alone (Fig. 2).</strong> Held-out-family AUROC was 0.750 for XGBoost, 0.725–0.775 for the LLM judges, and above 0.88 for every LoRA SLM. The best overall was <strong>0.922</strong> (Llama-3.1-8B LoRA, kernel only).</li>
+<li><strong>Composition helps.</strong> Cross-View was best for all 10 detectors in-distribution and for 7 of 10 on held-out families. It added +10.1 points for XGBoost (0.750 → 0.850) and +10.7 for AdaBoost.</li>
+<li><strong>App-layer blind spots (Table 2, mean over 10 detectors):</strong></li>
+</ul>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Mechanic</th>
+  <th>App-View AUROC</th>
+  <th>Kernel-View AUROC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Silent exfiltration via logging</td>
+  <td><strong>0.586</strong></td>
+  <td><strong>0.976</strong></td>
+</tr>
+<tr>
+  <td>Audit-log poisoning</td>
+  <td>0.608</td>
+  <td>0.932</td>
+</tr>
+<tr>
+  <td>Retrieval reference injection</td>
+  <td>0.906</td>
+  <td>0.703</td>
+</tr>
+</tbody>
+</table></div>
+<p>Retrieval reference injection is the reverse case: the app layer catches it and the kernel does not. Preference manipulation clears 0.75 only with Cross-View (0.834).</p>
+<ul>
+<li><strong>Default rules fail on agents (App. L).</strong></li>
+<li>Falco's default rules fire on <strong>every</strong> session, benign or malicious. Their rule-count AUROC is 0.565–0.572.</li>
+<li>The Cisco MCP scanner catches 15.9% of tampered-MCP attacks at a 16.3% false-positive rate.</li>
+<li><strong>Runtime transfer (App. M).</strong> On 592 sessions captured with a different agent (Devstral 2 123B in a ReAct scaffold), XGBoost reached 0.842 and a Qwen3-80B judge 0.998. TabPFN fell to 0.662 because a single <code>/tmp</code>-path count differs between the two runtimes.</li>
+<li><strong>Separation is in the tails (Table 6).</strong> Median syscall counts are nearly identical for benign and malicious sessions; the difference appears at p90 and above.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>There is one primary runtime (Claude Code with Haiku 4.5) plus one alternate.</li>
+<li>The network is sinkholed, so connect/send shapes differ from a real deployment.</li>
+<li><code>tools/list</code> is captured once per session.</li>
+<li>Attribution is per session, not per tool call.</li>
+<li>By construction, the design cannot see tool-return content manipulation, timing channels or whitespace steganography.</li>
+<li>The corpus is released only on acceptance.</li>
+</ul>
+<p><strong>Why it ranks:</strong> it is the first paired measurement of how much signal the application layer carries compared with the kernel. It quantifies exactly the evidence class BQAA is built on. It pairs with the 1834 trace-tampering card (<code>arxiv-2609-30266-llm-agents-tamper-with-own-traces</code>): both argue for evidence that the agent's own record cannot supply.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Document which mechanics app-layer telemetry cannot detect (silent exfiltration via logging, audit-log poisoning).</li>
+<li>Emit a session join key (container ID, PID namespace or cgroup) so EDR and eBPF evidence can be joined per session.</li>
+<li>Baseline agent sessions separately. Server-calibrated rules fire on every agent session.</li>
+</ul>
+<h3>3. NEW rank: <a href="https://arxiv.org/abs/2609.28586">arXiv 2609.28586</a>: Agent Approval Laundering: Transitive Effects Beyond the Approved Invocation</h3>
+<p><strong>Zhang, Xia, Wu, Yue, Zhang, Cheng, Tu</strong> (the same CAS IIE group as #1). Submitted 23 Sep 2026.</p>
+<p><strong>Full PDF read (19 pp):</strong> §I–IX, App. A–B (Tables IV–X).</p>
+<p><strong>The idea:</strong> an approval record faithfully names the command the human approved, but not what that command's workflow then does. For example, <code>pnpm install</code> runs a <code>postinstall</code> hook that writes files, and a named MCP documentation tool also reaches the network.</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li>They define &quot;closure-bound approval&quot;: the approval's recorded effects must cover every effect the launched workflow can reach. They track six effect classes: process, file, environment, network, container and MCP.</li>
+<li><strong>Lemma 1:</strong> if two runs look identical to the policy but need different decisions, no record-only policy, deterministic or randomized, can get both right.</li>
+<li>They measure the gap at three levels of information: the explicit approval fields, fields plus generic command semantics, and fields plus metadata that was available at decision time.</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Controlled benchmark (Table IV).</strong> Across 111 approval/trace pairs, records that omitted an effect the run exercised fell from <strong>40</strong> (explicit fields) to <strong>17</strong> (command semantics) to <strong>13</strong> (metadata). All nine mechanism classes show at least one explicit-field gap.</li>
+<li><strong>Real repositories (Table II).</strong> Across 11 executions on 8 pinned repos (webpack, vite, pip, flask, ripgrep, vscode devcontainer, awesome-compose, MCP servers), gaps fell from <strong>10 → 2 → 0</strong>. The two gaps left under command semantics are MCP remote calls that also used the network (M → M,N).</li>
+<li><strong>Across products.</strong> The same gaps recur in Claude Code, GitHub Copilot CLI and Qwen Code.</li>
+<li><strong>Predicting effects before approval (§VI, Table III).</strong> A frozen metadata parser, tested on 17 holdout workflows, reached macro recall <strong>0.926</strong>, precision <strong>0.941</strong>, and exact effect sets in 13/17 cases. The command-only baseline scored 0.770, 0.941 and 9/17.</li>
+<li>Effect-bound records raised coverage from 0.755 to 0.922 and cut missed effect instances from 10 to 3.</li>
+<li>The cost is prompt volume: the policy asked for extra approval in 17/18 cases, and 9 of those runs had no added effect.</li>
+<li>A Claude Code <code>PreToolUse</code> hook ran the check with a p95 of 98 ms.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>The samples are small (17 holdout cases).</li>
+<li>The six effect classes are coarse, and the environment class was not measured in the holdout.</li>
+<li>It is a paper-only release, and its authors are the same team as #1.</li>
+<li>Frequent extra approval prompts carry an approval-fatigue cost.</li>
+</ul>
+<p><strong>Why it ranks:</strong> it defines a measurable coverage gap (&quot;the effects the run exercised minus the effects the approval recorded&quot;) for the approval events that harnesses and ADK tool confirmation already log. It extends the catalog's <code>arxiv-2609-26529-from-approval-to-execution-reconstruction-aware</code> card: that paper shows the approved action can be rebuilt before it runs, and this one shows the action's side effects fall outside the record.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Log each approval with the effect classes it predicts.</li>
+<li>Join it to the effects the run actually produced (file delta, network, child processes, containers).</li>
+<li>Report the uncovered effects per approval as a first-class metric.</li>
+</ul>
+<h3>4. NEW rank: <a href="https://arxiv.org/abs/2609.30243">arXiv 2609.30243</a>: JevOut: Natural Context Can Flip Decision Models (with <a href="https://arxiv.org/abs/2609.28613">2609.28613</a> Decision Hijacking as its companion)</h3>
+<p><strong>JevOut: Zixiang Xu (USC)</strong>, submitted 24 Sep 2026, code released. <strong>Decision Hijacking: Wu, Lim (NTU Singapore)</strong>, submitted 23 Sep 2026.</p>
+<p><strong>Full PDFs read:</strong> JevOut (32 pp: §1–5, App. A, D, L–O; data tables H–K skimmed) and Decision Hijacking (18 pp: §1–7 and limitations).</p>
+<p><strong>JevOut: what they did:</strong></p>
+<ul>
+<li>The main target is hosted <strong>jev-1.13.0</strong>, plus OpenSourceJev, Von and a plain Qwen scorer.</li>
+<li>Tasks: 700 held-out items from seven datasets (MMLU-Pro, SuperGPQA, MuSR, ToMBench, LAR-ECHR, SATA-Bench, BFCL V4 tool routing).</li>
+<li>For each item the model initially answered correctly, they fixed a wrong target option. They then added short, fluent sentences that keep the question, the options and the correct answer unchanged, and let the model's own option probabilities guide the search (at most 64 target queries per item).</li>
+</ul>
+<p><strong>JevOut numbers:</strong></p>
+<ul>
+<li><strong>Targeted flips (Table 1).</strong> Jev chose the fixed wrong option on <strong>312 of 508</strong> initially correct decisions (<strong>61.4%</strong>, 95% CI 57.1–65.5%). It put at least 0.7 probability on the wrong option in 229 of them (45.1%), and at least 0.9 in 91.</li>
+<li>One target-aware sentence alone flipped 16.9%; one neutral sentence flipped 2.2%.</li>
+<li>The other systems flipped at 64.9–73.2%.</li>
+<li><strong>By task (Fig. 2).</strong> From 40.0% on legal reasoning to <strong>85.7% on tool routing</strong> (BFCL V4).</li>
+<li><strong>Small additions (Fig. 3).</strong> The median successful context adds 31 words, and 51.9% of successes use one sentence.</li>
+<li><strong>Probabilities are the attacker's signal (§4.3).</strong> Allocating the search by probability beat label-only feedback by +7.1 points (63.6% vs 56.4%, paired CI 2.1–12.9).</li>
+<li><strong>Transfer (Fig. 5).</strong> Contexts frozen after optimization redirected other systems 21–48% of the time; Jev → Von was 25.4%.</li>
+</ul>
+<p><strong>Decision Hijacking, the contrast:</strong></p>
+<ul>
+<li>They rebuilt 510 InjecAgent cases as typed Jev decisions and made 54,060 calls.</li>
+<li>The original injection text selected the attacker's tool in <strong>1.8%</strong> of cases. Adding &quot;ignore all previous instructions&quot; <strong>lowered</strong> the attacker's probability (−0.032).</li>
+<li>Twenty-four score-guided queries raised validated success to only <strong>3.5%</strong>.</li>
+<li>Success tracked the <strong>initial margin</strong> (Fig. 3). Near-boundary embedded cases (margin ≤ 0.1) were hijacked 12 of 12 times; far-boundary embedded cases 1 of 468.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>JevOut's optimizer needs repeated probability-returning queries.</li>
+<li>Answer preservation is checked by a Gemma4-12B judge, not by humans.</li>
+<li>Both papers use benchmark tasks, not deployment streams, and test one Jev version.</li>
+<li>Decision Hijacking uses a three-option action space.</li>
+</ul>
+<p><strong>Why it ranks:</strong> Industry just made these probabilities first-class (the PydanticAI <code>decide</code> spans and DSPy's <code>Choice.probabilities</code>), and this fleet runs Jev as its shadow routing layer. The two papers together say the risk variable is the <strong>decision margin</strong>, and that exposed probabilities are an optimization oracle. They qualify the catalog's <code>arxiv-2609-29769-jev-vs-llm-rubric-judges-correlated-errors</code> and <code>arxiv-2609-26758-type-safe-is-not-error-free-option-name-flip</code> cards.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>On decision events, store the top-1 minus top-2 margin and the provenance of each context segment (trusted vs tool- or retrieval-derived).</li>
+<li>Alert on low-margin picks, and on picks that flip when context grows.</li>
+<li>Restrict who can read per-option probabilities.</li>
+</ul>
+<h3>5. NEW rank: <a href="https://arxiv.org/abs/2609.28919">arXiv 2609.28919</a>: Control the Harness, Control the Cost: Routing and Governing AI Coding Agents in the Enterprise</h3>
+<p><strong>Abbasi, Aqrawi, Kwartler</strong> (Accenture; Harvard Extension). Submitted 24 Sep 2026.</p>
+<p><strong>Full PDF read (32 pp):</strong> §1–9 including the limitations. I skimmed App. A–D (taxonomy, cost model, the table of 20 harnesses).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li>Derived a cost model for agentic turns under prompt caching that belongs to one model.</li>
+<li>Repriced about 10,000 real Claude Code sessions from two public corpora (TraceLab, SWE-chat).</li>
+<li>Built a router in which Jev labels every prompt against a four-axis taxonomy supplied by the enterprise. It moves work only where no running conversation has to rebuild its cache: at session start, in side lanes, and at subagent launch.</li>
+<li>Emulated a 10,000-seat enterprise.</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Payback rule (Eq. 1).</strong> A mid-task model switch pays back only after the cheaper model has served enough requests to repay the cache rebuild. From Fable 5.1 to Sonnet 5 that is 291 requests with a return and 46 without; from Opus 5 to Sonnet 5, 27 and 8.</li>
+<li><strong>Crossover (Table 2, Fig. 3; the paper's list prices of 21 Sep 2026).</strong></li>
+<li>The top model reads cache at half the next tier's price ($0.25/M vs $0.50/M), so per warm turn it becomes <em>cheaper</em> above 65k context at 18 tool steps (211k at 6 steps).</li>
+<li>Of the real sessions costing $100 or more, 51% (TraceLab) and 80% (SWE-chat) are cheaper on the top model.</li>
+<li>The top 1% of sessions carry 31–53% of all spend.</li>
+<li><strong>Savings (Table 3, Fig. 7).</strong> The router recovers <strong>13.8% of spend with today's labels and 21.1% with perfect labels</strong> ($3.3M–$5.0M a year on $23.7M). Three quarters of that comes from the crossover.</li>
+<li><strong>Classifier (§5.3).</strong> Jev got the action right 74% of the time, the domain 80%, the complexity 63% and history-dependence 82%. Of the turns moved, 12.5% were moved to too weak a model, and 42% of the turns that could have moved were held.</li>
+<li><strong>Corrections and pauses (§5.3–5.4, Table 4).</strong></li>
+<li>Corrections are <strong>more than a third of the bill</strong> ($1.26M without them vs $1.97M).</li>
+<li><strong>17–27% of user turns follow a pause longer than 5 minutes</strong>, which expires the cache. The saving ranges from 24% with no such pauses to 7.4% with TraceLab-like pausing. A one-hour cache lifts it to 17.1%.</li>
+<li><strong>Standing prompt overhead (Table 5).</strong> A measured 55k-token power-user setup (skills, tool schemas, plugins) costs 3–4× the lean default per session.</li>
+<li><strong>Governance (§3.5).</strong> There is deliberately no productivity axis, and only aggregates are reported. The authors cite EU AI Act employee-monitoring rules and German works-council co-determination.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>The scenarios are synthetic: 46 conversations and 109 turns, written and tagged by the authors.</li>
+<li>The taxonomy has no inter-rater agreement yet.</li>
+<li>The crossover share rests on 102 + 30 sessions.</li>
+<li>Prices are list prices from one vendor on one date; under uniform 0.1× cache pricing the saving falls to 5.2%.</li>
+<li>The simulator is not released, and the enforcement point was not built.</li>
+</ul>
+<p><strong>Why it ranks:</strong> it gives agent cost analytics a correct unit (the turn, priced with cache reads and writes) and names the drivers most dashboards miss: cold returns after the cache expires, correction chains, and the always-loaded prompt prefix. Its aggregate-only rule is directly relevant to how BQAA should report cost per user.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Break every request into uncached input, cache read and cache write, and price the turn.</li>
+<li>Tag cold returns (a gap longer than the cache TTL) and correction turns.</li>
+<li>Report cost per verified task by team or harness configuration, never per person.</li>
+</ul>
+<h3>Academy scouted, not ranked</h3>
+<p><strong>Read in full but not ranked:</strong></p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.28559">2609.28559</a> LIDAR (Tsinghua; 17 pp, full read).</strong></li>
+<li>It identifies the LLM behind a coding-agent harness from its behavior on three paired probes (verify, recover, resolve).</li>
+<li>Across 36 models, Top-1 accuracy was 95.13% on mini-swe-agent and 88.36% on OpenCode (MRR 0.974 / 0.934; Table 4). Provider-side identity or format instructions cost at most 11 points; the baselines lost up to 83.</li>
+<li>Not ranked: it is an active audit that needs enrollment runs and a closed set of known models (an unregistered substitute maps to a registered label). It is not something BQAA computes from production traces.</li>
+<li>Worth keeping as a lead: trajectory-organization features (unique transitions, backtracking) carry 51–71% of the identity evidence, which suggests a passive &quot;the behavior changed but the model name did not&quot; drift signal.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.28613">2609.28613</a> Decision Hijacking:</strong> folded into rank #4 as its companion.</li>
+</ul>
+<p><strong>Not full-read (so not rankable):</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.29647">2609.29647</a> AgentKernel: <strong>backfill</strong> (v1 on 29 Aug); it proposes an OS substrate for agent trust.</li>
+<li><a href="https://arxiv.org/abs/2609.30216">2609.30216</a> Jev in the Wild: a census of 2,170 public Jev projects as of Sep 22. A possible input for decision-telemetry priorities.</li>
+<li><a href="https://arxiv.org/abs/2609.28416">2609.28416</a> AEWM (agent world model; &quot;task-state contamination&quot;); <a href="https://arxiv.org/abs/2609.29444">2609.29444</a> IterSynth (deep-search architecture); <a href="https://arxiv.org/abs/2609.30199">2609.30199</a> ExplorationBench (scientific-exploration eval). All are agent capability or training work, not measurement.</li>
+<li>The Jev application papers 2609.28940 (pentest), 28587 (NumericJev) and 30186 (Jev-Mobile), and 2609.30250 (conspiracy detection). None is analytics work.</li>
+<li>HF 09-25 late additions: 2609.29421 Rufus-Air (post-training recipe), 2609.28811 DeltaWAM (robotics), 2609.29892 Qwen-Planner-Agent (mobile planner).</li>
+</ul>
+<h2>Six-week EV (through ~Nov 6)</h2>
+<ul>
+<li><strong>Decision telemetry gets a shape (medium-high).</strong></li>
+<li>In one week: PydanticAI <code>decide</code> spans, DSPy decision types with probabilities, Langfuse DecisionModel evaluators, LiteLLM Jev routing logs and Goose's Decisions provider (all in the catalog).</li>
+<li>Expect either an OTel GenAI proposal for a <code>decide</code>-style operation, or other SDKs copying PydanticAI's attribute names.</li>
+<li>For BQAA: define the decision event (question keys, option labels, per-option probabilities, threshold, route taken, hand-off, margin) before the vendors define it for us. JevOut and Decision Hijacking say margin is the column that predicts misrouting.</li>
+<li><strong>Cost analytics becomes cache-aware and adversarial (medium-high).</strong></li>
+<li>Denial-of-Wallet makes &quot;re-billed retained state&quot; a security metric. Control the Harness shows the turn, not the request, is the cost unit.</li>
+<li>This week also brought correctness fixes to cost and budget data: LiteLLM's budget-reset fixes, DSPy's &quot;unknown cost stays unknown&quot;, and PydanticAI's one-hour cache-write pricing fix.</li>
+<li>Expect gateways to add Δp and CAF-style circuit breakers.</li>
+<li>For BQAA: canned views for per-turn cache read/write, CAF, cold returns and correction chains.</li>
+<li><strong>Evidence outside the agent's own record (medium).</strong></li>
+<li>Three papers point the same way: ACE (syscalls), last slot's trace-tampering paper (30266), and Approval Laundering (effects beyond the approval).</li>
+<li>Expect harness vendors to add effect-bound approvals and hooks, and enterprises to pair EDR with agent telemetry.</li>
+<li>For BQAA: join keys to host evidence (container, PID namespace, cgroup), and an &quot;approval coverage&quot; metric.</li>
+<li><strong>Telemetry egress under managed network policy (medium).</strong></li>
+<li>Codex already refuses OTLP under destination restrictions, and other enterprise harnesses may follow.</li>
+<li>For BQAA: ingestion should tell &quot;client silent by policy&quot; apart from &quot;client stopped&quot;, and document which egress allowlists do not help.</li>
+<li><strong>Watch list:</strong></li>
+<li>Codex 0.158 stable, carrying the spawn metrics, <code>flex_unavailable</code> and the Guardian OTLP events.</li>
+<li>Mastra 1.72.0 stable, carrying the durable-engine redaction fixes.</li>
+<li>LiteLLM 1.104 stable, with <code>gen_ai.conversation.id</code>, and the Langfuse v4-over-OTel callback.</li>
+<li>DSPy 3.5, which removes the legacy LM interfaces.</li>
+<li>The first public critique of <code>decide</code> span attribute naming.</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>PydanticAI v2.50.0:</strong> add <code>decide</code> as an operation type. Count hand-offs from <code>decide</code>-span exceptions, and never sum <code>decide</code> usage into totals. Flag configs that still set <code>typesafe_tool_call_threshold</code>, which is now ignored.</li>
+<li><strong>DSPy 3.4.0:</strong> its default LM path no longer goes through LiteLLM, so re-verify trace coverage. Keep unknown cost as NULL, and store requested vs applied parameters (<code>adaptations</code>).</li>
+<li><strong>Codex 0.157.0 stable:</strong> OTLP goes silent under destination-restricted managed policy, so alert on per-client silence. Key sessions by creator identity, and break out <code>invalid_prompt</code>.</li>
+<li><strong>LiteLLM 1.98.1 / 1.99.4 / 1.100.3 (progress):</strong> budget-reset correctness now reaches every maintained line. <code>gen_ai.conversation.id</code> (prerelease) is the session join key to adopt.</li>
+<li><strong>Codex alpha.11–13 (progress):</strong> copy the bounded-label spawn metrics schema, and treat <code>flex_unavailable</code> as a capacity class, not a failure.</li>
+<li><strong>Mastra 1.72.0-alpha.0 (progress):</strong> audit durable-agent thread histories and traces from before the fix for payloads that were meant to be redacted.</li>
+<li><strong>2609.28585 Denial-of-Wallet:</strong> ship CAF and Δp per session, and attribute retained tokens to the tool return that introduced them.</li>
+<li><strong>2609.28915 ACE:</strong> document what app-layer telemetry cannot see, and emit a session join key for EDR and eBPF evidence.</li>
+<li><strong>2609.28586 Approval Laundering:</strong> log predicted effects with each approval, join them to realized effects, and report the uncovered effects.</li>
+<li><strong>2609.30243 JevOut (+28613):</strong> store decision margin and context provenance, alert on low-margin or context-sensitive flips, and restrict access to per-option probabilities.</li>
+<li><strong>2609.28919 Control the Harness:</strong> price turns cache-aware, tag cold returns and corrections, and report cost per verified task in aggregate only.</li>
+</ul>
+<h2>Housekeeping</h2>
+<p><strong>Slot and inputs</strong></p>
+<ul>
+<li><strong>Slot:</strong> miss-watch catch-up. There was no <code>2026-09-25-0034-*</code> file in the hub <code>research/briefs/</code> or the research <code>briefs/</code> directory at 07:57Z. The run started ~00:55 PT, and the label is kept at <strong>0034</strong>.</li>
+<li><strong>Packs used (6, all PACK_DONE):</strong> Muse 1932, DSH 2032, Agy 2132, Muse 2232, DSH 2332 and Agy 0032.</li>
+<li><strong>Vault notes also read:</strong></li>
+<li><code>Hunt/agent-analytics/2026-09-24-2124-opus-field-brief-learnings-2026-09-24.md</code>. Its 0034 follow-up was to full-read 28585, 28915, 28586, 30243 and 28919; all were read and ranked.</li>
+<li><code>Hunt/agent-analytics/2026-09-25-0050-stories-full-web-scout.md</code> (KEEP_COUNT 0; not a Field Brief input).</li>
+</ul>
+<p><strong>Gaps</strong></p>
+<ul>
+<li><strong>Mac-down ~19:30–21:00 PT Thu.</strong></li>
+<li>Muse 1932 and DSH 2032 fired late (~21:06 PT) with their labels kept.</li>
+<li>Both cover 01:44Z–04:09Z and agree independently (39 commits across 7 repos, ceiling flat, HF 09-25 = 13).</li>
+<li>DSH 2032 caught one crewAI commit (04:07Z) that Muse missed.</li>
+<li><strong>DSH vault twins blocked (2032 and 2332).</strong> The workspace-write sandbox refused writes under <code>Hunt/</code>, and the escalation had no approval channel. Outbox copies exist at <code>/tmp/dsh-collect-20260924-2032/outbox/</code> and <code>/tmp/dsh-collect-20260924-2332/outbox/</code> (pack + learnings each). <strong>Follow-up for Collection or Github Bot:</strong> copy them into <code>Hunt/agent-analytics/</code>.</li>
+<li><strong>Older Wednesday gaps, still ABSENT</strong> (checked with <code>ls</code> at 08:14Z): <code>dsh-pack-2026-09-23-1732</code>, <code>agy-pack-2026-09-23-1832</code>, <code>muse-pack-2026-09-23-1932</code> and <code>agy-pack-2026-09-23-0932</code>. None were invented.</li>
+<li><strong>Social and other sources:</strong> X 401, Reddit 403 and LinkedIn 302 are the packs' labels; I did not re-probe them. Papers with Code remains a standing 302 gap. The arXiv export API returned 0-byte bodies for DSH 2032. Medium was not used.</li>
+</ul>
+<p><strong>Verified arXiv ceiling: <code>2609.30268</code></strong></p>
+<ul>
+<li><strong>Probed at 08:03Z:</strong> 30268 returns 200. 30269–30272, 30275, 30280, 30290, 30300, 30400, 30500 and 31000 return 404.</li>
+<li>This matches all six packs. There is no mailing on Friday or Saturday; the next is expected Sunday 20:00 ET.</li>
+<li><strong>Priority pin <code>2609.02702</code>:</strong> base 200 / v1 200 / v2 404 at 08:03Z. Intact.</li>
+</ul>
+<p><strong>HN</strong></p>
+<ul>
+<li>The helper outputs for all six packs report hits=0.</li>
+<li><strong>My own re-run at 08:07Z</strong> (since 01:44Z, the same six quoted queries, same threshold) found 0 stories above threshold. The <code>&quot;MCP&quot;</code> query had 2 raw hits.</li>
+<li><strong>Sanity check:</strong> unquoted <code>MCP</code> over ~30 h returned 47 raw hits, so the API works.</li>
+<li><strong>HN: hits=0 keep=0.</strong></li>
+</ul>
+<p><strong>Pack corrections</strong></p>
+<ul>
+<li><strong>DSH 2032:</strong> <code>@langchain/langgraph@1.4.18</code> <strong>does</strong> have a GH release object, in <code>langchain-ai/langgraphjs</code> (03:17:30Z); the pack checked the Python repo. The release is a dependency bump; the feature is in <code>@langchain/react</code>, <code>vue</code> and <code>svelte</code> 1.2.0.</li>
+<li><strong>DSH 2032 and Agy 2132 on LiteLLM #43075:</strong> LiteLLM did <strong>not</strong> treat the 200 as success. It raised an opaque 500 (&quot;no 'choices'&quot;), dropped the container's 400 and message, and Claude Code retried for about 4 minutes.</li>
+<li><strong>Muse 1932 and DSH 2032 said &quot;Mastra: no publish yet&quot;.</strong> That was true at 04:09Z, but <code>@mastra/core@1.72.0-alpha.0</code> published at 04:23:57Z. Agy 2132, Muse 2232, DSH 2332 and Agy 0032 checked only <code>latest</code> and missed it.</li>
+<li><strong>All packs missed DSPy 3.4.0</strong> (PyPI 04:04Z), because DSPy is not on the watchlist. <strong>Suggestion:</strong> add <code>dspy</code> (PyPI) and <code>stanfordnlp/dspy</code> (GH).</li>
+<li><strong>Agy 2132:</strong> Codex alpha.13's GH <code>published_at</code> is 04:29:26Z, not 04:32:44Z.</li>
+<li><strong>The 1834 brief</strong> did not report Codex alpha.11 (GH 23:23:08Z) or alpha.12 (00:54:29Z), both published before its probes. Both sort below older alphas in GitHub's release listing, so read deeper pages or use <code>tags</code> plus npm <code>time</code>.</li>
+<li><strong>Muse 1932</strong> called AgentKernel (2609.29647) &quot;strongest academy item&quot; without noting that its v1 date is 29 Aug (backfill). DSH 2032 caught this.</li>
+<li><strong>Agy 2132 on PydanticAI <code>decide</code> spans:</strong> broadly right. Two additions: <code>decide</code> spans carry <strong>no</strong> <code>gen_ai.usage.*</code> or cost, and with a <code>FallbackModel</code> the hand-off is visible <strong>only</strong> on the <code>decide</code> span.</li>
+</ul>
+<p><strong>Verification method</strong></p>
+<ul>
+<li><strong>Industry:</strong></li>
+<li>GitHub API: release objects for 37 repos, the Codex tag refs, and the <code>alpha.10…alpha.13</code> compare (28 commits).</li>
+<li>LiteLLM ancestry checks (the merge commits of #39729 and #40639 against v1.100.0, 1.101.0, 1.101.1, 1.101.2, 1.102.0 and 1.102.1) plus the 1.100.2…1.100.3 and 1.101.0…1.101.2 commit logs.</li>
+<li>PR bodies: Codex #47408, #47389, #47113, #47353, #47327, #47106, #47179, #47081, #47984, #47967, #47957, #47970; pydantic-ai #8696, #8698, #8733, #8739; LiteLLM #39729, #40639, #39631, #43132, #42486, #43075.</li>
+<li>Codex source at the tag (<code>http-client/src/network_policy.rs</code>, and the #47408 diff for <code>otel/src/network_policy.rs</code> and <code>provider.rs</code>).</li>
+<li>Registries: npm <code>time</code> and <code>dist-tags</code> for 53 packages, and PyPI JSON for 50 packages.</li>
+<li>Changelogs: Mastra <code>packages/core/CHANGELOG.md</code> (the 1.72.0-alpha.0 section), and the DSPy release notes plus the migration and observability docs at tag 3.4.0.</li>
+<li><strong>Academy:</strong></li>
+<li>arXiv abs pages for 20 candidates (titles, v1 dates, abstracts).</li>
+<li>7 PDFs extracted with <code>pdftotext</code> to <code>/tmp/fb0034/pdf/</code> and read in full; every quoted number was checked against the cited table or section.</li>
+<li><strong>Search:</strong> no web search. The HN Algolia re-run is described above.</li>
+</ul>
+<p><strong>Excluded by rule:</strong></p>
+<ul>
+<li>No first-party BQAA content. ADK commits are NOTE only, as first-party context.</li>
+<li>No Desk section and no GTM content.</li>
+<li>Crustdata and Fable were not used, and Medium was not cited.</li>
+<li>No re-admission of the 1834, 1234, 0634 or 0034 (Thu) sets. The priority pin was not re-carded.</li>
+</ul>
+<p><strong>Run limits:</strong></p>
+<ul>
+<li><strong>Volume:</strong> 8 ranks, 3 progress notes, about 12 NOTE lines and about 12 scouted lines, within 50 items.</li>
+<li><strong>Re-attempts (2):</strong> a GitHub contents fetch returned base64 that would not decode, so I re-fetched it raw; and one PDF text file exceeded the read limit, so I read it in two parts.</li>
+<li><strong>Other:</strong> $0 spent, 0 external messages, no background jobs.</li>
+</ul>
+<p><strong>Catalog:</strong></p>
+<ul>
+<li>405 / 101 / 103, read-only and untouched by me.</li>
+<li>Expected after publish: <strong>413 items / 102 briefs / 104 runs</strong> (+3 Industry, +5 Academy).</li>
+<li>The LiteLLM, Codex-alpha and Mastra progress notes update existing cards and add no items.</li>
+</ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW items (8):</strong></p>
+<ol>
+<li><strong>id:</strong> <code>pydantic-ai-v2-50-0-decision-model-decide-spans-route-threshold</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Industry</li>
+<li><strong>title:</strong> PydanticAI v2.50.0 — DecisionModel base plus a <code>decide</code> OTel span for every Decisions request (route options, pick, confidence, probabilities; hand-offs recorded as span errors); tool-call lean removed and <code>typesafe_tool_call_threshold</code> now ignored</li>
+<li><strong>URL:</strong> https://github.com/pydantic/pydantic-ai/releases/tag/v2.50.0</li>
+<li><strong>card text:</strong> GH 04:47Z, PyPI 05:03Z. #8696 adds <code>DecisionModel</code> for any Decisions-protocol backend (TypeSafe is now an adapter). #8698 nests a <code>decide {model}</code> span under <code>chat</code>, carrying <code>pydantic_ai.decision.*</code> (questions, route_options, route, confidence, answers with probabilities) but no <code>gen_ai.usage.*</code>. <code>UnsureRoute</code>/<code>UnfillableRoute</code> hand-offs appear as errors on the <code>decide</code> span even when a <code>FallbackModel</code> keeps <code>chat</code> clean. #8739 removes the tool-call lean, and <code>typesafe_tool_call_threshold</code> (v2.45–v2.49, default 0.6) is silently ignored.</li>
+</ul>
+<ol start="2">
+<li><strong>id:</strong> <code>dspy-3-4-0-jev-decision-types-reanchor-native-lm-engine</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Industry</li>
+<li><strong>title:</strong> DSPy 3.4.0 — Jev as a first-class <code>lm=</code> backend with Noul/Choice/Score outputs carrying probabilities and confidence; ReAnchor fits decision thresholds against the program metric; a native lm15 engine replaces LiteLLM as the default path</li>
+<li><strong>URL:</strong> https://github.com/stanfordnlp/dspy/releases/tag/3.4.0</li>
+<li><strong>card text:</strong> PyPI 04:04Z, GH 04:06Z; missed by all packs. The decision types expose <code>.probability</code>, <code>.probabilities</code> and <code>.confidence</code>, with thresholds applied locally, and ReAnchor calibrates them with a held-out fold check. <code>engine=&quot;auto&quot;</code> runs natively and uses LiteLLM only when the native route cannot carry the request, so LiteLLM-level tracing no longer sees native calls. Unknown cost stays unknown rather than 0, parameter adaptations are recorded in LM history, and GEPA trace capture no longer misaligns failed examples.</li>
+</ul>
+<ol start="3">
+<li><strong>id:</strong> <code>openai-codex-0-157-0-stable-network-policy-gates-otlp-telemetry</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Industry</li>
+<li><strong>title:</strong> OpenAI Codex CLI rust-v0.157.0 STABLE — the 0.157 train reaches npm latest; network policy now governs redirects, WebSocket traffic and telemetry, and OTLP exports are refused under destination-restricted managed policy; creator identity and <code>invalid_prompt</code> recorded</li>
+<li><strong>URL:</strong> https://github.com/openai/codex/releases/tag/rust-v0.157.0</li>
+<li><strong>card text:</strong> GH 02:31Z, npm <code>latest</code> 02:35Z, 126 PRs since 0.156.0. #47408 wraps every OTLP log, trace and metric exporter in a policy permit, and at the tag <code>acquire_for_unsupported_sdk()</code> denies whenever a destination allowlist or restricted managed policy is set, so telemetry stops even for an allowlisted collector. #47389/#47407 make policy denials non-retryable and enforce them across redirects and WebSocket traffic. The daemon starts automatically by default (#47179); #47113 persists thread creator identity, #47353 makes <code>invalid_prompt</code> its own error class, and #47327 keeps failed image-generation request IDs.</li>
+</ul>
+<ol start="4">
+<li><strong>id:</strong> <code>arxiv-2609-28585-denial-of-wallet-persistent-billable-state</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Persistent Billable State: Denial-of-Wallet — retained tool returns are re-billed on every later call; cumulative input reached 14,293× the first call's; raw history adds 21–36% cost; host checks before re-feeding contain 123/123 replays; 71 of 3,830 MCP repos show any safeguard</li>
+<li><strong>arXiv:</strong> 2609.28585 — https://arxiv.org/abs/2609.28585</li>
+<li><strong>card text:</strong> DOW-BENCH (six vectors, 243 executions, six model families) measures CAF (cumulative input ÷ first-call input) from provider usage. 51 of 69 priced attacks crossed $0.10 (max $3.40, against $0.025 for benign), and run length varies too much to act as a budget. Four host checks before each later call (token cap, Δp growth, recursion cap, cost breaker) contained every replay with 0.19% benign false positives, and progress-authorized budgets completed 22/24 workflows against 13/24 at a fixed cap. Paper-only release, mostly 2025-era models, same team as 28586.</li>
+</ul>
+<ol start="5">
+<li><strong>id:</strong> <code>arxiv-2609-28915-ace-kernel-level-evidence-agent-security</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> ACE (UGA + AWS) — 4,047 paired sessions: syscall traces detect agent attacks alone (held-out AUROC up to 0.922) and beat app-layer telemetry on silent exfiltration via logging (0.976 vs 0.586); default Falco rules fire on every agent session</li>
+<li><strong>arXiv:</strong> 2609.28915 — https://arxiv.org/abs/2609.28915</li>
+<li><strong>card text:</strong> Claude Code with Haiku 4.5 in containers with in-container strace, the <code>tools/list</code> snapshot and the transcript; 17 threat models, 12 mechanics, 14/25 OWASP categories. Kernel-View held-out AUROC was 0.73–0.92, and adding it to App-View added about 10 points for boosted trees. The app layer misses silent exfiltration via logging and audit-log poisoning; the kernel misses retrieval reference injection. Transfer to a different runtime held for 3 of 4 detector families.</li>
+</ul>
+<ol start="6">
+<li><strong>id:</strong> <code>arxiv-2609-28586-agent-approval-laundering-transitive-effects</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Agent Approval Laundering — approval records name the invocation but omit its workflow's effects (postinstall file writes, MCP network): 40/111 records leave a gap; source-backed effect predictions before approval reach recall 0.926 and cut missed effects from 10 to 3</li>
+<li><strong>arXiv:</strong> 2609.28586 — https://arxiv.org/abs/2609.28586</li>
+<li><strong>card text:</strong> Defines closure-bound approval over six effect classes and proves record-only policies cannot separate runs with identical approval fields. Gaps fall from 40 to 17 to 13 as command semantics and decision-time metadata are added (10 → 2 → 0 on 11 pinned repos), and they recur in Claude Code, Copilot CLI and Qwen Code. Effect-bound records raise coverage from 0.755 to 0.922 but ask for extra approval in 17 of 18 cases. Extends the approval-to-execution card (2609.26529).</li>
+</ul>
+<ol start="7">
+<li><strong>id:</strong> <code>arxiv-2609-30243-jevout-natural-context-flips-decision-models</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> JevOut — short, answer-preserving context redirects Jev on 61.4% of initially correct decisions (45% with ≥0.7 on the wrong option; 85.7% on tool routing); probability feedback helps the attacker; companion Decision Hijacking finds injection text flips only 1.8–3.5%, so margin is the risk variable</li>
+<li><strong>arXiv:</strong> 2609.30243 — https://arxiv.org/abs/2609.30243 (companion: 2609.28613 — https://arxiv.org/abs/2609.28613)</li>
+<li><strong>card text:</strong> jev-1.13.0 plus three other decision systems (64.9–73.2%) on seven datasets. The median successful addition is 31 words, and frozen contexts transfer 21–48% across systems. Decision Hijacking (NTU; 510 InjecAgent cases) found &quot;ignore previous instructions&quot; lowers attacker probability and 24 score-guided queries reach only 3.5%, with successes concentrated at small initial margins (12/12 near-boundary vs 1/468 far-boundary embedded). Qualifies the Jev-vs-LLM-judges and Type-Safe-Is-Not-Error-Free cards.</li>
+</ul>
+<ol start="8">
+<li><strong>id:</strong> <code>arxiv-2609-28919-control-the-harness-cache-aware-routing-cost</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Control the Harness, Control the Cost (Accenture) — price the turn, not the request: a mid-task model switch pays back only after 8–291 requests; the top model is cheaper on long cached sessions; routing at session start, side lanes and subagent launch saves 14–21% of a $23.7M emulated bill; corrections are over a third of spend</li>
+<li><strong>arXiv:</strong> 2609.28919 — https://arxiv.org/abs/2609.28919</li>
+<li><strong>card text:</strong> Derives a cache payback rule and a price crossover (on the paper's 21 Sep list prices, the top model's cheaper cache reads win above 65k context at 18 tool steps), and checks both by repricing about 10k real Claude Code sessions. A Jev-labelled router holds low-confidence turns and never downgrades corrections. 17–27% of turns follow a pause longer than the 5-minute cache life, and a one-hour cache lifts the saving to 17%. Synthetic scenarios, list prices, simulator not released; aggregate-only reporting by design.</li>
+</ul>
+<p><strong>Progress (3):</strong></p>
+<ul>
+<li><strong>parent:</strong> <code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code></li>
+<li><strong>text:</strong> LiteLLM v1.98.1 / v1.99.4 / v1.100.3 (GH 06:20–06:21Z, PyPI 06:05–06:08Z) backport #39729 (budget reset now clears the cached end-user spend counter on every replica, where before 429s continued after rollover) and #40639 (shared budgets with more than 32,767 end users now reset), plus the gpt-6 request-family fix. Every maintained line from 1.98.x to 1.102.x now has both. v1.104.0-dev.2 is the first artifact with #42486, which sets <code>gen_ai.conversation.id</code> on OTel LLM spans from the caller's session id.</li>
+<li><strong>parent:</strong> <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code></li>
+<li><strong>text:</strong> Codex rust-v0.158.0-alpha.11 (23:23Z), alpha.12 (00:54Z) and alpha.13 (GH 04:29Z, npm 04:40Z), 28 commits since alpha.10. #47984 adds <code>codex.multi_agent.spawn.phase.duration_ms</code> and a <code>codex.multi_agent.spawn.failure</code> counter with bounded labels; #47967 makes <code>flex_unavailable</code> a distinct, non-retried terminal error with its own telemetry class; #47957 bounds tool-call observations to 15 MiB and marks trimmed call inventories incomplete.</li>
+<li><strong>parent:</strong> <code>mastra-core-1-70-0-model-selection-processor-tenant-scoped-traces-memory-1-32</code></li>
+<li><strong>text:</strong> <code>@mastra/core@1.72.0-alpha.0</code> (npm <code>alpha</code>, 04:23Z; <code>latest</code> still 1.71.0). It fixes durable-engine gaps where redaction processors (<code>processToolResult</code>) and transcript transforms were silently skipped, so raw payloads reached streams and thread history. It also enforces the ignored <code>maxRetries</code> and <code>totalMs</code> budget, and propagates the evented engine's dropped <code>actor</code> identity. New: <code>observe().detach()</code>, <code>subscribeToThread({ withInitialHistory })</code> and <code>PubSub.trimTopic</code>.</li>
+</ul>
+<p><strong>Headline claims (for citation checks):</strong></p>
+<ol>
+<li>Codex rust-v0.157.0 guards OTLP log, trace and metric exports with revocable network-policy permits and disables them under destination restrictions. — https://github.com/openai/codex/pull/47408 (merged 2026-09-23; shipped in https://github.com/openai/codex/releases/tag/rust-v0.157.0 on 2026-09-25)</li>
+<li>Short, answer-preserving context additions redirected Jev on 312 of 508 initially correct decisions (61.4%), with at least 0.7 probability on the fixed wrong option in 229 cases. — https://arxiv.org/abs/2609.30243 (submitted 2026-09-24; Table 1)</li>
+<li>Across 243 executions, the maximum per-session cumulative input reached 14,293× the session's first-call input. — https://arxiv.org/abs/2609.28585 (submitted 2026-09-23; abstract and Table 4)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 25 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>

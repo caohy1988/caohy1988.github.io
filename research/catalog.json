@@ -1,6 +1,86 @@
 {
   "items": [
     {
+      "id": "pydantic-ai-v2-50-0-decision-model-decide-spans-route-threshold",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "PydanticAI v2.50.0 — DecisionModel base plus a decide OTel span for every Decisions request (route options, pick, confidence, probabilities; hand-offs recorded as span errors); tool-call lean removed and typesafe_tool_call_threshold now ignored",
+      "html": " GH <a href=\"https://github.com/pydantic/pydantic-ai/releases/tag/v2.50.0\">v2.50.0</a> 04:47Z, PyPI 05:03Z. #8696 adds DecisionModel for any Decisions-protocol backend (TypeSafe is now an adapter). #8698 nests a decide {model} span under chat, carrying pydantic_ai.decision.* (questions, route_options, route, confidence, answers with probabilities) but no gen_ai.usage.*. UnsureRoute/UnfillableRoute hand-offs appear as errors on the decide span even when a FallbackModel keeps chat clean. #8739 removes the tool-call lean, and typesafe_tool_call_threshold (v2.45–v2.49, default 0.6) is silently ignored. <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "dspy-3-4-0-jev-decision-types-reanchor-native-lm-engine",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "DSPy 3.4.0 — Jev as a first-class lm= backend with Noul/Choice/Score outputs carrying probabilities and confidence; ReAnchor fits decision thresholds against the program metric; a native lm15 engine replaces LiteLLM as the default path",
+      "html": " PyPI 04:04Z, GH <a href=\"https://github.com/stanfordnlp/dspy/releases/tag/3.4.0\">3.4.0</a> 04:06Z; missed by all packs. The decision types expose .probability, .probabilities and .confidence, with thresholds applied locally, and ReAnchor calibrates them with a held-out fold check. engine=\"auto\" runs natively and uses LiteLLM only when the native route cannot carry the request, so LiteLLM-level tracing no longer sees native calls. Unknown cost stays unknown rather than 0, parameter adaptations are recorded in LM history, and GEPA trace capture no longer misaligns failed examples. <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "openai-codex-0-157-0-stable-network-policy-gates-otlp-telemetry",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "OpenAI Codex CLI rust-v0.157.0 STABLE — the 0.157 train reaches npm latest; network policy now governs redirects, WebSocket traffic and telemetry, and OTLP exports are refused under destination-restricted managed policy; creator identity and invalid_prompt recorded",
+      "html": " GH <a href=\"https://github.com/openai/codex/releases/tag/rust-v0.157.0\">rust-v0.157.0</a> 02:31Z, npm latest 02:35Z, 126 PRs since 0.156.0. #47408 wraps every OTLP log, trace and metric exporter in a policy permit, and at the tag acquire_for_unsupported_sdk() denies whenever a destination allowlist or restricted managed policy is set, so telemetry stops even for an allowlisted collector. #47389/#47407 make policy denials non-retryable and enforce them across redirects and WebSocket traffic. The daemon starts automatically by default (#47179); #47113 persists thread creator identity, #47353 makes invalid_prompt its own error class, and #47327 keeps failed image-generation request IDs. <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-28585-denial-of-wallet-persistent-billable-state",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Persistent Billable State: Denial-of-Wallet — retained tool returns are re-billed on every later call; cumulative input reached 14,293× the first call's; raw history adds 21–36% cost; host checks before re-feeding contain 123/123 replays; 71 of 3,830 MCP repos show any safeguard",
+      "html": " <a href=\"https://arxiv.org/abs/2609.28585\">arXiv:2609.28585</a> · <a href=\"https://arxiv.org/pdf/2609.28585\">PDF</a> — Full-PDF. DOW-BENCH (six vectors, 243 executions, six model families) measures CAF (cumulative input ÷ first-call input) from provider usage. 51 of 69 priced attacks crossed $0.10 (max $3.40, against $0.025 for benign), and run length varies too much to act as a budget. Four host checks before each later call (token cap, Δp growth, recursion cap, cost breaker) contained every replay with 0.19% benign false positives, and progress-authorized budgets completed 22/24 workflows against 13/24 at a fixed cap. Paper-only release, mostly 2025-era models, same team as 28586. BQAA: compute CAF/Δp from per-call usage; treat retained tool returns as billable state. <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-28915-ace-kernel-level-evidence-agent-security",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "ACE (UGA + AWS) — 4,047 paired sessions: syscall traces detect agent attacks alone (held-out AUROC up to 0.922) and beat app-layer telemetry on silent exfiltration via logging (0.976 vs 0.586); default Falco rules fire on every agent session",
+      "html": " <a href=\"https://arxiv.org/abs/2609.28915\">arXiv:2609.28915</a> · <a href=\"https://arxiv.org/pdf/2609.28915\">PDF</a> — Full-PDF. Claude Code with Haiku 4.5 in containers with in-container strace, the tools/list snapshot and the transcript; 17 threat models, 12 mechanics, 14/25 OWASP categories. Kernel-View held-out AUROC was 0.73–0.92, and adding it to App-View added about 10 points for boosted trees. The app layer misses silent exfiltration via logging and audit-log poisoning; the kernel misses retrieval reference injection. Transfer to a different runtime held for 3 of 4 detector families. BQAA: join kernel/syscall evidence with app-layer traces; do not treat Falco defaults as agent-safe. <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-28586-agent-approval-laundering-transitive-effects",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Agent Approval Laundering — approval records name the invocation but omit its workflow's effects (postinstall file writes, MCP network): 40/111 records leave a gap; source-backed effect predictions before approval reach recall 0.926 and cut missed effects from 10 to 3",
+      "html": " <a href=\"https://arxiv.org/abs/2609.28586\">arXiv:2609.28586</a> · <a href=\"https://arxiv.org/pdf/2609.28586\">PDF</a> — Full-PDF. Defines closure-bound approval over six effect classes and proves record-only policies cannot separate runs with identical approval fields. Gaps fall from 40 to 17 to 13 as command semantics and decision-time metadata are added (10 → 2 → 0 on 11 pinned repos), and they recur in Claude Code, Copilot CLI and Qwen Code. Effect-bound records raise coverage from 0.755 to 0.922 but ask for extra approval in 17 of 18 cases. Extends the approval-to-execution card (2609.26529). BQAA: store predicted effects alongside approval decisions; measure gap rate on production approvals. <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-30243-jevout-natural-context-flips-decision-models",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "JevOut — short, answer-preserving context redirects Jev on 61.4% of initially correct decisions (45% with ≥0.7 on the wrong option; 85.7% on tool routing); probability feedback helps the attacker; companion Decision Hijacking finds injection text flips only 1.8–3.5%, so margin is the risk variable",
+      "html": " <a href=\"https://arxiv.org/abs/2609.30243\">arXiv:2609.30243</a> · <a href=\"https://arxiv.org/pdf/2609.30243\">PDF</a> — Full-PDF (companion 2609.28613 also read). jev-1.13.0 plus three other decision systems (64.9–73.2%) on seven datasets. The median successful addition is 31 words, and frozen contexts transfer 21–48% across systems. Decision Hijacking (NTU; 510 InjecAgent cases) found &quot;ignore previous instructions&quot; lowers attacker probability and 24 score-guided queries reach only 3.5%, with successes concentrated at small initial margins (12/12 near-boundary vs 1/468 far-boundary embedded). Qualifies the Jev-vs-LLM-judges and Type-Safe-Is-Not-Error-Free cards. Note: Jev is also this fleet&#x27;s shadow routing layer. BQAA: log decision context hashes + margin; alert on near-boundary flips. <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-28919-control-the-harness-cache-aware-routing-cost",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Control the Harness, Control the Cost (Accenture) — price the turn, not the request: a mid-task model switch pays back only after 8–291 requests; the top model is cheaper on long cached sessions; routing at session start, side lanes and subagent launch saves 14–21% of a $23.7M emulated bill; corrections are over a third of spend",
+      "html": " <a href=\"https://arxiv.org/abs/2609.28919\">arXiv:2609.28919</a> · <a href=\"https://arxiv.org/pdf/2609.28919\">PDF</a> — Full-PDF. Derives a cache payback rule and a price crossover (on the paper&#x27;s 21 Sep list prices, the top model&#x27;s cheaper cache reads win above 65k context at 18 tool steps), and checks both by repricing about 10k real Claude Code sessions. A Jev-labelled router holds low-confidence turns and never downgrades corrections. 17–27% of turns follow a pause longer than the 5-minute cache life, and a one-hour cache lifts the saving to 17%. Synthetic scenarios, list prices, simulator not released; aggregate-only reporting by design. BQAA: attribute spend by turn/session with cache-hit and correction flags; price mid-task switches with payback. <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
       "id": "arxiv-2609-30266-llm-agents-tamper-with-own-traces",
       "tag": "Academy",
       "kind": "rank",
@@ -100,6 +180,11 @@
       "added": "2026-09-24T0634",
       "addedDisplay": "6:34 AM PT",
       "progress": [
+        {
+          "at": "2026-09-25T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "Mastra <a href=\"https://www.npmjs.com/package/@mastra/core/v/1.72.0-alpha.0\">@mastra/core@1.72.0-alpha.0</a> (npm alpha, 04:23Z; latest still 1.71.0). It fixes durable-engine gaps where redaction processors (processToolResult) and transcript transforms were silently skipped, so raw payloads reached streams and thread history. It also enforces the ignored maxRetries and totalMs budget, and propagates the evented engine's dropped actor identity. New: observe().detach(), subscribeToThread({ withInitialHistory }) and PubSub.trimTopic. Progress (alpha). <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-24T1834",
           "displayTime": "6:34 PM PT",
@@ -494,7 +579,13 @@
       "html": " <a href=\"https://github.com/BerriAI/litellm/releases/tag/v1.102.1\">v1.102.1</a> — Jev surface previously only on v1.103 rc; customer-driven stable backport within one hour across four lines. <a href=\"/research/briefs/2026-09-23-0034-opus.html\">Full brief</a>.",
       "added": "2026-09-23T0034",
       "addedDisplay": "12:34 AM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-09-25T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "LiteLLM <a href=\"https://github.com/BerriAI/litellm/releases/tag/v1.100.3\">v1.98.1 / v1.99.4 / v1.100.3</a> (GH 06:20–06:21Z, PyPI 06:05–06:08Z) backport #39729 (budget reset now clears the cached end-user spend counter on every replica, where before 429s continued after rollover) and #40639 (shared budgets with more than 32,767 end users now reset), plus the gpt-6 request-family fix. Every maintained line from 1.98.x to 1.102.x now has both. <a href=\"https://github.com/BerriAI/litellm/releases/tag/v1.104.0-dev.2\">v1.104.0-dev.2</a> is the first artifact with #42486, which sets gen_ai.conversation.id on OTel LLM spans from the caller's session id. Progress only. <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "arxiv-2609-25938-certified-against-which-oracle-text-to-sql",
@@ -685,6 +776,11 @@
       "added": "2026-09-22T1234",
       "addedDisplay": "12:34 PM PT",
       "progress": [
+        {
+          "at": "2026-09-25T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "OpenAI Codex <a href=\"https://github.com/openai/codex/releases/tag/rust-v0.158.0-alpha.13\">rust-v0.158.0-alpha.11 / alpha.12 / alpha.13</a> (alpha.11 23:23Z, alpha.12 00:54Z, alpha.13 GH 04:29Z / npm 04:40Z), 28 commits since alpha.10. #47984 adds codex.multi_agent.spawn.phase.duration_ms and a codex.multi_agent.spawn.failure counter with bounded labels; #47967 makes flex_unavailable a distinct, non-retried terminal error with its own telemetry class; #47957 bounds tool-call observations to 15 MiB and marks trimmed call inventories incomplete. Progress (alpha line). <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-24T1834",
           "displayTime": "6:34 PM PT",
@@ -4652,6 +4748,28 @@
   ],
   "runs": [
     {
+      "id": "2026-09-25T0034",
+      "date": "2026-09-25",
+      "displayTime": "12:34 AM PT",
+      "added": [
+        "pydantic-ai-v2-50-0-decision-model-decide-spans-route-threshold",
+        "dspy-3-4-0-jev-decision-types-reanchor-native-lm-engine",
+        "openai-codex-0-157-0-stable-network-policy-gates-otlp-telemetry",
+        "arxiv-2609-28585-denial-of-wallet-persistent-billable-state",
+        "arxiv-2609-28915-ace-kernel-level-evidence-agent-security",
+        "arxiv-2609-28586-agent-approval-laundering-transitive-effects",
+        "arxiv-2609-30243-jevout-natural-context-flips-decision-models",
+        "arxiv-2609-28919-control-the-harness-cache-aware-routing-cost"
+      ],
+      "updated": [
+        "mastra-core-1-70-0-model-selection-processor-tenant-scoped-traces-memory-1-32",
+        "litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport",
+        "openai-codex-0-156-0-stable-telemetry-attribution-graduation"
+      ],
+      "brief": "/research/briefs/2026-09-25-0034-opus.html",
+      "note": "Miss-watch catch-up for official 00:34 PT Fri slot (primary :34 left no HTML/MD/tmux writer; kicked ~00:52+ PT). Writer Opus 5.5 (~$13.28, ~18.8 min, 89 turns). Packs: Muse1932 (late Mac-down catch-up) + DSH2032 (late; vault Hunt twin blocked) + Agy2132 + Muse2232 + DSH2332 (vault twin blocked) + Agy0032; all PACK_DONE. Mac-down ~19:30–21:00 PT Thu. Older Wed gaps still ABSENT: DSH1732 / Agy1832 / Muse1932 / Agy0932. Verified arXiv ceiling still 2609.30268. Industry NEW +3: PydanticAI v2.50.0, DSPy 3.4.0 (registry-sweep miss by packs), Codex rust-v0.157.0 stable. Progress: LiteLLM v1.98.1/v1.99.4/v1.100.3 backport wave; Codex alpha.11–13; Mastra 1.72.0-alpha.0. Academy +5 full-PDF: 2609.28585 DoW, 2609.28915 ACE, 2609.28586 Approval Laundering, 2609.30243 JevOut (+28613 companion), 2609.28919 harness cost. Scouted-not-ranked: 2609.28559 LIDAR. Pin 2609.02702 intact. No Stories companion (0 third-party BQAA). GTM skipped. JEV_SHADOW pre-writer worth_running run conf=0.89; citation research_check: verify_more/verify_more/accept (never blocked)."
+    },
+    {
       "id": "2026-09-24T1834",
       "date": "2026-09-24",
       "displayTime": "6:34 PM PT",
@@ -6191,6 +6309,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-09-25T0034",
+      "date": "2026-09-25",
+      "displayTime": "12:34 AM PT",
+      "title": "Opus 5.5: decision layers as telemetry — PydanticAI v2.50.0 decide spans, DSPy 3.4.0 Jev types, Codex rust-v0.157.0 stable OTLP gated by network policy; Academy Denial-of-Wallet (28585), ACE (28915), Approval Laundering (28586), JevOut (30243), harness cost (28919); Progress LiteLLM backport wave, Codex alpha.11–13, Mastra 1.72.0-alpha.0",
+      "href": "/research/briefs/2026-09-25-0034-opus.html",
+      "analyzer": "Opus 5.5"
+    },
     {
       "id": "2026-09-24T1834",
       "date": "2026-09-24",
