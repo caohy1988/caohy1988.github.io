@@ -1,6 +1,26 @@
 {
   "items": [
     {
+      "id": "otel-python-genai-1-2b0-cancellation-errors-own-scope-conversation-id",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "OpenTelemetry Python GenAI instrumentations 1.2b0 (13 packages) — cancelled calls now recorded as failures, telemetry under each instrumentation's own scope, gen_ai.conversation.id carried into nested spans, gen_ai.invoke_agent.duration / gen_ai.execute_tool.duration metrics, cache-write and reasoning token fields; first DSPy, Bedrock and LlamaIndex packages",
+      "html": " PyPI 16:36–16:38Z and GitHub <a href=\"https://github.com/open-telemetry/opentelemetry-python-genai/releases/tag/opentelemetry-util-genai%3D%3D1.2b0\">1.2b0</a> 16:40–16:47Z on Thu Sep 24; missed by the 1234, 1834 and 0034 briefs. Before 1.2b0, a cancelled call exported as a success (status UNSET, no error.type), or was never exported where a package used its own exception handler (#520, #656). Telemetry now carries each package's own scope instead of opentelemetry.util.genai.handler (#632), and gen_ai.conversation.id rides the context into nested chat spans (#726, #474). Agent frameworks record gen_ai.invoke_agent.duration and gen_ai.execute_tool.duration instead of gen_ai.client.operation.duration (#616). <a href=\"/research/briefs/2026-09-25-0634-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T0634",
+      "addedDisplay": "6:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-29429-just-ask-jev-rlcdalignbench-zero-shot-alignment-detector",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Just Ask Jev (RLCDAlignBench) — one generic Jev question ranks ten alignment-failure types at median AUROC 0.886 across 31 benchmarks; wording adds +0.006 out of sample while what the logged state contains decides detection; thresholds do not transfer (per-benchmark ECE 0.168 vs 0.074), ten labels recover most F1; $0.30 vs $18.96 for judges at list prices (3.3× median when repriced)",
+      "html": " <a href=\"https://arxiv.org/abs/2609.29429\">arXiv:2609.29429</a> · <a href=\"https://arxiv.org/pdf/2609.29429\">PDF</a> — Full-PDF. 44 benchmarks, 7,193 instances from five 2–7B targets, jev-1.13.0, with split-half selection to remove search inflation and 49 paired context ablations. Soft probabilities beat argmax and thresholded rubrics (−0.137 AUROC for rubrics), and deployable context helped on only 1 of 4 benchmarks, while label-defining fields gave the big gains. On StrongREJECT, Jev matches the reference judge&#x27;s agreement with humans (κ 0.809 vs 0.811), and its confident disagreements exposed label defects in three benchmarks. Caveats: one Jev version, small targets, mostly scorer labels, one-reader audit. BQAA: log the fields that define the failure label; do not trust a single pooled threshold across datasets. <a href=\"/research/briefs/2026-09-25-0634-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T0634",
+      "addedDisplay": "6:34 AM PT",
+      "progress": []
+    },
+    {
       "id": "pydantic-ai-v2-50-0-decision-model-decide-spans-route-threshold",
       "tag": "Industry",
       "kind": "rank",
@@ -159,6 +179,11 @@
       "added": "2026-09-24T0634",
       "addedDisplay": "6:34 AM PT",
       "progress": [
+        {
+          "at": "2026-09-25T0634",
+          "displayTime": "6:34 AM PT",
+          "html": "Langfuse <a href=\"https://github.com/langfuse/langfuse/releases/tag/v4.45.3\">v4.45.3</a> (GH 09:19Z) and <a href=\"https://github.com/langfuse/langfuse/releases/tag/v4.45.4\">v4.45.4</a> (09:41Z, chore). #17905 fixes decision-model evaluators saved with jev-1.13.0, which showed an empty picker and \"looked unconfigured\" after jev-latest became the only default. #17915 dedupes the picker, #17901 rejects TypeSafe base URLs ending in /systemone or carrying a query string, and #16375 now logs (sanitized) which public key failed an API-key lookup. Progress only. <a href=\"/research/briefs/2026-09-25-0634-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-24T1234",
           "displayTime": "12:34 PM PT",
@@ -776,6 +801,11 @@
       "added": "2026-09-22T1234",
       "addedDisplay": "12:34 PM PT",
       "progress": [
+        {
+          "at": "2026-09-25T0634",
+          "displayTime": "6:34 AM PT",
+          "html": "OpenAI Codex <a href=\"https://github.com/openai/codex/releases/tag/rust-v0.158.0-alpha.14\">rust-v0.158.0-alpha.14</a> (GH 12:51Z, npm alpha 13:06Z; latest still 0.157.0), 9 commits since alpha.13. #48073 stops runtime-only filesystem grants (for example, plugin metrics) from triggering write_stdin approval. #48060 dedupes instructions across Guardian reviews and classifies restored evidence as context, not user authorization. #48035 removes PluginSummary.extensions from the app-server protocol. Progress (alpha line). <a href=\"/research/briefs/2026-09-25-0634-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-25T0034",
           "displayTime": "12:34 AM PT",
@@ -4748,6 +4778,21 @@
   ],
   "runs": [
     {
+      "id": "2026-09-25T0634",
+      "date": "2026-09-25",
+      "displayTime": "6:34 AM PT",
+      "added": [
+        "otel-python-genai-1-2b0-cancellation-errors-own-scope-conversation-id",
+        "arxiv-2609-29429-just-ask-jev-rlcdalignbench-zero-shot-alignment-detector"
+      ],
+      "updated": [
+        "langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown",
+        "openai-codex-0-156-0-stable-telemetry-attribution-graduation"
+      ],
+      "brief": "/research/briefs/2026-09-25-0634-opus.html",
+      "note": "Miss-watch catch-up for official 06:34 PT Fri slot (primary :34 left no HTML/MD/tmux writer; kicked ~06:50+ PT). Writer Opus 5.5 (~$10.96, ~20.5 min). Packs: Agy0032 + Muse0132 + DSH0232 + Agy0332 + Muse0432 + Agy0632; all PACK_DONE. GAP: dsh-pack-2026-09-25-0532 ABSENT (never launched). Verified arXiv ceiling still 2609.30268. Industry NEW +1: OTel Python GenAI 1.2b0 (registry-sweep miss by every pack/brief since Thu). Progress: Langfuse v4.45.3/v4.45.4 TypeSafe picker correctness; Codex rust-v0.158.0-alpha.14. Academy +1 full-PDF: 2609.29429 Just Ask Jev / RLCDAlignBench. Scouted-not-ranked: 2609.29845, 2609.30216. Pin 2609.02702 intact. No Stories companion (0 third-party BQAA). GTM skipped. JEV_SHADOW pre-writer worth_running run conf=0.98; citation research_check: verify_more/verify_more/verify_more (never blocked)."
+    },
+    {
       "id": "2026-09-25T0034",
       "date": "2026-09-25",
       "displayTime": "12:34 AM PT",
@@ -6309,6 +6354,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-09-25T0634",
+      "date": "2026-09-25",
+      "displayTime": "6:34 AM PT",
+      "title": "Opus 5.5: telemetry that was quietly wrong — OpenTelemetry Python GenAI 1.2b0 (cancelled calls as failures, own scopes, conversation.id into nested spans); Academy Just Ask Jev / RLCDAlignBench (2609.29429) median AUROC 0.886 zero-shot; Progress Langfuse v4.45.3/4 TypeSafe picker + Codex rust-v0.158.0-alpha.14",
+      "href": "/research/briefs/2026-09-25-0634-opus.html",
+      "analyzer": "Opus 5.5"
+    },
     {
       "id": "2026-09-25T0034",
       "date": "2026-09-25",

@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-25 · 6:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="OTel Python GenAI 1.2b0 cancellation/scope/conversation.id fixes; Just Ask Jev RLCDAlignBench 2609.29429; Langfuse 4.45.3/4 + Codex alpha.14 progress.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-25-0634-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 6:34 AM PT · Miss-watch catch-up (primary :34 left no artifact)</p>
+    <article>
+<h1>Field Brief — 2026-09-25-0634: Telemetry that was quietly wrong. OpenTelemetry's Python GenAI instrumentations 1.2b0 (13 packages, missed by every brief since Thursday) stop exporting cancelled calls as successes, stop reporting everything under one shared scope, and carry <code>gen_ai.conversation.id</code> into nested spans. Unreleased fixes elsewhere show tool payloads dropped at 28 KiB, Gemini usage dropped for empty replies, and reasoning tokens counted twice. A 44-benchmark study finds one generic Jev question ranks alignment failures well (median AUROC 0.886), but its thresholds do not transfer between datasets, and what the log contains matters more than how the question is worded.</h1>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer:</strong> Opus 5.5 (<code>claude-opus-5-5[1m]</code>), primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-25-0634</strong> (official 6h slot, 06:34 AM PT Fri Sep 25, 2026). <strong>Miss-watch catch-up:</strong> the primary :34 run left no artifact (no HTML, no Markdown). This run started ~06:52 PT (first clock read 06:53 PT). The label stays <strong>0634</strong>, per <code>Maps/Decisions/2026-09-06-field-brief-routine-missed-slots.md</code>.
+<strong>Evidence window:</strong> from the 0034 brief's last probes (~08:10Z) to this run's last probes (~14:05Z). It also includes one release published before that window that no brief or pack reported (OpenTelemetry Python GenAI 1.2b0, Thu 16:36Z). I re-probed GitHub, PyPI, npm, arXiv abs pages and HN Algolia myself between 13:54Z and 14:05Z, and read 3 PDFs in full.</p>
+<ul>
+<li><strong>Source packs used (6, all PACK_DONE):</strong> Agy 0032, Muse 0132, DSH 0232, Agy 0332, Muse 0432 and Agy 0632. <strong>DSH 0532 is ABSENT</strong> (it never launched; see Housekeeping).</li>
+<li><strong>Catalog baseline:</strong> <strong>413 items / 102 briefs / 104 runs</strong>, SHA-256 <code>52c75e01…80fe89d5</code>, read-only. The newest brief is <code>2026-09-25T0034</code>.</li>
+</ul>
+<p><strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call; Collection owns the HTML, the catalog and the push.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: 1 new Industry rank, 1 new Academy rank, 2 Industry progress notes, and a NOTE list.</strong> A thin night for releases. Inside the window only Langfuse 4.45.3/4.45.4 and Codex alpha.14 shipped among watched products, plus an OTel Python core release no pack watched. But the packs carried real observability fixes, and my own sweep found a GenAI instrumentation release that every collector missed.</p>
+<p><strong>Theme 1: the telemetry producers fixed things that made agent data quietly wrong.</strong></p>
+<ul>
+<li><strong><a href="https://github.com/open-telemetry/opentelemetry-python-genai/releases/tag/opentelemetry-util-genai%3D%3D1.2b0">OpenTelemetry Python GenAI 1.2b0</a></strong> (13 packages, including the OpenAI Agents, LangChain, LlamaIndex, DSPy, Google GenAI, Anthropic and Bedrock instrumentations):</li>
+<li>Before it, a <strong>cancelled call exported as a success</strong> (status UNSET, no <code>error.type</code>). In packages with their own exception handler it was <strong>never exported at all</strong>.</li>
+<li>Before it, every package reported under one shared instrumentation scope, <code>opentelemetry.util.genai.handler</code>.</li>
+<li>It now carries <strong><code>gen_ai.conversation.id</code> into nested spans</strong>, for example from an OpenAI Agents <code>group_id</code> down to the model SDK's <code>chat</code> span.</li>
+<li>Agent frameworks now record <strong><code>gen_ai.invoke_agent.duration</code> and <code>gen_ai.execute_tool.duration</code></strong> instead of <code>gen_ai.client.operation.duration</code>.</li>
+<li><strong>Unreleased fixes on main this window:</strong></li>
+<li><strong>Cloudflare Agents</strong> silently dropped any tool payload over its <strong>28 KiB</strong> trace-attribute limit, so every screenshot result vanished (<a href="https://github.com/cloudflare/agents/pull/2366">#2366</a>).</li>
+<li><strong>Opik</strong> dropped Gemini usage for blocked or empty replies coming through the <strong>ADK</strong> integration (<a href="https://github.com/comet-ml/opik/pull/8555">#8555</a>).</li>
+<li><strong>Mastra's Langfuse export</strong> made Langfuse count reasoning tokens twice (<a href="https://github.com/mastra-ai/mastra/pull/24939">#24939</a>).</li>
+<li><strong>LangSmith</strong> produced no traces for one Claude Agent SDK API (<a href="https://github.com/langchain-ai/langsmith-sdk/pull/3576">#3576</a>).</li>
+<li><strong>LiteLLM's prerelease 1.104.0-dev.2</strong> can skip Presidio PII masking on streamed Anthropic responses (<a href="https://github.com/BerriAI/litellm/pull/43023">#43023</a>).</li>
+</ul>
+<p><strong>Theme 2: decision models as monitors: ranking transfers, thresholds do not.</strong></p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.29429">2609.29429</a> Just Ask Jev (RLCDAlignBench).</strong> One generic Jev question, asked zero-shot, ranks ten kinds of alignment failure at a <strong>median AUROC of 0.886</strong> over 31 benchmarks.</li>
+<li>Sharper wording adds only <strong>+0.006</strong> out of sample.</li>
+<li>What decides detection is <strong>what the detector sees</strong>: the user's stated belief, the system goal, the tool output that carried an instruction.</li>
+<li>Probabilities are well calibrated pooled, but off by the base rate within each benchmark. <strong>Ten labeled items</strong> recover most of the lost F1.</li>
+<li><strong>Langfuse v4.45.3</strong> fixed an evaluator bug in the same area: evaluators saved with <code>jev-1.13.0</code> showed an empty picker and &quot;looked unconfigured&quot;.</li>
+</ul>
+<p><strong>What this means for BQAA (as the observer, not the source of truth):</strong></p>
+<ul>
+<li><strong>Make ingestion version-aware for OTel GenAI producers:</strong></li>
+<li>Map scope names and metric names across 1.1b0 and 1.2b0.</li>
+<li>Treat cancellations from older producers as <em>unknown</em>, not success.</li>
+<li>Join sessions on <code>gen_ai.conversation.id</code>.</li>
+<li><strong>Add a per-session completeness check:</strong></li>
+<li>Every model call has usage.</li>
+<li>Reasoning tokens are counted once, as a subset of output.</li>
+<li>Omitted-payload markers are counted, not ignored.</li>
+<li><strong>For evaluator and monitor scores:</strong></li>
+<li>Store the probability, the judge model version and the fields the detector saw.</li>
+<li>Fit thresholds per evaluation set.</li>
+<li>Route the least-confident decisions to review.</li>
+</ul>
+<h2>Industry</h2>
+<p><strong>Screen used:</strong> a release-level move that ships a product capability, or a change to how agent telemetry, cost or decisions are recorded. Unreleased main-branch commits are NOTE only. I checked every item against its primary release object, tag, registry entry, changelog or PR body, not against the pack summary.</p>
+<p><strong>Sweep results (my own, 13:54Z–14:05Z):</strong></p>
+<ul>
+<li><strong>GitHub release objects since 06:40Z (55 repos):</strong></li>
+<li>Langfuse <code>v4.45.3</code> (09:19:59Z) and <code>v4.45.4</code> (09:41:43Z).</li>
+<li>Codex <code>rust-v0.158.0-alpha.14</code> (12:51:36Z).</li>
+<li>OpenTelemetry Python <code>v1.45.0</code> (12:32:47Z) and python-contrib <code>v0.66b0</code> (12:36:25Z). <strong>No pack reported these.</strong></li>
+<li>Mastra GitHub release objects for <code>@mastra/core@1.70.0</code> and <code>1.71.0</code>, drafts from Sep 24 published 10:06–10:07Z. The code and npm packages were carded Thursday.</li>
+<li>Out of scope: cline <code>desktop-v0.0.36</code> and <code>langchain-fireworks==1.6.3</code>.</li>
+<li><strong>PyPI since 07:40Z (60 packages):</strong></li>
+<li><code>opentelemetry-sdk</code> 1.45.0 and <code>opentelemetry-semantic-conventions</code> 0.66b0 (12:32Z).</li>
+<li>Pydantic <code>logfire</code> 5.1.1, plus 6.0.0b6 and b7 (09:19–09:20Z). This is not on the collectors' watchlist.</li>
+<li>Nothing else.</li>
+<li><strong>npm since 07:40Z (60 packages):</strong></li>
+<li><code>@openai/codex</code> 0.158.0-alpha.14 (<code>alpha</code> tag at 13:06:30Z, platform builds 13:05–13:09Z) and <code>@openai/codex-sdk</code> 0.158.0-alpha.14 (13:05:30Z). <code>latest</code> stays 0.157.0.</li>
+<li>Flat: Mastra, LangGraph, Vercel AI, Cloudflare <code>agents</code>, Langfuse JS, LangSmith and Opik published nothing.</li>
+<li><strong>Late catch:</strong> <code>open-telemetry/opentelemetry-python-genai</code> published <strong>1.2b0 for 13 packages</strong> on Thu Sep 24 (PyPI 16:36–16:38Z, GitHub 16:40–16:47Z). It is on no watchlist, and the 1234, 1834 and 0034 briefs all missed it. It is ranked below.</li>
+<li><strong>Main-branch tail since 13:40Z (55 repos):</strong> 10 commits in 7 repos (Opik SDK #8527, #8376, #8449; LiteLLM #43089; two Langfuse UI fixes; DSPy version bump #10496; Strands #4580, #4584; Cloudflare CI). None is release-grade.</li>
+<li><strong>Watch items from 0034, all still unshipped:</strong> Codex 0.158 stable, Mastra 1.72.0 stable, LiteLLM 1.104 stable, and the LiteLLM Langfuse v4-over-OTel callback.</li>
+</ul>
+<h3>NEW 1: <a href="https://github.com/open-telemetry/opentelemetry-python-genai/releases/tag/opentelemetry-util-genai%3D%3D1.2b0">OpenTelemetry Python GenAI instrumentations 1.2b0</a>: cancellations become failures, each package reports under its own scope, <code>gen_ai.conversation.id</code> reaches nested spans, and agent and tool durations get their own metrics</h3>
+<p><strong>Clocks:</strong> PyPI 16:36–16:38Z and GitHub releases 16:40:33–16:46:59Z on <strong>Thu Sep 24</strong>. The previous release was 1.1b0 on Aug 20. <strong>This is a late catch:</strong> it was published inside the 1234 Thu window, and no brief or pack reported it.</p>
+<p><strong>Packages:</strong></p>
+<ul>
+<li>The shared layer, <code>opentelemetry-util-genai</code>.</li>
+<li>Model SDK instrumentations: Google GenAI, OpenAI, Anthropic, Bedrock, Portkey.</li>
+<li>Agent framework instrumentations: OpenAI Agents, LangChain, LlamaIndex, DSPy, Agno, smolagents, Qwen-Agent.</li>
+</ul>
+<p><strong>Evidence:</strong> I read all 13 release notes, and the PR bodies of #520, #616, #632, #726 and #377. I also checked util-genai's source at the 1.2b0 tag.</p>
+<ul>
+<li><strong>Cancellation is now a failure (<a href="https://github.com/open-telemetry/opentelemetry-python-genai/pull/520">#520</a>, #656).</strong></li>
+<li>Before, <code>asyncio.CancelledError</code> took the success path. In the PR's words, a cancelled operation &quot;was exported with <code>StatusCode.UNSET</code>, no <code>error.type</code>, and a duration metric with no error dimension — indistinguishable from one that completed&quot;.</li>
+<li>The PR adds that packages finalizing in their own <code>except Exception:</code> handler were &quot;worse off&quot;: on cancellation &quot;the span is never ended, so nothing is exported at all&quot;.</li>
+<li>#656 closes that gap for OpenAI, Anthropic, Bedrock, Google GenAI, Portkey, Qwen-Agent and stream finalization.</li>
+<li><strong>Each package reports under its own instrumentation scope (<a href="https://github.com/open-telemetry/opentelemetry-python-genai/pull/632">#632</a>).</strong></li>
+<li>Before, spans, metrics and logs from every package carried the scope <code>opentelemetry.util.genai.handler</code>. Now they carry, for example, <code>opentelemetry.instrumentation.genai.openai</code>.</li>
+<li><code>get_telemetry_handler</code> is deprecated.</li>
+<li><strong>The conversation id travels (<a href="https://github.com/open-telemetry/opentelemetry-python-genai/pull/726">#726</a>, #474, #631).</strong></li>
+<li><code>gen_ai.conversation.id</code> is held on the OTel Context. Inference, agent and workflow invocations read it at finish time, and nested invocations inherit it, so a <code>chat</code> span owned by a <em>different</em> instrumentation package picks it up.</li>
+<li>OpenAI Agents maps <code>RunConfig.group_id</code> to it. LangChain resolves it from <code>thread_id</code>, <code>session_id</code> or <code>conversation_id</code> metadata. OpenAI Responses reads the <code>conversation</code> parameter.</li>
+<li>The PR's tests keep the id off metric attributes.</li>
+<li><strong>Agent spans split into local and remote (<a href="https://github.com/open-telemetry/opentelemetry-python-genai/pull/616">#616</a>).</strong></li>
+<li>In-process framework agents get <code>SpanKind.INTERNAL</code> and drop <code>gen_ai.agent.id</code> and the provider and server attributes. Remote agent services get <code>CLIENT</code>.</li>
+<li>The OpenAI Agents, LangChain, LlamaIndex, DSPy, Agno, smolagents and Qwen-Agent instrumentations now record <strong><code>gen_ai.invoke_agent.duration</code> and <code>gen_ai.execute_tool.duration</code></strong> instead of <code>gen_ai.client.operation.duration</code>.</li>
+<li><strong>Usage fields (#613, #662, #674, #680):</strong></li>
+<li><code>cache_write_input_tokens</code> replaces the deprecated <code>cache_creation_input_tokens</code>.</li>
+<li>Per-modality (text, image, audio) token breakdowns are added.</li>
+<li>OpenAI chat completions now record <code>gen_ai.usage.cache_read.input_tokens</code> and <code>gen_ai.usage.reasoning.output_tokens</code>.</li>
+<li><strong>Less content by default:</strong></li>
+<li><strong><a href="https://github.com/open-telemetry/opentelemetry-python-genai/pull/377">#377</a> (marked breaking):</strong> <code>gen_ai.tool.definitions</code> is no longer emitted when content capture is off.</li>
+<li><strong>#775:</strong> retrieval spans in LlamaIndex, LangChain and DSPy now keep document IDs and scores only, not text.</li>
+<li><strong>Silent coverage gaps closed (release notes):</strong></li>
+<li>Anthropic <code>messages.stream()</code> consumed via <code>text_stream</code> or <code>get_final_message()</code> &quot;previously produced a span with request attributes only&quot; (#654).</li>
+<li>OpenAI async <code>with_streaming_response</code> calls recorded no response telemetry (#610).</li>
+<li>LangChain never emitted streaming timing metrics (#482).</li>
+<li>Failed Google Interactions streams left their spans open (#538).</li>
+<li><strong>New coverage:</strong></li>
+<li>First PyPI releases of the DSPy, Bedrock and LlamaIndex instrumentations; 1.2b0 is their only version.</li>
+<li>Google GenAI adds time-to-first-chunk and time-per-output-chunk metrics and <code>fetch_response</code> spans.</li>
+<li><strong>Same stack, today:</strong></li>
+<li><a href="https://github.com/open-telemetry/opentelemetry-python-contrib/releases/tag/v0.66b0">OTel Python contrib v0.66b0</a> formally removes the anthropic, claude-agent-sdk, langchain and weaviate instrumentations from contrib (#4903); they now live in this repo.</li>
+<li><a href="https://github.com/open-telemetry/opentelemetry-python/releases/tag/v1.45.0">OTel Python v1.45.0</a> lets attribute values be maps and mixed arrays (#5266).</li>
+<li><strong>Checked at the tag:</strong> util-genai 1.2b0 still serializes messages to JSON strings on spans (<code>gen_ai_json_dumps(dicts) if for_span else dicts</code>) and passes structured values only on log events. <strong>So span shape does not change yet.</strong></li>
+<li><strong>Why it ranks as NEW:</strong> the catalog's <code>otel-python-genai-*</code> cards (Sep 1–2) are single merged PRs (#488, #494, #536, #537). None covers a release. This is the first release in five weeks, and it changes status, scope, metric names and the session join key across 13 Python instrumentations.</li>
+<li><strong>Caveats:</strong></li>
+<li>These are beta (<code>b0</code>) packages, and GenAI semconv is still &quot;development&quot;.</li>
+<li>A process that mixes 1.1b0 and 1.2b0 packages emits both scope names and both metric names.</li>
+<li><code>gen_ai.conversation.id</code> only appears where the framework supplies one.</li>
+<li><strong>TL;DR:</strong></li>
+<li>Join sessions on <code>gen_ai.conversation.id</code> from these producers.</li>
+<li>Do not read status UNSET from pre-1.2b0 producers as success.</li>
+<li>Alias the old and new scope and duration-metric names.</li>
+<li>Store instrumentation scope and version on every span, so mixed fleets can be explained.</li>
+</ul>
+<h3>Progress notes (update existing cards; no new card)</h3>
+<p><strong>1. Langfuse <a href="https://github.com/langfuse/langfuse/releases/tag/v4.45.3">v4.45.3</a> / <a href="https://github.com/langfuse/langfuse/releases/tag/v4.45.4">v4.45.4</a></strong> → progress on <code>langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown</code>, the 4.45.x line card that already holds the 4.45.2 note. The evaluator feature itself is <code>langfuse-4-42-0-decision-model-evaluators-typesafe-jev</code>.</p>
+<ul>
+<li><strong>Clocks:</strong> v4.45.3 GH 09:19:59Z (tag commit 09:19:44Z); v4.45.4 GH 09:41:43Z. I read the PR bodies of #17901, #17904, #17905, #17915 and #16375.</li>
+<li><strong>Decision-model evaluator fixes:</strong></li>
+<li><strong><a href="https://github.com/langfuse/langfuse/pull/17905">#17905</a>:</strong> since #17881 made <code>jev-latest</code> the only default TypeSafe model, an evaluator saved with <code>jev-1.13.0</code> showed an empty model picker. The PR says it &quot;looks unconfigured even though it isn't&quot;. The saved model now stays selectable.</li>
+<li><strong>#17915:</strong> a custom <code>jev-latest</code> that matched a default was listed twice.</li>
+<li><strong><a href="https://github.com/langfuse/langfuse/pull/17901">#17901</a>:</strong> TypeSafe base URLs ending in <code>/systemone</code>, or carrying a query string, are now rejected. The SDK appends <code>/systemone</code> itself, so such URLs produced <code>…/systemone/systemone</code> and the connection failed.</li>
+<li><strong>#17904:</strong> a custom base URL now survives switching between upstream cards.</li>
+<li><strong>Auth logging (<a href="https://github.com/langfuse/langfuse/pull/16375">#16375</a>):</strong> a failed API-key lookup now logs which public key failed. Before, the logger silently dropped the value. The key is sanitized (printable ASCII, 64 characters at most) so unauthenticated callers cannot forge log lines.</li>
+<li><strong>v4.45.4</strong> is chore-only (#17916 refreshes embedded skills; #17924 skips Azure CI tests).</li>
+<li><strong>Why progress, not NEW:</strong> these are patch releases in an already-carded line, and they keep the version chain continuous.</li>
+<li><strong>TL;DR:</strong> an evaluator pinned to a versioned Jev id looked broken, which invites a quiet re-save to <code>jev-latest</code> and a change of judge. Record the judge model version on every score.</li>
+</ul>
+<p><strong>2. OpenAI Codex <a href="https://github.com/openai/codex/releases/tag/rust-v0.158.0-alpha.14"><code>rust-v0.158.0-alpha.14</code></a></strong> → progress on <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code> (the alpha line; the same parent as the 0034 alpha.11–13 note).</p>
+<ul>
+<li><strong>Clocks:</strong> GH 12:51:36Z (release commit 11:50:27Z); npm <code>alpha</code> 13:06:30Z (platform packages 13:05–13:09Z); <code>@openai/codex-sdk</code> alpha.14 13:05:30Z. npm <code>latest</code> is still 0.157.0.</li>
+<li><strong>Contents:</strong> 9 commits since alpha.13 (compare API). PR bodies read:</li>
+<li><strong><a href="https://github.com/openai/codex/pull/48073">#48073</a>:</strong> runtime-only filesystem grants, such as those used to emit plugin metrics, no longer trigger a <code>write_stdin</code> approval when sandbox approval is disabled. Before, the approval blocked that input. Extra agent grants, sandbox bypasses and policy changes still require review.</li>
+<li><strong><a href="https://github.com/openai/codex/pull/48060">#48060</a>:</strong> Guardian, Codex's approval reviewer, stops re-sending instructions already in its history at the same revision. Evidence restored after compaction is classified &quot;as context rather than new user authorization&quot;.</li>
+<li><strong>#48035:</strong> removes <code>PluginSummary.extensions</code> and the extension declaration types from the app-server protocol. This breaks the schema for protocol consumers.</li>
+<li><strong>#48015:</strong> tool-suggestion install URLs must be HTTPS, with a host and no embedded credentials.</li>
+<li><strong>On main after alpha.14 (NOTE):</strong></li>
+<li><a href="https://github.com/openai/codex/pull/48078">#48078</a> replays exec-server shell snapshots through unlinked, read-only file descriptors instead of the child environment.</li>
+<li>#48077 (title only) adds Serde to the message-board request types.</li>
+<li><strong>TL;DR:</strong> a small prerelease with no new telemetry fields. Approval counts drop for runtime-only grants, so expect a step in approval-rate series when 0.158 goes stable.</li>
+</ul>
+<h3>NOTE (not ranked; recorded so the next brief can dedupe)</h3>
+<p>Unreleased unless marked. I read every PR body cited below unless it is marked &quot;title only&quot;.</p>
+<p><strong>Telemetry that was missing or wrong:</strong></p>
+<ul>
+<li><strong>Cloudflare Agents <a href="https://github.com/cloudflare/agents/pull/2366">#2366</a></strong> (merged 09:12Z; npm <code>agents</code> latest is still 0.24.0 of Sep 18).</li>
+<li>With <code>storeTools: true</code>, any tool payload over the <strong>28 KiB</strong> trace-attribute limit was &quot;silently dropped&quot;, leaving no <code>gen_ai.tool.call.result</code> at all. Every screenshot result vanished, &quot;not even the metadata&quot;.</li>
+<li>Now base64 is redacted to a size summary. If the payload still does not fit, an explicit <code>{ omitted: …, bytes }</code> marker keeps the original size.</li>
+<li><strong>Mastra <a href="https://github.com/mastra-ai/mastra/pull/24939">#24939</a></strong> (11:30Z; <code>@mastra/langfuse</code> latest is 1.5.10 of Sep 24).</li>
+<li>The Langfuse export sent inclusive <code>gen_ai.usage.output_tokens</code> plus a separate <code>gen_ai.usage.reasoning_tokens</code>, so Langfuse counted reasoning twice.</li>
+<li>It now maps reasoning to <code>gen_ai.usage.reasoning.output_tokens</code>, a subset of output, and drops the legacy key.</li>
+<li><strong>Opik <a href="https://github.com/comet-ml/opik/pull/8555">#8555</a></strong> (12:22Z; PyPI <code>opik</code> latest is 2.2.80).</li>
+<li>Gemini leaves out <code>candidates_token_count</code> for blocked or empty completions, and <strong>the ADK integration dumps usage with <code>exclude_unset=True</code></strong>. Opik's model required the field, so the usage &quot;was then logged as an error and dropped&quot;. It now records 0 completion tokens.</li>
+<li>Also on main after 13:40Z (titles only): #8527 keeps streamed tool calls complete in Bedrock <code>converse_stream</code> traces; #8376 keeps streamed Mistral reasoning content &quot;instead of dropping the output&quot;.</li>
+<li><strong>LangSmith SDK <a href="https://github.com/langchain-ai/langsmith-sdk/pull/3576">#3576</a></strong> (12:25Z; PyPI <code>langsmith</code> latest is 0.14.0). Applications consuming <code>ClaudeSDKClient.receive_messages()</code> &quot;produced no conversation traces&quot;. They now get one <code>claude.conversation</code> run per response, with LLM and tool children.</li>
+<li><strong>LiteLLM <a href="https://github.com/BerriAI/litellm/pull/43023">#43023</a></strong> (07:48Z).</li>
+<li>Since #42777, Presidio masking on streamed <code>/v1/messages</code> was skipped when the first upstream read was a keepalive, a data-less ping or a split UTF-8 character. The PR says &quot;every PII entity in the response then reaches the client in the clear&quot;.</li>
+<li><strong>Scope, checked with the compare API:</strong> #42777 shipped only in prerelease <strong>v1.104.0-dev.2</strong>. The stable 1.98.x–1.102.x lines do not contain it. The fix is on main, unreleased.</li>
+</ul>
+<p><strong>Durability, identity and memory state:</strong></p>
+<ul>
+<li><strong>Mastra <a href="https://github.com/mastra-ai/mastra/pull/25107">#25107</a></strong> (13:33Z).</li>
+<li>Since 1.62, a DurableAgent killed mid-tool or between steps could not recover (<code>TypeError … reading 'messages'</code>).</li>
+<li>The new crash test recovers <strong>73 of 77 checkpoints, up from 31</strong>.</li>
+<li>Still unfixed, per the PR: a restart can <strong>repeat a model or tool call that already finished</strong>, and a failed recovery deletes the run's snapshots.</li>
+<li>Earlier durable fixes #25078 and #25079 were NOTEd at 0034.</li>
+<li><strong>OpenHands <a href="https://github.com/All-Hands-AI/OpenHands/pull/17677">#17677</a></strong> (10:37Z).</li>
+<li>Cloud saves flattened OAuth MCP credentials into a static <code>Authorization: Bearer</code> header and deleted <code>auth</code>. Servers such as GitLab (two-hour tokens) then died with no refresh path.</li>
+<li>The credential and its refresh state are now kept.</li>
+<li>Also <a href="https://github.com/All-Hands-AI/OpenHands/pull/17683">#17683</a> (12:33Z): shared automation conversations now open read-only for organization members. Before, the links returned 404.</li>
+<li><strong>mem0</strong> (PyPI <code>mem0ai</code> latest is 2.2.0):</li>
+<li><a href="https://github.com/mem0ai/mem0/pull/6564">#6564</a> (Python) and its TypeScript twin <a href="https://github.com/mem0ai/mem0/pull/6578">#6578</a> (title only): Turbopuffer filters with operators other than <code>gte</code>/<code>lte</code> were silently dropped, so queries ran unfiltered.</li>
+<li><a href="https://github.com/mem0ai/mem0/pull/6580">#6580</a>: <code>euclidean_squared</code> turned into negative similarity (4.0 became −3.0), which inverted ranking.</li>
+<li><a href="https://github.com/mem0ai/mem0/pull/6547">#6547</a>: S3 Vectors clamped euclidean scores to 0.0.</li>
+</ul>
+<p><strong>Evaluation loop:</strong></p>
+<ul>
+<li><strong>Opik <a href="https://github.com/comet-ml/opik/pull/8462">#8462</a></strong> (10:57Z). Scored traces and threads that meet an automation's conditions are added to annotation queues (<code>source = AUTOMATED</code>), debounced for 15 s. It ships <strong>disabled</strong> (<code>ANNOTATION_QUEUE_ROUTING_ENABLED=false</code>).</li>
+<li><strong>Langfuse <a href="https://github.com/langfuse/langfuse/pull/17850">#17850</a></strong> (13:41Z). Assistant conversations and runs now follow project data-retention settings.</li>
+</ul>
+<p><strong>Released, but below the bar:</strong></p>
+<ul>
+<li><strong><a href="https://github.com/open-telemetry/opentelemetry-python/releases/tag/v1.45.0">OpenTelemetry Python v1.45.0</a> / <a href="https://github.com/open-telemetry/opentelemetry-python-contrib/releases/tag/v0.66b0">contrib v0.66b0</a></strong> (GH 12:32:47Z and 12:36:25Z; PyPI 12:32Z). No pack reported this.</li>
+<li><strong>Attribute values</strong> can now be maps, mixed arrays, <code>None</code> or bytes (<a href="https://github.com/open-telemetry/opentelemetry-python/pull/5266">#5266</a>). Bytes are no longer UTF-8-decoded to strings.</li>
+<li><strong>OTLP/HTTP exporters drop any serialized request over 64 MiB</strong>, measured before compression. This is on by default, and the drop is recorded as a failed export (<a href="https://github.com/open-telemetry/opentelemetry-python/pull/5369">#5369</a>).</li>
+<li>Spans ended after shutdown are dropped and counted with <code>error.type=already_shutdown</code> (#5509, #5512; release notes).</li>
+<li>Semconv constants move to v1.44.0.</li>
+<li>Contrib (release notes): GenAI instrumentations moved out (#4903), and botocore now records Bedrock converse prompt-cache tokens (#4615).</li>
+<li><strong>Not ranked:</strong> a generic SDK release, and GenAI span shape is unchanged at util-genai 1.2b0 (checked at the tag). BQAA ingestion should still accept map and array attribute values before producers start sending them.</li>
+<li><strong>Pydantic Logfire 5.1.1</strong> (PyPI 09:19Z): fixes only (project setup for accounts without organizations; TCP keepalive).</li>
+<li><strong>pydantic-ai <a href="https://github.com/pydantic/pydantic-ai/pull/8658">#8658</a></strong> (07:43Z) and <strong>#8775</strong> (11:01Z; title and pack only): the agent graph is cached (a trivial run is ~17% faster) and RunContext is shallow-copied. There is no public-surface or telemetry change. DSH 0232 asked the brief to rule on this: NOTE only.</li>
+<li><strong>Mastra GitHub release objects for <code>@mastra/core</code> 1.70.0 and 1.71.0</strong> (drafts published 10:06–10:07Z): carry only. Both were carded Thursday.</li>
+<li><strong>Also on main (titles or pack bodies only):</strong></li>
+<li>LiteLLM #43008: cache-leakage view grouped by model group.</li>
+<li>OpenHands #16699: subscription caches keyed by backend (Agy 0032).</li>
+<li>Opik #8533 / #8542: trace-read <code>FINAL</code> removal and batch-insert segment (Muse 0132).</li>
+<li>Opik #8545: <code>functools.partial</code> scorers no longer crash <code>evaluate()</code>.</li>
+<li><strong>Google ADK:</strong> no commits since <code>9625b06c</code> (04:58Z) in any pack or in my tail sweep. Nothing to note.</li>
+</ul>
+<h2>Academy</h2>
+<p><strong>Screen used:</strong> agent evaluation, cost, security or oversight evidence that produces a result BQAA could measure or log. Every rank below was read in full before ranking.</p>
+<p><strong>Coverage:</strong></p>
+<ul>
+<li><strong>No new arXiv mailing in this window.</strong> The ceiling is still <code>2609.30268</code>, and arXiv does not announce on Friday or Saturday evenings. The next mailing is Sunday 20:00 ET.</li>
+<li>Candidates therefore came from the packs' Hugging Face daily-list additions for Sep 25 (<code>2609.29429</code>, <code>2609.29845</code>), plus one leftover from the 0034 scouted list (<code>2609.30216</code>).</li>
+<li><strong>Full PDFs read (3):</strong> 29429, 29845 and 30216.</li>
+<li><strong>v1 dates checked:</strong> all three are v1 of Sep 24 (11:49Z, 14:12Z, 17:46Z). None is backfill.</li>
+<li>The priority pin <code>2609.02702</code> (Trace-as-State v1) is intact and is <strong>not</strong> re-carded.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.29429">arXiv 2609.29429</a>: Just Ask Jev: Reinforcement Learning for Calibrated Decisions as a Zero-Shot Detector of AI Alignment Failures (RLCDAlignBench)</h3>
+<p><strong>Guo, Liu, L. Y. Zhang (Griffith); Deng (NTU); Li (UNSW); Zhao (independent); Wu (Deakin); Chen (George Mason); Y. Zhang (Wake Forest).</strong> Submitted 24 Sep 2026; under review at ICLR 2027. Code, data and cached answers are at <a href="https://github.com/sumleo/RLCDAlignBench">sumleo/RLCDAlignBench</a> (MIT; the repo exists, created Sep 24).</p>
+<p><strong>Full PDF read (50 pp):</strong> §1–6 and App. A–J (Tables 1–34, Figs. 1–7). I skimmed the references.</p>
+<p><strong>The idea:</strong> many alignment failures are <em>relational</em>. Sycophancy is defined against the user's belief, deception against the model's own belief, and injection against an instruction hidden in tool output. So the study varies <strong>what Jev is asked</strong> (wording and answer type) separately from <strong>what Jev sees</strong> (which fields of the interaction are in its input).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>The benchmark:</strong> 44 benchmarks and 10 failure types (sycophancy, jailbreaks, deception, prompt injection, hallucination, privacy violation, social bias, reward hacking, concealing uncertainty, power seeking), for <strong>7,193 detection instances</strong> (Table 1).</li>
+<li><strong>Targets:</strong> five open 2–7B models (Qwen3.5-2B, Phi-4-mini, Gemma-2-2B, Llama-3.2-3B, Olmo-3-7B).</li>
+<li><strong>Labels:</strong> each benchmark's reference scorer (20 rules, 20 LLM judges, 4 multi-turn judges). Human labels exist for StrongREJECT (1,360 responses) and HarmBench validation (578).</li>
+<li><strong>Questions:</strong> one templated <strong>generic</strong> question per benchmark, asked as a yes/no (Noul), a pick (Choice) or a 3-level Score. Beside it, 15–40 targeted strategies, <strong>selected on one half of the items and scored on the other</strong> (20 splits) so that search does not inflate the result.</li>
+<li><strong>Context:</strong> 49 paired contrasts that add one field to what Jev sees. Each field is tagged <em>deployable</em> (a monitor could hold it) or <em>label key</em> (part of the label's definition).</li>
+<li><strong>Model and cost:</strong> every call resolved to <code>jev-1.13.0</code> (collected Sep 23). 23,411 calls cost USD 2.27 in total.</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Zero-shot ranking (§4.1, Table 6).</strong></li>
+<li>The generic Noul reaches a median <strong>AUROC of 0.886</strong> [0.821, 0.952] over 31 benchmarks.</li>
+<li>It beats the better of an in-domain TF-IDF classifier and response length on <strong>25 of 31</strong> benchmarks (+0.132).</li>
+<li>The split-half targeted strategy reaches 0.911 over 38 benchmarks.</li>
+<li><strong>Wording barely matters (§4.2, Tables 5 and 8).</strong></li>
+<li>Targeted wording adds <strong>+0.006</strong> [−0.004, +0.015] out of sample (24/1/11 wins/ties/losses, p = 0.055).</li>
+<li>Choosing the best question on the evaluation data would overstate that by 0.008, which is more than the gain itself.</li>
+<li><strong>Keep answers soft (§4.2, Fig. 3, Table 4).</strong></li>
+<li>Reading the probability beats taking the top answer on 28 of 31 benchmarks for Choice and 29 of 31 for Score (Table 4).</li>
+<li>Rubrics that threshold each answer at 0.5 before combining lose to one direct question on 9 of 10 benchmarks (median <strong>−0.137</strong> AUROC).</li>
+<li><strong>What Jev sees decides detection (§4.3, Tables 10–12).</strong></li>
+<li>Deployable context missing from the state helped on only 1 of 4 benchmarks (the deceptive goal on DeceptionBench, +0.050).</li>
+<li>The large gains come from label keys, such as PrivacyLens's secret list (0.79 → 0.95). Those gains measure the label's construct, not the failure.</li>
+<li>Long trajectories lose AUROC only when the reference is missing (PrivacyLens −0.14).</li>
+<li><strong>Calibration and thresholds (§4.4, App. E, Tables 15–16).</strong></li>
+<li>Pooled, calibration is good (ECE 0.047). Per benchmark, the median ECE is <strong>0.168 against 0.074</strong> under perfect calibration, and 24 of 31 benchmarks exceed the null's 95th percentile.</li>
+<li>The mean probability misses each benchmark's base rate by a median 0.125, while ranking stays strong. The median F1-optimal threshold is 0.35.</li>
+<li>F1 is 0.706 at t = 0.5, <strong>0.793 with a threshold fitted on 10 labeled items</strong>, and 0.822 with a cross-validated threshold. Label-free prior-shift correction makes it worse (0.571–0.690).</li>
+<li><strong>Route the unsure cases (§4.4, Fig. 6c; App. E).</strong> Keeping only the most confident half of decisions (largest |p − 0.5|) raises median accuracy from <strong>0.793 to 0.933</strong>. On social bias, confidence is anti-informative (AUROC 0.355).</li>
+<li><strong>Against humans (§4.5, Tables 20 and 22).</strong></li>
+<li>On StrongREJECT, Jev's κ is <strong>0.809</strong> against the GPT-4o-mini reference scorer's 0.811, and its AUROC is 0.971 against 0.929.</li>
+<li>On HarmBench validation, its κ with a single annotator is 0.748, against 0.736 between annotators.</li>
+<li>Per generator it is worse on GPT-3.5 outputs: κ 0.668 against the scorer's 0.790, and no threshold closes that gap.</li>
+<li><strong>Label audit (App. F, Tables 25–26).</strong></li>
+<li>Jev's confident disagreements exposed label-changing defects in three benchmarks. Open-Prompt-Injection's label tracks the injected task's accuracy; SycophancyEval (answer)'s label is correctness; the SycophancyEval (feedback) judge is inconsistent.</li>
+<li>The MACHIAVELLI labels cannot be observed from the state.</li>
+<li>Two AbstentionBench judges agree at only κ 0.05.</li>
+<li>Of the 311 items read one by one, 25.4% were Jev errors.</li>
+<li><strong>Cost (App. H, Table 32).</strong></li>
+<li>At list prices, one pass over 19 API-judged benchmarks costs <strong>$0.30 against $18.96 (62.9×)</strong>.</li>
+<li>Repriced conservatively (every judge at GPT-4o-mini, and Jev asked one question), Jev is <strong>12.1× cheaper pooled and 3.3× at the median</strong>.</li>
+<li>With the full question battery it is 6.0× pooled and 1.5× at the median, and the judge is cheaper on 5 benchmarks.</li>
+<li>A call carries 11.4 questions on average, with a median latency of 0.31 s that does not grow with the number of questions.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>It tests one RLCD model version (<code>jev-1.13.0</code>), English only, 2–7B targets, and mostly scorer labels (11 of 38 usable benchmarks are validated).</li>
+<li>Per-type medians rest on 1–6 benchmarks, so their CIs are wide. Six benchmarks are degenerate and excluded.</li>
+<li>The label audit is one reader, with no second adjudicator.</li>
+<li>The 63× figure leans on PrivacyLens and MASK, which are 62–65% of judge spend. Without them it is 35.1×.</li>
+<li>The developer states no retention period for versioned model ids. The authors pin every result to cached answers.</li>
+<li>The flip side is already in the catalog: JevOut (2609.30243) shows that exposed probabilities can be optimized against.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It is the first large, split-half-controlled test of Jev as a <strong>monitor for failure behavior</strong>, not as a rubric grader, and it includes a label audit.</li>
+<li>Its instruments map onto what BQAA would compute over logged sessions: soft scores, per-dataset thresholds, confidence-based routing, and ablations of what the logged state contains.</li>
+<li>It is distinct from the catalog's Jev-judge cards:</li>
+<li><code>arxiv-2609-26550-jev-as-a-judge-accept-escalate</code>: a cascade on grounded checks.</li>
+<li><code>arxiv-2609-29769-jev-vs-llm-rubric-judges-correlated-errors</code>: rubric panels.</li>
+<li><code>arxiv-2609-26758-type-safe-is-not-error-free-option-name-flip</code>: option-name flips.</li>
+<li>This paper adds that <strong>detection quality is bounded by what the log contains</strong>.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Log each turn's relational reference: the user's stated belief, the system prompt or goal, and the tool output that carried an instruction. A response-only log cannot support sycophancy, deception or injection detection.</li>
+<li>Store detector probabilities, not labels. Fit thresholds per evaluation set (10 labels recover most of the gap), and route the least-confident decisions to a judge or a human.</li>
+<li>Record the judge model version (<code>jev-1.13.0</code> vs <code>jev-latest</code>) with every score.</li>
+</ul>
+<h3>Academy scouted, not ranked</h3>
+<p><strong>Read in full but not ranked:</strong></p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.29845">2609.29845</a> &quot;Your Transformer Can Hold Two Thoughts at Once&quot; (Tikhonov et al.; 18 pp, full read).</strong></li>
+<li>Averaging the token embeddings of two texts keeps both next tokens in the top 10 in 30–40% of positions (§2.2), and pretraining erodes this (Fig. 2).</li>
+<li>A distillation fine-tune restores it (Pythia-2.8B KL 1.86 → 0.27), but hurts single-stream quality (LAMBADA 0.544 → 0.357; §4).</li>
+<li>Their contrastive decoder reaches LAMBADA 0.43, against 0.54 for the small single-stream model on Llama-3.2-3B (Table 5).</li>
+<li>Scope: models up to 8B, context up to 512.</li>
+<li><strong>Not ranked:</strong> model internals and inference efficiency, with no agent experiments and nothing BQAA can measure from traces. If it were ever served, one forward pass would serve two requests, and per-request token and latency attribution would need a new rule. That is far off.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.30216">2609.30216</a> Jev in the Wild (Sun Yat-sen, CUHK; 11 pp, full read).</strong></li>
+<li>A census of 2,170 public GitHub projects as of Sep 22, including 1,865 new repos in Jev's first week.</li>
+<li>Decision purposes: attribute judgment in 77% of projects, scoring 52%, action selection 31%, outcome judgment 20%, content filtering 15%, and model or tool selection 13%.</li>
+<li>Interfaces: Choice appears in 81.0% of projects, Noul in 72.2% and Score in 45.4%; 36.8% use all three (Figs. 2–3).</li>
+<li><strong>Not ranked:</strong> a GPT-6 Luna Max agent decided inclusion and labels, checked only by a second agent, with no human validation. Stars stand in for demand, and it is a one-week snapshot.</li>
+<li><strong>Useful context:</strong> a decision-event schema must carry all three answer types, because most projects mix them.</li>
+</ul>
+<p><strong>Not full-read (so not rankable):</strong></p>
+<ul>
+<li>Hugging Face Sep 25 additions from the packs:</li>
+<li><a href="https://arxiv.org/abs/2609.29362">2609.29362</a>: part-of-speech categories in SAE latents.</li>
+<li><a href="https://arxiv.org/abs/2609.30233">2609.30233</a>: Claude Code and Codex as program synthesizers for robot task-and-motion planning.</li>
+<li><a href="https://arxiv.org/abs/2609.28811">2609.28811</a>: DeltaWAM robotics.</li>
+<li>None is analytics work.</li>
+<li>The 0034 scouted list is otherwise unchanged.</li>
+</ul>
+<h2>Six-week EV (through ~Nov 6)</h2>
+<ul>
+<li><strong>OTel GenAI telemetry settles on the producer side in Python (medium-high).</strong></li>
+<li>In one release, python-genai 1.2b0 fixed status, scope, the conversation join key and metric names. Core 1.45.0 now allows structured attribute values, but util-genai still writes messages to spans as JSON strings.</li>
+<li>Expect a follow-up that puts structured <code>gen_ai.input.messages</code> on spans, and matching work in JS.</li>
+<li>For BQAA: version-aware mappings (scope names, metric names, cancellation meaning), and a structured-attribute path in ingestion before producers switch.</li>
+<li><strong>Silent truncation and dropping become visible (medium).</strong></li>
+<li>This slot alone had six cases:<ul>
+<li>the Cloudflare 28 KiB drop, now a sized marker;</li>
+<li>the OTel 64 MiB client-side drop;</li>
+<li>Opik dropping usage for empty Gemini replies;</li>
+<li>LangSmith missing traces for one Claude SDK API;</li>
+<li>Mastra counting reasoning twice;</li>
+<li>python-genai spans that held request attributes only.</li>
+</ul>
+</li>
+<li>Expect more &quot;sized omission&quot; markers.</li>
+<li>For BQAA: a per-session completeness score (spans expected against spans received, omission markers counted, usage present on every model call, reasoning counted once).</li>
+<li><strong>Decision models as monitors (medium).</strong></li>
+<li>RLCDAlignBench shows that ranking transfers and thresholds do not.</li>
+<li>Langfuse, LangSmith and Phoenix already offer Jev as an evaluator model, PydanticAI and DSPy expose its probabilities, and Opik is wiring scores into review queues (#8462).</li>
+<li>Expect per-project threshold fitting and &quot;escalate when unsure&quot; features.</li>
+<li>For BQAA: store probabilities, model versions and the fields the detector saw.</li>
+<li><strong>Watch list (none shipped this slot):</strong></li>
+<li>Codex 0.158 stable.</li>
+<li>Mastra 1.72.0 stable, carrying the durable-engine redaction fixes, #25107 and the Langfuse reasoning fix.</li>
+<li>A Cloudflare Agents release with #2366.</li>
+<li>Opik 2.2.81 with #8555 and #8462.</li>
+<li>LiteLLM 1.104 stable, with <code>gen_ai.conversation.id</code>, the Presidio fix and the Langfuse v4-over-OTel callback.</li>
+<li>The next python-genai release, which may put structured messages on spans.</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>OTel Python GenAI 1.2b0:</strong> join sessions on <code>gen_ai.conversation.id</code>; treat pre-1.2b0 cancellations as unknown, not success; alias the old and new scope and duration-metric names.</li>
+<li><strong>Langfuse 4.45.3 (progress):</strong> record the judge model version on every score, because evaluators pinned to <code>jev-1.13.0</code> looked unconfigured.</li>
+<li><strong>Codex alpha.14 (progress):</strong> runtime-only grants no longer raise stdin approvals, so approval-rate series will step; <code>PluginSummary.extensions</code> is gone from the app-server protocol.</li>
+<li><strong>2609.29429 RLCDAlignBench:</strong> log each turn's relational reference, store probabilities rather than labels, fit thresholds per evaluation set, and route low-confidence decisions to review.</li>
+<li><strong>NOTE cluster (Cloudflare, Opik, Mastra, LangSmith, LiteLLM):</strong> add a per-session completeness check covering omission markers, usage on every model call and reasoning counted once. Where Presidio masking guards streamed Anthropic traffic, keep LiteLLM off prerelease 1.104.0-dev.2.</li>
+</ul>
+<h2>Housekeeping</h2>
+<p><strong>Slot and inputs</strong></p>
+<ul>
+<li><strong>Slot:</strong> miss-watch catch-up. There was no <code>2026-09-25-0634-*</code> file in the hub <code>research/briefs/</code> or the research <code>briefs/</code> directory when this run started (~06:52 PT; first clock read 06:53:29 PT). The label is kept at <strong>0634</strong>.</li>
+<li><strong>Packs used (6, all PACK_DONE):</strong> Agy 0032, Muse 0132, DSH 0232, Agy 0332, Muse 0432 and Agy 0632.</li>
+<li>Agy 0032's window (06:46–07:44Z) is mostly before the 0034 publish. Its Mastra #25078 and #25079 were already NOTEd at 0034. Only OpenHands #16699 and LiteLLM #43008 were net-new, and both are NOTE-level.</li>
+<li><strong>Gap: DSH 0532 is ABSENT.</strong> There is no pack, no prompt copy (<code>packs/dsh-prompt-2026-09-25-0532.md</code>), no grok-tmux log and no <code>/tmp/dsh-collect-20260925-0532/</code> directory, so the run never launched. Agy 0632 bridged the window from Muse 0432's as-of (11:40Z → 13:46Z, 126 min). Nothing was invented.</li>
+<li><strong>Vault twins:</strong></li>
+<li>The DSH 0232 twin is now in <code>Hunt/agent-analytics/</code>; it was copied after that run.</li>
+<li>The <strong>DSH 2332 twin is still only at <code>/tmp/dsh-collect-20260924-2332/outbox/</code></strong>. The follow-up from 0034 remains open.</li>
+<li><strong>Social and other sources:</strong> X 401, Reddit 403, LinkedIn 302 and Papers with Code 302 are the packs' labels; I did not re-probe them. Medium was not used.</li>
+</ul>
+<p><strong>Verified arXiv ceiling: <code>2609.30268</code></strong></p>
+<ul>
+<li><strong>Probed at 14:01Z:</strong> 30266–30268 return 200. 30269–30273, 30275, 30280, 30290, 30300, 30350, 30400, 30500 and 31000 return 404.</li>
+<li>This matches all six packs. There is no mailing on Friday or Saturday evenings.</li>
+<li><strong>Priority pin <code>2609.02702</code>:</strong> base 200 / v1 200 / v2 404. Intact, and not re-carded.</li>
+</ul>
+<p><strong>HN</strong></p>
+<ul>
+<li>The helper outputs for all six packs report hits=0.</li>
+<li><strong>My own re-run at ~14:03Z</strong> (since 08:00Z; the same six quoted queries and the same threshold) found 0 stories above threshold.</li>
+<li><strong>Sanity check:</strong> the raw <code>&quot;MCP&quot;</code> query had 2 stories below threshold, so the API works.</li>
+<li><strong>HN: hits=0 keep=0.</strong></li>
+</ul>
+<p><strong>Pack corrections</strong></p>
+<ul>
+<li><strong>All packs missed OTel Python GenAI 1.2b0</strong> (Thu 16:36Z) and <strong>OTel Python 1.45.0 / contrib 0.66b0</strong> (today 12:32Z). The <code>open-telemetry/*</code> repos are not on the collectors' watchlist.</li>
+<li><strong>Suggestion:</strong> add <code>open-telemetry/opentelemetry-python-genai</code>, <code>open-telemetry/opentelemetry-python</code> and <code>-contrib</code> (GitHub), and <code>opentelemetry-util-genai</code> (PyPI).</li>
+<li><strong>Muse 0132 on LiteLLM #43023:</strong> it called this an edge-case repair. The PR body says every PII entity reached the client in the clear, but only on prerelease 1.104.0-dev.2. I checked #42777 with the compare API against v1.98.1 through v1.104.0-dev.2.</li>
+<li><strong>Muse 0432 on 2609.29429:</strong> the numbers match the paper. The 63× figure is pooled at list prices; the paper's conservative repricing gives 12.1× pooled and 3.3× at the median.</li>
+<li><strong>Agy 0632 on 2609.29845:</strong> &quot;concurrent tool planning&quot; is the pack's speculation. The paper tests models up to 8B on language-modeling benchmarks only, with no agent experiments.</li>
+<li><strong>DSH 0232 on pydantic-ai #8658:</strong> confirmed as NOTE only (no public surface, no telemetry change).</li>
+</ul>
+<p><strong>Verification method</strong></p>
+<ul>
+<li><strong>Industry:</strong></li>
+<li>GitHub API: release objects for 55 repos since 06:40Z, and the main-branch commit tail for the same 55 repos since 13:40Z.</li>
+<li>Compare API: Codex alpha.13…alpha.14 (9 commits), and LiteLLM #42777's merge commit against 7 tags.</li>
+<li>Registries: PyPI JSON for 60 packages and npm <code>time</code>/<code>dist-tags</code> for 60 packages, since 07:40Z.</li>
+<li>PR bodies read:<ul>
+<li>Langfuse #17901, #17904, #17905, #17915, #16375, #17850.</li>
+<li>Codex #48073, #48072, #48060, #48078, #48035, #48015.</li>
+<li>Cloudflare #2366.</li>
+<li>Opik #8462, #8555.</li>
+<li>Mastra #24939, #25107.</li>
+<li>OpenHands #17677, #17683.</li>
+<li>LangSmith #3576.</li>
+<li>mem0 #6564, #6580, #6547.</li>
+<li>pydantic-ai #8658.</li>
+<li>LiteLLM #43023.</li>
+<li>OTel #5266, #5369.</li>
+<li>python-genai #520, #632, #616, #726, #377.</li>
+</ul>
+</li>
+<li>Title and merge metadata only (fetched, body not read): Langfuse #17929; Codex #48077; Opik #8533, #8542, #8545; Mastra #25078, #25079, #24952; mem0 #6578 (the TypeScript twin of #6564); pydantic-ai #8775; LiteLLM #43008, #42777. OTel #5509, #5511, #5512, contrib #4903, #4615 and the other python-genai PRs are cited from their release notes.</li>
+<li>Release notes: 13 python-genai 1.2b0 releases, OTel 1.45.0, contrib 0.66b0 and Logfire 5.1.1.</li>
+<li>Source at the tag: util-genai 1.2b0 <code>_invocation.py</code> and <code>_inference_invocation.py</code> (how messages are encoded on spans).</li>
+<li><strong>Academy:</strong></li>
+<li>arXiv abs pages for 3 candidates (titles, authors, v1 dates, abstracts).</li>
+<li>3 PDFs extracted with <code>pdftotext</code> to <code>/tmp/fb0634/pdf/</code> and read in full; every quoted number was checked against the cited table or section.</li>
+<li>The code repo <code>sumleo/RLCDAlignBench</code> was checked on the GitHub API.</li>
+<li><strong>Search:</strong> no web search. The HN Algolia re-run is described above.</li>
+</ul>
+<p><strong>Excluded by rule:</strong></p>
+<ul>
+<li>No first-party BQAA content. ADK had nothing to note.</li>
+<li>No Desk section and no GTM content.</li>
+<li>Crustdata and Fable were not used, and Medium was not cited.</li>
+<li>No re-admission of the 0034, 1834, 1234 or 0634 (Thu) sets. The priority pin was not re-carded.</li>
+<li>This writer made no Jev calls. The Jev shadow gates are Collection's call sites.</li>
+</ul>
+<p><strong>Run limits:</strong></p>
+<ul>
+<li><strong>Volume:</strong> 2 ranks, 2 progress notes, about 16 NOTE lines and 5 scouted lines, within 50.</li>
+<li><strong>Re-attempts (2):</strong> two shell commands were re-run after zsh treated <code>=====</code> and an unquoted <code>?</code> as expansions.</li>
+<li><strong>Other:</strong> $0 spent on paid APIs, 0 external messages, no background jobs.</li>
+</ul>
+<p><strong>Catalog:</strong></p>
+<ul>
+<li>413 / 102 / 104, read-only and untouched by me.</li>
+<li>Expected after publish: <strong>415 items / 103 briefs / 105 runs</strong> (+1 Industry, +1 Academy).</li>
+<li>The Langfuse and Codex progress notes update existing cards and add no items.</li>
+</ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW items (2):</strong></p>
+<ol>
+<li><strong>id:</strong> <code>otel-python-genai-1-2b0-cancellation-errors-own-scope-conversation-id</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Industry</li>
+<li><strong>title:</strong> OpenTelemetry Python GenAI instrumentations 1.2b0 (13 packages) — cancelled calls now recorded as failures, telemetry under each instrumentation's own scope, <code>gen_ai.conversation.id</code> carried into nested spans, <code>gen_ai.invoke_agent.duration</code> / <code>gen_ai.execute_tool.duration</code> metrics, cache-write and reasoning token fields; first DSPy, Bedrock and LlamaIndex packages</li>
+<li><strong>URL:</strong> https://github.com/open-telemetry/opentelemetry-python-genai/releases/tag/opentelemetry-util-genai%3D%3D1.2b0</li>
+<li><strong>card text:</strong> PyPI 16:36–16:38Z and GitHub 16:40–16:47Z on Thu Sep 24; missed by the 1234, 1834 and 0034 briefs. Before 1.2b0, a cancelled call exported as a success (status UNSET, no <code>error.type</code>), or was never exported where a package used its own exception handler (#520, #656). Telemetry now carries each package's own scope instead of <code>opentelemetry.util.genai.handler</code> (#632), and <code>gen_ai.conversation.id</code> rides the context into nested chat spans, for example from an OpenAI Agents <code>group_id</code> or a LangChain <code>thread_id</code> (#726, #474). Agent frameworks record <code>gen_ai.invoke_agent.duration</code> and <code>gen_ai.execute_tool.duration</code> instead of <code>gen_ai.client.operation.duration</code> (#616). Tool definitions are dropped when content capture is off (#377), and retrieval spans keep IDs and scores only.</li>
+</ul>
+<ol start="2">
+<li><strong>id:</strong> <code>arxiv-2609-29429-just-ask-jev-rlcdalignbench-zero-shot-alignment-detector</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Just Ask Jev (RLCDAlignBench) — one generic Jev question ranks ten alignment-failure types at median AUROC 0.886 across 31 benchmarks; wording adds +0.006 out of sample while what the logged state contains decides detection; thresholds do not transfer (per-benchmark ECE 0.168 vs 0.074), ten labels recover most F1; $0.30 vs $18.96 for judges at list prices (3.3× median when repriced)</li>
+<li><strong>arXiv:</strong> 2609.29429 — https://arxiv.org/abs/2609.29429</li>
+<li><strong>card text:</strong> 44 benchmarks, 7,193 instances from five 2–7B targets, <code>jev-1.13.0</code>, with split-half selection to remove search inflation and 49 paired context ablations. Soft probabilities beat argmax and thresholded rubrics (−0.137 AUROC for rubrics), and deployable context helped on only 1 of 4 benchmarks, while label-defining fields gave the big gains. On StrongREJECT, Jev matches the reference judge's agreement with humans (κ 0.809 vs 0.811), and its confident disagreements exposed label defects in three benchmarks. Caveats: one Jev version, small targets, mostly scorer labels, one-reader audit.</li>
+</ul>
+<p><strong>Progress (2):</strong></p>
+<ul>
+<li><strong>parent:</strong> <code>langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown</code></li>
+<li><strong>text:</strong> Langfuse v4.45.3 (GH 09:19Z) and v4.45.4 (09:41Z, chore). #17905 fixes decision-model evaluators saved with <code>jev-1.13.0</code>, which showed an empty picker and &quot;looked unconfigured&quot; after <code>jev-latest</code> became the only default. #17915 dedupes the picker, #17901 rejects TypeSafe base URLs ending in <code>/systemone</code> or carrying a query string, and #16375 now logs (sanitized) which public key failed an API-key lookup.</li>
+<li><strong>parent:</strong> <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code></li>
+<li><strong>text:</strong> Codex rust-v0.158.0-alpha.14 (GH 12:51Z, npm <code>alpha</code> 13:06Z; <code>latest</code> still 0.157.0), 9 commits since alpha.13. #48073 stops runtime-only filesystem grants (for example, plugin metrics) from triggering <code>write_stdin</code> approval. #48060 dedupes instructions across Guardian reviews and classifies restored evidence as context, not user authorization. #48035 removes <code>PluginSummary.extensions</code> from the app-server protocol.</li>
+</ul>
+<p><strong>Headline claims (for citation checks):</strong></p>
+<ol>
+<li>Before opentelemetry-util-genai 1.2b0, a cancelled GenAI operation was exported with span status UNSET and no <code>error.type</code>, &quot;indistinguishable from one that completed&quot;; 1.2b0 records it as a failure. — https://github.com/open-telemetry/opentelemetry-python-genai/pull/520 (merged 2026-09-04; released in 1.2b0 on 2026-09-24)</li>
+<li>A single generic Jev question reached a median AUROC of 0.886 across 31 alignment-failure benchmarks zero-shot, while targeted wording added only +0.006 out of sample. — https://arxiv.org/abs/2609.29429 (submitted 2026-09-24; §4.1–4.2, Tables 6 and 8)</li>
+<li>With <code>storeTools</code> enabled, Cloudflare Agents silently dropped tool payloads over its 28 KiB trace-attribute limit; #2366 replaces the drop with base64 redaction or an explicit <code>omitted</code> marker that records the size. — https://github.com/cloudflare/agents/pull/2366 (merged 2026-09-25; unreleased)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 25 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
