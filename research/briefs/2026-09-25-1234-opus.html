@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-25 · 12:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="Opik 2.2.81 duration/cost fixes; Weave 0.53.11 transcript order + OTel cap; Academy 2609.29454 skills loading + 2609.30074 eval reproducibility.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-25-1234-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 PM PT · Late primary wake (~12:43 PT; label kept 1234)</p>
+    <article>
+<h1>Field Brief — 2026-09-25-1234: Evaluation data that was quietly wrong, now in shipped releases, and two papers on what an evaluation must log to be checkable</h1>
+<p>Before Opik 2.2.81, a judge rule meant for slow traces ran on every trace, and models from 19 providers were recorded at $0. Before Weave 0.53.11, a transcript rebuilt from spans could show the answer before the tool call, and a judge reading those transcripts flagged false success claims on 12 of 31 traces. mem0 recorded memory writes that never reached the store. Weave also stopped working on fresh installs when OpenTelemetry Python 1.45.0 removed two private attributes it used. On the research side, one paper finds that agent skills only help when the agent actually loads them: Codex with GPT-5.5 loaded skills in 40 of 40 audits, Claude Code with Opus-4.8 in 0 of 40. A second paper audits its own evaluation and finds that only the bottom of its ranking survives resampling.</p>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>), the primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-25-1234</strong> (official 6h slot, 12:34 PM PT Fri Sep 25, 2026). The primary cron woke late (~12:43 PT). This run's first clock read was 12:46:12 PT (19:46:12Z). The label stays <strong>1234</strong>.
+<strong>Evidence window:</strong> from the 0634 brief's last probes (~14:05Z) to this run's last probes (~20:08Z). Between 19:47Z and 20:08Z I re-probed GitHub (release objects and dated tags for 65 repos), PyPI (56 packages), npm (47 packages), arXiv abs pages, the Thursday arXiv listings for six categories, the Hugging Face daily lists and HN Algolia myself. I read 3 PDFs in full and re-checked a fourth.</p>
+<ul>
+<li><strong>Source packs used (4, all PACK_DONE):</strong> Agy 0932, Muse 1032, DSH 1132 and Agy 1232. <strong>Muse 0732 and DSH 0832 are ABSENT</strong> (see Housekeeping).</li>
+<li><strong>Catalog baseline:</strong> <strong>415 items / 103 briefs / 105 runs</strong>, SHA-256 <code>338e83fb…6d41fd671b</code>, read-only. The newest brief is <code>2026-09-25T0634</code>.</li>
+</ul>
+<p><strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call. Collection owns the HTML, the catalog and the push.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: no new Industry rank, 2 new Academy ranks, 7 Industry progress notes, and a NOTE list.</strong> Seven watched products shipped releases in this window. All of them are incremental releases or prereleases on product lines the catalog already carries. The one genuinely new product surface, Langfuse skill management, is still gated to Langfuse's internal staff. So nothing earns an Industry rank. But several releases fix evaluation and telemetry data that was wrong without anyone being told, and that is the story of the slot.</p>
+<p><strong>Theme 1: evaluation data that was quietly wrong, now fixed in shipped releases.</strong></p>
+<ul>
+<li><strong><a href="https://github.com/comet-ml/opik/releases/tag/2.2.81">Opik 2.2.81</a>:</strong></li>
+<li>An online evaluation rule stored its duration filter in seconds, exactly as typed, but the backend compared it against milliseconds. So <code>Duration &gt; 5</code> matched &quot;every trace slower than 5ms — effectively all of them&quot;, and an LLM-judge rule meant for the slow tail judged every trace (<a href="https://github.com/comet-ml/opik/pull/8544">#8544</a>).</li>
+<li>Models from 19 providers, including OpenRouter, Azure AI and Vercel AI Gateway, &quot;silently cost zero&quot;, because their price rows were dropped (<a href="https://github.com/comet-ml/opik/pull/8548">#8548</a>).</li>
+<li><strong><a href="https://pypi.org/project/weave/0.53.11/">Weave 0.53.11</a>:</strong> when two sibling spans started at the same instant, the one that ended last was listed first. A transcript then showed &quot;Script ran, done.&quot; ahead of the Shell call it described. A judge reading such transcripts &quot;reported a false success claim on 12 of 31 checked Cursor traces&quot; (<a href="https://github.com/wandb/weave/pull/7952">#7952</a>).</li>
+<li><strong><a href="https://github.com/mem0ai/mem0/releases/tag/v2.2.1">mem0 2.2.1</a>:</strong> when the vector store rejected records, <code>add()</code> still returned them as <code>ADD</code> events and wrote <code>ADD</code> history rows for memories that were never stored (<a href="https://github.com/mem0ai/mem0/pull/7066">#7066</a>).</li>
+<li><strong><a href="https://github.com/langchain-ai/langsmith-sdk/releases/tag/v0.14.1">LangSmith SDK 0.14.1</a>:</strong> the OTel export of LangChain runs carried no <code>gen_ai.tool.call.id</code> on tool spans and no <code>gen_ai.tool.definitions</code> on model spans (<a href="https://github.com/langchain-ai/langsmith-sdk/pull/3584">#3584</a>).</li>
+<li><strong><a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.2">Letta Code 0.33.2</a></strong> (no pack reported it): a workflow step that returned the wrong JSON shape &quot;quietly produc[ed] an empty list&quot; (<a href="https://github.com/letta-ai/letta-code/pull/4707">#4707</a>).</li>
+</ul>
+<p><strong>Theme 2: one dependency release broke a tracing SDK on fresh installs.</strong> OpenTelemetry Python 1.45.0 (noted at 0634) moved its OTLP/HTTP exporter onto a new transport and removed two private attributes. Weave read both. Every fresh <code>pip install</code> of weave 0.53.8–0.53.10 then failed in <code>weave.init()</code>. Weave's CI did not catch it, because it installs from a lockfile pinned to OTel 1.42.1. Weave 0.53.11 caps the exporter below 1.45. Logfire had already capped below 1.45. I found no other watched SDK that reads the removed attributes.</p>
+<p><strong>Theme 3: what an evaluation must log to be checkable.</strong></p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.29454">2609.29454</a></strong> measures skill use from session traces. Skills changed results only in the configuration that loaded them: Codex/GPT-5.5 loaded skills in 40 of 40 audits and gained +22.8% in detection. Claude Code/Opus-4.8 loaded none in 40. With a weaker backend model, every harness did worse with skills available.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.30074">2609.30074</a></strong> audits its own eight-model evaluation:</li>
+<li>Only the bottom of the ranking survives resampling.</li>
+<li>One undocumented merge rule moves the headline by 7.1 points.</li>
+<li>A hard 60-second client timeout produced a finding that two model families were &quot;inaccessible&quot;. The author withdrew that finding.</li>
+<li>Four of the eight model endpoints were retired within ten weeks, so the study can no longer be rerun.</li>
+</ul>
+<p><strong>What this means for BQAA (as the observer, not the source of truth):</strong></p>
+<ul>
+<li><strong>Check evaluation data on ingestion:</strong></li>
+<li>Store durations with their units.</li>
+<li>Flag model calls that have tokens but zero cost.</li>
+<li>When rebuilding a transcript from spans, break equal start times by end time or by an explicit sequence number.</li>
+<li>Join evaluator scores on evaluator ID, not score name.</li>
+<li>Treat a memory <code>ADD</code> as confirmed only when the store acknowledged it.</li>
+<li><strong>Log skills as events.</strong> Record when the skill list was shown to the model, when a skill was loaded (name and version), and when its resources were read. Compute skill effects only over sessions that actually loaded the skill.</li>
+<li><strong>For evaluation runs</strong>, record per call:</li>
+<li>finish reason, client timeout, token cap, model and endpoint ID;</li>
+<li>the raw output;</li>
+<li>the run date and campaign.</li>
+</ul>
+<p>Report how stable a ranking is under resampling next to the ranking itself.</p>
+<h2>Industry</h2>
+<p><strong>Screen used:</strong> a release-level move that ships a product capability, or a change to how agent telemetry, cost, evaluation or memory state is recorded. Unreleased main-branch commits are NOTE only. I checked every item against its primary release object, tag, registry entry, PR body or source at the tag, not against the pack summary.</p>
+<p><strong>Sweep results (my own, 19:47Z–19:59Z):</strong></p>
+<ul>
+<li><strong>GitHub release objects since 13:40Z (65 repos):</strong></li>
+<li>Langfuse <code>v4.46.0</code> (14:20:07Z)</li>
+<li>OpenHands <code>v1.24.0</code> (15:09:26Z)</li>
+<li>Opik <code>2.2.81</code> (15:35:46Z)</li>
+<li><strong>Letta Code <code>v0.33.2</code> (16:37:15Z); no pack reported this one</strong></li>
+<li>Codex <code>rust-v0.158.0-alpha.15</code> (17:33:04Z) and <code>rust-v0.159.0-alpha.1</code> (18:48:41Z)</li>
+<li>mem0 <code>v2.2.1</code> (17:35:20Z) and <code>ts-v3.3.1</code> (17:36:35Z)</li>
+<li>LangSmith SDK <code>v0.14.1</code> (17:37:45Z)</li>
+<li>Google ADK <code>v2.10.0</code> (19:00:05Z; first-party, NOTE only)</li>
+<li>Out of scope: Vercel AI <code>ai@6.0.292</code> / <code>ai@5.0.267</code> (19:43Z, gateway dependency bumps on the older v6 and v5 lines) and an OpenInference Java package.</li>
+<li><strong>Tags without a release object:</strong> Codex <code>rust-v0.159.0-alpha.2</code> (tag 19:07:43Z; the release lookup still returned 404 at 20:07Z, and npm <code>alpha</code> was still 0.159.0-alpha.1) and Weave <code>v0.53.11</code> (tag 18:35:41Z; Weave does not publish GitHub release objects).</li>
+<li><strong>PyPI since 13:40Z (56 packages):</strong> <code>opik</code> 2.2.81 (15:28:58Z), <code>letta</code> 0.33.2 (16:44:35Z; this is the Letta Code package), <code>mem0ai</code> 2.2.1 (17:36:07Z), <code>langsmith</code> 0.14.1 (17:38:05Z), <code>weave</code> 0.53.11 (18:47:35Z) and <code>google-adk</code> 2.10.0 (19:02:04Z). Nothing else.</li>
+<li><strong>npm since 13:40Z (47 packages):</strong></li>
+<li><code>@openai/codex</code> 0.158.0-alpha.15 (17:45Z), then 0.159.0-alpha.1 on the <code>alpha</code> tag (platform builds until 19:07Z). <strong><code>latest</code> is still 0.157.0.</strong></li>
+<li><code>@letta-ai/letta-code</code> 0.33.2 (16:28Z), <code>mem0ai</code> 3.3.1 (17:44Z) and <code>opik</code> 2.2.81 (15:32Z).</li>
+<li>Mastra alphas only: <code>@mastra/core</code> 1.72.0-alpha.1 (16:37Z). <code>latest</code> is still 1.71.0.</li>
+<li>Out of scope: <code>@anthropic-ai/claude-code</code> 2.1.283 and the Claude Agent SDK 0.3.283, both on the <code>next</code> tag.</li>
+<li>Flat: Langfuse JS, LangSmith JS, LangGraph, Cloudflare <code>agents</code>, OpenAI Agents JS and OTel JS.</li>
+<li><strong>The 0634 watch list:</strong></li>
+<li><strong>Opik 2.2.81 with #8555 and #8462 shipped.</strong> Queue routing ships switched off.</li>
+<li>Codex 0.158 stable did not ship; a 0.159.0-alpha line opened instead.</li>
+<li>Mastra 1.72.0 stable, a Cloudflare Agents release with #2366 and LiteLLM 1.104 stable (PyPI is still 1.102.1) did not ship.</li>
+<li>There was no new python-genai release.</li>
+</ul>
+<p><strong>Why there is no Industry rank:</strong></p>
+<ul>
+<li>Langfuse's skill management is real code, but its UI only renders for Langfuse staff (details below).</li>
+<li>Opik's new review-queue routing ships switched off.</li>
+<li>Everything else is an incremental release or prerelease on a line the catalog already carries.</li>
+</ul>
+<h3>Progress notes (update existing cards; no new card)</h3>
+<p><strong>1. Comet Opik <a href="https://github.com/comet-ml/opik/releases/tag/2.2.81">2.2.81</a></strong> → progress on <code>opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier</code> (the card that holds the 2.2.79 and 2.2.80 notes).</p>
+<ul>
+<li><strong>Clocks:</strong> PyPI 15:28:58Z, npm 15:32:40Z and GH 15:35:46Z. 24 PRs since 2.2.80.</li>
+<li><strong>Judge sampling was wrong by a factor of 1,000 (<a href="https://github.com/comet-ml/opik/pull/8544">#8544</a>).</strong></li>
+<li>A rule saved <code>Duration &gt; 5</code> as typed, and the backend compared it with milliseconds. In the PR's words, it &quot;matched every trace slower than 5ms — effectively all of them&quot;, so an LLM-judge rule meant for slow traces judged every trace.</li>
+<li>The dialog now converts both ways and labels the column <code>Duration (s)</code>.</li>
+<li>The same change fixes the Logs page, where <code>Duration = 16.1s</code> had always returned nothing: 16.1 × 1000 is 16100.000000000002 in floating point.</li>
+<li><strong>Cost was zero for 19 providers (<a href="https://github.com/comet-ml/opik/pull/8548">#8548</a>).</strong></li>
+<li><code>CostService</code> dropped every price row whose provider was missing from its mapping. So models from OpenRouter, Azure AI, Vercel AI Gateway, Cohere, watsonx, Replicate, Cloudflare and 12 others &quot;silently cost zero&quot;. Those providers are now registered.</li>
+<li>The PR notes that the mapping is an append-only literal, so the next batch of provider PRs will conflict the same way.</li>
+<li><strong>Shipped from the 0634 NOTE list:</strong></li>
+<li><a href="https://github.com/comet-ml/opik/pull/8555">#8555</a>: Gemini usage from the <strong>ADK</strong> integration is no longer dropped when <code>candidates_token_count</code> is missing.</li>
+<li><a href="https://github.com/comet-ml/opik/pull/8462">#8462</a>: routing scored traces into review queues. It ships <strong>off</strong>. I checked <code>config.yml</code> at the tag: <code>ANNOTATION_QUEUE_ROUTING_ENABLED:-false</code>.</li>
+<li><strong>Also in the release:</strong></li>
+<li>Streamed Bedrock tool calls and usage are kept (#8523, #8527), and so is streamed Mistral reasoning (#8376).</li>
+<li>Experiment comparison reads now cost one page, not the whole experiment (#8515).</li>
+<li>ClickHouse span reads are bounded (#8533, #8537).</li>
+<li><strong>NOTE:</strong> <a href="https://github.com/comet-ml/opik/pull/8570">#8570</a> adds a <code>tasks.kind</code> column (feature, bug, doc, investigation, other) to a session-analysis table for Comet's cost service. It is marked not user-facing.</li>
+<li><strong>TL;DR:</strong> Opik judge counts and costs from before 2.2.81 can be wrong in both directions. Duration-filtered rules over-sampled, and 19 providers read as free. Where BQAA compares cost across tools, flag model calls with tokens and zero cost.</li>
+</ul>
+<p><strong>2. W&amp;B Weave <a href="https://pypi.org/project/weave/0.53.11/">0.53.11</a></strong> → progress on <code>weave-claude-agent-sdk</code> (the card that holds the 0.53.10 note).</p>
+<ul>
+<li><strong>Clocks:</strong> version bump and tag at 18:35:41Z, PyPI at 18:47:35Z. There is no GitHub release object. The compare API shows 7 commits since 0.53.10.</li>
+<li><strong>Transcript order misled a judge (<a href="https://github.com/wandb/weave/pull/7952">#7952</a>; merged Sep 24).</strong></li>
+<li>In the example, a Cursor agent's <code>execute_tool</code> span (5 ms) and the <code>chat</code> span that reports its result (2 s) share one <code>started_at</code>. Weave listed the later-ending sibling first, so the transcript showed the assistant claiming completion before the script ran.</li>
+<li>The PR: &quot;A downstream judge fed this transcript saw the final message ahead of the call it describes and reported a false success claim on 12 of 31 checked Cursor traces.&quot;</li>
+<li>Siblings now sort earliest-ended first.</li>
+<li><strong>Fresh installs broke on OpenTelemetry 1.45.0 (<a href="https://github.com/wandb/weave/pull/7956">#7956</a>).</strong></li>
+<li><code>opentelemetry-exporter-otlp-proto-http</code> 1.45.0 (PyPI 12:32Z today) removed <code>_session</code> and <code>_certificate_file</code>. Weave's <code>weave_init.py</code> used both, and its requirement allowed any version from 1.28.0. So <code>weave.init()</code> raised <code>AttributeError</code> on a fresh install.</li>
+<li>The PR's table: 0.53.8–0.53.10 fail on the first <code>weave.init()</code> (&quot;yank&quot;). 0.53.1–0.53.7 fail when <code>weave.init()</code> switches to another project in the same process (&quot;yank recommended&quot;).</li>
+<li>Weave's CI installs from <code>uv.lock</code>, which pins 1.42.1, &quot;so CI never saw 1.45.0&quot;.</li>
+<li>0.53.11 requires <code>&lt;1.45,&gt;=1.28.0</code>; I checked <code>requires_dist</code> on PyPI. The PR calls this a quick fix and says the proper fix, dropping the private attributes, will be a separate PR.</li>
+<li><strong>At 20:07Z, no 0.53.x release on PyPI was yanked.</strong></li>
+<li><strong>SDK identity moves (<a href="https://github.com/wandb/weave/pull/7953">#7953</a>).</strong> Python and Node spans now carry <code>wandb.sdk.name</code>, <code>wandb.sdk.version</code> and <code>wandb.sdk.language</code> on their OTel resource. These replace Node's <code>weave.sdk.*</code> keys, so consumers of those keys must migrate.</li>
+<li><strong>Context I checked myself:</strong></li>
+<li>OTel classed the exporter refactor (<a href="https://github.com/open-telemetry/opentelemetry-python/pull/5389">#5389</a>, merged Aug 12) as a non-breaking feature. At the v1.45.0 tag the public constructor still accepts <code>session=</code>. Only code that reached into private attributes broke.</li>
+<li>Version caps differ:<ul>
+<li>Logfire 5.1.1 already requires <code>&lt;1.45.0</code>.</li>
+<li>Langfuse 4.15.6, Traceloop 0.62.3 and OpenLIT 1.45.0 allow anything below 2.</li>
+<li>Phoenix OTel and LangSmith set no upper bound.</li>
+</ul>
+</li>
+<li>GitHub code search found no use of the removed attributes in Langfuse Python, OpenLLMetry or OpenLIT. The Phoenix and Logfire hits were unrelated variables, LDAP code or tests. The search hit its rate limit before the LangSmith, Opik, MLflow, Sentry, OpenInference and Weave repos.</li>
+<li><strong>So Weave is the only watched SDK I found broken.</strong></li>
+<li><strong>TL;DR:</strong></li>
+<li>When BQAA or a judge rebuilds a transcript from spans, break equal start times explicitly. An ordering error becomes a false &quot;claimed success&quot; finding.</li>
+<li>Any SDK BQAA ships alongside OTel should cap exporter versions and test a fresh install, not only the lockfile.</li>
+</ul>
+<p><strong>3. mem0 <a href="https://github.com/mem0ai/mem0/releases/tag/v2.2.1">v2.2.1</a> + <a href="https://github.com/mem0ai/mem0/releases/tag/ts-v3.3.1">ts-v3.3.1</a></strong> → progress on <code>mem0-v2-2-0-ts-v3-3-0-user-profiles-async-idempotent-jobs</code>.</p>
+<ul>
+<li><strong>Clocks:</strong> GH 17:35:20Z and 17:36:35Z; PyPI <code>mem0ai</code> 2.2.1 at 17:36:07Z; npm <code>mem0ai</code> 3.3.1 at 17:44:47Z.</li>
+<li><strong>Writes that never happened (<a href="https://github.com/mem0ai/mem0/pull/7066">#7066</a>; merged Sep 24).</strong></li>
+<li>When a batch insert failed and record-by-record retry also failed, <code>add()</code> still returned <code>{&quot;event&quot;: &quot;ADD&quot;}</code> for the rejected memories. It also wrote <code>ADD</code> history rows for them and linked them to entities.</li>
+<li>Now only stored records are returned and recorded. If nothing was stored, <code>add()</code> raises <code>VectorStoreError</code>.</li>
+<li><strong>Ships the fixes NOTEd at 0634:</strong></li>
+<li>Turbopuffer filters read only <code>gte</code>/<code>lte</code> and silently dropped every other operator, so queries ran unfiltered. All operators now apply, and an unsupported one raises an error (#6564, #6578).</li>
+<li>Squared euclidean distance became a negative score, which inverted ranking (#6559, #6580).</li>
+<li>S3 Vectors clamped euclidean scores to 0 (#6547).</li>
+<li><strong>Also:</strong> Bedrock reasoning-first replies no longer fail with a <code>KeyError</code> (#6369). The TypeScript SDK no longer points DeepSeek or xAI configs at OpenAI's URL and model (#7350).</li>
+<li><strong>TL;DR:</strong> mem0 memory history from before 2.2.1 can include <code>ADD</code> events for records the store rejected. Reconcile history against the store's IDs before using it as an audit trail.</li>
+</ul>
+<p><strong>4. LangSmith SDK <a href="https://github.com/langchain-ai/langsmith-sdk/releases/tag/v0.14.1">v0.14.1</a></strong> → progress on <code>langsmith-sdk-v0-14-0-agent-identity-otel-finish-reasons</code>.</p>
+<ul>
+<li><strong>Clocks:</strong> GH 17:37:45Z; PyPI 17:38:05Z. 8 commits since v0.14.0.</li>
+<li><strong>Tool identity was missing from the OTel export (<a href="https://github.com/langchain-ai/langsmith-sdk/pull/3584">#3584</a>; merged Sep 24).</strong></li>
+<li>LangChain stores the tool call ID in <code>extra.tool_call_id</code>, but the exporter only read <code>metadata.tool_call_id</code>. So tool spans carried no <code>gen_ai.tool.call.id</code>, and model spans carried no <code>gen_ai.tool.definitions</code>.</li>
+<li>Both are now sent. The definitions go out &quot;in the provider's own format, unchanged. No normalization for the time being.&quot;</li>
+<li><strong>Also:</strong></li>
+<li><a href="https://github.com/langchain-ai/langsmith-sdk/pull/3576">#3576</a> (NOTEd at 0634) traces <code>ClaudeSDKClient.receive_messages()</code>.</li>
+<li>#3593 adds verifiers for signed sandbox user tokens and callbacks.</li>
+<li><strong>TL;DR:</strong></li>
+<li>LangChain runs exported through LangSmith's OTel mode before 0.14.1 cannot join a tool result to its call by ID. Fall back to name and order for that data.</li>
+<li>Tool definitions arrive in each provider's own shape, and OTel python-genai 1.2b0 omits them when content capture is off. Treat the attribute as optional and normalize it before comparing.</li>
+</ul>
+<p><strong>5. Langfuse <a href="https://github.com/langfuse/langfuse/releases/tag/v4.46.0">v4.46.0</a></strong> → progress on <code>langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown</code>. This is the 4.45.x line card that already holds the 4.45.2–4.45.4 notes.</p>
+<ul>
+<li><strong>Clock:</strong> GH 14:20:07Z (tag 14:17:33Z). I read the PR bodies of #17803, #17929, #17954 and #17938, and #17803's file patches.</li>
+<li><strong>Skill management (<a href="https://github.com/langfuse/langfuse/pull/17803">#17803</a>), not yet customer-facing.</strong></li>
+<li>It adds project-scoped skills with immutable versions, content-addressed files, labels (<code>production</code>, <code>latest</code>), tags and audit logging. It exposes them through <code>/api/public/unstable/skills</code> and four MCP read tools. <code>loadSkill</code> &quot;defaults to production&quot;.</li>
+<li>The UI is wrapped in <code>SkillsFeatureGate</code>, which renders only when <code>useInternalFeaturesEnabled()</code> is true: an admin with the internal-features preference.</li>
+<li>This corrects Agy 0932, which called it a &quot;major release&quot; and Langfuse's move &quot;into active agent configuration&quot;.</li>
+<li><strong>Experiment comparison (<a href="https://github.com/langfuse/langfuse/pull/17929">#17929</a>):</strong> side by side is now the default. The collapsible summary is &quot;calculated from the items on the current page&quot;, so it describes the page, not the experiment.</li>
+<li><strong>Also:</strong> assistant runs follow data-retention settings (#17850, NOTEd at 0634), and trace playback is removed (#17927).</li>
+<li><strong>On main after the release (NOTE):</strong></li>
+<li><a href="https://github.com/langfuse/langfuse/pull/17954">#17954</a>: a decision-model evaluator writes one score per question, named after that question's <code>scoreName</code>. So &quot;View scores&quot;, which filtered on the evaluator's name, showed an empty table. It now filters on <code>evaluator_id</code>.</li>
+<li><a href="https://github.com/langfuse/langfuse/pull/17938">#17938</a>: native Rust batch encoding lands, but &quot;production ingestion is unchanged&quot;. The opt-in comes later in the stack (#17941).</li>
+<li><strong>TL;DR:</strong> join evaluator scores on evaluator ID, because one evaluator can write several differently named scores. Summary numbers in Langfuse's comparison view cover one page.</li>
+</ul>
+<p><strong>6. OpenAI Codex <a href="https://github.com/openai/codex/releases/tag/rust-v0.158.0-alpha.15"><code>rust-v0.158.0-alpha.15</code></a> → <a href="https://github.com/openai/codex/releases/tag/rust-v0.159.0-alpha.1"><code>rust-v0.159.0-alpha.1</code></a></strong> → progress on <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code> (the alpha line, the same parent as the 0634 alpha.14 note).</p>
+<ul>
+<li><strong>Clocks:</strong></li>
+<li>alpha.15: GH 17:33:04Z (release commit 16:24:54Z), npm 17:45Z.</li>
+<li>0.159.0-alpha.1: tag 17:50:16Z, GH release 18:48:41Z, npm <code>alpha</code> tag with platform builds until 19:07Z.</li>
+<li><code>rust-v0.159.0-alpha.2</code>: tag 19:07:43Z; no release object and no npm build at my check.</li>
+<li>npm <code>latest</code> is still 0.157.0, so <strong>0.158 never went stable</strong>.</li>
+<li><strong>Compare API:</strong></li>
+<li>alpha.14 → alpha.15: 17 commits.</li>
+<li>alpha.15 → 0.159.0-alpha.1: 5 commits.</li>
+<li>alpha.1 → alpha.2: 7 commits.</li>
+<li>Each alpha is cut with its own release commit, so every compare shows <code>behind_by: 1</code>. 0.159.0-alpha.1 does not contain everything in alpha.15.</li>
+<li><strong>alpha.15 contents:</strong></li>
+<li>An HTTP client for remote agent message boards (#48100).</li>
+<li>Guardian keeps recent user and assistant authorization context under one shared limit (#48098).</li>
+<li>Local compaction keeps multipart user messages intact (#48115).</li>
+<li>Early yielding for code-mode observations (#48123).</li>
+<li><strong>0.159.0-alpha.1 contents:</strong></li>
+<li><strong>Interruptible agents, opt-in.</strong> <a href="https://github.com/openai/codex/pull/48135">#48135</a> adds the <code>instant_interrupt</code> flag, &quot;disabled by default&quot;. New user input makes running code-mode <code>exec</code>/<code>wait</code> calls hand back their cell IDs &quot;without stopping the cells&quot;.</li>
+<li><a href="https://github.com/openai/codex/pull/48141">#48141</a> also interrupts request setup, streaming and retry backoff. It resets the WebSocket &quot;so the next request sends full history&quot;, and drops unfinished assistant text.</li>
+<li><a href="https://github.com/openai/codex/pull/48143">#48143</a>: MCP declarations owned by a remote executor keep their credential policy across reconnects. There is no fallback to the host's bearer token.</li>
+<li><strong>alpha.2 (tag only):</strong></li>
+<li><a href="https://github.com/openai/codex/pull/48174">#48174</a> adds <code>usage_limit_window_minutes</code> to turn and compaction analytics events, telling five-hour limits from weekly ones. It is <code>null</code> for other errors.</li>
+<li>#48155: approved commands keep their read denials.</li>
+<li>#48151: pagination anchors on items.</li>
+<li>On main after alpha.2, #48176 protects <code>.aws</code> under writable roots.</li>
+<li><strong>TL;DR:</strong> with <code>instant_interrupt</code> on, a tool cell can outlive the model step that started it, and a preempted request is re-sent with the full history. Join tool results by cell or call ID, not by step, and expect input-token jumps after interrupts.</li>
+</ul>
+<p><strong>7. Letta Code <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.2">v0.33.2</a></strong> → progress on <code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code>.</p>
+<ul>
+<li><strong>Clocks:</strong> npm 16:28:46Z, GH 16:37:15Z, PyPI <code>letta</code> 16:44:35Z. <code>letta-ai/letta-code</code> is on no collector watchlist, so no pack reported this release.</li>
+<li><strong>Wrong shape became an empty result (<a href="https://github.com/letta-ai/letta-code/pull/4707">#4707</a>).</strong></li>
+<li>A workflow expecting <code>findings</code> could receive <code>{bugs: [...]}</code>, which parsed, &quot;quietly producing an empty list&quot;.</li>
+<li><code>agent(prompt, {schema})</code> now validates the result. When validation fails for good, it returns <code>null</code> and records the details in progress and the journal.</li>
+<li><strong>Logging killed the agents (<a href="https://github.com/letta-ai/letta-code/pull/4696">#4696</a>).</strong></li>
+<li>A 26-hour Cloud conversation that dispatched 40+ subagents filled a 9.8 GB disk: 2.3 GB of remote session log plus 571 MB of debug log. Subagents died with <code>ENOSPC</code>.</li>
+<li>Logs now rotate at 10 MB and keep 10 files.</li>
+<li><strong>Schedules that vanished (<a href="https://github.com/letta-ai/letta-code/pull/4722">#4722</a>):</strong> managed Cloud sandboxes now use durable Cloud schedules. Before, a local schedule could disappear when the sandbox idled, and was recorded as missed after restart.</li>
+<li><strong>TL;DR:</strong> record a schema-validation failure as its own outcome. An empty result is not the same as nothing found.</li>
+</ul>
+<h3>NOTE (not ranked; recorded so the next brief can dedupe)</h3>
+<p>Unreleased unless marked. I read every PR body cited below.</p>
+<p><strong>Durability and correctness on main:</strong></p>
+<ul>
+<li><strong>Mastra <a href="https://github.com/mastra-ai/mastra/pull/25114">#25114</a></strong> (15:49Z) closes the gap the 0634 brief flagged in #25107.</li>
+<li>If the process died after a step finished but before the next one started, <code>restart()</code> ran the finished step again. For loops, <code>foreach</code>, parallel blocks and branches, it re-ran every item, &quot;so side effects and LLM calls get repeated&quot;.</li>
+<li>Restart now moves past that step when all of its saved results succeeded. <code>DurableAgent.recover()</code> publishes FINISH from the saved result.</li>
+<li>Agy 0932 described the fix as atomic journaling of step completion. The PR describes a change to how restart reads the checkpoint.</li>
+<li><strong>Other Mastra fixes:</strong></li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25075">#25075</a>: a Zod v4 structured-output schema lost its <code>properties</code> between durable steps. OpenAI rejected the next call, and on recovery the run &quot;succeeds&quot; with <code>object: null</code>.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25123">#25123</a>: stored agents accepted <code>{&quot;durable&quot;: true}</code> and silently dropped it.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25162">#25162</a>: two concurrent streaming follow-ups to an A2A task waiting for input started duplicate runs with the same <code>runId</code>.</li>
+<li>npm <code>latest</code> is still 1.71.0.</li>
+<li><strong>Mastra trace aggregation:</strong></li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25124">#25124</a> adds the <code>aggregateTraces(plan)</code> storage contract and a <code>trace-aggregate</code> capability. Stores that lack it fail closed.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25016">#25016</a> adds a reference evaluator and 13 hand-derived conformance cases. Null is a real group value, empty buckets are omitted, nulls sort last and percentiles interpolate linearly.</li>
+<li>No database implements it yet.</li>
+<li><strong>OpenAI Agents Python</strong> (the release is still v0.22.3):</li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/5090">#5090</a>: a file-backed <code>SQLiteSession</code> kept one connection per exited worker thread. After 30 turns that was 30 connections and +61 file descriptors, until the process ran out.</li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/5061">#5061</a>: one transient 5xx no longer kills an MCP Streamable HTTP connection for good.</li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/5174">#5174</a>: <code>**kwargs</code> tools reject flat payloads that Pydantic used to discard silently.</li>
+<li><strong>crewAI <a href="https://github.com/crewAIInc/crewAI/pull/7677">#7677</a>:</strong></li>
+<li>Provider throttles are retried with bounded backoff at the client, without spending the agent's own retries.</li>
+<li>Throttles are no longer treated as context overflow, so a rate-limited request is never summarized.</li>
+<li>Streaming calls are retried only before any partial output.</li>
+<li><strong>LiteLLM <a href="https://github.com/BerriAI/litellm/pull/43126">#43126</a>:</strong> on <code>/v1/messages</code> for models bridged through the Responses API, a 429, a 500 or a timeout ended the stream as HTTP 200 with a lone <code>message_start</code>. Claude Code then &quot;retries blind&quot;. These now become Anthropic <code>error</code> events. PyPI <code>litellm</code> is still 1.102.1.</li>
+<li><strong>PydanticAI <a href="https://github.com/pydantic/pydantic-ai/pull/8755">#8755</a>:</strong> on OpenAI, Azure and xAI realtime sessions, a forcing <code>tool_choice</code> applies to the whole session. <code>gpt-realtime-mini</code> &quot;called the tool again after every result until <code>request_limit=6</code> ended the session&quot;. It now raises <code>UserError</code> before connecting. <a href="https://github.com/pydantic/pydantic-ai/pull/8390">#8390</a> adds <code>OpenAILiveModel</code>, in which the spoken model hands the work to a backend model.</li>
+</ul>
+<p><strong>Released, but below the bar:</strong></p>
+<ul>
+<li><strong>OpenHands <a href="https://github.com/OpenHands/OpenHands/releases/tag/v1.24.0">v1.24.0</a></strong> (GH 15:09Z):</li>
+<li>OAuth MCP credentials survive cloud saves (#17677, NOTEd at 0634).</li>
+<li>Failed messages survive a history reload (#17647).</li>
+<li>A saved profile that points at a removed model now shows &quot;Model not listed&quot; (#17675).</li>
+<li>Shared automation conversations open read-only (#17683).</li>
+<li>If Collection wants to keep the version chain, the parent is <code>openhands-v1-21-0-remote-docker-execution-workspaces</code>.</li>
+<li><strong>Google ADK <a href="https://github.com/google/adk-python/releases/tag/v2.10.0">v2.10.0</a></strong> (PyPI 19:02Z; <strong>first-party, NOTE only</strong>):</li>
+<li>Experimental skill lifecycle (<code>ADK_ENABLE_SKILL_LIFECYCLE=1</code>) and a <code>SkillDiscoveryMode</code> for how the skill list is shown to the model.</li>
+<li>Evaluation metrics for duration, tokens and model calls.</li>
+<li><strong>Span-shape changes:</strong> tool calls are now traced under the agent, not the model call (83d966c). A streamed model call is traced once, not once per chunk (733162e). Joins across ADK versions should expect a parent change.</li>
+<li><strong>OpenTelemetry Python 1.45.0</strong> was NOTEd at 0634. What is new today is Weave's breakage (progress note 2).</li>
+<li><strong>Codex on main after alpha.2:</strong> #48176 (<code>.aws</code> protected) and #48190 (message-board SSE frames bounded before parsing).</li>
+</ul>
+<h2>Academy</h2>
+<p><strong>Screen used:</strong> agent evaluation, cost, security or oversight evidence that produces a result BQAA could measure or log. Every rank below was read in full before ranking.</p>
+<p><strong>Coverage:</strong></p>
+<ul>
+<li><strong>No new arXiv mailing since the 0034 brief.</strong> The ceiling is still <code>2609.30268</code> (probed 19:54Z). The next mailing is Sunday 20:00 ET.</li>
+<li><strong>So I went back through the whole Thursday mailing.</strong> I pulled the listings for cs.AI, cs.SE, cs.MA, cs.CL, cs.LG and cs.CR: 767 unique entries, including cross-lists and replacements. I checked them against every brief since Sep 20 and against the catalog.</li>
+<li><strong>Three new submissions on agent or evaluation measurement were in no brief and no catalog item:</strong> 2609.29454, 2609.30074 and 2609.29709. I read all three in full, and re-checked the carried 2609.29845.</li>
+<li><strong>Hugging Face daily lists:</strong> 29 papers for Sep 24 and 21 for Sep 25 at my check. Every entry was already judged by an earlier brief or is off-topic (vision, robotics, video, world models, one model technical report).</li>
+<li>The priority pin <code>2609.02702</code> (Trace-as-State v1) is intact and is <strong>not</strong> re-carded.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.29454">arXiv 2609.29454</a>: Demystifying Agent Skills for Smart Contract Auditing: Design, Effectiveness, Behavioral Impact</h3>
+<p><strong>Gao, Zhong, Chen, Wang, Wu</strong> (Lingnan University, PolyU, Zhejiang University, HKUST). Submitted 24 Sep 2026 (v1, cs.SE), 12 pages. The authors say they release the skill corpus and artifacts.</p>
+<p><strong>Full PDF read:</strong> §I–IX, Tables I–IX and Figs. 1–11.</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>Corpus:</strong> 155 candidate audit skills from six skill marketplaces, two GitHub collections and SkillsBench, as of 21 Apr 2026. After deduplication, 83 remain (Table I).</li>
+<li><strong>Benchmark:</strong> EVMBench (40 real audits, 120 known vulnerabilities).</li>
+<li><strong>Seven agent–model configurations</strong> (CLIs as of 28 May 2026):</li>
+<li>Each harness with its flagship model: Claude Code/Opus-4.8, Codex/GPT-5.5, Antigravity/Gemini-3.5-Flash and OpenCode/GLM-5.1.</li>
+<li>Claude Code, Codex and OpenCode, each on the same weaker model, DeepSeek-V4-Pro.</li>
+<li><strong>Setup:</strong></li>
+<li>Skills are installed globally, and the agent is never told to use them. Only each skill's name and description sit in context until the agent loads the full <code>SKILL.md</code>.</li>
+<li><strong>Activation is counted from session traces:</strong> a skill counts as used only when its <code>SKILL.md</code> is read (§VI-B).</li>
+<li><strong>Behavior measures:</strong></li>
+<li>Trajectories are compared in two views: text embeddings, and a 10-way share of action types (reason, skill, read, list, grep, edit, bash, plan, search, other).</li>
+<li>The test is a paired Hotelling T² with a sign-flip permutation (B = 5000).</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>What skills look like (Table II, §IV):</strong></li>
+<li>The median <code>SKILL.md</code> is 120 lines and 1,281 tokens; the median package is 3 files and 25 KB.</li>
+<li>88% of skills call tools, but only 23% depend on vulnerability-analysis tools (Slither in 18).</li>
+<li><strong>Effect on detection (Table VI):</strong></li>
+<li><strong>Codex/GPT-5.5:</strong> 79 → 97 of 120 (65.8% → 80.8%, +22.8% relative). Precision rose from 28.8% to 33.1%, and the dollar value of bugs found rose +43.2%.</li>
+<li><strong>Claude Code/Opus-4.8:</strong> 62 → 64 (+3.2%).</li>
+<li><strong>Antigravity/Gemini-3.5-Flash:</strong> 47 → 50 (+6.4%).</li>
+<li><strong>OpenCode/GLM-5.1:</strong> 36 → 41 (+13.9%), but the value of bugs found fell −25.6%.</li>
+<li><strong>On DeepSeek-V4-Pro, all three harnesses got worse</strong> (−5.9% to −9.4%).</li>
+<li><strong>Skill loading (Table VII):</strong></li>
+</ul>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Configuration</th>
+  <th>Audits that loaded a skill</th>
+  <th>Distinct skills</th>
+  <th>Total loads</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Codex/GPT-5.5</td>
+  <td><strong>40 of 40</strong></td>
+  <td>27</td>
+  <td>119</td>
+</tr>
+<tr>
+  <td>Antigravity/Gemini-3.5-Flash</td>
+  <td>13 of 40</td>
+  <td>2</td>
+  <td>31</td>
+</tr>
+<tr>
+  <td>OpenCode/GLM-5.1</td>
+  <td>3 of 40</td>
+  <td>6</td>
+  <td>7</td>
+</tr>
+<tr>
+  <td>OpenCode/DeepSeek-V4-Pro</td>
+  <td>1 of 40</td>
+  <td>2</td>
+  <td>2</td>
+</tr>
+<tr>
+  <td>Claude Code/Opus-4.8</td>
+  <td><strong>0 of 40</strong></td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Codex/DeepSeek-V4-Pro</td>
+  <td>0 of 40</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>Claude Code/DeepSeek-V4-Pro</td>
+  <td>0 of 40</td>
+  <td>0</td>
+  <td>0</td>
+</tr>
+</tbody>
+</table></div>
+<p>Under the same Codex CLI, GPT-5.5 loaded skills in every audit and DeepSeek-V4-Pro in none. The authors conclude that the model, not the harness, drives activation.</p>
+<ul>
+<li><strong>Cost (Fig. 8):</strong></li>
+<li>Codex/GPT-5.5 was cheaper (−5.24%) and faster (−3.64%) with skills.</li>
+<li>Antigravity was both more expensive (+11.90%) and slower (+24.09%).</li>
+<li>Claude Code/Opus used +11.88% more tokens but ran −28.73% shorter.</li>
+<li><strong>How skills are used (Fig. 11):</strong></li>
+<li>Every configuration follows the same six stages: read instructions, explore, read README, read code, grep/trace/test, report.</li>
+<li>Some load skills early and some late. Some use one skill throughout. Others chain them by code region, for example <code>blockchain-auditor → bridges → erc20 → precision-math → proxies</code>.</li>
+<li><strong>Repeat runs (Table IX), for Codex/GPT-5.5 only:</strong> detection gains of +22.8%, +20.3% and +28.2%. Precision moved +14.8%, +2.5% and −10.6%.</li>
+<li><strong>My inference from the paper's own tables:</strong></li>
+<li>Six of seven configurations shifted significantly in at least one view, and the only exception was Claude Code/DeepSeek.</li>
+<li>So <strong>Claude Code/Opus-4.8 and Codex/DeepSeek changed behavior even though they never loaded a skill</strong>. Listing 83 skills in the context appears to be a treatment by itself.</li>
+<li>The paper does not discuss this. With 14 tests and no multiplicity correction, treat it as a lead.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>Results are mostly single runs; only Codex/GPT-5.5 was repeated, three times.</li>
+<li>The study uses one benchmark, which the authors say may be leaked, and one domain. The skill corpus is an April snapshot.</li>
+<li>The paper does not report a check that each harness actually listed the 83 global skills at startup. Claude Code's 0 of 40 could partly reflect discovery rather than the model.</li>
+<li>There is no per-skill causal attribution. OpenCode/GLM gained +13.9% while loading skills in only 3 audits, with overlapping confidence intervals, which shows how noisy single-run deltas are.</li>
+<li>The design analysis was coded by GPT-5.4, reviewed by Claude Opus 4.6, with manual adjudication.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It measures skill use in shipping harness–model pairs <strong>from traces</strong>: whether a skill loaded, when, how often, and in what chain. Those are the events a skill-telemetry schema needs.</li>
+<li>It is timely. Today Langfuse built versioned skills with an MCP <code>loadSkill</code> tool (still internal), and ADK 2.10 added a skill lifecycle and discovery modes (first-party). The catalog also carries the OTel <code>gen_ai.skill.*</code> proposal (<code>otel-genai-skills-proposal</code>).</li>
+<li>It is distinct from the catalog's skill cards:</li>
+<li><code>arxiv-2609-26863-skillapt-when-to-activate-agent-skills</code> learns a policy for when to load a skill, on a benchmark.</li>
+<li><code>arxiv-2609-12742-skill-issue-repository-skill-optimization-noise-floor</code> finds SKILL.md optimization gains within noise.</li>
+<li>This paper shows how rarely current harness–model pairs load third-party skills at all: 0 to 40 of 40 audits.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Log three skill events: the list shown to the model, a skill loaded (name and version), and a resource read.</li>
+<li>Report the load rate per model and harness, and measure a skill's effect only over sessions that loaded it.</li>
+<li>Treat &quot;skills available&quot; as its own condition, because the list alone may change behavior.</li>
+</ul>
+<h3>2. NEW rank: <a href="https://arxiv.org/abs/2609.30074">arXiv 2609.30074</a>: How Reproducible Are Evaluation Conclusions? A Self-Audit of LLM-Inferred Prompt Structure</h3>
+<p><strong>Sarkar</strong> (Skelf Research). Submitted 24 Sep 2026 (v1, cs.CL; cross-listed to cs.AI and cs.LG), 13 pages. Previously submitted to the TAE workshop at NeurIPS 2026. The author says the corpus, the 293 raw outputs and all scripts are released.</p>
+<p><strong>Full PDF read:</strong> §1–10 and App. A–F (Tables 1–3 and the appendix tables).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li>Eight open model variants from five families (8B to 675B), served by one commercial endpoint, were asked to recover the structure of prompts as a typed list of nodes.</li>
+<li>Each identical call was repeated 2–5 times with caching off, and all 293 raw outputs were kept.</li>
+<li>The author then audited seven of the study's own claims (Table 2).</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>The measurement itself is unstable (Table 1, §4.1–4.3).</strong></li>
+<li>Across models, agreement between repeated identical calls (node-set Jaccard) ranges from 0.39 to 0.96. Only 35 of 127 prompt–model cells (28%) were perfect.</li>
+<li>Within one family, the larger model was less reproducible: gpt-oss:120b scored 0.386 against gpt-oss:20b's 0.766 on 18 shared prompts (Wilcoxon p = 0.0046).</li>
+<li>On unannotated real <code>SKILL.md</code> files (11 models × 19 files × 3 runs), mean agreement is 0.22, and 15% of cells share no node ID across runs.</li>
+<li><strong>The ranking does not survive resampling (§5.2).</strong> Under a joint cluster bootstrap over prompts (9,583 usable replicates), only the bottom holds: last place in 99% and seventh in 86%. The middle four keep their place in 27–48% of replicates, and the top two in 68% each.</li>
+<li><strong>Analysis choices move the headline (§5.2, App. C, E, F).</strong></li>
+<li>Two defensible rules for merging repeated campaigns change four of eight rows, and the share of perfect cells moves from 27.6% to 20.5% (7.1 points).</li>
+<li>A tolerance documented as relative but coded as absolute changes how many cells &quot;stabilize&quot; from 80 to 50 of 98.</li>
+<li><strong>Reproducible is not correct (§6).</strong> Recall of annotated nodes is 0.86. About one in five nodes that a model said it had copied matches no annotation (explicit precision 0.82).</li>
+<li><strong>The instrument manufactured a finding (§7, App. D).</strong></li>
+<li>A hard 60,000 ms client timeout logged slow reasoning models as connection failures, which produced a &quot;DeepSeek and Zhipu are inaccessible&quot; finding. The author withdraws it.</li>
+<li>Under a 1,500-token cap, 8 of 11 models stop at <code>length</code> with invalid JSON; with 8,000 tokens, all 11 return valid JSON.</li>
+<li><strong>The endpoints disappeared (§7, App. A).</strong> Four of the eight ranked models were retired on 2026-07-15 with HTTP 410. Of 15 models named in the study, 10 were gone by the 17 Aug audit, in two waves. &quot;Had we kept only summary CSVs, half this paper would be unfalsifiable.&quot;</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>A single author, and one narrow task (recovering prompt structure), with no agent evaluation.</li>
+<li>An unbalanced panel; two rows rest on 3 and 6 prompts.</li>
+<li>One endpoint and one time window, and the author cannot verify which weights actually answered.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It is an end-to-end audit that names the pipeline facts an evaluation must record to stay checkable: raw outputs, finish reasons, client timeout and token cap, campaign and merge provenance, dates and endpoint status. BQAA can store and surface every one of them.</li>
+<li>It is distinct from the catalog's evaluation-reliability cards (<code>arxiv-2609-26489-calibration-first-class-criterion-llm-eval</code>, <code>arxiv-2609-29769-jev-vs-llm-rubric-judges-correlated-errors</code>). Those are about the judge; this is about the pipeline around it.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>For every evaluated call, store the finish reason, client timeout, <code>max_tokens</code>, model and endpoint ID and the endpoint's status.</li>
+<li>Classify each failure as the instrument's (timeout, token cap), the model's, or the endpoint's (410).</li>
+<li>Keep raw outputs, date every run and record which campaign each result came from.</li>
+<li>Report ranking stability next to any leaderboard.</li>
+</ul>
+<h3>Academy scouted, not ranked</h3>
+<p><strong>Read in full but not ranked:</strong></p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.29709">2609.29709</a> &quot;Three Ways Classical Test Theory Misleads for LLM Judges&quot;</strong> (Zhu, Oxford; 12 pp including the appendix, full read). Its v1 is dated 31 Aug, but it first appeared in the Sep 24 mailing.</li>
+<li><strong>KR-20</strong> is a standard internal-consistency statistic. Computed over rubric elements, it contains nothing about the judge.<ul>
+<li>With one judge's error fixed at 4.72%, KR-20 ranges from 0.01 to 0.68 depending only on how the item bank is built (§3, Table A.4).</li>
+<li>The judge's KR-20 and the ground truth's were 0.5223 and 0.5231.</li>
+</ul>
+</li>
+<li><strong>The dependability index Φ(λ) is not gate accuracy.</strong> Accuracy was 0.961, 0.928, 0.900 and 0.917 at cut scores 4–7, against Φ of 0.714, 0.560, 0.467 and 0.568 (§4).</li>
+<li><strong>The judge (Claude Haiku 4.5) errs in one direction.</strong> It accepts an absent element 10.4% of the time and rejects a present one 0.1% of the time. Error also concentrates by element, from 0.144 down to 0.000 (App. A.2).</li>
+<li><strong>Not ranked:</strong> one judge, 180 items in 13 clusters, and the author found no published instance of the three errors, so the caution is prospective. The useful line for BQAA: next to any judge-reliability number, store the per-element error rate and the spread of true scores in the test bank.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.29845">2609.29845</a> &quot;Your Transformer Can Hold Two Thoughts at Once&quot;</strong> (re-checked; 0634 read it in full).</li>
+<li>It has no agent, tool or trace content.</li>
+<li>Its fused decoding matches ordinary batch-of-2 throughput within 3% (Table 9). So the &quot;2×&quot; is against sequential decoding only.</li>
+<li>It stays not ranked.</li>
+</ul>
+<p><strong>Not full-read (so not rankable):</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.28876">2609.28876</a> Forecast-Dojo: replayable environments for forecasting agents; capability work.</li>
+<li><a href="https://arxiv.org/abs/2609.30094">2609.30094</a> PrivDrift: user secrets remain recoverable after topic drift. Agy 1832 (Thu) listed it; no brief did.</li>
+<li>Off-topic: <a href="https://arxiv.org/abs/2609.29816">2609.29816</a> AV-GRPO (audio-video diffusion), <a href="https://arxiv.org/abs/2609.29028">2609.29028</a> RGBD20K (segmentation), <a href="https://arxiv.org/abs/2609.24308">2609.24308</a> HappyWorld-Bench (world models).</li>
+</ul>
+<h2>Six-week EV (through ~Nov 6)</h2>
+<ul>
+<li><strong>Skills become a logged, versioned object (medium-high).</strong></li>
+<li>Langfuse built versioned, labeled skills with an MCP <code>loadSkill</code> tool (internal for now). ADK 2.10 added a skill lifecycle and discovery modes (first-party). Codex, Claude Code and OpenCode all load skills from directories, and the OTel <code>gen_ai.skill.*</code> proposal is in the catalog.</li>
+<li>2609.29454 shows that loading, not skill content, is the bottleneck. Expect skill-load events in traces and &quot;skill activation rate&quot; views from observability vendors.</li>
+<li>For BQAA: skill list, load and resource-read events carrying name and version, and outcome analysis conditioned on loading.</li>
+<li><strong>Evaluation plumbing becomes a release theme (medium).</strong></li>
+<li>Today alone brought a unit bug that ran a judge on every trace, 19 providers priced at zero, span order that produced false success claims, evaluator scores joined by the wrong key, and schema mismatches that became empty results.</li>
+<li>Expect more fixes of units, join keys and ordering.</li>
+<li>For BQAA: a per-evaluation data check (durations with units, zero cost with tokens, tie-broken span order, evaluator-ID joins).</li>
+<li><strong>OTel Python exporter churn (medium).</strong></li>
+<li>1.45.0 moved OTLP/HTTP onto a new transport package and added a 64 MiB drop-before-send default (0634). Weave broke on private attributes; Logfire had already capped below 1.45.</li>
+<li>Expect more version caps, and Weave's promised &quot;proper fix&quot;.</li>
+<li>For BQAA: cap exporter versions in anything BQAA ships with OTel, and test fresh installs.</li>
+<li><strong>Interruptible agents (medium-low, opt-in).</strong> Codex's <code>instant_interrupt</code> is off by default. When on, tool cells outlive the model step, and preempted requests re-send full history. For BQAA: join tool results by call or cell ID, and add an &quot;interrupted&quot; turn outcome.</li>
+<li><strong>Watch list (none shipped this slot):</strong></li>
+<li>Codex 0.158 or 0.159 stable.</li>
+<li>Mastra 1.72.0 stable with #25114, #25075 and #25123, and a first store that implements <code>aggregateTraces</code>.</li>
+<li>An openai-agents-python release with #5090 and #5061.</li>
+<li>LiteLLM 1.104 stable with #43126.</li>
+<li>Weave yanking 0.53.1–0.53.10, and its proper OTel fix.</li>
+<li>Langfuse skills leaving the internal gate.</li>
+<li>Opik turning queue routing on by default.</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>Opik 2.2.81 (progress):</strong> before it, duration-filtered judge rules ran on every trace and 19 providers' models cost $0. Store durations with units, and flag calls with tokens and zero cost.</li>
+<li><strong>Weave 0.53.11 (progress):</strong> break equal span start times explicitly when rebuilding transcripts (12 of 31 traces were falsely flagged), and test fresh installs against new OTel exporter releases.</li>
+<li><strong>mem0 2.2.1 (progress):</strong> <code>ADD</code> history from before 2.2.1 can include records the store rejected. Reconcile against store IDs.</li>
+<li><strong>LangSmith 0.14.1 (progress):</strong> tool call IDs and tool definitions now reach the OTel export for LangChain runs. Older data needs order-based joins.</li>
+<li><strong>Langfuse 4.46.0 (progress):</strong> skills are versioned and labeled but internal-only. Join evaluator scores on evaluator ID.</li>
+<li><strong>Codex alpha.15 / 0.159.0-alpha.1 (progress):</strong> opt-in interrupts split tool cells from model steps. A usage-limit window field is in the alpha.2 tag.</li>
+<li><strong>Letta Code 0.33.2 (progress):</strong> record a schema-validation failure as its own outcome; an empty result is not &quot;nothing found&quot;.</li>
+<li><strong>2609.29454:</strong> log skill list, load and resource-read events, and attribute effects to loading. Codex/GPT-5.5 loaded skills in 40 of 40 audits, Claude Code/Opus-4.8 in 0 of 40.</li>
+<li><strong>2609.30074:</strong> store finish reason, timeout, token cap, raw outputs, dates and campaign for every evaluated call, and report ranking stability.</li>
+<li><strong>NOTE cluster (Mastra, OpenAI Agents Python, crewAI, LiteLLM, PydanticAI, OpenHands, ADK):</strong></li>
+<li>A Mastra restart no longer repeats finished steps (unreleased).</li>
+<li><code>SQLiteSession</code> leaked file descriptors; LiteLLM reported upstream failures as HTTP 200.</li>
+<li>ADK 2.10 moves tool spans under the agent.</li>
+</ul>
+<h2>Housekeeping</h2>
+<p><strong>Slot and inputs</strong></p>
+<ul>
+<li><strong>Slot:</strong> the primary cron woke late (~12:43 PT). This run's first clock read was 12:46:12 PT. No <code>2026-09-25-1234-*</code> brief existed. The label is kept at <strong>1234</strong>.</li>
+<li><strong>Packs used (4, all PACK_DONE):</strong></li>
+<li>Agy 0932: 13:46Z → 16:47Z.</li>
+<li>Muse 1032: 16:47Z → 17:44Z.</li>
+<li>DSH 1132: 17:44Z → 18:50Z.</li>
+<li>Agy 1232: 18:50Z → 19:40Z.</li>
+<li>The windows join end to end from Agy 0632's as-of time (13:46Z), which the 0634 brief used.</li>
+<li><strong>Gaps: Muse 0732 and DSH 0832 are ABSENT.</strong></li>
+<li>For both slots there is no pack, no prompt copy in <code>packs/</code>, no <code>/tmp/*-collect-*</code> directory and no grok-tmux log, so neither run launched.</li>
+<li>Agy 0932 covered the whole 13:46Z → 16:47Z window, so no time went unwatched. Nothing was invented.</li>
+<li>DSH 0532 was also absent; that was disclosed at 0634.</li>
+<li><strong>Vault twins:</strong></li>
+<li>DSH 1132 reported that its vault write was blocked. Its pack and learnings are now in <code>Hunt/agent-analytics/</code>, copied afterwards.</li>
+<li><strong>The DSH 2332 (Thu) pack twin is still only at <code>/tmp/dsh-collect-20260924-2332/outbox/</code>.</strong> That follow-up from 0034 and 0634 remains open.</li>
+<li><strong>Social and other sources:</strong> X 401, Reddit 403, and the LinkedIn and Papers with Code redirect or shell pages are the packs' labels; I did not re-probe them. Medium was not used.</li>
+</ul>
+<p><strong>Verified arXiv ceiling: <code>2609.30268</code></strong></p>
+<ul>
+<li><strong>Probed at 19:54Z:</strong> 30266–30268 return 200. 30269–30273, 30275, 30280, 30290, 30300, 30350, 30400, 30500 and 31000 return 404.</li>
+<li><strong>Priority pin <code>2609.02702</code>:</strong> base 200 / v1 200 / v2 404. Intact, and not re-carded.</li>
+</ul>
+<p><strong>HN</strong></p>
+<ul>
+<li>All four pack helper files report hits=0.</li>
+<li><strong>My own re-run at ~19:59Z</strong>, since 14:00Z with the same six quoted queries and the same threshold, found 0 raw hits for every query.</li>
+<li><strong>Sanity check:</strong> the API returned a newest story at 19:56:57Z, so it is live.</li>
+<li><strong>HN: hits=0 keep=0.</strong></li>
+</ul>
+<p><strong>Pack corrections</strong></p>
+<ul>
+<li><strong>DSH 1132:</strong> said OTel Python 1.45.0 was not mentioned &quot;in the published 06:34 brief&quot;. It was NOTEd there under &quot;Released, but below the bar&quot;, with #5266 and #5369. What is new is the Weave breakage.</li>
+<li><strong>Agy 0932:</strong></li>
+<li>It called Langfuse skill management a &quot;major release&quot; and Langfuse's move into &quot;active agent configuration&quot;. Its UI is gated to internal staff, and its API is <code>unstable</code>.</li>
+<li>It described Mastra #25114 as atomic journaling of step completion. The PR changes how restart reads the checkpoint.</li>
+<li><strong>Muse 1032:</strong> listed Codex #48141 and #48143 under &quot;Codex alpha.15&quot;. The compare API puts them, with #48135, in 0.159.0-alpha.1, not alpha.15.</li>
+<li><strong>All packs missed Letta Code 0.33.2.</strong></li>
+<li><strong>Suggestion:</strong> add <code>letta-ai/letta-code</code> (GitHub), <code>@letta-ai/letta-code</code> (npm) and <code>letta</code> (PyPI) to the watchlist.</li>
+<li>The 0634 suggestion to add the <code>open-telemetry/opentelemetry-python*</code> repos still stands.</li>
+<li><strong>Agy 1232 on Weave:</strong> &quot;live on PyPI for all users&quot; is right for new installs. Environments that already pulled OTel 1.45.0 must downgrade the exporter, and per the PR, <code>pip</code> leaves the new <code>opentelemetry-exporter-otlp-common</code> package behind.</li>
+</ul>
+<p><strong>Verification method</strong></p>
+<ul>
+<li><strong>Industry:</strong></li>
+<li><strong>GitHub API:</strong> release objects and dated tags (GraphQL, <code>first:8</code> by tag date) for 65 repos since 13:40Z.</li>
+<li><strong>Compare API:</strong><ul>
+<li>Codex: alpha.14…alpha.15, alpha.15…0.159.0-alpha.1, alpha.1…alpha.2 and 0.157.0…alpha.2.</li>
+<li>Weave v0.53.10…v0.53.11 and LangSmith v0.14.0…v0.14.1.</li>
+</ul>
+</li>
+<li><strong>Registries:</strong> PyPI JSON for 56 packages (upload times, <code>requires_dist</code>, yank flags) and npm <code>time</code>/<code>dist-tags</code> for 47 packages, since 13:40Z.</li>
+<li><strong>PR bodies read:</strong><ul>
+<li>Langfuse #17803 (with file patches), #17929, #17954, #17938.</li>
+<li>Opik #8544, #8548, #8570, #8515, #8533, #8537, #8462.</li>
+<li>Weave #7956, #7953, #7952.</li>
+<li>LangSmith #3584, #3593. mem0 #7066.</li>
+<li>Codex #48098, #48115, #48135, #48141, #48143, #48151, #48155, #48174, #48176.</li>
+<li>Letta Code #4696, #4707, #4722. OpenHands #17647, #17675.</li>
+<li>Mastra #25114, #25075, #25123, #25124, #25016, #25162.</li>
+<li>OpenAI Agents Python #5090, #5061, #5174. crewAI #7677. LiteLLM #43126.</li>
+<li>PydanticAI #8755, #8390. OTel #5389.</li>
+</ul>
+</li>
+<li><strong>Source and config at the tag:</strong> OTel v1.45.0 <code>trace_exporter/__init__.py</code>, Opik 2.2.81 <code>config.yml</code>, Logfire's exporter and <code>pyproject.toml</code>, and Phoenix's <code>tracers.py</code>.</li>
+<li><strong>GitHub code search</strong> for the removed attributes: 6 SDK repos done, then rate-limited (403).</li>
+<li><strong>Release notes:</strong> all eleven releases listed in the sweep, including ADK 2.10.0.</li>
+<li><strong>Academy:</strong></li>
+<li>arXiv listing pages for six categories (767 entries), checked against the catalog, the briefs since Sep 20 and the packs.</li>
+<li>arXiv abs pages for 6 candidates.</li>
+<li>4 PDFs extracted with <code>pdftotext</code> to <code>/tmp/fb1234/pdf/</code>. Three were read in full (29454, 30074, 29709), and 29845 was re-checked. Every quoted number was checked against the cited table or section.</li>
+<li>Hugging Face daily API for Sep 24 and Sep 25.</li>
+<li><strong>Search:</strong> no web search. The HN Algolia re-run is described above.</li>
+</ul>
+<p><strong>Excluded by rule:</strong></p>
+<ul>
+<li>No first-party BQAA content. ADK 2.10.0 is NOTE only, and its BQAA-plugin line is not carded.</li>
+<li>No Desk section and no GTM content.</li>
+<li>Crustdata and Fable were not used, and Medium was not cited.</li>
+<li>No re-admission of the 0634, 0034, 1834 or 1234 (Thu) sets. The priority pin was not re-carded.</li>
+<li>This writer made no Jev calls. The Jev shadow gates are Collection's call sites.</li>
+</ul>
+<p><strong>Run limits:</strong></p>
+<ul>
+<li><strong>Volume:</strong> 2 ranks, 7 progress notes, about 15 NOTE lines and 7 scouted lines, within 50.</li>
+<li><strong>Re-attempts (3):</strong></li>
+<li>A zsh <code>set --</code> loop was rewritten as a bash script.</li>
+<li>A zsh glob on a <code>?ref=</code> URL, and an unquoted <code>=====</code> echo, were each re-run once.</li>
+<li>The GitHub code search stopped at its rate limit. I made one targeted follow-up for two repos and did not retry the others.</li>
+<li>This is one over the 2-retry guideline, and all of it was shell quoting or rate limiting. No failing API call was retried more than once.</li>
+<li><strong>Other:</strong> $0 spent on paid APIs, 0 external messages, no background jobs.</li>
+</ul>
+<p><strong>Catalog:</strong></p>
+<ul>
+<li>415 / 103 / 105, read-only and untouched by me.</li>
+<li>Expected after publish: <strong>417 items / 104 briefs / 106 runs</strong> (+2 Academy).</li>
+<li>The seven progress notes update existing cards and add no items.</li>
+</ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW items (2):</strong></p>
+<ol>
+<li><strong>id:</strong> <code>arxiv-2609-29454-agent-skills-audit-triggering-bottleneck</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Demystifying Agent Skills for Smart Contract Auditing — 83 in-the-wild audit skills on EVMBench across 7 agent–model configurations: skills help only when loaded (Codex/GPT-5.5 loaded them in 40/40 audits, +22.8% detection; Claude Code/Opus-4.8 in 0/40, +3.2%); on DeepSeek-V4-Pro every harness got worse; activation counted from session traces</li>
+<li><strong>arXiv:</strong> 2609.29454 — https://arxiv.org/abs/2609.29454</li>
+<li><strong>card text:</strong> 155 candidate skills from marketplaces, GitHub and SkillsBench were deduplicated to 83 and installed globally, without telling agents to use them. A skill counted as used only when the session trace showed its SKILL.md being read. Only Codex/GPT-5.5 loaded skills consistently (40/40 audits, 27 distinct skills, 119 loads); Antigravity/Gemini loaded them in 13/40 and Claude Code/Opus-4.8 in 0/40, and only the consistent loader gained substantially. By the paper's own tables, two configurations that never loaded a skill still shifted behavior significantly. Caveats: mostly single runs, one benchmark and domain, no per-skill attribution.</li>
+</ul>
+<ol start="2">
+<li><strong>id:</strong> <code>arxiv-2609-30074-eval-conclusions-reproducibility-self-audit</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> How Reproducible Are Evaluation Conclusions? — a self-audit of an 8-model LLM evaluation: only the bottom of the ranking survives a joint cluster bootstrap (last place held in 99% of replicates, top two in 68%), an unrecorded merge rule moves the headline 7.1 points, a 60 s client timeout manufactured an &quot;inaccessible model&quot; finding, and 4 of 8 endpoints were retired within ten weeks</li>
+<li><strong>arXiv:</strong> 2609.30074 — https://arxiv.org/abs/2609.30074</li>
+<li><strong>card text:</strong> 293 raw outputs from repeated identical calls, with caching off, show agreement from 0.39 to 0.96 across models, and the larger gpt-oss model was less reproducible than the smaller one. Auditing its own claims, the author finds that four of eight rows change under a second defensible merge rule, that a tolerance coded differently from its documentation changes stabilization from 80 to 50 of 98 cells, and that a client timeout and token caps turn slow reasoning models into apparent failures. Ten of fifteen named models were retired by the audit date. Recommends keeping raw per-run outputs, per-cell provenance, executed sensitivity checks, rank stability and a measurement date. Caveats: one author, one niche task, no agent evaluation.</li>
+</ul>
+<p><strong>Progress (7):</strong></p>
+<ul>
+<li><strong>parent:</strong> <code>opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier</code></li>
+<li><strong>text:</strong> Opik 2.2.81 (PyPI 15:28Z, GH 15:35Z). #8544: online-rule duration filters were stored in seconds and compared as milliseconds, so <code>Duration &gt; 5</code> matched effectively every trace and an LLM-judge rule meant for slow traces ran on all of them. #8548: models from 19 providers, including OpenRouter, Azure AI and Vercel AI Gateway, &quot;silently cost zero&quot;. Also ships #8555 (ADK/Gemini usage no longer dropped) and #8462 (review-queue routing), which is off by default.</li>
+<li><strong>parent:</strong> <code>weave-claude-agent-sdk</code></li>
+<li><strong>text:</strong> Weave 0.53.11 (PyPI 18:47Z). #7952: sibling spans sharing a start time were ordered latest-end-first, and a judge fed those transcripts reported false success claims on 12 of 31 Cursor traces; they now sort earliest-ended first. #7956: OTel exporter 1.45.0 removed private attributes Weave used, so <code>weave.init()</code> failed on fresh installs of 0.53.8–0.53.10. Weave now caps the exporter below 1.45, and no 0.53.x version had been yanked by 20:07Z. #7953 moves SDK identity to <code>wandb.sdk.*</code> resource keys.</li>
+<li><strong>parent:</strong> <code>mem0-v2-2-0-ts-v3-3-0-user-profiles-async-idempotent-jobs</code></li>
+<li><strong>text:</strong> mem0 v2.2.1 / ts-v3.3.1 (PyPI 17:36Z, npm 17:44Z). #7066: <code>add()</code> returned <code>ADD</code> events and wrote history rows for memories the vector store rejected; now only stored records count, and total failure raises <code>VectorStoreError</code>. Also releases the fixes for Turbopuffer filters that were silently dropped (#6564/#6578), negative euclidean scores (#6559/#6580) and S3 Vectors scores clamped to zero (#6547).</li>
+<li><strong>parent:</strong> <code>langsmith-sdk-v0-14-0-agent-identity-otel-finish-reasons</code></li>
+<li><strong>text:</strong> LangSmith SDK v0.14.1 (PyPI 17:38Z). #3584: the OTel export of LangChain runs lacked <code>gen_ai.tool.call.id</code> on tool spans, because the ID was read from the wrong field, and lacked <code>gen_ai.tool.definitions</code> on model spans. Both are now sent, with definitions in the provider's own unnormalized format. #3576 traces <code>ClaudeSDKClient.receive_messages()</code>.</li>
+<li><strong>parent:</strong> <code>langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown</code></li>
+<li><strong>text:</strong> Langfuse v4.46.0 (GH 14:20Z). #17803 adds versioned, labeled skills with an <code>unstable</code> REST API and MCP read tools (<code>loadSkill</code> defaults to the production label), but the UI is gated to internal staff. #17929's side-by-side comparison summary is computed from the current page only. On main after the release, #17954 joins decision-model evaluator scores on <code>evaluator_id</code>, because one evaluator writes one score per question and filtering by name showed an empty table.</li>
+<li><strong>parent:</strong> <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code></li>
+<li><strong>text:</strong> Codex rust-v0.158.0-alpha.15 (GH 17:33Z, 17 commits) and rust-v0.159.0-alpha.1 (GH 18:48Z, 5 commits on the new line); npm latest is still 0.157.0. #48135/#48141 add opt-in <code>instant_interrupt</code>: running code-mode cells yield without stopping, and preempted requests re-send full history. #48143 keeps executor MCP credential policy across reconnects. The alpha.2 tag (no release object) adds <code>usage_limit_window_minutes</code> to turn and compaction analytics (#48174).</li>
+<li><strong>parent:</strong> <code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code></li>
+<li><strong>text:</strong> Letta Code v0.33.2 (npm 16:28Z, GH 16:37Z; missed by all packs). #4707: a workflow expecting one JSON shape accepted another and &quot;quietly produc[ed] an empty list&quot;; results are now schema-validated, and failures are recorded in the journal. #4696: a 26-hour Cloud session with 40+ subagents filled a 9.8 GB disk with logs and subagents died with ENOSPC; logs now rotate at 10 MB. #4722 makes managed Cloud schedules durable.</li>
+</ul>
+<p><strong>Headline claims (for citation checks):</strong></p>
+<ol>
+<li>Opik online-evaluation rules compared a duration filter entered in seconds against a millisecond column, so <code>Duration &gt; 5</code> matched every trace slower than 5 ms and an LLM-judge rule meant for slow traces ran on effectively all traces; Opik 2.2.81 fixes it. — https://github.com/comet-ml/opik/pull/8544 (merged 2026-09-25; released in Opik 2.2.81 on 2026-09-25)</li>
+<li>Weave ordered sibling spans that shared a start time latest-end-first, and a downstream judge fed the resulting transcripts reported a false success claim on 12 of 31 checked Cursor traces; weave 0.53.11 fixes it. — https://github.com/wandb/weave/pull/7952 (merged 2026-09-24; weave 0.53.11 on PyPI 2026-09-25)</li>
+<li>In 2609.29454, Codex with GPT-5.5 loaded audit skills in all 40 EVMBench audits while Claude Code with Opus-4.8 loaded none, and only the consistently loading configuration gained substantially (+22.8% detection). — https://arxiv.org/abs/2609.29454 (submitted 2026-09-24; Tables VI–VII)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 25 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
