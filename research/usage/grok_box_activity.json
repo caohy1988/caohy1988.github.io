@@ -1,9 +1,8 @@
 {
   "ok": false,
-  "source": "box agents/<id>/ live mtimes + store.db (+ Mac client replicas when newer)",
-  "note": "Activity share from local Grok Bot transcripts \u2014 not Cursor plan dollars. Last-activity from agents/<id>/ (live) + Mac client replicas when newer; stale:true when source >24h while peers are fresh.",
-  "collected_at_pt": "2026-09-24 09:16:45 PDT",
-  "collected_at_utc": "2026-09-24T16:16:45Z",
+  "source": "box agents/<id>/ live mtimes + store.db (not agent-transcripts mirror)",
+  "collected_at_pt": "2026-09-24 17:23:43 PDT",
+  "collected_at_utc": "2026-09-25T00:23:43Z",
   "bots": [
     {
       "id": "a81d2a9a-c28e-4a7b-942d-8ffba226b0cc",
@@ -23,13 +22,13 @@
       "transcript_bytes": 35539071,
       "transcript_mb": 33.89,
       "missing_transcript": false,
-      "last_transcript_activity_pt": "2026-09-24 08:32 PDT",
-      "activity_source": "mac-client-replica:a81d2a9a-c28e-4a7b-942d-8ffba226b0cc",
-      "source_mtime_epoch": 1790263968.734,
+      "last_transcript_activity_pt": "2026-09-24 10:44 PDT",
+      "activity_source": "agents/a81d2a9a-c28e-4a7b-942d-8ffba226b0cc/store.db#unreadState.lastViewedAt",
+      "source_mtime_epoch": 1790271853.629,
       "missing_agent_dir": false,
       "stale": false,
       "stale_reason": null,
-      "source_age_hours": 0.7
+      "source_age_hours": 6.7
     },
     {
       "id": "a70a646f-fe6c-4fdf-8fb1-75a73cbccc4b",
@@ -49,13 +48,13 @@
       "transcript_bytes": 66667966,
       "transcript_mb": 63.58,
       "missing_transcript": false,
-      "last_transcript_activity_pt": "2026-09-24 08:56 PDT",
-      "activity_source": "mac-client-replica:a70a646f-fe6c-4fdf-8fb1-75a73cbccc4b",
-      "source_mtime_epoch": 1790265365.61,
+      "last_transcript_activity_pt": "2026-09-24 08:47 PDT",
+      "activity_source": "agents/a70a646f-fe6c-4fdf-8fb1-75a73cbccc4b/automations/all-tasks-5-min-progress/last-hb-state.json",
+      "source_mtime_epoch": 1790264825.81602,
       "missing_agent_dir": false,
       "stale": false,
       "stale_reason": null,
-      "source_age_hours": 0.3
+      "source_age_hours": 8.6
     },
     {
       "id": "5c4c5dd4-6a97-476f-b7fa-9f70f629bc51",
@@ -81,7 +80,7 @@
       "missing_agent_dir": false,
       "stale": false,
       "stale_reason": null,
-      "source_age_hours": 0.8
+      "source_age_hours": 8.9
     },
     {
       "id": "6a85c81a-8c66-4169-ae76-60d743932802",
@@ -101,13 +100,13 @@
       "transcript_bytes": 11444,
       "transcript_mb": 0.01,
       "missing_transcript": false,
-      "last_transcript_activity_pt": "2026-09-24 09:12 PDT",
-      "activity_source": "mac-client-replica:6a85c81a-8c66-4169-ae76-60d743932802",
-      "source_mtime_epoch": 1790266325.222,
+      "last_transcript_activity_pt": "2026-09-23 10:02 PDT",
+      "activity_source": "agents/6a85c81a-8c66-4169-ae76-60d743932802/profile.json",
+      "source_mtime_epoch": 1790182923.8532753,
       "missing_agent_dir": false,
-      "stale": false,
-      "stale_reason": null,
-      "source_age_hours": 0.1
+      "stale": true,
+      "stale_reason": "source agents/6a85c81a-8c66-4169-ae76-60d743932802/profile.json is 31h old (>24h) while other bots are fresh",
+      "source_age_hours": 31.4
     },
     {
       "id": "2ef4d2bc-4750-4633-9ea7-20b3b5015689",
@@ -127,17 +126,41 @@
       "transcript_bytes": 0,
       "transcript_mb": 0.0,
       "missing_transcript": false,
-      "last_transcript_activity_pt": "2026-09-21 08:11 PDT",
-      "activity_source": "agents/2ef4d2bc-4750-4633-9ea7-20b3b5015689/store.db-wal",
-      "source_mtime_epoch": 1790003504.515069,
+      "last_transcript_activity_pt": "2026-09-23 22:27 PDT",
+      "activity_source": "jev-route logs",
+      "source_mtime_epoch": 1790227634.628,
       "missing_agent_dir": false,
-      "stale": true,
-      "stale_reason": "source agents/2ef4d2bc-4750-4633-9ea7-20b3b5015689/store.db-wal is 73h old (>24h) while other bots are fresh",
-      "source_age_hours": 73.1
+      "stale": false,
+      "stale_reason": null,
+      "activity_source_detail": "jev/logs/20260924T052714628Z-intake.json",
+      "chat_folder_last_pt": "2026-09-21 08:11 PDT",
+      "chat_folder_source": "agents/2ef4d2bc-4750-4633-9ea7-20b3b5015689/store.db-wal",
+      "jev_calls": {
+        "source": "jev-route logs",
+        "log_dir": "/home/box/agent-data/jev/logs",
+        "total": 20,
+        "last_24h": 5,
+        "last_7d": 20,
+        "by_gate": {
+          "pre_tool": 7,
+          "untagged": 4,
+          "completion_check": 2,
+          "intake": 2,
+          "research_check": 2,
+          "pre_browser": 1,
+          "pre_research": 1,
+          "pre_retry": 1
+        },
+        "newest_log": "jev/logs/20260924T052714628Z-intake.json",
+        "newest_log_epoch": 1790227634.628,
+        "newest_log_pt": "2026-09-23 22:27 PDT"
+      },
+      "source_age_hours": 18.9
     }
   ],
   "fleet_messages_total": 35185,
   "fleet_assistant_tool_total": 32317,
+  "note": "Activity share from local Grok Bot transcripts \u2014 not Cursor plan dollars. Last-activity from agents/<id>/ (live); stale:true when source >24h while peers are fresh. Jev: last activity = newer of jev-route logs / chat folder; stale only if both >7d.",
   "links": {
     "usage_billing": "grokbot://app/v1/settings?id=plan",
     "on_demand": "grokbot://app/v1/settings?id=on-demand"
@@ -145,7 +168,7 @@
   "freshness": {
     "stale_after_hours": 24.0,
     "stale_or_missing": [
-      "Jev(73.1h)"
+      "Agent Manage Bot(31h)"
     ]
   }
 }

@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import re
 import sqlite3
 import sys
 from collections import Counter
@@ -61,6 +62,12 @@ GROK_LINKS = {
 }
 STALE_AFTER_HOURS = 36  # cache-level banner (collected_at age)
 SOURCE_STALE_AFTER_HOURS = 24.0  # per-bot relative source staleness
+# Jev is called on demand via /home/box/bin/jev-route; real usage = router logs.
+JEV_ID = "2ef4d2bc-4750-4633-9ea7-20b3b5015689"
+JEV_LOG_DIR = Path("/home/box/agent-data/jev/logs")
+JEV_SOURCE_LABEL = "jev-route logs"
+JEV_STALE_AFTER_HOURS = 24.0 * 7  # stale only if BOTH logs + chat folder >7d
+_JEV_LOG_RE = re.compile(r"^(\d{8}T\d{6})(\d{3})?Z(?:-(.+))?\.json$")
 SKIP_BASENAMES = {
     "store.db-shm",
     "conversation-blobs.db-shm",
@@ -294,6 +301,71 @@ def _collect_one(d: Path, trans_dir: Path) -> dict:
     }
 
 
+def jev_route_stats(now: datetime | None = None, log_dir: Path = JEV_LOG_DIR) -> dict | None:
+    """Count jev-route calls from log filenames (UTC stamp + gate). None if dir absent."""
+    if not log_dir.is_dir():
+        return None
+    now_ts = (now or datetime.now(timezone.utc)).timestamp()
+    total = last_24h = last_7d = 0
+    by_gate: dict[str, int] = {}
+    newest = None
+    for p in log_dir.iterdir():
+        m = _JEV_LOG_RE.match(p.name)
+        if not m or not p.is_file():
+            continue
+        try:
+            dt = datetime.strptime(m.group(1), "%Y%m%dT%H%M%S").replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+        ts = dt.timestamp() + (int(m.group(2)) / 1000.0 if m.group(2) else 0.0)
+        gate = m.group(3) or "untagged"
+        total += 1
+        by_gate[gate] = by_gate.get(gate, 0) + 1
+        age_h = (now_ts - ts) / 3600.0
+        last_24h += age_h <= 24.0
+        last_7d += age_h <= 24.0 * 7
+        newest = _consider(ts, f"jev/logs/{p.name}", newest)
+    return {
+        "source": JEV_SOURCE_LABEL,
+        "log_dir": str(log_dir),
+        "total": total,
+        "last_24h": int(last_24h),
+        "last_7d": int(last_7d),
+        "by_gate": dict(sorted(by_gate.items(), key=lambda kv: (-kv[1], kv[0]))),
+        "newest_log": newest[1] if newest else None,
+        "newest_log_epoch": newest[0] if newest else None,
+        "newest_log_pt": _mtime_pt(newest[0]) if newest else None,
+    }
+
+
+def apply_jev_route_logs(bots: list[dict], now: datetime | None = None) -> list[dict]:
+    """Jev last-activity = newer of jev-route logs / chat folder; label 'jev-route logs'."""
+    calls = jev_route_stats(now)
+    if calls is None:
+        return bots
+    for b in bots:
+        if (b.get("id") or NAME_TO_ID.get(b.get("name") or "")) != JEV_ID:
+            continue
+        chat_ts, chat_src = b.get("source_mtime_epoch"), b.get("activity_source")
+        log_ts = calls.get("newest_log_epoch")
+        if log_ts is not None and (chat_ts is None or log_ts > float(chat_ts)):
+            win_ts, win_src = log_ts, calls.get("newest_log")
+        else:
+            win_ts, win_src = chat_ts, chat_src
+        b["chat_folder_last_pt"] = _mtime_pt(float(chat_ts)) if chat_ts is not None else None
+        b["chat_folder_source"] = chat_src
+        b["source_mtime_epoch"] = win_ts
+        b["last_transcript_activity_pt"] = _mtime_pt(float(win_ts)) if win_ts is not None else None
+        b["activity_source"] = JEV_SOURCE_LABEL
+        b["activity_source_detail"] = win_src
+        b["jev_calls"] = calls
+    return bots
+
+
+def _is_jev(b: dict) -> bool:
+    return (b.get("id") or NAME_TO_ID.get(b.get("name") or "")) == JEV_ID
+
+
 def apply_source_freshness(bots: list[dict], now: datetime | None = None) -> list[str]:
     now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     now_ts = now.timestamp()
@@ -317,6 +389,19 @@ def apply_source_freshness(bots: list[dict], now: datetime | None = None) -> lis
             continue
         age_h = (now_ts - float(age)) / 3600.0
         b["source_age_hours"] = round(age_h, 1)
+        if _is_jev(b):
+            # On-demand: source_mtime_epoch = max(jev-route log, chat folder) → both >7d.
+            if age_h > JEV_STALE_AFTER_HOURS:
+                b["stale"] = True
+                b["stale_reason"] = (
+                    f"jev-route logs and chat folder both >{JEV_STALE_AFTER_HOURS:.0f}h old "
+                    f"(newest {age_h:.0f}h)"
+                )
+                problems.append(f"{b.get('name')}({age_h:.0f}h)")
+            else:
+                b["stale"] = False
+                b["stale_reason"] = None
+            continue
         if fresh_exists and age_h > SOURCE_STALE_AFTER_HOURS:
             b["stale"] = True
             b["stale_reason"] = (
@@ -394,6 +479,7 @@ def collect_box_bots(agents_dir: Path = BOX_AGENTS, trans_dir: Path = BOX_TRANS)
         if rid not in seen:
             bots.append({**empty_bot(rname), "id": rid, "missing_agent_dir": not (agents_dir / rid).is_dir()})
     bots = normalize_bots(bots)
+    apply_jev_route_logs(bots)
     apply_source_freshness(bots)
     return bots
 
@@ -468,7 +554,10 @@ def overlay_client_replicas(bots: list[dict]) -> list[dict]:
         if cur is None or float(ts) > float(cur):
             b["source_mtime_epoch"] = float(ts)
             b["last_transcript_activity_pt"] = _mtime_pt(float(ts))
-            b["activity_source"] = label
+            if _is_jev(b) and b.get("jev_calls"):
+                b["activity_source_detail"] = label  # keep "jev-route logs" label
+            else:
+                b["activity_source"] = label
             b["missing_transcript"] = False
     apply_source_freshness(bots)
     return bots

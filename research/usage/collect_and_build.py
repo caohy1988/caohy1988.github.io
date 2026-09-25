@@ -1564,6 +1564,25 @@ def _fmt_last_activity(b: dict) -> str:
     return when
 
 
+def _render_jev_calls(bots: list[dict]) -> str:
+    """Jev router call counts from jev-route logs (Jev is on-demand, not chat)."""
+    for b in bots:
+        c = b.get("jev_calls")
+        if not isinstance(c, dict):
+            continue
+        gates = " · ".join(
+            f"{esc(g)} <strong>{esc(n)}</strong>" for g, n in (c.get("by_gate") or {}).items()
+        ) or "—"
+        newest = esc(c.get("newest_log_pt") or "—")
+        return f"""
+      <div class="metric" id="jev-calls">
+        <div class="metric-label">Jev router calls <span class="muted">(source: {esc(c.get('source') or 'jev-route logs')})</span></div>
+        <p class="pill">Total <strong>{esc(c.get('total', 0))}</strong> · last 24h <strong>{esc(c.get('last_24h', 0))}</strong> · last 7d <strong>{esc(c.get('last_7d', 0))}</strong> · newest call <strong>{newest}</strong></p>
+        <p class="muted">By gate: {gates}</p>
+      </div>"""
+    return ""
+
+
 def render_grok_body(grok: dict) -> str:
     """Grok section body — STALE banner first when the box activity cache is old/unknown."""
     bots = grok.get("bots") or []
@@ -1635,6 +1654,7 @@ def render_grok_body(grok: dict) -> str:
           </tbody>
         </table>
       </div>
+      {_render_jev_calls(bots)}
       <p class="link-pills">
         <a class="link-pill" href="{esc(ub)}">Usage &amp; Billing</a>
         <a class="link-pill" href="{esc(od)}">On-demand</a>
