@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-24 · Coding EM kick ledger + usage freshness guard + Lab KEEP pointers + Opus 5.5 writer/roster sync</strong></span>
+      <span>Updated <strong>2026-09-25 · rari KEEPs: handoff packet + reproduce-before-fix + promotion gate / weekly receipts</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -342,6 +342,7 @@
       <li>Cold-start Claude/Codex/Kimi when a session id for that PR/slice already exists.</li>
       <li>Put Haiyuan back on the critical path of mid-build approval prompts.</li>
       <li>Forward one reviewer’s findings into the other reviewer’s kickoff (breaks blind dual LGTM).</li>
+      <li>Launch the implementer on a <code>job_type=bug</code> kick before a repro artifact is linked (<a href="#coding-em-kicks">§12 reproduce-before-fix</a>).</li>
     </ul>
     <p class="note">EM also runs a <strong>15‑minute heartbeat</strong> (<code>*/15</code> PT; stretched 2026-09-21 token save from <code>*/5</code>) across live agent tasks (babysitter layer). It does not replace Mac <code>grok-tmux-watchdog</code> (~540s) — both apply.</p>
     <p class="note"><strong>Heartbeat reads the kick ledger first (2026-09-24):</strong> each <code>*/15</code> pass opens <code>/home/box/agent-data/handoffs/coding-em-kicks.json</code> before inventorying tmux + PRs. A kick still <code>posted</code> with no seat is <strong>not idle</strong> — launch it or mark it <code>blocked</code> with a note. See <a href="#coding-em-kicks">§12 Coding EM kick ledger</a>.</p>
@@ -491,6 +492,7 @@ grok-tmux-run dsh-collect-HH32 -- \
       <li>Github return → <code>Ship/builds/</code> or <code>Ship/rfc/</code> + PR URL + dual-LGTM status</li>
       <li>Medium return → <code>Hunt/medium/</code> path list (no hub PRs)</li>
     </ul>
+    <p class="note" id="handoff-packet"><strong>Structured handoff packet (2026-09-25 · <a href="https://x.com/0xwhrrari/status/2095497109524934750">rari · Grok Bot operating system</a>):</strong> pass ownership, not transcripts. Every Manage → specialist handoff (and every new Coding EM kick row) also carries a machine-readable <code>packet</code>: <code>from</code> · <code>to</code> · <code>job_type</code> (feature | bug | docs | review | audit) · <code>objective</code> · <code>artifacts</code> (paths/URLs) · <code>decisions</code> (already made) · <code>constraints</code> · <code>open_questions</code> · <code>next_gate</code> (e.g. <code>hermetic_ci</code>, <code>dual_lgtm</code>, <code>fact_check</code>). The artifact carries the detail, the packet carries the state. Manage passes the packet as the <code>jev-shadow intake</code> state; Jev’s <code>packet_complete</code> check is shadow only and never blocks. Schema: box <code>/home/box/agent-data/handoffs/README.md</code>.</p>
 
     <h3 id="coding-em-kicks">Coding EM kick ledger + pickup check (2026-09-24)</h3>
     <p>Every Manage handoff to Coding EM goes as a <strong>direct priority wake to Github Bot</strong>. A Coding EM room post is optional and never enough on its own. Each kick also gets a row in the box ledger <code>/home/box/agent-data/handoffs/coding-em-kicks.json</code>: <code>posted</code> → <code>launched</code> → <code>pr_open</code> / <code>done</code>, or <code>blocked</code> + note.</p>
@@ -498,6 +500,8 @@ grok-tmux-run dsh-collect-HH32 -- \
       <li>Github Bot’s <code>*/15</code> heartbeat reads the ledger <strong>first</strong>; <code>posted</code> with no seat = launch or mark blocked, never “idle”.</li>
       <li>Manage routine <strong>Coding EM kick pickup check</strong> — 04:06 + 08:06 PT: cross-check ledger vs tmux / PRs, send <strong>one</strong> priority re-wake for a stuck kick, and tell Haiyuan at 08:06 if it is still stuck. Silent otherwise.</li>
       <li>New named failure mode for exception-first skills: <strong>unacked handoff</strong> (a room-only kick the heartbeat never read, 2026-09-24 03:15–06:50 PT).</li>
+      <li><strong>Packet on every new row (2026-09-25):</strong> each new kick carries the <a href="#handoff-packet">handoff packet</a>. Rows posted before 2026-09-25 are legacy and stay as-is. A missing field gets a <code>packet_incomplete</code> note and never blocks the kick.</li>
+      <li><strong>Reproduce before fix (2026-09-25):</strong> <code>job_type=bug</code> needs a repro artifact first: exact steps, command, logs or failing test, environment/versions. It is saved to the vault (<code>Ship/builds/…-repro.md</code>) or the worktree and linked as <code>packet.repro</code> <em>before</em> the Opus 5.5 implementer launches. The implementer’s first commit is that failing test. Repro fails after ≤2 tries → <code>blocked</code> + <code>repro_failed</code> note with the attempt recorded. Never fix an imagined failure. Exception paths live in the ai-native-sdlc-em + github-implement-then-review skills. Source: <a href="https://x.com/0xwhrrari/status/2095497109524934750">rari · Grok Bot operating system</a> (bug reproduction pattern).</li>
     </ul>
     <p class="note">Lock: <code>Maps/Decisions/2026-09-24-coding-em-kick-ledger.md</code>. Pairs with no-exit-while-waiting and <a href="#exception-first">exception-first skills</a>.</p>
 
@@ -514,7 +518,7 @@ grok-tmux-run dsh-collect-HH32 -- \
       <li>Nightly Mac harness audit — 02:59 PT (rotate one Mac CLI; dual-LGTM; no merge)</li>
       <li>Coding EM kick pickup check — 04:06 + 08:06 PT (ledger vs tmux/PRs; one re-wake; Haiyuan at 08:06 if still stuck — <a href="#coding-em-kicks">details</a>)</li>
     </ul>
-    <p><strong>Policy:</strong> <strong>Three-Run Proof</strong> (Observe → Correct → Release) before Active — never automate the first success. Prefer event triggers over tight crons. Mondays: playbook↔card sync <strong>plus weekly kill review</strong>. Mac/Field Brief skills are <strong>exception-first</strong> (ran? right? miss if killed?). Long fires use <strong>run limits</strong>, autonomy ladder + demotion, and a <strong>retry/cost ceiling</strong>. Audit PR babysits after merge. See <code>Maps/Decisions/2026-09-15-grok-routine-audit.md</code> · <code>Maps/Decisions/2026-09-23-0xgenai-three-run-kill-review-gyr.md</code>.</p>
+    <p><strong>Policy:</strong> <strong>Three-Run Proof</strong> (Observe → Correct → Release) before Active — never automate the first success; promotion up the ladder also needs <a href="#three-run-proof">rollback tested + receipt complete</a>. Prefer event triggers over tight crons. Mondays: playbook↔card sync <strong>plus weekly kill review + weekly receipts</strong>. Mac/Field Brief skills are <strong>exception-first</strong> (ran? right? miss if killed?). Long fires use <strong>run limits</strong>, autonomy ladder + demotion, and a <strong>retry/cost ceiling</strong>. Audit PR babysits after merge. See <code>Maps/Decisions/2026-09-15-grok-routine-audit.md</code> · <code>Maps/Decisions/2026-09-23-0xgenai-three-run-kill-review-gyr.md</code>.</p>
 
     <h3>Profile = contract</h3>
     <p>Each Grok Bot’s description mirrors its vault <code>Agents/*.md</code> card: ownership, never-do, and human gate. Update both when a lasting boundary changes.</p>
@@ -625,8 +629,10 @@ ask → Manage Bot
     <p class="note"><strong>P0 urgency</strong> stays keyword-only (no standing 5‑minute poller) until Haiyuan asks. <strong>Shared box ≠ isolation</strong> — all Grok bots share one cloud computer (files + logins).</p>
     <h3 id="three-run-proof">Three-Run Proof (2026-09-23)</h3>
     <p>From <a href="https://x.com/0xGenAi/status/2091199153942495683">0xGenAi’s complete Grok Bot guide</a>. Before enabling a new routine: <strong>Observe</strong> (fix charter/handoff/skill, not the artifact by hand) → <strong>Correct</strong> on a second input → <strong>Release</strong> after a third consecutive clean run (or three checkable proofs). Do not automate the first successful run.</p>
-    <h3 id="kill-review">Weekly kill review</h3>
-    <p>Paired with Monday playbook↔card sync. For each Manage routine: did it run? was the output right? would we miss it if killed? Pause or delete zombies. Spot-check one output by hand.</p>
+    <p class="note" id="promotion-gate"><strong>Promotion gate (2026-09-25 · <a href="https://x.com/0xwhrrari/status/2095497109524934750">rari · Grok Bot operating system</a>):</strong> moving a routine or skill <em>up</em> the <a href="#autonomy-ladder">autonomy ladder</a> needs three things. (1) <strong>Three clean runs</strong>: the Three-Run Proof above, still 3 runs; we did not adopt rari’s 5-run minimum. (2) <strong>Rollback tested</strong>: a documented way to undo the routine’s effects that has actually been tried once (revert commit, restore <code>.bak</code>, pause routine, delete draft). (3) <strong>Receipt complete</strong>: each run leaves a record of what it did, its inputs, its outputs (paths/URLs) and its side effects (pushes, PRs, messages, external writes). Any of the three missing → stays at its current level.</p>
+    <h3 id="kill-review">Weekly kill review + weekly receipts</h3>
+    <p>Paired with Monday playbook↔card sync. For each Manage routine: did it run? was the output right? <strong>Would anyone miss this if removed?</strong> If no, Manage proposes a kill (pause/delete) to Haiyuan. Pause or delete zombies.</p>
+    <p class="note"><strong>Weekly receipt habit (2026-09-25 · <a href="https://x.com/0xwhrrari/status/2095497109524934750">rari · Grok Bot operating system</a>):</strong> each bot hands in a short weekly receipt: runs due vs ran, outputs (paths/URLs), failures + human repairs, side effects, anything waiting on Haiyuan. Manage compiles them into one vault note and asks Haiyuan to spot-check <strong>one</strong> real artifact (a named path/URL, not a summary). A bot can summarize its history; it should not be the only judge of it.</p>
     <h3 id="gyr-authority">GREEN / YELLOW / RED (reversibility)</h3>
     <table>
       <thead><tr><th>Tier</th><th>Rule</th><th>Examples</th></tr></thead>
@@ -649,7 +655,7 @@ ask → Manage Bot
     <p class="note"><strong>Source (Lab 2026-09-24 · <a href="https://github.com/hammasbuilds/bounded-agent-runtime">bounded-agent-runtime</a>):</strong> the same idea — step / time / spend / tool-call / repeat ceilings plus tool risk tiers (READ / WRITE / EXTERNAL / IRREVERSIBLE ≈ our <a href="#gyr-authority">GYR</a>). Today our limits are policy in charters and skills; a wrapper that enforces them outside the agent loop is a <em>Lab follow-up, not live</em>.</p>
 
     <h3 id="autonomy-ladder">Autonomy ladder 0–4 + demotion</h3>
-    <p>GYR is touch policy; the ladder is earned autonomy: Observe → Prepare → Execute-with-approval → Auto → Coordinate. <strong>Demote</strong> when quality drops, an integration changes, or human repairs pile up.</p>
+    <p>GYR is touch policy; the ladder is earned autonomy: Observe → Prepare → Execute-with-approval → Auto → Coordinate. <strong>Promote</strong> only through the <a href="#promotion-gate">promotion gate</a> (3 clean runs + rollback tested + receipt complete). <strong>Demote</strong> when quality drops, an integration changes, or human repairs pile up.</p>
 
     <h3 id="retry-ceiling">Retry / cost ceiling</h3>
     <p>Transient ≤2 · schema repair once · conflicting evidence → ask · verification fail → return exact gap · three failed correction rounds → escalate · cost ceiling → stop. Pairs with exception-first skills.</p>
@@ -681,8 +687,8 @@ ask → Manage Bot
       <li>☐ Vault hooks installed (<code>install-agent-hooks.sh</code>); agents reading vault before tasks</li>
       <li>☐ Default asks go to Manage Bot; Field Brief / Coding EM rooms used for visible handoffs</li>
       <li>☐ Jev router <code>mode: active</code>; honor Choice when confidence ≥ floor; logs under <code>jev/logs/</code></li>
-      <li>☐ Handoffs carry artifact path per <code>Maps/Contracts/manage-handoffs.md</code></li>
-      <li>☐ New routines pass <strong>Three-Run Proof</strong> before Active; Monday sync includes kill review</li>
+      <li>☐ Handoffs carry artifact path per <code>Maps/Contracts/manage-handoffs.md</code> + a <a href="#handoff-packet">packet</a> (new Coding EM kicks); bug jobs link a repro before implement</li>
+      <li>☐ New routines pass <strong>Three-Run Proof</strong> before Active; promotion also needs <strong>rollback tested + receipt complete</strong>; Monday sync includes kill review + weekly receipts (Haiyuan spot-checks one artifact)</li>
       <li>☐ Bot charters end with <strong>GREEN / YELLOW / RED</strong> reversibility (RED = Haiyuan)</li>
       <li>☐ Mac launch + Field Brief skills carry <strong>Exception paths</strong> (symptom → action)</li>
       <li>☐ Long fires declare <strong>run limits</strong>; demote autonomy when quality drops</li>
