@@ -1,8 +1,76 @@
 {
-  "updatedAt": "2026-09-24T05:27:23Z",
+  "updatedAt": "2026-09-25T00:22:46Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger \u2014 Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "bounded-agent-runtime-limits-outside-loop-2026-09-24",
+      "date": "2026-09-24",
+      "displayDate": "Sep 24, 2026",
+      "title": "bounded-agent-runtime \u2014 run limits + tool risk tiers outside the LLM loop",
+      "href": "https://github.com/hammasbuilds/bounded-agent-runtime",
+      "why": "Hard ceilings enforced by the runtime, not the prompt (max_steps / max_seconds / max_usd / max_tool_calls / max_repeats loop detect), checked before each step and raised as exceptions; risk is a property of the tool (READ / WRITE / EXTERNAL / IRREVERSIBLE), not the agent's self-judgment. Shows how to move our 0xjmori run limits (50/2/$0/0) + GYR tiers from markdown into the grok-tmux-run / watchdog wrapper, with a hermetic model-free chaos test pattern. Lab card; no install; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-24-agy-harness-lab-pack",
+      "tags": [
+        "run-limits",
+        "watchdog",
+        "tmux",
+        "Mac CLI",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "agent-runway-preflight-quota-2026-09-24",
+      "date": "2026-09-24",
+      "displayDate": "Sep 24, 2026",
+      "title": "agent-runway \u2014 pre-flight quota check before dispatch (Claude / Codex / Gemini)",
+      "href": "https://github.com/jberdah/agent-runway",
+      "why": "CLI + Claude Code skill + MCP tool that reads remaining quota (% used, reset time) across Claude, Codex, Copilot, and Gemini CLI and returns a proceed / defer / unknown readiness check. Candidate pre-flight before each 6h Opus 5.5 Field Brief launch: route straight to the Kimi fallback when quota is near-capped instead of burning a 540s watchdog timeout. CLI/skill, unlike the UsageBar desktop app we skipped on 09-21. GREEN smoke candidate; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-24-agy-harness-lab-pack",
+      "tags": [
+        "usage",
+        "Field Brief",
+        "Mac CLI",
+        "routing",
+        "smoke"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "capo-quota-checkpoint-failover-2026-09-24",
+      "date": "2026-09-24",
+      "displayDate": "Sep 24, 2026",
+      "title": "CAPO \u2014 quota-wall checkpoint + relaunch on the other CLI",
+      "href": "https://github.com/whitewolfx7/capo",
+      "why": "Detects Claude Code / Codex usage-limit cutoffs, writes a plain Markdown checkpoint of git status + uncommitted worktree changes, and relaunches the session on the other platform; when both are capped it parks until the earliest reset instead of flapping. Maps to our Opus \u2192 Kimi / Astra fallback and pairs with no-exit-while-waiting + the retry ceiling. Idea: a \"quota limit checkpoint\" exception branch in manage-handoffs / Mac launch skill. Lab card; no install; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-24-agy-harness-lab-pack",
+      "tags": [
+        "handoffs",
+        "EM",
+        "Mac CLI",
+        "retry",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "ai-coding-gateway-tool-output-trim-2026-09-24",
+      "date": "2026-09-24",
+      "displayDate": "Sep 24, 2026",
+      "title": "ai-coding-gateway \u2014 PreToolUse/PostToolUse hook to trim noisy tool output",
+      "href": "https://github.com/dommar04/ai-coding-gateway",
+      "why": "Hooks Claude Code's PreToolUse / PostToolUse in ~/.claude/settings.json to strip ANSI colors, progress bars, passing-test lists, and build logs before the model reads them, plus global command allow/deny policy. Adapt the trimming hook pattern only (skip the GUI dashboard) to cut context bloat and premature compaction on long Fable/Opus test runs \u2014 a direct token-save lever. Lab card (adapted hook pattern); appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-24-agy-harness-lab-pack",
+      "tags": [
+        "tokens",
+        "hooks",
+        "Mac CLI",
+        "EM",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "company-in-a-box-jev-gates-2026-09-23",
       "date": "2026-09-23",
