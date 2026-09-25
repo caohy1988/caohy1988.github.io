@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-24 · Coding EM kick ledger + usage freshness guard + Lab KEEP pointers</strong></span>
+      <span>Updated <strong>2026-09-24 · Coding EM kick ledger + usage freshness guard + Lab KEEP pointers + Opus 5.5 writer/roster sync</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -171,8 +171,8 @@
   │    └─ Jev (OpenRouter) → typed route Choice before fan-out
   └─ Mac CLIs (execute)
        ├─ Agy / Muse / DSH  → hourly source packs (hour % 3)
-       ├─ Kimi (+ Astra fallback) → deep Field Brief Markdown
-       └─ Fable (+ Muse/DSH optional) → implement; Codex/Kimi review</div>
+       ├─ Opus 5.5 (Kimi if capped → Astra last-resort) → deep Field Brief Markdown
+       └─ Opus 5.5 / Claude Code (+ Muse/DSH optional) → implement; Astra + Fable blind review</div>
   </section>
 
   <section id="roster">
@@ -182,7 +182,7 @@
       <thead><tr><th>Agent</th><th>Owns</th><th>Does not</th></tr></thead>
       <tbody>
         <tr><td>Agent Analytics Collection Bot</td><td>Industry/academy Field Briefs; Hunt packs → hub publish; Stories; GTM twin boards</td><td>Desk/SDK PRs; own-stack engineering</td></tr>
-        <tr><td>Github Bot CHY1988</td><td>EM for GitHub agent coding; Fable implement + Codex/Kimi review</td><td>Merge without Haiyuan</td></tr>
+        <tr><td>Github Bot CHY1988</td><td>EM for GitHub agent coding; Opus 5.5 implements (Claude Code default) + Astra + Fable blind dual-LGTM review</td><td>Merge without Haiyuan</td></tr>
         <tr><td>Medium Bot</td><td>Medium-proxied industry scout for briefs / boards — standing scouts <strong>paused</strong> 2026-09-21 (token save) until Haiyuan resumes</td><td>Unsolicited Medium publish</td></tr>
         <tr><td>Agent Manage Bot</td><td>Create/organize teammates; onboard Mac CLIs; usage cards; hooks/skills; owns Jev router</td><td>Destroy agents without Haiyuan</td></tr>
         <tr><td>Jev</td><td>TypeSafe System One decision layer (OpenRouter <code>typesafe/jev-1.13</code>) — Choice/Score/Noul routing</td><td>Chat authorship; coding implement; merge/pay/send</td></tr>
@@ -192,15 +192,15 @@
     <table>
       <thead><tr><th>Agent</th><th>Default model lane</th><th>Primary job</th></tr></thead>
       <tbody>
-        <tr><td>Claude Code / Fable</td><td>Opus 5.5 (<code>claude-opus-5-5[1m]</code>)</td><td>Default implementer under Github Bot; also Field Brief deep writer</td></tr>
-        <tr><td>Codex / Astra</td><td>GPT-6 Astra</td><td>RFC / evidence review; Kimi fallback for deep briefs</td></tr>
+        <tr><td>Claude Code / Fable</td><td>Opus 5.5 (<code>claude-opus-5-5[1m]</code>)</td><td>Opus 5.5 = default implementer under Github Bot + Field Brief deep writer; Fable seat = dual-LGTM reviewer (with Astra), never on a PR it implemented</td></tr>
+        <tr><td>Codex / Astra</td><td>GPT-6 Astra</td><td>Blind dual-LGTM reviewer (with Fable); RFC / evidence review; <strong>last-resort</strong> Field Brief deep writer (after Kimi)</td></tr>
         <tr><td>Kimi</td><td>Kimi Code</td><td>Field Brief deep-writer <strong>fallback</strong> if Opus capped (Astra last-resort)</td></tr>
         <tr><td>Agy</td><td>Gemini 3.8 Flash High</td><td>Collect packs on <code>hour % 3 == 0</code>; social-superpowers for X/Reddit</td></tr>
         <tr><td>Muse Code / Muse Spark</td><td>muse-spark-1.3-contributor</td><td>Collect on <code>hour % 3 == 1</code>; optional implementer (off dual-LGTM unless asked)</td></tr>
         <tr><td>DSH</td><td>OpenRouter GLM-5.3 (coding) / DeepSeek V4.1 Flash (collect)</td><td>Collect on <code>hour % 3 == 2</code>; optional implementer</td></tr>
       </tbody>
     </table>
-    <p class="note">Muse and DSH are <strong>optional</strong> on the Claude→Codex+Kimi dual-LGTM critical path unless Haiyuan explicitly puts them on a slice.</p>
+    <p class="note">Muse and DSH are <strong>optional</strong> on the Opus implement → Astra + Fable dual-LGTM critical path unless Haiyuan explicitly puts them on a slice.</p>
   </section>
 
   <section id="vault">
@@ -233,7 +233,8 @@
         <tr><td>Medium Bot</td><td><code>Hunt/medium/</code></td></tr>
         <tr><td>Claude / Fable / Muse / DSH (implement)</td><td><code>Ship/builds/</code> (+ <code>Ship/rfc/</code> when on RFC work)</td></tr>
         <tr><td>Codex / Astra</td><td><code>Ship/briefs/</code> + <code>Hunt/agent-analytics/</code> (+ <code>Ship/rfc/</code> when reviewing)</td></tr>
-        <tr><td>Kimi / Agy (collect)</td><td><code>Hunt/agent-analytics/</code> (packs); Kimi never writes hub HTML</td></tr>
+        <tr><td>Agy / Muse / DSH (collect)</td><td><code>Hunt/agent-analytics/</code> (packs)</td></tr>
+        <tr><td>Opus 5.5 deep writer (Kimi fallback · Astra last-resort)</td><td>Deep Field Brief Markdown for Collection; never writes hub HTML (Collection publishes)</td></tr>
         <tr><td>Agent Manage Bot</td><td><code>Hunt/agent-manage/</code> + <code>Maps/Decisions/</code> for locks</td></tr>
       </tbody>
     </table>
@@ -335,7 +336,7 @@
 
     <h3>What the EM does not do</h3>
     <ul>
-      <li>Start Codex/Kimi before there is a PR URL.</li>
+      <li>Start reviewers (Astra / Fable) before there is a PR URL.</li>
       <li>Treat dual LGTM as merged.</li>
       <li>Stall the next independent slice on org APPROVE.</li>
       <li>Cold-start Claude/Codex/Kimi when a session id for that PR/slice already exists.</li>
