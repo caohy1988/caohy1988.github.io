@@ -1,8 +1,93 @@
 {
-  "updatedAt": "2026-09-26T03:25:34Z",
+  "updatedAt": "2026-09-26T23:53:43Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger \u2014 Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "sno-station-squad-memory-peer-review-rsi-2026-09-26",
+      "date": "2026-09-26",
+      "displayDate": "Sep 26, 2026",
+      "title": "Sno Station \u2014 shared encrypted memory, peer review, nightly skill proposals",
+      "href": "https://github.com/sno-ai/sno-station",
+      "why": "Open-source laptop workstation that turns coding agents you already run (Claude Code / Codex / OpenClaw) into one squad: shared encrypted memory in one workspace, agent-to-agent messaging (\"Reach\"), cross-vendor peer-review skills, and rate-limit failover that picks up with context intact. Nightly RSI loop reads sessions, proposes changes to their own skills, and waits for a human yes \u2014 the missing front half of our daily consolidation (20:57 digests write notes but never propose skill diffs) under the rari promotion gate. Cross-vendor review independently mirrors blind dual-LGTM; failover-with-context is a data point for Opus\u2192Kimi handoff state. README is honest: one-command install is \"Not yet\"; repo is assembled in public (opened 2026-09-18); Apache-2.0; no daemon/cloud required. Patterns/prose only for now \u2014 not a new coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-26-dsh-harness-lab-pack",
+      "tags": [
+        "handoffs",
+        "dual-LGTM",
+        "Mac CLI",
+        "routing",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "model-citizen-stop-gate-ownership-journal-2026-09-26",
+      "date": "2026-09-26",
+      "displayDate": "Sep 26, 2026",
+      "title": "Model Citizen \u2014 stop gate + ownership journal for Claude Code / Codex",
+      "href": "https://github.com/JakeSelby/model-citizen",
+      "why": "Control plane under coding agents you already run: write rules/skills/roles/stances once as primitives; it projects them into Claude Code and Codex and enforces with hooks. Verified README features: graded shell-command hook (read-only\u2192irreversible; autonomy stance decides which grades stop-and-ask), stop gate (\"the turn doesn't end while your repo's own gate is red\"), fresh-context review by agents that never saw the code, ownership journal so every file it touches is recorded and uninstall puts things back, per-session spend ledger exporting over OTLP (off by default). Mechanical form of three locks that are currently prose: code-decides-done as an enforced stop gate, install-agent-hooks.sh drift/revert via an ownership journal, and GYR reversibility tiers as a pre-execution grade. Explicitly not an LLM gateway or replacement runtime. MIT. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-26-dsh-harness-lab-pack",
+      "tags": [
+        "EM",
+        "verification",
+        "hooks",
+        "Mac CLI",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "cachebeat-inactivity-prompt-cache-heartbeat-2026-09-26",
+      "date": "2026-09-26",
+      "displayDate": "Sep 26, 2026",
+      "title": "cachebeat \u2014 inactivity-triggered prompt-cache heartbeat (Claude Code)",
+      "href": "https://github.com/ARahim3/cachebeat",
+      "why": "Tiny Claude Code skill: an inactivity-triggered silent heartbeat that keeps the prompt cache warm while a session sits idle, so the next message reads history from cache (~0.1\u00d7 input) instead of re-billing the whole transcript. Fires only after true silence, re-arms itself, and self-kills after a deadline (default 8h) so an abandoned session cannot drip-bill. README math: \"going cold once costs as much as ten heartbeats.\" Our seats are idle by design (Field Brief :32, 6h briefs, daily collect) and token-save is a locked priority \u2014 a long Fable/Opus EM session past cache TTL re-bills history on the next one-line check-in. Built-in deadline is already a kill condition shape. Claude-Code-only; Sept 2026 note: runs as a background shell task (beat.sh + SKILL.md) after monitors were capped at 30 min. $0, two files. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-26-dsh-harness-lab-pack",
+      "tags": [
+        "tokens",
+        "usage",
+        "Mac CLI",
+        "kill review",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "gate-inbox-tmux-blocked-on-you-board-2026-09-26",
+      "date": "2026-09-26",
+      "displayDate": "Sep 26, 2026",
+      "title": "Gate Inbox \u2014 tmux board that surfaces sessions blocked on you",
+      "href": "https://github.com/usestring/gate-inbox",
+      "why": "Terminal board for running and triaging many AI coding-agent sessions in tmux: one list with live status so the session blocked on you is visible without hunting tabs. Claude Code / Codex / OpenCode run side by side each in its own tmux session; `i` walks everything waiting on you; agents started by hand appear as-is. README: \"Gate Inbox reads the panes; it does not sit between you and the model.\" Our attention routing today is a markdown decision queue swept once at 09:09 PT \u2014 this is the live \"who is blocked on Haiyuan right now\" view that file is missing, adjacent to no-exit-while-waiting and the 540s watchdog. Read-only TUI over existing CLIs, not a coding-CLI seat, no Herdr. Small repo (Go). Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-26-dsh-harness-lab-pack",
+      "tags": [
+        "tmux",
+        "ops",
+        "CoS",
+        "routines",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "crossagent-verdict-contract-agree-escalate-2026-09-26",
+      "date": "2026-09-26",
+      "displayDate": "Sep 26, 2026",
+      "title": "crossagent \u2014 dual-agent tmux review with AGREE/ESCALATE/UNPARSED verdicts",
+      "href": "https://github.com/k8adev/crossagent",
+      "why": "MCP server (npm crossagent-mcp) that pairs two coding agents in adjacent tmux panes \u2014 one drives, the other reviews. Every plan/diff passes through the peer; the reply always ends in a machine-parseable `VERDICT: <word>` with fixed vocabulary: AGREE / ADJUST / OBJECT / ESCALATE / UNPARSED. tmux is the only transport (no network, no shared file, no socket); briefing clears the peer's conversation so the reviewer is genuinely fresh. Gives blind dual-LGTM (Astra+Fable) an interface: today reviewers can return prose we adjudicate by reading; ESCALATE is \"only the human can call it\" (silent-misroute rule in mechanical form) and UNPARSED detects a non-verdict instead of treating it as assent (retry ceiling schema\u00d71). Adopt the verdict contract as prose/checklist first; installing the MCP is optional/later. Requires Node 22+, tmux, Claude Code or Codex CLI. MIT. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-26-dsh-harness-lab-pack",
+      "tags": [
+        "dual-LGTM",
+        "review",
+        "handoffs",
+        "tmux",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "simply-ledger-owned-done-settle-gate-2026-09-25",
       "date": "2026-09-25",
