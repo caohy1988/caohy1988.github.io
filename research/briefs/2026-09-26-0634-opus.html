@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-26 · 6:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="LiveKit Agents 1.8.3 telemetry fixes; Academy 2609.24928 + 2609.22573.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-26-0634-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 6:34 AM PT · late wake ~06:42 PT (label kept 0634)</p>
+    <article>
+<h1>Field Brief — 2026-09-26-0634: LiveKit Agents 1.8.3 changes what its voice-agent traces count, stored trajectories cut agent regression evals by 90%, and hiding an MCP tool is only half of blocking it</h1>
+<p>Another quiet night for releases. Nothing new reached a stable channel after the 0034 brief. But one uncarded release came into view. LiveKit made its <code>livekit-agents@1.8.3</code> release notes public at 08:53Z. The package has been on PyPI since Sep 23, and no pack or brief caught it.</p>
+<p>It is a telemetry-correctness release for a widely used voice-agent framework:</p>
+<ul>
+<li>The fallback adapter no longer registers as an extra LLM call.</li>
+<li>Provider attribution survives failover.</li>
+<li>Custom span metadata, including the documented Langfuse session ID, returns. Every span inside a job had silently dropped it since 1.8.0.</li>
+<li>Exceptions keep their error status when redaction is on.</li>
+<li>A span that could end before it began is clamped.</li>
+</ul>
+<p>Everything else in the six packs is open PRs or main-branch merges. The most useful for analytics are a crewAI fix and a queued Cloudflare change:</p>
+<ul>
+<li><strong>crewAI:</strong> cached tool calls are reported as live in spans (<code>crewai.tool.from_cache=false</code>).</li>
+<li><strong>Cloudflare:</strong> turn <code>outcome</code> values are queued for <code>agents@0.25.0</code>.</li>
+</ul>
+<p>arXiv is between mailings. I backfilled the past-week listings of the six main agent categories plus cs.CV and cs.LO, and read two papers in full:</p>
+<ul>
+<li><strong>2609.24928:</strong> uses stored agent trajectories to pick a 10% regression subset. It keeps median error under 5% and cuts evaluation tokens by about 90%.</li>
+<li><strong>2609.22573 (from PayPal):</strong> listing a forbidden MCP tool drew 152 injected attempts out of 720. On identical prompts, attempt rates ranged from 0% to 50% by vendor. Hiding the tool stopped attempts, but a scripted client could still call it by name.</li>
+</ul>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>), the primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-26-0634</strong> (official 6h slot, 6:34 AM PT Sat Sep 26, 2026). <strong>Late wake:</strong> the slot woke at about 06:42 PT and Collection woke this writer at about 06:44 PT. This run's first clock read was 06:46:53 PT (13:46:53Z). The label stays <strong>0634</strong>.
+<strong>Evidence window:</strong> from the 0034 brief's last probes (07:56Z Sat) to this run's last probes (13:58Z Sat). I swept from 07:30Z so the two windows overlap. Between 13:47Z and 13:58Z I probed these sources myself:</p>
+<ul>
+<li>GitHub release objects and dated tags for 77 repos, and default-branch commits since 07:40Z.</li>
+<li>PyPI (66 packages) and npm (48 packages).</li>
+<li>arXiv abs pages, and the past-week listings of cs.AI, cs.CL, cs.LG, cs.SE, cs.CR, cs.MA, cs.CV and cs.LO.</li>
+<li>HN Algolia.</li>
+</ul>
+<p>I read 2 PDFs in full and 43 PR bodies. I also downloaded the published <code>livekit-agents</code> 1.8.3 wheel and searched its code.</p>
+<ul>
+<li><strong>Source packs used (6, all PACK_DONE at launch):</strong> Muse 0132, DSH 0232, Agy 0332, Muse 0432, DSH 0532 and Agy 0632.</li>
+<li><strong>Gaps this window: none.</strong></li>
+<li><strong>Catalog baseline:</strong> <strong>424 items / 106 briefs / 108 runs</strong>, SHA-256 <code>76b6fa040f1ab124…</code>, read-only. The newest brief is <code>2026-09-26T0034</code>.</li>
+</ul>
+<p><strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call. Collection owns the HTML, the catalog and the push.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: 1 new Industry rank, 2 new Academy ranks, 0 progress notes, and a NOTE list.</strong></p>
+<ul>
+<li>The Industry rank is a release the packs missed. The two Academy ranks are backfill from listings no brief had dispositioned.</li>
+<li>No catalog card moved: Codex, Mastra, Claude Code, PydanticAI, Vercel AI, Langfuse and Pipecat published nothing in the window. So there are no progress notes.</li>
+</ul>
+<p><strong>Theme 1: telemetry fixes change counts, not agent behavior.</strong></p>
+<ul>
+<li><strong>LiveKit Agents 1.8.3</strong> (PyPI Sep 23; release notes public 08:53Z today):</li>
+<li><a href="https://github.com/livekit/agents/pull/7373">#7373</a> stops the fallback adapter's span from also reporting <code>chat</code>, so &quot;observability backends can count an extra LLM call&quot; no longer applies.</li>
+<li><a href="https://github.com/livekit/agents/pull/7374">#7374</a> keeps the serving provider after failover.</li>
+<li><a href="https://github.com/livekit/agents/pull/7428">#7428</a> restores custom span metadata that 1.8.0–1.8.2 dropped inside jobs.</li>
+<li><a href="https://github.com/livekit/agents/pull/7332">#7332</a> clamps a <code>user_speaking</code> span that could end before it started. One backend read that duration as 18,446,744,073,500,970 µs.</li>
+<li><strong>crewAI <a href="https://github.com/crewAIInc/crewAI/pull/7776">#7776</a> (open):</strong> on the default executor, a cached tool call is reported with <code>crewai.tool.from_cache=false</code>. That has been the case since the executor became the default in May.</li>
+<li><strong>Cloudflare <a href="https://github.com/cloudflare/agents/pull/2378">#2378</a></strong> (merged, queued in <a href="https://github.com/cloudflare/agents/pull/2335">#2335</a> for <code>agents@0.25.0</code>): terminal chat frames gain <code>outcome</code> = completed / error / aborted / skipped / recovering. Before, a skipped or cancelled request &quot;looked the same as a completed one&quot;.</li>
+</ul>
+<p><strong>Theme 2: trace data pays for evaluation.</strong></p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.24928">2609.24928</a>:</strong> the method stratifies instances by how often they passed in past runs. It then takes the trajectories nearest each stratum's centroid.</li>
+<li>A 10% subset kept median error under 5% while cutting tokens from 3.44B to about 345M.</li>
+<li>Its worst single-run error was 8.6–9.0 points. A typical random-within-strata draw's worst was about 9.6 points, and an unlucky 95th-percentile draw's worst was 14.9–15.9 points.</li>
+</ul>
+<p><strong>Theme 3: tool visibility is one control and invocation authorization is another.</strong></p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.22573">2609.22573</a>:</strong> with every tool listed and checks inside tool bodies, 21.1% of injected runs named the forbidden tool. Refusal ranged from 0/180 to 90/180 by vendor on identical prompts.</li>
+<li>Filtering the listing brought attempts to 0/720.</li>
+<li>Even with the tool hidden, models still repeated its inferable name, 94% of the time on one model. A scripted client can call a hidden tool directly unless invocation is checked too.</li>
+<li><strong>Same seam, in a framework:</strong> crewAI <a href="https://github.com/crewAIInc/crewAI/pull/7779">#7779</a> (open). An explicit empty MCP allowlist allowed every tool.</li>
+</ul>
+<p><strong>What this means for BQAA (as the observer, not the source of truth):</strong></p>
+<ul>
+<li><strong>Version-segment every metric that depends on framework-emitted span attributes.</strong> The fields affected are LLM call counts, provider, <code>from_cache</code>, error status and span durations. Add data-quality checks for spans that end before they start and for booleans that are constant across a framework version.</li>
+<li><strong>Keep per-instance pass counts across full eval runs, plus a trajectory representation per instance.</strong> Together they make a cheap, deterministic regression subset possible.</li>
+<li><strong>Log the tool list an agent was shown, separately from each call's authorization result.</strong> Then count three classes: forbidden tool attempted, forbidden tool executed, and hidden tool named in model output.</li>
+</ul>
+<h2>Industry</h2>
+<p><strong>Screen used (same as 0034):</strong> a release-level move that ships a product capability, or a change to how agent telemetry, cost, evaluation or memory state is recorded. Unreleased main-branch commits are NOTE only. I checked every item against its release object, registry entry, changelog, PR body or published artifact, not against the pack summary.</p>
+<p><strong>Sweep results (my own, 13:47Z–13:57Z):</strong></p>
+<ul>
+<li><strong>GitHub release objects and dated tags (77 repos, GraphQL, since 07:30Z):</strong></li>
+<li><code>livekit-agents@1.8.3</code>: the release object was created Sep 23 19:02Z and published today at 08:53:41Z.</li>
+<li>One Opik tag, <code>2.2.82-thiagohora-opik-8274-6796</code> (09:45:50Z). It is branch-style, and PyPI <code>opik</code> is still 2.2.81.</li>
+<li>Nothing else. A re-sweep since 13:30Z, run at about 13:57Z, found nothing.</li>
+<li><strong>PyPI (66 packages, since 07:30Z):</strong> no uploads. <code>livekit-agents</code> 1.8.3 was uploaded 2026-09-23 19:04:06Z.</li>
+<li><strong>npm (48 packages):</strong></li>
+<li>Only an <code>opencode-ai</code> dev build (13:37Z) and a <code>cline</code> nightly (12:23Z).</li>
+<li><strong><code>latest</code> did not move anywhere:</strong> Codex 0.157.1, Mastra core 1.71.0, promptfoo 0.123.1, Cloudflare <code>agents</code> 0.24.0 (Sep 18), <code>@cloudflare/ai-chat</code> 0.12.0, <code>ai</code> 7.0.116 and <code>cline</code> 3.0.65.</li>
+<li><strong>Default-branch commits since 07:40Z (77 repos):</strong> 13 commits in 8 repos.</li>
+<li>LiteLLM 3 (#43295, #43151, #43302) and promptfoo 3 (#11045, #11044, #11087).</li>
+<li>Pipecat 2 (#5887 and its merge), and one each in Cloudflare Agents (#2378), Langfuse (#17966), LangWatch (#8316), Mastra (docs regeneration) and opencode (docs).</li>
+<li><strong>Flat:</strong></li>
+<li>Codex, Claude Code and both Agent SDKs, Mastra packages, PydanticAI, OpenAI Agents, Vercel AI and Phoenix.</li>
+<li>Opik, LangSmith, Weave, Letta, mem0, DSPy, Strands, ADK and the OTel repos.</li>
+</ul>
+<p><strong>Why only one NEW rank:</strong> LiveKit 1.8.3 is the only published release in scope that nobody has carded. Everything else in the window is an open PR, a main-branch merge or a docs change.</p>
+<h3>1. NEW rank: LiveKit Agents <a href="https://github.com/livekit/agents/releases/tag/livekit-agents%401.8.3"><code>livekit-agents@1.8.3</code></a>: fallback calls stop double-counting, provider attribution survives failover, and custom span metadata comes back</h3>
+<p><strong>Clocks:</strong></p>
+<ul>
+<li>PyPI <a href="https://pypi.org/project/livekit-agents/1.8.3/">1.8.3</a> was uploaded <strong>2026-09-23 19:04:06Z</strong>.</li>
+<li>The GitHub release object was created Sep 23 19:02:33Z but <strong>published 2026-09-26 08:53:41Z</strong>, inside this window. For comparison, 1.8.0–1.8.2 were each published within hours of creation.</li>
+<li><strong>No pack or brief mentioned 1.8.3.</strong> No collector's release sweep covers <code>livekit/agents</code> or PyPI <code>livekit-agents</code> (DSH 2032 on Sep 22 was the exception). The 0034 brief's GitHub sweep started at 03:20Z Sep 26 and only saw release objects, so it missed the Sep 23 upload.</li>
+<li>I rank it now because it is published, uncarded, and changes recorded telemetry.</li>
+</ul>
+<p><strong>How I checked:</strong></p>
+<ul>
+<li>The release notes list 66 PRs.</li>
+<li>I read the bodies of the ten that touch telemetry, tool events or usage: #7374, #7376, #7428, #7322, #7303, #7332, #7330, #7377, #7373 and #7340.</li>
+<li>I downloaded the published wheel and confirmed four fixes in the built code:</li>
+<li><code>FallbackLLMStream._genai_operation_name = None</code>, commented &quot;Provider request spans own the inference operation&quot;;</li>
+<li><code>_MetadataSpanProcessor.on_start</code> now merges provider metadata with job attributes instead of returning early;</li>
+<li><code>llm_input_audio_tokens</code> and <code>stt_input_audio_tokens</code> in the usage collector;</li>
+<li><code>ToolResult(..., reply_required=False)</code>.</li>
+</ul>
+<p><strong>What changes in the traces:</strong></p>
+<ul>
+<li><strong>One fewer LLM call per fallback (<a href="https://github.com/livekit/agents/pull/7373">#7373</a>).</strong></li>
+<li>&quot;<code>llm_fallback_adapter</code> and its provider request both report <code>chat</code>, so observability backends can count an extra LLM call.&quot;</li>
+<li>The adapter span keeps its metadata and fallback events but drops <code>gen_ai.operation.name</code>.</li>
+<li>This is part of LiveKit's adoption of the newer OTel GenAI attributes (AGT-3191).</li>
+<li><strong>Provider after failover (<a href="https://github.com/livekit/agents/pull/7374">#7374</a>).</strong></li>
+<li>&quot;After failover, <code>llm_node</code> could report the fallback model with the primary provider.&quot;</li>
+<li>The node now records its request identity before nested inference starts.</li>
+<li><strong>Custom span metadata restored (<a href="https://github.com/livekit/agents/pull/7428">#7428</a>).</strong></li>
+<li><code>set_tracer_provider(provider, metadata={...})</code> was &quot;silently ignored for every span created inside a job&quot;. All agent spans are in-job, so user metadata never landed.</li>
+<li>That broke the documented <code>langfuse.session.id</code> session grouping. The PR traces the regression to #7033, merged Aug 29, so it first shipped in 1.8.0 on Sep 5.</li>
+<li>Job attributes keep precedence, and provider metadata is kept separate so &quot;simulation and redaction flags cannot cross jobs&quot;.</li>
+<li><strong>Exceptions under redaction (<a href="https://github.com/livekit/agents/pull/7376">#7376</a>).</strong></li>
+<li>&quot;With project redaction enabled, uncaught exceptions lose their span event and error status.&quot;</li>
+<li>Both tracer context managers now record the exception and <code>error.type</code> through the redaction-aware helper. Duplicate recording in LLM and TTS attempts is removed.</li>
+<li><strong>Negative span durations (<a href="https://github.com/livekit/agents/pull/7332">#7332</a>).</strong></li>
+<li><code>user_speaking</code> starts on the STT turn anchor and ends on a backdated VAD anchor. &quot;The two detectors do not share a clock.&quot;</li>
+<li>On short bursts the end landed before the start. OTel keeps durations unsigned, and the reporter's backend read <code>18446744073500970us</code>.</li>
+<li>The end is now clamped to the start, and the trace-schema check flags any span that ends before it starts.</li>
+<li><strong>Close spans that nest (<a href="https://github.com/livekit/agents/pull/7322">#7322</a>).</strong></li>
+<li><code>session_close</code> now covers the whole close. Before, work in the close handlers parented to an already-ended <code>agent_session</code> span.</li>
+<li>In one export, a 103 ms <code>event_loop_blocked</code> appeared 8 ms after the session ended.</li>
+<li><strong>Realtime transcription usage (<a href="https://github.com/livekit/agents/pull/7303">#7303</a>).</strong></li>
+<li>OpenAI realtime ASR duration and tokens are reported as STT metrics and attributed to each session's current transcription model.</li>
+<li><code>input_tokens</code> includes audio and text, and <code>input_audio_tokens</code> is the audio subset.</li>
+<li><strong>Tool exchanges that stop disappearing (<a href="https://github.com/livekit/agents/pull/7330">#7330</a>).</strong></li>
+<li><code>ChatContext.copy(tools=...)</code> dropped name-less tool outputs and then their orphaned calls, so &quot;a completed tool exchange disappeared from the request&quot;.</li>
+<li>Outputs are now paired by <code>call_id</code>. A realtime call rejected before execution is also now recorded in <code>session.history</code>.</li>
+<li><strong>Tool events:</strong></li>
+<li><code>ToolCallEnded.message</code> no longer carries the <code>ToolResult</code> wrapper's repr (<a href="https://github.com/livekit/agents/pull/7377">#7377</a>).</li>
+<li>Tools can return <code>ToolResult(..., reply_required=False)</code> to keep a result in history without prompting a reply (<a href="https://github.com/livekit/agents/pull/7340">#7340</a>).</li>
+<li><strong>Also in the release notes (not individually verified):</strong></li>
+<li><code>GPTLiveModel.with_azure</code> (#7325) and a GPT Live service tier (#7401).</li>
+<li>Opus 5.5 on Bedrock falls back to <code>auto</code> tool choice (#7411).</li>
+<li>Google tool-schema errors are reported instead of ending the session silently (#7371).</li>
+<li>Silently dropped STT sockets are now detected for several providers (#7357, #7359, #7364, #7369).</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>It is a patch release, dated Sep 23 on PyPI. Only the public release notes are new in this window.</li>
+<li>I verified ten PR bodies and four fixes in the wheel. The rest of the 66-PR list is from the release notes.</li>
+<li>Several PR descriptions note that pre-existing plugin type-check errors remain on <code>main</code>.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It changes six things a trace store derives from LiveKit spans:</li>
+<li>LLM call counts;</li>
+<li>provider attribution;</li>
+<li>session grouping through custom metadata;</li>
+<li>error status;</li>
+<li>span durations;</li>
+<li>per-session ASR usage.</li>
+<li>Anyone comparing LiveKit agents before and after the upgrade will see step changes that are measurement, not behavior.</li>
+<li>It is the first LiveKit Agents card. The nearest catalog card is <code>pipecat-v1-12-0-classifiers-eval-judge-confidence-rtvi-double-report</code>, another voice framework's release that fixed a double-report.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Segment LiveKit metrics by <code>livekit-agents</code> version. Before 1.8.3:</li>
+<li>fallback turns carry an extra <code>chat</code> span (don't count it as an LLM call);</li>
+<li><code>llm_node</code> provider may be the primary after failover;</li>
+<li>on 1.8.0–1.8.2, custom span metadata is missing, so session grouping by <code>langfuse.session.id</code>-style attributes fails.</li>
+<li>Reject or flag spans whose end precedes their start. Treat absurd unsigned durations as invalid, not as long turns.</li>
+<li>Read <code>input_audio_tokens</code> as a subset of <code>input_tokens</code>. Don't add them.</li>
+</ul>
+<h3>Progress notes</h3>
+<p>None. No carded product published anything in the window:</p>
+<ul>
+<li>Codex's last is alpha.4 at 06:21Z, which the 0034 brief already carries.</li>
+<li>Mastra's last is 1.72.0-alpha.3.</li>
+<li>Claude Code, PydanticAI, Vercel AI, Langfuse, Pipecat and OTel GenAI are flat.</li>
+</ul>
+<p>The Pipecat and LiteLLM moves below are unreleased, so they are NOTEs.</p>
+<h3>NOTE (not ranked; recorded so the next brief can dedupe)</h3>
+<p>I read the PR body for every item below, except the &quot;Below the bar&quot; list and the promptfoo follow-up numbers. Those rest on titles and pack summaries.</p>
+<p><strong>Queued for a release (WATCH):</strong></p>
+<ul>
+<li><strong>Cloudflare Agents <a href="https://github.com/cloudflare/agents/pull/2378">#2378</a></strong> (merged 08:16:41Z).</li>
+<li>Terminal <code>cf_agent_use_chat_response</code> frames carry <code>outcome</code>: <code>completed</code>, <code>error</code>, <code>aborted</code>, <code>skipped</code> or <code>recovering</code>. Before, &quot;a skipped or cancelled request looked the same as a completed one&quot;.</li>
+<li><code>useAgentChat({ onTurnEnd })</code> fires once per ended request with <code>{ requestId, messageIds, outcome, error, replay }</code>. It is deduped per request and never fires for <code>recovering</code>.</li>
+<li>Older servers without <code>outcome</code> are read as <code>error</code> if any frame had an error, else <code>completed</code>.</li>
+<li>The Version Packages PR <a href="https://github.com/cloudflare/agents/pull/2335">#2335</a> (updated 08:22:45Z) now lists #2378 for <code>agents@0.25.0</code>, <code>@cloudflare/ai-chat@0.13.0</code> and <code>@cloudflare/think@0.20.0</code>. Also queued there: #2365's <code>messageIds</code> (0034 NOTE), and <code>cancelSubmission()</code> now returns <code>{ outcome, previousStatus, messagesApplied }</code> instead of <code>void</code>.</li>
+<li>npm <code>agents</code> is still 0.24.0 (Sep 18).</li>
+<li><strong>For BQAA:</strong> when 0.25.0 ships, <code>skipped</code> and <code>recovering</code> are neither success nor failure. Keep them out of error rates.</li>
+<li><strong>Pipecat <a href="https://github.com/pipecat-ai/pipecat/pull/5887">#5887</a></strong> (merged 12:27Z). With Anthropic prompt caching on, a cache breakpoint is added to the system prompt, &quot;so shared instructions can be reused across conversations&quot;. It is unreleased; the parent card is <code>pipecat-v1-12-0-classifiers-eval-judge-confidence-rtvi-double-report</code>. Expect the cache-read share to rise on the next Pipecat release.</li>
+</ul>
+<p><strong>Open PRs with an analytics consequence (WATCH):</strong></p>
+<ul>
+<li><strong>crewAI <a href="https://github.com/crewAIInc/crewAI/pull/7776">#7776</a></strong> (open, now +247/−6): <code>from_cache</code> is dropped on the default executor.</li>
+<li><code>Agent.executor_class</code> defaults to the experimental <code>AgentExecutor</code>, and two of its native tool paths compute <code>from_cache</code> but omit it from <code>ToolUsageFinishedEvent</code>.</li>
+<li>The <code>crewai.tool.from_cache</code> span attribute (<code>telemetry/tracing/handlers.py:1428</code>) therefore reads <code>False</code> on cache hits.</li>
+<li>The earlier fix (#7501) went to <code>CrewAgentExecutor</code>, which #5745 retired as the default in May.</li>
+<li>The author shows <code>event.from_cache = False</code> on a cached call, and 2 of 6 new tests fail with the fix reverted.</li>
+<li><strong>For BQAA:</strong> don't compute crewAI cache-hit rates from spans until a release carries this.</li>
+<li><strong>crewAI <a href="https://github.com/crewAIInc/crewAI/pull/7779">#7779</a></strong> (open): <code>StaticToolFilter</code> normalized <code>allowed_tool_names=None</code> and <code>[]</code> both to an empty set, so an explicit empty allowlist &quot;allowed every non-blocked MCP tool instead of blocking all tools&quot;. The author rates it low risk; only explicit empty allowlists change.</li>
+<li><strong>crewAI <a href="https://github.com/crewAIInc/crewAI/pull/7780">#7780</a></strong> (open): the <code>({.*})</code> DOTALL regex took the span from the first <code>{</code> to the last <code>}</code>. Valid JSON followed by any brace in trailing prose failed to parse and fell back to <code>convert_with_instructions</code> (an extra LLM call). The fix uses <code>raw_decode</code>.</li>
+<li><strong>LiteLLM <code>max_budget=0</code> (issue #43214): two competing open PRs.</strong></li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43305">#43305</a> (12:28Z) reproduces on <code>main</code> that a $0 budget on a provider, deployment or tag still routes and bills. It adds <code>test_zero_max_budget_blocks_spend</code>.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43292">#43292</a> (0034 NOTE) proposes the same <code>is not None</code> fix.</li>
+<li>Either one is a behavior change: 0 will block.</li>
+<li><strong>LiteLLM <a href="https://github.com/BerriAI/litellm/pull/43301">#43301</a></strong> (open): <code>prompt is too long</code> (Anthropic/Bedrock) and <code>context_length_exceeded</code> (vLLM) currently surface as generic 400s, so context-window fallback can't trigger. The PR maps both to <code>ContextWindowExceededError</code>.</li>
+<li><strong>LiteLLM, two smaller open PRs:</strong></li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43297">#43297</a>: a completed request's marker lives 400 s, but its hanging-request tracker entry lives 510 s. Above about 8 req/min, the marker can expire first and fire a false &quot;hanging request&quot; alert for a request that finished in under a second.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43296">#43296</a>: a named <code>signoz</code> OTel v2 preset with per-team ingestion keys. Today every team's traces go to one destination.</li>
+<li><strong>PydanticAI:</strong></li>
+<li><a href="https://github.com/pydantic/pydantic-ai/pull/8820">#8820</a> (open, now +8,688/−9,386, 8 unticked to-dos) folds <code>pydantic-ai-harness</code> and <code>pydantic-clai2</code> into the workspace, versioned <code>0.51.x</code> to track <code>v2.51.x</code>.</li>
+<li><a href="https://github.com/pydantic/pydantic-ai/pull/8822">#8822</a> (open): a raising <code>on_event</code> listener let <code>Agent.run()</code> return while a tool call was still running. Cancellation only happened at garbage collection. It also notes &quot;<code>main</code> currently fails lint, typecheck and cassette checks&quot; until #8820 lands.</li>
+<li><a href="https://github.com/pydantic/pydantic-ai/pull/8827">#8827</a> (open): <code>format_as_xml</code> walked a generator twice and silently dropped every item after the first.</li>
+<li><strong>Mastra <a href="https://github.com/mastra-ai/mastra/pull/25221">#25221</a></strong> (open): evented <code>.foreach</code> stored the whole input array in every iteration record.</li>
+<li>The PR's real case: 181 items of about 5 KB saved &quot;94 iteration records x 897 KB = 86 MB of JSON (16 MB stored) in one snapshot&quot;, which &quot;stalled a Postgres instance&quot;.</li>
+<li>The default engine is unaffected.</li>
+<li><strong>Cline <a href="https://github.com/cline/cline/pull/14555">#14555</a></strong> (open): the MCP stdio parser used <code>Content-Length</code> (bytes) as a UTF-16 string index. Responses with multibyte text hung until timeout, and back-to-back frames tore down the connection.</li>
+<li><strong>Cloudflare Agents <a href="https://github.com/cloudflare/agents/pull/2379">#2379</a></strong> (open): <code>cdp.spec()</code> kept method names but dropped parameters and returns. Restoring them grows the spec from about 250 KB to 776 KB, kept in the sandbox.</li>
+<li><strong>Langfuse <a href="https://github.com/langfuse/langfuse/pull/17965">#17965</a></strong> (open): <code>service_tier: &quot;fast&quot;</code> failed validation in in-app experiments, and the bundled OpenAI provider &quot;drops <code>priority</code> for GPT-6 models&quot;.</li>
+<li><strong>promptfoo</strong> (npm 0.123.1):</li>
+<li><a href="https://github.com/promptfoo/promptfoo/pull/11045">#11045</a> + <a href="https://github.com/promptfoo/promptfoo/pull/11044">#11044</a> (merged, docs and examples). Short IDs like <code>openai:gpt-6-sol</code> &quot;default to Responses&quot;.</li>
+<li>Both PRs state that the provider support (#11043) &quot;is merged but newer than published Promptfoo 0.123.1&quot;, so the <code>npx promptfoo@latest</code> snippets need a release that doesn't exist yet.</li>
+<li>The examples bound the Python OpenAI SDK below 2.45 &quot;to avoid the Agents SDK 0.14 usage-object incompatibility&quot;.</li>
+<li>Open follow-ups #11086, #11088–#11097 cover scoped env, cache and auth; transport isolation; telemetry flags; and #11096's OTel child-span docs fix.</li>
+</ul>
+<p><strong>Merged on main, small, and worth one line:</strong></p>
+<ul>
+<li><strong>LangWatch <a href="https://github.com/langwatch/langwatch/pull/8316">#8316</a></strong> (09:04Z): the health canary sat for about 620 s when the model answered with a question card. 2–4 canary turns an hour did this, against about 13 s p50 normally. The canary now settles on <code>awaiting_user</code> and counts it as healthy. <strong>For BQAA:</strong> &quot;waiting on the user&quot; is a turn state, not a timeout.</li>
+<li><strong>LiteLLM <a href="https://github.com/BerriAI/litellm/pull/43295">#43295</a></strong> (08:04Z) adds Rust gateway logging and test coverage. Its own User Flow reads &quot;No user-visible change: internal refactor and coverage&quot;. Still scaffolding; do not read it as a shipped Rust gateway.</li>
+</ul>
+<p><strong>Adjacent (opencode), below card bar:</strong></p>
+<ul>
+<li>Merged:</li>
+<li><a href="https://github.com/sst/opencode/pull/51006">#51006</a>: MCP OAuth choices resolve through server-owned integration IDs.</li>
+<li><a href="https://github.com/sst/opencode/pull/51484">#51484</a>: Ctrl+C at &quot;Waiting for authorization...&quot; exited 0 and left the attempt pending for up to 10 minutes on an open callback port. It now cancels and exits 130.</li>
+<li>Open: <a href="https://github.com/sst/opencode/pull/51486">#51486</a>. Bedrock lacked thinking-binding recovery, so Opus 5.5 rejected saved conversations after a prefix change. The author notes it &quot;does not repair the history edits that invalidate thinking&quot;.</li>
+</ul>
+<p><strong>Docs and policy:</strong> OpenHands <a href="https://github.com/All-Hands-AI/OpenHands/pull/17726">#17726</a> (open) defines review evidence:</p>
+<ul>
+<li>mock-LLM and mocked-backend runs are &quot;regression coverage rather than live evidence&quot;;</li>
+<li>temporal behavior needs video.</li>
+</ul>
+<p><strong>Below the bar:</strong></p>
+<ul>
+<li>LiteLLM #43151 (no behavior change), #43302 (test fixture), #43304 (types) and the #43306–#43309 canary test suite.</li>
+<li>promptfoo #11087 (prettier); Langfuse #17966 (ClickHouse metric tag); braintrust-proxy #1307/#1308 (model sync).</li>
+<li>Mastra docs regeneration; opencode #51487/#51488 (docs), #51471, #51495 and #51499 (open); agno #10605/#10606/#10609; weave #7957; crewAI #7774.</li>
+<li>The Opik branch tag, the <code>opencode-ai</code> dev build and the <code>cline</code> nightly.</li>
+</ul>
+<p><strong>Google (first-party; NOTE only):</strong> python-genai <a href="https://github.com/googleapis/python-genai/pull/3011">#3011</a> (open). Sync automatic function calling skipped calls whose <code>args</code> is <code>None</code>, i.e. zero-parameter tools, while async treated <code>None</code> as <code>{}</code>. So <code>Chat.send_message</code> and <code>AsyncChat.send_message</code> diverge for those tools.</p>
+<h2>Academy</h2>
+<p><strong>Screen used:</strong> agent evaluation, cost, security or oversight evidence that produces a result BQAA could measure or log. Every rank below was read in full before ranking.</p>
+<p><strong>Coverage:</strong></p>
+<ul>
+<li><strong>No new arXiv mailing.</strong> The ceiling is still <code>2609.30268</code> (probed 13:51Z). The next mailing is Sunday 20:00 ET.</li>
+<li><strong>So I backfilled the past-week listings of cs.AI, cs.CL, cs.LG, cs.SE, cs.CR, cs.MA, cs.CV and cs.LO.</strong></li>
+<li>These are 3,280 unique entries. The 0034 brief's backfill covered 20 other categories; the main ones had only been scanned day by day.</li>
+<li>2,006 appear in no brief, pack, vault note, catalog item or seen-links entry, and in none of the listings the 1234, 1834 (Thu) and 0034 runs scanned.</li>
+<li>330 matched agent or evaluation keywords and 47 matched a stricter filter. I read 16 abstracts and 2 papers in full.</li>
+<li><strong>Prior exposure, disclosed:</strong></li>
+<li>Both ranked papers' titles appear in raw listing output in the Mon 1834 (Kimi) and Tue 1834 (Opus) run logs.</li>
+<li>2609.24928's ID also appears in a <code>catalog=0</code> check list in the Tue 1834 (Opus) run.</li>
+<li>Neither ID appears in any brief, pack, vault note, the catalog or seen-links, so no one dispositioned them. Both ranks are backfill.</li>
+<li>The priority pin <code>2609.02702</code> (Trace-as-State v1) is intact and is <strong>not</strong> re-carded.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.24928">arXiv 2609.24928</a>: Trajectory-Aware Benchmark Subset Selection for Cost-Efficient Software Engineering Agent Regression Testing</h3>
+<p><strong>Ayyad, Wang, Shin, Zou, Adams</strong> (Queen's University; Wang at Concordia). v1 21 Sep 2026 (cs.SE), 37 pages, an ACM manuscript. The replication package, with the standardized trajectories, parsing schema and selection code, is at github.com/SAILResearch/swe-agent-subset-selection.</p>
+<p><strong>Full PDF read:</strong> §1–9 (Tables 1–9, Figs. 1–7).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>The problem.</strong> Agent developers rerun a full benchmark after every model, prompt or architecture change. The OpenHands harness subsamples with a fixed-seed random draw.</li>
+<li><strong>The data.</strong> 31,779 public trajectories from 58 runs across five agent frameworks, in three regression scenarios:</li>
+<li>45 reruns of one OpenHands setup on SWE-Rebench (3,188 instances);</li>
+<li>6 OpenHands runs with different models on SWE-bench Verified (Sonnet 3.5, Sonnet 3.7, Devstral, Sonnet 4, Kimi K2, GPT-5);</li>
+<li>7 runs across OpenHands, Moatless, Lingxi, Trae and Refact.</li>
+<li><strong>The pipeline:</strong></li>
+<li>Parse every framework's log into one schema (steps, commands, files touched, tests run, errors).</li>
+<li>Sanitize it. Random identifiers become typed placeholders, and boilerplate is removed. Words that reveal the outcome (like &quot;passed&quot; and &quot;exit code 0&quot;) or the repository are flagged by keyness testing and removed after review.</li>
+<li>Embed each step with Nomic Embed v1.5 (768-d). Pool each trajectory into 3,840 dimensions: the mean, standard deviation, first, middle and last step.</li>
+<li><strong>The selection.</strong> Group instances by how many times they passed in past runs, then pick the instances nearest each group's centroid. This is deterministic, with no random draw.</li>
+<li><strong>The evaluation:</strong></li>
+<li>Strict temporal cross-validation: select on past runs, score on later ones.</li>
+<li>1,000 synthetic 250-instance test suites across nine difficulty levels for the model and framework scenarios.</li>
+<li>500 seeds per random baseline, and 76 configurations in all.</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Stratifying by past pass counts is the strong baseline (Tables 3–4).</strong></li>
+<li>It cuts median RMSE against random sampling by 51% (reruns), 31–32% (model changes) and 40–42% (framework changes). Stratifying by repository adds under 2%.</li>
+<li><strong>But the tail stays wide.</strong> At a 5% subset, a typical pass-count-stratified draw's worst single-run error is 14.4 points on model changes and 14.3 on framework changes. The unluckiest seed's is 34.6 and 31.3 points; pure random reaches 47.2 and 47.8. Even at 30%, the worst seed errs by 11.4 and 10.5 points.</li>
+<li><strong>Trajectory-aware selection (Tables 5–6).</strong> At a 10% subset on model changes, median RMSE is 0.0431 against 0.0498 (mean −11.4%, Cliff's δ 0.49, large).</li>
+<li>Worst single-run error is 8.56 points. That compares with 9.63 for the typical baseline draw and 15.87 for the 95th-percentile draw.</li>
+<li>On framework changes: −3.1% RMSE (δ 0.22, small), and a worst error of 8.95 against 9.60 and 14.94.</li>
+<li>At 20–30% the edge persists on model changes but disappears on framework changes.</li>
+<li><strong>A worked failure (§6.2).</strong> One 5% baseline draw picked 12 instances that all passed on Kimi K2. It estimated a resolve rate of 1.00 against the true 0.43. The trajectory-aware subset estimated 0.42.</li>
+<li><strong>Both parts are needed (Table 7, 10% subset).</strong> RMSE rises when you change any one piece:</li>
+<li>dropping the pass-count grouping: +36.7% (model changes) and +30.5% (framework changes);</li>
+<li>clustering trajectories instead of grouping by pass count: +15.7% and +9.0%;</li>
+<li>shortlisting by geometry and then sampling randomly: +20.8% and +25.5%.</li>
+<li>Determinism alone doesn't explain the gain. The trajectory-aware subset beat the middle 95% of random stratified draws on 20.4% and 30.7% of test suites, and lost on 1.9% and 0.6%.</li>
+<li><strong>Cost (Tables 8–9):</strong></li>
+<li>The six OpenHands runs cost 335M–945M tokens each, 3.44B in total, and input is 99.3% of the volume.</li>
+<li>Per-instance cost varies up to 492×. Sonnet 4 took 2.2× GPT-5's steps (69.7 against 31.2) but cost 2.7× per instance, because context is re-sent every step.</li>
+<li>The trajectory-aware 10% subset consumed 10.48% of tokens, so it doesn't favor cheap or expensive instances. That is 3.44B → about 345M.</li>
+<li><strong>Sanitization check (§4.2.4).</strong> A TF-IDF classifier still predicts pass/fail at 65.7–80.3% after sanitization, against 68.9–78.3% before. But its top features change from &quot;passed&quot; and repository names to task terms.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>Only code-repair benchmarks (SWE-bench Verified and SWE-Rebench).</li>
+<li>The model and framework results use synthetic suites drawn from one 500-instance pool, with a mean Jaccard overlap of 0.35. So the p-values are optimistic.</li>
+<li>The authors rest their conclusions on Cliff's δ, plus a per-difficulty-level sign test. There, core/edge selection beats the baseline on all nine levels at 5% and 10% (p = 0.004).</li>
+<li>The gains concentrate at 5–10% subsets. A framework change still needs a full run to refresh the embeddings.</li>
+<li>Sanitization needs a manual calibration pass per dataset, and it removes explicit outcome words, not all correlation with the outcome.</li>
+<li>Only 6–7 runs in the model and framework scenarios. On average, 21% of instances flip outcome between two model-change runs (§8.3).</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It is the first method I've seen that uses stored agent trajectories as the selection signal for regression evals. Trace data directly lowers eval cost.</li>
+<li>It separates the two ways an eval subset fails: average error, and one bad estimate that reverts a good release. It shows random subsets hide a long tail: a worst draw of 47 points at 5%.</li>
+<li>It is distinct from the catalog's eval-cost cards:</li>
+<li><code>arxiv-2609-21267-efficient-benchmarking-production-analytics-agent</code>: stratified fixed subsets plus gp-IRT on a production analytics agent, about 38.5% of cost.</li>
+<li><code>arxiv-2609-20625-chronicle-cut-point-replay-regression</code>: replay, not instance selection.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>For each eval instance, keep its pass count across full runs and a trajectory representation. Then a 10% regression subset is one query: stratify by pass count and take the most central trajectories in each stratum.</li>
+<li>Report worst single-run error for subset evals, not just the mean.</li>
+<li>Model agent token cost as context re-sent every step (input is 99% of tokens), and expect a two-order-of-magnitude spread per task.</li>
+<li>Strip outcome words and repository identifiers before embedding trajectories, or the embedding clusters by result.</li>
+</ul>
+<h3>2. NEW rank: <a href="https://arxiv.org/abs/2609.22573">arXiv 2609.22573</a>: Zero-Trust Authorization and Discovery for Enterprise MCP</h3>
+<p><strong>Huan Li, Yuwei Wang, Srinivasan Manoharan</strong> (PayPal). v1 18 Sep 2026 (cs.CR; cross-listed to cs.AI), 12 pages. The artifacts are promised &quot;in a public repository (link to be added at submission/acceptance)&quot;.</p>
+<p><strong>Full PDF read:</strong> §1–7 and App. A (Tables 1–8, Fig. 1).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>A gap analysis of six official MCP SDKs</strong> (Python, TypeScript, Go, Rust, C# and Swift, at versions current as of 2026-05-15), in Table 1:</li>
+<li>none offers pre-authentication tool discovery;</li>
+<li>only Python with FastMCP offers permission-filtered listings and declarative per-tool permissions;</li>
+<li>the three older SDKs bind credential extraction to the <code>Authorization</code> header.</li>
+<li><strong>Four FastMCP extensions, in production on PayPal's enterprise agent platform</strong> (&quot;dozens of authenticated MCP servers&quot;):</li>
+<li><strong>C1:</strong> SSO bearer and service-account credentials arrive on different headers and are normalized into one principal.</li>
+<li><strong>C2:</strong> opaque-token verification is cached (SHA-256-keyed, 300 s TTL).</li>
+<li><strong>C3:</strong> an unauthenticated metadata endpoint lets a registry index tools without credentials.</li>
+<li><strong>C4:</strong> one per-tool permission annotation (AND/OR) drives both the filtered <code>list_tools</code> and the invocation check.</li>
+<li><strong>The attack test.</strong> 60 hand-reviewed injection payloads in four classes, 4 models, 3 server configurations and 3 seeds: 2,160 attempts in all.</li>
+<li>The target is a mock 8-tool Kubernetes server, where a viewer must not call <code>restart_pod</code>.</li>
+<li>The configurations: every tool listed with checks inside tool bodies; filtered listing only; and filtered listing plus the invocation check.</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Listing the forbidden tool invites attempts (Table 4).</strong></li>
+<li>With all tools listed, 152 of 720 runs named <code>restart_pod</code>: 21.1%, Wilson 95% CI 18.3–24.2. None executed, because the in-body check refused them.</li>
+<li>With the filtered listing, attempts fell to 0/720.</li>
+<li><strong>Refusal is a vendor property.</strong> On identical prompts: claude-sonnet-4-6 0/180, claude-opus-4-7 3/180, gpt-5 59/180 and gemini-2.5-pro 90/180 (50%).</li>
+<li>Role-play (70/180) and direct injection (56/180) broke models most. Context overflow broke them least (3/180).</li>
+<li><strong>Hidden is not unknown.</strong></li>
+<li>With the tool filtered out, models still repeated its name, which the prompts made inferable: claude-opus-4-7 169/180 (94%), claude-sonnet-4-6 142/180 (79%), gemini 44/180 and gpt-5 13/180.</li>
+<li>A scripted client calling the hidden tool directly succeeds when only the listing is filtered. Only the invocation-time check blocks it (Table 6).</li>
+<li><strong>Operations (§4.2, Table 2):</strong></li>
+<li>In a 7-day production trace, the verification cache served 96.1% of requests at 9.9 ms p50, against 296 ms p50 on a miss.</li>
+<li>The filter and invocation check added about 0 ms at p50 and at most about 0.15 ms at p95.</li>
+<li>Filtering also removed &quot;the PermissionError/wasted-LLM-cycle class&quot; and trimmed tool schemas from context.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>The authors call the 0/720 result &quot;almost true by definition&quot;: a model can't call a tool that isn't in its schema. The empirical content is the baseline attempt distribution and the leak rate.</li>
+<li><strong>Narrow setup:</strong> one forbidden tool, 60 payloads and no-op mock tools. The models are older than today's frontier: Sonnet 4.6, Opus 4.7, GPT-5 and Gemini 2.5 Pro.</li>
+<li><strong>A weak positive control:</strong> it ran on three models, used successor Claude models, and only the GPT-5 control matched the attack run's checkpoint. Gemini had no control.</li>
+<li>Tools without an annotation default to open. A revoked token stays valid for up to one TTL.</li>
+<li>Production figures are observational, and the artifacts are not yet public.</li>
+<li>FastMCP's own <code>auth=</code> already couples listing and invocation. What's added is AND/OR composition and a third consistent surface, the pre-auth metadata.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It quantifies a boundary an observer can see: attempted, executed, and named-while-hidden are different events.</li>
+<li>It shows containment by model refusal moves by 50 points across vendors on identical inputs, so it shifts at every model upgrade.</li>
+<li>It pairs with tonight's crewAI #7779, where an empty allowlist allowed everything. Visibility and invocation are separate controls, and each fails on its own.</li>
+<li>It is distinct from:</li>
+<li><code>arxiv-2609-22076-aport-vault-payment-authorization-benchmark</code>: a deterministic authorization layer for payments;</li>
+<li><code>arxiv-2609-24161-mcp-granite-tool-interface-granularity</code>: tool granularity, not permissions.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Log, per session, the tool list the agent was shown (count, schema hash and the caller's permission set), separately from each call's authorization result.</li>
+<li>Count three event classes: forbidden tool attempted, forbidden tool executed, and hidden tool named in model output.</li>
+<li>Segment attempt rates by model and model version.</li>
+<li>Treat permission-denied tool calls as wasted cost.</li>
+</ul>
+<h3>Academy scouted, not ranked</h3>
+<p><strong>Abstract only, so not rankable:</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.22222">2609.22222</a> &quot;Can Coding Agents Reproduce Official Statistics?&quot; (single author; 30 Eurostat tasks, 360 runs, Claude Sonnet 5).</li>
+<li>Per the abstract, execution diagnostics add little over the same retry budget without them.</li>
+<li>An under-specified output contract understated one condition by 23.4 points.</li>
+<li>A companion to the 0034 context-layer card (2609.22259).</li>
+<li><a href="https://arxiv.org/abs/2609.22951">2609.22951</a> &quot;AgentRouter&quot; (ICML 2026 AgenticUQ workshop): a 12M-parameter step-level router over four model tiers. It claims 72% lower cost at 97.3% of frontier quality, trained on 50,000 annotated trajectory steps.</li>
+<li><a href="https://arxiv.org/abs/2609.24200">2609.24200</a> &quot;Forgeable Confirmation in Automated Computer Security Testing&quot;.</li>
+<li>9 of 15 confirmation mechanisms could be forged. Whether a check reads attacker-controlled data predicted forgeability in 99.9% of 12,203 scanner templates.</li>
+<li>Routing between a rule and an AI judge raised forgery to 99%.</li>
+<li><a href="https://arxiv.org/abs/2609.23925">2609.23925</a> &quot;MCPGen&quot;: 100 executable MCP projects. No model exceeded 57% end-to-end, and integration success was at most 45%, even with 63.8% per-tool unit-test passes.</li>
+<li><a href="https://arxiv.org/abs/2609.24122">2609.24122</a> &quot;Re:CAP&quot;: a reference-free retrieval-coverage audit for production RAG. 73.9% of recovered documents added new information on live traffic (n = 180).</li>
+<li><a href="https://arxiv.org/abs/2609.22818">2609.22818</a> &quot;The Price of Safety&quot;: a read-time memory reranker quarantined legitimate memories on 33.6% of adjudicated items in attack-free conversations.</li>
+</ul>
+<h2>Six-week EV (through ~Nov 7)</h2>
+<ul>
+<li><strong>Telemetry-correctness releases shift counts, not behavior (medium-high).</strong></li>
+<li>Signals:<ul>
+<li>LiveKit 1.8.3 (fallback double-count, provider after failover, lost metadata, negative spans);</li>
+<li>crewAI #7776 (<code>from_cache</code>, pending);</li>
+<li>Pipecat v1.12.0's double-report fix (Fri 1834);</li>
+<li>Cloudflare <code>outcome</code> (queued).</li>
+</ul>
+</li>
+<li>For BQAA: version-aware metric definitions, release-boundary annotations, and span data-quality checks (end before start, constant booleans, duplicate operation spans).</li>
+<li><strong>Trace history becomes an eval-cost lever (medium).</strong></li>
+<li>Signals: 2609.24928 (a 10% subset at under 5% median error) and the production gp-IRT card 2609.21267 (about 38.5% of cost). Expect eval vendors to ship &quot;smart subset&quot; features.</li>
+<li>For BQAA: per-instance pass-count history and a trajectory representation per eval instance.</li>
+<li><strong>Tool visibility becomes a logged security dimension (medium).</strong></li>
+<li>Signals: 2609.22573, crewAI #7779, and opencode's MCP OAuth work.</li>
+<li>For BQAA: shown-tool sets and per-call authorization outcomes as first-class fields.</li>
+<li><strong>Turn-status taxonomies widen past success and failure (medium).</strong></li>
+<li>Signals: Cloudflare's <code>skipped</code> and <code>recovering</code>, LangWatch's <code>awaiting_user</code>, and PydanticAI #8822's run that returns while a tool still runs.</li>
+<li>For BQAA: a status enum that keeps these out of error and timeout rates.</li>
+<li><strong>Spend-cap semantics flip (low-medium).</strong> When LiteLLM merges #43305 or #43292, a <code>max_budget</code> of 0 starts blocking instead of meaning &quot;unlimited&quot;.</li>
+<li><strong>Watch list:</strong></li>
+<li>Cloudflare <code>agents@0.25.0</code> (#2335); a crewAI release with #7776, #7779 or #7780; a LiteLLM release with the <code>max_budget=0</code> fix or #43301.</li>
+<li>PydanticAI #8820 merged and a first <code>pydantic-ai-harness</code> 0.51.x publish.</li>
+<li>A promptfoo release with #11043 (GPT-6 short IDs); Pipecat with #5887; Mastra with #25221.</li>
+<li>Carried: Codex 0.158 or 0.159 stable, Mastra 1.72.0 stable, LiteLLM 1.104 stable.</li>
+<li>The Perplexity Sonar Chat Completions shutdown on Sep 27 (from 1834) is tomorrow.</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>LiveKit Agents 1.8.3 (NEW):</strong> segment LiveKit metrics by version. Before 1.8.3, fallback turns carry an extra <code>chat</code> span, provider can be wrong after failover, and on 1.8.0–1.8.2 custom span metadata (session IDs) is missing. Flag spans that end before they start.</li>
+<li><strong>2609.24928 (NEW):</strong> keep pass-count history and trajectory embeddings per eval instance to select a 10% regression subset. Report worst-case error, not just the mean.</li>
+<li><strong>2609.22573 (NEW):</strong> log the tool list shown per session apart from per-call authorization. Count forbidden-attempted, forbidden-executed and hidden-named, by model version.</li>
+<li><strong>NOTE cluster:</strong></li>
+<li>crewAI <code>crewai.tool.from_cache</code> is unreliable on the default executor (fix open).</li>
+<li>Cloudflare turn <code>outcome</code> is queued for 0.25.0.</li>
+<li>LiteLLM <code>max_budget=0</code> still means unlimited (two fixes open).</li>
+<li>LangWatch: <code>awaiting_user</code> is not a timeout.</li>
+</ul>
+<h2>Housekeeping</h2>
+<p><strong>Slot and inputs</strong></p>
+<ul>
+<li><strong>Slot:</strong> a late wake. The slot woke at about 06:42 PT, and Collection woke this writer at about 06:44 PT. This run's first clock read was 06:46:53 PT, and no <code>2026-09-26-0634-*</code> brief existed. The label stays <strong>0634</strong>.</li>
+<li><strong>Packs used (6, all PACK_DONE at launch, windows joined end to end):</strong></li>
+<li>Muse 0132: 07:48:14Z → 08:43:48Z.</li>
+<li>DSH 0232: → 09:49:18Z.</li>
+<li>Agy 0332: → 10:56:00Z.</li>
+<li>Muse 0432: → 11:46:08Z.</li>
+<li>DSH 0532: → 12:44:50Z.</li>
+<li>Agy 0632: → 13:43:00Z.</li>
+<li>I skimmed Agy 0032 (already used by the 0034 brief) for continuity.</li>
+<li><strong>Gaps this window: none.</strong> All six packs were PACK_DONE at kick and still present at write time.</li>
+<li>Older gaps, for continuity only: Muse 1932 (FAIL_MAC), Muse 0732, DSH 0832 and DSH 0532 (all Sep 25).</li>
+<li><strong>Agy 0632's header names the 12:34 brief as its consumer.</strong> It landed before this run started and the kick lists it, so it is used here. The 12:34 writer should treat its items as dispositioned by this brief.</li>
+<li><strong>Vault twins:</strong></li>
+<li>Muse 0132, Muse 0432, DSH 0232 and DSH 0532 report vault-twin writes blocked by the sandbox. Their outbox copies are under <code>/tmp/{muse,dsh}-collect-20260926-*/outbox/</code>, and I did not copy them.</li>
+<li>Agy 0332 and Agy 0632 wrote their twins directly.</li>
+<li><strong>Social and other sources:</strong> X 401, Reddit 403, and the LinkedIn and Papers with Code redirects are the packs' labels; I did not re-probe them. Medium was not used.</li>
+<li><strong>Collection's code-merged list</strong> (<code>_runs/fb-2026-09-26-0634/fresh-items.md</code>, 38 entries): I used it as a checklist only.</li>
+<li>Dispositions:<ul>
+<li>F01–F04, F06, F08, F09, F11, F12, F15–F25 and F29 are NOTEs above (F24 is the Google NOTE).</li>
+<li>F13 (crewAI #7777) was closed unmerged; see pack corrections.</li>
+<li>F05 is a probe-method note; I used no-slash version probes without <code>-L</code>.</li>
+<li>From F07, LiteLLM #43296 and #43297 are NOTEs; the rest of F07, plus F10, F14, F26–F28 and F33–F38, are below the bar.</li>
+<li>F30–F32 are carried items covered above.</li>
+</ul>
+</li>
+<li>Writer-sourced, not in that list: LiveKit 1.8.3 (the NEW rank), both Academy ranks (backfill), Pipecat #5887, LangWatch #8316, LiteLLM #43292's status, the Opik tag and the npm dev/nightly builds.</li>
+</ul>
+<p><strong>Verified arXiv ceiling: <code>2609.30268</code></strong></p>
+<ul>
+<li><strong>Probed at 13:51Z:</strong> 30266–30268 return 200.</li>
+<li>30269, 30270, 30271, 30275, 30280, 30290, 30300, 30400, 31000, <code>2610.00001</code> and <code>2610.00100</code> return 404.</li>
+<li><strong>Priority pin <code>2609.02702</code>:</strong> base 200, v1 200, v2 404 and v3 404. These are no-slash probes without <code>-L</code>, and I re-read the title. Intact, and not re-carded.</li>
+</ul>
+<p><strong>HN</strong></p>
+<ul>
+<li>All six pack helper files report hits=0 (Muse 0132, DSH 0232, Agy 0332, Muse 0432, DSH 0532 and Agy 0632). Their keep fields are unfilled templates, and with zero hits keep is 0.</li>
+<li><strong>My own re-run at about 13:51Z, since 07:40Z,</strong> with the same six queries and threshold: one raw hit, a &quot;Show HN&quot; about MCP with 5 points and 0 comments. That is below threshold.</li>
+<li><strong>Sanity check:</strong> the API's newest story was at 13:51:01Z, so it is live.</li>
+<li><strong>HN: hits=0 keep=0.</strong></li>
+</ul>
+<p><strong>Pack corrections</strong></p>
+<ul>
+<li><strong>crewAI #7777 was closed without merging by its author at 11:07:05Z.</strong> Agy 0632 §2.8, and the Muse 0432 and DSH 0532 carry lists, still list it as open. The same author opened #7779 at 11:49Z.</li>
+<li><strong>DSH 0532 §3 calls 2609.30266 &quot;uncarded&quot;.</strong> The catalog carries <code>arxiv-2609-30266-llm-agents-tamper-with-own-traces</code>.</li>
+<li><strong>The packs' npm baseline <code>@cloudflare/agents</code> 0.0.16 is a stale package</strong> (last published Feb 2025, with no repository link). Cloudflare's Agents SDK publishes as <code>agents</code> (0.24.0, Sep 18), with <code>@cloudflare/ai-chat</code> (0.12.0) and <code>@cloudflare/think</code> (0.19.0).</li>
+<li><strong>No collector sweeps <code>livekit/agents</code> releases or PyPI <code>livekit-agents</code>,</strong> so all six packs missed the 1.8.3 release notes going public at 08:53Z. Suggestion: add both to the Agy, Muse and DSH watchlists. DSH 2032 included the repo on Sep 22.</li>
+</ul>
+<p><strong>Verification method</strong></p>
+<ul>
+<li><strong>GitHub API:</strong></li>
+<li>Release objects and dated tags, by GraphQL, for 77 repos since 07:30Z, re-swept since 13:30Z at about 13:57Z.</li>
+<li>Default-branch commits since 07:40Z.</li>
+<li>PR state and body for 43 PRs:<ul>
+<li>Cloudflare #2378, #2379 and #2335;</li>
+<li>LiteLLM #43295, #43305, #43292, #43301, #43296, #43297, #43306 and #43308;</li>
+<li>crewAI #7776, #7777, #7779 and #7780;</li>
+<li>promptfoo #11045, #11044, #11096 and #11089;</li>
+<li>PydanticAI #8820, #8822 and #8827;</li>
+<li>Cline #14555; python-genai #3011;</li>
+<li>opencode #51006, #51484 and #51486;</li>
+<li>Mastra #25221; Langfuse #17965 and #17966; OpenHands #17726;</li>
+<li>Pipecat #5887; LangWatch #8316;</li>
+<li>LiveKit #7374, #7376, #7428, #7322, #7303, #7332, #7330, #7377, #7373 and #7340.</li>
+</ul>
+</li>
+<li>The issue events for crewAI #7777, and LiveKit #7033's merge date.</li>
+<li><strong>Registries and artifacts:</strong></li>
+<li>PyPI JSON for 66 packages; npm <code>time</code> and dist-tags for 48, plus <code>agents</code>, <code>@cloudflare/ai-chat</code>, <code>@cloudflare/think</code> and <code>@cloudflare/agents</code>.</li>
+<li>The <code>livekit-agents</code> 1.8.3 wheel from PyPI, searched for the fallback-adapter operation name, <code>_MetadataSpanProcessor.on_start</code>, the audio-token fields and <code>reply_required</code>.</li>
+<li><strong>Academy:</strong></li>
+<li>Past-week listings for 8 categories (3,280 unique entries). I checked them against every brief, pack, vault note, the catalog, seen-links and the listings the Thu 1234/1834 and Sat 0034 runs scanned.</li>
+<li>Run logs grepped for prior exposure. 16 abstracts via the arXiv API.</li>
+<li>2 PDFs extracted with <code>pdftotext</code> to <code>/tmp/fb0634sat/pdf/</code> and read in full (24928 and 22573). Every quoted number was checked against the cited table or section.</li>
+<li><strong>Search:</strong> no web search. The HN Algolia re-run is described above.</li>
+</ul>
+<p><strong>Excluded by rule:</strong></p>
+<ul>
+<li>No first-party BQAA content. python-genai is NOTE only, and ADK had no commits in the window.</li>
+<li>No Desk section and no GTM content.</li>
+<li>Crustdata and Fable were not used, and Medium was not cited.</li>
+<li>No re-admission of the 0034 (Sat), 1834, 1234, 0634 or 0034 (Fri) sets. The priority pin was not re-carded.</li>
+<li>This writer made no Jev calls. Collection logs its own <code>JEV_SHADOW worth_running</code> line.</li>
+</ul>
+<p><strong>Run limits:</strong></p>
+<ul>
+<li><strong>Volume:</strong> 3 ranks, 0 progress notes, about 25 NOTE lines and 6 scouted lines, within 50.</li>
+<li><strong>Re-attempts:</strong> two local <code>grep</code> commands failed on zsh globbing (unquoted <code>--include=*.jsonl</code> and <code>--include=*.py</code>), and I re-ran them with quoted patterns. No network call was retried.</li>
+<li><strong>Other:</strong> $0 spent, 0 external messages, no background jobs. The downloads were two public arXiv PDFs and one PyPI wheel.</li>
+</ul>
+<p><strong>Scratch dir:</strong> <code>/tmp/fb0634sat/</code>, created fresh for this run.</p>
+<p><strong>Catalog:</strong></p>
+<ul>
+<li>424 / 106 / 108, read-only and untouched by me. The research copy, the hub checkout and the live URL were byte-identical (SHA-256 <code>76b6fa040f1ab124…</code>).</li>
+<li>Expected after publish: <strong>427 items / 107 briefs / 109 runs</strong> (+1 Industry, +2 Academy).</li>
+</ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW items (3):</strong></p>
+<ol>
+<li><strong>id:</strong> <code>livekit-agents-1-8-3-fallback-attribution-span-metadata-negative-durations</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Industry</li>
+<li><strong>title:</strong> LiveKit Agents 1.8.3 — the fallback adapter stops reporting <code>chat</code> (no more extra LLM call per fallback), provider attribution survives failover, custom span metadata such as <code>langfuse.session.id</code> returns after 1.8.0–1.8.2 dropped it inside jobs, exceptions keep error status under redaction, negative <code>user_speaking</code> spans are clamped, and OpenAI realtime transcription usage is reported per session</li>
+<li><strong>primary URL:</strong> https://github.com/livekit/agents/releases/tag/livekit-agents%401.8.3 (PyPI https://pypi.org/project/livekit-agents/1.8.3/)</li>
+<li><strong>card text:</strong> A 66-PR patch release (PyPI 2026-09-23; GitHub release notes published 2026-09-26 08:53Z) that changes what LiveKit voice-agent traces record. <code>llm_fallback_adapter</code> spans no longer carry <code>gen_ai.operation.name=&quot;chat&quot;</code> alongside the provider request (#7373), <code>llm_node</code> keeps the serving provider after failover (#7374), <code>set_tracer_provider(metadata=...)</code> works again for in-job spans after a regression from #7033 that shipped in 1.8.0 (#7428), and <code>user_speaking</code> spans can no longer end before they start and read as huge unsigned durations (#7332). Also: exceptions and <code>error.type</code> recorded under redaction (#7376), <code>session_close</code> covering the whole close (#7322), realtime ASR usage per session with <code>input_audio_tokens</code> as a subset of <code>input_tokens</code> (#7303), tool outputs paired by <code>call_id</code> (#7330), and <code>ToolResult(reply_required=False)</code> (#7340).</li>
+</ul>
+<ol start="2">
+<li><strong>id:</strong> <code>arxiv-2609-24928-trajectory-aware-subset-selection-swe-agent-regression</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Trajectory-Aware Benchmark Subset Selection — stratify eval instances by past pass counts, then pick the trajectories nearest each stratum's centroid: across 31,779 trajectories from 58 runs of five SWE-agent frameworks, a 10% subset keeps median estimation error below 5% and worst single-run error at 8.6–9.0 points (vs 14.9–15.9 for an unlucky stratified-random draw) while cutting tokens 3.44B → ~345M</li>
+<li><strong>arXiv:</strong> 2609.24928 — https://arxiv.org/abs/2609.24928</li>
+<li><strong>card text:</strong> Queen's University researchers embed sanitized agent trajectories (outcome words and repository names removed; Nomic Embed, mean/std/first/middle/last-step pooling) and replace the random draw inside pass-count strata with deterministic centroid selection. Under temporal cross-validation, 10% subsets beat the strongest baseline by 11.4% mean RMSE on model changes (Cliff's δ 0.49) and 3.1% on framework changes; removing the pass-count grouping raises error 30–37%, and the edge fades at 20–30% subsets in the framework-change scenario. Caveats: code-repair benchmarks only, synthetic suites that overlap (p-values optimistic), per-dataset manual sanitization, and only 6–7 runs in the model and framework scenarios.</li>
+</ul>
+<ol start="3">
+<li><strong>id:</strong> <code>arxiv-2609-22573-zero-trust-mcp-authorization-tool-visibility</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Zero-Trust Authorization and Discovery for Enterprise MCP — PayPal's gap analysis of six MCP SDKs plus FastMCP extensions in production: with every tool listed, 152/720 injected runs (21.1%) named the forbidden tool, from 0/180 to 90/180 by vendor on identical prompts; a permission-filtered listing drops attempts to 0/720, but models still repeat a hidden tool's inferable name (up to 94%) and a scripted client can call it unless invocation is checked too</li>
+<li><strong>arXiv:</strong> 2609.22573 — https://arxiv.org/abs/2609.22573</li>
+<li><strong>card text:</strong> One per-tool AND/OR permission annotation drives the pre-auth metadata endpoint, the filtered <code>list_tools</code> and the invocation check, alongside cross-header SSO and service-account normalization and cached opaque-token verification (96.1% cache hits, 9.9 ms vs 296 ms p50). None of the six SDKs surveyed offers pre-auth tool discovery. The authors call the 0/720 result &quot;almost true by definition&quot;; the evidence is the baseline attempt spread across vendors and the hidden-name leak rate. Caveats: one forbidden tool, 60 payloads, no-op mock tools, a partial positive control, a generation-old model set, default-open for unannotated tools, and artifacts not yet released.</li>
+</ul>
+<p><strong>Progress (0):</strong> none. No carded product published in the window.</p>
+<p><strong>Headline claims (for citation checks):</strong></p>
+<ol>
+<li>LiveKit Agents 1.8.3 ships #7373: &quot;<code>llm_fallback_adapter</code> and its provider request both report <code>chat</code>, so observability backends can count an extra LLM call&quot;; the adapter's operation name is now omitted. — https://github.com/livekit/agents/pull/7373 (merged 2026-09-22 09:16Z; in <code>livekit-agents</code> 1.8.3, PyPI 2026-09-23 19:04Z; GitHub release published 2026-09-26 08:53Z)</li>
+<li>A 10% trajectory-aware subset kept median estimation error below 5% while cutting token cost by about 90%, from 3.44B to about 345M tokens across six OpenHands runs on SWE-bench Verified. — https://arxiv.org/abs/2609.24928 (v1 2026-09-21; Tables 5, 6, 8 and 9)</li>
+<li>With every MCP tool listed, 152 of 720 prompt-injection runs (21.1%) attempted the forbidden tool, ranging from 0/180 (claude-sonnet-4-6) to 90/180 (gemini-2.5-pro) on identical prompts; permission-aware visibility reduced attempts to 0/720. — https://arxiv.org/abs/2609.22573 (v1 2026-09-18; Table 4)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 26 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>

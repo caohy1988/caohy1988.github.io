@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "id": "livekit-agents-1-8-3-fallback-attribution-span-metadata-negative-durations",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "LiveKit Agents 1.8.3 — the fallback adapter stops reporting `chat` (no more extra LLM call per fallback), provider attribution survives failover, custom span metadata such as `langfuse.session.id` returns after 1.8.0–1.8.2 dropped it inside jobs, exceptions keep error status under redaction, negative `user_speaking` spans are clamped, and OpenAI realtime transcription usage is reported per session",
+      "html": " <a href=\"https://github.com/livekit/agents/releases/tag/livekit-agents%401.8.3\">livekit-agents@1.8.3</a> · <a href=\"https://pypi.org/project/livekit-agents/1.8.3/\">PyPI</a> — A 66-PR patch release (PyPI 2026-09-23; GitHub release notes published 2026-09-26 08:53Z) that changes what LiveKit voice-agent traces record. `llm_fallback_adapter` spans no longer carry `gen_ai.operation.name=&quot;chat&quot;` alongside the provider request (#7373), `llm_node` keeps the serving provider after failover (#7374), `set_tracer_provider(metadata=...)` works again for in-job spans after a regression from #7033 that shipped in 1.8.0 (#7428), and `user_speaking` spans can no longer end before they start and read as huge unsigned durations (#7332). Also: exceptions and `error.type` recorded under redaction (#7376), `session_close` covering the whole close (#7322), realtime ASR usage per session with `input_audio_tokens` as a subset of `input_tokens` (#7303), tool outputs paired by `call_id` (#7330), and `ToolResult(reply_required=False)` (#7340). <a href=\"/research/briefs/2026-09-26-0634-opus.html\">Full brief</a>.",
+      "added": "2026-09-26T0634",
+      "addedDisplay": "6:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-24928-trajectory-aware-subset-selection-swe-agent-regression",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Trajectory-Aware Benchmark Subset Selection — stratify eval instances by past pass counts, then pick the trajectories nearest each stratum's centroid: across 31,779 trajectories from 58 runs of five SWE-agent frameworks, a 10% subset keeps median estimation error below 5% and worst single-run error at 8.6–9.0 points (vs 14.9–15.9 for an unlucky stratified-random draw) while cutting tokens 3.44B → ~345M",
+      "html": " <a href=\"https://arxiv.org/abs/2609.24928\">arXiv:2609.24928</a> · <a href=\"https://arxiv.org/pdf/2609.24928\">PDF</a> — Queen&#x27;s University researchers embed sanitized agent trajectories (outcome words and repository names removed; Nomic Embed, mean/std/first/middle/last-step pooling) and replace the random draw inside pass-count strata with deterministic centroid selection. Under temporal cross-validation, 10% subsets beat the strongest baseline by 11.4% mean RMSE on model changes (Cliff&#x27;s δ 0.49) and 3.1% on framework changes; removing the pass-count grouping raises error 30–37%, and the edge fades at 20–30% subsets in the framework-change scenario. Caveats: code-repair benchmarks only, synthetic suites that overlap (p-values optimistic), per-dataset manual sanitization, and only 6–7 runs in the model and framework scenarios. <a href=\"/research/briefs/2026-09-26-0634-opus.html\">Full brief</a>.",
+      "added": "2026-09-26T0634",
+      "addedDisplay": "6:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-22573-zero-trust-mcp-authorization-tool-visibility",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Zero-Trust Authorization and Discovery for Enterprise MCP — PayPal's gap analysis of six MCP SDKs plus FastMCP extensions in production: with every tool listed, 152/720 injected runs (21.1%) named the forbidden tool, from 0/180 to 90/180 by vendor on identical prompts; a permission-filtered listing drops attempts to 0/720, but models still repeat a hidden tool's inferable name (up to 94%) and a scripted client can call it unless invocation is checked too",
+      "html": " <a href=\"https://arxiv.org/abs/2609.22573\">arXiv:2609.22573</a> · <a href=\"https://arxiv.org/pdf/2609.22573\">PDF</a> — One per-tool AND/OR permission annotation drives the pre-auth metadata endpoint, the filtered `list_tools` and the invocation check, alongside cross-header SSO and service-account normalization and cached opaque-token verification (96.1% cache hits, 9.9 ms vs 296 ms p50). None of the six SDKs surveyed offers pre-auth tool discovery. The authors call the 0/720 result &quot;almost true by definition&quot;; the evidence is the baseline attempt spread across vendors and the hidden-name leak rate. Caveats: one forbidden tool, 60 payloads, no-op mock tools, a partial positive control, a generation-old model set, default-open for unannotated tools, and artifacts not yet released. <a href=\"/research/briefs/2026-09-26-0634-opus.html\">Full brief</a>.",
+      "added": "2026-09-26T0634",
+      "addedDisplay": "6:34 AM PT",
+      "progress": []
+    },
+    {
       "id": "arxiv-2609-22259-context-layer-content-vs-scaffolding-text-to-sql-agents",
       "tag": "Academy",
       "kind": "rank",
@@ -4926,6 +4956,19 @@
   ],
   "runs": [
     {
+      "id": "2026-09-26T0634",
+      "date": "2026-09-26",
+      "displayTime": "6:34 AM PT",
+      "added": [
+        "livekit-agents-1-8-3-fallback-attribution-span-metadata-negative-durations",
+        "arxiv-2609-24928-trajectory-aware-subset-selection-swe-agent-regression",
+        "arxiv-2609-22573-zero-trust-mcp-authorization-tool-visibility"
+      ],
+      "updated": [],
+      "brief": "/research/briefs/2026-09-26-0634-opus.html",
+      "note": "Late-wake catch-up for official 06:34 PT Sat slot (writer kicked ~06:46 PT; label kept 0634). Writer Opus 5.5. Packs: Muse0132 + DSH0232 + Agy0332 + Muse0432 + DSH0532 + Agy0632 (all PACK_DONE); Agy0032 continuity skim. Gaps this window: none. Historical Muse1932 Fri FAIL_MAC continuity only. Verified arXiv mailing ceiling still 2609.30268; pin 2609.02702 intact. Industry NEW +1: LiveKit Agents 1.8.3 fallback attribution / span metadata / negative-duration clamp (writer-sourced; packs missed). Progress +0. Academy +2 full-PDF: 2609.24928 trajectory-aware subset selection; 2609.22573 zero-trust MCP authorization. No Stories companion (0 third-party BQAA). GTM skipped. JEV_SHADOW pre-writer worth_running run conf=0.97; citations verify_more/verify_more/verify_more (log-only)."
+    },
+    {
       "id": "2026-09-26T0034",
       "date": "2026-09-26",
       "displayTime": "12:34 AM PT",
@@ -6555,6 +6598,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-09-26T0634",
+      "date": "2026-09-26",
+      "displayTime": "6:34 AM PT",
+      "title": "Opus 5.5: LiveKit Agents 1.8.3 fallback attribution + span metadata; Academy 2609.24928 trajectory-aware subset selection + 2609.22573 zero-trust MCP authorization",
+      "href": "/research/briefs/2026-09-26-0634-opus.html",
+      "analyzer": "Opus 5.5"
+    },
     {
       "id": "2026-09-26T0034",
       "date": "2026-09-26",
