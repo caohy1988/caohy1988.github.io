@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-26 · 12:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="Inspect AI 0.3.270; Academy 2609.24130 + 2609.27607; LiteLLM cost-map + Codex alpha.6 Progress.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-26-1234-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 PM PT · late wake ~12:42 PT (label kept 1234) · first live fresh-list path</p>
+    <article>
+<h1>Field Brief — 2026-09-26-1234: Inspect AI 0.3.270 makes gateway-routed evals match direct ones, LiteLLM prices change without a release, and 55% of rejected agent self-edits fixed one case by breaking another</h1>
+<p>A quiet Saturday for stable releases. Only one product release in scope reached a stable channel after the 0634 brief, and no pack caught it: the UK AI Security Institute's Inspect AI 0.3.270 (PyPI 15:35Z). It is an eval-framework release that changes what gateway-routed evals measure:</p>
+<ul>
+<li>OpenAI reasoning models served through its LiteLLM-proxy provider move to the Responses API and keep their reasoning between turns. Before, in the PR's words, <code>litellm-proxy/gpt-5.5</code> and <code>openai/gpt-5.5</code> &quot;run the same eval differently&quot;.</li>
+<li>Claude thinking summaries now reach the log through older LiteLLM proxies, which had returned empty thinking.</li>
+<li><code>eval_set</code> tops up a grown dataset by running only the new samples.</li>
+<li><code>f1()</code> now counts repeated tokens, so some scores move.</li>
+</ul>
+<p>LiteLLM was the busiest repo: eight merges on <code>main</code> and four on its 1.103 release candidate, none released. One change matters anyway. LiteLLM loads model prices from its <code>main</code> branch when a process starts, so two price merges today changed computed spend for default SDK and proxy-server deployments at their next start, with no version change:</p>
+<ul>
+<li>Fireworks DeepSeek V4.1 Flash output went from $1.20 to $0.66 per 1M tokens.</li>
+<li>Databricks Claude Opus 5.5 calls had been logged at $0.</li>
+</ul>
+<p>arXiv is between mailings (the ceiling is still <code>2609.30268</code>). I went back to the pool the 0634 backfill left unread, read 49 abstracts no brief had dispositioned, and read two papers in full:</p>
+<ul>
+<li><strong>2609.24130:</strong> a replay gate rejected 383 agent-authored rules. 211 of them (55%) fixed the failure that prompted them while breaking a case that had passed.</li>
+<li><strong>2609.27607:</strong> Jev as a low-cost judge of radiology reports. One question per statement matches a seven-question design at 43–45% fewer tokens (about 2.3–2.6 cents per 100 report pairs). But no score repeated exactly across five runs, and raw probabilities need calibration before thresholding.</li>
+</ul>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>), the primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-26-1234</strong> (official 6h slot, 12:34 PM PT Sat Sep 26, 2026). <strong>Late wake:</strong> the slot woke at about 12:42 PT. Collection's lock <code>LOCK-fb-2026-09-26-1234</code> started at 19:44:34Z, and Collection woke this writer at about 12:46 PT. This run's first clock read was 12:47:39 PT (19:47:39Z), and no <code>2026-09-26-1234-*</code> brief existed. The label stays <strong>1234</strong>.
+<strong>Evidence window:</strong> from the 0634 brief's last probes (13:58Z) to this run's last probes (about 20:13Z). I swept from 13:30Z so the windows overlap. Between 19:48Z and 20:13Z I probed these sources myself:</p>
+<ul>
+<li>GitHub release objects and dated tags for 90 repos, and default-branch commits since 13:30Z.</li>
+<li>PyPI (82 packages) and npm (57 packages).</li>
+<li>arXiv abs pages and the arXiv API.</li>
+<li>HN Algolia.</li>
+</ul>
+<p>I read 37 PR bodies and 2 PDFs in full. I also searched the published <code>inspect-ai</code> 0.3.270 wheel and LiteLLM's live <code>main</code> price file.</p>
+<ul>
+<li><strong>Source packs used (6, all PACK_DONE at launch):</strong> Muse 0732, DSH 0832, Agy 0932, Muse 1032, DSH 1132 and Agy 1232.</li>
+<li><strong>Gaps this window: none.</strong></li>
+<li><strong>Catalog baseline:</strong> <strong>427 items / 107 briefs / 109 runs</strong>, SHA-256 <code>46ca38d4c34480df…</code>, read-only. The newest brief is <code>2026-09-26T0634</code>.</li>
+</ul>
+<p><strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call. Collection owns the HTML, the catalog and the push.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: 1 new Industry rank, 2 new Academy ranks, 2 progress notes, and a NOTE list.</strong></p>
+<ul>
+<li>The Industry rank is a stable release that no pack watched. The two Academy ranks are backfill from listings no brief had dispositioned.</li>
+<li>The progress notes:</li>
+<li>LiteLLM: two price merges reached default deployments without a release.</li>
+<li>Codex: alpha.6, published at 20:07Z after the last pack, keeps steered turns' connection and token usage. alpha.5 carried only a clipboard default.</li>
+<li>No other carded product published anything material: Mastra, Claude Code, PydanticAI, Vercel AI, Langfuse, Pipecat and LiveKit are flat.</li>
+</ul>
+<p><strong>Theme 1: the route to a model is part of the measurement.</strong></p>
+<ul>
+<li><strong>Inspect 0.3.269 (Sep 25) and 0.3.270 (today) show how much a gateway can change an eval:</strong></li>
+<li><a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5559">#5559</a> (0.3.269). Before Inspect had a LiteLLM-specific provider, evals through a LiteLLM proxy had no context window or cost for the model. Claude replies were cut at LiteLLM's 4,096-token default for models it didn't know, and one deployment &quot;recorded 0 cache reads over 715M input tokens&quot;.</li>
+<li><a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5575">#5575</a> (0.3.270). Proxied OpenAI reasoning models used Chat Completions, which returns no reasoning. So &quot;<code>litellm-proxy/gpt-5.5</code> and <code>openai/gpt-5.5</code> (which uses the Responses API) run the same eval differently&quot;. They now use the Responses API with encrypted reasoning replayed each turn.</li>
+<li><a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5579">#5579</a> (0.3.270). Through LiteLLM 1.96, Claude 4.7+ thinking reached the log as 0 characters plus a signature. Silent thinking phases longer than the 600 s timeout restarted from scratch on &quot;about 1–1.5% of calls&quot; on one deployment.</li>
+<li><strong>Codex <a href="https://github.com/openai/codex/pull/48508">#48508</a></strong> (in alpha.6, a GitHub prerelease published at 20:07Z). Steering an active turn used to drop the WebSocket and resend the full history. Now the follow-up continues from <code>previous_response_id</code>, and the interrupted response's token usage is kept.</li>
+</ul>
+<p><strong>Theme 2: cost can change with no version change.</strong></p>
+<ul>
+<li><strong>How LiteLLM loads prices.</strong> The LiteLLM SDK and its <code>litellm</code> proxy server fetch model prices from <code>main</code> at startup unless <code>LITELLM_LOCAL_MODEL_COST_MAP=True</code>. The official Docker image runs that server. Admins can also schedule reloads.</li>
+<li><strong>Today's price merges:</strong></li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43254">#43254</a> (15:34Z). Databricks Claude Opus 5.5 is priced at $4 / $20 per 1M input / output tokens; before, its calls logged $0. MAI-Image-2.5-Flash went from $0.0338 to $0.02 per image.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43311">#43311</a> (16:00Z). Fireworks DeepSeek V4.1 Flash went from $0.30 / $0.006 / $1.20 to $0.22 / $0.007 / $0.66 per 1M input / cached / output tokens.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43253">#43253</a> had set the older values 15 hours earlier. The provider's pricing page and its API disagree.</li>
+<li><strong>LiteLLM records where each process got its prices.</strong> <code>get_model_cost_map_source_info()</code> returns the source, <code>loaded_at</code>, <code>source_revision</code> (a git blob id) and the ETag. It is already in released v1.102.1.</li>
+</ul>
+<p><strong>Theme 3: local wins hide collateral damage, and cheap judges need calibration.</strong></p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.24130">2609.24130</a>:</strong></li>
+<li>211 of 383 replay-rejected self-authored rules (55%) improved their own failure but broke a protected case. A rule that only checks the target case would have kept all 211.</li>
+<li>Separately, on AppWorld with gpt-luna, rules that had each passed the gate still dragged the run from +0.017 to −0.016 as the active set grew from 13 to 70 rules.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.27607">2609.27607</a>:</strong></li>
+<li>Jev's report rankings repeat closely across runs (rank agreement 0.990), but no pair's score repeated exactly across five uncached runs.</li>
+<li>Raw probabilities are over-confident at the low end. Isotonic calibration cut expected calibration error from 0.1235 to 0.0077.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.27277">2609.27277</a></strong> (TimeEvo, abstract only): one round of self-revision &quot;changes 147 answers and breaks 56 of them, while the final score moves by less than a point&quot;.</li>
+</ul>
+<p><strong>What this means for BQAA (as the observer, not the source of truth):</strong></p>
+<ul>
+<li><strong>Make the route a first-class dimension.</strong></li>
+<li>Record, on every model call and eval sample: direct vs gateway, the gateway product and version, and the API family (Chat Completions vs Responses).</li>
+<li>Treat eval deltas across a route change as measurement changes.</li>
+<li><strong>Version the price, not just the tokens.</strong></li>
+<li>Store tokens and recompute cost from a versioned price table.</li>
+<li>Where LiteLLM computes spend, capture its cost-map <code>source_revision</code> and <code>loaded_at</code> per process. Then a price change can be told apart from a usage change.</li>
+<li><strong>Log admission decisions for self-modifying agents.</strong></li>
+<li>For each proposed rule or skill, keep the case, metric and delta at promotion or retirement.</li>
+<li>Watch aggregate drift against active-set size and tokens per turn. Per-case checks miss it.</li>
+<li><strong>Store judge probabilities and versions, and calibrate before thresholding.</strong></li>
+<li>Compare judge rankings across reruns, not raw scores.</li>
+<li>Report a size baseline next to any count-based judge score.</li>
+<li><strong>For the fleet as well:</strong></li>
+<li>Jev gates log <code>conf=</code> values. The paper's calibration result applies before any shadow gate goes active on a threshold.</li>
+<li>2609.24130 is direct evidence for the protected-case replay required by <code>Maps/Decisions/2026-09-25-code-decides-done-and-replay-check.md</code>.</li>
+</ul>
+<h2>Industry</h2>
+<p><strong>Screen used (same as 0634):</strong> a release-level move that ships a product capability, or a change to how agent telemetry, cost, evaluation or memory state is recorded. Unreleased main-branch commits are NOTE only. I checked every item against its release object, registry entry, changelog, PR body or published artifact, not against the pack summary.</p>
+<p><strong>Sweep results (my own, 19:48Z–20:01Z):</strong></p>
+<ul>
+<li><strong>GitHub release objects and dated tags (GraphQL, since 13:30Z):</strong></li>
+<li>90 repos: the 0634 list of 77 plus MLflow, Laminar, goose, A2A, a2a-python, AG-UI, inspect_ai, ragas, deepagents, NeMo Agent Toolkit, browser-use, graphiti and playwright-mcp.</li>
+<li>One release object: Codex <code>rust-v0.159.0-alpha.5</code>, created 16:32:50Z and published 17:34:23Z.</li>
+<li>Tags:<ul>
+<li>Codex <code>rust-v0.159.0-alpha.6</code> (19:09:52Z), with no release object;</li>
+<li>inspect_ai <code>0.3.270</code> (15:35:17Z);</li>
+<li>Stagehand <code>stagehand-python@4.2.0a0.dev1540</code> (19:00:55Z).</li>
+</ul>
+</li>
+<li>A re-sweep since 19:30Z, run at about 20:00Z, found only <code>stagehand-python@4.2.0a0.dev1541</code> (19:49:58Z).</li>
+<li>A final re-sweep since 20:00Z, run at about 20:12Z, found the Codex <code>rust-v0.159.0-alpha.6</code> release object: created 19:09:52Z, published 20:07:52Z, prerelease. No registry uploads.</li>
+<li><strong>PyPI (82 packages, since 13:30Z):</strong></li>
+<li><code>inspect-ai</code> 0.3.270 (15:35:53Z).</li>
+<li><code>stagehand</code> 4.2.0a0.dev1540 (19:06:30Z) and dev1541 (19:56:42Z).</li>
+<li>Nothing else. <code>litellm</code> is still 1.102.1.</li>
+<li><strong>npm (57 packages):</strong></li>
+<li><code>@openai/codex</code> and <code>@openai/codex-sdk</code> 0.159.0-alpha.5 (17:45–17:48Z).</li>
+<li>Two <code>@browserbasehq/stagehand</code> <code>4.2.0-alpha-&lt;sha&gt;</code> builds (19:08Z and 19:57Z).</li>
+<li>Two <code>opencode-ai</code> dev builds.</li>
+<li><strong><code>latest</code> did not move anywhere:</strong> Codex 0.157.1, <code>ai</code> 7.0.116, <code>@ai-sdk/gateway</code> 4.0.94, Mastra core 1.71.0, <code>agents</code> 0.24.0, promptfoo 0.123.1, <code>cline</code> 3.0.65, Claude Code 2.1.283 and Stagehand 4.1.0.</li>
+<li><strong>Default-branch commits since 13:30Z (90 repos): 40 commits in 15 repos.</strong></li>
+<li>LiteLLM 8, Codex 7, PydanticAI 6, inspect_ai 4 and Vercel AI 3.</li>
+<li>letta-code 2 (tests) and MLflow 2.</li>
+<li>One each in Stagehand, Langfuse, Mastra (docs regeneration), OTel collector-contrib, opencode (docs), DSPy (docs), Strands and deepagents.</li>
+<li><strong>Flat:</strong></li>
+<li>Claude Code and both Agent SDKs, OpenAI Agents, Phoenix, Opik, LangSmith, Weave, the Letta server and mem0.</li>
+<li>crewAI, Cline, Cloudflare Agents, LiveKit, Pipecat, promptfoo, ADK and the OTel GenAI repos.</li>
+</ul>
+<p><strong>Why only one NEW rank:</strong> Inspect 0.3.270 is the only published release in scope that nobody has carded. The rest:</p>
+<ul>
+<li>LiteLLM's merges are unreleased.</li>
+<li>Codex alpha.5 and alpha.6 are prereleases on an existing card, so progress at most.</li>
+<li>Stagehand's builds are alpha and dev only.</li>
+</ul>
+<h3>1. NEW rank: Inspect AI <a href="https://pypi.org/project/inspect-ai/0.3.270/">0.3.270</a>: proxied OpenAI reasoning models keep their reasoning, Claude thinking reaches LiteLLM-routed logs, <code>eval_set</code> tops up grown datasets, and <code>f1()</code> counts repeated tokens</h3>
+<p><strong>Clocks:</strong></p>
+<ul>
+<li>PyPI 0.3.270 was uploaded <strong>2026-09-26 15:35:53Z</strong>.</li>
+<li>The tag <code>0.3.270</code> is at 15:35:17Z (commit <code>c232fdeb</code>, &quot;update changelog for release&quot;). The project publishes tags and PyPI, not GitHub release objects. The <a href="https://github.com/UKGovernmentBEIS/inspect_ai/blob/main/CHANGELOG.md">changelog</a> dates the release 25 September.</li>
+<li>The day before, 0.3.269 (PyPI 2026-09-25 16:07:48Z) added the <code>litellm-proxy</code> provider that this release fixes.</li>
+<li>Neither version appears in any brief, pack, vault note, catalog item or seen-links entry.</li>
+</ul>
+<p><strong>How I checked:</strong></p>
+<ul>
+<li>The tag compare 0.3.269...0.3.270: 10 commits touching 29 files.</li>
+<li>I read the PR bodies for #5575, #5577, #5579, #5519, #5551 and #5532, plus #5559 from 0.3.269.</li>
+<li>I downloaded the published wheel and confirmed three changes in the built code:</li>
+<li><code>scorer/_classification.py</code> builds <code>Counter</code> word counts for <code>_f1</code>;</li>
+<li><code>_eval/task/run.py</code> (lines 3631–3672) reuses a prior log when the dataset grew as a strict superset;</li>
+<li><code>model/_providers/litellm_proxy.py</code> defaults GPT-5+, o-series and Codex models to the Responses API when <code>responses_api</code> isn't passed.</li>
+</ul>
+<p><strong>What changes in the logs and scores:</strong></p>
+<ul>
+<li><strong>Proxied OpenAI reasoning models keep their reasoning (<a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5575">#5575</a>).</strong></li>
+<li>Before, every request through the provider used Chat Completions, &quot;where OpenAI returns no reasoning, so a GPT-5 tool loop through the proxy starts each turn without its earlier reasoning&quot;.</li>
+<li>Now GPT-5 and later, o-series and Codex models use the Responses API, streamed, with encrypted reasoning replayed each turn (<code>store=false</code>).</li>
+<li>This applies only when every deployment of the alias uses LiteLLM's <code>openai</code> route with no other <code>api_base</code>. Azure and OpenAI-compatible servers are not covered. <code>-M responses_api=false</code> opts out.</li>
+<li>Key and team aliases now resolve to their target model through <code>/key/info</code> and <code>/team/info</code>. Before, an alias failed to construct for lack of model info, even though it routed fine.</li>
+<li>In the PR's live check through LiteLLM 1.104:<ul>
+<li>cost includes cached input at the cache-read rate;</li>
+<li>on gpt-5-mini, effort <code>none</code> is dropped, and <code>xhigh</code> and <code>max</code> are lowered to <code>high</code> with one warning each.</li>
+</ul>
+</li>
+<li><strong>Claude reasoning reaches the log through older LiteLLM (<a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5579">#5579</a>).</strong></li>
+<li>On LiteLLM 1.96, Claude 4.7+ returned thinking &quot;with empty text (only a signature)&quot;.<ul>
+<li>A live before/after with Opus 5.5 at <code>high</code>: 0 characters plus a 1,396-character signature became a 249-character summary.</li>
+<li>The stream also carried no bytes while the model thought. A thinking phase longer than the 600 s request timeout &quot;fails and is retried from scratch&quot;, on &quot;about 1–1.5% of calls&quot; on one deployment.</li>
+</ul>
+</li>
+<li>Now Claude 4.6+ requests with an effort send <code>thinking: {type: adaptive, display: summarized}</code>. <code>-M thinking_display=omitted</code> opts out.</li>
+<li>Known limit: on LiteLLM 1.104, a Claude 4.6 codename configured with <code>base_model</code> but without the <code>model_info</code> flags silently gets a 2,048-token thinking budget instead of the effort's 4,096.</li>
+<li><strong><code>eval_set</code> tops up grown datasets (<a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5577">#5577</a>).</strong></li>
+<li>When a dataset grew as a strict superset with stable sample ids, prior samples are reused by <code>(id, epoch)</code> and only the new ones run. The successor log holds all of them.</li>
+<li>A shrunk dataset, growth without stable ids, or an unknown prior count still re-runs everything.</li>
+<li>The PR notes that reuse &quot;never inspects sample content&quot;. At equal count it already reused samples by id regardless of content.</li>
+<li><strong><code>f1()</code> counts repeated tokens (<a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5519">#5519</a>).</strong></li>
+<li>It scored token overlap as a set, so &quot;Paris Paris Paris Paris Paris&quot; against &quot;Paris&quot; scored 1.0.</li>
+<li>It now uses multiset overlap, matching SQuAD F1. Only answers or targets with repeated tokens move; the PR's test case drops from 1.0 to 0.67.</li>
+<li><strong>Live readers stop mixing attempts (<a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5551">#5551</a>).</strong></li>
+<li>In shared log directories, a retried or requeued sample inherited the previous attempt's buffered events.</li>
+<li>The viewer, filestore recovery and <code>inspect ctl sample events --log-dir</code> saw both attempts as one sample. A model event could resolve its input to the previous attempt's messages.</li>
+<li>It affected readers of the synced sample buffer; the changelog describes it as happening while the sample runs.</li>
+<li><strong>Checkpoint resume (<a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5532">#5532</a>).</strong></li>
+<li>After a resume, hooks (<code>on_sample_event</code>), the live viewer and ACP clients received <code>attachment://</code> references instead of the restored text and images. They now get the content.</li>
+<li>Raw model API calls stay condensed until the sample completes. &quot;The final eval log is unaffected.&quot;</li>
+<li><strong>Context from 0.3.269 (<a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5559">#5559</a>, Sep 25).</strong></li>
+<li>Before the <code>litellm-proxy</code> provider existed, evals through a LiteLLM proxy used the generic <code>openai-api</code> provider:<ul>
+<li>there was no context window or cost for the alias;</li>
+<li>no <code>max_tokens</code> was sent, so LiteLLM's 4,096-token default cut replies from Claude models it didn't know;</li>
+<li>one deployment &quot;recorded 0 cache reads over 715M input tokens&quot;.</li>
+</ul>
+</li>
+<li>The authors filed six LiteLLM bugs upstream.</li>
+<li>The 0.3.269 changelog also records <code>reason=&quot;no_response&quot;</code> for empty completions, with score values unchanged. Samples cut off by a cancellation Inspect didn't issue now count as errors instead of completed. Both are changelog only.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>It is a point release in a fast train: 0.3.265 through 0.3.270 shipped in nine days.</li>
+<li>The Responses default covers only OpenAI-routed aliases. Azure, OpenAI-compatible servers and <code>model_info=false</code> stay on Chat Completions.</li>
+<li>The 715M-token and 1–1.5% figures each come from a single deployment described in a PR body.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It changes four things an eval store derives from Inspect logs:</li>
+<li>model behavior for gateway-routed OpenAI reasoning models (API family and reasoning replay);</li>
+<li>what reasoning text the log holds for Claude through LiteLLM;</li>
+<li>the definition of the F1 metric;</li>
+<li>sample provenance in topped-up eval sets.</li>
+<li>Its PRs show, with numbers, that the same model scored through a gateway and directly was not the same experiment.</li>
+<li>It is the first Inspect card. The nearest catalog cards are other eval vendors' releases: <code>promptfoo-0-123-1-openai-agents-api-portable-mcp-schemas</code> and <code>deepeval-4-2-4-to-4-2-5-jev-system-one-classifiers-jeveval</code>.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Tag every eval sample with its route (direct provider or <code>litellm-proxy</code>) and API family.</li>
+<li>Before 0.3.270, proxied GPT-5-class runs had no reasoning replay.</li>
+<li>Before 0.3.269, proxied runs of Claude models LiteLLM didn't know could be capped at 4,096 output tokens with no prompt caching.</li>
+<li>Segment F1 scores by Inspect version at 0.3.270.</li>
+<li>For topped-up eval sets, keep a per-sample reused-or-new flag and per-sample timestamps. A log's creation time no longer dates all of its samples.</li>
+<li>Expect Claude reasoning text in LiteLLM-routed logs from 0.3.270. Don't read its earlier absence as no reasoning.</li>
+</ul>
+<h3>Progress notes</h3>
+<p><strong>LiteLLM: cost-map merges reached default deployments without a release.</strong> Parent: <code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code>.</p>
+<ul>
+<li><strong>How prices load:</strong></li>
+<li><code>litellm/__init__.py</code> points <code>model_cost_map_url</code> at <code>raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json</code>, and <code>get_model_cost_map()</code> fetches it at import.</li>
+<li>Only two cases use the bundled copy instead: <code>LITELLM_LOCAL_MODEL_COST_MAP=True</code>, or the <code>lite</code> and <code>litellm-proxy</code> client CLIs.</li>
+<li>The <code>litellm</code> server entry point is not exempt, and the official Docker images run <code>exec litellm &quot;$@&quot;</code> (<code>docker/prod_entrypoint.sh</code>).</li>
+<li>Admins can also set a periodic per-pod reload (<code>model_cost_map_reload_config</code>, <code>interval_hours</code>).</li>
+<li>The released v1.102.1 has the same default URL and exemptions.</li>
+<li><strong>Today's changes.</strong> Both are in the live <code>main</code> file I fetched at 20:00:45Z:</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43254">#43254</a> (15:34:31Z):<ul>
+<li>adds <code>databricks/databricks-claude-opus-5-5</code> at $4 / $20 per 1M input / output tokens ($0.20 per 1M cache read); the PR says these calls were &quot;logged at $0&quot; before;</li>
+<li>moves <code>azure_ai/MAI-Image-2.5-Flash</code> from $0.0338 to $0.02 per image;</li>
+<li>adds <code>deprecation_date</code> to seven retired <code>azure_ai</code> DeepSeek and Grok models.</li>
+</ul>
+</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43311">#43311</a> (16:00:00Z):<ul>
+<li>prices <code>fireworks_ai/deepseek-v4p1-flash</code> (two keys) at the Fireworks API's values: $0.22 / $0.007 / $0.66 per 1M input / cached / output tokens, down from $0.30 / $0.006 / $1.20;</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43253">#43253</a> (00:37:56Z) had set the pricing page's values, and the PR notes the page &quot;still shows&quot; them.</li>
+</ul>
+</li>
+<li><strong>Provenance:</strong> <code>get_model_cost_map_source_info()</code> returns:</li>
+<li><code>source</code> (local or remote), <code>url</code>, <code>is_env_forced</code> and <code>fallback_reason</code>;</li>
+<li><code>loaded_at</code>, <code>source_revision</code> (the git blob id of the loaded bytes) and <code>etag</code>.</li>
+</ul>
+<p><strong>OpenAI Codex <code>rust-v0.159.0-alpha.6</code>: steered turns keep their connection and their token usage.</strong> Parent: <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code>.</p>
+<ul>
+<li><strong>Clocks:</strong></li>
+<li>The GitHub prerelease was created 19:09:52Z and published 20:07:52Z, after the last pack froze. Its body is only &quot;Release 0.159.0-alpha.6&quot;.</li>
+<li>npm <code>alpha</code> was still alpha.5 at 20:13Z, and <code>latest</code> is 0.157.1.</li>
+<li><strong>By tag compare, alpha.6 carries six changes since alpha.5. The one that matters for analytics is <a href="https://github.com/openai/codex/pull/48508">#48508</a>:</strong></li>
+<li>Steering an active WebSocket response used to drop the connection and resend the full history. Now the response is drained, and the follow-up continues with <code>previous_response_id</code>. The PR's test asserts connection reuse and incremental follow-up input.</li>
+<li><code>response.incomplete</code> with reason <code>interrupted</code> now counts as completion with <code>end_turn: false</code>, &quot;preserving token usage&quot;. Other incomplete reasons remain errors.</li>
+<li>For models using <code>use_responses_lite</code>, steering first sends <code>response.interrupt</code> with <code>discard_partial_items</code>.</li>
+<li><strong>The other five:</strong></li>
+<li>#48502: ChatGPT browser sign-in for local daemons.</li>
+<li>#48491 and #48483: Windows launch fixes.</li>
+<li>#48489: Mermaid parsing.</li>
+<li>#48513: the TUI welcome screen.</li>
+<li><strong>alpha.5</strong> (GitHub 17:34:23Z; npm <code>alpha</code> 17:45Z) carried only #48469, which copies transcript selections by default in more terminals.</li>
+<li><strong>For BQAA:</strong></li>
+<li>From alpha.6, a steered turn's follow-up sends incremental input instead of the full history, and the interrupted response's usage is kept.</li>
+<li>Count <code>interrupted</code> as a turn state, not an error.</li>
+<li>Compare per-turn input tokens on steered turns across this boundary only with that in mind.</li>
+</ul>
+<h3>NOTE (not ranked; recorded so the next brief can dedupe)</h3>
+<p>I read the PR body for every item below except the carried open items and the &quot;Below the bar&quot; list, which rest on GraphQL state checks and titles.</p>
+<p><strong>LiteLLM <code>main</code>, unreleased (the last dev tag is <code>v1.104.0-dev.2</code>, Sep 25):</strong></p>
+<ul>
+<li><strong><a href="https://github.com/BerriAI/litellm/pull/43237">#43237</a></strong> (17:10:13Z) changes gateway trace structure.</li>
+<li>Post-response work becomes single-span root traces linked back to the request span, for streaming and non-streaming requests alike: the response-cache write, spend-counter increments and success-event Redis writes.</li>
+<li>Before, on a streaming request, the cache write ended about 1 ms before the server span and stayed inside the request trace.</li>
+<li>Redis span names change from <code>redis async_set_cache &lt;- async_set_cache &lt;- async_add_cache</code> to <code>redis async_set_cache</code>. The call chain moves to the <code>litellm.service.caller</code> attribute.</li>
+<li><strong>For BQAA:</strong> span-name queries and per-trace span counts shift at the release that carries this.</li>
+<li><strong><a href="https://github.com/BerriAI/litellm/pull/43251">#43251</a></strong> (19:11:27Z) adds <code>general_settings.fail_closed_rate_limit_enforcement</code> (off by default).</li>
+<li>Before, when Redis was unreachable, each replica fell back to in-memory counters, so an <code>rpm_limit: 2</code> key admitted 4 requests on 2 replicas.</li>
+<li>With the flag on, the request gets a <code>503</code> that names the setting, not a <code>429</code>.</li>
+<li>The PR also found that the compaction polyfill's rate-limit gate read an unused limiter instance &quot;and never ran&quot;.</li>
+<li><strong>For BQAA:</strong> a new 503 class that is neither provider error nor rate limit.</li>
+<li><strong><a href="https://github.com/BerriAI/litellm/pull/43270">#43270</a></strong> (19:22:23Z): a mid-stream provider drop on <code>/v1/responses</code> ran failure logging on a helper thread while the event loop waited.</li>
+<li>With a slow Datadog agent, health probes hung for 19.6 s, and pods could freeze until restart.</li>
+<li>The logging now runs on the loop.</li>
+</ul>
+<p><strong>LiteLLM rc/1.103.0 (<code>v1.103.0-rc.1</code> published Sep 20; stable not yet cut):</strong></p>
+<ul>
+<li><strong><a href="https://github.com/BerriAI/litellm/pull/43326">#43326</a></strong> (18:14:53Z) reverts the top-N key cap and global spend rollup from the rc.</li>
+<li>On rc.1, &quot;Usage views only load spend for the top-N keys&quot;, so per-key widgets, exports and searches &quot;silently drop the long tail&quot;.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43328">#43328</a> rebuilds the UI bundle.</li>
+<li><strong><a href="https://github.com/BerriAI/litellm/pull/43323">#43323</a></strong> (18:15:05Z) backports #43029 (main, Sep 24).</li>
+<li>&quot;After one all-$0 member spend flush, later member spend never lands.&quot; Team, key and user spend kept rising while member rows froze.</li>
+<li><strong><a href="https://github.com/BerriAI/litellm/pull/43331">#43331</a></strong> (18:47:23Z) backports five regression fixes, including:</li>
+<li><code>/v1/mcp/tools</code> returns camelCase <code>inputSchema</code> and <code>outputSchema</code> again;</li>
+<li>replayed <code>redacted_thinking</code> blocks no longer break <code>prompt_caching</code> pinning, so each turn stops paying a fresh cache write.</li>
+<li><strong>For BQAA:</strong> don't trust rc.1 Usage exports for key-level spend, and check team-member spend rows against team totals.</li>
+<li><strong>An <code>rc/1.104.0</code> branch also exists.</strong> <a href="https://github.com/BerriAI/litellm/pull/43327">#43327</a> (open) would remove #41258's bounded S3 uploads from it.</li>
+<li>In a live test with a Deny bucket policy, &quot;the same 10 events re-PUT about 450 times in 3.5 minutes&quot;.</li>
+<li>The settings it removes &quot;only shipped in v1.104.0-dev.2&quot;.</li>
+</ul>
+<p><strong>LiteLLM, open, with an analytics consequence:</strong></p>
+<ul>
+<li><strong><a href="https://github.com/BerriAI/litellm/pull/43322">#43322</a>:</strong> the built-in <code>langtrace</code> callback posts to a 404 endpoint with the wrong header.</li>
+<li>&quot;Every trace from <code>callbacks: [&quot;langtrace&quot;]</code> has been dropped since the host moved, on every release.&quot; The only signal is <code>Failed to export batch code: 404</code> in the proxy log.</li>
+<li><strong>For BQAA:</strong> alert on exporter errors, not just on missing data.</li>
+<li><strong><a href="https://github.com/BerriAI/litellm/pull/43315">#43315</a>:</strong> with <code>turn_off_message_logging</code> on, Responses <code>instructions</code> still reach logging integrations, and callback redaction misses reasoning summaries and tool arguments.</li>
+<li><strong>Carried, all still open at about 19:55Z:</strong></li>
+<li><code>max_budget=0</code>: #43305 and #43292.</li>
+<li>#43301, #43297, #43296, #43310 and #43312–#43315.</li>
+<li>#43319, #43320, #43339 (Entra agent identity bindings) and #43340 (MCP calls with omitted arguments).</li>
+<li>The #43306–#43309 canary suites.</li>
+</ul>
+<p><strong>Queued for a release (WATCH):</strong></p>
+<ul>
+<li><strong>Vercel AI <a href="https://github.com/vercel/ai/pull/21215">#21215</a></strong> (17:23:26Z): typed conditional evaluation fallbacks under <code>providerOptions.gateway.models</code>.</li>
+<li>The fallback conditions:<ul>
+<li>Choice and Score questions use <code>confidenceBelow</code>;</li>
+<li>Boolean questions use <code>probabilityBetween</code> over P(true);</li>
+<li>conditions compose with <code>any</code>, <code>all</code> and <code>atLeast</code>.</li>
+</ul>
+</li>
+<li><code>response.modelId</code> names the fallback model when one answered. The example uses <code>'typesafe-ai/jev'</code>.</li>
+<li>&quot;Hold the release until conditional evaluation fallbacks are live in AI Gateway.&quot; The Version Packages PR <a href="https://github.com/vercel/ai/pull/21535">#21535</a> (open) lists <code>@ai-sdk/gateway@4.0.95</code> and <code>ai@7.0.117</code>. The parent card is <code>vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts</code>.</li>
+<li><strong>Stagehand <a href="https://github.com/browserbase/stagehand/pull/3045">#3045</a></strong> (19:00:56Z): telemetry export becomes opt-in.</li>
+<li>The v4 init schema had injected <code>https://example.com/v1/traces</code> whenever callers omitted telemetry. That caused &quot;guaranteed-failing background exports and possible shutdown delays&quot;.</li>
+<li>It ships only in dev and alpha builds so far; <code>latest</code> is 4.1.0.</li>
+<li>The Go SDK's <code>StagehandInitParams.Telemetry</code> becomes a pointer.</li>
+</ul>
+<p><strong>Merged on main, small, and worth one line:</strong></p>
+<ul>
+<li><strong>Langfuse <a href="https://github.com/langfuse/langfuse/pull/17970">#17970</a></strong> (19:05Z): dashboard queries with long <code>IN</code> lists failed with 414 or 400 behind proxies. Params over 4,096 URL-encoded characters now go in a multipart body; this also covers the MCP metrics tool.</li>
+<li><strong>MLflow:</strong></li>
+<li><a href="https://github.com/mlflow/mlflow/pull/26057">#26057</a> (16:45Z): a metric filter on <code>search_logged_models</code> duplicated models per metric row before <code>OFFSET</code>/<code>LIMIT</code>, so pages under-filled and pagination could stop &quot;while matches remain — silently dropping results&quot;.</li>
+<li><a href="https://github.com/mlflow/mlflow/pull/26109">#26109</a> (16:40Z): the AI Gateway's Gemini adapter dropped a tool call when text came first, and returned a 500 when the call came first.</li>
+<li><strong>deepagents <a href="https://github.com/langchain-ai/deepagents/pull/6557">#6557</a></strong> (17:34Z): Talon's <code>/context-doctor</code> reports estimated prompt, memory, skill, tool and conversation token costs. The estimates exclude middleware and provider overhead.</li>
+<li><strong>PydanticAI:</strong> the monorepo integration landed as a split series.</li>
+<li>#8829–#8836 make <code>pydantic-ai-harness</code> and <code>pydantic-clai2</code> workspace members, versioned <code>0.&lt;minor&gt;.&lt;patch&gt;</code> and pinned exactly to <code>pydantic-ai-slim</code> (e.g. <code>0.52.0</code> ↔ <code>2.52.0</code>).</li>
+<li>#8820 was closed unmerged at 16:01Z. There is no release.</li>
+</ul>
+<p><strong>Open, with an analytics consequence (WATCH):</strong></p>
+<ul>
+<li><strong>Mastra <a href="https://github.com/mastra-ai/mastra/pull/25225">#25225</a>:</strong> the ClickHouse trace list deduped every row of <code>mastra_trace_roots</code> before applying the time range, so its cost grew with retention.</li>
+<li>With 300k older roots, the same three traces came back in 42 ms reading 3.0 MiB, against 591 ms reading 610 MiB and 1.29 GiB of memory.</li>
+<li>The author kept the dedupe over candidate traces instead of filtering inside it, because a trace with two roots would otherwise be resurrected.</li>
+<li><strong>For BQAA:</strong> in BigQuery, prune by partition before any <code>QUALIFY</code>/dedupe over trace roots, and keep multi-root traces in the test set.</li>
+<li><strong>Carried, all still open:</strong></li>
+<li>crewAI #7776 (<code>from_cache</code>), #7779 and #7780.</li>
+<li>Cline #14555, #14556, #14557, #14559, #14561 and #14563.</li>
+<li>Mastra #25221 and #25222.</li>
+<li>OpenLLMetry #4515 and #4516; Opik #8576.</li>
+<li>Cloudflare #2335 (0.25.0 queue) and #2379.</li>
+<li>Vercel #21534 (the <code>chat.stop()</code> drain race).</li>
+<li>Langfuse #17965 and #17971.</li>
+<li>PydanticAI #8822, #8827 and #8828.</li>
+<li>OTel Python #5696 and #5699.</li>
+<li><strong>Closed unmerged:</strong> opencode #51525 (19:34Z) and #51524 (19:07Z).</li>
+</ul>
+<p><strong>Below the bar:</strong></p>
+<ul>
+<li>LiteLLM #43249, #43294 and #43321 (tests and CI).</li>
+<li>letta-code #4790 and #4791 (tests); Strands #4616 (<code>BidiAgent</code> storage parity).</li>
+<li>OTel collector-contrib #51499; Vercel #21522 and #21526 (docs and CI); DSPy #10513 and opencode #49735 (docs).</li>
+<li>The Stagehand and opencode dev builds.</li>
+</ul>
+<p><strong>Google (first-party; NOTE only):</strong></p>
+<ul>
+<li>adk-python #7299 (open): the SQLite migration now reports the events it actually migrated.</li>
+<li>adk-python #7297 (open): live mode for conformance testing.</li>
+<li>python-genai #3011 is still open. ADK had no commits in the window.</li>
+</ul>
+<h2>Academy</h2>
+<p><strong>Screen used:</strong> agent evaluation, cost, security or oversight evidence that produces a result BQAA could measure or log. Every rank below was read in full before ranking.</p>
+<p><strong>Coverage:</strong></p>
+<ul>
+<li><strong>No new arXiv mailing.</strong> The ceiling is still <code>2609.30268</code> (probed 19:55Z). The next mailing is Sunday 20:00 ET.</li>
+<li><strong>So I backfilled from the 0634 run's own pool.</strong> Its 8-category past-week sweep produced a 47-entry strict list and a 330-entry keyword list of papers no one had dispositioned.</li>
+<li>The 0634 run read only 5 of the 47 strict entries, so I pulled the other 42 abstracts through the arXiv API.</li>
+<li>I added 7 titles from a targeted keyword pass over the wider list (trace, cost, audit, judge, eval and similar terms): 97 hits, of which I chose 7.</li>
+<li>That is 49 abstracts read and 2 papers read in full.</li>
+<li><strong>Prior exposure, disclosed:</strong></li>
+<li>2609.24130 appears as a title line in raw listing output in four run logs: Mon 1834 (Kimi), Tue 1834 (Opus), Sat 0034 and Sat 0634.</li>
+<li>2609.27607 appears the same way in the Wed 1834 (Opus) and Sat 0634 run logs.</li>
+<li>Neither ID appears in any brief, pack, vault note, the catalog or seen-links, so both ranks are backfill.</li>
+<li>The priority pin <code>2609.02702</code> (Trace-as-State v1) is intact and is <strong>not</strong> re-carded.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.24130">arXiv 2609.24130</a>: Self-Healing Harness for Runtime Oversight of Agent Self-Modification</h3>
+<p><strong>Tayebati, Kumar, Darabi, Krishnan, Trivedi</strong> (University of Illinois Chicago; Krishnan at AI Labs, Capital One). v1 21 Sep 2026 (cs.AI), 16 pages.</p>
+<ul>
+<li>The paper states that Capital One does not use the method.</li>
+<li>There is no code or artifact link. Tracing and evaluation run on the first author's PandaProbe.</li>
+</ul>
+<p><strong>Full PDF read:</strong> the main text (RQ1–RQ5, Limitations, Conclusion) and the Technical Appendix (Tables 1–14, Algorithms 1–3).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>The question.</strong> An agent that can rewrite its own operating instructions needs a rule for which self-edits persist. Improving the failure that prompted an edit is not enough, because the same edit can break something that worked.</li>
+<li><strong>The harness wraps an unmodified agent with fixed weights and runs a Detect, Notice, Heal, Validate loop:</strong></li>
+<li><strong>Detect.</strong> Each turn's trace is scored, and a gate fires on the shape of each metric's series, not on a single low score.<ul>
+<li>It fires on a stall (10 traces without a 0.02 gain while the peak is below 0.5) or a regression (a drop of more than 0.15 below the running peak).</li>
+<li>Cheap metrics (task completion, coherence) run every turn. Tool-call and argument correctness run on the latest trace only after a flag.</li>
+<li>Only a finding corroborated by a step-level or outcome failure becomes a replayable case.</li>
+</ul>
+</li>
+<li><strong>Notice.</strong> The finding goes to a mailbox in an external workspace, not into the conversation.</li>
+<li><strong>Heal.</strong> The agent pulls the notice and writes a candidate rule, which is in force provisionally.</li>
+<li><strong>Validate.</strong> The runtime replays up to three matching failure cases and two previously passing &quot;protected&quot; cases under the candidate.<ul>
+<li>It promotes the rule only if the target metric improves by at least 0.05 on one failure case and no metric on any replayed case drops by 0.05 or more. Otherwise it retires the rule.</li>
+<li>When replay isn't possible, a weaker forward trial compares the flagged rate over the next three sessions.</li>
+<li>A corpus guard re-tests the whole active rule set.</li>
+<li>Each promotion records the case, metric and improvement that justified it.</li>
+</ul>
+</li>
+<li><strong>The evaluation.</strong> Paired Baseline and Harness runs:</li>
+<li>benchmarks: AppWorld test_normal (168 tasks), Terminal-Bench sample@2.0 (10), and τ²-bench airline (50) and retail (114);</li>
+<li>models: gpt-5.6-terra, gpt-5.6-luna, claude-haiku-4.5 and claude-sonnet-5;</li>
+<li>k = 4 trials per task and seed 1, giving 16 pairs.</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Most rejected edits were locally right and globally harmful (Table 2).</strong></li>
+<li>Agents proposed 2,306 rules. 1,244 were promoted and 1,062 retired (Table 10).</li>
+<li>Of the 383 retirements decided by replay, 211 (55%) improved the failure that motivated them but regressed a protected case. The other 172 improved nothing.</li>
+<li>Observed regressions include a 0.60 drop in task completion and a 0.25 drop in outcome correctness.</li>
+<li>&quot;A retention policy keyed only to improvement of the triggering failure would have accepted every one of them.&quot;</li>
+<li><strong>End-to-end gains are modest (Table 1).</strong> Task-completion score rose in all 16 pairs, but only two intervals exclude zero:</li>
+<li>AppWorld with gpt-terra: 0.701 → 0.723 (+0.022, 95% CI [+0.006, +0.040], p = 0.010), with pass@1 from 0.018 to 0.054;</li>
+<li>τ² retail with claude-sonnet-5: 0.669 → 0.701 (+0.032, [+0.003, +0.061], p = 0.03).</li>
+<li>Success on all four trials was higher in 12 pairs and tied in 4.</li>
+<li><strong>Rules admitted one at a time still drifted as a set (Table 4).</strong></li>
+<li>On AppWorld with gpt-luna, the paired advantage fell from +0.017 in the first quarter of tasks to −0.016 in the last (p = 0.022).</li>
+<li>Over that span the active set grew from 13 to 70 rules, and input tokens per turn from 1.50× to 2.52× Baseline.</li>
+<li>&quot;Every rule passed the gate individually, so the harm is a property of the corpus.&quot;</li>
+<li>The corpus guard could not see it, for three reasons:<ul>
+<li>it replays only captured failure cases;</li>
+<li>it flags only per-case drops of 0.05 or more;</li>
+<li>it cannot reproduce live retrieval dilution.</li>
+</ul>
+</li>
+<li><strong>The judge was biased against the harness's own tools (Table 12).</strong></li>
+<li>Trace judges penalized calls to the harness's read-only meta-tools: 14% of sampled rationales blamed them, and 31 scores were spurious zeros.</li>
+<li>Neutrality guidance in the judge prompt cut this to 0.17% and 1 zero across 4,800 sampled rationales. Both arms use the corrected prompts.</li>
+<li><strong>Replay was not always possible (Table 3).</strong></li>
+<li>Replay settled 58–92% of validations, except on Terminal-Bench. There it settled 0%, because validating would mean rebuilding the environment, so no rule was ever retired there.</li>
+<li>On τ² airline, a budget counted in turns but spent in message hops truncated many replays.</li>
+<li><strong>Cost (Tables 13–14):</strong></li>
+<li>context averaged 1.25× Baseline, and agent turns rose by 0.0 to 1.8 per trial;</li>
+<li>task spend went from $177.06 to $211.46, plus $92.90 of repair (1.72× overall);</li>
+<li>wall-clock time rose 1.7–7×, mostly from synchronous trace evaluation. AppWorld went from 17–20 s to 109–120 s per trial.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>The authors did not run the arm that would isolate the gate's benefit: the same agent admitting its rules immediately. So the end-to-end gains don't show that gating, rather than the healing loop, is what helped.</li>
+<li>Only 2 of 16 intervals exclude zero, and all runs use one seed.</li>
+<li>Each decision replays at most five sessions and at most two unranked protected cases. The 211 are detected conflicts, not an incidence rate.</li>
+<li>The forward-trial path has no protected-case test and a lenient default baseline (p0 = 1).</li>
+<li>The agent is assumed non-adversarial, the guarantees cover only measured metrics, and no code is released.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It measures, on the agent's own proposals, how often &quot;fixes the failing case&quot; coincides with &quot;breaks a passing one&quot;: in 55% of the replay rejections. That supports replaying protected cases before any skill, prompt or rule persists.</li>
+<li>It also shows a second failure scale: every per-candidate check passes while the accumulated set degrades, with context growth as a visible covariate.</li>
+<li>It is distinct from two replay cards in the catalog:</li>
+<li><code>arxiv-2609-20625-chronicle-cut-point-replay-regression</code> replays to regression-test an agent build;</li>
+<li><code>arxiv-2609-14858-dream-rsi-discovery-history-replay-simulator</code> replays search histories to re-score orchestration policies.</li>
+<li>Here, replay is the runtime admission test for agent-authored changes.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Store per-turn metric series, and captured failure and protected cases with their baseline scores. Both the trigger and the admission test depend on them.</li>
+<li>Log each self-authored change's lifecycle (proposed, promoted, retired) with its case, metric and delta.</li>
+<li>Track outcome by execution order against active-rule count and input tokens per turn, to catch drift no per-case check sees.</li>
+<li>Audit judge rationales for bias against specific tools whenever the harness adds tools.</li>
+</ul>
+<h3>2. NEW rank: <a href="https://arxiv.org/abs/2609.27607">arXiv 2609.27607</a>: Can Jev Judge Radiology Reports? Evaluating a System One Model for Clinical Factuality</h3>
+<p><strong>Huang, Yang, Ma, Liang, Cai, Ma, Chen, Sun, Tan</strong> (Macao Polytechnic University; Liang at the Netherlands Cancer Institute and Radboud UMC). v1 23 Sep 2026 (cs.CL, cross-listed to cs.AI), 19 pages. The analysis scripts are &quot;not yet publicly available&quot;.</p>
+<p><strong>Full PDF read:</strong> §1–7 and App. A–G (Tables 1–3 and A1–A12; Figs. 1–4, A1 and A2).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>The judge.</strong> TypeSafe's Jev (<code>jev-1.13.0</code>) answers typed questions with probabilities.</li>
+<li>A local Qwen3.5-9B splits each report into atomic findings.</li>
+<li>Each finding goes to Jev with the full opposite report and one Choice question: is it supported, contradicted or not addressed? This is &quot;OneQ&quot;.</li>
+<li>A report's error score sums contradiction and non-coverage for the generated report's findings, plus non-coverage for the reference's findings.</li>
+<li>&quot;Full&quot; adds six questions: negation and hedging booleans, the error type, and clinical significance.</li>
+<li><strong>The tests:</strong></li>
+<li>Kendall τb against radiologists' error counts, on RadEvalX (100 pairs) and RadEvalExpert (624 pairs from 208 studies);</li>
+<li>19,513 controlled-error sentences from ReXErr;</li>
+<li>comparisons with an open DeBERTa NLI judge under the same decomposition, a finding-count baseline, GREEN, RadCliQ, and local RadFact and RadMatch (Qwen3.8-27B);</li>
+<li>five-run repeatability;</li>
+<li>token cost at the listed $0.042 per million input tokens (output tokens are free).</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Agreement with experts (Table 1):</strong></li>
+<li>OneQ reaches τb = 0.573 [0.470, 0.661] on RadEvalX and 0.398 [0.339, 0.455] on RadEvalExpert (total errors).</li>
+<li>The NLI judge, with the same decomposition and aggregation, reaches 0.337 and 0.323. Counting findings alone reaches 0.288 and 0.261.</li>
+<li>Local RadMatch ties on RadEvalX total errors (0.580) but leads on clinically significant errors (0.491 vs 0.346).</li>
+<li>On a shared 200-pair RadEvalExpert subset RadMatch leads on both: 0.453 vs 0.322 (total) and 0.485 vs 0.259 (significant).</li>
+<li><strong>One question is enough (§5.3, Table A8):</strong></li>
+<li>OneQ vs Full changes τb by −0.009 [−0.026, 0.008] and +0.001 [−0.002, 0.004].</li>
+<li>It uses 44.56% and 43.03% fewer input tokens: 9,695 → 5,375 and 10,797 → 6,151 per pair.</li>
+<li>That is $0.000226–$0.000258 per pair, about 2.3–2.6 cents per 100 report pairs, excluding local decomposition.</li>
+<li>In a three-finding demo (§5.4, App. E.1), Jev cost $0.00005044 against $0.00018520 for GPT-5.6 Luna with reasoning off (about 3.7×). Median time was 1.13 s against 3.57 s, and all 30 calls gave the same labels.</li>
+<li><strong>What it catches (§5.2, Table A9):</strong></li>
+<li>Sentence-level AUROC is 0.977 for false negation (91.9% recall at 0.5), 0.984 for a changed location, 0.975 for severity and 0.989 for an added device.</li>
+<li>Typos score 0.562, and recall on repetition is 0.003.</li>
+<li>So NLI wins when meaning-preserving edits count as errors (0.8969 vs 0.8896 overall), and Jev wins on factual errors only (0.9680 vs 0.9614).</li>
+<li><strong>Scores vary run to run; rankings don't (Table 3):</strong></li>
+<li>Across five uncached runs, no pair got an identical score, yet median between-run rank agreement was 0.990 for OneQ. The SD of its expert correlation was 0.0038.</li>
+<li>GREEN with greedy decoding repeated exactly.</li>
+<li>RadMatch at its default temperature of 1.0 repeated exactly for 10% of pairs, with rank agreement 0.662. At temperature 0 that rose to 82% and 0.965.</li>
+<li><strong>Calibrate before thresholding (§5.6, App. G, Table A10):</strong></li>
+<li>Raw sentence-level expected calibration error (ECE) is 0.1192, against 0.1045 for NLI.</li>
+<li>In Jev's lowest-probability bin, 16.7% of sentences carried an injected error, although the mean predicted error probability there was 0.37%.</li>
+<li>Much of that bin is plausibly the typo and repetition class, which Jev treats as meaning-preserving. That is my inference from Table A9, not a number the paper reports.</li>
+<li>Isotonic calibration fit on held-out studies cut ECE from 0.1235 to 0.0077, with AUROC unchanged.</li>
+<li>At report level, Full's top score bin averages 8.53 against 5.30 expert errors.</li>
+<li><strong>Aggregation carries report size (§5.5).</strong> On the 200-pair subset, the same Full judgments give τb 0.320 as a count and 0.111 as soft F1.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li><strong>Scope:</strong></li>
+<li>Agreement is measured against the reference text, not the image.</li>
+<li>Only one Jev version is tested, and the expert sets are small.</li>
+<li>RadEvalX has one generator and RadCliQ-stratified sampling.</li>
+<li><strong>Method:</strong></li>
+<li>Sentence-level detection and calibration use Full, not OneQ.</li>
+<li>The baselines ran on a local 27B backend rather than their original judges.</li>
+<li>The weight setting that reaches τb 0.635 was chosen on the evaluation labels, which the authors flag.</li>
+<li><strong>Report-level error categories are unreliable.</strong> The &quot;false finding&quot; share dominates even for location and severity errors (App. F).</li>
+<li>The scripts are unreleased, and the price is the paper's listed rate.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It adds the operating numbers the catalog's Jev-as-judge cards lack:</li>
+<li>how many questions you need (one);</li>
+<li>what a judgment costs;</li>
+<li>that raw probabilities are miscalibrated until fit on your data;</li>
+<li>that scores never repeat exactly while rankings do.</li>
+<li>It qualifies the confidence-threshold rules in earlier cards: <code>arxiv-2609-26550-jev-as-a-judge-accept-escalate</code> (CMU; accept when q ≥ 0.9) and <code>arxiv-2609-29769-jev-vs-llm-rubric-judges-correlated-errors</code> (Penn; 29–325× cheaper). A raw-probability threshold needs task calibration first.</li>
+<li>It shows that count-based scores partly measure output size: the finding-count baseline alone reaches τb 0.26–0.29.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Store every judge call as a probability vector with the judge name, version and question id, not just the top label. Then re-aggregation, calibration and thresholds become queries.</li>
+<li>Fit calibration per task and judge version before any accept-or-escalate threshold, and keep a small labeled holdout.</li>
+<li>For regression detection, compare judge rankings across reruns rather than raw scores.</li>
+<li>Report a size baseline (findings, claims or steps) next to any count-based judge score.</li>
+</ul>
+<h3>Academy scouted, not ranked (abstract only, so not rankable)</h3>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.27277">2609.27277</a> &quot;TimeEvo&quot; (Yang, …, Philip S. Yu; code at github.com/Muyiiiii/TimeEvo), a companion to 2609.24130: aggregate scores hide per-item churn.</li>
+<li>&quot;Silent Harm&quot;: one round of generic self-revision &quot;changes 147 answers and breaks 56 of them, while the final score moves by less than a point&quot;.</li>
+<li>A library of 21 expert-curated tools lowered anomaly accuracy under every backbone.</li>
+<li>New tools get in only through a paired admission gate.</li>
+<li><a href="https://arxiv.org/abs/2609.25237">2609.25237</a> &quot;Trains but Doesn't Learn&quot; (EMNLP 2026 Industry Track).</li>
+<li>An agent drives a ten-stage post-training delivery while an oracle scores each stage &quot;from platform-recorded facts&quot;.</li>
+<li>The silent failure: loss falls and every signal stays green, but the model is no better than the base. An operator acceptance gate caught every such run.</li>
+<li><a href="https://arxiv.org/abs/2609.22247">2609.22247</a> &quot;CHART&quot;. A search agent trained under one harness learns parallel search &quot;harness-local&quot;, and after a system-prompt rewrite it falls back to serial search.</li>
+<li>Rotating harnesses during training brought parallel search to 89% of held-out-harness turns, against at most 5% for static pools.</li>
+<li><a href="https://arxiv.org/abs/2609.22231">2609.22231</a> &quot;EvalMem&quot;: splits memory failures into encoding, retrieval and generation. Retrieval is the most common failure layer.</li>
+<li><a href="https://arxiv.org/abs/2609.27087">2609.27087</a> &quot;Policy-as-Skill&quot;: versioned policy capabilities with evidence checks and audit. Deterministic control raised aggregate accuracy from 53.8% to 61.2%, but the effect is task-dependent.</li>
+<li><a href="https://arxiv.org/abs/2609.23939">2609.23939</a> &quot;XYEval&quot;: agents accept plausible but misleading user suggestions, with relative drops up to 46.7%.</li>
+<li><a href="https://arxiv.org/abs/2609.22819">2609.22819</a>: counterfactual tool ranking from exact-propensity logs over MCP. Direct regression beat doubly robust in-distribution (0.0139 vs 0.0272 MAE); doubly robust won under shift (0.0227 vs 0.0948).</li>
+</ul>
+<h2>Six-week EV (through ~Nov 7)</h2>
+<ul>
+<li><strong>Gateway route becomes an explicit eval dimension (medium-high).</strong></li>
+<li>Signals:<ul>
+<li>Inspect 0.3.269 and 0.3.270 (proxied and direct runs differed; the Responses default; reasoning summaries);</li>
+<li>Codex #48508 (usage on steered turns);</li>
+<li>LiteLLM #43237 (trace restructure).</li>
+</ul>
+</li>
+<li>Expect eval frameworks to record provider route and API family in their logs.</li>
+<li>For BQAA: route and API-family columns, the gateway version, and a check for whether two eval runs are comparable.</li>
+<li><strong>Prices behave as versioned data (medium).</strong></li>
+<li>Signals:<ul>
+<li>LiteLLM's live cost map: two price changes today, one reversing values set 15 hours earlier;</li>
+<li>its provenance API;</li>
+<li>the rc spend-rollup fixes.</li>
+</ul>
+</li>
+<li>For BQAA: a versioned price table, spend recomputed and compared, and a flag for models priced at $0.</li>
+<li><strong>Admission control for self-modifying agents (medium).</strong></li>
+<li>Signals: 2609.24130, TimeEvo's paired admission gate, and the fleet's own replay lock.</li>
+<li>Expect harness vendors to ship rule and skill admission backed by replay.</li>
+<li>For BQAA: lifecycle tables for rules, skills and prompts, and protected-case replay corpora.</li>
+<li><strong>Cheap typed judges need calibration logs (medium).</strong></li>
+<li>Signals:<ul>
+<li>2609.27607;</li>
+<li>Vercel #21215 (gateway fallbacks conditioned on confidence and probability, queued as <code>@ai-sdk/gateway@4.0.95</code>);</li>
+<li>the catalog's Jev cards.</li>
+</ul>
+</li>
+<li>For BQAA: store judge probability vectors, and calibrate per task.</li>
+<li><strong>Gateway trace structure shifts at the next LiteLLM release (medium).</strong></li>
+<li>Signals:<ul>
+<li>#43237: span renames, and post-response spans become linked root traces;</li>
+<li>#43251: a new 503 class;</li>
+<li>#43322: Langtrace traces start arriving;</li>
+<li>#43315: redaction fixes.</li>
+</ul>
+</li>
+<li>For BQAA: normalize span names, and assemble traces with links in mind.</li>
+<li><strong>Watch list:</strong></li>
+<li><strong>LiteLLM:</strong><ul>
+<li>v1.103.0 stable, as rc/1.103.0 now carries the top-N revert and the member-spend fix;</li>
+<li>a v1.104.0 release candidate (#43327 pending);</li>
+<li>the next dev tag carrying #43237, #43251 and #43270.</li>
+</ul>
+</li>
+<li><strong>Other queued releases:</strong><ul>
+<li>npm <code>@openai/codex@0.159.0-alpha.6</code> (the GitHub prerelease is out);</li>
+<li><code>@ai-sdk/gateway@4.0.95</code> / <code>ai@7.0.117</code> through #21535, once AI Gateway is live;</li>
+<li>Stagehand 4.2.0 stable (telemetry opt-in).</li>
+</ul>
+</li>
+<li><strong>Carried:</strong><ul>
+<li>Cloudflare <code>agents@0.25.0</code>;</li>
+<li>a crewAI release with #7776, #7779 or #7780;</li>
+<li>LiteLLM <code>max_budget=0</code> (#43305 or #43292);</li>
+<li>PydanticAI harness 0.52.x publishing from the monorepo;</li>
+<li>Mastra 1.72.0 stable, and Codex 0.158 or 0.159 stable.</li>
+</ul>
+</li>
+<li><strong>Dated:</strong> the Perplexity Sonar Chat Completions shutdown on Sep 27 (carried from Fri 1834) is tomorrow.</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>Inspect AI 0.3.270 (NEW):</strong> tag eval samples with route (direct or <code>litellm-proxy</code>) and API family, because proxied and direct runs of the same model differed before 0.3.270. Segment F1 by version, and flag reused vs newly run samples in topped-up eval sets.</li>
+<li><strong>LiteLLM cost map (Progress):</strong> default SDK and proxy processes load prices from <code>main</code> at start. Record the cost-map <code>source_revision</code> and <code>loaded_at</code>, and recompute spend from tokens against a versioned price table. Two price merges landed today with no release.</li>
+<li><strong>Codex alpha.6 (Progress):</strong> from alpha.6, steered turns continue with <code>previous_response_id</code> and keep the interrupted response's usage. Treat <code>interrupted</code> as a turn state, and expect lower input tokens on steered follow-ups.</li>
+<li><strong>2609.24130 (NEW):</strong> keep per-turn metric series, replay cases and a lifecycle log for agent-authored rules. 55% of replay-rejected rules fixed their own case and broke a protected one, and aggregate drift needs its own monitor.</li>
+<li><strong>2609.27607 (NEW):</strong> store Jev and other judge outputs as versioned probability vectors, calibrate per task before thresholds, compare rankings rather than raw scores across reruns, and report a size baseline.</li>
+<li><strong>NOTE cluster:</strong></li>
+<li>LiteLLM #43237 renames Redis spans and re-roots post-response spans (unreleased).</li>
+<li>The rc.1 Usage views undercounted the key long tail (reverted on the rc).</li>
+<li>LiteLLM's <code>langtrace</code> callback has dropped every trace (fix open).</li>
+<li>Mastra #25225: dedupe trace roots after the time filter, not before.</li>
+</ul>
+<h2>Unconfirmed</h2>
+<ul>
+<li><strong>Codex <code>rust-v0.159.0-alpha.6</code>.</strong></li>
+<li>Not confirmed: the npm publish. Also, the release body is boilerplate, so the contents are known from the tag compare and PR bodies, not from release notes.</li>
+<li>Where I looked:<ul>
+<li>the GitHub releases API: 404 at about 19:59Z, then published 20:07:52Z, seen at 20:12Z;</li>
+<li>npm dist-tags: <code>alpha</code> = alpha.5, no alpha.6 time entry, at 20:13Z.</li>
+</ul>
+</li>
+<li><strong>Vercel AI #21215's release timing.</strong></li>
+<li>Not confirmed: when AI Gateway's conditional evaluation fallbacks go live, which gates the release.</li>
+<li>Where I looked: the PR body and the open Version Packages PR #21535. I checked no gateway status source.</li>
+<li><strong>How far LiteLLM's price changes actually reached.</strong></li>
+<li>Not confirmed: how many deployments fetch the remote map. That depends on environment overrides, restart timing and reload schedules, and I can't observe any real deployment.</li>
+<li>Where I looked: <code>get_model_cost_map.py</code> and <code>__init__.py</code> on <code>main</code> and at v1.102.1, <code>pyproject.toml</code> scripts, <code>docker/prod_entrypoint.sh</code>, the Dockerfiles, <code>periodic_reload_schedule.py</code>, and the live raw price file.</li>
+<li><strong>Inspect 0.3.269's other changelog items.</strong></li>
+<li>Not confirmed: <code>reason=&quot;no_response&quot;</code>, and cancellations recorded as errors. They rest on the changelog only.</li>
+<li>Where I looked: the changelog. Its <code>#5376</code> reference returns 404 as a pull request.</li>
+<li><strong>Jev's price.</strong></li>
+<li>Not confirmed: $0.042 per million input tokens with free output is the paper's figure, citing TypeSafe's documentation.</li>
+<li>Where I looked: the paper only. I did not open TypeSafe's pricing page.</li>
+<li><strong>LiteLLM #43322's &quot;every trace dropped since the host moved&quot;.</strong></li>
+<li>Not confirmed: when the Langtrace host moved, or which releases were affected. I did not reproduce the 404.</li>
+<li>Where I looked: the PR body only.</li>
+<li><strong>2609.24130's implementation.</strong></li>
+<li>Not confirmed: that the implementation matches the paper. No code is released.</li>
+<li>Where I looked: the paper's text and references for a code or artifact link; PandaProbe is cited without a URL.</li>
+</ul>
+<h2>Housekeeping</h2>
+<p><strong>Slot and inputs</strong></p>
+<ul>
+<li><strong>Slot:</strong> a late wake.</li>
+<li>The slot woke at about 12:42 PT. Collection's lock started at 19:44:34Z, and Collection woke this writer at about 12:46 PT.</li>
+<li>This run's first clock read was 12:47:39 PT, and no <code>2026-09-26-1234-*</code> brief existed. The label stays <strong>1234</strong>.</li>
+<li><strong>Packs used (6, all PACK_DONE at launch, windows joined end to end):</strong></li>
+<li>Muse 0732: 13:43:00Z → 14:46:08Z.</li>
+<li>DSH 0832: → 15:41:40Z.</li>
+<li>Agy 0932: → 16:45:00Z.</li>
+<li>Muse 1032: → 17:40:45Z.</li>
+<li>DSH 1132: → 18:42:16Z.</li>
+<li>Agy 1232: → 19:44:00Z (probe freeze).</li>
+<li>Agy 0632 was already used by the 0634 brief, so I did not re-pitch its items.</li>
+<li><strong>Gaps this window: none.</strong> All six packs were PACK_DONE at kick and still present at write time.</li>
+<li>Older gaps, for continuity only: Muse 1932 (FAIL_MAC) and Muse 0732, DSH 0832 and DSH 0532 (all Sep 25).</li>
+<li><strong>Social and other sources:</strong> I relied on the packs' labels for X, Reddit, LinkedIn and Papers with Code and did not re-probe them. Medium was not used.</li>
+<li><strong>Fresh-list path used:</strong> <code>_runs/fb-2026-09-26-1234/fresh-items.md</code> (42 entries), as the candidate checklist.</li>
+<li><strong>Dispositions:</strong><ul>
+<li>F01 is a no-progress note: Codex alpha.5 contains only #48469.</li>
+<li>F02, F36 and F04/F05/F32 are NOTEs: rc/1.103.0 for the first two, LiteLLM <code>main</code> for the rest.</li>
+<li>F03 and F11 are folded into the LiteLLM Progress. #43311 merged at 16:00:00Z, after DSH 0832's freeze, so that pack's &quot;open&quot; was right when written.</li>
+<li>F06 is a NOTE: queued in #21535 with its release held.</li>
+<li>F07, F29 and F35 ship in alpha.6 (GitHub prerelease 20:07:52Z) and are covered by the Codex progress note.</li>
+<li>F08 and F09 are NOTEs.</li>
+<li>F10 is confirmed: the ceiling is flat.</li>
+<li>F12–F28 and the carry lists F30, F31, F34 and F37 were re-checked by GraphQL at about 19:55Z. All are still open except opencode #51525 and #51524, which closed unmerged. F25 and F26 include ADK PRs (first-party, NOTE only).</li>
+<li>F33 is the PydanticAI NOTE.</li>
+<li>F38–F42 are below the bar, and I agree.</li>
+</ul>
+</li>
+<li><strong>Writer-sourced, not in that list:</strong><ul>
+<li>Inspect AI 0.3.270 (the NEW rank) and both Academy ranks (backfill);</li>
+<li>the LiteLLM live-price mechanism and the Codex alpha.6 release;</li>
+<li>LiteLLM #43322, #43315 and #43327; MLflow #26057 and #26109; deepagents #6557; and Stagehand dev1541.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Verified arXiv ceiling: <code>2609.30268</code></strong></p>
+<ul>
+<li><strong>Probed at 19:55Z:</strong> 30266–30268 return 200.</li>
+<li>30269, 30270, 30271, 30275, 30280, 30300, 30400, 31000, <code>2610.00001</code> and <code>2610.00100</code> return 404.</li>
+<li><strong>Priority pin <code>2609.02702</code>:</strong> base 200, v1 200, v2 404 and v3 404. These are no-slash probes without <code>-L</code>, and I re-read the title (&quot;Trace as State: Reasoning Traces as Conditional States for Long-Context Transformers&quot;). Intact, and not re-carded.</li>
+</ul>
+<p><strong>HN</strong></p>
+<ul>
+<li>All six pack companions report <code>status ok</code>, hits=0 and no failed queries (Muse 0732, DSH 0832, Agy 0932, Muse 1032, DSH 1132 and Agy 1232).</li>
+<li><strong>My own re-run of <code>bin/hn-scan.py</code> at 19:59Z, since 13:43Z,</strong> used the same six queries and threshold. It wrote only to <code>/tmp/fb1234sat/probe/</code>, not to <code>packs/</code>. Result: 0 hits and 0 errors.</li>
+<li><strong>Sanity check:</strong> the API's newest story was at 19:57:24Z, so it is live.</li>
+<li><strong>HN: hits=0 keep=0.</strong></li>
+</ul>
+<p><strong>Pack corrections</strong></p>
+<ul>
+<li><strong>No pack caught Inspect 0.3.270 or 0.3.269.</strong> None of this window's packs mentions <code>UKGovernmentBEIS/inspect_ai</code> or PyPI <code>inspect-ai</code>. Suggestion: add both to the Agy, Muse and DSH watchlists.</li>
+<li><strong>No pack noted the Codex <code>rust-v0.159.0-alpha.6</code> tag (19:09:52Z).</strong> Agy 1232 froze at 19:44Z, before the release object existed (20:07:52Z), so release-object sweeps couldn't see it; a tag sweep would have. This is a timing gap, not an error.</li>
+<li><strong>Clarification, not an error: #43254 and #43311 describe themselves as data-only</strong> (&quot;data only, no code path changed&quot;), which reads as below the bar. But the live-fetch path means default deployments price with them before any release.</li>
+</ul>
+<p><strong>Verification method</strong></p>
+<ul>
+<li><strong>GitHub API:</strong></li>
+<li>Release objects and dated tags, by GraphQL, for 90 repos since 13:30Z. Re-swept since 19:30Z at about 20:00Z, and since 20:00Z at about 20:12Z.</li>
+<li>Default-branch commits since 13:30Z (40 commits in 15 repos).</li>
+<li>Tag compares: Codex alpha.4…alpha.5 and alpha.5…alpha.6; Inspect 0.3.269…0.3.270.</li>
+<li>LiteLLM release, tag and branch state (<code>v1.103.0-rc.1</code>, <code>rc/1.103.0</code>, <code>rc/1.104.0</code>).</li>
+<li>PR state for 64 PRs by GraphQL (about 19:55Z).</li>
+<li><strong>PR bodies read (37):</strong></li>
+<li>LiteLLM #43237, #43251, #43270, #43254, #43311, #43331, #43328, #43326, #43323, #43315, #43322 and #43327;</li>
+<li>Codex #48508, #48502, #48513, #48491, #48489, #48483 and #48469;</li>
+<li>Vercel #21215 and #21535;</li>
+<li>Inspect #5575, #5577, #5579, #5519, #5551, #5532 and #5559;</li>
+<li>Stagehand #3045, Langfuse #17970, MLflow #26057 and #26109, deepagents #6557, Strands #4616, PydanticAI #8831 and #8836, and Mastra #25225.</li>
+<li><strong>Code and artifacts:</strong></li>
+<li>The published <code>inspect-ai</code> 0.3.270 wheel, searched for the <code>f1</code> multiset, the <code>eval_set</code> superset reuse path and the Responses default.</li>
+<li>LiteLLM <code>get_model_cost_map.py</code>, <code>__init__.py</code> (on <code>main</code> and at v1.102.1), <code>pyproject.toml</code> scripts, <code>docker/prod_entrypoint.sh</code>, the Dockerfiles and <code>periodic_reload_schedule.py</code>.</li>
+<li>The raw <code>main</code> price file, fetched at 20:00:45Z: 4,378 entries, ETag <code>2cd176fc…</code>, git blob id <code>4b88072b479c</code>.</li>
+<li><strong>Registries:</strong> PyPI JSON for 82 packages, and npm <code>time</code> and dist-tags for 57.</li>
+<li><strong>Academy:</strong></li>
+<li>49 abstracts via the arXiv API: the 42 unread strict-list entries from the 0634 pool, plus 7 from its wider list.</li>
+<li>Dispositions checked against every brief, pack, vault note, the catalog, seen-links and the run logs.</li>
+<li>2 PDFs extracted with <code>pdftotext</code> to <code>/tmp/fb1234sat/pdf/</code> and read in full (24130 and 27607). Every quoted number was checked against the cited table or section.</li>
+<li><strong>Search:</strong> no web search. The HN re-run is described above.</li>
+</ul>
+<p><strong>Excluded by rule:</strong></p>
+<ul>
+<li>No first-party BQAA content. ADK and python-genai are NOTE only, and ADK had no commits in the window.</li>
+<li>No Desk section and no GTM content.</li>
+<li>Crustdata and Fable were not used, and Medium was not cited.</li>
+<li>No re-admission of the 0634 (Sat), 0034 (Sat), 1834, 1234, 0634 or 0034 (Fri) sets. LiveKit 1.8.3 is not re-admitted, and the priority pin is not re-carded.</li>
+<li>This writer made no Jev calls. Collection logs its own <code>JEV_SHADOW worth_running</code> line.</li>
+</ul>
+<p><strong>Run limits:</strong></p>
+<ul>
+<li><strong>Volume:</strong> 3 ranks, 2 progress notes, about 35 NOTE lines and 7 scouted lines, within 50.</li>
+<li><strong>Re-attempts:</strong> four local commands failed and I re-ran them corrected. No network call was retried.</li>
+<li>Two failed on zsh expanding an unquoted <code>=====</code> separator as a command lookup; the first failure was harmless at the end of a command.</li>
+<li>One <code>grep</code> failed on zsh globbing of <code>--include=*.md</code>.</li>
+<li>One GitHub fetch returned 404, because Inspect's <code>#5376</code> is not a PR.</li>
+<li><strong>Other:</strong> $0 spent, 0 external messages and no background jobs. The downloads were two public arXiv PDFs, one PyPI wheel and one public raw JSON file.</li>
+</ul>
+<p><strong>Scratch dir:</strong> <code>/tmp/fb1234sat/</code>, created fresh for this run. It reuses the 0634 run's sweep scripts, with 13 repos and 25 registry packages added.</p>
+<p><strong>Catalog:</strong></p>
+<ul>
+<li>427 / 107 / 109, read-only and untouched by me. The research copy, the hub checkout and the live URL were byte-identical (SHA-256 <code>46ca38d4c34480df…</code>, checked at 20:01Z).</li>
+<li>Expected after publish: <strong>430 items / 108 briefs / 110 runs</strong> (+1 Industry, +2 Academy; the two progress notes attach to existing items).</li>
+</ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW items (3):</strong></p>
+<ol>
+<li><strong>id:</strong> <code>inspect-ai-0-3-270-litellm-proxy-responses-default-eval-set-top-up-f1-multiset</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Industry</li>
+<li><strong>title:</strong> Inspect AI 0.3.270 — GPT-5+/o-series/Codex models behind the <code>litellm-proxy</code> provider move to the Responses API with reasoning replayed between turns (before, proxied and direct runs of the same model &quot;run the same eval differently&quot;), Claude thinking summaries reach LiteLLM-routed logs, <code>eval_set</code> tops up a grown dataset by running only new samples, and <code>f1()</code> counts repeated tokens</li>
+<li><strong>primary URL:</strong> https://pypi.org/project/inspect-ai/0.3.270/ (changelog https://github.com/UKGovernmentBEIS/inspect_ai/blob/main/CHANGELOG.md; PR https://github.com/UKGovernmentBEIS/inspect_ai/pull/5575)</li>
+<li><strong>card text:</strong> The UK AI Security Institute's eval framework (PyPI 2026-09-26 15:35Z) fixes three gaps in the <code>litellm-proxy</code> provider that 0.3.269 added a day earlier. OpenAI reasoning models now use the Responses API with encrypted reasoning replayed each turn, and key and team aliases resolve to their real models (#5575). Claude 4.6+ with an effort requests summarized thinking, so logs through LiteLLM 1.96 gain reasoning text where they had a bare signature (#5579). Also: <code>eval_set</code> reuses prior samples by <code>(id, epoch)</code> when a dataset grew as a strict superset (#5577); <code>f1()</code> switches from set to multiset overlap, so answers with repeated tokens score lower (#5519); and live readers of shared log directories stop mixing retried attempts' events (#5551). Before the dedicated provider existed, one deployment's proxied evals recorded 0 cache reads over 715M input tokens and had Claude replies cut at 4,096 tokens (#5559).</li>
+</ul>
+<ol start="2">
+<li><strong>id:</strong> <code>arxiv-2609-24130-self-healing-harness-replay-admission-collateral-regression</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Self-Healing Harness for Runtime Oversight of Agent Self-Modification — agents propose rules and an external gate admits them only after replay shows improvement on the triggering failure and no regression on protected cases: of 383 replay-rejected proposals across AppWorld, Terminal-Bench and τ²-bench, 211 (55%) fixed their own failure while breaking a previously passing case, and individually admitted rules still drifted a run negative as the set grew from 13 to 70 rules</li>
+<li><strong>arXiv:</strong> 2609.24130 — https://arxiv.org/abs/2609.24130</li>
+<li><strong>card text:</strong> University of Illinois Chicago and Capital One AI Labs wrap an unmodified agent in a Detect / Notice / Heal / Validate loop. A trajectory gate over per-turn metric series flags stalls and regressions, the agent authors candidate rules in an external workspace, and replay of at most three failure and two protected cases decides promotion (improve by ≥0.05 on a target, no metric drop of 0.05 or more), backed by a corpus-level guard. Across 16 paired runs, task-completion score rose in all pairs but only two intervals exclude zero (e.g. AppWorld/gpt-terra 0.701 → 0.723). Oversight cost 1.72× the spend and 1.7–7× the wall-clock time, and judge prompts first had to be fixed for bias against the harness's own meta-tools (14% → 0.17% of rationales). Caveats: no immediate-admission arm, one seed, sparse protected cases (the 211 are detected conflicts, not an incidence rate), and no code released.</li>
+</ul>
+<ol start="3">
+<li><strong>id:</strong> <code>arxiv-2609-27607-jev-judge-radiology-one-question-cost-calibration</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Can Jev Judge Radiology Reports? — one Jev support question per atomic finding, applied in both directions, tracks radiologists' error counts (Kendall τb 0.573 on RadEvalX, 0.398 on RadEvalExpert; open NLI 0.337/0.323) and matches a seven-question design at 43–45% fewer input tokens (about 2.3–2.6 cents per 100 report pairs), but raw probabilities need task calibration (isotonic ECE 0.1235 → 0.0077) and no score repeated exactly across five runs even as rankings held at 0.990</li>
+<li><strong>arXiv:</strong> 2609.27607 — https://arxiv.org/abs/2609.27607</li>
+<li><strong>card text:</strong> Macao Polytechnic University researchers use <code>jev-1.13.0</code> as a judge. Jev detects factual edits well (false-negation AUROC 0.977; location 0.984) but largely ignores typos and repetition by design, so an open NLI judge wins when those count as errors. Local RadMatch still leads on clinically significant errors. A finding-count baseline alone reaches τb 0.26–0.29, and count vs soft-F1 aggregation of the same judgments moves τb from 0.320 to 0.111, so benchmark agreement partly measures report size. Caveats: agreement with reference text rather than the image, one Jev version, small expert sets, calibration measured on the Full question set, and scripts not yet released.</li>
+</ul>
+<p><strong>Progress (2):</strong></p>
+<ul>
+<li><p><strong>parent:</strong> <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code></p>
+</li>
+<li><p><strong>text:</strong> OpenAI Codex rust-v0.159.0-alpha.6 (GitHub prerelease 2026-09-26 20:07Z; npm <code>alpha</code> still alpha.5 at 20:13Z) ships #48508. Steering an active WebSocket turn now drains the response and continues with <code>previous_response_id</code>, instead of dropping the connection and resending the full history. <code>response.incomplete</code> with reason <code>interrupted</code> now completes the turn with <code>end_turn: false</code>, preserving token usage. alpha.5 (17:34Z) carried only a copy-on-select default (#48469).</p>
+</li>
+<li><p><strong>parent:</strong> <code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code></p>
+</li>
+<li><p><strong>text:</strong> LiteLLM's SDK and <code>litellm</code> proxy server (the entry point the official Docker image runs) load model prices from <code>main</code> at startup unless <code>LITELLM_LOCAL_MODEL_COST_MAP=True</code>, so two cost-map merges changed computed spend for default deployments without a release. #43254 (2026-09-26 15:34Z) priced Databricks Claude Opus 5.5 at $4/$20 per 1M (previously logged at $0) and cut MAI-Image-2.5-Flash from $0.0338 to $0.02 per image; #43311 (16:00Z) moved Fireworks DeepSeek V4.1 Flash to $0.22/$0.007/$0.66 per 1M input/cached/output, from $0.30/$0.006/$1.20. <code>get_model_cost_map_source_info()</code> (in v1.102.1) exposes source, <code>loaded_at</code>, <code>source_revision</code> and ETag for provenance.</p>
+</li>
+</ul>
+<p><strong>Headline claims (for citation checks):</strong></p>
+<ol>
+<li>Inspect AI 0.3.270 makes GPT-5-and-later, o-series and Codex models served through its <code>litellm-proxy</code> provider use the Responses API with reasoning replayed each turn. Before, per the PR, <code>litellm-proxy/gpt-5.5</code> and <code>openai/gpt-5.5</code> &quot;run the same eval differently&quot;. — https://github.com/UKGovernmentBEIS/inspect_ai/pull/5575 (merged 2026-09-26 14:08Z; shipped in PyPI <code>inspect-ai</code> 0.3.270, 2026-09-26 15:35Z)</li>
+<li>Across 16 paired runs, a replay gate rejected 383 agent-authored rules, and 211 of them (55%) improved the failure that motivated them while degrading a previously passing protected case. — https://arxiv.org/abs/2609.24130 (v1 2026-09-21; Table 2)</li>
+<li>One Jev support question per statement matched the seven-question design's agreement with expert error counts (τb 0.573 vs 0.582 on RadEvalX) while using 43–45% fewer judgment input tokens, about 2.3–2.6 cents per 100 report pairs. — https://arxiv.org/abs/2609.27607 (v1 2026-09-23; Table 1, §5.3, Table A8)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 26 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>

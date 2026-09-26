@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "id": "inspect-ai-0-3-270-litellm-proxy-responses-default-eval-set-top-up-f1-multiset",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Inspect AI 0.3.270 — GPT-5+/o-series/Codex models behind the `litellm-proxy` provider move to the Responses API with reasoning replayed between turns (before, proxied and direct runs of the same model \"run the same eval differently\"), Claude thinking summaries reach LiteLLM-routed logs, `eval_set` tops up a grown dataset by running only new samples, and `f1()` counts repeated tokens",
+      "html": " <a href=\"https://pypi.org/project/inspect-ai/0.3.270/\">inspect-ai 0.3.270</a> · <a href=\"https://github.com/UKGovernmentBEIS/inspect_ai/pull/5575\">#5575</a> · <a href=\"https://github.com/UKGovernmentBEIS/inspect_ai/blob/main/CHANGELOG.md\">changelog</a> — The UK AI Security Institute&#x27;s eval framework (PyPI 2026-09-26 15:35Z) fixes three gaps in the `litellm-proxy` provider that 0.3.269 added a day earlier. OpenAI reasoning models now use the Responses API with encrypted reasoning replayed each turn, and key and team aliases resolve to their real models (#5575). Claude 4.6+ with an effort requests summarized thinking, so logs through LiteLLM 1.96 gain reasoning text where they had a bare signature (#5579). Also: `eval_set` reuses prior samples by `(id, epoch)` when a dataset grew as a strict superset (#5577); `f1()` switches from set to multiset overlap, so answers with repeated tokens score lower (#5519); and live readers of shared log directories stop mixing retried attempts&#x27; events (#5551). Before the dedicated provider existed, one deployment&#x27;s proxied evals recorded 0 cache reads over 715M input tokens and had Claude replies cut at 4,096 tokens (#5559). <a href=\"/research/briefs/2026-09-26-1234-opus.html\">Full brief</a>.",
+      "added": "2026-09-26T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-24130-self-healing-harness-replay-admission-collateral-regression",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Self-Healing Harness for Runtime Oversight of Agent Self-Modification — agents propose rules and an external gate admits them only after replay shows improvement on the triggering failure and no regression on protected cases: of 383 replay-rejected proposals across AppWorld, Terminal-Bench and τ²-bench, 211 (55%) fixed their own failure while breaking a previously passing case, and individually admitted rules still drifted a run negative as the set grew from 13 to 70 rules",
+      "html": " <a href=\"https://arxiv.org/abs/2609.24130\">arXiv:2609.24130</a> · <a href=\"https://arxiv.org/pdf/2609.24130\">PDF</a> — University of Illinois Chicago and Capital One AI Labs wrap an unmodified agent in a Detect / Notice / Heal / Validate loop. A trajectory gate over per-turn metric series flags stalls and regressions, the agent authors candidate rules in an external workspace, and replay of at most three failure and two protected cases decides promotion (improve by ≥0.05 on a target, no metric drop of 0.05 or more), backed by a corpus-level guard. Across 16 paired runs, task-completion score rose in all pairs but only two intervals exclude zero (e.g. AppWorld/gpt-terra 0.701 → 0.723). Oversight cost 1.72× the spend and 1.7–7× the wall-clock time, and judge prompts first had to be fixed for bias against the harness&#x27;s own meta-tools (14% → 0.17% of rationales). Caveats: no immediate-admission arm, one seed, sparse protected cases (the 211 are detected conflicts, not an incidence rate), and no code released. <a href=\"/research/briefs/2026-09-26-1234-opus.html\">Full brief</a>.",
+      "added": "2026-09-26T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-27607-jev-judge-radiology-one-question-cost-calibration",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Can Jev Judge Radiology Reports? — one Jev support question per atomic finding, applied in both directions, tracks radiologists' error counts (Kendall τb 0.573 on RadEvalX, 0.398 on RadEvalExpert; open NLI 0.337/0.323) and matches a seven-question design at 43–45% fewer input tokens (about 2.3–2.6 cents per 100 report pairs), but raw probabilities need task calibration (isotonic ECE 0.1235 → 0.0077) and no score repeated exactly across five runs even as rankings held at 0.990",
+      "html": " <a href=\"https://arxiv.org/abs/2609.27607\">arXiv:2609.27607</a> · <a href=\"https://arxiv.org/pdf/2609.27607\">PDF</a> — Macao Polytechnic University researchers use `jev-1.13.0` as a judge. Jev detects factual edits well (false-negation AUROC 0.977; location 0.984) but largely ignores typos and repetition by design, so an open NLI judge wins when those count as errors. Local RadMatch still leads on clinically significant errors. A finding-count baseline alone reaches τb 0.26–0.29, and count vs soft-F1 aggregation of the same judgments moves τb from 0.320 to 0.111, so benchmark agreement partly measures report size. Caveats: agreement with reference text rather than the image, one Jev version, small expert sets, calibration measured on the Full question set, and scripts not yet released. <a href=\"/research/briefs/2026-09-26-1234-opus.html\">Full brief</a>.",
+      "added": "2026-09-26T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
       "id": "livekit-agents-1-8-3-fallback-attribution-span-metadata-negative-durations",
       "tag": "Industry",
       "kind": "rank",
@@ -758,6 +788,11 @@
       "addedDisplay": "12:34 AM PT",
       "progress": [
         {
+          "at": "2026-09-26T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "LiteLLM SDK and <code>litellm</code> proxy server (the entry point the official Docker image runs) load model prices from <code>main</code> at startup unless <code>LITELLM_LOCAL_MODEL_COST_MAP=True</code>, so two cost-map merges changed computed spend for default deployments without a release. <a href=\"https://github.com/BerriAI/litellm/pull/43254\">#43254</a> (15:34Z) priced Databricks Claude Opus 5.5 at $4/$20 per 1M (previously logged at $0) and cut MAI-Image-2.5-Flash from $0.0338 to $0.02 per image; <a href=\"https://github.com/BerriAI/litellm/pull/43311\">#43311</a> (16:00Z) moved Fireworks DeepSeek V4.1 Flash to $0.22/$0.007/$0.66 per 1M input/cached/output from $0.30/$0.006/$1.20. <code>get_model_cost_map_source_info()</code> (in v1.102.1) exposes source, <code>loaded_at</code>, <code>source_revision</code> and ETag for provenance. Progress. <a href=\"/research/briefs/2026-09-26-1234-opus.html\">Full brief</a>."
+        },
+        {
           "at": "2026-09-25T0034",
           "displayTime": "12:34 AM PT",
           "html": "LiteLLM <a href=\"https://github.com/BerriAI/litellm/releases/tag/v1.100.3\">v1.98.1 / v1.99.4 / v1.100.3</a> (GH 06:20–06:21Z, PyPI 06:05–06:08Z) backport #39729 (budget reset now clears the cached end-user spend counter on every replica, where before 429s continued after rollover) and #40639 (shared budgets with more than 32,767 end users now reset), plus the gpt-6 request-family fix. Every maintained line from 1.98.x to 1.102.x now has both. <a href=\"https://github.com/BerriAI/litellm/releases/tag/v1.104.0-dev.2\">v1.104.0-dev.2</a> is the first artifact with #42486, which sets gen_ai.conversation.id on OTel LLM spans from the caller's session id. Progress only. <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>."
@@ -953,6 +988,11 @@
       "added": "2026-09-22T1234",
       "addedDisplay": "12:34 PM PT",
       "progress": [
+        {
+          "at": "2026-09-26T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "OpenAI Codex <a href=\"https://github.com/openai/codex/releases/tag/rust-v0.159.0-alpha.6\">rust-v0.159.0-alpha.6</a> (GitHub prerelease published 2026-09-26 20:07Z; npm <code>alpha</code> still alpha.5 at 20:13Z; <code>latest</code> still 0.157.1) ships <a href=\"https://github.com/openai/codex/pull/48508\">#48508</a>: steering an active WebSocket turn now drains the response and continues with <code>previous_response_id</code> instead of dropping the connection and resending full history; <code>response.incomplete</code> with reason <code>interrupted</code> completes with <code>end_turn: false</code>, preserving token usage. alpha.5 (17:34Z) carried only a copy-on-select default (#48469). Progress. <a href=\"/research/briefs/2026-09-26-1234-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-26T0034",
           "displayTime": "12:34 AM PT",
@@ -4956,6 +4996,22 @@
   ],
   "runs": [
     {
+      "id": "2026-09-26T1234",
+      "date": "2026-09-26",
+      "displayTime": "12:34 PM PT",
+      "added": [
+        "inspect-ai-0-3-270-litellm-proxy-responses-default-eval-set-top-up-f1-multiset",
+        "arxiv-2609-24130-self-healing-harness-replay-admission-collateral-regression",
+        "arxiv-2609-27607-jev-judge-radiology-one-question-cost-calibration"
+      ],
+      "updated": [
+        "litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport",
+        "openai-codex-0-156-0-stable-telemetry-attribution-graduation"
+      ],
+      "brief": "/research/briefs/2026-09-26-1234-opus.html",
+      "note": "Late-wake catch-up for official 12:34 PT Sat slot (writer kicked ~12:46 PT; label kept 1234). FIRST live fresh-list path publish (fb-merge-packs → fresh-items.md; Opus search stayed on). Writer Opus 5.5 (MODEL_CHECK_PASS 254/254 turns claude-opus-5-5). Packs: Muse0732 + DSH0832 + Agy0932 + Muse1032 + DSH1132 + Agy1232 (all PACK_DONE); HN companions hits=0. Gaps this window: none. Verified arXiv mailing ceiling still 2609.30268; pin 2609.02702 intact. Industry NEW +1: Inspect AI 0.3.270 litellm-proxy Responses default / eval_set top-up / f1 multiset (writer-sourced; packs missed Inspect). Progress +2: LiteLLM cost-map remote load (#43254/#43311) on parent litellm-1-102-1…; Codex rust-v0.159.0-alpha.6 #48508 steered-turn continuity. Academy +2 full-PDF: 2609.24130 self-healing harness replay admission; 2609.27607 Jev radiology one-question cost/calibration. Unconfirmed section present. No Stories companion (0 third-party BQAA). GTM skipped. FB_MERGE slot=2026-09-26-1234 packs=12 raw=49 unique=42 drop_catalog=0 drop_seen=0 drop_both=0 fresh=42 (cand=38 low=4) tokens_old~59532 tokens_new~6588. JEV_SHADOW pre worth_running run conf=0.97; citations verify_more/accept/accept (log-only)."
+    },
+    {
       "id": "2026-09-26T0634",
       "date": "2026-09-26",
       "displayTime": "6:34 AM PT",
@@ -6598,6 +6654,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-09-26T1234",
+      "date": "2026-09-26",
+      "displayTime": "12:34 PM PT",
+      "title": "Opus 5.5: Inspect AI 0.3.270 litellm-proxy Responses default + eval_set top-up; Academy 2609.24130 self-healing harness replay admission + 2609.27607 Jev radiology one-question; Progress LiteLLM cost-map remote load + Codex alpha.6 steered-turn continuity",
+      "href": "/research/briefs/2026-09-26-1234-opus.html",
+      "analyzer": "Opus 5.5"
+    },
     {
       "id": "2026-09-26T0634",
       "date": "2026-09-26",
