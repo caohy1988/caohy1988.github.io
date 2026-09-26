@@ -1,8 +1,59 @@
 {
-  "updatedAt": "2026-09-25T14:14:33Z",
+  "updatedAt": "2026-09-26T03:12:04Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger \u2014 Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "simply-ledger-owned-done-settle-gate-2026-09-25",
+      "date": "2026-09-25",
+      "displayDate": "Sep 25, 2026",
+      "title": "simply \u2014 ledger-owned done: judgment to models, gates to code",
+      "href": "https://github.com/newbie0413/simply",
+      "why": "tmux multi-agent harness where an auditor owns the work ledger + verification gates, a Claude Code PM owns the worker fleet, and completion travels a private file-based status ledger. Core rule: \"Judgment to models; observation, loops, and gates to code\" \u2014 agents cannot mark their own criteria passed; `verify` runs the checks and the settle gate stays open until every criterion passes and a QA package exists. Briefs state the outcome + observable criteria, not line-by-line steps (\"the model owns the path; the ledger owns the destination\"). Also ships max vs low-cost routing profiles (frontier for judgment, cheaper models for research/implementation), which mirrors our Opus-default / Kimi-fallback / flash-collect split. Import as prose + checklist for manage-handoffs and EM intent briefs (mechanical form of the rari promotion gate); no install, no new seat. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-25-muse-harness-lab-pack",
+      "tags": [
+        "handoffs",
+        "EM",
+        "verification",
+        "tmux",
+        "routing"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "vnx-orchestration-ndjson-receipts-worktrees-2026-09-25",
+      "date": "2026-09-25",
+      "displayDate": "Sep 25, 2026",
+      "title": "vnx-orchestration \u2014 per-dispatch NDJSON receipts + git worktree per worker",
+      "href": "https://github.com/vinix24/vnx-orchestration",
+      "why": "Local control plane that drives installed coding CLIs (claude / codex / gemini / kimi / ollama) as subprocess workers, each in its own git worktree, through review gates, with an append-only NDJSON receipt per dispatch (verdict, provider, model, cost). No vendor SDK, so dispatches bill to existing CLI subscriptions (README reports measured cost=$0.0000 receipts). A receipt refuses to call a dispatch done without its PR, and branch protection is declared as YAML with a drift preflight. Patterns to adapt for the EM loop: a per-PR receipts.ndjson line per dispatch/review/merge (the grep-able \"receipt complete\" artifact for the promotion gate) and worktree-per-lane, so a dual-LGTM reviewer never touches the implementer's tree. Adopt the patterns, not the runtime. The author says it is not a security sandbox, and parallel worktree isolation is not yet race-free. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-25-muse-harness-lab-pack",
+      "tags": [
+        "EM",
+        "receipts",
+        "dual-LGTM",
+        "Mac CLI",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "agent-evals-offline-replay-promotion-gate-2026-09-25",
+      "date": "2026-09-25",
+      "displayDate": "Sep 25, 2026",
+      "title": "agent-evals \u2014 record once, replay offline; gate on pass rate, cost p95, trajectory, calibrated judge",
+      "href": "https://github.com/jason-bourne-gg/agent-evals",
+      "why": "Eval harness that records model calls once and replays them offline (no key, no network, runs in CI), then gates on pass rate, cost p95 (not mean), latency, and trajectory (catches right-answer-wrong-path, e.g. a refund that skips the lookup), with the LLM judge calibrated against human labels (agreement, Cohen's kappa, false passes, order/length bias). Shape for the rari promotion gate + Three-Run Proof trial: replay keeps repeat runs at $0, trajectory checks catch skipped steps, and any Jev/LLM gate promoted from shadow should report kappa + false passes, not a bare score. Caveat from its own README: the same suite scored 92% on replay but 28\u201344% live (mostly brittle exact-substring asserts), so replay is a regression guard, not proof of live quality. Small, new repo (created 09-23): borrow the pattern, don't add a dependency. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-25-muse-harness-lab-pack",
+      "tags": [
+        "evals",
+        "promotion gate",
+        "Jev",
+        "tokens",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "rari-grok-bot-operating-system-2026-09-25",
       "date": "2026-09-25",
