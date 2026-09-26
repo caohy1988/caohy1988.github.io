@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-25 · rari KEEPs: handoff packet + reproduce-before-fix + promotion gate / weekly receipts</strong></span>
+      <span>Updated <strong>2026-09-25 · Lab KEEPs: code decides done + replay regression check (after rari handoff packet / promotion gate)</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -568,6 +568,7 @@ ask → Manage Bot
     </table>
     <p class="note"><strong>pre_tool local policy:</strong> deny→stop; ask→CoS/Haiyuan; allow→proceed. Honor if <code>verdict</code> confidence ≥ floor (0.55); else CoS. <strong>Never authorizes send/pay/merge.</strong></p>
     <p class="note"><strong>Company-in-a-Box shadow gates (2026-09-23):</strong> <code>research_check</code> + <code>completion_check</code> always return <code>honor: false</code> / <code>shadow: true</code> (per-gate <code>gate_modes</code> in <code>router.json</code>) — log the verdict, never block. Promote to active after Three-Run Proof. <strong>Live worker menu</strong> on <code>intake</code>: optional state <code>available_workers</code> / <code>unavailable</code> so callers only offer workers that exist right now (e.g. Mac offline → drop <code>coding_em</code> or escalate). Metrics to track later: routing accuracy, research escapes, false completion, unnecessary human interruptions, recovery. Source: <a href="https://x.com/unicodef1wn/status/2102375891875581966">unicodef1wn · AI Company-in-a-Box</a>.</p>
+    <p class="note" id="code-decides-done"><strong>Code decides done (2026-09-25 · Lab <a href="https://github.com/newbie0413/simply">simply</a>):</strong> a task is done only when a concrete, deterministic check passes: tests green, expected file exists, commit pushed to the remote, live URL returns HTTP 200. Agent self-reports and Jev <code>completion_check</code> are <strong>advisory only</strong> and never declare done on their own. If the check fails or cannot run, report the exact gap (see <a href="#retry-ceiling">retry ceiling</a>). Lock: <code>Maps/Decisions/2026-09-25-code-decides-done-and-replay-check.md</code>.</p>
     <p class="note">CoS packet rule (CyrilXBT): break missions into small packets + verify — <strong>Jev picks packet owner / route; Grok/Mac execute</strong>. Lab KEEP candidate only: <strong>jev-browser</strong> (Playwright + Jev click decisions) — do <em>not</em> install Playwright yet.</p>
 
     <h3 id="jev-session">Live session (2026-09-20)</h3>
@@ -630,6 +631,7 @@ ask → Manage Bot
     <h3 id="three-run-proof">Three-Run Proof (2026-09-23)</h3>
     <p>From <a href="https://x.com/0xGenAi/status/2091199153942495683">0xGenAi’s complete Grok Bot guide</a>. Before enabling a new routine: <strong>Observe</strong> (fix charter/handoff/skill, not the artifact by hand) → <strong>Correct</strong> on a second input → <strong>Release</strong> after a third consecutive clean run (or three checkable proofs). Do not automate the first successful run.</p>
     <p class="note" id="promotion-gate"><strong>Promotion gate (2026-09-25 · <a href="https://x.com/0xwhrrari/status/2095497109524934750">rari · Grok Bot operating system</a>):</strong> moving a routine or skill <em>up</em> the <a href="#autonomy-ladder">autonomy ladder</a> needs three things. (1) <strong>Three clean runs</strong>: the Three-Run Proof above, still 3 runs; we did not adopt rari’s 5-run minimum. (2) <strong>Rollback tested</strong>: a documented way to undo the routine’s effects that has actually been tried once (revert commit, restore <code>.bak</code>, pause routine, delete draft). (3) <strong>Receipt complete</strong>: each run leaves a record of what it did, its inputs, its outputs (paths/URLs) and its side effects (pushes, PRs, messages, external writes). Any of the three missing → stays at its current level.</p>
+    <p class="note" id="replay-check"><strong>Replay regression check (2026-09-25 · Lab <a href="https://github.com/jason-bourne-gg/agent-evals">agent-evals</a>):</strong> a step inside Three-Run Proof. Before promoting a skill or prompt change, or switching a Jev gate from shadow to active, replay a few saved runs (recorded inputs/outputs) and confirm nothing regressed. Caveat: agent-evals scored 92% on replay but only 28–44% live, so a replay pass means <em>nothing broke</em>, not that the change is good. Live Three-Run Proof stays the real bar.</p>
     <h3 id="kill-review">Weekly kill review + weekly receipts</h3>
     <p>Paired with Monday playbook↔card sync. For each Manage routine: did it run? was the output right? <strong>Would anyone miss this if removed?</strong> If no, Manage proposes a kill (pause/delete) to Haiyuan. Pause or delete zombies.</p>
     <p class="note"><strong>Weekly receipt habit (2026-09-25 · <a href="https://x.com/0xwhrrari/status/2095497109524934750">rari · Grok Bot operating system</a>):</strong> each bot hands in a short weekly receipt: runs due vs ran, outputs (paths/URLs), failures + human repairs, side effects, anything waiting on Haiyuan. Manage compiles them into one vault note and asks Haiyuan to spot-check <strong>one</strong> real artifact (a named path/URL, not a summary). A bot can summarize its history; it should not be the only judge of it.</p>
@@ -662,7 +664,7 @@ ask → Manage Bot
     <p class="note"><strong>Park unknown outcomes (Lab 2026-09-23 · orchvia):</strong> after a crash or dirty exit where success/failure is unknown, <em>do not</em> auto-retry — park for Haiyuan (or EM) instead of guessing. Recovery half of the retry ceiling; relaunch-vs-resume still uses the named session id when the outcome <em>is</em> known.</p>
 
     <h3 id="mission-dod">Light Mission DoD</h3>
-    <p>For non-trivial Field Brief / research / one-shots (not every ops nudge): <strong>Outcome · Done-when · Constraints · Approval</strong> before execute. Full 7-field Mission Contract optional.</p>
+    <p>For non-trivial Field Brief / research / one-shots (not every ops nudge): <strong>Outcome · Done-when · Constraints · Approval</strong> before execute. Done-when names a deterministic check (<a href="#code-decides-done">code decides done</a>); Jev and self-reports are advisory. Full 7-field Mission Contract optional.</p>
     <p class="note">Lock: <code>Maps/Decisions/2026-09-23-0xjmori-run-limits-ladder-retry.md</code> · Hunt: <code>Hunt/agent-manage/2026-09-23-0xjmori-trust-guide-keeps.md</code>.</p>
   </section>
 
@@ -688,7 +690,8 @@ ask → Manage Bot
       <li>☐ Default asks go to Manage Bot; Field Brief / Coding EM rooms used for visible handoffs</li>
       <li>☐ Jev router <code>mode: active</code>; honor Choice when confidence ≥ floor; logs under <code>jev/logs/</code></li>
       <li>☐ Handoffs carry artifact path per <code>Maps/Contracts/manage-handoffs.md</code> + a <a href="#handoff-packet">packet</a> (new Coding EM kicks); bug jobs link a repro before implement</li>
-      <li>☐ New routines pass <strong>Three-Run Proof</strong> before Active; promotion also needs <strong>rollback tested + receipt complete</strong>; Monday sync includes kill review + weekly receipts (Haiyuan spot-checks one artifact)</li>
+      <li>☐ Done = a deterministic check passed (tests / file / pushed commit / HTTP 200); Jev <code>completion_check</code> advisory only</li>
+      <li>☐ New routines pass <strong>Three-Run Proof</strong> (incl. a replay regression check before skill/prompt or Jev shadow→active changes) before Active; promotion also needs <strong>rollback tested + receipt complete</strong>; Monday sync includes kill review + weekly receipts (Haiyuan spot-checks one artifact)</li>
       <li>☐ Bot charters end with <strong>GREEN / YELLOW / RED</strong> reversibility (RED = Haiyuan)</li>
       <li>☐ Mac launch + Field Brief skills carry <strong>Exception paths</strong> (symptom → action)</li>
       <li>☐ Long fires declare <strong>run limits</strong>; demote autonomy when quality drops</li>
