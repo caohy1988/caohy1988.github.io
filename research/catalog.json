@@ -1,6 +1,26 @@
 {
   "items": [
     {
+      "id": "arxiv-2609-22259-context-layer-content-vs-scaffolding-text-to-sql-agents",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Which Part of the Context Layer Does the Work? — a four-arm DABStep ablation on four models: restoring the prose to an otherwise identical \"hollow\" data contract adds 26–36 hard-task points, while the governed tools and retrieval instruction alone add 0–15; the contract beats the same manual pasted into the prompt on every model (graded officially on GLM: 51.9% vs 18.8%); ungoverned arms attempted 166 mutating statements, governed arms none",
+      "html": " <a href=\"https://arxiv.org/abs/2609.22259\">arXiv:2609.22259</a> · <a href=\"https://arxiv.org/pdf/2609.22259\">PDF</a> — A frozen YAML data contract, authored only from DABStep&#x27;s manual and served through nine governed tools, raised hard-task accuracy from 13.9–37.0% (bare schema) to 55.1–77.4% on GLM-5.3-flash, DeepSeek-v4-flash, Sonnet 5 and GPT-5.6; with every prose field emptied, the same tools reached only 19.3–51.2%. The contract arm&#x27;s SQL carried all six fee clauses 39–98% of the time, against 3–9% for the arm with the same manual in its prompt, and it used the fewest turns and was cheapest per correct answer on three of four models. Caveats: one benchmark and one domain (fees), a single author, one run per model (a near-identical rerun flipped 23% of task verdicts), and the contract settles three ambiguities the manual leaves open. <a href=\"/research/briefs/2026-09-26-0034-opus.html\">Full brief</a>.",
+      "added": "2026-09-26T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-24161-mcp-granite-tool-interface-granularity",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "MCP-GRANITE — the same MCP capability set exposed as 8–10, 4, 2 or 1 tools across 8,748 runs with 9 local models: four task-level tools give the best task completion (0.49 vs 0.42 fine-grained and 0.36 monolithic; odds ×1.36) and double argument accuracy (0.20 → 0.40); with one monolithic tool, 28.2% of runs call no tool; model size tracks latency (ρ 0.95), not completion (ρ 0.29)",
+      "html": " <a href=\"https://arxiv.org/abs/2609.24161\">arXiv:2609.24161</a> · <a href=\"https://arxiv.org/pdf/2609.24161\">PDF</a> — A MASCOTS 2026 benchmark built on Google ADK&#x27;s McpToolset and LiteLLM varies only tool-interface granularity across 81 edge and IoT scenarios with deterministic mock MCP servers. Moderate consolidation helps most, mainly through argument accuracy; tool-selection F1 peaks at two tools without the best completion, so picking a tool and constructing its arguments fail independently. Caveats: mock servers, small quantized models on one T4 GPU, overlapping marginal intervals, and headline gains that are relative, not percentage points. <a href=\"/research/briefs/2026-09-26-0034-opus.html\">Full brief</a>.",
+      "added": "2026-09-26T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
       "id": "claude-code-2-1-283-gateway-prompt-id-otel-tool-output-agent-sdk",
       "tag": "Industry",
       "kind": "rank",
@@ -286,6 +306,11 @@
       "added": "2026-09-24T0634",
       "addedDisplay": "6:34 AM PT",
       "progress": [
+        {
+          "at": "2026-09-26T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "Mastra <a href=\"https://www.npmjs.com/package/@mastra/core/v/1.72.0-alpha.3\">@mastra/core@1.72.0-alpha.3</a> wave (npm 04:15–04:20Z; <code>latest</code> still 1.71.0) ships the fixes NOTEd as unreleased at Fri 1834: lease-fenced background tasks (<a href=\"https://github.com/mastra-ai/mastra/pull/24841\">#24841</a>; <code>@mastra/pg</code> adds <code>ownerId</code> and <code>leaseExpiresAt</code>, and older storage packages silently fall back to unfenced writes), requester-only channel approvals (<a href=\"https://github.com/mastra-ai/mastra/pull/25165\">#25165</a>), a resume that refuses finished Inngest runs (<a href=\"https://github.com/mastra-ai/mastra/pull/25181\">#25181</a>), and killed Docker commands no longer reported as natural exits (<a href=\"https://github.com/mastra-ai/mastra/pull/24775\">#24775</a>). Observational memory gains <code>maxRetries</code> (default 8) and <code>failurePolicy</code>, default <code>'abort'</code> with opt-in <code>'continue'</code> (<a href=\"https://github.com/mastra-ai/mastra/pull/24863\">#24863</a>); tool-input events gain the assistant message ID (#25196); and <code>CyberRefusalHandler</code> retries once past OpenAI or Anthropic cyber refusals and is on by default in <code>createCodingAgent</code> (#25172). Progress. <a href=\"/research/briefs/2026-09-26-0034-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-25T0034",
           "displayTime": "12:34 AM PT",
@@ -898,6 +923,11 @@
       "added": "2026-09-22T1234",
       "addedDisplay": "12:34 PM PT",
       "progress": [
+        {
+          "at": "2026-09-26T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "OpenAI Codex <a href=\"https://github.com/openai/codex/releases/tag/rust-v0.159.0-alpha.4\">rust-v0.159.0-alpha.4</a> (GitHub prerelease 06:21Z; npm 06:34Z, now the <code>alpha</code> tag on every platform; <code>latest</code> still 0.157.1). By tag compare it ships <a href=\"https://github.com/openai/codex/pull/48344\">#48344</a>: raw tool-result metadata and <code>client_metadata.mcp_attribution</code> now reach the built-in OpenAI provider at overridden endpoints (before, only HTTPS api.openai.com and ChatGPT hosts), while custom and remote-configured providers stay filtered. It also ships <a href=\"https://github.com/openai/codex/pull/48353\">#48353</a>, which caps cloud skills at three quarters of the skill-metadata budget and sends a short availability update instead of repeating an unchanged catalog on reconnect, plus #48222 and #48224. rust-v0.158.0-alpha.2.1 adds only the four Windows fixes 0.157.1 carried. Progress. <a href=\"/research/briefs/2026-09-26-0034-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-25T1834",
           "displayTime": "6:34 PM PT",
@@ -4896,6 +4926,21 @@
   ],
   "runs": [
     {
+      "id": "2026-09-26T0034",
+      "date": "2026-09-26",
+      "displayTime": "12:34 AM PT",
+      "added": [
+        "arxiv-2609-22259-context-layer-content-vs-scaffolding-text-to-sql-agents",
+        "arxiv-2609-24161-mcp-granite-tool-interface-granularity"
+      ],
+      "updated": [
+        "mastra-core-1-70-0-model-selection-processor-tenant-scoped-traces-memory-1-32",
+        "openai-codex-0-156-0-stable-telemetry-attribution-graduation"
+      ],
+      "brief": "/research/briefs/2026-09-26-0034-opus.html",
+      "note": "Late-wake catch-up for official 00:34 PT Sat slot (writer kicked ~00:39 PT; label kept 0034). Writer Opus 5.5. Packs: Agy1832 + DSH2032 + Agy2132 + Muse2232 + DSH2332 (PACK_DONE); Agy0032 landed mid-run PACK_DONE and was used. GAP: muse-1932 MISSING. Verified arXiv mailing ceiling still 2609.30268; pin 2609.02702 intact; backfilled secondary cats. Industry NEW +0. Progress +2: Codex rust-v0.159.0-alpha.4 MCP attribution at overridden endpoints + skill catalog; Mastra 1.72.0-alpha.3 lease/approvals/OM abort-default. Academy +2 full-PDF: 2609.22259 context-layer ablation; 2609.24161 MCP-GRANITE. No Stories companion (0 third-party BQAA). GTM skipped. JEV_SHADOW pre-writer worth_running run conf=0.97; citations verify_more/verify_more/accept (log-only)."
+    },
+    {
       "id": "2026-09-25T1834",
       "date": "2026-09-25",
       "displayTime": "6:34 PM PT",
@@ -6510,6 +6555,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-09-26T0034",
+      "date": "2026-09-26",
+      "displayTime": "12:34 AM PT",
+      "title": "Opus 5.5: Codex rust-v0.159.0-alpha.4 MCP attribution at overridden endpoints; Mastra 1.72.0-alpha.3 lease/approvals/OM abort-default; Academy 2609.22259 context-layer ablation + 2609.24161 MCP-GRANITE",
+      "href": "/research/briefs/2026-09-26-0034-opus.html",
+      "analyzer": "Opus 5.5"
+    },
     {
       "id": "2026-09-25T1834",
       "date": "2026-09-25",

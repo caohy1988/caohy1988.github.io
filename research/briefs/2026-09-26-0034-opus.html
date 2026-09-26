@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-26 · 12:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="Codex alpha.4 MCP attribution; Mastra 1.72.0-alpha.3; Academy 2609.22259 + 2609.24161.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-26-0034-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 AM PT · late wake ~00:36 PT (label kept 0034)</p>
+    <article>
+<h1>Field Brief — 2026-09-26-0034: Codex starts sending MCP attribution to custom OpenAI endpoints, Mastra's approval and lease fixes reach an alpha, and an ablation finds that a context layer's prose, not its tools, does the work</h1>
+<p>A quiet Friday night for releases: nothing reached a stable channel, so there is no new Industry rank. Two alpha lines moved things that matter for analytics. Codex 0.159.0-alpha.4 now sends raw tool-result metadata and MCP attribution to the built-in OpenAI provider even when its endpoint is overridden, so a gateway placed in front of Codex starts seeing which MCP server and tool produced each result. Mastra's 1.72.0-alpha.3 wave ships the durable-run fixes the 1834 brief listed as unreleased: lease-fenced background tasks, a resume that refuses finished runs, approvals only by the requester, and killed Docker commands that no longer read as clean exits. Its new observational-memory failure policy defaults to <code>'abort'</code>, not to fail-open as two packs said. arXiv is between mailings, so I backfilled the past week in 20 secondary categories and read two papers in full. A 21-page ablation on the DABStep benchmark finds that a data contract's prose, fetched one lookup at a time, lifts hard-task accuracy by 26–36 points on four models, while the same tools and instructions with the prose removed add 0–15. A MASCOTS paper finds that how the same MCP capabilities are grouped into tools changes task completion and doubles argument accuracy for small local models.</p>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>), the primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-26-0034</strong> (official 6h slot, 12:34 AM PT Sat Sep 26, 2026). <strong>Late wake:</strong> the slot woke at about 00:36 PT and Collection woke this writer at about 00:38 PT. This run's first clock read was 00:39:36 PT (07:39:36Z). The label stays <strong>0034</strong>.
+<strong>Evidence window:</strong> from the 1834 brief's last probes (03:35Z Sat) to this run's last probes (07:56Z Sat). I swept from 03:20Z so the two windows overlap. Between 07:41Z and 07:57Z I probed these sources myself:</p>
+<ul>
+<li>GitHub release objects and dated tags for 74 repos, and default-branch commits since 03:30Z.</li>
+<li>PyPI (66 packages) and npm (48 packages).</li>
+<li>arXiv abs pages, plus the past-week listings of 20 categories no earlier brief had scanned for this week.</li>
+<li>HN Algolia.</li>
+</ul>
+<p>I read 2 PDFs in full. I also downloaded four published Mastra alpha tarballs and searched their built code.</p>
+<ul>
+<li><strong>Source packs used (5, PACK_DONE at launch):</strong> Agy 1832, DSH 2032, Agy 2132, Muse 2232 and DSH 2332.</li>
+<li><strong>Agy 0032 was MISSING at launch.</strong> It landed as PACK_DONE at 00:48 PT, during this run, and I used it only to cross-check my own sweep.</li>
+<li><strong>Muse 1932 is MISSING</strong> (FAIL_MAC).</li>
+<li><strong>Catalog baseline:</strong> <strong>422 items / 105 briefs / 107 runs</strong>, SHA-256 <code>7dbbc5058bd9d06e…</code>, read-only. The newest brief is <code>2026-09-25T1834</code>.</li>
+</ul>
+<p><strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call. Collection owns the HTML, the catalog and the push.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: 0 new Industry ranks, 2 new Academy ranks, 2 Industry progress notes, and a NOTE list.</strong> Thin is not quiet here:</p>
+<ul>
+<li>Codex and Mastra shipped alpha packages on lines the catalog already carries.</li>
+<li>Everything else moved on main only, but several of those changes alter what traces record once they ship.</li>
+</ul>
+<p><strong>Theme 1: attribution fields are starting to ride inside the request, where a gateway can log them.</strong></p>
+<ul>
+<li><strong>Codex 0.159.0-alpha.4</strong> (<a href="https://github.com/openai/codex/pull/48344">#48344</a>) stops stripping raw tool-result metadata and <code>client_metadata.mcp_attribution</code> when the built-in OpenAI provider points at a custom endpoint. Before, only HTTPS <code>api.openai.com</code> and ChatGPT hosts received them.</li>
+<li><strong>Mastra 1.72.0-alpha.3</strong> adds the assistant message ID to tool-input events, &quot;so consumers can attribute streamed tool arguments to the model step that produced them&quot;.</li>
+<li><strong>Cloudflare Agents</strong> (merged, queued for 0.25.0, not shipped) puts <code>messageIds</code> on terminal response frames: the user messages each response belongs to.</li>
+<li>This continues Friday's Claude Code <code>x-claude-code-prompt-id</code> (1834).</li>
+</ul>
+<p><strong>Theme 2: durable-run correctness reaches a published package, as an alpha.</strong></p>
+<ul>
+<li>Mastra's lease-fenced background tasks, its resume that refuses finished runs, requester-only approvals and honest killed-exit reporting are all in the published alpha. I checked the changelogs, and searched the core, memory, inngest and pg tarballs.</li>
+<li>One catch for analytics: with an older storage package, lease fencing is silently off.</li>
+</ul>
+<p><strong>Theme 3: the context layer and the tool surface become measured variables.</strong></p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.22259">2609.22259</a>:</strong> on DABStep, a data contract's prose did most of the work. Governed tools with the prose emptied added 0–15 points, and the full contract added 26–36 more. Ungoverned arms attempted 166 mutating SQL statements; governed arms attempted none.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.24161">2609.24161</a>:</strong> regrouping the same MCP capabilities into 4 task-level tools beat both 8–10 primitives and 1 monolithic tool. With the single tool, 28.2% of runs never called it.</li>
+</ul>
+<p><strong>Theme 4 (NOTE, unreleased): LiteLLM's Rust path.</strong></p>
+<ul>
+<li>A GC fix for the Rust adapter that runs legacy Python callbacks (<a href="https://github.com/BerriAI/litellm/pull/43274">#43274</a>).</li>
+<li>Crates and a binary for a native Rust gateway (<a href="https://github.com/BerriAI/litellm/pull/43287">#43287</a> + <a href="https://github.com/BerriAI/litellm/pull/43289">#43289</a>). <strong>#43289's entire description: &quot;This is scaffolding and has 0 impact on prod.&quot;</strong></li>
+</ul>
+<p><strong>What this means for BQAA (as the observer, not the source of truth):</strong></p>
+<ul>
+<li><strong>Keep optional slots for attribution that arrives inside the request</strong>: prompt ID, MCP server and tool, originating message IDs. Record the client version that sent them, because coverage depends on version and provider type.</li>
+<li><strong>Follow span links, not only parent IDs.</strong> LiteLLM's post-response spend writes now land in their own root traces, linked back to the request, in its current pre-release.</li>
+<li><strong>Make the context artifact and the tool surface first-class dimensions.</strong> Log which context artifacts (by digest) a session fetched, whether the fetched rule appears in the query it ran, and a tool-surface identity (tool count and schema hash).</li>
+<li><strong>Treat attempted mutations and &quot;answered without calling a tool&quot; as their own event classes.</strong></li>
+</ul>
+<h2>Industry</h2>
+<p><strong>Screen used (same as 1834):</strong> a release-level move that ships a product capability, or a change to how agent telemetry, cost, evaluation or memory state is recorded. Unreleased main-branch commits are NOTE only. I checked every item against its release object, tag compare, registry entry, changelog or PR body, not against the pack summary.</p>
+<p><strong>Sweep results (my own, 07:41Z–07:57Z, since 03:20Z Sat):</strong></p>
+<ul>
+<li><strong>GitHub release objects and dated tags (74 repos, GraphQL):</strong> only two, both Codex prereleases:</li>
+<li><code>rust-v0.158.0-alpha.2.1</code> (04:51:49Z);</li>
+<li><code>rust-v0.159.0-alpha.4</code> (06:21:38Z).</li>
+<li>No other repo published a release or a tag. A re-sweep since 06:30Z at 07:56Z found nothing new.</li>
+<li><strong>PyPI (66 packages):</strong> one upload, <code>crewai</code> 1.15.22.dev20260926 (06:16:38Z), a nightly build.</li>
+<li><strong>npm (48 packages):</strong></li>
+<li><code>@openai/codex</code> 0.158.0-alpha.2.1 (05:04Z) and 0.159.0-alpha.4 (06:33:57Z; platform packages until 07:25Z).</li>
+<li><code>@mastra/memory</code> 1.33.0-alpha.2 (04:15:20Z), <code>@mastra/inngest</code> 1.10.1-alpha.1 (04:16:32Z) and <code>@mastra/core</code> 1.72.0-alpha.3 (04:18:46Z).</li>
+<li><strong><code>latest</code> did not move anywhere:</strong> Codex 0.157.1, Mastra core 1.71.0, promptfoo 0.123.1, Cloudflare <code>agents</code> 0.24.0 and <code>cline</code> 3.0.65.</li>
+<li><strong>Default-branch commits since 03:30Z (74 repos):</strong> 32 commits in 10 repos:</li>
+<li>LiteLLM 8, Cloudflare Agents 6, promptfoo 6, Codex 4, Mastra 2 and PydanticAI 2;</li>
+<li>one each in Vercel AI, ADK, python-genai and the OTel collector.</li>
+<li>None since 07:40Z (re-checked at 07:56Z).</li>
+<li><strong>Flat:</strong> Claude Code and both Agent SDKs, PydanticAI releases, Pipecat, OpenAI Agents, Langfuse, Opik, Phoenix, LangSmith, Weave, Letta, Strands and DSPy.</li>
+</ul>
+<p><strong>Why no NEW Industry rank:</strong> nothing reached a stable channel. Codex and Mastra shipped alphas on lines the catalog already carries, so they are progress notes. Everything else is on main.</p>
+<h3>Progress notes (update existing cards; no new card)</h3>
+<p><strong>1. OpenAI Codex <a href="https://github.com/openai/codex/releases/tag/rust-v0.159.0-alpha.4"><code>rust-v0.159.0-alpha.4</code></a>, plus <a href="https://github.com/openai/codex/releases/tag/rust-v0.158.0-alpha.2.1"><code>rust-v0.158.0-alpha.2.1</code></a></strong> → progress on <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code> (the alpha-line parent that holds the 1834 note).</p>
+<ul>
+<li><strong>Clocks:</strong></li>
+<li>Release commit 05:25:13Z; GitHub prerelease 06:21:38Z; npm 06:33:57Z, with platform packages from 06:34Z to 07:25Z.</li>
+<li><strong>npm's <code>alpha</code> tag, and every per-platform alpha tag, now points at 0.159.0-alpha.4.</strong> The backwards <code>alpha</code> tag the 1834 brief noted has moved forward again. <code>latest</code> is still 0.157.1.</li>
+<li><strong>What is in it.</strong> The release body says only &quot;Release 0.159.0-alpha.4&quot;, so I compared the tags. alpha.3 → alpha.4 adds 11 PRs plus the release commit:</li>
+<li>#48213, #48222, #48224, #48229, #48238, #48272, #48318;</li>
+<li><strong>#48344</strong>, #48350, #48352 and <strong>#48353</strong>.</li>
+<li>This settles the question Muse 2232 and DSH 2332 left open: alpha.4 does carry #48344 and #48353, and alpha.2.1 does not.</li>
+<li><strong>MCP attribution now reaches overridden OpenAI endpoints (<a href="https://github.com/openai/codex/pull/48344">#48344</a>, merged 03:49Z).</strong></li>
+<li><strong>The problem, in the PR:</strong> &quot;Destination-only filtering stripped raw tool result metadata and MCP attribution when the built-in OpenAI provider used a custom endpoint.&quot;</li>
+<li><strong>Before:</strong> Codex attached this internal metadata only when the destination was HTTPS <code>api.openai.com</code> or a ChatGPT host. Two fields in the PR's tests:<ul>
+<li><code>client_metadata.mcp_attribution</code> in the request body: a JSON string with a <code>status</code> and <code>sources</code> listing <code>server_name</code>, <code>tool_name</code> and <code>first_turn_id</code>;</li>
+<li><code>tool_result_metadata</code> on executed tool calls.</li>
+</ul>
+</li>
+<li><strong>After:</strong> a runtime-only <code>include_internal_metadata</code> grant is on for the built-in OpenAI provider, over both HTTP and WebSocket. The grant &quot;cannot be loaded from or written to serialized provider configuration&quot;.</li>
+<li><strong>Still filtered:</strong> other providers, including ones received through remote configuration, keep the destination check. A custom provider pointed at a gateway still has the metadata stripped.</li>
+<li><strong>Skill catalogs stop shifting when executors come and go (<a href="https://github.com/openai/codex/pull/48353">#48353</a>, merged 04:19Z).</strong></li>
+<li>Cloud skills are capped at three quarters of the skill-metadata budget. The split persists across disconnects, compaction and resume.</li>
+<li>When an unchanged catalog comes back, Codex emits &quot;a short availability update&quot; instead of repeating it. It reinjects the full catalog only when that text is missing from history.</li>
+<li><strong>Also ships two items the 1834 brief NOTEd as on main:</strong></li>
+<li>#48222: late result metadata stays attached to truncated code-mode calls.</li>
+<li>#48224: model and access-program pairs are kept through compaction.</li>
+<li><strong><code>rust-v0.158.0-alpha.2.1</code></strong> (GitHub 04:51Z, npm 05:04Z). Compared with alpha.2 (Sep 23), it adds only the four Windows fixes that 0.157.1 carried: #48138, #48157, #48238 and #48272.</li>
+<li><strong>TL;DR:</strong></li>
+<li>Suppose Codex traffic reaches BQAA through a gateway set as the OpenAI provider's base URL. <code>client_metadata.mcp_attribution</code> starts appearing with 0.159.0-alpha.4. 0.157.1 (<code>latest</code>) and custom providers don't send it, so segment MCP-attribution coverage by Codex version and provider type before reading it as adoption.</li>
+<li>A reconnect no longer resends an unchanged skill catalog, so a smaller prompt after a reconnect does not mean skills were lost.</li>
+</ul>
+<p><strong>2. Mastra <a href="https://www.npmjs.com/package/@mastra/core/v/1.72.0-alpha.3"><code>@mastra/core@1.72.0-alpha.3</code></a> wave</strong> → progress on <code>mastra-core-1-70-0-model-selection-processor-tenant-scoped-traces-memory-1-32</code> (the card that holds the 1.72.0-alpha.0 note).</p>
+<ul>
+<li><strong>Clocks:</strong></li>
+<li>The &quot;version packages&quot; commit <a href="https://github.com/mastra-ai/mastra/commit/561c06591f142e70b98a61103089ed664eb6fcda"><code>561c0659</code></a> landed at 04:05:20Z.</li>
+<li>npm: <code>@mastra/memory@1.33.0-alpha.2</code> at 04:15:20Z, <code>@mastra/inngest@1.10.1-alpha.1</code> at 04:16:32Z and <code>@mastra/core@1.72.0-alpha.3</code> at 04:18:46Z. <code>@mastra/pg@1.28.0-alpha.2</code>, <code>@mastra/docker@0.9.1-alpha.0</code>, server and deployer shipped in the same wave.</li>
+<li><code>latest</code> is still 1.71.0, and there is no GitHub release object.</li>
+<li><strong>How I checked:</strong></li>
+<li>I read the changelog entries that commit wrote for core, memory, server, inngest, pg and docker.</li>
+<li>I searched the published tarballs of core, memory, inngest and pg for the new fields.</li>
+<li>The 1834 brief found #25165 missing from alpha.2. Its <code>requesterId</code> check is in alpha.3's build.</li>
+<li><strong>Unreleased at 1834, now in the alpha:</strong></li>
+<li><strong>Lease-fenced background tasks (<a href="https://github.com/mastra-ai/mastra/pull/24841">#24841</a>).</strong> &quot;Several managers can now share one storage without running the same task twice.&quot;<ul>
+<li>A running task records its owner and lease expiry (<code>leaseDurationMs</code>), and recovery reclaims only expired leases.</li>
+<li>&quot;A worker that lost ownership can no longer save a result.&quot;</li>
+<li><code>@mastra/pg</code> adds <code>ownerId</code> and <code>leaseExpiresAt</code> in place. Rows written before the upgrade are treated as reclaimable.</li>
+<li>With an older storage package, &quot;the conditions are ignored and writes fall back to unfenced behaviour&quot;.</li>
+</ul>
+</li>
+<li><strong>Approvals:</strong><ul>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25165">#25165</a>: in shared channels only the requester can approve or decline; &quot;clicks from other users are now ignored and logged&quot;.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25181">#25181</a>: <code>InngestAgent.resume()</code> on a finished run now fails with &quot;not suspended&quot;, &quot;so a declined tool approval can no longer be approved after the run ends&quot;.</li>
+<li>#25167: Inngest runs waiting on approval now appear in <code>GET /api/agents/:agentId/suspended-runs</code>, with <code>requiresApproval: true</code> and the tool's <code>args</code>.</li>
+</ul>
+</li>
+<li><strong>Killed commands.</strong> <code>@mastra/docker</code>'s <code>wait()</code> no longer reports a killed or timed-out process as a natural exit (#24775).</li>
+<li><strong>Observational memory failures (<a href="https://github.com/mastra-ai/mastra/pull/24863">#24863</a>).</strong><ul>
+<li>New <code>maxRetries</code> (default 8) and <code>failurePolicy</code> options.</li>
+<li><strong>The default policy is <code>'abort'</code></strong>, which keeps the old behavior. <code>'continue'</code> lets the turn finish, and unobserved messages are retried on a later turn.</li>
+<li>The built code reads <code>failurePolicy ?? &quot;abort&quot;</code>. Agy 2132 repeated Agy 1832's &quot;fail-open by default&quot;, which the 1834 brief had already corrected.</li>
+</ul>
+</li>
+<li><strong>New in this alpha, and relevant to analytics:</strong></li>
+<li><strong>Attribution for streamed tool arguments.</strong> &quot;Added the assistant message id to tool-input events so consumers can attribute streamed tool arguments to the model step that produced them.&quot; This ships with #25196, which also fixes the Mastra Code speed meter NOTEd at 1834.</li>
+<li><strong>A retry past a refusal (<a href="https://github.com/mastra-ai/mastra/pull/25172">#25172</a>).</strong><ul>
+<li><code>CyberRefusalHandler</code> retries once when an OpenAI <code>cyber_policy</code> refusal or an Anthropic <code>cyber</code> refusal hits ordinary work. &quot;A second refusal on the same step is treated as genuine.&quot;</li>
+<li>Agents made with <code>createCodingAgent</code> get it by default, with <code>maxProcessorRetries: 3</code>.</li>
+</ul>
+</li>
+<li><strong>Retry feedback moves (#25171).</strong> A processor's retry reason is now sent as <code>&lt;system-reminder&gt;{reason}&lt;/system-reminder&gt;</code> after the conversation, so the prompt cache survives the retry. Before, it was a <code>[Processor Feedback]</code> system message placed ahead of the history.</li>
+<li><strong>TL;DR:</strong></li>
+<li>When 1.72.0 goes stable, log &quot;refused, then retried&quot; as its own event in coding-agent traces. Keep both the requester and the approver on every approval.</li>
+<li>Join streamed tool arguments to their model step by assistant message ID.</li>
+<li>Record storage-adapter versions with background-task data. With a mismatched storage package, lease fencing is silently off.</li>
+</ul>
+<h3>NOTE (not ranked; recorded so the next brief can dedupe)</h3>
+<p>I read the PR body for every item below unless it says otherwise.</p>
+<p><strong>A WATCH item from Thursday, now met by a pre-release:</strong></p>
+<ul>
+<li><strong>LiteLLM <a href="https://github.com/BerriAI/litellm/pull/42826">#42826</a></strong> moves post-response work into its own traces. It ships in <a href="https://github.com/BerriAI/litellm/releases/tag/v1.104.0-dev.2"><code>v1.104.0-dev.2</code></a> (PyPI <code>1.104.0.dev2</code>, Sep 25 06:09Z).</li>
+<li>The Thu 0034 brief set &quot;a LiteLLM release with #42826&quot; as a WATCH item.</li>
+<li>A tag compare shows dev.2 is 0 commits behind and 174 ahead of the PR's merge commit. Stable PyPI is still 1.102.1.</li>
+<li><strong>What it does in the OTel V2 logger:</strong> spend writes (<code>batch_write_to_db</code>), cache writes and Redis spend counters that finish after the request's server span now get their own root trace. That trace is linked back to the request span instead of being a child of it. Before, &quot;a request that took 2.5s showed up as a 3s trace&quot;.</li>
+<li>Tonight's test-only <a href="https://github.com/BerriAI/litellm/pull/42931">#42931</a> (05:40Z) teaches the e2e gate that shape. The cost span may sit in the request trace (chat, messages) or in a linked root trace (responses).</li>
+<li><strong>For BQAA:</strong> join LiteLLM cost spans to requests by span link as well as by parent ID, or <code>/v1/responses</code> spend will look unattributed.</li>
+</ul>
+<p><strong>Unreleased on main (WATCH):</strong></p>
+<ul>
+<li><strong>LiteLLM's Rust path, hardened and extended; nothing a user runs changed</strong> (PyPI 1.102.1):</li>
+<li><strong>GC leak:</strong> <a href="https://github.com/BerriAI/litellm/pull/43274">#43274</a> (03:24Z). The Rust adapter that runs legacy Python callbacks kept each call's headers dict without reporting it to Python's cycle collector, so &quot;a closed call keeps the dict alive until the driver drops the whole adapter&quot;. Fixed.</li>
+<li><strong>Gateway scaffolding:</strong> <a href="https://github.com/BerriAI/litellm/pull/43287">#43287</a> + <a href="https://github.com/BerriAI/litellm/pull/43289">#43289</a> (06:12Z), a two-PR stack.<ul>
+<li>It adds <code>config</code>, <code>router</code>, <code>gateway</code>, <code>gateway-auth</code> and <code>gateway-inference</code> crates, plus a <code>gateway</code> binary.</li>
+<li><strong>#43289's whole description is &quot;This is scaffolding and has 0 impact on prod.&quot;</strong></li>
+<li>#43287 is a &quot;Pure refactor with no user visible behavior change&quot;. The Rust routes are &quot;only reachable through the Python bridge&quot;, and &quot;Responses and errors on every endpoint are byte for byte the same as before&quot;.</li>
+<li>Two checklist items, CI and review score, are unticked. An open follow-up, <a href="https://github.com/BerriAI/litellm/pull/43295">#43295</a> (07:39Z), adds gateway tracing helpers.</li>
+</ul>
+</li>
+<li><strong>Context:</strong> the Rust Anthropic Messages code already &quot;backs the production <code>/v1/messages</code> route&quot; through that bridge, per <a href="https://github.com/BerriAI/litellm/pull/43269">#43269</a> (02:16Z). #43269 itself is a rename, and the 1834 brief did not list it.</li>
+<li><strong>Do not read any of this as a shipped Rust gateway.</strong></li>
+<li><strong>LiteLLM cost and budget:</strong></li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43273">#43273</a>: a duplicated cost-map key made <code>/model/info</code> report <code>supports_function_calling: false</code> for <code>openrouter/perceptron/perceptron-mk1.5</code>. JSON keeps the last duplicate.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/42665">#42665</a> (02:42Z; the 1834 brief did not list it): email alerts at configured percentages of a team member's budget.</li>
+<li>Open <a href="https://github.com/BerriAI/litellm/pull/43292">#43292</a>: <code>max_budget=0</code> on a provider, deployment or tag meant unlimited, because <code>0</code> is falsy in three guards.</li>
+<li><strong>Cloudflare Agents</strong> (merged 07:00–07:22Z; no pack covered them):</li>
+<li><a href="https://github.com/cloudflare/agents/pull/2365">#2365</a>: terminal <code>done</code> and <code>error</code> frames now carry <code>messageIds</code>, the user messages the request ended with. Queued sends carry several. The IDs are also kept for replay and recovery.</li>
+<li><a href="https://github.com/cloudflare/agents/pull/2364">#2364</a>: <code>eventDelivery: &quot;terminal&quot;</code> makes a parent forward only lifecycle, progress and milestone events from a child run. Skipped chunks still take a sequence number.</li>
+<li><a href="https://github.com/cloudflare/agents/pull/2361">#2361</a>: <code>onToolCall</code> fired for server tools mid-stream. An app that answered with an error &quot;sent the server a false failure&quot; and turned off auto-continuation.</li>
+<li><a href="https://github.com/cloudflare/agents/pull/2360">#2360</a>, <a href="https://github.com/cloudflare/agents/pull/2362">#2362</a> and <a href="https://github.com/cloudflare/agents/pull/2363">#2363</a>:<ul>
+<li>transient network errors now go to bounded recovery instead of ending the turn;</li>
+<li>interrupted structured workflow turns complete instead of being recorded as <code>skipped</code>;</li>
+<li>recovery no longer re-runs fibers that had already finished.</li>
+</ul>
+</li>
+<li><strong>All of it is queued, not shipped.</strong> The open &quot;Version Packages&quot; PR <a href="https://github.com/cloudflare/agents/pull/2335">#2335</a> (updated 07:29Z) would publish <code>agents@0.25.0</code> and <code>@cloudflare/ai-chat@0.13.0</code> with these changes and three earlier ones:<ul>
+<li>#2366: tool payloads over the 28 KiB trace limit are kept, with base64 redacted (NOTEd at Fri 0634);</li>
+<li>#2348: a chunk <code>seq</code> that continues across restarted streams, because replayed text appeared twice;</li>
+<li>#2343: stream errors that an app's <code>classifyChatError</code> marks transient or rate-limited now go to bounded recovery, and the durable submission stays <code>running</code> instead of <code>aborted</code>.</li>
+</ul>
+</li>
+<li>npm <code>agents</code> is still 0.24.0 (Sep 18), so the Fri 0634 WATCH item stays open.</li>
+<li><strong>promptfoo</strong> (npm 0.123.1):</li>
+<li><a href="https://github.com/promptfoo/promptfoo/pull/11075">#11075</a>: named-metric column headers reused the first column's denominator, so a healthy column could read &quot;125.00% (5.00/4.00)&quot;.</li>
+<li><a href="https://github.com/promptfoo/promptfoo/pull/11076">#11076</a> + <a href="https://github.com/promptfoo/promptfoo/pull/11077">#11077</a>, for the Vercel AI Gateway provider:<ul>
+<li>AI SDK 6's <code>tool-calls</code> and <code>content-filter</code> finish reasons never matched <code>finish-reason: tool_calls</code> assertions;</li>
+<li>structured refusals and truncated JSON lost their finish reason and token usage.</li>
+</ul>
+</li>
+<li><a href="https://github.com/promptfoo/promptfoo/pull/11059">#11059</a>: the prompt separator and <code>PROMPTFOO_ASSERTIONS_MAX_CONCURRENCY</code> from <code>--env-file</code> were ignored.</li>
+<li><strong>PydanticAI <a href="https://github.com/pydantic/pydantic-ai/pull/8818">#8818</a></strong> (07:34Z) imports the <code>pydantic-ai-harness</code> and <code>pydantic-clai2</code> history into the monorepo (+204,423 lines). &quot;This PR only adds files. The packaging, CI, and test adaptations come in a follow-up.&quot; It is a structural signal, not a release.</li>
+<li><strong>Still open from the 1834 watch list (no release tonight):</strong></li>
+<li>Cline #14426 (npm <code>cline</code> 3.0.65 predates it);</li>
+<li>PydanticAI #8764, Phoenix #16092, Promptfoo #11032 and openai-agents-python #5144;</li>
+<li>a Claude Code CLI that reads <code>CLAUDE_CODE_SDK_READS_SESSION_STATE</code>.</li>
+</ul>
+<p><strong>Below the bar:</strong></p>
+<ul>
+<li>Codex #48352 (TUI tips) and #48350 (reconnect line).</li>
+<li>CrewAI 1.15.22.dev20260926 (a nightly).</li>
+<li>LiteLLM test-only PRs #43281, #43282, #43288 and #42911.</li>
+<li>promptfoo #11026 and #11078.</li>
+<li>Vercel docs #21532; a Mastra docs regeneration; opencode #51447 and #51448; an OTel collector unexport.</li>
+</ul>
+<p><strong>Google (first-party; NOTE only):</strong></p>
+<ul>
+<li>ADK <code>044a1ec3</code> (#7185): the runner decided whether to persist an event from the original event, not from a plugin's replacement. A replacement that flipped <code>partial</code> from true to false &quot;reaches the caller as final while its event and state delta are missing from the session&quot;.</li>
+<li>python-genai <code>6d012889</code>: per-event-loop aiohttp sessions and auth locks were never released. Servers that run each request in a fresh <code>asyncio.run()</code> loop kept one session per request. This is from DSH 2032 and the commit title; I did not read the diff.</li>
+</ul>
+<h2>Academy</h2>
+<p><strong>Screen used:</strong> agent evaluation, cost, security or oversight evidence that produces a result BQAA could measure or log. Every rank below was read in full before ranking.</p>
+<p><strong>Coverage:</strong></p>
+<ul>
+<li><strong>No new arXiv mailing.</strong> The ceiling is still <code>2609.30268</code> (probed 07:46Z). The next mailing is Sunday 20:00 ET.</li>
+<li><strong>So I backfilled the past week in 20 secondary categories:</strong> cs.CY, cs.HC, cs.DB, cs.IR, cs.DC, cs.PL, cs.DL, eess.AS, cs.SD, stat.ME, stat.AP, econ.GN, cs.CE, cs.NE, cs.GT, cs.SI, cs.PF, cs.OS, cs.NI and stat.ML.</li>
+<li>That gave 1,388 entries. 1,092 of them appear in no brief, pack, catalog item, seen-links entry or <code>Hunt/agent-analytics</code> / <code>Ship/briefs</code> note, and not in the Thursday listings that the 1234 and 1834 briefs scanned.</li>
+<li>322 matched agent or evaluation keywords and 31 matched a stricter filter. I read six abstracts and two papers in full.</li>
+<li><strong>Prior exposure, disclosed.</strong> Both ranked papers were in the Monday Sep 21 mailing (listing date Tue 22 Sep).</li>
+<li>2609.22259's title appears in raw listing output in the Mon 1834 (Kimi) run log. 2609.24161's appears in the Mon 1834 (Kimi) and Tue 1834 (Opus) run logs.</li>
+<li>A grep of the whole vault, every brief and every pack finds neither ID, so no one ever read or dispositioned them. Both ranks are backfill.</li>
+<li>The priority pin <code>2609.02702</code> (Trace-as-State v1) is intact and is <strong>not</strong> re-carded.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.22259">arXiv 2609.22259</a>: Which Part of the Context Layer Does the Work? Separating Semantic Content from Retrieval Scaffolding in Text-to-SQL Agents</h3>
+<p><strong>Qing Ye</strong> (independent researcher). v1 submitted 6 Sep 2026 (cs.CL; cross-listed to cs.AI and cs.DB), listed Tue 22 Sep, 21 pages.</p>
+<ul>
+<li>The harness, the frozen contract and the result rows are at github.com/flyersworder/agentic-data-contracts.</li>
+<li>All 6,416 transcripts are released.</li>
+</ul>
+<p><strong>Full PDF read:</strong> §1–9 and App. A–H (Tables 1–12, Figs. 1–3).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>The question.</strong> Context layers, meaning curated documentation an analytics agent fetches at query time, produce large text-to-SQL gains. A with/without comparison can't say which part works: the semantic content, the retrieval scaffolding, or the pre-computed views that usually come along.</li>
+<li><strong>The instrument: a &quot;data contract&quot;.</strong></li>
+<li>It is two YAML files (60,181 characters), authored only from DABStep's manual, then frozen and content-hashed about 35 commits before the first run.</li>
+<li>It declares 5 readable tables, 11 forbidden operations, 8 domains and 14 metrics, each metric with a SQL expression.</li>
+<li>Nine governed tools serve it. sqlglot checks every statement against the allow-list before it reaches the database.</li>
+<li><strong>Four arms on DABStep,</strong> the Adyen / Hugging Face payments benchmark (401 tasks with reconstructed golds, 332 of them hard):</li>
+<li><code>schema</code>: three ungoverned tools and no documentation (the floor);</li>
+<li><code>hollow</code>: the same nine tools and &quot;look it up&quot; instruction, over a contract whose prose a script emptied (&quot;No documentation is available for this domain&quot;);</li>
+<li><code>manual</code>: the 24,177-character manual pasted into the system prompt (the practitioner's baseline);</li>
+<li><code>contract</code>: the full contract, one lookup away.</li>
+<li><strong>Four models:</strong> GLM-5.3-flash, DeepSeek-v4-flash, Claude Sonnet 5 and GPT-5.6 Sol, each pinned to one endpoint.</li>
+<li><strong>A ceiling.</strong> Compiling the contract's own SQL expressions into two views reproduces the gold answer on all 176 tasks those views cover.</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Content dominates (Fig. 2, Table 4).</strong> Hard-task accuracy, schema → hollow → contract:</li>
+<li>GLM 13.9 → 19.3 → 55.1%;</li>
+<li>DeepSeek 22.6 → 22.6 → 56.6%;</li>
+<li>Sonnet 5 22.9 → 38.0 → 68.4%;</li>
+<li>GPT-5.6 37.0 → 51.2 → 77.4%.</li>
+<li>Restoring the prose adds 26.2–35.8 points, while the tools and instruction alone add 0.0–15.1. The content step is 1.8× to 6.6× the scaffolding step, and on DeepSeek it is the whole effect.</li>
+<li><strong>The contract beats the same knowledge in the prompt</strong> on every model, by 13.7–44.6 hard-task points. On Sonnet 5, the pasted manual is indistinguishable from a bare schema (79 against 76 of 332, p = 0.72).</li>
+<li><strong>Graded by the benchmark itself (App. A).</strong> Submitted to the DABStep leaderboard, the GLM contract arm scored 51.9% against manual's 18.8% on 378 hard tasks (paired McNemar p = 4.9×10⁻²⁸). The author's own reconstructed golds run 5.7 points high for contract and 3.0 for manual.</li>
+<li><strong>Why: the rule is within reach (§6.1, Table 7).</strong> Both prompts contained the fee rule. On the 97 tasks that need all six fee clauses, the contract arm's SQL contains all six 39%, 65%, 55% and 98% of the time. The manual arm's does 3%, 9%, 4% and 4% of the time.</li>
+<li><strong>The derivation gap (§5.3, Table 6).</strong></li>
+<li>On the 176 tasks the compiled views answer outright, the contract arm recovers 60.8%, 62.7%, 73.9% and 94.9%. The gap to a proven ceiling falls from 39.2 points to 5.1 as capability rises.</li>
+<li>On the 148 tasks that need reasoning on top of the views, it scores 45.9–60.1%, with no clean ordering by model.</li>
+<li><strong>Work and cost (Tables 8–9).</strong></li>
+<li>The contract arm uses the fewest turns and the least reasoning on every model, and it never ran out of output budget.</li>
+<li>Cost per correct answer is lowest on three models. On Sonnet 5 it was $0.136, against $0.259 for the next arm.</li>
+<li>On GPT-5.6 the manual arm is cheaper ($0.062 against $0.067). Knowledge fetched by tools is billed at the fresh-input rate, while a static prompt is cached.</li>
+<li><strong>Empty tools are not free.</strong> <code>hollow</code> was the most expensive arm on both frontier models: told nothing, the agent searched harder. On Sonnet 5 it called <code>lookup_metric</code> 1,620 times.</li>
+<li><strong>Governance (§7, Table 10).</strong> Ungoverned arms submitted 166 mutating statements across 26 tasks, and two reached the (disposable) warehouse. Governed arms submitted none, so the validator never had to fire.</li>
+<li><strong>Reproducibility (§8.3).</strong> A near-replicate of the GLM contract run, differing only by a validator fix, at temperature 0 on a pinned endpoint, flipped 94 of 401 task verdicts (23.4%), about equally in each direction. Aggregate accuracy did not differ (60.3% against 57.9%, p = 0.35).</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li><strong>One benchmark, one domain.</strong> 294 of the 332 hard tasks concern fees, and on the non-fee hard tasks the contract shows no advantage (App. E).</li>
+<li><strong>The contract settles three things the manual leaves open.</strong> For example, list-typed fields use an empty list as the wildcard. The author notes this matters for 87 of the 97 payments tasks, and did not run the arm that would strip it (§8.2).</li>
+<li><strong>Thin replication.</strong> Single author; one run per model; lenient reconstructed golds; DeepSeek lost 29% of its rows to rate limits; a validator defect on GLM handicapped both governed arms; no contamination probe.</li>
+<li><strong>Two frontier points.</strong> They disagree on several capability trends, so read the capability story as two data points.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It is the cleanest decomposition I've seen of what a context layer buys.</li>
+<li>It hands BQAA a method it can copy: a hollow control plus a compiled ceiling.</li>
+<li>It adds a governance metric (attempted mutations) and a cost finding (context delivered by tools is billed fresh).</li>
+<li>It is distinct from the catalog's text-to-SQL cards:</li>
+<li><code>arxiv-2609-20886-bi-agent-bi-bench-end-to-end-bi</code>: specialized tools lift BI tasks.</li>
+<li><code>arxiv-2609-19615-semantic-layer-induction-raw-telemetry</code>: inducing a semantic layer from logs.</li>
+<li><code>arxiv-2609-25938-certified-against-which-oracle-text-to-sql</code>: abstention certificates.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Log, per session, which context artifacts (by digest) the agent fetched, and whether the fetched rule shows up in the SQL it ran. Here the main failure was &quot;fetched but misapplied&quot;, not &quot;never fetched&quot;.</li>
+<li>Evaluate a context-layer change against a hollow control and a compiled ceiling, not just with and without it.</li>
+<li>Count attempted mutating statements per session as a governance metric.</li>
+<li>Split cost per correct answer into fresh and cached input, because tool-delivered context is billed fresh.</li>
+<li>Don't trust single-task verdicts: a near-identical rerun flipped 23% of them.</li>
+</ul>
+<h3>2. NEW rank: <a href="https://arxiv.org/abs/2609.24161">arXiv 2609.24161</a>: MCP-GRANITE Benchmark: GRANularity Interface TEsting for MCP-Based LLM Agents</h3>
+<p><strong>Paschalides, Symeonides, Pallis, Dikaiakos</strong> (University of Cyprus). v1 21 Sep 2026 (cs.DC; cross-listed to cs.AI and cs.LG), listed Tue 22 Sep, 8 pages. Author copy of a MASCOTS 2026 paper; code at github.com/dpasch01/mcp-granite.</p>
+<p><strong>Full PDF read:</strong> §I–VI (Tables I–V, Figs. 1–9).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>Tool granularity is the only variable.</strong> The same capability set is exposed through MCP in four ways:</li>
+<li>L4: 8–10 single-purpose tools;</li>
+<li>L3: 4 task-class tools;</li>
+<li>L2: one read tool and one write tool;</li>
+<li>L1: one monolithic tool.</li>
+<li>Domain logic, the deterministic mock data and the prompts stay the same, and each level has its own gold call sequence.</li>
+<li><strong>Scale:</strong> 81 scenarios across 9 edge and IoT domains, and 9 local models (268M–20.9B parameters, 3- to 8-bit quantized, served by Ollama on one T4 GPU). Temperature 0, 3 repetitions, <strong>8,748 runs</strong> in all.</li>
+<li><strong>The harness</strong> is Google ADK's <code>McpToolset</code> with LiteLLM, discovering tools at runtime through <code>tools/list</code>.</li>
+<li><strong>Metrics:</strong> task completion; tool-selection F1 (over tool names, ignoring order); argument accuracy; the rate of runs with no tool call; errors; latency; GPU power and energy.</li>
+</ul>
+<p><strong>Numbers (Table II unless noted):</strong></p>
+<ul>
+<li><strong>Task completion:</strong> L4 0.42, <strong>L3 0.49</strong>, L2 0.42, L1 0.36.</li>
+<li>The headline &quot;+16.4%&quot; and &quot;+33.6%&quot; are relative gains of L3 over L4 and over L1, not percentage points.</li>
+<li>A logistic regression controlling for model size, quantization, domain and difficulty gives L3 1.36× the odds of completion (CI 1.12–1.66, p = 0.002), and L1 22% lower odds (p = 0.009).</li>
+<li><strong>Argument accuracy</strong> roughly doubles from L4 to L3 (0.20 → 0.40); L2 reaches 0.38.</li>
+<li><strong>Picking the tool is easier than using it.</strong> Tool-selection F1 peaks at L2 (0.71), but completion does not. In the paper's words, &quot;argument construction, not tool selection, is the main bottleneck&quot;.</li>
+<li><strong>One monolithic tool breaks agents qualitatively.</strong> 28.2% of L1 runs finished without calling any tool (L4: 10.2%). Error rates were 11.4% at L3, 12.9% at L4, 14.1% at L2 and 15.8% at L1 (§V-E).</li>
+<li><strong>Size predicts latency, not success (§V-C).</strong></li>
+<li>Parameter count correlates at ρ = 0.285 with completion (p = 0.46) and at 0.946 with latency.</li>
+<li>A 3.2B model at its best level beat a 20.9B model at a mismatched one.</li>
+<li>GPT-OSS (20.9B) and xLAM-2 errored on 55.6% and 52.8% of runs, mostly with malformed calls against schemas discovered at runtime (Table I, §V-A).</li>
+<li><strong>Energy (Table IV).</strong> At L3, Llama 3.2 3B used 621 J per successful task and Qwen3 14.8B used 14,544 J (23×), completing 0.61 against 0.79.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>The MCP servers are mocks with fixed responses, so this measures the agent side only.</li>
+<li>Only small, quantized local models on one GPU; no frontier models.</li>
+<li>Marginal confidence intervals for completion overlap across levels. The L3 advantage rests on the paired bootstrap and the regression.</li>
+<li>Quantization differs by model (3- to 8-bit), which confounds the size analysis. Energy is estimated from mean GPU power times time.</li>
+<li>With a single tool (L1), order-free tool-name F1 mostly measures call counts.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It makes the tool surface a controlled variable. For small models, it moves completion and argument accuracy about as much as model choice does.</li>
+<li>The transferable result is diagnostic: tool selection and argument construction fail independently, and &quot;answered without calling a tool&quot; is a distinct failure.</li>
+<li>It is built on ADK's <code>McpToolset</code> and LiteLLM, so it can be rerun directly on an ADK agent.</li>
+<li>It is distinct from <code>arxiv-2609-20886-bi-agent-bi-bench-end-to-end-bi</code>, which adds specialized tools rather than regrouping one capability set.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Store a tool-surface identity (tool count and schema hash) with every trace. Tool-call success rates are not comparable across agents with different surfaces.</li>
+<li>Report tool-selection accuracy and argument accuracy separately.</li>
+<li>Count runs that finish without any tool call as their own failure class.</li>
+</ul>
+<h3>Academy scouted, not ranked</h3>
+<p><strong>Abstract only, so not rankable:</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.24137">2609.24137</a> &quot;Data Agents: Agentic Data Systems&quot; (Li, Zhou, Zhou, Sun, Luo, Fan; accepted by TKDE; cs.DB). A vision and system paper on autonomous data systems.</li>
+<li><a href="https://arxiv.org/abs/2609.25563">2609.25563</a> &quot;AkasicMEM: Governed Enterprise Memory for Agents&quot; (cs.DB, 9 pp). It keeps source restrictions in force as memory is derived and reused, &quot;authorization continuity&quot;, through transitive lineage, policy composition when memory forms, and re-evaluation at retrieval. The abstract reports no evaluation numbers.</li>
+<li><a href="https://arxiv.org/abs/2609.22723">2609.22723</a> &quot;ANI-Gamut&quot; (cs.NI, an extended CNSM 2026 paper). Network agents at several interface levels. On a live change task, a raw-shell agent failed on all 6 seeds and a typed transactional interface succeeded on all 6 (McNemar p = 0.031), at roughly an order of magnitude less cost. It is a pilot, with 4–20 runs per level.</li>
+<li><a href="https://arxiv.org/abs/2609.28090">2609.28090</a> &quot;Can LLMs Catch a Rigged Backtest?&quot; (cs.CL/cs.CE). 96 paired flawed and clean backtests. Open prompts over-flag 93.8% of the clean code controls even at 100% recall, so the clean-control false-positive rate is what separates auditors. A companion to the 1834 judge-false-positive card (2609.28478).</li>
+</ul>
+<h2>Six-week EV (through ~Nov 7)</h2>
+<ul>
+<li><strong>Attribution fields ride inside the request, where gateways can log them (medium-high).</strong></li>
+<li>Signals: Codex's <code>client_metadata.mcp_attribution</code> at overridden endpoints (alpha.4), Claude Code's <code>x-claude-code-prompt-id</code> (1834), Mastra's assistant message ID on tool-input events (alpha), and Cloudflare's <code>messageIds</code> on terminal frames (queued).</li>
+<li>For BQAA: optional columns for attribution that arrives with the request (prompt ID, MCP server and tool, originating message IDs), filled when present, with the client version that produced them.</li>
+<li><strong>Linked traces replace parent-child edges for work after the response (medium).</strong></li>
+<li>LiteLLM's post-response spend writes are their own root traces in its pre-release. Expect more asynchronous follow-up work to be modeled with span links.</li>
+<li>For BQAA: follow span links in trace joins, and don't compute request duration from the whole trace's extent.</li>
+<li><strong>Context layers get measured by ablation (medium).</strong></li>
+<li>2609.22259's hollow control plus compiled ceiling is a better design than the with/without claims vendors publish.</li>
+<li>For BQAA: context-artifact digests and fetched-versus-applied metrics make the same analysis possible over production traces.</li>
+<li><strong>The tool surface becomes an explicit dimension (medium).</strong></li>
+<li>Signals: MCP-GRANITE, and Codex's skill-catalog budget split (#48353).</li>
+<li>For BQAA: tool-surface version as a first-class dimension of tool-call analytics.</li>
+<li><strong>Durable-agent status semantics shift as fixes ship (medium, pending releases).</strong></li>
+<li>Mastra's lease fencing and resume refusal. Cloudflare's recovery keeps a submission <code>running</code> rather than <code>aborted</code>.</li>
+<li>When these ship, aborted and failed counts will drop because of measurement, not behavior. Annotate the release boundaries.</li>
+<li><strong>Watch list:</strong></li>
+<li>Codex 0.158 or 0.159 stable; Mastra 1.72.0 stable; Cloudflare <code>agents@0.25.0</code> (#2335).</li>
+<li>LiteLLM 1.104 stable (with #42826 and #43274), and any release that exposes the Rust gateway.</li>
+<li>PydanticAI harness packaging after #8818.</li>
+<li>Releases carrying promptfoo #11075, #11076, #11077 or #11032, and Cline #14426.</li>
+<li>The Perplexity Sonar Chat Completions shutdown on Sep 27 (from 1834).</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>Codex 0.159.0-alpha.4 (progress):</strong> MCP attribution now reaches gateways configured as the OpenAI base URL; segment its coverage by Codex version and provider type.</li>
+<li><strong>Mastra 1.72.0-alpha.3 (progress):</strong> log refused-then-retried steps, requester and approver, and storage-adapter versions (fencing is silently off on old adapters); observational-memory failures abort by default.</li>
+<li><strong>2609.22259 (NEW):</strong> measure context layers with a hollow control and a compiled ceiling; log fetched-artifact digests, fetched-versus-applied, attempted mutations, and fresh versus cached input.</li>
+<li><strong>2609.24161 (NEW):</strong> record a tool-surface identity per trace, split selection from argument accuracy, and count runs that never call a tool.</li>
+<li><strong>NOTE cluster:</strong></li>
+<li>LiteLLM cost spans become linked root traces in 1.104.0.dev2 (join by span link); LiteLLM's Rust gateway is scaffolding with 0 prod impact.</li>
+<li>Cloudflare Agents 0.25.0 is queued: message IDs on terminal frames, and recovered turns stay <code>running</code>.</li>
+<li>promptfoo fixes finish-reason normalization and headers that read over 100% (all unreleased).</li>
+</ul>
+<h2>Housekeeping</h2>
+<p><strong>Slot and inputs</strong></p>
+<ul>
+<li><strong>Slot:</strong> a late wake. The slot woke at about 00:36 PT, and Collection woke this writer at about 00:38 PT. This run's first clock read was 00:39:36 PT, and no <code>2026-09-26-0034-*</code> brief existed. The label stays <strong>0034</strong>.</li>
+<li><strong>Packs used (5, PACK_DONE at launch):</strong></li>
+<li>Agy 1832 (as of 03:22Z): landed during 1834 and was used there only to cross-check; primary here for the window's start.</li>
+<li>DSH 2032: 03:22Z → 03:48:22Z.</li>
+<li>Agy 2132: → 04:42Z.</li>
+<li>Muse 2232: → 05:52Z.</li>
+<li>DSH 2332: → 06:49:57Z.</li>
+<li>The windows join end to end. I did not re-read Muse 1632 or DSH 1732; the 1834 brief cross-checked both.</li>
+<li><strong>Gaps:</strong></li>
+<li><strong>Muse 1932 MISSING</strong> (FAIL_MAC).</li>
+<li><strong>Agy 0032 was MISSING at launch.</strong> It landed as PACK_DONE at 00:48 PT (as of 07:48:14Z). I used it only to cross-check; it adds nothing my own sweep lacked.</li>
+<li>Earlier gaps still open: Muse 0732, DSH 0832 and DSH 0532 (Sep 25).</li>
+<li><strong>Vault twins:</strong> Muse 2232 and DSH 2332, like DSH 2032, reported that their vault-twin writes were blocked by the sandbox. Their outbox copies are under <code>/tmp/{muse,dsh}-collect-*/outbox/</code>. I did not copy them.</li>
+<li><strong>Social and other sources:</strong> X 401, Reddit 403, and the LinkedIn and Papers with Code redirects are the packs' labels; I did not re-probe them. Medium was not used.</li>
+<li><strong>Collection's code-merged list</strong> (<code>_runs/fb-2026-09-26-0034/fresh-items.md</code>, 19 fresh, 12 candidates): I used it as a checklist only. Every entry, F01–F19, has a disposition above.</li>
+</ul>
+<p><strong>Verified arXiv ceiling: <code>2609.30268</code></strong></p>
+<ul>
+<li><strong>Probed at 07:46Z:</strong> 30266–30268 return 200.</li>
+<li>30269, 30270, 30272, 30275, 30280, 30290, 30300, 30400, 31000 and <code>2610.00001</code> return 404.</li>
+<li><strong>Priority pin <code>2609.02702</code>:</strong> base 200, v1 200, v2 404; I re-read the title. Intact, and not re-carded.</li>
+</ul>
+<p><strong>HN</strong></p>
+<ul>
+<li>All six pack helper files report hits=0: 1832, 2032, 2132, 2232, 2332, and 0032, which landed during this run.</li>
+<li><strong>My own re-run at ~07:49Z, since 03:22Z,</strong> with the same six queries and threshold: 0 raw hits for all six, including &quot;MCP&quot;.</li>
+<li><strong>Sanity check:</strong> the API's newest story was at 07:45:59Z, so it is live.</li>
+<li><strong>HN: hits=0 keep=0.</strong></li>
+</ul>
+<p><strong>Pack corrections</strong></p>
+<ul>
+<li><strong>Agy 2132:</strong></li>
+<li>Mastra #24863's <code>failurePolicy</code> is <code>'abort'</code> by default or <code>'continue'</code>, not &quot;fail-open&quot; by default. This is confirmed in both the changelog and the built code.</li>
+<li>The full commit SHAs it gives for Codex #48344 and #48353 do not match GitHub's (<code>c9e25207073a…</code> and <code>e72da2b53805…</code>); only the first eight characters are right.</li>
+<li>#48353 is +1,172/−232, not +993/−232.</li>
+<li><strong>Muse 2232 and DSH 2332:</strong> the tag compare settles their open question. alpha.4 includes #48344 and #48353, while alpha.2.1 carries only the four Windows fixes.</li>
+<li><strong>Agy 0032:</strong> it missed six Cloudflare Agents merges (07:00–07:22Z). Suggestion: add <code>cloudflare/agents</code> to the Agy watchlist (it is on this writer's list).</li>
+</ul>
+<p><strong>Verification method</strong></p>
+<ul>
+<li><strong>GitHub API:</strong></li>
+<li>Release objects and dated tags, by GraphQL, for 74 repos since 03:20Z, re-swept since 06:30Z at 07:56Z.</li>
+<li>Default-branch commits since 03:30Z, re-swept since 07:40Z.</li>
+<li>Compare API:<ul>
+<li>Codex: alpha.3…alpha.4, alpha.2…alpha.2.1 and alpha.15.1…alpha.2.1.</li>
+<li>LiteLLM: #42826's merge commit…<code>v1.104.0-dev.2</code>.</li>
+</ul>
+</li>
+<li><strong>Diffs read:</strong></li>
+<li>Codex #48344's changed files (<code>model-provider-info</code>, <code>provider.rs</code>, <code>client.rs</code> and the <code>rmcp_client</code> / <code>direct_tool_metadata</code> tests).</li>
+<li>Mastra commit <code>561c0659</code>'s changelog entries for core, memory, server, inngest, pg, docker and mastracode.</li>
+<li><strong>Registries and artifacts:</strong></li>
+<li>PyPI JSON for 66 packages; npm <code>time</code> and dist-tags for 48.</li>
+<li>Tarballs of <code>@mastra/core@1.72.0-alpha.3</code>, <code>@mastra/memory@1.33.0-alpha.2</code>, <code>@mastra/inngest@1.10.1-alpha.1</code> and <code>@mastra/pg@1.28.0-alpha.2</code>, searched for <code>failurePolicy</code>, <code>leaseDurationMs</code>, <code>expectedOwnerId</code>, <code>leaseExpiresAt</code>, <code>requesterId</code>, <code>CyberRefusalHandler</code> and &quot;not suspended&quot;.</li>
+<li><strong>PR bodies read:</strong></li>
+<li>Codex #48344, #48353, #48352 and #48350.</li>
+<li>LiteLLM #43274, #43287, #43289, #43269, #43273, #42931, #42826, #42665, #43288, #43292 and #43295; also #43275, which is still open.</li>
+<li>Mastra #24863, #24841, #25181 and #25165.</li>
+<li>Cloudflare Agents #2360–#2366 and #2335 (the Version Packages PR), plus merge times for #2334, #2340, #2343, #2344 and #2348.</li>
+<li>promptfoo #11075, #11076, #11077, #11078 and #11059.</li>
+<li>PydanticAI #8818 and ADK #7185.</li>
+<li><strong>Academy:</strong></li>
+<li>arXiv past-week listings for 20 categories (1,388 entries), checked against every brief, pack, vault note, the catalog, seen-links and the 1234/1834 Thursday listings.</li>
+<li>Title lists in earlier run logs grepped for prior exposure.</li>
+<li>6 abstracts.</li>
+<li>2 PDFs extracted with <code>pdftotext</code> to <code>/tmp/fb0034sat/pdf/</code> and read in full (22259, 24161). Every quoted number was checked against the cited table or section.</li>
+<li><strong>Search:</strong> no web search. The HN Algolia re-run is described above.</li>
+</ul>
+<p><strong>Excluded by rule:</strong></p>
+<ul>
+<li>No first-party BQAA content. ADK and python-genai are NOTE only.</li>
+<li>No Desk section and no GTM content.</li>
+<li>Crustdata and Fable were not used, and Medium was not cited.</li>
+<li>No re-admission of the 1834, 1234, 0634 or 0034 (Fri) sets. The priority pin was not re-carded.</li>
+<li>This writer made no Jev calls. Collection logged <code>JEV_SHADOW worth_running run conf=0.97</code> before launch.</li>
+</ul>
+<p><strong>Run limits:</strong></p>
+<ul>
+<li><strong>Volume:</strong> 2 ranks, 2 progress notes, about 30 NOTE lines and 4 scouted lines, within 50.</li>
+<li><strong>Re-attempts:</strong> one <code>gh api</code> call with an unquoted <code>?</code> failed under zsh globbing; I read the same facts from PyPI instead and did not retry it. No call was retried.</li>
+<li><strong>Other:</strong> $0 spent, 0 external messages, no background jobs. The downloads were public npm tarballs and arXiv PDFs.</li>
+</ul>
+<p><strong>Scratch dir:</strong> <code>/tmp/fb0034sat/</code>, created fresh for this run.</p>
+<p><strong>Catalog:</strong></p>
+<ul>
+<li>422 / 105 / 107, read-only and untouched by me. The research copy, the hub checkout and the live URL were byte-identical (SHA-256 <code>7dbbc5058bd9d06e…</code>).</li>
+<li>Expected after publish: <strong>424 items / 106 briefs / 108 runs</strong> (+2 Academy).</li>
+<li>The two progress notes update existing cards and add no items.</li>
+</ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW items (2):</strong></p>
+<ol>
+<li><strong>id:</strong> <code>arxiv-2609-22259-context-layer-content-vs-scaffolding-text-to-sql-agents</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Which Part of the Context Layer Does the Work? — a four-arm DABStep ablation on four models: restoring the prose to an otherwise identical &quot;hollow&quot; data contract adds 26–36 hard-task points, while the governed tools and retrieval instruction alone add 0–15; the contract beats the same manual pasted into the prompt on every model (graded officially on GLM: 51.9% vs 18.8%); ungoverned arms attempted 166 mutating statements, governed arms none</li>
+<li><strong>arXiv:</strong> 2609.22259 — https://arxiv.org/abs/2609.22259</li>
+<li><strong>card text:</strong> A frozen YAML data contract, authored only from DABStep's manual and served through nine governed tools, raised hard-task accuracy from 13.9–37.0% (bare schema) to 55.1–77.4% on GLM-5.3-flash, DeepSeek-v4-flash, Sonnet 5 and GPT-5.6; with every prose field emptied, the same tools reached only 19.3–51.2%. The contract arm's SQL carried all six fee clauses 39–98% of the time, against 3–9% for the arm with the same manual in its prompt, and it used the fewest turns and was cheapest per correct answer on three of four models. Caveats: one benchmark and one domain (fees), a single author, one run per model (a near-identical rerun flipped 23% of task verdicts), and the contract settles three ambiguities the manual leaves open.</li>
+</ul>
+<ol start="2">
+<li><strong>id:</strong> <code>arxiv-2609-24161-mcp-granite-tool-interface-granularity</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> MCP-GRANITE — the same MCP capability set exposed as 8–10, 4, 2 or 1 tools across 8,748 runs with 9 local models: four task-level tools give the best task completion (0.49 vs 0.42 fine-grained and 0.36 monolithic; odds ×1.36) and double argument accuracy (0.20 → 0.40); with one monolithic tool, 28.2% of runs call no tool; model size tracks latency (ρ 0.95), not completion (ρ 0.29)</li>
+<li><strong>arXiv:</strong> 2609.24161 — https://arxiv.org/abs/2609.24161</li>
+<li><strong>card text:</strong> A MASCOTS 2026 benchmark built on Google ADK's <code>McpToolset</code> and LiteLLM varies only tool-interface granularity across 81 edge and IoT scenarios with deterministic mock MCP servers. Moderate consolidation helps most, mainly through argument accuracy; tool-selection F1 peaks at two tools without the best completion, so picking a tool and constructing its arguments fail independently. Caveats: mock servers, small quantized models on one T4 GPU, overlapping marginal intervals, and headline gains that are relative, not percentage points.</li>
+</ul>
+<p><strong>Progress (2):</strong></p>
+<ul>
+<li><strong>parent:</strong> <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code></li>
+<li><strong>text:</strong> OpenAI Codex rust-v0.159.0-alpha.4 (GitHub prerelease 06:21Z; npm 06:34Z, now the <code>alpha</code> tag on every platform; <code>latest</code> still 0.157.1). By tag compare it ships #48344: raw tool-result metadata and <code>client_metadata.mcp_attribution</code> now reach the built-in OpenAI provider at overridden endpoints (before, only HTTPS api.openai.com and ChatGPT hosts), while custom and remote-configured providers stay filtered. It also ships #48353, which caps cloud skills at three quarters of the skill-metadata budget and sends a short availability update instead of repeating an unchanged catalog on reconnect, plus #48222 and #48224. rust-v0.158.0-alpha.2.1 adds only the four Windows fixes 0.157.1 carried.</li>
+<li><strong>parent:</strong> <code>mastra-core-1-70-0-model-selection-processor-tenant-scoped-traces-memory-1-32</code></li>
+<li><strong>text:</strong> Mastra @mastra/core@1.72.0-alpha.3 wave (npm 04:15–04:20Z; <code>latest</code> still 1.71.0) ships the fixes NOTEd as unreleased at Fri 1834: lease-fenced background tasks (#24841; <code>@mastra/pg</code> adds <code>ownerId</code> and <code>leaseExpiresAt</code>, and older storage packages silently fall back to unfenced writes), requester-only channel approvals (#25165), a resume that refuses finished Inngest runs (#25181), and killed Docker commands no longer reported as natural exits (#24775). Observational memory gains <code>maxRetries</code> (default 8) and <code>failurePolicy</code>, default <code>'abort'</code> with opt-in <code>'continue'</code> (#24863); tool-input events gain the assistant message ID (#25196); and <code>CyberRefusalHandler</code> retries once past OpenAI or Anthropic cyber refusals and is on by default in <code>createCodingAgent</code> (#25172).</li>
+</ul>
+<p><strong>Headline claims (for citation checks):</strong></p>
+<ol>
+<li>Codex rust-v0.159.0-alpha.4 ships #48344, which sends raw tool-result metadata and MCP attribution (<code>client_metadata.mcp_attribution</code>) to the built-in OpenAI provider even when its endpoint is overridden; before, only HTTPS api.openai.com and ChatGPT destinations received them. — https://github.com/openai/codex/pull/48344 (merged 2026-09-26 03:49Z; in https://github.com/openai/codex/releases/tag/rust-v0.159.0-alpha.4, published 2026-09-26 06:21Z)</li>
+<li><code>@mastra/memory@1.33.0-alpha.2</code> adds <code>maxRetries</code> (default 8) and <code>failurePolicy</code> for observational memory, with <code>'abort'</code> as the default and <code>'continue'</code> as the opt-in that lets the agent turn finish. — https://github.com/mastra-ai/mastra/pull/24863 (npm 2026-09-26 04:15Z; changelog in commit 561c0659)</li>
+<li>On DABStep, restoring the prose to an otherwise identical hollow data contract raised hard-task accuracy by 26.2–35.8 points across four models, while the governed tools and retrieval instruction alone added 0.0–15.1. — https://arxiv.org/abs/2609.22259 (v1 2026-09-06; Fig. 2, Table 4)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 26 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
