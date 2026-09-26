@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-25 · Lab KEEPs: code decides done + replay regression check (after rari handoff packet / promotion gate)</strong></span>
+      <span>Updated <strong>2026-09-25 · decision queue + kill conditions + receipt lines (0xShoopy), after code decides done / replay check</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -131,7 +131,7 @@
       <li><a href="#usage">Usage visibility</a></li>
       <li><a href="#grok-patterns">Grok Bot team patterns</a></li>
       <li><a href="#jev">Jev decision layer</a> · <a href="#jev-gates">gates</a> · <a href="#jev-session">live session</a></li>
-      <li><a href="#spacex-keeps">SpaceX engineer-guide KEEPs</a></li>
+      <li><a href="#spacex-keeps">SpaceX engineer-guide KEEPs</a> · <a href="#decision-queue-kill-receipts">decision queue · kill conditions · receipts</a></li>
       <li><a href="#extend">How to extend the team</a></li>
       <li><a href="#checklist">Operator checklist</a></li>
     </ol>
@@ -623,7 +623,7 @@ ask → Manage Bot
       <thead><tr><th>Routine</th><th>When (PT)</th><th>What</th></tr></thead>
       <tbody>
         <tr><td>Weekday specialist ops nudge</td><td>08:11 Mon–Fri</td><td>Playbook bullets + blocker ask in Field Brief / Coding EM</td></tr>
-        <tr><td>PR board sweep 12h</td><td>09:09 + 21:09 daily</td><td>Open PRs → CI/conflict/stall → Mac CLI unblock + proof; never merge</td></tr>
+        <tr><td>PR board sweep 12h</td><td>09:09 + 21:09 daily</td><td>Open PRs → CI/conflict/stall → Mac CLI unblock + proof; never merge. The 09:09 run also checks the <a href="#decision-queue">decision queue</a></td></tr>
         <tr><td>Nightly Mac harness audit</td><td>02:59 daily</td><td>One rotating Mac seat; scoped audit PR; dual-LGTM; morning ping if ready</td></tr>
       </tbody>
     </table>
@@ -635,6 +635,11 @@ ask → Manage Bot
     <h3 id="kill-review">Weekly kill review + weekly receipts</h3>
     <p>Paired with Monday playbook↔card sync. For each Manage routine: did it run? was the output right? <strong>Would anyone miss this if removed?</strong> If no, Manage proposes a kill (pause/delete) to Haiyuan. Pause or delete zombies.</p>
     <p class="note"><strong>Weekly receipt habit (2026-09-25 · <a href="https://x.com/0xwhrrari/status/2095497109524934750">rari · Grok Bot operating system</a>):</strong> each bot hands in a short weekly receipt: runs due vs ran, outputs (paths/URLs), failures + human repairs, side effects, anything waiting on Haiyuan. Manage compiles them into one vault note and asks Haiyuan to spot-check <strong>one</strong> real artifact (a named path/URL, not a summary). A bot can summarize its history; it should not be the only judge of it.</p>
+    <h3 id="decision-queue-kill-receipts">Decision queue · kill conditions · receipt lines (2026-09-25)</h3>
+    <p>Three rules from <a href="https://x.com/0xShoopy/status/2092208249671962676">@0xShoopy · Grok Bot: how to build an AI crew that learns by watching you work</a> (Harness Lab-style pointer; rules only, no tooling adopted). Lock: <code>Maps/Decisions/2026-09-25-decision-queue-kill-conditions-receipts.md</code>.</p>
+    <p class="note" id="decision-queue"><strong>Daily decision queue + 3-day escalation:</strong> one file holds every item waiting on Haiyuan: box <code>/home/box/agent-data/decisions/queue.md</code>, owned by Manage. Each item has an id, opened date, owner bot, the question, options, our recommendation and a pointer (path/URL). Only <strong>irreversible</strong> things (send / spend / merge / delete / publish / permissions) and genuine judgment calls go in; reversible work never lands in the queue (<a href="#gyr-authority">GREEN/YELLOW</a>: do it, log it). Bots add items there instead of scattering asks in chat (emergencies still go to chat). Manage checks it once a day on the 09:09 PT PR board sweep, not in a new routine. An item unanswered <strong>3+ days</strong> is re-raised to Haiyuan <strong>once</strong> (marked escalated with the date), never daily. If the queue regularly holds more than ~20 items, the approval rules are too tight.</p>
+    <p class="note" id="kill-condition"><strong>Pre-written kill condition per routine:</strong> every routine prompt carries one line, <code>Kill condition: …</code>, written <em>before</em> it runs. Example: “If this produces 3+ wrong/unused items in a week, or fails 2 runs in a row, pause it and tell Haiyuan.” The Monday <a href="#kill-review">kill review</a> checks each routine against its own stated condition instead of judging ad hoc. Pausing or deleting still needs Haiyuan’s approval.</p>
+    <p class="note" id="receipt-line"><strong>Always-log receipt line, quiet chat:</strong> every routine run appends one line to box <code>/home/box/agent-data/receipts/routine-receipts.log</code> via <code>/home/box/bin/receipt &lt;routine&gt; &lt;ok|skip|fail|parked&gt; "&lt;note&gt;"</code>. The line is <code>YYYY-MM-DDTHH:MM PT | routine | outcome | note</code> (counts, duration if known). It is written even when nothing happened. Chat stays quiet on success (existing rule). Weekly receipts read this log to prove quiet routines actually ran. The helper always exits 0, so a receipt never breaks a run.</p>
     <h3 id="gyr-authority">GREEN / YELLOW / RED (reversibility)</h3>
     <table>
       <thead><tr><th>Tier</th><th>Rule</th><th>Examples</th></tr></thead>
@@ -692,6 +697,7 @@ ask → Manage Bot
       <li>☐ Handoffs carry artifact path per <code>Maps/Contracts/manage-handoffs.md</code> + a <a href="#handoff-packet">packet</a> (new Coding EM kicks); bug jobs link a repro before implement</li>
       <li>☐ Done = a deterministic check passed (tests / file / pushed commit / HTTP 200); Jev <code>completion_check</code> advisory only</li>
       <li>☐ New routines pass <strong>Three-Run Proof</strong> (incl. a replay regression check before skill/prompt or Jev shadow→active changes) before Active; promotion also needs <strong>rollback tested + receipt complete</strong>; Monday sync includes kill review + weekly receipts (Haiyuan spot-checks one artifact)</li>
+      <li>☐ Asks waiting on Haiyuan live in the <a href="#decision-queue">decision queue</a> (irreversible/judgment only; one re-raise at 3 days); every routine prompt has a <a href="#kill-condition">Kill condition</a> line and writes a <a href="#receipt-line">receipt line</a> each run</li>
       <li>☐ Bot charters end with <strong>GREEN / YELLOW / RED</strong> reversibility (RED = Haiyuan)</li>
       <li>☐ Mac launch + Field Brief skills carry <strong>Exception paths</strong> (symptom → action)</li>
       <li>☐ Long fires declare <strong>run limits</strong>; demote autonomy when quality drops</li>
