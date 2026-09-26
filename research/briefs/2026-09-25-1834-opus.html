@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-25 · 6:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="Claude Code 2.1.283 prompt-id; PydanticAI 2.51.0 GPT-Live; Pipecat 1.12.0 classifiers; Academy 2609.28478 + 2609.29431.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-25-1834-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 6:34 PM PT · Mac-reconnect catch-up after ~16:44–20:11 PT outage (label kept 1834)</p>
+    <article>
+<h1>Field Brief — 2026-09-25-1834: Claude Code gives gateways a per-prompt ID, two voice-agent frameworks change how turns are metered and judged, and two papers treat LLM judges as instruments that drift</h1>
+<p>Claude Code 2.1.283 became the npm <code>latest</code> release at about 21:50Z. If you opt in, it now sends an <code>x-claude-code-prompt-id</code> header, so an LLM gateway can group every request that served one user prompt. When tool-content logging is on, its OpenTelemetry <code>tool.output</code> event now also carries MCP, WebFetch and WebSearch outputs. The Python Agent SDK shipped the same day with a fix for follow-up turns that failed after a background subagent finished. But I checked the CLI bundled inside it, and that CLI does not yet send the signal the fix waits for, so by default the old behavior remains. PydanticAI 2.51.0 adds OpenAI's GPT-Live, a voice model that hands the work to a separate backend model and is metered twice: audio seconds priced at the Live model, tokens priced at the backend model. Pipecat 1.12.0 turns its eval judge into a classifier that reports a confidence. It also fixes a bridge that doubled every word of a worker's reply, both in the client's text and in Pipecat's own evals. On the research side, MagicSchool reports that a vendor upgrade to one judge model dropped a pass rate from 97% to 11% in a single day. A second judge failed to corroborate 94% of 140,000 flagged failures, and three changes cut confirmed false-positive flags by 99%. A second paper finds that judges from different models score on different scales and calibrates them with a 32-conversation anchor set. On whether a human–AI voice call completed its task, no judge it tested beat the rule &quot;the shorter call succeeded&quot;.</p>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>), the primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-25-1834</strong> (official 6h slot, 6:34 PM PT Fri Sep 25, 2026). This is a <strong>Mac-reconnect catch-up</strong>: the Mac was down from about 16:44 to 20:11 PT, and Collection woke this writer at about 20:16 PT. This run's first clock read was 20:18:26 PT (03:18:26Z Sat). The label stays <strong>1834</strong>.
+<strong>Evidence window:</strong> from the 1234 brief's last probes (~20:08Z Fri) to this run's last probes (03:35Z Sat). That covers the Mac-down hours, because GitHub, PyPI and npm keep their own clocks. Between 03:18Z and 03:36Z I probed these sources myself:</p>
+<ul>
+<li>GitHub release objects and dated tags for 69 repos (plus Pipecat once a late pack pointed to it), and default-branch commits since 22:40Z.</li>
+<li>PyPI (66 packages) and npm (48 packages).</li>
+<li>arXiv abs pages, and the listings of 12 categories the 1234 brief did not scan.</li>
+<li>The Hugging Face daily lists and HN Algolia.</li>
+</ul>
+<p>I read 3 PDFs in full. I also downloaded the Claude Agent SDK wheel from PyPI and searched its bundled CLI binary for strings.</p>
+<ul>
+<li><strong>Source packs used (3, PACK_DONE at launch):</strong> Muse 1332, DSH 1432 and Agy 1532.</li>
+<li><strong>Muse 1632, DSH 1732 and Agy 1832 were ABSENT at launch</strong> (Mac down; FAIL_MAC gap notes filed). All three landed as PACK_DONE during this run (20:19–20:22 PT), and I used them only to cross-check my own sweep (see Housekeeping).</li>
+<li><strong>Catalog baseline:</strong> <strong>417 items / 104 briefs / 106 runs</strong>, SHA-256 <code>d0a047c9…a4a784c3d</code>, read-only. The newest brief is <code>2026-09-25T1234</code>.</li>
+</ul>
+<p><strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call. Collection owns the HTML, the catalog and the push.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: 3 new Industry ranks, 2 new Academy ranks, 2 Industry progress notes, and a NOTE list.</strong> Vendors kept shipping through the Mac outage:</p>
+<ul>
+<li>Claude Code and Pipecat released new product surfaces, and neither has ever had a catalog card.</li>
+<li>PydanticAI shipped GPT-Live support, a new surface on a line the catalog already carries.</li>
+<li>Codex and Vercel moved lines that already have cards.</li>
+<li>Most of the rest are important fixes still unreleased on main, so they go in the NOTE list.</li>
+</ul>
+<p><strong>Theme 1: attribution keys are moving into the request itself.</strong></p>
+<ul>
+<li><strong>Claude Code 2.1.283</strong> adds <code>x-claude-code-prompt-id</code> to the gateway hint headers it can send (opt in with <code>CLAUDE_CODE_GATEWAY_HINT_HEADERS=1</code>).</li>
+<li>I compared the 2.1.283 binary with 2.1.282, and this is the only new <code>x-claude-code-*</code> header name.</li>
+<li>Names already present include session ID, agent ID, parent agent ID, agent type, request class and two compaction markers.</li>
+<li><strong>Codex 0.159.0-alpha.2</strong> (its release object appeared this window) appends a fresh UUID to every exec-server process ID (<a href="https://github.com/openai/codex/pull/48168">#48168</a>). Before this, threads sharing an executor, and sandbox retries, could reuse one process handle.</li>
+<li><strong>Vercel's harness packages</strong> changed two identities:</li>
+<li>The ACP adapter now identifies tools by the protocol's <code>tool.name</code> field instead of display titles.</li>
+<li>Harness sandboxes now live in their own sessions, which outlive the agent session.</li>
+</ul>
+<p><strong>Theme 2: voice agents change what a turn costs and how it is judged.</strong></p>
+<ul>
+<li><strong>PydanticAI's GPT-Live</strong> meters audio seconds and backend tokens separately, at two prices. Its context-window ratio is a snapshot, &quot;never summed&quot;. Two gaps are documented rather than fixed: a barge-in is recorded as a complete reply, and closing a session mid-reply loses that reply's usage.</li>
+<li><strong>Pipecat's judge</strong> now classifies and reports a confidence. On Pipecat's own replay, the Jev classifier matched 300 of 300 recorded verdicts, though 2 flipped between runs. Its median was 0.22 s per reply, against 6.2 s for the LLM judge.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.29431">2609.29431</a>:</strong> on task success in human–AI voice calls, no tested judge beat &quot;the shorter call succeeded&quot;.</li>
+</ul>
+<p><strong>Theme 3: judges are instruments, and instruments drift.</strong></p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.28478">2609.28478</a>:</strong> one judge-model upgrade moved a pass rate from 97% to 11% overnight, and 94% of 140,000 flagged failures did not survive a second judge. The team made three changes: repeated-judge panels that fail a case only when every run fails, a judge model chosen per evaluator, and softer rubrics. Precision per flag rose from 0.6% to 48.9%.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.29431">2609.29431</a>:</strong> a two-parameter transform, fit on a 32-conversation anchor set, puts different judges on one scale. It aligns scales; it does not make any judge more accurate.</li>
+</ul>
+<p><strong>Theme 4 (NOTE, unreleased): numbers that were quietly wrong, fixed on main.</strong></p>
+<ul>
+<li><strong>Tokens:</strong></li>
+<li>Cline counted reasoning tokens twice in output tokens, including in the counts it reports to the Harbor eval harness (<a href="https://github.com/cline/cline/pull/14426">#14426</a>).</li>
+<li>Mastra's speed meter showed 4,840 tokens/s for a step that spent 60 s thinking and then wrote 40 tokens in 1 s (<a href="https://github.com/mastra-ai/mastra/pull/25196">#25196</a>).</li>
+<li><strong>Cost and privacy (LiteLLM):</strong></li>
+<li>Provider budgets ignored all Responses and Messages spend (<a href="https://github.com/BerriAI/litellm/pull/38172">#38172</a>).</li>
+<li><code>turn_off_message_logging</code> left the prompt in <code>raw_request</code> (<a href="https://github.com/BerriAI/litellm/pull/43219">#43219</a>).</li>
+<li>422 errors copied the submitted body, passwords included, onto OTel spans (<a href="https://github.com/BerriAI/litellm/pull/43231">#43231</a>).</li>
+<li><strong>Traces:</strong> Phoenix merged two mappings of one span into messages that never existed (<a href="https://github.com/Arize-ai/phoenix/pull/16092">#16092</a>).</li>
+<li><strong>Success that wasn't:</strong></li>
+<li>LiteLLM streams that ended silently now fail explicitly (four PRs).</li>
+<li>A killed Docker command no longer reads as a clean exit in Mastra.</li>
+<li>A jailbreak found mid-conversation no longer turns into a pass in Promptfoo.</li>
+</ul>
+<p><strong>What this means for BQAA (as the observer, not the source of truth):</strong></p>
+<ul>
+<li><strong>Add a prompt-level key between session and request.</strong> Capture <code>x-claude-code-prompt-id</code> wherever a gateway logs headers. It is opt-in, so treat it as optional.</li>
+<li><strong>Meter voice sessions in two currencies.</strong></li>
+<li>Store audio seconds and backend tokens separately, each priced at its own model.</li>
+<li>Store context-window ratios as the latest snapshot; never sum them.</li>
+<li>Flag replies cut off by barge-in, a dropped connection or a close. They can be recorded as complete, or have no usage.</li>
+<li><strong>Register every judge as a versioned instrument.</strong></li>
+<li>Store the judge model and version, rubric version, panel size, each run's verdict, and the confidence with its source.</li>
+<li>Track each evaluator's activation rate and its capture rate on a fixed set of severe cases. Expect step changes when a judge model is upgraded.</li>
+<li>Calibrate on a shared anchor set before comparing judges.</li>
+<li><strong>Normalize reasoning tokens at ingestion.</strong> Vendors disagree on whether output tokens include reasoning. Store the provider's total, the reasoning count, and the convention used.</li>
+</ul>
+<h2>Industry</h2>
+<p><strong>Screen used (same as 1234):</strong> a release-level move that ships a product capability, or a change to how agent telemetry, cost, evaluation or memory state is recorded. Unreleased main-branch commits are NOTE only. I checked every item against its release object, tag, registry entry, PR body or shipped artifact, not against the pack summary.</p>
+<p><strong>Sweep results (my own, 03:18Z–03:36Z, since 20:00Z Fri):</strong></p>
+<ul>
+<li><strong>GitHub release objects (69 repos + Pipecat):</strong></li>
+<li>Codex <code>rust-v0.159.0-alpha.2</code> (20:18:01Z), <code>rust-v0.159.0-alpha.3</code> (21:42:44Z), <strong><code>rust-v0.157.1</code> stable (01:02:31Z)</strong> and <code>rust-v0.158.0-alpha.15.1</code> (02:58:19Z).</li>
+<li>Strands Agents <code>python/v1.57.1</code> (20:12:01Z) and <code>harness-cli/v0.1.4</code> (20:51:07Z).</li>
+<li>Claude Agent SDK TS <code>v0.3.283</code> (21:50:02Z), <strong>Claude Code <code>v2.1.283</code> (21:50:12Z)</strong> and Claude Agent SDK Python <code>v0.2.160</code> (22:32:31Z).</li>
+<li><strong>PydanticAI <code>v2.51.0</code> (23:19:04Z).</strong></li>
+<li><strong>Pipecat <code>v1.12.0</code> (01:58:06Z).</strong> It is not on my watchlist; DSH 1732's cross-check pointed to it, and I verified it on GitHub and PyPI.</li>
+<li>Cline <code>desktop-v0.0.37</code> (02:27:59Z).</li>
+<li>Vercel AI: 80 release objects since 20:00Z. The v7 train has 76, from <code>ai@7.0.116</code>'s own (20:39:49Z) to 20:43:34Z; DSH 1432 counted the 72 after 20:40Z. A provider train added 4 at 01:59Z. The v6 and v5 lines' releases came at 19:43Z, before this sweep's start.</li>
+<li>Out of scope: a Gemini CLI nightly (Google).</li>
+<li><strong>Tags without a release object:</strong> opencode <code>v2.0.17</code> (21:09:04Z) and <code>v2.0.18</code> (23:57:32Z), plus Stagehand dev tags.</li>
+<li><strong>PyPI (66 packages, plus <code>pipecat-ai</code>):</strong></li>
+<li>Released: <code>strands-agents</code> 1.57.1 (20:12:33Z), <code>claude-agent-sdk</code> 0.2.160 (22:31:19Z), <code>pydantic-ai</code> / <code>pydantic-ai-slim</code> 2.51.0 (23:32:17Z), <code>pipecat-ai</code> 1.12.0 (01:57:50Z), and a Haystack dev build.</li>
+<li>Flat: <code>litellm</code> 1.102.1, <code>openai-agents</code> 0.22.3, <code>arize-phoenix</code> 20.16.0, <code>langfuse</code> 4.15.6, <code>opik</code> 2.2.81 and <code>weave</code> 0.53.11.</li>
+<li><strong>npm (48 packages):</strong></li>
+<li><code>@anthropic-ai/claude-code</code> 2.1.283 was published at 18:46:11Z on <code>next</code>, and <strong><code>latest</code> moved to it at about 21:49Z</strong> (package <code>modified</code> 21:49:49Z). <code>stable</code> is still 2.1.274. <code>@anthropic-ai/claude-agent-sdk</code> 0.3.283 is <code>latest</code> as well.</li>
+<li><code>@openai/codex</code>: 0.159.0-alpha.2 (20:38Z), alpha.3 (21:56Z), <strong>0.157.1 as <code>latest</code> (01:06:57Z)</strong>, and 0.158.0-alpha.15.1 (03:12Z), <strong>which now holds the <code>alpha</code> tag</strong>.</li>
+<li>Vercel: <code>ai</code> 7.0.116 (20:41:56Z) and its train; later <code>@ai-sdk/perplexity</code> 5.0.0 (02:00:17Z) and <code>@ai-sdk/openai</code> 4.0.78 (02:01:30Z). <code>ai</code> itself is still 7.0.116.</li>
+<li>Mastra <code>@mastra/core</code> 1.72.0-alpha.2 (20:27:12Z); <code>latest</code> is still 1.71.0.</li>
+<li>Flat: promptfoo 0.123.1, <code>@openai/agents</code> 0.18.0, Langfuse, LangSmith, mem0, Opik, Letta Code and the MCP SDK.</li>
+<li><strong>The 1234 watch list:</strong></li>
+<li>No Codex 0.158 or 0.159 stable shipped; the only stable was the 0.157.1 patch.</li>
+<li>No Mastra 1.72.0 stable, no openai-agents-python release and no LiteLLM 1.104 stable.</li>
+<li><strong>No Weave 0.53.x release has been yanked</strong> (checked 03:35Z).</li>
+<li>Langfuse and Opik did not release.</li>
+</ul>
+<p><strong>Why these three ranks:</strong> each ships a product capability that changes what a trace records, or how an evaluation decides. Claude Code and Pipecat have no card for any version. PydanticAI's GPT-Live support is a new protocol, with its own metering rules, on a line the catalog already carries.</p>
+<h3>1. NEW rank: <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.283">Claude Code <code>v2.1.283</code></a> becomes <code>latest</code>: a per-prompt ID for gateways, MCP and web tool outputs in OTel, and fixes for lost tool results and usage</h3>
+<ul>
+<li><strong>Clocks:</strong></li>
+<li>Claude Code 2.1.283: npm at 18:46:11Z on <code>next</code>, <code>latest</code> at about 21:49Z, GitHub release at 21:50:12Z. The 1234 brief called it out of scope because it was still on <code>next</code>.</li>
+<li>Agent SDK TypeScript <a href="https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.283"><code>v0.3.283</code></a>: npm at 18:49Z, GitHub at 21:50:02Z.</li>
+<li>Agent SDK Python <a href="https://github.com/anthropics/claude-agent-sdk-python/releases/tag/v0.2.160"><code>v0.2.160</code></a>: PyPI at 22:31:19Z, GitHub at 22:32:31Z. It bundles CLI 2.1.283.</li>
+<li><strong>This is the catalog's first Claude Code card.</strong></li>
+<li>The only related items are a Weave integration card (<code>weave-claude-agent-sdk</code>) and Letta Code's card, where Claude Code runs as a subagent.</li>
+<li>The collectors' watch lists carry <code>claude-agent-sdk-python</code> but not <code>claude-code</code>.</li>
+<li><strong>Attribution and telemetry:</strong></li>
+<li><strong>A per-prompt ID for gateways.</strong> In the release notes: &quot;Added <code>x-claude-code-prompt-id</code> to the gateway hint headers so LLM gateways can group the requests that serve one user prompt; opt in with <code>CLAUDE_CODE_GATEWAY_HINT_HEADERS=1</code>.&quot;<ul>
+<li>I searched the 2.1.283 binary bundled in the SDK wheel (macOS arm64) and my local 2.1.282. <code>x-claude-code-prompt-id</code> occurs only in 2.1.283, and it is the only new <code>x-claude-code-*</code> header name.</li>
+<li>Names present in both versions:<ul>
+<li><code>X-Claude-Code-Session-Id</code>, <code>x-claude-code-agent-id</code>, <code>x-claude-code-parent-agent-id</code> and <code>x-claude-code-agent-type</code>;</li>
+<li><code>x-claude-code-request-class</code>, <code>x-claude-code-compaction</code>, <code>x-claude-code-context-compacted</code> and <code>x-claude-code-prev-tool-durations</code>.</li>
+</ul>
+</li>
+<li>I did not verify which of these the opt-in actually sends.</li>
+</ul>
+</li>
+<li><strong>Tool outputs in OTel.</strong> &quot;Added MCP tool, WebFetch and WebSearch outputs to the <code>tool.output</code> OpenTelemetry span event when <code>OTEL_LOG_TOOL_CONTENT=1</code>.&quot; Content logging stays opt-in.</li>
+<li><strong>Tool results and usage that went missing.</strong> &quot;Fixed SDK sessions losing a deferred tool call or finished tool result when a turn ended early, a held approval prompt after a worker restart, and a non-streaming fallback's <code>result.usage</code>.&quot;</li>
+<li><strong>The wrong model was recorded after a fallback.</strong> &quot;Fixed dynamic workflows started during a model fallback running every agent on the fallback model instead of retrying the configured model.&quot;</li>
+<li><strong>Warnings are no longer dropped.</strong> The TS SDK notes say stream-json output now includes &quot;warnings and notices raised during a turn as <code>system/informational</code> messages; it previously dropped them&quot;. <code>system/init</code> also gains <code>plugin_errors</code> with a <code>path</code>.</li>
+<li><strong>Steps repeated after a restart.</strong> Cloud sessions no longer occasionally redo &quot;an already-finished step, such as posting a duplicate comment or push&quot; after a server-side restart.</li>
+<li><code>/context</code> now counts MCP server instructions, which were missing from the total.</li>
+<li><strong>Governance defaults:</strong></li>
+<li>Two new managed settings: <code>deniedModels</code>, and <code>availableModelsMatch: &quot;exact&quot;</code>, which keeps new model releases blocked until they are listed.</li>
+<li><strong>The default permission mode changed.</strong> &quot;Changed interactive sessions on third-party providers or with telemetry off to start in auto mode when no permission mode is configured&quot;. Approval-prompt counts from those sessions will fall with no change in user behavior.</li>
+<li>A new <code>/doctor prompt-audit</code> checks CLAUDE.md files, skills, agents and commands for prompting patterns written for older models.</li>
+<li><strong>Python Agent SDK 0.2.160: the fix is dormant with its own bundled CLI.</strong></li>
+<li><strong>The bug</strong> (<a href="https://github.com/anthropics/claude-agent-sdk-python/issues/1190">#1190</a>, open since Aug 7):<ul>
+<li>With hooks, <code>can_use_tool</code> or SDK MCP servers, the SDK closed stdin at the first result if a background subagent had finished just before it.</li>
+<li>The follow-up turn's requests then failed with &quot;Stream closed&quot;, and &quot;The model reports that the tool was refused&quot; (<a href="https://github.com/anthropics/claude-agent-sdk-python/pull/1279">#1279</a>).</li>
+</ul>
+</li>
+<li><strong>The fix</strong> waits for the CLI's <code>session_state_changed</code> → <code>idle</code>. The SDK asks for these messages by setting <code>CLAUDE_CODE_SDK_READS_SESSION_STATE=1</code>, and expects them marked <code>sdk_host_only</code>. The PR says: &quot;The fix takes effect with a CLI that knows <code>CLAUDE_CODE_SDK_READS_SESSION_STATE</code>. The bundled 2.1.282 predates it.&quot;</li>
+<li><strong>What I found in the bundled 2.1.283 binary:</strong><ul>
+<li>Neither <code>CLAUDE_CODE_SDK_READS_SESSION_STATE</code> nor <code>sdk_host_only</code> occurs.</li>
+<li>The CLI emits <code>session_state_changed</code> only when <code>CLAUDE_CODE_EMIT_SESSION_STATE_EVENTS</code> is set.</li>
+</ul>
+</li>
+<li><strong>So by default, 0.2.160 still closes stdin at the first result, as before.</strong><ul>
+<li>A caller can enable the fix today with <code>CLAUDE_CODE_EMIT_SESSION_STATE_EVENTS=1</code>. That variant passed the PR's end-to-end test on CLI 2.1.282, and the state messages then also reach the caller.</li>
+<li>This corrects Agy 1532, which said the release &quot;eliminates false tool refusals&quot;.</li>
+</ul>
+</li>
+<li><strong>Caveats:</strong></li>
+<li>Both new telemetry features are off by default.</li>
+<li>I checked only the macOS arm64 binary.</li>
+<li><strong>TL;DR for BQAA:</strong></li>
+<li>Add a prompt level between session and request, keyed on <code>x-claude-code-prompt-id</code> where a gateway logs it, and treat it as optional.</li>
+<li>When tool-content logging is on, MCP and web results now land in OTel, so apply redaction there.</li>
+<li>Segment approval metrics by permission mode, because third-party-provider and telemetry-off sessions now default to auto mode.</li>
+<li>A &quot;tool refused&quot; right after a background subagent can be a transport artifact. Don't count it as a model refusal until the CLI supports the new handshake.</li>
+</ul>
+<h3>2. NEW rank: <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.51.0">PydanticAI <code>v2.51.0</code></a>: OpenAI GPT-Live voice agents, metered twice, with context use reported as a snapshot</h3>
+<ul>
+<li><strong>Clocks:</strong> tag 22:46:37Z, GitHub 23:19:04Z, PyPI 23:32:17Z (<code>pydantic-ai</code> and <code>-slim</code>).</li>
+<li>The previous card on this line is <code>pydantic-ai-v2-50-0-decision-model-decide-spans-route-threshold</code> (0034).</li>
+<li>The 1234 brief NOTEd <a href="https://github.com/pydantic/pydantic-ai/pull/8390">#8390</a> and <a href="https://github.com/pydantic/pydantic-ai/pull/8755">#8755</a> as unreleased. Both ship here.</li>
+<li><strong>What GPT-Live is (<a href="https://github.com/pydantic/pydantic-ai/pull/8390">#8390</a>, +25,061/−78).</strong></li>
+<li>It is &quot;a separate protocol from the Realtime API&quot;. The Live model &quot;runs the spoken conversation and delegates the work to a Responses backend&quot;.</li>
+<li>PydanticAI gives that backend the agent's instructions and tools, so its calls arrive as ordinary tool calls.</li>
+<li><strong>Which model is the backend:</strong><ol>
+<li>An explicit option.</li>
+<li>A <code>+</code> in the model name (<code>openai:gpt-live-1+gpt-6-luna</code>).</li>
+<li>The agent's own OpenAI model, if it sits at the same base URL.</li>
+<li>Otherwise <code>auto</code>, which means <code>gpt-6-sol</code>.</li>
+</ol>
+</li>
+<li><strong>How it is metered, which is the analytics part:</strong></li>
+<li><strong>&quot;Two usage meters.&quot;</strong><ul>
+<li>Live's own audio is a cumulative duration. It is recorded as increments in <code>RunUsage.audio_seconds</code> and priced against the Live model.</li>
+<li>Backend tokens &quot;land on the <code>ModelResponse</code> that spent them and are priced against the <em>backend's</em> model&quot;.</li>
+</ul>
+</li>
+<li><strong>Requests are counted differently.</strong> A new <code>responses_are_requests</code> flag makes <code>usage.requests</code> and <code>request_limit</code> count the backend's responses, not the spoken replies inferred from the audio.</li>
+<li><strong>One change reaches outside realtime.</strong> Spans and cost metrics now report <code>response.usage.cost</code> when the response carries it, instead of re-pricing it from <code>response.model_name</code>.<ul>
+<li>Without this, &quot;a delegated Live turn is priced as <code>gpt-live-1</code> using the backend's tokens&quot;.</li>
+<li>The PR says no other model's span output changes.</li>
+</ul>
+</li>
+<li><strong>Context use is a snapshot (<a href="https://github.com/pydantic/pydantic-ai/pull/8803">#8803</a>).</strong> <code>context_window_used</code> is &quot;a provider-reported fraction (a snapshot, never summed)&quot;.<ul>
+<li>Where response tokens don't measure the whole context, the derived ratio is turned off. xAI Grok Voice reports incremental input tokens: verified live over five turns, they were 908, then 10, 5, 5 and 10.</li>
+<li>GPT-Live's 128,000-token window is inferred from its reported ratios; OpenAI does not state it.</li>
+<li>The value can drop after a server-side compaction or truncation &quot;which no provider announces&quot;.</li>
+</ul>
+</li>
+<li><strong>Recorded wrong, documented rather than fixed:</strong></li>
+<li>&quot;Barge-in isn't recorded as an interruption: Live cuts its own reply off but says nothing on the wire, so the reply is recorded as complete.&quot;</li>
+<li>&quot;Closing mid-response loses that response's usage&quot; (<a href="https://github.com/pydantic/pydantic-ai/pull/8762">#8762</a>), because OpenAI reports usage only in <code>response.done</code>.</li>
+<li>The turn boundary is inferred. There is no end-of-turn frame, so the connection <em>synthesizes</em> <code>ResponseDone</code> after <code>openai_live_turn_silence_ms</code> of quiet, and a <code>synthesizes_turn_boundary</code> profile flag says so.</li>
+<li><strong>Fixed in this release:</strong></li>
+<li><a href="https://github.com/pydantic/pydantic-ai/pull/8762">#8762</a>: tool-call responses on OpenAI Realtime had <code>provider_details=None</code>, and a reply cut off by a dropped socket or <code>close()</code> had no <code>provider_response_id</code>.</li>
+<li><a href="https://github.com/pydantic/pydantic-ai/pull/8755">#8755</a>: a forcing <code>tool_choice</code> on realtime now raises. As the 1234 NOTE reported, <code>gpt-realtime-mini</code> had looped on the tool until <code>request_limit=6</code> ended the session.</li>
+<li><a href="https://github.com/pydantic/pydantic-ai/pull/8761">#8761</a>: Gemini Live close codes now raise <code>RealtimeError</code>.</li>
+<li><strong>On main after the release (NOTE):</strong> <a href="https://github.com/pydantic/pydantic-ai/pull/8764">#8764</a> records user turns in speaking order. Before it:</li>
+<li>a push-to-talk transcript could be filed after its own answer (&quot;Peru?&quot; recorded after &quot;Lima.&quot;);</li>
+<li>a barge-in turn could be filed before the reply it cut off;</li>
+<li>with transcription off, one live test recorded &quot;5 turns for 2 utterances&quot;.</li>
+<li><strong>Caveats:</strong> Pydantic's gateway cannot route Live yet. Live has no automatic reconnection. Final audio seconds after you close a session are an open issue (#8371).</li>
+<li><strong>TL;DR for BQAA:</strong></li>
+<li>For voice sessions, keep two meters, audio seconds and backend tokens, each priced at its own model.</li>
+<li>Store context-window ratios as the latest snapshot; never sum them.</li>
+<li>Flag inferred turn boundaries, and replies cut off by barge-in or close.</li>
+<li>Don't read turn order in stored history as speaking order until #8764 ships.</li>
+</ul>
+<h3>3. NEW rank: <a href="https://github.com/pipecat-ai/pipecat/releases/tag/v1.12.0">Pipecat <code>v1.12.0</code></a>: typed classifiers for voice agents, an eval judge that classifies and reports a confidence, and a bridge that doubled every word</h3>
+<ul>
+<li><strong>Clocks:</strong> GitHub 01:58:06Z; PyPI <code>pipecat-ai</code> 01:57:50Z. The previous release, 1.11.0, came on Sep 18.</li>
+<li><strong>First mention:</strong> no catalog item or brief has mentioned Pipecat before (grep: 0 and 0). Only DSH 1732, which landed during this run, reported it.</li>
+<li><strong>Pipecat Classifiers (<a href="https://github.com/pipecat-ai/pipecat/pull/5863">#5863</a>).</strong></li>
+<li>A classifier &quot;answers typed questions about some state&quot;: yes/no, a choice among options, or a score on a scale. Each result comes with probabilities.</li>
+<li><code>JevClassifier</code> answers through TypeSafe's Jev, with a limit of 255 options per choice. <code>LLMClassifier</code> asks any Pipecat LLM service everything in one JSON call, with a 10 s default timeout.</li>
+<li>Classifiers report metrics through <code>on_metrics</code>: processing time, and for <code>JevClassifier</code> the tokens used, as <code>LLMUsageMetricsData</code>.</li>
+<li>The voicemail detector and the UI worker now decide with a classifier.</li>
+<li><strong>The eval judge now classifies (<a href="https://github.com/pipecat-ai/pipecat/pull/5857">#5857</a>).</strong></li>
+<li><code>EvalJudge</code> decides every verdict with a classifier. An &quot;explainer&quot; LLM gives the reason for each <code>no</code> and each unsure verdict. &quot;The classifier's verdict always stands.&quot;</li>
+<li><code>JudgeVerdict</code> has a <code>confidence</code> from 0 to 1: &quot;With Jev the number is calibrated. With an LLM it is the LLM's own guess.&quot;</li>
+<li><strong>LLM judges behave differently too.</strong> They now get structured state instead of a prose prompt, so &quot;A borderline reply can get a different verdict than before&quot;.<ul>
+<li>Simulations are now judged one bot turn per call, so they cost more calls. With the LLM judge, a simulation now takes about 13 s, up from about 1.9 s.</li>
+</ul>
+</li>
+<li><strong>The PR's own replay:</strong><ul>
+<li>Of 300 recorded turn-completion replies, Jev matched 300/300 of the recorded verdicts (&quot;2 flip between runs, as Jev's borderline calls do&quot;). The LLM judge (<code>gemma4:12b</code>) matched 297/300.</li>
+<li>Median time per reply was 0.22 s for Jev and 6.2 s for the LLM judge.</li>
+<li>An earlier sweep of 1,395 replies had Jev agreeing with the LLM judge on 1,394.</li>
+</ul>
+</li>
+<li>Running the release evals as shipped needs the <code>jev</code> extra and <code>TYPESAFE_API_KEY</code>.</li>
+<li><strong>Observability fixes that changed eval results:</strong></li>
+<li><strong>Doubled words.</strong> &quot;Fixed a bridged <code>PipelineWorker</code> reporting every frame from its LLM twice over RTVI ... which doubled every word of a bridged worker's reply in the client's LLM text and in the evals.&quot; <code>enable_rtvi</code> is now off by default for bridged workers.</li>
+<li><strong>Wrong reply judged.</strong> &quot;Fixed the eval harness treating the bot's earlier speech as its reply when a scenario interrupts the bot&quot; (<a href="https://github.com/pipecat-ai/pipecat/pull/5846">#5846</a>).</li>
+<li><strong>Duplicated or dropped turns and messages:</strong><ul>
+<li>Inworld's realtime service resent a transcript after a fast tool result, which &quot;duplicated user turns and responses&quot; (#5116).</li>
+<li>The Telnyx serializer silently dropped RTVI messages (#5841).</li>
+<li>NVIDIA STT kept transcribing with its old settings while reporting the new ones (#5632).</li>
+</ul>
+</li>
+<li><strong>Observer memory.</strong> Observers kept every frame ID they saw for the life of the session (#5908). Observers set to <code>observe_every_push=False</code> now see a frame once, and <code>FramePushed.first_push</code> marks the first push.</li>
+<li><strong>Also:</strong></li>
+<li>Every frame now has an <code>interruptible</code> flag (#5835).</li>
+<li>User turns that end with no transcript get configurable handling (#5907).</li>
+<li>The <code>mcp</code> extra now requires MCP SDK 2 (<code>mcp[cli]&gt;=2.1.1,&lt;3</code>).</li>
+<li><strong>Caveats:</strong></li>
+<li>The agreement numbers are Pipecat's own replay against its old judge's recorded verdicts, not against human labels.</li>
+<li>Jev's borderline calls can flip between runs.</li>
+<li><strong>TL;DR for BQAA:</strong></li>
+<li>Store a judge's confidence together with its source, calibrated classifier or LLM self-report, and never average the two kinds.</li>
+<li>Record which judge implementation produced each verdict, because a judge swap alone can flip borderline verdicts.</li>
+<li>Dedupe voice-agent text by frame or turn identity; a bridge reported every word twice.</li>
+</ul>
+<h3>Progress notes (update existing cards; no new card)</h3>
+<p><strong>4. OpenAI Codex <a href="https://github.com/openai/codex/releases/tag/rust-v0.159.0-alpha.2"><code>rust-v0.159.0-alpha.2</code></a> → <a href="https://github.com/openai/codex/releases/tag/rust-v0.159.0-alpha.3"><code>rust-v0.159.0-alpha.3</code></a>, plus <a href="https://github.com/openai/codex/releases/tag/rust-v0.157.1"><code>rust-v0.157.1</code></a> stable and <a href="https://github.com/openai/codex/releases/tag/rust-v0.158.0-alpha.15.1"><code>rust-v0.158.0-alpha.15.1</code></a></strong> → progress on <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code> (the alpha-line parent that holds the 1234 note).</p>
+<ul>
+<li><strong>Clocks:</strong></li>
+<li><strong>alpha.2:</strong> tag 19:07:43Z (the 1234 brief saw only the tag), GitHub release 20:18:01Z, npm 20:38Z. 7 commits over alpha.1.</li>
+<li><strong>alpha.3:</strong> tag 20:50:29Z, GitHub 21:42:44Z, npm 21:56Z. 12 commits over alpha.2.</li>
+<li><strong>0.157.1:</strong> GitHub 01:02:31Z, npm 01:06:57Z, and now <strong><code>latest</code></strong>.<ul>
+<li>It adds 5 commits over 0.157.0: four Windows fixes (#48138, #48157, #48238, #48272) and the release commit.</li>
+<li>Its own notes say the release highlights &quot;could not be determined: the supplied PR index is empty&quot;.</li>
+</ul>
+</li>
+<li><strong>0.158.0-alpha.15.1:</strong> GitHub 02:58:19Z, npm 03:12Z. It carries the same four Windows fixes on the alpha.15 line.</li>
+<li><strong>npm's <code>alpha</code> tag now points at 0.158.0-alpha.15.1, an older line than 0.159.0-alpha.3.</strong> Some per-platform alpha tags still point at alpha.3.</li>
+<li><strong>alpha.2 contents:</strong></li>
+<li><a href="https://github.com/openai/codex/pull/48168">#48168</a>: every exec-server process ID now gets a fresh UUID. Before, &quot;Threads sharing an executor and sandbox retries can reuse a public process handle while the executor still retains the previous process.&quot;</li>
+<li><a href="https://github.com/openai/codex/pull/48174">#48174</a> (seen in the tag at 1234): <code>usage_limit_window_minutes</code> on turn and compaction analytics events.</li>
+<li>#48155 keeps filesystem denials on approved commands, and #48151 anchors pagination on items.</li>
+<li><strong>alpha.3 contents:</strong></li>
+<li><a href="https://github.com/openai/codex/pull/48207">#48207</a>: terminating a code-mode cell no longer detaches its observer before queued output drains. The terminated event now carries the remaining output.</li>
+<li><a href="https://github.com/openai/codex/pull/48198">#48198</a>: an environment's proxy requirement is now honored, so commands can be forced through a filtered proxy while direct access stays blocked.</li>
+<li>#48190 bounds message-board SSE frames before parsing, and #48176 protects <code>.aws</code> (both NOTEd at 1234).</li>
+<li><strong>On main after alpha.3 (unreleased):</strong></li>
+<li><a href="https://github.com/openai/codex/pull/48222">#48222</a>: late result metadata stays attached to a truncated code-mode call &quot;across retries, compaction, and waits&quot;. The binding is dropped when duplicate IDs make it ambiguous.</li>
+<li><a href="https://github.com/openai/codex/pull/48224">#48224</a>: model and access-program pairs are kept together during compaction.</li>
+<li>#48318: TUI reconnects keep trying until the 120 s deadline.</li>
+<li><strong>TL;DR:</strong></li>
+<li>Exec-server process IDs from before alpha.2 can collide across threads and retries, so don't join on them alone.</li>
+<li>Version strings from the <code>alpha</code> channel can go backwards (0.159.0-alpha.3, then 0.158.0-alpha.15.1). Order by release time, not by version number.</li>
+</ul>
+<p><strong>5. Vercel AI SDK <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.116"><code>ai@7.0.116</code></a> train and the 01:59Z provider train</strong> → progress on <code>vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts</code> (the card that holds the 7.0.114 note).</p>
+<ul>
+<li><strong>Clocks:</strong></li>
+<li><code>ai@7.0.116</code>: GitHub 20:39:49Z, npm 20:41:56Z. The train has 76 release objects, from 20:39:49Z to 20:43:34Z.</li>
+<li>The v6 and v5 lines (<code>ai@6.0.292</code>, <code>ai@5.0.267</code>) came out at 19:43Z; the 1234 brief left them out of scope.</li>
+<li>A second train at 01:59Z released <code>@ai-sdk/perplexity@5.0.0</code>, <code>@ai-sdk/openai@4.0.78</code>, <code>@ai-sdk/azure@4.0.82</code> and <code>@ai-sdk/amazon-bedrock@5.0.97</code>.</li>
+<li><strong>What shipped in the harness packages:</strong></li>
+<li><a href="https://github.com/vercel/ai/releases/tag/%40ai-sdk%2Fharness%401.0.126"><code>@ai-sdk/harness@1.0.126</code></a> ships <a href="https://github.com/vercel/ai/pull/21497">#21497</a>.<ul>
+<li>Sandbox creation and ownership move to explicit sandbox sessions passed to <code>HarnessAgent.createSession()</code>, and &quot;agent session cleanup does not destroy a supplied sandbox&quot;.</li>
+<li>Network sessions can be created and resumed across processes &quot;with explicit <code>sandboxId</code>&quot;, and Vercel snapshots can be reused as templates.</li>
+<li>The old APIs are deprecated, with removal planned &quot;in roughly 2 months&quot;.</li>
+</ul>
+</li>
+<li><a href="https://github.com/vercel/ai/releases/tag/%40ai-sdk%2Fharness-acp%401.0.64"><code>@ai-sdk/harness-acp@1.0.64</code></a> ships <a href="https://github.com/vercel/ai/pull/21221">#21221</a>: tool identity now comes from ACP's new <code>tool.name</code> field &quot;when present&quot;, instead of provider metadata or display titles.</li>
+<li><code>ai@7.0.116</code> targets ES2022 and preserves opaque URIs in file URLs. With <code>@ai-sdk/google@4.0.82</code>, supported Cloud Storage tool-result URLs go to Gemini as file data.</li>
+<li><strong>Perplexity 5.0.0 is a breaking release ahead of a shutdown (<a href="https://github.com/vercel/ai/pull/18991">#18991</a>).</strong></li>
+<li>Sonar Chat Completions is &quot;supported only until September 27, 2026&quot;. Version 5 moves to Perplexity's Agent API.</li>
+<li>&quot;Provider metadata, usage/cost data, and source identifiers can differ.&quot;</li>
+<li>Staying on v4 &quot;does not preserve language generation after the Sonar shutdown&quot;.</li>
+<li><strong>Also:</strong> <code>@ai-sdk/openai@4.0.78</code> accepts <code>reasoningEffortUpdate: 'none'</code> for GPT-6 Sol and Luna (#21518). The PR says live provider acceptance was not tested.</li>
+<li><strong>TL;DR:</strong></li>
+<li>Harness sandboxes now outlive agent sessions, so join sandbox activity on <code>sandboxId</code>, not on the agent session.</li>
+<li>Perplexity usage and cost records change shape around Sep 27, whatever SDK version a customer runs. Stamp provider cost records with their schema version.</li>
+</ul>
+<h3>NOTE (not ranked; recorded so the next brief can dedupe)</h3>
+<p>I read the PR body for every item below unless it says otherwise.</p>
+<p><strong>Released, but below the bar:</strong></p>
+<ul>
+<li><strong>Strands Agents <a href="https://github.com/strands-agents/sdk-python/releases/tag/python%2Fv1.57.1"><code>python/v1.57.1</code></a></strong> (GitHub 20:12Z, PyPI 20:12:33Z) and <code>harness-cli/v0.1.4</code> (20:51Z). There is no Strands card.</li>
+<li><a href="https://github.com/strands-agents/sdk-python/pull/4606">#4606</a>: when a retried prompt left one message stored in two session records, a guardrail redaction rewrote only the latest one on disk. &quot;A restore in a new process brings back the original flagged text in the earlier record.&quot;</li>
+<li><a href="https://github.com/strands-agents/sdk-python/pull/4605">#4605</a>: speech-to-speech tools now enter history when dispatched, not only when finished.</li>
+<li><a href="https://github.com/strands-agents/sdk-python/pull/4580">#4580</a>: a Graph yielded its final result before its after-hooks ran and before <code>execution_time</code> was committed.</li>
+<li><a href="https://github.com/strands-agents/sdk-python/pull/4519">#4519</a>: <code>Agent.shutdown()</code> flushes background memory. Before it, a short async run could &quot;end with its latest turns never persisted&quot;.</li>
+<li><strong>Cline <a href="https://github.com/cline/cline/releases/tag/desktop-v0.0.37"><code>desktop-v0.0.37</code></a></strong> (02:27:59Z): an About page, a What's-new dialog, diagnostics export, and a Bedrock fix for OpenAI models reached through inference profiles.</li>
+<li><strong>opencode <code>v2.0.17</code> (21:09Z) and <code>v2.0.18</code> (23:57Z):</strong> tags only, with no release objects. DSH 1432 found that the v2.0.17 cut is not on the default <code>dev</code> branch.</li>
+<li><strong>Mastra <code>@mastra/core@1.72.0-alpha.2</code></strong> (npm 20:27Z; <code>latest</code> is 1.71.0): alpha only.</li>
+<li>The approval fixes Muse 1332 listed next to it are not in this package. I searched the published package and found no trace of #25165's new <code>requesterId</code> field.</li>
+<li>The package was versioned by #25042, merged at 20:03:42Z; #25181 and #25167 merged after that.</li>
+<li><strong>Google ADK (first-party; NOTE only; release still <code>v2.10.0</code>):</strong></li>
+<li><code>dea81109</code>: a turn containing only thoughts or whitespace was treated as a final answer, which &quot;silently terminated&quot; the agent loop.</li>
+<li><code>6fbb22b1</code>: <code>Runner.close()</code> now closes toolsets inside Workflow graph nodes.</li>
+<li><code>46d5a2d3</code>: pagination for <code>list_accessible_data_agents</code>. (These three are from the packs; I did not re-read them.)</li>
+</ul>
+<p><strong>Unreleased on main (WATCH):</strong></p>
+<ul>
+<li><strong>LiteLLM</strong> (PyPI still 1.102.1):</li>
+<li><strong>Silent failures made explicit:</strong><ul>
+<li><a href="https://github.com/BerriAI/litellm/pull/43133">#43133</a>: a <code>/v1/responses</code> stream that ends with no terminal event now ends in <code>response.failed</code>. Drops before any output now fall back, and <code>request_timeout</code> now applies.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/41826">#41826</a>: on <code>/v1/messages</code>, &quot;The stream ends with no exception and <code>stop_reason=None</code>, so the app stores the half answer as the whole one&quot;. Failures now arrive as a standalone Anthropic <code>error</code> frame.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43213">#43213</a>: a Bedrock stream that returns HTTP 200 with no events becomes a 502, instead of an empty <code>end_turn</code> turn with zero usage.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43238">#43238</a>: a fallback before any output no longer announces two <code>response.created</code> IDs with sequence numbers restarting at 0.</li>
+</ul>
+</li>
+<li><strong>Cost and privacy:</strong><ul>
+<li><a href="https://github.com/BerriAI/litellm/pull/38172">#38172</a>: with the provider budget bug, &quot;everything an agent client sends through the Responses API is free of charge as far as the cap is concerned&quot;. Provider budgets now count Responses and Messages spend.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43219">#43219</a>: with <code>turn_off_message_logging</code> on, the raw request curl &quot;still carried the user's prompt to every logger&quot;. It is now redacted.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43231">#43231</a>: every 422 error echoed the whole submitted body, passwords included, and &quot;The same text is stamped on the request's OTEL span as the error message&quot;.</li>
+</ul>
+</li>
+<li><strong>Also:</strong><ul>
+<li>#43140: the ownership row for a streamed container is now written before <code>response.completed</code>.</li>
+<li>#43169: MCP versions and capabilities are enforced; a mismatched init returns <code>-32022</code>.</li>
+<li>#42013: a Databricks Zerobus trace-logging callback.</li>
+<li>#43123: Sentry scrubbing.</li>
+<li>#43215: the router now parses the classifier's verdict out of surrounding prose (from the packs; not re-read).</li>
+<li>#43248: <code>openrouter/typesafe/jev-router</code> added to the cost map.</li>
+</ul>
+</li>
+<li><strong>Mastra:</strong></li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/24841">#24841</a>: at startup, a second manager could &quot;reclaim and re-execute a task another live process was still running&quot;. Tasks are now fenced by a persisted ownership lease.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/24775">#24775</a>: a killed Docker command was recorded as a natural, successful exit.</li>
+<li><strong>Approval fixes:</strong><ul>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25165">#25165</a>: in a shared channel, anyone could approve someone else's tool call. Now only the requester can, and the card fails closed when the requester is ambiguous.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25181">#25181</a>: &quot;a declined tool approval could be approved after the run ended&quot;.</li>
+<li>#25167: Inngest approvals can now be listed and approved over HTTP.</li>
+</ul>
+</li>
+<li><strong>Accounting and retries:</strong><ul>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25196">#25196</a>: reasoning tokens were added on top of output tokens in the speed meter. The PR's example: a step that spent 60 s thinking and 1 s writing 40 tokens showed 4,840 t/s instead of 40.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25172">#25172</a>: <code>CyberRefusalHandler</code> retries a step once after a cybersecurity refusal. That is an event worth logging: a refusal that was retried past.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/24863">#24863</a>: Observational Memory gains <code>maxRetries</code> and <code>failurePolicy</code>: <code>'abort'</code> by default, or <code>'continue'</code>.</li>
+</ul>
+</li>
+<li><strong>Cline <a href="https://github.com/cline/cline/pull/14426">#14426</a> (03:10Z):</strong> reasoning tokens were counted twice. The double count reached session totals, telemetry and &quot;Harbor's <code>n_output_tokens</code> for eval harnesses&quot;. After the fix, <code>outputTokens</code> <em>excludes</em> reasoning, while cost still bills the full count.</li>
+<li><strong>Phoenix:</strong></li>
+<li><a href="https://github.com/Arize-ai/phoenix/pull/16092">#16092</a>: a span that carried both <code>gen_ai.*</code> attributes and a partial OpenInference mapping was merged key by key into &quot;messages that never existed&quot;.</li>
+<li><a href="https://github.com/Arize-ai/phoenix/pull/16532">#16532</a>: one errored run made the whole experiment export fail with a 500.</li>
+<li><strong>Promptfoo:</strong></li>
+<li><a href="https://github.com/promptfoo/promptfoo/pull/11032">#11032</a>: with <code>continueAfterSuccess: true</code>, later turns overwrote the flagged verdict, so &quot;a run that found a jailbreak is reported as a pass&quot;.</li>
+<li><a href="https://github.com/promptfoo/promptfoo/pull/11065">#11065</a>: the default models become GPT-6 Sol and Claude Sonnet 5, which will shift eval baselines.</li>
+<li><strong>OpenAI Agents Python</strong> (release still 0.22.3):</li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/5144">#5144</a>: after a handoff, another agent with a same-named tool could reuse a permanent approval.</li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/4984">#4984</a>: one value that can't be encoded as JSON no longer sinks a whole trace export batch.</li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/4981">#4981</a>: SQLite usage capture moves off the event loop, ordered so concurrent runs cannot attach usage to a newer or replaced turn.</li>
+</ul>
+<h2>Academy</h2>
+<p><strong>Screen used:</strong> agent evaluation, cost, security or oversight evidence that produces a result BQAA could measure or log. Every rank below was read in full before ranking.</p>
+<p><strong>Coverage:</strong></p>
+<ul>
+<li><strong>No new arXiv mailing since Thursday's.</strong> The ceiling is still <code>2609.30268</code> (probed 03:29Z). The next mailing is Sunday 20:00 ET.</li>
+<li><strong>So I scanned the categories the 1234 brief did not.</strong> I pulled the current listings for cs.DB, cs.HC, cs.IR, cs.DC, cs.PL, cs.CY, stat.ML, cs.PF, cs.OS, cs.SI, cs.NI and cs.GT, and re-checked cs.MA.</li>
+<li>That gave 286 entries. 98 new or cross-listed ones were not among the 767 the 1234 brief screened, and 37 of those matched agent or evaluation keywords.</li>
+<li>I checked the candidates against the catalog, every brief and every pack. I read three in full: 2609.28478, 2609.29431 and 2609.29707.</li>
+<li><strong>Hugging Face daily lists:</strong> 29 entries for Sep 24 and 22 for Sep 25, identical to Agy 1532's. Sep 26 is empty.</li>
+<li>The priority pin <code>2609.02702</code> (Trace-as-State v1) is intact and is <strong>not</strong> re-carded.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.28478">arXiv 2609.28478</a>: When Evaluators Cry Wolf: Lessons from Production LLM-as-Judge Evaluation in Educational AI</h3>
+<p><strong>Rohlfs, Vergara Bosse, Hopper, O'Keefe, Russell</strong> (MagicSchool AI). v1 dated 1 Aug 2026 (cs.CY), 16 pages.</p>
+<ul>
+<li>It was listed at Thu 1834 as &quot;backfill, not new work&quot; and was never read or ranked.</li>
+<li>It sits in cs.CY, which no scan since then covered.</li>
+</ul>
+<p><strong>Full PDF read:</strong> §1–7, Limitations, Ethical Considerations, App. A–E (Tables 1–3, Figs. 1–5).</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>The setting.</strong> MagicSchool's offline evaluation layer, EvalEye, runs <strong>21 deployed evaluators</strong>, each targeting one failure mode, across four severity groups (Table 1).</li>
+<li>The product suite is used by &quot;millions of teachers&quot;, with &quot;millions of teacher and student messages each month&quot;.</li>
+<li>A flag routes a case to analyst review. It is not a real-time block.</li>
+<li><strong>The trigger (§1):</strong></li>
+<li>&quot;a vendor upgrade to an evaluator's judge model lowered pass rates on Factual accuracy from 97% to 11% in a single day&quot;. The drop was caused by the measurement, not by the product.</li>
+<li>A second LLM judge re-examined every failure from 2.5 million evaluations over six months, and &quot;In 94% of the 140,000 failures, the second model failed to corroborate the issue.&quot;</li>
+<li><strong>Three levers (§4):</strong></li>
+<li><strong>Unanimous-fail panels.</strong> A panel is k repeated runs of one judge model on one rubric, capped at 5. It fails a case only if every run fails, and it stops at the first pass. Split cases go to a lower-priority &quot;minority report&quot;.</li>
+<li><strong>A judge model chosen per evaluator:</strong> Sonnet 4.5, GPT-5.4 or Haiku 4.5.</li>
+<li><strong>Softer rubrics:</strong> fail only when the violation is unambiguous, fail only when it dominates the response, and judge the response as a whole instead of letting any single checklist item trip it.</li>
+<li><strong>Two measuring sticks:</strong></li>
+<li>A 2,482-case synthetic benchmark measures how often each evaluator fires, its &quot;activation rate&quot;. The authors don't call it a false-positive rate, because the pool is unlabeled.</li>
+<li>A 570-case synthetic set of egregious failures checks that the worst cases are still caught.</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Activation (§5, Table 2).</strong> The median after calibration was <strong>0.04%</strong>: 16 of 21 evaluators at or below 0.2%, and 8 at 0.00%. The single-judge baseline had a mean of 7.7% and a median of 1.9%.</li>
+<li>Benchmark cases flagged in any non-trivial category fell from 2,086 to 72 (Fig. 2).</li>
+<li>The biggest change was &quot;Shallow&quot;, from 54.71% to 0.12%, still catching 29 of 29 egregious cases.</li>
+<li><strong>Precision per flag, audited by hand (Limitations).</strong> It rose from <strong>0.6% (24 true positives among 4,002 flags) to 48.9% (43 among 88)</strong>. True-positive flags rose from 24 to 43.</li>
+<li><strong>Severe-case capture.</strong> All 21 evaluators caught 100% of their egregious set afterwards. Before, the median was 100%, with a range of 73.3–100% (Fig. 3).</li>
+<li><strong>What drove the gain (App. E).</strong></li>
+<li>Going from 1 judge to 3 under the unanimous rule cut activation by about 40% on average, across three critical evaluators.</li>
+<li>Five evaluators run a single judge, so their whole gain came from the rubric and the judge model. Readability went from 11.28% to 0.00%.</li>
+<li>By the authors' reading, rubric changes were the main driver.</li>
+<li><strong>What failed (Table 3).</strong> Five instruction-following evaluators never reached deployable rates; their best configurations still fired on 2.23–20.72% of cases. The authors now plan narrow evaluators for the instructions that matter most.</li>
+<li><strong>Cost (App. E).</strong> Because the panel stops at the first pass, the average cost stays close to one judge call on traffic that passes anyway. Input context moved cost more than the panel size did.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li><strong>In-sample.</strong> The configurations were tuned on the same benchmark whose rates are reported, with no held-out split (Limitations).</li>
+<li><strong>Different audits.</strong> The before and after precision audits used different protocols: fixed rules plus human review, versus fully manual review.</li>
+<li><strong>Synthetic data.</strong> Both pools are synthetic, and the severe-set denominators are small, 12 to 79. At n = 12, the 95% lower bound on a 12-of-12 capture is 73.5%.</li>
+<li><strong>No isolation of levers.</strong> There is no factorial ablation, so no single lever's contribution is isolated.</li>
+<li><strong>Closed judges,</strong> and a known asymmetry the authors accept: one lenient judge run can pass a case, which they say would be wrong for front-line moderation.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It is production evidence that a judge is an instrument whose readings change when its vendor ships an upgrade. It gives the two health metrics a trace-analytics product can compute for every evaluator: activation rate, and capture rate on a fixed severe set.</li>
+<li>It is distinct from the catalog's judge cards:</li>
+<li><code>llm-judge-instrument-snapshot-identity-ladder</code>: identical requests disagree about one time in five.</li>
+<li><code>arxiv-2609-12191-gauge-judge-trust-boundaries</code>: judge-satisfied transcripts that fail the task.</li>
+<li><code>arxiv-2609-30074-eval-conclusions-reproducibility-self-audit</code>: the pipeline around the judge.</li>
+<li>None of them is a production program with a measured recipe and before/after precision.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Keep an evaluator registry: judge model and version, rubric version, panel size, each run's verdict and the stop point.</li>
+<li>Chart each evaluator's activation rate over time, and alert on step changes after a judge-model upgrade.</li>
+<li>Keep a fixed set of severe cases, and require 100% capture on it before any evaluator change ships.</li>
+</ul>
+<h3>2. NEW rank: <a href="https://arxiv.org/abs/2609.29431">arXiv 2609.29431</a>: Calibrating LLM Judges for Human and AI Conversations</h3>
+<p><strong>Züfle, Schmidtová (equal contribution), Zouhar, Bokkahalli Satish, Cooper, Banga, Nalawade, Kaur, Niehues, Müller, Klejch</strong> (KIT, Charles University, ETH Zurich, KTH, NICT, Voice Arena, Edinburgh). Submitted 24 Sep 2026 (v1, cs.HC), 5 pages. The authors release code and the VA dataset.</p>
+<p><strong>Full PDF read:</strong> §1–6, Tables 1–4, Fig. 1.</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>Judges on human–human conversations.</strong> They scored four open judges on CANDOR: 1,636 recorded conversations between strangers, each at least 25 minutes, with participants' own success ratings.</li>
+<li>The judges were Qwen2.5-Omni-7B, Phi-4-Multimodal and Qwen3-Omni-30B, given audio or transcript, and Qwen3.5-27B, given the transcript only.</li>
+<li>Each judge scored conversations one at a time and also compared them in pairs.</li>
+<li><strong>A calibration method.</strong> They fit a monotone affine transform per judge on a small anchor set that has human scores, so that different judges land on one scale.</li>
+<li><strong>A new voice dataset.</strong> They built the <strong>Voice Arena Goal Dataset (VA)</strong>: 200 task-oriented voice calls, 17.75 hours in total.</li>
+<li>A human caller booked or changed flights with four AI systems (Gemini, Grok, OpenAI, Inworld) and a human agent.</li>
+<li>Raters made 1,606 pairwise judgments across 397 pairs, on task capability and humanness.</li>
+<li><strong>A transfer test.</strong> They checked whether a calibration fit on CANDOR transfers to VA.</li>
+</ul>
+<p><strong>Numbers:</strong></p>
+<ul>
+<li><strong>Judges agree weakly with people (Table 1).</strong> The best correlations with participants' own ratings were ρ = 0.32 (Phi-4, audio) and 0.28 (Qwen3.5-27B, text).</li>
+<li>Separating clearly good from clearly bad conversations is easy: 93.6% and 90.3%, against 83.2% for a &quot;longer transcript wins&quot; baseline.</li>
+<li>On general pairs, every judge scored below 70%, against 61.3% for that baseline.</li>
+<li><strong>Pairwise judging has position bias.</strong> Phi-4 and Qwen2.5 picked the first-presented conversation about 90% of the time.</li>
+<li><strong>Calibration (Table 2).</strong> Fitting a Wasserstein-affine transform on 32 anchors cut the distance between judge and human score distributions from 0.69 to 0.41 (optimized anchors).</li>
+<li>Mean/SD matching was best with only 8 anchors.</li>
+<li>Recommendation: a fixed, optimized 32-conversation anchor set, calibrated by closed-form mean/SD matching.</li>
+<li><strong>Transfer to human–AI voice calls (Table 4).</strong> The mean pairwise distance between judges' score distributions on VA fell 3–10×:</li>
+<li>overall, from 1.44 to 0.29 (mean/SD) or 0.19 (Wasserstein);</li>
+<li>humanness, from 3.08 to 0.61 or 0.30;</li>
+<li>task capability, from 2.31 to 0.84 or 0.30.</li>
+<li><strong>On task success, no judge beats call length (Table 3).</strong></li>
+<li>&quot;Shorter call wins&quot; scored 65.0% on task and 60.4% on humanness. Humans reached 84.2% and 86.7%.</li>
+<li>The best judge on task reached 64.7% (transcript). On humanness, the best reached 67.2% (audio), about 7 points above the baseline.</li>
+<li>Overall, &quot;Most score at or below the duration baseline&quot;, and only three variants beat chance significantly.</li>
+</ul>
+<p><strong>Caveats I'd flag:</strong></p>
+<ul>
+<li>Only small open judges (7–30B) were tested; there are no frontier or proprietary judges.</li>
+<li>A monotone affine transform aligns scales but by design cannot change rankings, so it does not make a judge more accurate. This agrees with the catalog's <code>arxiv-2609-27954-accuracy-gaps-fail-to-certify-llm-judge-recalibration</code>.</li>
+<li>The anchor set is made of human–human conversations. VA is small, with one to six raters per task instance.</li>
+<li>The paper is short and has no limitations section.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>It gives two results BQAA can act on:</li>
+<li>A 32-item human-labeled anchor set plus a two-parameter transform makes scores from different judge models comparable, and the fit carries over to a new domain.</li>
+<li>For voice-agent task success, call duration is a baseline that today's open judges do not beat.</li>
+<li>It lands in the same window as GPT-Live support (PydanticAI) and Pipecat's classifier judge.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Store every judge score with its judge ID, and keep a small anchor set with human labels.</li>
+<li>Fit and version a calibration transform per judge before comparing scores across judges or over time.</li>
+<li>For voice-agent success metrics, always log call duration and report it as the baseline a judge must beat.</li>
+</ul>
+<h3>Academy scouted, not ranked</h3>
+<p><strong>Read in full but not ranked:</strong></p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.29707">2609.29707</a> &quot;Where Does the Energy Go? Profiling LLM Agent Inference on Blackwell GPUs&quot;</strong> (Luo, Li, Wang, Chen, HKUST-Guangzhou; v1 31 Aug, cs.DC, 11 pp).</li>
+<li><strong>GPU-only telemetry misses 41–45% of system energy</strong> (§4.4). During agentic coding, the CPUs drew 23.7% of system power and the GPUs 55.9% (§4.1).</li>
+<li><strong>Per-turn energy tracks turn duration, not power</strong> (Fig. 4). That fits longer prefill as context grows.</li>
+<li><strong>Thinking changes volume, not efficiency.</strong> Turning thinking on added 21–75% more tokens, with per-token energy within 0.4% (Table 1).</li>
+<li><strong>Headline numbers.</strong> The sequential agent used about <strong>63×</strong> the system energy per output token of saturated serving (58,383 vs 920 mJ/tok, §4.4). One SWE-bench task cost about 2,989 kJ.</li>
+<li><strong>Not ranked:</strong><ul>
+<li>one server, one 27B model and 50 SWE-bench tasks;</li>
+<li>no task success rates reported, and no external AC power measurement;</li>
+<li>the 63× compares unbatched sequential agent traffic with batched serving, per <em>output</em> token, for a workload dominated by prefill.</li>
+</ul>
+</li>
+<li>The useful line for BQAA: if energy or cost is estimated per turn, turn duration times whole-system power is a better proxy than GPU counters.</li>
+</ul>
+<p><strong>Not full-read (so not rankable):</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.29452">2609.29452</a> &quot;Voice Agents under Acoustic Stress&quot; (overview plus the TRACE workflow; scores task completion, wrong actions, recovery and user effort under noise).</li>
+<li><a href="https://arxiv.org/abs/2609.28801">2609.28801</a> &quot;The Interface Is Downstream&quot; (a single-author case of citation-provenance failure in a personal agent).</li>
+<li><a href="https://arxiv.org/abs/2609.28723">2609.28723</a> &quot;How Spatial Biologists Direct and Verify AI-Assisted Analyses&quot; (a study with 10 scientists using Claude Science).</li>
+<li><a href="https://arxiv.org/abs/2609.28603">2609.28603</a> is Hugging Face feed rotation. DSH 1432 screened it as out of scope; I did not re-read it.</li>
+</ul>
+<h2>Six-week EV (through ~Nov 6)</h2>
+<ul>
+<li><strong>Prompt-level IDs become a standard gateway join key (medium-high).</strong></li>
+<li>Claude Code now offers <code>x-claude-code-prompt-id</code> alongside its session and agent headers. Codex added usage-limit windows to its analytics events and unique exec-server process IDs. Langfuse's gateway already records Claude Code traffic (card from Thu 0634).</li>
+<li>Expect gateways to surface &quot;per prompt&quot; rollups.</li>
+<li>For BQAA: a session → prompt → request → tool hierarchy, with the prompt level optional.</li>
+<li><strong>Voice agents get their own metering and judging (medium).</strong></li>
+<li>Signals: GPT-Live in PydanticAI, Pipecat's classifiers, the VA benchmark, and Promptfoo's unreleased Grok Voice 2.0 billing by audio duration.</li>
+<li>For BQAA: usage fields for audio duration, a record of how each turn boundary was determined, interruption events, and duration kept as a baseline.</li>
+<li><strong>Judges become versioned, monitored instruments (medium-high).</strong></li>
+<li>Signals: 2609.28478's 97%-to-11% overnight drift, 2609.29431's anchor calibration, Pipecat's judge swap (borderline verdicts can flip), and the catalog's snapshot-identity card.</li>
+<li>For BQAA: an evaluator registry with version, activation rate, severe-set capture and a calibration transform per judge.</li>
+<li><strong>Gateways turn silent success into explicit failure (medium, pending a LiteLLM release).</strong></li>
+<li>When LiteLLM's four stream fixes ship, error rates on streamed calls will rise. That is a change in measurement, not a regression.</li>
+<li>For BQAA: annotate the release boundary, and don't alarm on it.</li>
+<li><strong>Reasoning-token conventions diverge (medium).</strong></li>
+<li>Cline will report output tokens <em>without</em> reasoning, OpenAI's usage includes it, and Mastra fixed a double count.</li>
+<li>For BQAA: store the provider total, the reasoning count, and which convention the source used.</li>
+<li><strong>Watch list:</strong></li>
+<li>A Claude Code CLI that understands <code>CLAUDE_CODE_SDK_READS_SESSION_STATE</code>, which activates SDK 0.2.160's fix.</li>
+<li>Codex 0.158 or 0.159 stable, and the npm <code>alpha</code> tag moving forward again.</li>
+<li>LiteLLM 1.104 stable; Mastra 1.72.0 stable with the approval fixes and ownership lease.</li>
+<li>Releases carrying openai-agents-python #5144, Promptfoo #11032, Phoenix #16092, Cline #14426 and PydanticAI #8764.</li>
+<li>The Perplexity Sonar shutdown on Sep 27.</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>Claude Code 2.1.283 (NEW):</strong> key requests to prompts with <code>x-claude-code-prompt-id</code> (opt-in), and segment approvals by permission mode. SDK 0.2.160's subagent fix is dormant with its bundled CLI.</li>
+<li><strong>PydanticAI 2.51.0 (NEW):</strong> meter voice in audio seconds and backend tokens at two prices, store context use as a snapshot, and flag barge-ins that were recorded as complete replies.</li>
+<li><strong>Pipecat 1.12.0 (NEW):</strong> store judge confidence with its source, and record which judge implementation decided; a bridge doubled every word until this release.</li>
+<li><strong>Codex alpha.2 / alpha.3 / 0.157.1 (progress):</strong> exec-server process IDs before alpha.2 can collide, and <code>alpha</code> version strings can go backwards.</li>
+<li><strong>Vercel AI 7.0.116 train (progress):</strong> join harness sandbox activity on <code>sandboxId</code>. Perplexity usage and cost change shape at the Sep 27 Sonar shutdown.</li>
+<li><strong>2609.28478 (NEW):</strong> give each evaluator an activation rate and a severe-set capture rate, and watch for step changes after judge upgrades.</li>
+<li><strong>2609.29431 (NEW):</strong> calibrate judges on a shared anchor set before comparing them, and keep call duration as the voice-agent baseline.</li>
+<li><strong>NOTE cluster:</strong></li>
+<li>LiteLLM budgets, redaction and silent-stream fixes; Cline's reasoning double count; Phoenix's invented messages; Promptfoo's masked jailbreaks.</li>
+<li>Mastra approval and ownership fixes (all unreleased); Strands' redaction fix (released).</li>
+</ul>
+<h2>Housekeeping</h2>
+<p><strong>Slot and inputs</strong></p>
+<ul>
+<li><strong>Slot:</strong> a Mac-reconnect catch-up. The Mac was down from about 16:44 to 20:11 PT. This run's first clock read was 20:18:26 PT, and no <code>2026-09-25-1834-*</code> brief existed. The label stays <strong>1834</strong>.</li>
+<li><strong>Packs used (3, PACK_DONE at launch):</strong></li>
+<li>Muse 1332: 19:40Z → 20:40Z.</li>
+<li>DSH 1432: 20:40Z → 21:46Z.</li>
+<li>Agy 1532: 21:46Z → 22:40Z.</li>
+<li>The windows join end to end from Agy 1232's as-of time, which the 1234 brief used.</li>
+<li><strong>Gaps: Muse 1632, DSH 1732 and Agy 1832 were ABSENT at launch</strong> (FAIL_MAC; gap notes are in <code>Hunt/agent-analytics/</code>). All three then landed as PACK_DONE during this run:</li>
+<li>Muse 1632 at 20:19 PT, covering 22:40Z → 23:42Z.</li>
+<li>DSH 1732 at 20:21 PT, covering 22:40Z → 03:20Z.</li>
+<li>Agy 1832 at 20:22 PT, covering 23:42Z → 03:22Z.</li>
+<li>DSH 1732 and Agy 1832 name the 00:34 Sat brief as their consumer. I had already swept 20:00Z → 03:35Z myself, so I used the three packs only as cross-checks.</li>
+<li>The cross-check added one release outside my watchlist, Pipecat 1.12.0, which I verified at the source.</li>
+<li><strong>The 00:34 Sat brief should treat this brief's cards and progress notes as baseline.</strong></li>
+<li><strong>Earlier gaps, still open:</strong> Muse 0732, DSH 0832 and DSH 0532 (disclosed at 0634 and 1234).</li>
+<li><strong>Vault twins:</strong> all six pack twins from today (1332 through 1832) are now in <code>Hunt/agent-analytics/</code>. Muse 1332, DSH 1432 and Muse 1632 had reported blocked vault writes; copies were filed afterwards.</li>
+<li><strong>Social and other sources:</strong> X 401, Reddit 403, and the LinkedIn and Papers with Code redirects are the packs' labels; I did not re-probe them. Medium was not used.</li>
+</ul>
+<p><strong>Verified arXiv ceiling: <code>2609.30268</code></strong></p>
+<ul>
+<li><strong>Probed at 03:29Z:</strong> 30266–30268 return 200.</li>
+<li>30269–30272, 30275, 30280, 30300, 30400, 30500, 31000, <code>2610.00001</code> and <code>2610.00100</code> return 404.</li>
+<li><strong>Priority pin <code>2609.02702</code>:</strong> base 200 / v1 200 / v2 404. Intact, and not re-carded.</li>
+</ul>
+<p><strong>HN</strong></p>
+<ul>
+<li>All six pack helper files report hits=0.</li>
+<li><strong>My own re-run at ~03:30Z</strong>, since 19:40Z, with the same six queries and threshold: 3 raw hits for &quot;MCP&quot; and none for the other five queries. None of the three met the threshold.</li>
+<li><strong>Sanity check:</strong> the API's newest story was at 03:26:26Z, so it is live.</li>
+<li><strong>HN: hits=0 keep=0.</strong></li>
+</ul>
+<p><strong>Pack corrections</strong></p>
+<ul>
+<li><strong>Agy 1532:</strong> it said <code>claude-agent-sdk</code> 0.2.160 &quot;eliminates false tool refusals&quot;. With its bundled CLI 2.1.283, the fix is dormant by default (see rank 1).</li>
+<li><strong>Agy 1832:</strong></li>
+<li>Mastra #24863's <code>failurePolicy</code> values are <code>'abort'</code> (the default) and <code>'continue'</code>, not fail-open and fail-closed with fail-open as the default.</li>
+<li>Cline #14426 makes <code>outputTokens</code> <em>exclude</em> reasoning. It does not make it &quot;reflect provider-reported output totals&quot;.</li>
+<li><strong>Muse 1332:</strong> it listed Mastra's approval fixes next to the alpha.2 publish. The published alpha.2 package does not contain #25165 (its new <code>requesterId</code> field is absent from the build).</li>
+<li><strong>DSH 1732:</strong> it was right that the alpha channel is not monotonic. npm's <code>alpha</code> tag now points at 0.158.0-alpha.15.1.</li>
+<li><strong>All packs before DSH 1732 missed Pipecat.</strong> Suggestion: add <code>pipecat-ai/pipecat</code> (GitHub) and <code>pipecat-ai</code> (PyPI), and <code>anthropics/claude-code</code> (GitHub), to the collector watchlists.</li>
+</ul>
+<p><strong>Verification method</strong></p>
+<ul>
+<li><strong>GitHub API:</strong></li>
+<li>Release objects and dated tags, by GraphQL (<code>first:20</code>, ordered by tag date, time-zone-aware), for 69 repos plus Pipecat, since 20:00Z.</li>
+<li>Default-branch commits since 22:40Z.</li>
+<li>Compare API:<ul>
+<li>Codex: alpha.1…alpha.2, alpha.2…alpha.3, alpha.3…main, 0.157.0…0.157.1 and alpha.15…alpha.15.1.</li>
+<li>claude-agent-sdk-python v0.2.159…v0.2.160.</li>
+</ul>
+</li>
+<li><strong>Registries:</strong></li>
+<li>PyPI JSON for 66 packages plus <code>pipecat-ai</code>: upload times and yank flags.</li>
+<li>npm <code>time</code>, dist-tags and <code>modified</code> for 48 packages.</li>
+<li><strong>Artifacts:</strong></li>
+<li>The <code>claude-agent-sdk</code> 0.2.160 macOS arm64 wheel (94 MB, from PyPI). I searched its bundled CLI binary and my local 2.1.282 binary for strings.</li>
+<li>The <code>@mastra/core@1.72.0-alpha.2</code> npm tarball, searched for #25165's field.</li>
+<li><strong>Release notes read:</strong></li>
+<li>Claude Code 2.1.283; Agent SDK TS 0.3.283 and Python 0.2.160.</li>
+<li>PydanticAI 2.51.0; Pipecat 1.12.0; Strands 1.57.1 and harness-cli 0.1.4; Cline desktop 0.0.37.</li>
+<li>Codex 0.157.1 and alpha.15.1; Vercel <code>ai@7.0.116</code>, <code>@ai-sdk/harness@1.0.126</code>, <code>harness-acp@1.0.64</code>, <code>harness-claude-code@1.0.130</code>, <code>perplexity@5.0.0</code>, <code>openai@4.0.78</code>, <code>google@4.0.82</code>, <code>azure@4.0.82</code> and <code>amazon-bedrock@5.0.97</code>.</li>
+<li><strong>PR and issue bodies read:</strong></li>
+<li>claude-agent-sdk-python #1190 and #1279.</li>
+<li>PydanticAI #8390, #8803, #8762, #8799, #8658 and #8764.</li>
+<li>Pipecat #5857 and #5863.</li>
+<li>Strands #4606, #4605, #4580 and #4519.</li>
+<li>Vercel #21497, #21221 and #18991.</li>
+<li>Codex #48168, #48174, #48198, #48207, #48222 and #48224.</li>
+<li>LiteLLM #43133, #38172, #43140, #41826, #43213, #43219, #43238, #43231, #42013, #43123 and #43169.</li>
+<li>Mastra #24841, #24775, #25165, #25167, #25181, #25196, #25172 and #24863.</li>
+<li>Promptfoo #11032 and #11065.</li>
+<li>OpenAI Agents Python #5144, #4984 and #4981.</li>
+<li>Phoenix #16532 and #16092; Cline #14426.</li>
+<li><strong>Academy:</strong></li>
+<li>arXiv listing pages for 13 categories (286 entries), checked against the 1234 brief's 767 screened entries, the catalog, the briefs and the packs.</li>
+<li>arXiv abs pages for 6 candidates.</li>
+<li>3 PDFs extracted with <code>pdftotext</code> to <code>/tmp/fb1834/pdf/</code> and read in full (28478, 29431, 29707). Every quoted number was checked against the cited table or section.</li>
+<li>Hugging Face daily API for Sep 24, 25 and 26.</li>
+<li><strong>Search:</strong> no web search. The HN Algolia re-run is described above.</li>
+</ul>
+<p><strong>Excluded by rule:</strong></p>
+<ul>
+<li>No first-party BQAA content. The ADK commits are NOTE only, and the Gemini CLI nightly is not considered.</li>
+<li>No Desk section and no GTM content.</li>
+<li>Crustdata and Fable were not used, and Medium was not cited.</li>
+<li>No re-admission of the 1234, 0634 or 0034 (Fri) sets. The priority pin was not re-carded.</li>
+<li>This writer made no Jev calls. The Jev shadow gates are Collection's call sites.</li>
+</ul>
+<p><strong>Run limits:</strong></p>
+<ul>
+<li><strong>Volume:</strong> 5 ranks, 2 progress notes, about 30 NOTE lines and 5 scouted lines, within 50.</li>
+<li><strong>Re-attempts (2):</strong></li>
+<li>A zsh echo of <code>=====</code> was misparsed; I re-ran it once with quotes.</li>
+<li>The Mastra tarball has no CHANGELOG, so I switched to searching its build output.</li>
+<li>One watchlist entry (<code>openai/openai-agents-go</code>) does not exist and was skipped. No API call was retried more than once.</li>
+<li><strong>Other:</strong> $0 spent on paid APIs, 0 external messages, no background jobs. The one large download was a public PyPI wheel.</li>
+</ul>
+<p><strong>Scratch dir:</strong> <code>/tmp/fb1834/</code> already held files from Thursday's 1834 run. I read only files I fetched in this run, by name.</p>
+<p><strong>Catalog:</strong></p>
+<ul>
+<li>417 / 104 / 106, read-only and untouched by me.</li>
+<li>Expected after publish: <strong>422 items / 105 briefs / 107 runs</strong> (+3 Industry, +2 Academy).</li>
+<li>The two progress notes update existing cards and add no items.</li>
+</ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW items (5):</strong></p>
+<ol>
+<li><strong>id:</strong> <code>claude-code-2-1-283-gateway-prompt-id-otel-tool-output-agent-sdk</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Industry</li>
+<li><strong>title:</strong> Claude Code 2.1.283 (npm latest) — <code>x-claude-code-prompt-id</code> lets gateways group every request serving one user prompt (opt-in); MCP, WebFetch and WebSearch outputs in the OTel <code>tool.output</code> event; SDK sessions stop losing deferred tool calls, finished tool results and a fallback's <code>result.usage</code>; auto mode by default on third-party providers or with telemetry off. Agent SDK Python 0.2.160's subagent stdin fix is dormant with its bundled CLI</li>
+<li><strong>primary URL:</strong> https://github.com/anthropics/claude-code/releases/tag/v2.1.283</li>
+<li><strong>card text:</strong> Claude Code 2.1.283 became npm <code>latest</code> at about 21:49Z (GitHub release 21:50Z), with Agent SDK TS 0.3.283 and Python 0.2.160. With <code>CLAUDE_CODE_GATEWAY_HINT_HEADERS=1</code>, it sends a new <code>x-claude-code-prompt-id</code> header so gateways can group the requests behind one user prompt; it is the only new <code>x-claude-code-*</code> header name versus 2.1.282 in the shipped binary. With <code>OTEL_LOG_TOOL_CONTENT=1</code>, MCP and web tool outputs now reach the <code>tool.output</code> span event. SDK sessions stop losing deferred tool calls, finished tool results and a non-streaming fallback's usage, and interactive sessions on third-party providers or with telemetry off now start in auto mode. The Python SDK's fix for follow-up turns after background subagents waits for a CLI signal that the bundled 2.1.283 does not send, so it is dormant unless the caller sets <code>CLAUDE_CODE_EMIT_SESSION_STATE_EVENTS=1</code>.</li>
+</ul>
+<ol start="2">
+<li><strong>id:</strong> <code>pydantic-ai-v2-51-0-gpt-live-two-usage-meters-context-window-used</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Industry</li>
+<li><strong>title:</strong> PydanticAI v2.51.0 — OpenAI GPT-Live voice agents that delegate work to a Responses backend, metered twice (audio seconds at the Live model, tokens at the backend model); spans now take cost from the response instead of re-pricing by model name; <code>context_window_used</code> as a provider-reported snapshot, never summed; barge-in recorded as a complete reply (documented)</li>
+<li><strong>primary URL:</strong> https://github.com/pydantic/pydantic-ai/releases/tag/v2.51.0</li>
+<li><strong>card text:</strong> PydanticAI 2.51.0 (GitHub 23:19Z, PyPI 23:32Z) adds <code>OpenAILiveModel</code> for GPT-Live, a voice protocol separate from the Realtime API in which the Live model speaks and a Responses backend runs the agent's tools (#8390). Audio seconds are priced against the Live model and backend tokens against the backend model, and spans and cost metrics now report <code>response.usage.cost</code> rather than re-pricing by <code>model_name</code>. Realtime sessions expose <code>context_window_used</code> as a snapshot, turned off where providers report incremental tokens, as xAI does (#8803). Documented gaps: barge-in is recorded as a complete reply, closing mid-response loses that response's usage, and turn boundaries are inferred from silence. Also ships realtime <code>provider_details</code> and response-ID fixes (#8762) and a <code>UserError</code> for forced realtime <code>tool_choice</code> (#8755).</li>
+</ul>
+<ol start="3">
+<li><strong>id:</strong> <code>pipecat-v1-12-0-classifiers-eval-judge-confidence-rtvi-double-report</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Industry</li>
+<li><strong>title:</strong> Pipecat v1.12.0 — typed classifiers (yes/no, choice, score, with probabilities) via TypeSafe Jev or any LLM; the eval judge now decides with a classifier and reports a confidence (calibrated with Jev, self-reported by an LLM); a bridged worker that reported every LLM frame twice over RTVI, doubling every word in client text and in evals, is fixed</li>
+<li><strong>primary URL:</strong> https://github.com/pipecat-ai/pipecat/releases/tag/v1.12.0</li>
+<li><strong>card text:</strong> Pipecat 1.12.0 (GitHub 01:58Z, PyPI 01:57Z) adds Pipecat Classifiers with <code>JevClassifier</code> and <code>LLMClassifier</code>, with processing-time and token metrics (#5863). <code>EvalJudge</code> now decides every verdict with a classifier plus an explainer LLM, and <code>JudgeVerdict.confidence</code> is calibrated with Jev and the LLM's own guess otherwise (#5857). On the PR's replay of 300 recorded replies, Jev matched all 300 verdicts, with 2 flipping between runs, at 0.22 s against 6.2 s. LLM judges now see structured state, so borderline verdicts can change. Fixes that changed eval results: a bridged <code>PipelineWorker</code> doubled every word over RTVI, the eval harness judged the bot's pre-interruption speech, and Inworld realtime duplicated user turns. The <code>mcp</code> extra now requires MCP SDK 2.</li>
+</ul>
+<ol start="4">
+<li><strong>id:</strong> <code>arxiv-2609-28478-when-evaluators-cry-wolf-production-llm-judge-false-positives</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> When Evaluators Cry Wolf (MagicSchool) — in a 21-evaluator production LLM-as-judge program, one judge-model vendor upgrade dropped a pass rate from 97% to 11% in a day and a second judge failed to corroborate 94% of 140,000 flagged failures; unanimous-fail panels, a judge model per evaluator and softened rubrics cut confirmed false-positive flags 99% (precision per flag 0.6% → 48.9%) with 100% capture on a 570-case severe set</li>
+<li><strong>arXiv:</strong> 2609.28478 — https://arxiv.org/abs/2609.28478</li>
+<li><strong>card text:</strong> An offline evaluation layer serving a K–12 product used by millions of teachers found that false positives dominated analyst queues. Panels of up to five repeated judge runs that fail a case only when all runs fail, a judge chosen per evaluator (Sonnet 4.5, GPT-5.4 or Haiku 4.5), and rubric gates for unambiguity and dominance brought the median activation rate on a 2,482-case benchmark to 0.04%, with every evaluator catching its egregious cases. Five instruction-following evaluators could not be brought into range. Caveats: the rates are in-sample, the pools synthetic, the before and after audits used different protocols, and there is no per-lever ablation.</li>
+</ul>
+<ol start="5">
+<li><strong>id:</strong> <code>arxiv-2609-29431-calibrating-llm-judges-anchor-set-voice-conversations</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Calibrating LLM Judges for Human and AI Conversations — judges from different models score on different scales; a 32-conversation anchor set with human scores plus a monotone affine transform puts them on one scale and transfers to human–AI voice calls (3–10× smaller between-judge distance); on task success in the new 200-call Voice Arena Goal Dataset, no judge beats &quot;shorter call wins&quot; (best 64.7% vs 65.0%)</li>
+<li><strong>arXiv:</strong> 2609.29431 — https://arxiv.org/abs/2609.29431</li>
+<li><strong>card text:</strong> Four open judges (7–30B) scored 1,636 CANDOR conversations with ρ ≤ 0.32 against participants' own success ratings, and pairwise judging showed about 90% first-position bias for two models. Anchor calibration (Wasserstein-affine or mean/SD matching) fit on CANDOR also aligned the judges on the new Voice Arena Goal Dataset: 200 flight-booking calls with Gemini, Grok, OpenAI, Inworld and a human agent, 1,606 pairwise human judgments. Judges reached at most 64.7% on task success against a 65.0% duration baseline and an 84.2% human ceiling. Caveat: calibration aligns scales but cannot make a judge more accurate, and only small open judges were tested.</li>
+</ul>
+<p><strong>Progress (2):</strong></p>
+<ul>
+<li><strong>parent:</strong> <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code></li>
+<li><strong>text:</strong> OpenAI Codex rust-v0.159.0-alpha.2 (GH 20:18Z, 7 commits) and alpha.3 (GH 21:42Z, 12 commits), plus rust-v0.157.1 stable (npm <code>latest</code> 01:07Z; four Windows-only fixes) and rust-v0.158.0-alpha.15.1, which now holds npm's <code>alpha</code> tag, older than alpha.3. #48168 gives every exec-server process ID a fresh UUID, because threads sharing an executor and sandbox retries could reuse one handle. #48174 adds <code>usage_limit_window_minutes</code> to analytics. #48207 keeps queued output attached to observers when a code-mode cell terminates, and #48198 honors an environment's proxy requirement. On main: #48222 keeps late result metadata attached to truncated code-mode calls, and #48224 keeps model/access-program pairs through compaction.</li>
+<li><strong>parent:</strong> <code>vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts</code></li>
+<li><strong>text:</strong> Vercel AI SDK ai@7.0.116 train (npm 20:41Z, 76 release objects). <code>@ai-sdk/harness@1.0.126</code> ships #21497: sandboxes live in explicit sessions that survive agent-session cleanup and resume across processes by <code>sandboxId</code>. <code>@ai-sdk/harness-acp@1.0.64</code> ships #21221: tool identity comes from ACP's <code>tool.name</code>. A 01:59Z train ships <code>@ai-sdk/perplexity@5.0.0</code> (#18991), which moves to Perplexity's Agent API before the Sep 27 Sonar Chat Completions shutdown; usage, cost and source IDs change shape. It also ships <code>@ai-sdk/openai@4.0.78</code>, which accepts <code>reasoningEffortUpdate: 'none'</code>.</li>
+</ul>
+<p><strong>Headline claims (for citation checks):</strong></p>
+<ol>
+<li>Claude Code 2.1.283 added <code>x-claude-code-prompt-id</code> to its gateway hint headers so LLM gateways can group the requests that serve one user prompt, opt-in via <code>CLAUDE_CODE_GATEWAY_HINT_HEADERS=1</code>. — https://github.com/anthropics/claude-code/releases/tag/v2.1.283 (published 2026-09-25 21:50Z; npm <code>latest</code> the same time)</li>
+<li>In MagicSchool's production judge program, a vendor upgrade to one evaluator's judge model lowered the Factual accuracy pass rate from 97% to 11% in a single day, and a second LLM judge failed to corroborate 94% of 140,000 flagged failures from 2.5 million evaluations. — https://arxiv.org/abs/2609.28478 (v1 dated 2026-08-01; §1)</li>
+<li>Pipecat 1.12.0 fixed a bridged <code>PipelineWorker</code> that reported every LLM frame twice over RTVI, which doubled every word of the worker's reply in the client's LLM text and in the evals. — https://github.com/pipecat-ai/pipecat/releases/tag/v1.12.0 (published 2026-09-26 01:58Z; PR #5857)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 25 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>

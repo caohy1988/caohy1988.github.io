@@ -1,6 +1,56 @@
 {
   "items": [
     {
+      "id": "claude-code-2-1-283-gateway-prompt-id-otel-tool-output-agent-sdk",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Claude Code 2.1.283 (npm latest) — `x-claude-code-prompt-id` lets gateways group every request serving one user prompt (opt-in); MCP, WebFetch and WebSearch outputs in the OTel `tool.output` event; SDK sessions stop losing deferred tool calls, finished tool results and a fallback's `result.usage`; auto mode by default on third-party providers or with telemetry off. Agent SDK Python 0.2.160's subagent stdin fix is dormant with its bundled CLI",
+      "html": " Claude Code <a href=\"https://github.com/anthropics/claude-code/releases/tag/v2.1.283\">2.1.283</a> became npm `latest` at about 21:49Z (GitHub release 21:50Z), with Agent SDK TS 0.3.283 and Python 0.2.160. With `CLAUDE_CODE_GATEWAY_HINT_HEADERS=1`, it sends a new `x-claude-code-prompt-id` header so gateways can group the requests behind one user prompt; it is the only new `x-claude-code-*` header name versus 2.1.282 in the shipped binary. With `OTEL_LOG_TOOL_CONTENT=1`, MCP and web tool outputs now reach the `tool.output` span event. SDK sessions stop losing deferred tool calls, finished tool results and a non-streaming fallback's usage, and interactive sessions on third-party providers or with telemetry off now start in auto mode. The Python SDK's fix for follow-up turns after background subagents waits for a CLI signal that the bundled 2.1.283 does not send, so it is dormant unless the caller sets `CLAUDE_CODE_EMIT_SESSION_STATE_EVENTS=1`. <a href=\"/research/briefs/2026-09-25-1834-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T1834",
+      "addedDisplay": "6:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "pydantic-ai-v2-51-0-gpt-live-two-usage-meters-context-window-used",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "PydanticAI v2.51.0 — OpenAI GPT-Live voice agents that delegate work to a Responses backend, metered twice (audio seconds at the Live model, tokens at the backend model); spans now take cost from the response instead of re-pricing by model name; `context_window_used` as a provider-reported snapshot, never summed; barge-in recorded as a complete reply (documented)",
+      "html": " PydanticAI <a href=\"https://github.com/pydantic/pydantic-ai/releases/tag/v2.51.0\">v2.51.0</a> (GitHub 23:19Z, PyPI 23:32Z) adds `OpenAILiveModel` for GPT-Live, a voice protocol separate from the Realtime API in which the Live model speaks and a Responses backend runs the agent's tools (#8390). Audio seconds are priced against the Live model and backend tokens against the backend model, and spans and cost metrics now report `response.usage.cost` rather than re-pricing by `model_name`. Realtime sessions expose `context_window_used` as a snapshot, turned off where providers report incremental tokens, as xAI does (#8803). Documented gaps: barge-in is recorded as a complete reply, closing mid-response loses that response's usage, and turn boundaries are inferred from silence. Also ships realtime `provider_details` and response-ID fixes (#8762) and a `UserError` for forced realtime `tool_choice` (#8755). <a href=\"/research/briefs/2026-09-25-1834-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T1834",
+      "addedDisplay": "6:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "pipecat-v1-12-0-classifiers-eval-judge-confidence-rtvi-double-report",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Pipecat v1.12.0 — typed classifiers (yes/no, choice, score, with probabilities) via TypeSafe Jev or any LLM; the eval judge now decides with a classifier and reports a confidence (calibrated with Jev, self-reported by an LLM); a bridged worker that reported every LLM frame twice over RTVI, doubling every word in client text and in evals, is fixed",
+      "html": " Pipecat <a href=\"https://github.com/pipecat-ai/pipecat/releases/tag/v1.12.0\">v1.12.0</a> (GitHub 01:58Z, PyPI 01:57Z) adds Pipecat Classifiers with `JevClassifier` and `LLMClassifier`, with processing-time and token metrics (#5863). `EvalJudge` now decides every verdict with a classifier plus an explainer LLM, and `JudgeVerdict.confidence` is calibrated with Jev and the LLM's own guess otherwise (#5857). On the PR's replay of 300 recorded replies, Jev matched all 300 verdicts, with 2 flipping between runs, at 0.22 s against 6.2 s. LLM judges now see structured state, so borderline verdicts can change. Fixes that changed eval results: a bridged `PipelineWorker` doubled every word over RTVI, the eval harness judged the bot's pre-interruption speech, and Inworld realtime duplicated user turns. The `mcp` extra now requires MCP SDK 2. <a href=\"/research/briefs/2026-09-25-1834-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T1834",
+      "addedDisplay": "6:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-28478-when-evaluators-cry-wolf-production-llm-judge-false-positives",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "When Evaluators Cry Wolf (MagicSchool) — in a 21-evaluator production LLM-as-judge program, one judge-model vendor upgrade dropped a pass rate from 97% to 11% in a day and a second judge failed to corroborate 94% of 140,000 flagged failures; unanimous-fail panels, a judge model per evaluator and softened rubrics cut confirmed false-positive flags 99% (precision per flag 0.6% → 48.9%) with 100% capture on a 570-case severe set",
+      "html": " <a href=\"https://arxiv.org/abs/2609.28478\">arXiv:2609.28478</a> · <a href=\"https://arxiv.org/pdf/2609.28478\">PDF</a> — An offline evaluation layer serving a K–12 product used by millions of teachers found that false positives dominated analyst queues. Panels of up to five repeated judge runs that fail a case only when all runs fail, a judge chosen per evaluator (Sonnet 4.5, GPT-5.4 or Haiku 4.5), and rubric gates for unambiguity and dominance brought the median activation rate on a 2,482-case benchmark to 0.04%, with every evaluator catching its egregious cases. Five instruction-following evaluators could not be brought into range. Caveats: the rates are in-sample, the pools synthetic, the before and after audits used different protocols, and there is no per-lever ablation. <a href=\"/research/briefs/2026-09-25-1834-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T1834",
+      "addedDisplay": "6:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-29431-calibrating-llm-judges-anchor-set-voice-conversations",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Calibrating LLM Judges for Human and AI Conversations — judges from different models score on different scales; a 32-conversation anchor set with human scores plus a monotone affine transform puts them on one scale and transfers to human–AI voice calls (3–10× smaller between-judge distance); on task success in the new 200-call Voice Arena Goal Dataset, no judge beats \"shorter call wins\" (best 64.7% vs 65.0%)",
+      "html": " <a href=\"https://arxiv.org/abs/2609.29431\">arXiv:2609.29431</a> · <a href=\"https://arxiv.org/pdf/2609.29431\">PDF</a> — Four open judges (7–30B) scored 1,636 CANDOR conversations with ρ ≤ 0.32 against participants&#x27; own success ratings, and pairwise judging showed about 90% first-position bias for two models. Anchor calibration (Wasserstein-affine or mean/SD matching) fit on CANDOR also aligned the judges on the new Voice Arena Goal Dataset: 200 flight-booking calls with Gemini, Grok, OpenAI, Inworld and a human agent, 1,606 pairwise human judgments. Judges reached at most 64.7% on task success against a 65.0% duration baseline and an 84.2% human ceiling. Caveat: calibration aligns scales but cannot make a judge more accurate, and only small open judges were tested. <a href=\"/research/briefs/2026-09-25-1834-opus.html\">Full brief</a>.",
+      "added": "2026-09-25T1834",
+      "addedDisplay": "6:34 PM PT",
+      "progress": []
+    },
+    {
       "id": "arxiv-2609-29454-agent-skills-audit-triggering-bottleneck",
       "tag": "Academy",
       "kind": "rank",
@@ -357,6 +407,11 @@
       "added": "2026-09-23T1834",
       "addedDisplay": "6:34 PM PT",
       "progress": [
+        {
+          "at": "2026-09-25T1834",
+          "displayTime": "6:34 PM PT",
+          "html": "Vercel AI SDK <a href=\"https://github.com/vercel/ai/releases/tag/ai%407.0.116\">ai@7.0.116</a> train (npm 20:41Z, 76 release objects). <a href=\"https://www.npmjs.com/package/@ai-sdk/harness/v/1.0.126\">@ai-sdk/harness@1.0.126</a> ships #21497: sandboxes live in explicit sessions that survive agent-session cleanup and resume across processes by `sandboxId`. <a href=\"https://www.npmjs.com/package/@ai-sdk/harness-acp/v/1.0.64\">@ai-sdk/harness-acp@1.0.64</a> ships #21221: tool identity comes from ACP's `tool.name`. A 01:59Z train ships <a href=\"https://github.com/vercel/ai/releases/tag/%40ai-sdk%2Fperplexity%405.0.0\">@ai-sdk/perplexity@5.0.0</a> (#18991), which moves to Perplexity's Agent API before the Sep 27 Sonar Chat Completions shutdown; usage, cost and source IDs change shape. It also ships `@ai-sdk/openai@4.0.78`, which accepts `reasoningEffortUpdate: 'none'`. Progress. <a href=\"/research/briefs/2026-09-25-1834-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-24T1234",
           "displayTime": "12:34 PM PT",
@@ -843,6 +898,11 @@
       "added": "2026-09-22T1234",
       "addedDisplay": "12:34 PM PT",
       "progress": [
+        {
+          "at": "2026-09-25T1834",
+          "displayTime": "6:34 PM PT",
+          "html": "OpenAI Codex <a href=\"https://github.com/openai/codex/releases/tag/rust-v0.159.0-alpha.2\">rust-v0.159.0-alpha.2</a> (GH 20:18Z, 7 commits) and <a href=\"https://github.com/openai/codex/releases/tag/rust-v0.159.0-alpha.3\">alpha.3</a> (GH 21:42Z, 12 commits), plus <a href=\"https://github.com/openai/codex/releases/tag/rust-v0.157.1\">rust-v0.157.1</a> stable (npm `latest` 01:07Z; four Windows-only fixes) and rust-v0.158.0-alpha.15.1, which now holds npm's `alpha` tag, older than alpha.3. #48168 gives every exec-server process ID a fresh UUID, because threads sharing an executor and sandbox retries could reuse one handle. #48174 adds `usage_limit_window_minutes` to analytics. #48207 keeps queued output attached to observers when a code-mode cell terminates, and #48198 honors an environment's proxy requirement. On main: #48222 keeps late result metadata attached to truncated code-mode calls, and #48224 keeps model/access-program pairs through compaction. Progress (alpha + Windows patch). <a href=\"/research/briefs/2026-09-25-1834-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-25T1234",
           "displayTime": "12:34 PM PT",
@@ -4836,6 +4896,24 @@
   ],
   "runs": [
     {
+      "id": "2026-09-25T1834",
+      "date": "2026-09-25",
+      "displayTime": "6:34 PM PT",
+      "added": [
+        "claude-code-2-1-283-gateway-prompt-id-otel-tool-output-agent-sdk",
+        "pydantic-ai-v2-51-0-gpt-live-two-usage-meters-context-window-used",
+        "pipecat-v1-12-0-classifiers-eval-judge-confidence-rtvi-double-report",
+        "arxiv-2609-28478-when-evaluators-cry-wolf-production-llm-judge-false-positives",
+        "arxiv-2609-29431-calibrating-llm-judges-anchor-set-voice-conversations"
+      ],
+      "updated": [
+        "vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts",
+        "openai-codex-0-156-0-stable-telemetry-attribution-graduation"
+      ],
+      "brief": "/research/briefs/2026-09-25-1834-opus.html",
+      "note": "Mac-reconnect catch-up for official 18:34 PT Fri slot (Mac-down ~16:44–~20:11 PT; writer kicked ~20:17 PT; label kept 1834). Writer Opus 5.5 (~$11.96). Packs at launch: Muse1332 + DSH1432 + Agy1532 (PACK_DONE). GAP at launch: muse-1632 + dsh-1732 + agy-1832 ABSENT (FAIL_MAC); all three landed PACK_DONE mid-run and were used as cross-checks (writer had already swept 20:00Z→03:35Z). Verified arXiv ceiling still 2609.30268; pin 2609.02702 intact. Industry NEW +3: Claude Code 2.1.283; PydanticAI 2.51.0; Pipecat 1.12.0. Progress +2: Codex rust-v0.159.0-alpha.2/3 + rust-v0.157.1 Windows + alpha.15.1; Vercel ai@7.0.116 harness sessions + perplexity@5.0.0. Academy +2 full-PDF: 2609.28478 Cry Wolf; 2609.29431 judge calibration. No Stories companion (0 third-party BQAA). GTM skipped. JEV_SHADOW pre-writer worth_running run conf=0.33; citation shadow optional."
+    },
+    {
       "id": "2026-09-25T1234",
       "date": "2026-09-25",
       "displayTime": "12:34 PM PT",
@@ -6432,6 +6510,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-09-25T1834",
+      "date": "2026-09-25",
+      "displayTime": "6:34 PM PT",
+      "title": "Opus 5.5: Claude Code 2.1.283 gateway prompt-id + OTel tool.output; PydanticAI 2.51.0 GPT-Live dual meters; Pipecat 1.12.0 classifiers + RTVI double-report fix; Academy 2609.28478 Cry Wolf + 2609.29431 judge calibration",
+      "href": "/research/briefs/2026-09-25-1834-opus.html",
+      "analyzer": "Opus 5.5"
+    },
     {
       "id": "2026-09-25T1234",
       "date": "2026-09-25",
