@@ -38,6 +38,7 @@ from collect_grok_box_activity import (  # noqa: E402
     GROK_SKIP_NAMES,
     SOURCE_STALE_AFTER_HOURS,
     STALE_AFTER_HOURS,
+    apply_manage_receipts,
     apply_source_freshness,
     build_payload,
     collect_box_bots,
@@ -1095,6 +1096,7 @@ def _collect_grok_from_box() -> dict | None:
     if bots is None:
         return None
     bots = _apply_manage_bot_client_counts(bots)
+    bots = apply_manage_receipts(bots)  # Manage: max(chat signals, routine receipts)
     bots = overlay_client_replicas(bots)
     problems = []
     for b in bots:
@@ -1480,6 +1482,7 @@ def collect_grok() -> dict:
             data.setdefault("note", GROK_NOTE)
             data["links"] = dict(GROK_LINKS)
             bots = _apply_manage_bot_client_counts(normalize_bots(data.get("bots") or []))
+            bots = apply_manage_receipts(bots)  # Manage: max(chat signals, routine receipts)
             bots = overlay_client_replicas(bots)
             data["bots"] = bots
             data["freshness"] = {

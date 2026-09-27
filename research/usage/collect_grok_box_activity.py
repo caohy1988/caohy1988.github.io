@@ -54,6 +54,7 @@ GROK_SKIP_NAMES = {"New Bot", "Field Brief", "Coding EM"}
 GROK_NOTE = (
     "Activity share from local Grok Bot transcripts — not Cursor plan dollars. "
     "Last-activity from agents/<id>/ (live) + Mac client replicas when newer; "
+    "Manage also from its routine receipts log; "
     "stale:true when source >24h while peers are fresh."
 )
 GROK_LINKS = {
@@ -68,6 +69,35 @@ JEV_LOG_DIR = Path("/home/box/agent-data/jev/logs")
 JEV_SOURCE_LABEL = "jev-route logs"
 JEV_STALE_AFTER_HOURS = 24.0 * 7  # stale only if BOTH logs + chat folder >7d
 _JEV_LOG_RE = re.compile(r"^(\d{8}T\d{6})(\d{3})?Z(?:-(.+))?\.json$")
+# Agent Manage Bot works mostly through server routines that never touch
+# agents/<id>/, so its chat folder goes quiet while it works. Each Manage routine
+# run appends to the shared receipts log via /home/box/bin/receipt:
+#   YYYY-MM-DDTHH:MM PT | <routine folder> | ok|skip|fail|parked | note
+# (PT local; Z/UTC/offset stamps also accepted). Other bots write there too, so
+# only Manage's routine folders count unless a line carries agent=<...>.
+# On the Mac the box log is not visible: the box collector embeds the summary as
+# bots[Manage].manage_receipts in grok_box_activity.json and we reuse it.
+MANAGE_ID = "6a85c81a-8c66-4169-ae76-60d743932802"
+RECEIPTS_LOG = Path("/home/box/agent-data/receipts/routine-receipts.log")
+MANAGE_RECEIPTS_LABEL = "routine receipts"
+MANAGE_RECEIPT_ROUTINES = {
+    "weekday-usage-dashboard-refresh",
+    "daily-harness-lab-curate-publish",
+    "daily-harness-lab-collect-kick",
+    "weekly-playbook-card-sync",
+    "weekday-specialist-ops-nudge",
+    "weekday-pr-board-sweep",
+    "30595382-8271-5c77-8818-26c0ebc3f6d3",  # weekday-pr-board-sweep routine id
+    "nightly-mac-harness-audit",
+    "coding-em-kick-pickup-check",
+    "jev-shadow-savings-tally",
+    "daily-mac-cli-update",
+}
+MANAGE_AGENT_NAMES = {"manage", "agent manage bot", "agent-manage", "agent-manage-bot", MANAGE_ID}
+_RECEIPT_TS_RE = re.compile(
+    r"^(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2})?)\s*(PT|PDT|PST|UTC|Z|[+-]\d{2}:?\d{2})?$"
+)
+_RECEIPT_AGENT_RE = re.compile(r"^agent\s*[=:]\s*(.+)$", re.I)
 SKIP_BASENAMES = {
     "store.db-shm",
     "conversation-blobs.db-shm",
@@ -362,6 +392,114 @@ def apply_jev_route_logs(bots: list[dict], now: datetime | None = None) -> list[
     return bots
 
 
+def parse_receipt_ts(raw: str) -> float | None:
+    """Receipt stamp -> epoch. 'PT'/no zone = America/Los_Angeles; Z/UTC/offset honored."""
+    m = _RECEIPT_TS_RE.match(raw.strip())
+    if not m:
+        return None
+    base, zone = m.group(1).replace(" ", "T"), (m.group(2) or "PT").upper()
+    fmt = "%Y-%m-%dT%H:%M:%S" if base.count(":") == 2 else "%Y-%m-%dT%H:%M"
+    try:
+        dt = datetime.strptime(base, fmt)
+    except ValueError:
+        return None
+    if zone in ("PT", "PDT", "PST"):
+        dt = dt.replace(tzinfo=PT)
+    elif zone in ("Z", "UTC"):
+        dt = dt.replace(tzinfo=timezone.utc)
+    else:
+        try:
+            dt = datetime.fromisoformat(base + (zone if ":" in zone else zone[:3] + ":" + zone[3:]))
+        except ValueError:
+            return None
+    return dt.timestamp()
+
+
+def _receipt_is_manage(routine: str, extra: list[str]) -> bool:
+    for f in extra:
+        m = _RECEIPT_AGENT_RE.match(f.strip())
+        if m:  # explicit agent field wins over folder attribution
+            return m.group(1).strip().lower() in MANAGE_AGENT_NAMES
+    return routine in MANAGE_RECEIPT_ROUTINES
+
+
+def manage_receipt_stats(now: datetime | None = None, log: Path = RECEIPTS_LOG) -> dict | None:
+    """Manage routine runs from the receipts log. None if the log is absent (e.g. Mac)."""
+    if not log.is_file():
+        return None
+    now_ts = (now or datetime.now(timezone.utc)).timestamp()
+    total = last_24h = last_7d = 0
+    by_routine: dict[str, int] = {}
+    newest = None
+    try:
+        lines = log.read_text(errors="replace").splitlines()
+    except OSError:
+        return None
+    for line in lines:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        parts = [x.strip() for x in line.split(" | ")]
+        if len(parts) < 3:
+            continue
+        ts = parse_receipt_ts(parts[0])
+        if ts is None or ts > now_ts + 300:  # unparseable or future-dated
+            continue
+        routine, outcome = parts[1], parts[2]
+        if not _receipt_is_manage(routine, parts[2:]):
+            continue
+        total += 1
+        by_routine[routine] = by_routine.get(routine, 0) + 1
+        age_h = (now_ts - ts) / 3600.0
+        last_24h += age_h <= 24.0
+        last_7d += age_h <= 24.0 * 7
+        if newest is None or ts >= newest[0]:
+            newest = (ts, routine, outcome)
+    return {
+        "source": MANAGE_RECEIPTS_LABEL,
+        "log": str(log),
+        "total": total,
+        "last_24h": int(last_24h),
+        "last_7d": int(last_7d),
+        "by_routine": dict(sorted(by_routine.items(), key=lambda kv: (-kv[1], kv[0]))),
+        "newest_routine": newest[1] if newest else None,
+        "newest_outcome": newest[2] if newest else None,
+        "newest_epoch": newest[0] if newest else None,
+        "newest_pt": _mtime_pt(newest[0]) if newest else None,
+    }
+
+
+def apply_manage_receipts(bots: list[dict], now: datetime | None = None, log: Path = RECEIPTS_LOG) -> list[dict]:
+    """Manage last-activity = max(existing signals, newest Manage routine receipt).
+
+    Uses the live box log when visible; otherwise the summary the box collector
+    embedded in grok_box_activity.json (bots[Manage].manage_receipts).
+    Staleness threshold is unchanged (apply_source_freshness decides).
+    """
+    live = manage_receipt_stats(now, log)
+    for b in bots:
+        if (b.get("id") or NAME_TO_ID.get(b.get("name") or "")) != MANAGE_ID:
+            continue
+        stats = live if live is not None else b.get("manage_receipts")
+        if not isinstance(stats, dict):
+            continue
+        cur_ts, cur_src = b.get("source_mtime_epoch"), b.get("activity_source")
+        if live is not None or "chat_folder_source" not in b:
+            if cur_src != MANAGE_RECEIPTS_LABEL:
+                b["chat_folder_last_pt"] = _mtime_pt(float(cur_ts)) if cur_ts is not None else None
+                b["chat_folder_source"] = cur_src
+        b["manage_receipts"] = stats
+        r_ts = stats.get("newest_epoch")
+        if isinstance(r_ts, (int, float)) and (cur_ts is None or float(r_ts) > float(cur_ts)):
+            b["source_mtime_epoch"] = float(r_ts)
+            b["last_transcript_activity_pt"] = _mtime_pt(float(r_ts))
+            b["activity_source"] = MANAGE_RECEIPTS_LABEL
+            b["activity_source_detail"] = (
+                f"receipts/routine-receipts.log#{stats.get('newest_routine')} @ {stats.get('newest_pt')}"
+            )
+            b["missing_transcript"] = False
+    return bots
+
+
 def _is_jev(b: dict) -> bool:
     return (b.get("id") or NAME_TO_ID.get(b.get("name") or "")) == JEV_ID
 
@@ -480,6 +618,7 @@ def collect_box_bots(agents_dir: Path = BOX_AGENTS, trans_dir: Path = BOX_TRANS)
             bots.append({**empty_bot(rname), "id": rid, "missing_agent_dir": not (agents_dir / rid).is_dir()})
     bots = normalize_bots(bots)
     apply_jev_route_logs(bots)
+    apply_manage_receipts(bots)
     apply_source_freshness(bots)
     return bots
 
