@@ -1,6 +1,46 @@
 {
   "items": [
     {
+      "id": "langwatch-3-18-0-lwql-query-door-instant-evals-judge-functions-cost-attribution",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "LangWatch 3.18.0 — LangWatchQL gets a public query door (REST /api/v1/query, CLI, MCP run_query) and LLM judge functions as SQL projections with persisted, metered verdicts (off by default at the tag); coding-agent PR cost split by declared branch; a metered-spend lane that read $0 fixed",
+      "html": " <a href=\"https://github.com/langwatch/langwatch/releases/tag/langwatch@v3.18.0\">langwatch@v3.18.0</a> — LangWatch&#x27;s first app release since Aug 27 opens LangWatchQL to API keys through POST /api/v1/query, a langwatch query CLI and an MCP run_query tool, and adds judge functions (eval, eval_score, eval_category…) whose verdicts, judged by TypeSafe Jev, persist as a queryable judgments dataset and are metered on the gateway spend ledger; at the tag the release_instant_evals flag defaults to false and a classifier key is required. The same release fixes a governance metered-spend lane that has shown zero for every real organization since it shipped while its nightly drift check compared empty against empty and passed every night (#8080), splits long-lived coding-agent sessions&#x27; cost by the branch declared at call time after one reviewer-bot Codex session&#x27;s 382M tokens and $212.61 landed on one pull request (#7757, #8169), and stops dropping metric values of exactly 0 (#7921). <a href=\"/research/briefs/2026-09-27-1234-opus.html\">Full brief</a>.",
+      "added": "2026-09-27T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "agenta-0-121-4-trace-cost-token-rollups-pricing-markers-harness-usage",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Agenta v0.121.4 — agent-trace cost and token accounting rebuilt: roll-ups reach agent spans (0 of 48,005 had a cumulative cost), traces split across OTLP requests are re-totaled, unpriceable spans are marked instead of $0, and Claude Code / Codex harness usage is booked per turn",
+      "html": " <a href=\"https://github.com/Agenta-AI/agenta/releases/tag/v0.121.4\">Agenta v0.121.4</a> · <a href=\"https://pypi.org/project/agenta/0.121.4/\">PyPI</a> — Sixteen PRs fix how Agenta records agent cost and tokens. The roll-up never gave an agent span a cumulative cost (measured: 0 of 48,005 spans) and double-counted summary spans (#7179). Traces arriving in several OTLP requests are now re-totaled from all stored spans (#7181), and spans that cannot be priced carry an ag.meta.pricing reason (unknown_model, missing_token_split, custom_connection…) instead of a silent $0 (#7178). The runner now books Claude Code&#x27;s running total_cost_usd and Codex&#x27;s per-turn usage per turn, where before each message showed the whole conversation&#x27;s cost and Codex counted only a turn&#x27;s last call with cached tokens dropped (#7177). The dashboard stops counting a trace that failed three levels deep as three failures and stops multiplying the rate by 100 twice (#7176). <a href=\"/research/briefs/2026-09-27-1234-opus.html\">Full brief</a>.",
+      "added": "2026-09-27T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-21133-stochastic-shift-text-to-sql-ai-operators-evaluation",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "The Stochastic Shift — evaluating text-to-SQL that calls AI operators (BigQuery AI.IF, ThalamusDB NLfilter): Execution Accuracy recognizes only 25–36% of correct translations and a whole-query LLM judge falsely rejects about a third, while judging the relational skeleton and the AI predicate separately reaches 97.2% / 93.3% accuracy",
+      "html": " <a href=\"https://arxiv.org/abs/2609.21133\">arXiv:2609.21133</a> · <a href=\"https://arxiv.org/pdf/2609.21133\">PDF</a> — Five Google authors show that once SQL embeds AI operators, two correct prompts can return 9 and 11 rows, so Execution Accuracy recognized only 36.0% (BigQuery) and 25.0% (ThalamusDB) of correct generated queries on SemBench, and LLM-SQL-Solver&#x27;s counterexample prompt falsely rejected about 32%. Their framework splits each query into a relational skeleton and an AI part, executes both, and has an LLM rater score relational and AI similarity separately; it reached 97.2% and 93.3% accuracy (Table 1). Caveats: 36 and 15 judged queries, one model at temperature 1.0 generating, splitting and rating, author-verified labels, and no venue yet. <a href=\"/research/briefs/2026-09-27-1234-opus.html\">Full brief</a>.",
+      "added": "2026-09-27T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-25237-trains-but-doesnt-learn-agent-delivery-contract",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Trains but Doesn't Learn — an oracle that scores ten delivery stages from platform-recorded facts, never the agent's claims: four frontier agents pass every metric gate on 38 certified post-training deliveries, yet 31/38 fail the delivery contract (model cards 30/38, cost reports 29/38, registry CI 19/38), and the oracle-correct configuration fixes none of it",
+      "html": " <a href=\"https://arxiv.org/abs/2609.25237\">arXiv:2609.25237</a> · <a href=\"https://arxiv.org/pdf/2609.25237\">PDF</a> — A UC Berkeley and Imperial benchmark (EMNLP 2026 Industry Track, per arXiv) seats LLM agents as forward-deployed engineers on metered L40S, A100 and H200 GPUs, and scores ten governed stages from platform-recorded facts, consuming none of the agent&#x27;s own claims. A calibrated anytime-valid detector flags severe train-but-don&#x27;t-learn runs 11/12 mid-run with 0/36 false alarms. Claude Opus 5, GPT-5.6-luna, Gemini 3.7 Flash and DeepSeek V4-Pro pass acceptance 38/38 with 0 gate bypasses, but 31/38 deliveries fail the contract, mostly on report schema shape rather than arithmetic, and 22/24 still fail when handed the oracle-correct configuration; engineer-plus-assistant arms post lower judgment residuals (0.06, 0.09) than every agent (0.10–0.40). Caveats: post-training only, single-annotator oracle labels, and cross-grid human comparison. <a href=\"/research/briefs/2026-09-27-1234-opus.html\">Full brief</a>.",
+      "added": "2026-09-27T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
       "id": "arxiv-2609-17464-decomposition-buys-integrity-not-yield-delegation-production-traces",
       "tag": "Academy",
       "kind": "rank",
@@ -385,6 +425,11 @@
       "added": "2026-09-24T1234",
       "addedDisplay": "12:34 PM PT",
       "progress": [
+        {
+          "at": "2026-09-27T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "Letta Code v0.33.3 (npm 18:05Z, GitHub 18:12Z, PyPI letta 18:19Z; 37 changelog entries) — local stores stop serving pre-compaction messages when conversation.json keeps its modification time (#4815); telemetry queue capped at 2,000 events (#4671); listener-registered external tools return a task ID after 10s (#4763); memory / memory_apply_patch tools removed (#4745). A fix that would report remote Agent tasks completed only when the correlated child run persisted a reply (#4721) was reverted (#4744) before the tag. PyPI letta now points to letta-ai/letta-code; letta-ai/letta stopped at 0.16.8. <a href=\"/research/briefs/2026-09-27-1234-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-25T1234",
           "displayTime": "12:34 PM PT",
@@ -873,6 +918,11 @@
       "added": "2026-09-23T0034",
       "addedDisplay": "12:34 AM PT",
       "progress": [
+        {
+          "at": "2026-09-27T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "LiteLLM 1.103.0 reached PyPI latest (17:47Z; tag v1.103.0 = rc/1.103.0 head #43429; no GitHub release object). First non-dev build where v2 OTel LLM spans carry gen_ai.conversation.id from litellm_session_id (#43343). Also carries deleted DB-stored logging callbacks actually stop (#43429); member spend no longer freezes after an all-$0 flush (#43323); rc.1's top-100-key cap on Usage views is reverted (#43326). Follow-up #43434 (restore code-registered callbacks the DB sync replaced) still open — so 1.103.0 can silently stop a code-registered exporter after an admin adds then deletes the same callback. <a href=\"/research/briefs/2026-09-27-1234-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-26T1834",
           "displayTime": "6:34 PM PT",
@@ -5103,6 +5153,23 @@
   ],
   "runs": [
     {
+      "id": "2026-09-27T1234",
+      "date": "2026-09-27",
+      "displayTime": "12:34 PM PT",
+      "added": [
+        "langwatch-3-18-0-lwql-query-door-instant-evals-judge-functions-cost-attribution",
+        "agenta-0-121-4-trace-cost-token-rollups-pricing-markers-harness-usage",
+        "arxiv-2609-21133-stochastic-shift-text-to-sql-ai-operators-evaluation",
+        "arxiv-2609-25237-trains-but-doesnt-learn-agent-delivery-contract"
+      ],
+      "updated": [
+        "letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction",
+        "litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport"
+      ],
+      "brief": "/research/briefs/2026-09-27-1234-opus.html",
+      "note": "Late-wake 12:34 PT Sun slot (label kept 1234). Fresh-list path publish (fb-merge-packs → fresh-items.md; Opus search stayed on). Writer Opus 5.5 (MODEL_CHECK_PASS 185/185 turns claude-opus-5-5). Effort-test HIGH slot attempt: run.sh passed --effort high but process env CLAUDE_CODE_EFFORT_LEVEL=max outranked it (do not count as HIGH measurement). Packs: Agy0632 + Muse0732 + DSH0832 + Agy0932 + Muse1032 + DSH1132 (+ Agy1232 PACK_DONE ~12:46 PT after merge; disclosed; grep-only). HN companions hits=0. Gap: Agy1232 post-merge arrival disclosed. Packs missed LangWatch+Agenta (writer-sourced). Verified arXiv mailing ceiling still 2609.30268; pin 2609.02702 intact. Industry NEW +2: LangWatch 3.18.0 LWQL query door + instant evals; Agenta 0.121.4 agent-trace cost roll-ups. Progress +2: Letta Code v0.33.3; LiteLLM 1.103.0. Academy +2 full-PDF: 2609.21133 Stochastic Shift (writer-sourced); 2609.25237 Trains but Doesn't Learn (held→rank). Unconfirmed section present (10 items). No Stories companion (0 third-party BQAA). GTM skipped. FB_MERGE slot=2026-09-27-1234 packs=11 raw=71 unique=62 drop_catalog=0 drop_seen=2 drop_both=0 fresh=60 (cand=59 low=1) tokens_old~69523 tokens_new~8677"
+    },
+    {
       "id": "2026-09-27T0634",
       "date": "2026-09-27",
       "displayTime": "6:34 AM PT",
@@ -6807,6 +6874,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-09-27T1234",
+      "date": "2026-09-27",
+      "displayTime": "12:34 PM PT",
+      "title": "Opus 5.5: Industry LangWatch 3.18.0 LWQL query door + instant evals + Agenta 0.121.4 agent-trace cost roll-ups; Academy 2609.21133 Stochastic Shift text-to-SQL AI operators + 2609.25237 Trains but Doesn't Learn; Progress Letta Code v0.33.3 + LiteLLM 1.103.0",
+      "href": "/research/briefs/2026-09-27-1234-opus.html",
+      "analyzer": "Opus 5.5"
+    },
     {
       "id": "2026-09-27T0634",
       "date": "2026-09-27",

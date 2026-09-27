@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-27 · 12:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="LangWatch 3.18.0 + Agenta 0.121.4 Industry NEW; Academy 2609.21133 + 2609.25237; Progress Letta v0.33.3 + LiteLLM 1.103.0.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-27-1234-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 PM PT · late-wake · fresh-list path · effort-test attempt</p>
+    <article>
+<h1>Field Brief — 2026-09-27-1234: Cost roll-ups that read zero, LLM judges inside trace SQL, and how to grade SQL that calls a model</h1>
+<p>A Sunday-midday window with four real ships. Two of them were missed by every pack:</p>
+<ul>
+<li><strong>LangWatch 3.18.0</strong> (14:49Z), the first app release since 3.17.0 on Aug 27.</li>
+<li><strong>Agenta v0.121.4</strong> (16:12Z), a release whose 16 PRs are almost all about agent-trace cost and token accounting.</li>
+</ul>
+<p>The other two were carried by DSH 1132 and I verified both:</p>
+<ul>
+<li><strong>Letta Code v0.33.3</strong> (npm 18:05Z, GitHub 18:12Z, PyPI <code>letta</code> 18:19Z).</li>
+<li><strong>LiteLLM 1.103.0</strong> on PyPI (17:47Z, now <code>latest</code>). It has no GitHub release object, and the follow-up fix #43434 is still open.</li>
+</ul>
+<p>The common thread is that observability tools shipped fixes to their own cost numbers:</p>
+<ul>
+<li><strong>Agenta #7179:</strong> &quot;no agent span ever got a cumulative cost (measured: 0 of 48,005 spans)&quot;.</li>
+<li><strong>LangWatch #8080:</strong> the gateway's metered-spend lane &quot;has shown zero for every real organization since it shipped&quot;, and the nightly drift check &quot;compared empty against empty and passed every night&quot;.</li>
+</ul>
+<p>LangWatch 3.18.0 also puts LLM judges inside its trace query language (<code>eval(...)</code>, <code>eval_score(...)</code> as SQL projections). The feature is off by default at the tag.</p>
+<p>arXiv is between mailings (ceiling <code>2609.30268</code>). I rank two papers, both read in full:</p>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.21133">2609.21133</a></strong> (Google; evaluating text-to-SQL that calls AI operators).</li>
+<li>Execution Accuracy recognized only 36.0% (BigQuery) and 25.0% (ThalamusDB) of correct translations.</li>
+<li>Splitting the relational skeleton from the AI predicate reached 97.2% and 93.3% accuracy.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.25237">2609.25237</a></strong> (held three times; 0634 asked this slot to decide).</li>
+<li>An oracle scores delivery stages from platform-recorded facts, never the agent's claims.</li>
+<li>Four frontier agents passed every metric gate, yet 31/38 of their deliveries failed the delivery contract. The oracle-correct configuration fixed none of it.</li>
+</ul>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK
+<strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>), the primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Slot:</strong> <strong>2026-09-27-1234</strong> (official 6h slot, 12:34 PM PT Sun Sep 27, 2026).</p>
+<ul>
+<li><strong>Late wake:</strong> this run's first clock read was 12:46:01 PT (19:46:01Z). The label stays <strong>1234</strong>.</li>
+<li><strong>Effort:</strong> Collection launched this as the effort=high test slot (<code>--effort high</code> in <code>run.sh</code>). I did not change effort. But this process has <code>CLAUDE_CODE_EFFORT_LEVEL=max</code>, which outranks <code>--effort</code>, so the test probably ran at max. See Housekeeping.</li>
+</ul>
+<p><strong>Evidence window:</strong> from the 0634 brief's last probes (about 14:05Z) to this run's final re-sweep (20:02Z). I swept from 13:30Z so the windows overlap. Between 19:46Z and 20:02Z I probed these myself:</p>
+<ul>
+<li>GitHub release objects and dated tags for 91 watchlist repos plus 22 others, and default-branch commits.</li>
+<li>PyPI (82 packages plus <code>agenta</code>) and npm (66 packages).</li>
+<li>arXiv abs pages and the arXiv API.</li>
+<li>HN Algolia.</li>
+<li>Code at the LangWatch <code>langwatch@v3.18.0</code> tag, and the LiteLLM <code>v1.103.0</code> tag and its compare against <code>v1.103.0-rc.1</code>.</li>
+</ul>
+<p>I fetched and read 81 PR bodies and checked 51 PR states. I read 2 PDFs in full.</p>
+<ul>
+<li><strong>Source packs used (6 PACK_DONE, grep only):</strong> Agy 0632, Muse 0732, DSH 0832, Agy 0932, Muse 1032 and DSH 1132.</li>
+<li><strong>Gap to disclose:</strong> Agy 1232 was in flight when Collection merged the fresh list (12:45 PT).</li>
+<li>It landed at 12:46 PT with PACK_DONE.</li>
+<li>I used it only through greps. See Housekeeping.</li>
+<li><strong>Catalog baseline:</strong> <strong>437 items / 111 briefs / 113 runs</strong>, SHA-256 <code>ef0dbf27d9d2454e…</code>, read-only. The newest brief is <code>2026-09-27T0634</code>.</li>
+</ul>
+<p><strong>Delivery:</strong> Markdown handoff only. PUBLISH is an editorial call. Collection owns the HTML, the catalog and the push.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: 2 new Industry ranks, 2 new Academy ranks, 2 progress notes, and a NOTE list.</strong></p>
+<ul>
+<li><strong>Why publish:</strong> four releases shipped in the window. Two change how agent cost, usage and evaluation are recorded (Agenta, LangWatch), and two progress existing cards (Letta Code, LiteLLM).</li>
+<li><strong>Pack miss:</strong> no window pack mentions LangWatch or Agenta: 0 hits across the six window packs, and 0 in Agy 1232. My release sweep found both.</li>
+<li><strong>Academy:</strong> 21133 is net-new from my own sweep. 25237 comes off the hold queue.</li>
+</ul>
+<p><strong>Theme 1: the observability layer's own cost numbers were wrong, and the fixes shipped.</strong></p>
+<ul>
+<li><strong>Agenta v0.121.4.</strong></li>
+<li>#7179: no agent span had a cumulative cost (0 of 48,005). Summary spans also double-counted: &quot;26 tokens over a 13-token call, and twice the cost&quot;.</li>
+<li>#7177: Claude Code's <code>total_cost_usd</code> is a running session total, so &quot;Claude runs showed the cost of the whole conversation on every message&quot;. Codex runs &quot;counted only the last model call of a turn, and cached tokens were dropped, so they cost $0&quot;.</li>
+<li>#7176: the dashboard counted a trace that failed three levels deep as three failures, and multiplied the rate by 100 twice.</li>
+<li><strong>LangWatch 3.18.0.</strong></li>
+<li>#8080: the metered-spend lane read zero, and its drift check passed on empty-vs-empty.</li>
+<li>#8169: a reviewer bot's single Codex session, with 382 million tokens and $212.61, was billed to one pull request.</li>
+<li>#7921: a metric value of exactly 0, such as a neutral thumbs vote, was accepted with HTTP 200 and then dropped.</li>
+<li><strong>LiteLLM 1.103.0.</strong></li>
+<li>#43323: team-member spend froze after one all-$0 flush.</li>
+<li>#43326: rc.1's Usage pages loaded only the top 100 keys. That change is reverted in the release.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.25237">2609.25237</a>:</strong> 29/38 agent-written cost reports failed reconciliation. They failed on schema shape, not arithmetic.</li>
+</ul>
+<p><strong>Theme 2: LLM judges move into the query language, and so does the evaluation problem.</strong></p>
+<ul>
+<li><strong>LangWatch 3.18.0: judge functions in trace SQL.</strong></li>
+<li>LangWatchQL gains judge functions: <code>eval</code>, <code>eval_criteria</code>, <code>eval_passed</code>, <code>eval_score</code>, <code>eval_category</code> and <code>eval_category_probs</code>.</li>
+<li>&quot;Instant Eval&quot; jobs judge up to 10,000 rows by default, and up to 100,000 on plans that lift the cap. Verdicts are stored as a queryable <code>judgments</code> dataset, and spend is metered on the gateway ledger.</li>
+<li>The judge is TypeSafe Jev, called with LangWatch's own key.</li>
+<li>At the tag, <code>release_instant_evals</code> defaults to false, and the functions need a configured classifier key.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.21133">2609.21133</a> (Google):</strong> once SQL calls AI operators (BigQuery <code>AI.IF</code>, ThalamusDB <code>NLfilter</code>), neither result equality nor a whole-query LLM judge grades it reliably:</li>
+<li>two AI prompts that are both correct can return 9 rows and 11 rows;</li>
+<li>so Execution Accuracy misses most correct translations, and a whole-query LLM judge rejects about a third of them.</li>
+</ul>
+<p><strong>Theme 3 (NOTE level): runtime state that silently diverges.</strong></p>
+<ul>
+<li><strong>Letta Code #4815:</strong> a local conversation store kept serving pre-compaction messages when <code>conversation.json</code> kept its modification time.</li>
+<li><strong>openai-agents-python <code>main</code>:</strong></li>
+<li>#5073: Realtime <code>agent_end</code> named the post-handoff agent;</li>
+<li>#5189: snapshots silently dropped nested durable files.</li>
+<li><strong>Cloudflare Agents <code>main</code> #2384:</strong> after a reconnect, &quot;<code>AB</code> became <code>ABB</code>&quot;.</li>
+<li><strong>Status:</strong> all unreleased except Letta.</li>
+</ul>
+<p><strong>What this means for BQAA (as the observer, not the source of truth):</strong></p>
+<ul>
+<li><strong>Record where every cost number came from:</strong></li>
+<li>one of provider-billed, computed from tokens (with the price-map version), or harness-reported (and for harnesses, whether the value is a running total or a per-turn value);</li>
+<li>an explicit reason when a span is unpriced, never a silent $0. Agenta's <code>ag.meta.pricing</code> values and LangWatch's null-with-count are the patterns.</li>
+<li><strong>Re-total a trace from all its stored spans</strong> after late batches. Single-batch roll-ups undercount traces split across OTLP requests (Agenta #7181).</li>
+<li><strong>Charge long-lived sessions by the context declared at call time</strong>, not by the session's lifetime (LangWatch #7757, #8169).</li>
+<li><strong>Keep 0 distinct from missing</strong> in metric columns (#7921).</li>
+<li><strong>Make drift checks fail when both sides are empty</strong> (#8080).</li>
+<li><strong>For SQL that calls AI operators</strong> (judge columns over <code>agent_events</code>):</li>
+<li>test the relational skeleton deterministically and the AI predicate semantically;</li>
+<li>log the judge's prompt, model and version, and per-query judge spend (21133; LangWatch Instant Evals).</li>
+<li><strong>Join LiteLLM spans on <code>gen_ai.conversation.id</code>.</strong> 1.103.0 sets it from <code>litellm_session_id</code> on v2 spans.</li>
+</ul>
+<h2>Industry</h2>
+<p><strong>Screen used (same as 0634):</strong> a release-level move that ships a product capability, or a change to how agent telemetry, cost, evaluation or memory state is recorded. Unreleased <code>main</code>-branch commits are NOTE only. I checked every item against its PR body, release object, registry entry or tagged code, not against a pack summary.</p>
+<p><strong>Sweep results (my own, 19:46Z–20:02Z, window from 13:30Z):</strong></p>
+<ul>
+<li><strong>GitHub release objects and dated tags (GraphQL), 91 watchlist repos: 5 release objects in 3 repos.</strong></li>
+<li>LangWatch: <code>langwatch@v3.18.0</code> (14:49:40Z), <code>v3.18.0</code> (14:55:46Z) and Helm chart <code>langwatch-3.18.0</code> (15:09:19Z).</li>
+<li>Letta Code: <code>v0.33.3</code> (18:12:22Z).</li>
+<li>Codex: <code>rust-v0.158.0-alpha.15.3</code> (prerelease, 19:18:13Z).</li>
+<li>Tags: the same, plus three Opik branch-build tags (<code>2.2.81-avinahradau-opik-832-6799</code>…<code>6801</code>), none of them a release.</li>
+<li><strong>22 extra repos: 1 release,</strong> Agenta <code>v0.121.4</code> (16:12:22Z).</li>
+<li><strong>PyPI (82 packages):</strong> <code>litellm</code> 1.103.0 (17:47:52Z) and <code>letta</code> 0.33.3 (18:19:55Z). I checked <code>agenta</code> separately: 0.121.4 at 16:13:27Z.</li>
+<li><strong>npm (66 packages):</strong></li>
+<li><code>@letta-ai/letta-code</code> 0.33.3 (18:05:50Z);</li>
+<li><code>@openai/codex</code> and <code>@openai/codex-sdk</code> 0.158.0-alpha.15.3 (19:33Z–19:56Z). <code>latest</code> stays 0.157.1.</li>
+<li><strong>Default-branch commits since 13:30Z (91 repos): 46 commits in 12 repos.</strong></li>
+<li>openai-agents-python 15, Codex 9, Cloudflare Agents 6, openai-python 3, Skyvern 3.</li>
+<li>LiteLLM, Letta Code and openai-node 2 each.</li>
+<li>LangChain, LangWatch, Mastra and Vercel AI 1 each.</li>
+<li><strong>Final re-sweep at 20:01Z</strong> (releases, tags and registries since 19:40Z): nothing new, apart from the last Codex alpha platform package (win32-arm64, 19:56:42Z).</li>
+</ul>
+<h3>1. NEW rank (Industry): LangWatch 3.18.0: a public door for LangWatchQL, LLM judge functions inside it, and cost attribution fixes</h3>
+<p><strong>What shipped:</strong></p>
+<ul>
+<li><strong>Release objects:</strong></li>
+<li><a href="https://github.com/langwatch/langwatch/releases/tag/langwatch@v3.18.0"><code>langwatch@v3.18.0</code></a> (14:49:40Z; compare <code>langwatch-3.17.0...langwatch@v3.18.0</code>);</li>
+<li><code>v3.18.0</code>, &quot;@langwatch/server@3.18.0 — aigateway monobinaries&quot; (14:55:46Z);</li>
+<li>Helm chart <code>langwatch-3.18.0</code> (15:09:19Z).</li>
+<li><strong>Size:</strong> the previous app release was 3.17.0 on Aug 27, and this one has about 225 changelog entries. Most PRs below merged between Aug 31 and Sep 19 and ship here for the first time in a release.</li>
+</ul>
+<p><strong>A public door for LangWatchQL (LWQL, SQL over LangWatch's trace datasets).</strong></p>
+<ul>
+<li><strong>REST.</strong> #7611 adds <code>POST /api/v1/query</code> and <code>GET /api/v1/query/schema</code>, and removes the old routes.</li>
+<li>At the tag, the route file checks only an API key with <code>analytics:view</code>, and I found no feature-flag check in it.</li>
+<li>An organization or personal key spans every project it can read.</li>
+<li><strong>Reference, CLI and MCP.</strong> #8198 adds:</li>
+<li><code>GET /api/v1/query/reference</code>, which describes both query languages in one payload;</li>
+<li>a <code>langwatch query</code> CLI;</li>
+<li>an MCP <code>run_query</code> tool that renders up to 50 rows;</li>
+<li>a <code>filter</code> string on <code>POST /api/traces/search</code>.</li>
+<li>It also deletes the MCP server's &quot;hand-copied list of 24 filter field names&quot;, which had drifted from the real ones.</li>
+<li><strong>Workbench flag.</strong> The <code>release_lwql_workbench</code> flag (default false at the tag) gates the workbench UI and the tRPC endpoints.</li>
+</ul>
+<p><strong>LLM judges as SQL functions (&quot;Instant Evals&quot;).</strong></p>
+<ul>
+<li><strong>The functions (#8201).</strong> <code>eval(text, instructions)</code> returns a probability. <code>eval_criteria</code>, <code>eval_passed</code>, <code>eval_score</code>, <code>eval_category</code> and <code>eval_category_probs</code> are its siblings.</li>
+<li>They are ClickHouse projection UDFs, and a call may wrap one extraction function such as <code>conversation_bounded(...)</code>.</li>
+<li>All questions about one text go into one classifier request. Rows are never packed together: per the PR's bench, agreement was 98% on single conversations and 87% with eight packed in.</li>
+<li><strong>The judge.</strong> It is TypeSafe Jev (<code>JEV_BASE_URL</code> defaults to <code>https://api.typesafe.ai</code>; <code>jev-latest</code> resolves to <code>jev-1.13.0</code> per the PR), called &quot;with LangWatch's own key, never a customer's&quot;.</li>
+<li><strong>Jobs (#8208).</strong> An Instant Eval run judges every row an LWQL statement matches:</li>
+<li>10,000 rows by default on every plan, up to 100,000 where the plan lifts the cap;</li>
+<li><code>POST /api/v1/instant-evals/estimate</code> prices a run before it starts;</li>
+<li>verdicts go to ClickHouse <code>instant_eval_judgments</code>, exposed as a <code>judgments</code> dataset that joins back to traces. &quot;The judged text is not stored.&quot;</li>
+<li><strong>Spend (#8220).</strong> Each run or synchronous judged query writes one row on the gateway spend ledger (<code>RequestType = &quot;instant_eval&quot;</code>, <code>Model = &quot;jev&quot;</code>).</li>
+<li>Project and organization gateway budgets apply to it, and it has its own Stripe meter.</li>
+<li>Organizations without a paid plan get a $1.00 free budget.</li>
+<li>The PR's pricing doc says $0.0546 per million input tokens.</li>
+<li><strong>CLI and shorthand (#8216).</strong> <code>langwatch instant-eval run|estimate|status|list|results|sample|cancel</code>, plus shorthand targets (<code>traces</code>, <code>threads</code>, <code>llm_spans</code>) that expand into an LWQL statement the caller gets back.</li>
+<li><strong>Gate (checked in code at the tag).</strong> <code>release_instant_evals</code> has <code>defaultValue: false</code>: &quot;Off by default; enable per project or organization via a targeting rule.&quot;</li>
+<li><code>.env.example</code> says that without <code>JEV_API_KEY</code> &quot;the eval functions are published as unavailable and every judgement is skipped&quot;.</li>
+<li>So on a self-hosted 3.18.0 install the judge functions are dark until both the flag and the key are set.</li>
+</ul>
+<p><strong>Cost and usage attribution fixes in the same release:</strong></p>
+<ul>
+<li><strong><a href="https://github.com/langwatch/langwatch/pull/8080">#8080</a>: the metered-spend lane read $0.</strong></li>
+<li>The governance cost screen's metered lane &quot;has shown zero for every real organization since it shipped&quot;. The gateway wrote its daily totals under the trace project, while the screen read under a hidden bookkeeping project.</li>
+<li>A nightly drift check &quot;compared empty against empty and passed every night&quot;.</li>
+<li>The lane now reads the per-request gateway ledger. Days where nothing was priced read null with a count, not $0.</li>
+<li><strong><a href="https://github.com/langwatch/langwatch/pull/7757">#7757</a> and <a href="https://github.com/langwatch/langwatch/pull/8169">#8169</a>: coding-agent cost now splits by declared context.</strong></li>
+<li>A background agent that runs <code>claude --resume</code> for weeks, across branches, used to charge its &quot;hundreds of millions of tokens&quot; to one pull request.</li>
+<li>In #8169's case, one reviewer-bot Codex session &quot;with 382 million tokens and $212.61&quot; landed on one pull request.</li>
+<li>Usage is now split by the repository and branch declared at call time. Codex, which reports tokens only on <code>session_task.turn</code> spans, is covered through a per-context usage record.</li>
+<li>Sessions folded before the change are not re-split.</li>
+<li><strong><a href="https://github.com/langwatch/langwatch/pull/7921">#7921</a>: zero readings were dropped.</strong> A metric value of exactly 0 was accepted with HTTP 200 and dropped by a truthiness check. That includes a neutral thumbs vote, a count of 0 and a latency of 0.</li>
+<li><strong><a href="https://github.com/langwatch/langwatch/pull/8192">#8192</a>: evaluator spans became orphan traces</strong> when the target trace had no usable parent link.</li>
+<li><strong><a href="https://github.com/langwatch/langwatch/pull/8111">#8111</a>:</strong> the nightly cost-rollup comparison is now event-driven and checks only days that changed.</li>
+</ul>
+<p><strong>Why it ranks:</strong></p>
+<ul>
+<li>LangWatch was already carded for SQL over traces (<code>langwatch-governed-sql-workbench-coding-agent-capture</code>, Aug 16).</li>
+<li>3.18.0 goes further in two ways: it opens that SQL to API keys, a CLI and MCP; and it makes an LLM judge a column in the same language, with persisted, joinable verdicts and metered spend. That is BQAA's design space: BigQuery SQL plus AI functions over <code>agent_events</code>.</li>
+<li>Its cost fixes also show two failure modes a BQAA drift check would miss: empty-vs-empty passing, and whole-session attribution.</li>
+</ul>
+<p><strong>For BQAA:</strong></p>
+<ul>
+<li><strong>Judge columns need three things LangWatch built:</strong></li>
+<li>one judge request per text for all questions;</li>
+<li>verdicts persisted with keys (trace, span, question, judge version);</li>
+<li>judge spend written to the same ledger as agent spend, with an estimate before large runs.</li>
+<li><strong>Treat a drift check with no rows on either side as a failure,</strong> not a pass.</li>
+<li><strong>For long-lived agent sessions, store usage per declared working context</strong> (repository and branch), not per session.</li>
+<li><strong>Keep 0 and null distinct</strong> in every metric column.</li>
+</ul>
+<h3>2. NEW rank (Industry): Agenta v0.121.4: agent-trace cost and token accounting rebuilt</h3>
+<p><strong>What shipped:</strong></p>
+<ul>
+<li><strong>Artifacts:</strong></li>
+<li>GitHub release <a href="https://github.com/Agenta-AI/agenta/releases/tag/v0.121.4"><code>v0.121.4</code></a> (16:12:22Z, stable);</li>
+<li>PyPI <code>agenta</code> 0.121.4 (16:13:27Z; the SDK, which carries #7175).</li>
+<li><strong>Contents:</strong> 16 PRs merged into <code>release/v0.121.4</code>. The eleven I read merged between 11:54Z and 14:50Z.</li>
+<li><strong>Previous coverage:</strong> v0.121.3 was NOTE'd at Sat 1834 as a patch. Agenta has no catalog card.</li>
+</ul>
+<p><strong>The roll-up and pricing fixes (API):</strong></p>
+<ul>
+<li><strong><a href="https://github.com/Agenta-AI/agenta/pull/7179">#7179</a>: agent spans had no cumulative cost.</strong></li>
+<li>The roll-up built trees only from parentless spans. So the agent runner's batch, which hangs under a workflow span from another batch, never got a cumulative cost: &quot;measured: 0 of 48,005 spans&quot;.</li>
+<li>Workflow spans that repeat their children's usage were double-counted: &quot;26 tokens over a 13-token call, and twice the cost&quot;.</li>
+<li>A measured $0 now rolls up as $0, and the walk is iterative. A 3,000-span chain used to risk <code>RecursionError</code>.</li>
+<li><strong><a href="https://github.com/Agenta-AI/agenta/pull/7181">#7181</a>: traces split across OTLP requests are re-totaled.</strong></li>
+<li>An agent trace often arrives in several OTLP requests: the SDK sends the workflow span, and the runner sends the model spans. The root's totals missed the other requests' spans.</li>
+<li>After each batch, every trace the batch touched is now recomputed from all its stored spans, under a per-trace advisory lock. Traces over 10,000 spans are skipped.</li>
+<li><strong><a href="https://github.com/Agenta-AI/agenta/pull/7178">#7178</a>: unpriced spans are marked, not silently $0.</strong></li>
+<li>Spans that cannot be priced now carry <code>ag.meta.pricing</code> (<code>unknown_model</code>, <code>missing_model</code>, <code>missing_token_split</code>, <code>pricing_failed</code> or <code>custom_connection</code>) instead of a silent or wrong cost.</li>
+<li>Cache writes are priced, OpenLLMetry spans get costs, and <code>llm</code> spans are priced.</li>
+<li>With the runner's 1-hour cache-write marker, one Claude Sonnet turn on a reloaded session was priced $0.4786 instead of $0.3087.</li>
+<li><strong><a href="https://github.com/Agenta-AI/agenta/pull/7176">#7176</a>: dashboard figures.</strong></li>
+<li>The failure count used the sum of exception events, so a trace failing three levels deep counted three times. The rate was also multiplied by 100 twice.</li>
+<li>Charts bucketed traces by storage time (<code>created_at</code>), not run time (<code>start_time</code>).</li>
+<li>The Cost card now shows &quot;Without cost: N&quot;.</li>
+</ul>
+<p><strong>The harness fixes (runner):</strong></p>
+<ul>
+<li><strong><a href="https://github.com/Agenta-AI/agenta/pull/7177">#7177</a>: Claude and Codex usage is booked per turn.</strong></li>
+<li>Claude Code's <code>total_cost_usd</code> is a session running total, so every message carried the whole conversation's cost. Each turn now reports its own share.</li>
+<li>Codex runs counted only a turn's last model call and dropped cached tokens. A patch to codex-acp now reports the turn's share of <code>tokenUsage.total</code>, not <code>tokenUsage.last</code>.</li>
+<li>Without a token split, the runner had reported the context-window size as the token total.</li>
+<li>Claude's 1-hour cache writes had been priced at the 5-minute rate, &quot;about 35% low on a reloaded-session turn&quot;.</li>
+<li><strong><a href="https://github.com/Agenta-AI/agenta/pull/7183">#7183</a>:</strong> usage is kept across an approval pause, and spans served by a custom model connection are marked so they are not priced from the public list.</li>
+<li><strong><a href="https://github.com/Agenta-AI/agenta/pull/7185">#7185</a>:</strong> Pi chat spans carry OpenRouter's billed cost, marked <code>agenta.usage.cost_source = &quot;provider&quot;</code>, instead of pi-ai's estimate.</li>
+<li><strong><a href="https://github.com/Agenta-AI/agenta/pull/7197">#7197</a>:</strong> the API downloads LiteLLM's latest price map at startup again. The bundled 1.101.0 map lacked <code>gpt-6-sol</code>.</li>
+<li><strong><a href="https://github.com/Agenta-AI/agenta/pull/7203">#7203</a>:</strong> a late Claude cost reading no longer overwrites a turn's usage.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li>The measured numbers are the PR authors' own.</li>
+<li>Several PRs list QA still to do. #7181: &quot;The full UPDATE has not run against a real spans table here.&quot; #7176's demo was &quot;Not captured&quot;.</li>
+<li>#7181 recomputes only traces that a new batch touches, and none of the PRs describes a backfill of stored traces.</li>
+<li>Codex turns are still priced as one request over summed tokens, which the PR says can cross a long-context tier.</li>
+</ul>
+<p><strong>Why it ranks:</strong> it is a release-level change to how agent cost and tokens are recorded. It names the failure modes an observer can inherit from harness telemetry, such as running totals read as per-event costs and last-call-only token counts.</p>
+<p><strong>For BQAA:</strong></p>
+<ul>
+<li><strong>When ingesting Claude Code telemetry,</strong> treat <code>total_cost_usd</code> as a running total and take per-turn deltas.</li>
+<li><strong>When ingesting Codex telemetry,</strong> check whether token usage is per call or last call.</li>
+<li><strong>Store <code>cost_source</code> and a <code>pricing_status</code> enum per span</strong> (provider-billed, computed with a price-map version, harness-reported, unpriced with a reason).</li>
+<li><strong>Recompute root totals from all spans after late batches.</strong></li>
+<li><strong>Report the count of traces without cost next to any cost total.</strong></li>
+</ul>
+<h3>Progress (2)</h3>
+<p><strong>Letta Code v0.33.3 → <code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code></strong></p>
+<ul>
+<li><strong>Artifacts:</strong></li>
+<li>GitHub release <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.3">v0.33.3</a> (created 18:01:23Z, published 18:12:22Z);</li>
+<li>npm <code>@letta-ai/letta-code</code> 0.33.3 (18:05:50Z);</li>
+<li>PyPI <code>letta</code> 0.33.3 (five wheels, 18:19:55Z–18:20:26Z).</li>
+<li>The changelog has 37 entries since v0.33.2 (Sep 25, already a progress note).</li>
+<li><strong>What changes what an observer sees:</strong></li>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4815">#4815</a> (17:51Z): a local store that loaded 12 messages kept returning them after another store compacted the conversation to a summary plus four messages, because <code>conversation.json</code>'s modification time did not change. It now compares the stored record.</li>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4671">#4671</a>: with the telemetry endpoint unreachable, the in-memory queue grew for the life of the process. It is now capped at 2,000 events, and the oldest are dropped.</li>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4763">#4763</a>: listener-registered external tools wait up to 10 seconds, then return an <code>external_&lt;id&gt;</code> task ID. The eventual result starts a follow-up turn.</li>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4745">#4745</a>: the <code>memory</code> and <code>memory_apply_patch</code> tools are removed (32 → 30 tools). Agents now edit memory with the regular file tools.</li>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4762">#4762</a>: tools that only touch agent-owned state (<code>TaskCreate</code>…<code>TaskUpdate</code>, artifact tools, <code>Wake</code>) no longer prompt in <code>standard</code> or <code>acceptEdits</code> mode.</li>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4806">#4806</a>: agents in managed Cloud sandboxes get a low-disk system reminder at 90% used or under 1 GiB free.</li>
+<li>Also: #4802 (<code>WatchPR</code>), #4814 (stops a startup call that returned 401 in every sandbox and subagent) and #4796 (a 30-second deadline on Workflow setup).</li>
+<li><strong>Reverted before the tag:</strong></li>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4721">#4721</a> described a bug: when a remote listener failed before creating a child run, the remote <code>Agent</code> task could still report success, with no reply.</li>
+<li>Its fix, which reports success only when the correlated child run completes with a persisted reply, merged Sep 25 and was reverted the same day by <a href="https://github.com/letta-ai/letta-code/pull/4744">#4744</a>, an exact inverse diff (+85/−885 against +885/−85).</li>
+<li>So v0.33.3 ships without it.</li>
+<li><strong>Path correction (verified):</strong></li>
+<li>PyPI <code>letta</code> 0.33.3 is &quot;Letta Code: stateful agents in your terminal&quot;, with Source <code>github.com/letta-ai/letta-code</code>.</li>
+<li><code>letta-ai/letta</code> was last pushed Sep 10, and its newest tag is 0.16.8. Watch <code>letta-ai/letta-code</code>.</li>
+</ul>
+<p><strong>LiteLLM 1.103.0 → <code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code></strong></p>
+<ul>
+<li><strong>Artifacts:</strong></li>
+<li>PyPI <a href="https://pypi.org/project/litellm/1.103.0/"><code>litellm==1.103.0</code></a> (first wheel 17:47:52Z). It is now PyPI <code>latest</code>, replacing 1.102.1 (Sep 23).</li>
+<li>Tag <code>v1.103.0</code> points at <code>c991f4b0</code>, which is #43429 (07:50:16Z) and the head of <code>rc/1.103.0</code>. No GitHub release object exists (404 at 19:50Z), so there are no release notes.</li>
+<li><strong>Contents:</strong> against <code>v1.103.0-rc.1</code> (Sep 20, also on PyPI), the tag is 13 commits ahead, all backports, reverts or CI fixes:</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43343">#43343</a>: v2 OTel LLM spans carry <code>gen_ai.conversation.id</code> from the caller's <code>litellm_session_id</code> (backport of #42486). Per the 09-25 progress note, <code>v1.104.0-dev.2</code> was the first artifact with it, and #43343 says rc/1.103.0 lacked it. It also lets <code>x-litellm-team-id</code> take a team alias, or any team the JWT caller belongs to.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43429">#43429</a>: deleting a DB-stored logging callback now stops it on every worker. (0634 NOTE'd it on the rc branch.)</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43323">#43323</a>: after one all-$0 member-spend flush, member rows froze while team totals kept rising.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43326">#43326</a>: reverts rc.1's top-N key cap. rc.1's Usage pages showed only the top 100 keys, and global export was blocked.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43331">#43331</a>, five regression fixes, including:<ul>
+<li>a replayed <code>redacted_thinking</code> block broke <code>prompt_caching</code> pinning, so each turn paid a fresh cache write;</li>
+<li><code>/v1/mcp/tools</code> returned snake_case schemas;</li>
+<li>DB config reloads leaked two background tasks every 30 seconds.</li>
+</ul>
+</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43342">#43342</a>: automatic caching added 2 cache marks on top of a client's own when <code>extra_body</code> hid the client's mark.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43400">#43400</a>: streaming <code>/v1/completions</code> with <code>include_usage</code> ended in a <code>MockValSer</code> error instead of usage, a regression since v1.94.0-rc.1.</li>
+<li><strong>Still open (checked 20:01Z):</strong> <a href="https://github.com/BerriAI/litellm/pull/43434">#43434</a> (Greptile P1), which restores code-registered callbacks the DB sync replaced.</li>
+<li>Without it, a callback registered in code (e.g. <code>langfuse_otel</code>) stops exporting after an admin adds and then deletes the same callback through the UI.</li>
+<li>#43428, the <code>main</code> version, is also open.</li>
+</ul>
+<h3>NOTE (not ranked; recorded so the next brief can dedupe)</h3>
+<p>I read the PR body for every merged item below unless it is marked &quot;(title only)&quot;. Open and closed states come from GraphQL at 20:01Z.</p>
+<p><strong>openai-agents-python <code>main</code>, merged, unreleased (latest 0.22.3, Sep 17):</strong></p>
+<ul>
+<li><strong><a href="https://github.com/openai/openai-agents-python/pull/5189">#5189</a> (17:14:15Z): snapshots silently lost nested durable files.</strong></li>
+<li>In Daytona, Blaxel and E2B tar snapshots, excluding an ephemeral <code>data/</code> also dropped <code>app/data/</code>.</li>
+<li>Exclusions are now workspace-rooted, and legacy fingerprints are compared with their original exclusions before a live workspace is cleared.</li>
+<li>It &quot;cannot recover bytes already omitted from an old snapshot&quot;.</li>
+<li><strong><a href="https://github.com/openai/openai-agents-python/pull/5188">#5188</a> (17:50:41Z):</strong> UnixLocal snapshots handle hardlinked files, and resume validates the archive before clearing the live workspace.</li>
+<li><strong><a href="https://github.com/openai/openai-agents-python/pull/5073">#5073</a> (16:57:28Z): wrong agent in <code>agent_end</code>.</strong></li>
+<li>After an in-response handoff, Realtime sessions emitted <code>agent_start(A)</code>, <code>handoff(A → B)</code>, <code>agent_end(B)</code>, which &quot;breaks per-agent pairing of start and end events&quot;.</li>
+<li><code>agent_end</code> now names A.</li>
+<li><strong>Handoffs, compaction and timeouts:</strong></li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/4835">#4835</a> (18:05:13Z): a failed session append during a fresh streamed handoff left <code>current_agent</code> on the pre-handoff agent.</li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/5197">#5197</a> (19:20:27Z): handoffs are recovered when compaction commits replacement history during cancellation. It extends the unreleased RunState schema 1.18.</li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/5196">#5196</a> (18:39:23Z): compaction replay sent output-only <code>created_by</code>, which failed the next request.</li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/5194">#5194</a> (18:41:59Z): after a late tool timeout, the SDK's generic error was validated against the tool's output schema, which aborted the run.</li>
+<li><strong>Other fixes:</strong></li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/5187">#5187</a>: provider stream errors were masked by transport-teardown failures.</li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/4807">#4807</a>: an MCP tools-cache race could keep a stale schema authoritative.</li>
+<li>#5193 and #5195 (voice and Realtime), #5186 (non-UTF-8 stderr from the Codex subprocess) and #4941.</li>
+<li>Docs: #5192 and #5201.</li>
+<li><strong>For BQAA:</strong></li>
+<li>Pair agent start and end events by the agent that started the turn.</li>
+<li>Sessions on ≤0.22.3 can show handoffs whose persisted state lags the live agent.</li>
+</ul>
+<p><strong>Cloudflare Agents <code>main</code>, merged, unreleased (npm <code>agents</code> 0.24.0 and <code>@cloudflare/think</code> 0.19.0, both Sep 18):</strong></p>
+<ul>
+<li><strong><a href="https://github.com/cloudflare/agents/pull/2383">#2383</a> (17:33:36Z):</strong> replayed terminals carry an <code>outcome</code> (<code>completed</code>, <code>aborted</code> or <code>recovering</code>). The sending tab no longer stays <code>submitted</code> forever after &quot;No response was generated&quot;.</li>
+<li><strong><a href="https://github.com/cloudflare/agents/pull/2384">#2384</a> (17:54:36Z):</strong> replay after a reconnect numbered only stored chunks, so &quot;<code>AB</code> became <code>ABB</code> and chunks streamed while offline were lost&quot;.</li>
+<li><strong><a href="https://github.com/cloudflare/agents/pull/2385">#2385</a> (17:33:40Z):</strong> Think retried errors raised after the stream had finished, so &quot;the answer was silently skipped&quot;.</li>
+<li><strong>Also:</strong> #2386 (turn-lifecycle edge cases), <a href="https://github.com/cloudflare/agents/pull/2387">#2387</a> (messenger follow-ups were dropped during long turns) and #2388 (<code>ai@^7</code> peer range; the sandbox coding-agent example now reports container death as a failure). #2389 is open.</li>
+<li><strong>For BQAA:</strong> key turn completion on the stream <code>outcome</code>. Replay duplication can inflate text and token counts on ≤0.24.0.</li>
+</ul>
+<p><strong>LangChain:</strong></p>
+<ul>
+<li><strong><a href="https://github.com/langchain-ai/langchain/pull/40864">#40864</a> (15:03:28Z):</strong> <code>AIMessage.invalid_tool_calls</code> now serialize as Anthropic <code>tool_use</code> blocks, so replayed <code>tool_result</code> blocks have parents and malformed calls stop breaking Anthropic conversations.</li>
+<li>Unreleased: <code>langchain-anthropic</code> is still 1.7.4 (Sep 23).</li>
+</ul>
+<p><strong>Codex:</strong></p>
+<ul>
+<li><strong>Codex prerelease <code>rust-v0.158.0-alpha.15.3</code>:</strong> GitHub prerelease published 19:18:13Z; npm 19:33Z–19:56Z.</li>
+<li>It is two commits past alpha.15.2:<ul>
+<li><a href="https://github.com/openai/codex/pull/48686">#48686</a> takes WebSocket headers and tool-call payload previews out of info logs (0634 NOTE'd it as not yet in any alpha);</li>
+<li>#48621 removes TUI follow-up prompt suggestions and the <code>tui.prompt_suggestions</code> option.</li>
+</ul>
+</li>
+<li>npm <code>alpha</code> now resolves to 0.158.0-alpha.15.3, a lower version than 0.159.0-alpha.9 (on npm since 06:50Z). <code>latest</code> stays 0.157.1.</li>
+<li>No progress note: this is not a material capability.</li>
+<li><strong><code>main</code>, not in any alpha yet:</strong></li>
+<li><a href="https://github.com/openai/codex/pull/48725">#48725</a> (15:03:58Z): Guardian keeps confirmed Code Mode messages as review context, and invalidates approvals when that context changes.</li>
+<li><a href="https://github.com/openai/codex/pull/48764">#48764</a>: tool-call events keep <code>mcpAppResourceUri</code> even when no display mode is set.</li>
+<li>#48772 (Unix sockets through long symlink paths).</li>
+<li>Below the bar: #48754, #48757, #48761, #48775, #48724 and #48727.</li>
+</ul>
+<p><strong>OpenAI SDKs (<code>main</code>, unreleased; <code>openai</code> 3.19.2 on PyPI, 7.23.0 on npm):</strong></p>
+<ul>
+<li><strong>openai-python <a href="https://github.com/openai/openai-python/pull/3967">#3967</a> and openai-node #2812 (about 19:15Z)</strong> add beta Agents types:</li>
+<li>vault credential metadata;</li>
+<li>an &quot;ultrafast&quot; Agents service tier;</li>
+<li>a <code>misalignment_policy_violation</code> error for session turns.</li>
+<li>These are SDK types only; I did not check API docs.</li>
+<li><strong>For BQAA:</strong> if Agents API sessions are traced, keep that error class separate from tool and model failures.</li>
+</ul>
+<p><strong>LiteLLM <code>main</code> (not in 1.103.0):</strong></p>
+<ul>
+<li><strong>Cost map:</strong></li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43440">#43440</a> (15:56:51Z) cuts <code>azure_ai/grok-4.6</code> input from $2.00 to $1.25 per 1M, following Azure's page. xAI, Vertex, OpenRouter and Bedrock list $2.00.</li>
+<li>#43446 (16:14:33Z) adds <code>azure_ai/MAI-Cyber-1-Flash</code>.</li>
+<li>LiteLLM downloads the latest price map at startup by default (as Agenta #7197 describes), so these reach default deployments on restart without a release.</li>
+<li><strong>#43449 (Rust Responses HTTP path)</strong> merged into the stacked branch <code>litellm_shared_route_lifecycle</code>, not <code>main</code>.</li>
+<li><strong>Open:</strong> #43443, #43445, #43454 and #43455 (A2A header forwarding, a v1.102.0 regression), #43452, #43451, #43457 and #43442.</li>
+</ul>
+<p><strong>opencode:</strong></p>
+<ul>
+<li><strong>Merged to <code>v2</code>:</strong> #51635 (14:17:26Z, retries transient failures on queued generation reads; title only) and #51713.</li>
+<li><strong>Closed unmerged:</strong> #51669 (v2 <code>permissions:</code> silently discarded), #51704, #51705, #51687 and #51700.</li>
+<li><strong>Open:</strong> #51707, #51712 (compaction output budget), #51714 and #51678.</li>
+</ul>
+<p><strong>Skyvern (sync PRs, title only):</strong> #8688 stops charging Task V3 action steps for calls refused before acting on the page. Also #8686 and #8687.</p>
+<p><strong>Open, analytics-adjacent (20:01Z):</strong></p>
+<ul>
+<li>openllmetry #4520: instrumentation must never swallow the wrapped call.</li>
+<li>llama_index #23274 and #23275 (choice-select parser accepts non-positive numbers), and #23276.</li>
+<li>promptfoo #11240 and #11242.</li>
+<li>Cline #14583 (sandboxed terminal).</li>
+<li>OpenHands #17738 (compaction vs the 60 s client timeout).</li>
+<li>Haystack #12987, anthropic-sdk-python #1954 and Inspect AI #5591.</li>
+<li>agno #10621 (response schema missing from model cache keys), #10623 and #10625.</li>
+<li>Stagehand #3061.</li>
+<li>Langfuse #17977 (OpenAI fast service tier).</li>
+<li>LangSmith SDK #3603 (PEM redaction).</li>
+<li>Mastra #25259 and Opik #8579.</li>
+</ul>
+<p><strong>Google (first-party; NOTE only; all open at 20:01Z):</strong> adk-python #7317 (stop sending exception text to the remote A2A peer), #7316 (non-UTF-8 bytes in <code>EditFileTool</code>) and #7312 (credential masking in the telemetry serializer; NOTE'd at 0634).</p>
+<p><strong>Below the bar:</strong> Mastra provider regeneration (<code>cceb9abb</code>), vercel/ai #20836 (Azure MAI-Transcribe-2), openai-python #3971 and #3972, openai-node #2815, and the Opik branch-build tags.</p>
+<h2>Academy</h2>
+<p><strong>Screen used (same as 0634):</strong> agent evaluation, cost, security or oversight evidence that produces a result BQAA could measure or log. Every rank below was read in full before ranking.</p>
+<p><strong>Coverage:</strong></p>
+<ul>
+<li><strong>No new arXiv mailing.</strong> The ceiling is still <code>2609.30268</code> (probed 19:54Z). The next mailing is Sunday 20:00 ET (Monday 00:00Z, 17:00 PT).</li>
+<li><strong>My own sweep:</strong></li>
+<li>20 arXiv API queries across all categories, for papers submitted Sep 15–27, none of them repeated from 0634's list, returned 111 unique papers.</li>
+<li>67 already appear in the catalog, seen-links, a brief, a pack, a run log, the vault or a prior writer's sweep.</li>
+<li>Of the 44 with no prior exposure, most are off-domain. I read 13 abstracts.</li>
+<li>I downloaded 4 PDFs and read 2 in full (21133 and 25237).</li>
+<li><strong>Prior exposure, disclosed:</strong></li>
+<li>21133 appears in no catalog item, seen-links entry, brief, pack, run log, vault note or prior sweep, by id.</li>
+<li>25237 appears only in brief text: scouted at Sat 1234, and read in full but held at Sat 1834, Sun 0034 and Sun 0634.</li>
+<li><strong>Priority pin <code>2609.02702</code></strong> (Trace-as-State v1) is intact and is <strong>not</strong> re-carded.</li>
+</ul>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.21133">arXiv 2609.21133</a>: The Stochastic Shift: A New Evaluation Paradigm for Text-to-SQL with AI Operators</h3>
+<p><strong>Authors:</strong> Tarfah Alrashed, Fatma Özcan, Per Jacobsson, Tal Neiman and Xianshun Chen, all Google. v1 17 Sep 2026 (cs.DB), 6 pages.</p>
+<ul>
+<li>The PDF still carries ACM template placeholders (&quot;Conference acronym 'XX&quot;), so no venue is stated.</li>
+<li><strong>First-party check:</strong> this is Google-authored research on BigQuery's AI operators, not a BigQuery Agent Analytics doc or blog. I rank it under the same reading as <code>arxiv-2609-24972</code> (Google Cloud AI Research). If Haiyuan reads the first-party rule to cover it, drop this card; the rest of the brief stands.</li>
+</ul>
+<p><strong>Full PDF read:</strong> §1–8 and the references, Table 1, Fig. 1.</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>The problem (§3).</strong> SQL with AI operators is not deterministic. A gold query filters reviews with <code>AI.IF('Determine if the following movie review is positive:', …)</code> and counts 9. An equivalent phrasing (&quot;Is this review positive?&quot;) counts 11, including all 9, and Execution Accuracy (EX) scores it 0.</li>
+<li><strong>The framework (§4, Fig. 1).</strong></li>
+<li>An LLM-based SQL Splitter separates the relational skeleton (the AI predicate replaced by <code>WHERE TRUE</code>) from the AI part.</li>
+<li>Full and split queries are executed on the real engine.</li>
+<li>An autorater scores overall, relational and AI similarity on a 1–5 scale (&gt;3 is correct), and names the primary error source.</li>
+<li><strong>Setup (§5.1).</strong></li>
+<li>The data is SemBench (55 queries across five scenarios over text, image and audio).</li>
+<li>A few-shot generator (gemini-3.1-pro-preview, temperature 1.0, no seed) wrote BigQuery (<code>AI.IF</code>, <code>AI.SCORE</code>, <code>AI.SEARCH</code>) and ThalamusDB (<code>NLfilter</code>, <code>NLjoin</code>) queries.</li>
+<li>The authors verified the outputs by hand: 70% correct on BigQuery and 80% on ThalamusDB.</li>
+<li>The same model runs the splitter and the autorater.</li>
+<li>Baselines: EX, and LLM-SQL-Solver's &quot;Miniature &amp; Mull&quot; and &quot;Explain &amp; Compare&quot; prompts, each also run with execution results added.</li>
+</ul>
+<p><strong>Key numbers (Table 1; Table 1's rates imply 25 correct / 11 flawed queries on BigQuery and 12 / 3 on ThalamusDB):</strong></p>
+<ul>
+<li><strong>EX:</strong></li>
+<li>true-positive rate 36.0% on BigQuery and 25.0% on ThalamusDB;</li>
+<li>accuracy 52.8% and 26.7%.</li>
+<li>It accepted a query missing a required <code>DISTINCT</code> because the database had no duplicates (§5.2).</li>
+<li><strong>LLM-SQL-Solver, Miniature &amp; Mull:</strong></li>
+<li>true-negative rate 100% on both, but it falsely rejected about 32% of correct queries (true-positive rate 68.0% and 66.7%);</li>
+<li>adding execution results made it worse (56.0% and 58.3%).</li>
+<li><strong>Explain &amp; Compare with execution results:</strong></li>
+<li>84.0% / 81.8% (true-positive / true-negative rate) on BigQuery, and 91.7% / 66.7% on ThalamusDB;</li>
+<li>it accepted <code>UNION DISTINCT</code> in place of the required <code>UNION ALL</code> because the results coincided.</li>
+<li><strong>The split framework:</strong></li>
+<li>BigQuery: true-positive rate 100.0%, true-negative rate 90.9%, accuracy <strong>97.2%</strong>;</li>
+<li>ThalamusDB: 91.7%, 100.0% and <strong>93.3%</strong>.</li>
+<li><strong>Open problems (§6):</strong></li>
+<li>choosing between a structured column and an AI operator: &quot;three bedrooms&quot; mapped to <code>number_of_rooms = 3</code>;</li>
+<li>choosing the data source or modality;</li>
+<li>queries that mix database columns with world knowledge;</li>
+<li>generating costly AI queries for questions that should be refused.</li>
+</ul>
+<p><strong>Caveats:</strong></p>
+<ul>
+<li><strong>Tiny n:</strong> 36 judged queries on BigQuery and 15 on ThalamusDB. ThalamusDB has only 3 flawed queries, so its true-negative rate moves in 33-point steps.</li>
+<li><strong>One model family does everything:</strong> it generates, splits and rates, at temperature 1.0 with no seed, and no repeat runs or variance are reported.</li>
+<li><strong>Labels are the authors' manual verification.</strong> The authors call SemBench's queries relatively simple.</li>
+<li><strong>Cost:</strong> no framework cost or latency is reported.</li>
+<li><strong>Artifacts:</strong> code and prompts are on figshare. I did not run them.</li>
+</ul>
+<p><strong>Why it ranks:</strong> it is the evaluation problem for the query shape BQAA users write over agent traces: SQL whose <code>WHERE</code> or <code>SELECT</code> calls a model. It gives a concrete, testable split. It is also the academic side of this window's LangWatch release, which puts judge functions inside a trace query language.</p>
+<p><strong>For BQAA:</strong></p>
+<ul>
+<li><strong>Do not grade AI-augmented SQL by result-set equality.</strong> Two correct AI predicates can return 9 and 11 rows.</li>
+<li><strong>Store AI-operator calls as separate lineage:</strong> operator, prompt text, model and connection, per query. That makes the relational skeleton regression-testable deterministically and the AI predicate testable semantically.</li>
+<li><strong>For natural-language-to-SQL features over <code>agent_events</code>:</strong></li>
+<li>report whether a query calls an AI operator;</li>
+<li>evaluate those queries with a split judge, not whole-query EX or a single whole-query LLM judge.</li>
+</ul>
+<h3>2. NEW rank: <a href="https://arxiv.org/abs/2609.25237">arXiv 2609.25237</a>: Trains but Doesn't Learn: A Post-Training Delivery Benchmark for LLM Agents as Forward-Deployed Engineers</h3>
+<p><strong>Authors:</strong> Weihang Ding (UC Berkeley IEOR) and Junfei Zhan (Imperial College London, corresponding). v1 21 Sep 2026 (cs.LG; also cs.AI and cs.CL), 12 pages. The arXiv comment says &quot;Accepted to EMNLP 2026 Industry Track&quot;.</p>
+<ul>
+<li><strong>Queue history:</strong> scouted at Sat 1234; read in full and held for the cap at Sat 1834, Sun 0034 and Sun 0634. 0634 asked this slot to rank it or drop it. I read it in full again and rank it.</li>
+</ul>
+<p><strong>Full PDF read:</strong> §1–6, the Ethics and Reproducibility statements, Appendices A–F, Tables 1–8, Figs. 1–3.</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>The plane.</strong> An LLM agent in the forward-deployed-engineer seat drives ten governed stages of a post-training delivery: intake, plan, config, schedule, train, eval, register, deploy, cost review and handoff.</li>
+<li>Each stage is scored by discrete predicates &quot;from platform-recorded facts, consuming none of the agent's own claims&quot; (§1–2).</li>
+<li>The oracle never reads the trained model.</li>
+<li>Appendix D gives every predicate, and Table 7 maps stage failures to labels: intake-misread, silent non-learning, cost-irresponsibility, irreproducibility and premature-rollout.</li>
+<li><strong>The central failure is &quot;trains but does not learn&quot; (TBDL).</strong> The train stage passes but the held-out eval does not (Eq. 1): a one-sided exact McNemar test plus a pre-registered margin of 0.06–0.08.</li>
+<li><strong>Hardware and models:</strong> real metered GPUs (L40S, A100, H200) and four open bases (Qwen3-8B/32B, Gemma-2-9B-it, Llama-3.3-70B).</li>
+</ul>
+<p><strong>Key numbers:</strong></p>
+<ul>
+<li><strong>Calibration (§3.1, Table 1).</strong></li>
+<li>Correct deliveries learn on every base (Δ ≈ +0.48, 12/12).</li>
+<li>A relabeling trap induces TBDL 12/12 across 8B–70B.</li>
+<li>An anytime-valid detector (an empirical-Bernstein e-process on a clean-probe loss gap, App. E) flags it 11/12 at a median step 250 of 300, with 0/36 false alarms.</li>
+<li>It misses the subtle dirty-data trap 0/11.</li>
+<li><strong>Pressure (§3.3, Table 3).</strong> Across the cheaper tier, gate-staging compliance fell from 1.00 (neutral) to 0.96 (deadline), 0.73 (authority) and 0.47 (sunk-cost).</li>
+<li>Under sunk-cost framing, Claude-Sonnet-4.6 scored 0.30 and Gemini-3.5-Flash 0.10.</li>
+<li>Claude Opus 5, GPT-5.6-luna and Gemini 3.7 Flash staged 360/360 deliverable tickets and refused 60/60 infeasible ones. This was a call-level probe.</li>
+<li><strong>Delivery (§3.4, Table 4).</strong> Four frontier agents ran 38 certified episodes.</li>
+<li>38/38 passed the acceptance metric, with 0 TBDL deliveries, 0 gate bypasses and 12/12 infeasible tickets refused.</li>
+<li>Yet <strong>31/38 metric-passing deliveries were rejected by the documented contract:</strong> schema-checked model cards 30/38, reconciled cost reports 29/38 and registry CI 19/38.</li>
+<li>Per arm: Opus 5 10/10, GPT-5.6-luna 10/10, DeepSeek V4-Pro 8/8 and Gemini 3.7 Flash 3/10 rejected.</li>
+<li>Reports reconciled when written in the documented flat shape. &quot;The arms that restructure the schema fail on shape, not on arithmetic.&quot;</li>
+<li>Handing agents the oracle-correct configuration: 24/24 pass acceptance, and <strong>22/24 are still rejected</strong>.</li>
+<li>The worst excluded-contract episode retrained 15 times, for 5.63 GPU-hours and $10.98, &quot;every signal green&quot;, and delivered a model no better than base.</li>
+<li><strong>Humans (§3.5, Table 5).</strong> Judgment residuals: GPT-5.6-luna 0.40, Claude Opus 5 0.35, DeepSeek V4-Pro 0.25 and Gemini 3.7 Flash 0.10. Two engineer-plus-assistant arms scored 0.06 and 0.09. No arm reaches zero.</li>
+</ul>
+<p><strong>Caveats (§6):</strong></p>
+<ul>
+<li>The work is post-training only and single-node, with six task groups (cluster df = 5).</li>
+<li>The human comparison is cross-grid.</li>
+<li>The flagship pressure result is call-level.</li>
+<li>The oracle's judgment labels are single-annotator, with no agreement statistics yet.</li>
+<li>The EMNLP acceptance comes from the arXiv comment only.</li>
+</ul>
+<p><strong>Why it ranks now:</strong> this window shipped real cases of cost and usage numbers that were wrong while every signal looked healthy (Agenta, LangWatch, LiteLLM). 25237 is the controlled version: an oracle built only from platform-recorded facts, and evidence that agent-written artifacts fail on schema rather than arithmetic.</p>
+<p><strong>For BQAA:</strong></p>
+<ul>
+<li><strong>Keep platform-recorded facts</strong> (metered cost, job ledger, registry state) <strong>in columns separate from agent-reported claims,</strong> and reconcile the two.</li>
+<li><strong>Validate the schema of agent-emitted artifacts</strong> (cost reports, model cards, manifests) as its own check. 22/24 still failed with the right configuration.</li>
+<li><strong>Use Table 7's stage-failure labels</strong> as a starting taxonomy for delivery-agent sessions.</li>
+<li><strong>Treat &quot;loss falls, every signal green&quot; as a known false-healthy state,</strong> and require a held-out check before a session is scored as successful.</li>
+</ul>
+<h3>Held (not re-read this slot)</h3>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.25299">2609.25299</a> &quot;Making Agents More Consistent&quot;.</strong></li>
+<li>Downloaded but not re-read; 0634's full read stands. Its finding: a trace gate that records argument <em>schemas</em>, not values, made 11 of 13 admitted wrong answers invisible.</li>
+<li>Held a second time because this window's themes are cost and judges.</li>
+<li>I recommend the next writer drop it from the active queue unless a content-capture item lands.</li>
+</ul>
+<h3>Scouted, abstract only (not rankable)</h3>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.25130">2609.25130</a> &quot;Impact Is Not Invalidation&quot;</strong> (single author; downloaded, not read in full).</li>
+<li>Five models asked whether a commit &quot;preserves behavior&quot; reached 0.29–0.33 precision.</li>
+<li>Asked whether one specific stored claim still holds, the same models reached 0.71–0.97.</li>
+<li>Changing only the question moved precision by 0.49 and 0.65. This is a judge-framing result, and <strong>the strongest candidate for next slot.</strong></li>
+<li><strong><a href="https://arxiv.org/abs/2609.29333">2609.29333</a>:</strong> LLM graders on two dual-graded CS exams (570 and 1,038 students).</li>
+<li>A &quot;strict grader&quot; preamble pushed 14 of 17 open-weights models out of the graded band.</li>
+<li>The best configuration's error (MAE 1.64/35) was below the two human graders' disagreement (2.61/35).</li>
+<li><strong><a href="https://arxiv.org/abs/2609.24194">2609.24194</a>:</strong> judge and reward-model scores track surface form. A public preference reward model picked a terse correct solution over a commented buggy one only 50.7% of the time. Removing the surface component does not repair the score.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.23959">2609.23959</a>:</strong> an open Jev-style readout (JevLite): one calibrated probability per option from one forward pass. It reached AUROC .974 at 64.5 ms per decision, matching an LLM judge, on synthetic scam calls. This is relevant because LangWatch's Instant Evals call TypeSafe Jev.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.21841">2609.21841</a> (EnterpriseVal):</strong> use-case gates (REJECT, CONDITIONAL or SCALE) from calibrated LLM-judge scores, via prediction-powered inference, piloted at a bank.</li>
+<li><strong>Other abstracts read:</strong> 18605 (PACT, compliance under pressure), 27535 (KITE), 22592 (AutoGym), 22664 (pen-test harness assurance), 18391 (SCA-Agent), 22056 (retrieval abstention) and 29001 (politeness judgments).</li>
+<li><strong>Still queued from 0634:</strong></li>
+<li>16487, 27277, 27064, 25911, 27857, 22111 and 24144;</li>
+<li>0034's scouted set: 28870, 20519, 29757, 30219 and 19825.</li>
+</ul>
+<h2>Six-week EV (through ~Nov 8)</h2>
+<ul>
+<li><strong>Cost-accounting correctness becomes release content (high).</strong></li>
+<li>Signals:<ul>
+<li>Agenta v0.121.4 (16 PRs, mostly cost and usage);</li>
+<li>LangWatch #8080, #7757, #8169 and #7921;</li>
+<li>LiteLLM #43323, #43326 and #43342;</li>
+<li>Letta #4671 (telemetry drop policy);</li>
+<li>25237's cost-report reconciliation.</li>
+</ul>
+</li>
+<li>Expect:<ul>
+<li>more &quot;unpriced&quot; markers instead of $0;</li>
+<li>provider-billed cost fields (OpenRouter <code>usage.cost</code>, <code>gen_ai.usage.cost</code>) preferred over computed ones;</li>
+<li>per-turn semantics for harness-reported cost.</li>
+</ul>
+</li>
+<li><strong>For BQAA:</strong> <code>cost_source</code> and <code>pricing_status</code> columns, and root totals recomputed across ingestion batches.</li>
+<li><strong>Judges as SQL functions over traces (medium-high).</strong></li>
+<li>Signals:<ul>
+<li>LangWatch 3.18.0 eval functions and Instant Eval jobs (dark by default);</li>
+<li>BigQuery <code>AI.IF</code> and <code>AI.SCORE</code> (21133);</li>
+<li>the SQL-over-traces vendors already carded (LangWatch's Aug workbench card).</li>
+</ul>
+</li>
+<li>Expect LangWatch to enable <code>release_instant_evals</code> more widely and publish pricing, and other vendors to add judge calls to their query languages.</li>
+<li><strong>For BQAA:</strong> persisted verdict tables keyed by trace, question and judge version; judge spend metered per query; and a split evaluation method for AI-operator SQL.</li>
+<li><strong>Harness cost semantics get patched at the adapter layer (medium).</strong></li>
+<li>Signals:<ul>
+<li>Agenta #7177 (Claude's <code>total_cost_usd</code> is a running total; codex-acp reported <code>.last</code>, not <code>.total</code>);</li>
+<li>#7185 (pi-ai dropped OpenRouter's billed cost);</li>
+<li>LangWatch #8169 (Codex tokens live only on turn spans).</li>
+</ul>
+</li>
+<li>Expect upstream fixes in the ACP adapters.</li>
+<li><strong>For BQAA:</strong> never sum a running-total cost field across events.</li>
+<li><strong>Runtime state bugs cluster around compaction, handoffs and replay (medium).</strong></li>
+<li>Signals:<ul>
+<li>openai-agents #4835, #5073, #5196 and #5197;</li>
+<li>Cloudflare #2383–#2385;</li>
+<li>Letta #4815;</li>
+<li>OpenHands #17738 and opencode #51712 (open).</li>
+</ul>
+</li>
+<li>Expect an openai-agents release after 0.22.3 and a Cloudflare <code>agents</code> release after 0.24.0 carrying these.</li>
+<li><strong>For BQAA:</strong> session analytics should tolerate duplicated replay chunks and compaction boundaries, and should pair agent start and end events by the agent that started the turn.</li>
+<li><strong>Watch list:</strong></li>
+<li><strong>LiteLLM:</strong> #43434 merging and a 1.103.x follow-up, plus any GitHub release notes for 1.103.0.</li>
+<li><strong>LangWatch:</strong> a <code>release_instant_evals</code> default flip or a public Instant Evals launch.</li>
+<li><strong>Agenta:</strong> the QA follow-ups (#7181 on a real Postgres).</li>
+<li><strong>Releases to watch for:</strong><ul>
+<li>openai-agents (after 0.22.3);</li>
+<li>Cloudflare <code>agents</code> and <code>@cloudflare/think</code>;</li>
+<li><code>langchain-anthropic</code> with #40864;</li>
+<li>Codex 0.158.0 stable (npm <code>alpha</code> is now 0.158.0-alpha.15.3);</li>
+<li>the OpenAI SDK Agents types.</li>
+</ul>
+</li>
+<li><strong>Carried from 0634:</strong> promptfoo, openllmetry and Opik releases carrying 0634's NOTE items.</li>
+<li><strong>arXiv:</strong> the Sunday 20:00 ET mailing (17:00 PT).</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>LangWatch 3.18.0 (NEW):</strong> LLM judges became SQL functions over traces, with persisted, joinable verdicts and metered spend (off by default at the tag). Its fixes show a cost drift check passing on empty-vs-empty and a 382M-token session billed to one PR.</li>
+<li><strong>Agenta v0.121.4 (NEW):</strong> 0 of 48,005 agent spans had a cumulative cost, and Claude Code's running <code>total_cost_usd</code> was booked per message. Store cost provenance and an explicit unpriced reason, and re-total traces after late batches.</li>
+<li><strong>2609.21133 (NEW):</strong> when SQL calls AI operators, result equality recognizes only 25–36% of correct queries. Evaluate the relational skeleton and the AI predicate separately (97.2% / 93.3%).</li>
+<li><strong>2609.25237 (NEW):</strong> an oracle built from platform-recorded facts rejected 31/38 metric-passing agent deliveries on contract (cost reports 29/38 failed on shape). Keep agent claims apart from recorded facts, and schema-check agent artifacts.</li>
+<li><strong>Letta Code v0.33.3 (progress):</strong></li>
+<li>stale post-compaction reads fixed;</li>
+<li>telemetry capped at 2,000 queued events (oldest dropped);</li>
+<li>external tools finish in follow-up turns;</li>
+<li>watch <code>letta-ai/letta-code</code>, not <code>letta-ai/letta</code>.</li>
+<li><strong>LiteLLM 1.103.0 (progress):</strong> <code>gen_ai.conversation.id</code> reaches a PyPI <code>latest</code> build, and member-spend and usage-view regressions are fixed. #43434 is still open, so code-registered callbacks can vanish after a UI add-then-delete.</li>
+<li><strong>NOTE cluster:</strong> unreleased runtime fixes in openai-agents (handoffs, compaction, <code>agent_end</code> naming, snapshot data loss), Cloudflare Agents (replay duplication, stream outcomes), LangChain #40864 and Codex. OpenAI SDKs add a <code>misalignment_policy_violation</code> session error.</li>
+</ul>
+<h2>Unconfirmed</h2>
+<ul>
+<li><strong>LangWatch Cloud timing and flag state.</strong></li>
+<li>Not confirmed: when these features reached LangWatch Cloud, and whether <code>release_instant_evals</code> is on for any Cloud project.</li>
+<li>Where I looked: the <code>langwatch@v3.18.0</code> release body; <code>featureFlag/registry.ts</code>, <code>instant-evals/access.ts</code>, <code>.env.example</code> and the REST route file <code>api/query/[[...route]]/app.v1.ts</code> at the tag; PR bodies #7611, #8198, #8201, #8208, #8216 and #8220.</li>
+<li>I checked only the route file for a flag check, not its middleware.</li>
+<li><strong>LangWatch numbers.</strong></li>
+<li>Not confirmed: the 98% vs 87% packed-agreement bench, the $0.0546 per million input tokens price, and the 382M-token / $212.61 attribution. All are the PRs' own.</li>
+<li>Where I looked: PR bodies #8201, #8220 and #8169.</li>
+<li><strong>Agenta numbers and deployment.</strong></li>
+<li>Not confirmed:<ul>
+<li>&quot;0 of 48,005&quot;, &quot;26 tokens over a 13-token call&quot;, $0.3087 vs $0.4786 and &quot;about 35% low&quot; (the PR authors' measurements);</li>
+<li>Docker image tags and Agenta Cloud deployment timing for v0.121.4;</li>
+<li>whether any backfill exists.</li>
+</ul>
+</li>
+<li>Where I looked: the release body and PR bodies #7175–#7203; PyPI <code>agenta</code> JSON.</li>
+<li><strong>LiteLLM 1.103.0 behavior.</strong></li>
+<li>Not confirmed: the runtime behavior claimed by #43343, #43323, #43326, #43331, #43342 and #43400. I ran nothing.</li>
+<li>Confirmed: the tag target, the compare against rc.1, the PyPI times, no GitHub release object, and #43434 and #43428 open at 20:01Z.</li>
+<li>Where I looked: the git refs API, the compare API, PyPI JSON and the PR bodies.</li>
+<li><strong>Letta #4721's pre-fix behavior after the revert.</strong></li>
+<li>Not confirmed at runtime. The revert's diff is the exact inverse (+85/−885 against +885/−85), which I checked.</li>
+<li>Where I looked: PR bodies and stats for #4721 and #4744, and the v0.33.3 release body.</li>
+<li><strong>2609.21133.</strong></li>
+<li>Not confirmed: the Table 1 rates beyond reading them. I did not run the figshare artifact.</li>
+<li>The implied denominators (25/11 and 12/3) are my arithmetic from the rates.</li>
+<li><strong>2609.25237.</strong></li>
+<li>Not confirmed: the EMNLP 2026 Industry Track acceptance (arXiv comment only). I did not visit the demo site.</li>
+<li><strong>Codex npm <code>alpha</code> history.</strong></li>
+<li>Not confirmed: which version the <code>alpha</code> tag pointed to before 19:34Z. npm keeps no tag history.</li>
+<li>Confirmed: that <code>alpha</code> now resolves below 0.159.0-alpha.9.</li>
+<li><strong>OpenAI Agents API.</strong></li>
+<li>Not confirmed: that the API itself exposes the service tier and error code. These are SDK types from #3967 and #2812.</li>
+<li>Where I looked: the two PR bodies.</li>
+<li><strong>Title-only NOTE lines.</strong></li>
+<li>Not confirmed beyond titles: Skyvern #8686–#8688 (sync PRs with no description) and opencode #51635 and #51713.</li>
+<li>Where I looked: commit titles, and the empty or unread PR bodies.</li>
+</ul>
+<h2>Housekeeping</h2>
+<p><strong>Slot and inputs</strong></p>
+<ul>
+<li><strong>Slot:</strong> late wake.</li>
+<li>This run's first clock read was 12:46:01 PT (19:46:01Z). Collection's tmux session was created at 12:45:51 PT. The label stays <strong>1234</strong>.</li>
+<li>Collection's merge line: <code>FB_MERGE slot=2026-09-27-1234 packs=11 raw=71 unique=62 drop_catalog=0 drop_seen=2 drop_both=0 fresh=60 (cand=59 low=1)</code>.</li>
+<li>Collection's Jev line: <code>JEV_SHADOW worth_running run conf=0.97</code> (shadow, log-only). This writer made no Jev calls.</li>
+<li><strong>Effort (effort=high test slot): the test likely did not run at high.</strong></li>
+<li><code>run.sh</code> passes <code>--effort high</code>. But this process's environment has <code>CLAUDE_CODE_EFFORT_LEVEL=max</code> and <code>CLAUDE_EFFORT=max</code>, which I read with Bash.</li>
+<li>Per <code>Maps/Decisions/2026-09-24-mac-cli-max-effort-defaults.md</code>, the settings <code>env</code> value outranks <code>--effort</code>, and <code>$CLAUDE_EFFORT</code> is that lock's own test of the effective level. So this run most likely ran at <strong>max</strong>, not high.</li>
+<li>The stream's init event does not record effort. I did not change effort.</li>
+<li>To test high, the lock's documented override is <code>--settings '{&quot;env&quot;:{&quot;CLAUDE_CODE_EFFORT_LEVEL&quot;:&quot;high&quot;}}'</code>.</li>
+<li><strong>Packs used (6 PACK_DONE, none opened wholesale):</strong> Agy 0632, Muse 0732, DSH 0832, Agy 0932, Muse 1032 and DSH 1132.</li>
+<li>I grepped each for PACK_DONE, its HN line, and LangWatch, Agenta, <code>3.18</code> and <code>0.121.4</code>. All four item patterns had 0 hits in all six.</li>
+<li>Agy 0632 landed during the 0634 merge. 0634 used it by grep, and nothing from it is re-pitched here.</li>
+<li><strong>Gaps:</strong></li>
+<li><strong>Agy 1232 was missing at merge.</strong><ul>
+<li>The prompt file existed at 12:40 PT, and its tmux session was running at 12:46.</li>
+<li>The pack landed at 12:46 PT (19:46Z) with PACK_DONE. Its stated window is 18:45:31Z → 19:45:31Z.</li>
+<li>I used it only through greps: status, window, HN line, ceiling, and the items Letta, <code>1.103.0</code>, <code>alpha.15.3</code> and #5197.</li>
+<li>It caught Codex alpha.15.3, #2388 and #5197, which match my sweep. It has no LangWatch or Agenta mention. No claim here rests on it alone.</li>
+</ul>
+</li>
+<li><strong>All packs missed LangWatch 3.18.0 and Agenta v0.121.4.</strong> Agenta is in my 22-repo extra sweep, not the 91-repo watchlist.</li>
+<li><strong>Social and other sources:</strong> I relied on the packs' labels for X, Reddit, LinkedIn and Papers with Code, and did not re-probe them. Medium was not used.</li>
+<li><strong>Fresh-list path used:</strong> <code>_runs/fb-2026-09-27-1234/fresh-items.md</code> (59 candidates), as the candidate checklist.</li>
+<li><strong>Fresh-list dispositions:</strong></li>
+<li><strong>Progress:</strong> F01 (Letta) and F09 (LiteLLM).</li>
+<li><strong>openai-agents NOTE:</strong> F05, F06, F07, F10, F11, F12, F13, F17, F46, F49 and F50.</li>
+<li><strong>Cloudflare NOTE:</strong> F08, F37, F38, F45 and F56.</li>
+<li><strong>LangChain NOTE:</strong> F26.</li>
+<li><strong>Codex NOTE:</strong> F14 and F54. Below the bar: F55, F58 and F59.</li>
+<li><strong>LiteLLM NOTE:</strong> F15, F32, F33, F34, F42, F52 and F57.</li>
+<li><strong>opencode NOTE:</strong> F03, F04, F21, F35, F36, F40, F41 and F51. F51 was already NOTE'd at 0634, so it is dedupe only.</li>
+<li><strong>Open elsewhere:</strong> F16, F18, F19, F20, F22, F23, F24, F25, F27, F28, F29, F30, F31, F39, F43 and F44.</li>
+<li><strong>Below the bar:</strong> F02, F47 and F48.</li>
+<li><strong>First-party NOTE:</strong> F60.</li>
+<li><strong>Carry list checked:</strong> F53.</li>
+<li><strong>Dropped as known (2):</strong> the ceiling line matches mine.</li>
+<li><strong>Writer-sourced, not in the fresh list:</strong></li>
+<li>LangWatch 3.18.0 and Agenta v0.121.4 (both NEW).</li>
+<li>Codex <code>rust-v0.158.0-alpha.15.3</code> and the npm tag check.</li>
+<li>OpenAI SDK #3967 and #2812.</li>
+<li>Skyvern #8686–#8688.</li>
+<li>Codex #48772 and #48775.</li>
+<li>openai-agents #5201 and Cloudflare #2388.</li>
+<li>The LiteLLM tag and compare work, and the LangWatch tagged-code checks.</li>
+<li>The PyPI <code>letta</code> metadata check.</li>
+<li>2609.21133, the 25237 decision and the arXiv sweep.</li>
+</ul>
+<p><strong>Pack corrections</strong></p>
+<ul>
+<li><strong>Stale states in the fresh list:</strong></li>
+<li>F17 (#5188) is listed open but merged at 17:50:41Z.</li>
+<li>F46 (#5197, #5195), open at DSH 1132, merged at 19:20:27Z and 18:45:40Z.</li>
+<li>F36 (#51704) is listed open and is now closed unmerged.</li>
+<li><strong>Wrong labels:</strong> F26 (#40864), F37 (#2384) and F38 (#2387) are merged but tagged <code>[WATCH]</code>.</li>
+<li><strong>Link bug:</strong> F56 links Cloudflare Agents #2383–#2388 as <code>livekit/agents/pull/…</code>. This is the same normalizer bug 0634 reported (F43, F48).</li>
+<li><strong>Prompt lead:</strong> &quot;#43449 Responses API path MERGED on main&quot; is not right. It merged into the stacked branch <code>litellm_shared_route_lifecycle</code>.</li>
+<li><strong>HN companions:</strong> the prompt expected <code>packs/_hn/</code> files for Muse 0732 and 1032. Only DSH files exist in <code>packs/_hn/</code> for this window (0832, 1132); Muse and Agy report HN inline.</li>
+</ul>
+<p><strong>Verified arXiv ceiling: <code>2609.30268</code></strong></p>
+<ul>
+<li><strong>Probed at 19:54Z:</strong> 30266–30268 return 200.</li>
+<li>30269, 30270, 30271, 30275, 30280, 30300, 30400, 31000, <code>2610.00001</code>, <code>2610.00010</code> and <code>2610.00100</code> return 404.</li>
+<li><strong>Priority pin <code>2609.02702</code>:</strong> base 200, v1 200 and v2 404. I re-read the title (&quot;Trace as State: Reasoning Traces as Conditional States for Long-Context Transformers&quot;). Intact, and not re-carded.</li>
+</ul>
+<p><strong>HN</strong></p>
+<ul>
+<li>All six window packs and Agy 1232 report <code>HN: hits=0 keep=0</code>.</li>
+<li><strong>My own re-run of <code>bin/hn-scan.py</code> since 13:30Z,</strong> with the same six queries and threshold, wrote only to <code>/tmp/fb1234sun/probe/</code>. Result: 0 hits and 0 errors.</li>
+<li><strong>Sanity check:</strong> the API's newest story was at 19:55:36Z, so it is live.</li>
+<li><strong>HN: hits=0 keep=0.</strong></li>
+</ul>
+<p><strong>Verification method</strong></p>
+<ul>
+<li><strong>GitHub API:</strong></li>
+<li>Release objects and dated tags, by GraphQL, for 91 watchlist repos plus 22 others since 13:30Z (at 19:46Z). A final pass since 19:40Z ran at 20:01Z.</li>
+<li>Default-branch commits since 13:30Z (46 commits in 12 repos).</li>
+<li>The compare API for LiteLLM <code>v1.103.0-rc.1...v1.103.0</code> and for Codex alpha.15 → alpha.15.1 → alpha.15.2 → alpha.15.3.</li>
+<li>The git refs API for the LiteLLM tags.</li>
+<li>The contents API for four LangWatch files at <code>langwatch@v3.18.0</code>, and code search.</li>
+<li>PR states for 51 items by GraphQL (20:01Z).</li>
+<li><strong>PR bodies:</strong> 81 fetched and read. Skyvern's three have no description.</li>
+<li><strong>Registries:</strong></li>
+<li>PyPI JSON for 82 packages, plus <code>agenta</code>, <code>letta</code> (with version metadata), <code>openai-agents</code>, <code>langchain-anthropic</code>, <code>langchain-core</code> and <code>openai</code>.</li>
+<li>npm for 66 packages, plus <code>agents</code>, <code>@cloudflare/think</code>, <code>@cloudflare/ai-chat</code> and <code>openai</code>, and the <code>@openai/codex</code> time and dist-tags.</li>
+<li>0 errors.</li>
+<li><strong>Academy:</strong></li>
+<li>20 arXiv API queries (111 unique papers since Sep 15), checked by id against the catalog, seen-links (with per-run appends), briefs, packs, run logs, the vault and prior writers' sweeps.</li>
+<li>13 residual abstracts read.</li>
+<li>4 PDFs downloaded to <code>/tmp/fb1234sun/pdf/</code>. 2 were read in full with <code>pdftotext</code> (21133 and 25237). 25299 and 25130 were extracted but not read.</li>
+<li>Every quoted number was checked against the cited table or section.</li>
+<li><strong>Search:</strong> no web search; only the arXiv API.</li>
+</ul>
+<p><strong>Excluded by rule:</strong></p>
+<ul>
+<li>No first-party BQAA content. ADK #7312, #7316 and #7317 are NOTE only.</li>
+<li>21133 is Google-authored BigQuery research, not a BQAA doc; it is disclosed above for Haiyuan's call.</li>
+<li>No Desk section and no GTM content.</li>
+<li>Crustdata and Fable were not used, and Medium was not cited.</li>
+<li>No re-admission of earlier sets:</li>
+<li>0634's Academy papers (17464, 28614) and NOTE list;</li>
+<li>the Sun 0034 set (LangChain.js 1.5.14, 19587, 23809) and the Sat 1834, 1234 and 0634 sets;</li>
+<li>Inspect 0.3.270 and 0.3.271, LiveKit 1.8.3, Mastra alpha.4 and Codex alpha.8/alpha.9 are not re-admitted;</li>
+<li>Codex #48686 appears only as NOTE (now in alpha.15.3);</li>
+<li>the priority pin is not re-carded.</li>
+</ul>
+<p><strong>Run limits:</strong></p>
+<ul>
+<li><strong>Volume:</strong> 6 catalog actions (4 NEW and 2 progress), about 45 NOTE lines and 15 scouted or held lines. Within 50 catalog items.</li>
+<li><strong>Re-attempts:</strong> three local commands failed and I re-ran them corrected. No network call was retried.</li>
+<li>Two <code>ugrep</code> regex-complexity errors, re-run as Python.</li>
+<li>One zsh glob no-match on an HN file pattern, re-run with <code>find</code>.</li>
+<li><strong>Other:</strong> $0 spent, 0 external messages and no background jobs. The downloads were 4 public arXiv PDFs and abs pages, and public JSON.</li>
+</ul>
+<p><strong>Scratch dir:</strong> <code>/tmp/fb1234sun/</code>, created fresh for this run. It reuses 0634's GitHub and registry sweep scripts, with a new arXiv query set (<code>abs/arxiv_sweep.py</code>).</p>
+<p><strong>Catalog:</strong></p>
+<ul>
+<li>437 / 111 / 113, read-only and untouched by me. SHA-256 <code>ef0dbf27d9d2454e…</code>.</li>
+<li>Expected after publish: <strong>441 items / 112 briefs / 114 runs</strong> (+2 Industry, +2 Academy, and 2 progress notes on existing items).</li>
+</ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW items (4):</strong></p>
+<ol>
+<li><strong>id:</strong> <code>langwatch-3-18-0-lwql-query-door-instant-evals-judge-functions-cost-attribution</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Industry</li>
+<li><strong>title:</strong> LangWatch 3.18.0 — LangWatchQL gets a public query door (REST /api/v1/query, CLI, MCP run_query) and LLM judge functions as SQL projections with persisted, metered verdicts (off by default at the tag); coding-agent PR cost split by declared branch; a metered-spend lane that read $0 fixed</li>
+<li><strong>primary URL:</strong> https://github.com/langwatch/langwatch/releases/tag/langwatch@v3.18.0 (2026-09-27)</li>
+<li><strong>card text:</strong> LangWatch's first app release since Aug 27 opens LangWatchQL to API keys through <code>POST /api/v1/query</code>, a <code>langwatch query</code> CLI and an MCP <code>run_query</code> tool, and adds judge functions (<code>eval</code>, <code>eval_score</code>, <code>eval_category</code>…) whose verdicts, judged by TypeSafe Jev, persist as a queryable <code>judgments</code> dataset and are metered on the gateway spend ledger; at the tag the <code>release_instant_evals</code> flag defaults to false and a classifier key is required. The same release fixes a governance metered-spend lane that &quot;has shown zero for every real organization since it shipped&quot; while its nightly drift check &quot;compared empty against empty and passed every night&quot; (#8080), splits long-lived coding-agent sessions' cost by the branch declared at call time after one reviewer-bot Codex session's 382M tokens and $212.61 landed on one pull request (#7757, #8169), and stops dropping metric values of exactly 0 (#7921).</li>
+</ul>
+<ol start="2">
+<li><strong>id:</strong> <code>agenta-0-121-4-trace-cost-token-rollups-pricing-markers-harness-usage</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Industry</li>
+<li><strong>title:</strong> Agenta v0.121.4 — agent-trace cost and token accounting rebuilt: roll-ups reach agent spans (0 of 48,005 had a cumulative cost), traces split across OTLP requests are re-totaled, unpriceable spans are marked instead of $0, and Claude Code / Codex harness usage is booked per turn</li>
+<li><strong>primary URL:</strong> https://github.com/Agenta-AI/agenta/releases/tag/v0.121.4 (2026-09-27; PyPI <code>agenta</code> 0.121.4)</li>
+<li><strong>card text:</strong> Sixteen PRs fix how Agenta records agent cost and tokens. The roll-up never gave an agent span a cumulative cost (&quot;measured: 0 of 48,005 spans&quot;) and double-counted summary spans (#7179). Traces arriving in several OTLP requests are now re-totaled from all stored spans (#7181), and spans that cannot be priced carry an <code>ag.meta.pricing</code> reason (<code>unknown_model</code>, <code>missing_token_split</code>, <code>custom_connection</code>…) instead of a silent $0 (#7178). The runner now books Claude Code's running <code>total_cost_usd</code> and Codex's per-turn usage per turn, where before each message showed the whole conversation's cost and Codex counted only a turn's last call with cached tokens dropped (#7177). The dashboard stops counting a trace that failed three levels deep as three failures and stops multiplying the rate by 100 twice (#7176).</li>
+</ul>
+<ol start="3">
+<li><strong>id:</strong> <code>arxiv-2609-21133-stochastic-shift-text-to-sql-ai-operators-evaluation</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> The Stochastic Shift — evaluating text-to-SQL that calls AI operators (BigQuery AI.IF, ThalamusDB NLfilter): Execution Accuracy recognizes only 25–36% of correct translations and a whole-query LLM judge falsely rejects about a third, while judging the relational skeleton and the AI predicate separately reaches 97.2% / 93.3% accuracy</li>
+<li><strong>arXiv:</strong> 2609.21133 — https://arxiv.org/abs/2609.21133</li>
+<li><strong>card text:</strong> Five Google authors show that once SQL embeds AI operators, two correct prompts can return 9 and 11 rows, so Execution Accuracy recognized only 36.0% (BigQuery) and 25.0% (ThalamusDB) of correct generated queries on SemBench, and LLM-SQL-Solver's counterexample prompt falsely rejected about 32%. Their framework splits each query into a relational skeleton and an AI part, executes both, and has an LLM rater score relational and AI similarity separately; it reached 97.2% and 93.3% accuracy (Table 1). Caveats: 36 and 15 judged queries, one model at temperature 1.0 generating, splitting and rating, author-verified labels, and no venue yet.</li>
+</ul>
+<ol start="4">
+<li><strong>id:</strong> <code>arxiv-2609-25237-trains-but-doesnt-learn-agent-delivery-contract</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Trains but Doesn't Learn — an oracle that scores ten delivery stages from platform-recorded facts, never the agent's claims: four frontier agents pass every metric gate on 38 certified post-training deliveries, yet 31/38 fail the delivery contract (model cards 30/38, cost reports 29/38, registry CI 19/38), and the oracle-correct configuration fixes none of it</li>
+<li><strong>arXiv:</strong> 2609.25237 — https://arxiv.org/abs/2609.25237</li>
+<li><strong>card text:</strong> A UC Berkeley and Imperial benchmark (EMNLP 2026 Industry Track, per arXiv) seats LLM agents as forward-deployed engineers on metered L40S, A100 and H200 GPUs, and scores ten governed stages &quot;from platform-recorded facts, consuming none of the agent's own claims&quot;. A calibrated anytime-valid detector flags severe train-but-don't-learn runs 11/12 mid-run with 0/36 false alarms. Claude Opus 5, GPT-5.6-luna, Gemini 3.7 Flash and DeepSeek V4-Pro pass acceptance 38/38 with 0 gate bypasses, but 31/38 deliveries fail the contract, mostly on report schema shape rather than arithmetic, and 22/24 still fail when handed the oracle-correct configuration; engineer-plus-assistant arms post lower judgment residuals (0.06, 0.09) than every agent (0.10–0.40). Caveats: post-training only, single-annotator oracle labels, and cross-grid human comparison.</li>
+</ul>
+<p><strong>Progress (2):</strong></p>
+<ul>
+<li><strong><code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code>:</strong></li>
+<li>Letta Code <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.3">v0.33.3</a> (npm 18:05Z, GitHub 18:12Z, PyPI <code>letta</code> 18:19Z; 37 changelog entries) makes these changes:<ul>
+<li>local stores stop serving pre-compaction messages when <code>conversation.json</code> keeps its modification time (#4815);</li>
+<li>the telemetry queue is capped at 2,000 events, dropping the oldest when the endpoint is unreachable (#4671);</li>
+<li>listener-registered external tools return a task ID after 10 seconds and deliver their result in a follow-up turn (#4763);</li>
+<li>the <code>memory</code> and <code>memory_apply_patch</code> tools are removed (#4745).</li>
+</ul>
+</li>
+<li>A fix that would report remote <code>Agent</code> tasks as completed only when the correlated child run persisted a reply (#4721) was reverted (#4744) before the tag. PyPI <code>letta</code> now points to <code>letta-ai/letta-code</code>; <code>letta-ai/letta</code> stopped at 0.16.8.</li>
+<li><strong><code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code>:</strong></li>
+<li>LiteLLM <a href="https://pypi.org/project/litellm/1.103.0/">1.103.0</a> reached PyPI <code>latest</code> (17:47Z; tag <code>v1.103.0</code> = <code>rc/1.103.0</code> head #43429; no GitHub release object). It is the first non-dev build where v2 OTel LLM spans carry <code>gen_ai.conversation.id</code> from <code>litellm_session_id</code> (#43343). It also carries:<ul>
+<li>deleted DB-stored logging callbacks actually stop (#43429);</li>
+<li>member spend no longer freezes after an all-$0 flush (#43323);</li>
+<li>rc.1's top-100-key cap on Usage views is reverted (#43326).</li>
+</ul>
+</li>
+<li>The follow-up that restores code-registered callbacks the DB sync replaced (#43434, Greptile P1) is still open. So 1.103.0 can silently stop a code-registered exporter after an admin adds and then deletes the same callback.</li>
+</ul>
+<p><strong>Headline claims (for citation checks):</strong></p>
+<ol>
+<li>Agenta's cost roll-up never gave an agent span a cumulative cost (&quot;measured: 0 of 48,005 spans&quot;); the fix shipped in Agenta v0.121.4. — https://github.com/Agenta-AI/agenta/pull/7179 (merged 2026-09-27 11:54Z; released https://github.com/Agenta-AI/agenta/releases/tag/v0.121.4, 2026-09-27 16:12Z)</li>
+<li>LangWatch 3.18.0 ships LangWatchQL judge functions (<code>eval</code>, <code>eval_score</code>, <code>eval_category</code>…) whose <code>release_instant_evals</code> flag has <code>defaultValue: false</code> at the release tag. — https://github.com/langwatch/langwatch/releases/tag/langwatch@v3.18.0 (2026-09-27; <code>platform/app/src/server/featureFlag/registry.ts</code> at the tag)</li>
+<li>On SemBench, Execution Accuracy recognized 36.0% (BigQuery) and 25.0% (ThalamusDB) of correct AI-augmented SQL translations, while the split-and-rate framework reached 97.2% and 93.3% accuracy. — https://arxiv.org/abs/2609.21133 (v1 2026-09-17; Table 1)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 27 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
