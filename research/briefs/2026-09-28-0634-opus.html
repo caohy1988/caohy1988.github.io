@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-28 · 6:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="Academy Silent Success 2609.30307 + ReVerPi 2609.31381; Progress Opik 2.2.82 + LiteLLM 1.104.0-rc.1 Langfuse v4.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-28-0634-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 6:34 AM PT · late-wake on-cadence · fresh-list path · effort max</p>
+    <article>
+<h1>Field Brief — 2026-09-28-0634: A release gate that passed on checks it never ran, paired evals that hide capped failures, Opik's never-attachable cold tier fixed, and LiteLLM's Langfuse callback moves to SDK v4 (RC)</h1>
+<p><strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>)
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, catalog and push.
+<strong>Slot:</strong> 2026-09-28-0634 (6:34 AM PT, Mon Sep 28). Late wake: launched ~07:00 PT on the 06:34 cadence. The label stays 0634.
+<strong>Effort:</strong> max. This is the default Mac CLI max effort; the effort test is marked DONE after 0034, and Collection launched without an override.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>Industry NEW: none.</strong> Releases were quiet all window: after Opik 2.2.82 and the LiteLLM RC (both around 08:00Z), every collector pack reported zero releases in its tracked repos. My own sweep of 70 GitHub repos, 41 npm packages and 52 PyPI packages found only three in-window releases:</li>
+<li>Opik 2.2.82.</li>
+<li>The GitHub release object for the LiteLLM 1.104 RC.</li>
+<li>Agenta 0.121.5, which is UI and templates only, so NOTE.</li>
+<li><strong>Academy NEW (2), both full PDFs read:</strong></li>
+<li><strong>Silent Success</strong> (<code>2609.30307</code>). A blocking release gate reported PASS for about two weeks. On the recorded run, one subgate had run 0 of its 2 checks and another 6 of 8. The gate counted violations only over the cases that produced a result, so absent data answered &quot;no violation&quot;. The fix is a third verdict, <em>unable to determine</em>, that fails the build. Two of the paper's nine cases are in LLM infrastructure:<ul>
+<li>A LiteLLM Redis TTL that was configured but never applied.</li>
+<li>A vLLM free-slot counter that climbed 7,500 above the cache's capacity.</li>
+</ul>
+</li>
+<li><strong>Completed Pairs Hide Capped Failures</strong> (<code>2609.31381</code>). Completed full-vs-projected pairs tie at 12/15 correct each. But the runner never ran the second arm whenever the first arm hit its request cap. With all 27 boundary runs counted, the success difference could be anywhere from −9 to +1 tasks.</li>
+<li><strong>Progress (2):</strong></li>
+<li><strong>Opik 2.2.82.</strong> The ClickHouse tiered-storage policy our 2.2.78 card listed as &quot;cold tier&quot; <strong>could never be attached to any table</strong> until this release (#8559). Experiment paging also reads about 3× fewer rows (#8575).</li>
+<li><strong>LiteLLM <code>v1.104.0-rc.1</code>.</strong> The GitHub release notes for the RC show #36741, which moves LiteLLM's <code>langfuse</code> callback to Langfuse SDK v4 over OpenTelemetry. PyPI metadata confirms it: the rc1 <code>proxy-runtime</code> extra pins <code>langfuse&gt;=4.7,&lt;5</code>, where 1.103.0 pinned <code>&lt;3</code>. It is an RC, so default installs stay on 1.103.0 until 1.104 goes stable.</li>
+<li><strong>NOTE only (merged, not shipped):</strong></li>
+<li><strong>Langfuse's metric-correctness fixes.</strong> OpenAI cache writes had been costed at $0. Anthropic 1-hour writes came out 37.5% low. Cancelled gateway calls got made-up ~$6 costs. Inputs over 1 MiB were dropped with no reason recorded. The export-freshness metric went silent when an export stalled. All of these are on <strong>staging only</strong>: Langfuse Cloud production was last deployed Sep 26 19:07Z, and the latest release is v4.46.0 from Sep 25.</li>
+<li><strong>Cloudflare Agents</strong> approval/continuation chain #2390–#2394 is on main. npm <code>agents</code> is still 0.24.0 from Sep 18.</li>
+<li><strong>vercel/ai #21585</strong> (MCP server identity in Codex tool names). The package hasn't been published since Sep 27.</li>
+<li><strong>pydantic-ai #8866</strong> (workspaces harness) is on main and unreleased.</li>
+<li><strong>Theme:</strong> measurement that reports &quot;fine&quot; because the missing part never reached the count. That covers both papers, Langfuse's fixes, and Opik's cold tier.</li>
+<li>No re-cards from the 0034, 1834, 1234 or earlier carded sets. Pin <code>2609.02702</code> is intact.</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<h3>NEW</h3>
+<p>None this slot. No release in the window shipped a material agent-observability or evaluation capability. The only stable releases were:</p>
+<ul>
+<li><strong>Opik 2.2.82:</strong> a patch, carried as Progress below.</li>
+<li><strong>Agenta 0.121.5:</strong> a UI and templates release, below the bar and carried as NOTE.</li>
+</ul>
+<h3>Progress</h3>
+<p><strong>P1 — Comet Opik 2.2.82</strong>, attached to <code>opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier</code>.</p>
+<ul>
+<li>Timestamps: PyPI <code>opik</code> 2.2.82 wheel 2026-09-28T07:51:56Z; npm <code>opik</code> 2.2.82 at 07:55:17Z (<code>latest</code>); <a href="https://github.com/comet-ml/opik/releases/tag/2.2.82">GitHub release</a> at 07:58:19Z.</li>
+<li>The compare <code>2.2.81...2.2.82</code> holds 4 commits: the version bump plus three PRs.</li>
+<li><a href="https://github.com/comet-ml/opik/pull/8559">#8559</a>: the Helm chart's <code>tiered_replicated</code> ClickHouse storage policy named its hot volume <code>hot</code>.</li>
+<li>ClickHouse only allows <code>MODIFY SETTING storage_policy</code> when the new policy contains the old policy's volume. Every table starts on the <code>default</code> policy, whose volume is also named <code>default</code>.</li>
+<li>So the policy &quot;could never be attached&quot;, and per the PR the tiered-storage feature &quot;has never been usable&quot;. The volume is now renamed to <code>default</code>.</li>
+<li>Tiered storage is off by default (<code>clickhouse.tieredStorage.enabled: false</code>), so default OSS, self-hosted and Docker installs never rendered the policy.</li>
+<li><strong>This corrects our 2.2.78 card, which listed a &quot;ClickHouse cold tier&quot; as shipped.</strong></li>
+<li><a href="https://github.com/comet-ml/opik/pull/8575">#8575</a> with the follow-up refactor #8578: the raw paging scan behind experiment-item reads (the un-aggregated branch) was being re-inlined about six times per page. It is now evaluated once.</li>
+<li>On a 100k-item local fixture, rows read per page fell from 1,239,899 to 412,185, and a page query from 0.83 s to 0.31 s.</li>
+<li>A 50-page read went from 14.48 s to 5.56 s (2.61×). #8578 reports about 3.96× on a deployed end-to-end raw read.</li>
+<li>Row sets were identical across all 50 pages, and end-to-end reads of sampled pages returned the same rows and totals.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> a storage capability named in release notes and present in the Helm chart could not be switched on at all. &quot;It's in the config&quot; is not evidence that it works, which is the same lesson as A1 below.</p>
+<p><strong>P2 — LiteLLM <code>v1.104.0-rc.1</code></strong> (prerelease), attached to <code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code>.</p>
+<ul>
+<li>The <a href="https://github.com/BerriAI/litellm/releases/tag/v1.104.0-rc.1">GitHub release object</a> was published 2026-09-28T08:01:07Z (<code>prerelease=true</code>; tag commit <code>a76395ec70</code>, Sep 27 08:02Z).</li>
+<li>PyPI <code>1.104.0rc1</code> had already gone up at 07:32:50Z. The 0034 brief NOTEd it as &quot;contents unknown&quot;; the GitHub notes now show what it contains.</li>
+<li><strong>What matters for observability is <a href="https://github.com/BerriAI/litellm/pull/36741">#36741</a>, <code>feat(langfuse)!</code>.</strong> It merged to main Sep 25 and is not in 1.103.0.</li>
+<li>LiteLLM's <code>langfuse</code> callback previously worked only with Langfuse SDK v2, which Langfuse has retired.</li>
+<li>Per the PR, a proxy with <code>success_callback: [&quot;langfuse&quot;]</code> and <code>langfuse&gt;=4</code> installed <strong>failed every request</strong> (<code>module 'langfuse' has no attribute 'version'</code>, HTTP 400 on chat completions).</li>
+<li>The callback now exports the generation and its child spans as OpenTelemetry spans. They go through a LiteLLM-owned provider, carry <code>langfuse.*</code> attributes, and use Langfuse's v4 OTLP route.</li>
+<li>It rejects SDK 2.x and 3.x at construction, and <strong>trace ids become 32 hex characters</strong>.</li>
+<li>Oversized spans (HTTP 413) are truncated with v2's marker and resent instead of being dropped.</li>
+<li>I verified this in PyPI metadata:</li>
+<li>1.104.0rc1's <code>proxy-runtime</code> extra pins <code>langfuse&gt;=4.7,&lt;5</code> and OpenTelemetry 1.33.1.</li>
+<li>1.103.0 pinned <code>langfuse&gt;=2.59.7,&lt;3</code> and OpenTelemetry 1.28.0.</li>
+<li>This is an RC: <code>pip install litellm</code> stays on 1.103.0 without <code>--pre</code>.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> at the 1.104 stable upgrade, LiteLLM→Langfuse traces switch to OTel spans with 32-hex trace ids. Check any downstream join that assumes the old trace-id format before that upgrade.</p>
+<h3>NOTE (below card bar)</h3>
+<p><strong>Langfuse metric-correctness fixes (NOTE, not shipped).</strong></p>
+<ul>
+<li>They merged to main 10:44–12:25Z and deployed to <strong>staging</strong> at 13:37Z.</li>
+<li>They are <strong>not in Langfuse Cloud production</strong>:</li>
+<li><code>prod-us</code> and <code>prod-eu</code> were last deployed 2026-09-26T19:07:40Z.</li>
+<li>The <code>production</code> branch is 12–19 commits behind these merges.</li>
+<li>They are not in a self-host release either; the latest is v4.46.0 from Sep 25.</li>
+<li>They become Progress on <code>langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown</code> once they ship.</li>
+</ul>
+<p>The PRs:</p>
+<ul>
+<li><a href="https://github.com/langfuse/langfuse/pull/17957">#17957</a>: OpenAI cache-write tokens (<code>input_cache_write_tokens</code>) had no price key, so they were <strong>costed at $0</strong>.</li>
+<li>Real gateway Codex traffic showed 227,060 cache-write tokens costed at $0.179, which was the output alone.</li>
+<li>50 price entries are fixed.</li>
+<li><a href="https://github.com/langfuse/langfuse/pull/17958">#17958</a>: Anthropic 1-hour cache writes were priced at the 5-minute rate, <strong>37.5% too low</strong>.</li>
+<li>The gateway's nested <code>cache_creation</code> object lost its TTL split.</li>
+<li>A staging request moved from $0.0385 to $0.0615.</li>
+<li><a href="https://github.com/langfuse/langfuse/pull/17959">#17959</a>: failed and cancelled gateway generations got usage inferred by tokenizing the request body.</li>
+<li><strong>Cancelled long Codex calls showed about $6 each</strong>, while the thread's real calls cost about $0.2.</li>
+<li>The v1 observations table and the v2 events table also disagreed on errored calls.</li>
+<li>Gateway generations now use provider-reported usage only. Stored rows are not backfilled.</li>
+<li><a href="https://github.com/langfuse/langfuse/pull/17960">#17960</a>: full-mode capture <strong>dropped every request body over 1 MiB as <code>input=null</code> with no reason given</strong>, which covered &quot;most long Claude Code / Codex sessions&quot;.</li>
+<li>The limit is now 5 MiB.</li>
+<li>Omitted inputs are tagged <code>langfuse.gateway.request.input_omitted</code> with a reason: <code>size_limit</code>, <code>content_encoding</code>, <code>invalid_json</code>, <code>record_limit</code> or <code>telemetry_buffer</code>.</li>
+<li><a href="https://github.com/langfuse/langfuse/pull/17956">#17956</a>: a <code>langfuse-environment</code> header or baggage value now sets the trace environment.</li>
+<li><a href="https://github.com/langfuse/langfuse/pull/17995">#17995</a> and <a href="https://github.com/langfuse/langfuse/pull/18005">#18005</a>: <code>langfuse.export.freshness_lag_seconds</code> sat flat at the lag buffer on every successful run and <strong>emitted nothing when an integration stopped</strong>. It is replaced by a scheduler-sampled <code>langfuse.export.staleness_seconds</code>.</li>
+</ul>
+<p><strong>Cloudflare Agents approval/continuation chain (NOTE, unreleased).</strong> All six PRs are on <code>main</code>; main HEAD is #2394's merge commit.</p>
+<ul>
+<li><a href="https://github.com/cloudflare/agents/pull/2390">#2390</a>: a child agent's stream error now survives eviction, so reconciliation no longer seals the failed run as <code>completed</code>. Before, a parent could report a failed task as a success.</li>
+<li><a href="https://github.com/cloudflare/agents/pull/2391">#2391</a>: tool input is kept when the approval request arrives before it. This covers AI SDK 7's <code>inputTextDelta</code>.</li>
+<li>#2392: approved tool calls that never ran are settled as <code>output-error</code>. Left unsettled, they made OpenAI-compatible providers reject every later request.</li>
+<li>#2393: continuations that fail before streaming now report an error frame, an <code>onChatResponse</code> with status <code>error</code>, and a terminal status.</li>
+<li>#2394: <code>useAgentChat</code> no longer loads history through the previous agent's URL and auth token after the agent name changes.</li>
+<li>#2379: the CDP spec keeps parameters and return values.</li>
+<li>Release state: npm <code>agents</code> 0.24.0 and <code>@cloudflare/think</code> 0.19.0 date from Sep 18, and 51 changesets are pending. There is no catalog card for Cloudflare Agents.</li>
+</ul>
+<p><strong>vercel/ai <a href="https://github.com/vercel/ai/pull/21585">#21585</a></strong> (main, 10:47Z). Codex MCP tool calls and results were emitted with bare tool names, so calls to different servers were indistinguishable. They are now named <code>mcp__&lt;server&gt;__&lt;tool&gt;</code>.</p>
+<ul>
+<li>The fix lives in <code>packages/harness-codex</code>, and <code>@ai-sdk/harness-codex</code> was last published as 1.0.130 on Sep 27 at 06:09Z, so it is unreleased.</li>
+</ul>
+<p><strong>Mastra</strong> (main, unreleased; the latest is <code>@mastra/core</code> 1.72.0-alpha.5 from Sep 28 04:25Z):</p>
+<ul>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25292">#25292</a>: in Studio, Approve and Decline did nothing for <code>createInngestAgent()</code> tool approvals. <code>InngestAgent.stream()</code> never emits <code>start</code>, so no run id was ever set.</li>
+<li>#25217: Inngest per-step processor hooks received an empty step history.</li>
+</ul>
+<p><strong>pydantic-ai <a href="https://github.com/pydantic/pydantic-ai/pull/8866">#8866</a></strong> (main, 13:56Z, +14,665/−6,099). Harness capabilities (<code>Coder</code>, <code>FileSystem</code>, <code>Shell</code>) now run through <code>ctx.workspace</code>, locally or in a sandbox. It is unreleased; the latest release is 2.51.0 from Sep 25. The Agy 0632 pack caught it.</p>
+<p><strong>Other main-only merges:</strong></p>
+<ul>
+<li><strong>cline:</strong> #14395 lets VS Code submit prompts after API errors. #14177 adds a telemetry label for background command failures with no exit code. No stable cline release followed; npm shows only a 3.0.65 nightly (12:30Z), and I did not check whether it includes them.</li>
+<li><strong>Opik <a href="https://github.com/comet-ml/opik/pull/8574">#8574</a></strong> (after 2.2.82). The cost-alert query now uses an explicit latest-version dedup instead of <code>FINAL</code>.</li>
+<li>All 23 <code>FROM spans FINAL</code> sites were replayed against production. Only this one changed; the other 22 kept <code>FINAL</code> because the rewrites were slower at scale (e.g., 10,006 ms → 37,118 ms).</li>
+<li>A useful method, but unreleased.</li>
+<li><strong>haystack #12995:</strong> pins <code>anyio&gt;=4.14.2</code> for CVE-2026-63374.</li>
+<li><strong>qwen-code:</strong></li>
+<li>#12855: managed-agent task list, +13,932 lines.</li>
+<li>#12616: bounded route-session rotation.</li>
+<li>#12895: unwedges batch runs after provider anomalies and bounds <code>maxCostUsd</code> by the worst case.</li>
+<li>#9845: honors <code>--bare</code> and <code>--safe-mode</code> in cross-session messaging.</li>
+<li>All are unreleased; the latest nightly is from Sep 26.</li>
+<li><strong>inspect_ai #5420:</strong> the computer tool no longer rejects click actions without a coordinate.</li>
+<li><strong>agno #9912:</strong> durable filesystem support in AgentOS, merged to the <code>feat/v3.1</code> branch, not main.</li>
+</ul>
+<p><strong>Agenta v0.121.5</strong> (GitHub 09:51:16Z, PyPI 09:51:57Z; no pack had it). It adds:</p>
+<ul>
+<li>An agent templates catalog and marketplace.</li>
+<li>A redesigned Publish drawer plus a Settings &gt; Channels page.</li>
+<li>A chart fix that stops the autoscaler from evicting single-replica stateful pods.</li>
+</ul>
+<p>A grep of all 146 commit messages found no trace, cost or eval change, so it stays below the bar for Progress on <code>agenta-0-121-4-…</code>.</p>
+<p><strong>google-adk:</strong> first-party, so NOTE-only by policy. No release this window; PyPI is still 2.10.0 from Sep 25.</p>
+<hr />
+<h2>Academy</h2>
+<h3>NEW A1 — <a href="https://arxiv.org/abs/2609.30307">Silent Success: A Release Gate That Passed on Checks It Never Ran, and Eight More</a> (arXiv 2609.30307, Dong Hyeon Jeon, independent researcher, cs.SE, v1 23 Sep 2026)</h3>
+<p><strong>Full PDF read:</strong> §1–9, 27 pages.</p>
+<p><strong>The gate (§3).</strong></p>
+<ul>
+<li>A blocking CI gate in front of a detection pipeline returned PASS in <strong>48 seconds</strong>. Its false-positive subgate had executed <strong>0 of its 2 checks</strong>, and its consistency section <strong>6 of 8</strong> (§3.1).</li>
+<li>The cause: one datastore wasn't initialized in that environment. Every spec that read it errored and was recorded as &quot;unavailable&quot;, which is an honest record.</li>
+<li>Both deciding keys went wrong from there:</li>
+<li>The first counted violations over <em>the cases that had produced a result</em>. The failed cases had already been removed, so the count was zero and zero meant pass.</li>
+<li>The second compared a &quot;no answer&quot; sentinel against <code>False</code>, found them unequal, and read that as &quot;no inconsistency&quot; (§3.2–3.3).</li>
+<li>Five layers each behaved reasonably, and together they held a false pass for about two weeks of green builds (§3.4).</li>
+</ul>
+<p><strong>The repair (§3.5).</strong></p>
+<ul>
+<li>A third verdict, <em>unable to determine</em>, that fails the build.</li>
+<li>A coverage key comparing the evaluated population with an expected count derived from the case definitions, not from a constant.</li>
+<li>The sentinel test changed from &quot;is false&quot; to &quot;is not true&quot;.</li>
+<li>Evaluated-versus-expected counts printed per section.</li>
+</ul>
+<p>The build went red on the same 6-of-8 it had been passing, and only turned green again at 8/8 and 7/7. Of 11 regression tests written for the repaired rule, <strong>6 failed against the old code</strong>, each asserting that a population of zero had scored a pass.</p>
+<p><strong>What stayed unfixed (§3.6).</strong> A detector elsewhere was firing with a margin of 0.000177 percentage points, and the repaired gate still can't see that.</p>
+<p><strong>Eight more cases (§4).</strong> Two are public LLM-infrastructure cases:</p>
+<ul>
+<li><strong>LiteLLM <a href="https://github.com/BerriAI/litellm/pull/35934">#35934</a>.</strong> <code>default_redis_ttl</code> was configured, parsed and stored on the cache object but never applied to Redis writes. The effective TTL stayed at 60 s regardless of configuration.</li>
+<li><strong>vLLM <a href="https://github.com/vllm-project/vllm/pull/51228">#51228</a>.</strong> <code>num_free_slots</code> was credited on every decode step for releases that returned nothing. Over six steps it rose 7,500 above the cache's 8,192-slot capacity, and <code>can_allocate</code> admitted an input of <code>cache_size + 1</code>.</li>
+<li>Both fix PRs were opened by the author in August and are <strong>still open</strong> as of 2026-09-28 (GitHub API).</li>
+</ul>
+<p><strong>The common form and the remedy.</strong></p>
+<ul>
+<li>All nine cases promote a weaker claim to a stronger one, and none runs the other way (Fig. 1). Examples: unobserved to absent, configured to in effect, released to freed.</li>
+<li><strong>Seven of nine would have been caught by a single query, command or comparison</strong> (Table 2).</li>
+<li>Rule R8 (§6.1): &quot;A check that counts violations must also count itself.&quot; That means:</li>
+<li>Report the evaluated population beside the verdict.</li>
+<li>Derive the expected population from the definitions.</li>
+<li>Add a failing third value.</li>
+<li>Test with an input in which nothing runs.</li>
+<li>§6.2 adds: type every zero as <em>unviolated</em>, <em>unreachable</em> or <em>unexecuted</em>, because &quot;an untyped zero is not evidence&quot;.</li>
+<li>§7 applies this to data-quality tools (Schelter et al.): a completeness metric computed over a population that had rows removed before the check still reports complete.</li>
+</ul>
+<p><strong>Companion paper <a href="https://arxiv.org/abs/2609.30308">2609.30308</a> (full PDF read)</strong> tests these prescriptions on the same deployment snapshot.</p>
+<ul>
+<li>The deployment's verification decisions read only values the system had written itself. One decision rests on 24 values, all written by the system (30308 §3.2). In the same deployment, 0 of 124,432 time-series rows came from observation, even though five source labels name measuring instruments (30307 §2.3).</li>
+<li>Grading rows by provenance raised classified coverage from <strong>36.1% to 98.4%</strong> of 194,620 rows (Table 3). A single write ingress refused 3,070 unattributable writes (Table 4).</li>
+<li>Neither changed either verification decision. The repaired rows and the 32 rows the decisions actually read don't intersect (Fig. 1).</li>
+<li>One verifier read 0 of the 45 rows it was meant to check. <code>ORDER BY time DESC LIMIT 8</code> put 69,788 later rows in front of them (§6, K3).</li>
+</ul>
+<p><strong>Limitations the author states (§8).</strong></p>
+<ul>
+<li>The nine cases were fitted after the fact.</li>
+<li>There is no denominator: the same person found, and upstreamed fixes for, both external cases.</li>
+<li>The deployment is anonymized and checkable only against the author's own snapshot.</li>
+<li>The author committed <strong>11 further instances</strong> of the pattern while writing, inside tooling built to prevent it.</li>
+<li>The C1 claim covers the two keys that decided that one run, not every key in the gate.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Every evaluator, health-check or eval-gate row should carry <code>evaluated_count</code> and an <code>expected_count</code> derived from definitions, plus a verdict enum whose <code>undetermined</code> value fails closed.</li>
+<li>A zero-violation result over an empty or filtered population is a coverage gap, not a pass.</li>
+<li>The companion paper adds a check on <em>reach</em>: confirm which rows a decision actually reads, not just how well the table is labelled.</li>
+</ul>
+<h3>NEW A2 — <a href="https://arxiv.org/abs/2609.31381">Completed Pairs Hide Capped Failures: A ReVerPi Case Study of Selective Context Projection</a> (arXiv 2609.31381, Guangzhe Zhang, independent researcher, cs.AI, v1 25 Sep 2026)</h3>
+<p><strong>Full PDF read:</strong> §1–7 and Appendices A–F.</p>
+<p><strong>Setup (§3, Table 1).</strong></p>
+<ul>
+<li>ReVerPi extends the Pi coding harness (v0.84.2).</li>
+<li>In outgoing requests it replaces older, large tool observations with a 1,024-byte head/tail excerpt plus a content-addressed handle. An observation qualifies when it is at least 10 KiB, has been sent in two completed requests, and is neither the most recent one nor an error.</li>
+<li>The model can call <code>search_evidence</code> or <code>recover_evidence</code>, sharing a 3-call allowance.</li>
+<li>A capture phase seals a common prefix. Full (F) and projected (P) continuations then replay the same tape, each with a 12-request cap.</li>
+<li>The model label is the proxy-reported <code>deepseek-flash</code>, at low effort.</li>
+</ul>
+<p><strong>The stop rule (§3.3).</strong></p>
+<ul>
+<li>The runner stopped a pair whenever the first arm didn't <em>complete</em>. A wrong final answer counted as completing; hitting the cap didn't.</li>
+<li>So the probability of observing the companion arm after a first-arm cap is exactly zero (Eq. 2).</li>
+<li>Adjusting for the first-arm outcome can't recover the missing arms, because the positivity assumption fails (App. A.3).</li>
+</ul>
+<p><strong>Key numbers (§5, Fig. 2, Tables 2–3).</strong></p>
+<ul>
+<li>The campaign: 86 runs, 641 model requests, 8.2M tokens (74.9% of input cached).</li>
+<li>The 76 paired or capture runs broke down as:</li>
+<li>44 finished before any observation qualified.</li>
+<li>5 stopped during capture.</li>
+<li>27 reached a verified intervention boundary: 15 completed pairs and 12 stopped pairs.</li>
+<li><strong>Completed pairs tie at 12/15 correct per arm.</strong></li>
+<li>Of the 12 stopped pairs, 10 hit the first-arm cap with the companion never run. In the other 2, full completed and projected then capped.</li>
+<li>Counting all 27 boundary runs (Table 3):</li>
+<li>Full: 14 correct, 6 known failures, 7 never run.</li>
+<li>Projected: 12 correct, 12 known failures, 3 never run.</li>
+<li>The projected-minus-full success difference lies in <strong>[−9, +1] tasks of 27</strong> (−33.3 to +3.7 points).</li>
+<li>The first-arm cap rate was 20.0% when full ran first and 58.3% when projected ran first (Table 2).</li>
+</ul>
+<p><strong>Cost within the 11 pairs where both arms succeeded (§5.4, Table 5).</strong></p>
+<ul>
+<li>Projection used 25% fewer logical tokens in aggregate (1,267,036 → 949,774).</li>
+<li>But the median pair's token ratio was 1.292, and 7 of 11 pairs used more. Dropping one pair turns the aggregate ratio to 1.077.</li>
+<li>Suffix requests rose from 35 to 55.</li>
+<li>Cached input fell by 407,680 tokens while uncached input rose by 89,684, so whether projection saves money depends on prices.</li>
+</ul>
+<p><strong>The selector (§5.3, Table 4).</strong> A size-threshold rule chooses when to project; it was fitted on 4 of the pairs.</p>
+<ul>
+<li>It ties always-full at 3 failures in 17 runs.</li>
+<li>That tie rests on a fitting pair. On the 13 runs outside fitting, it adds 1 failure and spends 8.6% more tokens.</li>
+</ul>
+<p><strong>One trace (§5.5).</strong></p>
+<ul>
+<li>In one task, projection retrieved the archived text yet used all 12 requests (237,629 suffix tokens) with no answer. Full answered in 3.</li>
+<li>Its two quota refusals were logged with <code>isError=false</code>, because Pi marks a tool failure only when <code>execute</code> throws. The mismatch was fixed after the campaign in ReVerPi PR 15.</li>
+</ul>
+<p><strong>Limitations (§6, Table 6).</strong></p>
+<ul>
+<li>The questions were investigator-authored and adaptively built.</li>
+<li>Each arm had one stochastic continuation, and the model label is proxy-reported.</li>
+<li>The adapter is read-only rather than the full Pi product.</li>
+<li>Raw requests and invoices are not distributed.</li>
+<li>The findings describe this recorded campaign, not population effects.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>In experiment tables, an arm the runner never executed should be a row with an <em>unknown</em> outcome, not a missing row. A cap is a known failure.</li>
+<li>Report request counts and cached, uncached and output token categories next to totals.</li>
+<li>Don't treat a harness's <code>is_error</code> flag as the only tool-failure signal. Here a refusal went out as a success.</li>
+</ul>
+<h3>Scouted, not ranked (cap reached)</h3>
+<p><strong>Full PDF read:</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.30308">2609.30308</a> <strong>Empty Intersection.</strong> The companion to A1, summarized there. Provenance coverage went from 36.1% to 98.4% with neither decision moving. It has the same single-deployment, self-measured limits.</li>
+<li><a href="https://arxiv.org/abs/2609.30137">2609.30137</a> <strong>Screen Before You Serve</strong> (Nubank, with Guardrails AI, which makes the simulator).</li>
+<li>Across 4 production versions, simulated and production version-level evaluator scores correlate at Pearson 0.74 and Kendall 0.67. A naive LLM simulator scored −0.09 and −0.33 (App. E, Table 5).</li>
+<li>Simulated users are far wordier: median 111 user words vs 19 in production (App. C).</li>
+<li>Live A/Bs (Table 2):<ul>
+<li>Card Management vs Card Delivery: self-service +4.90 pp [4.08, 5.71], tNPS +36.69 [32.81, 40.57].</li>
+<li>The screened Qwen3.5-122B-A10B vs the incumbent: self-service +8.82 pp [7.95, 9.69], tNPS −1.21 (not significant), p95 latency −25%.</li>
+</ul>
+</li>
+<li>Caveats:<ul>
+<li>The rank agreement rests on 4 versions.</li>
+<li>The first A/B changes the whole agent, not just the simulation.</li>
+<li>The simulator's vendor co-authored the paper.</li>
+</ul>
+</li>
+<li>The authors warn that simulated traces must match production schemas, identifiers and telemetry, &quot;or export and reconciliation work can erase the iteration gains&quot;. That point is directly relevant to BQAA.</li>
+<li>Strong candidate for a later slot.</li>
+<li><a href="https://arxiv.org/abs/2609.30328">2609.30328</a> <strong>When Is a Multi-Agent Code Judge Actually Grounded?</strong> (WiML at NeurIPS 2026).</li>
+<li>This is a one-page extended abstract. MARCH ties the two candidate solutions on 78–95% of comparisons.</li>
+<li>Two label-free signals come from its own logs: identical proposer questions for both solutions (76.6% of comparisons) and 80.7% checker agreement.</li>
+<li>Gating on the first signal raises accuracy from 20.7% to 36.9% while still answering 50.6% of comparisons. The direct judge scores 73.4%.</li>
+<li>Too thin to rank, and the arXiv abstract's &quot;80 condition-by-cell measurements&quot; doesn't match the PDF's &quot;54 experimental cells&quot;.</li>
+</ul>
+<p><strong>Abstract only:</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.30813">2609.30813</a>: claim admission in shared agent memory. Once an uncontested false belief is in memory, it is asserted in 0.97–0.99 of probes.</li>
+<li><a href="https://arxiv.org/abs/2609.30345">2609.30345</a>: a security context layer vs Claude Code on 28 cloud investigations. It names a &quot;sample-and-generalise&quot; failure: the agent enumerates part of a population, then asserts an unhedged universal.</li>
+<li><a href="https://arxiv.org/abs/2609.30514">2609.30514</a>: Inquesto Score for voice-agent reliability.</li>
+<li><a href="https://arxiv.org/abs/2609.30662">2609.30662</a>: &quot;LLM Parkinsonism&quot;, i.e. token-inefficient persistence.</li>
+<li><a href="https://arxiv.org/abs/2609.30830">2609.30830</a>: AGATE provenance gate with forensic replay, across DSH, OpenCode and OpenClaw.</li>
+<li><a href="https://arxiv.org/abs/2609.31422">2609.31422</a>: Active Provenance Gate for multi-agent debate.</li>
+<li><a href="https://arxiv.org/abs/2609.31215">2609.31215</a>: DIAL position-debiased judges.</li>
+</ul>
+<p><strong>Title/abstract screen, pack carries:</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.29167">2609.29167</a>: IndicBankBench. Strict pass^3 is 43.7–58.2% vs 60–74% at-least-once.</li>
+<li><a href="https://arxiv.org/abs/2609.29050">2609.29050</a>: SLCA-GRPO.</li>
+<li><a href="https://arxiv.org/abs/2609.31473">2609.31473</a>: Game Arena.</li>
+<li><a href="https://arxiv.org/abs/2609.31590">2609.31590</a>: AgentWorld.</li>
+<li><a href="https://arxiv.org/abs/2609.30967">2609.30967</a>: MoMHa.</li>
+<li><a href="https://arxiv.org/abs/2609.30541">2609.30541</a>: AutoResearch at production scale.</li>
+<li><a href="https://arxiv.org/abs/2609.30798">2609.30798</a>: voice-agent evaluation survey.</li>
+<li><a href="https://arxiv.org/abs/2609.30216">2609.30216</a>: Jev in the Wild, already scouted Sep 25.</li>
+<li><a href="https://arxiv.org/abs/2609.29474">2609.29474</a>: CodeGraph, the HF net-new item; off-bar.</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ul>
+<li><strong>&quot;Unable to determine&quot; becomes a first-class verdict.</strong> This slot shows three versions of the same failure: a CI gate passing on zero evaluated cases (A1), a freshness metric that goes silent when an export stalls (Langfuse #17995/#18005), and experiment tables that drop arms the runner never ran (A2).</li>
+<li>The bet: evaluator and gate tooling adds denominators and a failing third state.</li>
+<li>For BQAA the cost is one verdict enum and two count columns.</li>
+<li>Expected value: high.</li>
+<li><strong>Cost figures are being corrected at the source, so historical cost rows are wrong.</strong></li>
+<li>Langfuse had $0 OpenAI cache writes, 37.5%-low 1-hour Anthropic writes, and made-up ~$6 cancelled calls, with no backfill.</li>
+<li>ReVerPi's shorter prompts cut cached input by 407,680 tokens while adding 89,684 uncached.</li>
+<li>An observer should store cache-read, cache-write and uncached token categories separately, flag inferred versus provider-reported usage, and record which price table produced each cost.</li>
+<li>Expected value: medium-high.</li>
+<li><strong>Agent-SDK approval and continuation state is queued to ship.</strong> Candidates are the Cloudflare <code>agents</code> chain, Mastra's Inngest approvals, Vercel's Codex MCP identity and pydantic-ai workspaces.</li>
+<li>Once released, expect new terminal-status and approval-settlement events worth a stable schema slot.</li>
+<li>Expected value: medium. Tracking cost is low; upgrade each to Progress when its release lands.</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>Silent Success 2609.30307 (NEW):</strong> give every verdict evaluated and expected counts plus an <code>undetermined</code> state that fails. A zero over an empty or filtered population is a gap, not a pass.</li>
+<li><strong>Completed Pairs 2609.31381 (NEW):</strong> store arms the runner never ran as rows with unknown outcomes, and count caps as failures. Report requests and cache categories, not just total tokens.</li>
+<li><strong>Opik 2.2.82 (Progress):</strong> the cold tier listed at 2.2.78 could never be attached until now. Experiment paging now reads about 3× fewer rows.</li>
+<li><strong>LiteLLM v1.104.0-rc.1 (Progress):</strong> the Langfuse callback becomes OTel spans on SDK v4 with 32-hex trace ids. Check joins that assume the old trace-id format before the stable upgrade.</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What was not confirmed</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Langfuse #17956–#17960 and #17995/#18005</td>
+  <td>Whether and when these reach Langfuse Cloud production or a self-host release. At ~14:00Z they are on staging only.</td>
+  <td>GitHub releases (latest v4.46.0); deployments API (<code>prod-us</code>/<code>prod-eu</code> last 2026-09-26T19:07:40Z, staging 13:37Z); compare <code>production...&lt;merge sha&gt;</code> (ahead 12–19)</td>
+</tr>
+<tr>
+  <td>LiteLLM PyPI <code>1.104.0rc1</code> vs GitHub <code>v1.104.0-rc.1</code></td>
+  <td>That the PyPI RC was built from tag commit <code>a76395ec70</code>. I only confirmed that its dependency pins match #36741 (<code>langfuse&gt;=4.7,&lt;5</code>, OTel 1.33.1).</td>
+  <td>PyPI JSON <code>requires_dist</code> for 1.104.0rc1 and 1.103.0; <code>git/ref/tags/v1.104.0-rc.1</code></td>
+</tr>
+<tr>
+  <td>LiteLLM #36741 &quot;every request fails&quot;</td>
+  <td>The pre-fix failure (HTTP 400 with <code>langfuse&gt;=4</code>) comes from the PR's description; I did not reproduce it.</td>
+  <td>PR #36741 body</td>
+</tr>
+<tr>
+  <td>Opik #8575/#8578 speed-ups</td>
+  <td>The local-fixture numbers and the &quot;~3.96× deployed&quot; figure come from the PR bodies; not reproduced.</td>
+  <td>PR bodies</td>
+</tr>
+<tr>
+  <td>2609.30307 external cases</td>
+  <td>Whether the LiteLLM TTL bug and the vLLM slot-counter bug still exist on current main. Both fix PRs, opened by the paper's author, are still open.</td>
+  <td>GitHub PR API, 2026-09-28</td>
+</tr>
+<tr>
+  <td>2609.30307 / 2609.30308 deployment</td>
+  <td>Anonymized; the figures are checkable only against the author's snapshot. This is the authors' own stated limitation.</td>
+  <td>§2.6 and §8 of both papers</td>
+</tr>
+<tr>
+  <td>2609.30328</td>
+  <td>The arXiv abstract says &quot;80 condition-by-cell measurements&quot; and the PDF says &quot;54 experimental cells&quot;. The cell behind &quot;4.4% vs 43.7%&quot; isn't identified. Scouted only, not claimed.</td>
+  <td>arXiv API abstract; PDF p. 1</td>
+</tr>
+<tr>
+  <td>Agenta v0.121.5</td>
+  <td>Only the commit messages were grepped (146 commits); I didn't read the diffs.</td>
+  <td>GitHub compare <code>v0.121.4...v0.121.5</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Everything ranked in Industry Progress and Academy was confirmed against the sources listed. Those are the GitHub release, compare, pull and deployment APIs, npm <code>time</code>/<code>dist-tags</code>, PyPI JSON, and the full arXiv PDFs.</p>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Packs used:</strong></li>
+<li>Five came via <code>fresh-items.md</code> and were not read wholesale: <code>muse-pack-2026-09-28-0132.md</code>, <code>dsh-pack-2026-09-28-0232.md</code>, <code>agy-pack-2026-09-28-0332.md</code>, <code>muse-pack-2026-09-28-0432.md</code> and <code>dsh-pack-2026-09-28-0532.md</code>. All were PACK_DONE at merge.</li>
+<li><code>agy-pack-2026-09-28-0632.md</code> landed PACK_DONE at 07:06 PT, after the 07:00 fresh-list merge. I only grep-checked it:<ul>
+<li>0 releases.</li>
+<li>pydantic-ai #8866 → NOTE.</li>
+<li>Ceiling 2609.31620.</li>
+<li>One HF net-new item, 2609.29474, which is off-bar.</li>
+</ul>
+</li>
+<li><strong>Gaps:</strong></li>
+<li>No collector hours are missing.</li>
+<li><strong>Watchlist gap:</strong> neither Agenta nor LangWatch appears in any of the six window packs (0 mentions), although both were carded Sun 1234. Agenta v0.121.5 turned up only in my own sweep. Suggestion for Collection: add <code>Agenta-AI/agenta</code> and <code>langwatch/langwatch</code> to the collectors' tracked repos.</li>
+<li><strong>Verified arXiv ceiling: 2609.31620.</strong></li>
+<li>The abs page returns 200; it's cs.CV &quot;FuseReg&quot;, off-bar. <code>2609.31621</code> returns 404.</li>
+<li>The Mon 28 Sep new listings for cs.AI/SE/CL/MA/LG/DB/CR top out at 2609.31619; I parsed 664 titles.</li>
+<li>This is the same batch as 1834 and 0034. The next announcement is Mon ~17:00 PT.</li>
+<li>Pin <code>2609.02702</code> is intact (31 catalog hits).</li>
+<li><strong>Verification method:</strong></li>
+<li><code>gh api</code>: releases, compare, pulls, pull files, deployments, branches and git refs.</li>
+<li><code>npm view</code> for <code>time</code> and <code>dist-tags</code>.</li>
+<li>PyPI JSON for upload times and <code>requires_dist</code>.</li>
+<li>arXiv API and listing HTML.</li>
+<li>Full reads with <code>pdftotext</code> of 2609.30307, 2609.31381, 2609.30308, 2609.30137 and 2609.30328.</li>
+<li>Catalog greps for every candidate ID: 0 hits for 30307, 31381, 30308, 30137 and 30328.</li>
+<li><strong>Independent sweep since 07:40Z:</strong></li>
+<li>Coverage: 70 GitHub repos, 41 npm packages and 52 PyPI packages. Every lookup of a real source returned a last-publish time.</li>
+<li>Three names on my own list were wrong (<code>openai/openai-agents-go</code>, <code>sourcegraph/cody</code>, and the npm name <code>@ai-sdk/codex-cli</code>). They 404 as nonexistent; they are not failed lookups of real sources. The real Codex package, <code>@ai-sdk/harness-codex</code>, was checked separately.</li>
+<li>In-window hits:<ul>
+<li>Opik 2.2.82 (GitHub, PyPI and npm).</li>
+<li>The LiteLLM GitHub <code>v1.104.0-rc.1</code> release object.</li>
+<li>Agenta v0.121.5 (GitHub and PyPI).</li>
+<li>Below the bar: four <code>opencode-ai</code> dev snapshots and cline <code>3.0.65-nightly</code>.</li>
+</ul>
+</li>
+<li>Claude Code is still 2.1.283 (Sep 25).</li>
+<li><strong>Fresh-list path used:</strong> <code>_runs/fb-2026-09-28-0634/fresh-items.md</code>, with 49 candidates and 7 dropped as already seen. Dispositions:</li>
+<li>F01 → P1; F02 → P2.</li>
+<li>NOTE:<ul>
+<li>Langfuse: F10, F11, F15, F16, F17, F21.</li>
+<li>Cloudflare: F05, F19.</li>
+<li>Mastra: F13.</li>
+<li>cline: F03, F08.</li>
+<li>Opik: F04.</li>
+<li>haystack: F23.</li>
+<li>qwen-code: F06, F07, F12, F14, F18.</li>
+<li>Others: F09 (inspect_ai), F20 (agno, v3.1 branch).</li>
+</ul>
+</li>
+<li>F34 is superseded by #8866 landing on main, so NOTE.</li>
+<li>Hygiene or below the bar: F22, F24–F33, F35, F37, F40, F44 and F48.</li>
+<li>Opens, below the bar: F36, F38, F42, F45 and F49.</li>
+<li>F39, F41, F43 and F46 are zero-release attestations. They agree with my sweep except for Agenta, which no collector tracks.</li>
+<li>F47 is test-only.</li>
+<li>vercel/ai #21585 was dropped as seen; it goes to NOTE because it's unreleased.</li>
+<li><strong>HN:</strong> the source was dropped fleet-wide on 2026-09-27. There are no <code>packs/_hn/</code> files in window and 0 HN keeps.</li>
+<li><strong>Late wake:</strong> launched ~07:00 PT on the 06:34 cadence; the label stays 0634.</li>
+<li><strong>Effort:</strong> max, the default. No override.</li>
+<li><strong>Catalog baseline at start:</strong> 446 items, 114 briefs and 116 runs. Max brief <code>2026-09-28T0034</code>.</li>
+<li><strong>JEV_SHADOW:</strong> pre-launch was skipped because this is a fixed-schedule run (Q8). Collection runs the post-card citation <code>research_check</code>.</li>
+<li><strong>Tooling pitfalls, repeated this slot:</strong></li>
+<li>zsh <code>set -- $spec</code> doesn't word-split, which produces fake GitHub 404s. The 0034 brief logged this too. Use <code>bash -c</code>.</li>
+<li>zsh expands an unquoted <code>======</code> argument as <code>=cmd</code>, which fails with &quot;not found&quot;. Quote separators.</li>
+<li>Per the repeat-lesson rule, the vault note proposes a skill diff instead of adding another <code>forbidden.md</code> line.</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<pre><code class="language-yaml">new:
+- id: arxiv-2609-30307-silent-success-gate-passed-checks-never-ran
+  tag: Academy
+  title: &quot;Silent Success — a blocking release gate passed for about two weeks on checks it never ran (0 of 2 false-positive checks, 6 of 8 consistency checks) because absent data answered “no violation”; the fix is a third verdict that fails&quot;
+  arxiv: &quot;2609.30307&quot;
+  url: https://arxiv.org/abs/2609.30307
+  card: &gt;-
+    The gate counted violations only over cases that produced a result, so a datastore outage left an empty population
+    that scored PASS in 48 s (§3); adding &quot;unable to determine&quot;, plus evaluated-vs-expected counts derived from the
+    case definitions, turned the build red on the same 6/8 (§3.5). Eight more cases include a LiteLLM Redis TTL
+    configured but never applied (#35934) and a vLLM free-slot counter 7,500 above capacity (#51228); 7 of 9 needed only
+    one query, command or comparison (Table 2). The companion 2609.30308 shows provenance coverage rising from 36.1% to
+    98.4% moved neither verification decision; limits: nine cases found by one observer, anonymized deployment.
+- id: arxiv-2609-31381-completed-pairs-hide-capped-failures-context-projection
+  tag: Academy
+  title: &quot;Completed Pairs Hide Capped Failures (ReVerPi) — a 12/15-vs-12/15 tie in completed full/projected pairs becomes a −9 to +1 task range once runs whose second arm was never executed are counted&quot;
+  arxiv: &quot;2609.31381&quot;
+  url: https://arxiv.org/abs/2609.31381
+  card: &gt;-
+    The Pi-harness runner skipped the companion arm whenever the first arm hit its 12-request cap, so 10 of 27 boundary
+    runs had an unexecuted arm and completed-pair analysis hid capped failures (§3.3, Table 3). Among the 11 jointly
+    correct pairs, context projection cut aggregate tokens 25% but raised the median pair's tokens 29%, requests 35→55,
+    and cut cached input by 407,680 tokens while adding 89,684 uncached (Table 5); a fitted selector's tie with always-full rested on
+    a fitting pair (Table 4). Single-model, adaptively built campaign of 86 runs.
+progress:
+- parent: opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier
+  text: &gt;-
+    Opik 2.2.82 (PyPI 07:51Z, npm latest 07:55Z, GH 07:58Z Sep 28). #8559: the chart's tiered_replicated ClickHouse
+    policy named its hot volume &quot;hot&quot;, so it could never be attached to any table — per the PR the tiered-storage
+    feature &quot;has never been usable&quot; (off by default); renamed to &quot;default&quot;. #8575/#8578: the experiment-items raw
+    paging scan now runs once, cutting rows read per page from 1,239,899 to 412,185 (50-page read 14.48 s → 5.56 s).
+- parent: litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport
+  text: &gt;-
+    LiteLLM v1.104.0-rc.1 (GH prerelease 08:01Z Sep 28; PyPI 1.104.0rc1 07:32Z) carries #36741: the langfuse callback
+    moves from Langfuse SDK v2 to v4, exporting generations as OpenTelemetry spans on the v4 OTLP route with 32-hex
+    trace ids and rejecting SDK 2.x/3.x. Per the PR, a proxy with success_callback langfuse and langfuse&gt;=4 installed
+    previously failed every request; the rc1 proxy-runtime extra now pins langfuse&gt;=4.7,&lt;5 (1.103.0: &gt;=2.59.7,&lt;3). RC only.
+headline_claims:
+- claim: &quot;A blocking release gate reported PASS for about two weeks, including on a run where one subgate had executed 0 of its 2 checks and another 6 of 8, because its violation count was computed only over cases that produced a result.&quot;
+  url: https://arxiv.org/abs/2609.30307
+  date: 2026-09-23
+- claim: &quot;In ReVerPi's campaign the 15 completed full/projected pairs tied at 12/15 correct, but counting all 27 boundary runs bounds projection's success difference between −9 and +1 tasks because the runner skipped the second arm after a first-arm cap.&quot;
+  url: https://arxiv.org/abs/2609.31381
+  date: 2026-09-25
+- claim: &quot;LiteLLM 1.104.0rc1's proxy-runtime extra pins langfuse&gt;=4.7,&lt;5 (1.103.0 pinned langfuse&gt;=2.59.7,&lt;3), reflecting #36741's migration of the langfuse callback to Langfuse SDK v4 over OpenTelemetry.&quot;
+  url: https://github.com/BerriAI/litellm/releases/tag/v1.104.0-rc.1
+  date: 2026-09-28
+</code></pre>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 28 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
