@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-25 · decision queue + kill conditions + receipt lines (0xShoopy), after code decides done / replay check</strong></span>
+      <span>Updated <strong>2026-09-27 · done receipt with NOT VERIFIED + open risks, and disproof review (Mori), after decision queue / code decides done</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -320,12 +320,13 @@
       <li><strong>Haiyuan accepts</strong> intent/spec when the change is consequential.</li>
       <li><strong>EM launches implementer</strong> via <code>grok-tmux-run</code> + stream-json + watchdog; prompt points at the committed <code>plan.md</code>.</li>
       <li><strong>Implementer</strong> builds, runs the repo’s one-command tests, commits, pushes, opens the PR — does not wait for reviewers.</li>
-      <li><strong>EM requests Astra + Fable</strong> on the PR URL independently (blind dual-LGTM). Local CLI review is optional extra, never a gate.</li>
+      <li><strong>EM requests Astra + Fable</strong> on the PR URL independently (blind dual-LGTM), each prompted for <a href="#disproof-review">attempted disproof</a>. Local CLI review is optional extra, never a gate.</li>
       <li><strong>EM triages</strong> — P0/P1 block dual LGTM; P2s get a fix pass on the same branch/session id. Recurring findings go into <code>CLAUDE.md</code> / a skill, not another one-off FIX prompt.</li>
       <li><strong>Dual LGTM</strong> → ping product owner. Merge only if Haiyuan asked (or a standing order for that repo).</li>
       <li><strong>File vault</strong> — Ship/builds or Ship/rfc note with PR URL, session ids, follow-ups.</li>
       <li><strong>Next independent slice</strong> starts without waiting on org APPROVE of the previous one.</li>
     </ol>
+    <p class="note" id="disproof-review"><strong>Reviewers attempt disproof with explicit rejection criteria (2026-09-27 · <a href="https://x.com/0xjmori/status/2104192305146032271">Mori · Harness Engineering: How to Build AI Agents That Actually Work</a>):</strong> each blind reviewer asks <em>“What would make this unacceptable?”</em>, not <em>“Does this look good?”</em>. Before reading the diff it names 2–3 rejection criteria from the task contract (intent/spec/plan done-when). Then it checks the change against that contract, searches for missing cases, tests unsupported claims and tries to break the result. FAIL returns evidence (file:line, command + output, failing input); PASS lists what was tried. Astra and Fable stay blind to each other; P0/P1 still block dual LGTM.</p>
 
     <h3>Clay plays (always on)</h3>
     <ul>
@@ -569,6 +570,7 @@ ask → Manage Bot
     <p class="note"><strong>pre_tool local policy:</strong> deny→stop; ask→CoS/Haiyuan; allow→proceed. Honor if <code>verdict</code> confidence ≥ floor (0.55); else CoS. <strong>Never authorizes send/pay/merge.</strong></p>
     <p class="note"><strong>Company-in-a-Box shadow gates (2026-09-23):</strong> <code>research_check</code> + <code>completion_check</code> always return <code>honor: false</code> / <code>shadow: true</code> (per-gate <code>gate_modes</code> in <code>router.json</code>) — log the verdict, never block. Promote to active after Three-Run Proof. <strong>Live worker menu</strong> on <code>intake</code>: optional state <code>available_workers</code> / <code>unavailable</code> so callers only offer workers that exist right now (e.g. Mac offline → drop <code>coding_em</code> or escalate). Metrics to track later: routing accuracy, research escapes, false completion, unnecessary human interruptions, recovery. Source: <a href="https://x.com/unicodef1wn/status/2102375891875581966">unicodef1wn · AI Company-in-a-Box</a>.</p>
     <p class="note" id="code-decides-done"><strong>Code decides done (2026-09-25 · Lab <a href="https://github.com/newbie0413/simply">simply</a>):</strong> a task is done only when a concrete, deterministic check passes: tests green, expected file exists, commit pushed to the remote, live URL returns HTTP 200. Agent self-reports and Jev <code>completion_check</code> are <strong>advisory only</strong> and never declare done on their own. If the check fails or cannot run, report the exact gap (see <a href="#retry-ceiling">retry ceiling</a>). Lock: <code>Maps/Decisions/2026-09-25-code-decides-done-and-replay-check.md</code>.</p>
+    <p class="note" id="done-receipt"><strong>Done receipt: NOT VERIFIED + open risks in every done receipt (2026-09-27 · <a href="https://x.com/0xjmori/status/2104192305146032271">Mori · Harness Engineering: How to Build AI Agents That Actually Work</a>):</strong> final done reports (Github Bot PR/job reports, Manage’s own non-trivial reports) use a short receipt: <code>OBJECTIVE</code> · <code>CHANGED</code> · <code>VERIFIED</code> (only checks that actually ran, each with evidence: exit code, CI URL, HTTP 200, commit) · <code>NOT VERIFIED</code> (what was not checked; never omitted) · <code>RISKS</code> (open risks) · <code>APPROVAL NEEDED</code>. It summarizes what the harness can prove happened, not what the model claims, and reuses the handoff Verified / Assumptions / Waiting-approval fields rather than adding a new block. Field Briefs keep their existing Unconfirmed section. Lock: <code>Maps/Decisions/2026-09-27-0xjmori-harness-receipt-and-disproof-review.md</code>.</p>
     <p class="note">CoS packet rule (CyrilXBT): break missions into small packets + verify — <strong>Jev picks packet owner / route; Grok/Mac execute</strong>. Lab KEEP candidate only: <strong>jev-browser</strong> (Playwright + Jev click decisions) — do <em>not</em> install Playwright yet.</p>
 
     <h3 id="jev-session">Live session (2026-09-20)</h3>
@@ -695,7 +697,7 @@ ask → Manage Bot
       <li>☐ Default asks go to Manage Bot; Field Brief / Coding EM rooms used for visible handoffs</li>
       <li>☐ Jev router <code>mode: active</code>; honor Choice when confidence ≥ floor; logs under <code>jev/logs/</code></li>
       <li>☐ Handoffs carry artifact path per <code>Maps/Contracts/manage-handoffs.md</code> + a <a href="#handoff-packet">packet</a> (new Coding EM kicks); bug jobs link a repro before implement</li>
-      <li>☐ Done = a deterministic check passed (tests / file / pushed commit / HTTP 200); Jev <code>completion_check</code> advisory only</li>
+      <li>☐ Done = a deterministic check passed (tests / file / pushed commit / HTTP 200); Jev <code>completion_check</code> advisory only; done reports use the <a href="#done-receipt">receipt</a> with NOT VERIFIED + open risks</li>
       <li>☐ New routines pass <strong>Three-Run Proof</strong> (incl. a replay regression check before skill/prompt or Jev shadow→active changes) before Active; promotion also needs <strong>rollback tested + receipt complete</strong>; Monday sync includes kill review + weekly receipts (Haiyuan spot-checks one artifact)</li>
       <li>☐ Asks waiting on Haiyuan live in the <a href="#decision-queue">decision queue</a> (irreversible/judgment only; one re-raise at 3 days); every routine prompt has a <a href="#kill-condition">Kill condition</a> line and writes a <a href="#receipt-line">receipt line</a> each run</li>
       <li>☐ Bot charters end with <strong>GREEN / YELLOW / RED</strong> reversibility (RED = Haiyuan)</li>
@@ -703,7 +705,7 @@ ask → Manage Bot
       <li>☐ Long fires declare <strong>run limits</strong>; demote autonomy when quality drops</li>
       <li>☐ Auto-review intent list checked after Duplicate (<code>Maps/Hooks/auto-review-personal-rules.md</code>)</li>
       <li>☐ Coding slices have committed <code>intent.md</code> / <code>spec.md</code> / <code>plan.md</code> before implement</li>
-      <li>☐ Reviewers only after PR URL; <strong>blind</strong> dual LGTM ≠ merge</li>
+      <li>☐ Reviewers only after PR URL; <strong>blind</strong> dual LGTM ≠ merge; reviewers <a href="#disproof-review">attempt disproof</a> with 2–3 rejection criteria</li>
       <li>☐ Ambiguous asks clarified with Haiyuan (no silent misroute)</li>
       <li>☐ <a href="/research/harness-lab/">Lab</a> KEEPs applied or filed as follow-up</li>
       <li>☐ Collect crons: Agy ≡0 / Muse ≡1 / DSH ≡2 at <code>:32</code></li>
