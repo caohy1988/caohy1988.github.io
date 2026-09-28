@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "id": "anthropic-sdk-1-9-0-claude-sonnet-5-5-cache-miss-diagnostics-ga-between-tools-thinking",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Claude Sonnet 5.5 + Anthropic SDK 1.9.0 (Python) / 0.129.0 (TS) — prompt-cache miss reasons ship as typed response fields (model/system/tools/messages changed, with missed-token counts); Sonnet 5.5 thinking blocks become account-bound and are silently dropped when replayed from another account",
+      "html": " <a href=\"https://github.com/anthropics/anthropic-sdk-python/releases/tag/v1.9.0\">release</a> — Sending diagnostics.previous_message_id makes the response report why the prompt-cache prefix wasn&#x27;t reused: model_changed, system_changed, tools_changed or messages_changed (each with cache_missed_input_tokens), plus previous_message_not_found or unavailable; a null reason means the diagnosis is still pending. It was a beta from May 13, went GA on the API Sep 23, and is typed on the stable Message in the Sep 28 SDKs. Sonnet 5.5 ($2/$10 per MTok, $0.20 cache reads, 1M context) rejects forced tool choice, replaces disabled thinking with between_tools, and drops thinking blocks sent from another account while the request still succeeds. Claude Code 2.1.284, Vercel @ai-sdk/anthropic 4.0.67 and Inspect 0.3.272 shipped day-one support. <a href=\"/research/briefs/2026-09-28-1234-opus.html\">Full brief</a>.",
+      "added": "2026-09-28T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-30137-screen-before-you-serve-simulation-production-cx-agents",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Screen Before You Serve (Nubank) — tool-boundary user simulation ranks 4 deployed agent versions like production (Pearson 0.74, Kendall 0.67 vs −0.09/−0.33 for a naive simulator); a simulation-screened open-weight model raised self-service rate 8.82 pp in a live A/B",
+      "html": " <a href=\"https://arxiv.org/abs/2609.30137\">arXiv:2609.30137</a> · <a href=\"https://arxiv.org/pdf/2609.30137\">PDF</a> — SNOWGLOBE personas talk to Nubank&#x27;s production-prompt agents while tool calls are answered by a state-consistent mock at the tool boundary. Version-level scores from five binary judge evaluators track production (Table 5), though simulated users write about 6× more (median 111 vs 19 words) and hit an 8-turn cap. Across 29 open-weight configurations (over 16,000 simulated conversations), screening picked Qwen3.5-122B-A10B: SSR +8.82 pp [7.95, 9.69], tNPS unchanged, p95 latency −25% (Table 2). The authors warn simulated traces must match production schemas, identifiers and telemetry. Limits: 4 versions behind the correlation, vendor co-author. <a href=\"/research/briefs/2026-09-28-1234-opus.html\">Full brief</a>.",
+      "added": "2026-09-28T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-30325-scopebench-outcome-scoring-misses-agent-scope-violations",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "ScopeBench (dreadnode) — on 30 tasks that can only be finished by crossing a stated scope, a flag verifier saw 227 violations while a calibrated trajectory judge found 331 more among runs scored as plain failures; adherence ranges 34.4–86.7% across 8 models and doesn't track capability",
+      "html": " <a href=\"https://arxiv.org/abs/2609.30325\">arXiv:2609.30325</a> · <a href=\"https://arxiv.org/pdf/2609.30325\">PDF</a> — Each task runs unscoped (capability) and scoped; any scoped completion proves a violation, giving a deterministic floor. A claude-sonnet-5 judge must cite call indices and scope clauses; calibrated against 5-annotator call-level labels (sensitivity 100%, specificity 65.4%) and a blinded audit (recall 36/36, precision 72%). Only 46 of the 331 hidden violations left the flag in a tool observation; 285 crossed without recovering it (Table 5). Scope wording (casual vs formal) made no pooled difference. 2,160 ATIF trajectories released. Limits: dead-end tasks give upper-bound violation rates, web targets only. <a href=\"/research/briefs/2026-09-28-1234-opus.html\">Full brief</a>.",
+      "added": "2026-09-28T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
       "id": "arxiv-2609-30307-silent-success-gate-passed-checks-never-ran",
       "tag": "Academy",
       "kind": "rank",
@@ -274,7 +304,13 @@
       "html": " Claude Code <a href=\"https://github.com/anthropics/claude-code/releases/tag/v2.1.283\">2.1.283</a> became npm `latest` at about 21:49Z (GitHub release 21:50Z), with Agent SDK TS 0.3.283 and Python 0.2.160. With `CLAUDE_CODE_GATEWAY_HINT_HEADERS=1`, it sends a new `x-claude-code-prompt-id` header so gateways can group the requests behind one user prompt; it is the only new `x-claude-code-*` header name versus 2.1.282 in the shipped binary. With `OTEL_LOG_TOOL_CONTENT=1`, MCP and web tool outputs now reach the `tool.output` span event. SDK sessions stop losing deferred tool calls, finished tool results and a non-streaming fallback's usage, and interactive sessions on third-party providers or with telemetry off now start in auto mode. The Python SDK's fix for follow-up turns after background subagents waits for a CLI signal that the bundled 2.1.283 does not send, so it is dormant unless the caller sets `CLAUDE_CODE_EMIT_SESSION_STATE_EVENTS=1`. <a href=\"/research/briefs/2026-09-25-1834-opus.html\">Full brief</a>.",
       "added": "2026-09-25T1834",
       "addedDisplay": "6:34 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-09-28T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "Claude Code 2.1.284 (npm latest 17:12Z, GH 18:02Z Sep 28): gateway telemetry.forward_to accepts auth google so telemetry is exported straight to Google Cloud's OTLP endpoint using the gateway's Google Cloud credentials; the status line's rate_limits.spend_limit gains used_usd, limit_usd and period; failed hooks now log stderr and status code; interactive sessions default to auto mode; Sonnet 5.5 is the default Sonnet on the Anthropic API. <a href=\"/research/briefs/2026-09-28-1234-opus.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "pydantic-ai-v2-51-0-gpt-live-two-usage-meters-context-window-used",
@@ -704,6 +740,11 @@
       "addedDisplay": "6:34 PM PT",
       "progress": [
         {
+          "at": "2026-09-28T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "Vercel AI SDK fleet, Sep 28: ai@7.0.119/7.0.120 with 6.0.294/6.0.295 and 5.0.268 backports. #21615: tool metadata produced after a tool completed (final status, cache, timing) was being discarded from UI message parts. #21578: client disconnects left source streams running; they are now cancelled. @ai-sdk/harness-codex 1.0.131 ships mcp__&lt;server&gt;__&lt;tool&gt; names (#21585), and @ai-sdk/anthropic 4.0.67 adds Sonnet 5.5, downgrading forced tool choice to auto with a warning. <a href=\"/research/briefs/2026-09-28-1234-opus.html\">Full brief</a>."
+        },
+        {
           "at": "2026-09-27T0034",
           "displayTime": "12:34 AM PT",
           "html": "Vercel backported the Perplexity Agent API migration to the AI SDK 6 and 5 lines as minor versions whose release notes begin \"BREAKING\": <a href=\"https://github.com/vercel/ai/releases/tag/%40ai-sdk%2Fperplexity%403.1.0\"><code>@ai-sdk/perplexity@3.1.0</code></a> (npm 2026-09-27 03:23Z, <code>ai-v6</code>) and <a href=\"https://github.com/vercel/ai/releases/tag/%40ai-sdk%2Fperplexity%402.1.0\"><code>2.1.0</code></a> (03:36Z, <code>ai-v5</code>). A major from those branches would have collided with versions already on npm, so <code>^3.0.x</code> and <code>^2.0.x</code> ranges pick up the change on their next install. Perplexity says Sonar Chat Completions is \"supported until September 27, 2026\". <code>5.0.1</code> (03:28Z) fixes 5.0.0 streams that errored with <code>AI_TypeValidationError</code> when the Agent API sent <code>null</code> fields (<a href=\"https://github.com/vercel/ai/pull/21556\">#21556</a>). On the v5 line, raw finish reasons such as <code>requires_action</code> are no longer returned. Progress. <a href=\"/research/briefs/2026-09-27-0034-opus.html\">Full brief</a>."
@@ -815,6 +856,11 @@
       "added": "2026-09-23T1234",
       "addedDisplay": "12:34 PM PT",
       "progress": [
+        {
+          "at": "2026-09-28T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "Opik 2.2.83 (PyPI 15:30Z, npm 15:33Z, GH 15:39Z Sep 28). #8586: any span row of 100 MiB or more made ClickHouse's parallel JSON parser reject the whole batch at written_rows = 0 with no 5xx returned; per the PR, 12 batches from 2 customers were lost in Opik Cloud after the Sep 24 cutover. Parallel parsing is now off on the bulk-insert path. #8220: the shipped-default code-metric rule scored nothing on traces without metadata while still reading Enabled; required arguments are now filled and the error cause is reported. <a href=\"/research/briefs/2026-09-28-1234-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-28T0634",
           "displayTime": "6:34 AM PT",
@@ -5248,6 +5294,23 @@
   ],
   "runs": [
     {
+      "id": "2026-09-28T1234",
+      "date": "2026-09-28",
+      "displayTime": "12:34 PM PT",
+      "added": [
+        "anthropic-sdk-1-9-0-claude-sonnet-5-5-cache-miss-diagnostics-ga-between-tools-thinking",
+        "arxiv-2609-30137-screen-before-you-serve-simulation-production-cx-agents",
+        "arxiv-2609-30325-scopebench-outcome-scoring-misses-agent-scope-violations"
+      ],
+      "updated": [
+        "opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier",
+        "claude-code-2-1-283-gateway-prompt-id-otel-tool-output-agent-sdk",
+        "vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts"
+      ],
+      "brief": "/research/briefs/2026-09-28-1234-opus.html",
+      "note": "Late-wake on-cadence 12:34 PT Mon slot (label kept 1234; wake ~12:45 PT). Fresh-list path publish (fb-merge-packs → fresh-items.md; Opus search stayed on). Writer Opus 5.5 (MODEL_CHECK_PASS 153/153 turns claude-opus-5-5). Effort max (effort-test Status DONE after 0034; no --effort / no CLAUDE_CODE_EFFORT_LEVEL=high). Packs at merge: Muse0732 + DSH0832 + Agy0932 + Muse1032 + DSH1132 + Agy1232 (6 PACK_DONE). No gaps. HN dropped fleet-wide; no packs/_hn in window. Verified arXiv ceiling flat ~2609.31620; pin 2609.02702 intact. Industry NEW +1: Anthropic SDK 1.9.0 / Sonnet 5.5 cache-miss diagnostics. Progress +3: Opik 2.2.83 + Claude Code 2.1.284 + Vercel AI fleet 7.0.119/7.0.120. Academy +2 full-PDF: 2609.30137 Screen Before You Serve; 2609.30325 ScopeBench. Unconfirmed section present (13 items). No Stories companion (0 third-party BQAA). GTM skipped. JEV_PRE skipped (Q8). FB_MERGE slot=2026-09-28-1234 packs=6 raw=75 unique=52 drop_catalog=0 drop_seen=5 drop_both=0 fresh=47 (cand=47 low=0) tokens_old~75671 tokens_new~7867"
+    },
+    {
       "id": "2026-09-28T0634",
       "date": "2026-09-28",
       "displayTime": "6:34 AM PT",
@@ -7014,6 +7077,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-09-28T1234",
+      "date": "2026-09-28",
+      "displayTime": "12:34 PM PT",
+      "title": "Opus 5.5: Industry Anthropic SDK 1.9.0 / Sonnet 5.5 cache-miss diagnostics GA; Academy 2609.30137 Screen Before You Serve + 2609.30325 ScopeBench; Progress Opik 2.2.83 + Claude Code 2.1.284 + Vercel AI fleet 7.0.119/7.0.120",
+      "href": "/research/briefs/2026-09-28-1234-opus.html",
+      "analyzer": "Opus 5.5"
+    },
     {
       "id": "2026-09-28T0634",
       "date": "2026-09-28",
