@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-27 · 6:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="Academy 2609.30290 LLM-judge audit + 2609.30725 coding-agent cost waste detectors; Progress Letta Code v0.33.4.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-27-1834-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 6:34 PM PT · on-cadence · fresh-list path · effort HIGH test</p>
+    <article>
+<h1>Field Brief — 2026-09-27-1834: A production SQL judge at κ = 0.04, the waste you can find in coding-agent traces, and Letta Code v0.33.4 reports the exact run</h1>
+<p><strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>), the primary deep Field Brief writer per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, the catalog and the push.
+<strong>Slot:</strong> official <strong>2026-09-27-1834</strong>, on cadence (6:34 PM PT, Sun Sep 27). Label kept as 1834.
+<strong>Effort:</strong> high. This is an effort-test slot, and Collection set the level through an environment override. I did not change it.
+<strong>For:</strong> Haiyuan Cao, TL of BQAA + ADK.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>Two Academy ranks, both full-PDF reads, and both hand BQAA something it can query.</strong></li>
+<li><a href="https://arxiv.org/abs/2609.30290">2609.30290</a> audits a production text-to-SQL pipeline's LLM judge. It agreed with human gold at Cohen's κ = 0.04 on disagreement-enriched cases and κ = 0.42 on a uniform random spot-check.<ul>
+<li>Most over-flags came from one trigger. The judge saw codes like &quot;E&quot; or &quot;z&quot; in the result preview and invented a constraint the question never stated.</li>
+<li>Removing the preview raised κ from 0.04 to 0.37. Only better judges plus unanimity routing got to κ = 0.79, deciding 89.7% of cases automatically.</li>
+</ul>
+</li>
+<li><a href="https://arxiv.org/abs/2609.30725">2609.30725</a> mines 1,200 Claude Code and Mini-SWE-Agent trajectories. It finds three wasteful behaviors, detectable from the trace alone, that cost up to 22.75% of task spend.<ul>
+<li>A popular code-graph MCP tool <em>raised</em> cost by up to 28.14%.</li>
+<li>Seven hand-written behavioral rules cut cost by 7.88–41.73% in six of eight settings.</li>
+</ul>
+</li>
+<li><strong>Industry is thin. The one carded move is a Progress note: Letta Code v0.33.4</strong> is on npm, GitHub, and PyPI <code>letta</code>.</li>
+<li>It makes remote <code>Agent</code> tasks report the outcome of the exact accepted Super Run. Before, a run that dropped off the active list was assumed to have succeeded.</li>
+<li>It also lets a continued child subagent be tracked by its <code>super_run_id</code> after the parent goes idle.</li>
+<li><strong>Correction to the packs: LiteLLM's Rust gateway stack did <em>not</em> complete.</strong></li>
+<li>Six of twelve PRs merged to <code>main</code>: config, shared lifecycle, HTTP host, shared execution, Responses API, and the container.</li>
+<li>The six that make it matter to operators are still open: the Python bridge opt-in, route tracing, auth, virtual keys, UI, and the <strong>MCP gateway</strong> (#43465–#43470).</li>
+<li>Nothing is released: PyPI is still <code>1.103.0</code>. NOTE only.</li>
+<li><strong>Codex</strong> shipped two more alpha tags (<code>rust-v0.159.0-alpha.10</code> and <code>alpha.11</code>) plus <code>rust-v0.158.0-alpha.15.3</code>. Their release bodies are empty and nothing reached stable. NOTE.</li>
+<li><strong>arXiv ceiling moved.</strong> I probed it myself and found it at about <strong><code>2609.31620</code></strong>. The DSH 1732 pack reported 31119, but abs pages resolve well past that. Priority pin <code>2609.02702</code> is intact at v1.</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<p>No NEW Industry ranks this slot. The only watchlist releases in the window were Letta Code v0.33.4 (below) and Codex alpha tags. I swept the watchlist (GitHub releases, npm, PyPI) since 19:30Z and nothing else published. The rest of the window was unreleased merges on <code>main</code>.</p>
+<h3>Progress (1)</h3>
+<p><strong>Parent catalog id: <code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code></strong></p>
+<p>Letta Code <strong>v0.33.4</strong> is on every channel:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Channel</th>
+  <th>Timestamp (UTC, 2026-09-27)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>npm <code>@letta-ai/letta-code</code> 0.33.4</td>
+  <td>21:42:13Z</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.4">GitHub release</a></td>
+  <td>21:48:38Z</td>
+</tr>
+<tr>
+  <td>PyPI <code>letta</code> 0.33.4</td>
+  <td>21:55:36Z</td>
+</tr>
+</tbody>
+</table></div>
+<p>The changelog has three entries, and two of them change behavior:</p>
+<ul>
+<li><strong>#4764, &quot;require exact remote terminal evidence&quot; [LET-13200].</strong></li>
+<li>Computer-routed <code>Agent</code> tasks now read the exact accepted Super Run and its newest correlated child run. Before, success was inferred when the entry disappeared from the active list.</li>
+<li>Listener terminal errors carry the accepted <code>client_message_ids</code> and are emitted before <code>idle</code>, so an error can no longer be overtaken by the idle signal and lost.</li>
+<li>A rejected tool continuation stays a failure. The PR says &quot;elapsed time does not decide whether the task finished&quot;.</li>
+<li>Failure strings now name the run, for example &quot;Remote Super Run ${run.id} failed during ${code}: ${message}&quot;. Transient reads retry without resubmitting work.</li>
+<li><strong>#4647, &quot;stop child sends from retaining parent runtimes&quot; [LET-12939].</strong></li>
+<li>A continued child published by <code>SendAgentMessage</code> now carries <code>claims_parent_runtime: false</code> and the accepted send's <code>super_run_id</code>. The server can follow that exact send after the parent disconnects, and the idle parent can sleep.</li>
+<li>Older servers ignore the new fields.</li>
+</ul>
+<p>Continuity: v0.33.3 (carded at 1234) shipped <em>without</em> an earlier fix on this same outcome-reporting path. That was #4721, completion only when the child persisted a reply, reverted in #4744. #4764 addresses the same &quot;did the remote task really finish?&quot; question by a different route: exact run reads.</p>
+<p>Both PR bodies say server support must be live before the client ships. I could not confirm that server-side rollout (see Unconfirmed).</p>
+<p><strong>TL;DR for BQAA:</strong> the agent's own completion claim now comes from an exact server run ID rather than an inference. That is the event a trace observer should key on, not &quot;the task disappeared&quot;.</p>
+<h3>NOTE (not ranked; recorded for dedupe)</h3>
+<ol>
+<li><strong>LiteLLM Rust gateway: half-merged, unreleased.</strong> The fresh list and the DSH 1732 pack say the stack &quot;completes&quot;; it did not.</li>
+</ol>
+<ul>
+<li><p>Merged to <code>main</code>:</p>
+<p>| PR | Change | Merged (UTC) |
+|---|---|---|
+| #43460 | config parsing | 21:54Z |
+| #43461 | shared call lifecycle | 23:05Z |
+| #43462 | HTTP host driver | 23:18Z |
+| #43471 | gateway container Dockerfile, now standalone against <code>main</code> | 23:49Z |
+| #43463 | shared execution | 23:50Z |
+| #43464 | HTTP Responses API | 00:38Z (Sep 28) |</p>
+</li>
+<li><p>Still open: #43465 (native Python inference opt-in, now based on <code>main</code>) and #43466–#43470, stacked (route tracing → auth/authz split → virtual-key storage → UI login → <strong>MCP gateway</strong>).</p>
+</li>
+<li><p>There is no release. PyPI <code>latest</code> is still <code>1.103.0</code>, and the newest GitHub release is <code>v1.104.0-dev.2</code> (Sep 25).</p>
+</li>
+<li><p>Re-evaluate when #43465 plus tracing land in a tagged build.</p>
+</li>
+<li><p>Parent for a future Progress entry: <code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code>.</p>
+</li>
+</ul>
+<ol start="2">
+<li><strong>LiteLLM cost-map syncs.</strong> #43506 (OpenRouter prices synced from the models API) and #43507 (<code>deprecation_date</code> for together_ai <code>Salesforce/Llama-Rank-V1</code>) merged 00:26–00:39Z Sep 28 by the provider-info sync bot. These are routine data syncs.</li>
+<li><strong>Codex alpha train.</strong></li>
+</ol>
+<ul>
+<li>Tags: <code>rust-v0.158.0-alpha.15.3</code> (GitHub 19:18Z, npm 19:34Z), <code>rust-v0.159.0-alpha.10</code> (GitHub 21:09Z, npm 21:20Z), and <code>rust-v0.159.0-alpha.11</code> (GitHub 00:20Z, npm 00:31Z Sep 28). Every release body is just &quot;Release 0.x&quot;.</li>
+<li>Merged on <code>main</code> in the window:<ul>
+<li>#48779: Guardian history preserved across parent compaction</li>
+<li>#48783: single-server MCP status discovery with thread connection reuse</li>
+<li>#48796: opt-in structured errors for Guardian circuit-breaker interruptions</li>
+<li>#48812: history-aware prewarming for idle threads</li>
+<li>#48819: explicit histogram buckets for tool and skill context metrics</li>
+<li>#48805 / #48807: TUI changes</li>
+</ul>
+</li>
+<li>None of these is on a stable build. Hold for a stable 0.159.0.</li>
+<li>Parent: <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code>.</li>
+</ul>
+<ol start="4">
+<li><strong>openai-agents-python.</strong> A burst of merges from jbeckwith-oai:</li>
+</ol>
+<ul>
+<li>#5207, &quot;bound trace collection normalization work&quot;, merged 21:25Z</li>
+<li>#5206, grants enforced during recursive sandbox removal, merged 21:09Z</li>
+<li>#5198–#5202, merged ~20:21Z</li>
+<li>#4834 / #4893, sandbox races and Docker workspace restore, merged 00:23–00:24Z Sep 28</li>
+</ul>
+<p>There is no release since <code>v0.22.3</code> (Sep 17). No card exists, and none is warranted until these ship.
+5. <strong>Mastra.</strong> Merged but unreleased; the latest GitHub release is still <code>@mastra/core@1.71.0</code> (Sep 25), and I found no in-window npm publish.</p>
+<ul>
+<li>#25269: workflow step results used for experiment trajectory scorers when no trace is stored</li>
+<li>#25271: DuckDB observability stops scanning all <code>span_events</code> on an empty trace page</li>
+<li>#25273: review skills hidden from non-review Factory sessions (a self-approval fix)</li>
+<li>#25277 / #25279: Factory and workflow correctness</li>
+</ul>
+<p><strong>WATCH #25282</strong> (still open): stop exporting raw provider response body and headers in <code>model_step</code> metadata. This is telemetry hygiene that matters to any trace sink.
+6. <strong>Letta Code #4817</strong>, &quot;disable memory guard for workers&quot;, merged 01:28Z Sep 28, after v0.33.4. It is unreleased; next-slot Progress candidate if a v0.33.5 ships.
+7. <strong>vercel/ai #21531</strong>: <code>streamText</code> no longer emits unhandled telemetry completion rejections in non-Node runtimes. Merged 00:00Z Sep 28, unreleased.
+8. <strong>Open WATCHes, unchanged state:</strong></p>
+<ul>
+<li>Helicone #5825: cross-tenant IDOR in prompt version forking (open)</li>
+<li>haystack #12990: schema-constrained Agent outputs (open)</li>
+<li>LiteLLM #43459: delegated team authorization context (open, non-main base)</li>
+</ul>
+<ol start="9">
+<li><strong>google/adk-python #7320</strong> (open): isolate <code>single_turn</code> node_input events. 1P, NOTE only, never a card.</li>
+</ol>
+<hr />
+<h2>Academy</h2>
+<p>Two NEW ranks, both <strong>full PDF read</strong> (pdftotext of the whole paper, including appendices). Section and table numbers are cited for key figures.</p>
+<h3>1. NEW rank: <a href="https://arxiv.org/abs/2609.30290">arXiv 2609.30290</a>: Auditing and Repairing LLM-as-Judge Failures in a Production Text-to-SQL Pipeline</h3>
+<p><em>Liu, Wu, Fang (Santa Clara University / independent). cs.CL; v1 stamped 9 Sep 2026; 13 pages. Full PDF read.</em></p>
+<p><strong>What they did.</strong> SynCA is a production pipeline that generates question–SQL pairs over a 604,146-row, 43-column telecom-derived table. Its stages are:</p>
+<ol>
+<li>question generation</li>
+<li>three-model SQL consensus</li>
+<li>o1 debate</li>
+<li>a final gpt-4o-mini faithfulness judge that sees the schema, question, SQL, and a top-10-row result preview</li>
+</ol>
+<p>Its output gates an analyst-assist tool (~30 daily users) and an eval harness (§1, §3). Analysts kept finding plausible queries the judge had rejected, so the authors measured the judge.</p>
+<p><strong>Key numbers:</strong></p>
+<ul>
+<li><strong>Judge agreement with human gold (Table 2).</strong> Gold is two-author, with an independent annotator agreeing at κ = 0.85 (§4).</li>
+</ul>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Judge</th>
+  <th>Enriched 234-set κ</th>
+  <th>Uniform 200 spot-check κ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>gpt-4o-mini (production)</td>
+  <td>0.04</td>
+  <td>0.42</td>
+</tr>
+<tr>
+  <td>gpt-5.4-mini</td>
+  <td>0.63</td>
+  <td>0.67</td>
+</tr>
+<tr>
+  <td>Qwen3.6-27B</td>
+  <td>0.72</td>
+  <td>0.94</td>
+</tr>
+<tr>
+  <td>Claude Opus 4.7</td>
+  <td>0.71</td>
+  <td>0.93</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>The production judge's false-negative rate on human-FAITHFUL cases was 77.1%.</li>
+<li><strong>One mechanism dominates (§5, App. F).</strong> GRADE-HALLUCINATION covers 66% of the 148 false flags: the judge sees &quot;E&quot;, &quot;z&quot; or &quot;None&quot; in the preview, recalls a canonical {A,B,C,D} set, and flags &quot;invalid grades&quot; the question never excluded.</li>
+<li>The finer 7-class taxonomy only reached second-coder κ = 0.29, so the authors rely on the binary split.</li>
+<li><strong>Prompting only partly fixes it (Table 3).</strong> All four prompt variants flip the judge from over-flagging to under-flagging. Dropping the preview is best, at κ = 0.37; nothing reaches 0.72.</li>
+<li><strong>Ensembles need calibrated members (§6, Table 4).</strong></li>
+<li>Pairing the weak judge with gpt-5.4-mini <em>lowers</em> κ (AND 0.572 vs 0.631 alone). On their 154 disagreements the stronger judge was right 142–12.</li>
+<li>Three strong judges with unanimity routing reach κ = 0.788 at 89.7% auto-coverage, with about 10% sent to humans.</li>
+<li>Adding the weak fourth judge drops coverage to 29%.</li>
+<li>A learned 14-feature GBM router does no better (+0.002 κ, App. K).</li>
+<li><strong>Cost (§8, App. D).</strong> Per 1,000 questions: self-hosted Qwen $0.10, gpt-4o-mini $0.40, Opus 4.7 $30.</li>
+<li><strong>Transfer (§7, Table 5).</strong> Run on BIRD-financial, the same recipe flags 23–27 of 106 expert gold SQLs (21.7–25.5%) as candidate gold bugs; a blind annotator confirmed 23 of 27 at κ = 0.86. Per-judge over-flag rates shift 2–4.7× across schemas.</li>
+</ul>
+<p><strong>Caveats (Limitations, App. B, App. J):</strong></p>
+<ul>
+<li>a single English telecom deployment over SQLite</li>
+<li>headline gold is author-produced</li>
+<li>the Qwen-vs-Opus head-to-head is underpowered (n = 96, McNemar p = 0.082)</li>
+<li>the failure taxonomy was collapsed post hoc</li>
+<li>Anthropic and Google judges have no dated snapshot IDs, so κ can drift</li>
+<li>datasets are deferred; only code and pre-registration are released now</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong> The 1234 brief carded LLM judges running inside trace queries (LangWatch judge functions; the text-to-SQL AI-operator paper 2609.21133). This paper measures what happens once such a judge is deployed and nobody checks it: it drifts to chance on the hard cases.</p>
+<p>Three things transfer:</p>
+<ol>
+<li>Store (judge model and snapshot, prompt version, input-view) with every verdict. &quot;Saw the result preview&quot; was the failure trigger here.</li>
+<li>Keep a small domain gold set and re-measure κ whenever the schema or snapshot changes.</li>
+<li>Before adding a judge to a panel, check the split of its disagreements with the others. One-sided (142–12) means the weaker judge is simply wrong and the panel gets worse; split (12–7) means the cases are genuinely hard and a panel can help.</li>
+</ol>
+<p><strong>TL;DR for BQAA:</strong> an LLM judge over SQL results should be treated as an uncalibrated instrument until measured against domain gold. The preview rows it sees can make it invent constraints.</p>
+<h3>2. NEW rank: <a href="https://arxiv.org/abs/2609.30725">arXiv 2609.30725</a>: Analyzing and Mitigating Cost-Inefficient Behaviors in Coding Agents</h3>
+<p><em>Hu, Jiang, Liang, Dey, Wu, Tan (Purdue). cs.AI; v1 25 Sep 2026; 30 pages; under review. Full PDF read.</em></p>
+<p><strong>What they did.</strong></p>
+<ul>
+<li>Four configurations: Claude Code v2.1.169 with Sonnet 4.6 (Haiku 4.5 subagents), and Mini-SWE-Agent v2.3.0 with Sonnet 4.6, MiniMax-M3, or Qwen-3.5 Plus.</li>
+<li>Each ran on 300 SWE-bench Verified tasks, giving 1,200 trajectories.</li>
+<li>Every step gets one of 18 action labels, mostly by rules; an LLM fallback labeled 7.26% of steps (App. A.1.1).</li>
+<li>Each flagged action is costed from its tokens (tiktoken o200k) at model prices, including the cache and input charges when its output is carried forward (App. A.1.2).</li>
+<li>Mitigations were tested over 10k+ trajectories on held-out Verified-200 and SWE-bench Pro-100 tasks. Baselines were run three times to set noise floors (App. A.1.4).</li>
+</ul>
+<p><strong>The three behaviors (§3, Table 1):</strong></p>
+<ul>
+<li><strong>Subsumed retrieval.</strong> A read whose content is fully covered by an earlier read. It hits 64.33–92.33% of tasks and 5.01–11.41% of cost.</li>
+<li>In Claude Code, 50.15% of it is <em>cross-agent</em>: the main agent re-reads code a subagent already read, because subagents return summaries rather than code (Table 2).</li>
+<li><strong>Similar script generation.</strong> A new script with line-level Jaccard ≥ 0.60 against an earlier one. It hits up to 68% of tasks and up to 9.57% of cost, and is 5.9–10× more frequent in Mini-SWE-Agent.</li>
+<li><strong>Test re-execution.</strong> The same test ID rerun within a window with no new patch. It hits 49.67–83% of tasks and up to 5.39% of cost.</li>
+</ul>
+<p>Together the three touch 79–98% of tasks and account for 6.86–22.75% of task cost.</p>
+<p><strong>Mitigations (§4, Tables 3–4, Fig. 6):</strong></p>
+<ul>
+<li><strong>CodeGraph, a structure-aware retrieval MCP/CLI tool, is not a cost win.</strong></li>
+<li>In Claude Code it cut subsumed retrieval by more than 75%, yet cost rose 8.30% on Verified and 12.19% on Pro (robust).</li>
+<li>Each CodeGraph call returns 8.2–16.6× more tokens than a normal read.</li>
+<li>Haiku subagent calls fell to zero, shifting the same token volume onto Sonnet at 3× the price.</li>
+<li>Under Mini-SWE-Agent, CodeGraph calls were stacked on top of ordinary retrieval, raising cost by up to 28.14%.</li>
+<li><strong>Agent-synthesized skills</strong> (23–41 low-level rules distilled from traces via Trace2Skill) cut cost by at most 22.32%. Once synthesis cost is amortized over the 300 tasks, only one robust reduction remains (App. Table 15).</li>
+<li><strong>Seven developer-written principles cut cost by 7.88–41.73% in six of eight settings</strong>, with one small Pass@1 drop (−1.50 pp). Examples: &quot;reuse context, justify re-reads&quot;, &quot;capture test output, filter don't rerun&quot;, &quot;persist and revise scripts, no numbered variants&quot;.</li>
+<li>Task-cost changes are amplified relative to behavior-attributed cost, with fitted slopes of 2.83 on Verified and 1.33 on Pro. Removing one wasteful action also removes the later cache reads and reasoning it triggers.</li>
+</ul>
+<p><strong>Caveats (§6, App. A.1.4):</strong></p>
+<ul>
+<li>SWE-bench only, four configurations</li>
+<li>15 of 24 mitigation cells are single runs judged against transferred noise floors</li>
+<li>behavior-frequency metrics are noisy (mean CV 15.68%), so behavior deltas carry no robustness verdicts</li>
+<li>detectors and thresholds are author-calibrated</li>
+<li>Mini-SWE-Agent with Sonnet 4.6 relied on the LLM labeler for 31.17% of its steps</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong> All three detectors are pure trace analytics:</p>
+<ul>
+<li>span-content containment against earlier retrieval spans</li>
+<li>near-duplicate tool inputs</li>
+<li>repeated test-tool calls with no intervening edit span</li>
+</ul>
+<p>Per-action cost attribution needs tokens per tool output plus cache-carry accounting. The Claude Code finding needs parent/subagent linkage to separate cross-agent re-reads. This is a ready-made &quot;waste report&quot; query set over <code>agent_events</code>-style tables. The paper also shows why cost dashboards must check <em>delegation shifts</em>: a tool that reduces one behavior can silently move tokens from a cheap model onto an expensive one.</p>
+<p><strong>TL;DR for BQAA:</strong> three SQL-expressible trace detectors account for up to 22.75% of coding-agent spend. Fixes should be judged on end-to-end cost, not on the behavior count.</p>
+<h3>Scouted, abstract only (not ranked; cap reached)</h3>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.30471">2609.30471</a> <strong>CARGO</strong>. Reference-based judges penalize correct answers about a <em>different</em> live entity (&quot;reference–instance divergence&quot;); it grounds claims in the live instance instead. The authors report 20% recall on procedural corruptions. Strong next-slot candidate; PDF downloaded, not fully read.</li>
+<li><a href="https://arxiv.org/abs/2609.30308">2609.30308</a> <strong>Empty Intersection</strong>. Provenance grades raised classified coverage from 36.1% to 98.4% over 194,620 rows, and neither verification decision moved. The rows the fixes repaired and the 32 rows the decisions read did not overlap. Not fully read.</li>
+<li><a href="https://arxiv.org/abs/2609.31301">2609.31301</a> <strong>EffectMatch</strong>. Validates an agent's <em>persistent</em> side effects against what was approved before commit; blocks all tested incorrect commits over 206 business tasks. Not fully read.</li>
+<li><a href="https://arxiv.org/abs/2609.30137">2609.30137</a> <strong>Screen Before You Serve</strong>. Simulation screening of customer-experience agents at 140M scale. Not fully read.</li>
+<li>Also title-screened and not opened: 2609.30328 (multi-agent code judge grounding), 2609.30967 (MoMHa harness optimization over accuracy, safety, and tokens), 2609.31215 (DIAL position-debiased judges), 2609.30012 (low-cost cross-vendor behavior assays), 2609.30798 (voice agent evaluation).</li>
+<li>Already carded, excluded: 2609.30266 (agents tampering with their own traces), 2609.30217.</li>
+</ul>
+<hr />
+<h2>Six-week EV (through ~Nov 8)</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>Likelihood it matters to BQAA by Nov 8</th>
+  <th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>2609.30290 judge audit recipe</td>
+  <td><strong>High</strong></td>
+  <td>Judge verdicts in trace SQL are now shipping across vendors (LangWatch 3.18.0 carded at 1234). A calibration and disagreement-win check is a cheap, defensible default for BQAA eval guidance.</td>
+</tr>
+<tr>
+  <td>2609.30725 waste detectors</td>
+  <td><strong>High</strong></td>
+  <td>Directly expressible as queries over tool spans; a good demo query set for coding-agent customers watching spend.</td>
+</tr>
+<tr>
+  <td>Letta Code v0.33.4 exact-run completion</td>
+  <td>Medium</td>
+  <td>Completion semantics tied to server run IDs make agent-reported &quot;done&quot; auditable. It depends on Letta's server rollout.</td>
+</tr>
+<tr>
+  <td>LiteLLM Rust gateway</td>
+  <td>Medium, if #43465–#43470 land in a tag</td>
+  <td>An MCP gateway plus route tracing in a new Rust data plane would change where gateway spans originate. Nothing is user-reachable yet.</td>
+</tr>
+<tr>
+  <td>Codex 0.159 stable</td>
+  <td>Medium</td>
+  <td>Guardian structured errors, MCP status and the context-metric buckets become telemetry-relevant once they reach a stable build.</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>2609.30290:</strong> a deployed SQL judge sat at κ = 0.04 on hard cases because it saw preview rows. Record the judge's inputs and version, and re-calibrate against domain gold.</li>
+<li><strong>2609.30725:</strong> three trace-only detectors (subsumed reads, near-duplicate scripts, test re-runs) explain up to 22.75% of coding-agent cost. Judge fixes on end-to-end cost, including shifts between models.</li>
+<li><strong>Letta Code v0.33.4 (Progress):</strong> remote task completion now comes from exact Super Run reads, and terminal errors can't be lost behind <code>idle</code>.</li>
+<li><strong>LiteLLM Rust gateway (NOTE):</strong> half-merged and unreleased; the packs overstated completion.</li>
+<li><strong>Codex alphas (NOTE):</strong> Guardian, MCP status and metric-bucket changes stay on alpha.</li>
+<li><strong>Mastra #25282 (WATCH):</strong> stop exporting raw provider bodies and headers in span metadata. Worth mirroring as guidance for any trace sink.</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What was not confirmed</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Letta #4764 / #4647 server prerequisites</td>
+  <td>Both PR bodies say a server-side endpoint or field support must be live before release. I could not confirm Letta Cloud has rolled it out, so whether v0.33.4 behaves as described against today's server is unverified.</td>
+  <td>PR bodies via <code>gh api</code>; no public Letta server changelog entry found in this pass.</td>
+</tr>
+<tr>
+  <td>#4764 as a follow-up to reverted #4721</td>
+  <td>That it deliberately re-lands the reverted fix. I only claim both target the same outcome-reporting path.</td>
+  <td>#4764 body and v0.33.3/v0.33.4 release notes.</td>
+</tr>
+<tr>
+  <td>arXiv ceiling exact value</td>
+  <td>IDs are not contiguous (2609.31120 returns 404 while 2609.31200 returns 200). My binary search gives about 2609.31620 as the highest live ID (31621–31640 all 404), but a live ID above a gap could exist.</td>
+  <td>Direct <code>abs/</code> HTTP probes, 2026-09-28 ~01:35Z.</td>
+</tr>
+<tr>
+  <td>2609.30290 datasets</td>
+  <td>The released datasets. Only code and pre-registration are public; data is &quot;deferred to the post-publication release&quot;.</td>
+  <td>Paper §8 and abstract.</td>
+</tr>
+<tr>
+  <td>HN</td>
+  <td>Not independently re-checked. Packs report <code>HN: hits=0 keep=0</code> across the window, and the HN source was dropped fleet-wide at ~18:20 PT.</td>
+  <td>Pack HN lines, <code>packs/_hn/</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>No ranked claim in Industry or Academy depends on an unconfirmed item.</p>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Packs present (all six expected; PACK_DONE on each):</strong></li>
+<li><code>agy-pack-2026-09-27-1232.md</code> (arrived around the 1234 merge; disclosed then)</li>
+<li><code>muse-pack-2026-09-27-1332.md</code></li>
+<li><code>dsh-pack-2026-09-27-1432.md</code></li>
+<li><code>agy-pack-2026-09-27-1532.md</code></li>
+<li><code>muse-pack-2026-09-27-1632.md</code></li>
+<li><code>dsh-pack-2026-09-27-1732.md</code></li>
+</ul>
+<p><strong>No gaps.</strong> I read none wholesale; I grepped only for specific items.</p>
+<ul>
+<li><strong>Fresh-list path used:</strong> <code>_runs/fb-2026-09-27-1834/fresh-items.md</code> (F01–F50). F01, F02–F06, F08–F13, F17 and F21 were re-verified via <code>gh api</code>, npm and PyPI.</li>
+<li><strong>Correction:</strong> F21 (&quot;stack completes&quot;) is wrong. #43465–#43470 remain open.</li>
+<li><strong>Independent sweep:</strong> GitHub releases for 44 watchlist repos published after 19:30Z (hits only in Letta Code and Codex); npm (10 packages) and PyPI (16 packages) since 19:30Z (hits: Letta and Codex only); the arXiv API over recent agent/trace/judge/cost queries, about 90 new-range titles screened.</li>
+<li><strong>arXiv ceiling:</strong> about <strong>2609.31620</strong> (my probe), versus DSH 1732's 31119 and the prior 30268. Pin <strong>2609.02702</strong> is live at v1 and intact.</li>
+<li><strong>Dedupe:</strong> the live catalog is at the expected baseline, <strong>441 items / 112 briefs / 114 runs</strong>, with max brief <code>2026-09-27T1234</code>. Every Academy candidate was grepped against <code>catalog.json</code> and <code>briefs/*.md</code>: 30290 and 30725 have 0 hits; 30266 and 30217 were already carded and are excluded. All Progress and NOTE parent ids exist in the catalog.</li>
+<li><strong>HN:</strong> hits=0 keep=0 (pack-reported). The HN source was dropped fleet-wide at ~18:20 PT.</li>
+<li><strong>Cadence:</strong> on cadence, 18:34 PT, label 1834. Effort was high (a test slot; Collection's environment override).</li>
+<li><strong>Rules honored:</strong> no first-party BQAA cards; ADK is NOTE only; no GTM, Desk or Medium citations.</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW items (2):</strong></p>
+<ol>
+<li><strong>id:</strong> <code>arxiv-2609-30290-production-text-to-sql-llm-judge-audit-grade-hallucination-unanimity-routing</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Auditing and Repairing LLM-as-Judge Failures in a Production Text-to-SQL Pipeline. A deployed gpt-4o-mini SQL judge agreed with humans at κ = 0.04 on hard cases (0.42 uniform), mostly by inventing constraints from result-preview rows. Self-hosted Qwen3.6-27B reaches κ = 0.72 at about 1/300 of Opus's cost, and three-judge unanimity routing reaches κ = 0.79 at 89.7% coverage.</li>
+<li><strong>arXiv:</strong> 2609.30290 — https://arxiv.org/abs/2609.30290</li>
+<li><strong>card text:</strong><ul>
+<li>A production pipeline generating question–SQL pairs over a 604K-row telecom-derived table ended in a gpt-4o-mini faithfulness judge. It agreed with two-author gold at κ = 0.04 on disagreement-enriched cases and κ = 0.42 on a uniform spot-check (Table 2). In 66% of its 148 false flags the judge saw codes like &quot;E&quot; or &quot;z&quot; in the result preview and flagged &quot;invalid grades&quot; the question never excluded.</li>
+<li>Prompt fixes topped out at κ = 0.37 (Table 3). Pairing the weak judge with a stronger one lowered agreement, while three strong judges under unanimity routing reached κ = 0.79 at 89.7% auto-coverage (Table 4).</li>
+<li>Caveats: one SQLite deployment, author gold (independent κ = 0.85), an underpowered n = 96 head-to-head, and datasets deferred.</li>
+</ul>
+</li>
+</ul>
+<ol start="2">
+<li><strong>id:</strong> <code>arxiv-2609-30725-coding-agent-cost-inefficient-behaviors-trace-detectors-dev-skills</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy</li>
+<li><strong>title:</strong> Analyzing and Mitigating Cost-Inefficient Behaviors in Coding Agents. Three trace-detectable behaviors (subsumed retrieval, near-duplicate scripts, test re-runs) hit 79–98% of tasks and up to 22.75% of cost across 1,200 Claude Code and Mini-SWE-Agent trajectories. A code-graph MCP tool raised cost by up to 28.14%; seven developer-written rules cut it by 7.88–41.73%.</li>
+<li><strong>arXiv:</strong> 2609.30725 — https://arxiv.org/abs/2609.30725</li>
+<li><strong>card text:</strong><ul>
+<li>Purdue researchers labeled 1,200 SWE-bench Verified trajectories and costed each flagged action from its tokens (Table 1). Half of Claude Code's re-reads were the main agent re-reading code a subagent had already read (Table 2).</li>
+<li>CodeGraph cut those re-reads by more than 75% yet raised Claude Code's cost 8–12%: its calls return 8–17× more tokens and it displaced cheap Haiku subagents onto Sonnet (Table 4).</li>
+<li>Seven hand-written principles cut cost in six of eight settings, about twice the best agent-synthesized skills (Table 3). Caveats: SWE-bench only, 15 single-run cells, author-calibrated detectors.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Progress (1):</strong></p>
+<ul>
+<li><strong><code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code>:</strong></li>
+<li>Letta Code <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.4">v0.33.4</a> (npm 21:42Z, GitHub 21:48Z, PyPI <code>letta</code> 21:55Z, Sep 27) makes remote <code>Agent</code> tasks report the outcome of the exact accepted Super Run and its newest correlated child. Before, success was inferred when the run left the active list. Terminal errors now carry accepted message IDs and are ordered before <code>idle</code> (#4764).</li>
+<li>Continued child sends publish <code>claims_parent_runtime: false</code> with their <code>super_run_id</code>, so the parent can sleep while the server tracks the child (#4647).</li>
+<li>Both changes need matching server support.</li>
+</ul>
+<p><strong>Headline claims (for citation checks):</strong></p>
+<ol>
+<li>The deployed gpt-4o-mini text-to-SQL judge agreed with two-author human gold at Cohen's κ = 0.04 on the 234-case disagreement-enriched set and κ = 0.42 on a 200-case uniform spot-check. — https://arxiv.org/abs/2609.30290 (v1 2026-09-09; Table 2)</li>
+<li>Across 1,200 trajectories, subsumed retrieval, similar script generation and test re-execution together affected 79.00–98.00% of tasks and accounted for 6.86–22.75% of task cost; developer-designed skills robustly reduced cost by 7.88–41.73% in six of eight settings. — https://arxiv.org/abs/2609.30725 (v1 2026-09-25; Tables 1 and 3)</li>
+<li>Letta Code v0.33.4 was published to npm at 2026-09-27T21:42:13Z and as a GitHub release at 21:48:38Z, containing #4764 (exact remote terminal evidence) and #4647 (child sends stop retaining parent runtimes). — https://github.com/letta-ai/letta-code/releases/tag/v0.33.4</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 27 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
