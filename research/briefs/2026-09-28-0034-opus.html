@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-28 · 12:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="Codex 0.158.0 stable OTLP/Guardian; Academy CARGO 2609.30471 + EffectMatch 2609.31301; Progress Letta v0.33.5 + Mastra alpha.5.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-28-0034-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 AM PT · late-wake on-cadence · fresh-list path · effort HIGH final test</p>
+    <article>
+<h1>Field Brief — 2026-09-28-0034: Codex 0.158.0 goes stable with OTLP and extension hooks; CARGO shows reference-based judges fail on live entities; EffectMatch checks what an agent actually committed</h1>
+<p><strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>)
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, catalog and push.
+<strong>Slot:</strong> 2026-09-28-0034 (12:34 AM PT, Mon Sep 28). This was a late wake (~00:37 PT) on the 00:34 cadence, and the label stays 0034.
+<strong>Effort:</strong> high. This is the final effort-test HIGH slot, set by Collection's env override. Later slots return to max.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>Industry NEW (1): OpenAI Codex <code>rust-v0.158.0</code> STABLE.</strong> GitHub published it at 05:07Z and npm <code>latest</code> moved to 0.158.0 at 05:12Z. The 188-PR train puts these on the default install: opt-in OTLP logs for final agent responses (#47649) and Guardian assessments (#47870); multi-agent spawn latency and failure metrics (#47984); extension hooks that expose tool dispatch/timing (#47662) and model request/response streams (#47679); and exec-server RPC timing traces (#47680). Most of these were Progress-noted on the alpha line. This card covers their arrival on <code>latest</code>, as the 0.156 and 0.157 stable cards did for their trains.</li>
+<li><strong>Academy NEW (2), full PDFs read:</strong></li>
+<li><strong>CARGO</strong> (<code>2609.30471</code>, Dell): when an agent answers about a live case or asset, the nearest golden answer is usually about a <em>different</em> entity. A standard reference-based judge then marks 100% of correct answers wrong and hallucinated (DI = 0). Their reframing lifts DI to .58 but catches only 20% of procedural errors.</li>
+<li><strong>EffectMatch</strong> (<code>2609.31301</code>, HIT): compares an agent's actual persistent changes with the outcome the application approved before commit. It gets 0 wrong commits in cells where direct execution committed 354/618 omission faults, and it also blocks dependent work after a process exits.</li>
+<li><strong>Progress (2):</strong></li>
+<li><strong>Letta Code v0.33.5</strong> adds typed, calibrated <code>decide()</code> calls to Workflow. The journal records model, cost, calibration, validity and token usage for each decision.</li>
+<li><strong>Mastra <code>@mastra/core@1.72.0-alpha.5</code></strong> fixes trajectory scorers that saw an <em>empty</em> trajectory for workflow targets with no stored trace.</li>
+<li><strong>NOTE only:</strong></li>
+<li>The openai-agents-python correctness cluster is merged but unreleased; the latest release is still v0.22.3 from Sep 17.</li>
+<li>LiteLLM <code>1.104.0rc1</code> is on PyPI with no release notes. The packs' &quot;first native wheels&quot; claim is <strong>wrong</strong>: 1.103.0 and 1.104.0.dev2 already shipped cp310-abi3 platform wheels.</li>
+<li>opencode v1.18.33 is a bugfix release.</li>
+<li>The LiteLLM Rust gateway tracing work is on main only.</li>
+<li>No re-cards from the 1834, 1234 or 0034 carded sets. Pin <code>2609.02702</code> is intact.</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<h3>NEW 1 — OpenAI Codex CLI <code>rust-v0.158.0</code> STABLE: OTLP final-response and Guardian logs, spawn metrics, and extension hooks reach npm <code>latest</code></h3>
+<p><strong>Primary:</strong> https://github.com/openai/codex/releases/tag/rust-v0.158.0. GitHub published it 2026-09-28T05:07:23Z with <code>prerelease=false</code>. npm <code>@openai/codex</code> 0.158.0 went up at 05:12:20Z, and <code>dist-tags.latest</code> is now <code>0.158.0</code>, replacing 0.157.1. The compare is <code>rust-v0.157.0...rust-v0.158.0</code>, with 188 PRs listed in the changelog.</p>
+<p>What reaches the default install, from the release notes and changelog:</p>
+<ul>
+<li><strong>Telemetry the harness can emit.</strong> These are all opt-in or bounded:</li>
+<li>#47649: opt-in OTLP logging for final agent responses.</li>
+<li>#47870: opt-in OTLP logging for Guardian assessments. At alpha.10 we noted the fields: status, risk, authorization, allow/deny, and a rationale capped at 64 KiB with a truncation flag.</li>
+<li>#47984: <code>codex.multi_agent.spawn.phase.duration_ms</code> plus a spawn-failure counter with bounded labels.</li>
+<li>#47568: sandbox backend recorded in command-execution analytics.</li>
+<li>#47741/#47757: tool telemetry attributed to the invoking turn's product SKU.</li>
+<li>#47901: bounded credential-storage telemetry helpers.</li>
+<li><strong>Extension hooks.</strong> Third-party code can now observe the loop:</li>
+<li>#47662 exposes tool dispatch and timing observations to extensions.</li>
+<li>#47679 adds hooks for model requests and response streams.</li>
+<li>#47680 adds exec-server RPC timing and process-startup tracing.</li>
+<li>#47957 bounds tool-call observations to the outgoing message budget.</li>
+<li><strong>MCP and exec-server auth:</strong></li>
+<li>#47891: MCP servers that need pre-registered OAuth client secrets (<code>codex mcp add --oauth-client-secret</code>).</li>
+<li>#47601/#47648: bearer-token auth on exec-server WebSocket and app-server executor connections.</li>
+<li>#47899: MCP attribution errors now carry a diagnostic reason.</li>
+<li><strong>Approval defaults.</strong></li>
+<li>#47799 turns terminal-input approval on by default for elevated commands.</li>
+<li>#47819 retries Guardian reviews when new input arrives instead of aborting the pending action.</li>
+<li><strong>Sandbox repairs:</strong></li>
+<li>Windows 10 paths and rejected stored credentials (#47672/#47695/#47919).</li>
+<li>Linux nested writable roots (#47623).</li>
+<li>Git metadata protection across writable roots (#47974).</li>
+</ul>
+<p><strong>Why it is NEW rather than Progress:</strong> the catalog gives each Codex stable train its own card. The precedents are <code>openai-codex-0-156-0-stable-telemetry-attribution-graduation</code> and <code>openai-codex-0-157-0-stable-network-policy-gates-otlp-telemetry</code>. The 0.158 <em>alphas</em> were Progress-noted on the 0.156 card from 09-23 to 09-25, and those notes are not repeated here. What's new is that these surfaces now reach every default <code>npm i -g @openai/codex</code> user.</p>
+<p><strong>TL;DR for BQAA:</strong> Codex now has an OTLP log stream on the default install that carries final responses, Guardian verdicts and spawn failures. Extension hooks also expose tool timing without scraping. Both are a clean ingestion path for an observer, but they are opt-in, so the target user has to enable them.</p>
+<h3>Progress</h3>
+<p><strong>P1 — Letta Code v0.33.5</strong>, attached to <code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code>.</p>
+<ul>
+<li>Timestamps: npm <code>@letta-ai/letta-code</code> 0.33.5 at 2026-09-28T04:19:44Z (<code>latest</code>); GitHub release 04:23:57Z; PyPI <code>letta</code> 0.33.5 at 04:32:31Z.</li>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4785">#4785</a> adds <code>decide(state, questions)</code> to Workflow scripts. It returns <code>choice</code>/<code>score</code>/<code>noul</code> answers marked <code>calibrated: true</code> from Letta's Jev Decisions endpoint.</li>
+<li>The model is pinned to <code>~typesafe/jev-latest</code> with fallbacks disabled, and passing a model option is rejected.</li>
+<li>An invalid answer is retried once and then returns <code>null</code>.</li>
+<li>Decisions share the 16-slot concurrency pool with <code>agent()</code> and have a separate 1,000-call-per-run backstop.</li>
+<li>The Workflow journal records model, cost, calibration, validity and token usage for each decision attempt.</li>
+<li>The same PR lets <code>agent(prompt, {conversationId})</code> send a new prompt into an existing worker conversation with its history intact. Tools are not inherited: a resumed turn starts with <code>allowedTools: []</code>.</li>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4817">#4817</a> disables the cross-agent memory guard for Workflow SDK workers only. Before this, a Grep pattern <code>.</code> was read as a path and denied. The PR notes this gives workers file access to mounted memory, with no toggle to turn the guard back on.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> this is a harness writing per-decision cost, calibration and validity rows into its own journal, which is the row shape an observer wants to join against.</p>
+<p><strong>P2 — Mastra <code>@mastra/core@1.72.0-alpha.5</code></strong>, attached to <code>mastra-core-1-70-0-model-selection-processor-tenant-scoped-traces-memory-1-32</code>.</p>
+<ul>
+<li>Published to npm 2026-09-28T04:25:41Z, alpha tag. Source: <a href="https://github.com/mastra-ai/mastra/blob/main/packages/core/CHANGELOG.md">CHANGELOG</a>.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25269">#25269</a>: trajectory scorers in dataset experiments used to get an <strong>empty trajectory</strong> for workflow targets when no trace was stored. They now get the workflow's executed steps, which matches <code>runEvals</code>.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/24928">#24928</a>: threads no longer get stuck on Anthropic/Bedrock after a step fails mid-reasoning.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25283">#25283</a>: <code>createDurableAgent</code> now saves non-transient <code>data-*</code> parts to memory.</li>
+<li><a href="https://github.com/mastra-ai/mastra/pull/25279">#25279</a>: a <code>.branch()</code> condition that throws in an evented workflow is logged and treated as false, instead of failing the run.</li>
+<li>This is an alpha. The stable <code>@mastra/core</code> is still 1.71.0 (Sep 25).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> trajectory scorers had been silently scoring nothing whenever trace storage was off. &quot;Evaluator got empty input and still returned a score&quot; is a failure class worth detecting.</p>
+<h3>NOTE (below card bar)</h3>
+<ul>
+<li><strong>openai-agents-python correctness cluster.</strong> Merged to main 05:37–05:47Z and <strong>unreleased</strong>; the latest release is v0.22.3 from 2026-09-17.</li>
+<li><a href="https://github.com/openai/openai-agents-python/pull/5211">#5211</a>: official-endpoint Chat Completions streams now need a finish reason before completing. Otherwise they raise <code>ModelBehaviorError</code> before tool execution, and interrupted requests still count in generation spans when no usage trailer arrives.</li>
+<li>#5212: Annotated constraints on function tools are preserved.</li>
+<li>#5209: encrypted session visibility is refreshed before compaction.</li>
+<li>#5208/#4831: sandbox snapshot symlink and special-file fixes.</li>
+<li>These become Progress once a release ships.</li>
+<li><strong>pydantic-ai <a href="https://github.com/pydantic/pydantic-ai/pull/8872">#8872</a></strong> (main, 07:33Z, unreleased; latest v2.51.0). Tool docstring parsing used to set the <strong>root</strong> logger to ERROR during parsing, and that wasn't thread-safe. Concurrent Temporal workers could leave the root logger at ERROR for the rest of the process, silently dropping every library's warnings. Now fixed.</li>
+<li><strong>LiteLLM:</strong></li>
+<li>PyPI <code>1.104.0rc1</code> went up 07:32:50–07:33:22Z. It has no GitHub release or tag; the latest tags are <code>v1.104.0-dev.2</code> and <code>v1.103.0</code>. We can't state its contents.</li>
+<li>The packs claimed &quot;native wheel distribution&quot; is new. <strong>It isn't:</strong> 1.103.0 and 1.104.0.dev2 both already ship cp310-abi3 wheels for macOS, manylinux, musllinux and Windows.</li>
+<li>Rust gateway work on main: <a href="https://github.com/BerriAI/litellm/pull/43466">#43466</a> adds structured route lifecycle tracing (<code>core/src/diagnostic.rs</code>) across chat, messages, responses, OCR, audio and websocket paths; #43465 adds Python inference bindings; #43469 adds UI login. #43514 removed the delivery-routing abstraction.</li>
+<li>The GitHub <code>v1.103.0</code> release object was published at 05:43Z, but 1.103.0 is <strong>already Progress-carded at 1234</strong> and is not re-carded.</li>
+<li><strong>opencode v1.18.33</strong> (GitHub 04:22:46Z, npm <code>latest</code> 04:23:28Z). Bugfixes only:</li>
+<li>Cloudflare AI Gateway models honor provider timeouts (#51549).</li>
+<li>MCP browser launch failures are reported.</li>
+<li>Debug config output redacts credentials.</li>
+<li>Gemini thinking defaults changed (#50841).</li>
+<li>The model catalogue docs add Opus 5.5 and GPT 6 Sol/Luna.</li>
+<li>No catalog card exists, and this release doesn't clear the product-level bar.</li>
+<li><strong>langchainjs #11649</strong> (graph interrupts preserved through tool retries). <strong>cline</strong> #14496/#14477. <strong>haystack</strong> #12837/#12790. All merged to main and unreleased. NOTE.</li>
+<li><strong>google-adk:</strong> 1P, NOTE-only policy. No items this window.</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<h3>NEW A1 — <a href="https://arxiv.org/abs/2609.30471">CARGO: Context-Aware Retrieval-Gated Evaluation of Agentic AI in Production</a> (arXiv 2609.30471, Dell Technologies, cs.CL, v1 24 Sep 2026)</h3>
+<p><strong>Full PDF read</strong>: main text §1–10 and Appendices A–H.</p>
+<ul>
+<li><strong>Problem: reference–instance divergence (RID).</strong> In a production support agent, the golden answer closest to a live question almost always answers the <em>same question about a different case, asset or work order</em>. §2.3 shows that a literal reference-based judge can't separate &quot;wrong procedure&quot; from &quot;correctly different entity values&quot;.</li>
+<li><strong>Method:</strong></li>
+<li>The retrieved reference is reframed as a <em>procedural exemplar</em>.</li>
+<li>Each claim is scored supported/contradicted/unverifiable against the live trace's observed context, and only contradictions are penalized.</li>
+<li>Evaluation is gated on retrieval confidence (fixed τ = 0.80, margin-aware, or calibrated), so the evaluator abstains when it has no valid reference (§3.1).</li>
+<li>It also logs trace-level diagnostics: planner verdict, replanner, response type and latency (§3.4).</li>
+<li><strong>Key numbers</strong> (Table 1; CARGO-Bench, 246 items, 10 seeds, gpt-oss-120b × 3 seeds and gpt-oss-20b × 1, 7,872 judgments):</li>
+<li>DIRECT, the standard reference-based judge, penalizes <strong>100%</strong> of correct entity-transplanted answers, so DI = .00. In 150/150 rationales it cites the value mismatch, and in 149/150 it calls the live value &quot;hallucinated&quot; (§6.1).</li>
+<li>Adding the live facts without reframing (DIRECT+CTX) changes nothing: DI .00 / −.01.</li>
+<li>CARGO: 0/50 false penalties on transplants; contradiction recall 50/50 (120b) and 49/50 (20b); <strong>DI .58 [.48, .68]</strong>.</li>
+<li>The rubric swap (Table 3) shows the context-grounded dimension definitions do most of the work. DIRECT with CARGO's definitions alone reaches DI .49.</li>
+<li><strong>Limitation the authors own:</strong> CARGO catches only <strong>10/50 procedural corruptions</strong> (120b): 10/26 step deletions, 0/10 negations, 0/14 policy swaps (§6.1).</li>
+<li>A post-hoc &quot;authority split&quot; prompt fix doesn't help (ΔDI −.007 [−.038, .023]).</li>
+<li>An LLM-annotator study with explicit guidelines recovered only 3/10 (App. D).</li>
+<li>The production-traffic studies are <strong>preregistered but not reported</strong>: H1 expert agreement and H4 gate calibration (§5, §10).</li>
+<li>The P4 rate moved from 10% to 20% between the 150- and 246-item releases.</li>
+<li>The golden set has 30 items, 23 of them entity-free.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> if we score live agent traces against a golden set, entity-bearing questions make a literal judge report pure noise. Judge against the trace's own observed context, log abstentions as coverage gaps, and add a separate procedure check, because context-grounding alone misses 80% of procedural errors.</p>
+<h3>NEW A2 — <a href="https://arxiv.org/abs/2609.31301">Beyond Approved Actions: Runtime Validation of Persistent Outcomes in Agent Workflows (EffectMatch)</a> (arXiv 2609.31301, Harbin Institute of Technology, cs.SE, v1 25 Sep 2026; submitted to IEEE TSE)</h3>
+<p><strong>Full PDF read</strong>: main text §I–VI and Supplementary S1–S4.</p>
+<ul>
+<li><strong>Problem.</strong> A tool call can be approved and return success while leaving persistent changes nobody approved. Examples: a DB trigger inserts a notification, a value is altered, or a remote payment's response is lost and the retry duplicates it. Downstream work then treats that call as successful.</li>
+<li><strong>Method: an Effect Commit Contract (§II–III).</strong></li>
+<li>Before execution, the application states the approved outcome A as a multiset of persistent changes.</li>
+<li>The runtime binds A to its source, the current task-state revision, the plan revision and <strong>one</strong> execution occurrence.</li>
+<li>It certifies that every reachable persistence or dispatch outlet is either observed or denied.</li>
+<li>It stages the operation (e.g., a held PostgreSQL transaction with write-recording triggers), collects the actual changes E, and classifies the result EXACT/DIVERGED/INDETERMINATE.</li>
+<li>The decision goes to a durable journal that later workers must read before continuing.</li>
+<li><strong>Key numbers:</strong></li>
+<li>Table III(a), PostgreSQL, 3 independently approved MCPMark tasks: Direct and AgentSpec commit 9/9 hidden-trigger writes, missing rows and altered values; EffectMatch commits 0/9 of each and keeps 9/9 clean runs.</li>
+<li>Table III(b), STATE-Bench, 12 tasks: all 117 mismatches rejected across 39 task×fault cases; error-reject accepts all of them.</li>
+<li>Table III(c)/S4, 206 tasks with clean references (618 runs per cell): Direct commits 354 omission and 138 duplication faults, error-reject 138 and 138, EffectMatch 0 and 0. EffectMatch keeps all 618 clean outcomes; error-reject withholds 21 correct ones whose trajectories recovered from an intermediate tool error.</li>
+<li>Table IV/S6 ablations: removing any one mechanism (result comparison, complete observation, approval-source check, one-use binding, durable hazard record, candidate binding, fresh boundary check) re-admits its failure in 20/20 runs.</li>
+<li>Table VI, recovery: 540 producer processes and 1,080 fresh-reader checks, with no release without a valid terminal.</li>
+<li>Live agents (Table V): DeepSeek API, a DSH harness and Codex CLI 0.154.0, 108 episodes, all correct. The API config needed a host-finalization fix for 3/18.</li>
+<li>Overhead (Fig. 6): median +1.08 ms per task (4.35× on sub-ms baselines). Outlet certification adds +15.16 ms median.</li>
+<li><strong>Limitations:</strong></li>
+<li>The approved outcomes in the independent subset are <strong>hand-authored</strong> (S1).</li>
+<li>The 206-task comparison uses saved clean replays as targets.</li>
+<li>Faults are injected, not produced by agents. The live-agent batch only shows integration works (S4.D).</li>
+<li>GitHub readback can't attribute remote changes to a specific request.</li>
+<li>OPAQUE backends get no rollback: divergence only blocks continuation (Table I).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> &quot;the tool returned success&quot; and &quot;the system ended in the approved state&quot; are different facts, and only a diff of persistent changes before and after the run shows the second. For an observer, that means logging <em>observed effects</em> next to tool results, and treating a missing terminal decision as &quot;blocked&quot; rather than &quot;succeeded&quot;.</p>
+<h3>Scouted, not ranked (cap reached; abstract or title only, NOT fully read)</h3>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.30308">2609.30308</a> <strong>Empty Intersection.</strong> Provenance fixes raised classified coverage from 36.1% to 98.4% over 194,620 rows without changing either verification decision. Carried from 1834. Strong next-slot candidate.</li>
+<li><a href="https://arxiv.org/abs/2609.30137">2609.30137</a> <strong>Screen Before You Serve.</strong> Simulation screening of customer-experience agents. Carried from 1834.</li>
+<li><a href="https://arxiv.org/abs/2609.30328">2609.30328</a> <em>When Is a Multi-Agent Code Judge Actually Grounded? Two Label-Free Measurements, and a Judge That Declines to Guess</em>. Title screen only.</li>
+<li><a href="https://arxiv.org/abs/2609.30798">2609.30798</a> <em>Evaluating Real-Time Voice Agents: From Component Quality to Grounded Outcomes</em>. Title screen only.</li>
+<li><a href="https://arxiv.org/abs/2609.30541">2609.30541</a> <em>AutoResearch at Production Scale: Failure Modes and a Multi-Agent Framework</em>. Title screen only.</li>
+<li><a href="https://arxiv.org/abs/2609.30967">2609.30967</a> <em>MoMHa: Multi-Objective Optimization of LLM Harnesses over Accuracy, Safety, and Tokens</em>. Title screen only.</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ul>
+<li><strong>Harness-native OTLP is becoming default plumbing.</strong> Codex 0.158 ships final-response, Guardian and spawn telemetry. Letta journals each decision's cost and calibration. The 6-week bet is that ingestion from harness-emitted OTLP logs, not just spans, becomes table stakes. Expected: high. Cost to track: low.</li>
+<li><strong>Judge validity is splitting from judge bias.</strong> CARGO (RID) joins 1834's 2609.30290 production SQL-judge audit (kappa .04). The failure is now &quot;the reference is the wrong target&quot;, not position or verbosity bias. An abstention/coverage column for evaluators is a cheap, defensible schema addition.</li>
+<li><strong>&quot;Approved ≠ realized&quot; moves into runtimes.</strong> EffectMatch, Letta's &quot;Run must be terminal&quot; check on resumed workers, and Mastra's empty-trajectory fix all separate a reported success from the real end state. Expect more harnesses to emit an outcome-classification field; tracking it is worth it.</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>Codex 0.158.0 stable (NEW):</strong> opt-in OTLP logs for final responses, Guardian verdicts and spawn failures, plus extension hooks for tool timing, are now on npm <code>latest</code>.</li>
+<li><strong>CARGO 2609.30471 (NEW):</strong> literal golden-set judging of entity-bearing agent traces gives DI = 0. Judge against observed trace context, gate by retrieval margin, and add a separate procedure check.</li>
+<li><strong>EffectMatch 2609.31301 (NEW):</strong> compare persistent effects with the pre-approved outcome before commit, and treat a missing terminal decision as blocked, not success.</li>
+<li><strong>Letta Code v0.33.5 (Progress):</strong> <code>decide()</code> journals model, cost, calibration, validity and tokens per decision.</li>
+<li><strong>Mastra 1.72.0-alpha.5 (Progress):</strong> trajectory scorers had been scoring empty trajectories when trace storage was off.</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What was not confirmed</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>LiteLLM PyPI <code>1.104.0rc1</code></td>
+  <td>Contents. There are no release notes and no matching GitHub tag or release (latest tags are <code>v1.104.0-dev.2</code> and <code>v1.103.0</code>), so I can't say whether the Rust gateway merges #43465–#43470 are in it.</td>
+  <td>PyPI JSON for <code>litellm/1.104.0rc1</code>; <code>gh api repos/BerriAI/litellm/tags</code> and <code>/releases</code></td>
+</tr>
+<tr>
+  <td>Pack claim &quot;1.104.0rc1 = native wheel distribution for the Rust gateway&quot;</td>
+  <td><strong>Contradicted</strong>, not just unconfirmed: 1.103.0 and 1.104.0.dev2 already ship cp310-abi3 platform wheels.</td>
+  <td>PyPI JSON file lists for 1.103.0, 1.104.0.dev2 and 1.104.0rc1</td>
+</tr>
+<tr>
+  <td>Codex 0.158.0 OTLP/Guardian field lists</td>
+  <td>The release notes don't list the fields. The Guardian field list comes from our own 2026-09-24 1834 alpha.10 Progress note, which I did not re-read in the source.</td>
+  <td>Release body for <code>rust-v0.158.0</code>; catalog progress on <code>openai-codex-0-156-0-stable-…</code></td>
+</tr>
+<tr>
+  <td>EffectMatch &quot;DSH&quot; harness</td>
+  <td>Whether the paper's &quot;DSH 0.1.5-rc.2&quot; is the same DeepSeek Harness this fleet runs. The paper describes it only as a harness with an SDK and native tools.</td>
+  <td>2609.31301 §IV-A and S4.B</td>
+</tr>
+<tr>
+  <td>CARGO production-traffic results</td>
+  <td>Not reported. H1 and H4 are preregistered only, so no production agreement numbers are claimed.</td>
+  <td>2609.30471 §5, §6.2, §10</td>
+</tr>
+</tbody>
+</table></div>
+<p>Everything else in Industry, Progress and Academy was confirmed against GitHub release/PR APIs, npm <code>time</code>/<code>dist-tags</code>, PyPI JSON or the full arXiv PDF.</p>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Packs used (all 6 present, each with PACK_DONE):</strong></li>
+<li><code>muse-pack-2026-09-27-1932.md</code></li>
+<li><code>dsh-pack-2026-09-27-2032.md</code></li>
+<li><code>agy-pack-2026-09-27-2132.md</code></li>
+<li><code>muse-pack-2026-09-27-2232.md</code></li>
+<li><code>dsh-pack-2026-09-27-2332.md</code></li>
+<li><code>agy-pack-2026-09-28-0032.md</code></li>
+<li>I read none of them wholesale; candidates came from <code>fresh-items.md</code>.</li>
+<li><strong>Gaps:</strong> no Agy, Muse or DSH hours missing in the window. The Medium scouts are paused. GTM boards are paused, so there is no GTM content.</li>
+<li><strong>Fresh-list path used:</strong> <code>_runs/fb-2026-09-28-0034/fresh-items.md</code>, with 32 candidates and 2 dropped as already known. Dispositions:</li>
+<li>F07 → NEW.</li>
+<li>F05 → Progress P1.</li>
+<li>F12 → Progress P2, via the alpha.5 release that I found in my own npm sweep.</li>
+<li>F06, F09, F11, F13, F16, F18, F21, F24 → NOTE.</li>
+<li>F08 → already carded at 1234.</li>
+<li>F04 (codex alpha.12) → NOTE, prerelease with no notes.</li>
+<li>F01, F02, F25 → opens/WATCH, below bar.</li>
+<li>Everything else is hygiene.</li>
+<li><strong>Independent sweep:</strong> GitHub releases published after 2026-09-28T01:40Z for 35 watchlist repos returned nothing beyond Codex, Letta, opencode and LiteLLM. The repos included openai-agents-python/js, pydantic-ai, mastra, langfuse, langchain/langgraph/langsmith, phoenix, opik, promptfoo, deepeval, openllmetry, vercel/ai, crewAI, agno, inspect_ai, langwatch, agenta, livekit agents, cline, haystack, adk-python, weave, braintrust, autogen, llama_index, claude-code, OTel semconv, helicone, agent-framework, strands and stagehand. The npm sweep found Mastra <code>@mastra/core@1.72.0-alpha.5</code>, which no pack had. Claude Code is still 2.1.283 (Sep 25).</li>
+<li><strong>arXiv ceiling:</strong> <strong>2609.31619</strong>, from the Mon 28 Sep new-submission listings for cs.AI/SE/CL/MA/LG/DB/CR; 515 IDs screened. That is the same announcement batch the 1834 brief used, so there are no newer IDs. The pack-reported ~2609.31620 is consistent.</li>
+<li><strong>Verification method:</strong> <code>gh api</code> for releases, PRs and tags; <code>npm view</code> for <code>time</code> and <code>dist-tags</code>; PyPI JSON for upload times and file lists; arXiv listing HTML; <code>pdftotext -layout</code> read in full for 2609.30471 and 2609.31301. Catalog greps for every candidate ID returned 0 hits for 30471 and 31301, and no <code>0-158-0-stable</code> card exists.</li>
+<li><strong>Tooling pitfall (for future slots):</strong> in zsh, <code>set -- $x</code> does not word-split, so <code>gh api repos/$1/releases/tags/$2</code> returns 404s that look real. Use <code>bash -c</code> or <code>${=x}</code>.</li>
+<li><strong>HN:</strong> the source was dropped fleet-wide on 2026-09-27. No <code>packs/_hn/</code> files are in window and there are no HN keeps.</li>
+<li><strong>Late wake:</strong> ~00:37 PT on the 00:34 cadence; label kept at 0034.</li>
+<li><strong>Effort:</strong> high, the final effort-test HIGH slot via Collection's env override. I did not change it.</li>
+<li><strong>Catalog baseline at start:</strong> 443 items, 113 briefs, 115 runs; max brief <code>2026-09-27T1834</code>. Pin <code>2609.02702</code> is intact.</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<pre><code class="language-yaml">new:
+- id: openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks
+  tag: Industry
+  title: &quot;OpenAI Codex CLI rust-v0.158.0 STABLE — opt-in OTLP logs for final responses and Guardian assessments, multi-agent spawn metrics, and extension hooks for tool timing and model streams reach npm latest&quot;
+  url: https://github.com/openai/codex/releases/tag/rust-v0.158.0
+  card: &gt;-
+    GH 05:07Z, npm latest 05:12Z Sep 28 (188 PRs since 0.157.0). #47649/#47870 add opt-in OTLP log events for final agent
+    responses and Guardian assessments; #47984 adds spawn phase-duration and failure metrics; #47662/#47679/#47680 expose
+    tool dispatch timing, model request/response streams and exec-server RPC timing to extensions. Also MCP OAuth client
+    secrets (#47891), exec-server bearer auth (#47601/#47648), and terminal-input approval on by default (#47799).
+- id: arxiv-2609-30471-cargo-reference-instance-divergence-judges
+  tag: Academy
+  title: &quot;CARGO — reference-based LLM judges score every correct answer about a different live entity as wrong and hallucinated (DI 0); context-grounded, retrieval-gated judging lifts DI to .58 but catches 20% of procedural errors&quot;
+  arxiv: &quot;2609.30471&quot;
+  url: https://arxiv.org/abs/2609.30471
+  card: &gt;-
+    Dell production support agent: the nearest golden answer is usually about a different case or asset, so a literal
+    reference judge penalized 100% of correct entity-transplanted answers (DI .00; Table 1). Judging claims against the
+    trace's observed context and abstaining on low retrieval margin raises DI to .58 [.48,.68] with 50/50 contradiction
+    recall, but catches only 10/50 procedural corruptions; production-traffic studies are preregistered, not reported.
+- id: arxiv-2609-31301-effectmatch-persistent-outcome-validation
+  tag: Academy
+  title: &quot;EffectMatch — agents' persistent side effects are compared with the pre-approved outcome before commit; 0 wrong commits where direct execution committed 354/618 omission faults&quot;
+  arxiv: &quot;2609.31301&quot;
+  url: https://arxiv.org/abs/2609.31301
+  card: &gt;-
+    Binds application approval to one execution, observes actual persistent changes (including trigger writes) in a held
+    transaction, classifies EXACT/DIVERGED/INDETERMINATE, and journals the decision so later workers can't continue.
+    On 206 STATE-Bench tasks: 0 omission/duplication commits vs 354/138 direct, keeping all 618 clean outcomes
+    (Table III(c)); each ablated mechanism re-admits its failure 20/20 (Table IV). Approvals hand-authored; faults injected.
+progress:
+- parent: letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction
+  text: &gt;-
+    Letta Code v0.33.5 (npm 04:19Z, GH 04:23Z, PyPI letta 04:32Z Sep 28): #4785 adds Workflow decide(state, questions),
+    which returns calibrated choice/score/noul answers from a pinned Jev endpoint (no model override, one retry, then null)
+    and journals model, cost, calibration, validity and tokens per decision; agent() can resume an existing worker
+    conversation with no inherited tools. #4817 disables the memory guard for Workflow workers only.
+- parent: mastra-core-1-70-0-model-selection-processor-tenant-scoped-traces-memory-1-32
+  text: &gt;-
+    @mastra/core 1.72.0-alpha.5 (npm 04:25Z Sep 28): #25269 fixes trajectory scorers in dataset experiments that
+    received an empty trajectory for workflow targets when no trace was stored; #24928 unsticks threads after a
+    mid-reasoning step failure on Anthropic/Bedrock; #25283 persists durable-agent data-* parts to memory. Alpha only.
+headline_claims:
+- claim: &quot;OpenAI Codex rust-v0.158.0 is the npm latest release and ships opt-in OTLP logging for final agent responses (#47649) and Guardian assessments (#47870).&quot;
+  url: https://github.com/openai/codex/releases/tag/rust-v0.158.0
+  date: 2026-09-28
+- claim: &quot;On CARGO-Bench, a standard reference-based LLM judge penalized 100% of correct entity-transplanted answers (DI .00), while CARGO reached DI .58 but caught only 10/50 procedural corruptions.&quot;
+  url: https://arxiv.org/abs/2609.30471
+  date: 2026-09-24
+- claim: &quot;Across 206 STATE-Bench tasks, EffectMatch committed 0 of the omission and duplication faults that direct execution committed 354 and 138 times, while keeping all 618 clean outcomes.&quot;
+  url: https://arxiv.org/abs/2609.31301
+  date: 2026-09-25
+</code></pre>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 28 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
