@@ -1,8 +1,93 @@
 {
-  "updatedAt": "2026-09-28T05:08:54Z",
+  "updatedAt": "2026-09-28T23:53:42Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "claimcheck-stop-hook-session-record-contradicts-claim-2026-09-28",
+      "date": "2026-09-28",
+      "displayDate": "Sep 28, 2026",
+      "title": "claimcheck — Stop hook that blocks completion claims the session record contradicts",
+      "href": "https://github.com/Allan-Nava/claimcheck",
+      "why": "Deterministic Claude Code Stop hook (no model, no network, no API key, no deps; Node 18+) that refuses a claim of completion when the session's own transcript contradicts it: tests ran+passed, commit made, push landed, tag exists (paths/ran/merged opt-in, off by default). Ships measured evals (claim-detection precision/recall, p50 latency vs Node startup, sweep over 1,744 real transcripts), audit mode with a decisions log, and fail-open rules — new checks earn blocking only after measured FP≈0. Direct mechanical answer to the triage objection that kept stingray out of the playbook (Jev call per Stop / no-op without TypeSafe key): enforces code-decides-done + no-exit-while-waiting at zero marginal cost. npm `@allan_nava/claimcheck`; MIT. Not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-28-muse-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "EM",
+        "code-decides-done",
+        "no-exit-while-waiting",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "ccdrift-claude-code-session-log-drift-alerts-2026-09-28",
+      "date": "2026-09-28",
+      "displayDate": "Sep 28, 2026",
+      "title": "ccdrift — silent Claude Code drift alerts from local session logs",
+      "href": "https://github.com/rkolesnichenko/ccdrift",
+      "why": "Local-only seat-health monitor that reads Claude Code transcripts and alerts on silent behavior shifts: prompt-cache ratio regressions, tool-loop cache misses, Haiku on the main thread, effort-level / cache-tier changes, session-start context shifts (system prompt, MCP, CLAUDE.md), hooks failing or silently stopping, request failures, responses cut at the token limit. State in ~/.ccdrift (no prompt/response text kept); macOS launchd schedule; incident lifecycle with Claude Code version attribution. Complements Agent Console (Console measures cache splits on demand; ccdrift alerts when the seat drifts). Caveat: set cleanupPeriodDays: 365 in Claude settings so the first run has history to replay. uv/pipx install; $0, no key. Not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-28-muse-harness-lab-pack",
+      "tags": [
+        "tokens",
+        "Mac CLI",
+        "cache",
+        "monitoring",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "finetooth-coverage-map-fingerprint-third-recurrence-2026-09-28",
+      "date": "2026-09-28",
+      "displayDate": "Sep 28, 2026",
+      "title": "finetooth — coverage map, fingerprints/re-stamp, and third-recurrence guards for whole-repo review",
+      "href": "https://github.com/mikey-semy/finetooth",
+      "why": "Whole-repository review as an Agent Skill (single stdlib-Python file; README on master): a coverage map (file→block) that fails if any tracked file is unowned; numbered hypotheses with mandatory verdicts per block; fingerprints (a block closed on old code, or moved finding code, turns check red until re-stamped); a findings register in git; guards from the third recurrence (third same-root-cause finding cannot close without a test/lint/CI guard); tests proven by mutations. Three portable patterns for our dual-LGTM contract without requiring the install: (a) reviewer-stated file-coverage line, (b) mechanical form of VERDICT-on-head-SHA (new push resets), (c) mechanical form of #repeat-lesson (3× → guard, not another forbidden.md paragraph). MIT; works across Claude Code/Codex/Gemini/Cursor via Agent Skills. Patterns/checks, not a new coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-28-muse-harness-lab-pack",
+      "tags": [
+        "review",
+        "dual-LGTM",
+        "repeat-lesson",
+        "patterns",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "coding-agent-guardrails-byte-budget-declared-effective-2026-09-28",
+      "date": "2026-09-28",
+      "displayDate": "Sep 28, 2026",
+      "title": "coding-agent-guardrails — resident-rules byte budget + declared≠effective loading checks",
+      "href": "https://github.com/Quarkgluonmixture/coding-agent-guardrails",
+      "why": "Day-to-day harness patterns from real failures: evidence-before-verdict (show the check ran on the right object before claiming done/passing/empty); two-tier git-guard PreToolUse hook (DENY: add -A/-a/--no-verify/force-push; ASK: reset --hard/checkout ./stash); resident-rules byte budget (20,000-byte ceiling on always-on rules, CI-enforced — add one, compress or demote another); declared≠effective via kit state (rules observed loading with SHA-256, flags declared-but-never-loaded); generated README inventory checked in CI. Two imports fit gaps named this week: (a) byte budget on resident vault policy (forbidden.md grows without a ceiling — enforcement half of #repeat-lesson), (b) declared-vs-effective skill/hook loading in nightly Mac audit (lighter than Model Citizen's ownership journal). MIT. Patterns/checks, not a new coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-28-muse-harness-lab-pack",
+      "tags": [
+        "rules",
+        "hooks",
+        "audit",
+        "repeat-lesson",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "swarm-agent-coordination-merge-batch-paths-owned-2026-09-28",
+      "date": "2026-09-28",
+      "displayDate": "Sep 28, 2026",
+      "title": "swarm-agent-coordination — merge-batch gate, paths-owned covering the diff, shared-resources register",
+      "href": "https://github.com/kunci115/swarm-agent-coordination",
+      "why": "Classified field evidence from 35 days of agents building production software in one repo (1,417 commits, 229 PRs, 159 worktrees, zero inter-agent chat): 85/229 PRs carried a coordination incident — 16 seam defects vs 1 textual conflict (\"green lanes are not a green merge\"). Mechanical refuses: merge_batch.sh + merge gate (test the combined tree, not the lanes), migration-chain single-head check, per-run Compose identity, shared-resources register (ceilings written down), check_paths_owned (ownership declaration must cover the diff — 63 of 221 did not), branch-base claim checks. Honestly scopes its limit (test stub sharing the code's wrong assumption). Strengthens stacked/parallel EM work on one repo (Pages, SDK): re-run gates on the combined tree before merge; paths-owned must cover the diff; repo AGENTS.md carries a shared-resources register. MIT. Patterns/checks, not a new coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-28-muse-harness-lab-pack",
+      "tags": [
+        "EM",
+        "coordination",
+        "merge",
+        "ownership",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "agent-console-local-cache-token-split-2026-09-27",
       "date": "2026-09-27",
