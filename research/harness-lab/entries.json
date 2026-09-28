@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-27T23:47:41Z",
+  "updatedAt": "2026-09-28T05:08:54Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
@@ -77,7 +77,7 @@
       "displayDate": "Sep 27, 2026",
       "title": "claude-code-ops-kit — self-audit + reproduce-first debugging + adversarial verifier",
       "href": "https://github.com/daichi-0818/claude-code-ops-kit",
-      "why": "Operational discipline kit against silent long-run agent failure: skills/self-audit (claim-to-source table, fact-vs-guess split, double-check that \"zero/stopped/missing\" claims are not failed fetches or stale checkouts), skills/systematic-debugging (reproduce first, instrument boundaries, one minimal change, 3-strike escalation to a human), agents/adversarial-verifier (separate read-only \"assume broken\" judge), plus scripts/launchd-watchdog.py for quiet launchd deaths. Directly maps onto forbidden.md \"0 items / stopped\" false reports and the 2026-09-25 reproduce-before-fix rule for bug tasks. Skills/agents pack only — adapt patterns into ~/.agents/skills/; not a new coding-CLI seat, no Herdr. MIT (master branch). Lab card; appliedToPlaybook false.",
+      "why": "Operational discipline kit against silent long-run agent failure: skills/self-audit (claim-to-source table, fact-vs-guess split, double-check that \"zero/stopped/missing\" claims are not failed fetches or stale checkouts), skills/systematic-debugging (reproduce first, instrument boundaries, one minimal change, 3-strike escalation to a human), agents/adversarial-verifier (separate read-only \"assume broken\" judge), plus scripts/launchd-watchdog.py for quiet launchd deaths. Directly maps onto forbidden.md \"0 items / stopped\" false reports and the 2026-09-25 reproduce-before-fix rule for bug tasks. Skills/agents pack only — adapt patterns into ~/.agents/skills/; not a new coding-CLI seat, no Herdr. MIT (master branch). In playbook (2026-09-27, Haiyuan-approved) as the negative-claim check (#negative-claim-check): a zero / none / stale claim needs a lookup that worked, otherwise it is an access gap. Reproduce-first and the adversarial verifier were already covered (rari repro-before-fix, disproof review); no install.",
       "source": "Hunt/agent-manage/2026-09-27-agy-harness-lab-pack",
       "tags": [
         "EM",
@@ -86,7 +86,7 @@
         "reproduce-before-fix",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "sno-station-squad-memory-peer-review-rsi-2026-09-26",
@@ -94,7 +94,7 @@
       "displayDate": "Sep 26, 2026",
       "title": "Sno Station — shared encrypted memory, peer review, nightly skill proposals",
       "href": "https://github.com/sno-ai/sno-station",
-      "why": "Open-source laptop workstation that turns coding agents you already run (Claude Code / Codex / OpenClaw) into one squad: shared encrypted memory in one workspace, agent-to-agent messaging (\"Reach\"), cross-vendor peer-review skills, and rate-limit failover that picks up with context intact. Nightly RSI loop reads sessions, proposes changes to their own skills, and waits for a human yes — the missing front half of our daily consolidation (20:57 digests write notes but never propose skill diffs) under the rari promotion gate. Cross-vendor review independently mirrors blind dual-LGTM; failover-with-context is a data point for Opus→Kimi handoff state. README is honest: one-command install is \"Not yet\"; repo is assembled in public (opened 2026-09-18); Apache-2.0; no daemon/cloud required. Patterns/prose only for now — not a new coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "Open-source laptop workstation that turns coding agents you already run (Claude Code / Codex / OpenClaw) into one squad: shared encrypted memory in one workspace, agent-to-agent messaging (\"Reach\"), cross-vendor peer-review skills, and rate-limit failover that picks up with context intact. Nightly RSI loop reads sessions, proposes changes to their own skills, and waits for a human yes — the missing front half of our daily consolidation (20:57 digests write notes but never propose skill diffs) under the rari promotion gate. Cross-vendor review independently mirrors blind dual-LGTM; failover-with-context is a data point for Opus→Kimi handoff state. README is honest: one-command install is \"Not yet\"; repo is assembled in public (opened 2026-09-18); Apache-2.0; no daemon/cloud required. Patterns/prose only for now — not a new coding-CLI seat, no Herdr. In playbook (2026-09-27, Haiyuan-approved) as repeat lesson → proposed skill diff (#repeat-lesson) inside the existing daily consolidation; no install, no new routine.",
       "source": "Hunt/agent-manage/2026-09-26-dsh-harness-lab-pack",
       "tags": [
         "handoffs",
@@ -103,7 +103,7 @@
         "routing",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "model-citizen-stop-gate-ownership-journal-2026-09-26",
@@ -162,7 +162,7 @@
       "displayDate": "Sep 26, 2026",
       "title": "crossagent — dual-agent tmux review with AGREE/ESCALATE/UNPARSED verdicts",
       "href": "https://github.com/k8adev/crossagent",
-      "why": "MCP server (npm crossagent-mcp) that pairs two coding agents in adjacent tmux panes — one drives, the other reviews. Every plan/diff passes through the peer; the reply always ends in a machine-parseable `VERDICT: <word>` with fixed vocabulary: AGREE / ADJUST / OBJECT / ESCALATE / UNPARSED. tmux is the only transport (no network, no shared file, no socket); briefing clears the peer's conversation so the reviewer is genuinely fresh. Gives blind dual-LGTM (Astra+Fable) an interface: today reviewers can return prose we adjudicate by reading; ESCALATE is \"only the human can call it\" (silent-misroute rule in mechanical form) and UNPARSED detects a non-verdict instead of treating it as assent (retry ceiling schema×1). Adopt the verdict contract as prose/checklist first; installing the MCP is optional/later. Requires Node 22+, tmux, Claude Code or Codex CLI. MIT. Lab card; appliedToPlaybook false.",
+      "why": "MCP server (npm crossagent-mcp) that pairs two coding agents in adjacent tmux panes — one drives, the other reviews. Every plan/diff passes through the peer; the reply always ends in a machine-parseable `VERDICT: <word>` with fixed vocabulary: AGREE / ADJUST / OBJECT / ESCALATE / UNPARSED. tmux is the only transport (no network, no shared file, no socket); briefing clears the peer's conversation so the reviewer is genuinely fresh. Gives blind dual-LGTM (Astra+Fable) an interface: today reviewers can return prose we adjudicate by reading; ESCALATE is \"only the human can call it\" (silent-misroute rule in mechanical form) and UNPARSED detects a non-verdict instead of treating it as assent (retry ceiling schema×1). Adopt the verdict contract as prose/checklist first; installing the MCP is optional/later. Requires Node 22+, tmux, Claude Code or Codex CLI. MIT. In playbook (2026-09-27, Haiyuan-approved) as the review verdict line (#review-verdict-line): VERDICT: APPROVE | REQUEST_CHANGES | ESCALATE @ head SHA; a missing line is UNPARSED and never an LGTM. MCP not installed.",
       "source": "Hunt/agent-manage/2026-09-26-dsh-harness-lab-pack",
       "tags": [
         "dual-LGTM",
@@ -171,7 +171,7 @@
         "tmux",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "simply-ledger-owned-done-settle-gate-2026-09-25",
@@ -531,7 +531,7 @@
       "displayDate": "Sep 21, 2026",
       "title": "Archestra — Jev 100-call calibration (79% constant trap)",
       "href": "https://archestra.ai/blog/we-tested-jev-on-100-real-agent-calls",
-      "why": "Field benchmark: naive ~75% accuracy can be worse than a benign constant (79% of calls are local status checks). Separate input authority vs output trust in Jev policy rubrics. Calibration KEEP for our Jev decision layer — no install.",
+      "why": "Field benchmark: naive ~75% accuracy can be worse than a benign constant (79% of calls are local status checks). Separate input authority vs output trust in Jev policy rubrics. Calibration KEEP for our Jev decision layer — no install. In playbook (2026-09-27, Haiyuan-approved) as the Jev constant baseline (#constant-baseline): a Jev gate must beat the always-majority constant before shadow→active.",
       "source": "Hunt/agent-manage/2026-09-21-agy-harness-lab-pack",
       "tags": [
         "jev",
@@ -539,7 +539,7 @@
         "IFC",
         "policy"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "portable-dsh-multi-agent-plugin-2026-09-21",
