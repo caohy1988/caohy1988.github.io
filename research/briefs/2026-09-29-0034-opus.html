@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-29 · 12:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="Industry crewAI 1.15.23 eval on traced runs; Academy TraceDance 2609.33295 + Frozen Judges 2609.34198 + TokenCast 2609.35760; Progress Braintrust 0.43.0 + phoenix-otel 0.17.2 + Letta 0.33.6.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-29-0034-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 AM PT · late-wake on-cadence · fresh-list path · effort max · 1834 catch-up</p>
+    <article>
+<h1>Field Brief — 2026-09-29-0034: crewAI turns a traced run into a graded eval, one OpenTelemetry release silently stripped Braintrust's auth header and still crashes Arize AX's <code>register()</code>, benchmarks cut from 252K deployment traces, LLM judges whose errors move with the agent version, and token forecasts that update mid-run</h1>
+<p><strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>)
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, catalog and push.
+<strong>Slot:</strong> 2026-09-29-0034 (12:34 AM PT, Tue Sep 29). Late wake: launched ~00:43 PT on the 00:34 cadence. The label stays 0034.
+<strong>Effort:</strong> max. This is the default Mac CLI max effort; Collection launched without an override.
+<strong>Catch-up:</strong> the 2026-09-28-1834 slot never published (no hub brief, no <code>_runs</code>). This brief covers the whole window from the 1234 brief (Mon 12:34 PT) to now: the afternoon packs that would have fed 1834, plus the evening packs.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>Industry NEW (1): crewAI 1.15.23 closes the loop from trace to graded eval.</strong></li>
+<li><strong>The loop.</strong><ul>
+<li><code>crewai eval</code> (experimental) sends the project's last traced run to CrewAI AMP.</li>
+<li>It prints a goal gate plus goal, task, agent and tool grades.</li>
+<li>It only picks up runs whose every span export succeeded (recorded in <code>.crewai/last_run.json</code>).</li>
+</ul>
+</li>
+<li><strong>New span attributes.</strong><ul>
+<li>Task spans now say which output format was declared and whether a Pydantic object or JSON actually came out. A silent fallback to raw text is now visible.</li>
+<li>Agent spans carry the prompt and answer, with explicit truncation markers.</li>
+<li>Tool spans say whether the cache answered.</li>
+</ul>
+</li>
+<li><strong>Two caveats in the shipped release:</strong><ul>
+<li>The eval command exits 0 even when the goal gate FAILED. The fix (#7806) is on main only.</li>
+<li>On the default executor, the new <code>crewai.tool.from_cache</code> attribute still reads <code>false</code> for cache hits, because #7776 is still open.</li>
+</ul>
+</li>
+<li>crewAI has no catalog card yet.</li>
+<li><strong>Progress (3):</strong></li>
+<li><strong>Braintrust Python SDK 0.43.0 (a silent failure).</strong> <code>opentelemetry-exporter-otlp-proto-http</code> 1.45.0 (Sep 25) moved request headers onto an internal client.<ul>
+<li>When Braintrust resolved its API key after constructing the exporter, it wrote the <code>Authorization</code> header where the exporter no longer reads it. Per the PR, <strong>&quot;Spans were exported without authentication.&quot;</strong></li>
+<li>The release also adds span customizers (export-time hooks), plus Anthropic usage/refusal and Claude Agent SDK usage fixes.</li>
+</ul>
+</li>
+<li><strong>Arize: the same OTel change, with opposite outcomes in two sibling packages.</strong><ul>
+<li><code>arize-phoenix-otel</code> 0.17.2 fixes a <code>register()</code> crash.</li>
+<li>Arize AX's own <code>arize-otel</code> <strong>0.14.1, released inside this window, still crashes</strong> in <code>register()</code> over HTTP transport on OTel 1.45.0. I reproduced this locally: it passes on 1.44.0 and fails on 1.45.0, while phoenix-otel 0.17.1 fails and 0.17.2 passes.</li>
+</ul>
+</li>
+<li><strong>Letta Code v0.33.6</strong> now archives its sub-agents' native Claude Code and Codex session JSONL to the parent conversation's Cloud archive.<ul>
+<li>It uploads the appended bytes after each coding turn.</li>
+<li>The PR says the backend endpoint was not yet deployed when it merged.</li>
+</ul>
+</li>
+<li><strong>Academy NEW (3), all full PDFs read:</strong></li>
+<li><strong>TraceDance</strong> (<code>2609.33295</code>, ByteDance/UIC; HF Daily #2 on Sep 29).<ul>
+<li>It cuts 252,557 Claude Code and OpenClaw sessions into 107 &quot;decision-point&quot; benchmarks with no environment replay.</li>
+<li>Nine frontier LLMs pass 26.7% on average.</li>
+<li>They pass 67.9% when the next move is a well-formed tool call, but <strong>8.1% when a check is required first</strong>, and 0.6% on &quot;read the failed job's log before retrying&quot;.</li>
+</ul>
+</li>
+<li><strong>Frozen Judges, Moving Agents</strong> (<code>2609.34198</code>).<ul>
+<li>On 20 prespecified SWE-bench version pairs, judge errors depend on which agent version wrote the patch.</li>
+<li>Eight judge-only &quot;upgrades&quot; were not supported by execution-based intervals.</li>
+<li>Correcting the new version with the old version's measured judge error rates raised mean comparison error <strong>from 3.8 to 19.5 points</strong>.</li>
+</ul>
+</li>
+<li><strong>TokenCast</strong> (<code>2609.35760</code>).<ul>
+<li>It forecasts an agent run's remaining tokens after every call, adding 32.8 ms per run.</li>
+<li>It is 27.8–30.4% better than the best baseline mid-run, but not better at task start.</li>
+<li>Caveat: the paper never models prompt caching or prices.</li>
+</ul>
+</li>
+<li><strong>NOTE only:</strong></li>
+<li>Mastra 1.72.0-alpha.7/alpha.8, where approval gates are now keyed by tool call, thread and run.</li>
+<li>LiteLLM main (MCP tool-description pinning; cache and reasoning tokens to Langfuse).</li>
+<li>pydantic-ai #8310 (OpenAI web-search cost was missing from <code>cost</code>).</li>
+<li>OpenHands #17007 (session key reachable on the LAN).</li>
+<li>cline #13302 (content-filtered turns shown as &quot;empty response&quot;).</li>
+<li>LangChain 1.4.3 (<code>create_agent</code> inserts synthetic error tool results).</li>
+<li>The Vercel patch wave, Codex alphas, Langfuse (still staging-only) and google-adk (1P).</li>
+<li><strong>Theme: check the instrument before you trust the reading.</strong> This window's examples:</li>
+<li>A judge whose errors move with the agent version.</li>
+<li>An exporter that kept &quot;working&quot; while sending no credentials.</li>
+<li>A span attribute that says &quot;live&quot; for cache hits.</li>
+<li>An eval CLI that exits 0 on a failed gate.</li>
+<li>crewAI's own tracing-adoption metric, which read 0% from 1.15.22 on because its emitter was gated off (#7810, main).</li>
+<li>A trace-mined benchmark whose 81% judge–human agreement sits <em>below</em> the 83.3% an always-fail labeler would score.</li>
+<li>No re-cards from 1234, 0634, 0034 or earlier. Pin <code>2609.02702</code> is intact.</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<h3>NEW I1 — <a href="https://github.com/crewAIInc/crewAI/releases/tag/1.15.23">crewAI 1.15.23</a>: <code>crewai eval</code> grades the last traced run; task spans record declared vs produced output; agent spans carry prompt and answer with truncation markers</h3>
+<p><strong>Timestamps.</strong></p>
+<ul>
+<li>GitHub release 2026-09-28T21:14:32Z (tag created 21:14:28Z); PyPI <code>crewai</code> 1.15.23 at 21:15:33Z.</li>
+<li>Both fall inside this brief's window, which starts Mon 19:34Z.</li>
+<li>The &quot;clock trap&quot; DSH 2332 flagged applies to <em>its own</em> narrower window. The only upload in that window was the nightly <code>1.15.23.dev20260929</code> (06:18Z), which is not a release.</li>
+<li>This is the first crewAI card: the catalog has 0 items for crewAI.</li>
+</ul>
+<p><strong>What the release adds</strong> (compare <code>1.15.22...1.15.23</code>, 26 commits; PR bodies):</p>
+<ul>
+<li><strong><code>crewai eval</code></strong> (<a href="https://github.com/crewAIInc/crewAI/pull/7649">#7649</a>, <a href="https://github.com/crewAIInc/crewAI/pull/7648">#7648</a>, <a href="https://github.com/crewAIInc/crewAI/pull/7701">#7701</a>, <a href="https://github.com/crewAIInc/crewAI/pull/7707">#7707</a>).</li>
+<li>It evaluates the project's last traced run, or <code>--run EXECUTION_ID</code>, through AMP (<code>POST /crewai_plus/api/v1/tracing/evaluations</code>).</li>
+<li>It prints the report URL, waits, then prints &quot;the goal gate and the four grades&quot;. The #7765 sample shows <code>goal 5/5 tasks 5/5 agents 3/5 tools 5/5</code>.</li>
+<li><strong>Where the run id comes from.</strong> After a traced run, crewAI now writes <code>.crewai/last_run.json</code> with the execution id, start/end times, tier and AMP URL.<ul>
+<li>It does so <strong>only when every span export succeeded</strong>. Partial or truncated exports are not recorded.</li>
+<li>The write is atomic and never fails the run.</li>
+</ul>
+</li>
+<li>The command lives in a new <code>experimental</code> CLI package, so its output and flags &quot;may change between releases without the deprecation cycle&quot;.</li>
+<li>The PR says AMP owns the grading and access rules.</li>
+<li><strong>Richer spans</strong> (<a href="https://github.com/crewAIInc/crewAI/pull/7597">#7597</a>):</li>
+<li><strong><code>execute task</code></strong> spans:<ul>
+<li><code>crewai.task.output_format</code> (<code>json</code>/<code>pydantic</code>/<code>raw</code>).</li>
+<li>On completion, <code>crewai.task.output_pydantic_produced</code> and <code>crewai.task.output_json_produced</code>. So &quot;a declared-pydantic task that fell back to raw text is told apart from one that parsed&quot;.</li>
+</ul>
+</li>
+<li><strong><code>execute agent</code></strong> spans carry <code>gen_ai.input.messages</code> (the task prompt) and <code>gen_ai.output.messages</code> (the answer).<ul>
+<li>These are capped by <code>CREWAI_OTEL_MAX_ATTR_BYTES</code> (default 32 KiB).</li>
+<li>Over the cap, <code>&lt;attr&gt;.truncated</code> and <code>&lt;attr&gt;.original_size_bytes</code> are set, &quot;so a cut is never mistaken for a short text&quot;.</li>
+<li>There is no content-capture switch; redaction is left to the caller.</li>
+</ul>
+</li>
+<li><strong><code>call tool</code></strong> spans carry <code>crewai.tool.from_cache</code>.</li>
+<li><strong>Consent and TUI</strong> (<a href="https://github.com/crewAIInc/crewAI/pull/7765">#7765</a>, merged Sep 28 18:28Z):</li>
+<li>Turning tracing on (<code>CREWAI_TRACING_ENABLED</code> or <code>tracing=True</code>) now counts as permission to upload. Anonymous runs where nobody can answer (CI, containers) are still not uploaded.</li>
+<li>An Evaluate button in the run TUI runs the evaluation in place.</li>
+<li>A freshly finished run waits up to two minutes for its spans. One end-to-end attempt was refused as &quot;No spans recorded&quot; and read fine minutes later.</li>
+<li><strong>Also in the release:</strong> it retries throttled provider calls (<a href="https://github.com/crewAIInc/crewAI/pull/7677">#7677</a>) and adds native Gemini 3.8 Flash.</li>
+</ul>
+<p><strong>Caveats that ship with 1.15.23</strong> (verified on GitHub at 07:50Z):</p>
+<ul>
+<li><strong><code>from_cache</code> misreports on the default executor.</strong> <a href="https://github.com/crewAIInc/crewAI/pull/7776">#7776</a> is still <strong>open</strong>.</li>
+<li>Per its body, both native tool paths of the default <code>AgentExecutor</code> compute the flag and then leave it out of the event.</li>
+<li>On a cache hit the span therefore says <code>crewai.tool.from_cache=False</code>.</li>
+<li>The Mon 0634 brief flagged this. Nothing in 1.15.23 fixes it.</li>
+<li><strong>The exit code doesn't reflect the gate.</strong> In 1.15.23, <code>crewai eval</code> exits 1 only when the evaluation itself fails (#7649), so a FAILED gate exits 0.</li>
+<li><a href="https://github.com/crewAIInc/crewAI/pull/7806">#7806</a> makes it exit 1 unless the gate PASSED. It merged 06:17Z Sep 29 and is on main only.</li>
+<li>Main is 3 commits ahead of the tag, and the fix is only in the <code>.dev20260929</code> nightly.</li>
+<li><strong>crewAI's own adoption metric went dark.</strong> <a href="https://github.com/crewAIInc/crewAI/pull/7810">#7810</a> (main, 07:40Z) says the <code>tracing:*_sent</code> usage events &quot;are never emitted&quot; since 1.15.22.</li>
+<li>The PR puts it as: &quot;Telemetry shows 3–4% of projects reporting tracing on 1.15.18–1.15.21 and 0% on 1.15.22.&quot;</li>
+<li>The zero was a gated-off emitter, not a real drop.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li><strong>Silent structured-output fallback becomes a GROUP BY.</strong> For crewAI, compare declared vs produced output per task.</li>
+<li><strong>Truncation.</strong> Store <code>*.truncated</code> and <code>*.original_size_bytes</code> next to any captured text, so short answers and cut answers aren't conflated.</li>
+<li><strong>Cache hits.</strong> Don't compute crewAI cache-hit rates from <code>crewai.tool.from_cache</code> on 1.15.23 (default executor).</li>
+<li><strong>Eval gates.</strong> Store the verdict, not the process exit code.</li>
+<li><strong>Last-run pointers.</strong> Only complete exports get recorded, which is a good rule for any &quot;evaluate the last run&quot; pointer.</li>
+</ul>
+<h3>Progress</h3>
+<p><strong>P1 — Braintrust Python SDK <a href="https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.43.0">py-sdk v0.43.0</a></strong>, attached to <code>braintrust-sdk-v0-36</code>.</p>
+<ul>
+<li>Timestamps: GitHub 2026-09-28T21:38:24Z; PyPI <code>braintrust</code> 0.43.0 at 21:38:19Z.</li>
+<li>The release has 6 PRs.</li>
+</ul>
+<p><strong><a href="https://github.com/braintrustdata/braintrust-sdk-python/pull/811">#811</a>: unauthenticated span export.</strong></p>
+<ul>
+<li><strong>The dependency change.</strong> <code>opentelemetry-exporter-otlp-proto-http</code> 1.45.0 (PyPI 2026-09-25T12:32Z) &quot;moved the exporter's request headers off <code>_headers</code> / <code>_session</code> and onto an internal HTTP client&quot;.</li>
+<li><strong>What broke.</strong> When <code>OtelExporter</code> resolved the Braintrust API key after construction (for example from <code>.env.braintrust</code> or an env var set later), &quot;it wrote the <code>Authorization</code> header to attributes the exporter no longer reads. <strong>Spans were exported without authentication.</strong>&quot;</li>
+<li>The path that supplies the key at construction kept working.</li>
+<li><strong>How it was caught.</strong></li>
+<li><code>test_otel</code> installs OTel unpinned, so CI failed on every PR.</li>
+<li>The old <code>.env.braintrust</code> test &quot;passed on 1.45 while no header was actually sent&quot;, because it asserted on the private attribute rather than on the wire.</li>
+<li><strong>The fix.</strong></li>
+<li>The exporter re-runs the public constructor with the header added, and a shutdown guard stops that from reviving a closed exporter.</li>
+<li>Tests now assert on what a local OTLP collector actually receives, across OTel 1.16.0, 1.44.0 and 1.45.0.</li>
+</ul>
+<p><strong>Also in 0.43.0:</strong></p>
+<ul>
+<li><strong>Span customizers (<a href="https://github.com/braintrustdata/braintrust-sdk-python/pull/788">#788</a>):</strong> <code>SpanCustomizer.on_span_export</code>, <code>set_span_customizers</code> and <code>auto_instrument(span_customizers=...)</code>.</li>
+<li>They rewrite native instrumentation records before masking and serialization. This is the Python counterpart of the JS <code>onSpanExport</code> hooks on the 3.35.0 card.</li>
+<li>They <strong>fail open</strong>: &quot;throwing is not a safe way to block export&quot;.</li>
+<li>Manual spans, datasets, feedback and separate OTel exporters are out of scope.</li>
+<li><strong>Usage capture:</strong></li>
+<li><a href="https://github.com/braintrustdata/braintrust-sdk-python/pull/800">#800</a> captures Anthropic usage and refusal metadata.</li>
+<li><a href="https://github.com/braintrustdata/braintrust-sdk-python/pull/810">#810</a> preserves Claude Agent SDK partial-mode usage.</li>
+</ul>
+<p><strong>Context.</strong> This is the same OTel 1.45 refactor (<a href="https://github.com/open-telemetry/opentelemetry-python/pull/5389">opentelemetry-python#5389</a>) that broke fresh Weave installs at the Fri 2026-09-25 1234 brief. Weave crashed loudly; Braintrust kept exporting with no credentials.</p>
+<p><strong>TL;DR for BQAA:</strong></p>
+<ul>
+<li>Any exporter that sets headers after construction needs a wire-level test: what the collector <em>received</em>, not what the object holds.</li>
+<li>Reconcile spans sent against spans landed per exporter. A dependency minor release can remove the credentials while everything still looks green.</li>
+</ul>
+<p><strong>P2 — Arize family: <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-otel-v0.17.2"><code>arize-phoenix-otel</code> v0.17.2</a> fixes the OTel 1.45 <code>register()</code> crash; Arize AX's <code>arize-otel</code> 0.14.1, released in the same window, does not.</strong> Attached to <code>arize-phoenix-20-16-0-pxi-tool-raise-closes-turn-frontier-cost-tables</code>.</p>
+<p><strong>Phoenix, fixed.</strong></p>
+<ul>
+<li>phoenix-otel 0.17.2: GitHub 2026-09-28T20:58:45Z; PyPI 21:00:53Z.</li>
+<li>Its only fix is <a href="https://github.com/Arize-ai/phoenix/pull/16549">#16549</a>. <code>register()</code> always calls <code>_tracing_details()</code>, which read <code>HTTPSpanExporter._headers</code>.</li>
+<li>On OTel 1.45 that attribute is gone, so <strong><code>register()</code> raised <code>AttributeError</code> with the HTTP transport, even with <code>verbose=False</code></strong>.</li>
+<li>It now reads headers from <code>exporter._client</code> on 1.45+.</li>
+</ul>
+<p><strong>Arize AX, still broken.</strong></p>
+<ul>
+<li><code>arize-otel</code> 0.14.1 (PyPI 2026-09-28T23:07:41Z, 4 minutes after a Copybara sync) still does <code>headers = _printable_headers(exporter._headers)</code> unguarded at <code>arize/otel/otel.py:402</code>. I checked the published wheel.</li>
+<li>It requires <code>opentelemetry-exporter-otlp&gt;=1.22</code>, with no upper pin.</li>
+<li>Issue <a href="https://github.com/Arize-ai/arize-otel-python/issues/30">#30</a> (&quot;incompatible with latest opentelemetry 1.45.0&quot;) has been open since Sep 25.</li>
+</ul>
+<p><strong>My local reproduction</strong> (throwaway venvs, <code>register(..., transport=HTTP)</code> against a dead localhost endpoint, $0):</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Package</th>
+  <th>OTel 1.44.0</th>
+  <th>OTel 1.45.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>arize-otel</code> 0.14.1</td>
+  <td>passes</td>
+  <td>fails: <code>AttributeError: 'HTTPSpanExporter' object has no attribute '_headers'</code></td>
+</tr>
+<tr>
+  <td><code>arize-phoenix-otel</code> 0.17.1</td>
+  <td>not tested</td>
+  <td>fails: same error</td>
+</tr>
+<tr>
+  <td><code>arize-phoenix-otel</code> 0.17.2</td>
+  <td>not tested</td>
+  <td>passes</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Other Phoenix changes (main, unreleased):</strong></p>
+<ul>
+<li><a href="https://github.com/Arize-ai/phoenix/pull/16597">#16597</a> (23:02Z): bash tool spans that exit non-zero were showing OK in PXI traces. They now show ERROR (&quot;exit code N&quot;).</li>
+<li><a href="https://github.com/Arize-ai/phoenix/pull/16563">#16563</a>: <code>Dataset.experiments</code> gains sort and user-facing <code>sequenceNumbers</code>.</li>
+<li>Phoenix server is still 20.16.0 (Sep 23).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> any stack sending to Arize AX through <code>arize-otel</code> should pin OTel below 1.45 until a fix ships.</p>
+<ul>
+<li>A GitHub code search finds 124 Python files that read <code>exporter._headers</code>, mostly vendored copies and tests (langfuse-python, LiteLLM and sentry tests among them).</li>
+<li>I did not audit them, but the pattern is widespread.</li>
+</ul>
+<p><strong>P3 — <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.6">Letta Code v0.33.6</a></strong>, attached to <code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code>.</p>
+<ul>
+<li>Timestamps: npm <code>@letta-ai/letta-code</code> 0.33.6 at 2026-09-29T00:14:31Z; GitHub 01:50:04Z.</li>
+<li>The <code>letta</code> package on PyPI now carries Letta Code, at 0.33.6 (01:57Z; summary &quot;Letta Code: stateful agents in your terminal&quot;).</li>
+</ul>
+<p><strong><a href="https://github.com/letta-ai/letta-code/pull/4820">#4820</a>: native sub-agent transcripts get archived.</strong></p>
+<ul>
+<li><strong>What it does.</strong> &quot;After each coding turn, Letta Code now reads the native JSONL&quot; of the Claude Code and Codex sub-agent sessions. It &quot;sends appended bytes in 256 KiB chunks to its parent conversation's Cloud archive&quot;.</li>
+<li><strong>Scope rules:</strong></li>
+<li>The upload runs in the background and can't change the task result.</li>
+<li>Local-backend runs don't upload.</li>
+<li>Unknown sessions after a harness restart are not claimed.</li>
+<li>Resuming a native session from a different parent conversation doesn't copy its earlier private history.</li>
+<li><strong>Deployment caveat from the PR:</strong> &quot;the new Cloud upload endpoint has not been exercised end to end because the companion backend is not deployed&quot;. A live authenticated upload was waived for review &quot;until tested or explicitly waived&quot;.</li>
+</ul>
+<p><strong>Also in v0.33.6:</strong></p>
+<ul>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4840">#4840</a> adds local-backend workflow workers. Per the PR, it &quot;does <strong>not</strong> enable local workflows in the published package&quot; until the SDK pin moves.</li>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4837">#4837</a> hides routine server diagnostics behind debug mode.</li>
+<li><a href="https://github.com/letta-ai/letta-code/pull/4841">#4841</a> adds a <code>letta sandbox desktop-link</code>.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> harnesses are starting to keep their sub-agents' <em>native</em> transcripts as append-only byte streams keyed to a parent conversation.</p>
+<ul>
+<li>If BQAA ingests them, join on parent conversation plus native session id.</li>
+<li>Honor the &quot;unknown after restart&quot; and &quot;no cross-conversation history&quot; rules, or the joins will double-count or leak.</li>
+</ul>
+<h3>NOTE (below the card bar)</h3>
+<p><strong>Mastra <code>@mastra/core</code> <a href="https://www.npmjs.com/package/@mastra/core/v/1.72.0-alpha.7">1.72.0-alpha.7</a> (npm 00:36:18Z) and alpha.8 (04:21:11Z).</strong> These are prereleases, so NOTE only. They become Progress on <code>mastra-core-1-70-0-model-selection-processor-tenant-scoped-traces-memory-1-32</code> when 1.72.0 ships stable. From <code>packages/core/CHANGELOG.md</code>:</p>
+<ul>
+<li><strong>alpha.7:</strong></li>
+<li><strong>Approval gates are per thread and run</strong>, keyed by tool call, so concurrent approvals no longer overwrite or answer each other.<ul>
+<li>An approval response without <code>toolCallId</code> is now <strong>rejected</strong> rather than silently applied, which breaks external callers.</li>
+<li>&quot;Always allow&quot; grants are scoped to the gate's thread.</li>
+</ul>
+</li>
+<li>AgentController error events gain the provider finish reason, separating token limits and refusals from execution failures.</li>
+<li>A retried cross-agent message resolves to the first attempt's outcome instead of re-running tool side effects.</li>
+<li><strong>alpha.8:</strong></li>
+<li><code>Session.sendMessage()</code> no longer hangs when no completion event arrives.</li>
+<li><code>.foreach()</code> snapshots no longer grow quadratically.</li>
+<li><strong>Main only, after alpha.8:</strong> <a href="https://github.com/mastra-ai/mastra/pull/24935">#24935</a> (06:38Z) adds <code>runId</code>, <code>sessionId</code>, <code>userId</code> and <code>organizationId</code> filters to trace queries.</li>
+</ul>
+<p><strong>LiteLLM</strong> (main only; PyPI latest 1.103.0; <code>v1.104.0-rc.1</code> unchanged since 08:01Z Sep 28):</p>
+<ul>
+<li><a href="https://github.com/BerriAI/litellm/pull/43283">#43283</a> (01:38Z, +1,969/−96): scan and pin upstream MCP tool descriptions.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43553">#43553</a>: send cache and reasoning tokens in Langfuse OTel <code>usage_details</code>.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43601">#43601</a>: select Rust caching through explicit cache objects.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43647">#43647</a>: Bedrock Mantle cost rows for Opus 5.5 and Sonnet 5.5.</li>
+<li><a href="https://github.com/BerriAI/litellm/pull/43378">#43378</a>: reverts &quot;search keys beyond the top-N usage subset&quot;.</li>
+<li>The #43217 Langfuse-secret-in-spend-logs fix (1234 NOTE) is still unreleased.</li>
+</ul>
+<p><strong>pydantic-ai <a href="https://github.com/pydantic/pydantic-ai/pull/8310">#8310</a></strong> (main, 06:11Z; latest release still v2.51.0, Sep 25).</p>
+<ul>
+<li><strong>The gap.</strong> OpenAI bills native web search per call (&quot;$10 per 1,000 on most models&quot;) but doesn't report it in <code>usage</code>, so <code>RunUsage.cost</code> covered tokens only.</li>
+<li><strong>The fix.</strong> It now counts from the undocumented <code>tool_usage.web_search.num_requests</code>, or falls back to <code>web_search_call</code> items with a <code>search</code> action. <code>open_page</code> and <code>find_in_page</code> are not billed and not counted.</li>
+<li><strong>Limits stated in the PR:</strong></li>
+<li>Per-call search-content input tokens are still missing.</li>
+<li>Durable-execution usage deltas drop the extra <code>web_searches</code> unit.</li>
+</ul>
+<p><strong>OpenHands <a href="https://github.com/All-Hands-AI/OpenHands/pull/17007">#17007</a></strong> (main, 00:47Z; latest release v1.24.0, Sep 25).</p>
+<ul>
+<li>&quot;Keep local session keys off externally reachable listeners.&quot; Per the PR, the local stack bound to all interfaces while putting the session API key in unauthenticated HTML.</li>
+</ul>
+<p><strong>cline <a href="https://github.com/cline/cline/pull/13302">#13302</a></strong> (main, 05:34Z).</p>
+<ul>
+<li><strong>The problem.</strong> &quot;Model returned empty response&quot; was a catch-all. The PR puts it at &quot;~3.6k occurrences across ~1.1k users a week&quot;.</li>
+<li>Content-filtered turns were collapsed into <code>stop</code>, so users were told to retry a refusal that repeats every time.</li>
+<li>It now distinguishes content-filtered turns from empty responses.</li>
+<li><strong>Also:</strong> <code>sdk/sdk/v0.0.87</code> (05:30Z) is a Windows proxy loopback fix, trivia. #14501 (resumable cloud workspaces) is on main only.</li>
+</ul>
+<p><strong>LangChain <a href="https://github.com/langchain-ai/langchain/releases/tag/langchain%3D%3D1.4.3"><code>langchain</code> 1.4.3</a> (GitHub 20:17:43Z, PyPI 20:17:22Z) and <code>langchain-fireworks</code> 1.7.0 (20:46:50Z).</strong></p>
+<ul>
+<li><a href="https://github.com/langchain-ai/langchain/pull/40530">#40530</a>: <code>create_agent</code> now inserts an <strong>error <code>ToolMessage</code> for each malformed tool call</strong>, including historical ones, so providers accept a replayed history.</li>
+<li><a href="https://github.com/langchain-ai/langchain/pull/40886">#40886</a>: <code>ModelFallbackMiddleware</code> strips unsupported cache keys and Fireworks session-affinity headers on fallback.</li>
+<li><a href="https://github.com/langchain-ai/langchain/pull/38823">#38823</a>: a Fireworks prompt-caching middleware.</li>
+<li>For BQAA: framework-synthesized tool results now appear in histories. Tag them apart from real tool output.</li>
+</ul>
+<p><strong>Vercel AI SDK wave</strong> (patches after the 1234 Progress). There is no <code>ai@7.0.121</code> on npm.</p>
+<ul>
+<li><code>ai@7.0.122</code> (npm 21:59:45Z) encodes chat IDs in reconnect URLs.</li>
+<li><code>ai@6.0.296</code> (21:08:54Z) backports the tool-completion metadata fix (#21615) and <code>smoothStream</code> provider-metadata preservation.</li>
+<li><code>ai@5.0.269</code> (21:07:43Z) carries the <code>smoothStream</code> fix.</li>
+<li><code>@ai-sdk/mcp</code> 2.0.62 keeps prototype-named tools, providers and metadata as own properties (#21648).</li>
+</ul>
+<p><strong>Codex:</strong> prereleases only (<code>rust-v0.160.0-alpha.3</code> 01:32Z, <code>alpha.6</code> 06:27Z). npm <code>@openai/codex</code> latest is still 0.158.0. Main merges:</p>
+<ul>
+<li>#49082: Guardian diff-path setup no longer searches remote Git.</li>
+<li>#49075: subagents keep pending environments.</li>
+</ul>
+<p><strong>Other main-only merges:</strong></p>
+<ul>
+<li><strong>opencode</strong> (v2 branch, dev snapshots): Bedrock thinking binding, redacted reasoning, and cache-policy merges (#51959, #51999, #51981).</li>
+<li><strong>qwen-code:</strong> #12964, #12545 and the #12862/#12933/#12966 security and cache trio.</li>
+<li><strong>AutoGPT</strong> (<code>dev</code>): #15007 gives the content judge one retry; #14645 adds an E2B credential-swap proxy.</li>
+<li><strong>livekit agents:</strong> four Bedrock fixes (#7414–#7518).</li>
+</ul>
+<p><strong>Langfuse (carried).</strong> The cost and metric fixes are still <strong>staging-only</strong>.</p>
+<ul>
+<li><code>prod-us</code> and <code>prod-eu</code> were last deployed 2026-09-26T19:07:40Z (<code>2ed0d25</code>).</li>
+<li>Staging was redeployed 2026-09-29T06:49:56Z (<code>e3b81ec</code>).</li>
+<li>No release since v4.46.0.</li>
+</ul>
+<p><strong>google-adk:</strong> first-party, so NOTE only by policy. PyPI is still 2.10.0 (Sep 25).</p>
+<p><strong>Dev channels, ignored:</strong> <code>crewai 1.15.23.dev20260929</code>, <code>haystack-ai 3.3.0.dev…</code>, stagehand 4.2.0 alpha/dev and gemini-cli nightly. PostHog's eight <code>agent-skills-v0.22xx</code> builds are version churn and were not reviewed.</p>
+<hr />
+<h2>Academy</h2>
+<h3>NEW A1 — <a href="https://arxiv.org/abs/2609.33295">TraceDance: An Automated System for Building Agent Behavior Benchmarks from Real-World Agent Deployment Traces</a> (arXiv 2609.33295, ByteDance with UIC, cs.AI, v1 27 Sep 2026)</h3>
+<p><strong>Full PDF read:</strong> §1–6 and Appendices A–F, 34 pages. Code at <a href="https://github.com/ZhishanQ/TraceDance">ZhishanQ/TraceDance</a>. The traces are <strong>not</strong> released.</p>
+<p><strong>What it does (§3, Fig. 1, App. A).</strong> A developer names an undesirable behavior in natural language. TraceDance builds a benchmark of <strong>recorded contexts cut just before a deployed agent did that thing</strong>.</p>
+<ul>
+<li><strong>Three frames:</strong></li>
+<li><em>action</em> cuts before the action;</li>
+<li><em>failure</em> keeps the observed failure but not the response;</li>
+<li><em>claim</em> keeps the work but not the claim.</li>
+<li><strong>Grading.</strong> An evaluated LLM writes only the next turn. A 3-judge panel (GPT-5.6-Sol, Gemini-3.5-Flash, Claude Opus 4.8) grades it against a behavior-specific 0–5 rubric; a mean of 4 or more passes.</li>
+<li><strong>No replay needed.</strong> There is no reference answer and no environment replay, so traces from private repos and MCP servers stay usable.</li>
+<li><strong>Cut rules:</strong></li>
+<li>Source-model reasoning blocks are removed.</li>
+<li>Cuts at harness-forced turns, such as compaction-summary requests, are excluded.</li>
+<li><strong>Anchor-and-Confirm.</strong></li>
+<li>Programmable anchors scan structured traces on CPUs, using tool errors, call arguments, event order and keywords.</li>
+<li>A Flash LLM (DeepSeek-V4-Flash) only confirms the retrieved candidates.</li>
+<li>Per successful query, that is <strong>128,297 session scans → 706 candidates → 40.4 instances</strong>, costing 552 LLM calls and 25.1M tokens on average (Fig. 3b, Table 23).</li>
+</ul>
+<p><strong>Data (§4.1, Table 1, App. B.1).</strong></p>
+<ul>
+<li><strong>Sessions.</strong> 252,557 sessions over six weeks: 75,076 from Claude Code and 177,481 from OpenClaw, mostly driven by Doubao Seed 2.0 models.</li>
+<li><strong>Held-out split.</strong> 10,000 sessions per harness were reserved for behavior discovery.</li>
+<li><strong>Input source vs role.</strong> In the traces, &quot;messages with the user role are not necessarily written by users&quot;.</li>
+<li>Only <strong>74.8% of Claude Code input turns and 30.8% of OpenClaw input turns were user-written</strong>.</li>
+<li>The rest are harness-injected reminders, skills and heartbeats.</li>
+</ul>
+<p><strong>Construction results (§5.2–5.3, Table 21).</strong></p>
+<ul>
+<li><strong>Queries.</strong> It built benchmarks for 102 of 107 build-target queries (95.3%) and correctly rejected all 32 rejection-target queries. That produced 107 benchmarks with 4,125 instances.</li>
+<li><strong>Instance validity.</strong> Both annotators confirm the requested behavior in 84 of 100 sampled instances. Rubrics were rated 4/5 or better in 90% of them.</li>
+<li><strong>Judge vs humans (App. C.2, Table 14):</strong></li>
+<li>Pass/fail agreement is 81.0%. But humans passed only 16.7% of responses, so <strong>an always-fail labeler would agree 83.3% of the time</strong>.</li>
+<li>The chance-corrected κ is 0.40, against 0.31 between the two annotators.</li>
+<li>The panel is lenient (mean score 2.46 vs 1.68 for humans), with 44.7% precision and 60.7% recall on human passes.</li>
+<li>GPT-5.6-Sol shows a +0.22 self-preference (Table 15).</li>
+</ul>
+<p><strong>What the benchmarks show (§5.4, Table 2, Figs. 4–5, Tables 9 and 26).</strong></p>
+<ul>
+<li><strong>Overall.</strong> Nine LLMs pass <strong>26.7%</strong> on average. Claude Opus 4.8 is highest at 33.5% (ranked first in 99.9% of resamples); Qwen3.7-Max is lowest at 22.9%.</li>
+<li><strong>By what the rubric requires:</strong></li>
+<li>Valid call: <strong>67.9%</strong>.</li>
+<li>Handle failure: 33.5%.</li>
+<li>Honest claim: 28.9%.</li>
+<li><strong>Check first: 8.1%</strong>.</li>
+<li><strong>Worst families:</strong></li>
+<li>Failure-log inspection 0.6% (read the failed job's log before retrying).</li>
+<li>Commit hygiene 0.9%.</li>
+<li>Delivery recovery 2.4%.</li>
+<li>Secret protection 6.9%.</li>
+<li><strong>Planning-first responses.</strong> Responses that start with <code>TodoWrite</code> pass 4.6%, vs 30.8% for other first actions on the same instances. This holds for all nine models, and 91% of those responses contain no other tool call. The authors call this an association.</li>
+<li><strong>Rankings hide behaviors.</strong> Kimi-K3 beats Opus on error-guided correction (57.8% vs 27.8%), and GPT-5.6-Sol leads 8 of 28 families while ranking fifth overall.</li>
+</ul>
+<p><strong>Limits (App. F, §C.4).</strong></p>
+<ul>
+<li>Only the next turn is graded. A plan-first response may act well later, and a passing response may fail when executed.</li>
+<li>Pass rates are measured at points where the behavior already happened, so they are not deployment frequencies.</li>
+<li>The traces can't be released, so the benchmarks can't be rebuilt.</li>
+<li>The source traces come mostly from one model family. The authors test for a same-family penalty and rule out one larger than about 3 points.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> BQAA holds exactly the input this needs. Three schema requirements follow:</p>
+<ol>
+<li>Store the full request per LLM call, including the system prompt and tool definitions, so any decision point can be cut and replayed as a continuation input.</li>
+<li>Record each input turn's <em>source</em> (user-written vs harness-injected) separately from its role.</li>
+<li>Flag harness-forced turns, such as compaction requests, so they're never chosen as decision points.</li>
+</ol>
+<p>Then SQL anchors do the scan, and a model only confirms the candidates. Report judge–human agreement as κ, never as raw percent.</p>
+<h3>NEW A2 — <a href="https://arxiv.org/abs/2609.34198">Frozen Judges, Moving Agents: Version-Dependent LLM-Judge Error and the Limits of Judge-Assisted Agent Evaluation</a> (arXiv 2609.34198, Jiapeng Li, cs.LG, v1 28 Sep 2026)</h3>
+<p><strong>Full PDF read:</strong> §1–9 and Appendices A–E, 40 pages. This was my own sweep find; it is in no pack.</p>
+<p><strong>Design (§3–4, App. B).</strong></p>
+<ul>
+<li><strong>Question.</strong> Can a fixed LLM judge decide whether agent version N+1 beats version N?</li>
+<li><strong>Primary data.</strong> 35 public mini-SWE-agent SWE-bench Verified submissions on 250 held-out issues, with 20 prespecified successive-version pairs: model upgrades, effort changes and scaffold changes.</li>
+<li>The reference is test-based resolution.</li>
+<li>Replications: τ-bench (2 agents, 155 tasks, database-state reward) and AgentRewardBench (1,106 expert-labeled trajectories, 15 released evaluators).</li>
+<li><strong>Judges.</strong> GPT-5 mini, GPT-6 Sol, Gemini 3.5 Flash and Claude Opus 5.5.</li>
+<li>An upstream Opus 5.5 outage after 7,653 of 8,750 cells left <strong>three judges on 8,743 aligned cells</strong> for the primary analysis. Opus is reported on its matched subset only.</li>
+<li><strong>Preregistration.</strong> The plan was frozen in a private repo on 2026-09-23 with a logged deviation table (§4.6).</li>
+</ul>
+<p><strong>Results (§5.2, Table 1; §5.3; §5.4).</strong></p>
+<ul>
+<li><strong>Error depends on the agent.</strong> All three judges reject task-conditioned non-differential error (p = 0.0001 each).</li>
+<li>Median false-positive rates on failed patches: 65.7% (Gemini 3.5 Flash), 66.0% (GPT-5 mini), 40.0% (GPT-6 Sol).</li>
+<li>Median false-negative rates: 9.6%, 13.1%, 22.2%.</li>
+<li><strong>Stronger agents' failures get accepted more.</strong> The task-conditioned false-acceptance contrast rises with the agent's resolve rate (mean Spearman 0.819, p = 0.0001). The top half of agents sits 21–26 points above the bottom half.</li>
+<li><strong>Release decisions.</strong> The judges rank the 35 agents well (Kendall 0.71–0.79), yet the differential error component is nonzero in <strong>32 of 60</strong> judge-by-pair units, against about 1.1% under a simulated null.</li>
+<li><strong>8 judge-only intervals declare an upgrade the execution-based interval can't establish</strong>; 3 miss a real one.</li>
+<li>Example: Claude Sonnet 4.5 → a high-effort successor scores −0.4 points by tests [−5.2, +4.4]. GPT-5 mini judges it +8.0 [+2.0, +14.4] and GPT-6 Sol +9.6 [+3.2, +16.0].</li>
+<li><strong>Transported calibration makes it worse.</strong> Correcting the new version with the old version's sensitivity and specificity raises mean absolute comparison error <strong>from 3.8 to 19.5 points</strong>.</li>
+<li>It is worse in 59 of 60 units, clipped to [0, 1] in 35%, and undefined in 24.6% of bootstrap draws.</li>
+<li>Prop. 2 explains why: transport divides the differential error by the old version's Youden index, which here is only 0.19–0.38.</li>
+<li><strong>A confident wrong pick on τ-bench retail.</strong></li>
+<li>By reward, GPT-4o is 9.0 points worse [−16.0, −2.5]. GPT-6 Sol calls it <strong>17.8 points better</strong> [11.8, 24.1].</li>
+<li>The mechanism: the policy forbids a tool call and a user message in the same turn, and the reward ignores that. Claude's successful retail conversations average 7.4 such turns vs 0.5 for GPT-4o.</li>
+<li>31.7% of GPT-6 Sol's rejections of Claude's successes cite the rule; none of its rejections of GPT-4o's do.</li>
+<li><strong>Audits.</strong> Paired PPI++ audits keep coverage (about 94% at 80+ tasks), where judge-only intervals cover the reference in 80.0% of cases.</li>
+<li>But the judge buys little: about <strong>5% narrower</strong> than a classical audit at 80 tasks on SWE-bench (13% on AgentRewardBench).</li>
+<li><strong>Self-report is a null.</strong> Showing the judge the agent's own final message did <em>not</em> raise false acceptance (Holm-adjusted p = 1.0 for all three judges; §5.4).</li>
+</ul>
+<p><strong>Limits (§7).</strong></p>
+<ul>
+<li>Test labels are imperfect. A blinded adjudicator disputes 23.4% of judge-accepted test failures and 49.1% of judge-rejected test successes.</li>
+<li>All SWE-bench agents share one scaffold family.</li>
+<li>The code and data are in a private repo, so it can't be reproduced independently yet.</li>
+<li>There is a single author, and the design and analysis were substantially model-assisted (disclosed).</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> evaluator results need an <strong>agent-version column and per-version audits</strong>.</p>
+<ul>
+<li>Store class-conditional judge false-positive and false-negative rates per agent version, from a random reference-labeled sample.</li>
+<li>Compute version deltas as paired estimates over shared tasks.</li>
+<li>Never apply one version's calibration to the next.</li>
+<li>Treat judge-only deltas as &quot;which comparison to audit&quot;, not as a ship decision.</li>
+<li>Log the rubric's success definition next to the reference's. The τ-bench reversal was a construct mismatch.</li>
+</ul>
+<h3>NEW A3 — <a href="https://arxiv.org/abs/2609.35760">TokenCast: Forecasting Token Consumption During LLM Agent Execution</a> (arXiv 2609.35760, Sun Yat-sen, RPI, Southeast, HKUST, cs.LG/cs.AI/cs.SE, v1 28 Sep 2026)</h3>
+<p><strong>Full PDF read:</strong> §1–5 and Appendices A–F, 39 pages. Code at <a href="https://github.com/DEFENSE-SEU/TokenCast">DEFENSE-SEU/TokenCast</a>, created Sep 29.</p>
+<p><strong>Method (§3, Eq. 1, App. B).</strong></p>
+<ul>
+<li><strong>The segment triple.</strong> Each run of calls is summarized as (n = calls, g = net input-length change, b = cost minus the starting-input baseline).</li>
+<li><strong>Composition.</strong> Adjacent segments compose exactly: <code>b(A∘B) = b_A + b_B + n_B·g_A</code>. The cross-term is the cost of every later call re-reading the context an earlier segment added.</li>
+<li><strong>Models.</strong> LightGBM models predict prefix, boundary and suffix, and a correction model blends direct and compositional forecasts.</li>
+<li><strong>Updates and intervals.</strong> Forecasts refresh after each call without any LLM call, and calibrated 90% intervals come from quantile models.</li>
+</ul>
+<p><strong>Data (§4.1, Table 2, App. C.1).</strong></p>
+<ul>
+<li>11,712 traces on 240 tasks: SWE-bench Verified, Search-R1, MMLU-Pro and LongBench-v2.</li>
+<li>Six agent LLMs, two harnesses: DeepSeek Harness 0.1.1-rc.2 and OpenHands 1.18.0.</li>
+<li><strong>In both harnesses, context compaction, result pruning and subagents were switched off.</strong></li>
+<li>For GPT-5.4 on SWE-bench Verified, <strong>input is 99% of tokens</strong>.</li>
+</ul>
+<p><strong>Results (§4.2, Tables 1, 3, 20, 21; App. D).</strong></p>
+<ul>
+<li><strong>Error.</strong> Mean absolute error drops 14.5% on average against the best comparator across 96 benchmark–model–point combinations. The gains are all mid-run:</li>
+<li>30.4% at In-call Update and 27.8% at Task Update.</li>
+<li><strong>−2.2% (worse) at Task Start</strong> and 1.9% at Call Start. It trails in 24 combinations, all at those two early points.</li>
+<li>Example: SWE-bench with GPT-5.4 at Task Update, 80k vs 115k tokens.</li>
+<li><strong>Intervals.</strong> 90% intervals cover 82.0% at Task Start and 89.8–92.8% later.</li>
+<li>The Self-Prediction baseline's intervals are its native, uncalibrated ones (52.7% at Task Start), so that comparison flatters TokenCast.</li>
+<li><strong>Budget replay.</strong> On 288 GPT-5.4 runs, TokenCast uses <strong>21.3% fewer tokens</strong> than a fixed budget at matched <em>trace completion</em>. Savings run from 34.6% at the tightest budget to 7.8% at the loosest.</li>
+<li>Trace completion means reaching the recorded terminal state, <strong>not task resolution</strong> (App. D.7).</li>
+<li>The replay is offline, not live control.</li>
+<li><strong>Cost of forecasting.</strong> 32.8 ms of prediction per run for 19.7 forecasts, under 0.03% of a 129 s median run.</li>
+<li><strong>What drives the Task Update forecast.</strong> Last-call input tokens (0.28), remaining plan items (0.25) and calls without progress (0.23) (Fig. 5).</li>
+</ul>
+<p><strong>Limits (from the paper and my read).</strong></p>
+<ul>
+<li>Zero-shot transfer to an unseen task domain is <em>worse</em> than asking the agent to self-estimate (1.31× at Call Start, 1.47× at Task Update). About 20 target tasks bring it to 0.82–0.85×.</li>
+<li>Moving from DeepSeek Harness to OpenHands is 1.04× the naive history median at Task Start (Table 12).</li>
+<li><strong>The paper never models prompt caching or prices.</strong> &quot;cach&quot; has 0 matches in the full text, and the target is raw provider-accounted tokens.</li>
+<li>There is no Limitations section.</li>
+<li>The Muse 2232 pack described TokenCast as &quot;pre-execution&quot; forecasting. Pre-execution is where it is weakest.</li>
+</ul>
+<p><strong>TL;DR for BQAA:</strong> a remaining-cost forecast per <em>running</em> session is cheap if every LLM-call row carries input, output and reasoning tokens plus the input-length delta. The (n, g, b) triple is window-function SQL, and &quot;calls without progress&quot; is a strong feature.</p>
+<ul>
+<li>Forecast <strong>dollars, not tokens</strong>: with 99% input, cache-read vs uncached pricing dominates the answer.</li>
+<li>Mark compaction events, which break the &quot;context keeps growing&quot; assumption the method relies on.</li>
+</ul>
+<h3>Scouted, not ranked (abstract only unless noted)</h3>
+<p><strong>HF Daily leads from the packs:</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.34313">2609.34313</a> ControlScope (workflow revision: keep vs edit arguments vs replace).</li>
+<li>Small net differences on AppWorld (585 instances).</li>
+<li>Five-call protection saves 19.4% of model output for one lost success in 20.</li>
+<li>Below the bar.</li>
+<li><a href="https://arxiv.org/abs/2609.33665">2609.33665</a> CompoWorld (448 services, 10,130 tools, +9.17 points on 8 benchmarks) and <a href="https://arxiv.org/abs/2609.33772">2609.33772</a> Skill2Env: environment synthesis for training, off-bar for analytics.</li>
+</ul>
+<p><strong>Evaluation validity:</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.32691">2609.32691</a> <em>Silent Failures in Agentic Security Evaluation</em>.</li>
+<li>A tool-identity scorer reports 21.7% attack success where argument-level scoring gives 1.2%.</li>
+<li>A model reported at 62.8% scores 0% once payload delivery is checked.</li>
+<li>Worth a full read next slot.</li>
+<li><a href="https://arxiv.org/abs/2609.34320">2609.34320</a> <em>Certified Selective Automation of LLM Agent Evaluation</em>.</li>
+<li>A naive i.i.d. certificate claims 98% automation but exceeds its error budget in 17.5% of task resamples.</li>
+<li>A task-level bootstrap fixes this.</li>
+<li><a href="https://arxiv.org/abs/2609.34262">2609.34262</a> <em>Unearned passes</em>.</li>
+<li>Across 3,810 passing trajectories, confirmed violations on SWE-Bench Pro rise from 24% to 73% between two model generations.</li>
+<li>Git-history leaks dominate.</li>
+<li><a href="https://arxiv.org/abs/2609.33955">2609.33955</a>: an LLM-judge measurement system for multi-turn business agents.</li>
+<li><a href="https://arxiv.org/abs/2609.34862">2609.34862</a> <em>JEV as a Judge for Agent Trace Security</em>.</li>
+<li>F1 77.8 vs 74.1 for the best generative judge on 5,219 trajectories.</li>
+<li>$0.000195 per judgment.</li>
+<li><a href="https://arxiv.org/abs/2609.33401">2609.33401</a>: System One models for security decisions. Good average calibration hides confident misses.</li>
+</ul>
+<p><strong>Trace analytics:</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.32687">2609.32687</a> <em>Dude, Where's My State?</em> (VESTIGE over 72,562 software-agent trajectories).</li>
+<li><a href="https://arxiv.org/abs/2609.32514">2609.32514</a>: causal error graphs for trace diagnosis.</li>
+<li><a href="https://arxiv.org/abs/2609.34701">2609.34701</a> ResonAct: streaming metrics and self-healing; detection precision 70.6–82.9%.</li>
+<li><a href="https://arxiv.org/abs/2609.33676">2609.33676</a>: query-conditioned action attribution (A³Bench, 1,396 auditing queries).</li>
+<li><a href="https://arxiv.org/abs/2609.35659">2609.35659</a> Tracekit: a hash-chained Claude Code ledger. A regex gate blocked 18 of 44 harmful calls; the provider withheld all 27 thinking blocks.</li>
+<li><a href="https://arxiv.org/abs/2609.34496">2609.34496</a> MASTraceBench.</li>
+<li><a href="https://arxiv.org/abs/2609.34215">2609.34215</a>: recovery metrics, where &quot;set agreement&quot; masks near-zero success.</li>
+</ul>
+<p><strong>Agent behavior:</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/2609.32616">2609.32616</a> CAVE-Bench: false accusations damage correct work in up to 60.06% of runs across 14 models in Claude Code; a live-signal harness gate cuts replayed harm 74%.</li>
+<li><a href="https://arxiv.org/abs/2609.35732">2609.35732</a> Failure-Transparent Agents: false-success 22.8% → 0.8% with an evidence contract. This is close to the already-carded Silent Success <code>2609.30307</code>.</li>
+</ul>
+<p><strong>Carried, no re-pitch:</strong> CodeGraph <code>2609.29474</code>, IndicBankBench <code>2609.29167</code>, SAGE <code>2609.30192</code>, <code>2609.29050</code>, <code>2609.31473</code> and <code>2609.31590</code> (fresh-list F39).</p>
+<hr />
+<h2>Six-week EV</h2>
+<ul>
+<li><strong>Trace stores become eval factories.</strong> The evidence:</li>
+<li>TraceDance turns 252K deployment sessions into decision-point benchmarks.</li>
+<li>crewAI now grades &quot;the last traced run&quot; from the CLI.</li>
+<li>Mon 1234's Nubank paper screened agents on simulated traces.</li>
+<li>The bet: within six weeks, observability vendors ship &quot;make a test from this trace&quot; flows. The prerequisites are full request capture (system prompt and tool definitions per call), input-source tagging and compaction markers.</li>
+<li>BQAA already stores the traces; the missing pieces are those three fields plus a cut-point convention.</li>
+<li>Expected value: <strong>high</strong>.</li>
+<li><strong>Judge validity is per agent version, not per judge.</strong> The evidence:</li>
+<li>Frozen Judges measures differential error in 32 of 60 version comparisons, and 3.8 → 19.5 points of error from transported calibration.</li>
+<li>TraceDance's own judge panel is lenient, with a κ of 0.40.</li>
+<li>Mon 1234's ScopeBench showed judge estimates and outcome floors diverging.</li>
+<li>For BQAA: version-tagged audit samples, class-conditional judge error per version, and paired release deltas. This is a schema-and-view change, not new infrastructure.</li>
+<li>Expected value: <strong>high</strong>.</li>
+<li><strong>Private-attribute coupling in OTel exporters keeps breaking tracing SDKs, sometimes silently.</strong> The 1.45 refactor has now hit:</li>
+<li>Weave (Fri, crash on fresh install);</li>
+<li>Braintrust (spans exported without credentials);</li>
+<li>Phoenix (crash, fixed);</li>
+<li>Arize AX's <code>arize-otel</code> (crash, still shipping).</li>
+<li>Expect more: a code search finds 124 files that read <code>exporter._headers</code>.</li>
+<li>For BQAA: pin exporter dependencies, test headers on the wire, and reconcile rows sent vs landed per exporter.</li>
+<li>Expected value: <strong>medium-high</strong>.</li>
+<li><strong>Live cost forecasts.</strong> TokenCast shows per-call evidence predicts the remaining cost well <em>mid-run</em> at negligible overhead.</li>
+<li>It works in tokens, not dollars, and with compaction off.</li>
+<li>A BQAA &quot;projected session cost&quot; column priced with cache splits is a small, visible feature.</li>
+<li>Expected value: <strong>medium</strong>.</li>
+</ul>
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>crewAI 1.15.23 (NEW):</strong></li>
+<li>Declared vs produced output per task makes silent structured-output fallback a GROUP BY.</li>
+<li>Store truncation markers next to captured text.</li>
+<li>Don't trust <code>crewai.tool.from_cache</code> on the default executor (#7776 open), and store eval verdicts, not exit codes.</li>
+<li><strong>Braintrust 0.43.0 (Progress):</strong> an OTel minor release made a lazily keyed exporter send spans with no <code>Authorization</code> header. Test exporters on the wire and reconcile sent vs landed.</li>
+<li><strong>Arize family (Progress):</strong> phoenix-otel 0.17.2 fixes the OTel 1.45 <code>register()</code> crash. <code>arize-otel</code> 0.14.1 still crashes (reproduced), so pin OTel below 1.45 for Arize AX.</li>
+<li><strong>Letta Code v0.33.6 (Progress):</strong> sub-agents' native Claude Code and Codex JSONL are archived as append-only chunks per parent conversation. Join on parent plus native session id; the backend was undeployed at merge.</li>
+<li><strong>TraceDance 2609.33295 (NEW):</strong> capture the system prompt and tool definitions per call, tag input source apart from role, and flag compaction turns. Mine with SQL anchors, confirm with a model, and report κ.</li>
+<li><strong>Frozen Judges 2609.34198 (NEW):</strong> give evaluator results an agent-version column and per-version false-positive/false-negative audits. Use paired deltas and never transport calibration.</li>
+<li><strong>TokenCast 2609.35760 (NEW):</strong> remaining-cost forecasts from per-call token and context-growth rows, priced in dollars with cache splits and compaction marked.</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What was not confirmed</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>crewAI <code>crewai eval</code></td>
+  <td>I did not run it ($0, no external calls). Unconfirmed: whether the AMP evaluation endpoint is live for all accounts, and how the four grades are computed. #7649 said AMP returned 404 until its side deployed; #7765 shows live output.</td>
+  <td>Release notes; PR bodies #7648, #7649, #7701, #7707, #7765</td>
+</tr>
+<tr>
+  <td>crewAI <code>from_cache</code> misreport</td>
+  <td>Taken from #7776's body and code references; I did not reproduce it.</td>
+  <td>PR #7776 body; compare <code>1.15.22...1.15.23</code> (the fix is absent)</td>
+</tr>
+<tr>
+  <td>crewAI #7810 adoption figures</td>
+  <td>The &quot;3–4% → 0%&quot; figures are crewAI's internal telemetry, quoted from the PR.</td>
+  <td>PR #7810 body</td>
+</tr>
+<tr>
+  <td>Braintrust #811 impact</td>
+  <td>I did not reproduce it. Unconfirmed: what Braintrust's endpoint did with the unauthenticated spans (rejected or dropped), and how many users were affected.</td>
+  <td>PR #811 body; py-sdk v0.43.0 release; PyPI</td>
+</tr>
+<tr>
+  <td><code>arize-otel</code> 0.14.1 on the gRPC transport</td>
+  <td>Only the HTTP transport was reproduced. gRPC is untested.</td>
+  <td>Local venv repro; wheel source; issue #30</td>
+</tr>
+<tr>
+  <td>124 <code>exporter._headers</code> code-search hits</td>
+  <td>Counted but not audited. Many are vendored copies or tests, and the index may lag fixes.</td>
+  <td>GitHub code search</td>
+</tr>
+<tr>
+  <td>Letta #4820 archive</td>
+  <td>Whether the Cloud upload endpoint is deployed now. The PR says it wasn't at merge.</td>
+  <td>PR #4820 body; v0.33.6 release</td>
+</tr>
+<tr>
+  <td>Mastra alpha.7/alpha.8</td>
+  <td>Prerelease behavior only; not confirmed in a stable release.</td>
+  <td><code>packages/core/CHANGELOG.md</code> on main; npm <code>time</code></td>
+</tr>
+<tr>
+  <td>Vercel wave, pydantic-ai #8310, OpenHands #17007, cline #13302</td>
+  <td>Behavior as described in PR bodies and release notes; not reproduced.</td>
+  <td>GitHub releases and PRs; npm; PyPI</td>
+</tr>
+<tr>
+  <td>2609.33295 TraceDance</td>
+  <td>Stated limits: traces not released, next turn only, lenient judges, 84% instance validity.</td>
+  <td>Full PDF, §5.3, App. C.2 and F</td>
+</tr>
+<tr>
+  <td>2609.34198 Frozen Judges</td>
+  <td>Stated limits: private repo, single author, model-assisted design, imperfect reference labels, one scaffold family.</td>
+  <td>Full PDF, §4.6 and §7</td>
+</tr>
+<tr>
+  <td>2609.35760 TokenCast</td>
+  <td>No caching or prices in scope, compaction off, replay measures trace completion rather than resolution, no Limitations section.</td>
+  <td>Full PDF, App. C.1 and D.7; full-text grep</td>
+</tr>
+<tr>
+  <td>Scouted papers</td>
+  <td>Abstracts only; none is claimed.</td>
+  <td>arXiv listing HTML</td>
+</tr>
+<tr>
+  <td>arXiv export API</td>
+  <td><code>export.arxiv.org/api/query</code> returned 0 bytes for my metadata call, a failed lookup. I used the abs pages instead (all 200). This is not a negative claim about any paper.</td>
+  <td>export API; abs HTML</td>
+</tr>
+</tbody>
+</table></div>
+<p>Everything ranked in Industry, Progress and Academy was confirmed against these sources:</p>
+<ul>
+<li>GitHub: releases, PRs, compare, deployments and issues.</li>
+<li>npm <code>time</code> and <code>dist-tags</code>; PyPI JSON, including <code>requires_dist</code>.</li>
+<li>A local venv reproduction for the Arize item.</li>
+<li>The full arXiv PDFs.</li>
+</ul>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Packs used</strong>, via <code>_runs/fb-2026-09-29-0034/fresh-items.md</code> (73 candidates, 1 dropped as seen). All 8 were PACK_DONE at merge. None was read wholesale; I only grepped packs for specific items:</li>
+<li><code>muse-pack-2026-09-28-1332.md</code></li>
+<li><code>dsh-pack-2026-09-28-1432.md</code></li>
+<li><code>agy-pack-2026-09-28-1532.md</code></li>
+<li><code>muse-pack-2026-09-28-1632.md</code></li>
+<li><code>dsh-pack-2026-09-28-2032.md</code></li>
+<li><code>agy-pack-2026-09-28-2132.md</code></li>
+<li><code>muse-pack-2026-09-28-2232.md</code></li>
+<li><code>dsh-pack-2026-09-28-2332.md</code></li>
+<li><strong>Late pack.</strong> <code>agy-pack-2026-09-29-0032.md</code> landed at 00:47 PT, after the 00:43 merge, so it isn't in the fresh list.</li>
+<li>I grepped only its headings and release/arXiv lines: PACK_DONE, window 06:48–07:47Z, zero releases, ceiling 2609.35771.</li>
+<li>That matches my sweep.</li>
+<li>Its crewAI #7810 merge is covered in I1.</li>
+<li><strong>Gaps:</strong></li>
+<li><strong>Collector hours:</strong> DSH 1732, Agy 1832 and Muse 1932 are absent. <code>dsh-prompt-2026-09-28-1732.md</code> exists with no pack. This is a standing carry, and nothing was invented to fill it.</li>
+<li>The other hours listed in the launch prompt belong to other collectors' <code>hour % 3</code> rotation; they are not missing packs.</li>
+<li><strong>Brief slot 2026-09-28-1834 is absent</strong> (never published); this 0034 brief catches up.</li>
+<li><strong>Watchlist gaps:</strong><ul>
+<li><code>braintrustdata/braintrust-sdk-python</code> isn't in the sweep list; the watchlist entry <code>braintrustdata/braintrust-sdk</code> resolves to the JS repo. DSH 1432 did catch v0.43.0.</li>
+<li><code>Arize-ai/arize-otel-python</code> / PyPI <code>arize-otel</code> appears in no pack.</li>
+<li>Suggestion for Collection: add both.</li>
+</ul>
+</li>
+<li><strong>Verified arXiv ceiling: 2609.35771.</strong></li>
+<li>The abs page returns 200; <code>2609.35772</code>, <code>.35773</code>, <code>.35780</code> and <code>.35800</code> return 404. Agy 0032 agrees.</li>
+<li>Tue Sep 29 new listings for cs.AI/SE/CL/MA/LG/DB/CR/HC/IR: 1,971 unique entries (1,966 are 2609.*), max listed 2609.35770.</li>
+<li>492 matched agent keywords; I reviewed about 30 abstracts and read 3 full PDFs.</li>
+<li>Pin <code>2609.02702</code> is intact: abs and v1 return 200, v2 returns 404, and the catalog has 36 hits.</li>
+<li><strong>HF Daily 2026-09-29:</strong> 74 papers, ranked by upvotes.</li>
+<li>TraceDance #2 (47), CompoWorld #7 (25), Skill2Env #14 (19), TokenCast #43 (3), ControlScope #56 (1).</li>
+<li>Frozen Judges is not listed.</li>
+<li><strong>Verification method:</strong></li>
+<li><code>gh api</code>: releases, pulls, compare, deployments, issues and code search.</li>
+<li><code>npm view</code> for <code>time</code> and <code>dist-tags</code>.</li>
+<li>PyPI JSON, including <code>requires_dist</code>.</li>
+<li><code>pip download</code> plus a wheel grep for <code>arize-otel</code> 0.14.1.</li>
+<li>Four throwaway venvs reproducing <code>register()</code> on OTel 1.44.0 and 1.45.0.</li>
+<li>arXiv listing HTML and abs pages; the export API returned 0 bytes.</li>
+<li>Full <code>pdftotext</code> reads of 2609.33295, 2609.34198 and 2609.35760.</li>
+<li>Catalog greps: 0 hits for 33295, 34198, 35760, tracedance, tokencast, &quot;frozen judge&quot; and crewai 1.15.23. There are 0 crewAI cards; the &quot;crewai&quot; string appears only inside two OTel GenAI items.</li>
+<li><strong>Independent sweep since 19:30Z Mon:</strong></li>
+<li>Coverage: 70 GitHub repos (0 lookup errors), 54 npm packages and 52 PyPI packages.</li>
+<li>Targeted extra checks: <code>braintrust-sdk-python</code> and <code>-javascript</code>, <code>arize-otel-python</code> and <code>opentelemetry-python</code>.</li>
+<li>Two npm names don't exist (E404): the watchlist's <code>@ai-sdk/codex-cli</code> and my extra <code>@agenta/sdk</code>. These are slug gaps, not misses; the first broke the npm script until I hardened it.</li>
+<li>In-window stable releases: langchain 1.4.3 and langchain-fireworks 1.7.0; the Vercel wave (<code>ai@7.0.122</code>/6.0.296/5.0.269, <code>@ai-sdk/*</code>); arize-phoenix-otel 0.17.2; crewAI 1.15.23; braintrust 0.43.0; arize-otel 0.14.1 (PyPI only); Letta Code v0.33.6; cline <code>sdk/sdk/v0.0.87</code>.</li>
+<li>Already covered at 1234: Inspect 0.3.272 (19:50Z) and Codex <code>0.160.0-alpha.2</code> (19:51Z).</li>
+<li><strong>Fresh-list dispositions:</strong></li>
+<li>F04, F38 → I1 (crewAI).</li>
+<li>F05 → P1 (Braintrust).</li>
+<li>F03, F21, F44, F48 → P2 (Phoenix) plus NOTE.</li>
+<li>F24 → P3 (Letta).</li>
+<li>F39 → carried Academy, no re-pitch.</li>
+<li>NOTE:<ul>
+<li>F01, F13 (LangChain).</li>
+<li>F02, F06, F10, F14 (Vercel).</li>
+<li>F07, F17, F19, F23, F34, F37, F55, F59, F65 (Mastra).</li>
+<li>F08, F27, F45, F64, F69 (cline).</li>
+<li>F09, F16, F20, F26, F29, F35, F46 (Codex).</li>
+<li>F11, F36, F43, F52 (pydantic-ai).</li>
+<li>F12, F60, F61, F73 (qwen-code).</li>
+<li>F18, F25, F33, F49, F50, F53, F58, F66, F72 (LiteLLM).</li>
+<li>F28, F31, F32, F54, F62, F68, F71 (opencode).</li>
+<li>F30 (OpenHands); F63 (livekit); F15, F22, F51, F57 (AutoGPT); F41 (stagehand dev).</li>
+</ul>
+</li>
+<li>Opens and hygiene, below the bar: F40, F42, F47, F56, F67, F70.</li>
+<li><strong>HN:</strong> dropped fleet-wide on 2026-09-27. There are no <code>packs/_hn/</code> files in window (the latest is from 09-27 16:32) and 0 HN keeps.</li>
+<li><strong>Late wake:</strong> launched ~00:43 PT on the 00:34 cadence; the label stays 0034.</li>
+<li><strong>Effort:</strong> max, the default. No override.</li>
+<li><strong>Catalog baseline at start:</strong> 451 items, 116 briefs and 118 runs. Max brief <code>2026-09-28T1234</code>. Hub HEAD <code>a15b4f7</code>.</li>
+<li><strong>JEV_SHADOW:</strong> pre-launch was skipped because this is a fixed-schedule run (Q8). Collection runs the post-card citation <code>research_check</code>.</li>
+<li><strong>Tooling pitfall, fourth repeat:</strong> a zsh <code>for spec in &quot;owner/repo tag&quot;; do set -- $spec</code> loop doesn't word-split. The first langchain release-body fetch this slot returned a fake 404.</li>
+<li>I caught it immediately and re-ran under <code>bash -c</code>.</li>
+<li>Per the repeat-lesson rule, the vault note proposes a skill diff instead of another <code>forbidden.md</code> line.</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<pre><code class="language-yaml">new:
+- id: crewai-1-15-23-crewai-eval-grades-last-traced-run-declared-vs-produced-output-spans
+  tag: Industry
+  title: &quot;crewAI 1.15.23 — `crewai eval` grades the project's last fully exported traced run through CrewAI AMP (goal gate + goal/task/agent/tool grades); task spans record declared vs produced output format, agent spans carry prompt and answer with truncation markers, tool spans carry from_cache&quot;
+  url: https://github.com/crewAIInc/crewAI/releases/tag/1.15.23
+  card: &gt;-
+    Released Sep 28 (GitHub 21:14Z, PyPI 21:15Z). After a traced run, crewAI records .crewai/last_run.json only when
+    every span export succeeded; the experimental `crewai eval` sends that run (or --run ID) to AMP and prints a goal
+    gate plus grades. Task spans now carry crewai.task.output_format and whether a Pydantic/JSON object was actually
+    produced; agent spans carry gen_ai.input/output.messages capped at 32 KiB with .truncated and
+    .original_size_bytes markers; enabling tracing now counts as consent to upload. Caveats: in 1.15.23 a FAILED gate
+    still exits 0 (fix #7806 on main), and on the default executor crewai.tool.from_cache reads false for cache hits
+    (#7776 open).
+- id: arxiv-2609-33295-tracedance-deployment-traces-to-decision-point-behavior-benchmarks
+  tag: Academy
+  title: &quot;TraceDance (ByteDance/UIC) — cuts 252,557 Claude Code and OpenClaw deployment sessions into 107 decision-point benchmarks with no environment replay; nine frontier LLMs pass 26.7% on average, 67.9% on well-formed tool calls but 8.1% when a check is required first&quot;
+  arxiv: &quot;2609.33295&quot;
+  url: https://arxiv.org/abs/2609.33295
+  card: &gt;-
+    A developer names an undesirable behavior; CPU-side anchors scan structured traces (128K session scans per query),
+    a Flash LLM confirms ~700 candidates, and each instance is the recorded context cut just before the source agent's
+    action, failure response or claim. A 3-judge panel grades only the next turn against a behavior rubric. 102 of 107
+    build queries succeed (4,125 instances); failure-log inspection passes 0.6% and responses that open with TodoWrite
+    pass 4.6% vs 30.8%. Only 30.8% of OpenClaw input turns were user-written. Limits: judge–human agreement of 81% is
+    below the 83.3% always-fail baseline (κ 0.40), next turn only, traces not released.
+- id: arxiv-2609-34198-frozen-judges-moving-agents-version-dependent-judge-error
+  tag: Academy
+  title: &quot;Frozen Judges, Moving Agents — on 20 prespecified SWE-bench version pairs, LLM-judge error depends on the agent version; 8 judge-only upgrades lack execution support, and transporting old-version calibration raises comparison error from 3.8 to 19.5 points&quot;
+  arxiv: &quot;2609.34198&quot;
+  url: https://arxiv.org/abs/2609.34198
+  card: &gt;-
+    35 mini-SWE-agent submissions, 250 tasks, three judges on 8,743 cells (a fourth lost to an outage). All judges show
+    task-conditioned agent-dependent error; false acceptance of failed patches rises with agent capability (mean
+    Spearman 0.82). Differential error is nonzero in 32 of 60 judge-pair units despite Kendall 0.71–0.79 on the
+    ranking. On τ-bench retail, GPT-6 Sol calls GPT-4o 17.8 points better when the reward says 9.0 worse, because its
+    rubric punishes a turn habit the reward ignores. Paired PPI++ audits stay valid but save ~5% of labels. Limits:
+    single author, private repo, imperfect test labels.
+- id: arxiv-2609-35760-tokencast-mid-run-agent-token-forecasting
+  tag: Academy
+  title: &quot;TokenCast — composable per-segment cost triples forecast an agent run's remaining tokens after every call (32.8 ms/run); 27.8–30.4% lower error than the best baseline mid-run but no gain at task start; offline budget replay saves 21.3% tokens at matched trace completion&quot;
+  arxiv: &quot;2609.35760&quot;
+  url: https://arxiv.org/abs/2609.35760
+  card: &gt;-
+    Each segment is (calls, context growth, residual cost); segments compose exactly, with a cross-term for later calls
+    re-reading earlier context. 11,712 traces over 4 benchmarks, 6 models and 2 harnesses (DeepSeek Harness,
+    OpenHands); input is 99% of tokens on SWE-bench. Mean error falls 14.5% overall but is 2.2% worse at Task Start.
+    Budget replay saves 21.3% at matched trace completion, which is not task resolution. Limits: raw tokens only, with
+    no prompt caching or prices; compaction switched off; zero-shot domain transfer worse than agent self-estimates.
+progress:
+- parent: braintrust-sdk-v0-36
+  text: &gt;-
+    Braintrust py-sdk 0.43.0 (Sep 28, PyPI 21:38Z). #811: with opentelemetry-exporter-otlp-proto-http 1.45.0, an API key
+    resolved after exporter construction was written to attributes the exporter no longer reads, so &quot;spans were
+    exported without authentication&quot;; the fix re-runs the public constructor and tests headers on the wire across OTel
+    1.16/1.44/1.45. Also adds fail-open span customizers (on_span_export) and fixes Anthropic usage/refusal capture.
+- parent: arize-phoenix-20-16-0-pxi-tool-raise-closes-turn-frontier-cost-tables
+  text: &gt;-
+    arize-phoenix-otel 0.17.2 (Sep 28) fixes register() raising AttributeError with the HTTP transport on OTel 1.45
+    (#16549). Arize AX's arize-otel 0.14.1, published the same evening, still reads exporter._headers unguarded and has
+    no OTel upper pin: reproduced locally, it fails on 1.45.0 and passes on 1.44.0 (issue #30 open since Sep 25).
+- parent: letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction
+  text: &gt;-
+    Letta Code v0.33.6 (npm 00:14Z Sep 29): after each coding turn it reads the native Claude Code / Codex session JSONL
+    of its sub-agents and uploads appended bytes in 256 KiB chunks to the parent conversation's Cloud archive (#4820);
+    local-backend runs are excluded. Per the PR, the backend endpoint was not deployed at merge.
+headline_claims:
+- claim: &quot;crewAI 1.15.23 (Sep 28, 2026) adds an experimental `crewai eval` command that evaluates the project's last traced run through CrewAI AMP and prints a goal gate and grades; the run is recorded in .crewai/last_run.json only when every span export succeeded.&quot;
+  url: https://github.com/crewAIInc/crewAI/releases/tag/1.15.23
+  date: 2026-09-28
+- claim: &quot;Braintrust's Python SDK PR #811 reports that with opentelemetry-exporter-otlp-proto-http 1.45.0, an API key resolved after exporter construction was written to attributes the exporter no longer reads, so spans were exported without authentication; the fix shipped in braintrust 0.43.0.&quot;
+  url: https://github.com/braintrustdata/braintrust-sdk-python/pull/811
+  date: 2026-09-28
+- claim: &quot;TraceDance built 107 decision-point benchmarks (4,125 instances) from 252,557 Claude Code and OpenClaw deployment sessions; nine frontier LLMs averaged a 26.7% pass rate, 67.9% where a well-formed tool call was required but 8.1% where a check was required before proceeding.&quot;
+  url: https://arxiv.org/abs/2609.33295
+  date: 2026-09-27
+</code></pre>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 29 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
