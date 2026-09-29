@@ -1,8 +1,98 @@
 {
-  "updatedAt": "2026-09-28T23:53:42Z",
+  "updatedAt": "2026-09-29T23:50:00Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "catstack-symlink-prune-install-freshness-ab-gate-2026-09-29",
+      "date": "2026-09-29",
+      "displayDate": "Sep 29, 2026",
+      "title": "catstack — symlink+prune install integrity, skill A/B gate, thrash-reflect-automate, hook-freshness",
+      "href": "https://github.com/EdbertChan/catstack",
+      "why": "`./install.sh` symlinks skills/hooks/rules into Claude, Cursor, and Codex, then removes any link into catstack the run did not create so renamed/deleted skills do not linger — the closest external mirror of our seat-install hole (we copy without a manifest). Ships `skill-ab-token-gate` (paired A/B token proof for skill/hook changes), `thrash-reflect-automate` (FAIL → reflect → fix the class → codify invariant → automate a catch → re-validate), and advisory `hook-freshness` (installed hooks behind checkout). Direct fit for install integrity + the locked-but-unbuilt replay promotion gate. Caveat: GitHub reports no SPDX license — patterns only, do not vendor files. Not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-29-dsh-harness-lab-pack",
+      "tags": [
+        "install",
+        "hooks",
+        "skills",
+        "replay",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "chargehand-open-questions-prompt-ci-evidence-resolver-2026-09-29",
+      "date": "2026-09-29",
+      "displayDate": "Sep 29, 2026",
+      "title": "chargehand — open_questions unresolved-claims list, Prompt CI paired evals, approval above risk/cost",
+      "href": "https://github.com/Egoushka/chargehand",
+      "why": "Result contract with an evidence resolver: every claim is checked against files at a commit, diffs, session messages, or caller inputs; unresolved claims move to first-class `open_questions` (the missing machine-readable field in our done receipt). Prompt CI runs paired evals on PRs touching `prompts/` or `presets/` and posts a commit status; preset changes wait for approval in a `prompt-ci-review` environment. Presets can require approval above a risk or cost estimate. Caveat: pre-1.0, workers read-only — adopt the contracts, do not install the runtime. Apache-2.0. Patterns/contracts, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-29-dsh-harness-lab-pack",
+      "tags": [
+        "receipts",
+        "Prompt CI",
+        "evidence",
+        "autonomy",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "orglet-one-catchup-day-cost-cap-unknown-spend-2026-09-29",
+      "date": "2026-09-29",
+      "displayDate": "Sep 29, 2026",
+      "title": "orglet — one catch-up not N replays, per-day schedule cost cap, never-guess failed spend, evidence-ID file hash",
+      "href": "https://github.com/codepawl/orglet",
+      "why": "Schedule hygiene we need written into Manage routines: missed fires collapse into one catch-up you can run or skip while the next slot stays on the calendar; optional per-day cost cap on the schedule itself; if an API request fails or omits usage, the budget reservation is kept and zero is written only when confirmed — never guesses a failed request was free. Evidence IDs on `workspace_read` are checked against grant + unchanged file hash before a report is accepted. Caveat: early software, AGPL-3.0, desktop-app install class — patterns only, no install. Not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-29-dsh-harness-lab-pack",
+      "tags": [
+        "routines",
+        "cost",
+        "catch-up",
+        "evidence",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "wordcell-path-scoped-vault-context-revision-proofs-2026-09-29",
+      "date": "2026-09-29",
+      "displayDate": "Sep 29, 2026",
+      "title": "wordcell — path-scoped vault context, graph proofs tied to source revision, provider-failure keeps baseline",
+      "href": "https://github.com/hraness/wordcell",
+      "why": "Reads an existing Obsidian/Markdown vault in place (no init/convert). Frontmatter `repository_scopes` plus `wordcell context <path>` returns only the notes/plans/scoped AGENTS.md for the path an agent is about to change — the missing retrieval bridge between our Decisions/forbidden.md and the file under edit. Graph proofs are tied to a specific source revision; optional hosted Jev rerank keeps exact-search order as baseline on provider failure with a diagnostic. Caveats: requires Bun; default support discovery notices print to stderr for agents (`HRANESS_SUPPORT=off` suppresses). MIT. Patterns/retrieval, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-29-dsh-harness-lab-pack",
+      "tags": [
+        "vault",
+        "context",
+        "tokens",
+        "retrieval",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "cinch-skill-dialect-matrix-audit-manifest-2026-09-29",
+      "date": "2026-09-29",
+      "displayDate": "Sep 29, 2026",
+      "title": "cinch — SKILL.md dialect matrix, .cinch.json audit manifest, non-destructive exists outcome, cinch diff",
+      "href": "https://github.com/00200200/cinch",
+      "why": "Author-once dialect bridge: translates one SKILL.md into a multi-harness matrix (README matrix lists 12 incl. Grok `.grok/skills/` with `when-to-use`/`allowed-tools` and unsupported Claude keys stripped; badge says 11). Every run writes `.cinch.json` — exact audit of files written/merged/skipped; `cinch status` checks integrity; `cinch diff` shows workspace drift as unified diffs. Zero destructive overwrites (`outcome: \"exists\"` for hand-crafted files). Complements catstack (install integrity/prune vs dialect translation/manifest). Caveat: dialect rows are project vendor-doc claims, not independently re-verified here. MIT; uvx. Patterns/reference data, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-29-dsh-harness-lab-pack",
+      "tags": [
+        "skills",
+        "dialects",
+        "install",
+        "manifest",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "claimcheck-stop-hook-session-record-contradicts-claim-2026-09-28",
       "date": "2026-09-28",
