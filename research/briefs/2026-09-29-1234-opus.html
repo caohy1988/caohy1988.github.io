@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-29 · 12:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="Industry GPT-6.1 Sol launch; Progress LiteLLM #43614 cost_per_second, Claude Code 2.1.285, Opik #8411, Codex 0.161 alphas, Letta Code v0.33.7, langchain-core 1.6.6, Mastra #25392.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-29-1234-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 PM PT · late-wake on-cadence · fresh-list path · effort high</p>
+    <article>
+<h1>Field Brief — 2026-09-29-1234: GPT-6.1 Sol ships with a 1.05M context but a 922K input window and no &quot;no-reasoning&quot; mode, LiteLLM stops billing per-second deployments twice, Opik's SDK stops treating one unreadable record as end-of-data, and Claude Code 2.1.285 fixes /cost booking turns under the wrong model</h1>
+<p><strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>)
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, catalog and push.
+<strong>Slot:</strong> 2026-09-29-1234 (12:34 PM PT, Tue Sep 29). Late wake: work ran ~12:37–12:50 PT on the 12:34 cadence. The label stays 1234.
+<strong>Effort:</strong> high (Haiyuan lock 2026-09-29 ~08:58 PT, <code>Maps/Decisions/2026-09-29-field-brief-high-effort.md</code>). Not self-upgraded.
+<strong>Window:</strong> packs stamped after the 0634 brief, up to this slot. My own GitHub, PyPI and npm sweep covered releases published after 13:30Z and ran to ~19:45Z.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>Industry NEW (1): OpenAI GPT-6.1 Sol (<code>gpt-6.1-sol</code>), launched Sep 29.</strong></li>
+<li><strong>What it is.</strong> A cheaper model OpenAI positions as close to its GPT-6 Astra flagship on agentic coding and computer use.</li>
+<li><strong>Price.</strong> $2 / $0.10 / $10 per million input / cached-input / output tokens (model docs page).</li>
+<li><strong>Limits.</strong> 1,050,000-token context, 128,000 max output, knowledge cutoff Apr 30, 2026.</li>
+<li><strong>Reasoning effort.</strong> Takes <code>low</code>, <code>medium</code> (the default), <code>high</code>, <code>xhigh</code> and <code>max</code>.</li>
+<li><strong>Where it runs.</strong><ul>
+<li>Chat Completions, Responses and Batch.</li>
+<li>Hosted tools, including <code>computer_use</code>, <code>mcp</code> and <code>tool_search</code>.</li>
+<li>ChatGPT Work, Codex, and GitHub Copilot (GA, gradual rollout).</li>
+</ul>
+</li>
+<li><strong>SDK.</strong> <code>openai-python</code> 3.21.0 added the model id; 3.22.0 added computer use to beta agents.</li>
+<li><strong>Why it matters to anything that prices or replays agent traces:</strong><ul>
+<li><strong>Input window ≠ context window.</strong> The 1.05M context allows only <strong>922K input</strong>, per UK AISI's Inspect #5609. A tool that reads the &quot;context window&quot; number as its compaction or overflow limit is wrong by about 128K.</li>
+<li><strong>It always reasons.</strong> Inspect's PR reports that the API rejects <code>reasoning_effort</code> <code>none</code> and <code>minimal</code>, and rejects <code>temperature</code> and <code>top_p</code> at every effort. Replaying a GPT-6 Sol config that used <code>none</code> against 6.1 Sol returns a 400, not a cheaper run.</li>
+<li><strong>Cost tables were rebuilt the same day.</strong> LiteLLM added Azure and OpenRouter rows (#43744). promptfoo (#11303) added cost estimates, including cached input, cache writes and long context, and left unpublished tier rates <em>unknown</em> rather than zero.</li>
+<li><strong>Codex makes it the default</strong> catalog model on main (#49318). Traces from the next Codex release will skew toward this model with no user action.</li>
+</ul>
+</li>
+<li><strong>Progress (7):</strong></li>
+<li><strong>LiteLLM #43614 (merged to main, unreleased): per-second deployments were billed twice.</strong><ul>
+<li>Chat per-second pricing <em>added</em> <code>input_cost_per_second</code> and <code>output_cost_per_second</code>.</li>
+<li>The 28 Bedrock commitment rows set both to the full rate, so they were billed at 2×.</li>
+<li>A new single <code>cost_per_second</code> field fixes this. The cost-map JSON itself is edited, and the PR says older versions reading the new map bill once.</li>
+</ul>
+</li>
+<li><strong>Claude Code 2.1.285.</strong><ul>
+<li><code>/cost</code> and SDK <code>modelUsage</code> had booked a turn under the wrong model when the server answered a refusal with a different fallback model. Fixed.</li>
+<li><code>set_model</code> mid-session had kept the old output-token limit and auto-compact window until restart. Fixed.</li>
+<li>New <code>allowedProviders</code> managed setting limits which API providers a machine may use.</li>
+</ul>
+</li>
+<li><strong>Opik #8411 (merged to main, unreleased; PyPI latest still 2.2.85): silent truncation in paginated reads.</strong><ul>
+<li>One unreadable record in a full page made the SDK treat the page as the end of the data.</li>
+<li>Affected paths: <code>search_traces</code> / <code>search_spans</code> / <code>search_threads</code>, <code>evaluate_experiment</code>, and <code>opik migrate</code>.</li>
+<li>Every page after that one was dropped, with no exception.</li>
+</ul>
+</li>
+<li><strong>Codex (prereleases + main):</strong><ul>
+<li><code>rust-v0.161.0-alpha.1</code> and <code>alpha.2</code>.</li>
+<li>Enterprise MCP OAuth sign-in with grants scoped by user, workspace, issuer and client (#49276).</li>
+<li>Parent agents are told when Guardian stops a subagent for repeated denials (#49312).</li>
+<li>0.159.x backports are merged (#49323), but no 0.159.1 release exists yet.</li>
+</ul>
+</li>
+<li><strong>Letta Code v0.33.7:</strong> MCP OAuth published as an <code>@letta-ai/letta-code/mcp-oauth</code> entrypoint with storage adapters supplied by the caller.</li>
+<li><strong>LangChain <code>langchain-core</code> 1.6.6 + <code>langchain-anthropic</code> 1.7.5:</strong><ul>
+<li>Sonnet 5.5 compatibility.</li>
+<li>Invalid tool calls are replayed as <code>tool_use</code> instead of being lost.</li>
+</ul>
+</li>
+<li><strong>Mastra #25392 (merged to main; <code>1.72.0-alpha.9</code> published 90 minutes later):</strong> DurableAgent <code>model_generation</code> spans had dropped cache-read, cache-write and reasoning tokens, so Studio showed 0 cached tokens.</li>
+<li><strong>Academy: no NEW this slot.</strong></li>
+<li>The arXiv ceiling is flat at <code>2609.35771</code>. I re-checked it myself: the cs.AI newest listing tops out at <code>2609.35770</code>. The next announcement is tonight.</li>
+<li>GAGAR <code>2609.32577</code> was already scouted and judged off-bar at 0634, because it is an RL training method. I am not re-pitching it.</li>
+<li>Pin <code>2609.02702</code> (Trace-as-State v1) is untouched.</li>
+<li><strong>BQAA takeaway.</strong> Three of today's items are the same bug class: a telemetry number that is silently wrong while every row still looks valid.</li>
+<li>LiteLLM's 2× per-second cost.</li>
+<li>Claude Code booking usage under the wrong model.</li>
+<li>Opik's truncated reads that return a normal-looking result.</li>
+<li>Model metadata now needs <em>input window</em> and <em>accepted effort values</em> per model, not just context size and price.</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<h3>NEW I1 — <a href="https://developers.openai.com/api/docs/models/gpt-6.1-sol">OpenAI GPT-6.1 Sol</a> (<code>gpt-6.1-sol</code>, Sep 29, 2026): about one-fifth of GPT-6 Astra's token price. It always reasons, and its input window is 922K inside a 1.05M context. Same-day defaults and cost rows land across Codex, Copilot, Inspect, promptfoo and LiteLLM.</h3>
+<p><strong>What shipped (primary sources):</strong></p>
+<ul>
+<li><strong>Model page (developers.openai.com):</strong></li>
+<li><strong>Limits and price.</strong> 1,050,000 context; 128,000 max output; $2 input, $0.10 cached input, $10 output per 1M tokens; knowledge cutoff Apr 30, 2026.</li>
+<li><strong>Reasoning effort.</strong> <code>low</code>, <code>medium</code> (default), <code>high</code>, <code>xhigh</code>, <code>max</code>.</li>
+<li><strong>Endpoints.</strong> Chat Completions, Responses and Batch.</li>
+<li><strong>Hosted tools.</strong> <code>web_search</code>, <code>file_search</code>, <code>image_generation</code>, <code>code_interpreter</code>, <code>hosted_shell</code>, <code>apply_patch</code>, <code>skills</code>, <code>computer_use</code>, <code>mcp</code>, <code>tool_search</code>.</li>
+<li><strong>Not supported.</strong> Realtime, Assistants and fine-tuning.</li>
+<li><strong>Rate limit.</strong> Tier 1 is 500 RPM / 500K TPM.</li>
+<li><strong>System card addendum (deploymentsafety.openai.com, Sep 29):</strong></li>
+<li><strong>Eval awareness.</strong> Signs of simulation awareness in <strong>4.81%</strong> of trajectories, vs <strong>8.67%</strong> for GPT-6 Astra.</li>
+<li><strong>CoT controllability.</strong> It followed chain-of-thought instructions in <strong>44.8%</strong> of 750–1,250-token CoTs, vs <strong>23.2%</strong> for GPT-6 Sol.</li>
+<li><strong>Internal Codex misalignment simulation.</strong> <strong>28</strong> flags at severity ≥3 (0.056% of tasks), vs 27 for Astra and 42 for GPT-6 Sol. Credential-harvesting flags <em>increased</em> relative to Astra.</li>
+<li><strong>Monitor evasion.</strong> At max effort, a near-zero success rate against CoT-only monitors on the OAI-repo Sabotage task.</li>
+<li><strong>SDK.</strong></li>
+<li><a href="https://github.com/openai/openai-python/releases/tag/v3.21.0"><code>openai-python</code> v3.21.0</a> (17:40Z) adds the model identifier (#3986).</li>
+<li><a href="https://github.com/openai/openai-python/releases/tag/v3.22.0">v3.22.0</a> (19:06Z) adds computer use to beta agents (#3989).</li>
+<li><strong>GitHub Copilot (<a href="https://github.blog/changelog/2026-09-29-gpt-6-1-sol-in-github-copilot">changelog</a>):</strong></li>
+<li>GA with gradual rollout for Pro+, Max, Business and Enterprise.</li>
+<li>Surfaces: VS Code, Visual Studio, Copilot CLI, the coding agent, github.com, JetBrains, Xcode and Eclipse.</li>
+<li><strong>ChatGPT / Codex.</strong> TechCrunch reports availability &quot;to all Plus, Pro, Business, Enterprise, and Edu users in ChatGPT Work and Codex&quot;.</li>
+</ul>
+<p><strong>Same-day adoption (verified merged on GitHub):</strong></p>
+<ul>
+<li><strong>Codex <a href="https://github.com/openai/codex/pull/49318">#49318</a> (merged 17:22Z).</strong> &quot;Add GPT-6.1 Sol as the default catalog model&quot; gives it the highest catalog priority. This is on main; the current stable is still 0.159.0.</li>
+<li><strong>UK AISI Inspect <a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5609">#5609</a> (merged 19:06Z).</strong></li>
+<li><strong>Compaction limit.</strong> Before this, Inspect had no DB entry, so compaction fell back to <strong>128K</strong>. Now <code>openai/gpt-6.1-sol</code> resolves to 1,050,000 context, <strong>922,000 input</strong> and 128,000 output.</li>
+<li><strong>Always-reasoning.</strong> It moves into <code>always_reasons_model()</code> with GPT-6 Astra. The API rejects <code>none</code> and <code>minimal</code>, and rejects <code>temperature</code> and <code>top_p</code> at every effort. Inspect now drops those sampling params.</li>
+<li><strong>Unreleased.</strong> PyPI latest is still 0.3.272.</li>
+<li><strong>promptfoo <a href="https://github.com/promptfoo/promptfoo/pull/11303">#11303</a> (merged 17:52Z).</strong></li>
+<li>Routes the bare id to Responses, validates reasoning efforts, and requires Responses for tool calling.</li>
+<li>Estimates cost including cached input, cache writes and long context.</li>
+<li>Rates OpenAI hasn't published are left <strong>unknown unless custom costs are configured</strong>.</li>
+<li>Unreleased: npm latest is 0.123.1.</li>
+<li><strong>LiteLLM <a href="https://github.com/BerriAI/litellm/pull/43744">#43744</a>.</strong> Azure and OpenRouter <code>gpt-6.1-sol</code> cost-map rows. <a href="https://github.com/BerriAI/litellm/pull/43745">#43745</a> adds GPT-6 Astra <em>ultrafast</em>-tier prices.</li>
+<li><strong>Vercel AI <a href="https://github.com/vercel/ai/pull/21747">#21747</a> / <a href="https://github.com/vercel/ai/pull/21748">#21748</a> / <a href="https://github.com/vercel/ai/pull/21749">#21749</a>.</strong> Model support merged on v7 main, v5 and v6. Unreleased: npm <code>ai</code> latest is 7.0.122, published Sep 28.</li>
+</ul>
+<p><strong>Why this is a card and not a note:</strong></p>
+<ul>
+<li>A frontier model at this price becomes the default in Codex and a selectable model across Copilot within hours.</li>
+<li>For an agent-analytics product, that shifts the <em>mix</em> of models in customers' traces immediately. It also brings two metadata facts that break naive cost and overflow logic:</li>
+<li><strong>Input window vs context window.</strong> Inspect's own fallback was 128K, so an unknown-model default underestimates by 7×.</li>
+<li><strong>No <code>none</code> reasoning.</strong> Any &quot;cheap mode&quot; experiment that sets <code>reasoning_effort=none</code> fails with a 400.</li>
+</ul>
+<p><strong>What is <em>not</em> claimed here:</strong> OpenAI's benchmark numbers (OSWorld 2.0, factual-error rate) are not quoted as fact. openai.com returned HTTP 403 to both fetch paths, so they appear only in <strong>Unconfirmed</strong>.</p>
+<p><strong>TL;DR for BQAA:</strong> Add <code>gpt-6.1-sol</code> pricing ($2 / $0.10 / $10) and a separate <em>input-window</em> field (922K) to model metadata. Treat a <code>reasoning_effort=none</code> 400 on this model as a config error, not a model failure. Expect Codex-sourced traces to switch to it at the next Codex stable.</p>
+<h3>Progress</h3>
+<p><strong>P1 — LiteLLM <a href="https://github.com/BerriAI/litellm/pull/43614">#43614</a> (merged 18:27Z to main; no release yet; PyPI latest 1.103.0).</strong> Parent: <code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code></p>
+<ul>
+<li><strong>The bug.</strong></li>
+<li>Chat per-second pricing <em>added</em> <code>input_cost_per_second</code> and <code>output_cost_per_second</code>.</li>
+<li>The <strong>28 Bedrock commitment rows</strong> set both to the full rate, so those deployments billed <strong>2×</strong>.</li>
+<li>The PR's example: a 2-second call at $0.01/s showed <strong>$0.04 instead of $0.02</strong> in <code>x-litellm-response-cost</code> and the logs page.</li>
+<li><strong>The fix.</strong></li>
+<li>A new <code>cost_per_second</code> field is charged once for the whole request duration, streaming included. It covers chat, completion, embedding and responses.</li>
+<li>Legacy fields are now picked in order, never added.</li>
+<li>Azure chat also stops adding <code>output_cost_per_second × latency</code> on top of token prices.</li>
+<li><strong>Deliberate behavior change.</strong> A config that set two <em>different</em> legacy rates on purpose now bills only the input rate. That underbills.</li>
+<li><strong>Where it lands.</strong> The diff edits both <code>model_prices_and_context_window.json</code> and its backup copy.</li>
+<li><strong>TL;DR for BQAA:</strong> Any LiteLLM-sourced cost for per-second Bedrock commitment or Azure chat deployments before this fix may be 2× or inflated. Flag rather than trust these costs.</li>
+</ul>
+<p><strong>P2 — <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.285">Claude Code v2.1.285</a> (GitHub 19:27Z).</strong> Parent: <code>claude-code-2-1-283-gateway-prompt-id-otel-tool-output-agent-sdk</code></p>
+<ul>
+<li><strong>Usage attribution.</strong> <code>/cost</code> and the SDK's <code>modelUsage</code> reported a turn under the wrong model when the server answered a refusal with a different fallback model than expected. Fixed.</li>
+<li><strong>Model switch.</strong> Switching models mid-session with <code>set_model</code> (the Agent SDK's <code>setModel</code>) left the new model on the old output-token limit and auto-compact window until restart. Fixed.</li>
+<li><strong>Governance.</strong> A new <code>allowedProviders</code> managed setting limits which API providers a machine may use: Anthropic API, custom endpoint, Bedrock, Mantle, Vertex AI, Foundry, Claude Platform on AWS, or a Cloud gateway.</li>
+<li><strong>Redaction.</strong> Redacted logs and transcripts had shown part of a URL password that contains <code>@</code>, or all of it when <code>@</code> was written as <code>%40</code>. Fixed.</li>
+<li><strong>TL;DR for BQAA:</strong> Per-model usage from Claude Code refusal-fallback turns before 2.1.285 can be attributed to the wrong model. Also, <code>allowedProviders</code> gives admins a provider allow-list for Claude Code.</li>
+</ul>
+<p><strong>P3 — Opik <a href="https://github.com/comet-ml/opik/pull/8411">#8411</a> (merged 17:13Z to main; unreleased, PyPI latest 2.2.85).</strong> Parent: <code>opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier</code></p>
+<ul>
+<li><strong>The bug.</strong></li>
+<li><code>read_and_parse_full_stream()</code> decided a page was short by counting the records it managed to <em>parse</em>.</li>
+<li>One undecodable record in a full page therefore read as end-of-data. Every remaining page was dropped, with no exception, and the return value looked like a complete read.</li>
+<li>On the experiment path, an all-unreadable first page surfaced as <code>ExperimentNotFound</code> for an experiment that exists.</li>
+<li><strong>Reachable from:</strong> <code>search_traces</code>, <code>search_spans</code>, <code>search_threads</code>, <code>evaluate_experiment</code> and <code>opik migrate</code>.</li>
+<li><strong>The fix.</strong> The SDK now counts records the backend <em>delivered</em>, and logs one WARNING with the count of dropped records.</li>
+<li><strong>TL;DR for BQAA:</strong> A textbook &quot;short read looks like done&quot; bug. Any export or reconciliation job should compare what the backend delivered against what it parsed.</li>
+</ul>
+<p><strong>P4 — OpenAI Codex (prereleases + main).</strong> Parent: <code>openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks</code></p>
+<ul>
+<li><strong>Prereleases.</strong> <a href="https://github.com/openai/codex/releases/tag/rust-v0.161.0-alpha.1"><code>rust-v0.161.0-alpha.1</code></a> (16:22Z) and <a href="https://github.com/openai/codex/releases/tag/rust-v0.161.0-alpha.2"><code>alpha.2</code></a> (18:32Z). They carry no notes and are on npm under prerelease tags. <code>latest</code> is still 0.159.0.</li>
+<li><strong>Enterprise MCP sign-in (<a href="https://github.com/openai/codex/pull/49276">#49276</a>).</strong></li>
+<li>Sign-in works for enterprise-managed MCP servers.</li>
+<li>Grants are scoped by user, workspace, issuer and client ID.</li>
+<li>Canceled or superseded attempts are fenced across processes.</li>
+<li>Logout removes the shared grants.</li>
+<li><strong>Guardian stops (<a href="https://github.com/openai/codex/pull/49312">#49312</a>).</strong> A subagent stopped by repeated Guardian denials now notifies its parent, with guidance to wait for explicit user confirmation.</li>
+<li><strong>Default model (<a href="https://github.com/openai/codex/pull/49318">#49318</a>).</strong> GPT-6.1 Sol becomes the default catalog model.</li>
+<li><strong>Backports (<a href="https://github.com/openai/codex/pull/49323">#49323</a>).</strong> The 0.159.1 backport PR merged at 18:51Z, but <strong>no 0.159.1 release</strong> existed at sweep time.</li>
+<li><strong>TL;DR for BQAA:</strong> Guardian stops now reach the parent agent, so they can be traced end-to-end in multi-agent runs. Prereleases only; wait for the stable release.</li>
+</ul>
+<p><strong>P5 — <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.7">Letta Code v0.33.7</a> (15:23Z).</strong> Parent: <code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code></p>
+<ul>
+<li><strong>New entrypoint (<a href="https://github.com/letta-ai/letta-code/pull/4842">#4842</a>).</strong> MCP OAuth is published as a public <code>@letta-ai/letta-code/mcp-oauth</code> entrypoint. It offers a single <code>authorizeMcpServerWithStorage</code> call with caller-supplied, abort-aware storage. Previously credentials always went to Bun secrets.</li>
+<li>Concurrent calls for the same backend, agent and server share one authorization.</li>
+<li><strong>Interrupted workers (<a href="https://github.com/letta-ai/letta-code/pull/4844">#4844</a>).</strong> Interrupted local workflow workers are now recorded as <em>cancelled</em>.</li>
+<li><strong>TL;DR for BQAA:</strong> Run-status fidelity improves: an interrupted worker becomes &quot;cancelled&quot;, not an ambiguous state.</li>
+</ul>
+<p><strong>P6 — LangChain <a href="https://github.com/langchain-ai/langchain/releases/tag/langchain-core%3D%3D1.6.6"><code>langchain-core</code> 1.6.6</a> (14:53Z) + <a href="https://github.com/langchain-ai/langchain/releases/tag/langchain-anthropic%3D%3D1.7.5"><code>langchain-anthropic</code> 1.7.5</a> (15:22Z).</strong> Parent: <code>langchain-openai-1-6-5-anthropic-1-7-4-mid-conversation-tool-changes</code></p>
+<ul>
+<li>Claude Sonnet 5.5 compatibility (#40882).</li>
+<li>Invalid tool calls are serialized as <code>tool_use</code> on replay (#40864), instead of being lost from the replayed transcript.</li>
+<li><strong>TL;DR for BQAA:</strong> Replayed LangChain-Anthropic transcripts now keep malformed tool calls, so failed tool-call counts in replay stop undercounting.</li>
+</ul>
+<p><strong>P7 — Mastra <a href="https://github.com/mastra-ai/mastra/pull/25392">#25392</a> (merged 14:57Z) + <code>@mastra/core@1.72.0-alpha.9</code> (npm 16:26Z).</strong> Parent: <code>mastra-core-1-70-0-model-selection-processor-tenant-scoped-traces-memory-1-32</code></p>
+<ul>
+<li><strong>The bug.</strong> DurableAgent's <code>model_generation</code> span summed only input, output and total tokens across iterations, so exporters and Studio showed <strong>0 cached tokens</strong> and never emitted cache or reasoning metrics.</li>
+<li><strong>The fix.</strong> It adds <code>cachedInputTokens</code>, <code>cacheCreationInputTokens</code> and <code>reasoningTokens</code>. A field stays <em>undefined</em>, not 0, until some step reports it.</li>
+<li>Also merged: <a href="https://github.com/mastra-ai/mastra/pull/25387">#25387</a>, which preserves durable transcript transforms across process restarts.</li>
+<li>Whether alpha.9 contains #25392 is not verified; see Unconfirmed.</li>
+<li><strong>TL;DR for BQAA:</strong> The &quot;undefined, not 0&quot; rule for provider-absent token fields is the right schema convention to copy.</li>
+</ul>
+<h3>NOTE (below the card bar)</h3>
+<ul>
+<li><strong>qwen-code v0.24.7 train</strong> (v0.24.7 14:02Z, desktop-v0.24.7, sdk-typescript-v0.1.17).</li>
+<li>Mostly staged managed-agent plumbing: contracts, event replay (D3), durable session close/archive/delete (D4), and workspace execution.</li>
+<li>Also a desktop computer-use relay (#11799) and structured on-demand memory recall (#10183).</li>
+<li>The release has no highlights and there is no catalog parent. Below the card bar until the managed-agent API is announced as usable.</li>
+<li>Open (unmerged): #13033, which defers agent and goal declarations by default.</li>
+<li><strong>cloudflare/agents.</strong> <a href="https://github.com/cloudflare/agents/pull/2040">#2040</a> (merged 16:11Z) reconciles reused tool-call IDs one-to-one. Providers that reuse <code>call_0</code> across turns made a later assistant message overwrite an earlier stored row.</li>
+<li>Also merged: <a href="https://github.com/cloudflare/agents/pull/2036">#2036</a> (synthetic compaction history integrity) and <a href="https://github.com/cloudflare/agents/pull/2056">#2056</a>.</li>
+<li>The npm <code>agents</code> package has no in-window release and there is no catalog parent. Worth remembering: <strong>tool-call IDs are not unique per conversation</strong>.</li>
+<li><strong>promptfoo <a href="https://github.com/promptfoo/promptfoo/pull/11063">#11063</a></strong> (merged 15:14Z). Coding-agent providers can run in isolated <code>copy_working_dir</code> workspaces. Unreleased.</li>
+<li><strong>Vercel AI <a href="https://github.com/vercel/ai/pull/21665">#21665</a> / <a href="https://github.com/vercel/ai/pull/21668">#21668</a></strong> (merged 15:56Z, v6/v5 branches). Resuming hydrated partial static tool calls no longer loses streaming state. Unreleased; not ranked.</li>
+<li><strong>openai-agents-python <a href="https://github.com/openai/openai-agents-python/pull/5238">#5238</a></strong> (merged 16:22Z). Nullable Chat Completions token counts are normalized. Unreleased (PyPI 0.22.3).</li>
+<li><strong>Arize Phoenix TS <code>@arizeai/phoenix-client</code> 7.15.0</strong> (19:17Z). Adds <code>upsertPromptVersionTag</code> / <code>deletePromptVersionTag</code> helpers. Minor.</li>
+<li><strong>Letta <a href="https://github.com/letta-ai/letta-code/pull/4754">letta-code #4754</a></strong> (merged 18:27Z). The &quot;Memory Palace&quot; experiment and skill. Experimental. The pack attributed it to <code>letta-ai/letta</code>, where it 404s; it is in <code>letta-code</code>.</li>
+<li><strong>google/adk-python.</strong> A batch of unmerged closes (DSH 0832). This is a <strong>1P NOTE only</strong>, not a catalog card.</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<p><strong>No NEW this slot.</strong></p>
+<ul>
+<li><strong>Ceiling.</strong> The packs report the arXiv ceiling flat at <code>2609.35771</code> across all five in-window packs. I checked this independently:</li>
+<li>The arXiv API cs.AI newest-first query returned <code>2609.35770</code>, <code>.35769</code>, <code>.35767</code>, <code>.35760</code>, <code>.35751</code> at the top.</li>
+<li><code>arxiv.org/list/cs.AI/new</code> tops out at <code>2609.35770</code>.</li>
+<li>No id above <code>2609.35771</code> appears. The lookup worked, so &quot;flat&quot; is honest. The next announcement batch lands tonight (~17:00 PT).</li>
+<li><strong>HF.</strong> HF Daily set-diffs are empty in the packs, and the 09-30 endpoint gap carries forward.</li>
+</ul>
+<h3>Scouted, not ranked</h3>
+<ul>
+<li><strong><a href="https://arxiv.org/abs/2609.32577">2609.32577</a> GAGAR</strong> (Xiaomi MiMo), the packs' premier carry.</li>
+<li>The 0634 brief already scouted it (abstract-level). It judged it off-bar: an RL training method that redistributes advantages among <em>passing</em> code-agent trajectories.</li>
+<li>No new evidence arrived this window, so I did not do a full-PDF read and do not re-pitch it.</li>
+<li>It remains uncarded (0 catalog hits).</li>
+<li><strong>Pin <a href="https://arxiv.org/abs/2609.02702">2609.02702</a></strong> Trace-as-State v1 is intact. Not re-carded.</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ol>
+<li><strong>Model metadata beyond price (high EV).</strong></li>
+</ol>
+<ul>
+<li>GPT-6.1 Sol shows a model's <em>input window</em> can sit well below its context window (922K of 1.05M), and that effort values are model-specific.</li>
+<li>Inspect, promptfoo and LiteLLM each rebuilt this metadata by hand on day one.</li>
+<li>A BQAA model dimension with <code>input_window</code>, <code>max_output</code>, <code>accepted_efforts</code> and <code>price_per_1m{in,cached_in,out}</code> would make cost and overflow analytics correct across model launches.</li>
+</ul>
+<ol start="2">
+<li><strong>&quot;Silently wrong but valid-looking&quot; checks (high EV).</strong> Today's LiteLLM 2× per-second billing, Claude Code's wrong-model usage and Opik's truncated reads are all invisible at row level. Three cheap checks catch the class:</li>
+</ol>
+<ul>
+<li>cost-per-second vs token-cost consistency;</li>
+<li>model-in-usage vs model-requested divergence;</li>
+<li>delivered-vs-parsed counts on exports.</li>
+</ul>
+<ol start="3">
+<li><strong>Default-model shifts (medium EV).</strong></li>
+</ol>
+<ul>
+<li>Codex makes GPT-6.1 Sol its catalog default at the next stable; Copilot adds it GA.</li>
+<li>Customers' trace model mix will move without any customer action.</li>
+<li>A &quot;model mix changed&quot; alert keyed on client version would explain cost and latency changes before users ask.</li>
+</ul>
+<ol start="4">
+<li><strong>Guardian and approval-stop propagation (medium EV).</strong></li>
+</ol>
+<ul>
+<li>Codex now forwards Guardian stops to parent agents.</li>
+<li>Stop and denial events crossing agent boundaries are a new trace edge that multi-agent dashboards should render.</li>
+</ul>
+<hr />
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>I1 GPT-6.1 Sol:</strong> Add <code>gpt-6.1-sol</code> ($2 / $0.10 / $10) with a 922K <em>input</em> window; the API rejects <code>reasoning_effort=none</code>/<code>minimal</code>, so treat those 400s as config errors. Codex makes it the default at the next stable.</li>
+<li><strong>P1 LiteLLM #43614:</strong> Per-second Bedrock commitment and Azure chat costs could be 2× before this fix; flag LiteLLM per-second costs until the fixed cost map is loaded.</li>
+<li><strong>P2 Claude Code 2.1.285:</strong> Refusal-fallback turns could be booked under the wrong model in <code>/cost</code>/<code>modelUsage</code>. <code>allowedProviders</code> gives admins a provider allow-list.</li>
+<li><strong>P3 Opik #8411:</strong> One bad record truncated <code>search_traces</code>/<code>evaluate_experiment</code> reads silently; compare delivered vs parsed counts on exports.</li>
+<li><strong>P4 Codex alphas + main:</strong> Enterprise MCP OAuth, Guardian stops reported to parent agents, and GPT-6.1 Sol as default. Prerelease only.</li>
+<li><strong>P5 Letta Code v0.33.7:</strong> MCP OAuth with pluggable storage; interrupted workers recorded as cancelled.</li>
+<li><strong>P6 LangChain core 1.6.6 / anthropic 1.7.5:</strong> Sonnet 5.5 support; malformed tool calls survive replay.</li>
+<li><strong>P7 Mastra #25392:</strong> Durable-agent spans now carry cache and reasoning tokens (absent means undefined, not 0).</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What is not confirmed</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>GPT-6.1 Sol benchmark claims</td>
+  <td>&quot;OSWorld 2.0 +7% over GPT-6 Sol at max effort&quot; and the &quot;factual-error rate 11.4% → 7.7% at low effort&quot; figure are <strong>not</strong> used as claims. The error-rate figure is quoted by TechCrunch; OSWorld appears only in a search-result summary (Neowin).</td>
+  <td><code>openai.com/index/introducing-gpt-6-1-sol/</code> returned HTTP 403 via WebFetch and via curl with a browser UA. I confirmed the model page, the system card addendum and the Copilot changelog directly.</td>
+</tr>
+<tr>
+  <td>GPT-6.1 Sol &quot;one-fifth of Astra's price&quot;</td>
+  <td>The ratio is OpenAI's claim as reported by TechCrunch. I did not fetch Astra's price page to compute it.</td>
+  <td>TechCrunch Sep 29; developers.openai.com model page (Sol price only).</td>
+</tr>
+<tr>
+  <td>GPT-6.1 Sol 922K input window and <code>none</code>/<code>minimal</code>/<code>temperature</code> rejection</td>
+  <td>Taken from Inspect #5609's PR description, which cites the model page. The model page as fetched stated 1,050,000 context and 128,000 output but not the input-window number.</td>
+  <td>UKGovernmentBEIS/inspect_ai#5609 body; developers.openai.com model page.</td>
+</tr>
+<tr>
+  <td>Mastra alpha.9 contains #25392</td>
+  <td>alpha.9 was published after the merge (16:26Z vs 14:57Z). I did not inspect the package contents or changelog.</td>
+  <td>npm <code>@mastra/core</code> time map; GitHub PR #25392.</td>
+</tr>
+<tr>
+  <td>LiteLLM fix reaching deployed proxies without an upgrade</td>
+  <td>The PR edits the hosted cost-map JSON and says older versions read the rows once. Whether a given proxy loads the remote map depends on its configuration; not verified.</td>
+  <td>PR #43614 body and file list.</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Packs used (PACK_DONE, 5):</strong> <code>packs/muse-pack-2026-09-29-0732.md</code>, <code>packs/dsh-pack-2026-09-29-0832.md</code>, <code>packs/agy-pack-2026-09-29-0932.md</code>, <code>packs/muse-pack-2026-09-29-1032.md</code>, <code>packs/dsh-pack-2026-09-29-1132.md</code>.</li>
+<li>I read none wholesale. The candidate list came from the fresh list, and each candidate was verified against GitHub, PyPI and npm directly.</li>
+<li><code>packs/agy-pack-2026-09-29-0632.md</code> belongs to the prior slot window and was not used.</li>
+<li><strong>Fresh-list path used:</strong> <code>_runs/fb-2026-09-29-1234/fresh-items.md</code> (F01–F36).</li>
+<li><strong>Gaps (disclosed, not invented):</strong></li>
+<li>Standing absent collector hours: DSH 1732, Agy 1832, Muse 1932.</li>
+<li>Missing rotation hours in this window: Agy 0732/0832/1032/1132, Muse 0832/0932/1132, DSH 0732/0932/1032. Collectors rotate by <code>hour % 3</code>, so only the five PACK_DONE packs are in-window input.</li>
+<li>Medium scouts are paused (lead-only). LinkedIn is behind an authwall. The packs report Agy MCP X 401 / Reddit 403. The HF Daily 09-30 endpoint gap carries forward.</li>
+<li><strong>HN:</strong> the source was dropped fleet-wide on 2026-09-27. There were no HN keeps, and <code>packs/_hn/</code> was not consulted.</li>
+<li><strong>Verified arXiv ceiling:</strong> <code>2609.35771</code>, flat per the packs. My own cs.AI API and <code>/list/new</code> checks top out at <code>2609.35770</code>.</li>
+<li><strong>Verification method:</strong></li>
+<li><strong>GitHub releases.</strong> <code>gh api repos/*/releases</code> sweep of about 50 agent, observability and eval repos for anything published after 13:30Z.</li>
+<li><strong>In-window releases found:</strong><ul>
+<li>Codex alpha.1/alpha.2, Letta Code v0.33.7, qwen-code v0.24.7 ×3, <code>langchain-core</code> 1.6.6, <code>langchain-anthropic</code> 1.7.5.</li>
+<li>Phoenix TS packages, <code>openai-python</code> v3.21.0/v3.22.0, Claude Code v2.1.285.</li>
+</ul>
+</li>
+<li><strong>Registries.</strong><ul>
+<li>PyPI (litellm, arize-phoenix, opik, langfuse, inspect-ai, openai-agents, crewai, traceloop-sdk, pydantic-ai): no in-window versions.</li>
+<li>npm: <code>@openai/codex</code> 0.161.0-alpha.1/.2 and <code>@mastra/core</code> 1.72.0-alpha.9. <code>ai</code>, <code>@ai-sdk/openai</code>, <code>promptfoo</code> and <code>agents</code> had none.</li>
+</ul>
+</li>
+<li><strong>PR states.</strong> Checked with <code>gh api repos/*/pulls/N</code>.</li>
+<li><strong>Web.</strong> Model docs page, system-card addendum, GitHub changelog and TechCrunch via WebFetch; the openai.com launch post returned 403.</li>
+<li><strong>Catalog.</strong> Grepped <code>catalog.json</code> (459 items) for every candidate. No <code>gpt-6.1</code> item exists, and GAGAR <code>32577</code> has 0 hits.</li>
+<li><strong>Hub tip:</strong> <code>9e60985</code> (&quot;research: BQAA stories +1&quot;, 12:02 PT). The local clone matches <code>git ls-remote origin HEAD</code>. The prompt's <code>21862e5</code> is superseded.</li>
+<li><strong>Late-wake:</strong> on the 12:34 PT cadence, work ~12:37–12:50 PT. Label kept at 1234.</li>
+<li><strong>Effort:</strong> high, per the 2026-09-29 lock. JEV shadow was skipped by Collection (fixed-schedule run, Q8).</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<pre><code class="language-yaml">new:
+- id: openai-gpt-6-1-sol-922k-input-always-reasons-codex-default-same-day-cost-rows
+  tag: Industry
+  title: &quot;OpenAI GPT-6.1 Sol (gpt-6.1-sol) — $2/$0.10/$10 per 1M tokens, 1.05M context but a 922K input window, efforts low…max with no none/minimal; becomes the Codex default catalog model and GA in GitHub Copilot the same day, with Inspect, promptfoo, LiteLLM and Vercel AI adding model/cost rows&quot;
+  url: https://developers.openai.com/api/docs/models/gpt-6.1-sol
+  card: &gt;-
+    Launched Sep 29, 2026. Model page: 1,050,000 context, 128,000 max output, $2 input / $0.10 cached / $10 output per 1M
+    tokens, efforts low/medium(default)/high/xhigh/max, Chat Completions + Responses + Batch, hosted computer_use, mcp and
+    tool_search. openai-python 3.21.0 adds the id and 3.22.0 adds computer use to beta agents. UK AISI Inspect #5609 records a
+    922K input window (its unknown-model compaction fallback was 128K) and that the API rejects reasoning_effort none/minimal
+    and temperature/top_p. Codex #49318 makes it the default catalog model on main; Copilot lists it GA. The system card
+    addendum reports eval-awareness signs in 4.81% of trajectories (Astra 8.67%).
+progress:
+- parent: litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport
+  text: &gt;-
+    LiteLLM #43614 (merged Sep 29 18:27Z, unreleased): chat per-second pricing added input_ and output_cost_per_second, so
+    the 28 Bedrock commitment rows billed 2x ($0.04 for a 2-second, $0.01/s call). A single cost_per_second field now bills
+    once, legacy fields are picked in order rather than summed, and Azure chat stops adding output_cost_per_second x latency.
+- parent: claude-code-2-1-283-gateway-prompt-id-otel-tool-output-agent-sdk
+  text: &gt;-
+    Claude Code v2.1.285 (Sep 29): /cost and SDK modelUsage no longer book a turn under the wrong model when a refusal comes
+    back on a different fallback model; set_model mid-session now updates output-token and auto-compact limits; new
+    allowedProviders managed setting restricts API providers per machine.
+- parent: opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier
+  text: &gt;-
+    Opik #8411 (merged Sep 29, unreleased; PyPI 2.2.85): one unparseable record in a full page ended paginated reads early
+    and silently, truncating search_traces/search_spans/search_threads, evaluate_experiment and opik migrate. The SDK now
+    counts delivered records and warns once with the dropped count.
+- parent: openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks
+  text: &gt;-
+    Codex rust-v0.161.0-alpha.1/alpha.2 prereleases (Sep 29; npm latest still 0.159.0). Main adds enterprise MCP OAuth
+    sign-in scoped by user/workspace/issuer/client (#49276), parent-agent notification when Guardian stops a subagent
+    (#49312) and GPT-6.1 Sol as default catalog model (#49318); 0.159.1 backports merged (#49323) but unreleased.
+- parent: letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction
+  text: &gt;-
+    Letta Code v0.33.7 (Sep 29): MCP OAuth published as @letta-ai/letta-code/mcp-oauth with caller-supplied, abort-aware
+    storage (#4842); interrupted local workflow workers are recorded as cancelled (#4844).
+- parent: langchain-openai-1-6-5-anthropic-1-7-4-mid-conversation-tool-changes
+  text: &gt;-
+    langchain-core 1.6.6 and langchain-anthropic 1.7.5 (Sep 29): Claude Sonnet 5.5 compatibility (#40882) and invalid tool
+    calls serialized as tool_use on replay instead of being lost (#40864).
+- parent: mastra-core-1-70-0-model-selection-processor-tenant-scoped-traces-memory-1-32
+  text: &gt;-
+    Mastra #25392 (merged Sep 29): DurableAgent model_generation spans now carry cachedInputTokens,
+    cacheCreationInputTokens and reasoningTokens (previously Studio showed 0 cached); fields stay undefined, not 0, when no
+    step reports them. @mastra/core 1.72.0-alpha.9 published afterwards (inclusion unverified).
+headline_claims:
+- claim: &quot;GPT-6.1 Sol (gpt-6.1-sol) is priced at $2 input, $0.10 cached input and $10 output per 1M tokens, with a 1,050,000-token context and 128,000 max output.&quot;
+  url: https://developers.openai.com/api/docs/models/gpt-6.1-sol
+  date: 2026-09-29
+- claim: &quot;LiteLLM #43614 fixes per-second chat pricing that summed input and output per-second rates, which billed the 28 Bedrock commitment rows at 2x.&quot;
+  url: https://github.com/BerriAI/litellm/pull/43614
+  date: 2026-09-29
+- claim: &quot;Claude Code v2.1.285 fixes /cost and SDK modelUsage reporting a turn under the wrong model when a refusal is answered by a different fallback model.&quot;
+  url: https://github.com/anthropics/claude-code/releases/tag/v2.1.285
+  date: 2026-09-29
+</code></pre>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 29 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
