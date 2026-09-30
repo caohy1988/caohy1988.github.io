@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-29T23:50:00Z",
+  "updatedAt": "2026-09-30T22:58:57Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
@@ -99,7 +99,7 @@
       "displayDate": "Sep 28, 2026",
       "title": "claimcheck — Stop hook that blocks completion claims the session record contradicts",
       "href": "https://github.com/Allan-Nava/claimcheck",
-      "why": "Deterministic Claude Code Stop hook (no model, no network, no API key, no deps; Node 18+) that refuses a claim of completion when the session's own transcript contradicts it: tests ran+passed, commit made, push landed, tag exists (paths/ran/merged opt-in, off by default). Ships measured evals (claim-detection precision/recall, p50 latency vs Node startup, sweep over 1,744 real transcripts), audit mode with a decisions log, and fail-open rules — new checks earn blocking only after measured FP≈0. Direct mechanical answer to the triage objection that kept stingray out of the playbook (Jev call per Stop / no-op without TypeSafe key): enforces code-decides-done + no-exit-while-waiting at zero marginal cost. npm `@allan_nava/claimcheck`; MIT. Not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "Deterministic Claude Code Stop hook (no model, no network, no API key, no deps; Node 18+) that refuses a claim of completion when the session's own transcript contradicts it: tests ran+passed, commit made, push landed, tag exists (paths/ran/merged opt-in, off by default). Ships measured evals (claim-detection precision/recall, p50 latency vs Node startup, sweep over 1,744 real transcripts), audit mode with a decisions log, and fail-open rules — new checks earn blocking only after measured FP≈0. Direct mechanical answer to the triage objection that kept stingray out of the playbook (Jev call per Stop / no-op without TypeSafe key): enforces code-decides-done + no-exit-while-waiting at zero marginal cost. npm `@allan_nava/claimcheck`; MIT. Not a coding-CLI seat, no Herdr. In playbook (2026-09-30, Haiyuan-approved) as the claim-vs-record check (#claim-vs-record): a pass/pushed/done claim must match the session record, and a green run after skipped, deleted, focused or gutted tests is SUSPECT. Prose rule only; no hook installed (a Stop-hook trial would be Opus-drafted and blind-reviewed, audit mode first).",
       "source": "Hunt/agent-manage/2026-09-28-muse-harness-lab-pack",
       "tags": [
         "hooks",
@@ -108,7 +108,7 @@
         "no-exit-while-waiting",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "ccdrift-claude-code-session-log-drift-alerts-2026-09-28",
@@ -150,7 +150,7 @@
       "displayDate": "Sep 28, 2026",
       "title": "coding-agent-guardrails — resident-rules byte budget + declared≠effective loading checks",
       "href": "https://github.com/Quarkgluonmixture/coding-agent-guardrails",
-      "why": "Day-to-day harness patterns from real failures: evidence-before-verdict (show the check ran on the right object before claiming done/passing/empty); two-tier git-guard PreToolUse hook (DENY: add -A/-a/--no-verify/force-push; ASK: reset --hard/checkout ./stash); resident-rules byte budget (20,000-byte ceiling on always-on rules, CI-enforced — add one, compress or demote another); declared≠effective via kit state (rules observed loading with SHA-256, flags declared-but-never-loaded); generated README inventory checked in CI. Two imports fit gaps named this week: (a) byte budget on resident vault policy (forbidden.md grows without a ceiling — enforcement half of #repeat-lesson), (b) declared-vs-effective skill/hook loading in nightly Mac audit (lighter than Model Citizen's ownership journal). MIT. Patterns/checks, not a new coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "Day-to-day harness patterns from real failures: evidence-before-verdict (show the check ran on the right object before claiming done/passing/empty); two-tier git-guard PreToolUse hook (DENY: add -A/-a/--no-verify/force-push; ASK: reset --hard/checkout ./stash); resident-rules byte budget (20,000-byte ceiling on always-on rules, CI-enforced — add one, compress or demote another); declared≠effective via kit state (rules observed loading with SHA-256, flags declared-but-never-loaded); generated README inventory checked in CI. Two imports fit gaps named this week: (a) byte budget on resident vault policy (forbidden.md grows without a ceiling — enforcement half of #repeat-lesson), (b) declared-vs-effective skill/hook loading in nightly Mac audit (lighter than Model Citizen's ownership journal). MIT. Patterns/checks, not a new coding-CLI seat, no Herdr. In playbook (2026-09-30, Haiyuan-approved) as the byte ceiling on resident policy (#resident-budget): AGENTS.md and forbidden.md may not grow past their 2026-09-30 size; add a line only by compressing or demoting another. Declared-vs-effective hook loading and the git-guard hook were not adopted.",
       "source": "Hunt/agent-manage/2026-09-28-muse-harness-lab-pack",
       "tags": [
         "rules",
@@ -159,7 +159,7 @@
         "repeat-lesson",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "swarm-agent-coordination-merge-batch-paths-owned-2026-09-28",
