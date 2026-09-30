@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-30 · 6:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="Academy NEW 2609.37236 horizontal/vertical proactivity need-graphs + 2609.35025 AutoDataBench; Progress Langfuse v4.48.0, Opik 2.2.86, Codex 0.161.0-alpha.4.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-30-0634-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 6:34 AM PT · late-wake on-cadence · fresh-list path · effort high</p>
+    <article>
+<h1>Field Brief — 2026-09-30-0634: a judge-free way to score what an agent looks for without being asked; agents can aim a training task at a model's failure modes but can't set its difficulty; Langfuse's Python SDK now drops oversized span batches; Opik fixes a ClickHouse connection leak and lost Bedrock usage fields; Codex moves its model list out of the spawn_agent tool description</h1>
+<p><strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>)
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, catalog and push.
+<strong>Slot:</strong> 2026-09-30-0634 (06:34 AM PT, Wed Sep 30). This was a late wake: the work ran ~06:40–07:10 PT on the 06:34 cadence, and the label stays 0634.
+<strong>Effort:</strong> high, per Haiyuan's lock of 2026-09-29 (<code>Maps/Decisions/2026-09-29-field-brief-high-effort.md</code>). I did not raise it to max.
+<strong>Window:</strong> A normal on-cadence slot. It covers everything after the last published brief (<code>2026-09-30T0034</code>, published ~01:07 PT) up to this slot. My own GitHub, PyPI and npm sweep covered anything published after 07:00Z Sep 30 and ran to 13:46Z.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>The Industry release window was quiet.</strong> Between 07:00Z and 13:46Z, the only stable releases in 70 agent, observability and eval repos were:</li>
+<li>Langfuse v4.48.0, with Python SDK 4.16.0;</li>
+<li>Opik 2.2.86;</li>
+<li>Cline desktop 0.0.39;</li>
+<li>a GitHub release page for Mastra 1.72.0, which is the npm release already carded at 0034.</li>
+</ul>
+<p>Prereleases: Codex <code>rust-v0.161.0-alpha.4</code> and LiteLLM <code>v1.105.0-dev.1</code>. Nothing this window qualifies as <strong>Industry NEW</strong>. The largest thing that happened, qwen-code's managed-agent merge wave, is merged to main but not released. It stays a WATCH (details below).</p>
+<ul>
+<li><strong>Progress (3):</strong></li>
+<li><strong>Langfuse v4.48.0 + Python SDK 4.16.0.</strong><ul>
+<li><strong>Pricing.</strong> The server adds default prices for Claude Sonnet 5.5, GPT-6.1 Sol and a GPT-6 Astra Ultrafast tier.</li>
+<li><strong>Batch cap.</strong> The Python SDK now drops any OTLP export request over <strong>64 MiB</strong>. Each drop is reported as a failed export, with a warning that gives only the sizes.</li>
+<li><strong>Dependency floor.</strong> The SDK now requires OpenTelemetry ≥ 1.45.</li>
+</ul>
+</li>
+<li><strong>Opik 2.2.86.</strong> Four fixes that affect data correctness:<ul>
+<li>The backend no longer cancels ClickHouse client futures. Cancelling them leaked pooled connections.</li>
+<li>Bedrock Nova spans now keep every usage field Bedrock reports, including cache counters, instead of only two.</li>
+<li>OTel spans from quarkus-langchain4j used to be priced at <strong>$0</strong> because of provider-name aliases (<code>open_ai</code>, <code>amazon_bedrock</code>, <code>google_ai_gemini</code>). They are now priced.</li>
+<li>Nine PromptInjection patterns that fired on normal output were removed or tightened.</li>
+</ul>
+</li>
+<li><strong>Codex <code>rust-v0.161.0-alpha.4</code>.</strong> A new opt-in <code>model_catalog_in_context</code> flag moves multi-agent model listings out of the <code>spawn_agent</code> tool description and into developer <code>&lt;model_catalog&gt;</code> messages. The alpha also adds a TUI fork shortcut.<ul>
+<li>Unreleased on main after the alpha: resumed threads now replay authoritative history, and user edits to the thread's goal are persisted in model history.</li>
+</ul>
+</li>
+<li><strong>Academy NEW (2), each from a full PDF read.</strong> The arXiv ceiling is flat at <strong><code>2609.38180</code></strong>; I verified this myself. Both papers are HF-rotation or pack leads from Sep 28–29 that had not been carded.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.37236">2609.37236</a> Horizontal and vertical proactivity.</strong> The paper scores <em>what an agent looks for without being asked</em> directly from the transcript, with <strong>no model judge</strong>. It uses a &quot;need graph&quot;: the evidence a task requires and the order in which each piece becomes findable.<ul>
+<li>At equal retrieval spend, a trained 8B questioner recovers 89.5% vs 78.3% of the required evidence on MuSiQue.</li>
+<li>It stops 29–33 points more often once all the needed evidence is found.</li>
+<li>In τ²-bench retail, success rises from 13% to 34% with no retraining.</li>
+</ul>
+</li>
+<li><strong><a href="https://arxiv.org/abs/2609.35025">2609.35025</a> AutoDataBench.</strong> Agents write new executable training tasks aimed at a target model's observed failure modes. Each task is scored before any training, as gate × difficulty band × rubric coverage.<ul>
+<li>No agent scores above 0.20.</li>
+<li>Only 14.6–25% of the tasks agents deliver fall in the target pass-rate band. The ones that do cover 0.70–0.97 of the hidden rubric of failure modes.</li>
+<li>Four times the time budget lifts the best agent from 0.184 to 0.541, but the cost of one usable task stays at ~$12.</li>
+</ul>
+</li>
+<li><strong>BQAA takeaway.</strong> Two measurement themes this window:</li>
+</ul>
+<ol>
+<li><strong>Score agent behavior from traces with deterministic rules, not judges.</strong> 37236's coverage, out-of-order, stop-when-done and ask-when-not-done rates are all set arithmetic over a transcript. AutoDataBench's difficulty term is a pass rate the task's own verifier decides.</li>
+<li><strong>Silent telemetry loss at the SDK and pricing layer.</strong> Langfuse Python now drops &gt;64 MiB batches, quarkus-langchain4j spans were costed at $0 in Opik, and Nova cache counters were being discarded. In each case the trace row looks valid while something is missing from it.</li>
+</ol>
+<hr />
+<h2>Industry</h2>
+<p><strong>No Industry NEW this slot.</strong> None of the in-window releases shipped a product capability that clears the NEW bar. I checked each of them against the catalog.</p>
+<h3>Progress P1 — <a href="https://github.com/langfuse/langfuse/releases/tag/v4.48.0">Langfuse v4.48.0</a> (GitHub 10:12Z Sep 30) + <a href="https://github.com/langfuse/langfuse-python/releases/tag/v4.16.0">langfuse-python v4.16.0</a> (PyPI 09:55Z)</h3>
+<p><strong>Attach to:</strong> <code>langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown</code> (v4.47.0 was attached there at 2026-09-29T0634).</p>
+<p><strong>What shipped (release notes; PR bodies checked for #18055, #18062 and langfuse-python #1909):</strong></p>
+<ul>
+<li><strong>Default model prices.</strong></li>
+<li>Claude Sonnet 5.5 (#18023).</li>
+<li>GPT-6.1 Sol plus a GPT-6 Astra Ultrafast tier (#18055). The pricing audit bot re-fetched official provider pages on 2026-09-30.</li>
+<li>Until now, Langfuse cost for these models showed zero or had to be set per project.</li>
+<li><strong>Skills.</strong> Drafts track which files changed, and file contents are fetched in batches by SHA-256 hash (#18062).</li>
+<li><strong>Python SDK 4.16.0: 64 MiB export cap (#1909).</strong></li>
+<li>The minimum OpenTelemetry version rises to <code>&gt;=1.45.0,&lt;2</code>.</li>
+<li>The default exporter now drops any serialized OTLP request over 64 MiB, measured before compression. The drop is reported as a failed export, with a size-only warning.</li>
+<li><code>LANGFUSE_OTEL_MAX_BATCH_SIZE_BYTES</code> overrides the limit. The check runs after masking and media processing. Custom span exporters are untouched.</li>
+<li>Also: a session-timeline &quot;incident session&quot; seeder scenario (#18061), and UI fixes.</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong></p>
+<ul>
+<li>The SDK cap is a new, silent source of <strong>missing spans</strong>. Agents that attach large tool outputs or media can lose whole batches, and the only signal is an exporter-failure log. Any Langfuse → BQAA import should reconcile span counts.</li>
+<li>The new default prices move cost dashboards for Sonnet 5.5 and GPT-6.1 Sol from zero to real values, which will show up as a step change on the upgrade date.</li>
+</ul>
+<h3>Progress P2 — <a href="https://github.com/comet-ml/opik/releases/tag/2.2.86">Opik 2.2.86</a> (GitHub 10:28Z Sep 30; PyPI 10:22Z; npm 10:25Z)</h3>
+<p><strong>Attach to:</strong> <code>opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier</code> (2.2.82–2.2.85 and #8411 were already attached there).</p>
+<p><strong>What shipped (release notes; PR bodies checked for #7696 and #8621):</strong></p>
+<ul>
+<li><strong>ClickHouse connection leak (#8606).</strong> The backend no longer cancels a ClickHouse v2 client future. A cancelled future stranded the response and leaked the pooled connection.</li>
+<li><strong>Bedrock Nova usage (#7696).</strong> The <code>invoke_model</code> Nova path rebuilt the usage dict from two keys and dropped everything else Bedrock reports, including cache-read and cache-write counters. It now passes the full usage through, overlaying only the fields it must. The Converse path already did this.</li>
+<li><strong>Zero-cost OTel spans (#8621).</strong> quarkus-langchain4j writes <code>gen_ai.provider.name</code> as <code>open_ai</code>, <code>amazon_bedrock</code> or <code>google_ai_gemini</code>. None of those matched a price-table provider, so <strong>every such span cost $0</strong>. They are now aliased.</li>
+<li><strong>Guardrail false positives.</strong> Four PromptInjection patterns that match normal output were dropped (#8573), and five more now require a trailing noun (#8508).</li>
+<li><strong>Other.</strong></li>
+<li>Paginated stream reads no longer end early on one dropped record (#8411; carded as Progress at 1234 and now shipped).</li>
+<li>Stored alert configs that use the enum-name <code>Operator</code> form now load (#8588).</li>
+<li>Docs describe Jev as a classifier judge in online evaluation rules (#8617).</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong> This is a third &quot;valid row, wrong number&quot; case, after Cline and Mastra at 0034. Nova cache tokens and quarkus-langchain4j costs recorded in Opik before 2.2.86 are <strong>understated</strong>. A cross-tool cost reconciliation should mark this version boundary.</p>
+<h3>Progress P3 — <a href="https://github.com/openai/codex/releases/tag/rust-v0.161.0-alpha.4">Codex <code>rust-v0.161.0-alpha.4</code></a> (GitHub 11:49Z; npm 12:02Z) + main</h3>
+<p><strong>Attach to:</strong> <code>openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks</code> (0.159.1/0.159.2 were attached at 0034).</p>
+<p><strong>What shipped:</strong></p>
+<ul>
+<li><strong>In alpha.4.</strong> I confirmed each of these via <code>compare rust-v0.161.0-alpha.3...alpha.4</code> (16 commits):</li>
+<li><strong>Opt-in model catalog for multi-agent (#49560).</strong> With the <code>model_catalog_in_context</code> feature enabled, available models are listed in developer <code>&lt;model_catalog&gt;</code> messages instead of the <code>spawn_agent</code> tool description.<ul>
+<li>Each entry carries the model's description, reasoning efforts and service tiers. The whole listing is capped at 1,000 bytes.</li>
+<li>A new listing is appended only when its content changes, so the tool schema stays stable across refreshes.</li>
+</ul>
+</li>
+<li><strong>TUI fork shortcut (#49517).</strong> A fork shortcut in the TUI command center.</li>
+<li><strong>MCP authorization-server validation (#49478).</strong> Codex now checks MCP authorization servers before ID-JAG token exchange. This was noted as main-only at 0034 and has now shipped in a prerelease.</li>
+<li><strong>On main after alpha.4 (unreleased):</strong></li>
+<li>Resuming a thread returns authoritative replay history, including writes committed before the resumed session took writer ownership (#49599).</li>
+<li>Unchanged history snapshots are reused on resume (#49600).</li>
+<li>Explicit user goal edits and clears persist in model history (#49598).</li>
+<li>Guardian reviews skip host skill discovery, which could block Guardian startup (#49584).</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong></p>
+<ul>
+<li>With the flag on, a coordinating agent's model choices sit in a developer message instead of the tool schema. A trace parser that reads the tool schema for the available models will miss them.</li>
+<li>The resume fixes mean resumed Codex threads should no longer replay stale history. Duplicate or missing turns around a resume become rarer after the next stable release.</li>
+</ul>
+<h3>Watched, not carded (NOTE)</h3>
+<ul>
+<li><strong>qwen-code managed-agent wave (strongest pending item; 0 catalog items today).</strong> All merged to main Sep 30 (07:57–12:38Z); no release or nightly carries them yet. The last is <code>v0.24.7-nightly.20260929</code>, at 22:29Z Sep 29.</li>
+<li><strong>User-facing but unreleased:</strong><ul>
+<li><strong>Mem0 bundled in the main CLI (#12891).</strong> Opt-in <code>memory.mem0</code>, search-only by default. Writes go through the exact-content confirmation Hook, even in YOLO mode.</li>
+<li><strong>A2A 1.0 access for workspace agents (#12851).</strong> Experimental. Shares expire and can be revoked, and retries are idempotent.</li>
+</ul>
+</li>
+<li><strong>Hosted Harness (private profiles):</strong><ul>
+<li><strong>Durable tool approvals, D6a (#13071).</strong> Per-mode pre-approval lists, a 10-minute default expiry, and <code>allow</code>/<code>deny</code> Actions.</li>
+<li><strong>Settled task-event and cancel semantics (#12998).</strong></li>
+<li><strong>Durable remote Shell results, O2 (#12894).</strong> The private Shell profile is &quot;disabled until deployment supplies explicit capacity and storage settings&quot;.</li>
+<li><strong>Private Hosted MCP runtime, H1 (#12946).</strong></li>
+</ul>
+</li>
+<li><strong>Still open:</strong> D6b public permission Actions (#13101) and the Web Shell approval panel (#13107).</li>
+<li>I will card this when a nightly or stable release ships Mem0 and A2A. Tonight's nightly (~22:00Z) is the likely point.</li>
+<li><strong>Mastra main (post-1.72.0), unreleased.</strong> Only npm canaries were published.</li>
+<li>Custom approval <code>resumeData</code> is now forwarded in the durable tool-call step (#25562).</li>
+<li><code>ToolCallFilter</code> keeps a resumed run's own tool calls (#25566).</li>
+<li>Observational-memory internals are hidden from the trace thread view (#25565).</li>
+<li>These refine the 0034 card's approval routing, and would be Progress when 1.72.x or 1.73 ships.</li>
+<li><strong>agno #10597, merged 12:11Z, unreleased.</strong> The PR itself calls it &quot;a major fix&quot;: human-in-the-loop (HITL) did not work in AgentOS with default settings (background + stream). A continued run was re-read from history, so the model saw the paused turn twice and Chat Completions rejected it. This will be Progress on <code>agno-3-0-agentos-published-versions-per-user-metrics-runs-table</code> once a PyPI release carries it.</li>
+<li><strong>Inspect AI #5492, merged 08:31Z, unreleased.</strong> Root access for sandbox tools is now decided once, before the agent runs, from a fixed probe (uid, CapEff, setgroups). An inconclusive result now warns instead of silently falling back to the default user. There was no PyPI upload in the window.</li>
+<li><strong>Cline desktop-v0.0.39 (07:18Z).</strong> On Linux with the NVIDIA driver, the window no longer opens blank (WebKitGTK DMA-BUF), and <code>.deb</code>/<code>.rpm</code> metadata was added. This is a packaging fix and below Progress bar. The 0034 sweep listed it but did not card it.</li>
+<li><strong>LiteLLM.</strong></li>
+<li><code>v1.105.0-dev.1</code> is a prerelease (GitHub 08:44Z; PyPI <code>1.105.0.dev1</code> 08:16Z).</li>
+<li>Router merges: per-request routing reads carried on context variables (#43814), and the routing prefetch now honours the cooldown read interval (#43815). Both merged ~07:30Z.</li>
+<li>Still open: custom-priced deployments bill their own prices on streams (#43837), and Fireworks session affinity (#43852).</li>
+<li>A prerelease is NOTE only.</li>
+<li><strong>AutoGPT #14950 (merged to <code>dev</code> 11:49Z).</strong> Conductor integration blocks: a new provider plus eleven blocks. It is a connector, not an analytics surface. Approval-liveness PR #15062 is still open.</li>
+<li><strong>promptfoo #11119 (merged 08:06Z).</strong> Breaking: local Transformers providers now need an explicit <code>@huggingface/transformers@^4</code> install. Unreleased.</li>
+<li><strong>OpenHands #17823 (Deep Planning mode) and pydantic-ai #9457 (Bubblewrap planted-file escape): both still OPEN.</strong></li>
+<li><strong>Mastra 1.72.0</strong> re-surfaced in the list as fresh item F29 because its GitHub release page was published at 10:31Z. <strong>Dropped as already carded at 0034.</strong></li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<p><strong>arXiv ceiling: <code>2609.38180</code> (flat since the 0034 brief).</strong> <code>abs/2609.38180</code> returns 200, and <code>.38181</code>, <code>.38190</code> and <code>.38200</code> return 404. The next announcement is Wed 20:00 ET. Both NEW items were submitted Sep 28–29 and reached the packs through HF daily-papers rotation. Neither was in the catalog or in any prior brief.</p>
+<h3>NEW A1 — <a href="https://arxiv.org/abs/2609.37236">Asking for What Was Never Requested: Horizontal and Vertical Proactivity in Agents (arXiv 2609.37236)</a></h3>
+<p><strong>Full PDF read</strong> (48 pp. incl. appendices A–O; IBM + Weizmann; code, need graphs and a Qwen3-8B LoRA are released).</p>
+<p><strong>What it is.</strong></p>
+<ul>
+<li><strong>The axis.</strong> The paper separates <em>what</em> an agent pursues without being asked from <em>whether</em> or <em>when</em> it acts.</li>
+<li><strong>Horizontal proactivity</strong> pursues an unstated need that the current state already names, like looking up the account from a name and ZIP code.</li>
+<li><strong>Vertical proactivity</strong> pursues a need that only newly found evidence names, like the order that account record points to, and then the size-8 variant.</li>
+<li><strong>The need graph.</strong> Each task gets a graph of the evidence it requires. An edge from A to B means B can only be named once A is found. The graphs are recovered mechanically from the benchmarks' own decompositions (MuSiQue <code>#1</code> references, StrategyQA, 2Wiki). No person or model wrote a node or edge (§4, Table 4).</li>
+<li><strong>Metrics, all computed from a finished transcript with no model judge (Table 1, Table 5):</strong></li>
+<li>required-evidence coverage;</li>
+<li>breadth;</li>
+<li>depth-weighted recall;</li>
+<li>deepest need resolved;</li>
+<li>out-of-order rate: evidence taken before its prerequisite;</li>
+<li>promptness;</li>
+<li>stop-when-done and ask-when-not-done, read at <strong>every decision point</strong>, not just the last one;</li>
+<li>cost per need found.</li>
+<li><strong>Q&amp;D, the training method.</strong></li>
+<li>A questioner is trained against a frozen drafter. At a fork in a recorded run, 8 candidate questions are sampled and each run is continued to the end.</li>
+<li>The candidate whose continuation retrieves more required evidence, sooner, is preferred (§3). The training is imitation → DPO on question pairs → DPO plus stop contrasts.</li>
+</ul>
+<p><strong>Key numbers:</strong></p>
+<ul>
+<li><strong>At equal retrieval spend (Table 2, Table 10), trained Qwen3-8B vs the same model prompted:</strong></li>
+<li>Coverage rises +11.2 pts on MuSiQue (78.3 → 89.5), +7.0 on StrategyQA and +5.0 on 2Wiki.</li>
+<li>Depth-weighted recall rises +12.5, +5.4 and +5.5.</li>
+<li>It beats prompted GPT-OSS-120B (15× larger) on MuSiQue (+7.0) and StrategyQA (+4.3) but trails it on 2Wiki (−3.5).</li>
+<li><strong>Cost and ablations:</strong></li>
+<li>Tokens per required need found fall 40% on MuSiQue (11,610 vs 19,354; §5).</li>
+<li>Swapping in random same-benchmark questions costs 34.7 and 63.3 pts of coverage.</li>
+<li>Letting the prompted model spend as many question tokens still leaves it 14.9 and 4.7 pts behind (App. C).</li>
+<li><strong>Stopping (§5, App. G):</strong> the trained questioner stops 29–33 pts more often once the evidence is complete. Stopping is still the weak part: it clears the stop-when-done floor of 0.85 on neither suite (0.427 / 0.545 on dev; App. G). Answer F1 gains are <strong>not</strong> detectable (+2.4 on MuSiQue, interval spans zero; Table 10).</li>
+<li><strong>τ²-bench transfer, with no retraining (§5, App. H Tables 18–20):</strong></li>
+<li>Retail success goes from 13% / 12% to 34% / 32% across the two prompt variants, better on 10 of 25 tasks and worse on none. Airline success rises +6.9 / +6.4.</li>
+<li>Against GPT-OSS-120B in retail: +17.0 / +12.7 success, with 1.6 / 1.8 fewer customer follow-up turns (decided).</li>
+<li><strong>Follow-up turns vs the same model prompted, the declared primary endpoint, are <em>not</em> established.</strong> Every pooled interval spans zero (Table 18).</li>
+<li><strong>Label validity (App. I).</strong> Two human raters agree on whether a question reaches an unstated need (κ = 0.76). They agree on which question is the better move only at κ = 0.24. Each agrees with the rule on 65–68% of pairs, against 50% chance.</li>
+</ul>
+<p><strong>Limitations the authors state (§7, App. I.4).</strong></p>
+<ul>
+<li>The retrieval pools are small (10–20 paragraphs), so only 20 of 1,040 prerequisite edges actually gate retrieval. &quot;Vertical&quot; therefore means depth in the benchmark's decomposition, not evidence that was truly unreachable earlier.</li>
+<li>Every user-facing number comes from a simulated customer.</li>
+<li>The two reported seeds share one supervised fine-tuning (SFT) checkpoint.</li>
+<li>&quot;Proactive without harassing the user&quot; is not measured.</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong> This is a ready-made <strong>trace-level metric family</strong> that needs no judge. Given a per-task list of required evidence, the tool-call log alone yields:</p>
+<ul>
+<li>coverage;</li>
+<li>out-of-order rate;</li>
+<li>stop-when-done / ask-when-not-done per decision point;</li>
+<li>cost per need found.</li>
+</ul>
+<p>The per-decision-point reading of stopping is the useful part: a run-level &quot;did it stop&quot; summary gives full credit to an agent that asked six extra questions after it was done. And &quot;user follow-up turns <em>and</em> task success, never one ratio&quot; is the right pairing for customer-facing agent dashboards.</p>
+<h3>NEW A2 — <a href="https://arxiv.org/abs/2609.35025">AutoDataBench: Can Agents Write the Data That Feeds the Self-Improvement Loop? (arXiv 2609.35025)</a></h3>
+<p><strong>Full PDF read</strong> (21 pp. incl. appendices A–I; HKUST / SLAI / NTU; code and rubrics released).</p>
+<p><strong>What it is.</strong></p>
+<ul>
+<li><strong>An episode.</strong> The agent under test gets one original task and six sanitised transcripts of a fixed target model (<code>deepseek-v4-pro</code>) attempting it. It must deliver one new executable task, with its own verifier, for the same suite.</li>
+<li><strong>Scoring (§2.3, Eq. 2):</strong> <strong>score = gate × difficulty × quality</strong>.</li>
+<li><strong>Gate.</strong> Any of eight defects scores zero, for example a verifier that never checks the answer, a leaked answer, or a surface-swapped clone of the original. The clone check starts from a word-level instruction diff.</li>
+<li><strong>Difficulty.</strong> 1 if the target model's pass rate on the new task, over K = 6 runs, is in [0.125, 0.75], else 0. The task's own verifier decides this, not a judge.</li>
+<li><strong>Quality.</strong> Coverage of a hidden rubric of 3–5 failure modes an analyst wrote from the transcripts. A mode counts only if the judge cites an attempt, a step and a verbatim quote. Coverage is capped with a = 0.6.</li>
+<li><strong>Setup.</strong> 24 original tasks from Terminal-Bench 4.0, Terminal-Bench-Science and AutomationBench. The analyst and judge are claude-opus-5.</li>
+</ul>
+<p><strong>Key numbers:</strong></p>
+<ul>
+<li><strong>Scores (Table 2):</strong> no author agent scores above 0.20. kimi-k3 0.184, gpt-5.6-sol 0.177, qwen3.8-max 0.139, glm-5.3 0.130, deepseek-v4-pro 0.097.</li>
+<li><strong>Difficulty is the bottleneck (Table 2).</strong> Only 14.6–25.0% of deliveries land in the pass-rate band. The in-band, ungated ones cover 0.70–0.97 of the rubric.</li>
+<li><strong>Self-authoring (Table 2).</strong> deepseek-v4-pro, writing for itself, has the highest in-band rate but passes the gate on only 41.7% of those tasks. Staying close to the original is the cheapest way into the band, and the clone gate catches it.</li>
+<li><strong>Domain ranking is unstable (Fig. 4).</strong> qwen3.8-max is first on Terminal-Bench and scores zero on AutomationBench.</li>
+<li><strong>Time budget (§3.3, Fig. 5).</strong> At 180 vs 45 minutes, kimi-k3 goes from 0.184 to 0.541.</li>
+<li>Caveat (App. F): the 180-minute arm also ran at maximum reasoning effort, so budget and effort are confounded.</li>
+<li>The cost of one usable task barely moves: $11.88 → $12.62, and 244 → 230 minutes (Table 3).</li>
+<li><strong>Cost of one usable task (Table 3):</strong> $4.81 (deepseek-v4-pro) to $27.69 (gpt-5.6-sol), versus $0.50–$5.77 per episode.</li>
+<li><strong>Failure catalogue (App. H, Table 5).</strong> Of 14 cross-agent behaviours, 8 cost the pass rate. Two examples:</li>
+<li>Extrapolating a pass rate from one sample, then delivering without re-testing (C4).</li>
+<li>Adding a discriminating condition, then spelling it out in the instruction (C14).</li>
+</ul>
+<p><strong>Limitations the authors state.</strong> 8 tasks per suite, and a single target model. The analyst and judge are one model family. The budget/effort confound noted above. The paper does not test whether a task that exercises a failure mode actually repairs it after training (§6).</p>
+<p><strong>Why it matters for BQAA.</strong></p>
+<ol>
+<li><strong>Rubric modes from transcripts.</strong> The analyst → hidden-rubric → evidence-cited-judge pipeline turns failure transcripts into reusable, suite-level failure modes. The same pipeline could turn BQAA trace clusters into eval tasks.</li>
+<li><strong>Cost per <em>usable</em> output, not per run.</strong> Pricing agent work by accepted outputs matters for any customer running data-generation agents: the per-episode cost ordering and the per-usable-task ordering disagree.</li>
+<li><strong>Difficulty needs execution.</strong> Difficulty calibration only closes by actually running the target model. Authoring agents compress it into the last minutes (C11), and a trace view of calibration loops would expose that directly.</li>
+</ol>
+<h3>Scouted, not ranked</h3>
+<ul>
+<li><strong>Off-bar on abstract</strong> (robotics, VLA or vision memory; no agent-trace angle):</li>
+<li><code>2609.32522</code> VoxPolyMem, multi-party spoken memory.</li>
+<li><code>2609.36352</code> StructRL, VLA online RL.</li>
+<li><code>2609.37559</code> APM-Bench, egocentric streaming-video memory.</li>
+<li><code>2609.33748</code> AnyStep-WAM.</li>
+<li><strong>Other off-bar leads:</strong></li>
+<li><code>2609.35427</code> &quot;LLMs are General Asynchronous Agents&quot;: a framework for asynchronous coroutines. It has no evaluation-methods angle, so it stays below bar.</li>
+<li><code>2609.37040</code> informative-token selection for natural-language autoencoders: interpretability auditing for prompt injection, not agent analytics.</li>
+<li><code>2609.35530</code> AutoRef: harness optimisation for multi-reference image generation. The collectors flagged it as low-tier and it is image-generation scope.</li>
+<li><strong>Pin <a href="https://arxiv.org/abs/2609.02702">2609.02702</a></strong> (Trace-as-State v1) is untouched. No prior Academy NEW was re-pitched.</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ol>
+<li><strong>Judge-free, trace-derived behavior metrics (high EV).</strong></li>
+</ol>
+<ul>
+<li>37236 shows that coverage, ordering and stopping can be scored from tool-call logs against a task's required-evidence list. The per-decision-point stop rates are the novel reading.</li>
+<li>A BQAA &quot;evidence coverage&quot; view needs only one customer-supplied mapping: required records per task → tool-result identifiers. It would sit next to judge-based evals and cost nothing per row.</li>
+</ul>
+<ol start="2">
+<li><strong>Telemetry completeness checks at the SDK boundary (high EV).</strong></li>
+</ol>
+<ul>
+<li>This window adds three silent-loss or zero-value cases: Langfuse Python's 64 MiB batch drop, Opik's $0 quarkus-langchain4j spans, and dropped Nova cache counters. At 0034 there were two more: Cline's double-counted reasoning tokens and Mastra's cache-write pricing.</li>
+<li>A BQAA ingest check could flag three things: span-count drops across exporter errors, cost = 0 on priced models, and cache counters missing where the provider reports them.</li>
+</ul>
+<ol start="3">
+<li><strong>Approval and resume lifecycle (medium-high EV).</strong></li>
+</ol>
+<ul>
+<li>Several stacks are converging on durable approval and resume flows:<ul>
+<li>qwen-code Hosted approvals (pending release);</li>
+<li>Mastra durable <code>resumeData</code>;</li>
+<li>agno's HITL continue fix;</li>
+<li>Codex authoritative resume history.</li>
+</ul>
+</li>
+<li>The failure mode common to all of them: resumed runs that duplicate or drop turns. A trace check for &quot;the same tool_call_id appears twice across a resume&quot; would catch exactly the agno bug class.</li>
+</ul>
+<ol start="4">
+<li><strong>Cost per <em>accepted</em> output for generation agents (medium EV).</strong> AutoDataBench's cost ordering and quality ordering disagree by 2.3× at near-equal score. Customers running synthesis or labeling agents need an acceptance-joined cost metric, not a cost-per-run metric.</li>
+</ol>
+<hr />
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>P1 Langfuse v4.48.0 / Python 4.16.0:</strong> Default prices for Sonnet 5.5, GPT-6.1 Sol and GPT-6 Astra Ultrafast. The Python SDK now drops OTLP batches over 64 MiB, which is a silent-loss path, so reconcile span counts.</li>
+<li><strong>P2 Opik 2.2.86:</strong> Fixes a ClickHouse connection leak. Nova cache counters are kept, and quarkus-langchain4j spans stop costing $0. Pre-2.2.86 Nova and quarkus costs are understated.</li>
+<li><strong>P3 Codex 0.161.0-alpha.4:</strong> An opt-in model catalog moves multi-agent model lists into developer messages. Main fixes stale history on resume.</li>
+<li><strong>A1 Proactivity need graphs (2609.37236):</strong> Score coverage, ordering and stopping from transcripts with no judge. A trained 8B questioner gains +11 pts of coverage at equal spend. Stopping stays the weak point.</li>
+<li><strong>A2 AutoDataBench (2609.35025):</strong> Agents aim tasks at failure modes well (coverage 0.70–0.97) but land in the difficulty band only 15–25% of the time. Best score is 0.184, and a usable task costs $5–28.</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What is not confirmed</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Langfuse Sonnet 5.5 / GPT-6 Astra Ultrafast price values</td>
+  <td>I confirmed the PRs added pricing entries (#18023, #18055), but I did not read the per-token values in <code>default-model-prices.json</code>. The brief makes no price-level claim.</td>
+  <td>Release notes; PR #18055 body.</td>
+</tr>
+<tr>
+  <td>Codex #49584 (Guardian skill skip) in alpha.4</td>
+  <td>It merged at 11:06Z, before alpha.4 (11:49Z), but it is not in the alpha.3→alpha.4 compare list, so I treat it as main-only.</td>
+  <td><code>gh api compare rust-v0.161.0-alpha.3...rust-v0.161.0-alpha.4</code> (16 commits).</td>
+</tr>
+<tr>
+  <td>qwen-code Mem0 / A2A user availability</td>
+  <td>Merged to main, but no release or nightly contains them yet (the latest nightly is 20260929). I have not confirmed that tonight's nightly will carry them.</td>
+  <td><code>gh api repos/QwenLM/qwen-code/releases</code>; npm <code>@qwen-code/qwen-code</code> time map (no in-window publish).</td>
+</tr>
+<tr>
+  <td>37236 τ²-bench follow-up-turn reduction vs same model</td>
+  <td>The paper itself reports this endpoint as <strong>not established</strong>; every pooled interval spans zero (Table 18). The brief claims only the success gain and the vs-GPT-OSS-120B turn reduction.</td>
+  <td>Full PDF, App. H.</td>
+</tr>
+<tr>
+  <td>AutoDataBench time-budget effect</td>
+  <td>The 180-minute arm also used maximum reasoning effort. The authors read the 2.9× as a direction, not a size (App. F).</td>
+  <td>Full PDF, §3.3 + App. F.</td>
+</tr>
+<tr>
+  <td>Agy 0632 pack</td>
+  <td>ABSENT at merge. Only <code>agy-prompt-2026-09-30-0632.md</code> exists (06:39). No pack content was used or invented.</td>
+  <td><code>ls packs/</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Packs used (PACK_DONE, 5):</strong></li>
+<li><code>packs/muse-pack-2026-09-30-0132.md</code>, <code>packs/dsh-pack-2026-09-30-0232.md</code>, <code>packs/agy-pack-2026-09-30-0332.md</code>, <code>packs/muse-pack-2026-09-30-0432.md</code>, <code>packs/dsh-pack-2026-09-30-0532.md</code>.</li>
+<li>None was read wholesale. Candidates came from the fresh list and were verified directly against GitHub, PyPI, npm and arXiv.</li>
+<li><strong>Fresh-list path used:</strong> <code>_runs/fb-2026-09-30-0634/fresh-items.md</code> (F01–F32; FB_MERGE <code>packs=5 raw=35 unique=32 fresh=32</code>).</li>
+<li>F29 (Mastra 1.72.0) was dropped as already carded.</li>
+<li>The F05/F07/F09/F13/F22 qwen-code rows are consolidated into one NOTE (unreleased).</li>
+<li><strong>Gaps (disclosed, not invented):</strong></li>
+<li><strong>Agy 0632 ABSENT at merge.</strong> The prompt file landed at 06:39; there is no pack.</li>
+<li><strong>Agy 0032</strong> is on disk but stamp-excluded, since its 0032 label falls before the 0034 window start. I verified its leads independently:<ul>
+<li>Cline desktop-v0.0.39: confirmed, NOTE.</li>
+<li>Codex #49517: confirmed, in alpha.4.</li>
+<li>LiteLLM #43814 / #43815: confirmed merged, NOTE.</li>
+<li>Mastra canaries: confirmed npm canary publishes only.</li>
+</ul>
+</li>
+<li><strong>Standing ABSENT hours carried from Sep 29:</strong> DSH 1732, Agy 1832, Muse 1932, DSH 2032.</li>
+<li><strong>Rotation hours not in the window's input:</strong><ul>
+<li>Muse: 0032, 0232, 0332, 0532, 0632.</li>
+<li>DSH: 0032, 0132, 0332, 0432, 0632.</li>
+<li>Agy: 0132, 0232, 0432, 0532, 0632.</li>
+</ul>
+</li>
+<li><strong>Source limits:</strong> Medium scouts are paused (lead-only). LinkedIn is behind an authwall. The packs report Agy MCP X 401 / Reddit 403.</li>
+<li><strong>HN:</strong> the source was dropped fleet-wide on 2026-09-27. No HN keeps. <code>packs/_hn/</code> holds only the pre-drop 2026-09-27 files, and I did not consult it.</li>
+<li><strong>Verified arXiv ceiling:</strong> <code>2609.38180</code>, from <code>abs</code> probes (.38180 → 200; .38181, .38190, .38200 → 404). This matches the packs' FLAT report. The arXiv export API returned an empty body for my batch <code>id_list</code> query, so I read titles and abstracts from the <code>abs</code> page meta tags instead.</li>
+<li><strong>Verification method:</strong></li>
+<li><strong>GitHub releases.</strong> <code>gh api repos/*/releases?per_page=100</code> over 70 agent, observability and eval repos, for anything published after 07:00Z Sep 30. <code>humanloop/humanloop-sdk</code> returned 404; that is a gap, not a zero.</li>
+<li><strong>Registries.</strong><ul>
+<li>PyPI (23 packages): in-window uploads only for langfuse 4.16.0, opik 2.2.86 and litellm 1.105.0.dev1.</li>
+<li>npm (19 packages): <code>@openai/codex</code> 0.161.0-alpha.4, <code>opik</code> 2.2.86, Mastra canaries and a Cline nightly. No new <code>@anthropic-ai/claude-code</code>, <code>ai</code>, <code>@google/gemini-cli</code>, <code>@letta-ai/letta-code</code> or <code>@qwen-code/qwen-code</code> publish.</li>
+</ul>
+</li>
+<li><strong>PR states.</strong> 32 PRs checked with <code>gh api repos/*/pulls/N</code>. PR bodies were read for 15 of them.</li>
+<li><strong>Codex alpha contents.</strong> Taken from the alpha.3→alpha.4 compare.</li>
+<li><strong>Catalog.</strong> Grepped <code>catalog.json</code> (<strong>467 items / 120 briefs / 122 runs</strong>) for every candidate and for both arXiv ids. qwen-code has 0 items, and neither 37236 nor 35025 appears. Progress parents were confirmed as the items where v4.47.0, 2.2.85 and 0.159.1 were attached.</li>
+<li><strong>Academy.</strong> Full PDFs of 37236 and 35025 were extracted with <code>pdftotext</code> and read, including appendices.</li>
+<li><strong>Hub tip:</strong> <code>44da7f9</code> (&quot;research: Field Brief 2026-09-30-0034 Opus 5.5 …&quot;, 01:06 PT). It is unchanged since the prompt was finalized.</li>
+<li><strong>Late wake:</strong> on the 06:34 PT cadence, work ~06:40–07:10 PT. The label is kept at 0634.</li>
+<li><strong>Effort:</strong> high, per the 2026-09-29 lock. JEV shadow was skipped by Collection (fixed-schedule run, Q8).</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<pre><code class="language-yaml">new:
+- id: arxiv-2609-37236-horizontal-vertical-proactivity-need-graph-judge-free-transcript-scoring
+  tag: Academy
+  title: &quot;Horizontal and Vertical Proactivity — need graphs score what an agent pursues unasked from its transcript with no judge; a trained 8B questioner recovers +11 pts more required evidence at equal spend and lifts τ²-bench retail success 13%→34%&quot;
+  url: https://arxiv.org/abs/2609.37236
+  card: &gt;-
+    A need graph, recovered mechanically from benchmark decompositions, lets coverage, depth-weighted recall, out-of-order
+    rate and per-decision-point stop-when-done / ask-when-not-done be read from a finished transcript without a model judge.
+    Q&amp;D trains a Qwen3-8B questioner on what each question's continuation retrieves: at equal spend coverage rises 78.3→89.5%
+    on MuSiQue, it beats prompted GPT-OSS-120B on two of three suites, and in τ²-bench retail success rises 13%→34% with no
+    retraining; stopping remains weak and answer F1 gains are not detectable.
+- id: arxiv-2609-35025-autodatabench-agents-author-training-tasks-difficulty-band-bottleneck
+  tag: Academy
+  title: &quot;AutoDataBench — agents writing executable training tasks aimed at a target model's failure modes score ≤0.184 of 1.0; rubric coverage is 0.70–0.97 but only 15–25% of deliveries land in the pass-rate band&quot;
+  url: https://arxiv.org/abs/2609.35025
+  card: &gt;-
+    Each delivered task is scored before any training as gate (eight disqualifying defects, including surface-swapped clones)
+    × difficulty (target pass rate in [0.125, 0.75] by execution) × coverage of a hidden, evidence-cited rubric of failure
+    modes. Across 24 tasks from Terminal-Bench 4.0, Terminal-Bench-Science and AutomationBench, difficulty calibration is the
+    binding constraint and domain rankings are unstable. A 4× time budget (confounded with max effort) lifts kimi-k3 from
+    0.184 to 0.541 at an unchanged ~$12 per usable task.
+progress:
+- parent: langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown
+  text: &gt;-
+    Langfuse v4.48.0 (Sep 30) adds default pricing for Claude Sonnet 5.5, GPT-6.1 Sol and a GPT-6 Astra Ultrafast tier, plus
+    skill-draft change tracking. Python SDK 4.16.0 raises OpenTelemetry to ≥1.45 and drops any OTLP export request over
+    64 MiB (reported only as a failed export; override via LANGFUSE_OTEL_MAX_BATCH_SIZE_BYTES).
+- parent: opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier
+  text: &gt;-
+    Opik 2.2.86 (Sep 30) stops cancelling ClickHouse v2 client futures that leaked pooled connections, keeps every Bedrock
+    Nova usage field including cache counters, prices quarkus-langchain4j OTel spans that previously cost $0, and removes or
+    tightens nine false-positive PromptInjection patterns; the #8411 paginated-stream fix ships here.
+- parent: openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks
+  text: &gt;-
+    rust-v0.161.0-alpha.4 (Sep 30) adds an opt-in model_catalog_in_context feature that moves multi-agent model listings from
+    the spawn_agent tool description into developer &lt;model_catalog&gt; messages, plus a TUI fork shortcut. Main now returns
+    authoritative replay history on thread resume and persists user goal edits in model history.
+headline_claims:
+- claim: &quot;Langfuse Python SDK v4.16.0 drops any serialized OTLP export request over 64 MiB by default, reporting it as a failed export.&quot;
+  url: https://github.com/langfuse/langfuse-python/pull/1909
+  date: 2026-09-30
+- claim: &quot;Opik 2.2.86 fixes quarkus-langchain4j OTel spans being priced at $0 because their gen_ai.provider.name values (open_ai, amazon_bedrock, google_ai_gemini) matched no price-table provider.&quot;
+  url: https://github.com/comet-ml/opik/pull/8621
+  date: 2026-09-30
+- claim: &quot;In arXiv 2609.37236, a Q&amp;D-trained Qwen3-8B questioner recovers 89.5% vs 78.3% of required evidence on MuSiQue at equal retrieval spend, scored from transcripts without a model judge.&quot;
+  url: https://arxiv.org/abs/2609.37236
+  date: 2026-09-29
+</code></pre>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 30 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
