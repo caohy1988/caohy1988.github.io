@@ -106,7 +106,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-09-27 · Lab KEEPs folded in: negative-claim check, review verdict line, repeat lesson → skill diff, Jev constant baseline (worth_running now retries/one-off launches only); after done receipt + disproof review (Mori)</strong></span>
+      <span>Updated <strong>2026-09-30 · 6h Field Brief gets 2 extra collect seats (decision; Collection launch pending) · 2026-09-27 · Lab KEEPs folded in: negative-claim check, review verdict line, repeat lesson → skill diff, Jev constant baseline (worth_running now retries/one-off launches only); after done receipt + disproof review (Mori)</strong></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
   </header>
@@ -170,7 +170,7 @@
   │    ├─ Agent Manage Bot→ create / organize / keep useful
   │    └─ Jev (OpenRouter) → typed route Choice before fan-out
   └─ Mac CLIs (execute)
-       ├─ Agy / Muse / DSH  → hourly source packs (hour % 3)
+       ├─ Agy / Muse / DSH  → hourly source packs (hour % 3); 6h brief hours: all three (rotation seat + 2 extra)
        ├─ Opus 5.5 (Kimi if capped → Astra last-resort) → deep Field Brief Markdown
        └─ Opus 5.5 / Claude Code (+ Muse/DSH optional) → implement; Astra + Fable blind review</div>
   </section>
@@ -368,8 +368,9 @@
     <p>Surfaces: X/Twitter, Reddit, LinkedIn (proxy), Google/vendor, arXiv, Papers with Code. Agy owns social-superpowers for X/Reddit; Muse/DSH label proxies honestly. <strong>Collection only</strong> — no catalog HTML from pack agents. Crustdata is forbidden.</p>
     <h3>Every 6h deep brief (<code>00:34 / 06:34 / 12:34 / 18:34</code> PT)</h3>
     <p class="note"><strong>Research-system shape (Lab #1):</strong> lead orchestrates → parallel collectors persist packs → Opus 5.5 synthesizes (Kimi fallback) → Collection citation-checks and publishes. Label thin packs before brief. Collection <code>:44</code> miss-watch is the <strong>sole</strong> Field Brief detector when primary <code>:34</code> never wakes (Manage <code>:50</code> miss-watch paused 2026-09-21 token save).</p>
+    <p><strong>Two extra collect seats (2026-09-30):</strong> the brief hours <code>0 / 6 / 12 / 18</code> are all <code>hour % 3 == 0</code>, so Agy is always the rotation seat. The two other cheap seats, <strong>Muse</strong> and <strong>DSH</strong> (DeepSeek overlay), also collect for that brief. All three run in parallel, read-only, with the same window and surfaces as the hourly pack. Sandbox limit: Muse/DSH can only write under their workspace (<code>agent-analytics-research</code>), so they write the pack there and Collection copies it to <code>packs/</code>. Seats never publish; a dedupe step (by URL) runs before the brief. The hourly rotation is unchanged. Launch timing is owned by Collection (launch pending); the trial runs took about 4 to 15 minutes, so the extra seats have to start well before the <code>:34</code> brief. Basis: a one-time fan-out trial (Agy/Muse/DSH, 2026-09-30) found the same core signal with a few extra academy leads per extra seat, so this is a modest-coverage change, not a new source.</p>
     <ol>
-      <li>Opus 5.5 writes deep Field Brief Markdown from <strong>agy + muse + dsh</strong> packs since the last slot (dedupe across collectors). Kimi is fallback if Opus capped; Astra last-resort. Fable is off for briefs.</li>
+      <li>Opus 5.5 writes deep Field Brief Markdown from <strong>agy + muse + dsh</strong> packs since the last slot, including the two extra 6h-lead-in packs (dedupe across collectors by URL before writing). Kimi is fallback if Opus capped; Astra last-resort. Fable is off for briefs.</li>
       <li>Collection Bot publishes HTML + catalog + push to the hub.</li>
     </ol>
     <h3>Stories &amp; GTM boards</h3>
