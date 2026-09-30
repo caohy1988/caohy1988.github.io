@@ -1,8 +1,80 @@
 {
-  "updatedAt": "2026-09-30T22:58:57Z",
+  "updatedAt": "2026-09-30T23:55:00Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "proof-stop-hook-completion-claims-tamper-receipts-2026-09-30",
+      "date": "2026-09-30",
+      "displayDate": "Sep 30, 2026",
+      "title": "Proof — Stop hook that fact-checks completion claims with real checks + tamper receipts",
+      "href": "https://github.com/EricFinland/proof",
+      "why": "Claude Code skill + dual hooks: SessionStart snapshots the repo (`refs/proof/baseline/session`); Stop intercepts completion claims (\"tests pass\" / \"all done\"), runs real checks (tests/build/types/lint/http) in a 90s inline budget, diffs vs baseline, applies tamper rules (skips, deleted tests, `.only`, gutted asserts), and returns PASS/FAIL/SUSPECT/INCONCLUSIVE with command receipts before the turn can end. Direct mechanical layer on code-decides-done + Mori done-receipt + the 2026-09-30 claim-vs-record prose lock (claimcheck covers transcript-vs-claim; Proof also re-runs the checks). Caveats: hook entrypoints are `proof/scripts/proof_session_start.py` + `proof_trigger.py` (not `hooks/`); Python 3.11+; headless `claude -p` Stop-hook fire not verified here; overlaps claimcheck (heavier). MIT. Patterns/hooks over existing seats, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false (tamper half already folded as prose on 2026-09-30).",
+      "source": "Hunt/agent-manage/2026-09-30-agy-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "code-decides-done",
+        "tamper",
+        "receipts",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "temper-harness-contract-typecheck-author-time-2026-09-30",
+      "date": "2026-09-30",
+      "displayDate": "Sep 30, 2026",
+      "title": "temper — author-time contract type-checker for Claude Code harnesses (tsc, not ESLint)",
+      "href": "https://github.com/duct-tape-and-markdown/temper",
+      "why": "CLI that validates a `.claude/` harness (skills, rules, hooks, MCP, CLAUDE.md, AGENTS.md) against Anthropic schemas and a declared contract so malformed frontmatter, ignored rule keys, and dead hook paths fail at author-time instead of silently at headless runtime. `npx @dtmd/temper check --harness .`; optional PreToolUse guard + typed harness-as-program emit. Fits seat-sync / install-hook drift across our multi-CLI skill homes. Caveats: npm `@dtmd/temper` 0.0.21 prebuilt binaries are Linux/Windows x64 only — macOS is \"next\" (needs Rust 1.96+ source build on this Mac today); checks `.claude/` only (not ~/.dsh/Muse/Agy homes); pre-1.0. Dual MIT OR Apache-2.0. Patterns/checks, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-30-agy-harness-lab-pack",
+      "tags": [
+        "harness",
+        "lint",
+        "hooks",
+        "skills",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "cadence-hooks-rust-binary-obsidian-vault-guards-2026-09-30",
+      "date": "2026-09-30",
+      "displayDate": "Sep 30, 2026",
+      "title": "cadence-hooks — compiled Rust Claude Code hooks + cadence-obsidian vault rm/empty-write guards",
+      "href": "https://github.com/cameronsjo/cadence-hooks",
+      "why": "Single native binary consolidating 78 Claude Code hooks across 6 namespaces (cadence / git-guardrails / rules / obsidian / metrics / session) with claimed sub-ms cold starts and zero runtime deps. `cadence-obsidian` is the fleet-relevant slice: blocks `rm`/destructive ops and empty `Write` over an existing vault file, plus SessionStart liveness — machine enforcement of forbidden.md vault invariants at PreToolUse. Homebrew install on macOS (`brew install cameronsjo/tap/cadence-hooks`); also cargo/manual per-platform archives. Caveats: LICENSE is Apache-2.0 + Commons Clause (no selling); Claude Code hooks only (does not cover Muse/DSH/Agy/Fable seats that share the vault); \"sub-millisecond\" is author claim, not measured here; needs `OBSIDIAN_VAULT` set. Patterns/binary guards, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-30-agy-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "vault",
+        "obsidian",
+        "performance",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "context-guard-token-ceiling-handoff-checkpoints-2026-09-30",
+      "date": "2026-09-30",
+      "displayDate": "Sep 30, 2026",
+      "title": "Context Guard — context-growth ceiling + structured handoff checkpoints before long chats explode",
+      "href": "https://github.com/Masry-code/context-guard",
+      "why": "Five Python-stdlib Claude Code hooks that measure live context, warn on quadratic re-read cost, force a structured handoff note (`handoff-template.md`) past a ceiling (Stop refuses to close; `CEILING_MAX = 3`), write a stub note if none exists, and rehydrate a memory manifest on the next chat. Pattern fits grok-token-save-cuts + rari handoff-packet for long Coding EM / Field Brief sessions. Caveats: the 800k-token / 54-compaction / 16% savings figures are the author's own 64-session account, not ours; README examples are Windows-first and the author notes it has only ever been run on Windows (cross-platform path bug fixed in tests, not on a real Mac); our fleet runs are mostly one-shot `grok-tmux-run` jobs, not long interactive chats — adopt the handoff-checkpoint pattern, do not assume the savings numbers transfer. MIT. Patterns/hooks, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-09-30-agy-harness-lab-pack",
+      "tags": [
+        "tokens",
+        "handoff",
+        "hooks",
+        "context",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "catstack-symlink-prune-install-freshness-ab-gate-2026-09-29",
       "date": "2026-09-29",
