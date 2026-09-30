@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-09-30 · 12:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="Industry Mastra 1.72.0, AutoGPT 0.8.2, Pydantic AI 2.52.0, Cline 4.1.22; Progress LiteLLM GHSA escalation, Codex 0.159.1, Letta 0.34.0, Vercel AI, Inspect 0.3.273; Academy ToxicBench, UserProxyBench, evalstats.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-09-30-0034-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 AM PT · late-wake on-cadence · 1834 Mac-down catch-up · fresh-list path · effort high</p>
+    <article>
+<h1>Field Brief — 2026-09-30-0034: LiteLLM patches an internal-user-to-admin escalation (with RCE) across four release lines; Mastra 1.72 adds an aggregate-plan API for traces; AutoGPT ships a supervised AutoPilot; Cline stops double-counting reasoning tokens; three papers on how evidence and judges mislead agent evals</h1>
+<p><strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>)
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, catalog and push.
+<strong>Slot:</strong> 2026-09-30-0034 (12:34 AM PT, Wed Sep 30). This was a late wake: the work ran ~00:40–01:10 PT on the 00:34 cadence, and the label stays 0034.
+<strong>Effort:</strong> high, per Haiyuan's lock of 2026-09-29 ~08:58 PT (<code>Maps/Decisions/2026-09-29-field-brief-high-effort.md</code>). I did not raise it to max.
+<strong>Window (catch-up):</strong> The <strong>2026-09-29-1834 slot was skipped because the Mac was down</strong>, and nothing was published for it. This brief covers everything after the last published brief (<code>2026-09-29T1234</code>) up to this slot. My own GitHub, PyPI and npm sweep covered releases published after 19:30Z Sep 29, and ran to ~07:40Z Sep 30.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>Industry NEW (4):</strong></li>
+<li><strong>Mastra <code>@mastra/core</code> 1.72.0 (stable, Sep 30 00:03Z).</strong> The first stable release since 1.71.0 (Sep 24).<ul>
+<li><strong>Trace aggregates.</strong> Storage adapters can declare a <code>trace-aggregate</code> capability. <code>aggregateTraces()</code> then runs a planned aggregate query (<code>TrustedTraceAggregatePlan</code>).</li>
+<li><strong>Trace filters.</strong> Advanced trace queries can now filter on <code>runId</code>, <code>sessionId</code>, <code>userId</code> and <code>organizationId</code>.</li>
+<li><strong>Background tasks.</strong> Tasks are protected by an expiring ownership lease, so a stale worker can no longer overwrite the current owner's result.</li>
+<li><strong>Refusal retry.</strong> A new <code>CyberRefusalHandler</code> retries once when an OpenAI or Anthropic cyber safeguard refuses mid-run.</li>
+<li><strong>Cost fix.</strong> Anthropic 1-hour cache writes are now priced at their real rate. Before, they were priced at the cheaper 5-minute rate.</li>
+</ul>
+</li>
+<li><strong>AutoGPT platform beta v0.8.2 (Sep 30 05:25Z).</strong> This is AutoGPT's first catalog entry.<ul>
+<li><strong>Gating modes.</strong> AutoPilot actions run under Ask First, Auto or Unsupervised.</li>
+<li><strong>Two judges.</strong><ul>
+<li>A Haiku 4.5 action supervisor decides allow or ask. Its tuned rubric reached 98% recall with 43% needless holds on a 120-judgement holdout (PR #14928).</li>
+<li>A content judge screens every outside read for instructions aimed at the agent before the model sees it.</li>
+</ul>
+</li>
+<li><strong>Scoped approvals.</strong> Approval rules can hold for one chat, one Expert or the whole team.</li>
+<li><strong>Attribution.</strong> The credit history and cost log name the AutoPilot chat instead of a made-up graph execution.</li>
+</ul>
+</li>
+<li><strong>Pydantic AI v2.52.0 (+ v1.107.7), Sep 30 ~01:17Z.</strong><ul>
+<li><strong>Workspaces and sandboxes.</strong> <code>ctx.workspace</code> lets harness tools run locally or in E2B, Fly Sprites, Modal, SSH or Bubblewrap sandboxes.</li>
+<li><strong>Packaging.</strong> <code>pydantic-ai-harness</code> now ships from the main repo.</li>
+<li><strong>Default change.</strong> <code>AnthropicModel</code> now defaults <code>max_tokens</code> to the model's maximum output and streams behind the scenes.</li>
+<li><strong>Security.</strong> A moderate advisory (GHSA-v36g-jcw9-x7cw): nested HTML sent to the local <code>web_fetch</code> tool could exhaust CPU and memory.</li>
+</ul>
+</li>
+<li><strong>Cline v4.1.22 / CLI 3.0.66 (Sep 30 02:41–04:10Z).</strong><ul>
+<li><strong>Token fix.</strong> Reasoning tokens are no longer counted twice in output-token totals. Cost was unaffected.</li>
+<li><strong>New default model.</strong> GPT-6.1 Sol becomes the default for 11 providers, including OpenAI, OpenRouter and GitHub Copilot.</li>
+<li><strong>Refusals.</strong> Direct Anthropic requests use Anthropic's server-side refusal fallback. On OpenRouter and Cline, Anthropic models can fail over to another upstream provider.</li>
+<li><strong>Error messages.</strong> A response blocked by a content filter is reported as such, not as &quot;empty response&quot;.</li>
+</ul>
+</li>
+<li><strong>Progress (5):</strong></li>
+<li><strong>LiteLLM GHSA-7hp6-4w63-5g45 (high).</strong> One salt key both encrypted secrets at rest and minted session tokens. An <code>internal_user</code> could get the proxy to encrypt a forged admin credential, present it as a bearer token, become <code>proxy_admin</code>, and run commands through the MCP stdio endpoint.<ul>
+<li>It is patched in 1.100.4, 1.101.3, 1.102.2, 1.103.1 and 1.104.0rc2, all published together on Sep 29 ~23:04–00:16Z.</li>
+</ul>
+</li>
+<li><strong>Codex <code>rust-v0.159.1</code> / <code>rust-v0.159.2</code> stable.</strong><ul>
+<li>0.159.1 makes GPT-6.1 Sol the default model in the bundled catalog and in the Bedrock Mantle and Runtime catalogs. npm <code>latest</code> is now 0.159.2.</li>
+<li>Main adds tool-call metadata that survives request-window rotation (#49401), and MCP authorization-server validation before ID-JAG token exchange (#49478).</li>
+</ul>
+</li>
+<li><strong>Letta Code v0.33.8 → v0.34.0.</strong> User questions no longer block the agent turn, and conversation client preferences are persisted.</li>
+<li><strong>Vercel AI <code>ai</code> 7.0.123 / 6.0.297 / 5.0.270.</strong><ul>
+<li>Pending tool approvals that a later user message superseded are now ignored.</li>
+<li>Idle UI message streams stay open with optional SSE heartbeats.</li>
+<li><code>@ai-sdk/deepseek</code> 3.0.57 fixes cached-input-token reporting.</li>
+</ul>
+</li>
+<li><strong>Inspect 0.3.273.</strong> When one task was evaluated against several models, <code>model_graded_qa()</code>, <code>model_graded_fact()</code> (with <code>model_role=None</code>) and <code>self_critique()</code> could grade or critique with the wrong model. Fixed.</li>
+<li><strong>Academy NEW (3), each from a full PDF read.</strong> The ceiling jumped from <code>2609.35771</code> to <strong><code>2609.38180</code></strong>; I verified this myself.</li>
+<li><strong><a href="https://arxiv.org/abs/2609.37153">2609.37153</a> ToxicBench.</strong> A proxy silently corrupts successful tool outputs while the source tables stay intact.<ul>
+<li>Poisoned task success drops 26–39 points for data agents that score 0.92–0.99 clean.</li>
+<li>Under repeated poisoning, 101 runs adopted the wrong answer <em>after</em> a validating check.</li>
+</ul>
+</li>
+<li><strong><a href="https://arxiv.org/abs/2609.38043">2609.38043</a> UserProxyBench.</strong> The agent was held fixed at GPT-5.5 and only the simulated user was swapped.<ul>
+<li>That alone moved mean τ-bench reward by 15.2 points.</li>
+<li>24.4% of <em>successful</em> episodes contain a user-side contract violation.</li>
+</ul>
+</li>
+<li><strong><a href="https://arxiv.org/abs/2609.35815">2609.35815</a> evalstats.</strong> Running statistics directly on LLM-judge scores inflates false positives. On Likert data that risk <em>peaks</em> at &quot;almost perfect&quot; human–judge agreement (0.80–0.90).<ul>
+<li>The paper ships nine hypothesis tests corrected with prediction-powered inference (PPI), a method that uses a small human-labeled sample to correct the judge's bias. Four are rank-based tests with no prior PPI correction.</li>
+</ul>
+</li>
+<li><strong>BQAA takeaway.</strong> Tonight's items move in two directions. Agent frameworks are adding approval, content-judge and trace-aggregate layers that produce new analyzable events. The research says the numbers those layers produce are easy to misread:</li>
+<li>a tool result can be wrong while it looks successful;</li>
+<li>a simulated user can change what is being measured;</li>
+<li>a judge can agree with humans and still create false findings.</li>
+<li>Cline's reasoning-token double count and Mastra's cache-write mispricing are two more instances of &quot;valid row, wrong number&quot;.</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<h3>NEW I1 — <a href="https://github.com/mastra-ai/mastra/blob/main/packages/core/CHANGELOG.md">Mastra <code>@mastra/core</code> 1.72.0</a> (npm, Sep 30 00:03Z): an aggregate-plan API over trace storage, trace filters by run, session, user and organization, lease-protected background tasks, and a retry for cyber-safeguard refusals</h3>
+<p><strong>What shipped (from the <code>packages/core</code> CHANGELOG, <code>## 1.72.0</code> section; npm time map confirms 1.72.0 at 2026-09-30T00:03:19Z, <code>latest</code>):</strong></p>
+<ul>
+<li><strong>Trace aggregates (#25124).</strong></li>
+<li>Storage adapters can declare a <code>trace-aggregate</code> capability next to <code>trace-query</code>.</li>
+<li><code>ObservabilityStorage.aggregateTraces()</code> runs a <code>TrustedTraceAggregatePlan</code> and returns a <code>TraceAggregateResponse</code>. The plan is built with <code>parseTraceAggregateRequest</code> → <code>planTraceAggregate</code>, for example <code>measures: ['count']</code> over a time range.</li>
+<li>Adapters without the capability throw <code>OBSERVABILITY_STORAGE_AGGREGATE_TRACES_NOT_IMPLEMENTED</code>.</li>
+<li><strong>Trace-query filters (#24935).</strong></li>
+<li>Advanced trace queries accept <code>runId</code>, <code>sessionId</code>, <code>userId</code> and <code>organizationId</code>, at trace scope or inside <code>spans.some</code> / <code>spans.none</code>.</li>
+<li><code>organizationId</code> &quot;can only narrow the trusted tenant scope&quot;.</li>
+<li><strong>Lease-protected background tasks (#24841).</strong></li>
+<li>A running task records its owner and when the lease expires. Recovery only reclaims tasks whose lease has expired, and a worker that lost ownership cannot save a result.</li>
+<li>Conditional storage writes (<code>expectedStatus</code>, <code>expectedOwnerId</code>) are enforced only by storage adapters that support them. Older adapters silently fall back to unprotected writes.</li>
+<li><strong><code>CyberRefusalHandler</code> (#25172).</strong></li>
+<li>Retries once when OpenAI's <code>cyber_policy</code> or Anthropic's <code>cyber</code> classifier refuses mid-run. A second refusal on the same step is treated as genuine.</li>
+<li><code>createCodingAgent</code> includes it by default, with <code>maxProcessorRetries: 3</code>.</li>
+<li><strong>Cost and telemetry fixes:</strong></li>
+<li>Anthropic 1-hour cache writes are now priced at their real rate instead of the 5-minute rate (#25089).</li>
+<li>DurableAgent <code>model_generation</code> spans now carry cached-input, cache-write and reasoning tokens (#25392, carded as Progress at 1234).</li>
+<li>The provider finish reason is added to AgentController error events (#24321).</li>
+<li>Tool approvals always go to the run that requested them (#24874).</li>
+<li>Durable-engine transcript transforms now redact stored arguments and results; before, raw values were persisted (#24569).</li>
+<li><strong>After the release, on main (Sep 30 04:56–06:37Z, unreleased):</strong></li>
+<li>Evented runs recover before their first step (#25389).</li>
+<li>A factory guard blocks review verdicts that contradict their own review text (#25494).</li>
+<li>Recorded traces pick the true root span regardless of span order (#25536).</li>
+<li><code>@mastra/teams</code> 0.1.0 was also published to npm (23:57Z). I did not inspect its contents.</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong></p>
+<ul>
+<li>Mastra now has a planned-aggregate API for trace analytics, where before it had only a row-query API. That is the same layer a BigQuery-backed adapter would implement. The &quot;trusted plan&quot; model is how Mastra keeps tenant scoping out of the caller's hands.</li>
+<li>The cache-write fix means Mastra-reported Anthropic costs before 1.72.0 <strong>understate</strong> 1-hour cache writes.</li>
+<li>The lease fields (owner, lease expiry) give task-level telemetry a way to tell &quot;reclaimed after a crash&quot; from &quot;duplicate execution&quot;.</li>
+</ul>
+<h3>NEW I2 — <a href="https://github.com/Significant-Gravitas/AutoGPT/releases/tag/autogpt-platform-beta-v0.8.2">AutoGPT platform beta v0.8.2</a> (Sep 30 05:25Z): supervised AutoPilot, with an action supervisor, a content judge on outside reads, and approvals scoped to a chat, an Expert or a team</h3>
+<p><strong>What shipped (release notes; PR bodies checked for #14928 and #14834):</strong></p>
+<ul>
+<li><strong>Action gating modes (#14209).</strong> Ask First, Auto and Unsupervised.</li>
+<li>Workflows started from AutoPilot pause before an irreversible action (#14817).</li>
+<li>Read-only and workspace blocks run without asking (#14837).</li>
+<li>MCP calls are decided on each server's effect map, with an ask on first use of any other tool (#14839).</li>
+<li><strong>Action supervisor (#14928).</strong> Haiku 4.5, with a rubric tuned on a labelled split. On a held-out set of 60 calls judged twice each (120 judgements), per the PR body:</li>
+<li>recall went from 95% to 98% (3 → 1 dangerous call let through);</li>
+<li>harmless calls held needlessly went from 52% to 43%;</li>
+<li>p95 latency was 1.05 s.</li>
+<li>The PR names a known miss: a graph edit whose ~4,000-character payload buries a POST to an outside URL.</li>
+<li>Two later PRs hand the decision itself to Jev, with the LLM only explaining an &quot;ask&quot; (#14932) or quoting a hold (#15006).</li>
+<li><strong>Content judge on outside reads (#14834).</strong></li>
+<li>Every outside read is judged by Sonnet 5 before the model sees it.</li>
+<li>A read that carries instructions aimed at the agent, or that the judge could not assess, is withheld and queued for the user.</li>
+<li>The user releases or keeps it out. The chain row is tagged Held, then Released, Kept out or Unclear.</li>
+<li><strong>Approval scope and attribution.</strong></li>
+<li>Approval rules can hold for one chat, one Expert or the whole team (#14931).</li>
+<li>Approval requests belong to their chat (#14853).</li>
+<li>Credit history and the cost log name the AutoPilot chat instead of a made-up graph execution (#14878).</li>
+<li>A spend ceiling per chat triggers an ask on paid reads (#14841).</li>
+<li><strong>Other.</strong></li>
+<li>A credential-swap proxy for E2B egress (#14645).</li>
+<li>Thumbs up/down feedback saved as Langfuse scores (#14899).</li>
+<li>The Sentry scrubber no longer silently drops error events (#14880).</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong> AutoGPT now emits a <em>decision trail</em> for each held call. Each record carries the supervisor verdict, a content-judge verdict, the user's release or rejection, the rule scope and the chat-level cost. That is a new first-class event type, the approval/hold lifecycle.</p>
+<ul>
+<li>The published holdout numbers (98% recall, 43% needless holds) give a baseline for what &quot;gate precision&quot; looks like in production.</li>
+<li>AutoGPT had <strong>0</strong> catalog items before this.</li>
+</ul>
+<h3>NEW I3 — <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.52.0">Pydantic AI v2.52.0</a> (Sep 30 ~01:17Z; v1.107.7 security backport): workspaces and sandboxed harness tools, the harness moves in-repo, Anthropic <code>max_tokens</code> defaults to the model maximum, and a <code>web_fetch</code> advisory</h3>
+<p><strong>What shipped (release notes; PyPI upload times 01:14Z v1.107.7, 01:17Z v2.52.0):</strong></p>
+<ul>
+<li><strong>Workspaces (#6492).</strong> <code>ctx.workspace</code> gives tools one API for files and commands, locally or in a sandbox, with durable-execution support.</li>
+<li><code>Coder</code>, <code>FileSystem</code> and <code>Shell</code> now work through it (#8866).</li>
+<li>New backends: E2B (#8868), Fly Sprites (#8869), Modal (#8867), <code>SSHWorkspace</code> and <code>BubblewrapSandbox</code> (#8956).</li>
+<li><strong>Packaging.</strong></li>
+<li><code>pydantic-ai-harness</code> now ships from the main repository with every release. Its version jumps from 0.36.0 to 0.52.0.</li>
+<li><code>pydantic-clai2</code> 0.52.0 is its first release.</li>
+<li><strong>Compatibility notes that change what traces look like:</strong></li>
+<li><code>AnthropicModel</code> defaults <code>max_tokens</code> to the model's maximum output and streams such requests behind the scenes (#9298). An earlier entry had raised the default from 4096 to 16384 on Sonnet 4.5+ (#9025).</li>
+<li><code>SubAgents</code> stop loading agent files by default, and <code>inherit_tools</code> is deprecated (#9023).</li>
+<li>A <code>DecisionModel</code> keeps the prompt as the judged <code>text</code> after a retry (#8967).</li>
+<li><strong>Other telemetry-relevant changes:</strong></li>
+<li><code>default_cache_retention</code> and a <code>prompt_cache_outlook()</code> cold-window helper (#6337).</li>
+<li>Realtime user turns are recorded in speaking order under push-to-talk and barge-in (#8764).</li>
+<li>Unexpected <code>RequestUsage.extract()</code> failures now warn (#8564).</li>
+<li><code>gpt-6.1-sol</code> support (#9305).</li>
+<li><strong>Security.</strong> GHSA-v36g-jcw9-x7cw (moderate): attacker-controlled, deeply nested HTML sent to the local <code>web_fetch</code> tool could consume excessive CPU and memory. Patched in 2.52.0 and 1.107.7.</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong></p>
+<ul>
+<li><strong>The <code>max_tokens</code> change is a behavior change under an unchanged model.</strong> Anthropic calls from Pydantic AI 2.52.0 will stop hitting <code>max_tokens</code> stop reasons that earlier versions produced, and will stream even when the caller did not ask for streaming.</li>
+<li>A dashboard that tracks truncation rate or stop-reason mix for Pydantic AI agents should split on client version.</li>
+<li>Sandboxed workspaces add a new dimension, where the tool actually ran, that command and tool spans will start to carry.</li>
+</ul>
+<h3>NEW I4 — <a href="https://github.com/cline/cline/releases/tag/v4.1.22">Cline v4.1.22</a> + <a href="https://github.com/cline/cline/releases/tag/cli-v3.0.66">CLI 3.0.66</a> (Sep 30): reasoning tokens no longer double-counted, GPT-6.1 Sol becomes the default for 11 providers, and Anthropic refusal fallback plus routed failover</h3>
+<p><strong>What shipped (release notes; npm <code>cline</code> 3.0.66 at 02:42Z):</strong></p>
+<ul>
+<li><strong>Token accounting.</strong> &quot;Reasoning tokens are no longer counted twice in token usage. Cost is unchanged.&quot; The CLI notes say the double count was in <em>output</em> token totals, and reasoning is billed at the output rate.</li>
+<li><strong>Default-model shift.</strong></li>
+<li>GPT-6.1 Sol becomes the default model for OpenAI, OpenRouter, GitHub Copilot, Cortecs, Eden AI, Kilo Gateway, both LLM Gateway providers, NanoGPT, OpenCode Zen and Requesty.</li>
+<li>Other defaults move: Vercel AI Gateway to Ling 3.1 Flash, Tempr to MiMo V2.6 Flash, CrossModel and Ofox to Claude Sonnet 5.5, Scaleway to Qwen 3.8 27B.</li>
+<li>The notes say: &quot;If you use one of those providers without pinning a model, expect a different default.&quot;</li>
+<li><strong>Refusals and failover (#14673).</strong></li>
+<li>Direct Anthropic requests use Anthropic's server-side refusal fallback.</li>
+<li>On OpenRouter and Cline, Anthropic models can fail over to another upstream provider instead of failing the request.</li>
+<li>A response blocked by a content filter is now reported as such, not as &quot;Model returned empty response&quot;.</li>
+<li><strong>Other.</strong></li>
+<li>Cancel and Esc right after sending now actually stop the turn. Before, the task kept running in the background.</li>
+<li>Bedrock routes GPT-6 and GPT-5.6 through inference profiles.</li>
+<li>Hub diagnostics log why each socket closed.</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong></p>
+<ul>
+<li><strong>Token history.</strong> Cline output-token totals from before 4.1.22 / CLI 3.0.66 are inflated by the reasoning tokens, while cost is correct. Any &quot;output tokens per task&quot; trend for Cline users will show a step down at the upgrade that is not a behavior change.</li>
+<li><strong>Model mix.</strong> Together with Codex 0.159.1 (below), two major coding agents moved their defaults to GPT-6.1 Sol within about 8 hours. Traces from users who don't pin a model will change model mix with no action on their part.</li>
+<li>Cline had <strong>0</strong> catalog items before this.</li>
+</ul>
+<h3>Progress notes</h3>
+<ul>
+<li><strong>P1 → <code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code>: <a href="https://github.com/BerriAI/litellm/security/advisories/GHSA-7hp6-4w63-5g45">GHSA-7hp6-4w63-5g45</a> (high), published Sep 30 01:13Z.</strong></li>
+<li><strong>The attack.</strong> The proxy used one salt key both to seal secrets at rest and to mint UI and CLI session tokens.<ul>
+<li>An authenticated <code>internal_user</code> requests a key whose metadata carries a forged admin credential as its &quot;secret&quot;. The proxy encrypts and returns it.</li>
+<li>Presented as a bearer token, it decrypts to a trusted admin identity. That grants <code>proxy_admin</code> and command execution through the MCP stdio endpoint.</li>
+</ul>
+</li>
+<li><strong>Exposure.</strong> Exploitable in the default configuration on versions after 1.91.0. On 1.87.0–1.90.x it is exploitable only when <code>EXPERIMENTAL_UI_LOGIN=true</code>.</li>
+<li><strong>Patches.</strong> 1.100.4, 1.101.3, 1.102.2, 1.103.1 and 1.104.0rc2 (PyPI 23:04Z–00:16Z). Each line's diff is the same fix: &quot;bind UI/CLI session tokens to their own AES-GCM context&quot;.</li>
+<li><strong>Stopgap.</strong> Setting <code>EXPERIMENTAL_UI_LOGIN=false</code> closes the hole but breaks CLI SSO and Claude Code gateway login.</li>
+<li><strong>Also merged to main:</strong> #43776 (00:56Z) completes the three-part Redis request pipeline for auth-object refresh.</li>
+<li><strong>Still open:</strong> #43816 (ClickHouse storage for agent tracing) and #43819 (Rust-backed trace query). WATCH.</li>
+<li><strong>P2 → <code>openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks</code>: <a href="https://github.com/openai/codex/releases/tag/rust-v0.159.1"><code>rust-v0.159.1</code></a> (20:32Z) and <a href="https://github.com/openai/codex/releases/tag/rust-v0.159.2"><code>rust-v0.159.2</code></a> (23:57Z), both stable.</strong></li>
+<li>0.159.1 adds GPT-6.1 Sol as the default model in the bundled catalog and in the Amazon Bedrock Mantle and Runtime catalogs (#49323, #49342).</li>
+<li>0.159.2 stops console windows flashing on Windows (#49385). npm <code>@openai/codex</code> <code>latest</code> is now 0.159.2.</li>
+<li><strong>Main (unreleased):</strong><ul>
+<li>#49401 (23:24Z) preserves live tool-call metadata across request windows.</li>
+<li>#49478 (Sep 30 04:30Z) discovers and validates MCP authorization servers before the ID-JAG token exchange.</li>
+</ul>
+</li>
+<li><code>rust-v0.161.0-alpha.3</code> (02:24Z) and <code>rust-v0.160.0-alpha.6.1</code> (01:09Z) are prereleases.</li>
+<li>GPT-6.1 Sol itself was carded at 1234. This note is only about the <em>stable default</em>.</li>
+<li><strong>P3 → <code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code>: <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.33.8">v0.33.8</a> (20:42Z) and <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.34.0">v0.34.0</a> (Sep 30 06:18Z).</strong></li>
+<li>v0.33.8: OAuth callers can guard provider fetches (#4852), title generation defaults to <code>gpt-6-luna</code> (#4692), and the Memory Palace experiment ships.</li>
+<li>v0.34.0:<ul>
+<li>User questions no longer block the agent turn (#4868).</li>
+<li>Conversation client preferences are persisted (#4873).</li>
+<li>Listener-state write failures are reported instead of swallowed (#4856).</li>
+<li>Local analysis workers run again (#4851).</li>
+<li>The Memory Palace skill becomes Cloud-only (#4866).</li>
+</ul>
+</li>
+<li><strong>P4 → <code>vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts</code>: <code>ai</code> <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.123">7.0.123</a> (02:21Z), with 6.0.297 and 5.0.270 (01:19Z).</strong></li>
+<li>Pending tool approvals superseded by a user message are ignored (changeset 50a26d5).</li>
+<li>Idle UI message streams stay open with optional SSE heartbeats.</li>
+<li>All tool content is pruned when zero trailing messages are retained.</li>
+<li>Partial reasoning tags are preserved when streamed text parts end.</li>
+<li><code>@ai-sdk/deepseek</code> 3.0.57 fixes cached-input-token reporting for OpenAI-compatible DeepSeek responses.</li>
+<li><code>@ai-sdk/openai</code> 4.0.82 / 3.0.121 / 2.0.132 add GPT-6.1 Sol across v7, v6 and v5.</li>
+<li>#21811 (Azure DeepSeek cached input tokens) merged at 23:12Z. I did not map it to a specific published package (see Unconfirmed).</li>
+<li><strong>P5 → <code>inspect-ai-0-3-270-litellm-proxy-responses-default-eval-set-top-up-f1-multiset</code>: Inspect 0.3.273 (PyPI Sep 30 00:10Z; CHANGELOG dated Sep 29).</strong></li>
+<li><strong>Grader bug fixed.</strong> When one task was evaluated against several models, <code>self_critique()</code> could critique with the wrong model, and so could <code>model_graded_qa()</code> / <code>model_graded_fact()</code> with <code>model_role=None</code>. Fixed.</li>
+<li><strong>Also:</strong> <code>gpt-6.1-sol</code> context and output limits, explicit prompt-cache boundaries for Anthropic and OpenAI GPT-5.6+, and much faster <code>resolve_attachments</code> for long conversations.</li>
+<li><strong>Why it matters.</strong> Multi-model eval sets scored with model-graded scorers before 0.3.273 may carry grades from the wrong grader model.</li>
+</ul>
+<h3>NOTE (scouted, not ranked)</h3>
+<ul>
+<li><strong>Gemini CLI.</strong> v0.62.0 stable (21:17Z), v0.63.0-preview.0 (20:58Z) and v0.64.0-nightly (01:33Z).</li>
+<li>v0.62.0 is a roll-up of fixes: MCP tool-call titles formatted as structured signatures, OAuth refresh-token retention, ACP <code>tool_call</code> emitted before <code>request_permission</code>, and Gemini 3.8 Flash / 3.5 Flash-Lite support.</li>
+<li>The preview bounds tool-output size in long agent loops (#29451).</li>
+<li>Google product, fix roll-up, 0 catalog items. <strong>NOTE only.</strong></li>
+<li><strong>wandb/weave #7965</strong> (merged 19:53Z): usage is kept across trace batches. Unreleased (PyPI <code>weave</code> latest 0.53.11, Sep 25).</li>
+<li><strong>OpenHands #17465</strong> (merged 05:35Z): canvas streaming slots are retired by event id instead of by fuzzy text matching. Unreleased.</li>
+<li><strong>qwen-code</strong> <code>v0.24.7-nightly.20260929</code> (22:29Z). The managed-agent tool-output retirement chain (#13084, draft) is still open. WATCH.</li>
+<li><strong>LangChain #40921</strong> (draft): configurable model-routing middleware. WATCH.</li>
+<li><strong>Minor releases:</strong></li>
+<li><code>openai-python</code> 3.22.1: auth error message and <code>NotRequired</code> fixes only.</li>
+<li><code>claude-agent-sdk-python</code> 0.2.162: bundles CLI 2.1.285, which was already carded.</li>
+<li>LangWatch 3.18.1: AI-gateway monobinaries.</li>
+<li><code>crewai</code> <code>1.15.23.dev20260930</code>: a dev build.</li>
+<li><strong>google/adk-python.</strong> No in-window release. It remains a <strong>1P NOTE only</strong>.</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<p><strong>Verified ceiling: <code>2609.38180</code>.</strong></p>
+<ul>
+<li>The arXiv API cs.AI newest-first returns <code>2609.38178</code>, <code>.38169</code>, <code>.38166</code>, <code>.38155</code>, <code>.38147</code>.</li>
+<li><code>/list/cs.AI/new</code> (&quot;new listings for Wednesday, 30 September 2026&quot;) tops out at <code>2609.38178</code>.</li>
+<li><code>abs/2609.38180</code> returns 200, while <code>.38181</code>, <code>.38200</code> and <code>.38300</code> return 404.</li>
+</ul>
+<p>I screened ~1,100 unique ids from the cs.AI, cs.SE, cs.MA, cs.CL, cs.LG and cs.CR new listings with a keyword filter, read about 20 abstracts, then did full-PDF reads (<code>pdftotext</code>, whole document) of the three papers below.</p>
+<h3>NEW A1 — <a href="https://arxiv.org/abs/2609.37153">arXiv:2609.37153</a> &quot;When Tools Silently Lie: Evaluating and Mitigating Blind Compliance in Tool-Augmented Data Agents&quot; (ToxicBench; Tao &amp; Yin, Tongji)</h3>
+<p><strong>Full PDF read (28 pp).</strong></p>
+<ul>
+<li><strong>Setup.</strong> A proxy runs the real tool, then edits the <em>returned observation</em>. The source CSVs are left unchanged, so the clean answer is always recoverable.</li>
+<li>Operators: aggregate scale, rank or label swap, treatment/control flip, column-semantic swap, stale metadata, biased retrieval.</li>
+<li>Each task is paired clean vs poisoned on the same query, data, model and adapter.</li>
+<li><strong>Metrics (§3.2, Table 6).</strong></li>
+<li>BCR (blind compliance): adopting the poisoned answer without detecting or checking anything.</li>
+<li>VPA: adopting the poisoned answer <em>despite</em> a fresh evidence-producing check.</li>
+<li>RR (recovery): a clean final answer after detection or validation.</li>
+<li><strong>Headline results:</strong></li>
+<li><strong>Degradation (Table 1, GPT, 118 tasks).</strong> Clean task success 0.92–0.99 → poisoned drop of 0.26–0.39 across LangGraph, smolagents and AutoGen. BCR was 0.27–0.53.<ul>
+<li>Across models (Table 16), numerical-suite BCR averages GPT 0.62, Qwen 0.40, Claude 0.20.</li>
+</ul>
+</li>
+<li><strong>Which operators hurt most (Table 15).</strong> Label swaps preserve amounts while changing entities, so magnitude checks miss them. Label swap BCR is 0.55; aggregate scale BCR is 0.62.</li>
+<li><strong>Retry vs verification (§4.3, Table 18).</strong><ul>
+<li>A plain second attempt beats Base by <strong>+0.110</strong> poisoned task success (95% CI [0.056, 0.171]).</li>
+<li>Explicit verification prompts add nothing beyond that: Guard − Double-pass = −0.025 [−0.054, 0.000].</li>
+</ul>
+</li>
+<li><strong>Adoption after checking (§4.3, Table 20).</strong> Under repeated poisoning, <strong>101 of 1,572</strong> trajectories adopted the poisoned answer after a qualifying check. 78 of those had only corrupted follow-up checks.<ul>
+<li>In the structured control (App. E.2), full-target corruption gave 0/48 correct for both retry and review, vs 48/48 and 47/48 with clean evidence.</li>
+</ul>
+</li>
+<li><strong>Source independence (App. A).</strong> 0 of 133 checks were source-independent: every verification re-read the same CSVs.</li>
+<li><strong>Scorer validity (§4.4, Table 7).</strong> The frozen scorer agrees with humans on 96.0% of 200 post-freeze trajectories (precision 1.000, recall 0.957).</li>
+<li><strong>Limitations (§6).</strong></li>
+<li>Tiny synthetic tables (4–12 rows) and no production traces.</li>
+<li>Token billing was unavailable, so cost is latency only: Guard 39.8 s vs Base 16.9 s.</li>
+<li>204 of 3,319 historical corruption events were flagged as mis-delivered and are handled with sensitivity analyses.</li>
+</ul>
+<p><strong>Why BQAA cares.</strong> This is the data-agent failure BigQuery users would hit: a query that &quot;succeeds&quot; with wrong bindings.</p>
+<ul>
+<li>The paper's split into <em>checked</em>, <em>checked-but-adopted</em> and <em>recovered</em> maps directly onto trace-level metrics BQAA could compute.</li>
+<li><strong>A tool call followed by a re-query is not evidence of verification.</strong> Only a source-independent check is (0/133 here).</li>
+</ul>
+<h3>NEW A2 — <a href="https://arxiv.org/abs/2609.38043">arXiv:2609.38043</a> &quot;UserProxyBench: Evaluating LLM User Simulators for Agent Benchmarks and Training&quot; (Jain &amp; Sandhu; NeurIPS 2026 workshop)</h3>
+<p><strong>Full PDF read (8 pp).</strong></p>
+<ul>
+<li><strong>Setup.</strong> An evaluation layer over τ²-bench (commit 8ebb749) that scores the <em>simulated user</em> against its private blueprint.</li>
+<li>The User Fidelity Score (UFS) is the fraction of episodes where the user proxy passes every applicable criterion.</li>
+<li>There are 2,141 task-grounded rubric criteria, 5.7 per task.</li>
+<li>The agent is frozen at GPT-5.5. Seven user proxies each run 375 tasks (Telecom 114, Airline 50, Retail 114, Banking 97).</li>
+<li><strong>Results:</strong></li>
+<li><strong>Reward moves with the simulator (§3.2, Table 1).</strong> Changing only the simulated user moves mean agent reward from <strong>.644 to .796</strong>. The per-domain spread reaches .298 on Retail and .280 on Airline.</li>
+<li><strong>Hidden failures (§3.2).</strong> <strong>24.4%</strong> of agent-successful episodes fail UFS. On Telecom, 39.7% of all trajectories pass reward but fail UFS.</li>
+<li><strong>Reward is blind to the commonest failure (§3.3, Fig. 3).</strong><ul>
+<li>Premature disclosure (480 cases) changes agent pass rate by only −.043, with a positive median effect. Goal deviation costs −.515.</li>
+<li>On Telecom, Sonnet-4-6 and GPT-4.1-mini give the same reward (.947) but UFS .474 vs .737.</li>
+</ul>
+</li>
+<li><strong>The trajectory changes, not the reward (§3.4).</strong> In successful episodes, over-disclosing users make the agent issue <strong>1.06 fewer tool calls</strong> and ask 0.26 fewer questions. Mean agent turns track UFS (r = .955) far better than reward (r = .594).</li>
+<li><strong>Cheapest adequate simulator (§3.1).</strong> At UFS ≥ .84 the cheapest adequate proxy is Gemma-31B (~$0.0175 per simulation). Gemini-3.5-Flash gains 1.9 UFS points at 3.2× the cost.</li>
+<li><strong>Limitations (§4, App. F).</strong></li>
+<li>The judge is the same model that wrote the rubrics (Claude Opus 4.8).</li>
+<li>The manual audit is single-rater and unblinded.</li>
+<li>One rollout per task and one frozen agent.</li>
+<li>No measurement of how training against low-UFS proxies affects the resulting policy.</li>
+</ul>
+<p><strong>Why BQAA cares.</strong> Any eval or RL pipeline that uses simulated users is also measuring the simulator. Tool-call count per successful episode moved by more than one call with reward unchanged, so &quot;agent efficiency&quot; dashboards need the user proxy as a dimension.</p>
+<h3>NEW A3 — <a href="https://arxiv.org/abs/2609.35815">arXiv:2609.35815</a> &quot;How to Run Statistics over LLM Judges and Trust the Results: Calibrated Inference for Small-Sample AI Evaluation with evalstats&quot; (Arawjo, Université de Montréal)</h3>
+<p><strong>Full PDF read (39 pp):</strong> main text §1–10, plus Appendices A–F for the simulation design, the PPI power-tuning changes and the rank-test constructions.</p>
+<ul>
+<li><strong>Setup.</strong></li>
+<li>Monte Carlo sweeps pick CI, p-value and multiple-comparison methods for small evals (N &lt; 100) on binary, [0,1] and Likert scores. They use synthetic data plus real runs from OpenEval and Inspect AI.</li>
+<li>Nine hypothesis tests are corrected with prediction-powered inference, PPI++ (App. B, C). Wilcoxon, Mann-Whitney U, Friedman and Kruskal-Wallis get what the author calls the first known PPI corrections for rank-based tests.</li>
+<li>A &quot;bootstrap-adaptive&quot; tweak stabilizes the power-tuning weight with only 15–50 human labels.</li>
+<li><strong>Results:</strong></li>
+<li><strong>High agreement does not make raw judge statistics safe (§6.2, Fig. 6, App. F).</strong><ul>
+<li>On Likert data, false-positive risk from testing uncorrected judge scores <em>peaks</em> at quadratic-weighted κ / ICC ≈ <strong>0.80–0.90</strong>. It returns to nominal only above 0.99.</li>
+<li>For binary data, κ = 0.81 still gave ≈37% false positives (fn. 7).</li>
+<li>The PPI-corrected tests held Type I error near 0.05 across 2,046 null scenarios per test (≈3.68M trials, Fig. 4) and on real judge corpora (Fig. 11).</li>
+</ul>
+</li>
+<li><strong>When a judge is worth it (§6.3, Fig. 7).</strong><ul>
+<li>The effective label multiplier is ≈1.5× at ρ² = 0.4 (worst cell 1.36×) and ≈2.3× at ρ² = 0.6.</li>
+<li>Below ρ² ≈ 0.2 (κ &lt; ~0.41) the judge is not worth using.</li>
+</ul>
+</li>
+<li><strong>Small evals (§5, Fig. 2).</strong><ul>
+<li>Bootstrap CIs under-covered nearly everywhere below N = 100; for paired binary data, none reached nominal even at N = 100.</li>
+<li>Recommended instead: Wilson or logit-t intervals, Bonett–Price for paired binary data, and Wilcoxon / McNemar mid-p tests. Multiple comparisons use Šidák and Shaffer, or Romano–Wolf at n ≥ 30.</li>
+</ul>
+</li>
+<li><strong>Worked example (§8.3, real ELLIPSE essays + six-judge ensemble).</strong> Raw judge scores gave Kruskal-Wallis p = 1.9×10⁻⁴ at κ = 0.66. The PPI-corrected test gave p = 0.31, matching the human ground truth (p = 0.47).</li>
+<li><strong>Limitations (§9.6).</strong></li>
+<li>PPI in <code>compare()</code> needs ≥ 50 judge-scored items, a single factor and no multi-run data.</li>
+<li>Pairwise CIs for between-subjects designs are not validated.</li>
+<li>Guarantees assume human labels were sampled at random; paired t, Wilcoxon and RM-ANOVA are the most robust when they were not (Fig. 10).</li>
+<li>No user study.</li>
+</ul>
+<p><strong>Why BQAA cares.</strong> Judge-scored agent evals over traces are exactly this setting. The paper gives two concrete rules for any BQAA eval report:</p>
+<ul>
+<li>report the judge–human ρ² with the effective sample size;</li>
+<li>never report significance on raw judge scores, however high the agreement.</li>
+<li>Weave and promptfoo are named (§2) as offering no uncertainty quantification.</li>
+</ul>
+<h3>Scouted, not ranked (abstract-level only; no full read)</h3>
+<ul>
+<li><strong>Near the bar:</strong></li>
+<li><a href="https://arxiv.org/abs/2609.36556">2609.36556</a> <strong>MAADBench.</strong> A refreshable anomaly-detection benchmark for multi-agent traces with step-level labels (5,200 labeled steps). Closest to trace analytics; a candidate for a full read next slot.</li>
+<li><a href="https://arxiv.org/abs/2609.37315">2609.37315</a> <strong>Executable-contract audit.</strong> Seven tool defects confirmed across 34 mutating tools in four agent benchmarks.</li>
+<li><a href="https://arxiv.org/abs/2609.38108">2609.38108</a> <strong>Plan declaration vs execution gap.</strong> Only 22–45% of Plan+ReAct trajectories keep their declared plan structure.</li>
+<li><strong>Adjacent safety and eval work, lower BQAA fit:</strong></li>
+<li><a href="https://arxiv.org/abs/2609.35889">2609.35889</a> SINGED: correct outputs can hide forbidden side effects.</li>
+<li><a href="https://arxiv.org/abs/2609.36043">2609.36043</a> SAGE: a per-item paired acceptance gate for skill edits.</li>
+<li><a href="https://arxiv.org/abs/2609.36308">2609.36308</a> CheatBench.</li>
+<li><a href="https://arxiv.org/abs/2609.37864">2609.37864</a> AgentBug-Smith / Live-Harness-Bench.</li>
+<li><strong>Pack leads judged off-bar on abstract:</strong></li>
+<li>Training or RL methods: HybridCUA <code>2609.38008</code> (GUI+CLI computer-use training), ActFirst-OPD <code>2609.36608</code>, HDL <code>2609.36864</code>.</li>
+<li>Memory and agent methods: VideoLoop <code>2609.38119</code>, EpiCon <code>2609.37923</code>, Marathoner <code>2609.34378</code>, Omni-IO Skills <code>2609.31847</code>, CorpusMap <code>2609.37226</code> (agentic-search navigation layer).</li>
+<li><strong>Pin <a href="https://arxiv.org/abs/2609.02702">2609.02702</a></strong> (Trace-as-State v1) is untouched. No prior Academy NEW was re-pitched.</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ol>
+<li><strong>Approval and hold lifecycle as a first-class event (high EV).</strong></li>
+</ol>
+<ul>
+<li>AutoGPT v0.8.2 now emits a supervisor verdict, a content-judge hold, the user's release or rejection, and the rule scope per chat. Vercel AI ignores superseded approvals; Mastra routes approvals to the run that asked.</li>
+<li>A BQAA schema for approval events (<code>requested</code> / <code>held</code> / <code>released</code> / <code>denied</code> / <code>superseded</code>, plus the judge and scope) would let customers measure how often gates hold harmless calls and how often they miss dangerous ones.</li>
+<li>AutoGPT's published 43% needless-hold rate gives a baseline.</li>
+</ul>
+<ol start="2">
+<li><strong>Judge-score statistics that don't lie (high EV).</strong></li>
+</ol>
+<ul>
+<li>evalstats shows that raw judge-score significance is unsafe even at κ 0.8–0.9, and Inspect 0.3.273 just fixed wrong-model grading in multi-model eval sets.</li>
+<li>A BQAA eval-comparison view should require a random human-labeled sample, report ρ² and effective N, and use PPI-corrected intervals. It should not show bar charts with standard-error bars.</li>
+</ul>
+<ol start="3">
+<li><strong>Verification is not the same as source independence (medium-high EV).</strong></li>
+</ol>
+<ul>
+<li>ToxicBench finds 0/133 checks were source-independent, and 101 adoptions happened <em>after</em> checking.</li>
+<li>For data agents over BigQuery, a trace metric that separates &quot;re-queried the same table&quot; from &quot;checked against an independent source&quot; would show whether verification steps actually add safety.</li>
+</ul>
+<ol start="4">
+<li><strong>Version-split baselines for token metrics (medium EV).</strong> Cline 4.1.22 removes double-counted reasoning tokens, Pydantic AI 2.52.0 changes the Anthropic <code>max_tokens</code> default, and Mastra 1.72.0 corrects 1-hour cache-write cost. Each causes a step change in a per-client metric with no change in agent behavior. An automatic &quot;client version changed&quot; annotation on usage charts would prevent false regressions.</li>
+<li><strong>Default-model drift (medium EV).</strong> Codex 0.159.1 stable and Cline 4.1.22 moved to GPT-6.1 Sol within ~8 hours. Expect model-mix shifts in customer traces this week without any customer action.</li>
+</ol>
+<hr />
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>I1 Mastra 1.72.0:</strong> A planned trace-aggregate API plus trace filters by run, session, user and organization. 1-hour Anthropic cache writes were under-priced before this release.</li>
+<li><strong>I2 AutoGPT v0.8.2:</strong> AutoPilot ships a supervisor (98% recall, 43% needless holds on holdout) and a content judge. Approvals are scoped to a chat, an Expert or a team, and the cost log is attributed to the chat.</li>
+<li><strong>I3 Pydantic AI 2.52.0:</strong> Sandboxed workspaces for harness tools. The Anthropic <code>max_tokens</code> default jumps to the model maximum, which changes stop-reason mix by version.</li>
+<li><strong>I4 Cline 4.1.22 / CLI 3.0.66:</strong> Output-token totals before this version include reasoning twice (cost is correct). GPT-6.1 Sol is the new default for 11 providers.</li>
+<li><strong>P1 LiteLLM GHSA-7hp6-4w63-5g45:</strong> Internal user → proxy admin → RCE on &gt;1.91.0 in the default configuration. Upgrade to 1.100.4 / 1.101.3 / 1.102.2 / 1.103.1.</li>
+<li><strong>P2 Codex 0.159.1/0.159.2:</strong> GPT-6.1 Sol is now the <em>stable</em> default, including Bedrock catalogs. Main keeps tool-call metadata across request windows.</li>
+<li><strong>P3 Letta Code 0.34.0:</strong> User questions no longer block the agent turn, so expect overlapping question and tool spans.</li>
+<li><strong>P4 Vercel AI 7.0.123:</strong> Superseded approvals are ignored, SSE heartbeats keep idle streams open, and DeepSeek cached-token reporting is fixed.</li>
+<li><strong>P5 Inspect 0.3.273:</strong> Model-graded scorers could grade with the wrong model in multi-model tasks. Re-check affected eval sets.</li>
+<li><strong>A1 ToxicBench:</strong> Silent tool-output corruption costs data agents 26–39 points. Re-checks against the same source don't prevent adoption.</li>
+<li><strong>A2 UserProxyBench:</strong> The simulated user alone moves τ-bench reward by 15 points and cuts agent tool calls by about one per successful episode.</li>
+<li><strong>A3 evalstats:</strong> Never run statistics on raw judge scores. Report ρ² and effective N, and use PPI-corrected tests.</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What is not confirmed</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Vercel AI #21811 (Azure DeepSeek cached tokens) in a published package</td>
+  <td>#21811 merged at 23:12Z. <code>@ai-sdk/deepseek</code> 3.0.57 carries a similar-sounding changeset (&quot;fix cached input token reporting for OpenAI-compatible DeepSeek responses&quot;, <code>ea54a10</code>), but I did not tie that changeset to #21811 or find an <code>@ai-sdk/azure</code> release in the window.</td>
+  <td><code>gh api repos/vercel/ai/releases</code> (azure, deepseek, openai and gateway tags after 19:30Z); PR #21811.</td>
+</tr>
+<tr>
+  <td>Codex #49401 in <code>rust-v0.161.0-alpha.3</code></td>
+  <td>alpha.3 (02:24Z) was published after #49401 merged (23:24Z). I did not inspect the tag's commit range. #49478 (04:30Z) is definitely not in it.</td>
+  <td>GitHub releases and PR merge times.</td>
+</tr>
+<tr>
+  <td>AutoGPT supervisor numbers</td>
+  <td>The 98% recall / 43% needless holds figures come from the PR #14928 body: a 60-call holdout, two passes each, with the harness on #14893. I did not rerun them or read #14893.</td>
+  <td>PR #14928 body; release notes.</td>
+</tr>
+<tr>
+  <td><code>@mastra/teams</code> 0.1.0</td>
+  <td>An npm publish (23:57Z) is confirmed. I did not inspect the package or changelog, so no capability claim is made.</td>
+  <td>npm registry time map.</td>
+</tr>
+<tr>
+  <td>LiteLLM advisory CVSS / CVE</td>
+  <td>The advisory lists severity &quot;high&quot; and no CVE id. The CVSS score was not returned by the API.</td>
+  <td>GitHub security-advisories API; advisory page (HTTP 200).</td>
+</tr>
+<tr>
+  <td>Agy 0032 pack</td>
+  <td>The file <code>packs/agy-pack-2026-09-30-0032.md</code> exists as of 01:00 PT but was <strong>absent at merge</strong> and is not in the PACK_DONE list. I did not read it or use it as input.</td>
+  <td><code>ls packs/</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Packs used (PACK_DONE, 7):</strong></li>
+<li><code>packs/muse-pack-2026-09-29-1332.md</code>, <code>packs/dsh-pack-2026-09-29-1432.md</code>, <code>packs/agy-pack-2026-09-29-1532.md</code>, <code>packs/muse-pack-2026-09-29-1632.md</code>, <code>packs/agy-pack-2026-09-29-2132.md</code>, <code>packs/muse-pack-2026-09-29-2232.md</code>, <code>packs/dsh-pack-2026-09-29-2332.md</code>.</li>
+<li>None was read wholesale. Candidates came from the fresh list, and each was verified directly against GitHub, PyPI, npm and arXiv.</li>
+<li><strong>Fresh-list path used:</strong> <code>_runs/fb-2026-09-30-0034/fresh-items.md</code> (F01–F38).</li>
+<li><strong>Gaps (disclosed, not invented):</strong></li>
+<li><strong>Field Brief 2026-09-29-1834 was skipped (Mac down)</strong> and never published. This slot is the catch-up.</li>
+<li><strong>Standing absent collector hours:</strong> DSH 1732, Agy 1832, Muse 1932, DSH 2032.</li>
+<li><strong>Other missing rotation hours in the window:</strong><ul>
+<li>Muse: 1432, 1532, 1732, 1832, 2032, 2132, 2332.</li>
+<li>DSH: 1332, 1532, 1632, 1832, 1932, 2132, 2232.</li>
+<li>Agy: 1332, 1432, 1632, 1732, 1932, 2032, 2232, 2332.</li>
+<li>Agy 0032 was absent at merge; its file landed later and was not used.</li>
+</ul>
+</li>
+<li><strong>Source limits:</strong> Medium scouts are paused (lead-only). LinkedIn is behind an authwall. The packs report Agy MCP X 401 / Reddit 403.</li>
+<li><strong>HN:</strong> the source was dropped fleet-wide on 2026-09-27. No HN keeps. <code>packs/_hn/</code> holds only the pre-drop 2026-09-27 files, and I did not consult it.</li>
+<li><strong>Verified arXiv ceiling:</strong> <code>2609.38180</code>, from the arXiv API newest-first query, <code>/list/cs.AI/new</code> for Wed 30 Sep, and <code>abs</code> probes (.38180 → 200; .38181, .38200, .38300 → 404). That matches the packs' jump from <code>2609.35771</code>.</li>
+<li><strong>Verification method:</strong></li>
+<li><strong>GitHub releases.</strong> <code>gh api repos/*/releases?per_page=100</code> over 65 agent, observability and eval repos for anything published after 19:30Z Sep 29.</li>
+<li><strong>In-window releases found:</strong><ul>
+<li>Codex 0.159.1, 0.159.2, 0.160.0-alpha.6.1 and 0.161.0-alpha.3.</li>
+<li>Gemini CLI 0.62.0, 0.63.0-preview.0 and 0.64.0-nightly.</li>
+<li>Letta Code 0.33.8 and 0.34.0.</li>
+<li>AutoGPT beta 0.8.2.</li>
+<li>LiteLLM 1.100.4, 1.101.3, 1.102.2, 1.103.1 and 1.104.0-rc.2.</li>
+<li>Vercel AI fleet (7.0.123 / 6.0.297 / 5.0.270 plus provider packages).</li>
+<li>Cline 4.1.22, CLI 3.0.66, SDK 0.0.88 and desktop 0.0.38/0.0.39.</li>
+<li>qwen-code nightly, pydantic-ai 2.52.0 / 1.107.7, openai-python 3.22.1, claude-agent-sdk 0.2.162, LangWatch 3.18.1 and posthog-python.</li>
+</ul>
+</li>
+<li><strong>Registries.</strong><ul>
+<li>PyPI (litellm, pydantic-ai, opik, langfuse, arize-phoenix, crewai, traceloop-sdk, inspect-ai, openai-agents, langsmith, deepeval): in-window uploads for litellm, pydantic-ai, inspect-ai 0.3.273 and a crewai dev build. The deepeval 4.2.7 upload (19:31Z) falls before the window.</li>
+<li>npm: <code>@mastra/core</code> 1.72.0, <code>@mastra/teams</code> 0.1.0, <code>@openai/codex</code> 0.159.1/0.159.2, <code>ai</code> 7.0.123, <code>@google/gemini-cli</code>, <code>@letta-ai/letta-code</code> 0.33.8/0.34.0 and <code>cline</code> 3.0.66. <code>@anthropic-ai/claude-code</code> is unchanged at 2.1.285.</li>
+</ul>
+</li>
+<li><strong>Advisories.</strong> GitHub security-advisories API for LiteLLM and pydantic-ai.</li>
+<li><strong>PR states.</strong> 16 PRs checked with <code>gh api repos/*/pulls/N</code>.</li>
+<li><strong>Changelogs.</strong> Mastra <code>packages/core/CHANGELOG.md</code> (the 1.72.0 section) and Inspect <code>CHANGELOG.md</code>.</li>
+<li><strong>Catalog.</strong> Grepped <code>catalog.json</code> (460 items) for every candidate. AutoGPT, Cline and Gemini CLI had 0 items, and no <code>2609.36</code>–<code>2609.38</code> ids exist.</li>
+<li><strong>Academy.</strong> Full PDFs of 37153, 38043 and 35815 were extracted with <code>pdftotext</code> and read.</li>
+<li><strong>Hub tip:</strong> <code>294ecf2</code> (&quot;research: Harness Lab +5 DSH KEEP cards&quot;, 16:50 PT). The local clone matches <code>git ls-remote origin HEAD</code>.</li>
+<li><strong>Late-wake:</strong> on the 00:34 PT cadence, work ~00:40–01:10 PT. Label kept at 0034.</li>
+<li><strong>Effort:</strong> high, per the 2026-09-29 lock. JEV shadow was skipped by Collection (fixed-schedule run, Q8).</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<pre><code class="language-yaml">new:
+- id: mastra-core-1-72-0-trace-aggregate-plans-lease-fenced-background-tasks-cyber-refusal-retry
+  tag: Industry
+  title: &quot;Mastra @mastra/core 1.72.0 — aggregateTraces() over TrustedTraceAggregatePlan, trace queries filterable by runId/sessionId/userId/organizationId, lease-fenced background tasks, CyberRefusalHandler, and 1-hour Anthropic cache writes priced correctly&quot;
+  url: https://github.com/mastra-ai/mastra/blob/main/packages/core/CHANGELOG.md
+  card: &gt;-
+    Stable on npm Sep 30, 2026 (first stable since 1.71.0). Storage adapters can declare a trace-aggregate capability and
+    run planned aggregate queries via ObservabilityStorage.aggregateTraces(); advanced trace queries gain runId, sessionId,
+    userId and organizationId filters (organizationId can only narrow the trusted tenant scope). Background tasks carry an
+    expiring ownership lease so stale workers cannot overwrite results. Fixes price Anthropic 1-hour cache writes at their
+    real rate and keep cache and reasoning tokens on DurableAgent spans.
+- id: autogpt-platform-beta-v0-8-2-autopilot-action-gating-content-judge-per-chat-approvals
+  tag: Industry
+  title: &quot;AutoGPT platform beta v0.8.2 — AutoPilot action gating (Ask First / Auto / Unsupervised) with a Haiku action supervisor (98% recall, 43% needless holds on holdout), a content judge on outside reads, approvals scoped to chat/Expert/team, and cost logs attributed to the chat&quot;
+  url: https://github.com/Significant-Gravitas/AutoGPT/releases/tag/autogpt-platform-beta-v0.8.2
+  card: &gt;-
+    Released Sep 30, 2026. AutoPilot gates actions in three modes; a Haiku 4.5 supervisor with a tuned rubric reached 98%
+    recall and 43% needless holds on a 120-judgement holdout (PR #14928). Every outside read is judged by Sonnet 5 before
+    the model sees it, and reads carrying agent-directed instructions are held for user release. Approval rules scope to a
+    chat, an Expert or the team, and credit history and cost logs name the AutoPilot chat.
+- id: pydantic-ai-v2-52-0-workspaces-sandboxes-harness-in-repo-anthropic-max-tokens-default
+  tag: Industry
+  title: &quot;Pydantic AI v2.52.0 — ctx.workspace runs harness tools locally or in E2B/Sprites/Modal/SSH/Bubblewrap sandboxes, pydantic-ai-harness ships in-repo, AnthropicModel max_tokens defaults to model maximum, and GHSA-v36g-jcw9-x7cw web_fetch fix&quot;
+  url: https://github.com/pydantic/pydantic-ai/releases/tag/v2.52.0
+  card: &gt;-
+    Released Sep 30, 2026 (with v1.107.7 backport). Workspaces give Coder, FileSystem and Shell one API across local and
+    sandbox backends with durable-execution support; pydantic-ai-harness (0.52.0) and pydantic-clai2 now ship with every
+    release. AnthropicModel's max_tokens now defaults to the model's maximum output with streaming behind the scenes, which
+    changes stop-reason mix by client version. Also adds prompt_cache_outlook(), gpt-6.1-sol, and patches a moderate
+    nested-HTML resource-exhaustion advisory in local web_fetch.
+- id: cline-4-1-22-reasoning-tokens-no-longer-double-counted-gpt-6-1-sol-defaults-refusal-fallback
+  tag: Industry
+  title: &quot;Cline v4.1.22 / CLI 3.0.66 — reasoning tokens no longer double-counted in output totals, GPT-6.1 Sol becomes default for 11 providers, Anthropic server-side refusal fallback and routed provider failover&quot;
+  url: https://github.com/cline/cline/releases/tag/v4.1.22
+  card: &gt;-
+    Released Sep 30, 2026. Reasoning tokens had been counted twice in output-token totals (cost was unaffected). GPT-6.1 Sol
+    becomes the default model for OpenAI, OpenRouter, GitHub Copilot and eight other providers, so unpinned users change
+    model mix on upgrade. Direct Anthropic requests use server-side refusal fallback; on OpenRouter and Cline, Anthropic
+    models can fail over to another upstream; content-filter blocks are now reported as such.
+- id: arxiv-2609-37153-toxicbench-silent-tool-poisoning-data-agents-adopt-after-checking
+  tag: Academy
+  title: &quot;When Tools Silently Lie (ToxicBench) — silently corrupted tool outputs cut data-agent success by 26–39 points; a plain retry beats explicit verification prompts, and agents still adopt poisoned answers after checking&quot;
+  url: https://arxiv.org/abs/2609.37153
+  card: &gt;-
+    A proxy edits successful tool observations while source tables stay fixed. Across LangGraph, smolagents and AutoGen
+    (GPT, 118 tasks), clean success 0.92–0.99 drops 0.26–0.39 when poisoned, with blind-compliance rates 0.27–0.53. A
+    second plain attempt adds +0.110 success; verification prompts add nothing beyond it (−0.025). Under repeated poisoning
+    101 of 1,572 runs adopted the wrong answer after a validating check, and 0 of 133 checks were source-independent.
+- id: arxiv-2609-38043-userproxybench-user-simulator-fidelity-changes-agent-reward
+  tag: Academy
+  title: &quot;UserProxyBench — with the agent frozen at GPT-5.5, swapping only the simulated user moves τ-bench reward from .644 to .796; 24.4% of successful episodes contain a user-contract violation&quot;
+  url: https://arxiv.org/abs/2609.38043
+  card: &gt;-
+    Scores the simulated user against its private blueprint across 375 τ²-bench tasks and seven user proxies (2,141
+    criteria). Premature disclosure is the most common failure yet barely moves reward (−.043), while it cuts agent tool
+    calls by 1.06 per successful episode. Mean agent turns track user fidelity (r=.955) far better than reward (r=.594). A
+    cost–fidelity frontier picks the cheapest adequate simulator.
+- id: arxiv-2609-35815-evalstats-ppi-corrected-tests-llm-judge-false-positives-peak-high-irr
+  tag: Academy
+  title: &quot;evalstats — running statistics on raw LLM-judge scores inflates false positives, peaking at 'almost perfect' agreement; nine PPI-corrected tests (first for rank-based ones) and small-sample CI/p-value defaults&quot;
+  url: https://arxiv.org/abs/2609.35815
+  card: &gt;-
+    Simulations show uncorrected judge-score tests' false-positive risk peaks at quadratic-weighted κ/ICC ≈0.80–0.90 on
+    Likert data, and binary κ=0.81 still gave ≈37% false positives. PPI++-corrected Wilcoxon, Mann-Whitney, Friedman,
+    Kruskal-Wallis and five parametric tests hold α≈.05 on synthetic and real judge data. Judges are worth it from ρ²≈0.4
+    (~1.5× effective labels); bootstrap CIs under-cover below N=100. A real six-judge example flips p=1.9e-4 to p=0.31.
+progress:
+- parent: litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport
+  text: &gt;-
+    GHSA-7hp6-4w63-5g45 (high, Sep 30): one salt key sealed secrets and minted session tokens, letting an internal_user
+    forge a proxy_admin bearer token and run commands via the MCP stdio endpoint (default-exploitable after 1.91.0). Patched
+    in 1.100.4, 1.101.3, 1.102.2, 1.103.1 and 1.104.0rc2; stopgap EXPERIMENTAL_UI_LOGIN=false breaks CLI SSO and Claude
+    Code gateway login.
+- parent: openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks
+  text: &gt;-
+    rust-v0.159.1 stable (Sep 29) makes GPT-6.1 Sol the default model in the bundled and Amazon Bedrock Mantle/Runtime
+    catalogs; 0.159.2 (npm latest) fixes Windows console flashing. Main preserves live tool-call metadata across request
+    windows (#49401) and validates MCP authorization servers before ID-JAG exchange (#49478).
+- parent: letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction
+  text: &gt;-
+    Letta Code v0.33.8 (Sep 29) and v0.34.0 (Sep 30): user questions become asynchronous and no longer block the agent
+    turn (#4868), conversation client preferences persist (#4873), and listener-state write failures are reported
+    (#4856).
+- parent: vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts
+  text: &gt;-
+    ai 7.0.123 / 6.0.297 / 5.0.270 (Sep 30): pending tool approvals superseded by a user message are ignored, idle UI
+    message streams stay open with optional SSE heartbeats, and @ai-sdk/deepseek 3.0.57 fixes cached-input-token
+    reporting; @ai-sdk/openai adds GPT-6.1 Sol across v5–v7.
+- parent: inspect-ai-0-3-270-litellm-proxy-responses-default-eval-set-top-up-f1-multiset
+  text: &gt;-
+    Inspect 0.3.273 (Sep 29): self_critique() and model_graded_qa()/model_graded_fact() with model_role=None now grade
+    with the correct model when one task is evaluated against several models; adds gpt-6.1-sol limits and explicit
+    prompt-cache boundaries.
+headline_claims:
+- claim: &quot;LiteLLM advisory GHSA-7hp6-4w63-5g45 (high) lets an internal_user escalate to proxy_admin and execute commands via the MCP stdio endpoint; it is patched in 1.100.4, 1.101.3, 1.102.2, 1.103.1 and 1.104.0rc2.&quot;
+  url: https://github.com/BerriAI/litellm/security/advisories/GHSA-7hp6-4w63-5g45
+  date: 2026-09-30
+- claim: &quot;Mastra @mastra/core 1.72.0 adds ObservabilityStorage.aggregateTraces() for adapters with the trace-aggregate capability and fixes cost estimates for Anthropic 1-hour prompt-cache writes.&quot;
+  url: https://github.com/mastra-ai/mastra/blob/main/packages/core/CHANGELOG.md
+  date: 2026-09-30
+- claim: &quot;Cline v4.1.22 stops counting reasoning tokens twice in token usage and makes GPT-6.1 Sol the default model for OpenAI, OpenRouter, GitHub Copilot and other providers.&quot;
+  url: https://github.com/cline/cline/releases/tag/v4.1.22
+  date: 2026-09-30
+</code></pre>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 30 Sep 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
