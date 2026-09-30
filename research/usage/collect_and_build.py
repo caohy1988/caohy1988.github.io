@@ -1164,6 +1164,72 @@ def collect_muse() -> dict:
     return out
 
 
+_DSH_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,79}")  # OpenRouter-style provider/model ids
+# One "key: value" line of the overlay subset. The value is empty (null), a '…' / "…" closed on the same
+# line (no escapes) or a plain ASCII token, then an optional " # comment". Flow collections, block
+# scalars, tags, anchors, open quotes and plain values with spaces or quote/bracket chars never match.
+_DSH_KV = re.compile(r"""([A-Za-z_][A-Za-z0-9_-]*):(?: +('[^']*'|"[^"\\]*"|[A-Za-z0-9~][A-Za-z0-9_.:/@+~-]*(?<!:)))?(?: +#.*)? *""")
+# Plain tokens that dsh's js-yaml (JSON schema) loads as null / bool / int / float instead of a string.
+_DSH_NONSTR = re.compile(r"~|null|Null|NULL|true|True|TRUE|false|False|FALSE|0b[01]+|0x[0-9a-fA-F]+|0o[0-7]+|[0-9]+(?:\.[0-9]*)?(?:[eE][-+]?[0-9]+)?")
+
+
+def _dsh_str(tok: str | None) -> str | None:
+    """_DSH_KV value token -> its string; None for null and for non-string plain scalars."""
+    if tok and tok[0] in "'\"":
+        return tok[1:-1]
+    return None if not tok or _DSH_NONSTR.fullmatch(tok) else tok
+
+
+def _dsh_overlay_model(path: Path) -> tuple:
+    """(provider, model) of the agent-default-model entry in a dsh --patch overlay, else (None, None).
+
+    Strict line parser for exactly the overlay's shape: a top-level YAML list of flat "key: scalar"
+    entries where only a bare `config:` opens a flat mapping. Anything else (tabs, control chars, other
+    indents, flow/block collections, block or multi-line scalars, open quotes, duplicate keys) rejects
+    the whole file, as does an entry dsh would skip or not apply as written: duplicate id, disabled
+    (any value js-yaml + Boolean() treat as true), other name, extra keys, config not a mapping. Each
+    returned value must pass _DSH_ID. Never raises.
+    """
+    try:
+        text = path.read_bytes().decode("utf-8")
+    except Exception:  # missing, unreadable, not UTF-8
+        return None, None
+    if re.search(r"[\x00-\x09\x0b-\x1f\x7f-\x9f\u2028\u2029\ufeff]", text):  # tab, CR, NUL, BOM, ...
+        return None, None
+    entries, cfg = [], None  # cfg: the open `config:` mapping of the current entry, else None
+    for line in text.split("\n"):
+        if not line.strip(" ") or line.lstrip(" ").startswith("#"):
+            continue  # blank or comment line
+        if line.startswith("- "):  # a new list entry; its first key sits at indent 2
+            entries.append({})
+            ind = 2
+        else:
+            ind = len(line) - len(line.lstrip(" "))
+        mapping = entries[-1] if ind == 2 and entries else cfg if ind == 4 else None
+        kv = _DSH_KV.fullmatch(line[ind:])
+        if mapping is None or not kv or kv.group(1) in mapping:
+            return None, None  # outside the subset, or a duplicate key
+        key, tok = kv.groups()
+        if ind == 4:
+            cfg[key] = tok
+        elif key == "config" and tok is None:  # a bare `config:` opens the entry's nested mapping
+            cfg = mapping[key] = {}
+        else:
+            cfg, mapping[key] = None, tok
+    hits = [e for e in entries if _dsh_str(e.get("id")) == "agent-default-model"]
+    if len(hits) != 1:
+        return None, None
+    entry, conf = hits[0], hits[0].get("config")
+    if (
+        not isinstance(conf, dict)
+        or set(entry) - {"id", "name", "config", "disabled"}
+        or ("name" in entry and _dsh_str(entry["name"]) != "@deepseek-ai/dsh-agent-default-model")
+        or entry.get("disabled") not in (None, "false", "False", "FALSE", "null", "~", "0", "''", '""')
+    ):
+        return None, None
+    vals = (_dsh_str(conf.get("provider")), _dsh_str(conf.get("model")))
+    return tuple(v if v and _DSH_ID.fullmatch(v) else None for v in vals)
+
 
 def collect_dsh() -> dict:
     """DSH (DeepSeek Harness) — version + OpenRouter auth health; credits PAYG (no Coding Plan bars)."""
@@ -1172,11 +1238,12 @@ def collect_dsh() -> dict:
 
     out: dict = {
         "ok": False,
-        "source": "dsh --version + ~/.dsh settings/credentials",
+        "source": "dsh --version + ~/.dsh/collect-model.patch.yml + credential presence",
         "bars": [],
         "product": "DeepSeek Harness",
-        "model": "z-ai/glm-5.3",
-        "provider": "openrouter",
+        "model": None,
+        "provider": None,
+        "model_source": None,
     }
     try:
         dsh = DSH_BIN if DSH_BIN.exists() else Path(shutil.which("dsh") or "")
@@ -1195,19 +1262,11 @@ def collect_dsh() -> dict:
         ver_blob = ((proc.stdout or "") + (proc.stderr or "")).strip().splitlines()
         out["cli_version"] = ver_blob[0].strip() if ver_blob else "unknown"
 
-        settings = DSH_DIR / "settings.yaml"
-        if settings.exists():
-            raw = settings.read_text()
-            m = re.search(r"agent-default-model:\s*\n(?:\s+\w+:.*\n)*?\s+model:\s*([^\n]+)", raw)
-            if not m:
-                m = re.search(r"agent-default-model:[\s\S]*?model:\s*([^\n]+)", raw)
-            if m:
-                out["model"] = m.group(1).strip().strip("\"'")
-            if re.search(r"provider:\s*openrouter", raw):
-                out["provider"] = "openrouter"
-            pm = re.search(r"agent-default-model:[\s\S]*?provider:\s*([^\n]+)", raw)
-            if pm:
-                out["provider"] = pm.group(1).strip().strip("\"'")
+        # dsh 0.2.0 has no settings.yaml: model/provider come only from the per-run --patch overlay
+        # (None when it cannot supply them; a leftover settings.yaml is never read).
+        out["provider"], out["model"] = _dsh_overlay_model(DSH_DIR / "collect-model.patch.yml")
+        if out["provider"] or out["model"]:
+            out["model_source"] = "~/.dsh/collect-model.patch.yml (dsh --patch collect overlay)"
 
         # Auth health: key present but never expose value
         auth_ok = False
@@ -1236,7 +1295,8 @@ def collect_dsh() -> dict:
         out["ok"] = bool(out.get("cli_version")) and auth_ok and out["cli_version"] != "unknown"
         out["detail"] = (
             "OpenRouter prepaid credits / PAYG (no Coding Plan quota bars). "
-            "Card shows install + OpenRouter key presence + default model only."
+            "Card shows install + OpenRouter key presence + the collect model, read from the "
+            "dsh --patch overlay ~/.dsh/collect-model.patch.yml (dsh 0.2.0 has no settings.yaml)."
         )
         if not auth_ok:
             out["error"] = "OpenRouter key missing — set OPENROUTER_API_KEY in ~/.dsh/.env"
@@ -1788,7 +1848,7 @@ def render_html(snap: dict) -> str:
     if dsh.get("error"):
         dsh_err = f'<p class="err">{esc(dsh.get("error"))}</p>'
     dsh_body = f"""
-      <p class="pill">CLI <strong>{esc(dsh.get('cli_version') or '—')}</strong> · provider <strong>{esc(dsh.get('provider') or 'openrouter')}</strong> · model <strong>{esc(dsh.get('model') or 'z-ai/glm-5.3')}</strong></p>
+      <p class="pill">CLI <strong>{esc(dsh.get('cli_version') or '—')}</strong> · provider <strong>{esc(dsh.get('provider') or '—')}</strong> · model <strong>{esc(dsh.get('model') or '—')}</strong></p>
       <div class="metric">
         <div class="metric-label">DSH status</div>
         <div class="status-chip {dsh_tone}">{esc(dsh_chip)}</div>
