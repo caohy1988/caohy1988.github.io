@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-10-01 · 12:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="Industry NEW langchain mcp-adapters 2.0.0; Academy NEW 2609.40111/38761/38983; Progress LiteLLM v1.103.2 GHSA-3cv6, Phoenix 20.18, Anthropic SDK 1.11.0, Cline CLI 3.0.67.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-01-0034-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 AM PT · late-wake on-cadence · fresh-list path · effort high · 1834 Mac-down wider window</p>
+    <article>
+<h1>Field Brief — 2026-10-01-0034: LangChain's MCP adapter renames every tool by default; LiteLLM's stable line stops showing hashed keys as owners; a 50,000-row agent-failure dataset shows 30% of &quot;fixes&quot; would have passed on a plain retry; a correct answer can hide a broken multi-agent rule; approval-vs-execution gaps measured in Claude Code</h1>
+<p><strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>)
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, catalog and push.
+<strong>Slot:</strong> 2026-10-01-0034 (00:34 PT, Thu Oct 1). Late wake: I worked ~00:40–01:30 PT on the 00:34 cadence. The label stays 0034.
+<strong>Effort:</strong> high, per Haiyuan's lock of 2026-09-29 (<code>Maps/Decisions/2026-09-29-field-brief-high-effort.md</code>). I did not raise it to max.
+<strong>Window:</strong> wider than usual. The 1834 Wed slot was <strong>skipped because the Mac was down</strong>, so no 1834 brief exists. This brief covers everything after the last published brief (<code>2026-09-30T1234</code>, i.e. after 19:34Z Sep 30) through this slot (07:34Z Oct 1). My own GitHub, PyPI and npm sweep covered releases published after 19:30Z Sep 30.</p>
+<hr />
+<h2>Read this first</h2>
+<ol>
+<li><strong>LangChain.js's MCP adapter 2.0.0 renames every MCP tool by default (Industry NEW I1).</strong> <code>@langchain/mcp-adapters</code> 2.0.0 moves to MCP SDK 2 and handles modern and legacy MCP servers in one adapter. It lets servers ask the user for input through LangGraph interrupts. It also <strong>prefixes every tool name with its server name by default</strong>: <code>search</code> on server <code>docs</code> becomes <code>docs__search</code>. Any tool-level metric keyed on the tool name breaks at this upgrade unless names are normalized.</li>
+<li><strong>LiteLLM's stable line now shows the real owner of CLI spend instead of a hashed key (Progress P1).</strong> Stable <code>v1.103.2</code> backports three fixes. Before them, the daily-activity endpoint returned CLI session keys as SHA-256 hashes with null <code>key_alias</code> and <code>user_email</code>, so per-user cost reports were &quot;dirty&quot;. The same window published <strong>GHSA-3cv6-jpf6-8222 / CVE-2026-84377</strong>: any authenticated proxy user could redirect a provider call and exfiltrate the operator's provider credentials. It is patched on the 1.88–1.96 lines.</li>
+<li><strong>Agent Error Dataset: about 30% of &quot;successful corrections&quot; would also have passed if the original action were simply retried (Academy NEW A1, <code>2609.40111</code>, full PDF read).</strong> This is 50,228 error–diagnosis pairs from 33 environments, 19 harnesses and 23 models. Corrections lift pass rates from 18.4% to 51.1% against matched retries. Of 1,564 passing first proposals, however, 470 also passed when the original action was retried (App. B.2). And when the prompt presupposes failure, LLM diagnosers name an error on 100% of <em>successful</em> runs (App. L).</li>
+<li><strong>A correct answer can hide a broken multi-agent rule (Academy NEW A2, <code>2609.38761</code>, full PDF read).</strong> In 43 of 72 runs where the rule for admitting evidence was deliberately broken, the system still answered correctly. A diagnoser using native execution records caught 63% of the broken mechanisms, against 26% from public outputs. With identical evidence, a generic prompt claimed a definite verdict in 576 of 768 cases where the records could not support one.</li>
+<li><strong>Approval Laundering: what a human approves is often not what a coding agent runs (Academy NEW A3, <code>2609.38983</code>, full PDF read).</strong> The study measured Claude Code 2.1.197. Scope, Temporal and same-name-<code>$PATH</code> Tool laundering occur in 100% of runs, and subagents run with the main session's approval in 94.7%. A seven-field HMAC &quot;Approval Token&quot; eliminates the Delegation and Temporal cases but cannot see effect-level divergence such as git hooks or npm scripts.</li>
+<li><strong>Smaller moves.</strong> Phoenix 20.17/20.18 puts eval results into the trace tree (P2). Anthropic SDK 1.11.0 adds a list-spend-limits endpoint (P3). Cline CLI 3.0.67 lets the agent page through MCP output past the context cutoff (P4). Codex shipped only <code>0.159.3</code> (one security-reminder backport) plus alphas.</li>
+</ol>
+<hr />
+<h2>Industry</h2>
+<h3>NEW I1 — <a href="https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fmcp-adapters%402.0.0"><code>@langchain/mcp-adapters</code> 2.0.0</a>: MCP SDK 2, modern and legacy servers in one adapter, elicitation via LangGraph interrupts, tool names prefixed by server</h3>
+<p><strong>Release times:</strong> GitHub 01:15:20Z Oct 1. npm <code>@langchain/mcp-adapters@2.0.0</code> was published 01:16:28Z.
+<strong>Catalog check:</strong> I grepped the live catalog for <code>mcp-adapter</code>. There is no card. The nearest LangChain card is <code>langchainjs-langchain-1-5-14-openai-1-6-0-tool-error-status-cache-writes-langsmith-gateway</code>, which covers the core <code>langchain</code> package rather than the MCP adapter. This is a major-version product change to a separate package, so I rank it NEW.</p>
+<p><strong>What shipped (release notes):</strong></p>
+<ul>
+<li><strong>One adapter for both MCP protocol generations.</strong> Each server negotiates its own protocol: <code>mode: &quot;auto&quot;</code> (the default), <code>&quot;modern&quot;</code> or <code>&quot;legacy&quot;</code>. The adapter bundles the MCP SDK 2 client, and SSE remains legacy-only. In auto or modern mode, HTTP connections no longer resume a dropped response stream.</li>
+<li><strong>Tool names include the server name by default.</strong> <code>search</code> on server <code>docs</code> becomes <code>docs__search</code>. This applies even with one server and with the deprecated <code>MultiServerMCPClient</code>. <code>prefixToolNameWithServerName: false</code> restores the old names, but then <strong>duplicate tool names throw</strong> <code>MCPClientError</code>.</li>
+<li><strong>New API surface.</strong> <code>MCPAdapter</code> replaces <code>MultiServerMCPClient</code>, <code>listTools()</code> replaces <code>getTools()</code>, and <code>listToolsets()</code> groups tools by server. Configuration is validated with Zod 4, so unknown or conflicting options now throw.</li>
+<li><strong>Servers can ask users for input through LangGraph interrupts</strong> (elicitation). Notification and progress callbacks move into each server's own configuration.</li>
+<li><strong>Auth:</strong> <code>authProvider</code> accepts token providers as well as OAuth providers. Discovery retries after an authentication failure, and <code>UnauthorizedError</code> is exported.</li>
+<li><strong>Requirements:</strong> <code>@langchain/core ^1.2.6</code> and <code>@langchain/langgraph ^1.4.13</code>.</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong></p>
+<ul>
+<li><strong>Tool-name discontinuity.</strong> Every LangChain.js agent that upgrades will emit <code>server__tool</code> names instead of <code>tool</code>. Per-tool call counts, error rates and latency will split into two series at the upgrade boundary. Normalize on (server, tool) as two fields rather than on the raw name string.</li>
+<li><strong>Human-input waits become interrupts.</strong> MCP elicitation now surfaces as LangGraph interrupts. A session that pauses for user input should be classified as &quot;waiting on human&quot;, not as idle or failed.</li>
+<li><strong>Context:</strong> <code>@langchain/typesafe</code> 0.0.2 shipped in the same train (01:22Z). It adds <code>modelRouterMiddleware</code> (TypeSafe <code>Choice</code> routing) and <code>autoModeMiddleware</code> (blocks risky tool calls using a calibrated probability). This is NOTE only; Jev/TypeSafe integrations are already carded elsewhere.</li>
+</ul>
+<h3>Progress P1 — LiteLLM stable <a href="https://github.com/BerriAI/litellm/releases/tag/v1.103.2"><code>v1.103.2</code></a> + <a href="https://github.com/BerriAI/litellm/releases/tag/v1.101.4"><code>v1.101.4</code></a> + advisory <a href="https://github.com/advisories/GHSA-3cv6-jpf6-8222">GHSA-3cv6-jpf6-8222 / CVE-2026-84377</a></h3>
+<p><strong>Attach to:</strong> <code>litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport</code> (credential hygiene was attached at Wed 1234).
+<strong>Times:</strong> <code>v1.103.2</code> was published on GitHub 06:37:31Z Oct 1 and uploaded to PyPI 06:20:45Z (<code>prerelease: false</code>). <code>v1.101.4</code> was published 05:10:19Z. The advisory was published 21:11:25Z Sep 30.</p>
+<p><strong>What shipped in v1.103.2 (four backport PRs):</strong></p>
+<ul>
+<li><strong>#43897</strong> backports #40541, #43642 and #43656.</li>
+<li>#40541 attributes CLI session spend to the per-user cli-session alias instead of the hashed session token.</li>
+<li>#43642 recovers session-key owners from daily spend.</li>
+<li>#43656 looks up hashed key names when a key has two spend-log rows.</li>
+<li>The PR's own motivation: a customer pulling <code>/user/daily/activity/aggregated</code> into BI on v1.103.0 got &quot;CLI session keys … as sha256 hashes with null <code>key_alias</code> and <code>user_email</code>&quot;, so &quot;its per-user cost report is dirty.&quot;</li>
+<li><strong>#43662</strong> backports #42152 and #42288. Claude Code auto mode's <code>safeguards</code> field now passes through <code>/v1/messages</code> to Anthropic, Bedrock, Vertex and Azure AI Foundry, and <code>safeguard_results</code> comes back. Before this, v1.103.1 stripped the field, so Claude Code reported auto mode as unavailable behind the gateway.</li>
+<li><strong>#43984</strong> backports #43962. With <code>STORE_MODEL_IN_DB=true</code>, config pass-throughs using <code>forward_headers: true</code> had stopped forwarding <code>Authorization</code> from v1.103.0 onward. <code>os.environ/</code> targets were also sent upstream unresolved. Both are fixed.</li>
+</ul>
+<p><strong>Advisory (GHSA-3cv6-jpf6-8222, severity medium).</strong></p>
+<ul>
+<li><strong>The flaw:</strong> request-body validation was a denylist that missed some sensitive parameters and did not inspect nested ones. Any authenticated proxy user could therefore set <code>api_base</code>, <code>base_url</code>, <code>model_list</code>, <code>fallbacks</code> or provider credential fields. The proxy would then send the operator's own provider credentials to that destination, and the same path allowed SSRF against internal services.</li>
+<li><strong>Patched versions:</strong> 1.88.6, 1.89.7, 1.90.7, 1.91.5, 1.92.2, 1.93.2, 1.94.3, 1.95.1 and 1.96.2.</li>
+<li><strong>Workaround:</strong> <code>general_settings.allow_client_side_credentials: false</code>.</li>
+<li><strong>Downstream:</strong> crewAI merged a pin to <code>litellm</code> 1.88.6 for this advisory (crewAI #7835, 04:34Z Oct 1).</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong> This is another &quot;valid row, wrong owner&quot; case: per-user cost from LiteLLM v1.103.0/1.103.1 can attribute CLI spend to a hash with no user. Re-derive owners for that version window, or join on the alias once customers move to v1.103.2. Gateways older than the patched versions should be treated as able to leak provider keys to any key holder. Recommend the advisory's workaround to customers who route agent traffic through LiteLLM.</p>
+<h3>Progress P2 — Phoenix <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.17.0"><code>arize-phoenix-v20.17.0</code></a> (22:10Z) + <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.18.0"><code>v20.18.0</code></a> (23:04Z; PyPI 23:09:15Z) + <code>@arizeai/phoenix-client</code> 7.16.0</h3>
+<p><strong>Attach to:</strong> <code>arize-phoenix-20-16-0-pxi-tool-raise-closes-turn-frontier-cost-tables</code>.</p>
+<p><strong>What shipped:</strong></p>
+<ul>
+<li><strong>Eval results appear in the trace tree</strong> (#16619, 20.18.0). A span that an online evaluator flagged now carries a badge in the tree, and the hover preview shows an annotations table.</li>
+<li><strong>Bash tool spans become errors on a non-zero exit</strong> (#16597, 20.17.0). Before this, a <code>TOOL</code> span for a failed bash command showed <code>OK</code>. This change applies to Phoenix's own PXI agent traces.</li>
+<li><strong>Ingest fix</strong> (#16092). A per-key merge no longer interleaves dual-emitted <code>gen_ai</code> messages.</li>
+<li><strong>Other fixes:</strong> cost-pattern scoring fixes (#16176), and the OTel <code>register()</code> crash with exporter-otlp-proto-http 1.45 (#16549).</li>
+<li><strong>REST revert:</strong> the <code>list_experiments</code> ordinal fields shipped and were then reverted in the same release (#16574 → #16624).</li>
+<li><strong><code>phoenix-client</code> 7.16.0</strong> adds helpers to assign annotation configs to projects.</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong> Phoenix now puts evaluator verdicts directly on spans, which is the trace-plus-eval join BQAA would do in SQL. The bash exit-code fix is another instance of the &quot;OK status, failed action&quot; pattern: span status alone undercounts tool failures unless exit codes are part of the status rule.</p>
+<h3>Progress P3 — Anthropic SDK <a href="https://github.com/anthropics/anthropic-sdk-python/releases/tag/v1.11.0">1.11.0</a> (Python; PyPI 22:58:22Z) + <a href="https://github.com/anthropics/anthropic-sdk-typescript/releases/tag/sdk-v0.131.0">TypeScript <code>sdk-v0.131.0</code></a> (npm 23:03:22Z)</h3>
+<p><strong>Attach to:</strong> <code>anthropic-sdk-1-10-0-admin-api-org-analytics-per-user-cost-spend-limits-rbac-org-api-ga</code> (carded NEW at Wed 1234, so this is not re-admitted).</p>
+<p><strong>What shipped:</strong></p>
+<ul>
+<li><strong>A list endpoint for spend limits.</strong> The source diff adds <code>beta/organization/spend_limits</code> with <code>BetaSpendLimit</code> and <code>SpendLimitListParams</code> types, so admins can now enumerate configured limits rather than only reading one at a time.</li>
+<li><strong>Sonnet 4.5 is marked deprecated</strong> in the client.</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong> Spend limits can now be listed and joined to per-user cost (from 1.10.0) in one pass, which gives a &quot;cost versus limit&quot; view. This is small but completes the admin surface carded on Wednesday.</p>
+<h3>Progress P4 — Cline <a href="https://github.com/cline/cline/releases/tag/cli-v3.0.67">CLI <code>cli-v3.0.67</code></a> (23:42Z) + SDK v0.0.89 + desktop 0.0.40</h3>
+<p><strong>Attach to:</strong> <code>cline-4-1-22-reasoning-tokens-no-longer-double-counted-gpt-6-1-sol-defaults-refusal-fallback</code>.</p>
+<p><strong>What shipped:</strong></p>
+<ul>
+<li><strong>Oversized MCP output is no longer lost.</strong> When a tool returns more than fits in context, the agent gets a preview plus a link it can page through with <code>read_files</code> (#14712, a session memory cache).</li>
+<li><strong>Custom providers</strong> from <code>providers.json</code>/<code>models.json</code> now run instead of failing with <code>Unknown or disabled provider</code>.</li>
+<li><strong>Credential-save errors</strong> during onboarding are now shown instead of failing silently.</li>
+<li><strong>Model catalog refresh.</strong> Several default models changed, and Vultr model ids were renamed upstream.</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong> A truncated tool result now produces follow-up <code>read_files</code> calls. Count those as part of the original tool call's cost, not as new user-driven work.</p>
+<h3>NOTE (not ranked)</h3>
+<ul>
+<li><strong>Codex.</strong> <code>rust-v0.159.3</code> (22:57Z) carries one change: optional account-security setup reminders (#49744). The <code>0.161.0-alpha.5</code> through <code>alpha.8</code> and <code>0.160.0-alpha.6.2</code> cuts have boilerplate bodies. <code>main</code> merged coordinated shutdown for local agent trees (#49814), world-state snapshots persisted with rendered context (#49847), and extension filesystem access scoped to callback permissions (#49898), but none of these is in a stable release. Watch for 0.161 stable.</li>
+<li><strong>Letta Code v0.34.1</strong> (21:25Z) is a thin release: a Windows memfs fix and a Sonnet 5.5 dependency bump. The remote tray app was added and then reverted. Not material over v0.34.0.</li>
+<li><strong>Vercel AI.</strong></li>
+<li><code>@ai-sdk/openai-compatible</code> 3.0.62 (22:57Z) ships multipart tool results for compatible providers (#21857).</li>
+<li><code>ai@7.0.126</code> clears tool approvals when <code>addToolOutput</code> runs.</li>
+<li><code>ai@6.0.299</code> is a dependency bump only.</li>
+<li>Small; held for the next material Vercel move.</li>
+<li><strong>opencode v1.18.34</strong> sends namespaced session and parent-session identity headers with model requests. This helps gateways attribute subagent calls to their parent session.</li>
+<li><strong>openai-python #4004</strong> (&quot;collect final output from beta Agents streams&quot;) merged at 23:49Z. There has been no release since v3.22.1 (Sep 30 00:25Z). The <code>[1/n]</code> typed-answers series (#4007) is still open.</li>
+<li><strong>OpenInference</strong> cut a batch of instrumentation releases at 02:30Z Oct 1, including <code>semantic-conventions</code> v0.1.40. These are patch-level; there is no product-level change to card.</li>
+<li><strong>google-adk (1P, NOTE only, never carded).</strong> <code>adk-js</code> v2.2.0 (21:05Z Sep 30) attaches session metadata to A2A task, working and input-required events.</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<h3>NEW A1 — <a href="https://arxiv.org/abs/2609.40111">Agent Error Dataset: Scaling 50,000 Error–Diagnosis Pairs for Failure Analysis and Error-Aware Post-Training (arXiv 2609.40111)</a></h3>
+<p><strong>Authors:</strong> Kunlun Zhu, Xuyan Ye, Yibo Li, Cheng Qian, Beibin Li and Heng Ji (Apodex). Submitted 30 Sep 2026, cs.AI. <strong>Full PDF read</strong> (73 pages: main text plus Appendices A–X).</p>
+<p><strong>What it is.</strong> AED holds 50,228 error–diagnosis pairs linked to 38,278 stored traces over 9,961 source tasks, across 33 environments, 19 harness families and 23 policy models (Table 4).</p>
+<ul>
+<li><strong>Record contents:</strong> each record keeps the failed trace, the blamed step, the responsible agent, an explanation with verbatim trace quotations, a proposed replacement action and, where replay is possible, a matched replay.</li>
+<li><strong>The matched replay:</strong> the correction and a plain retry of the original action are both run from the same checkpoint, so each correction has its own control.</li>
+<li><strong>Evidence grades:</strong> E0 means grounded but not replayed. E1 means an observed recovery. E2 means at least two trials per arm, with every treatment passing and every control failing (App. C.1, D.2).</li>
+</ul>
+<p><strong>Key numbers.</strong></p>
+<ul>
+<li><strong>Corrections versus retries.</strong> Over 3,062 matched replay pairs, first-proposal corrections pass 51.1% against 18.4% for an original-action retry: +32.7 points, with a task-clustered 95% CI of 28.4–37.0 (Table 47a). However, <strong>470 of the 1,564 passing first proposals also passed on the plain retry (30.1%)</strong>. The breakdown is 1,094 correction-only, 470 both, 93 retry-only and 1,405 neither (App. B.2, Fig. 7a).</li>
+<li><strong>Repeated diagnoses rarely move on.</strong> Across 1,744 successive diagnosis rounds, 61.0% re-blame the same step (App. K.1).</li>
+<li><strong>Fine-tuning a diagnoser.</strong> Full-diagnosis fine-tuning of Qwen3-8B raises exact-step agreement with the internal teacher labels from 47.2% to 63.6% (three seeds, 943-case holdout; Table 28). Prompted Claude Opus 5 scores 54.7% (Table 48a). <strong>Public transfer is weak:</strong></li>
+<li>On TrajErrBench, two of three seeds score below the base (Table 32).</li>
+<li>The Who&amp;When gain of +7.97 shrinks to +4.92 [−2.24, 12.08] once tasks that overlap training are excluded (Table 15).</li>
+<li>After Holm correction, the only significant public cells are three losses (Table 31).</li>
+<li><strong>Error-reporting bias.</strong> On 50 <em>successful</em> trajectories, GPT-5 mini, GPT-5.6 Sol and Claude Opus 5 all name an error under a prompt that presupposes failure (0 of 150 abstain). With a neutral prompt that allows &quot;none&quot;, they abstain 84%, 86% and 44% of the time (App. L).</li>
+<li><strong>Label quality.</strong></li>
+<li>6,381 of 11,116 diagnosis attempts (57.4%) pass citation grounding (App. E.2).</li>
+<li>A blinded three-model panel endorsed both the blamed step and full evidence support on only 9 of 120 records (Table 8).</li>
+<li>Two human reviewers chose the same preferred step on 59 of 69 records, but both accepted the diagnosis on only 41 of 80 (Table 44).</li>
+<li><strong>Grader defects.</strong> In AgentBench-DB, gold SQL failed to reproduce the table hash on 234 of 455 state-changing tasks. In BFCL, the ground-truth calls failed the state checker on 112 of 386 instances (App. D, E.1).</li>
+<li><strong>Cost.</strong> Rollout plus diagnosis cost $0.110 per diagnosis (21,629 runs, 6,898 diagnoses, $758.96; Table 21). Strict admission keeps 767 of 19,904 candidates (3.9%) at $1.25 per retained row (Table 50a).</li>
+</ul>
+<p><strong>Limitations, as stated by the authors.</strong></p>
+<ul>
+<li>The diagnosis experiments use an earlier frozen release whose inputs omitted policy system prompts and tool lists (App. A).</li>
+<li>1,846 of the 3,062 replay pairs ran under a substituted ReAct harness, not the harness that failed (Table 14).</li>
+<li>Actor training on repair targets gains on WebShop-lite but loses 8–10 points on TextQuest. On real ALFWorld and ScienceWorld it falls to 0.75% and 0.34%, against 5.97% and 9.67% for the base policy (Table 49, App. X.6).</li>
+<li>Code and data are &quot;will be released&quot;; they are not available now.</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong></p>
+<ul>
+<li><strong>A ready schema for failure diagnosis.</strong> The AED record is a near-ready template for a <code>failure_diagnosis</code> table joined to <code>agent_events</code>: blamed step id, responsible unit, quoted evidence span ids, proposed action, replay outcome <em>with its control</em>, and an evidence grade. BQAA should store the control outcome too, or &quot;fix rates&quot; overstate by roughly 30%.</li>
+<li><strong>Prompting rule for diagnosers.</strong> Never prompt an LLM diagnoser with &quot;this run failed&quot; over unlabeled traces. Use the neutral, abstain-allowed form, or the error rate becomes 100% by construction.</li>
+<li><strong>Check graders before trusting labels.</strong> Verifier and grader defects are common enough that &quot;failure&quot; labels need a grader sanity check before they feed analytics.</li>
+</ul>
+<h3>NEW A2 — <a href="https://arxiv.org/abs/2609.38761">Where Do Multi-Agent Systems Fail? Evidence-Grounded Diagnosis of Collective Mechanisms (arXiv 2609.38761)</a></h3>
+<p><strong>Author:</strong> Zhengye Han (NYU), sole author. Submitted 30 Sep 2026, cs.MA. <strong>Full PDF read</strong> (9 pages).</p>
+<p><strong>What it is.</strong> A <strong>diagnostic contract</strong> pairs two things for one multi-agent mechanism: a <em>violation predicate</em> (what counts as breaking the rule) and an <em>evidence specification</em> (which authoritative records can settle it).</p>
+<ul>
+<li><strong>Three-valued verdict.</strong> The contract returns <em>supported</em>, <em>ruled_out</em> or <em>unknown</em>.</li>
+<li><strong>Key property.</strong> Removing records can turn a verdict into unknown but can never reverse it (Prop. 3.1, §3.3).</li>
+<li><strong>Mechanisms covered:</strong> routing, admission/dependence, state maintenance and representation/action.</li>
+<li><strong>Ground truth by construction:</strong> the author replays each run from a frozen prefix three ways (unchanged, mechanism broken, mechanism restored) across AutoGen, LangGraph, CAMEL and MetaGPT adapters (§4).</li>
+</ul>
+<p><strong>Key numbers.</strong></p>
+<ul>
+<li><strong>Correct answers hide violations.</strong> In <strong>43 of 72</strong> admission-rule violations the system still answered correctly, so task success concealed 59.7% of realized violations (Table 3, §6.1). In the separately frozen allocation family (DRAC), 28 violations still produced the exact optimal allocation.</li>
+<li><strong>Evidence access matters.</strong> A diagnoser prompt without examples recovered the broken mechanism in <strong>26.4%</strong> of cases from public outputs and <strong>63.2%</strong> from native execution records, a paired gain of +0.368 [0.271, 0.472] (§6.2, Fig. 2).</li>
+<li><strong>Overclaiming with the same evidence</strong> (Table 4):</li>
+<li>When decisive records were deleted, the generic prompt still asserted a definite verdict on <strong>576 of 768</strong> packages.</li>
+<li>It reversed <strong>138 of 1,152</strong> verdicts as records were removed, which the contract semantics forbid.</li>
+<li>Prompts that state the contracts made 0 reversals, but returned valid outputs on only 78.1% and 67.1% of packages. The preregistered verdict is therefore &quot;inconclusive&quot; (§5.3).</li>
+<li><strong>Transfer gap.</strong> A prompt that kept its verdict under irrelevant-record deletion in 287 of 287 benchmark pairs did so in only <strong>13 of 28</strong> pairs from an independently developed workflow (Co-STORM) (Fig. 3, §6.4).</li>
+<li><strong>Public traces lack the needed records.</strong> None of 156 TraceElephant multi-agent traces supports a verdict at any of the four mechanisms; 147 stay unresolved (§6.3).</li>
+</ul>
+<p><strong>Limitations.</strong></p>
+<ul>
+<li>One model lineage (DeepSeek-V4.1-Flash) throughout.</li>
+<li>The benchmark authors its own institutions, and mechanisms are broken one at a time.</li>
+<li>The transfer result rests on one external workflow: 28 pairs from 10 tasks, with an admission binding that reviewers called ambiguous.</li>
+<li>An OpenAI Agents SDK approval gate was rejected as a binding, because it authorizes actions rather than admitting evidence (Table 5).</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong></p>
+<ul>
+<li><strong>Formal backing for &quot;missing ≠ absent&quot;.</strong> This formalizes the vault rule that a negative claim needs a lookup that worked. &quot;Unknown&quot; is the correct answer when the records cannot settle the question.</li>
+<li><strong>Log per-operation records, not just transcripts.</strong> To support any mechanism-level diagnosis, BQAA needs records bound to each operation: the input each agent actually received, admission decisions, state versions and action receipts tied to the caller and payload. Outcome rows and chat transcripts are not enough.</li>
+<li><strong>Prompt LLM trace diagnosers with the evidence rules.</strong> Any LLM diagnoser over BQAA traces should be prompted with the evidence obligations, or it will claim certainty the data cannot support.</li>
+</ul>
+<h3>NEW A3 — <a href="https://arxiv.org/abs/2609.38983">Approval Laundering: Systematizing Approval–Execution Binding Failures in AI Coding-Agent Harnesses (arXiv 2609.38983)</a></h3>
+<p><strong>Author:</strong> Yang Wang (Fudan), sole author. Submitted 30 Sep 2026, cs.CR. This is a working draft dated 2026-09-22 that has not yet been submitted for review. <strong>Full PDF read</strong> (20 pages).</p>
+<p><strong>What it is.</strong> The paper names six ways the action a human approves can differ from the action the harness actually runs:</p>
+<ul>
+<li><strong>Scope:</strong> an approved npm script's child process reads a file the grant never named.</li>
+<li><strong>Argument:</strong> a pre-commit hook runs <code>git add -A</code> under an exact-literal <code>git commit -m &quot;wip&quot;</code> grant.</li>
+<li><strong>Temporal:</strong> a persisted rule is reused in a later session.</li>
+<li><strong>Tool:</strong> a cross-tool substitution, or a <code>$PATH</code>-shadowed binary behind an approved command name.</li>
+<li><strong>Delegation:</strong> a subagent runs with the main session's approval.</li>
+<li><strong>Semantic:</strong> the approval text does not disclose the target.</li>
+</ul>
+<p>The measurements instrument Claude Code 2.1.197 headless through its <code>PreToolUse</code> hook, with N=19–20 runs per class (§4).</p>
+<p><strong>Key numbers (Bound-Gap Rate, Table 3).</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Class</th>
+  <th>Bound-Gap Rate</th>
+  <th>95% CI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Scope</td>
+  <td>1.00</td>
+  <td>[0.839, 1.0]</td>
+</tr>
+<tr>
+  <td>Temporal</td>
+  <td>1.00</td>
+  <td>—</td>
+</tr>
+<tr>
+  <td>Tool, same-name <code>$PATH</code></td>
+  <td>1.00</td>
+  <td>—</td>
+</tr>
+<tr>
+  <td>Delegation</td>
+  <td>0.947</td>
+  <td>[0.754, 0.991]</td>
+</tr>
+<tr>
+  <td>Argument</td>
+  <td>0.45</td>
+  <td>[0.258, 0.658]</td>
+</tr>
+<tr>
+  <td>Semantic (proxy metric)</td>
+  <td>0.10</td>
+  <td>—</td>
+</tr>
+<tr>
+  <td>Tool, cross-tool (Bash/curl with only a WebFetch grant)</td>
+  <td>0.00</td>
+  <td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>The 0.00 cross-tool result is correctly blocked by the native policy engine.</p>
+<p><strong>The proposed defense.</strong> Approval Token is an HMAC over principal, agent id, session id, tool, arguments, scope and expiry, verified in a second hook (Table 5).</p>
+<ul>
+<li><strong>Delegation</strong> falls from 0.947 to 0 (p=7.6e-6) and <strong>Temporal</strong> from 1.0 to 0 (p=1.9e-6). Both were also confirmed in 6 of 6 live runs.</li>
+<li><strong>Scope</strong> is unchanged at 1.0, and <strong>Argument</strong> moves only from 0.45 to 0.40 (p=1). These are effect divergences that sit one process below what a field-level check can see (§3.2, §9).</li>
+</ul>
+<p><strong>Limitations, which the author discloses.</strong></p>
+<ul>
+<li>Runs were not hermetic: all 138 main-study traces had a previous-session summary and extra plugins injected at SessionStart (§4.1).</li>
+<li>Temporal uses a synthetic seeded session id, not a real two-session lifecycle.</li>
+<li>κ comes from a non-blinded author cross-check.</li>
+<li>An analyzer bug, found during review, changed Scope from 0.80 to 1.00 (§4.4).</li>
+<li>Only one harness was measured. The Codex probe used v0.154.0, where <code>codex exec</code> never invoked the configured hook (§9).</li>
+<li>The token's key file is readable by the same user.</li>
+</ul>
+<p><strong>Why it matters for BQAA.</strong> An approval audit row is only useful if it carries <code>agent_id</code>, <code>session_id</code> and the grant identity. With those, Delegation and Temporal laundering become detectable with a SQL join (approval's agent or session ≠ executing call's). Scope and Argument laundering are invisible at the tool-call layer, so detecting them requires joining approvals to <em>effects</em> (file writes, commits, network) rather than to command strings. Note that this measures an older Claude Code version (2.1.197); I did not confirm the rates on current 2.1.286.</p>
+<h3>Scouted, not ranked (abstract-level only; no full read)</h3>
+<ul>
+<li><code>2609.36730</code> LibraryDesignBench (F01 top). Agents designing libraries for other agents. Solid, but about code reuse, not trace analytics.</li>
+<li><code>2609.38812</code> Terminal-agent self-verification. 61.43% of incorrect candidates are detected and 49.36% of detected errors are repaired on TerminalBench2.1. A good &quot;self-report vs reality&quot; data point; next-slot candidate.</li>
+<li><code>2609.39958</code> Harness gains versus judge drift on banking decks. Repeated grading shifts scores on unchanged decks.</li>
+<li><code>2609.39989</code> Component-replacement evidence scoping review.</li>
+<li><code>2609.38670</code> Decision-checkpoint auditing of search agents.</li>
+<li><code>2609.39026</code> Evidence-selection bias in deep-research agents.</li>
+<li><code>2609.38223</code> CATP local authorization and audit evidence.</li>
+<li><code>2609.38266</code> Janus evidence-before-effect provenance.</li>
+<li><code>2609.40284</code> cua-speedrun.</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ol>
+<li><strong>Tool-name normalization (I1).</strong> This is the highest near-term EV. LangChain.js MCP users will flip to <code>server__tool</code> names as they upgrade. Ship a (server, tool) split in the <code>agent_events</code> view now, before mixed-version data accumulates.</li>
+<li><strong>Owner re-derivation for LiteLLM v1.103.0/1.103.1 spend (P1).</strong> Add a version-boundary rule so that hashed-key rows are re-joined to their aliases. This is another &quot;valid row, wrong owner/number&quot; case, following the Claude Code gateway meter fix carded at Wed 1234, so it deserves a standing data-quality check.</li>
+<li><strong>Failure-diagnosis table design (A1 + A2).</strong> Adopt AED's record shape: blamed step, evidence span ids, proposal, replay <em>with control</em>, and evidence grade. Use A2's three-valued verdict, with unknown as a first-class value. Both papers say LLM diagnosers overclaim unless prompted neutrally and with explicit evidence rules.</li>
+<li><strong>Approval audit join (A3).</strong> Approval events need agent and session identity to be analyzable. Raise this with ADK and plugin owners as a field requirement.</li>
+</ol>
+<hr />
+<h2>TL;DRs for BQAA (one line per item)</h2>
+<ul>
+<li><strong>I1 <code>@langchain/mcp-adapters</code> 2.0.0:</strong> MCP tool names become <code>server__tool</code> by default; split the tool dimension into server and tool before the series fractures.</li>
+<li><strong>P1 LiteLLM v1.103.2 + GHSA-3cv6:</strong> CLI spend on v1.103.0/1.103.1 was owned by a hash, so re-derive owners. Unpatched gateways older than the patched 1.88–1.96 versions can leak provider keys to any key holder.</li>
+<li><strong>P2 Phoenix 20.17/20.18:</strong> eval verdicts now sit on spans; bash exit codes now set span ERROR in PXI traces.</li>
+<li><strong>P3 Anthropic SDK 1.11.0:</strong> spend limits are listable, so cost-versus-limit can be computed in one join with per-user cost.</li>
+<li><strong>P4 Cline CLI 3.0.67:</strong> oversized MCP output now triggers paged <code>read_files</code> calls; attribute them to the original tool call.</li>
+<li><strong>A1 AED (2609.40111):</strong> store the retry control with every &quot;successful fix&quot;, since about 30% would have passed anyway; never prompt diagnosers with &quot;this run failed&quot;.</li>
+<li><strong>A2 Diagnostic contracts (2609.38761):</strong> a correct answer hid 59.7% of broken admission rules; log per-operation records and allow &quot;unknown&quot;.</li>
+<li><strong>A3 Approval Laundering (2609.38983):</strong> approve ≠ execute. Delegation and Temporal gaps are detectable only if approval rows carry agent and session ids; effect gaps need effect-level joins.</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What I could not confirm</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Langfuse public-API quota cut (breaking), from the theme hints</td>
+  <td>No release carries it. The latest tag is v4.48.0 (Sep 30 10:12Z, already carded), and a PR search for &quot;quota&quot; found no matching merged change.</td>
+  <td><code>gh api repos/langfuse/langfuse/releases</code>, <code>gh search prs --repo langfuse/langfuse quota</code></td>
+</tr>
+<tr>
+  <td>Agno v3.1</td>
+  <td>No tag exists; the latest release is v3.0.11 (Sep 23).</td>
+  <td><code>gh api repos/agno-agi/agno/releases</code></td>
+</tr>
+<tr>
+  <td>GHSA-3cv6 exposure on LiteLLM ≥1.97 (incl. 1.101.x/1.103.x)</td>
+  <td>The advisory lists patched versions only through 1.96.2 and no vulnerable range above 1.96. I did not confirm whether later lines were never affected or were fixed silently.</td>
+  <td>GitHub advisory API <code>/advisories/GHSA-3cv6-jpf6-8222</code></td>
+</tr>
+<tr>
+  <td>Codex agent-tree shutdown (#49814) in alpha.7/alpha.8</td>
+  <td>It merged at 01:58Z, but the alpha release bodies are boilerplate, so I could not confirm which alpha contains it.</td>
+  <td><code>gh api repos/openai/codex/releases</code>, <code>gh search prs</code></td>
+</tr>
+<tr>
+  <td>openai-python Agents DX series</td>
+  <td>#4004 merged, but no release has carried it since v3.22.1; #4007 [1/n] is still open.</td>
+  <td><code>gh pr view</code>, <code>gh api repos/openai/openai-python/releases</code></td>
+</tr>
+<tr>
+  <td>arXiv ceiling <code>2609.40363</code> (pack claim)</td>
+  <td>The highest id I saw is <code>2609.40361</code> (cs.CL and cs.LG new, Thu 1 Oct). 40363 was not in the seven lists I checked; it may sit in another category.</td>
+  <td>arxiv.org/list/{cs.AI,cs.CL,cs.SE,cs.LG,cs.MA,cs.CR,cs.DB}/new</td>
+</tr>
+<tr>
+  <td>A3 rates on current Claude Code</td>
+  <td>The paper measured 2.1.197; I did not re-test on 2.1.286.</td>
+  <td>Paper §4.1</td>
+</tr>
+<tr>
+  <td>AED data/code availability</td>
+  <td>The paper says &quot;will be released&quot;; I did not check the release URL.</td>
+  <td>Paper abstract and reproducibility statement</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Packs used:</strong> I worked from the fresh list <code>_runs/fb-2026-10-01-0034/fresh-items.md</code> (FB_MERGE: 12 packs, 76 raw, 49 unique, 47 fresh, 2 dropped-as-seen). All 12 expected packs were included: Muse1332, DSH1432, Agy1532, Muse1632, Muse1932, DSH2032, Agy2132, Muse2232, DSH2332, EXTRA Muse0007, EXTRA DSH0009, and Agy0032 (present at merge). I did not read packs wholesale.</li>
+<li><strong>Gaps:</strong></li>
+<li><strong>1834 Wed was skipped because the Mac was down</strong>, so there was no brief that slot and this window runs from 1234 to 0034.</li>
+<li>Standing ABSENT slots: Muse 0732, DSH 0832, DSH 1732 and Agy 1832 (Mac-down).</li>
+<li>Medium scouts are paused (lead-only). LinkedIn is behind an authwall. Packs report X 401 and Reddit 403 (fresh-list F33).</li>
+<li><strong>Verified arXiv ceiling:</strong> <code>2609.40361</code>, the max across the cs.AI/CL/SE/LG/MA/CR/DB &quot;new&quot; listings for Thu 1 Oct 2026. The arXiv export API returned 503, so I used the listing pages and the abs pages.</li>
+<li><strong>Verification method:</strong></li>
+<li>GitHub releases API sweep of about 55 agent and observability repos from 19:30Z Sep 30 onward.</li>
+<li>PyPI JSON and <code>npm view</code> for upload times.</li>
+<li><code>gh pr view</code> for every cited PR.</li>
+<li>The GitHub advisory API for GHSA-3cv6.</li>
+<li>Full PDF text (<code>pdftotext</code>) read end-to-end for A1–A3.</li>
+<li>I grepped the live catalog <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code> (471 items; hub HEAD <code>aee159c</code>) for every candidate. None of <code>mcp-adapter</code>, <code>2609.40111</code>, <code>2609.38761</code> or <code>2609.38983</code> is present.</li>
+<li><strong>HN:</strong> this source was dropped fleet-wide on 2026-09-27, so there are no HN keeps.</li>
+<li><strong>Pin:</strong> <code>2609.02702</code> (Trace-as-State v1) is intact and was not re-carded.</li>
+<li><strong>Late wake:</strong> this ran on the 00:34 cadence (work ~00:40–01:30 PT), and the label stays 0034. Effort was high.</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<pre><code class="language-yaml">new:
+- id: langchainjs-mcp-adapters-2-0-0-mcp-sdk-2-server-prefixed-tool-names-elicitation-interrupts
+  tag: Industry
+  title: &quot;@langchain/mcp-adapters 2.0.0 — MCP SDK 2, modern + legacy servers in one adapter, tool names prefixed by server by default, elicitation via LangGraph interrupts&quot;
+  url: https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fmcp-adapters%402.0.0
+  text: &gt;-
+    LangChain.js's MCP adapter moves to MCP SDK 2 and handles modern and legacy MCP servers in one adapter. Servers can now ask users for input through LangGraph interrupts.
+    By default every tool name gains its server prefix (search on server docs becomes docs__search), and duplicate unprefixed names now throw.
+    For BQAA, tool-level metrics split at this upgrade unless the tool dimension is stored as separate server and tool fields.
+- id: arxiv-2609-40111-agent-error-dataset-50k-error-diagnosis-pairs-replay-controls
+  tag: Academy
+  title: &quot;Agent Error Dataset: 50,000 error–diagnosis pairs with matched-retry replay (arXiv 2609.40111)&quot;
+  url: https://arxiv.org/abs/2609.40111
+  text: &gt;-
+    AED links 50,228 natural agent failures (33 environments, 19 harnesses, 23 models) to a blamed step, quoted evidence and a proposed correction, with matched original-action retries where replay is possible.
+    Corrections lift pass rates from 18.4% to 51.1%, but 470 of 1,564 passing first proposals also passed on a plain retry. LLM diagnosers name an error on every successful run when the prompt presupposes failure.
+    For BQAA, store the retry control with every recorded fix and prompt trace diagnosers neutrally.
+- id: arxiv-2609-38761-diagnostic-contracts-multi-agent-mechanisms-supported-ruled-out-unknown
+  tag: Academy
+  title: &quot;Where Do Multi-Agent Systems Fail? Diagnostic contracts with supported / ruled-out / unknown verdicts (arXiv 2609.38761)&quot;
+  url: https://arxiv.org/abs/2609.38761
+  text: &gt;-
+    Breaking a multi-agent evidence-admission rule left the answer correct in 43 of 72 runs. A diagnoser found 63% of broken mechanisms from native execution records against 26% from public outputs.
+    With identical evidence, a generic prompt asserted definite verdicts in 576 of 768 cases where the records forced &quot;unknown&quot;.
+    For BQAA, log per-operation records (actual inputs, admission decisions, state versions, action receipts) and treat &quot;unknown&quot; as a first-class verdict.
+- id: arxiv-2609-38983-approval-laundering-approve-vs-execute-coding-agent-harnesses
+  tag: Academy
+  title: &quot;Approval Laundering: approval–execution binding failures in coding-agent harnesses (arXiv 2609.38983)&quot;
+  url: https://arxiv.org/abs/2609.38983
+  text: &gt;-
+    Measured on Claude Code 2.1.197, Scope, Temporal and same-name $PATH Tool laundering occur in 100% of runs, Delegation (subagents running with the main session's approval) in 94.7%, and Argument in 45%.
+    A seven-field HMAC Approval Token removes the Delegation and Temporal cases but cannot see hook- or script-level effect divergence.
+    For BQAA, approval audit rows need agent_id, session_id and grant identity, and effect-level joins are required to detect scope drift.
+progress:
+- parent: litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport
+  text: &gt;-
+    Stable v1.103.2 backports per-user CLI spend attribution: v1.103.0 reported CLI keys as hashes with null alias and email. It also backports Claude Code safeguards passthrough on /v1/messages and the pass-through Authorization-forwarding fix.
+    GHSA-3cv6-jpf6-8222 / CVE-2026-84377 (authenticated SSRF and provider-credential exfiltration via request-body routing params) is patched on 1.88.6 through 1.96.2.
+- parent: arize-phoenix-20-16-0-pxi-tool-raise-closes-turn-frontier-cost-tables
+  text: &gt;-
+    Phoenix 20.18.0 shows eval results as badges in the trace tree. 20.17.0 marks bash TOOL spans ERROR on a non-zero exit in PXI traces and stops dual-emitted gen_ai messages from interleaving at ingest.
+- parent: anthropic-sdk-1-10-0-admin-api-org-analytics-per-user-cost-spend-limits-rbac-org-api-ga
+  text: &gt;-
+    Anthropic SDK 1.11.0 / TS 0.131.0 add a list endpoint for organization spend limits and deprecate Sonnet 4.5 in the client.
+- parent: cline-4-1-22-reasoning-tokens-no-longer-double-counted-gpt-6-1-sol-defaults-refusal-fallback
+  text: &gt;-
+    Cline CLI 3.0.67 lets the agent page through MCP tool output past the context cutoff via read_files instead of losing it, and fixes custom providers that failed at run time.
+headline_claims:
+- claim: &quot;@langchain/mcp-adapters 2.0.0 prefixes MCP tool names with the server name by default, so search on a server named docs becomes docs__search.&quot;
+  url: https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fmcp-adapters%402.0.0
+  date: 2026-10-01
+- claim: &quot;In 2609.40111, 470 of 1,564 passing first-proposal corrections also passed when the original action was simply retried from the same checkpoint.&quot;
+  url: https://arxiv.org/abs/2609.40111
+  date: 2026-09-30
+- claim: &quot;GHSA-3cv6-jpf6-8222 (CVE-2026-84377) lets any authenticated LiteLLM proxy user exfiltrate the operator's provider credentials via unvalidated request-body routing parameters; it is fixed in 1.88.6 through 1.96.2.&quot;
+  url: https://github.com/advisories/GHSA-3cv6-jpf6-8222
+  date: 2026-09-30
+</code></pre>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 1 Oct 2026</span>
+    </div>
+  </footer>
+</body>
+</html>

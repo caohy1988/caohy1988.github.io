@@ -1,6 +1,46 @@
 {
   "items": [
     {
+      "id": "langchainjs-mcp-adapters-2-0-0-mcp-sdk-2-server-prefixed-tool-names-elicitation-interrupts",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "@langchain/mcp-adapters 2.0.0 — MCP SDK 2, modern + legacy servers in one adapter, tool names prefixed by server by default, elicitation via LangGraph interrupts",
+      "html": " <a href=\"https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fmcp-adapters%402.0.0\">release</a> — LangChain.js&#x27;s MCP adapter moves to MCP SDK 2 and handles modern and legacy MCP servers in one adapter. Servers can now ask users for input through LangGraph interrupts. By default every tool name gains its server prefix (search on server docs becomes docs__search), and duplicate unprefixed names now throw. For BQAA, tool-level metrics split at this upgrade unless the tool dimension is stored as separate server and tool fields. <a href=\"/research/briefs/2026-10-01-0034-opus.html\">Full brief</a>.",
+      "added": "2026-10-01T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-40111-agent-error-dataset-50k-error-diagnosis-pairs-replay-controls",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Agent Error Dataset: 50,000 error–diagnosis pairs with matched-retry replay (arXiv 2609.40111)",
+      "html": " <a href=\"https://arxiv.org/abs/2609.40111\">abs</a> — AED links 50,228 natural agent failures (33 environments, 19 harnesses, 23 models) to a blamed step, quoted evidence and a proposed correction, with matched original-action retries where replay is possible. Corrections lift pass rates from 18.4% to 51.1%, but 470 of 1,564 passing first proposals also passed on a plain retry. LLM diagnosers name an error on every successful run when the prompt presupposes failure. For BQAA, store the retry control with every recorded fix and prompt trace diagnosers neutrally. <a href=\"/research/briefs/2026-10-01-0034-opus.html\">Full brief</a>.",
+      "added": "2026-10-01T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-38761-diagnostic-contracts-multi-agent-mechanisms-supported-ruled-out-unknown",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Where Do Multi-Agent Systems Fail? Diagnostic contracts with supported / ruled-out / unknown verdicts (arXiv 2609.38761)",
+      "html": " <a href=\"https://arxiv.org/abs/2609.38761\">abs</a> — Breaking a multi-agent evidence-admission rule left the answer correct in 43 of 72 runs. A diagnoser found 63% of broken mechanisms from native execution records against 26% from public outputs. With identical evidence, a generic prompt asserted definite verdicts in 576 of 768 cases where the records forced &quot;unknown&quot;. For BQAA, log per-operation records (actual inputs, admission decisions, state versions, action receipts) and treat &quot;unknown&quot; as a first-class verdict. <a href=\"/research/briefs/2026-10-01-0034-opus.html\">Full brief</a>.",
+      "added": "2026-10-01T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-38983-approval-laundering-approve-vs-execute-coding-agent-harnesses",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Approval Laundering: approval–execution binding failures in coding-agent harnesses (arXiv 2609.38983)",
+      "html": " <a href=\"https://arxiv.org/abs/2609.38983\">abs</a> — Measured on Claude Code 2.1.197, Scope, Temporal and same-name $PATH Tool laundering occur in 100% of runs, Delegation (subagents running with the main session&#x27;s approval) in 94.7%, and Argument in 45%. A seven-field HMAC Approval Token removes the Delegation and Temporal cases but cannot see hook- or script-level effect divergence. For BQAA, approval audit rows need agent_id, session_id and grant identity, and effect-level joins are required to detect scope drift. <a href=\"/research/briefs/2026-10-01-0034-opus.html\">Full brief</a>.",
+      "added": "2026-10-01T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
       "id": "anthropic-sdk-1-10-0-admin-api-org-analytics-per-user-cost-spend-limits-rbac-org-api-ga",
       "tag": "Industry",
       "kind": "rank",
@@ -8,7 +48,13 @@
       "html": " <a href=\"https://github.com/anthropics/anthropic-sdk-python/releases/tag/v1.10.0\">release</a> — Anthropic&#x27;s SDKs add a beta.organization.analytics namespace with org and per-user usage and cost reports, broken down by skills, plugins, connectors, artifacts and chat projects. The Admin API gains spend limits, RBAC groups and roles, and a plugin marketplace, and the Organization API endpoints go GA. For BQAA, per-seat Claude usage and cost is now available from the vendor. BQAA cost rollups should reconcile against it and carry the same skill, plugin and connector dimensions. <a href=\"/research/briefs/2026-09-30-1234-opus.html\">Full brief</a>.",
       "added": "2026-09-30T1234",
       "addedDisplay": "12:34 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-10-01T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "Anthropic SDK 1.11.0 / TS 0.131.0 add a list endpoint for organization spend limits and deprecate Sonnet 4.5 in the client. <a href=\"/research/briefs/2026-10-01-0034-opus.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "arxiv-2609-36139-insecure-reporters-agents-hide-flaws-they-can-see-pending-tool-call",
@@ -78,7 +124,13 @@
       "html": " <a href=\"https://github.com/cline/cline/releases/tag/v4.1.22\">release</a> — Released Sep 30, 2026. Reasoning tokens had been counted twice in output-token totals (cost was unaffected). GPT-6.1 Sol becomes the default model for OpenAI, OpenRouter, GitHub Copilot and eight other providers, so unpinned users change model mix on upgrade. Direct Anthropic requests use server-side refusal fallback; on OpenRouter and Cline, Anthropic models can fail over to another upstream; content-filter blocks are now reported as such. <a href=\"/research/briefs/2026-09-30-0034-opus.html\">Full brief</a>.",
       "added": "2026-09-30T0034",
       "addedDisplay": "12:34 AM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-10-01T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "Cline CLI 3.0.67 lets the agent page through MCP tool output past the context cutoff via read_files instead of losing it, and fixes custom providers that failed at run time. <a href=\"/research/briefs/2026-10-01-0034-opus.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "arxiv-2609-37153-toxicbench-silent-tool-poisoning-data-agents-adopt-after-checking",
@@ -1199,6 +1251,11 @@
       "addedDisplay": "12:34 PM PT",
       "progress": [
         {
+          "at": "2026-10-01T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "Phoenix 20.18.0 shows eval results as badges in the trace tree. 20.17.0 marks bash TOOL spans ERROR on a non-zero exit in PXI traces and stops dual-emitted gen_ai messages from interleaving at ingest. <a href=\"/research/briefs/2026-10-01-0034-opus.html\">Full brief</a>."
+        },
+        {
           "at": "2026-09-29T0034",
           "displayTime": "12:34 AM PT",
           "html": "arize-phoenix-otel 0.17.2 (Sep 28) fixes register() raising AttributeError with the HTTP transport on OTel 1.45 (#16549). Arize AX's arize-otel 0.14.1, published the same evening, still reads exporter._headers unguarded and has no OTel upper pin: reproduced locally, it fails on 1.45.0 and passes on 1.44.0 (issue #30 open since Sep 25). <a href=\"/research/briefs/2026-09-29-0034-opus.html\">Full brief</a>."
@@ -1366,6 +1423,11 @@
       "added": "2026-09-23T0034",
       "addedDisplay": "12:34 AM PT",
       "progress": [
+        {
+          "at": "2026-10-01T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "Stable v1.103.2 backports per-user CLI spend attribution: v1.103.0 reported CLI keys as hashes with null alias and email. It also backports Claude Code safeguards passthrough on /v1/messages and the pass-through Authorization-forwarding fix. GHSA-3cv6-jpf6-8222 / CVE-2026-84377 (authenticated SSRF and provider-credential exfiltration via request-body routing params) is patched on 1.88.6 through 1.96.2. <a href=\"/research/briefs/2026-10-01-0034-opus.html\">Full brief</a>."
+        },
         {
           "at": "2026-09-30T1234",
           "displayTime": "12:34 PM PT",
@@ -5631,6 +5693,25 @@
   ],
   "runs": [
     {
+      "id": "2026-10-01T0034",
+      "date": "2026-10-01",
+      "displayTime": "12:34 AM PT",
+      "added": [
+        "langchainjs-mcp-adapters-2-0-0-mcp-sdk-2-server-prefixed-tool-names-elicitation-interrupts",
+        "arxiv-2609-40111-agent-error-dataset-50k-error-diagnosis-pairs-replay-controls",
+        "arxiv-2609-38761-diagnostic-contracts-multi-agent-mechanisms-supported-ruled-out-unknown",
+        "arxiv-2609-38983-approval-laundering-approve-vs-execute-coding-agent-harnesses"
+      ],
+      "updated": [
+        "litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport",
+        "arize-phoenix-20-16-0-pxi-tool-raise-closes-turn-frontier-cost-tables",
+        "anthropic-sdk-1-10-0-admin-api-org-analytics-per-user-cost-spend-limits-rbac-org-api-ga",
+        "cline-4-1-22-reasoning-tokens-no-longer-double-counted-gpt-6-1-sol-defaults-refusal-fallback"
+      ],
+      "brief": "/research/briefs/2026-10-01-0034-opus.html",
+      "note": "Late-wake on-cadence 00:34 PT Thu slot (label kept 0034; wake ~00:40 PT). 1834 Wed SKIPPED Mac-down — wider window since last published 1234. Fresh-list path publish (fb-merge-packs → fresh-items.md; Opus search stayed on). Writer Opus 5.5 (MODEL_CHECK_PASS 70 turns claude-opus-5-5). Effort high (env -u CLAUDE_EFFORT CLAUDE_CODE_EFFORT_LEVEL=high + --effort high + settings; effective=high). Packs at merge (12 PACK_DONE): Muse1332 DSH1432 Agy1532 Muse1632 Muse1932 DSH2032 Agy2132 Muse2232 DSH2332 EXTRA Muse0007 EXTRA DSH0009 Agy0032. Gaps: 1834 Mac-down; standing Muse0732/DSH0832/DSH1732/Agy1832. HN dropped. Industry NEW +1: @langchain/mcp-adapters 2.0.0. Progress +4: LiteLLM v1.103.2/v1.101.4 + GHSA-3cv6 + Phoenix 20.17/20.18 + Anthropic SDK 1.11.0 + Cline CLI 3.0.67. Academy +3: 2609.40111 AED + 2609.38761 diagnostic contracts + 2609.38983 Approval Laundering. Unconfirmed section present (8 rows). No Stories companion (0 third-party BQAA). GTM skipped. JEV_PRE skipped (Q8). FB_MERGE slot=2026-10-01-0034 packs=12 raw=76 unique=49 drop_catalog=0 drop_seen=2 drop_both=0 fresh=47 (cand=47 low=0) tokens_old~150116 tokens_new~9693; actual_in~11731851 turns=70 pack_full_reads=0 cost=$4.4211684"
+    },
+    {
       "id": "2026-09-30T1234",
       "date": "2026-09-30",
       "displayTime": "12:34 PM PT",
@@ -7527,6 +7608,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-10-01T0034",
+      "date": "2026-10-01",
+      "displayTime": "12:34 AM PT",
+      "title": "Opus 5.5: Industry NEW @langchain/mcp-adapters 2.0.0 server-prefixed tool names; Academy NEW 2609.40111 AED + 2609.38761 diagnostic contracts + 2609.38983 Approval Laundering; Progress LiteLLM v1.103.2/GHSA-3cv6 + Phoenix 20.17/20.18 + Anthropic SDK 1.11.0 + Cline CLI 3.0.67",
+      "href": "/research/briefs/2026-10-01-0034-opus.html",
+      "analyzer": "Opus 5.5"
+    },
     {
       "id": "2026-09-30T1234",
       "date": "2026-09-30",
