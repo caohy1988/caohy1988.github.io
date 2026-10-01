@@ -1,8 +1,98 @@
 {
-  "updatedAt": "2026-09-30T23:55:00Z",
+  "updatedAt": "2026-10-01T23:55:00Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "gatehouse-completion-gates-oracle-reverify-2026-10-01",
+      "date": "2026-10-01",
+      "displayDate": "Oct 1, 2026",
+      "title": "gatehouse — GATES.md oracles + evidence binding + --reverify (Stop hook anti-wedge)",
+      "href": "https://github.com/dfirmin/gatehouse",
+      "why": "Stdlib-only Python 3.9+ completion gates: a GATES.md ledger pairs each outcome with CHECK (shell) + EXPECT (marker); a gate is met only when the command exits 0, the output contains the marker, and evidence is bound to the current gate definition (edit CHECK/EXPECT/CWD and old evidence goes stale). --status and the Claude Code Stop hook never execute checks; --approve records each exact oracle in a private 0700 store outside the repo; --reverify re-runs every runnable gate including met ones and demotes failures; Stop releases after six consecutive blocks with no state change (anti-wedge); ABANDON is a handoff, never a pass. Mechanical form of code-decides-done + the 2026-09-25 replay regression check. Caveats (README + pack §5): proves only the oracle you wrote; approval is consent not proof (changed scripts can run under old approval); evidence detects drift not forgery; young ★0 MIT port of Leonxlnx/unlazy gate core (upstream outside recency window — do not treat evidence as interchangeable); not installed/run here. Overlaps published Proof (Stop claim checks) — gatehouse's distinct piece is declared oracles + binding + reverify. Patterns/hooks over existing seats, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-01-dsh-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "code-decides-done",
+        "replay",
+        "receipts",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "skillwharf-skill-lockfile-pin-hash-doctor-usage-2026-10-01",
+      "date": "2026-10-01",
+      "displayDate": "Oct 1, 2026",
+      "title": "skillwharf — commit-sha + content-hash skill lockfile, all-or-nothing sync, doctor + usage",
+      "href": "https://github.com/mujieha/skillwharf",
+      "why": "npm package manager for shared SKILL.md folders (Node ≥22.12): skillwharf.json + lockfile pin each skill to a full commit sha and integrity sha256; one store copy is symlinked into .claude/skills and cross-tool .agents/skills (Cursor opt-in). sync fetches and checks every skill before installing any — hash mismatch or unpinned entry (unless --allow-unpinned) stops with nothing installed. doctor reports broken links, lockfile drift, folders skillwharf did not create, and stale unused skills; usage reads Claude Code local session logs only to count which skills actually fire (Codex/Cursor have no comparable logs — stated limit). Caps: 2,000 files / 50 MB per skill; refuses write-through symlinked store/agent folders. Complements catstack (prune/freshness) and cinch (dialect matrix) with the pinning/integrity half of seat install. Caveats: ★0 MIT, young; not installed/run here; Windows copy fallback has a forged-links edge case the README discloses. Patterns/checks, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-01-dsh-harness-lab-pack",
+      "tags": [
+        "skills",
+        "install",
+        "manifest",
+        "hooks",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "sessionpipe-privacy-tiers-secrets-redaction-conformance-2026-10-01",
+      "date": "2026-10-01",
+      "displayDate": "Oct 1, 2026",
+      "title": "sessionpipe — privacy tiers 0–3, non-disableable secrets redaction, per-harness conformance fixtures",
+      "href": "https://github.com/micmmakarov/sessionpipe",
+      "why": "Open protocol + client (npm, pre-release 0.1.x; Apache-2.0 code / CC BY 4.0 spec) that installs hooks for Claude Code, Codex, Gemini CLI, Antigravity and more; events land in a local outbox and leave only when a sink is added. Four privacy tiers per sink with receiver max and lower-wins; secrets ruleset runs on every string above tier 0 and cannot be turned off; PII reduction is a separate opt-in; sessionpipe tail shows exactly what a tier would send before you point a sink anywhere. Ships spec/, JSON schemas, and conformance/ with real hook payloads per harness plus a conformance CLI. Three promises: no telemetry, secrets never leave, your server or none. Fit: written 'what may leave a seat' contract for our activity feed (file sink only) + per-harness hook payload reference next to cinch's dialect matrix. Overlap: Agent Console owns token accounting; sessionpipe is event transport/redaction/tiering. Caveats: ★4, pre-release; not installed/run here. Patterns/reference, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-01-dsh-harness-lab-pack",
+      "tags": [
+        "secrets",
+        "hooks",
+        "observability",
+        "conformance",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "harness-mocks-claude-mock-model-free-e2e-2026-10-01",
+      "date": "2026-10-01",
+      "displayDate": "Oct 1, 2026",
+      "title": "harness-mocks / claude-mock — deterministic claude binary mock for model-free harness e2e",
+      "href": "https://github.com/sloprail/harness-mocks",
+      "why": "Go monorepo whose claude-mock stands in for the claude binary so e2e suites run without a model call (tip has 19 e2e suite dirs covering hooks, session file, subagent block loop, plugin hooks, compaction, resume prompt, transcript chain, session lifecycle, etc.; make build / test-unit / test-e2e; releases build linux/amd64 + linux/arm64). Direct instrument for the 2026-09-25 replay regression check and for writing Mac hooks (stingray / claimcheck / Proof) against cited harness semantics instead of folklore. Pack collect also fetched a 27.8 KB EVIDENCE.md with per-behaviour evidence tags and a Not modelled gap list; that file is absent from tip main as of this publish (hook-contract detail treated as pack-time verification, not re-fetched tip docs). Caveats: ★1 MIT; external PRs need signed CLA + signed commits; release assets Linux-only; mock not built or run here; token counts / some stream frames called out as unmodelled in pack. Patterns/reference + mock harness, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-01-dsh-harness-lab-pack",
+      "tags": [
+        "evals",
+        "hooks",
+        "replay",
+        "reference",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "dsh-stable-context-first-prefix-reorder-2026-10-01",
+      "date": "2026-10-01",
+      "displayDate": "Oct 1, 2026",
+      "title": "dsh-stable-context-first — reorder question-independent DSH context for prompt-prefix cache",
+      "href": "https://github.com/YevheniiMiachyn/dsh-stable-context-first",
+      "why": "Local DSH plugin (0.1.0-local.1, MIT, zero deps, not published) that registers one agent/pre-step waterfall listener with prepend:true and permutes decision.messages so question-independent injected context precedes the user message — pure permutation (unit tests assert multiset identity, idempotence, no mutation; README reports 14/14). Moves only two allow-listed sources (skill-catalog; dsh-system-prompt runtime-context snapshot) and never moves skill-invocation, agent-instructions, hooks, user message, or system prompt. Documents the DSH seam: options.messages must byte-match session.deriveMessages() or the agent-loop invariant fails with log-reconstruction desync. Author measurements on llama-server / RX 7900 XT: reusable prefix ~67.96% → ~99.8%+, prefill ~17.9 s → ~0.58 s. Fit: only DSH-seat-specific token-prefix lever in this pack; reference/pattern for our OpenRouter DSH collectors. Caveats (pack §5 + README): measurements are the author's local KV cache, not OpenRouter or our seat — transfer unproven; unpublished/local; do not install without a DSH owner + Jev constant-baseline/shadow step. Patterns/reference, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-01-dsh-harness-lab-pack",
+      "tags": [
+        "tokens",
+        "DSH",
+        "cache",
+        "patterns",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "proof-stop-hook-completion-claims-tamper-receipts-2026-09-30",
       "date": "2026-09-30",
