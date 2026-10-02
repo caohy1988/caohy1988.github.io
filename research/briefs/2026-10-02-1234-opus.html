@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-10-02 · 12:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="Industry NEW MCP TypeScript SDK same-origin redirects and token-audience checks, Microsoft Agent Framework Python 1.20.0 fail-closed approvals; Academy NEW process-level eval, OffQuery, Agents-as-Systems.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-02-1234-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 PM PT · on-cadence late wake · fresh-list path · effort high</p>
+    <article>
+<h1>Field Brief — 2026-10-02-1234: Microsoft's Agent Framework blocks tool calls it can't get approval for, the MCP TypeScript SDK limits redirects to the same origin and adds token-audience checks, and an IBM study finds 93% of &quot;correct&quot; agent runs still broke the required process</h1>
+<p><strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>) · effort = <strong>high</strong>, per the 2026-09-29 lock (not self-upgraded)
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, the catalog and the push.
+<strong>Slot:</strong> 2026-10-02-1234 (12:34 PM PT, Fri Oct 2), the scheduled slot. The run woke late, at about 12:36 PT, and the label stays <strong>1234</strong>.
+<strong>Window:</strong> about 6 hours since the last published brief, <code>2026-10-02-0634</code>, covering 13:34Z to 19:34Z Oct 2. Material landing up to about 19:45Z is included where my own sweep caught it.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>Industry NEW (2):</strong></li>
+<li><strong>MCP TypeScript SDK 1.32.0 and v2.3.0</strong> (the reference SDK for the Model Context Protocol):<ul>
+<li>HTTP client transports now follow redirects <strong>only within the same origin</strong>.</li>
+<li>Servers get two opt-in limits: <code>maxToolInputElements</code> caps the size of tool-call arguments, and <code>expectedResource</code> on bearer auth accepts <strong>only tokens issued for this server</strong> (audience binding).</li>
+<li>v2 now rejects sharing one server instance across requests: it is one server per request.</li>
+<li>A 100 MB tool result sent as a single SSE event used to take about a minute and 1.7 GB of memory. It now takes under a second and about 0.5 GB.</li>
+</ul>
+</li>
+<li><strong>Microsoft Agent Framework (Python) 1.20.0:</strong><ul>
+<li>Approvals <strong>fail closed</strong>: if an approval binding or agent-tool approval cannot be resolved, the tool call is blocked.</li>
+<li>MCP security labels are applied <strong>before</strong> dynamically discovered or progressively disclosed tools become callable.</li>
+<li>Disconnected AG-UI runs are now durable.</li>
+<li>Foundry hosting is redesigned around request-scoped agents, persistent sandbox-isolated sessions and durable runs (a breaking change).</li>
+</ul>
+</li>
+<li><strong>Progress (3):</strong></li>
+<li><strong>OpenAI:</strong> <code>openai</code> Python 3.24.0 adds typed <strong>agent session webhooks</strong>: created, in_progress, idle, failed and action_required. <code>openai-agents</code> 0.23.1 is the <strong>first PyPI publication of the 0.23 line</strong>. That line changes what traces show: tool-failure details are redacted by default, and sensitive-trace settings now also govern model metadata.</li>
+<li><strong>LangSmith SDK 0.14.4 / JS 0.10.8:</strong> fixes the OTLP traces endpoint. <strong>Since an April 16 change, the Python SDK's default exporter had been sending traces to <code>/otel</code> instead of <code>/otel/v1/traces</code>.</strong></li>
+<li><strong>goose v1.53.0:</strong><ul>
+<li>remediates GHSA-6mg9-3cvh-9939, in which a malicious repo's git <code>diff.external</code> setting could run arbitrary commands during <code>goose review</code>;</li>
+<li>guards MCP streamable-HTTP redirects against SSRF;</li>
+<li>estimates costs through canonical provider aliases.</li>
+</ul>
+</li>
+<li><strong>Academy NEW (3):</strong> all are full PDF reads.</li>
+<li><strong>Continuous process-level evaluation (<code>2610.01833</code>, IBM):</strong> 175 of 240 Claude Code and Codex runs got the final numbers right, and <strong>162 of them (92.6%) still had a process deviation</strong>, such as wrong tool arguments, a missing database readback, or a tool outside the allowlist. A dependency graph cut 6.34 failed checks per run to 2.65 root causes.</li>
+<li><strong>OffQuery (<code>2610.01244</code>):</strong> multi-agent teams answer the current question correctly 64.7% of the time, but they identify the misleading source only 14.3% of the time and rebuild a correct shared state only 43.1% of the time. In 100 cases where the original answer was right, <strong>43% of broader follow-up plans went wrong</strong> because a corrupted fact had stayed in the shared state.</li>
+<li><strong>&quot;Agents Are Systems, Not Models&quot; (<code>2610.01618</code>):</strong> across 18,240 trajectories, <strong>about 54% of score variance among genuine attempts is repeat-run noise</strong>, not configuration. The task information given to the agent matters more than the model or the time budget. Prompting an agent to verify itself barely changes its behavior, but giving it a verification tool does.</li>
+<li><strong>The theme:</strong> a correct final answer is a weak signal.</li>
+<li>The IBM paper (process deviations behind correct numbers), OffQuery (corrupted state behind correct answers) and the configuration study (half the variance is noise) all argue for judging agents from the <strong>trace and the state</strong>, not the final output.</li>
+<li>On the industry side, the reference MCP SDK and Microsoft's framework both moved toward fail-closed defaults. Analytics should record which policy blocked a call.</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<h3>I1 (NEW). <a href="https://github.com/modelcontextprotocol/typescript-sdk/releases/tag/v2.3.0">MCP TypeScript SDK 1.32.0 and v2.3.0: same-origin redirects, tool-argument limits, token-audience binding, one server per request</a></h3>
+<p><strong>What shipped:</strong></p>
+<ul>
+<li><strong>Release clocks:</strong> GitHub <code>1.32.0</code> at 17:28:24Z Oct 2, with npm <code>@modelcontextprotocol/sdk@1.32.0</code> at 17:32:51Z (<code>latest</code>). GitHub <code>v2.3.0</code> at 17:55:03Z, with npm <code>@modelcontextprotocol/server@2.3.0</code> at 17:48:29Z (<code>latest</code>), plus <code>client</code> / <code>core</code> / <code>server-legacy</code> / <code>codemod</code> 2.3.0, <code>node</code> 2.1.1, <code>express</code> / <code>hono</code> 2.0.2 and <code>fastify</code> 2.0.1.</li>
+<li><strong>Redirects stay on the same origin</strong> (v1 #2902, v2 #2901). The HTTP client transports follow a redirect only if scheme, host and port are unchanged; http to https on the same host is allowed. To redirect to another host, you must set <code>redirectPolicy: 'follow'</code> or configure the final URL. In browsers, a cross-origin redirect now fails unless that option is set.</li>
+<li><strong>Two new opt-in server limits:</strong></li>
+<li><code>maxToolInputElements</code> on <code>McpServer</code> caps the array elements and object members in a tool call's arguments (#2927 / #2926).</li>
+<li><code>expectedResource</code> on <code>requireBearerAuth</code> (v2 also on <code>verifyBearerToken</code>) accepts only tokens whose audience is this server (#2930 / #2929).</li>
+<li><strong>v2 only:</strong></li>
+<li><strong>One server per request:</strong> <code>Server.connect()</code> rejects an instance that is already connected, and a stateless Streamable HTTP transport serves one request (#2918). Creating a server is now cheap because tool schemas are no longer converted up front (#2889).</li>
+<li><strong>Large SSE messages are fast:</strong> with <code>eventsource-parser</code> ≥3.0.8 the client handles a large single-event message quickly. A 100 MB tool result went from about a minute and 1.7 GB of peak memory to under a second and about 0.5 GB, and a 50 MB result from about 13 s to under 1 s (#2846).</li>
+<li>The Tasks extension's <code>tasks/get</code> and <code>tasks/cancel</code> work on 2026-07-28 connections (#2599).</li>
+<li><code>allowedOrigins</code> accepts <code>&lt;scheme&gt;://*</code> entries for browser-extension clients (#2907).</li>
+<li><code>SSEClientTransport</code> refreshes once after a 401 instead of retrying without limit (#2905, #2934).</li>
+<li><strong>v1 also:</strong> the in-memory task store keeps tasks within the session that created them (#2925).</li>
+<li><strong>Context:</strong> the repo's most recent published advisory is GHSA-6qxp-vccf-f47h (Sep 30, high: an OAuth client could send credentials to an authorization server chosen by the MCP server). This release continues that hardening, but it cites no new advisory.</li>
+</ul>
+<p><strong>Why NEW:</strong> there is no MCP SDK card in the catalog. This is the reference implementation most agent frameworks embed, and it changes default network behavior for every TypeScript MCP client.</p>
+<p><strong>BQAA read:</strong></p>
+<ol>
+<li><strong>A new class of connection failures.</strong> MCP endpoints behind cross-host redirects (load balancers, auth proxies) will start failing after upgrade. In agent telemetry this shows up as MCP connect errors, not tool errors. Keep <code>mcp.connect</code> failure reasons as their own dimension, so a jump after an SDK bump can be attributed.</li>
+<li><strong>Audience binding is a security attribute worth logging.</strong> Whether a server enforces <code>expectedResource</code> decides whether a token issued for one MCP server can be replayed against another. Capture the setting with MCP server inventory when it is available.</li>
+<li><strong>Large SSE payloads were slow on the client side.</strong> If BQAA ever saw multi-second tool latency on large results from TypeScript MCP clients, part of it was this client-side parsing cost. Recheck baselines after clients upgrade.</li>
+</ol>
+<h3>I2 (NEW). <a href="https://github.com/microsoft/agent-framework/releases/tag/python-1.20.0">Microsoft Agent Framework (Python) 1.20.0: approvals fail closed, MCP labels applied before tools become callable, durable AG-UI runs, Foundry hosting redesigned</a></h3>
+<p><strong>What shipped</strong> (GitHub release 14:40:44Z Oct 2; PyPI <code>agent-framework</code> 1.20.0 at 14:38:16Z):</p>
+<ul>
+<li><strong>Approvals fail closed</strong> (#8579, #8589, #8750, #8780, #8527):</li>
+<li>local approvals must be backed by a session;</li>
+<li>a matched function result counts as terminal;</li>
+<li>when an approval binding or agent-tool approval cannot be resolved, the call is blocked.</li>
+<li>#8780, which I read: with <code>approval_on_violation=True</code>, a policy violation whose approval binding failed used to fall through to the allow path and run. It is now blocked.</li>
+<li><strong>MCP security labels before exposure</strong> (#8972, merged 12:13Z Oct 2): <code>SecureMCPToolProxy</code> applies its local security labels to tools found later through list-change reloads, and to tools hidden by progressive disclosure, before they are published as callable. Before this, only tools present at connect time were labelled.</li>
+<li><strong>Durable runs and event ordering:</strong></li>
+<li>disconnected AG-UI runs are durable;</li>
+<li><code>RUN_STARTED</code> is emitted before execution when IDs are supplied;</li>
+<li>custom approval-state namespaces are isolated (#8672, #8807, #8714).</li>
+<li>Functional-workflow replay identity is preserved, and invocation arguments and activity IDs are scoped to their workflow run (#8887, #8596).</li>
+<li><strong>Foundry hosting [BREAKING]:</strong> redesigned around request-scoped agent factories, persistent sandbox-isolated sessions, parsed and durable Invocations runs, and configurable Responses history and background execution (#8372, #8593, #8741, #8794, #8894). Native workflows can be hosted over Foundry Responses and Invocations (#8947, #8966).</li>
+<li><strong>Response streams</strong> gain ordered gates, transforms and buffered release, so egress controls can hold back a stream until a gate passes (#8829).</li>
+<li><strong>Telemetry:</strong> <code>agent-framework-foundry</code> requires Azure Monitor OpenTelemetry 1.8.10 for trace propagation (#8512).</li>
+<li><strong>Also in this release:</strong></li>
+<li>native computer use in Responses clients (#8751);</li>
+<li>DuckDB and SQL Server vector stores and a TypeSafe AI connector (#8675, #8686, #8592);</li>
+<li>Bedrock forwards Converse guardrail options and streams through ConverseStream (#8680, #8683, #8685).</li>
+</ul>
+<p><strong>Why NEW:</strong> there is no Microsoft Agent Framework card in the catalog. A major vendor's agent framework switching approvals to fail-closed is a product-level change, as is a durable-run model for its hosted agents.</p>
+<p><strong>BQAA read:</strong></p>
+<ol>
+<li><strong>&quot;Blocked because approval could not be bound&quot; is a new outcome.</strong> It differs from &quot;user denied&quot; and from &quot;policy denied&quot;. An approval-outcome dimension should carry at least <code>approved</code>, <code>denied_by_user</code>, <code>denied_by_policy</code> and <code>blocked_unresolvable</code>. Otherwise fail-closed blocks look like user denials.</li>
+<li><strong>Tool inventory now changes during a session, under policy.</strong> Labels applied at discovery time mean a tool's security label can appear partway through a session. Join tool calls to the tool-label state at call time, not at connect time.</li>
+<li><strong><code>RUN_STARTED</code> before execution helps run-level joins.</strong> AG-UI clients now get a run ID before any tool fires. Durable disconnected runs mean one run can span client sessions, so key runs by run ID, not by connection.</li>
+</ol>
+<h3>Progress</h3>
+<ul>
+<li><strong>→ <code>openai-sdk-python-3-23-0-node-7-27-0-agent-session-traces-otlp-json</code>: <a href="https://github.com/openai/openai-python/releases/tag/v3.24.0">openai-python v3.24.0</a></strong> (GitHub 15:54:21Z Oct 2, PyPI 15:55Z) <strong>and <a href="https://github.com/openai/openai-agents-python/releases/tag/v0.23.1">openai-agents-python v0.23.1</a></strong> (GitHub 15:19:29Z; <strong>PyPI <code>openai-agents</code> 0.23.1 at 15:42:03Z</strong>).</li>
+<li><strong>Session webhooks</strong> (<a href="https://github.com/openai/openai-python/pull/4013">#4013</a>): typed <code>agent.session.created</code>, <code>in_progress</code>, <code>idle</code>, <code>failed</code> and <code>action_required</code> webhook events. Each carries the session <code>id</code>, an <code>environment_type</code> (<code>none</code> / <code>openai_hosted</code> / <code>self_hosted</code>) and an optional <code>environment_id</code>, as I read in <code>agent_session_failed_webhook_event.py</code> at the tag.</li>
+<li>The <code>ultrafast</code> service tier is removed from beta agent and session create and update.</li>
+<li><code>input_cache_write_12h_tokens</code> is added to organization usage.</li>
+<li><strong><code>openai-agents</code> 0.23.1</strong> is a release-tooling patch. Its release review says PyPI had neither 0.23.0 nor 0.23.1 until now, so this is <strong>the first PyPI publication of the 0.23 line</strong>. What the 0.23 changes do to traces:<ul>
+<li>default tool-failure details are redacted (#5112);</li>
+<li>streaming tracebacks are redacted (#5121);</li>
+<li>sensitive-trace capture now covers model metadata (#5129);</li>
+<li><code>ModelSettings.to_traceable_dict</code> serializes only fields meant for tracing (#5003);</li>
+<li>Codex command spans follow the run's tracing policy (#5138).</li>
+</ul>
+</li>
+<li>It also scopes function-tool approvals to their owning agent (#5144).</li>
+<li>(0634 listed 0.23.0 as unconfirmed because PyPI returned 404. That gap is now closed.)</li>
+<li><strong>BQAA:</strong> pair the traces endpoint with the webhooks. <code>failed</code> and <code>action_required</code> tell an ingester when to pull a session's OTLP. Expect fewer error strings in OpenAI Agents SDK spans from 0.23 on, because the redaction is a default change, not a drop in error rates.</li>
+<li><strong>→ <code>langsmith-sdk-v0-14-0-agent-identity-otel-finish-reasons</code>: <a href="https://github.com/langchain-ai/langsmith-sdk/releases/tag/v0.14.4">LangSmith SDK v0.14.4</a></strong> (GitHub 17:16:21Z, PyPI 17:16:34Z; npm <code>langsmith@0.10.8</code> 17:22:18Z).</li>
+<li><a href="https://github.com/langchain-ai/langsmith-sdk/pull/3645">#3645</a>: a change merged on <strong>April 16, 2026</strong> made the Python default exporter pass <code>&lt;API URL&gt;/otel</code> as the full endpoint, so <strong>traces went to <code>/otel</code> instead of <code>/otel/v1/traces</code></strong>. The JS environment override had the same mismatch.</li>
+<li>The fix defaults to <code>/otel/v1/traces</code>. It honors <code>OTEL_EXPORTER_OTLP_TRACES_ENDPOINT</code> as a full URL, ahead of the base variable, and appends <code>/v1/traces</code> to base endpoints, unless the URL already ends in <code>/traces</code>. In that case it warns once per process.</li>
+<li>Agent addresses are now passed as strings (#3651).</li>
+<li><strong>BQAA:</strong> if BQAA reads LangSmith-originated OTLP, or teams compare LangSmith and BQAA trace counts, check for a step change since mid-April. Whether the old path dropped traces or accepted them is not stated (see Unconfirmed).</li>
+<li><strong>→ <code>goose-v1-52-0-decisions-provider-crate-openrouter-jev</code>: <a href="https://github.com/block/goose/releases/tag/v1.53.0">goose v1.53.0</a></strong> (18:44:11Z Oct 2).</li>
+<li><strong>Security:</strong><ul>
+<li>remediates <strong>GHSA-6mg9-3cvh-9939</strong>: <code>goose review</code> ran <code>git diff</code> without disabling external diff drivers, so a repo's <code>diff.external</code> setting could execute arbitrary commands (<a href="https://github.com/aaif-goose/goose/pull/12537">#12537</a>, merged Sep 28, first shipped here);</li>
+<li>guards MCP streamable-HTTP client redirects against SSRF (#11501).</li>
+</ul>
+</li>
+<li><strong>Cost and telemetry:</strong><ul>
+<li>costs are estimated through canonical provider aliases (#11916);</li>
+<li>model metadata is fetched live from models.dev, with a bundled fallback (#12560);</li>
+<li>max_tokens truncation is reported for Bedrock (#11872);</li>
+<li>compaction is automatic at tool boundaries in the unrolled loop (#12444).</li>
+</ul>
+</li>
+<li>Also: a lean ACP-only binary (#11961) and MCP sampling code removed (#12193).</li>
+</ul>
+<h3>Notes (below card bar)</h3>
+<ul>
+<li><strong>Cloudflare Agents <code>agents@0.26.0</code></strong> (17:54Z; npm 17:57Z, <code>latest</code>): only bumps pi-durable and pi-ai to <code>^1.0.0</code> (#2451), so it is incremental on the 0634 card.</li>
+<li>Separately, an <strong>11-PR &quot;Channels on turns&quot; stack merged at about 19:20Z</strong> (#2429–#2459). It deletes the first-pass <code>agents/channels</code> and moves it to experimental. That is breaking but unreleased; WATCH for 0.27.</li>
+<li><strong>Claude Code 2.1.288</strong> (npm 18:30:40Z) and <strong>Agent SDK 0.3.288</strong> (18:33:37Z) are on the <strong><code>next</code> dist-tag only</strong>. <code>latest</code> is still 2.1.287, and there is no CHANGELOG entry or GitHub release. Not covered (see Unconfirmed).</li>
+<li><strong>Arize Phoenix:</strong> a <strong>14-PR online-eval reliability burst</strong> merged around 18:30Z. For example, #16599 publishes a result and finishes its work unit in one transaction. Unreleased; PyPI <code>arize-phoenix</code> stays 20.19.0, already carded.</li>
+<li><strong>LiteLLM:</strong> no release (PyPI 1.103.2). Merged:</li>
+<li>#42375, JWT auto-registration that maps to a user's existing virtual key (19:11Z);</li>
+<li>#43673, a one-command Docker quickstart.</li>
+</ul>
+<p>Open: #44219, upstream MCP servers opting into the 2026-07-28 protocol.</p>
+<ul>
+<li><strong>Google Gen AI SDKs</strong> <code>python-genai</code> 2.28.0 / <code>js-genai</code> 2.27.0 (17:30Z): Interactions gains <code>continuation_token</code>. <strong>Google first-party; NOTE only.</strong> No ADK release in window.</li>
+<li><strong>Small releases:</strong></li>
+<li><strong>inspect-ai 0.3.276:</strong> LiteLLM-proxy Gemini tool results are sent under <code>content</code>.</li>
+<li><strong>deepeval 4.2.8:</strong> PyPI only, no notes.</li>
+<li><strong>Agenta v0.121.7:</strong> inbound channel files, and a re-prompt for turns that stalled before their first response.</li>
+<li><strong>Codex 0.162.0-alpha.7</strong> (13:48Z): title-only.</li>
+<li><strong>Mastra <code>@mastra/core</code> 1.75.0-alpha.1:</strong> prerelease.</li>
+<li><strong>WATCH (open PRs, no release):</strong></li>
+<li>Pydantic AI #9673, a Bubblewrap/SSH sandbox escape through shell startup files and PATH (VERIA-212), and #9674, cross-repo plugin approval;</li>
+<li>Mastra #25835, <code>aggregateTraces()</code> for DuckDB;</li>
+<li>W&amp;B Weave #7973, which preserves causal tool evidence across continuations;</li>
+<li>vercel/ai #21970, experimental mid-turn steering.</li>
+</ul>
+<p>Merged but unreleased: Codex #50402, which consolidates command output into <code>aggregated_output</code> (breaking for anyone parsing the old fields), and Qwen Code #12582, isolated remote runtime hosts.</p>
+<hr />
+<h2>Academy</h2>
+<h3>A1 (NEW). <a href="https://arxiv.org/abs/2610.01833">Continuous Process-Level Evaluation for Evolving Enterprise AI Agent Skills (arXiv 2610.01833)</a></h3>
+<p><em>Vo, Doshi, Sheinin (IBM Research / Georgia Tech). NeurIPS 2026 workshop, Continual Learning for Enterprise AI Agents. <strong>Full PDF read</strong> (13 pp., including Appendices A–B).</em></p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li>They evaluated two revenue and productivity apportionment skills in an IBM resiliency system.</li>
+<li>The skills run as Claude Code or Codex sessions over two MCP servers: 23 stateless tools over Instana, Kubecost and ServiceNow, and 18 tools over a SQLite state store (§4).</li>
+<li>The evaluator has five stages (§5, Fig. 1):</li>
+</ul>
+<ol>
+<li>parse the harness tool-call trace (tool, arguments, return value, turn index);</li>
+<li>compute ground truth by calling the same live APIs independently of the agent;</li>
+<li>expand template test cases whose placeholders resolve at evaluation time from that ground truth;</li>
+<li>check tool selection, arguments, <strong>ordering by turn index</strong> (fetch → stage → readback → allocate → write), scope coverage and database integrity;</li>
+<li>collapse failures to root causes through an authored dependency graph.</li>
+</ol>
+<ul>
+<li><strong>The design:</strong> 2 skills × 2 specification variants × 2 harnesses × 3 models (GPT-5.6-Sol, Opus 4.8, Sonnet 4.6) × 10 trials = 240 runs (§6).</li>
+</ul>
+<p><strong>Key results:</strong></p>
+<ul>
+<li><strong>Final numbers miss process failures</strong> (§7.1): 175 of 240 runs passed every final numerical check, and <strong>162 of those 175 (92.6%; Wilson CI 87.7–95.6%) had another evaluator-detected deviation</strong>.</li>
+<li>With a broader seven-check final-state baseline, 151 of 164 passing runs (92.1%) still violated a trajectory check: 109/109 for Revenue and 42/55 for Productivity.</li>
+<li>All 120 Revenue runs got the revenue right, and all 120 had a deviation.</li>
+<li>Removing the allowlist check, which is arguably normative, leaves the 162 unchanged.</li>
+<li><strong>Root families</strong> among the 162 (not exclusive, §7.1): data or numerical consistency 106, missing phase or required tool 66, allowlist 55, redundancy or call count 43, scope or filter 13.</li>
+<li>The leading Revenue roots are wrong staged-utilization arguments (75/120), an off-allowlist tool (42/120) and a missing database readback (24/120).</li>
+<li><strong>Root-cause compression:</strong> a mean of 6.34 failed checks per run (median 4) collapses to 2.65 roots (median 2), cutting initial triage by 58% (§7.1).</li>
+<li><strong>Harness × specification interaction</strong> (Table 1): the same specification revision costs GPT-5.6-Sol −1.2 pp on Claude Code but +12.9 pp on Codex (Revenue). Bootstrap interaction intervals exclude zero for all three Revenue model comparisons.</li>
+<li><strong>Cost and reliability:</strong></li>
+<li>Unrecovered errors cluster in Codex (38 vs 5; App. A, Table 2).</li>
+<li>Recorded cost was $859.34 across 240 runs: Claude Code averaged $1.04 per run against Codex's $6.12. Cache reads are 90.7–92.9% of Claude Code tokens for Claude models and 0% under Codex (App. B, Tables 3–4).</li>
+</ul>
+<p><strong>Limitations</strong> (App. A):</p>
+<ul>
+<li>one system, one portfolio and one date window per skill, at 10 trials per cell;</li>
+<li>the specification variants differ in content, not just format;</li>
+<li>the evaluator encodes workflow policy (the &quot;irrelevant tool&quot; check is the root failure in 71/240 runs);</li>
+<li>the judge (Sonnet 4.6) is also an evaluated model, and the 57/60 judge audit was done by the authors;</li>
+<li>live-API ground truth can drift;</li>
+<li>persistence under real API evolution is untested.</li>
+</ul>
+<p><strong>BQAA read:</strong> this is the clearest published case for <strong>SQL assertions over <code>agent_events</code></strong>.</p>
+<ul>
+<li>Tool presence, arguments, turn-ordered phases, per-scope call coverage and &quot;readback before write&quot; are each a query over the tool-call table.</li>
+<li>Template tests with runtime placeholders map to parameterized checks whose expected values come from a reference query.</li>
+<li>A dependency graph over checks gives &quot;root failures per run&quot;, a better triage metric than a raw failure count.</li>
+</ul>
+<h3>A2 (NEW). <a href="https://arxiv.org/abs/2610.01244">Right Answers, Wrong States: Hidden Information Failures in Multi-Agent Collaboration (arXiv 2610.01244)</a></h3>
+<p><em>Wan, Wu, Luo, Ma, Li, Chen, Kan (Xi'an Jiaotong, NUS, Yunnan, A\</em>STAR). <strong>Full PDF read</strong> (44 pp., including Appendices A–E). Code and data: github.com/whr000001/OffQuery.*</p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>The benchmark (OffQuery):</strong></li>
+<li>It builds 723 + 587 healthcare cases (from MediQ) and 93 disaster-response cases (from CrisisFacts).</li>
+<li>A reliable global state is split into shared context and private observations across 5–7 agents.</li>
+<li>One agent gets a fabricated, refutable claim, and the shared context gets misleading additions (§3.2, Table 4).</li>
+<li><strong>Three scores</strong> (§3.1):</li>
+<li>T1 asks whether the team can identify the misleading source;</li>
+<li>T2 asks whether it can rebuild the shared state, scored on atomic facts (keep reliable facts, drop injected ones);</li>
+<li>T3 asks whether it answers the current multiple-choice question.</li>
+<li><strong>ReGround,</strong> their fix (§4), works in three steps:</li>
+</ul>
+<ol>
+<li>resolve conflicts between agents into a candidate pool;</li>
+<li>verify the shared context fact by fact against trusted sources;</li>
+<li>rebuild the state and reason only over it.</li>
+</ol>
+<p><strong>Key results:</strong></p>
+<ul>
+<li><strong>The gap:</strong> averaged over 21 model–setting combinations, standard collaboration reaches <strong>T3 64.7% but T1 14.3% and T2 43.1%</strong> (§1, Table 1). GPT-5 on Healthcare-S scores T3 86.2% against T1 10.9% and T2 33.2% (Table 1).</li>
+<li><strong>Distribution alone hurts the state more than the answer</strong> (Table 2): with all information reliable, splitting it across agents drops T2 by 34.2 and 34.3%, but T3 by only 6.9 and 12.4%.</li>
+<li><strong>The mechanism is selective use</strong> (§6, App. E.1): unreliable facts appear in 60.9 and 71.7% of explanations for wrong decisions, but only 13.9 and 19.2% of explanations for correct ones.</li>
+<li><strong>Latent errors surface on reuse</strong> (§6, App. E.2): in 100 healthcare cases where T3 was correct but the state still held misleading facts, <strong>43% of broader clinical plans were inconsistent with plans built from the reliable state</strong>.</li>
+<li><strong>ReGround</strong> improves all three scores in every setting, with average relative gains of +309.0% (T1), +82.9% (T2) and +17.6% (T3). It uses fewer tokens than standard discussion: 19.4K vs 52.1K with GPT-4o on Healthcare-S (Table 11).</li>
+<li>Given the misleading source directly, T2 goes from .728 to .813 and T3 from .661 to .837 (Table 10). Source attribution is the bottleneck.</li>
+</ul>
+<p><strong>Limitations</strong> (App. A, D.2):</p>
+<ul>
+<li>the benchmark and all corruptions are GPT-4o-generated;</li>
+<li>the main setting has exactly one misleading agent (multi-source stress tests are in App. E.4);</li>
+<li>T2 relies on an LLM judge;</li>
+<li>Claude models were not evaluated, because of API limits;</li>
+<li>episodes are bounded, with no persistent memory.</li>
+<li><strong>Inconsistency in the paper:</strong> §3.3 reports human–GPT-4o agreement of 0.86 with Cohen's κ 0.84, but Table 7 gives human–GPT-4o κ of 0.76 and 0.68. 0.84 is the human–human κ. I use the Table 7 figures.</li>
+</ul>
+<p><strong>BQAA read:</strong> task success does not certify what a multi-agent system <strong>carries forward</strong>.</p>
+<ul>
+<li>For agents with shared memory or blackboards (ADK session state, A2A handoffs), log state writes as facts with their source agent. Then &quot;facts in state that no trusted source supports&quot; becomes a metric next to answer accuracy.</li>
+<li>A correct trace today can be the cause of a wrong answer tomorrow.</li>
+</ul>
+<h3>A3 (NEW). <a href="https://arxiv.org/abs/2610.01618">Agents Are Systems, Not Models: Rethinking Agentic Evaluation (arXiv 2610.01618)</a></h3>
+<p><em>Wiedmann, Girrbach, Schmid, Akata (TU Munich / MCML / Helmholtz Munich / Inria). <strong>Full PDF read</strong> (main text plus Appendices A.1–A.18). 18,240 trajectories released.</em></p>
+<p><strong>What they did:</strong></p>
+<ul>
+<li><strong>The tasks:</strong> four science tasks where a coding agent must find and operate a published specialist model. Three tasks reward using the specialist (redshift from galaxy images, promoter prediction with fine-tuning, RNA folding). One rewards <em>declining</em> a weaker specialist (MMLU-astronomy).</li>
+<li><strong>The configuration axes:</strong></li>
+<li>Information: none, identity, interface or protocol;</li>
+<li>Reasoning: act-only, think-act or ReAct;</li>
+<li>Verification prompt: none, asked, reported or binding;</li>
+<li>Budget: 5, 10 or 20 minutes;</li>
+<li>Model: Qwen3.5 35B, 122B or 397B.</li>
+<li><strong>The grid:</strong> 432 cells × 5 repeats × 4 tasks = 8,640 main runs, plus Step-3.7-Flash, Claude Sonnet 5 and oracle-tool ablations (§3, §4.1, Table 4).</li>
+<li><strong>The metric:</strong> the share of the backbone-to-specialist gap the agent closes. A hurdle separates genuine attempts from trivial ones.</li>
+</ul>
+<p><strong>Key results:</strong></p>
+<ul>
+<li><strong>Noise:</strong> among genuine attempts, <strong>about 54% of score variance is within-configuration repeat noise</strong> (ICC 46.1%; 39.4% over all completed runs; §4.2, Table 8). 19.3% of runs ran out of budget (A.4).</li>
+<li><strong>Information dominates.</strong> Effect sizes are 1.93, 1.45 and 1.50, against Model at 0.70, 0.17 and 1.25 (Table 3). Information ranks first in ≥99% of bootstrap draws (A.9). More information also lowers cost and runtime and improves calibration.</li>
+<li><strong>Interactions:</strong> more budget lowers the score for the small model and raises it for the large one (Table 19). On redshift with no task information, more time makes the result worse (Table 9).</li>
+<li><strong>Verification is a system property, not a prompt property</strong> (§4.3, §5, Fig. 4):</li>
+<li>Moving the prompt from none to binding raises reference-based verification only from 19% to 22%.</li>
+<li>An oracle-check tool roughly triples it, raises Qwen-122B pooled G from 0.822 to 0.923, and cuts calibration error from 0.093 to 0.002 (Table 12).</li>
+<li>Only 4.4% of oracle runs hill-climb (A.12).</li>
+<li><strong>Authority bias:</strong> 99.8% of MMLU-astronomy runs used the weaker specialist. Accuracy was 0.685, against 0.967 for the backbone alone (A.13).</li>
+<li><strong>Closed vs open model</strong> (Table 17): Claude Sonnet 5 uses fewer tool calls (14.2 vs 31.4) and makes fewer errors (0.5 vs 2.6), and is better calibrated. But its pooled G is lower (0.828 vs 0.870), and for it Budget, not Information, ranks first (Table 16).</li>
+</ul>
+<p><strong>Limitations</strong> (§6):</p>
+<ul>
+<li>four tasks in two domains;</li>
+<li>memory and multi-agent setups excluded;</li>
+<li>the &quot;system beats prompt&quot; finding is shown on one behavior (verification);</li>
+<li>open models are FP8-quantized.</li>
+</ul>
+<p><strong>BQAA read:</strong></p>
+<ol>
+<li><strong>Log configuration as dimensions.</strong> Outcome analytics are noisy without them: information level, budget, model and whether a verification tool exists.</li>
+<li><strong>Report variance and repeat counts.</strong> With half the variance being noise, a single-run success rate in a dashboard is misleading. Show confidence intervals per configuration, and keep completion separate from genuine-attempt success.</li>
+<li><strong>Tool calls beat prompts as evidence.</strong> If verification behavior is wanted, it should show up as tool calls in the trace, not be inferred from the prompt.</li>
+</ol>
+<h3>Scouted, not ranked (abstract only)</h3>
+<ul>
+<li><code>2610.00651</code> <strong>Agent Evaluation Reliability:</strong> Bayesian variance decomposition over 22 HAL / Harbor benchmarks. More tasks don't always fix rank reliability. Strong next-slot candidate.</li>
+<li><code>2610.01045</code> <strong>Empty Commitments:</strong> promises of future actions that the runtime cannot carry out. A measurement protocol only.</li>
+<li><code>2610.00917</code> <strong>Model–harness interactions:</strong> across 66 configurations, model rankings reverse across harnesses; Claude leads GPT by 7.94 points in OpenHands but trails by 30.16 in PI on Terminal-Bench 4.</li>
+<li>Also: <code>2610.01349</code> PACE (provenance-aware capability enforcement), <code>2610.02163</code> AutoCompact (learned context compaction), <code>2610.00710</code> ReLiveGym (weeks-long replayed environments), and <code>2610.00954</code> (tokenomics of SLM ensembles).</li>
+<li>From the fresh list: <code>2609.37539</code> SkillGym (verifiable skill-use environments), <code>2610.00313</code> Rules-to-Tools (26/30 vs 29/30 repair with executable checks), <code>2610.02206</code> KaliBench. The rest of the fresh list's arXiv links are off-scope (video, robotics, astrophysics) or do not resolve (see Housekeeping).</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ol>
+<li><strong>MCP transport defaults keep tightening.</strong> The TypeScript SDK now limits redirects to the same origin and offers audience binding. goose added an SSRF guard on MCP redirects. Expect the Python MCP SDK to match the redirect and audience behavior, and at least one major client to make audience checks the default, by mid-November. MCP connect-failure analytics will need a &quot;policy refused&quot; reason. <em>Value: medium-high.</em></li>
+<li><strong>Process checks over traces become the eval product pitch.</strong> IBM shows 93% of right-answer runs broke the required process. Phoenix is hardening online evals, and Mastra and LiteLLM are building trace-aggregate queries. Expect at least one observability vendor to ship &quot;trajectory assertions&quot; (ordering, scope, required-step checks) as a first-class feature within six weeks. BQAA can offer the same as SQL over <code>agent_events</code>. <em>Value: high for BQAA.</em></li>
+<li><strong>Vendor-hosted agents emit lifecycle events as well as traces.</strong> OpenAI now has session webhooks to go with OTLP traces. An ingester needs <code>failed</code> and <code>action_required</code> events to know when to pull. Expect at least one more hosted-agent platform to pair traces with status webhooks. <em>Value: medium.</em></li>
+<li><strong>Fail-closed approval spreads.</strong> Microsoft Agent Framework now blocks unresolvable approvals; Pydantic blocks when unsure (prior slot). Analytics that can't tell a policy block from a user denial will misreport human-in-the-loop friction. <em>Value: medium-high.</em></li>
+</ol>
+<hr />
+<h2>TL;DRs for BQAA</h2>
+<ul>
+<li><strong>I1 MCP TS SDK 1.32 / 2.3:</strong> expect MCP connect failures behind cross-host redirects after upgrade. Log MCP connect-failure reasons separately, and capture audience binding as a server attribute.</li>
+<li><strong>I2 Microsoft Agent Framework 1.20:</strong> add <code>blocked_unresolvable</code> to approval outcomes, join tool calls to label state at call time, and key durable AG-UI runs by run ID.</li>
+<li><strong>P OpenAI 3.24 / agents 0.23.1:</strong> session webhooks tell you when to pull OTLP traces. The 0.23 line on PyPI redacts tool-failure detail by default.</li>
+<li><strong>P LangSmith 0.14.4:</strong> the Python default OTLP exporter had been sending traces to <code>/otel</code> instead of <code>/otel/v1/traces</code> since April 16. Check for trace-count step changes.</li>
+<li><strong>P goose 1.53:</strong> a <code>diff.external</code> command-execution advisory was fixed, plus an MCP redirect SSRF guard and cost estimates via canonical aliases.</li>
+<li><strong>A1 IBM process-level eval:</strong> 162 of 175 right-answer runs broke the process. Build turn-ordered, scope and readback assertions as SQL, and report root failures per run.</li>
+<li><strong>A2 OffQuery:</strong> answer accuracy 64.7% vs state reconstruction 43.1%, and 43% of broader follow-up plans went wrong. Log shared-state writes with their source agent.</li>
+<li><strong>A3 Agents are systems:</strong> about 54% of variance is repeat noise. Log configuration dimensions and show confidence intervals. Verification shows up as tool use, not prompt wording.</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What was not confirmed</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>LangSmith <code>/otel</code> path impact (Apr 16 → Oct 2)</td>
+  <td>Whether traces sent to <code>/otel</code> were dropped, rejected, or accepted server-side. The PR says only that they &quot;went to <code>/otel</code> instead of <code>/otel/v1/traces</code>&quot;.</td>
+  <td>PR #3645 body; v0.14.4 release notes</td>
+</tr>
+<tr>
+  <td>goose GHSA-6mg9-3cvh-9939</td>
+  <td>The advisory itself returns 404 from both the repo and global advisory APIs, so severity and affected versions are unverified. The description comes from the fix PR.</td>
+  <td><code>gh api repos/aaif-goose/goose/security-advisories/…</code>; <code>gh api /advisories/…</code>; PR #12537</td>
+</tr>
+<tr>
+  <td>Claude Code 2.1.288 / Agent SDK 0.3.288</td>
+  <td>Published to npm under <code>next</code> only (18:30Z / 18:33Z). There is no CHANGELOG entry and no GitHub release, so contents are unknown. Not covered.</td>
+  <td>npm <code>dist-tags</code>; <code>CHANGELOG.md</code> on main; GitHub releases API</td>
+</tr>
+<tr>
+  <td>OpenAI session webhooks live behavior</td>
+  <td>I did not register a webhook ($0 / no external calls). The claims rest on SDK types at the v3.24.0 tag and on PR #4013.</td>
+  <td>openai-python v3.24.0 <code>types/webhooks/agent_session_*</code></td>
+</tr>
+<tr>
+  <td>Microsoft Agent Framework per-PR details</td>
+  <td>I read the bodies of #8972, #8780 and #8829. The other cited changes rest on the release notes only.</td>
+  <td>GitHub release python-1.20.0; PR API</td>
+</tr>
+<tr>
+  <td>MCP v2.3.0 <code>client</code> package clock</td>
+  <td>I verified npm <code>@modelcontextprotocol/server@2.3.0</code> (17:48:29Z, <code>latest</code>) and <code>@modelcontextprotocol/sdk@1.32.0</code>. The <code>client</code> 2.3.0 clock (17:46:01Z) is from the DSH 1132 pack only.</td>
+  <td>npm <code>view … time</code> / <code>dist-tags</code>; grep of the DSH 1132 pack</td>
+</tr>
+<tr>
+  <td>OffQuery judge agreement</td>
+  <td>The paper is internally inconsistent: §3.3 says human–GPT-4o κ 0.84, but Table 7 says 0.76 and 0.68. I used Table 7.</td>
+  <td>full PDF, §3.3 vs App. B.7 Table 7</td>
+</tr>
+<tr>
+  <td>Fresh-list arXiv ids <code>2610.02211</code>, <code>2610.02250</code></td>
+  <td>Both return 404 on arxiv.org/abs. They may be collector typos, or not yet announced.</td>
+  <td>curl arxiv.org/abs/… (12:47 PT)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Slot:</strong> on-cadence, with a late wake (about 12:36 PT, writing at about 12:50 PT). The label is kept as <strong>1234</strong>. The window covers about 6 hours since the published <code>2026-10-02-0634</code>.</li>
+<li><strong>Fresh-list path used:</strong> the candidates came from <code>_runs/fb-2026-10-02-1234/fresh-items.md</code> (62 fresh). I opened packs only through targeted greps, and read no pack wholesale.</li>
+<li><strong>Packs merged (5):</strong> agy-0932, muse-1032, dsh-1132, muse-1207 (extra) and dsh-1209 (extra). FB_MERGE: raw 110, unique 65, 3 dropped as seen, 62 fresh.</li>
+<li><strong>Gaps:</strong></li>
+<li><strong>Agy 1232</strong> was ABSENT at kick, so it is not in the merge. It landed at 12:43 PT, after the kick. I grepped only its headings: merges and opens only, such as Mastra #25758 merged, a LiteLLM spend-log cascade and vercel/ai #21961, with <strong>no releases</strong>. Nothing from it is ranked.</li>
+<li><strong>Standing ABSENT:</strong> Muse 0732, DSH 0832, DSH 1732, Agy 1832 and Muse 1932. The overnight Oct 1→2 outage packs were already disclosed in 0634.</li>
+<li><strong>Source gaps:</strong> Medium scouts are paused (lead-only); LinkedIn is behind an authwall; X returns 401 and Reddit 403, as the packs report. <strong>HN was dropped on 2026-09-27, so there are 0 HN hits by design.</strong></li>
+<li><strong>Verification method:</strong></li>
+<li>GitHub releases API (per_page 60–100) across about 80 agent and observability repos, for releases after 13:20Z Oct 2. One repo request timed out, and the high-volume repos were re-swept individually.</li>
+<li>npm <code>view … time</code> / <code>dist-tags</code> (20 packages) and the PyPI JSON API (31 packages) for in-window artifacts.</li>
+<li>Release bodies read for every ranked item, plus PR bodies for MAF #8972 / #8780 / #8829, LangSmith #3645, OpenAI #4013 (with the webhook type at the tag) and goose #12537, and advisory APIs for MCP-TS and goose.</li>
+<li>PR state checks for 12 WATCH and NOTE items.</li>
+<li>arXiv export API: fresh-list ids, plus my own keyword sweep (agent × trace / trajectory / telemetry / audit / evaluation / logs; 120 most recent).</li>
+<li>Three PDFs fetched from arxiv.org/pdf and read in full with <code>pdftotext</code>.</li>
+<li>Every candidate id grepped against the live <code>catalog.json</code> (489 items) and all prior briefs.</li>
+<li><strong>Verified arXiv ceiling:</strong> <code>2610.02210</code> resolves. <code>2610.02211</code>, <code>.02212</code>, <code>.02215</code>, <code>.02220</code> and <code>.02250</code> return 404. No new arXiv mailing landed between 0634 and this slot, so the three Academy picks are full reads of unranked papers from the Oct 1 batch. OffQuery was flagged as next-slot material at 0634.</li>
+<li><strong>Dedup:</strong> none of the 5 NEW items appears in the catalog or in any prior brief. All 3 Progress parents were verified in the live catalog. Pin <code>2609.02702</code> is untouched. I re-admitted nothing from the do-not-re-admit list. Langfuse v4.50.0, Agno 3.1.1, Letta Code 0.34.2 and Cline desktop 0.0.42 were already noted at 0634 and are not repeated. Opik 2.2.88 was already Progress at 0634.</li>
+<li><strong>Exclusions honored:</strong> no first-party BQAA card; Google Gen AI SDK and ADK are NOTE only. No GTM content, no Desk section, no Crustdata, no Medium citations. Fable is off.</li>
+<li><strong>Effort = high</strong> (per the 2026-09-29 lock). Jev shadow was skipped by Collection (scheduled slot, Q8).</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<pre><code class="language-yaml">new:
+- id: mcp-typescript-sdk-1-32-0-2-3-0-same-origin-redirects-token-audience-one-server-per-request
+  tag: Industry
+  title: &quot;MCP TypeScript SDK 1.32.0 / v2.3.0: same-origin redirects, tool-argument limits, token-audience binding, one server per request&quot;
+  url: https://github.com/modelcontextprotocol/typescript-sdk/releases/tag/v2.3.0
+  text: &gt;-
+    The reference MCP TypeScript SDK's HTTP client transports now follow redirects only within the same origin,
+    and servers gain opt-in maxToolInputElements and expectedResource (accept only tokens issued for this server).
+    v2.3.0 also requires one server instance per request and makes large single-event SSE messages fast
+    (100 MB: about a minute and 1.7 GB down to under a second and about 0.5 GB).
+- id: microsoft-agent-framework-python-1-20-0-fail-closed-approvals-mcp-labels-durable-ag-ui
+  tag: Industry
+  title: &quot;Microsoft Agent Framework (Python) 1.20.0: approvals fail closed, MCP labels before tools become callable, durable AG-UI runs&quot;
+  url: https://github.com/microsoft/agent-framework/releases/tag/python-1.20.0
+  text: &gt;-
+    Tool calls are now blocked when an approval binding or agent-tool approval cannot be resolved, and local
+    approvals must be session-backed. MCP security labels are applied to dynamically discovered and progressively
+    disclosed tools before they become callable. Disconnected AG-UI runs are durable and emit RUN_STARTED before
+    execution, and Foundry hosting is redesigned around request-scoped agents and persistent sandbox-isolated
+    sessions (breaking).
+- id: arxiv-2610-01833-process-level-eval-enterprise-agent-skills-92-percent-correct-runs-deviate
+  tag: Academy
+  title: &quot;Continuous process-level evaluation: 162 of 175 agent runs with correct final numbers still broke the required process (arXiv 2610.01833)&quot;
+  arxiv: &quot;2610.01833&quot;
+  url: https://arxiv.org/abs/2610.01833
+  text: &gt;-
+    IBM evaluates enterprise apportionment skills run in Claude Code and Codex over 240 trials with trace-level
+    checks on tool selection, arguments, turn-ordered phases, scope and database readback. 92.6% of runs with correct
+    final numbers had another deviation (§7.1), and a dependency graph compresses 6.34 failed checks per run to
+    2.65 root causes. The same spec revision costs 1.2 pp on one harness and 12.9 pp on the other (Table 1).
+- id: arxiv-2610-01244-offquery-right-answers-wrong-states-multi-agent-shared-state
+  tag: Academy
+  title: &quot;OffQuery: multi-agent teams answer correctly 64.7% of the time but rebuild a reliable shared state only 43.1% (arXiv 2610.01244)&quot;
+  arxiv: &quot;2610.01244&quot;
+  url: https://arxiv.org/abs/2610.01244
+  text: &gt;-
+    A benchmark separating source verification, shared-state reconstruction and task accuracy in healthcare and
+    disaster settings. Standard collaboration scores 14.3% / 43.1% / 64.7% across 21 model-setting combinations
+    (Table 1). In 100 cases with a correct answer but a corrupted state, 43% of broader follow-up plans diverged
+    (§6). ReGround's verify-then-rebuild pipeline lifts all three scores.
+- id: arxiv-2610-01618-agents-are-systems-54-percent-repeat-noise-information-beats-model
+  tag: Academy
+  title: &quot;Agents Are Systems, Not Models: about 54% of agent score variance is repeat-run noise, and task information beats model size (arXiv 2610.01618)&quot;
+  arxiv: &quot;2610.01618&quot;
+  url: https://arxiv.org/abs/2610.01618
+  text: &gt;-
+    Across 18,240 trajectories on four science tasks, about 54% of score variance among genuine attempts comes from
+    repeating the same configuration (Table 8). Task information has the largest effect, ahead of model and budget
+    (Table 3). Prompting for verification barely changes behavior, while an oracle-check tool raises scores and
+    calibration (Table 12).
+progress:
+- parent: openai-sdk-python-3-23-0-node-7-27-0-agent-session-traces-otlp-json
+  text: &gt;-
+    openai-python 3.24.0 (Oct 2) adds typed agent.session created / in_progress / idle / failed / action_required
+    webhooks. openai-agents 0.23.1 is the first PyPI publication of the 0.23 line, which redacts default
+    tool-failure details and applies sensitive-trace settings to model metadata.
+- parent: langsmith-sdk-v0-14-0-agent-identity-otel-finish-reasons
+  text: &gt;-
+    LangSmith SDK 0.14.4 / JS 0.10.8 (Oct 2) fix the OTLP traces endpoint: since an April 16 change, the Python
+    default exporter had been sending traces to /otel instead of /otel/v1/traces. OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    is now honored as a full URL.
+- parent: goose-v1-52-0-decisions-provider-crate-openrouter-jev
+  text: &gt;-
+    goose v1.53.0 (Oct 2) remediates GHSA-6mg9-3cvh-9939, where a repo's git diff.external setting could run
+    arbitrary commands during goose review. It also guards MCP streamable-HTTP redirects against SSRF and
+    estimates costs through canonical provider aliases.
+headline_claims:
+- claim: &quot;MCP TypeScript SDK 1.32.0 and v2.3.0 make HTTP client transports follow redirects only when they stay on the same origin, and add an opt-in expectedResource option that accepts only bearer tokens issued for the server.&quot;
+  url: https://github.com/modelcontextprotocol/typescript-sdk/releases/tag/v2.3.0
+  date: 2026-10-02
+- claim: &quot;Microsoft Agent Framework Python 1.20.0 fails closed when approval bindings or agent-tool approvals cannot be resolved, and applies MCP security labels before dynamically discovered tools become callable.&quot;
+  url: https://github.com/microsoft/agent-framework/releases/tag/python-1.20.0
+  date: 2026-10-02
+- claim: &quot;In IBM's 240-trial study, 162 of 175 agent runs that passed all final numerical checks still had at least one evaluator-detected process deviation (92.6%).&quot;
+  url: https://arxiv.org/abs/2610.01833
+  date: 2026-10-01
+</code></pre>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 2 Oct 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
