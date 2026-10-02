@@ -1,8 +1,96 @@
 {
-  "updatedAt": "2026-10-01T23:55:00Z",
+  "updatedAt": "2026-10-02T23:55:00Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "contextscope-prefix-cache-break-diff-fail-on-2026-10-02",
+      "date": "2026-10-02",
+      "displayDate": "Oct 2, 2026",
+      "title": "contextscope — longest-common-prefix cache-bust diffs + --fail-on CI gate",
+      "href": "https://github.com/antonsoo/contextscope",
+      "why": "Local-first analyzer of raw agent JSON requests (Anthropic Messages / OpenAI Chat+Responses; single/array/JSONL/gzip/batch/gateway wrappers). Finds the longest common prefix in the provider's serialization order, shows a readable cache-bust diff, and simulates Anthropic/OpenAI cache rules (breakpoints, min cacheable length, lookback, TTL pricing) with actual vs optimized cost. Grouped findings name the offending block (interpolated system value, tools reordered, schema key order, model switch, prefix below minimum, no tail cache breakpoint). Token treemap + duplicate-content detection. CLI `--fail-on warning` exits 2 as a CI floor. Privacy: CSP connect-src 'self'; nothing uploaded. Caveats: ★0 MIT, npm unpublished; Claude counts are estimates unless calibrated; cache simulation is a model not a measurement; not installed/run here. Distinct from Agent Console / cachebeat / dsh-stable-context-first (attributes a miss to a block). Patterns/checks, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-02-dsh-harness-lab-pack",
+      "tags": [
+        "tokens",
+        "cache",
+        "hooks",
+        "cost",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "boozelee-harness-task-contract-verify-pr-refuse-2026-10-02",
+      "date": "2026-10-02",
+      "displayDate": "Oct 2, 2026",
+      "title": "BoozeLee/harness — task contract + verify gates/scope/review; pr create refuses unless PASS (AGPL reference)",
+      "href": "https://github.com/BoozeLee/harness",
+      "why": "AGPL-3.0-only governed agentic control plane (stdlib Python) — clean-room / reference-only; do not copy code or vendor. scan → readiness score + gates/protected paths (--fail-under 70 exits 1); task start binds goal + accept criteria + path allow-list + risk; verify runs every gate + scope check + independent review into evidence HTML; pr create refuses unless verdict is PASS. Done only when all risk-level gates pass, changes stay in scope, and reviewer returns VERDICT: PASS — skipped review = not passed. guard PreToolUse blocks protected-path writes / secret reads / forbidden commands (exit 2) + audit.log; policy status exits 1 on local≠team policy drift. Eval matrix keeps failing runs named (11/13 PASS). Caveats: ★0 young; AGPL-3.0-only pattern only; README also mentions harness serve on 127.0.0.1:8766 — do not install; not executed here. Overlaps gatehouse / Proof / coding-agent-guardrails — distinct piece is task contract + PR refusal. Patterns/reference, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-02-dsh-harness-lab-pack",
+      "tags": [
+        "harness",
+        "hooks",
+        "receipts",
+        "evidence",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "agent-quota-tracker-verified-poke-window-state-2026-10-02",
+      "date": "2026-10-02",
+      "displayDate": "Oct 2, 2026",
+      "title": "agent-quota-tracker — multi-seat rolling-window state + verified smart poke + launchd",
+      "href": "https://github.com/joseamair/agent-quota-tracker",
+      "why": "Local multi-seat quota monitor + priming watchdog (Python 3.11+/uv). Per seat: ACTIVE vs INACTIVE 5h rolling-window state with exact countdown, 5h % usage, weekly reset as local time. Live per-provider engines (not scraped): agy JSON usage; Codex JSON-RPC rateLimits/read; Claude OAuth usage API (~/.claude/ or ~/.ccs/instances/<profile>); OpenRouter auth-key/credit API; Beta Cursor/Windsurf/Copilot. Verified smart poke: minimal prompt to an inactive window, wait for reply, then re-query the provider — never trusts the poke alone. --poke-watch adaptive sleep min(remaining)+45s; --schedule-install writes launchd LaunchAgent (or Task Scheduler/crontab). Also cached Starship/Oh-My-Posh/tmux segments, --status --json, localhost dashboard. Caveats: ★0 MIT; reads provider OAuth credentials / OpenRouter key API — pass keys by env, never echo; some engines Beta; ccs multi-account path assumed; not installed/run here. Complements Agent Limit Watchdog / agent-runway with window-state measure. Patterns/checks, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-02-dsh-harness-lab-pack",
+      "tags": [
+        "cost",
+        "quota",
+        "watchdog",
+        "hooks",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "blackbox-evidence-class-completion-barrier-seal-2026-10-02",
+      "date": "2026-10-02",
+      "displayDate": "Oct 2, 2026",
+      "title": "suites-dev/blackbox — evidence classes + completion-barrier seals before absence/exact counts",
+      "href": "https://github.com/suites-dev/blackbox",
+      "why": "System-verification framework (TypeScript) that forces an agent to state what its evidence can support. Capsule = controlled Docker Compose env + OpenTelemetry; experiment = known initial state + stimulus + measurements + criteria. Findings are supported, refuted, or unresolved for insufficient evidence — verdict type chosen by evidence, not the agent. docs/completion-barriers.md: assert absence or exact effect counts only after an observable completion boundary (a seal — queue drain, terminal state, checkpoint, or terminal response — never a timer); execution identity defines evidence scope. Capsules retain records after env stops; HTML/JSON export; $blackbox Agent Skill. Caveats: ★18 Apache-2.0 but alpha, source-only, not on npm; own docs say raw telemetry is not yet projected into normalized effects; needs Docker Compose + OTel (heavy for headless seats); not installed/run here. Complements agent-evals (replay) and claude-mock with real-system evidence + scope. Patterns/reference, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-02-dsh-harness-lab-pack",
+      "tags": [
+        "evidence",
+        "receipts",
+        "harness",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "tapehead-append-only-contiguous-tape-replay-2026-10-02",
+      "date": "2026-10-02",
+      "displayDate": "Oct 2, 2026",
+      "title": "tapehead — append-only contiguous tape, one writer, repair-by-append, replay-derived context",
+      "href": "https://github.com/rainzee/tapehead",
+      "why": "Agent kernel whose single source of truth is an append-only tape; message history is derived by replay, not stored separately (README-pinned concepts; graded from README only — docs/design.md HTTP 404). Frame sequence numbers are position starting at 0, contiguous, no holes; recorded frames never modified/deleted/reordered; single writer per tape; repair is by appending (never editing old frames); streaming deltas never go on the tape — live stream only. mem/fs/db media share Tape/Silo protocols; kernel holds no provider and reads no env vars; host-declared msgspec tool schemas; tool failure returns an error result without aborting the turn. Caveats: ★0, no SPDX license detected → reference design only, nothing copied/vendored; concepts beyond the pinned list still under discussion in issue #1; README partly Chinese; not installed/run here. Overlaps simply / claimcheck / orglet / vnx — general case of those ledger invariants. Patterns/reference, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-02-dsh-harness-lab-pack",
+      "tags": [
+        "receipts",
+        "replay",
+        "harness",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "gatehouse-completion-gates-oracle-reverify-2026-10-01",
       "date": "2026-10-01",
