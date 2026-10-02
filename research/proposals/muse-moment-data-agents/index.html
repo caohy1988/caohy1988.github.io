@@ -17,16 +17,7 @@
       --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
       --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
       --mono: "IBM Plex Mono", ui-monospace, monospace;
-      --v-bg: #e6eaf2; --v-fg: #22314f;
-      --i-bg: #e0eee3; --i-fg: #1f4a2b;
-      --o-bg: #fbe2cd; --o-fg: #7a320a;
-      --g-bg: #e9e4db; --g-fg: #4a453d;
-      --h-bg: #ebe4f4; --h-fg: #4a3170;
-      --u-bg: #f5dada; --u-fg: #7a1f1f;
-      --p-bg: #f7ecc6; --p-fg: #5c4400;
-      --yes-bg: #d9eedf; --yes-fg: #1d4a2a;
-      --part-bg: #f7ecc6; --part-fg: #5c4400;
-      --no-bg: #f5dada; --no-fg: #7a1f1f;
+      --o-bg: #fbe2cd; --u-fg: #7a1f1f; --yes-fg: #1d4a2a; --no-fg: #7a1f1f;
     }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
@@ -57,7 +48,7 @@
     .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
     .nw { white-space: nowrap; }
 
-    .banner { margin: 22px 0 0; padding: 10px 14px; background: var(--o-bg); border-left: 4px solid var(--accent); font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: #6b2c06; }
+    .banner { margin: 22px 0 0; padding: 0 0 8px; border-bottom: 1px solid var(--line); font-size: 0.9rem; color: var(--ink-soft); }
     .howto { background: var(--cream); border: 1px solid var(--line); border-radius: 8px; padding: 2px 20px 8px; margin: 10px 0 8px; }
     .howto h2 { margin-top: 18px; }
     .howto p { font-size: 0.97rem; }
@@ -76,30 +67,11 @@
     .notverified { border-left: 4px solid var(--u-fg); background: #fff; padding: 12px 16px; margin: 0 0 18px; color: var(--ink); }
     .demo-label { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.04em; color: var(--ink-soft); }
 
-    .tag { display: inline-block; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 6px; border-radius: 3px; vertical-align: 1px; white-space: nowrap; line-height: 1.5; }
-    .tag.v { background: var(--v-bg); color: var(--v-fg); }
-    .tag.i { background: var(--i-bg); color: var(--i-fg); }
-    .tag.o { background: var(--o-bg); color: var(--o-fg); }
-    .tag.g { background: var(--g-bg); color: var(--g-fg); }
-    .tag.h { background: var(--h-bg); color: var(--h-fg); }
-    .tag.u { background: var(--u-bg); color: var(--u-fg); }
-    .tag.p { background: var(--p-bg); color: var(--p-fg); }
-    .tag.d { background: #fff; color: var(--o-fg); box-shadow: inset 0 0 0 1px var(--o-fg); }
-    .cov { display: inline-block; min-width: 1.6em; text-align: center; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; padding: 1px 5px; border-radius: 3px; }
-    .cov.F { background: var(--yes-bg); color: var(--yes-fg); }
-    .cov.P { background: var(--part-bg); color: var(--part-fg); }
-    .cov.L { background: var(--v-bg); color: var(--v-fg); }
-    .cov.N { background: var(--g-bg); color: var(--g-fg); }
-    .ind { display: inline-block; min-width: 1.6em; text-align: center; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; padding: 0 5px; border-radius: 3px; border: 1px solid currentColor; background: #fff; }
-    .slash { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-faint); margin: 0 1px; }
-    .ind.I { color: var(--yes-fg); }
-    .ind.S { color: var(--no-fg); }
-    .ind.O { color: var(--ink-faint); }
+    .cov { font-size: 0.86rem; font-weight: 700; color: var(--ink); }
+    .ind { font-size: 0.86rem; font-weight: 700; color: var(--ink); }
+    .slash { font-size: 0.86rem; color: var(--ink-faint); margin: 0 1px; }
     table.instances td:last-child { min-width: 210px; }
-    .verdict { display: inline-block; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
-    .verdict.yes { background: var(--yes-bg); color: var(--yes-fg); }
-    .verdict.partly { background: var(--part-bg); color: var(--part-fg); }
-    .verdict.no { background: var(--no-bg); color: var(--no-fg); }
+    .verdict { font-size: 0.86rem; font-weight: 650; color: var(--ink); }
     sup.refs { font-size: 0.66em; line-height: 0; margin-left: 1px; white-space: nowrap; }
     sup.refs a { box-shadow: none; font-weight: 600; }
 
@@ -155,9 +127,6 @@
     #tldr p.tldr-do { margin: 0 0 4px; }
     #tldr ul.tldr-asks { margin: 0 0 16px; padding-left: 1.1em; }
     #tldr ul.tldr-asks li { margin-bottom: 2px; }
-    .tldr-gloss { font-size: 0.84em; font-style: italic; color: var(--ink-soft); }
-    .tag.nv { background: var(--g-bg); color: var(--g-fg); }
-    #tldr .tag { font-family: var(--sans); font-size: 1rem; font-weight: 650; letter-spacing: 0; text-transform: none; padding: 1px 8px; vertical-align: 0; }
     .tldr-steps figcaption { font-weight: 650; color: var(--ink); margin: 0 0 8px; }
     .tldr-actions { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 6px 0 18px; }
     a.tldr-btn { display: inline-block; background: var(--navy); color: #fff; padding: 10px 22px; border-radius: 8px; box-shadow: none; font-weight: 650; }
@@ -181,7 +150,7 @@
     .view-tldr .meta { margin-bottom: 12px; padding-bottom: 10px; }
     .view-tldr .tabs { margin-bottom: 18px; }
     .print-url, .print-only { display: none; }
-    .ctl { font-family: var(--mono); font-size: 0.8em; font-weight: 600; color: var(--ink); background: #ebe4d8; border-radius: 4px; padding: 0 4px; white-space: normal; }
+    .ctl { font-weight: 650; color: var(--ink); }
     dl.tldr-qa dt { font-weight: 650; color: var(--ink); margin-top: 9px; }
     dl.tldr-qa dd { margin: 2px 0 0; color: var(--ink-soft); }
     .tldr-foot { font-size: 0.86rem; color: var(--ink-faint); border-top: 1px solid var(--line); padding-top: 8px; margin-top: 18px; }
@@ -210,11 +179,10 @@
       .print-url { display: inline; }
       .print-only { display: block; }
       #tldr details { display: none; }
-      #tldr .tag { font-size: 8.5pt; line-height: 1.2; padding: 0 3pt; vertical-align: 0; letter-spacing: 0; }
       .view-tldr .kicker { padding-top: 0; }
       .view-tldr article { padding-bottom: 0; }
       .view-tldr h1 { font-size: 15pt; margin: 2pt 0 2pt; }
-      .view-tldr .banner, .view-tldr .meta { font-size: 8pt; margin: 0 0 3pt; padding: 2pt 0 2pt 6pt; }
+      .view-tldr .banner, .view-tldr .meta { font-size: 8pt; margin: 0 0 3pt; padding: 1pt 0; }
       .view-tldr .meta { border-bottom: 0; padding-left: 0; }
       .view-tldr .subtitle, .view-tldr .share-gap, .view-tldr .kicker, .view-tldr footer { display: none; }
       #tldr { font-size: 11pt; line-height: 1.38; margin-bottom: 0; }
@@ -281,9 +249,9 @@
       <p class="banner" role="note">Proposal for review. Personal views; public sources and own measurements only.</p>
       <h1>The Muse moment for enterprise data agents</h1>
       <p class="subtitle">Hypothesis under test: the data job you can hand off and check cold, as Proof-Carrying Jobs delivered in a Proof PR.</p>
-      <p class="share-gap"><strong>Title status.</strong> Provisional until the D90 verdicts: a hypothesis under test, not a result. Outcome claims will name the tested jobs, the one sponsor and both controls; at most they may read “enterprise data agents, extrapolated from one sponsor” <span class="tag h">Hypothesis</span>, under the section 9 rules.</p>
-      <p class="share-gap"><span class="tag g">Gap</span> Qualifying share of the sponsor's 20 largest jobs (hours-weighted, evaluator-scored): not yet measured (day-10 census)</p>
-      <p class="meta">Haiyuan Cao · proposal · <span class="nw">2026-09-30</span> · updated <span class="nw">2026-10-01</span> · public sources and own measurements only</p>
+      <p class="share-gap"><strong>Title status.</strong> Provisional until the D90 verdicts: a hypothesis under test, not a result. Outcome claims will name the tested jobs, the one sponsor and both controls; at most they may read “enterprise data agents, extrapolated from one sponsor”, which is still our guess, under the section 9 rules.</p>
+      <p class="share-gap">Not yet measured: the qualifying share of the sponsor's 20 largest jobs (hours-weighted, evaluator-scored), until the day-10 census.</p>
+      <p class="meta">Haiyuan Cao · proposal · <span class="nw">2026-09-30</span> · updated <span class="nw">2026-10-02</span> · public sources and own measurements only</p>
 
       <div class="tabs" role="tablist" aria-label="Page views" hidden>
         <button type="button" role="tab" id="tab-tldr" aria-controls="tldr" aria-selected="true" tabindex="0">Quick read</button>
@@ -292,46 +260,47 @@
 
       <div id="tldr" class="view">
         <h2 id="tldr-h" class="tldr-headline">Hand off the whole data job. Check it, don’t redo it.</h2>
-        <p class="tldr-anchor">On September 18, 2026, Meta’s assistant app, Muse, topped Apple’s free App Store chart in the United States<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>. A ranking site had it first on October 1<sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup>. <span class="tag u" title="Formal label: Unconfirmed">Not checked</span></p>
-        <p class="thesis">We think data work’s moment comes when checking beats redoing. <span class="tag h" title="Formal label: Hypothesis">Our guess</span> <span class="tldr-gloss">not proven</span></p>
-        <p class="tldr-honest">A top spot does not prove quality. Meta’s ad push likely helped, by an unknown amount<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>, and so may little setup. <span class="tag u" title="Formal label: Unconfirmed">Not checked</span> Muse Code, Meta’s coding tool, is not the author’s most-used tool. <span class="tag o" title="Formal label: Own measurement">Our own count</span></p>
-        <p class="tldr-missing"><strong>What is missing:</strong> proof on real company data. <span class="tag nv" title="Formal label: Not verified">No public test found</span></p>
-        <p class="tldr-example"><strong>Example, not a result:</strong> month-end invoices take 80 hours, the smallest job we would test. Someone new checks them in 16 hours or less. <span class="tag p" title="Formal label: Proposed">Our target</span></p>
+        <p class="tldr-anchor">On September 18, 2026, Meta’s assistant app Muse topped Apple’s free App Store chart in the United States<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>. A ranking site also ranked it first on <span class="nw">2026-10-01</span><sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup>, not yet checked by us.</p>
+        <p class="thesis">Our guess, not yet proven: data work’s moment comes when checking beats redoing.</p>
+        <p class="tldr-honest">A top spot does not prove quality. Meta’s ad push likely helped, by an unknown amount<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>. By the author’s own count, Muse Code is not their most-used coding tool.</p>
+        <p class="tldr-missing"><strong>What is missing:</strong> a public test of this on real company data. We found none.</p>
+        <p class="tldr-argo">A preprint we read only in its abstract, Argo-Bench<sup class="refs">[<a href="#s40" aria-label="Source 40">40</a>]</sup>, tests data agents on a simulated company. Its best of 14 models scores 95 or higher on only 34.8 percent of 210 tasks. It is not about Muse.</p>
+        <p class="tldr-example"><strong>An example, not a result:</strong> a month-end invoice run takes 80 staff hours, our minimum job size. Our target: someone new checks it within 16 hours.</p>
         <figure class="tldr-steps" aria-labelledby="tldr-steps-cap">
           <figcaption id="tldr-steps-cap">The pattern: Hand off. Check. Sign.</figcaption>
           <ol>
-            <li><b>Hand off</b><span>the whole job</span></li>
+            <li><b>Hand off</b></li>
             <li><b>Check</b><span>someone new, faster than a redo</span></li>
-            <li><b>Sign</b><span>a person approves</span></li>
+            <li><b>Sign</b></li>
           </ol>
         </figure>
-        <p class="tldr-step"><strong>Why this is a big jump, not a small add-on:</strong> the software does the whole job. <span class="tag h" title="Formal label: Hypothesis">Our guess</span></p>
-        <p class="tldr-do"><strong>Our ask:</strong> back a trial of 90 days or more on two regular jobs.</p>
+        <p class="tldr-step"><strong>Why this is a big jump (our guess):</strong> the software does the whole job, not a small add-on.</p>
+        <p class="tldr-do"><strong>Our ask:</strong> back a trial of 90 days or more on two regular jobs. Not yet funded or staffed.</p>
         <ul class="tldr-asks">
-          <li>An owner, such as the head of billing, signs.</li>
-          <li><strong>Key test:</strong> an outside judge plants ten or more mistakes.</li>
-          <li>A new checker may miss one and raise one false alarm, at most, in a fifth of the redo time.</li>
-          <li>A pass means it is worth trying on more jobs. It does not prove the software is reliable. Not yet funded or staffed.</li>
+          <li>The owner, say the head of billing, signs.</li>
+          <li><strong>Key test, with targets we chose:</strong> an outside judge plants ten or more mistakes.</li>
+          <li>A new checker may miss one and wrongly flag one, at most, in a fifth of redo time.</li>
+          <li>A pass earns a try on more jobs, not proof of reliability.</li>
         </ul>
         <p class="tldr-actions"><a class="tldr-btn" href="#full">Go deeper</a> <a href="#h-demo">Open the example</a> <span class="tldr-demo-note">(made-up data, steps only)</span></p>
         <details class="tldr-more" id="tldr-questions">
-          <summary>Likely questions from a director</summary>
+          <summary>Likely questions</summary>
           <dl class="tldr-qa">
-            <div><dt>Is Muse the tool the author uses most?</dt><dd>No. Meta’s coding agent, Muse Code, is not the author’s most-used. Claude Code leads the author’s 15-day count. Another agent tool leads over 7 days, 138 files to 132. <span class="tag o" title="Formal label: Own measurement">Our own count</span></dd></div>
-            <div><dt>How is this different from Muse Code?</dt><dd>In the author’s own use, Muse Code hands back code with tests. <span class="tag o" title="Formal label: Own measurement">Our own count</span> Here a whole data job comes back with evidence and a human signature. We think the idea carries over only in part. Section 7 rates four of six traits as partly or not at all.</dd></div>
+            <div><dt>Is Muse Code the tool the author uses most?</dt><dd>No. Meta’s coding agent, Muse Code, is not the author’s most-used. Claude Code leads the author’s 15-day count. Another agent tool leads over 7 days, 138 files to 132. These are the author’s own counts on one machine.</dd></div>
+            <div><dt>How is this different from Muse Code?</dt><dd>In the author’s own use, by our own count, Muse Code hands back code with tests. Here a whole data job comes back with evidence and a human signature. We think the idea carries over only in part. Section 7 rates four of six traits as partly or not at all.</dd></div>
             <div><dt>Does this need the newest models?</dt><dd>It may not. That it does is our guess, not proven. If fixed rules pass at a similar cost, there is no Muse moment. If an older model passes, the win is the method, not the model (sections 6 and 9).</dd></div>
             <div><dt>Why not just use fixed rules?</dt><dd>We test that too. One data engineer per job builds a rules-based version. Their setup is capped at 176 hours. If it passes every test at a similar cost, the answer is plain automation (section 9).</dd></div>
-            <div><dt>What if the assistant is wrong?</dt><dd>Every check says how much it covers and who controls it. An outside judge hides 20 mistakes, and 18 must be caught. A surprise test uses a checker who did not do the work. One real wrong number sent out fails the newest model on that job (sections 3 and 9).</dd></div>
-            <div><dt>What does it cost, and when does it pay back?</dt><dd>A similar cost means within 1.25 times the newest model’s total. Setup is spread over 12 runs and must be expected to pay back within 12 runs. The model’s running cost is not confirmed (section 8). These are targets we chose, not tested. The demo’s costs are made up (section 4). <span class="tag p" title="Formal label: Proposed">Our target</span></dd></div>
+            <div><dt>What if the assistant is wrong?</dt><dd>Every check says how much it covers and who controls it. An outside judge hides 20 mistakes, and 18 must be caught. A surprise test uses a checker who did not do the work. One real wrong number sent out fails the newest model on that job (sections 3 and 9). These are targets we chose.</dd></div>
+            <div><dt>What does it cost, and when does it pay back?</dt><dd>A similar cost means within 1.25 times the newest model’s total. Setup is spread over 12 runs and must be expected to pay back within 12 runs. The model’s running cost is not confirmed (section 8). These are targets we chose, not tested. The demo’s costs are made up (section 4).</dd></div>
             <div><dt>Who signs, and who carries the risk?</dt><dd>The job’s owner rules on each open item and signs. A separate check must pass on each ruling first. So the person who signs answers for the release. The software can only read data and write in a safe test area, within budgets and with an off switch. Nothing goes out unsigned (sections 3 and 8).</dd></div>
-            <div><dt>What about access and audit?</dt><dd>The software needs its own managed identity. That is a design need. For live questions, Google’s data agent already uses the asker’s own access<sup class="refs">[<a href="#s21" aria-label="Source 21">21</a>]</sup>. The warehouse enforces row and column rules<sup class="refs">[<a href="#s22" aria-label="Source 22">22</a>, <a href="#s23" aria-label="Source 23">23</a>]</sup>. Calls can be logged for audit<sup class="refs">[<a href="#s26" aria-label="Source 26">26</a>]</sup>. Whether auditors accept this is not confirmed (section 8). <span class="tag u" title="Formal label: Unconfirmed">Not checked</span></dd></div>
-            <div><dt>What is the test, and what fails it?</dt><dd>It runs 90 days, or longer if the two live runs need it. First come 10 days of setup, then 9 practice runs. Next come 3 sealed test runs with hidden mistakes. Last come 2 live runs with an audit and a surprise test. These fail the newest model on a job: a real wrong number sent out or a real missed item. So do two hidden mistakes signed, or a review taking over half the redo time. So do hours cut by less than half, or a data leak. So does a write outside its area, or a human fixing its work (section 9).</dd></div>
-            <div><dt>What is the evidence today?</dt><dd>Little: public building blocks, claims by makers, and one person’s usage counts. No source shows this working on company data jobs (section 6). <span class="tag nv" title="Formal label: Not verified">No public test found</span> Meta’s 75.4 percent score was run by Meta itself<sup class="refs">[<a href="#s6" aria-label="Source 6">6</a>]</sup>.</dd></div>
-            <div><dt>Isn’t this just because the Muse app was heavily advertised?</dt><dd>Possibly. A report says Meta’s own ad push “has likely played a role in its rapid adoption”<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>. How much is not confirmed. <span class="tag u" title="Formal label: Unconfirmed">Not checked</span> We use the chart only to show what a moment looks like. It says nothing about quality. Our test is whether checking beats redoing, not whether people adopt it (sections 2 and 9).</dd></div>
+            <div><dt>What about access and audit?</dt><dd>The software needs its own managed identity. That is a design need. For live questions, Google’s data agent already uses the asker’s own access<sup class="refs">[<a href="#s21" aria-label="Source 21">21</a>]</sup>. Google’s public docs say the warehouse enforces row and column rules<sup class="refs">[<a href="#s22" aria-label="Source 22">22</a>, <a href="#s23" aria-label="Source 23">23</a>]</sup> and that calls can be logged for audit<sup class="refs">[<a href="#s26" aria-label="Source 26">26</a>]</sup>. Whether auditors accept this is not confirmed (section 8).</dd></div>
+            <div><dt>What is the test, and what fails it?</dt><dd>It runs 90 days, or longer if the two live runs need it. First come 10 days of setup, then 9 practice runs. Next come 3 sealed test runs with hidden mistakes. Last come 2 live runs with an audit and a surprise test. These fail the newest model on a job: a real wrong number sent out or a real missed item. So do two hidden mistakes signed, or a review taking over half the redo time. So do hours cut by less than half, or a data leak. So does a write outside its area, or a human fixing its work (section 9). These are targets we chose.</dd></div>
+            <div><dt>What is the evidence today?</dt><dd>Little: public building blocks, claims by makers, and one person’s usage counts. We found no public source showing this working on company data jobs (section 6). Meta’s 75.4 percent score was run by Meta itself<sup class="refs">[<a href="#s6" aria-label="Source 6">6</a>]</sup>.</dd></div>
+            <div><dt>Isn’t this just because the Muse app was heavily advertised?</dt><dd>Possibly. A report says Meta’s own ad push “has likely played a role in its rapid adoption”<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>. How much is not confirmed. We use the chart only to show what a moment looks like. It says nothing about quality. Our test is whether checking beats redoing, not whether people adopt it (sections 2 and 9).</dd></div>
           </dl>
         </details>
         <details class="tldr-more" id="tldr-agenda">
-          <summary>The 30-minute agenda</summary>
+          <summary>30-minute agenda</summary>
           <div class="tbl tldr-agenda-wrap" tabindex="0" role="region" aria-label="Agenda for a 30-minute review">
             <table class="tldr-agenda">
               <caption>Agenda for a 30-minute review</caption>
@@ -349,7 +318,7 @@
         </details>
         <details class="tldr-more" id="tldr-clicks">
           <summary>Try the example, 12 minutes</summary>
-          <p class="note"><span class="tag o" title="Formal label: Own measurement">Our own count</span> We tested this path by driving the demo on the author’s computer. A script clicked every step in order, for both jobs. We ran it with normal motion and again with reduced motion, where the run ends at once. Every button was there and worked. The drill clock counts 600 seconds for a full redo. So the 20 percent bar is 120 seconds. Each opened row adds 2 seconds. Button names below are the demo’s own.</p>
+          <p class="note">This is our own measurement. We tested this path by driving the demo on the author’s computer. A script clicked every step in order, for both jobs. We ran it with normal motion and again with reduced motion, where the run ends at once. Every button was there and worked. The drill clock counts 600 seconds for a full redo. So the 20 percent bar is 120 seconds. Each opened row adds 2 seconds. Button names below are the demo’s own.</p>
           <div class="tbl" tabindex="0" role="region" aria-label="Clicks in the demo, by step, with minutes (labels as they appear in the demo)">
             <table class="tldr-clicks">
               <caption>Clicks in the demo, by step, with minutes (labels as they appear in the demo)</caption>
@@ -373,7 +342,6 @@
             <div><dt>Oracle badge</dt><dd>A label on each check. It says how much of the work the check covers and who controls it (section 3).</dd></div>
             <div><dt>Cold drill</dt><dd>A surprise test with hidden mistakes, for a checker who did not do the work (section 9).</dd></div>
             <div><dt>Canary</dt><dd>Fake marker data that must never leave the safe test area. If it shows up outside, data leaked (section 8).</dd></div>
-            <div><dt>The labels</dt><dd>Each plain label here has a formal name on the full page. “Our guess” is Hypothesis. “Not checked” is Unconfirmed. “Meta’s own claim” is Vendor. “Our target” is Proposed. “No public test found” is Not verified. “Our own count” is Own measurement.</dd></div>
             <div><dt>Three arms</dt><dd>The same job run three ways: the newest model, an older model and fixed rules. This shows whether the newest models matter (section 9).</dd></div>
           </dl>
         </details>
@@ -387,7 +355,7 @@
         <p><strong>“Muse”</strong> names two Meta products here: the consumer <strong>Muse app</strong>, a personal agent that topped the US App Store in September 2026<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup> (the anchor, section 2), and the <strong>Muse Code</strong> terminal coding agent, launched in beta on <span class="nw">2026-08-05</span>, with the <strong>Muse Spark</strong> models behind it<sup class="refs">[<a href="#s1" aria-label="Source 1">1</a>]</sup>. The question: what would a data-agent counterpart of the Muse pattern be? Our answer is the subtitle.</p>
         <p><strong>Alternative reading, in one line:</strong> the app’s chart run as a generic breakout, a projected 5 million downloads about three weeks after its US launch, amid heavy advertising<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>. We keep that reading and use the rank only as the anchor for what a moment looks like (section 2).</p>
         <p><strong>Two-minute path:</strong> section 1, the thesis in section 3, and the pass, kill and title rules in section 9.</p>
-        <p class="legend"><strong>Labels:</strong> <span class="tag v">Vendor</span> the vendor’s own claim · <span class="tag i">Independent</span> third party · <span class="tag o">Own measurement</span> the author’s own data or logs, n=1 · <span class="tag g">Gap</span> not yet measured · <span class="tag u">Unconfirmed</span> claimed or plausible, not confirmed · <span class="tag p">Proposed</span> a threshold chosen, not calibrated · <span class="tag h">Hypothesis</span> ours, untested · <span class="tag d">Own derivation</span> our arithmetic, assumptions stated. Bracketed numbers link to section 13.</p>
+        <p class="legend"><strong>How to read the qualifiers.</strong> Plain phrases say how sure we are. <em>Our guess</em> or <em>not yet tested</em> marks a hypothesis. <em>Not yet checked</em> or <em>not confirmed</em> means unconfirmed. <em>Meta says</em> or <em>the maker says</em> marks a vendor’s own claim. <em>An independent source</em> or <em>a third party reports</em> means independent. <em>Our own measurement</em> or <em>by our own count</em> means the author’s own data or logs, n=1. <em>Not yet measured</em> marks a gap. <em>A threshold we chose, not calibrated</em> or <em>our target</em> means proposed. <em>Our own arithmetic</em> means our derivation, with its assumptions stated. Bracketed numbers link to section 13.</p>
       </section>
 
       <nav class="toc" aria-label="Sections">
@@ -397,43 +365,43 @@
       <section id="summary" aria-labelledby="h-summary">
         <h2 id="h-summary">1. Executive summary</h2>
         <ol class="exec">
-          <li><strong>Thesis, a hypothesis under test.</strong> The Muse moment for enterprise data agents is the data job you can hand off and check cold: a process owner hands a whole recurring data job to an agent crew working unattended inside read-only seats and budgets, and gets back a Proof PR whose checks are labelled by how far the builder controls them, I (separate), S (shares a source) or O (self-check), and by coverage. A human signs. <span class="tag h">Hypothesis</span> The anchor for what a moment looks like is Meta’s consumer Muse app at No. 1 on the US App Store<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup> (section 2): a reported free-app chart position, not evidence for this thesis.</li>
+          <li><strong>Thesis, a hypothesis under test.</strong> The Muse moment for enterprise data agents is the data job you can hand off and check cold: a process owner hands a whole recurring data job to an agent crew working unattended inside read-only seats and budgets, and gets back a Proof PR whose checks are labelled by how far the builder controls them, I (separate), S (shares a source) or O (self-check), and by coverage. A human signs. The anchor for what a moment looks like is Meta’s consumer Muse app at No. 1 on the US App Store on <span class="nw">2026-09-18</span><sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup> (section 2): a reported free-app chart position, not evidence for this thesis.</li>
           <li><strong>What we propose.</strong> One pattern, Proof-Carrying Jobs, with five instances, claimed only for runs where an item-level oracle reaches every item of the current denominator (coverage F, measured per run); claims stop at each row’s certifies cell.</li>
           <li><strong>The ask.</strong> A sponsor, read-only seats, an owner’s time and an independent evaluator for 90 days, longer if two prospective runs do not fit, running three arms on two parallel tracks, invoicing and a warehouse-native job: the two model arms on identical tool, evidence and compute budgets, the rules arm on the same evidence, with one capped engineer per track.</li>
-          <li><strong>Pass and kill.</strong> Pass, per arm and instance: zero wrong released items on fully keyed sealed runs, and on prospective runs no confirmed wrong release within an audited bound; 18 of 20 planted faults caught; a cold reviewer signing at most 1 planted drill error and flagging at most 1 clean item, within 20% of redo hours; hours down 70%. A real wrong release, a real in-scope omission or a canary leak kills the frontier arm on that instance. A pass means worth scaling, not reliable. <span class="tag p">Proposed</span></li>
-          <li><strong>Honest caveat.</strong> Frontier dependence and generality are hypotheses the pilot can refute, not establish: it runs at one sponsor, against one previous-generation model and one rules workflow. A rules workflow matching the crew at comparable cost means no Muse moment; an older model matching it makes the moment a protocol, not a model. Muse is a design reference, not our most-used agent.</li>
+          <li><strong>Pass and kill.</strong> Pass, per arm and instance: zero wrong released items on fully keyed sealed runs, and on prospective runs no confirmed wrong release within an audited bound; 18 of 20 planted faults caught; a cold reviewer signing at most 1 planted drill error and flagging at most 1 clean item, within 20% of redo hours; hours down 70%. A real wrong release, a real in-scope omission or a canary leak kills the frontier arm on that instance. A pass means worth scaling, not reliable. These are thresholds we chose, not calibrated.</li>
+          <li><strong>Honest caveat.</strong> Frontier dependence and generality are hypotheses the pilot can refute, not establish: it runs at one sponsor, against one previous-generation model and one rules workflow. A rules workflow matching the crew at comparable cost means no Muse moment; an older model matching it makes the moment a protocol, not a model. Muse Code is a design reference and, by our own count, not our most-used agent.</li>
         </ol>
       </section>
 
       <section id="muse" aria-labelledby="h-muse">
         <h2 id="h-muse">2. What the Muse moment was, as we read it</h2>
         <h3 id="anchor">The anchor: the app that topped the store</h3>
-        <p>The Muse app, Meta’s consumer personal agent, reached No. 1 among free apps on Apple’s US App Store on <span class="nw">2026-09-18</span>, a week after launch<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>; by <span class="nw">2026-09-22</span> it ranked as the top free app, ahead of OpenAI’s ChatGPT<sup class="refs">[<a href="#s38" aria-label="Source 38">38</a>]</sup>; by <span class="nw">2026-09-30</span> it had a 12-day streak at the top of the US store and a Sensor Tower projection of 5 million downloads, amid a “massive advertising push”<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>. <span class="tag i">Independent</span> An independent tracker’s US snapshot, fetched <span class="nw">2026-10-01</span>, listed it No. 1 in Top Free Overall and Top Free Productivity<sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup>; the tracker says its positions reflect Apple’s public charts, which we have not confirmed <span class="tag u">Unconfirmed</span>.</p>
+        <p>The Muse app, Meta’s consumer personal agent, reached No. 1 among free apps on Apple’s US App Store on <span class="nw">2026-09-18</span>, a week after launch<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>; by <span class="nw">2026-09-22</span> it ranked as the top free app, ahead of OpenAI’s ChatGPT<sup class="refs">[<a href="#s38" aria-label="Source 38">38</a>]</sup>; by <span class="nw">2026-09-30</span> it had a 12-day streak at the top of the US store and a Sensor Tower projection of 5 million downloads, amid a “massive advertising push”<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>. All three are independent press reports. An independent tracker’s US snapshot, fetched <span class="nw">2026-10-01</span>, listed it No. 1 in Top Free Overall and Top Free Productivity<sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup>; the tracker says its positions reflect Apple’s public charts, which we have not confirmed.</p>
         <p><strong>What the rank does not say.</strong> A reported free-app chart position says nothing about agent quality or enterprise value, and the Muse app’s run came amid heavy advertising, so the generic-breakout reading (How to read this) stays open. We use the rank only as the anchor for what a moment looks like, never as evidence for the thesis. The author’s own counts below also show that Muse Code is not the author’s most-used agent.</p>
-        <div class="tbl" tabindex="0" role="region" aria-label="Traits of the app as we read them, and the enterprise-data equivalent: our mapping Own derivation Hypothesis">
+        <div class="tbl" tabindex="0" role="region" aria-label="Traits of the app as we read them, and the enterprise-data equivalent: our own mapping, a guess not yet tested">
           <table class="anchor-map">
-            <caption>Traits of the app as we read them, and the enterprise-data equivalent: our mapping <span class="tag d">Own derivation</span> <span class="tag h">Hypothesis</span></caption>
+            <caption>Traits of the app as we read them, and the enterprise-data equivalent: our own mapping, a guess not yet tested</caption>
             <thead><tr><th scope="col">The consumer app</th><th scope="col">The enterprise-data equivalent</th></tr></thead>
             <tbody>
-              <tr><th scope="row">Little setup, our own estimate <span class="tag u">Unconfirmed</span>: download, connect accounts and ask; the store copy, as relayed by the tracker, says “Link your email, calendar”<sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup>. <span class="tag v">Vendor</span></th><td>No identity or access setup for the asker: the platform team sets up a governed agent identity and read-only seats once, with no user impersonation (section 8); the owner approves a manifest, and setup must be projected to repay within 12 runs (section 9).</td></tr>
-              <tr><th scope="row">Anyone can ask, with no training: the author’s assumption. <span class="tag u">Unconfirmed</span></th><td>Any owner of a qualifying job can hand it over whole, not just analysts.</td></tr>
-              <tr><th scope="row">It acts for the user, but for sensitive actions Meta says it “seeks users’ approval before proceeding on their behalf”<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>. <span class="tag v">Vendor</span></th><td>Approval before any consequential action: nothing is released unsigned; the process owner rules and signs after a separate check passes on each ruling (Proof-Carrying Jobs, section 3).</td></tr>
-              <tr><th scope="row">It plugs into services the user already has, such as email and calendars<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>. <span class="tag v">Vendor</span></th><td>It plugs into governed sources already in the warehouse, under the warehouse’s row and column policies (section 8).</td></tr>
+              <tr><th scope="row">Little setup, our own estimate, not yet checked: download, connect accounts and ask; the store copy, as relayed by the tracker, says “Link your email, calendar”<sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup>, in Meta’s own words.</th><td>No identity or access setup for the asker: the platform team sets up a governed agent identity and read-only seats once, with no user impersonation (section 8); the owner approves a manifest, and setup must be projected to repay within 12 runs (section 9).</td></tr>
+              <tr><th scope="row">Anyone can ask, with no training: the author’s assumption, not checked.</th><td>Any owner of a qualifying job can hand it over whole, not just analysts.</td></tr>
+              <tr><th scope="row">It acts for the user, but for sensitive actions Meta says it “seeks users’ approval before proceeding on their behalf”<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>.</th><td>Approval before any consequential action: nothing is released unsigned; the process owner rules and signs after a separate check passes on each ruling (Proof-Carrying Jobs, section 3).</td></tr>
+              <tr><th scope="row">Meta says it plugs into services the user already has, such as email and calendars<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>.</th><td>It plugs into governed sources already in the warehouse, under the warehouse’s row and column policies (section 8).</td></tr>
             </tbody>
           </table>
         </div>
-        <p><strong>The difference we keep.</strong> A consumer app can top a chart on delight and distribution. An enterprise data agent has its Muse moment only when delegated jobs come back checkable, as a Proof PR, because a wrong number costs more than a wrong dinner reservation; that is the thesis (section 3). The rank anchors what a moment looks like; the protocol tests, at one sponsor, whether delegated jobs come back checkable; adoption is outside it (section 9). <span class="tag d">Own derivation</span> <span class="tag h">Hypothesis</span></p>
+        <p><strong>The difference we keep.</strong> A consumer app can top a chart on delight and distribution. An enterprise data agent has its Muse moment only when delegated jobs come back checkable, as a Proof PR, because a wrong number costs more than a wrong dinner reservation; that is the thesis (section 3). The rank anchors what a moment looks like; the protocol tests, at one sponsor, whether delegated jobs come back checkable; adoption is outside it (section 9). This is our own reasoning, a guess not yet tested.</p>
         <h3 id="muse-code">Muse Code, the coding agent</h3>
-        <p class="lead"><strong>Unattended work inside hard limits, whose output lands in a checkable artifact.</strong> That is our reading, not a published finding <span class="tag h">Hypothesis</span>. Not volume: Muse is not our most-used agent.</p>
+        <p class="lead"><strong>Unattended work inside hard limits, whose output lands in a checkable artifact.</strong> That is our reading, a guess and not a published finding. Not volume: by our own count, Muse Code is not our most-used agent.</p>
         <div class="tbl" tabindex="0" role="region" aria-label="Muse Code and Muse Spark, from public sources only">
           <table>
             <caption>Muse Code and Muse Spark, from public sources only</caption>
             <thead><tr><th scope="col">Area</th><th scope="col">What the public record says</th><th scope="col">Type</th></tr></thead>
             <tbody>
-              <tr><th scope="row">Log and headless runs</th><td>A local event log records every model call, tool run, approval and edit<sup class="refs">[<a href="#s1" aria-label="Source 1">1</a>]</sup>. <code>muse exec</code> runs headless, and its exit code “reflects how the run ended, not whether the work is correct”<sup class="refs">[<a href="#s3" aria-label="Source 3">3</a>]</sup>.</td><td><span class="tag v">Vendor</span></td></tr>
-              <tr><th scope="row">Hard limits</th><td>Approvals and an OS sandbox are on by default; the sandbox “refuses to run if it cannot enforce that boundary”<sup class="refs">[<a href="#s4" aria-label="Source 4">4</a>]</sup>. Hooks and MCP tools run outside it; subagents can get separate git worktrees<sup class="refs">[<a href="#s3" aria-label="Source 3">3</a>]</sup>.</td><td><span class="tag v">Vendor</span></td></tr>
-              <tr><th scope="row">Tiers</th><td>Standard: $1.25 and $4.25 per million input and output tokens, no training. Contributor: $0.10 and $0.20, “in exchange for permission to use your prompts and completions to train future Meta models”<sup class="refs">[<a href="#s5" aria-label="Source 5">5</a>]</sup>.</td><td><span class="tag v">Vendor</span></td></tr>
-              <tr><th scope="row">Claims</th><td>Meta says it co-trained Muse Spark 1.2 with Muse Code<sup class="refs">[<a href="#s1" aria-label="Source 1">1</a>]</sup>; its own table puts the Muse Spark 1.3 max variant at 75.4% on DeepSWE 1.1, run in Meta’s own Muse Code harness, ahead of two rival models, per Tech Times, which calls that figure vendor-run and reports an independently confirmed 61 for the public variant on the Artificial Analysis Intelligence Index<sup class="refs">[<a href="#s6" aria-label="Source 6">6</a>]</sup>. 24/7 Wall St., on Meta’s claim of parity with rival labs, as of <span class="nw">2026-09-03</span>: “a claim that no independent benchmark has confirmed yet”<sup class="refs">[<a href="#s7" aria-label="Source 7">7</a>]</sup>.</td><td><span class="tag v">Vendor</span> <span class="tag i">Independent</span> <span class="tag u">Unconfirmed</span></td></tr>
+              <tr><th scope="row">Log and headless runs</th><td>A local event log records every model call, tool run, approval and edit<sup class="refs">[<a href="#s1" aria-label="Source 1">1</a>]</sup>. <code>muse exec</code> runs headless, and its exit code “reflects how the run ended, not whether the work is correct”<sup class="refs">[<a href="#s3" aria-label="Source 3">3</a>]</sup>.</td><td>Meta’s own claim</td></tr>
+              <tr><th scope="row">Hard limits</th><td>Approvals and an OS sandbox are on by default; the sandbox “refuses to run if it cannot enforce that boundary”<sup class="refs">[<a href="#s4" aria-label="Source 4">4</a>]</sup>. Hooks and MCP tools run outside it; subagents can get separate git worktrees<sup class="refs">[<a href="#s3" aria-label="Source 3">3</a>]</sup>.</td><td>Meta’s own claim</td></tr>
+              <tr><th scope="row">Tiers</th><td>Standard: $1.25 and $4.25 per million input and output tokens, no training. Contributor: $0.10 and $0.20, “in exchange for permission to use your prompts and completions to train future Meta models”<sup class="refs">[<a href="#s5" aria-label="Source 5">5</a>]</sup>.</td><td>Meta’s own claim</td></tr>
+              <tr><th scope="row">Claims</th><td>Meta says it co-trained Muse Spark 1.2 with Muse Code<sup class="refs">[<a href="#s1" aria-label="Source 1">1</a>]</sup>; its own table puts Muse Spark 1.3 at 75.4% on DeepSWE 1.1, run in Meta’s own Muse Code harness, ahead of two rival models, per Tech Times, which calls that figure vendor-run and reports an independently confirmed 61 for the public variant on the Artificial Analysis Intelligence Index<sup class="refs">[<a href="#s6" aria-label="Source 6">6</a>]</sup>. 24/7 Wall St., on Meta’s claim of parity with rival labs, as of <span class="nw">2026-09-03</span>: “a claim that no independent benchmark has confirmed yet”<sup class="refs">[<a href="#s7" aria-label="Source 7">7</a>]</sup>.</td><td>Meta’s own claims, independent reports, not confirmed by us</td></tr>
             </tbody>
           </table>
         </div>
@@ -450,17 +418,17 @@
             </tbody>
           </table>
         </div>
-        <p><span class="tag o">Own measurement</span> Claude Code leads with about four times Muse’s 15-day count; over 7 days the order changes, and one of the other agent CLIs edges past Claude Code while counting files, not sessions. Muse is first on no count<sup class="refs">[<a href="#s8" aria-label="Source 8">8</a>]</sup>. Its real role: 82 of its 119 lifetime sessions gathered sources for our public research digest, mostly on a schedule; 18 ran in per-task git worktrees of an open-source SDK, drafting two small pull requests and reviewing a third.</p>
+        <p>By our own measurement on one Mac, Claude Code leads with about four times Muse Code’s 15-day count; over 7 days the order changes, and one of the other agent CLIs edges past Claude Code while counting files, not sessions. Muse Code is first on no count<sup class="refs">[<a href="#s8" aria-label="Source 8">8</a>]</sup>. Its real role: 82 of its 119 lifetime sessions gathered sources for our public research digest, mostly on a schedule; 18 ran in per-task git worktrees of an open-source SDK, drafting two small pull requests and reviewing a third.</p>
         <p><strong>What bounds those runs is not approvals.</strong> Headless runs use <code>--disable-approval</code> on the contributor-tier model<sup class="refs">[<a href="#s8" aria-label="Source 8">8</a>]</sup>: approval prompts off, OS sandbox on<sup class="refs">[<a href="#s4" aria-label="Source 4">4</a>]</sup>. In our practice (n=1), the sandbox, one worktree per task, an exportable log, and tests plus review before merge bound them. Scheduler activity is not preference.</p>
         <p class="note"><strong>Weaknesses:</strong> n=1, one Mac, 15 days, file-count method; a three-minute run and a three-hour session each count once; units differ by tool; the mix reflects how work is assigned.</p>
-        <p><strong>The pattern we borrow</strong>, stated narrowly in the thesis (section 3), is a design reference, not evidence of demand. Muse’s cheap trial has no counterpart here: the contributor tier is cheap because Meta trains on prompts and completions<sup class="refs">[<a href="#s5" aria-label="Source 5">5</a>]</sup>; TechCrunch reports that Arvind Narayanan noted there is good evidence that large companies don’t want their data used for model training<sup class="refs">[<a href="#s9" aria-label="Source 9">9</a>]</sup>; and a pilot needs seats, an evaluator and full keys.</p>
+        <p><strong>The pattern we borrow</strong>, stated narrowly in the thesis (section 3), is a design reference, not evidence of demand. Muse Code’s cheap trial has no counterpart here: the contributor tier is cheap because Meta trains on prompts and completions<sup class="refs">[<a href="#s5" aria-label="Source 5">5</a>]</sup>; TechCrunch reports that Arvind Narayanan noted there is good evidence that large companies don’t want their data used for model training<sup class="refs">[<a href="#s9" aria-label="Source 9">9</a>]</sup>; and a pilot needs seats, an evaluator and full keys.</p>
       </section>
 
       <section id="pattern" aria-labelledby="h-pattern">
         <h2 id="h-pattern">3. The thesis and the pattern: Proof-Carrying Jobs</h2>
-        <p class="thesis"><strong>Thesis, a hypothesis under test.</strong> The Muse moment for enterprise data agents is the data job you can hand off and check cold. Muse is not the author’s most-used agent; its lesson is narrower: work left unattended inside hard limits that lands as a PR with tests (in the author’s use, only 18 of 119 Muse sessions and two small pull requests, plus vendor docs; own measurement), and checking could cost less than doing; that cost advantage is <span class="tag u">Unconfirmed</span>. The data counterpart: a process owner hands a whole recurring data job to an agent crew working unattended inside read-only seats and budgets, and gets back a Proof PR checked against history, walled-off re-derivation, invariants and outside evidence, each badge labelled by how far the builder controls it, I (separate), S (shares a source) or O (self-check), and by its coverage. A human signs. It counts only if a reviewer who did not do the work catches planted errors faster than redoing the job. Frontier dependence and generality are hypotheses the pilot can refute, not establish. <span class="tag h">Hypothesis</span></p>
+        <p class="thesis"><strong>Thesis, a hypothesis under test.</strong> The Muse moment for enterprise data agents is the data job you can hand off and check cold. By our own count, Muse Code is not the author’s most-used agent; its lesson is narrower: work left unattended inside hard limits that lands as a PR with tests (in the author’s use, only 18 of 119 Muse Code sessions and two small pull requests, plus vendor docs; own measurement), and checking could cost less than doing; that cost advantage is not yet confirmed. The data counterpart: a process owner hands a whole recurring data job to an agent crew working unattended inside read-only seats and budgets, and gets back a Proof PR checked against history, walled-off re-derivation, invariants and outside evidence, each badge labelled by how far the builder controls it, I (separate), S (shares a source) or O (self-check), and by its coverage. A human signs. It counts only if a reviewer who did not do the work catches planted errors faster than redoing the job. Frontier dependence and generality are hypotheses the pilot can refute, not establish.</p>
         <p class="scope"><strong>Scope clause.</strong> Only jobs where an item-level oracle covers the current run’s whole denominator, new cases included; changed rules only once ratified and checked; claims stop at each row’s “certifies” cell (section 5). Coverage is measured per run: an oracle that cannot reach every item is P for that run, even if the unreached items are withheld; withholding counts toward the 5% cap but never restores F. A run with no F cell is out of scope for the claim and, if scored, misses a pass bar. Elsewhere, no claim.</p>
-        <p>Tests alone cannot show a data output is right for this run, so the job lands as a Proof PR whose oracle badges add checks; checking is meant to cost less than redoing, and the cold drill tests whether it does (section 9). <span class="tag h">Hypothesis</span></p>
+        <p>Our guess, not yet tested: tests alone cannot show a data output is right for this run, so the job lands as a Proof PR whose oracle badges add checks; checking is meant to cost less than redoing, and the cold drill tests whether it does (section 9).</p>
         <p><strong>The Proof PR</strong> is one reviewable change per run: executable job, outputs, source-fixed denominator, replayable log, and per-oracle badges stating the named checks passed, coverage, independence and audit bound. A process change in a builder input or the job’s rules makes a new version, with a new denominator, fresh checks and a fresh signature; the old signature, badges and audit results lapse, shown as historical, until the new version is checked. A change confined to lagging evidence, such as the bank’s remittance file, only marks that badge stale and never gates release. <strong>A badge means “passed these named checks”</strong>; it is not a correctness claim, and gaps are never green.</p>
         <ol>
           <li><strong>Delegate:</strong> the job, run unit, materiality and a source-fixed denominator.</li>
@@ -589,9 +557,9 @@
 #demo .pc-inst[aria-pressed="true"] .pc-inst-n { color: var(--pc-accent-dark); }
 #demo .pc-inst-name { font-weight: 650; font-size: 0.95rem; line-height: 1.25; }
 #demo .pc-inst-sub { font-size: 0.76rem; line-height: 1.3; color: var(--pc-soft); }
-#demo .pc-inst-flag { display: inline-block; margin-top: 3px; padding: 0 6px; font-family: var(--pc-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 3px; background: var(--pc-lag-bg); color: var(--pc-lag-fg); }
-#demo .pc-inst-flag.is-pilot { background: var(--pc-hot-bg); color: var(--pc-hot-fg); }
-#demo .pc-inst-flag.is-fin { background: var(--pc-non-bg); color: var(--pc-non-fg); }
+#demo .pc-inst-flag { display: block; margin-top: 3px; font-size: 0.76rem; font-weight: 600; color: var(--pc-soft); }
+
+
 
 /* stepper */
 #demo .pc-steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; margin: 16px 0 0; counter-reset: none; }
@@ -627,11 +595,11 @@
 #demo .pc-card-h { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
 #demo .pc-card-h h5 { margin: 0; }
 #demo .pc-note { font-size: 0.84rem; color: var(--pc-soft); }
-#demo .pc-syn { flex: none; display: inline-block; padding: 1px 7px; font-family: var(--pc-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 3px; background: var(--pc-non-bg); color: var(--pc-non-fg); }
+#demo .pc-syn { flex: none; font-size: 0.84rem; font-weight: 600; color: var(--pc-soft); }
 #demo .pc-dark { background: var(--pc-navy); color: #f3eee6; border-color: var(--pc-navy); }
 #demo .pc-dark h5, #demo .pc-dark strong { color: #fbf7f0; }
 #demo .pc-dark p, #demo .pc-dark .pc-note { color: #d9d1c4; }
-#demo .pc-dark .pc-syn { background: rgba(251, 247, 240, .14); color: #e9e3d8; }
+#demo .pc-dark .pc-syn { color: #e9e3d8; }
 
 /* buttons */
 #demo .pc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; margin: 0; padding: 10px 18px; font-size: 0.93rem; font-weight: 600; line-height: 1.2; text-align: center; border-radius: 999px; border: 1px solid transparent; cursor: pointer; transition: background-color .15s ease, border-color .15s ease, color .15s ease; }
@@ -675,8 +643,7 @@
 #demo .pc-fig[aria-expanded="true"] { background: #fbe2cd; border-bottom-style: solid; }
 #demo .pc-dark .pc-fig { border-bottom-color: #ffb27a; }
 #demo .pc-dark .pc-fig:hover, #demo .pc-dark .pc-fig[aria-expanded="true"] { background: rgba(255, 178, 122, .2); }
-#demo .pc-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.8rem; color: var(--pc-soft); }
-#demo .pc-legend span { display: inline-flex; gap: 6px; align-items: center; }
+#demo .pc-legend { margin: 0; font-size: 0.8rem; line-height: 1.45; color: var(--pc-soft); }
 
 /* key-value lists */
 #demo .pc-kv { display: grid; grid-template-columns: minmax(7.5em, 30%) minmax(0, 1fr); gap: 6px 14px; margin: 0; font-size: 0.9rem; }
@@ -703,7 +670,7 @@
 #demo .pc-man-c { font-variant-numeric: tabular-nums; font-weight: 650; text-align: right; }
 #demo .pc-man-n { grid-column: 2 / -1; font-size: 0.8rem; color: var(--pc-soft); }
 #demo .pc-man li.is-risk { background: linear-gradient(90deg, #fff3e6, transparent 70%); }
-#demo .pc-risk { display: inline-block; margin-left: 6px; padding: 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--pc-hot-fg); background: var(--pc-hot-bg); border-radius: 3px; vertical-align: 1px; }
+#demo .pc-risk { margin-left: 6px; font-size: 0.8rem; font-weight: 700; color: var(--pc-accent-dark); }
 #demo .pc-scope { margin-top: 14px; padding: 12px 14px; border: 1px dashed #a99b86; border-radius: 10px; background: #fff; }
 #demo .pc-scope.is-out { border-color: #c45c5c; background: #fff7f7; }
 #demo .pc-check { display: inline-flex; gap: 8px; align-items: center; margin-top: 8px; font-size: 0.88rem; color: var(--pc-ink); cursor: pointer; }
@@ -802,8 +769,8 @@
 #demo .pc-lane { position: relative; z-index: 1; display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 10px; align-items: center; padding: 6px 0; }
 #demo .pc-lane-h { font-size: 0.86rem; font-weight: 650; color: #fbf7f0; line-height: 1.25; }
 #demo .pc-lane-h small { display: block; font-size: 0.72rem; font-weight: 400; color: #c9c0b1; }
-#demo .pc-track { position: relative; height: 46px; border-radius: 8px; background: rgba(251, 247, 240, .06); background-image: linear-gradient(90deg, rgba(251, 247, 240, .09) 1px, transparent 1px); background-size: calc(100% / 6) 100%; }
-#demo .pc-blk { position: absolute; top: 4px; bottom: 4px; left: calc(var(--s) * 1%); width: calc(var(--w) * 1%); padding: 4px 7px 7px; border-radius: 7px; border: 1px dashed rgba(251, 247, 240, .32); background: #172034; overflow: hidden; transition: background-color .3s ease, box-shadow .3s ease, border-color .3s ease; }
+#demo .pc-track { position: relative; height: 46px; border-radius: 0; background: rgba(251, 247, 240, .06); background-image: linear-gradient(90deg, rgba(251, 247, 240, .09) 1px, transparent 1px); background-size: calc(100% / 6) 100%; }
+#demo .pc-blk { position: absolute; top: 4px; bottom: 4px; left: calc(var(--s) * 1%); width: calc(var(--w) * 1%); padding: 4px 7px 7px; border-radius: 0; border: 1px dashed rgba(251, 247, 240, .32); background: #172034; overflow: hidden; transition: background-color .3s ease, box-shadow .3s ease, border-color .3s ease; }
 #demo .pc-blk.is-on { border: 1px solid var(--c); background: #2a3243; background: color-mix(in srgb, var(--c) 22%, #101828); box-shadow: 0 0 0 1px var(--c), 0 0 18px -4px var(--c); }
 #demo .pc-blk.is-done { border: 1px solid var(--c); background: #232b3b; background: color-mix(in srgb, var(--c) 16%, #101828); }
 #demo .pc-blk-l { display: block; font-size: 0.74rem; font-weight: 600; line-height: 1.15; color: #c9cdd5; }
@@ -875,7 +842,7 @@
 #demo .pc-trace-steps li::before { content: ""; position: absolute; left: 7px; top: 18px; bottom: -2px; width: 2px; background: var(--pc-line); }
 #demo .pc-trace-steps li:last-child::before { display: none; }
 #demo .pc-trace-steps .pc-dot { position: absolute; left: 0; top: 3px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--pc-accent-dark); background: #fff; }
-#demo .pc-trace-steps .pc-tk { display: inline-block; margin-right: 6px; padding: 0 6px; font-family: var(--pc-mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 3px; background: var(--pc-non-bg); color: var(--pc-non-fg); }
+#demo .pc-trace-steps .pc-tk { margin-right: 6px; font-weight: 700; color: var(--pc-ink); }
 #demo .pc-trace-steps .pc-tr { display: block; margin: 2px 0 1px; font-family: var(--pc-mono); font-size: 0.76rem; color: var(--pc-accent-dark); overflow-wrap: anywhere; }
 
 /* step 5: rule and sign */
@@ -994,7 +961,9 @@
 #demo .pc-subs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin-top: 10px; }
 #demo .pc-subs li { padding: 10px 12px; border: 1px solid var(--pc-line); border-radius: 10px; background: #fff; font-size: 0.86rem; color: var(--pc-ink); min-width: 0; }
 #demo .pc-headline p.pc-hyp { margin-top: 8px; font-size: 0.84rem; line-height: 1.4; color: #ffdcb8; }
-#demo .pc-headline p.pc-hyp b { display: inline-block; margin-right: 6px; padding: 1px 7px; border-radius: 4px; background: #ffcf9e; color: #101828; font-family: var(--pc-mono); font-size: 0.72rem; letter-spacing: 0.06em; }
+#demo .pc-headline p.pc-hyp b { margin-right: 4px; font-weight: 700; color: #fff; }
+#demo .pc-cat { margin-right: 8px; font-size: 0.84rem; font-weight: 600; color: var(--pc-soft); }
+#demo .pc-headline .pc-cat { color: #f3eee6; }
 #demo .pc-headline p.pc-tested { margin-top: 8px; font-size: 0.88rem; line-height: 1.4; color: #e9e3d8; }
 #demo .pc-sub-h { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
 #demo .pc-sub-t { display: block; margin-top: 6px; font-family: var(--pc-serif); font-size: 1rem; line-height: 1.35; color: var(--pc-ink); }
@@ -1021,10 +990,7 @@
 #demo .pc-jobchip.is-tested { cursor: default; box-shadow: inset 0 0 0 2px #fff; }
 #demo .pc-jobchip[aria-pressed="true"] { background: var(--pc-mint); border-color: var(--pc-mint); color: #fff; }
 #demo .pc-tl { display: grid; grid-template-columns: minmax(0, 9fr) minmax(min-content, 3fr) minmax(min-content, 2fr); gap: 4px; margin: 10px 0 8px; }
-#demo .pc-tl span { padding: 7px 9px; border-radius: 6px; font-size: 0.76rem; font-weight: 600; line-height: 1.3; min-width: 0; }
-#demo .pc-tl .t-dev { background: var(--pc-non-bg); color: var(--pc-non-fg); }
-#demo .pc-tl .t-seal { background: var(--pc-navy); color: #fbf7f0; }
-#demo .pc-tl .t-pro { background: var(--pc-hot-bg); color: var(--pc-hot-fg); }
+#demo .pc-tl span { padding: 4px 0 0; border-top: 1px solid var(--pc-line); font-size: 0.8rem; font-weight: 600; line-height: 1.3; color: var(--pc-ink); min-width: 0; }
 #demo .pc-blist { padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid var(--pc-line); font-size: 0.86rem; color: var(--pc-ink); min-width: 0; }
 #demo .pc-blist.is-pass { box-shadow: inset 0 3px 0 var(--pc-mint); }
 #demo .pc-blist.is-kill { box-shadow: inset 0 3px 0 #b33a3a; }
@@ -1175,7 +1141,7 @@
         <li>Report pack: history P/S, re-derivation F/S for all cells through the shared mappings, journal, hierarchy and cell template (P/S for key figures only), with ledger control totals per entity as an independent P/I part, invariants P/O, outside evidence L/S. Certifies rebuilt cells; blind to judgment overlays and to mapping, journal, hierarchy or template faults.</li>
         <li>Invoice preparation: history P/S, re-derivation F/S (it shares the meter), invariants P/O, outside evidence L/I. Certifies contract terms on metered usage; blind to meter accuracy. Remittances lag sign-off and never gate release.</li>
       </ul>
-      <p>The title is decided per instance, at one sponsor, for two pilots run as parallel tracks: invoicing (pilot A) and a warehouse-native job (pilot B). The frontier arm missing a pass bar means no claim for that instance, and its subtitle names the missed bar (the headline names bars only when both instances miss); a rules workflow, built by one human data engineer per track whose rate and hour cap (176 setup hours per track) the evaluator fixes at the gate, passing every quality bar and the 70% hours bar at comparable cost means automation; a previous-generation model passing means protocol; otherwise, moment. The headline is the weakest verdict among instances that cleared the first rule. Every outcome claim names the tested jobs, the sponsor and the controls, with each control's result and cost ratio, and every class it names is a HYPOTHESIS named from the tested jobs. "Enterprise data agents, extrapolated from one sponsor" appears only as a HYPOTHESIS-labelled extrapolation, when both share protocol or moment and at least 5 of the sponsor's 20 largest jobs, and a quarter of their hours, qualify. The pilot can refute generality, not establish it.</p>
+      <p>The title is decided per instance, at one sponsor, for two pilots run as parallel tracks: invoicing (pilot A) and a warehouse-native job (pilot B). The frontier arm missing a pass bar means no claim for that instance, and its subtitle names the missed bar (the headline names bars only when both instances miss); a rules workflow, built by one human data engineer per track whose rate and hour cap (176 setup hours per track) the evaluator fixes at the gate, passing every quality bar and the 70% hours bar at comparable cost means automation; a previous-generation model passing means protocol; otherwise, moment. The headline is the weakest verdict among instances that cleared the first rule. Every outcome claim names the tested jobs, the sponsor and the controls, with each control's result and cost ratio, and every class it names is a hypothesis named from the tested jobs. "Enterprise data agents, extrapolated from one sponsor" appears only as an extrapolation labelled our guess, when both share protocol or moment and at least 5 of the sponsor's 20 largest jobs, and a quarter of their hours, qualify. The pilot can refute generality, not establish it.</p>
     </div>
   </noscript>
 
@@ -1360,7 +1326,7 @@
       var hd = h('div', 'pc-card-h', null, c);
       var t = h('h5', null, title, hd);
       if (opts.id) t.id = opts.id;
-      if (opts.syn) h('span', 'pc-syn', opts.syn === true ? 'synthetic' : opts.syn, hd);
+      if (opts.syn) h('span', 'pc-syn', opts.syn === true ? 'made-up data' : opts.syn, hd);
     }
     return c;
   }
@@ -2168,6 +2134,7 @@
     var body = h('div', 'pc-body', null, st);
     STEP_FN[S.step](d, p, body);
     renderNav(st);
+    if (!root.querySelector('#pc-trace-box')) { var tb = h('div', null, null, st); tb.id = 'pc-trace-box'; tb.hidden = true; }
   }
   function renderNav(st) {
     var nav = h('div', 'pc-nav', null, st);
@@ -2287,7 +2254,7 @@
     var tk = h('div', 'pc-ticket', null, g);
     var th = h('div', 'pc-ticket-h', null, tk);
     h('span', 'pc-ticket-id', 'Ticket ' + d.ticket.id, th);
-    h('span', 'pc-syn', 'synthetic', th);
+    h('span', 'pc-syn', 'made-up data', th);
     h('p', 'pc-ticket-job', d.ticket.job, tk);
     kv(tk, [['Process owner', d.owner], ['Run unit', d.ticket.unit], ['Materiality', d.ticket.mat], ['Value metric', d.ticket.metric],
       ['Baseline', d.ticket.base], ['Size floor', d.ticket.floor]]);
@@ -2869,13 +2836,13 @@
     file('Oracle badges, one per oracle', '4 badges');
     var lf = h('span'); fig(plural(p.log.length, 'entry', 'entries'), 'log', 'the replayable log', lf); file('Replayable log, head ' + p.head, lf);
     var pb = h('div', 'pc-pr-b', null, pr);
-    h('p', 'pc-claim', 'What this PR claims: the named checks below passed, over a denominator fixed from sources. What it does not claim: that the output is correct.', pb);
+    h('p', 'pc-claim', 'This PR records each named check’s status below, over a denominator fixed from sources. Incomplete or failed checks do not support release; passed checks do not establish correctness.', pb);
     if (p.prevSig && !p.signed) h('p', 'pc-vnote', histLine(p), pb);
     if (p.ver > 1 && !p.killed) h('p', 'pc-vnote', 'Version ' + p.ver + ', ' + p.verAt + ': ' + (p.verWhy === 'change' ? 'the process change re-fixed the denominator (' + fmtInt(t.D) + ' ' + d.manifest.unit + (addN(d, p) ? ', v1 had ' + fmtInt(d.manifest.total) : ', unchanged') + ')' : 'the owner started a new version to change its configuration') + ' and every badge was re-run. ' + 'Rulings stand as owner decisions, but each check must pass again on this version.', pb);
     var cov = h('div', 'pc-cov', null, pb);
     var ch = h('div', 'pc-card-h', null, cov);
     h('h5', null, 'Denominator coverage, scored by count and by value', ch);
-    h('span', 'pc-syn', 'synthetic', ch);
+    h('span', 'pc-syn', 'made-up data', ch);
     var F = inScope(d, p), VOID = !!p.killed;
     function covRow(label, parts) {
       var row = h('div', 'pc-cov-row', null, cov);
@@ -2933,15 +2900,14 @@
     h('dt', null, 'Blind to', sep);
     h('span', 'pc-not', d.blind, h('dd', null, null, sep));
     h('p', 'pc-note', 'Rows qualify only through an F cell and certify nothing their S cells share. Lagging badges never gate release.', pb).style.margin = '0 0 10px';
-    var lgd = h('div', 'pc-legend', null, pb);
+    var lgd = h('p', 'pc-legend', 'Coverage letters: ' + ['F', 'P', 'L', 'N'].map(function (x) { return x + ', ' + TAGTXT[x]; }).join('; ') +
+      '. Independence letters: ' + ['I', 'S', 'O'].map(function (x) { return x + ', ' + INDTXT[x]; }).join('; ') + '.', pb);
     lgd.style.marginBottom = '10px';
-    ['F', 'P', 'L', 'N'].forEach(function (x) { var s = h('span', null, null, lgd); tagEl(x, s); h('span', null, TAGTXT[x], s); });
-    ['I', 'S', 'O'].forEach(function (x) { var s = h('span', null, null, lgd); indEl(x, s); h('span', null, INDTXT[x], s); });
     h('p', 'pc-note', 'Tags are measured per run; the instance table gives their design intent. Each badge is evidence labelled by how far the builder controls it: I separate, S shares a source, O self-check.', pb).style.margin = '0 0 10px';
     var bg = h('div', 'pc-badges', null, pb);
     OKEYS.forEach(function (k) { badgeCard(d, p, k, bg); });
     tracePanel(d, p, right);
-    var au = card(right, 'Audit bound on contaminated recorded value', { syn: 'own derivation' });
+    var au = card(right, 'Audit bound on contaminated recorded value', { syn: 'our own arithmetic' });
     if (VOID) h('p', 'pc-note', 'No audit: the run stopped, so ' + (p.sigHist.length ? 'no further release is permitted and nothing more is audited; the earlier release stays in the log as history. ' : 'nothing was released and nothing is audited. ') + (p.killed.kind === 'kill' ? 'A protocol kill fails the frontier arm on this instance.' : 'A limit trip is not a protocol kill; on a scored run it misses a pass bar.'), au);
     else if (!F) h('p', 'pc-note', 'No item-level oracle reaches every item this run, so no item-level audit bound is stated. Outside the claim.', au);
     else {
@@ -3059,8 +3025,8 @@
     h('span', 'pc-ritem-t', r.id + '. ' + r.title, hd);
     var cs = h('span', 'pc-acts', null, hd);
     var closed = !!(st.gap && p.ext);
-    chip(closed ? 'ok' : KINDCHIP[r.kind][0], closed ? 'Evidence added' : KINDCHIP[r.kind][1], cs);
-    chip('lag', 'Flagged by ' + ONAME[r.by], cs, 'search');
+    h('span', 'pc-cat', closed ? 'Evidence added' : KINDCHIP[r.kind][1], cs);
+    h('span', 'pc-cat', 'Flagged by ' + ONAME[r.by], cs);
     h('p', null, (closed ? 'As the crew found it: ' : '') + r.detail, it);
     if (closed) h('p', null, d.ext.who + ': ' + d.ext.done, it);
     var vals = h('div', 'pc-rvals', null, it);
@@ -3332,7 +3298,7 @@
     h('b', null, 'Totals alone would pass all 10', tt);
     h('span', null, 'With every planted error in place the run total still ties. Sub-total checks catch ' + sub + '; the other ' + (10 - sub) + ' tie at every level.', tt);
     h('p', 'pc-note', 'Planted faults count only on their own bars: this drill bar here, the 18 of 20 fault bar on the sealed runs. A real wrong released item or a real in-scope omission is a kill, and a fault that both the builder and a source-sharing oracle missed still counts as wrong once the key, the audit or later discovery shows it.', c).style.marginTop = '10px';
-    h('p', 'pc-note', 'What a pass shows, illustratively: if the planted errors were independent, representative trials, 9 of 10 caught would be compatible with a true catch rate down to about 55%, and 10 of 10 down to about 69% (95% Clopper-Pearson; one drill, one reviewer). Paired compensating errors can be dependent, so a population catch rate is UNCONFIRMED. A pass supports "worth scaling", not "reliable".', c).style.marginTop = '6px';
+    h('p', 'pc-note', 'What a pass shows, illustratively: if the planted errors were independent, representative trials, 9 of 10 caught would be compatible with a true catch rate down to about 55%, and 10 of 10 down to about 69% (95% Clopper-Pearson; one drill, one reviewer). Paired compensating errors can be dependent, so a population catch rate is not confirmed. A pass supports "worth scaling", not "reliable".', c).style.marginTop = '6px';
     var rev = h('table', 'pc-rev', null, c);
     rev.setAttribute('role', 'table');
     h('caption', 'pc-sr', 'The 10 planted errors, revealed', rev);
@@ -3717,7 +3683,7 @@
     set(c, { role: 'region', 'aria-labelledby': 'pc-inst-' + slot });
     var hd = h('div', 'pc-card-h', null, c);
     h('h5', null, (slot === 'a' ? 'Instance 1: ' : 'Instance 2: ') + d.name, hd).id = 'pc-inst-' + slot;
-    chip(slot === 'a' ? 'hot' : 'lag', slot === 'a' ? 'pilot A, parallel track' : 'pilot B, warehouse-native', hd);
+    h('span', 'pc-cat', slot === 'a' ? 'pilot A, parallel track' : 'pilot B, warehouse-native', hd);
     h('p', 'pc-note', 'Class named in {S}: ' + v.cls + '.', c);
     if (slot === 'b') {
       var wr = h('div', 'pc-wnpick', null, c);
@@ -3772,7 +3738,7 @@
     set(c, { role: 'region', 'aria-labelledby': 'pc-title-h' });
     var hd = h('div', 'pc-card-h', null, c);
     h('h5', null, 'Title at D90: one verdict per instance, then the headline', hd).id = 'pc-title-h';
-    h('span', 'pc-syn', 'synthetic outcomes', hd);
+    h('span', 'pc-syn', 'made-up outcomes', hd);
     h('p', 'pc-note', 'Rules apply per instance, and the first match sets its verdict. Toggle any arm or the census below, or load a preset.', c);
     var pre = h('div', 'pc-pre', null, c);
     segBtns(pre, 'Title presets', TPRE.map(function (x) { return [x[0], x[1]]; }), S.tp, 'tp-',
@@ -3782,7 +3748,7 @@
     h('p', 'pc-headline-k', 'Headline: the weakest verdict among instances that cleared rule 1', hb);
     if (T.hyp) {
       var hy = h('p', 'pc-hyp', null, hb);
-      h('b', null, 'HYPOTHESIS', hy);
+      h('b', null, 'Our guess, not a tested result:', hy);
       hy.appendChild(document.createTextNode(T.hyp === 'ext' ? ' An extrapolation from one sponsor, not a tested result: two jobs can refute generality, not establish it.'
         : T.hyp === 'pair' ? ' A class named from the two tested jobs at one sponsor, not a tested result: each further job must pass its own sealed runs and drill.'
         : ' A class named from one tested job (' + jobName(T.slots[0]) + ') at one sponsor, not a tested result: each further job must pass its own sealed runs and drill.'));
@@ -3796,8 +3762,8 @@
     hc.style.marginTop = '10px';
     if (T.head) {
       chip('dark', 'verdict: ' + VERD[T.code].word, hc, 'flag');
-      chip('dark', '{S} = ' + T.S, hc, 'doc');
-      chip('dark', VERD[T.code].counts ? 'counts as a Muse moment (stated position)' : 'does not count as a Muse moment', hc, VERD[T.code].counts ? 'ok' : 'bad');
+      h('span', 'pc-cat', '{S} = ' + T.S, hc);
+      h('span', 'pc-cat', VERD[T.code].counts ? 'counts as a Muse moment (stated position)' : 'does not count as a Muse moment', hc);
     } else chip('dark', 'no claim for either instance', hc, 'bad');
     var subs = h('ul', 'pc-subs', null, c);
     subs.setAttribute('data-el', 'subtitles');
@@ -3810,7 +3776,7 @@
       h('span', 'pc-sub-t', V.code === 0 ? 'No claim for ' + jobName(slot) + ': the frontier crew missed a pass bar (' + barMiss('f') + ').' : fillTitle(V.code, v.cls + SPONSOR), li);
       if (V.code !== 0) {
         var sx = h('span', 'pc-sub-x', null, li);
-        h('b', null, 'HYPOTHESIS: ', sx);
+        h('b', null, 'Our guess: ', sx);
         sx.appendChild(document.createTextNode('the class, ' + v.cls + ', is named from this one tested job, ' + jobName(slot) + '.'));
       }
       h('span', 'pc-sub-x', 'Controls: ' + ctlText(V, S.ti[slot], 'p') + '; ' + ctlText(V, S.ti[slot], 'r') + '. ' + whyText(V, S.ti[slot]), li);
@@ -3818,10 +3784,10 @@
     if (S.tp === 'worked') h('p', 'pc-note', 'The worked example: the frontier crew passes both and the previous-generation model passes invoicing only. The headline is the protocol title for reconciliation-shaped data jobs at one sponsor; the subtitles read invoice preparation, ' + VERD[T.A.code].word + ', and ' + lc1(INST[VI[S.wn].i].name) + ', ' + VERD[T.B.code].word + ', each naming its job and both controls.', c).style.marginTop = '10px';
     var fine = h('ul', 'pc-fine', null, c);
     ['Comparable cost: within ' + COMPARABLE.toFixed(2) + ' times the frontier arm’s total on that instance, setup amortized over ' + AMORT + ' runs.',
-      '{S} names only the instances with that verdict, by class, at one sponsor; every class is a HYPOTHESIS named from the tested jobs. When both share verdict 3 or 4 and the breadth rule holds, it reads "enterprise data agents, extrapolated from one sponsor", labelled HYPOTHESIS; when they share it and breadth fails, "data jobs with an item-level oracle at one sponsor".',
+      '{S} names only the instances with that verdict, by class, at one sponsor; every class is a hypothesis named from the tested jobs. When both share verdict 3 or 4 and the breadth rule holds, it reads "enterprise data agents, extrapolated from one sponsor", labelled as our guess; when they share it and breadth fails, "data jobs with an item-level oracle at one sponsor".',
       'Outcome claims name the tested jobs, the sponsor and the controls: each subtitle names its job and both controls, with each control’s result and cost ratio, and the rule that fired.',
       'A run with no F cell, or one stopped by a limit trip, misses a pass bar for that arm. Under rule 1 an instance gets no claim and its subtitle names the missed bar; the headline names bars only when both instances miss.',
-      'Stated position (HYPOTHESIS): a protocol verdict still counts as a Muse moment, since the lesson is the checkable hand-off rather than one model, though the vendor credits co-training; automation does not count.',
+      'Stated position (our guess): a protocol verdict still counts as a Muse moment, since the lesson is the checkable hand-off rather than one model, though the vendor credits co-training; automation does not count.',
       'The pilot can refute generality, not establish it: each further instance must pass its own sealed runs and drill.'].forEach(function (x) { h('li', null, x, fine); });
     instCard(box, 'a', T);
     instCard(box, 'b', T);
@@ -3832,7 +3798,7 @@
     set(bc, { role: 'region', 'aria-labelledby': 'pc-breadth-h' });
     var bh = h('div', 'pc-card-h', null, bc);
     h('h5', null, 'Breadth rule: the sponsor’s 20 largest jobs', bh).id = 'pc-breadth-h';
-    h('span', 'pc-syn', 'synthetic census', bh);
+    h('span', 'pc-syn', 'made-up census', bh);
     h('p', 'pc-note', 'At least 5 of the 20 largest jobs and a quarter of their hours must qualify. Count stops one giant job carrying the claim; hours stop five trivial ones. Scored by the evaluator, hours-weighted; the share describes this sponsor only. Hours are human hours a month today, as on each job’s ticket, so the tested jobs carry their tickets’ hours. The two tested jobs always qualify, so every preset includes them.', bc);
     var br = T.br, sg = h('div', 'pc-totals', null, bc);
     sg.style.marginTop = '10px';
@@ -3874,7 +3840,7 @@
     set(sc, { role: 'region', 'aria-labelledby': 'pc-score-h' });
     var sh = h('div', 'pc-card-h', null, sc);
     h('h5', null, 'How each arm is scored', sh).id = 'pc-score-h';
-    h('span', 'pc-syn', 'protocol', sh);
+    h('span', 'pc-syn', 'protocol rules, thresholds we chose', sh);
     var tl = h('div', 'pc-tl', null, sc);
     h('span', 't-dev', 'Development: 9 runs on evidence dated before the first sealed period', tl);
     h('span', 't-seal', 'Sealed: the 3 latest periods, fully keyed', tl);
@@ -3891,7 +3857,7 @@
       'The incumbent’s issued output is scored on the same key: ' + INCUMBENT.wrong + ' wrong released items and ' + INCUMBENT.omis + ' in-scope omissions on invoicing (synthetic), which shows what zero wrong asks.',
       'Every arm is named at the gate and works from the same evidence. The model arms also get identical tools and identical token, compute and time budgets, with 30 logged questions each; any human edit to their code, prompts or plan is coaching and kills that arm on that instance. The rules arm is built and kept by one human data engineer per track with the established tooling: the evaluator fixes the engineer rate (' + fmtUSD0(ENG_RATE) + ' an hour, synthetic) and each engineer’s hour cap (' + ENG_CAP[0] + ' setup hours per track, 22 working days of 8 hours inside D11 to D40, and ' + ENG_CAP[1] + ' a run) at the gate; those hours count as setup and per run, and the coaching bar does not apply to it. Its engineer’s run hours join the same review, ruling and audit hours in the 70% hours bar, which the rules arm can miss on small jobs: here it misses on the KPI, migration and incident tracks, so rule 2 cannot fire there, with these synthetic sizes, not by the protocol.',
       'Full-key building for the sealed runs is evaluation cost, reported apart. Audit hours count toward the hours bar and payback.',
-      'What a pass shows, illustratively: if the 20 planted faults were independent, representative trials, 18 of 20 would be compatible with a true catch rate down to about 68% (95% Clopper-Pearson). Paired compensating faults can be dependent, so a population catch rate is UNCONFIRMED. A pass supports "worth scaling", not "reliable".'].forEach(function (x) { h('li', null, x, nt); });
+      'What a pass shows, illustratively: if the 20 planted faults were independent, representative trials, 18 of 20 would be compatible with a true catch rate down to about 68% (95% Clopper-Pearson). Paired compensating faults can be dependent, so a population catch rate is not confirmed. A pass supports "worth scaling", not "reliable".'].forEach(function (x) { h('li', null, x, nt); });
   }
 
   /* ---------- test hook, see the comment at the top ---------- */
@@ -4005,63 +3971,64 @@
 
       <section id="frontier" aria-labelledby="h-frontier">
         <h2 id="h-frontier">6. Why frontier models, as a hypothesis</h2>
-        <p class="notverified"><strong>NOT VERIFIED.</strong> Public evidence shows ingredients, not a verified end-to-end capability for this work. No source below shows them combined, on enterprise data jobs, at the reliability that zero wrong released items needs. <span class="tag h">Hypothesis</span></p>
+        <p class="notverified"><strong>Not verified.</strong> Public evidence shows ingredients, not a verified end-to-end capability for this work. No source below shows them combined, on enterprise data jobs, at the reliability that zero wrong released items needs. That frontier models can is our guess, not yet tested.</p>
         <div class="bleed">
           <div class="tbl" tabindex="0" role="region" aria-label="Each capability the pattern needs, the public evidence we fetched, and what it does not show">
             <table class="frontier">
               <caption>Each capability the pattern needs, the public evidence we fetched, and what it does not show</caption>
               <thead><tr><th scope="col">Capability</th><th scope="col">Public evidence</th><th scope="col">Type</th><th scope="col">What it does not show</th></tr></thead>
               <tbody>
-                <tr><th scope="row">Days-long unattended work</th><td>Anthropic: agents are asked for “work that spans hours, or even days”, yet steady progress “remains an open problem”<sup class="refs">[<a href="#s10" aria-label="Source 10">10</a>]</sup>. METR: the 50% time horizon “has been doubling approximately every seven months since 2019”<sup class="refs">[<a href="#s11" aria-label="Source 11">11</a>]</sup>, and “Measurements above 16 hrs are unreliable with our current task suite”<sup class="refs">[<a href="#s12" aria-label="Source 12">12</a>]</sup>.</td><td><span class="tag v">Vendor</span> <span class="tag i">Independent</span></td><td>50% and 80% success on mostly software tasks; zero wrong items needs far more. <span class="tag u">Unconfirmed</span></td></tr>
-                <tr><th scope="row">Long context</th><td>Muse Spark: a 1,048,576-token window<sup class="refs">[<a href="#s13" aria-label="Source 13">13</a>]</sup>. Claude: “up to 1M tokens, depending on the model”, though “As token count grows, accuracy and recall degrade”<sup class="refs">[<a href="#s14" aria-label="Source 14">14</a>]</sup>.</td><td><span class="tag v">Vendor</span></td><td>Reliable one-pass reading of a contract estate.</td></tr>
-                <tr><th scope="row">Multi-agent teams, walled-off verifiers</th><td>Subagents work “in parallel with their own context windows”, and “multi-agent systems use about 15× more tokens than chats”<sup class="refs">[<a href="#s15" aria-label="Source 15">15</a>]</sup>. A known-good compiler served as an oracle for parallel agents<sup class="refs">[<a href="#s16" aria-label="Source 16">16</a>]</sup>.</td><td><span class="tag v">Vendor</span></td><td>Walled-off checks of business data; untested, costly.</td></tr>
-                <tr><th scope="row">Computer use</th><td>OSWorld at publication: “humans can accomplish over 72.36% of the tasks, the best model achieves only 12.24% success”<sup class="refs">[<a href="#s17" aria-label="Source 17">17</a>]</sup>. Vendor docs: computer use “has unique risks distinct from standard API features”<sup class="refs">[<a href="#s18" aria-label="Source 18">18</a>]</sup>.</td><td><span class="tag i">Independent</span> <span class="tag v">Vendor</span></td><td>Current scores not extracted; enterprise GUI reliability <span class="tag u">Unconfirmed</span>.</td></tr>
-                <tr><th scope="row">Code at scale</th><td>16 parallel agents, about 2,000 sessions and $20,000 produced a 100,000-line C compiler that builds Linux 6.9; “It's not yet a drop-in replacement for a real compiler”<sup class="refs">[<a href="#s16" aria-label="Source 16">16</a>]</sup>.</td><td><span class="tag v">Vendor</span></td><td>One vendor experiment, mature test suites; not reproduced.</td></tr>
-                <tr><th scope="row">Self-verification</th><td>A September 2026 preprint: a model “flags the negative result in only 2 of 200 generated reports”, but in 190 of 200 once told to be honest; models “tend to present narratives of success by default”<sup class="refs">[<a href="#s19" aria-label="Source 19">19</a>]</sup>. A verifier must be nearly perfect, “otherwise Claude will solve the wrong problem”<sup class="refs">[<a href="#s16" aria-label="Source 16">16</a>]</sup>.</td><td><span class="tag i">Independent</span> <span class="tag v">Vendor</span></td><td>The weakest ingredient: the crew’s report is never trusted.</td></tr>
-                <tr><th scope="row">Warehouse reasoning</th><td>Spider 2.0: per the benchmark site, o1-preview solved only 17.1% of tasks; team-submitted leaderboard entries now reach 96.70 and 76.23 on different settings<sup class="refs">[<a href="#s20" aria-label="Source 20">20</a>]</sup>.</td><td><span class="tag i">Independent</span></td><td>Accuracy on a given company’s schema; capability may still gate.</td></tr>
+                <tr><th scope="row">Days-long unattended work</th><td>Anthropic: agents are asked for “work that spans hours, or even days”, yet steady progress “remains an open problem”<sup class="refs">[<a href="#s10" aria-label="Source 10">10</a>]</sup>. METR: the 50% time horizon “has been doubling approximately every seven months since 2019”<sup class="refs">[<a href="#s11" aria-label="Source 11">11</a>]</sup>, and “Measurements above 16 hrs are unreliable with our current task suite”<sup class="refs">[<a href="#s12" aria-label="Source 12">12</a>]</sup>.</td><td>Vendor and independent sources</td><td>50% and 80% success on mostly software tasks; zero wrong items needs far more, by our estimate, not yet checked.</td></tr>
+                <tr><th scope="row">Long context</th><td>Muse Spark: a 1,048,576-token window<sup class="refs">[<a href="#s13" aria-label="Source 13">13</a>]</sup>. Claude: “up to 1M tokens, depending on the model”, though “As token count grows, accuracy and recall degrade”<sup class="refs">[<a href="#s14" aria-label="Source 14">14</a>]</sup>.</td><td>Vendor sources</td><td>Reliable one-pass reading of a contract estate.</td></tr>
+                <tr><th scope="row">Multi-agent teams, walled-off verifiers</th><td>Subagents work “in parallel with their own context windows”, and “multi-agent systems use about 15× more tokens than chats”<sup class="refs">[<a href="#s15" aria-label="Source 15">15</a>]</sup>. A known-good compiler served as an oracle for parallel agents<sup class="refs">[<a href="#s16" aria-label="Source 16">16</a>]</sup>.</td><td>Vendor source</td><td>Walled-off checks of business data; untested, costly.</td></tr>
+                <tr><th scope="row">Computer use</th><td>OSWorld at publication: “humans can accomplish over 72.36% of the tasks, the best model achieves only 12.24% success”<sup class="refs">[<a href="#s17" aria-label="Source 17">17</a>]</sup>. Vendor docs: computer use “has unique risks distinct from standard API features”<sup class="refs">[<a href="#s18" aria-label="Source 18">18</a>]</sup>.</td><td>Independent and vendor sources</td><td>Current scores not extracted; enterprise GUI reliability not confirmed.</td></tr>
+                <tr><th scope="row">Code at scale</th><td>16 parallel agents, about 2,000 sessions and $20,000 produced a 100,000-line C compiler that builds Linux 6.9; “It's not yet a drop-in replacement for a real compiler”<sup class="refs">[<a href="#s16" aria-label="Source 16">16</a>]</sup>.</td><td>Vendor source</td><td>One vendor experiment, mature test suites; not reproduced.</td></tr>
+                <tr><th scope="row">Self-verification</th><td>A September 2026 preprint, not confirmed by us, reports that a model “flags the negative result in only 2 of 200 generated reports”, but in 190 of 200 once told to be honest; models “tend to present narratives of success by default”<sup class="refs">[<a href="#s19" aria-label="Source 19">19</a>]</sup>. A verifier must be nearly perfect, “otherwise Claude will solve the wrong problem”<sup class="refs">[<a href="#s16" aria-label="Source 16">16</a>]</sup>.</td><td>A preprint not confirmed by us, and a vendor source</td><td>The weakest ingredient: the crew’s report is never trusted.</td></tr>
+                <tr><th scope="row">Warehouse reasoning</th><td>Spider 2.0: per the benchmark site, o1-preview solved only 17.1% of tasks; team-submitted leaderboard entries now reach 96.70 and 76.23 on different settings<sup class="refs">[<a href="#s20" aria-label="Source 20">20</a>]</sup>.</td><td>Independent source</td><td>Accuracy on a given company’s schema; capability may still gate.</td></tr>
               </tbody>
             </table>
           </div>
         </div>
+        <p><strong>A new test graded by outcomes.</strong> Argo-Bench, an arXiv preprint whose affiliations are not stated and which we have checked only in its abstract, grades data agents by the consequences of the actions they file, such as banning fraudulent accounts or issuing back pay, in a simulated New York food-delivery company whose warehouse has 235 tables and 7.5 billion rows. The best of 14 frontier and open-weight models scores 95 or higher on only 34.8% of its 210 tasks and averages 59.5 points<sup class="refs">[<a href="#s40" aria-label="Source 40">40</a>]</sup>. That fits our premise that agents’ data work still needs checking. Its authors also say that for established text-to-SQL benchmarks “audits have found their answer keys frequently wrong”<sup class="refs">[<a href="#s40" aria-label="Source 40">40</a>]</sup>, which supports our concern about the reference answer an outside judge uses (section 9). It is not about Muse, it does not test our protocol, and its data are simulated; it supports the thesis no further than that.</p>
         <p>Section 9’s three arms can refute this.</p>
       </section>
 
       <section id="transfer" aria-labelledby="h-transfer">
         <h2 id="h-transfer">7. What transfers from Muse Code, and what does not</h2>
         <div class="bleed">
-          <div class="tbl" tabindex="0" role="region" aria-label="Muse Code traits, sourced, and their data-job counterparts; the transfer verdicts are our judgment">
+          <div class="tbl" tabindex="0" role="region" aria-label="Muse Code traits, sourced, as each vendor’s own public docs describe them, and their data-job counterparts; the transfer verdicts are our judgment">
             <table class="transfer">
-              <caption>Muse Code traits, sourced, and their data-job counterparts; the transfer verdicts are our judgment</caption>
+              <caption>Muse Code traits, sourced, as each vendor’s own public docs describe them, and their data-job counterparts; the transfer verdicts are our judgment</caption>
               <thead><tr><th scope="col">Muse Code trait</th><th scope="col">Data-job counterpart</th><th scope="col">Transfers?</th></tr></thead>
               <tbody>
                 <tr><th scope="row">Headless, scriptable runs<sup class="refs">[<a href="#s3" aria-label="Source 3">3</a>]</sup></th><td>Unattended crew runs per run unit, scheduled and budgeted.</td><td><span class="verdict yes">Yes</span></td></tr>
                 <tr><th scope="row">Replayable event log<sup class="refs">[<a href="#s1" aria-label="Source 1">1</a>]</sup></th><td>An append-only log in every Proof PR. It proves process, not truth.</td><td><span class="verdict yes">Yes</span> <span class="note">(with limits)</span></td></tr>
                 <tr><th scope="row">Approvals and sandbox on by default<sup class="refs">[<a href="#s4" aria-label="Source 4">4</a>]</sup></th><td>Read-only seats, sandbox writes, budgets, canaries and a kill switch, enforced by the warehouse, not a client sandbox.</td><td><span class="verdict partly">Partly</span></td></tr>
                 <tr><th scope="row">Worktree isolation<sup class="refs">[<a href="#s3" aria-label="Source 3">3</a>]</sup></th><td>Walled-off re-derivers and adjudicator with separate seats and scratch datasets.</td><td><span class="verdict partly">Partly</span></td></tr>
-                <tr><th scope="row">Tests before merge (our practice, n=1) <span class="tag o">Own measurement</span></th><td>Evidence labelled by how far the builder controls it (I, S or O), plus a cold drill.</td><td><span class="verdict partly">Partly</span></td></tr>
+                <tr><th scope="row">Tests before merge (our practice, n=1, our own measurement)</th><td>Evidence labelled by how far the builder controls it (I, S or O), plus a cold drill.</td><td><span class="verdict partly">Partly</span></td></tr>
                 <tr><th scope="row">Cheap trial (contributor tier)<sup class="refs">[<a href="#s5" aria-label="Source 5">5</a>]</sup></th><td>No counterpart: it is cheap because it trains on prompts, and a pilot needs seats, an evaluator and full keys.</td><td><span class="verdict no">No</span></td></tr>
               </tbody>
             </table>
           </div>
         </div>
-        <p><strong>Enablers, not the thesis</strong> (untested): a <strong>result airlock</strong> releases only policy-passing results, a <strong>precedent diff</strong> shows only what is new, a <strong>synthetic twin</strong> holds zero real rows, and a <strong>licence to query</strong> needs a per-dataset exam. Muse’s single-user trust does not transfer: an owner rules and signs. <span class="tag h">Hypothesis</span></p>
+        <p><strong>Enablers, not the thesis</strong> (untested): a <strong>result airlock</strong> releases only policy-passing results, a <strong>precedent diff</strong> shows only what is new, a <strong>synthetic twin</strong> holds zero real rows, and a <strong>licence to query</strong> needs a per-dataset exam. Muse Code’s single-user trust does not transfer: an owner rules and signs. That is our guess, not yet tested.</p>
       </section>
 
       <section id="constraints" aria-labelledby="h-constraints">
         <h2 id="h-constraints">8. Enterprise constraints, addressed by design</h2>
         <div class="bleed">
-          <div class="tbl" tabindex="0" role="region" aria-label="How the Proof PR is designed to meet each constraint, and the gap that remains">
+          <div class="tbl" tabindex="0" role="region" aria-label="How the Proof PR is designed to meet each constraint, and the gap that remains; platform features as each vendor’s own public docs describe them">
             <table class="constraints">
-              <caption>How the Proof PR is designed to meet each constraint, and the gap that remains</caption>
+              <caption>How the Proof PR is designed to meet each constraint, and the gap that remains; platform features as each vendor’s own public docs describe them</caption>
               <thead><tr><th scope="col">Constraint</th><th scope="col">How the Proof PR handles it</th><th scope="col">Residual gap</th></tr></thead>
               <tbody>
-                <tr><th scope="row">Identity</th><td>A governed agent identity with a named owner, no user impersonation. For interactive questions, Google’s data-agent API already queries data with the asker’s own credentials<sup class="refs">[<a href="#s21" aria-label="Source 21">21</a>]</sup>.</td><td>Delegation for unattended crews is a design requirement, not a cited feature. <span class="tag u">Unconfirmed</span></td></tr>
+                <tr><th scope="row">Identity</th><td>A governed agent identity with a named owner, no user impersonation. For interactive questions, Google’s data-agent API already queries data with the asker’s own credentials<sup class="refs">[<a href="#s21" aria-label="Source 21">21</a>]</sup>.</td><td>Delegation for unattended crews is a design requirement, not a cited feature, so it is not yet confirmed.</td></tr>
                 <tr><th scope="row">Access</th><td>Read-only seats, sandbox-only writes, row and column policies enforced by the warehouse<sup class="refs">[<a href="#s22" aria-label="Source 22">22</a>, <a href="#s23" aria-label="Source 23">23</a>]</sup>, canaries for leaks.</td><td>Canaries catch some leaks, not all.</td></tr>
                 <tr><th scope="row">Lineage</th><td>The denominator comes from sources; the Proof PR names every source version read; lineage graphs where available<sup class="refs">[<a href="#s24" aria-label="Source 24">24</a>]</sup>.</td><td>The raw recompute shares raw events and the device map with the builder (S); incomplete lineage makes it P for that run, and a scored run with no F cell misses a pass bar.</td></tr>
-                <tr><th scope="row">Audit</th><td>Append-only log, done receipt, named signer. Forrester’s trust tax: “Every autonomous action has to be logged and defensible to an auditor”<sup class="refs">[<a href="#s25" aria-label="Source 25">25</a>]</sup>. Data-agent calls can create audit log entries<sup class="refs">[<a href="#s26" aria-label="Source 26">26</a>]</sup>.</td><td>Auditor acceptance <span class="tag u">Unconfirmed</span>; replaying row-level-secured history needs a special permission<sup class="refs">[<a href="#s27" aria-label="Source 27">27</a>]</sup>.</td></tr>
-                <tr><th scope="row">Cost</th><td>Per-run budgets; under on-demand billing, byte caps stop over-limit queries before they are charged<sup class="refs">[<a href="#s28" aria-label="Source 28">28</a>]</sup>, and since “Setting quotas for individual agents isn't supported”, each crew gets its own project<sup class="refs">[<a href="#s29" aria-label="Source 29">29</a>]</sup>. Databricks says many agents leave “access control, budgets, security policy, and usage logging” scattered<sup class="refs">[<a href="#s30" aria-label="Source 30">30</a>]</sup>.</td><td>These controls cover on-demand billing, not slot reservations<sup class="refs">[<a href="#s29" aria-label="Source 29">29</a>]</sup>; crew cost <span class="tag u">Unconfirmed</span>; setup must be projected to repay within 12 runs. <span class="tag p">Proposed</span></td></tr>
+                <tr><th scope="row">Audit</th><td>Append-only log, done receipt, named signer. Forrester’s trust tax: “Every autonomous action has to be logged and defensible to an auditor”<sup class="refs">[<a href="#s25" aria-label="Source 25">25</a>]</sup>. Data-agent calls can create audit log entries<sup class="refs">[<a href="#s26" aria-label="Source 26">26</a>]</sup>.</td><td>Auditor acceptance is not yet confirmed; replaying row-level-secured history needs a special permission<sup class="refs">[<a href="#s27" aria-label="Source 27">27</a>]</sup>.</td></tr>
+                <tr><th scope="row">Cost</th><td>Per-run budgets; under on-demand billing, byte caps stop over-limit queries before they are charged<sup class="refs">[<a href="#s28" aria-label="Source 28">28</a>]</sup>, and since Google’s docs say “Setting quotas for individual agents isn't supported”, each crew gets its own project<sup class="refs">[<a href="#s29" aria-label="Source 29">29</a>]</sup>. Databricks says many agents leave “access control, budgets, security policy, and usage logging” scattered<sup class="refs">[<a href="#s30" aria-label="Source 30">30</a>]</sup>.</td><td>These controls cover on-demand billing, not slot reservations<sup class="refs">[<a href="#s29" aria-label="Source 29">29</a>]</sup>; crew cost is not yet confirmed; setup must be projected to repay within 12 runs, a threshold we chose, not calibrated.</td></tr>
                 <tr><th scope="row">Data use</th><td>No training-eligible tier. Google: “Gemini doesn't use your prompts or its responses as data to train its models”<sup class="refs">[<a href="#s31" aria-label="Source 31">31</a>]</sup>.</td><td>Terms checked per vendor contract; every receipt records model ID and version.</td></tr>
-                <tr><th scope="row">Evals</th><td>Full keys on sealed runs, an audited bound on prospective runs, planted faults, a cold drill, an independent evaluator (section 9). In a survey reported in SD Times by its author, a vendor CEO (informal, n=103), “Only 31% of developers trust the accuracy of AI-generated output”<sup class="refs">[<a href="#s32" aria-label="Source 32">32</a>]</sup>.</td><td>Full-key cost <span class="tag u">Unconfirmed</span>; tacit rules can hide from any key.</td></tr>
+                <tr><th scope="row">Evals</th><td>Full keys on sealed runs, an audited bound on prospective runs, planted faults, a cold drill, an independent evaluator (section 9). In a survey reported in SD Times by its author, a vendor CEO (informal, n=103), “Only 31% of developers trust the accuracy of AI-generated output”<sup class="refs">[<a href="#s32" aria-label="Source 32">32</a>]</sup>.</td><td>Full-key cost is not yet confirmed; tacit rules can hide from any key.</td></tr>
               </tbody>
             </table>
           </div>
@@ -4070,7 +4037,7 @@
 
       <section id="protocol" aria-labelledby="h-protocol">
         <h2 id="h-protocol">9. The 90-day protocol</h2>
-        <p>Every threshold here is <span class="tag p">Proposed</span>: chosen, not calibrated. Three arms are named at the gate and run on two parallel tracks (invoicing and a warehouse-native job): the frontier crew and a previous-generation model, each lifting and repairing on identical tool, evidence and compute budgets, and a rules workflow built with the established tooling on the same evidence by one human data engineer per track. The evaluator fixes the rate and each engineer’s hour cap at the gate, within what one engineer can work: at most 176 setup hours per track in D11 to D40 (22 working days) and 12 hours a run; those hours count as setup and recurring cost. Coaching kills only the model arms; the rules arm may repair by a costed human edit and is judged on hours, every quality bar and total cost. Its engineer’s run hours join the same review, ruling and audit hours in the 70% bar, which any arm can miss on small jobs.</p>
+        <p>Every threshold here is proposed: chosen, not calibrated. Three arms are named at the gate and run on two parallel tracks (invoicing and a warehouse-native job): the frontier crew and a previous-generation model, each lifting and repairing on identical tool, evidence and compute budgets, and a rules workflow built with the established tooling on the same evidence by one human data engineer per track. The evaluator fixes the rate and each engineer’s hour cap at the gate, within what one engineer can work: at most 176 setup hours per track in D11 to D40 (22 working days) and 12 hours a run; those hours count as setup and recurring cost. Coaching kills only the model arms; the rules arm may repair by a costed human edit and is judged on hours, every quality bar and total cost. Its engineer’s run hours join the same review, ruling and audit hours in the 70% bar, which any arm can miss on small jobs.</p>
         <div class="bleed">
           <div class="tbl" tabindex="0" role="region" aria-label="Timeline, work and rules">
             <table class="protocol">
@@ -4088,7 +4055,7 @@
         </div>
         <div class="passkill">
           <div class="pass">
-            <h3>Pass, per arm and instance <span class="tag p">Proposed</span></h3>
+            <h3>Pass, per arm and instance (thresholds we chose, not calibrated)</h3>
             <ul>
               <li>Withholding under 5% on every run.</li>
               <li>Every scored run has an F cell and no limit trip.</li>
@@ -4102,7 +4069,7 @@
             </ul>
           </div>
           <div class="kill">
-            <h3>Kill, frontier arm, any one <span class="tag p">Proposed</span></h3>
+            <h3>Kill, frontier arm, any one (thresholds we chose, not calibrated)</h3>
             <ul>
               <li>A real wrong released item, confirmed by key, audit or later discovery, even if every oracle agreed.</li>
               <li>A real in-scope omission.</li>
@@ -4113,8 +4080,8 @@
           </div>
         </div>
         <p><strong>Definitions and costs.</strong> A wrong released item is any released item that the key, the audit or later discovery shows wrong, even one the builder and a source-sharing oracle both miss. A ruling is not a check: a ruled residual stays open until its corrected output passes an explicit check. A budget overrun trips the kill switch and stops the run: a limit trip, not a kill, but a scored run with a limit trip misses a pass bar. Full keys are evaluation cost, kept out of hours and payback; review, ruling, the prospective audit and the rules arm’s human hours count in both.</p>
-        <p><strong>What a pass shows</strong> <span class="tag d">Own derivation</span>, illustratively and only if faults act as independent, representative trials (paired compensating faults may not): 18 of 20 caught is consistent with a true catch rate as low as about 68%, and 9 caught in a 10-error drill with about 55% (95% Clopper-Pearson), from one drill and one reviewer. A population catch rate is <span class="tag u">Unconfirmed</span>; a pass supports worth scaling, not reliable.</p>
-        <p><strong>Audit bound</strong> <span class="tag d">Own derivation</span>. Zero errors in 300 items gives under 1% at 95% only for simple random items<sup class="refs">[<a href="#s33" aria-label="Source 33">33</a>]</sup>. For independent uniform draws of value units from a nonnegative recorded frame in H strata, with a taint of at most 100% per unit (overstatement of recorded value only), zero errors bound the contaminated recorded value at 95% by <code>Σ<sub>h</sub> V<sub>h</sub> × ln(20H) / n<sub>h</sub></code>, where V<sub>h</sub> is a stratum’s recorded value and n<sub>h</sub> its draws: the rule of three per stratum, the 5% risk split across strata by a union bound (ln 20 is about 3). Omissions and zero-valued items are checked separately, against the source-fixed denominator; understatement beyond recorded value is not bounded; any observed error changes the computation. A wider monetary guarantee is <span class="tag u">Unconfirmed</span>.</p>
+        <p><strong>What a pass shows</strong>, by our own arithmetic with its assumptions stated, illustratively and only if faults act as independent, representative trials (paired compensating faults may not): 18 of 20 caught is consistent with a true catch rate as low as about 68%, and 9 caught in a 10-error drill with about 55% (95% Clopper-Pearson), from one drill and one reviewer. A population catch rate is not yet confirmed; a pass supports worth scaling, not reliable.</p>
+        <p><strong>Audit bound</strong>, our own arithmetic with its assumptions stated. Zero errors in 300 items gives under 1% at 95% only for simple random items<sup class="refs">[<a href="#s33" aria-label="Source 33">33</a>]</sup>. For independent uniform draws of value units from a nonnegative recorded frame in H strata, with a taint of at most 100% per unit (overstatement of recorded value only), zero errors bound the contaminated recorded value at 95% by <code>Σ<sub>h</sub> V<sub>h</sub> × ln(20H) / n<sub>h</sub></code>, where V<sub>h</sub> is a stratum’s recorded value and n<sub>h</sub> its draws: the rule of three per stratum, the 5% risk split across strata by a union bound (ln 20 is about 3). Omissions and zero-valued items are checked separately, against the source-fixed denominator; understatement beyond recorded value is not bounded; any observed error changes the computation. A wider monetary guarantee is not yet confirmed.</p>
         <h3>Title at D90</h3>
         <p><strong>Breadth rule:</strong> at least 5 of the 20 largest jobs and a quarter of their hours qualify. The count stops one giant job carrying the claim; the hours stop five trivial ones. The share describes this sponsor only, and qualifying is not succeeding.</p>
         <p>Rules apply per instance; the first match sets that instance’s verdict. Comparable cost means within 1.25 times the frontier arm’s total on that instance, setup amortized over 12 runs. A moment or protocol verdict names the checkable hand-off at one sponsor; it claims no adoption.</p>
@@ -4124,9 +4091,9 @@
           <li>The previous-generation arm passes: protocol, titled “The Muse moment for {S} is a protocol, not a model: the data job you can hand off and check cold.”</li>
           <li>Otherwise: moment, titled “The Muse moment for {S} is the data job you can hand off and check cold.”</li>
         </ol>
-        <p>{S} names only the instances with that verdict, by class, at one sponsor (for example, reconciliation-shaped data jobs at one sponsor); every class is a <span class="tag h">Hypothesis</span> named from the tested jobs. Each subtitle names its job and gives its verdict, the rule that fired and why, and both controls’ results and cost ratios. The pilot can refute generality, not establish it: {S} may read “enterprise data agents, extrapolated from one sponsor” <span class="tag h">Hypothesis</span> only when both instances share verdict 3 or 4 and the breadth rule holds, and “data jobs with an item-level oracle at one sponsor” <span class="tag h">Hypothesis</span> when they share it but breadth fails.</p>
+        <p>{S} names only the instances with that verdict, by class, at one sponsor (for example, reconciliation-shaped data jobs at one sponsor); every class is a hypothesis named from the tested jobs. Each subtitle names its job and gives its verdict, the rule that fired and why, and both controls’ results and cost ratios. The pilot can refute generality, not establish it: {S} may read “enterprise data agents, extrapolated from one sponsor”, still a guess, only when both instances share verdict 3 or 4 and the breadth rule holds, and “data jobs with an item-level oracle at one sponsor”, still a guess, when they share it but breadth fails.</p>
         <p><strong>Headline:</strong> the title of the weakest verdict among instances that cleared rule 1 (automation, then protocol, then moment); beneath it, one subtitle per instance gives its verdict and title, or no claim and the missed bar. If neither instance clears rule 1, the headline reads no claim and names the bars missed. The worked example: the frontier crew passes both and the previous-generation model passes invoicing only. The headline is the protocol title for reconciliation-shaped data jobs at one sponsor; the subtitles read invoice preparation, protocol, and KPI pipeline, moment, each naming its job and both controls.</p>
-        <p><strong>Our position</strong> <span class="tag h">Hypothesis</span>: Meta says it co-trained model and agent<sup class="refs">[<a href="#s1" aria-label="Source 1">1</a>]</sup>, yet we read Muse Code’s lesson as resting on the workflow, not on model exclusivity, so a protocol verdict still counts; automation does not.</p>
+        <p><strong>Our position</strong>, a guess not yet tested: Meta says it co-trained model and agent<sup class="refs">[<a href="#s1" aria-label="Source 1">1</a>]</sup>, yet we read Muse Code’s lesson as resting on the workflow, not on model exclusivity, so a protocol verdict still counts; automation does not.</p>
         <h3>Two settled positions</h3>
         <ul>
           <li><strong>Cash:</strong> being post-sign-off, it never gates release or qualifies a row, and stays a lagging badge only if it uniquely catches a material error in sealed runs.</li>
@@ -4147,7 +4114,7 @@
                 <tr><th scope="row">Shared-source failures</th><td>Builder and re-deriver read the same source: the invoice meter, migration legacy code, incident raw events, report-pack template and mappings.</td><td>S labels name it; a meter fault both miss still counts as wrong once the key or audit finds it.</td></tr>
                 <tr><th scope="row">Compensating errors</th><td>Totals tie while items are wrong.</td><td>10 of the 20 planted faults and all drill errors preserve totals; F cells check items.</td></tr>
                 <tr><th scope="row">Vendor conflict</th><td>A warehouse owner grading its own pilot wants it to pass.</td><td>Independent evaluator, full keys, preregistration, published failures.</td></tr>
-                <tr><th scope="row">Auditors’ acceptance</th><td>Agent-produced evidence is new to auditors.</td><td><span class="tag u">Unconfirmed</span>; a human still signs; ask auditors before scaling.</td></tr>
+                <tr><th scope="row">Auditors’ acceptance</th><td>Agent-produced evidence is new to auditors.</td><td>Their acceptance is not yet confirmed; a human still signs; ask auditors before scaling.</td></tr>
                 <tr><th scope="row">Tacit rules</th><td>Some rules live in people, not sources.</td><td>Owner rules residuals; 30 logged questions per arm; hindsight-only items never score.</td></tr>
                 <tr><th scope="row">GUI brittleness</th><td>Legacy screens change; computer use has documented risks<sup class="refs">[<a href="#s18" aria-label="Source 18">18</a>]</sup>.</td><td>Prefer warehouse and API reads; GUIs only where no API exists.</td></tr>
               </tbody>
@@ -4159,7 +4126,7 @@
 
       <section id="dissent" aria-labelledby="h-dissent">
         <h2 id="h-dissent">11. Alignment record, resolved dissents and dropped ideas</h2>
-        <p><strong>Alignment record</strong> <span class="tag o">Own measurement</span> (the author’s log; no public receipt). Five rounds of alignment with two independent AI model reviewers (not named here) ended with both replying AGREE at round 5; the last objection, on titles, came at round 4. Agreement is not validation: only the pilot can test the thesis. Several rounds of blind page review followed (own account), repeated after each change; the anchor, its mapping and the rewritten Quick read were added after alignment, and the aligned reviewers have not seen them; no approval is claimed here. The main dissents and their resolutions:</p>
+        <p><strong>Alignment record</strong>, our own measurement (the author’s log; no public receipt). Five rounds of alignment with two independent AI model reviewers (not named here) ended with both replying AGREE at round 5; the last objection, on titles, came at round 4. Agreement is not validation: only the pilot can test the thesis. Several rounds of blind page review followed (own account), repeated after each change; the anchor, its mapping, the rewritten Quick read and the Argo-Bench paragraphs were added after alignment, and the aligned reviewers have not seen them; no approval is claimed here. The main dissents and their resolutions:</p>
         <ul>
           <li><strong>Capability claims:</strong> frontier dependence and generality are hypotheses the pilot can refute, not establish.</li>
           <li><strong>Omissions and badges:</strong> a source-fixed denominator; badges certify named checks only; a real wrong release or omission kills.</li>
@@ -4175,7 +4142,7 @@
           <li><strong>Cash, two instances, cheap trial:</strong> settled in sections 2 and 9.</li>
         </ul>
         <h3>Dropped, one line each</h3>
-        <p class="note">Reasons are our judgment unless cited. <span class="tag h">Hypothesis</span></p>
+        <p class="note">Reasons are our judgment unless cited.</p>
         <ul>
           <li><strong>Answer receipts as the adoption lever</strong> (our earlier version): they prove process, not truth.</li>
           <li><strong>Chat Q&amp;A as the headline:</strong> already shipping<sup class="refs">[<a href="#s34" aria-label="Source 34">34</a>]</sup>; retires no work.</li>
@@ -4207,54 +4174,56 @@
 
       <section id="sources" aria-labelledby="h-sources">
         <h2 id="h-sources">13. Sources</h2>
-        <p class="note">Every URL was fetched on <span class="nw">2026-09-30</span> (PT), Meta’s developer docs (sources 3, 4, 5 and 13) as their .md exports, and every quote was matched against the fetched text; the three App Store chart sources were fetched on <span class="nw">2026-10-01</span>, as their entries show. Meta’s docs pages carry no dates; Google docs dates are the pages’ own “last updated” stamps. VENDOR = a company describing its own product, research or customer; INDEPENDENT = third party; OWN MEASUREMENT = the author’s own data or logs, unpublished.</p>
+        <p class="note">Every URL was fetched on <span class="nw">2026-09-30</span> (PT), Meta’s developer docs (sources 3, 4, 5 and 13) as their .md exports, and every quote was matched against the fetched text; the three App Store chart sources were fetched on <span class="nw">2026-10-01</span> and the Argo-Bench preprint on <span class="nw">2026-10-02</span>, as their entries show. Meta’s docs pages carry no dates; Google docs dates are the pages’ own “last updated” stamps. Each entry starts with its type in plain words: a vendor source is a company describing its own product, research or customer; an independent source is a third party; a preprint whose independence is not confirmed has unstated author affiliations; own measurement is the author’s own data or logs, unpublished.</p>
         <ol class="sources">
-          <li id="s1"><span class="tag v">VENDOR</span> Meta AI Research blog. “Introducing Muse Code and Muse Spark 1.2.” <span class="nw">2026-08-05</span>. <a class="url" href="https://research.meta.ai/blog/introducing-muse-code-and-muse-spark-1-2">https://research.meta.ai/blog/introducing-muse-code-and-muse-spark-1-2</a></li>
-          <li id="s2"><span class="tag i">INDEPENDENT</span> 9to5Mac (Marcus Mendes). “Report: Meta’s Muse crosses 5 million downloads amid massive advertising push.” <span class="nw">2026-09-30</span>. <em>consumer Muse app; download figure is a Sensor Tower projection.</em> <a class="url" href="https://9to5mac.com/2026/09/30/report-metas-muse-crosses-5-million-downloads-amid-massive-advertising-push/">https://9to5mac.com/2026/09/30/report-metas-muse-crosses-5-million-downloads-amid-massive-advertising-push/</a></li>
-          <li id="s3"><span class="tag v">VENDOR</span> Meta developer docs. “Extending and automating: subagents, observers, hooks, MCP, headless (Muse Code).” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://dev.meta.ai/docs/muse-code/extending">https://dev.meta.ai/docs/muse-code/extending</a></li>
-          <li id="s4"><span class="tag v">VENDOR</span> Meta developer docs. “Permissions and safety (Muse Code).” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://dev.meta.ai/docs/muse-code/permissions">https://dev.meta.ai/docs/muse-code/permissions</a></li>
-          <li id="s5"><span class="tag v">VENDOR</span> Meta developer docs. “Pricing and rate limits (Meta Model API).” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://dev.meta.ai/docs/pricing-rate-limits">https://dev.meta.ai/docs/pricing-rate-limits</a></li>
-          <li id="s6"><span class="tag i">INDEPENDENT</span> Tech Times (Brandon Fisher). “Muse Spark 1.3 Jumps 16 Points on DeepSWE: How Meta Training Loop Closed Gap.” <span class="nw">2026-09-03</span>. <em>independent outlet reporting Meta’s own evaluation numbers.</em> <a class="url" href="https://www.techtimes.com/articles/326417/20260903/muse-spark-13-jumps-16-points-deepswe-how-meta-training-loop-closed-gap.htm">https://www.techtimes.com/articles/326417/20260903/muse-spark-13-jumps-16-points-deepswe-how-meta-training-loop-closed-gap.htm</a></li>
-          <li id="s7"><span class="tag i">INDEPENDENT</span> 24/7 Wall St. (David Moadel). “Meta Rises 4% as Muse Spark 1.3 Claims Parity With Anthropic and OpenAI.” <span class="nw">2026-09-03</span>. <a class="url" href="https://247wallst.com/investing/2026/09/03/meta-rises-4-as-muse-spark-1-3-claims-parity-with-anthropic-and-openai/">https://247wallst.com/investing/2026/09/03/meta-rises-4-as-muse-spark-1-3-claims-parity-with-anthropic-and-openai/</a></li>
-          <li id="s8"><span class="tag o">OWN MEASUREMENT</span> Haiyuan Cao. “Session-log counts per agent CLI on one Mac, <span class="nw">2026-09-16</span> to <span class="nw">2026-09-30</span>; Muse workspace categories, event counts, launch flags and model ID; metadata only.” measured <span class="nw">2026-09-30</span>. <em>not published; method and weaknesses in section 2.</em></li>
-          <li id="s9"><span class="tag i">INDEPENDENT</span> TechCrunch via Yahoo Finance (Tim Fernholz). “Meta is paying to peek at how you use their latest AI model.” <span class="nw">2026-09-03</span>. <em>syndicated TechCrunch article.</em> <a class="url" href="https://finance.yahoo.com/technology/ai/articles/meta-paying-peek-latest-ai-181956233.html">https://finance.yahoo.com/technology/ai/articles/meta-paying-peek-latest-ai-181956233.html</a></li>
-          <li id="s10"><span class="tag v">VENDOR</span> Anthropic Engineering. “Effective harnesses for long-running agents.” <span class="nw">2025-11-26</span>. <a class="url" href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents</a></li>
-          <li id="s11"><span class="tag i">INDEPENDENT</span> Kwa, West, Becker et al. (METR), arXiv 2503.14499. “Measuring AI Ability to Complete Long Software Tasks.” <span class="nw">2025-03-18</span> (v1); revised <span class="nw">2026-07-10</span>. <a class="url" href="https://arxiv.org/abs/2503.14499">https://arxiv.org/abs/2503.14499</a></li>
-          <li id="s12"><span class="tag i">INDEPENDENT</span> METR. “Task-Completion Time Horizons of Frontier AI Models.” last updated <span class="nw">2026-05-08</span>. <em>per-model values render by script and were not extracted.</em> <a class="url" href="https://metr.org/time-horizons/">https://metr.org/time-horizons/</a></li>
-          <li id="s13"><span class="tag v">VENDOR</span> Meta developer docs. “Models (Muse Spark tiers and context window).” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://dev.meta.ai/docs/models">https://dev.meta.ai/docs/models</a></li>
-          <li id="s14"><span class="tag v">VENDOR</span> Claude developer docs. “Context windows.” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://docs.claude.com/en/docs/build-with-claude/context-windows">https://docs.claude.com/en/docs/build-with-claude/context-windows</a></li>
-          <li id="s15"><span class="tag v">VENDOR</span> Anthropic Engineering. “How we built our multi-agent research system.” <span class="nw">2025-06-13</span>. <a class="url" href="https://www.anthropic.com/engineering/multi-agent-research-system">https://www.anthropic.com/engineering/multi-agent-research-system</a></li>
-          <li id="s16"><span class="tag v">VENDOR</span> Anthropic Engineering (Nicholas Carlini). “Building a C compiler with a team of parallel Claudes.” <span class="nw">2026-02-05</span>. <em>a vendor experiment reported by its own researcher.</em> <a class="url" href="https://www.anthropic.com/engineering/building-c-compiler">https://www.anthropic.com/engineering/building-c-compiler</a></li>
-          <li id="s17"><span class="tag i">INDEPENDENT</span> Xie et al., arXiv 2404.07972. “OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments.” <span class="nw">2024-04-11</span> (v1). <a class="url" href="https://arxiv.org/abs/2404.07972">https://arxiv.org/abs/2404.07972</a></li>
-          <li id="s18"><span class="tag v">VENDOR</span> Claude developer docs. “Computer use tool.” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://docs.claude.com/en/docs/agents-and-tools/tool-use/computer-use-tool">https://docs.claude.com/en/docs/agents-and-tools/tool-use/computer-use-tool</a></li>
-          <li id="s19"><span class="tag i">INDEPENDENT</span> <span class="tag u">Unconfirmed</span> Huang, Fan, Humayun et al., arXiv 2609.36139. “Language Models Are ‘Insecure’ Reporters.” <span class="nw">2026-09-28</span>. <em>preprint, not peer reviewed; author affiliations not stated in the receipt.</em> <a class="url" href="https://arxiv.org/abs/2609.36139">https://arxiv.org/abs/2609.36139</a></li>
-          <li id="s20"><span class="tag i">INDEPENDENT</span> XLANG Lab. “Spider 2.0: site and leaderboard.” read <span class="nw">2026-09-30</span>; latest news item <span class="nw">2025-05-22</span>. <em>leaderboard entries are submitted by the teams that built them.</em> <a class="url" href="https://spider2-sql.github.io/">https://spider2-sql.github.io/</a></li>
-          <li id="s21"><span class="tag v">VENDOR</span> Google Cloud docs. “Conversational Analytics API access control with IAM.” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/access-control">https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/access-control</a></li>
-          <li id="s22"><span class="tag v">VENDOR</span> Google Cloud docs. “Introduction to BigQuery row-level security.” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://cloud.google.com/bigquery/docs/row-level-security-intro">https://cloud.google.com/bigquery/docs/row-level-security-intro</a></li>
-          <li id="s23"><span class="tag v">VENDOR</span> Google Cloud docs. “Introduction to column-level access control (BigQuery).” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://cloud.google.com/bigquery/docs/column-level-security-intro">https://cloud.google.com/bigquery/docs/column-level-security-intro</a></li>
-          <li id="s24"><span class="tag v">VENDOR</span> Google Cloud docs. “About data lineage (Knowledge Catalog).” last updated <span class="nw">2026-09-30</span>. <a class="url" href="https://cloud.google.com/dataplex/docs/about-data-lineage">https://cloud.google.com/dataplex/docs/about-data-lineage</a></li>
-          <li id="s25"><span class="tag i">INDEPENDENT</span> Forrester blog (B. Hopkins, C. Le Clair, J. Pollard, R. Curran, L. Joseph). “The State Of Agentic AI In 2026: Companies Are Chasing, Few Are Catching.” <span class="nw">2026-06-03</span>. <em>analyst blog; the underlying survey data is paywalled.</em> <a class="url" href="https://www.forrester.com/blogs/the-state-of-agentic-ai-in-2026-companies-are-chasing-few-are-catching/">https://www.forrester.com/blogs/the-state-of-agentic-ai-in-2026-companies-are-chasing-few-are-catching/</a></li>
-          <li id="s26"><span class="tag v">VENDOR</span> Google Cloud docs. “Conversational Analytics API audit logging.” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/audit-logging">https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/audit-logging</a></li>
-          <li id="s27"><span class="tag v">VENDOR</span> Google Cloud docs. “Data retention with time travel and fail-safe (BigQuery).” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://cloud.google.com/bigquery/docs/time-travel">https://cloud.google.com/bigquery/docs/time-travel</a></li>
-          <li id="s28"><span class="tag v">VENDOR</span> Google Cloud docs. “Estimate and control costs (BigQuery).” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://cloud.google.com/bigquery/docs/best-practices-costs">https://cloud.google.com/bigquery/docs/best-practices-costs</a></li>
-          <li id="s29"><span class="tag v">VENDOR</span> Google Cloud docs. “Manage BigQuery costs for Conversational Analytics API agents.” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/manage-costs">https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/manage-costs</a></li>
-          <li id="s30"><span class="tag i">INDEPENDENT</span> Unite.AI. “Databricks Introduces Unity Gateway CLI to Centralize Coding Agent Control.” <span class="nw">2026-09-24</span>. <em>press report of a vendor announcement.</em> <a class="url" href="https://www.unite.ai/databricks-introduces-unity-gateway-cli-to-centralize-coding-agent-control/">https://www.unite.ai/databricks-introduces-unity-gateway-cli-to-centralize-coding-agent-control/</a></li>
-          <li id="s31"><span class="tag v">VENDOR</span> Google Cloud docs. “How Gemini products in Google Cloud use your data.” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://docs.cloud.google.com/gemini/docs/discover/data-governance">https://docs.cloud.google.com/gemini/docs/discover/data-governance</a></li>
-          <li id="s32"><span class="tag v">VENDOR</span> SD Times (Moshe Bar). “AI Coding Tools in Mid-2026: High Adoption, Low Trust, and What It Means for Developers.” <span class="nw">2026-09-25</span>. <em>informal survey reported by its author, a vendor CEO; n=103.</em> <a class="url" href="https://sdtimes.com/ai-coding-assistants/ai-coding-tools-in-mid-2026-high-adoption-low-trust-and-what-it-means-for-developers/">https://sdtimes.com/ai-coding-assistants/ai-coding-tools-in-mid-2026-high-adoption-low-trust-and-what-it-means-for-developers/</a></li>
-          <li id="s33"><span class="tag i">INDEPENDENT</span> Wikipedia. “Rule of three (statistics).” read <span class="nw">2026-09-30</span>. <em>standard statistical result.</em> <a class="url" href="https://en.wikipedia.org/wiki/Rule_of_three_(statistics)">https://en.wikipedia.org/wiki/Rule_of_three_(statistics)</a></li>
-          <li id="s34"><span class="tag v">VENDOR</span> Google Cloud docs. “Build data agents and chat with your data (Conversational Analytics API overview).” last updated <span class="nw">2026-09-24</span>. <em>same page is served at /gemini/docs/conversational-analytics-api/overview.</em> <a class="url" href="https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/overview">https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/overview</a></li>
-          <li id="s35"><span class="tag v">VENDOR</span> Agent Development Kit docs. “BigQuery Agent Analytics plugin for ADK.” undated; read <span class="nw">2026-09-30</span>. <em>Google open source.</em> <a class="url" href="https://adk.dev/integrations/bigquery-agent-analytics/">https://adk.dev/integrations/bigquery-agent-analytics/</a></li>
-          <li id="s36"><span class="tag v">VENDOR</span> GitHub, GoogleCloudPlatform. “BigQuery Agent Analytics SDK (README; Apache 2.0).” read <span class="nw">2026-09-30</span>. <em>Google open source; the author works on this SDK.</em> <a class="url" href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK</a></li>
-          <li id="s37"><span class="tag i">INDEPENDENT</span> Proactive Investors (Angela Harmantas, editor). “Meta’s Muse tops Apple’s US free app chart.” <span class="nw">2026-09-18</span>; fetched <span class="nw">2026-10-01</span>. <em>independent press; the feature list it relays is Meta’s own claim.</em> <a class="url" href="https://www.proactiveinvestors.com/companies/news/1098763/meta-s-muse-tops-apple-s-us-free-app-chart-1098763.html">https://www.proactiveinvestors.com/companies/news/1098763/meta-s-muse-tops-apple-s-us-free-app-chart-1098763.html</a></li>
-          <li id="s38"><span class="tag i">INDEPENDENT</span> Fox Business (Eric Revell). “Meta’s Muse becomes App Store’s hottest download.” <span class="nw">2026-09-22</span>; fetched <span class="nw">2026-10-01</span>. <a class="url" href="https://www.foxbusiness.com/technology/metas-muse-becomes-app-stores-hottest-download">https://www.foxbusiness.com/technology/metas-muse-becomes-app-stores-hottest-download</a></li>
-          <li id="s39"><span class="tag i">INDEPENDENT</span> <span class="tag u">Unconfirmed</span> AppTracker. “Muse from Meta: App Store rank, ratings and charts (US listing).” snapshot fetched <span class="nw">2026-10-01</span>. <em>independent rank tracker, not affiliated with Meta per its page; a third-party snapshot that says it reflects Apple’s public charts, not confirmed against Apple’s own chart.</em> <a class="url" href="https://apptracker.ai/app/6760173601">https://apptracker.ai/app/6760173601</a></li>
+          <li id="s1"><span class="src-type">Vendor source (the maker’s own claim).</span> Meta AI Research blog. “Introducing Muse Code and Muse Spark 1.2.” <span class="nw">2026-08-05</span>. <a class="url" href="https://research.meta.ai/blog/introducing-muse-code-and-muse-spark-1-2">https://research.meta.ai/blog/introducing-muse-code-and-muse-spark-1-2</a></li>
+          <li id="s2"><span class="src-type">Independent source.</span> 9to5Mac (Marcus Mendes). “Report: Meta’s Muse crosses 5 million downloads amid massive advertising push.” <span class="nw">2026-09-30</span>. <em>consumer Muse app; download figure is a Sensor Tower projection.</em> <a class="url" href="https://9to5mac.com/2026/09/30/report-metas-muse-crosses-5-million-downloads-amid-massive-advertising-push/">https://9to5mac.com/2026/09/30/report-metas-muse-crosses-5-million-downloads-amid-massive-advertising-push/</a></li>
+          <li id="s3"><span class="src-type">Vendor source (the maker’s own claim).</span> Meta developer docs. “Extending and automating: subagents, observers, hooks, MCP, headless (Muse Code).” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://dev.meta.ai/docs/muse-code/extending">https://dev.meta.ai/docs/muse-code/extending</a></li>
+          <li id="s4"><span class="src-type">Vendor source (the maker’s own claim).</span> Meta developer docs. “Permissions and safety (Muse Code).” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://dev.meta.ai/docs/muse-code/permissions">https://dev.meta.ai/docs/muse-code/permissions</a></li>
+          <li id="s5"><span class="src-type">Vendor source (the maker’s own claim).</span> Meta developer docs. “Pricing and rate limits (Meta Model API).” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://dev.meta.ai/docs/pricing-rate-limits">https://dev.meta.ai/docs/pricing-rate-limits</a></li>
+          <li id="s6"><span class="src-type">Independent source.</span> Tech Times (Brandon Fisher). “Muse Spark 1.3 Jumps 16 Points on DeepSWE: How Meta Training Loop Closed Gap.” <span class="nw">2026-09-03</span>. <em>independent outlet reporting Meta’s own evaluation numbers.</em> <a class="url" href="https://www.techtimes.com/articles/326417/20260903/muse-spark-13-jumps-16-points-deepswe-how-meta-training-loop-closed-gap.htm">https://www.techtimes.com/articles/326417/20260903/muse-spark-13-jumps-16-points-deepswe-how-meta-training-loop-closed-gap.htm</a></li>
+          <li id="s7"><span class="src-type">Independent source.</span> 24/7 Wall St. (David Moadel). “Meta Rises 4% as Muse Spark 1.3 Claims Parity With Anthropic and OpenAI.” <span class="nw">2026-09-03</span>. <a class="url" href="https://247wallst.com/investing/2026/09/03/meta-rises-4-as-muse-spark-1-3-claims-parity-with-anthropic-and-openai/">https://247wallst.com/investing/2026/09/03/meta-rises-4-as-muse-spark-1-3-claims-parity-with-anthropic-and-openai/</a></li>
+          <li id="s8"><span class="src-type">Own measurement.</span> Haiyuan Cao. “Session-log counts per agent CLI on one Mac, <span class="nw">2026-09-16</span> to <span class="nw">2026-09-30</span>; Muse workspace categories, event counts, launch flags and model ID; metadata only.” measured <span class="nw">2026-09-30</span>. <em>not published; method and weaknesses in section 2.</em></li>
+          <li id="s9"><span class="src-type">Independent source.</span> TechCrunch via Yahoo Finance (Tim Fernholz). “Meta is paying to peek at how you use their latest AI model.” <span class="nw">2026-09-03</span>. <em>syndicated TechCrunch article.</em> <a class="url" href="https://finance.yahoo.com/technology/ai/articles/meta-paying-peek-latest-ai-181956233.html">https://finance.yahoo.com/technology/ai/articles/meta-paying-peek-latest-ai-181956233.html</a></li>
+          <li id="s10"><span class="src-type">Vendor source (the maker’s own claim).</span> Anthropic Engineering. “Effective harnesses for long-running agents.” <span class="nw">2025-11-26</span>. <a class="url" href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents</a></li>
+          <li id="s11"><span class="src-type">Independent source.</span> Kwa, West, Becker et al. (METR), arXiv 2503.14499. “Measuring AI Ability to Complete Long Software Tasks.” <span class="nw">2025-03-18</span> (v1); revised <span class="nw">2026-07-10</span>. <a class="url" href="https://arxiv.org/abs/2503.14499">https://arxiv.org/abs/2503.14499</a></li>
+          <li id="s12"><span class="src-type">Independent source.</span> METR. “Task-Completion Time Horizons of Frontier AI Models.” last updated <span class="nw">2026-05-08</span>. <em>per-model values render by script and were not extracted.</em> <a class="url" href="https://metr.org/time-horizons/">https://metr.org/time-horizons/</a></li>
+          <li id="s13"><span class="src-type">Vendor source (the maker’s own claim).</span> Meta developer docs. “Models (Muse Spark tiers and context window).” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://dev.meta.ai/docs/models">https://dev.meta.ai/docs/models</a></li>
+          <li id="s14"><span class="src-type">Vendor source (the maker’s own claim).</span> Claude developer docs. “Context windows.” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://docs.claude.com/en/docs/build-with-claude/context-windows">https://docs.claude.com/en/docs/build-with-claude/context-windows</a></li>
+          <li id="s15"><span class="src-type">Vendor source (the maker’s own claim).</span> Anthropic Engineering. “How we built our multi-agent research system.” <span class="nw">2025-06-13</span>. <a class="url" href="https://www.anthropic.com/engineering/multi-agent-research-system">https://www.anthropic.com/engineering/multi-agent-research-system</a></li>
+          <li id="s16"><span class="src-type">Vendor source (the maker’s own claim).</span> Anthropic Engineering (Nicholas Carlini). “Building a C compiler with a team of parallel Claudes.” <span class="nw">2026-02-05</span>. <em>a vendor experiment reported by its own researcher.</em> <a class="url" href="https://www.anthropic.com/engineering/building-c-compiler">https://www.anthropic.com/engineering/building-c-compiler</a></li>
+          <li id="s17"><span class="src-type">Independent source.</span> Xie et al., arXiv 2404.07972. “OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments.” <span class="nw">2024-04-11</span> (v1). <a class="url" href="https://arxiv.org/abs/2404.07972">https://arxiv.org/abs/2404.07972</a></li>
+          <li id="s18"><span class="src-type">Vendor source (the maker’s own claim).</span> Claude developer docs. “Computer use tool.” undated; read <span class="nw">2026-09-30</span>. <a class="url" href="https://docs.claude.com/en/docs/agents-and-tools/tool-use/computer-use-tool">https://docs.claude.com/en/docs/agents-and-tools/tool-use/computer-use-tool</a></li>
+          <li id="s19"><span class="src-type">Preprint, independence not confirmed.</span> Not confirmed by us. Huang, Fan, Humayun et al., arXiv 2609.36139. “Language Models Are ‘Insecure’ Reporters.” <span class="nw">2026-09-28</span>. <em>preprint, not peer reviewed; author affiliations not stated in the receipt.</em> <a class="url" href="https://arxiv.org/abs/2609.36139">https://arxiv.org/abs/2609.36139</a></li>
+          <li id="s20"><span class="src-type">Independent source.</span> XLANG Lab. “Spider 2.0: site and leaderboard.” read <span class="nw">2026-09-30</span>; latest news item <span class="nw">2025-05-22</span>. <em>leaderboard entries are submitted by the teams that built them.</em> <a class="url" href="https://spider2-sql.github.io/">https://spider2-sql.github.io/</a></li>
+          <li id="s21"><span class="src-type">Vendor source (the maker’s own claim).</span> Google Cloud docs. “Conversational Analytics API access control with IAM.” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/access-control">https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/access-control</a></li>
+          <li id="s22"><span class="src-type">Vendor source (the maker’s own claim).</span> Google Cloud docs. “Introduction to BigQuery row-level security.” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://cloud.google.com/bigquery/docs/row-level-security-intro">https://cloud.google.com/bigquery/docs/row-level-security-intro</a></li>
+          <li id="s23"><span class="src-type">Vendor source (the maker’s own claim).</span> Google Cloud docs. “Introduction to column-level access control (BigQuery).” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://cloud.google.com/bigquery/docs/column-level-security-intro">https://cloud.google.com/bigquery/docs/column-level-security-intro</a></li>
+          <li id="s24"><span class="src-type">Vendor source (the maker’s own claim).</span> Google Cloud docs. “About data lineage (Knowledge Catalog).” last updated <span class="nw">2026-09-30</span>. <a class="url" href="https://cloud.google.com/dataplex/docs/about-data-lineage">https://cloud.google.com/dataplex/docs/about-data-lineage</a></li>
+          <li id="s25"><span class="src-type">Independent source.</span> Forrester blog (B. Hopkins, C. Le Clair, J. Pollard, R. Curran, L. Joseph). “The State Of Agentic AI In 2026: Companies Are Chasing, Few Are Catching.” <span class="nw">2026-06-03</span>. <em>analyst blog; the underlying survey data is paywalled.</em> <a class="url" href="https://www.forrester.com/blogs/the-state-of-agentic-ai-in-2026-companies-are-chasing-few-are-catching/">https://www.forrester.com/blogs/the-state-of-agentic-ai-in-2026-companies-are-chasing-few-are-catching/</a></li>
+          <li id="s26"><span class="src-type">Vendor source (the maker’s own claim).</span> Google Cloud docs. “Conversational Analytics API audit logging.” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/audit-logging">https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/audit-logging</a></li>
+          <li id="s27"><span class="src-type">Vendor source (the maker’s own claim).</span> Google Cloud docs. “Data retention with time travel and fail-safe (BigQuery).” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://cloud.google.com/bigquery/docs/time-travel">https://cloud.google.com/bigquery/docs/time-travel</a></li>
+          <li id="s28"><span class="src-type">Vendor source (the maker’s own claim).</span> Google Cloud docs. “Estimate and control costs (BigQuery).” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://cloud.google.com/bigquery/docs/best-practices-costs">https://cloud.google.com/bigquery/docs/best-practices-costs</a></li>
+          <li id="s29"><span class="src-type">Vendor source (the maker’s own claim).</span> Google Cloud docs. “Manage BigQuery costs for Conversational Analytics API agents.” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/manage-costs">https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/manage-costs</a></li>
+          <li id="s30"><span class="src-type">Independent source.</span> Unite.AI. “Databricks Introduces Unity Gateway CLI to Centralize Coding Agent Control.” <span class="nw">2026-09-24</span>. <em>press report of a vendor announcement.</em> <a class="url" href="https://www.unite.ai/databricks-introduces-unity-gateway-cli-to-centralize-coding-agent-control/">https://www.unite.ai/databricks-introduces-unity-gateway-cli-to-centralize-coding-agent-control/</a></li>
+          <li id="s31"><span class="src-type">Vendor source (the maker’s own claim).</span> Google Cloud docs. “How Gemini products in Google Cloud use your data.” last updated <span class="nw">2026-09-24</span>. <a class="url" href="https://docs.cloud.google.com/gemini/docs/discover/data-governance">https://docs.cloud.google.com/gemini/docs/discover/data-governance</a></li>
+          <li id="s32"><span class="src-type">Vendor source (the maker’s own claim).</span> SD Times (Moshe Bar). “AI Coding Tools in Mid-2026: High Adoption, Low Trust, and What It Means for Developers.” <span class="nw">2026-09-25</span>. <em>informal survey reported by its author, a vendor CEO; n=103.</em> <a class="url" href="https://sdtimes.com/ai-coding-assistants/ai-coding-tools-in-mid-2026-high-adoption-low-trust-and-what-it-means-for-developers/">https://sdtimes.com/ai-coding-assistants/ai-coding-tools-in-mid-2026-high-adoption-low-trust-and-what-it-means-for-developers/</a></li>
+          <li id="s33"><span class="src-type">Independent source.</span> Wikipedia. “Rule of three (statistics).” read <span class="nw">2026-09-30</span>. <em>standard statistical result.</em> <a class="url" href="https://en.wikipedia.org/wiki/Rule_of_three_(statistics)">https://en.wikipedia.org/wiki/Rule_of_three_(statistics)</a></li>
+          <li id="s34"><span class="src-type">Vendor source (the maker’s own claim).</span> Google Cloud docs. “Build data agents and chat with your data (Conversational Analytics API overview).” last updated <span class="nw">2026-09-24</span>. <em>same page is served at /gemini/docs/conversational-analytics-api/overview.</em> <a class="url" href="https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/overview">https://docs.cloud.google.com/gemini/data-agents/conversational-analytics-api/overview</a></li>
+          <li id="s35"><span class="src-type">Vendor source (the maker’s own claim).</span> Agent Development Kit docs. “BigQuery Agent Analytics plugin for ADK.” undated; read <span class="nw">2026-09-30</span>. <em>Google open source.</em> <a class="url" href="https://adk.dev/integrations/bigquery-agent-analytics/">https://adk.dev/integrations/bigquery-agent-analytics/</a></li>
+          <li id="s36"><span class="src-type">Vendor source (the maker’s own claim).</span> GitHub, GoogleCloudPlatform. “BigQuery Agent Analytics SDK (README; Apache 2.0).” read <span class="nw">2026-09-30</span>. <em>Google open source; the author works on this SDK.</em> <a class="url" href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK</a></li>
+          <li id="s37"><span class="src-type">Independent source.</span> Proactive Investors (Angela Harmantas, editor). “Meta’s Muse tops Apple’s US free app chart.” <span class="nw">2026-09-18</span>; fetched <span class="nw">2026-10-01</span>. <em>independent press; the feature list it relays is Meta’s own claim.</em> <a class="url" href="https://www.proactiveinvestors.com/companies/news/1098763/meta-s-muse-tops-apple-s-us-free-app-chart-1098763.html">https://www.proactiveinvestors.com/companies/news/1098763/meta-s-muse-tops-apple-s-us-free-app-chart-1098763.html</a></li>
+          <li id="s38"><span class="src-type">Independent source.</span> Fox Business (Eric Revell). “Meta’s Muse becomes App Store’s hottest download.” <span class="nw">2026-09-22</span>; fetched <span class="nw">2026-10-01</span>. <a class="url" href="https://www.foxbusiness.com/technology/metas-muse-becomes-app-stores-hottest-download">https://www.foxbusiness.com/technology/metas-muse-becomes-app-stores-hottest-download</a></li>
+          <li id="s39"><span class="src-type">Independent source.</span> Not confirmed by us. AppTracker. “Muse from Meta: App Store rank, ratings and charts (US listing).” snapshot fetched <span class="nw">2026-10-01</span>. <em>independent rank tracker, not affiliated with Meta per its page; a third-party snapshot that says it reflects Apple’s public charts, not confirmed against Apple’s own chart.</em> <a class="url" href="https://apptracker.ai/app/6760173601">https://apptracker.ai/app/6760173601</a></li>
+          <li id="s40"><span class="src-type">Preprint, independence not confirmed.</span> Not checked by us beyond the abstract. Tomitsuka, Raayatsanati, Xing, Gand and Ma, arXiv 2610.02122. “Argo-Bench: Evaluating Data Agents on Enterprise-Scale Workflows.” <span class="nw">2026-10-01</span>; fetched <span class="nw">2026-10-02</span>. <em>an arXiv preprint, affiliations not stated, not peer reviewed, not by us.</em> <a class="url" href="https://arxiv.org/abs/2610.02122">https://arxiv.org/abs/2610.02122</a></li>
         </ol>
         <h3>Still unconfirmed, and where we looked</h3>
         <ul class="gaps">
+          <li>Two preprints we have not confirmed: the self-reporting study<sup class="refs">[<a href="#s19" aria-label="Source 19">19</a>]</sup> and Argo-Bench, read only in its abstract<sup class="refs">[<a href="#s40" aria-label="Source 40">40</a>]</sup>; both leave author affiliations unstated. The ranking-site snapshot<sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup> is not checked against Apple’s own chart.</li>
           <li>Days-long unattended reliability (the METR horizon trend), contract reading and enterprise computer use (OSWorld-style results).</li>
-          <li>Spider 2.0’s self-submitted entries; Muse’s vendor-claimed benchmarks; our n=1 usage role.</li>
+          <li>Spider 2.0’s self-submitted entries; Muse Spark’s vendor-claimed benchmarks; our n=1 usage role.</li>
           <li>Thresholds are uncalibrated.</li>
-          <li>Unpublished own measurements: session counts, Muse’s 82 of 119 sessions and pull requests, the alignment record.</li>
+          <li>Unpublished own measurements: session counts, Muse Code’s 82 of 119 sessions and pull requests, the alignment record.</li>
           <li>Pages we could not use: Google’s Gemini long-context guide (redirected with an empty body); current OSWorld and METR model scores (rendered by script); Meta’s benchmark table (rendered by script, so its figures come from Tech Times).</li>
         </ul>
       </section>
