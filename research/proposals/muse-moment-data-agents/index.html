@@ -126,8 +126,8 @@
 
     ol.sources { padding-left: 2.2em; }
     ol.sources li { font-size: 0.86rem; margin-bottom: 7px; overflow-wrap: anywhere; }
-    ol.sources li:target { background: var(--o-bg); }
-    ol.sources li:target a { color: #8f3608; }
+    ol.sources li:target, ol.sources li.src-hit { background: var(--o-bg); }
+    ol.sources li:target a, ol.sources li.src-hit a { color: #8f3608; }
     ol.sources .url { font-family: var(--mono); font-size: 0.74rem; font-weight: 500; }
     ul.gaps li { font-size: 0.9rem; }
 
@@ -143,27 +143,55 @@
     .tabs [role="tab"][aria-selected="true"] { color: var(--ink); background: var(--cream); border-color: var(--line); }
     .tabs [role="tab"]:focus-visible { outline: 2px solid var(--accent-dark); outline-offset: 2px; }
     .tabs[hidden], .tabs-js.view-tldr #full, .tabs-js.view-full #tldr { display: none; }
-    #tldr { margin-bottom: 44px; }
-    #tldr h2 { margin-top: 8px; }
-    .tldr-actions { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin: 6px 0 18px; }
-    a.tldr-btn { display: inline-block; background: var(--navy); color: #fff; padding: 9px 16px; border-radius: 8px; box-shadow: none; }
+    #tldr { margin-bottom: 20px; font-size: 19px; line-height: 1.6; }
+    #tldr p, #tldr li { color: var(--ink); }
+    #tldr h2.tldr-headline { font-family: var(--serif); font-size: 2.2rem; line-height: 1.15; letter-spacing: -0.02em; margin: 4px 0 18px; }
+    #tldr p.tldr-anchor { margin: 0 0 14px; }
+    #tldr .thesis { margin: 0 0 14px; padding: 12px 18px; font-size: 1.22em; line-height: 1.45; font-weight: 600; }
+    #tldr p.tldr-honest { margin: 0 0 14px; color: var(--ink-soft); }
+    #tldr p.tldr-missing { margin: 0 0 18px; }
+    #tldr p.tldr-example { background: #fff; border-left: 4px solid var(--accent); padding: 10px 16px; margin: 0 0 18px; }
+    #tldr p.tldr-step { margin: 0 0 16px; }
+    #tldr p.tldr-do { margin: 0 0 4px; }
+    #tldr ul.tldr-asks { margin: 0 0 16px; padding-left: 1.1em; }
+    #tldr ul.tldr-asks li { margin-bottom: 2px; }
+    .tldr-gloss { font-size: 0.84em; font-style: italic; color: var(--ink-soft); }
+    .tag.nv { background: var(--g-bg); color: var(--g-fg); }
+    #tldr .tag { font-family: var(--sans); font-size: 1rem; font-weight: 650; letter-spacing: 0; text-transform: none; padding: 1px 8px; vertical-align: 0; }
+    .tldr-steps figcaption { font-weight: 650; color: var(--ink); margin: 0 0 8px; }
+    .tldr-actions { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 6px 0 18px; }
+    a.tldr-btn { display: inline-block; background: var(--navy); color: #fff; padding: 10px 22px; border-radius: 8px; box-shadow: none; font-weight: 650; }
     a.tldr-btn:hover { box-shadow: none; background: #24324f; }
-    ol.tldr-five li { margin-bottom: 6px; }
-    .flow { margin: 10px 0 18px; }
-    .flow ol { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-    .flow li { border: 1.5px solid var(--ink); border-radius: 8px; padding: 8px 10px; background: #fff; margin: 0; color: var(--ink); }
-    .flow li.flow-key { border-width: 3px; }
-    .flow li b { display: block; font-family: var(--serif); font-size: 1rem; }
-    .flow li:not(:last-child) b::after { content: " \2192" / ""; }
-    .flow li span { display: block; font-size: 0.82rem; color: var(--ink-soft); }
-    .flow li span.flow-badges { margin-top: 4px; font-family: var(--mono); font-size: 0.72rem; color: var(--ink); }
-    .flow figcaption { font-size: 0.86rem; color: var(--ink-faint); margin-top: 8px; }
+    .tldr-demo-note { font-size: 0.86em; color: var(--ink-soft); }
+    .tldr-steps { margin: 0 0 18px; }
+    .tldr-steps ol { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+    .tldr-steps li { position: relative; border: 2px solid var(--ink); border-radius: 10px; padding: 8px 12px; background: #fff; margin: 0; color: var(--ink); }
+    .tldr-steps li b { display: block; font-family: var(--serif); font-size: 1.12em; line-height: 1.25; }
+    .tldr-steps li span { display: block; font-size: 0.84em; line-height: 1.35; color: var(--ink-soft); }
+    .tldr-steps li:not(:last-child)::after { content: "\2192"; content: "\2192" / ""; position: absolute; right: -24px; top: 50%; transform: translateY(-50%); font-size: 1.25rem; line-height: 1; color: var(--ink); }
+    details.tldr-more { border-top: 1px solid var(--line); padding: 6px 0; font-size: 17px; }
+    details.tldr-more:last-of-type { border-bottom: 1px solid var(--line); }
+    details.tldr-more > summary { cursor: pointer; font-weight: 650; color: var(--ink); padding: 4px 0; font-size: 18px; }
+    details.tldr-more > summary:focus-visible { outline: 2px solid var(--accent-dark); outline-offset: 2px; }
+    details.tldr-more[open] > summary { margin-bottom: 8px; }
+    details.tldr-more dd, details.tldr-more p { color: var(--ink-soft); }
+    .view-tldr .subtitle, .view-tldr .share-gap, .view-tldr .kicker { display: none; }
+    .view-tldr .banner { margin-top: 26px; }
+    .view-tldr h1 { font-size: 1.55rem; margin: 14px 0 4px; }
+    .view-tldr .meta { margin-bottom: 12px; padding-bottom: 10px; }
+    .view-tldr .tabs { margin-bottom: 18px; }
     .print-url, .print-only { display: none; }
     .ctl { font-family: var(--mono); font-size: 0.8em; font-weight: 600; color: var(--ink); background: #ebe4d8; border-radius: 4px; padding: 0 4px; white-space: normal; }
     dl.tldr-qa dt { font-weight: 650; color: var(--ink); margin-top: 9px; }
     dl.tldr-qa dd { margin: 2px 0 0; color: var(--ink-soft); }
     .tldr-foot { font-size: 0.86rem; color: var(--ink-faint); border-top: 1px solid var(--line); padding-top: 8px; margin-top: 18px; }
-    @media (max-width: 640px) { .flow ol { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tabs [role="tab"] { padding: 9px 14px; } }
+    @media (max-width: 640px) {
+      #tldr { font-size: 18px; }
+      #tldr h2.tldr-headline { font-size: 1.75rem; }
+      .tldr-steps ol { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+      .tldr-steps li:not(:last-child)::after { content: "\2193"; content: "\2193" / ""; right: auto; left: 50%; top: auto; bottom: -17px; transform: translateX(-50%); }
+      .tabs [role="tab"] { padding: 9px 14px; }
+    }
     @page { margin: 15mm 13mm; }
     @media print {
       body { background: #fff; font-size: 10pt; }
@@ -181,42 +209,27 @@
       .tabs, .tldr-actions, .skip-link, .site-topbar { display: none !important; }
       .print-url { display: inline; }
       .print-only { display: block; }
-      #tldr .tldr-agenda-wrap { display: none; }
-      #tldr .ctl { padding: 0; background: none; font-size: inherit; }
-      #tldr .note { font-size: 7pt; }
-      #tldr .tag { font-size: 6.2pt; line-height: 1.2; padding: 0 3pt; vertical-align: 0; letter-spacing: 0.03em; }
+      #tldr details { display: none; }
+      #tldr .tag { font-size: 8.5pt; line-height: 1.2; padding: 0 3pt; vertical-align: 0; letter-spacing: 0; }
       .view-tldr .kicker { padding-top: 0; }
       .view-tldr article { padding-bottom: 0; }
-      .view-tldr h1 { font-size: 18pt; margin: 2pt 0 3pt; }
-      .view-tldr .subtitle { font-size: 10.5pt; margin-bottom: 3pt; }
-      .view-tldr .banner, .view-tldr .share-gap, .view-tldr .meta { font-size: 7.4pt; margin: 0 0 2pt; padding: 1pt 0; }
-      .view-tldr .meta { border-bottom: 0; }
-      #tldr { font-size: 8pt; line-height: 1.27; margin-bottom: 0; }
-      #tldr h2 { font-size: 12.5pt; margin: 3pt 0 2pt; }
-      #tldr h3 { font-size: 9.6pt; margin: 6pt 0 2pt; }
-      #tldr p, #tldr li, #tldr dd { margin: 0 0 1.5pt; }
-      #tldr dl.tldr-qa { columns: 2; column-gap: 12pt; font-size: 7.5pt; }
-      #tldr dl.tldr-qa > div { break-inside: avoid; }
-      #tldr dl.tldr-qa dt { margin-top: 2pt; }
-      #tldr caption { display: none; }
-      #tldr thead th { font-size: 6.6pt; }
-      #tldr tbody th { font-size: 7.1pt; }
-      #tldr ol.tldr-five li, #tldr ul li { margin-bottom: 1pt; }
-      #tldr .thesis { padding: 3pt 6pt; margin: 2pt 0 4pt; font-size: 9pt; }
-      #tldr table { font-size: 7.1pt; }
-      #tldr th, #tldr td { padding: 1.5pt 5pt 1.5pt 0; }
-      #tldr .tbl { margin-bottom: 4pt; }
-      .flow { margin: 4pt 0; }
-      .flow ol { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3pt; }
-      .flow li { padding: 3pt 4pt; border-width: 1pt; }
-      .flow li.flow-key { border-width: 2pt; }
-      .flow li b { font-size: 8.4pt; }
-      .flow li span { font-size: 7pt; }
-      .flow li span.flow-badges { font-size: 6.6pt; }
-      .flow figcaption { font-size: 7.4pt; margin-top: 2pt; }
-      .tldr-foot { font-size: 7.4pt; margin-top: 4pt; padding-top: 2pt; }
-      .view-tldr .banner, .view-tldr p.share-gap + p.share-gap, .view-tldr footer { display: none; }
-      #tldr table.tldr-agenda th:last-child, #tldr table.tldr-agenda td:last-child { display: none; }
+      .view-tldr h1 { font-size: 15pt; margin: 2pt 0 2pt; }
+      .view-tldr .banner, .view-tldr .meta { font-size: 8pt; margin: 0 0 3pt; padding: 2pt 0 2pt 6pt; }
+      .view-tldr .meta { border-bottom: 0; padding-left: 0; }
+      .view-tldr .subtitle, .view-tldr .share-gap, .view-tldr .kicker, .view-tldr footer { display: none; }
+      #tldr { font-size: 11pt; line-height: 1.38; margin-bottom: 0; }
+      #tldr h2.tldr-headline { font-size: 19pt; margin: 4pt 0 6pt; }
+      #tldr .thesis { padding: 4pt 8pt; margin: 2pt 0 6pt; font-size: 12pt; background: none; border-left: 3pt solid #000; }
+      #tldr p, #tldr li { margin: 0 0 5pt; color: #000; }
+      #tldr p.tldr-example { background: none; border-left: 3pt solid #000; padding: 2pt 8pt; }
+      .tldr-gloss { color: #000; }
+      .tldr-steps { margin: 4pt 0 8pt; }
+      .tldr-steps ol { gap: 18pt; }
+      .tldr-steps li { border: 1pt solid #000; padding: 3pt 6pt; }
+      .tldr-steps li b { font-size: 11pt; }
+      .tldr-steps li span { font-size: 9.5pt; color: #000; }
+      .tldr-steps li:not(:last-child)::after { right: -15pt; color: #000; }
+      .tldr-foot { font-size: 8.5pt; margin-top: 6pt; padding-top: 3pt; }
     }
   </style>
   <link rel="stylesheet" href="../../../assets/site-nav.css" data-site-nav>
@@ -270,101 +283,101 @@
       <p class="subtitle">Hypothesis under test: the data job you can hand off and check cold, as Proof-Carrying Jobs delivered in a Proof PR.</p>
       <p class="share-gap"><strong>Title status.</strong> Provisional until the D90 verdicts: a hypothesis under test, not a result. Outcome claims will name the tested jobs, the one sponsor and both controls; at most they may read “enterprise data agents, extrapolated from one sponsor” <span class="tag h">Hypothesis</span>, under the section 9 rules.</p>
       <p class="share-gap"><span class="tag g">Gap</span> Qualifying share of the sponsor's 20 largest jobs (hours-weighted, evaluator-scored): not yet measured (day-10 census)</p>
-      <p class="meta">Haiyuan Cao · proposal · <span class="nw">2026-09-30</span> · public sources and own measurements only</p>
+      <p class="meta">Haiyuan Cao · proposal · <span class="nw">2026-09-30</span> · updated <span class="nw">2026-10-01</span> · public sources and own measurements only</p>
 
       <div class="tabs" role="tablist" aria-label="Page views" hidden>
-        <button type="button" role="tab" id="tab-tldr" aria-controls="tldr" aria-selected="true" tabindex="0">TL;DR</button>
+        <button type="button" role="tab" id="tab-tldr" aria-controls="tldr" aria-selected="true" tabindex="0">Quick read</button>
         <button type="button" role="tab" id="tab-full" aria-controls="full" aria-selected="false" tabindex="-1">Full page</button>
       </div>
 
       <div id="tldr" class="view">
-        <h2 id="tldr-h">TL;DR: the proposal in five minutes</h2>
-        <p class="note">Muse is Meta’s Muse Code, a terminal coding agent, and the Muse Spark models behind it<sup class="refs">[<a href="#s1" aria-label="Source 1">1</a>]</sup>; the anchor below is Meta’s consumer Muse app.</p>
-        <p class="thesis"><strong>Thesis, a hypothesis under test.</strong> The Muse moment for enterprise data agents is the data job you can hand off and check cold: run unattended inside hard limits, returned as a Proof PR that a reviewer who did not do the work can check faster than redoing it. <span class="tag h">Hypothesis</span></p>
-        <p class="tldr-actions"><a class="tldr-btn" href="#h-demo">Open the live demo</a> <a href="#full">Read the full page</a></p>
-
-        <h3 id="tldr-five">In five lines</h3>
-        <ol class="tldr-five">
-          <li><strong>Pattern.</strong> Proof-Carrying Jobs: a process owner hands a whole recurring data job to an agent crew working unattended inside read-only seats and budgets, and gets back a Proof PR whose checks are labelled by coverage and by how far the builder controls them. A human signs.</li>
-          <li><strong>Scope.</strong> Claimed only for runs where an item-level oracle reaches every item of the current denominator; five instances described, two piloted as parallel tracks: invoicing and a warehouse-native job fixed by the evaluator at the gate (the example uses the KPI refresh).</li>
-          <li><strong>Ask.</strong> A sponsor, read-only seats, an owner’s time, an independent evaluator and 90 days, longer if two prospective runs do not fit, for three arms: the frontier crew, a previous-generation model and a rules workflow.</li>
-          <li><strong>Pass and kill.</strong> Zero wrong released items on fully keyed sealed runs; 18 of 20 planted faults caught; a cold reviewer signing at most 1 planted drill error and flagging at most 1 clean item, within 20% of redo hours; hours down 70%. A real wrong release, a real in-scope omission or a canary leak kills the frontier arm on that instance. A pass means worth scaling, not reliable. <span class="tag p">Proposed</span></li>
-          <li><strong>Caveat.</strong> Frontier dependence and generality are hypotheses the pilot can refute, not establish: a rules workflow matching at comparable cost means no Muse moment; an older model matching makes it a protocol, not a model.</li>
-        </ol>
-
-        <h3 id="tldr-why">Why it matters, and what is different from Muse for code</h3>
-        <ul>
-          <li><strong>The anchor:</strong> the Muse app, Meta’s consumer agent, was No. 1 among free US apps on <span class="nw">2026-09-18</span><sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>, ahead of ChatGPT on <span class="nw">2026-09-22</span><sup class="refs">[<a href="#s38" aria-label="Source 38">38</a>]</sup>, with a 12-day streak by <span class="nw">2026-09-30</span> amid heavy advertising<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>. A reported free-app chart position says nothing about agent quality or enterprise value. Our mapping <span class="tag h">Hypothesis</span>: little setup, and approval for sensitive actions, per Meta <span class="tag v">Vendor</span>, mean any owner of a qualifying job hands it to a governed agent and signs a checkable Proof PR (section 2).</li>
-          <li><strong>Muse’s lesson, narrowly:</strong> in the author’s own use <span class="tag o">Own measurement</span> (n=1), work left unattended inside hard limits lands as a PR with tests: 18 of 119 Muse sessions and two small pull requests<sup class="refs">[<a href="#s8" aria-label="Source 8">8</a>]</sup>.</li>
-          <li><strong>The data counterpart:</strong> tests alone cannot show a data output is right for this run, so the job lands as a Proof PR whose oracle badges add checks: history, walled-off re-derivation, invariants and outside evidence, each labelled for coverage (F, P, L, N) and independence (I, S, O). Gaps are never green. <span class="tag h">Hypothesis</span></li>
-          <li><strong>Checking is meant to cost less than redoing;</strong> the cold drill tests whether it does: a pass needs review within 20% of redo hours. <span class="tag h">Hypothesis</span></li>
-          <li><strong>Not claimed:</strong> Muse is not the author’s most-used agent; Claude Code leads on the 15-day count (another agent CLI leads over 7 days, 138 against 132 files) <span class="tag o">Own measurement</span>. Meta’s 75.4% is a vendor-run figure<sup class="refs">[<a href="#s6" aria-label="Source 6">6</a>]</sup>. Frontier dependence is a hypothesis: section 6 is NOT VERIFIED.</li>
-        </ul>
-
-        <figure class="flow" aria-labelledby="tldr-flow-cap">
+        <h2 id="tldr-h" class="tldr-headline">Hand off the whole data job. Check it, don’t redo it.</h2>
+        <p class="tldr-anchor">On September 18, 2026, Meta’s assistant app, Muse, topped Apple’s free App Store chart in the United States<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>. A ranking site had it first on October 1<sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup>. <span class="tag u" title="Formal label: Unconfirmed">Not checked</span></p>
+        <p class="thesis">We think data work’s moment comes when checking beats redoing. <span class="tag h" title="Formal label: Hypothesis">Our guess</span> <span class="tldr-gloss">not proven</span></p>
+        <p class="tldr-honest">A top spot does not prove quality. Meta’s ad push likely helped, by an unknown amount<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>, and so may little setup. <span class="tag u" title="Formal label: Unconfirmed">Not checked</span> Muse Code, Meta’s coding tool, is not the author’s most-used tool. <span class="tag o" title="Formal label: Own measurement">Our own count</span></p>
+        <p class="tldr-missing"><strong>What is missing:</strong> proof on real company data. <span class="tag nv" title="Formal label: Not verified">No public test found</span></p>
+        <p class="tldr-example"><strong>Example, not a result:</strong> month-end invoices take 80 hours, the smallest job we would test. Someone new checks them in 16 hours or less. <span class="tag p" title="Formal label: Proposed">Our target</span></p>
+        <figure class="tldr-steps" aria-labelledby="tldr-steps-cap">
+          <figcaption id="tldr-steps-cap">The pattern: Hand off. Check. Sign.</figcaption>
           <ol>
-            <li><b>1 Delegate</b><span>job, run unit, materiality, source-fixed denominator</span></li>
-            <li><b>2 Limits</b><span>read-only seats, sandbox writes, budgets, canaries, kill switch</span></li>
-            <li><b>3 Leave it</b><span>the crew works for days without approvals; append-only log</span></li>
-            <li class="flow-key"><b>4 Review</b><span>the Proof PR and its oracle badges</span><span class="flow-badges">history, re-derivation, invariants, outside; coverage F/P/L/N, independence I/S/O</span></li>
-            <li class="flow-key"><b>5 Rule, check, sign</b><span>a ruling is not a check; the human owner signs before release</span></li>
-            <li><b>6 Break it</b><span>unannounced cold drill with planted errors</span></li>
+            <li><b>Hand off</b><span>the whole job</span></li>
+            <li><b>Check</b><span>someone new, faster than a redo</span></li>
+            <li><b>Sign</b><span>a person approves</span></li>
           </ol>
-          <figcaption id="tldr-flow-cap">Proof-Carrying Jobs in one picture: six steps, with oracle badges at review and a human signature before anything is released.</figcaption>
         </figure>
-
-        <h3 id="tldr-agenda">30-minute agenda</h3>
-        <p class="print-only">Anchor and thesis 3 minutes; live demo 12; evidence and honest limits 5; protocol and ask 5; discussion 5; total 30.</p>
-        <div class="tbl tldr-agenda-wrap" tabindex="0" role="region" aria-label="Agenda for a 30-minute review">
-          <table class="tldr-agenda">
-            <caption>Agenda for a 30-minute review</caption>
-            <thead><tr><th scope="col" class="num">Minutes</th><th scope="col">Block</th><th scope="col">What</th></tr></thead>
-            <tbody>
-              <tr><td class="num">3</td><th scope="row">Thesis</th><td>The anchor, the one-line thesis and what is not claimed (sections 1 to 3).</td></tr>
-              <tr><td class="num">12</td><th scope="row">Live demo</th><td>The six steps on invoice preparation and the KPI pipeline, the worked example’s two tracks (section 4).</td></tr>
-              <tr><td class="num">5</td><th scope="row">Evidence and honest limits</th><td>Public ingredients, vendor claims and one person’s counts; NOT VERIFIED (sections 2 and 6).</td></tr>
-              <tr><td class="num">5</td><th scope="row">Protocol and ask</th><td>Pass, kill and title rules; the demo’s Title at D90 panel, Worked example preset (sections 9 and 12).</td></tr>
-              <tr><td class="num">5</td><th scope="row">Discussion</th><td>The likely questions below.</td></tr>
-              <tr><td class="num">30</td><th scope="row">Total</th><td></td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3 id="tldr-clicks">Demo click path, 12 minutes</h3>
-        <p class="note"><span class="tag o">Own measurement</span> Tested by driving the demo on the author’s machine, with normal motion and again with reduced motion (where the run finishes at once): a headless-browser script followed this table literally in one session, invoice preparation then the KPI pipeline, and every control existed and was enabled when clicked. The drill clock counts 600 seconds for a full redo, so the 20% pass bar is 120 seconds, and each opened row adds 2.</p>
-        <div class="tbl" tabindex="0" role="region" aria-label="Clicks in the demo, by step, with minutes (labels as they appear in the demo)">
-          <table class="tldr-clicks">
-            <caption>Clicks in the demo, by step, with minutes (labels as they appear in the demo)</caption>
-            <thead><tr><th scope="col">Step</th><th scope="col">Invoice preparation, 7 minutes</th><th scope="col">KPI pipeline, 5 minutes</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">1 Delegate</th><td>Pick <span class="ctl" data-act="pick">Invoice preparation</span>; <span class="ctl">Delegate to the crew</span> (0:30)</td><td><span class="ctl">Next job: KPI pipeline</span>; <span class="ctl">Delegate to the crew</span> (0:20)</td></tr>
-              <tr><th scope="row">2 Limits</th><td><span class="ctl">Next: Limits</span>; <span class="ctl">Try to write outside the sandbox</span> (0:40)</td><td><span class="ctl">Next: Limits</span> (0:10)</td></tr>
-              <tr><th scope="row">3 Leave it</th><td><span class="ctl">Next: Leave it</span>; <span class="ctl">Start the unattended run</span>, then <span class="ctl" data-act="if-running">Skip to the end</span>, if the run is still running (1:00)</td><td><span class="ctl">Next: Leave it</span>; <span class="ctl">Start the unattended run</span>, then <span class="ctl" data-act="if-running">Skip to the end</span>, if the run is still running (0:20)</td></tr>
-              <tr><th scope="row">4 Review</th><td><span class="ctl">Next: Review</span>; click <span class="ctl" data-act="figure">a dotted-underline figure</span>; read the badge labels (1:30)</td><td><span class="ctl">Next: Review</span>; the F/I re-derivation and its blind spots (0:40)</td></tr>
-              <tr><th scope="row">5 Rule, check, sign</th><td><span class="ctl">Next: Rule, check, sign</span>; <span class="ctl">Rule all as the evidence suggests</span>; <span class="ctl">Run all checks</span>; <span class="ctl">Sign as process owner</span> (1:30)</td><td><span class="ctl">Next: Rule, check, sign</span>; <span class="ctl">Rule all as the evidence suggests</span>; <span class="ctl">Run all checks</span>; <span class="ctl">Sign as process owner</span> (0:40)</td></tr>
-              <tr><th scope="row">6 Break it</th><td><span class="ctl">Next: Break it</span>; <span class="ctl">Process change</span>; <span class="ctl" data-expect="text:historical: signed under v1|button:Review Proof PR v2">Apply the change</span>: the signature retires and the unattended repair opens Proof PR v2 (1:50)</td><td><span class="ctl">Next: Break it</span>; <span class="ctl">Cold drill</span>; <span class="ctl">Start the drill: the clock starts</span>; <span class="ctl" data-act="flag" data-rows="K02 K03 K04 K06 K07 K08 K10 K11 K12 K13">Open evidence, then Flag as error</span>, row by row, on K02, K03, K04, K06, K07, K08, K10, K11, K12 and K13 (four carry no badge flag); <span class="ctl" data-expect="verdict:PASS">Finish: sign every unflagged row</span> within about 100 seconds: expect PASS. Flagging only the badge-flagged rows scores KILL (2:50)</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3 id="tldr-questions">Likely questions</h3>
-        <dl class="tldr-qa">
-          <div><dt>How is this different from Muse?</dt><dd>In the author’s own use <span class="tag o">Own measurement</span> (n=1), Meta’s Muse Code hands off code that lands as a PR with tests; here a whole recurring data job lands as a Proof PR with oracle badges and a human signature. Checking is meant to cost less than redoing, a hypothesis the drill tests, and we judge the pattern transfers in part: section 7 rates four of six traits Partly or No, our judgment.</dd></div>
-          <div><dt>Why would this need frontier models?</dt><dd>It may not; that is a hypothesis. A rules workflow passing at comparable cost refutes it (no Muse moment), and a previous-generation model passing makes it a protocol, not a model (sections 6 and 9).</dd></div>
-          <div><dt>Why not just rules or ETL?</dt><dd>That is the third arm: one human data engineer per track builds a rules workflow with established tooling, capped at 176 setup hours; if it passes every bar at comparable cost, the verdict is automation (section 9).</dd></div>
-          <div><dt>What if the agent is wrong?</dt><dd>Oracles labelled I, S or O by how far the builder controls them, 20 planted faults with 18 to catch, and an unannounced cold drill; a real wrong released item kills the frontier arm on that instance even if every oracle agreed (sections 3 and 9).</dd></div>
-          <div><dt>What does it cost, and when does it break even?</dt><dd>Comparable cost means within 1.25 times the frontier arm’s total, setup amortized over 12 runs, and setup must be projected to repay within 12 runs. Crew cost is <span class="tag u">Unconfirmed</span> (section 8); these thresholds are proposed, not calibrated, and the demo’s costs are synthetic (section 9). <span class="tag p">Proposed</span></dd></div>
-          <div><dt>Who signs, and who carries the risk?</dt><dd>The process owner rules and signs, and a separate check must pass on each ruling first, so release accountability stays with that human signer; the crew has read-only seats and sandbox writes inside budgets, canaries and a kill switch, and nothing is released unsigned (sections 3 and 8).</dd></div>
-          <div><dt>What about identity, access, lineage and audit?</dt><dd>A governed agent identity is a design requirement; for interactive questions, Google’s data-agent API already queries data with the asker’s own credentials<sup class="refs">[<a href="#s21" aria-label="Source 21">21</a>]</sup>. Row and column policies are enforced by the warehouse<sup class="refs">[<a href="#s22" aria-label="Source 22">22</a>, <a href="#s23" aria-label="Source 23">23</a>]</sup>, lineage is used where available<sup class="refs">[<a href="#s24" aria-label="Source 24">24</a>]</sup>, and data-agent calls can create audit log entries<sup class="refs">[<a href="#s26" aria-label="Source 26">26</a>]</sup>; auditor acceptance is <span class="tag u">Unconfirmed</span> (section 8).</dd></div>
-          <div><dt>What is the protocol, and what kills it?</dt><dd>A D1-10 gate and census, 9 development runs, 3 fully keyed sealed runs with planted faults, then 2 prospective runs with a value audit and a cold drill, over 90 days or longer if two prospective runs do not fit. A real wrong release, a real in-scope omission, 2 drill errors signed, review over 50% of redo hours, hours down under 50%, a canary leak, an outside write or a coaching edit kills the frontier arm on that instance (section 9).</dd></div>
-          <div><dt>What is the evidence today?</dt><dd>Little: public ingredients, vendor claims and one person’s usage counts (n=1). No source shows the combination working on enterprise data jobs (section 6, NOT VERIFIED).</dd></div>
-          <div><dt>Isn’t this just because the Muse app was heavily advertised?</dt><dd>Possibly: 9to5Mac reports that the advertising push “has likely played a role in its rapid adoption”<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>; its causal contribution is <span class="tag u">Unconfirmed</span>. We use the app’s chart position only as the anchor for what a moment looks like, not as evidence of agent quality or data value; the test is the protocol (sections 2 and 9).</dd></div>
-        </dl>
-
-        <h3 id="tldr-ask">The ask, for decision</h3>
-        <p>Sponsor a pilot of 90 days, longer if two prospective runs do not fit: one sponsor with two qualifying recurring jobs, run as parallel tracks; read-only seats on their sources, 12 past runs and outputs; a process owner for the manifest, questions and sign-off; an independent evaluator; fresh cold reviewers for the drills; one data engineer per track for the rules arm; consent to unannounced drills. None of this is funded or staffed yet (section 12).</p>
-        <p class="tldr-actions"><a class="tldr-btn" href="#h-demo">Open the live demo</a> <a href="#full">Read the full page</a></p>
-        <p class="tldr-foot">Personal views. Public sources and own measurements only. Proposal for review.<span class="print-url"> Page and numbered sources: https://caohy1988.github.io/research/proposals/muse-moment-data-agents/</span></p>
+        <p class="tldr-step"><strong>Why this is a big jump, not a small add-on:</strong> the software does the whole job. <span class="tag h" title="Formal label: Hypothesis">Our guess</span></p>
+        <p class="tldr-do"><strong>Our ask:</strong> back a trial of 90 days or more on two regular jobs.</p>
+        <ul class="tldr-asks">
+          <li>An owner, such as the head of billing, signs.</li>
+          <li><strong>Key test:</strong> an outside judge plants ten or more mistakes.</li>
+          <li>A new checker may miss one and raise one false alarm, at most, in a fifth of the redo time.</li>
+          <li>A pass means it is worth trying on more jobs. It does not prove the software is reliable. Not yet funded or staffed.</li>
+        </ul>
+        <p class="tldr-actions"><a class="tldr-btn" href="#full">Go deeper</a> <a href="#h-demo">Open the example</a> <span class="tldr-demo-note">(made-up data, steps only)</span></p>
+        <details class="tldr-more" id="tldr-questions">
+          <summary>Likely questions from a director</summary>
+          <dl class="tldr-qa">
+            <div><dt>Is Muse the tool the author uses most?</dt><dd>No. Meta’s coding agent, Muse Code, is not the author’s most-used. Claude Code leads the author’s 15-day count. Another agent tool leads over 7 days, 138 files to 132. <span class="tag o" title="Formal label: Own measurement">Our own count</span></dd></div>
+            <div><dt>How is this different from Muse Code?</dt><dd>In the author’s own use, Muse Code hands back code with tests. <span class="tag o" title="Formal label: Own measurement">Our own count</span> Here a whole data job comes back with evidence and a human signature. We think the idea carries over only in part. Section 7 rates four of six traits as partly or not at all.</dd></div>
+            <div><dt>Does this need the newest models?</dt><dd>It may not. That it does is our guess, not proven. If fixed rules pass at a similar cost, there is no Muse moment. If an older model passes, the win is the method, not the model (sections 6 and 9).</dd></div>
+            <div><dt>Why not just use fixed rules?</dt><dd>We test that too. One data engineer per job builds a rules-based version. Their setup is capped at 176 hours. If it passes every test at a similar cost, the answer is plain automation (section 9).</dd></div>
+            <div><dt>What if the assistant is wrong?</dt><dd>Every check says how much it covers and who controls it. An outside judge hides 20 mistakes, and 18 must be caught. A surprise test uses a checker who did not do the work. One real wrong number sent out fails the newest model on that job (sections 3 and 9).</dd></div>
+            <div><dt>What does it cost, and when does it pay back?</dt><dd>A similar cost means within 1.25 times the newest model’s total. Setup is spread over 12 runs and must be expected to pay back within 12 runs. The model’s running cost is not confirmed (section 8). These are targets we chose, not tested. The demo’s costs are made up (section 4). <span class="tag p" title="Formal label: Proposed">Our target</span></dd></div>
+            <div><dt>Who signs, and who carries the risk?</dt><dd>The job’s owner rules on each open item and signs. A separate check must pass on each ruling first. So the person who signs answers for the release. The software can only read data and write in a safe test area, within budgets and with an off switch. Nothing goes out unsigned (sections 3 and 8).</dd></div>
+            <div><dt>What about access and audit?</dt><dd>The software needs its own managed identity. That is a design need. For live questions, Google’s data agent already uses the asker’s own access<sup class="refs">[<a href="#s21" aria-label="Source 21">21</a>]</sup>. The warehouse enforces row and column rules<sup class="refs">[<a href="#s22" aria-label="Source 22">22</a>, <a href="#s23" aria-label="Source 23">23</a>]</sup>. Calls can be logged for audit<sup class="refs">[<a href="#s26" aria-label="Source 26">26</a>]</sup>. Whether auditors accept this is not confirmed (section 8). <span class="tag u" title="Formal label: Unconfirmed">Not checked</span></dd></div>
+            <div><dt>What is the test, and what fails it?</dt><dd>It runs 90 days, or longer if the two live runs need it. First come 10 days of setup, then 9 practice runs. Next come 3 sealed test runs with hidden mistakes. Last come 2 live runs with an audit and a surprise test. These fail the newest model on a job: a real wrong number sent out or a real missed item. So do two hidden mistakes signed, or a review taking over half the redo time. So do hours cut by less than half, or a data leak. So does a write outside its area, or a human fixing its work (section 9).</dd></div>
+            <div><dt>What is the evidence today?</dt><dd>Little: public building blocks, claims by makers, and one person’s usage counts. No source shows this working on company data jobs (section 6). <span class="tag nv" title="Formal label: Not verified">No public test found</span> Meta’s 75.4 percent score was run by Meta itself<sup class="refs">[<a href="#s6" aria-label="Source 6">6</a>]</sup>.</dd></div>
+            <div><dt>Isn’t this just because the Muse app was heavily advertised?</dt><dd>Possibly. A report says Meta’s own ad push “has likely played a role in its rapid adoption”<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>. How much is not confirmed. <span class="tag u" title="Formal label: Unconfirmed">Not checked</span> We use the chart only to show what a moment looks like. It says nothing about quality. Our test is whether checking beats redoing, not whether people adopt it (sections 2 and 9).</dd></div>
+          </dl>
+        </details>
+        <details class="tldr-more" id="tldr-agenda">
+          <summary>The 30-minute agenda</summary>
+          <div class="tbl tldr-agenda-wrap" tabindex="0" role="region" aria-label="Agenda for a 30-minute review">
+            <table class="tldr-agenda">
+              <caption>Agenda for a 30-minute review</caption>
+              <thead><tr><th scope="col" class="num">Minutes</th><th scope="col">Block</th><th scope="col">What</th></tr></thead>
+              <tbody>
+                <tr><td class="num">3</td><th scope="row">Opening</th><td>The Muse app’s moment, our guess for data, and what we do not claim (sections 1 to 3).</td></tr>
+                <tr><td class="num">12</td><th scope="row">Made-up example</th><td>The steps on two made-up jobs: invoices and a key-numbers report (section 4).</td></tr>
+                <tr><td class="num">5</td><th scope="row">Evidence and limits</th><td>Public building blocks, claims by makers, and one person’s counts. Not shown yet (sections 2 and 6).</td></tr>
+                <tr><td class="num">5</td><th scope="row">Test and ask</th><td>How a job passes or fails, and what we would claim (sections 9 and 12).</td></tr>
+                <tr><td class="num">5</td><th scope="row">Discussion</th><td>The likely questions above.</td></tr>
+                <tr><td class="num">30</td><th scope="row">Total</th><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="tldr-more" id="tldr-clicks">
+          <summary>Try the example, 12 minutes</summary>
+          <p class="note"><span class="tag o" title="Formal label: Own measurement">Our own count</span> We tested this path by driving the demo on the author’s computer. A script clicked every step in order, for both jobs. We ran it with normal motion and again with reduced motion, where the run ends at once. Every button was there and worked. The drill clock counts 600 seconds for a full redo. So the 20 percent bar is 120 seconds. Each opened row adds 2 seconds. Button names below are the demo’s own.</p>
+          <div class="tbl" tabindex="0" role="region" aria-label="Clicks in the demo, by step, with minutes (labels as they appear in the demo)">
+            <table class="tldr-clicks">
+              <caption>Clicks in the demo, by step, with minutes (labels as they appear in the demo)</caption>
+              <thead><tr><th scope="col">Step</th><th scope="col">Invoice preparation, 7 minutes</th><th scope="col">KPI pipeline, 5 minutes</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">1 Delegate</th><td>Pick <span class="ctl" data-act="pick">Invoice preparation</span>; <span class="ctl">Delegate to the crew</span> (0:30)</td><td><span class="ctl">Next job: KPI pipeline</span>; <span class="ctl">Delegate to the crew</span> (0:20)</td></tr>
+                <tr><th scope="row">2 Limits</th><td><span class="ctl">Next: Limits</span>; <span class="ctl">Try to write outside the sandbox</span> (0:40)</td><td><span class="ctl">Next: Limits</span> (0:10)</td></tr>
+                <tr><th scope="row">3 Leave it</th><td><span class="ctl">Next: Leave it</span>; <span class="ctl">Start the unattended run</span>, then <span class="ctl" data-act="if-running">Skip to the end</span>, if the run is still running (1:00)</td><td><span class="ctl">Next: Leave it</span>; <span class="ctl">Start the unattended run</span>, then <span class="ctl" data-act="if-running">Skip to the end</span>, if the run is still running (0:20)</td></tr>
+                <tr><th scope="row">4 Review</th><td><span class="ctl">Next: Review</span>; click <span class="ctl" data-act="figure">a dotted-underline figure</span>; read the badge labels (1:30)</td><td><span class="ctl">Next: Review</span>; the F/I re-derivation and its blind spots (0:40)</td></tr>
+                <tr><th scope="row">5 Rule, check, sign</th><td><span class="ctl">Next: Rule, check, sign</span>; <span class="ctl">Rule all as the evidence suggests</span>; <span class="ctl">Run all checks</span>; <span class="ctl">Sign as process owner</span> (1:30)</td><td><span class="ctl">Next: Rule, check, sign</span>; <span class="ctl">Rule all as the evidence suggests</span>; <span class="ctl">Run all checks</span>; <span class="ctl">Sign as process owner</span> (0:40)</td></tr>
+                <tr><th scope="row">6 Break it</th><td><span class="ctl">Next: Break it</span>; <span class="ctl">Process change</span>; <span class="ctl" data-expect="text:historical: signed under v1|button:Review Proof PR v2">Apply the change</span>: the signature retires and the unattended repair opens Proof PR v2 (1:50)</td><td><span class="ctl">Next: Break it</span>; <span class="ctl">Cold drill</span>; <span class="ctl">Start the drill: the clock starts</span>; <span class="ctl" data-act="flag" data-rows="K02 K03 K04 K06 K07 K08 K10 K11 K12 K13">Open evidence, then Flag as error</span>, row by row, on K02, K03, K04, K06, K07, K08, K10, K11, K12 and K13 (four carry no badge flag); <span class="ctl" data-expect="verdict:PASS">Finish: sign every unflagged row</span> within 100 seconds on the drill clock: expect PASS. Flagging only the badge-flagged rows scores KILL (2:50)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="tldr-more" id="tldr-terms">
+          <summary>Terms in plain words</summary>
+          <dl class="tldr-qa">
+            <div><dt>Proof PR</dt><dd>The finished job, sent for review like a code change. Each check’s result and evidence come with it (section 3).</dd></div>
+            <div><dt>Proof-Carrying Jobs</dt><dd>Our formal name for the pattern we call “Hand off. Check. Sign.” You hand off a whole repeating data job and get back a Proof PR. A person signs before anything goes out (section 3).</dd></div>
+            <div><dt>Oracle badge</dt><dd>A label on each check. It says how much of the work the check covers and who controls it (section 3).</dd></div>
+            <div><dt>Cold drill</dt><dd>A surprise test with hidden mistakes, for a checker who did not do the work (section 9).</dd></div>
+            <div><dt>Canary</dt><dd>Fake marker data that must never leave the safe test area. If it shows up outside, data leaked (section 8).</dd></div>
+            <div><dt>The labels</dt><dd>Each plain label here has a formal name on the full page. “Our guess” is Hypothesis. “Not checked” is Unconfirmed. “Meta’s own claim” is Vendor. “Our target” is Proposed. “No public test found” is Not verified. “Our own count” is Own measurement.</dd></div>
+            <div><dt>Three arms</dt><dd>The same job run three ways: the newest model, an older model and fixed rules. This shows whether the newest models matter (section 9).</dd></div>
+          </dl>
+        </details>
+        <p class="tldr-foot print-only">Proposal for review.<span class="print-url"> Page and numbered sources: https://caohy1988.github.io/research/proposals/muse-moment-data-agents/</span></p>
       </div>
 
       <div id="full" class="view">
@@ -395,14 +408,14 @@
       <section id="muse" aria-labelledby="h-muse">
         <h2 id="h-muse">2. What the Muse moment was, as we read it</h2>
         <h3 id="anchor">The anchor: the app that topped the store</h3>
-        <p>The Muse app, Meta’s consumer personal agent, reached No. 1 among free apps on Apple’s US App Store on <span class="nw">2026-09-18</span>, a week after launch<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>; by <span class="nw">2026-09-22</span> it ranked as the top free app, ahead of OpenAI’s ChatGPT<sup class="refs">[<a href="#s38" aria-label="Source 38">38</a>]</sup>; by <span class="nw">2026-09-30</span> it had a 12-day streak at the top of the US store and a Sensor Tower projection of 5 million downloads, amid a “massive advertising push”<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>. <span class="tag i">Independent</span> An independent tracker’s US snapshot, fetched <span class="nw">2026-10-01</span>, still listed it No. 1 in Top Free Overall and Top Free Productivity<sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup>; the tracker says its positions reflect Apple’s public charts, which we have not confirmed <span class="tag u">Unconfirmed</span>.</p>
+        <p>The Muse app, Meta’s consumer personal agent, reached No. 1 among free apps on Apple’s US App Store on <span class="nw">2026-09-18</span>, a week after launch<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>; by <span class="nw">2026-09-22</span> it ranked as the top free app, ahead of OpenAI’s ChatGPT<sup class="refs">[<a href="#s38" aria-label="Source 38">38</a>]</sup>; by <span class="nw">2026-09-30</span> it had a 12-day streak at the top of the US store and a Sensor Tower projection of 5 million downloads, amid a “massive advertising push”<sup class="refs">[<a href="#s2" aria-label="Source 2">2</a>]</sup>. <span class="tag i">Independent</span> An independent tracker’s US snapshot, fetched <span class="nw">2026-10-01</span>, listed it No. 1 in Top Free Overall and Top Free Productivity<sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup>; the tracker says its positions reflect Apple’s public charts, which we have not confirmed <span class="tag u">Unconfirmed</span>.</p>
         <p><strong>What the rank does not say.</strong> A reported free-app chart position says nothing about agent quality or enterprise value, and the Muse app’s run came amid heavy advertising, so the generic-breakout reading (How to read this) stays open. We use the rank only as the anchor for what a moment looks like, never as evidence for the thesis. The author’s own counts below also show that Muse Code is not the author’s most-used agent.</p>
         <div class="tbl" tabindex="0" role="region" aria-label="Traits of the app as we read them, and the enterprise-data equivalent: our mapping Own derivation Hypothesis">
           <table class="anchor-map">
             <caption>Traits of the app as we read them, and the enterprise-data equivalent: our mapping <span class="tag d">Own derivation</span> <span class="tag h">Hypothesis</span></caption>
             <thead><tr><th scope="col">The consumer app</th><th scope="col">The enterprise-data equivalent</th></tr></thead>
             <tbody>
-              <tr><th scope="row">Little setup: download, connect accounts and ask; the store copy says “Link your email, calendar”<sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup>. <span class="tag v">Vendor</span></th><td>No identity or access setup for the asker: the platform team sets up a governed agent identity and read-only seats once, with no user impersonation (section 8); the owner approves a manifest, and setup must be projected to repay within 12 runs (section 9).</td></tr>
+              <tr><th scope="row">Little setup, our own estimate <span class="tag u">Unconfirmed</span>: download, connect accounts and ask; the store copy, as relayed by the tracker, says “Link your email, calendar”<sup class="refs">[<a href="#s39" aria-label="Source 39">39</a>]</sup>. <span class="tag v">Vendor</span></th><td>No identity or access setup for the asker: the platform team sets up a governed agent identity and read-only seats once, with no user impersonation (section 8); the owner approves a manifest, and setup must be projected to repay within 12 runs (section 9).</td></tr>
               <tr><th scope="row">Anyone can ask, with no training: the author’s assumption. <span class="tag u">Unconfirmed</span></th><td>Any owner of a qualifying job can hand it over whole, not just analysts.</td></tr>
               <tr><th scope="row">It acts for the user, but for sensitive actions Meta says it “seeks users’ approval before proceeding on their behalf”<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>. <span class="tag v">Vendor</span></th><td>Approval before any consequential action: nothing is released unsigned; the process owner rules and signs after a separate check passes on each ruling (Proof-Carrying Jobs, section 3).</td></tr>
               <tr><th scope="row">It plugs into services the user already has, such as email and calendars<sup class="refs">[<a href="#s37" aria-label="Source 37">37</a>]</sup>. <span class="tag v">Vendor</span></th><td>It plugs into governed sources already in the warehouse, under the warehouse’s row and column policies (section 8).</td></tr>
@@ -447,6 +460,7 @@
         <h2 id="h-pattern">3. The thesis and the pattern: Proof-Carrying Jobs</h2>
         <p class="thesis"><strong>Thesis, a hypothesis under test.</strong> The Muse moment for enterprise data agents is the data job you can hand off and check cold. Muse is not the author’s most-used agent; its lesson is narrower: work left unattended inside hard limits that lands as a PR with tests (in the author’s use, only 18 of 119 Muse sessions and two small pull requests, plus vendor docs; own measurement), and checking could cost less than doing; that cost advantage is <span class="tag u">Unconfirmed</span>. The data counterpart: a process owner hands a whole recurring data job to an agent crew working unattended inside read-only seats and budgets, and gets back a Proof PR checked against history, walled-off re-derivation, invariants and outside evidence, each badge labelled by how far the builder controls it, I (separate), S (shares a source) or O (self-check), and by its coverage. A human signs. It counts only if a reviewer who did not do the work catches planted errors faster than redoing the job. Frontier dependence and generality are hypotheses the pilot can refute, not establish. <span class="tag h">Hypothesis</span></p>
         <p class="scope"><strong>Scope clause.</strong> Only jobs where an item-level oracle covers the current run’s whole denominator, new cases included; changed rules only once ratified and checked; claims stop at each row’s “certifies” cell (section 5). Coverage is measured per run: an oracle that cannot reach every item is P for that run, even if the unreached items are withheld; withholding counts toward the 5% cap but never restores F. A run with no F cell is out of scope for the claim and, if scored, misses a pass bar. Elsewhere, no claim.</p>
+        <p>Tests alone cannot show a data output is right for this run, so the job lands as a Proof PR whose oracle badges add checks; checking is meant to cost less than redoing, and the cold drill tests whether it does (section 9). <span class="tag h">Hypothesis</span></p>
         <p><strong>The Proof PR</strong> is one reviewable change per run: executable job, outputs, source-fixed denominator, replayable log, and per-oracle badges stating the named checks passed, coverage, independence and audit bound. A process change in a builder input or the job’s rules makes a new version, with a new denominator, fresh checks and a fresh signature; the old signature, badges and audit results lapse, shown as historical, until the new version is checked. A change confined to lagging evidence, such as the bank’s remittance file, only marks that badge stale and never gates release. <strong>A badge means “passed these named checks”</strong>; it is not a correctness claim, and gaps are never green.</p>
         <ol>
           <li><strong>Delegate:</strong> the job, run unit, materiality and a source-fixed denominator.</li>
@@ -3981,7 +3995,7 @@
                 <tr><th scope="row">Migration, per job: tables, consumer queries (legacy code, logs)</th><td>Dual-run <span class="cov F" role="img" aria-label="F, full: every current item" title="F, full: every current item">F</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span></td><td>Equivalence proofs <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span></td><td>Checksums <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind O" role="img" aria-label="O, self-check" title="O, self-check">O</span></td><td>Downstream exports <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span></td><td>Equivalence only; legacy bugs, changed rules</td></tr>
                 <tr><th scope="row">Incident recovery, per incident class: assets in defect window (lineage, raw event files, device map)</th><td>Pre-incident state <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span></td><td>Raw recompute <span class="cov F" role="img" aria-label="F, full: every current item" title="F, full: every current item">F</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span> if lineage complete</td><td>Untouched partitions <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind O" role="img" aria-label="O, self-check" title="O, self-check">O</span></td><td>Source-system counts <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind I" role="img" aria-label="I, independent: separate sources" title="I, independent: separate sources">I</span></td><td>Restoration; assets lineage misses, faults in raw events or the device map</td></tr>
                 <tr><th scope="row">Report pack, per pack: cells per entity (workbooks, cell template, mappings, adjustment journals, hierarchies)</th><td>Archived packs <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span></td><td>Ledger control totals <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind I" role="img" aria-label="I, independent: separate sources" title="I, independent: separate sources">I</span>; all cells via shared template and mappings <span class="cov F" role="img" aria-label="F, full: every current item" title="F, full: every current item">F</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span></td><td>Cross-footing <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind O" role="img" aria-label="O, self-check" title="O, self-check">O</span></td><td>Filed figures <span class="cov L" role="img" aria-label="L, late: after sign-off" title="L, late: after sign-off">L</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span></td><td>Rebuilt cells; judgment overlays, template, mapping, journal or hierarchy faults</td></tr>
-                <tr><th scope="row">Invoicing, per billing run: contracts, amendments, usage events, zero-billed too (billing config, invoices, usage extracts)</th><td>Closed periods <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span></td><td>Signed contracts, raw meter <span class="cov F" role="img" aria-label="F, full: every current item" title="F, full: every current item">F</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span></td><td>Sub-ledger ties <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind O" role="img" aria-label="O, self-check" title="O, self-check">O</span></td><td>Remittances <span class="cov L" role="img" aria-label="L, late: after sign-off" title="L, late: after sign-off">L</span><span class="slash" aria-hidden="true">/</span><span class="ind I" role="img" aria-label="I, independent: separate sources" title="I, independent: separate sources">I</span></td><td>Terms on metered usage; meter accuracy</td></tr>
+                <tr><th scope="row">Invoicing, per billing run: contracts and amendments, with usage events priced within each contract item, zero-billed too (billing config, invoices, usage extracts)</th><td>Closed periods <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span></td><td>Signed contracts, raw meter <span class="cov F" role="img" aria-label="F, full: every current item" title="F, full: every current item">F</span><span class="slash" aria-hidden="true">/</span><span class="ind S" role="img" aria-label="S, shared: reads a builder source" title="S, shared: reads a builder source">S</span></td><td>Sub-ledger ties <span class="cov P" role="img" aria-label="P, partial: totals, precedent or some items" title="P, partial: totals, precedent or some items">P</span><span class="slash" aria-hidden="true">/</span><span class="ind O" role="img" aria-label="O, self-check" title="O, self-check">O</span></td><td>Remittances <span class="cov L" role="img" aria-label="L, late: after sign-off" title="L, late: after sign-off">L</span><span class="slash" aria-hidden="true">/</span><span class="ind I" role="img" aria-label="I, independent: separate sources" title="I, independent: separate sources">I</span></td><td>Terms on metered usage; meter accuracy</td></tr>
               </tbody>
             </table>
           </div>
@@ -4013,12 +4027,12 @@
       </section>
 
       <section id="transfer" aria-labelledby="h-transfer">
-        <h2 id="h-transfer">7. What transfers from Muse, and what does not</h2>
+        <h2 id="h-transfer">7. What transfers from Muse Code, and what does not</h2>
         <div class="bleed">
-          <div class="tbl" tabindex="0" role="region" aria-label="Muse traits, sourced, and their data-job counterparts; the transfer verdicts are our judgment">
+          <div class="tbl" tabindex="0" role="region" aria-label="Muse Code traits, sourced, and their data-job counterparts; the transfer verdicts are our judgment">
             <table class="transfer">
-              <caption>Muse traits, sourced, and their data-job counterparts; the transfer verdicts are our judgment</caption>
-              <thead><tr><th scope="col">Muse trait</th><th scope="col">Data-job counterpart</th><th scope="col">Transfers?</th></tr></thead>
+              <caption>Muse Code traits, sourced, and their data-job counterparts; the transfer verdicts are our judgment</caption>
+              <thead><tr><th scope="col">Muse Code trait</th><th scope="col">Data-job counterpart</th><th scope="col">Transfers?</th></tr></thead>
               <tbody>
                 <tr><th scope="row">Headless, scriptable runs<sup class="refs">[<a href="#s3" aria-label="Source 3">3</a>]</sup></th><td>Unattended crew runs per run unit, scheduled and budgeted.</td><td><span class="verdict yes">Yes</span></td></tr>
                 <tr><th scope="row">Replayable event log<sup class="refs">[<a href="#s1" aria-label="Source 1">1</a>]</sup></th><td>An append-only log in every Proof PR. It proves process, not truth.</td><td><span class="verdict yes">Yes</span> <span class="note">(with limits)</span></td></tr>
@@ -4103,7 +4117,7 @@
         <p><strong>Audit bound</strong> <span class="tag d">Own derivation</span>. Zero errors in 300 items gives under 1% at 95% only for simple random items<sup class="refs">[<a href="#s33" aria-label="Source 33">33</a>]</sup>. For independent uniform draws of value units from a nonnegative recorded frame in H strata, with a taint of at most 100% per unit (overstatement of recorded value only), zero errors bound the contaminated recorded value at 95% by <code>Σ<sub>h</sub> V<sub>h</sub> × ln(20H) / n<sub>h</sub></code>, where V<sub>h</sub> is a stratum’s recorded value and n<sub>h</sub> its draws: the rule of three per stratum, the 5% risk split across strata by a union bound (ln 20 is about 3). Omissions and zero-valued items are checked separately, against the source-fixed denominator; understatement beyond recorded value is not bounded; any observed error changes the computation. A wider monetary guarantee is <span class="tag u">Unconfirmed</span>.</p>
         <h3>Title at D90</h3>
         <p><strong>Breadth rule:</strong> at least 5 of the 20 largest jobs and a quarter of their hours qualify. The count stops one giant job carrying the claim; the hours stop five trivial ones. The share describes this sponsor only, and qualifying is not succeeding.</p>
-        <p>Rules apply per instance; the first match sets that instance’s verdict. Comparable cost means within 1.25 times the frontier arm’s total on that instance, setup amortized over 12 runs.</p>
+        <p>Rules apply per instance; the first match sets that instance’s verdict. Comparable cost means within 1.25 times the frontier arm’s total on that instance, setup amortized over 12 runs. A moment or protocol verdict names the checkable hand-off at one sponsor; it claims no adoption.</p>
         <ol>
           <li>The frontier arm misses a pass bar there: no claim, and its subtitle names the missed bar.</li>
           <li>The rules workflow passes at comparable cost: automation, titled “No Muse moment for {S}: conventional automation, checked the same way, does as well.”</li>
@@ -4145,7 +4159,7 @@
 
       <section id="dissent" aria-labelledby="h-dissent">
         <h2 id="h-dissent">11. Alignment record, resolved dissents and dropped ideas</h2>
-        <p><strong>Alignment record</strong> <span class="tag o">Own measurement</span> (the author’s log; no public receipt). Five rounds of alignment with two independent AI model reviewers (not named here) ended with both replying AGREE at round 5; the last objection, on titles, came at round 4. Agreement is not validation: only the pilot can test the thesis. Several rounds of blind page review followed (own account), repeated after each change; the fixes tighten the agreed wording, which is not yet re-aligned, and no approval is claimed here. The main dissents and their resolutions:</p>
+        <p><strong>Alignment record</strong> <span class="tag o">Own measurement</span> (the author’s log; no public receipt). Five rounds of alignment with two independent AI model reviewers (not named here) ended with both replying AGREE at round 5; the last objection, on titles, came at round 4. Agreement is not validation: only the pilot can test the thesis. Several rounds of blind page review followed (own account), repeated after each change; the anchor, its mapping and the rewritten Quick read were added after alignment, and the aligned reviewers have not seen them; no approval is claimed here. The main dissents and their resolutions:</p>
         <ul>
           <li><strong>Capability claims:</strong> frontier dependence and generality are hypotheses the pilot can refute, not establish.</li>
           <li><strong>Omissions and badges:</strong> a source-fixed denominator; badges certify named checks only; a real wrong release or omission kills.</li>
@@ -4269,6 +4283,10 @@
           if (!el) return null;
           return { i: panels[1].contains(el) ? 1 : panels[0].contains(el) ? 0 : current(), el: el };
         }
+        function markSource(el) {
+          [].forEach.call(document.querySelectorAll('ol.sources li.src-hit'), function (r) { r.classList.remove('src-hit'); });
+          if (el && el.matches && el.matches('ol.sources li')) el.classList.add('src-hit');
+        }
         function focusEl(el) {
           if (!el.hasAttribute('tabindex') && !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) el.setAttribute('tabindex', '-1');
           try { el.focus({ preventScroll: true }); } catch (err) { el.focus(); }
@@ -4277,6 +4295,7 @@
           var t = target(id);
           if (!t) return false;
           show(t.i);
+          markSource(t.el);
           if (scroll && t.el) requestAnimationFrame(function () {
             t.el.scrollIntoView();
             if (focus) focusEl(t.el === list ? panels[t.i] : t.el);
