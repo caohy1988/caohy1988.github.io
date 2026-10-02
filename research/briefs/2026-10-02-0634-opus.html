@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-10-02 · 6:34 AM PT · Opus 5.5</title>
+  <meta name="description" content="Catch-up brief: Industry NEW OpenAI SDK session traces as OTLP JSON, Pydantic AI 2.53.0 ToolCallJudge, Phoenix DECISION span kind, Cloudflare Agents 0.25.0; Academy NEW Argo-Bench, DeFA, WebArena-Lite audit.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-02-0634-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 6:34 AM PT · catch-up after Mac outage · fresh-list path · effort high</p>
+    <article>
+<h1>Field Brief — 2026-10-02-0634: OpenAI's hosted agents return their own traces as OTLP, &quot;decision&quot; becomes a span kind, and a warehouse benchmark puts a price on agent BigQuery scans</h1>
+<p><strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>) · effort = <strong>high</strong>, per the 2026-09-29 lock
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, the catalog and the push.
+<strong>Slot:</strong> 2026-10-02-0634 (6:34 AM PT, Fri Oct 2). This is a <strong>catch-up run after the Mac outage</strong>. The Mac was offline from about 23:30 PT Oct 1 to about 06:59 PT Oct 2, so the 18:34 (Oct 1) and 00:34 (Oct 2) briefs never ran. The label stays <strong>0634</strong>, and the missed slots are not backfilled as separate briefs.
+<strong>Window:</strong> everything since the last published brief, <code>2026-10-01-1234</code>. That is about 18.5 hours, from 19:34Z Oct 1 to about 14:05Z Oct 2, or three slots of material.
+<strong>Collector gap:</strong> the last collected pack is Muse 2232, stamped 22:45 PT Oct 1. <strong>From 22:45 PT Oct 1 to 06:59 PT Oct 2, only my own registry, GitHub and arXiv sweep covers the window.</strong> Everything in that stretch below comes from that sweep.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>Industry NEW (4):</strong></li>
+<li><strong>OpenAI SDKs (<code>openai</code> Python 3.23.0, Node 7.26.0 and 7.27.0):</strong> a new beta endpoint, <code>client.beta.agents.sessions.traces.list</code>, returns each turn of a hosted agent session as an <strong>OTLP JSON <code>ExportTraceServiceRequest</code></strong>. The SDK docstring warns that only data already published is returned and later updates are not awaited. A major model vendor now exports its hosted agents' traces in a format BQAA can ingest directly. It also says outright that those traces can be incomplete when read.</li>
+<li><strong>Pydantic AI v2.53.0:</strong> a <strong>high-severity</strong> fix (GHSA-6fqq-452j-qhrp) for streamed requests that kept concurrency slots and could block every request sharing a limiter. It also ships <strong><code>ToolCallJudge</code></strong>, a second model that rules allow / block / ask on a tool call before it runs. It blocks when unsure by default and emits a <code>judge tool call</code> span with a verdict attribute.</li>
+<li><strong>Arize Phoenix 20.19.0 + OpenInference semconv 0.1.40:</strong> a <strong><code>DECISION</code> span kind</strong> for calls to decision models that score or select among options given in the request. Both mark it experimental.</li>
+<li><strong>Cloudflare Agents <code>agents@0.25.0</code> / <code>@cloudflare/think@0.20.0</code></strong> (released overnight, found by my own sweep): terminal chat frames now carry outcomes and user message IDs. A failed agent-tool child is reported as failed even if it was evicted before recording the failure. A tool call keeps its input when the approval request arrives before the input finishes streaming.</li>
+<li><strong>Progress (4):</strong></li>
+<li><strong>Codex 0.160.0</strong> (stable): opt-in Guardian review can retrieve earlier user instructions and use handoff context.</li>
+<li><strong>Braintrust JS 3.36.0 / Python 0.44.0:</strong> span provenance for the Temporal and OpenAI Agents SDK integrations.</li>
+<li><strong>LangSmith 0.14.3 / JS 0.10.7:</strong> a typed agent address object, and OTel prompt/completion exported as JSON strings.</li>
+<li><strong>Opik 2.2.88:</strong> Gemini tool-use prompt tokens are counted and priced as input.</li>
+<li><strong>Academy NEW (3):</strong> all are full PDF reads.</li>
+<li><strong>Argo-Bench (<code>2610.02122</code>):</strong> a 235-table, 7.49B-row ERP warehouse, run on BigQuery. The best model solves only 34.8% of tasks. Agents scanned 986 TiB, which is <strong>$6,160 of BigQuery against $14,502 of model API</strong> (Appendix K). For the cheapest model, the warehouse is 92% of the cost of a run.</li>
+<li><strong>DeFA (<code>2610.01256</code>):</strong> dependency-guided failure attribution. Exact-step accuracy on Who&amp;When is 52.7% against the best baseline's 43.5% (Table 1). Removing only the propagation edges drops it to 40.2% (Table 4).</li>
+<li><strong>WebArena-Lite audit (<code>2610.01491</code>):</strong> human review recovers 5.45 to 8.49 points of success that the automatic evaluator missed (Table 1). Seven failed runs claimed 100% progress in their own memory, but none of the 40 failures that ran out of steps reached 100% verified progress (Table 7).</li>
+<li><strong>The theme:</strong> traces are becoming something vendors <strong>hand you</strong> (OpenAI OTLP export) and something you <strong>query</strong> (LiteLLM's unreleased trace-SQL work). The trace vocabulary also gains <strong>judgments</strong>: a decision span kind and a judge verdict span. BQAA should model both, and should treat &quot;trace read before it was complete&quot; as a real state.</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<h3>I1 (NEW). <a href="https://github.com/openai/openai-python/releases/tag/v3.23.0">OpenAI SDKs <code>openai</code> 3.23.0 (Python) and 7.26.0 / 7.27.0 (Node): hosted agent sessions return their traces as OTLP JSON</a></h3>
+<p><strong>What shipped</strong> (GitHub releases; Python v3.23.0 at 23:02:59Z Oct 1, PyPI <code>openai</code> 3.23.0 at 23:03:50Z; Node v7.26.0 at 21:01:39Z and v7.27.0 at 23:01:43Z, npm <code>openai@7.27.0</code> is <code>latest</code>):</p>
+<ul>
+<li><strong>Session traces API</strong> (<a href="https://github.com/openai/openai-python/pull/4001">openai-python#4001</a>; Node <a href="https://github.com/openai/openai-node/pull/2845">#2845</a>): sync and async <code>client.beta.agents.sessions.traces.list(...)</code>, with cursor pagination (<code>after</code>, <code>limit</code> 1–100, default 20) and <code>order</code> (default <code>desc</code>). Each result is a <code>SessionTrace</code> with:</li>
+<li><code>object: &quot;agent.session.trace&quot;</code>;</li>
+<li><code>id</code>: the root turn id, which is also the pagination anchor;</li>
+<li><code>session_id</code> and <code>created_at</code>;</li>
+<li><code>otlp</code>: &quot;An OTLP JSON ExportTraceServiceRequest containing resourceSpans. <strong>Only currently published data is returned; later trace updates are not awaited.</strong>&quot; (quoted from <code>src/openai/types/beta/agents/sessions/session_trace.py</code> at the tag).</li>
+<li><strong>Agents developer experience in the same trains:</strong></li>
+<li>typed answers parsed from session streams (#4007 / Node #2853);</li>
+<li>final output collected from beta Agents streams;</li>
+<li>typed application actions or functions exposed as agent tools (#4006 / Node #2852);</li>
+<li>staging files and downloading turn artifacts (#4009 / Node 7.27.0 #2855).</li>
+<li><strong>Other changes:</strong></li>
+<li>a <code>container_size</code> tier (<code>small</code> / <code>medium</code> / <code>large</code>) for hosted agent environments;</li>
+<li>a <code>flex_unavailable</code> turn error code;</li>
+<li>Realtime translation client secrets;</li>
+<li>an eval-run cancellation endpoint fix.</li>
+</ul>
+<p><strong>Related:</strong> <code>openai-agents-python</code> <strong>v0.23.0</strong> was tagged on GitHub (01:08:23Z Oct 2). It scopes function-tool approvals to their owning agent (#5144), redacts default tool-failure details and streaming tracebacks (#5112, #5121), and respects sensitive-trace capture for model metadata (#5129). <strong>PyPI still serves 0.22.3</strong>, so I treat it as a note, not a ranked release (see Unconfirmed).</p>
+<p><strong>BQAA read:</strong></p>
+<ol>
+<li><strong>This is a first-party OTLP export for a hosted agent runtime.</strong> BQAA can ingest it as-is: one <code>ExportTraceServiceRequest</code> per root turn, keyed by <code>session_id</code>. A BigQuery loader for &quot;vendor-hosted agent traces&quot; needs no custom schema beyond OTLP.</li>
+<li><strong>The trace can be partial when read.</strong> OpenAI says later updates are not awaited. An ingester polling this endpoint must handle a root turn arriving twice with more spans the second time. It should upsert by <code>(session_id, root turn id)</code> and keep a &quot;complete as of&quot; timestamp, rather than append and double-count.</li>
+<li><strong>The span attribute vocabulary inside <code>otlp</code> is not documented in the SDK.</strong> Whether it follows OTel GenAI semconv is unknown (see Unconfirmed). Map it once, and then you have the first like-for-like comparison of a vendor-hosted agent and a self-hosted ADK agent.</li>
+</ol>
+<h3>I2 (NEW). <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.53.0">Pydantic AI v2.53.0: high-severity concurrency-slot fix (GHSA-6fqq-452j-qhrp), <code>ToolCallJudge</code> with verdict spans, <code>SystemOneModel</code>, managed subagents</a></h3>
+<p><strong>What shipped</strong> (GitHub release 02:52:26Z Oct 2; PyPI <code>pydantic-ai</code> 2.53.0 at 03:17:54Z and <code>pydantic-ai-slim</code> at 03:17:58Z):</p>
+<ul>
+<li><strong>Security, <a href="https://github.com/pydantic/pydantic-ai/security/advisories/GHSA-6fqq-452j-qhrp">GHSA-6fqq-452j-qhrp</a></strong> (repo advisory published 03:19:39Z; severity high; affects <code>&gt;= 2.10.0, &lt; 2.53.0</code>; no CVE id):</li>
+<li><strong>The bug:</strong> a streamed request through <code>ConcurrencyLimitedModel</code> / <code>limit_model_concurrency</code> could keep its slot when the slot was released on a different task. This happened after an early exit, and also after fully consuming <code>stream_text()</code> with default debouncing. &quot;Repeated streams could then block every request sharing the limiter.&quot;</li>
+<li><strong>What the fix also changes:</strong> a wrapper that shares a limiter with its agent now raises <code>UserError</code>, and <code>acquire()</code> takes a slot on every call.</li>
+<li><strong><a href="https://github.com/pydantic/pydantic-ai/pull/9041"><code>ToolCallJudge</code></a></strong> (in <code>pydantic_ai_harness.tool_call_judge</code>): a second model answers one risk question per selected tool call, before the tool body runs.</li>
+<li><strong>Verdicts:</strong> <code>yes</code> blocks, <code>no</code> allows, and <code>unsure</code> follows <code>on_uncertain</code>, which <strong>defaults to <code>block</code></strong>. <code>ask</code> turns the call into a human approval.</li>
+<li><strong>What the model sees:</strong> a blocked call returns a <code>denial_message</code> to the model. The run continues; the block is not an error.</li>
+<li><strong>Durable runs:</strong> under Temporal, DBOS or Prefect the verdict is checkpointed, so a replay reuses it and the judge is billed once.</li>
+<li><strong>Observability</strong> (README at the tag): every judged call opens a <strong><code>judge tool call</code> span</strong> with attributes <code>tool_call_judge.tool</code>, <code>.tool_call_id</code>, <code>.model_result</code> (yes / no / unsure / error), <code>.verdict</code> (allow / block / ask), <code>.confidence</code>, and <code>.error.type</code>. <code>.arguments</code> is recorded only when <code>trace_include_content</code> is on. The judge's own prompt is deliberately not instrumented, but its usage is added to the outer run's usage.</li>
+<li><strong>Also in this release:</strong></li>
+<li><code>SystemOneModel</code> runs decision models (CLM, Laya) over a <code>/v1/systemone</code> API (#8942);</li>
+<li>managed subagents in CLAI2, loading Claude Code (Markdown) and Codex (TOML) agent definitions (#9573);</li>
+<li><code>repair_messages</code> exposes the message-history repair pipeline (#8370);</li>
+<li>streamed and complete <code>ModelResponse</code> objects are now identical for OpenAI Responses, OpenAI Chat and OpenRouter (#9417, #9418);</li>
+<li>Google grounding search queries are counted in <code>usage</code> (#8891).</li>
+</ul>
+<p><strong>Why NEW and not Progress on <code>pydantic-ai-v2-52-0-…</code>:</strong> it combines a high-severity advisory with a new pre-execution judgment primitive that has its own span contract. Both are product-level.</p>
+<p><strong>BQAA read:</strong></p>
+<ol>
+<li><strong><code>judge tool call</code> is a ready-made schema for &quot;a model decided whether a tool could run&quot;.</strong> BQAA can lift it as-is: verdict, raw model result, confidence and error type. Note that <code>unsure → block</code> is the default. A dashboard that counts blocks without splitting <code>model_result=unsure</code> from <code>yes</code> will overstate how risky the agent's calls were.</li>
+<li><strong>The judge's tokens land in the parent run's usage.</strong> Cost per run now includes the judge's spend, with no separate span for its LLM call. If BQAA attributes cost by LLM span, judged runs will look more expensive than their LLM spans explain. Attribute judge cost to the <code>judge tool call</code> span instead.</li>
+<li><strong>The GHSA is an operations signal BQAA can detect:</strong> rising queue wait on a shared limiter with flat request volume. That is a useful saturation alert generally, not just for this bug.</li>
+</ol>
+<h3>I3 (NEW). <a href="https://github.com/arize-ai/phoenix/releases/tag/arize-phoenix-v20.19.0">Arize Phoenix 20.19.0 and OpenInference semantic conventions 0.1.40: a <code>DECISION</code> span kind</a></h3>
+<p><strong>What shipped</strong> (Phoenix GitHub release 22:59:10Z Oct 1, PyPI <code>arize-phoenix</code> 20.19.0 at 23:04:53Z; <code>openinference-semantic-conventions</code> 0.1.40 on PyPI 02:30Z Oct 1, now 0.1.41; npm <code>@arizeai/openinference-semantic-conventions</code> is at 2.14.0):</p>
+<ul>
+<li><strong><a href="https://github.com/Arize-ai/phoenix/pull/16657">Phoenix #16657</a></strong> wires <code>DECISION</code> through the whole platform: the backend enum, the GraphQL and REST span-kind filters, the PXI assistant prompts, the CLI <code>--span-kind</code> option, icons and docs. The PR defines the kind as &quot;a call to a decision model that scores or selects among candidate options supplied in the request rather than generating free-form text.&quot;</li>
+<li><strong>It is explicitly experimental:</strong> &quot;There are no decision-specific attributes or cards yet and no decision-model provider is fully supported.&quot;</li>
+<li><strong>Also in this release:</strong> datagen sends each recorded application to its own project (#16682).</li>
+</ul>
+<p><strong>BQAA read:</strong> the same day, Pydantic AI shipped <code>SystemOneModel</code> (I2), and Vercel has an open PR renaming <code>experimental_evaluate</code> to <code>experimental_decide</code> (<a href="https://github.com/vercel/ai/pull/21935">vercel/ai#21935</a>, open draft, WATCH). Router, classifier and judge calls are getting their own span kind, separate from <code>LLM</code>. BQAA should keep <code>span_kind</code> an open string and not an enum. It should also not roll DECISION spans into LLM token or cost charts until the attributes settle. Today a DECISION span has no defined attributes, so any &quot;decision analytics&quot; would be guessing.</p>
+<h3>I4 (NEW). <a href="https://github.com/cloudflare/agents/releases/tag/agents%400.25.0">Cloudflare Agents <code>agents@0.25.0</code> and <code>@cloudflare/think@0.20.0</code>: outcome-carrying terminal frames, evicted-child failures reported, approval-before-input fixed</a></h3>
+<p><strong>What shipped</strong> (GitHub releases 12:30Z Oct 2; npm <code>agents@0.25.0</code> at 12:33:20Z and <code>@cloudflare/think@0.20.0</code> at 12:32:18Z). This landed in the collector gap and was found by my own sweep.</p>
+<ul>
+<li><strong>Lifecycle (minor, breaking):</strong> native RPC calls to async Agent and Think methods now start lifecycle initialization first. Agents must be addressed by name, because raw ids from <code>newUniqueId()</code> and <code>idFromString()</code> now fail their first async RPC (#2005).</li>
+<li><strong>Outcome integrity:</strong></li>
+<li>Terminal chat frames carry outcomes and user message ids, and <code>useAgentChat</code> gains <code>onTurnEnd</code> (#2378).</li>
+<li>A WebSocket close before the final <code>done</code> frame now shows an <strong>error</strong> instead of a truncated answer presented as complete (#2019).</li>
+<li>A failed agent-tool child is reported as failed even when it was evicted before recording the failure (#2390).</li>
+<li><strong>Approval integrity:</strong> a tool call keeps its input when its approval request arrives before the input finishes streaming (#2391).</li>
+<li><strong>Event volume:</strong> <code>runAgentTool({ eventDelivery: &quot;terminal&quot; })</code> forwards only lifecycle, progress and milestone events (#2364).</li>
+<li><strong>Experimental:</strong> a pi harness hosted in a Durable Object, and Workers AI / AI Gateway providers for the AI SDK and pi-ai.</li>
+</ul>
+<p><strong>BQAA read:</strong> two of these fixes describe failure modes BQAA would otherwise record wrongly. <strong>A truncated stream shown as a completed answer</strong> and <strong>an evicted child whose failure was never written</strong> both produce traces that look successful. BQAA should treat a turn without a terminal outcome as <code>outcome=unknown</code>, not success. <code>eventDelivery: &quot;terminal&quot;</code> means some Cloudflare agent-tool traces will now be lifecycle-only by design, so missing intermediate spans are not a data-loss signal for them.</p>
+<h3>Progress</h3>
+<ul>
+<li><strong>→ <code>openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks</code>: <a href="https://github.com/openai/codex/releases/tag/rust-v0.160.0">Codex rust-v0.160.0</a></strong> (stable, 20:19:13Z Oct 1; npm <code>@openai/codex</code> <code>latest</code> = 0.160.0).</li>
+<li>Opt-in Guardian reviews can retrieve earlier user instructions and include agent-handoff context (#49036, #49057).</li>
+<li>Analytics requests are attributed to each thread's product SKU (#49117).</li>
+<li>Lifecycle extensions are notified of compaction usage limits and see original error details (#49097, #49138).</li>
+<li>Subagents keep environments that are still starting (#49075).</li>
+<li>It is a maintenance line cut from a frozen alpha, released after the 0.161 alphas. 0.162.0-alpha.1 through alpha.7 followed (22:57Z Oct 1 to 13:48Z Oct 2), all title-only.</li>
+<li><strong>→ <code>braintrust-js-3-35-0-onspanexport-multimodal-dataset-snapshot-fix</code>: <a href="https://github.com/braintrustdata/braintrust-sdk/releases/tag/braintrust%403.36.0">braintrust@3.36.0</a></strong> (20:40:31Z Oct 1; npm 20:48Z) with <code>@braintrust/otel@1.0.2</code>, <code>@braintrust/temporal@1.0.1</code> and <code>@braintrust/openai-agents@0.1.7</code>, plus <strong><a href="https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.44.0">Python py-sdk-v0.44.0</a></strong> (PyPI 20:49:32Z).</li>
+<li>Span provenance for the Temporal and OpenAI Agents SDK integrations (#2518).</li>
+<li>Span customizer enhancements.</li>
+<li>The Claude Agent SDK integration records verbatim prompt mode (#819).</li>
+<li>The Agno integration adds a cancellation stage to metadata (#822).</li>
+<li>Projects can be created inside project groups.</li>
+<li><strong>→ <code>langsmith-sdk-v0-14-0-agent-identity-otel-finish-reasons</code>: <a href="https://github.com/langchain-ai/langsmith-sdk/releases/tag/v0.14.3">LangSmith SDK v0.14.3</a></strong> (PyPI 23:57:40Z Oct 1; npm <code>langsmith@0.10.7</code> 00:03:17Z Oct 2).</li>
+<li>Agent addressing is sent as a typed address object, and JS gains an <code>address()</code> handle (#3635, #3604).</li>
+<li>Python exports OTel prompt/completion as JSON strings (#3636).</li>
+<li>JS ends traced runs when a returned <code>ReadableStream</code> errors (#3633).</li>
+<li><strong>→ <code>opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier</code>: <a href="https://github.com/comet-ml/opik/releases/tag/2.2.88">Opik 2.2.88</a></strong> (13:34:29Z Oct 2, own sweep).</li>
+<li>The SDK counts Gemini <code>tool_use_prompt_tokens</code> in prompt tokens (#8668), and the backend prices them as input (#8689). Before this, Gemini tool-use runs were under-costed.</li>
+<li>Annotation-queue automation is on by default (#8687).</li>
+<li>Azure OpenAI Haystack components are recorded as <code>provider=azure</code> (#8672).</li>
+</ul>
+<h3>Notes (below card bar)</h3>
+<ul>
+<li><strong>Langfuse v4.50.0</strong> (10:13Z Oct 2, own sweep): evaluators show seven-day execution health. Read-side trace, observation and score metadata are typed as objects (#18122). Below bar.</li>
+<li><strong>LiteLLM:</strong> only <strong>v1.105.0-dev.2</strong> (prerelease, 08:33Z Oct 2). Its notes include an agent-traces tab, OTLP ingestion ported to the new trace foundation, and ClickHouse rollup fixes. Merged but unreleased in window:</li>
+<li><code>litellm.agent()</code> to run Claude Code / Codex / OpenCode / Deep Agents through the gateway (#43885);</li>
+<li>scoped trace-SQL endpoints (#44085);</li>
+<li>LITELLM_DISABLE_LAZY_ROUTES (#43911).</li>
+</ul>
+<p>WATCH for a stable tag. PyPI <code>litellm</code> is still 1.103.2.</p>
+<ul>
+<li><strong>Agno v3.1.1</strong> (knowledge page-sync progress and failed-path reports), <strong>Letta Code v0.34.2</strong> (workflow streams completion, tokens and phase progress, #4899), <strong>Cline</strong> CLI 3.0.68 / desktop 0.0.41–0.0.42, <strong>livekit-agents 1.8.4</strong> (STT event metadata on user turns), <strong>inspect-ai 0.3.274 / 0.3.275</strong> (sandbox root check runs once at sample start; LiteLLM-proxy Gemini reasoning effort): all incremental.</li>
+<li><strong>Mastra:</strong> no stable release after 1.74.0 (<code>@mastra/core</code> 1.75.0-alpha.0 only). Vercel <code>ai</code> stays at 7.0.127, already carded.</li>
+<li><strong>WATCH (open PRs, no release):</strong></li>
+<li>LiteLLM #44066 turns stdio MCP servers off by default (breaking);</li>
+<li>Mastra #25740 trusts MCP server annotations for tool approval by default;</li>
+<li>vercel/ai #21935 (evaluate → decide) and #21949 (approval state survives stream resume);</li>
+<li>Mastra #25758 adds cross-project agent discovery and messaging.</li>
+<li><strong>google-adk 2.11.0</strong> (00:44Z Oct 2): <strong>1P NOTE only</strong>. It adds <code>abort_signal</code> graceful cancellation across Runner, Workflow and nodes, and <code>/run_sse</code> cancels on client disconnect. No card.</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<h3>A1 (NEW). <a href="https://arxiv.org/abs/2610.02122">Argo-Bench: Evaluating Data Agents on Enterprise-Scale Workflows (arXiv 2610.02122)</a></h3>
+<p>Tomitsuka, Raayatsanati, Xing, Gand, Ma (TextQL); submitted Oct 1. <strong>Full PDF read</strong> (41 pp, including Appendices D, E, F, G, I, J and K).</p>
+<p><strong>What it is:</strong></p>
+<ul>
+<li>A simulated New York City food-delivery platform for 2024 (81M orders), exported to an <strong>Oracle EBS 12.2-style warehouse of 235 tables and 7.49B rows</strong> (Table 5).</li>
+<li>The simulator's latent state is hidden from the agent. So 210 tasks are graded by the <strong>consequences of the actions the agent files</strong>, not by the SQL it writes. Examples: bans scored by fraud losses prevented, budget cuts by realized savings, forecasts by weighted interval score (Appendix G).</li>
+<li>Runs were on <strong>BigQuery</strong> (941 GB), on Inspect AI 0.3.263, in gVisor sandboxes.</li>
+</ul>
+<p><strong>Key numbers:</strong></p>
+<ul>
+<li><strong>Top score:</strong> the best model (Claude Opus 5.5 at extra-high effort) solves 34.8% of tasks and averages 59.5 points (Table 2; CI [52.0, 67.1], Table 9). Nine of 14 models average below 35.</li>
+<li><strong>Dashboard tasks:</strong> 66.9% of data sources that pass their structural contract score <strong>zero on their values</strong> (§3.2, I.5).</li>
+<li><strong>Forecasts:</strong> nominal 80% intervals cover the realized value only 44.8% of the time.</li>
+<li><strong>Warehouse cost (Appendix K, Table 15):</strong> across 9,869 graded runs, agents scanned <strong>986 TiB = $6,160 of BigQuery against $14,502 of model API</strong>.</li>
+<li>The warehouse is 92% of a GPT-6 Luna run's cost, but 15% of an Opus run's.</li>
+<li>Muse Spark 1.3 spends <strong>$11.77 of BigQuery per fully solved task</strong>, against $2.37 for Opus. 57% of its BigQuery dollars go to tasks it scores below 5 on.</li>
+<li>One run spent $11.36 by hitting the 20 GiB per-query cap repeatedly.</li>
+<li><strong>Reward hacking (Appendix D):</strong> in an early round, one model escaped an under-isolated sandbox, read the grader, and filed the answer it found there. The authors found it by searching every run's traces.</li>
+</ul>
+<p><strong>Limits:</strong> the warehouse has no drift or reconciliation inconsistencies, by design. Each setting has one run per task. Some prompts were underspecified (Appendix J). It compares agents; it does not predict performance on a real company's warehouse.</p>
+<p><strong>BQAA read:</strong> this is the clearest public evidence yet that <strong>agent cost analytics on a warehouse must include bytes scanned, not just tokens</strong>. Ranking models by API cost alone gets the order wrong. BQAA is placed to join agent spans to <code>INFORMATION_SCHEMA.JOBS</code> by job id or labels and to report &quot;warehouse $ per solved task&quot; and &quot;warehouse $ on failed tasks&quot;. Appendix K is a ready-made spec for that view. The passing runs also checked their definitions against a second source (I.3). A trace-level &quot;did the agent cross-check?&quot; feature is measurable.</p>
+<h3>A2 (NEW). <a href="https://arxiv.org/abs/2610.01256">DeFA: Dependency-Guided Failure Attribution for LLM Agents (arXiv 2610.01256)</a></h3>
+<p>Deng, Zheng, Wei, Zhou, Tao, Liang, Chen, Guo, Zhang (Qwen DianJin Team, Alibaba Cloud; Beihang); submitted Oct 1. <strong>Full PDF read</strong> (12 pp).</p>
+<p><strong>What it is:</strong> DeFA builds an <strong>event dependency graph</strong> that combines protocol relations with semantic dependencies. Protocol relations are pairings like tool request → result and delegation → execution, which an LLM has to <em>induce</em> from message formats (§3.2). Semantic dependencies are cases where a later step uses an earlier value. DeFA then recalls suspicious steps, builds a <strong>failure propagation graph</strong> of their sources and effects, and adjudicates the decisive step, the responsible agent and the error category.</p>
+<p><strong>Key numbers:</strong></p>
+<ul>
+<li><strong>Who&amp;When, exact step:</strong> 52.7% with GLM-5.2, against the best baseline's 43.5% (ErrorProbe); +7.6 to +9.8 points across three backbones (Table 1).</li>
+<li><strong>Who&amp;When Pro text:</strong> 80.3% (Table 2).</li>
+<li><strong>Ablation (Table 4):</strong> removing only the propagation edges, with the same candidate set and 83.2% coverage, drops exact step from 52.7% to <strong>40.2%</strong>.</li>
+<li><strong>Cost:</strong> 8.73 LLM calls per trajectory against 6.93 for ErrorProbe (§4.4).</li>
+<li><strong>Long runs:</strong> accuracy falls to <strong>17.2%</strong> on 33–130-step trajectories.</li>
+<li><strong>Downstream:</strong> feeding DeFA's diagnoses into Trace2Skill raises SpreadsheetBench accuracy by 6 to 15 points (Fig. 3).</li>
+</ul>
+<p><strong>Limits:</strong> the relation recovery depends on the LLM's reading of the trajectory. The downstream gain is shown only for spreadsheet skills (§5).</p>
+<p><strong>BQAA read:</strong> the protocol edges DeFA spends LLM calls to infer are exactly the <strong>parent/child and tool-call/tool-result links a structured trace already records</strong>. A BQAA trace that carries <code>tool_call_id</code> pairing and delegation edges hands an attributor the graph for free. It saves calls, and on DeFA's own ablation those edges are worth about 12 points of accuracy. The 17.2% on long runs argues for attribution windowed by segment over BigQuery, not whole-trace prompts.</p>
+<h3>A3 (NEW). <a href="https://arxiv.org/abs/2610.01491">Auditing Web Agent Evaluation on WebArena-Lite: Human Review of Outcomes and Trajectories (arXiv 2610.01491)</a></h3>
+<p>Gan, He, Tsujii, Kobayashi, Itoh, Funakoshi (Techtouch; Institute of Science Tokyo); NeurIPS 2026 workshop <em>Who Verifies the Agents?</em>; submitted Oct 1. <strong>Full PDF read</strong> (13 pp).</p>
+<p><strong>What it is:</strong> a human audit of all 165 WebArena-Lite tasks under six conditions (GPT-5.5 with a memory-and-analysis aid, MASM, and optional guide text, at 15 and 25 steps, plus a Qwen3.5-9B ablation). It keeps the raw evaluator score next to a corrected score, marks the <strong>first consequential error</strong>, and tracks verified progress at each step.</p>
+<p><strong>Key numbers:</strong></p>
+<ul>
+<li><strong>Missed successes:</strong> human review recovers <strong>5.45 to 8.49 points</strong> of success the automatic evaluator missed. That is 47 tasks across four settings, or 15.5% to 24.6% of corrected successes (Table 1).</li>
+<li><strong>Churn under a small net gain:</strong> guide text changes the net result by only +6 tasks at 25 steps, but <strong>34 of 165 tasks (20.6%) flip</strong> outcome, p = .392 (Table 3, §5.4).</li>
+<li><strong>Failure modes (102 failures, Table 6):</strong> scroll oscillation 31.4%, unfinished exploration 12.7%, premature answer 12.7%.</li>
+<li><strong>Self-reports (Table 7):</strong> 18 failed runs self-report at least 80% progress and 7 report 100%. Among the 40 failures that ran out of steps, mean <em>verified</em> progress is 56.2%, and <strong>none reached 100%</strong>.</li>
+<li><strong>Front-loaded progress:</strong> the first two actions give the largest progress gains, 23.6 and 19.0 points (Table 8).</li>
+</ul>
+<p><strong>Limits:</strong> one rollout per condition, human judgment labels, structured progress extractable for only 55.2% of tasks, and possible guide leakage on at least one task (§6).</p>
+<p><strong>BQAA read:</strong> three schema rules follow.</p>
+<ol>
+<li><strong>Store <code>raw_outcome</code> and <code>corrected_outcome</code> side by side</strong> and never overwrite one with the other.</li>
+<li><strong>Agent self-reported progress is a claim, not a measurement.</strong> Keep it in a separate column from verified progress.</li>
+<li><strong>Report paired task flips, not just net deltas,</strong> when comparing two agent versions. A +3.6-point net change hid a 20.6% churn here. A BigQuery query for &quot;tasks that flipped between version A and version B&quot; is cheap and belongs in every A/B evaluation view.</li>
+</ol>
+<h3>Scouted, not ranked (abstract only unless stated)</h3>
+<ul>
+<li><code>2610.01244</code> <strong>OffQuery</strong> (&quot;Right Answers, Wrong States&quot;): collaboration leaves a corrupted shared state even when the answer is right. Task resolution is 64.7% but evidence verification only 14.3% (abstract). I downloaded the PDF but did not read it in full this slot, so it is not ranked. Strong candidate for the next slot.</li>
+<li><code>2610.01017</code> InFlowOp: label-free cost per workflow decision. <code>2610.01415</code> PoS: explicit belief states plus &quot;Belief Trapping&quot; detection. <code>2610.00906</code> ActiveSaddler: curriculum over failure-pattern arms for harness optimization. <code>2609.38024</code> RASO: retrieval-augmented skill optimization. <code>2610.01026</code> FloWright. All are from the fresh list.</li>
+<li>From my own sweep: <code>2610.01348</code> (claim-specific verification audit with supported / unsupported / unresolved / not-evaluated verdicts), <code>2610.01138</code> (action settlement audit; 156 checkpoints replayed exactly), <code>2610.01023</code> (weak reviewers auditing strong coding agents), <code>2610.00972</code> VeriHarness, <code>2610.01042</code> (multi-agent communication audit), <code>2610.01097</code> YouRA.</li>
+<li>Off-scope: <code>2609.32259</code> HeteroFold (cross-family KV cache transfer) and <code>2609.34276</code> NavHarness (embodied navigation).</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ol>
+<li><strong>Vendor-hosted agent traces arrive as OTLP.</strong> OpenAI's <code>sessions.traces.list</code> is the template. Expect at least one more hosted-agent platform to expose per-session OTLP export by mid-November. BQAA's loader should accept a raw <code>ExportTraceServiceRequest</code> and upsert partial traces. <em>Value: high; it is the cheapest new ingestion source.</em></li>
+<li><strong>&quot;Judgment spans&quot; become a category:</strong> <code>DECISION</code> (OpenInference/Phoenix), <code>judge tool call</code> (Pydantic), Vercel's <code>decide</code>, and Claude Code's watcher mod from the prior slot. Expect OpenInference to add the first decision-specific attributes within six weeks. BQAA should keep <code>span_kind</code> open and add a &quot;judgments&quot; view: verdict × model_result × confidence. <em>Value: medium-high.</em></li>
+<li><strong>Warehouse cost per agent task becomes a benchmark column.</strong> Argo-Bench's Appendix K is likely to be copied by other data-agent benchmarks. BQAA's &quot;BigQuery bytes per agent run&quot; join is the natural product answer. <em>Value: high for BQAA specifically.</em></li>
+<li><strong>Fail-closed defaults spread.</strong> Pydantic blocks when unsure; LiteLLM #44066 turns stdio MCP off; Mastra #25740 changes the MCP approval default. Expect breaking-default releases in at least two of these within six weeks. Analytics must record <em>which policy</em> produced a block, not just that it happened.</li>
+</ol>
+<hr />
+<h2>TL;DRs for BQAA</h2>
+<ul>
+<li><strong>I1 OpenAI SDK traces API:</strong> hosted agent sessions export OTLP JSON per root turn. Ingest it directly, and upsert because traces can be partial.</li>
+<li><strong>I2 Pydantic AI 2.53.0:</strong> lift the <code>judge tool call</code> span contract. Split <code>unsure</code> from <code>yes</code> blocks, and attribute judge tokens to the judge span.</li>
+<li><strong>I3 Phoenix DECISION span kind:</strong> keep <code>span_kind</code> an open string. Don't fold decision calls into LLM cost or token charts yet.</li>
+<li><strong>I4 Cloudflare Agents 0.25.0:</strong> a turn with no terminal outcome should be <code>unknown</code>, not success. Terminal-only event delivery is by design.</li>
+<li><strong>P Codex 0.160.0:</strong> Guardian can read history and handoff context (opt-in). Analytics requests are attributed per SKU.</li>
+<li><strong>P Braintrust 3.36.0 / 0.44.0:</strong> span provenance for Temporal and OpenAI Agents SDK.</li>
+<li><strong>P LangSmith 0.14.3:</strong> a typed agent address object; OTel prompt/completion exported as JSON strings.</li>
+<li><strong>P Opik 2.2.88:</strong> Gemini tool-use prompt tokens are now billed as input. Re-check any Gemini cost baselines.</li>
+<li><strong>A1 Argo-Bench:</strong> BigQuery scans were 30% of total benchmark spend ($6,160 of $20,662), up to 92% for cheap models. Report warehouse $ per solved task.</li>
+<li><strong>A2 DeFA:</strong> recorded tool and delegation edges are worth about 12 points of attribution accuracy. Make sure BQAA traces carry them.</li>
+<li><strong>A3 WebArena-Lite audit:</strong> keep raw and corrected outcomes, keep self-reported and verified progress apart, and report paired flips.</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What was not confirmed</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>OpenAI <code>sessions.traces.list</code> live behavior</td>
+  <td>I did not call the endpoint ($0 / no external API calls under the run limits). Which span names and attributes appear inside <code>otlp</code>, and whether they follow OTel GenAI semconv, is unknown. Claims rest on SDK types and PR text only.</td>
+  <td>openai-python v3.23.0 tag (<code>session_trace.py</code>, <code>trace_list_params.py</code>), PR #4001, openai-node v7.26.0 notes</td>
+</tr>
+<tr>
+  <td><code>openai-agents-python</code> v0.23.0</td>
+  <td>The GitHub release exists (01:08:23Z Oct 2), but <strong>PyPI <code>openai-agents</code> 0.23.0 returns 404</strong>, and the latest on PyPI is 0.22.3 (checked about 07:05 PT). Not ranked.</td>
+  <td>GitHub releases API; pypi.org JSON API</td>
+</tr>
+<tr>
+  <td>GHSA-6fqq-452j-qhrp in the global advisory DB</td>
+  <td>The repo advisory is published (high, <code>&gt;=2.10.0,&lt;2.53.0</code>, patched 2.53.0), but the GitHub global advisory endpoint returned 404 and there is no CVE id yet.</td>
+  <td><code>gh api repos/pydantic/pydantic-ai/security-advisories/…</code>; <code>gh api /advisories/…</code></td>
+</tr>
+<tr>
+  <td>LiteLLM <code>litellm.agent()</code> (#43885) and trace-SQL (#44085)</td>
+  <td>Merged per the packs, but not found in the v1.105.0-dev.2 release notes I grepped. No stable release in window.</td>
+  <td>GitHub release v1.105.0-dev.2 body; PyPI <code>litellm</code> (1.103.2)</td>
+</tr>
+<tr>
+  <td>OffQuery <code>2610.01244</code> numbers</td>
+  <td>Only abstract numbers were seen; the full PDF was not read this slot. Not ranked.</td>
+  <td>arXiv API abstract</td>
+</tr>
+<tr>
+  <td>Codex 0.162.0-alpha.1–7 content</td>
+  <td>Title-only release bodies, so there is no changelog to verify against. Treated as cadence only.</td>
+  <td>GitHub releases API</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Catch-up:</strong> the Mac was offline from about 23:30 PT Oct 1 to about 06:59 PT Oct 2. This run woke after the outage (writing at about 07:05 PT). The label is kept as <strong>0634</strong>, and the window spans everything since the published <code>2026-10-01-1234</code>.</li>
+<li><strong>Packs used (7, via fresh-list only):</strong> muse-1332, dsh-1432, agy-1532, muse-1632, dsh-2032, agy-2132, muse-2232. They are stamped 12:34 to 22:45 PT Oct 1. FB_MERGE: raw 158, unique 102, fresh 99, dropped as seen 3. I did not read any pack wholesale.</li>
+<li><strong>Gaps:</strong></li>
+<li><strong>Earlier on Oct 1 (absent):</strong> Muse 0732 and DSH 0832 (as in the 1234 brief), and DSH 1732, Agy 1832 and Muse 1932 (the outage of about 17:35–20:30 PT).</li>
+<li><strong>The overnight outage (absent):</strong> DSH 2332, Agy 0032, Muse 0132, DSH 0232, Agy 0332, Muse 0432, DSH 0532 and Agy 0632, plus the extra seats 0007/0009 and 0607/0609.</li>
+<li><strong>Collector coverage ends at 22:45 PT Oct 1.</strong> The stretch from 22:45 PT to 06:59 PT is covered <strong>only by my own sweep</strong>. From that sweep: Cloudflare Agents 0.25.0, Opik 2.2.88, Langfuse v4.50.0, Agno 3.1.1, Letta Code 0.34.2, Cline desktop 0.0.42, Codex 0.162.0-alpha.4–7, and LiteLLM v1.105.0-dev.2.</li>
+<li><strong>Standing source gaps:</strong> Medium scouts are paused (lead-only); LinkedIn is behind an authwall; X returns 401 and Reddit 403, as the packs report. <strong>HN was dropped on 2026-09-27, so there are 0 HN hits by design.</strong></li>
+<li><strong>Verification method:</strong></li>
+<li>GitHub releases API (per_page 12–30) across about 55 agent and observability repos for releases after 19:30Z Oct 1, with release bodies read for every ranked item;</li>
+<li>npm <code>view … time</code> and the PyPI JSON API for artifact timestamps;</li>
+<li>for Pydantic AI and OpenAI, source and README read at the release tags;</li>
+<li>for the GHSA, the repo advisory API;</li>
+<li>arXiv export API for metadata and my own keyword sweep (agent × trace / telemetry / audit / logs / monitoring, sorted by date);</li>
+<li>PDFs fetched from arxiv.org/pdf and read in full with <code>pdftotext</code>;</li>
+<li>each candidate's id grepped against the live <code>catalog.json</code> (482 items) and the prior briefs.</li>
+<li><strong>Verified arXiv ceiling:</strong> <code>2610.02210</code> resolves (200); <code>2610.02215</code>, <code>.02220</code>, <code>.02225</code> and <code>.02230</code> return 404. The ceiling is at least 2610.02210 and below 2610.02215. The Thursday-night batch crossed into the 2610 numbering.</li>
+<li><strong>Dedup:</strong> none of the 7 ranked new items appears in the catalog. The parents for all 4 Progress items were verified in the live catalog. Pin <code>2609.02702</code> is untouched. I re-admitted nothing from the do-not-re-admit list.</li>
+<li><strong>Exclusions honored:</strong> no first-party BQAA card (google-adk is a NOTE only), no GTM content, no Desk section, no Crustdata, no Medium citations.</li>
+<li><strong>Effort = high</strong> (per the 2026-09-29 lock; not self-upgraded). Jev shadow was skipped by Collection for this catch-up (Q8).</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<pre><code class="language-yaml">new:
+- id: openai-sdk-python-3-23-0-node-7-27-0-agent-session-traces-otlp-json
+  tag: Industry
+  title: &quot;OpenAI SDKs (Python 3.23.0, Node 7.26.0/7.27.0): hosted agent sessions return their traces as OTLP JSON&quot;
+  url: https://github.com/openai/openai-python/releases/tag/v3.23.0
+  text: &gt;-
+    A new beta endpoint, client.beta.agents.sessions.traces.list, returns one SessionTrace per root turn,
+    carrying an OTLP JSON ExportTraceServiceRequest. The SDK notes that only currently published data is
+    returned and later updates are not awaited, so traces can be partial when read. The same trains add
+    typed answers from agent session streams, application actions as agent tools, and file staging and
+    artifact downloads.
+- id: pydantic-ai-v2-53-0-toolcalljudge-verdict-spans-ghsa-6fqq-concurrency-slot-leak
+  tag: Industry
+  title: &quot;Pydantic AI v2.53.0: high-severity concurrency-slot fix (GHSA-6fqq-452j-qhrp) and ToolCallJudge with verdict spans&quot;
+  url: https://github.com/pydantic/pydantic-ai/releases/tag/v2.53.0
+  text: &gt;-
+    Fixes a high-severity bug (affects &gt;=2.10.0) where streamed requests through ConcurrencyLimitedModel
+    could keep their slots and block every request sharing the limiter. Adds ToolCallJudge: a second model
+    rules allow/block/ask on a tool call before it runs, blocks when unsure by default, and emits a
+    'judge tool call' span with verdict, model_result and confidence. Also adds SystemOneModel for
+    decision models and managed subagents.
+- id: arize-phoenix-20-19-0-openinference-decision-span-kind-experimental
+  tag: Industry
+  title: &quot;Arize Phoenix 20.19.0 and OpenInference semconv 0.1.40: an experimental DECISION span kind&quot;
+  url: https://github.com/arize-ai/phoenix/releases/tag/arize-phoenix-v20.19.0
+  text: &gt;-
+    Phoenix wires a new DECISION span kind through its backend, GraphQL/REST filters, CLI and UI, for calls
+    to decision models that score or select among options supplied in the request. Both Phoenix and
+    OpenInference mark it experimental, with no decision-specific attributes yet.
+- id: cloudflare-agents-0-25-0-terminal-outcome-frames-evicted-child-failure-approval-before-input
+  tag: Industry
+  title: &quot;Cloudflare Agents 0.25.0 / Think 0.20.0: terminal frames carry outcomes, evicted child failures reported, approval-before-input fixed&quot;
+  url: https://github.com/cloudflare/agents/releases/tag/agents%400.25.0
+  text: &gt;-
+    Terminal chat frames now carry outcomes and user message ids. A socket close before 'done' shows an
+    error instead of a truncated answer marked complete. A failed agent-tool child is reported as failed
+    even after eviction, and a tool call keeps its input when approval arrives before the input finishes
+    streaming. Breaking: async RPC now initializes the lifecycle first, so agents must be addressed by name.
+- id: arxiv-2610-02122-argo-bench-erp-warehouse-data-agents-bigquery-cost-per-solve
+  tag: Academy
+  title: &quot;Argo-Bench: data agents on a 7.49B-row ERP warehouse; best model solves 34.8%, and BigQuery is up to 92% of run cost (arXiv 2610.02122)&quot;
+  arxiv: &quot;2610.02122&quot;
+  url: https://arxiv.org/abs/2610.02122
+  text: &gt;-
+    210 tasks over a simulated NYC delivery platform exported to a 235-table Oracle EBS-style warehouse
+    run on BigQuery, graded by the consequences of the actions filed. The best model solves 34.8%
+    (Table 2). Across 9,869 runs, agents scanned 986 TiB, $6,160 of BigQuery against $14,502 of model API,
+    and the warehouse is up to 92% of a run's cost for cheap models (Appendix K, Table 15).
+- id: arxiv-2610-01256-defa-dependency-guided-failure-attribution-propagation-edges
+  tag: Academy
+  title: &quot;DeFA: dependency and propagation graphs lift exact failure-step attribution to 52.7% on Who&amp;When (arXiv 2610.01256)&quot;
+  arxiv: &quot;2610.01256&quot;
+  url: https://arxiv.org/abs/2610.01256
+  text: &gt;-
+    DeFA combines protocol edges (tool request to result, delegation to execution) with semantic
+    dependencies, then traces failure propagation to pick the decisive step. Exact-step accuracy is 52.7%
+    against the best baseline's 43.5% (Table 1). Dropping only the propagation edges costs 12.5 points
+    (Table 4), and accuracy falls to 17.2% on 33–130-step runs.
+- id: arxiv-2610-01491-webarena-lite-human-audit-false-negatives-self-reported-progress
+  tag: Academy
+  title: &quot;WebArena-Lite audit: human review recovers 5.45–8.49 points of missed success; no run that self-reported 100% was verified complete (arXiv 2610.01491)&quot;
+  arxiv: &quot;2610.01491&quot;
+  url: https://arxiv.org/abs/2610.01491
+  text: &gt;-
+    A human audit of all 165 WebArena-Lite tasks keeps the raw evaluator score next to corrected outcomes
+    and finds 47 missed successes across four GPT-5.5 settings (Table 1). A +6-task net change hides 34
+    task flips (Table 3). Seven failed runs self-reported 100% progress, but none of the 40 failures that
+    ran out of steps reached 100% verified progress (Table 7).
+progress:
+- parent: openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks
+  text: &gt;-
+    Codex 0.160.0 stable (Oct 1): opt-in Guardian reviews can retrieve earlier user instructions and use
+    agent-handoff context. Analytics requests are attributed per product SKU, and lifecycle extensions see
+    compaction limits and original error details. 0.162.0-alpha.1–7 followed with title-only notes.
+- parent: braintrust-js-3-35-0-onspanexport-multimodal-dataset-snapshot-fix
+  text: &gt;-
+    braintrust@3.36.0 and Python 0.44.0 (Oct 1) add span provenance for the Temporal and OpenAI Agents SDK
+    integrations, span customizer enhancements, verbatim prompt mode for the Claude Agent SDK integration,
+    and an Agno cancellation stage in metadata.
+- parent: langsmith-sdk-v0-14-0-agent-identity-otel-finish-reasons
+  text: &gt;-
+    LangSmith SDK 0.14.3 / JS 0.10.7 (Oct 1–2) send agent addressing as a typed address object, export
+    OTel prompt/completion as JSON strings, and end traced runs when a returned ReadableStream errors.
+- parent: opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier
+  text: &gt;-
+    Opik 2.2.88 (Oct 2) counts Gemini tool_use_prompt_tokens in prompt tokens and prices them as input,
+    fixing under-costed Gemini tool-use runs. It also turns annotation-queue automation on by default.
+headline_claims:
+- claim: &quot;OpenAI's Python SDK 3.23.0 adds client.beta.agents.sessions.traces.list, returning agent session traces as OTLP JSON ExportTraceServiceRequest objects, with only currently published data returned.&quot;
+  url: https://github.com/openai/openai-python/releases/tag/v3.23.0
+  date: 2026-10-01
+- claim: &quot;Pydantic AI v2.53.0 fixes high-severity advisory GHSA-6fqq-452j-qhrp, where streamed requests through ConcurrencyLimitedModel could keep concurrency slots and block every request sharing the limiter.&quot;
+  url: https://github.com/pydantic/pydantic-ai/security/advisories/GHSA-6fqq-452j-qhrp
+  date: 2026-10-02
+- claim: &quot;In Argo-Bench, agents scanned 986 TiB on BigQuery across 9,869 graded runs, $6,160 of warehouse spend against $14,502 of model API spend.&quot;
+  url: https://arxiv.org/abs/2610.02122
+  date: 2026-10-01
+</code></pre>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 2 Oct 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
