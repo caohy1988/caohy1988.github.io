@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-10-03 · 12:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="Industry NEW LangGraph.js 1.4.19 subgraph state fixes; Academy NEW BudgetSchemaBench, Delegation Danger Band, Verifier Leak.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-03-1234-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 · 12:34 PM PT · on-cadence late wake · fresh-list path · effort high · ~6h window since 0634</p>
+    <article>
+<h1>Field Brief — 2026-10-03-1234: LangGraph.js stops returning empty subgraph state, and three papers on what an agent was actually given: how much catalog schema, which inherited notes, and whether the verifier already gave away the answer</h1>
+<p><strong>Writer: Opus 5.5</strong> (<code>claude-opus-5-5[1m]</code>) · effort = <strong>high</strong>, per the 2026-09-29 lock (not self-upgraded)
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, the catalog and the push.
+<strong>Slot:</strong> 2026-10-03-1234 (12:34 PM PT, Sat Oct 3), the scheduled slot. The run woke late, at about 12:37 PT, and the label stays <strong>1234</strong>.
+<strong>Window:</strong> about <strong>6 hours</strong> since the last published brief, <code>2026-10-03-0634</code>. It covers 13:34Z to 19:34Z Oct 3 (06:34 to 12:34 PT). Normal cadence.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>Industry NEW (1): LangGraph.js <code>@langchain/langgraph</code> 1.4.19 and <code>@langchain/langgraph-sdk</code> 1.12.1</strong> (GitHub releases 18:38Z, npm 18:39Z). This is the only stable product release in the window. It is a patch release. I rank it because it fixes <strong>silent state-read and state-write bugs</strong>, the bar the 0634 brief set for LangGraph #8548.</li>
+<li><strong>Empty subgraph state:</strong> reading a subgraph's state returned every <code>DeltaChannel</code> as <code>[]</code> while plain channels were correct. Reads now use the checkpointer the parent resolved. Hydrating a written <code>DeltaChannel</code> without a checkpointer now <strong>throws</strong> instead of returning empty.</li>
+<li><strong>Lost updates:</strong> for a <code>checkpointer: true</code> subgraph, <code>getState(config, { subgraphs: true })</code> returned <code>values: {}</code>, and <code>updateState</code> from the subgraph task's config was <strong>silently lost</strong>. Both are fixed.</li>
+<li><strong>Resume re-fired the interrupt:</strong> resuming from a subgraph checkpoint returned by <code>getState</code> re-fired the interrupt instead of applying the answer. Fixed.</li>
+<li><strong>SDK changes:</strong> the protocol SSE transport no longer retries on 4xx (except 408 and 429), and errors keep the HTTP status and body. After <code>stop()</code> cancels a run mid-turn, <code>useStream</code> reconciles against the persisted thread state, so messages that were never checkpointed no longer stay visible.</li>
+<li><strong>Python is behind:</strong> the Python counterparts (#8538, merged Oct 2; #8548, merged Oct 3 12:56Z) are <strong>still unreleased</strong>. PyPI <code>langgraph</code> is still 1.2.12, from Sep 21.</li>
+<li><strong>Academy NEW (3).</strong> All three are full PDF reads from the Fri Oct 2 listing. The 0634 brief screened them by abstract and named them as strong candidates for a later slot; none was carded.</li>
+<li><strong>BudgetSchemaBench (<code>2610.00092</code>, Megagon Labs, COLM 2026 workshop):</strong> schema context for data agents over an 80-database, 597-table catalog.<ul>
+<li>With lexical retrieval, raising the schema budget from 2.5% to 50% of the catalog lifts execution accuracy <strong>+18 pp</strong>. With dense retrieval the lift is only +3 pp.</li>
+<li>With the needed tables <strong>removed</strong>, <strong>94.6%</strong> of the &quot;correct&quot; answers name a removed table exactly. The model rebuilt the missing schema from memory.</li>
+</ul>
+</li>
+<li><strong>The Delegation Danger Band (<code>2610.00041</code>, PayPal AI):</strong> a sub-agent that inherits a parent's superseded note.<ul>
+<li>The mid-sized model (Qwen3-1.7B) does <strong>worse than a fresh fork</strong>, by −0.19.</li>
+<li>When the stale note arrives <strong>without</strong> the current note beside it, <strong>every</strong> model follows it, including 4B and 8B (reliance 0.90 / 0.94).</li>
+<li>A curated handoff beats full inheritance on all three datasets.</li>
+</ul>
+</li>
+<li><strong>A Verifier Can Leak the Answer (<code>2610.00126</code>, Blossom AI):</strong> an exact solver and a greedy one &quot;agreed&quot; in 12/12 cases only because the probes had already revealed the planted fault (9/9).<ul>
+<li>The fix is a verifier that <strong>abstains</strong> unless it has eligible, comparable evidence.</li>
+<li>A preregistered heldout produced <strong>0/20</strong> false admissions (95% upper bound 0.139).</li>
+<li><strong>Caveat:</strong> the agent is a simulator policy, not an LLM.</li>
+</ul>
+</li>
+<li><strong>The theme:</strong> all three papers show that an agent record can mislead unless it says what the agent was <strong>given</strong>:</li>
+<li>how much schema was in budget, and whether the answer could have come from memory;</li>
+<li>which inherited notes the child saw, and whether a current note sat next to the stale one;</li>
+<li>whether the verifier's probe already encoded the answer.</li>
+<li><strong>For BQAA:</strong> log the <strong>inputs</strong> of each step, not just its outputs: schema-context budget and recall, inherited-context provenance, and the verifier's eligibility state.</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<h3>I1 (NEW). <a href="https://github.com/langchain-ai/langgraphjs/releases/tag/%40langchain%2Flanggraph%401.4.19">LangGraph.js 1.4.19 / SDK 1.12.1: subgraph state reads stop coming back empty, subgraph updates stop being lost, and SDK streams stop retrying 4xx</a></h3>
+<ul>
+<li><strong>What shipped (Oct 3, 18:38Z, GitHub releases; npm 18:39–18:40Z):</strong></li>
+<li><code>@langchain/langgraph</code> 1.4.19, <code>@langchain/langgraph-sdk</code> 1.12.1;</li>
+<li><code>@langchain/react</code>, <code>vue</code>, <code>svelte</code> and <code>angular</code> 1.2.1 (dependency bumps only);</li>
+<li><code>@langchain/langgraph-api</code>, <code>-cli</code> and <code>-ui</code> 1.5.2 (dependency bumps; &quot;no changes&quot; for <code>-ui</code>).</li>
+<li><strong>Core fix (#2906, merged Oct 2 15:19Z, released now):</strong></li>
+<li><strong>Empty reads.</strong> <code>getState</code>, <code>getStateHistory</code> and <code>updateState</code> resolved the checkpointer in a way that came out <code>undefined</code> for subgraphs. So <code>getState(config, { subgraphs: true })</code> showed <code>delta: []</code> beside correct plain channels.<ul>
+<li>Only reads were affected; <code>bulkUpdateState</code> already hydrated correctly, so no bad state was written back.</li>
+</ul>
+</li>
+<li><strong>Wrong namespace for <code>checkpointer: true</code> subgraphs.</strong> Their runs store checkpoints under a namespace without task ids, but the state methods looked under <code>name:&lt;task_id&gt;</code>. As a result, <code>getState</code> returned <code>values: {}</code> and <code>updateState</code> from the subgraph task's config was <strong>silently lost</strong>. Runs and all three state methods now share one namespace rule.</li>
+<li><strong>Replay re-fired the interrupt.</strong> Returning the real subgraph checkpoint exposed a resume bug that also affects default subgraphs. Replaying from a subgraph checkpoint and then resuming re-fired the interrupt instead of applying the resume value.</li>
+<li><strong>Checkpointer flags are now enforced:</strong><ul>
+<li>a <code>checkpointer: false</code> graph no longer writes state through a checkpointer lent via config;</li>
+<li>a <code>checkpointer: true</code> graph used as a root fails state methods with the run's error rather than a <code>TypeError</code>.</li>
+</ul>
+</li>
+<li><strong>Cost (PR table):</strong> root reads are unchanged. A subgraph read adds one history lookup, matching a root read.</li>
+<li><strong>SDK fixes in 1.12.1:</strong></li>
+<li><strong>#2918:</strong> the protocol SSE transport stops retrying <code>stream/events</code> on 4xx (except 408/429), keeps the HTTP <code>status</code> and body text on errors, and resets the reconnect counter after each successful connect. Idle reconnects no longer use up <code>maxReconnectAttempts</code>.</li>
+<li><strong>#2882:</strong> after <code>stop()</code> cancels a run mid-turn, <code>useStream</code> reconciles its buffer against persisted thread state. Messages that were never checkpointed no longer stay visible.</li>
+<li><strong>Why BQAA cares:</strong></li>
+<li>Anything that reads LangGraph state for analytics, such as time-travel debugging, HITL audit or state diffs, could have recorded <strong>empty subgraph channels or lost subgraph edits</strong> as if they were real.</li>
+<li>Before this release, an empty <code>DeltaChannel</code> in a subgraph snapshot from LangGraph.js is suspect, not evidence of an empty channel.</li>
+<li>Readers of LangGraph checkpoints should key on the library version. Python LangGraph has the same fixes merged (#8538, #8548) but <strong>not released</strong> (PyPI <code>langgraph</code> 1.2.12, Sep 21).</li>
+<li><strong>Bar note:</strong> this is a patch release and is ranked for <strong>state-history correctness</strong>, not new capability. The 0634 brief set the same bar for LangGraph #8548. No LangGraph card exists in the catalog (grepped). I propose this card as the parent for the Python release when it ships.</li>
+</ul>
+<h3>Progress</h3>
+<p>None this slot. No tracked product with an existing card shipped a stable release in the window. The registry sweep, the collector packs and the GitHub releases API agree.</p>
+<h3>NOTE (not ranked: merged without a release, open, or alpha only)</h3>
+<ul>
+<li><strong>OpenAI Codex #50687</strong> (merged 18:15Z, main; no release in window). Adds a <strong>disabled-by-default</strong> <code>code_mode_only_strict_3p_tools</code> feature.</li>
+<li>In Code Mode Only, it keeps MCP, app and dynamic tools deferred (discoverable and callable via <code>exec</code>), so the eager tool prefix stays stable while MCP catalogs change between turns.</li>
+<li>Conflicting exposure settings are logged, not warned. A cache and tool-catalog stability change; WATCH for a release.</li>
+<li><strong>LiteLLM</strong> (no release; PyPI latest is still <code>1.105.0.dev2</code>):</li>
+<li><strong>#44404</strong> (merged 19:00Z to <code>stable/1.103.x</code>) backports a fix for <strong>streamed chat through a dotted alias (e.g. <code>claude-opus-4.6</code>) recorded at $0 spend</strong>. The PR body says it rides the <strong>unreleased 1.103.3</strong>.</li>
+<li><strong>#44391</strong> (merged 17:33Z) adds <code>Harness.TOOL_LOOP</code>, an in-process tool-calling loop for <code>litellm.agent()</code> that tags every model call <code>harness,tool_loop</code> in spend logs.</li>
+<li><strong>#44397</strong> (merged 18:41Z to <code>rc/1.104.0</code>) is a SpendLogs index migration guard.</li>
+<li><strong>#44418</strong> (open) would make Lens &quot;investigations&quot; run every 15 minutes by default over new traces only, with one Findings table across investigations.</li>
+<li>The $0-spend backport is the item to rank when 1.103.3 ships, as Progress if a LiteLLM card is the parent.</li>
+<li><strong>Qwen Code #13304</strong> (merged 17:57Z, main). Two failures in released v0.24.7 could leave a Hosted Session <strong>permanently blocked</strong> after its durable work had completed:</li>
+<li>a lost Shell-result acknowledgement (one TCP reset, then every later prompt got a 409);</li>
+<li>an unbounded publisher drain that also blocked <code>DELETE /session/:id</code>.</li>
+<li>Both are fixed, with witness tests. No release yet.</li>
+<li><strong>promptfoo #10606</strong> (merged 18:38Z). The OpenCode provider now forwards each call's <code>traceparent</code> when it starts an owned server, and applies scoped env and credentials correctly. Trace-context propagation into a spawned agent server. No release (npm <code>promptfoo</code> not in window).</li>
+<li><strong>Letta Code #4929</strong> (open, 19:23Z): <code>TaskStop</code> would cancel the remote run before reporting &quot;stopped&quot;. Today a sub-agent can report stopped while its remote run continues. WATCH.</li>
+<li><strong>Mastra <code>@mastra/core</code> 1.75.0-alpha.3 / <code>mastra</code> 1.32.2-alpha.3</strong> (npm 17:38Z): alpha only.</li>
+<li><strong>PostHog <code>agent-skills-v0.2521.0</code>–<code>v0.2523.0</code></strong> (14:34Z–18:54Z): build tags, not product capability.</li>
+<li><strong>google-adk:</strong> no release in window (PyPI 2.11.0, Oct 2). First-party, NOTE only in any case.</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<h3>A1 (NEW). <a href="https://arxiv.org/abs/2610.00092">BudgetSchemaBench: how much catalog schema a data agent gets, and what it answers from memory when the needed tables are missing (arXiv 2610.00092)</a></h3>
+<p><strong>Full PDF read</strong> (11 pages, including Appendix A). Chen Shen, Megagon Labs. Accepted at the COLM 2026 Workshop on Context Beyond the Window. cs.CL. Submitted Sep 8; it first appeared in the Fri Oct 2 listing.</p>
+<ul>
+<li><strong>Setup (§3, Table 2):</strong></li>
+<li><strong>Catalog:</strong> the pooled BIRD dev+train union, 80 databases, 597 tables, 127,560 tokens (cl100k). 24.5% of tables have a base-name collision with a table in another database.</li>
+<li><strong>Budgets:</strong> the schema payload is capped at <strong>2.5 / 10 / 25 / 50%</strong> of the catalog (3.2k to 63.8k tokens). Tables are packed whole, in retriever-rank order.</li>
+<li><strong>Questions:</strong> the 1,279-question held-out complement.</li>
+<li><strong>Three regimes:</strong> end-to-end retrieval; frozen-gold (the needed tables are guaranteed); and a probe that <strong>removes the needed tables</strong>.</li>
+<li><strong>Labels</strong> are derived mechanically from gold SQL (no human or LLM annotation).</li>
+<li><strong>Source-namespace contract:</strong> a result-equivalent answer read from the <strong>wrong database</strong> counts as an error, with lineage checked by <code>sqlglot</code> parse.</li>
+<li><strong>Results:</strong></li>
+<li><strong>Budget matters when retrieval is coverage-limited (Table 3):</strong><ul>
+<li>Primary solver gpt-5.4-mini, lexical retrieval: execution accuracy goes <strong>0.38 to 0.55</strong> as recall goes 0.60 to 0.90 (Δ +0.18, CI [0.15, 0.20]).</li>
+<li>Dense retrieval already has recall 0.92 at the smallest budget, so the gain is only Δ +0.03.</li>
+<li>gpt-4o-mini: +0.09 lexical, about zero dense.</li>
+</ul>
+</li>
+<li><strong>Memorization floor (§4):</strong> with the needed tables removed, the solver still answers 4–19% correctly. Of the 1,236 predictions counted correct, <strong>94.6% (1,169)</strong> name a removed table <strong>by its exact name</strong>. That is consistent with rebuilding the absent schema from what the model learned in training (15/15 sampled flags confirmed by hand).</li>
+<li><strong>Representation barely matters once the needed tables are in context (Table 4):</strong> raw DDL, enriched (with column descriptions) and hybrid differ by at most <strong>0.02</strong>. No contrast survives Holm correction, and the widest paired CI is ±0.04.</li>
+<li><strong>The lineage contract</strong> changed the classification of only 2 of 797 sampled result-correct predictions (0.3%).</li>
+<li><strong>Off-family replication (Table 5):</strong> DeepSeek-V4-Flash reproduces all three patterns, with the same lexical Δ of +0.18.</li>
+<li><strong>Limitations (stated):</strong></li>
+<li>One BIRD snapshot. BIRD's gold SQL carries known annotation noise.</li>
+<li>Only 11 source databases in the clustered bootstrap.</li>
+<li>Single decode at temperature 1.</li>
+<li>Representation-aware retrieval is out of scope.</li>
+<li>The memorization floor is not separated from generic schema-name priors; there is no identifier-randomization control yet.</li>
+<li>The dense retriever is near-saturated, so the catalog may understate how hard schema selection is.</li>
+<li><strong>Why BQAA cares:</strong></li>
+<li>This is the BigQuery data-agent setting: a large catalog, schema that does not fit, and a retriever that picks tables.</li>
+<li>The <strong>schema-context budget and table recall</strong> for each step drive accuracy more than serialization format. They belong in the agent's trace.</li>
+<li>A correct answer can come from <strong>training memory of a public schema</strong> rather than the schema the agent was shown. Logging which tables were in context lets an analyst flag &quot;answered about a table it was never given&quot;.</li>
+<li>&quot;Right result, wrong source database&quot; needs a <strong>lineage check</strong>, not a result match.</li>
+</ul>
+<h3>A2 (NEW). <a href="https://arxiv.org/abs/2610.00041">The Delegation Danger Band: mid-capability sub-agents over-trust inherited stale state, and every model follows a stale note that arrives alone (arXiv 2610.00041)</a></h3>
+<p><strong>Full PDF read</strong> (16 pages, including appendices A–J). Jundong Hu and Shekar Ramachandran, PayPal AI. cs.MA. Submitted Sep 3; it first appeared in the Fri Oct 2 listing.</p>
+<ul>
+<li><strong>Setup (§3):</strong> a parent forks a child under one of three inheritance policies:</li>
+<li><strong>RESET:</strong> fork fresh, base evidence only.</li>
+<li><strong>SELECTIVE:</strong> a curated handoff of the base evidence plus the useful current conclusion.</li>
+<li><strong>FULL@d:</strong> an implicit fork that also carries <em>d</em> copies of a superseded conclusion, with <em>d</em> = 1 to 32.</li>
+<li><strong>Solvable without the notes:</strong> every task can be solved from the base evidence alone, so any loss is reliance on stale state.</li>
+<li><strong>Models:</strong> Qwen3 0.6B / 1.7B / 4B / 8B (plus 14B), with Llama-3.x as a cross-family check.</li>
+<li><strong>Tasks:</strong> two synthetic primitives (summation, counting) plus MuSiQue and HotpotQA. Scoring is judge-free closed-set matching.</li>
+<li><strong>Results:</strong></li>
+<li><strong>Deference falls with capability (§4):</strong> the slope of stale-reliance against clean accuracy is negative on all four task families, and every CI excludes zero (Spearman −0.80 to −0.91).</li>
+<li><strong>But harm is band-shaped (§5, Table 1):</strong><ul>
+<li>Only Qwen3-1.7B falls significantly below its fresh-fork baseline: Δ(32) = <strong>−0.19</strong> [−0.25, −0.12].</li>
+<li>4B, 8B and 14B stay positive (+0.15 / +0.13 / +0.20), and 0.6B is near zero.</li>
+<li>1.7B is a significant local minimum against both of its neighbours.</li>
+</ul>
+</li>
+<li><strong>Stale meaning causes it (Table 5):</strong> at 1.7B, matched-length neutral filler (+0.33) and 32 copies of the right answer (+0.36) both help, while stale notes harm (−0.15).</li>
+<li><strong>The strong models are not immune (Appendix G):</strong> with base evidence plus a stale note and <strong>no current note</strong>, every model follows the stale note.<ul>
+<li>Reliance is 0.69 / 0.97 / 0.90 / 0.94.</li>
+<li>4B and 8B accuracy drops by <strong>0.75 and 0.78</strong>.</li>
+<li>Strong-model robustness in FULL comes from <strong>comparing two notes</strong>, not from recomputing.</li>
+</ul>
+</li>
+<li><strong>A live fork reproduces it (Table 8):</strong> when the parent writes the stale note itself and the child inherits it through a full-context copy, 1.7B is harmed from dose 1 (Δ(32) = −0.43).</li>
+<li><strong>What works (§6, Table 2):</strong> curated handoff beats full inheritance on all three datasets (+0.211 synthetic, +0.104 MuSiQue, +0.068 HotpotQA).<ul>
+<li>A capability-threshold router helps on synthetic (+0.048) but <strong>hurts MuSiQue</strong> (−0.054).</li>
+<li>No observable router transfers in leave-one-dataset-out testing (Appendix J, Table 9).</li>
+<li>Turning on thinking at 1.7B does not remove the effect (−0.17 versus −0.15).</li>
+</ul>
+</li>
+<li><strong>Limitations (stated):</strong></li>
+<li>Small open models only (≤14B; 14B on the synthetic core only).</li>
+<li>On the real datasets, no model enters the band at default difficulty; the band evidence comes from the matched-difficulty sweep and the Llama replication.</li>
+<li>The harm needs the stale note to be <strong>recent</strong>; placed at the start of context, it disappears.</li>
+<li>The live fork runs in the authors' harness, not a production runtime.</li>
+<li><strong>Why BQAA cares:</strong></li>
+<li>Sub-agent spans should record <strong>what context the child inherited</strong>: full, curated or fresh, plus whether a superseded note was present and whether a current note sat beside it.</li>
+<li>The most dangerous case for every model size is a stale note <strong>without</strong> its correction. That is detectable from inheritance provenance and invisible from the child's output alone.</li>
+<li>Pairs with Causal Recovery Eval (<code>2610.00372</code>, carded at 0634): both say to score delegation and retry choices against a counterfactual, not by average success.</li>
+</ul>
+<h3>A3 (NEW). <a href="https://arxiv.org/abs/2610.00126">A Verifier Can Leak the Answer: audit evidence eligibility and non-revelation before comparing optimizers (arXiv 2610.00126)</a></h3>
+<p><strong>Full PDF read</strong> (7 pages). Peiying Zhu and Sidi Chang, Blossom AI. cs.CR. Submitted Sep 9; it first appeared in the Fri Oct 2 listing.</p>
+<ul>
+<li><strong>Setup (§3):</strong></li>
+<li>A trace debugger watches a closed-loop decision agent in a simulator (24 policy components, 3 demand regimes, 72 regime-component units) and tries to localize a planted fault from <strong>aggregate traces</strong>.</li>
+<li>It turns discrepancies into conflict sets and solves them with exact minimum hitting set or a greedy method.</li>
+<li><strong>Caveat:</strong> the agent is a fitted policy, <strong>not an LLM</strong>.</li>
+<li><strong>The failure (§4, Table 1):</strong></li>
+<li>Exact and greedy returned <strong>identical answers in 12/12</strong> development cases and recovered the planted fault in 9/12.</li>
+<li>An audit found why: the exact-anchor predicates produced the planted pair in <strong>9/9</strong> cases. After those anchors were removed, a single-component hard probe still produced it in <strong>9/9</strong>.</li>
+<li><strong>0/9</strong> cases had any ambiguity left after propagation. The optimizer was correct, but the verifier had already disclosed the answer.</li>
+<li><strong>The fix (§5): a support-gated verification contract.</strong></li>
+<li><strong>State sequence:</strong> <code>REFERENCE_ABSTAIN</code> → <code>RUNTIME_ABSTAIN</code> → <code>SIGNAL_ELIGIBLE</code> → <code>DETECTED</code> / <code>NOT_DETECTED</code>.</li>
+<li><strong>Reference gate:</strong> a clean reference map must show the component was exercised (support ≥12 in ≥14 of 15 partitions).</li>
+<li><strong>Runtime gate:</strong> reference and current streams must have matched support <strong>in the same partitions</strong>.</li>
+<li><strong>Detection:</strong> only then may a pre-fixed signal rule (z ≥ 1.50) fire.</li>
+<li><strong>Separate verdicts:</strong> execution, safety and structure each get their own label, with no combined PASS.</li>
+<li><strong>Preregistered heldout (§6–7, Table 2):</strong></li>
+<li><strong>Scale:</strong> 1,440 cases and 21,600 partition rows; all 56 independent validation checks passed.</li>
+<li><strong>Admission:</strong> the reference gate admitted 55/72 units, and the runtime gate admitted 54 of those 55.</li>
+<li><strong>False admission:</strong> <strong>0/20</strong> represented components (one-sided 95% upper bound <strong>0.1391</strong>, inside the frozen 0.20 rule).</li>
+<li><strong>Traffic predicts detection:</strong> affected clean traffic predicts detection better than the share of cells edited, by 0.126 nats per row, CI [0.059, 0.192].</li>
+<li><strong>Limitations (stated):</strong></li>
+<li>One simulator and one policy family; <strong>not an LLM agent</strong>.</li>
+<li>The heldout does not confirm fault localization.</li>
+<li>About 20 component clusters, and the family-sufficiency margin is thin (0.0034 nats).</li>
+<li>The &quot;refresh&quot; endpoint is a smoke test only.</li>
+<li><strong>Why BQAA cares:</strong></li>
+<li>An eval pipeline that converts traces into predicates and then scores them can be deterministic and still <strong>leak the answer</strong> through how its probes are scoped.</li>
+<li>For BQAA's eval and diagnosis tables, the states &quot;<strong>not testable here</strong>&quot; (abstain) and &quot;verifier is non-revealing&quot; should be first-class columns, separate from &quot;detected&quot;.</li>
+<li>Coverage should be indexed by <strong>actual traffic</strong> through the component, not by the size of the injected change.</li>
+</ul>
+<h3>Scouted, not ranked</h3>
+<ul>
+<li><strong>No new arXiv mailing in this window.</strong> There is no Saturday announcement; <code>/list/cs.AI/new</code> still shows &quot;Friday, 2 October 2026&quot;. The verified ceiling stays <strong><code>2610.02210</code></strong>, flat. The newest submission in the arXiv API is <code>2610.02207</code>, Oct 1 17:59:58Z (https query).</li>
+<li><strong>Still screened, not ranked, from the Oct 2 listing:</strong></li>
+<li><code>2610.00371</code> Deny Without Disabling;</li>
+<li><code>2610.00151</code> A-IDS (single author, conceptual);</li>
+<li><code>2610.00015</code> Praxa (pilot shows no superiority);</li>
+<li><code>2610.02142</code> Keyword Harnesses Fail Open;</li>
+<li><code>2610.01506</code> MCRI skill evaluation.</li>
+<li>Unchanged from 0634. <code>2610.00371</code> is the strongest remaining candidate if Sunday's mailing is thin.</li>
+<li><strong>Packs:</strong> no net-new Academy keepers. The collectors' work this window was GitHub PR and release tracking.</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ol>
+<li><strong>Agent-state readers need version gates.</strong> LangGraph.js 1.4.19 fixes subgraph reads that returned empty channels and subgraph updates that were lost. Python has the same fixes merged but unreleased. Expect a Python LangGraph release within weeks. A BQAA reader of LangGraph state should mark snapshots from earlier versions as unverified for subgraph <code>DeltaChannel</code>s.</li>
+<li><strong>Schema-context telemetry for data agents.</strong> BudgetSchemaBench shows schema budget and table recall drive accuracy, and that answers about absent tables come from memory. Recording &quot;tables in context, tokens spent, recall&quot; for each step is a cheap, differentiated BQAA view for BigQuery data agents. It also enables a &quot;referenced a table it was never shown&quot; flag.</li>
+<li><strong>Context-inheritance provenance on sub-agent spans.</strong> The Delegation Danger Band, plus Letta Code #4929 (TaskStop versus a still-running remote run) and Qwen Code #13304 (sessions blocked after durable work), all point at the parent-to-child boundary as where records go wrong. Expect frameworks to add inheritance-mode attributes. BQAA can define them first: <code>inherit_mode</code>, <code>stale_note_present</code>, <code>current_note_present</code>.</li>
+<li><strong>Abstention as an eval outcome.</strong> &quot;A Verifier Can Leak the Answer&quot; and Causal Recovery Eval (0634) both show that eval tables need &quot;not testable here&quot; and paired baselines. An eval schema that forces every item into pass or fail will keep certifying verifier artefacts.</li>
+<li><strong>Spend correctness is still a live bug class.</strong> LiteLLM's dotted-alias $0-spend backport is waiting on unreleased 1.103.3. Cost analytics built on gateway spend logs should cross-check provider-side usage until it ships.</li>
+</ol>
+<hr />
+<h2>TL;DRs for BQAA</h2>
+<ul>
+<li><strong>LangGraph.js 1.4.19 / SDK 1.12.1:</strong> subgraph <code>DeltaChannel</code> reads no longer come back empty, <code>checkpointer: true</code> subgraph updates are no longer lost, resume-after-replay applies the answer, and SDK streams stop retrying 4xx. Python's fixes are merged but unreleased.</li>
+<li><strong>BudgetSchemaBench (2610.00092):</strong> schema budget lifts accuracy +18 pp under lexical retrieval but only +3 pp under dense. With the needed tables removed, 94.6% of correct answers name a removed table exactly. Log schema budget, recall and in-context tables per step.</li>
+<li><strong>Delegation Danger Band (2610.00041):</strong> Qwen3-1.7B does 0.19 worse than a fresh fork when it inherits stale notes, and <strong>every</strong> model, including 8B, follows a stale note that arrives without its correction. Curated handoff wins everywhere; record what each child inherited.</li>
+<li><strong>A Verifier Can Leak the Answer (2610.00126):</strong> a deterministic verifier revealed the planted fault in 9/9 cases, making a solver comparison meaningless. Abstention plus matched-evidence gates gave 0/20 false admissions. Not an LLM agent. Make &quot;abstain&quot; and &quot;non-revealing&quot; eval columns.</li>
+<li><strong>NOTE:</strong> Codex #50687 (strict deferred third-party tools, off by default), LiteLLM #44404 ($0 spend on dotted-alias streams; awaiting 1.103.3), Qwen Code #13304 (blocked Hosted Sessions) and promptfoo #10606 (traceparent forwarded to OpenCode) are all unreleased. WATCH.</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What is not confirmed</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Python LangGraph release of #8538 / #8548</td>
+  <td>Both are merged (Oct 2 15:26Z and Oct 3 12:56Z), but no Python release carries them. The card claims only that the JS release ships the fix.</td>
+  <td>GitHub PR API for both; PyPI <code>langgraph</code> JSON (latest 1.2.12, Sep 21); GitHub releases sweep</td>
+</tr>
+<tr>
+  <td>LiteLLM 1.103.3</td>
+  <td>The #44404 PR body says the backport rides the unreleased 1.103.3. No 1.103.3 exists on PyPI or GitHub releases in window. NOTE only; I make no claim about when it ships.</td>
+  <td>GitHub PR API; PyPI <code>litellm</code> JSON; GitHub releases sweep</td>
+</tr>
+<tr>
+  <td>BudgetSchemaBench memorization floor</td>
+  <td>The paper says exact-name overlap is <em>consistent with</em> reconstruction from training memory and does not separate it from generic schema-name priors (no identifier-randomization control). The card says &quot;consistent with&quot;, not &quot;proved&quot;.</td>
+  <td>Full PDF §4 and §5</td>
+</tr>
+<tr>
+  <td>Delegation Danger Band generality</td>
+  <td>Results cover ≤14B open models, and the band does not appear on the real datasets at default difficulty. The card does not claim the band exists for frontier models.</td>
+  <td>Full PDF §7 and Appendix H</td>
+</tr>
+<tr>
+  <td>Verifier-leak transfer to LLM agents</td>
+  <td>The agent studied is a simulator policy, not an LLM. Transfer to LLM-agent verifiers is the authors' argument, not a result.</td>
+  <td>Full PDF §3 and §9</td>
+</tr>
+<tr>
+  <td>arXiv submission versus announcement</td>
+  <td>The arXiv API dates the three papers Sep 3, 8 and 9, yet they appeared in the Oct 2 listing. I treat the listing as the first public announcement, as at 0634.</td>
+  <td>PDF headers (<code>arXiv:2610.000xx v1</code>, dated Sep 3, 8 and 9); 0634 listing parse</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Packs merged (7):</strong> muse-0732, dsh-0832, agy-0932, muse-1032, dsh-1132, muse-1207 (extra), dsh-1209 (extra).</li>
+<li><code>FB_MERGE slot=2026-10-03-1234 packs=7 raw=189 unique=148 drop_seen=12 fresh=136</code>.</li>
+<li>I used the fresh-list path (<code>_runs/fb-2026-10-03-1234/fresh-items.md</code>). No pack was opened or read in full; every cited PR was checked directly against the GitHub API instead.</li>
+<li><strong>Gaps:</strong></li>
+<li><strong>ABSENT this window:</strong> <strong>Agy 1232</strong>. No pack existed at kick, and it is not in the merge.</li>
+<li><strong>Stamp-excluded:</strong> <code>agy-pack-2026-10-03-0632.md</code> (stamp 0632 falls at or before the prior slot, 0634).</li>
+<li><strong>PRESENT today:</strong> <strong>Muse 0732 and DSH 0832</strong>, historically standing-absent, both landed and are in the merge.</li>
+<li>Prior evening Mac-down gaps (DSH 1732 / Agy 1832 / Muse 1932 / Field Brief 1834 SKIP, Oct 2) were disclosed earlier and are outside this window.</li>
+<li><strong>Verified arXiv ceiling:</strong> <code>2610.02210</code>, flat. There is no Saturday announcement; <code>/list/cs.AI/new</code> shows Fri Oct 2. The arXiv API (https) newest submission is <code>2610.02207</code>.</li>
+<li><strong>Verification method:</strong></li>
+<li><strong>Releases:</strong> GitHub releases sweep across 70 tracked repos at <code>per_page=100</code> for <code>published_at &gt;= 2026-10-03T13:30Z</code>.<ul>
+<li>Hits: LangGraph.js ×9 package tags and PostHog agent-skills ×3.</li>
+<li><code>openai/openai-agents-go</code> returned 404 because the repo does not exist; that is not a gap.</li>
+</ul>
+</li>
+<li><strong>Registries:</strong> PyPI upload times for 44 packages (0 in-window hits; the LAST line is logged for each) and npm <code>time</code> for 37 packages.<ul>
+<li>npm hits: <code>@langchain/langgraph</code> 1.4.19, Mastra alphas, and a Cline nightly. <code>@langchain/langgraph-sdk</code> 1.12.1 was checked separately.</li>
+</ul>
+</li>
+<li><strong>PRs:</strong> GitHub PR API for state, merge time, base and body of every cited PR: langgraphjs #2906 / #2882 / #2918; langgraph #8538 / #8548; codex #50687; litellm #44404 / #44391 / #44397 / #44418; qwen-code #13304; letta-code #4929; promptfoo #10606.</li>
+<li><strong>arXiv:</strong> <code>/list/cs.AI/new</code>, the arXiv API, and full-PDF <code>pdftotext</code> for all three Academy ranks (16, 11 and 7 pages).</li>
+<li><strong>Catalog:</strong> grepped for every candidate. There is no LangGraph product card, and no card for <code>2610.00041</code>, <code>00092</code> or <code>00126</code>; those three appear only in the 0634 brief's screened list.</li>
+<li><strong>Social sources:</strong> HN was dropped 2026-09-27 (0 hits by design). X returned 401, Reddit 403, and LinkedIn hit its authwall (per packs). Medium scouts are paused and lead-only.</li>
+<li><strong>Run:</strong></li>
+<li>Late wake about 12:37 PT; on-cadence, label kept <strong>1234</strong>. Effort = <strong>high</strong>.</li>
+<li>Priority pin <code>2609.02702</code> untouched. Nothing from the do-not-re-admit list was re-admitted.</li>
+<li>No first-party BQAA cards; google-adk is NOTE only. GTM is paused, so no GTM content. Crustdata not used.</li>
+<li><strong>Catalog baseline at start:</strong> 504 items / 129 briefs / 131 runs; max brief <code>2026-10-03T0634</code>.</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW — Industry</strong></p>
+<ol>
+<li><strong>id:</strong> <code>langgraphjs-1-4-19-subgraph-state-reads-not-empty-updates-not-lost-sdk-no-4xx-retry</code></li>
+</ol>
+<ul>
+<li><p><strong>tag:</strong> Industry · <strong>title:</strong> LangGraph.js 1.4.19 / SDK 1.12.1: subgraph state reads stop coming back empty, subgraph updates stop being lost</p>
+</li>
+<li><p><strong>URL:</strong> https://github.com/langchain-ai/langgraphjs/releases/tag/%40langchain%2Flanggraph%401.4.19</p>
+</li>
+<li><p><strong>card:</strong> Fixes silent state bugs in LangGraph.js (released Oct 3):</p>
+<ul>
+<li>reading a subgraph's state returned every <code>DeltaChannel</code> as empty;</li>
+<li><code>getState</code>/<code>updateState</code> on <code>checkpointer: true</code> subgraphs read <code>{}</code> and silently dropped updates;</li>
+<li>resuming from a replayed subgraph checkpoint re-fired the interrupt.</li>
+</ul>
+<p>SDK 1.12.1 stops retrying protocol SSE streams on 4xx, keeps HTTP status on errors, and reconciles <code>useStream</code> with persisted state after <code>stop()</code>. The Python equivalents (#8538, #8548) are merged but unreleased.</p>
+</li>
+</ul>
+<p><strong>NEW — Academy</strong></p>
+<ol start="2">
+<li><strong>id:</strong> <code>arxiv-2610-00092-budgetschemabench-schema-budget-data-agents-memorization-floor</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy · <strong>title:</strong> BudgetSchemaBench: schema-context budget for data agents, and answers rebuilt from memory</li>
+<li><strong>arXiv:</strong> 2610.00092 · https://arxiv.org/abs/2610.00092</li>
+<li><strong>card:</strong> Sweeps the schema budget (2.5–50% of an 80-database, 597-table catalog) for text-to-SQL data agents. Wrong-source answers count as errors.<ul>
+<li><strong>Budget:</strong> under lexical retrieval, execution accuracy rises 0.38 to 0.55 (+18 pp); under dense retrieval only +3 pp.</li>
+<li><strong>Memory:</strong> with the needed tables removed, 94.6% of &quot;correct&quot; answers name a removed table exactly, consistent with rebuilding schema from training memory.</li>
+<li><strong>Format:</strong> once the needed tables are present, the schema format moves accuracy by at most 2 pp (full PDF read).</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li><strong>id:</strong> <code>arxiv-2610-00041-delegation-danger-band-sub-agents-over-trust-inherited-stale-state</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy · <strong>title:</strong> The Delegation Danger Band: sub-agents over-trust inherited stale state</li>
+<li><strong>arXiv:</strong> 2610.00041 · https://arxiv.org/abs/2610.00041</li>
+<li><strong>card:</strong> When a forked sub-agent inherits a superseded parent note, mid-capability Qwen3-1.7B does 0.19 worse than a fresh fork, while 4B–14B stay robust because they compare the stale note with the current one. When the stale note arrives without its correction, every model follows it (4B/8B reliance 0.90/0.94; accuracy drops 0.75/0.78). Curated handoff beats full inheritance on all three datasets, and no capability router transfers across datasets (full PDF read).</li>
+</ul>
+<ol start="4">
+<li><strong>id:</strong> <code>arxiv-2610-00126-verifier-can-leak-answer-support-gated-abstention-before-optimization</code></li>
+</ol>
+<ul>
+<li><strong>tag:</strong> Academy · <strong>title:</strong> A Verifier Can Leak the Answer: audit evidence eligibility before comparing optimizers</li>
+<li><strong>arXiv:</strong> 2610.00126 · https://arxiv.org/abs/2610.00126</li>
+<li><strong>card:</strong> In a closed-loop agent debugger, exact and greedy solvers agreed 12/12 only because scoped probes had already revealed the planted fault (9/9), leaving 0/9 cases with any ambiguity. A support-gated contract (reference gate, then matched runtime gate, then signal, with explicit abstain states) gave 0/20 false admissions (95% upper bound 0.139) on a preregistered 1,440-case heldout. The agent is a simulator policy, not an LLM (full PDF read).</li>
+</ul>
+<p><strong>Progress:</strong> none this slot.</p>
+<p><strong>Headline claims (for citation checks)</strong></p>
+<ol>
+<li>The LangGraph.js <code>@langchain/langgraph</code> 1.4.19 release notes say a subgraph's <code>DeltaChannel</code> is now read with the checkpointer the parent resolved instead of being hydrated empty, and that <code>updateState</code> on a <code>checkpointer: true</code> subgraph's namespace is no longer lost. https://github.com/langchain-ai/langgraphjs/releases/tag/%40langchain%2Flanggraph%401.4.19 (Oct 3, 2026)</li>
+<li>In BudgetSchemaBench, with the needed tables removed, 1,169 of 1,236 predictions counted correct (94.6%) referred to a removed gold table by its exact name. https://arxiv.org/abs/2610.00092 (Oct 2, 2026 listing; §4)</li>
+<li>In the Delegation Danger Band stale-only arm, Qwen3-4B and Qwen3-8B followed an uncorroborated stale note with reliance 0.90 and 0.94, and their accuracy dropped by 0.75 and 0.78. https://arxiv.org/abs/2610.00041 (Oct 2, 2026 listing; Appendix G)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 3 Oct 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
