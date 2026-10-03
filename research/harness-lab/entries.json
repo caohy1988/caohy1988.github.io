@@ -1,8 +1,97 @@
 {
-  "updatedAt": "2026-10-02T23:55:00Z",
+  "updatedAt": "2026-10-03T23:55:00Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "phase-barrier-anti-shortcut-stage-gate-2026-10-03",
+      "date": "2026-10-03",
+      "displayDate": "Oct 3, 2026",
+      "title": "phase-barrier — stage-gate anti_shortcut blocks impl edits until failing repro exists",
+      "href": "https://github.com/Xuqing0415/phase-barrier",
+      "why": "Stage-gate enforcement harness (anti_shortcut) that intercepts tool calls (write_file, execute_command, shell redirects, script one-liners) so a coding agent cannot edit source until the current phase's verifiable artifacts exist — requirement → spec → tests → implementation → test → fix → delivery. State secured with HMAC signatures + SHA-256 evidence manifest. SWE-bench Lite Scale-20 claim (README): baseline 18/20 (90%) vs gated 20/20 (100%), 78 gate interceptions, 0 regressions, ~1.8× wall-clock (262s → 462s). Mechanical fit for reproduce-before-fix / intent→spec→plan SOPs. Caveats: ★2 MIT young; SWE-bench numbers README-only not re-run here; stage-gate overhead + language adapters; not installed/run. Patterns/hooks, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-03-agy-harness-lab-pack",
+      "tags": [
+        "harness",
+        "hooks",
+        "evidence",
+        "repro-first",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "agent-receipts-transcript-claim-gaming-audit-2026-10-03",
+      "date": "2026-10-03",
+      "displayDate": "Oct 3, 2026",
+      "title": "agent-receipts — transcript claim auditor catches assertion cuts, || true, --no-verify",
+      "href": "https://github.com/0xelitesystem/agent-receipts",
+      "why": "Zero-dependency pure-Python-stdlib transcript verifier: parses agent session logs (Claude Code + sub-agent transcripts), extracts completion claims (\"tests pass\", \"committed\", \"created X\"), and cross-checks against real exit codes, filesystem state, and git commits. Flags gaming signals — assertion-count reductions, failure masking with || true, commits with --no-verify — and scores a receipts report offline (no API keys). Fits Mori done-receipt / code-decides-done audits. Caveats: ★0 MIT young; post-hoc only (does not block in-flight tampering); scoring on huge multi-agent transcripts unverified here; not installed/run. Patterns/checks, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-03-agy-harness-lab-pack",
+      "tags": [
+        "receipts",
+        "evidence",
+        "hooks",
+        "audit",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "dibs-resource-lease-single-door-ship-2026-10-03",
+      "date": "2026-10-03",
+      "displayDate": "Oct 3, 2026",
+      "title": "dibs — resource leases + single-door ship for parallel Mac CLI sessions (reference only)",
+      "href": "https://github.com/vaknin/dibs",
+      "why": "Zero-daemon coordination layer (single Rust binary + SQLite) for parallel agent sessions on one machine. SessionStart awareness of peers/checkouts/holds; PreToolUse regex-mapped resource leases (git branches, ports, devices, services, files) that deny collisions and name the holder; dibs ship as the one door to master (queue, lease master, rebase, tests, ff-merge, push); stateful handoffs that transfer leases + peer notes. Fits multi-seat Mac CLI concurrency and no-exit-while-waiting push serialization. Caveats: ★0 young; **no SPDX license detected** → clean-room / reference design only — do not vendor or copy code; needs Rust build + hook config; concurrency under load unverified here; not installed/run. Patterns/reference, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-03-agy-harness-lab-pack",
+      "tags": [
+        "harness",
+        "hooks",
+        "concurrency",
+        "git",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "claude-code-cache-keepalive-collapse-transcript-audit-2026-10-03",
+      "date": "2026-10-03",
+      "displayDate": "Oct 3, 2026",
+      "title": "claude-code-cache-keepalive — transcript time-series exposes self-healing cache collapse",
+      "href": "https://github.com/lllq-123/claude-code-cache-keepalive",
+      "why": "Operational analysis + transcript audit recipes for Claude Code prompt-cache collapse: a busting turn recomputes the full prefix at write cost (1.25×/2×), then the next turn self-heals to ~99% hit — so point-in-time metrics hide the burn. Exact jq over cache_read_input_tokens vs cache_creation_input_tokens on ~/.claude/projects/ JSONL; classifies break location (tools schema vs system vs messages); TTL keepalive notes before Anthropic's sliding window expires. Complements yesterday's contextscope (request-body LCP diffs) with post-hoc transcript detection. Caveats: ★13 MIT; unofficial community notes (Claude Code 2.1.x; behavior may change); retrospective only; not installed/run. Patterns/checks, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-03-agy-harness-lab-pack",
+      "tags": [
+        "tokens",
+        "cache",
+        "audit",
+        "cost",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "relevo-mastermind-builder-worktree-handoff-2026-10-03",
+      "date": "2026-10-03",
+      "displayDate": "Oct 3, 2026",
+      "title": "relevo — MasterMind↔builder plan/report handoffs with worktrees + stall_after_ms",
+      "href": "https://github.com/fuad-daoud/relevo",
+      "why": "Automated plan/report handoff reconciler between an architect MasterMind and headless builders (native Claude Code, Codex, Agy). Moves files, starts builders in isolated git worktrees, captures round diffs, runs post-round validation gates, detects stalled headless streams (stall_after_ms), and can wake idle Agy on report arrival. README explicitly decoupled from Herdr (\"builders are headless or remote processes, and relevo no longer integrates with herdr\"). Aligns with Manage↔Mac CLI handoff contracts. Caveats: ★1 MIT young; full Go binary + optional LaunchAgent/service — prefer handoff protocol / worktree / stall heuristics as reference patterns rather than installing a heavy supervisor; daemon lifecycle unverified here; not installed/run. Patterns/reference, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-03-agy-harness-lab-pack",
+      "tags": [
+        "handoffs",
+        "worktrees",
+        "harness",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "contextscope-prefix-cache-break-diff-fail-on-2026-10-02",
       "date": "2026-10-02",
