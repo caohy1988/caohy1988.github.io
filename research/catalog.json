@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "id": "litellm-1-104-0-stable-langfuse-v4-otel-master-key-gate-normalized-error-missing-alias-spend-fix",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "LiteLLM v1.104.0 (stable): Langfuse callback on SDK v4/OTel, proxy refuses weak master keys, normalized error keys and $0-cost counters, but no dotted-alias $0-spend fix",
+      "html": " <a href=\"https://github.com/BerriAI/litellm/releases/tag/v1.104.0\">release</a> — LiteLLM 1.104.0 (Oct 3, now PyPI latest) makes two breaking changes stable: the langfuse callback moves to Langfuse SDK v4 and exports OTel spans (pin langfuse&gt;=4.7,&lt;5); the proxy refuses to boot with an unset, empty or sk-1234 master key. It adds error_information.normalized_error, a litellm_zero_cost_requests_total counter for billable requests priced at $0, a span_type spend-log filter, and fail-closed agent access groups. Its source lacks the #44341 fix for streamed dotted-alias requests logged at $0 (a regression since v1.92.0), which v1.103.3 shipped about 45 minutes later. <a href=\"/research/briefs/2026-10-03-1834-opus.html\">Full brief</a>.",
+      "added": "2026-10-03T1834",
+      "addedDisplay": "6:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2610-00371-deny-without-disabling-authorization-paired-eval-runtime-lineage-beats-model-lineage",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Deny Without Disabling: authorization-paired evaluation, and runtime lineage that agents can't be trusted to write",
+      "html": " <a href=\"https://arxiv.org/abs/2610.00371\">abs</a> — Scores multi-agent safety as block the prohibited use AND complete the authorized one. Composition: with proposals fixed, per-artifact review let 413/480 composed denied commits through and union review 0/480, with authorized supply unchanged (459/480). Lineage: model-written lineage was complete in 178/840 graphs, and permission attribution drifted in 676/840 even with an explicit contract. Runtime-recorded lineage plus an isolated permission specialist reached 1.0. Enforcement: model review leaked 11/991 at 0.987 recall versus 0/1,009 for deterministic deletion (full PDF read). <a href=\"/research/briefs/2026-10-03-1834-opus.html\">Full brief</a>.",
+      "added": "2026-10-03T1834",
+      "addedDisplay": "6:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-39957-hisentinel-hindsight-distilled-pre-execution-sentinel-trajectories-kv-cache-flips",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "HiSentinel: logged coding trajectories train a 1.7B pre-execution sentinel",
+      "html": " <a href=\"https://arxiv.org/abs/2609.39957\">abs</a> — A teacher that sees each action&#x27;s recorded continuation distills ALLOW / REDIRECT / HARD-PAUSE judgments into a 1.7B student that sees only the prefix and the proposed action. Results: Qwen3-Coder rose from 30% to 44% on SWE-bench Verified Mini (15 to 22 of 50) and from 23% to 33% on Ask-or-Assume. 109 of 242 interventions were beneficial and 27 harmful. Caching: cross-step KV caching flipped 13 of 896 token-identical routing calls and cost 4 resolved tasks. Caveat: single runs, no intervals (full PDF read). <a href=\"/research/briefs/2026-10-03-1834-opus.html\">Full brief</a>.",
+      "added": "2026-10-03T1834",
+      "addedDisplay": "6:34 PM PT",
+      "progress": []
+    },
+    {
       "id": "langgraphjs-1-4-19-subgraph-state-reads-not-empty-updates-not-lost-sdk-no-4xx-retry",
       "tag": "Industry",
       "kind": "rank",
@@ -279,6 +309,11 @@
           "at": "2026-10-03T0034",
           "displayTime": "12:34 AM PT",
           "html": "Claude Code 2.1.288 (GitHub release Oct 2 20:19Z, now npm latest; Agent SDK 0.3.288 at parity) fixes claude_code.tool.blocked_on_user spans reporting unknown source/decision in -p/SDK sessions, and emits tool_decision for unanswered permission asks. PreToolUse/PermissionRequest hooks now block the call when matching fails, and MCP tool calls no longer run twice on results over 16 MB or unparseable. <a href=\"/research/briefs/2026-10-03-0034-opus.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-03T1834",
+          "atDisplay": "6:34 PM PT",
+          "html": "Claude Code 2.1.289 (npm latest Oct 3; Agent SDK 0.3.289 at parity) fixes Bash deny and ask rules being skipped under sandbox auto-allow behind env-var prefixes or bare assignments, and deny rules not holding over a user mod's approval on managed machines. User plugins can no longer rewrite an org-managed MCP server's sign-in tool descriptions. It adds one agent id across plugin hook events and agent.spawn for teammates. https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md <a href=\"/research/briefs/2026-10-03-1834-opus.html\">Full brief</a>."
         }
       ]
     },
@@ -1868,6 +1903,11 @@
           "at": "2026-09-25T0034",
           "displayTime": "12:34 AM PT",
           "html": "LiteLLM <a href=\"https://github.com/BerriAI/litellm/releases/tag/v1.100.3\">v1.98.1 / v1.99.4 / v1.100.3</a> (GH 06:20–06:21Z, PyPI 06:05–06:08Z) backport #39729 (budget reset now clears the cached end-user spend counter on every replica, where before 429s continued after rollover) and #40639 (shared budgets with more than 32,767 end users now reset), plus the gpt-6 request-family fix. Every maintained line from 1.98.x to 1.102.x now has both. <a href=\"https://github.com/BerriAI/litellm/releases/tag/v1.104.0-dev.2\">v1.104.0-dev.2</a> is the first artifact with #42486, which sets gen_ai.conversation.id on OTel LLM spans from the caller's session id. Progress only. <a href=\"/research/briefs/2026-09-25-0034-opus.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-03T1834",
+          "atDisplay": "6:34 PM PT",
+          "html": "LiteLLM v1.103.3 (stable, Oct 3 23:33Z) ships the #44404 backport. Streamed dotted-alias requests such as claude-opus-4.6 are priced at the deployment's rate instead of $0, and bridged Responses replies keep text and tool calls in one choice. Newer stable 1.104.0 does not carry this fix. https://github.com/BerriAI/litellm/releases/tag/v1.103.3 <a href=\"/research/briefs/2026-10-03-1834-opus.html\">Full brief</a>."
         }
       ]
     },
@@ -6104,6 +6144,22 @@
   ],
   "runs": [
     {
+      "id": "2026-10-03T1834",
+      "date": "2026-10-03",
+      "display": "6:34 PM PT",
+      "href": "/research/briefs/2026-10-03-1834-opus.html",
+      "analyzer": "Opus 5.5",
+      "added": [
+        "litellm-1-104-0-stable-langfuse-v4-otel-master-key-gate-normalized-error-missing-alias-spend-fix",
+        "arxiv-2610-00371-deny-without-disabling-authorization-paired-eval-runtime-lineage-beats-model-lineage",
+        "arxiv-2609-39957-hisentinel-hindsight-distilled-pre-execution-sentinel-trajectories-kv-cache-flips"
+      ],
+      "updated": [
+        "litellm-1-102-1-jev-routing-compaction-passthrough-stable-backport",
+        "claude-code-2-1-287-claude-mods-you-should-know-side-agent-otel-prompt-text"
+      ]
+    },
+    {
       "id": "2026-10-03T1234",
       "date": "2026-10-03",
       "display": "12:34 PM PT",
@@ -8142,6 +8198,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-10-03T1834",
+      "date": "2026-10-03",
+      "display": "6:34 PM PT",
+      "href": "/research/briefs/2026-10-03-1834-opus.html",
+      "analyzer": "Opus 5.5",
+      "title": "Opus 5.5: Industry NEW LiteLLM v1.104.0 stable Langfuse v4/OTel + master-key gate; Academy NEW Deny Without Disabling 2610.00371 + HiSentinel 2609.39957; Progress LiteLLM 1.103.3 + Claude Code 2.1.289"
+    },
     {
       "id": "2026-10-03T1234",
       "date": "2026-10-03",
