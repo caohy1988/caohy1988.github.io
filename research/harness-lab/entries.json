@@ -1,8 +1,98 @@
 {
-  "updatedAt": "2026-10-04T16:02:36Z",
+  "updatedAt": "2026-10-04T23:52:38Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "loupe-sha-bound-review-envelopes-circuit-breakers-2026-10-04",
+      "date": "2026-10-04",
+      "displayDate": "Oct 4, 2026",
+      "title": "loupe — review envelopes bound to commit SHAs, fingerprinted findings, and circuit breakers that stop non-converging rounds",
+      "href": "https://github.com/picosam/loupe",
+      "why": "Deterministic, agent-neutral review plumbing with no model inside: request, verdict, disposition and authorization envelopes each bound to a commit SHA; findings fingerprinted with alias lineage so they can't quietly change between rounds; an append-only ledger; and circuit breakers (repetition, stale, no-progress, unverifiable, budget, orphan) that block the next handoff until a human records a decision. A human carries every leg. Fits our verdict-on-head-SHA rule, finetooth-style fingerprints and the human gate, and gives a machine form of 'reviewer loops must terminate'. Caveats: 0 stars, MIT, Python 3.15.x pinned, published-not-developed (issues only); adds relay latency; README-verified, not installed or run. Patterns/reference over existing seats, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-04-muse-harness-lab-pack",
+      "tags": [
+        "review",
+        "dual-LGTM",
+        "verification",
+        "ledger",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "corralai-critic-not-writer-reproduce-or-demote-2026-10-04",
+      "date": "2026-10-04",
+      "displayDate": "Oct 4, 2026",
+      "title": "corralai — critic must differ from writer, unreproduced review claims are demoted, mutation kill-rate measures test adequacy (patterns only)",
+      "href": "https://github.com/pdbethke/corralai",
+      "why": "Auditing engine that refuses to grade its own work. certify plants goal-violating faults and runs your own suite against each one, so the kill-rate is measured, not self-reported, and 'zero proven gaps means nothing was proven'. review uses a decorrelated adversary: every claim ships a script it runs, unreproduced claims are demoted on the record, and the run refuses to start if the critic matches the writer. Fits our implementer-not-reviewer and blind dual-LGTM rule (refuse, not just discourage), our negative-claim rule, and mutation-based test adequacy. Its measured cross-model blind-spot overlap (Jaccard 0.750 over 13 survivors, author-reported) is worth reading before any multi-seat review fan-out. Caveats: Elastic-2.0, so patterns only, do not vendor or run as a hosted service; 2 stars; certify needs a provider key, Go toolchain and sandbox time; README-verified, not run. No Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-04-muse-harness-lab-pack",
+      "tags": [
+        "review",
+        "verification",
+        "mutation-testing",
+        "dual-LGTM",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "delivery-harness-autonomy-error-budget-engine-lock-2026-10-04",
+      "date": "2026-10-04",
+      "displayDate": "Oct 4, 2026",
+      "title": "delivery-harness — autonomy per task class with an error budget, hash-locked harness engine, and tests run at the base version",
+      "href": "https://github.com/SnowsonZ/delivery-harness",
+      "why": "Verifiable delivery harness whose engine is vendored per project and hash-locked (verify fails on drift; changes only through a reviewable upgrade PR). Checks that check themselves: Defect-trailer fixes must fail before and pass after, existing tests run at the base version so the agent can't weaken them, past incidents are replayed, and quality baselines only move one way. Risk is routed R0 to R3 from the paths touched, not author claims, and autonomy is granted per task class with an error budget that is withdrawn automatically when exceeded. Fits our autonomy ladder with demotion (the automatic enforcement half), seat-install drift checks in the nightly Mac audit, and prevention behind agent-receipts' post-hoc detection. Caveats: 0 stars, MIT, Chinese-first messages; adopt the three named mechanisms, not the platform install; overlaps kept cards; README-verified, not run. No Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-04-muse-harness-lab-pack",
+      "tags": [
+        "autonomy",
+        "verification",
+        "integrity",
+        "risk-routing",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "ai-jury-cross-vendor-cli-review-jury-2026-10-04",
+      "date": "2026-10-04",
+      "displayDate": "Oct 4, 2026",
+      "title": "ai-jury — cross-vendor review jury that drives agent CLIs read-only, with a chair that verifies before it synthesizes",
+      "href": "https://github.com/berkayturanci/ai-jury",
+      "why": "Review jury that runs agent CLIs (claude, codex, agy), hosted APIs and local open-weight models (Ollama, llama.cpp, vLLM) headless and sandboxed read-only, handing each the diff in the prompt so no reviewer needs repo access. Round one is independent parallel review, then an adaptive rebuttal round, then a chair verifies and synthesizes one verdict (APPROVE, COMMENT or REQUEST CHANGES) or a panel vote; jury --mock runs a full offline deliberation with zero config. Fits our blind review and evidence-before-verdict discipline, could add a $0-marginal local third seat, and --mock gives a model-free fixture for replay checks. Caveats: 8 stars, MIT, PyPI; fan-out costs tokens, so CI gate on selected repos only and any standing use needs Haiyuan approval under token-save; the agy seat is opt-in because it can't be confined; read corralai's blind-spot overlap first; README-verified, not run. Not a new coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-04-muse-harness-lab-pack",
+      "tags": [
+        "review",
+        "dual-LGTM",
+        "CI",
+        "cost",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "stk-read-side-outlines-claude-codex-hooks-2026-10-04",
+      "date": "2026-10-04",
+      "displayDate": "Oct 4, 2026",
+      "title": "STK — one Rust binary that turns oversized file reads into line-numbered outlines for Claude Code and Codex",
+      "href": "https://github.com/ryanportfolio/STK",
+      "why": "Hook-based tool for Claude Code and Codex: oversized whole-file reads become line-numbered outlines so the agent fetches only the parts it needs (stk read --offset/--limit), while small or scoped reads pass through. stk gain reports an upper bound on bytes avoided and says plainly that follow-up reads still cost tokens, so it measures hook behavior, not net session savings. Read-side counterpart to the kept ai-coding-gateway (output-side trim) and a fit for the usage dashboard's bytes-are-not-tokens discipline. Caveats: 1 star, young; LICENSE file reads MIT (GitHub API license field not reported); upstream verification is Windows-only, so macOS behavior is unverified until a one-seat trial; needs a Rust toolchain; README-verified, not installed. A hook on existing seats, not a new coding CLI; no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-04-muse-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "tokens",
+        "context",
+        "cost",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "untrusted-content-is-data-not-instructions-2026-10-04",
       "date": "2026-10-04",
