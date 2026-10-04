@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "id": "arxiv-2609-40027-who-verifies-the-graph-one-edge-certified-false-executions-wrongful-inaction-audit-cost",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Who Verifies the Graph? One omitted edge or reversed arrow makes a certified action verifier act wrongly, and auditing executions alone misses wrongful inaction",
+      "html": " <a href=\"https://arxiv.org/abs/2609.40027\">abs</a> — A red-team of the CIVeX causal action verifier that corrupts only its committed graph. Attacks: omitting one edge takes false executions from 0% to 15.3% at the published strength; reversing one mediator arrow gives 48.9%, with every certificate internally valid. Defense: checking each execution against a bounded randomized experiment removes false executions, but 97.1% of beneficial actions stay rejected. Cost: recovering safety took 127 experiments and recovering value took 614 more, so audits must cover rejections, not just executions (full PDF read). <a href=\"/research/briefs/2026-10-04-0034-opus.html\">Full brief</a>.",
+      "added": "2026-10-04T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-38021-auditable-long-term-memory-judge-flips-identical-answers-negative-control-request-capture",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Auditable Long-Term Memory: 479/475 on LongMemEval-S inside a judge that flips verdicts on identical answers",
+      "html": " <a href=\"https://arxiv.org/abs/2609.38021\">abs</a> — A deterministic retrieval chain with a swappable LLM reader scores 479 and 475 of 500 across two passes, bracketing the published 478. Judge noise: re-judging byte-identical answers with the official judge flipped 3 verdicts, and a second judge agrees on 98.6% of rows. Negative control: it blocked a verifier that fixed 3 rows but broke 11 correct drafts. Provenance gap: the headline reader carried about 59–62k characters of operator context and MCP tools were left enabled, and the full requests weren&#x27;t retained (full PDF read). <a href=\"/research/briefs/2026-10-04-0034-opus.html\">Full brief</a>.",
+      "added": "2026-10-04T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2609-38245-agent-warden-ebpf-process-file-provenance-beyond-app-layer-traces",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Agent-Warden: eBPF process–file provenance recovers agent causal chains that application-layer traces miss",
+      "html": " <a href=\"https://arxiv.org/abs/2609.38245\">abs</a> — An eBPF monitor propagates provenance through fork/exec, file writes, reads by independent processes and child exit. Visibility: in a controlled scenario it reconstructs an agent → script → file → rename → uninstrumented-reader chain that the Langfuse trace did not record, 30/30 runs per backend on x86-64 and ARM64. Overhead: 0.2–3.5% end-to-end and 0.6–3.7% extra system CPU. Caveat: evidence is a single predefined payload, with no io_uring, mmap or network coverage (full PDF read). <a href=\"/research/briefs/2026-10-04-0034-opus.html\">Full brief</a>.",
+      "added": "2026-10-04T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
       "id": "litellm-1-104-0-stable-langfuse-v4-otel-master-key-gate-normalized-error-missing-alias-spend-fix",
       "tag": "Industry",
       "kind": "rank",
@@ -8,7 +38,13 @@
       "html": " <a href=\"https://github.com/BerriAI/litellm/releases/tag/v1.104.0\">release</a> — LiteLLM 1.104.0 (Oct 3, now PyPI latest) makes two breaking changes stable: the langfuse callback moves to Langfuse SDK v4 and exports OTel spans (pin langfuse&gt;=4.7,&lt;5); the proxy refuses to boot with an unset, empty or sk-1234 master key. It adds error_information.normalized_error, a litellm_zero_cost_requests_total counter for billable requests priced at $0, a span_type spend-log filter, and fail-closed agent access groups. Its source lacks the #44341 fix for streamed dotted-alias requests logged at $0 (a regression since v1.92.0), which v1.103.3 shipped about 45 minutes later. <a href=\"/research/briefs/2026-10-03-1834-opus.html\">Full brief</a>.",
       "added": "2026-10-03T1834",
       "addedDisplay": "6:34 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-10-04T0034",
+          "atDisplay": "12:34 AM PT",
+          "html": "LiteLLM v1.105.0-rc.1 (Oct 4 01:41Z, prerelease) adds team-scoped SQL over otel_traces / agent_traces_by_key / spend_logs via POST /v1/traces/query (#44085). It keeps NULL-team spend when teams are excluded on Usage (#44139) and exempts tool payloads and logprobs from stored-body credential masking (#44075). It still lacks the dotted-alias $0-spend fix that only stable 1.103.3 carries. <a href=\"/research/briefs/2026-10-04-0034-opus.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "arxiv-2610-00371-deny-without-disabling-authorization-paired-eval-runtime-lineage-beats-model-lineage",
@@ -6144,6 +6180,21 @@
   ],
   "runs": [
     {
+      "id": "2026-10-04T0034",
+      "date": "2026-10-04",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-10-04-0034-opus.html",
+      "analyzer": "Opus 5.5",
+      "added": [
+        "arxiv-2609-40027-who-verifies-the-graph-one-edge-certified-false-executions-wrongful-inaction-audit-cost",
+        "arxiv-2609-38021-auditable-long-term-memory-judge-flips-identical-answers-negative-control-request-capture",
+        "arxiv-2609-38245-agent-warden-ebpf-process-file-provenance-beyond-app-layer-traces"
+      ],
+      "updated": [
+        "litellm-1-104-0-stable-langfuse-v4-otel-master-key-gate-normalized-error-missing-alias-spend-fix"
+      ]
+    },
+    {
       "id": "2026-10-03T1834",
       "date": "2026-10-03",
       "display": "6:34 PM PT",
@@ -8198,6 +8249,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-10-04T0034",
+      "date": "2026-10-04",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-10-04-0034-opus.html",
+      "analyzer": "Opus 5.5",
+      "title": "Opus 5.5: Academy NEW Who Verifies the Graph 2609.40027 + Auditable LTM 2609.38021 + Agent-Warden 2609.38245; Progress LiteLLM v1.105.0-rc.1 on 1.104.0 card; Industry quiet"
+    },
     {
       "id": "2026-10-03T1834",
       "date": "2026-10-03",
