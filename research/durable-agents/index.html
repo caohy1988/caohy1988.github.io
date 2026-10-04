@@ -56,7 +56,7 @@
 <header class="topbar">
 <a class="skip" href="#study">Skip to study</a>
 <a class="brand" href="/research/" aria-label="Field notes, Durable running agents (Research home)"><svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6"/><path class="bm-a" d="M6 21h8"/><path class="bm-cut" d="M14 26l3-10 3 10"/><path class="bm-b" d="M18 11h8"/></svg><span class="brand-name">Field notes</span> <span class="brand-sub">Durable running agents</span></a>
-<div class="top-actions"><a href="#sources">Sources <span class="source-count">165</span></a><button id="share" type="button">Copy link</button></div>
+<div class="top-actions"><a href="#sources">Sources <span class="source-count">166</span></a><button id="share" type="button">Copy link</button></div>
 </header>
 <div id="share-status" class="share-status" role="status" aria-live="polite"></div>
 <main id="study">
@@ -68,7 +68,7 @@
 <p class="deck">An agent that works for hours will outlive the process running it. What should survive the crash, what runs twice, and who notices?</p>
 <p class="intro">On 1 October 2026 Earendil released Pi Durable as an experimental package, a library in which “every step of a run is a task that stores a checkpoint before it moves on.”<a class="cite" href="#s90" aria-label="Source 90">[90]</a><a class="cite" href="#s89" aria-label="Source 89">[89]</a> The page opens with Pi Durable because it is the recent system that prompted this study. From there it widens to durable running agents in general: how a new process picks up after the old one dies, where that breaks, what it costs, and how 26 systems compare, Pi Durable among them, from durable-execution engines and agent frameworks to vendor agents that run in the background.</p>
 <p class="read-links"><a class="read-link" href="#summary">Read the study on one screen</a> <a class="read-link" href="#pi-differs">How Pi Durable differs, and what it teaches</a></p>
-<p class="hero-meta">Fifteen chapters, seven interactive explainers, seven diagrams, and 165 numbered sources, each opened and read for this study.</p>
+<p class="hero-meta">Sixteen chapters, seven interactive explainers, seven diagrams, and 166 numbered sources, each opened and read for this study.</p>
 </div>
 <figure class="hero-visual" aria-labelledby="hero-cap">
 <svg class="hero-svg" viewBox="0 0 420 300" aria-hidden="true" focusable="false">
@@ -147,13 +147,14 @@
 <a href="#costs"><b>12</b> Costs and hazards</a>
 <a href="#research"><b>13</b> The research</a>
 <a href="#conclusions"><b>14</b> What to do</a>
-<a href="#gaps"><b>15</b> Not confirmed</a>
+<a href="#warehouse"><b>15</b> Where a warehouse fits</a>
+<a href="#gaps"><b>16</b> Not confirmed</a>
 <a href="#sources"><b>S</b> Sources</a>
 </nav>
 <p class="sidebar-note">Numbers in brackets link to the sourcebook. Quotations are verbatim.</p>
 </aside>
 <article aria-labelledby="study-h">
-<h2 id="study-h" class="visually-hidden">The study, in fifteen chapters</h2>
+<h2 id="study-h" class="visually-hidden">The study, in sixteen chapters</h2>
 
 <section id="idea" class="chapter" data-path="quick" aria-labelledby="idea-h">
 <p class="chapter-number">Chapter 1</p>
@@ -710,8 +711,19 @@
 </div>
 </section>
 
-<section id="gaps" class="chapter" data-path="full" aria-labelledby="gaps-h">
+<section id="warehouse" class="chapter" data-path="full" aria-labelledby="warehouse-h">
 <p class="chapter-number">Chapter 15</p>
+<h2 id="warehouse-h">Where a data warehouse fits.</h2>
+<p class="in-short"><strong>In short:</strong> <em>In our reading</em>, the recovery store is for resuming one run, and a warehouse copy of run history is for learning from many; the study tested no warehouse in either role.</p>
+<div class="chapter-body" id="warehouse-body">
+<p>Chapter 1 calls durability a record that outlives the process: a new process reads it and continues.<a class="cite" href="#s89" aria-label="Source 89">[89]</a><a class="cite" href="#s62" aria-label="Source 62">[62]</a> Pi Durable commits that record to storage you choose: memory, SQLite, JSONL, or your own (chapter 9).<a class="cite" href="#s89" aria-label="Source 89">[89]</a><a class="cite" href="#s91" aria-label="Source 91">[91]</a> Chapters 2, 5 and 8 describe what particular designs require: Pi Durable checkpoints each step, DBOS stores wake-up times, shared storage has to reject a stale writer, and the OpenAI Agents SDK docs call for an atomic conditional transition there.<a class="cite" href="#s89" aria-label="Source 89">[89]</a><a class="cite" href="#s19" aria-label="Source 19">[19]</a><a class="cite" href="#s140" aria-label="Source 140">[140]</a><a class="cite" href="#s70" aria-label="Source 70">[70]</a> We evaluated no warehouse, BigQuery included; none of the 26 systems is listed with one as its durable store, and whether a warehouse could meet those requirements is untested.</p>
+<p><em>In our reading</em>, chapter 14’s advice suggests reviewing history across runs: were keys sent, how did the model respond to “may have partially run”, and which runs merit spend alerts? <em>In our reading</em>, those checks need complete enough records of keys, interrupted tool calls, what followed and spend. Chapter 13 reports one calibrated, deterministic simulation: the expected outcome was recovered after all 240 injected crashes, yet 30 traces changed because pre-commit crashes repeated a planner call.<a class="cite" href="#s158" aria-label="Source 158">[158]</a></p>
+<p><em>In our reading</em>, that review is the warehouse’s best position, and the recovery store stays where a run resumes. Our example is BigQuery Agent Analytics (BQAA), which Haiyuan works on; we did not run its SDK. The BQAA SDK README calls BigQuery a “Google Cloud analytics data warehouse” and says the SDK is “read-only over that table” of agent events.<a class="cite" href="#s166" aria-label="Source 166">[166]</a> It describes trace reconstruction, per-event-type views, turn-count and cost metrics, evaluation with an LLM judge, by trajectory and across trials, and regression detection through BigQuery SQL or Python.<a class="cite" href="#s166" aria-label="Source 166">[166]</a> It also describes Agent Context Graph decision traces, “the requests an agent handled, the options it weighed, and the outcomes it committed”, and long-horizon cross-session memory.<a class="cite" href="#s166" aria-label="Source 166">[166]</a> It does not say whether those events record idempotency keys or interrupted tool calls.<a class="cite" href="#s166" aria-label="Source 166">[166]</a> <em>In our reading</em>, that memory puts the warehouse back in the loop, so chapter 14’s rule applies: treat persisted context as input you did not write.<a class="cite" href="#s142" aria-label="Source 142">[142]</a></p>
+</div>
+</section>
+
+<section id="gaps" class="chapter" data-path="full" aria-labelledby="gaps-h">
+<p class="chapter-number">Chapter 16</p>
 <h2 id="gaps-h">What we could not confirm.</h2>
 <p class="in-short"><strong>In short:</strong> These are the claims we could not check and the lookups that failed; a failed lookup is a gap, not evidence that something is absent.</p>
 <div class="chapter-body" id="gaps-body">
@@ -727,6 +739,8 @@
 <li>Devin’s statement that sessions snapshot to disk when they sleep appears under its macOS heading; we did not confirm it for Linux or Windows sessions.<a class="cite" href="#s134" aria-label="Source 134">[134]</a></li>
 <li>For Pi Durable we read the v1.0.0 source but did not run it. The hazards described in chapters 4 and 5, such as two owners or a lost intent record after a power cut, are inferences from the code, not observed failures.</li>
 <li>We did not run Cloudflare’s <code>PiHarness</code>, which is in beta. We report its documentation only.</li>
+<li>We did not test any data warehouse, BigQuery included, as the storage a run resumes from or as a history of runs. We did not run the BigQuery Agent Analytics SDK, which Haiyuan works on; chapter 15 reports what its README says.<a class="cite" href="#s166" aria-label="Source 166">[166]</a></li>
+<li>We did not check whether a warehouse copy of a run is complete. Chapter 8 notes that the Claude Agent SDK’s SessionStore mirror is best-effort and drops a batch it cannot deliver.<a class="cite" href="#s76" aria-label="Source 76">[76]</a></li>
 <li>We did not check conference proceedings, so the table in chapter 13 gives arXiv dates rather than venues, including for the three 2025 papers.</li>
 <li>Meta’s Rule of Two page returned HTTP 400 to a browser-style request and HTTP 200 to a plain one. We checked the quoted text in the 200 response.</li>
 <li>Price tables rendered by scripts on some vendor pages, including Restate and DBOS, and AWS’s per-operation rates for durable functions, were not captured. We quote only prices we could read.</li>
@@ -923,6 +937,10 @@
 <li id="s163"><span class="source-num">163</span><a href="https://arxiv.org/abs/2610.02163" rel="noopener noreferrer">AutoCompact: Learning When to Compact Context in Long-Horizon Coding Agents</a><p>Learning when to compact lifts SWE-bench Verified from 30.4% to 39.6%.</p><p class="source-meta">Xuan Zhang, Longtao Zheng, Cunxiao Du, Bo An, Xin Dong. arXiv preprint, 1 October 2026.</p></li>
 <li id="s164"><span class="source-num">164</span><a href="https://arxiv.org/abs/2503.11951" rel="noopener noreferrer">SagaLLM: Context Management, Validation, and Transaction Guarantees for Multi-Agent LLM Planning</a><p>Applies the saga pattern with compensation to multi-agent planning; relaxes strict ACID guarantees.</p><p class="source-meta">Edward Y. Chang, Longling Geng. arXiv, first submitted 15 March 2025 (v3, 9 July 2025).</p></li>
 <li id="s165"><span class="source-num">165</span><a href="https://arxiv.org/abs/2607.25076" rel="noopener noreferrer">Towards an Agent Operating System - Lessons from Classical and Cloud OS</a><p>Argues that agent platforms should consolidate around abstractions extended from classical and cloud operating-system primitives.</p><p class="source-meta">Gosia Steinder, Hubertus Franke. arXiv preprint, 27 July 2026.</p></li>
+</ol>
+<h3 class="source-group">Agent analytics in a data warehouse</h3>
+<ol class="source-list" start="166">
+<li id="s166"><span class="source-num">166</span><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/README.md" rel="noopener noreferrer">BigQuery Agent Analytics SDK README on the main branch</a><p>Calls BigQuery a "Google Cloud analytics data warehouse" and the SDK "read-only over that table" of agent events; describes trace reconstruction, evaluation, Agent Context Graph decision traces, and long-horizon cross-session memory.</p><p class="source-meta">Google, main branch at commit 4a4f3ae, read 3 October 2026. Project documentation. Haiyuan works on BigQuery Agent Analytics.</p></li>
 </ol>
 </section>
 
