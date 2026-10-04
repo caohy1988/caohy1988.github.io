@@ -66,6 +66,7 @@ h1 { font: 800 clamp(44px, 6.2vw, 88px)/1.0 var(--sans); letter-spacing: -0.035e
 .intro { color: var(--ink-2); max-width: 54ch; margin: 0 0 22px; }
 .read-link { display: inline-block; font: 650 16px/1.3 var(--sans); color: var(--ink); text-decoration: none; padding: 10px 0; border-bottom: 2px solid var(--steel); }
 .read-link:hover { color: var(--steel); }
+.read-links { display: flex; flex-wrap: wrap; gap: 4px 28px; margin: 0; }
 .hero-meta { font: 14px/1.5 var(--sans); color: var(--muted); margin: 22px 0 0; }
 .hero-visual { margin: 0; padding: 22px 22px 18px; background: var(--wash); border: 1px solid var(--line); border-radius: 6px; }
 .hero-svg { display: block; width: 100%; height: auto; max-width: 480px; }
@@ -83,6 +84,39 @@ h1 { font: 800 clamp(44px, 6.2vw, 88px)/1.0 var(--sans); letter-spacing: -0.035e
 .summary-more { margin: 6px 0 0; }
 .summary-more > summary { cursor: pointer; padding: 10px 0; font: 650 15.5px/1.4 var(--sans); color: var(--steel); border-top: 1px solid var(--line); }
 .summary-more > summary:hover { text-decoration: underline; }
+/* Points 4 and 5 sit in the list when the screen is tall enough for five points; on shorter screens they move behind
+   the disclosure, which then holds six points, so the closed summary fits one screen below the anchor offset. The
+   heights come from measuring the summary at each width (five points need about 894 px of screen at 320 px wide,
+   793 px at 375 to 414, 701 px at 700 to 820, and 582 px from 1280), with a margin. Print keeps the tall layout. */
+.summary-list-more > .sum-mid-copy, .sum-n-short { display: none; }
+@media screen and (max-width: 359px) and (max-height: 919px),
+  screen and (min-width: 360px) and (max-width: 374px) and (max-height: 889px),
+  screen and (min-width: 375px) and (max-width: 699px) and (max-height: 811px),
+  screen and (min-width: 700px) and (max-width: 899px) and (max-height: 729px),
+  screen and (min-width: 900px) and (max-height: 669px) {
+  .summary-list > .sum-mid { display: none; }
+  .summary-list-more > .sum-mid-copy { display: block; }
+  .summary-list-more { counter-reset: take 3; }
+  .sum-n-tall { display: none; }
+  .sum-n-short { display: inline; }
+}
+/* The shortest screens (below 620 px on a phone, below 520 px wider) also move point 3 behind the disclosure, which
+   then holds seven points; below 450 px, as on a phone held sideways, the summary's spacing tightens as well. */
+.summary-list-more > .sum-low-copy, .sum-n-low { display: none; }
+@media screen and (max-width: 699px) and (max-height: 619px), screen and (min-width: 700px) and (max-height: 519px) {
+  .summary-list > .sum-low { display: none; }
+  .summary-list-more > .sum-low-copy { display: block; }
+  .summary-list-more { counter-reset: take 2; }
+  .sum-n-short { display: none; }
+  .sum-n-low { display: inline; }
+}
+@media screen and (max-height: 449px) {
+  .summary { padding-top: 10px; padding-bottom: 4px; }
+  .summary h2 { margin-bottom: 4px; }
+  .summary-list li { padding-top: 5px; padding-bottom: 5px; }
+  .summary-list li::before { top: 5px; }
+  .summary-more > summary { padding: 5px 0; }
+}
 
 /* How to read this page */
 .guide { max-width: 1296px; margin: 0 auto; padding: 28px 5vw 4px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 48px; align-items: start; }
@@ -305,7 +339,39 @@ dl.sys-cells dd, dl.sys-extra dd { margin: 2px 0 0; }
 .picker-table tr.differs .differs-note { color: var(--steel); font-weight: 650; }
 .picker-table td { font-size: 14px; }
 
-/* Explainer 4: crash simulator */
+/* Chapter 9: Pi Durable against the others (Diagram 7 and Explainer 4) */
+.pd-highlights { max-width: 720px; }
+.pd-figwrap { margin: 4px 0 0; }
+.pd-svg { display: block; width: 100%; height: auto; max-width: 860px; font-family: var(--sans); }
+.pd-colhead { font: 650 12.5px var(--sans); fill: var(--ink-2); }
+.pd-colnum { font: 650 11px var(--sans); fill: var(--ink-2); }
+.pd-famhead { font: 700 13px var(--sans); fill: var(--ink); }
+.pd-svg.narrow .pd-famhead { font-size: 12px; }
+.pd-name { font: 13px var(--sans); fill: var(--ink); }
+.pd-svg.narrow .pd-name { font-size: 11px; }
+.pd-same { fill: var(--steel); stroke: var(--steel); stroke-width: 1; }
+.pd-diff { fill: #fff; stroke: var(--ink-2); stroke-width: 1.6; }
+.pd-ns { fill: #fff; stroke: var(--faint); stroke-width: 1.4; stroke-dasharray: 2.5 2; }
+.pd-band { fill: var(--steel-wash); }
+.pd-key { font: 13.5px/1.5 var(--sans); color: var(--ink-2); margin: 8px 0 0; max-width: 760px; }
+.pd-text-version li { margin-bottom: 8px; }
+.pd-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 16px 0 0; }
+.pd-controls label { display: block; font: 600 14.5px/1.4 var(--sans); margin-bottom: 4px; }
+.pd-controls select { width: 100%; }
+.pd-pi { margin: 14px 0 0; padding: 12px 14px; border-left: 3px solid var(--steel); background: var(--wash); font: 15px/1.55 var(--sans); max-width: 760px; }
+.pd-pi p { margin: 0 0 6px; }
+.pd-pi p:last-child { margin-bottom: 0; }
+.pd-fams { margin: 6px 0 0; font-family: var(--sans); max-width: 820px; }
+.pd-fam h4 { margin: 20px 0 4px; font-size: 16px; }
+.pd-kind { margin: 12px 0 4px; font: 650 14.5px/1.4 var(--sans); color: var(--ink-2); }
+.pd-list { margin: 0 0 4px; font: 14.5px/1.55 var(--sans); }
+.pd-list li { margin-bottom: 6px; }
+.pd-overview { padding-left: 1.4em; font: 15px/1.55 var(--sans); max-width: 820px; margin: 12px 0 0; }
+.pd-overview li { margin-bottom: 10px; }
+.pd-overview p { margin: 0; }
+.lessons li { margin-bottom: 16px; }
+
+/* Explainer 5: crash simulator */
 .sim-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 14px; margin: 18px 0 14px; }
 .sim-sys { display: grid; gap: 8px; }
 .sim-stepper { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 6px 0 0; font-family: var(--sans); }
@@ -345,7 +411,7 @@ dl.sys-cells dd, dl.sys-extra dd { margin: 2px 0 0; }
 #sim-out.flash .sim-col { animation: simIn 0.35s ease-out; }
 @keyframes simIn { from { opacity: 0.35; } to { opacity: 1; } }
 
-/* Explainer 5: decision tree */
+/* Explainer 6: decision tree */
 .tree-flow { margin: 16px 0 0; font-family: var(--sans); max-width: 720px; }
 .tree-progress { font: 600 14px/1.4 var(--sans); color: var(--muted); margin: 0 0 8px; }
 .tree-q legend { font-size: 16px; }
@@ -368,7 +434,7 @@ details.tree-why > ul { margin: 6px 0 4px; }
 .tree-static { padding-left: 1.4em; font: 15px/1.55 var(--sans); }
 .tree-static p { margin: 0 0 4px; }
 
-/* Explainer 6: cost */
+/* Explainer 7: cost */
 .cost-controls { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; max-width: 620px; margin: 16px 0 6px; font-family: var(--sans); }
 .cost-controls > label { font: 600 15px/1.4 var(--sans); margin-top: 10px; }
 .range-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 10px; font: 600 15px/1.4 var(--sans); }
@@ -436,7 +502,7 @@ html:not(.js) .matrix-table td[data-label]::before { content: attr(data-label); 
   .sim-cols, .sim-cols[data-cols="2"] { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 760px) {
-  .m-row, .picker-controls { grid-template-columns: minmax(0, 1fr); }
+  .m-row, .picker-controls, .pd-controls { grid-template-columns: minmax(0, 1fr); }
   .m-cols { grid-template-columns: minmax(0, 1fr); }
   .matrix-table, .matrix-table tbody, .matrix-table tr, .matrix-table th, .matrix-table td { display: block; }
   .matrix-table { min-width: 0; }

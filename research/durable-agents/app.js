@@ -273,7 +273,7 @@ var Core = (function () {
     return '<g class="map-pt" tabindex="0" role="button" data-sys="' + s.id + '" aria-label="' + esc((s.short && s.short !== s.name ? s.short + ' (' + s.name + ')' : s.name) + '. Record: ' + c.label + '. Runs: ' + r.label + '. Press Enter for the cells that placed it.') + '">' + shape + '<text class="map-name" x="' + (x + 12) + '" y="' + y + '">' + esc(s.short || s.name) + '</text></g>';
   }
   function mapLegend() {
-    return '<ul class="map-legend" aria-label="Shapes on the map">' +
+    return '<p class="visually-hidden">Shapes on the map:</p><ul class="map-legend">' +
       '<li><svg viewBox="0 0 14 14" aria-hidden="true" focusable="false"><rect class="map-dot fam-engine" x="1.5" y="1.5" width="11" height="11"/></svg> a durable-execution engine</li>' +
       '<li><svg viewBox="0 0 14 14" aria-hidden="true" focusable="false"><circle class="map-dot fam-framework" cx="7" cy="7" r="6"/></svg> an agent framework or library</li>' +
       '<li><svg viewBox="0 0 14 14" aria-hidden="true" focusable="false"><path class="map-dot fam-vendor" d="M7 1 L13.5 13 L0.5 13 Z"/></svg> a vendor agent or hosted runtime</li></ul>';
@@ -303,6 +303,235 @@ var Core = (function () {
     });
     h.push('</tbody></table></div>');
     if (m.unplaced.length) h.push('<p class="caption">Not placed, because a placing cell says the sources are silent: ' + m.unplaced.map(function (s) { return '<a href="#sys-' + s.id + '">' + esc(s.name) + '</a>'; }).join(', ') + '.</p>');
+    return h.join('');
+  }
+
+  /* ---------------- Pi Durable, question by question (chapter 9) ---------------- */
+  // The contrast uses the ten questions of the comparison table plus data.moreDims (compaction), answered from the same
+  // sources. Two answers are of the same kind when their kind codes match; KIND_LABELS names each kind in plain words,
+  // and every answer keeps its own sentence and sources. Groups have a fixed order: Pi Durable's kind, then the other
+  // kinds in the order listed, then the systems whose sources are silent. Nothing is scored or ranked.
+  var PD_ID = 'pi';
+  var PD_QS = ['state', 'recovery', 'model_rule', 'tool_rule', 'owner', 'hosting', 'waits', 'duration', 'retention', 'compaction', 'effects', 'sandbox'];
+  var PD_SHORT = { state: 'State', recovery: 'Recovery', model_rule: 'Model request', tool_rule: 'Tool call', owner: 'One owner', hosting: 'Hosting', waits: 'Waits', duration: 'Time limit', retention: 'Retention', compaction: 'Compaction', effects: 'Effects', sandbox: 'Sandbox' };
+  // Pi Durable's notes from reading its code that bear on a question.
+  var PD_EXTRA = { recovery: 'Checkpoint unit', tool_rule: 'Built-in tools', compaction: 'Compaction', duration: 'Spend' };
+  // Sourced notes on configurations the table's cells do not cover (data.pdNotes, numbered by the build): Cloudflare's
+  // PiHarness runs Pi Durable itself, while the Cloudflare row describes Think; and AWS's at-most-once step mode is the
+  // nearest relative of Pi Durable's tool rule. They are shown wherever a question's shared answers are listed.
+  var KIND_LABELS = {
+    state: [['your-database', 'kept in storage you provide or choose'], ['engine-service', 'kept by the engine’s or platform’s own service'], ['disk-local', 'kept in files on the machine that runs it'], ['vendor', 'kept in the vendor’s product']],
+    recovery: [['checkpoint-resume', 'resumes from the last saved point'], ['replay-history', 'replays the code against a recorded history'], ['stored-results', 'runs the code again, reusing stored step results'], ['snapshot', 'continues from a saved snapshot'], ['manual-or-none', 'leaves recovery to you, or does not recover'], ['other', 'another kind of answer']],
+    model_rule: [['resent', 'sends the request again'], ['retried-in-step', 'retries the call as a durable step'], ['other', 'another kind of answer']],
+    tool_rule: [['rerun-if-safe', 'reruns it only if it is declared safe'], ['retried', 'runs the cut-off call again'], ['not-rerun-told', 'does not rerun it; the model is told'], ['no-auto-recovery', 'does not recover it automatically']],
+    owner: [['single-owner', 'one owner at a time'], ['queue-workers', 'workers take runs from a queue'], ['vendor-managed', 'the vendor or platform runs and schedules it'], ['no-lock', 'no lock or lease is provided'], ['other', 'another kind of answer']],
+    hosting: [['library', 'a library inside your process'], ['engine-service', 'your code, coordinated by an engine service'], ['serverless-platform', 'your code, run by a platform'], ['vendor-product', 'a vendor’s product runs the agent']],
+    waits: [['durable-waits', 'timers and waits that survive restarts'], ['pause-and-store', 'pauses the run and stores it until it is resumed'], ['in-process', 'waits inside a running process'], ['other', 'another kind of answer']],
+    duration: [['none-stated', 'states no time limit on a run either way'], ['unlimited', 'says a run has no time limit'], ['run-cap', 'states a time limit on a whole run'], ['part-cap', 'limits the time of an attempt, step, or activation, not of a whole run'], ['count-cap', 'caps steps, turns, or calls rather than time'], ['optional', 'offers a time limit that is off by default']],
+    retention: [['kept', 'keeps records rather than expiring them'], ['size-cap', 'caps the size of a run’s history or storage'], ['retention', 'states how long records are kept']],
+    compaction: [['built-in', 'compacts the context itself'], ['your-code', 'shows how to compact in your own code'], ['framework', 'leaves it to the agent framework that runs on it']],
+    effects: [['mixed', 'a mixed answer'], ['asks-idempotency', 'asks you to make steps idempotent'], ['idempotency-key-provided', 'provides an idempotency key'], ['at-least-once', 'runs steps at least once'], ['other', 'another kind of answer']],
+    sandbox: [['user-provided', 'uses an environment you supply'], ['kept', 'keeps the environment'], ['snapshot', 'snapshots the environment'], ['lost', 'environment state is lost'], ['other', 'another kind of answer']]
+  };
+  function pdCell(s, q) { return (s.cells && s.cells[q]) || (s.more || {})[q] || null; }
+  function pdKind(c) { return !c || c.ns ? 'ns' : c.k; }
+  function capFirst(t) { return t ? t.charAt(0).toUpperCase() + t.slice(1) : t; }
+  function pdKindLabel(q, k) {
+    if (k === 'ns') return 'not stated in the sources we read';
+    var l = (KIND_LABELS[q] || []).filter(function (x) { return x[0] === k; })[0];
+    return l ? l[1] : 'another kind of answer';
+  }
+  function pdQLabel(data, q) {
+    var d = dimById(data, q);
+    if (d) return d.label;
+    var m = (data.moreDims || []).filter(function (x) { return x.id === q; })[0];
+    return m ? m.label : q;
+  }
+  function pdQuestions(data) { return PD_QS.filter(function (q) { return dimById(data, q) || (data.moreDims || []).some(function (m) { return m.id === q; }); }); }
+  function pdOthers(data) { return data.systems.filter(function (s) { return s.id !== PD_ID; }); }
+  // One system's answer relative to Pi Durable's: the same kind, a different kind, or silent (either side).
+  function pdRel(data, q, s) {
+    var pk = pdKind(pdCell(byId(data, PD_ID), q)), k = pdKind(pdCell(s, q));
+    return k === 'ns' || pk === 'ns' ? 'ns' : k === pk ? 'same' : 'diff';
+  }
+  function pdTally(data, q) {
+    var t = { q: q, pk: pdKind(pdCell(byId(data, PD_ID), q)), same: [], diff: [], ns: [] };
+    pdOthers(data).forEach(function (s) { t[pdRel(data, q, s)].push(s); });
+    return t;
+  }
+  function pdCount(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+  function pdSentence(data, q, w) {
+    var nq = pdQuestions(data).length, nOther = pdOthers(data).length;
+    if (w === 'families') {
+      if (q === 'all') return 'Pi Durable against the other ' + nOther + ' systems on ' + nq + ' questions. For each question, the systems with the same kind of answer as Pi Durable are named first.';
+      var t = pdTally(data, q);
+      return pdQLabel(data, q) + '. Pi Durable’s kind of answer: ' + pdKindLabel(q, t.pk) + '. Of the other ' + nOther + ' systems as the table describes them, ' +
+        (t.same.length ? pdCount(t.same.length, 'gives', 'give') + ' the same kind of answer, ' : 'none gives the same kind of answer, ') +
+        pdCount(t.diff.length, 'gives', 'give') + ' a different kind, and ' + pdCount(t.ns.length, 'is', 'are') + ' not stated in the sources we read.' +
+        ((data.pdNotes || {})[q] ? ' The note under Pi Durable’s answer covers configurations outside the table.' : '');
+    }
+    var s = byId(data, w);
+    if (!s) return '';
+    if (q === 'all') {
+      var n = { same: 0, diff: 0, ns: 0 };
+      pdQuestions(data).forEach(function (qq) { n[pdRel(data, qq, s)]++; });
+      return 'Pi Durable and ' + s.name + ' give the same kind of answer on ' + n.same + ' of ' + nq + ' questions and different kinds on ' + n.diff + (n.ns ? '; on ' + n.ns + ', at least one of them is not stated in the sources we read' : '') + '.';
+    }
+    var r = pdRel(data, q, s);
+    if (r === 'ns') return pdQLabel(data, q) + '. ' + (pdKind(pdCell(s, q)) === 'ns' ? s.name : 'Pi Durable') + ': not stated in the sources we read.';
+    if (r === 'same') return pdQLabel(data, q) + '. Pi Durable and ' + s.name + ' give the same kind of answer: ' + pdKindLabel(q, pdKind(pdCell(s, q))) + '.';
+    return pdQLabel(data, q) + '. Different kinds of answer. Pi Durable: ' + pdKindLabel(q, pdKind(pdCell(byId(data, PD_ID), q))) + '. ' + s.name + ': ' + pdKindLabel(q, pdKind(pdCell(s, q))) + '.';
+  }
+  function pdPiHTML(data, q) {
+    var pi = byId(data, PD_ID), c = pdCell(pi, q);
+    var h = '<div class="pd-pi"><p class="pd-head"><strong>Pi Durable.</strong> Kind of answer: ' + esc(pdKindLabel(q, pdKind(c))) + '.</p><p>' + cellHTML(c) + '</p>';
+    var x = PD_EXTRA[q] && (pi.extra || []).filter(function (e) { return e.k === PD_EXTRA[q]; })[0];
+    if (x) h += '<p class="pd-extra"><strong>' + esc(x.k) + ', from reading the v1.0.0 code.</strong> ' + rich(x.t) + cite(x.s) + '</p>';
+    var note = (data.pdNotes || {})[q];
+    if (note) h += '<p class="pd-extra"><strong>Outside the table.</strong> ' + rich(note.t) + cite(note.s) + '</p>';
+    return h + '</div>';
+  }
+  function pdFamilyName(f) { return f.id === 'framework' ? 'Other agent frameworks and libraries' : f.many; }
+  function pdFamiliesHTML(data, q) {
+    var t = pdTally(data, q);
+    var order = [t.pk].concat((KIND_LABELS[q] || []).map(function (x) { return x[0]; }).filter(function (k) { return k !== t.pk; }));
+    var h = [pdPiHTML(data, q), '<div class="pd-fams">'];
+    data.families.forEach(function (f) {
+      var list = pdOthers(data).filter(function (s) { return s.family === f.id; });
+      if (!list.length) return;
+      var groups = {};
+      list.forEach(function (s) { var k = pdKind(pdCell(s, q)); (groups[k] = groups[k] || []).push(s); });
+      var keys = order.filter(function (k) { return groups[k] && k !== 'ns'; })
+        .concat(Object.keys(groups).filter(function (k) { return order.indexOf(k) < 0 && k !== 'ns'; }))
+        .concat(groups.ns ? ['ns'] : []);
+      h.push('<section class="pd-fam" aria-labelledby="pd-fam-' + f.id + '"><h4 id="pd-fam-' + f.id + '">' + esc(pdFamilyName(f)) + ' (' + list.length + ')</h4>');
+      keys.forEach(function (k) {
+        var head = k === 'ns' ? 'Not stated in the sources we read' : k === t.pk ? 'The same kind as Pi Durable: ' + pdKindLabel(q, k) : capFirst(pdKindLabel(q, k));
+        h.push('<h5 class="pd-kind">' + esc(head) + ' (' + groups[k].length + ')</h5><ul class="plain pd-list">');
+        groups[k].forEach(function (s) {
+          var c = pdCell(s, q);
+          // A partial answer keeps its caveat in its qualifier, so the qualifier is shown with the short answer.
+          h.push('<li><a href="#sys-' + s.id + '">' + esc(s.name) + '</a>: ' + (c && !c.ns ? esc(c.sh) + '.' + cite(c.s) + (c.q ? ' <span class="qual">' + rich(c.q) + '</span>' : '') : 'looked for in ' + cite(c ? c.l : []) + '.') + '</li>');
+        });
+        h.push('</ul>');
+      });
+      h.push('</section>');
+    });
+    h.push('</div>');
+    return h.join('');
+  }
+  function pdPairHTML(data, q, w) {
+    var s = byId(data, w), pi = byId(data, PD_ID);
+    var qs = q === 'all' ? pdQuestions(data) : [q];
+    var h = ['<div class="table-wrap"><table class="picker-table pd-table"><caption class="visually-hidden">Pi Durable and ' + esc(s.name) + (q === 'all' ? ' on ' + qs.length + ' questions' : ': ' + esc(pdQLabel(data, q))) + '</caption>'];
+    h.push('<thead><tr><th scope="col">Question</th><th scope="col">Pi Durable</th><th scope="col">' + esc(s.name) + '</th></tr></thead><tbody>');
+    qs.forEach(function (qq) {
+      var r = pdRel(data, qq, s), pk = pdKind(pdCell(pi, qq)), sk = pdKind(pdCell(s, qq));
+      var note = r === 'same' ? 'The same kind of answer: ' + pdKindLabel(qq, sk) + '.'
+        : r === 'diff' ? 'Different kinds of answer. Pi Durable: ' + pdKindLabel(qq, pk) + '. ' + s.name + ': ' + pdKindLabel(qq, sk) + '.'
+          : 'Not stated in the sources we read for ' + (sk === 'ns' ? s.name : 'Pi Durable') + '.';
+      h.push('<tr' + (r === 'diff' ? ' class="differs"' : '') + '><th scope="row">' + esc(pdQLabel(data, qq)) + '<span class="differs-note">' + esc(note) + '</span></th>');
+      h.push('<td data-label="Pi Durable">' + cellHTML(pdCell(pi, qq)) + '</td><td data-label="' + esc(s.name) + '">' + cellHTML(pdCell(s, qq)) + '</td></tr>');
+    });
+    h.push('</tbody></table></div>');
+    return h.join('');
+  }
+  // Every question at once: who shares Pi Durable's kind of answer, who does not, and who is silent.
+  function pdOverviewHTML(data, linked) {
+    var pi = byId(data, PD_ID);
+    var names = function (list) { return list.length ? (linked ? sysLinks(list) : esc(joinNames(list.map(function (s) { return s.name; })))) : 'none'; };
+    var h = [linked ? '<ol class="pd-overview">' : '<ol class="dg-text-version pd-text-version">'];
+    pdQuestions(data).forEach(function (q) {
+      var t = pdTally(data, q), c = pdCell(pi, q), note = (data.pdNotes || {})[q];
+      h.push('<li>' + (linked ? '<p>' : '') + '<strong>' + esc(pdQLabel(data, q)) + '.</strong> Pi Durable: ' + (c && !c.ns ? esc(c.sh) + '.' + (linked ? cite(c.s) : '') : NOT_STATED) +
+        ' The same kind of answer, ' + esc(pdKindLabel(q, t.pk)) + ': ' + (t.same.length ? names(t.same) : 'no other system as the table describes it') + '. A different kind: ' + names(t.diff) + '. Not stated in the sources we read: ' + names(t.ns) + '.' +
+        (note ? ' Outside the table: ' + rich(note.t) + (linked ? cite(note.s) : '') : '') + (linked ? '</p>' : '') + '</li>');
+    });
+    h.push('</ol>');
+    return h.join('');
+  }
+  // The chapter's opening list, computed from the cells: the questions on which at most two other systems share Pi
+  // Durable's kind of answer, then those on which five or more do. The thresholds are stated in the text.
+  function pdHighlights(data) {
+    var rare = [], common = [];
+    pdQuestions(data).forEach(function (q) {
+      var t = pdTally(data, q);
+      if (t.pk === 'ns') return;
+      if (t.same.length <= 2) rare.push(t);
+      else if (t.same.length >= 5) common.push(t);
+    });
+    var rareText = rare.map(function (t) {
+      return pdQLabel(data, t.q).toLowerCase() + ' (' + pdKindLabel(t.q, t.pk) + '): ' + (t.same.length ? 'only ' + joinNames(t.same.map(function (s) { return s.name; })) + (t.same.length === 1 ? ' shares' : ' share') + ' it' : 'no other system in the table shares it');
+    });
+    var commonText = common.map(function (t) { return pdQLabel(data, t.q).toLowerCase() + ' (' + pdKindLabel(t.q, t.pk) + ', ' + t.same.length + ' others)'; });
+    var notes = pdQuestions(data).filter(function (q) { return (data.pdNotes || {})[q]; }).map(function (q) { return { t: pdQLabel(data, q) + ': ' + data.pdNotes[q].t, s: data.pdNotes[q].s }; });
+    return '<ul class="plain pd-highlights">' +
+      '<li><strong>Where at most two other systems in the table share Pi Durable’s kind of answer.</strong> ' + esc(capFirst(rareText.join('; '))) + '.</li>' +
+      '<li><strong>Where five or more others in the table share it.</strong> ' + esc(capFirst(commonText.join('; '))) + '.</li>' +
+      (notes.length ? '<li><strong>Outside the table.</strong> ' + notes.map(function (n) { return rich(n.t) + cite(n.s); }).join(' ') + '</li>' : '') + '</ul>';
+  }
+  function pdOutput(data, q, w) {
+    if (w === 'families') return q === 'all' ? pdOverviewHTML(data, true) : pdFamiliesHTML(data, q);
+    return byId(data, w) ? pdPairHTML(data, q, w) : '';
+  }
+  // Diagram 7: one row per system, one column per question; the mark says whether the answer is of Pi Durable's kind.
+  // The chosen question and system are drawn on a light band. Narrow screens number the columns (key below).
+  function pdSVG(data, narrow, sel) {
+    sel = sel || {};
+    var qs = pdQuestions(data), others = pdOthers(data);
+    var labelW = narrow ? 142 : 214, colW = narrow ? 17.5 : 54, rowH = narrow ? 20 : 22, famH = narrow ? 26 : 28, top = narrow ? 26 : 92;
+    var W = labelW + qs.length * colW + (narrow ? 2 : 40);
+    var rows = [], y = top, out = [];
+    data.families.forEach(function (f) {
+      var list = others.filter(function (s) { return s.family === f.id; });
+      if (!list.length) return;
+      rows.push({ fam: f, y: y }); y += famH;
+      list.forEach(function (s) { rows.push({ s: s, y: y }); y += rowH; });
+      y += 6;
+    });
+    var H = y;
+    var qi = qs.indexOf(sel.q);
+    if (qi >= 0) out.push('<rect class="pd-band" x="' + (labelW + qi * colW) + '" y="0" width="' + colW + '" height="' + H + '"/>');
+    rows.forEach(function (r) { if (r.s && r.s.id === sel.w) out.push('<rect class="pd-band" x="0" y="' + r.y + '" width="' + (labelW + qs.length * colW) + '" height="' + rowH + '"/>'); });
+    qs.forEach(function (q, i) {
+      var cx = labelW + i * colW + colW / 2;
+      if (narrow) out.push('<text class="pd-colnum" x="' + cx + '" y="18" text-anchor="middle">' + (i + 1) + '</text>');
+      else out.push('<text class="pd-colhead" x="' + (cx - 4) + '" y="' + (top - 10) + '" transform="rotate(-40 ' + (cx - 4) + ' ' + (top - 10) + ')">' + esc(PD_SHORT[q] || q) + '</text>');
+    });
+    rows.forEach(function (r) {
+      if (r.fam) { out.push('<text class="pd-famhead" x="0" y="' + (r.y + famH - 9) + '">' + esc(pdFamilyName(r.fam)) + '</text>'); return; }
+      var cy = r.y + rowH / 2, m = narrow ? 9 : 11;
+      out.push('<text class="pd-name" x="0" y="' + (cy + 4) + '">' + esc(r.s.short || r.s.name) + '</text>');
+      qs.forEach(function (q, i) {
+        var cx = labelW + i * colW + colW / 2;
+        out.push('<rect class="pd-' + pdRel(data, q, r.s) + '" x="' + (cx - m / 2) + '" y="' + (cy - m / 2) + '" width="' + m + '" height="' + m + '"/>');
+      });
+    });
+    return '<svg class="pd-svg' + (narrow ? ' narrow' : '') + '" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true" focusable="false">' + out.join('') + '</svg>';
+  }
+  function pdLegend(data) {
+    var item = function (cls, words) { return '<li><svg viewBox="0 0 14 14" aria-hidden="true" focusable="false"><rect class="' + cls + '" x="1.5" y="1.5" width="11" height="11"/></svg> ' + words + '</li>'; };
+    return '<p class="visually-hidden">Marks in the diagram:</p><ul class="map-legend pd-legend">' + item('pd-same', 'the same kind of answer as Pi Durable') + item('pd-diff', 'a different kind of answer') + item('pd-ns', 'not stated in the sources we read') + '</ul>' +
+      '<p class="pd-key">Columns, left to right: ' + pdQuestions(data).map(function (q, i) { return (i + 1) + ', ' + esc(pdQLabel(data, q).toLowerCase()); }).join('; ') + '.</p>';
+  }
+  function pdFigure(data) {
+    return '<div class="pd-figwrap" id="pd-fig">' + pdSVG(data, false, { q: 'tool_rule', w: 'families' }) + '</div>' + pdLegend(data) +
+      '<details class="evidence pd-textdetails"><summary>The diagram as text, question by question</summary>' + pdOverviewHTML(data, false) + '</details>';
+  }
+  function pdBlock(data) {
+    var q0 = 'tool_rule', w0 = 'families';
+    var h = ['<div class="pd-controls needs-js">'];
+    h.push('<div><label for="pd-q">Question</label><select id="pd-q"><option value="all">Every question</option>' + pdQuestions(data).map(function (q) { return '<option value="' + q + '"' + (q === q0 ? ' selected' : '') + '>' + esc(pdQLabel(data, q)) + '</option>'; }).join('') + '</select></div>');
+    h.push('<div><label for="pd-with">Set Pi Durable against</label><select id="pd-with"><option value="families" selected>Every other system, by family</option>');
+    data.families.forEach(function (f) {
+      h.push('<optgroup label="' + esc(f.many) + '">');
+      pdOthers(data).filter(function (s) { return s.family === f.id; }).forEach(function (s) { h.push('<option value="' + s.id + '">' + esc(s.name) + '</option>'); });
+      h.push('</optgroup>');
+    });
+    h.push('</select></div></div>');
+    h.push('<p class="calculation" id="pd-summary" aria-live="polite">' + esc(pdSentence(data, q0, w0)) + '</p>');
+    h.push('<div id="pd-out">' + pdOutput(data, q0, w0) + '</div>');
+    h.push('<p class="caption">How the comparison is made: every answer is a cell from the comparison table in chapter 8, or, for compaction, an answer we added from the same sources, and it keeps its own citations. Two answers count as the same kind when the table gives them the same kind code; the kind is named in plain words above each group. Groups follow a fixed order: Pi Durable’s kind first, then the other kinds, then the systems whose sources are silent. Nothing is scored or ranked.</p>');
     return h.join('');
   }
 
@@ -346,7 +575,8 @@ var Core = (function () {
     }
     if (st.kind === 'wait') {
       var w = sim.wait;
-      if (!w || w.o === 'not-documented') return nd('a wait that was under way');
+      // An undocumented wait keeps the standard wording; a sourced sentence about what the pages do cover may follow it.
+      if (!w || w.o === 'not-documented') return w && w.t ? { state: 'unknown', text: ND_TEXT('a wait that was under way') + ' ' + w.t, src: w.s || [] } : nd('a wait that was under way');
       return { state: w.o === 'survives' ? 'waits' : 'waits-cond', text: w.t, src: w.s };
     }
     var t = sim.tool, tx;
@@ -435,7 +665,7 @@ var Core = (function () {
     r.cols.forEach(function (col) {
       h.push('<section class="sim-col" aria-label="' + esc(col.sys.name) + '"><h4>' + esc(col.sys.name) + '</h4>');
       h.push(simTimeline(r, col, ph));
-      if (ph >= 1) h.push('<p class="sim-run"><strong>After the crash:</strong> ' + runSentence(col) + '</p>');
+      if (ph >= 1) h.push('<p class="sim-run" data-result="' + col.cont + '"><strong>After the crash:</strong> ' + runSentence(r, col) + '</p>');
       var as = (col.sys.sim && col.sys.sim.assume) || [];
       if (as.length) h.push('<p class="sim-assume"><strong>These outcomes assume:</strong> ' + as.map(function (a) { return rich(a.t) + cite(a.s); }).join(' ') + '</p>');
       h.push('<ol class="sim-steps">');
@@ -456,10 +686,30 @@ var Core = (function () {
     h.push('</div>');
     return h.join('');
   }
-  function runSentence(col) {
-    if (col.sys.id === 'none') return 'Nothing was saved, so someone starts the task over from the beginning.';
-    var r = runOf(col.sys);
-    return r.t ? rich(r.t) + cite(r.s) : NOT_STATED;
+  // The column's result after the crash, in the same terms as its steps and the last stage's summary: one phrase per
+  // outcome, then what the sources say for this crash point. A crash during a wait that survives is a suspension, not a
+  // running process dying, so the wait's own sentence is the evidence, and a run that a working crash would stop says so
+  // as a separate case.
+  var RESULT = {
+    next: 'The run continues on its own.',
+    'wait-next': 'The run continues when the wait ends.',
+    'next-cond': 'The run continues only under the condition stated here.',
+    stopped: 'The run stops; it is not picked up again.',
+    'unknown-step': 'Not stated: the sources do not say how the step that was cut off is handled.',
+    'unknown-run': 'Not stated in the sources we read.',
+    restart: 'Nothing was saved, so someone starts the task over from the beginning.'
+  };
+  function runSentence(r, col) {
+    if (col.cont === 'restart') return esc(RESULT.restart);
+    var run = runOf(col.sys), sim = col.sys.sim || {};
+    var kind = r.cp.during != null ? STEP[r.run.steps[r.cp.during]].kind : null;
+    var h = esc(RESULT[col.cont]);
+    if (kind === 'wait' && sim.wait && sim.wait.o !== 'not-documented') {
+      h += ' During a wait: ' + rich(sim.wait.t) + cite(sim.wait.s);
+      if (run.t && (run.o === 'stops' || run.o === 'not-documented')) h += ' A crash while the run is working is a different case: ' + rich(run.t) + cite(run.s);
+      return h;
+    }
+    return h + (run.t ? ' ' + rich(run.t) + cite(run.s) : '');
   }
   function simPhaseSentence(data, ids, runId, cpId, opts, phase) {
     var r = simulate(data, ids, runId, cpId, opts);
@@ -524,7 +774,7 @@ var Core = (function () {
   }
   function simLegend() {
     var item = function (st, words) { return '<li><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">' + shapeFor(st, 10, 10) + '</svg> ' + words + '</li>'; };
-    return '<ul class="sim-legend" aria-label="Shapes in the timelines">' +
+    return '<p class="visually-hidden">Shapes in the timelines:</p><ul class="sim-legend">' +
       item('kept', 'kept: its saved result is used') + item('rerun', 'runs again') + item('cond', 'runs again only under the condition its sentence states') + item('told', 'not rerun; the model is told') +
       item('waits', 'a wait that resumes') + item('waits-cond', 'a wait that resumes only if its state was stored') + item('lost', 'left as it was; recovery is not automatic') + item('unknown', 'not documented') +
       item('next', 'runs next') + item('next-cond', 'runs next only under the condition its column states') + item('stopped', 'does not run, because the run is not picked up again') + '</ul>';
@@ -563,8 +813,9 @@ var Core = (function () {
   // The rules, stated under the result: the first answer keeps systems whose hosting cell is of that kind; the second
   // keeps systems whose hosting cell describes running there (s.hosts, read from that cell); the run length leaves a
   // system out only when every run-length limit its sources state is fixed and shorter than the range's lower bound
-  // (s.limit.caps, read from its limits cell); everything else only adds cells as reasons and cautions. Nothing is
-  // scored, and matches keep the order of the comparison table.
+  // (s.limit.caps, read from its limits cell), and a limit stated for one kind of run only (a cap's scope) never leaves
+  // a system out; everything else only adds cells as reasons and cautions. Nothing is scored, and matches keep the
+  // order of the comparison table.
   var EMBED = { library: ['library'], engine: ['engine-service', 'serverless-platform'], vendor: ['vendor-product'] };
   var STACK = { temporal: ['temporal'], aws: ['aws'], azure: ['azure'], cloudflare: ['cf-workflows', 'cf-agents'], vercel: ['vercel'], langchain: ['langgraph', 'langsmith'] };
   function rangeOf(ans) {
@@ -572,14 +823,18 @@ var Core = (function () {
     QUESTIONS[2].options.forEach(function (o) { if (o.id === ans.length) b = o; });
     return b;
   }
-  // caps: [{sec, fixed, on}], one per plan or deployment; sec null means that plan or deployment states no cap.
+  // caps: [{sec, fixed, on}], one per plan or deployment (on names it); sec null means that plan or deployment states
+  // no cap. A cap with a scope ({sec, fixed, scope}) covers only one kind of run, so it never leaves a system out: it is
+  // returned in `scoped` when it may cut such a run in the range short, and the result shows it as a caution.
   function limitCheck(s, b) {
     var caps = (s.limit && s.limit.caps) || [];
-    if (!b || !caps.length) return { out: false, short: false };
-    var timed = caps.filter(function (c) { return c.sec != null; });
-    var out = timed.length === caps.length && caps.every(function (c) { return c.fixed && c.sec < b.min; });
+    if (!b || !caps.length) return { out: false, short: false, scoped: [] };
+    var whole = caps.filter(function (c) { return !c.scope; });
+    var timed = whole.filter(function (c) { return c.sec != null; });
+    var out = whole.length > 0 && timed.length === whole.length && whole.every(function (c) { return c.fixed && c.sec < b.min; });
     var short = !out && timed.some(function (c) { return b.max == null || c.sec < b.max; });
-    return { out: out, short: short };
+    var scoped = caps.filter(function (c) { return c.scope && c.sec != null && (b.max == null || c.sec < b.max); });
+    return { out: out, short: short, scoped: scoped };
   }
   function recommend(data, ans) {
     var out = { families: [], list: [], excluded: [], notThere: [], otherKind: [], onStack: [], cautions: [] };
@@ -596,8 +851,11 @@ var Core = (function () {
       if (asked('stack') && ans.stack !== 'none' && (STACK[ans.stack] || []).indexOf(s.id) >= 0) { why.push({ h: 'Runs on the platform you already use.' }); out.onStack.push(s); }
       if (asked('embed') || asked('where')) why.push({ c: ho });
       if (where === 'sandbox') caution.push({ h: 'Only its sandbox runs on infrastructure you operate; the vendor runs the agent harness, as its hosting cell says.' });
-      if (lim && !lim.ns) (lc.short ? caution : why).push(lc.short ? { pre: 'A stated limit may cut a run in this range short: ', c: lim } : { c: lim });
-      else caution.push({ h: 'No run-length limit is stated in the sources we read.', l: lim ? lim.l : [] });
+      if (lim && !lim.ns) {
+        if (lc.short) caution.push({ pre: 'A stated limit may cut a run in this range short: ', c: lim });
+        else if (lc.scoped.length) caution.push({ pre: 'A limit stated only for ' + joinNames(lc.scoped.map(function (c) { return c.scope; })) + ' may cut such a run in this range short: ', c: lim });
+        else why.push({ c: lim });
+      } else caution.push({ h: 'No run-length limit is stated in the sources we read.', l: lim ? lim.l : [] });
       if (ans.human === 'yes') {
         var w = s.cells.waits;
         if (w && !w.ns) why.push({ c: w }); else caution.push({ h: 'Human waits are not described in the sources we read.', l: w ? w.l : [] });
@@ -643,7 +901,7 @@ var Core = (function () {
     if (r.notThere.length) h.push('<p class="tree-excluded">Left out by where the agent runs, because their hosting cells do not describe running there: ' + sysLinks(r.notThere) + '.</p>');
     if (r.otherKind.length) h.push('<p class="tree-excluded">Left out by the first answer, because their hosting cells describe a different kind of system: ' + sysLinks(r.otherKind) + '.</p>');
     r.cautions.forEach(function (c) { h.push('<p class="tree-note">' + rich(c.t) + cite(c.s) + '</p>'); });
-    h.push('<p class="caption">A reading aid derived from the sourced table, not a ranking and not a recommendation of any vendor. How the list is made: the first answer keeps systems whose hosting cell describes that kind of system. The second keeps systems whose hosting cell describes running where you chose; an option a system’s pages do not mention counts as not described. The run length leaves a system out only when every run-length limit its sources state is fixed and shorter than the shortest run in the range you chose; a limit that falls inside the range, or a default you can change, appears as a caution instead. Step, turn, and event caps appear with the limits cell but do not filter. The other answers add the matching cells as reasons and cautions. Nothing is scored: systems are listed family by family, in the order of the comparison table.</p>');
+    h.push('<p class="caption">A reading aid derived from the sourced table, not a ranking and not a recommendation of any vendor. How the list is made: the first answer keeps systems whose hosting cell describes that kind of system. The second keeps systems whose hosting cell describes running where you chose; an option a system’s pages do not mention counts as not described. The run length leaves a system out only when every run-length limit its sources state is fixed and shorter than the shortest run in the range you chose; a limit that falls inside the range, or a default you can change, appears as a caution instead. A limit stated for only one kind of run never leaves a system out; it appears as a caution that names the runs it covers. Step, turn, and event caps appear with the limits cell but do not filter. The other answers add the matching cells as reasons and cautions. Nothing is scored: systems are listed family by family, in the order of the comparison table.</p>');
     return h.join('');
   }
   function treeStatic(data) {
@@ -782,6 +1040,7 @@ var Core = (function () {
     MAP_X: MAP_X, MAP_Y: MAP_Y, place: place, mapModel: mapModel, mapSVG: mapSVG, mapLegend: mapLegend, mapReadout: mapReadout, mapTable: mapTable,
     RUNS: RUNS, STEP: STEP, crashPoints: crashPoints, simulate: simulate, simOutput: simOutput, simLegend: simLegend, PHASES: PHASES,
     QUESTIONS: QUESTIONS, recommend: recommend, limitCheck: limitCheck, treeResult: treeResult, treeStatic: treeStatic,
+    pdQuestions: pdQuestions, pdHighlights: pdHighlights, pdTally: pdTally, pdRel: pdRel, pdSentence: pdSentence, pdOutput: pdOutput, pdSVG: pdSVG, pdBlock: pdBlock, pdFigure: pdFigure, pdKindLabel: pdKindLabel, pdCell: pdCell,
     costSeries: costSeries, costSVG: costSVG, NOT_STATED: NOT_STATED
   };
 })();
@@ -1075,12 +1334,38 @@ if (typeof module !== 'undefined') module.exports = Core;
   function renderPicker() {
     var ids = pickSel.map(function (s) { return s ? s.value : ''; }).filter(Boolean);
     var uniq = ids.filter(function (id, i) { return ids.indexOf(id) === i; });
-    if (uniq.length < ids.length) { pickSummary.textContent = 'Choose different systems in each list.'; return; }
+    // A repeated choice hides the table, so an earlier comparison is never left on screen under a new selection.
+    if (uniq.length < ids.length) { pickSummary.textContent = 'Choose different systems in each list. The comparison is hidden until the lists differ.'; pickTable.hidden = true; return; }
+    pickTable.hidden = false;
     var r = Core.compare(DATA, uniq);
     pickSummary.textContent = r.sentence;
     pickTable.innerHTML = Core.pickerTable(DATA, uniq);
   }
   if (pickSel[0] && pickSummary && pickTable) pickSel.forEach(function (s) { if (s) s.addEventListener('change', renderPicker); });
+
+  /* ---------------- Pi Durable, question by question ---------------- */
+  var pdQ = $('#pd-q'), pdWith = $('#pd-with'), pdOut = $('#pd-out'), pdSum = $('#pd-summary'), pdFig = $('#pd-fig');
+  if (pdQ && pdWith && pdOut) {
+    var pdNarrow = null;
+    // The diagram above the explainer marks the chosen question and system; narrow screens get the numbered layout.
+    var drawPdFig = function (force) {
+      if (!pdFig) return;
+      var narrow = pdFig.clientWidth < 640;
+      if (!force && narrow === pdNarrow) return;
+      pdNarrow = narrow;
+      pdFig.innerHTML = Core.pdSVG(DATA, narrow, { q: pdQ.value, w: pdWith.value });
+    };
+    var renderPd = function () {
+      if (pdSum) pdSum.textContent = Core.pdSentence(DATA, pdQ.value, pdWith.value);
+      pdOut.innerHTML = Core.pdOutput(DATA, pdQ.value, pdWith.value);
+      drawPdFig(true);
+    };
+    pdQ.addEventListener('change', renderPd);
+    pdWith.addEventListener('change', renderPd);
+    drawPdFig(true);
+    var pdTimer;
+    window.addEventListener('resize', function () { clearTimeout(pdTimer); pdTimer = setTimeout(function () { drawPdFig(false); }, 120); });
+  }
 
   /* ---------------- Crash simulator ---------------- */
   var sim = $('#sim');
@@ -1133,6 +1418,18 @@ if (typeof module !== 'undefined') module.exports = Core;
     var restart = $('#tree-restart');
     var result = $('#tree-result');
     var treeStatus = $('#tree-status');
+    var resultHead = $('#tree-result-h');
+    var staticResult = result.innerHTML;
+    var shown = false;
+    // A result belongs to the answers that produced it: starting again, or changing an answer once it is shown, puts
+    // the static list of questions back and hides the result heading.
+    var clearResult = function () {
+      if (!shown) return false;
+      shown = false;
+      result.innerHTML = staticResult;
+      if (resultHead) resultHead.hidden = true;
+      return true;
+    };
     var drawQ = function () {
       var q = Core.QUESTIONS[qi];
       legend.textContent = q.text;
@@ -1147,13 +1444,20 @@ if (typeof module !== 'undefined') module.exports = Core;
       save();
       if (qi < Core.QUESTIONS.length - 1) { qi += 1; drawQ(); legend.parentNode.querySelector('input').focus(); return; }
       result.innerHTML = Core.treeResult(DATA, answers);
+      shown = true;
       var sum = $('#tree-summary', result);
       if (treeStatus && sum) treeStatus.textContent = sum.textContent;
-      var head = $('#tree-result-h');
-      if (head) { head.hidden = false; head.focus(); }
+      if (resultHead) { resultHead.hidden = false; resultHead.focus(); }
     });
     back.addEventListener('click', function () { save(); if (qi > 0) { qi -= 1; drawQ(); legend.parentNode.querySelector('input').focus(); } });
-    restart.addEventListener('click', function () { answers = {}; qi = 0; drawQ(); legend.parentNode.querySelector('input').focus(); if (treeStatus) treeStatus.textContent = 'Started again at question 1.'; });
+    restart.addEventListener('click', function () {
+      var cleared = clearResult();
+      answers = {}; qi = 0; drawQ(); legend.parentNode.querySelector('input').focus();
+      if (treeStatus) treeStatus.textContent = 'Started again at question 1.' + (cleared ? ' The earlier result was cleared.' : '');
+    });
+    opts2.addEventListener('change', function () {
+      if (clearResult() && treeStatus) treeStatus.textContent = 'An answer changed, so the earlier result was cleared. Finish the questions to see a new one.';
+    });
     drawQ();
   }
 
