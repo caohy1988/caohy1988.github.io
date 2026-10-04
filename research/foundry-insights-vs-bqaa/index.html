@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Foundry Insights vs BigQuery Agent Analytics: value and comparison — Field Brief</title>
+<meta name="description" content="What Microsoft Foundry Insights is, how Microsoft measured it, what it is worth, and how it compares with BigQuery Agent Analytics. Prepared from the BQAA side; sources fetched 2026-10-03.">
+<meta property="og:title" content="Foundry Insights vs BigQuery Agent Analytics: value and comparison"><meta property="og:description" content="How Microsoft measured Foundry Insights, what its measurements leave unproven, and how it compares with BigQuery Agent Analytics. A field brief prepared from the BQAA side."><meta property="og:type" content="article"><meta property="og:url" content="https://caohy1988.github.io/research/foundry-insights-vs-bqaa/">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%231b2129'/%3E%3Cpath%20d='M6%2010h9M6%2016h12M6%2022h7'%20stroke='%2391c3e8'%20stroke-width='3'/%3E%3Cpath%20d='M20%209l6%207-6%207'%20fill='none'%20stroke='%23f2622e'%20stroke-width='2.6'/%3E%3C/svg%3E">
+<link rel="canonical" href="https://caohy1988.github.io/research/foundry-insights-vs-bqaa/">
+<meta name="theme-color" content="#1b2129">
+<link rel="stylesheet" href="../../assets/site-nav.css" data-site-nav>
+<script defer src="../../assets/site-nav.js" data-site-nav></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#study">Skip to study</a>
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav data-sticky="">
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <a href="/research/harness/">Harness</a>
+      <a href="/research/harness-lab/">Lab</a>
+      <a href="/research/templates/">Templates</a>
+      <a href="/research/jev/">Jev</a>
+      <a href="/research/durable-agents/">Durable</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+          <a href="/research/builds/mcp-apps-feature-matrix/">MCP Apps matrix</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+<!-- site-nav:end -->
+<header class="topbar">
+<a class="brand" href="/research/" aria-label="Field notes, Foundry Insights vs BQAA (Research home)"><svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6"/><path class="bm-a" d="M6 10h9M6 16h12M6 22h7"/><path class="bm-cut" d="M20 9l6 7-6 7"/></svg><span class="brand-name">Field notes</span> <span class="brand-sub">Foundry Insights vs BQAA</span></a>
+<div class="top-actions"><a href="#sources">Sources <span class="source-count">22</span></a></div>
+</header>
+<main id="study">
+<section class="hero" aria-labelledby="title">
+<div class="hero-copy">
+<p class="eyebrow">A field brief, prepared 3 October 2026</p>
+<h1 id="title">Microsoft Foundry Insights and BigQuery Agent Analytics: value and comparison</h1>
+<p class="deck">Foundry Insights analyzes traces and organizes recurring behavior into reviewable findings.</p>
+</div>
+<div class="hero-notes">
+<p class="provenance">Prepared and sources fetched 2026-10-03. This comparison is prepared from the BQAA side, so readers should weigh it accordingly.</p>
+<p class="review-note">This comparison was reviewed by one blind reviewer (Astra) because the second reviewer was unavailable.</p>
+<p class="citation-key">Citation key: "post" is Microsoft's <a href="https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/beyond-the-trace-the-science-of-insight-quality/4559981">Beyond the Trace: the science of insight quality</a> (updated 2026-10-02); "Learn" is <a href="https://learn.microsoft.com/en-us/azure/foundry/observability/how-to/agent-insights">Use Insights in Foundry (preview)</a> (updated 2026-09-22). Single-quoted names are section headings. BQAA claims link to public Google pages or the <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/tree/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3">SDK repository at commit 4a4f3ae</a>.</p>
+<p class="hero-meta">Six numbered sections, a list of what was not verified, and 22 linked sources.</p>
+</div>
+</section>
+
+<div class="study-layout">
+<nav class="contents" aria-label="In this study">
+<p class="small-label" aria-hidden="true">In this study</p>
+<ol>
+<li><a href="#what-it-is"><span class="toc-num">01</span> What Foundry Insights is</a></li>
+<li><a href="#measurement"><span class="toc-num">02</span> How Microsoft measured it</a></li>
+<li><a href="#value"><span class="toc-num">03</span> Value assessment</a></li>
+<li><a href="#side-by-side"><span class="toc-num">04</span> Side by side with BQAA's trace-to-findings loop</a></li>
+<li><a href="#bottom-line"><span class="toc-num">05</span> Bottom line</a></li>
+<li><a href="#borrow"><span class="toc-num">06</span> What BQAA could borrow</a></li>
+<li><a href="#not-verified"><span class="toc-num"></span> Not verified</a></li>
+<li><a href="#sources"><span class="toc-num"></span> Sources</a></li>
+</ol>
+</nav>
+<div class="study">
+
+<section id="what-it-is" class="chapter" aria-labelledby="what-it-is-h">
+<p class="chapter-number" aria-hidden="true">01 / What Foundry Insights is</p>
+<h2 id="what-it-is-h"><span class="visually-hidden">1. </span>What Foundry Insights is</h2>
+<p>Insights analyzes traces from the Application Insights resource connected to a Foundry project and organizes recurring behavior into reviewable findings (post, 'From trace search to an actionable review queue'). Prerequisites include a GPT-5 or newer GPT deployment, user and managed-identity role assignments, and recent representative traces (Learn, 'Prerequisites'); only GPT models can be the judge (Learn, 'Choose a supported judge model').</p>
+<p>An Insight can carry a title; one of eight categories; High, Medium or Low severity; a status; agent version and creation time; an AI-generated likely cause; linked traces; highlighted traces; and a proposed action or fix (Learn, 'Information in an Insight').</p>
+<p>The first analysis looks back 7 days; later runs are on demand or scheduled (Learn, 'How Insights in Foundry works'). Developers triage in the portal, checking highlighted traces against healthy ones (Learn, 'Review generated Insights' and 'Validate an Insight'). Foundry MCP's <code>agent_insights_get</code> tool or the Microsoft Foundry Skill gives a local coding agent read-only access to findings (Learn, 'Pull Insights into a local coding agent'). Proposed fixes can be instruction diffs for Prompt agents or source diffs for code-based Hosted agents, otherwise general guidance, and status can be active, resolved or dismissed (Learn, 'Take action on a confirmed Insight').</p>
+<p>The only charge either source names is the model deployment, including scheduled runs (Learn, 'Pricing'; post, 'Get started'). The feature is a preview without a service-level agreement, not recommended for production workloads (Learn, opening note), and its supported agents, models, regions, limits and prices can change (Learn, 'Responsible use and limitations').</p>
+</section>
+
+<section id="measurement" class="chapter" aria-labelledby="measurement-h">
+<p class="chapter-number" aria-hidden="true">02 / How Microsoft measured it</p>
+<h2 id="measurement-h"><span class="visually-hidden">2. </span>How Microsoft measured it</h2>
+<p>Linkage: the same 746 benchmark inputs (653 failure-labeled) ran on September 15, 16, and 17, 2026, across six public research slices (post, 'Labeled evaluation: Do Insights link the right traces?'). Precision was 100.0% on AgentErrorBench and TraceElephant only because every input there is failure-labeled (post, 'Labeled results'). On the mixed AgentRx (Tau-bench retail) slice, with 29 of 102 inputs failure-labeled, mean trace precision was 37.8% and mean trace recall 57.5%, with daily recall of 65.5%, 58.6%, and 48.3% (post, 'What the labeled results show'). The post states: "They do not establish whether an explanation is correct or a proposed action is useful" (same section).</p>
+<p>Finding quality: a separate LLM judge scored 40 Insights from 4,496 inputs across five datasets on eight 1-to-5 dimensions (post, 'The eight-dimension judge rubric' and 'Unlabeled results'). Dataset means were 3.53 (PUPA), 3.57 (FailSafeQA), 3.88 (internal monitoring dashboard agent), 2.84 (tau2-bench) and 3.81 (synthetic scenarios). Fix specificity was lowest in four of five snapshots (means 2.00 to 2.64), and tau2-bench's lowest was correctness at 2.25 (post, 'Unlabeled results'). These scores "are not human ratings" (post, 'Unlabeled evaluation: Are the findings grounded and useful?').</p>
+<p>Known issues: in the September 23 hosted-agent report, 11 of 12 expected issues were scorable and 10 were detected, and all three scorable healthy baselines had no confirmed unsupported findings. The snapshot is "not a representative product-wide rate" (post, 'Controlled end-to-end tests: Can Insights find known issues?').</p>
+</section>
+
+<section id="value" class="chapter" aria-labelledby="value-h">
+<p class="chapter-number" aria-hidden="true">03 / Value assessment</p>
+<h2 id="value-h"><span class="visually-hidden">3. </span>Value assessment</h2>
+<h3 id="methodology">Methodology worth borrowing</h3>
+<p>The post separates linkage, finding quality and known-issue detection, reports label prevalence beside precision, keeps datasets separate, scores explanation, importance and fix usefulness apart, and leaves incomplete controlled cases unscored (post, 'Three complementary ways to evaluate Insight quality', 'What the labeled results show', 'Unlabeled results', 'The eight-dimension judge rubric' and 'Controlled end-to-end tests: Can Insights find known issues?').</p>
+<p class="judgement"><em class="judge">Judgement:</em> this measurement contract is the release's most transferable part; any trace-to-findings product, BQAA included, can be held to it.</p>
+<h3 id="competitor-signal">Competitor signal</h3>
+<p>Microsoft calls discovering "repeated behavior that the team did not know to predefine" the harder problem beyond observability and evaluation (post, 'From trace search to an actionable review queue') and publishes weak results beside strong ones (post, 'What the labeled results show').</p>
+<p class="judgement"><em class="judge">Judgement:</em> the competitive bar is moving from storing and querying traces to delivering evidence-linked findings into the coding agent that makes the change, with published measurement in the pitch. Without adoption data in the sources, this signals direction, not traction.</p>
+<h3 id="limits">Limits</h3>
+<p>Preview with no SLA (Learn, opening note); GPT-5-or-newer GPT judge only (Learn, 'Choose a supported judge model'); Application Insights and role setup (Learn, 'Prerequisites'); lookback-window analysis, where Insights "aren't guaranteed to be real time" and the feature "might miss real issues or combine unrelated behavior" (Learn, 'Responsible use and limitations'); no evidence on "longitudinal recurrence or deduplication performance across runs" (post, 'How we track quality over time'); fix specificity lowest-scoring (post, 'Unlabeled results'); benchmark inputs that are "not a representative sample of customer production traffic" (post, 'Labeled evaluation: Do Insights link the right traces?'), plus an internal dataset "compiled from Microsoft employee usage" and synthetic scenarios (post, 'Unlabeled evaluation: Are the findings grounded and useful?').</p>
+<h3 id="unproven">What is unproven</h3>
+<p>Diagnosis correctness, fix usefulness and measured improvement after a fix (post, 'What the labeled results show' and 'Unlabeled results'); judge agreement with humans (none reported); category labels, since category agreement is "an exploratory benchmark diagnostic" (post, 'A broader view of quality'); customer-traffic results; and cost per run (no figures given).</p>
+<p class="judgement"><em class="judge">Judgement:</em> the labeled results show broad failure coverage but weak discrimination. The mixed slice's failure share is 28.4% (29 of 102, computed), so 37.8% precision beats random linking, yet most linked inputs there had no failure label (the post notes some may hold unlabeled cost or latency issues). On the three mostly-failure slices that include healthy inputs, precision sits within about a point of the failure share (computed shares 75.9%, 96.6% and 94.4%; precision 75.3%, 96.9% and 93.3%). On the mixed slice, daily recall on identical inputs varied; whether the pipeline changed between runs is unstated (NOT VERIFIED), so stability is open. With 40 judged Insights and 11 scorable injected issues, the samples are small.</p>
+</section>
+
+<section id="side-by-side" class="chapter" aria-labelledby="side-by-side-h">
+<p class="chapter-number" aria-hidden="true">04 / Side by side with BQAA's trace-to-findings loop</p>
+<h2 id="side-by-side-h"><span class="visually-hidden">4. </span>Side by side with BQAA's trace-to-findings loop</h2>
+<div class="table-wrap" role="region" aria-label="Comparison table: Foundry Insights and BQAA" tabindex="0">
+<table class="compare" role="table" aria-labelledby="compare-caption">
+<caption id="compare-caption">Foundry Insights and BQAA compared on eleven dimensions</caption>
+<colgroup><col class="c-dim"><col class="c-fi"><col class="c-bq"></colgroup>
+<thead role="rowgroup">
+<tr role="row"><th scope="col" role="columnheader">Dimension</th><th scope="col" role="columnheader">Foundry Insights</th><th scope="col" role="columnheader">BQAA</th></tr>
+</thead>
+<tbody role="rowgroup">
+<tr role="row"><th scope="row" role="rowheader">Capture</th><td role="cell" data-label="Foundry Insights">OpenTelemetry traces in the connected Application Insights resource (Learn, 'How Insights in Foundry works')</td><td role="cell" data-label="BQAA">ADK plugin for Python and Java (Kotlin logs lifecycle events only) (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK page</a>); LangChain and LangGraph handler, or direct Storage Write API ingestion (<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery docs</a>); an OTLP receiver for coding-agent OpenTelemetry (<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/deploy/otlp_receiver/README.md">receiver guide</a>)</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Storage and query</th><td role="cell" data-label="Foundry Insights">Telemetry stays in Application Insights; Insights live in a monitor (Learn, 'Use the code samples')</td><td role="cell" data-label="BQAA"><code>agent_events</code> table with a predefined schema in the user's BigQuery dataset; SQL, notebooks, SDK and business-table joins (<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery docs</a>)</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Analysis and findings</th><td role="cell" data-label="Foundry Insights">On-demand or scheduled discovery of recurring behavior, with evidence-linked findings (Learn, 'How Insights in Foundry works' and 'Information in an Insight')</td><td role="cell" data-label="BQAA"><code>client.insights()</code> extracts LLM facets per session, aggregates them and generates seven analysis sections, up to 50 qualifying sessions by default; no per-finding trace links, severity or status are documented (<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/SDK.md">SDK reference</a>, section 10; <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/src/bigquery_agent_analytics/insights.py">insights module</a>). SQL examples cover per-session root cause and failure clustering; a context graph makes agent decisions GQL-queryable (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK page</a>; <a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery docs</a>)</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Agent evaluation</th><td role="cell" data-label="Foundry Insights">Separate Foundry evaluation, fed by confirmed Insights (Learn, 'Take action on a confirmed Insight')</td><td role="cell" data-label="BQAA">Deterministic metrics, Gemini-based judges, trajectory matching, multi-trial metrics, and weighted, binary or majority grader composition (<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/README.md">SDK README</a>; <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/SDK.md">SDK reference</a>, section 4)</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Published evaluation of finding quality</th><td role="cell" data-label="Foundry Insights">Trace-linkage benchmarks, LLM-judge scores, and controlled known-issue tests; limitations described above (post)</td><td role="cell" data-label="BQAA">None found (NOT VERIFIED)</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Back to developer or coding agent</th><td role="cell" data-label="Foundry Insights">Portal, Python SDK, read-only MCP tool and Skill (Learn, 'Pull Insights into a local coding agent' and 'Use the code samples')</td><td role="cell" data-label="BQAA">Looker Studio template, Looker Block and Conversational Analytics (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK page</a>); CLI with JSON output, described as useful for "agent tool-calling", CI exit codes, and a BigQuery Remote Function (<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/SDK.md">SDK reference</a>, section 19); no BQAA-specific MCP tool documented (NOT VERIFIED)</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Proposed changes</th><td role="cell" data-label="Foundry Insights">Instruction or source diffs for Prompt and code-based Hosted agents, otherwise guidance (Learn, 'Take action on a confirmed Insight')</td><td role="cell" data-label="BQAA">A weekly job can evolve an agent's SKILL.md and open a pull request with before-and-after metrics and failure evidence (<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/deploy/skill_evolution_job/README.md">job guide</a>), shipped "repo side, not in the wheel" (<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/CHANGELOG.md">CHANGELOG</a>, 0.5.2). In one recorded lab run on a deliberately defective baseline, 26 of 80 held-out questions passed before evolution and 73 after (32.5% and 91.2%), with a Gemini judge grading the 70 in-scope answers against expected answers (<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/examples/skill_evolution_lab/VERIFICATION.md">lab record</a>)</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Cost model</th><td role="cell" data-label="Foundry Insights">Model deployment charges (Learn, 'Pricing'); Application Insights costs not covered (NOT VERIFIED)</td><td role="cell" data-label="BQAA">Open-source SDK (<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery docs</a>); paid Storage Write API (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK page</a>) at $0.025 per GiB in the default Iowa (us-central1) view, first 2 TiB per month free, plus storage and query charges (<a href="https://cloud.google.com/bigquery/pricing">BigQuery pricing</a>); charged AI.GENERATE inference (<a href="https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-ai-generate">AI.GENERATE docs</a>)</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Openness</th><td role="cell" data-label="Foundry Insights">Foundry service; Python samples and a REST API specification are linked (Learn, 'Related content')</td><td role="cell" data-label="BQAA">An "open source solution" (<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery docs</a>); Apache-2.0 SDK with readable insights prompts (<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/pyproject.toml">pyproject</a>; <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/src/bigquery_agent_analytics/insights.py">insights module</a>)</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Framework scope</th><td role="cell" data-label="Foundry Insights">Foundry Prompt and Hosted agents, and external agents with a registered <code>otel_agent_id</code> (Learn, 'Prerequisites' and 'Use the code samples'); frameworks not listed (NOT VERIFIED)</td><td role="cell" data-label="BQAA">ADK, LangGraph, LangChain, and custom frameworks via the Storage Write API (<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery docs</a>)</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Maturity</th><td role="cell" data-label="Foundry Insights">Public preview, no SLA (post, 'From trace search to an actionable review queue'; Learn, opening note)</td><td role="cell" data-label="BQAA">Preview at launch, November 20, 2025 (<a href="https://cloud.google.com/blog/products/data-analytics/introducing-bigquery-agent-analytics">launch blog</a>); GA in ADK since April 15, 2026 (<a href="https://docs.cloud.google.com/bigquery/docs/release-notes">release notes</a>); LangGraph in Preview (<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery docs</a>); SDK 0.5.4 marked "Development Status :: 3 - Alpha" (<a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/pyproject.toml">pyproject</a>)</td></tr>
+</tbody>
+</table>
+</div>
+<p class="judgement"><em class="judge">Judgement:</em> BQAA's documented insights output reads as a summary report, not a triage queue. BQAA's strengths are the substrate: multi-framework capture into the user's own BigQuery project, SQL joins to business data, and in-SDK evaluation tooling. In the sources reviewed, measured improvement after a proposed change appears only in BQAA's lab, whose planted-defect baseline shows the loop can work, not that it helps production agents.</p>
+</section>
+
+<section id="bottom-line" class="chapter" aria-labelledby="bottom-line-h">
+<p class="chapter-number" aria-hidden="true">05 / Bottom line</p>
+<h2 id="bottom-line-h"><span class="visually-hidden">5. </span>Bottom line</h2>
+<p class="judgement"><em class="judge">Judgement:</em> Insights is worth more as a product pattern and a measurement standard than as proven diagnosis. It turns traces into an evidence-linked review queue that coding agents can read, but by Microsoft's own numbers it discriminates weakly on the mixed benchmark slice (37.8% precision, 57.5% recall), fix specificity is usually its weakest-judged dimension, and the reviewed Microsoft sources do not establish correct diagnoses or helpful fixes on customer traffic. Insights is in public preview. BQAA is GA in ADK; the pinned SDK 0.5.4 declares an Alpha development status. Whether the ADK GA announcement covers the SDK analysis layer is NOT VERIFIED. The apparent gap in the reviewed SDK is a persisted, evidence-linked, status-tracked findings queue with dedicated read-only retrieval, beyond its agent-callable reporting CLI. A published finding-quality evaluation was not found in the reviewed sources; wider availability is NOT VERIFIED.</p>
+</section>
+
+<section id="borrow" class="chapter" aria-labelledby="borrow-h">
+<p class="chapter-number" aria-hidden="true">06 / What BQAA could borrow</p>
+<h2 id="borrow-h"><span class="visually-hidden">6. </span>What BQAA could borrow</h2>
+<p class="judgement"><em class="judge">Judgement:</em> each adapts a sourced Microsoft practice.</p>
+<ol class="borrow">
+<li>A persisted finding record (category, severity, status, agent version, linked and highlighted sessions, proposed action) with a verify-before-resolve rule (Learn, 'Information in an Insight' and 'Resolve, dismiss, or monitor recurrence').</li>
+<li>A published three-part evaluation of the insights pipeline, per dataset, with base rates beside precision and defect-injection tests that count unsupported and duplicate findings and leave incomplete cases unscored (post, 'Three complementary ways to evaluate Insight quality', 'What the labeled results show' and 'Controlled end-to-end tests: Can Insights find known issues?').</li>
+<li>A rubric for findings, not sessions, that scores fix specificity and fix applicability apart from correctness (post, 'The eight-dimension judge rubric'; compare the SDK's session <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/docs/evaluation_rubrics.md">rubric reference</a>).</li>
+<li>A read-only, paginated findings tool for coding agents that cannot start analyses or change status (Learn, 'Pull Insights into a local coding agent').</li>
+<li>Structured feedback classes for wrong findings (false positive, wrong likely cause, merged or duplicated issues) stored as evaluation data (Learn, 'An Insight appears incorrect').</li>
+</ol>
+</section>
+
+<section id="not-verified" class="chapter" aria-labelledby="not-verified-h">
+<p class="chapter-number" aria-hidden="true">What this brief did not verify</p>
+<h2 id="not-verified-h">NOT VERIFIED</h2>
+<ul class="gaps">
+<li>Application Insights charges, and any Insights fee beyond model charges: Learn 'Pricing' names only model charges; Azure pricing was not checked.</li>
+<li>Insights regions and subscriptions: Learn 'Troubleshoot Insights in Foundry' says to check availability but lists none.</li>
+<li>External frameworks Insights can analyze: Learn mentions only registered external agents; its linked "Set up tracing" page was not reviewed.</li>
+<li>Pipeline changes between the September 15 to 17 runs: the post does not say ('How we track quality over time').</li>
+<li>Whether BQAA's GA covers the SDK: the release note says only "in the Google Agent Developer Kit"; the BigQuery docs page and SDK README state no SDK launch stage.</li>
+<li>A published quality evaluation of BQAA findings or judges: none in the SDK README, SDK reference, rubric reference, CHANGELOG, or three design documents listed in Sources. The lab measures skill changes, not finding quality. Papers and blogs were not searched.</li>
+<li>Evolved-skill gains outside the lab: none found in the job guide, <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/examples/skill_evolution_lab/README.md">lab README</a> or lab record; the lab's companion blog post and other venues were not reviewed.</li>
+<li>A BQAA-specific MCP tool or skill for retrieving findings: no "mcp" match in the SDK README, SDK reference or repository file list; BigQuery docs list a general "Use the BigQuery MCP server" page, not reviewed.</li>
+<li>Cost per Insights run or BQAA insights report: none in the Microsoft sources, SDK reference or README; the lab README prices a demo-size evolution round at "single-digit dollars".</li>
+</ul>
+</section>
+
+<section id="sources" class="chapter sources" aria-labelledby="sources-h">
+<p class="chapter-number" aria-hidden="true">Sourcebook</p>
+<h2 id="sources-h">Sources</h2>
+<ul class="source-list">
+<li><a href="https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/beyond-the-trace-the-science-of-insight-quality/4559981">https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/beyond-the-trace-the-science-of-insight-quality/4559981</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/foundry/observability/how-to/agent-insights">https://learn.microsoft.com/en-us/azure/foundry/observability/how-to/agent-insights</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics</a></li>
+<li><a href="https://adk.dev/integrations/bigquery-agent-analytics/">https://adk.dev/integrations/bigquery-agent-analytics/</a></li>
+<li><a href="https://cloud.google.com/blog/products/data-analytics/introducing-bigquery-agent-analytics">https://cloud.google.com/blog/products/data-analytics/introducing-bigquery-agent-analytics</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/release-notes">https://docs.cloud.google.com/bigquery/docs/release-notes</a></li>
+<li><a href="https://cloud.google.com/bigquery/pricing">https://cloud.google.com/bigquery/pricing</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-ai-generate">https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-ai-generate</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/tree/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/tree/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/README.md">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/README.md</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/SDK.md">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/SDK.md</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/CHANGELOG.md">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/CHANGELOG.md</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/pyproject.toml">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/pyproject.toml</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/src/bigquery_agent_analytics/insights.py">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/src/bigquery_agent_analytics/insights.py</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/deploy/skill_evolution_job/README.md">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/deploy/skill_evolution_job/README.md</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/examples/skill_evolution_lab/README.md">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/examples/skill_evolution_lab/README.md</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/examples/skill_evolution_lab/VERIFICATION.md">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/examples/skill_evolution_lab/VERIFICATION.md</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/deploy/otlp_receiver/README.md">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/deploy/otlp_receiver/README.md</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/docs/evaluation_rubrics.md">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/docs/evaluation_rubrics.md</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/docs/hatteras_evaluation.md">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/docs/hatteras_evaluation.md</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/docs/evalbench.md">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/docs/evalbench.md</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/docs/week0_preregistration.md">https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/blob/4a4f3ae6cbbf41fbeaada79521b5ac322bbf3ec3/docs/week0_preregistration.md</a></li>
+</ul>
+</section>
+
+</div>
+</div>
+</main>
+<footer class="footer">
+<div class="footer-inner">
+<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6"/><path class="bm-a" d="M6 10h9M6 16h12M6 22h7"/><path class="bm-cut" d="M20 9l6 7-6 7"/></svg>
+<div><p class="footer-title">Microsoft Foundry Insights and BigQuery Agent Analytics: value and comparison</p><p>Independent synthesis on <a href="https://caohy1988.github.io/research/foundry-insights-vs-bqaa/">caohy1988.github.io/research/foundry-insights-vs-bqaa/</a>, not a publication of any vendor. Written from the BQAA side and reviewed by one blind reviewer. Prepared and sources fetched <time datetime="2026-10-03">2026-10-03</time>.</p></div>
+<a class="back-top" href="#title">Back to top</a>
+</div>
+</footer>
+</body>
+</html>

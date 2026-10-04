@@ -1,0 +1,178 @@
+/* Foundry Insights vs BigQuery Agent Analytics: page styles. System fonts only; no external assets.
+   Colour is used sparingly: steel blue for links and structure. No caveat or status is ever shown as a
+   coloured word, tile, or label; a judgement differs from a fact only by its italic lead-in. */
+:root {
+  --ink: #1b2129;
+  --ink-2: #333d48;
+  --muted: #5a6470;
+  --faint: #66707b;
+  --paper: #ffffff;
+  --wash: #f3f5f7;
+  --line: #dde2e7;
+  --line-2: #c3cbd3;
+  --steel: #1f5f8b;
+  --serif: "Iowan Old Style", "Charter", "Bitstream Charter", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 18px/1.7 var(--serif); overflow-wrap: break-word; }
+a { color: var(--steel); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--steel); outline-offset: 3px; }
+code { font: 0.86em/1.5 var(--mono); overflow-wrap: anywhere; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* Skip link */
+.skip { position: absolute; left: 12px; top: -120px; z-index: 100; background: var(--paper); color: var(--ink); padding: 10px 14px; font: 600 15px/1.2 var(--sans); border: 2px solid var(--steel); border-radius: 4px; }
+.skip:focus { top: 12px; }
+
+/* Study top bar (sits under the shared site navigation) */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px 5vw; border-bottom: 1px solid var(--line); font-family: var(--sans); }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; color: var(--ink); text-decoration: none; font-size: 15px; }
+.brand-mark { width: 32px; height: 32px; flex: none; }
+.brand-mark rect { fill: var(--ink); }
+.brand-mark path { fill: none; stroke-width: 3; }
+.brand-mark .bm-a { stroke: #91c3e8; }
+.brand-mark .bm-cut { stroke: #f2622e; stroke-width: 2.6; }
+.brand-name { font-weight: 700; white-space: nowrap; }
+.brand-sub { color: var(--muted); padding-left: 12px; border-left: 1px solid var(--line-2); }
+.top-actions { font-size: 15px; white-space: nowrap; }
+.top-actions a { color: var(--ink); text-decoration: none; }
+.top-actions a:hover { text-decoration: underline; }
+.source-count { color: var(--muted); margin-left: 4px; }
+
+/* Hero */
+.hero { max-width: 1296px; margin: 0 auto; padding: 56px 5vw 44px; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 32px 5vw; align-items: end; border-bottom: 1px solid var(--line); }
+.eyebrow { margin: 0; font: 600 15px/1.4 var(--sans); color: var(--steel); }
+h1 { font: 800 clamp(34px, 4.3vw, 56px)/1.06 var(--sans); letter-spacing: -0.03em; margin: 18px 0 22px; max-width: 20ch; }
+.deck { font-size: 22px; line-height: 1.45; margin: 0; max-width: 36ch; }
+.hero-notes { font-family: var(--sans); max-width: 60ch; }
+.hero-notes p { margin: 0 0 14px; font-size: 16.5px; line-height: 1.6; }
+.hero-notes .citation-key { font-size: 15.5px; color: var(--ink-2); padding-top: 14px; border-top: 1px solid var(--line); }
+.hero-notes .hero-meta { margin: 0; font-size: 14px; color: var(--muted); }
+
+/* Study layout and contents */
+.study-layout { max-width: 1296px; margin: 0 auto; padding: 40px 5vw 0; display: grid; grid-template-columns: 224px minmax(0, 860px); gap: 64px; }
+.contents { position: sticky; top: 78px; align-self: start; max-height: calc(100vh - 96px); overflow-y: auto; padding-bottom: 12px; font-family: var(--sans); }
+.small-label { margin: 0; font: 700 12.5px/1.4 var(--sans); letter-spacing: 0.12em; text-transform: uppercase; color: var(--steel); }
+.contents ol { list-style: none; margin: 14px 0 0; padding: 0; }
+.contents a { display: flex; gap: 12px; padding: 6px 0; font-size: 14.5px; line-height: 1.35; color: var(--muted); text-decoration: none; }
+.contents a:hover { color: var(--ink); text-decoration: underline; }
+.toc-num { width: 20px; flex: none; color: var(--faint); font-variant-numeric: tabular-nums; }
+.study { min-width: 0; }
+
+/* Chapters */
+.chapter { padding: 8px 0 40px; margin-bottom: 36px; border-bottom: 1px solid var(--line); }
+.chapter > p, .chapter > ul, .chapter > ol, .chapter > h3 { max-width: 720px; }
+.chapter-number { font: 700 12.5px/1.4 var(--sans); letter-spacing: 0.12em; text-transform: uppercase; color: var(--steel); margin: 0 0 10px; }
+h2 { font: 750 clamp(28px, 3.2vw, 40px)/1.15 var(--sans); letter-spacing: -0.02em; margin: 0 0 20px; }
+h3 { font: 700 21px/1.3 var(--sans); letter-spacing: -0.01em; margin: 34px 0 10px; }
+h2 + h3 { margin-top: 0; }
+p { margin: 0 0 16px; }
+.judge { font-style: italic; font-weight: 700; }
+.chapter ol, .chapter ul { margin: 0 0 18px; padding-left: 1.5em; }
+.chapter li { margin: 0 0 12px; padding-left: 0.3em; }
+.borrow li::marker { font: 700 0.9em var(--sans); color: var(--steel); }
+.gaps li::marker { color: var(--muted); }
+
+/* Comparison table: scrolls sideways inside its own focusable region when the column is narrow */
+.table-wrap { overflow-x: auto; max-width: 100%; margin: 6px 0 26px; }
+.compare { width: 100%; min-width: 680px; border-collapse: collapse; table-layout: fixed; font: 14.5px/1.55 var(--sans); }
+.compare caption { caption-side: top; text-align: left; padding: 0 0 10px; font: 600 14.5px/1.4 var(--sans); color: var(--ink-2); }
+.compare .c-dim { width: 18%; }
+.compare .c-fi { width: 36%; }
+.compare .c-bq { width: 46%; }
+.compare th, .compare td { text-align: left; vertical-align: top; padding: 12px; border-bottom: 1px solid var(--line); }
+.compare thead th { font-size: 13px; font-weight: 650; color: var(--muted); background: var(--wash); border-bottom: 1px solid var(--line-2); }
+.compare tbody th { font-weight: 650; color: var(--ink); }
+
+/* Sourcebook */
+.chapter .source-list { list-style: none; margin: 0; padding: 0; font-family: var(--sans); }
+.chapter .source-list li { margin: 0; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14.5px; line-height: 1.5; }
+.chapter .source-list li:last-child { border-bottom: 1px solid var(--line); }
+.source-list a { overflow-wrap: anywhere; }
+
+/* Footer */
+.footer { max-width: 1296px; margin: 0 auto; padding: 0 5vw 64px; display: grid; grid-template-columns: 224px minmax(0, 860px); gap: 64px; font-family: var(--sans); }
+.footer-inner { grid-column: 2; display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 8px 18px; }
+.footer .brand-mark { width: 36px; height: 36px; }
+.footer p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.footer .footer-title { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.footer a { overflow-wrap: anywhere; }
+.back-top { font-size: 14px; white-space: nowrap; }
+time { white-space: nowrap; }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .study-layout, .footer { grid-template-columns: 170px minmax(0, 1fr); gap: 40px; }
+}
+@media (max-width: 860px) {
+  .hero { grid-template-columns: minmax(0, 1fr); padding: 36px 5vw 32px; gap: 26px; align-items: start; }
+  .study-layout { display: block; padding-top: 22px; }
+  .contents { position: static; max-height: none; overflow: visible; padding-bottom: 14px; margin-bottom: 28px; border-bottom: 1px solid var(--line); }
+  .contents ol { margin-top: 8px; }
+  .contents a { padding: 5px 0; }
+  .footer { display: block; }
+}
+/* Narrow screens: each table row becomes a block. Header cells stay in the accessibility tree
+   (visually hidden, not display: none) and the explicit table roles in the markup keep the cells
+   associated with them; the visible labels come from data-label and are hidden from speech. */
+@media screen and (max-width: 760px) {
+  .compare, .compare caption, .compare tbody, .compare tr, .compare th, .compare td { display: block; }
+  .compare { min-width: 0; table-layout: auto; }
+  .compare colgroup { display: none; }
+  .compare thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+  .compare tbody tr { padding: 12px 0 4px; border-top: 2px solid var(--line-2); }
+  .compare tbody tr:last-child { border-bottom: 1px solid var(--line); }
+  .compare tbody th { padding: 0 0 6px; border: 0; font-size: 17px; }
+  .compare td { padding: 2px 0 12px; border: 0; }
+  .compare td::before { content: attr(data-label); content: attr(data-label) / ""; display: block; margin-bottom: 2px; font: 650 13px/1.4 var(--sans); color: var(--muted); }
+}
+@media (max-width: 700px) {
+  body { font-size: 17px; }
+  .topbar { padding: 12px 5vw; }
+  .brand-sub { display: none; }
+  .deck { font-size: 19px; }
+  h3 { font-size: 19px; }
+  .footer-inner { grid-template-columns: 36px minmax(0, 1fr); align-items: start; }
+  .back-top { grid-column: 2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* Print: black on white, no navigation chrome, the table kept as a table and fitted to the page */
+@media print {
+  @page { margin: 16mm 14mm; }
+  .skip, .topbar, .contents, .back-top, .brand-mark { display: none !important; }
+  html { scroll-padding-top: 0; }
+  body { background: #fff; color: #000; font-size: 10.5pt; line-height: 1.45; }
+  a, .eyebrow, .chapter-number, .small-label, .source-count, .hero-notes .citation-key, .hero-notes .hero-meta,
+  .compare caption, .compare thead th, .footer p, .footer .footer-title, .borrow li::marker, .gaps li::marker { color: #000; }
+  a { text-decoration: underline; }
+  .hero { display: block; max-width: none; padding: 0 0 10pt; border-bottom: 1px solid #999; }
+  h1 { font-size: 24pt; max-width: none; margin: 6pt 0 10pt; }
+  .deck { font-size: 13pt; max-width: none; margin-bottom: 10pt; }
+  .hero-notes { max-width: none; }
+  .hero-notes p, .hero-notes .citation-key, .hero-notes .hero-meta { font-size: 10pt; }
+  .hero-notes .citation-key { border-top-color: #999; }
+  .study-layout { display: block; max-width: none; padding: 12pt 0 0; }
+  .chapter { padding: 0 0 8pt; margin: 0 0 12pt; border-bottom-color: #999; }
+  .chapter > p, .chapter > ul, .chapter > ol, .chapter > h3 { max-width: none; }
+  h2 { font-size: 17pt; margin-bottom: 8pt; }
+  h3 { font-size: 12.5pt; margin: 12pt 0 4pt; }
+  .chapter-number, h2, h3, .compare caption { break-after: avoid; page-break-after: avoid; }
+  p, li { orphans: 3; widows: 3; }
+  .table-wrap { overflow: visible; margin-bottom: 12pt; }
+  .compare { min-width: 0; font-size: 8.5pt; line-height: 1.4; }
+  .compare thead { display: table-header-group; }
+  .compare thead th { background: none; }
+  .compare th, .compare td { padding: 4pt 5pt; border-bottom: 0.75pt solid #999; }
+  .compare tr { break-inside: avoid; page-break-inside: avoid; }
+  .chapter .source-list li { padding: 3pt 0; font-size: 9pt; border-color: #bbb; }
+  .footer { display: block; max-width: none; padding: 8pt 0 0; }
+  .footer-inner { display: block; }
+}
