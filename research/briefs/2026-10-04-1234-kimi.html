@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-10-04 · 12:34 PM PT · Kimi</title>
+  <meta name="description" content="Progress openai-node v7.28.0 agent-session webhooks + 12h cache-write tokens; Opus weekly-limit → Kimi fallback; ~12h window (0634 Mac-down skip).">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-04-1234-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Kimi · 12:34 PM PT · on-cadence late wake · Opus-quota fallback · fresh-list path · ~12h window (0634 Mac-down skip)</p>
+    <article>
+<h1>Field Brief — 2026-10-04-1234: OpenAI Node SDK v7.28.0 types agent-session lifecycle webhooks and adds a 12h cache-write token field to org usage; Codex alpha.13 stays TUI/daemon; LiteLLM merges per-caller MCP tool schemas into pre-call guardrails</h1>
+<p><strong>Writer: Kimi</strong> (<code>kimi-code/k3</code>, thinking effort max) — <strong>Opus weekly-limit fallback</strong> (Opus 5.5 hit its weekly cap; resets Oct 6 ~3pm PT), per the 2026-09-22 lock.
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, the catalog and the push.
+<strong>Slot:</strong> 2026-10-04-1234 (12:34 PT, Sun Oct 4), the scheduled slot. The run woke late, at about 12:41 PT, and the label stays <strong>1234</strong>.
+<strong>Window:</strong> about <strong>12 hours</strong> since the last published brief, <code>2026-10-04-0034</code> (07:34Z → 19:34Z Oct 4). The window is double-length because the <strong>06:34 PT slot was SKIPPED — Mac-down</strong> at ~06:43 PT.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>A quiet Sunday window.</strong> Across 60 GitHub repos, 28 npm packages and 35 PyPI packages swept at ~19:50Z, exactly <strong>two artifacts</strong> landed in-window, and one stable:</li>
+<li><strong>openai-node v7.28.0</strong> (stable): GitHub release 18:22:13Z, npm <code>latest</code> = 7.28.0 at 18:31:37Z. <strong>Progress</strong> on the existing OpenAI SDK session-traces card.</li>
+<li><strong>Codex <code>rust-v0.162.0-alpha.13</code></strong> (15:42:32Z, alpha channel; npm <code>latest</code> still 0.160.0): TUI/daemon/Windows scope. NOTE, no Progress.</li>
+<li><strong>No Industry NEW this slot.</strong> The one stable release extends a surface the catalog already tracks, so it is Progress, not a new card.</li>
+<li><strong>Academy: nothing new.</strong> arXiv has no weekend mailing; <code>/list/cs.AI/new</code> at ~19:55Z still reads &quot;Friday, 2 October 2026&quot; and the ceiling id is still <code>2610.02207</code> — unchanged from the 0034 brief. The fresh list carries zero Academy items.</li>
+<li><strong>Notable unreleased merge:</strong> LiteLLM #41162 (merged 07:53Z, after v1.105.0-rc.1 was cut) hands each caller's listed-tool <strong>description and input schema</strong> to MCP pre-call hooks — guardrails can newly reject calls they previously allowed. Watch for the next rc.</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<h3>NEW</h3>
+<p>None this slot. The only stable release (openai-node v7.28.0) extends an existing card's surface and is filed as Progress below.</p>
+<h3>Progress — openai-node v7.28.0: agent-session webhook event interfaces and a 12h cache-write token field on org usage</h3>
+<p><strong>Parent:</strong> <code>openai-sdk-python-3-23-0-node-7-27-0-agent-session-traces-otlp-json</code>
+<strong>Primary:</strong> https://github.com/openai/openai-node/releases/tag/v7.28.0 — GitHub release 2026-10-04 18:22:13Z, <code>prerelease=false</code>. npm <code>openai@7.28.0</code> uploaded 18:31:37Z and <strong>is now <code>latest</code></strong> (was 7.27.0). Single feature commit, PR #2858 (merged Oct 2 05:55Z).</p>
+<p><strong>Why Progress and not NEW.</strong> A stable minor, but every change extends the session-events / usage-telemetry surface the Fri 0634 card already tracks (<code>openai-sdk-python-3-23-0-node-7-27-0-...</code>). PyPI <code>openai</code> had <strong>no</strong> in-window upload — this is Node-only this window.</p>
+<p>What ships (release notes + PR #2858 body):</p>
+<ul>
+<li><strong>Agent session webhook interfaces.</strong> Typed webhook payloads for agent session lifecycle events: <strong>created, in_progress, idle, failed, action_required</strong>. This is the first typed surface for session <em>lifecycle</em> (not just session traces) in the OpenAI SDKs — the events an analytics pipeline would consume to reconstruct session state transitions without polling.</li>
+<li><strong><code>input_cache_write_12h_tokens</code> on organization usage results.</strong> A new cost-analytics field exposing 12-hour cache-write token counts at the org usage endpoint. Cache-aware cost accounting gains another dimension beyond the existing cached-read fields.</li>
+<li><strong>Custom voice creation</strong> (<code>audio.voices.create</code> — uploaded sample with consent, or text prompt; prompt-created voices documented as Live-only). Not analytics-relevant; noted for completeness.</li>
+<li><strong>Beta <code>service_tier</code> cleanup:</strong> <code>ultrafast</code> removed from the beta agent and session <code>service_tier</code> unions — a breaking type-level change for anyone pinning <code>ultrafast</code> on those beta surfaces.</li>
+<li>Docs: image-variations retirement and model deprecations documented.</li>
+</ul>
+<p><strong>BQAA read.</strong> Two concrete ingestion notes: (1) if you consume OpenAI org-usage exports, expect a new <code>input_cache_write_12h_tokens</code> key in usage rows — schema mappers should tolerate-and-capture it; (2) agent-session lifecycle is now a typed webhook event set (created/in_progress/idle/failed/action_required) — the natural join key against session traces for &quot;what state was the session in when this span fired&quot;.</p>
+<h3>NOTE (below card bar)</h3>
+<ul>
+<li><strong>Codex <code>rust-v0.162.0-alpha.13</code></strong> (GitHub 15:42:32Z, prerelease; npm alpha 15:55Z; <code>latest</code> still 0.160.0). Six commits over alpha.12: Windows <code>mklink /J</code> fallback when daemon junction updates are denied (#50802), managed daemon for eligible <code>remote-control</code> launches with <code>--no-daemon</code> escape (#50803), review-lifecycle ordering preserved on failure (#50804), TUI snapshot pruning/test consolidation (#50808), server reasoning-summary defaults honored in new TUI threads (#50811). TUI/daemon/Windows scope — nothing new for telemetry. <strong>No Progress</strong> on <code>openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks</code> (mirrors the 0034 call on alpha.12).</li>
+<li><strong>LiteLLM #41162</strong> (merged 07:53:58Z — <strong>after</strong> v1.105.0-rc.1's 01:41Z publish, so not in rc.1; unreleased): MCP pre-call hooks now receive the listed tool's <strong>description and input schema per caller</strong>, with metadata carried separately to preserve synthetic messages and token accounting. The PR states the intentional behavior change plainly: metadata-aware guardrails can evaluate tool purpose and accepted inputs, <strong>potentially rejecting calls previously allowed</strong>. When this ships in the next rc, expect guardrail decision spans to carry tool-schema context — and a possible step-up in denial rates that is a policy change, not a regression. WATCH.</li>
+<li><strong>LiteLLM #44518</strong> (open, created 18:46Z): skip the <code>raw_gen_ai_request</code> span when per-request message redaction applies — privacy/telemetry interaction. Open PR, below the bar. WATCH.</li>
+<li><strong>letta-code merges (unreleased; latest card v0.33.1):</strong> #4933 (merged 17:56:39Z) — subagent shell-secret resolution falls back to the parent agent across the MCP trust boundary for <code>$NAME</code> references missing from the subagent's own vault (subagent secrets still win); #4949 (merged 19:05:03Z) — names the cancelling mod in <code>turn_start</code> cancel notices. NOTE. (Pack cross-check: the fresh-list F06 headline described #4949 as a <code>letta model set</code> settings merge; the merged #4949 is actually the cancel-notice fix — the settings PR is #4950, whose state I did not re-verify.)</li>
+<li><strong>stagehand #3102</strong> (open, created 08:36Z): extension decision-model providers (Clef, Perplexity Decider, OpenAI Decisions). Open PR, below the bar. WATCH.</li>
+<li><strong>Pack-reported PR traffic:</strong> F01/F04/F05/F07 count ~150 net-new open PRs across litellm / vercel-ai / mastra / opencode / openai-agents-python / letta-code / inspect_ai / OpenHands / qwen-code; F18 is a 10-PR langfuse production error-handling batch. All open or unreleased — below the card bar per standing rule.</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<h3>NEW</h3>
+<p>None. arXiv is flat: no weekend mailing, <code>/list/cs.AI/new</code> still shows &quot;Friday, 2 October 2026&quot; (ceiling <code>2610.02207</code>, identical to the 0034 brief's verified ceiling). The fresh list contains zero Academy items, and nothing in the already-announced listing changed since 0034.</p>
+<h3>Scouted, not ranked</h3>
+<ul>
+<li>The 0034 brief's four holds stand unchanged (no new evidence in-window): <code>2610.00347</code> (authorization succession for self-modifying agent populations — formal, no empirics in abstract), <code>2609.38291</code> HARDE (harness optimization), <code>2610.00328</code> ContractRL (training-side tool-call repair), <code>2610.00980</code> (single-seed coordination run). Not re-litigated this slot.</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ol>
+<li><strong>Agent-session lifecycle is becoming typed SDK surface.</strong> openai-node 7.28.0 adds created/in_progress/idle/failed/action_required webhook interfaces on top of the session-traces surface carded Friday. Expect session-state event streams to become a standard ingestion lane alongside OTLP traces — analytics schemas should plan a session-state dimension keyed to session id.</li>
+<li><strong>Cache-aware cost fields keep multiplying.</strong> <code>input_cache_write_12h_tokens</code> joins the cached-read fields in org usage. Cost models that treat &quot;cached&quot; as one bucket will drift; expect per-window (1h/12h) cache-write pricing surfaces to keep appearing across providers.</li>
+<li><strong>Guardrails are gaining tool-schema context.</strong> LiteLLM #41162 gives pre-call hooks the tool's description and input schema per caller — guardrail verdicts become richer records (what the tool <em>was</em>, not just its name), and denial-rate steps after upgrades become explainable policy events. Pairs with the standing &quot;log rejections with their evidence&quot; thread from the 0034 Academy cards.</li>
+</ol>
+<hr />
+<h2>TL;DRs for BQAA</h2>
+<ul>
+<li><strong>openai-node v7.28.0 (Progress, stable, now npm latest):</strong> typed agent-session webhook events (created/in_progress/idle/failed/action_required) + new <code>input_cache_write_12h_tokens</code> org-usage field; <code>ultrafast</code> dropped from beta agent/session service_tier unions. Node-only this window — PyPI <code>openai</code> flat.</li>
+<li><strong>Codex alpha.13 (NOTE):</strong> Windows junction fallback, managed-daemon remote-control, review-ordering-on-failure, TUI fixes. Alpha channel; nothing telemetry-material; no Progress.</li>
+<li><strong>LiteLLM #41162 (WATCH, merged unreleased):</strong> MCP pre-call hooks get per-caller tool description + input schema; guardrails can newly reject previously allowed calls. Not in v1.105.0-rc.1 (merged after the rc cut).</li>
+<li><strong>letta-code (NOTE):</strong> subagent <code>$NAME</code> secrets now fall back to the parent agent across the MCP trust boundary (#4933); cancel notices name the cancelling mod (#4949). Unreleased.</li>
+<li><strong>Academy:</strong> quiet Sunday — arXiv ceiling unchanged at <code>2610.02207</code> (Friday Oct 2 listing).</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th>What is not confirmed</th>
+  <th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>openai-node 7.28.0 webhook events at runtime</td>
+  <td>The release adds <strong>typed interfaces</strong> for the five session events; actual server-side emission of these webhooks (and their event payloads' full schemas) was not exercised.</td>
+  <td>GitHub release body; PR #2858 body/files summary; npm registry</td>
+</tr>
+<tr>
+  <td>Codex alpha.13 full contents</td>
+  <td>Release body is empty; contents derived from the alpha.12→alpha.13 compare (6 commits / 114 files). I read commit messages, not diffs; did not build or run.</td>
+  <td>GitHub compare API</td>
+</tr>
+<tr>
+  <td>LiteLLM #41162 absent from rc.1</td>
+  <td>Claim is by timestamp ordering (merged 07:53:58Z &gt; rc.1 published 01:41:07Z), not a source diff of the rc.1 tag.</td>
+  <td>GitHub PR API; rc.1 release metadata from 0034 brief</td>
+</tr>
+<tr>
+  <td>letta-code #4950 (<code>letta model set</code> settings merge)</td>
+  <td>Pack-reported (F06) as an in-window merge; not independently re-verified, so it is not asserted as a claim above.</td>
+  <td>Fresh list only (did not open packs wholesale)</td>
+</tr>
+<tr>
+  <td>Braintrust / OpenInference / agent-squad GitHub releases</td>
+  <td>Repo-name misses: <code>braintrustdata/braintrust</code>, <code>openinference/openinference(-python)</code>, <code>microsoft/agent-squad</code> returned 404 in my sweep. Covered instead via <code>braintrustdata/braintrust-sdk</code>, <code>awslabs/agent-squad</code>, PyPI <code>braintrust</code> / <code>openinference-instrumentation</code>, npm <code>braintrust</code> — all with <strong>no</strong> in-window artifacts. The &quot;quiet window&quot; claim for these three rests on registry checks, not the GitHub releases API.</td>
+  <td>gh api (404s); PyPI/npm registry JSON</td>
+</tr>
+<tr>
+  <td>Late-morning collection coverage</td>
+  <td>Agy 1232 was ABSENT at kick; 11:34–12:34 PT coverage rests on muse-1207/dsh-1209 extras + my own sweep.</td>
+  <td>FB_MERGE header; fresh-items.md</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Writer/fallback:</strong> <strong>Kimi</strong> (<code>kimi-code/k3</code>, thinking max) — Opus 5.5 hit its weekly limit (resets Oct 6 ~3pm PT); this is the documented Kimi fallback per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.</li>
+<li><strong>Slot:</strong> on-cadence 1234; late wake ~12:41 PT, label kept <strong>1234</strong>. Window ~<strong>12h</strong> because <strong>0634 was SKIPPED (Mac-down ~06:43 PT)</strong> — said plainly, no invented 0634 brief.</li>
+<li><strong>Fresh-list path used:</strong> <code>_runs/fb-2026-10-04-1234/fresh-items.md</code> (51 candidates). No pack was opened or read in full; verification went to primary sources (GitHub/npm/PyPI/arXiv).</li>
+<li><strong>Packs merged (6):</strong> muse-0132, agy-0932, muse-1032, dsh-1132, muse-1207 (extra), dsh-1209 (extra). <code>FB_MERGE slot=2026-10-04-1234 packs=6 raw=58 unique=51 fresh=51</code>.</li>
+<li><strong>Gaps (disclosed, not invented):</strong> ABSENT / Mac-down overnight+morning — Agy 0332/0632, Muse 0432/0732, DSH 0232/0532/0832, extras 0607/0609; <strong>Agy 1232 ABSENT at kick</strong> (did not wait). Stamp-excluded (already used by 0034): muse-1932, dsh-2032, agy-2132, muse-2232, dsh-2332, muse-0007, dsh-0009.</li>
+<li><strong>Verified arXiv ceiling:</strong> <code>2610.02207</code>; <code>/list/cs.AI/new</code> at ~19:55Z still &quot;Friday, 2 October 2026&quot; (no weekend mailing before this slot — the Sunday 20:00 ET mailing lands ~17:00 PT, after the cutoff).</li>
+<li><strong>Verification method:</strong></li>
+<li><strong>GitHub releases:</strong> <code>gh api</code> sweep, <code>published_at &gt;= 2026-10-04T07:30Z</code>, 60 repo attempts (58 + 2 corrected names), 3 repo-name 404s covered via registries (see Unconfirmed). <strong>Hits:</strong> codex alpha.13, openai-node v7.28.0 only.</li>
+<li><strong>Registries:</strong> npm (28 packages) and PyPI (35 packages) upload times since 07:30Z. <strong>Hits:</strong> <code>@openai/codex 0.162.0-alpha.13</code> (15:55Z), <code>openai 7.28.0</code> (18:31Z, now <code>latest</code>). PyPI: zero in-window uploads.</li>
+<li><strong>PRs:</strong> GitHub PR API for openai-node #2858; litellm #41162 / #44518; letta-code #4933 / #4949; stagehand #3102; codex compare alpha.12→alpha.13.</li>
+<li><strong>arXiv:</strong> <code>/list/cs.AI/new</code> header + id ceiling check.</li>
+<li><strong>Catalog:</strong> grepped the <strong>live</strong> <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code> (514 items / 132 briefs / 134 runs, max brief <code>2026-10-04T0034</code>) for every candidate id/name; all parent ids verified present (<code>openai-sdk-python-3-23-0-node-7-27-0-...</code>, codex 0-158, letta-code v0.33.x). (Note: a stale 504-item <code>catalog.json</code> copy sits in the agent-analytics-research repo root — do not grep that one.)</li>
+<li><strong>Social sources:</strong> HN dropped 2026-09-27 (0 hits by design). X 401 / Reddit 403 / LinkedIn authwall as reported in packs. Medium paused and lead-only.</li>
+<li><strong>Run hygiene:</strong> priority pin <code>2609.02702</code> untouched; nothing from the do-not-re-admit list re-admitted; no first-party BQAA card; google-adk NOTE-only (and no in-window ADK release anyway); GTM paused; Crustdata not used. JEV shadow: scheduled-slot fallback retry — Collection ran <code>worth_running</code> once (log-only); this run itself is the scheduled slot's writer. Citation research_check (max 3) is Collection's post-card step.</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW:</strong> none this slot.</p>
+<p><strong>Progress</strong></p>
+<ol>
+<li><strong>parent:</strong> <code>openai-sdk-python-3-23-0-node-7-27-0-agent-session-traces-otlp-json</code></li>
+</ol>
+<ul>
+<li><strong>text:</strong> openai-node v7.28.0 (Oct 4 18:22Z GitHub; npm latest 18:31Z) adds typed agent-session webhook interfaces (created / in_progress / idle / failed / action_required) and exposes <code>input_cache_write_12h_tokens</code> on organization usage results (#2858). It also adds custom voice creation and removes <code>ultrafast</code> from the beta agent/session service_tier unions. Node-only this window; PyPI <code>openai</code> had no in-window upload.</li>
+</ul>
+<p><strong>Headline claims (for citation checks)</strong></p>
+<ol>
+<li>openai-node v7.28.0 was released on GitHub on 2026-10-04 at 18:22:13Z (npm <code>openai@7.28.0</code> at 18:31:37Z, now <code>latest</code>), and its release notes list &quot;add custom voice creation and agent session events&quot; (#2858), including webhook interfaces for created, in_progress, idle, failed and action_required agent session events plus <code>input_cache_write_12h_tokens</code> on organization usage results. https://github.com/openai/openai-node/releases/tag/v7.28.0 (Oct 4, 2026)</li>
+<li>LiteLLM PR #41162 (&quot;feat(mcp): hand listed-tool description and input schema to pre-call hooks per caller&quot;) merged 2026-10-04 07:53:58Z, after the v1.105.0-rc.1 prerelease (01:41:07Z), so it is unreleased. https://github.com/BerriAI/litellm/pull/41162 (Oct 4, 2026)</li>
+<li>Codex <code>rust-v0.162.0-alpha.13</code> was published as a GitHub prerelease on 2026-10-04 at 15:42:32Z (npm alpha channel 15:55Z; npm <code>latest</code> remains 0.160.0). https://github.com/openai/codex/releases/tag/rust-v0.162.0-alpha.13 (Oct 4, 2026)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Kimi · 4 Oct 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
