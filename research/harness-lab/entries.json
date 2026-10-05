@@ -1,8 +1,99 @@
 {
-  "updatedAt": "2026-10-04T23:52:38Z",
+  "updatedAt": "2026-10-05T23:48:32Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "claude-code-dispatch-mechanical-dispatch-orchestrator-write-deny-2026-10-05",
+      "date": "2026-10-05",
+      "displayDate": "Oct 5, 2026",
+      "title": "claude-code-dispatch — hook-enforced model/effort routing for subagents, an orchestrator write-deny, and a replay benchmark against the dumbest baseline",
+      "href": "https://github.com/Kevsosmooth/claude-code-dispatch",
+      "why": "PreToolUse hooks that print one dispatch line per subagent launch (model, effort, type, plan usage, job), stop model-less dispatches from silently inheriting the parent's premium model, ask before premium or high-stakes-on-cheap launches, and log every launch to JSONL. A separate gate denies code Edit/Write/Bash in the orchestrator session so it must brief a worker (plans and scratch stay writable, workers exempt), a non-blocking tripwire lists code a parent changed anyway via node -e or a script, and the escape hatch lasts one turn only. Rule: raise effort before tier; stakes never downshift, even when usage is red. Its replay benchmark scores routers on your own dispatch history against the dumbest baseline: a keyword rule (89%) beat an LLM classifier (84%). Turns our prose rules (no Grok bot writes code; per-seat max effort) into something that denies, and matches the Jev dumb-baseline lock. Caveats: 0 stars, MIT, single-day repo, macOS untested and the usage snapshot reads UNKNOWN there (Keychain token); the orchestrator gate is inert unless its model regex matches our orchestrator; README-verified, not installed or run. Shadow-first; a live-seat deny gate needs Haiyuan. Patterns over existing seats, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-05-dsh-harness-lab-pack",
+      "tags": [
+        "routing",
+        "effort",
+        "hooks",
+        "guardrails",
+        "cost",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "titan-receipts-poaw-independent-verifier-anchor-2026-10-05",
+      "date": "2026-10-05",
+      "displayDate": "Oct 5, 2026",
+      "title": "Titan Receipts + POAW — a receipt only counts if the party it describes can't verify it, and a claim that is only local is not evidence",
+      "href": "https://github.com/Rmasood1122/titan-gate-plugin",
+      "why": "Titan gives every commit a hash-chained, HMAC-signed receipt (model, Claude Code version, session, file and diff hashes), verifiable offline. Its CI check runs its own pinned verifier, never the copy committed in the repo under audit, because the party who could alter receipts also controls a vendored verifier; the escape hatch warns that the result is then self-reported. /verify-chain ends with an ANCHOR count of untracked, uncommitted or unpushed receipts, a keyless clone says SIGNATURES NOT CHECKED and exits 2, and the README spells out what a receipt proves and what it doesn't. POAW / qed-proof-core (https://github.com/Nuraveda/qed-proof-core) adds the destination check: when an agent claims a push, the node asks GitHub and signs a pass or Failed receipt into an append-only Merkle log. Fits our gap-not-zero and VERIFIED-means-ran receipt locks, which today are self-administered, and the no-exit-while-waiting push rule. Caveats: Titan 1 star, MIT, HMAC is a shared secret; POAW 3 stars, Apache-2.0 spec plus AGPL-3.0 node, so patterns only and copy nothing, and it was read at headline level; README-verified, not run. Documentation pattern, no new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-05-dsh-harness-lab-pack",
+      "tags": [
+        "receipts",
+        "verification",
+        "evidence",
+        "CI",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "bastionfuse-honeytokens-taint-then-egress-sticky-fuse-2026-10-05",
+      "date": "2026-10-05",
+      "displayDate": "Oct 5, 2026",
+      "title": "bastionfuse — containment that never reads text: honeytokens, decoys, taint-then-egress, and a sticky per-session fuse",
+      "href": "https://github.com/Rinkia/bastionfuse",
+      "why": "Starts from the case we never write down, that the model itself is the attacker, so it relies only on controls outside the LLM. It plants honeytokens, decoy files and decoy MCP tools, matches tokens in call inputs and in results across common encodings, and taints a session that reads a decoy; after that, any data-capable call trips the fuse. That catches curl -d @.env.backup even though the secret never appears in the arguments. Trips are sticky and per session, a bounded trace is kept, the guard protects its own state and settings, and the state path is baked into the hook. Rollout: operator-written rules enforce from day one, while built-in budgets only log 'would trip' until real sessions are reviewed, which is a clean statement of our shadow-to-active ladder. Fills a gap next to coding-agent-guardrails and Preflight, which prevent or declare but have no canary. Caveats are the README's own: tamper-evident, not tamper-proof, against a same-user agent; a hook that can't start fails open; /clear or deleting state resets it; shell egress detection is word-based; about 250 ms per tool call; 0 stars, MIT, created the day it was collected; README-verified, not run. Reference only; any live-seat hook needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-05-dsh-harness-lab-pack",
+      "tags": [
+        "security",
+        "guardrails",
+        "hooks",
+        "containment",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "cache-live-control-priced-wait-ttl-precedence-2026-10-05",
+      "date": "2026-10-05",
+      "displayDate": "Oct 5, 2026",
+      "title": "cache-live-control — prompt-cache TTL as a per-chat decision, with the agent's wait and delegation rule priced against it",
+      "href": "https://github.com/rezzminator/cache-live-control",
+      "why": "Claude Code plugin whose /cache command switches the main-chat and subagent TTLs separately, mid-session, at no cost. It publishes the TTL source-precedence table (FORCE_PROMPT_CACHING_5M down to automatic: 1h on a subscription, 5m on an API key or cloud provider) and notes that subagents default to 5m even when the main chat is on 1h. Its new idea is a priced-wait rule: on a 1h cache, delegate anything past roughly 30 tool calls and wait, because waiting is free and writes cost 2x; on 5m, work directly and keep each wait under 4 minutes. It also names the transcript fields that make cache claims checkable (message.usage.cache_creation ephemeral_5m / ephemeral_1h input tokens, with subagent messages under subagents/), and reports 11 of 12 warm TTL switches kept the cache. Adds the missing decision to our cache lane (cachebeat, cache-keepalive, contextscope, stable-context-first measure or reorder; none picks the TTL). Caveats: built on early-access function hooks; it can't see the plan, so it assumes the longer TTL; the measurement is the author's own 12 runs; 1 star, MIT; README-verified, not installed. Doc pattern now; a live-seat install needs the mod precondition (written load order, named first loader, owner, read before install). No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-05-dsh-harness-lab-pack",
+      "tags": [
+        "cache",
+        "cost",
+        "seat-instructions",
+        "reference",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "token-weather-usage-pacing-vs-clock-cache-miss-cause-2026-10-05",
+      "date": "2026-10-05",
+      "displayDate": "Oct 5, 2026",
+      "title": "token-weather-usage — usage limits shown against elapsed time, with the cause of every cache miss named",
+      "href": "https://github.com/augiefra/claude-mods",
+      "why": "One-band Claude Code mod that shows the 5h and 7d limits as a share of the account limit with the gap against elapsed time hatched: green while usage doesn't run ahead of the clock, yellow beyond, red when more than 15 points ahead or past 90%. Windows that already reset stay hidden until the next reading, and the latest reading is shared across every session open on the machine. The cache pill shows the share read from cache and the time left before it lapses, and on a miss it names the cause (model changed, lapsed, start changed). Cost is labelled as an API-price equivalent on a subscription, not a bill. It makes no network calls. Gives our usage dashboard its missing axis: Agent Limit Watchdog and agent-runway compare a bare percentage, so 74% with 24 minutes left looks the same as 74% with two hours left. A pacing column and miss-cause labels can come from data we already collect, with nothing installed. Caveats: a mod is unsandboxed code with Claude Code's own access, so installing it on a live seat needs the mod precondition; the thresholds are the author's defaults, not measured; the cache lifetime is inferred from traffic; 3 stars, Apache-2.0; README-verified, not run. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-05-dsh-harness-lab-pack",
+      "tags": [
+        "usage",
+        "dashboard",
+        "cache",
+        "cost",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "loupe-sha-bound-review-envelopes-circuit-breakers-2026-10-04",
       "date": "2026-10-04",
