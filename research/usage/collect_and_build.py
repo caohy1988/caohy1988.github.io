@@ -1360,6 +1360,11 @@ def _cron_fires_per_week(cron: str):
             fires_per_hour = 1.0
         return round(fires_per_hour * hours_per_day * days, 1)
 
+    if "," in minute:
+        # Explicit minute list, e.g. Github EM heartbeat "4,19,34,49 * * * *".
+        per_hour = float(len([p for p in minute.split(",") if p.strip()]))
+        return round(per_hour * hours_per_day * days, 1)
+
     if "," in hour:
         return round(field_count(hour, 24) * days, 1)
 
@@ -1470,22 +1475,30 @@ def collect_routine_proxy() -> dict:
     rows = []
     sources = []
 
+    # Live vault card Agents/agent-manage-bot.md Standing routines (refreshed 2026-10-05).
     manage = [
-        ("Agent Manage Bot", "Weekday usage dashboard refresh", "5 9 * * 1-5", "weekday integrity check"),
-        ("Agent Manage Bot", "Field Brief 6h orchestration watch", "50 0,6,12,18 * * *", "detect-only second-line room ping"),
-        ("Agent Manage Bot", "Daily harness-lab collect kick", "0 9 * * *", "Agy/Muse/DSH Lab scout"),
-        ("Agent Manage Bot", "Daily harness-lab curate publish", "30 16 * * *", "KEEP-only Lab publish"),
+        ("Agent Manage Bot", "Monday specialist ops nudge", "11 8 * * 1", "paused — merged into weekly playbook↔card sync 2026-09-28", "paused"),
+        ("Agent Manage Bot", "Daily harness-lab collect kick", "55 8 * * *", "Agy/Muse/DSH Lab scout", "enabled"),
+        ("Agent Manage Bot", "Weekday usage dashboard refresh", "5 9 * * 1-5", "weekday integrity check", "enabled"),
+        ("Agent Manage Bot", "PR board sweep daily", "9 9 * * *", "CI/conflict/stall → Coding EM; never merge", "enabled"),
+        ("Agent Manage Bot", "Weekly playbook ↔ card sync", "47 10 * * 1", "playbook→card + kill review + ops nudge", "enabled"),
+        ("Agent Manage Bot", "Daily harness-lab curate publish", "45 16 * * *", "KEEP-only Lab publish", "enabled"),
+        ("Agent Manage Bot", "Nightly Mac harness audit", "59 2 * * *", "rotate one Mac CLI; dual-LGTM; no merge", "enabled"),
+        ("Agent Manage Bot", "Coding EM kick pickup check", "6 4,8 * * *", "ledger vs tmux/PRs", "enabled"),
+        ("Agent Manage Bot", "Jev shadow savings tally", "Monday via weekly sync", "paused / folded into Monday weekly sync (Haiyuan kick 2026-10-05); prior 4 8 * * 1-5", "paused"),
+        ("Agent Manage Bot", "Daily Mac CLI update", "53 7 * * *", "bump Mac CLIs + verify defaults", "enabled"),
+        ("Agent Manage Bot", "Field Brief 6h orchestration watch", "50 0,6,12,18 * * *", "paused — Collection :44 sole miss detector", "paused"),
     ]
-    for owner, name, cron, notes in manage:
+    for owner, name, cron, notes, status in manage:
         rows.append({
             "owner": owner,
             "name": name,
             "cron": cron,
-            "fires_per_week": _cron_fires_per_week(cron),
+            "fires_per_week": _cron_fires_per_week(cron) if status == "enabled" else 0,
             "notes": notes,
-            "status": "enabled",
+            "status": status,
         })
-    sources.append("Manage Bot (%d)" % len(manage))
+    sources.append("Manage Bot live vault card 2026-10-05 (%d)" % len(manage))
 
     dump_specs = [
         ("*collection-bot-active-routines.md", "Collection Bot"),
@@ -1515,8 +1528,10 @@ def collect_routine_proxy() -> dict:
         "total_fires_per_week": round(total, 1),
         "detail": (
             "Coarse cron math only. Newest *collection-bot-active-routines.md + "
-            "*github-bot-active-routines.md under Hunt/agent-manage/ plus Manage Bot. "
-            "Event listeners show as (event listener) with no fires/week. Not tokens or plan spend."
+            "*github-bot-active-routines.md under Hunt/agent-manage/ plus Manage Bot "
+            "live vault card 2026-10-05. Github heartbeat */15 (4,19,34,49); Collection "
+            "dump may still be stale — no Collection rows invented. Event listeners show "
+            "as (event listener) with no fires/week. Not tokens or plan spend."
         ),
     }
 

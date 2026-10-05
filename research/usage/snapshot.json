@@ -230,32 +230,40 @@
     "ok": true,
     "proxy": true,
     "label": "fires/week estimate \u2014 NOT dollars",
-    "source": "Manage Bot (4); Collection Bot 2026-09-20-collection-bot-active-routines.md (0); Github Bot 2026-09-16-1800-github-bot-active-routines.md (2)",
+    "source": "Manage Bot live vault card 2026-10-05 (11); Collection Bot 2026-09-20-collection-bot-active-routines.md (0); Github Bot 2026-10-05-github-bot-active-routines.md (2)",
     "dump_paths": [
       "/Users/haiyuancao/Documents/agent-context/Hunt/agent-manage/2026-09-20-collection-bot-active-routines.md",
-      "/Users/haiyuancao/Documents/agent-context/Hunt/agent-manage/2026-09-16-1800-github-bot-active-routines.md"
+      "/Users/haiyuancao/Documents/agent-context/Hunt/agent-manage/2026-10-05-github-bot-active-routines.md"
     ],
     "rows": [
       {
         "owner": "Github Bot",
-        "name": "EM 5-min heartbeat (all agent tasks)",
-        "cron": "*/5 * * * *",
-        "fires_per_week": 2016.0,
-        "notes": "durable",
+        "name": "EM heartbeat (all agent tasks)",
+        "cron": "4,19,34,49 * * * *",
+        "fires_per_week": 672.0,
+        "notes": "durable; was */5, token-save */15",
         "status": "enabled"
       },
       {
         "owner": "Agent Manage Bot",
-        "name": "Field Brief 6h orchestration watch",
-        "cron": "50 0,6,12,18 * * *",
-        "fires_per_week": 28.0,
-        "notes": "detect-only second-line room ping",
+        "name": "Coding EM kick pickup check",
+        "cron": "6 4,8 * * *",
+        "fires_per_week": 14.0,
+        "notes": "ledger vs tmux/PRs",
+        "status": "enabled"
+      },
+      {
+        "owner": "Agent Manage Bot",
+        "name": "Daily Mac CLI update",
+        "cron": "53 7 * * *",
+        "fires_per_week": 7.0,
+        "notes": "bump Mac CLIs + verify defaults",
         "status": "enabled"
       },
       {
         "owner": "Agent Manage Bot",
         "name": "Daily harness-lab collect kick",
-        "cron": "0 9 * * *",
+        "cron": "55 8 * * *",
         "fires_per_week": 7.0,
         "notes": "Agy/Muse/DSH Lab scout",
         "status": "enabled"
@@ -263,9 +271,25 @@
       {
         "owner": "Agent Manage Bot",
         "name": "Daily harness-lab curate publish",
-        "cron": "30 16 * * *",
+        "cron": "45 16 * * *",
         "fires_per_week": 7.0,
         "notes": "KEEP-only Lab publish",
+        "status": "enabled"
+      },
+      {
+        "owner": "Agent Manage Bot",
+        "name": "Nightly Mac harness audit",
+        "cron": "59 2 * * *",
+        "fires_per_week": 7.0,
+        "notes": "rotate one Mac CLI; dual-LGTM; no merge",
+        "status": "enabled"
+      },
+      {
+        "owner": "Agent Manage Bot",
+        "name": "PR board sweep daily",
+        "cron": "9 9 * * *",
+        "fires_per_week": 7.0,
+        "notes": "CI/conflict/stall \u2192 Coding EM; never merge",
         "status": "enabled"
       },
       {
@@ -283,10 +307,42 @@
         "fires_per_week": 5.0,
         "notes": "weekday integrity check",
         "status": "enabled"
+      },
+      {
+        "owner": "Agent Manage Bot",
+        "name": "Weekly playbook \u2194 card sync",
+        "cron": "47 10 * * 1",
+        "fires_per_week": 1.0,
+        "notes": "playbook\u2192card + kill review + ops nudge",
+        "status": "enabled"
+      },
+      {
+        "owner": "Agent Manage Bot",
+        "name": "Field Brief 6h orchestration watch",
+        "cron": "50 0,6,12,18 * * *",
+        "fires_per_week": 0,
+        "notes": "paused \u2014 Collection :44 sole miss detector",
+        "status": "paused"
+      },
+      {
+        "owner": "Agent Manage Bot",
+        "name": "Jev shadow savings tally",
+        "cron": "Monday via weekly sync",
+        "fires_per_week": 0,
+        "notes": "paused / folded into Monday weekly sync (Haiyuan kick 2026-10-05); prior 4 8 * * 1-5",
+        "status": "paused"
+      },
+      {
+        "owner": "Agent Manage Bot",
+        "name": "Monday specialist ops nudge",
+        "cron": "11 8 * * 1",
+        "fires_per_week": 0,
+        "notes": "paused \u2014 merged into weekly playbook\u2194card sync 2026-09-28",
+        "status": "paused"
       }
     ],
-    "total_fires_per_week": 2070.0,
-    "detail": "Coarse cron math only. Newest *collection-bot-active-routines.md + *github-bot-active-routines.md under Hunt/agent-manage/ plus Manage Bot. Event listeners show as (event listener) with no fires/week. Not tokens or plan spend."
+    "total_fires_per_week": 734.0,
+    "detail": "Coarse cron math only. Newest *collection-bot-active-routines.md + *github-bot-active-routines.md under Hunt/agent-manage/ plus Manage Bot live vault card 2026-10-05. Github heartbeat */15 (4,19,34,49); Collection dump may still be stale \u2014 no Collection rows invented. Event listeners show as (event listener) with no fires/week. Not tokens or plan spend."
   },
   "grok": {
     "ok": true,
