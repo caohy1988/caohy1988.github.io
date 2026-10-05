@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Haiyuan Cao's reading of technical-leadership growth — team TL to cross-team to area — in the AI agent era: build a system where people and agents reliably produce valuable outcomes, grounded in the Field Brief dual-layer harness.">
+  <meta name="theme-color" content="#101828">
+  <title>Technical Leadership in the AI Agent Era — Field Brief</title>
+  <link rel="canonical" href="https://caohy1988.github.io/research/tl-agent-era/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/site-nav.css" data-site-nav>
+  <script defer src="../../assets/site-nav.js" data-site-nav></script>
+  <style>
+    :root {
+      --navy: #101828; --navy-2: #17233a; --paper: #f4efe6; --paper-2: #ebe4d8;
+      --cream: #fbf7f0; --ink: #161410; --ink-soft: #5c564c; --ink-faint: #8a8378;
+      --line: #d9d0c3; --accent: #e87324; --accent-dark: #b7480d; --mint: #0f766e;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); text-underline-offset: 2px; }
+    a:hover { color: var(--ink); }
+    .shell { width: min(860px, calc(100% - 40px)); margin: 0 auto; }
+    header.hero { padding: 36px 0 8px; }
+    .kicker { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-dark); margin: 0 0 8px; }
+    h1 { font-family: var(--serif); font-size: clamp(1.9rem, 3.2vw, 2.6rem); font-weight: 600; margin: 0 0 12px; letter-spacing: -0.02em; }
+    .lede { color: var(--ink-soft); max-width: 62ch; margin: 0 0 16px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 28px; }
+    .meta strong { color: var(--ink); }
+    .toc { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 0 0 36px; }
+    .toc h2 { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; margin: 0 0 10px; color: var(--ink-faint); font-weight: 600; border: 0; padding: 0; }
+    .toc ol { margin: 0; padding-left: 1.2rem; }
+    .toc li { margin: 4px 0; }
+    .toc a { color: var(--ink); text-decoration: none; }
+    .toc a:hover { color: var(--accent-dark); text-decoration: underline; }
+    section { margin: 0 0 42px; }
+    h2 { font-family: var(--serif); font-size: 1.55rem; font-weight: 600; margin: 0 0 12px; letter-spacing: -0.01em; padding-top: 8px; border-top: 1px solid var(--line); }
+    h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 600; margin: 22px 0 8px; }
+    p { margin: 0 0 12px; }
+    ul, ol { margin: 0 0 14px; padding-left: 1.25rem; }
+    li { margin: 4px 0; }
+    code, .mono { font-family: var(--mono); font-size: 0.88em; }
+    pre { background: var(--navy); color: #e8eef6; border-radius: 10px; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 0.82rem; line-height: 1.45; margin: 0 0 16px; white-space: pre-wrap; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 0 0 16px; }
+    .table-wrap { overflow-x: auto; margin: 8px 0 12px; }
+    section[id] { scroll-margin-top: 72px; }
+    th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+    .card { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 0 0 14px; }
+    .card strong { display: block; margin-bottom: 4px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 16px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .note { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; color: var(--ink-soft); margin: 0 0 16px; }
+    footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--ink-faint); font-size: 0.88rem; }
+    .callout { background: #fff7ed; border: 1px solid #f0d2b0; border-radius: 12px; padding: 14px 16px; margin: 0 0 20px; }
+  </style>
+</head>
+<body>
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav data-sticky="">
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <a href="/research/harness/">Harness</a>
+      <a href="/research/harness-lab/">Lab</a>
+      <a href="/research/templates/">Templates</a>
+      <a href="/research/jev/">Jev</a>
+      <a href="/research/durable-agents/">Durable</a>
+      <a href="/research/tl-agent-era/" aria-current="page">Leadership</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+          <a href="/research/builds/mcp-apps-feature-matrix/">MCP Apps matrix</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+<!-- site-nav:end -->
+
+<main class="shell">
+  <header class="hero">
+    <p class="kicker">Study · technical leadership</p>
+    <h1>Technical leadership in the AI agent era</h1>
+    <p class="lede">Haiyuan&rsquo;s reading of the growth path from team TL to cross-team and area-level leadership, now that agents do much of the producing. The central goal is not to become the person who produces the most work with AI. It is to become the person who builds a system in which people and agents reliably produce valuable outcomes. This page adapts that argument into hub prose and grounds each claim in what this fleet actually runs: the dual-layer harness (Grok bots + Mac CLIs), the Harness Lab, Jev routing, and the durable-agents study.</p>
+    <div class="meta">
+      <span>Owner <strong>Haiyuan Cao</strong></span>
+      <span>Adapted <strong>2026-10-04</strong></span>
+      <span>Grounded in <strong><a href="/research/harness/">harness</a> · <a href="/research/harness-lab/">Lab</a> · <a href="/research/jev/">Jev</a> · <a href="/research/durable-agents/">durable agents</a></strong></span>
+    </div>
+  </header>
+
+  <div class="callout">
+    <strong>How to read this page.</strong> The argument below is adapted from Haiyuan&rsquo;s essay of the same name &mdash; same thesis and structure, rewritten as hub prose. Every &ldquo;fleet&rdquo; reference links to the live playbook rule or study it rests on. External citations link out to the cited source; nothing here invents quotes. Where this fleet has policy text but no running evidence yet, the page says so.
+  </div>
+
+  <nav class="toc" aria-label="Contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#changes">What changes, and what does not</a></li>
+      <li><a href="#growth-model">The growth model: responsibility, not activity</a></li>
+      <li><a href="#problem-ownership">From solution ownership to problem ownership</a></li>
+      <li><a href="#depth">Keep technical depth, use it differently</a></li>
+      <li><a href="#delegation">Specify work, engineer the environment</a></li>
+      <li><a href="#verification">Verification, autonomy, operations</a></li>
+      <li><a href="#owners">Develop owners, lead across teams</a></li>
+      <li><a href="#strategy">Strategy, measurement, rhythm</a></li>
+      <li><a href="#practice">What we already practice, what is still open</a></li>
+      <li><a href="#end-state">The end state</a></li>
+      <li><a href="#sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <section id="changes" aria-labelledby="changes-h">
+    <h2 id="changes-h">1. What changes, and what does not</h2>
+    <p>Agents change the production process, not the definition of success. They can generate implementations, explore alternatives, run tests, investigate failures, and prepare documentation &mdash; but producing more candidate work is different from delivering more useful, correct, maintainable software. When generating work becomes easier, the ability to select, verify, integrate, and operate that work deserves more attention. Implementation throughput stops being a sufficient measure of engineering effectiveness.</p>
+    <p>This matches what the industry accounts describe. OpenAI&rsquo;s February 2026 post on <a href="https://openai.com/index/harness-engineering/">harness engineering</a> frames the shift as engineers designing environments, clarifying intent, and building feedback loops so agents can work reliably &mdash; the harness, not the model call, is the engineering artifact. DORA&rsquo;s 2025 <em>State of AI-Assisted Software Development</em> report characterizes AI as an amplifier: it magnifies the strengths of high-performing organizations and the dysfunctions of struggling ones, which puts the strategic focus on the underlying organizational system rather than tool adoption alone (see <a href="https://cloud.google.com/blog/products/ai-machine-learning/from-adoption-to-impact-putting-the-dora-ai-capabilities-model-to-work">Google Cloud&rsquo;s summary of the DORA AI capabilities model</a>).</p>
+    <h3>Do not plan around a universal multiplier</h3>
+    <p>&ldquo;One engineer now replaces five&rdquo; is not a sound foundation for organizational design. In its <a href="https://metr.org/blog/2026-02-24-uplift-update/">February 2026 update</a>, METR explained that selection effects and concurrent-agent workflows made its follow-up productivity experiment difficult to interpret: improved productivity seemed plausible, but its evidence for the magnitude was weak. The practical lesson is to measure your own workflows rather than transplant a headline number into staffing or delivery commitments. The TL&rsquo;s question is therefore not &ldquo;how much AI-generated code did we produce?&rdquo; but &ldquo;did we improve accepted outcomes, end-to-end delivery time, reliability, and total operating cost?&rdquo; This fleet&rsquo;s planned version of that discipline is a replay set judged on the worst of three runs plus a stated detection floor &mdash; the set itself is policy text, not built yet (see <a href="#verification">section 6</a>).</p>
+    <h3>Orchestration is not leadership</h3>
+    <p>Running twenty agents does not establish the same capability as developing several engineers or aligning independent teams. Agent orchestration exercises task decomposition, context preparation, verification, and resource control. Human leadership additionally requires trust, motivation, disagreement resolution, career development, and negotiated commitments. Develop both, and do not use strength in the first to avoid practicing the second.</p>
+  </section>
+
+  <section id="growth-model" aria-labelledby="growth-model-h">
+    <h2 id="growth-model-h">2. The growth model: responsibility, not activity</h2>
+    <p>TL, cross-team (Uber) TL, and area TL describe increasing scopes of responsibility &mdash; not a fixed promotion ladder or guaranteed level mapping. Role, demonstrated behavior, sustained impact, and organizational recognition should be evaluated separately, a distinction the <a href="https://staffeng.com/book">Staff Engineer framework</a> also emphasizes in separating the technical-lead role from a formal level.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th scope="col">Scope</th><th scope="col">Central responsibility</th><th scope="col">Agent-era emphasis</th><th scope="col">Evidence of readiness</th></tr>
+      <tr><td>Agent-enabled engineer</td><td>Deliver a well-defined outcome</td><td>Use agents effectively while independently validating results</td><td>Work is accepted without hidden cleanup by others</td></tr>
+      <tr><td>Team TL</td><td>Make a team&rsquo;s delivery reliable</td><td>Build shared workflows, quality controls, and clear human ownership</td><td>Others can use and maintain the system without constant intervention</td></tr>
+      <tr><td>Cross-team TL</td><td>Make multiple teams technically coherent</td><td>Establish interfaces, shared evaluation practices, and decision rights</td><td>Independent teams adopt the approach and achieve better outcomes</td></tr>
+      <tr><td>Area-level leader</td><td>Improve the direction and investment choices of a technical domain</td><td>Shape a portfolio of capabilities, leaders, and long-term bets</td><td>The organization makes better choices and stays effective as circumstances change</td></tr>
+    </table>
+    </div>
+    <p>Two dimensions grow together. Technical-system leverage is the ability to improve what people and agents accomplish through better tools, architecture, evaluation, and operating environments. Organizational leverage is the ability to improve what independent people and teams accomplish through shared direction, clear ownership, and better judgment. A person can be excellent at the first while remaining the sole decision-maker &mdash; a powerful individual workflow, but not a scalable technical organization. The transition toward cross-team leadership begins when other capable owners can operate within a direction you helped establish, not when every project routes through you.</p>
+    <p class="note">Fleet parallel: the harness playbook&rsquo;s promotion gate moves a routine up the autonomy ladder only after three clean runs, tested rollback, and a complete receipt (<a href="/research/harness/#three-run-proof">Three-Run Proof</a>, <a href="/research/harness/#autonomy-ladder">autonomy ladder</a>). Readiness evidence for people works the same way: demonstrated operation by others, not self-reported completion.</p>
+  </section>
+
+  <section id="problem-ownership" aria-labelledby="problem-ownership-h">
+    <h2 id="problem-ownership-h">3. From solution ownership to problem ownership</h2>
+    <p>The first major development step is learning to question the assignment before optimizing the implementation. Suppose someone proposes building a multi-agent system that automatically investigates every agent failure. A solution-focused response starts with orchestration, tools, memory, and model selection. A problem-focused response first asks: what decisions will the investigation change? Which failures are expensive? What information is missing today? Would better instrumentation solve most of the problem? What happens when an investigation is wrong, and who acts on its conclusions? The most valuable first step may not be another agent &mdash; it may be a stable failure taxonomy, reproducible traces, or an ownership map.</p>
+    <p>Anthropic&rsquo;s <a href="https://www.anthropic.com/engineering/building-effective-agents">agent-design guidance</a> recommends starting with the simplest adequate solution and adding complexity only when it improves outcomes, and its <a href="https://www.anthropic.com/engineering/multi-agent-research-system">multi-agent research account</a> describes meaningful coordination and cost trade-offs. Agent architecture should be a choice justified by evidence, not an identity to defend. This fleet applies the same instinct structurally: Jev&rsquo;s <code>worth_running</code> shadow gate was narrowed to retries and one-off launches after the data showed scheduled runs always run &mdash; 139 of 142 answered calls said run, so the gate added cost without a decision (<a href="/research/harness/#worth-running-scope">worth_running scope</a>). The five-test charter likewise asks whether a new bot is justified at all before describing how to add one (<a href="/research/harness/#five-test-charter">five tests before a new bot</a>).</p>
+    <h3>The practice: a problem brief before a design document</h3>
+    <p>Keep it short enough to challenge. Describe the affected user or team, the observed problem, its consequence, and the evidence that it matters. State the current workaround, the simplest plausible intervention, and the conditions under which doing nothing is preferable. Then identify the uncertain assumption most likely to invalidate the proposal &mdash; for example, &ldquo;we believe investigation time is dominated by missing execution context rather than insufficient reasoning capability; before building an autonomous investigator, we will test whether a standardized trace bundle materially reduces diagnosis effort.&rdquo; That is a stronger starting point than &ldquo;we need an agent.&rdquo; Evidence of growth is impact on the choice of work itself: narrowing an oversized proposal, finding a cheaper intervention, exposing an unsupported assumption, or identifying a valuable problem with no owner. Do not turn cancellation into a performance target; the goal is better allocation, not a quota of projects stopped.</p>
+  </section>
+
+  <section id="depth" aria-labelledby="depth-h">
+    <h2 id="depth-h">4. Keep technical depth, use it differently</h2>
+    <p>A dangerous interpretation of senior leadership is that broader scope means stopping technical work. A better principle: stay close to the technical evidence, but stop owning every implementation. For an agent-oriented TL, useful depth means understanding how context is assembled, how tools fail, how state survives interruptions, how outputs are evaluated, and how permissions constrain actions &mdash; enough understanding to detect when a proposal&rsquo;s central assumptions are wrong, not the deepest expertise in every subsystem.</p>
+    <p>Reserve hands-on work for questions that materially affect direction: reproducing a persistent agent failure, validating whether a new tool interface improves task completion, investigating a misleading evaluation result, or testing whether an architectural simplification works. Avoid automatically taking the hardest feature because you can finish it faster. Before taking work back from an owner, ask: &ldquo;am I resolving a critical uncertainty, or protecting my identity as the strongest implementer?&rdquo;</p>
+    <p>Then turn insight into a reusable asset: debug one failure, explain the failure class, create a regression case, improve the interface or operating rule, teach another owner to maintain it. The first step produces a fix; the complete sequence produces organizational capability. This fleet&rsquo;s version is the Lab-to-playbook loop &mdash; architecture tips that survive a day get filed in the <a href="/research/harness-lab/">Harness Lab</a>, and a KEEP that changes how we run patches the playbook the same day &mdash; plus the repeat-lesson rule that turns a recurring correction into a skill diff (<a href="/research/harness/#repeat-lesson">repeat lesson</a>). Technical credibility increasingly comes from making good distinctions and producing evidence, not from being the only person who can navigate the codebase.</p>
+  </section>
+
+  <section id="delegation" aria-labelledby="delegation-h">
+    <h2 id="delegation-h">5. Specify work, engineer the environment</h2>
+    <p>Effective delegation to agents requires more than a detailed prompt: a usable environment and an explicit agreement about what counts as completion.</p>
+    <h3>Write a delegation contract</h3>
+    <p>For substantial agent-assisted work, define the objective, allowed scope, constraints, acceptance evidence, escalation conditions, and accountable human owner:</p>
+    <pre>Objective: Implement retry-safe ingestion for agent execution events.
+Scope: Modify the ingestion component and its tests; do not change public schemas or production permissions.
+Constraints: Preserve compatibility and existing privacy behavior.
+Acceptance: Demonstrate correct behavior under retries, interruption, and resumed execution in the test environment.
+Evidence: Provide the patch, test results, assumptions, and unresolved risks.
+Escalation: Stop for an architectural decision if correctness requires changing the event contract.
+Owner: The designated engineer remains accountable for acceptance and rollout.</pre>
+    <p>The contract leaves implementation freedom while making boundaries unambiguous. This is also good human delegation; the difference is that an agent&rsquo;s permissions and stopping conditions should be enforced technically wherever practical, not only written down. This fleet&rsquo;s delegation contracts are the Coding EM kicks: each handoff goes as a direct priority wake with a ledger row tracking posted to launched to PR-open or done, plus a twice-daily pickup check that re-wakes stuck kicks and tells Haiyuan if one is still stuck (<a href="/research/harness/#coding-em-kicks">Coding EM kick ledger</a>). The intake-restatement rule adds the missing check that the agent read the ask the same way before work starts (<a href="/research/harness/#intake-restatement">restate the ask</a>).</p>
+    <h3>Build the environment that makes good work repeatable</h3>
+    <p>Think beyond the model. Can a new agent run discover the relevant architecture? Reproduce the failure? Execute the same tests as a human? Identify the current owner and distinguish active guidance from obsolete notes? OpenAI&rsquo;s harness account emphasizes discoverable repository knowledge and mechanically enforced constraints; Anthropic&rsquo;s long-running-agent work stresses explicit progress records, environment setup, and verification across sessions. A practical exercise: examine the last ten times an agent needed your intervention, classify each as missing context, unclear intent, inadequate tools, weak verification, environmental failure, or genuine judgment &mdash; then fix one recurring category in the shared environment. The strongest evidence is not that you can make the agent succeed; it is that another engineer can use the workflow successfully, recognize its limits, and improve it without inheriting your private prompting habits.</p>
+  </section>
+
+  <section id="verification" aria-labelledby="verification-h">
+    <h2 id="verification-h">6. Verification, autonomy, operations</h2>
+    <p>Three related responsibilities, three different questions. Verification: did the system accomplish the intended outcome? Autonomy: what may it do without further approval? Operations: what happens when execution is interrupted, degraded, or wrong? A mature TL makes all three explicit.</p>
+    <h3>Evaluate outcomes, not declarations of success</h3>
+    <p>An agent saying &ldquo;the migration completed&rdquo; is not evidence that it completed correctly. Anthropic&rsquo;s <a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">evaluation guidance</a> distinguishes the execution transcript from the final environment state, and recommends combining deterministic checks, model-based assessments, and human judgment, with repeated trials where variability matters. For each important workflow, keep an acceptance record covering the intended result, correctness checks, prohibited effects, resource limits, and unresolved uncertainty &mdash; and do not collapse them into one opaque quality score. This fleet&rsquo;s acceptance record is the done receipt: objective, changed, verified (only checks that actually ran, each with evidence), not verified (never omitted), risks, and approval needed (<a href="/research/harness/#done-receipt">done receipt</a>). The transcript-is-not-the-world warning is the subject of its own study chapter (<a href="/research/durable-agents/#world">durable agents on outside the transcript</a>).</p>
+    <h3>Keep independent grounds for acceptance</h3>
+    <p>Do not let the implementation process silently redefine success. Protect acceptance criteria and critical tests from unilateral modification by the workflow producing the implementation, and keep representative cases that were not repeatedly used for tuning. A second agent&rsquo;s agreement is useful feedback, not automatic proof; independence comes from evidence, test construction, environment checks, and accountable review. The fleet&rsquo;s planned replay set is 20&ndash;50 real failures drawn from past corrections and failed receipts, with a case passing only if all three runs pass &mdash; the worst of three counts, never the best &mdash; but the set is not built yet: the playbook marks it policy text (<a href="/research/harness/#replay-set">replay set</a>). The detection-floor rule keeps this honest: three runs catch a large regression, but three clean runs do not show a smaller one is absent, so a promotion note lists every case that got worse even when all three runs passed (<a href="/research/harness/#detection-floor">detection floor</a>).</p>
+    <h3>Grant autonomy by action and risk</h3>
+    <p>Avoid a single &ldquo;autonomous mode&rdquo; for a whole system. Distinguish read-only investigation, sandboxed modification, bounded reversible action, and high-impact or externally consequential action, with approval requirements reflecting reversibility, scope, sensitivity, and detectability. Google&rsquo;s agent-security guidance centers on well-defined human controllers, limited powers, and observable actions (<a href="https://cloud.google.com/blog/products/identity-security/cloud-ciso-perspectives-how-google-secures-ai-agents">how Google secures AI agents</a>). Treat prompts as behavioral guidance, never as the sole access-control mechanism: require runtime authorization, scoped credentials, isolation, and a reliable way to revoke access. This fleet implements the same shape twice: GREEN / YELLOW / RED touch policy by reversibility &mdash; &ldquo;if you cannot undo it in under a minute, park and ask&rdquo; (<a href="/research/harness/#gyr-authority">GYR authority</a>) &mdash; and a 0&ndash;4 autonomy ladder with promotion and demotion (<a href="/research/harness/#autonomy-ladder">autonomy ladder</a>). Jev adds typed pre-action gates with calibrated confidence, including an intake gate and a tool gate that denies destructive actions outright (see <a href="/research/jev/">the Jev study</a> and its <a href="/research/harness/#jev-session">live session smoke results</a>). Untrusted content is data, never instructions: anything an agent reads from the web or another agent&rsquo;s output is evidence only, and a reviewer takes policy from its own prompt (<a href="/research/harness/#untrusted-content">untrusted content</a>).</p>
+    <h3>Test recovery, not just the happy path</h3>
+    <p>For long-running work, deliberately test interruption, stale state, duplicate execution, unavailable tools, budget exhaustion, and revoked authorization. Ask whether resumption could repeat an external side effect, whether a checkpoint records intent or completed work or both, and whether the system can stop safely when it cannot determine what happened. Do not assume saving a conversation equals preserving execution correctness &mdash; the durable-agents study covers checkpoint and resume, side effects and idempotency keys, and what long runs cost (<a href="/research/durable-agents/#checkpoint">checkpoint</a>, <a href="/research/durable-agents/#effects">side effects</a>, <a href="/research/durable-agents/#costs">costs</a>). The fleet&rsquo;s emergency-stop rule verifies every layer &mdash; bot, schedules, in-flight tasks, ledger rows, gates &mdash; because pausing a bot does not cancel its crons or handed-out work (<a href="/research/harness/#emergency-stop">emergency stop</a>). Evidence of growth: you can explain not only what the agent usually accomplishes, but why its outputs are accepted, where its authority ends, and how failures are contained.</p>
+  </section>
+
+  <section id="owners" aria-labelledby="owners-h">
+    <h2 id="owners-h">7. Develop owners, lead across teams</h2>
+    <h3>Delegate a domain, not a queue of tasks</h3>
+    <p>The transition to cross-team leadership depends on developing people who make sound decisions without you, and agent adoption should support that goal rather than remove every meaningful learning opportunity. Compare &ldquo;use an agent to add the evaluation dashboard&rdquo; with &ldquo;own the evaluation experience: determine which release decisions it must support, propose the quality criteria, work with consumers, and maintain the resulting capability.&rdquo; The second assignment includes problem understanding, judgment, stakeholder relationships, and ongoing responsibility. The development sequence runs task, outcome, subsystem, domain, then coordinating owners across domains &mdash; expanding authority alongside demonstrated capability, never jumping from small tasks to unbounded responsibility.</p>
+    <p>Make coaching a review of reasoning and evidence: ask what alternatives the owner considered, which evidence is strongest, what would change their mind, and where they need a decision rather than assistance. Do not rewrite every design into your preferred version; the objective is people who reach defensible conclusions and know when to escalate. Protect learning in agent-assisted work by asking the owner to explain the invariants, demonstrate a failure case, and describe how they would diagnose a regression &mdash; pairing and targeted exercises beat requiring all code to be written manually. Evidence of growth: other engineers become trusted owners who represent their domains and improve systems you originally helped establish, so your scope grows because their ownership grows, not because your hours expand.</p>
+    <h3>Cross-team leadership starts with a shared problem</h3>
+    <p>Cross-team scope should begin with a real problem independent teams recognize &mdash; incompatible outcome definitions, inconsistent tool-error semantics, unclear failure responsibility, duplicated evaluation infrastructure &mdash; not with declaring yourself responsible for their architectures. Choose one problem with a visible consequence, then work with existing owners on a narrow agreement: what is shared, what stays local, who decides, and how exceptions are handled. You rarely need every team on the same implementation; you may need agreement on identity propagation, event semantics, versioning, or the evidence required before a release. The leadership skill is distinguishing a genuinely shared invariant from a local preference: &ldquo;what is the minimum agreement that lets these teams evolve independently without breaking each other?&rdquo;</p>
+    <p>Make adoption part of the design: for each adopting team, clarify what becomes easier, what work changes, how compatibility is preserved, who supports the integration, and how the team influences future changes. Seek voluntary design partners; their willingness to keep using the capability is valuable evidence. And establish decision rights explicitly &mdash; what you own, what you recommend, what needs joint approval, where disagreements escalate &mdash; so the role becomes neither unofficial management nor responsibility without authority. Evidence of growth: multiple teams make better decisions through a mechanism they can operate, not through repeated personal negotiation by you.</p>
+  </section>
+
+  <section id="strategy" aria-labelledby="strategy-h">
+    <h2 id="strategy-h">8. Strategy, measurement, rhythm</h2>
+    <h3>Grow into investment judgment</h3>
+    <p>Area-level development shifts from coordinating initiatives to evaluating the portfolio: which capabilities should the organization build, maintain, purchase, partner for, or stop investing in? Separate durable needs from temporary implementations by asking which parts of the system stay valuable if model capabilities improve substantially, costs change, or a platform provider absorbs part of the stack. These are scenarios, not predictions; a sound strategy explains what remains useful across several plausible futures and which investments are deliberately temporary. For consequential bets, maintain a decision ledger recording the thesis, supporting evidence, alternatives, uncertainty, bounded initial investment, review date, and conditions for expansion or change &mdash; then review decisions against what was knowable at the time, since a good decision can have a bad outcome and a lucky outcome can follow weak reasoning. Communicate recommendations in decision-ready form: the decision required, why it matters now, the evidence, the alternatives, the requested commitment &mdash; plus what would change your recommendation, which makes uncertainty actionable rather than merely cautious.</p>
+    <h3>Measure outcomes and leadership separately</h3>
+    <p>Use a small scorecard, and never convert it into individual surveillance or a competition in AI usage:</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th scope="col">Dimension</th><th scope="col">Useful evidence</th><th scope="col">Misleading substitute</th></tr>
+      <tr><td>User value</td><td>Accepted outcomes and meaningful consumer benefit</td><td>Impressive demonstrations</td></tr>
+      <tr><td>Delivery</td><td>End-to-end time, including review and rework</td><td>Time to first generated patch</td></tr>
+      <tr><td>Quality</td><td>Escaped defects, regressions, verified correctness</td><td>Agent confidence or self-reported completion</td></tr>
+      <tr><td>Economics</td><td>Total cost per accepted outcome</td><td>Token price alone</td></tr>
+      <tr><td>Ownership</td><td>Independent owners and effective escalation</td><td>Number of decisions you personally approve</td></tr>
+      <tr><td>Cross-team impact</td><td>Sustained adoption and reduced coordination friction</td><td>Number of meetings or teams contacted</td></tr>
+    </table>
+    </div>
+    <p>Total cost per accepted outcome means all execution, infrastructure, review, and repair costs divided by accepted outcomes &mdash; including failed and abandoned attempts, with human attention tracked separately so a cheap model run does not conceal expensive supervision. Compare similar task categories, and do not infer causality from a before-and-after result when workload, staffing, or acceptance standards changed at the same time. Keep an impact record capturing the original problem, your contribution, others&rsquo; contributions, the resulting decision or capability, the observed outcome, and the remaining uncertainty &mdash; with quantitative claims only where the evidence supports them. The point is to make real work inspectable, not to manufacture a promotion story after the fact.</p>
+    <h3>A practical 12-month plan</h3>
+    <p>A plan for building stronger evidence and capability, not a promise of a title within a year. Months 1&ndash;2: establish the baseline on one workflow you understand &mdash; acceptance criteria, human effort, recurring failures, operating ownership &mdash; add bounded agent assistance, measure the complete process including review and rework, and exit able to explain when assistance helps, when it does not, and how the outcome is verified. Months 3&ndash;4: transfer the capability to another engineer with genuine authority over a bounded domain, moving knowledge from private conversations into maintained team resources; exit when it functions without you directing every run. Months 5&ndash;8: solve one cross-team problem with willing partners under a narrow charter and agreed decision rights, tracking consumer benefit and migration cost before expanding; exit when partners explain the value in their own terms. Months 9&ndash;12: review the initiative as a portfolio decision, recommend what to expand, simplify, delegate, or stop, and test independence with a planned reduced-involvement period. Area-level growth then means repeating these capabilities across a broader domain, not renaming the initiative.</p>
+    <h3>Sustainable rhythm</h3>
+    <p>Growth should improve the system&rsquo;s ability to function, not make you permanently available. Daily, reflect briefly: what outcome became more likely, what was delegated with clear authority and acceptance criteria, whose judgment grew stronger, what evidence changed your understanding, what recurring problem became a reusable improvement. Weekly, stay close to reality: one real trace or failure, one important decision, one owner&rsquo;s development, plus a protected hands-on block for a consequential uncertainty. Monthly, review the system rather than just status: are consumers receiving value, are costs understood, do the same failures recur, is ownership strengthening &mdash; and can you reconstruct the evidence behind an apparently successful outcome? Quarterly, revisit the direction: would you make the same investments starting today? Sometimes the right answer is less work, a narrower interface, or a simpler implementation.</p>
+  </section>
+
+  <section id="practice" aria-labelledby="practice-h">
+    <h2 id="practice-h">9. What we already practice, what is still open</h2>
+    <p>This fleet is small enough that the essay&rsquo;s abstractions have concrete counterparts &mdash; and honest enough that the gaps are visible. Already practiced: delegation contracts take the form of Coding EM kicks with a ledger and pickup checks (<a href="/research/harness/#coding-em-kicks">kicks</a>); touch policy is GREEN / YELLOW / RED by reversibility (<a href="/research/harness/#gyr-authority">GYR</a>); every non-trivial done report carries a receipt with a never-omitted NOT VERIFIED line (<a href="/research/harness/#done-receipt">done receipt</a>); new routines earn automation only through the Three-Run Proof with tested rollback (<a href="/research/harness/#three-run-proof">proof</a>); every routine carries a pre-written kill condition checked at a Monday review (<a href="/research/harness/#kill-condition">kill condition</a>); recovery is an ownership test: in documented practice, exception-first branches cover stalls, dirty exits, quota failover, and Mac-down gaps (<a href="/research/harness/#exception-first">exception-first skills</a>), miss-watch catch-ups cover missed briefs (<a href="/research/harness/#pipeline">Field Brief pipeline</a>), and a nightly Mac harness audit keeps the dual layer honest (<a href="/research/harness/#grok-patterns">Grok Bot team patterns</a>). Still open: the approval-rate policy that would graduate oft-approved categories to standing boundaries is policy text only &mdash; no counts are kept yet (<a href="/research/harness/#approval-rate">approval rate</a>); several October 2026 additions (untrusted-content rule, emergency-stop verification list, intake restatement, detection floor) are recent policy text whose operating evidence is still accumulating; the replay set of 20&ndash;50 own-failures judged worst-of-three is policy text too &mdash; the set is not built yet (<a href="/research/harness/#replay-set">replay set</a>); and total cost per accepted outcome is not yet tracked as a series &mdash; the usage dashboard shows spend, but review and repair costs are not folded into a per-outcome number. Those gaps are the next twelve months&rsquo; work, not disclaimers to hide.</p>
+  </section>
+
+  <section id="end-state" aria-labelledby="end-state-h">
+    <h2 id="end-state-h">10. The end state</h2>
+    <p>Applied to agent analytics and reliability, the promising growth direction is not simply building a larger observability product. It is helping teams make better decisions about agent quality, failure, cost, and production readiness: at team scope, make one capability dependable &mdash; a reliable event pipeline, an evaluation workflow, a reproducible failure bundle &mdash; and transfer meaningful ownership; at cross-team scope, connect evidence to decisions with a shared quality-and-reliability approach spanning execution evidence, outcome definitions, evaluation, and failure classification, kept complementary to existing runtime, access, logging, and product owners; at area scope, help leadership distinguish where a common platform is valuable, where domain-specific solutions stay independent, and where additional autonomy is justified. That trajectory beats accumulating features or becoming the mandatory reviewer for every agent project.</p>
+    <p>A mature technical leader in the agent era should be able to say:</p>
+    <div class="card"><strong>End-state checklist</strong>We understand the problem we are solving. We know which work agents can perform and under what constraints. We have credible evidence that the results are acceptable. We have human owners who can improve the system. We can change direction without depending on one person&rsquo;s constant intervention.</div>
+    <p>The progression is therefore not &ldquo;write code, write prompts, supervise more agents.&rdquo; It is: exercise technical judgment, build reliable execution, develop stronger owners, coordinate independent teams, improve strategic choices. The goal is not to stop being an engineer. It is to engineer a larger system &mdash; one that includes software, agents, people, decisions, and the ability to keep learning.</p>
+  </section>
+
+  <section id="sources" aria-labelledby="sources-h">
+    <h2 id="sources-h">11. Sources</h2>
+    <p>External citations, linked rather than quoted. Fleet grounding links appear inline above.</p>
+    <ul>
+      <li><a href="https://openai.com/index/harness-engineering/">OpenAI, &ldquo;Harness engineering&rdquo;</a> (February 2026) &mdash; environments, intent, and feedback loops as the engineering artifact.</li>
+      <li><a href="https://www.anthropic.com/engineering/building-effective-agents">Anthropic, &ldquo;Building effective agents&rdquo;</a> &mdash; simplest adequate solution first; complexity only when it improves outcomes.</li>
+      <li><a href="https://www.anthropic.com/engineering/multi-agent-research-system">Anthropic, &ldquo;How we built our multi-agent research system&rdquo;</a> &mdash; coordination and cost trade-offs of multi-agent designs.</li>
+      <li><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic, &ldquo;Demystifying evals for AI agents&rdquo;</a> &mdash; transcript vs. environment state; deterministic, model-based, and human judgment combined.</li>
+      <li><a href="https://cloud.google.com/blog/products/ai-machine-learning/from-adoption-to-impact-putting-the-dora-ai-capabilities-model-to-work">DORA 2025 <em>State of AI-Assisted Software Development</em></a> (via Google Cloud) &mdash; AI as an amplifier of the underlying organizational system.</li>
+      <li><a href="https://metr.org/blog/2026-02-24-uplift-update/">METR, &ldquo;We are changing our developer productivity experiment design&rdquo;</a> (February 2026) &mdash; weak evidence for the magnitude of any speedup; measure your own workflows.</li>
+      <li><a href="https://cloud.google.com/blog/products/identity-security/cloud-ciso-perspectives-how-google-secures-ai-agents">Google Cloud, &ldquo;How Google secures AI agents&rdquo;</a> &mdash; human controllers, limited powers, observable actions.</li>
+      <li><a href="https://staffeng.com/book">Will Larson, <em>Staff Engineer</em></a> &mdash; the technical-lead role distinguished from formal level.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Adapted 2026-10-04 from Haiyuan Cao&rsquo;s essay &ldquo;Technical Leadership in the AI Agent Era&rdquo; and grounded in the live <a href="/research/harness/">harness playbook</a>, <a href="/research/harness-lab/">Harness Lab</a>, <a href="/research/jev/">Jev study</a>, and <a href="/research/durable-agents/">durable-agents study</a>. Personal views; no confidential employer material.</p>
+  </footer>
+</main>
+</body>
+</html>
