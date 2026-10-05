@@ -612,7 +612,7 @@
         <h2>Routine fire proxy</h2>
         <p class="sub">cron fires/week estimate · NOT billing</p>
         
-      <p class="pill"><strong>PROXY</strong> · estimated fires/week <strong>2070.0</strong> · not dollars · not tokens</p>
+      <p class="pill"><strong>PROXY</strong> · estimated fires/week <strong>734.0</strong> · not dollars · not tokens</p>
       <div class="table-wrap">
         <table class="bots">
           <thead>
@@ -627,26 +627,44 @@
             
         <tr>
           <td>Github Bot</td>
-          <td><strong>EM 5-min heartbeat (all agent tasks)</strong><div class="muted">durable</div></td>
-          <td class="mono">*/5 * * * *</td>
-          <td class="num">2016.0</td>
+          <td><strong>EM heartbeat (all agent tasks)</strong><div class="muted">durable; was */5, token-save */15</div></td>
+          <td class="mono">4,19,34,49 * * * *</td>
+          <td class="num">672.0</td>
         </tr>
         <tr>
           <td>Agent Manage Bot</td>
-          <td><strong>Field Brief 6h orchestration watch</strong><div class="muted">detect-only second-line room ping</div></td>
-          <td class="mono">50 0,6,12,18 * * *</td>
-          <td class="num">28.0</td>
+          <td><strong>Coding EM kick pickup check</strong><div class="muted">ledger vs tmux/PRs</div></td>
+          <td class="mono">6 4,8 * * *</td>
+          <td class="num">14.0</td>
+        </tr>
+        <tr>
+          <td>Agent Manage Bot</td>
+          <td><strong>Daily Mac CLI update</strong><div class="muted">bump Mac CLIs + verify defaults</div></td>
+          <td class="mono">53 7 * * *</td>
+          <td class="num">7.0</td>
         </tr>
         <tr>
           <td>Agent Manage Bot</td>
           <td><strong>Daily harness-lab collect kick</strong><div class="muted">Agy/Muse/DSH Lab scout</div></td>
-          <td class="mono">0 9 * * *</td>
+          <td class="mono">55 8 * * *</td>
           <td class="num">7.0</td>
         </tr>
         <tr>
           <td>Agent Manage Bot</td>
           <td><strong>Daily harness-lab curate publish</strong><div class="muted">KEEP-only Lab publish</div></td>
-          <td class="mono">30 16 * * *</td>
+          <td class="mono">45 16 * * *</td>
+          <td class="num">7.0</td>
+        </tr>
+        <tr>
+          <td>Agent Manage Bot</td>
+          <td><strong>Nightly Mac harness audit</strong><div class="muted">rotate one Mac CLI; dual-LGTM; no merge</div></td>
+          <td class="mono">59 2 * * *</td>
+          <td class="num">7.0</td>
+        </tr>
+        <tr>
+          <td>Agent Manage Bot</td>
+          <td><strong>PR board sweep daily</strong><div class="muted">CI/conflict/stall → Coding EM; never merge</div></td>
+          <td class="mono">9 9 * * *</td>
           <td class="num">7.0</td>
         </tr>
         <tr>
@@ -661,10 +679,34 @@
           <td class="mono">5 9 * * 1-5</td>
           <td class="num">5.0</td>
         </tr>
+        <tr>
+          <td>Agent Manage Bot</td>
+          <td><strong>Weekly playbook ↔ card sync</strong><div class="muted">playbook→card + kill review + ops nudge</div></td>
+          <td class="mono">47 10 * * 1</td>
+          <td class="num">1.0</td>
+        </tr>
+        <tr>
+          <td>Agent Manage Bot</td>
+          <td><strong>Field Brief 6h orchestration watch</strong><div class="muted">paused — Collection :44 sole miss detector</div></td>
+          <td class="mono">50 0,6,12,18 * * *</td>
+          <td class="num">0</td>
+        </tr>
+        <tr>
+          <td>Agent Manage Bot</td>
+          <td><strong>Jev shadow savings tally</strong><div class="muted">paused / folded into Monday weekly sync (Haiyuan kick 2026-10-05); prior 4 8 * * 1-5</div></td>
+          <td class="mono">Monday via weekly sync</td>
+          <td class="num">0</td>
+        </tr>
+        <tr>
+          <td>Agent Manage Bot</td>
+          <td><strong>Monday specialist ops nudge</strong><div class="muted">paused — merged into weekly playbook↔card sync 2026-09-28</div></td>
+          <td class="mono">11 8 * * 1</td>
+          <td class="num">0</td>
+        </tr>
           </tbody>
         </table>
       </div>
-      <p class="muted">Coarse cron math only. Newest *collection-bot-active-routines.md + *github-bot-active-routines.md under Hunt/agent-manage/ plus Manage Bot. Event listeners show as (event listener) with no fires/week. Not tokens or plan spend. Source: Manage Bot (4); Collection Bot 2026-09-20-collection-bot-active-routines.md (0); Github Bot 2026-09-16-1800-github-bot-active-routines.md (2).</p>
+      <p class="muted">Coarse cron math only. Manage Bot live vault card 2026-10-05 + hardcoded Github Bot rows (heartbeat */15 at 4,19,34,49; Github dump not read) + newest *collection-bot-active-routines.md under Hunt/agent-manage/ (may still be stale — no Collection rows invented). Event listeners show as (event listener) with no fires/week. Not tokens or plan spend. Source: Manage Bot live vault card 2026-10-05 (11); Github Bot hardcoded */15 (4,19,34,49) + vault consolidation (2); Collection Bot 2026-09-20-collection-bot-active-routines.md (0).</p>
     
       </section>
     </div>
