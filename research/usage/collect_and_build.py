@@ -1469,7 +1469,7 @@ def _newest_dump(hunt: Path, glob_pat: str):
 
 
 def collect_routine_proxy() -> dict:
-    """Fleet routine fire-count proxy — NOT dollars. Newest Collection + Github dumps + Manage."""
+    """Fleet routine fire-count proxy — NOT dollars. Newest Collection dump + hardcoded Manage/Github."""
     vault = Path.home() / "Documents/agent-context"
     hunt = vault / "Hunt/agent-manage"
     rows = []
@@ -1489,7 +1489,14 @@ def collect_routine_proxy() -> dict:
         ("Agent Manage Bot", "Daily Mac CLI update", "53 7 * * *", "bump Mac CLIs + verify defaults", "enabled"),
         ("Agent Manage Bot", "Field Brief 6h orchestration watch", "50 0,6,12,18 * * *", "paused — Collection :44 sole miss detector", "paused"),
     ]
-    for owner, name, cron, notes, status in manage:
+    # Github Bot durable routines, hardcoded (2026-10-05): the on-disk
+    # *github-bot-active-routines.md dumps went stale (*/5 heartbeat), so the
+    # proxy no longer reads Github rows from dumps — refresh cannot revert.
+    github = [
+        ("Github Bot", "EM heartbeat (all agent tasks)", "4,19,34,49 * * * *", "durable; was */5, token-save */15", "enabled"),
+        ("Github Bot", "Daily vault consolidation 20:57", "57 20 * * *", "durable", "enabled"),
+    ]
+    for owner, name, cron, notes, status in manage + github:
         rows.append({
             "owner": owner,
             "name": name,
@@ -1499,10 +1506,10 @@ def collect_routine_proxy() -> dict:
             "status": status,
         })
     sources.append("Manage Bot live vault card 2026-10-05 (%d)" % len(manage))
+    sources.append("Github Bot hardcoded */15 (4,19,34,49) + vault consolidation (%d)" % len(github))
 
     dump_specs = [
         ("*collection-bot-active-routines.md", "Collection Bot"),
-        ("*github-bot-active-routines.md", "Github Bot"),
     ]
     dump_paths = []
     for pat, owner in dump_specs:
@@ -1527,11 +1534,11 @@ def collect_routine_proxy() -> dict:
         "rows": rows,
         "total_fires_per_week": round(total, 1),
         "detail": (
-            "Coarse cron math only. Newest *collection-bot-active-routines.md + "
-            "*github-bot-active-routines.md under Hunt/agent-manage/ plus Manage Bot "
-            "live vault card 2026-10-05. Github heartbeat */15 (4,19,34,49); Collection "
-            "dump may still be stale — no Collection rows invented. Event listeners show "
-            "as (event listener) with no fires/week. Not tokens or plan spend."
+            "Coarse cron math only. Manage Bot live vault card 2026-10-05 + hardcoded "
+            "Github Bot rows (heartbeat */15 at 4,19,34,49; Github dump not read) + "
+            "newest *collection-bot-active-routines.md under Hunt/agent-manage/ (may "
+            "still be stale — no Collection rows invented). Event listeners show as "
+            "(event listener) with no fires/week. Not tokens or plan spend."
         ),
     }
 
