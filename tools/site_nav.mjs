@@ -32,6 +32,7 @@ export const NAV = [
   { label: "Templates", href: "/research/templates/" },
   { label: "Jev", href: "/research/jev/" },
   { label: "Durable", href: "/research/durable-agents/" },
+  { label: "Leadership", href: "/research/tl-agent-era/" },
   { label: "Builds", id: "builds", items: [
     { label: "RFC", href: "/rfc/" },
     { label: "Detailed RFC", href: "/rfc/detailed-rfc/" },
@@ -55,6 +56,7 @@ export const PAGES = {
   "/research/templates/": "research/templates/index.html",
   "/research/jev/": "research/jev/index.html",
   "/research/durable-agents/": "research/durable-agents/index.html",
+  "/research/tl-agent-era/": "research/tl-agent-era/index.html",
   "/rfc/": "rfc/index.html",
   "/rfc/detailed-rfc/": "rfc/detailed-rfc/index.html",
   "/rfc/demo/": "rfc/demo/index.html",
@@ -68,7 +70,7 @@ export const PAGES = {
 export const CURRENT = { "/rfc/demo/": "/rfc/", "/rfc/full-demo/": "/rfc/", "/rfc/e2e/": "/rfc/" };
 
 // Long single-page documents keep the bar pinned (they did before the shared chrome).
-export const STICKY = new Set(["/rfc/detailed-rfc/", "/rfc/demo/", "/rfc/full-demo/", "/rfc/e2e/", "/research/harness/", "/research/jev/", "/research/durable-agents/"]);
+export const STICKY = new Set(["/rfc/detailed-rfc/", "/rfc/demo/", "/rfc/full-demo/", "/rfc/e2e/", "/research/harness/", "/research/jev/", "/research/durable-agents/", "/research/tl-agent-era/"]);
 
 const START = "<!-- site-nav:start -->";
 const END = "<!-- site-nav:end -->";
