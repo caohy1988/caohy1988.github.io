@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-10-05 · 12:34 PM PT · Kimi</title>
+  <meta name="description" content="Industry NEW LangGraph 1.2.13 checkpoint/replay state integrity; Academy NEW ROUTEAUDIT 2610.02808; Progress Langfuse v4.51.0, Braintrust JS 3.37.0, Opik 2.2.90, Vercel AI 7.0.128; Opus weekly-limit → Kimi fallback.">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-05-0034-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Kimi · 12:34 PM PT · on-cadence late wake · Opus-quota fallback · fresh-list path · ~6h window</p>
+    <article>
+<h1>Field Brief — 2026-10-05-1234: Langfuse v4.51.0 wires decision-model evaluators into MCP and ships the AI-gateway OpenAI relay with request-ID correlation; LangGraph 1.2.13 lands a checkpoint/replay state-integrity train (first Python card); ROUTEAUDIT shows a cascade's apparent gain was entirely the verifier-set edge</h1>
+<p><strong>Writer: Kimi</strong> (<code>kimi-code/k3</code>, thinking effort max) — <strong>Opus weekly-limit fallback</strong>: the 12:40 PT Opus probe returned 429 (weekly cap; resets Oct 6 ~3pm PT), so the documented Kimi fallback wrote this brief per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, the catalog and the push.
+<strong>Slot:</strong> 2026-10-05-1234 (12:34 PT, Mon Oct 5), the scheduled slot. The run woke late, at about 12:39 PT; the label stays <strong>1234</strong>.
+<strong>Window:</strong> ~6 hours since the last published brief, <code>2026-10-05-0634</code> (13:34Z → 19:34Z Oct 5).</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>Langfuse v4.51.0</strong> (stable, 08:47 PT) is the slot's densest industry move: <strong>decision-model evaluators are now served over MCP</strong> (#18166), the <strong>AI gateway relays OpenAI Chat Completions with usage telemetry</strong> (#18204 — the merge the 0634 brief watched landed at 06:27 PT and shipped 08:47 PT), gateway requests get a <strong>correlating request ID</strong> (#18052), experiment comparison grids take <strong>direct annotation</strong> (#17990), and audit logs now record <strong>actor info for audited actions and deletions</strong> (#18107). Progress on the v4.44→v4.45.1 card.</li>
+<li><strong>LangGraph 1.2.13</strong> (Python; stable, 10:51 PT) gets the <strong>first Python-langgraph catalog card</strong>: a seven-fix checkpoint/replay state-integrity train — fork-before-replay when the thread moved past a checkpoint, <code>update_state</code> on an older checkpoint kept out of other branches, DeltaChannel counter/history corrections, and <code>get_state</code> stops reporting answered interrupts. This mirrors the LangGraph.js 1.4.19 card from Saturday: durable-state surfaces correcting what they report.</li>
+<li><strong>Academy: one NEW card, full-PDF-read.</strong> <strong>ROUTEAUDIT (2610.02808)</strong> turns multi-verifier routing comparison into a contract-conditioned identification problem: on two held-out caches, matched static SF+SA <strong>exactly equals</strong> the cascade — the apparent cascade gains of <strong>+0.1797 / +0.1250</strong> over full static were entirely the verifier-set edge (route Δ = 0.0000). It ships a machine-checkable <strong>attribution certificate</strong> that returns IDENTIFIED / PARTIALLY-IDENTIFIED / NOT-IDENTIFIED before any route claim is reported.</li>
+<li><strong>Two more Progress entries with data-integrity content:</strong> Braintrust JS <strong>3.37.0</strong> adds cooperative eval cancellation (an abort <code>signal</code> threaded into task hooks; in-flight tasks and scorers settle before reject) and stops dropping output/token metrics on Responses API streams that end <code>incomplete</code>/<code>failed</code>. Vercel AI SDK <strong>ai@7.0.128</strong> preserves <strong>tool-approval state across stream resume</strong> and adds a durable non-streaming <code>WorkflowAgent.generate()</code>. Opik <strong>2.2.90</strong> adds free-form SQL row policies on the tables behind traces/spans.</li>
+<li><strong>WATCH, not cards:</strong> pydantic-ai #6534 (prompt-cache health span attributes) and inspect_ai #5690 (<code>enqueue_sample(epoch=)</code>) both merged in-window but are unreleased; openai-python #4030 / openai-node #2881 (agent turn items + usage source grouping) are open mirror PRs; LiteLLM #44610 (LiteAdmin MCP embed) is open; MCP servers v2 is still not cut (third consecutive quiet check).</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<h3>NEW — LangGraph 1.2.13 (Python): the checkpoint/replay state-integrity train — fork-before-replay, branch-scoped <code>update_state</code>, DeltaChannel corrections, <code>get_state</code> stops reporting answered interrupts</h3>
+<p><strong>Primary:</strong> https://github.com/langchain-ai/langgraph/releases/tag/1.2.13 (2026-10-05T17:51:32Z = 10:51 PT, <code>prerelease=false</code>). PyPI <code>langgraph==1.2.13</code> uploaded 17:51:20Z — installable artifact confirmed.</p>
+<p><strong>Why NEW and why now.</strong> The catalog has a LangGraph.js card (1.4.19, Saturday 1234) but <strong>no Python LangGraph card</strong> (live catalog grep: zero <code>langgraph-1-2</code> / python-langgraph items). 1.2.13 is a patch release, but its entire content is durable-state integrity on the checkpoint store — the same class of fix that carded the JS line, and the surface that durable-agent analytics reads. All seven substantive changes (release notes):</p>
+<ul>
+<li><strong>Fork before replay when the thread moved past the checkpoint</strong> being updated (#9170) — replaying an <code>update_state</code> no longer mutates a checkpoint the thread has already advanced beyond; the update forks instead.</li>
+<li><strong><code>update_state</code> on an older checkpoint stays out of its other branches</strong> (#9165) — cross-branch state leakage on stale-checkpoint writes is closed.</li>
+<li><strong>DeltaChannel counters kept on every <code>update_state</code> path</strong> (#9142), <strong>no history walk for a DeltaChannel that was never written</strong> (#9141), <strong>no replay of an abandoned branch into a DeltaChannel fork</strong> (#8548) — three accumulator/replay corrections for interrupted multi-branch runs.</li>
+<li><strong>Subgraph delta channels hydrate with the caller-resolved saver</strong> (#8538) — subgraph state rehydration uses the right checkpointer.</li>
+<li><strong><code>get_state</code> stops reporting answered interrupts</strong> (#9103) — the state API no longer surfaces interrupts that were already answered as pending.</li>
+</ul>
+<p><strong>BQAA read.</strong> If your trace model keys "pending interrupt" or "branch state" off <code>get_state</code>/checkpoint reads, pre-1.2.13 LangGraph could hand you answered interrupts as pending and stale-checkpoint writes as live branch state — silent wrong-state telemetry, not an error. This is the Python twin of Saturday's JS card: durable-execution state surfaces are being corrected to <em>report what actually happened</em>, which is exactly what run-epoch/restore analytics depends on (see 0634's qwen-code v0.25.0 and the Mastra durable-run WATCH).</p>
+<h3>Progress — Langfuse v4.51.0: decision-model evaluators over MCP; AI gateway relays OpenAI Chat Completions with usage telemetry; gateway request-ID correlation; audit-log actor info</h3>
+<p><strong>Parent:</strong> <code>langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown</code>
+<strong>Primary:</strong> https://github.com/langfuse/langfuse/releases/tag/v4.51.0 (2026-10-05T15:47:49Z = 08:47 PT, stable).</p>
+<p>Feature content (release notes):</p>
+<ul>
+<li><strong><code>feat(mcp): support decision-model evaluators</code> (#18166)</strong> — the decision-model (TypeSafe Jev) evaluator line, carded at v4.42.0 as released-to-every-project, is now exposed over MCP: external tools/agents can reach evaluator decisions through the protocol surface.</li>
+<li><strong><code>feat(ai-gateway): relay OpenAI Chat Completions with usage telemetry</code> (#18204)</strong> — merged 06:27 PT (the 0634 brief's carried WATCH), shipped 08:47 PT: the AI gateway now relays OpenAI chat traffic with usage telemetry attached. Paired with <strong><code>feat(ai-gateway): correlate requests with a gateway request ID</code> (#18052)</strong> — gateway-relayed calls get a correlation ID, closing the gap left when the per-span request-ID correlation PR #18215 was closed unmerged last night (0634 NOTE).</li>
+<li><strong><code>feat(experiments): annotate directly from comparison grid</code> (#17990)</strong> + persistent resizable charts (#18216) — the experiment-review loop loses a context switch.</li>
+<li><strong><code>feat(audit-logs): log actor info for audited actions and deletions</code> (#18107)</strong> — audit entries now carry actor identity, including for deletions.</li>
+</ul>
+<p><strong>BQAA read.</strong> Two governance surfaces harden at once: evaluator decisions become a protocol-accessible service (MCP), and gateway-relayed model traffic becomes attributable (usage telemetry + request-ID correlation + actor-stamped audit log). If you instrument Langfuse-fronted traffic, the gateway request ID is the join key to add now.</p>
+<h3>Progress — Braintrust JS 3.37.0: cooperative eval cancellation via <code>signal</code> into task hooks; Responses API incomplete/failed streams stop losing output and token metrics</h3>
+<p><strong>Parent:</strong> <code>braintrust-js-3-35-0-onspanexport-multimodal-dataset-snapshot-fix</code>
+<strong>Primary:</strong> https://github.com/braintrustdata/braintrust-sdk/releases/tag/braintrust@3.37.0 (2026-10-05T16:59:25Z = 09:59 PT, stable). npm <code>braintrust@3.37.0</code> published 17:07:33Z.</p>
+<p>What ships (release notes): eval task hooks receive an <strong>AbortSignal</strong> — on <code>timeout</code> or abort the eval stops scheduling new trials, aborts the signal in task hooks, and <strong>waits for in-flight tasks and scorers to settle before rejecting</strong> (previously it rejected immediately and left tasks running in the background) (#2549); workflow-eval gains <strong>batch tasks and scorers</strong> (#2548); tracing now <strong>logs output and token metrics for OpenAI Responses API streams that end <code>response.incomplete</code> or <code>response.failed</code></strong>, and logs the error for <code>failed</code> (#2540); Claude token-usage stats fix (#2544); Eve 0.62+/0.70 support (#2572).</p>
+<p><strong>BQAA read.</strong> Two silent-data-loss fixes for eval pipelines: cancelled evals no longer strand running trials (their partial results and costs were previously orphaned mid-flight), and truncated/failed Responses streams now surface their partial output and token usage instead of vanishing from the trace. Cancellation is becoming a first-class, instrumented eval event — same theme as Vercel's approval-state resume below.</p>
+<h3>Progress — Opik 2.2.90: free-form SQL row policies on the local tables behind traces and spans</h3>
+<p><strong>Parent:</strong> <code>opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier</code>
+<strong>Primary:</strong> https://github.com/comet-ml/opik/releases/tag/2.2.90 (2026-10-05T14:40:39Z = 07:40 PT, stable; PyPI upload 14:35:34Z).</p>
+<p>Content: <strong>row-level access policies (free-form SQL) on the local tables behind traces and spans</strong> (#8662) — trace data gets row-scoped access control; the frontend offers <strong>max reasoning effort on OpenAI keys set to the Responses API</strong> (#8682); ClickHouse progress headers are throttled under Apache HC's 100-header cap (#8657 — a correctness fix for long streaming reads); <code>find_thread_by_id</code> reads thread messages for two traces only (#8735, perf); SDK docs now point read methods at the matching Opik MCP calls (#8737). Patch-scale, hence Progress — but the row-policy item is worth noting: trace-store access control is moving below the project level.</p>
+<h3>Progress — Vercel AI SDK ai@7.0.128: tool-approval state survives stream resume; durable non-streaming <code>WorkflowAgent.generate()</code></h3>
+<p><strong>Parent:</strong> <code>vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts</code>
+<strong>Primary:</strong> https://github.com/vercel/ai/releases/tag/ai@7.0.128 (2026-10-05T18:25:00Z = 11:25 PT, stable). npm <code>ai@7.0.128</code> published 18:25:30Z — now <code>latest</code>.</p>
+<p>Content (changesets): <strong>preserve tool-approval state when resuming streams</strong> (0fe8c67 — resumed streams no longer lose which tools were approved); <strong>durable non-streaming <code>WorkflowAgent.generate()</code></strong> with a shared tool loop, a 20-step default, and typed output (0ca1ab9; transport-independent approval creation is named as separate follow-up work); <code>evaluate</code> renamed to <code>decide</code> (2959d35 — API rename to watch in dashboards); custom reasoning delimiters in <code>extractReasoningMiddleware</code> (d6b42fd); silent audio returns successful empty transcripts (ed6e72d). <code>ai@6.0.301</code> (18:28Z) is a dependency-only backport — NOTE, not Progress.</p>
+<p><strong>BQAA read.</strong> Approval state and durability keep converging: approvals survive replay (7.0.113, carded), now they survive <em>resume</em>, and the workflow agent gets a durable non-streaming path with an explicit step ceiling. If you count agent steps or approval events from AI SDK spans, the 20-step default on <code>generate()</code> is a new attribution boundary to record.</p>
+<h3>NOTE (below card bar)</h3>
+<ul>
+<li><strong>codex rust-v0.160.1</strong> (stable, 2026-10-05T18:29:37Z = 11:29 PT; npm <code>latest</code> moved to <strong>0.160.1</strong> — verified): a single backport — preserve <code>SYSTEMROOT</code>/<code>TEMP</code>/<code>TMP</code> when launching remote stdio MCP servers from Unix hosts driving a Windows executor (#51121). Patch; NOTE only.</li>
+<li><strong>qwen-code #13289</strong> (experimental Kubernetes CSI runtime + durable worker ACK) — <strong>merged 17:07:31Z (10:07 PT), unreleased</strong>: npm <code>@qwen-code/qwen-code</code> remains 0.25.0, no in-window qwen-code release (verified). NOTE per the merge-vs-release rule; WATCH the next tag.</li>
+<li><strong>pydantic-ai #6534</strong> — <strong>merged 16:00:04Z (09:00 PT), unreleased</strong> (PyPI still 2.54.0): reports prompt-cache health per conversation via <code>pydantic_ai.cache.*</code> span attributes and collapse events. Cache-hit telemetry landing as span attributes is directly analytics-relevant once released; WATCH the next pydantic-ai tag.</li>
+<li><strong>inspect_ai #5690</strong> — <strong>merged 17:53:18Z (10:53 PT), unreleased</strong> (PyPI still 0.3.276, Oct 2): <code>enqueue_sample(..., epoch=)</code> runs one sample repeatedly under its own id — per-epoch identity for repeated samples, useful for eval-rerun attribution when it ships.</li>
+<li><strong>openai-python #4030 + openai-node #2881</strong> — <strong>both OPEN</strong> (created 19:21Z/19:22Z today): "add agent turn items and usage source grouping" — a mirror pair hinting at API-level agent-turn structure and per-source usage attribution. WATCH.</li>
+<li><strong>LiteLLM #44610</strong> (embed enterprise LiteAdmin MCP in proxy images) — <strong>OPEN</strong> (created 18:13:59Z). WATCH. The 99-PR unmerged-close sweep (F12) is repo hygiene, not a card, as briefed.</li>
+<li><strong>MCP servers v2</strong> — still not cut: three independent pack checks in-window (dsh-1132, muse-1207, dsh-1209) report zero releases/merges/opens; my own sweep found no in-window <code>modelcontextprotocol/servers</code> release. Standing WATCH continues.</li>
+<li><strong>OpenAI "EU text provenance" page</strong> (openai.com/index/eu-text-provenance; detected in-window by agy-0932): textGrain text watermarking — <strong>opt-in for API customers globally starting today</strong>, invisible watermark rolling to eligible EU ChatGPT/Codex output over coming weeks, detector access application-only; published detection numbers (≈80% on 200-token passages at 1% FPR; 10% synonym replacement cuts detection 92%→66%). Real launch, but provenance/compliance rather than agent-analytics product surface → NOTE.</li>
+<li><strong>braintrust-py 0.44.1</strong> on PyPI (17:00:28Z = 10:00 PT): PyPI-only patch, no GitHub release object; content unconfirmed and not Progress-worthy at patch scale. NOTE.</li>
+<li><strong>vercel <code>ai@5.0.272</code>, <code>@ai-sdk/zai@3.0.25</code>, <code>@ai-sdk/xai@5.0.15</code></strong> (18:23–18:28Z): provider-line dependency patches. NOTE.</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<h3>NEW — <a href="https://arxiv.org/abs/2610.02808">2610.02808</a> — ROUTEAUDIT: contract-conditioned identification for budgeted multi-verifier routing — matched static equals the cascade; the apparent +0.1797/+0.1250 gains were the verifier-set edge; ship an attribution certificate before any route claim</h3>
+<p><strong>Full PDF read</strong> (method §3 with the C1–C6 contract and the lattice/tape/bounds constructions, experiments §4 with Tables 4–7, robustness §4.6, limitations §5, and appendices A–J including the mutation suite Table 28, blind semantic audit Table 30, error taxonomy Table 31, and RLVR binding Table 37). U. Chinese Academy of Sciences + Institute of Information Engineering CAS (Hu, Hu, Guo, Wang, Wang, Fu, Zha, Xiao). v1 2 Oct 2026.</p>
+<p>The problem: adaptive multi-verifier routing (cheap verifier first, escalate conditionally) is routinely compared through <strong>endpoint quality–cost gaps where the verifier catalog, availability, accounting, information filtration, or scorer changes with the policy</strong> — so the "route effect" mixes the policy change with a changed measurement contract. ROUTEAUDIT makes the contract itself the object: K = (request support, verifier catalog, availability schedule, prices/accounting, online filtration, post-trace scorer), and a legitimate route claim requires the <strong>matched contrast Δroute that changes only the policy coordinate</strong> (Eqs. 1–3). On top it adds (§3.3): a <strong>contract lattice</strong> that averages coordinate increments over all admissible bridge orders (Shapley allocation on the full factorial) and reports path sensitivity Ωj; a <strong>policy-independent response tape</strong> indexed by (request, verifier, call index) so adaptive policies couple to the same provider realization instead of two independent draws; <strong>sharp partial-identification bounds</strong> for incomplete matching that strictly refine complete-case analysis; and a machine-verifiable <strong>identification certificate</strong> returning IDENTIFIED / PARTIALLY-IDENTIFIED / NOT-IDENTIFIED before any aggregate claim.</p>
+<p>The headline measurement (Table 5, Table 7, Table 17; two held-out raw-tail caches, n=128 and n=32): full static (SF+SA+LF, 3 calls/10 units) scores 0.7656 / 0.8438 while the cascade (SF→SA, 2 calls/6 units) scores 0.9453 / 0.9688 — an apparent adaptive gain of <strong>+0.1797 / +0.1250</strong>. But matched static SF+SA at the same 2-call/6-unit budget scores <strong>identically to the cascade on every record</strong> (route Δ = 0.0000, McNemar p = 1.0): the entire apparent gain is the <strong>verifier-set edge</strong> (adding LF hurts), not routing. The negative-control gate (§3.8, §4.4) makes this structural: mixed-path operating points that lose quality (−0.0625 on calibration) fail the predeclared gate; quality parity occurs exactly at the fixed two-call endpoint.</p>
+<p>The learned-policy stress test (Tables 4, 9–11, 13; 1,319 held-out GSM8K-style requests, Qwen2.5-7B/32B generators, 5 seeds, 7 serving seeds) runs under the same contract: RLVR router reaches quality 0.9553 vs matched static 0.9484 — paired <strong>+0.0068, request-paired interval [0.0015, 0.0122]</strong>, training-seed-by-request hierarchical interval <strong>[0.0006, 0.0131]</strong> — at 1.4466 mean calls and 0.680 normalized cost; the learned router's interval straddles zero ([−0.0003, 0.0079]); expanding the verifier catalog yields route–catalog interaction ΓV = −0.0027 (Table 6). Integrity machinery: controlled attribution recovery reaches route MAE 0.0011 / endpoint reconstruction error 0.0004; the trace checker detects <strong>2,025 of 2,028 mutations with zero clean false positives</strong> (misses: one availability-field and two reason-field mutations, §4.6/Table 28); the full contract's false-attribution rate is 0.0000 vs 0.0498 MAE under controlled violations.</p>
+<p>Limitations (stated, §5): identification is conditional on the declared contract; the task study is a short routing horizon; interaction/path-sensitivity values are specific to the measured factorial cells; pairing and retraining are separate uncertainty sources (hence two intervals); RLVR is an application of the contract, not a universally superior optimizer claim.</p>
+<p><strong>Why it ranks.</strong> This is the eval-integrity paper for the verifier-routing wave: it shows a canonical-looking cascade win evaporating under a matched control, and turns "did you measure the route or the contract?" into a machine-checkable certificate with an explicit NOT-IDENTIFIED verdict. It pairs directly with 0634's VeriHarness (verify against environment evidence) and LiteTrajEval (budgeted trace serialization), and with 0034's ArrivalBench (replay invariance): the week's Academy line is that agent-eval claims need declared contracts, paired identification, and replayable traces — all ingestible as product checks.</p>
+<h3>Scouted, not ranked</h3>
+<ul>
+<li>The 0634 Monday-listing screen stands (no new mailing lands Monday daytime; verified the listing still shows "Monday, 5 October 2026" at ~12:45 PT). ROUTEAUDIT was its closest miss and is now full-read and ranked. The rest of that screen remains unranked without full reads: 2610.02925 (PU learning for safety false-alarm auditing — abs re-checked this slot; alarm-triage ranking method, adjacent to monitor-ops), 2610.02616 VERSE, 2610.02920 HASTE, 2610.03020 DyadMem, 2610.02472 APDMem, 2610.03387, 2609.32993 X-Tree.</li>
+<li>The 0034/0634 holds stand (2610.00347, 2609.38291, 2610.00328, 2610.00980; 2610.02521 and 2609.40153 off-topic).</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ol>
+<li><strong>Evaluator decisions and gateway traffic become governed, protocol-accessible surfaces.</strong> Langfuse serving decision-model evaluators over MCP, relaying OpenAI traffic with usage telemetry and request-ID correlation, and stamping actor identity on deletions — plus Opik's row-level SQL policies on trace/span tables — point the same way: within six weeks, expect evaluator invocation, gateway relay, and trace-data access to carry first-class audit attributes (actor, request ID, policy) that analytics pipelines must join on.</li>
+<li><strong>Cancellation and approval become instrumented lifecycle events, not gaps.</strong> Braintrust's cooperative eval abort (signal into task hooks, settle-before-reject), Vercel's approval-state-preserving resume plus durable <code>WorkflowAgent.generate()</code> with a step ceiling, and Opik's abandoned-stream span fix (0634) all convert previously-invisible events (aborted trials, resumed approvals, truncated streams) into structured telemetry. Products that still treat cancel/approve/resume as missing data will misstate cost and failure rates.</li>
+<li><strong>Route and verifier claims get identification contracts.</strong> ROUTEAUDIT's demonstration that a headline cascade gain was 100% verifier-set edge — with a certificate that can answer NOT-IDENTIFIED — is the eval-side counterpart of this week's harness-side durability fixes (qwen-code cold restore, LangGraph checkpoint integrity). Expect eval tooling to ship matched-control checks and replay-tape coupling as standard, and "endpoint gap vs. matched contrast" to become a review question for any routing/eval claim.</li>
+</ol>
+<hr />
+<h2>TL;DRs for BQAA</h2>
+<ul>
+<li><strong>LangGraph 1.2.13 (Industry NEW, first Python card):</strong> checkpoint/replay state-integrity train — fork-before-replay on moved threads, branch-scoped stale-checkpoint writes, DeltaChannel corrections, <code>get_state</code> stops re-reporting answered interrupts; pre-1.2.13 state reads can silently misreport durable-run state.</li>
+<li><strong>Langfuse v4.51.0 (Industry Progress):</strong> decision-model evaluators served over MCP; AI gateway relays OpenAI Chat Completions with usage telemetry + gateway request-ID correlation; experiment-grid direct annotation; audit logs record actor on deletions.</li>
+<li><strong>Braintrust JS 3.37.0 (Industry Progress):</strong> evals get cooperative cancellation (AbortSignal into task hooks, settle in-flight tasks/scorers before reject); Responses API streams ending incomplete/failed no longer lose output + token metrics.</li>
+<li><strong>Opik 2.2.90 (Industry Progress):</strong> free-form SQL row policies on the local tables behind traces/spans — trace access control moves row-level; ClickHouse progress-header throttle fix.</li>
+<li><strong>Vercel AI SDK 7.0.128 (Industry Progress):</strong> tool-approval state survives stream resume; durable non-streaming <code>WorkflowAgent.generate()</code> (shared tool loop, 20-step default, typed output); <code>evaluate</code>→<code>decide</code> rename.</li>
+<li><strong>ROUTEAUDIT 2610.02808 (Academy NEW):</strong> matched static equals the cascade — apparent +0.1797/+0.1250 gains were entirely the verifier-set edge; contract-conditioned identification with a machine-verifiable IDENTIFIED/PARTIALLY/NOT-IDENTIFIED certificate before any route claim.</li>
+<li><strong>WATCH:</strong> pydantic-ai #6534 (prompt-cache health span attrs) and inspect_ai #5690 (per-epoch sample ids) merged-unreleased; openai-python/openai-node agent-turn-items + usage-source-grouping PRs open; LiteLLM LiteAdmin MCP open; MCP servers v2 still uncut.</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>What is not confirmed</th>
+<th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI EU-text-provenance page publication timestamp</td>
+<td>Exact publish time (page carries no visible date; "starting today" phrasing); treated as in-window per pack detection</td>
+<td>Fetched the page directly; pack agy-0932 detected it in-window</td>
+</tr>
+<tr>
+<td>braintrust-py 0.44.1 content</td>
+<td>Patch content — PyPI-only, no GitHub release object exists</td>
+<td>PyPI JSON (upload 17:00:28Z); <code>gh api .../releases/tags/braintrust-py@0.44.1</code> → 404</td>
+</tr>
+<tr>
+<td>Pack-reported merge/open inventories (F01–F03 clusters: litellm #44605/#44609, crewai #7907, vercel #22055/#22079/#22080, etc.)</td>
+<td>State/content beyond the spot checks listed above</td>
+<td>Fresh list only (packs not read wholesale per instruction); the five prompt-named watches spot-verified via <code>gh api</code></td>
+</tr>
+<tr>
+<td>ROUTEAUDIT (2610.02808) reported numbers</td>
+<td>All numbers are the paper's own (five-seed task study, seven-seed serving study); no independent rerun</td>
+<td>The paper itself (Tables 4–7, 9–13, 17–18, 28, 30; App I)</td>
+</tr>
+<tr>
+<td>"Nothing else released in-window" beyond the ranked/NOTE set</td>
+<td>My 30-repo GitHub sweep covers tracked repos only; a non-tracked repo could have shipped</td>
+<td><code>gh api .../releases</code> across 30 tracked repos, published_at &gt; 2026-10-05T13:30Z</td>
+</tr>
+<tr>
+<td>Langfuse #18204 merge timestamp (~06:27 PT)</td>
+<td>Pack-reported; the release-notes inclusion is verified, the exact merge minute is not</td>
+<td>Release body feature list (verified); merge time from fresh list</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Writer/fallback:</strong> <strong>Kimi</strong> (<code>kimi-code/k3</code>, thinking max) — Opus 5.5 weekly-limited (429 on the 12:40 PT probe; resets Oct 6 ~3pm PT); documented Kimi fallback per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>. Kimi effort stays max; the 2026-09-29 high-effort lock applies to the Opus seat only.</li>
+<li><strong>Slot:</strong> on-cadence 1234; late wake ~12:39 PT, label kept <strong>1234</strong>. Window ~6h post <code>2026-10-05-0634</code> (13:34Z → 19:34Z).</li>
+<li><strong>Fresh-list path used:</strong> <code>_runs/fb-2026-10-05-1234/fresh-items.md</code> / <code>.json</code> (<code>FB_MERGE slot=2026-10-05-1234 packs=6 raw=40 unique=35 drop_catalog=0 drop_seen=1 drop_both=0 fresh=34</code>). No pack was opened or read in full; all verification went to primary sources.</li>
+<li><strong>Packs merged (6):</strong> agy-0632 (carried — finished 06:54 PT, after the 0634 kick), agy-0932, muse-1032, dsh-1132, muse-1207 (extra), dsh-1209 (extra).</li>
+<li><strong>Gaps (disclosed, not invented):</strong> <strong>Muse 0732 and DSH 0832 ABSENT</strong> (Mac offline ~07:16 PT through the 08:32 slot; skipped, no packs); <strong>Agy 1232 ABSENT at kick</strong> (still running; did not wait). HN dropped 2026-09-27 (0 hits by design). X 401 / Reddit 403 / LinkedIn authwall as reported in packs. Medium paused, lead-only.</li>
+<li><strong>Verified arXiv ceiling:</strong> all four <code>/list/&lt;cat&gt;/new</code> pages still show <strong>"Monday, 5 October 2026"</strong> at ~12:45 PT (cs.AI 267 <code>2610.*</code> ids incl. cross-lists); no new mailing lands Monday daytime — the 0634 listing screen remains current, and 2610.02808 (ranked this slot) was in it. Next listing is Tuesday's.</li>
+<li><strong>Verification method:</strong></li>
+<li><strong>Academy:</strong> abs page + <strong>full PDF</strong> (<code>pdftotext -layout</code>, complete read incl. appendices A–J) for 2610.02808. Key numbers cited to tables/sections.</li>
+<li><strong>GitHub (<code>gh api</code>):</strong> release objects + bodies for braintrust@3.37.0, langfuse v4.51.0, opik 2.2.90, langgraph 1.2.13, codex rust-v0.160.1, ai@7.0.128, ai@6.0.301; PR-state checks pydantic-ai #6534 (merged 16:00Z), openai-python #4030 (open), openai-node #2881 (open), litellm #44610 (open), qwen-code #13289 (merged 17:07Z), inspect_ai #5690 (merged 17:53Z); qwen-code releases list (none in-window).</li>
+<li><strong>Independent release sweep:</strong> 30 tracked repos via <code>gh api .../releases</code>, filtered to published_at &gt; 2026-10-05T13:30Z — returned exactly the set above plus vercel provider-line patches (ai@5.0.272, zai/xai), nothing else.</li>
+<li><strong>Registries:</strong> npm (braintrust 3.37.0 17:07Z; ai 7.0.128 18:25Z; <code>@openai/codex</code> latest 0.160.1; <code>@anthropic-ai/claude-code</code> still 2.1.289; <code>@mastra/core</code> still 1.74.0; <code>@google/gemini-cli</code> still 0.62.0; openai-node still 7.28.0). PyPI (opik 2.2.90 14:35Z; langgraph 1.2.13 17:51Z; braintrust 0.44.1 17:00Z; pydantic-ai still 2.54.0; openai still 3.24.0 = Oct 2 pre-window; inspect-ai still 0.3.276 = Oct 2 pre-window; litellm still 1.104.0; langfuse still 4.17.0).</li>
+<li><strong>Web:</strong> OpenAI EU-text-provenance page fetched and read (NOTE only).</li>
+<li><strong>Catalog:</strong> grepped the <strong>live</strong> <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code> (<strong>521 items / 135 briefs / 137 runs, max brief <code>2026-10-05T0634</code></strong> — matches the stated baseline): zero 2610.02808/routeaudit, zero langgraph-1-2/python-langgraph, zero 3-37-0 / 4-51-0 / 2-2-90 / 7-0-128 / 0-160-1; Progress parents verified present. Priority pin <code>2609.02702</code> (<code>arxiv-2609-02702-trace-as-state</code>) intact.</li>
+<li><strong>Run hygiene:</strong> nothing from the do-not-re-admit list re-admitted (0634's qwen-code v0.25.0 / VeriHarness / LiteTrajEval / MCP-TS v2.3.1 / Mastra 1.74.0 / Opik 2.2.89 untouched as NEW; letta v0.34.3/4, Sun-0034 Academy trio, LiteLLM 1.104.0/rc.1 untouched); no first-party BQAA card; google-adk NOTE-only (the one in-window ADK event, adk-python #5091, is an unmerged close — not noted further); GTM paused; Crustdata not used. Citation research_check (max 3) is Collection's post-card step.</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW (2):</strong></p>
+<ol>
+<li>
+<p><strong>id:</strong> <code>langgraph-1-2-13-checkpoint-replay-integrity-fork-before-replay-answered-interrupts-get-state</code>
+   - <strong>tag:</strong> Industry
+   - <strong>title:</strong> LangGraph 1.2.13 (Python) — checkpoint/replay state-integrity train: fork-before-replay on moved threads, branch-scoped stale-checkpoint updates, DeltaChannel corrections, <code>get_state</code> stops reporting answered interrupts
+   - <strong>url:</strong> https://github.com/langchain-ai/langgraph/releases/tag/1.2.13 (2026-10-05, stable; PyPI 17:51Z same hour)
+   - <strong>card text:</strong> First Python-LangGraph card (the JS 1.4.19 sibling carded 2026-10-03). An all-fixes patch, but every fix is durable-state integrity on the checkpoint store: replaying <code>update_state</code> on a checkpoint the thread moved past now forks instead of mutating (#9170); updates on an older checkpoint stay out of its other branches (#9165); DeltaChannel counters persist on every <code>update_state</code> path (#9142), no history walk for never-written channels (#9141), no replay of abandoned branches into forks (#8548); subgraph delta channels hydrate with the caller-resolved saver (#8538); and <code>get_state</code> stops surfacing already-answered interrupts as pending (#9103). Analytics consequence: pre-1.2.13 state reads could silently report answered interrupts as pending and stale-checkpoint writes as live branch state — wrong-state telemetry without an error.</p>
+</li>
+<li>
+<p><strong>id:</strong> <code>arxiv-2610-02808-routeaudit-contract-conditioned-identification-matched-verifier-set-controls-attribution-certificate</code>
+   - <strong>tag:</strong> Academy
+   - <strong>title:</strong> ROUTEAUDIT: interaction-aware identification for budgeted multi-verifier routing — matched static equals the cascade (apparent +0.1797/+0.1250 gains were the verifier-set edge); attribution certificates return IDENTIFIED / PARTIALLY-IDENTIFIED / NOT-IDENTIFIED
+   - <strong>arxiv:</strong> 2610.02808 — https://arxiv.org/abs/2610.02808
+   - <strong>card text:</strong> UCAS + IIE CAS. Formulates verifier-routing comparison as contract-conditioned identification: the contract fixes request support, verifier catalog, availability, accounting, filtration, and scorer; a route claim requires the matched contrast that changes only the policy coordinate (Eqs. 1–3, C1–C6). Adds a contract lattice (permutation-averaged bridge attribution + path sensitivity), a policy-independent response tape for paired sequential contrasts, sharp partial-identification bounds for incomplete matching, and a machine-verifiable certificate per comparison. On two held-out raw-tail caches, matched static SF+SA equals the cascade exactly (route Δ = 0.0000) — the apparent gains of +0.1797/+0.1250 over full static are entirely the verifier-set edge (Tables 5/7/17). On 1,319 held-out task requests (Qwen2.5-7B/32B, 5 seeds): RLVR router quality 0.9553 vs 0.9484 matched static, paired +0.0068 [0.0015, 0.0122], hierarchical [0.0006, 0.0131], at 0.680 normalized cost (Tables 4/9–13). Integrity: 2,025/2,028 trace mutations detected with zero clean false positives; controlled attribution recovery MAE 0.0011 (§4.6). Limits: contract-conditional claims, short routing horizon, cell-specific interactions.</p>
+</li>
+</ol>
+<p><strong>Progress (4):</strong></p>
+<ol>
+<li>
+<p><strong>parent:</strong> <code>langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown</code>
+   - <strong>text:</strong> Langfuse v4.51.0 (2026-10-05 15:47Z, stable): decision-model evaluators are now served over MCP (#18166); the AI gateway relays OpenAI Chat Completions with usage telemetry (#18204 — the 0634 WATCH merged 06:27 PT, shipped 08:47 PT) and correlates requests with a gateway request ID (#18052, closing the gap left when #18215 was closed unmerged); experiment comparison grids take direct annotation (#17990); audit logs now record actor info for audited actions and deletions (#18107). Gateway request ID is the new join key for Langfuse-fronted model traffic.</p>
+</li>
+<li>
+<p><strong>parent:</strong> <code>braintrust-js-3-35-0-onspanexport-multimodal-dataset-snapshot-fix</code>
+   - <strong>text:</strong> Braintrust JS 3.37.0 (2026-10-05 16:59Z; npm 17:07Z): eval task hooks receive an AbortSignal — on timeout/abort the eval stops scheduling new trials and waits for in-flight tasks and scorers to settle before rejecting, ending orphaned mid-flight trials (#2549); workflow-eval adds batch tasks and scorers (#2548); tracing now logs output and token metrics for OpenAI Responses API streams that end <code>response.incomplete</code>/<code>response.failed</code> instead of dropping them (#2540); Claude token-usage stats fixed (#2544). (Same-day braintrust-py 0.44.1 is a PyPI-only patch — noted, not progressed.)</p>
+</li>
+<li>
+<p><strong>parent:</strong> <code>opik-2-2-78-jury-votes-33x-experiment-reads-clickhouse-cold-tier</code>
+   - <strong>text:</strong> Opik 2.2.90 (2026-10-05 14:40Z, stable; PyPI 14:35Z): free-form SQL row policies on the local tables behind traces and spans (#8662 — trace-store access control moves row-level); max reasoning effort on OpenAI Responses-API keys in the playground (#8682); ClickHouse progress headers throttled under Apache HC's 100-header cap (#8657); thread-by-id reads limited to two traces (#8735); SDK docs point read methods at the matching Opik MCP calls (#8737).</p>
+</li>
+<li>
+<p><strong>parent:</strong> <code>vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts</code>
+   - <strong>text:</strong> Vercel AI SDK ai@7.0.128 (2026-10-05 18:25Z, stable; npm latest): tool-approval state is preserved when resuming streams (0fe8c67 — approvals now survive both replay and resume); durable non-streaming <code>WorkflowAgent.generate()</code> with a shared tool loop, 20-step default, and typed output (0ca1ab9); <code>evaluate</code> renamed to <code>decide</code> (2959d35); custom reasoning delimiters in extractReasoningMiddleware (d6b42fd). Same-window ai@6.0.301 is a dependency-only backport — noted only.</p>
+</li>
+</ol>
+<p><strong>Headline claims (for citation checks):</strong></p>
+<ol>
+<li>Langfuse v4.51.0 was released on GitHub on 2026-10-05 at 15:47:49Z (stable), adding decision-model evaluators over MCP (#18166), AI-gateway relay of OpenAI Chat Completions with usage telemetry (#18204), gateway request-ID correlation (#18052), and actor info in audit logs (#18107). https://github.com/langfuse/langfuse/releases/tag/v4.51.0 (Oct 5, 2026)</li>
+<li>LangGraph 1.2.13 (Python) was released on GitHub on 2026-10-05 at 17:51:32Z (stable; PyPI 17:51:20Z) with seven checkpoint/replay state-integrity fixes including fork-before-replay on moved threads (#9170) and <code>get_state</code> no longer reporting answered interrupts (#9103). https://github.com/langchain-ai/langgraph/releases/tag/1.2.13 (Oct 5, 2026)</li>
+<li>arXiv 2610.02808 (v1, 2 Oct 2026) reports that on two held-out caches a matched static SF+SA control exactly equals the cascade (route Δ = 0.0000), assigning the cascade's apparent gains of +0.1797 and +0.1250 over full static entirely to the verifier-set edge, and ships an identification certificate returning IDENTIFIED / PARTIALLY-IDENTIFIED / NOT-IDENTIFIED per comparison. https://arxiv.org/abs/2610.02808 (Oct 2, 2026)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Kimi · 5 Oct 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
