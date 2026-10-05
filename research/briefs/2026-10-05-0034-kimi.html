@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-10-05 · 12:34 AM PT · Kimi</title>
+  <meta name="description" content="Academy NEW Sentry 2610.02994, Fast Models Slow Evidence 2610.02267, ArrivalBench 2610.02363, PACE 2610.02932; Progress letta-code v0.34.3/v0.34.4; Opus weekly-limit → Kimi fallback; ~12h window (1834 Mac-down skip).">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-05-0034-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Kimi · 12:34 AM PT · on-cadence late wake · Opus-quota fallback · fresh-list path · ~12h window (1834 Mac-down skip)</p>
+    <article>
+<h1>Field Brief — 2026-10-05-0034: Failure knowledge is conditional (Sentry beats always-on playbooks by exposing lessons only on matching failures); a paired, self-audited eval of System-1 decision models (JEV vs LAYA) flips its own headline savings; ArrivalBench shows snapshot grading certifies 86–100% of agent pipelines that replay proves silently wrong</h1>
+<p><strong>Writer: Kimi</strong> (<code>kimi-code/k3</code>, thinking effort max) — <strong>Opus weekly-limit fallback</strong>: the 00:44 PT Opus probe returned 429 (weekly cap; resets Oct 6 ~3pm PT), so the documented Kimi fallback wrote this brief per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>.
+<strong>Delivery:</strong> Markdown handoff only. Collection owns the HTML, the catalog and the push.
+<strong>Slot:</strong> 2026-10-05-0034 (00:34 PT, Mon Oct 5), the scheduled slot. The run woke late, at about 00:41 PT, and the label stays <strong>0034</strong>.
+<strong>Window:</strong> about <strong>12 hours</strong> since the last published brief, <code>2026-10-04-1234</code> (19:34Z Oct 4 → 07:34Z Oct 5). The window is double-length because the <strong>18:34 PT slot was SKIPPED — Mac-down</strong> ~17:57–~20:30 PT. No 1834 brief exists and none is invented here.</p>
+<hr />
+<h2>Read this first</h2>
+<ul>
+<li><strong>The window is Academy-heavy and four papers clear the bar — all full-PDF-read.</strong> The Sunday-evening arXiv mailing landed in-window (Monday Oct 5 listing: 124 new / 142 cross / 136 replaced), and the collectors' 2610.02xxx–2610.03xxx cluster produced four keepers, each read end-to-end (methods, results tables, limitations):</li>
+<li><strong>2610.02994 Sentry</strong> — failure lessons are <em>conditional knowledge</em>: exposing an evolving playbook persistently <em>lowers</em> agent performance; failure-triggered, verified-only recovery beats every runtime-intervention baseline by 37% on average.</li>
+<li><strong>2610.02267 Fast Models, Slow Evidence</strong> — a paired, self-audited eval of System-1 decision models (hosted JEV vs open LAYA) across 11 harness decision points; JEV wins 9 of 11, and the authors' own audit moves their headline saving from 23.9% to 4.3%. Directly relevant to the fleet's Jev decision-layer thread.</li>
+<li><strong>2610.02363 ArrivalBench</strong> — re-executes agent-written data pipelines under late/duplicate/out-of-order/crash delivery; snapshot grading certifies 86–100% while 7.0–79.2% of certified pipelines are silently wrong.</li>
+<li><strong>2610.02932 PACE</strong> — when to compile a computer-use agent's procedure into a program: measured payback counts of 2–16 uses, and a budgeted online rule that saves 17–25% over ReAct-style baselines.</li>
+<li><strong>Industry: no NEW cards.</strong> The only stable in-window releases are letta-code <strong>v0.34.3 + v0.34.4</strong> (nested subagents, parent-MCP inheritance, read-only memfs policy) — Progress on the existing letta-code card. Everything else notable is a merged-but-unreleased PR (Codex turn-analytics tool-change tracking, inspect_ai provider request/response ids, MCP servers v2 wave, LiveKit span↔conversation correlation) — NOTE/WATCH, not ranks.</li>
+<li><strong>One structural theme across the window:</strong> the errors that matter sit in the <em>accounting around</em> the model — omitted pre-screen costs, snapshot-only grading, in-sample thresholds — not in the models.</li>
+</ul>
+<hr />
+<h2>Industry</h2>
+<h3>NEW</h3>
+<p>None this slot. The two stable releases (letta-code v0.34.3/v0.34.4) extend an existing card's surface and are filed as Progress below; all other in-window activity is unreleased merges or prerelease nightlies.</p>
+<h3>Progress — letta-code v0.34.3 + v0.34.4: subagents nest one layer, message their parent, and inherit parent MCP servers; memfs gains a read-only file policy</h3>
+<p><strong>Parent:</strong> <code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code>
+<strong>Primary:</strong> https://github.com/letta-ai/letta-code/releases/tag/v0.34.3 (2026-10-04 21:31:57Z, <code>prerelease=false</code>) and https://github.com/letta-ai/letta-code/releases/tag/v0.34.4 (2026-10-04 23:49:18Z, <code>prerelease=false</code>).</p>
+<p><strong>Why Progress and not NEW.</strong> Patch-level bumps on the letta-code line the catalog already tracks (v0.33.x carded; v0.34.0–0.34.2 already shipped Sep 30–Oct 2). But v0.34.3 ships a material harness capability, so it earns a Progress entry rather than silence.</p>
+<p>What ships (release notes):</p>
+<ul>
+<li><strong>v0.34.3:</strong> subagents can <strong>launch one nested layer and message their parent</strong> (#4915); subagents <strong>inherit parent MCP servers automatically</strong> (#4921) — a trust-boundary default worth watching, since child agents now receive the parent's tool surface unless scoped; memfs adds a <strong>read-only file policy</strong> (#4910); the environment block names the shell on macOS/Linux (#4916).</li>
+<li><strong>v0.34.4:</strong> memory subagents can write their own scratchpad inside the sandbox (#4952); <strong>reverts</strong> the automatic reply relay from core channels (#4956 — the #4043 opt-in relay from v0.34.2 is pulled back out, a same-week capability reversal); docs and an Amelia CI review gate for oversized PRs.</li>
+</ul>
+<p><strong>BQAA read.</strong> Nested-subagent spawning plus automatic parent-MCP inheritance means agent trees gain depth with inherited tool credentials by default — session/span attribution should expect <code>parent → child → grandchild</code> chains and should record which MCP servers each node inherited, or blast-radius analysis will undercount.</p>
+<h3>NOTE (below card bar — merged but unreleased, or prerelease)</h3>
+<ul>
+<li><strong>Codex #50964</strong> (merged 2026-10-04 21:19:20Z, verified): "Track inference tool changes in turn analytics" — tool-set changes during a turn now land in turn-level analytics. Supersedes #50943 (closed unmerged). Unreleased: npm <code>latest</code> is still 0.160.0; <code>rust-v0.162.0-alpha.14</code> (prerelease, 02:05:59Z, npm alpha 02:20Z) is TUI/daemon scope per the pattern of alpha.12/13 — <strong>no Progress</strong> on <code>openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks</code> until a release carries it. WATCH the next 0.162 rc.</li>
+<li><strong>inspect_ai #5676</strong> (merged 23:44:53Z, verified): logs <strong>provider request and response ids for every model call</strong> — the join key eval/observability pipelines need to reconcile provider-side logs against eval traces. Unreleased; WATCH the next inspect_ai release.</li>
+<li><strong>MCP <code>servers</code> v2 train lands on <code>v2/main</code>:</strong> the wave-1…wave-7 atomic merges (everything, memory, sequentialthinking, fetch, git, time) plus a <strong>DCO signoff CI gate</strong> (#5055, merged 05:58:39Z, verified; #5009 Unicode-path fix merged 03:22:01Z, verified) — and a 26-PR scripted bulk close retiring the v1 <code>main</code> line (pack-reported). All on the <code>v2/main</code> branch with <strong>no release tag</strong>: the first v2 merge question is answered, but nothing is installable yet. WATCH for a v2 RC.</li>
+<li><strong>LiveKit agents #7533</strong> (merged 20:40:07Z, verified): correlates telemetry spans with the conversation — voice-agent observability closing the span↔transcript gap. Unreleased. NOTE.</li>
+<li><strong>promptfoo #11400</strong> (merged 02:42:38Z, verified): the CLI now <strong>fails its exit code when a target error stops the eval</strong> — silent-green eval runs get louder. Plus #11391 (merged 06:43:59Z, verified): accept grader result shapes earlier releases recorded. Unreleased. NOTE; pairs with this slot's eval-integrity Academy thread.</li>
+<li><strong>vercel/ai #20819</strong> (merged 05:03:56Z, verified): durable <code>WorkflowAgent.generate</code> (+1795/−286), stacked on #20817's shared execution boundaries — workflow-agent durability moving into the AI SDK mainline, unreleased. NOTE.</li>
+<li><strong>mastra #25916</strong> (merged 07:10:00Z, verified): Studio data hooks move to a public <code>@mastra/react/hooks</code> entry (+7931/−5054, 677 files, merged 33 min after opening). Unreleased. NOTE.</li>
+<li><strong>qwen-code:</strong> #13210 (merged 04:20:38Z, verified) — managed-agent <strong>broker authentication with broker-provisioned writer credentials</strong> (+5821/−381, 51 files); #13406 (merged 07:26:00Z, verified) — host-tool confinement now <strong>denies before</strong> permission handling. Both unreleased; qwen-code is not yet carded, and these are below the NEW bar. NOTE.</li>
+<li><strong>Nightly/prerelease tags (verified, all <code>prerelease=true</code>):</strong> gemini-cli <code>v0.64.0-nightly.20261005.gfb972b2f8</code> (01:39:02Z), qwen-code <code>v0.24.7-nightly.20261004.9915c7ff8f</code> (22:14:03Z). NOTE only.</li>
+<li><strong>LiteLLM:</strong> PyPI <code>latest</code> remains <strong>1.104.0</strong> (no new rc since v1.105.0-rc.1); #44532 "Lens: search and plot agent runs on the server" is open/unmerged — WATCH; the 1234 brief's #41162 (per-caller tool schemas to MCP pre-call hooks) is still unreleased.</li>
+<li><strong>Pack-reported traffic not individually re-verified:</strong> pydantic-ai harness-telemetry merges (#9705 train, #9792 SpendLimits-on-fallback open), opencode v2 merges (native Venice provider, GUI-extension preview hold), ag2 typing merges, langfuse/langsmith test-harness opens. See Unconfirmed.</li>
+</ul>
+<hr />
+<h2>Academy</h2>
+<h3>NEW — <a href="https://arxiv.org/abs/2610.02994">2610.02994</a> — Sentry: failure knowledge is conditional; exposing the playbook only on a matching, verified failure beats always-on memory</h3>
+<p><strong>Full PDF read</strong> (methods §3, results §5 with Tables 1–5 and Fig 3, limitations §6). Stanford (Ji, Lu, Zhang, Olukotun). v1 submitted Fri 2 Oct 2026; appears in the Monday Oct 5 listing as a cs.LG cross-list.</p>
+<p>The finding first: failure lessons kept in context <strong>misfire when their failure is absent</strong>. Removing failure-mode lessons from ACE's evolving playbook <em>improves</em> held-out performance (WebShop reward 0.335→0.391; Mind2Web Replay completion 0.562→0.643, §2), and exposing the same frozen playbook persistently <em>lowers</em> WebShop reward 0.364→0.296 and M2W completion 0.651→0.599 (Table 4). Intervening without a need check drops reward below the unassisted agent (0.136 vs. 0.170, §2).</p>
+<p>The system: <strong>Sentry</strong>, a failure-management layer beside the agent. It routes invalid actions to hard repair, diagnoses progress/reasoning-grounding failures over the last W=5 cycles, retrieves at most k=5 lessons matching the failure type + labels, and <strong>writes a new lesson only after verifying — without access to task rewards — that the agent recovered</strong> over the next H=10 cycles. The full playbook never enters the agent's context.</p>
+<p>Results (Qwen3.5-9B, five runs, online-from-scratch / held-out protocols §4.3): beats the strongest runtime-intervention baseline on all four benchmarks — WebShop +77.3%, AppWorld +39.8%, SWE-bench Lite +25.0%, Mind2Web Replay +7.1% (Table 1; 37% average) — and beats ACE by +47.8% / +29.7% (Table 2; the abstract's "39%" is the two-benchmark average). ACE+Sentry is best overall, so task-level and failure-level memory compose. Paired forks from 200 intervention points: local recovery 33.5%→60.5%, final score better in 74 / tie 101 / worse 25 (§5.2). Human agreement: 86.0% on interventions, 81.8% on recovery judgments (κ=0.82–0.89, §5.2). Cost: 1.54× base-agent tokens (Table 5a). Ablations (Table 3): removing the intervention-need check is the biggest hit (−70.9% WebShop / −38.5% AppWorld); removing recovery verification −26.7%/−13.1%.</p>
+<p>Limitations (§6): only Qwen3.5-9B and GPT-OSS-120B; the same model plays task agent, detector and verifier (decoupling unstudied); the playbook can accumulate redundant/over-specific entries.</p>
+<p><strong>Why it ranks.</strong> First controlled demonstration that <em>when</em> failure knowledge enters the context matters as much as its content — a direct design constraint on every agent-memory feature that defaults to "always include the lessons."</p>
+<h3>NEW — <a href="https://arxiv.org/abs/2610.02267">2610.02267</a> — Fast Models, Slow Evidence: a paired, self-audited evaluation of System-1 decision models — JEV wins 9 of 11 harness decision points; the authors' own audit moves the headline saving from 23.9% to 4.3%</h3>
+<p><strong>Full PDF read</strong> (protocol §3, benchmark §4/Table 1, results §5–6 with Figs 1–5 and Tables 3–8, self-audit §7/Table 2, threats §8, recommendations/limitations §9). Jiawei Li. v1 1 Oct 2026. Artifacts: github.com/David-DL-Space/sys1-eval.</p>
+<p>The eval: 11 harness decision points (model routing, tool selection, tool-call guard, RAG relevance, injection guard, large label sets, groundedness, pre-execution safety, PII egress, plus controls) built from 18 public sources — 7,283 base cases + 6,640 robustness variants, <strong>byte-identical inputs</strong> to both systems, exact McNemar paired tests, Wilson intervals, cross-hardware and cross-day reproducibility checks (JEV changed 5/1,080 decisions across days; LAYA 1,180/1,180 across GPU→CPU).</p>
+<p>Findings (Fig 1, §5): <strong>JEV is significantly more accurate on 9 of 11 decision points (+10.8 to +46.0 pp)</strong>; overall 76.7% vs 63.1%. The two ties are the instructive ones: <strong>zero-shot model routing is at chance for both</strong> (JEV answers "cheap" for 99.5% of requests; LAYA AUROC 0.48), and RAG relevance is a well-powered tie (+0.5 pp, CI [−2.0, 3.0]) where the systems err in opposite directions (JEV recall 58.3% vs 45.4%; LAYA rejects more hard negatives). LAYA is order-sensitive — reversing option order flips <strong>30.3%</strong> of its decisions (53% with 60–77 labels) vs 1.8% for JEV (Fig 3a) — and collapses on many similar candidates: 31.3% at K=50 nearest-neighbour tools vs <strong>98.9%</strong> for JEV on unique-correct items (Fig 2, Table 7). On pre-execution safety LAYA lets through 81.5% of harmful requests (JEV 25.5%); its PII AUROC of 0.41 ranks classes the wrong way round (Table 3).</p>
+<p>The self-audit is the card-worthy half (§7, Table 2): re-deriving every number from raw outputs found that the reported <strong>23.9% safety-review saving was actually 4.3%</strong> once the pre-screen's own tokens are counted (Table 8: τ=0.1 costs 95.7% of LLM-only; τ=0.05 costs 4.7% <em>more</em>); that "end-to-end correctness 45–58%" was gate classification accuracy mislabelled (97.9% of answerable queries retained); that in-sample 5%-FNR thresholds blow out to p95 6–17% held-out (Fig 4b); and that a "channel effect" on injection false positives vanishes with channel-native content (0%→0% FPR for JEV on native documents, Fig 6). Cost/latency: JEV ≈ $32 per million decisions (759 tokens/decision at $0.042/M), p50 83–325 ms depending on client site; LAYA 31 ms on GPU, 200 ms on M4 CPU (§5).</p>
+<p>Limitations (§9): two systems at single versions, zero-shot, English-dominant public data with synthetic mixes; ±5 pp wording band on any single accuracy number; JEV's training data is not public, so near-perfect scores on popular sets may partly reflect exposure; LAYA's fine-tuning path untested (its typed-decisions checkpoint crashed).</p>
+<p><strong>Why it ranks.</strong> The first paired, reproducibility-checked evaluation of the System-1/typed-decision layer the fleet itself runs (Jev) — and a transferable checklist: the errors that changed deployment recommendations sat in the <em>accounting around</em> the model, not its scored predictions.</p>
+<h3>NEW — <a href="https://arxiv.org/abs/2610.02363">2610.02363</a> — ArrivalBench: snapshot grading certifies 86–100% of agent-written data pipelines; replay under late/duplicate/out-of-order delivery finds 7.0–79.2% of the certified ones silently wrong</h3>
+<p><strong>Full PDF read</strong> (method §3, results §4 with Tables 1–6 and Figs 2–3, discussion/limitations §5, full limitations Appendix B). Pranay Kothari (Oxford); NeurIPS 2026 "Who Verifies the Agents?" workshop. v1 1 Oct 2026.</p>
+<p>The design: ask an agent to write an incremental data pipeline, then grade <strong>the artifact after the agent has stopped</strong> by re-executing it under adversarial-but-replayable delivery schedules (late arrival, out-of-order CDC, duplicate delivery, crash-and-retry, backfill, additive schema evolution — each grounded in a verbatim primary-documentation quote). The oracle is a batch recomputation over the complete logical log, so <strong>a wrong table and a crash are distinct verdicts</strong> (FAIL vs ERROR) — a crash is visible to monitoring a team already runs; a wrong table is not. 40 tasks, 42 negative controls, k=5 samples, 11 models / 8 organisations, 18 arms, 28,041 gradeable verdicts that re-grade byte-identically with zero mismatches (§4.1).</p>
+<p>Results (Table 1, Fig 2): the authors' reimplementation of single-execution snapshot grading certifies <strong>86–100%</strong> of pipelines across eleven models; replay finds <strong>7.0–79.2%</strong> of certified pipelines silently wrong — an elevenfold separation the incumbent metric cannot see (GPT-5.6 Sol 7.0%, Opus 5 16.7%, Kimi K3 35.2%, Sonnet 5 48.2%, Haiku 4.5 52.2%, Codestral 79.2%). The gap is <strong>not produced by the repair loop</strong>: within the same model and task (163 strata), cells repaired against the snapshot test fail replay no more than first-time passes (+0.2 pp [−6.6, +6.6], §4.2). Signature (§4.3, Fig 3): <strong>idempotency hazards fail more often than ordering hazards in all eleven unhinted arms</strong> on group means (+4.0 to +39.4 pp; 15/18 arms positive with 3 saturated ties). The FAIL/ERROR separation changes how interventions read: a hazard-warning prompt cuts one model's silent failure 48.2%→10.5% while raising crashes 9.0%→37.0% — all-in failure moves only 51.0%→44.0%, i.e., the prompt <em>converted silent failure into loud failure</em> rather than removing it (§4.5). All eleven unhinted arms were independently re-run; rates moved at most 5.9 points.</p>
+<p>Limitations (§5, App B): 40 single-author tasks and golds sharing one anti-join staging idiom; one engine/dialect (DuckDB SQL); open-weights arms via one aggregator with no intervention arms; evaluation code, tasks and pre-registration <strong>not public with this version</strong>; three pilot claims failed to replicate at 40 tasks and are withdrawn.</p>
+<p><strong>Why it ranks.</strong> It turns "the pipeline passed the benchmark" into a verdict about day-two behavior, and it names the gap every agent-coded-artifact benchmark currently ignores: pass-once grading certifies pipelines that corrupt the warehouse on redelivery.</p>
+<h3>NEW — <a href="https://arxiv.org/abs/2610.02932">2610.02932</a> — When to Compile a Computer-Use Agent? PACE measures payback (2–16 uses) and makes budgeted compile decisions, saving 17–25% of tokens</h3>
+<p><strong>Full PDF read</strong> (method §3, measurement §4/Tables 1–3, ablations Table 4, cost-assumption sensitivity §5, limitations §7). City University of Hong Kong (Ming, Xu, Wu, Jia). v1 2 Oct 2026. Code: github.com/myl7/computer-use.</p>
+<p>The problem: compiling a repeated GUI procedure into a program saves model tokens per run, but compilation cost is uncertain (attempts need repair and can still fail) and future reuse is unknown (tasks stop arriving; GUI drift kills the program). PACE records <strong>successful and failed</strong> compilation costs, compares agent vs program execution on matched inputs to estimate per-use savings and payback counts, and an online rule checks execution/compilation charges against a cumulative budget from observed arrivals before allowing either — total cost after each arrival stays ≤ (1+ε) × the all-agent cost under stated action-cost assumptions (§4.3).</p>
+<p>Numbers: estimated payback counts excluding source runs are <strong>2–16 uses</strong> across programs (Table 1; 1.389–15.488). In simulations on recorded arrival sequences, PACE reduces token cost <strong>17.3% vs ReAct, 24.9% vs an AutoRPA adaptation, 17.3% vs a ToolPro adaptation</strong> (ε=0.25; abstract, Table 3); over two 300-condition grids ReAct costs 1.107–1.130× PACE (Table 2). Ablations (Table 4, §5): removing the budget barely moves mean cost on recorded logs (0.0013%) but raises the worst grid ratio to ReAct from 1.2468 to 1.7563 (+40.9%) — the budget is tail insurance, not mean savings. Assigning high compilation costs to frequent-but-flaky families pushes PACE to 1.5% <em>above</em> ReAct — task frequency alone is not enough to decide (§5).</p>
+<p>Limitations (§7): seven task families, three model profiles, simulations use given family labels and fixed cost profiles; the live GUI study tests one fixed program, not the full online algorithm; token cost only — latency, device use and program maintenance excluded.</p>
+<p><strong>Why it ranks.</strong> The first payback-accounted, budget-constrained answer to "when is procedure compilation worth it" — the same question every agent-cost platform asks about caching, distillation and routing.</p>
+<h3>Scouted, not ranked</h3>
+<ul>
+<li><strong>2610.02911 Probe the Harness</strong> — full PDF read (it's short). A stale-data RL comparison (SAN vs TIS on verl/GSM8K) whose ranking reversed because of four harness defects — the PPO ratio taken against the learner's own recomputed probabilities, a data seed that never reached the TIS arm, a replay queue reusing its first batch for 33 updates, and loss normalisers differing from their description. Good "measure the quantity that defines the comparison" checklist, but it is <strong>training-side RL reproducibility, not agent observability</strong> — below this brief's analytics bar. Held.</li>
+<li><strong>Pack clusters not full-read</strong> (listed so the next slot can pick them up): 2610.03458 / 2609.39050 / 2610.03190 (failure-recovery companions to Sentry); 2610.02486 / 2610.02516 / 2610.02762 and 2610.03387 / 2610.03324 (typed-decision-model companions to the sys1 paper); 2610.02664 + 2610.02827 (long-horizon governance + jailbreak benchmark); 2610.03089 + 2610.03153 (branch steering / runtime-risk benchmarks); 2610.03010 cluster (sustainable agents for developer workflows); 2610.02563 / 2610.02399 / 2610.02456 / 2610.02404 (benchmarks/sandboxes/context NOTE cluster). Not ranked because not full-PDF-read — per the standing Academy rule.</li>
+<li>The 1234 brief's holds stand (2610.00347, 2609.38291, 2610.00328, 2610.00980) — no new evidence in-window.</li>
+</ul>
+<hr />
+<h2>Six-week EV</h2>
+<ol>
+<li><strong>Agent memory gets a conditional-exposure rule.</strong> Sentry's paired findings — persistent playbook exposure <em>hurts</em> (0.364→0.296), failure-triggered verified-only retrieval helps (+37% avg) — give memory products a concrete design constraint: retrieval <em>timing</em> (on diagnosed failure) and admission <em>gating</em> (verified recovery) beat retrieval quality alone. Expect "when to surface" to become a first-class knob in agent-memory systems within six weeks, and watch for harnesses adding failure-detection spans to drive it.</li>
+<li><strong>Eval methodology is becoming the product surface.</strong> Two of this window's four papers flip their own headlines by fixing accounting (23.9%→4.3% savings; 86–100% certified vs 7–79% silently wrong). The durable lesson for analytics: grade the <em>artifact</em> under re-execution hazards, count the <em>decision layer's own tokens</em> in any savings claim, and pick thresholds out of sample. Products that certify agent outputs from single snapshot runs will increasingly read as marketing, not measurement.</li>
+<li><strong>Cost decisions are formalizing into budgeted online rules.</strong> PACE's payback counts (2–16 uses) and (1+ε) budget, the sys1 paper's call-rate/held-out-miss-rate gate accounting, and last slot's cache-write token fields (openai-node 7.28.0) are the same move at three layers: every "savings" mechanism (compile, gate, cache) must publish its own cost and its payback horizon. Expect agent-cost telemetry to standardize per-decision cost lines so these audits can run on production data.</li>
+</ol>
+<hr />
+<h2>TL;DRs for BQAA</h2>
+<ul>
+<li><strong>Sentry (2610.02994, Academy NEW):</strong> keep failure lessons out of the standing context; retrieve ≤5 only on a diagnosed failure, admit only after reward-free recovery verification — +37% avg over runtime-intervention baselines, and always-on playbooks measurably <em>hurt</em>.</li>
+<li><strong>Fast Models, Slow Evidence (2610.02267, Academy NEW):</strong> JEV beats LAYA on 9/11 typed harness decision points (both fail zero-shot routing); any gate-savings number that omits the gate's own tokens is unreliable — theirs moved 23.9%→4.3% on re-derivation.</li>
+<li><strong>ArrivalBench (2610.02363, Academy NEW):</strong> re-execute agent-written pipelines under late/duplicate/out-of-order delivery against a recomputation oracle — snapshot grading certified 86–100% of pipelines that were 7–79% silently wrong; separate FAIL (wrong table) from ERROR (crash).</li>
+<li><strong>PACE (2610.02932, Academy NEW):</strong> compile a repeated GUI procedure only when measured payback (2–16 uses) clears a cumulative budget — saves 17–25% over ReAct-style execution, and the budget's real value is capping the worst case (1.25×→1.76× without it).</li>
+<li><strong>letta-code v0.34.3/v0.34.4 (Industry Progress, stable):</strong> subagents nest one layer, message parents, and <strong>auto-inherit parent MCP servers</strong>; memfs read-only policy; the v0.34.2 auto-reply-relay was reverted in v0.34.4.</li>
+<li><strong>Unreleased telemetry merges to watch:</strong> Codex turn analytics now track in-turn tool changes (#50964); inspect_ai logs provider request/response ids per model call (#5676); LiveKit correlates spans with conversations (#7533); promptfoo fails its exit code when a target error stops the eval (#11400); MCP <code>servers</code> v2 waves 1–7 + DCO gate landed on <code>v2/main</code> (no release yet).</li>
+</ul>
+<hr />
+<h2>Unconfirmed</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>What is not confirmed</th>
+<th>Where I looked</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Academy cluster companions (2610.03458, 2609.39050, 2610.03190; 2610.02486/02516/02762; 2610.03387/03324; 2610.02664/02827; 2610.03089/03153; 2610.03010 cluster; F38's 2610.02563 et al.)</td>
+<td>Content, claims and whether any clears the card bar — only the four ranked papers and PTH were full-PDF-read</td>
+<td>Fresh list cluster headlines; not fetched beyond that (per the rank-only-what-you-full-read rule)</td>
+</tr>
+<tr>
+<td>Pack-reported merges I did <strong>not</strong> independently re-verify</td>
+<td>pydantic-ai #9705/#9406/#8337/#9790/#9792, opencode #53249/#53247/#53271/#53292 cluster, ag2 #3356/#3358, litellm #44524/#44525/#44528/#44529/#44533/#44537/#44442, cline #14818/#14826, haystack #13047, OpenHands #17612, the 26-PR MCP <code>servers</code> v1 bulk-close batch, codex #50943's unmerged close, letta-code #4953's 42-min open→close</td>
+<td>Fresh list only (packs not read wholesale per instruction); not asserted as claims above</td>
+</tr>
+<tr>
+<td>F85 repo mismatch</td>
+<td>Muse 2232's text says <code>openai/openai-agents-python #5299</code> (tracing: omit caller data from lifecycle debug logs, merged 05:01:48Z) but its link points at <code>openai/openai-python/pull/5299</code> — different repos; I did not resolve which repo actually merged it</td>
+<td>Fresh list line F85; flagged rather than asserted</td>
+</tr>
+<tr>
+<td>MCP <code>servers</code> v2 wave completeness</td>
+<td>I spot-verified #5009 (merged 03:22:01Z → v2/main) and #5055 (merged 05:58:39Z → v2/main); the full wave-1…7 enumeration and the 26-PR v1 retirement batch are pack-reported counts, not re-derived</td>
+<td>gh api on the two PRs; fresh list F23/F74/F82/F91/F97</td>
+</tr>
+<tr>
+<td>letta-code v0.34.3/v0.34.4 package availability</td>
+<td>GitHub releases verified stable (<code>prerelease=false</code>); I did not check npm/PyPI upload timing for the corresponding package</td>
+<td>GitHub releases API</td>
+</tr>
+<tr>
+<td>JEV/LAYA vendor claims inside 2610.02267</td>
+<td>All numbers are the paper's own; JEV's training data is not public (the paper flags possible benchmark exposure) and I made no independent vendor check</td>
+<td>The paper itself (§8 threats)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>Housekeeping</h2>
+<ul>
+<li><strong>Writer/fallback:</strong> <strong>Kimi</strong> (<code>kimi-code/k3</code>, thinking max) — Opus 5.5 weekly-limited (429 on the 00:44 PT probe; resets Oct 6 ~3pm PT); documented Kimi fallback per <code>Maps/Decisions/2026-09-22-opus-5-5-default-coding-and-field-brief.md</code>. Kimi effort stays max; the 2026-09-29 high-effort lock applies to the Opus seat.</li>
+<li><strong>Slot:</strong> on-cadence 0034; late wake ~00:41 PT, label kept <strong>0034</strong>. Window ~<strong>12h</strong> because <strong>1834 was SKIPPED (Mac-down ~17:57–~20:30 PT)</strong> — stated plainly, no invented 1834 brief.</li>
+<li><strong>Fresh-list path used:</strong> <code>_runs/fb-2026-10-05-0034/fresh-items.md</code> (122 candidates; <code>FB_MERGE slot=2026-10-05-0034 packs=11 raw=131 unique=123 drop_catalog=0 drop_seen=1 fresh=122</code>). No pack was opened or read in full; verification went to primary sources (GitHub/PyPI/npm/arXiv).</li>
+<li><strong>Packs merged (11):</strong> muse-1332, dsh-1432, agy-1532, muse-1632, dsh-1732, dsh-2032, agy-2132, muse-2232, dsh-2332, muse-0007 (extra), dsh-0009 (extra).</li>
+<li><strong>Gaps (disclosed, not invented):</strong> ABSENT / Mac-down evening — <strong>Agy 1832, Muse 1932, extras 1807/1809</strong>; <strong>Agy 0032 ABSENT at kick</strong> (still running; did not wait). DSH 1732 was written just before the Mac dropped; its PACK_DONE marker is verified present. The <strong>1834 brief slot itself was skipped</strong> with the Mac down.</li>
+<li><strong>Verified arXiv ceiling:</strong> the Sunday-evening mailing landed in-window — <code>/list/cs.AI/new</code> now shows <strong>"Monday, 5 October 2026"</strong> (124 new / 142 cross / 136 replaced = 402 entries). New-submission ceiling <code>2610.03693</code>; cross-list ceiling <code>2610.03717</code> (checked ~07:55Z). Prior brief's ceiling was <code>2610.02207</code> (Friday listing). All four ranked ids (2610.02994, 2610.02267, 2610.02363, 2610.02932) appear in the Monday listing.</li>
+<li><strong>Verification method:</strong></li>
+<li><strong>Academy:</strong> abs page + <strong>full PDF</strong> (<code>pdftotext -layout</code>, complete read of methods/results/limitations) for the four ranked papers and for 2610.02911 (read, not ranked — training-side RL). Key numbers cited to tables/sections in each card.</li>
+<li><strong>GitHub:</strong> <code>gh api</code> for letta-code v0.34.3/v0.34.4 releases; codex #50964 + rust-v0.162.0-alpha.14 tag; inspect_ai #5676; MCP servers #5009/#5055; livekit #7533; promptfoo #11400/#11391; vercel/ai #20819; mastra #25916; qwen-code #13210/#13406; gemini-cli + qwen-code nightly tags.</li>
+<li><strong>Registries:</strong> PyPI <code>litellm</code> (latest 1.104.0, no new in-window upload); npm <code>openai</code> (7.28.0 = latest, from prior window); npm <code>@openai/codex</code> (alpha.14 family 02:20–02:27Z, <code>latest</code> still 0.160.0).</li>
+<li><strong>Catalog:</strong> grepped the <strong>live</strong> <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code> (514 items / 133 briefs / 135 runs, max brief <code>2026-10-04T1234</code>) for every candidate id/name — no Academy candidate is carded; letta parent <code>letta-code-v0-33-1-...</code> verified present; no MCP-servers-v2 card exists yet.</li>
+<li><strong>Social sources:</strong> HN dropped 2026-09-27 (0 hits by design). X 401 / Reddit 403 / LinkedIn authwall as reported in packs. Medium paused and lead-only.</li>
+<li><strong>Run hygiene:</strong> priority pin <code>2609.02702</code> untouched; nothing from the do-not-re-admit list re-admitted (openai-node 7.28.0 left to the 1234 card; LiteLLM rc.1 left at Sun 0034; codex alphas stay NOTE); no first-party BQAA card; google-adk NOTE-only (no in-window ADK event anyway); GTM paused; Crustdata not used. Collection ran one log-only jev-shadow worth_running check before this Kimi relaunch, because it followed the failed Opus attempt (result: run, conf 0.52). Citation research_check (max 3) is Collection's post-card step.</li>
+</ul>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW (4, all Academy):</strong></p>
+<ol>
+<li>
+<p><strong>id:</strong> <code>arxiv-2610-02994-sentry-failure-knowledge-conditional-exposure-verified-recovery-playbook</code>
+   - <strong>tag:</strong> Academy
+   - <strong>title:</strong> Sentry: failure lessons are conditional knowledge — retrieving them only on a diagnosed, matching failure (and admitting only verified recoveries) beats always-on playbooks and runtime monitors
+   - <strong>arxiv:</strong> 2610.02994 — https://arxiv.org/abs/2610.02994
+   - <strong>card text:</strong> Stanford's Sentry runs a failure-management layer beside the agent: hard repair for schema-invalid actions, soft repair with ≤5 label-matched lessons for progress/grounding failures, and a reward-free verifier that admits a lesson only if the agent actually recovered (H=10 cycles). It beats the strongest runtime-intervention baseline on all four benchmarks (+37% avg, up to +77.3% WebShop; Table 1) and ACE by 39% (Table 2). The counter-finding is the design rule: exposing the same playbook persistently <em>lowers</em> WebShop reward 0.364→0.296 (Table 4), and pruning failure lessons from ACE <em>helps</em> (0.335→0.391, §2). Paired forks show causal local recovery 33.5%→60.5% (§5.2); cost is 1.54× base tokens (Table 5). Limitations: two models only; same model is agent, detector and verifier (§6).</p>
+</li>
+<li>
+<p><strong>id:</strong> <code>arxiv-2610-02267-fast-models-slow-evidence-system-1-decision-models-paired-self-audited-eval</code>
+   - <strong>tag:</strong> Academy
+   - <strong>title:</strong> Fast Models, Slow Evidence: paired eval of System-1 decision models (JEV vs LAYA) across 11 harness decision points — and a self-audit that moved the headline saving from 23.9% to 4.3%
+   - <strong>arxiv:</strong> 2610.02267 — https://arxiv.org/abs/2610.02267
+   - <strong>card text:</strong> 7,283 base cases + 6,640 robustness variants from 18 public sources, byte-identical inputs, McNemar paired tests. JEV wins 9 of 11 decision points (+10.8 to +46.0 pp; Fig 1); both models fail zero-shot model routing at chance and tie on RAG relevance (+0.5 pp [−2.0, 3.0]). LAYA flips 30.3% of decisions under option-order reversal (Fig 3a) and collapses to 31.3% at K=50 similar tools vs JEV's 98.9% on unique-correct items (Table 7). The self-audit (§7, Table 2) is the transferable half: counting the pre-screen's own tokens moves the two-tier safety saving from 23.9% to 4.3% (Table 8); in-sample 5%-FNR thresholds run 6–17% held-out (Fig 4b); a "channel effect" on injection FPR vanishes with channel-native content (Fig 6). JEV ≈ $32/M decisions at 759 tokens/decision. Limitations: two systems, single versions, zero-shot, English-dominant, JEV training data not public (§9).</p>
+</li>
+<li>
+<p><strong>id:</strong> <code>arxiv-2610-02363-arrivalbench-replay-invariance-snapshot-grading-silent-wrong-pipelines</code>
+   - <strong>tag:</strong> Academy
+   - <strong>title:</strong> ArrivalBench: snapshot grading certifies 86–100% of agent-written data pipelines; re-execution under late/duplicate/out-of-order delivery finds 7.0–79.2% of the certified ones silently wrong
+   - <strong>arxiv:</strong> 2610.02363 — https://arxiv.org/abs/2610.02363
+   - <strong>card text:</strong> Grades the artifact an agent leaves behind by re-executing it under six documentation-grounded delivery hazards against a batch-recomputation oracle, separating FAIL (wrong table — invisible to monitoring) from ERROR (crash — visible). 40 tasks, 42 negative controls, 11 models / 8 organisations, 28,041 verdicts re-grading byte-identically (§4.1). Snapshot grading saturates at 86–100% while silent-failure spans 7.0% (GPT-5.6 Sol) to 79.2% (Codestral) (Table 1, Fig 2); the repair loop does not produce the gap (+0.2 pp [−6.6, +6.6] within arm×task, §4.2). Idempotency hazards fail more than ordering hazards in all eleven unhinted arms (§4.3). A hazard-warning prompt converted one model's silent failures to crashes (48.2%→10.5% silent, 9.0%→37.0% crash) — all-in failure moved only 51.0%→44.0% (§4.5). Limitations: single-author tasks, DuckDB-only, code/tasks not public with this version (App B).</p>
+</li>
+<li>
+<p><strong>id:</strong> <code>arxiv-2610-02932-pace-payback-aware-compilation-computer-use-agent-token-efficiency</code>
+   - <strong>tag:</strong> Academy
+   - <strong>title:</strong> When to Compile a Computer-Use Agent? PACE measures payback counts (2–16 uses) and makes budget-constrained compile decisions, saving 17–25% of tokens
+   - <strong>arxiv:</strong> 2610.02932 — https://arxiv.org/abs/2610.02932
+   - <strong>card text:</strong> Compiling a repeated GUI procedure into a program saves per-run tokens, but compilation attempts can fail and reuse is uncertain. PACE records successful <em>and</em> failed compilation costs, estimates per-use savings on matched inputs, and admits executions/compilations only within a cumulative budget from observed arrivals — total cost ≤ (1+ε) × all-agent under stated action-cost assumptions (§4.3). Payback counts excluding source runs: 2–16 uses (Table 1). On recorded arrival sequences: −17.3% vs ReAct, −24.9% vs AutoRPA adaptation, −17.3% vs ToolPro adaptation (ε=0.25, Table 3). The budget's value is tail insurance: removing it leaves mean cost flat but raises the worst grid ratio to ReAct from 1.25× to 1.76× (Table 4, §5). Limitations: seven task families, fixed cost profiles, token cost only, live study covers one fixed program (§7).</p>
+</li>
+</ol>
+<p><strong>Progress (1):</strong></p>
+<ol>
+<li><strong>parent:</strong> <code>letta-code-v0-33-1-claude-code-codex-tracked-subagents-wake-launch-credential-redaction</code>
+   - <strong>text:</strong> letta-code v0.34.3 (2026-10-04 21:31:57Z, stable) lets subagents launch one nested layer and message their parent (#4915), auto-inherits parent MCP servers into subagents (#4921), and adds a read-only memfs file policy (#4910). v0.34.4 (23:49:18Z) lets memory subagents write their scratchpad inside the sandbox (#4952) and reverts the v0.34.2 automatic reply relay from core channels (#4956).</li>
+</ol>
+<p><strong>Headline claims (for citation checks):</strong></p>
+<ol>
+<li>letta-code v0.34.3 was released on GitHub on 2026-10-04 at 21:31:57Z (stable, <code>prerelease=false</code>) with subagents launching one nested layer and inheriting parent MCP servers automatically; v0.34.4 followed at 23:49:18Z reverting the automatic reply relay. https://github.com/letta-ai/letta-code/releases/tag/v0.34.3 (Oct 4, 2026)</li>
+<li>arXiv 2610.02267 (v1, 1 Oct 2026) reports JEV significantly more accurate than LAYA on 9 of 11 agent-harness decision points, with the authors' self-audit correcting the two-tier safety-review saving from a reported 23.9% to 4.3% once the pre-screen's own token cost is counted. https://arxiv.org/abs/2610.02267 (Oct 1, 2026)</li>
+<li>arXiv 2610.02363 (v1, 1 Oct 2026) reports single-execution snapshot grading certifying 86–100% of agent-generated data pipelines across eleven models while re-execution under adversarial delivery schedules finds 7.0–79.2% of the certified pipelines silently wrong. https://arxiv.org/abs/2610.02363 (Oct 1, 2026)</li>
+</ol>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Kimi · 5 Oct 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
