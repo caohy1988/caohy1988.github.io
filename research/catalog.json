@@ -1,6 +1,46 @@
 {
   "items": [
     {
+      "id": "openhands-v1-25-0-model-router-run-at-conversation-start-agent-profiles-full-tool-catalog-sdk-1-53-0",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "OpenHands v1.25.0 — Model Router runs at conversation start (auto-enabled on first router) + direct-prompt router settings; agent profiles pick every tool from the server catalog (SDK 1.53.0 pin); Canvas Apps Update; automations templates + native git",
+      "html": " <a href=\"https://github.com/All-Hands-AI/OpenHands/releases/tag/v1.25.0\">v1.25.0</a> (2026-10-06T00:56:53Z, stable) — First OpenHands card since v1.21.0. Model Router leaves the settings page for the default execution path: a \"Run at conversation start\" toggle (#17797), auto-enabled when the first router is created (#17840), plus direct-prompt router settings (#16147) — router-selection spans now precede the agent span on new conversations. Agent profiles can pick every tool from a server's catalog with SDK 1.53.0 pinned (#17516); bulk-add provider models as per-connection LLM profiles (#16426); Canvas Apps get an Update action (#17736) and manifest-declared icons (#17877); automations gain creator filter, cloud templates and native git integrations (#17814/#17830/#17868); optional voice dictation (#17804). Analytics consequence: first-span-is-agent assumptions break; profile tool surfaces expand to full server catalogs. <a href=\"/research/briefs/2026-10-06-0034-kimi.html\">Full brief</a>.",
+      "added": "2026-10-06T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2610-06001-agentspy-external-system-level-observability-star-graph-18-percent-unrelated-7-percent-grading-file-reads",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "AgentSpy: Making AI Agent Behavior Observable — syscall/network recording of the agent and every subprocess; among all-passing runs 18.2% did task-unrelated work, 6.8% read the grading files, 17% ignored the skills; deterministic rules catch 4/5 injection categories (precision 1.00)",
+      "html": " <a href=\"https://arxiv.org/abs/2610.06001\">abs</a> — U. St. Gallen/USI. Observes the agent from outside the agent: Firecracker microVM + auditd/Zeek (reliability) and Falco (security), no agent instrumentation, no LLM judge. Each run becomes a star graph over commands/files/hosts; repeated runs compared by weighted-Jaccard similarity. On 77 SkillsBench tasks × 3 models × 3 runs, same-task sets beat mixed sets in 92.2% of comparisons; on the 88 all-passing task–model pairs, manual review (κ 0.96/0.92) flags 16 (18.2%) for unrelated activity (8 unrequested network, 5 env exploration, 6 test-file reads — all deepseek-v4-flash) and 15 (17.0%) for solving without the provided skills. Security rules detect 14/18 executed skill-injection behaviors (precision 1.00, recall 0.78; zero false alarms; misses confined to a git-remote backdoor crossing no monitored boundary). Overhead not significant (all p ≥ 0.16). Limits: one harness (codex 0.146.0), 4 LLMs, 2 benchmarks. (full PDF read). <a href=\"/research/briefs/2026-10-06-0034-kimi.html\">Full brief</a>.",
+      "added": "2026-10-06T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2610-04433-what-does-a-harness-buy-tokens-mostly-rerun-calibrated-13-percent-flip-parity-3x-cost-preamble-steps",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "What Does a Harness Buy? Tokens, Mostly — harness swaps flip as many tasks as reruns (13%); Claude Code ≡ mini-SWE-agent within 5pp on 447 SWE-bench Verified tasks; only OpenCode's loss (≤9pp, output-cap cutoffs) clears the noise; cost differs ≤3× via preamble × steps",
+      "html": " <a href=\"https://arxiv.org/abs/2610.04433\">abs</a> — Shandong University. Three production harnesses (Claude Code 2.1, mini-SWE-agent 2.4.6, OpenCode 1.18) × five models on SWE-bench Verified (hard45 + pool447), fully offline, with rerun pairs as the noise yardstick (McNemar/Newcombe, TOST at δ=5). Pass rate: CC−mini = −1.8/−1.4pp (equivalent both models); hard45 spread 2–5 tasks vs 3 for a rerun; harness-swap flip rate 13% = rerun flip rate (model swap 22%); splits don't replicate (5 same, 7 reversed). The one effect clearing noise is a loss: OpenCode trails ≤9.2pp (Holm-surviving on Qwen3.8), half from output-cap cutoffs (33 trials vs CC's 1). Cost: ≤3× per task on the same model — preamble 16,581/7,025/829 tokens paid per step; 96–99% of inputs are cache hits; cache price scales but doesn't reorder. Power: 45 tasks resolve nothing at 80%; 447 resolve ~5.2pp — most published harness gains sit below one or both. Vendor home-field (dsh) scores inside the range at top of bill. Repro: github.com/YangzeLiu/what-does-a-harness-buy. (full PDF read). <a href=\"/research/briefs/2026-10-06-0034-kimi.html\">Full brief</a>.",
+      "added": "2026-10-06T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2610-04195-memleak-cross-user-semantic-leakage-multi-tenant-agent-memory-70-100-incidental-hard-ownership-gating",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "MemLeak: Cross-User Semantic Leakage in Multi-Tenant AI Agent Memory — pooled vector stores leak 70–100% incidentally through ordinary cosine retrieval; crafted memories place 90–100%; contamination 5.00/5 while helpful; only hard post-retrieval ownership gating restores baseline (~1.4 ms/query)",
+      "html": " <a href=\"https://arxiv.org/abs/2610.04195\">abs</a> — Workday AI Research. Formalizes cross-user admissibility failure for pooled agent-memory stores (soft user_id metadata over a shared index — the Mem0/A-Mem/MemOS pattern): semantic similarity, not any exploit, pulls one user's memories into another's session. Controlled PoC (4 synthetic user pairs, n=10, Wilson CIs): same-team pooled leakage 70–100% (TF-IDF/MiniLM), partitioned 0%; centroid similarity doesn't predict leakage (org distance is no proxy); crafted memories (domain/role knowledge only) hit 90–100% top-k placement, near the verbatim-copy oracle; downstream contamination 5.00/5 (Gemini 2.5 Flash retrieval path) and 4.67/5 (Sonnet 4.5) from a 1.00 clean baseline while helpfulness stays 4.53–5.00 — quality monitoring can't see it (human-validated as a conservative lower bound). Negative covert-channel result bounds the claim to incidental leakage. Mitigations: metadata filtering fails once scope widens to include the attacker; embedding prefixes halve leakage at best; only hard post-retrieval ownership gating restores 1.00/5 on both models at ~1.4 ms/query (10k-memory pgvector HNSW). Leakage doesn't diminish with embedder scale. (full PDF read). <a href=\"/research/briefs/2026-10-06-0034-kimi.html\">Full brief</a>.",
+      "added": "2026-10-06T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
       "id": "langgraph-1-2-13-checkpoint-replay-integrity-fork-before-replay-answered-interrupts-get-state",
       "tag": "Industry",
       "kind": "rank",
@@ -451,6 +491,11 @@
           "at": "2026-10-03T1834",
           "atDisplay": "6:34 PM PT",
           "html": "Claude Code 2.1.289 (npm latest Oct 3; Agent SDK 0.3.289 at parity) fixes Bash deny and ask rules being skipped under sandbox auto-allow behind env-var prefixes or bare assignments, and deny rules not holding over a user mod's approval on managed machines. User plugins can no longer rewrite an org-managed MCP server's sign-in tool descriptions. It adds one agent id across plugin hook events and agent.spawn for teammates. https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md <a href=\"/research/briefs/2026-10-03-1834-opus.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-06T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "claude-agent-sdk v0.3.290 (2026-10-05T23:32Z) + v0.3.291 (2026-10-06T03:54Z; npm latest both SDK 0.3.291 and claude-code 2.1.291): deny/ask rules no longer miss <code>toolAliases</code> tools under wildcards (<code>Bash*</code>), match-all (<code>Bash(**)</code>) or disallowedTools overlap; failed Claude-in-Chrome tool calls keep <code>tool_use_result._meta</code>; same-uuid replay no longer races the in-flight message; <code>includePartialMessages</code> streams emit <code>message_stop</code> on cut/interrupted streams; <code>user_message_uuid(s)</code> + <code>resume_reason</code> set on worker-resumed turns; WebFetch gains <code>offset</code>. <a href=\"/research/briefs/2026-10-06-0034-kimi.html\">Full brief</a>."
         }
       ]
     },
@@ -522,7 +567,13 @@
       "html": " <a href=\"https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fmcp-adapters%402.0.0\">release</a> — LangChain.js&#x27;s MCP adapter moves to MCP SDK 2 and handles modern and legacy MCP servers in one adapter. Servers can now ask users for input through LangGraph interrupts. By default every tool name gains its server prefix (search on server docs becomes docs__search), and duplicate unprefixed names now throw. For BQAA, tool-level metrics split at this upgrade unless the tool dimension is stored as separate server and tool fields. <a href=\"/research/briefs/2026-10-01-0034-opus.html\">Full brief</a>.",
       "added": "2026-10-01T0034",
       "addedDisplay": "12:34 AM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-10-06T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "@langchain/mcp-adapters 2.0.1 (2026-10-06T00:43Z, stable; npm 00:47Z): MCP tool-name separator changed from double to single underscore — <code>server_tool</code> instead of <code>server__tool</code> (#11845; <code>additionalToolNamePrefix</code>'s <code>mcp__server_tool</code> unchanged) — trace/tool-name parsers must accept both shapes; HTTP→SSE fallback now chains the SSE SDK error as <code>cause</code> (#11804), fixing <code>UnauthorizedError.isInstance(error.cause)</code> OAuth handlers on SSE-only servers. Same-train @langchain/core 1.2.16 is a plain patch. <a href=\"/research/briefs/2026-10-06-0034-kimi.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "arxiv-2609-40111-agent-error-dataset-50k-error-diagnosis-pairs-replay-controls",
@@ -1083,7 +1134,13 @@
       "html": " <a href=\"https://github.com/livekit/agents/releases/tag/livekit-agents%401.8.3\">livekit-agents@1.8.3</a> · <a href=\"https://pypi.org/project/livekit-agents/1.8.3/\">PyPI</a> — A 66-PR patch release (PyPI 2026-09-23; GitHub release notes published 2026-09-26 08:53Z) that changes what LiveKit voice-agent traces record. `llm_fallback_adapter` spans no longer carry `gen_ai.operation.name=&quot;chat&quot;` alongside the provider request (#7373), `llm_node` keeps the serving provider after failover (#7374), `set_tracer_provider(metadata=...)` works again for in-job spans after a regression from #7033 that shipped in 1.8.0 (#7428), and `user_speaking` spans can no longer end before they start and read as huge unsigned durations (#7332). Also: exceptions and `error.type` recorded under redaction (#7376), `session_close` covering the whole close (#7322), realtime ASR usage per session with `input_audio_tokens` as a subset of `input_tokens` (#7303), tool outputs paired by `call_id` (#7330), and `ToolResult(reply_required=False)` (#7340). <a href=\"/research/briefs/2026-09-26-0634-opus.html\">Full brief</a>.",
       "added": "2026-09-26T0634",
       "addedDisplay": "6:34 AM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-10-06T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "livekit-agents 1.8.5 (2026-10-06T02:06Z, stable; PyPI 01:40Z): sticky LLM fallback routing (#7589 — failover sticks per call); replay function calls and their outputs on realtime reconnection (#7576 — tool evidence survives reconnects); record LLM input as deltas on trace spans (#7605) + tool names in telemetry result parts (#7534); Soniox final span covers all timed tokens, end_time never regresses (#6976); loop-stall sampler frees sampled frames (#7613); Vertex call-id on tool responses (#7591); gemini-3.8-live support (#7587); boson-avatar plugin and Nova Sonic 2.5. <a href=\"/research/briefs/2026-10-06-0034-kimi.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "arxiv-2609-24928-trajectory-aware-subset-selection-swe-agent-regression",
@@ -1667,6 +1724,11 @@
           "at": "2026-09-24T1234",
           "displayTime": "12:34 PM PT",
           "html": "Vercel AI SDK <a href=\"https://github.com/vercel/ai/releases/tag/ai@7.0.114\">ai@7.0.114</a> (GH 18:51Z / npm 18:52Z) — #21447 tracing-channel telemetry allowlist leak: restricted dispatcher filtered lifecycle callbacks but inherited tracing-channel helpers unchanged, so subscribers received runtimeContext/toolsContext/toolContext that allowlists exclude (repro generateText/streamText/executeTool). Progress only. <a href=\"/research/briefs/2026-09-24-1234-opus.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-06T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "@ai-sdk/workflow 2.0.60 (2026-10-05T23:04Z): persisted tool-denial results are reused during approval resumption (d9e04cb) — denied calls replay their verdict instead of re-prompting, the denial twin of the carded approval-replay line. @ai-sdk/azure 4.0.92 + 3.0.135 (22:56–23:06Z): MAI-Image models through the MAI image API on both major lines (#22094). <a href=\"/research/briefs/2026-10-06-0034-kimi.html\">Full brief</a>."
         }
       ]
     },
@@ -2936,7 +2998,13 @@
       "html": " promptfoo <a href=\"https://github.com/promptfoo/promptfoo/releases\">0.123.1</a> (pub 2026-09-18T01:07Z): hosted Agents API eval surface + pre-connection MCP schema validation. <a href=\"/research/briefs/2026-09-20-1134-kimi.html\">Full brief</a>.",
       "added": "2026-09-20T1134",
       "addedDisplay": "11:34 AM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-10-06T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "promptfoo 0.124.0 (2026-10-06T01:09Z, stable; npm 01:35Z) — BREAKING: hosted ChatKit provider removed (#11434); install diet makes Langfuse (#11351), WatsonX (#11359), Slack (#11349), Codex-Security (#11325), OpenAI Agents (#11177) and browser SDKs (#11163) opt-in — pipelines piping results to Langfuse must add the explicit dep. New: run coding agents in isolated workspaces; resume paused Claude server-tool turns; OpenAI safety identifiers; providers for Claude Opus 5.5 / Sonnet 5.5, GPT-6 Sol/Luna (+6.1), Grok 4.7, TypeSafe Jev; <code>--filter-metadata</code> OR; target-error exit codes. <a href=\"/research/briefs/2026-10-06-0034-kimi.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "openai-codex-0-155-1-transcript-product-surface",
@@ -6316,6 +6384,26 @@
   ],
   "runs": [
     {
+      "id": "2026-10-06T0034",
+      "date": "2026-10-06",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-10-06-0034-kimi.html",
+      "analyzer": "Kimi",
+      "added": [
+        "openhands-v1-25-0-model-router-run-at-conversation-start-agent-profiles-full-tool-catalog-sdk-1-53-0",
+        "arxiv-2610-06001-agentspy-external-system-level-observability-star-graph-18-percent-unrelated-7-percent-grading-file-reads",
+        "arxiv-2610-04433-what-does-a-harness-buy-tokens-mostly-rerun-calibrated-13-percent-flip-parity-3x-cost-preamble-steps",
+        "arxiv-2610-04195-memleak-cross-user-semantic-leakage-multi-tenant-agent-memory-70-100-incidental-hard-ownership-gating"
+      ],
+      "updated": [
+        "promptfoo-0-123-1-openai-agents-api-portable-mcp-schemas",
+        "livekit-agents-1-8-3-fallback-attribution-span-metadata-negative-durations",
+        "langchainjs-mcp-adapters-2-0-0-mcp-sdk-2-server-prefixed-tool-names-elicitation-interrupts",
+        "claude-code-2-1-287-claude-mods-you-should-know-side-agent-otel-prompt-text",
+        "vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts"
+      ]
+    },
+    {
       "id": "2026-10-05T1234",
       "date": "2026-10-05",
       "display": "12:34 PM PT",
@@ -8446,6 +8534,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-10-06T0034",
+      "date": "2026-10-06",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-10-06-0034-kimi.html",
+      "analyzer": "Kimi",
+      "title": "Kimi (Opus-quota fallback, old path): Industry NEW OpenHands v1.25.0 Model Router at conversation start; Academy NEW AgentSpy 2610.06001, Harness-Buy 2610.04433, MemLeak 2610.04195; Progress promptfoo 0.124.0, livekit-agents 1.8.5, mcp-adapters 2.0.1, claude-agent-sdk 0.3.291, Vercel @ai-sdk/workflow 2.0.60"
+    },
     {
       "id": "2026-10-05T1234",
       "date": "2026-10-05",
