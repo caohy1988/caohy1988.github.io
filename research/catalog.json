@@ -1,6 +1,46 @@
 {
   "items": [
     {
+      "id": "openai-decisions-api-public-beta-gpt-6-luna-v1-decisions-typed-answers-input-only-pricing",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "OpenAI Decisions API (public beta): POST /v1/decisions on gpt-6-luna returns typed predicate / choice / score answers with confidence and probabilities plus per-question refusals; input-only pricing; openai-python v3.26.0 and openai-node v7.30.0 ship decisions.create",
+      "html": " <a href=\"https://developers.openai.com/api/docs/guides/decisions\">Decisions API guide</a> (2026-10-06, beta; <a href=\"https://developers.openai.com/api/docs/changelog\">changelog</a>; <a href=\"https://github.com/openai/openai-python/releases/tag/v3.26.0\">openai-python v3.26.0</a>) — OpenAI's first first-party decision endpoint: shared text/image evidence plus ordered questions in, typed answers out. Predicate returns a probability; choice returns a pick with confidence and a probabilities array; score returns a probability-weighted level. Any question may come back as a refusal, which withholds its score. The endpoint runs only on gpt-6-luna, is billed at $0.10 per 1M input tokens with no output or cache charges, and OpenAI claims it is 10x faster than the Responses API (beta; GA \"in the coming weeks\"; ZDR/HIPAA eligible). Analytics consequence: decision calls are a distinct event class. Keep question-level answer type, confidence, the probability vector and refusal as fields rather than logging them as short generations. <a href=\"/research/briefs/2026-10-07-0034-opus.html\">Full brief</a>.",
+      "added": "2026-10-07T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2610-08364-transect-long-horizon-agent-eval-observability-turn-axis-subagent-token-attribution",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Transect: Retaining Observability for Long-Horizon LLM Agent Evaluations. One turn axis aligns token use, sub-agent spans, compactions, operator messages and judged phase labels with per-judgment provenance. In a 13M-token AI R&D run, 89% of tokens went to sub-agents, self-review plus write-up took ~10.7M of 14.5M new-work tokens, and 2 of 580 outputs were labelled Hypothesising.",
+      "html": " <a href=\"https://arxiv.org/abs/2610.08364\">abs</a> — UK AISI + Meridian Labs. An Inspect Scout-based package that ingests Inspect <code>.eval</code> and OpenClaw logs, places orchestrator and sub-agent outputs on a shared turn index, and combines structural scanners (tokens, compactions, human interventions, setup) with judged scanners (phases from a pre-registered vocabulary; sub-agent roles). Each judgment is stored with model, roll, confidence and verifier provenance, with explicit reliability warnings; token measures include billable (cache reads excluded) and new-work. Case study: 81.7% of labels were unanimous over 5 rolls, and 922 cross-agent file-access records were traced (66.6% in the manuscript workspace). The analysis is descriptive, from one transcript, and reliability does not establish validity. (full PDF read). <a href=\"/research/briefs/2026-10-07-0034-opus.html\">Full brief</a>.",
+      "added": "2026-10-07T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2610-07274-trust-layer-agent-evaluation-regrade-provenance-honesty-rerun-22-6-percent-passes-trusted",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "A Trust Layer for Agent Evaluation: four post-hoc checks beside each recorded score (re-grade, value provenance, completion-claim honesty, 5× rerun stability). Only 19 of 84 recorded passes (22.6%) on 108 Agents' Last Exam tasks × 5 agents clear all four.",
+      "html": " <a href=\"https://arxiv.org/abs/2610.07274\">abs</a> — Centific Research. Verdicts are deterministic and model judges only label evidence (3-vote majority); the recorded score is never modified. On ALE, the share of answers with no traceable computation ranges from 10.3% (Opus 5) to 50.5% (GPT-5.6 Sol). Confirmed false completion claims range from 17 to 55 per model, and 18–46% of tasks change score band over five reruns. Deterministic checks alone leave 34 of 84 passes; all four leave 19 (95% CI 15.0–32.6). Persist trajectories, value provenance and terminal claims beside scores; pass rate alone overstates trusted success about 4×. (full PDF read). <a href=\"/research/briefs/2026-10-07-0034-opus.html\">Full brief</a>.",
+      "added": "2026-10-07T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2610-07359-evaluate-the-stack-rule-vs-llm-gate-coupling-nmult-served-model-drift",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Evaluate the Stack, Not the Layer: on 1,119 labelled agent actions, rule + judge gates behave like ~2 independent layers (n_mult 1.86–2.09) but any two LLM judges like ~1.2–1.4, cross-vendor included. A cloud rule pack cuts solo miss 20% and adds zero joint coverage, and the requested claude-opus-5 was served by claude-opus-4-8 on 50 of 112 batches.",
+      "html": " <a href=\"https://arxiv.org/abs/2610.07359\">abs</a> — University of Lancashire. Measures failure correlation among stacked action gates (AgentTrust 174-regex rule layer + four LLM judges) with a multiplication-equivalent-layers instrument and its perfect-coupling floor. Judge pairs couple (φ median +0.430, 6/6 significant; two judges jointly miss 5.2% vs a 1.1% prediction); rule pairs do not (0/4). Solo accuracy does not predict added coverage, and counting <code>review</code> as caught versus not stopped reverses five conclusions. Per-call served-model logging exposed silent substitution on 45% of one tier's batches (79% of the external corpus vs 32% internal). Log the served model on every call and measure joint misses, not per-layer accuracy. (full PDF read). <a href=\"/research/briefs/2026-10-07-0034-opus.html\">Full brief</a>.",
+      "added": "2026-10-07T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
       "id": "vercel-ai-gateway-confidence-based-decision-fallbacks-beta",
       "tag": "Industry",
       "kind": "rank",
@@ -766,6 +806,11 @@
           "at": "2026-10-01T0034",
           "displayTime": "12:34 AM PT",
           "html": "Cline CLI 3.0.67 lets the agent page through MCP tool output past the context cutoff via read_files instead of losing it, and fixes custom providers that failed at run time. <a href=\"/research/briefs/2026-10-01-0034-opus.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-07T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "Cline v4.1.23 / CLI 3.0.69 / SDK 0.0.91 / Desktop 0.0.44 (2026-10-07T06:00–07:28Z): missing or unknown finish reasons are no longer treated as successful completion (SDK <code>AgentModelFinishReason: 'unknown'</code>). MCP stdio servers get 10s instead of 3s to start (slow <code>npx</code>/<code>uvx</code> servers were silently dropped), and oversized MCP tool output is pageable. Opt-in Langfuse tracing for BYOK providers; the 4.1.22 Anthropic-fallbacks 400 on custom endpoints is fixed. <a href=\"/research/briefs/2026-10-07-0034-opus.html\">Full brief</a>."
         }
       ]
     },
@@ -1159,6 +1204,11 @@
           "at": "2026-09-26T1834",
           "displayTime": "6:34 PM PT",
           "html": "Inspect AI <a href=\"https://pypi.org/project/inspect-ai/0.3.271/\">0.3.271</a> (PyPI 2026-09-26 22:07Z) adds <code>--extra-headers</code> and <code>--extra-body</code> to <code>inspect eval</code> / <code>inspect eval-set</code> (also <code>INSPECT_EVAL_EXTRA_HEADERS</code> / <code>INSPECT_EVAL_EXTRA_BODY</code>), each an inline JSON or YAML mapping (<a href=\"https://github.com/UKGovernmentBEIS/inspect_ai/pull/5582\">#5582</a>). Headers join the model generate config stored as <code>eval.model_generate_config</code>; Inspect's own source notes API keys in model args are redacted but \"extra_headers is recorded verbatim\". Google token counting falls back to a local estimate (o200k_base + 10%) with a warning when <code>countTokens</code> returns 404 or another non-retryable error (<a href=\"https://github.com/UKGovernmentBEIS/inspect_ai/pull/5581\">#5581</a>); 401/429/5xx still propagate. Progress. <a href=\"/research/briefs/2026-09-26-1834-opus.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-07T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "inspect-ai 0.3.277 (2026-10-06T21:36Z): cost tracking and <code>cost_limit</code> price each request at the model that served it (refusal fallbacks, Azure, OpenRouter/Bedrock/Fireworks/LiteLLM routers via <code>ModelAPI.served_model_usage()</code>). Model events log provider request ids (including retries) and response ids even without raw-call logging, and calls are refused before sending once a limit is already reached. <a href=\"/research/briefs/2026-10-07-0034-opus.html\">Full brief</a>."
         }
       ]
     },
@@ -2324,6 +2374,11 @@
           "at": "2026-09-27T0034",
           "displayTime": "12:34 AM PT",
           "html": "<a href=\"https://www.npmjs.com/package/@ai-sdk/gateway/v/4.0.95\"><code>@ai-sdk/gateway@4.0.95</code></a> (npm 2026-09-27 03:27Z, with <code>ai@7.0.117</code>) ships typed conditional evaluation fallbacks (<a href=\"https://github.com/vercel/ai/pull/21215\">#21215</a>). An evaluation's <code>models</code> list can start with a fallback model that answers only when Choice or Score confidence falls below a threshold, or a Boolean probability falls inside a range, combined with <code>any</code>, <code>all</code> or <code>atLeast</code>. <code>response.modelId</code> names the fallback when one answered. <code>4.0.96</code> (06:09Z, with <code>ai@7.0.118</code>) removed the <code>GatewayEvaluationProviderOptions</code> type that 4.0.95 had introduced, folding it into <code>GatewayProviderOptions</code> (<a href=\"https://github.com/vercel/ai/pull/21561\">#21561</a>), and dropped the 256-character model cap (<a href=\"https://github.com/vercel/ai/pull/21554\">#21554</a>). Progress. <a href=\"/research/briefs/2026-09-27-0034-opus.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-07T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "<code>@ai-sdk/openai</code> 4.0.85 (2026-10-06T22:23Z) makes <code>decide</code> call OpenAI's native Decisions API; <code>openai.decisionModel()</code> now accepts only gpt-6-luna, and native usage and confidence are preserved. <code>ai@7.0.130</code> / <code>@ai-sdk/openai</code> 4.0.86 / <code>@ai-sdk/gateway</code> 4.0.106 (01:4xZ Oct 7) add a typed <code>{type:'refusal'}</code> decision answer, and <code>experimental_decide</code> now throws <code>Experimental_DecisionRefusalError</code> with the refused question IDs. Upgrading changes the decision model id in traces. <a href=\"/research/briefs/2026-10-07-0034-opus.html\">Full brief</a>."
         }
       ]
     },
@@ -4593,7 +4648,13 @@
       "html": "<a href=\"https://github.com/mlflow/mlflow/releases/tag/v3.16.0\">MLflow v3.16.0</a> (tagged 2026-09-04T08:30 UTC). First-class span links with Links tab (OTLP-normalized); redesigned trace explorer now default with inline session grouping (Sessions tab deprecated); Custom Trace Views built by MLflow Assistant in plain English, saved per experiment. <a href=\"/research/briefs/2026-09-04-0946-kimi.html\">Full brief</a>.",
       "added": "2026-09-04T0946",
       "addedDisplay": "Sep 4, 2026 · 9:46 AM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-10-07T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "MLflow 3.17.0 (PyPI 2026-10-07T06:07Z; changelog dated Oct 6): Jev/TypeSafe decisions across evaluation, gateway and tracing; opt-in SQL daily rollups for trace analytics; fine-grained permissions on runs, traces and versions (wildcards + explicit DENY); OTLP ingestion metrics for Prometheus; span descriptions; GenAI semconv <code>tool_call_response</code> now uses the <code>response</code> key. Requires a coordinated <code>mlflow db upgrade</code>. <a href=\"/research/briefs/2026-10-07-0034-opus.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "langfuse-assistant-sandboxed-analysis-dataset-dashboard-builds",
@@ -6449,6 +6510,25 @@
     }
   ],
   "runs": [
+    {
+      "id": "2026-10-07T0034",
+      "date": "2026-10-07",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-10-07-0034-opus.html",
+      "analyzer": "Opus 5.5",
+      "added": [
+        "openai-decisions-api-public-beta-gpt-6-luna-v1-decisions-typed-answers-input-only-pricing",
+        "arxiv-2610-08364-transect-long-horizon-agent-eval-observability-turn-axis-subagent-token-attribution",
+        "arxiv-2610-07274-trust-layer-agent-evaluation-regrade-provenance-honesty-rerun-22-6-percent-passes-trusted",
+        "arxiv-2610-07359-evaluate-the-stack-rule-vs-llm-gate-coupling-nmult-served-model-drift"
+      ],
+      "updated": [
+        "vercel-ai-sdk-7-0-111-experimental-evaluate-otel-spans",
+        "mlflow-3-16-span-links-session-grouping-assistant-trace-views",
+        "inspect-ai-0-3-270-litellm-proxy-responses-default-eval-set-top-up-f1-multiset",
+        "cline-4-1-22-reasoning-tokens-no-longer-double-counted-gpt-6-1-sol-defaults-refusal-fallback"
+      ]
+    },
     {
       "id": "2026-10-06T1234",
       "date": "2026-10-06",
@@ -8620,6 +8700,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-10-07T0034",
+      "date": "2026-10-07",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-10-07-0034-opus.html",
+      "analyzer": "Opus 5.5",
+      "title": "Opus 5.5 (fresh path): Industry NEW OpenAI Decisions API (public beta, gpt-6-luna); Academy NEW Transect 2610.08364, Trust Layer 2610.07274, Evaluate the Stack 2610.07359; Progress Vercel AI SDK decide → /decisions + refusal answers, MLflow 3.17.0, inspect-ai 0.3.277, Cline v4.1.23"
+    },
     {
       "id": "2026-10-06T1234",
       "date": "2026-10-06",
