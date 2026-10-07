@@ -1,8 +1,98 @@
 {
-  "updatedAt": "2026-10-05T23:48:32Z",
+  "updatedAt": "2026-10-07T03:17:20Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "ruttla-two-probe-rules-exit-2-nothing-measured-2026-10-06",
+      "date": "2026-10-06",
+      "displayDate": "Oct 6, 2026",
+      "title": "Ruttla — deterministic quality gate: every rule must fail its broken probe and pass its healthy one, and exit 2 means nothing was measured",
+      "href": "https://github.com/hehljo/Ruttla",
+      "why": "Local quality gate that turns a proven failure into an executable rule: a rule must fail its broken probe and pass its healthy probe, and ruttla --self-test re-runs both. The exit code is a contract: 0 measured with no blocking finding, 1 a blocking finding, 2 nothing was measured (the README says not a success), 3 a runner, input, config or plugin error. Without its engine the declarative rules report as unmeasured, never green, and platforms with no rule pack are listed instead of passing. The README warns that ruttla . | head reports head's status, so capture the code before filtering. --format agent prints one line per finding with a FIX: hint; scans use no LLM or network and never execute target code. Fit: it puts our negative-claim rule and code decides done into an exit code a wrapper can test, and its two-probe test is an admission rule for checks we add. Caveats: 0.1.0.dev0 public preview; rule messages are currently in German; the quick install pipes a script to sh; 0 stars, Apache-2.0, created 2026-09-18; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-06-agy-harness-lab-pack",
+      "tags": [
+        "verification",
+        "code-decides-done",
+        "lint",
+        "evidence",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "sandbox-run-detached-worktree-verify-main-tree-byte-identical-2026-10-06",
+      "date": "2026-10-06",
+      "displayDate": "Oct 6, 2026",
+      "title": "sandbox-run — verify in a detached worktree overlaid by manifest copy, then check the main tree's VCS state stayed byte-identical",
+      "href": "https://github.com/LosEcher/sandbox-run",
+      "why": "Runs build, test or lint commands in a detached git worktree (or jj workspace) in a temp directory, not the live checkout. Uncommitted files are overlaid by manifest copy, never patch-apply, hardlink or symlink, so writes cannot leak back, and cache directories such as target/ and node_modules/ are left out, so a pass comes from a clean rebuild and catches a forgotten new file the way CI would. Timeouts kill the whole process group. The isolation.integrity gate checks that the main tree's VCS state is byte-identical before and after (failure exits 2). By default, sandbox.clean marks a run that changed the snapshot as polluted, and runs are logged to the append-only .sandbox-run/runs.jsonl. Fit: our wrapper fails a push-required kick on a dirty tree (no-exit-while-waiting), and the README's first problem is build artifacts mixing into the change set; it isolates only the verify step. Caveats: the ledger is the one file it writes in the main tree, so .sandbox-run/ needs a .gitignore line; a large project's first run rebuilds caches slowly; Rust CLI; 0 stars, MIT, created 2026-08-20; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-06-agy-harness-lab-pack",
+      "tags": [
+        "verification",
+        "worktrees",
+        "git",
+        "no-exit-while-waiting",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "claude-tmux-session-state-marks-cache-cold-warning-2026-10-06",
+      "date": "2026-10-06",
+      "displayDate": "Oct 6, 2026",
+      "title": "claude-tmux — tmux window marks for working, done with a background command still running, waiting on you, and a prompt cache about to go cold",
+      "href": "https://github.com/admirito/claude-tmux",
+      "why": "tmux plugin that names each Claude Code window after its session and puts a state mark where the colon was: ◐ ◓ ◑ ◒ turning while it works, ◌ when it is done but a command it started in the background still runs, ◉ when it is your move, and ◉ on darker green on a permission prompt or dialog. It also times the prompt cache from the last 128 KB of each transcript: the name changes color at 30, 20 and 10 minutes left and the mark flashes ❄ for the last 5 (on a one-hour cache; the points scale on a five-minute one). The state is also a tmux format variable, @claude_state. Fit: our Mac CLI jobs already run in tmux under grok-tmux-run, ◌ is the state behind no-exit-while-waiting, and the cache marks show the TTL that cachebeat and cache-live-control manage; Gate Inbox is an adjacent tmux waiting-state board. Caveats: Claude Code only, read from a session registry under ~/.claude/sessions that the README calls undocumented (a changed format shows nothing, not a wrong mark); the README is silent on headless claude -p runs; needs tmux 3.2+ and jq; the author says Claude wrote almost all of the code; writes nothing to disk, no network calls; 0 stars, MIT, created 2026-09-27; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-06-agy-harness-lab-pack",
+      "tags": [
+        "tmux",
+        "Mac CLI",
+        "cache",
+        "ops",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "effortless-per-prompt-effort-judge-cache-countdown-2026-10-06",
+      "date": "2026-10-06",
+      "displayDate": "Oct 6, 2026",
+      "title": "effortless — a Jev or Haiku judge picks reasoning effort for each prompt, plus a prompt-cache countdown with one-click Compact",
+      "href": "https://github.com/HeyCubit/effortless",
+      "why": "Claude Code mod where a judge picks reasoning effort per prompt: TypeSafe Jev when a key is set (about 0.25 s, TYPESAFE_API_KEY), else Haiku on your own Claude login (about 1 s), falling back to Haiku on error or past 3 s; setting effort by hand turns Auto off. A footer countdown shows the prompt cache's time left and offers Compact once it is cold. Its reported version 1.5.1 benchmark (73 cases, 20 held out) puts Jev at 99% against 51% for always-high, which the README says measures effort choice, not cost or answer quality; its cost note says Auto saves a lot against a high default (a median xhigh prompt cost about three times a medium one) and a few percent against medium. Fit: a Jev effort-routing candidate, with the constant baselines our Jev rule asks for; a trial must square it with the max-effort defaults referenced in the pack's 2026-09-24 lock, and the README does not say how the mod sets effort. Caveats: Auto pauses on Fable 5.1; the terminal may need CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 in settings; a live-seat install needs the mod precondition (written load order, named first loader, owner, read before install); 0 stars, MIT, created 2026-10-06; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-06-agy-harness-lab-pack",
+      "tags": [
+        "effort",
+        "jev",
+        "cache",
+        "cost",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "proof-of-done-stop-hook-claim-after-last-edit-2026-10-06",
+      "date": "2026-10-06",
+      "displayDate": "Oct 6, 2026",
+      "title": "proof-of-done — Stop hook that blocks a tests-pass, build or deploy claim unless the transcript shows the command ran after the last relevant edit and succeeded",
+      "href": "https://github.com/B0yko/proof-of-done",
+      "why": "Claude Code plugin whose Stop hook checks specific claims (tests pass, build succeeds, lint or types clean, fixed, verified, deployed) against the session's own transcript: the latest matching foreground Bash command after the last relevant edit decides. Failed, empty and background-only runs do not count; masked runs (| tail, || true) are inconclusive when their output shows no success line, and a block ends with a Run: line naming the command. It makes no network or model call, fails open, caps itself at 2 blocks in a row, honors #skip-proof only from the human, and partly undoes the session's own attempts to switch it off; an audit command replays past transcripts. On a synthetic held-out set (one author wrote detector and fixtures, the README notes) the gate scores 98.2% precision and 82.1% recall, and 1.0% of turns without an unsupported claim were falsely blocked. Fit: code decides done and the receipt's VERIFIED field, enforced at the stop; unlike POAW in the 10-05 Titan card it never asks the destination. Caveats: English keywords only, so phrasings like Types check go unchecked; transcript format pinned to Claude Code 2.1.281; headless claude -p behavior not verified here; 0 stars, Apache-2.0, created 2026-09-28; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-06-agy-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "code-decides-done",
+        "evidence",
+        "receipts",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "claude-code-dispatch-mechanical-dispatch-orchestrator-write-deny-2026-10-05",
       "date": "2026-10-05",
