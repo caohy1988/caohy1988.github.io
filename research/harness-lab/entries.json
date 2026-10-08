@@ -1,8 +1,98 @@
 {
-  "updatedAt": "2026-10-07T03:17:20Z",
+  "updatedAt": "2026-10-08T00:08:12Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "agent-ops-guardrails-real-value-leak-check-observe-first-go-gate-2026-10-07",
+      "date": "2026-10-07",
+      "displayDate": "Oct 7, 2026",
+      "title": "agent-ops-guardrails — leak-check for the real secret values, a GO gate that starts in observe mode, and a council where one blocking vote goes to a human",
+      "href": "https://github.com/renocz/agent-ops-guardrails",
+      "why": "Field notes from letting Claude Code run a homelab with root. leak-check is a root job that searches what the agent produced for the real secret values: each run starts with a canary, a hit is a leak, not a guess, and it found 7 real leaks the pattern hook had missed; its inventory covers 53% of what gitleaks flags, measured. go-gate (experimental, observe mode by default) allows changes only inside a plan the human approved with a GO, with scope and expiry. Rollout: simulate.py on your own history, then a week in observe mode; in the author's simulation over 11,000 past tool calls, only about 45% of the agent's changes came within 2 h of a short explicit approval (time proximity, not a replay). The council has four models from four vendors review a written plan; the verdict is computed from their votes, and one blocking member sends it to human review. Fit: real values beside bastionfuse's honeytokens and Preflight's redaction; simulate-then-observe is our shadow-to-active ladder for a deny gate; the lone-blocker rule suits wider panels such as ai-jury's. Caveats: the hooks run with the agent's own rights (an external audit of v0.8 got past secret-guard 16 ways; closed in v0.9, but the class remains), and a hostile agent needs a separate process, not built yet; the real-value inventory is itself sensitive; 0 stars, MIT, created 2026-10-05; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-07-muse-harness-lab-pack",
+      "tags": [
+        "security",
+        "secrets",
+        "guardrails",
+        "hooks",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "sessionlens-verdict-calibrated-checks-rule-follow-up-2026-10-07",
+      "date": "2026-10-07",
+      "displayDate": "Oct 7, 2026",
+      "title": "SessionLens — reviews test-writing agent sessions, calibrates eligible checks on your Confirm/False verdicts, and compares finding frequency before and after a rule is marked Moved",
+      "href": "https://github.com/nikolaylosev/sessionlens-vscode",
+      "why": "VS Code extension that reviews Claude Code, Codex and Cursor Agent sessions that write or fix tests: tests never run, pass claims with no run before them, weakened or deleted asserts, added sleeps. Your Confirm or False verdicts are the ground truth: a calibrated check with at least 10 verdicts for one source and precision below 50% drops to low severity, and below 30% it is switched off but keeps running hidden and counting verdicts. Model findings, imported findings, no_spec, spec_uncovered and hardcoded_secret (a missed token costs more than a false alarm) are marked not calibrated, so calibration never switches them off. A check confirmed at least twice (the default) becomes a proposed rule for CLAUDE.md, AGENTS.md or a Cursor rule; once marked Moved, it charts how often the finding occurred per session before and after. The PR report is blocked until every high-severity finding has a verdict, and hidden findings stay listed and counted, so a green session with hidden findings does not look clean. Fit: a measured form of our repeat lesson → proposed skill diff rule (Sno Station), with recalibrate-or-retire's earns-its-place test built in; the pass-claim check is claimcheck's claim-vs-record idea, after the fact. Caveats: experimental; an editor extension with no headless mode in the README, so the loop is the import; optional model review sends test code and a shortened transcript, pattern-masked, to a provider you pick; 0 stars, MIT, created 2026-09-28; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-07-muse-harness-lab-pack",
+      "tags": [
+        "repeat-lesson",
+        "calibration",
+        "rules",
+        "code-decides-done",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "vibeguard-destructive-bash-block-outcome-only-record-pre-push-ancestry-2026-10-07",
+      "date": "2026-10-07",
+      "displayDate": "Oct 7, 2026",
+      "title": "vibeguard — one Rust hook runtime for Codex, Claude Code and Grok: blocks a few destructive commands, records outcomes not commands, checks push ancestry",
+      "href": "https://github.com/majiayu000/vibeguard",
+      "why": "Rust CLI (v2) with native hooks for Codex, Claude Code or Grok (written to $GROK_HOME/hooks for Grok), plus a DSH Bash adapter that routes blocks through DSH's native approval and fails closed if the pre-call runtime fails. Its Bash hook rejects a small set of destructive spellings: bulk git checkout or restore of the current directory, forced git clean except dry runs, and selected recursive forced deletes of root, home or system paths. The result hook keeps only the latest outcome, optional exit code, timestamp, cwd and tool-use ID, never the raw command or output. An explicit per-repo pre-push hook rejects remote ref deletion and tag replacement, requires fast-forward branch updates, and makes missing objects an explicit error. Its status command says it cannot prove host trust or complete coverage, and that a zero exit does not certify tests ran. Fit: one runtime for our Claude Code and Codex seats, where cadence-hooks is Claude Code only; the pre-push check guards the push in our push-required kicks (no-exit-while-waiting); coding-agent-guardrails' git-guard hook was not adopted. Caveats: per the README the Bash classifier is not a complete shell parser or a sandbox and both hook kinds can be bypassed, so host permissions and repository protection stay the control; the Grok and DSH paths are unconfirmed on our seats; v1 needs its own uninstall first, with no migration; 41 stars, MIT, created 2026-02-14; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-07-muse-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "guardrails",
+        "git",
+        "Mac CLI",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "tokenpilot-path-launcher-usage-counters-no-causation-2026-10-07",
+      "date": "2026-10-07",
+      "displayDate": "Oct 7, 2026",
+      "title": "TokenPilot — PATH launchers wrap installed coding CLIs to count tokens locally, with no proxy, a bypass, and no savings claimed from session counters",
+      "href": "https://github.com/cesaremcasa/tokenpilot",
+      "why": "Local token measurement: tokenpilot install sets up launchers that come first on PATH and wrap the Claude Code, Codex, Grok Build or Kimi Code CLI already installed. It does not proxy traffic or store prompts, responses, code or credentials, and scans no transcripts or logs; it keeps content-free session metadata and numeric counters. A missing capability or failed setup starts the original CLI unchanged; the TOKENPILOT_BYPASS switch skips it per invocation, and tokenpilot mode off stops measurement and treatment. The default report shows the session's cache reuse and uncached input, which the README says do not measure total-token savings or prove TokenPilot caused a reduction. In its October 6 paired observe/reduce runs (one pair per model, evidence JSON committed), total input plus output changed by at least 42% for 6 of 9 OpenAI Codex models (range 19.8–62.2%) and 4 of 4 Grok Build models, labeled individual controlled-task observations, not universal estimates; Claude, Kimi and Grok Bot results are unproven, and Kimi passes through untreated. Fit: Agent Console reads transcripts for a similar cache split, while this wraps the CLI and reports provider-published usage; its wording is a model for savings claims on our usage dashboard. Caveats: the README does not say what a treatment changes; Agy, Muse and DSH are not among its providers; Node.js 22.13+ or 23.4+, macOS or Linux; 1 star, MIT, created 2026-08-14; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-07-muse-harness-lab-pack",
+      "tags": [
+        "usage",
+        "tokens",
+        "cache",
+        "evidence",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "tmux-agent-status-session-file-state-not-hooks-sticky-done-2026-10-07",
+      "date": "2026-10-07",
+      "displayDate": "Oct 7, 2026",
+      "title": "tmux-agent-status — Claude Code and Codex status from the agents' own session state, not hooks, so an Esc interrupt doesn't leave a window stuck on working",
+      "href": "https://github.com/rorhcdream/tmux-agent-status",
+      "why": "tmux plugin that shows each coding agent's status in the window list from the agent's own on-disk session state instead of agent hooks. Hook trackers set working on submit and done on Stop, but an Esc interrupt fires no hook, so the window stays on working. For Claude Code it reads ~/.claude/sessions/<pid>.json, whose status (busy, idle, waiting or shell) Claude updates on every transition, interrupts included. Codex has no status file, so it ties a running codex process to its rollout log with lsof (newer clients by working directory) and uses the last task_started, task_complete or turn_aborted event; where panes or root sessions share a directory with no other link, the status stays blank rather than going to the wrong pane. Done stays until you view the window once (stamped by a tmux after-select-window hook) and returns only on the next completion; nothing is written to disk. Fit: claude-tmux reads the same registry for Claude Code only; this adds Codex, our Astra seat's CLI. grok-tmux-watchdog acts on a stale log (~540s), and a status the agent writes itself is a second signal; blank when unsure matches our rule that a failed lookup is a gap, not a zero. Caveats: the Claude file is undocumented (schema observed on v2.1.178) and may change; the README is silent on headless claude -p and codex exec runs; needs bash 4+, tmux 3.0+, jq, and lsof for Codex; 0 stars, MIT, created 2026-07-17; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-07-muse-harness-lab-pack",
+      "tags": [
+        "tmux",
+        "watchdog",
+        "Mac CLI",
+        "ops",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "ruttla-two-probe-rules-exit-2-nothing-measured-2026-10-06",
       "date": "2026-10-06",
