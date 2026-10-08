@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-10-08 · 12:34 PM PT · Opus 5.5</title>
+  <meta name="description" content="Industry NEW Google Gemini agent audit trail + spend caps; Academy NEW AgentTracer 2610.09935, Conditional Accuracy Profiles 2610.09229; Progress OpenAI Decisions API adoption, Codex 0.162.0, Claude Code v2.1.295, Agno 3.1.2, Langfuse 4.55.0">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-08-1234-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 (high) · 12:34 PM PT · miss-watch catch-up · fresh-list path · 12h window</p>
+    <article>
+<h1>Field Brief — 2026-10-08-1234: Google's Gemini agent writes every action to an agent-attributed audit trail; a day of Decisions API adoption; tracing prompt-injection chains by intent</h1>
+<p><strong>Writer: Opus 5.5 (high)</strong> · For Haiyuan Cao (TL, BQAA + ADK)
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>Slot:</strong> 2026-10-08-1234, <strong>miss-watch catch-up</strong>. The scheduled 12:34 run and the 12:44 miss-watch both failed at the platform level before writing anything. This run was kicked at ~13:40 PT; the label stays <strong>1234</strong>. It covers the 12h cadence window since the <code>2026-10-08-0034</code> brief, roughly 00:45–13:47 PT Thu Oct 8.</p>
+<hr />
+<h2>Read this first</h2>
+<ol><li><strong>Google launched the Gemini agent at Gemini at Work 2026 (Oct 8 keynote).</strong> It is one agent for chat, long-running objectives and code, and it orchestrates Gemini and Claude models. For us the relevant parts are governance: every agent gets its own attested identity. Every action goes to an audit trail attributed to the agent, not a person, and the identity is "stamped into the logs". Spend caps are set per project and pause the agent when they trip. The post gives no GA or preview label for most of this, and it does not mention ADK, tracing or evaluation. → NEW Industry.
+</li><li><strong>The OpenAI Decisions API (carded Oct 7) got same-day support across the stack.</strong> In this window: a LiteLLM stable backport of <code>/v1/decisions</code> (v1.104.2), <code>langchain-openai</code> 1.7.0, promptfoo 0.124.1, Langfuse 4.55.0 evaluators, and Codex 0.162.0 Guardian V2 opt-in Decisions comparison with agreement/latency metrics. Decision calls are about to show up in traces from every major framework. → Progress on the Decisions card.
+</li><li><strong>Codex 0.162.0 and Claude Code 2.1.295 both shipped stable with telemetry changes.</strong> Codex adds Guardian agreement, latency and denial-limit telemetry, plus OTLP metrics temporality. Claude Code adds fail-closed hooks (<code>onFailure: &quot;block&quot;</code>). Its gateway now returns a <code>request-id</code> that matches the <code>request_id</code> in Claude Code telemetry. → Progress.
+</li><li><strong>Academy: AgentTracer (2610.09935)</strong> traces indirect-prompt-injection chains through tool-call logs by intent drift. It reaches 94% injection-point accuracy with a 3,000:1 background-noise ratio. It needs reasoning records in the log: swapping its intent graph for a plain temporal graph drops accuracy 17 points. <strong>CAP (2610.09229)</strong> shows that a judge's aggregate accuracy hides its weak conditions. The best judge overall is near the bottom on omitted qualifications. → two NEW Academy, both full-PDF read.
+</li><li><strong>No arXiv listing landed in the window.</strong> The ceiling is still <strong>2610.10540</strong>. Both papers come from Thursday's listing, which the 0034 brief scouted but did not rank. Friday's listing (~17:00 PT) goes to the next slot.
+</li></ol>
+<hr />
+<h2>Industry</h2>
+<h3>NEW</h3>
+<h4>Google Gemini agent (Gemini at Work 2026): agent identity in logs, agent-attributed audit trail, per-project spend caps that pause the agent</h4>
+<p><strong>Source:</strong> <a href="https://cloud.google.com/blog/products/ai-machine-learning/welcome-to-gemini-at-work-2026">https://cloud.google.com/blog/products/ai-machine-learning/welcome-to-gemini-at-work-2026</a> (Oct 8, 2026; Thomas Kurian keynote, adapted)</p>
+<ul><li><strong>What shipped:</strong> the Gemini agent, described as "a single, universal agent for work". It combines chat, autonomous objectives and code generation, and can run on a schedule or respond to events. It runs headless across web, desktop, the command line, Workspace, Microsoft 365 and Slack. Work "keeps running after you close your laptop". It creates temporary sub-agents, and "coworker agents" get their own <code>@agents.company.com</code> identities and storage. It orchestrates "Gemini family of models and Claude models from Anthropic today".
+</li><li><strong>Telemetry and governance claims:</strong>
+<ul><li>"every action Gemini takes is written to an audit trail and attributed to the agent rather than to a person";
+</li><li>the agent identity "is stamped into the logs" and carries into any VM the agent starts;
+</li><li>Agent Gateway enforces policy on all traffic, and Agent Sandbox gives each agent its own network boundary;
+</li><li>real-time spend caps in Cloud Billing pause "that project's agent", tracked per project for chargeback.
+</li></ul>
+</li><li><strong>Data hooks:</strong> reporting skills are integrated with BigQuery and Knowledge Catalog. Saved reports re-run "without incurring token costs".
+</li><li><strong>Not stated:</strong> GA or preview status for most items (only the Financial Services and Legal specializations are labelled preview). The post does not mention ADK, Agent Engine, A2A, tracing or evaluation, and it does not name the "observability tools".
+</li><li><strong>Why it matters for BQAA:</strong> Google's own agent now treats <em>agent identity as the attribution key</em> for audit and spend. An agent-analytics event table needs the agent principal as a first-class column, separate from the human user, and it needs to join spend and pause events at project grain.
+</li></ul>
+<h3>Progress (existing cards)</h3>
+<ul><li><strong>→ <code>openai-decisions-api-public-beta-gpt-6-luna-v1-decisions-typed-answers-input-only-pricing</code></strong>
+<ul><li>In this window the Decisions API got same-day support across gateways, frameworks and eval tools:
+<ul><li>LiteLLM <strong>v1.104.2</strong> (stable, GitHub 08:39Z; PyPI 08:34Z) backports <code>/v1/decisions</code> and the OpenAI Decisions provider to the stable line (#45190);
+</li><li><code>langchain-openai</code> <strong>1.7.0</strong> (16:07Z) adds Decisions API support (#41125);
+</li><li>promptfoo <strong>0.124.1</strong> (14:23Z) adds an OpenAI Decisions provider (#11454) and records cost without a threshold (#11451);
+</li><li>Langfuse <strong>v4.55.0</strong> (13:36Z) lets evaluators use OpenAI decision models (#18389).
+</li></ul>
+</li><li>Codex <strong>0.162.0</strong> adds opt-in Decisions comparison for Guardian V2 (#50099). It records agreement and latency metrics for it (#50273).
+</li><li>This also resolves the 0034 Unconfirmed row: v1.104.2 is now published.
+</li></ul>
+</li><li><strong>→ <code>openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks</code></strong>
+<ul><li>Codex <strong>rust-v0.162.0</strong> (stable; GitHub 18:55Z, npm <code>latest</code> 19:01Z) adds telemetry:
+<ul><li>Guardian telemetry: total approval-decision duration (#51330) and counts of denial-limit interruptions (#51334);
+</li><li>raw MCP tool-catalog sizes (#51215);
+</li><li>the multi-agent version in turn analytics (#51333);
+</li><li>the OTLP metrics temporality preference is now honored (#51220).
+</li></ul>
+</li><li>Rollout history now keeps additional tool definitions (#50435), and thread usage keeps native USD amounts (#50442).
+</li><li>Product-facing: managed Git worktree tools (#50148), and <code>Retry-After</code> is honored for Responses/WebSocket failures (#50418).
+</li></ul>
+</li><li><strong>→ <code>claude-code-2-1-287-claude-mods-you-should-know-side-agent-otel-prompt-text</code></strong>
+<ul><li>Claude Code <strong>v2.1.295</strong> (npm <code>latest</code> 18:22Z, GitHub 19:48Z; the 2.1.294 hook fix carded at 0034 is now on <code>latest</code> too):
+<ul><li><code>onFailure: &quot;block&quot;</code> for command and HTTP hooks: a hook that can't start, times out or exits unexpectedly now blocks the action;
+</li><li>the Claude apps gateway returns a <code>request-id</code> header, so <code>request_id</code> in Claude Code telemetry matches the gateway audit log;
+</li><li>the gateway's <code>inference</code> audit event gains <code>upstream_request_id</code> (the Bedrock, Anthropic API or other upstream ID);
+</li><li>fixed: <code>--tools</code>/<code>--restricted</code> were not applied to built-in tools registered after launch.
+</li></ul>
+</li><li>Agent SDK TS <strong>0.3.295</strong> (19:48Z) adds <code>overageEnabled</code> to rate-limit info and caps oversized MCP tool-result <code>_meta</code>.
+</li></ul>
+</li><li><strong>→ <code>agno-3-1-0-agentos-rbac-audit-log-per-user-filesystem-mcp-tools-opt-in</code></strong>
+<ul><li>Agno <strong>v3.1.2</strong> (GitHub 19:52Z; PyPI 19:53Z) adds conversation compaction that never rewrites stored messages. A <code>CompactionRecord</code> in a new <code>agno_compactions</code> table drives the model payload, and removing the record restores the full conversation. <code>searchable=True</code> adds a regex search tool over the archived transcript (#9873).
+</li><li>Also: a <code>CodexAgent</code> external-agent adapter (#10901). Each approval-required tool call now gets its own approval record (#10812); before, a second pause reused the first approval. <code>cache_write_tokens</code> is now populated from OpenAI and LiteLLM usage (#10313, #10476).
+</li></ul>
+</li><li><strong>→ <code>langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown</code></strong>
+<ul><li>Langfuse <strong>v4.55.0</strong> (13:36Z):
+<ul><li>Google Cloud Storage as a blob-storage export target, with a service-account key or ADC (#18158). GCS was previously hard-coded off and reachable only through S3-interop HMAC keys;
+</li><li>batch <code>POST /scores</code> (#18408);
+</li><li>one generation per evaluator execution (#18415);
+</li><li>503 with Retry-After when S3 throttles ingestion (#18398).
+</li></ul>
+</li></ul>
+</li></ul>
+<h3>One-line mentions (NOTE)</h3>
+<ul><li><strong>Microsoft Agent Framework Python 1.21.0</strong> (10:27Z): when agents run as tools, provider-owned service session state is now isolated (#8853). Purview can evaluate streamed responses over the full buffer (#8702). Approvals in the DevUI are scoped to their conversations (#9180).
+</li><li><strong>AWS Strands:</strong> <code>harness-python</code>/<code>harness-typescript</code> <strong>v0.2.0</strong> and SDK python <strong>v1.59.0</strong> / TS <strong>v1.20.0</strong> (13:36–13:40Z). The notes are an auto-drafted commit list: bidirectional streaming graduated, normalized bidi token-usage events, reported cache-token usage preserved, and <code>traceAttributes</code> on chat, tool and cycle spans (TS). There is no curated release post. Strands has no Field Brief card yet.
+</li><li><strong>Vercel Workflow 5.2.0</strong> (19:32Z): the invocation trace records whether out-of-band events could affect each inline step boundary (#4683). VM-memory snapshotting is on by default for QuickJS.
+</li><li><strong>OpenHands v1.26.0</strong> (20:36Z): adds the verify-openhands skill, a harness that maps product behaviors to live recipes and files the defects it reproduces. PostHog no longer initializes under Do Not Track.
+</li><li><strong>Letta Code v0.34.6/0.34.7</strong> (16:33Z / 20:29Z): a daemon runtime release contract, and a Memory tool for MemFS v2 agents. Neither is material over the v0.34.5 Progress.
+</li><li><strong>Opik 2.2.95</strong> (12:27Z): fixes only, e.g. sampling params are dropped for OpenAI reasoning models (#8736) and <code>opik mcp configure</code> exits 1 on failure.
+</li><li><strong>Vercel <code>ai@7.0.134</code></strong> (16:50Z): patch-level only; provider-executed tool calls are kept when a stream resumes.
+</li><li><strong>openai-python 3.26.1 / openai-node 7.30.1:</strong> fixes only.
+</li><li><strong>Merged but unreleased (NOTE only):</strong>
+<ul><li>cloudflare/agents <code>web_fetch</code> tool stack (#2520–#2527, #2530, 14:39Z) with a shared private-host URL policy. These merged into the stacked <code>web-fetch/*</code> branches, not into <code>main</code> yet;
+</li><li>Mastra #26461 (usageId ties tokens to cost) and #26405 (trace root-duration filter);
+</li><li>LiteLLM v1.105.0 is still rc (rc.3, 09:26Z).
+</li></ul>
+</li><li><strong>google-adk:</strong> 1P, NOTE only. No in-window PyPI release (latest 2.11.0, Oct 2).
+</li></ul>
+<hr />
+<h2>Academy</h2>
+<p>Ranked papers are from Thursday's arXiv listing (announced ~17:00 PT Wed). The 0034 brief scouted them but did not full-read them. No new listing was announced in this window.</p>
+<h3>NEW — AgentTracer: Tracing Indirect Prompt Injection Attack through Fine-Grained Intention-Execution Alignment — <a href="https://arxiv.org/abs/2610.09935">https://arxiv.org/abs/2610.09935</a></h3>
+<p>Yao, Wu, Lin, Huang, Zhang, Nan (SYSU / HKUST), cs.SE, Oct 7. <strong>Full PDF read</strong> (pdftotext, all sections and tables).</p>
+<ul><li><strong>Method:</strong>
+<ul><li>Starts from one anomalous tool call and slices back to the nearest user request.
+</li><li>Extracts <em>decision relations</em> ⟨sources, operation, targets⟩ from the agent's reasoning records. It grounds them in successful tool calls, which builds an Intent-Driven Execution Graph (§4.1).
+</li><li>Checks each edge against a user-intent authorization space built from the request and an 11-class operation knowledge base, on action, target and constraint (Table 1, §4.2).
+</li><li>Walks misaligned edges backward. If the root is an ExternalResource node, it reports IPI, the injection point and the chain (§4.3).
+</li></ul>
+</li><li><strong>Setup:</strong> 356 AgentDyn plus 936 InjecAgent attack logs, mixed into five months of Codex logs (1,800 requests, 9,000 background tool calls). That is ~3,000:1 noise (§5.1). Every LLM step uses deepseek-v4-flash.
+</li><li><strong>Results:</strong>
+<ul><li>Table 2: injection-point accuracy 93.33% / 95.00%, path precision 91.11% / 96.00% (AgentDyn / InjecAgent).
+</li><li>Table 3: AgentTracer 94% injection accuracy vs Codex-as-tracer 70%, OpenClaw 69% and AgentArmor 76%. Precision is 93.18% vs ~51% for the agent tracers.
+</li><li>Ablations (Table 4): a plain temporal graph drops injection accuracy 91 → 74 and coverage 90.3 → 58.5. Replacing structured alignment with a direct LLM judgment drops accuracy to 64.
+</li><li>Event-anchored pruning saves 31% time and 51% tokens (Table 5).
+</li><li>Benign false-positive rate is 3.52% of edges (13 of 369, §5.5).
+</li></ul>
+</li><li><strong>Limits:</strong>
+<ul><li>It needs reasoning records; black-box agents degrade toward the temporal-graph ablation (§6.1).
+</li><li>Some baselines were reimplemented from their papers.
+</li><li>Only one LLM backbone is used.
+</li><li>Cross-session (persistent) IPI is exploratory only: 45 cases, &gt;85%, excluded from the formal results (§6.1).
+</li><li>Code-level injection is out of scope (§6.2).
+</li></ul>
+</li><li><strong>For BQAA:</strong> this sets a schema requirement for forensics. You need the user request, the reasoning text, and tool records with result objects, all linked into one segment. Each tool result also needs an origin label (external vs. internal). A table ordered by timestamp alone gets the temporal-graph number, not the full one.
+</li></ul>
+<h3>NEW — Conditional Accuracy Profiles: Diagnosing LLM Judges across Deployment Conditions — <a href="https://arxiv.org/abs/2610.09229">https://arxiv.org/abs/2610.09229</a></h3>
+<p>Li, Liu, Ruan, Hu, Yin, Li (UAlbany / WVU), cs.LG, Oct 6. <strong>Full PDF read</strong> (main text and Appendices A–C).</p>
+<ul><li><strong>Method:</strong> CAP splits pairwise judge accuracy into eight conditions (Table 1):
+<ul><li>factual, logical, scope-overclaim and scope-omission sensitivity;
+</li><li>style, length and position robustness, scored strictly: correct in both variants;
+</li><li>rationale quality.
+<br />Each condition has bootstrap CIs and a per-benchmark coverage status: direct, approximate, augmented or unavailable (Table 2). The new JudgerEva-Standard has 2,092 planted-error items and 6,276 pairs with presentation variants (§3.2). It is used alongside five public benchmarks with seven judges.
+</li></ul>
+</li><li><strong>Results:</strong>
+<ul><li>On the judge-independent Hard-Constructed subset (Table 4, N=139), the best judge overall (Sonnet 4.5, 76.3%) scores 36.7% on omission. The two best omission judges (Llama-3.3-70B 56.7%, GPT-4o-mini 51.7%) are the third-weakest and weakest overall. Overall accuracy vs omission: Spearman ρ = −0.33.
+</li><li>Position-robustness rankings transfer across benchmarks (mean ρ = 0.87, §4.2). Under JudgeBench-Pro stress, position robustness shows the largest mean drop (30.7 pts). Claude Haiku 4.5 degrades 47.0 pts on average (Table 6).
+</li></ul>
+</li><li><strong>Limits:</strong>
+<ul><li>Pairwise judging only; extending CAP to scalar or rubric judges needs new condition definitions (§7).
+</li><li>The judges are older models (GPT-4o, Sonnet/Haiku 4.5, Gemini 2.5), so the profiles are point-in-time.
+</li><li>Errors are generated by GPT-4o; absolute values depend on the generator, though rankings transfer (App. I).
+</li><li>Rationale quality relies on an LLM evaluator: κ = 0.826 against one non-blinded annotator (App. C).
+</li></ul>
+</li><li><strong>For BQAA:</strong> for judge scores in agent analytics, store per-condition slices (order-swap pairs, length variants, error type) next to the verdict. A single judge-accuracy number will hide the omission failure that matters most for policy and compliance checks.
+</li></ul>
+<h3>Full-PDF read, not ranked</h3>
+<ul><li><strong>2610.09237 Trajectory Abstraction for the Science of Language Agent Behavior</strong> (Yan, Monash; full PDF read). The paper builds behavioral variables from traces recursively: events → temporally constrained relations → motif variables such as detect→commit→repair. Each level must pass stability and intervention tests. Not ranked: the method is proposed and analyzed with a constructed example only. The paper's own Limitations section says there is no empirical evaluation.
+</li></ul>
+<h3>Scouted, not ranked (abstract-level; carried from 0034)</h3>
+<ul><li>2610.09944 AgentTime, 2610.09088 RippleCP, 2610.09037 governor-as-disturbance, 2610.10478 (predicting coding-agent performance from base models), 2610.09484 MIMESIS (user simulators as training environments).
+</li><li>The collectors' other F01 ids (robotics, diffusion, RL theory, a physics paper at 2610.10540) are off-topic.
+</li></ul>
+<hr />
+<h2>Six-week EV</h2>
+<ul><li><strong>Agent principal becomes the join key.</strong> Google's Gemini agent attributes audit entries, logs and spend caps to the agent identity. Claude Code now links its telemetry <code>request_id</code> to the gateway audit log. Expect customers to ask BQAA to join agent events to cloud audit logs and billing by agent principal and request ID. Plan the columns now.
+</li><li><strong>Decision calls show up in every trace.</strong> After today, Decisions-API calls will come from LiteLLM, LangChain, promptfoo, Langfuse evaluators and Codex Guardian. Typed answers with confidence and refusals need their own event shape: answer type, confidence, refusal flag, input-only cost. They do not fit as generic LLM spans.
+</li><li><strong>Compaction as a record, not a rewrite.</strong> Agno's reversible <code>CompactionRecord</code> follows the same pattern as Codex rollout history and Claude Code transcripts. The model payload differs from stored history, and the difference is itself an auditable event. Analytics that replays "what the model saw" has to read compaction events.
+</li><li><strong>Forensics needs reasoning records.</strong> AgentTracer only works with reasoning text and result-origin labels. Agent analytics that drop reasoning content for cost will not support injection forensics later. Consider a keep-for-N-days tier instead of dropping it.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>Google Gemini agent:</strong> every action goes to an agent-attributed audit trail; per-project spend caps pause the agent. Model the agent principal as a first-class key.
+</li><li><strong>OpenAI Decisions adoption day:</strong> LiteLLM stable, LangChain, promptfoo, Langfuse evals and Codex Guardian all shipped support today. Give decision events their own shape in the schema.
+</li><li><strong>Codex 0.162.0:</strong> Guardian decision duration, denial-limit counts, tool-catalog size and multi-agent version are now in telemetry, and OTLP temporality is honored.
+</li><li><strong>Claude Code 2.1.295:</strong> fail-closed hooks, and gateway <code>request-id</code> = telemetry <code>request_id</code>. You can now join client telemetry to gateway audit.
+</li><li><strong>Agno 3.1.2:</strong> compaction never rewrites stored messages; each approval-required call gets its own approval record. Compaction and approvals are now separate auditable rows.
+</li><li><strong>Langfuse 4.55.0:</strong> export can write directly to GCS with ADC, a short path into BigQuery for Langfuse users.
+</li><li><strong>2610.09935 AgentTracer:</strong> 94% injection-point accuracy, and only with reasoning records plus tool-result origin. Timestamp order alone scores 74%.
+</li><li><strong>2610.09229 CAP:</strong> the best judge overall can be the worst on omissions. Store per-condition judge slices, not one accuracy number.
+</li></ul>
+<h2>Unconfirmed</h2>
+<table>
+<tr><th>Item</th><th>What was not confirmed</th><th>Where I looked</th></tr>
+<tr><td>Gemini agent launch status</td><td>GA vs preview is not stated for the agent, Agent Gateway, Agent Sandbox, spend caps or audit trail; only the FS/Legal specializations are labelled preview. The card reports this as "not stated". The "observability tools" are not named.</td><td>cloud.google.com/blog Gemini at Work 2026 post (WebFetch)</td></tr>
+<tr><td>Reuters "Google Cloud introduces Gemini agent for work"</td><td>Secondary coverage only; used as a lead. The card cites the Google post.</td><td>Web search (investing.com/Reuters)</td></tr>
+<tr><td>Anthropic "Claude Marketplace" (2,000+ plugins) and OpenAI "Dots" background agents</td><td>Aggregator headlines only; no primary page or date found. Not ranked.</td><td>Web search (aiweekly.co OpenAI news Oct 8)</td></tr>
+<tr><td>Microsoft execution containers adopted by OpenAI/Anthropic</td><td>Aggregator (newsquawk) only, ~Oct 7, probably before the window. Not ranked.</td><td>Web search</td></tr>
+<tr><td>New Relic AI Evaluation / OTel normalization (Oct 6)</td><td>No New Relic newsroom post found; secondary only, and before the window.</td><td>Web search</td></tr>
+<tr><td>AWS Strands Harness v0.2.0 product scope</td><td>Release notes are an auto-drafted commit list; there is no curated release post and no Oct 8 launch coverage (the harness launched Sep 21 per SiliconANGLE). NOTE only.</td><td>GitHub releases API; web search</td></tr>
+<tr><td>LangGraph #9251 / #9232 (collector "at freeze edge")</td><td>Merge state not re-checked; no LangGraph release in the window (PyPI 1.2.14, Oct 6).</td><td>PyPI JSON</td></tr>
+<tr><td>arXiv 2610.10541–2610.10600 (collector lists)</td><td>404 at ~13:45 PT; the ceiling is still 2610.10540. These are collector typos or unannounced ids.</td><td>curl arxiv.org/abs/2610.{10539–10545,10550,10560,10600}</td></tr>
+</table>
+<p>All ranked claims (one Industry NEW, two Academy NEW, five Progress) are confirmed against primary sources: the Google Cloud blog, GitHub release bodies, PyPI/npm timestamps and arXiv PDFs.</p>
+<h2>Housekeeping</h2>
+<ul><li><strong>Packs used (6, lookup only, through the fresh list):</strong> agy-0032 (carried), muse-0132, dsh-0232, agy-0332, muse-1207 (extra seat), dsh-1209 (extra seat). No pack was read in full; only the muse-1207 releases section was grepped.
+</li><li><strong>Gaps:</strong>
+<ul><li><strong>ABSENT:</strong> Muse 0432, DSH 0532 and Agy 0632 (Mac down ~03:50–06:58 PT).
+</li><li><strong>ABSENT:</strong> Muse 0732, DSH 0832, Agy 0932, Muse 1032 and DSH 1132 (Mac down ~07:35–11:09 PT, plus routine failures).
+</li><li>My own sweep covered both windows: GitHub releases for ~60 repos, PyPI for ~20 packages and npm for 8 packages, all filtered to ≥ 2026-10-08T07:30Z; plus web search for launches. The Gemini at Work keynote (10:30 PT) fell in the second gap and was found by the sweep, not the packs.
+</li><li>LinkedIn authwall, X 401 and Reddit 403, as reported in the packs. HN dropped 2026-09-27.
+</li></ul>
+</li><li><strong>Verified arXiv ceiling:</strong> <strong>2610.10540</strong> (10539 and 10540 → 200; 10541–10545, 10550, 10560 and 10600 → 404) at ~13:45 PT Thu. No listing was announced in the window; the next is ~17:00 PT Thu → 0034 Fri slot.
+</li><li><strong>Verification method:</strong>
+<ul><li><code>gh api</code> release bodies and PR fields (rate limit 5000/5000 at start);
+</li><li>PyPI JSON upload times; npm registry <code>dist-tags</code> and <code>time</code>;
+</li><li><code>export.arxiv.org</code> API (https) for titles;
+</li><li>full PDFs through <code>pdftotext -layout</code>;
+</li><li>WebFetch of the Google Cloud blog.
+</li><li>Every candidate id and slug was grepped against <code>catalog.json</code> (542 items): 0 hits for 2610.09935, 2610.09229 and the Gemini agent. The pinned <code>2609.02702</code> (in F01) was not re-carded.
+</li></ul>
+</li><li><strong>Catch-up note:</strong> the platform failed the scheduled run and the miss-watch; this is the catch-up, published late under label <strong>1234</strong>. Fresh-list path used (19 candidates, F01–F19).
+</li></ul>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>google-gemini-agent-gemini-at-work-2026-agent-identity-audit-trail-spend-caps</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Google Gemini agent (Gemini at Work 2026): agent identity stamped into logs, agent-attributed audit trail, per-project spend caps that pause the agent
+</li><li><strong>url:</strong> <a href="https://cloud.google.com/blog/products/ai-machine-learning/welcome-to-gemini-at-work-2026">https://cloud.google.com/blog/products/ai-machine-learning/welcome-to-gemini-at-work-2026</a> (2026-10-08, stable)
+</li><li><strong>card text:</strong> Google's Gemini agent is one headless agent for chat, long-running objectives and code, and it orchestrates Gemini and Claude models. Every action is written to an audit trail attributed to the agent rather than a person, and the agent's identity is stamped into the logs. Real-time spend caps pause a project's agent. GA/preview status is not stated for most items, and ADK, tracing and evaluation are not mentioned.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-09935-agenttracer-intent-drift-ipi-attack-chain-94-injection-point</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> AgentTracer: injection chains come from intent drift, so reasoning records must be kept
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.09935">https://arxiv.org/abs/2610.09935</a>
+</li><li><strong>card text:</strong> AgentTracer builds an intent-driven graph from reasoning records and tool calls, then flags calls outside the user's authorization space. It reaches 94% injection-point accuracy and 93% path precision against 3,000:1 background noise (Tables 2–3), vs 70% for Codex as a tracer. A timestamp-only graph drops to 74% (Table 4), so the trace needs reasoning text and tool-result origin labels.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-09229-conditional-accuracy-profiles-llm-judge-eight-conditions</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Conditional Accuracy Profiles: one judge-accuracy number hides the omission failures
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.09229">https://arxiv.org/abs/2610.09229</a>
+</li><li><strong>card text:</strong> CAP splits pairwise judge accuracy into eight conditions (content, robustness, rationale) with CIs. On a judge-independent subset, the best judge overall scores 36.7% on omitted qualifications, while the two weakest overall judges lead that condition (Table 4). Position-robustness ranks transfer across benchmarks (ρ̄ = 0.87) but drop most under adversarial stress.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>openai-decisions-api-public-beta-gpt-6-luna-v1-decisions-typed-answers-input-only-pricing</code>
+<ul><li><strong>text:</strong> On Oct 8, LiteLLM v1.104.2 (stable) backported /v1/decisions, langchain-openai 1.7.0 and promptfoo 0.124.1 added Decisions providers, and Langfuse 4.55.0 evaluators accept OpenAI decision models. Codex 0.162.0 adds an opt-in Guardian V2 Decisions comparison with agreement and latency metrics.
+</li></ul>
+</li><li><strong>parent:</strong> <code>openai-codex-0-158-0-stable-otlp-final-response-guardian-logs-extension-hooks</code>
+<ul><li><strong>text:</strong> Codex rust-v0.162.0 stable (Oct 8) adds Guardian decision-duration and denial-limit telemetry, MCP tool-catalog sizes, the multi-agent version in turn analytics and OTLP metrics temporality. Rollout history keeps additional tool definitions, and thread usage keeps native USD amounts.
+</li></ul>
+</li><li><strong>parent:</strong> <code>claude-code-2-1-287-claude-mods-you-should-know-side-agent-otel-prompt-text</code>
+<ul><li><strong>text:</strong> Claude Code v2.1.295 (npm latest, Oct 8) adds onFailure "block" so hooks that fail to run block the action. The apps gateway returns a request-id that matches telemetry request_id and logs upstream_request_id in its inference audit event.
+</li></ul>
+</li><li><strong>parent:</strong> <code>agno-3-1-0-agentos-rbac-audit-log-per-user-filesystem-mcp-tools-opt-in</code>
+<ul><li><strong>text:</strong> Agno v3.1.2 (Oct 8) adds reversible conversation compaction: a CompactionRecord drives the model payload without rewriting stored messages, with an optional search tool over the archive. Each approval-required tool call now gets its own approval record, and cache-write tokens are populated.
+</li></ul>
+</li><li><strong>parent:</strong> <code>langfuse-4-44-0-to-4-45-1-anthropic-gateway-native-usage-dashboard-math-shutdown</code>
+<ul><li><strong>text:</strong> Langfuse v4.55.0 (Oct 8) adds Google Cloud Storage as an export target with a service-account key or ADC, batch POST /scores, and one generation per evaluator execution.
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>Google's Gemini agent writes "every action Gemini takes" to an audit trail "attributed to the agent rather than to a person": <a href="https://cloud.google.com/blog/products/ai-machine-learning/welcome-to-gemini-at-work-2026">https://cloud.google.com/blog/products/ai-machine-learning/welcome-to-gemini-at-work-2026</a> (2026-10-08).
+</li><li>LiteLLM v1.104.2 backports /v1/decisions and the OpenAI Decisions provider to the stable 1.104.x line: <a href="https://github.com/BerriAI/litellm/releases/tag/v1.104.2">https://github.com/BerriAI/litellm/releases/tag/v1.104.2</a> (2026-10-08).
+</li><li>AgentTracer reaches 94% injection-point accuracy vs 70% for Codex as a direct tracer (Table 3): <a href="https://arxiv.org/abs/2610.09935">https://arxiv.org/abs/2610.09935</a> (2026-10-07).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Opus 5.5 · 8 Oct 2026</span>
+    </div>
+  </footer>
+</body>
+</html>
