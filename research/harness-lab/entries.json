@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-08T00:08:12Z",
+  "updatedAt": "2026-10-08T09:15:41Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
@@ -81,7 +81,7 @@
       "displayDate": "Oct 7, 2026",
       "title": "tmux-agent-status — Claude Code and Codex status from the agents' own session state, not hooks, so an Esc interrupt doesn't leave a window stuck on working",
       "href": "https://github.com/rorhcdream/tmux-agent-status",
-      "why": "tmux plugin that shows each coding agent's status in the window list from the agent's own on-disk session state instead of agent hooks. Hook trackers set working on submit and done on Stop, but an Esc interrupt fires no hook, so the window stays on working. For Claude Code it reads ~/.claude/sessions/<pid>.json, whose status (busy, idle, waiting or shell) Claude updates on every transition, interrupts included. Codex has no status file, so it ties a running codex process to its rollout log with lsof (newer clients by working directory) and uses the last task_started, task_complete or turn_aborted event; where panes or root sessions share a directory with no other link, the status stays blank rather than going to the wrong pane. Done stays until you view the window once (stamped by a tmux after-select-window hook) and returns only on the next completion; nothing is written to disk. Fit: claude-tmux reads the same registry for Claude Code only; this adds Codex, our Astra seat's CLI. grok-tmux-watchdog acts on a stale log (~540s), and a status the agent writes itself is a second signal; blank when unsure matches our rule that a failed lookup is a gap, not a zero. Caveats: the Claude file is undocumented (schema observed on v2.1.178) and may change; the README is silent on headless claude -p and codex exec runs; needs bash 4+, tmux 3.0+, jq, and lsof for Codex; 0 stars, MIT, created 2026-07-17; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "tmux plugin that shows each coding agent's status in the window list from the agent's own on-disk session state instead of agent hooks. Hook trackers set working on submit and done on Stop, but an Esc interrupt fires no hook, so the window stays on working. For the claude CLI it reads ~/.claude/sessions/<pid>.json, whose status (busy, idle, waiting or shell) Claude updates on every transition, interrupts included. Codex has no status file, so it ties a running codex process to its rollout log with lsof (newer clients by working directory) and uses the last task_started, task_complete or turn_aborted event; where panes or root sessions share a directory with no other link, the status stays blank rather than going to the wrong pane. Done stays until you view the window once (stamped by a tmux after-select-window hook) and returns only on the next completion; nothing is written to disk. Fit: claude-tmux reads the same registry for the claude CLI only; this adds Codex, our Astra seat's CLI. grok-tmux-watchdog acts on a stale log (~540s), and a status the agent writes itself is a second signal; blank when unsure matches our rule that a failed lookup is a gap, not a zero. Caveats: the Claude file is undocumented (schema observed on v2.1.178) and may change; the README is silent on headless claude -p and codex exec runs (on this Mac a headless claude -p run on v2.1.292 did write the file with a status field, checked 2026-10-08); needs bash 4+, tmux 3.0+, jq, and lsof for Codex; 0 stars, MIT, created 2026-07-17; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Not adopted: the Codex lsof-to-rollout matching and the 'done until viewed' display. In playbook (2026-10-08, Haiyuan-approved) as part of watchdog resume safety: the stale line logs each claude process's session-file status, logging only (it never decides kill or resume), and the reader is re-checked after each claude CLI update; staged, not live until Haiyuan approves the install: https://caohy1988.github.io/research/harness/#watchdog-resume-safety.",
       "source": "Hunt/agent-manage/2026-10-07-muse-harness-lab-pack",
       "tags": [
         "tmux",
@@ -91,7 +91,16 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true,
+      "keeps": [
+        "stale line logs each claude process's session-file status from ~/.claude/sessions/<pid>.json (logging only; never decides kill or resume)",
+        "re-check that reader after each claude CLI update (undocumented format)"
+      ],
+      "skippedAsCovered": [
+        "Codex lsof-to-rollout matching (not adopted)",
+        "'done until viewed' window display (not adopted)",
+        "installing the tmux plugin (not installed)"
+      ]
     },
     {
       "id": "ruttla-two-probe-rules-exit-2-nothing-measured-2026-10-06",
@@ -135,7 +144,7 @@
       "displayDate": "Oct 6, 2026",
       "title": "claude-tmux — tmux window marks for working, done with a background command still running, waiting on you, and a prompt cache about to go cold",
       "href": "https://github.com/admirito/claude-tmux",
-      "why": "tmux plugin that names each Claude Code window after its session and puts a state mark where the colon was: ◐ ◓ ◑ ◒ turning while it works, ◌ when it is done but a command it started in the background still runs, ◉ when it is your move, and ◉ on darker green on a permission prompt or dialog. It also times the prompt cache from the last 128 KB of each transcript: the name changes color at 30, 20 and 10 minutes left and the mark flashes ❄ for the last 5 (on a one-hour cache; the points scale on a five-minute one). The state is also a tmux format variable, @claude_state. Fit: our Mac CLI jobs already run in tmux under grok-tmux-run, ◌ is the state behind no-exit-while-waiting, and the cache marks show the TTL that cachebeat and cache-live-control manage; Gate Inbox is an adjacent tmux waiting-state board. Caveats: Claude Code only, read from a session registry under ~/.claude/sessions that the README calls undocumented (a changed format shows nothing, not a wrong mark); the README is silent on headless claude -p runs; needs tmux 3.2+ and jq; the author says Claude wrote almost all of the code; writes nothing to disk, no network calls; 0 stars, MIT, created 2026-09-27; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "tmux plugin that names each claude CLI window after its session and puts a state mark where the colon was: ◐ ◓ ◑ ◒ turning while it works, ◌ when it is done but a command it started in the background still runs, ◉ when it is your move, and ◉ on darker green on a permission prompt or dialog. It also times the prompt cache from the last 128 KB of each transcript: the name changes color at 30, 20 and 10 minutes left and the mark flashes ❄ for the last 5 (on a one-hour cache; the points scale on a five-minute one). The state is also a tmux format variable, @claude_state. Fit: our Mac CLI jobs already run in tmux under grok-tmux-run, ◌ is the state behind no-exit-while-waiting, and the cache marks show the TTL that cachebeat and cache-live-control manage; Gate Inbox is an adjacent tmux waiting-state board. Caveats: claude CLI only, read from a session registry under ~/.claude/sessions that the README calls undocumented (a changed format shows nothing, not a wrong mark); the README is silent on headless claude -p runs (on this Mac a headless claude -p run on v2.1.292 did write a registry file, checked 2026-10-08); needs tmux 3.2+ and jq; the author says Claude wrote almost all of the code; writes nothing to disk, no network calls; 0 stars, MIT, created 2026-09-27; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Not adopted: the window state marks and the cache-cold marks. In playbook (2026-10-08, Haiyuan-approved) only as a second source for the undocumented-registry caveat in watchdog resume safety: the watchdog's session-file status line is logging only and its reader is re-checked after each claude CLI update (staged, not live until Haiyuan approves the install): https://caohy1988.github.io/research/harness/#watchdog-resume-safety.",
       "source": "Hunt/agent-manage/2026-10-06-agy-harness-lab-pack",
       "tags": [
         "tmux",
@@ -145,7 +154,15 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true,
+      "keeps": [
+        "undocumented ~/.claude/sessions registry: the watchdog's status line stays logging only and its reader is re-checked after each claude CLI update"
+      ],
+      "skippedAsCovered": [
+        "window state marks (not adopted)",
+        "prompt-cache cold marks (not adopted)",
+        "installing the tmux plugin (not installed)"
+      ]
     },
     {
       "id": "effortless-per-prompt-effort-judge-cache-countdown-2026-10-06",
@@ -363,7 +380,7 @@
       "displayDate": "Oct 4, 2026",
       "title": "loupe — review envelopes bound to commit SHAs, fingerprinted findings, and circuit breakers that stop non-converging rounds",
       "href": "https://github.com/picosam/loupe",
-      "why": "Deterministic, agent-neutral review plumbing with no model inside: request, verdict, disposition and authorization envelopes each bound to a commit SHA; findings fingerprinted with alias lineage so they can't quietly change between rounds; an append-only ledger; and circuit breakers (repetition, stale, no-progress, unverifiable, budget, orphan) that block the next handoff until a human records a decision. A human carries every leg. Fits our verdict-on-head-SHA rule, finetooth-style fingerprints and the human gate, and gives a machine form of 'reviewer loops must terminate'. Caveats: 0 stars, MIT, Python 3.15.x pinned, published-not-developed (issues only); adds relay latency; README-verified, not installed or run. Patterns/reference over existing seats, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "Deterministic, agent-neutral review plumbing with no model inside: request, verdict, disposition and authorization envelopes each bound to a commit SHA; findings fingerprinted with alias lineage so they can't quietly change between rounds; an append-only ledger; and circuit breakers (repetition, stale, no-progress, unverifiable, budget, orphan) that block the next handoff until a human records a decision. A human carries every leg. Fits our verdict-on-head-SHA rule, finetooth-style fingerprints and the human gate, and gives a machine form of 'reviewer loops must terminate'. Caveats: 0 stars, MIT, Python 3.15.x pinned, published-not-developed (issues only); adds relay latency; README-verified, not installed or run. Patterns/reference over existing seats, no Herdr. Not adopted: the envelopes, fingerprinted findings and ledger; loupe was not installed. In playbook (2026-10-08, Haiyuan-approved) as the review-round breaker, circuit-breaker idea only: before the blind review of a multi-file doc or policy fold, sweep the whole fold against the newest live sources and dry-run the rebase; a fresh P1 in text the round did not change means another whole-fold sweep, not another one-P1 fix (the 2026-10-05 to 10-07 role-card fold took 13 review rounds; the fix-round caps are unchanged): https://caohy1988.github.io/research/harness/#review-round-breaker.",
       "source": "Hunt/agent-manage/2026-10-04-muse-harness-lab-pack",
       "tags": [
         "review",
@@ -373,7 +390,15 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true,
+      "keeps": [
+        "stop non-converging review rounds: whole-fold sweep against the newest live sources + dry-run rebase before blind review; a P1 in unchanged text means sweep again, not another one-P1 fix"
+      ],
+      "skippedAsCovered": [
+        "verdict bound to the head SHA (already the review verdict line)",
+        "fingerprinted findings with alias lineage (not adopted)",
+        "SHA-bound envelopes and append-only ledger (not adopted; loupe not installed)"
+      ]
     },
     {
       "id": "corralai-critic-not-writer-reproduce-or-demote-2026-10-04",
@@ -535,7 +560,7 @@
       "displayDate": "Oct 4, 2026",
       "title": "Tetral (Yang Li) — The Next Scaling Problem: a timeout does not prove the old worker stopped",
       "href": "https://tetral.ai/blog/the-next-scaling-problem/",
-      "why": "Yang Li's post on Tetral, an open-source alpha cloud-agent runtime, keeps the agent replaceable and commits every transition before the action is dispatched. It notes that a timeout does not prove the old worker stopped, so a fencing token keeps a stale worker from acting; Comma's Salix gives each Loop a fence value for the same reason. What to try here: grok-tmux-watchdog resumes the same session when its log goes stale (~540s), and the resumed run should start only after the old process is confirmed dead. Whether the watchdog kills the old process before it resumes is not verified; its code has not been read for this. Status: trial; the first step is to read that code. Tetral says placement, backpressure and multi-node recovery are not yet proven.",
+      "why": "Yang Li's post on Tetral, an open-source alpha cloud-agent runtime, keeps the agent replaceable and commits every transition before the action is dispatched. It notes that a timeout does not prove the old worker stopped, so a fencing token keeps a stale worker from acting; Comma's Salix gives each Loop a fence value for the same reason. Applied here: grok-tmux-watchdog resumes the same session when its log goes stale (~540s). Its code was read on 2026-10-08: after killing the tmux session it resumes without checking that the old agent process has exited. The fix resumes a stale run only after the old claude / codex process is confirmed gone: the staged watchdog waits a short grace period after the kill (default 15 s) and parks the run as an unknown outcome if the old process is still running then or its state cannot be read. It is staged, not live, and goes live only after Haiyuan approves the install; until then the EM checks by hand. Stale kills are rare: 2 of 266 watchdog marker logs from 2026-10-02 to 10-08 had one (counted 2026-10-08 01:23 PT). Fencing tokens were not adopted. Tetral says placement, backpressure and multi-node recovery are not yet proven. In playbook (2026-10-08, Haiyuan-approved) as watchdog resume safety: https://caohy1988.github.io/research/harness/#watchdog-resume-safety.",
       "source": "Hunt/harness-lab/2026-10-04-nine-link-gap-analysis",
       "tags": [
         "watchdog",
@@ -544,7 +569,13 @@
         "concurrency",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true,
+      "keeps": [
+        "resume a stale run only after the old claude / codex process is confirmed gone; a survivor or an unreadable process state parks the run as an unknown outcome (staged, not live until Haiyuan approves the install)"
+      ],
+      "skippedAsCovered": [
+        "fencing token per worker (not adopted)"
+      ]
     },
     {
       "id": "approval-rate-per-category-decision-queue-2026-10-04",
