@@ -1,8 +1,80 @@
 {
-  "updatedAt": "2026-10-08T09:15:41Z",
+  "updatedAt": "2026-10-09T03:26:28Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "brindle-check-exit-0-done-status-line-not-trusted-usage-pause-resume-2026-10-08",
+      "date": "2026-10-08",
+      "displayDate": "Oct 8, 2026",
+      "title": "brindle — milestones are done only when their checks exit 0, a new session re-runs checks rather than trust its status line, and autopilot resumes after a usage reset",
+      "href": "https://github.com/PawDelta/brindle",
+      "why": "Supervisor that runs Claude Code, Codex, Google Antigravity and open-weight models side by side under tmux, each worker by default in its own git worktree and branch. A goal is split into milestones whose check commands brindle runs itself: a milestone is verified when its check exits 0, re-run after later merges, never when a model says so. The status lines it writes to goals.md are information only: a new session starts every milestone as pending and re-runs the checks. Under autopilot a branch merges only when a reviewer approved that exact commit (an approval carries over a clean merge of the base) and the checks pass, and a clean commit's passing result is cached by sha; manual merges are never gated. Autopilot stops when every milestone check passes and, by default, a read-only completion reviewer has audited the work against the goal and approved that commit, when it needs a decision, after three reminders with no progress, or near the Claude usage limit; there it pauses: the Claude workers stop, their worktrees, branches, queued messages and sessions are kept, and brindle restarts them after the reset; speaking to the supervisor doesn't end the pause. With plan_first a worker waits for plan approval, but only Claude workers are held by a hook (Edit, Write and NotebookEdit refused); other CLIs are only told to wait. Fit: code decides done, built into the driver; the status-line rule matches our staged watchdog, which logs the claude session-file status but never lets it decide kill or resume; the no-progress stop sits beside loupe's circuit breakers. Caveats: not open source: the Brindle License 1.0 (GitHub: NOASSERTION) makes it source-available and restricts modification and redistribution, with explicit exceptions such as contributions, configuration and plugins, private defect fixes and copies within your own company, so it is pattern only: read and re-implement the idea; copy no file and vendor no code; 0 stars, created 2026-10-05; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-08-dsh-harness-lab-pack",
+      "tags": [
+        "code-decides-done",
+        "worktrees",
+        "run-limits",
+        "usage",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "authority-demo-dispatch-time-recheck-signed-finding-check-writable-2026-10-08",
+      "date": "2026-10-08",
+      "displayDate": "Oct 8, 2026",
+      "title": "authority-demo — approval does not pre-approve the world: authority is re-checked at dispatch, and a signed finding records what the check read and whether it was writable",
+      "href": "https://github.com/arman-jalili/authority-demo",
+      "why": "Runnable demo for the Rigorix policy engine: a human approves an agent's payout, the beneficiary is frozen while the next run waits for approval, and once that run is approved the payout is refused at dispatch; the ledger never changes. Authority is checked when the agent asks and again immediately before the step executes, and the second check is the one that matters because it sees the current world; a beneficiary missing from the authority is refused even with an approval. The check is the whole policy: it answers one question and exits 0 to dispatch or 3 to refuse, with no LLM, no domain semantics and no network. The refusal is recorded in an HMAC-signed audit envelope with the outcome, exit code, checked_at, inputs_hash (the step inputs the engine fed the check), authority_digest (the authority content it read) and check_writable, which is true on the default $HOME install because your UID can write it. The rule the agent is judged by is not in its repository, and a PreToolUse hook denies direct payout, ledger and authority writes; the README calls this a policy + path + hook boundary, not a sandbox, since an unmediated write to $HOME is still possible. --isolated makes both files root-owned and non-writable, and setup refuses an agent user with passwordless sudo unless overridden with a loud warning. Fit: a re-check at dispatch for anything approved before it runs; Titan's verifier-outside-the-repo rule, applied to authority; and evidence for our done receipt's VERIFIED line: what the check read, when, and whether the guard was writable. Caveats: needs rigorix-mcp 1.9.2+ and Node 22+; no LICENSE file (GitHub reports none), so treat it as all rights reserved and as pattern only: read and re-implement the idea; copy no file and vendor no code; 0 stars, created 2026-10-06; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-08-dsh-harness-lab-pack",
+      "tags": [
+        "policy",
+        "receipts",
+        "guardrails",
+        "evidence",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "kanon-guard-must-be-able-to-fail-coverage-figure-no-configuration-2026-10-08",
+      "date": "2026-10-08",
+      "displayDate": "Oct 8, 2026",
+      "title": "Kanon — agent-workflow rulebook: a guard must be able to fail, a detector reports what it examined, and there is no configuration to switch a rule off",
+      "href": "https://github.com/yedeya-labs/kanon",
+      "why": "Opinionated workflow for GitHub and Claude Code in which agents file, implement and review work under a rulebook of about 200 rules, each with its reason. Two principles are why it is here. K-PRIN-11, a guard must be able to fail: mutation-check every guard assertion by breaking the thing it protects and confirming it goes red, separately for each assertion; when a mutation passes, decide whether it is equivalent or the assertion is dead; scope a documentation guard to the line or block that makes the claim and make it throw when its anchor moves; restore a mutated file from a copy, never by reverting it to the committed version, which reverts the fix too. K-PRIN-8: every detector reports a coverage figure (what it examined), not only what it found, and a check whose healthy state is silence emits a positive signal that it ran. K-PRIN-9 records a missing measurement as absent, never as zero, and K-PRIN-1 gives a reason for having no configuration: a guard that checks the code against a config the code also reads can no longer fail. Fit: a test procedure behind our negative-claims rule (a failed lookup is a gap, never zero) and code decides done, next to Ruttla's two-probe rule and corralai's planted faults. Caveats: by its own Enforced-by lines K-PRIN-11 is only partly enforced (the brief guard is mutation-tested, elsewhere prose only), K-PRIN-8 per component with no general guard, and K-PRIN-1 prose only, so these are mostly prose rules; it assumes GitHub Actions and Claude Code as its runtimes, so only the rules transfer; pre-1.0, Apache-2.0, 0 stars, created 2026-09-30; README and rulebook/00-principles.md verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-08-dsh-harness-lab-pack",
+      "tags": [
+        "verification",
+        "mutation-testing",
+        "rules",
+        "code-decides-done",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "ai-baton-workspace-rules-file-per-machine-health-stamp-leaked-value-gate-2026-10-08",
+      "date": "2026-10-08",
+      "displayDate": "Oct 8, 2026",
+      "title": "ai-baton — Claude Code workspace kit: one WORKSPACE.md every session loads, a per-machine /kit-health stamp, and a kit-PR gate for leaked values and missing version bumps",
+      "href": "https://github.com/MdaaaaO/ai-baton",
+      "why": "Workspace kit for Claude Code (a plugin, or a clone in the workspace root) whose stated loop sizes an issue once, gives it to a worker matched to that size, reviews and merges it without a human once the routine gates hold, and lets a session's own retro turn what went wrong back into an issue. Four mechanisms matter here. One rules file: WORKSPACE.md is loaded by every session, through a CLAUDE.md import on a clone or a SessionStart hook on the plugin, because rules drift from repo to repo. An env fact store: a skill that needs a value such as a channel id reads it from .context/reference/env/, discovers a missing value once and writes it back, and the kit ships no names, ids or org settings. Per-machine health: /kit-health audits the kit and the machine's wiring (frontmatter, leaked values, env store, hooks, an engine smoke), names the update command when a newer release is out, and stamps .context/kit-health/HEALTH-<env>.md. PR-only changes: every skill and agent carries a version, each PR says what a machine must do (usually nothing), and a gate blocks leaked values and missing version bumps. Fit: our install-agent-hooks.sh wires the vault AGENTS.md into the agy, Codex, Kimi and DSH homes and the home and project roots; a per-machine stamp would show which machine last proved its copy, close to coding-agent-guardrails' declared-vs-effective loading check (not adopted); retro-to-issue parallels our repeat lesson → proposed skill diff. Caveats: Claude Code only; both install paths need python3 and make, and a clone needs git; the README says a plain CLAUDE.md fits one repo and one person; in its loop an approved, green PR merges itself and a human gates only the sensitive paths (anything under .github/ and the review's own rule and gate files), while our merges go through the human gate; MIT, 0 stars, created 2026-09-26; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-08-dsh-harness-lab-pack",
+      "tags": [
+        "rules",
+        "install",
+        "skills",
+        "audit",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "agent-ops-guardrails-real-value-leak-check-observe-first-go-gate-2026-10-07",
       "date": "2026-10-07",
