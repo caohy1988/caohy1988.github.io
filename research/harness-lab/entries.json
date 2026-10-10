@@ -1,8 +1,97 @@
 {
-  "updatedAt": "2026-10-09T03:26:28Z",
+  "updatedAt": "2026-10-10T02:14:25Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "dsh-goal-wait-gate-hold-goal-rounds-during-live-background-work-2026-10-09",
+      "date": "2026-10-09",
+      "displayDate": "Oct 9, 2026",
+      "title": "dsh-goal-wait-gate — DSH plugin that by default withholds automatic goal continuation while the session still has a running or stopping background job or a live subagent",
+      "href": "https://github.com/LMGateX/dsh-goal-wait-gate",
+      "why": "DeepSeek Harness (DSH) plugin for a known, still-unfixed upstream behavior through DSH 0.2.1-alpha.1: the official driver injects a <goal_round> prompt whenever an agent is idle and its goal is active and armed, and idle only means no turn is running, so an agent that ended its turn to wait on a background job or subagent gets goal rounds that use up the round budget and re-prefill the whole session. Live work is a job the session owns in running or stopping status (read from ctx.jobs.list) or a live subagent descendant at any depth. The gate evaluates at agent/turn-stopping, at agent/status idle and on goal/changed; in the default activation strategy, while live work exists and the goal is active and armed, it calls ctx.goals.disarm, then ctx.goals.resume on its own hold once the work has settled and its completion-notice turn has ended. It never calls pause, never resumes a goal it did not disarm, drops its hold on an explicit human re-arm, and re-arms held goals when unloaded. Its bundle layer disables DSH's own goal-round-driver row and mounts the driver itself, so switching the row off means no automatic continuation (the native strategy restores official behavior); maxHoldMs defaults to 0, which holds indefinitely. Fit: the DSH goal-mode side of our no-exit-while-waiting rule (never end a turn waiting on background work and then commit): a DSH agent that does end its turn to wait gets no goal rounds until the work has settled; stingray's unwatched check intercepts the opposite case, a promise to monitor with no background task, session cron or handoff behind it. Caveats: the README lists DSH 0.1.7-alpha.2 through 0.2.0-rc.2 (declared peer range >=0.1.7-alpha.2 <0.3) and Node 22+, and its opt-in startup owner runs only on exactly pinned 0.2.0-rc.2 and 0.2.1-alpha.1 hosts; not on npm; MIT, 0 stars, created 2026-09-24; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-09-agy-harness-lab-pack",
+      "tags": [
+        "DSH",
+        "no-exit-while-waiting",
+        "Mac CLI",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "jev-belay-transcript-evidence-first-one-jev-call-unverified-done-2026-10-09",
+      "date": "2026-10-09",
+      "displayDate": "Oct 9, 2026",
+      "title": "jev-belay — Claude Code Stop hook that reads the turn's transcript first and spends one Jev call only when files changed and no check has passed since",
+      "href": "https://github.com/valentynkit/jev-belay",
+      "why": "Claude Code Stop hook (plugin or settings.json hook) for a final message that calls the work done when nothing backs it. It reads the transcript slice since the last prompt locally with two regex belts: a test, build or lint runner named in a command, and a runner's own summary in the output. If nothing changed, or a check passed after the last change, the hook exits and Jev is never asked. Only when something changed and nothing proved it does it send one jev-1.13.0 call with four questions, $0.00005 per call and 346 ms median latency; if the answer is an unverified done, it blocks the stop (exit 2) and Claude is told to run the tests, build or lint and report the actual result. Only the prompt, the closing message and two counts leave the machine. Blocks are capped at one per prompt, none within 60 seconds of the last and three per session; every error path exits 0; a shadow mode only reports what it would have blocked. Measured on 100 labeled stops: AUROC 0.976 against 0.777 for the wording alone, blocking 8 turns in 100, 7 rightly. Fit: it keeps the order of our code-decides-done rule, where a deterministic check outranks Jev's completion_check: a passing check ends the turn with no Jev call, and Jev's answer only decides whether to block; it sits next to proof-of-done (no network or model call) and stingray (half-done stops judged by Jev). Caveats: the corpus is the author's own sessions, labeled by a model rather than by hand, with 12 false dones, so the README puts the AUROC interval at about ±0.06, and only one of its four thresholds (claims_done) was swept; a turn with no file edits never reaches the question; a custom check script is invisible unless named in the check option or its output carries a runner summary the hook knows; it needs Node 20+, Claude Code 2.1.196+ and a TypeSafe key (TYPESAFE_API_KEY), while our router reaches Jev through OpenRouter; headless claude -p behavior not verified here; MIT, 34 stars, created 2026-09-18; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-09-agy-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "jev",
+        "code-decides-done",
+        "calibration",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "agent-delegate-exit-65-no-change-config-header-echo-stdin-dev-null-2026-10-09",
+      "date": "2026-10-09",
+      "displayDate": "Oct 9, 2026",
+      "title": "agent-delegate — non-interactive coding-agent harness: exit 0 becomes 65 when neither git status nor HEAD moved, the agent's config header is echoed, stdin is /dev/null",
+      "href": "https://github.com/laika56/agent-delegate",
+      "why": "Bash harness (delegate.sh, worktree.sh, review-status.sh and a spec template) for handing a written spec to a non-interactive coding agent; it defaults to codex exec, and AGENT_CMD takes any agent that accepts a prompt and a working directory. Five guards, each from an incident: it snapshots git status and HEAD before and after the run and, when neither moved, rewrites exit 0 to 65, so an agent that asked for approval into a run with nobody to answer cannot pass as success (HEAD counts because an agent that commits leaves a clean status); after the run it echoes the agent's own config header lines so a silent effort downgrade shows; it runs the agent with stdin from /dev/null, since a detached agent otherwise blocks on stdin; in a git worktree it grants the shared git dir so commits do not die on index.lock; and it tells callers to use set -o pipefail, because piping its output through tail reports tail's status. Other exits: 64 bad usage, 66 missing project or spec. Its review order starts with whether anything was produced, because tests always pass when nothing changed. Fit: our no-exit-while-waiting wrapper gate fails a push-required kick on a dirty tree or an unchanged HEAD; exit 65 is a looser no-op signal for any run, push or not; and the header echo would show, per run, the reasoning effort to compare with our 2026-09-24 Astra xhigh default. Caveats: the defaults are set for codex exec (-s workspace-write) and pass -c model_reasoning_effort=high, below the xhigh that lock sets for Astra, so our seats would need those overridden; its tests are ten cases driven by stub agents; no network calls except an optional webhook; a pay-what-you-want Gumroad zip adds an installer and support, and the README calls the repo code the whole product; MIT, 0 stars, created 2026-09-22; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-09-agy-harness-lab-pack",
+      "tags": [
+        "Mac CLI",
+        "no-exit-while-waiting",
+        "effort",
+        "worktrees",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "verified-ops-starter-freshness-wrap-rollout-exit-contract-mutants-2026-10-09",
+      "date": "2026-10-09",
+      "displayDate": "Oct 9, 2026",
+      "title": "verified-ops-starter — freshness, no-op and rollout checks for scheduled jobs under one exit-code contract in which a dead checker cannot look like a clean result",
+      "href": "https://github.com/tonydzi/verified-ops-starter",
+      "why": "Python standard-library kit that replaces a scheduled job's self-report with evidence. freshness asks whether the job's real output is young enough (optional min_bytes, and a contains marker taken from the body, never the filename); wrap runs the job and announces a silent no-op when it exits 0 but its artifact did not change, comparing mtime and size, and kills and announces a hang under --timeout-s; rollout reads a fix back from each target, and a target whose verify only exits 0 comes back WEAK. One exit contract: 0 clean, 1 a problem found and the alert delivered, 3 found but the alert could not be delivered (also what --dry-run returns), 4 the checker itself died; a run that measured nothing, such as an empty or misspelled config, is 4, never 0, and under wrap any non-zero child code becomes 4 unless declared with --signal. selftest.py runs 44 checks, each first broken by a mutant, under the README's rule that a check with no mutant that makes it fail measures nothing. Fit: that rule is Kanon's K-PRIN-11 (a guard must be able to fail) in runnable form; 4 for nothing measured is Ruttla's exit 2 under another number; and wrap catches a job that exits 0 after an empty page or an expired token, the failure our negative-claims rule says must be a gap, never zero. Caveats: mtime is evidence, not proof (a third process writing the artifact mid-run reads as work landed, and a byte-identical rewrite on a coarse filesystem can read as a no-op), and a synced folder can stamp a fresh mtime on an old file; it answers whether the work landed, not whether the job fired, so the README puts it beside heartbeat monitoring rather than in place of it; Python 3.8+, CI on Ubuntu, macOS and Windows, v0.1.0; MIT, 1 star, created 2026-08-04; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-09-agy-harness-lab-pack",
+      "tags": [
+        "routines",
+        "verification",
+        "mutation-testing",
+        "evidence",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "vigil-claim-vs-check-missed-window-catchup-degraded-2026-10-09",
+      "date": "2026-10-09",
+      "displayDate": "Oct 9, 2026",
+      "title": "Vigil — holds a scheduled agent's claim to independent checks you declare, reports a window nothing tried as missed and can re-run it, and flags identical output N runs in a row",
+      "href": "https://github.com/ksolano220/vigil",
+      "why": "Python verification layer that supervises a scheduled job from outside and keeps two things apart: the claim, what the job says it did (JSON written to $VIGIL_CLAIM or one stdout line), and the check, evidence from outside the job (a file changed recently or has real content, an endpoint returns 200, a command passes, a metric went up). Verdicts: verified (exited 0 and the checks agree), unverified (exited 0, the evidence does not support it), failed (nonzero exit or timeout), missed (the window closed and nothing even tried), degraded (identical output N runs in a row, set by degrade_after). Schedules are declared in vigil.toml, which is how it can report a run that never happened; vigil catchup re-runs uncovered windows (the README's case: a laptop asleep through its 9:15 window); vigil run exits 0 on verified, 1 on failed and 2 on unverified or degraded; vigil check exits 1 if any job is missed, unverified or degraded. A job can also be watched without a command, checking only the artifact that window should have left. No daemon or database: it runs when the scheduler runs it and keeps one JSON state file; alerts are deduplicated per job. Fit: our Field Brief miss-watch (Collection's :44 catch-up when the :34 brief is missing) is the same missed-window idea for one routine; the README's demo bug, an except that returns an empty list so a dead source looks like a quiet day, is the case our negative-claims rule makes a gap. Caveats: a job with no checks behaves like cron again, and claim_field only checks the claim against itself, so a job that lies in its claim passes it; a watched job proves the artifact exists, not that the run succeeded; vigil.toml runs commands through a shell, so it is trusted input; identical output is also what a job with genuinely unchanged data produces, so degrade_after needs care; Python 3.11+; MIT, 0 stars, created 2026-09-24, last push 2026-10-02; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-09-agy-harness-lab-pack",
+      "tags": [
+        "routines",
+        "miss-watch",
+        "catch-up",
+        "verification",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "brindle-check-exit-0-done-status-line-not-trusted-usage-pause-resume-2026-10-08",
       "date": "2026-10-08",
