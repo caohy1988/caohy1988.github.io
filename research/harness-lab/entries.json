@@ -1,8 +1,97 @@
 {
-  "updatedAt": "2026-10-10T02:14:25Z",
+  "updatedAt": "2026-10-11T00:09:05Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "harness-creator-three-a-week-code-gates-signal-came-back-2026-10-10",
+      "date": "2026-10-10",
+      "displayDate": "Oct 10, 2026",
+      "title": "harness-creator — Claude Code plugin that turns repeated corrections in your own sessions into at most 3 proposed rules, hooks or skills a week, through five mostly code-run gates",
+      "href": "https://github.com/qjc-office/harness-creator",
+      "why": "Claude Code plugin that reads your last 7 days of Claude Code sessions (Codex sessions too if you agree), finds repeated corrections, failure loops and repeated instructions, and proposes at most 3 rules, hooks or skills a week, each backed by quotes and session counts. Five gates, most of which run as plain code, not as another prompt, drop signals that were already resolved (G1), counts inflated by a single batch run (G2), issues that appeared only in Codex (G3, moved to a reference section), always-loaded rules with weak support (G4) and anything past the weekly limit of 3 (G5). The judge gets masked excerpts once, through your own claude CLI with no tools or MCP servers and your settings, CLAUDE.md, skills, plugins and hooks off (--restricted --safe-mode --tools \"\"), from an empty temporary folder. Rules, skills and hooks are written to ~/.claude only after you approve the diff, with a backup and undo; memory, script and agent ideas stay drafts. A rejected signal is not proposed again until it happens twice as often, and the next analysis reports whether an applied harness's signal came back. Fit: our repeat lesson → proposed skill diff rule turns a correction already in forbidden.md twice or more into a drafted fix such as skill text or a CLAUDE.md line (2026-09-27-lab-keeps-folded-into-playbook); this mines session history for repeated corrections instead and caps proposals at 3 a week, and SessionLens has a similar follow-up, comparing a finding's frequency before and after its rule is marked Moved. Caveats: without a claude CLI whose --help lists --restricted and --safe-mode it does not judge at all; masked excerpts and a masked list of your existing harness, including up to 200 list lines from MEMORY.md index files, go to that CLI; masking is regular expressions plus word lists, with 13 known misses listed; the Chinese and English correction patterns were checked only against synthetic samples, so the README says to read each candidate yourself for the first two weeks; MIT, 0 stars, created 2026-10-10; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-10-muse-harness-lab-pack",
+      "tags": [
+        "repeat-lesson",
+        "rules",
+        "skills",
+        "hooks",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "claim-gate-five-claim-rules-named-evidence-lines-once-per-turn-2026-10-10",
+      "date": "2026-10-10",
+      "displayDate": "Oct 10, 2026",
+      "title": "claim-gate — Claude Code Stop hook that by default blocks, at most once per turn, a reply making a completion, count, absence or universal claim without the evidence its rule asks for",
+      "href": "https://github.com/CY-HYUN/claim-gate",
+      "why": "Claude Code Stop hook in one standard-library Python file of about 270 lines; it does not judge whether a claim is true, only whether the reply shows how it was made. Five rules, each cleared by a command or a named line: completion (\"all done\", \"tests pass\") by a code block, a command or a Verified: line; number (a count or percentage stated as observed) by the command that produced it or a Counted with: line; absence (\"nothing uses this\") by two pieces of evidence (two commands or file:line citations) or a Searched: block; universal (all, every, none, always or never next to a countable noun) by a counted scope or a Scope: line; correction (\"I was wrong\" with a new number or cause) by a command, a file:line or a Correction source: line. Plans and questions do not fire, and text in code blocks, inline code and > quotes is ignored. In the default block mode the model is told which evidence to add; on the next stop of that turn Claude Code sets stop_hook_active and the hook passes, so it blocks at most once per turn; warn mode never blocks, and any internal error lets the stop through. 17 tests; each detector was replaced with always-fires and never-fires in turn, and all 10 broken versions turned at least one test red. Fit: a Verified: line is close to the VERIFIED field of our done receipt (only checks that ran, with evidence), and the absence rule sits next to our negative-claims rule; claimcheck, the source of our claim-vs-record rule, and proof-of-done check claims against the session transcript, while this reads only the final reply; the always-fires/never-fires check follows Kanon's K-PRIN-11 (a guard must be able to fail). Caveats: it checks for evidence, not for truth, since a reply can paste a command it never ran; English only and regex based, it misses claims phrased in ways its patterns do not cover and sometimes fires on descriptive sentences; evidence anywhere in the reply counts, so one command clears every number claim in the same reply, even claims it did not produce; MIT, 0 stars, created 2026-10-09; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-10-muse-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "evidence",
+        "receipts",
+        "mutation-testing",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "tamperproof-test-files-read-only-shell-allowlist-verify-on-dirty-stop-2026-10-10",
+      "date": "2026-10-10",
+      "displayDate": "Oct 10, 2026",
+      "title": "tamperproof — Claude Code plugin that blocks agent edits to existing test files, including through shell commands, and runs the tests when the agent stops with uncommitted changes",
+      "href": "https://github.com/Mattbusel/tamperproof",
+      "why": "Claude Code plugin of two plain-Node hooks with zero dependencies. PreToolUse on Edit, Write, MultiEdit, NotebookEdit and Bash blocks edits and overwrites of existing test files (exit 2, reason shown to the agent) and any shell command that names a test file unless it is a known read-only command or test runner, an allowlist so sed --in-place, node -e, python -c and redirects don't slip through; writing new test files is still allowed. The default protect list also covers snapshots and the places expected values hide (test/resources/, fixtures/, testdata/, golden/), and the config file protects itself. Stop runs the test command when the working tree is dirty (auto-detected for Rust, Go, Node, Python and Swift, or a verify command you set), gives the agent the last 40 lines on failure, and after 3 failed attempts lets the session end and says the tests are failing. In the author's runs on Claude Code (Opus, Sonnet and Haiku), when two tests contradicted each other so no code change could pass, 2 of 6 runs edited a test to force a green check, against 0 of 6 with the plugin, where every run stopped and asked which rule was right; on four fixable bugs 0 of 24 runs touched a test either way; method and raw results are in the repo. 28 node --test tests run the real hooks against a throwaway repo, including every bypass reported so far. Fit: under our code-decides-done rule a deterministic check such as a passing test run decides done, and our claim-vs-record rule (from claimcheck) marks a green run after skipped, deleted, focused or gutted tests SUSPECT; Proof applies similar tamper rules at the stop, while this blocks the edit when it is attempted. Caveats: the README itself says 0 of 6 only bounds the true rate below about 39% (95% one-sided) and 0 of 24 below about 12%; its Stop check runs on a dirty working tree, while a push-required kick of ours must end on a clean tree with HEAD moved (2026-09-05-no-exit-while-waiting), so as the README describes it a seat that commits before stopping is not re-tested; TAMPERPROOF_OFF=1 switches it off for a session; MIT, 0 stars, created 2026-10-10; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-10-muse-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "code-decides-done",
+        "tamper",
+        "verification",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "cliffhanger-checklist-first-stop-subagentstop-blocked-escape-stats-2026-10-10",
+      "date": "2026-10-10",
+      "displayDate": "Oct 10, 2026",
+      "title": "Cliffhanger — Stop and SubagentStop hook that blocks on open items in the agent's own checklist or, with no checklist, an early-stop pattern, unless BLOCKED: or another escape applies",
+      "href": "https://github.com/Arthur031221/Cliffhanger",
+      "why": "Claude Code Stop and SubagentStop hook plus a skill, for a turn that ends with work still owed when, in a headless run or overnight job, nobody is there to type continue. The hook rebuilds the agent's checklist from the transcript (TaskCreate and TaskUpdate, the latest TodoWrite list, or the turn's latest Markdown - [ ] list), and the first matching rule decides: a BLOCKED: or NEEDS-YOU: line, background tasks that will wake the session, plan mode, or 3 automatic continuations already in the user turn (CLIFFHANGER_MAX) allow the stop; open checklist items block it; with no checklist, a named blocker allows it and five early-stop patterns block it, the four from the model vendor's prompting guide plus a report that work was not run or tested. It makes no model calls, uses only the standard library, fails open on an internal error, has an observe mode that never blocks, and logs every decision locally; cliffhanger stats counts caught stops by pattern and allowed stops by reason. In the README's 12-task Sonnet 5.5 benchmark (claude -p, with Bash(pytest *) as the only test permission), 6 baseline runs stopped before a green test run and none did with the blocking hook and skill, at about 4 percent more cost; every early stop followed a refused command (the agent tried python -m pytest, got refused and wrapped up). Fit: agent-delegate rewrites exit 0 to 65 when neither git status nor HEAD moved, and stingray sends its half-done-turn judgements to Jev; this acts at the stop itself, before the run exits, with no model call. Its background-task escape makes it no check on our no-exit-while-waiting rule, written after a claude -p run waited on a background pytest and exited 0 (2026-09-05-no-exit-while-waiting). Caveats: per its FAQ the skill did the work in that benchmark and the hook never had to block; the refused-command advice was added after earlier runs showed the same failure, so it was not a held-out test, and it was one model on one fixture; with every test command allowed neither arm stopped early and the hook plus skill added about 13 percent to cost; Codex, Cursor and OpenCode get AGENTS.md instructions that nothing enforces; MIT, 1 star, created 2026-09-29; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-10-muse-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "Mac CLI",
+        "no-exit-while-waiting",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "dsh-claude-compat-claude-dir-bridge-project-dsh-user-order-2026-10-10",
+      "date": "2026-10-10",
+      "displayDate": "Oct 10, 2026",
+      "title": "dsh-claude-compat — DSH plugin that reads .claude/ skills, commands, rules, agents and three hook events in place, ranking same-name entries project .claude, DSH-native, ~/.claude",
+      "href": "https://github.com/biedongbin/dsh-claude-compat",
+      "why": "DeepSeek Harness (DSH) plugin that carries a project's .claude/ and the user's ~/.claude/ into DSH so both tools share one config: skills become lazy-loaded DSH skills, commands user-invocable skills, agents delegation-shim skills, and rules are prepended once per session as a user-role message in a <system-reminder> envelope; installed Claude Code plugins add their skills, commands and agents at the lowest rank. A hook subset (PreToolUse, PostToolUse, UserPromptSubmit) runs via /bin/sh -c with the Claude-style JSON on stdin: exit 2 denies or blocks, other non-zero exits and timeouts allow with a warning. A project-root .mcp.json becomes dsh-mcp-client instances, and plugin-declared MCP servers mount only with enablePluginMcp (off by default). Same-name skills, commands, rules and agents resolve in a fixed order, project .claude over DSH native over ~/.claude; CLAUDE.md and AGENTS.md, which it never touches, stay with DSH's built-in dsh-agent-instructions. Fit: our install-agent-hooks.sh wires the vault AGENTS.md into ~/.dsh and installs the shared skills into ~/.dsh/skills, ~/.agents/skills and project .agents and .dsh mirrors (2026-09-15-muse-dsh-vault-skills-hooks), so this would add .claude/ trees under a stated order and leave that AGENTS.md wiring alone; cinch translates one SKILL.md per harness, and catstack and skillwharf link one copy into several. Caveats: user-level ~/.claude/settings.json hooks are bridged too, and /cc-plugin keeps its state in ~/.claude/plugins and ~/.claude/settings.json enabledPlugins so Claude Code and DSH read the same truth, which makes a plugin change made from DSH a Claude Code change as well; Stop hooks are outside the bridged subset; .mcp.json is read once at DSH startup and rules once per new session; the bundled restart script re-applies a dsh-terminal-bash prompt patch unless run with --no-patch; the README names no DSH version range, needs pnpm on PATH and badges version 0.8.1; MIT, 14 stars, created 2026-08-14; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-10-muse-harness-lab-pack",
+      "tags": [
+        "DSH",
+        "skills",
+        "install",
+        "hooks",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "dsh-goal-wait-gate-hold-goal-rounds-during-live-background-work-2026-10-09",
       "date": "2026-10-09",
