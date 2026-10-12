@@ -1,8 +1,78 @@
 {
-  "updatedAt": "2026-10-11T00:09:05Z",
+  "updatedAt": "2026-10-12T00:05:39Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "agent-docs-lint-dead-ref-model-name-unreferenced-agent-broken-anchor-2026-10-11",
+      "date": "2026-10-11",
+      "displayDate": "Oct 11, 2026",
+      "title": "agent-docs-lint — zero-LLM CLI that flags missing file and slash-command targets, listed model or plan names, unreferenced agent or skill files and broken anchors in agent docs",
+      "href": "https://github.com/hrtaym1114-github/agent-docs-lint",
+      "why": "Zero-LLM Python CLI that catches drift in agent documentation, designed for AGENTS.md, CLAUDE.md, .cursor/rules, .claude/agents, .claude/skills, .agents/skills and similar repos where docs are the source of truth. Four checks: dead_ref (local Markdown links, backtick path-like references or slash commands that point to missing files or command targets), model_name (hard-coded model or plan tokens from a configurable list), unreferenced_agent (agent or skill Markdown files not mentioned by filename stem) and broken_anchor (a local Markdown link whose #anchor is missing in the target file). Findings print as file:line: rule: message (AGENTS.md:11: dead_ref: missing slash command target: /missing-command) or as JSON with --json, and a TOML config sets model_names, ignore_paths, disable_rules and extra_scan_globs. Exit 0 means no error findings or --warn-only was used, 1 one or more error findings, 2 a CLI, config or runtime error. Fit: our vault AGENTS.md, which install-agent-hooks.sh wires into the agy, Codex, Kimi and DSH homes, cites its locks as backtick Maps/Decisions/ paths, the kind of path-like reference dead_ref checks. temper validates a .claude/ harness against schemas and a declared contract, and ai-baton's /kit-health audits frontmatter, leaked values, the env store, hooks and an engine smoke; this reads the references, model names and anchors written in the docs, and unreferenced_agent asks whether any doc names an agent or skill file, where skillwharf's usage counts whether a skill fires. Caveats: model_name finds only the names on its list (the README's example config lists gpt-4, gpt-4o, claude-3-opus and ChatGPT Plus), so our own retired names would have to be added; extra_scan_globs adds paths beyond the listed ones (the README's example adds docs/agents/**/*.md); the GitHub Actions snippet is documentation only; v0.1.0, MIT, 0 stars, created 2026-10-06; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-11-dsh-harness-lab-pack",
+      "tags": [
+        "lint",
+        "rules",
+        "skills",
+        "audit",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "learn-from-mistakes-agent-judges-cli-counts-per-source-cited-records-checked-2026-10-11",
+      "date": "2026-10-11",
+      "displayDate": "Oct 11, 2026",
+      "title": "learn-from-mistakes — an agent labels what went wrong; the lfm CLI counts repeated causes per source, never adding sources together, and flags recommendations citing missing records",
+      "href": "https://github.com/umeranjum17/learn-from-mistakes",
+      "why": "Node CLI (lfm) plus a bundled agent skill for finding the mistakes coding agents keep repeating in records a fleet already writes, such as a defect log or a pipeline's failed steps. The work is split: your agent reads each record and judges what happened, following the skill, and writes the labels and proposed changes; the CLI does the arithmetic: it merges duplicates, counts each source separately, checks that every recommendation cites real records and lists what was never read. The README's example config pairs a Markdown log (each \"- \" bullet a record, dated by its ## heading) with a no-mistakes store whose failed steps are opened read-only, gives a cause an optional match that counts typed store rows, and sets repeat to min_incidents 3, min_days 2. Log and store counts are shown side by side and never added, a recommendation citing a record that does not exist is named as a problem, and records nobody labelled are reported as unlabelled, never guessed. Exit 0 ok, 1 a label or proposal has a problem, 2 bad usage or config, 3 the sources hold nothing. It never edits sources, instructions or config, makes no network or model calls, and does not apply the recommended changes or measure whether they worked. Fit: our repeat lesson → proposed skill diff rule drafts a fix instead of another forbidden.md paragraph when the correction is already there twice or more (2026-09-27-lab-keeps-folded-into-playbook); lfm adds a spread across days to the count, keeps sources apart and checks that each proposal's evidence resolves. harness-creator mines session history and writes the rules, hooks or skills you approve; lfm only recommends, and its label-then-count step is the one failure-taxonomy's card proposes for our forbidden.md corrections. Caveats: no LICENSE file (GitHub reports none), so treat it as all rights reserved and as pattern only: read and re-implement the idea; copy no file and vendor no code; the README's examples are synthetic (a 13-record defect log, a small no-mistakes store, labels written by following the skill), and its end-to-end tests run the real CLI on synthetic fixtures; needs Node 22.13+; 0 stars, created 2026-10-11; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-11-dsh-harness-lab-pack",
+      "tags": [
+        "repeat-lesson",
+        "evidence",
+        "rules",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "compaction-stress-lab-1-in-5-exact-details-kept-keep-exact-paragraph-7-of-72-2026-10-11",
+      "date": "2026-10-11",
+      "displayDate": "Oct 11, 2026",
+      "title": "compaction-stress-lab — 628 runs on two small models: one compaction kept about 1 in 5 exact tool-printed details on real sessions, and a keep-exact paragraph roughly doubled that",
+      "href": "https://github.com/imyash2004/compaction-stress-lab",
+      "why": "Study of what native context compaction in the Anthropic and OpenAI APIs makes coding agents forget, measured at the API layer with two small models, Claude Haiku 5.5 and GPT-6 Luna: 628 runs across a controlled lab session with 29 facts hidden at known spots (108), 12 recorded SWE-agent sessions (240) and its own API agent fixing 10 SWE-bench Verified bugs in Docker (280). Findings: one compaction keeps about 1 in 5 exact details the tools printed on real sessions (19–20%, against 99–100% with full history); losses compound (GPT-6 Luna 67% → 48% → 30% → 23% over four compactions); summaries keep what was discussed, not what was printed (facts the agent stated 79–91%, facts only in tool output 24–31%); one paragraph of keep-exact instructions, printed in the README, roughly doubled exact recall on real sessions (to 41–48%), though in the live layer it cut steps, not failures; 90–97% of lost values were answered UNKNOWN, yet 7 of 72 rollout plans written after compaction used an outdated value (old DB port, revoked secret, broken release), against 0 of 36 without compaction. Its advice: compact late and rarely, at a task boundary after the agent has stated its results, write exact values to a notes file first, and re-check the source of truth before deploys, rollbacks or secrets. Fit: Context Guard's card notes our fleet runs are mostly one-shot grok-tmux-run jobs, not long interactive chats, so this bears on a seat only where its runs actually compact; there, the notes-file advice sits next to Context Guard's handoff checkpoints and our handoff packet v1, whose artifacts and decisions fields carry paths and decisions already made (2026-09-25-rari-handoff-packet-repro-first-promotion-gate). Caveats: two small models, and the README says larger models compact better (gpt-6.1-sol with instructions kept about 99% in an earlier 10-model run); measured through its own API adapters and agent loop, not inside a coding CLI; live bugs were short (7–15 steps), so compaction was forced early; an AI drafted the real-session questions and code verified them, and the question writer and judge are OpenAI models; code and docs MIT, while inputs/ keep their sources' licenses (CC-BY-4.0 for the recorded sessions); 0 stars, created 2026-10-10; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-11-dsh-harness-lab-pack",
+      "tags": [
+        "context",
+        "handoffs",
+        "evals",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "juli-os-agents-enter-only-resend-gutted-path-resolver-pane-probes-cooldown-2026-10-11",
+      "date": "2026-10-11",
+      "displayDate": "Oct 11, 2026",
+      "title": "@juli-os/agents — tmux session runtime: a swallowed Enter is re-sent, never the text; tmux is resolved despite a gutted PATH; pane probes tell awaiting input from still working",
+      "href": "https://github.com/juli-os/agents",
+      "why": "Bottom layer of the juli-os ladder: a tmux-based agent session runtime in TypeScript with zero npm dependencies (Node built-ins only, Node ≥ 22.5). Its tmux client confirms delivery: sendTextConfirmed polls for the input box to reset, and a swallowed Enter is re-sent, never the text. A startup-time binary resolver survives GUI-launched processes with a gutted PATH (the homebrew ENOENT class of failure), and a side-effect-free CLI inspector (juli-agents bin) prints which tmux binary it resolved. Provisioning dispatch creates or reuses a session, cold-starts claude, and uses pane probes to tell \"awaiting input\" from \"still working\". Self-healing is a snapshot/recover loop, zombie fingerprints and a context gate that auto-compacts on a threshold with a cooldown. It also installs Claude Code Stop, SessionStart and PermissionRequest hooks from a spec so agent events flow back to your service, keeps a markdown skill registry, prefers an ACP executor (protocol-level completion) over tmux async when present, and carries orchestrator and voice-call scaffolding with a staged-plan (discuss → proposed → confirmed) call flow. Fit: our long Mac CLI runs launch through grok-tmux-run in tmux, and grok-tmux-watchdog acts on a stale log (~540s) (2026-09-05-stream-json-watchdog-all-runs); a pane read that tells awaiting input from still working would be a second signal there, as tmux-agent-status's card says of a status the agent writes itself, and Gate Inbox also reads the panes, to show sessions blocked on you. agent-quota-tracker's verified poke re-queries the provider rather than trust the poke alone; sendTextConfirmed checks delivery at the input box and retries only the keystroke. Context Guard forces a handoff note past a ceiling; this gate compacts at a threshold and adds a cooldown. Caveats: the dispatch cold-starts claude and the hooks it installs are Claude Code hooks, so for our mixed seats the patterns transfer, not the package; comments and a few operator-facing strings, such as the staged-plan voice prompt contract, are Chinese in this first release; the README gives no threshold or cooldown values; Apache-2.0, 0 stars, created 2026-10-09; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-11-dsh-harness-lab-pack",
+      "tags": [
+        "tmux",
+        "Mac CLI",
+        "watchdog",
+        "context",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "harness-creator-three-a-week-code-gates-signal-came-back-2026-10-10",
       "date": "2026-10-10",
