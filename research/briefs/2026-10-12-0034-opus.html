@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-10-12 · 12:34 AM PT (catch-up) · Opus 5.5</title>
+  <meta name="description" content="Industry NEW Laminar v0.3.0 signals + PII dual mode; Academy NEW Same Query Different Answer 2610.13823, SemViews 2610.12768, Agreement Without Alignment 2610.13303, Jev in agent workflows 2610.13092">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-12-0034-opus.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Opus 5.5 (high) · 12:34 AM PT catch-up · fresh path · ~11h window since 2026-10-11 12:34</p>
+    <article>
+<h1>Field Brief — 2026-10-12-0034: The same LLM-in-SQL query returns different answers on reruns at temperature 0; Laminar's self-hosted edition gets trace signals and per-viewer PII masking</h1>
+<p><strong>Writer: Opus 5.5 (high)</strong> · For Haiyuan Cao (TL, BQAA + ADK)
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>Slot:</strong> 2026-10-12-0034 (scheduled; kicked ~00:55 PT). <strong>Window:</strong> ~11h since the 2026-10-11-1234 brief, about 13:50 PT Sun Oct 11 to 00:34 PT Mon Oct 12 (20:50Z Oct 11 – 07:34Z Oct 12).</p>
+<p><strong>Shape of this window:</strong> a quiet Sunday evening for products and a full Monday arXiv listing (the first since Thursday night). One real product release: Laminar's v0.3.0 platform release. The rest are nightlies, a Letta Code patch, and unreleased merges or opens. The Academy picks cluster around one theme that matters for BQAA: <strong>an LLM verdict stored in a table is one sample, not a fact.</strong> Two IBM papers measure this for semantic SQL operators (one of them includes BigQuery's own SemBench results). A judge-panel study shows that judges can agree more with each other without agreeing more with humans. An agent study shows that cheaper decisions can raise the cost per <em>delivered</em> task.</p>
+<hr />
+<h2>Read this first</h2>
+<ol><li><strong>Same Query, Different Answer (2610.13823, IBM): rerunning a semantic SQL query at temperature 0 changes the answer often, and BigQuery is not exempt.</strong> Across five published SemBench runs, 27% of BigQuery's 64 query cells changed quality, with a maximum range of 1.00. Item flip rates reach 10.2% for gpt-oss-120B and 24.0% on one extraction task. A 4% change in extracted values changed 67% of SQL answers. The fix the paper recommends is cheap: record each operator output (~39 bytes) with its decision margin or reasoning length. → NEW Academy.
+</li><li><strong>SemViews (2610.12768, IBM): reuse earlier LLM labels to decide which rows to check, never to decide what is true, and the precision/recall guarantee survives.</strong> It saves 28–45% of oracle calls while missing targets on 0.37% of 145,000 replayed queries. Similarity caches that reuse a "close enough" predicate missed a target <strong>100% of the time when they hit</strong>. 56% of the implications an LLM judge asserted between predicates failed on the actual labels. → NEW Academy.
+</li><li><strong>Agreement Without Alignment (2610.13303): editing the rubric clauses that judges disagree on raised inter-judge α by 0.069 on SummEval, with no detectable gain in agreement with experts (τ −0.007).</strong> The study was preregistered and used five judges from three providers (129,770 requests). Editing random clauses tended to do better against humans. A provider's batch API silently ignored the JSON schema (0/20 conform). → NEW Academy.
+</li><li><strong>Jev in agent workflows (2610.13092): Jev cuts per-decision cost by 66–78%, yet cost per delivered success <em>rose</em> for one mobile agent (68.70 → 73.97 mUSD).</strong> In another, time per success went from 239 s to 378 s. In Reflexion-J, failed recovery consumed 53.3% of all inference spend. → NEW Academy.
+</li><li><strong>Laminar v0.3.0 (Oct 11 22:01Z):</strong> the open-source, self-hosted edition gains:
+<ul><li>Signals and clusters stored on each trace in ClickHouse;
+</li><li>ingestion of OpenRouter Broadcast OTLP traces;
+</li><li>a "dual" PII mode that stores raw text plus masks and redacts at read time according to the viewer's role.
+<br />Upgrading involves an irreversible Postgres migration. → NEW Industry.
+</li></ul>
+</li></ol>
+<hr />
+<h2>Industry</h2>
+<h3>NEW</h3>
+<h4>Laminar v0.3.0 (self-hosted platform): signals and clusters on every trace, OpenRouter Broadcast ingestion, and viewer-dependent PII masking</h4>
+<ul><li><strong>What shipped:</strong> the lmnr-ai/lmnr GitHub release v0.3.0, published 2026-10-11T22:01:00Z (not a prerelease). It is the first tagged release since v0.2.5, so it is the first to carry a batch of September merges to self-hosted users.
+</li><li><strong>Signals and clusters in the open-source edition (#2347, #2366, #2474, #2477):</strong>
+<ul><li>each aggregated trace row now holds its signal events (<code>event_id, signal_id, severity, payload</code>) and cluster IDs;
+</li><li>a ClickHouse dictionary resolves cluster ancestry;
+</li><li>trace views read signals and clusters in a single query instead of three round trips;
+</li><li>shared trace pages show signals and clusters;
+</li><li>signals can be renamed, and alert emails link to the trace behind a signal event.
+<br />Signals remain a credit-metered feature in Laminar's cloud pricing (#2454, #2471).
+</li></ul>
+</li><li><strong>OpenRouter Broadcast traces (#2369):</strong> OpenRouter posts OTLP spans to <code>/v1/traces</code> but does not follow GenAI semantic conventions. Conversations arrive as JSON in <code>gen_ai.prompt</code> / <code>gen_ai.completion</code>, and session and user arrive as bare <code>session.id</code> / <code>user.id</code>. Laminar adds a mapper so that input, output (with the reasoning shown first), session, user and trace name populate correctly. Per-provider "attempt" child spans no longer appear as zero-token generations.
+</li><li><strong>PII "dual" mode (#2357–#2361, #2384, #2392):</strong>
+<ul><li><code>piiMode</code> = <code>off | redact | dual</code> replaces <code>removePii</code>;
+</li><li>in <code>dual</code>, raw text is stored once, next to the byte-range masks the redactor returned;
+</li><li>ClickHouse views splice <code>[REDACTED_&lt;LABEL&gt;]</code> at read time for members and share-link viewers, while owners and admins see the original;
+</li><li>rows the redactor failed on are stamped unchecked and render masked;
+</li><li>search indexes only the masked text.
+</li></ul>
+</li><li><strong>Operational caveat:</strong> Quickwit 0.9 requires an irreversible Postgres schema migration ("make a backup"). Quickwit also force-commits every batch again (configurable).
+</li><li><strong>Why it matters for BQAA:</strong> this is another trace store that attaches derived events (signals) and groupings (clusters) to the trace row itself. It also addresses a problem BQAA will face with stored prompts and responses: <strong>keep the raw content once and decide redaction per reader at query time</strong>, rather than redacting at write time and losing the original. OpenRouter Broadcast is now a second gateway-originated OTLP source with non-standard attribute keys, after LiteLLM's ingestion last brief. Ingestion mappers per emitter are becoming a product feature.
+</li></ul>
+<h3>Progress (existing cards)</h3>
+<p>None this window. Mastra's observational-memory fixes merged but are unreleased (see NOTE). Mastra 1.76.0 was already carded as Progress in the last brief.</p>
+<h3>One-line mentions (NOTE)</h3>
+<ul><li><strong>Mastra observational-memory reliability stack (merged Oct 11 23:17Z, unreleased):</strong> #25906 (+10,782/−2,289) makes reflection, buffering and activation lossless across processes. On <code>main</code> it reproduced lost context: chunks stranded on retired generations, and messages marked observed that the cycle never saw. Fixes sit at the storage boundary, behind a liveness marker. <code>@mastra/core@1.77.0-alpha.0</code> hit npm at 04:44Z; whether it includes the stack is unverified (see Unconfirmed).
+</li><li><strong>googleapis/python-genai #3103 (merged Oct 12 00:24Z, unreleased):</strong> "add billable token counts fields" (+96/−0). The SDK will expose billable token counts separately from raw usage. The PR body is the title only.
+</li><li><strong>LiveKit Agents 2.0 beta (PR #7757, opened Oct 12 05:35Z, open, "Staging only"):</strong>
+<ul><li>text mode with <code>agent.run</code>, an A2A endpoint and HTTP+SSE;
+</li><li><code>A2ADelegate</code> delegation and human-in-the-loop approvals;
+</li><li>graphs;
+</li><li>per-thread persistence on "agent-db", committed around every turn;
+</li><li>a Rust core.
+<br />Unmerged.
+</li></ul>
+</li><li><strong>Letta Code 0.34.11 (Oct 12 03:57Z):</strong> <code>letta mcp connect</code> for MCP OAuth with a localhost callback, and subagents now return their final report after child workers finish. Patch release; no analytics change.
+</li><li><strong>Nightlies:</strong> gemini-cli 0.65.0-nightly (Oct 12 01:29Z), qwen-code 0.25.1-nightly (Oct 11 22:01Z), crewAI 1.15.27.dev20261012 (PyPI). Not assessed.
+</li><li><strong>openai-node 7.33.0:</strong> still an open release PR. npm <code>openai</code> latest is 7.32.0 (Oct 9), checked at 08:40Z Oct 12.
+</li></ul>
+<hr />
+<h2>Academy</h2>
+<p>None of the four is in the catalog: 0 hits for each arXiv ID, "semviews" and "semantic quer". The nearest existing card is <code>arxiv-2609-21133-stochastic-shift-text-to-sql-ai-operators-evaluation</code>, which 2610.13823 cites; it is about evaluating generated text-to-SQL, not about engine variance. Jev is heavily carded, but no card measures task-level transfer in agent workflows. For each paper below I read the <strong>full PDF</strong> (<code>pdftotext -layout</code>): methods, results, appendices and limitations.</p>
+<h3>NEW — Same Query, Different Answer: Run-to-Run Variance in Semantic Query Processing — <a href="https://arxiv.org/abs/2610.13823">https://arxiv.org/abs/2610.13823</a></h3>
+<p><em>Hassanzadeh, Subramanian (IBM). cs.DB, cross-listed to cs.AI; submitted Oct 9, listed Mon Oct 12. Full PDF read.</em></p>
+<ul><li><strong>Setup:</strong> the authors re-ran SemBench, LRO-Bench and UDA-Bench through each benchmark's own harness at temperature 0. They logged all 1,219,338 model calls (per-item output, finish reason, tokens, reasoning length and top-5 logprobs where available) on six open-weight deployments plus GPT-4o and Claude Sonnet 5. They also reanalysed SemBench's published five-run results for LOTUS, Palimpzest, ThalamusDB and <strong>BigQuery</strong> (§4, Table 3).
+</li><li><strong>Published results move (§5, Table 4):</strong>
+<ul><li>21% of the 101 text cells change quality across five runs;
+</li><li>BigQuery: 27% of its 64 cells, 8% by ≥0.1, max range 1.00;
+</li><li>among cells with deterministic plans (LOTUS outside joins, and BigQuery), 12 of 50 change;
+</li><li>7 of 112 text system comparisons need more than five runs to separate at 95%.
+</li></ul>
+</li><li><strong>Item flip rates at temperature 0 (§6, Tables 5–6):</strong>
+<ul><li>0.07% (Mistral-24B) to 10.2% (gpt-oss-120B) over five runs;
+</li><li>24.0% on a 24-way diagnosis extraction;
+</li><li>GPT-4o 7.5% and Claude Sonnet 5 4.1% on the same filters and maps;
+</li><li>rates keep growing with more runs: 5.2% → 10.2% → 13.0% at 2/5/10 runs.
+</li></ul>
+</li><li><strong>Plans amplify item changes (§3, §7, Tables 1, 9):</strong> reproduction ≈ e^(−Σδᵢ) when the answer exposes every item. On UDA-Bench, 4.0% of extracted values change but 67% of SQL answers do. LIMIT absorbs changes, and quality metrics hide many: Movie Q1 scores 1.00 in all 10 runs while only 0.53 of run pairs return the same five rows. Averaged over deployments, only 32% of SemBench queries reproduce every operator output and 48% their answer (Fig. 5).
+</li><li><strong>Cause (§8, Table 11):</strong>
+<ul><li>Identical requests <em>within</em> one run disagree as often as across runs (6.0% vs 6.1% on gpt-oss-120B).
+</li><li>Concurrency, input order, seed and reasoning effort do not remove the variance.
+</li><li>The same Llama-3.3-70B on two serving stacks gives deterministically different answers (1.8% of majority outputs), and one stack shifted between campaigns.
+</li><li>Changing items are contested items: the first run's decision margin predicts later flips (AUC 0.93), and so does reasoning length (AUC 0.84).
+</li></ul>
+</li><li><strong>Remedies (§9, Tables 12–13):</strong>
+<ul><li>Voting with three samples removes 36% of disagreement at ≤2.13 calls per item, but not all of it.
+</li><li>Re-asking only the 20% of items with the longest reasoning gets 64% of that reduction at 1.4 calls per item.
+</li><li>A recall-guaranteed cascade keeps its guarantee, but different oracle runs make it return the same rows only 24% of the time.
+</li><li>Recording outputs costs ~39 bytes each (348 KB per run).
+</li></ul>
+</li><li><strong>Limitations (§11):</strong> text and tabular data only. RQ2–5 rest on open-weight deployments plus two commercial models; Gemini 2.5 Flash, which SemBench used, could not be re-run. The deployment effect rests on one model served by two stacks. Five runs bound the smallest detectable rates. Code and logs: github.com/semviews/sqp-variance-study (not checked).
+</li><li><strong>Why it matters for BQAA:</strong> BQAA's analysis layer runs LLM judgments in SQL (AI functions, LLM-as-judge over <code>agent_events</code>), and the paper's BigQuery cells are first-party evidence that reruns change answers. Every derived label column needs, per row: model and deployment identity, the run id, and a margin or reasoning-length field. Dashboards should report answer reproduction, not only quality. "Re-run the eval" is not a regression test unless outputs are pinned.
+</li></ul>
+<h3>NEW — Semantic Views: Certified Reuse of LLM Labels Across Semantic Queries — <a href="https://arxiv.org/abs/2610.12768">https://arxiv.org/abs/2610.12768</a></h3>
+<p><em>Hassanzadeh, Subramanian (IBM). cs.DB; submitted Oct 8, listed Mon Oct 12. Full PDF read, including Appendices A–D.</em></p>
+<ul><li><strong>Method (§4, Alg. 1):</strong> <code>CertifiedFilter</code> follows one rule: views, helper scores and embeddings may only <em>order</em> the rows.
+<ol><li>Fit a logistic score on a 200-row uniform shaping sample, using as features prior predicates' labels (including "unknown"), a helper model's score and a local embedding.
+</li><li>Refine the score on boundary rows for up to 8 rounds.
+</li><li>Split the order into reject, oracle and accept regions.
+</li><li>Certify both outer regions with fresh draws (sampled without replacement, exact hypergeometric bounds).
+</li><li>If needed, close the gap by labelling more rows.
+<br />Theorem 4.1: precision and recall targets hold with probability ≥1−δ <strong>for any catalog, including adversarial ones</strong>. Views carry provenance (<code>oracle</code> vs <code>derived</code>), and the identity of a view includes the oracle model and prompt version (§3, §5).
+</li></ol>
+</li><li><strong>Results:</strong> replayed against 725,000 recorded labels (Llama 3.3 70B oracle; re-labelling 2,000 pairs matched in 99.85% of cases).
+<ul><li><strong>Accuracy and cost (§7.3–7.4, Table 5):</strong> misses a target on 0.37% of 145,000 queries (worst predicate 3.2%) and saves 28–45% of the oracle calls of exact evaluation. BARGAIN needs 1.32–1.71× as many calls.
+</li><li><strong>Baselines that skip certification:</strong> the LOTUS cascade misses 30.8–65.4%, and SemWeave's entailment-based reuse misses up to 67.8%.
+</li><li><strong>Similarity caches:</strong> when they hit, they miss a target 100% of the time.
+</li></ul>
+</li><li><strong>Relations between predicates are statistical (§3, §7.2, Table 3, Prop. 3.2):</strong>
+<ul><li>only 92 of 5,280 ordered predicate pairs are 0.1-contained;
+</li><li>56% of implications asserted by an LLM judge fail;
+</li><li>containment errors compound along chains by the ratio of the predicates' selectivities.
+</li></ul>
+</li><li><strong>Reworded questions (§7.5, Table 6):</strong> a reworded predicate agrees with the original on 76–99.8% of rows, but the positive sets overlap only at Jaccard 0.57–0.95. SemViews uses the twin's view to cut calls by a further 27–36% and misses ≤0.2%.
+</li><li><strong>Robustness and scale (§7.6, Tables 7–8, App. B):</strong>
+<ul><li>views from a <em>different</em> oracle still save 18%;
+</li><li>unrelated workloads add no measurable cost, and adversarial views do not break validity;
+</li><li>cost falls from 60% of exact evaluation at 5,000 rows to 34% at 100,000 on DBpedia.
+</li></ul>
+</li><li><strong>Limitations:</strong> filters only (no joins or ranking), and the main tables are 5,000 rows. Two of the four datasets helped tune hyperparameters (App. C). Real analyst or agent sessions were not measured.
+</li><li><strong>Why it matters for BQAA:</strong> when an analyst or an agent asks "sessions where the user was frustrated", then "…frustrated about billing", BQAA can treat earlier label columns as <strong>planning hints</strong> and still certify the new answer with a small fresh sample. The paper is also strong evidence against the shortcut of "reuse the label from a similar prompt".
+</li></ul>
+<h3>NEW — Agreement Without Alignment: Label-Free Rubric Clarification Increases LLM-Judge Consensus but Not Agreement with Humans — <a href="https://arxiv.org/abs/2610.13303">https://arxiv.org/abs/2610.13303</a></h3>
+<p><em>Han, Kim (CEO Business School). cs.CL; submitted Oct 9, listed Mon Oct 12. Full PDF read, including Appendices A–E.</em></p>
+<ul><li><strong>Procedure (§3):</strong>
+<ol><li>Decompose each rubric into sub-criteria.
+</li><li>Five judges probe a development split.
+</li><li>Rank sub-criteria by cross-judge disagreement.
+</li><li>An editor (Claude Opus 5.5) rewrites the top k = min(5, ⌊n/2⌋) contested clauses, adding pass/fail examples where available.
+<br />The stage that moves sub-criteria to code checkers transferred none of the 75.
+</li></ol>
+</li><li><strong>Design (§4, Tables 1–2):</strong>
+<ul><li>judges: Claude Opus 5.5, Sonnet 5.5, Haiku 4.5, GPT-6 Luna and Gemini 3.5 Flash-Lite;
+</li><li>data: SummEval, the HealthBench meta-evaluation and USR;
+</li><li>six rubric conditions, including a matched control that applies the same edits to random unselected clauses;
+</li><li>preregistered under a version-control tag, with a sealed manifest;
+</li><li>129,770 requests at $236.69 (§5.1).
+</li></ul>
+</li><li><strong>Results (Table 3):</strong>
+<ul><li><strong>SummEval:</strong> inter-judge α +0.069 (95% CI 0.046–0.092) over the original and +0.074 over the random-clause control. Agreement with experts did not move: τ −0.007 (−0.037 to 0.021).
+</li><li><strong>HealthBench and USR:</strong> no α effect met the preregistered criteria.
+</li><li><strong>Secondary comparison:</strong> human agreement after editing contested clauses was <em>below</em> the control on all three datasets in point estimate (all CIs include 0).
+</li><li><strong>Repeat runs (Table 6):</strong> run-to-run disagreement ranged from ~0 (Haiku at temperature 0) to 0.246 (GPT-6 Luna on SummEval). Clarification raised it for Opus and Sonnet.
+</li></ul>
+</li><li><strong>Practical findings:</strong>
+<ul><li>One provider's batch transport ignored <code>responseJsonSchema</code>: 0/20 outputs conformed, versus 20/20 synchronously (App. C, Table 8).
+</li><li>On a negated HealthBench criterion, a judge's explanation identified the failure and then emitted <code>criteria_met = true</code> (App. B).
+</li></ul>
+</li><li><strong>Limitations (§7):</strong> three of the five judges are Claude models, and the editor is from the same family. Provider and model size are confounded. The plan changed before evaluation (all changes logged, App. A). No equivalence tests.
+</li><li><strong>Why it matters for BQAA:</strong> the paper argues against panel consensus as a quality metric for judge configurations. BQAA's eval tables should store per-judge verdicts <em>and</em> their rationales, run-to-run repeat rates and a small human-labelled anchor set. A "rubric v2 raised agreement" claim needs the human anchor. The schema-enforcement failure is a concrete reason to validate the structured output of every judge row at ingestion.
+</li></ul>
+<h3>NEW — When Faster Decisions Do Not Make Better Agents: An Empirical Study of Jev in Agent Workflows — <a href="https://arxiv.org/abs/2610.13092">https://arxiv.org/abs/2610.13092</a></h3>
+<p><em>Ling, Yu, Chen, Fang (Nanjing U, TU Munich). cs.AI; submitted Oct 9, listed Mon Oct 12. Full PDF read, including Appendices A–C.</em></p>
+<ul><li><strong>Setup (§4, Table 1):</strong>
+<ul><li>five agent families: ReAct and Reflexion on ALFWorld (134 tasks); T3A, AutoDroid and FastAgent on AndroidWorld (116 tasks);
+</li><li>variants: baseline LLM (gpt-5.6-luna), Jev (<code>jev-1.13.0</code>) for action selection, and on ALFWorld an LLM-Choice control with the same candidate interface;
+</li><li>three runs each, 4,500 executions;
+</li><li>paired task-cluster bootstrap intervals;
+</li><li>two-author trace coding (κ 0.756–1.0).
+</li></ul>
+</li><li><strong>Decision level (§5.2, Fig. 3):</strong> per-decision cost −66.1% to −78.4%, time −73.9% to −81.5%, and tokens per decision +53.5% to +134.9%. Jev's lower input price and zero output price (App. A.1) offset the extra tokens.
+</li><li><strong>Task success (§5.1, Table 5):</strong> ALFWorld drops 1.49 / 1.74 points. AndroidWorld drops 13.22 (T3A), 2.30 (AutoDroid) and 18.10 (FastAgent) points; the intervals for T3A and FastAgent are entirely negative.
+</li><li><strong>Delivered outcome (Table 2):</strong>
+<ul><li><strong>T3A:</strong> cost per delivered success rises from 68.70 to 73.97 mUSD (+7.7%; the interval spans zero).
+</li><li><strong>FastAgent:</strong> time per success goes from 239.4 s to 377.8 s.
+</li><li><strong>Reflexion-J:</strong> 2.0% of executions consume 53.3% of inference spend through unsuccessful recovery (§5.2). First-trial success is higher than the baseline (383/402 vs 376/402), but it recovers only 11/19 initial failures, against 25/26 for the baseline (Table 4).
+</li></ul>
+</li><li><strong>Where savings go (Fig. 4, §5.3, Table 3):</strong>
+<ul><li>auxiliary LLM calls and extra interactions absorb the selection savings;
+</li><li><strong>failed recovery</strong> (29.1% of coded executions) and <strong>ineffective search</strong> (24.7%) separate persistent losses;
+</li><li><strong>premature completion</strong> ends a run early, e.g. clicking a switch labelled "Off" and declaring Wi-Fi enabled.
+</li></ul>
+</li><li><strong>Limitations:</strong> text-only observations, three runs with one seed, budgets matched only within a family, and prices fixed at experiment time.
+</li><li><strong>Why it matters for BQAA:</strong> the right unit for agent cost analytics is <strong>cost per delivered success, including failed attempts</strong>, split into decision, auxiliary and environment time. Per-call cost is the wrong unit. BQAA dashboards that show only per-span or per-call savings would have reported T3A-J and FastAgent-J as wins. (The same model family sits behind several carded eval-vendor integrations, and behind the fleet's own <code>jev-shadow</code> gate.)
+</li></ul>
+<h3>Scouted, not ranked</h3>
+<p>From the Mon Oct 12 listing (cs.AI/SE/CL/MA new + cross-lists, 272 IDs); abstract only unless stated:</p>
+<ul><li><strong>Agent evaluation and safety:</strong>
+<ul><li>2610.12822, reward hacking as a transmissible strategy in multi-agent coding (PDF downloaded, <strong>not</strong> read in full);
+</li><li>2610.12756, hardware faults in LLM agents;
+</li><li>2610.13227, cross-session attacks through persistent artifacts in agent skills;
+</li><li>2610.13623 APEX-Harm, injection in shared workspaces;
+</li><li>2610.13886 X-AgentRed;
+</li><li>2610.13626 SWE-DeceptionBench;
+</li><li>2610.13267, memory repair for poisoned agents;
+</li><li>2610.13516 RESCUE, counterfactual evaluation of runtime monitors (VLA).
+</li></ul>
+</li><li><strong>Coding-agent trajectories and verifiers:</strong>
+<ul><li>2610.13356 SWE-Critix;
+</li><li>2610.13152, structural scoring of trajectories;
+</li><li>2610.13668, code-review agents on bug detection;
+</li><li>2610.13841, sandbox snapshots for retry;
+</li><li>2610.12849, agent PRs that touch CI/infrastructure;
+</li><li>2610.13361 AgentSWE;
+</li><li>2610.12569 SWE-Duel.
+</li></ul>
+</li><li><strong>Evaluation method:</strong>
+<ul><li>2610.13627 AMLworld-Compact, importance-weighted downsampling for cheaper evaluation;
+</li><li>2610.12601, multi-seed protocol for prompt-level overfitting;
+</li><li>2610.13829 MC-EvoBench, auditing self-improvement claims.
+</li></ul>
+</li><li><strong>Tools, memory and orchestration:</strong>
+<ul><li>2610.13889 RATED, reliability-aware tool retrieval;
+</li><li>2610.13870, when to consult a stronger model;
+</li><li>2610.13144, competence-aware orchestration;
+</li><li>2610.12874, temporal evidence forests for conversational memory;
+</li><li>2610.13075 LongHarness.
+</li></ul>
+</li><li><strong>Carried from the collector list (F02):</strong> 2610.12452 BrickBench and the out-of-scope vision, 3D and music items stay unranked.
+</li></ul>
+<hr />
+<h2>Six-week EV</h2>
+<ul><li><strong>LLM-derived columns need provenance and a reproducibility number.</strong> Two independent lines of work now converge: 2610.13823 (variance in semantic operators, including BigQuery cells) and the carded Stochastic Shift paper. Expect buyers who run LLM judgments in SQL to ask "would this dashboard say the same thing tomorrow?". BQAA can answer if it stores per-row model and deployment, run id and margin, and reports answer reproduction.
+</li><li><strong>Reuse with certification beats caching.</strong> SemViews shows that label reuse across related questions is safe only when a fresh sample certifies it. Agent-driven analytics (agents refining predicates at machine speed) makes this pattern valuable soon; similarity caches will produce silent misses.
+</li><li><strong>Judge consensus is not a quality metric.</strong> Following last brief's TestJack and SSCBench, this window adds evidence that agreement among judges can rise while agreement with humans does not. Eval tables need a human anchor slice and should keep per-judge rationales.
+</li><li><strong>"Cost per delivered success" becomes the agent-cost unit.</strong> The Jev agent study shows per-call savings reversing at the task level. Vendors who chart per-span cost will be challenged on this.
+</li><li><strong>Trace stores grow per-emitter ingestion mappers and read-time redaction.</strong> Laminar (OpenRouter Broadcast) and LiteLLM (OTLP ingestion, last brief) both map non-standard gateway attributes. Laminar's dual-mode PII sets a bar for redaction that depends on who is reading.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>Laminar v0.3.0:</strong> the self-hosted edition gets per-trace signals and clusters, an OpenRouter Broadcast OTLP mapper and read-time PII masking by viewer role. Upgrade needs an irreversible migration.
+</li><li><strong>2610.13823 Same Query, Different Answer:</strong> BigQuery's SemBench cells moved in 27% of cases across reruns. Store per-row outputs with model, deployment and margin, and report answer reproduction.
+</li><li><strong>2610.12768 SemViews:</strong> reuse old LLM labels only to order rows, and certify each answer with fresh samples. It cut oracle calls 28–45% while staying valid; similarity caches missed every time they hit.
+</li><li><strong>2610.13303 Agreement Without Alignment:</strong> rubric edits raised judge consensus (+0.069 α) but not agreement with experts. Keep a human anchor set and validate judge JSON at ingestion.
+</li><li><strong>2610.13092 Jev in agent workflows:</strong> per-decision cost fell 66–78%, but cost or time per delivered success rose for two mobile agents. Report cost per success, including failed attempts.
+</li><li><strong>NOTE:</strong> the Mastra observational-memory fixes and python-genai billable-token fields are merged but unreleased. LiveKit Agents 2.0 is still an open beta PR (A2A and per-thread persistence). Letta Code 0.34.11 is a patch.
+</li></ul>
+<h2>Unconfirmed</h2>
+<table>
+<tr><th>Item</th><th>What was not confirmed</th><th>Where I looked</th></tr>
+<tr><td>Laminar Signals semantics</td><td>What a "signal" detects, and how, is not described in the v0.3.0 notes. I describe only the stored shape (event id, signal id, severity, payload, clusters) and the pricing/credit changes. I did not run the release.</td><td>GitHub API release v0.3.0 (curl); PR bodies #2347, #2361, #2369</td></tr>
+<tr><td>Mastra 1.77.0-alpha.0 contents</td><td>npm shows <code>1.77.0-alpha.0</code> at 04:44Z Oct 12. I did not check whether it includes the #25906 observational-memory stack, so the stack is treated as unreleased.</td><td>npm registry; GitHub API PR #25906</td></tr>
+<tr><td>python-genai #3103</td><td>The PR body is just the title; I did not inspect which fields were added or what "billable" excludes.</td><td>GitHub API PR #3103</td></tr>
+<tr><td>Paper artifacts</td><td>Repositories not checked: github.com/semviews/sqp-variance-study and semviews/lotus-semviews (IBM papers), anonymous.4open.science/r/jev-emp-5BF4 (Jev study). The rubric paper says its artifacts are "to be released". All numbers come from the PDFs.</td><td>arXiv PDFs (full read)</td></tr>
+<tr><td>2610.12822 and other scouted papers</td><td>Abstract only; not read in full, so not ranked.</td><td>arXiv listing pages (https)</td></tr>
+<tr><td>AutoGPT proactive harness v1 (#15255) closed unmerged; AutoGPT 503 circuit breaker (#15414) opened</td><td>Collector-reported only; not re-checked (unmerged, NOTE-level at most).</td><td>fresh list F07/F15</td></tr>
+<tr><td>GitHub CLI calls</td><td>gap: several <code>gh api</code> calls stalled locally (no error code; background jobs killed at the time limit). I re-ran those lookups through the public GitHub REST API with curl, which succeeded. The 88-repo releases sweep completed via <code>gh</code> with no ERR lines.</td><td>local <code>gh</code> / curl</td></tr>
+<tr><td>Anthropic release notes completeness</td><td>Read the first 100k of ~125k characters. The newest entry is Oct 9, with none on Oct 10–12; the unread tail is older entries.</td><td>platform.claude.com release notes (WebFetch)</td></tr>
+<tr><td>Twitter/X, LinkedIn, Reddit</td><td>gap: X 401, LinkedIn authwall and Reddit 403, as reported in packs. Not re-probed. HN dropped 2026-09-27.</td><td>Pack status via fresh list</td></tr>
+</table>
+<p>All ranked claims are confirmed against primary sources: one Industry NEW from the GitHub release body and PR bodies, and four Academy NEW from full PDFs.</p>
+<h2>Housekeeping</h2>
+<ul><li><strong>Path:</strong> fresh-list (<code>_runs/fb-2026-10-12-0034/fresh-items.md</code> / <code>.json</code>; <code>FB_MERGE … fresh=18</code>). Packs were used only through the fresh list; no pack was opened.
+</li><li><strong>Packs merged (10):</strong> dsh-1432, agy-1532, muse-1632, dsh-1732, agy-1832, muse-1932, dsh-2032, agy-2132 (all PACK_DONE), muse-2232 (partial, no PACK_DONE), dsh-2332 (in-progress skeleton, 0 items).
+</li><li><strong>Gaps (disclosed):</strong>
+<ul><li>Agy 1232 and Muse 1332 Sun absent (Mac offline until ~13:42 PT Sun);
+</li><li>Agy 0032 Mon absent (not launched; tmux server wedged ~00:19 PT);
+</li><li>extra seats 0007 (Muse) and 0009 (DSH) failed (tmux wedged, no packs);
+</li><li>Muse 2232 partial; DSH 2332 skeleton.
+</li></ul>
+</li><li><strong>My own sweep covered the whole window, including the thin late-evening stretch (Sun ~22:20 PT – Mon 00:34 PT):</strong>
+<ul><li>GitHub releases for 88 repos (per_page=100; since 20:40Z Oct 11; no ERR lines; rate limit 5000/5000 at start);
+</li><li>PyPI JSON for 59 packages (1 × 404: <code>arize-ax</code>) and the npm registry for 31 packages, read ~08:00Z Oct 12;
+</li><li>Anthropic release notes and the OpenAI developer changelog (WebFetch; newest entries Oct 9 and Oct 8);
+</li><li>an extended web search for agent observability, tracing and evaluation launches (none dated Oct 11–12; Snowflake's Agent Observability event is still Oct 22).
+<br />In-window releases found: Laminar v0.3.0, Letta Code 0.34.11, gemini-cli 0.65.0-nightly, qwen-code 0.25.1-nightly, <code>@mastra/core</code> 1.77.0-alpha.0, and crewAI 1.15.27.dev20261012.
+</li></ul>
+</li><li><strong>arXiv:</strong> the Monday Oct 12 listing (announced Sun ~17:00 PT) for cs.AI (83 new), cs.SE (18), cs.CL (72) and cs.MA (8), 272 unique IDs including cross-lists. <strong>Verified ceiling: 2610.13948</strong> (200); 2610.13960, 14000, 14100 and 15000 all returned 404 at 08:40Z Oct 12.
+</li><li><strong>Pin:</strong> <code>2609.02702</code> v1 intact (abs 200, v1 200, v2 404 at 08:40Z). Not touched or re-carded.
+</li><li><strong>Verification method:</strong>
+<ul><li><code>gh api</code> releases sweep, plus curl against <code>api.github.com</code> for release and PR bodies (lmnr #2347, #2361, #2369; mastra #25906; python-genai #3103; livekit #7757);
+</li><li>PyPI <code>upload_time_iso_8601</code> and npm <code>time</code> / <code>dist-tags</code>;
+</li><li>arXiv <code>/list/&lt;cat&gt;/new</code> pages (https);
+</li><li>full PDFs via <code>pdftotext -layout</code> for 2610.13823, 2610.12768, 2610.13303 and 2610.13092.
+</li></ul>
+</li><li><strong>Catalog checks</strong> (<code>research/catalog.json</code>, 558 items): 0 hits for the four arXiv IDs, "semviews", "semantic quer" and "lmnr". "laminar" appears only inside the text of a LangWatch card, so there is no Laminar card and v0.3.0 is NEW. Nearest academic neighbours are <code>arxiv-2609-21133-stochastic-shift-…</code> and <code>arxiv-2610-02267-fast-models-slow-evidence-…</code>; both are distinct claims.
+</li></ul>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>laminar-v0-3-0-oss-signals-clusters-openrouter-broadcast-pii-dual-mode</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Laminar v0.3.0 (self-hosted): signals and clusters on every trace, OpenRouter Broadcast OTLP ingestion, and viewer-dependent PII masking
+</li><li><strong>url:</strong> <a href="https://github.com/lmnr-ai/lmnr/releases/tag/v0.3.0">https://github.com/lmnr-ai/lmnr/releases/tag/v0.3.0</a> (2026-10-11, stable)
+</li><li><strong>card text:</strong> Laminar's open-source platform release stores signal events (severity, payload) and cluster IDs on each aggregated trace row, and maps OpenRouter Broadcast's non-standard OTLP attributes into input, output, session and user. A new <code>dual</code> PII mode keeps raw text plus byte-range masks and redacts at read time according to the viewer's role. Upgrading requires an irreversible Postgres migration for Quickwit 0.9.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-13823-semantic-query-run-to-run-variance-bigquery-sembench</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Same Query, Different Answer — run-to-run variance in semantic SQL operators at temperature 0 (IBM)
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.13823">https://arxiv.org/abs/2610.13823</a>
+</li><li><strong>card text:</strong> Across SemBench's published five-run results, 27% of BigQuery's query cells changed quality (21% of text cells overall). At temperature 0, item flip rates reach 10.2% (24.0% on one task), and 4% of changed extractions changed 67% of SQL answers. Identical requests within one run disagree as often as across runs, and the paper recommends recording each operator output with its decision margin.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-12768-semviews-certified-reuse-llm-labels-semantic-filters</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> SemViews — certified reuse of LLM labels across semantic queries (IBM)
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.12768">https://arxiv.org/abs/2610.12768</a>
+</li><li><strong>card text:</strong> Earlier predicates' labels, a helper score and embeddings only order the rows; fresh stratified oracle samples certify precision and recall, so the guarantee holds for any catalog. It saves 28–45% of oracle calls and misses targets on 0.37% of 145,000 replayed queries, while similarity caches miss on every hit and 56% of LLM-judged implications between predicates fail on the actual labels.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-13303-rubric-clarification-judge-consensus-not-human-agreement</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Agreement Without Alignment — rubric clarification raises LLM-judge consensus but not agreement with humans
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.13303">https://arxiv.org/abs/2610.13303</a>
+</li><li><strong>card text:</strong> In a preregistered study (five judges, three providers, 129,770 requests), rewriting the rubric clauses judges disagreed on raised SummEval inter-judge α by 0.069 (+0.074 vs a random-clause control) with no detectable change in agreement with experts (τ −0.007). HealthBench and USR showed no effect. One provider's batch API ignored the response schema (0/20 conformed).
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-13092-jev-agent-workflows-cost-per-delivered-success</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> When Faster Decisions Do Not Make Better Agents — Jev for action selection across five agents (4,500 runs)
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.13092">https://arxiv.org/abs/2610.13092</a>
+</li><li><strong>card text:</strong> Jev cut per-decision cost 66–78% and latency 74–82%, but success fell 13–18 points on two AndroidWorld agents. T3A's cost per delivered success rose from 68.70 to 73.97 mUSD, and FastAgent's time per success went from 239 s to 378 s. Failed recovery and premature completion, not selection speed, decided task-level value.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<p>None.</p>
+<p><strong>Headline claims</strong></p>
+<ul><li>In SemBench's published five-run results, 27% of BigQuery's 64 query cells changed quality across runs, and item flip rates at temperature 0 reached 10.2% for gpt-oss-120B: <a href="https://arxiv.org/abs/2610.13823">https://arxiv.org/abs/2610.13823</a> (2026-10-09).
+</li><li>SemViews met its precision/recall targets on all but 0.37% of 145,000 replayed queries while saving 28–45% of oracle calls: <a href="https://arxiv.org/abs/2610.12768">https://arxiv.org/abs/2610.12768</a> (2026-10-08).
+</li><li>Laminar v0.3.0 adds a <code>dual</code> PII mode that stores raw text with masks and redacts at read time by viewer role: <a href="https://github.com/lmnr-ai/lmnr/releases/tag/v0.3.0">https://github.com/lmnr-ai/lmnr/releases/tag/v0.3.0</a> (2026-10-11).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>2026-10-12 · 12:34 AM PT (catch-up) · Opus 5.5</span>
+    </div>
+  </footer>
+</body>
+</html>
