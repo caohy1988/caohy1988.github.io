@@ -2476,6 +2476,25 @@
         "field-brief"
       ],
       "appliedToPlaybook": true
+    },
+    {
+      "id": "uncle-bob-agent-code-quality-loop-mutation-crap-gherkin-2026-10-11",
+      "date": "2026-10-11",
+      "displayDate": "Oct 11, 2026",
+      "title": "Uncle Bob agent code-quality loop — short instructions, small steps, automated gates, then mutation and CRAP hardening and Gherkin acceptance",
+      "href": "https://caohy1988.github.io/research/harness-lab/",
+      "why": "Code-quality loop for coding agents in five stages, as summarized from an image Haiyuan shared on 2026-10-10: short instructions, small steps, automated gates, hardening with mutation testing and CRAP scores, and acceptance written in Gherkin (Given / When / Then). No URL: that image is the only source and its author is not identified, so href is this Lab page, not a source, and the Uncle Bob name is how the loop was shared, not checked here. CRAP (change risk) is comp² × (1 − cov)³ + comp per function, where comp is its cyclomatic complexity and cov its test coverage from 0 to 1; over 30 is the usual cut-off, and a function whose complexity is over 30 scores over 30 at any coverage, so it needs splitting, not more tests. Already applied, per the harness playbook: dual review → human merge. Also applied: #522, report-only mutmut on the BQAA SDK, schedule or manual only and never a merge gate: 972 mutants, 70.9% score, 272 survivors (kick-ledger numbers; (972 − 272) / 972 would be 72.0%, so check #522's report before quoting a killed count), the survivors now a nightly-audit follow-up. Not yet: CRAP scoring and Gherkin acceptance. Design notes drafted 2026-10-11 (nothing run): report-only CRAP next to #522 (coverage.py plus radon or lizard, schedule or manual, never a gate, its top functions fed to the nightly audit as test-writing themes), and Coding EM kick done-when written as Given / When / Then, each Then a check code can run, or tagged for review when it needs judgment. Fit: code decides done, the closed proof loop, disproof review (reviewers take their rejection criteria from the done-when), and the mutation-testing Lab cards (Kanon's a guard must be able to fail, corralai's planted faults). Caveats: CRAP rewards coverage, not assertions, so a test that runs a line without checking it lowers CRAP while that line's mutants survive, so CRAP sits next to mutation, not in place of it; per-function coverage from line spans is approximate, and radon and lizard count complexity differently, so one tool is picked and pinned; Gherkin here covers the kick contract, not executable acceptance tests inside the SDK, which would need step definitions and a runner. Any workflow, kick-template or playbook change needs Haiyuan. No new seat. Lab card; appliedToPlaybook false.",
+      "source": "Image Haiyuan shared 2026-10-10 (no URL; author not identified) · harness-queue-1011 item 7 draft",
+      "tags": [
+        "mutation-testing",
+        "CRAP",
+        "Gherkin",
+        "code-decides-done",
+        "EM",
+        "nightly",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
     }
   ]
 }
