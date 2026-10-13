@@ -1,8 +1,98 @@
 {
-  "updatedAt": "2026-10-12T00:05:39Z",
+  "updatedAt": "2026-10-13T00:07:32Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "overnight-receipts-per-branch-receipt-merge-fix-kill-needs-you-2026-10-12",
+      "date": "2026-10-12",
+      "displayDate": "Oct 12, 2026",
+      "title": "overnight-receipts — zero-dependency CLI reads Claude Code session JSONL plus git branches and prints a per-branch receipt ranked worst-first with a merge/fix/kill suggestion and a needs-you list",
+      "href": "https://github.com/smithdavedesign/overnight-receipts",
+      "why": "Zero-dependency triage CLI (Node ≥ 22 and git, nothing to build) for the morning after unattended Claude Code runs: it parses the session logs already on disk under ~/.claude/projects and the local git branches, then prints one receipt per branch. A receipt carries a status (FAILED, UNVERIFIED or PASSED, taken from the last test or lint command — a test piped into tail that exits 0 is never PASSED), a merge/fix/kill suggestion with its reason (it never suggests merge without a passing test run), the task's first prompt, the session id and transcript path with a line reference per field, the last test command and its exit code, commit diff stats, retry counts, risk labels (dependency, data, auth, payments), out-of-area files, and a \"needs you\" list of what the agent's final message left undone or asked. Ranking is worst-first; a digest subcommand writes one file across repos atomically, and --json has a published schema. The repo is a 2026-10-11 rename of dawnlog, the npm name belonging to an unrelated tool. Safety: without --summarize the only subprocess is git and nothing touches the network (a test traps subprocesses and sockets to assert it), and all output is secret-redacted across 12 formats, best-effort; --summarize is the one option that runs anything else, your own claude -p, redacted first. Fit: our Mac CLIs run unattended overnight through grok-tmux-run, and the done-receipt rule (2026-09-27-0xjmori-harness-receipt-and-disproof-review) wants VERIFIED backed by checks that ran; a receipt built from test exit codes and git state is that evidence, next to titan-receipts (receipts checked in CI using a pinned verifier rather than the copy in the audited repo), receipt-pr-agent-cost-ledger and completion-check-evidence-not-narrative. Caveats: it assumes the Claude Code project JSONL layout and matches sessions to branches by branch name, worktree or commit times, so runs whose branches do not line up land under Unmatched; redaction is best-effort — a token format not on the list leaks; 228 node:test tests; 0 stars, created 2026-10-11, MIT; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-12-agy-harness-lab-pack",
+      "tags": [
+        "receipts",
+        "verification",
+        "git",
+        "Mac CLI",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "agent-chain-doctor-30-silent-stop-checks-exposed-guarded-unknown-startup-watchdog-2026-10-12",
+      "date": "2026-10-12",
+      "displayDate": "Oct 12, 2026",
+      "title": "agent-chain-doctor — one read-only shell script audits a scheduled agent chain (launchd / cron / systemd + the session script) against 30 silent-stop checks, verdict exposed, guarded or undecidable with the evidence printed",
+      "href": "https://github.com/elfovo/agent-chain-doctor",
+      "why": "A single shell script — no dependencies, no network, no writes, no privileges, running on the stock macOS bash 3.2 — that inspects the chain a scheduled agent runs through (launchd, cron or systemd plus the session script they launch) and returns, for each of 30 checks, exposed, guarded or undecidable (UNKNOWN in the report: a check that measured nothing is UNKNOWN, never GUARDED, and evidence prints under every EXPOSED). Exit 0 means nothing exposed, 1 something exposed, 2 the tool refused to diagnose. The failure shapes come from the author's own chain: a wakeup trigger file emptied by a failing date, a stale lock nothing clears, traps covering EXIT only, a scheduler PATH missing the agent's own binary, a laptop asleep through the window. Extras include extras/startup-watchdog, which kills a run that has printed nothing after N seconds instead of waiting out a multi-hour timeout, plus an MCP server (Python 3 stdlib, stdio, read-only) exposing the same 30 checks as diagnose_scheduled_agent. The honesty contract is stated up front: zero EXPOSED means \"these 30 checks found nothing\", never \"your chain is fine\" — the false-negative rate is unknown and, the README says, will stay unknown — and the suite is mutation-tested (30 checks × 2 mutants), with a published account of its own GUARDED line having been wrong twice. Fit: a job that never starts produces no job output, while a local scheduler may leave diagnostic traces; our launch standard pairs stream-json with grok-tmux-watchdog on a ~540s stale log (2026-09-05-stream-json-watchdog-all-runs) and vigil's card reports a window nothing tried as missed from outside, while this audits the launch chain before the window, beside loop-orchestrator-tmux-watchdog, confirm-old-process-dead-before-resume and the 2026-09-15-field-brief-miss-watch second line. Caveats: it is not a liveness monitor and cannot tell whether the agent did good work; hosted schedulers are unreadable from the machine, and its missed-run-check only tells you the same hour it skipped; the checks are heuristic; 12 open issues; 0 stars, created 2026-09-13, MIT; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-12-agy-harness-lab-pack",
+      "tags": [
+        "routines",
+        "audit",
+        "watchdog",
+        "Mac CLI",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "starlane-mapcheck-vault-audit-read-only-agents-tick-caps-circuit-breaker-2026-10-12",
+      "date": "2026-10-12",
+      "displayDate": "Oct 12, 2026",
+      "title": "starlane — stdlib-only Python harness around a Markdown vault: mapcheck link and secret audit, read-only specialist agents behind an Atlas dispatcher, scheduled routines with time limit, daily cap and circuit breaker",
+      "href": "https://github.com/Nichtege/starlane",
+      "why": "A personal tool made public — the README's own honest note says not a framework and not production software, shared as is — that runs a small harness over an Obsidian-style vault plus the Claude Code CLI, in four layers, stdlib-only Python 3.11+: Memory (aos mapcheck checks broken links, a two-hop navigation rule, frontmatter and leaked secrets), Agent (a roster of specialist agents whose tools come from a fixed whitelist — vault Read, Grep, Glob, with WebSearch and WebFetch only for an agent declared mixed, which is then told never to put note text into a search or URL — routed by an Atlas dispatcher; agents can read, they cannot write, run commands or push), Pulse (aos tick runs whitelisted routines without a shell, each with a time limit, a daily cap and a circuit breaker, the risky ones off by default), and Screen (aos serve, a local 127.0.0.1 dashboard behind a per-start token showing vault health, routine timelines, agent status and spend). It never edits notes except the digest folder and an opt-in git-pull routine. Fit: our fleet's root AGENTS.md vault contract is the same shape — vault truth over chat memory — and mapcheck is the same guard class as cadence-hooks' vault rm/empty-write guards, aimed at links, frontmatter and leaked secrets rather than writes, beside wordcell's path-scoped vault context and the 2026-09-15-box-mac-vault-sync card; the read-only specialist roster is a possible boundary for read-only research agents; our standing rule prohibits Grok bots from coding and routes implementation to Mac CLIs (2026-09-28-opus-draft-astra-fable-review), and tick's caps and circuit breaker are the run-limits idea (2026-09-23-0xjmori-run-limits-ladder-retry) inside a scheduler. Caveats: single-user, single-machine design; agents and skills need the claude CLI on PATH, logged in; the pack URL resolves to Nichtege/starlane, with the same repository ID; 1 star, created 2026-10-12, MIT; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-12-agy-harness-lab-pack",
+      "tags": [
+        "vault",
+        "routines",
+        "guardrails",
+        "run-limits",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "dsh-doc-review-isolated-subagent-json-schema-token-gate-multi-round-convergence-2026-10-12",
+      "date": "2026-10-12",
+      "displayDate": "Oct 12, 2026",
+      "title": "dsh-doc-review — DSH plugin: a per-session activated doc_review tool spawns an isolated sub-agent review with a JSON Schema report, a pre-spawn token cost gate and multi-round convergence tracking",
+      "href": "https://github.com/JiewiW/dsh-doc-review",
+      "why": "DeepSeek Harness plugin (Node.js ≥ 20, host @deepseek-ai/dsh >=0.2.0-rc.1 <0.3.0) that keeps document reviews out of the main session. Since v0.2.0 the doc_review tool is not globally resident: a session must run the /doc-review slash command first, which registers the tool in that session's scope only — idempotent, revoked when the session closes, and a session that never activated gets no schema at all. On a call it spawns an isolated sub-agent session with no external tools by default (web_search and web_fetch only under web_fact_check: true) and reviews the document against four toggleable dimensions — fact, completeness, necessity, format — returning a JSON Schema-constrained report (each issue carries id, dimension, severity, a location containing either a verbatim quote of at least 8 consecutive document characters or a Markdown heading line, claim, evidence and suggestion), an adjudication template and a next_action. A conservative token estimate runs before any spawn: a worst case over 20,000 tokens returns confirmationRequired without spawning, a chain-cumulative projection over 20,000 × max_rounds is blocked again, and one confirmation holds per chain_id. Multi-round chains (default 1 round, hard cap 3) read the archived previous round back, compute a line- and character-level LCS change ratio, align issues across rounds (an unmatched old issue counts as resolved, an unmatched new one as added — the plugin recounts, not the reviewer) and stop on convergence (change ratio under 3.0%, or no high-severity issue and zero recomputed new ones, or the cap). Each round archives document.md, review-report.json and change-log.md under .doc-review/<chain_id>/, with chain-cost.json at the root; tests run under node --test with zero LLM calls and zero network. Fit: our locked doc workflow (2026-09-28-opus-draft-astra-fable-review, 2026-10-06-reviewer-rule-docs-vs-code) runs blind reviews whose commentary should not bloat the drafting session; an isolated sub-agent with a schema-locked report is that shape for the DSH seat, beside portable-dsh-multi-agent-plugin and dsh-cos-verify-handoffs, and the pre-spawn cost gate is the run-limits rule (2026-09-23-0xjmori-run-limits-ladder-retry) inside the tool. Caveats: the README is in Chinese; it depends on the host's subagents spawn provider and degrades to same-session without it; references never fetch URLs; it is built against 0.2.0 preview hosts whose kernel API may change before a stable release; 0 stars, created 2026-10-12, MIT; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-12-agy-harness-lab-pack",
+      "tags": [
+        "DSH",
+        "review",
+        "run-limits",
+        "dual-LGTM",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "clear-resume-handover-note-disk-warm-cache-resume-before-clear-2026-10-12",
+      "date": "2026-10-12",
+      "displayDate": "Oct 12, 2026",
+      "title": "clear-resume — Claude Code plugin that saves a plain-text handover (goal, next action, status, decisions, failed attempts) into ~/.clear-resume before /clear or cache expiry and loads it in the fresh session",
+      "href": "https://github.com/m4cd4r4/clear-resume",
+      "why": "Claude Code plugin (Node ≥ 18 and git; one skill, three hooks, one mod) for pausing a long chat without losing the task. /clear-resume:handover writes a short plain-text handover into ~/.clear-resume — the goal, the next action, where things stand, the decisions made and what already failed — a file you can open, edit, paste into another chat or load on a second machine; after /clear the fresh session loads it automatically. Two opt-ins sit on top: an idle handover (off by default) that acts about 5 minutes before the prompt cache expires, either as a toast or as auto, which has the handover written while the cache is still warm, clears the session and then waits — it does not keep working while you are away; and a relay mod that runs /clear after each save and continues from the handover, stopping when its clears are used up or two continued sessions in a row make no new commit. The README reports these separate measurements: coming back to a 390k-token session after the 60-minute cache expired cost US$1.56 in each of 3 runs, while a warm handover plus a fresh session reading it cost US$0.15–0.17 in total (n=3, both on Sonnet 5.5, 10 Oct 2026), about 9–10× less — with the caveat that the saving exists only if you come back; moving a 390k-token session to Opus cost US$3.13 against US$0.24 via a scripted handover (n=1); and on a 30-item build the relay and native auto-compaction each finished 5 of 6 runs, with the five completed runs in each group averaging 37.4M vs 35.3M tokens. A handover is under 1% of what /clear removes (about 780 vs 102,088 tokens, medians across the author's 104 clears). Fit: our handoff packet v1 (Maps/Contracts/manage-handoffs.md, 2026-09-25-rari-handoff-packet-repro-first-promotion-gate) similarly preserves the objective and decisions, with the note itself kept on disk where another machine can audit it; it sits next to context-guard-token-ceiling-handoff-checkpoints (forces a handoff note past a ceiling) and claude-code-cache-keepalive (cache collapse visible in the transcript), and compaction-stress-lab's card is the measured account of what a summary loses. Caveats: macOS has not been tested by hand — the author daily-drives Windows 11, a Linux clean install was tested by hand, and CI covers all three; the cost figures are the author's own small-n measurements; the cache-expiry timing is an estimate; handovers are local plain text, so keep secrets out of them; 1 star, created 2026-09-19, MIT; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-12-agy-harness-lab-pack",
+      "tags": [
+        "handoffs",
+        "context",
+        "cache",
+        "cost",
+        "Agy Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "agent-docs-lint-dead-ref-model-name-unreferenced-agent-broken-anchor-2026-10-11",
       "date": "2026-10-11",
