@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-10-13 · 12:34 PM PT · Muse</title>
+  <meta name="description" content="Continuation billing reaches the JS stack with gemini-4-argon; Cline makes plugin failures and scheduled-run failures observable; arXiv&#x27;s Monday batch never lands">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-13-1234-muse.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 PM PT · Tue Oct 13, 2026 · Muse (muse-wonder-full-1.0)</p>
+    <article>
+<h1>Field Brief — 2026-10-13-1234: Continuation billing reaches the JS stack with gemini-4-argon; Cline makes plugin failures and scheduled-run failures observable; arXiv's Monday batch never lands</h1>
+<p><strong>Writer: Muse (<code>muse-wonder-full-1.0</code>)</strong> · For Haiyuan Cao (TL, BQAA + ADK)
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>Slot:</strong> 2026-10-13-1234 (scheduled; late wake ~12:45 PT). <strong>Window:</strong> ~12h since the 2026-10-13-0034 brief — about 00:34 PT to 12:34 PT Tue Oct 13 (07:34Z–19:34Z; my write-time sweep ran to ~20:01Z). <strong>Effort:</strong> high. <strong>Path:</strong> old (pack reads; revert flag after the 0034 shadow check found merge_lost=1).</p>
+<p><strong>Shape of this window:</strong> a release morning, not a paper morning. Four shipped, material Industry releases anchor the brief — Vercel's <code>@ai-sdk/google</code> bringing gemini-4-argon with automatic long-decode continuation and summed usage to JavaScript, a three-train Cline wave that stops hiding plugin and scheduled-run failures, Opik publishing triggered alerts to AWS EventBridge, and Cloudflare normalizing a second harness's events into one stream vocabulary. Underneath sits a dense unreleased merge layer (Langfuse trace-batching/audit work, Mastra telemetry flushing, LiteLLM redaction, Inspect header retention) that is NOTE-grade until versions carry it. Academy is empty by verified absence, not by inattention: the arXiv ceiling never moved off <code>2610.13948</code> in twelve hours of hourly probes plus my own write-time ladder — the Monday announcement batch simply never landed.</p>
+<hr />
+<h2>Read this first</h2>
+<ol><li><strong>Vercel AI SDK <code>@ai-sdk/google@4.0.95</code> (GH Release 2026-10-13T16:10:55Z, in the <code>ai@7.0.139</code> wave): gemini-4-argon arrives with long-decode continuation, and usage is summed across the hops.</strong> Requests that hit the per-request <code>CONTINUATION</code> cap are continued automatically, usage is summed across requests, the first request's prompt count is exposed as <code>providerMetadata.google.initialPromptTokenCount</code>, and a <code>continuationToken</code> resumes responses that exhausted <code>maxOutputTokens</code>. This is last night's python-genai v2.30.0 billable-continuation semantics landing in the JS stack the same day the model name propagates through LiteLLM, gemini-cli and AutoGPT. → NEW Industry.
+</li><li><strong>Cline SDK <code>sdk/sdk/v0.0.93</code> (08:26:52Z) + CLI <code>cli-v3.0.71</code> (08:56:25Z; npm 08:57:00Z) + VS Code <code>v4.1.24</code> (15:02:27Z): failures stop being silent.</strong> Plugins load in-process behind one registry that tracks loading/ready/degraded/failed state; a failing plugin now surfaces via <code>pluginIssues</code>, <code>cline hub plugins</code> and <code>plugin.status_changed</code> instead of silently dropping its tools. Images cost a flat 1,600 estimated tokens instead of ~30k at the text rate (a few screenshots were triggering auto-compaction), and scheduled runs that die on a provider error are recorded as failed with usage and tool calls kept. → NEW Industry.
+</li><li><strong>Opik 2.2.99 (GH Release 08:31:59Z; npm 08:30:21Z; PyPI 08:26:40Z): alerts leave the platform, MCP overhead lands on the right row.</strong> Triggered alerts publish to AWS EventBridge (#8752), and MCP server instructions plus deferred tool listings are attributed to their server's breakdown row instead of polluting the trace (#8892). → NEW Industry.
+</li><li><strong>Cloudflare Agents <code>agents@0.28.1</code> + <code>@cloudflare/codemode@0.5.4</code> (both 13:28Z): a second harness gets translated into the shared event vocabulary.</strong> <code>OpenCodeHarness</code> <code>session.events()</code> now emits the same <code>run_start</code>/<code>tool_start</code>/<code>text_delta</code>/compaction kinds <code>PiHarness</code> reports (raw events stay available, durable and resumable, via <code>session.log()</code>), and codemode's durable <code>describe()</code> shows real tool output types instead of <code>unknown</code>. → NEW Industry.
+</li><li><strong>Academy: verified zero.</strong> Every hourly pack and my own 20:01Z probe agree — <code>2610.13948</code> → 200; <code>2610.13949</code>/<code>13950</code>/<code>14000</code>/<code>14500</code>/<code>15000</code> → 404. No new arXiv IDs exist to screen. The seven HF-resurfaced older papers (submitted Sep 30–Oct 9) are scouted-not-ranked below with reasons; none clears the agent-eval/observability bar, so none was PDF-read for ranking.
+</li></ol>
+<hr />
+<h2>Industry</h2>
+<h3>NEW</h3>
+<h4>Vercel AI SDK <code>@ai-sdk/google@4.0.95</code> (ai 7.0.139 wave) — gemini-4-argon with automatic long-decode continuation and summed usage</h4>
+<ul><li><strong>What shipped:</strong> GH Release <code>@ai-sdk/google@4.0.95</code> published 2026-10-13T16:10:55Z as part of the <code>ai@7.0.139</code> train (16:10:34Z; npm <code>ai</code> 7.0.139 at 16:10:54Z), with v6/v5 backports (<code>ai@6.0.305</code>, <code>ai@5.0.275</code>) and ~100 <code>@ai-sdk/*</code> package releases. Body read via <code>gh api</code> by me; the feature merged as vercel/ai #23261 (15:58:13Z, +1144/−30) and shipped the same afternoon.
+</li><li><strong>Continuation surface:</strong> <code>gemini-4-argon</code> model id plus long-decode support for <code>generateContent</code> — a request that reaches the per-request cap (<code>CONTINUATION</code>) is continued automatically, <strong>usage is summed across requests</strong>, the first request's prompt token count is exposed as <code>providerMetadata.google.initialPromptTokenCount</code>, and the <code>continuationToken</code> provider option/metadata resumes a response that used up its <code>maxOutputTokens</code> budget. <code>generateText</code> on the Interactions API now polls <code>background: true</code> model calls until they finish.
+</li><li><strong>The same-day argon wave (context, mostly NOTE-grade):</strong> LiteLLM merged <code>gemini-4-argon-cyber-permissive</code> on Vertex (#46249) and deduped bare argon pricing rows (#46246, breaking-marked); AutoGPT merged backend argon support (#15496); gemini-cli opened argon model support (#29737); python-genai opened an argon <code>Model</code> enum add (#3124). Only the Vercel release ships a usable surface today.
+</li><li><strong>Why it matters for BQAA:</strong> the continuation-billing problem carded last night for Python (<code>BillableUsage</code> accumulated across continuation calls) now has a JS twin with the same shape — per-hop usage summed by the SDK, initial prompt tokens broken out separately. Two independent SDKs converging on "sum the hops, expose the first prompt" within 16 hours is the strongest signal yet that warehouse cost models need a continuation dimension, not a per-response usage block. Catalog check: 0 hits for <code>argon</code> / <code>gemini-4</code> before ranking.
+</li></ul>
+<h4>Cline SDK v0.0.93 + CLI v3.0.71 + VS Code v4.1.24 — plugin state machine, flat image tokens, scheduled runs that admit failure</h4>
+<ul><li><strong>What shipped:</strong> three stable trains in one day, all bodies read via <code>gh api</code> by me — <code>sdk/sdk/v0.0.93</code> (08:26:52Z), <code>cli-v3.0.71</code> (08:56:25Z; npm <code>cline</code> 3.0.71 at 08:57:00Z), and <code>v4.1.24</code> (15:02:27Z; plus <code>desktop-v0.0.46</code> at 15:03:59Z, body not separately read). The SDK/CLI pair carries the substance; v4.1.24 ports the token/compaction fixes to the extension.
+</li><li><strong>Plugin observability:</strong> plugins load in-process through one registry per process (no node/bun runtime on PATH; <code>CLINE_PLUGIN_MODE=sandbox</code> keeps the subprocess). The registry wraps import/setup/hooks/tools/commands with timeouts and error capture and tracks each plugin's state (loading/ready/degraded/failed/disabled) with its last error. A failing plugin no longer silently drops its tools: <code>session.create</code> accepts a <code>plugins</code> policy and returns <code>pluginIssues</code>, the hub answers <code>plugins.list|status|reload</code> and broadcasts <code>plugin.status_changed</code>, <code>cline config tools --json</code> lists a <code>plugin_failure</code> entry, and an uncaught plugin error marks the plugin failed instead of shutting down the daemon. Each session gets its own copy of every plugin module.
+</li><li><strong>Cost correctness:</strong> <code>estimateRequestInputTokens</code> no longer bills base64 image payloads at the text rate — a ~90 KB screenshot counted ~30k tokens, so a few images triggered auto-compaction far below budget. Each image now adds a flat <code>ESTIMATED_TOKENS_PER_IMAGE</code> (1600), and auto-compaction uses the resolved model's context window when the catalog entry lacks one.
+</li><li><strong>Scheduled-run honesty:</strong> queued runs are claimed correctly under <code>bun:sqlite</code> (named parameters bound as NULL meant the hub never claimed a run and it sat pending with no error); a run whose agent turn ends in a provider error is recorded as <strong>failed with the error message, keeping usage and tool calls</strong>, instead of succeeding silently; superseded cron occurrences are cancelled instead of replaying every missed slot back to back.
+</li><li><strong>Also:</strong> reasoning-off works on every provider (level-only Gemini models get a thinking level, not a rejected <code>thinkingBudget</code>; a request never carries both portable and native reasoning controls); Composio connector meta-tools register for signed-in sessions; <code>.claude/skills</code> is discovered; symlink rule files load; catalog grows 6,572 → 6,862 models.
+</li><li><strong>Why it matters for BQAA:</strong> this is the harness-side version of the trace-store correctness wave — extension points and background runs getting explicit state machines and failure records. "The run report keeps usage and tool calls on failure" is exactly the property cost audits need from autonomous schedulers; flat image-token accounting is a reminder that token <em>estimates</em> drive compaction behavior and belong in the trace. Prior Cline card is v4.1.22 (Sep 30); this is a distinct capability wave, ranked NEW.
+</li></ul>
+<h4>Opik 2.2.99 — triggered alerts to AWS EventBridge; MCP instructions and deferred tools attributed to their server's breakdown row</h4>
+<ul><li><strong>What shipped:</strong> GH Release <code>2.2.99</code> published 2026-10-13T08:31:59Z; npm <code>opik</code> 2.2.99 at 08:30:21Z and PyPI <code>opik</code> 2.2.99 at 08:26:40Z (three distinct clocks, all in-window; body read via <code>gh api</code> by me).
+</li><li><strong>Product items:</strong> triggered alerts publish to <strong>AWS EventBridge</strong> (#8752) — alerting leaves the Opik UI and becomes routable infrastructure; <strong>MCP server instructions and deferred tool listings land on their server's breakdown row</strong> (#8892) — MCP overhead is attributed to the server that caused it instead of smearing across the trace; saved Ollie chart widget queries run by reference (#8833); Vertex AI models resolve through the model registry rather than an enum (#8897); partition-health series bounded with per-table LWD scan isolation (#8805).
+</li><li><strong>Same-window merge tail (unreleased, NOTE only):</strong> the OPIK-8636 judge wave kept landing all morning — cache tokens counted once for Anthropic/Bedrock LangChain usage (#8904), judge extra-body forwarding (#8889/#8890), thinking-model output-limit messaging (#8846) — none of it in a published version yet.
+</li><li><strong>Why it matters for BQAA:</strong> two recurring themes in one small release — observability outputs becoming event streams other systems subscribe to (EventBridge), and attribution granularity catching up with MCP (per-server rows for instructions/deferred tools). The unreleased cache-token-once fix is the cost-correctness item to watch for the next Opik version. Catalog check: latest Opik card is 2.2.78; 2.2.98 (Oct 12) was never carded (0 hits for <code>2.2.98</code>), so 2.2.99 ranks on its own shipped content.
+</li></ul>
+<h4>Cloudflare Agents 0.28.1 + @cloudflare/codemode 0.5.4 — OpenCodeHarness events normalized to the shared harness vocabulary; codemode describes real output types</h4>
+<ul><li><strong>What shipped:</strong> GH Releases <code>agents@0.28.1</code> (13:28:30Z) and <code>@cloudflare/codemode@0.5.4</code> (13:28:27Z), both stable, bodies read via <code>gh api</code> by me. Labeled "Patch Changes" upstream; ranked here because the harness-event normalization is a material capability, not a version-bump diary entry.
+</li><li><strong>Harness events:</strong> <code>OpenCodeHarness</code> <code>session.events()</code> now returns a session snapshot followed by events translated into the same kinds <code>PiHarness</code> reports — <code>run_start</code>/<code>run_end</code>, <code>operation_start</code>/<code>operation_end</code> (carrying the result <code>wait()</code> returns), <code>message_start</code>/<code>message_end</code>, <code>text_delta</code>, <code>reasoning_delta</code>, <code>tool_start</code>/<code>tool_end</code>, permissions and compaction. The raw OpenCode events remain available, durable and resumable, from <code>session.log()</code>. The OpenCode example also swaps local file/shell tools for Workspace tools from <code>@cloudflare/computer</code>.
+</li><li><strong>Codemode types:</strong> <code>ToolSetConnector</code> forwards each AI SDK tool's <code>outputSchema</code> into connector descriptors, so durable <code>codemode.describe()</code> shows the output type instead of <code>unknown</code>; async-converting schemas are awaited instead of dropped, and output types now describe the returned value (<code>.default()</code> required, <code>.pipe()</code> piped, <code>.transform()</code> honestly <code>unknown</code>).
+</li><li><strong>Also in 0.28.1:</strong> <code>createAI</code> gains a <code>zdr</code> gateway option, <code>vendorKey: &quot;request&quot;</code> BYOK routing, and AI Gateway dynamic routes as <code>ai(&quot;dynamic/&lt;route&gt;&quot;)</code>; MCP client/server 2.3.1 + SDK 1.32.1 with same-origin-only redirect following; <code>McpAgent</code> answers 404 immediately for DELETE-ended sessions.
+</li><li><strong>Why it matters for BQAA:</strong> cross-harness event normalization is the ingest problem in miniature — one vocabulary (<code>tool_start</code>/<code>tool_end</code>, compaction, permissions) over heterogeneous runtimes, with the raw log retained underneath for replay. That two-layer shape (normalized stream + durable raw log) is precisely the contract a warehouse wants harness vendors to converge on. Prior Cloudflare card is 0.25.0; ranked NEW for the normalization capability.
+</li></ul>
+<h3>Progress (existing cards)</h3>
+<ul><li><strong><code>python-genai-v2-30-0-continuation-required-auto-resumption-checkpoint-resume-billable-usage-accumulated</code></strong> — same-day patch <code>v2.30.1</code> (GH Release 2026-10-13T14:02:01Z; PyPI 14:11:16Z; body read by me) concatenates <code>output_text</code> across multi-step model responses in a turn; the identical fix shipped in JS as <code>@google/genai</code> v2.29.1 (GH 14:54:13Z). The continuation surface is already attracting correctness fixes: #3117 (merged 17:58Z, unreleased) clears continuation state and preserves prompt feedback when a continuation hop returns no candidates, and a <code>2.30.2</code> release PR (#3123) is open. Only the shipped v2.30.1 is claimed here; the rest is watch state.
+</li></ul>
+<h3>One-line mentions (NOTE)</h3>
+<ul><li><strong>Langfuse merge wave, unreleased (no v4.59; latest stays v4.58.0):</strong> #18602 reprocesses late trace arrivals with sharded Redis-Cluster readiness (24h history, stop-and-drain deploy); #18671 adds an <code>audit_logs</code> table with staging outbox and event contract; #18705/#18698 gate and parallelize the Topics trace pipeline; #18679 (open) would keep semconv per-modality token counts out of usage totals. All NOTE until a release carries them — but this is the densest trace-integrity work of the window.
+</li><li><strong>Mastra merge wave, unreleased (@mastra/core stable stays 1.76.0; 1.77.0-alpha.3 npm prerelease 16:29Z):</strong> telemetry is flushed completely before shutdown across OTel/Braintrust/Datadog/LangSmith exporters (#26757–#26761, #26760); usage of completed steps is reported when a stream aborts (#26629); experiments comparison shows cost/duration/tokens at full precision (#26853); a suspended tool runs once under concurrent approval/resume (#26688); one stored preview format for span input/output/error (#26764).
+</li><li><strong>LiteLLM, unreleased (latest stable v1.105.0):</strong> nested-field redaction for callback inputs and provider responses merged (#45923, 19:25Z) — top-level-only redaction was a known leak shape; breaking-marked provider-matching 4xx proxy errors (#45537); dev train rolls to 1.107.0 (#46239) while <code>v1.106.0</code> final remains absent.
+</li><li><strong>Inspect (UK AISI), unreleased (latest 0.3.279; release PR retargeted to 0.4.0):</strong> model-call response headers retained in eval records (#5795, merged 19:13Z); writable host mounts blocked in Docker sandboxes by default, breaking-marked (#5830); proxy sentinel rejection/termination decisions proposed (#5844, open).
+</li><li><strong>OpenAI SDK browser/computer-use helpers (open, unshipped):</strong> parity PRs opened three minutes apart — openai-python #4071 (19:27Z) and openai-node #2934 (19:30Z) — proposing first-party browser-use/computer-use helpers in both official SDKs. WATCH for merge; do not read as shipped.
+</li><li><strong>langchainjs HITL respond decisions (merged, unreleased):</strong> #11498 (19:25Z) adds human-in-the-loop respond-decision plumbing to the JS core runtime; no npm release carries it yet (latest <code>langchain@1.5.16</code>, Oct 8). Sibling open: #11930 beta OpenAI Decisions middleware with fail-closed tool gating (live API behavior explicitly unverified by its author).
+</li><li><strong>Codex internals, unreleased (stable stays rust-v0.162.1; alpha.9 prerelease 15:47Z):</strong> speculative remote V2 compaction gets background-result reuse (#53620, following #53614's not-yet-wired infrastructure), multi-agent v2 thread spawning is extracted with provisional children (#53654/#53660), and V2 executor capability inventories are acquired and cached via exec-server RPC (#53723/#53736).
+</li><li><strong>Pydantic AI merges, unreleased (latest v2.55.0, Oct 9):</strong> Postgres-backed <code>PGTaskDurability</code> (#10174), xAI server-side tool results replayed as tool turns paired with their calls (#10043), one-summary compaction idempotence (#9716). Plan-only PR #10173 proposes automatic Batch API support for durable runs (Temporal + Anthropic first) — adds no runtime API.
+</li><li><strong>Qwen Code merges, unreleased:</strong> web-shell trajectory history bridged to live lifecycle state (#13952) after the workspace file browser (#13878); durable team plan approval for the managed-agent runtime (#13974); a convergence reminder that interrupts runaway read-only exploration phases (#13601).
+</li><li><strong>LiveKit prompt-caching wave, unreleased:</strong> six merges (18:28Z) add <code>CacheBreakpoint</code> markers for GPT-5.6+ across the Responses LLM, voice instructions and dynamic instructions (#7459–#7656) — per-turn cache reuse becomes explicit in a voice-agent stack.
+</li><li><strong>Arize Phoenix v20.21.2 (GH Release 16:04:09Z; PyPI 16:10:15Z):</strong> two type-coercion bugfixes only (PostgreSQL latency float, retrieval summary int) — shipped but below the ranking bar. Release PRs for 20.21.3 / phoenix-otel 0.17.3 opened 19:26Z, unshipped.
+</li><li><strong>npm <code>langsmith</code> 0.10.13 (11:38:45Z):</strong> JS clock moved with no same-version GH Release (JS publishes npm-only here); substance unconfirmed — see Unconfirmed.
+</li><li><strong>google/adk-python v2.12.0 (GH Release 16:35:19Z; PyPI <code>google-adk</code> 16:42:55Z):</strong> 1P NOTE only per standing rule; clocks recorded, body not carded.
+</li><li><strong>Bulk-close hygiene:</strong> vercel/ai closed ~49 stale PRs unmerged in a ~3-minute automated sweep (19:21–19:24Z) — a triage signal, not 49 product decisions; individual closes not carded.
+</li></ul>
+<hr />
+<h2>Academy</h2>
+<p>No new arXiv listing landed in-window — verified, not assumed. The ceiling held at <strong><code>2610.13948</code></strong> at every hourly probe from 07:49Z through 19:31Z and at my own write-time ladder (~20:01Z): <code>2610.13948</code> → 200; <code>2610.13949</code>, <code>2610.13950</code>, <code>2610.14000</code>, <code>2610.14500</code>, <code>2610.15000</code> → 404. Category listings (cs.AI/cs.CL/cs.LG/cs.SE/cs.MA <code>new</code>) agree all day, maxima ≤ <code>2610.13948</code>. The Monday announcement batch (ordinarily ~20:00 ET Monday) had still not posted more than twelve hours late; when it lands it will be a double-size screening job for the 00:34 slot. Priority pin <code>2609.02702</code> re-verified by me: v1 → 200, v2 → 404 — intact, not re-carded.</p>
+<p><strong>NEW ranks: none.</strong> There are no in-window submissions to rank, and I am not backfilling older papers to fill the section. No full-PDF reads were performed because no candidate cleared the abstract screen for the agent-evaluation / observability / tracing / memory / safety bar; per standing rule, un-read papers are never ranked.</p>
+<h3>Scouted, not ranked</h3>
+<p>All seven surfaced via HF Daily Papers 2026-10-13 set-diffs during the window (the feed grew 14 → 22 papers across the day; abstracts fetched by me from the abs pages; catalog grep 0 hits for every id). All were submitted Sep 30 – Oct 9 — resurfaced, not new:</p>
+<ul><li><a href="https://arxiv.org/abs/2610.03825">https://arxiv.org/abs/2610.03825</a> — <em>Same Output, Different Gold</em> (submitted Oct 2): holding system output fixed and swapping the gold reference moves a multilingual PII benchmark score by up to 4.95 F1 (worst language 7.55), because an undocumented aggregation default made the shipped reference a partial copy of a scored output. The closest to the bar — genuine eval-integrity methodology with a reference-sensitivity band — but a single-benchmark annotation study from Oct 2; HOLD. Worth a PDF read only if a future slot needs Academy depth and the listing is again empty.
+</li><li><a href="https://arxiv.org/abs/2610.00707">https://arxiv.org/abs/2610.00707</a> — <em>Initialization Improves LLM-Driven Discovery</em> (Sep 30): 12 "Modular" discovery harnesses across 5 tasks; early-iterate quality predicts success and parallel-exploration initialization gives consistent gains. Harness-adjacent, but about discovery optimization, not evaluation or observability. HOLD.
+</li><li><a href="https://arxiv.org/abs/2610.05637">https://arxiv.org/abs/2610.05637</a> — <em>Visual Grounding Safety in Vision-Language Models</em> (Oct 5): models that refuse harmful VQA requests comply 31–59pp more often when the same request asks for a point/bbox grounding. Safety-relevant, but VLM-output-channel alignment, off the agent-analytics bar. HOLD.
+</li><li><a href="https://arxiv.org/abs/2610.13481">https://arxiv.org/abs/2610.13481</a> — <em>Branching On-Policy Distillation</em> (Oct 9): teacher supervision on branched student continuations; training method, not analytics. HOLD.
+</li><li><a href="https://arxiv.org/abs/2610.02740">https://arxiv.org/abs/2610.02740</a> — <em>Prospective Hindsight</em> (Oct 2): RL self-calibration via prediction-reality gaps; training signal, not analytics. HOLD.
+</li><li><a href="https://arxiv.org/abs/2610.12998">https://arxiv.org/abs/2610.12998</a> — <em>Evaluating LLM Creativity through Long-Tail Performance</em> (Oct 9): creativity-benchmark unification across 15 benchmarks; general LLM eval, not agent eval. HOLD.
+</li><li><a href="https://arxiv.org/abs/2610.12099">https://arxiv.org/abs/2610.12099</a> — <em>UNITAS</em> (Oct 8): 3D-native world-action model for robot manipulation; embodied AI, out of scope. HOLD.
+</li></ul>
+<hr />
+<h2>Six-week EV</h2>
+<ul><li><strong>Continuation is becoming a billing primitive, defined independently by each SDK.</strong> Python defined accumulated <code>BillableUsage</code> last night; Vercel's Google provider summed usage across continuation hops today; gemini-4-argon is the forcing model, propagating through LiteLLM/gemini-cli/AutoGPT within hours. Within six weeks, any agent workload on long-decode models will produce multi-hop generations whose cost is only correct if the warehouse models continuations explicitly (hop count, per-hop usage, initial prompt vs. resumed tokens). Expect "why is my token total different from the provider's" tickets as the visible symptom.
+</li><li><strong>Failure visibility is the new harness feature race.</strong> Cline shipped a plugin state machine and scheduled runs that record failures with usage intact; Letta shipped a watchdog for silent watches last night; Mastra spent the morning making every telemetry exporter flush completely before shutdown (unreleased). The pattern: silent degradation — dropped tools, pending-forever runs, lost spans — is being engineered out in public. BQAA should expect (and ask for) explicit degraded/failed states with last-error fields as standard trace columns.
+</li><li><strong>Attribution granularity is catching up with MCP and multi-hop calls.</strong> Opik attributes MCP instructions/deferred tools per server; Cloudflare normalizes two harnesses into one event vocabulary while keeping the raw log durable underneath; Inspect retains raw response headers per model call (unreleased). The direction is consistent: normalized views for aggregation, raw artifacts retained for audit. Schema designs that keep only one of the two will feel dated quickly.
+</li><li><strong>The unreleased queue is unusually deep — next slots will be release-heavy.</strong> Langfuse (late-arrival reprocessing, audit logs), Mastra 1.77, LiteLLM 1.106/1.107, Inspect 0.4.0, OpenHands 1.28.0, Codex rust-v0.163.0, OpenAI SDK 7.33.0/3.30.0 and the browser/computer-use helpers are all merged-or-open and unshipped, and a double arXiv batch is pending. The 00:34 and next 12:34 briefs should budget for verification volume, not discovery.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>@ai-sdk/google 4.0.95:</strong> gemini-4-argon lands in the Vercel AI SDK with automatic long-decode continuation — usage summed across hops, <code>initialPromptTokenCount</code> exposed, <code>continuationToken</code> resumes exhausted responses; last night's Python billable-continuation semantics, now in JS.
+</li><li><strong>Cline SDK 0.0.93 / CLI 3.0.71 / v4.1.24:</strong> in-process plugin registry with loading/ready/degraded/failed states and <code>pluginIssues</code> instead of silently dropped tools; images cost a flat 1,600 estimated tokens; scheduled runs record provider-error failures with usage and tool calls kept.
+</li><li><strong>Opik 2.2.99:</strong> triggered alerts publish to AWS EventBridge; MCP server instructions and deferred tool listings are attributed to their server's breakdown row.
+</li><li><strong>Cloudflare Agents 0.28.1:</strong> <code>OpenCodeHarness</code> events are translated into the shared PiHarness vocabulary (run/tool/text/compaction kinds) with the raw log kept durable and resumable; codemode <code>describe()</code> shows real tool output types.
+</li><li><strong>python-genai v2.30.1 (Progress):</strong> multi-step <code>output_text</code> concatenation fix, mirrored in JS v2.29.1; continuation-state fix merged unreleased, 2.30.2 PR open — the new durability surface is already in its correctness-fix phase.
+</li><li><strong>Academy:</strong> verified zero — arXiv ceiling frozen at <code>2610.13948</code> for 12+ hours (my ladder at 20:01Z agrees); seven older HF-resurfaced papers scouted and held with reasons, none PDF-read or ranked.
+</li></ul>
+<h2>Unconfirmed</h2>
+<table>
+<tr><th>Item</th><th>What was not confirmed</th><th>Where I looked</th></tr>
+<tr><td>npm <code>langsmith</code> 0.10.13 substance</td><td>Clock confirmed (11:38:45Z, packs + my npm registry read showing <code>latest: 0.10.13</code>); no same-version GH Release exists and I did not read a changelog/diff, so no capability claim is made</td><td>GH <code>langchain-ai/langsmith-sdk</code> releases (newest v0.14.8, Python); npm registry JSON</td></tr>
+<tr><td>Cline <code>desktop-v0.0.46</code> (15:03:59Z)</td><td>Existence/clock from Agy 0932; body not read by me — no claims made from it</td><td>Pack §2A only</td></tr>
+<tr><td>Social surfaces</td><td>gap: X HTTP 401 invalid_token, Reddit HTTP 403, LinkedIn 302 authwall — as reported consistently by packs; extra seats 1207/1209 did not probe social at all; not re-probed by me</td><td>Pack §1 lines (0032/0132/0232/0332/0432/0532/0932/1032/1132)</td></tr>
+<tr><td>Collector gaps 06:00–09:00 PT</td><td>agy-0632, muse-0732, dsh-0832 absent (no pack files). The stretch is covered by Agy 0932's long window (since 13:18:35Z) plus my own release sweep, disclosed rather than proven per-item</td><td><code>ls packs/</code> at kick; Agy 0932 header; my <code>gh api</code> sweep ~19:57Z</td></tr>
+<tr><td>Agy 1232 pack</td><td>IN PROGRESS stub at write time (all sections "Pending probe execution", no PACK_DONE) — used as no evidence at all; anything after the extra seats' ~19:30Z freezes rests on my sweep alone</td><td><code>packs/agy-pack-2026-10-13-1232.md</code> read in full</td></tr>
+<tr><td>Python HTTPS probes</td><td>gap: python <code>urllib</code> SSL CERTIFICATE_VERIFY_FAILED for arXiv/npm/PyPI in my environment — worked around with <code>curl</code> (all ceiling/registry claims above rest on the curl reads, which succeeded)</td><td>My probe output ~20:01Z</td></tr>
+<tr><td>Release behaviors (all ranked items)</td><td>Release bodies and registry clocks read; nothing executed or installed</td><td><code>gh api</code> release bodies; npm/PyPI JSON via packs + curl spot reads</td></tr>
+<tr><td>Prior-brief Unconfirmed rows</td><td>inspect_ai 0.3.279 "internal improvements" still unread at diff level (unchanged; 0.4.0 now the pending target); DSH 2332 Mon residue is moot — this window's packs start from its as-of and my sweep re-derived the release set independently</td><td>This window's packs; my sweep</td></tr>
+</table>
+<p>All ranked claims are confirmed against primary sources I read directly: GH release bodies for <code>@ai-sdk/google@4.0.95</code>, <code>cline</code> <code>sdk/sdk/v0.0.93</code> + <code>cli-v3.0.71</code> + <code>v4.1.24</code>, <code>opik 2.2.99</code>, <code>agents@0.28.1</code>, <code>@cloudflare/codemode@0.5.4</code>, <code>python-genai v2.30.1</code>, <code>js-genai v2.29.1</code>, <code>phoenix v20.21.2</code> and <code>ai@7.0.139</code> via <code>gh api</code>; arXiv ceiling/pin and seven candidate abstracts via direct abs-page reads; catalog dedupe greps against the live <code>catalog.json</code> (572 items / 148 briefs / 150 runs; max brief <code>2026-10-13T0034</code>).</p>
+<h2>Housekeeping</h2>
+<ul><li><strong>Old path used:</strong> revert flag <code>_runs/FB-OLD-PATH-NEXT</code> (set after the 0034 shadow found merge_lost=1, AgentSWE 2610.13361). No fresh-items list existed; the packs below were my candidate list, read by me (full reads of 0032/0132 headers-and-sections; section-targeted reads of the rest), deduped across packs and against the live catalog before ranking — 0 hits for <code>argon</code>, <code>gemini-4</code>, <code>2.2.98</code>, and every scouted arXiv id; prior cards confirmed for Cline (v4.1.22), Opik (2.2.78), Cloudflare (0.25.0) and python-genai (v2.30.0). Priority pin <code>2609.02702</code> v1 intact (verified by me ~20:01Z), not re-carded. Nothing from the 0034 brief (Letta Code, python-genai v2.30.0, Weave v0.53.12, 2610.13227, 2610.13361, LangGraph/Langfuse Progress) is re-admitted; the one Progress entry is the shipped v2.30.1 patch on the v2.30.0 card.
+</li><li><strong>Packs used (11 PACK_DONE + 1 stub):</strong> agy-0032, muse-0132, dsh-0232, agy-0332, muse-0432, dsh-0532, agy-0932, muse-1032, dsh-1132, muse-1207 (extra), dsh-1209 (extra); agy-1232 IN PROGRESS stub — lookup reference only, contributed no items.
+</li><li><strong>Gaps (disclosed):</strong> agy-0632 / muse-0732 / dsh-0832 ABSENT (Tue ~06:00–09:00 PT thin stretch, backstopped by Agy 0932's 13:18:35Z-since window and my sweep); Agy 1232 incomplete at write time; X 401 / Reddit 403 / LinkedIn 302 authwall as reported in packs (extra seats did not probe social); HN dropped 2026-09-27; Medium scout silent (newest file 2026-09-21, lead-only in any case). No Desk section, no GTM content, no 1P BQAA cards; google-adk v2.12.0 clocks NOTE'd only.
+</li><li><strong>My own sweep (~19:57–20:01Z Oct 13):</strong> <code>gh api …/releases?per_page=2</code> over 23 tracked repos plus by-tag body reads for every ranked/NOTE'd release — in-window shipped set confirmed as ranked above; nothing material after the extra seats' freezes (newest anything: codex <code>rust-v0.163.0-alpha.9</code> prerelease 15:47Z; stable still absent). Still-absent at write time, all verified by successful lookups: litellm v1.106.0 final, inspect_ai 0.4.0, OpenHands 1.28.0, @mastra/core 1.77.0 stable, codex rust-v0.163.0 stable, phoenix 20.21.3.
+</li><li><strong>arXiv ceiling verified by me:</strong> <code>2610.13948</code> → 200; <code>2610.13949</code> / <code>2610.13950</code> / <code>2610.14000</code> / <code>2610.14500</code> / <code>2610.15000</code> → 404 (~20:01Z, curl). Twelve hours of pack ladders agree. The late Monday batch, when it lands, makes the 00:34 slot a double screening.
+</li><li><strong>Verification method:</strong> GH release bodies via authenticated <code>gh api</code> (no rate-limit failures; the packs' codex stream-CANCEL/504 transients cleared on their retries and on mine); npm/PyPI clocks from pack direct reads plus my curl spot reads (python urllib SSL failed — see Unconfirmed); arXiv abs probes and abstract reads via curl; catalog greps over the live JSON. Untrusted pack/web text treated as evidence only throughout.
+</li></ul>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>vercel-ai-sdk-google-4-0-95-gemini-4-argon-long-decode-continuation-usage-summed-initial-prompt-tokens</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Vercel AI SDK @ai-sdk/google 4.0.95 — gemini-4-argon with automatic long-decode continuation; usage summed across hops, initial prompt tokens exposed, continuationToken resumes exhausted responses
+</li><li><strong>url:</strong> <a href="https://github.com/vercel/ai/releases/tag/%40ai-sdk%2Fgoogle%404.0.95">https://github.com/vercel/ai/releases/tag/%40ai-sdk%2Fgoogle%404.0.95</a> (2026-10-13, stable)
+</li><li><strong>card text:</strong> The ai 7.0.139 wave adds the gemini-4-argon model id and long-decode support for generateContent: requests that reach the per-request CONTINUATION cap are continued automatically with usage summed across requests, the first request's prompt count exposed as providerMetadata.google.initialPromptTokenCount, and a continuationToken provider option resumes responses that used up their maxOutputTokens budget. generateText on the Interactions API now polls background:true model calls until they finish — the JS twin of python-genai v2.30.0's accumulated BillableUsage, shipped the same day.
+</li></ul>
+</li><li><strong>id:</strong> <code>cline-sdk-0-0-93-cli-3-0-71-plugin-failures-observable-flat-image-tokens-scheduled-runs-record-failures</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Cline SDK v0.0.93 + CLI v3.0.71 (+ VS Code v4.1.24) — in-process plugin registry with per-plugin state and pluginIssues, flat 1600-token image estimates, scheduled runs recorded as failed with usage kept
+</li><li><strong>url:</strong> <a href="https://github.com/cline/cline/releases/tag/sdk/sdk/v0.0.93">https://github.com/cline/cline/releases/tag/sdk/sdk/v0.0.93</a> (2026-10-13, stable)
+</li><li><strong>card text:</strong> Plugins load in-process through one registry that tracks loading/ready/degraded/failed/disabled state with last errors; a failing plugin surfaces via pluginIssues, plugins.list/status/reload and plugin.status_changed instead of silently dropping its tools, and each session gets its own plugin-module copy. Image payloads cost a flat ESTIMATED_TOKENS_PER_IMAGE (1600) instead of ~30k at the text rate that triggered early auto-compaction, and scheduled runs are claimed correctly under bun:sqlite, recorded as failed with usage and tool calls when a provider error ends the turn, and no longer replay every missed cron slot. CLI v3.0.71 (08:56Z) and VS Code v4.1.24 (15:02Z) carry the same wave.
+</li></ul>
+</li><li><strong>id:</strong> <code>opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Opik 2.2.99 — triggered alerts publish to AWS EventBridge; MCP server instructions and deferred tool listings attributed to their server's breakdown row
+</li><li><strong>url:</strong> <a href="https://github.com/comet-ml/opik/releases/tag/2.2.99">https://github.com/comet-ml/opik/releases/tag/2.2.99</a> (2026-10-13, stable)
+</li><li><strong>card text:</strong> Triggered alerts now publish to AWS EventBridge (#8752), taking alerting out of the UI into routable infrastructure, and MCP server instructions plus deferred tool listings are put on their server's breakdown row (#8892) so MCP overhead is attributed where it originates. Also: saved Ollie chart widget queries run by reference (#8833), Vertex AI models resolve through the model registry not an enum (#8897), and partition-health series are bounded with per-table LWD scan isolation (#8805). GH 08:31Z, npm 08:30Z, PyPI 08:26Z.
+</li></ul>
+</li><li><strong>id:</strong> <code>cloudflare-agents-0-28-1-opencodeharness-normalized-event-stream-codemode-output-schemas</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Cloudflare Agents 0.28.1 + codemode 0.5.4 — OpenCodeHarness events translated into the shared PiHarness vocabulary with durable raw log underneath; codemode describe() shows real tool output types
+</li><li><strong>url:</strong> <a href="https://github.com/cloudflare/agents/releases/tag/agents%400.28.1">https://github.com/cloudflare/agents/releases/tag/agents%400.28.1</a> (2026-10-13, stable)
+</li><li><strong>card text:</strong> OpenCodeHarness session.events() now emits a session snapshot followed by events in the same kinds PiHarness reports — run_start/run_end, operation_start/operation_end carrying the wait() result, message and text/reasoning deltas, tool_start/tool_end, permissions and compaction — while raw OpenCode events stay available, durable and resumable, via session.log(). Codemode 0.5.4 forwards each tool's outputSchema so durable describe() shows the returned value's type instead of unknown. Also: createAI zdr gateway option, vendorKey request BYOK, AI Gateway dynamic routes, MCP 2.3.1/SDK 1.32.1 with same-origin redirect following.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>python-genai-v2-30-0-continuation-required-auto-resumption-checkpoint-resume-billable-usage-accumulated</code>
+<ul><li><strong>text:</strong> Same-day patch v2.30.1 (GH Release 2026-10-13T14:02:01Z; PyPI 14:11:16Z) concatenates output_text across multi-step model responses in a turn; the identical fix shipped in JS as @google/genai v2.29.1 (GH 14:54:13Z). Continuation correctness work is already queuing behind it: #3117 (merged, unreleased) clears continuation state and preserves prompt feedback on empty continuation hops, and release PR #3123 (2.30.2) is open.
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>@ai-sdk/google 4.0.95 (<a href="https://github.com/vercel/ai/releases/tag/%40ai-sdk%2Fgoogle%404.0.95">https://github.com/vercel/ai/releases/tag/%40ai-sdk%2Fgoogle%404.0.95</a>, 2026-10-13) adds gemini-4-argon with long-decode continuation: usage summed across requests, providerMetadata.google.initialPromptTokenCount exposed, continuationToken resumes maxOutputTokens-exhausted responses.
+</li><li>Cline SDK v0.0.93 (<a href="https://github.com/cline/cline/releases/tag/sdk/sdk/v0.0.93">https://github.com/cline/cline/releases/tag/sdk/sdk/v0.0.93</a>, 2026-10-13) loads plugins in-process behind a state-tracking registry that surfaces failures via pluginIssues instead of silently dropping tools, and flattens image token estimates to 1600 per image.
+</li><li>Opik 2.2.99 (<a href="https://github.com/comet-ml/opik/releases/tag/2.2.99">https://github.com/comet-ml/opik/releases/tag/2.2.99</a>, 2026-10-13) publishes triggered alerts to AWS EventBridge and attributes MCP server instructions and deferred tool listings to their server's breakdown row.
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>12:34 PM PT · Tue Oct 13, 2026 · Muse</span>
+    </div>
+  </footer>
+</body>
+</html>
