@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief · 2026-10-14 · 12:34 PM PT · Muse</title>
+  <meta name="description" content="Braintrust learns to trace ADK workflows; Langfuse relays audit events into ClickHouse; Mastra&#x27;s GitHub release catches up with npm; two carried eval-integrity papers clear the full-PDF bar">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-14-1234-muse.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 PM PT · Wed Oct 14, 2026 · Muse (muse-wonder-full-1.0)</p>
+    <article>
+<h1>Field Brief — 2026-10-14-1234: Braintrust learns to trace ADK workflows; Langfuse relays audit events into ClickHouse; Mastra's GitHub release catches up with npm; two carried eval-integrity papers clear the full-PDF bar</h1>
+<p><strong>Writer: Muse (<code>muse-wonder-full-1.0</code>)</strong> · For Haiyuan Cao (TL, BQAA + ADK)
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>Slot:</strong> 2026-10-14-1234 (scheduled). <strong>Window:</strong> ~12h since the 2026-10-14-0034 brief — about 00:34 PT to 12:34 PT Wed Oct 14 (07:34Z–19:34Z; my write-time probes ran to ~19:44Z). <strong>Effort:</strong> high. <strong>Path:</strong> fresh (fresh-items candidate list; packs used as lookup reference only).</p>
+<p><strong>Shape of this window:</strong> a consolidation window, not a launch window. No new arXiv IDs exist above last night's ceiling — every collector ladder and my own probe agree the ceiling is still <code>2610.18874</code>, and the Wednesday announcement lands after this slot — so Academy promotes two papers from last night's scouted pool on fresh full-PDF reads rather than inventing a batch. Industry is the observability vendors tightening their own plumbing: Braintrust's Python SDK learns ADK workflow tracing and OpenTelemetry span customizers, Langfuse ships its audit-log relay and trace-batching reprocessing in the v4.59.0 platform release, Opik fixes a cache-token double-count, and Mastra's 1.77.0 GitHub Release finally appears about three hours after npm — closing the open Unconfirmed row from the 0034 brief. The unreleased-merge pile (Cloudflare's Workspace migration, Inspect's bridge header forwarding, LiteLLM's safeguard classifier) is where next window's releases are visibly queuing.</p>
+<hr />
+<h2>Read this first</h2>
+<ol><li><strong>Braintrust Python SDK <code>py-sdk-v0.46.0</code> (GH Release 2026-10-14T15:30:43Z): ADK workflows become traceable, and span customization becomes fail-closed.</strong> The release adds tracing for ADK workflow nodes and tool calls (with Google GenAI owning LLM spans for ADK model calls), OpenTelemetry span customizers that fail closed on errors without dropping spans, usage-detail capture for Pydantic AI web search, Mistral service tiers, OpenRouter Responses APIs, and OpenAI/LiteLLM Decisions API tracing. For an ADK TL this is the most directly relevant ship of the window. → NEW Industry.
+</li><li><strong>Mastra <code>@mastra/core@1.77.0</code> GH Release exists (2026-10-14T08:29:32Z) — the 0034 brief's open row closes.</strong> The 0034 brief ranked 1.77.0 from the npm clock (05:31:29Z) plus the repo CHANGELOG because no GitHub Release existed; the Release has now been published and its highlights (FactorySandbox contract with Docker/E2B/Platform providers, environment builds, durable-agent run fencing) are consistent with the carded content. → Progress on the 1.77.0 card.
+</li><li><strong>Langfuse platform v4.59.0 (GH Release 2026-10-14T09:20:36Z): audit events relay into ClickHouse, late trace arrivals get reprocessed.</strong> Staged audit events now relay into ClickHouse on a 10-second single-worker lease, trace-batching reprocesses late arrivals with sharded readiness, organizations can opt into ClickHouse Billing, and Gemini 4 Argon pricing lands. The paired SDK minors (Python v4.18.0, JS v5.14.0) are API-typing only. → Progress on the v4.57.0 card.
+</li><li><strong>Academy headline — <a href="https://arxiv.org/abs/2610.14477">What Counts as the Same Task?</a> (full PDF read): similarity is not validity.</strong> Scoring the same 14,336 stored agent runs under different validity rules, embedding-threshold policies admitted 75–100% of edits that changed the task itself (e.g. a swapped payee) across four encoders. The proposed fix is an executable task contract — protected facts, permitted edits, authorized outcomes, feasible completions — checked before any agent runs. → NEW Academy (promoted from the 0034 brief's scouted pool on a fresh full-PDF read; no new arXiv IDs exist this window).
+</li><li><strong>Opik 2.2.100 (GH Release 2026-10-14T08:48:51Z): a token-accounting fix worth more than its patch number.</strong> Cache tokens are now counted once for Anthropic and Bedrock LangChain usage (#8904), and a new <code>span_weeks</code> index table is registered from span writes (#8858/#8859). One day after the 2.2.99 card, this is Progress, not a new rank — but any cost rollup built on the old counting overstates cache spend. → Progress on the 2.2.99 card.
+</li></ol>
+<hr />
+<h2>Industry</h2>
+<h3>NEW</h3>
+<h4>Braintrust Python SDK v0.46.0 — ADK workflow-node and tool-call tracing; OTel span customizers fail closed without dropping spans; Decisions API tracing</h4>
+<ul><li><strong>What shipped:</strong> GH Release <code>py-sdk-v0.46.0</code> published 2026-10-14T15:30:43Z (stable; body read via <code>gh api</code> by me). The latest Braintrust Python SDK catalog card is 0.36.0 — ten minors back — so this ranks NEW on its own shipped content, not as a patch bump.
+</li><li><strong>Tracing surface:</strong> ADK workflow nodes and tool calls are traced (#895), with a follow-on fix letting Google GenAI own the LLM spans for ADK model calls (#897) — i.e. the vendor thought about span <em>ownership</em> at the framework/model boundary instead of double-emitting. OpenAI and LiteLLM <strong>Decisions APIs</strong> are traced (#927), which connects directly to yesterday's OpenAI SDK Decisions usage reporting: decision-model calls are becoming a first-class traced object on both sides of the wire. OpenRouter GA and beta Responses APIs are traced (#893); streamed Google GenAI candidate metadata is preserved (#894).
+</li><li><strong>Usage fidelity:</strong> Pydantic AI web-search usage details are captured (#892) and conversation input is captured on agent spans (#925); Mistral usage service tier (#891), new request params and streamed logprobs (#926) are captured. These are the fields that decide whether a stored span can be re-priced later.
+</li><li><strong>Safety posture:</strong> OpenTelemetry span customizers are supported (#916) and — the load-bearing detail — customizer errors <strong>fail closed without dropping spans</strong> (#915). A broken enrichment hook degrades to an uncustomized span rather than a missing one, which is the correct failure mode for an analytics pipeline: partial data beats silent holes. Heavy imports are deferred on Python 3.15 via <code>__lazy_modules__</code> (#931).
+</li><li><strong>Why it matters for BQAA:</strong> Braintrust is a trace producer BQAA may warehouse, and ADK is Haiyuan's other team. ADK workflow/tool spans with explicit GenAI span ownership, plus fail-closed customizers, determine whether ADK-originated traces arrive complete, de-duplicated and re-priceable — or with exactly the silent gaps that make warehouse joins lie.
+</li></ul>
+<h3>Progress (existing cards)</h3>
+<ul><li><strong><code>langfuse-v4-57-0-eval-score-persistence-decision-model-evaluators-graduate-gateway-key-expiration-otel-inline-media</code></strong> — Langfuse platform <code>v4.59.0</code> (GH Release 2026-10-14T09:20:36Z; body read by me) relays staged audit events into ClickHouse (#18713, relay every 10 seconds on a single-worker lease #18737/#18728) — the audit wave the 1234/0034 briefs tracked as unreleased now ships. Trace-batching reprocesses late arrivals with sharded readiness (#18602) and emits readiness gauges as totals only (#18723); individual organizations can opt into ClickHouse Billing (#18742) with spend alerts corrected to count plan fees (#18739/#18768); OTEL ingest gains media workload/throughput metrics and per-media-path input-preparation measurement (#18750/#18757), bounded concurrent media uploads, and Claude Managed Agents span mapping (session-create as span #18756, agent-named spans #18754, tool mapping #18720); Gemini 4 Argon pricing and selectable-model coverage land (#18762); the JS v6 / PY v5 SDK majors preparation merges into this release (#18516) but the majors themselves remain unreleased. The redesigned session view is enabled by default (#18690). Only the audit/batching/billing/OTEL increments are claimed here; the long web-fix tail is not.
+</li><li><strong><code>opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row</code></strong> — Opik <code>2.2.100</code> (GH Release 2026-10-14T08:48:51Z; npm 08:47:52Z, PyPI earliest upload 08:44:00Z per Muse 0132; body read by me) counts cache tokens once for Anthropic and Bedrock LangChain usage (#8904) — a direct correction to cost/token rollups — registers a <code>span_weeks</code> index from span writes (#8858/#8859, retention/query plumbing for span storage), carries <code>scoring_failed</code> through Optimization Studio's code-metric wrapper (#8742), gives thinking Claude judges more default <code>max_tokens</code> (#8881), and reports "output limit ran out while thinking" instead of "empty response" (#8846). An opt-in TTL backfill joins the tiered-storage Helm job (#8870).
+</li><li><strong><code>mastra-core-1-77-0-span-links-traceparent-gateway-pricing-factorysandbox</code></strong> — the <code>@mastra/core@1.77.0</code> GitHub Release was published 2026-10-14T08:29:32Z (read via <code>gh api</code> by me; npm clock remains 05:31:29Z — different clocks, kept apart), closing the 0034 brief's disclosure that 1.77.0 content rested on npm + CHANGELOG. The Release highlights match the carded content (FactorySandbox contract now shown with Docker/E2B/Platform provider implementations, Factory environment builds and multi-repo sessions, observational-memory hardening) and add one detail the CHANGELOG read did not surface: durable-agent <strong>run fencing</strong> across many storage adapters, so a crashed-and-recovered run cannot overwrite the recovered run's threads/messages/workflow state. No card-text correction is needed; the GH-lag caveat can be retired. Post-1.77, npm has moved to <code>1.78.0-alpha.2</code> (18:15:33Z, per DSH 1132) with no same-version GH Release — the alpha line is NOTE-only below.
+</li></ul>
+<h3>One-line mentions (NOTE)</h3>
+<ul><li><strong>Langfuse SDK minors — Python v4.18.0 (GH 08:40:51Z; PyPI 08:40:45Z) + JS v5.14.0 (GH 08:41:14Z; npm @langfuse/tracing 08:43:03Z), bodies read by me:</strong> API typing/docs only (Dataset JSON-schema fields typed as objects, optional read-side metadata, shared <code>CursorMetaResponse</code> pagination, <code>fromStartTime</code>/experiments docs). No new tracing capability; NOTE. The JS-v6/Py-v5 majors remain unreleased.
+</li><li><strong>LangChain <code>langchain==1.4.6</code> (GH Release 17:28:06Z; PyPI 17:27:47Z; body read by me):</strong> patch release whose one feature is opt-in per-call interrupts in HITL middleware (#41062) — a real control-surface increment, but a single feature inside a patch train; NOTE until a minor carries a broader surface.
+</li><li><strong>Claude Agent SDK v0.3.300 (GH Release 18:24:05Z; npm publish 14:28:12Z with the <code>latest</code> dist-tag moving at 18:26:23Z per DSH 1132; body read by me):</strong> fix-grade, like 0.3.299 before it — transcript import no longer skips rows containing U+2028/U+2029, a background subagent's final report always runs as its own turn, <code>canUseTool</code> stops suppressing always-allow rules for org-approval connector tools (reverting 0.3.292 behavior), hook <code>updatedInput</code> is validated and unknown keys dropped. Shipped and worth knowing; below the NEW bar.
+</li><li><strong>Arize Phoenix <code>arize-phoenix-v20.21.4</code> (GH Release 16:12:17Z; body read by me):</strong> single UI bug-fix (labels/table sort/accessibility); patch bump, NOTE.
+</li><li><strong>Prereleases (not rankable):</strong> Haystack <code>v3.4.0-rc1</code> (GH 11:29:25Z; <code>page_number</code> metadata unified to chunk-start page across splitters — a behavior change worth watching at final), LiteLLM <code>v1.107.0-dev.1</code> (17:02:35Z), AutoGPT platform beta <code>v0.8.4</code> (16:22:16Z). LiteLLM <code>v1.106.0</code> final remains absent (newest stable still <code>v1.105.1</code>; confirmed in my sweep — newest release overall is the dev prerelease).
+</li><li><strong>Material merges, unreleased (NOTE at most):</strong> Cloudflare Agents migrates <code>think</code>/<code>agents</code> to the <code>@cloudflare/computer</code> Workspace, deprecating <code>@cloudflare/shell</code>/<code>createExecuteTool</code> (#2560–#2565, #2559; <code>createAI</code> on <code>env.AI.run</code> #2576; automatic resume for dropped <code>/run</code> streams #2589 — Agy 0932); Inspect's agent-bridge forwards allowed Anthropic betas, Accept-Encoding and Responses reasoning context (#5708, superseding the unmerged #4894 — DSH 0532); LiteLLM generates Anthropic "auto mode" <code>safeguard_results</code> via a classifier model on the <code>/v1/messages</code> bridge (#45600, +7597/−888 — DSH 0532); Langfuse records billable units in an append-only ClickHouse ledger (#18722, post-v4.59.0 — DSH 0532); Cline runs plugins only in workers, dropping in-process mode (#15069 — Agy 0032); Inspect merges an eval-sharding design/Step-1 plan (#5540 — Agy 0332). Watch the next Cloudflare/Inspect/LiteLLM releases for these to ship.
+</li><li><strong>Standing watches, unchanged (verified by me or by collectors this window):</strong> OpenAI SDKs' newest releases are still Node v7.33.0 / Python v3.31.0 in my write-time sweep — browser/computer toolset parts 2–4 have not shipped; Inspect newest is still 0.3.280 (release PR #5853 for 0.3.281 still open per collectors); python-genai newest is still v2.30.1 (release PR #3123 still open per collectors); npm <code>langsmith</code> latest is still 0.10.13 (2026-10-13T11:38:45Z, re-read by me) with its substance still unread (see Unconfirmed); npm <code>@mastra/core</code> <code>latest</code> is still 1.77.0.
+</li><li><strong>google/adk-python:</strong> collector sweeps show PR activity only, no in-window release. 1P NOTE only per standing rule; nothing carded.
+</li></ul>
+<hr />
+<h2>Academy</h2>
+<p><strong>No new arXiv batch landed in this window.</strong> The abs-page ceiling is unchanged at <code>2610.18874</code>: every collector this window (Muse 0132 through the 1207/1209 extra seats) probed <code>18874</code> → 200 with <code>18875</code>–<code>18882</code> → eight consecutive 404s, and my own write-time ladder (~19:44Z) agrees (<code>18874</code>/<code>2609.02702</code> → 200; <code>18875</code>/<code>19000</code>/<code>19500</code> → 404). The Tuesday-evening (Wed-dated) announcement lands ~17:00 PT, after this slot; the 00:34 brief owns it. Priority pin <code>2609.02702</code> Trace-as-State remains intact (v1/v2 live) and is not re-carded. The two papers below were announced in last night's batch, listed as scouted-not-ranked in the 0034 brief, and are promoted here on <strong>fresh full-PDF reads by me</strong> (<code>pdftotext</code>, methods/results/limitations included) — promoted as carry, disclosed as such, not dressed up as in-window discoveries.</p>
+<h3>NEW</h3>
+<h4><a href="https://arxiv.org/abs/2610.14477">What Counts as the Same Task? Executable Contracts for Robustness Evaluation of Tool-Using Agents</a></h4>
+<ul><li><strong>Full PDF read.</strong> v1 [cs.SE] 10 Oct 2026 (announced in last night's batch). Shahriyar, Iftee, Barton &amp; Wright (RIT / Naval Postgraduate School).
+</li><li><strong>The question:</strong> robustness and agent-security evals score agents on <em>modified</em> task instances (injected notes, perturbed fields). A result on a modified instance only says something about the original task if the modification is still a valid test of it. The paper's running example is exact: a hostile invoice note saying "pay B" is a valid hostile candidate (correct payee still A); changing the trusted payee field to B is a different task wearing a small edit; disabling the usual payment endpoint changes the plan, not the task. Scoring all three as one perturbation class makes it impossible to tell agent failure from task change from vanished solution.
+</li><li><strong>Method:</strong> an <strong>executable task contract</strong> states, before any agent runs, the protected facts and relations that define the task, the permitted edits, the authorized outcomes, and the accepted completion plans. A candidate is valid when it passes four checks — well-formedness (K), permitted-edit compliance, protected-fact preservation, and feasibility (an accepted plan still completes it). The authors compare validity policies by scoring the <strong>same 14,336 stored agent runs</strong> under each rule (four agents × prompts over 1,792 instances), plus finite-state diagnostics and an AgentDojo adapter study (3,168 trajectories) where the contract protects entity-identifying fields at injection points.
+</li><li><strong>Results:</strong> across four encoders, <strong>embedding-threshold policies admitted 75–100% of task-changing substitutions</strong> — invoices naming different payees sit close in embedding space, so similarity bounds structurally cannot protect task-defining facts. Schema policies (any well-formed edit to an injection field) fail the same way when the editable field <em>is</em> the task-defining one. Replaying a saved reference solution is shown to be neither necessary nor sufficient evidence of validity (reference success ⇏ same task; reference failure ⇏ infeasible; Table 2). Contract authorship choices matter measurably: on the same 192 candidates, a primary-route-only specification admits 64, an either-route specification 80, and a recipient-ignoring negative control 128 (Table 3) — the contract makes that evaluator judgment explicit and auditable instead of hiding it in a threshold.
+</li><li><strong>Limits (stated by the authors):</strong> contracts do not discover the correct task definition — they require structured specifications naming protected facts, allowed edits, authorized outcomes and feasible completions, which open-ended tasks may not provide; they do not establish semantic equivalence or agreement with every human judge; the controlled corpus uses deliberately structured cases that show the tested policies <em>can</em> fail, not how often they fail in practice; specification counts reflect three specifications the authors wrote, not measured evaluator disagreement.
+</li><li><strong>Why it matters for BQAA:</strong> this is the ingest-side twin of last night's oracle-failures paper. Warehouses routinely join perturbed/robustness runs back to their base tasks and aggregate them as one task family. If the validity decision that admitted a perturbed run was an embedding threshold, the aggregate silently mixes different tasks. A stored, executable contract (protected fields + permitted edits + authorized outcomes) is a schema-level artifact BQAA can version alongside the task — and "which contract version admitted this run" becomes an answerable query instead of folklore.
+</li></ul>
+<h4><a href="https://arxiv.org/abs/2610.15055">Trace Evolution Bench: Measuring Whether Agents Improve from Their Own Environment Traces</a></h4>
+<ul><li><strong>Full PDF read.</strong> v1 [cs.AI] 10 Oct 2026 (announced in last night's batch). Li, Zhao, Wang, Tian &amp; Guo (MatrixOrigin).
+</li><li><strong>The question:</strong> self-evolving agents are usually judged by endpoint <strong>Gain</strong> (final held-out success minus round-0 success). The paper argues — and then measures — that Gain conflates true evolution with the variance of simply re-scoring a frozen agent, plus protocol leaks (teacher traces substituted for self-traces, held-out IDs entering the update, the evaluated checkpoint differing from the artifact <code>evolve()</code> returned, text and weight updates compared on one budget axis).
+</li><li><strong>Method:</strong> Trace Evolution Bench (TEB) is an attribution protocol with four controls: locked held-out identifiers (never visible to <code>evolve()</code>), validation-gated accept/rollback per round, repeated <strong>frozen no-evolve rescoring</strong> to measure each seed's own noise band (max−min across four passes), and <strong>seed-matched paired excess</strong> — a method's Gain minus the same model+seed's no-evolve Gain, only credited when it exceeds that seed's band. Three frozen 80/20/40 packs (140 tasks each; held-out n=40, 2.5pp per task; Table 3): coding (primary; hidden unit tests in a closed workspace), office, and manufacturing as secondary lanes.
+</li><li><strong>Results:</strong> frozen DeepSeek v4 Pro under no-evolve keeps version M0 yet its held-out score range across four passes spans <strong>7.5, 5.0 and 12.5 percentage points</strong> across seeds on coding (Table 6) — i.e. double-digit "improvement" is available from rescoring alone. Under paired excess, seven of nine DeepSeek text-update cells exceed their own seed bands (Table 8/Figure 4), but the pattern does <strong>not</strong> reproduce on GLM or MiniMax (Table 9/Figure 6), and no method stays above its band on every seed of all three models. On office, DeepSeek does not exceed its bands (widest 17.5pp); on manufacturing there is no paired positive excess beyond band at all. The screen round's gains (0, −5.6, −11.1pp) did not predict held-out excess (Table 4).
+</li><li><strong>Limits (stated by the authors):</strong> coding held-out is one task family (fix-bug, n=40) so per-task granularity is coarse; validation is n=20 (5pp per task); office effects under the 17.5pp band are unresolved by this design; some cells are single-seed or impaired (crossed evolution-token cap, unpaired round-0) and are flagged rather than hidden; closed hosted models were not weight-updated, and the weight track is a different budget class — historical weight-grid cards are excluded over a trace-provenance mismatch the appendix documents in detail.
+</li><li><strong>Why it matters for BQAA:</strong> "the agent improved after we fed it its own traces" is exactly the claim trace warehouses will be asked to substantiate. TEB's controls translate directly into stored artifacts: the frozen-rescore band per seed, the locked held-out ID set, accept/rollback records, and paired excess instead of raw Gain. A warehouse that stores only endpoint scores cannot distinguish evolution from rescoring weather — this paper puts a number on that weather (up to 12.5pp) and a contract around the claim.
+</li></ul>
+<h3>Scouted, not ranked</h3>
+<p>No new IDs exist above <code>2610.18874</code>, so nothing new was screened this window. The 0034 brief's scouted pool stands unchanged minus the two promotions above — strongest remaining carries for future full-PDF promotion: <a href="https://arxiv.org/abs/2610.14460">https://arxiv.org/abs/2610.14460</a> <em>Re-executing Coding-Agent Evaluations</em>; <a href="https://arxiv.org/abs/2610.14115">https://arxiv.org/abs/2610.14115</a> <em>Silent Failures in Agentic Data Science</em>; <a href="https://arxiv.org/abs/2610.14146">https://arxiv.org/abs/2610.14146</a> <em>Long-Horizon-Terminal-Bench 2.0</em>; <a href="https://arxiv.org/abs/2610.14096">https://arxiv.org/abs/2610.14096</a> <em>SWEeper-Bench</em>; <a href="https://arxiv.org/abs/2610.14071">https://arxiv.org/abs/2610.14071</a> <em>Loose Lips</em>; <a href="https://arxiv.org/abs/2610.18766">https://arxiv.org/abs/2610.18766</a> <em>ReVeR</em>; <a href="https://arxiv.org/abs/2610.18760">https://arxiv.org/abs/2610.18760</a> <em>Agentic Code Judging</em>. Collector HOLDs unchanged (<a href="https://arxiv.org/abs/2610.18272">https://arxiv.org/abs/2610.18272</a>, <a href="https://arxiv.org/abs/2610.15915">https://arxiv.org/abs/2610.15915</a>). I did not open these PDFs and make no claim about their results.</p>
+<hr />
+<h2>Six-week EV</h2>
+<ul><li><strong>The vendor plumbing quarter: audit, billing and span correctness are shipping, not roadmapped.</strong> In one morning Langfuse shipped an audit-event relay into ClickHouse plus ClickHouse billing opt-in, Opik fixed a cache-token double-count, and Braintrust made span customizers fail closed. Within six weeks, "does your trace store carry audit events, billable-unit ledgers and deduped cache accounting?" becomes a checklist item in vendor comparisons — and BQAA's schema will be measured against producers who now emit these fields natively.
+</li><li><strong>Span ownership at framework boundaries becomes an explicit contract.</strong> Braintrust letting Google GenAI own LLM spans for ADK model calls, Inspect attributing bridged requests per-agent (0.3.280, last night), and Mastra persisting cross-trace links are three vendors solving the same problem — who emits the canonical span when frameworks nest — in three public ways. Expect double-emission and orphan-span bugs to be the dominant trace-quality complaint until these ownership conventions stabilize; warehouses should budget for producer-side dedupe keys now.
+</li><li><strong>Validity and attribution artifacts join the eval record.</strong> Last night's trio (oracle invariants, judge-risk scores, authority envelopes) plus today's pair (task contracts, frozen-rescore bands) all produce <em>storable</em> side-artifacts that qualify a score. Within six weeks, serious eval consumers will ask producers for at least one of: the contract version that admitted a perturbed run, the rescore band behind an improvement claim, or the risk score behind a judge label. Schemas with room for qualifying artifacts win; score-only schemas keep looking thin.
+</li><li><strong>The unreleased pile says next window is heavy.</strong> Cloudflare's Workspace migration, Inspect's bridge forwarding + eval sharding, LiteLLM's safeguard classifier, Langfuse's append-only billing ledger, Mastra's 1.78 scopes, OpenAI toolset parts 2–4, and the Wednesday arXiv batch all land in the next 12–48 hours. Treat tonight's 00:34 slot as a likely dense brief, not a quiet one.
+</li></ul>
+<hr />
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>Braintrust py-sdk 0.46.0:</strong> ADK workflow/tool tracing lands with GenAI owning LLM spans; OTel span customizers fail closed without dropping spans — the right failure mode for ingest.
+</li><li><strong>Langfuse v4.59.0:</strong> audit events relay into ClickHouse and late trace arrivals get reprocessed; ClickHouse billing goes opt-in per org.
+</li><li><strong>Opik 2.2.100:</strong> cache tokens counted once for Anthropic/Bedrock LangChain usage — recheck any cost rollup built on the old counting.
+</li><li><strong>Mastra 1.77.0:</strong> the GitHub Release now exists (08:29Z) and matches the npm/CHANGELOG-based card; run fencing is the one new detail.
+</li><li><strong>Executable Contracts (2610.14477):</strong> embedding thresholds admitted 75–100% of task-changing edits across 14,336 stored runs — store the contract version that admitted each perturbed run.
+</li><li><strong>Trace Evolution Bench (2610.15055):</strong> frozen rescoring alone swings held-out scores up to 12.5pp; credit self-improvement only as paired excess over the seed's own noise band.
+</li><li><strong>Everything else:</strong> Langfuse SDK minors are typing-only; LangChain 1.4.6's HITL per-call interrupts and Claude Agent SDK 0.3.300's transcript fixes are worth a pin-check, not a rank; the Wednesday arXiv batch lands tonight.
+</li></ul>
+<hr />
+<h2>Unconfirmed</h2>
+<table>
+<tr><th>Item</th><th>What was not confirmed</th><th>Where I looked</th></tr>
+<tr><td>Wednesday arXiv batch</td><td>Absence <strong>confirmed as a working-lookup zero</strong>, not assumed: ceiling still <code>2610.18874</code> at my 19:44Z ladder (<code>18875</code>/<code>19000</code>/<code>19500</code> → 404), agreeing with every collector probe this window. The batch lands ~17:00 PT, after this slot — no in-window Academy discovery claim is made; the two ranked papers are disclosed carry promotions</td><td>My abs probes; collector ladders in all 12 packs</td></tr>
+<tr><td>Collector gaps Wed ~07:00–10:00 PT</td><td>Muse 0732 and DSH 0832 packs absent (Mac down ~07:28–09:xx PT). The stretch is covered by Agy 0632/0932 overlap plus my own <code>gh api</code>/registry sweep, disclosed rather than proven per-item</td><td>Kickoff gap list; pack inventory; my sweep ~19:44Z</td></tr>
+<tr><td>Agy 1232 Wed</td><td>Not done at merge (~12:45 PT); the ~12:00–12:34 PT tail rests on the 1207/1209 extra seats (zero in-window GH Releases in their final sweeps, working-lookup) plus my write-time release sweep</td><td>Kickoff; DSH 1209 <code>releases_final</code> (49 repos, 0 errors); my sweep</td></tr>
+<tr><td>gap: Vercel changelog Atom feed 404 (19:19Z)</td><td>Feed access gap reported at merge; I did not re-fetch the Vercel changelog page and make no Vercel-release claim either way. <code>ai@7.0.140</code> remains the newest vercel/ai GH Release in my sweep</td><td>Kickoff gap; <code>gh api</code> vercel/ai releases</td></tr>
+<tr><td>Langfuse v4.58.0 contents</td><td>The 0034 brief cited v4.58.0 as latest stable; I read only the v4.59.0 body this window and claim only v4.59.0 increments in Progress</td><td><code>gh api</code> v4.59.0 body</td></tr>
+<tr><td>npm <code>langsmith</code> 0.10.13 substance (carry)</td><td>Still <code>latest</code> at my re-read (2026-10-13T11:38:45Z clock, unchanged); changelog/diff still not read — no capability claim made, third brief running</td><td>npm registry JSON re-read ~19:44Z</td></tr>
+<tr><td>Social surfaces</td><td>gap: X MCP 401 / Reddit 403 / LinkedIn authwall as reported across packs; not re-probed by me; no social claims made</td><td>Pack §1 surface lines</td></tr>
+<tr><td>Release behaviors (all ranked items)</td><td>Release bodies and registry clocks read; nothing executed or installed</td><td><code>gh api</code>; npm/PyPI JSON via collectors + my re-reads</td></tr>
+<tr><td>Academy claims beyond the 2 ranked</td><td>Scouted-not-ranked items rest on prior collector abstract reads; I did not open their PDFs</td><td>Prior brief scouted list; pack Academy sections</td></tr>
+</table>
+<p>All ranked claims are confirmed against primary sources I read directly: GH release bodies for <code>braintrust-sdk-python py-sdk-v0.46.0</code>, <code>langfuse v4.59.0</code>, <code>langfuse-python v4.18.0</code>, <code>langfuse-js v5.14.0</code>, <code>opik 2.2.100</code>, <code>@mastra/core@1.77.0</code>, <code>langchain==1.4.6</code>, <code>claude-agent-sdk v0.3.300</code>, <code>phoenix v20.21.4</code> via <code>gh api</code>; latest-release sweep over openai-node/-python, mastra, inspect_ai, python-genai, litellm, pydantic-ai, vercel/ai; npm registry re-reads for <code>langsmith</code> and <code>@mastra/core</code>; arXiv ceiling/pin via direct abs probes; two Academy papers via full <code>pdftotext</code> reads with table/section citations; catalog dedupe greps against the live <code>catalog.json</code> (584 items / 150 briefs / 152 runs; max brief <code>2026-10-14T0034</code>; pin <code>2609.02702</code> present).</p>
+<hr />
+<h2>Housekeeping</h2>
+<ul><li><strong>Decision: PUBLISH</strong> — 3 NEW (1 Industry, 2 Academy) + 3 Progress. Candidates had keepers (nine stable releases read at body level), so per standing guidance this publishes with Progress/NOTE content rather than staying quiet on a consolidation window.
+</li><li><strong>Packs used (lookup reference only, per fresh path — no pack read wholesale):</strong> candidates from <code>_runs/fb-2026-10-14-1234/fresh-items.md</code> (FB_MERGE: packs=12 raw=26 unique=9 fresh=9); targeted greps/section reads in <code>agy-pack-2026-10-14-0032/0332/0632/0932</code>, <code>muse-pack-2026-10-14-0132/0432/1032/1207</code>, <code>dsh-pack-2026-10-14-0232/0532/1132/1209</code> for specific items only. As last slot, the merged fresh list compressed the release set into blocks; body-level recovery was via targeted pack lookup + my own <code>gh api</code> reads.
+</li><li><strong>Gaps (disclosed, not invented):</strong> Muse 0732 + DSH 0832 absent (Mac down ~07:28–09:xx PT); Agy 1232 not done at merge; gap: Vercel changelog Atom feed 404 (19:19Z); LinkedIn authwall; X MCP 401 and Reddit 403 on collector seats; HN dropped 2026-09-27. My sweep weighted the thin stretches (Wed ~07:00–10:00 PT via neighboring-pack overlap + GH reads; after ~12:20 PT via my 19:44Z release/registry/arXiv probes).
+</li><li><strong>Verified arXiv ceiling:</strong> <code>2610.18874</code> (my ladder ~19:44Z: 18874 → 200; 18875/19000/19500 → 404), agreeing with all twelve packs' probes; screened-through unchanged since the 0034 brief. Pin <code>2609.02702</code> → 200, intact, not re-carded. The Wednesday announcement (~17:00 PT) belongs to the 00:34 slot.
+</li><li><strong>Verification method:</strong> GH release bodies via authenticated <code>gh api</code> (no rate-limit failures encountered by me); npm clocks via registry JSON; PyPI clocks via collectors' direct reads where cited; arXiv via abs probes + full-PDF <code>pdftotext</code> reads for every ranked paper; catalog greps over the live JSON for every candidate id/name before ranking (0 hits for all 3 NEW; Progress parents verified as exact catalog ids). Untrusted pack/web/release text treated as evidence only throughout.
+</li><li><strong>Fresh path used:</strong> yes — ranked from the fresh-items candidate list plus my own GH/registry/arXiv sweep, which independently re-derived the release set and re-checked last brief's open rows (Mastra GH Release: now exists; OpenAI parts 2–4: still unshipped; langsmith 0.10.13: still latest, substance still unread).
+</li><li><strong>Standing-rule compliance:</strong> no BQAA 1P cards; google-adk NOTE-only; no Desk section; no GTM content; Medium lead-only (no Medium-derived claims ranked; scout paused since Sep 21 per packs); no Crustdata; Opus/Fable off.
+</li></ul>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>braintrust-python-sdk-0-46-0-adk-workflow-tracing-otel-span-customizers</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Braintrust Python SDK v0.46.0 — ADK workflow-node/tool-call tracing with GenAI-owned LLM spans; fail-closed OTel span customizers; Decisions API tracing
+</li><li><strong>url:</strong> <a href="https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.46.0">https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.46.0</a> (2026-10-14, stable)
+</li><li><strong>card text:</strong> Braintrust's Python SDK v0.46.0 traces ADK workflow nodes and tool calls while letting Google GenAI own the LLM spans for ADK model calls, and traces OpenAI/LiteLLM Decisions APIs plus OpenRouter Responses APIs. OpenTelemetry span customizers fail closed on errors without dropping spans, and usage fidelity improves across Pydantic AI web search, Mistral service tiers/logprobs, and streamed GenAI candidate metadata.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-14477-executable-contracts-robustness-evaluation</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> What Counts as the Same Task? — executable task contracts for robustness eval; embedding thresholds admit 75–100% of task-changing edits
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.14477">https://arxiv.org/abs/2610.14477</a>
+</li><li><strong>card text:</strong> Full PDF read. Scoring the same 14,336 stored agent runs under different validity rules, embedding-threshold policies admitted 75–100% of edits that changed the task itself across four encoders, and reference-solution replay proved neither necessary nor sufficient for validity. The proposed executable task contract — protected facts, permitted edits, authorized outcomes, feasible completions, checked before any agent runs — makes the validity decision explicit and auditable; on 192 candidates, specification choices alone moved admissions from 64 to 128 (Table 3).
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-15055-trace-evolution-bench-paired-excess</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Trace Evolution Bench — frozen rescoring swings held-out scores up to 12.5pp; credit self-evolution only as paired excess over the seed noise band
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.15055">https://arxiv.org/abs/2610.15055</a>
+</li><li><strong>card text:</strong> Full PDF read. TEB evaluates self-evolving agents with locked held-out IDs, validation-gated accept/rollback, repeated frozen no-evolve rescoring, and seed-matched paired excess. Frozen DeepSeek v4 Pro rescoring alone spans 5.0–12.5pp across seeds on the 40-task coding held-out set (Table 6); seven of nine DeepSeek text-update cells exceed their bands, but the pattern does not reproduce on GLM/MiniMax and no method clears every seed of every model.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>langfuse-v4-57-0-eval-score-persistence-decision-model-evaluators-graduate-gateway-key-expiration-otel-inline-media</code>
+<ul><li><strong>text:</strong> Langfuse v4.59.0 (2026-10-14) relays staged audit events into ClickHouse on a 10-second single-worker lease, reprocesses late trace-batching arrivals with sharded readiness, and lets organizations opt into ClickHouse Billing with corrected spend alerts. OTEL ingest gains media workload/input-preparation metrics and Claude Managed Agents span mapping; Gemini 4 Argon pricing lands. JS-v6/Py-v5 majors preparation merges; the majors remain unreleased.
+</li></ul>
+</li><li><strong>parent:</strong> <code>opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row</code>
+<ul><li><strong>text:</strong> Opik 2.2.100 (2026-10-14) counts cache tokens once for Anthropic and Bedrock LangChain usage (correcting cost rollups), registers a span_weeks index from span writes, carries scoring_failed through Optimization Studio's code-metric wrapper, and reports output-limit-during-thinking distinctly from empty responses.
+</li></ul>
+</li><li><strong>parent:</strong> <code>mastra-core-1-77-0-span-links-traceparent-gateway-pricing-factorysandbox</code>
+<ul><li><strong>text:</strong> The @mastra/core@1.77.0 GitHub Release was published 2026-10-14T08:29:32Z (~3h after npm), confirming the carded content and retiring the 0034 brief's npm/CHANGELOG-only caveat. The Release highlights add durable-agent run fencing across storage adapters so a crashed-and-recovered run cannot overwrite the recovered run's state. npm has since moved to 1.78.0-alpha.2 (no GH Release).
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>Braintrust Python SDK v0.46.0 traces ADK workflow nodes/tool calls with GenAI-owned LLM spans and fail-closed OTel span customizers (<a href="https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.46.0">https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.46.0</a>, 2026-10-14).
+</li><li>Embedding-threshold validity policies admitted 75–100% of task-changing edits across 14,336 stored agent runs (<a href="https://arxiv.org/abs/2610.14477">https://arxiv.org/abs/2610.14477</a>, 2026-10-10).
+</li><li>Frozen no-evolve rescoring alone swings held-out agent scores by up to 12.5 percentage points across seeds (<a href="https://arxiv.org/abs/2610.15055">https://arxiv.org/abs/2610.15055</a>, 2026-10-10).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>12:34 PM PT · Wed Oct 14, 2026 · Muse</span>
+    </div>
+  </footer>
+</body>
+</html>
