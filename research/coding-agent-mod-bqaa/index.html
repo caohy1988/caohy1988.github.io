@@ -63,8 +63,8 @@
 <p class="deck">A mod runs as code inside the host coding-agent CLI. This one turns each turn, model request, tool call and subagent into a BQAA <code>agent_events</code> row, and sends them to BigQuery from timers, so no hook waits on the network.</p>
 </div>
 <div class="hero-notes">
-<p class="provenance">Built and tested on 13 October 2026 against v2.1.296 of the host CLI, using only methods its mod documentation and type declarations describe. The code is in <code>plugins/bigquery-agent-analytics-mod</code> on the <code>coding-agent-mod</code> branch of <code>bigquery_agent_analytics_skill</code>; its pull request is pending, so the repository links resolve once that branch is pushed. Sample rows are output of the mod&rsquo;s own test fixture, not production data, and no live BigQuery insert was made for this note.</p>
-<p class="citation-key">Citation key: &ldquo;mod docs&rdquo; is the host CLI&rsquo;s mod documentation (first entry under Sources); &ldquo;ADK&rdquo; is the <a href="https://adk.dev/integrations/bigquery-agent-analytics/">BigQuery Agent Analytics plugin for ADK</a> page; &ldquo;Repo&rdquo; is the <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/coding-agent-mod/plugins/bigquery-agent-analytics-mod">mod&rsquo;s directory</a> (PR pending). Single-quoted names are page or section names in the cited source. What could not be checked is listed under <strong>NOT VERIFIED</strong>.</p>
+<p class="provenance">Built and tested on 13 October 2026 against v2.1.296 of the host CLI, using only methods its mod documentation and type declarations describe. The code, <code>plugins/bigquery-agent-analytics-mod</code>, is in <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">pull request #7</a> to <code>bigquery_agent_analytics_skill</code>, open as of this note. The sample rows and queries shown here are linked at commit <code>4e8951c</code> of the pull request&rsquo;s branch; the fixes that followed it left both files unchanged. Sample rows are output of the mod&rsquo;s own test fixture, not production data, and no live BigQuery insert was made for this note.</p>
+<p class="citation-key">Citation key: &ldquo;mod docs&rdquo; is the host CLI&rsquo;s mod documentation (first entry under Sources); &ldquo;ADK&rdquo; is the <a href="https://adk.dev/integrations/bigquery-agent-analytics/">BigQuery Agent Analytics plugin for ADK</a> page; &ldquo;Repo&rdquo; is <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">pull request #7</a>, which holds the mod. Single-quoted names are page or section names in the cited source. What could not be checked is listed under <strong>NOT VERIFIED</strong>.</p>
 <p class="hero-meta">Ten numbered sections, a list of what was not verified, and 6 linked sources.</p>
 </div>
 </section>
@@ -102,7 +102,7 @@
 <li><strong>Subagents:</strong> <code>AGENT_STARTING</code> and <code>AGENT_COMPLETED</code> with their own span, their type in the <code>agent</code> column and their token totals.</li>
 <li><strong>Commands:</strong> <code>/bqaa-status</code> (queue depth, sent, dead-lettered, refused, dropped, last error, dead-letter files), <code>/bqaa-flush</code> and <code>/bqaa-backfill</code>.</li>
 </ul>
-<p>The rows follow the ADK schema reference, including <code>event_id</code> from schema version 2 (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK, &lsquo;Schema Reference&rsquo;</a>), so they can share a table with ADK agents and with this repository&rsquo;s settings-hook plugin, and the repository&rsquo;s analysis skill reads them with its existing queries (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/coding-agent-mod/plugins/bigquery-agent-analytics-mod">Repo</a>).</p>
+<p>The rows follow the ADK schema reference, including <code>event_id</code> from schema version 2 (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK, &lsquo;Schema Reference&rsquo;</a>), so they can share a table with ADK agents and with this repository&rsquo;s settings-hook plugin, and the repository&rsquo;s analysis skill reads them with its existing queries (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">Repo</a>).</p>
 </section>
 
 <section id="why-a-mod" class="chapter" aria-labelledby="why-a-mod-h">
@@ -114,8 +114,8 @@
 <li>Work that outlives one event &ldquo;runs on a timer you start from <code>session.start</code>&rdquo;, with <code>$.clock.every</code> and <code>$.clock.after</code> in place of <code>setInterval</code> and <code>setTimeout</code> (mod docs, &lsquo;Run work in the background&rsquo;).</li>
 <li>A hook that throws is skipped and &ldquo;the next handler runs in its place&rdquo; (mod docs, &lsquo;Handle a hook that fails&rsquo;), so an observer fails open by default.</li>
 </ul>
-<p>The mod holds itself to three rules. Each hook calls <code>next(e)</code> first, records what it saw into an in-memory queue with synchronous, bounded work, and returns what <code>next</code> gave it unchanged. No hook waits on the network, a process or the disk. And every observing hook carries a <code>.catch(($, e, next) =&gt; next(e))</code> handler, so the plugin validator reports it as a gating hook <em>with</em> a catch whose answer is &ldquo;go on as if the mod were not here&rdquo;.</p>
-<p>The tests make the rules checkable. One makes BigQuery never answer, then sends 25 tool calls through the mod and expects each to return; another checks that no hook called <code>$.http.fetch</code> or <code>$.process.run</code>. As a check on the checks, awaiting the flush inside the <code>tool.call</code> hook made the never-answer test hit the test kit&rsquo;s 5-second limit and fail: the same failure, in a test, that a person sees as the CLI hanging.</p>
+<p>The mod holds itself to three rules. Each capture hook (prompt, turn, model request, tool and subagent events) calls <code>next(e)</code> first, records what it saw into an in-memory queue with synchronous, bounded work, and returns what <code>next</code> gave it unchanged. No hook waits on the network or a process; two lifecycle hooks do bounded work of their own before passing their event on: <code>session.start</code> sets the writer up and registers the three commands, and <code>session.end</code> writes what is still queued to a spill file, waiting at most 800&nbsp;ms inside the host&rsquo;s end-of-session bound, the one wait on the disk. And the mod&rsquo;s bookkeeping cannot throw into an event: the five observers the plugin validator lists as gating hooks with a catch (<code>classic.SessionStart</code>, <code>classic.SubagentStart</code>, <code>classic.PermissionRequest</code>, <code>prompt.submit</code>, <code>tool.call</code>) carry a <code>.catch(($, e, next) =&gt; next(e))</code> handler whose answer is &ldquo;go on as if the mod were not here&rdquo;, and the other hooks run their bookkeeping inside <code>try</code> blocks.</p>
+<p>The tests make the rules checkable. One makes BigQuery never answer, then sends 25 tool calls through the mod and expects each to return; another checks that no hook, <code>session.end</code> included, called <code>$.http.fetch</code> or <code>$.process.run</code>. As a check on the checks, awaiting the flush inside the <code>tool.call</code> hook made the never-answer test hit the test kit&rsquo;s 5-second limit and fail: the same failure, in a test, that a person sees as the CLI hanging.</p>
 <p class="judgement"><em class="judge">Judgement:</em> the mods API does not make blocking impossible (a hook can still <code>await</code> a fetch), but it gives the right primitives a name &mdash; <code>next</code>, timers, a per-hook time limit &mdash; so the rule can be stated in code review and enforced by a test. The cost moves elsewhere: an in-memory queue can lose rows that a disk spool would not, which section 10 bounds.</p>
 </section>
 
@@ -125,7 +125,7 @@
 <figure class="diagram">
 <svg viewBox="0 0 860 500" role="img" aria-labelledby="arch-title arch-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="arch-title">Architecture of the BigQuery Agent Analytics mod</title>
-<desc id="arch-desc">The host coding-agent CLI raises session, prompt, turn, model-request, tool and subagent events. The mod's hooks call next first, build a BQAA row synchronously and put it in a bounded in-memory queue; that is the whole hot path. A background writer on a timer takes batches from the queue, gets an access token from a cached gcloud command, and posts them to BigQuery's insertAll with a timeout. Retryable failures back off and retry three times; rows that still fail, rows BigQuery refuses, and rows left at session end go to JSONL files in a dead-letter directory, which /bqaa-backfill, the next session or recovery send again.</desc>
+<desc id="arch-desc">The host coding-agent CLI raises session, prompt, turn, model-request, tool and subagent events. The mod's hooks call next first, build a BQAA row synchronously and put it in a bounded in-memory queue; that is the whole hot path. A background writer on a timer takes batches from the queue, gets an access token from a cached gcloud command, and posts them to BigQuery's insertAll with a timeout. Retryable failures back off and retry three times; rows that still fail, rows BigQuery refuses, and rows left at session end go to JSONL files in a dead-letter directory, one subdirectory per table, which /bqaa-backfill, the next session or recovery send again, each line only to the table it records.</desc>
 <defs>
 <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-head" d="M0,0 L10,5 L0,10 z"/></marker>
 <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-head-muted" d="M0,0 L10,5 L0,10 z"/></marker>
@@ -178,16 +178,16 @@
 <text class="d-label" x="733" y="288">$.http.fetch</text>
 <!-- dead letter -->
 <rect class="d-box" x="290" y="310" width="266" height="104" rx="6"/>
-<text class="d-title" x="306" y="336">Dead-letter directory (disk)</text>
+<text class="d-title" x="306" y="336">Dead-letter dir, one per table</text>
 <text class="d-mono" x="306" y="358">retry-*.jsonl</text><text class="d-text" x="434" y="358">retries ran out</text>
 <text class="d-mono" x="306" y="378">rejected-*.jsonl</text><text class="d-text" x="434" y="378">refused</text>
 <text class="d-mono" x="306" y="398">spill-*.jsonl</text><text class="d-text" x="434" y="398">exit, pressure</text>
 <path class="d-arrow-muted" d="M600,244 L574,244 L574,330 L562,330" marker-end="url(#arrow-muted)"/>
 <text class="d-text" x="566" y="292" text-anchor="end">after retries, or refused</text>
 <path class="d-arrow-muted" d="M125,282 L125,372 L284,372" marker-end="url(#arrow-muted)"/>
-<text class="d-text" x="136" y="300">session.end: one bounded</text>
-<text class="d-text" x="136" y="318">request at most, the rest</text>
-<text class="d-text" x="136" y="336">spilled to disk</text>
+<text class="d-text" x="136" y="300">session.end: no request;</text>
+<text class="d-text" x="136" y="318">what is queued goes</text>
+<text class="d-text" x="136" y="336">to a spill file</text>
 <!-- backfill -->
 <path class="d-arrow-muted" d="M556,400 L725,400 L725,394" marker-end="url(#arrow-muted)"/>
 <text class="d-text" x="560" y="430">/bqaa-backfill, next session start,</text>
@@ -195,17 +195,17 @@
 <text class="d-label" x="290" y="446">queue past 80% while failing:</text>
 <text class="d-text" x="290" y="466">oldest half spilled, not dropped</text>
 </svg>
-<figcaption>The hot path (shaded) ends at the queue. Everything to its right and below runs from timers or commands, outside any hook&rsquo;s dispatch. Dashed lines are failure and recovery paths.</figcaption>
+<figcaption>The hot path (shaded) ends at the queue. Everything to its right and below runs from timers or commands, outside any hook&rsquo;s dispatch, except the spill write at session end, which that hook waits for within its budget. Dashed lines are failure and recovery paths.</figcaption>
 </figure>
 <ol>
 <li><strong>Hot path.</strong> A hook calls <code>next(e)</code>, then builds the row synchronously: ids and spans, secrets redacted, payloads cut to <code>maxPayloadChars</code> within a character budget (a 2,760,000-character Write is copied in under 100&nbsp;ms in a unit test), <code>is_truncated</code> set when anything was cut.</li>
-<li><strong>Queue.</strong> In memory, bounded at 5,000 rows and 8&nbsp;MiB by default; when full it drops its oldest rows and counts them. While BigQuery is failing and the queue passes 80%, the writer moves the oldest half to disk instead.</li>
-<li><strong>Writer.</strong> A <code>$.clock.every</code> timer (5&nbsp;s by default), plus a send after each main-loop turn, runs one request at a time: a cached access token from <code>$.process.run</code> (default <code>gcloud auth application-default print-access-token</code>), batches of at most 500 rows and 3&nbsp;MiB because <code>$.http.fetch</code> refuses request bodies over 4&nbsp;MiB, and a 10-second client timeout raced with <code>$.clock.after</code> under the host&rsquo;s own 30-second cap per fetch (mod docs, &lsquo;Mods reference&rsquo;, limits).</li>
+<li><strong>Queue.</strong> In memory, bounded at 5,000 rows and 8&nbsp;MiB of UTF-8 by default; when full it drops its oldest rows and counts them. While BigQuery is failing and the queue passes 80%, the writer moves the oldest half to disk instead.</li>
+<li><strong>Writer.</strong> A <code>$.clock.every</code> timer (5&nbsp;s by default), plus a send after each main-loop turn, runs one request at a time: a cached access token from <code>$.process.run</code> (default <code>gcloud auth application-default print-access-token</code>), batches of at most 500 rows and 3&nbsp;MiB of UTF-8, under the 4&nbsp;MiB that <code>$.http.fetch</code> takes in a request body (counted in characters, which never outnumber the bytes), and a 10-second client timeout raced with <code>$.clock.after</code> under the host&rsquo;s own 30-second cap per fetch (mod docs, &lsquo;Mods reference&rsquo;, limits).</li>
 <li><strong>Retries and refusals.</strong> 408, 429, 5xx, quota 403s, network errors and timeouts back off exponentially (1&nbsp;s to 60&nbsp;s) for up to three retries with the same <code>insertId</code>s; a 401 refreshes the token; a 404 for the table creates it with the BQAA DDL&rsquo;s partitioning and clustering; 400, access-denied 403s, a missing dataset and rows insertAll reports as invalid are refused.</li>
-<li><strong>Dead letter and backfill.</strong> <code>$.fs</code> has <code>read</code>, <code>write</code>, <code>list</code>, <code>exists</code>, <code>stat</code> and <code>ancestors</code> and nothing else, and <code>write</code> &ldquo;isn&rsquo;t atomic&rdquo; (mod docs, &lsquo;Mods reference&rsquo;, API methods). So each failure writes a new JSONL file (<code>retry-</code>, <code>rejected-</code> or <code>spill-</code>) that no writer touches again; a backfill that lands a file&rsquo;s rows truncates it to zero bytes, and a per-file lease in <code>$.store</code> keeps two sessions off the same file.</li>
-<li><strong>Session end.</strong> &ldquo;All <code>session.end</code> hooks together&rdquo; get 1.5 seconds by default (mod docs, &lsquo;Mods reference&rsquo;, limits). The mod spends at most 800&nbsp;ms of it: one request if a token is in hand and no earlier request is stuck, then everything not confirmed sent goes to a spill file that the next session replays.</li>
+<li><strong>Dead letter and backfill.</strong> <code>$.fs</code> has <code>read</code>, <code>write</code>, <code>list</code>, <code>exists</code>, <code>stat</code> and <code>ancestors</code> and nothing else, <code>write</code> &ldquo;isn&rsquo;t atomic&rdquo;, and a read or write takes at most 4&nbsp;MiB of one file (mod docs, &lsquo;Mods reference&rsquo;, API methods and limits), whose text is UTF-8. So each failure writes a new JSONL file (<code>retry-</code>, <code>rejected-</code> or <code>spill-</code>) that no writer touches again, of at most 3&nbsp;MiB of UTF-8, in a subdirectory named after the table the rows were meant for; a row too large for a file on its own has its payload columns cut to fit. A replay reads only the configured table&rsquo;s subdirectory and checks each line&rsquo;s recorded table before sending it, so a line for another table stays where it is, as written. A backfill that lands a file&rsquo;s rows truncates it to zero bytes, a file over 4&nbsp;MiB is reported rather than passed over, and a per-file lease in <code>$.store</code> keeps two sessions off the same file.</li>
+<li><strong>Session end.</strong> &ldquo;All <code>session.end</code> hooks together&rdquo; get 1.5 seconds by default (mod docs, &lsquo;Mods reference&rsquo;, limits). The mod starts no request there: the rows still queued, and any whose request has not answered, go to a spill file in the table&rsquo;s subdirectory, and the hook waits at most 800&nbsp;ms for that write before passing the event on. The next session sends the file 15 seconds after it starts, or <code>/bqaa-backfill</code> does; a row whose request was in flight at exit can arrive twice, and <code>event_id</code> dedups it.</li>
 </ol>
-<p>Why <code>tabledata.insertAll</code>: the ADK plugin writes through the Storage Write API in Python and Java (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK</a>), which is gRPC, while <code>$.http.fetch</code> makes <code>http</code> or <code>https</code> requests with a string body (mod docs, &lsquo;Use the mods API&rsquo;). The ADK docs note that their Kotlin plugin also uses <code>tabledata.insertAll</code>, inserting rows &ldquo;one at a time &hellip; synchronously on the invocation path&rdquo; (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK, &lsquo;Kotlin support&rsquo;</a>); the mod uses the same API batched and off the hot path. Each row&rsquo;s <code>event_id</code> doubles as its <code>insertId</code>, and a row sent twice (an ambiguous timeout, a backfill) keeps it, so the ADK docs&rsquo; dedup applies: <code>QUALIFY event_id IS NULL OR ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY timestamp) = 1</code> (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK, &lsquo;Delivery and deduplication&rsquo;</a>).</p>
+<p>Why <code>tabledata.insertAll</code>: the ADK plugin writes through the Storage Write API in Python and Java (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK</a>), which is gRPC, while <code>$.http.fetch</code> makes <code>http</code> or <code>https</code> requests with a string body (mod docs, &lsquo;Use the mods API&rsquo;). The ADK docs note that their Kotlin plugin also uses <code>tabledata.insertAll</code>, inserting rows &ldquo;one at a time &hellip; synchronously on the invocation path&rdquo; (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK, &lsquo;Kotlin support&rsquo;</a>); the mod uses the same API batched and off the hot path. Each row&rsquo;s <code>event_id</code> doubles as its <code>insertId</code>, and a row sent twice (an ambiguous timeout, a backfill) keeps it, so the ADK docs&rsquo; dedup applies: <code>QUALIFY event_id IS NULL OR ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY timestamp) = 1</code> (<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK, &lsquo;Delivery and deduplication&rsquo;</a>). <code>QUALIFY</code> is evaluated after <code>GROUP BY</code>, so a query that aggregates dedups in a CTE first, as the queries in section 8 do.</p>
 </section>
 
 <section id="install" class="chapter" aria-labelledby="install-h">
@@ -243,9 +243,9 @@ claude plugin install bigquery-agent-analytics-mod@bigquery-agent-analytics-plug
 <tr role="row"><th scope="row" role="rowheader"><code>enabled</code>, <code>dryRun</code></th><td role="cell" data-label="Effect">On, off. <code>BQAA_TRACE_ENABLED=false</code> turns capture off; <code>BQAA_DRY_RUN=true</code> writes rows as JSONL beside the dead-letter directory instead of sending.</td></tr>
 <tr role="row"><th scope="row" role="rowheader"><code>maxPayloadChars</code></th><td role="cell" data-label="Effect">16,384 (1,024 to 500,000). Cap per JSON payload column; past it the value is cut and <code>is_truncated</code> set.</td></tr>
 <tr role="row"><th scope="row" role="rowheader"><code>flushIntervalMs</code></th><td role="cell" data-label="Effect">5,000 (1,000 to 300,000). How often the writer sends.</td></tr>
-<tr role="row"><th scope="row" role="rowheader"><code>deadLetterDir</code></th><td role="cell" data-label="Effect"><code>BQAA_DEAD_LETTER_DIR</code>, then <code>~/.bqaa-mod/dead-letter</code>.</td></tr>
+<tr role="row"><th scope="row" role="rowheader"><code>deadLetterDir</code></th><td role="cell" data-label="Effect"><code>BQAA_DEAD_LETTER_DIR</code>, then <code>~/.bqaa-mod/dead-letter</code>; one subdirectory per table.</td></tr>
 <tr role="row"><th scope="row" role="rowheader"><code>agentName</code>, <code>accessTokenCommand</code></th><td role="cell" data-label="Effect"><code>coding-agent</code>; <code>gcloud auth application-default print-access-token</code> (argv, no shell). <code>BQAA_ACCESS_TOKEN</code> skips the command.</td></tr>
-<tr role="row"><th scope="row" role="rowheader">Environment only</th><td role="cell" data-label="Effect"><code>BQAA_USER_ID</code>, <code>BQAA_REQUEST_TIMEOUT_MS</code> (10,000), <code>BQAA_MAX_QUEUE_ROWS</code> (5,000), <code>BQAA_EXIT_FLUSH_MS</code> (800; 0 spills without sending), <code>BQAA_AUTO_CREATE_TABLE</code>, <code>BQAA_AUTO_BACKFILL</code>.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Environment only</th><td role="cell" data-label="Effect"><code>BQAA_USER_ID</code>, <code>BQAA_REQUEST_TIMEOUT_MS</code> (10,000), <code>BQAA_MAX_QUEUE_ROWS</code> (5,000), <code>BQAA_EXIT_FLUSH_MS</code> (800: how long session end may wait for its spill file), <code>BQAA_AUTO_CREATE_TABLE</code>, <code>BQAA_AUTO_BACKFILL</code>.</td></tr>
 </tbody>
 </table>
 </div>
@@ -285,7 +285,7 @@ claude plugin install bigquery-agent-analytics-mod@bigquery-agent-analytics-plug
 <section id="sample-rows" class="chapter" aria-labelledby="sample-rows-h">
 <p class="chapter-number" aria-hidden="true">07 / Sample rows</p>
 <h2 id="sample-rows-h"><span class="visually-hidden">7. </span>Sample rows</h2>
-<p><em class="judge">Sample output.</em> These rows are what the mod sent to a stubbed insertAll when its own fixture test, <code>tests/sample-rows.test.ts</code>, ran in the plugin test runner: a prompt, four model requests, Read, an Agent call that runs an Explore subagent, Edit, and Bash after a permission prompt. The model id <code>example-model</code>, the token counts and the turn&rsquo;s 48,211&nbsp;ms are fixture inputs; the other <code>latency_ms</code> values are what the run measured, a few milliseconds, because nothing really ran. Ids are random per run.</p>
+<p><em class="judge">Sample output.</em> These rows are the insertAll payload the mod built when its own fixture test, <code>tests/sample-rows.test.ts</code>, ran in the plugin test runner: a prompt, four model requests, Read, an Agent call that runs an Explore subagent, Edit, and Bash after a permission prompt. All but the last went to a stubbed insertAll; the last, the session-end row, is the one session end writes to a spill file for the next session to send. The model id <code>example-model</code>, the token counts and the turn&rsquo;s 48,211&nbsp;ms are fixture inputs; the other <code>latency_ms</code> values are what the run measured, a few milliseconds, because nothing really ran. Ids are random per run.</p>
 <div class="table-wrap" role="region" aria-label="Table: the 26 sample rows" tabindex="0">
 <table class="compare rows" role="table" aria-labelledby="rows-caption">
 <caption id="rows-caption">The fixture session, one line per row, in the order the mod queued them. Span ids shortened to 8 characters.</caption>
@@ -375,13 +375,13 @@ claude plugin install bigquery-agent-analytics-mod@bigquery-agent-analytics-plug
 <h3 id="row-tool">One <code>TOOL_COMPLETED</code> row, as the insertAll payload carries it</h3>
 <p>The JSON columns travel as JSON text inside the row, which is how <code>tabledata.insertAll</code> takes BigQuery <code>JSON</code> values:</p>
 <pre><code>{&quot;timestamp&quot;: &quot;2026-10-14T02:54:21.142Z&quot;, &quot;event_id&quot;: &quot;12d434849fd84d98541e1e7436c55b97&quot;, &quot;event_type&quot;: &quot;TOOL_COMPLETED&quot;, &quot;agent&quot;: &quot;coding-agent&quot;, &quot;session_id&quot;: &quot;5c4b1d2e-8f7a-4c3b-9d1e-2a6f0b7c8d9e&quot;, &quot;invocation_id&quot;: &quot;3f0e2a71-9c4d-4b8e-a1f6-52d7c0e9b134&quot;, &quot;user_id&quot;: &quot;dev&quot;, &quot;trace_id&quot;: &quot;a4db76890e3b711d381938f9c05e0935&quot;, &quot;span_id&quot;: &quot;bab87003630f5369&quot;, &quot;parent_span_id&quot;: &quot;b569e2cf4f1bf6ab&quot;, &quot;content&quot;: &quot;{\&quot;tool\&quot;:\&quot;Bash\&quot;,\&quot;tool_origin\&quot;:\&quot;LOCAL\&quot;,\&quot;result\&quot;:\&quot;12 pass\\n0 fail\&quot;}&quot;, &quot;content_parts&quot;: [], &quot;attributes&quot;: &quot;{\&quot;root_agent_name\&quot;:\&quot;coding-agent\&quot;,\&quot;source\&quot;:\&quot;coding_agent\&quot;,\&quot;tool_use_id\&quot;:\&quot;toolu_c4d39d1a1c094555ae72affc428e50ac\&quot;,\&quot;permission_requested\&quot;:true,\&quot;writer\&quot;:{\&quot;plugin\&quot;:\&quot;bigquery-agent-analytics-mod\&quot;,\&quot;version\&quot;:\&quot;0.1.0\&quot;,\&quot;label\&quot;:\&quot;bigquery-agent-analytics-mod/0.1.0\&quot;,\&quot;agent\&quot;:\&quot;coding-agent\&quot;,\&quot;mode\&quot;:\&quot;insert_all\&quot;}}&quot;, &quot;latency_ms&quot;: &quot;{\&quot;total_ms\&quot;:0}&quot;, &quot;status&quot;: &quot;OK&quot;, &quot;error_message&quot;: null, &quot;is_truncated&quot;: false}</code></pre>
-<p>All 26 rows are in <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/coding-agent-mod/plugins/bigquery-agent-analytics-mod/examples/sample-rows.jsonl"><code>examples/sample-rows.jsonl</code></a> (Repo).</p>
+<p>All 26 rows are in <a href="https://github.com/caohy1988/bigquery_agent_analytics_skill/blob/4e8951cb7346d31e52850888e45c0c5a286f8daf/plugins/bigquery-agent-analytics-mod/examples/sample-rows.jsonl"><code>examples/sample-rows.jsonl</code></a> (at commit <code>4e8951c</code>).</p>
 </section>
 
 <section id="queries" class="chapter" aria-labelledby="queries-h">
 <p class="chapter-number" aria-hidden="true">08 / Queries</p>
 <h2 id="queries-h"><span class="visually-hidden">8. </span>Queries</h2>
-<p><code>sql/sample_queries.sql</code> holds eight queries written with the analysis skill&rsquo;s <code>{PROJECT}.{DATASET}.{TABLE}</code> placeholders and <code>@start</code>/<code>@end</code>/<code>@trace_id</code> parameters, so the skill&rsquo;s <code>run_bq.py</code> can run them (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/coding-agent-mod/plugins/bigquery-agent-analytics-mod/sql/sample_queries.sql">Repo</a>). Three of them:</p>
+<p><code>sql/sample_queries.sql</code> holds eight queries written with the analysis skill&rsquo;s <code>{PROJECT}.{DATASET}.{TABLE}</code> placeholders and <code>@start</code>/<code>@end</code>/<code>@trace_id</code> parameters, so the skill&rsquo;s <code>run_bq.py</code> can run them (<a href="https://github.com/caohy1988/bigquery_agent_analytics_skill/blob/4e8951cb7346d31e52850888e45c0c5a286f8daf/plugins/bigquery-agent-analytics-mod/sql/sample_queries.sql">the file at commit <code>4e8951c</code></a>). Three of them, as the file has them:</p>
 <h3 id="q-tokens">Tokens and prompt-cache share per session and model</h3>
 <pre><code>WITH responses AS (
   SELECT *
@@ -396,6 +396,7 @@ SELECT
   COUNT(*) AS model_requests,
   SUM(CAST(JSON_VALUE(attributes, '$.usage_metadata.input_tokens') AS INT64)) AS input_tokens,
   SUM(CAST(JSON_VALUE(attributes, '$.usage_metadata.cache_read_input_tokens') AS INT64)) AS cache_read_tokens,
+  SUM(CAST(JSON_VALUE(attributes, '$.usage_metadata.cache_creation_input_tokens') AS INT64)) AS cache_write_tokens,
   SUM(CAST(JSON_VALUE(attributes, '$.usage_metadata.output_tokens') AS INT64)) AS output_tokens,
   ROUND(SAFE_DIVIDE(
     SUM(CAST(JSON_VALUE(attributes, '$.usage_metadata.cache_read_input_tokens') AS INT64)),
@@ -404,46 +405,64 @@ FROM responses
 GROUP BY session_id, model
 ORDER BY output_tokens DESC;</code></pre>
 <h3 id="q-tools">Tool failure rate and latency</h3>
-<pre><code>SELECT
+<pre><code>WITH tools AS (
+  SELECT *
+  FROM `{PROJECT}.{DATASET}.{TABLE}`
+  WHERE event_type = 'TOOL_COMPLETED'
+    AND timestamp BETWEEN @start AND @end
+  QUALIFY event_id IS NULL OR ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY timestamp) = 1
+)
+SELECT
   JSON_VALUE(content, '$.tool') AS tool_name,
+  JSON_VALUE(content, '$.tool_origin') AS tool_origin,
   COUNT(*) AS calls,
   COUNTIF(status = 'ERROR') AS failures,
+  ROUND(COUNTIF(status = 'ERROR') / COUNT(*) * 100, 2) AS fail_rate_pct,
+  COUNTIF(JSON_VALUE(attributes, '$.denied') = 'true') AS denied_by_hook,
   COUNTIF(JSON_VALUE(attributes, '$.permission_requested') = 'true') AS asked_permission,
+  APPROX_QUANTILES(CAST(JSON_VALUE(latency_ms, '$.total_ms') AS INT64), 100)[OFFSET(50)] AS p50_ms,
   APPROX_QUANTILES(CAST(JSON_VALUE(latency_ms, '$.total_ms') AS INT64), 100)[OFFSET(95)] AS p95_ms
-FROM `{PROJECT}.{DATASET}.{TABLE}`
-WHERE event_type = 'TOOL_COMPLETED'
-  AND timestamp BETWEEN @start AND @end
-QUALIFY event_id IS NULL OR ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY timestamp) = 1
-GROUP BY tool_name
+FROM tools
+GROUP BY tool_name, tool_origin
 ORDER BY failures DESC, calls DESC;</code></pre>
 <h3 id="q-tree">The span tree of one turn</h3>
-<pre><code>SELECT child.timestamp, child.event_type, child.agent, child.span_id, child.parent_span_id,
-       parent.event_type AS parent_event_type,
-       CAST(JSON_VALUE(child.latency_ms, '$.total_ms') AS INT64) AS total_ms
+<pre><code>SELECT
+  child.timestamp,
+  child.event_type,
+  child.agent,
+  child.span_id,
+  child.parent_span_id,
+  parent.event_type AS parent_event_type,
+  COALESCE(JSON_VALUE(child.content, '$.tool'), JSON_VALUE(child.attributes, '$.model')) AS detail,
+  CAST(JSON_VALUE(child.latency_ms, '$.total_ms') AS INT64) AS total_ms,
+  child.status
 FROM `{PROJECT}.{DATASET}.{TABLE}` AS child
 LEFT JOIN (
   SELECT span_id, trace_id, ANY_VALUE(event_type) AS event_type
   FROM `{PROJECT}.{DATASET}.{TABLE}`
-  WHERE timestamp BETWEEN @start AND @end AND trace_id = @trace_id
+  WHERE timestamp BETWEEN @start AND @end
+    AND trace_id = @trace_id
     AND event_type IN ('INVOCATION_STARTING', 'LLM_REQUEST', 'AGENT_STARTING')
   GROUP BY span_id, trace_id
 ) AS parent
   ON child.parent_span_id = parent.span_id AND child.trace_id = parent.trace_id
-WHERE child.timestamp BETWEEN @start AND @end AND child.trace_id = @trace_id
+WHERE child.timestamp BETWEEN @start AND @end
+  AND child.trace_id = @trace_id
+QUALIFY child.event_id IS NULL OR ROW_NUMBER() OVER (PARTITION BY child.event_id ORDER BY child.timestamp) = 1
 ORDER BY child.timestamp;</code></pre>
-<p>The other five deduplicate rows, show model latency by model (p50/p95 total, time to first token), give one line per turn, rank subagent types, and track the mod&rsquo;s own health per day. All eight parse as BigQuery SQL and ran over the 26 sample rows in DuckDB after a dialect translation (section 9); none has been run in BigQuery.</p>
+<p>The other five deduplicate rows, show model latency by model (p50/p95 total, time to first token), give one line per turn, rank subagent types, and track the mod&rsquo;s own health per day. All eight parse as BigQuery SQL and ran over the 26 sample rows in DuckDB after a dialect translation, and so did the three above as extracted from this page (section 9); none has been run in BigQuery.</p>
 </section>
 
 <section id="verification" class="chapter" aria-labelledby="verification-h">
 <p class="chapter-number" aria-hidden="true">09 / How it was checked</p>
 <h2 id="verification-h"><span class="visually-hidden">9. </span>How it was checked</h2>
 <ul>
-<li><strong><code>claude plugin validate</code></strong> passes on the mod and on the repository&rsquo;s marketplace file. It lists the ten hooked events and three commands, &ldquo;answers its own command&rdquo; for each command, &ldquo;gating hook with .catch&rdquo; for each observer, and the calls the module makes: <code>$.clock.after</code>, <code>$.clock.every</code>, <code>$.command.register</code>, <code>$.env.get</code>, <code>$.fs.*</code>, <code>$.http.fetch</code>, <code>$.process.run</code>, <code>$.session.id</code>, <code>$.session.version</code>, <code>$.store.*</code>, <code>$.ui.log</code>, <code>$.ui.status</code>. The validator is how the mod docs suggest you &ldquo;list what a mod does&rdquo; before installing it (mod docs, &lsquo;Mods overview&rsquo;).</li>
-<li><strong><code>claude plugin test</code></strong>: 55 tests pass, run with no session, sign-in, GCP or network; <code>$.http.fetch</code>, <code>$.process.run</code>, <code>$.fs</code> and <code>$.store</code> are stubbed and <code>mock.clock</code> drives the timers (mod docs, &lsquo;Test a mod&rsquo;). They cover the rows and spans, the non-blocking rules, the queue bound, retries with stable insertIds, timeouts, token refresh, table creation, partial inserts, dead-letter files, backfill, leases, the exit spill, <code>/clear</code>, dry run, redaction, truncation that keeps a row&rsquo;s identifying fields, a refused environment read, a re-fired <code>session.start</code>, and configuration. Breaking the hot-path rule or the span parenting on purpose made the relevant tests fail.</li>
+<li><strong><code>claude plugin validate</code></strong> passes on the mod and on the repository&rsquo;s marketplace file. It lists the ten hooked events and three commands, &ldquo;answers its own command&rdquo; for each command, &ldquo;gating hook with .catch&rdquo; for the five observers that carry one (<code>classic.SessionStart</code>, <code>classic.SubagentStart</code>, <code>classic.PermissionRequest</code>, <code>prompt.submit</code>, <code>tool.call</code>), and the calls the module makes: <code>$.clock.after</code>, <code>$.clock.every</code>, <code>$.command.register</code>, <code>$.env.get</code>, <code>$.fs.*</code>, <code>$.http.fetch</code>, <code>$.process.run</code>, <code>$.session.id</code>, <code>$.session.version</code>, <code>$.store.*</code>, <code>$.ui.log</code>, <code>$.ui.status</code>. The validator is how the mod docs suggest you &ldquo;list what a mod does&rdquo; before installing it (mod docs, &lsquo;Mods overview&rsquo;).</li>
+<li><strong><code>claude plugin test</code></strong>: 67 tests pass, run with no session, sign-in, GCP or network; <code>$.http.fetch</code>, <code>$.process.run</code>, <code>$.fs</code> and <code>$.store</code> are stubbed and <code>mock.clock</code> drives the timers (mod docs, &lsquo;Test a mod&rsquo;), and the <code>$.fs</code> stubs measure files in UTF-8 bytes and refuse one over 4&nbsp;MiB, as the host does. They cover the rows and spans, the non-blocking rules with <code>session.end</code> included, the queue bound, retries with stable insertIds, timeouts, token refresh, table creation, partial inserts, dead-letter files, replay that keeps two tables&rsquo; rows apart, backfill, leases, the exit spill and its time bound, multibyte rows held to the file limit in bytes, <code>/clear</code>, dry run, redaction (credential keys by stem, signed links, and every place a diagnostic goes), truncation that keeps a row&rsquo;s identifying fields, refused environment reads, a re-fired <code>session.start</code>, and configuration. Breaking a rule on purpose made the relevant tests fail: awaiting the flush inside <code>tool.call</code>, breaking the span parenting, and undoing, one at a time, the per-table replay directory, the per-line table check, diagnostic redaction, byte-based file sizes, the request-free session end, the token-variable fallback, stem matching of credential keys, the oversized-file report and redaction before cutting.</li>
 <li><strong>TypeScript:</strong> the hooks module and tests type-check under <code>tsc --strict</code> against the type declarations the CLI (v2.1.296) wrote.</li>
-<li><strong>A real session, dry run:</strong> a headless (<code>-p</code>) run of the CLI with <code>--plugin-dir</code> and <code>BQAA_DRY_RUN=true</code> on v2.1.296, once during development and again on the final code. <code>/bqaa-status</code> ran as a command with no model call. A one-tool prompt (<code>echo</code> through Bash, on a small model) wrote 12 rows each time: a <code>STATE_DELTA</code> at each end, <code>INVOCATION_STARTING</code>, <code>USER_MESSAGE_RECEIVED</code>, two <code>LLM_REQUEST</code>/<code>LLM_RESPONSE</code> pairs, <code>TOOL_STARTING</code>/<code>TOOL_COMPLETED</code>, <code>AGENT_RESPONSE</code> and <code>INVOCATION_COMPLETED</code>, with the engine&rsquo;s token counts and measured latencies (including time to first token) filled in, the tool span under the request that asked for it, and the session-end row written by the exit drain. The engine starts a tool while the response that asked for it is still streaming, so the tool&rsquo;s start row came before that response&rsquo;s row, and the exact order differed between the runs. Two runs on one machine are not a benchmark, so no timings are quoted here.</li>
+<li><strong>Real sessions:</strong> headless (<code>-p</code>) runs of the CLI with <code>--plugin-dir</code> on v2.1.296. Two runs with <code>BQAA_DRY_RUN=true</code> and a one-tool prompt (<code>echo</code> through Bash, on a small model), made before the session-end and dead-letter changes, wrote 12 rows each: a <code>STATE_DELTA</code> at each end, <code>INVOCATION_STARTING</code>, <code>USER_MESSAGE_RECEIVED</code>, two <code>LLM_REQUEST</code>/<code>LLM_RESPONSE</code> pairs, <code>TOOL_STARTING</code>/<code>TOOL_COMPLETED</code>, <code>AGENT_RESPONSE</code> and <code>INVOCATION_COMPLETED</code>, with the engine&rsquo;s token counts and measured latencies (including time to first token) filled in, the tool span under the request that asked for it, and the session-end row written at exit. The engine starts a tool while the response that asked for it is still streaming, so the tool&rsquo;s start row came before that response&rsquo;s row, and the exact order differed between the runs. After those changes, <code>/bqaa-status</code> ran with no model call in a dry run, and once against a destination with a token command that always fails, so nothing could be sent: at exit its two <code>STATE_DELTA</code> rows went to a spill file in the destination&rsquo;s subdirectory, each line naming its table, and the status named the token program without its arguments. Runs on one machine are not a benchmark, so no timings are quoted here.</li>
 <li><strong>Install path:</strong> <code>claude plugin marketplace add ./</code> and <code>claude plugin install bigquery-agent-analytics-mod@bigquery-agent-analytics-plugin --config &hellip;</code> succeeded in an isolated configuration directory, storing the options under <code>pluginConfigs</code>.</li>
-<li><strong>SQL:</strong> the DDL and the eight queries parse with sqlglot&rsquo;s BigQuery dialect; translated to DuckDB, all eight ran over the 26 sample rows with the expected results (one turn, 48,211&nbsp;ms, five model requests, four tool calls, one subagent).</li>
+<li><strong>SQL:</strong> the DDL and the eight queries parse with sqlglot&rsquo;s BigQuery dialect; translated to DuckDB, all eight ran over the 26 sample rows with the expected results (one turn, 48,211&nbsp;ms, five model requests, four tool calls, one subagent). The three queries in section 8 and the README&rsquo;s example were also checked as extracted from this page and the README, and ran the same way.</li>
 </ul>
 </section>
 
@@ -458,6 +477,8 @@ ORDER BY child.timestamp;</code></pre>
 <li>A subagent&rsquo;s span sits under its turn, not under the <code>Agent</code> tool call that started it: the events seen carry no reliable link between the two.</li>
 <li>No <code>HITL_*</code> rows: the mod sees a permission prompt open (<code>classic.PermissionRequest</code>) but not a reliable answer, and a request row without its completion would read as unanswered.</li>
 <li>The in-memory queue is lost when the hooks module reloads or its worker crashes &mdash; at most one flush interval of rows plus any batch in backoff. A disk spool would avoid that at the cost of disk work per event.</li>
+<li>Rows queued at exit reach BigQuery when a later session starts (15 seconds in) or <code>/bqaa-backfill</code> runs; until then they wait in a spill file.</li>
+<li>Rows parked for a table are sent only by a session configured for that table; after switching tables, the old table&rsquo;s rows wait until a session runs with its settings again.</li>
 <li><code>$.fs</code> cannot append or delete: one file per failure, truncated rather than removed after a backfill.</li>
 <li>The type declarations mark <code>$.process.run</code> as &ldquo;CLI only&rdquo;; where the token command cannot run, set <code>BQAA_ACCESS_TOKEN</code>.</li>
 <li>Redaction is pattern-based and best effort; the table holds prompts, answers, tool arguments and results, cut to <code>maxPayloadChars</code>.</li>
@@ -474,6 +495,7 @@ ORDER BY child.timestamp;</code></pre>
 <li><strong>NOT VERIFIED:</strong> the per-file backfill lease under many concurrent sessions, and memory and timing over long sessions.</li>
 <li><strong>NOT VERIFIED:</strong> BigQuery cost for this write pattern; no rates are quoted here.</li>
 <li><strong>NOT VERIFIED:</strong> the eight sample queries in BigQuery itself (they were parsed and run in DuckDB only).</li>
+<li><strong>NOT VERIFIED:</strong> a spill file sent by the next session to a live table; the real-host run above stopped at the spill file, and the replay is covered by the tests only.</li>
 </ul>
 </section>
 
@@ -484,7 +506,7 @@ ORDER BY child.timestamp;</code></pre>
 <li><a href="https://code.claude.com/docs/en/plugins/mods/overview">mod docs</a>: the host coding-agent CLI&rsquo;s mod documentation (the overview, with the create, events, API, test and reference pages it links to)</li>
 <li><a href="https://adk.dev/integrations/bigquery-agent-analytics/">https://adk.dev/integrations/bigquery-agent-analytics/</a></li>
 <li><a href="https://github.com/googleapis/python-bigquery/blob/main/google/cloud/bigquery/_helpers.py">https://github.com/googleapis/python-bigquery/blob/main/google/cloud/bigquery/_helpers.py</a></li>
-<li><a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/coding-agent-mod/plugins/bigquery-agent-analytics-mod">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/coding-agent-mod/plugins/bigquery-agent-analytics-mod</a> (pull request pending; resolves once the branch is pushed)</li>
+<li><a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7</a>: the pull request with the mod, open as of this note; single files are linked at commit 4e8951c of its branch</li>
 <li><a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/main/plugins/bigquery-agent-analytics-tracing">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/main/plugins/bigquery-agent-analytics-tracing</a></li>
 <li><a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/6">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/6</a></li>
 </ul>
@@ -496,7 +518,7 @@ ORDER BY child.timestamp;</code></pre>
 <footer class="footer">
 <div class="footer-inner">
 <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6"/><path class="bm-a" d="M6 10h9M6 16h12M6 22h7"/><path class="bm-cut" d="M20 9l6 7-6 7"/></svg>
-<div><p class="footer-title">A coding-agent mod that writes BigQuery Agent Analytics rows without blocking</p><p>Build note on <a href="https://caohy1988.github.io/research/coding-agent-mod-bqaa/">caohy1988.github.io/research/coding-agent-mod-bqaa/</a>. Code in <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/coding-agent-mod/plugins/bigquery-agent-analytics-mod">plugins/bigquery-agent-analytics-mod</a> (pull request pending). Sample rows are test-fixture output. Prepared and documentation fetched <time datetime="2026-10-13">2026-10-13</time>.</p></div>
+<div><p class="footer-title">A coding-agent mod that writes BigQuery Agent Analytics rows without blocking</p><p>Build note on <a href="/research/coding-agent-mod-bqaa/">caohy1988.github.io/research/coding-agent-mod-bqaa/</a>. Code in <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">pull request #7</a> (<code>plugins/bigquery-agent-analytics-mod</code>). Sample rows are test-fixture output. Prepared and documentation fetched <time datetime="2026-10-13">2026-10-13</time>.</p></div>
 <a class="back-top" href="#title">Back to top</a>
 </div>
 </footer>
