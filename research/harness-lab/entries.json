@@ -1,8 +1,37 @@
 {
-  "updatedAt": "2026-10-14T04:53:12Z",
+  "updatedAt": "2026-10-14T06:34:16Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "cyrilxbt-memory-loop-write-consolidate-recall-apply-2026-10-13",
+      "date": "2026-10-13",
+      "displayDate": "Oct 13, 2026",
+      "title": "CyrilXBT (@cyrilXBT) — memory loop: write only what is new, one-line summaries first, consolidation deletes, say what recall applied",
+      "href": "https://threadnavigator.com/thread/2075623918417723502/",
+      "why": "CyrilXBT's article (dated Jul 11, 2026 on the threadnavigator mirror) argues that memory is compression, not a longer transcript, and builds it in four steps. Write: after a session, record only what is not already in the code, the chat history or an existing note, one lesson per file with a one-line summary on top. Consolidate: on a schedule, merge duplicate lessons and delete the ones that turned out wrong or outdated: 'deleted entirely, not archived, deleted'. Recall: at the start, scan the summaries, load only the files that apply, and say so when nothing does. Apply: at the end, name the recalled lesson that changed the work, or confirm none did; a lesson that keeps going unused means its summary or the search needs fixing. Fit: the vault and each agent's own memory get the same loop inside the existing daily consolidation, with no new routine; the post-task note template gains a summary line, a 'New?' line and a 'Recalled lessons applied' line, and the done receipt gains that last line. Caveats: our standing rule allows deletions only after Haiyuan's explicit approval of the specific items, so consolidation merges duplicates directly but puts wrong or outdated lessons, an agent's private memory included, on a named prune list; approved items are deleted, not archived, and Decision notes are preserved; the article is written around one model but says the protocol is not built-in model behavior, so every model in the path must be told it; its prompts, weekly cadence, monthly audit and per-project folders are the author's process, not measured here, and only the four rules were taken. In playbook (2026-10-13, Haiyuan-approved) §4: https://caohy1988.github.io/research/harness/#memory-loop.",
+      "source": "Haiyuan-approved fold-in (Manage) · Maps/Decisions/2026-10-13-memory-write-consolidate-recall-apply",
+      "tags": [
+        "memory",
+        "vault",
+        "context",
+        "receipts"
+      ],
+      "appliedToPlaybook": true,
+      "keeps": [
+        "write only what is new: check the code, the chat or PR thread and existing notes first; update or cite instead of restating",
+        "one-line summary on top of every new note; recall scans the summaries first and opens only the notes that apply",
+        "consolidation merges duplicates directly; wrong or outdated lessons, private memory included, go on a named prune list, and only items Haiyuan approves are deleted, not archived (direct deletion only for agent-owned scratch; Decision notes preserved)",
+        "say 'nothing applies' at recall; the post-task note and done receipt name the recalled lesson that changed the work, or 'none applied'"
+      ],
+      "skippedAsCovered": [
+        "per-project memory folders (covered: five buckets + shared-memory admission rule)",
+        "weekly consolidation cadence (folded into the existing daily consolidation; no new routine)",
+        "monthly memory-value audit (not adopted: a new standing cost)",
+        "verify a lesson before writing it (covered: claim vs record, code decides done)",
+        "tell a newly switched model the protocol (covered: AGENTS.md is wired into every CLI home by install-agent-hooks.sh)"
+      ]
+    },
     {
       "id": "workflow-script-harness-unmodified-node-test-scripted-agents-counter-trace-named-errors-2026-10-13",
       "date": "2026-10-13",
@@ -188,7 +217,7 @@
       "displayDate": "Oct 11, 2026",
       "title": "agent-docs-lint — zero-LLM CLI that flags missing file and slash-command targets, listed model or plan names, unreferenced agent or skill files and broken anchors in agent docs",
       "href": "https://github.com/hrtaym1114-github/agent-docs-lint",
-      "why": "Zero-LLM Python CLI that catches drift in agent documentation, designed for AGENTS.md, CLAUDE.md, .cursor/rules, .claude/agents, .claude/skills, .agents/skills and similar repos where docs are the source of truth. Four checks: dead_ref (local Markdown links, backtick path-like references or slash commands that point to missing files or command targets), model_name (hard-coded model or plan tokens from a configurable list), unreferenced_agent (agent or skill Markdown files not mentioned by filename stem) and broken_anchor (a local Markdown link whose #anchor is missing in the target file). Findings print as file:line: rule: message (AGENTS.md:11: dead_ref: missing slash command target: /missing-command) or as JSON with --json, and a TOML config sets model_names, ignore_paths, disable_rules and extra_scan_globs. Exit 0 means no error findings or --warn-only was used, 1 one or more error findings, 2 a CLI, config or runtime error. Fit: our vault AGENTS.md, which install-agent-hooks.sh wires into the agy, Codex, Kimi and DSH homes, cites its locks as backtick Maps/Decisions/ paths, the kind of path-like reference dead_ref checks. temper validates a .claude/ harness against schemas and a declared contract, and ai-baton's /kit-health audits frontmatter, leaked values, the env store, hooks and an engine smoke; this reads the references, model names and anchors written in the docs, and unreferenced_agent asks whether any doc names an agent or skill file, where skillwharf's usage counts whether a skill fires. Caveats: model_name finds only the names on its list (the README's example config lists gpt-4, gpt-4o, claude-3-opus and ChatGPT Plus), so our own retired names would have to be added; extra_scan_globs adds paths beyond the listed ones (the README's example adds docs/agents/**/*.md); the GitHub Actions snippet is documentation only; v0.1.0, MIT, 0 stars, created 2026-10-06; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "Zero-LLM Python CLI that catches drift in agent documentation, designed for AGENTS.md, CLAUDE.md, .cursor/rules, .claude/agents, .claude/skills, .agents/skills and similar repos where docs are the source of truth. Four checks: dead_ref (local Markdown links, backtick path-like references or slash commands that point to missing files or command targets), model_name (hard-coded model or plan tokens from a configurable list), unreferenced_agent (agent or skill Markdown files not mentioned by filename stem) and broken_anchor (a local Markdown link whose #anchor is missing in the target file). Findings print as file:line: rule: message (AGENTS.md:11: dead_ref: missing slash command target: /missing-command) or as JSON with --json, and a TOML config sets model_names, ignore_paths, disable_rules and extra_scan_globs. Exit 0 means no error findings or --warn-only was used, 1 one or more error findings, 2 a CLI, config or runtime error. Fit: our vault AGENTS.md, which install-agent-hooks.sh wires into the agy, Codex, Kimi and DSH homes, cites its locks as backtick Maps/Decisions/ paths, the kind of path-like reference dead_ref checks. temper validates a .claude/ harness against schemas and a declared contract, and ai-baton's /kit-health audits frontmatter, leaked values, the env store, hooks and an engine smoke; this reads the references, model names and anchors written in the docs, and unreferenced_agent asks whether any doc names an agent or skill file, where skillwharf's usage counts whether a skill fires. Caveats: model_name finds only the names on its list (the README's example config lists gpt-4, gpt-4o, claude-3-opus and ChatGPT Plus), so our own retired names would have to be added; extra_scan_globs adds paths beyond the listed ones (the README's example adds docs/agents/**/*.md); the GitHub Actions snippet is documentation only; v0.1.0, MIT, 0 stars, created 2026-10-06; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false. In playbook (2026-10-13, Haiyuan-approved): https://caohy1988.github.io/research/harness/#pointer-check.",
       "source": "Hunt/agent-manage/2026-10-11-dsh-harness-lab-pack",
       "tags": [
         "lint",
@@ -198,7 +227,7 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "learn-from-mistakes-agent-judges-cli-counts-per-source-cited-records-checked-2026-10-11",
@@ -276,7 +305,7 @@
       "displayDate": "Oct 10, 2026",
       "title": "claim-gate — Claude Code Stop hook that by default blocks, at most once per turn, a reply making a completion, count, absence or universal claim without the evidence its rule asks for",
       "href": "https://github.com/CY-HYUN/claim-gate",
-      "why": "Claude Code Stop hook in one standard-library Python file of about 270 lines; it does not judge whether a claim is true, only whether the reply shows how it was made. Five rules, each cleared by a command or a named line: completion (\"all done\", \"tests pass\") by a code block, a command or a Verified: line; number (a count or percentage stated as observed) by the command that produced it or a Counted with: line; absence (\"nothing uses this\") by two pieces of evidence (two commands or file:line citations) or a Searched: block; universal (all, every, none, always or never next to a countable noun) by a counted scope or a Scope: line; correction (\"I was wrong\" with a new number or cause) by a command, a file:line or a Correction source: line. Plans and questions do not fire, and text in code blocks, inline code and > quotes is ignored. In the default block mode the model is told which evidence to add; on the next stop of that turn Claude Code sets stop_hook_active and the hook passes, so it blocks at most once per turn; warn mode never blocks, and any internal error lets the stop through. 17 tests; each detector was replaced with always-fires and never-fires in turn, and all 10 broken versions turned at least one test red. Fit: a Verified: line is close to the VERIFIED field of our done receipt (only checks that ran, with evidence), and the absence rule sits next to our negative-claims rule; claimcheck, the source of our claim-vs-record rule, and proof-of-done check claims against the session transcript, while this reads only the final reply; the always-fires/never-fires check follows Kanon's K-PRIN-11 (a guard must be able to fail). Caveats: it checks for evidence, not for truth, since a reply can paste a command it never ran; English only and regex based, it misses claims phrased in ways its patterns do not cover and sometimes fires on descriptive sentences; evidence anywhere in the reply counts, so one command clears every number claim in the same reply, even claims it did not produce; MIT, 0 stars, created 2026-10-09; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "Claude Code Stop hook in one standard-library Python file of about 270 lines; it does not judge whether a claim is true, only whether the reply shows how it was made. Five rules, each cleared by a command or a named line: completion (\"all done\", \"tests pass\") by a code block, a command or a Verified: line; number (a count or percentage stated as observed) by the command that produced it or a Counted with: line; absence (\"nothing uses this\") by two pieces of evidence (two commands or file:line citations) or a Searched: block; universal (all, every, none, always or never next to a countable noun) by a counted scope or a Scope: line; correction (\"I was wrong\" with a new number or cause) by a command, a file:line or a Correction source: line. Plans and questions do not fire, and text in code blocks, inline code and > quotes is ignored. In the default block mode the model is told which evidence to add; on the next stop of that turn Claude Code sets stop_hook_active and the hook passes, so it blocks at most once per turn; warn mode never blocks, and any internal error lets the stop through. 17 tests; each detector was replaced with always-fires and never-fires in turn, and all 10 broken versions turned at least one test red. Fit: a Verified: line is close to the VERIFIED field of our done receipt (only checks that ran, with evidence), and the absence rule sits next to our negative-claims rule; claimcheck, the source of our claim-vs-record rule, and proof-of-done check claims against the session transcript, while this reads only the final reply; the always-fires/never-fires check follows Kanon's K-PRIN-11 (a guard must be able to fail). Caveats: it checks for evidence, not for truth, since a reply can paste a command it never ran; English only and regex based, it misses claims phrased in ways its patterns do not cover and sometimes fires on descriptive sentences; evidence anywhere in the reply counts, so one command clears every number claim in the same reply, even claims it did not produce; MIT, 0 stars, created 2026-10-09; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false. In playbook (2026-10-13, Haiyuan-approved): https://caohy1988.github.io/research/harness/#check-can-fail.",
       "source": "Hunt/agent-manage/2026-10-10-muse-harness-lab-pack",
       "tags": [
         "hooks",
@@ -286,7 +315,7 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "tamperproof-test-files-read-only-shell-allowlist-verify-on-dirty-stop-2026-10-10",
@@ -400,7 +429,7 @@
       "displayDate": "Oct 9, 2026",
       "title": "verified-ops-starter — freshness, no-op and rollout checks for scheduled jobs under one exit-code contract in which a dead checker cannot look like a clean result",
       "href": "https://github.com/tonydzi/verified-ops-starter",
-      "why": "Python standard-library kit that replaces a scheduled job's self-report with evidence. freshness asks whether the job's real output is young enough (optional min_bytes, and a contains marker taken from the body, never the filename); wrap runs the job and announces a silent no-op when it exits 0 but its artifact did not change, comparing mtime and size, and kills and announces a hang under --timeout-s; rollout reads a fix back from each target, and a target whose verify only exits 0 comes back WEAK. One exit contract: 0 clean, 1 a problem found and the alert delivered, 3 found but the alert could not be delivered (also what --dry-run returns), 4 the checker itself died; a run that measured nothing, such as an empty or misspelled config, is 4, never 0, and under wrap any non-zero child code becomes 4 unless declared with --signal. selftest.py runs 44 checks, each first broken by a mutant, under the README's rule that a check with no mutant that makes it fail measures nothing. Fit: that rule is Kanon's K-PRIN-11 (a guard must be able to fail) in runnable form; 4 for nothing measured is Ruttla's exit 2 under another number; and wrap catches a job that exits 0 after an empty page or an expired token, the failure our negative-claims rule says must be a gap, never zero. Caveats: mtime is evidence, not proof (a third process writing the artifact mid-run reads as work landed, and a byte-identical rewrite on a coarse filesystem can read as a no-op), and a synced folder can stamp a fresh mtime on an old file; it answers whether the work landed, not whether the job fired, so the README puts it beside heartbeat monitoring rather than in place of it; Python 3.8+, CI on Ubuntu, macOS and Windows, v0.1.0; MIT, 1 star, created 2026-08-04; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "Python standard-library kit that replaces a scheduled job's self-report with evidence. freshness asks whether the job's real output is young enough (optional min_bytes, and a contains marker taken from the body, never the filename); wrap runs the job and announces a silent no-op when it exits 0 but its artifact did not change, comparing mtime and size, and kills and announces a hang under --timeout-s; rollout reads a fix back from each target, and a target whose verify only exits 0 comes back WEAK. One exit contract: 0 clean, 1 a problem found and the alert delivered, 3 found but the alert could not be delivered (also what --dry-run returns), 4 the checker itself died; a run that measured nothing, such as an empty or misspelled config, is 4, never 0, and under wrap any non-zero child code becomes 4 unless declared with --signal. selftest.py runs 44 checks, each first broken by a mutant, under the README's rule that a check with no mutant that makes it fail measures nothing. Fit: that rule is Kanon's K-PRIN-11 (a guard must be able to fail) in runnable form; 4 for nothing measured is Ruttla's exit 2 under another number; and wrap catches a job that exits 0 after an empty page or an expired token, the failure our negative-claims rule says must be a gap, never zero. Caveats: mtime is evidence, not proof (a third process writing the artifact mid-run reads as work landed, and a byte-identical rewrite on a coarse filesystem can read as a no-op), and a synced folder can stamp a fresh mtime on an old file; it answers whether the work landed, not whether the job fired, so the README puts it beside heartbeat monitoring rather than in place of it; Python 3.8+, CI on Ubuntu, macOS and Windows, v0.1.0; MIT, 1 star, created 2026-08-04; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false. In playbook (2026-10-13, Haiyuan-approved): https://caohy1988.github.io/research/harness/#check-can-fail.",
       "source": "Hunt/agent-manage/2026-10-09-agy-harness-lab-pack",
       "tags": [
         "routines",
@@ -410,7 +439,7 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "vigil-claim-vs-check-missed-window-catchup-degraded-2026-10-09",
@@ -454,7 +483,7 @@
       "displayDate": "Oct 8, 2026",
       "title": "authority-demo — approval does not pre-approve the world: authority is re-checked at dispatch, and a signed finding records what the check read and whether it was writable",
       "href": "https://github.com/arman-jalili/authority-demo",
-      "why": "Runnable demo for the Rigorix policy engine: a human approves an agent's payout, the beneficiary is frozen while the next run waits for approval, and once that run is approved the payout is refused at dispatch; the ledger never changes. Authority is checked when the agent asks and again immediately before the step executes, and the second check is the one that matters because it sees the current world; a beneficiary missing from the authority is refused even with an approval. The check is the whole policy: it answers one question and exits 0 to dispatch or 3 to refuse, with no LLM, no domain semantics and no network. The refusal is recorded in an HMAC-signed audit envelope with the outcome, exit code, checked_at, inputs_hash (the step inputs the engine fed the check), authority_digest (the authority content it read) and check_writable, which is true on the default $HOME install because your UID can write it. The rule the agent is judged by is not in its repository, and a PreToolUse hook denies direct payout, ledger and authority writes; the README calls this a policy + path + hook boundary, not a sandbox, since an unmediated write to $HOME is still possible. --isolated makes both files root-owned and non-writable, and setup refuses an agent user with passwordless sudo unless overridden with a loud warning. Fit: a re-check at dispatch for anything approved before it runs; Titan's verifier-outside-the-repo rule, applied to authority; and evidence for our done receipt's VERIFIED line: what the check read, when, and whether the guard was writable. Caveats: needs rigorix-mcp 1.9.2+ and Node 22+; no LICENSE file (GitHub reports none), so treat it as all rights reserved and as pattern only: read and re-implement the idea; copy no file and vendor no code; 0 stars, created 2026-10-06; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "Runnable demo for the Rigorix policy engine: a human approves an agent's payout, the beneficiary is frozen while the next run waits for approval, and once that run is approved the payout is refused at dispatch; the ledger never changes. Authority is checked when the agent asks and again immediately before the step executes, and the second check is the one that matters because it sees the current world; a beneficiary missing from the authority is refused even with an approval. The check is the whole policy: it answers one question and exits 0 to dispatch or 3 to refuse, with no LLM, no domain semantics and no network. The refusal is recorded in an HMAC-signed audit envelope with the outcome, exit code, checked_at, inputs_hash (the step inputs the engine fed the check), authority_digest (the authority content it read) and check_writable, which is true on the default $HOME install because your UID can write it. The rule the agent is judged by is not in its repository, and a PreToolUse hook denies direct payout, ledger and authority writes; the README calls this a policy + path + hook boundary, not a sandbox, since an unmediated write to $HOME is still possible. --isolated makes both files root-owned and non-writable, and setup refuses an agent user with passwordless sudo unless overridden with a loud warning. Fit: a re-check at dispatch for anything approved before it runs; Titan's verifier-outside-the-repo rule, applied to authority; and evidence for our done receipt's VERIFIED line: what the check read, when, and whether the guard was writable. Caveats: needs rigorix-mcp 1.9.2+ and Node 22+; no LICENSE file (GitHub reports none), so treat it as all rights reserved and as pattern only: read and re-implement the idea; copy no file and vendor no code; 0 stars, created 2026-10-06; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false. In playbook (2026-10-13, Haiyuan-approved): https://caohy1988.github.io/research/harness/#approval-recheck.",
       "source": "Hunt/agent-manage/2026-10-08-dsh-harness-lab-pack",
       "tags": [
         "policy",
@@ -464,7 +493,7 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "kanon-guard-must-be-able-to-fail-coverage-figure-no-configuration-2026-10-08",
@@ -472,7 +501,7 @@
       "displayDate": "Oct 8, 2026",
       "title": "Kanon — agent-workflow rulebook: a guard must be able to fail, a detector reports what it examined, and there is no configuration to switch a rule off",
       "href": "https://github.com/yedeya-labs/kanon",
-      "why": "Opinionated workflow for GitHub and Claude Code in which agents file, implement and review work under a rulebook of about 200 rules, each with its reason. Two principles are why it is here. K-PRIN-11, a guard must be able to fail: mutation-check every guard assertion by breaking the thing it protects and confirming it goes red, separately for each assertion; when a mutation passes, decide whether it is equivalent or the assertion is dead; scope a documentation guard to the line or block that makes the claim and make it throw when its anchor moves; restore a mutated file from a copy, never by reverting it to the committed version, which reverts the fix too. K-PRIN-8: every detector reports a coverage figure (what it examined), not only what it found, and a check whose healthy state is silence emits a positive signal that it ran. K-PRIN-9 records a missing measurement as absent, never as zero, and K-PRIN-1 gives a reason for having no configuration: a guard that checks the code against a config the code also reads can no longer fail. Fit: a test procedure behind our negative-claims rule (a failed lookup is a gap, never zero) and code decides done, next to Ruttla's two-probe rule and corralai's planted faults. Caveats: by its own Enforced-by lines K-PRIN-11 is only partly enforced (the brief guard is mutation-tested, elsewhere prose only), K-PRIN-8 per component with no general guard, and K-PRIN-1 prose only, so these are mostly prose rules; it assumes GitHub Actions and Claude Code as its runtimes, so only the rules transfer; pre-1.0, Apache-2.0, 0 stars, created 2026-09-30; README and rulebook/00-principles.md verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "Opinionated workflow for GitHub and Claude Code in which agents file, implement and review work under a rulebook of about 200 rules, each with its reason. Two principles are why it is here. K-PRIN-11, a guard must be able to fail: mutation-check every guard assertion by breaking the thing it protects and confirming it goes red, separately for each assertion; when a mutation passes, decide whether it is equivalent or the assertion is dead; scope a documentation guard to the line or block that makes the claim and make it throw when its anchor moves; restore a mutated file from a copy, never by reverting it to the committed version, which reverts the fix too. K-PRIN-8: every detector reports a coverage figure (what it examined), not only what it found, and a check whose healthy state is silence emits a positive signal that it ran. K-PRIN-9 records a missing measurement as absent, never as zero, and K-PRIN-1 gives a reason for having no configuration: a guard that checks the code against a config the code also reads can no longer fail. Fit: a test procedure behind our negative-claims rule (a failed lookup is a gap, never zero) and code decides done, next to Ruttla's two-probe rule and corralai's planted faults. Caveats: by its own Enforced-by lines K-PRIN-11 is only partly enforced (the brief guard is mutation-tested, elsewhere prose only), K-PRIN-8 per component with no general guard, and K-PRIN-1 prose only, so these are mostly prose rules; it assumes GitHub Actions and Claude Code as its runtimes, so only the rules transfer; pre-1.0, Apache-2.0, 0 stars, created 2026-09-30; README and rulebook/00-principles.md verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false. In playbook (2026-10-13, Haiyuan-approved): https://caohy1988.github.io/research/harness/#check-can-fail.",
       "source": "Hunt/agent-manage/2026-10-08-dsh-harness-lab-pack",
       "tags": [
         "verification",
@@ -482,7 +511,7 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "ai-baton-workspace-rules-file-per-machine-health-stamp-leaked-value-gate-2026-10-08",
@@ -607,7 +636,7 @@
       "displayDate": "Oct 6, 2026",
       "title": "Ruttla — deterministic quality gate: every rule must fail its broken probe and pass its healthy one, and exit 2 means nothing was measured",
       "href": "https://github.com/hehljo/Ruttla",
-      "why": "Local quality gate that turns a proven failure into an executable rule: a rule must fail its broken probe and pass its healthy probe, and ruttla --self-test re-runs both. The exit code is a contract: 0 measured with no blocking finding, 1 a blocking finding, 2 nothing was measured (the README says not a success), 3 a runner, input, config or plugin error. Without its engine the declarative rules report as unmeasured, never green, and platforms with no rule pack are listed instead of passing. The README warns that ruttla . | head reports head's status, so capture the code before filtering. --format agent prints one line per finding with a FIX: hint; scans use no LLM or network and never execute target code. Fit: it puts our negative-claim rule and code decides done into an exit code a wrapper can test, and its two-probe test is an admission rule for checks we add. Caveats: 0.1.0.dev0 public preview; rule messages are currently in German; the quick install pipes a script to sh; 0 stars, Apache-2.0, created 2026-09-18; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "Local quality gate that turns a proven failure into an executable rule: a rule must fail its broken probe and pass its healthy probe, and ruttla --self-test re-runs both. The exit code is a contract: 0 measured with no blocking finding, 1 a blocking finding, 2 nothing was measured (the README says not a success), 3 a runner, input, config or plugin error. Without its engine the declarative rules report as unmeasured, never green, and platforms with no rule pack are listed instead of passing. The README warns that ruttla . | head reports head's status, so capture the code before filtering. --format agent prints one line per finding with a FIX: hint; scans use no LLM or network and never execute target code. Fit: it puts our negative-claim rule and code decides done into an exit code a wrapper can test, and its two-probe test is an admission rule for checks we add. Caveats: 0.1.0.dev0 public preview; rule messages are currently in German; the quick install pipes a script to sh; 0 stars, Apache-2.0, created 2026-09-18; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false. In playbook (2026-10-13, Haiyuan-approved): https://caohy1988.github.io/research/harness/#check-can-fail.",
       "source": "Hunt/agent-manage/2026-10-06-agy-harness-lab-pack",
       "tags": [
         "verification",
@@ -617,7 +646,7 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "sandbox-run-detached-worktree-verify-main-tree-byte-identical-2026-10-06",
@@ -1042,7 +1071,7 @@
       "displayDate": "Oct 4, 2026",
       "title": "@sermakarevich — evals guide: re-audit gates and rules when a model or version in the path changes",
       "href": "https://x.com/sermakarevich/status/2106453816757354947",
-      "why": "@sermakarevich's eval guide says to calibrate a cheap gate once against ground truth and re-audit it when the model, the judge or the domain changes. What to try here: when a model or version in the path changes (Opus 5.5, Astra, Jev 1.13, a Mac CLI update), re-run the Jev shadow report and the replay set, and review whether each lint, hook or prompt rule still earns its place; delete rules that a better model made pointless. Where it applies: Jev gates checked against the constant baseline, and the rules under the resident-policy byte ceiling. The byte ceiling and the Monday kill review exist, but nothing fires on a model change, so calibrated gates can go stale without anyone noticing. Status: backlog; the first real use is the next model or CLI version change. The guide's numbers come from its cited sources and were not checked.",
+      "why": "@sermakarevich's eval guide says to calibrate a cheap gate once against ground truth and re-audit it when the model, the judge or the domain changes. What to try here: when a model or version in the path changes (Opus 5.5, Astra, Jev 1.13, a Mac CLI update), re-run the Jev shadow report and the replay set, and review whether each lint, hook or prompt rule still earns its place; delete rules that a better model made pointless. Where it applies: Jev gates checked against the constant baseline, and the rules under the resident-policy byte ceiling. The byte ceiling and the Monday kill review exist, but nothing fires on a model change, so calibrated gates can go stale without anyone noticing. Status: backlog; the first real use is the next model or CLI version change. The guide's numbers come from its cited sources and were not checked. In playbook (2026-10-13, Haiyuan-approved): https://caohy1988.github.io/research/harness/#model-change-sweep.",
       "source": "Hunt/harness-lab/2026-10-04-nine-link-gap-analysis",
       "tags": [
         "jev",
@@ -1051,7 +1080,7 @@
         "rules",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "confirm-old-process-dead-before-resume-2026-10-04",
@@ -1274,7 +1303,7 @@
       "displayDate": "Oct 3, 2026",
       "title": "agent-receipts — transcript claim auditor catches assertion cuts, || true, --no-verify",
       "href": "https://github.com/0xelitesystem/agent-receipts",
-      "why": "Zero-dependency pure-Python-stdlib transcript verifier: parses agent session logs (Claude Code + sub-agent transcripts), extracts completion claims (\"tests pass\", \"committed\", \"created X\"), and cross-checks against real exit codes, filesystem state, and git commits. Flags gaming signals — assertion-count reductions, failure masking with || true, commits with --no-verify — and scores a receipts report offline (no API keys). Fits Mori done-receipt / code-decides-done audits. Caveats: ★0 MIT young; post-hoc only (does not block in-flight tampering); scoring on huge multi-agent transcripts unverified here; not installed/run. Patterns/checks, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "why": "Zero-dependency pure-Python-stdlib transcript verifier: parses agent session logs (Claude Code + sub-agent transcripts), extracts completion claims (\"tests pass\", \"committed\", \"created X\"), and cross-checks against real exit codes, filesystem state, and git commits. Flags gaming signals — assertion-count reductions, failure masking with || true, commits with --no-verify — and scores a receipts report offline (no API keys). Fits Mori done-receipt / code-decides-done audits. Caveats: ★0 MIT young; post-hoc only (does not block in-flight tampering); scoring on huge multi-agent transcripts unverified here; not installed/run. Patterns/checks, not a coding-CLI seat, no Herdr. Lab card; appliedToPlaybook false. In playbook (2026-10-13, Haiyuan-approved): https://caohy1988.github.io/research/harness/#check-can-fail.",
       "source": "Hunt/agent-manage/2026-10-03-agy-harness-lab-pack",
       "tags": [
         "receipts",
@@ -1284,7 +1313,7 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": true
     },
     {
       "id": "dibs-resource-lease-single-door-ship-2026-10-03",
