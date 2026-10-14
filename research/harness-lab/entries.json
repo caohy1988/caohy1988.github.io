@@ -1,8 +1,97 @@
 {
-  "updatedAt": "2026-10-13T00:07:32Z",
+  "updatedAt": "2026-10-14T04:53:12Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "workflow-script-harness-unmodified-node-test-scripted-agents-counter-trace-named-errors-2026-10-13",
+      "date": "2026-10-13",
+      "displayDate": "Oct 13, 2026",
+      "title": "workflow-script-harness — test harness that runs a Claude Code Workflow-tool script unmodified under node:test, with scripted per-label agent responses, a counter trace for proving overlap and named sandbox errors",
+      "href": "https://github.com/vannifr/workflow-script-harness",
+      "why": "Node test harness (Node 18+; the whole implementation is one file, src/harness.js, with zero runtime dependencies) for scripts written against Claude Code's Dynamic Workflows feature, the Workflow tool's DSL (agent(), pipeline(), parallel(), phase(), log(), args, budget). It reproduces that sandbox in Node's built-in vm module, so a script runs unmodified under node:test with no real Claude Code session, no real agents and no network. agentResponses scripts agent() per label, in call order: { type: 'null' } resolves to null to simulate a failed or empty agent call, and a label whose responses run out raises a clear error. budget takes a total and an ordered spentSequence that each budget.spent() call consumes, so budget-aware branches are testable too. parallel() runs its tasks concurrently with Promise.all, and pipeline() lets independent items overlap across stages while a given item's stage 2 never starts before its own stage 1 finished; result.trace records monotonic counters, not timestamps, so a test checks overlap with a.startCounter < b.endCounter && b.startCounter < a.endCounter, with no wall-clock flakiness. Date, Math, require, process and other host or non-deterministic primitives are blocked with a named FORBIDDEN_PRIMITIVE error when called or when their properties are read, and calling an unknown global or reading its properties throws UNKNOWN_GLOBAL; in both cases, capturing an untouched reference inside a returned object can succeed. A HarnessError (a test or config problem: fix the test) is always distinguishable by .name from a ScriptError (the script's own bug, such as a TypeError: fix the script). Fit: harness-mocks' claude-mock stands in for the claude binary and agent-evals records model calls once and replays them offline; this stands in for the agents a Workflow-tool script calls. Its FAQ still asks for a final real run before a script is trusted in production, close to how our replay regression check sits inside Three-Run Proof, where live Three-Run Proof stays the bar (2026-09-25-code-decides-done-and-replay-check). Caveats: the sandbox semantics are a point-in-time snapshot that the README dates as last verified against the Workflow tool on 2026-09-09; allowed globals or concurrency behaviour can change at any time, and the README asks for an issue naming your Claude Code version if they drift; the harness is not a security boundary (Node's vm is not hardened against a malicious script), which the README says is fine because the script under test is yours; it targets Claude Code's Workflow tool, so it applies only where a Claude Code seat runs such scripts; the author built it to test their own Workflow-tool scripts, with no formal support commitment; npm package, MIT, 0 stars, created 2026-09-09; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-13-muse-harness-lab-pack",
+      "tags": [
+        "evals",
+        "orchestration",
+        "concurrency",
+        "replay",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "the-docket-numbered-rulings-governs-hook-stop-judge-fail-stale-2026-10-13",
+      "date": "2026-10-13",
+      "displayDate": "Oct 13, 2026",
+      "title": "The Docket — Claude Code plugin: a ledger of numbered rulings, a pre-edit hook that prints the rulings cited within twenty lines, and a judge at the stop that can block it on a FAIL or STALE verdict",
+      "href": "https://github.com/AlastairZeved/The-Docket",
+      "why": "Claude Code plugin (v0.1.0; needs Node 20+, git and the claude CLI) that keeps a repository's decisions from being undone, built around a ledger the agent doing the work (the README's maker) cannot walk past. A ledger is a Markdown file of numbered rulings (docs/DECISIONS.md, or your own), each with the principle it was resolved against, its reason and what it does to earlier rulings, an edge named by one of a fixed list of verbs: a later ruling supersedes an earlier one, often a single clause of it, and never edits it away. Before an edit, a hook prints the rulings cited within twenty lines of it, nearest first, with the edges among them; it informs and never blocks. At the stop, if the session's diff touches a governed file (one that cites a ruling), a ledger or a spec beside one, the hook starts a judge: a headless session of its own, allowed to read files and run the docket's core, which records its verdict. The judge scores the diff against the rulings and its domain packs, and a FAIL, or a STALE for a ruling whose reason the diff has made untrue, blocks the stop with located failures: FAIL directs the maker to change the code or supersede the ruling through /rule; STALE directs it to a dated addendum through /rule. /rule asks five questions, refuses a vague answer and writes nothing until you type confirm in a turn of your own. The witness that checks the rulings is a node script your repository owns and your CI runs, so they still govern after the plugin is uninstalled. Measured results are dated ledger records; the latest judge record (2026-10-02, Claude Code 2.1.287) printed \"every outcome: met\" over six scenarios, each judge ending 23 to 35 seconds after it started. Fit: our standing rules are dated Maps/Decisions/ locks behind one-line AGENTS.md pointers, and a later lock can narrow part of an earlier one (AGENTS.md's Jev pre-launch step cites 2026-09-24-jev-fleet-shadow-token-gate with § Q8 of 2026-09-27-lab-keeps-folded-into-playbook); the Docket keeps that shape inside a code repository and adds a judge of the diff. wordcell's card calls its path-scoped context the missing retrieval bridge between our Decisions/forbidden.md and the file under edit, the job the Docket's pre-edit hook does for a repository's own rulings. Caveats, from its Known Limits: the maker's session may run the core and record a verdict, so the boundary is permission and visibility, not cryptography; the judge is a model reading prose that most likely shares the maker's model and its blind spots; the stale reading is the weakest, met in 1 of 2 further runs; each governed stop costs a headless session on your account, with at most 5 judged blocks per session between passes and the judge bounded at 700 seconds; every measurement ran on one host, and no measurement of the hook has had a control; 0 stars, created 2026-09-11, MIT; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-13-muse-harness-lab-pack",
+      "tags": [
+        "rules",
+        "hooks",
+        "ledger",
+        "judges",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "prove-it-done-receipts-verifier-reruns-said-never-counts-one-per-instrument-2026-10-13",
+      "date": "2026-10-13",
+      "displayDate": "Oct 13, 2026",
+      "title": "prove-it-done — agent skill for receipt-gated completion: one-line receipts a bundled verifier re-runs, self-reports recorded but never counted, and two confirmations through one instrument counted as one",
+      "href": "https://github.com/issaquahd/prove-it-done",
+      "why": "Agent skill (SKILL.md plus scripts/verify_receipts.py, which needs Python 3.9 or later and nothing else) that puts a small, mechanical step between the work and the word done. A receipt is a one-line check, written in a Markdown ledger, that the bundled verifier re-runs against the real system and judges PASS or FAIL. Receipt kinds: cmd: (no shell), sh: (shell, off unless --allow-shell is given), file: (exists, SHA-256), dir:, http: (status, body text), commit: (exists, touches a path, on a branch) and said: (a recorded self-report, never counted). Six rules: a self-report is a claim, not evidence; a confirmation names its instrument, and two through the same instrument count as one; a config check is not a behaviour check; a check that errors proves nothing; a check must come after the last change; reopen, never delete, so a done step whose receipt fails is reopened with strike-through, not deleted. In the README's example, run with --min-instruments 2, a deploy tool's \"ok: rollout started\" prints as CLAIM and does not count, while an http: receipt and a cmd: receipt through kubectl pass, so the step is PROVEN through 2 instruments. Install is a copy into the skills folder of Claude Code or any runtime that loads SKILL.md skills. Fit: our done receipt's VERIFIED lists only checks that ran, with evidence (2026-09-27-0xjmori-harness-receipt-and-disproof-review), and under code decides done a deterministic check (tests, file, commit or live URL) beats an agent self-report (2026-09-25-code-decides-done-and-replay-check); cmd:, file:, commit: and http: receipts cover similar ground as one-liners, and the instrument rule would add a count of independent sources to a VERIFIED line. proof-of-done blocks a tests-pass, build or deploy claim at the stop unless the transcript shows the command ran after the last relevant edit and succeeded, and gatehouse binds evidence to GATES.md oracles; this is a skill the agent follows, not a hook. Caveats, from its Limits: it is a skill, not a gate, so nothing stops an agent from skipping it unless the verifier's exit status is wired into a hook or CI step; the verifier checks receipts, not whether they are the right receipts, and via= and proves=config are labels the agent applies honestly or not; instrument names are guessed from the receipt (program name, HTTP host), so two tools reading the same source look independent unless tagged with the same via=; http: sends no credentials; no effect size is claimed, since the eval harness has been tested on four synthetic transcripts only; 0 stars, created 2026-10-11, MIT; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-13-muse-harness-lab-pack",
+      "tags": [
+        "receipts",
+        "evidence",
+        "code-decides-done",
+        "skills",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "bouncer-pretooluse-hard-rules-before-jev-observe-default-calibration-gate-2026-10-13",
+      "date": "2026-10-13",
+      "displayDate": "Oct 13, 2026",
+      "title": "bouncer — Claude Code PreToolUse judgment layer: hard rules and a fast path decide in code before any model call, seven Jev questions judge the middle against a YAML policy, and it ships in observe mode",
+      "href": "https://github.com/clownware/bouncer",
+      "why": "Claude Code plugin (Node 20+, zero runtime dependencies) whose PreToolUse hook asks TypeSafe Jev, a fast judgment model rather than a frontier LLM, seven plain-English questions about a proposed tool call in one call, for about four cents a day per the README; each answer is a probability, and thresholds in a YAML policy you own act on it. Its stated rule is that the edges are code and the judge decides the middle: gate.hard_rules and the gate.fast_path allowlist decide the cases that should never have been a probability before any model is called. The README's evidence: calibration run 7 cleared the bar on all seven questions, yet the question naming the risk scored cat .env at 0.15; in run 8 a correct friction fix removed the coverage a neighbouring question had given a live Stripe key exported on the command line, which fell through to allow, and the second pass, with hard rules in place, caught it. Modes: observe, the default, emits no decision and logs what it would have said (\"a classifier you have not personally watched be wrong is not one to hand a veto to\"); seatbelt, for --dangerously-skip-permissions sessions, stays silent until a hard rule matches unless you enable a deny threshold yourself, and a deny under that flag was confirmed by a sentinel probe on 2026-09-18; guard and full are for prompted users. bouncer calibrate runs the policy over labelled near-miss pairs and prints a pass/fail row per question against 0.85 accuracy at confidence 0.8 or higher; calibrate --gate produces a six-part candidate/reference report covering accuracy, calibration, polarity, rephrase, injection and latency. Latency is not measured, reversed and rephrased variants are skipped until stamped, and no backend can pass or receive an attestation yet; polarity or injection failures disqualify. Fit: company-in-a-box's card records that our Jev layer already had a guard (pre_tool) gate (2026-09-20-jev-decision-layer); gates such as worth_running run in shadow and never block (2026-09-24-jev-fleet-shadow-token-gate), as observe mode does; and our Jev constant baseline asks a gate to beat the always-majority constant before shadow→active (2026-09-27-lab-keeps-folded-into-playbook; archestra's card), a different bar from calibrate's accuracy row. Caveats: its 112 hand-labelled fixtures measure agreement with one person's policy intuitions, not ground truth; it catches mistakes and is not a security boundary; a judged call sends Jev a state (the tool, the command, what its paths mean), and the jev backend reads BOUNCER_TYPESAFE_API_KEY, while jev-belay's card notes our router reaches Jev through OpenRouter; the README gives both nineteen and twenty-two hard rules, so no count is quoted here; 1 star, created 2026-09-18, MIT; README-verified, not installed or run. Any live gating or model-call spend is a separate Haiyuan decision. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-13-muse-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "jev",
+        "calibration",
+        "guardrails",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "five-second-report-stop-hook-seven-sections-who-owes-next-resend-cap-2026-10-13",
+      "date": "2026-10-13",
+      "displayDate": "Oct 13, 2026",
+      "title": "five-second-report — Claude Code and Codex Stop hook that asks for a re-send, by default, at most twice a session, when a change-making turn's final message lacks status sections or has a detected structural violation",
+      "href": "https://github.com/jrejaud/five-second-report",
+      "why": "Stop hook for Claude Code and OpenAI Codex (Node 18+, one hooks/report.js file; the README says no dependencies) for running many agents at once, when each turn ends in a wall of prose and you cannot tell which agent is finished, which is stuck and which is waiting on you. When a turn ends, the hook reads the session transcript: a turn that only read things or chatted stays silent, and a turn that changed something should end in up to seven sections, in order, empty ones left out: BROKEN, IN PROGRESS, DONE, DISPATCHED, QUEUED, PENDING, DECISION, with ALL FINISHED when nothing is left open; a PENDING item says what you must do (the README's example: \"you: run the deploy script; I have no access to the prod server.\"). A detected change-making turn without status sections triggers a re-send. Certain structural violations also trigger one, including out-of-order sections and excessive item counts. Missing bold titles can pass unnoticed; preamble, trailing-text and soft-ask warnings accompany another violation rather than independently triggering a re-send. A DECISION section without an AskUserQuestion call in the recognized turn triggers a picker request. It answers with a block decision that does not reject the turn: the agent re-sends the message fixed, so you never see the bad version. It ignores re-sends it triggered itself, remembers each message it already complained about, defaults to firing at most twice per session, configurable through STATUS_FORMAT_MAX_FIRES, and CLAUDE_DISABLE_STATUS_FORMAT=1 turns it off. The hook only enforces the format, so the agent must be told it first: the FORMAT.md text goes in CLAUDE.md or an output style, or AGENTS.md for Codex. Its tests feed it fake Claude Code and Codex transcripts. Fit: Gate Inbox reads the tmux panes to show sessions blocked on you, tmux-agent-status reads each agent's own session state, and overnight-receipts lists what an agent's final message left undone or asked; this puts the who-owes-next answer in the final message itself. Our done receipt (OBJECTIVE / CHANGED / VERIFIED / NOT VERIFIED / RISKS / APPROVAL NEEDED) covers Github PR/job and Manage non-trivial done reports, not each turn (2026-09-27-0xjmori-harness-receipt-and-disproof-review), and oversight-readable-output's trial asks for short controlled-language reports Haiyuan must judge; a DONE section here is shape, not evidence. Caveats: of our seats in AGENTS.md, only Claude Code and Codex are covered; Codex skips an untrusted hook with no warning until it is trusted in /hooks; Context Guard's card notes our fleet runs are mostly one-shot grok-tmux-run jobs, not long interactive chats; 0 stars, created 2026-10-12, MIT; README-verified, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-13-muse-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "ops",
+        "CoS",
+        "Muse Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "overnight-receipts-per-branch-receipt-merge-fix-kill-needs-you-2026-10-12",
       "date": "2026-10-12",
