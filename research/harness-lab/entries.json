@@ -1,8 +1,98 @@
 {
-  "updatedAt": "2026-10-14T06:34:16Z",
+  "updatedAt": "2026-10-15T06:57:41Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
+    {
+      "id": "overclaim-false-completion-rate-hidden-check-stop-hook-no-detectable-reduction-2026-10-14",
+      "date": "2026-10-14",
+      "displayDate": "Oct 14, 2026",
+      "title": "overclaim — scores an agent's completion claim against a hidden check it never saw and reports the false-completion rate; in its intervention study a verify prompt and both Stop-hook modes gave no detectable reduction",
+      "href": "https://github.com/h-a-forster/overclaim",
+      "why": "Python 3.11+ CLI with no runtime dependencies (v0.1.0) that labels the claim in a coding agent's own final message (complete, partial, incomplete or none) and scores it against an independent hidden check the agent never saw. It reports the false-completion rate (FCR: of the failed runs, how many said \"done\"), the false-claim share (of the \"done\" messages, how many were wrong) and what the agent's own tests showed before it claimed success, and it ships a Claude Code Stop hook that sends the agent back once when it claims success with no passing test run after its last edit, or in audit mode asks for a requirement-by-requirement check. Study 1 (Claude Code 2.1.296, Claude Haiku 5.5 and Sonnet 5.5 at low and high effort, 18 solvable and 5 impossible Python tasks, 184 trials, $28.88): failed solvable runs were reported as done 11 of 14 times, FCR 78.6% [50.0, 100.0], and 11 of 98 \"done\" messages were wrong; in 10 of the 11 the agent's last test run after its last edit had passed (the 11th was unreadable). Flagging \"done\" without a passing test after the last edit caught 1 of 11, with 14 false alarms among the 87 correct \"done\" messages; an LLM judge also caught 1 of 11. Study 2 (Haiku 5.5, 18 solvable tasks; arms control, ask-verify, stop-hook in claim mode and stop-audit; 288 trials, $28.08): FCR 5/6, 6/9, 5/9 and 6/7, paired differences in false-completion incidence against control +1.4, 0.0 and +1.4 percentage points, all p = 1.00; the claim-mode hook blocked 10 of 72 trials, 9 of which passed, and the audit hook blocked all 72 once. \"The study found no support for a Stop hook preventing false completions.\" Fit: under our code-decides-done rule a deterministic check, not the agent's self-report, decides done (2026-09-25-code-decides-done-and-replay-check), and claimcheck's card is the source of our claim-vs-record check, where a done claim must match the session record; proof-of-done's card blocks a tests-pass claim unless the transcript shows the command ran after the last relevant edit and succeeded, close to this repo's claim mode and to the detector that caught 1 of 11 here. overclaim's rate is a way to test whether such a gate changes anything. Caveats, from its Limitations: one agent family, Python tasks only and few failures (14 failed solvable trials in study 1, 31 in study 2), so the README says to read the rates as rough; 6 of the 11 study-1 false completions come from one task whose hidden check contradicts its prompt (without it, FCR 5/6 and a false-claim share of 5.4%); the labels come from LLMs, all Claude models, and the rule classifier was partly tuned on these messages; in study 2 the hook sat in the workspace's .claude/ directory, where the agent could read it; a failed hidden check counts as ground truth, and hidden checks can be wrong too; every number is the author's run, not ours; MIT, 1 star, created 2026-10-11; README, docs/results.md and docs/hook.md read, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-14-dsh-harness-lab-pack",
+      "tags": [
+        "evals",
+        "evidence",
+        "code-decides-done",
+        "hooks",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "cheat-drill-39-cheat-moves-blocked-vs-legit-blocked-held-out-21-of-25-2026-10-14",
+      "date": "2026-10-14",
+      "displayDate": "Oct 14, 2026",
+      "title": "cheat-drill — feeds 39 known agent cheat moves to Claude Code PreToolUse hooks and permission rules, scoring cheats blocked next to legit actions blocked; a typical path-based protected-files hook stops 9 of 39",
+      "href": "https://github.com/thinx-pro/cheat-drill",
+      "why": "Python 3.8+ CLI with no dependencies (v0.1.0) that feeds 39 ways an agent can weaken its own checks to the PreToolUse command hooks and permission rules it collects from user and project settings: sed -i on a test, --no-verify, core.hooksPath, overwriting a golden file, HUSKY=0, assume-unchanged, base64 | sh and more, in seven categories, among them 13 shell routes to the test and verifier files and 9 ways to skip or disable git hooks. It builds a throwaway fixture repo, runs every matching hook for real with the stdin JSON Claude Code sends, approximates the permission matcher, and scores blocked, ask and got through per category, with false blocks on 15 legit controls reported next to the score; nothing in a scenario is ever executed, and --unattended counts ask as got through. The author's measured configs: no guard 0/39; permission deny rules on tests/CI paths plus --no-verify 10/39; a typical path-based protected-files hook 9/39, with 0 of the 13 shell routes; the reference verifier_guard.py 36/39 with 3 ask, an in-sample number because it was written while looking at these scenarios. On 25 held-out cheat variants and 14 controls written afterwards (scripts/heldout.py), v0.1.0 denies 21/25, asks on 1 and lets 3 through (export HUSKY=0; git commit with the variable set in a separate statement, a Python heredoc that writes a test, GIT_CONFIG_PARAMETERS setting core.hooksPath), and wrongly denies 1/14 controls (touch tests/test_new.py). Both path-based setups' one legit block is adding a brand-new test file: \"Blanket tests/** rules punish the behaviour you want.\" Fit: Kanon's card (a guard must be able to fail) and agent-receipts' card (flags || true and commits made with --no-verify, after the fact) are in our playbook as #check-can-fail; cheat-drill is the same kind of probe for a hook guard, known cheat moves in and blocked or not out, with false blocks counted too. tamperproof's card describes a guard with a shell allowlist so sed --in-place, node -e, python -c and redirects don't slip through, which still allows new test files: the two weak spots the drill found in both path-based setups. Caveats: only Claude Code's hook protocol for now (Codex and Gemini CLI formats are on its roadmap), so of our seats in AGENTS.md only Claude Code is covered; non-command hooks are listed as skipped and managed settings are not read; permission-rule results approximate Claude Code's matcher, while hook results are exact because the hooks actually ran; the README says a PreToolUse hook is not a sandbox, since shell parsing can always be outrun, and pairs the guard with a hash check of the verifier in CI; \"The drill measures any guard; this one is a starting point, not a solved problem\"; every score is the author's run, not ours; MIT, 0 stars, created 2026-10-14; README, scripts/heldout.py and cheat_drill/scenarios.py read, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-14-dsh-harness-lab-pack",
+      "tags": [
+        "hooks",
+        "guardrails",
+        "tamper",
+        "verification",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "harness-wrangler-paired-runs-confidence-interval-no-headroom-ablate-trigger-set-2026-10-14",
+      "date": "2026-10-14",
+      "displayDate": "Oct 14, 2026",
+      "title": "Harness Wrangler — controlled experiments over coding-agent harness patterns: repeated graded runs per task and variant, a confidence interval on the difference, and a baseline with no room to improve reported as no headroom",
+      "href": "https://github.com/colebrumley/harness-wrangler",
+      "why": "Rust CLI and desktop app (real runs need Claude Code installed and logged in) that measures whether skills, CLAUDE.md files, hooks, system prompt appends, effort levels and models actually help, by how much, and which parts carry the effect. A pattern is testable when four conditions hold: its effect shows inside one session; the result can be checked by a rule, a test command or a rubric judge; the baseline leaves room, because if the agent already gets the task right without the pattern no variant can show a gain (the report calls this \"no headroom\"; when every task is saturated, that verdict counts as inconclusive, never as \"no effect\"); and a run is cheap enough to repeat (the default is five runs per cell, and a comparison needs several tasks). Comparisons are paired by task, with 95% hierarchical bootstrap intervals. Graders include test commands, diff size, regex and transcript checks, and a rubric judge whose pairwise comparisons run both orders and count a win only when both agree. wrangler ablate generates leave-one-section-out overlays of a skill or CLAUDE.md to find which sections carry the effect, wrangler trigger-set drafts should-fire and near-miss prompts from a skill's description, a conversation task with a simulated user tests patterns such as asking one question before changing code, and a suite diff on a new model lists patterns that regressed, ones the new model made redundant and ones still earning their keep. For review skills you build the ground truth, fixtures with planted defects and safe-looking decoys, each one verified, and small fixtures saturate: \"In one project a plain single pass found every planted defect in fixtures of up to 200 lines, which left a multi-agent review skill nothing to win\"; run --baseline-only before paying for the variants. Fit: the three-run-proof-detection-floor card says three runs only catch large regressions and asks for paired comparisons with error bars; agent-evals' card became our replay regression check inside Three-Run Proof, where a replay pass means nothing broke, not that the change is good (2026-09-25-code-decides-done-and-replay-check); recalibrate-or-retire's card asks, when a model in the path changes, whether each rule still earns its place, the question the suite diff answers per pattern. Caveats: no LICENSE file, and GitHub reports no license (the Cargo workspace manifest declares MIT, but no license text ships), so it is pattern only: read and re-implement the idea; copy no file and vendor no code. By its own list, poor fits are skills whose payoff spans sessions (memory, notes), skills that act outside the workspace, and permission and safety behaviour, since runs use bypassPermissions; the 200-line finding is one project's experience; 0 stars, created 2026-10-13; README and Cargo.toml read, not built or run. Any real experiment is model spend and a separate Haiyuan decision. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-14-dsh-harness-lab-pack",
+      "tags": [
+        "evals",
+        "skills",
+        "rules",
+        "promotion gate",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "agent-perch-frozen-two-signals-dialog-keys-banner-alert-only-file-mailbox-2026-10-14",
+      "date": "2026-10-14",
+      "displayDate": "Oct 14, 2026",
+      "title": "agent-perch — one-file stdlib Python supervisor for always-on agents in tmux: frozen means an unchanged screen and a known marker, a known dialog gets its keys instead of a restart, a usage-limit banner only alerts",
+      "href": "https://github.com/tses89214/agent-perch",
+      "why": "Single-file supervisor (perch.py: Python 3.11+, standard library only, needs tmux), extracted from the watchdog a fleet of always-on Claude Code agents needed on a Raspberry Pi. A one-shot tick run from cron reads agents.toml (cmd, cwd, auto_replies, restart_markers, notice_regex and an optional health_cmd), restarts a dead session, and halts an agent with one alert after 3 restarts in 10 minutes. Its design rules: frozen = unchanged screen AND a known marker, because \"Either signal alone misfires: an idle agent at a prompt has an unchanged screen; a working agent shows a marker-like word mid-output\"; markers match the last 10 lines after trailing whitespace is removed; interior blank lines count, idle_markers veto stuck_markers, and restart_markers restart at once for prompts nothing can answer, such as arrow-key menus; auto_replies answer a known harness dialog with keys from your config, since a restart would just show it again; notice_regex observes and never acts, so a usage-limit banner is alert only, suppressing consecutive repeats of the same last matching line; a reappearing banner can alert again; health_cmd restarts after 2 consecutive failures, for a hung agent whose screen looks normal (the fleet needed a check that its MCP child process was alive); and the mailbox is a file, not keystroke injection (\"Typing into another agent's terminal corrupts whatever it is mid-way through\"): a jsonl append under flock with per-reader cursors, so agents must poll, plus an opt-in doorbell that types one fixed line telling an idle agent to read it. Alerts go through your own notify_cmd, with credentials kept out of the config, and the dashboard binds 127.0.0.1 and is read-only unless PERCH_TOKEN is set (a Tailscale login named in PERCH_TS_USER can also skip the token). Fit: grok-tmux-watchdog acts on a stale log (~540s) and resumes the same session (2026-09-05-stream-json-watchdog-all-runs); juli-os/agents' pane probes tell awaiting input from still working, and tmux-agent-status reads a status the agent writes itself; perch adds rules for when a screen should and should not cause a restart. A perch restart is tmux kill-session followed by a new session, with no check that the old process exited; our watchdog resume-safety rule resumes a stale run only after the old process is confirmed gone, and until its code goes live the EM checks by hand (confirm-old-process-dead-before-resume's card). Caveats, its own: markers are per-agent config you must know up front, and the strings must be adjusted to your Claude Code version; \"liveness is 'session exists', not 'work is progressing'\"; alerts have no delivery guarantee or retry; single machine, single tenant, no per-agent CPU or memory limits, and no auth, secrets management or isolation between agents, which share a Unix user; the resource check reads /proc/meminfo, with a Pi's default thresholds; MIT, 0 stars, created 2026-10-05; README, perch.py and docs/case-study.md read, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-14-dsh-harness-lab-pack",
+      "tags": [
+        "watchdog",
+        "tmux",
+        "Mac CLI",
+        "ops",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "agentic-vault-skeleton-imported-agents-md-off-limits-map-skill-catalog-two-session-cache-2026-10-14",
+      "date": "2026-10-14",
+      "displayDate": "Oct 14, 2026",
+      "title": "Agentic Vault Skeleton — Obsidian vault template: one AGENTS.md that CLAUDE.md only imports, a three-file map marking what is off limits, a skill catalog read instead of the skills, a cache of the last two sessions",
+      "href": "https://github.com/OferBlum/agentic-vault-skeleton",
+      "why": "Obsidian vault template, part of the author's Digital Brain repos, laid out so that any AI agent can find its way around without reading everything. Its rules: \"I write; agents read and enrich\": your notes are yours, and agents link them and summarize sources next to them, but never rewrite them. One rules file for every agent: AGENTS.md holds the working rules and CLAUDE.md only imports it (@AGENTS.md), so Claude Code, Codex, Hermes or any other runtime follow the same rules. A map, not a scan: three small files in 0 - System/, me.md (who you are), vault-map.md (each folder's contents and permission; the private folder is off limits, with no read, write, list, index or memory, and every scan starts at a content folder, never at the vault root) and skills-index.md (name, trigger, role). Lazy-loaded skills: \"The agent reads the skill catalog, not the skills\"; a skill's full instructions load only when a request matches its trigger, and a new capability is one skill folder plus one row. Memory between sessions: the agent reads _cache.md at session start and adds a dated block at the end, then trim_cache.py keeps the 2 most recent sessions and moves older ones to _cache-archive.md, backing both files up first. Privacy is a folder, enforced by a separate repo, vault-privacy-guard, which the README lists as a pre-tool hook that keeps every agent out of the private folder. Fit: our vault AGENTS.md applies to every agent, and install-agent-hooks.sh wires it into the agy, Codex, Kimi and DSH homes and the home and project roots, copies a global CLAUDE.md and installs the shared skills into the DSH, Muse and .agents skill homes (2026-09-15-muse-dsh-vault-skills-hooks). ai-baton's card has the same one-rules-file shape (WORKSPACE.md loaded by every session through a CLAUDE.md import on a clone); the memory loop card's recall step scans the one-line summaries and loads only the files that apply, as the skill catalog does for skills; and agent-docs-lint's unreferenced_agent check asks whether any doc names an agent or skill file, the drift a hand-kept catalog can develop. Caveats: hooks.json is written in plain language, so the session-start read and the session-end write and trim are instructions the agent follows because AGENTS.md says so, not hooks a runtime executes; the privacy guard lives in that separate repo, not fetched here; it is a starter layout (me.md is a template, skills-index.md holds one example row); MIT, 0 stars, created 2026-10-13; README, AGENTS.md, CLAUDE.md, the 0 - System/ files and trim_cache.py read, not installed or run. Reference only; any live-seat install, hook, or settings change needs Haiyuan. No new seat, no Herdr. Lab card; appliedToPlaybook false.",
+      "source": "Hunt/agent-manage/2026-10-14-dsh-harness-lab-pack",
+      "tags": [
+        "vault",
+        "rules",
+        "skills",
+        "context",
+        "DSH Lab",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
     {
       "id": "cyrilxbt-memory-loop-write-consolidate-recall-apply-2026-10-13",
       "date": "2026-10-13",
