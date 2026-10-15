@@ -53,7 +53,7 @@
 <!-- site-nav:end -->
 <header class="topbar">
 <a class="brand" href="/research/" aria-label="Field notes, coding-agent mod for BQAA (Research home)"><svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6"/><path class="bm-a" d="M6 10h9M6 16h12M6 22h7"/><path class="bm-cut" d="M20 9l6 7-6 7"/></svg><span class="brand-name">Field notes</span> <span class="brand-sub">Coding-agent mod for BQAA</span></a>
-<div class="top-actions"><a href="#sources">Sources <span class="source-count">16</span></a></div>
+<div class="top-actions"><a href="#sources">Sources <span class="source-count">19</span></a></div>
 </header>
 <main id="study">
 <section class="hero" aria-labelledby="title">
@@ -63,9 +63,9 @@
 <p class="deck">A mod runs as code inside the host coding-agent CLI. This one turns each turn, model request, tool call and subagent into a BQAA <code>agent_events</code> row, and sends them to BigQuery from timers, so no hook waits on the network.</p>
 </div>
 <div class="hero-notes">
-<p class="provenance">Built and tested on 13 October 2026 against v2.1.296 of the host CLI, and tested again on 14 October against v2.1.299, using only methods its mod documentation and type declarations describe. The code, <code>plugins/bigquery-agent-analytics-mod</code>, came in through <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">pull request #7</a> to <code>bigquery_agent_analytics_skill</code>, merged on 15 October 2026 as <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/commit/5566d7f78f520af3f5916b6c2191931c0ad67c28">commit <code>5566d7f</code></a> on <code>main</code>. The sample rows and queries shown here are linked at commit <code>4e8951c</code> of the pull request&rsquo;s branch; the fixes that followed it left both files unchanged. Sample rows are output of the mod&rsquo;s own test fixture, not production data; the demo below is real sessions writing to a test dataset. Section 11, on an admin-managed deployment, was checked on 15 October against the merged mod and v2.1.299.</p>
+<p class="provenance">Built and tested on 13 October 2026 against v2.1.296 of the host CLI, and tested again on 14 October against v2.1.299, using only methods its mod documentation and type declarations describe. The code, <code>plugins/bigquery-agent-analytics-mod</code>, came in through <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">pull request #7</a> to <code>bigquery_agent_analytics_skill</code>, merged on 15 October 2026 as <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/commit/5566d7f78f520af3f5916b6c2191931c0ad67c28">commit <code>5566d7f</code></a> on <code>main</code>. The sample rows and queries shown here are linked at commit <code>4e8951c</code> of the pull request&rsquo;s branch; the fixes that followed it left both files unchanged. Sample rows are output of the mod&rsquo;s own test fixture, not production data; the demo below is real sessions writing to a test dataset. Section 11, on an admin-managed deployment, was checked on 15 October against the merged mod and v2.1.299, and corrected the same day after review.</p>
 <p class="citation-key">Citation key: &ldquo;mod docs&rdquo; is the host CLI&rsquo;s mod documentation (first entry under Sources); &ldquo;ADK&rdquo; is the <a href="https://adk.dev/integrations/bigquery-agent-analytics/">BigQuery Agent Analytics plugin for ADK</a> page; &ldquo;Repo&rdquo; is <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">pull request #7</a>, which holds the mod. Single-quoted names are page or section names in the cited source. What could not be checked is listed under <strong>NOT VERIFIED</strong>.</p>
-<p class="hero-meta">A demo recording, eleven numbered sections, a list of what was not verified, and 16 linked sources.</p>
+<p class="hero-meta">A demo recording, eleven numbered sections, a list of what was not verified, and 19 linked sources.</p>
 </div>
 </section>
 
@@ -96,7 +96,7 @@
 <h2 id="demo-h">Demo: real sessions</h2>
 <figure class="demo-video">
 <video controls preload="metadata" width="1228" height="924" poster="demo-v2-poster.png" src="demo-v2.mp4" aria-describedby="demo-caption">The video does not play in this browser: <a href="demo-v2.mp4">download it</a> (MP4, 1.2&nbsp;MB).</video>
-<figcaption id="demo-caption">A terminal recording of two real sessions, made on 15 October 2026 with v2.1.299 of the host CLI and the mod in live mode, writing to a test dataset. <strong>a)</strong> Fail open: with a token command that always fails, the prompt is still answered. The mod&rsquo;s toast and transcript notice say no working credentials and name the fix. <code>/bqaa-status</code> shows the notice with the rows waiting, and at exit the rows go to a spill file on disk. <strong>b)</strong> With working credentials, the agent runs <code>ls</code> (allowed by a settings rule) and reads a file. Fifteen seconds in, the session replays the 8 rows that a) parked, and its <code>/bqaa-status</code> reports them sent. <strong>c)</strong> <code>bq</code> reads b)&rsquo;s 15 rows back. Both <code>TOOL_COMPLETED</code> rows carry the recorded permission decision, <code>accept</code> from the configuration, and a count by event type follows. <strong>d)</strong> <code>setup.sh</code> checks the table and makes the usage views. The two views report the day&rsquo;s requests, sessions and tokens by model and by user. Every query is capped at 100&nbsp;MB billed. The project id was masked during the recording; in this copy, the model name in the by-model view is masked too. Waits are shortened in playback.</figcaption>
+<figcaption id="demo-caption">A terminal recording of two real sessions, made on 15 October 2026 with v2.1.299 of the host CLI and the mod in live mode, writing to a test dataset. <strong>a)</strong> Fail open: with a token command that always fails, the prompt is still answered. The mod&rsquo;s toast and transcript notice say no working credentials and name the fix. <code>/bqaa-status</code> shows the notice with the rows waiting, and at exit the rows go to a spill file on disk. <strong>b)</strong> With working credentials, the agent runs <code>ls</code> (allowed by a settings rule) and reads a file. Fifteen seconds in, the session replays the 8 rows that a) parked, and its <code>/bqaa-status</code> reports them sent. <strong>c)</strong> <code>bq</code> reads b)&rsquo;s 15 rows back. Both <code>TOOL_COMPLETED</code> rows carry the recorded permission decision, <code>accept</code> from the configuration, and a count by event type follows. <strong>d)</strong> <code>setup.sh</code> checks the table and makes the usage views. The two views report the day&rsquo;s requests, sessions and tokens by model and by user. Every query is capped at 100&nbsp;MB billed. This copy is re-rendered from the recording&rsquo;s text with two substitutions: the project id reads <code>PROJECT</code> wherever it appears, and the model name in the by-model view reads <code>example-model</code>. Waits are shortened in playback.</figcaption>
 </figure>
 </section>
 
@@ -516,9 +516,11 @@ That order is why a finished call waits for its decision. Runs on one machine ar
 </ul></li>
 <li><strong>Admin-managed deployment (section 11):</strong>
 <ul>
-<li>21 scenarios ran on the Linux build of v2.1.299, in an offline container. The managed-settings file and a marketplace directory, holding the merged mod and a probe mod, were writable only by root, and sessions ran as an ordinary user.</li>
+<li>26 scenarios ran on the Linux build of v2.1.299, in an offline container. The managed-settings file and a marketplace directory, holding the merged mod and a probe mod, were writable only by root, and sessions ran as an ordinary user.</li>
 <li>They checked where options and environment variables come from, and which lower settings lose to the policy. They also covered the guard&rsquo;s options, the sideload and marketplace locks, safe mode and <code>--bare</code>, and a user&rsquo;s mod hooking the mod&rsquo;s reads.</li>
 <li>The real mod&rsquo;s <code>/bqaa-status</code> ran under the policy.</li>
+<li>After review, the mod&rsquo;s token command ran with a repository&rsquo;s <code>CLOUDSDK_PYTHON</code> and <code>PATH</code>, against an administrator-owned stand-in for the credential tool. A repository&rsquo;s settings also set the four delivery variables, with and without the policy&rsquo;s pins.</li>
+<li>On the macOS build, the credential tool&rsquo;s own launcher ran a stand-in interpreter named by <code>CLOUDSDK_PYTHON</code> and a stand-in helper found through <code>PATH</code>. It also read a credentials file and a configuration directory named by variables. None of these printed a token.</li>
 <li>Two checks ran on the macOS build: a post-merge install from GitHub, and the order of a user&rsquo;s own settings with no policy.</li>
 <li>One read-only check, printing only true or false, found that a per-user default-credentials token carries a verified email.</li>
 </ul></li>
@@ -559,14 +561,21 @@ That order is why a finished call waits for its decision. Runs on one machine ar
 <ul>
 <li><strong>Install it for everyone.</strong> The administrator copies the mod into a marketplace directory that users cannot write, and the policy names that directory and enables the mod. The mod then counts as the organization&rsquo;s (mod docs, &lsquo;Manage mods for your organization&rsquo;). It loaded ahead of users&rsquo; own mods, and a user who disabled it in their own settings, or turned all hooks off, did not unload it.</li>
 <li><strong>Pin the options.</strong> The policy&rsquo;s <code>pluginConfigs</code> entry sets the mod&rsquo;s options key by key, and nothing lower changed a pinned key. A user&rsquo;s settings, <code>--settings</code>, a repository&rsquo;s settings and exported variables all lost. <code>claude plugin configure</code> still printed &ldquo;Configuration saved&rdquo;, and the session kept the policy&rsquo;s value. A key the policy leaves unset still takes the user&rsquo;s value.</li>
-<li><strong>Pin what environment variables can flip.</strong> Each of these works even when the matching option is pinned:
+<li><strong>Pin what environment variables can change.</strong> Each of these works even when the matching option is pinned:
 <ul>
 <li><code>BQAA_TRACE_ENABLED=false</code> turns capture off;</li>
 <li><code>BQAA_DRY_RUN=true</code> turns a dry run on;</li>
 <li>an exported <code>BQAA_ACCESS_TOKEN</code> replaces the token command.</li>
 </ul>
-The policy&rsquo;s <code>env</code> block replaces what a user exports, so pin these variables there too. With both pins, a user&rsquo;s <code>BQAA_TRACE_ENABLED=false</code> left capture on; with only the option pinned, it turned capture off.</li>
-<li><strong>Mark unverified identities.</strong> With <code>userIdFromCredentials</code> pinned on, <code>user_id</code> is the verified email of the token&rsquo;s account. A policy value <code>BQAA_USER_ID=unverified</code> makes every row whose account is not known say so, rather than carry a name the user picked. Rows parked without a token carried <code>unverified</code>, not the user&rsquo;s exported name.</li>
+Four delivery settings exist only as variables, and a repository&rsquo;s settings can set them too:
+<ul>
+<li><code>BQAA_AUTO_BACKFILL=false</code> stops parked rows from being replayed;</li>
+<li>a small <code>BQAA_MAX_QUEUE_ROWS</code> drops the oldest queued rows;</li>
+<li><code>BQAA_EXIT_FLUSH_MS=0</code> can cut off the last rows at exit;</li>
+<li><code>BQAA_REQUEST_TIMEOUT_MS</code> sets every request&rsquo;s time limit.</li>
+</ul>
+The policy&rsquo;s <code>env</code> block replaces what a user exports or a repository sets, so pin all of these there too, the four delivery settings at their defaults. With both pins, a user&rsquo;s <code>BQAA_TRACE_ENABLED=false</code> left capture on; with only the option pinned, it turned capture off. Without the four pins, a repository&rsquo;s settings changed all four for the organization&rsquo;s copy; with them, it read the defaults.</li>
+<li><strong>Mark unverified identities.</strong> With <code>userIdFromCredentials</code> pinned on, <code>user_id</code> is the verified email of the token&rsquo;s account. A policy value <code>BQAA_USER_ID=unverified</code> makes every row whose account is not known say so, rather than carry a name the user picked. Rows parked without a token carried <code>unverified</code>, not the user&rsquo;s exported name. This holds for rows the session captures. Rows replayed from the local spool keep the <code>user_id</code> stored in their file, and the person can edit those files. So a file written before the rollout, or changed, can still send another name.</li>
 <li><strong>Keep other copies out</strong> (optional, and fleet-wide: these apply to every plugin, not just this one). Each did what it says:
 <ul>
 <li>the host&rsquo;s built-in guard can refuse every mod that is not the organization&rsquo;s (<code>allowManagedModsOnly</code>);</li>
@@ -594,7 +603,9 @@ The policy&rsquo;s <code>env</code> block replaces what a user exports, so pin t
         "accessTokenCommand": "/opt/google-cloud-sdk/bin/gcloud auth application-default print-access-token",
         "userIdFromCredentials": true,
         "recordHostname": false,
-        "maxPayloadChars": 16384
+        "maxPayloadChars": 16384,
+        "flushIntervalMs": 5000,
+        "agentName": "coding-agent"
       }
     }
   },
@@ -603,7 +614,11 @@ The policy&rsquo;s <code>env</code> block replaces what a user exports, so pin t
     "BQAA_DRY_RUN": "false",
     "BQAA_ACCESS_TOKEN": "",
     "BQAA_USER_ID": "unverified",
-    "BQAA_AUTO_CREATE_TABLE": "false"
+    "BQAA_AUTO_CREATE_TABLE": "false",
+    "BQAA_AUTO_BACKFILL": "true",
+    "BQAA_MAX_QUEUE_ROWS": "5000",
+    "BQAA_EXIT_FLUSH_MS": "800",
+    "BQAA_REQUEST_TIMEOUT_MS": "10000"
   }
 }</code></pre>
 <p>Optional and fleet-wide, in the same file (the two <code>pluginConfigs</code> entries merge):</p>
@@ -621,8 +636,9 @@ The policy&rsquo;s <code>env</code> block replaces what a user exports, so pin t
 <tr role="row"><th scope="row" role="rowheader"><code>project</code>, <code>dataset</code>, <code>table</code>, <code>location</code></th><td role="cell" data-label="Pins">The destination. <code>/bqaa-status</code> showed the pinned target over a user option, a user variable and an exported project.</td></tr>
 <tr role="row"><th scope="row" role="rowheader"><code>enabled</code> and <code>BQAA_TRACE_ENABLED</code></th><td role="cell" data-label="Pins">Capture on. Without the variable pin, an exported <code>BQAA_TRACE_ENABLED=false</code> turned capture off.</td></tr>
 <tr role="row"><th scope="row" role="rowheader"><code>dryRun</code> and <code>BQAA_DRY_RUN</code></th><td role="cell" data-label="Pins">Live writes. A user&rsquo;s <code>dryRun: true</code> was ignored.</td></tr>
-<tr role="row"><th scope="row" role="rowheader"><code>accessTokenCommand</code>, and <code>BQAA_ACCESS_TOKEN</code> set empty</th><td role="cell" data-label="Pins">The token source. An exported token was ignored and the pinned command ran.</td></tr>
-<tr role="row"><th scope="row" role="rowheader"><code>userIdFromCredentials</code> and <code>BQAA_USER_ID</code></th><td role="cell" data-label="Pins">The identity: the verified email of the token&rsquo;s account, else <code>unverified</code>.</td></tr>
+<tr role="row"><th scope="row" role="rowheader"><code>accessTokenCommand</code>, and <code>BQAA_ACCESS_TOKEN</code> set empty</th><td role="cell" data-label="Pins">The token command&rsquo;s program and arguments. An exported token was ignored and the pinned command ran. The command&rsquo;s environment is not pinned; see below.</td></tr>
+<tr role="row"><th scope="row" role="rowheader"><code>userIdFromCredentials</code> and <code>BQAA_USER_ID</code></th><td role="cell" data-label="Pins">The identity of rows the session captures: the verified email of the token&rsquo;s account, else <code>unverified</code>. Replayed rows keep what their file says.</td></tr>
+<tr role="row"><th scope="row" role="rowheader"><code>BQAA_AUTO_BACKFILL</code>, <code>BQAA_MAX_QUEUE_ROWS</code>, <code>BQAA_EXIT_FLUSH_MS</code>, <code>BQAA_REQUEST_TIMEOUT_MS</code> at their defaults</th><td role="cell" data-label="Pins">Replay on, and the queue, exit and request limits at their defaults. Without these pins, a repository&rsquo;s settings changed all four for the organization&rsquo;s copy.</td></tr>
 <tr role="row"><th scope="row" role="rowheader"><code>BQAA_AUTO_CREATE_TABLE</code> set to <code>false</code></th><td role="cell" data-label="Pins">Users&rsquo; credentials never create the table; the administrator makes it once, with <code>setup.sh</code>.</td></tr>
 <tr role="row"><th scope="row" role="rowheader"><code>recordHostname</code>, <code>maxPayloadChars</code></th><td role="cell" data-label="Pins">The host name stays out, and the payload cap is fixed, pinned like the other options. These two were not read back one by one.</td></tr>
 </tbody>
@@ -634,6 +650,13 @@ The policy&rsquo;s <code>env</code> block replaces what a user exports, so pin t
 <ul class="gaps">
 <li>A person can start a session without the mod. The host&rsquo;s safe mode (a flag or an environment variable) and <code>--bare</code> both skip installed plugins, the organization&rsquo;s included, and managed settings bind only the host CLI.</li>
 <li>A local administrator can edit the managed settings.</li>
+<li>The token command&rsquo;s environment. The policy pins the command&rsquo;s program and arguments, but the command inherits the session&rsquo;s environment, a repository&rsquo;s settings included.
+<ul>
+<li>In the checks, a repository&rsquo;s <code>CLOUDSDK_PYTHON</code> made the pinned credential tool run the repository&rsquo;s own interpreter, and a repository&rsquo;s <code>PATH</code> ran its own helper inside the same command. The real tool&rsquo;s launcher behaves the same way.</li>
+<li>The policy&rsquo;s <code>env</code> block can pin a named variable such as <code>CLOUDSDK_PYTHON</code>, which stopped the first case. But every tool in the session then gets that value, and <code>PATH</code> cannot be pinned that way.</li>
+<li>The fix is proposed below.</li>
+</ul></li>
+<li>Replayed rows keep their stored identity. Rows parked in a spill or retry file are sent as the file holds them. The file sits in the person&rsquo;s own directory, protected by a checksum, not a signature, so a file written before the rollout, or edited, can send another <code>user_id</code>.</li>
 <li>Row content is what the writer sends. Whoever holds the insert permission can write rows through the API with any <code>user_id</code>. BigQuery does not record who streamed which row: <code>insertAll</code> is among the methods that write no audit log (<a href="https://docs.cloud.google.com/bigquery/docs/reference/auditlogs#exempt-methods">BigQuery audit logs</a>).</li>
 <li>BigQuery has no per-person cap on streaming inserts; its custom quotas cover query bytes only (<a href="https://docs.cloud.google.com/bigquery/docs/custom-quotas">custom quotas</a>).</li>
 </ul>
@@ -657,6 +680,17 @@ The policy&rsquo;s <code>env</code> block replaces what a user exports, so pin t
 <li>For raw rows, a row access policy with <code>FILTER USING (user_id = SESSION_USER())</code> shows each person their own rows (<a href="https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/data-definition-language#create_row_access_policy_statement">row access policies</a>).</li>
 <li>It needs <code>user_id</code> from credentials, and it filters reads: it does not stop a writer from naming someone else.</li>
 </ul></li>
+<li><strong>Administrators.</strong> Setting up needs more than running.
+<ul>
+<li>Once, to set up:
+<ul>
+<li><code>setup.sh</code> runs its DDL as query jobs, which need <code>bigquery.jobs.create</code> on the project they run from (<a href="https://docs.cloud.google.com/bigquery/docs/running-queries#required_permissions">running queries</a>).</li>
+<li>Making the two datasets needs <code>bigquery.datasets.create</code> on the project (<a href="https://docs.cloud.google.com/bigquery/docs/datasets#required_permissions">creating datasets</a>); a grant on a dataset cannot give it before the dataset exists.</li>
+<li>Making the custom writer role needs Role Administrator on the project (<a href="https://docs.cloud.google.com/iam/docs/creating-custom-roles#required-roles">custom roles</a>).</li>
+<li>Grant these to whoever sets up, or have a project owner make the datasets and the role first.</li>
+</ul></li>
+<li>After that, <code>roles/bigquery.dataOwner</code> on the two datasets covers the grants, the view authorization, row access policies and retention. Add <code>roles/bigquery.jobUser</code> on one project, for the DDL those changes run as.</li>
+</ul></li>
 <li><strong>Cost and retention.</strong>
 <ul>
 <li><code>insertAll</code> costs $0.01 per 200&nbsp;MiB, each row counted as at least 1&nbsp;KB (<a href="https://cloud.google.com/bigquery/pricing#data-ingestion-pricing">pricing</a>). The demo&rsquo;s rows were about 1&nbsp;KB each.</li>
@@ -666,23 +700,34 @@ The policy&rsquo;s <code>env</code> block replaces what a user exports, so pin t
 </ul>
 
 <h3 id="admin-proposed">Proposed, not yet implemented</h3>
-<p><em class="judge">Proposed, not yet implemented.</em> These need mod code, and none is written. The estimate is three to five days, plus review.</p>
+<p><em class="judge">Proposed, not yet implemented.</em> These need mod code, and none is written. The estimate is six to seven days, plus review.</p>
 <ul class="gaps">
 <li><strong>The policy decides, and the mod says so.</strong>
 <ul>
 <li>The mod reads the managed policy itself: the mods API&rsquo;s <code>$.settings.read({ source: 'policy' })</code> returned it in the checks.</li>
 <li>It resolves each setting in this order: the policy, then the user&rsquo;s settings and environment, then a repository&rsquo;s.</li>
 <li>A pinned option then holds on its own. No variable can flip <code>enabled</code> or <code>dryRun</code>, or replace a pinned token command.</li>
-<li>Under a policy, a repository&rsquo;s settings no longer pick the destination or the token command.</li>
+<li>Under a policy, a repository&rsquo;s settings no longer pick the destination, the token command, or the replay, queue, exit and request settings.</li>
+</ul></li>
+<li><strong>The token command runs in an environment the administrator controls.</strong> The mods API can set a child process&rsquo;s variables but not remove them, so this has two parts:
+<ul>
+<li>The mod sets every variable that steers the command&rsquo;s interpreter, executable search, loaders, or credential and configuration files to the policy&rsquo;s value or to empty, before it runs the command. This covers, for example, <code>CLOUDSDK_PYTHON</code>, <code>PATH</code> and <code>GOOGLE_APPLICATION_CREDENTIALS</code>.</li>
+<li>The policy pins a launcher in the administrator&rsquo;s own directory. The launcher clears its environment before it starts the credential tool.</li>
+<li>An acceptance test replays this section&rsquo;s counterexample. With the change, a repository&rsquo;s interpreter and <code>PATH</code> leave no trace, and the token still comes back.</li>
 </ul></li>
 <li><strong>A locked marker.</strong> <code>/bqaa-status</code> shows each setting&rsquo;s value and its source, such as <code>dataset agent_analytics (policy, locked)</code>. The host itself shows no lock.</li>
-<li><strong>Where <code>user_id</code> came from.</strong> Each row records whether its <code>user_id</code> came from the credential, the configuration or the administrator&rsquo;s marker, and the views can split verified rows from the rest.</li>
+<li><strong>Where <code>user_id</code> came from.</strong> Each row records whether its <code>user_id</code> came from the credential, the configuration or the administrator&rsquo;s marker, and the views can split verified rows from the rest.
+<ul>
+<li>Replayed rows are marked unverifiable, whatever their file says. They take the replaying session&rsquo;s verified account, or <code>unverified</code>, or a policy can keep them from being sent at all.</li>
+<li>A regression test replays a completed file that names someone else.</li>
+</ul></li>
 <li><strong>Messages for managed users.</strong> A refused write tells the person to ask their administrator, instead of naming <code>roles/bigquery.dataEditor</code>. A missing table, with auto-create off, raises the notice instead of only parking rows.</li>
 <li><strong>Tests:</strong>
 <ul>
 <li>unit tests of the resolution over policy snapshots, where no policy means today&rsquo;s behaviour;</li>
 <li>plugin tests with <code>$.settings.read</code> stubbed;</li>
 <li>mutation checks;</li>
+<li>regression tests for this section&rsquo;s two counterexamples, the repository&rsquo;s interpreter and <code>PATH</code> and the replayed file;</li>
 <li>this section&rsquo;s container check, as a script;</li>
 <li>one live session.</li>
 </ul></li>
@@ -692,7 +737,7 @@ The policy&rsquo;s <code>env</code> block replaces what a user exports, so pin t
 <h3 id="admin-rollout">Rollout</h3>
 <p>Pilot with one group, then widen. A policy reaches everyone it is delivered to, so a group needs its own file or profile.</p>
 <ol>
-<li>The administrator makes the table and views with <code>setup.sh</code>, sets retention, and grants writers and readers.</li>
+<li>Whoever holds the setup permissions above makes the datasets, table and views with <code>setup.sh</code>, and the custom writer role. The administrators then set retention, and grant writers and readers.</li>
 <li>Each person signs in once with <code>gcloud auth application-default login</code>.</li>
 <li>Device management places the marketplace directory, the policy, and gcloud at a fixed path.</li>
 </ol>
@@ -704,16 +749,16 @@ The policy&rsquo;s <code>env</code> block replaces what a user exports, so pin t
 <h2 id="not-verified-h">NOT VERIFIED</h2>
 <ul class="gaps">
 <li><strong>NOT VERIFIED:</strong> BigQuery&rsquo;s other answers. The demo&rsquo;s live session landed its rows with <code>tabledata.insertAll</code> in a table created from the DDL, JSON-typed columns sent as JSON text included; every other answer the writer handles (partial insert errors, 401, 403, 404, 429, 5xx, timeouts) is a scripted stub in the tests, and the mod&rsquo;s own table creation and BigQuery&rsquo;s <code>insertId</code> dedup were not exercised against the service.</li>
-<li><strong>NOT VERIFIED:</strong> the 401 refresh path against a real expired token; the demo&rsquo;s sessions used the default token command with a real identity.</li>
+<li><strong>NOT VERIFIED:</strong> the 401 refresh path against a real expired token; the demo&rsquo;s working-credentials session, b), used the default token command with a real identity.</li>
 <li><strong>NOT VERIFIED:</strong> behaviour in the host&rsquo;s desktop app and editor extension, and on Windows; the real-session check ran headless on macOS.</li>
 <li><strong>NOT VERIFIED:</strong> the per-file backfill lease and the completion records under many concurrent sessions on a real file system (a test shows a write&rsquo;s first line before the rest, as a write that is not atomic can), and memory and timing over long sessions.</li>
-<li><strong>NOT VERIFIED:</strong> BigQuery cost for this write pattern; no rates are quoted here.</li>
+<li><strong>NOT VERIFIED:</strong> BigQuery cost for this write pattern.</li>
 <li><strong>NOT VERIFIED:</strong> the eight sample queries in BigQuery itself (they were parsed and run in DuckDB only).</li>
 <li><strong>NOT VERIFIED:</strong> the credential notice in a real terminal session. The drawing tests check the band&rsquo;s tree, not how a terminal paints it; the demo shows the toast and the transcript line as a headless session receives them.</li>
 <li><strong>NOT VERIFIED:</strong> <code>setup.sh</code> creating a missing dataset or table against a project. In the demo it ran where both datasets and the table existed, and made the views.</li>
 <li><strong>NOT VERIFIED:</strong> the opt-in identity in a real session, and a token running out in one. A per-user default-credentials token was checked to carry a verified email; the mod&rsquo;s use of it ran in tests only.</li>
 <li><strong>NOT VERIFIED:</strong> managed settings delivered by a device-management profile, a registry value or the host&rsquo;s server, and on macOS or Windows; the section 11 checks used a managed-settings file on the Linux build. That the classic hooks pass over a person-installed plugin under such a policy is still the validator&rsquo;s report, and the session id after <code>/clear</code> or resume without them is covered by the tests only.</li>
-<li><strong>NOT VERIFIED:</strong> section 11&rsquo;s grants, row access policy and view authorization against a project (only the documentation and gcloud&rsquo;s role listings were read), its cost figures beyond the documented prices, and everything it marks as proposed.</li>
+<li><strong>NOT VERIFIED:</strong> section 11&rsquo;s grants, row access policy and view authorization against a project (only the documentation and gcloud&rsquo;s role listings were read), its cost figures beyond the documented prices, and everything it marks as proposed. Section 11&rsquo;s token-environment checks ran the mod with a stand-in for the credential tool, and the real tool&rsquo;s launcher with stand-in interpreters and helpers, never together.</li>
 </ul>
 </section>
 
@@ -737,6 +782,9 @@ The policy&rsquo;s <code>env</code> block replaces what a user exports, so pin t
 <li><a href="https://docs.cloud.google.com/bigquery/docs/custom-quotas">https://docs.cloud.google.com/bigquery/docs/custom-quotas</a></li>
 <li><a href="https://docs.cloud.google.com/bigquery/docs/reference/auditlogs#exempt-methods">https://docs.cloud.google.com/bigquery/docs/reference/auditlogs#exempt-methods</a>: methods that write no audit log, <code>InsertAll</code> among them</li>
 <li><a href="https://docs.cloud.google.com/docs/authentication/token-types#fed-access-tokens">https://docs.cloud.google.com/docs/authentication/token-types#fed-access-tokens</a>: federated access tokens cannot be introspected</li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/running-queries#required_permissions">https://docs.cloud.google.com/bigquery/docs/running-queries#required_permissions</a>: query jobs need <code>bigquery.jobs.create</code> on the project they run from</li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/datasets#required_permissions">https://docs.cloud.google.com/bigquery/docs/datasets#required_permissions</a>: creating a dataset needs <code>bigquery.datasets.create</code></li>
+<li><a href="https://docs.cloud.google.com/iam/docs/creating-custom-roles#required-roles">https://docs.cloud.google.com/iam/docs/creating-custom-roles#required-roles</a>: custom roles need Role Administrator</li>
 </ul>
 </section>
 
