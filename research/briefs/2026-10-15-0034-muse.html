@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-10-15-0034 (Muse)</title>
+  <meta name="description" content="LiveKit DecisionModel; OpenAI Agents Python MCP annotations; Divergent Paths, Doc2Harness, AgenticRV">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-15-0034-muse.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">THE FIELD BRIEF · 12:34 AM PT · Thu Oct 15, 2026</p>
+    <article>
+<h1>Field Brief — 2026-10-15-0034: LiveKit ships background decision models; OpenAI Agents Python exposes MCP annotations; Wednesday arXiv batch measures trajectory divergence, harness-building, and runtime monitors</h1>
+<p><strong>Writer: Muse (<code>muse-wonder-full-1.0</code>)</strong> · For Haiyuan Cao (TL, BQAA + ADK)
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>Slot:</strong> 2026-10-15-0034 (scheduled). <strong>Window:</strong> ~12h since the 2026-10-14-1234 brief — about 12:34 PT Wed Oct 14 to 00:34 PT Thu Oct 15 (19:34Z Oct 14 – 07:34Z Oct 15; my write-time probes ran to ~07:47Z). <strong>Effort:</strong> high. <strong>Path:</strong> fresh (fresh-items candidate list; packs used as lookup reference only).</p>
+<p><strong>Shape of this window:</strong> the dense window the 1234 brief predicted. The Wednesday arXiv batch landed (ceiling <code>2610.18874</code> → <code>2610.20611</code>, +1,737 IDs, screened by Agy 1832 + successors), giving Academy three rankable papers on full-PDF reads: trajectory outcome prediction from stored rollouts, a benchmark for building the harness itself, and formalism-agnostic runtime verification. Industry's material ships are LiveKit's background decision-model surface (with a TypeSafe Jev plugin) and OpenAI Agents Python's MCP-annotation/approval-history minor; the rest of the release train (OpenAI Node 7.34.0, python-genai 2.31.0, LangGraph checkpoint pruning) is honest Progress. OpenAI's browser/computer toolset parts 2–4 still have not shipped — Node 7.34.0 is residency options, not toolsets.</p>
+<hr />
+<h2>Read this first</h2>
+<ol><li><strong>LiveKit Agents 1.8.8 (GH Release 2026-10-15T06:10:17Z): decision models become a background runtime primitive.</strong> A new <code>DecisionModel</code> runs probability/choice/score evaluations without delaying replies, with a TypeSafe Jev plugin (<code>jev-1.13.0</code>, OpenRouter Decisions API) as the first vendor implementation — decision calls are now first-class, traceable side-evaluations inside a voice-agent loop. GPT-Live 1 via LiveKit Inference and Gemini Live/Grok Voice model updates ride along, with two breaking changes (realtime class hierarchy, <code>cedar</code> voice). → NEW Industry.
+</li><li><strong>Academy headline — <a href="https://arxiv.org/abs/2610.19614">Divergent Paths</a> (full PDF read): stored trajectories predict their own outcomes.</strong> Embedding actions+observations into a shared space, per-task discriminators reach 0.77–0.95 AUROC on held-out rollouts across three benchmarks × three policies (Table 1); the meta-learned Precog-RM matches the best k=8 baseline with k=2 support rollouts and, as a GRPO early-stopping controller on Tau2-Bench, cuts training FLOPs up to 47.3% at near-baseline pass@1. Warehouses of rollouts are training signal for outcome predictors, not just audit logs. → NEW Academy.
+</li><li><strong>OpenAI Agents Python v0.24.0 (GH Release 2026-10-15T02:20:12Z): MCP tool annotations survive conversion; deferred approvals persist across resumes.</strong> MCP annotations are exposed on converted tools (#5356), run-wide tool-exception formatting lands (#5326), Runner tracing opt-out is honored inside caller traces (#5296), and deferred approval history persists across session resumes (#4828). No prior agents-python card exists. → NEW Industry.
+</li><li><strong><a href="https://arxiv.org/abs/2610.20344">Doc2Harness</a> (full PDF read): the harness itself becomes the benchmark target.</strong> Nineteen build models implement a coding-agent harness from a development document + contract skeleton inside a fixed OpenCode builder; pass rates over 328 test cases span 27.44–53.05% (Table 2), with permissions the most discriminating category (50.8-point strong–weak gap, Table 3). Even the best model fails nearly half the suite. → NEW Academy.
+</li><li><strong>OpenAI Node v7.34.0 is NOT toolset parts 2–4.</strong> The release (2026-10-14T21:24:48Z) adds regional processing residency options and clarifies Decisions fields; Python stays at 3.31.0 (PyPI re-read by me). The 1/4 toolset card gets a Progress line, not a completion claim.
+</li></ol>
+<hr />
+<h2>Industry</h2>
+<h3>NEW</h3>
+<h4>LiveKit Agents 1.8.8 — background DecisionModel with TypeSafe Jev plugin; GPT-Live via Inference; realtime breaking changes</h4>
+<ul><li><strong>What shipped:</strong> GH Release <code>livekit-agents@1.8.8</code> published 2026-10-15T06:10:17Z (stable; body read via <code>gh api</code> by me), via release PR #7844. Prior LiveKit card is 1.8.3; 1.8.7 was Progress in the 0034 brief. This ranks NEW on the decision-model surface, not the version tick.
+</li><li><strong>Decision surface:</strong> <code>feat(agents): add DecisionModel for background decisions</code> (#7714) plus <code>feat(typesafe): add TypeSafe Jev decision model plugin</code> (#7756) supporting <code>jev-1.13.0</code> and OpenRouter's Decisions API "for background probability, choice, and score evaluations without delaying replies" (release body). This is the third side of the Decisions triangle the briefs have tracked: OpenAI SDKs report Decisions usage, Braintrust traces Decisions APIs (1234 brief), and now a runtime framework invokes decision models as non-blocking side calls. Each background decision is an evaluative event tied to a live session — exactly the kind of record that needs session/turn keys if it is ever to be joined to the reply it judged.
+</li><li><strong>Model surface:</strong> GPT-Live 1 through LiveKit Inference (<code>inference.DuplexModel</code>, <code>llm=&quot;openai/gpt-live-1&quot;</code>, #7673) without a separate OpenAI key; Gemini Live model-string support (<code>google/gemini-3.8-live</code>, extended-thinking, <code>gemini-live</code>); xAI Grok Voice 3.0 replacing Think Fast 2.0. Retired GPT Realtime 1.5/2 and Think Fast 2.0 IDs remain accepted with deprecation warnings.
+</li><li><strong>Breaking/behavior changes (state plainly):</strong> <code>inference.RealtimeModel</code> no longer subclasses the plugin's <code>openai.realtime.RealtimeModel</code> (update <code>isinstance</code> checks; wildcard exports gone); GPT-Live voice <code>cedar</code> replaces unsupported <code>aster</code>; realtime <code>inference_class</code> deprecated and no longer sent; Gemini 3.x reply instructions use wrapped user turns; xAI hosted sessions emit one final user transcript per turn. XML-aware TTS chunking (#7742), realtime startup retries, turn-audio flushing and interruption handling hardened.
+</li><li><strong>Why it matters for BQAA:</strong> decision-model calls are becoming a routinized, vendor-pluggable evaluation primitive inside production agent loops. A warehouse ingesting LiveKit sessions should expect a new event class — background probability/choice/score verdicts with their own model/version (<code>jev-1.13.0</code>) — that is neither a user turn nor a tool call, and whose value depends entirely on join keys back to the turn evaluated.
+</li></ul>
+<h4>OpenAI Agents Python v0.24.0 — MCP annotations exposed on converted tools; run-wide exception formatting; approval history survives resume; tracing opt-out honored</h4>
+<ul><li><strong>What shipped:</strong> GH Release <code>v0.24.0</code> published 2026-10-15T02:20:12Z (stable; body read via <code>gh api</code> by me; prior release v0.23.1, 2026-10-02). Catalog grep finds no prior openai-agents-python card (only a promptfoo interop card), so this ranks NEW.
+</li><li><strong>Tool semantics:</strong> MCP annotations are exposed on converted tools (#5356) — read-only/destructive/idempotency hints declared by an MCP server now survive the framework's tool conversion instead of being stripped, which is the difference between a stored tool record that can be policy-checked later and one that cannot. Run-wide tool exception formatting (#5326) standardizes how tool failures are rendered back into the run; completed sibling tool outputs are preserved when one tool fails (#5332) and after callback failures (#5318) — partial-failure runs keep their evidence instead of collapsing.
+</li><li><strong>State/approval fidelity:</strong> deferred approval history persists across session resumes (#4828); function-call aliases survive RunState restoration (#5358); RunState agent ownership is preserved across hook state changes (#5362); automatic compaction defers while approvals are pending (#5363); Redis compaction history replaces atomically (#5354) with early rejection of unsupported Redis Cluster clients (#5323/#5361). Sandbox hardening: caller-owned exceptions preserved during redaction (#5367), embedded separators preserved in patches (#5365), recovery from invalid sandbox tool arguments (#5321).
+</li><li><strong>Tracing:</strong> Runner tracing opt-out is now honored inside caller traces (#5296) — an opt-out that leaks into a parent trace is a data-governance bug, and this closes it. Unserializable dataclass run contexts are omitted rather than crashing serialization (#5303).
+</li><li><strong>Why it matters for BQAA:</strong> annotations, approval history, and opt-out semantics are ingest-contract fields. Runs produced by this SDK now carry (a) machine-readable tool-risk hints, (b) approval state that survives the resume boundary where warehouses usually lose it, and (c) a tracing opt-out that actually holds under nesting — the same span-ownership problem Braintrust's ADK/GenAI split addressed yesterday, from the privacy side.
+</li></ul>
+<h3>Progress (existing cards)</h3>
+<ul><li><strong><code>openai-sdk-node-7-33-0-python-3-31-0-browser-computer-toolsets</code></strong> — OpenAI Node <code>v7.34.0</code> (GH Release 2026-10-14T21:24:48Z; body read by me) adds regional processing residency options (#2942) and clarifies Decisions request/response fields (#2940); the rest is dependency bumps. It does <strong>not</strong> ship browser/computer toolset parts 2–4. Python remains <code>v3.31.0</code> (GH + PyPI <code>openai</code> 3.31.0 re-read by me; release PR for 3.32.0 reported open by collectors, unshipped). The card's 1/4 status is unchanged.
+</li><li><strong><code>python-genai-v2-30-0-continuation-required-auto-resumption-checkpoint-resume-billable-usage-accumulated</code></strong> — python-genai <code>v2.31.0</code> (GH Release 2026-10-14T23:27:27Z; body read by me) hardens the continuation machinery carded in 2.30.0: continuation streams retry dropped hops, stop on <code>prompt_feedback</code>, and keep real errors in <code>generate_content</code>; continuation state clears (with prompt feedback preserved) when a hop returns no candidates; grounding-metadata merging for automatic continuation is fixed in both unary and streaming paths. Also: <code>gemini-4-argon</code> joins the interactions Model enum, the function-declaration parser handles union types (#3060), and mTLS endpoints match each transport's SSL context. npm <code>@google/genai</code> 2.30.0 (2026-10-15T00:06:41Z, per collectors) is the JS-side clock, kept separate; I did not read its changelog and make no JS content claim.
+</li><li><strong><code>langgraph-1-2-13-checkpoint-replay-integrity-fork-before-replay-answered-interrupts-get-state</code></strong> — <code>langgraph-checkpoint-postgres==3.2.0</code> (GH Release 2026-10-14T19:54:57Z; body read by me) adds <code>prune</code> to <code>PostgresSaver</code> and <code>AsyncPostgresSaver</code> (#9290, released via #9313) — checkpoint stores gain a first-class retention operation instead of growing unboundedly or relying on hand-written SQL. Paired component release <code>langgraph-prebuilt==1.1.1</code> (2026-10-15T04:32:40Z) is NOTE-grade. Retention semantics (what prune keeps by default) are not stated in the release body; see Unconfirmed.
+</li></ul>
+<h3>One-line mentions (NOTE)</h3>
+<ul><li><strong>Arize Phoenix <code>arize-phoenix-v20.22.0</code> (GH Release 2026-10-15T07:02:33Z; body read by me):</strong> playground adds Meta muse-wonder-1.0 + gemini-4-argon, an OAuth2 SameSite=Strict return-url fix, and Claude Managed Agents tracing docs — model-list/docs grade, below the NEW bar the 20.19.0 decision-span card set.
+</li><li><strong>Vercel AI <code>ai@7.0.141</code> (GH Release 2026-10-15T02:23:17Z; body read by me):</strong> patch — workflow runtime context now passes when <code>telemetry.includeRuntimeContext</code> allows it, plus provider-utils/gateway dependency updates. The bulk <code>Version Packages</code> publish (68 GH Releases incl. <code>ai@6.0.307</code>/<code>5.0.277</code> maintenance lines, per DSH 2032 + my release listing) is one train, NOTE as a whole.
+</li><li><strong>Letta Code <code>v0.34.15</code> (GH Release 2026-10-15T05:10:26Z):</strong> version-bump-driven patch train (PR #5103); 0.34.14 was Progress in the 0034 brief — no re-Progress for a bump.
+</li><li><strong>Prereleases (not rankable):</strong> LiteLLM <code>v1.107.0-dev.2</code> (2026-10-15T06:31:30Z, prerelease; <code>v1.106.0</code> final still absent), OpenAI Codex <code>rust-v0.163.0-alpha.10.1</code> (2026-10-14T20:45:55Z), Mastra <code>@mastra/core 1.78.0-alpha.x</code> npm line (alpha.3/alpha.5 per collectors; stable <code>latest</code> remains 1.77.0), Qwen Code nightly.
+</li><li><strong>Material merges/opens, unreleased (NOTE at most):</strong> LiteLLM proxy-analytics cluster — Ask AI token-type breakdown open (#46635), Usage-view schema pinning open (#46636), audit-log value-fidelity pair merged (#46555/#46577), budget-threshold model pausing open (#46622); Pydantic AI eval/OTel opens (#10290–#10293, per DSH 2032); Mem0 six-PR agent-memory hardening burst opens (#7647–#7652, per DSH 2332); Stagehand role/text locator stack opens (#3187–#3193). All rest on collector reads; none shipped in a stable release this window.
+</li><li><strong>Standing watches, unchanged (verified by me):</strong> npm <code>langsmith</code> latest still 0.10.13 (2026-10-13T11:38:45Z, registry re-read by me; substance still unread — see Unconfirmed); PyPI <code>openai</code> still 3.31.0; Inspect still 0.3.280 per collectors (0.3.281 release PR open).
+</li><li><strong>google/adk-python:</strong> collector sweeps show PR activity only (incl. unmerged closes #6944/#7429), no in-window release. 1P NOTE only per standing rule; nothing carded.
+</li></ul>
+<hr />
+<h2>Academy</h2>
+<p><strong>The Wednesday batch landed in-window.</strong> Ceiling advanced <code>2610.18874</code> → <code>2610.20611</code> (+1,737 IDs, announced Wed ~17:00 PT — inside this window, during the DSH-1732 Mac-down gap; recovered by Agy 1832's full-range export-API screen plus successor packs). My write-time ladder (~07:47Z) agrees: <code>2610.20611</code> → 200, <code>2610.20612</code>/<code>2610.20620</code> → 404. Priority pin <code>2609.02702</code> → 200, intact, not re-carded. The three papers below are <strong>full PDF reads by me</strong> (<code>pdftotext</code>, methods/results/limitations included), selected from the collectors' screened admits (Agy 1832's 15-bullet Wed screen; DSH 2032/2332 HF admits). Catalog greps: 0 hits for all three IDs.</p>
+<h3>NEW</h3>
+<h4><a href="https://arxiv.org/abs/2610.19614">Divergent Paths: Learning an Outcome-Predictive Representation of LLM Agent Trajectories</a></h4>
+<ul><li><strong>Full PDF read.</strong> v1 [cs.LG] 14 Oct 2026. Gill, Gogia &amp; Guzmán (Handshake AI / U. Utah). Code: github.com/alexgill321/precog-rm (named in paper; not audited by me).
+</li><li><strong>The question:</strong> agent trajectories run 10–100+ turns and 100K–500K+ tokens, and most downstream machinery (credit assignment, failure diagnosis, data filtering) reads the raw token sequence. The paper reframes a trajectory as a path through a shared embedding space of actions and observations (the AOS) and asks whether outcomes are separable in that space early enough to act on.
+</li><li><strong>Method:</strong> per-task discriminators (nearest-centroid / RBF on pooled representations; fastText on clustered state-ID sequences) fit per task under stratified 3-fold CV (~33 training rollouts), then <strong>Precog-RM</strong> — a transformer meta-learner that performs outcome prediction few-shot from a small support set of labeled rollouts with no per-task fitting. Three agent benchmarks × three policy models; finally Precog-RM is deployed as an early-stopping controller for GRPO on Tau2-Bench, leaving optimizer and advantage estimator untouched.
+</li><li><strong>Results:</strong> outcomes are separable in every condition — best per-task discriminator <strong>0.77–0.95 AUROC</strong> on held-out rollouts (Table 1), with ceilings shifting ~0.12 AUROC across benchmarks and ~0.05 across models (AgentClinic the consistent low performer). Precog-RM's margin is largest at k=1 (+0.06–0.12 AUROC) and at <strong>k=2 it matches or exceeds the strongest baselines at k=8</strong> — a four-fold reduction in labeled rollouts (Figure 3); cross-model generalization to unseen policies/benchmarks is reported in Table 2 (OOD cells shaded). As a GRPO controller it cuts training FLOPs by <strong>up to 47.3%</strong> while keeping pass@1 within one standard deviation of baseline.
+</li><li><strong>Limits (from the paper's own reporting):</strong> separability is not uniform (benchmark-dependent ceilings; AgentClinic lags); per-task fitting transfers nothing and is bounded by per-task rollout counts — the meta-learner exists precisely because of that bound; the GRPO result is a single-benchmark (Tau2-Bench) deployment. I found no standalone Limitations section; these bounds are stated in the results/discussion text I read.
+</li><li><strong>Why it matters for BQAA:</strong> this prices the warehouse. If a handful of labeled rollouts per task suffices to predict outcomes of unlabeled ones at 0.9+ AUROC, then stored trajectories need (a) outcome labels joinable at rollout granularity and (b) action/observation sequences preserved in an embeddable form — not just final scores. It also gives early-stopping a measurable contract: kill doomed rollouts mid-flight and bank ~47% of training FLOPs, provided the predictor's per-task support set is versioned like any other eval artifact.
+</li></ul>
+<h4><a href="https://arxiv.org/abs/2610.20344">Doc2Harness: Benchmarking LLMs on Long-Horizon Harness Engineering of Coding Agents</a></h4>
+<ul><li><strong>Full PDF read.</strong> v1 [cs.SE] 14 Oct 2026. Ge et al. (ICT/CAS, Tsinghua, PKU, Southeast U.).
+</li><li><strong>The question:</strong> coding-agent benchmarks fix the harness and vary the model. Doc2Harness inverts it: can a model <em>build</em> the harness — tools, commands, permission modes, persistent memory, exit codes — from documentation alone?
+</li><li><strong>Method:</strong> each of 19 build models runs inside a fixed builder harness (OpenCode) and receives a development document (rewritten/merged/disambiguated from twelve frontier harnesses' user docs, to reduce parametric-knowledge shortcuts) plus a contract skeleton. Three independently built candidate harnesses per model are scored against <strong>328 test cases</strong> (positive controls excluded from every denominator; vacuous-pass channels ruled out by three control classes); build models are ranked by mean pass rate, with each stage holding one component fixed to reduce confounding.
+</li><li><strong>Results:</strong> pass rates span <strong>27.44% (weakest) to 53.05% (GPT-6 Astra)</strong> — a ~26-point gap; even the strongest model fails nearly half the suite (Table 2/Figure 1). Rankings are unstable across categories (up to 16 positions). Permissions is the most discriminating category: 43.7% average pass rate, 50.8-point strong–weak gap, 51 of 61 cases discriminating; file operations averages similar (39.6%) with only a 20.9-point gap; interactive-terminal averages 79.9% and nears saturation; 56 cases are failed by every candidate (Table 3).
+</li><li><strong>Limits (stated by the authors):</strong> the protocol measures a single build (up to three submissions), not an iterative build–evaluate–repair loop; contract checks test form rather than behavior, so an early submitter's pass rate is a lower bound; a single defect can fail several test cases at once (single-variable expansions share features).
+</li><li><strong>Why it matters for BQAA:</strong> harness variance is the confounder behind "same model, different score" (cf. the catalog's same-model-harness card). Doc2Harness quantifies the harness as an artifact with its own capability gradient — and its category split says permission/role machinery is where harnesses actually diverge. For trace analytics, harness identity+version belongs in the primary key of any cross-agent comparison; this paper is the evidence that omitting it can swing results by double digits.
+</li></ul>
+<h4><a href="https://arxiv.org/abs/2610.19818">One Monitor Does Not Fit All: Formalism-Agnostic Runtime Verification for Agentic AI</a></h4>
+<ul><li><strong>Full PDF read.</strong> v1 [cs.AI] 14 Oct 2026. Ferrando (U. Modena and Reggio Emilia).
+</li><li><strong>The question:</strong> runtime monitors for agents need different observations (temporal order vs. payload content) and different verdict vocabularies, yet must combine into one allow/block decision <em>before</em> an operation takes effect — across LangGraph, MCP and A2A boundaries.
+</li><li><strong>Method:</strong> AgenticRV separates execution boundaries from monitoring formalism: adapters emit canonical events, each monitor receives its own projection/abstraction, and a decision policy arbitrates normalised verdicts into a reaction (allow / log / block / replace) that the responsible adapter supports (Table 1: decision vs. observation boundaries). The paper formalises when observations suffice, when monitor replacement preserves decisions, and when blocking prevents unsafe effects — explicitly distinguishing <em>rejected attempts</em> from <em>completed effects</em> so a blocked request need not leave every monitor in permanent violation.
+</li><li><strong>Results:</strong> a controlled LangGraph experiment pairs an external Reelay temporal monitor with a programmatic report monitor; ablations over seven paths / 34 tool decisions per configuration (6 unsafe, 28 safe; labels fixed by controlled inputs and checked against an effect ledger, not by monitor verdicts) show both monitors are needed for the selected requirements (Table 2); cross-boundary validation varies temporal observation/scope partition over 24 reporting decisions with the ledger confirming release/suppression and no monitor/delivery failures (Table 3). Overhead microbenchmarks: instrumenting a one-node graph adds ~696µs over its ~223µs native run, a first monitor a further ~414µs (complete invocation 1.333ms); 0→8 immediate monitors at a guarded tool boundary adds ~869µs (Table 4).
+</li><li><strong>Limits (stated in the paper):</strong> coverage requires using the wrapper/handler (a raw provider HTTP client needs separate instrumentation; the LangGraph proxy does not guard every reducer/state merge); results hold "subject to the stated observation and deployment assumptions"; the controlled counts concern constructed requirements/inputs, and the LLM-driven incident-response example is illustrative rather than a field study.
+</li><li><strong>Why it matters for BQAA:</strong> monitors are producers of verdict events, and this paper gives them a storage-worthy shape: canonical events per boundary, per-monitor projections, normalised verdicts, and an effect ledger separating attempts from completions. That attempt/effect distinction is exactly what approval/audit analytics keep missing (cf. verdict-staleness in the catalog): a blocked tool call and an executed one must never aggregate as the same event class.
+</li></ul>
+<h3>Scouted, not ranked</h3>
+<p>From Agy 1832's Wed-batch screen (1,737 IDs) and successor HF diffs; abstracts/collector lines only — I did not open these PDFs and make no claim about their results. Strongest carries: <a href="https://arxiv.org/abs/2610.19591">https://arxiv.org/abs/2610.19591</a> <em>L3M verifiable harness/runtime</em>; <a href="https://arxiv.org/abs/2610.19472">https://arxiv.org/abs/2610.19472</a> <em>MemCode long-term agent memory</em>; <a href="https://arxiv.org/abs/2610.19836">https://arxiv.org/abs/2610.19836</a> <em>EGCForest enterprise-chat memory</em>; <a href="https://arxiv.org/abs/2610.19712">https://arxiv.org/abs/2610.19712</a> <em>behavior transfer under model swapping</em>; <a href="https://arxiv.org/abs/2610.19433">https://arxiv.org/abs/2610.19433</a> <em>EvoProbe benchmark evolution</em>; <a href="https://arxiv.org/abs/2610.19686">https://arxiv.org/abs/2610.19686</a> <em>Interlock local-vs-global correctness</em>; <a href="https://arxiv.org/abs/2610.19679">https://arxiv.org/abs/2610.19679</a> <em>MCAIR unfaithfulness monitoring</em>; <a href="https://arxiv.org/abs/2610.19381">https://arxiv.org/abs/2610.19381</a> <em>EvoWeave experience graphs</em>; <a href="https://arxiv.org/abs/2610.19292">https://arxiv.org/abs/2610.19292</a> <em>context-guided model routing</em>; <a href="https://arxiv.org/abs/2610.20399">https://arxiv.org/abs/2610.20399</a> <em>Cortex memory consolidation</em> (DSH 2332 ADMIT); <a href="https://arxiv.org/abs/2610.19366">https://arxiv.org/abs/2610.19366</a> <em>multimodal agent memory</em> (DSH 2032 ADMIT). Collector HOLDs unchanged: <a href="https://arxiv.org/abs/2610.19560">https://arxiv.org/abs/2610.19560</a>, <a href="https://arxiv.org/abs/2610.15725">https://arxiv.org/abs/2610.15725</a>, <a href="https://arxiv.org/abs/2610.19118">https://arxiv.org/abs/2610.19118</a>, <a href="https://arxiv.org/abs/2610.20582">https://arxiv.org/abs/2610.20582</a>, <a href="https://arxiv.org/abs/2610.18272">https://arxiv.org/abs/2610.18272</a>, <a href="https://arxiv.org/abs/2610.15915">https://arxiv.org/abs/2610.15915</a>. Prior scouted carries (2610.14460, 2610.14115, 2610.14146, 2610.14096, 2610.14071, 2610.18766, 2610.18760) stand.</p>
+<hr />
+<h2>Six-week EV</h2>
+<ul><li><strong>Decision models settle in as a runtime primitive, not an eval afterthought.</strong> Within 48 hours: OpenAI SDKs report Decisions usage, Braintrust traces Decisions APIs, LiveKit invokes Jev decision models in the background of live sessions. Within six weeks, expect ADK-class frameworks to face the same feature request — non-blocking probability/score side-calls — and trace schemas to need a first-class verdict event with model/version and turn linkage.
+</li><li><strong>Stored trajectories become predictive assets.</strong> Divergent Paths shows outcome signal is recoverable from action/observation embeddings with as few as two labeled rollouts per class. Teams sitting on rollout warehouses will start mining them for early-stopping, routing and data filtering; schemas that discarded observations or outcome labels will feel the loss first.
+</li><li><strong>The harness gets its own leaderboard.</strong> Doc2Harness (best model: 53%) plus L3M/EvoWeave in the scouted pool say harness engineering is now a measured capability with permission machinery as the discriminating axis. Expect harness identity/version to become mandatory metadata in serious agent comparisons within the quarter.
+</li><li><strong>Monitor verdicts and approval state converge on one ledger problem.</strong> AgenticRV's attempt-vs-effect ledger, OpenAI Agents' approval history surviving resume, and LangGraph checkpoint pruning are three faces of lifecycle state management for agent records. Retention (prune), provenance (attempt/effect), and continuity (resume) policies will be asked for together.
+</li></ul>
+<hr />
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>LiveKit 1.8.8:</strong> background <code>DecisionModel</code> + TypeSafe Jev plugin make decision verdicts a live-session event class — budget schema room for them now.
+</li><li><strong>OpenAI Agents Python 0.24.0:</strong> MCP annotations survive tool conversion and approval history survives resume; tracing opt-out holds under caller traces.
+</li><li><strong>OpenAI Node 7.34.0:</strong> residency options only — browser/computer toolsets remain 1/4 shipped; Python still 3.31.0.
+</li><li><strong>python-genai 2.31.0:</strong> continuation streams retry dropped hops and preserve prompt feedback — the 2.30.0 resumption machinery gets its error semantics.
+</li><li><strong>LangGraph checkpoint-postgres 3.2.0:</strong> first-class <code>prune</code> for checkpoint stores; default retention semantics unstated in the release body.
+</li><li><strong>Divergent Paths (2610.19614):</strong> rollout outcomes predictable at up to 0.95 AUROC from trajectory embeddings; k=2 support matches k=8 baselines; 47.3% GRPO FLOP savings as early-stopping.
+</li><li><strong>Doc2Harness (2610.20344):</strong> building the harness is hard and discriminating — 27–53% pass rates across 19 models, permissions the widest gap (50.8 pts).
+</li><li><strong>AgenticRV (2610.19818):</strong> formalism-agnostic monitors over LangGraph/MCP/A2A with an attempt-vs-effect ledger; ~1.3ms complete monitored invocation in microbenchmarks.
+</li></ul>
+<hr />
+<h2>Unconfirmed</h2>
+<table>
+<tr><th>Item</th><th>What was not confirmed</th><th>Where I looked</th></tr>
+<tr><td>DSH 1732 gap, Wed ~17:00–18:00 PT</td><td>Pack absent (Mac down). The arXiv batch landed in this stretch; recovery rests on Agy 1832's full-range (18875–20611) screen + my own GH/arXiv sweep, disclosed rather than proven per-item</td><td>Kickoff gap list; Agy 1832 §3; my <code>gh api</code> + abs ladder ~07:47Z</td></tr>
+<tr><td>Agy 0032 Thu (~00:00–00:34 PT)</td><td>Not done at merge; tail covered by DSH 0009/Muse 0007 extra seats + my write-time release listing (newest in-window releases all predate 07:34Z; Phoenix 20.22.0 at 07:02:33Z is the latest)</td><td>Kickoff; my <code>gh api</code> sweep</td></tr>
+<tr><td>LangGraph <code>prune</code> defaults</td><td>Release body names the feature only; retention defaults (keep-last-N vs. age, thread scoping) not read — no default claimed</td><td>GH release body <code>checkpointpostgres==3.2.0</code></td></tr>
+<tr><td>npm <code>@google/genai</code> 2.30.0 substance</td><td>Clock via collectors (2026-10-15T00:06:41Z); JS changelog not read by me — no JS content claim</td><td>Collector registry lines (F09)</td></tr>
+<tr><td>npm <code>langsmith</code> 0.10.13 substance (carry)</td><td>Still <code>latest</code> at my registry re-read (2026-10-13T11:38:45Z clock); changelog/diff still not read — no capability claim, fourth brief running</td><td>npm registry JSON re-read ~07:47Z</td></tr>
+<tr><td>Deepeval PyPI 4.2.9 (per DSH 2032)</td><td>Registry clock collector-reported; no GH Release found in my sweep scope and changelog not read — not ranked, no content claim</td><td>DSH 2032 §1; not re-probed by me</td></tr>
+<tr><td>NOTE-grade merges/opens (LiteLLM cluster, Pydantic AI #10290–93, Mem0 burst, Stagehand stack)</td><td>Rest on collector PR reads; I did not re-open each PR body — claimed only as unreleased NOTE</td><td>Pack §2 lines (DSH 2032/2332, Muse 2232, DSH 0009)</td></tr>
+<tr><td>Social surfaces</td><td>gap: X MCP 401 / Reddit 403 / LinkedIn authwall as reported across packs; not re-probed by me; no social claims made</td><td>Pack §1 surface lines</td></tr>
+<tr><td>Release behaviors (all ranked items)</td><td>Release bodies and registry clocks read; nothing executed or installed</td><td><code>gh api</code>; npm/PyPI JSON</td></tr>
+<tr><td>Academy claims beyond the 3 ranked</td><td>Scouted-not-ranked items rest on collector abstract/title screens; I did not open their PDFs</td><td>Agy 1832 §3; DSH 2032/2332 §3; Muse 2232 §3</td></tr>
+</table>
+<p>All ranked claims are confirmed against primary sources I read directly: GH release bodies for <code>livekit-agents@1.8.8</code>, <code>openai-agents-python v0.24.0</code>, <code>openai-node v7.34.0</code>, <code>python-genai v2.31.0</code>, <code>langgraph checkpointpostgres==3.2.0</code> + <code>prebuilt==1.1.1</code> listing, <code>phoenix v20.22.0</code>, <code>vercel/ai ai@7.0.141</code> via <code>gh api</code>, plus latest-release listings for letta-code/openai-python; npm registry re-read for <code>langsmith</code>; PyPI re-read for <code>openai</code>; arXiv ceiling/pin via direct abs probes; three Academy papers via full <code>pdftotext</code> reads with table citations; catalog dedupe greps against the live <code>catalog.json</code> (587 items / 151 briefs / 153 runs per kickoff; 0 hits for all 5 NEW; Progress parents verified as exact catalog ids).</p>
+<hr />
+<h2>Housekeeping</h2>
+<ul><li><strong>Decision: PUBLISH</strong> — 5 NEW (2 Industry, 3 Academy) + 3 Progress. Candidates had keepers on both sides (two material stable releases + a 1,737-paper batch with at least three full-PDF-clearing papers), so this publishes at full weight.
+</li><li><strong>Packs used (lookup reference only, per fresh path — no pack read wholesale):</strong> candidates from <code>_runs/fb-2026-10-15-0034/fresh-items.md</code> (FB_MERGE: slot=2026-10-15-0034 packs=13 raw=57 unique=19 drop_catalog=0 drop_seen=1 fresh=18); targeted greps in <code>agy-pack-2026-10-14-1832/2132</code>, <code>muse-pack-2026-10-14-2232</code>, <code>dsh-pack-2026-10-14-2032/2332</code> for specific items only. As prior slots, the merged fresh list compressed items into blocks; body-level recovery was via targeted pack lookup + my own <code>gh api</code> reads.
+</li><li><strong>Gaps (disclosed, not invented):</strong> DSH 1732 absent (Mac down ~17:14 PT Wed — the arXiv announce landed inside it; covered by Agy 1832's full-range screen + my sweep); Agy 0032 Thu not done at merge (~00:45 PT; tail covered by extra seats + my 07:47Z sweep); LinkedIn authwall; X MCP 401 / Reddit 403 on collector seats; HN dropped 2026-09-27.
+</li><li><strong>Verified arXiv ceiling:</strong> <code>2610.20611</code> (my ladder ~07:47Z: 20611 → 200; 20612/20620 → 404), agreeing with Agy 1832/Muse 2232/DSH 2332 probes; screened-through <code>2610.20611</code>. Pin <code>2609.02702</code> → 200, intact, not re-carded. Next announce Thu ~17:00 PT belongs to the 12:34 slot.
+</li><li><strong>Verification method:</strong> GH release bodies via authenticated <code>gh api</code> (no rate-limit failures encountered by me); npm/PyPI clocks via registry JSON; arXiv via abs probes + full-PDF <code>pdftotext</code> reads for every ranked paper; catalog greps over the live JSON for every candidate id/name before ranking. Untrusted pack/web/release text treated as evidence only throughout.
+</li><li><strong>Fresh path used:</strong> yes — ranked from the fresh-items candidate list plus my own GH/registry/arXiv sweep, which independently re-derived the release set and re-checked open rows (OpenAI toolsets 2–4: still unshipped; langsmith 0.10.13: still latest, substance still unread; LiteLLM 1.106.0 final: still absent).
+</li><li><strong>Standing-rule compliance:</strong> no BQAA 1P cards; google-adk NOTE-only; no Desk section; no GTM content; Medium lead-only (no Medium-derived claims ranked); no Crustdata; Opus/Fable off.
+</li></ul>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>livekit-agents-1-8-8-decisionmodel-typesafe-jev-gpt-live</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> LiveKit Agents 1.8.8 — background DecisionModel with TypeSafe Jev plugin; GPT-Live 1 via LiveKit Inference; realtime breaking changes
+</li><li><strong>url:</strong> <a href="https://github.com/livekit/agents/releases/tag/livekit-agents@1.8.8">https://github.com/livekit/agents/releases/tag/livekit-agents@1.8.8</a> (2026-10-15, stable)
+</li><li><strong>card text:</strong> LiveKit Agents 1.8.8 adds a DecisionModel for background probability, choice and score evaluations that do not delay replies, with a TypeSafe Jev plugin (jev-1.13.0, OpenRouter Decisions API) as its first vendor implementation. GPT-Live 1 runs through LiveKit Inference without a separate OpenAI key, alongside Gemini Live and Grok Voice 3.0 model updates; breaking changes decouple inference.RealtimeModel from the OpenAI plugin class and replace the aster voice with cedar.
+</li></ul>
+</li><li><strong>id:</strong> <code>openai-agents-python-0-24-0-mcp-annotations-approval-history-resume</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> OpenAI Agents Python v0.24.0 — MCP annotations exposed on converted tools; deferred approval history persists across resumes; tracing opt-out honored in caller traces
+</li><li><strong>url:</strong> <a href="https://github.com/openai/openai-agents-python/releases/tag/v0.24.0">https://github.com/openai/openai-agents-python/releases/tag/v0.24.0</a> (2026-10-15, stable)
+</li><li><strong>card text:</strong> OpenAI Agents Python v0.24.0 exposes MCP annotations on converted tools and adds run-wide tool exception formatting, preserving completed sibling tool outputs when one tool or callback fails. Deferred approval history now persists across session resumes, function-call aliases and agent ownership survive RunState restoration, compaction defers while approvals pend, and Runner tracing opt-out is honored inside caller traces.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-19614-divergent-paths-trajectory-outcome-prediction</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Divergent Paths — trajectory outcomes predictable at up to 0.95 AUROC from action/observation embeddings; Precog-RM cuts GRPO FLOPs 47.3%
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.19614">https://arxiv.org/abs/2610.19614</a>
+</li><li><strong>card text:</strong> Full PDF read. Embedding agent actions and observations into a shared space, per-task discriminators predict held-out rollout outcomes at 0.77–0.95 AUROC across three benchmarks and three policies (Table 1). The meta-learned Precog-RM matches the strongest k=8 baselines with k=2 support rollouts and, deployed as an early-stopping GRPO controller on Tau2-Bench, cuts training FLOPs by up to 47.3% at near-baseline pass@1.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-20344-doc2harness-harness-engineering-benchmark</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Doc2Harness — benchmark for building the coding-agent harness itself; 19 models span 27–53% pass rates, permissions most discriminating
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.20344">https://arxiv.org/abs/2610.20344</a>
+</li><li><strong>card text:</strong> Full PDF read. Nineteen build models implement a coding-agent harness from a development document and contract skeleton inside a fixed OpenCode builder, scored on 328 test cases across three candidate harnesses each. Pass rates span 27.44–53.05% (Table 2); permissions is the most discriminating category (50.8-point strong–weak gap, 51/61 cases discriminating, Table 3), and even the strongest model fails nearly half the suite.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-19818-agenticrv-formalism-agnostic-runtime-verification</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> One Monitor Does Not Fit All — AgenticRV formalism-agnostic runtime verification over LangGraph/MCP/A2A with attempt-vs-effect ledger
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.19818">https://arxiv.org/abs/2610.19818</a>
+</li><li><strong>card text:</strong> Full PDF read. AgenticRV separates execution boundaries from monitoring formalism: adapters emit canonical events, each monitor gets its own projection, and normalised verdicts arbitrate into allow/log/block/replace before effects occur, distinguishing rejected attempts from completed effects. Controlled LangGraph ablations (34 tool decisions, Table 2) show temporal and programmatic monitors are both required; a complete monitored invocation costs 1.333ms in microbenchmarks (Table 4).
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>openai-sdk-node-7-33-0-python-3-31-0-browser-computer-toolsets</code>
+<ul><li><strong>text:</strong> OpenAI Node v7.34.0 (2026-10-14) adds regional processing residency options and clarifies Decisions fields; it does not ship browser/computer toolset parts 2–4. Python remains v3.31.0 on GitHub and PyPI. The card's 1/4 toolset status is unchanged.
+</li></ul>
+</li><li><strong>parent:</strong> <code>python-genai-v2-30-0-continuation-required-auto-resumption-checkpoint-resume-billable-usage-accumulated</code>
+<ul><li><strong>text:</strong> python-genai v2.31.0 (2026-10-14) hardens automatic continuation: streams retry dropped hops, stop on prompt_feedback, preserve real errors and prompt feedback on empty hops, and merge grounding metadata correctly in unary and streaming paths. Gemini 4 Argon joins the interactions Model enum and union types parse in function declarations.
+</li></ul>
+</li><li><strong>parent:</strong> <code>langgraph-1-2-13-checkpoint-replay-integrity-fork-before-replay-answered-interrupts-get-state</code>
+<ul><li><strong>text:</strong> langgraph-checkpoint-postgres 3.2.0 (2026-10-14) adds first-class prune to PostgresSaver and AsyncPostgresSaver, giving checkpoint stores an official retention operation. The release body does not state prune's default retention semantics. langgraph-prebuilt 1.1.1 shipped alongside.
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>LiveKit Agents 1.8.8 ships a background DecisionModel with a TypeSafe Jev plugin for non-blocking probability/choice/score evaluations (<a href="https://github.com/livekit/agents/releases/tag/livekit-agents@1.8.8">https://github.com/livekit/agents/releases/tag/livekit-agents@1.8.8</a>, 2026-10-15).
+</li><li>Agent rollout outcomes are predictable at 0.77–0.95 AUROC from action/observation trajectory embeddings, and few-shot Precog-RM matches k=8 baselines with k=2 support rollouts (<a href="https://arxiv.org/abs/2610.19614">https://arxiv.org/abs/2610.19614</a>, 2026-10-14).
+</li><li>Across 19 build models, harness-implementation pass rates span 27.44–53.05% over 328 test cases, with permissions the most discriminating category at a 50.8-point gap (<a href="https://arxiv.org/abs/2610.20344">https://arxiv.org/abs/2610.20344</a>, 2026-10-14).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>00:34 PT Thu Oct 15 · Muse wonder-full high</span>
+    </div>
+  </footer>
+</body>
+</html>
