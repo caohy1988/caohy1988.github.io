@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Who writes the rows? A permission model for the BQAA coding-agent mod — Field Brief</title>
+<meta name="description" content="How the BQAA coding-agent mod gets its BigQuery credentials today, why per-user grants, a shared service account and a key file are each uncomfortable, and how seven options compare on IAM roles, blast radius, user experience, operations and cost. Prepared 2026-10-15 for issue #8.">
+<meta property="og:title" content="Who writes the rows? A permission model for the BQAA coding-agent mod"><meta property="og:description" content="Seven ways to let every developer's machine write BigQuery Agent Analytics events, compared on IAM roles, blast radius, user experience, operations and cost, with a phased recommendation."><meta property="og:type" content="article"><meta property="og:url" content="https://caohy1988.github.io/research/bqaa-permission-model/">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%231b2129'/%3E%3Cpath%20d='M6%2010h9M6%2016h12M6%2022h7'%20stroke='%2391c3e8'%20stroke-width='3'/%3E%3Cpath%20d='M20%209l6%207-6%207'%20fill='none'%20stroke='%23f2622e'%20stroke-width='2.6'/%3E%3C/svg%3E">
+<link rel="canonical" href="https://caohy1988.github.io/research/bqaa-permission-model/">
+<meta name="theme-color" content="#1b2129">
+<link rel="stylesheet" href="../../assets/site-nav.css" data-site-nav>
+<script defer src="../../assets/site-nav.js" data-site-nav></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#study">Skip to study</a>
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav data-sticky="">
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <a href="/research/harness/">Harness</a>
+      <a href="/research/harness-lab/">Lab</a>
+      <a href="/research/templates/">Templates</a>
+      <a href="/research/jev/">Jev</a>
+      <a href="/research/durable-agents/">Durable</a>
+      <a href="/research/tl-agent-era/">Leadership</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+          <a href="/research/builds/mcp-apps-feature-matrix/">MCP Apps matrix</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+<!-- site-nav:end -->
+<header class="topbar">
+<a class="brand" href="/research/" aria-label="Field notes, BQAA permission model (Research home)"><svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6"/><path class="bm-a" d="M6 10h9M6 16h12M6 22h7"/><path class="bm-cut" d="M20 9l6 7-6 7"/></svg><span class="brand-name">Field notes</span> <span class="brand-sub">BQAA permission model</span></a>
+<div class="top-actions"><a href="#sources">Sources <span class="source-count">65</span></a></div>
+</header>
+<main id="study">
+<section class="hero" aria-labelledby="title">
+<div class="hero-copy">
+<p class="eyebrow">A design study, prepared 15 October 2026</p>
+<h1 id="title">Who writes the rows? A permission model for the BQAA coding-agent mod</h1>
+<p class="deck">An admin installs the mod once. After that, every developer's machine writes agent events to one BigQuery table. This study compares seven ways to grant that write, and recommends a phased path.</p>
+</div>
+<div class="hero-notes">
+<p class="provenance">Prepared 2026-10-15 in answer to issue <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/issues/8">#8, "Permission model"</a>. Code references point to <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/5566d7f78f520af3f5916b6c2191931c0ad67c28">bigquery_agent_analytics_skill at commit 5566d7f</a> (main, 2026-10-15). Google Cloud behaviour is cited to Google's documentation, read on 2026-10-15. No option was tried against a live project.</p>
+<p class="citation-key">Citation key: "mod" is <code>plugins/bigquery-agent-analytics-mod</code> and "tracing" is <code>plugins/bigquery-agent-analytics-tracing</code>. A reference such as <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L12">config.ts L12</a> links to that line at commit 5566d7f. A judgement carries an italic lead-in; everything else is a sourced fact or a stated assumption. Product docs: <a href="https://adk.dev/integrations/bigquery-agent-analytics/">BigQuery Agent Analytics</a>.</p>
+<p class="hero-meta">Eight numbered sections, two comparison tables, open questions for the PM, and 65 linked sources.</p>
+</div>
+</section>
+
+<div class="study-layout">
+<nav class="contents" aria-label="In this study">
+<p class="small-label" aria-hidden="true">In this study</p>
+<ol>
+<li><a href="#short-answer"><span class="toc-num">01</span> The short answer</a></li>
+<li><a href="#today"><span class="toc-num">02</span> How credentials work today</a></li>
+<li><a href="#issue-options"><span class="toc-num">03</span> Why the issue's three options hurt</a></li>
+<li><a href="#options"><span class="toc-num">04</span> The options, one by one</a></li>
+<li class="toc-sub"><a href="#opt-a">A. Per-user grants</a></li>
+<li class="toc-sub"><a href="#opt-b">B. Impersonate a service account</a></li>
+<li class="toc-sub"><a href="#opt-c">C. A key in the config</a></li>
+<li class="toc-sub"><a href="#opt-d1">D1. Cloud Run ingestion</a></li>
+<li class="toc-sub"><a href="#opt-d2">D2. Pub/Sub ingestion</a></li>
+<li class="toc-sub"><a href="#opt-e">E. Workload Identity Federation</a></li>
+<li class="toc-sub"><a href="#opt-f">F. One group, narrow scope</a></li>
+<li><a href="#compare"><span class="toc-num">05</span> Comparison</a></li>
+<li><a href="#recommendation"><span class="toc-num">06</span> Recommendation</a></li>
+<li><a href="#mod-changes"><span class="toc-num">07</span> What changes in the mod</a></li>
+<li><a href="#pm-questions"><span class="toc-num">08</span> Open questions for the PM</a></li>
+<li><a href="#not-verified"><span class="toc-num"></span> Assumptions and gaps</a></li>
+<li><a href="#sources"><span class="toc-num"></span> Sources</a></li>
+</ol>
+</nav>
+<div class="study">
+
+<section id="short-answer" class="chapter" aria-labelledby="short-answer-h">
+<p class="chapter-number" aria-hidden="true">01 / The short answer</p>
+<h2 id="short-answer-h"><span class="visually-hidden">1. </span>The short answer</h2>
+<div class="answer">
+<p><strong>Yes, there are better options than the three in the issue.</strong> The writer runs on machines the admin does not control. Whatever credential it uses, the developer holds too, and no client-side setting can stop them using it outside the mod. So there are only two real levers: make each developer's own write right as small as possible, or move the write right off the laptop and give developers a right that can only submit events.</p>
+<ol>
+<li><strong>Now: one Google group, bound once, with a narrow role (option F).</strong> The admin binds a group such as <code>bqaa-writers@example.com</code> on a dataset that holds only the events table, with a custom role that can add rows but cannot read them or delete the table. It does not stop a member from overwriting the rows. Developers keep signing in with their own Google account, as today. Joiners and leavers become group changes, not IAM changes.</li>
+<li><strong>Later, for customers who need developers to have no table access at all, so no way to overwrite rows either: a central ingestion path (option D).</strong> The cheapest is a Pub/Sub topic with a BigQuery subscription; developers can only publish. If the row's <code>user_id</code> must be trustworthy, use a small Cloud Run service behind Identity-Aware Proxy (IAP) that stamps the verified email.</li>
+<li><strong>Never ship service-account keys (option C).</strong> Impersonating a shared service account (B) avoids long-lived service-account keys but adds nothing over a group grant unless a policy demands it. Workload Identity Federation (E) covers CI and companies whose people have no Google accounts.</li>
+</ol>
+<p>Step 1 needs small mod changes: a configurable "how to get access" message, an auto-create switch the admin can set, a setup step that authorizes the reporting views, and new docs. Step 2 adds a second transport that both live sends and the replay of parked rows must use; the queue, retries and dead-letter files stay as they are.</p>
+</div>
+</section>
+
+<section id="today" class="chapter" aria-labelledby="today-h">
+<p class="chapter-number" aria-hidden="true">02 / How credentials work today</p>
+<h2 id="today-h"><span class="visually-hidden">2. </span>How credentials work today</h2>
+<p>The BQAA coding-agent mod runs inside each developer's coding-agent CLI. Hooks build rows; a background writer sends them. The facts that matter for permissions:</p>
+<ol class="steps">
+<li><strong>Transport.</strong> The writer sends batches with <code>tabledata.insertAll</code>, BigQuery's legacy streaming API, as plain HTTPS. A Google client library is not available inside a mod, and the Storage Write API needs gRPC, which the mod's fetch does not speak (mod <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/bigquery.ts#L1-L4">bigquery.ts L1–4</a>, <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L199-L201">README L199–201</a>).</li>
+<li><strong>Token source.</strong> First <code>BQAA_ACCESS_TOKEN</code>, if set, re-read every five minutes. Otherwise the command in the <code>accessTokenCommand</code> option or <code>BQAA_ACCESS_TOKEN_COMMAND</code>, by default <code>gcloud auth application-default print-access-token</code>. The command runs with no shell and a 15-second limit. The token stays in memory for 45 minutes, and a 401 gets one fresh token and one retry (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L12">config.ts L12</a>, <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L108-L109">L108–109</a>, <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L170">L170</a>, <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L195-L197">L195–197</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L670-L701">writer.ts L670–701</a>, <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L307-L327">L307–327</a>).</li>
+<li><strong>So, with the default command, the writer is whoever Application Default Credentials (ADC) name on that machine.</strong> After <code>gcloud auth application-default login</code>, that is the developer's own Google account. If <code>GOOGLE_APPLICATION_CREDENTIALS</code> points at a key file, it is that service account. If ADC was set up with <code>--impersonate-service-account</code>, it is the impersonated account (<a href="https://docs.cloud.google.com/sdk/gcloud/reference/auth/application-default/print-access-token">gcloud reference</a>; <a href="https://docs.cloud.google.com/docs/authentication/use-service-account-impersonation">impersonation with ADC</a>).</li>
+<li><strong>Permissions it needs.</strong> insertAll needs <code>bigquery.tables.updateData</code> and <code>bigquery.tables.get</code> on the table, and <code>bigquery.datasets.get</code> on the dataset. It is not a job, so it needs no <code>bigquery.jobs.create</code> (<a href="https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll">insertAll reference</a>). The test fixture's refusal names the first: "Permission bigquery.tables.updateData denied" (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/tests/credentials.test.ts#L29-L32">credentials.test.ts L29–32</a>). Auto-create is on by default: on a 404 the writer creates the table, which needs <code>bigquery.tables.create</code> on the dataset (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L198">config.ts L198</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L355-L366">writer.ts L355–366</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/bigquery.ts#L36-L44">bigquery.ts L36–44</a>).</li>
+<li><strong>What every setup path grants.</strong> <code>roles/bigquery.dataEditor</code> on the dataset. The mod's own "to fix" notice asks for it (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L526-L529">writer.ts L526–529</a>), as do the mod README (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L216-L217">L216–217</a>) and <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/setup.sh#L120-L122">setup.sh L120–122</a>. The tracing bootstrap binds it with <code>bq add-iam-policy-binding -d</code> and also grants project-level <code>roles/bigquery.jobUser</code> "for verification queries" (tracing <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/scripts/setup_gcp_prereqs.py#L329-L358">setup_gcp_prereqs.py L329–358</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/USER_GUIDE.md#L211-L219">USER_GUIDE L211–219</a>).</li>
+<li><strong>What the table holds.</strong> Prompts, the model's visible answers, tool arguments and tool results, each cut to <code>maxPayloadChars</code>. The README's advice: "Treat the dataset like the transcripts it mirrors" (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L583-L587">README L583–587</a>).</li>
+<li><strong>Who the row says wrote it.</strong> <code>user_id</code> comes from <code>BQAA_USER_ID</code>, then the login name, so the client asserts it (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L180">config.ts L180</a>). The opt-in <code>userIdFromCredentials</code> replaces it with the verified email of the token's account, looked up at Google's token-information endpoint. That is best effort: when the lookup fails, or the token carries no verified email, the row keeps the configured name (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L617-L621">writer.ts L617–621</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L269-L273">README L269–273</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L200">config.ts L200</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L606-L636">writer.ts L606–636</a>).</li>
+<li><strong>One table, three writers.</strong> The DDL keeps the columns of ADK's BQAA plugin, so ADK agents, the tracing plugin and the mod can share one table (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/sql/agent_events_ddl.sql#L1-L5">agent_events_ddl.sql L1–5</a>). Whatever we decide here applies to all three.</li>
+<li><strong>The tracing plugin's advice.</strong> On a workstation, use the developer's own identity. For a service account, impersonate it through ADC (the caller needs <code>roles/iam.serviceAccountTokenCreator</code>); a JSON key is "least preferred"; Workload Identity Federation is for CI (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/USER_GUIDE.md#L64-L105">USER_GUIDE L64–105</a>).</li>
+</ol>
+<p class="judgement"><em class="judge">Judgement:</em> today's default is option 1 of the issue with a wide role. Every developer's own account holds <code>dataEditor</code> on the dataset, so every developer can read every other developer's transcripts.</p>
+
+<figure class="flows" aria-labelledby="flows-cap">
+<figcaption id="flows-cap">Where the right to write the table lives, in today's setup and in the two central designs</figcaption>
+<div class="flow">
+<p class="flow-name">Direct write<span>today; also A, B, C, E, F</span></p>
+<div class="box holds"><b>Developer machine</b>a token for the developer (A, F), a service account (B, C) or a federated identity (E)</div>
+<div class="arrow" aria-hidden="true">→</div>
+<div class="box"><b>BigQuery API</b><code>tabledata.insertAll</code></div>
+<div class="arrow" aria-hidden="true">→</div>
+<div class="box"><b><code>agent_events</code></b>one shared table</div>
+</div>
+<div class="flow">
+<p class="flow-name">Pub/Sub (D2)<span>publish only</span></p>
+<div class="box"><b>Developer machine</b>same ADC token, publish right only</div>
+<div class="arrow" aria-hidden="true">→</div>
+<div class="box"><b>Pub/Sub topic</b>one topic, BigQuery subscription</div>
+<div class="arrow" aria-hidden="true">→</div>
+<div class="box holds"><b><code>agent_events</code></b>written by the subscription's identity</div>
+</div>
+<div class="flow">
+<p class="flow-name">Cloud Run (D1)<span>submit only</span></p>
+<div class="box"><b>Developer machine</b>ID token, invoke right only</div>
+<div class="arrow" aria-hidden="true">→</div>
+<div class="box holds"><b>Ingestion service</b>Cloud Run, optionally behind IAP; its own service account</div>
+<div class="arrow" aria-hidden="true">→</div>
+<div class="box"><b><code>agent_events</code></b>one shared table</div>
+</div>
+<p class="flow-key">The box with the heavy border is where the identity that can write the table lives.</p>
+</figure>
+</section>
+
+<section id="issue-options" class="chapter" aria-labelledby="issue-options-h">
+<p class="chapter-number" aria-hidden="true">03 / Why the issue's three options hurt</p>
+<h2 id="issue-options-h"><span class="visually-hidden">3. </span>Why the three options in the issue are each uncomfortable</h2>
+<h3>1. "Every user has to be given write access to the table"</h3>
+<p>Today, "write access" means <code>roles/bigquery.dataEditor</code> on the dataset. That role is far more than append. Granted on a table, it lets the holder "get (query), export, replicate, and update table data" and "delete the table" (<a href="https://docs.cloud.google.com/bigquery/docs/access-control">BigQuery access control</a>). Granted on a dataset, it covers every table in it and adds creating tables. So each developer can read and export every other developer's prompts and tool output, rewrite or delete rows with a query (given any project where they can run query jobs, which the tracing bootstrap also grants), delete the table, and create new ones. No predefined role that can be granted to people adds rows without also reading them. A per-person binding also means one IAM change for every joiner and every leaver. One allow policy holds at most 1,500 principals, and that limit "cannot be changed" (<a href="https://docs.cloud.google.com/iam/quotas">IAM quotas</a>).</p>
+<h3>2. "Every user has to be given ServiceUser permission on the service account"</h3>
+<p>The role that lets a person mint tokens for a service account, and use gcloud's <code>--impersonate-service-account</code> flag, is Service Account Token Creator (<code>roles/iam.serviceAccountTokenCreator</code>). Service Account User (<code>roles/iam.serviceAccountUser</code>) grants <code>iam.serviceAccounts.actAs</code>: it lets a person attach the account to a resource, such as a VM or a Cloud Run service, and it "does not allow principals to create short-lived credentials" (<a href="https://docs.cloud.google.com/iam/docs/service-account-permissions">service account permissions</a>). So option 2 in practice means Token Creator, and the worry stands. With Token Creator, every developer can take on the account's full power, at any time, from any machine. The blast radius is the account's role, for every developer. BigQuery also sees one identity for everyone, so only the client-asserted <code>user_id</code> tells developers apart.</p>
+<h3>3. "Some long-lived credentials have to be saved in the config file"</h3>
+<p>A service-account key is a bearer secret. By default it never expires (<a href="https://docs.cloud.google.com/resource-manager/docs/organization-policy/restricting-service-accounts">restricting service accounts</a>). Many organizations block key creation by policy, and organizations created since May 2024 do so by default (option C below). Copied to every laptop, it can be read by the developer, by the coding agent itself and by every tool the agent runs. Anyone who copies it can act as the account from anywhere until an admin deletes the key, and deleting it breaks every machine at once.</p>
+<p class="judgement"><em class="judge">Judgement:</em> all three put a write credential on every machine. They differ in which credential, how long it lives and how much it can do. The real alternatives either shrink what that credential can do (F), or swap it for a right that can only submit events (D).</p>
+</section>
+
+<section id="options" class="chapter" aria-labelledby="options-h">
+<p class="chapter-number" aria-hidden="true">04 / The options, one by one</p>
+<h2 id="options-h"><span class="visually-hidden">4. </span>The options, one by one</h2>
+<p>Each option lists its IAM roles, what the admin does, what each developer does, setup, blast radius, user experience (UX), operations burden and cost. "Blast radius" asks what a leaked credential, or a developer acting in bad faith, can do: add rows, change or delete rows, delete the table, or read other people's events. Examples use <code>my-project</code>, dataset <code>agent_analytics</code> and table <code>agent_events</code>.</p>
+
+<article id="opt-a" class="option" aria-labelledby="opt-a-h">
+<p class="option-tag">Option A</p>
+<h3 id="opt-a-h">Per-user grants on the dataset or table</h3>
+<p>Each developer's own Google account gets a role on the events table or its dataset. This is what the mod and the tracing plugin document today.</p>
+<dl class="facts">
+<dt>IAM roles</dt>
+<dd><p>Today: <code>roles/bigquery.dataEditor</code> on the dataset. Narrower: the same role on the table only, or a write-only custom role (see option F). A table-only grant needs testing, because insertAll also checks <code>bigquery.datasets.get</code> on the dataset.</p><p><code>roles/bigquery.jobUser</code> is not needed to write: insertAll is not a job (<a href="https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll">insertAll reference</a>). It is needed only to run queries, which is why the tracing bootstrap grants it "for verification queries".</p></dd>
+<dt>Admin flow</dt>
+<dd>One binding per developer, added when they join and removed when they leave. The admin needs the right to change the table's or dataset's IAM policy.</dd>
+<dt>Developer flow</dt>
+<dd>Run <code>gcloud auth application-default login</code> once. That is already the mod's default.</dd>
+<dt>Setup</dt>
+<dd><pre><code>bq add-iam-policy-binding -d \
+  --member='user:dev@example.com' \
+  --role='roles/bigquery.dataEditor' \
+  'my-project:agent_analytics'</code></pre><p>The dataset-level form the tracing bootstrap runs today; repeat for every developer.</p></dd>
+<dt>Blast radius</dt>
+<dd>With <code>dataEditor</code> on the dataset, a leaked credential or a developer acting in bad faith can add forged rows under any <code>user_id</code>, read and export every developer's events, rewrite or delete rows with a query (given any project where they can run query jobs), delete the table, and create tables in the dataset (<a href="https://docs.cloud.google.com/bigquery/docs/access-control">BigQuery access control</a>). The credential that leaks is the person's whole Google account, which exists anyway; this option adds rights to it, not a new secret.</dd>
+<dt>UX</dt>
+<dd>Best. Nothing new for developers.</dd>
+<dt>Operations</dt>
+<dd>Grows with headcount. Offboarding depends on someone removing the binding. One allow policy holds at most 1,500 principals (<a href="https://docs.cloud.google.com/iam/quotas">IAM quotas</a>).</dd>
+<dt>Cost</dt>
+<dd>No new infrastructure. Ingestion is billed as legacy streaming inserts at $0.01 per 200 MiB, with each row counted as at least 1 KB (<a href="https://cloud.google.com/bigquery/pricing">BigQuery pricing</a>, Iowa).</dd>
+</dl>
+<p class="judgement"><em class="judge">Judgement:</em> fine for one developer or a small, trusted team. As an organization's default, a dataset-wide <code>dataEditor</code> grant shows everyone's transcripts to everyone.</p>
+</article>
+
+<article id="opt-b" class="option" aria-labelledby="opt-b-h">
+<p class="option-tag">Option B</p>
+<h3 id="opt-b-h">Developers impersonate a shared service account</h3>
+<p>A service account such as <code>bqaa-writer@my-project.iam.gserviceaccount.com</code> holds the write role. Developers get the right to mint short-lived tokens for it.</p>
+<dl class="facts">
+<dt>IAM roles</dt>
+<dd><p>On the service account itself, not on the project: <code>roles/iam.serviceAccountTokenCreator</code> for a group of developers. Its permissions include <code>iam.serviceAccounts.getAccessToken</code>, <code>getOpenIdToken</code>, <code>implicitDelegation</code>, <code>signBlob</code> and <code>signJwt</code>. <code>roles/iam.serviceAccountUser</code> grants <code>actAs</code>, for attaching the account to resources, and it cannot mint tokens (<a href="https://docs.cloud.google.com/iam/docs/service-account-permissions">service account permissions</a>).</p><p>Granted on the project, either role covers every service account in the project, so bind it on the one account. The account itself gets the write role on the dataset.</p></dd>
+<dt>Admin flow</dt>
+<dd>Create the account, grant it the write role, and grant Token Creator on it to a group. Each step happens once; after that, the admin manages the group.</dd>
+<dt>Developer flow</dt>
+<dd><p>Point the mod at an impersonated token. The narrowest way is the mod's own token command, which uses the gcloud CLI sign-in (<code>gcloud auth login</code>):</p><pre><code>export BQAA_ACCESS_TOKEN_COMMAND='gcloud auth print-access-token --impersonate-service-account=bqaa-writer@my-project.iam.gserviceaccount.com'</code></pre><p>The <code>accessTokenCommand</code> option takes the same text (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L170">config.ts L170</a>).</p><p>The tracing guide suggests <code>gcloud auth application-default login --impersonate-service-account=…</code> instead (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/USER_GUIDE.md#L91-L94">USER_GUIDE L91–94</a>). That changes ADC for every tool on the machine, not just the mod.</p></dd>
+<dt>Setup</dt>
+<dd><pre><code>gcloud iam service-accounts create bqaa-writer --project=my-project
+
+# today's grant; or the write-only custom role from option F
+bq add-iam-policy-binding -d \
+  --member='serviceAccount:bqaa-writer@my-project.iam.gserviceaccount.com' \
+  --role='roles/bigquery.dataEditor' \
+  'my-project:agent_analytics'
+
+gcloud iam service-accounts add-iam-policy-binding \
+  bqaa-writer@my-project.iam.gserviceaccount.com \
+  --member='group:bqaa-writers@example.com' \
+  --role='roles/iam.serviceAccountTokenCreator'</code></pre></dd>
+<dt>Token lifetime</dt>
+<dd>Impersonated access tokens last one hour by default. They last up to 12 hours only if the org policy constraint <code>constraints/iam.allowServiceAccountCredentialLifetimeExtension</code> allows it (<a href="https://docs.cloud.google.com/sdk/gcloud/reference/auth/print-access-token">gcloud reference</a>). No long-lived service-account key sits on the laptop. The one-hour tokens are minted from the developer's gcloud sign-in, a renewable user credential that gcloud keeps and reuses: "If valid credentials for an account are already available from a prior authorization, the account is set to active without rerunning the flow" (<a href="https://docs.cloud.google.com/sdk/gcloud/reference/auth/login">gcloud auth login reference</a>).</dd>
+<dt>Blast radius</dt>
+<dd>Whatever the account can do, every token holder can do, from any machine. Whoever holds a developer's stored gcloud sign-in can keep minting tokens until that sign-in or the Token Creator grant is revoked. If the account holds <code>dataEditor</code> on the dataset, every developer can read, rewrite and delete everything. BigQuery sees the account as the caller. Cloud Audit Logs entries made with an impersonated token also name the person, under <code>serviceAccountDelegationInfo</code>; the token-minting call itself is logged only if IAM Data Access audit logs are on (<a href="https://docs.cloud.google.com/iam/docs/audit-logging/examples-service-accounts">audit log examples</a>). The table cannot tell developers apart.</dd>
+<dt>UX</dt>
+<dd>One config line per machine, which the admin can push with the mod's options. Each developer still signs in to gcloud.</dd>
+<dt>Operations</dt>
+<dd>One account and one group. The account becomes a shared, high-value identity to watch.</dd>
+<dt>Cost</dt>
+<dd>No new infrastructure. Same ingestion price as A.</dd>
+</dl>
+<p class="judgement"><em class="judge">Judgement:</em> no smaller blast radius than binding the same role to a group directly (F), and weaker attribution. Use it only where a policy says data roles must be held by service accounts.</p>
+</article>
+
+<article id="opt-c" class="option" aria-labelledby="opt-c-h">
+<p class="option-tag">Option C</p>
+<h3 id="opt-c-h">A service-account key in the config file</h3>
+<p>An admin creates a JSON key for a writer account and installs it on every machine.</p>
+<dl class="facts">
+<dt>IAM roles</dt>
+<dd>The account gets the write role. An admin with the right to create keys (for example <code>roles/iam.serviceAccountKeyAdmin</code>) makes the key. Developers need no role.</dd>
+<dt>How the mod would use it</dt>
+<dd>The mod cannot sign with a key itself: a mod has a digest function but no signing (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L209-L214">README L209–214</a>). The usual route is <code>GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json</code>. The default token command then prints a token for the key's account (<a href="https://docs.cloud.google.com/sdk/gcloud/reference/auth/application-default/print-access-token">gcloud reference</a>).</dd>
+<dt>Admin flow</dt>
+<dd>Create the key, push the file to every machine, rotate it on a schedule, and replace it everywhere after any suspected leak.</dd>
+<dt>Developer flow</dt>
+<dd>None.</dd>
+<dt>Setup</dt>
+<dd><pre><code>gcloud iam service-accounts keys create key.json \
+  --iam-account=bqaa-writer@my-project.iam.gserviceaccount.com
+# then, on every machine:
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json</code></pre></dd>
+<dt>Blast radius</dt>
+<dd><p>The file is the account. It works from any machine, for anyone, until an admin deletes it. By default it never expires; an expiry needs the org policy constraint <code>constraints/iam.serviceAccountKeyExpiryHours</code>, which applies only to new keys (<a href="https://docs.cloud.google.com/resource-manager/docs/organization-policy/restricting-service-accounts">restricting service accounts</a>).</p><p>It sits where the developer, the coding agent and every tool the agent runs can read it. The mod's redaction is pattern-based, and its README warns that "Patterns cannot catch every secret" (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L665">README L665</a>). If Google finds the key exposed in public, the default response is to disable it (<code>constraints/iam.serviceAccountKeyExposureResponse</code>), which stops every machine at once (<a href="https://docs.cloud.google.com/organization-policy/reference/org-policy-constraints">constraints reference</a>). Every row comes from one account, so there is no attribution.</p></dd>
+<dt>Org policy</dt>
+<dd>Key creation can be blocked with <code>iam.disableServiceAccountKeyCreation</code> or its managed version, <code>iam.managed.disableServiceAccountKeyCreation</code>. Organizations created on or after 3 May 2024 block it by default as part of Google's secure-by-default baseline (<a href="https://docs.cloud.google.com/resource-manager/docs/secure-by-default-organizations">secure-by-default organizations</a>). In those organizations, this option needs a policy exception first.</dd>
+<dt>UX</dt>
+<dd>Easiest for developers: nothing to do.</dd>
+<dt>Operations</dt>
+<dd>The heaviest: distribution, rotation, leak response, and an outage for everyone when the key is revoked.</dd>
+<dt>Cost</dt>
+<dd>No new infrastructure. Same ingestion price as A.</dd>
+</dl>
+<p class="judgement"><em class="judge">Judgement:</em> do not use it. Every other option avoids a long-lived shared secret, and this one would put it on every machine that runs a coding agent.</p>
+</article>
+
+<article id="opt-d1" class="option" aria-labelledby="opt-d1-h">
+<p class="option-tag">Option D1 · central ingestion</p>
+<h3 id="opt-d1-h">A Cloud Run ingestion service</h3>
+<p>A small HTTPS service on Cloud Run (or a Cloud Run function) accepts event batches and writes them. It runs as its own service account, the only principal that can write the table. Developers hold no BigQuery role at all.</p>
+<dl class="facts">
+<dt>IAM roles</dt>
+<dd><p>Without IAP: developers, through a group, get <code>roles/run.invoker</code> on that one service (<a href="https://docs.cloud.google.com/run/docs/authenticating/developers">Cloud Run docs</a>).</p><p>With IAP: developers get <code>roles/iap.httpsResourceAccessor</code>, and the IAP service agent, <code>service-PROJECT_NUMBER@gcp-sa-iap.iam.gserviceaccount.com</code>, gets <code>roles/run.invoker</code> (<a href="https://docs.cloud.google.com/run/docs/securing/identity-aware-proxy-cloud-run">IAP for Cloud Run</a>).</p><p>Either way, the service's own account gets the write role on the table, and developers get no BigQuery role.</p></dd>
+<dt>Authentication</dt>
+<dd><p>Cloud Run's documented credential for calling a private service is a Google-signed ID token. The Cloud Run pages checked for this study describe only ID tokens for invoking a service, and the service-to-service page tells federated callers to request an ID token rather than an access token (<a href="https://docs.cloud.google.com/run/docs/authenticating/service-to-service">service-to-service authentication</a>). Its docs show a developer calling a private service with <code>gcloud auth print-identity-token</code>, but warn that such tokens "lack an audience claim, which makes them susceptible to replay attacks", and point production callers to service-account ID tokens with an audience (<a href="https://docs.cloud.google.com/run/docs/authenticating/developers">Authenticate developers</a>).</p><p>For per-person identity in production, turn on IAP for the service. IAP then passes a signed JWT in <code>x-goog-iap-jwt-assertion</code>, whose <code>email</code> claim the service can trust (<a href="https://docs.cloud.google.com/iap/docs/signed-headers-howto">IAP signed headers</a>). Command-line callers need extra setup: a custom desktop OAuth client on IAP's programmatic-access allowlist and an ID token for it, and "Only Google Identities are supported for user account programmatic access in IAP" (<a href="https://docs.cloud.google.com/iap/docs/authentication-howto">IAP programmatic authentication</a>).</p><p>Without IAP, developers can impersonate a submit-only service account to get audience-bound ID tokens. Then the service cannot tell developers apart. Federated workloads (option E) get ID tokens the same way, through a service account.</p></dd>
+<dt>Admin flow</dt>
+<dd>Build and deploy the service, create its account, grant it the write role, and bind the developer group as invoker, or as IAP user when IAP is on. Then manage the group.</dd>
+<dt>Developer flow</dt>
+<dd>Sign in once: gcloud, or an IAP sign-in helper. The endpoint URL arrives with the mod's options.</dd>
+<dt>Setup</dt>
+<dd><pre><code>gcloud run deploy bqaa-ingest --image=IMAGE --region=us-central1 \
+  --service-account=bqaa-ingest@my-project.iam.gserviceaccount.com \
+  --no-allow-unauthenticated
+
+gcloud run services add-iam-policy-binding bqaa-ingest --region=us-central1 \
+  --member='group:bqaa-writers@example.com' \
+  --role='roles/run.invoker'</code></pre><p>Add <code>--iap</code> to the deploy to put IAP in front (<a href="https://docs.cloud.google.com/sdk/gcloud/reference/run/deploy">gcloud reference</a>).</p></dd>
+<dt>What the service does</dt>
+<dd>Checks the schema and the size of each batch, applies per-person rate limits, stamps <code>user_id</code> from the verified identity, and writes with <code>event_id</code> as the deduplication key. It answers with per-row errors that the mod's writer can classify, as it does insertAll answers today.</dd>
+<dt>Blast radius</dt>
+<dd>A leaked developer credential can submit events as that developer, through the service's checks and limits. It cannot read, change or delete rows. With IAP, rows cannot be forged under another person's name. Only people who can deploy the service, or act as its account, reach the write identity.</dd>
+<dt>UX</dt>
+<dd>Same as today after sign-in. The new host must be allowed by any organization web-fetch policy on the host CLI (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L829-L830">README L829–830</a>).</dd>
+<dt>Operations</dt>
+<dd>The highest of the real options: a production service to deploy, patch, monitor, scale and keep in step with the schema. During an outage, the mod's dead-letter files hold the rows, and replay must go through the same endpoint (section 07, Phase 2).</dd>
+<dt>Cost</dt>
+<dd>Cloud Run's request-based billing has a monthly free tier of 2 million requests, 180,000 vCPU-seconds and 360,000 GiB-seconds. Requests past that cost $0.40 per million, and requests denied by IAM are not billed (<a href="https://cloud.google.com/run/pricing">Cloud Run pricing</a>). The service can write with the Storage Write API (gRPC), whose first 2 TiB a month are free (<a href="https://cloud.google.com/bigquery/pricing">BigQuery pricing</a>).</dd>
+</dl>
+<p class="judgement"><em class="judge">Judgement:</em> the strongest model, and with IAP the only one in which <code>user_id</code> can be trusted. Worth its operating cost when a customer needs verified attribution or server-side checks.</p>
+</article>
+
+<article id="opt-d2" class="option" aria-labelledby="opt-d2-h">
+<p class="option-tag">Option D2 · central ingestion</p>
+<h3 id="opt-d2-h">A Pub/Sub topic with a BigQuery subscription</h3>
+<p>The mod publishes each row as a message to one Pub/Sub topic. A BigQuery subscription writes the messages into the events table. There is no code to run.</p>
+<dl class="facts">
+<dt>IAM roles</dt>
+<dd><p>Developers, through a group: <code>roles/pubsub.publisher</code> on the one topic. It holds only <code>pubsub.topics.publish</code> (<a href="https://docs.cloud.google.com/pubsub/docs/access-control">Pub/Sub access control</a>). Developers need no BigQuery role.</p><p>Writer: by default the Pub/Sub service agent, <code>service-PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com</code>, or a service account named with <code>--bigquery-service-account-email</code>. It needs <code>roles/bigquery.dataEditor</code>, which the Pub/Sub docs allow on the project or on the table alone. A table grant is enough here, unlike insertAll in F, because the subscription writes through the Storage Write API, which lists <code>bigquery.tables.updateData</code> and no dataset permission (<a href="https://docs.cloud.google.com/bigquery/docs/write-api">Storage Write API</a>). Prefer the named account: with the service-agent default, the docs warn that "any user who has permission to create a subscription in your project can write to the BigQuery table" (<a href="https://docs.cloud.google.com/pubsub/docs/create-bigquery-subscription">BigQuery subscriptions</a>). With a named account, the service agent needs Token Creator on it, and whoever creates the subscription needs <code>actAs</code> on it.</p></dd>
+<dt>Authentication</dt>
+<dd>The OAuth access token the mod already gets works as is: publishing is an ordinary Google API call (<code>topics.publish</code>). No new sign-in.</dd>
+<dt>Admin flow</dt>
+<dd>Create the topic, a dedicated writer account with its table role, and the BigQuery subscription, plus a dead-letter topic and a subscription that holds what lands there. Bind the developer group as publisher. Name an owner for failed rows. Then manage the group.</dd>
+<dt>Developer flow</dt>
+<dd>Nothing beyond today's <code>gcloud auth application-default login</code>.</dd>
+<dt>Setup</dt>
+<dd><pre><code># 1. the topic, and the developers' publish right
+gcloud pubsub topics create bqaa-events --project=my-project
+gcloud pubsub topics add-iam-policy-binding bqaa-events --project=my-project \
+  --member='group:bqaa-writers@example.com' \
+  --role='roles/pubsub.publisher'
+
+# 2. a dedicated writer account for the subscription
+gcloud iam service-accounts create bqaa-pubsub-writer --project=my-project
+bq add-iam-policy-binding \
+  --member='serviceAccount:bqaa-pubsub-writer@my-project.iam.gserviceaccount.com' \
+  --role='roles/bigquery.dataEditor' \
+  'my-project:agent_analytics.agent_events'
+gcloud iam service-accounts add-iam-policy-binding \
+  bqaa-pubsub-writer@my-project.iam.gserviceaccount.com \
+  --member='serviceAccount:service-PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com' \
+  --role='roles/iam.serviceAccountTokenCreator'
+
+# 3. dead letters: a topic with no subscription drops what it receives,
+#    so a hold subscription keeps failed rows for replay
+gcloud pubsub topics create bqaa-events-dead --project=my-project
+gcloud pubsub subscriptions create bqaa-events-dead-hold --project=my-project \
+  --topic=bqaa-events-dead \
+  --message-retention-duration=31d --expiration-period=never
+gcloud pubsub topics add-iam-policy-binding bqaa-events-dead --project=my-project \
+  --member='serviceAccount:service-PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com' \
+  --role='roles/pubsub.publisher'
+
+# 4. the BigQuery subscription, then the service agent's grant on it
+gcloud pubsub subscriptions create bqaa-events-bq --project=my-project \
+  --topic=bqaa-events \
+  --bigquery-table=my-project:agent_analytics.agent_events \
+  --use-table-schema \
+  --bigquery-service-account-email=bqaa-pubsub-writer@my-project.iam.gserviceaccount.com \
+  --dead-letter-topic=bqaa-events-dead --max-delivery-attempts=5
+gcloud pubsub subscriptions add-iam-policy-binding bqaa-events-bq --project=my-project \
+  --member='serviceAccount:service-PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com' \
+  --role='roles/pubsub.subscriber'</code></pre><p>Flags from the <a href="https://docs.cloud.google.com/sdk/gcloud/reference/pubsub/subscriptions/create">gcloud reference</a>. Google's samples warn that "messages published to a topic with no subscriptions are lost", and the service agent needs the two dead-letter grants above (<a href="https://docs.cloud.google.com/pubsub/docs/handling-failures">dead-letter topics</a>). The hold subscription keeps failed rows for at most 31 days, the maximum retention; <code>--expiration-period=never</code> stops it from expiring while nobody reads it.</p></dd>
+<dt>Blast radius</dt>
+<dd>A leaked credential or a developer acting in bad faith can publish messages: forged events under any <code>user_id</code>, or a flood that costs money. They cannot read, change or delete rows. Nothing about the publisher reaches the row, and Pub/Sub "does not currently write Data Access audit logs for message operations, such as Publish" (<a href="https://docs.cloud.google.com/pubsub/docs/audit-logging">Pub/Sub audit logging</a>). So a forged row cannot be traced to its sender afterwards.</dd>
+<dt>Delivery and schema</dt>
+<dd><p>Pub/Sub delivers at least once, and the subscription writes through the Storage Write API (gRPC) (<a href="https://docs.cloud.google.com/pubsub/docs/bigquery">BigQuery subscriptions overview</a>). A row can land twice; the mod already gives each row an <code>event_id</code> for exact deduplication in SQL (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/bigquery.ts#L22-L23">bigquery.ts L22–23</a>).</p><p>With <code>--use-table-schema</code>, JSON message fields map to table columns. JSON-type columns must arrive as "valid, JSON in an escaped string" (<a href="https://docs.cloud.google.com/pubsub/docs/create-bigquery-subscription">BigQuery subscriptions</a>), which is how the mod already sends <code>content</code>, <code>attributes</code> and <code>latency_ms</code> (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/rows.ts#L29-L32">rows.ts L29–32</a>). The mod sends <code>timestamp</code> as an ISO 8601 string (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/rows.ts#L85">rows.ts L85</a>); whether the subscription accepts that for a TIMESTAMP column needs a spike.</p><p>Do not use <code>--write-metadata</code>: it puts message attributes into a column named <code>attributes</code>, which BQAA already uses (<a href="https://docs.cloud.google.com/sdk/gcloud/reference/pubsub/subscriptions/create">gcloud reference</a>).</p></dd>
+<dt>UX</dt>
+<dd>Same as today. The host <code>pubsub.googleapis.com</code> must be allowed by any organization web-fetch policy on the host CLI.</dd>
+<dt>Operations</dt>
+<dd><p>Low: fully managed. But failed rows need an owner. Alert on the <code>subscription/dead_letter_message_count</code> metric (<a href="https://docs.cloud.google.com/pubsub/docs/handling-failures">dead-letter topics</a>). Each forwarded message names its failure in the <code>CloudPubSubDeadLetterSourceDeliveryErrorMessage</code> attribute, which export subscriptions such as BigQuery ones set. The owner fixes the cause, for example a missing column, then republishes the held messages to <code>bqaa-events</code> within the 31 days, or they are gone.</p><p>A new column must reach the table before the mod sends it, or the subscription must drop unknown fields.</p></dd>
+<dt>Cost</dt>
+<dd>BigQuery subscriptions cost $50 per TiB, with "no additional BigQuery data ingestion charges", and their first 10 GiB is not free. Publishing costs $40 per TiB after the first 10 GiB a month (<a href="https://cloud.google.com/pubsub/pricing">Pub/Sub pricing</a>).</dd>
+</dl>
+<p class="judgement"><em class="judge">Judgement:</em> the cheapest way to take table access away from developers. Choose it over D1 when a best-effort <code>user_id</code> is acceptable.</p>
+</article>
+
+<article id="opt-e" class="option" aria-labelledby="opt-e-h">
+<p class="option-tag">Option E</p>
+<h3 id="opt-e-h">Workload Identity Federation, and its workforce twin</h3>
+<p>Not a new place for the write right, but a way to give it, without keys, to identities that are not Google accounts.</p>
+<dl class="facts">
+<dt>What it covers</dt>
+<dd>Workload identity federation lets workloads outside Google Cloud, such as CI runners on GitHub Actions or machines in another cloud, use "federated identities instead of a service account key" (<a href="https://docs.cloud.google.com/iam/docs/workload-identity-federation">Workload Identity Federation</a>). Workforce identity federation lets a company's own identity provider, such as Okta, sign its people in to Google Cloud without Google accounts (<a href="https://docs.cloud.google.com/iam/docs/workforce-identity-federation">Workforce Identity Federation</a>).</dd>
+<dt>IAM roles</dt>
+<dd><p>For F and D2, grant the narrow role or the publish right directly to federated principals. Google recommends this "direct resource access" over impersonating a service account (<a href="https://docs.cloud.google.com/iam/docs/workload-identity-federation">Workload Identity Federation</a>).</p><p>D1 is different. Cloud Run needs a Google-signed ID token, and a federated workload gets one only through a service account: Cloud Run's docs tell such callers to "call <code>generateIdToken</code> instead" of <code>generateAccessToken</code> (<a href="https://docs.cloud.google.com/run/docs/authenticating/service-to-service">service-to-service authentication</a>). Google's tutorial grants the federated principal <code>roles/iam.workloadIdentityUser</code> on a service account that holds <code>roles/run.invoker</code> (<a href="https://docs.cloud.google.com/iam/docs/tutorial-cloud-run-workload-id-federation">Cloud Run and Workload Identity Federation</a>). The service then sees that account, not the workload, so <code>user_id</code> stays client-asserted. The per-person IAP design does not carry over to workforce identities either: IAP's command-line path supports only Google identities (<a href="https://docs.cloud.google.com/iap/docs/authentication-howto">IAP programmatic authentication</a>).</p><p>Identifiers look like <code>principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/subject/SUBJECT</code> for one workload, or <code>principalSet://iam.googleapis.com/locations/global/workforcePools/POOL_ID/group/GROUP_ID</code> for a workforce group (<a href="https://docs.cloud.google.com/iam/docs/principal-identifiers">principal identifiers</a>). The tracing bootstrap's checks already accept <code>principal://</code> and <code>principalSet://</code> members, though its <code>bq</code> binding step was not tried with them (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/scripts/setup_gcp_prereqs.py#L29-L36">setup_gcp_prereqs.py L29–36</a>). BigQuery supports federated identities: its API has no known limitations, and the listed gaps are console features and some data-loading connectors (<a href="https://docs.cloud.google.com/iam/docs/federated-identity-supported-services">supported services</a>).</p></dd>
+<dt>Admin flow</dt>
+<dd>Create a pool and a provider once, with an attribute condition that limits which repositories or people can get tokens. Then grant roles to the pool's principals or groups.</dd>
+<dt>Setup</dt>
+<dd><pre><code># a pool and an OIDC provider for one CI system, limited to one repository
+gcloud iam workload-identity-pools create ci-pool --location=global
+gcloud iam workload-identity-pools providers create-oidc ci-provider \
+  --location=global --workload-identity-pool=ci-pool \
+  --issuer-uri='https://token.actions.githubusercontent.com' \
+  --attribute-mapping='google.subject=assertion.sub,attribute.repository=assertion.repository' \
+  --attribute-condition="assertion.repository=='my-org/my-repo'"
+
+# on the runner: a credential file that holds no secret; it reads the
+# job's OIDC token from the file the CI job writes it to
+gcloud iam workload-identity-pools create-cred-config \
+  projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/ci-pool/providers/ci-provider \
+  --credential-source-file=/path/to/oidc-token --output-file=credentials.json
+
+# one direct grant, here the publish right from D2
+gcloud pubsub topics add-iam-policy-binding bqaa-events --project=my-project \
+  --member='principalSet://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/ci-pool/attribute.repository/my-org/my-repo' \
+  --role='roles/pubsub.publisher'</code></pre><p>Flags from the gcloud reference; the <code>principalSet://</code> form for an attribute value is from the <a href="https://docs.cloud.google.com/iam/docs/principal-identifiers">principal identifiers</a> page. Workforce pools (people) are set up separately; see <a href="https://docs.cloud.google.com/iam/docs/workforce-identity-federation">Workforce Identity Federation</a>.</p></dd>
+<dt>Developer or CI flow</dt>
+<dd>CI: point <code>GOOGLE_APPLICATION_CREDENTIALS</code> at the credential configuration file, so the mod's default token command can print a federated token (not tried for this study). For D1, the job mints an ID token for the service account instead. People: sign in to gcloud through the company's identity provider; no Google account is needed.</dd>
+<dt>Blast radius</dt>
+<dd>The credential configuration file "doesn't contain a private key and doesn't need to be kept confidential" (<a href="https://docs.cloud.google.com/iam/docs/workload-identity-federation-with-other-providers">federation with other providers</a>). Federated tokens are short-lived, and an attribute condition limits which repositories or people can get one. What a token can do is whatever you granted, so pair this with F or D.</dd>
+<dt>UX, operations, cost</dt>
+<dd>One-time setup per identity provider or CI system. No key rotation and no infrastructure to run.</dd>
+</dl>
+<p class="judgement"><em class="judge">Judgement:</em> use it for CI and for customers whose people have no Google accounts. It combines with F and D2 directly, and with D1 only through a service account; it does not replace them.</p>
+</article>
+
+<article id="opt-f" class="option" aria-labelledby="opt-f-h">
+<p class="option-tag">Option F</p>
+<h3 id="opt-f-h">One Google group, bound once, with a narrow scope</h3>
+<p>Option A done properly. The admin creates one Google group and binds it once. After that, access is group membership.</p>
+<dl class="facts">
+<dt>IAM roles</dt>
+<dd><p>One custom role, "BQAA event writer", with exactly the three permissions insertAll lists: <code>bigquery.tables.updateData</code>, <code>bigquery.tables.get</code> and <code>bigquery.datasets.get</code> (<a href="https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll">insertAll reference</a>). No predefined role that can be granted to people adds rows without also reading them, so a custom role is the only way to stay write-only (<a href="https://docs.cloud.google.com/bigquery/docs/access-control">BigQuery access control</a>). Write-only here means it cannot read rows. It is not append-only; see the blast radius below.</p><p>Bind it once, to <code>group:bqaa-writers@example.com</code>, on a dataset that holds only the events table; <code>setup.sh</code> already keeps the views in a separate dataset (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/setup.sh#L7-L9">setup.sh L7–9</a>). A binding on the table alone may not be enough, because insertAll also checks <code>bigquery.datasets.get</code> on the dataset.</p><p>No <code>jobUser</code>, and no right to create tables: the admin pre-creates the table with <code>setup.sh</code>. The writer tries to create the table only after a 404 (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L355-L366">writer.ts L355–366</a>), so with the table in place auto-create never runs, and the role would refuse it anyway. Auto-create can be switched off only through the <code>BQAA_AUTO_CREATE_TABLE</code> environment variable, not a mod option (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L198">config.ts L198</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L181-L190">README L181–190</a>). Where custom roles are not allowed, <code>roles/bigquery.dataEditor</code> on that dataset is the fallback, with reading and deleting included.</p></dd>
+<dt>Scoping that helps</dt>
+<dd><ul><li>A dataset of its own: no reach into other tables.</li><li>No other way in. The no-read promise holds only if developers get no BigQuery read from elsewhere. Basic roles reach data: "granting access to a project also grants access to datasets within it", and BigQuery gives a project's Viewers <code>roles/bigquery.dataViewer</code>, and its Editors <code>roles/bigquery.dataEditor</code>, on datasets created while they hold those roles; Owners can delete any dataset (<a href="https://docs.cloud.google.com/bigquery/docs/access-control-basic-roles">basic roles in BigQuery</a>). Data roles granted on the project, folder or organization reach every dataset below, because "resources inherit the allow policies of the parent resource" (<a href="https://docs.cloud.google.com/iam/docs/resource-hierarchy-access-control">resource hierarchy</a>). So keep developers off basic Viewer, Editor and Owner on the events project and off project-wide data roles such as <code>roles/bigquery.dataViewer</code>, and check the events dataset's own access list for grants those defaults left behind.</li><li>Readers use views. <code>setup.sh</code> puts the views in a separate reporting dataset, then only tells the admin to authorize them on the source dataset (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/setup.sh#L120-L122">setup.sh L120–122</a>). That step must happen: an authorized view lets readers "run queries on it, but they can't access the source dataset directly" (<a href="https://docs.cloud.google.com/bigquery/docs/authorized-views">authorized views</a>). Authorizing the whole reporting dataset covers both views at once. Then readers never touch the table, and writers need nothing in the reporting dataset.</li><li>IAM Conditions attach to organization, folder, project and dataset bindings, not to table bindings. A <code>request.time</code> condition gives contractors expiring access (<a href="https://docs.cloud.google.com/bigquery/docs/conditions">IAM Conditions in BigQuery</a>).</li><li>Per-person reads, if wanted: a view or row access policy that filters on <code>SESSION_USER()</code>, which returns the caller's email, or a federated caller's principal identifier (<a href="https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/security_functions">security functions</a>). It works only for rows whose <code>user_id</code> holds the verified email. Even with <code>userIdFromCredentials</code> on, a failed lookup leaves the configured name in a row, so such a filter can miss that person's rows (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L617-L621">writer.ts L617–621</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L269-L273">README L269–273</a>). Row access policies limit reads, not writes, and views are read-only (<a href="https://docs.cloud.google.com/bigquery/docs/views-intro">views</a>).</li></ul></dd>
+<dt>Admin flow</dt>
+<dd>Once: create the group, the custom role and the binding. After that, add and remove people in the group, or sync the group from the company's identity provider.</dd>
+<dt>Developer flow</dt>
+<dd>Unchanged: <code>gcloud auth application-default login</code> once.</dd>
+<dt>Setup</dt>
+<dd><pre><code>gcloud iam roles create bqaaEventWriter --project=my-project \
+  --title='BQAA event writer' \
+  --permissions=bigquery.tables.updateData,bigquery.tables.get,bigquery.datasets.get
+
+bq add-iam-policy-binding -d \
+  --member='group:bqaa-writers@example.com' \
+  --role='projects/my-project/roles/bqaaEventWriter' \
+  'my-project:agent_analytics'</code></pre><p>Then add people to the group.</p></dd>
+<dt>Blast radius</dt>
+<dd><p>A leaked credential or a member acting in bad faith can add forged rows under any <code>user_id</code>, and read table metadata such as the schema. They cannot read or export rows, and they cannot delete or create tables; deleting a table needs <code>bigquery.tables.delete</code> (<a href="https://docs.cloud.google.com/bigquery/docs/managing-tables">manage tables</a>), which the role leaves out.</p><p>The role is not append-only. Google lists <code>bigquery.tables.updateData</code> as the permission "to write data to a new table, overwrite a table, or append data to a table", with <code>bigquery.jobs.create</code> "to run a query job" (<a href="https://docs.cloud.google.com/bigquery/docs/writing-results">Write query results</a>). So a member who can run query jobs in any project, a personal one included, can very likely replace or empty the table's rows with a query that overwrites it. Withholding <code>jobUser</code> in the events project does not stop that. <code>TRUNCATE TABLE</code> has no documented permission list (<a href="https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/dml-syntax">DML syntax</a>) and may work the same way. Load and copy jobs that overwrite a table are documented as also needing <code>bigquery.tables.create</code> and <code>bigquery.tables.update</code>, which the role lacks (<a href="https://docs.cloud.google.com/bigquery/docs/batch-loading-data">batch loading</a>; <a href="https://docs.cloud.google.com/bigquery/docs/managing-tables">manage tables</a>).</p><p>Time travel can restore changed or deleted rows from up to seven days back by default (<a href="https://docs.cloud.google.com/bigquery/docs/time-travel">time travel</a>). If developers must not be able to destroy rows, use central ingestion (D). The spike should try the overwrite paths before anyone relies on this paragraph.</p></dd>
+<dt>UX</dt>
+<dd>Same as today. The mod's "no permission" notice should say "ask to join bqaa-writers@…" instead of naming <code>dataEditor</code> on the dataset.</dd>
+<dt>Operations</dt>
+<dd>One binding, ever. Membership follows the company's joiner and leaver process. Group changes are eventually consistent: "Typically several minutes, potentially hours or longer", and adding a person propagates faster than removing one (<a href="https://docs.cloud.google.com/iam/docs/access-change-propagation">access change propagation</a>).</dd>
+<dt>Cost</dt>
+<dd>Nothing beyond today.</dd>
+</dl>
+<p class="judgement"><em class="judge">Judgement:</em> the right default now. It needs no new infrastructure and no secret, and its blast radius is far smaller than today's dataset-wide <code>dataEditor</code>: nobody reads anybody else's transcripts. It does not stop a member from overwriting rows; customers who need that go to D.</p>
+</article>
+
+</section>
+
+<section id="compare" class="chapter" aria-labelledby="compare-h">
+<p class="chapter-number" aria-hidden="true">05 / Comparison</p>
+<h2 id="compare-h"><span class="visually-hidden">5. </span>Comparison</h2>
+<div class="table-wrap" role="region" aria-label="Pros and cons of each option" tabindex="0">
+<table class="compare pros-cons" role="table" aria-labelledby="pros-cons-caption">
+<caption id="pros-cons-caption">Pros and cons of the seven options</caption>
+<colgroup><col class="c-opt"><col class="c-pro"><col class="c-con"><col class="c-use"></colgroup>
+<thead role="rowgroup">
+<tr role="row"><th scope="col" role="columnheader">Option</th><th scope="col" role="columnheader">Pros</th><th scope="col" role="columnheader">Cons</th><th scope="col" role="columnheader">Use when</th></tr>
+</thead>
+<tbody role="rowgroup">
+<tr role="row"><th scope="row" role="rowheader">A. Per-user grants</th><td role="cell" data-label="Pros">Nothing new for developers. No new infrastructure or secret.</td><td role="cell" data-label="Cons">One IAM change per person; at most 1,500 principals per policy. Today's role lets everyone read all transcripts and delete the table.</td><td role="cell" data-label="Use when">One developer, or a small trusted team.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">B. Impersonate a service account</th><td role="cell" data-label="Pros">No long-lived service-account key; one-hour tokens, minted from each developer's renewable gcloud sign-in. One place to change the account's role.</td><td role="cell" data-label="Cons">Every developer can become the account, so no smaller blast radius than F. BigQuery sees one identity for everyone.</td><td role="cell" data-label="Use when">A policy requires data roles to be held by service accounts.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">C. Key in the config</th><td role="cell" data-label="Pros">Zero developer setup.</td><td role="cell" data-label="Cons">A shared bearer secret on every laptop, readable by the agent and its tools. Revocation breaks everyone. Often blocked by policy.</td><td role="cell" data-label="Use when">Never, for this mod.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">D1. Cloud Run ingestion</th><td role="cell" data-label="Pros">Developers have no table access. Server-side checks and rate limits. With IAP, a trustworthy <code>user_id</code>.</td><td role="cell" data-label="Cons">A production service to run. ID-token or IAP sign-in work in the mod. A new host for web-fetch policies.</td><td role="cell" data-label="Use when">Verified attribution or validation is required.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">D2. Pub/Sub ingestion</th><td role="cell" data-label="Pros">Developers can only publish. No code to run. Same access token as today.</td><td role="cell" data-label="Cons"><code>user_id</code> stays client-asserted. At-least-once delivery, so deduplicate on <code>event_id</code>. Column mapping needs a spike.</td><td role="cell" data-label="Use when">Developers must not touch the table; best-effort attribution is fine.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">E. Workload Identity Federation</th><td role="cell" data-label="Pros">No keys for CI or for people without Google accounts. Short-lived tokens; attribute conditions.</td><td role="cell" data-label="Cons">Setup per identity provider or CI system. Narrows nothing by itself. With D1, callers act through a service account, so the service cannot tell them apart.</td><td role="cell" data-label="Use when">CI agents, or customers whose people have no Google accounts.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">F. One group, narrow scope</th><td role="cell" data-label="Pros">One binding, ever. Offboarding through the group. With the custom role, no reading rows and no deleting the table. Nothing new for developers.</td><td role="cell" data-label="Cons">Members can add forged rows and, from any project where they can run query jobs, very likely overwrite or empty the table. Needs the right to create custom roles, and someone to run the group.</td><td role="cell" data-label="Use when">The default, now.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap" role="region" aria-label="Blast radius at a glance" tabindex="0">
+<table class="compare glance" role="table" aria-labelledby="glance-caption">
+<caption id="glance-caption">Blast radius at a glance: what a leaked developer credential, or a developer acting in bad faith, can do</caption>
+<colgroup><col class="c-opt"><col><col><col><col><col><col></colgroup>
+<thead role="rowgroup">
+<tr role="row"><th scope="col" role="columnheader">Option</th><th scope="col" role="columnheader">Who can write the table</th><th scope="col" role="columnheader">New secret on laptops</th><th scope="col" role="columnheader">Read others' events</th><th scope="col" role="columnheader">Change or delete rows, or the table</th><th scope="col" role="columnheader"><code>user_id</code> verified</th><th scope="col" role="columnheader">Service to run</th></tr>
+</thead>
+<tbody role="rowgroup">
+<tr role="row"><th scope="row" role="rowheader">A. Per-user grants (today's role)</th><td role="cell" data-label="Who can write the table">Every developer, directly</td><td role="cell" data-label="New secret on laptops">No</td><td role="cell" data-label="Read others' events">Yes</td><td role="cell" data-label="Change or delete rows, or the table">Yes</td><td role="cell" data-label="user_id verified">No</td><td role="cell" data-label="Service to run">No</td></tr>
+<tr role="row"><th scope="row" role="rowheader">B. Impersonate a service account</th><td role="cell" data-label="Who can write the table">Every developer, as the account</td><td role="cell" data-label="New secret on laptops">No key; one-hour tokens, minted from the developer's renewable gcloud sign-in</td><td role="cell" data-label="Read others' events">If the account can; with <code>dataEditor</code>, yes</td><td role="cell" data-label="Change or delete rows, or the table">If the account can; with <code>dataEditor</code>, yes</td><td role="cell" data-label="user_id verified">No</td><td role="cell" data-label="Service to run">No</td></tr>
+<tr role="row"><th scope="row" role="rowheader">C. Key in the config</th><td role="cell" data-label="Who can write the table">Anyone holding the file</td><td role="cell" data-label="New secret on laptops">Yes; never expires by default</td><td role="cell" data-label="Read others' events">If the account can</td><td role="cell" data-label="Change or delete rows, or the table">If the account can</td><td role="cell" data-label="user_id verified">No</td><td role="cell" data-label="Service to run">No</td></tr>
+<tr role="row"><th scope="row" role="rowheader">D1. Cloud Run ingestion</th><td role="cell" data-label="Who can write the table">Only the service's account</td><td role="cell" data-label="New secret on laptops">No</td><td role="cell" data-label="Read others' events">No</td><td role="cell" data-label="Change or delete rows, or the table">No</td><td role="cell" data-label="user_id verified">Yes, with IAP</td><td role="cell" data-label="Service to run">Yes</td></tr>
+<tr role="row"><th scope="row" role="rowheader">D2. Pub/Sub ingestion</th><td role="cell" data-label="Who can write the table">Only the subscription's writer account</td><td role="cell" data-label="New secret on laptops">No</td><td role="cell" data-label="Read others' events">No</td><td role="cell" data-label="Change or delete rows, or the table">No</td><td role="cell" data-label="user_id verified">No</td><td role="cell" data-label="Service to run">No; managed</td></tr>
+<tr role="row"><th scope="row" role="rowheader">E. Workload Identity Federation</th><td role="cell" data-label="Who can write the table">The federated identities you grant</td><td role="cell" data-label="New secret on laptops">No; the config file holds no secret</td><td role="cell" data-label="Read others' events">As granted</td><td role="cell" data-label="Change or delete rows, or the table">As granted</td><td role="cell" data-label="user_id verified">Not by itself</td><td role="cell" data-label="Service to run">No</td></tr>
+<tr role="row"><th scope="row" role="rowheader">F. One group, narrow scope</th><td role="cell" data-label="Who can write the table">Group members, directly</td><td role="cell" data-label="New secret on laptops">No</td><td role="cell" data-label="Read others' events">No, if no basic or project-wide role grants it</td><td role="cell" data-label="Change or delete rows, or the table">Very likely can overwrite or empty the rows with a query job; cannot delete the table</td><td role="cell" data-label="user_id verified">No</td><td role="cell" data-label="Service to run">No</td></tr>
+</tbody>
+</table>
+</div>
+<p class="table-note">"<code>user_id</code> verified" means a person cannot write a row under someone else's name. <code>userIdFromCredentials</code> labels rows with the verified email when the token lookup works, and with the configured name when it does not. Anyone who can write the table can still insert rows under another name.</p>
+<p class="judgement"><em class="judge">Judgement:</em> cost does not decide this. For a 100-developer team, every option's ingestion bill rounds to a few dollars a month or less (see the cost estimate below). The deciding questions are who can read transcripts, who can destroy data, whether <code>user_id</code> must be trustworthy, and who will operate what.</p>
+<h3>Cost estimate</h3>
+<p>These are assumptions, not measurements: 100 developers, 2,000 rows each per working day, 2 KB per row on average, and 22 working days a month. The mod's fixture rows average 958 bytes; real rows with long tool output are larger. That is about 8.8 GB, or 8.2 GiB, a month (computed).</p>
+<ul>
+<li><strong>Direct write (A, B, C, E, F):</strong> legacy streaming inserts at $0.01 per 200 MiB come to about $0.42 a month (computed from <a href="https://cloud.google.com/bigquery/pricing">BigQuery pricing</a>, Iowa).</li>
+<li><strong>Pub/Sub (D2):</strong> the BigQuery subscription at $50 per TiB comes to about $0.40 a month. Publishing stays inside Pub/Sub's free 10 GiB a month (computed from <a href="https://cloud.google.com/pubsub/pricing">Pub/Sub pricing</a>).</li>
+<li><strong>Cloud Run (D1):</strong> if every developer's writer sent a batch every five seconds for four hours a working day, that is about 6.3 million requests a month: about $1.73 for requests past the free 2 million, plus CPU and memory time past the free tier (computed from <a href="https://cloud.google.com/run/pricing">Cloud Run pricing</a>). The service's own writes through the Storage Write API (gRPC) fall inside its free 2 TiB.</li>
+</ul>
+</section>
+
+<section id="recommendation" class="chapter" aria-labelledby="recommendation-h">
+<p class="chapter-number" aria-hidden="true">06 / Recommendation</p>
+<h2 id="recommendation-h"><span class="visually-hidden">6. </span>Recommendation: group grant now, central ingestion later, keys never</h2>
+<ol class="phases">
+<li><strong>Now: make option F the documented default for any shared install.</strong> One Google group and one binding of a write-only custom role, on a dataset that holds only the events table, which the admin pre-creates. Readers on the views in the reporting dataset that <code>setup.sh</code> builds, once the admin authorizes them. Developers keep their own ADC sign-in. No impersonation, no keys, no project-level <code>jobUser</code> for writers.</li>
+<li><strong>Now, as a PM decision: whether shared installs record a verified <code>user_id</code>.</strong> Turning on <code>userIdFromCredentials</code> costs no code, but it writes a personal email into every row, and it is best effort: when the token lookup fails or finds no verified email, the row keeps the configured name.</li>
+<li><strong>Later, when a customer needs developers to have no table access, or rows that developers cannot overwrite: add the Pub/Sub transport (D2).</strong> Offer Cloud Run behind IAP (D1) only to customers who also need a trustworthy <code>user_id</code> or server-side checks.</li>
+<li><strong>Whenever CI or non-Google identities appear: add Workload Identity Federation (E)</strong> on top of F or D2, by granting the same narrow role or publish right to the federated principals. With D1, federated callers go through a submit-only service account instead, and the service sees that account, not them.</li>
+<li><strong>Never: service-account keys (C).</strong> Impersonation (B) stays a documented fallback for organizations whose policy requires a service account to hold data roles.</li>
+</ol>
+<h3>Why this order</h3>
+<p>F removes the worst exposure today, which is every developer reading every transcript and being able to delete the table. It changes nothing for developers, adds no infrastructure and no secret, and replaces per-person IAM changes with group membership. It is also mostly documentation and setup.</p>
+<p>F cannot stop a group member from adding forged rows, or from overwriting the table with a query job: the permission that adds rows also overwrites them (<a href="https://docs.cloud.google.com/bigquery/docs/writing-results">Write query results</a>). Only a central path removes that right from laptops. D2 does it with no code to run and with the token the mod already has, so it is the natural second step. D1 adds the one thing D2 lacks, a trustworthy <code>user_id</code>, at the price of running a service.</p>
+<p>B gives every developer the service account's power, so it shrinks nothing that F does not, and it hides who wrote what behind one identity. C adds a shared secret with no expiry to every laptop that runs a coding agent.</p>
+<p class="judgement"><em class="judge">Judgement:</em> if only one thing changes this quarter, it should be the default grant: from <code>dataEditor</code> for each person to a write-only role held by one group.</p>
+</section>
+
+<section id="mod-changes" class="chapter" aria-labelledby="mod-changes-h">
+<p class="chapter-number" aria-hidden="true">07 / What changes in the mod</p>
+<h2 id="mod-changes-h"><span class="visually-hidden">7. </span>What changes in the mod</h2>
+<h3>Phase 1: group grant (small changes)</h3>
+<ol class="steps">
+<li><strong>The "no permission" notice.</strong> Today it says "ask for roles/bigquery.dataEditor on PROJECT:DATASET" (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L526-L529">writer.ts L526–529</a>). Add an option the admin sets, for example <code>accessHelp</code> = "ask to join bqaa-writers@example.com", and show it instead. Without it, name the permission on the table, not a dataset-wide role. Update the test that pins today's text (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/tests/credentials.test.ts#L135-L153">credentials.test.ts L135–153</a>).</li>
+<li><strong>Auto-create.</strong> Writers in a shared install should not create tables, and F's role cannot. Today the switch is the <code>BQAA_AUTO_CREATE_TABLE</code> environment variable, which README lists as "environment only" (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L198">config.ts L198</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L181-L190">README L181–190</a>). Options the admin pushes cannot turn it off. Add an <code>autoCreateTable</code> option, on by default, that shared installs set off. Until then auto-create is harmless when the admin pre-creates the table, because the writer only tries after a 404 (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L355-L366">writer.ts L355–366</a>). When a create attempt is refused, show the same permission notice rather than only a recorded error (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L704-L716">writer.ts L704–716</a>).</li>
+<li><strong>Setup.</strong> <code>setup.sh</code> ends by telling writers to get <code>dataEditor</code> on the dataset (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/setup.sh#L115-L122">setup.sh L115–122</a>). Add an optional writers-group setting that creates the custom role and binds it on the events dataset, printed in <code>--dry-run</code> like every other step. Also make it authorize the reporting views on the events dataset, which today it only asks the admin to do. Authorizing the whole reporting dataset covers both views; the two datasets must be in the same location, and the admin needs <code>bigquery.datasets.update</code> on the events dataset (<a href="https://docs.cloud.google.com/bigquery/docs/authorized-views">authorized views</a>).</li>
+<li><strong>Tracing bootstrap and docs.</strong> Give <code>setup_gcp_prereqs.py</code> the same write-only custom-role choice, and make its project-level <code>jobUser</code> grant opt-in, since it serves only verification queries (tracing <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/scripts/setup_gcp_prereqs.py#L329-L358">L329–358</a>). Update the mod README (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L197-L217">L197–217</a>) and the tracing guide's IAM table (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/USER_GUIDE.md#L211-L246">USER_GUIDE L211–246</a>) to match.</li>
+<li><strong>Verified <code>user_id</code>, if the PM wants it.</strong> Shared installs could turn on <code>userIdFromCredentials</code> (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L200">config.ts L200</a>). It needs no new code, but it is a privacy decision. It is also best effort: a failed lookup, or a token with no verified email, leaves the configured name in the row (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L617-L621">writer.ts L617–621</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L269-L273">README L269–273</a>). And anyone with write access can still insert rows under another name.</li>
+</ol>
+<h3>Moving an existing install to F</h3>
+<p>Teams already running the mod hold today's grants. Add the new access before removing the old, so writes never stop:</p>
+<ol class="steps">
+<li><strong>Add.</strong> Create the custom role and the group binding (option F), and put the current writers in the group. Group changes can take "several minutes, potentially hours or longer" to apply (<a href="https://docs.cloud.google.com/iam/docs/access-change-propagation">access change propagation</a>).</li>
+<li><strong>Remove per-person grants.</strong> Take each developer's <code>dataEditor</code> off the events dataset:<pre><code>bq remove-iam-policy-binding -d \
+  --member='user:dev@example.com' \
+  --role='roles/bigquery.dataEditor' \
+  'my-project:agent_analytics'</code></pre></li>
+<li><strong>Remove project-level grants made for writers.</strong> The tracing bootstrap grants <code>roles/bigquery.jobUser</code> on the project "for verification queries", and with <code>--runtime-auto-create-dataset</code> also <code>roles/bigquery.user</code> (tracing <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/scripts/setup_gcp_prereqs.py#L346-L378">setup_gcp_prereqs.py L346–378</a>). The second is wider: on a project it also "allows the creation of new datasets", and the creator becomes their owner (<a href="https://docs.cloud.google.com/bigquery/docs/access-control">BigQuery access control</a>). Remove both unless people need them for other work. With <code>jobUser</code> gone from this project, a member can still run query jobs in any other project where they have it.</li>
+<li><strong>Tidy the dataset.</strong> Move any other tables out of the events dataset, authorize the reporting views, and point readers at them. Turning auto-create off still means setting the environment variable on each machine until the option exists (Phase 1, item 2).</li>
+<li><strong>Check what people can actually do.</strong> List the grants that remain on the dataset, the table and the project:<pre><code>bq get-iam-policy -d 'my-project:agent_analytics'
+bq get-iam-policy -t 'my-project:agent_analytics.agent_events'
+gcloud projects get-iam-policy my-project</code></pre>Look for leftover per-person, basic or project-wide BigQuery roles. After the changes propagate, test with one developer's account: a session's rows are sent (<code>/bqaa-status</code> counts them, <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L568-L572">README L568–572</a>), and reading the table (<code>bq head -n 1 'my-project:agent_analytics.agent_events'</code>) is denied. Do not test deletion by deleting. Ask Policy Troubleshooter instead; for the dataset, it should report no access:<pre><code>gcloud policy-intelligence troubleshoot-policy iam \
+  //bigquery.googleapis.com/projects/my-project/datasets/agent_analytics \
+  --principal-email=dev@example.com \
+  --permission=bigquery.tables.delete</code></pre>The dataset resource name follows Google's <a href="https://docs.cloud.google.com/iam/docs/resource-names">full resource names</a> list.</li>
+<li><strong>Replay.</strong> Rows refused during the switch wait in the mod's dead-letter files, and <code>/bqaa-backfill</code> sends them once access works (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L250-L251">README L250–251</a>). That works under F as it is, because replay still uses insertAll (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L950">writer.ts L950</a>). A later move to D1 or D2 needs the Phase 2 writer change first, or parked rows are stranded.</li>
+</ol>
+<h3>Phase 2: a second transport</h3>
+<ol class="steps">
+<li><strong>A transport option.</strong> In <code>config.ts</code>: <code>bigquery</code> (today), <code>pubsub</code> (a topic name) or <code>endpoint</code> (a URL).</li>
+<li><strong>Pub/Sub requests.</strong> In <code>bigquery.ts</code>, beside the insertAll helpers: a publish URL (<code>https://pubsub.googleapis.com/v1/projects/PROJECT/topics/TOPIC:publish</code>), a body with each row base64-encoded in <code>data</code> and <code>event_id</code> as an attribute, and a classifier for publish answers. Pub/Sub takes up to 1,000 messages and 10 MB per request (<a href="https://docs.cloud.google.com/pubsub/quotas">Pub/Sub quotas</a>). Base64 adds a third, so the batch byte cap must fall: today's 3 MiB batch would grow to about 4 MiB, which is the mod fetch's request limit (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L185-L189">config.ts L185–189</a>).</li>
+<li><strong>Endpoint requests.</strong> The same rows as JSON to the service URL. The token changes from an access token to an ID token: from an IAP sign-in helper for per-person identity, or an audience-bound token from a submit-only service account. Plain <code>gcloud auth print-identity-token</code> tokens are for development only (D1).</li>
+<li><strong>The writer.</strong> Both send paths must use the selected transport. Live delivery is <code>deliver()</code> (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L289-L379">writer.ts L289–379</a>). Replay is <code>backfillFile()</code>, which posts parked rows to insertAll on its own (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L912-L994">writer.ts L912–994</a>, the call at <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L950">L950</a>). Replay runs 15 seconds after a session starts, after BigQuery recovers, and on <code>/bqaa-backfill</code> (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/register.ts#L305-L309">register.ts L305–309</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts#L391-L396">writer.ts L391–396</a>; <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/register.ts#L535-L548">register.ts L535–548</a>). Under D1 or D2 developers hold no BigQuery access, so a replay left on insertAll would be refused and parked rows would be stranded. The bounded queue, retries and the dead-letter file format stay as they are.</li>
+<li><strong>Docs.</strong> Say that the new host must be allowed by any organization web-fetch policy.</li>
+</ol>
+</section>
+
+<section id="pm-questions" class="chapter" aria-labelledby="pm-questions-h">
+<p class="chapter-number" aria-hidden="true">08 / Open questions for the PM</p>
+<h2 id="pm-questions-h"><span class="visually-hidden">8. </span>Open questions for the PM</h2>
+<p>Each answer changes the design. The first five matter most.</p>
+<ol class="steps">
+<li><strong>Who is "the admin"?</strong> The person who installs the CLI and the mod, the owner of the BigQuery project, and the person who manages Google groups are often three different people. Which of them runs setup, and which step needs whom?</li>
+<li><strong>Do developers have Google identities?</strong> That means Google Workspace or Cloud Identity accounts, plus the gcloud CLI on each machine. If not, we need workforce identity federation (E), or a central path with a different sign-in.</li>
+<li><strong>Which organization policies must we live with?</strong> Key creation turned off, which is the default for organizations created since May 2024 (<a href="https://docs.cloud.google.com/resource-manager/docs/secure-by-default-organizations">secure-by-default organizations</a>). Domain restricted sharing, under which "only principals that belong to allowed domains or organizations can be granted IAM roles"; it is also on by default in new organizations (<a href="https://docs.cloud.google.com/resource-manager/docs/organization-policy/restricting-domains">restricting domains</a>). VPC Service Controls around BigQuery, which deny access from the internet by default, so writes from laptops need an ingress rule or access level (<a href="https://docs.cloud.google.com/vpc-service-controls/docs/overview">VPC Service Controls</a>). Also the right to create custom roles, and the host CLI's web-fetch allowlist.</li>
+<li><strong>May developers read each other's events?</strong> Today they can, because the table mirrors transcripts. If not, who reads: a small analyst group, through views?</li>
+<li><strong>Must <code>user_id</code> be trustworthy?</strong> Chargeback, compliance and per-person dashboards need it; usage trends may not. The answer decides between D2 and D1, and whether shared installs turn on <code>userIdFromCredentials</code>, which puts a personal email in every row.</li>
+<li><strong>One table per company, per team, or per project?</strong> Where does it live, who pays for ingestion, and do grants cross projects or organizations?</li>
+<li><strong>Where must the data stay?</strong> The dataset location defaults to <code>US</code> (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts#L10">config.ts L10</a>). With D, the Pub/Sub message storage policy or the Cloud Run region must match too.</li>
+<li><strong>Who may delete rows?</strong> For example, one person's events on request. Under F, members cannot read rows or delete the table, but they can very likely overwrite or empty it with a query job. Only D leaves row destruction to admins alone. Either way, somebody must own deletion requests.</li>
+<li><strong>Will we run a service for customers?</strong> D1 is code that someone deploys, patches and supports. Some customers will want everything in their own project with nothing to operate, which favours F or D2.</li>
+<li><strong>Are CI and headless agents in scope for the first release?</strong> If so, E is part of the first release, not a later one.</li>
+<li><strong>Should ADK's BQAA plugin and the tracing plugin follow the same model?</strong> They write the same table, so a shared answer and shared setup tooling would be simpler for customers.</li>
+</ol>
+</section>
+
+<section id="not-verified" class="chapter" aria-labelledby="not-verified-h">
+<p class="chapter-number" aria-hidden="true">What this study assumed or did not verify</p>
+<h2 id="not-verified-h">Assumptions and gaps</h2>
+<ul class="gaps">
+<li>No option was set up or tested against a live Google Cloud project for this study. IAM facts come from Google's documentation and from the built-in references of gcloud 559.0.0 and bq 2.1.28, read on 2026-10-15.</li>
+<li>Assumption: an admin can push the mod's options (project, dataset, token command, and any new option) to every machine through the host CLI's organization management. The README mentions organization-managed installs (<a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md#L829-L836">README L829–836</a>); pushing options that way was not tested.</li>
+<li>The custom writer role in option F was not tried. A spike should confirm that insertAll succeeds with only the listed permissions, and that a refused create shows up as expected.</li>
+<li>Pub/Sub's mapping of <code>agent_events</code> columns was not tried: the TIMESTAMP column, the three JSON columns and the repeated <code>content_parts</code> record. A spike should confirm it before D2 is promised.</li>
+<li>The IAP sign-in flow for a CLI client was not tried, and the mod has no sign-in helper today.</li>
+<li>Volume and cost figures are estimates from stated assumptions, not measurements. The mod's fixture rows average 958 bytes (computed from <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/examples/sample-rows.jsonl">sample-rows.jsonl</a>, 26 rows); real rows with long tool output are larger.</li>
+<li>The DML reference lists no per-statement permissions, and <code>TRUNCATE TABLE</code> has none documented. Overwriting a table through a query job is documented for <code>bigquery.tables.updateData</code>. Which of these paths actually work for F's role was not tested.</li>
+<li>A table-only binding was not tested. The insertAll reference lists <code>bigquery.datasets.get</code> on the dataset, which is why option F binds on a dedicated dataset.</li>
+<li>Google's pages disagree on which key-creation constraint new organizations enforce by default: the secure-by-default page lists the managed <code>iam.managed.disableServiceAccountKeyCreation</code>, while other pages name the legacy <code>iam.disableServiceAccountKeyCreation</code>. Both block new keys.</li>
+<li>Prices are Iowa (us-central1) list prices, read on 2026-10-15. The BigQuery pricing page lists no US multi-region price for ingestion.</li>
+<li>Whether gcloud's application-default token command prints a token from a federated credential file (option E) was not tried.</li>
+<li>Whether <code>bq add-iam-policy-binding</code> accepts <code>principal://</code> or <code>principalSet://</code> members was not tried. Its built-in help lists only user, group, service-account, domain and all-users members, which is why option E's example binds with <code>gcloud</code>.</li>
+<li>Whether Cloud Run would accept an OAuth access token for invocation was not tested. None of the Cloud Run pages checked (authentication overview, authenticate developers, service-to-service, release notes) documents that, so D1 is designed around ID tokens.</li>
+</ul>
+</section>
+
+<section id="sources" class="chapter sources" aria-labelledby="sources-h">
+<p class="chapter-number" aria-hidden="true">Sourcebook</p>
+<h2 id="sources-h">Sources</h2>
+<ul class="source-list">
+<li><span class="src-note">Issue #8, "Permission model":</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/issues/8">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/issues/8</a></li>
+<li><span class="src-note">Repository at commit 5566d7f:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/5566d7f78f520af3f5916b6c2191931c0ad67c28">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/5566d7f78f520af3f5916b6c2191931c0ad67c28</a></li>
+<li><span class="src-note">mod: hooks/lib/config.ts:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/config.ts</a></li>
+<li><span class="src-note">BigQuery Agent Analytics documentation:</span> <a href="https://adk.dev/integrations/bigquery-agent-analytics/">https://adk.dev/integrations/bigquery-agent-analytics/</a></li>
+<li><span class="src-note">mod: hooks/lib/bigquery.ts:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/bigquery.ts">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/bigquery.ts</a></li>
+<li><span class="src-note">mod: README.md:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/README.md</a></li>
+<li><span class="src-note">mod: hooks/lib/writer.ts:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/writer.ts</a></li>
+<li><span class="src-note">mod: tests/credentials.test.ts:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/tests/credentials.test.ts">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/tests/credentials.test.ts</a></li>
+<li><span class="src-note">mod: setup.sh:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/setup.sh">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/setup.sh</a></li>
+<li><span class="src-note">tracing: scripts/setup_gcp_prereqs.py:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/scripts/setup_gcp_prereqs.py">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/scripts/setup_gcp_prereqs.py</a></li>
+<li><span class="src-note">tracing: USER_GUIDE.md:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/USER_GUIDE.md">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-tracing/USER_GUIDE.md</a></li>
+<li><span class="src-note">mod: sql/agent_events_ddl.sql:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/sql/agent_events_ddl.sql">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/sql/agent_events_ddl.sql</a></li>
+<li><span class="src-note">mod: hooks/lib/rows.ts:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/rows.ts">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/lib/rows.ts</a></li>
+<li><span class="src-note">mod: hooks/register.ts:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/register.ts">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/hooks/register.ts</a></li>
+<li><span class="src-note">mod: examples/sample-rows.jsonl:</span> <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/examples/sample-rows.jsonl">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/blob/5566d7f78f520af3f5916b6c2191931c0ad67c28/plugins/bigquery-agent-analytics-mod/examples/sample-rows.jsonl</a></li>
+<li><span class="src-note">gcloud auth application-default print-access-token:</span> <a href="https://docs.cloud.google.com/sdk/gcloud/reference/auth/application-default/print-access-token">https://docs.cloud.google.com/sdk/gcloud/reference/auth/application-default/print-access-token</a></li>
+<li><span class="src-note">Authentication: use service account impersonation:</span> <a href="https://docs.cloud.google.com/docs/authentication/use-service-account-impersonation">https://docs.cloud.google.com/docs/authentication/use-service-account-impersonation</a></li>
+<li><span class="src-note">BigQuery tabledata.insertAll reference:</span> <a href="https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll">https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll</a></li>
+<li><span class="src-note">BigQuery IAM roles and permissions:</span> <a href="https://docs.cloud.google.com/bigquery/docs/access-control">https://docs.cloud.google.com/bigquery/docs/access-control</a></li>
+<li><span class="src-note">IAM quotas and limits:</span> <a href="https://docs.cloud.google.com/iam/quotas">https://docs.cloud.google.com/iam/quotas</a></li>
+<li><span class="src-note">IAM: roles for service account authentication:</span> <a href="https://docs.cloud.google.com/iam/docs/service-account-permissions">https://docs.cloud.google.com/iam/docs/service-account-permissions</a></li>
+<li><span class="src-note">Organization policy: restricting service accounts:</span> <a href="https://docs.cloud.google.com/resource-manager/docs/organization-policy/restricting-service-accounts">https://docs.cloud.google.com/resource-manager/docs/organization-policy/restricting-service-accounts</a></li>
+<li><span class="src-note">BigQuery pricing:</span> <a href="https://cloud.google.com/bigquery/pricing">https://cloud.google.com/bigquery/pricing</a></li>
+<li><span class="src-note">gcloud auth print-access-token:</span> <a href="https://docs.cloud.google.com/sdk/gcloud/reference/auth/print-access-token">https://docs.cloud.google.com/sdk/gcloud/reference/auth/print-access-token</a></li>
+<li><span class="src-note">gcloud auth login:</span> <a href="https://docs.cloud.google.com/sdk/gcloud/reference/auth/login">https://docs.cloud.google.com/sdk/gcloud/reference/auth/login</a></li>
+<li><span class="src-note">IAM: audit logging examples for service accounts:</span> <a href="https://docs.cloud.google.com/iam/docs/audit-logging/examples-service-accounts">https://docs.cloud.google.com/iam/docs/audit-logging/examples-service-accounts</a></li>
+<li><span class="src-note">Organization policy constraints reference:</span> <a href="https://docs.cloud.google.com/organization-policy/reference/org-policy-constraints">https://docs.cloud.google.com/organization-policy/reference/org-policy-constraints</a></li>
+<li><span class="src-note">Secure-by-default organizations:</span> <a href="https://docs.cloud.google.com/resource-manager/docs/secure-by-default-organizations">https://docs.cloud.google.com/resource-manager/docs/secure-by-default-organizations</a></li>
+<li><span class="src-note">Cloud Run: authenticate developers:</span> <a href="https://docs.cloud.google.com/run/docs/authenticating/developers">https://docs.cloud.google.com/run/docs/authenticating/developers</a></li>
+<li><span class="src-note">Cloud Run: IAP for Cloud Run:</span> <a href="https://docs.cloud.google.com/run/docs/securing/identity-aware-proxy-cloud-run">https://docs.cloud.google.com/run/docs/securing/identity-aware-proxy-cloud-run</a></li>
+<li><span class="src-note">Cloud Run: service-to-service authentication:</span> <a href="https://docs.cloud.google.com/run/docs/authenticating/service-to-service">https://docs.cloud.google.com/run/docs/authenticating/service-to-service</a></li>
+<li><span class="src-note">IAP: signed headers:</span> <a href="https://docs.cloud.google.com/iap/docs/signed-headers-howto">https://docs.cloud.google.com/iap/docs/signed-headers-howto</a></li>
+<li><span class="src-note">IAP: programmatic authentication:</span> <a href="https://docs.cloud.google.com/iap/docs/authentication-howto">https://docs.cloud.google.com/iap/docs/authentication-howto</a></li>
+<li><span class="src-note">gcloud run deploy:</span> <a href="https://docs.cloud.google.com/sdk/gcloud/reference/run/deploy">https://docs.cloud.google.com/sdk/gcloud/reference/run/deploy</a></li>
+<li><span class="src-note">Cloud Run pricing:</span> <a href="https://cloud.google.com/run/pricing">https://cloud.google.com/run/pricing</a></li>
+<li><span class="src-note">Pub/Sub access control:</span> <a href="https://docs.cloud.google.com/pubsub/docs/access-control">https://docs.cloud.google.com/pubsub/docs/access-control</a></li>
+<li><span class="src-note">BigQuery Storage Write API:</span> <a href="https://docs.cloud.google.com/bigquery/docs/write-api">https://docs.cloud.google.com/bigquery/docs/write-api</a></li>
+<li><span class="src-note">Pub/Sub: create BigQuery subscriptions:</span> <a href="https://docs.cloud.google.com/pubsub/docs/create-bigquery-subscription">https://docs.cloud.google.com/pubsub/docs/create-bigquery-subscription</a></li>
+<li><span class="src-note">gcloud pubsub subscriptions create:</span> <a href="https://docs.cloud.google.com/sdk/gcloud/reference/pubsub/subscriptions/create">https://docs.cloud.google.com/sdk/gcloud/reference/pubsub/subscriptions/create</a></li>
+<li><span class="src-note">Pub/Sub: dead-letter topics:</span> <a href="https://docs.cloud.google.com/pubsub/docs/handling-failures">https://docs.cloud.google.com/pubsub/docs/handling-failures</a></li>
+<li><span class="src-note">Pub/Sub audit logging:</span> <a href="https://docs.cloud.google.com/pubsub/docs/audit-logging">https://docs.cloud.google.com/pubsub/docs/audit-logging</a></li>
+<li><span class="src-note">Pub/Sub: BigQuery subscriptions:</span> <a href="https://docs.cloud.google.com/pubsub/docs/bigquery">https://docs.cloud.google.com/pubsub/docs/bigquery</a></li>
+<li><span class="src-note">Pub/Sub pricing:</span> <a href="https://cloud.google.com/pubsub/pricing">https://cloud.google.com/pubsub/pricing</a></li>
+<li><span class="src-note">Workload Identity Federation:</span> <a href="https://docs.cloud.google.com/iam/docs/workload-identity-federation">https://docs.cloud.google.com/iam/docs/workload-identity-federation</a></li>
+<li><span class="src-note">Workforce Identity Federation:</span> <a href="https://docs.cloud.google.com/iam/docs/workforce-identity-federation">https://docs.cloud.google.com/iam/docs/workforce-identity-federation</a></li>
+<li><span class="src-note">IAM: Cloud Run and Workload Identity Federation tutorial:</span> <a href="https://docs.cloud.google.com/iam/docs/tutorial-cloud-run-workload-id-federation">https://docs.cloud.google.com/iam/docs/tutorial-cloud-run-workload-id-federation</a></li>
+<li><span class="src-note">IAM principal identifiers:</span> <a href="https://docs.cloud.google.com/iam/docs/principal-identifiers">https://docs.cloud.google.com/iam/docs/principal-identifiers</a></li>
+<li><span class="src-note">Federated identity: supported services:</span> <a href="https://docs.cloud.google.com/iam/docs/federated-identity-supported-services">https://docs.cloud.google.com/iam/docs/federated-identity-supported-services</a></li>
+<li><span class="src-note">Workload Identity Federation with other providers:</span> <a href="https://docs.cloud.google.com/iam/docs/workload-identity-federation-with-other-providers">https://docs.cloud.google.com/iam/docs/workload-identity-federation-with-other-providers</a></li>
+<li><span class="src-note">BigQuery: basic roles and permissions:</span> <a href="https://docs.cloud.google.com/bigquery/docs/access-control-basic-roles">https://docs.cloud.google.com/bigquery/docs/access-control-basic-roles</a></li>
+<li><span class="src-note">IAM: resource hierarchy and access control:</span> <a href="https://docs.cloud.google.com/iam/docs/resource-hierarchy-access-control">https://docs.cloud.google.com/iam/docs/resource-hierarchy-access-control</a></li>
+<li><span class="src-note">BigQuery: authorized views:</span> <a href="https://docs.cloud.google.com/bigquery/docs/authorized-views">https://docs.cloud.google.com/bigquery/docs/authorized-views</a></li>
+<li><span class="src-note">BigQuery: IAM Conditions:</span> <a href="https://docs.cloud.google.com/bigquery/docs/conditions">https://docs.cloud.google.com/bigquery/docs/conditions</a></li>
+<li><span class="src-note">BigQuery: security functions (SESSION_USER):</span> <a href="https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/security_functions">https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/security_functions</a></li>
+<li><span class="src-note">BigQuery: introduction to views:</span> <a href="https://docs.cloud.google.com/bigquery/docs/views-intro">https://docs.cloud.google.com/bigquery/docs/views-intro</a></li>
+<li><span class="src-note">BigQuery: manage tables:</span> <a href="https://docs.cloud.google.com/bigquery/docs/managing-tables">https://docs.cloud.google.com/bigquery/docs/managing-tables</a></li>
+<li><span class="src-note">BigQuery: write query results:</span> <a href="https://docs.cloud.google.com/bigquery/docs/writing-results">https://docs.cloud.google.com/bigquery/docs/writing-results</a></li>
+<li><span class="src-note">BigQuery DML syntax reference:</span> <a href="https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/dml-syntax">https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/dml-syntax</a></li>
+<li><span class="src-note">BigQuery: batch loading:</span> <a href="https://docs.cloud.google.com/bigquery/docs/batch-loading-data">https://docs.cloud.google.com/bigquery/docs/batch-loading-data</a></li>
+<li><span class="src-note">BigQuery: time travel and fail-safe:</span> <a href="https://docs.cloud.google.com/bigquery/docs/time-travel">https://docs.cloud.google.com/bigquery/docs/time-travel</a></li>
+<li><span class="src-note">IAM: access change propagation:</span> <a href="https://docs.cloud.google.com/iam/docs/access-change-propagation">https://docs.cloud.google.com/iam/docs/access-change-propagation</a></li>
+<li><span class="src-note">IAM: full resource names:</span> <a href="https://docs.cloud.google.com/iam/docs/resource-names">https://docs.cloud.google.com/iam/docs/resource-names</a></li>
+<li><span class="src-note">Pub/Sub quotas and limits:</span> <a href="https://docs.cloud.google.com/pubsub/quotas">https://docs.cloud.google.com/pubsub/quotas</a></li>
+<li><span class="src-note">Organization policy: restricting domains:</span> <a href="https://docs.cloud.google.com/resource-manager/docs/organization-policy/restricting-domains">https://docs.cloud.google.com/resource-manager/docs/organization-policy/restricting-domains</a></li>
+<li><span class="src-note">VPC Service Controls overview:</span> <a href="https://docs.cloud.google.com/vpc-service-controls/docs/overview">https://docs.cloud.google.com/vpc-service-controls/docs/overview</a></li>
+</ul>
+</section>
+
+</div>
+</div>
+</main>
+<footer class="footer">
+<div class="footer-inner">
+<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6"/><path class="bm-a" d="M6 10h9M6 16h12M6 22h7"/><path class="bm-cut" d="M20 9l6 7-6 7"/></svg>
+<div><p class="footer-title">Who writes the rows? A permission model for the BQAA coding-agent mod</p><p>Design study on <a href="https://caohy1988.github.io/research/bqaa-permission-model/">caohy1988.github.io/research/bqaa-permission-model/</a>, for issue <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/issues/8">#8</a>. Not tested against a live project. Prepared <time datetime="2026-10-15">2026-10-15</time>.</p></div>
+<a class="back-top" href="#title">Back to top</a>
+</div>
+</footer>
+</body>
+</html>
