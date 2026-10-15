@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>A coding-agent mod for BigQuery Agent Analytics — Field Brief</title>
-<meta name="description" content="A coding-agent mod that turns sessions, turns, model requests, tool calls and subagents into BigQuery Agent Analytics agent_events rows and writes them from the background, so no hook waits on BigQuery. Why a mod, the architecture, install, configuration, schema mapping, sample rows, queries and limitations. Built and tested 2026-10-13 against v2.1.296 of the host CLI.">
-<meta property="og:title" content="A coding-agent mod for BigQuery Agent Analytics"><meta property="og:description" content="Non-blocking capture of coding-agent sessions into the BQAA agent_events schema: architecture, install, schema mapping, sample rows from the test fixture, queries and limitations."><meta property="og:type" content="article"><meta property="og:url" content="https://caohy1988.github.io/research/coding-agent-mod-bqaa/">
+<meta name="description" content="A coding-agent mod that turns sessions, turns, model requests, tool calls and subagents into BigQuery Agent Analytics agent_events rows and writes them from the background, so no hook waits on BigQuery. Why a mod, the architecture, install, configuration, schema mapping, sample rows, queries, limitations, and an admin-managed deployment. Built and tested 2026-10-13 against v2.1.296 of the host CLI.">
+<meta property="og:title" content="A coding-agent mod for BigQuery Agent Analytics"><meta property="og:description" content="Non-blocking capture of coding-agent sessions into the BQAA agent_events schema: architecture, install, schema mapping, sample rows from the test fixture, queries, limitations, and how one administrator can point every user at one dataset."><meta property="og:type" content="article"><meta property="og:url" content="https://caohy1988.github.io/research/coding-agent-mod-bqaa/">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%231b2129'/%3E%3Cpath%20d='M6%2010h9M6%2016h12M6%2022h7'%20stroke='%2391c3e8'%20stroke-width='3'/%3E%3Cpath%20d='M20%209l6%207-6%207'%20fill='none'%20stroke='%23f2622e'%20stroke-width='2.6'/%3E%3C/svg%3E">
 <link rel="canonical" href="https://caohy1988.github.io/research/coding-agent-mod-bqaa/">
 <meta name="theme-color" content="#1b2129">
@@ -53,19 +53,19 @@
 <!-- site-nav:end -->
 <header class="topbar">
 <a class="brand" href="/research/" aria-label="Field notes, coding-agent mod for BQAA (Research home)"><svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6"/><path class="bm-a" d="M6 10h9M6 16h12M6 22h7"/><path class="bm-cut" d="M20 9l6 7-6 7"/></svg><span class="brand-name">Field notes</span> <span class="brand-sub">Coding-agent mod for BQAA</span></a>
-<div class="top-actions"><a href="#sources">Sources <span class="source-count">6</span></a></div>
+<div class="top-actions"><a href="#sources">Sources <span class="source-count">16</span></a></div>
 </header>
 <main id="study">
 <section class="hero" aria-labelledby="title">
 <div class="hero-copy">
-<p class="eyebrow">A build note, prepared 13 October 2026, updated 14 October 2026</p>
+<p class="eyebrow">A build note, prepared 13 October 2026, updated 15 October 2026</p>
 <h1 id="title">A coding-agent mod that writes BigQuery Agent Analytics rows without blocking</h1>
 <p class="deck">A mod runs as code inside the host coding-agent CLI. This one turns each turn, model request, tool call and subagent into a BQAA <code>agent_events</code> row, and sends them to BigQuery from timers, so no hook waits on the network.</p>
 </div>
 <div class="hero-notes">
-<p class="provenance">Built and tested on 13 October 2026 against v2.1.296 of the host CLI, and tested again on 14 October against v2.1.299, using only methods its mod documentation and type declarations describe. The code, <code>plugins/bigquery-agent-analytics-mod</code>, is in <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">pull request #7</a> to <code>bigquery_agent_analytics_skill</code>, open as of this note. The sample rows and queries shown here are linked at commit <code>4e8951c</code> of the pull request&rsquo;s branch; the fixes that followed it left both files unchanged. Sample rows are output of the mod&rsquo;s own test fixture, not production data; the demo below is a real session writing to a test dataset.</p>
+<p class="provenance">Built and tested on 13 October 2026 against v2.1.296 of the host CLI, and tested again on 14 October against v2.1.299, using only methods its mod documentation and type declarations describe. The code, <code>plugins/bigquery-agent-analytics-mod</code>, came in through <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">pull request #7</a> to <code>bigquery_agent_analytics_skill</code>, merged on 15 October 2026 as <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/commit/5566d7f78f520af3f5916b6c2191931c0ad67c28">commit <code>5566d7f</code></a> on <code>main</code>. The sample rows and queries shown here are linked at commit <code>4e8951c</code> of the pull request&rsquo;s branch; the fixes that followed it left both files unchanged. Sample rows are output of the mod&rsquo;s own test fixture, not production data; the demo below is real sessions writing to a test dataset. Section 11, on an admin-managed deployment, was checked on 15 October against the merged mod and v2.1.299.</p>
 <p class="citation-key">Citation key: &ldquo;mod docs&rdquo; is the host CLI&rsquo;s mod documentation (first entry under Sources); &ldquo;ADK&rdquo; is the <a href="https://adk.dev/integrations/bigquery-agent-analytics/">BigQuery Agent Analytics plugin for ADK</a> page; &ldquo;Repo&rdquo; is <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">pull request #7</a>, which holds the mod. Single-quoted names are page or section names in the cited source. What could not be checked is listed under <strong>NOT VERIFIED</strong>.</p>
-<p class="hero-meta">A demo recording, ten numbered sections, a list of what was not verified, and 6 linked sources.</p>
+<p class="hero-meta">A demo recording, eleven numbered sections, a list of what was not verified, and 16 linked sources.</p>
 </div>
 </section>
 
@@ -73,7 +73,7 @@
 <nav class="contents" aria-label="In this study">
 <p class="small-label" aria-hidden="true">In this note</p>
 <ol>
-<li><a href="#demo"><span class="toc-num"></span> Demo: a real session</a></li>
+<li><a href="#demo"><span class="toc-num"></span> Demo: real sessions</a></li>
 <li><a href="#what-it-does"><span class="toc-num">01</span> What it does</a></li>
 <li><a href="#why-a-mod"><span class="toc-num">02</span> Why a mod, not settings hooks</a></li>
 <li><a href="#architecture"><span class="toc-num">03</span> Architecture</a></li>
@@ -84,6 +84,7 @@
 <li><a href="#queries"><span class="toc-num">08</span> Queries</a></li>
 <li><a href="#verification"><span class="toc-num">09</span> How it was checked</a></li>
 <li><a href="#limitations"><span class="toc-num">10</span> Limitations</a></li>
+<li><a href="#admin-managed"><span class="toc-num">11</span> Admin-managed deployment</a></li>
 <li><a href="#not-verified"><span class="toc-num"></span> Not verified</a></li>
 <li><a href="#sources"><span class="toc-num"></span> Sources</a></li>
 </ol>
@@ -92,10 +93,10 @@
 
 <section id="demo" class="chapter" aria-labelledby="demo-h">
 <p class="chapter-number" aria-hidden="true">Demo</p>
-<h2 id="demo-h">Demo: a real session</h2>
+<h2 id="demo-h">Demo: real sessions</h2>
 <figure class="demo-video">
-<video controls preload="metadata" width="986" height="700" poster="demo-poster.jpg" src="demo.mp4" aria-describedby="demo-caption">The video does not play in this browser: <a href="demo.mp4">download it</a> (MP4, 0.7&nbsp;MB).</video>
-<figcaption id="demo-caption">A terminal recording of a real session, made on 14 October 2026 with v2.1.299 of the host CLI, writing to a test dataset. The mod loads with <code>--plugin-dir</code> in live mode; one prompt has the agent list the files in a folder and read one. The next session runs <code>/bqaa-status</code> before and after it replays the first session&rsquo;s spill file, and <code>bq</code> queries, each capped at 100&nbsp;MB billed, read the session&rsquo;s 14 rows back. The project id is masked on screen, and waits are shortened in playback.</figcaption>
+<video controls preload="metadata" width="1228" height="924" poster="demo-v2-poster.png" src="demo-v2.mp4" aria-describedby="demo-caption">The video does not play in this browser: <a href="demo-v2.mp4">download it</a> (MP4, 1.2&nbsp;MB).</video>
+<figcaption id="demo-caption">A terminal recording of two real sessions, made on 15 October 2026 with v2.1.299 of the host CLI and the mod in live mode, writing to a test dataset. <strong>a)</strong> Fail open: with a token command that always fails, the prompt is still answered. The mod&rsquo;s toast and transcript notice say no working credentials and name the fix. <code>/bqaa-status</code> shows the notice with the rows waiting, and at exit the rows go to a spill file on disk. <strong>b)</strong> With working credentials, the agent runs <code>ls</code> (allowed by a settings rule) and reads a file. Fifteen seconds in, the session replays the 8 rows that a) parked, and its <code>/bqaa-status</code> reports them sent. <strong>c)</strong> <code>bq</code> reads b)&rsquo;s 15 rows back. Both <code>TOOL_COMPLETED</code> rows carry the recorded permission decision, <code>accept</code> from the configuration, and a count by event type follows. <strong>d)</strong> <code>setup.sh</code> checks the table and makes the usage views. The two views report the day&rsquo;s requests, sessions and tokens by model and by user. Every query is capped at 100&nbsp;MB billed. The project id was masked during the recording; in this copy, the model name in the by-model view is masked too. Waits are shortened in playback.</figcaption>
 </figure>
 </section>
 
@@ -239,11 +240,11 @@
 claude --plugin-dir ./plugins/bigquery-agent-analytics-mod</code></pre>
 <p><code>--plugin-dir</code> &ldquo;loads a plugin directory for one session without installing it&rdquo; (mod docs, &lsquo;Create a mod&rsquo;).</p>
 <h3 id="install-marketplace">From the repository&rsquo;s marketplace</h3>
-<p>The repository&rsquo;s <code>.claude-plugin/marketplace.json</code> lists the mod beside the settings-hook plugin. Until the pull request merges, add the marketplace from a clone of the branch:</p>
+<p>The repository&rsquo;s <code>.claude-plugin/marketplace.json</code> lists the mod beside the settings-hook plugin. From a clone of the repository:</p>
 <pre><code>claude plugin marketplace add ./
 claude plugin install bigquery-agent-analytics-mod@bigquery-agent-analytics-plugin \
   --config project=my-gcp-project --config dataset=agent_analytics</code></pre>
-<p>After it merges, one command adds the marketplace from GitHub and installs (<code>--marketplace</code> needs v2.1.292 or later):</p>
+<p>Or one command adds the marketplace from GitHub and installs (<code>--marketplace</code> needs v2.1.292 or later). After the merge, it installed the mod as <code>bigquery-agent-analytics-mod@bigquery-agent-analytics-plugin</code> in an isolated configuration directory and saved both options:</p>
 <pre><code>claude plugin install bigquery-agent-analytics-mod \
   --marketplace haiyuan-eng-google/bigquery_agent_analytics_skill \
   --config project=my-gcp-project --config dataset=agent_analytics</code></pre>
@@ -253,7 +254,7 @@ claude plugin install bigquery-agent-analytics-mod@bigquery-agent-analytics-plug
 <section id="configure" class="chapter" aria-labelledby="configure-h">
 <p class="chapter-number" aria-hidden="true">05 / Configure</p>
 <h2 id="configure-h"><span class="visually-hidden">5. </span>Configure</h2>
-<p>Options are the plugin&rsquo;s <code>userConfig</code>, which the CLI shows in the install dialog and as <code>/config</code> rows; a string option left empty falls back to the <code>BQAA_*</code> environment variable the tracing plugin already reads, then to a default.</p>
+<p>Options are the plugin&rsquo;s <code>userConfig</code>, which the CLI shows in the install dialog and as <code>/config</code> rows; a string option left empty falls back to the <code>BQAA_*</code> environment variable the tracing plugin already reads, then to a default. An administrator can set them for every user and lock them: see <a href="#admin-managed">section 11</a>.</p>
 <div class="table-wrap" role="region" aria-label="Table: configuration options" tabindex="0">
 <table class="compare ref" role="table" aria-labelledby="config-caption">
 <caption id="config-caption">Options and their environment fallbacks. Numbers are held to the bounds shown.</caption>
@@ -492,7 +493,13 @@ ORDER BY child.timestamp;</code></pre>
 </ul>
 Breaking a rule on purpose made the relevant tests fail: awaiting the flush inside <code>tool.call</code>, breaking the span parenting, and undoing, one at a time, the per-table replay directory, the per-line table check, diagnostic redaction, byte-based file sizes, the request-free session end, the token-variable fallback, stem matching of credential names, the oversized-file report, redaction before cutting (in the writer and where BigQuery&rsquo;s error text is first cut), the check that a 2xx answer is a valid insertAll response, the redaction of values that already hold a marker, scanning past 4,096 characters, decoding JSON inside strings, <code>pass</code> and <code>pwd</code> as credential names, webhook URLs, URL user-info, dropping JSON text that cannot be parsed (rather than scrubbing it line by line), reading the session id only at start, keeping the old id after a session change, reading it in <code>tool.call</code> after the tool has started, emptying a replayed file before what it leaves is written elsewhere, keeping every key (no allowlist), redacting only credential names instead of everything not listed, dropping the plural and numbered forms of credential names, exempting no listed name from the text rule, treating lists that open with a scalar or JSON-encoded strings as plain text, scrubbing unparseable JSON-looking text instead of dropping it, leaving a key the mod writes off the list, reading every file as complete, skipping the record&rsquo;s checksum, writing dead-letter or replacement files without a completion record, not reporting incomplete files, taking a subagent&rsquo;s <code>turn.start</code> as a main-loop turn, writing its start row before SubagentStart names it, opening a second span when SubagentStart comes late, reusing an ended run&rsquo;s span, nesting a run under a fresh trace, writing the session-start row with the defaults the module starts with, never writing a session-start row that waited, stamping it when written rather than when its event came, copying key names as they came, keeping a name past the scan budget, numbering placeholders over an object&rsquo;s own names, not counting a replaced name, and checking names only in a payload&rsquo;s own objects. The same was done for the additions: making the prompt hook wait for a token, dropping the notice or its clearing, stamping an account looked up for another token or for an expired one, and writing a call&rsquo;s row without waiting for a late rejection.</li>
 <li><strong>TypeScript:</strong> the hooks module type-checks under <code>tsc --strict</code> against the type declarations the CLI wrote for v2.1.296 and against those for v2.1.299; the tests type-check against those for v2.1.299, as they use <code>turn.start</code>&rsquo;s loop id, which the v2.1.296 declarations lack.</li>
-<li><strong>Real sessions:</strong> headless (<code>-p</code>) runs of the CLI with <code>--plugin-dir</code> on v2.1.296. Two runs with <code>BQAA_DRY_RUN=true</code> and a one-tool prompt (<code>echo</code> through Bash, on a small model), made before the session-end and dead-letter changes, wrote 12 rows each: a <code>STATE_DELTA</code> at each end, <code>INVOCATION_STARTING</code>, <code>USER_MESSAGE_RECEIVED</code>, two <code>LLM_REQUEST</code>/<code>LLM_RESPONSE</code> pairs, <code>TOOL_STARTING</code>/<code>TOOL_COMPLETED</code>, <code>AGENT_RESPONSE</code> and <code>INVOCATION_COMPLETED</code>, with the engine&rsquo;s token counts and measured latencies (including time to first token) filled in, the tool span under the request that asked for it, and the session-end row written at exit. The engine starts a tool while the response that asked for it is still streaming, so the tool&rsquo;s start row came before that response&rsquo;s row, and the exact order differed between the runs. After those changes, <code>/bqaa-status</code> ran with no model call in a dry run, and once against a destination with a token command that always fails, so nothing could be sent: at exit its two <code>STATE_DELTA</code> rows went to a spill file in the destination&rsquo;s subdirectory, each line naming its table, and the status named the token program without its arguments. On v2.1.299, a dry run whose prompt delegated a search to an <code>Explore</code> subagent wrote 25 rows: one <code>INVOCATION_STARTING</code>; one <code>AGENT_STARTING</code>, typed <code>Explore</code>, under the turn&rsquo;s span; the turn&rsquo;s 23 rows, the subagent&rsquo;s and its handed-back answer included, in one trace and one invocation with no parent span missing; a session-end <code>trace_count</code> of 1; and a session-start row with the loaded user, writer mode and host version, as on the rows after it. Live, on v2.1.299, the demo above: one session wrote 14 rows to a test table created from the DDL, its session-end row through a spill file that the next session sent 15 seconds in, and <code>bq</code> read all 14 back. A headless probe on v2.1.299 had three findings:
+<li><strong>Real sessions:</strong> headless (<code>-p</code>) runs of the CLI with <code>--plugin-dir</code> on v2.1.296. Two runs with <code>BQAA_DRY_RUN=true</code> and a one-tool prompt (<code>echo</code> through Bash, on a small model), made before the session-end and dead-letter changes, wrote 12 rows each: a <code>STATE_DELTA</code> at each end, <code>INVOCATION_STARTING</code>, <code>USER_MESSAGE_RECEIVED</code>, two <code>LLM_REQUEST</code>/<code>LLM_RESPONSE</code> pairs, <code>TOOL_STARTING</code>/<code>TOOL_COMPLETED</code>, <code>AGENT_RESPONSE</code> and <code>INVOCATION_COMPLETED</code>, with the engine&rsquo;s token counts and measured latencies (including time to first token) filled in, the tool span under the request that asked for it, and the session-end row written at exit. The engine starts a tool while the response that asked for it is still streaming, so the tool&rsquo;s start row came before that response&rsquo;s row, and the exact order differed between the runs. After those changes, <code>/bqaa-status</code> ran with no model call in a dry run, and once against a destination with a token command that always fails, so nothing could be sent: at exit its two <code>STATE_DELTA</code> rows went to a spill file in the destination&rsquo;s subdirectory, each line naming its table, and the status named the token program without its arguments. On v2.1.299, a dry run whose prompt delegated a search to an <code>Explore</code> subagent wrote 25 rows: one <code>INVOCATION_STARTING</code>; one <code>AGENT_STARTING</code>, typed <code>Explore</code>, under the turn&rsquo;s span; the turn&rsquo;s 23 rows, the subagent&rsquo;s and its handed-back answer included, in one trace and one invocation with no parent span missing; a session-end <code>trace_count</code> of 1; and a session-start row with the loaded user, writer mode and host version, as on the rows after it. Live, on v2.1.299:
+<ul>
+<li>A first recording, on 14 October, wrote one session&rsquo;s 14 rows to a test table created from the DDL, the session-end row through a spill file that the next session sent 15 seconds in, and <code>bq</code> read all 14 back.</li>
+<li>The demo above, recorded on 15 October, adds the failure path. Session a), whose token command always fails, answered its prompt and parked its 8 rows. Session b) sent them 15 seconds in, sent its own 15 rows while open (both <code>TOOL_COMPLETED</code> rows with an <code>accept</code> decision from the configuration), and spilled its session-end row at exit.</li>
+<li><code>bq</code> read b)&rsquo;s 15 rows back, and the views counted 4 requests over 2 sessions for the day. Every query was capped at 100&nbsp;MB billed, and each billed 0 bytes.</li>
+</ul>
+A headless probe on v2.1.299 had three findings:
 <ul>
 <li>the host&rsquo;s collector records reach a mod with no telemetry settings;</li>
 <li>an accepted tool decision arrives before its call returns;</li>
@@ -505,6 +512,15 @@ That order is why a finished call waits for its decision. Runs on one machine ar
 <li><code>setup.sh</code> passes 38 offline checks against a stand-in <code>bq</code> that logs its calls. Plain names are required before any call, and a dry run calls nothing.</li>
 <li>Both views ran in DuckDB over a fixture that several writers share, and in BigQuery over the same fixture as literal rows. Each time they counted only this mod&rsquo;s requests, sessions and tokens.</li>
 <li>A BigQuery dry run with one day&rsquo;s filter reads 0 bytes of the other days.</li>
+<li>In the demo, <code>setup.sh</code> ran against the test project, where both datasets and the table already existed, and made the two views.</li>
+</ul></li>
+<li><strong>Admin-managed deployment (section 11):</strong>
+<ul>
+<li>21 scenarios ran on the Linux build of v2.1.299, in an offline container. The managed-settings file and a marketplace directory, holding the merged mod and a probe mod, were writable only by root, and sessions ran as an ordinary user.</li>
+<li>They checked where options and environment variables come from, and which lower settings lose to the policy. They also covered the guard&rsquo;s options, the sideload and marketplace locks, safe mode and <code>--bare</code>, and a user&rsquo;s mod hooking the mod&rsquo;s reads.</li>
+<li>The real mod&rsquo;s <code>/bqaa-status</code> ran under the policy.</li>
+<li>Two checks ran on the macOS build: a post-merge install from GitHub, and the order of a user&rsquo;s own settings with no policy.</li>
+<li>One read-only check, printing only true or false, found that a per-user default-credentials token carries a verified email.</li>
 </ul></li>
 <li><strong>SQL:</strong> the DDL and the eight queries parse with sqlglot&rsquo;s BigQuery dialect; translated to DuckDB, all eight ran over the 26 sample rows with the expected results (one turn, 48,211&nbsp;ms, five model requests, four tool calls, one subagent). The three queries in section 8 and the README&rsquo;s example were also checked as extracted from this page and the README, and ran the same way.</li>
 </ul>
@@ -528,9 +544,159 @@ That order is why a finished call waits for its decision. Runs on one machine ar
 <li><code>$.fs</code> cannot append, rename or delete: one file per failure, truncated rather than removed after a backfill.</li>
 <li>A dead-letter file without a matching completion record is never replayed: one left by a writer that stopped part-way, or written by an earlier version of the mod, stays on disk, listed by <code>/bqaa-status</code>, for a person to look at.</li>
 <li>The type declarations mark <code>$.process.run</code> as &ldquo;CLI only&rdquo;; where the token command cannot run, set <code>BQAA_ACCESS_TOKEN</code>.</li>
-<li>Where an organization manages the host CLI, <code>classic.SessionStart</code>, <code>classic.SubagentStart</code> and <code>classic.PermissionRequest</code> pass over a plugin a person installs, as <code>claude plugin validate</code> reports. Installed that way, the mod records no session-start row, records each subagent with an inferred <code>AGENT_STARTING</code> row typed <code>subagent</code>, and flags no permission prompts; rows still carry the current session id.</li>
+<li>Where an organization manages the host CLI, <code>classic.SessionStart</code>, <code>classic.SubagentStart</code> and <code>classic.PermissionRequest</code> pass over a plugin a person installs, as <code>claude plugin validate</code> reports. Installed that way, the mod records no session-start row, records each subagent with an inferred <code>AGENT_STARTING</code> row typed <code>subagent</code>, and flags no permission prompts; rows still carry the current session id. Installed as the organization&rsquo;s mod (<a href="#admin-managed">section 11</a>), it received <code>classic.SessionStart</code> even under a policy that keeps users&rsquo; hooks out; the other two were not exercised there.</li>
 <li>Redaction is by allowlist: in <code>content</code> and <code>attributes</code>, at any depth and in JSON inside their text, a value is kept only under a key on the mod&rsquo;s list (the fields it writes, such as ids, token counts, timings, model and tool names; and free-text fields: the prompt, the answer, a tool&rsquo;s arguments and result, error text and the built-in tools&rsquo; text arguments). Under any other key the value becomes <code>[REDACTED]</code>, whatever it holds, so an MCP tool&rsquo;s own arguments and JSON output are mostly redacted. A name that is not on the list and itself holds a credential shape, a URL with user-info or a credential-named parameter, or a credential-named value becomes <code>[REDACTED_KEY:n]</code>, numbered within its object. Text that looks like JSON (an object, a list opening with any value, or a JSON-encoded object or list) is parsed and held to the same list; when it cannot be parsed whole (too long to scan, or not valid JSON) it is dropped and marked, never scrubbed line by line. Other text is scanned for known credential shapes, URL credentials and credential-named values (plural and numbered names included), best effort: JSON that follows other text (a file view with line numbers, a log line) is free text, where a value nested on a later line than its credential name is missed, and a credential-named line can also lose a little more than the credential (a type name in code). The table holds prompts, answers, tool arguments and results, cut to <code>maxPayloadChars</code>.</li>
 </ul>
+</section>
+
+<section id="admin-managed" class="chapter" aria-labelledby="admin-managed-h">
+<p class="chapter-number" aria-hidden="true">11 / Admin-managed deployment</p>
+<h2 id="admin-managed-h"><span class="visually-hidden">11. </span>Admin-managed deployment</h2>
+<p>Can one administrator configure the mod so that every user&rsquo;s sessions trace into one BigQuery dataset? Yes, and most of it works today with no change to the mod. It goes through the host CLI&rsquo;s managed settings: a policy an organization deploys to every machine, which no user, project or command-line setting overrides (mod docs, &lsquo;Deploy managed settings&rsquo;). The setup is about half a day to a day per platform. Anything that needs mod code is marked <strong>Proposed, not yet implemented</strong>.</p>
+<p>Everything under &lsquo;Works today&rsquo; was observed on 15 October 2026 with v2.1.299 of the host CLI and the mod as merged. The host&rsquo;s Linux build ran in an offline container, with a managed-settings file only root could write, and the sessions ran as an ordinary user.</p>
+
+<h3 id="admin-today">Works today, with no code change</h3>
+<ul>
+<li><strong>Install it for everyone.</strong> The administrator copies the mod into a marketplace directory that users cannot write, and the policy names that directory and enables the mod. The mod then counts as the organization&rsquo;s (mod docs, &lsquo;Manage mods for your organization&rsquo;). It loaded ahead of users&rsquo; own mods, and a user who disabled it in their own settings, or turned all hooks off, did not unload it.</li>
+<li><strong>Pin the options.</strong> The policy&rsquo;s <code>pluginConfigs</code> entry sets the mod&rsquo;s options key by key, and nothing lower changed a pinned key. A user&rsquo;s settings, <code>--settings</code>, a repository&rsquo;s settings and exported variables all lost. <code>claude plugin configure</code> still printed &ldquo;Configuration saved&rdquo;, and the session kept the policy&rsquo;s value. A key the policy leaves unset still takes the user&rsquo;s value.</li>
+<li><strong>Pin what environment variables can flip.</strong> Each of these works even when the matching option is pinned:
+<ul>
+<li><code>BQAA_TRACE_ENABLED=false</code> turns capture off;</li>
+<li><code>BQAA_DRY_RUN=true</code> turns a dry run on;</li>
+<li>an exported <code>BQAA_ACCESS_TOKEN</code> replaces the token command.</li>
+</ul>
+The policy&rsquo;s <code>env</code> block replaces what a user exports, so pin these variables there too. With both pins, a user&rsquo;s <code>BQAA_TRACE_ENABLED=false</code> left capture on; with only the option pinned, it turned capture off.</li>
+<li><strong>Mark unverified identities.</strong> With <code>userIdFromCredentials</code> pinned on, <code>user_id</code> is the verified email of the token&rsquo;s account. A policy value <code>BQAA_USER_ID=unverified</code> makes every row whose account is not known say so, rather than carry a name the user picked. Rows parked without a token carried <code>unverified</code>, not the user&rsquo;s exported name.</li>
+<li><strong>Keep other copies out</strong> (optional, and fleet-wide: these apply to every plugin, not just this one). Each did what it says:
+<ul>
+<li>the host&rsquo;s built-in guard can refuse every mod that is not the organization&rsquo;s (<code>allowManagedModsOnly</code>);</li>
+<li><code>disableSideloadFlags</code> refuses <code>--plugin-dir</code>;</li>
+<li><code>strictKnownMarketplaces</code> allows only the listed marketplace sources.</li>
+</ul></li>
+<li><strong>Other mods cannot feed it false values.</strong> A user&rsquo;s mod hooked environment and settings reads to return false values. The guard bypassed it, and the organization&rsquo;s mod read the true values. Under <code>allowManagedHooksOnly</code>, the organization&rsquo;s copy still loaded and still received <code>classic.SessionStart</code>.</li>
+<li><strong>Fixed behaviour needs no pin.</strong> Redaction is always on; only the payload cap, <code>maxPayloadChars</code>, is an option. A credential failure always fails open with the notice, since the mod has no setting that blocks prompts. Under the policy, a pinned token command that failed gave the usual notice, naming that command.</li>
+</ul>
+<p>A policy that does all of this. The names are placeholders; the file&rsquo;s path on each system is in the host docs.</p>
+<pre><code>{
+  "extraKnownMarketplaces": {
+    "org-tools": { "source": { "source": "directory", "path": "/opt/org/agent-plugins" } }
+  },
+  "enabledPlugins": { "bigquery-agent-analytics-mod@org-tools": true },
+  "pluginConfigs": {
+    "bigquery-agent-analytics-mod@org-tools": {
+      "options": {
+        "project": "my-gcp-project",
+        "dataset": "agent_analytics",
+        "table": "agent_events",
+        "location": "US",
+        "enabled": true,
+        "dryRun": false,
+        "accessTokenCommand": "/opt/google-cloud-sdk/bin/gcloud auth application-default print-access-token",
+        "userIdFromCredentials": true,
+        "recordHostname": false,
+        "maxPayloadChars": 16384
+      }
+    }
+  },
+  "env": {
+    "BQAA_TRACE_ENABLED": "true",
+    "BQAA_DRY_RUN": "false",
+    "BQAA_ACCESS_TOKEN": "",
+    "BQAA_USER_ID": "unverified",
+    "BQAA_AUTO_CREATE_TABLE": "false"
+  }
+}</code></pre>
+<p>Optional and fleet-wide, in the same file (the two <code>pluginConfigs</code> entries merge):</p>
+<pre><code>{
+  "pluginConfigs": { "cc-plugin-sec-default@builtin": { "options": { "allowManagedModsOnly": true } } },
+  "disableSideloadFlags": true,
+  "strictKnownMarketplaces": [ { "source": "directory", "path": "/opt/org/agent-plugins" } ]
+}</code></pre>
+<div class="table-wrap" role="region" aria-label="Table: what each policy entry pins" tabindex="0">
+<table class="compare ref" role="table" aria-labelledby="admin-pins-caption">
+<caption id="admin-pins-caption">What each policy entry pins, and what the checks saw.</caption>
+<colgroup><col class="c-k"><col class="c-v"></colgroup>
+<thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Entry</th><th scope="col" role="columnheader">Pins, and what was seen</th></tr></thead>
+<tbody role="rowgroup">
+<tr role="row"><th scope="row" role="rowheader"><code>project</code>, <code>dataset</code>, <code>table</code>, <code>location</code></th><td role="cell" data-label="Pins">The destination. <code>/bqaa-status</code> showed the pinned target over a user option, a user variable and an exported project.</td></tr>
+<tr role="row"><th scope="row" role="rowheader"><code>enabled</code> and <code>BQAA_TRACE_ENABLED</code></th><td role="cell" data-label="Pins">Capture on. Without the variable pin, an exported <code>BQAA_TRACE_ENABLED=false</code> turned capture off.</td></tr>
+<tr role="row"><th scope="row" role="rowheader"><code>dryRun</code> and <code>BQAA_DRY_RUN</code></th><td role="cell" data-label="Pins">Live writes. A user&rsquo;s <code>dryRun: true</code> was ignored.</td></tr>
+<tr role="row"><th scope="row" role="rowheader"><code>accessTokenCommand</code>, and <code>BQAA_ACCESS_TOKEN</code> set empty</th><td role="cell" data-label="Pins">The token source. An exported token was ignored and the pinned command ran.</td></tr>
+<tr role="row"><th scope="row" role="rowheader"><code>userIdFromCredentials</code> and <code>BQAA_USER_ID</code></th><td role="cell" data-label="Pins">The identity: the verified email of the token&rsquo;s account, else <code>unverified</code>.</td></tr>
+<tr role="row"><th scope="row" role="rowheader"><code>BQAA_AUTO_CREATE_TABLE</code> set to <code>false</code></th><td role="cell" data-label="Pins">Users&rsquo; credentials never create the table; the administrator makes it once, with <code>setup.sh</code>.</td></tr>
+<tr role="row"><th scope="row" role="rowheader"><code>recordHostname</code>, <code>maxPayloadChars</code></th><td role="cell" data-label="Pins">The host name stays out, and the payload cap is fixed, pinned like the other options. These two were not read back one by one.</td></tr>
+</tbody>
+</table>
+</div>
+<p>To check one machine, <code>claude -p /bqaa-status</code> prints the pinned target with no model call, and the debug log says the mod loaded ahead of users&rsquo; mods.</p>
+
+<h3 id="admin-limits">What no setting can enforce</h3>
+<ul class="gaps">
+<li>A person can start a session without the mod. The host&rsquo;s safe mode (a flag or an environment variable) and <code>--bare</code> both skip installed plugins, the organization&rsquo;s included, and managed settings bind only the host CLI.</li>
+<li>A local administrator can edit the managed settings.</li>
+<li>Row content is what the writer sends. Whoever holds the insert permission can write rows through the API with any <code>user_id</code>. BigQuery does not record who streamed which row: <code>insertAll</code> is among the methods that write no audit log (<a href="https://docs.cloud.google.com/bigquery/docs/reference/auditlogs#exempt-methods">BigQuery audit logs</a>).</li>
+<li>BigQuery has no per-person cap on streaming inserts; its custom quotas cover query bytes only (<a href="https://docs.cloud.google.com/bigquery/docs/custom-quotas">custom quotas</a>).</li>
+</ul>
+
+<h3 id="admin-access">Credentials, access and cost</h3>
+<ul>
+<li><strong>Credentials.</strong> Each person&rsquo;s own default credentials are the default and the recommended model.
+<ul>
+<li>The token of a person signed in with gcloud&rsquo;s default scopes carried a verified email. The check printed only true or false.</li>
+<li>Impersonating one writer service account gives every row the same identity at best: that account&rsquo;s email, and only when its token carries the email scope.</li>
+<li>Workforce and workload identity federation tokens cannot be introspected, so the mod finds no email for them (<a href="https://docs.cloud.google.com/docs/authentication/token-types#fed-access-tokens">token types</a>).</li>
+<li>A key file on every machine is not recommended.</li>
+</ul></li>
+<li><strong>Writers.</strong> <code>insertAll</code> needs <code>bigquery.tables.updateData</code> and <code>bigquery.tables.get</code> on the table, and <code>bigquery.datasets.get</code> on the dataset (<a href="https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll#iam-permissions">insertAll permissions</a>).
+<ul>
+<li>An insert-only grant: <code>roles/bigquery.metadataViewer</code> on the dataset, plus a custom role holding only <code>bigquery.tables.updateData</code>, granted on the table alone (<a href="https://docs.cloud.google.com/bigquery/docs/control-access-to-resources-iam#grant_access_to_a_table_or_view">table-level access</a>).</li>
+<li>Not <code>roles/bigquery.dataEditor</code>: it can also read every row, and with them every person&rsquo;s prompts.</li>
+</ul></li>
+<li><strong>Readers.</strong> Analysts query the views, which sit in the separate dataset <code>setup.sh</code> makes. Authorized on the events dataset, they need no access to the table (<a href="https://docs.cloud.google.com/bigquery/docs/authorized-views">authorized views</a>).
+<ul>
+<li>For raw rows, a row access policy with <code>FILTER USING (user_id = SESSION_USER())</code> shows each person their own rows (<a href="https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/data-definition-language#create_row_access_policy_statement">row access policies</a>).</li>
+<li>It needs <code>user_id</code> from credentials, and it filters reads: it does not stop a writer from naming someone else.</li>
+</ul></li>
+<li><strong>Cost and retention.</strong>
+<ul>
+<li><code>insertAll</code> costs $0.01 per 200&nbsp;MiB, each row counted as at least 1&nbsp;KB (<a href="https://cloud.google.com/bigquery/pricing#data-ingestion-pricing">pricing</a>). The demo&rsquo;s rows were about 1&nbsp;KB each.</li>
+<li>Throughput limits are per project, 1&nbsp;GB/s in the US and EU multi-regions, and at most 500 rows per request are recommended: the mod&rsquo;s own batch cap (<a href="https://docs.cloud.google.com/bigquery/quotas#streaming_inserts">quotas</a>).</li>
+<li>Set a partition expiration on the table (<a href="https://docs.cloud.google.com/bigquery/docs/managing-partitioned-tables#partition-expiration">partition expiration</a>). Neither <code>setup.sh</code> nor the mod sets one.</li>
+</ul></li>
+</ul>
+
+<h3 id="admin-proposed">Proposed, not yet implemented</h3>
+<p><em class="judge">Proposed, not yet implemented.</em> These need mod code, and none is written. The estimate is three to five days, plus review.</p>
+<ul class="gaps">
+<li><strong>The policy decides, and the mod says so.</strong>
+<ul>
+<li>The mod reads the managed policy itself: the mods API&rsquo;s <code>$.settings.read({ source: 'policy' })</code> returned it in the checks.</li>
+<li>It resolves each setting in this order: the policy, then the user&rsquo;s settings and environment, then a repository&rsquo;s.</li>
+<li>A pinned option then holds on its own. No variable can flip <code>enabled</code> or <code>dryRun</code>, or replace a pinned token command.</li>
+<li>Under a policy, a repository&rsquo;s settings no longer pick the destination or the token command.</li>
+</ul></li>
+<li><strong>A locked marker.</strong> <code>/bqaa-status</code> shows each setting&rsquo;s value and its source, such as <code>dataset agent_analytics (policy, locked)</code>. The host itself shows no lock.</li>
+<li><strong>Where <code>user_id</code> came from.</strong> Each row records whether its <code>user_id</code> came from the credential, the configuration or the administrator&rsquo;s marker, and the views can split verified rows from the rest.</li>
+<li><strong>Messages for managed users.</strong> A refused write tells the person to ask their administrator, instead of naming <code>roles/bigquery.dataEditor</code>. A missing table, with auto-create off, raises the notice instead of only parking rows.</li>
+<li><strong>Tests:</strong>
+<ul>
+<li>unit tests of the resolution over policy snapshots, where no policy means today&rsquo;s behaviour;</li>
+<li>plugin tests with <code>$.settings.read</code> stubbed;</li>
+<li>mutation checks;</li>
+<li>this section&rsquo;s container check, as a script;</li>
+<li>one live session.</li>
+</ul></li>
+<li><strong>Further out.</strong> An ingestion endpoint that stamps <code>user_id</code> on the server: the only way to make it unforgeable, at two to three weeks.</li>
+</ul>
+
+<h3 id="admin-rollout">Rollout</h3>
+<p>Pilot with one group, then widen. A policy reaches everyone it is delivered to, so a group needs its own file or profile.</p>
+<ol>
+<li>The administrator makes the table and views with <code>setup.sh</code>, sets retention, and grants writers and readers.</li>
+<li>Each person signs in once with <code>gcloud auth application-default login</code>.</li>
+<li>Device management places the marketplace directory, the policy, and gcloud at a fixed path.</li>
+</ol>
+<p>Updates replace the directory. To roll back, set the plugin to <code>false</code> in the policy&rsquo;s <code>enabledPlugins</code>. Without device management, the same keys in users&rsquo; own settings work but lock nothing. The host&rsquo;s server-managed settings can carry the policy, but they cannot place the directory. The mod would then install from GitHub and count as a user&rsquo;s.</p>
 </section>
 
 <section id="not-verified" class="chapter" aria-labelledby="not-verified-h">
@@ -543,10 +709,11 @@ That order is why a finished call waits for its decision. Runs on one machine ar
 <li><strong>NOT VERIFIED:</strong> the per-file backfill lease and the completion records under many concurrent sessions on a real file system (a test shows a write&rsquo;s first line before the rest, as a write that is not atomic can), and memory and timing over long sessions.</li>
 <li><strong>NOT VERIFIED:</strong> BigQuery cost for this write pattern; no rates are quoted here.</li>
 <li><strong>NOT VERIFIED:</strong> the eight sample queries in BigQuery itself (they were parsed and run in DuckDB only).</li>
-<li><strong>NOT VERIFIED:</strong> the credential notice in a real terminal session. The drawing tests check the band&rsquo;s tree, not how a terminal paints it.</li>
-<li><strong>NOT VERIFIED:</strong> <code>setup.sh</code> end to end against a project. The views&rsquo; SQL ran in BigQuery; the script ran only against a stand-in <code>bq</code>.</li>
-<li><strong>NOT VERIFIED:</strong> the opt-in identity in a real session, and a token running out in one.</li>
-<li><strong>NOT VERIFIED:</strong> a host under managed settings; that the classic hooks pass over a person-installed plugin there is the validator&rsquo;s report, and the session id after <code>/clear</code> or resume without them is covered by the tests only.</li>
+<li><strong>NOT VERIFIED:</strong> the credential notice in a real terminal session. The drawing tests check the band&rsquo;s tree, not how a terminal paints it; the demo shows the toast and the transcript line as a headless session receives them.</li>
+<li><strong>NOT VERIFIED:</strong> <code>setup.sh</code> creating a missing dataset or table against a project. In the demo it ran where both datasets and the table existed, and made the views.</li>
+<li><strong>NOT VERIFIED:</strong> the opt-in identity in a real session, and a token running out in one. A per-user default-credentials token was checked to carry a verified email; the mod&rsquo;s use of it ran in tests only.</li>
+<li><strong>NOT VERIFIED:</strong> managed settings delivered by a device-management profile, a registry value or the host&rsquo;s server, and on macOS or Windows; the section 11 checks used a managed-settings file on the Linux build. That the classic hooks pass over a person-installed plugin under such a policy is still the validator&rsquo;s report, and the session id after <code>/clear</code> or resume without them is covered by the tests only.</li>
+<li><strong>NOT VERIFIED:</strong> section 11&rsquo;s grants, row access policy and view authorization against a project (only the documentation and gcloud&rsquo;s role listings were read), its cost figures beyond the documented prices, and everything it marks as proposed.</li>
 </ul>
 </section>
 
@@ -554,12 +721,22 @@ That order is why a finished call waits for its decision. Runs on one machine ar
 <p class="chapter-number" aria-hidden="true">Sourcebook</p>
 <h2 id="sources-h">Sources</h2>
 <ul class="source-list">
-<li><a href="https://code.claude.com/docs/en/plugins/mods/overview">mod docs</a>: the host coding-agent CLI&rsquo;s mod documentation (the overview, with the create, events, API, test and reference pages it links to)</li>
+<li><a href="https://code.claude.com/docs/en/plugins/mods/overview">mod docs</a>: the host coding-agent CLI&rsquo;s mod documentation (the overview, with the create, events, API, test and reference pages it links to), and for section 11 the same documentation&rsquo;s &lsquo;Manage mods for your organization&rsquo;, &lsquo;Deploy managed settings&rsquo; and &lsquo;Manage plugins for your organization&rsquo; pages, fetched 15 October 2026</li>
 <li><a href="https://adk.dev/integrations/bigquery-agent-analytics/">https://adk.dev/integrations/bigquery-agent-analytics/</a></li>
 <li><a href="https://github.com/googleapis/python-bigquery/blob/main/google/cloud/bigquery/_helpers.py">https://github.com/googleapis/python-bigquery/blob/main/google/cloud/bigquery/_helpers.py</a></li>
-<li><a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7</a>: the pull request with the mod, open as of this note; single files are linked at commit 4e8951c of its branch</li>
+<li><a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7</a>: the pull request with the mod, merged on 15 October 2026 as commit 5566d7f; single files are linked at commit 4e8951c of its branch</li>
 <li><a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/main/plugins/bigquery-agent-analytics-tracing">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/tree/main/plugins/bigquery-agent-analytics-tracing</a></li>
 <li><a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/6">https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/6</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll#iam-permissions">https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll#iam-permissions</a>: the permissions <code>insertAll</code> needs (section 11)</li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/control-access-to-resources-iam#grant_access_to_a_table_or_view">https://docs.cloud.google.com/bigquery/docs/control-access-to-resources-iam#grant_access_to_a_table_or_view</a>: roles granted on one table</li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/authorized-views">https://docs.cloud.google.com/bigquery/docs/authorized-views</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/data-definition-language#create_row_access_policy_statement">https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/data-definition-language#create_row_access_policy_statement</a></li>
+<li><a href="https://cloud.google.com/bigquery/pricing#data-ingestion-pricing">https://cloud.google.com/bigquery/pricing#data-ingestion-pricing</a>: streaming insert prices, read 15 October 2026</li>
+<li><a href="https://docs.cloud.google.com/bigquery/quotas#streaming_inserts">https://docs.cloud.google.com/bigquery/quotas#streaming_inserts</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/managing-partitioned-tables#partition-expiration">https://docs.cloud.google.com/bigquery/docs/managing-partitioned-tables#partition-expiration</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/custom-quotas">https://docs.cloud.google.com/bigquery/docs/custom-quotas</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/reference/auditlogs#exempt-methods">https://docs.cloud.google.com/bigquery/docs/reference/auditlogs#exempt-methods</a>: methods that write no audit log, <code>InsertAll</code> among them</li>
+<li><a href="https://docs.cloud.google.com/docs/authentication/token-types#fed-access-tokens">https://docs.cloud.google.com/docs/authentication/token-types#fed-access-tokens</a>: federated access tokens cannot be introspected</li>
 </ul>
 </section>
 
@@ -569,7 +746,7 @@ That order is why a finished call waits for its decision. Runs on one machine ar
 <footer class="footer">
 <div class="footer-inner">
 <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6"/><path class="bm-a" d="M6 10h9M6 16h12M6 22h7"/><path class="bm-cut" d="M20 9l6 7-6 7"/></svg>
-<div><p class="footer-title">A coding-agent mod that writes BigQuery Agent Analytics rows without blocking</p><p>Build note on <a href="/research/coding-agent-mod-bqaa/">caohy1988.github.io/research/coding-agent-mod-bqaa/</a>. Code in <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">pull request #7</a> (<code>plugins/bigquery-agent-analytics-mod</code>). Sample rows are test-fixture output. Prepared and documentation fetched <time datetime="2026-10-13">2026-10-13</time>; updated <time datetime="2026-10-14">2026-10-14</time>.</p></div>
+<div><p class="footer-title">A coding-agent mod that writes BigQuery Agent Analytics rows without blocking</p><p>Build note on <a href="/research/coding-agent-mod-bqaa/">caohy1988.github.io/research/coding-agent-mod-bqaa/</a>. Code in <a href="https://github.com/haiyuan-eng-google/bigquery_agent_analytics_skill/pull/7">pull request #7</a> (<code>plugins/bigquery-agent-analytics-mod</code>). Sample rows are test-fixture output. Prepared and documentation fetched <time datetime="2026-10-13">2026-10-13</time>; updated <time datetime="2026-10-15">2026-10-15</time>.</p></div>
 <a class="back-top" href="#title">Back to top</a>
 </div>
 </footer>
