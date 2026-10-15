@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-15T06:57:41Z",
+  "updatedAt": "2026-10-15T08:36:18Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
@@ -2790,6 +2790,24 @@
         "code-decides-done",
         "EM",
         "nightly",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "scalemas-bounded-sharing-during-collection-2026-10-15",
+      "date": "2026-10-15",
+      "displayDate": "Oct 15, 2026",
+      "title": "ScaleMAS: bounded sharing during collection",
+      "href": "https://arxiv.org/abs/2610.16120",
+      "why": "ScaleMAS (Qi et al.) has identical, role-free agents work asynchronously through one append-only store per task: they publish results with references to what they built on, search it with BM25 plus a decaying citation weight (at most 8 messages per call), and visit messages by address. With a 9B model the authors report BrowseComp-Plus accuracy rising from 38.1% with one agent to 65.3% with 16; on SWE-bench Verified, 4 agents matching the 80.0% of 8 independent agents with about half the tokens (15.3M against 28.3M per example); and, at 8 agents, BrowseComp-Plus falling from 60.0% to 40.8% when the citation weight is removed. Proposed experiment (playbook §6, Field Brief pipeline): with the three existing collector seats and equal total token budgets, compare the current pack workflow (one pack per seat, all read for the brief) against task-local sharing of intermediate results with bounded BM25 retrieval, then add citation weighting as a separate ablation. Measure verified coverage and false claims in the selected final brief, duplicate tool calls, total tokens and elapsed time; the runs include a misleading but popular finding and a collector dropout. Adopt only if verified output improves or equal quality costs less; stop if citation ranking amplifies false findings. Promotion only via §16's existing gate (three clean runs, rollback tested, receipt complete); reviewer findings stay out of the shared pool so review stays blind. Caveats: the three third-party benchmarks run on 100 items each (the first 100, or all of FATE-H) with no variance or error bars reported for the headline numbers, and are scored Pass@N: the group counts as right if any of its N agents is right (so part of the 1-to-16 rise is extra tries), and choosing the final answer is called orthogonal and never tested, which is why the experiment scores the selected brief. ScaleMAS's large relative gains over debate and shared-context baselines are on Contradiction Audit, the authors' own LLM-built benchmark, where a contradiction counts as found if any reported pair includes its edited snippet and false reports cost nothing: debate and shared-context baselines never exceed 7% there in the 9B runs, while ScaleMAS reaches 29.4% at 16 agents and 50.9% at 128. Citation-quality evidence is partly circular: among examples whose correct answer cites a message, 85% of the most-cited fifth of messages lie on a correct answer's evidence chain against 29% of the least-cited, but that chain is traced through citations, as the authors acknowledge; messages naming gold evidence do draw about twice the citations of those naming other sources. Self-citations and replies that correct or contradict a message also add to its weight, so popularity cannot stand in for verification. The cap bounds each call, not total context or cost: an agent's intake grows with how often it reads, and on FATE-M at 8 agents BM25-only ranking read twice the tokens of the default (5.7M against 2.7M) under the same cap. The store is discarded after each task, so it is no evidence against our durable memory loop. The paper's role-free agents run with no human gate or reviewer, so the results do not justify replacing our lanes, human gates or blind review. Nothing has been run; any workflow change needs Haiyuan. No new seat. Lab card; appliedToPlaybook false.",
+      "source": "Haiyuan-approved Lab card (2026-10-15 01:18 PT) · arXiv 2610.16120v1 full text",
+      "tags": [
+        "Field Brief",
+        "coordination",
+        "retrieval",
+        "evals",
+        "tokens",
         "backlog"
       ],
       "appliedToPlaybook": false
