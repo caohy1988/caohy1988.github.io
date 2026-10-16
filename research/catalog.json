@@ -1,6 +1,26 @@
 {
   "items": [
     {
+      "id": "agno-v3-1-4-sandboxed-harness-agents-durable-queue",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Agno v3.1.4 — ClaudeAgent/CodexAgent take a sandbox= provider and run the whole harness in per-session Docker/AgentCore computers; turns publish run+checkpoint atomically or nothing, and unverifiable restores fail before the model runs",
+      "html": " <a href=\"https://github.com/agno-agi/agno/releases/tag/v3.1.4\">Launch page</a> (2026-10-16, stable) — Agno v3.1.4 adds Sandboxed Harness Agents: ClaudeAgent and CodexAgent accept a sandbox= provider (DockerSandbox or Bedrock AgentCoreSandbox) and run the entire harness process in an isolated per-session computer. Each turn claims the session via a Postgres lease, restores the last committed checkpoint (workspace plus native conversation files), and publishes the run row and recovery point in one transaction — a failed or cancelled turn publishes nothing, and a restore missing the native conversation id fails with native_state_missing before the model runs. Background runs for db-backed, version-pinned, and factory components now ride the durable queue with a stamped resolution scope replayed at claim time. <a href=\"/research/briefs/2026-10-16-1234-muse.html\">Full brief</a>.",
+      "added": "2026-10-16T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "langfuse-v4-61-0-v4-63-0-skills-gateway-keys-experiment-filters",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Langfuse v4.61.0–v4.63.0 — skills become first-class versioned trace objects with usage metrics and a public v4 preview API; AI Gateway keys separated from organization API keys; per-experiment filter targeting unified",
+      "html": " <a href=\"https://github.com/langfuse/langfuse/releases/tag/v4.63.0\">Launch page</a> (2026-10-16, stable) — Across three stable releases in one day (v4.61.0 08:20Z, v4.62.0 10:00Z, v4.63.0 14:33Z), Langfuse makes skills first-class trace objects: a dedicated skills tab, traces per skill version, a usage-metrics tab, and skill management exposed as a public v4 preview. v4.63 also separates AI Gateway keys from organization API keys, attributes gateway errors by origin with measured gateway overhead, and unifies per-experiment filter targeting; v4.61 adds gateway routing by connection slug with per-connection model controls. Python SDK v5.0.2 shipped alongside (perf/docs only). <a href=\"/research/briefs/2026-10-16-1234-muse.html\">Full brief</a>.",
+      "added": "2026-10-16T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
       "id": "pydantic-ai-v2-57-0-approval-reviewer-mcp-apps-service-tier-pricing",
       "tag": "Industry",
       "kind": "rank",
@@ -158,7 +178,13 @@
       "html": " <a href=\"https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.46.0\">Launch page</a> (2026-10-14, stable) — Braintrust's Python SDK v0.46.0 traces ADK workflow nodes and tool calls while letting Google GenAI own the LLM spans for ADK model calls, and traces OpenAI/LiteLLM Decisions APIs plus OpenRouter Responses APIs. OpenTelemetry span customizers fail closed on errors without dropping spans, and usage fidelity improves across Pydantic AI web search, Mistral service tiers/logprobs, and streamed GenAI candidate metadata. <a href=\"/research/briefs/2026-10-14-1234-muse.html\">Full brief</a>.",
       "added": "2026-10-14T1234",
       "addedDisplay": "12:34 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-10-16T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "Braintrust Python SDK 0.46.1 (2026-10-16) makes error-score handler calls reliable for every failed eval row and forwards the handler through EvalAsync, so failed rows can no longer silently lack scores; the rest is fix/perf across tracing integrations. <a href=\"/research/briefs/2026-10-16-1234-muse.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "arxiv-2610-14477-executable-contracts-robustness-evaluation",
@@ -310,6 +336,11 @@
           "at": "2026-10-15T1234",
           "displayTime": "12:34 PM PT",
           "html": "Opik 2.2.102 (2026-10-15) ships the model catalog with profiles and per-model parameters served by the registry API and bounds trace-keyed span reads with the span_weeks index. Same-day 2.2.101 retired the R2DBC bulk-insert paths and backfilled span_weeks from existing spans. <a href=\"/research/briefs/2026-10-15-1234-muse.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-16T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "Opik 2.2.103 (2026-10-16) fixes ADK agent-span tracking for spans opened via start_span on google-adk 2.12.0, so ADK traces record spans they previously missed, and adds a native Together AI SDK integration plus latest-prompt-version returns on no-op prompt saves. <a href=\"/research/briefs/2026-10-16-1234-muse.html\">Full brief</a>."
         }
       ]
     },
@@ -7411,6 +7442,21 @@
   ],
   "runs": [
     {
+      "id": "2026-10-16T1234",
+      "date": "2026-10-16",
+      "display": "12:34 PM PT",
+      "href": "/research/briefs/2026-10-16-1234-muse.html",
+      "analyzer": "Muse",
+      "added": [
+        "agno-v3-1-4-sandboxed-harness-agents-durable-queue",
+        "langfuse-v4-61-0-v4-63-0-skills-gateway-keys-experiment-filters"
+      ],
+      "updated": [
+        "opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row",
+        "braintrust-python-sdk-0-46-0-adk-workflow-tracing-otel-span-customizers"
+      ]
+    },
+    {
       "id": "2026-10-16T0034",
       "date": "2026-10-16",
       "display": "12:34 AM PT",
@@ -9873,6 +9919,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-10-16T1234",
+      "date": "2026-10-16",
+      "display": "12:34 PM PT",
+      "href": "/research/briefs/2026-10-16-1234-muse.html",
+      "analyzer": "Muse",
+      "title": "Harness agents get sandboxes with verified checkpoints; skills become first-class trace objects; a Friday with no new arXiv batch"
+    },
     {
       "id": "2026-10-16T0034",
       "date": "2026-10-16",
