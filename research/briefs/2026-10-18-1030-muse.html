@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-10-18-1030: Catch-up after the outage — OpenAI&#x27;s SDKs gain a Live sideband and an ultrafast Agents tier; LiteLLM turns stdio MCP off by default; no new arXiv batch all weekend</title>
+  <meta name="description" content="Field Brief 2026-10-18-1030: Catch-up after the outage — OpenAI&#x27;s SDKs gain a Live sideband and an ultrafast Agents tier; LiteLLM turns stdio MCP off by default; no new arXiv batch all weekend">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-18-1030-muse.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 10:30 AM PT · Sun Oct 18, 2026 · Muse</p>
+    <article>
+<h1>Field Brief — 2026-10-18-1030: Catch-up after the outage — OpenAI's SDKs gain a Live sideband and an ultrafast Agents tier; LiteLLM turns stdio MCP off by default; no new arXiv batch all weekend</h1>
+<p><strong>Writer: Muse (<code>muse-wonder-full-1.0</code>)</strong> · For Haiyuan Cao (TL, BQAA + ADK)
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>Slot:</strong> 2026-10-18-1030 (on-demand catch-up, requested 10:19 PT Sun Oct 18). <strong>Window:</strong> ~46h since the last published brief <code>2026-10-16-1234-muse</code> — about 12:34 PT Fri Oct 16 (19:34Z) through 10:30 PT Sun Oct 18 (17:30Z). Routine usage was out from ~13:00 PT Fri to ~08:00 PT Sun, so the scheduled 00:34 Sat, 12:34 Sat and 00:34 Sun briefs never published and most hourly packs never ran. <strong>Effort:</strong> high. <strong>Path:</strong> fresh (<code>_runs/fb-2026-10-18-1030/fresh-items.md</code> is the candidate list; packs grepped per item only, plus the one allowed section read: DSH 0832 lines 43–108 and Agy 0932 lines 54–106).</p>
+<p><strong>Shape of this window:</strong> a quiet weekend on the surface — no arXiv batch, no observability-vendor stable in my 26-repo sweep — with two real keeps underneath. OpenAI shipped nine SDK releases that together add a typed sideband channel to Live sessions, a new "ultrafast" service tier name for Agents traffic, and Realtime Translation as a first-class session type. LiteLLM's v1.106.0 flips a security default that will break silent assumptions: stdio MCP servers are now disabled unless explicitly enabled. Everything else is patch trains, prereleases, and merge traffic, judged as Progress or mentions below.</p>
+<hr />
+<h2>Read this first</h2>
+<p>This is a catch-up brief covering an outage gap with thin collector coverage: one wide DSH sweep (44.6h window), two short Agy windows, and no Muse collector pass at all. I compensated with my own GitHub release sweep of 26 watchlist repos, registry re-reads, and an arXiv ladder (method and gaps in Housekeeping/Unconfirmed) — but per-item coverage of Fri afternoon through Sun morning is thinner than a normal slot, and vendor blog/changelog surfaces got only my web pass, which found no primary-source launch to rank.</p>
+<ol><li><strong>OpenAI Python v3.32.0→v3.35.1 and Node v7.35.0→v7.38.0 (2026-10-16T20:17Z → 2026-10-18T01:06Z): Live sessions get a typed sideband, Agents get an "ultrafast" tier, and Realtime Translation becomes a session type.</strong> Nine stable releases in ~29 hours; every body read by me. The headline trio lands in Python v3.35.0 / Node v7.38.0 (typed Live sideband events in both; ultrafast Agents tier in the Python release), with Realtime Translation WebSocket sessions in Python v3.34.0 and Decisions-in-Live plus regional residency options opening the train. → NEW Industry.
+</li><li><strong>LiteLLM v1.106.0 (GH Release 2026-10-18T05:53:32Z; PyPI <code>litellm</code> latest = 1.106.0, re-read by me): stdio MCP servers are disabled by default — a breaking security default.</strong> The same minor adds a one-command Docker quickstart (gateway + Postgres + admin UI), JWT-to-existing-virtual-key mapping, Claude Agent SDK trace support in Lens, and durable cross-pod settlement for background interaction billing. Compare base <code>v1.105.0...v1.106.0</code> verified by me, so this is a clean delta on the 1.105 card, not a re-count. → NEW Industry.
+</li><li><strong>Academy: no new batch all weekend — verified, not assumed.</strong> My own abs ladder at write time: <code>2610.22372</code> → 200 (44,671 B), <code>2610.22373</code> and <code>2610.22400</code> → 404; pin <code>2609.02702</code> → 200, intact. No Fri/Sat-night announce landed; the next regular batch is expected Sun ~17:00 PT, after this slot. → Academy section.
+</li><li><strong>The loud merge traffic did not ship.</strong> LiteLLM's breaking <code>count_tokens</code> and MCP ID-JAG stacks, Mastra's v2 legacy-API removal, and Qwen Code's 108-merge Managed Agent programme are all merged-to-branch or RC-only at write time — recorded as watches in the mentions, with nothing claimed as released.
+</li></ol>
+<hr />
+<h2>Industry</h2>
+<h3>NEW</h3>
+<h4>OpenAI Python v3.32.0–v3.35.1 / Node v7.35.0–v7.38.0 — typed Live sideband events, an "ultrafast" service tier for Agents, and Realtime Translation sessions</h4>
+<ul><li><strong>What shipped:</strong> five stable Python releases (<code>v3.32.0</code> 2026-10-16T20:17:26Z, <code>v3.33.0</code> 2026-10-17T00:29:04Z, <code>v3.34.0</code> 2026-10-17T20:34:04Z, <code>v3.35.0</code> 2026-10-17T23:13:52Z, <code>v3.35.1</code> 2026-10-18T01:05:46Z) and four stable Node releases (<code>v7.35.0</code> 2026-10-16T20:16:58Z, <code>v7.36.0</code> 2026-10-17T00:28:22Z, <code>v7.37.0</code> 2026-10-17T20:34:08Z, <code>v7.38.0</code> 2026-10-17T23:13:58Z) — all nine bodies read by me via <code>gh api</code>; PyPI <code>openai</code> latest = 3.35.1 re-read by me. Prior card is <code>openai-sdk-node-7-33-0-python-3-31-0-browser-computer-toolsets</code>; this train ranks NEW as one card on the Live/Realtime surface expansion, following the same train-consolidation precedent.
+</li><li><strong>The Live surface is the story.</strong> v3.35.0/v7.38.0 add <em>typed Live sideband events</em> (Python #4099, Node #2964) — Live sessions gain a typed out-of-band event channel alongside the media path, so session-adjacent signals stop being untyped payloads parsers must guess at. v3.34.0 adds <em>Realtime Translation WebSocket sessions</em> as a named session type (Python #4095; Node v7.37.0 moves onto generated Translation bindings, #2961). The train opens with Decisions inside Live sessions, audio fixture playback in Live, cache settings/key options, prompt-based voice creation, regional processing residency options, and response error diagnostics with model notices (v3.32.0/v7.35.0). Read together, "Live" is becoming a session family — voice, decisions, translation — with its own event typing, not a single realtime socket.
+</li><li><strong>The Agents tier name matters for analytics even before its semantics are public.</strong> Python v3.35.0's body lists, verbatim, "add ultrafast service tier for Agents" (#4101). I claim only what the release establishes: a new service-tier value named for Agents traffic now exists in the Python SDK's API surface. The Node v7.38.0 body lists only the sideband feature — the collector-reported Node ultrafast merge (#2966) is <strong>not</strong> in the v7.38.0 body I read, so Node shipment of the tier is recorded under Unconfirmed, not claimed here. v3.35.1 is a one-line Realtime byte-read fix on websockets 13 (#4102), included in the train, not a rank reason. GPT-4-alias shutdown notices (Node v7.37.0, #2959) are noted without weight.
+</li><li><strong>Why it matters for BQAA:</strong> three new dimensions will start appearing in OpenAI-originated traces and usage rows: session family (Live vs Realtime Translation vs classic Realtime), sideband event types, and service tier including <code>ultrafast</code>. If tier and session-type fields are flattened into free-form attributes at ingest, the first "what did ultrafast Agents traffic cost/latency?" question becomes a backfill. Preserve them first-class now, while volume is zero-to-small. The residency options (v3.32.0) similarly foreshadow region as a queryable field on requests that previously carried none.
+</li></ul>
+<h4>LiteLLM v1.106.0 — stdio MCP servers disabled by default (breaking); one-command Docker quickstart; Lens learns Claude Agent SDK traces</h4>
+<ul><li><strong>What shipped:</strong> GH Release <code>v1.106.0</code> published 2026-10-18T05:53:32Z (stable; body read by me via <code>gh api</code>, including its <code>v1.105.0...v1.106.0</code> compare line); PyPI <code>litellm</code> latest = 1.106.0 re-read by me via curl. Prior card is <code>litellm-1-105-0-stable-lens-beta-agent-trace-investigations-otlp-ingest-clickhouse</code>. The in-window <code>v1.103.5</code> (2026-10-17T17:02:19Z, body read by me) is a two-fix stable-branch backport (#46949) and is a mention, not part of this rank; <code>v1.107.0-rc.1</code> is a prerelease and NOTE-only (see mentions).
+</li><li><strong>The breaking default is the headline:</strong> <code>feat(mcp)!: disable stdio MCP servers by default</code> (#44066). A gateway that silently spawned local stdio MCP servers on configuration now refuses unless explicitly enabled — the safe direction for a proxy that increasingly runs multi-tenant, and an upgrade-breaker for anyone who relied on the implicit behaviour. For an analytics audience the immediate effect is a population change: MCP tool-call traffic through LiteLLM gateways will step down (or error) at this version boundary wherever stdio servers were implicit, and that step will look like a usage drop unless version is joined in.
+</li><li><strong>The rest of the minor, judged honestly:</strong> a one-command Docker quickstart starting gateway + Postgres + admin UI (#43673) lowers the self-host on-ramp; <code>auto_register_map_existing_key</code> maps a JWT to the user's existing virtual key (#42375), tightening the identity-to-spend join; Lens gains Claude Agent SDK trace support with agent name/logo/chat content (#44248), typed trace queries aligned with log visibility (#44228), and investigation briefs carrying problem/goal/outcome/test-cases (#44311); background interaction billing gets durable cross-pod settlement (#41955) — spend records for async work are exactly where double-counts and drops hide, so durability here is an analytics-correctness feature; ROI reporting adds GitLab sources with branch cost attribution (#44324). The long fix tail (Bedrock/Responses bridging, pricing stamps, guardrails on image edits) is recorded as tail, not rank weight.
+</li><li><strong>Why it matters for BQAA:</strong> LiteLLM is the gateway most likely to sit between BQAA-adjacent agent traffic and its warehouse copy. This minor changes three joins at once — MCP traffic population (stdio default), identity mapping (JWT→existing key), and async spend settlement (cross-pod durable) — so cost and tool-call series spanning the 1.106 boundary need a version annotation before anyone trends them.
+</li></ul>
+<h3>Progress (existing cards)</h3>
+<ul><li><strong><code>langgraph-1-2-13-checkpoint-replay-integrity-fork-before-replay-answered-interrupts-get-state</code></strong> — LangGraph <code>1.2.16</code> (GH Release 2026-10-16T22:11:28Z; body read by me; PyPI <code>langgraph</code> latest = 1.2.16 re-read by me) is a resume-correctness patch in the same integrity line as the parent card: a resumed Command's update applies once (#9322), a subgraph no longer reruns finished tasks on resume (#9315), a resumed exit run's pending writes save once (#9314), and an invalid resume value lets sibling tasks finish (#9265). The one new capability rides along: <code>prune</code> on <code>PostgresSaver</code>/<code>AsyncPostgresSaver</code> (checkpoint-postgres 3.2.0, #9290) — checkpoint stores gain a first-class retention verb, which matters to anyone warehousing thread state. Fix-led with one capability: Progress, not NEW. (The prior brief's open "prune defaults" question is not answered by this body; the row stands in Unconfirmed.)
+</li><li><strong><code>letta-code-v0-34-12-13-claude-codex-subagents-connected-computer-live-tool-progress-opencode-backup-wake</code></strong> — Letta Code <code>v0.34.16</code> (GH Release 2026-10-16T21:45:24Z; body read by me) lets operators steer, resume and stop remote Claude Code/Codex subagents (#5115, with e2e coverage #5123) and makes subagents and Claude/Codex workers inherit the main agent's vault (#5087). Steering a running subagent is a control-surface step on the parent card's subagent line — runs become intervenable objects with an audit-relevant act (who steered, when) rather than fire-and-forget children. The remainder is listener/teleport fixes: Progress, not NEW.
+</li></ul>
+<h3>One-line mentions (NOTE)</h3>
+<ul><li><strong>Vercel AI SDK <code>ai@7.0.143</code> patch train (GH Release 2026-10-16T20:10:09Z; body read by me):</strong> lazy default chat IDs and an experimental <code>experimental_lowMemory</code> streaming mode for <code>streamText</code>. The ~79-package <code>@ai-sdk/*</code> wave includes the <code>@ai-sdk/harness-*</code> adapter family, but I verified on npm that <code>@ai-sdk/harness</code> was created 2026-06-04 — the family pre-dates this window and is <strong>not</strong> a launch; do not card it as one. Patch train: NOTE.
+</li><li><strong>Cline CLI v3.0.73 / SDK v0.0.95 / Desktop v0.0.48 (2026-10-17T03:00–04:34Z; CLI body read by me via tag <code>cli-v3.0.73</code>):</strong> a model-catalog refresh — GPT-6 <code>max_completion_tokens</code> fix, new CommandCode/Reflection providers, default-model changes. One day after the Cloud-sessions card (<code>cline-v4-1-25-…</code>), this is maintenance: NOTE, no Progress.
+</li><li><strong>DeepEval continuity (prior Unconfirmed, updated not resolved):</strong> PyPI <code>deepeval</code> 4.3.1 uploaded 2026-10-16T19:59:47Z (re-read by me) and GH Release <code>setup-v0.1.0</code> "Setup wizard 0.1.0" published 2026-10-16T20:00:06Z (body read by me) — but the GH artifact is a setup-wizard tag whose body is a long mixed changelog (transcription-accuracy and voice metrics among docs/persona changes), not a Python-library release note for 4.3.1. Still no clean primary body for the PyPI minor: NOTE only, row stands in Unconfirmed.
+</li><li><strong>vLLM v0.32.0 (GH Release 2026-10-18T06:50:48Z, stable; highlights read by me) — writer-sourced, not in the candidate list:</strong> a large serving minor (814 commits) whose agent-adjacent surface is a <code>POST /v1/systemone</code> structured-decisions endpoint and a generic <code>hf</code> tool/reasoning parser; the bulk is KV-cache precision, Model Runner V2, and security hardening. vLLM has no catalog card and this brief does not open a serving-infra line on a catch-up slot: mention only.
+</li><li><strong>Prereleases and unreleased merges (NOTE/watch only, nothing claimed as shipped):</strong> LiteLLM <code>v1.107.0-rc.1</code> (2026-10-18T08:00:57Z) with the breaking <code>count_tokens</code> (#47209/#46777) and MCP ID-JAG (#47058/#47094) stacks merged to <code>main</code>/<code>rc/1.107.0</code> — the 0034-era count-endpoint watch is now "in RC," still not stable; Mastra <code>@mastra/core</code> 1.79.0-alpha.2/.3 only (npm <code>latest</code> still 1.78.0, re-read by me) with the breaking v2 legacy-API/AI-SDK-v4 removal merged to the <code>v2</code> branch (#27343) — a migration cliff to watch, not a release; Qwen Code nightlies only (no stable 0.25.3 — watch stays OPEN) under a 108-merge Managed Agent durability programme that will matter when it ships stable; Codex <code>rust-v0.164.0-alpha.3</code> (2026-10-17T04:03:25Z, prerelease, seen in my sweep); Gemini CLI nightlies; MCP TypeScript SDK Skills extension SEP-2640 as an <strong>open</strong> PR (#3047) — spec-direction signal rhyming with last brief's Langfuse skills card, ranked nowhere until merged.
+</li><li><strong>Already covered, not re-adjudicated:</strong> <code>langchain-core==1.6.12</code> (candidate F02/F04) was judged NOTE in the 2026-10-16-1234 brief, whose write-time sweep caught its 19:28Z release; the late-finishing Agy 1232 pack re-presents it here. No re-mention beyond this line. <code>google/adk-python</code>: no in-window release in my sweep; PR activity only (incl. an unmerged close, F07). 1P NOTE only per standing rule; nothing carded.
+</li><li><strong>Quiet by successful lookup (my sweep, not absence of looking):</strong> Langfuse, Opik, Phoenix, Braintrust Python SDK, Weave, Agno, Pydantic AI, Inspect, promptfoo, LangWatch, LlamaIndex, CrewAI, Haystack, OpenCode, OpenHands, LangChain, MCP TS SDK, OpenLLMetry, OpenInference and Helicone returned no stable GH Release after 2026-10-16T19:34Z in my <code>gh api</code> sweep (lookups succeeded; per-repo detail in Unconfirmed). LangSmith Python PyPI remains 0.14.11 (re-read by me) — the standing no-substance row stands.
+</li></ul>
+<hr />
+<h2>Academy</h2>
+<p><strong>No new batch; no new ranks.</strong> Ceiling <code>2610.22372</code>, verified three ways: my own curl ladder at write time (<code>2610.22372</code> → 200 at 44,671 B; <code>2610.22373</code> and <code>2610.22400</code> → 404), DSH 0832's double ladder probe with eight consecutive 404s above the ceiling plus category listings topping at the same ID (allowed section, read by me), and Agy 0932's independent re-probe Sun morning. Priority pin <code>2609.02702</code> → 200 by my probe, intact, not re-carded. No arXiv announce landed Fri or Sat night; HF Daily Papers publishes nothing Sat/Sun (collector-verified zeros, not gaps). I opened no PDFs this slot and rank nothing on abstracts. The next batch is expected with the Sunday-evening (ET) announcement, feeding the next scheduled slot.</p>
+<h3>Scouted, not ranked (carried, unchanged)</h3>
+<p>The 2026-10-16-1234 brief's scouted carries stand untouched — collector title/abstract screens only, no PDFs opened in either slot, no claims made about results. Strongest carries into the next Academy slot remain: <a href="https://arxiv.org/abs/2610.21098">https://arxiv.org/abs/2610.21098</a> <em>ToolBottleneckBench</em>; <a href="https://arxiv.org/abs/2610.22209">https://arxiv.org/abs/2610.22209</a> <em>Beyond Downstream QA</em>; <a href="https://arxiv.org/abs/2610.21128">https://arxiv.org/abs/2610.21128</a> <em>When Judges Agree and Are Wrong</em>; <a href="https://arxiv.org/abs/2610.19128">https://arxiv.org/abs/2610.19128</a> <em>CLASHarness</em>; plus the HF-surfaced <a href="https://arxiv.org/abs/2610.22280">https://arxiv.org/abs/2610.22280</a> <em>LEASH</em> already screened in-range by collectors. Full-PDF reads are owed before any of these can rank.</p>
+<hr />
+<h2>Six-week EV</h2>
+<ul><li><strong>Service tier becomes an agent-traffic dimension.</strong> OpenAI naming an "ultrafast" tier <em>for Agents</em> (this brief) is the first mainstream signal that agent loops get their own latency/cost class rather than borrowing chat tiers. Within six weeks expect gateways (LiteLLM first, by position) to surface tier-aware routing and pricing rows; warehouse schemas should carry <code>service_tier</code> first-class before the first cost review asks for it.
+</li><li><strong>Safe-by-default flips will keep landing as breaking minors.</strong> LiteLLM's stdio-MCP-off default (this brief) follows the same arc as Agno's host-setting rejections (last brief): implicit local execution is being removed from agent plumbing one default at a time. Each flip creates a version-boundary step in tool-call populations — annotate version on ingest or misread the step as behaviour change.
+</li><li><strong>Skills are converging on a cross-vendor object.</strong> Langfuse versioned skills (last brief), Opik persisting repo skills on traces (last brief), and now an MCP Skills extension drafted in the reference TypeScript SDK (this brief, open PR) point the same way: skill id/version is becoming a portable trace dimension. If SEP-2640 merges, BQAA should expect it from MCP-native emitters, not just observability vendors.
+</li></ul>
+<hr />
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>OpenAI SDKs 3.32–3.35.1 / 7.35–7.38:</strong> Live sessions gain typed sideband events and a Translation session type; Agents gain an <code>ultrafast</code> tier value (Python-shipped) — preserve session family, sideband types, and service tier on ingest.
+</li><li><strong>LiteLLM 1.106.0:</strong> stdio MCP is off by default (breaking) — expect a tool-call population step at this boundary; JWT→existing-key mapping and durable async billing settlement change cost joins.
+</li><li><strong>LangGraph 1.2.16:</strong> resume paths now apply/save exactly once, and Postgres checkpoint stores gain <code>prune</code> — checkpoint retention becomes a policy surface.
+</li><li><strong>Letta Code 0.34.16:</strong> remote Claude/Codex subagents can be steered/resumed/stopped and inherit the main vault — subagent runs become intervenable, auditable objects.
+</li><li><strong>Academy:</strong> ceiling still <code>2610.22372</code> (verified three ways); no weekend batch exists to mine; scouted carries still owe full-PDF reads.
+</li><li><strong>Watches, not ships:</strong> LiteLLM <code>count_tokens</code>/ID-JAG sit in the 1.107 RC; Mastra v2 drops legacy APIs on a branch; Qwen's Managed Agent programme has no stable yet.
+</li></ul>
+<hr />
+<h2>Unconfirmed</h2>
+<table>
+<tr><th>Item</th><th>What was not confirmed</th><th>Where I looked</th></tr>
+<tr><td>Collector outage gap (Muse 1332 Fri → Agy 0632 Sun absent; extra seats Sat/Sun absent; briefs 00:34 Sat, 12:34 Sat, 00:34 Sun unpublished)</td><td>No packs exist for those seats; the ~44h core window rests on DSH 0832's single wide sweep plus my own checks — disclosed, not proven per-item</td><td>Kickoff gap list; my <code>gh api</code> sweep of 26 watchlist repos for releases after 2026-10-16T19:34Z (found only the releases judged above, plus writer-sourced vLLM v0.32.0); registry re-reads via curl</td></tr>
+<tr><td>Vendor blog/changelog launches Fri afternoon → Sun morning (LangChain/LangSmith, Langfuse, Arize, Braintrust, Weave, Datadog, Galileo, Opik, OpenAI, Google/Vertex, Bedrock AgentCore, Foundry, Databricks, Snowflake)</td><td>gap: no dedicated collector pass exists for these surfaces this window; my web searches returned only aggregators/SEO pages and pre-window items — recorded as an incomplete surface, <strong>not</strong> as "no launch." Nothing is ranked from web search</td><td>Two <code>web_search</code> passes by me (observability vendors; platform vendors) at write time; no primary-source in-window launch surfaced</td></tr>
+<tr><td>OpenAI Node "ultrafast" Agents tier shipment</td><td>Collector reports merge <code>openai-node#2966</code>; the v7.38.0 release body I read lists only typed Live sideband events. Tier claimed as shipped for Python v3.35.0 only (#4101 in body)</td><td>GH release bodies for <code>v7.35.0</code>–<code>v7.38.0</code> and <code>v3.35.0</code> via <code>gh api</code></td></tr>
+<tr><td>DeepEval PyPI 4.3.1 substance (carry, updated)</td><td>PyPI 4.3.1 exists in-window, but the only in-window GH artifact is <code>setup-v0.1.0</code> (setup wizard) with a mixed changelog body — still no primary release body for the Python minor; not ranked</td><td>PyPI JSON via curl; <code>gh api</code> deepeval <code>setup-v0.1.0</code> body</td></tr>
+<tr><td>LangSmith Python 0.14.10/0.14.11 substance (carry from 0034/1234)</td><td>Re-checked: PyPI still 0.14.11; no in-window GH Release in my sweep — no capability claimed; row stands</td><td>PyPI JSON via curl; <code>gh api</code> langsmith-sdk releases in sweep</td></tr>
+<tr><td>LangGraph <code>prune</code> defaults (carry)</td><td>1.2.16's body announces <code>prune</code> on the Postgres savers (#9290) without default/retention semantics; I did not open the PR — defaults unconfirmed</td><td>GH release body for <code>1.2.16</code></td></tr>
+<tr><td>NOTE-grade merge/open PR rows (LiteLLM RC stacks, Mastra #27343, Qwen Managed Agent exemplars, MCP SEP-2640 #3047, Phoenix opens)</td><td>Rest on collector PR reads in the allowed sections; I verified every <em>release</em> body/clock myself but did not re-open these PR bodies — no PR-level claim is ranked; all sit in mentions as watches</td><td>DSH 0832 §2 / Agy 0932 §2 (allowed read); <code>gh api</code> for all release tags judged</td></tr>
+<tr><td>Social surfaces</td><td>gap: LinkedIn authwall; X 401 / Reddit 403 walls as reported in packs; not re-probed by me; no social claims made</td><td>Pack surface lines via fresh list and allowed sections</td></tr>
+<tr><td>Python <code>urllib</code> registry reads</td><td>My first registry pass failed with local SSL certificate verification errors — a failed lookup class, routed around with <code>curl</code> reads that succeeded for every package cited; no "no release" claim rests on the failed pass</td><td>curl re-reads: PyPI <code>litellm</code>, <code>openai</code>, <code>deepeval</code>, <code>langgraph</code>, <code>langsmith</code>; npm <code>@ai-sdk/harness</code>, <code>@mastra/core</code></td></tr>
+<tr><td>Release behaviors (all ranked items)</td><td>Release bodies and registry clocks read; nothing executed or installed</td><td><code>gh api</code>; npm/PyPI JSON via curl</td></tr>
+<tr><td>Academy scouted carries</td><td>Rest on collector abstract/title screens; I opened no PDFs this slot and claim nothing about their results</td><td>2026-10-16-1234 brief, Academy scouted section; DSH/Agy §3</td></tr>
+</table>
+<p>All ranked claims are confirmed against primary sources I read directly: GH release bodies for <code>openai-python v3.32.0</code>–<code>v3.35.1</code>, <code>openai-node v7.35.0</code>–<code>v7.38.0</code>, <code>litellm v1.106.0</code> + <code>v1.103.5</code>, <code>langgraph 1.2.16</code>, <code>deepeval setup-v0.1.0</code>, <code>letta-code v0.34.16</code>, <code>vercel/ai ai@7.0.143</code>, <code>cline cli-v3.0.73</code>, and <code>vllm v0.32.0</code> highlights via <code>gh api</code>; a release-listing sweep (published after 2026-10-16T19:34Z) across 26 watchlist repos; registry re-reads via curl for PyPI <code>litellm</code> (latest 1.106.0), <code>openai</code> (3.35.1), <code>deepeval</code> (4.3.1, 2026-10-16T19:59:47Z), <code>langgraph</code> (1.2.16), <code>langsmith</code> (0.14.11) and npm <code>@ai-sdk/harness</code> (created 2026-06-04), <code>@mastra/core</code> (latest 1.78.0, alpha 1.79.0-alpha.3); arXiv ceiling/pin via my curl abs ladder; catalog dedupe greps against the live <code>catalog.json</code> (604 items / 155 briefs / 157 runs; 0 hits for both NEW version strings <code>1.106</code>/<code>3.35</code>/<code>7.38</code>/<code>7.0.143</code>/<code>1.2.16</code>/<code>4.3.1</code>/<code>0.34.16</code>; both Progress parents verified as exact catalog ids; no vLLM card exists). No GitHub lookup failed on my ranked path (one Cline tag guess 404'd and was corrected to <code>cli-v3.0.73</code> from the release listing); the one failed lookup class (Python-urllib SSL) is recorded above and was routed around with curl — nothing is reported as "no release" or "no papers" on a failed lookup.</p>
+<hr />
+<h2>Housekeeping</h2>
+<ul><li><strong>Decision: PUBLISH</strong> — 2 NEW (both Industry) + 2 Progress, 0 Academy NEW. The catch-up window held two material stable trains (OpenAI Live/Agents surface; LiteLLM 1.106's breaking MCP default) plus two material Progress steps, so PUBLISH over STAY_QUIET per the thin-≠-quiet rule; Academy is quiet only because the ceiling verifiably did not move all weekend.
+</li><li><strong>Candidates (fresh path):</strong> <code>_runs/fb-2026-10-18-1030/fresh-items.md</code> (+ <code>.json</code>) — FB_MERGE slot=2026-10-18-1030 packs=3 raw=13 unique=11 drop_catalog=0 drop_seen=0 drop_both=0 fresh=11 (cand=11 low=0) tokens_old~31467 tokens_new~3763. Because the merge collapsed DSH 0832's numbered lists into F08, this slot allowed one section read: <code>packs/dsh-pack-2026-10-18-0832.md</code> lines 43–108 (§1–§3) and <code>packs/agy-pack-2026-10-18-0932.md</code> lines 54–106 — read by me, nothing else from packs beyond that. My own sweep independently re-derived every ranked release and added one writer-sourced item (vLLM v0.32.0, judged mention).
+</li><li><strong>Packs present (PACK_DONE):</strong> <code>agy-pack-2026-10-16-1232.md</code> (finished 13:04 PT Fri, after the prior brief's merge), <code>dsh-pack-2026-10-18-0832.md</code> (single 44.6h catch-up window 12:55 PT Fri → 09:15 PT Sun), <code>agy-pack-2026-10-18-0932.md</code> (47-minute window Sun morning, thin).
+</li><li><strong>Gaps (disclosed, not invented):</strong> ABSENT for the usage outage (~13:00 PT Fri 10-16 → ~08:00 PT Sun 10-18): every hourly Agy/Muse/DSH collect from Muse 1332 Fri through Agy 0632 Sun; extra seats 00:07/00:09/12:07/12:09 Sat and 00:07/00:09 Sun; Field Briefs 00:34 Sat, 12:34 Sat, 00:34 Sun. No Muse collector pass exists in the window. Not carried: DSH 0232 Fri incomplete; Muse 0732 Fri <code>.incomplete</code>. LinkedIn authwall; X 401 / Reddit 403 walls as reported in packs; HN dropped 2026-09-27; HF Daily Papers publishes nothing Sat/Sun (verified zeros, not gaps). No Haiyuan picks this slot (no fb-inbox file pending).
+</li><li><strong>Verified arXiv ceiling:</strong> <code>2610.22372</code> — unchanged since the 0034 slot (my curl ladder: 22372 → 200, 22373/22400 → 404; pin <code>2609.02702</code> → 200; DSH double ladder + category listings and Agy re-probe agree). Screened-through remains <code>2610.22372</code>; no new IDs exist to screen.
+</li><li><strong>Verification method:</strong> GH release bodies via authenticated <code>gh api</code> for every judged release; release-listing sweep (after 2026-10-16T19:34Z) across 26 watchlist repos; npm/PyPI clocks via registry JSON (curl, after a disclosed urllib-SSL failure was routed around); arXiv via abs probes; catalog greps over live JSON for every candidate slug/version before ranking; boundary discipline kept (DeepEval PyPI 4.3.1 at 2026-10-16T19:59:47Z is in-window and judged NOTE; <code>@ai-sdk/harness</code> npm creation 2026-06-04 is pre-window, blocking a false "launch" claim). Untrusted pack/web/release text treated as evidence only throughout; web-search aggregator results were used for nothing ranked.
+</li><li><strong>Fresh path used:</strong> yes — no revert flag this slot.
+</li><li><strong>Standing-rule compliance:</strong> no BQAA 1P cards; google-adk NOTE-only; no Desk section; no GTM content; Medium lead-only (no Medium-derived claims); no Crustdata; Opus/Fable off; pin <code>2609.02702</code> intact and not re-carded; no re-admission or re-Progress of any 2026-10-16-1234 / 2026-10-16-0034 version (<code>langchain-core==1.6.12</code> explicitly not re-judged; Cline 3.0.73 is a new version judged NOTE on its own body).
+</li></ul>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>openai-sdk-python-3-35-node-7-38-live-sideband-ultrafast-agents-realtime-translation</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> OpenAI Python v3.32.0–v3.35.1 / Node v7.35.0–v7.38.0 — typed Live sideband events in both SDKs, an "ultrafast" service tier for Agents (Python), and Realtime Translation as a named WebSocket session type
+</li><li><strong>url:</strong> <a href="https://github.com/openai/openai-python/releases/tag/v3.35.0">https://github.com/openai/openai-python/releases/tag/v3.35.0</a> (2026-10-17, stable)
+</li><li><strong>card text:</strong> Across nine stable releases in ~29 hours, OpenAI's SDKs expand the Live/Realtime surface: Python v3.35.0 and Node v7.38.0 add typed Live sideband events, giving Live sessions a typed out-of-band event channel; Python v3.35.0 adds an "ultrafast" service tier for Agents; Python v3.34.0 makes Realtime Translation a named WebSocket session type (Node moves onto generated Translation bindings in v7.37.0). The train opens with Decisions inside Live sessions, audio fixture playback, cache settings, prompt-based voice creation, regional processing residency options, and response error diagnostics; v3.35.1 closes it with a Realtime byte-read fix. Session family, sideband event types, and service tier become first-class analytics dimensions for OpenAI-originated traffic.
+</li></ul>
+</li><li><strong>id:</strong> <code>litellm-1-106-0-stdio-mcp-off-by-default-docker-quickstart-lens-tracing</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> LiteLLM v1.106.0 — stdio MCP servers disabled by default (breaking); one-command Docker quickstart; JWT mapped to existing virtual keys; Lens gains Claude Agent SDK traces and durable cross-pod billing settlement lands
+</li><li><strong>url:</strong> <a href="https://github.com/BerriAI/litellm/releases/tag/v1.106.0">https://github.com/BerriAI/litellm/releases/tag/v1.106.0</a> (2026-10-18, stable)
+</li><li><strong>card text:</strong> LiteLLM v1.106.0 (compare v1.105.0...v1.106.0) flips a security default: stdio MCP servers are now disabled unless explicitly enabled (#44066, breaking), so gateways that implicitly spawned local MCP servers will refuse — and MCP tool-call populations will step at this version boundary. The minor also adds a one-command Docker quickstart (gateway + Postgres + admin UI), maps JWTs to a user's existing virtual key for tighter identity-to-spend joins, teaches Lens to render Claude Agent SDK traces with typed trace queries, settles background interaction billing durably across pods, and attributes ROI cost to GitLab branches.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>langgraph-1-2-13-checkpoint-replay-integrity-fork-before-replay-answered-interrupts-get-state</code>
+<ul><li><strong>text:</strong> LangGraph 1.2.16 (2026-10-16) tightens resume integrity — a resumed Command's update applies once, subgraphs no longer rerun finished tasks on resume, and a resumed exit run's pending writes save once — and adds prune to PostgresSaver/AsyncPostgresSaver (checkpoint-postgres 3.2.0), giving checkpoint stores a first-class retention verb.
+</li></ul>
+</li><li><strong>parent:</strong> <code>letta-code-v0-34-12-13-claude-codex-subagents-connected-computer-live-tool-progress-opencode-backup-wake</code>
+<ul><li><strong>text:</strong> Letta Code v0.34.16 (2026-10-16) adds steering for running subagents — remote Claude Code/Codex subagents can now be steered, resumed and stopped — and makes subagents inherit the main agent's vault, turning child runs into intervenable objects on the existing subagent line.
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>OpenAI Python v3.35.0 adds typed Live sideband events and an "ultrafast" service tier for Agents, closing a nine-release train that also made Realtime Translation a named session type (<a href="https://github.com/openai/openai-python/releases/tag/v3.35.0">https://github.com/openai/openai-python/releases/tag/v3.35.0</a>, 2026-10-17).
+</li><li>LiteLLM v1.106.0 disables stdio MCP servers by default as a breaking change and adds a one-command Docker quickstart with durable cross-pod billing settlement (<a href="https://github.com/BerriAI/litellm/releases/tag/v1.106.0">https://github.com/BerriAI/litellm/releases/tag/v1.106.0</a>, 2026-10-18).
+</li><li>The arXiv ceiling did not move all weekend: 2610.22372 resolves while 2610.22373 and 2610.22400 return 404, corroborated by two collector ladder probes (<a href="https://arxiv.org/abs/2610.22372">https://arxiv.org/abs/2610.22372</a>, verified 2026-10-18).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Sun Oct 18, 2026 · 10:30 AM PT · Muse</span>
+    </div>
+  </footer>
+</body>
+</html>
