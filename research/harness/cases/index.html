@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Agent harness cases and decisions: a complete before-and-after case study (the 2026-10-15 Mac exec wedge and the spawn-ok control) with vault evidence, plus an index to the decision notes cited on the main playbook page.">
+  <meta name="theme-color" content="#101828">
+  <title>Cases &amp; decisions — Agent Harness — Field Brief</title>
+  <link rel="canonical" href="https://caohy1988.github.io/research/harness/cases/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../assets/site-nav.css" data-site-nav>
+  <script defer src="../../../assets/site-nav.js" data-site-nav></script>
+  <style>
+    :root {
+      --navy: #101828; --navy-2: #17233a; --paper: #f4efe6; --paper-2: #ebe4d8;
+      --cream: #fbf7f0; --ink: #161410; --ink-soft: #5c564c; --ink-faint: #8a8378;
+      --line: #d9d0c3; --accent: #e87324; --accent-dark: #b7480d; --mint: #0f766e;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); text-underline-offset: 2px; }
+    a:hover { color: var(--ink); }
+    .shell { width: min(860px, calc(100% - 40px)); margin: 0 auto; }
+    header.hero { padding: 36px 0 8px; }
+    .kicker { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-dark); margin: 0 0 8px; }
+    h1 { font-family: var(--serif); font-size: clamp(1.9rem, 3.2vw, 2.6rem); font-weight: 600; margin: 0 0 12px; letter-spacing: -0.02em; }
+    .lede { color: var(--ink-soft); max-width: 62ch; margin: 0 0 16px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 28px; }
+    .meta strong { color: var(--ink); }
+    .toc { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 0 0 36px; }
+    .toc h2 { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; margin: 0 0 10px; color: var(--ink-faint); font-weight: 600; }
+    .toc ol { margin: 0; padding-left: 1.2rem; }
+    .toc li { margin: 4px 0; }
+    .toc a { color: var(--ink); text-decoration: none; }
+    .toc a:hover { color: var(--accent-dark); text-decoration: underline; }
+    section { margin: 0 0 42px; }
+    h2 { font-family: var(--serif); font-size: 1.55rem; font-weight: 600; margin: 0 0 12px; letter-spacing: -0.01em; padding-top: 8px; border-top: 1px solid var(--line); }
+    h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 600; margin: 22px 0 8px; }
+    p { margin: 0 0 12px; }
+    ul, ol { margin: 0 0 14px; padding-left: 1.25rem; }
+    li { margin: 4px 0; }
+    code, .mono { font-family: var(--mono); font-size: 0.88em; }
+    pre { background: var(--navy); color: #e8eef6; border-radius: 10px; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 0.82rem; line-height: 1.45; margin: 0 0 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 0 0 16px; }
+    th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+    .card { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 0 0 14px; }
+    .card strong { display: block; margin-bottom: 4px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 16px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .pill { display: inline-block; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; background: var(--paper-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; margin: 0 6px 6px 0; color: var(--ink-soft); }
+    .flow { font-family: var(--mono); font-size: 0.82rem; background: var(--navy-2); color: #d7e0ec; border-radius: 10px; padding: 14px 16px; margin: 0 0 16px; white-space: pre-wrap; }
+    .note { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; color: var(--ink-soft); margin: 0 0 16px; }
+    footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--ink-faint); font-size: 0.88rem; }
+    .callout { background: #fff7ed; border: 1px solid #f0d2b0; border-radius: 12px; padding: 14px 16px; margin: 0 0 20px; }
+  </style>
+</head>
+<body>
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav data-sticky="">
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <a href="/research/harness/" aria-current="page">Harness</a>
+      <a href="/research/harness-lab/">Lab</a>
+      <a href="/research/templates/">Templates</a>
+      <a href="/research/jev/">Jev</a>
+      <a href="/research/durable-agents/">Durable</a>
+      <a href="/research/tl-agent-era/">Leadership</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+          <a href="/research/builds/mcp-apps-feature-matrix/">MCP Apps matrix</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+<!-- site-nav:end -->
+
+<main class="shell">
+  <header class="hero">
+    <p class="kicker">Playbook · cases</p>
+    <h1>Cases &amp; decisions</h1>
+    <p class="lede">Rules on the <a href="/research/harness/">main playbook page</a> exist because something broke. This page works one incident end to end — failure, diagnosis, control, measured result, operating cost, and what is still unproven — with the evidence trail, then shows where every other decision note lives.</p>
+    <div class="meta">
+      <span>Owner <strong>Haiyuan Cao</strong></span>
+      <span>Incident <strong>2026-10-15</strong></span>
+      <span>Control approved <strong>2026-10-18</strong></span>
+      <span>Written <strong>2026-10-20</strong></span>
+    </div>
+  </header>
+
+  <section id="case-exec-wedge">
+    <h2>Case: the 2026-10-15 exec wedge — a Mac that answered but could not launch</h2>
+
+    <h3>Context</h3>
+    <p>The fleet’s long jobs run on one Mac through <code>grok-tmux-run</code>: a tmux session, a streaming log, and a ~540-second stale watchdog (<a href="/research/harness/#launch">§8 launch standards</a>). Scheduled work depends on spawning processes all day — hourly collect packs at <code>:32</code>, the 12-hour Field Brief at <code>:34</code>, evening reviews. The health signal in use was connection-level: the machine answers <code>ListMachines</code>, and a shell responds. No routine checked whether the Mac could still <em>start a program</em>.</p>
+
+    <h3>Failure</h3>
+    <p>2026-10-15, ~18:43 PT. Mac <code>e327005d</code> reported connected — <code>ListMachines</code> OK, shell OK — but newly started programs hung before running and never came back. From the on-shift collector’s episode note (vault <code>Hunt/agent-analytics/2026-10-15-1832-agy-episode.md</code>):</p>
+    <ul>
+      <li><code>tmux ls</code> hung over 10 minutes (pid 74629; another agent’s <code>tmux list-sessions</code>, pid 74707, hung the same way). The tmux server sat idle in <code>select()</code> — the hang was in the client exec, not the server.</li>
+      <li><code>sample</code> showed the hung clients stuck at <code>_dyld_start</code> — they never got past the loader. <code>codesign -dv tmux</code> hung too; <code>syspolicyd</code> was not running per <code>pgrep</code> (<code>amfid</code> was).</li>
+      <li>Hung: <code>tmux -V</code>/<code>ls</code>, <code>agy --version</code>, <code>grok-tmux-run</code>, one <code>gh api rate_limit</code> call, the PATH <code>python3</code>, <code>otool</code>. Still fine: <code>/usr/bin/python3</code>, <code>ls</code>, <code>md5</code>, <code>perl</code>, <code>jq</code>, <code>rg</code>, <code>gh --version</code>.</li>
+      <li>Three exec probes at 18:50 / 18:52 / 18:54 PT (10–12 s alarms) all returned rc=142 — timed out.</li>
+    </ul>
+    <p>The 18:32 Agy collect filed <code>SKIP (MAC_EXEC_HANG)</code> and staged nothing — no prompt, no session, no pack. The day’s consolidation (vault <code>Wiki/Daily/2026-10-15-agent-analytics.md</code>, vault commit <code>2d03f7b</code>) records the blast radius: Muse 1632 left only an <code>.incomplete</code> skeleton, DSH 1732 never ran, Agy 1832 hit the wedge, and the 19:32 Muse collect recovered at ~20:39 PT covering the 4.5-hour gap. The same evening a review run’s tmux server hung at ~19:55 PT; it was relaunched at 22:46, one minute after a “Mac healthy” signal at 22:45 (<code>~/work/perm-1015/RESUME.md</code>, per the main page’s <a href="/research/harness/#mac-run-lessons">Mac run lessons</a>). Haiyuan reports that a restart cleared the wedge — and that the two obvious bare checks, <code>python3 -c 'print(1)'</code> and <code>tmux -V</code>, had themselves hung during it.</p>
+
+    <h3>Diagnosis</h3>
+    <p>The wedge sat in process launch: clients stuck at <code>_dyld_start</code>, code-signing validation unresponsive, while the machine, the shell, and already-running processes stayed healthy. Every existing health signal answered “is the Mac there?”, and the true answer was useless: the Mac was there and could not run anything new. Two gaps followed. First, no skill defined a <em>spawn-ok</em> check, so nothing distinguished “unreachable” from “reachable but cannot exec” — collectors filed MISS_MAC-style gaps or, worse, launched into the wedge. Second, the standard probe wrapper was itself unsafe: <code>timeout</code> hung during the wedge, so a naive health check would hang beside everything else.</p>
+
+    <h3>Control added</h3>
+    <p>Approved by Haiyuan 2026-10-18 11:46 PT (proposal 4 of the harness update; lock <code>Maps/Decisions/2026-10-18-harness-update-approved-1-2-4-5-6.md</code>, vault commit <code>d6983a6</code>): after <strong>any</strong> Mac trouble — a disconnect, an app restart, a hang the watchdog cannot explain — check spawn-ok before any launch, relaunch or resume. Spawn-ok means both timed probes exit 0:</p>
+    <pre>/usr/bin/perl -e 'alarm 10; exec @ARGV or exit 127' python3 -c 'print(1)'
+/usr/bin/perl -e 'alarm 10; exec @ARGV or exit 127' tmux -V</pre>
+    <p>Exit 142 means the program hung; 127 means it could not start; a probe that does not return within about 15 seconds counts as hung. Never probe with <code>timeout</code> — it hung in the 10-15 wedge. On any failure: kill only your own hung probes, launch or resume nothing, record <code>gap: mac-exec-hang</code> as a <code>skip</code> receipt, and ask Haiyuan for a restart. The round-3 review amendment added that the probe must also fail on a missing program or failed exec — not only on a hang.</p>
+    <p>Where it landed: the box Mac-launch-heartbeats skill (exec-wedge row) and the tmux-backed-launches skill; the vault <code>field-brief-source-collect</code> and <code>harness-lab-source-collect</code> skills; the routine prompts for the daily CLI update, the nightly audit, and the Lab collect kick; and the main page as <a href="/research/harness/#spawn-ok">#spawn-ok</a>. The same lock approved the sibling fix for the evening’s other failure (the Agy idle collect): resume-first with the recorded conversation id, parking when the old process is not confirmed gone.</p>
+
+    <h3>Measured result after</h3>
+    <ul>
+      <li><strong>Probe test on this Mac, 2026-10-18 10:44 and 11:55 PDT</strong> (recorded in the lock): healthy machine → both probes exit 0; a planted hang (<code>alarm 2</code> on <code>/bin/sleep 5</code>) → exit 142; a missing program, or a PATH without <code>python3</code> → exit 127. And the decisive negative test: without the <code>or exit 127</code> clause, those last two cases exited <strong>0 — a false pass</strong>, caught by Astra in triage review round 3 and fixed before approval. The check was seen to fail before it was trusted, per the <a href="/research/harness/#check-can-fail">check-can-fail</a> rule.</li>
+      <li><strong>First live use, 2026-10-20 ~09:03–09:05 PT</strong> (vault <code>Hunt/agent-manage/2026-10-20-0900-dsh-harness-lab-MISS_MAC-gap.md</code>): after two <code>ListMachines connected=false</code> results, the DSH Lab collect kick ran both spawn-ok probes; they failed to spawn (“temporarily unreachable” / “local machine isn’t connected”). The kick launched nothing, recorded <code>gap: MISS_MAC</code>, and — correctly — did <em>not</em> file a restart ask, because the probes never reached the Mac: a disconnect is not an exec hang. The control’s first real invocation discriminated between the two failure classes exactly as specified.</li>
+    </ul>
+
+    <h3>What it costs to operate</h3>
+    <p>Two probes, each seconds (worst case the ~15 s hang window), run by hand before any launch, relaunch or resume after Mac trouble — plus one <code>skip</code> receipt line when they fail. The <a href="/research/harness/#controls-inventory">controls inventory</a> rates it <strong>report-only</strong>: it is not wired into the launcher, so discipline, not code, keeps it in the path. The review cost is already paid (three triage rounds on the wording, including the false-pass catch). The resume-first recovery path it gates still waits on one manual verification run before kicks may use it.</p>
+
+    <h3>What remains unproven</h3>
+    <ul>
+      <li>The wedge’s root cause was never established beyond “exec/code-signing validation stuck, <code>syspolicyd</code> absent”; a restart cleared it, so recurrence is possible and unpredictable.</li>
+      <li>The probes were tested against a planted hang and a missing program — not against a recurrence of the real wedge. The 10-20 live use exercised the disconnect branch, not <code>mac-exec-hang</code>.</li>
+      <li>Nothing enforces the probe: a launch after Mac trouble with no probe record would surface only in review, not be blocked.</li>
+      <li>The related failover rows (stop, confirm the old process exited, fail over to the next Lab seat) stayed <strong>held</strong> until the freshness check runs clean — so a wedged or disconnected Mac still means missed slots, filed as <code>skip</code>, not automatic seat failover.</li>
+    </ul>
+  </section>
+
+  <section id="decision-index">
+    <h2>Where the decision notes live</h2>
+    <p>Every dated rule on the main page cites its lock inline as <code>Maps/Decisions/YYYY-MM-DD-slug.md</code> in the vault; the vault folder is the canonical store, and the page is the readable index over it. Entry points by topic:</p>
+    <table>
+      <thead><tr><th>Topic</th><th>Main-page section</th><th>Example locks cited there</th></tr></thead>
+      <tbody>
+        <tr><td>Memory, provenance, recall</td><td><a href="/research/harness/#vault">§4 vault</a></td><td><code>2026-10-13-memory-write-consolidate-recall-apply</code> · <code>2026-10-05-memory-provenance-cards</code> · <code>2026-10-08-shared-memory-admission-rule</code></td></tr>
+        <tr><td>Review method &amp; rounds</td><td><a href="/research/harness/#em-loop">§5 EM loop</a></td><td><code>2026-10-06-reviewer-rule-docs-vs-code</code> · <code>2026-10-20-review-convergence</code> · <code>2026-10-09-review-posts-blockers-only</code></td></tr>
+        <tr><td>Field Brief cadence &amp; seats</td><td><a href="/research/harness/#pipeline">§6 pipeline</a></td><td><code>2026-10-07-field-brief-12h-cadence</code> · <code>2026-10-13-muse-field-brief-writer</code> · <code>2026-09-30-six-hour-brief-extra-seats</code></td></tr>
+        <tr><td>Mac launch &amp; recovery</td><td><a href="/research/harness/#launch">§8 launch</a></td><td><code>2026-10-18-harness-update-approved-1-2-4-5-6</code> · <code>2026-10-08-watchdog-resume-safety-and-review-breaker</code> · <code>2026-09-05-no-exit-while-waiting</code></td></tr>
+        <tr><td>Routing layer</td><td><a href="/research/harness/#jev">§13 Jev</a></td><td><code>2026-09-20-jev-decision-layer</code> · <code>2026-09-27-lab-keeps-folded-into-playbook</code></td></tr>
+        <tr><td>Proof, gates, kill machinery</td><td><a href="/research/harness/#spacex-keeps">§16 KEEPs</a></td><td><code>2026-09-23-0xgenai-three-run-kill-review-gyr</code> · <code>2026-09-25-decision-queue-kill-conditions-receipts</code> · <code>2026-10-04-nine-link-gap-ideas-added</code></td></tr>
+        <tr><td>Rule ↔ enforcer status</td><td><a href="/research/harness/#controls-inventory">controls inventory</a></td><td><code>Maps/Contracts/rule-enforcers.md</code> (73 rules, checked 2026-10-20)</td></tr>
+        <tr><td>Extending the team</td><td><a href="/research/harness/#extend">§17 extend</a></td><td><code>2026-10-05-five-field-role-cards</code> · <code>2026-10-04-nine-link-gap-ideas-added</code></td></tr>
+      </tbody>
+    </table>
+    <p class="note">A live example of the same evidence discipline: the usage dashboard’s <a href="/research/usage/#routine-proxy">routine fire proxy</a> now pins the locked 12-hour Field Brief schedule and raises a visible <strong>CONFIG DRIFT</strong> flag when a month-old routines dump disagrees with the 2026-10-07 lock — observed source versus current config, side by side, never silently merged.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="shell">
+    Public research hub · agent harness playbook · Haiyuan Cao ·
+    <a href="/research/">Field Brief</a> ·
+    <a href="/research/usage/">Usage</a> ·
+    <a href="/research/harness-lab/">Lab</a> ·
+    <a href="https://github.com/caohy1988/caohy1988.github.io">source</a>
+  </div>
+</footer>
+</body>
+</html>

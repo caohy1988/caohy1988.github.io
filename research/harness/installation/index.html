@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How the Field Brief agent fleet is set up today: Grok bot and Mac CLI roster, model seats, routines and schedules, reviewer seats, and the gates. Condensed from the agent harness playbook with links back to every section.">
+  <meta name="theme-color" content="#101828">
+  <title>Current installation — Agent Harness — Field Brief</title>
+  <link rel="canonical" href="https://caohy1988.github.io/research/harness/installation/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../assets/site-nav.css" data-site-nav>
+  <script defer src="../../../assets/site-nav.js" data-site-nav></script>
+  <style>
+    :root {
+      --navy: #101828; --navy-2: #17233a; --paper: #f4efe6; --paper-2: #ebe4d8;
+      --cream: #fbf7f0; --ink: #161410; --ink-soft: #5c564c; --ink-faint: #8a8378;
+      --line: #d9d0c3; --accent: #e87324; --accent-dark: #b7480d; --mint: #0f766e;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); text-underline-offset: 2px; }
+    a:hover { color: var(--ink); }
+    .shell { width: min(860px, calc(100% - 40px)); margin: 0 auto; }
+    header.hero { padding: 36px 0 8px; }
+    .kicker { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-dark); margin: 0 0 8px; }
+    h1 { font-family: var(--serif); font-size: clamp(1.9rem, 3.2vw, 2.6rem); font-weight: 600; margin: 0 0 12px; letter-spacing: -0.02em; }
+    .lede { color: var(--ink-soft); max-width: 62ch; margin: 0 0 16px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 28px; }
+    .meta strong { color: var(--ink); }
+    .toc { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 0 0 36px; }
+    .toc h2 { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; margin: 0 0 10px; color: var(--ink-faint); font-weight: 600; }
+    .toc ol { margin: 0; padding-left: 1.2rem; }
+    .toc li { margin: 4px 0; }
+    .toc a { color: var(--ink); text-decoration: none; }
+    .toc a:hover { color: var(--accent-dark); text-decoration: underline; }
+    section { margin: 0 0 42px; }
+    h2 { font-family: var(--serif); font-size: 1.55rem; font-weight: 600; margin: 0 0 12px; letter-spacing: -0.01em; padding-top: 8px; border-top: 1px solid var(--line); }
+    h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 600; margin: 22px 0 8px; }
+    p { margin: 0 0 12px; }
+    ul, ol { margin: 0 0 14px; padding-left: 1.25rem; }
+    li { margin: 4px 0; }
+    code, .mono { font-family: var(--mono); font-size: 0.88em; }
+    pre { background: var(--navy); color: #e8eef6; border-radius: 10px; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 0.82rem; line-height: 1.45; margin: 0 0 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 0 0 16px; }
+    th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+    .card { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 0 0 14px; }
+    .card strong { display: block; margin-bottom: 4px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 16px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .pill { display: inline-block; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; background: var(--paper-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; margin: 0 6px 6px 0; color: var(--ink-soft); }
+    .flow { font-family: var(--mono); font-size: 0.82rem; background: var(--navy-2); color: #d7e0ec; border-radius: 10px; padding: 14px 16px; margin: 0 0 16px; white-space: pre-wrap; }
+    .note { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; color: var(--ink-soft); margin: 0 0 16px; }
+    footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--ink-faint); font-size: 0.88rem; }
+    .callout { background: #fff7ed; border: 1px solid #f0d2b0; border-radius: 12px; padding: 14px 16px; margin: 0 0 20px; }
+  </style>
+</head>
+<body>
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav data-sticky="">
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <a href="/research/harness/" aria-current="page">Harness</a>
+      <a href="/research/harness-lab/">Lab</a>
+      <a href="/research/templates/">Templates</a>
+      <a href="/research/jev/">Jev</a>
+      <a href="/research/durable-agents/">Durable</a>
+      <a href="/research/tl-agent-era/">Leadership</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+          <a href="/research/builds/mcp-apps-feature-matrix/">MCP Apps matrix</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+<!-- site-nav:end -->
+
+<main class="shell">
+  <header class="hero">
+    <p class="kicker">Playbook · installation</p>
+    <h1>How this fleet is set up today</h1>
+    <p class="lede">The current configuration — roster, seats and models, routines and schedules, reviewers, gates — condensed from the <a href="/research/harness/">agent harness playbook</a>, which stays the detailed source. Every block below links back to the section it summarizes; statuses are as of 2026-10-20.</p>
+    <div class="meta">
+      <span>Owner <strong>Haiyuan Cao</strong></span>
+      <span>Timezone <strong>America/Los_Angeles</strong></span>
+      <span>As of <strong>2026-10-20</strong></span>
+      <span>Full reference <strong><a href="/research/harness/">/research/harness/</a></strong></span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#inst-roster">Roster</a></li>
+      <li><a href="#inst-models">Seats &amp; models</a></li>
+      <li><a href="#inst-routines">Routines &amp; schedules</a></li>
+      <li><a href="#inst-reviewers">Reviewers</a></li>
+      <li><a href="#inst-gates">Gates</a></li>
+    </ol>
+  </nav>
+
+  <section id="inst-roster">
+    <h2>Roster</h2>
+    <p>Two layers: always-on Grok bots orchestrate; Mac CLIs execute. Detail: <a href="/research/harness/#layers">§2 two layers</a> · <a href="/research/harness/#roster">§3 roster</a>.</p>
+    <h3>Grok bots (orchestrate, publish, EM, roster)</h3>
+    <table>
+      <thead><tr><th>Agent</th><th>Owns</th><th>Does not</th></tr></thead>
+      <tbody>
+        <tr><td>Agent Analytics Collection Bot</td><td>Industry/academy Field Briefs; Hunt packs → hub publish; Stories; GTM twin boards</td><td>Desk/SDK PRs; own-stack engineering</td></tr>
+        <tr><td>Github Bot CHY1988</td><td>EM for GitHub agent coding; Opus 5.5 implements; blind review seats per the reviewer rule</td><td>Merge without Haiyuan</td></tr>
+        <tr><td>Medium Bot</td><td>Medium-proxied industry scout — standing scouts <strong>paused</strong> 2026-09-21 (token save)</td><td>Unsolicited Medium publish</td></tr>
+        <tr><td>Agent Manage Bot</td><td>Create/organize teammates; onboard Mac CLIs; usage cards; hooks/skills; owns the Jev router</td><td>Destroy agents without Haiyuan</td></tr>
+        <tr><td>Jev</td><td>TypeSafe System One decision layer (OpenRouter <code>typesafe/jev-1.13</code>) — Choice/Score/Noul routing</td><td>Chat authorship; coding implement; merge/pay/send</td></tr>
+      </tbody>
+    </table>
+    <h3>Mac CLIs (execute)</h3>
+    <table>
+      <thead><tr><th>Agent</th><th>Default lane</th><th>Primary job</th></tr></thead>
+      <tbody>
+        <tr><td>Fable (Opus 5.5 coding seat)</td><td>Opus 5.5, 1M window, max effort</td><td>Default implementer under Github Bot (off the Field Brief since 2026-10-13); Fable seat = blind reviewer, never on a PR it implemented</td></tr>
+        <tr><td>Codex / Astra</td><td>GPT-6 Astra, effort xhigh</td><td>Blind reviewer; RFC / evidence review; <strong>current Field Brief writer</strong> 2026-10-20 12:34 → 10-25 12:34 PT (see note below)</td></tr>
+        <tr><td>Kimi</td><td>Kimi Code, effort max</td><td>Field Brief writer <strong>fallback</strong>; trivial one-file code fixes</td></tr>
+        <tr><td>Agy</td><td>Gemini 3.8 Flash High, <code>--effort high</code></td><td>Collect packs on <code>hour % 3 == 0</code>; social-superpowers for X/Reddit</td></tr>
+        <tr><td>Muse Code / Muse Spark</td><td><code>muse-spark-1.3-contributor</code> (collect); <code>muse-wonder-full-1.0</code> high (briefs)</td><td>Collect on <code>hour % 3 == 1</code>; standing Field Brief writer since 2026-10-13; optional implementer</td></tr>
+        <tr><td>DSH</td><td>CLI pinned to the 0.2.1 line (0.2.1-rc.2+); <code>deepseek/deepseek-v4.1-flash-1017</code> via OpenRouter</td><td>Collect on <code>hour % 3 == 2</code>; optional implementer</td></tr>
+      </tbody>
+    </table>
+    <p class="note"><strong>Writer seat this week (vault, newer than the main page):</strong> Muse hit its weekly subscription quota on the 2026-10-20 00:34 brief, so <strong>Astra writes the Field Brief</strong> from the 2026-10-20 12:34 slot through the 2026-10-25 12:34 slot (Codex <code>gpt-6-astra</code> at xhigh, slug <code>-astra</code>); from 2026-10-26 00:34 the writer goes back to Muse <code>muse-wonder-full-1.0</code> high. Kimi stays fallback; Opus and Fable stay off briefs. Lock: vault <code>Maps/Decisions/2026-10-20-astra-field-brief-writer.md</code> (commit <code>ef00d18</code>), superseding window of <code>Maps/Decisions/2026-10-13-muse-field-brief-writer.md</code>. Main page: <a href="/research/harness/#field-brief-12h">§6 Field Brief pipeline</a>.</p>
+  </section>
+
+  <section id="inst-models">
+    <h2>Seats &amp; models</h2>
+    <p>Providers on the Mac: Agy → Gemini; Muse → Meta Muse Spark (OAuth, no CLI quota bars yet); DSH → OpenRouter credits (PAYG); the Fable, Astra and Kimi seats run vendor CLIs with usage cards on the <a href="/research/usage/">usage dashboard</a>; Jev → OpenRouter <code>typesafe/jev-1.13</code> via <code>POST /api/v1/systemone</code>. Max-effort defaults per seat (models unchanged), restored daily by the 07:53 CLI-update routine — DSH excepted, manual updates only, so the 0.2.1 pin holds. The DSH model-check gate is parked for good (2026-10-19); the served model is confirmed through OpenRouter’s generation API instead. Detail: <a href="/research/harness/#providers">§10 model providers</a> · <a href="/research/harness/#dsh-pin">DSH pin</a> · <a href="/research/harness/#usage">§11 usage visibility</a>.</p>
+  </section>
+
+  <section id="inst-routines">
+    <h2>Routines &amp; schedules (PT)</h2>
+    <p>Locked cadence, all times America/Los_Angeles. Detail: <a href="/research/harness/#pipeline">§6 Field Brief pipeline</a> · <a href="/research/harness/#field-brief-12h">12h cadence note</a> · <a href="/research/harness/#grok-patterns">§12 routines</a> · <a href="/research/harness/#usage">§11 usage</a>.</p>
+    <table>
+      <thead><tr><th>When</th><th>Routine</th><th>Owner</th></tr></thead>
+      <tbody>
+        <tr><td>Hourly <code>:32</code></td><td>Source collect packs — seats rotate <code>hour % 3</code>: Agy ≡0, Muse ≡1, DSH ≡2 (HN dropped from surfaces)</td><td>Collection kicks; Agy/Muse/DSH run</td></tr>
+        <tr><td><code>00:34</code> + <code>12:34</code></td><td>Deep Field Brief, 12h cadence since 2026-10-07 (06:34/18:34 retired); writer per the seat note above; Collection publishes HTML + catalog + push</td><td>Collection + writer seat</td></tr>
+        <tr><td><code>:44</code> at 0,12</td><td>Field Brief miss-watch — <strong>sole</strong> detector + auto-kick (Manage’s <code>:50</code> watch paused since 2026-09-21)</td><td>Collection</td></tr>
+        <tr><td><code>:07</code> / <code>:09</code> at 0,12</td><td>Two extra collect seats (Muse, DSH) for the brief hours only; read-only, dedupe by URL before the brief</td><td>Collection owns timing</td></tr>
+        <tr><td><code>*/15</code></td><td>EM heartbeat across live agent tasks; reads the kick ledger first</td><td>Github Bot</td></tr>
+        <tr><td>08:06</td><td>Coding EM kick pickup check (ledger vs tmux/PRs; one re-wake; tell Haiyuan if still stuck)</td><td>Manage</td></tr>
+        <tr><td>08:11 Mon–Fri</td><td>Weekday specialist ops nudge</td><td>Manage</td></tr>
+        <tr><td>08:55</td><td>Harness Lab daily collect (Agy/Muse/DSH rotation; one catch-up pack after missed days)</td><td>Manage</td></tr>
+        <tr><td>09:05 Mon–Fri</td><td>Weekday usage integrity</td><td>Manage</td></tr>
+        <tr><td>09:09 + 21:09</td><td>PR board sweep (CI/conflict/stall → Coding EM; never merge; 09:09 also checks the decision queue)</td><td>Manage</td></tr>
+        <tr><td>07:53</td><td>Daily Mac CLI update (all CLIs except DSH; restores model/effort defaults; skips CLIs with a live run)</td><td>Manage</td></tr>
+        <tr><td>16:45</td><td>Harness Lab KEEP curate/publish</td><td>Manage</td></tr>
+        <tr><td>02:59</td><td>Nightly Mac harness audit — one rotating Mac seat; scoped audit PR; dual review; no merge</td><td>Manage</td></tr>
+        <tr><td>~20:57</td><td>Daily vault consolidation digest, every agent</td><td>All bots</td></tr>
+        <tr><td>Mon 10:47</td><td>Weekly playbook ↔ card sync + kill review + weekly receipts (Haiyuan spot-checks one artifact)</td><td>Manage</td></tr>
+        <tr><td>3× daily</td><td>Usage dashboard refresh</td><td>Collection</td></tr>
+        <tr><td>Mon ~10:03</td><td>Research + Stories weekly pack+page — reported paused by Collection since ~10-12; the 2026-10-20 controls inventory flags the fleet contract line as known drift</td><td>Collection</td></tr>
+      </tbody>
+    </table>
+    <p class="note"><strong>Paused until Haiyuan lifts (2026-09-21 token save):</strong> GTM twin-board weekly updates, Medium standing scouts, Manage’s Field Brief <code>:50</code> miss-watch. The usage dashboard’s <a href="/research/usage/#routine-proxy">routine fire proxy</a> shows these crons with sources and flags any dump that disagrees with the locked config.</p>
+  </section>
+
+  <section id="inst-reviewers">
+    <h2>Reviewers</h2>
+    <ul>
+      <li><strong>Seats (resolved 2026-10-20):</strong> code PRs the Opus seat implemented get <strong>Astra alone</strong>; docs, drafts and other seats’ code keep <strong>Astra + Fable</strong> blind dual review; a Fable-authored PR in a two-seat lane (a doc or draft) keeps the 09-16 fallback — Kimi (or Muse) as second blind reviewer for that PR only; a code PR the Fable coding seat authored is Opus-implemented and gets Astra alone. Implementer ≠ reviewer on the same PR, always. <a href="/research/harness/#reviewer-rule">reviewer rule</a></li>
+      <li><strong>Method:</strong> each reviewer is blind to the other (PR + intent/spec/plan only), attempts disproof with 2–3 named rejection criteria, and ends with exactly one <code>VERDICT: … @ &lt;head sha&gt;</code> line — UNPARSED never counts. <a href="/research/harness/#disproof-review">disproof</a> · <a href="/research/harness/#review-verdict-line">verdict line</a></li>
+      <li><strong>Rounds:</strong> re-reviews read only the new diff and never re-raise findings; P0/P1 introduced by the change block; Pre-existing never blocks; three fix rounds, then escalate to Haiyuan (2026-10-20 02:39 PT). <a href="/research/harness/#review-convergence">converging re-reviews</a> · <a href="/research/harness/#review-round-breaker">round breaker</a></li>
+      <li><strong>Public posts:</strong> a GitHub review is posted only when a seat has a P0/P1 introduced by the change (from 2026-10-19 14:08 PT; BQAA SDK #534 posts all findings). <a href="/research/harness/#review-posts-blockers">blockers only</a></li>
+      <li><strong>Approved by Haiyuan 2026-10-20:</strong> three review-depth tiers by consequence; complementary seat focus. <strong>Proposed, not built yet:</strong> an Astra reviewer eval. <a href="/research/harness/#review-depth-tiers">depth tiers</a></li>
+    </ul>
+  </section>
+
+  <section id="inst-gates">
+    <h2>Gates</h2>
+    <ul>
+      <li><strong>Human gates:</strong> merge, production, send/publish, spend, delete non-junk, permissions = Haiyuan, always (<a href="/research/harness/#gyr-authority">GREEN/YELLOW/RED</a>); an approval is re-checked — item unchanged, authority current — right before the action runs (<a href="/research/harness/#approval-recheck">approval re-check</a>). Standing approvals on record: Collection’s Field Brief publish blanket; Manage’s Lab + playbook publish blanket (<a href="/research/harness/#promotion-ladder">promotion ladder</a>).</li>
+      <li><strong>Decision queue:</strong> irreversible asks and judgment calls wait in one queue file, checked daily on the 09:09 sweep; one re-raise at 3 days (<a href="/research/harness/#decision-queue">decision queue</a>).</li>
+      <li><strong>Jev gates:</strong> active — <code>intake</code>, <code>pre_browser</code>, <code>pre_retry</code>, <code>pre_research</code>, <code>pre_tool</code> (confidence floor 0.55; <code>pre_tool</code> never authorizes send/pay/merge); shadow-only — <code>research_check</code>, <code>completion_check</code>, and <code>worth_running</code> (narrowed 2026-09-27 to retries and one-off launches). Shadow → active needs Three-Run Proof + a replay check + beating the constant baseline (<a href="/research/harness/#jev-gates">gates</a> · <a href="/research/harness/#constant-baseline">baseline</a>).</li>
+      <li><strong>Launch gates (Mac):</strong> tmux + streaming + ~540s watchdog; spawn-ok probes before any launch after Mac trouble; hold long launches below 15 GB free; a stale run resumes only after the old process is confirmed gone, else parked (<a href="/research/harness/#launch">§8 launch standards</a>).</li>
+      <li><strong>Done gates:</strong> code decides done; done receipts carry VERIFIED + NOT VERIFIED; negative claims need a lookup that worked; a new check must be seen failing once (<a href="/research/harness/#code-decides-done">code decides done</a> · <a href="/research/harness/#check-can-fail">check can fail</a>).</li>
+      <li><strong>Review gates:</strong> see <a href="#inst-reviewers">reviewers</a> above — dual LGTM is agent-complete, never shipped; merge only by Haiyuan.</li>
+      <li><strong>Kill machinery:</strong> every routine has a pre-written kill condition and a receipt line; Monday kill review proposes pauses/deletes to Haiyuan; runs an outage prevented count as skip (<a href="/research/harness/#kill-condition">kill conditions</a> · <a href="/research/harness/#kill-review">kill review</a>).</li>
+    </ul>
+    <p class="note">Which of these controls is enforced, report-only, manual or proposed — one row each — is tracked in the main page’s <a href="/research/harness/#controls-inventory">controls inventory</a> (73 rules paired with enforcers, checked 2026-10-20).</p>
+  </section>
+</main>
+
+<footer>
+  <div class="shell">
+    Public research hub · agent harness playbook · Haiyuan Cao ·
+    <a href="/research/">Field Brief</a> ·
+    <a href="/research/usage/">Usage</a> ·
+    <a href="/research/harness-lab/">Lab</a> ·
+    <a href="https://github.com/caohy1988/caohy1988.github.io">source</a>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The core of the agent harness playbook in five ideas — owner + verifiable contract, resumable state, execution vs correctness vs usefulness, boundaries outside the model, and machinery that must prove its worth. Ten-minute read.">
+  <meta name="theme-color" content="#101828">
+  <title>Core playbook — Agent Harness — Field Brief</title>
+  <link rel="canonical" href="https://caohy1988.github.io/research/harness/core/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../assets/site-nav.css" data-site-nav>
+  <script defer src="../../../assets/site-nav.js" data-site-nav></script>
+  <style>
+    :root {
+      --navy: #101828; --navy-2: #17233a; --paper: #f4efe6; --paper-2: #ebe4d8;
+      --cream: #fbf7f0; --ink: #161410; --ink-soft: #5c564c; --ink-faint: #8a8378;
+      --line: #d9d0c3; --accent: #e87324; --accent-dark: #b7480d; --mint: #0f766e;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); text-underline-offset: 2px; }
+    a:hover { color: var(--ink); }
+    .shell { width: min(860px, calc(100% - 40px)); margin: 0 auto; }
+    header.hero { padding: 36px 0 8px; }
+    .kicker { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-dark); margin: 0 0 8px; }
+    h1 { font-family: var(--serif); font-size: clamp(1.9rem, 3.2vw, 2.6rem); font-weight: 600; margin: 0 0 12px; letter-spacing: -0.02em; }
+    .lede { color: var(--ink-soft); max-width: 62ch; margin: 0 0 16px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 28px; }
+    .meta strong { color: var(--ink); }
+    .toc { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 0 0 36px; }
+    .toc h2 { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; margin: 0 0 10px; color: var(--ink-faint); font-weight: 600; }
+    .toc ol { margin: 0; padding-left: 1.2rem; }
+    .toc li { margin: 4px 0; }
+    .toc a { color: var(--ink); text-decoration: none; }
+    .toc a:hover { color: var(--accent-dark); text-decoration: underline; }
+    section { margin: 0 0 42px; }
+    h2 { font-family: var(--serif); font-size: 1.55rem; font-weight: 600; margin: 0 0 12px; letter-spacing: -0.01em; padding-top: 8px; border-top: 1px solid var(--line); }
+    h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 600; margin: 22px 0 8px; }
+    p { margin: 0 0 12px; }
+    ul, ol { margin: 0 0 14px; padding-left: 1.25rem; }
+    li { margin: 4px 0; }
+    code, .mono { font-family: var(--mono); font-size: 0.88em; }
+    pre { background: var(--navy); color: #e8eef6; border-radius: 10px; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 0.82rem; line-height: 1.45; margin: 0 0 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 0 0 16px; }
+    th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+    .card { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 0 0 14px; }
+    .card strong { display: block; margin-bottom: 4px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 16px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .pill { display: inline-block; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; background: var(--paper-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; margin: 0 6px 6px 0; color: var(--ink-soft); }
+    .flow { font-family: var(--mono); font-size: 0.82rem; background: var(--navy-2); color: #d7e0ec; border-radius: 10px; padding: 14px 16px; margin: 0 0 16px; white-space: pre-wrap; }
+    .note { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; color: var(--ink-soft); margin: 0 0 16px; }
+    footer { border-top: 1px solid var(--line); padding: 24px 0 48px; color: var(--ink-faint); font-size: 0.88rem; }
+    .callout { background: #fff7ed; border: 1px solid #f0d2b0; border-radius: 12px; padding: 14px 16px; margin: 0 0 20px; }
+  </style>
+</head>
+<body>
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav data-sticky="">
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
+      <a href="/research/">Research</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <a href="/research/harness/" aria-current="page">Harness</a>
+      <a href="/research/harness-lab/">Lab</a>
+      <a href="/research/templates/">Templates</a>
+      <a href="/research/jev/">Jev</a>
+      <a href="/research/durable-agents/">Durable</a>
+      <a href="/research/tl-agent-era/">Leadership</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+          <a href="/research/builds/mcp-apps-feature-matrix/">MCP Apps matrix</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+<!-- site-nav:end -->
+
+<main class="shell">
+  <header class="hero">
+    <p class="kicker">Playbook · core</p>
+    <h1>The core playbook</h1>
+    <p class="lede">The <a href="/research/harness/">agent harness playbook</a> runs to eighteen sections. This is the ten-minute version: five ideas the fleet actually runs on, each with the incident that forced it, and the smallest setup worth starting with. Every claim here comes from the main page or the dated decision notes it cites; the detail is always one link away.</p>
+    <div class="meta">
+      <span>Owner <strong>Haiyuan Cao</strong></span>
+      <span>Reading time <strong>~10 min</strong></span>
+      <span>Updated <strong>2026-10-20</strong></span>
+      <span>Full reference <strong><a href="/research/harness/">/research/harness/</a></strong></span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#idea-owner">Every task has an owner and a verifiable contract</a></li>
+      <li><a href="#idea-state">Keep enough state to resume or replace a worker</a></li>
+      <li><a href="#idea-signals">Separate execution status, verified correctness, and usefulness</a></li>
+      <li><a href="#idea-boundaries">Enforce consequential boundaries outside the model</a></li>
+      <li><a href="#idea-machinery">Keep machinery only when it proves its worth</a></li>
+      <li><a href="#minimal-setup">Minimal starting setup</a></li>
+    </ol>
+  </nav>
+
+  <section id="idea-owner">
+    <h2>1. Every task has an owner and a verifiable contract</h2>
+    <p>A task is a contract, not a chat message. One named owner is accountable for it, and “done” is a condition a machine can check — not a summary a model wrote. In this fleet that means: a five-field role card per bot (<strong>Owns · Inputs · May · Must ask before · Done when</strong>), a light mission definition (<strong>Outcome · Done-when · Constraints · Approval</strong>) before any non-trivial run, an artifact chain for coding work (<code>intent.md → spec.md → plan.md → PR</code>), and a kick ledger row for every coding task with an explicit state: <code>posted → launched → pr_open / done</code>, or <code>blocked</code> with a note. “Code decides done”: a task is done when a deterministic check passes — tests green, the file exists, the commit is on the remote, the URL returns 200. Self-reports stay advisory.</p>
+    <p><strong>Why.</strong> On 2026-09-24, between 03:15 and 06:50 PT, a coding kick sat in a group room with no owner watching: the room post existed, but there was no ledger row, so the 15-minute heartbeat never read it, and three and a half hours passed before anyone noticed. That failure mode now has a name — <em>unacked handoff</em> — and a control: every kick is a ledger row, the heartbeat reads the ledger <em>first</em>, and a kick still <code>posted</code> with no seat is launched or marked <code>blocked</code>, never reported as “idle.” The same idea, one level up: the 2026-10-05 role-card rule exists because an ownership sentence that needs six unrelated verbs is really four jobs wearing one name, and failures become impossible to attribute.</p>
+    <p>Detail on the main page: <a href="/research/harness/#coding-em-kicks">kick ledger + pickup check</a> · <a href="/research/harness/#role-card">five-field role card</a> · <a href="/research/harness/#mission-dod">mission done-when</a> · <a href="/research/harness/#code-decides-done">code decides done</a> · <a href="/research/harness/#em-loop">the EM loop</a>.</p>
+  </section>
+
+  <section id="idea-state">
+    <h2>2. Keep enough state to resume or replace a worker</h2>
+    <p>Assume the worker dies mid-task. Every long run goes through <code>tmux</code> with a streaming log and a ~540-second stale watchdog; each run keeps a named session id so the follow-up <em>resumes</em> it instead of cold-starting; handoffs carry a machine-readable packet (owner, job type, objective, artifacts, decisions, constraints, open questions, next gate) because “the artifact carries the detail, the packet carries the state”; and the shared vault holds durable memory so a replacement seat — not just the same seat — can pick the work up. Two workers on one output is the failure this guards against. The rule: a stale run is resumed only after the old process is confirmed gone, otherwise it is parked as an unknown outcome. The live watchdog does not yet make that check — it still kills and resumes without confirming the old process died — so today the EM or babysitter confirms the old process is gone by hand before any resume it starts; the enforcement code was parked after review (2026-10-08), and the smaller no-auto-resume redesign is parked too (2026-10-11).</p>
+    <p><strong>Why.</strong> On 2026-10-15 an Agy catch-up collect handed its search to a background task and went idle (<code>root agent idle; waiting up to 15m0s</code>). The watchdog re-ran it <em>cold</em> twice — a new conversation each time, because the resume path did not carry the conversation id — and each run ended <code>terminating 1 background task(s)</code> with a SUCCESS marker and no pack. The second re-run started three seconds before the Muse replacement, so two seats held the same pack path for about three minutes; Muse wrote the pack. The fix, approved 2026-10-18 as wording on the Agy Lab-collect recipe, keeps its stated limits: resume first with the recorded conversation id, and park when the old process is not proven gone — but the recipe enters the kick only after a manual verification step passes (one headless resume, run by hand, must keep the conversation id; until then the kick keeps today’s recipe), it permits one recorded cold start when no id was captured, and Muse and DSH Lab launches are unchanged. A week earlier (10-08) a plain <code>nohup</code> watch loop died together with its launching shell — the reason nothing long runs outside tmux anymore.</p>
+    <p>Detail on the main page: <a href="/research/harness/#launch">Mac launch standards</a> · <a href="/research/harness/#mac-run-lessons">Mac run lessons</a> · <a href="/research/harness/#watchdog-resume-safety">watchdog resume safety</a> · <a href="/research/harness/#handoff-packet">handoff packet</a> · <a href="/research/harness/#vault">the vault</a>.</p>
+  </section>
+
+  <section id="idea-signals">
+    <h2>3. Separate execution status, verified correctness, and usefulness</h2>
+    <p>Three different questions, three different signals. <em>Did it run?</em> — every routine appends a receipt line (<code>ok / skip / fail / parked</code>), even when nothing happened. <em>Is it right?</em> — a deterministic check actually ran and passed; done reports carry <code>VERIFIED</code> (checks that ran, with evidence) and <code>NOT VERIFIED</code> (never omitted); blind reviewers attempt disproof against named rejection criteria and pin one machine-readable <code>VERDICT</code> line to the head SHA. <em>Is it worth keeping?</em> — the Monday kill review asks “would anyone miss this?”, and a decision gate must beat the constant “always answer the majority verdict” before it may go active. Never let one signal impersonate another: a negative claim (“none”, “quiet”, “stale”) is valid only with a lookup that worked; otherwise it is reported as an access <code>gap:</code>.</p>
+    <p><strong>Why.</strong> On 2026-10-08 the usage collector flagged Collection (27h) and Github Bot (31h) as stale from agent-directory mtimes — although both had same-day receipts; it read receipts for Manage only. Execution metadata had been read as a correctness signal. The patched collector (installed 2026-10-11, thirteen tests, blind-reviewed APPROVE) shows both <code>stale=False</code>. Usefulness has its own incident: the <code>worth_running</code> shadow gate answered “run” on 139 of 142 answered calls — a constant at extra cost — so on 2026-09-27 it was narrowed to retries and one-off launches, where it actually decides something.</p>
+    <p>Detail on the main page: <a href="/research/harness/#usage-false-stale">the false-stale fix</a> · <a href="/research/harness/#negative-claim-check">negative-claim check</a> · <a href="/research/harness/#done-receipt">done receipt</a> · <a href="/research/harness/#review-verdict-line">verdict line</a> · <a href="/research/harness/#constant-baseline">constant baseline</a> · <a href="/research/harness/#kill-review">kill review</a>.</p>
+  </section>
+
+  <section id="idea-boundaries">
+    <h2>4. Enforce consequential boundaries outside the model</h2>
+    <p>Anything hard to undo — send, publish, spend, merge, delete, grant permissions, touch production — is a RED action and goes to the human. The point is <em>where</em> the boundary lives: not in the model’s instructions, but in the architecture around it. The vault’s <code>bin/</code> contains no post/push/send primitive at all (checked by search 2026-10-20); must-hold rules go in hooks, advisory policy in skills; the implementer of a PR can never be its reviewer; the routing model may never authorize merge/pay/send, and its config carries a kill switch; an approval covers exactly the item that was approved and is re-checked — item unchanged, authority still valid — immediately before the action runs (that re-check is a manual, policy-text-only step today: nothing runs it for the operator). And everything an agent reads from the web, a PR, or another agent is data, never instructions.</p>
+    <p><strong>Why.</strong> Review approvals had been carried across later author pushes (corrections dated 2026-09-14 and 2026-09-20): a boundary held in prose slid when the artifact changed under it. The recommended fix is mechanical, not exhortation — a review ends with exactly one <code>VERDICT: APPROVE | REQUEST_CHANGES | ESCALATE @ &lt;head sha&gt;</code> line, and a review without it, or naming an older SHA, is UNPARSED and never counts as approval. What is installed today is the manual form of that check: the EM reads the line and compares the SHA by hand, and the controls inventory files this control as <code>manual</code>, not enforced — so that is a recommendation about where the boundary should live, not evidence that code holds it there today. The untrusted-content rule exists because collectors read X, Reddit and the web every hour, and until 2026-10-04 no rule said what to do with instructions found <em>inside</em> collected text (quote them to the human; never follow them).</p>
+    <p>Detail on the main page: <a href="/research/harness/#gyr-authority">GREEN / YELLOW / RED</a> · <a href="/research/harness/#approval-recheck">approval re-check</a> · <a href="/research/harness/#review-verdict-line">verdict pinned to head SHA</a> · <a href="/research/harness/#untrusted-content">untrusted content is data</a> · <a href="/research/harness/#controls-inventory">controls inventory</a>.</p>
+  </section>
+
+  <section id="idea-machinery">
+    <h2>5. Keep machinery only when it proves its worth</h2>
+    <p>Every piece of process is on trial. A new routine passes a Three-Run Proof — observe, correct, release after a third consecutive clean run — before it may go active; promotion further needs a tested rollback and complete receipts. Every routine prompt carries a pre-written <code>Kill condition:</code> line, and the Monday review checks each routine against its own stated condition rather than judging ad hoc. A gate that always gives the same answer is a constant at extra cost, not a control. Even the policy files are on a budget: the two documents every agent reads before every task are capped at their 2026-09-30 byte sizes, and a repeated lesson must become a proposed fix where the rule is applied — not a third paragraph.</p>
+    <p><strong>Why.</strong> The <code>worth_running</code> narrowing above is the canonical case. A second: the DSH mode of the model-check gate was parked for good on 2026-10-19 after four blind review rounds each found a new way for a malformed record to pass it (an escaped type name, pooled session files, a duplicate payload key, a broken quote); the served model is confirmed through the provider’s per-request generation API instead — cheaper and checkable. And the byte ceiling exists because <code>forbidden.md</code> accumulated eighteen near-identical review-preflight paragraphs in five days (2026-09-20 → 09-24): the lesson was recorded every time and applied never, while every task paid the full read.</p>
+    <p>Detail on the main page: <a href="/research/harness/#three-run-proof">Three-Run Proof</a> · <a href="/research/harness/#promotion-gate">promotion gate</a> · <a href="/research/harness/#kill-review">kill review</a> · <a href="/research/harness/#constant-baseline">constant baseline</a> · <a href="/research/harness/#dsh-pin">the parked DSH gate</a> · <a href="/research/harness/#repeat-lesson">repeat lesson → skill diff</a> · <a href="/research/harness/#resident-budget">byte ceiling</a>.</p>
+  </section>
+
+  <section id="minimal-setup">
+    <h2>Minimal starting setup</h2>
+    <p>The smallest harness worth running has four pieces, all cheap:</p>
+    <ol>
+      <li><strong>One owner per task</strong>, named in one place (a role card, or one line in the task itself).</li>
+      <li><strong>A done-when a command can check</strong> — a test, a file, a pushed commit, a live URL.</li>
+      <li><strong>A dated note per finished task</strong> — proof of done; chat is only a digest.</li>
+      <li><strong>A human gate for irreversible actions</strong> — everything else, just do and log.</li>
+    </ol>
+    <p>Everything else on the main page exists because something specific broke. Add each component when its failure has already happened once — this fleet’s justification list:</p>
+    <table>
+      <thead><tr><th>Add…</th><th>…only after this observed failure</th></tr></thead>
+      <tbody>
+        <tr><td>tmux + streaming log + stale watchdog on long runs</td><td>Long jobs died silently — a <code>nohup</code> watch loop died with its shell (2026-10-08); stalls were found by hand (<a href="/research/harness/#mac-run-lessons">lessons</a>)</td></tr>
+        <tr><td>A kick ledger the babysitter reads first</td><td>The unacked handoff: a room-only kick sat unread 03:15–06:50 PT (2026-09-24; <a href="/research/harness/#coding-em-kicks">ledger</a>)</td></tr>
+        <tr><td>Named session ids, resume-first, park unknown outcomes</td><td>The 10-15 cold re-runs: two fresh conversations, no pack, a 3-minute two-seat overlap (<a href="/research/harness/#mac-run-lessons">incident</a>)</td></tr>
+        <tr><td>A machine-readable verdict pinned to the head SHA</td><td>Verdicts carried across later pushes (09-14, 09-20; <a href="/research/harness/#review-verdict-line">verdict line</a>)</td></tr>
+        <tr><td>Done receipts with NOT VERIFIED + the negative-claim check</td><td>False “quiet / stale” reports from failed or frozen lookups (09-06 → 09-08; the frozen-mirror alarm 09-24; the usage false-stale 10-08; <a href="/research/harness/#negative-claim-check">check</a>)</td></tr>
+        <tr><td>A miss-watch as sole detector for scheduled publishes</td><td>The primary brief slot sometimes never wakes (<a href="/research/harness/#field-brief-12h">pipeline</a>)</td></tr>
+        <tr><td>Three-Run Proof, kill conditions, a constant baseline for gates</td><td>A shadow gate that answered “run” 139 of 142 times (2026-09-27; <a href="/research/harness/#constant-baseline">baseline</a>)</td></tr>
+        <tr><td>A byte ceiling on the files every agent must read</td><td>18 near-identical paragraphs in five days; 81,155 B of resident policy (2026-09-30; <a href="/research/harness/#resident-budget">ceiling</a>)</td></tr>
+      </tbody>
+    </table>
+    <p class="note">The symmetric rule closes the loop: retire a control when the Monday kill review cannot name what it catches. Machinery that cannot prove its worth — a gate parked after four review rounds, a watch nobody reads — is removed or narrowed, not kept for comfort.</p>
+  </section>
+
+  <section id="where-next">
+    <h2>Where next</h2>
+    <p>This page is the summary. The full roster, schedules, reviewers and gates as configured today are on the <a href="/research/harness/installation/">current installation</a> page; a complete before-and-after incident writeup with vault evidence is on the <a href="/research/harness/cases/">cases &amp; decisions</a> page; and every rule above lives in full — with its dated decision lock — on the <a href="/research/harness/">main playbook page</a>.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="shell">
+    Public research hub · agent harness playbook · Haiyuan Cao ·
+    <a href="/research/">Field Brief</a> ·
+    <a href="/research/usage/">Usage</a> ·
+    <a href="/research/harness-lab/">Lab</a> ·
+    <a href="https://github.com/caohy1988/caohy1988.github.io">source</a>
+  </div>
+</footer>
+</body>
+</html>
