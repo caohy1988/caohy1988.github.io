@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-10-20-1234: Price the cache, measure retained success, bound the audit</title>
+  <meta name="description" content="Field Brief 2026-10-20-1234: Price the cache, measure retained success, bound the audit">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-20-1234-astra.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 PM PT · Tue Oct 20, 2026 · Astra</p>
+    <article>
+<h1>Field Brief — 2026-10-20-1234: Price the cache, measure retained success, bound the audit</h1>
+<p><strong>Writer: Astra (<code>gpt-6-astra</code>)</strong>
+<strong>For:</strong> Haiyuan Cao — BQAA (BigQuery Agent Analytics) + ADK
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>Window:</strong> ~12h since the scheduled 2026-10-20-0034 brief: October 20, ~00:34–12:34 PT (07:34–19:34 UTC). Verification continued after the cutoff; publication clocks, not fetch clocks, determine admission.
+<strong>Effort:</strong> xhigh. <strong>Path:</strong> fresh.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: four NEW cards—two Industry, two Academy—and three Progress updates.</strong> The independent vendor sweep found the two Industry admissions: selectable 12-hour OpenAI prompt caching and generally available Claude structured outputs on Amazon Bedrock. The fresh list contributes material Progress on Langfuse, Opik and Anthropic’s organization-analytics client. Patch trains and open release PRs stay below the rank threshold.</p>
+<p>The Academy picks are <strong>pre-window IDs announced in the prior 0034 window, never previously ranked</strong>, admitted under this slot’s explicit carry-forward allowance. StopLoss makes the economics of early stopping measurable, but its biggest savings trade away successful runs. The private-state leakage paper establishes a limit on what communication-only audits can certify. Both received a <strong>full PDF read</strong>. AgentLens also received a full read and is held because its framework roster and variance figures do not reconcile internally.</p>
+<p><strong>BQAA decision:</strong> prioritize an accounting and coverage contract: separate cache writes from reads, distinguish intentionally uncaptured traffic from missing instrumentation, and report intervention cost together with retained task success. Schema compliance, observable communication and successful task completion answer different questions.</p>
+<p>Claude Enterprise inference hooks are a substantive, confirmed October 20 GA announcement, but this pass did not establish its position relative to the 12:34 cutoff. It is held in <strong>Unconfirmed</strong>, not included in NEW or the catalog handoff.</p>
+<h2>Industry</h2>
+<h3>NEW 1 — OpenAI: selectable 12-hour prompt caching changes the cost ledger</h3>
+<p><strong>Stable, October 20.</strong> The <a href="https://developers.openai.com/api/docs/changelog">API changelog</a> announces selectable 12-hour prompt caching. The <a href="https://developers.openai.com/api/docs/guides/prompt-caching">official guide</a> documents <code>prompt_cache_options.ttl: &quot;12h&quot;</code>, a 30-minute default, and per-breakpoint overrides. A 12-hour cache write costs <strong>2.5× the ordinary input-token rate in total</strong>. Extending a still-valid 30-minute prefix to 12 hours incurs a new write without credit for the earlier write; existing 12-hour coverage remains a read.</p>
+<p>Usage separates <code>cache_write_tokens_details.ttl_30m_tokens</code> and <code>ttl_12h_tokens</code>; <code>cached_tokens</code> excludes cache writes and upgrades. The new product capability is selecting extended cache coverage, not the first appearance of a 12-hour field: an older SDK card already mentions an organization-usage counter.</p>
+<p><strong>BQAA implication:</strong> test mixed-TTL prompts and coverage upgrades against invoices. Store the pricing version and TTL partition with each usage record; an undifferentiated input/cache-hit total can conceal the write premium. Model expected reuse before choosing longer coverage.</p>
+<p><strong>Clock evidence:</strong> primary changelog dated October 20; a <a href="https://community.openai.com/t/1403525/79">public discussion linking the OpenAIDevs announcement</a> was created at <strong>18:03:12Z / 11:03 PT</strong>, corroborating availability before cutoff. Technical claims come from the official docs. Direct X retrieval failed; see Unconfirmed.</p>
+<h3>NEW 2 — Amazon Bedrock: Claude structured outputs GA across runtime and mantle</h3>
+<p><strong>Stable, October 20, 14:00Z / 07:00 PT announcement.</strong> AWS <a href="https://aws.amazon.com/about-aws/whats-new/2026/10/claude-structured-outputs-bedrock/">announces structured outputs for Claude on Bedrock</a>. The <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/claude-messages-structured-outputs.html">implementation guide</a> confirms GA on <code>bedrock-runtime</code> and <code>bedrock-mantle</code>, subject to model/endpoint support. JSON-schema output configuration constrains responses; <code>strict: true</code> on a tool definition constrains tool names and inputs. Runtime supports Converse and InvokeModel as well as the Anthropic Messages interface; mantle uses Messages. The announcement clock is independently present in the <a href="https://aws.amazon.com/about-aws/whats-new/recent/feed/">AWS What's New RSS feed</a>.</p>
+<p><strong>BQAA implication:</strong> record schema identity/version, enforcement mode, model, endpoint and stop reason. Evaluate structural validity separately from semantic correctness and tool execution success. A valid object can contain a wrong answer; an interrupted generation still needs handling. This is a material serving capability, not a package-version card.</p>
+<h3>Progress — Langfuse: stable Skills API and an explicit no-ingestion gateway mode</h3>
+<p><strong>Target catalog item:</strong> <code>langfuse-v4-61-0-v4-63-0-skills-gateway-keys-experiment-filters</code>.</p>
+<p>Stable <a href="https://github.com/langfuse/langfuse/releases/tag/v4.65.0">v4.65.0</a>, published <strong>13:35:55Z</strong>, graduates skills to <code>/api/public/skills</code>, retaining the unstable aliases. The <a href="https://github.com/langfuse/langfuse/pull/19025">shipped Skills change</a> restores permissioned MCP skill retrieval and recommends pinning manifest versions for consistent resource reads. The same release enables self-hosted gateway <code>NONE</code> ingestion: requests route without Langfuse capture. The <a href="https://github.com/langfuse/langfuse/pull/19074">included follow-up</a> removes the default ingestion-project/signing-key requirement for that mode. Stable <a href="https://github.com/langfuse/langfuse/releases/tag/v4.66.0">v4.66.0</a>, <strong>17:31:25Z</strong>, adds compatibility and UI/permission fixes; it is part of this single Progress update.</p>
+<p><strong>Why material:</strong> the earlier card covered preview skills. This moves the integration contract to a stable API and creates a deliberate trace-coverage boundary. BQAA should carry skill version and capture mode; absent exported traces cannot by themselves establish absent gateway traffic.</p>
+<h3>Progress — Opik: preserve decision questions and answers in tracked spans</h3>
+<p><strong>Target catalog item:</strong> <code>opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row</code>.</p>
+<p>Stable <a href="https://github.com/comet-ml/opik/releases/tag/2.2.106">2.2.106</a> shipped at <strong>10:13:34Z</strong> (PyPI <strong>10:08:40Z</strong>). Its <a href="https://github.com/comet-ml/opik/pull/8829">Decisions API integration</a> adds Python <code>decisions_create</code> LLM spans with input/questions, answer output and usage parsing. TypeScript now retains questions and answers previously omitted by its generic wrapping. The integration requires compatible upstream SDKs: Python ≥3.26 and TypeScript ≥7.30.</p>
+<p><strong>Why material:</strong> tracing must preserve the request/answer shape of a new decision interface to support meaningful evaluation. A span that exists but drops the actual questions is incomplete evidence. Later same-window 2.2.107–2.2.109 activity is a fix rollup, not another capability card.</p>
+<h3>Progress — Anthropic Python SDK: analytics freshness and pagination become explicit</h3>
+<p><strong>Target catalog item:</strong> <code>anthropic-sdk-1-10-0-admin-api-org-analytics-per-user-cost-spend-limits-rbac-org-api-ga</code>.</p>
+<p>Stable <a href="https://github.com/anthropics/anthropic-sdk-python/releases/tag/v1.16.0">Python SDK v1.16.0</a>, <strong>17:49:46Z</strong> (PyPI <strong>17:50:12Z</strong>), adds <code>data_refreshed_at</code> and <code>has_more</code> to analytics report pages. This is a shipped client-contract change; it does not independently date a backend rollout. Other release features include workspace rate-limit updates and User Profiles GA.</p>
+<p><strong>Why material:</strong> organization-cost reconciliation needs to know both how fresh a report is and whether pagination is complete. BQAA can now preserve those vendor-reported fields beside its ingestion timestamp rather than presenting a partial or stale extract as a complete current total.</p>
+<h3>One-line mentions — no additional ranks</h3>
+<ul><li><strong>Vercel AI SDK <code>ai@7.0.147</code>:</strong> one stable <a href="https://github.com/vercel/ai/pull/23596">30-package train</a>, release <strong>18:36:31Z</strong>; adapter image-input support and tool/UI fidelity changes are incremental here, not 30 product launches.
+</li><li><strong><code>@langchain/core@1.2.19</code>:</strong> <a href="https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain/core%401.2.19">stable release</a>, <strong>11:58:03Z</strong>; streaming tool-argument delta handling improves fidelity, below NEW-rank scope.
+</li><li><strong>LiteLLM:</strong> stable <a href="https://github.com/BerriAI/litellm/releases/tag/v1.105.2">1.105.2</a> (<strong>18:14:48Z</strong>) and independently found <a href="https://github.com/BerriAI/litellm/releases/tag/v1.106.1">1.106.1</a> (<strong>18:58:28Z</strong>) are backport/fix bundles, not newly admitted product capabilities.
+</li><li><strong>Opik later fixes:</strong> registry/public-tag evidence establishes 2.2.107 availability; stable <a href="https://github.com/comet-ml/opik/releases/tag/2.2.108">2.2.108</a> and <a href="https://github.com/comet-ml/opik/releases/tag/2.2.109">2.2.109</a> address release/security/performance and UI issues; no separate rank or second Progress entry.
+</li><li><strong>Release proposals:</strong> <a href="https://github.com/OpenHands/OpenHands/pull/18681">OpenHands #18681</a> remains draft; <a href="https://github.com/openai/openai-agents-python/pull/5394">openai-agents-python #5394</a>, <a href="https://github.com/openai/openai-node/pull/2986">openai-node #2986</a> and <a href="https://github.com/UKGovernmentBEIS/inspect_ai/pull/5974">inspect_ai #5974</a> remain open at lookup; proposals do not establish stable shipping.
+</li><li><strong>Other fresh-list development groups:</strong> codex Guardian/auth-provider work, the pydantic-ai background-tools cluster, Mastra, AutoGPT, qwen-code managed-agent work and MCP-server triage remain collector-reported development leads; no matching stable material capability was admitted from those records.
+</li><li><strong>Previously covered versions:</strong> no re-Progress for Inspect 0.3.282 or the prior brief’s SDK/security trains; prerelease/dev builds remain NOTE-only.
+</li><li><strong>Adjacent vendor sweep:</strong> Snowflake’s October 20 <a href="https://docs.snowflake.com/en/release-notes/2026/other/2026-10-20-online-feature-store-ga">Online Feature Store GA</a> is not promoted to an agent-analytics card; Databricks’ October 20 connector betas and Google’s government private previews also do not qualify for this brief’s NEW ranks.
+</li></ul>
+<h2>Academy</h2>
+<p>There was <strong>no new scheduled arXiv announcement inside this daytime window</strong>. Both NEW papers below are older IDs appearing in the Monday-evening announcement represented by arXiv’s Tuesday, October 20 listings. They were scouted but not ranked in the prior brief. NEW here means new to this catalog, not first announced during these 12 hours.</p>
+<h3>NEW 3 — <a href="https://arxiv.org/abs/2610.25525">StopLoss: Teaching Agents to Predict Failure and Stop Early — arXiv:2610.25525</a></h3>
+<p><strong>Full PDF read:</strong> all <strong>19 pages</strong>, including methods, results, limitations, references and Appendices A–D; whole-file <code>pdftotext -layout</code> extraction and complete reading. Submitted October 18; prior-window announcement; not previously carded.</p>
+<p>The monitor learns from terminal outcomes and periodically scores recent action/observation windows. <strong>Table 1</strong> reports replay results for the primary Qwen2.5-7B ensemble:</p>
+<table>
+<tr><th>Executor / benchmark</th><th>Cost per retained solve change, including monitor</th><th>Original successes retained</th></tr>
+<tr><td>GPT-5.6 Luna / SWE-bench Pro</td><td>−24.2%</td><td>72.2%</td></tr>
+<tr><td>Claude Sonnet 4.6 / SWE-bench Pro</td><td>−30.6%</td><td>91.6%</td></tr>
+<tr><td>GPT-5.6 Luna / SWE-bench Verified</td><td>−4.5%</td><td>99.0%</td></tr>
+<tr><td>Claude Sonnet 4.6 / SWE-bench Verified</td><td>+0.2%</td><td>100.0%</td></tr>
+</table>
+<p>The nominal 5% calibration false-kill target does not transfer uniformly. <strong>§5.3, Eq. 2</strong> makes savings conditional on avoided executor cost exceeding monitoring overhead plus the lost-success fraction. Monitor cost uses a GPU-time price proxy, not an online deployment invoice (<strong>§4.3; Appendix C.2</strong>). Frozen pricing, replay, narrow repositories and distribution shift limit portability.</p>
+<p><strong>BQAA interpretation:</strong> benchmark an intervention against the original success population. Report retained successes and false kills next to cost per solve, with confidence intervals and actual serving overhead. The Pro result that looks cheaper also discards many successes; that is a product tradeoff, not free efficiency. Start with shadow decisions and a held-out workload. Do not import the paper’s threshold or its GPU proxy as a production guarantee.</p>
+<h3>NEW 4 — <a href="https://arxiv.org/abs/2610.25032">Don't Judge an Agent by Its Messages: Private-State Leakage under Passive Monitoring of Agent Communication — arXiv:2610.25032</a></h3>
+<p><strong>Full PDF read:</strong> all <strong>23 pages</strong>, including formal proofs, experimental details, limitations, references and Appendices A–B. Submitted October 18; prior-window announcement; not previously carded.</p>
+<p><strong>Theorem 4.2 / Corollary 4.3 and Table 1</strong> show that the same observable task/message/action law can coexist with different private-state leakage. Communication alone therefore need not identify leakage.</p>
+<p>The experiments distinguish two arms. In the selection attack, private-bit recovery reaches 100%, but a selection-aware detector reaches <strong>AUC 0.972 across 16 independent messages</strong> (<strong>§6; Table 2</strong>). The law-preserving resampling arm reports <strong>97.72% recovery</strong> and detector AUC <strong>0.540</strong>, with a wide <strong>[0.450, 0.633]</strong> interval (<strong>Table 4</strong>). These are not evidence that every attack defeats detection. The empirical setting uses one small model and a synthetic routing task; the 16-message collections are not adaptive agent conversations. A trusted canonical task interface changes the audit assumptions (<strong>§5.3, Proposition 5.3</strong>).</p>
+<p><strong>BQAA interpretation:</strong> a complete-looking trace is evidence of observed behavior, not a certificate about unobserved private-state coupling. Name the property an evaluator actually checks. Where stronger assurance is required, collect trusted provenance and enforce restricted interfaces; do not respond by indiscriminately copying private state or secrets into telemetry. A privacy-certification claim needs assumptions and controls beyond a clean message score.</p>
+<h3>Scouted, not ranked</h3>
+<ul><li><strong><a href="https://arxiv.org/abs/2610.25231">AgentLens — arXiv:2610.25231</a>: full PDF read, all 14 pages.</strong> Hold. Its experimental framework roster and variance summaries conflict across sections/figures; see Unconfirmed. The replay controller also measures allocation behavior rather than end-to-end agent task latency. No headline performance number is admitted.
+</li><li><strong><a href="https://arxiv.org/abs/2610.26770">HarnessPro — arXiv:2610.26770</a>:</strong> abstract screened for harness/cost optimization; PDF not read, no rank.
+</li><li><strong><a href="https://arxiv.org/abs/2610.26394">PACE — arXiv:2610.26394</a>:</strong> abstract screened for PRD-conditioned evaluation; PDF not read, no rank.
+</li><li><strong><a href="https://arxiv.org/abs/2610.26624">arXiv:2610.26624</a>:</strong> abstract screened for MCP security/governance; PDF not read, no rank.
+</li><li>The prior brief’s remaining scouted list stays unranked. MASIF <code>2610.25852</code>, AgInt <code>2610.23996</code>, and tool-trace auditing <code>2610.25540</code> are already carded and were not re-admitted. The priority pin <code>2609.02702</code> remains intact.
+</li></ul>
+<h2>Six-week EV</h2>
+<p>These are proposed BQAA experiments, not measured returns or commitments.</p>
+<table>
+<tr><th>Priority / horizon</th><th>Proposed work</th><th>Evidence that would justify keeping it</th></tr>
+<tr><td>1 — weeks 1–2</td><td>Add explicit cache-write TTL partitions, source freshness and pagination-complete flags to a small reconciliation dataset. Replay mixed-TTL, upgrade and incomplete-report fixtures.</td><td>Explain invoice/report differences without conflating a write premium, a missing page and stale source data.</td></tr>
+<tr><td>2 — weeks 2–3</td><td>Define trace coverage fields: instrumentation version, endpoint, capture mode, skill version and decision-interface payload completeness.</td><td>A deliberately uncaptured request and an instrumentation failure produce distinguishable records; question/answer evaluation has both sides of the decision.</td></tr>
+<tr><td>3 — weeks 3–4</td><td>Split structured-output checks into schema validity, termination status, semantic correctness and tool execution outcome.</td><td>A schema-valid but wrong result does not pass the task evaluator; interrupted generations are counted explicitly.</td></tr>
+<tr><td>4 — weeks 4–6</td><td>Run an early-stop monitor in shadow on a fixed held-out workload; estimate cost per retained solve using actual monitor overhead.</td><td>Savings survive false-kill accounting and workload shift. Keep an explicit rejection criterion for unacceptable loss of original successes.</td></tr>
+</table>
+<p>The highest near-term EV is improved denominators and reconciliation. Automated stopping has a higher evaluation burden; communication-only privacy certification is unsupported by this evidence.</p>
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>OpenAI cache:</strong> price write TTLs separately and test upgrades before recommending longer coverage.
+</li><li><strong>Bedrock structured outputs:</strong> schema conformance becomes a serving control; it does not replace task evaluation.
+</li><li><strong>Langfuse Progress:</strong> join versioned skills to traces and represent intentional no-ingestion explicitly.
+</li><li><strong>Opik Progress:</strong> preserve questions and answers when instrumenting typed decisions.
+</li><li><strong>Anthropic analytics Progress:</strong> retain source refresh time and pagination completion beside warehouse ingestion time.
+</li><li><strong>StopLoss:</strong> assess cost reductions against retained successes, not spend alone.
+</li><li><strong>Private-state leakage:</strong> label communication audit coverage precisely; observed traces cannot supply every assurance property.
+</li></ul>
+<h2>Unconfirmed</h2>
+<table>
+<tr><th>Item</th><th>What was not confirmed / disposition</th><th>Where looked</th></tr>
+<tr><td>Claude Enterprise inference hooks</td><td><strong>Held from NEW:</strong> October 20 GA is confirmed, but no intraday publication time was found to place it before 12:34 PT. Scope is Enterprise product traffic, not a blanket Claude Platform API/Bedrock/Google Cloud control.</td><td><a href="https://platform.claude.com/docs/en/release-notes/overview">Release notes</a>, <a href="https://platform.claude.com/docs/en/manage-claude/inference-hooks">full hook documentation</a>, page metadata and targeted search. First direct observation was 12:40 PT. Carry to the next slot with this timing caveat.</td></tr>
+<tr><td>AgentLens <code>2610.25231</code></td><td><strong>Held:</strong> §3.1’s framework roster omits OpenHands although §4.2.3/Fig. 6 discuss it. Framework/task variance summaries in the abstract/§5.2 do not reconcile with §4.3.3/Fig. 14. No author correction or explanation was established.</td><td>Full <a href="https://arxiv.org/pdf/2610.25231">PDF</a>, including figures, methods and limitations.</td></tr>
+<tr><td>Opik 2.2.107</td><td><strong>gap: GitHub release-tag API HTTP 404.</strong> This does not mean no package release. PyPI succeeds; the public URL is a tag page, while 2.2.108 notes the failed release process.</td><td><a href="https://pypi.org/pypi/opik/json">PyPI JSON</a>, <a href="https://github.com/comet-ml/opik/releases/tag/2.2.107">public 2.2.107 tag</a>, <a href="https://github.com/comet-ml/opik/releases/tag/2.2.108">2.2.108 release</a>.</td></tr>
+<tr><td>Direct OpenAIDevs X announcement</td><td><strong>gap: X HTTP 403.</strong> Technical capability confirmed from official docs; in-window public discussion supplies corroborating timing, not a substitute technical source. One guessed Discourse post-JSON route returned 404; the correct topic/post JSON route succeeded.</td><td><a href="https://x.com/OpenAIDevs/status/2112603916076781778">Official post URL</a>, API changelog/guide, <a href="https://community.openai.com/t/1403525/79.json">discussion JSON</a>.</td></tr>
+<tr><td>W&amp;B Weave</td><td><strong>gap: release-notes URL redirected to login; updates URL HTTP 404.</strong> Public articles and PyPI are not a complete product-change log. No broad “no launch” claim.</td><td>W&amp;B release notes, updates/articles pages, <a href="https://pypi.org/pypi/weave/json">weave registry</a>.</td></tr>
+<tr><td>Datadog / Galileo</td><td><strong>gap: selected Datadog release-notes and What's New URLs HTTP 404; Galileo changelog HTTP 404.</strong> Blog fallbacks loaded, but do not establish comprehensive in-window coverage.</td><td>Datadog LLM Observability docs and blog (Scout article dated Oct 15); Galileo blog (latest visible entry May 26).</td></tr>
+<tr><td>Vertex AI / Microsoft Foundry</td><td><strong>gap: Vertex successor URL HTTP 404; old notes say no longer updated. Foundry original What's New URL HTTP 404.</strong> Google’s aggregate notes and corrected Foundry page loaded, but the latter exposes an older summary. No platform-wide negative claim.</td><td>Google Cloud aggregate release notes; Vertex notes/successor attempt; Microsoft corrected Foundry What's New page and targeted search.</td></tr>
+<tr><td>Braintrust / LangSmith date precision</td><td>Month/week grouping does not establish exact in-window launch dates for every entry. No fresh rank inferred from undated grouping; public-preview entries remain below rank level.</td><td><a href="https://www.braintrust.dev/docs/changelog">Braintrust changelog</a>, <a href="https://docs.langchain.com/langsmith/changelog">LangSmith changelog</a>, relevant package registries.</td></tr>
+<tr><td>AWS AgentCore release-history coverage</td><td>Initial document-history response was a short redirect stub and the What's New HTML was not a usable list; RSS fallback succeeded. Feed evidence confirms the Bedrock item, not exhaustive coverage of every AgentCore change.</td><td>AgentCore history/What's New pages, <a href="https://aws.amazon.com/about-aws/whats-new/recent/feed/">AWS RSS</a>.</td></tr>
+<tr><td>Social collection</td><td>LinkedIn authentication wall; X 401 and Reddit 403 reported by collectors. Those are access gaps, not evidence of inactivity.</td><td>Fresh-list provenance and supplied pack-gap ledger; no authenticated social access claimed.</td></tr>
+</table>
+<p>Ranked capabilities and paper statements above are supported by the cited primary material. Product integrations, paper experiments and billing behavior were not executed in a live customer environment.</p>
+<h2>Housekeeping</h2>
+<p><strong>Fresh path used.</strong> Read <code>_runs/fb-2026-10-20-1234/fresh-items.md</code> as the complete collector candidate list, with its JSON metadata. <strong>No file under <code>packs/</code> was opened or read wholesale; no raw pack reading was needed.</strong> The eleven packs below were consumed through that merged list:</p>
+<ul><li><code>packs/agy-pack-2026-10-20-0032.md</code> — late-finishing prior-slot collection, newly consumed here.
+</li><li><code>packs/muse-pack-2026-10-20-0132.md</code>
+</li><li><code>packs/dsh-pack-2026-10-20-0232.md</code>
+</li><li><code>packs/agy-pack-2026-10-20-0332.md</code>
+</li><li><code>packs/muse-pack-2026-10-20-0432.md</code>
+</li><li><code>packs/dsh-pack-2026-10-20-0532.md</code>
+</li><li><code>packs/agy-pack-2026-10-20-0632.md</code>
+</li><li><code>packs/agy-pack-2026-10-20-0932.md</code>
+</li><li><code>packs/muse-pack-2026-10-20-1032.md</code>
+</li><li><code>packs/dsh-pack-2026-10-20-1132.md</code>
+</li><li><code>packs/dsh-pack-2026-10-20-1209.md</code> — extra seat, thin by design.
+</li></ul>
+<p>Merge receipt: <code>FB_MERGE slot=2026-10-20-1234 packs=11 raw=62 unique=28 drop_catalog=0 drop_seen=0 drop_both=0 fresh=28 (cand=28 low=0) tokens_old~98438 tokens_new~6430</code>.</p>
+<p><strong>Collection gaps:</strong> Mac down ~07:37–09:30 PT; Muse 0732 and DSH 0832 are absent, with no backfill. Agy 0932 covered forward from Agy 0632. Muse extra seat 1207 is missing because its subscription quota returned 429; reset is Sunday October 25 at 17:00 PT. Agy 1232 belongs to the next slot. HN remains dropped since September 27. No missing pack was invented.</p>
+<p><strong>Independent sweep:</strong> checked primary release/changelog/blog surfaces for LangChain/LangSmith, Langfuse, Arize Phoenix, Braintrust, W&amp;B Weave, Datadog, Galileo, Comet Opik, OpenAI, Anthropic, Google Cloud/Vertex AI, AWS/Bedrock/AgentCore, Microsoft Foundry, Databricks, Snowflake and Vercel. Used PyPI/npm clocks and public release pages for candidate verification; GitHub release API use was limited to eleven lookups, including the failed Opik 2.2.107 lookup. The failures and stale/date-coarse surfaces above prevent an ecosystem-wide “nothing else shipped” conclusion. The independent pass found OpenAI caching, AWS structured outputs, the held Claude hooks announcement, later Opik fixes and LiteLLM 1.106.1 beyond the fresh list.</p>
+<p><strong>Verified arXiv boundary:</strong> <a href="https://arxiv.org/abs/2610.26863">2610.26863</a> returned HTTP 200; adjacent <code>2610.26864</code> and <code>2610.26865</code> returned 404. This establishes the checked contiguous ceiling, not a proof over every higher identifier. Current cs.AI/cs.CR/cs.OS Tuesday listings place the selected carry-forward papers in the Monday-evening announcement. The <a href="https://info.arxiv.org/help/availability.html">arXiv availability schedule</a> places Tuesday’s next announcement at 20:00 Eastern / <strong>17:00 PT</strong>, after this cutoff. No new scheduled announce occurred in-window.</p>
+<p><strong>PDF verification:</strong> downloaded three complete PDFs, ran <code>pdftotext -layout</code> over each whole file, normalized whitespace for reading, and read every partition, including proofs/appendices/references. StopLoss: 19 pages; private-state leakage: 23; AgentLens: 14. No abstract-only paper is ranked. No paper experiment was reproduced. Scratch source bodies, fetch metadata, PDFs, complete extracts and read-audit receipt are under <code>_runs/astra-brief-1234-tue20261020/</code>.</p>
+<p><strong>Catalog check:</strong> live catalog read-only baseline <strong>615 items / 160 briefs / 162 runs</strong>, maximum brief <code>2026-10-20T0034</code>. Selected IDs, names and URLs were checked against the live catalog before handoff; all three Progress parents exist. No duplicate admission or repeated-version Progress. The <code>2609.02702</code> priority pin is unchanged. Catalog bytes match the starting SHA-256; no HTML, catalog edit, commit or push is part of this handoff.</p>
+<p><strong>Recall applied:</strong> the prior handoff correction distinguished whole-PDF extraction from actual full reading; this run performed both and records the coverage. Untrusted source text was treated as evidence only. No first-party BQAA card, ADK rank, Desk section, Medium citation or GTM content. Collection files the Ship/vault note.</p>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>openai-responses-12-hour-prompt-cache-ttl-write-accounting</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> OpenAI Responses API — selectable 12-hour prompt caching and TTL-specific write accounting
+</li><li><strong>url:</strong> <a href="https://developers.openai.com/api/docs/changelog">https://developers.openai.com/api/docs/changelog</a> (2026-10-20, stable)
+</li><li><strong>card text:</strong> OpenAI adds selectable 12-hour prompt caching, with longer writes priced at 2.5× ordinary input tokens. BQAA should account separately for TTL-specific writes, reads and coverage upgrades before recommending longer cache coverage.
+</li></ul>
+</li><li><strong>id:</strong> <code>amazon-bedrock-claude-structured-outputs-ga-runtime-mantle-strict-tools</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Amazon Bedrock — Claude structured outputs GA across runtime and mantle, with strict tool schemas
+</li><li><strong>url:</strong> <a href="https://aws.amazon.com/about-aws/whats-new/2026/10/claude-structured-outputs-bedrock/">https://aws.amazon.com/about-aws/whats-new/2026/10/claude-structured-outputs-bedrock/</a> (2026-10-20, stable)
+</li><li><strong>card text:</strong> Claude structured outputs are generally available on Bedrock runtime and mantle endpoints, with model/endpoint-specific support for JSON schemas and strict tool definitions. Track structural validity separately from semantic correctness, termination and tool outcomes.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-25525-stoploss-outcome-trained-monitor-cost-per-retained-solve</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> StopLoss — early-stop economics must include lost successes and monitoring cost
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.25525">https://arxiv.org/abs/2610.25525</a>
+</li><li><strong>card text:</strong> Full PDF read; previously unranked paper from the prior announcement window. Outcome-trained monitors can reduce replay cost per solve, but retention varies materially across executor and benchmark; BQAA should evaluate intervention economics with false kills and actual monitoring overhead.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-25032-private-state-leakage-passive-audit-identifiability</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Private-state leakage — passive communication audits can leave leakage unidentified
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.25032">https://arxiv.org/abs/2610.25032</a>
+</li><li><strong>card text:</strong> Full PDF read; previously unranked paper from the prior announcement window. Its formal result separates observable communication laws from private-state leakage, while experiments distinguish detectable selection attacks from law-preserving resampling; BQAA should state audit assumptions and trusted-interface requirements explicitly.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>langfuse-v4-61-0-v4-63-0-skills-gateway-keys-experiment-filters</code>
+<ul><li><strong>text:</strong> Langfuse v4.65.0–v4.66.0 (2026-10-20) graduate the Skills API and enable self-hosted gateway routing with NONE ingestion, including removal of the default ingestion-project/signing-key requirement for that mode. Preserve skill versions and explicit capture mode when interpreting missing traces: <a href="https://github.com/langfuse/langfuse/releases/tag/v4.65.0">https://github.com/langfuse/langfuse/releases/tag/v4.65.0</a>
+</li></ul>
+</li><li><strong>parent:</strong> <code>opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row</code>
+<ul><li><strong>text:</strong> Opik 2.2.106 (2026-10-20) adds Python Decisions API LLM spans and preserves decision questions/answers in TypeScript tracking, improving evaluation payload completeness. Same-window 2.2.107–2.2.109 fixes do not create another capability card: <a href="https://github.com/comet-ml/opik/releases/tag/2.2.106">https://github.com/comet-ml/opik/releases/tag/2.2.106</a>
+</li></ul>
+</li><li><strong>parent:</strong> <code>anthropic-sdk-1-10-0-admin-api-org-analytics-per-user-cost-spend-limits-rbac-org-api-ga</code>
+<ul><li><strong>text:</strong> Anthropic Python SDK v1.16.0 (2026-10-20) exposes data_refreshed_at and has_more on analytics report pages. BQAA can preserve vendor freshness and pagination completeness when reconciling organization analytics: <a href="https://github.com/anthropics/anthropic-sdk-python/releases/tag/v1.16.0">https://github.com/anthropics/anthropic-sdk-python/releases/tag/v1.16.0</a>
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>OpenAI announced selectable 12-hour prompt caching with 2.5× input-token write pricing on 2026-10-20: <a href="https://developers.openai.com/api/docs/changelog">https://developers.openai.com/api/docs/changelog</a>
+</li><li>AWS announced Claude structured outputs GA on Bedrock runtime and mantle on 2026-10-20, with a 14:00Z RSS publication clock: <a href="https://aws.amazon.com/about-aws/whats-new/2026/10/claude-structured-outputs-bedrock/">https://aws.amazon.com/about-aws/whats-new/2026/10/claude-structured-outputs-bedrock/</a>
+</li><li>Langfuse v4.65.0 shipped the stable Skills API and self-hosted NONE-ingestion gateway mode on 2026-10-20: <a href="https://github.com/langfuse/langfuse/releases/tag/v4.65.0">https://github.com/langfuse/langfuse/releases/tag/v4.65.0</a>
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Tue Oct 20, 2026 · 12:34 PM PT · Astra</span>
+    </div>
+  </footer>
+</body>
+</html>
