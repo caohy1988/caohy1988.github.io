@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-20T09:48:21Z",
+  "updatedAt": "2026-10-20T10:47:20Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
@@ -3106,6 +3106,74 @@
         "git",
         "review",
         "tokens",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "meta-thin-orchestrator-rule-table-router-2026-10-20",
+      "date": "2026-10-20",
+      "displayDate": "Oct 20, 2026",
+      "title": "Meta Engineering, 'The Thin Orchestrator' — deterministic rule-table router in front of Jev, which handles only the cases the table does not cover",
+      "href": "https://engineering.fb.com/2026/10/19/ml-applications/thin-orchestrator-ai-agent-architecture/",
+      "why": "Meta's engineering post 'The Thin Orchestrator: How We Made Our AI Agents More Reliable by Giving the Router Less to Do' (engineering.fb.com, 2026-10-19; Plawan Rath, Akhil Jindal and Ashwini Verma) describes a 1,300-line orchestrator that routes 20+ workflows to 14 specialist subagents and does zero domain work itself. Every request follows a fixed 7-step protocol: read the subagent's instruction file, check whether the target already exists, gather required fields from the user, auto-discover what can be inferred, run a reliability gate for active warnings or required reviewers, delegate to the subagent with full context, and handle results (surface errors, confirm success); steps 1–5 and 7 are deterministic, and only step 6 uses LLM reasoning, inside an isolated subagent with only its domain knowledge loaded. Every subagent follows one standard structure (knowledge sources, a pre-gathering checklist, a step-by-step workflow, discovery patterns, troubleshooting), and workflow templates fix the order in which specialists run, so a new use case, pipeline migration, needed a new template and zero new agent code. Reported results: configuration prep for a new column took three to four days by hand and about a day with their earlier config-driven system, and takes under an hour with the thin orchestrator; about two-thirds of the system's changes land without significant human edits. This card takes the router. The post's rule: 'which subagent handles this?' is a routing decision, not a reasoning task, so routing stays deterministic (keyword matching, intent classification, field gathering) and the line between deterministic and probabilistic work is drawn explicitly. Why it matters here: Jev, our typed decision layer (Choice / Score / Noul answers through the TypeSafe API, on OpenRouter typesafe/jev-1.13, mode active since 2026-09-20), takes typed state through jev-route or jev-shadow and answers its gates (intake, pre_browser, pre_retry, pre_research, pre_tool, and worth_running in shadow); a caller honors an answer only at confidence ≥ the 0.55 floor in router.json and otherwise falls back to CoS. The idea: a deterministic rule table in front of Jev, run on the same typed state, where a matching row returns its answer with no model call and only states that no row covers go to Jev, under the unchanged floor and CoS fallback. Our own baseline points the same way: on 2026-09-27, worth_running said run on 139 of 142 answered calls, and a Jev gate goes shadow → active only if it beats that always-majority constant (#constant-baseline), plus the replay check and Three-Run Proof; a rule table writes such constants down as rows instead of paying a model call for each. We already have, as Lab cards only: bouncer's card, whose hard rules and fast-path allowlist decide tool calls in code before its Jev questions run, and downshift's card, deterministic subagent model routing with no model in the loop; this card applies the same edges-in-code split to our own Jev routing. Status: trial idea, not installed and not scheduled; router.json, Jev's mode and its kill switch do not change; any install or adoption needs Haiyuan, and promoting any gate from shadow to active still needs Haiyuan's approval plus the replay check, constant baseline and Three-Run Proof. Card requested by Haiyuan on 2026-10-20. Caveats: the post's numbers are Meta's own, from one data-pipeline system (column onboarding across three code repositories, three programming languages and up to six pipeline stages), and none has been measured here; no rule table exists, so how many of our calls it would cover is unknown (139 of 142 is one gate's answers, not a routing count). Lab card; appliedToPlaybook false.",
+      "source": "Haiyuan-requested Lab card (Manage) · 2026-10-20 02:49 PT · Maps/Decisions/2026-10-20-thin-orchestrator-lab-trial.md",
+      "tags": [
+        "jev",
+        "router",
+        "routing",
+        "orchestration",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "meta-thin-orchestrator-standard-agent-card-2026-10-20",
+      "date": "2026-10-20",
+      "displayDate": "Oct 20, 2026",
+      "title": "Meta Engineering, 'The Thin Orchestrator' — one standard card layout for every specialist agent: knowledge to load, pre-handoff checklist, workflow steps, error → fix",
+      "href": "https://engineering.fb.com/2026/10/19/ml-applications/thin-orchestrator-ai-agent-architecture/",
+      "why": "Meta's engineering post 'The Thin Orchestrator' (engineering.fb.com, 2026-10-19) describes a 1,300-line orchestrator that routes 20+ workflows to 14 specialist subagents through a fixed 7-step protocol in which steps 1–5 and 7 are deterministic and only step 6 uses LLM reasoning, and reports that configuration prep for a new column fell from three to four days by hand to under an hour. This card takes the standard subagent structure: each of the 14 subagents has knowledge sources (which domain files to load at runtime, typically a few thousand tokens each), a pre-gathering checklist (what the orchestrator must collect before delegation), a step-by-step workflow, discovery patterns (how to find relevant code patterns in the monorepo) and troubleshooting (error-to-resolution mappings for common failures), so adding a subagent is templated work and 'the 15th subagent looks structurally identical to the first'; the 25+ knowledge files load on demand when a subagent runs, so an update reaches the next session with no orchestrator change. Why it matters here: our Agents/*.md cards open with the five-field role card (Owns / Inputs / May / Must ask before / Done when) and its promotion ladder (#role-card), and the rest of each card is a free-form list that differs from card to card. The idea is one standard card layout for every specialist agent. The role card stays at the top, per the 2026-10-05 five-field role-card lock, with the four layout sections below it: Knowledge to load, Pre-handoff checklist, Workflow steps and Error → fix (a symptom-to-fix table). Reference / history comes last, for facts that fit no other section, and the post's discovery patterns are left out. Trial rewrite of two vault cards, pending review: Agents/dsh.md and Agents/muse-code.md were reorganized into this layout in this same change (vault only), with every number, date, backticked token and path of the old text checked present in the new text, and each role card, with its promotion ladder, left word for word at the top. Status: trial idea, not installed, not scheduled and not adopted: no other card, playbook section, template or skill changes, and any adoption or rollout to more cards needs Haiyuan. Card requested by Haiyuan on 2026-10-20. Caveats: the post's numbers are Meta's own, from one data-pipeline system, and none has been measured here; whether the layout speeds up or hardens handoffs is unmeasured, and the rewrite added no facts, so thin sections show gaps rather than fill them (Muse's Error → fix table has three rows). Lab card; appliedToPlaybook false.",
+      "source": "Haiyuan-requested Lab card (Manage) · 2026-10-20 02:49 PT · Maps/Decisions/2026-10-20-thin-orchestrator-lab-trial.md",
+      "tags": [
+        "role card",
+        "vault",
+        "seat-instructions",
+        "handoffs",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "meta-thin-orchestrator-pre-handoff-checks-2026-10-20",
+      "date": "2026-10-20",
+      "displayDate": "Oct 20, 2026",
+      "title": "Meta Engineering, 'The Thin Orchestrator' — checks before every handoff: does the target already exist, and are there active warnings or required reviewers?",
+      "href": "https://engineering.fb.com/2026/10/19/ml-applications/thin-orchestrator-ai-agent-architecture/",
+      "why": "Meta's engineering post 'The Thin Orchestrator' (engineering.fb.com, 2026-10-19) describes a 1,300-line orchestrator that routes 20+ workflows to 14 specialist subagents through a fixed 7-step protocol in which steps 1–5 and 7 are deterministic and only step 6 uses LLM reasoning, and reports that configuration prep for a new column fell from three to four days by hand to under an hour. This card takes two of the deterministic steps that run before every delegation: step 2 checks whether the target already exists, to prevent duplicates, and step 5 is a reliability gate that checks for active warnings or required reviewers. The post's argument: a heavyweight orchestrator that hallucinates routes to the wrong agent, gathers the wrong fields or skips reliability checks, while a thin one follows a fixed protocol. Why it matters here: every handoff from Manage to a specialist, and every new Coding EM kick row, carries a machine-readable packet (from, to, job_type, objective, artifacts, decisions, constraints, open_questions, next_gate), and its completeness check, Jev packet_complete, is shadow only and never blocks (#handoff-packet). The idea is two fixed checks before every handoff: (1) does the target already exist, such as an open PR, a kick row, a vault note, a Lab card id or a pack for the same work, so that no duplicate is created; and (2) are there active warnings or required reviewers, such as a forbidden.md line or a Decisions lock that touches the work, and the blind reviewer seats the change needs, with the implementer never a reviewer on the same PR (#em-loop). We already have parts of it: Collection URL-dedupes the extra collect packs before each deep brief; publishing has one owner, Collection, with miss-watch as a catch-up rather than a second publisher; an ambiguous route goes to Haiyuan, never a silent misroute; an approval re-check runs right before a RED action, as policy text only (#approval-recheck); and, as a Lab card only, agent-role-contracts' offline preflight rejects self-review and stale handoffs. Status: trial idea, not installed and not scheduled; no handoff contract, skill or playbook text changes; any install or adoption needs Haiyuan. Card requested by Haiyuan on 2026-10-20. Caveats: the post's numbers are Meta's own, from one data-pipeline system, and none has been measured here; what counts as the same work for the duplicate check, and where active warnings are read from, would need defining before any trial. Lab card; appliedToPlaybook false.",
+      "source": "Haiyuan-requested Lab card (Manage) · 2026-10-20 02:49 PT · Maps/Decisions/2026-10-20-thin-orchestrator-lab-trial.md",
+      "tags": [
+        "handoffs",
+        "verification",
+        "review",
+        "guardrails",
+        "backlog"
+      ],
+      "appliedToPlaybook": false
+    },
+    {
+      "id": "meta-thin-orchestrator-workflow-templates-2026-10-20",
+      "date": "2026-10-20",
+      "displayDate": "Oct 20, 2026",
+      "title": "Meta Engineering, 'The Thin Orchestrator' — named workflow templates: set orders of specialists reused across workflows",
+      "href": "https://engineering.fb.com/2026/10/19/ml-applications/thin-orchestrator-ai-agent-architecture/",
+      "why": "Meta's engineering post 'The Thin Orchestrator' (engineering.fb.com, 2026-10-19) describes a 1,300-line orchestrator that routes 20+ workflows to 14 specialist subagents through a fixed 7-step protocol in which steps 1–5 and 7 are deterministic and only step 6 uses LLM reasoning, and reports that configuration prep for a new column fell from three to four days by hand to under an hour. This card takes the workflow templates: deterministic state machines that constrain the LLM's decision space by fixing the phase order, such as Column Onboarding (Schema → Validation → Population → Testing), Event Onboarding (Schema → Population → Validation → Testing → Event Processing) and Pipeline Migration (Assessment → Planning → Population → Validation → Monitoring). All three reuse the same pool of 14 subagents in different orders; pipeline migration, a completely new use case, took a new template and zero new agent code, and the post's first question for any new use case is 'Can I sequence existing agents differently?' Why it matters here: we already run set orders of seats, but they live in separate locks and cards rather than under one name. The Field Brief runs the 3-way hourly collect (Agy, Muse and DSH by hour % 3) and two extra collect seats, Collection URL-dedupes the extra packs before the 12h deep brief (00:34 / 12:34 PT), and Collection publishes; a coding job runs the Opus 5.5 implementer, then blind review in which the implementer is never a reviewer on the same PR (#em-loop), then fix rounds capped at three before escalating (Haiyuan 2026-10-20 02:39 PT), then Haiyuan's merge gate. The idea is named workflow templates: each set order written once under a name (for example field-brief or code-pr) and cited by the handoffs that run it, so that a new use case is first tried as a new order of existing seats, in line with the 'No new seat.' line our Lab cards keep. Status: trial idea, not installed and not scheduled; no routine, schedule, skill or handoff contract changes; any install or adoption needs Haiyuan. Card requested by Haiyuan on 2026-10-20. Caveats: the post's numbers are Meta's own, from one data-pipeline system, and none has been measured here; Meta's templates order specialists inside one domain, while our seats are general CLIs and Grok bots, so the reuse may be smaller; field-brief and code-pr are example names, not agreed ones. Lab card; appliedToPlaybook false.",
+      "source": "Haiyuan-requested Lab card (Manage) · 2026-10-20 02:49 PT · Maps/Decisions/2026-10-20-thin-orchestrator-lab-trial.md",
+      "tags": [
+        "orchestration",
+        "routing",
+        "EM",
+        "Field Brief",
         "backlog"
       ],
       "appliedToPlaybook": false
