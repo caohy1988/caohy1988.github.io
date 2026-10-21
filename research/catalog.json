@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "id": "braintrust-js-3-39-0-application-logs-console-capture-trace-correlation",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Braintrust JavaScript 3.39.0 — application logs join traces without becoming extra spans",
+      "html": " <a href=\"https://github.com/braintrustdata/braintrust-sdk-javascript/releases/tag/braintrust%403.39.0\">Launch page</a> (2026-10-21, stable) — Braintrust adds severity-based application logging and opt-in console capture; messages can inherit the active Braintrust or compatible OTel trace/span IDs while retaining distinct log row IDs, without creating child spans. The same release adds AI SDK batch/code-mode tracing and LiveKit cascade instrumentation. Analytics should preserve record kind and record identity to avoid multiplying operation counts when joining logs to spans. <a href=\"/research/briefs/2026-10-21-1234-astra.html\">Full brief</a>.",
+      "added": "2026-10-21T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "claude-api-2026-10-21-explicit-key-scope-analytics-schema-migration",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Claude API 2026-10-21 — explicit key scope and a breaking analytics attribution contract",
+      "html": " <a href=\"https://platform.claude.com/docs/en/api/migration-2026-10-21\">Launch page</a> (2026-10-21, stable) — API version 2026-10-21, defaulted by Python 2.0.0 and TypeScript 1.0.0, replaces ambiguous API-key workspace_id with explicit scope, distinguishing Default Workspace from organization-wide keys. Enterprise analytics renames actor.email and summaries, and the ordinary SDK credential path moves API keys to Authorization: Bearer with one selected credential. Tenant mapping, analytics parsers and credential redaction need coordinated migration; separately documented user-profile enforcement fields are not assumed to be typed in these SDKs. <a href=\"/research/briefs/2026-10-21-1234-astra.html\">Full brief</a>.",
+      "added": "2026-10-21T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2610-27465-recoverability-verifier-strength-measured-rollback",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "Recoverability and Verifier Strength — measure judge health, restoration and the effects rollback cannot undo",
+      "html": " <a href=\"https://arxiv.org/abs/2610.27465\">abs</a> — Pre-window Tuesday-announcement carry-forward, full PDF read: a platform's diversity gate collapses to a constant in 9 of 37 tested configurations, while saved-prompt restoration returns to a measured noise floor and regenerated undos do not. Three deployed prompt changes alter outcomes by 0.17 beyond the null-change floor, with improvements and regressions both contributing. The proposed autonomy rule remains a design recommendation: the verifier-strength/regret trend is statistically unresolved, and only prompt edits were tested end to end. <a href=\"/research/briefs/2026-10-21-1234-astra.html\">Full brief</a>.",
+      "added": "2026-10-21T1234",
+      "addedDisplay": "12:34 PM PT",
+      "progress": []
+    },
+    {
       "id": "claude-enterprise-inference-hooks-ga-governed-request-policy-coverage",
       "tag": "Industry",
       "kind": "rank",
@@ -208,7 +238,13 @@
       "html": " <a href=\"https://github.com/agno-agi/agno/releases/tag/v3.1.4\">Launch page</a> (2026-10-16, stable) — Agno v3.1.4 adds Sandboxed Harness Agents: ClaudeAgent and CodexAgent accept a sandbox= provider (DockerSandbox or Bedrock AgentCoreSandbox) and run the entire harness process in an isolated per-session computer. Each turn claims the session via a Postgres lease, restores the last committed checkpoint (workspace plus native conversation files), and publishes the run row and recovery point in one transaction — a failed or cancelled turn publishes nothing, and a restore missing the native conversation id fails with native_state_missing before the model runs. Background runs for db-backed, version-pinned, and factory components now ride the durable queue with a stamped resolution scope replayed at claim time. <a href=\"/research/briefs/2026-10-16-1234-muse.html\">Full brief</a>.",
       "added": "2026-10-16T1234",
       "addedDisplay": "12:34 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-10-21T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "Agno 3.1.8 (Oct 21) adds opt-in PostgreSQL sandbox checkpoints for multi-replica restore and makes the default retention horizon three checkpoints per session, with retain_checkpoints=None preserving unlimited retention. Invalid host-local durable-queue storage fails at startup, and a missing committed checkpoint becomes a non-retryable terminal error that releases the session: https://github.com/agno-agi/agno/releases/tag/v3.1.8. <a href=\"/research/briefs/2026-10-21-1234-astra.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "langfuse-v4-61-0-v4-63-0-skills-gateway-keys-experiment-filters",
@@ -569,6 +605,11 @@
           "at": "2026-10-20T1234",
           "displayTime": "12:34 PM PT",
           "html": "Opik 2.2.106 (2026-10-20) adds Python Decisions API LLM spans and preserves decision questions/answers in TypeScript tracking, improving evaluation payload completeness. Same-window 2.2.107–2.2.109 fixes do not create another capability card: https://github.com/comet-ml/opik/releases/tag/2.2.106. <a href=\"/research/briefs/2026-10-20-1234-astra.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-21T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "Opik 2.2.111–2.2.113 (Oct 21) add project routing via opik.project_name, fallback for supported permanent judge-provider rejections, and suite-assertion retirement handling that records an evaluation-error reason and lets the suite finish. Preserve unavailable judging separately from agent-quality failure; the train also blocks empty evaluation inputs and repairs authored-score reads in deprecated workspace metrics endpoints: https://github.com/comet-ml/opik/releases/tag/2.2.112. <a href=\"/research/briefs/2026-10-21-1234-astra.html\">Full brief</a>."
         }
       ]
     },
@@ -1866,6 +1907,11 @@
           "at": "2026-10-11T1234",
           "displayTime": "12:34 PM PT",
           "html": "<code>@mastra/core</code> 1.76.0 and <code>@mastra/observability</code> 1.19.0 (Oct 11) give every token and cost metric row from one model call a shared <code>usageId</code>, include reasoning tokens in cost estimates, and let a judge run nest under the run it scores (<code>nestUnderParent</code>, spans marked <code>nestedUnderParent: true</code>). Interrupted model requests now get their own <code>MODEL_INFERENCE</code> span with finish reason <code>interrupted</code>, and trace queries gain <code>matches</code> / <code>notMatches</code> operators. <a href=\"/research/briefs/2026-10-11-1234-opus.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-21T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "Mastra core 1.79.0 and its Oct 21 coordinated train add a capability-gated aggregateSpans() storage contract, root/entity attribution fields, batch experiment metric filtering and nullable timeToFirstChunkMs queries. Usage belongs to the span recording it, model/provider grouping is not supported, and unsupported adapters reject aggregation; the querySpans response/filter migration also needs explicit handling: https://github.com/mastra-ai/mastra/releases/tag/%40mastra%2Fcore%401.79.0. <a href=\"/research/briefs/2026-10-21-1234-astra.html\">Full brief</a>."
         }
       ]
     },
@@ -7700,6 +7746,24 @@
   ],
   "runs": [
     {
+      "id": "2026-10-21T1234",
+      "date": "2026-10-21",
+      "display": "12:34 PM PT",
+      "href": "/research/briefs/2026-10-21-1234-astra.html",
+      "analyzer": "Astra",
+      "added": [
+        "braintrust-js-3-39-0-application-logs-console-capture-trace-correlation",
+        "claude-api-2026-10-21-explicit-key-scope-analytics-schema-migration",
+        "arxiv-2610-27465-recoverability-verifier-strength-measured-rollback"
+      ],
+      "updated": [
+        "mastra-core-1-72-0-trace-aggregate-plans-lease-fenced-background-tasks-cyber-refusal-retry",
+        "agno-v3-1-4-sandboxed-harness-agents-durable-queue",
+        "opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row"
+      ],
+      "note": "PUBLISH (Astra gpt-6-astra xhigh, fresh path): ~12h Wednesday-morning window, no new arXiv announce; 2 NEW Industry (Braintrust JS 3.39.0 application logs + console capture with distinct log-record identity; Claude API 2026-10-21 explicit key scope + analytics field migration, Python SDK 2.0.0 / TS SDK 1.0.0) + 1 NEW Academy carry-forward, full PDF read (2610.27465 Recoverability and Verifier Strength) + 3 Progress (Mastra core 1.79.0 aggregateSpans + timeToFirstChunkMs; Agno 3.1.8 Postgres checkpoints + 3-checkpoint default retention; Opik 2.2.111-2.2.113 unjudgeable-suite retirement). LiteLLM 1.107.0 (reported compromised, removed from PyPI) held in Unconfirmed, never ranked. Packs agy-0032/0332/0632/0932, dsh-0232/0532/1132/1209; gaps DSH 0832 (Mac down), Muse none (quota), Agy 1232 next slot."
+    },
+    {
       "id": "2026-10-21T0034",
       "date": "2026-10-21",
       "display": "12:34 AM PT",
@@ -10289,6 +10353,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-10-21T1234",
+      "date": "2026-10-21",
+      "display": "12:34 PM PT",
+      "href": "/research/briefs/2026-10-21-1234-astra.html",
+      "analyzer": "Astra",
+      "title": "Preserve attribution, and distinguish a failed judge from a failed agent"
+    },
     {
       "id": "2026-10-21T0034",
       "date": "2026-10-21",
