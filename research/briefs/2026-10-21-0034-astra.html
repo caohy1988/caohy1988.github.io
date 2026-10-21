@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-10-21-0034: Account for missing usage, then test whether interventions pay</title>
+  <meta name="description" content="Field Brief 2026-10-21-0034: Account for missing usage, then test whether interventions pay">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-21-0034-astra.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 AM PT · Wed Oct 21, 2026 · Astra</p>
+    <article>
+<h1>Field Brief — 2026-10-21-0034: Account for missing usage, then test whether interventions pay</h1>
+<p><strong>Writer: Astra (<code>gpt-6-astra</code>)</strong>
+<strong>For:</strong> Haiyuan Cao — BQAA (BigQuery Agent Analytics) + ADK
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>Window:</strong> ~12h since the scheduled <code>2026-10-20-1234</code> brief: Oct 20, 12:34 PT–Oct 21, 00:34 PT (<code>2026-10-20T19:34Z</code>–<code>2026-10-21T07:34Z</code>). The previous brief was published around 12:53 PT; the scheduled boundary controls this window.
+<strong>Effort:</strong> xhigh. <strong>Path:</strong> old (revert flag); seven source packs read directly for leads, with an independent primary-source sweep and live-catalog dedupe.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: five NEW catalog entries and two material Progress notes.</strong> Three Academy entries are from the Tuesday-evening arXiv announcement. The other two NEW entries are explicitly labeled catch-ups: an Oct 20 Enterprise product launch whose intraday clock is unresolved, and an older, previously uncarded controller study. NEW means newly admitted to the catalog; it does not make those two fresh-window discoveries.</p>
+<p>The immediate BQAA opportunity is <strong>honest accounting when a run is incomplete</strong>. Pydantic AI 2.59.0 distinguishes unavailable provider usage from measured zero and warns when a budget cannot be verified. Braintrust 0.48.0 retains available usage and final output from incomplete or failed response streams. These releases address a prerequisite for trustworthy cost-per-success analysis: failed and partially measured work must remain in the denominator.</p>
+<p>The Academy findings then sharpen what to measure. A controlled terminal-agent study finds that a useful decision signal can still produce an expensive intervention. DecisionPivot separates probability ordering, correct decisions, and confidence reliability. Two context-efficiency papers show why text length, active cache state, image tokens, additional steps, and monetary cost need separate fields. None establishes a universal savings rate for production agents.</p>
+<p><strong>Recalled lesson applied:</strong> whole-file PDF extraction is not a full read, and an abstract's headline is not a result audit. All four ranked PDFs were extracted in full and read through their methods, results, limitations, references and appendices where present; the claims below use the underlying tables. Missing source access is recorded as a gap, not as a quiet market.</p>
+<h2>Industry</h2>
+<h3>NEW 1 — Claude Enterprise inference hooks graduate to GA; measure the coverage of inline enforcement</h3>
+<p><strong>Dated catch-up, not a confirmed in-window launch.</strong> The <a href="https://platform.claude.com/docs/en/release-notes/overview">Oct 20 release notes</a> explicitly say inference hooks are out of beta. The prior brief held this item because there was no reliable publication time relative to 12:34 PT. That clock remains unresolved. The live catalog has no card for this capability, so this admission uses the permitted never-carded catch-up path; it does not claim the launch occurred after the cutoff.</p>
+<p>The <a href="https://platform.claude.com/docs/en/manage-claude/inference-hooks">product documentation</a> describes an Enterprise organization sending a governed request's transcript to its HTTPS security service before inference. The service returns allow or deny; an optional tool-call event can also gate a response's proposed tool calls before execution. The default verdict timeout is five seconds. A configured failure policy determines whether endpoint errors/timeouts allow or block requests, and sustained endpoint failures trigger a circuit breaker. Shadow mode, rollout sampling and role exclusions make enforcement coverage variable.</p>
+<p>This is a material product capability because it creates an inline decision and telemetry boundary across governed Enterprise conversations. Its scope is bounded: Claude Platform API organizations, Amazon Bedrock and Google Cloud are excluded; raw attachments/images, system prompts and internal context are not sent; some internal tool calls and hosted feature model calls are outside coverage. Verdicts allow or deny; they do not rewrite content. <strong>BQAA implication:</strong> join verdicts to the applicable coverage and failure-policy state. A missing denial is uninterpretable without knowing whether that request was inspected, sampled out, exempt, or allowed during an endpoint failure.</p>
+<h3>Progress — Pydantic AI 2.59.0 makes unknown usage visible to pricing and budget enforcement</h3>
+<p><strong>Target catalog item:</strong> <code>pydantic-ai-v2-57-0-approval-reviewer-mcp-apps-service-tier-pricing</code>.</p>
+<p>The <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.59.0">stable release</a> was published Oct 20 at <strong>21:36 PT / Oct 21 04:36Z</strong>; <a href="https://pypi.org/pypi/pydantic-ai/json">PyPI</a> confirms the 2.59.0 distribution at <strong>22:00 PT / 05:00Z</strong>. The substantive change is a distinction between omitted usage and an explicit zero. Its <a href="https://github.com/pydantic/pydantic-ai/pull/9491">implementation description</a> documents an <code>unmeasured_requests</code> count, retained known subtotals, and <code>UsageLimitUnavailableWarning</code> when missing usage prevents full token/cost-limit verification. Pricing an individual response with omitted usage raises <code>ValueError</code>; known charges remain usable as lower bounds.</p>
+<p><strong>Operational qualification:</strong> the warning does not stop a run by default. A known exceeded limit still raises, and applications can promote the warning to an error when they require complete accounting. Streaming omissions are determined at completed-response boundaries. This is material Progress on the existing pricing card, not a new card for a version number. The same release adds provider-neutral error categories and an option to make selected categories non-retryable under Temporal, making retry policy easier to analyze consistently. <strong>BQAA action:</strong> preserve measured-zero, unavailable, and partially measured states through aggregation; expose budget-verification status alongside spend.</p>
+<h3>Progress — Braintrust Python 0.48.0 preserves telemetry on failed and incomplete response streams</h3>
+<p><strong>Target catalog item:</strong> <code>braintrust-python-sdk-0-46-0-adk-workflow-tracing-otel-span-customizers</code>.</p>
+<p>The <a href="https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.48.0">stable release</a> landed Oct 20 at <strong>18:37 PT / Oct 21 01:37Z</strong>; <a href="https://pypi.org/pypi/braintrust/json">PyPI</a> records the upload at 01:36:56Z. Previously, the streaming postprocessor selected the terminal response only for successful completion. It now recognizes incomplete and failed terminal events too, retaining their available usage and final output for synchronous and asynchronous streams. The <a href="https://github.com/braintrustdata/braintrust-sdk-python/pull/978">change description</a> is explicit that absent usage remains absent.</p>
+<p>The release also captures OpenRouter safeguard/alignment metadata and preserves additional hook-input fields on agent-hook spans. The product significance is more complete failure and policy telemetry within existing integrations. <strong>BQAA action:</strong> test that interrupted, token-limited and failed responses contribute their reported spend and outcomes without synthesizing zero usage where none was reported.</p>
+<h3>One-line mentions — no additional ranks or catalog Progress</h3>
+<ul><li><strong>Vercel WebSockets GA:</strong> the <a href="https://vercel.com/changelog/websocket-support-is-now-generally-available">Oct 20 announcement</a>, timestamped 20:00Z in Vercel's Atom feed, makes Function WebSockets generally available; relevant infrastructure for realtime agents, but no new agent-evaluation or observability capability is established here.
+</li><li><strong>Anthropic Python 1.17.0:</strong> stable bindings shipped at 22:13Z, but <a href="https://platform.claude.com/docs/en/release-notes/overview">organization webhooks remain beta and access-gated</a>; stable packaging does not graduate the underlying service.
+</li><li><strong>Gemini CLI 0.65.0:</strong> <a href="https://github.com/google-gemini/gemini-cli/releases/tag/v0.65.0">custom OTLP headers and session-resume fixes</a>, 21:17Z, are useful integration maintenance; no separate rank or repeat of the existing usage/session card.
+</li><li><strong>Vercel AI SDK train:</strong> <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.148">ai 7.0.148</a>, 02:19Z, is treated as one coordinated maintenance train, not a card per package.
+</li><li><strong>Claude Agent SDK:</strong> <a href="https://github.com/anthropics/claude-agent-sdk/releases/tag/v0.3.305">0.3.305</a>, 20:46Z, adds usage-recommendation access and compatibility fixes; the follow-on versions reported by the packs are not separate product launches.
+</li><li><strong>OpenAI Agents JS 0.21.0:</strong> <a href="https://registry.npmjs.org/@openai%2Fagents">npm</a> confirms stable publication at 22:14Z; the public tag page did not supply substantive release notes, so capability claims remain unconfirmed.
+</li><li><strong>Pack-only engineering leads:</strong> OpenHands skill/profile changes, LangChain JS capability flags, LiteLLM maintenance, and unreleased compaction/verifier/metrics work remain unranked leads; no proposed, merged, alpha or nightly change is promoted to a product launch.
+</li><li><strong>Already covered:</strong> OpenAI's longer prompt-cache TTL, Bedrock structured outputs, Langfuse 4.65.0–4.66.0, Opik 2.2.106 and Anthropic Python 1.16.0 are not re-admitted or re-Progressed.
+</li></ul>
+<h2>Academy</h2>
+<h3>NEW 1 — <a href="https://arxiv.org/abs/2610.24649">Good Judgment, Bad Advice: Decision-Model Controllers Raise Agent Cost Without Improving Success — arXiv:2610.24649</a></h3>
+<p><strong>Carry-forward:</strong> v1 submitted Oct 17, before this window; previously uncarded. The pack's late discovery does not make this a Tuesday-announcement paper. <strong>Full PDF read:</strong> all 8 pages, including methods, all results, limitations, references and Appendices A–D. <a href="https://arxiv.org/pdf/2610.24649">PDF</a>.</p>
+<p>The study fixes one Sonnet 5.5 terminal-agent loop and varies its controller: none, deterministic rules, a small LLM, Jev 1.13, or a placebo sampled from development-phase choice frequencies. Deterministic trigger points and guardrails stay fixed. There are <strong>21 held-out Terminal-Bench 2.1 tasks × five arms × three trials = 315 trials</strong> (§3). This design is unusually relevant to deciding whether a controller is worth invoking.</p>
+<p><strong>Table 1:</strong> native and Jev arms both pass <strong>73.0%</strong> of trials; their arithmetic mean costs per attempt are <strong>$0.177 and $0.206</strong>, and cost per solved task is <strong>$0.243 and $0.283</strong>. <strong>Table 2's paired geometric-mean comparison</strong> gives a Jev/native cost ratio of <strong>1.19, 95% CI 1.02–1.36</strong>. Jev is cheaper than the small-LLM controller (ratio 0.81), but more expensive than the placebo (1.22). These ratios use a different estimator from simply dividing the Table 1 arithmetic means.</p>
+<p>The diagnostic result is that finish-request ranking can look good while the resulting policy is poorly calibrated: <strong>AUROC 0.78</strong>, but mean predicted completion probability <strong>0.50</strong> where <strong>87%</strong> of the corresponding trials pass (§4.3, Table 3). Controller calls themselves account for only <strong>0.11% of spend</strong> (§4.4); downstream behavior is the expensive part. No arm chooses abandonment. The observed equal pass rates do not establish equivalent success: the paired pass-rate interval remains wide, approximately −11.1 to +12.7 percentage points (Table 2).</p>
+<p><strong>Limits and BQAA read-through:</strong> one agent loop, a small and mostly easy task set, unpinned hosted providers, and no completed open-weight replication. Costs cover model calls, not sandbox operations. Outcome labels are not counterfactual labels for each controller action. Treat this as evidence to run controlled intervention tests, not as a fleet-wide verdict on a decision-model vendor. Log the recommended action, action actually taken, confidence, trigger, subsequent work and final verified outcome; compare with both no-controller and cheap-rule/placebo controls.</p>
+<h3>NEW 2 — <a href="https://arxiv.org/abs/2610.28522">DecisionPivot: A Diagnostic Benchmark for Decision Models in LLM Systems — arXiv:2610.28522</a></h3>
+<p><strong>Fresh Tuesday-announcement batch; v1 Oct 20. Full PDF read:</strong> all 41 pages, including the full benchmark/protocol specification, results, limitations, references and Appendices A–F. <a href="https://arxiv.org/pdf/2610.28522">PDF</a>.</p>
+<p>DecisionPivot evaluates <strong>40 decision models and 14 general models</strong> on <strong>48 tasks / 40,033 items</strong>: 7,800 generated items across 13 controlled task families, plus 32,233 items from 35 public test sets (§§3–4). Its useful distinction is between answering an item correctly, answering every member of a controlled contrast correctly, ordering probabilities correctly, and assigning usable confidence.</p>
+<p>On <strong>2,400 binary contrast pairs</strong>, Perplexity Decider orders the positive member above the negative in <strong>92.3%</strong> of pairs, but answers both correctly in <strong>74.1%</strong> (§4.1, Table D6). A system can rank two alternatives correctly while placing both on the wrong side of its decision threshold. These binary-pair diagnostics are not the same population as the all-13-family headline group score.</p>
+<p><strong>Table D1</strong> provides a second practical example. Kev 27B and JEV-27B have similar item accuracy (70.6% versus 70.3%), yet at confidence ≥0.90 their accuracies are <strong>93.8% on 34.1% of items</strong> and <strong>88.9% on 47.4%</strong>, respectively. Both reliability and coverage must accompany a confidence threshold. The benchmark's “automation at 5%” metric is <strong>retrospective, label-selected coverage with family-specific cutoffs</strong> (§3.6, Eq. 2). It is not a prospective guarantee of a 5% production error rate; deployment thresholds require independent calibration.</p>
+<p><strong>Limits and BQAA read-through:</strong> the benchmark authors also develop models in the comparison; generated written cases are not live agent interventions. Model-specific protocols, missing outputs and input limits affect comparisons; disclosed overlap removal does not establish that every other model is contamination-free. Use the diagnostic design before using the leaderboard: retain contrast-group IDs, task family, confidence readout, threshold/version and abstention status. Evaluate these against both held-out correctness and downstream action outcomes. This complements Good Judgment: calibrated classification and beneficial intervention are separate tests.</p>
+<h3>NEW 3 — <a href="https://arxiv.org/abs/2610.28577">Cache Engineering for Agents — arXiv:2610.28577</a></h3>
+<p><strong>Fresh Tuesday-announcement batch; v1 Oct 20. Full PDF read:</strong> all 21 pages, including cache semantics, serving implementation, benchmark/replay methods, results, limitations, references and the complete appendix. <a href="https://arxiv.org/pdf/2610.28577">PDF</a>.</p>
+<p>The proposed Agentic KV Cache (AKV) lets a policy drop selected cache segments, reposition retained keys, and append new context while keeping the textual trajectory. Consequently, two requests with the same retained text and positions can have different cache states because their operation histories differ (§3.4, Figure 5). The serving implementation tracks that history for cache reuse, eviction and restoration (§4). This exposes a concrete observability requirement: a rendered conversation is insufficient to reconstruct the computation that produced an answer.</p>
+<p>Against threshold-triggered summarization, the authors report <strong>1.7 points higher average benchmark score and 27.7% lower modeled cost</strong> across three models and four benchmarks (Table 1, §5.2). Results are not uniformly better: GPT-OSS-120B on SWE-bench Verified rises from <strong>40.0 to 43.2</strong>, while MiniMax-M2.7 moves from <strong>75.2 to 74.4</strong>. The cost accounting is explicitly <strong>API-equivalent estimation using fixed token prices</strong>, including agent and summarization calls and a charge for repositioned tokens (§5.1, Appendix A.3/Table 6). It is not measured customer invoice savings.</p>
+<p>The serving result compares peak operating points: <strong>369 versus 313 output tokens/s</strong> and <strong>28.49 versus 43.16 seconds P95 request latency</strong> (Table 2; AKV concurrency 14 versus standard concurrency 12). Appendix A.1.4 bounds that result: replay of the 80 longest-context SWE trajectories, method-specific recorded trajectories, replayed tool responses and fixed recorded output budgets, on eight A800 80-GB GPUs. This is a controlled serving experiment, not an online production A/B test.</p>
+<p><strong>BQAA implication:</strong> record logical context size, active KV size, cache-operation history/version, hits/misses and re-prefill work separately from billed input/output tokens. The paper requires serving-engine support; it is not a drop-in hosted API option. Dropping KV entries also does not prove privacy erasure: retained states can encode information from earlier context. Six-week value lies in the event schema and replay diagnostics before any commitment to a custom cache server.</p>
+<h3>NEW 4 — <a href="https://arxiv.org/abs/2610.28612">TraceLite: Efficient Trace Reduction for SWE Agents via Optical Compression and Redundancy Removal — arXiv:2610.28612</a></h3>
+<p><strong>Fresh Tuesday-announcement batch; v1 Oct 20. Full PDF read:</strong> all 20 pages, including preliminary studies, method, main experiments, ablations, generalization, threats to validity and references. <a href="https://arxiv.org/pdf/2610.28612">PDF</a>.</p>
+<p>TraceLite keeps three recent observations as text, renders older observations into compressed images, removes repeated lines, and clears pre-edit observation payloads while retaining historical tool calls (§3). It changes the agent's working context. The paper does not establish a policy for deleting an organization's archival audit traces.</p>
+<p>On <strong>400 held-out SWE-bench Verified tasks</strong> with GPT-5.6-Luna, <strong>Table 4</strong> reports <strong>313/400 solved versus 312/400</strong> for full text. Mean cumulative input tokens fall <strong>33.05%</strong>, from <strong>289,507 to 193,827</strong>, and normalized modeled API cost falls <strong>21.30%</strong>, from 1.0000 to <strong>0.7870</strong>. But steps rise from <strong>14.65 to 17.52</strong> and output tokens from <strong>7,248 to 7,621</strong>. The success comparison has McNemar <strong>p=1.000</strong>: no detected difference, not proof of equivalent task performance.</p>
+<p>The reported <strong>0.438 seconds per observation</strong> is compression processing overhead (Table 5), not an end-to-end task-latency reduction. A 50-task DeepSWE experiment preserves 30/50 solved at normalized cost 0.5569 (Table 10), but is a small generalization check. The preliminary all-image variant also matters: on 50 tasks, converting every observation to images at 4× compression drops solves from <strong>45 to 29</strong> (Table 3). Preserving recent precise evidence is central to the method.</p>
+<p><strong>Limits and BQAA read-through:</strong> one agent framework, limited model/task generalization, potential benchmark contamination, and verifier coverage limits (§6). The §4.2 cost calculation uses agent and auxiliary-model token charges; this brief does not infer customer-specific cache pricing or invoice savings from it. Pre-edit payload removal is a heuristic, not proof that every discarded fact is irrelevant later. Instrument transformation provenance, image/text token accounting, steps, tool retries, cost and verified success together. Keep the working-context transformation linked to the original trace so later failure analysis can recover what was removed.</p>
+<h3>Scouted, not ranked</h3>
+<p>These are title/abstract or listing-level reads only; <strong>their full PDFs were not read this slot</strong>, and no numerical claims from them enter the catalog.</p>
+<ul><li><strong>Harness evaluation:</strong> <a href="https://arxiv.org/abs/2610.27435">Harness Self-Evolution / RiseHarness, 2610.27435</a>, <a href="https://arxiv.org/abs/2610.27465">Recoverability and Verifier Strength, 2610.27465</a>, <a href="https://arxiv.org/abs/2610.27480">Runtime Control, 2610.27480</a>, and <a href="https://arxiv.org/abs/2610.27889">Elicitation or Expansion?, 2610.27889</a> are follow-ups for separating better repeatability, broader solvable-task coverage, and control-policy benefit.
+</li><li><strong>Memory and context:</strong> <a href="https://arxiv.org/abs/2610.27406">More Memory, Worse Agents, 2610.27406</a>, <a href="https://arxiv.org/abs/2610.27301">Evaluating Context Compaction on the Questions That Come Later, 2610.27301</a>, and <a href="https://arxiv.org/abs/2610.28601">Evolving Agent Interfaces, 2610.28601</a> merit later full reads; four PDF slots were used on the stronger immediate accounting/evaluation questions above.
+</li><li><strong>Authorization and failures:</strong> <a href="https://arxiv.org/abs/2610.27548">Authorization Alignment, 2610.27548</a>, <a href="https://arxiv.org/abs/2610.27620">Local Allow, Global Deny, 2610.27620</a>, and <a href="https://arxiv.org/abs/2610.27777">RITE, 2610.27777</a> remain abstract-level leads.
+</li><li><strong>Older carry-forward:</strong> <a href="https://arxiv.org/abs/2610.25078">CoEvo-RSI, 2610.25078</a> was submitted Oct 18; it is not a fresh Tuesday-batch paper despite appearing in the late pack. Prior holds AgentLens <code>2610.25231</code>, HarnessPro <code>2610.26770</code>, PACE <code>2610.26394</code> and <code>2610.26624</code> receive no new admission or claimed full read here.
+</li></ul>
+<h2>Six-week EV</h2>
+<p>These are proposed BQAA/ADK experiments, not completed work or revenue estimates. Expected value is qualitative and depends on having representative traces and independent outcome labels.</p>
+<table>
+<tr><th>Priority</th><th>Six-week deliverable</th><th>Why it is worth testing</th><th>Decision evidence</th></tr>
+<tr><td>High</td><td>A usage-completeness contract and failure-inclusive cost view</td><td>Pydantic and Braintrust now expose complementary parts of a recurring accounting error: unknown usage and lost terminal metrics.</td><td>By week 2, replay measured-zero, omitted, partial, interrupted and failed cases; by week 6, quantify missing-usage coverage and spend reconciliation without treating lower bounds as totals.</td></tr>
+<tr><td>High</td><td>A controller-intervention evaluation slice</td><td>Good Judgment and DecisionPivot show why classifier scores alone cannot justify adding an agent control step.</td><td>Compare fixed no-controller, cheap-rule and candidate policies on paired tasks; report success intervals, spend per attempt/solve, additional steps and calibration on separately held-out data. Retain shadow status if benefit remains unresolved.</td></tr>
+<tr><td>Medium</td><td>Context-transformation lineage in trace analytics</td><td>TraceLite and AKV make working context and computation state diverge from the original textual history.</td><td>Link each transformation to source event IDs, policy version and representation; compare invoice-aware cost, P95 task latency and verified success. Reject a token-only win if extra work or failures erase it.</td></tr>
+<tr><td>Medium</td><td>A governed-request coverage panel</td><td>Enterprise hooks illustrate how sampling, exemptions and endpoint failures change what a verdict stream means.</td><td>Show inspected, shadow, exempt, sampled-out and failure-policy outcomes with a known denominator. Treat this as a cross-product schema experiment; the Enterprise hook itself does not cover BQAA's API traffic.</td></tr>
+</table>
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>Enterprise hooks:</strong> enforcement analytics need coverage and failure-policy state next to each verdict; this is a dated catch-up, not a timestamp-confirmed window launch.
+</li><li><strong>Pydantic AI:</strong> unknown usage must stay unknown, and a budget warning is not an enforced stop.
+</li><li><strong>Braintrust:</strong> preserve reported cost on failed and incomplete streams; missing usage remains missing.
+</li><li><strong>Good Judgment:</strong> measure the downstream cost of a controller's advice, with controls and uncertainty, before promoting it.
+</li><li><strong>DecisionPivot:</strong> log decision thresholds, confidence coverage and contrast-group correctness separately.
+</li><li><strong>AKV:</strong> textual history alone cannot identify cache computation; modeled token savings and serving throughput answer different questions.
+</li><li><strong>TraceLite:</strong> fewer input tokens can accompany more steps; preserve transformation lineage for later failure analysis.
+</li></ul>
+<h2>Unconfirmed</h2>
+<table>
+<tr><th>Item</th><th>What was not confirmed</th><th>Where looked / disposition</th></tr>
+<tr><td>Enterprise inference hooks</td><td>Exact Oct 20 publication time relative to 12:34 PT.</td><td>Official dated release notes and product docs; prior brief's hold. GA and scope confirmed; admitted only as an explicitly dated, never-carded catch-up.</td></tr>
+<tr><td>OpenAI Agents JS 0.21.0</td><td>Material product changes in the release.</td><td>Public GitHub tag page returned a tag without substantive notes and displayed loading errors: <strong>gap: GitHub release-body unavailable</strong>. npm registry fallback succeeded and confirms 22:14Z publication; version-only NOTE.</td></tr>
+<tr><td>W&amp;B Weave documentation</td><td>Full current hosted release-note content.</td><td><strong>gap: release-note URL redirected to a login page</strong>. Public GitHub releases and PyPI fallback succeeded; registry latest was 0.53.12, uploaded Oct 9, with no distribution uploaded inside this window. This does not establish that hosted Weave had no changes.</td></tr>
+<tr><td>Microsoft Foundry changelog</td><td>Content at the two attempted general what's-new paths.</td><td><strong>gap: Microsoft Learn HTTP 404</strong> at <code>/azure/ai-foundry/whats-new</code> and <code>/azure/foundry/whats-new</code>. Official Foundry blog fallback succeeded, with latest listed post Oct 19; not a claim of complete service inactivity.</td></tr>
+<tr><td>Vertex AI / AgentCore release coverage</td><td>A current, complete service-specific change feed from the attempted legacy URLs.</td><td><strong>gap: Vertex legacy generative-AI release page was stale; AgentCore document-history path redirected to a documentation stub</strong>. Google Cloud aggregate release notes and AWS What's New RSS succeeded as fallbacks.</td></tr>
+<tr><td>Grafana Oct 20 event</td><td>Which Agent Observability OTel additions are materially new beyond the existing <code>grafana-agent-obs</code> card.</td><td>Official event announcement and live catalog; insufficient incremental detail for a new rank. No generic GA re-card.</td></tr>
+<tr><td>AgentLens <code>2610.25231</code></td><td>Resolution of the prior brief's internal-consistency concerns.</td><td>Prior brief hold only; no fresh full-PDF re-review this slot. Remains unranked.</td></tr>
+<tr><td>Social-source coverage</td><td>Direct coverage behind authentication/access walls.</td><td>Packs report LinkedIn authwall, X 401 and Reddit 403; no claim that those sources were quiet.</td></tr>
+</table>
+<p>Ranked empirical numbers are confirmed as statements/results in the papers, <strong>not independently reproduced experimental outcomes</strong>. Product behavior is documentation/source verified; no tenant deployment or runtime integration test was performed.</p>
+<h2>Housekeeping</h2>
+<p><strong>Packs used, in window order:</strong></p>
+<ol><li><code>packs/agy-pack-2026-10-20-1232.md</code> — late completion around 13:07 PT, rolled forward because the previous brief did not consume it.
+</li><li><code>packs/dsh-pack-2026-10-20-1432.md</code>.
+</li><li><code>packs/agy-pack-2026-10-20-1532.md</code>.
+</li><li><code>packs/dsh-pack-2026-10-20-2032.md</code>.
+</li><li><code>packs/agy-pack-2026-10-20-2132.md</code>.
+</li><li><code>packs/dsh-pack-2026-10-20-2332.md</code>.
+</li><li><code>packs/dsh-pack-2026-10-21-0009.md</code> — deliberately thin extra-seat pack.
+</li></ol>
+<p>All seven were present with PACK_DONE and directly screened for release, registry, Academy, status and gap evidence; engineering rows were treated as leads. No older pack was used, and there was no fresh-list candidate file. <strong>Old path used throughout.</strong></p>
+<p><strong>Collection gaps:</strong> Mac downtime around 16:10–20:30 PT left DSH 17:32 and Agy 18:32 absent, with no backfill. Agy and DSH run every three hours; no other missing hourly packs are invented. Muse supplied no window packs because its subscription quota was exhausted (429); the extra 00:07 seat was also missing. Agy's Oct 21 00:32 pack belongs to the next slot and was not consumed. LinkedIn/X/Reddit coverage is bounded above; HN remains dropped. GTM remains paused and is excluded.</p>
+<p><strong>Independent vendor sweep:</strong> primary pages were checked for LangChain/LangSmith, Langfuse, Arize Phoenix, Braintrust, W&amp;B Weave, Datadog, Galileo, Comet Opik, OpenAI, Anthropic, Google Cloud/Vertex AI, AWS/AgentCore, Microsoft Foundry, Databricks, Snowflake and Vercel. Successful dated surfaces included <a href="https://docs.langchain.com/langsmith/changelog">LangSmith's Oct 12–19 week</a>, <a href="https://www.langchain.com/blog">LangChain's blog</a>, <a href="https://langfuse.com/changelog">Langfuse's changelog</a>, <a href="https://arize.com/docs/phoenix/release-notes">Phoenix release notes</a>, <a href="https://www.comet.com/docs/opik/changelog">Opik's changelog</a>, <a href="https://developers.openai.com/api/docs/changelog">OpenAI's API changelog</a>, <a href="https://docs.cloud.google.com/release-notes">Google Cloud aggregate notes</a>, <a href="https://aws.amazon.com/about-aws/whats-new/recent/feed/">AWS RSS</a>, <a href="https://devblogs.microsoft.com/foundry/">Foundry's blog</a>, <a href="https://docs.databricks.com/aws/en/release-notes/product/2026/october">Databricks October notes</a>, <a href="https://docs.snowflake.com/en/release-notes/new-features">Snowflake feature notes</a>, and <a href="https://vercel.com/atom">Vercel's feed</a>. Braintrust's month-level changelog, Datadog's blog/product page and Galileo's blog did not establish another timestamped window launch. Vercel's durable-harness article is dated Oct 19 and is outside the window; future-dated entries visible on aggregate pages were excluded. This is bounded source coverage, not a blanket no-release assertion for every vendor.</p>
+<p><strong>Tuesday arXiv batch verified:</strong> all five requested listings—<a href="https://arxiv.org/list/cs.AI/new?skip=0&amp;show=2000">cs.AI</a>, <a href="https://arxiv.org/list/cs.SE/new?skip=0&amp;show=2000">cs.SE</a>, <a href="https://arxiv.org/list/cs.CL/new?skip=0&amp;show=2000">cs.CL</a>, <a href="https://arxiv.org/list/cs.MA/new?skip=0&amp;show=2000">cs.MA</a>, <a href="https://arxiv.org/list/cs.CR/new?skip=0&amp;show=2000">cs.CR</a>—successfully identified <strong>Wednesday, Oct 21</strong> listings, corresponding to the Tuesday-evening announcement inside this window. Listing rows including cross-lists and replacements totaled 473 / 47 / 239 / 19 / 83; they were keyword-screened for this brief's topics, not all full-read. The independently checked new-ID interval is <strong>2610.26864–2610.28633</strong>: <code>26864</code> is the first new cs.CL entry, <code>26863</code> is from the prior batch, <code>28633</code> resolves, and the next ID <code>28634</code> returned 404 at verification. This is a boundary check, not a claim to have read all 1,770 numerical IDs. Submission dates can predate announcements: <code>26864</code>, for example, carries a June submission date. <code>24649</code> and <code>25078</code> are older carry-forwards, not fresh IDs in this batch.</p>
+<p><strong>Verification and dedupe:</strong> public primary HTML, GitHub release timestamps, PyPI/npm JSON, dated arXiv listings/abstracts, and whole-file <code>pdftotext -layout</code> extraction followed by complete reading of four PDFs (8 + 41 + 21 + 20 = <strong>90 pages</strong>). No GitHub API quota was consumed. The five proposed NEW entries were checked by identifier/name/URL against <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code>; both Progress parents exist and the new versions are not already recorded there. Baseline: <strong>619 items / 161 briefs / 163 runs</strong>, max brief <code>2026-10-20T1234</code>. Priority pin <code>2609.02702</code> remains intact; no re-card. No first-party BQAA card, ADK rank, Medium citation, Desk section or GTM material was introduced.</p>
+<p><strong>Handoff boundary:</strong> this run writes only this Markdown brief and scratch evidence under <code>_runs/astra-brief-0034-wed20261021/</code>. Collection owns the Ship/vault note, HTML, catalog changes and push. No publication, commit, push or paid experiment was performed. Open follow-ups are the source gaps above and the proposed six-week evaluation work.</p>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>claude-enterprise-inference-hooks-ga-governed-request-policy-coverage</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Claude Enterprise inference hooks GA — inline verdicts with explicit enforcement-coverage limits
+</li><li><strong>url:</strong> <a href="https://platform.claude.com/docs/en/manage-claude/inference-hooks">https://platform.claude.com/docs/en/manage-claude/inference-hooks</a> (2026-10-20, stable)
+</li><li><strong>card text:</strong> Oct 20 dated catch-up: the exact intraday launch time is unresolved, and this is not asserted to have launched inside the window. Claude Enterprise inference hooks gate governed requests through an organization's security service, with optional tool-call validation, configurable failure handling, shadow mode, sampling and exclusions. Coverage excludes Claude Platform API organizations, Bedrock and Google Cloud, so analytics must retain inspection and failure-policy state alongside verdicts.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-24649-good-judgment-controller-interventions-cost-controls</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Good Judgment, Bad Advice — controller signals need intervention-level cost and success tests
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.24649">https://arxiv.org/abs/2610.24649</a>
+</li><li><strong>card text:</strong> Pre-window carry-forward, full PDF read: 315 trials on 21 held-out terminal tasks yield equal observed 73.0% pass rates for Jev and the native agent, but a paired geometric-mean cost ratio of 1.19 (95% CI 1.02–1.36). Finish-request AUROC of 0.78 coexists with poor calibration and additional downstream work; the small, single-loop experiment supports controlled policy evaluation, not a universal vendor conclusion.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-28522-decisionpivot-contrast-correctness-confidence-coverage</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> DecisionPivot — contrast correctness and confidence coverage expose hidden decision failures
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.28522">https://arxiv.org/abs/2610.28522</a>
+</li><li><strong>card text:</strong> Full PDF read: the 48-task, 40,033-item benchmark separates item correctness, contrast-group correctness, probability ordering and confidence reliability. On 2,400 binary pairs, one model orders probabilities correctly in 92.3% but answers both members correctly in 74.1%; reported coverage at 5% error is retrospective and requires independent calibration before deployment.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-28577-agentic-kv-cache-operation-history-cost-accounting</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Cache Engineering for Agents — cache-operation history becomes part of trace identity
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.28577">https://arxiv.org/abs/2610.28577</a>
+</li><li><strong>card text:</strong> Full PDF read: Agentic KV Cache exposes selective drop and reposition operations while retaining textual history, so cache state depends on operation history as well as text. The authors report 27.7% lower API-equivalent modeled cost on average and a separate controlled serving-replay improvement; neither is a demonstrated customer invoice saving, and the design requires serving-engine support.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-28612-tracelite-optical-context-reduction-cost-step-tradeoff</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> TraceLite — working-context compression reduces input cost while increasing interaction steps
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.28612">https://arxiv.org/abs/2610.28612</a>
+</li><li><strong>card text:</strong> Full PDF read: on 400 SWE-bench Verified tasks, recent-text preservation plus historical image compression and redundancy removal yields 313 solves versus 312, 33.05% fewer input tokens and 21.30% lower normalized modeled API cost. Steps increase from 14.65 to 17.52; unchanged observed success is not equivalence proof, and working-context reduction does not establish an archival trace-deletion policy.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>pydantic-ai-v2-57-0-approval-reviewer-mcp-apps-service-tier-pricing</code>
+<ul><li><strong>text:</strong> Pydantic AI 2.59.0 (Oct 20 PT; PyPI Oct 21 05:00Z) distinguishes omitted provider usage from measured zero, counts unmeasured requests, retains known cost lower bounds and warns when token/cost limits cannot be fully verified. Pricing an unmeasured response raises, but budget-verification warnings do not stop runs by default; the release also adds provider-neutral error categories and category-based Temporal retry exclusions. <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.59.0">https://github.com/pydantic/pydantic-ai/releases/tag/v2.59.0</a>
+</li></ul>
+</li><li><strong>parent:</strong> <code>braintrust-python-sdk-0-46-0-adk-workflow-tracing-otel-span-customizers</code>
+<ul><li><strong>text:</strong> Braintrust Python 0.48.0 (Oct 20 PT; Oct 21 01:37Z) preserves available usage and terminal output on incomplete and failed response streams, while leaving genuinely absent usage absent. It also captures OpenRouter safeguard/alignment metadata and additional agent-hook fields, improving failure and policy telemetry on the existing tracing surface. <a href="https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.48.0">https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.48.0</a>
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>Pydantic AI 2.59.0 makes omitted provider usage explicit and warns when configured budgets cannot be fully verified; the stable release is dated Oct 21 UTC / Oct 20 PT: <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.59.0">https://github.com/pydantic/pydantic-ai/releases/tag/v2.59.0</a>.
+</li><li>Braintrust Python 0.48.0 retains available metrics from failed and incomplete response streams; the stable release is dated Oct 21 UTC / Oct 20 PT: <a href="https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.48.0">https://github.com/braintrustdata/braintrust-sdk-python/releases/tag/py-sdk-v0.48.0</a>.
+</li><li>TraceLite reports 33.05% fewer input tokens and 21.30% lower normalized modeled API cost on 400 tasks, with more steps and no detected success difference (Table 4), v1 Oct 20: <a href="https://arxiv.org/abs/2610.28612">https://arxiv.org/abs/2610.28612</a>.
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Wed Oct 21, 2026 · 12:34 AM PT · Astra</span>
+    </div>
+  </footer>
+</body>
+</html>
