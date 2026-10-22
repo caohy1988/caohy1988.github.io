@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-10-22-1234: Tool streams, execution gates and score provenance</title>
+  <meta name="description" content="Field Brief 2026-10-22-1234: Tool streams, execution gates and score provenance">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-22-1234-astra.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 PM PT · Thu Oct 22, 2026 · Astra</p>
+    <article>
+<h1>Field Brief — 2026-10-22-1234: Tool streams, execution gates and score provenance</h1>
+<p><strong>Writer: Astra (<code>gpt-6-astra</code>)</strong>
+<strong>For:</strong> Haiyuan Cao, TL of BQAA (BigQuery Agent Analytics) + ADK
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>Window:</strong> ~12h since the scheduled 2026-10-22-0034 brief: October 22, 00:34–12:34 PT / 07:34–19:34 UTC. The prior brief was published around 00:59 PT.
+<strong>Effort:</strong> xhigh. <strong>Path:</strong> fresh. <strong>Decision:</strong> PUBLISH — one NEW Industry rank, five material Industry Progress updates, no new Academy ranks.</p>
+<h2>Read this first</h2>
+<p>This window strengthens the evidence around agent operations: how streamed arguments become a tool call, which approval permits execution, whether an output completed, and where an evaluation score came from. The material changes are shipped releases, including several found by the independent registry and public-release sweep. The collector list's numerous open and merged PRs do not become separate ranks.</p>
+<p><strong>The immediate BQAA opportunity is a small compatibility and evidence audit.</strong> Retain producer versions, assemble tool arguments before interpreting a call, distinguish HTTP delivery from tool outcome, and carry evaluator provenance into exported scores. LangChain's stream change requires client coordination; Langfuse's export fields are opt-in; AI SDK's new interruption handling still awaits provider emission. Those boundaries determine what analytics can safely infer. <a href="https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fcore%401.3.0">LangChain Core 1.3.0</a>, <a href="https://github.com/langfuse/langfuse/releases/tag/v4.68.0">Langfuse 4.68.0</a>, <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.149">AI SDK 7.0.149</a>, all October 22.</p>
+<p><strong>Academy is quiet within the requested screen.</strong> Successful arXiv listing fetches still reach <strong>2610.30136</strong>, with no IDs above the prior ceiling. No paper was promoted from the pre-window backlog and no PDF was read this slot. Keep the existing Trace-as-State pin (<code>2609.02702</code>) intact.</p>
+<p>An independently found OpenAI Decisions GA entry is held in <strong>Unconfirmed</strong> because its intraday availability could not be placed before the cutoff. Its date alone does not establish this slot's eligibility.</p>
+<h2>Industry</h2>
+<h3>NEW — LangChain.js Core 1.3.0 changes the tool-call stream contract</h3>
+<p><strong>Primary:</strong> <a href="https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fcore%401.3.0">@langchain/core 1.3.0</a>, October 22, stable. GitHub: 17:57:19 UTC / 10:57:19 PT; <a href="https://registry.npmjs.org/@langchain%2fcore">npm</a>: 18:04:49 UTC / 11:04:49 PT. <strong>Suggested id:</strong> <code>langchain-core-1-3-0-tool-call-delta-stream-contract</code>.</p>
+<p>Tool arguments now arrive as incremental <code>tool-call-delta</code> slices instead of cumulative <code>block-delta</code> argument snapshots across the listed supported adapters. Google and Ollama retain complete snapshots; Anthropic <code>mcp_tool_use</code> remains a non-standard block using <code>block-delta</code>. Final assembled messages and <code>.toolCalls</code> are unchanged; raw-event consumers must migrate. Identity can arrive at block start or, when delayed, at block finish. <a href="https://github.com/langchain-ai/langchainjs/pull/11986">Released emitter behavior and exceptions</a>.</p>
+<p><strong>Upgrade clients first:</strong> the documented minimums are LangGraph SDK 1.12.6, React/Vue/Svelte/Angular clients 1.2.6, and Python <code>langchain-core</code> 1.6.13. Registry checks confirmed all were published October 21. Older clients mishandle the new events; pin JS core below 1.3.0 when postponing migration. <a href="https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fcore%401.3.0">Compatibility notice</a>.</p>
+<p><strong>BQAA implication:</strong> event count is a transport measurement, not a count of completed tool operations. A consumer should retain the stream format and producer version, reconstruct each call, and tolerate late identity. Test mixed snapshot/delta producers and interrupted argument streams before comparing payload sizes or call counts across an upgrade. No measured production savings are claimed here.</p>
+<h3>Progress — Langfuse 4.68.0 exports score lineage and adds gateway completion evidence</h3>
+<p><strong>Target catalog item id:</strong> <code>langfuse-v4-61-0-v4-63-0-skills-gateway-keys-experiment-filters</code>.</p>
+<p><strong>Primary:</strong> <a href="https://github.com/langfuse/langfuse/releases/tag/v4.68.0">Langfuse v4.68.0</a>, October 22, stable; 14:30:27 UTC / 07:30:27 PT. This extends the existing platform/gateway card, without repeating 4.65–4.66.</p>
+<p>Blob exports gain separate, <strong>opt-in</strong> score metadata and provenance groups. Provenance includes author, configuration, queue, evaluator, evaluation-rule and execution-trace references. Existing exports retain their old selection; observation metadata does not implicitly enable score metadata. The released change warns that older workers/forms do not safely understand saved new groups, so enable them only after coordinating the relevant components. Correction scores remain outside this export. <a href="https://github.com/langfuse/langfuse/pull/19138">Export behavior and version-skew limits</a>.</p>
+<p>Gateway request logs and server spans now carry connection linkage; connection-close logs record socket-write progress and stalls, while execution logs expose <code>output_complete</code> at info level. Small connections without write problems can be filtered out. This helps distinguish provider truncation from gateway write stalls, but connection-level bytes do not prove that a particular response reached or was consumed by the end user. <a href="https://github.com/langfuse/langfuse/pull/19154">Released logging semantics</a>.</p>
+<p><strong>BQAA implication:</strong> exported scores need enough lineage to join back to the judge and its execution. For delivery analysis, preserve separate provider-completion, connection-write and application-outcome signals; retain their different granularities. A further released legacy-ingestion restriction is controlled by an optional organization-creation cutoff. Its actual Cloud activation time was not verified and is not asserted here. <a href="https://github.com/langfuse/langfuse/pull/19042">Conditional ingestion behavior</a>.</p>
+<h3>Progress — AI SDK 7.0.149 tightens approval execution and tool-choice enforcement</h3>
+<p><strong>Target catalog item id:</strong> <code>vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts</code>.</p>
+<p><strong>Primary:</strong> <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.149">ai 7.0.149</a>, October 22, stable; <a href="https://registry.npmjs.org/ai">npm</a> 18:53:25 UTC / 11:53:25 PT. Treat the simultaneous major-line releases as one family.</p>
+<p>Only the first approval response for a tool call is processed, preventing repeated or conflicting responses from causing duplicate execution or an execute-and-deny combination. The same fix is in <a href="https://github.com/vercel/ai/releases/tag/ai%406.0.313">6.0.313</a>; <a href="https://github.com/vercel/ai/releases/tag/ai%405.0.280">5.0.280</a> does not claim it. Version 7.0.149 also enforces <code>toolChoice: &#x27;none&#x27;</code> before local execution and withholds streamed tool parts that could otherwise reach client-side execution. <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.149">7.x release</a>.</p>
+<p>The release adds an <code>interrupted</code> finish reason and handling that preserves partial output while stopping continuation and tool execution. <strong>Provider detection/emission is explicitly separate work.</strong> Do not infer automatic truncation detection across current providers. The expanded public type can also break exhaustive TypeScript switches despite the patch version. <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.149">Compatibility notice</a>.</p>
+<p><strong>BQAA implication:</strong> record the approval response actually consumed and the resulting execution once, while retaining duplicate/conflicting inputs for diagnosis. Distinguish incomplete output from an ordinary error and from success. A missing error event cannot establish successful completion.</p>
+<h3>Progress — Opik 2.2.114–117 changes evaluator authoring and repairs large trace writes</h3>
+<p><strong>Target catalog item id:</strong> <code>opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row</code>.</p>
+<p><strong>Primary:</strong> <a href="https://github.com/comet-ml/opik/releases/tag/2.2.114">2.2.114</a>, <a href="https://github.com/comet-ml/opik/releases/tag/2.2.115">2.2.115</a>, <a href="https://github.com/comet-ml/opik/releases/tag/2.2.116">2.2.116</a>, <a href="https://github.com/comet-ml/opik/releases/tag/2.2.117">2.2.117</a>, October 22, stable. <a href="https://pypi.org/pypi/opik/json">PyPI</a> first uploads: 07:35:06, 09:04:06, 12:28:29 and 16:16:20 UTC, respectively. All are in-window and unyanked at lookup. Version 2.2.114 was correctly deferred by the prior slot.</p>
+<p>The online evaluation editor is a substantive change beyond panel layout: a single prompt with inline variables, task-completion defaults by scope, Boolean templates, a separate decision-model form with yes/no questions, and prompt attachments. Saving an older multi-message judge combines its messages; old rules remain unchanged until saved. Custom Python mappings have an explicit conversion action. <a href="https://github.com/comet-ml/opik/pull/8976">Released editor and migration behavior</a>, shipped in 2.2.114.</p>
+<p>Version 2.2.116 fixes a trace/span write inconsistency: large payloads accepted by batch creation could fail during later writes because SQL literals exceeded <code>max_query_size</code>. Payload streaming bypasses that parser limit while retaining server-side merge behavior. The implementation reports single-node tests; it does not establish unrestricted payload sizes or multi-replica behavior. <a href="https://github.com/comet-ml/opik/pull/9146">Released write-path fix</a>.</p>
+<p><strong>BQAA implication:</strong> treat a saved judge conversion as a potentially meaningful evaluation-definition change. Preserve the prompt, input mapping, score type and version when comparing old and new evaluations. Also test create, update and update-before-create paths independently: ingest acceptance is insufficient evidence that a large trace remains maintainable. The rest of this train stays supporting maintenance rather than additional cards.</p>
+<h3>Progress — Agno 3.1.9 makes published MCP tools runnable from an HTTP inspection surface</h3>
+<p><strong>Target catalog item id:</strong> <code>agno-3-1-0-agentos-rbac-audit-log-per-user-filesystem-mcp-tools-opt-in</code>.</p>
+<p><strong>Primary:</strong> <a href="https://github.com/agno-agi/agno/releases/tag/v3.1.9">Agno v3.1.9</a>, October 22, stable; GitHub 16:50:03 UTC / 09:50:03 PT; <a href="https://pypi.org/pypi/agno/json">PyPI</a> 16:51:09 UTC. This is separate from the already-covered 3.1.8 checkpoint changes.</p>
+<p>The new HTTP runner executes tools published on the AgentOS Server Card, allowing operator testing without an MCP client. It can be disabled. The released implementation pins execution to the published tool version/schema and applies the relevant authentication and per-tool scope gates. <a href="https://github.com/agno-agi/agno/pull/10666">Runner contract</a>.</p>
+<p>Its result contract is analytically useful: a tool that ran and failed returns HTTP 200 with <code>isError=true</code>; malformed/invalid requests and unpublished tools return 4xx; timeout returns 504 with cancellation handling. A 200 therefore does not establish tool success, and timeout handling should not be generalized into proof that an external side effect was rolled back. <a href="https://github.com/agno-agi/agno/pull/10666">Status and cancellation semantics</a>.</p>
+<p><strong>BQAA implication:</strong> record invocation surface, published tool/schema version, admission outcome, execution outcome and cancellation separately. Include inspection-originated calls in the correct cohort rather than silently counting them as autonomous agent work.</p>
+<h3>Progress — Letta Code 0.34.21 preserves MCP originator boundaries across queued work</h3>
+<p><strong>Target catalog item id:</strong> <code>letta-code-v0-34-12-13-claude-codex-subagents-connected-computer-live-tool-progress-opencode-backup-wake</code>.</p>
+<p><strong>Primary:</strong> <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.34.21">Letta Code v0.34.21</a>, October 22, stable; <a href="https://registry.npmjs.org/@letta-ai%2fletta-code">npm</a> 18:57:08 UTC / 11:57:08 PT; GitHub 19:02:59 UTC. The release's comparison starts at 0.34.19; only the newly shipped originator work is advanced here.</p>
+<p>Queued inputs with incompatible MCP originator authority stay in separate listener turns and approval continuations. Explicitly tokenless inputs cannot borrow a token later stored for the same super run. Recovery sends its existing approval results before resuming queued work separately. <a href="https://github.com/letta-ai/letta-code/pull/5210">Queue/continuation boundary</a>.</p>
+<p>A companion change advertises the cooperating client's isolation behavior alongside attributed requests. <strong>That marker is compatibility information, not identity proof:</strong> the server must verify authority. These client changes do not themselves activate restricted connections or isolate shared conversation history. <a href="https://github.com/letta-ai/letta-code/pull/5211">Request marker and limits</a>.</p>
+<p><strong>BQAA implication:</strong> track originator scope through enqueue, continuation, recovery and tool execution. Preserve unknown authority as unknown, and keep secrets out of analytical records. The release supports a narrower client-boundary claim; it does not establish end-to-end multi-user isolation.</p>
+<h3>One-line mentions — no additional ranks</h3>
+<ul><li><strong>Codex 0.164.0-alpha.12:</strong> the public release index shows an October 22 11:11:51 UTC prerelease; alpha status keeps it NOTE-only. <a href="https://github.com/openai/codex/releases">Release index</a>.
+</li><li><strong>Mastra:</strong> registry updates in-window are snapshots; stable <code>@mastra/core</code> remains 1.79.0, already covered. <a href="https://registry.npmjs.org/@mastra%2fcore">npm metadata</a>.
+</li><li><strong>OpenAI Agents Python:</strong> the successful <a href="https://pypi.org/pypi/openai-agents/json">PyPI lookup</a> still lists 0.24.0 as latest; the fresh-list 0.25.0 release-PR lead is not evidence that 0.25.0 shipped.
+</li><li><strong>Grafana:</strong> the independently fetched ObservabilityCON roundup is dated October 20; the October 21 Workflows post describes public preview. Both are outside this window, and the latter remains NOTE-only. <a href="https://grafana.com/blog/observabilitycon-2026-announcements/">Roundup</a>, <a href="https://grafana.com/blog/spend-less-time-on-operational-busywork-and-resolve-incidents-faster-with-grafana-workflows/">Workflows</a>.
+</li><li><strong>Prior-slot carry and unreleased work:</strong> Claude Code 2.1.307–308/Agent SDKs, Inspect 0.3.283, OpenHands 1.30.1 and the specified October 21 admissions are not re-admitted. Fresh-list PR activity stays unranked; first-party ADK work is NOTE-only at most. No first-party BQAA card.
+</li></ul>
+<h2>Academy</h2>
+<h3>NEW ranks</h3>
+<p>None. The successfully retrieved Thursday, October 22 listings, including their cross-list and replacement sections, contain no IDs above <strong>2610.30136</strong>, the ceiling already screened by the prior brief. This is a bounded listing result, not a claim to have read every paper or to rule out all revisions of older IDs. <a href="https://arxiv.org/list/cs/new?skip=0&amp;show=2000">All-CS listing</a>, <a href="https://arxiv.org/list/cs.AI/new?skip=0&amp;show=2000">cs.AI</a>, <a href="https://arxiv.org/list/cs.CL/new?skip=0&amp;show=2000">cs.CL</a>, <a href="https://arxiv.org/list/cs.LG/new?skip=0&amp;show=2000">cs.LG</a>, <a href="https://arxiv.org/list/cs.SE/new?skip=0&amp;show=2000">cs.SE</a>.</p>
+<h3>Scouted, not ranked</h3>
+<p>The fresh list's <a href="https://arxiv.org/abs/2610.28679">VerifierBench, 2610.28679</a>, and the prior brief's <a href="https://arxiv.org/abs/2610.28811">failure-attribution study, 2610.28811</a>, <a href="https://arxiv.org/abs/2610.29823">Memory Tax, 2610.29823</a>, and other held pointers remain <strong>pre-window, unranked backlog</strong>. This pass did not reopen their PDFs or import their results. Full-PDF reads this slot: <strong>zero</strong>. Already-carded Academy items and the Trace-as-State pin were excluded from new admissions.</p>
+<h2>Six-week EV</h2>
+<p>These are proposed research/validation priorities, not implementation commitments or measured savings.</p>
+<table>
+<tr><th>Timing</th><th>Proposed work and expected value</th><th>Evidence required before adoption</th></tr>
+<tr><td>Weeks 1–2</td><td>Build a small compatibility fixture set spanning incremental arguments, snapshots, late tool identity, duplicate approvals and partial output. Expected value: find silent miscounts and unsafe interpretations introduced by producer upgrades.</td><td>Reconcile raw events, assembled calls and actual executions against fixture ground truth. Test old/new client combinations; do not assume the presence of an interruption enum means providers emit it.</td></tr>
+<tr><td>Weeks 2–4</td><td>Extend an analysis of tool outcomes to separate admission, approval, execution, cancellation, provider completion and delivery observations. Include operator inspection calls and queued-originator transitions.</td><td>Demonstrate that HTTP 200 tool errors, rejected calls, duplicate approval responses and unknown principals remain distinguishable. Report ambiguous joins; no forced end-to-end success label.</td></tr>
+<tr><td>Weeks 4–6</td><td>Evaluate score provenance export and judge-definition migration on a held-out trace set. Expected value: explain whether score changes came from the agent, judge, mapping or data path.</td><td>Preserve judge configuration and source-trace links, verify opt-in export selection and component compatibility, and compare old/new definitions on identical inputs. Test large-record update paths as well as creation.</td></tr>
+</table>
+<p>Keep the prior slot's report-isolated completion audit and Trace-as-State priority in place. This window adds concrete compatibility and lineage checks; it supplies no new paper-based estimate of accuracy, review-load reduction or cost savings.</p>
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>LangChain Core 1.3.0:</strong> reconstruct calls from the producer's actual stream format before counting or interpreting them.
+</li><li><strong>Langfuse 4.68.0:</strong> export score lineage explicitly and keep provider completeness separate from connection-write evidence.
+</li><li><strong>AI SDK 7.0.149:</strong> preserve the consumed approval and execution outcome; provider-side interruption detection remains unverified.
+</li><li><strong>Opik 2.2.114–117:</strong> version judge conversions and verify large-trace updates as well as initial ingestion.
+</li><li><strong>Agno 3.1.9:</strong> distinguish operator invocation, request admission and tool outcome; HTTP status alone is insufficient.
+</li><li><strong>Letta Code 0.34.21:</strong> preserve originator scope across queued turns and recovery without claiming transcript isolation.
+</li><li><strong>Academy:</strong> no above-ceiling additions verified; no new research result enters this slot.
+</li></ul>
+<h2>Unconfirmed</h2>
+<table>
+<tr><th>Item</th><th>What was not confirmed</th><th>Where looked / disposition</th></tr>
+<tr><td>OpenAI Decisions GA</td><td>Availability before October 22 12:34 PT</td><td>The directly fetched <a href="https://developers.openai.com/api/docs/changelog">API changelog</a> has an October 22 GA entry, and the <a href="https://developers.openai.com/api/docs/guides/decisions">guide</a> confirms prompt caching, question-level images, JSON input and a 400-question limit. Neither supplied an intraday timestamp; first observation in this run was ~12:40 PT. Official-domain search returned older cached material, and a targeted grep of the four reference packs found no matching receipt. Hold from Industry and catalog Progress; recheck next slot against parent <code>openai-decisions-api-public-beta-gpt-6-luna-v1-decisions-typed-answers-input-only-pricing</code>.</td></tr>
+<tr><td>Langfuse legacy-ingestion cutoff</td><td>Actual Cloud activation timestamp and affected organizations</td><td>The <a href="https://github.com/langfuse/langfuse/pull/19042">released implementation</a> is conditional on an environment-configured cutoff and leaves behavior unchanged when unset. An example deployment timestamp is not a rollout receipt. No blanket Cloud restriction claim.</td></tr>
+<tr><td>AI SDK interruption / Letta restricted connections</td><td>Provider emission coverage; end-to-end restricted-connection rollout</td><td><a href="https://github.com/vercel/ai/releases/tag/ai%407.0.149">AI SDK notes</a> explicitly defer provider detection/emission. <a href="https://github.com/letta-ai/letta-code/pull/5211">Letta client change</a> explicitly leaves server authorization and activation separate. Only the shipped, bounded behavior is advanced.</td></tr>
+<tr><td>Braintrust hosted changes</td><td>Intraday eligibility of billing activity and MCP human-review entries</td><td>The <a href="https://www.braintrust.dev/docs/changelog">changelog</a> groups entries under October, without a usable day/time boundary. No new hosted-product rank; JS 3.39.0 and Python 0.48.0 remain already covered.</td></tr>
+<tr><td>W&amp;B Weave hosted releases</td><td>Complete current hosted-change coverage</td><td><strong>gap: Weave release-notes fetch timed out after redirect to docs.coreweave.com.</strong> <a href="https://docs.wandb.ai/weave/reference/release-notes">Original URL</a>. <a href="https://docs.wandb.ai/release-notes/server-releases">Server release notes</a> and <a href="https://pypi.org/pypi/weave/json">PyPI</a> succeeded, but server/SDK versions do not settle hosted releases.</td></tr>
+<tr><td>Galileo / Datadog / Grafana index coverage</td><td>Complete in-window announcement coverage</td><td><strong>gap: Galileo blog's visible latest entries were May-dated</strong> at <a href="https://galileo.ai/blog">the blog</a>. <strong>gap: Datadog AI/blog/search surfaces exposed featured material or a search shell without a usable current dated list</strong> (<a href="https://www.datadoghq.com/blog/ai/">AI index</a>, <a href="https://www.datadoghq.com/blog/search/?blog-0=AI">search</a>). <strong>gap: Grafana what's-new extraction yielded a shell</strong> (<a href="https://grafana.com/whats-new/">index</a>); individual October 20/21 posts were successfully checked. Targeted searches did not establish an additional eligible launch; these are coverage limits, not zero-activity claims.</td></tr>
+<tr><td>Recovered fetch/routing gaps</td><td>Initial source retrieval failures</td><td><strong>gap: GitHub Opik 2.2.114 web-tool cache miss</strong>, recovered by a successful public-page fetch plus PyPI. <strong>gap: all-CS web-tool listing timeout</strong>, recovered by direct HTTP 200 listing fetches. The <a href="https://docs.cloud.google.com/vertex-ai/generative-ai/docs/release-notes">legacy Vertex page</a> says it is no longer updated; an attempted Agent Platform release-notes path returned 404. Current coverage instead used the successfully fetched <a href="https://docs.cloud.google.com/release-notes">consolidated Cloud release notes</a>. None was interpreted as absence of a release.</td></tr>
+</table>
+<h2>Housekeeping</h2>
+<p><strong>Fresh path used.</strong> Read <code>_runs/fb-2026-10-22-1234/fresh-items.md</code> as the complete collector candidate list. No pack was read wholesale. Only a targeted grep for the OpenAI Decisions/changelog lead was made in the reference packs; it returned no matches. The four packs supplied to the merge were:</p>
+<ol><li><code>packs/agy-pack-2026-10-22-0032.md</code> — explicitly carried forward after finishing too late for the prior brief.
+</li><li><code>packs/dsh-pack-2026-10-22-0232.md</code>.
+</li><li><code>packs/dsh-pack-2026-10-22-1132.md</code> — PACK_DONE at 12:16 PT.
+</li><li><code>packs/dsh-pack-2026-10-22-1209.md</code> — extra seat; overlap handled by the merged list.
+</li></ol>
+<p>Merge receipt: <code>FB_MERGE slot=2026-10-22-1234 packs=4 raw=98 unique=53 drop_catalog=0 drop_seen=1 drop_both=0 fresh=52 (cand=52 low=0) tokens_old~78898 tokens_new~8019</code>.</p>
+<p><strong>Coverage gaps reported by Collection:</strong> Agy 03:32 is incomplete, renamed <code>.incomplete</code> and unused. DSH 05:32, Agy 06:32, DSH 08:32 and Agy 09:32 are absent following Mac outages around 03:53–07:37 and 08:41–11:30 PT, without backfill. There are no Muse packs in-window; quota is exhausted and the 12:07 extra seat has only a prompt. Agy 12:32 was unfinished at merge and belongs to the <strong>2026-10-23-0034</strong> slot. LinkedIn is authwalled; X/Reddit access gaps remain as collector-reported. This pass did not restore those surfaces. HN remains dropped; Medium scouting and GTM updates remain paused.</p>
+<p><strong>Verified arXiv ceiling:</strong> successful direct fetches around 12:40 PT showed Thursday, October 22 listings: all-CS <strong>2610.30136</strong>, cs.AI <strong>2610.30128</strong>, cs.CL/cs.LG <strong>2610.30132</strong>, cs.SE <strong>2610.30059</strong>. New-submission counts were 741, 63, 89, 137 and 34, respectively; category counts overlap. The complete fetched listing text was checked for IDs above the prior ceiling, yielding none, so no new paper abstracts or PDFs were selected. The evening announcement batch lies beyond this scheduled cutoff. Listing receipts are retained in the allowed run directory.</p>
+<p><strong>Independent sweep and verification method:</strong> public npm/PyPI metadata established package clocks; versioned GitHub release pages established shipped scope; linked implementation descriptions clarified consequential limits. No GitHub API calls were used. In-window release discovery included LangChain Core, Langfuse's server release, AI SDK, Agno, Letta Code and the later Opik versions. These were assessed as product changes, not as individual PR ranks. No provider calls, live integrations, benchmarks or upstream tests were run; upstream test reports are source evidence, not our own verification.</p>
+<p>The vendor pass covered <a href="https://www.langchain.com/blog">LangChain's blog</a>, <a href="https://docs.langchain.com/langsmith/changelog">LangSmith</a>, <a href="https://langfuse.com/changelog">Langfuse</a> plus its public releases, <a href="https://arize.com/docs/phoenix/release-notes">Phoenix</a>, Braintrust, Weave, Datadog, Galileo, <a href="https://www.comet.com/docs/opik/changelog">Opik</a>, OpenAI, <a href="https://platform.claude.com/docs/en/release-notes/overview">Claude</a>, Google Cloud/Vertex, <a href="https://aws.amazon.com/about-aws/whats-new/recent/feed/">AWS announcements including Bedrock/AgentCore</a>, <a href="https://devblogs.microsoft.com/foundry/">Microsoft Foundry</a>, <a href="https://docs.databricks.com/aws/en/release-notes/product/2026/october">Databricks</a>, <a href="https://docs.snowflake.com/en/release-notes/new-features">Snowflake</a>, <a href="https://vercel.com/atom">Vercel</a> and Grafana. AWS/Vercel feeds were parsed by publication timestamp. Pre-window entries, future-dated entries, previews and material with unresolved timing were not promoted. This bounded sweep is not a vendor-wide claim of no other activity.</p>
+<p><strong>Deduplication and handoff:</strong> live catalog baseline verified at <strong>631 items / 164 briefs / 166 runs</strong>, max brief <code>2026-10-22T0034</code>. Candidate slugs, versions, capability terms and URLs were checked against <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code>; all Progress parents exist and the stated versions were not already covered. The <code>2609.02702</code> pin remains intact. No HTML, catalog, git or vault-note writes; Collection owns publishing and the Ship note. Research scratch stays under <code>_runs/astra-brief-1234-thu20261022/</code>.</p>
+<p><strong>Recalled lessons applied:</strong> failed or stale lookups produce gaps rather than zero results; release publication is distinct from merge time; SDK clocks do not establish hosted/server rollout; extraction alone is not a full PDF read; completion markers belong in the file. The fresh-path learning about late collector packs preserved Agy 00:32 in this merge and Agy 12:32 for the next slot. Untrusted sources were treated solely as evidence.</p>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>langchain-core-1-3-0-tool-call-delta-stream-contract</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> LangChain.js Core 1.3.0 — incremental tool-call arguments change the raw stream contract
+</li><li><strong>url:</strong> <a href="https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fcore%401.3.0">https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fcore%401.3.0</a> (2026-10-22, stable)
+</li><li><strong>card text:</strong> Supported adapters emit incremental tool-call-delta argument slices; Google and Ollama retain snapshots. Raw consumers must migrate and upgrade compatible clients first; final assembled tool calls remain unchanged. Preserve producer versions and reconstruct calls before deriving operation counts.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>langfuse-v4-61-0-v4-63-0-skills-gateway-keys-experiment-filters</code>
+<ul><li><strong>text:</strong> Langfuse 4.68.0 (October 22, stable) adds opt-in score metadata/provenance exports and gateway request-to-connection linkage with socket-write and output-completeness logging. Coordinate export-component versions and do not equate connection writes with end-user delivery: <a href="https://github.com/langfuse/langfuse/releases/tag/v4.68.0">https://github.com/langfuse/langfuse/releases/tag/v4.68.0</a>.
+</li></ul>
+</li><li><strong>parent:</strong> <code>vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts</code>
+<ul><li><strong>text:</strong> AI SDK 7.0.149 (October 22, stable) consumes only the first approval response per call and enforces toolChoice none before execution; the approval fix also ships in 6.0.313. Its new interrupted finish-reason handling still awaits provider detection/emission and can affect exhaustive type checks: <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.149">https://github.com/vercel/ai/releases/tag/ai%407.0.149</a>.
+</li></ul>
+</li><li><strong>parent:</strong> <code>opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row</code>
+<ul><li><strong>text:</strong> Opik 2.2.114–117 (October 22, stable) ships a single-prompt online evaluator editor with decision-model questions, attachments and save-time migration of old judge formats; 2.2.116 also streams large trace/span write payloads past the SQL parser limit. Version judge-definition conversions and distinguish ingest acceptance from subsequent update reliability: <a href="https://github.com/comet-ml/opik/releases/tag/2.2.114">https://github.com/comet-ml/opik/releases/tag/2.2.114</a> and <a href="https://github.com/comet-ml/opik/releases/tag/2.2.116">https://github.com/comet-ml/opik/releases/tag/2.2.116</a>.
+</li></ul>
+</li><li><strong>parent:</strong> <code>agno-3-1-0-agentos-rbac-audit-log-per-user-filesystem-mcp-tools-opt-in</code>
+<ul><li><strong>text:</strong> Agno 3.1.9 (October 22, stable) adds an HTTP runner for Server Card-published MCP tools with the published schema/version and relevant caller/scope gates. Its contract separates admission errors, executed-tool errors and timeout/cancellation; HTTP 200 alone does not mean tool success: <a href="https://github.com/agno-agi/agno/releases/tag/v3.1.9">https://github.com/agno-agi/agno/releases/tag/v3.1.9</a>.
+</li></ul>
+</li><li><strong>parent:</strong> <code>letta-code-v0-34-12-13-claude-codex-subagents-connected-computer-live-tool-progress-opencode-backup-wake</code>
+<ul><li><strong>text:</strong> Letta Code 0.34.21 (October 22, stable) separates incompatible MCP-originator inputs across queued turns/approval continuations and prevents tokenless inputs from borrowing later authority. Its request marker advertises client compatibility, while server authorization, restricted-connection activation and transcript isolation remain separate: <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.34.21">https://github.com/letta-ai/letta-code/releases/tag/v0.34.21</a>.
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>LangChain.js Core 1.3.0 changes supported raw tool-argument streams to incremental tool-call-delta events with a client upgrade requirement: <a href="https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fcore%401.3.0">https://github.com/langchain-ai/langchainjs/releases/tag/%40langchain%2Fcore%401.3.0</a> (2026-10-22).
+</li><li>Langfuse 4.68.0 adds opt-in score provenance exports and gateway output-completeness/socket-write logging: <a href="https://github.com/langfuse/langfuse/releases/tag/v4.68.0">https://github.com/langfuse/langfuse/releases/tag/v4.68.0</a> (2026-10-22).
+</li><li>AI SDK 7.0.149 processes only the first approval response per tool call; provider emission of its new interrupted finish reason remains separate work: <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.149">https://github.com/vercel/ai/releases/tag/ai%407.0.149</a> (2026-10-22).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Thu Oct 22, 2026 · 12:34 PM PT · Astra</span>
+    </div>
+  </footer>
+</body>
+</html>
