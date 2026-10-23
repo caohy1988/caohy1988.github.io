@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-10-23-0034: Evidence behind actions, retries and evaluation labels</title>
+  <meta name="description" content="Field Brief 2026-10-23-0034: Evidence behind actions, retries and evaluation labels">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-23-0034-astra.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 AM PT · Fri Oct 23, 2026 · Astra</p>
+    <article>
+<h1>Field Brief — 2026-10-23-0034: Evidence behind actions, retries and evaluation labels</h1>
+<p><strong>Writer: Astra (<code>gpt-6-astra</code>)</strong>
+<strong>For:</strong> Haiyuan Cao, TL of BQAA (BigQuery Agent Analytics) + ADK
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>Window:</strong> ~12h since the scheduled 2026-10-22-1234 brief: October 22, 12:34 PT–October 23, 00:34 PT / October 22, 19:34 UTC–October 23, 07:34 UTC. The prior brief was published around 12:51 PT.
+<strong>Effort:</strong> xhigh. <strong>Path:</strong> fresh. <strong>Decision:</strong> PUBLISH — one NEW Industry rank, three NEW Academy ranks and four material Industry Progress updates.</p>
+<h2>Read this first</h2>
+<p><strong>The strongest BQAA thread is evidence that remains interpretable after execution.</strong> This batch supplies three complementary research views: reconstruct a particular action from runtime events; audit the detector that turns those events into a label; and check required actions alongside final state. The practical opportunity is an evidence record that keeps observations, evaluator interpretation and missing information distinguishable. The Academy cards below give the measurements and their boundaries; none is a production validation of BQAA.</p>
+<p><strong>OpenAI Decisions GA clears the prior slot's timing hold.</strong> The official announcement now supplies an in-window timestamp, and both official SDKs ship a consequential type change. Pydantic AI makes retries and changing tool availability more explicit; Weave adds decision-call tracing while changing telemetry field names; Claude Code preserves an interrupted operation as an unknown outcome after runner migration. These changes make producer version and observation completeness necessary analytical dimensions. <a href="https://community.openai.com/t/decisions-api-is-now-generally-available-with-new-updates/1408934">OpenAI announcement</a>, <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.60.0">Pydantic AI 2.60.0</a>, <a href="https://github.com/wandb/weave/releases/tag/v0.53.13">Weave 0.53.13</a>, <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.309">Claude Code 2.1.309</a>.</p>
+<p>The independent vendor sweep also found an in-window AWS security-agent launch. Several appealing leads remain outside the ranks: experimental interfaces, repository automation and announcements whose exact slot eligibility is unresolved. Collector coverage stops early in this window; Housekeeping records the gaps. The Thursday-evening arXiv announcement did arrive: the all-CS ceiling is <strong>2610.31671</strong>. Keep the existing <strong>Trace-as-State <code>2609.02702</code></strong> priority pin intact.</p>
+<h2>Industry</h2>
+<h3>NEW — AWS Continuum GA attaches execution evidence to remediation</h3>
+<p><strong>Primary:</strong> <a href="https://aws.amazon.com/about-aws/whats-new/2026/10/aws-continuum-for-code-vulnerabilities-is-now-generally-available">AWS Continuum for code vulnerabilities GA</a>, October 22, stable/GA. The <a href="https://aws.amazon.com/about-aws/whats-new/recent/feed/">AWS announcement feed</a> timestamps it at <strong>21:00 UTC / 14:00 PT</strong>. <strong>Suggested id:</strong> <code>aws-continuum-code-vulnerabilities-ga-evidence-remediation</code>.</p>
+<p>AWS describes a workflow that combines application topology, identity relationships and network reachability with vulnerability findings, tests exploitability in an isolated sandbox, and supplies remediation PRs with exploitability proof and a blast-radius assessment. It starts with proposed fixes in Learn mode; the operator can switch to Enforce mode with configured guardrails. This is a product launch, not a repository PR announcement. <a href="https://aws.amazon.com/about-aws/whats-new/2026/10/aws-continuum-for-code-vulnerabilities-is-now-generally-available">GA scope</a>.</p>
+<p><strong>BQAA implication — inference:</strong> retain the evidence and authorization transition connecting a finding, validation attempt, proposed patch and action. A useful analysis should distinguish proposed, approved, executed and independently verified remediation. The announcement supplies no measured precision, false-positive rate or threshold for changing modes; none is inferred here.</p>
+<h3>Progress — OpenAI Decisions reaches GA; typed consumers need migration checks</h3>
+<p><strong>Target catalog item id:</strong> <code>openai-decisions-api-public-beta-gpt-6-luna-v1-decisions-typed-answers-input-only-pricing</code>.</p>
+<p><strong>Primary:</strong> <a href="https://openai.com/index/decisions-api/">GA product announcement</a>, October 22. The <a href="https://community.openai.com/t/decisions-api-is-now-generally-available-with-new-updates/1408934">official developer announcement</a> has <code>article:published_time=2026-10-22T20:51:09+00:00</code> (<strong>13:51:09 PT</strong>), resolving the previous brief's cutoff uncertainty. This establishes an in-window announcement, not the exact instant every account gained access.</p>
+<p>The GA update adds prompt caching, native JSON input, images within individual question instructions and a <strong>400-question</strong> request limit, increased from 200. GPT-Live integration was already covered; it is not another new admission. Cached reads receive discounted pricing, but cache writes are charged, and regional/long-context modifiers apply. The former beta shorthand of no cache charges should not survive unchanged in cost models. <a href="https://developers.openai.com/api/docs/changelog">Changelog</a>, <a href="https://developers.openai.com/api/docs/guides/decisions">current guide and pricing rules</a>.</p>
+<p>The in-window SDK pair is <strong>Python 3.37.0</strong> (<a href="https://github.com/openai/openai-python/releases/tag/v3.37.0">release</a>; <a href="https://pypi.org/pypi/openai/json">PyPI</a>, 20:04:37 UTC) and <strong>Node 7.43.0</strong> (<a href="https://github.com/openai/openai-node/releases/tag/v7.43.0">release</a>; <a href="https://registry.npmjs.org/openai">npm</a>, 21:54:28 UTC). Live response question instructions can now be a string or structured text/image/JSON parts; request inputs gain roles and tool-history items. Node's <code>DecisionInputMessage</code> becomes a union. Both releases explicitly warn of breaking type behavior despite minor version increments.</p>
+<p><strong>BQAA implication — inference:</strong> join request-level usage to question-level outcomes without counting each question as a separately billed request. Preserve content type, refusal state, cache accounting and producer version. Test consumers that assume every instruction is a string or that the set of history variants is closed. Vendor/customer speed comparisons in the launch post were not independently reproduced and are not used as planning estimates.</p>
+<h3>Progress — Pydantic AI 2.60.0 records retry causes and mid-run tool additions</h3>
+<p><strong>Target catalog item id:</strong> <code>pydantic-ai-v2-57-0-approval-reviewer-mcp-apps-service-tier-pricing</code>.</p>
+<p><strong>Primary:</strong> <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.60.0">Pydantic AI v2.60.0</a>, stable; GitHub <strong>October 23 01:44:06 UTC / October 22 18:44:06 PT</strong>; <a href="https://pypi.org/pypi/pydantic-ai/json">PyPI</a> 02:01:51 UTC, unyanked at lookup. This advances 2.59.0 rather than repeating its missing-usage accounting.</p>
+<p>Tool retries become <code>ToolReturnPart(outcome=&#x27;retried&#x27;)</code>; feedback without a corresponding call becomes <code>RetryFeedbackPart</code>. Retry metadata can carry cause, attempt and retry budget, including unknown/unavailable-tool rejection. New history therefore requires updated type matching. Tool spans expose <code>pydantic_ai.tool.retry.*</code>; counters can be absent when a retry is not charged. Legacy histories remain loadable. <strong>Limits matter:</strong> the final rejection when retries are exhausted can still lack a history part, and the Vercel live stream lacks an outcome carrier that preserves this distinction on echoed turns. <a href="https://github.com/pydantic/pydantic-ai/pull/8094">Released retry representation and remaining gaps</a>.</p>
+<p>The release also records newly appearing mid-run tools through <code>ToolAvailabilityDeltaPart</code>, with provider-specific addition channels rather than simply extending the initial tool list. Consumers inspecting only <code>tools[]</code> can miss newly introduced tools. AG-UI client-held history can lose activity messages on its return trip; Temporal cannot recreate an <code>add_function()</code> mutation performed inside an activity it does not re-execute. The documented alternatives are retained server history/returned activity records and workflow-side tool configuration. <a href="https://github.com/pydantic/pydantic-ai/pull/9405">Released tool-history contract</a>.</p>
+<p><strong>BQAA implication — inference:</strong> reconstruct the tool set available at each decision and distinguish a rejected call from an executed tool that requested a retry. Keep history/event gaps explicit. This is one framework update; its sandbox, compaction and realtime changes do not become separate cards.</p>
+<h3>Progress — Weave 0.53.13 traces decision calls and changes emitted usage names</h3>
+<p><strong>Target catalog item id:</strong> <code>weave-v0-53-12-usage-preserved-across-trace-batches-tool-executions-ordered-after-model-call-span-bytes</code>.</p>
+<p><strong>Primary:</strong> <a href="https://github.com/wandb/weave/releases/tag/v0.53.13">Weave v0.53.13</a>, October 22, stable; <a href="https://pypi.org/pypi/weave/json">PyPI</a> <strong>22:57:44 UTC / 15:57:44 PT</strong>, unyanked; GitHub 22:58:56 UTC.</p>
+<p>The Python release includes instrumentation for TypeSafe <code>system_one</code>: one model span per call, carrying model, questions, answers, usage and an available request ID. It uses the current turn or a documented fallback; it does <strong>not</strong> create a Weave Call or make a surrounding <code>@weave.op</code> its parent. Content capture is configurable, and image content is represented by references. The implementation also covers TypeScript, but this brief's release clock establishes the Python distribution only. <a href="https://github.com/wandb/weave/pull/7987">Instrumentation semantics</a>.</p>
+<p>The release emits <code>gen_ai.usage.cache_write.input_tokens</code> and <code>gen_ai.usage.reasoning.output_tokens</code>, replacing older keys, and moves finish reasons to the span-level field in the described integrations. The compatibility notice requires corresponding server changes first: older servers can lose cache-write counts and finish-reason information. A released SDK is not a receipt for the deployed server version. <a href="https://github.com/wandb/weave/pull/8045">Attribute migration and deployment ordering</a>.</p>
+<p><strong>BQAA implication — inference:</strong> version semantic-convention mappings and test producer/server combinations. Avoid interpreting a missing count after an upgrade as zero, and do not invent an operation-parent relationship merely because an SDK wrapper surrounds the call.</p>
+<h3>Progress — Claude Code 2.1.309 preserves unknown outcomes after runner migration</h3>
+<p><strong>Target catalog item id:</strong> <code>claude-code-2-1-307-otel-safety-events-tool-interventions</code>.</p>
+<p><strong>Primary:</strong> <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.309">Claude Code v2.1.309</a>, October 22; GitHub <strong>22:18:57 UTC / 15:18:57 PT</strong>; <a href="https://registry.npmjs.org/@anthropic-ai%2fclaude-code">npm</a> 20:34:13 UTC. It is a non-prerelease package published under <code>latest</code>; the registry's separate <code>stable</code> channel still points to 2.1.308.</p>
+<p>For self-hosted sessions moving to a new runner, the agent now sees the interrupted tool call with its outcome marked unknown. The release also fixes sandbox and permission-boundary behavior, including shell startup files, protected MCP configuration and split-pane teammates inheriting command-line tool restrictions. These are material execution-boundary repairs, not another admission of 2.1.307's OTel events. <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.309">Release notes</a>.</p>
+<p><strong>BQAA implication — inference:</strong> preserve unknown outcomes through recovery. A resumed session is not proof that the interrupted operation failed or is safe to repeat. The notes do not claim a new OTel field for this runner-migration marker, and this pass did not test the fixes locally.</p>
+<h3>One-line mentions — no additional ranks</h3>
+<ul><li><strong>AI SDK 7.0.150:</strong> the package is stable, but its new speech-streaming interface is explicitly experimental; NOTE only. <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.150">Release</a>. The already-covered 7.0.149 approval behavior is not re-Progressed.
+</li><li><strong>Phoenix 20.25.0:</strong> the release's main feature is repository issue-to-PR automation; its linked implementation is a maintainer factory, not a new observability product surface. Sandbox teardown and server fixes remain maintenance. <a href="https://github.com/Arize-ai/phoenix/releases/tag/arize-phoenix-v20.25.0">Release</a>, <a href="https://github.com/Arize-ai/phoenix/pull/17020">scope</a>.
+</li><li><strong>Letta Code 0.34.22–23:</strong> npm confirms in-window distributions, but the checked tag pages contain version-bump messages without substantive release notes; no inferred capability or repeat of 0.34.21. <a href="https://registry.npmjs.org/@letta-ai%2fletta-code">Registry</a>; scope gap below.
+</li><li><strong>Mastra:</strong> the in-window core package is a snapshot; stable <code>@mastra/core</code> remains the already-covered 1.79.0. <a href="https://registry.npmjs.org/@mastra%2fcore">Registry</a>.
+</li><li><strong>Langfuse:</strong> the October 22 <a href="https://langfuse.com/blog/2026-10-22-operating-langfuse-as-an-internal-service">internal-service operations article</a> is guidance, not a launch; the release index still tops out at already-covered 4.68.0.
+</li><li><strong>AWS AgentCore Gateway:</strong> the InvokeModel/fallback announcement is timestamped October 22 08:00 UTC, before this window. <a href="https://aws.amazon.com/about-aws/whats-new/2026/10/agentcore-gateway-invokemodel-fallback/">Primary announcement</a>. No late re-admission here.
+</li><li><strong>Databricks/Snowflake:</strong> MCP screening, memory pipelines and the newly listed Cortex Responses/Search entries are beta/preview or outside the cutoff; none becomes a rank. <a href="https://docs.databricks.com/aws/en/release-notes/product/2026/october">Databricks October notes</a>, <a href="https://docs.snowflake.com/en/release-notes/new-features">Snowflake feature index</a>.
+</li><li><strong>Fresh-list PRs:</strong> open/merged work without a verified qualifying release stays unranked. First-party ADK is NOTE-only at most; no first-party BQAA card. Already-covered LangChain Core, Langfuse, Opik, Agno, Inspect and Braintrust versions are not re-admitted.
+</li></ul>
+<h2>Academy</h2>
+<p>All three selections are in the successfully fetched <strong>Friday, October 23 new listings</strong>, announced Thursday evening PT, above the prior ceiling. Eligibility is the new public listing, not the manuscript's submission date. Each PDF was extracted in full with <code>pdftotext</code> and read through its references and appendices; no experimental artifact was executed.</p>
+<h3>NEW — <a href="https://arxiv.org/abs/2610.30738">AgentTriage: Replayable Security Diagnosis Across Heterogeneous Agent Runtimes — arXiv:2610.30738</a></h3>
+<p><strong>Full PDF read — 17 pages.</strong> Five runtime overlays normalize invocation/result evidence for deterministic, policy-relative diagnosis. On <strong>120 adjudicated cases</strong>, grounded joint diagnosis is <strong>0.858</strong>, versus <strong>0.683</strong> for the strongest same-schema baseline; paired gain <strong>0.175</strong>, 95% CI <strong>[0.092, 0.258]</strong> (Tables 5 and 7). Unsupported claims remain <strong>0.036</strong> (Table 5).</p>
+<p>The useful design is explicit lifecycle identity, claim-to-event links and abstention when required evidence is missing. Replayability does not establish observational completeness. Two overlays synthesize call IDs, parent evidence varies (Table 2), and selection diagnoses one terminal lifecycle rather than every action (§3.5). Synthetic, pinned configurations limit transfer (§7). Provider token overhead is <strong>unavailable</strong>, not zero (Appendix C/Table 14).</p>
+<p><strong>BQAA inference:</strong> prototype replayable outcome queries with recorded evidence classes; test missing results, reordered completions and multiple effects before expanding attribution.</p>
+<h3>NEW — <a href="https://arxiv.org/abs/2610.30491">What the Trace Shows and What the Label Says — arXiv:2610.30491</a></h3>
+<p><strong>Full PDF read — 13 pages.</strong> A fault-injected calculator audit uses six models and 30 arithmetic tasks per model. Human review covers 90 traces; verification agrees on <strong>67/81 applicable comparisons</strong>, while correctness agrees on <strong>67/67</strong> (Table 6). A quiet correction, a repeated expression and a stuck loop can defeat a simple re-check detector's interpretation (§4.4).</p>
+<p>These are reviewed-case rates, not population accuracy. One primary reviewer helped expose gaps; detectors were revised and the same reviewed cases rechecked (§§4.3, 5.1). Tool-call frequency changes fault exposure, and execution budgets censor runs (Table 5). The study does not establish reliability in open-ended workflows.</p>
+<p><strong>BQAA inference:</strong> retain automatic labels, evidence, applicability, cutoff reason and human corrections separately. Validate a detector on held-out traces before treating its label as a behavioral fact.</p>
+<h3>NEW — <a href="https://arxiv.org/abs/2610.30161">TauIndianBankBench: Procedure-Aware, Action-Oriented Evaluation — arXiv:2610.30161</a></h3>
+<p><strong>Full PDF read — 15 pages.</strong> Across six models on <strong>1,000 synthetic banking tasks</strong>, final-state-only grading raises pass rates by <strong>6.5–12.0 percentage points</strong> over the combined action/state criterion (Table 2, §5.2). The action check requires specified calls, including reads, and rejects unrequested writes even if later reversed (§3.2).</p>
+<p>The scorer is <strong>order-insensitive</strong>, and one matching call can satisfy a repeated reference call. Task dependencies and the simulated customer supply ordering pressure; this is not direct proof of temporal compliance. Communication assertions do not affect the released score (Appendix F/Table 8). English-only synthetic tasks and an unmeasured customer-simulator error rate limit deployment conclusions (Limitations).</p>
+<p><strong>BQAA inference:</strong> compare outcome checks with required-event and collateral-action checks, then test temporal constraints separately. Its September 30 submission date is retained; its new October 23 listing is the freshness basis.</p>
+<h3>Scouted, not ranked</h3>
+<p>Title screening covered the above-ceiling listings across cs.AI, cs.CL, cs.LG, cs.SE and cs.MA; targeted abstracts were then read. The following remain <strong>listing/abstract-only leads</strong>, with no PDF-result claims imported into this brief:</p>
+<ul><li><a href="https://arxiv.org/abs/2610.30151">Handshake overhead, 2610.30151</a> — a useful cost-telemetry follow-up.
+</li><li><a href="https://arxiv.org/abs/2610.30157">MCP versus CLI, 2610.30157</a> — architectural comparison; not selected for a full read.
+</li><li><a href="https://arxiv.org/abs/2610.30200">Detection Is Not Enough, 2610.30200</a> and <a href="https://arxiv.org/abs/2610.30284">SWE-VERIFIER, 2610.30284</a> — detection/repair and selective-verification candidates.
+</li><li><a href="https://arxiv.org/abs/2610.30573">Personalization failures, 2610.30573</a> and <a href="https://arxiv.org/abs/2610.30635">specification-oracle gaps, 2610.30635</a> — diagnostic evaluation leads.
+</li><li><a href="https://arxiv.org/abs/2610.30924">REGATTA, 2610.30924</a> and <a href="https://arxiv.org/abs/2610.31130">Post-Audit Mirage, 2610.31130</a> — measurement and observation-boundary leads.
+</li><li><a href="https://arxiv.org/abs/2610.31280">Typed-state quality assurance, 2610.31280</a>, <a href="https://arxiv.org/abs/2610.31366">AfterDeleteBench, 2610.31366</a>, <a href="https://arxiv.org/abs/2610.31446">action-conditioned memory verification, 2610.31446</a>, <a href="https://arxiv.org/abs/2610.31553">contestable governance, 2610.31553</a> and <a href="https://arxiv.org/abs/2610.31650">EpiSEM-Bench, 2610.31650</a> — reserve for later full reads, not rejected on merit.
+</li></ul>
+<p>Full-PDF reads: <strong>three, 45 pages total</strong>. Prior-slot Academy cards and the Trace-as-State pin were excluded from new admissions.</p>
+<h2>Six-week EV</h2>
+<p>These are proposed validation priorities. Expected value is qualitative; this pass provides no measured BQAA savings or accuracy gain.</p>
+<table>
+<tr><th>Timing</th><th>Proposed work and expected value</th><th>Evidence needed to continue</th></tr>
+<tr><td>Weeks 1–2</td><td>Build a small fixture set for attempted/executed/blocked/unknown outcomes, rejected calls, retries and changing tool availability. Expected value: expose silent misclassification after producer upgrades.</td><td>Reconcile raw events, reconstructed calls and known effects. Include runner loss, missing results, duplicate identities and client-held history round trips. Report unresolved joins.</td></tr>
+<tr><td>Weeks 2–4</td><td>Audit a narrow completion or verification detector on held-out traces. Store its version, evidence, applicability, budget cutoff and any reviewer correction. Expected value: separate agent failures from measurement failures.</td><td>Freeze rules before the held-out review. Keep completed-wrong, incomplete and unobservable cases separate; compare action requirements, temporal requirements and final state independently.</td></tr>
+<tr><td>Weeks 4–6</td><td>Evaluate a small evidence-linked diagnosis and cost view. Join decision questions to request usage; retain cache-read/write categories and telemetry schema versions; connect a proposed corrective action to subsequent verification.</td><td>Replay diagnoses from frozen inputs. Test known-old and new producers/servers. Validate cost changes against quality on the same workload; an estimated saving or an approved patch is not an observed improvement.</td></tr>
+</table>
+<p><strong>Priority:</strong> extend the existing Trace-as-State work with evidence completeness and evaluator provenance before adding a broad autonomous diagnosis layer. A useful stop condition is unresolved outcome identity: if the data cannot distinguish which operation completed, defer causal or savings claims for that cohort.</p>
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>AWS Continuum:</strong> connect proposed remediation, authorization and verification evidence.
+</li><li><strong>OpenAI Decisions GA:</strong> retain question-level outcomes and request-level cache accounting; migrate typed consumers.
+</li><li><strong>Pydantic AI 2.60.0:</strong> distinguish retries from execution and reconstruct available tools from history.
+</li><li><strong>Weave 0.53.13:</strong> coordinate telemetry mappings and server compatibility before interpreting missing usage.
+</li><li><strong>Claude Code 2.1.309:</strong> preserve unknown outcomes through runner recovery.
+</li><li><strong>AgentTriage:</strong> make diagnostic claims replayable and expose observation limits.
+</li><li><strong>Detector audit:</strong> evaluate the measurement procedure behind the label.
+</li><li><strong>TauIndianBankBench:</strong> test actions, ordering and final state as separate obligations.
+</li></ul>
+<h2>Unconfirmed</h2>
+<table>
+<tr><th>Item</th><th>What was not confirmed</th><th>Where looked / disposition</th></tr>
+<tr><td>Claude Models on Google Cloud, Anthropic managed</td><td>Exact availability/announcement time within this 12-hour slot</td><td>The <a href="https://claude.com/resources/articles/claude-models-on-google-cloud-anthropic-managed">October 22 GA article</a>, <a href="https://platform.claude.com/docs/en/release-notes/overview">platform notes</a> and <a href="https://platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed">setup documentation</a> confirm the offering, but the article metadata is date-only. Product GA and the SDK client's beta status are distinct. Held from ranking pending a usable timing receipt; not a claim that the launch did not occur.</td></tr>
+<tr><td>Datadog cost attribution / Cost Savings Opportunities</td><td>An in-window launch or material rollout timestamp</td><td>The <a href="https://www.datadoghq.com/blog/cost-agent-observability/">October 22 article</a> describes available capabilities, but metadata is date-only and the <a href="https://www.datadoghq.com/blog/index.xml">RSS entry</a> uses October 22 00:00 UTC, before this window. A third-party observation time is not a rollout clock. No rank. <strong>gap: Datadog AI index exposes featured content without a usable dated latest list</strong>; direct article/feed and targeted search recovered this lead, not full index coverage.</td></tr>
+<tr><td>Weave hosted changes and server compatibility</td><td>Complete hosted-release coverage; deployment of the server changes needed by 0.53.13</td><td><strong>gap: Weave release-notes URL redirects to a CoreWeave login page</strong>, even though HTTP status is 200: <a href="https://docs.wandb.ai/weave/reference/release-notes">original URL</a>. Public release/PyPI and <a href="https://github.com/wandb/weave/pull/8045">migration notice</a> succeeded. Python shipment does not verify server rollout or TypeScript distribution timing.</td></tr>
+<tr><td>Braintrust hosted changes</td><td>Day/time eligibility of billing activity and MCP review-queue changes</td><td>The <a href="https://www.braintrust.dev/docs/changelog">changelog</a> groups these under October without an intraday clock. JS 3.39.0 and Python 0.48.0 remain already covered. No hosted-product rank.</td></tr>
+<tr><td>Galileo / Grafana announcement completeness</td><td>Current complete vendor coverage</td><td><strong>gap: Galileo blog's visible latest entries remain May-dated</strong> at <a href="https://galileo.ai/blog">the blog</a>. <strong>gap: Grafana what's-new extraction is a shell</strong>, at <a href="https://grafana.com/whats-new/">the index</a>. Targeted searches did not establish another eligible primary announcement. These are coverage limits, not zero-activity findings.</td></tr>
+<tr><td>Letta Code 0.34.22–23</td><td>Material shipped scope beyond version bumps</td><td><a href="https://registry.npmjs.org/@letta-ai%2fletta-code">npm</a> confirms 05:36:14 and 06:32:27 UTC uploads October 23; <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.34.22">0.34.22</a> and <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.34.23">0.34.23</a> resolve to tag pages without substantive release bodies. No capability inferred from the fresh-list merges.</td></tr>
+<tr><td>AWS Continuum effectiveness / research transfer</td><td>Production precision, autonomous-mode promotion threshold, independent replication and BQAA transfer</td><td>The <a href="https://aws.amazon.com/about-aws/whats-new/2026/10/aws-continuum-for-code-vulnerabilities-is-now-generally-available">AWS announcement</a> establishes product scope, not measured effectiveness. Academy results are paper-reported; full PDFs were read, but repositories, benchmarks and live integrations were not run.</td></tr>
+</table>
+<p>The former <strong>OpenAI Decisions GA</strong> hold is resolved by the timestamped primary announcement and is intentionally absent from the unresolved rows.</p>
+<h2>Housekeeping</h2>
+<p><strong>Fresh path used.</strong> <code>_runs/fb-2026-10-23-0034/fresh-items.md</code> was the complete collector candidate list. No file under <code>packs/</code> was opened or read wholesale; this pass needed no pack-level lookup. The merge used exactly:</p>
+<ol><li><code>packs/agy-pack-2026-10-22-1232.md</code> — late completion, explicitly carried from the prior slot.
+</li><li><code>packs/dsh-pack-2026-10-22-1432.md</code>.
+</li></ol>
+<p>Merge receipt: <code>FB_MERGE slot=2026-10-23-0034 packs=2 raw=54 unique=52 drop_catalog=0 drop_seen=4 drop_both=0 fresh=48 (cand=48 low=0) tokens_old~27314 tokens_new~7466</code>.</p>
+<p><strong>Collector gaps, as reported by Collection:</strong> Agy 15:32 Thursday skipped after a Mac execution hang and the ~15:48 reboot that removed the temporary collector toolchain/WATCH list. Agy 18:32 skipped with the Mac down. DSH 17:32, 20:32 and 23:32, Agy 21:32 Thursday and 00:32 Friday, and extra seats 00:07/00:09 Friday were skipped by Haiyuan's order pending rebuild. No backfill. No Muse packs: weekly quota exhausted. The independent sweep therefore carries coverage from roughly 15:00 PT onward. LinkedIn authwall, X 401 and Reddit 403 are collector-reported gaps, not restored access in this run. HN remains dropped; Medium scouting and GTM updates remain paused. No user picks were pending.</p>
+<p><strong>Verified arXiv ceiling:</strong> all-CS <strong>2610.31671</strong>, on the Friday, October 23 listings; the requested categories reach cs.AI/cs.CL <strong>2610.31667</strong>, cs.LG <strong>2610.31670</strong>, cs.SE <strong>2610.31588</strong>, cs.MA <strong>2610.31562</strong>. There are <strong>448 distinct above-ceiling IDs</strong> across those five category listings, including cross-lists; counts overlap. The complete fetched lists were parsed, titles screened for relevant topics, 16 selected abstracts examined, and three full PDFs read. Submission histories are September 30 for 2610.30161, October 21 for 2610.30491 and October 22 for 2610.30738; none is misrepresented as an upload during the slot. Sources: <a href="https://arxiv.org/list/cs/new?skip=0&amp;show=2000">all-CS</a>, <a href="https://arxiv.org/list/cs.AI/new?skip=0&amp;show=2000">cs.AI</a>, <a href="https://arxiv.org/list/cs.CL/new?skip=0&amp;show=2000">cs.CL</a>, <a href="https://arxiv.org/list/cs.LG/new?skip=0&amp;show=2000">cs.LG</a>, <a href="https://arxiv.org/list/cs.SE/new?skip=0&amp;show=2000">cs.SE</a>, <a href="https://arxiv.org/list/cs.MA/new?skip=0&amp;show=2000">cs.MA</a>.</p>
+<p><strong>Independent vendor verification:</strong> directly fetched LangChain/LangSmith, Langfuse, Phoenix, Braintrust, Weave, Datadog, Galileo, Opik, OpenAI, Anthropic, Google Cloud, AWS, Microsoft Foundry, Databricks, Snowflake, Vercel and Grafana pages; supplemented them with official-domain searches and public npm/PyPI metadata. AWS/Vercel/Datadog feeds were parsed for clocks. Successful <a href="https://docs.cloud.google.com/release-notes">Cloud release notes</a>, <a href="https://devblogs.microsoft.com/foundry/">Foundry blog</a>, <a href="https://www.comet.com/docs/opik/changelog">Opik changelog</a>, <a href="https://docs.langchain.com/langsmith/changelog">LangSmith changelog</a> and <a href="https://vercel.com/atom">Vercel feed</a> did not establish another qualifying in-window rank in this bounded pass. This is not a universal no-release claim. No GitHub API calls were used; the public release/PR content required for admitted claims was retrieved successfully. No paid API inference, external write, benchmark execution or new agent launch occurred.</p>
+<p><strong>Deduplication and handoff:</strong> live catalog read-only baseline <strong>632 items / 165 briefs / 167 runs</strong>, max brief <code>2026-10-22T1234</code>. Candidate IDs, names, versions, capability terms and primary URLs were searched against <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code>; new entries were absent and every Progress parent exists. <code>arxiv-2609-02702-trace-as-state</code> remains untouched. Scratch and receipts are under <code>_runs/astra-brief-0034-fri20261023/</code>; downloaded PDFs were removed after reading, retaining text and checksums. No HTML, catalog, git or vault-note writes; Collection owns the Ship note and publication.</p>
+<p><strong>Recalled lessons applied:</strong> failed/login/shell/stale retrievals are gaps; a package clock does not establish a hosted rollout; full extraction is followed by full reading; and completion markers belong in the brief file. New handoff lesson: a date-only prior hold can be resolved by a timestamped official announcement without pretending to know the exact service activation instant. All external content was treated as evidence, never as instructions.</p>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>aws-continuum-code-vulnerabilities-ga-evidence-remediation</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> AWS Continuum GA — exploitability evidence and blast-radius assessment accompany remediation PRs
+</li><li><strong>url:</strong> <a href="https://aws.amazon.com/about-aws/whats-new/2026/10/aws-continuum-for-code-vulnerabilities-is-now-generally-available">https://aws.amazon.com/about-aws/whats-new/2026/10/aws-continuum-for-code-vulnerabilities-is-now-generally-available</a> (2026-10-22, stable)
+</li><li><strong>card text:</strong> AWS Continuum validates vulnerabilities in a sandbox and attaches evidence to remediation PRs. Operators control the move from proposed fixes to guarded autonomous action; no effectiveness benchmark is established by the launch.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-30738-agenttriage-replayable-security-diagnosis</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> AgentTriage — replayable diagnoses with explicit evidence and abstention boundaries
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.30738">https://arxiv.org/abs/2610.30738</a>
+</li><li><strong>card text:</strong> Full PDF read. A deterministic cross-runtime diagnosis contract ties claims to recorded events; synthetic evaluations support the approach, while incomplete instrumentation and synthesized identifiers bound its conclusions.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-30491-trace-label-behavioral-detector-audit</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> What the Trace Shows and What the Label Says — audit the detector behind the score
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.30491">https://arxiv.org/abs/2610.30491</a>
+</li><li><strong>card text:</strong> Full PDF read. An arithmetic trace audit exposes mismatches between visible re-checks and recovery; applicability, censoring and human corrections belong beside labels. Reviewed-case agreement is not held-out validation.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-30161-tauindianbankbench-procedure-action-state</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> TauIndianBankBench — required actions reveal violations hidden by final-state grading
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.30161">https://arxiv.org/abs/2610.30161</a>
+</li><li><strong>card text:</strong> Full PDF read. Combined action/state scoring catches omitted required calls and unrequested writes. Call membership remains order-insensitive; simulator assumptions and temporal compliance require separate scrutiny.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>openai-decisions-api-public-beta-gpt-6-luna-v1-decisions-typed-answers-input-only-pricing</code>
+<ul><li><strong>text:</strong> Decisions GA is confirmed by an October 22 20:51:09 UTC official announcement, resolving the prior hold; caching, native JSON, question-level images and 400-question requests advance the beta card. Python 3.37.0/Node 7.43.0 also require consumers to handle structured question instructions and expanded input unions: <a href="https://openai.com/index/decisions-api/">https://openai.com/index/decisions-api/</a> and <a href="https://github.com/openai/openai-node/releases/tag/v7.43.0">https://github.com/openai/openai-node/releases/tag/v7.43.0</a>.
+</li></ul>
+</li><li><strong>parent:</strong> <code>pydantic-ai-v2-57-0-approval-reviewer-mcp-apps-service-tier-pricing</code>
+<ul><li><strong>text:</strong> Pydantic AI 2.60.0 (October 22 PT, stable) records typed retry outcomes/causes and mid-run tool additions, changing history and outgoing-request interpretation. Preserve documented exhausted-retry, UI round-trip and durable-execution gaps: <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.60.0">https://github.com/pydantic/pydantic-ai/releases/tag/v2.60.0</a>.
+</li></ul>
+</li><li><strong>parent:</strong> <code>weave-v0-53-12-usage-preserved-across-trace-batches-tool-executions-ordered-after-model-call-span-bytes</code>
+<ul><li><strong>text:</strong> Weave 0.53.13 (October 22, stable) ships Python TypeSafe decision-call model spans and updated usage/finish-reason attributes. Coordinate server compatibility and retain the documented distinction between these spans and Weave Calls: <a href="https://github.com/wandb/weave/releases/tag/v0.53.13">https://github.com/wandb/weave/releases/tag/v0.53.13</a>.
+</li></ul>
+</li><li><strong>parent:</strong> <code>claude-code-2-1-307-otel-safety-events-tool-interventions</code>
+<ul><li><strong>text:</strong> Claude Code 2.1.309 (October 22, non-prerelease/latest) exposes interrupted tool outcomes as unknown after self-hosted runner migration and repairs sandbox/permission boundaries. This does not establish a new OTel field or replay safety: <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.309">https://github.com/anthropics/claude-code/releases/tag/v2.1.309</a>.
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>AWS announced Continuum for code vulnerabilities GA with evidence-bearing remediation PRs: <a href="https://aws.amazon.com/about-aws/whats-new/2026/10/aws-continuum-for-code-vulnerabilities-is-now-generally-available">https://aws.amazon.com/about-aws/whats-new/2026/10/aws-continuum-for-code-vulnerabilities-is-now-generally-available</a> (2026-10-22; official feed 21:00 UTC).
+</li><li>OpenAI's official Decisions GA announcement provides an in-window timestamp: <a href="https://community.openai.com/t/decisions-api-is-now-generally-available-with-new-updates/1408934">https://community.openai.com/t/decisions-api-is-now-generally-available-with-new-updates/1408934</a> (2026-10-22 20:51:09 UTC).
+</li><li>Pydantic AI 2.60.0 ships explicit retry representations and mid-run tool-availability records: <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.60.0">https://github.com/pydantic/pydantic-ai/releases/tag/v2.60.0</a> (2026-10-23 01:44:06 UTC / October 22 PT).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Fri Oct 23, 2026 · 12:34 AM PT · Astra</span>
+    </div>
+  </footer>
+</body>
+</html>
