@@ -28,6 +28,7 @@ TMP = Path(tempfile.mkdtemp())
 os.environ["HOME"] = str(TMP)  # collect_qwen / read_kimi_config / collect_kimi resolve ~ per call
 BEFORE = datetime(2026, 10, 24, 12, 0, tzinfo=PT)  # trial not started
 AFTER = datetime(2026, 10, 26, 12, 0, tzinfo=PT)
+LATE = datetime(2026, 10, 28, 12, 0, tzinfo=PT)  # after every trial fixture session
 
 
 def usage(requests, inp, out, cached, thoughts=0):
@@ -54,14 +55,34 @@ def assert_private(label, blob):
         assert s not in text, f"{label}: leaked {s[:14]}"
 
 
+def card(text, now):
+    """summarize_qwen_usage + render_qwen_body, the way collect_qwen wires them."""
+    u = cab.summarize_qwen_usage(text, now)
+    t = u.pop("trial")
+    return u, t, cab.render_qwen_body({"usage": u, "trial": t})
+
+
 # 1. no runs: missing / empty / blank file
 for text in ("", "\n\n  \n"):
-    u = cab.summarize_qwen_usage(text, BEFORE)
-    assert u["sessions"] == 0 and u["bad_lines"] == 0 and u["last_session_pt"] is None, u
+    u, t, h = card(text, BEFORE)
+    assert u["state"] == "no_runs" and u["sessions"] == 0 and u["bad_lines"] == 0 and u["future_records"] == 0, u
+    assert u["last_session_pt"] is None
     assert u["windows"]["all_time"] == {"sessions": 0, "requests": 0, "input_tokens": 0, "cached_tokens": 0,
-                                        "output_tokens": 0, "unpriced_tokens": 0, "est_cost_usd": 0.0}, u
-    assert u["trial"]["status"] == "trial starts 10/25 ~3 AM PT; 0/3 runs", u["trial"]
-    assert u["trial"]["runs_display"] == "0/3" and u["trial"]["setup_test_sessions"] == 0
+                                        "output_tokens": 0, "unpriced_models": 0, "unpriced_tokens": 0,
+                                        "est_cost_usd": 0.0}, u
+    assert t["status"] == "trial starts 10/25 ~3 AM PT; 0/3 runs", t
+    assert t["runs_display"] == "0/3" and t["setup_test_sessions"] == 0
+    assert "no runs yet" in h and "usage unavailable" not in h and ">DATA<" not in h
+
+# 1b. records present but none readable (corrupt, truncated, unsupported version) is not "no runs"
+for text, why in (("not json\n", "1 unreadable line"),
+                  ('{"version": 1, "sessionId": "s", "timest\n' + rec(BEFORE, version=2), "2 unreadable lines")):
+    u, t, h = card(text, BEFORE)
+    assert u["state"] == "unreadable" and u["sessions"] == 0 and u["bad_lines"] == int(why[0]), u
+    assert t["runs"] is None and t["runs_display"] is None and t["setup_test_sessions"] is None, t
+    assert t["status"] == f"trial status unavailable: no readable records ({why})", t
+    assert "no runs yet" not in h and "usage unavailable: no readable records" in h and "0/3" not in h, h
+    assert ">DATA<" in h and f"Not counted from usage_record.jsonl: {why}" in h and "TRIAL —" in h
 
 # 2. the real setup-test record: counts, list-price cost, last session in PT, setup test (not a trial run)
 u = cab.summarize_qwen_usage(rec(datetime(2026, 10, 24, 10, 30, 52, tzinfo=PT)) + "\n", BEFORE)
@@ -92,9 +113,11 @@ bad_lines = [
     rec(BEFORE, sid="models-list", models=[SMOKE]),
     rec(BEFORE, sid="model-not-dict", models={MODEL: 7}),
 ]
-u = cab.summarize_qwen_usage("\n".join(bad_lines[:6] + [good] + bad_lines[6:] + [""]), BEFORE)
-assert u["bad_lines"] == len(bad_lines) == 13 and u["sessions"] == 1, u
+u, t, h = card("\n".join(bad_lines[:6] + [good] + bad_lines[6:] + [""]), BEFORE)
+assert u["bad_lines"] == len(bad_lines) == 13 and u["sessions"] == 1 and u["state"] == "ok", u
 assert u["windows"]["all_time"]["input_tokens"] == 24755
+assert t["status"] == "trial starts 10/25 ~3 AM PT; 0/3 runs (not counted: 13 unreadable lines)", t
+assert "<table" in h and ">DATA<" in h and "Not counted from usage_record.jsonl: 13 unreadable lines" in h
 
 # 4. one record per session: the last record wins (qwen's own dedupBySessionId)
 u = cab.summarize_qwen_usage("\n".join([rec(BEFORE - timedelta(hours=2), models={MODEL: usage(1, 10, 1, 0)}),
@@ -117,6 +140,19 @@ w = u["windows"]["all_time"]
 assert w["est_cost_usd"] == 0.042968 and w["unpriced_tokens"] == 1010 and w["input_tokens"] == 25755, w
 assert cab._qwen_cost_cell(w) == "$0.0430 + unpriced"
 assert [m["model"] for m in u["models"]] == ["other/model-x", MODEL]
+# an unpriced model at zero tokens is still unpriced: no $0.00, alone or next to a priced model
+zero = {"other/zero-tokens": usage(1, 0, 0, 0)}
+u, t, h = card(rec(BEFORE, models=zero), BEFORE)
+w, row = u["windows"]["all_time"], u["models"][0]
+assert w["est_cost_usd"] is None and w["unpriced_models"] == 1 and w["unpriced_tokens"] == 0, w
+assert row["est_cost_usd"] is None and row["priced"] is False and cab._qwen_cost_cell(row) == "tokens only", row
+assert "$0.00" not in h and "tokens only" in h, h
+u, t, h = card(rec(BEFORE, models=dict(zero, **{MODEL: SMOKE})), BEFORE)
+w = u["windows"]["all_time"]
+assert w["est_cost_usd"] == 0.042968 and w["unpriced_models"] == 1 and cab._qwen_cost_cell(w) == "$0.0430 + unpriced", w
+assert "$0.0430 + unpriced" in h and "other/zero-tokens 0 in / 0 out, tokens only" in h, h
+u = cab.summarize_qwen_usage(rec(BEFORE, models={MODEL: usage(1, 0, 0, 0)}), BEFORE)  # priced, really $0
+assert u["windows"]["all_time"]["est_cost_usd"] == 0.0 and u["windows"]["all_time"]["unpriced_models"] == 0
 u = cab.summarize_qwen_usage(rec(BEFORE, models={OR_KEY: usage(1, 5, 5, 0), "bad id; rm": usage(1, 5, 5, 0)}), BEFORE)
 assert [m["model"] for m in u["models"]] == ["unrecognized model id"] * 2 and u["sessions"] == 1
 assert_private("odd model ids", u)
@@ -135,10 +171,26 @@ u = cab.summarize_qwen_usage("\n".join(lines), AFTER)
 assert (u["trial"]["runs"], u["trial"]["runs_display"], u["trial"]["setup_test_sessions"]) == (2, "2/3", 1), u["trial"]
 assert u["trial"]["status"] == "2/3 runs since 10/25", u["trial"]
 lines += [rec(start + timedelta(hours=h), sid=f"extra{h}") for h in (50, 51, 52)]
-u = cab.summarize_qwen_usage("\n".join(lines), AFTER)
+u = cab.summarize_qwen_usage("\n".join(lines), LATE)
 assert (u["trial"]["runs"], u["trial"]["runs_display"]) == (5, "3/3") and u["trial"]["status"] == "3/3 runs since 10/25; 5 sessions"
+assert u["future_records"] == 0 and u["sessions"] == 6
 u = cab.summarize_qwen_usage(rec(start - timedelta(hours=1)), start)  # midnight PT: started, 0 runs
 assert u["trial"]["status"] == "0/3 runs since 10/25"
+
+# 7b. records dated after the collection time are quarantined: no usage, no trial run, visible flag
+u, t, h = card(rec(start), BEFORE)  # Oct 25 00:00 record read on Oct 24 noon
+assert u["future_records"] == 1 and u["sessions"] == 0 and u["state"] == "unreadable", u
+assert u["windows"]["last_24h"]["sessions"] == 0 and t["runs"] is None, (u, t)
+assert "usage unavailable: no readable records" in h and "1 future-dated record" in h and "1/3" not in h, h
+u, t, h = card("\n".join([rec(BEFORE - timedelta(hours=1), sid="past"), rec(start, sid="future"),
+                          rec(BEFORE, sid="1ms-late", timestamp=int(BEFORE.timestamp()) * 1000 + 1)]), BEFORE)
+assert (u["sessions"], u["future_records"], u["windows"]["last_24h"]["sessions"]) == (1, 2, 1), u
+assert t["runs"] == 0 and t["status"] == "trial starts 10/25 ~3 AM PT; 0/3 runs (not counted: 2 future-dated records)", t
+assert ">DATA<" in h and "2 future-dated records" in h and "<table" in h
+u = cab.summarize_qwen_usage(rec(BEFORE), BEFORE)  # stamped exactly at collection time: counted
+assert u["sessions"] == 1 and u["future_records"] == 0
+u = cab.summarize_qwen_usage(rec(start), start + timedelta(hours=3))  # once the clock passes it, it counts
+assert u["sessions"] == 1 and u["trial"]["runs"] == 1 and u["trial"]["runs_display"] == "1/3"
 
 # 8. collect_qwen end to end: fake binary, temp HOME, fake key — the key never leaves openrouter_key_present
 bindir = TMP / "bin"
@@ -168,7 +220,7 @@ q = cab.collect_qwen()
 assert q["usage"]["sessions"] == 1 and q["usage"]["bad_lines"] == 1 and q["trial"]["setup_test_sessions"] == 1
 html = cab.render_qwen_body(q)
 assert "no runs yet" not in html and "<table" in html and "24,755" in html and "$0.0430" in html, html
-assert "1 setup test session before 10/25" in html and "1 unreadable line(s)" in html
+assert "1 setup test session before 10/25" in html and "Not counted from usage_record.jsonl: 1 unreadable line " in html
 assert "estimated, list price" in html and "Qwen Code system prompt adds ~25k input tokens per request" in html
 assert "Last session 2026-10-24 10:30 PDT" in html
 assert_private("collect_qwen", q)
@@ -227,7 +279,7 @@ for doc, want in (({"model": {"name": MODEL}}, MODEL), ({"model": "qwen3-coder-p
 sp.write_text("{ // comments are not JSON\n}")
 assert cab.qwen_settings_model(sp) is None and cab.qwen_settings_model(TMP / "missing.json") is None
 
-# 10. Kimi config.toml: top-level default_model, [thinking] effort; tomllib and the 3.9 line-scan fallback
+# 10. Kimi config.toml: top-level default_model + [thinking] effort, via tomllib and the 3.9 scanner
 KIMI_TOML = """default_plan_mode = false
 default_model = "kimi-code/k3.1-pro"   # 2026-10-24 default
 telemetry = false
@@ -254,22 +306,62 @@ model = "k3.1-pro"
 support_efforts = [ "low", "high", "max" ]
 default_effort = "max"
 """
-modes = [False] + ([True] if cab.tomllib is not None else [])
+WANT = {"default_model": "kimi-code/k3.1-pro", "effort": "max"}
+NONE = {"default_model": None, "effort": None}
+TAIL = 'default_model = "kimi-code/k3.1-pro"\n[thinking]\neffort = "max"\n'
+VALID = [  # (valid TOML, expected); both parsers must agree on every one
+    (KIMI_TOML, WANT),
+    (KIMI_TOML.replace("\n", "\r\n"), WANT),
+    ('default_model = "kimi-code/k3.1-pro"\n# Example: """multiline"""\n[thinking]\neffort = "max"\n', WANT),
+    ('"default_model" = "kimi-code/k3.1-pro"\n["thinking"]\n\'effort\' = "max"\n', WANT),  # quoted keys
+    ("default_model = 'kimi-code/k3.1-pro' # literal, comment\n[ thinking ]   # spaced header\neffort='max'#tight\n", WANT),
+    ('default_model = "kimi-code/k3\\u002e1-pro"\nthinking.effort = "max"\n', WANT),  # escape; dotted key
+    ('default_model = "kimi-code/k3.1-pro"\nthinking = { enabled = true, effort = "max" }\n', WANT),  # inline table
+    ('default_model = """\nkimi-code/k3.1-pro"""\n[thinking]\neffort = \'\'\'max\'\'\'\n', WANT),  # one-line multi-line strings
+    # look-alike lines inside unrelated values or comments cannot shadow the real keys
+    ('notes = """\ndefault_model = "evil/shadow"\n[thinking]\neffort = "low"\n"""\n' + TAIL, WANT),
+    ("notes = '''\n[thinking]\neffort = 'low'\n'''\n" + TAIL, WANT),
+    ('notes = """an escaped \\""" does not close it\ndefault_model = "evil/shadow"\n"""\n' + TAIL, WANT),
+    ('dirs = [\n  "~/a",  # a comment with a " quote\n  \'[thinking]\',\n  [1, [2]],\n  { effort = "low" },\n]\n'
+     'esc = "a \\" [thinking] \\\\"\nwhen = 1979-05-27 07:32:00Z\n' + TAIL, WANT),
+    ('[thinking]\neffort = "max"\n[thinking.sub]\neffort = "low"\n', dict(NONE, effort="max")),
+    ('[thinking.sub]\nx = 1\n[thinking]\neffort = "max"\n', dict(NONE, effort="max")),  # super-table declared later
+    ('default_model = "kimi-code/k3.1-pro"\n[[hooks]]\n[hooks.sub]\nx = 1\n[[hooks]]\n[hooks.sub]\nx = 2\n'
+     '[thinking]\neffort = "max"\n', WANT),  # a sub-table per array entry
+    ('default_model = "kimi-code/k3.1-pro"\nfruit.apple = "red"\n[fruit.texture]\nsmooth = true\n'
+     '[thinking]\neffort = "max"\n', WANT),  # a sub-table of a dotted-key table
+    (TAIL.replace("[thinking]", '[hooks.sub]\ndefault_model = "evil/in-table"\n[thinking]'), WANT),
+    ('default_model = "kimi-code/k3.1-pro"\n[[thinking]]\neffort = "low"\n', dict(WANT, effort=None)),  # array of tables
+    ('["thinking.x"]\neffort = "low"\n', NONE),  # a quoted key with a dot is one key
+    ('effort = "high"\n[models."kimi-code/k3"]\ndefault_model = "kimi-code/k3"\n', NONE),  # neither key where it counts
+    ('default_model = "bad id; rm -rf /"\n[thinking]\neffort = "MAX!"\n', NONE),  # fail the id / effort regex
+    ('default_model = """kimi-code/k3\nsecond line"""\n', NONE),
+    ("telemetry = false\n", NONE),
+]
+INVALID = [  # both parsers refuse the whole file, so nothing is read from it
+    'default_model = "kimi-code/k3"\ndefault_model = "kimi-code/k3.1-pro"\n',
+    'default_model = "kimi-code/k3.1-pro" junk\n',
+    'default_model = "kimi-code/k3.1-pro\n',
+    'notes = """never closed\n' + TAIL,
+    '[thinking]\neffort = "max"\n[thinking]\nenabled = true\n',
+    "default_model = \n",
+    'thinking.effort = "high"\n[thinking]\nenabled = true\n',  # dotted-key table reopened by a header
+    'thinking = { enabled = true }\n[thinking]\neffort = "max"\n',  # inline table reopened
+    '[thinking]\neffort = "max"\n[[thinking]]\n',  # table, then array of tables
+    '[[thinking]]\n[thinking]\neffort = "max"\n',  # array of tables, then table
+    'default_model = "kimi-code/k3"\ndefault_model.x = 1\n',  # a value extended by a dotted key
+    'thinking.effort.x = 1\nthinking.effort = "max"\n',  # a dotted-key table overwritten by a value
+    '[thinking.effort]\nx = 1\n[thinking]\neffort = "max"\n',  # a header table overwritten by a value
+    'default_model = "kimi-code/k3.1-pro"\r[thinking]\neffort = "max"\n',  # bare CR
+]
+modes = [False] + ([True] if cab.tomllib is not None else [])  # 3.9: the scanner only
 for use_toml in modes:
-    def parse(text):
-        return cab.parse_kimi_config(text, use_tomllib=use_toml)
-
-    assert parse(KIMI_TOML) == {"default_model": "kimi-code/k3.1-pro", "effort": "max"}, (use_toml, parse(KIMI_TOML))
-    assert parse("default_model = 'kimi-code/k3.1-pro'\neffort = \"high\"\n[thinking]\neffort = \"max\"\n") == \
-        {"default_model": "kimi-code/k3.1-pro", "effort": "high"}  # top-level effort wins
-    assert parse('[models."kimi-code/k3"]\ndefault_model = "kimi-code/k3"\n')["default_model"] is None  # not top-level
-    assert parse('default_model = "bad id; rm -rf /"\n[thinking]\neffort = "MAX!"\n') == {"default_model": None, "effort": None}
-    assert parse("telemetry = false\n") == {"default_model": None, "effort": None}
-    dup = parse('default_model = "kimi-code/k3"\ndefault_model = "kimi-code/k3.1-pro"\n')
-    assert dup["default_model"] is None and "config_error" in dup, dup
-assert cab.parse_kimi_config('default_model = """kimi-code/k3"""\n', use_tomllib=False)["default_model"] is None
-if cab.tomllib is not None:
-    assert "config_error" in cab.parse_kimi_config("default_model = \n", use_tomllib=True)
+    for doc, want in VALID:
+        got = cab.parse_kimi_config(doc, use_tomllib=use_toml)
+        assert got == want, (use_toml, doc, got)
+    for doc in INVALID:
+        got = cab.parse_kimi_config(doc, use_tomllib=use_toml)
+        assert got["default_model"] is None and got["effort"] is None and "config_error" in got, (use_toml, doc, got)
 
 kc = cab.read_kimi_config()
 assert kc["default_model"] is None and kc["config_error"] == "~/.kimi-code/config.toml not found", kc

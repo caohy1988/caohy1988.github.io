@@ -358,18 +358,189 @@ def collect_codex() -> dict:
 
 _KIMI_MODEL_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,95}")
 _KIMI_EFFORT = re.compile(r"[a-z][a-z0-9_-]{0,15}")
-# tomllib fallback: a `[table]` header line, and a plain `key = "string"` / `key = 'string'` line.
-_TOML_TABLE = re.compile(r"\[([^\[\]]+)\]\s*(?:#.*)?")
-_TOML_STR_KV = re.compile(r"""([A-Za-z0-9_-]+)\s*=\s*(?:"([^"\\]*)"|'([^']*)')\s*(?:#.*)?""")
+_TOML_BARE_KEY = re.compile(r"[A-Za-z0-9_-]+")
+_TOML_SCALAR = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}[^\s,\]}#]*|[^\s,\]}#]+")  # "date time" or one token
+_TOML_ESCAPES = {"b": "\b", "t": "\t", "n": "\n", "f": "\f", "r": "\r", '"': '"', "\\": "\\"}
+
+
+def _toml_strings(text: str) -> dict:
+    """{key path tuple: str} for every one-line string value of a TOML document — the tomllib
+    fallback for Python 3.9.
+
+    A scanner, not a full validator: it follows [table] headers and bare / quoted / dotted keys, and
+    walks every value (multi-line strings, arrays, inline tables) and comment to its end, so nothing
+    inside one can be read as a key or a header. Keys under [[array]] headers or inside arrays are not
+    collected. Raises on anything it cannot follow and on TOML's redefinition errors: a key or table
+    defined twice, a table defined both by a header and by keys or a value, a bare CR between lines.
+    Not checked (so a broken file may still be read): keys inside [[array]] entries, control characters
+    inside strings and comments, an implicit super-table later declared as [[array]].
+    """
+    found: dict = {}
+    assigned: set = set()  # key paths given a value (inline tables included)
+    implied: set = set()  # tables created by dotted keys
+    tables: set = set()  # [table] headers
+    arrays: set = set()  # [[array]] headers
+    n, i = len(text), 0
+
+    def newline(i):  # length of the LF / CRLF at i, else 0
+        return 1 if text.startswith("\n", i) else 2 if text.startswith("\r\n", i) else 0
+
+    def ws(i, newlines=False):
+        while i < n:
+            if text[i] in " \t":
+                i += 1
+            elif newlines and newline(i):
+                i += newline(i)
+            else:
+                break
+        return i
+
+    def blank(i):  # spaces, newlines and comments
+        i = ws(i, True)
+        while text.startswith("#", i):
+            i = text.find("\n", i)
+            i = n if i < 0 else ws(i, True)
+        return i
+
+    def string(i):  # one-line "basic" or 'literal' string at i -> (value, end)
+        q, out, i = text[i], [], i + 1
+        while i < n and text[i] not in (q, "\n"):
+            if q == '"' and text[i] == "\\":
+                e = text[i + 1:i + 2]
+                if e in ("u", "U"):
+                    k = 4 if e == "u" else 8
+                    out.append(chr(int(text[i + 2:i + 2 + k], 16)))
+                    i += 2 + k
+                else:
+                    out.append(_TOML_ESCAPES[e])
+                    i += 2
+                continue
+            out.append(text[i])
+            i += 1
+        if not text.startswith(q, i):
+            raise ValueError("unterminated string")
+        return "".join(out), i + 1
+
+    def multiline(i):  # """...""" or '''...''' at i -> (text if one plain line else None, end)
+        q, j = text[i], i + 3
+        while True:
+            j = text.find(q * 3, j)
+            if j < 0:
+                raise ValueError("unterminated multi-line string")
+            k = j
+            while q == '"' and text[k - 1] == "\\":
+                k -= 1
+            if (j - k) % 2 == 0:  # not escaped; up to two more quotes still belong to the string
+                end = j + 3
+                while end < j + 5 and text.startswith(q, end):
+                    end += 1
+                body = text[i + 3:end - 3]
+                body = body[2:] if body.startswith("\r\n") else body[1:] if body.startswith("\n") else body
+                return (None if any(c in body for c in "\r\n\\") else body), end
+            j += 1
+
+    def key(i):  # dotted key at i -> (parts, end after trailing spaces)
+        parts = []
+        while True:
+            i = ws(i)
+            if text.startswith(('"', "'"), i):
+                part, i = string(i)
+            else:
+                m = _TOML_BARE_KEY.match(text, i)
+                if not m:
+                    raise ValueError("bad key")
+                part, i = m.group(), m.end()
+            parts.append(part)
+            i = ws(i)
+            if not text.startswith(".", i):
+                return tuple(parts), i
+            i += 1
+
+    def assign(path, base):  # base: length of the enclosing table's path; path None: not tracked
+        if path is None:
+            return
+        for k in range(base + 1, len(path) + 1):
+            p = path[:k]
+            if p in assigned or p in tables or p in arrays or k == len(path) and p in implied:
+                raise ValueError("key or table defined twice")
+        assigned.add(path)
+        implied.update(path[:k] for k in range(base + 1, len(path)))
+
+    def value(i, path):  # walk one value at i -> end; a one-line string is collected under path
+        if text.startswith(('"', "'"), i):
+            s, i = multiline(i) if text.startswith(('"""', "'''"), i) else string(i)
+            if path is not None and s is not None:
+                found[path] = s
+            return i
+        if text.startswith(("[", "{"), i):  # array (nothing collected) or inline table (keys extend path)
+            close = "]" if text[i] == "[" else "}"
+            i = blank(i + 1)
+            while not text.startswith(close, i):
+                if close == "]":
+                    i = value(i, None)
+                else:
+                    sub, i = key(i)
+                    if not text.startswith("=", i):
+                        raise ValueError("bad inline table")
+                    full = None if path is None else path + sub
+                    assign(full, len(path or ()))
+                    i = value(ws(i + 1), full)
+                i = blank(i)
+                if text.startswith(",", i):
+                    i = blank(i + 1)
+                elif not text.startswith(close, i):
+                    raise ValueError("bad array / inline table")
+            return i + 1
+        m = _TOML_SCALAR.match(text, i)
+        if not m:
+            raise ValueError("bad value")
+        return m.end()
+
+    scope = ()  # key path of the current [table]; None inside an [[array]] entry
+    while True:
+        i = blank(i)
+        if i >= n:
+            return found
+        if text.startswith("[", i):
+            array = text.startswith("[[", i)
+            width = 2 if array else 1
+            path, i = key(i + width)
+            if not text.startswith("]" * width, i):
+                raise ValueError("bad header")
+            i += width
+            if path in implied or any(path[:k] in assigned for k in range(1, len(path) + 1)):
+                raise ValueError("table defined twice")
+            if array:
+                if path in tables:
+                    raise ValueError("table defined twice")
+                arrays.add(path)
+                scope = None
+            elif any(path[:k] in arrays for k in range(1, len(path))):
+                scope = None  # a sub-table of an [[array]] entry: neither collected nor tracked
+            elif path in tables or path in arrays:
+                raise ValueError("table defined twice")
+            else:
+                tables.add(path)
+                scope = path
+        else:
+            sub, i = key(i)
+            if not text.startswith("=", i):
+                raise ValueError("expected =")
+            full = None if scope is None else scope + sub
+            assign(full, len(scope or ()))
+            i = value(ws(i + 1), full)
+        i = ws(i)
+        if text.startswith("#", i):
+            i = text.find("\n", i)
+            i = n if i < 0 else i
+        if i < n and not newline(i):
+            raise ValueError("text after a statement")
 
 
 def parse_kimi_config(text: str, use_tomllib: bool = True) -> dict:
-    """default_model (top-level key) and effort (top-level, else the [thinking] table) from kimi-code's
-    config.toml; a value that fails the id / effort regex comes back as None.
-
-    tomllib when available. Otherwise a strict line scan: only plain one-line string values count, each
-    scoped by the last `[table]` header (lines under `[[array]]` headers are ignored); multi-line strings
-    or a duplicate key void the whole file, as tomllib would.
+    """Top-level default_model and the [thinking] table's effort from kimi-code's config.toml; a value
+    that fails the id / effort regex comes back as None. tomllib when available, else _toml_strings();
+    a file either one cannot read sets config_error instead.
     """
     out = {"default_model": None, "effort": None}
     if use_tomllib and tomllib is not None:
@@ -379,29 +550,13 @@ def parse_kimi_config(text: str, use_tomllib: bool = True) -> dict:
             return dict(out, config_error="config.toml is not valid TOML")
         thinking = cfg.get("thinking")
         model = cfg.get("default_model")
-        effort = cfg.get("effort", thinking.get("effort") if isinstance(thinking, dict) else None)
+        effort = thinking.get("effort") if isinstance(thinking, dict) else None
     else:
-        if '"""' in text or "'''" in text:
-            return dict(out, config_error="config.toml has multi-line strings (no tomllib to parse them)")
-        seen: dict = {}
-        scope = ""  # "" = top level; None = under an [[array]] header
-        for line in text.splitlines():
-            s = line.strip()
-            if not s or s.startswith("#"):
-                continue
-            if s.startswith("["):
-                t = _TOML_TABLE.fullmatch(s)
-                scope = t.group(1).strip() if t else None
-                continue
-            kv = _TOML_STR_KV.fullmatch(s)
-            if kv is None or scope is None:
-                continue
-            key = (scope, kv.group(1))
-            if key in seen:
-                return dict(out, config_error="config.toml has a duplicate key")
-            seen[key] = kv.group(2) if kv.group(2) is not None else kv.group(3)
-        model = seen.get(("", "default_model"))
-        effort = seen.get(("", "effort"), seen.get(("thinking", "effort")))
+        try:
+            found = _toml_strings(text)
+        except Exception:
+            return dict(out, config_error="config.toml could not be parsed")
+        model, effort = found.get(("default_model",)), found.get(("thinking", "effort"))
     if isinstance(model, str) and _KIMI_MODEL_ID.fullmatch(model):
         out["default_model"] = model
     if isinstance(effort, str) and _KIMI_EFFORT.fullmatch(effort):
@@ -1457,7 +1612,7 @@ def _qwen_cost(model: str, c: dict) -> float | None:
 
 def _qwen_window(sessions: list) -> dict:
     w = {"sessions": len(sessions), "requests": 0, "input_tokens": 0, "cached_tokens": 0, "output_tokens": 0}
-    cost, priced, unpriced = 0.0, False, 0
+    cost, priced, unpriced, unpriced_tokens = 0.0, False, set(), 0
     for _ts, per_model in sessions:
         for name, c in per_model.items():
             w["requests"] += c["requests"]
@@ -1466,21 +1621,33 @@ def _qwen_window(sessions: list) -> dict:
             w["output_tokens"] += c["outputTokens"]
             usd = _qwen_cost(name, c)
             if usd is None:
-                unpriced += c["inputTokens"] + c["outputTokens"]
+                unpriced.add(name)
+                unpriced_tokens += c["inputTokens"] + c["outputTokens"]
             else:
                 cost, priced = cost + usd, True
-    w["unpriced_tokens"] = unpriced
-    # Cost covers priced models only; a window holding nothing but unpriced tokens has no cost at all.
+    w["unpriced_models"] = len(unpriced)
+    w["unpriced_tokens"] = unpriced_tokens
+    # Cost covers priced models only: with any unpriced model (even at zero tokens) it is null, or just the
+    # priced part when priced models are there too (unpriced_models says so).
     w["est_cost_usd"] = round(cost, 6) if priced or not unpriced else None
     return w
+
+
+def _qwen_excluded(bad: int, future: int) -> str:
+    """'1 unreadable line, 2 future-dated records' — what summarize_qwen_usage left out ('' if nothing)."""
+    parts = [f"{n} {label}{'' if n == 1 else 's'}" for n, label in
+             ((bad, "unreadable line"), (future, "future-dated record")) if n]
+    return ", ".join(parts)
 
 
 def summarize_qwen_usage(text: str, now: datetime) -> dict:
     """Aggregate ~/.qwen/usage_record.jsonl text (one line per finished session).
 
     Mirrors qwen's own reader: version-1 records only, and the last record wins per sessionId. Other
-    non-blank lines are counted in bad_lines and skipped. sessionId is the de-dup key only; neither it
-    nor the project path is returned.
+    non-blank lines are counted in bad_lines; records dated after `now` (the collection time) in
+    future_records. Neither counts toward usage or trial runs. state: "ok" (readable sessions),
+    "no_runs" (no records at all) or "unreadable" (records, none usable), which is never shown as zero
+    usage. sessionId is the de-dup key only; neither it nor the project path is returned.
     """
     sessions: dict = {}
     bad = dups = 0
@@ -1493,8 +1660,11 @@ def summarize_qwen_usage(text: str, now: datetime) -> dict:
             continue
         dups += rec[0] in sessions
         sessions[rec[0]] = rec[1:]
-    picked = list(sessions.values())
     now_ms = int(now.timestamp() * 1000)
+    picked = [s for s in sessions.values() if s[0] <= now_ms]
+    future = len(sessions) - len(picked)
+    excluded = _qwen_excluded(bad, future)
+    state = "ok" if picked else "unreadable" if excluded else "no_runs"
     windows = {
         "last_24h": _qwen_window([s for s in picked if s[0] >= now_ms - 86_400_000]),
         "last_7d": _qwen_window([s for s in picked if s[0] >= now_ms - 7 * 86_400_000]),
@@ -1510,31 +1680,33 @@ def summarize_qwen_usage(text: str, now: datetime) -> dict:
         w["model"] = _qwen_model_id(name) or "unrecognized model id"
         w["priced"] = name in QWEN_PRICES
         by_model.append(w)
-    start_ms = int(QWEN_TRIAL_START.timestamp() * 1000)
-    runs = sum(1 for ts, _ in picked if ts >= start_ms)
-    shown = f"{min(runs, QWEN_TRIAL_RUNS)}/{QWEN_TRIAL_RUNS}"
-    if now < QWEN_TRIAL_START:
-        status = f"trial starts 10/25 ~3 AM PT; {shown} runs"
+    trial = {"seat": "trial", "window": "nightly audit 2026-10-25 to 2026-10-27", "starts_pt": iso_pt(QWEN_TRIAL_START)}
+    if state == "unreadable":
+        trial.update(runs=None, runs_display=None, setup_test_sessions=None,
+                     status=f"trial status unavailable: no readable records ({excluded})")
     else:
-        status = f"{shown} runs since 10/25"
-        if runs > QWEN_TRIAL_RUNS:
-            status += f"; {runs} sessions"
+        start_ms = int(QWEN_TRIAL_START.timestamp() * 1000)
+        runs = sum(1 for ts, _ in picked if ts >= start_ms)
+        shown = f"{min(runs, QWEN_TRIAL_RUNS)}/{QWEN_TRIAL_RUNS}"
+        if now < QWEN_TRIAL_START:
+            status = f"trial starts 10/25 ~3 AM PT; {shown} runs"
+        else:
+            status = f"{shown} runs since 10/25"
+            if runs > QWEN_TRIAL_RUNS:
+                status += f"; {runs} sessions"
+        if excluded:
+            status += f" (not counted: {excluded})"
+        trial.update(runs=runs, runs_display=shown, setup_test_sessions=len(picked) - runs, status=status)
     return {
+        "state": state,
         "sessions": len(picked),
         "bad_lines": bad,
+        "future_records": future,
         "duplicate_records": dups,
         "last_session_pt": ts_to_pt(max(s[0] for s in picked) / 1000) if picked else None,
         "windows": windows,
         "models": by_model,
-        "trial": {
-            "seat": "trial",
-            "window": "nightly audit 2026-10-25 to 2026-10-27",
-            "starts_pt": iso_pt(QWEN_TRIAL_START),
-            "runs": runs,
-            "runs_display": shown,
-            "setup_test_sessions": len(picked) - runs,
-            "status": status,
-        },
+        "trial": trial,
     }
 
 
@@ -2064,12 +2236,13 @@ def _fmt_usd(v) -> str:
 
 def _qwen_cost_cell(w: dict) -> str:
     if w.get("est_cost_usd") is None:
-        return "tokens only" if w.get("unpriced_tokens") else "—"
-    return _fmt_usd(w["est_cost_usd"]) + (" + unpriced" if w.get("unpriced_tokens") else "")
+        return "tokens only" if w.get("unpriced_models") else "—"
+    return _fmt_usd(w["est_cost_usd"]) + (" + unpriced" if w.get("unpriced_models") else "")
 
 
 def render_qwen_body(qwen: dict) -> str:
-    """Qwen Code card — install/auth chip, trial runs, usage table (24h / 7d / all time) or "no runs yet"."""
+    """Qwen Code card — install/auth chip, data-quality banner, trial runs, and the usage table
+    (24h / 7d / all time), "no runs yet" or "usage unavailable"."""
     usage = qwen.get("usage")
     trial = qwen.get("trial") or {}
     tone = "ok" if qwen.get("ok") else "bad"
@@ -2091,8 +2264,18 @@ def render_qwen_body(qwen: dict) -> str:
         {setup}
       </div>"""
 
+    quality = ""
+    excluded = _qwen_excluded(usage.get("bad_lines") or 0, usage.get("future_records") or 0) if isinstance(usage, dict) else ""
+    if excluded:  # shown in every state: skipped records may hide usage or trial runs
+        quality = (
+            '<p class="stale-banner" role="status"><span class="status-chip warn">DATA</span> '
+            f"Not counted from usage_record.jsonl: {esc(excluded)} (future-dated = timestamp after this refresh). "
+            "Totals may be incomplete.</p>"
+        )
     if not isinstance(usage, dict):
         usage_html = '<p class="muted">Usage unavailable (see error above).</p>'
+    elif usage.get("state") == "unreadable" or (not usage.get("sessions") and excluded):
+        usage_html = '<div class="metric"><div class="metric-label">Usage</div><p class="pill">usage unavailable: no readable records</p></div>'
     elif not usage.get("sessions"):
         usage_html = '<div class="metric"><div class="metric-label">Usage</div><p class="pill">no runs yet</p></div>'
     else:
@@ -2118,9 +2301,6 @@ def render_qwen_body(qwen: dict) -> str:
                 for m in models
             )
             per_model = f'<p class="muted">All time by model: {items}</p>'
-        skipped = ""
-        if usage.get("bad_lines"):
-            skipped = f'<p class="muted">{esc(usage["bad_lines"])} unreadable line(s) in usage_record.jsonl skipped.</p>'
         usage_html = f"""
       <div class="table-wrap">
         <table class="bots">
@@ -2129,8 +2309,7 @@ def render_qwen_body(qwen: dict) -> str:
         </table>
       </div>
       <div class="metric-reset">Last session {esc(usage.get('last_session_pt') or '—')}</div>
-      {per_model}
-      {skipped}"""
+      {per_model}"""
 
     return f"""
       <p class="pill">CLI <strong>{esc(qwen.get('cli_version') or '—')}</strong> · provider <strong>{esc(qwen.get('provider') or '—')}</strong> · model <strong>{esc(qwen.get('model') or '—')}</strong></p>
@@ -2140,6 +2319,7 @@ def render_qwen_body(qwen: dict) -> str:
         <div class="metric-reset">auth {esc(qwen.get('auth_mechanism') or '—')} · OpenRouter PAYG (no plan bars)</div>
       </div>
       {err}
+      {quality}
       {trial_html}
       {usage_html}
       <p class="muted">{esc(qwen.get('note') or QWEN_NOTE)}.</p>
@@ -2777,7 +2957,7 @@ def main() -> None:
     q = snap.get("qwen") or {}
     qu = q.get("usage") or {}
     print(
-        f"Qwen: ok={q.get('ok')} ver={q.get('cli_version')} model={q.get('model')} sessions={qu.get('sessions')} "
+        f"Qwen: ok={q.get('ok')} ver={q.get('cli_version')} model={q.get('model')} state={qu.get('state')} sessions={qu.get('sessions')} "
         f"cost_all={((qu.get('windows') or {}).get('all_time') or {}).get('est_cost_usd')} trial={(q.get('trial') or {}).get('status')}"
     )
     g = snap["grok"]
