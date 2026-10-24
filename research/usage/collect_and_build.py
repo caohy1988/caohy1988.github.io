@@ -14,6 +14,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+try:
+    import tomllib  # Python 3.11+
+except ImportError:  # /usr/bin/python3 on the Mac is 3.9 — parse_kimi_config() falls back to a line scan
+    tomllib = None
+
 HERE = Path(__file__).resolve().parent
 PT = ZoneInfo("America/Los_Angeles")
 HUB_USAGE = Path.home() / "caohy1988.github.io/research/usage"
@@ -26,6 +31,7 @@ MUSE_BIN = Path.home() / ".local/bin/muse"
 MUSE_AUTH = Path.home() / ".config/muse/auth.json"
 DSH_BIN = Path.home() / ".local/bin/dsh"
 DSH_DIR = Path.home() / ".dsh"
+QWEN_BIN = Path("/usr/local/bin/qwen")
 GROK_CACHE = HERE / "grok_box_activity.json"
 
 # Box collection + freshness logic is shared with the box-side collector script.
@@ -350,6 +356,72 @@ def collect_codex() -> dict:
     return out
 
 
+_KIMI_MODEL_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,95}")
+_KIMI_EFFORT = re.compile(r"[a-z][a-z0-9_-]{0,15}")
+# tomllib fallback: a `[table]` header line, and a plain `key = "string"` / `key = 'string'` line.
+_TOML_TABLE = re.compile(r"\[([^\[\]]+)\]\s*(?:#.*)?")
+_TOML_STR_KV = re.compile(r"""([A-Za-z0-9_-]+)\s*=\s*(?:"([^"\\]*)"|'([^']*)')\s*(?:#.*)?""")
+
+
+def parse_kimi_config(text: str, use_tomllib: bool = True) -> dict:
+    """default_model (top-level key) and effort (top-level, else the [thinking] table) from kimi-code's
+    config.toml; a value that fails the id / effort regex comes back as None.
+
+    tomllib when available. Otherwise a strict line scan: only plain one-line string values count, each
+    scoped by the last `[table]` header (lines under `[[array]]` headers are ignored); multi-line strings
+    or a duplicate key void the whole file, as tomllib would.
+    """
+    out = {"default_model": None, "effort": None}
+    if use_tomllib and tomllib is not None:
+        try:
+            cfg = tomllib.loads(text)
+        except Exception:
+            return dict(out, config_error="config.toml is not valid TOML")
+        thinking = cfg.get("thinking")
+        model = cfg.get("default_model")
+        effort = cfg.get("effort", thinking.get("effort") if isinstance(thinking, dict) else None)
+    else:
+        if '"""' in text or "'''" in text:
+            return dict(out, config_error="config.toml has multi-line strings (no tomllib to parse them)")
+        seen: dict = {}
+        scope = ""  # "" = top level; None = under an [[array]] header
+        for line in text.splitlines():
+            s = line.strip()
+            if not s or s.startswith("#"):
+                continue
+            if s.startswith("["):
+                t = _TOML_TABLE.fullmatch(s)
+                scope = t.group(1).strip() if t else None
+                continue
+            kv = _TOML_STR_KV.fullmatch(s)
+            if kv is None or scope is None:
+                continue
+            key = (scope, kv.group(1))
+            if key in seen:
+                return dict(out, config_error="config.toml has a duplicate key")
+            seen[key] = kv.group(2) if kv.group(2) is not None else kv.group(3)
+        model = seen.get(("", "default_model"))
+        effort = seen.get(("", "effort"), seen.get(("thinking", "effort")))
+    if isinstance(model, str) and _KIMI_MODEL_ID.fullmatch(model):
+        out["default_model"] = model
+    if isinstance(effort, str) and _KIMI_EFFORT.fullmatch(effort):
+        out["effort"] = effort
+    return out
+
+
+def read_kimi_config() -> dict:
+    """Kimi default model + effort from ~/.kimi-code/config.toml (~ resolved per call, like collect_kimi)."""
+    out = {"default_model": None, "effort": None, "config_source": "~/.kimi-code/config.toml"}
+    try:
+        text = (Path.home() / ".kimi-code" / "config.toml").read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return dict(out, config_error="~/.kimi-code/config.toml not found")
+    except Exception:
+        return dict(out, config_error="~/.kimi-code/config.toml unreadable")
+    out.update(parse_kimi_config(text))
+    return out
+
+
 def collect_kimi() -> dict:
     """Prefer live Kimi Code /usages API; fall back to vault DONE_BLOCKED markers."""
     out: dict = {
@@ -364,6 +436,7 @@ def collect_kimi() -> dict:
         "bars": [],
         "evidence": [],
     }
+    out.update(read_kimi_config())  # default model + effort ride along on every status path below
 
     # --- Live API (Bearer from ~/.kimi-code/credentials/kimi-code.json) ---
     cred_path = Path.home() / ".kimi-code" / "credentials" / "kimi-code.json"
@@ -1305,6 +1378,236 @@ def collect_dsh() -> dict:
     return out
 
 
+# OpenRouter list prices, USD per 1M tokens — estimates only; models not listed show tokens, no cost.
+QWEN_PRICES = {"qwen/qwen3.8-max-0902": {"input": 2.00, "cached_input": 0.25, "output": 6.00}}
+QWEN_TRIAL_START = datetime(2026, 10, 25, tzinfo=PT)  # nightly-audit trial 10/25–10/27; earlier = setup tests
+QWEN_TRIAL_RUNS = 3
+QWEN_NOTE = "Qwen Code system prompt adds ~25k input tokens per request"
+_QWEN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}(?:/[A-Za-z0-9][A-Za-z0-9._:-]{0,95})?")
+_QWEN_VERSION = re.compile(r"v?(\d{1,4}\.\d{1,4}\.\d{1,6}(?:-[0-9A-Za-z.]{1,32})?)")
+_QWEN_COUNTERS = ("requests", "inputTokens", "outputTokens", "cachedTokens")
+_OPENROUTER_KEY_LINE = re.compile(rb"""\s*(?:export\s+)?OPENROUTER_API_KEY\s*=\s*['"]?[^\s'"#]""")
+
+
+def _qwen_model_id(v) -> str | None:
+    """A publishable provider/model id, else None (also refuses anything shaped like an API key)."""
+    if isinstance(v, str) and _QWEN_ID.fullmatch(v) and not v.lower().startswith("sk-"):
+        return v
+    return None
+
+
+def qwen_settings_model(path: Path) -> str | None:
+    """model.name from ~/.qwen/settings.json (or a bare string `model`, the older layout)."""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    model = data.get("model") if isinstance(data, dict) else None
+    if isinstance(model, dict):
+        model = model.get("name")
+    return _qwen_model_id(model)
+
+
+def openrouter_key_present(path: Path) -> bool:
+    """True if the dotenv file gives OPENROUTER_API_KEY a non-empty value. Only this bool leaves here."""
+    try:
+        with path.open("rb") as fh:
+            return any(_OPENROUTER_KEY_LINE.match(line) for line in fh)
+    except OSError:
+        return False
+
+
+def _qwen_record(line: str):
+    """One usage_record.jsonl line -> (sessionId, end-time ms, {model: counters}), or None if unusable."""
+    try:
+        o = json.loads(line)
+    except Exception:
+        return None
+    if not isinstance(o, dict) or o.get("version") != 1:
+        return None
+    sid, ts, models = o.get("sessionId"), o.get("timestamp"), o.get("models")
+    if not (isinstance(sid, str) and sid and isinstance(ts, int) and not isinstance(ts, bool) and ts > 0):
+        return None
+    if not isinstance(models, dict):
+        return None
+    try:
+        datetime.fromtimestamp(ts / 1000, tz=timezone.utc)
+    except (OverflowError, OSError, ValueError):
+        return None
+    per_model = {}
+    for name, m in models.items():
+        if not isinstance(m, dict):
+            return None
+        counts = {k: m.get(k, 0) for k in _QWEN_COUNTERS}  # a missing counter is 0
+        if not all(isinstance(v, int) and not isinstance(v, bool) and v >= 0 for v in counts.values()):
+            return None
+        per_model[name] = counts
+    return sid, ts, per_model
+
+
+def _qwen_cost(model: str, c: dict) -> float | None:
+    """Estimated USD at list price; None when the model has no price. thoughtsTokens are not added:
+    qwen's records have totalTokens == inputTokens + outputTokens, so thoughts sit inside outputTokens."""
+    p = QWEN_PRICES.get(model)
+    if p is None:
+        return None
+    uncached = max(0, c["inputTokens"] - c["cachedTokens"])
+    return (uncached * p["input"] + c["cachedTokens"] * p["cached_input"] + c["outputTokens"] * p["output"]) / 1e6
+
+
+def _qwen_window(sessions: list) -> dict:
+    w = {"sessions": len(sessions), "requests": 0, "input_tokens": 0, "cached_tokens": 0, "output_tokens": 0}
+    cost, priced, unpriced = 0.0, False, 0
+    for _ts, per_model in sessions:
+        for name, c in per_model.items():
+            w["requests"] += c["requests"]
+            w["input_tokens"] += c["inputTokens"]
+            w["cached_tokens"] += c["cachedTokens"]
+            w["output_tokens"] += c["outputTokens"]
+            usd = _qwen_cost(name, c)
+            if usd is None:
+                unpriced += c["inputTokens"] + c["outputTokens"]
+            else:
+                cost, priced = cost + usd, True
+    w["unpriced_tokens"] = unpriced
+    # Cost covers priced models only; a window holding nothing but unpriced tokens has no cost at all.
+    w["est_cost_usd"] = round(cost, 6) if priced or not unpriced else None
+    return w
+
+
+def summarize_qwen_usage(text: str, now: datetime) -> dict:
+    """Aggregate ~/.qwen/usage_record.jsonl text (one line per finished session).
+
+    Mirrors qwen's own reader: version-1 records only, and the last record wins per sessionId. Other
+    non-blank lines are counted in bad_lines and skipped. sessionId is the de-dup key only; neither it
+    nor the project path is returned.
+    """
+    sessions: dict = {}
+    bad = dups = 0
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        rec = _qwen_record(line)
+        if rec is None:
+            bad += 1
+            continue
+        dups += rec[0] in sessions
+        sessions[rec[0]] = rec[1:]
+    picked = list(sessions.values())
+    now_ms = int(now.timestamp() * 1000)
+    windows = {
+        "last_24h": _qwen_window([s for s in picked if s[0] >= now_ms - 86_400_000]),
+        "last_7d": _qwen_window([s for s in picked if s[0] >= now_ms - 7 * 86_400_000]),
+        "all_time": _qwen_window(picked),
+    }
+    models: dict = {}
+    for ts, per_model in picked:
+        for name, c in per_model.items():
+            models.setdefault(name, []).append((ts, {name: c}))
+    by_model = []
+    for name, rows in sorted(models.items()):
+        w = _qwen_window(rows)
+        w["model"] = _qwen_model_id(name) or "unrecognized model id"
+        w["priced"] = name in QWEN_PRICES
+        by_model.append(w)
+    start_ms = int(QWEN_TRIAL_START.timestamp() * 1000)
+    runs = sum(1 for ts, _ in picked if ts >= start_ms)
+    shown = f"{min(runs, QWEN_TRIAL_RUNS)}/{QWEN_TRIAL_RUNS}"
+    if now < QWEN_TRIAL_START:
+        status = f"trial starts 10/25 ~3 AM PT; {shown} runs"
+    else:
+        status = f"{shown} runs since 10/25"
+        if runs > QWEN_TRIAL_RUNS:
+            status += f"; {runs} sessions"
+    return {
+        "sessions": len(picked),
+        "bad_lines": bad,
+        "duplicate_records": dups,
+        "last_session_pt": ts_to_pt(max(s[0] for s in picked) / 1000) if picked else None,
+        "windows": windows,
+        "models": by_model,
+        "trial": {
+            "seat": "trial",
+            "window": "nightly audit 2026-10-25 to 2026-10-27",
+            "starts_pt": iso_pt(QWEN_TRIAL_START),
+            "runs": runs,
+            "runs_display": shown,
+            "setup_test_sessions": len(picked) - runs,
+            "status": status,
+        },
+    }
+
+
+def collect_qwen() -> dict:
+    """Qwen Code trial seat — version, model, OpenRouter key presence, and usage + estimated cost from
+    ~/.qwen/usage_record.jsonl. OpenRouter PAYG: no plan bars."""
+    out: dict = {
+        "ok": False,
+        "source": "qwen --version + ~/.qwen/settings.json + ~/.qwen/usage_record.jsonl + key presence",
+        "bars": [],
+        "product": "Qwen Code",
+        "seat": "trial",
+        "provider": "OpenRouter",
+        "model": None,
+        "cli_version": None,
+        "auth_ok": False,
+        "auth_mechanism": None,
+        "note": QWEN_NOTE,
+        "pricing": {
+            "label": "estimated, list price",
+            "usd_per_million_tokens": QWEN_PRICES,
+            "uncached_input": "inputTokens - cachedTokens (floor 0)",
+        },
+    }
+    errors = []
+    try:
+        home = Path.home()  # resolved per call, like collect_kimi (tests run with a temp HOME)
+        if not QWEN_BIN.exists():
+            errors.append("qwen binary not found")
+        else:
+            out["binary"] = str(QWEN_BIN)
+            try:
+                proc = subprocess.run(
+                    [str(QWEN_BIN), "--version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=20,
+                    stdin=subprocess.DEVNULL,
+                    env={**os.environ, "PATH": "/usr/local/bin:" + os.environ.get("PATH", "")},  # env node
+                )
+                lines = (proc.stdout or "").strip().splitlines()
+                m = _QWEN_VERSION.fullmatch(lines[0].strip()) if lines else None
+                if m:
+                    out["cli_version"] = m.group(1)
+                else:  # never echo unexpected output into the public page
+                    errors.append(f"qwen --version printed no version (exit {proc.returncode})")
+            except Exception as e:
+                errors.append(safe_error(e))
+        out["model"] = qwen_settings_model(home / ".qwen" / "settings.json")
+        # ~/.local/bin/qwen-or sources ~/.dsh/.env at launch; presence check only, the value is never read out.
+        out["auth_ok"] = openrouter_key_present(home / ".dsh" / ".env")
+        if out["auth_ok"]:
+            out["auth_mechanism"] = "~/.dsh/.env via qwen-or"
+        else:
+            errors.append("OpenRouter key missing — qwen-or sources OPENROUTER_API_KEY from ~/.dsh/.env")
+        try:
+            text = (home / ".qwen" / "usage_record.jsonl").read_text(encoding="utf-8", errors="replace")
+        except FileNotFoundError:
+            text = ""  # no finished session yet
+        except Exception as e:
+            text = None  # unreadable is not "no runs": leave usage/trial unset so the card says so
+            errors.append(f"usage_record.jsonl unreadable: {safe_error(e)}")
+        if text is not None:
+            out["usage"] = summarize_qwen_usage(text, now_pt())
+            out["trial"] = out["usage"].pop("trial")
+        out["ok"] = bool(out["cli_version"]) and out["auth_ok"]
+    except Exception as e:
+        errors.append(safe_error(e))
+    if errors:
+        out["error"] = "; ".join(errors)
+    return out
+
+
 
 
 
@@ -1749,6 +2052,101 @@ def render_grok_body(grok: dict) -> str:
     return grok_body
 
 
+def _fmt_int(n) -> str:
+    return f"{n:,}" if isinstance(n, int) and not isinstance(n, bool) else "—"
+
+
+def _fmt_usd(v) -> str:
+    if not isinstance(v, (int, float)) or isinstance(v, bool):
+        return "—"
+    return f"${v:,.2f}" if v == 0 or v >= 1 else f"${v:.4f}"
+
+
+def _qwen_cost_cell(w: dict) -> str:
+    if w.get("est_cost_usd") is None:
+        return "tokens only" if w.get("unpriced_tokens") else "—"
+    return _fmt_usd(w["est_cost_usd"]) + (" + unpriced" if w.get("unpriced_tokens") else "")
+
+
+def render_qwen_body(qwen: dict) -> str:
+    """Qwen Code card — install/auth chip, trial runs, usage table (24h / 7d / all time) or "no runs yet"."""
+    usage = qwen.get("usage")
+    trial = qwen.get("trial") or {}
+    tone = "ok" if qwen.get("ok") else "bad"
+    chip = "AUTH OK" if qwen.get("ok") else "AUTH / INSTALL"
+    err = f'<p class="err">{esc(qwen.get("error"))}</p>' if qwen.get("error") else ""
+
+    setup_n = trial.get("setup_test_sessions") or 0
+    setup = ""
+    if setup_n:
+        setup = (
+            f'<div class="metric-reset">{esc(setup_n)} setup test session{"" if setup_n == 1 else "s"} '
+            "before 10/25 (not trial runs)</div>"
+        )
+    trial_html = f"""
+      <div class="metric">
+        <div class="metric-label">Trial seat · nightly audit 10/25–10/27</div>
+        <div class="status-chip {'ok' if (trial.get('runs') or 0) >= QWEN_TRIAL_RUNS else 'unk'}">TRIAL {esc(trial.get('runs_display') or '—')}</div>
+        <div class="metric-reset">{esc(trial.get('status') or 'trial status unavailable')}</div>
+        {setup}
+      </div>"""
+
+    if not isinstance(usage, dict):
+        usage_html = '<p class="muted">Usage unavailable (see error above).</p>'
+    elif not usage.get("sessions"):
+        usage_html = '<div class="metric"><div class="metric-label">Usage</div><p class="pill">no runs yet</p></div>'
+    else:
+        wins = usage.get("windows") or {}
+        cols = [wins.get(k) or {} for k in ("last_24h", "last_7d", "all_time")]
+        rows = []
+        for label, cell in (
+            ("Sessions", lambda w: _fmt_int(w.get("sessions"))),
+            ("Requests", lambda w: _fmt_int(w.get("requests"))),
+            ("Input tokens", lambda w: _fmt_int(w.get("input_tokens"))),
+            ("Cached input", lambda w: _fmt_int(w.get("cached_tokens"))),
+            ("Output tokens", lambda w: _fmt_int(w.get("output_tokens"))),
+            ("Est. cost*", _qwen_cost_cell),
+        ):
+            tds = "".join(f'<td class="num">{esc(cell(w))}</td>' for w in cols)
+            rows.append(f"<tr><td>{esc(label)}</td>{tds}</tr>")
+        models = usage.get("models") or []
+        per_model = ""
+        if len(models) > 1 or any(not m.get("priced") for m in models):
+            items = " · ".join(
+                f"{esc(m.get('model'))} {esc(_fmt_int(m.get('input_tokens')))} in / "
+                f"{esc(_fmt_int(m.get('output_tokens')))} out, {esc(_qwen_cost_cell(m))}"
+                for m in models
+            )
+            per_model = f'<p class="muted">All time by model: {items}</p>'
+        skipped = ""
+        if usage.get("bad_lines"):
+            skipped = f'<p class="muted">{esc(usage["bad_lines"])} unreadable line(s) in usage_record.jsonl skipped.</p>'
+        usage_html = f"""
+      <div class="table-wrap">
+        <table class="bots">
+          <thead><tr><th>Usage</th><th>24h</th><th>7d</th><th>All time</th></tr></thead>
+          <tbody>{''.join(rows)}</tbody>
+        </table>
+      </div>
+      <div class="metric-reset">Last session {esc(usage.get('last_session_pt') or '—')}</div>
+      {per_model}
+      {skipped}"""
+
+    return f"""
+      <p class="pill">CLI <strong>{esc(qwen.get('cli_version') or '—')}</strong> · provider <strong>{esc(qwen.get('provider') or '—')}</strong> · model <strong>{esc(qwen.get('model') or '—')}</strong></p>
+      <div class="metric">
+        <div class="metric-label">Qwen Code status</div>
+        <div class="status-chip {tone}">{esc(chip)}</div>
+        <div class="metric-reset">auth {esc(qwen.get('auth_mechanism') or '—')} · OpenRouter PAYG (no plan bars)</div>
+      </div>
+      {err}
+      {trial_html}
+      {usage_html}
+      <p class="muted">{esc(qwen.get('note') or QWEN_NOTE)}.</p>
+      <p class="muted">* Est. cost is estimated, list price: $2/M uncached input, $0.25/M cached input, $6/M output for qwen/qwen3.8-max-0902; other models show tokens only. Source: <code>~/.qwen/usage_record.jsonl</code>, one line per finished session.</p>
+    """
+
+
 def render_html(snap: dict) -> str:
     refreshed = snap["refreshed_at"]
     claude = snap["claude"]
@@ -1757,6 +2155,7 @@ def render_html(snap: dict) -> str:
     agy = snap["agy"]
     muse = snap.get("muse") or {}
     dsh = snap.get("dsh") or {}
+    qwen = snap.get("qwen") or {}
     routine_proxy = snap.get("routine_proxy") or {}
     grok = snap["grok"]
 
@@ -1806,11 +2205,12 @@ def render_html(snap: dict) -> str:
     if kimi.get("last_checked"):
         kimi_extra += f'<div class="metric-reset">Last checked {esc(kimi.get("last_checked"))}</div>'
     kimi_body = f"""
+      <p class="pill">model <strong>{esc(kimi.get('default_model') or '—')}</strong> · effort <strong>{esc(kimi.get('effort') or '—')}</strong></p>
       <div class="status-chip {tone}">{esc(chip)}</div>
       <p class="kimi-detail">{esc(kimi.get('detail') or '')}</p>
       {kimi_bars}
       {kimi_extra}
-      <p class="muted">Bars from live <code>/usages</code> API (used % = 100 − remaining). Vault markers are fallback only.</p>
+      <p class="muted">Bars from live <code>/usages</code> API (used % = 100 − remaining). Vault markers are fallback only. Model + effort from <code>~/.kimi-code/config.toml</code>.</p>
     """
 
     # Agy
@@ -1880,6 +2280,8 @@ def render_html(snap: dict) -> str:
       {dsh_bars}
       <p class="muted">{esc(dsh.get('detail') or 'DeepSeek Harness via OpenRouter.')}</p>
     """
+
+    qwen_body = render_qwen_body(qwen)
 
     grok_body = render_grok_body(grok)
 
@@ -2245,7 +2647,7 @@ def render_html(snap: dict) -> str:
     <header class="hero">
       <p class="kicker">Mac CLIs · Grok activity</p>
       <h1>Agent model usage</h1>
-      <p class="lede">At-a-glance quotas for Claude/Fable, Codex/Astra, Kimi, Agy, Muse Spark, DSH, Grok activity share, plus a routine fires/week proxy (not dollars).</p>
+      <p class="lede">At-a-glance quotas for Claude/Fable, Codex/Astra, Kimi, Agy, Muse Spark, DSH, Qwen Code (trial), Grok activity share, plus a routine fires/week proxy (not dollars).</p>
       <div class="meta">
         <span>Last refreshed <strong>{esc(refreshed)}</strong></span>
         <span>Timezone <strong>America/Los_Angeles</strong></span>
@@ -2294,6 +2696,12 @@ def render_html(snap: dict) -> str:
         {dsh_body}
       </section>
 
+      <section class="card" id="qwen">
+        <h2>Qwen Code</h2>
+        <p class="sub">qwen --version · OpenRouter Qwen3.8-Max</p>
+        {qwen_body}
+      </section>
+
       <section class="card wide" id="grok">
         <h2>Overall Grok Bots</h2>
         <p class="sub">activity from local transcripts · not plan dollars</p>
@@ -2332,6 +2740,7 @@ def main() -> None:
         "agy": collect_agy(),
         "muse": collect_muse(),
         "dsh": collect_dsh(),
+        "qwen": collect_qwen(),
         "routine_proxy": collect_routine_proxy(),
         "grok": collect_grok(),
     }
@@ -2358,13 +2767,19 @@ def main() -> None:
     print(f"Wrote {HERE / 'index.html'}")
     print(f"Refreshed at {snap['refreshed_at']}")
     k = snap["kimi"]
-    print(f"Kimi: {k.get('status')} chip={k.get('chip')} pct={k.get('used_percent')}")
+    print(f"Kimi: {k.get('status')} chip={k.get('chip')} pct={k.get('used_percent')} model={k.get('default_model')} effort={k.get('effort')}")
     a = snap["agy"]
     print(f"Agy: ssp={ (a.get('social_superpowers') or {}).get('state') } health={ (a.get('collect_health') or {}).get('chip') }")
     m = snap.get("muse") or {}
     print(f"Muse: ok={m.get('ok')} ver={m.get('cli_version')} model={m.get('model')}")
     d = snap.get("dsh") or {}
     print(f"DSH: ok={d.get('ok')} ver={d.get('cli_version')} model={d.get('model')} provider={d.get('provider')}")
+    q = snap.get("qwen") or {}
+    qu = q.get("usage") or {}
+    print(
+        f"Qwen: ok={q.get('ok')} ver={q.get('cli_version')} model={q.get('model')} sessions={qu.get('sessions')} "
+        f"cost_all={((qu.get('windows') or {}).get('all_time') or {}).get('est_cost_usd')} trial={(q.get('trial') or {}).get('status')}"
+    )
     g = snap["grok"]
     print(f"Grok: bots={len(g.get('bots') or [])} fleet={g.get('fleet_messages_total')} source={g.get('source')} stale={g.get('stale')}")
     rp = snap.get("routine_proxy") or {}

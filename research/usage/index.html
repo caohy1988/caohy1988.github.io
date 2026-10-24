@@ -113,24 +113,6 @@
       color: var(--ink-soft);
       margin-top: 4px;
     }
-    .metric-pace {
-      font-size: 0.8rem;
-      color: var(--ink-soft);
-      margin-top: 2px;
-    }
-    .metric-pace.na { color: var(--ink-faint); }
-    .metric-pace.marked { color: var(--bad); font-weight: 600; }
-    .card.pace-marked { border-color: #fecaca; box-shadow: inset 4px 0 0 var(--bad); }
-    .pace-flag {
-      margin: 0 0 12px;
-      padding: 8px 10px;
-      border: 1px solid #fecaca;
-      border-left: 4px solid var(--bad);
-      border-radius: 8px;
-      background: #fef2f2;
-      color: #991b1b;
-      font-size: 0.86rem;
-    }
     .kimi-detail { margin: 0 0 10px; font-size: 0.95rem; }
     .bar-row {
       display: grid;
@@ -349,64 +331,57 @@
     <header class="hero">
       <p class="kicker">Mac CLIs · Grok activity</p>
       <h1>Agent model usage</h1>
-      <p class="lede">At-a-glance quotas for Claude/Fable, Codex/Astra, Kimi, Agy, Muse Spark, DSH, Grok activity share, plus a routine fires/week proxy (not dollars).</p>
+      <p class="lede">At-a-glance quotas for Claude/Fable, Codex/Astra, Kimi, Agy, Muse Spark, DSH, Qwen Code (trial), Grok activity share, plus a routine fires/week proxy (not dollars).</p>
       <div class="meta">
-        <span>Last refreshed <strong>2026-10-24 10:48:56 PDT</strong></span>
+        <span>Last refreshed <strong>2026-10-24 12:13:27 PDT</strong></span>
         <span>Timezone <strong>America/Los_Angeles</strong></span>
       </div>
       <div class="legend">
         <span><i class="ok"></i>&lt;70% green</span>
         <span><i class="warn"></i>70–89% amber</span>
         <span><i class="bad"></i>≥90% / blocked red</span>
-        <span>pacing = published used % vs share of the window elapsed (not dollars or tokens)</span>
-        <span>⚑ pacing mark: usage &gt;15 pts ahead of the window clock or past 90% used · report only</span>
       </div>
     </header>
 
     <div class="grid">
-      <section class="card pace-marked" id="claude">
+      <section class="card" id="claude">
         <h2>Claude / Fable</h2>
         <p class="sub">claude -p /usage</p>
-        <p class="pace-flag" role="status">⚑ <strong>Pacing mark</strong> (report only): Current week (all models) — more than 15 pts ahead of the clock</p>
         
         <div class="metric">
           <div class="metric-label">Current session</div>
           
     <div class="bar-row">
-      <div class="bar-track"><div class="bar-fill ok" style="width:11.0%"></div></div>
-      <div class="bar-pct ok">11%</div>
+      <div class="bar-track"><div class="bar-fill ok" style="width:32.0%"></div></div>
+      <div class="bar-pct ok">32%</div>
     </div>
-          <div class="metric-reset">Resets Oct 24 at 1:19pm (America/Los_Angeles)</div>
-          <div class="metric-pace" title="Share of the rolling window used (the published %) vs share of the window's time elapsed at this reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled.">pacing: 11% used vs 50% of window elapsed (0.22× the clock) · 39 pts behind</div>
+          <div class="metric-reset">Resets Oct 24 at 1:20pm (America/Los_Angeles)</div>
         </div>
 
         <div class="metric">
           <div class="metric-label">Current week (all models)</div>
           
     <div class="bar-row">
-      <div class="bar-track"><div class="bar-fill warn" style="width:83.0%"></div></div>
-      <div class="bar-pct warn">83%</div>
+      <div class="bar-track"><div class="bar-fill warn" style="width:87.0%"></div></div>
+      <div class="bar-pct warn">87%</div>
     </div>
-          <div class="metric-reset">Resets Oct 27 at 2:59pm (America/Los_Angeles)</div>
-          <div class="metric-pace marked" title="Share of the rolling window used (the published %) vs share of the window's time elapsed at this reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled.">⚑ pacing: 83% used vs 54.7% of window elapsed (1.52× the clock) · 28.3 pts ahead · marked: more than 15 pts ahead of the clock</div>
+          <div class="metric-reset">Resets Oct 27 at 3pm (America/Los_Angeles)</div>
         </div>
 
         <div class="metric">
           <div class="metric-label">Current week (Fable)</div>
           
     <div class="bar-row">
-      <div class="bar-track"><div class="bar-fill ok" style="width:3.0%"></div></div>
-      <div class="bar-pct ok">3%</div>
+      <div class="bar-track"><div class="bar-fill ok" style="width:5.0%"></div></div>
+      <div class="bar-pct ok">5%</div>
     </div>
-          <div class="metric-reset">Resets Oct 27 at 2:59pm (America/Los_Angeles)</div>
-          <div class="metric-pace" title="Share of the rolling window used (the published %) vs share of the window's time elapsed at this reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled.">pacing: 3% used vs 54.7% of window elapsed (0.05× the clock) · 51.7 pts behind</div>
+          <div class="metric-reset">Resets Oct 27 at 3pm (America/Los_Angeles)</div>
         </div>
       </section>
 
-      <section class="card pace-marked" id="codex">
+      <section class="card" id="codex">
         <h2>Codex / Astra</h2>
-        <p class="sub">wham/usage · plan + primary / secondary windows</p>
-        <p class="pace-flag" role="status">⚑ <strong>Pacing mark</strong> (report only): Primary window — more than 15 pts ahead of the clock</p>
+        <p class="sub">wham/usage · plan + primary window</p>
         
         <p class="pill">plan: <strong>pro</strong> · gpt-6-astra: <strong>available</strong></p>
         
@@ -414,11 +389,10 @@
           <div class="metric-label">Primary window</div>
           
     <div class="bar-row">
-      <div class="bar-track"><div class="bar-fill ok" style="width:38.0%"></div></div>
-      <div class="bar-pct ok">38%</div>
+      <div class="bar-track"><div class="bar-fill ok" style="width:43.0%"></div></div>
+      <div class="bar-pct ok">43%</div>
     </div>
           <div class="metric-reset">Resets 2026-10-30 11:21 PDT</div>
-          <div class="metric-pace marked" title="Share of the rolling window used (the published %) vs share of the window's time elapsed at this reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled.">⚑ pacing: 38% used vs 14% of window elapsed (2.72× the clock) · 24 pts ahead · marked: more than 15 pts ahead of the clock</div>
         </div>
         
         <p class="muted">Credits: has=True balance=49493.4476500000 unlimited=False</p>
@@ -429,7 +403,7 @@
         <h2>Kimi</h2>
         <p class="sub">weekly (7-day) quota · derived status</p>
         
-        
+      <p class="pill">model <strong>kimi-code/k3.1-pro</strong> · effort <strong>max</strong></p>
       <div class="status-chip ok">OK</div>
       <p class="kimi-detail">Weekly remaining 63/100</p>
       
@@ -441,7 +415,6 @@
       <div class="bar-pct ok">37%</div>
     </div>
           <div class="metric-reset">Resets 2026-10-26 22:29 PDT</div>
-          <div class="metric-pace" title="Share of the rolling window used (the published %) vs share of the window's time elapsed at this reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled.">pacing: 37% used vs 64.5% of window elapsed (0.57× the clock) · 27.5 pts behind</div>
         </div>
 
         <div class="metric">
@@ -452,17 +425,15 @@
       <div class="bar-pct ok">0%</div>
     </div>
           <div class="metric-reset">Resets 2026-10-24 12:29 PDT</div>
-          <div class="metric-pace" title="Share of the rolling window used (the published %) vs share of the window's time elapsed at this reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled.">pacing: 0% used vs 66.6% of window elapsed (0× the clock) · 66.6 pts behind</div>
         </div>
-      <div class="metric-reset">Last checked 2026-10-24 10:49:10 PDT</div>
-      <p class="muted">Bars from live <code>/usages</code> API (used % = 100 − remaining). Vault markers are fallback only.</p>
+      <div class="metric-reset">Last checked 2026-10-24 12:13:32 PDT</div>
+      <p class="muted">Bars from live <code>/usages</code> API (used % = 100 − remaining). Vault markers are fallback only. Model + effort from <code>~/.kimi-code/config.toml</code>.</p>
     
       </section>
 
       <section class="card" id="agy">
         <h2>Agy</h2>
         <p class="sub">agy -p /usage · pack · social-superpowers MCP</p>
-        
         
       <p class="pill">CLI <strong>1.4.7</strong> · <code>agy -p /usage</code></p>
       
@@ -474,7 +445,6 @@
       <div class="bar-pct ok">45%</div>
     </div>
           <div class="metric-reset">Resets 2026-10-25 08:03 PDT</div>
-          <div class="metric-pace" title="Share of the rolling window used (the published %) vs share of the window's time elapsed at this reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled.">pacing: 45% used vs 87.4% of window elapsed (0.52× the clock) · 42.4 pts behind</div>
         </div>
 
         <div class="metric">
@@ -485,7 +455,6 @@
       <div class="bar-pct ok">3%</div>
     </div>
           <div class="metric-reset">Resets 2026-10-24 14:04 PDT</div>
-          <div class="metric-pace" title="Share of the rolling window used (the published %) vs share of the window's time elapsed at this reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled.">pacing: 3% used vs 34.8% of window elapsed (0.09× the clock) · 31.8 pts behind</div>
         </div>
 
         <div class="metric">
@@ -495,8 +464,7 @@
       <div class="bar-track"><div class="bar-fill ok" style="width:0%"></div></div>
       <div class="bar-pct ok">0%</div>
     </div>
-          <div class="metric-reset">Resets 2026-10-31 10:49 PDT</div>
-          <div class="metric-pace" title="Share of the rolling window used (the published %) vs share of the window's time elapsed at this reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled.">pacing: 0% used vs 0% of window elapsed · on the clock</div>
+          <div class="metric-reset">Resets 2026-10-31 12:13 PDT</div>
         </div>
 
         <div class="metric">
@@ -506,8 +474,7 @@
       <div class="bar-track"><div class="bar-fill ok" style="width:0%"></div></div>
       <div class="bar-pct ok">0%</div>
     </div>
-          <div class="metric-reset">Resets 2026-10-24 15:49 PDT</div>
-          <div class="metric-pace" title="Share of the rolling window used (the published %) vs share of the window's time elapsed at this reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled.">pacing: 0% used vs 0% of window elapsed · on the clock</div>
+          <div class="metric-reset">Resets 2026-10-24 17:13 PDT</div>
         </div>
 
         <div class="metric">
@@ -517,8 +484,7 @@
       <div class="bar-track"><div class="bar-fill ok" style="width:0%"></div></div>
       <div class="bar-pct ok">0%</div>
     </div>
-          <div class="metric-reset">Resets 2026-10-31 10:49 PDT</div>
-          <div class="metric-pace" title="Share of the rolling window used (the published %) vs share of the window's time elapsed at this reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled.">pacing: 0% used vs 0% of window elapsed · on the clock</div>
+          <div class="metric-reset">Resets 2026-10-31 12:13 PDT</div>
         </div>
       <div class="metric">
         <div class="metric-label">social-superpowers MCP daily</div>
@@ -542,122 +508,23 @@
 
       <section class="card" id="muse">
         <h2>Muse / Muse Spark</h2>
-        <p class="sub">muse --version · Meta Muse Code · 7d local usage (model_completed)</p>
+        <p class="sub">muse --version · Meta Muse Code</p>
         
-        
-      <p class="pill">CLI <strong>Muse Code 1.4.13 (1.4.13-R6996.1)</strong> · plan <strong>Max</strong> · model <strong>muse-wonder-full-1.0</strong></p>
+      <p class="pill">CLI <strong>Muse Code 1.4.13 (1.4.13-R6996.1)</strong> · model <strong>muse-spark-1.3-contributor</strong></p>
       <div class="metric">
         <div class="metric-label">Muse Spark status</div>
-        <div class="status-chip ok">MAX</div>
-        <div class="metric-reset">auth oauth · limit/reset not exposed by Muse CLI</div>
-      </div>
-      
-      
-      
-      
-      <p class="pill">7d tokens <strong>693,689,738</strong> in / <strong>3,942,050</strong> out · today <strong>0</strong> / <strong>0</strong></p>
-      <p class="muted">By model (7d, in+out): muse-wonder-full-1.0 <strong>562,843,569</strong> · muse-spark-1.3-contributor <strong>134,788,219</strong></p>
-      
-      <div class="table-wrap">
-        <table class="bots">
-          <thead>
-            <tr>
-              <th>Day (PT)</th>
-              <th>Sess</th>
-              <th>Prompts</th>
-              <th>In tok</th>
-              <th>Out tok</th>
-              <th>Cached tok</th>
-              <th>Reas tok</th>
-              <th>Models (in+out)</th>
-            </tr>
-          </thead>
-          <tbody>
-            
-        <tr>
-          <td class="mono">2026-10-18</td>
-          <td class="num">29</td>
-          <td class="num">29</td>
-          <td class="num">208,407,944</td>
-          <td class="num">1,169,781</td>
-          <td class="num">404,808,240</td>
-          <td class="num">571,510</td>
-          <td class="mono">muse-wonder-full-1.0 168,137,697, muse-spark-1.3-contributor 41,440,028</td>
-        </tr>
-        <tr>
-          <td class="mono">2026-10-19</td>
-          <td class="num">64</td>
-          <td class="num">70</td>
-          <td class="num">466,137,485</td>
-          <td class="num">2,588,016</td>
-          <td class="num">903,796,076</td>
-          <td class="num">1,415,606</td>
-          <td class="mono">muse-spark-1.3-contributor 75,476,933, muse-wonder-full-1.0 393,248,568</td>
-        </tr>
-        <tr>
-          <td class="mono">2026-10-20</td>
-          <td class="num">9</td>
-          <td class="num">9</td>
-          <td class="num">19,144,309</td>
-          <td class="num">184,253</td>
-          <td class="num">36,843,072</td>
-          <td class="num">42,189</td>
-          <td class="mono">muse-spark-1.3-contributor 17,871,258, muse-wonder-full-1.0 1,457,304</td>
-        </tr>
-        <tr>
-          <td class="mono">2026-10-21</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="mono">—</td>
-        </tr>
-        <tr>
-          <td class="mono">2026-10-22</td>
-          <td class="num">1</td>
-          <td class="num">1</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="mono">—</td>
-        </tr>
-        <tr>
-          <td class="mono">2026-10-23</td>
-          <td class="num">1</td>
-          <td class="num">1</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="mono">—</td>
-        </tr>
-        <tr>
-          <td class="mono">2026-10-24</td>
-          <td class="num">1</td>
-          <td class="num">1</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="num">0</td>
-          <td class="mono">—</td>
-        </tr>
-          </tbody>
-        </table>
+        <div class="status-chip ok">AUTH OK</div>
+        <div class="metric-reset">auth oauth · no CLI quota bars yet</div>
       </div>
       
       <p class="muted">No bar data.</p>
-<div class="metric-pace na">pacing: n/a (no window time)</div>
-      <p class="muted">Usage = local session-index.db (read-only, temp-copy fallback) + session logs, last 7 days PT by event timestamp: tokens from model_completed only (goal_usage_attribution excluded), prompts from user_intent events. Plan Max is user-stated (2026-10-12): the Muse CLI exposes no plan/limit/reset API, so quota stays null.</p>
+      <p class="muted">Per Muse itself (2026-09-15): no documented /usage, muse usage, or quota API. Plan/limits live in Meta Accounts Center (web). Card shows install + auth health only.</p>
     
       </section>
 
       <section class="card" id="dsh">
         <h2>DSH / DeepSeek Harness</h2>
         <p class="sub">dsh --version · OpenRouter DeepSeek</p>
-        
         
       <p class="pill">CLI <strong>0.2.1-rc.2</strong> · provider <strong>openrouter</strong> · model <strong>deepseek/deepseek-v4.1-flash-1017</strong></p>
       <div class="metric">
@@ -667,8 +534,40 @@
       </div>
       
       <p class="muted">No bar data.</p>
-<div class="metric-pace na">pacing: n/a (no window time)</div>
       <p class="muted">OpenRouter prepaid credits / PAYG (no Coding Plan quota bars). Card shows install + OpenRouter key presence + the collect model, read from the dsh --patch overlay ~/.dsh/collect-model.patch.yml (dsh 0.2.0 has no settings.yaml).</p>
+    
+      </section>
+
+      <section class="card" id="qwen">
+        <h2>Qwen Code</h2>
+        <p class="sub">qwen --version · OpenRouter Qwen3.8-Max</p>
+        
+      <p class="pill">CLI <strong>0.26.1</strong> · provider <strong>OpenRouter</strong> · model <strong>qwen/qwen3.8-max-0902</strong></p>
+      <div class="metric">
+        <div class="metric-label">Qwen Code status</div>
+        <div class="status-chip ok">AUTH OK</div>
+        <div class="metric-reset">auth ~/.dsh/.env via qwen-or · OpenRouter PAYG (no plan bars)</div>
+      </div>
+      
+      
+      <div class="metric">
+        <div class="metric-label">Trial seat · nightly audit 10/25–10/27</div>
+        <div class="status-chip unk">TRIAL 0/3</div>
+        <div class="metric-reset">trial starts 10/25 ~3 AM PT; 0/3 runs</div>
+        <div class="metric-reset">1 setup test session before 10/25 (not trial runs)</div>
+      </div>
+      
+      <div class="table-wrap">
+        <table class="bots">
+          <thead><tr><th>Usage</th><th>24h</th><th>7d</th><th>All time</th></tr></thead>
+          <tbody><tr><td>Sessions</td><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr><tr><td>Requests</td><td class="num">2</td><td class="num">2</td><td class="num">2</td></tr><tr><td>Input tokens</td><td class="num">24,755</td><td class="num">24,755</td><td class="num">24,755</td></tr><tr><td>Cached input</td><td class="num">4,352</td><td class="num">4,352</td><td class="num">4,352</td></tr><tr><td>Output tokens</td><td class="num">179</td><td class="num">179</td><td class="num">179</td></tr><tr><td>Est. cost*</td><td class="num">$0.0430</td><td class="num">$0.0430</td><td class="num">$0.0430</td></tr></tbody>
+        </table>
+      </div>
+      <div class="metric-reset">Last session 2026-10-24 10:30 PDT</div>
+      
+      
+      <p class="muted">Qwen Code system prompt adds ~25k input tokens per request.</p>
+      <p class="muted">* Est. cost is estimated, list price: $2/M uncached input, $0.25/M cached input, $6/M output for qwen/qwen3.8-max-0902; other models show tokens only. Source: <code>~/.qwen/usage_record.jsonl</code>, one line per finished session.</p>
     
       </section>
 
@@ -710,7 +609,7 @@
           <td class="num">1664 / 10685 / 8937</td>
           <td class="num">63.58 MB</td>
           <td class="num">50</td>
-          <td>2026-10-24 10:45 PDT</td>
+          <td>2026-10-24 11:25 PDT</td>
           <td class="num">60.7%</td>
         </tr>
         <tr>
@@ -718,7 +617,7 @@
           <td class="num">137 / 1095 / 918</td>
           <td class="num">6.02 MB</td>
           <td class="num">22</td>
-          <td><span class="status-chip warn" title="source agents/5c4c5dd4-6a97-476f-b7fa-9f70f629bc51/conversation-blobs.db is 38h old (&gt;24h) while other bots are fresh">stale source</span> <span class="muted">2026-10-22 20:24 PDT</span></td>
+          <td><span class="status-chip warn" title="source agents/5c4c5dd4-6a97-476f-b7fa-9f70f629bc51/conversation-blobs.db is 40h old (&gt;24h) while other bots are fresh">stale source</span> <span class="muted">2026-10-22 20:24 PDT</span></td>
           <td class="num">6.2%</td>
         </tr>
         <tr>
@@ -726,7 +625,7 @@
           <td class="num">10 / 32 / 0</td>
           <td class="num">0.01 MB</td>
           <td class="num">0</td>
-          <td>2026-10-24 10:49 PDT</td>
+          <td>2026-10-24 12:13 PDT</td>
           <td class="num">0.1%</td>
         </tr>
         <tr>
@@ -758,7 +657,7 @@
         <h2>Routine fire proxy</h2>
         <p class="sub">cron fires/week estimate · NOT billing</p>
         
-      <p class="pill"><strong>PROXY</strong> · estimated fires/week <strong>1198.0</strong> · not dollars · not tokens</p>
+      <p class="pill"><strong>PROXY</strong> · estimated fires/week <strong>734.0</strong> · not dollars · not tokens</p>
       <div class="table-wrap">
         <table class="bots">
           <thead>
@@ -773,51 +672,21 @@
             
         <tr>
           <td>Github Bot</td>
-          <td><strong>EM heartbeat (all agent tasks)</strong><div class="muted">durable; */15 (was */5)</div></td>
+          <td><strong>EM heartbeat (all agent tasks)</strong><div class="muted">durable; was */5, token-save */15</div></td>
           <td class="mono">4,19,34,49 * * * *</td>
           <td class="num">672.0</td>
         </tr>
         <tr>
-          <td>Collection Bot</td>
-          <td><strong>Usage dashboard 30-min refresh</strong><div class="muted">`usage-dashboard-10-min-refresh`</div></td>
-          <td class="mono">*/30 7-22 * * *</td>
-          <td class="num">224.0</td>
+          <td>Agent Manage Bot</td>
+          <td><strong>Coding EM kick pickup check</strong><div class="muted">ledger vs tmux/PRs</div></td>
+          <td class="mono">6 4,8 * * *</td>
+          <td class="num">14.0</td>
         </tr>
         <tr>
-          <td>Collection Bot</td>
-          <td><strong>Hourly Agy agent-analytics source pack</strong><div class="muted">`hourly-agy-agent-analytics-source-pack`</div></td>
-          <td class="mono">32 0,3,6,9,12,15,18,21 * * *</td>
-          <td class="num">56.0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>Hourly DSH agent-analytics source pack</strong><div class="muted">`hourly-dsh-agent-analytics-source-pack`</div></td>
-          <td class="mono">32 2,5,8,11,14,17,20,23 * * *</td>
-          <td class="num">56.0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>Hourly Muse agent-analytics source pack</strong><div class="muted">`hourly-muse-agent-analytics-source-pack`</div></td>
-          <td class="mono">32 1,4,7,10,13,16,19,22 * * *</td>
-          <td class="num">56.0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>6-hour agent analytics Field Brief</strong><div class="muted">`hourly-top-5-agent-analytics-brief`</div></td>
-          <td class="mono">34 0,6,12,18 * * *</td>
-          <td class="num">28.0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>6h Research + Stories pack (no page)</strong><div class="muted">`6h-stories-full-web-scout`</div></td>
-          <td class="mono">50 0,6,12,18 * * *</td>
-          <td class="num">28.0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>Field Brief miss-watch</strong><div class="muted">`field-brief-miss-watch`</div></td>
-          <td class="mono">44 0,6,12,18 * * *</td>
-          <td class="num">28.0</td>
+          <td>Agent Manage Bot</td>
+          <td><strong>Daily Mac CLI update</strong><div class="muted">bump Mac CLIs + verify defaults</div></td>
+          <td class="mono">53 7 * * *</td>
+          <td class="num">7.0</td>
         </tr>
         <tr>
           <td>Agent Manage Bot</td>
@@ -832,27 +701,15 @@
           <td class="num">7.0</td>
         </tr>
         <tr>
-          <td>Collection Bot</td>
-          <td><strong>Daily Mac bots vault update</strong><div class="muted">`daily-mac-bots-vault-update`</div></td>
-          <td class="mono">10 21 * * *</td>
+          <td>Agent Manage Bot</td>
+          <td><strong>Nightly Mac harness audit</strong><div class="muted">rotate one Mac CLI; dual-LGTM; no merge</div></td>
+          <td class="mono">59 2 * * *</td>
           <td class="num">7.0</td>
         </tr>
         <tr>
-          <td>Collection Bot</td>
-          <td><strong>Daily Research + Stories page publish</strong><div class="muted">`daily-research-stories-page-publish`</div></td>
-          <td class="mono">0 17 * * *</td>
-          <td class="num">7.0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>Daily vault learning consolidation</strong><div class="muted">`daily-vault-learning-consolidation`</div></td>
-          <td class="mono">57 20 * * *</td>
-          <td class="num">7.0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>Morning Mac CLI update</strong><div class="muted">`morning-mac-cli-update`</div></td>
-          <td class="mono">0 8 * * *</td>
+          <td>Agent Manage Bot</td>
+          <td><strong>PR board sweep daily</strong><div class="muted">CI/conflict/stall → Coding EM; never merge</div></td>
+          <td class="mono">9 9 * * *</td>
           <td class="num">7.0</td>
         </tr>
         <tr>
@@ -862,75 +719,39 @@
           <td class="num">7.0</td>
         </tr>
         <tr>
-          <td>Collection Bot</td>
-          <td><strong>Weekly GTM boards pack + page</strong><div class="muted">`weekly-gtm-boards-pack-page`</div></td>
-          <td class="mono">0 10 * * 1</td>
+          <td>Agent Manage Bot</td>
+          <td><strong>Weekday usage dashboard refresh</strong><div class="muted">weekday integrity check</div></td>
+          <td class="mono">5 9 * * 1-5</td>
+          <td class="num">5.0</td>
+        </tr>
+        <tr>
+          <td>Agent Manage Bot</td>
+          <td><strong>Weekly playbook ↔ card sync</strong><div class="muted">playbook→card + kill review + ops nudge</div></td>
+          <td class="mono">47 10 * * 1</td>
           <td class="num">1.0</td>
         </tr>
         <tr>
           <td>Agent Manage Bot</td>
-          <td><strong>Field Brief 6h orchestration watch</strong><div class="muted">PAUSED · detect-only second-line room ping</div></td>
+          <td><strong>Field Brief 6h orchestration watch</strong><div class="muted">paused — Collection :44 sole miss detector</div></td>
           <td class="mono">50 0,6,12,18 * * *</td>
           <td class="num">0</td>
         </tr>
         <tr>
           <td>Agent Manage Bot</td>
-          <td><strong>Weekday usage dashboard refresh</strong><div class="muted">PAUSED · weekday integrity check</div></td>
-          <td class="mono">5 9 * * 1-5</td>
+          <td><strong>Jev shadow savings tally</strong><div class="muted">paused / folded into Monday weekly sync (Haiyuan kick 2026-10-05); prior 4 8 * * 1-5</div></td>
+          <td class="mono">Monday via weekly sync</td>
           <td class="num">0</td>
         </tr>
         <tr>
-          <td>Collection Bot</td>
-          <td><strong>12h Stories additive BQAA update</strong><div class="muted">PAUSED · `12h-stories-additive-bqaa-update`</div></td>
-          <td class="mono">46 8,20 * * *</td>
-          <td class="num">0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>6h BQ Graph additive scout</strong><div class="muted">PAUSED · `6h-bq-graph-additive-scout`</div></td>
-          <td class="mono">5 1,7,13,19 * * *</td>
-          <td class="num">0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>6h BQ Lakehouse additive scout</strong><div class="muted">PAUSED · `6h-bq-lakehouse-additive-scout`</div></td>
-          <td class="mono">10 1,7,13,19 * * *</td>
-          <td class="num">0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>6h BQ Search additive scout</strong><div class="muted">PAUSED · `6h-bq-search-additive-scout`</div></td>
-          <td class="mono">15 1,7,13,19 * * *</td>
-          <td class="num">0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>6h BQML AI Operators additive scout</strong><div class="muted">PAUSED · `6h-bqml-ai-operators-additive-scout`</div></td>
-          <td class="mono">0 1,7,13,19 * * *</td>
-          <td class="num">0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>6h CA in BigQuery additive scout</strong><div class="muted">PAUSED · `6h-ca-in-bigquery-additive-scout`</div></td>
-          <td class="mono">55 0,6,12,18 * * *</td>
-          <td class="num">0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>Research Agent Analytics latest progress</strong><div class="muted">PAUSED · `research-agent-analytics-latest-progress`</div></td>
-          <td class="mono">0 0 * * *</td>
-          <td class="num">0</td>
-        </tr>
-        <tr>
-          <td>Collection Bot</td>
-          <td><strong>Research seat 20-min watch</strong><div class="muted">PAUSED · `claude-code-5-min-output-watch`</div></td>
-          <td class="mono">*/20 * * * *</td>
+          <td>Agent Manage Bot</td>
+          <td><strong>Monday specialist ops nudge</strong><div class="muted">paused — merged into weekly playbook↔card sync 2026-09-28</div></td>
+          <td class="mono">11 8 * * 1</td>
           <td class="num">0</td>
         </tr>
           </tbody>
         </table>
       </div>
-      <p class="muted">Coarse cron math only. Newest *collection-bot-active-routines.md + *github-bot-active-routines.md under Hunt/agent-manage/ plus Manage Bot. Event listeners show as (event listener) with no fires/week; paused routines count 0. Not tokens or plan spend. Source: Manage Bot (4); Collection Bot 2026-09-20-collection-bot-active-routines.md (20); Github Bot 2026-10-05-github-bot-active-routines.md (2).</p>
+      <p class="muted">Coarse cron math only. Manage Bot live vault card 2026-10-05 + hardcoded Github Bot rows (heartbeat */15 at 4,19,34,49; Github dump not read) + newest *collection-bot-active-routines.md under Hunt/agent-manage/ (may still be stale — no Collection rows invented). Event listeners show as (event listener) with no fires/week. Not tokens or plan spend. Source: Manage Bot live vault card 2026-10-05 (11); Github Bot hardcoded */15 (4,19,34,49) + vault consolidation (2); Collection Bot 2026-09-20-collection-bot-active-routines.md (0).</p>
     
       </section>
     </div>
