@@ -2290,7 +2290,7 @@ def render_html(snap: dict) -> str:
 
       <section class="card" id="dsh">
         <h2>DSH / DeepSeek Harness</h2>
-        <p class="sub">dsh --version · OpenRouter GLM / DeepSeek</p>
+        <p class="sub">dsh --version · OpenRouter DeepSeek</p>
         {dsh_body}
       </section>
 
