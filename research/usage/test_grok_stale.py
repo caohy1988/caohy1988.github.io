@@ -10,6 +10,7 @@ import copy
 import io
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -117,6 +118,14 @@ assert not any(s.startswith("Extra Bot") for s in g["freshness"]["stale_or_missi
 assert "<strong>Extra Bot</strong>" in h and "Side project" in h
 g, h = run(lambda d: d["bots"].append(dict(box.empty_bot("Field Brief"), id="room-1")))
 assert "Field Brief" not in [b["name"] for b in g["bots"]]  # rooms stay out
+# with the extra bots listed, every bot in the share bar still gets its own colour
+many = {"bots": [dict(box.empty_bot(f"Bot {i}"), share_assistant_tool_pct=5.0) for i in range(20)]}
+many_html = cab.render_grok_body(many)
+seg_colors = re.findall(r'class="stack-seg" style="width:[^;]+;background:(#[0-9a-f]{6})"', many_html)
+legend_colors = re.findall(r'class="stack-leg"><i style="background:(#[0-9a-f]{6})"', many_html)
+assert len(seg_colors) == 20 and len(set(seg_colors)) == 20, seg_colors
+assert legend_colors == seg_colors
+assert seg_colors[:len(cab.GROK_COLORS)] == cab.GROK_COLORS  # roster colours stay stable
 
 # box collector against a fake box tree: every roster dir, two rooms, the New Bot placeholder and one
 # idle bot outside the roster

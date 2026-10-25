@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import colorsys
 import json
 import math
 import os
@@ -3537,7 +3538,13 @@ def render_grok_body(grok: dict) -> str:
     legend = []
     for i, b in enumerate(bots):
         pct = float(b.get("share_assistant_tool_pct") or 0)
-        color = GROK_COLORS[i % len(GROK_COLORS)]
+        if i < len(GROK_COLORS):
+            color = GROK_COLORS[i]
+        else:
+            # Spread additional bots around the hue wheel instead of reusing roster colours.
+            hue = ((i - len(GROK_COLORS)) * 0.61803398875) % 1
+            rgb = colorsys.hls_to_rgb(hue, 0.42, 0.65)
+            color = "#" + "".join(f"{round(c * 255):02x}" for c in rgb)
         if pct > 0:
             segments.append(
                 f'<div class="stack-seg" style="width:{pct}%;background:{color}" title="{esc(b.get("name"))}: {pct}%"></div>'

@@ -25,10 +25,14 @@ Each test file runs on its own, under the Mac's system Python 3.9 (`/usr/bin/pyt
 
 ```
 cd research/usage
-for py in /usr/bin/python3 /usr/local/bin/python3.13; do
-  for t in test_*.py; do PYTHONDONTWRITEBYTECODE=1 "$py" "$t" >/dev/null 2>&1 || echo "FAIL $py $t"; done
+for t in test_*.py; do
+  PYTHONDONTWRITEBYTECODE=1 /usr/bin/arch -arm64 /usr/bin/python3 "$t" || exit 1
+  PYTHONDONTWRITEBYTECODE=1 /usr/local/bin/python3.13 "$t" || exit 1
 done
 ```
+
+The ARM prefix avoids an `xcrun` architecture error when the shell runs through Rosetta.
+Each failure stops the loop and leaves its diagnostic visible.
 
 | File | Covers |
 |------|--------|
